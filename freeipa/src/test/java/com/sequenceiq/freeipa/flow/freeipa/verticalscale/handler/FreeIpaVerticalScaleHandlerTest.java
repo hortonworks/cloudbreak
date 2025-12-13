@@ -1,6 +1,7 @@
 package com.sequenceiq.freeipa.flow.freeipa.verticalscale.handler;
 
 import static java.util.Collections.singletonList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -11,7 +12,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -54,7 +54,7 @@ public class FreeIpaVerticalScaleHandlerTest {
 
     @Test
     void testType() {
-        Assert.assertEquals(com.sequenceiq.freeipa.flow.freeipa.verticalscale.event.FreeIpaVerticalScaleRequest.class, underTest.type());
+        assertEquals(com.sequenceiq.freeipa.flow.freeipa.verticalscale.event.FreeIpaVerticalScaleRequest.class, underTest.type());
     }
 
     @Test

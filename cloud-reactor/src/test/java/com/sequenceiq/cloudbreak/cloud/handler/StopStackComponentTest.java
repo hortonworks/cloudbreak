@@ -1,10 +1,10 @@
 package com.sequenceiq.cloudbreak.cloud.handler;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -18,10 +18,10 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 
 @SpringBootTest(classes = { TestApplicationContext.class, StopStackComponentTest.TestConfig.class },
         properties = "spring.main.allow-bean-definition-overriding=true")
-public class StopStackComponentTest extends AbstractComponentTest<StopInstancesResult> {
+class StopStackComponentTest extends AbstractComponentTest<StopInstancesResult> {
 
     @Test
-    public void testStopStack() {
+    void testStopStack() {
         StopInstancesResult result = sendCloudRequest();
 
         assertEquals(1L, result.getResults().getResults().size());
@@ -43,6 +43,6 @@ public class StopStackComponentTest extends AbstractComponentTest<StopInstancesR
 
     @Configuration
     @Import({StopStackHandler.class})
-    public static class TestConfig {
+    static class TestConfig {
     }
 }

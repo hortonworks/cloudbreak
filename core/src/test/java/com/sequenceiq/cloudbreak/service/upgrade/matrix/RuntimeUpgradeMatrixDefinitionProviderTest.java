@@ -1,24 +1,24 @@
 package com.sequenceiq.cloudbreak.service.upgrade.matrix;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.nio.file.Path;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
-@RunWith(MockitoJUnitRunner.class)
-public class RuntimeUpgradeMatrixDefinitionProviderTest {
+@ExtendWith(MockitoExtension.class)
+class RuntimeUpgradeMatrixDefinitionProviderTest {
 
     private static final String UPGRADE_MATRIX_DEFINITION_FILE = "upgrade-matrix-definition";
 
@@ -29,7 +29,7 @@ public class RuntimeUpgradeMatrixDefinitionProviderTest {
     private CloudbreakResourceReaderService cloudbreakResourceReaderService;
 
     @Test
-    public void testGetUpgradeMatrixShouldReadTheUpgradeMatrixFromJson() throws IOException {
+    void testGetUpgradeMatrixShouldReadTheUpgradeMatrixFromJson() throws IOException {
         String upgradeMatrixJson = getUpgradeMatrixJson();
         when(cloudbreakResourceReaderService.resourceDefinition(UPGRADE_MATRIX_DEFINITION_FILE)).thenReturn(upgradeMatrixJson);
 

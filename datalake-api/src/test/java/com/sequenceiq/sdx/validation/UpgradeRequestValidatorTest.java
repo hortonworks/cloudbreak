@@ -3,6 +3,8 @@ package com.sequenceiq.sdx.validation;
 import static com.sequenceiq.sdx.api.model.SdxUpgradeShowAvailableImages.DO_NOT_SHOW;
 import static com.sequenceiq.sdx.api.model.SdxUpgradeShowAvailableImages.LATEST_ONLY;
 import static com.sequenceiq.sdx.api.model.SdxUpgradeShowAvailableImages.SHOW;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
@@ -11,7 +13,6 @@ import java.util.stream.Stream;
 
 import jakarta.validation.ConstraintValidatorContext;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -51,7 +52,7 @@ public class UpgradeRequestValidatorTest {
         sdxUpgradeRequest.setDryRun(dryRun);
         sdxUpgradeRequest.setShowAvailableImages(showAvailableImages);
         sdxUpgradeRequest.setReplaceVms(replaceVms);
-        Assertions.assertTrue(underTest.isValid(sdxUpgradeRequest, validatorContext));
+        assertTrue(underTest.isValid(sdxUpgradeRequest, validatorContext));
     }
 
     @ParameterizedTest
@@ -65,7 +66,7 @@ public class UpgradeRequestValidatorTest {
         sdxUpgradeRequest.setDryRun(dryRun);
         sdxUpgradeRequest.setShowAvailableImages(showAvailableImages);
         sdxUpgradeRequest.setReplaceVms(replaceVms);
-        Assertions.assertFalse(underTest.isValid(sdxUpgradeRequest, validatorContext));
+        assertFalse(underTest.isValid(sdxUpgradeRequest, validatorContext));
     }
 
     @ParameterizedTest
@@ -84,7 +85,7 @@ public class UpgradeRequestValidatorTest {
         sdxUpgradeRequest.setDryRun(dryRun);
         sdxUpgradeRequest.setShowAvailableImages(showAvailableImages);
         sdxUpgradeRequest.setReplaceVms(replaceVms);
-        Assertions.assertFalse(underTest.isValid(sdxUpgradeRequest, validatorContext));
+        assertFalse(underTest.isValid(sdxUpgradeRequest, validatorContext));
     }
 
     static Stream<Arguments> validUpgradeRequests() {

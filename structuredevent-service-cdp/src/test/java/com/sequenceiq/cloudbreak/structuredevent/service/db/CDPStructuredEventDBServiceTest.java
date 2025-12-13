@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -18,7 +19,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -109,8 +109,8 @@ public class CDPStructuredEventDBServiceTest {
         underTest.create(event);
 
         assertEquals("CDPStructuredNotificationEvent", event.getType());
-        verify(cdpStructuredEventToCDPStructuredEventEntityConverter, Mockito.times(1)).convert(event);
-        verify(structuredEventRepository, Mockito.times(1)).save(entity);
+        verify(cdpStructuredEventToCDPStructuredEventEntityConverter, times(1)).convert(event);
+        verify(structuredEventRepository, times(1)).save(entity);
     }
 
     @Test
@@ -120,7 +120,7 @@ public class CDPStructuredEventDBServiceTest {
         underTest.create(event);
 
         assertEquals("CDPStructuredRestCallEvent", event.getType());
-        verify(structuredEventRepository, Mockito.times(0)).save(any());
+        verify(structuredEventRepository, times(0)).save(any());
     }
 
     @Test
@@ -130,7 +130,7 @@ public class CDPStructuredEventDBServiceTest {
         underTest.create(event);
 
         assertEquals("CDPStructuredFlowEvent", event.getType());
-        verify(structuredEventRepository, Mockito.times(0)).save(any());
+        verify(structuredEventRepository, times(0)).save(any());
     }
 
     private CDPStructuredEvent getCdpStructuredEvent(String simpleName) {

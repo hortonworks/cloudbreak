@@ -1,15 +1,15 @@
 package com.sequenceiq.cloudbreak.converter.stack.cluster.gateway;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.GatewayType;
@@ -21,8 +21,8 @@ import com.sequenceiq.cloudbreak.converter.v4.stacks.cli.GatewayTopologyToGatewa
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.GatewayTopology;
 
-@RunWith(MockitoJUnitRunner.class)
-public class GatewayToGatewayJsonConverterTest {
+@ExtendWith(MockitoExtension.class)
+class GatewayToGatewayJsonConverterTest {
 
     private static final String PATH = "path";
 
@@ -40,13 +40,13 @@ public class GatewayToGatewayJsonConverterTest {
     @Mock
     private GatewayTopologyToGatewayTopologyV4RequestConverter gatewayTopologyToGatewayTopologyV4RequestConverter;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         when(gatewayTopologyToGatewayTopologyV4RequestConverter.convert(any(GatewayTopology.class))).thenReturn(new GatewayTopologyV4Request());
     }
 
     @Test
-    public void testConvert() {
+    void testConvert() {
         Gateway gateway = new Gateway();
         gateway.setPath(PATH);
         gateway.setSsoProvider(SSO_PROVIDER);

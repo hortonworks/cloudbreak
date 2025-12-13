@@ -1,12 +1,12 @@
 package com.sequenceiq.it.cloudbreak.util.spot;
 
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
 import java.lang.reflect.Method;
 
-import org.mockito.Mockito;
 import org.testng.ITestNGMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -24,13 +24,13 @@ public class SpotRetryUtilTest {
 
     @BeforeMethod
     public void setUp() throws NoSuchMethodException {
-        ConstructorOrMethod constructorOrMethod = Mockito.mock(ConstructorOrMethod.class);
+        ConstructorOrMethod constructorOrMethod = mock(ConstructorOrMethod.class);
         method = ExampleTest.class.getDeclaredMethod("exampleMethod");
         when(constructorOrMethod.getMethod()).thenReturn(method);
-        testMethod = Mockito.mock(ITestNGMethod.class);
+        testMethod = mock(ITestNGMethod.class);
         when(testMethod.getConstructorOrMethod()).thenReturn(constructorOrMethod);
 
-        spotUtil = Mockito.mock(SpotUtil.class);
+        spotUtil = mock(SpotUtil.class);
         underTest = new SpotRetryUtil(spotUtil, true);
     }
 

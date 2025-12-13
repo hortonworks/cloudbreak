@@ -1,22 +1,22 @@
 package com.sequenceiq.cloudbreak.service.upgrade.image;
 
 import static com.sequenceiq.common.model.ImageCatalogPlatform.imageCatalogPlatform;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.InternalUpgradeSettings;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.common.model.Architecture;
 
-public class PreWarmParcelLocationFilterTest {
+class PreWarmParcelLocationFilterTest {
 
     private static final String ARCHIVE_URL = "http://archive.cloudera.com/asdf/";
 
@@ -31,113 +31,113 @@ public class PreWarmParcelLocationFilterTest {
     private final PreWarmParcelLocationFilter underTest = new PreWarmParcelLocationFilter();
 
     @Test
-    public void testFilterImageShouldReturnTrueWhenTheStackTypeIsNotWorkload() {
+    void testFilterImageShouldReturnTrueWhenTheStackTypeIsNotWorkload() {
         assertTrue(underTest.filterImage(null, new ImageFilterParams(null, null, null, false, false, null, StackType.DATALAKE, null, STACK_ID,
                 new InternalUpgradeSettings(false, true, true), imageCatalogPlatform(CLOUD_PLATFORM), CLOUD_PLATFORM, REGION, false)));
     }
 
     @Test
-    public void testFilterImageShouldReturnFalseWhenTheImageIsNull() {
+    void testFilterImageShouldReturnFalseWhenTheImageIsNull() {
         assertFalse(underTest.filterImage(null, createImageFilterParams(null)));
     }
 
     @Test
-    public void testFilterImageShouldReturnTrueWhenImageIsArm64WithoutPrewarmedParcels() {
+    void testFilterImageShouldReturnTrueWhenImageIsArm64WithoutPrewarmedParcels() {
         Image image = createArmImage(List.of());
         assertTrue(underTest.filterImage(image, createImageFilterParams(null)));
     }
 
     @Test
-    public void testFilterImageShouldReturnFalseWhenThePreWarmParcelsAreNull() {
+    void testFilterImageShouldReturnFalseWhenThePreWarmParcelsAreNull() {
         Image image = createImage(null);
         assertFalse(underTest.filterImage(image, createImageFilterParams(null)));
     }
 
     @Test
-    public void testFilterImageShouldReturnFalseWhenThePreWarmParcelsListIsEmpty() {
+    void testFilterImageShouldReturnFalseWhenThePreWarmParcelsListIsEmpty() {
         Image image = createImage(Collections.emptyList());
         assertFalse(underTest.filterImage(image, createImageFilterParams(null)));
     }
 
     @Test
-    public void testFilterImageShouldReturnFalseWhenThePreWarmParcelsListElementsAreEmpty() {
+    void testFilterImageShouldReturnFalseWhenThePreWarmParcelsListElementsAreEmpty() {
         List<List<String>> preWarmParcels = List.of(List.of("parcel1", ""), List.of("parcel2"));
         Image image = createImage(preWarmParcels);
         assertFalse(underTest.filterImage(image, createImageFilterParams(Map.of("parcel1", "", "parcel2", ""))));
     }
 
     @Test
-    public void testFilterImageShouldReturnTrueWhenSomePreWarmParcelsListElementsAreNull() {
+    void testFilterImageShouldReturnTrueWhenSomePreWarmParcelsListElementsAreNull() {
         List<List<String>> preWarmParcels = List.of(Arrays.asList("parcel1", ARCHIVE_URL), Arrays.asList(null, null));
         Image image = createImage(preWarmParcels);
         assertTrue(underTest.filterImage(image, createImageFilterParams(Map.of("parcel1", "", "parcel2", ""))));
     }
 
     @Test
-    public void testFilterImageShouldReturnFalseWhenThePreWarmParcelsListElementsAreNull() {
+    void testFilterImageShouldReturnFalseWhenThePreWarmParcelsListElementsAreNull() {
         List<List<String>> preWarmParcels = List.of(Arrays.asList("parcel1", null), Arrays.asList(null, null));
         Image image = createImage(preWarmParcels);
         assertFalse(underTest.filterImage(image, createImageFilterParams(Map.of("parcel1", "", "parcel2", ""))));
     }
 
     @Test
-    public void testFilterImageShouldReturnTrueWhenThePreWarmParcelsAreEligibleForUpgrade() {
+    void testFilterImageShouldReturnTrueWhenThePreWarmParcelsAreEligibleForUpgrade() {
         List<List<String>> preWarmParcels = List.of(List.of("parcel", ARCHIVE_URL));
         Image image = createImage(preWarmParcels);
         assertTrue(underTest.filterImage(image, createImageFilterParams(Map.of("parcel", ""))));
     }
 
     @Test
-    public void testFilterImageShouldReturnFalseWhenThePreWarmParcelsContainsCorruptedAndProperElementAsWell() {
+    void testFilterImageShouldReturnFalseWhenThePreWarmParcelsContainsCorruptedAndProperElementAsWell() {
         List<List<String>> preWarmParcels = List.of(List.of("parcel1", ARCHIVE_URL), Arrays.asList("parcel2", null));
         Image image = createImage(preWarmParcels);
         assertFalse(underTest.filterImage(image, createImageFilterParams(Map.of("parcel1", "", "parcel2", ""))));
     }
 
     @Test
-    public void testFilterImageShouldReturnTrueWhenThePreWarmParcelsAreNotEligibleForUpgrade() {
+    void testFilterImageShouldReturnTrueWhenThePreWarmParcelsAreNotEligibleForUpgrade() {
         List<List<String>> preWarmParcels = List.of(List.of("parcel", RANDOM_URL));
         Image image = createImage(preWarmParcels);
         assertTrue(underTest.filterImage(image, createImageFilterParams(Map.of("parcel1", "", "parcel2", ""))));
     }
 
     @Test
-    public void testFilterImageShouldReturnFalseWhenOnlyOneParcelIsNotEligibleForUpgrade() {
+    void testFilterImageShouldReturnFalseWhenOnlyOneParcelIsNotEligibleForUpgrade() {
         List<List<String>> preWarmParcels = List.of(List.of("parcel1", RANDOM_URL), List.of("parcel2", ARCHIVE_URL));
         Image image = createImage(preWarmParcels);
         assertFalse(underTest.filterImage(image, createImageFilterParams(Map.of("parcel1", "", "parcel2", ""))));
     }
 
     @Test
-    public void testFilterImageShouldReturnTrueWhenTheImageDoesNotContainsPreWarmParcelFromTheStackRelatedParcels() {
+    void testFilterImageShouldReturnTrueWhenTheImageDoesNotContainsPreWarmParcelFromTheStackRelatedParcels() {
         List<List<String>> preWarmParcels = List.of(List.of("parcel1", RANDOM_URL), List.of("parcel2", ARCHIVE_URL));
         Image image = createImage(preWarmParcels);
         assertTrue(underTest.filterImage(image, createImageFilterParams(Map.of("spark", ""))));
     }
 
     @Test
-    public void testFilterImageShouldReturnTrueWhenThereAreNoStackRelatedParcels() {
+    void testFilterImageShouldReturnTrueWhenThereAreNoStackRelatedParcels() {
         List<List<String>> preWarmParcels = List.of(List.of("parcel1", RANDOM_URL), List.of("parcel2", ARCHIVE_URL));
         Image image = createImage(preWarmParcels);
         assertTrue(underTest.filterImage(image, createImageFilterParams(Collections.emptyMap())));
     }
 
     @Test
-    public void testFilterImageShouldReturnTrueWhenThereAreNoInstalledParcelInfoAvailable() {
+    void testFilterImageShouldReturnTrueWhenThereAreNoInstalledParcelInfoAvailable() {
         List<List<String>> preWarmParcels = List.of(List.of("parcel2", ARCHIVE_URL));
         Image image = createImage(preWarmParcels);
         assertTrue(underTest.filterImage(image, createImageFilterParams(null)));
     }
 
     @Test
-    public void testFilterImageShouldReturnTrueWhenTheStackRelatedParcelsContainsOnlyTheIgnoredParcel() {
+    void testFilterImageShouldReturnTrueWhenTheStackRelatedParcelsContainsOnlyTheIgnoredParcel() {
         List<List<String>> preWarmParcels = List.of(List.of("parcel", ARCHIVE_URL));
         Image image = createImage(preWarmParcels);
         assertTrue(underTest.filterImage(image, createImageFilterParams(Map.of("CDH", ""))));
     }
 
     @Test
-    public void testFilterImageShouldReturnTrueWhenThereAreNoPreWarmParcelAvailableForAllRequiresParcels() {
+    void testFilterImageShouldReturnTrueWhenThereAreNoPreWarmParcelAvailableForAllRequiresParcels() {
         List<List<String>> preWarmParcels = List.of(List.of("parcel", ARCHIVE_URL));
         Image image = createImage(preWarmParcels);
         assertTrue(underTest.filterImage(image, createImageFilterParams(Map.of("parcel", "", "spark", ""))));

@@ -1,12 +1,12 @@
 package com.sequenceiq.cloudbreak.service.spot;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.cloudbreak.cloud.model.instance.AwsInstanceTemplate;
 import com.sequenceiq.cloudbreak.common.json.Json;
@@ -14,24 +14,24 @@ import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 
-public class SpotInstanceUsageConditionTest {
+class SpotInstanceUsageConditionTest {
 
     private final SpotInstanceUsageCondition underTest = new SpotInstanceUsageCondition();
 
     @Test
-    public void testIsStackRunsOnSpotInstancesShouldReturnFalseWhenTheCloudPlatformIdNotSupported() {
+    void testIsStackRunsOnSpotInstancesShouldReturnFalseWhenTheCloudPlatformIdNotSupported() {
         Stack stack = createStack("AZURE", Set.of(createInstanceGroup(0), createInstanceGroup(null)));
         assertFalse(underTest.isStackRunsOnSpotInstances(stack));
     }
 
     @Test
-    public void testIsStackRunsOnSpotInstancesShouldReturnFalseWhenTheStackIsNotUsingSpotInstances() {
+    void testIsStackRunsOnSpotInstancesShouldReturnFalseWhenTheStackIsNotUsingSpotInstances() {
         Stack stack = createStack("AWS", Set.of(createInstanceGroup(0), createInstanceGroup(null)));
         assertFalse(underTest.isStackRunsOnSpotInstances(stack));
     }
 
     @Test
-    public void testIsStackRunsOnSpotInstancesShouldReturnTrueWhenTheStackIsUsingSpotInstances() {
+    void testIsStackRunsOnSpotInstancesShouldReturnTrueWhenTheStackIsUsingSpotInstances() {
         Stack stack = createStack("AWS", Set.of(createInstanceGroup(100)));
         assertTrue(underTest.isStackRunsOnSpotInstances(stack));
     }

@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.reactor;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -16,7 +17,6 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.ArgumentMatchers;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -121,7 +121,7 @@ class UpscaleUpdateUserdataSecretsHandlerTest {
         when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
         when(cloudInformationDecoratorProvider.getForStack(stack)).thenReturn(cloudInformationDecorator);
         when(environmentClientService.getByCrn(ENVIRONMENT_CRN)).thenReturn(ENVIRONMENT);
-        when(cloudInformationDecorator.getAuthorizedClientForLuksEncryptionKey(eq(stack), ArgumentMatchers.argThat((correctInstances::contains))))
+        when(cloudInformationDecorator.getAuthorizedClientForLuksEncryptionKey(eq(stack), argThat((correctInstances::contains))))
                 .thenReturn("secretArn");
 
         underTest.accept(new Event<>(new UpscaleUpdateUserdataSecretsRequest(STACK_ID, CLOUD_CONTEXT, CLOUD_CREDENTIAL, Arrays.asList(0L, 1L))));

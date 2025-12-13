@@ -4,6 +4,8 @@ import static com.sequenceiq.cloudbreak.cloud.aws.resource.instance.util.Securit
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -14,7 +16,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -110,7 +111,7 @@ class SecurityGroupBuilderUtilTest {
 
         String actual = underTest.createSecurityGroup(network, group, amazonEc2Client, context, ac);
 
-        Assertions.assertEquals(groupId, actual);
+        assertEquals(groupId, actual);
         verify(amazonEc2Client, times(1)).createSecurityGroup(any());
         verify(amazonEc2Client, times(0)).addEgress(any());
         verify(amazonEc2Client, times(1)).addIngress(any());
@@ -130,7 +131,7 @@ class SecurityGroupBuilderUtilTest {
                 .build();
         when(amazonEc2Client.createSecurityGroup(request)).thenThrow(amazonEC2Exception);
 
-        Assertions.assertThrows(RuntimeException.class,
+        assertThrows(RuntimeException.class,
                 () -> underTest.createOrGetSecurityGroup(amazonEc2Client, request, group, awsNetworkView, ac));
         verify(amazonEc2Client, times(0)).addIngress(any());
     }
@@ -159,7 +160,7 @@ class SecurityGroupBuilderUtilTest {
         when(amazonEc2Client.createSecurityGroup(request)).thenThrow(amazonEC2Exception);
 
         String actual = underTest.createOrGetSecurityGroup(amazonEc2Client, request, group, awsNetworkView, ac);
-        Assertions.assertEquals(groupId, actual);
+        assertEquals(groupId, actual);
         verify(amazonEc2Client, times(0)).addIngress(any());
     }
 
@@ -187,7 +188,7 @@ class SecurityGroupBuilderUtilTest {
         when(amazonEc2Client.createSecurityGroup(request)).thenThrow(amazonEC2Exception);
 
         String actual = underTest.createOrGetSecurityGroup(amazonEc2Client, request, group, awsNetworkView, ac);
-        Assertions.assertEquals(groupId, actual);
+        assertEquals(groupId, actual);
         verify(amazonEc2Client, times(0)).addIngress(any());
     }
 
@@ -213,9 +214,9 @@ class SecurityGroupBuilderUtilTest {
                 .build());
         when(amazonEc2Client.createSecurityGroup(request)).thenThrow(amazonEC2Exception);
 
-        NotFoundException actual = Assertions.assertThrows(NotFoundException.class,
+        NotFoundException actual = assertThrows(NotFoundException.class,
                 () -> underTest.createOrGetSecurityGroup(amazonEc2Client, request, group, awsNetworkView, ac));
-        Assertions.assertEquals("Aws Security Group 'groupName' not found.", actual.getMessage());
+        assertEquals("Aws Security Group 'groupName' not found.", actual.getMessage());
     }
 
     @Test
@@ -234,14 +235,14 @@ class SecurityGroupBuilderUtilTest {
         verify(amazonEc2Client).addIngress(ingressCaptor.capture());
 
         AuthorizeSecurityGroupIngressRequest value = ingressCaptor.getValue();
-        Assertions.assertEquals(1, value.ipPermissions().size());
+        assertEquals(1, value.ipPermissions().size());
         IpPermission permission = IpPermission.builder()
                 .ipProtocol("tcp")
                 .fromPort(22)
                 .toPort(22)
                 .ipRanges(IpRange.builder().cidrIp("0.0.0.0/10").build())
                 .build();
-        Assertions.assertEquals(permission, value.ipPermissions().get(0));
+        assertEquals(permission, value.ipPermissions().get(0));
     }
 
     @Test
@@ -261,14 +262,14 @@ class SecurityGroupBuilderUtilTest {
         verify(amazonEc2Client).addIngress(ingressCaptor.capture());
 
         AuthorizeSecurityGroupIngressRequest value = ingressCaptor.getValue();
-        Assertions.assertEquals(1, value.ipPermissions().size());
+        assertEquals(1, value.ipPermissions().size());
         IpPermission permission = IpPermission.builder()
                 .ipProtocol("tcp")
                 .fromPort(22)
                 .toPort(22)
                 .ipRanges(IpRange.builder().cidrIp("0.0.0.0/10").build())
                 .build();
-        Assertions.assertEquals(permission, value.ipPermissions().get(0));
+        assertEquals(permission, value.ipPermissions().get(0));
     }
 
     @Test
@@ -295,21 +296,21 @@ class SecurityGroupBuilderUtilTest {
                 .toPort(-1)
                 .ipRanges(IpRange.builder().cidrIp("0.0.0.0/10").build())
                 .build();
-        Assertions.assertEquals(permission, sorted.get(0));
+        assertEquals(permission, sorted.get(0));
         IpPermission permission1 = IpPermission.builder()
                 .ipProtocol("tcp")
                 .fromPort(0)
                 .toPort(TO_PORT)
                 .ipRanges(IpRange.builder().cidrIp("0.0.0.0/10").build())
                 .build();
-        Assertions.assertEquals(permission1, sorted.get(1));
+        assertEquals(permission1, sorted.get(1));
         IpPermission permission2 = IpPermission.builder()
                 .ipProtocol("udp")
                 .fromPort(0)
                 .toPort(TO_PORT)
                 .ipRanges(IpRange.builder().cidrIp("0.0.0.0/10").build())
                 .build();
-        Assertions.assertEquals(permission2, sorted.get(2));
+        assertEquals(permission2, sorted.get(2));
     }
 
     @Test
@@ -373,12 +374,12 @@ class SecurityGroupBuilderUtilTest {
         verify(amazonEc2Client, times(1)).addEgress(any());
         verify(amazonEc2Client, times(1)).revokeEgress(any());
 
-        Assertions.assertEquals("id", egressCaptor.getValue().groupId());
-        Assertions.assertEquals("-1", egressCaptor.getValue().ipPermissions().get(0).ipProtocol());
-        Assertions.assertEquals(0, egressCaptor.getValue().ipPermissions().get(0).fromPort());
-        Assertions.assertEquals(TO_PORT, egressCaptor.getValue().ipPermissions().get(0).toPort());
-        Assertions.assertEquals("id1", egressCaptor.getValue().ipPermissions().get(0).prefixListIds().get(0).prefixListId());
-        Assertions.assertEquals("id2", egressCaptor.getValue().ipPermissions().get(1).prefixListIds().get(0).prefixListId());
+        assertEquals("id", egressCaptor.getValue().groupId());
+        assertEquals("-1", egressCaptor.getValue().ipPermissions().get(0).ipProtocol());
+        assertEquals(0, egressCaptor.getValue().ipPermissions().get(0).fromPort());
+        assertEquals(TO_PORT, egressCaptor.getValue().ipPermissions().get(0).toPort());
+        assertEquals("id1", egressCaptor.getValue().ipPermissions().get(0).prefixListIds().get(0).prefixListId());
+        assertEquals("id2", egressCaptor.getValue().ipPermissions().get(1).prefixListIds().get(0).prefixListId());
     }
 
     @Test
@@ -394,10 +395,10 @@ class SecurityGroupBuilderUtilTest {
         verify(amazonEc2Client, times(1)).addEgress(any());
         verify(amazonEc2Client, times(1)).revokeEgress(any());
 
-        Assertions.assertEquals("id", egressCaptor.getValue().groupId());
-        Assertions.assertEquals("-1", egressCaptor.getValue().ipPermissions().get(0).ipProtocol());
-        Assertions.assertEquals("cidr1", egressCaptor.getValue().ipPermissions().get(0).ipRanges().get(0).cidrIp());
-        Assertions.assertEquals("cidr2", egressCaptor.getValue().ipPermissions().get(1).ipRanges().get(0).cidrIp());
+        assertEquals("id", egressCaptor.getValue().groupId());
+        assertEquals("-1", egressCaptor.getValue().ipPermissions().get(0).ipProtocol());
+        assertEquals("cidr1", egressCaptor.getValue().ipPermissions().get(0).ipRanges().get(0).cidrIp());
+        assertEquals("cidr2", egressCaptor.getValue().ipPermissions().get(1).ipRanges().get(0).cidrIp());
     }
 
     @Test
@@ -418,11 +419,11 @@ class SecurityGroupBuilderUtilTest {
         verify(amazonEc2Client, times(1)).addEgress(any());
         verify(amazonEc2Client, times(1)).revokeEgress(any());
 
-        Assertions.assertEquals("id", egressCaptor.getValue().groupId());
-        Assertions.assertEquals("-1", egressCaptor.getValue().ipPermissions().get(0).ipProtocol());
-        Assertions.assertEquals(0, egressCaptor.getValue().ipPermissions().get(0).fromPort());
-        Assertions.assertEquals(TO_PORT, egressCaptor.getValue().ipPermissions().get(0).toPort());
-        Assertions.assertEquals("id2", egressCaptor.getValue().ipPermissions().get(0).prefixListIds().get(0).prefixListId());
+        assertEquals("id", egressCaptor.getValue().groupId());
+        assertEquals("-1", egressCaptor.getValue().ipPermissions().get(0).ipProtocol());
+        assertEquals(0, egressCaptor.getValue().ipPermissions().get(0).fromPort());
+        assertEquals(TO_PORT, egressCaptor.getValue().ipPermissions().get(0).toPort());
+        assertEquals("id2", egressCaptor.getValue().ipPermissions().get(0).prefixListIds().get(0).prefixListId());
     }
 
     @Test
@@ -439,9 +440,9 @@ class SecurityGroupBuilderUtilTest {
         verify(amazonEc2Client, times(1)).addEgress(any());
         verify(amazonEc2Client, times(1)).revokeEgress(any());
 
-        Assertions.assertEquals("id", egressCaptor.getValue().groupId());
-        Assertions.assertEquals("-1", egressCaptor.getValue().ipPermissions().get(0).ipProtocol());
-        Assertions.assertEquals("cidr2", egressCaptor.getValue().ipPermissions().get(0).ipRanges().get(0).cidrIp());
+        assertEquals("id", egressCaptor.getValue().groupId());
+        assertEquals("-1", egressCaptor.getValue().ipPermissions().get(0).ipProtocol());
+        assertEquals("cidr2", egressCaptor.getValue().ipPermissions().get(0).ipRanges().get(0).cidrIp());
     }
 
     @Test
@@ -493,12 +494,12 @@ class SecurityGroupBuilderUtilTest {
         verify(amazonEc2Client, times(1)).addEgress(any());
         verify(amazonEc2Client, times(1)).revokeEgress(any());
 
-        Assertions.assertEquals("id", egressCaptor.getValue().groupId());
-        Assertions.assertEquals("-1", egressCaptor.getValue().ipPermissions().get(0).ipProtocol());
-        Assertions.assertEquals(0, egressCaptor.getValue().ipPermissions().get(0).fromPort());
-        Assertions.assertEquals(TO_PORT, egressCaptor.getValue().ipPermissions().get(0).toPort());
-        Assertions.assertEquals("id1", egressCaptor.getValue().ipPermissions().get(0).prefixListIds().get(0).prefixListId());
-        Assertions.assertEquals("id2", egressCaptor.getValue().ipPermissions().get(1).prefixListIds().get(0).prefixListId());
+        assertEquals("id", egressCaptor.getValue().groupId());
+        assertEquals("-1", egressCaptor.getValue().ipPermissions().get(0).ipProtocol());
+        assertEquals(0, egressCaptor.getValue().ipPermissions().get(0).fromPort());
+        assertEquals(TO_PORT, egressCaptor.getValue().ipPermissions().get(0).toPort());
+        assertEquals("id1", egressCaptor.getValue().ipPermissions().get(0).prefixListIds().get(0).prefixListId());
+        assertEquals("id2", egressCaptor.getValue().ipPermissions().get(1).prefixListIds().get(0).prefixListId());
     }
 
     private void stubRegionName() {

@@ -1,12 +1,13 @@
 package com.sequenceiq.cloudbreak.cloud.aws.conf;
 
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import jakarta.inject.Inject;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -59,7 +60,7 @@ class AwsConfigTagValueValidatorRegexpTest {
         boolean tagKeyResult = awsTagKeyValidatorPattern.matcher(tagValue)
                 .matches();
 
-        Assertions.assertEquals(expectedForTagValue, tagValueResult);
-        Assertions.assertEquals(expectedForTagKey, tagKeyResult);
+        assertEquals(expectedForTagValue, tagValueResult);
+        assertEquals(expectedForTagKey, tagKeyResult);
     }
 }

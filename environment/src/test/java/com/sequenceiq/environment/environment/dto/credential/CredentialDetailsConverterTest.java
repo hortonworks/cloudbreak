@@ -1,13 +1,16 @@
 package com.sequenceiq.environment.environment.dto.credential;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import java.util.Map;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
@@ -31,14 +34,14 @@ public class CredentialDetailsConverterTest {
         CredentialAttributes credentialAttributes = new CredentialAttributes();
         credential.setAttributes(JsonUtil.writeValueAsString(credentialAttributes));
         CloudPlatformAwareCredentialDetailsConverter cloudPlatformAwareCredentialDetailsConverter =
-                Mockito.mock(CloudPlatformAwareCredentialDetailsConverter.class);
-        Mockito.when(cloudPlatformAwareCredentialDetailsConverterMap.containsKey(Mockito.any())).thenReturn(true);
-        Mockito.when(cloudPlatformAwareCredentialDetailsConverterMap.get(Mockito.any())).thenReturn(cloudPlatformAwareCredentialDetailsConverter);
+                mock(CloudPlatformAwareCredentialDetailsConverter.class);
+        when(cloudPlatformAwareCredentialDetailsConverterMap.containsKey(any())).thenReturn(true);
+        when(cloudPlatformAwareCredentialDetailsConverterMap.get(any())).thenReturn(cloudPlatformAwareCredentialDetailsConverter);
         CredentialDetails.Builder builder = CredentialDetails.builder();
-        Mockito.when(cloudPlatformAwareCredentialDetailsConverter.convertCredentialDetails(
-                Mockito.any(CredentialAttributes.class), Mockito.any(CredentialDetails.Builder.class))).thenReturn(builder);
+        when(cloudPlatformAwareCredentialDetailsConverter.convertCredentialDetails(
+                any(CredentialAttributes.class), any(CredentialDetails.Builder.class))).thenReturn(builder);
         CredentialDetails credentialDetails = underTest.credentialToCredentialDetails(CloudPlatform.AWS, credential);
-        Assertions.assertEquals(builder.build().getCredentialType(), credentialDetails.getCredentialType());
+        assertEquals(builder.build().getCredentialType(), credentialDetails.getCredentialType());
     }
 
     @Test
@@ -47,7 +50,7 @@ public class CredentialDetailsConverterTest {
         CredentialAttributes credentialAttributes = new CredentialAttributes();
         credential.setAttributes(JsonUtil.writeValueAsString(credentialAttributes));
         CredentialDetails credentialDetails = underTest.credentialToCredentialDetails(null, credential);
-        Assertions.assertEquals(CredentialType.UNKNOWN, credentialDetails.getCredentialType());
+        assertEquals(CredentialType.UNKNOWN, credentialDetails.getCredentialType());
     }
 
     @Test
@@ -56,7 +59,7 @@ public class CredentialDetailsConverterTest {
         CredentialAttributes credentialAttributes = new CredentialAttributes();
         credential.setAttributes(JsonUtil.writeValueAsString(credentialAttributes));
         CredentialDetails credentialDetails = underTest.credentialToCredentialDetails(CloudPlatform.AWS, credential);
-        Assertions.assertEquals(CredentialType.UNKNOWN, credentialDetails.getCredentialType());
+        assertEquals(CredentialType.UNKNOWN, credentialDetails.getCredentialType());
     }
 
     @Test
@@ -64,6 +67,6 @@ public class CredentialDetailsConverterTest {
         Credential credential = new Credential();
         credential.setAttributes("Illegal json");
         CredentialDetails credentialDetails = underTest.credentialToCredentialDetails(CloudPlatform.AWS, credential);
-        Assertions.assertEquals(CredentialType.UNKNOWN, credentialDetails.getCredentialType());
+        assertEquals(CredentialType.UNKNOWN, credentialDetails.getCredentialType());
     }
 }

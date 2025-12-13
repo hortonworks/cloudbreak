@@ -2,12 +2,12 @@ package com.sequenceiq.cloudbreak.cloud.gcp.compute;
 
 import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -69,7 +69,7 @@ public class AbstractGcpComputeBuilderTest {
         AuthenticatedContext authenticatedContext = new AuthenticatedContext(context, credential);
         List<CloudResource> resourceList = new ArrayList<>();
         List<CloudResourceStatus> cloudResourceStatuses = underTest.checkResources(gcpContext, authenticatedContext, resourceList);
-        Assert.assertEquals(true, cloudResourceStatuses.isEmpty());
+        assertEquals(true, cloudResourceStatuses.isEmpty());
     }
 
     @Test
@@ -97,7 +97,7 @@ public class AbstractGcpComputeBuilderTest {
         AuthenticatedContext authenticatedContext = new AuthenticatedContext(context, credential);
         List<CloudInstance> resourceList = new ArrayList<>();
         List<CloudVmInstanceStatus> cloudVmInstanceStatuses = underTest.checkInstances(gcpContext, authenticatedContext, resourceList);
-        Assert.assertEquals(null, cloudVmInstanceStatuses);
+        assertEquals(null, cloudVmInstanceStatuses);
     }
 
     @Test
@@ -125,7 +125,7 @@ public class AbstractGcpComputeBuilderTest {
         CloudCredential credential = new CloudCredential();
         AuthenticatedContext authenticatedContext = new AuthenticatedContext(context, credential);
         CloudVmInstanceStatus stop = underTest.stop(gcpContext, authenticatedContext, cloudInstance);
-        Assert.assertEquals(null, stop);
+        assertEquals(null, stop);
     }
 
     @Test
@@ -153,7 +153,7 @@ public class AbstractGcpComputeBuilderTest {
         CloudCredential credential = new CloudCredential();
         AuthenticatedContext authenticatedContext = new AuthenticatedContext(context, credential);
         CloudVmInstanceStatus stop = underTest.start(gcpContext, authenticatedContext, cloudInstance);
-        Assert.assertEquals(null, stop);
+        assertEquals(null, stop);
     }
 
 }

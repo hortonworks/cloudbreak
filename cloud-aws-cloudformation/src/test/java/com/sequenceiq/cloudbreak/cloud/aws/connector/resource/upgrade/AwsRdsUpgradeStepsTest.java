@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.aws.connector.resource.upgrade;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
@@ -14,7 +15,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.assertj.core.data.MapEntry;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -102,7 +102,7 @@ public class AwsRdsUpgradeStepsTest {
         when(awsRdsUpgradeOperations.describeRds(rdsClient, DB_INSTANCE_IDENTIFIER)).thenReturn(describeDbInstancesResponse);
         doThrow(CloudConnectorException.class).when(awsRdsUpgradeValidatorProvider).validateClusterHasASingleVersion(any());
 
-        Assertions.assertThrows(CloudConnectorException.class, () ->
+        assertThrows(CloudConnectorException.class, () ->
                 underTest.getRdsInfo(rdsClient, DB_INSTANCE_IDENTIFIER)
         );
     }
@@ -152,7 +152,7 @@ public class AwsRdsUpgradeStepsTest {
         when(awsRdsUpgradeValidatorProvider.getHighestUpgradeTargetVersion(rdsClient, targetMajorVersion, currentVersion))
                 .thenThrow(CloudConnectorException.class);
 
-        Assertions.assertThrows(CloudConnectorException.class, () ->
+        assertThrows(CloudConnectorException.class, () ->
                 underTest.upgradeRds(null, rdsClient, databaseServer, rdsInfo, targetMajorVersion)
         );
 
@@ -170,7 +170,7 @@ public class AwsRdsUpgradeStepsTest {
         when(awsRdsParameterGroupService.createParameterGroupWithCustomSettings(ac, rdsClient, databaseServer, targetVersion))
                 .thenThrow(RuntimeException.class);
 
-        Assertions.assertThrows(RuntimeException.class, () ->
+        assertThrows(RuntimeException.class, () ->
                 underTest.upgradeRds(null, rdsClient, databaseServer, rdsInfo, targetMajorVersion)
         );
 

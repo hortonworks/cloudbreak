@@ -4,25 +4,25 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.google.common.collect.ImmutableMap;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.model.AzureDatabaseType;
 import com.sequenceiq.common.model.AzureHighAvailabiltyMode;
 
-public class AzureDatabaseServerV4ParametersTest {
+class AzureDatabaseServerV4ParametersTest {
 
     private AzureDatabaseServerV4Parameters underTest;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         underTest = new AzureDatabaseServerV4Parameters();
     }
 
     @Test
-    public void testGettersAndSetters() {
+    void testGettersAndSetters() {
         underTest.setBackupRetentionDays(3);
         assertThat(underTest.getBackupRetentionDays().intValue()).isEqualTo(3);
 
@@ -46,7 +46,7 @@ public class AzureDatabaseServerV4ParametersTest {
     }
 
     @Test
-    public void testAsMap() {
+    void testAsMap() {
         underTest.setBackupRetentionDays(3);
         underTest.setDbVersion("1.2.3");
 
@@ -91,12 +91,12 @@ public class AzureDatabaseServerV4ParametersTest {
     }
 
     @Test
-    public void testGetCloudPlatform() {
+    void testGetCloudPlatform() {
         assertThat(underTest.getCloudPlatform()).isEqualTo(CloudPlatform.AZURE);
     }
 
     @Test
-    public void testParse() {
+    void testParse() {
         Map<String, Object> parameters = ImmutableMap.<String, Object>builder()
                 .put("backupRetentionDays", 3)
                 .put("dbVersion", "1.2.3")

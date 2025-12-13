@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.aws.connector.resource;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -18,7 +19,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -174,7 +174,7 @@ class AwsUpdateServiceTest {
                 .withParameters(Collections.singletonMap(CloudResource.IMAGE, "dummy"))
                 .build();
 
-        Assertions.assertThrows(IllegalStateException.class, () -> underTest.updateUserData(ac, stack, List.of(cf), userDataMap));
+        assertThrows(IllegalStateException.class, () -> underTest.updateUserData(ac, stack, List.of(cf), userDataMap));
     }
 
     @Test

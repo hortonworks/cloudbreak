@@ -1,9 +1,9 @@
 package com.sequenceiq.cloudbreak.cloud.handler;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -19,10 +19,10 @@ import com.sequenceiq.cloudbreak.cloud.task.PollTaskFactory;
 
 @SpringBootTest(classes = { TestApplicationContext.class, DownscaleStackComponentTest.TestConfig.class },
         properties = "spring.main.allow-bean-definition-overriding=true")
-public class DownscaleStackComponentTest extends AbstractComponentTest<DownscaleStackResult> {
+class DownscaleStackComponentTest extends AbstractComponentTest<DownscaleStackResult> {
 
     @Test
-    public void testUpscaleStack() {
+    void testUpscaleStack() {
         DownscaleStackResult result = sendCloudRequest();
 
         assertEquals(EventStatus.OK, result.getStatus());
@@ -47,6 +47,6 @@ public class DownscaleStackComponentTest extends AbstractComponentTest<Downscale
 
     @Configuration
     @Import({DownscaleStackHandler.class, SyncPollingScheduler.class, PollTaskFactory.class, PollResourcesStateTask.class})
-    public static class TestConfig {
+    static class TestConfig {
     }
 }

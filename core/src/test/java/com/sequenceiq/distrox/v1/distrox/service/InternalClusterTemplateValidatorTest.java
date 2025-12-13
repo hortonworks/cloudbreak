@@ -1,6 +1,8 @@
 package com.sequenceiq.distrox.v1.distrox.service;
 
-import org.junit.Assert;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -38,7 +40,7 @@ public class InternalClusterTemplateValidatorTest {
         ClusterTemplate clusterTemplate = new ClusterTemplate();
         clusterTemplate.setFeatureState(state);
         boolean shouldPopulate = underTest.shouldPopulate(clusterTemplate, internalTenant);
-        Assert.assertEquals(expectedShouldPopulate, shouldPopulate);
+        assertEquals(expectedShouldPopulate, shouldPopulate);
     }
 
     @ParameterizedTest(name = "state = {0} internalTenant = {1} expectedShouldPopulate = {2}")
@@ -48,7 +50,7 @@ public class InternalClusterTemplateValidatorTest {
         DefaultClusterTemplateV4Request clusterTemplate = new DefaultClusterTemplateV4Request();
         clusterTemplate.setFeatureState(state);
         boolean shouldPopulate = underTest.shouldPopulate(clusterTemplate, internalTenant);
-        Assert.assertEquals(expectedShouldPopulate, shouldPopulate);
+        assertEquals(expectedShouldPopulate, shouldPopulate);
     }
 
     @ParameterizedTest(name = "state = {0} internalTenant = {1} expectedShouldPopulate = {2}")
@@ -58,7 +60,7 @@ public class InternalClusterTemplateValidatorTest {
         ClusterTemplateView clusterTemplate = new ClusterTemplateView();
         clusterTemplate.setFeatureState(state);
         boolean shouldPopulate = underTest.shouldPopulate(clusterTemplate, internalTenant);
-        Assert.assertEquals(expectedShouldPopulate, shouldPopulate);
+        assertEquals(expectedShouldPopulate, shouldPopulate);
     }
 
     @ParameterizedTest(name = "state = {0} internalTenant = {1} expectedShouldPopulate = {2}")
@@ -66,6 +68,6 @@ public class InternalClusterTemplateValidatorTest {
     public void internalClusterTemplateValidatorDataWithisInternalTemplateMethod(
             FeatureState state, boolean internalTenant, boolean expectedShouldPopulate) {
         boolean internalTemplateInNotInternalTenant = underTest.isInternalTemplateInNotInternalTenant(internalTenant, state);
-        Assert.assertEquals(!expectedShouldPopulate, internalTemplateInNotInternalTenant);
+        assertEquals(!expectedShouldPopulate, internalTemplateInNotInternalTenant);
     }
 }

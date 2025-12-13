@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.cloud.aws.common;
 
 import static com.sequenceiq.cloudbreak.cloud.model.network.SubnetType.PUBLIC;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,7 +11,6 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
@@ -108,11 +109,11 @@ public class AwsSubnetRequestProviderTest {
     }
 
     private AmazonEc2Client createEc2Client(List<AvailabilityZone> availabilityZones) {
-        AmazonEc2Client ec2Client = Mockito.mock(AmazonEc2Client.class);
+        AmazonEc2Client ec2Client = mock(AmazonEc2Client.class);
         DescribeAvailabilityZonesResponse result = DescribeAvailabilityZonesResponse.builder()
                 .availabilityZones(availabilityZones)
                 .build();
-        Mockito.when(ec2Client.describeAvailabilityZones()).thenReturn(result);
+        when(ec2Client.describeAvailabilityZones()).thenReturn(result);
         return ec2Client;
     }
 

@@ -1,20 +1,22 @@
 package com.sequenceiq.cloudbreak.controller.validation;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import jakarta.validation.ConstraintValidatorContext;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.validation.JsonValidator;
 import com.sequenceiq.cloudbreak.validation.ValidJson;
 
-@RunWith(MockitoJUnitRunner.class)
-public class JsonValidatorTest extends AbstractValidatorTest {
+@ExtendWith(MockitoExtension.class)
+class JsonValidatorTest extends AbstractValidatorTest {
 
     @InjectMocks
     private JsonValidator underTest;
@@ -25,28 +27,28 @@ public class JsonValidatorTest extends AbstractValidatorTest {
     @Mock
     private ValidJson validJson;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         underTest.initialize(validJson);
     }
 
     @Test
-    public void testNullValue() {
-        Assert.assertTrue(underTest.isValid(null, constraintValidatorContext));
+    void testNullValue() {
+        assertTrue(underTest.isValid(null, constraintValidatorContext));
     }
 
     @Test
-    public void testEmptyValue() {
-        Assert.assertTrue(underTest.isValid("", constraintValidatorContext));
+    void testEmptyValue() {
+        assertTrue(underTest.isValid("", constraintValidatorContext));
     }
 
     @Test
-    public void testJsonValue() {
-        Assert.assertTrue(underTest.isValid("{}", constraintValidatorContext));
+    void testJsonValue() {
+        assertTrue(underTest.isValid("{}", constraintValidatorContext));
     }
 
     @Test
-    public void testInvalidJsonValue() {
-        Assert.assertFalse(underTest.isValid(".", constraintValidatorContext));
+    void testInvalidJsonValue() {
+        assertFalse(underTest.isValid(".", constraintValidatorContext));
     }
 }

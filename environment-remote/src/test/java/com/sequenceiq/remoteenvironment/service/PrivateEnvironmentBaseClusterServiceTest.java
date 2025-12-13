@@ -3,6 +3,7 @@ package com.sequenceiq.remoteenvironment.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -20,7 +21,6 @@ import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.thunderhead.service.environments2api.model.DescribeEnvironmentResponse;
@@ -58,7 +58,7 @@ class PrivateEnvironmentBaseClusterServiceTest {
     void testRegisterHappyPaths(String cmUrl, String knoxGatewayUrl) {
         String baseClusterCrn = "baseClusterCrn";
         String privateEnvironmentCrn = "privateEnvironmentCrn";
-        DescribeEnvironmentResponse envDetails = Mockito.mock(Answers.RETURNS_DEEP_STUBS);
+        DescribeEnvironmentResponse envDetails = mock(Answers.RETURNS_DEEP_STUBS);
         when(envDetails.getEnvironment().getPvcEnvironmentDetails().getCmHost()).thenReturn(cmUrl);
         when(envDetails.getEnvironment().getPvcEnvironmentDetails().getKnoxGatewayUrl()).thenReturn(knoxGatewayUrl);
         when(envDetails.getEnvironment().getEnvironmentName()).thenReturn(ENVIRONMENT_NAME);
@@ -79,7 +79,7 @@ class PrivateEnvironmentBaseClusterServiceTest {
 
     @Test
     void testRegisterWhenCMHostDoesNotMatchWithPattern() {
-        DescribeEnvironmentResponse envDetails = Mockito.mock(Answers.RETURNS_DEEP_STUBS);
+        DescribeEnvironmentResponse envDetails = mock(Answers.RETURNS_DEEP_STUBS);
         when(envDetails.getEnvironment().getPvcEnvironmentDetails().getCmHost()).thenReturn("https://testcloud:7199");
         when(envDetails.getEnvironment().getEnvironmentName()).thenReturn(ENVIRONMENT_NAME);
 
@@ -92,7 +92,7 @@ class PrivateEnvironmentBaseClusterServiceTest {
     @ParameterizedTest
     @NullAndEmptySource
     void testRegisterWhenCMHostIsNullOrEmpty(String cmHost) {
-        DescribeEnvironmentResponse envDetails = Mockito.mock(Answers.RETURNS_DEEP_STUBS);
+        DescribeEnvironmentResponse envDetails = mock(Answers.RETURNS_DEEP_STUBS);
         when(envDetails.getEnvironment().getPvcEnvironmentDetails().getCmHost()).thenReturn(cmHost);
         when(envDetails.getEnvironment().getEnvironmentName()).thenReturn(ENVIRONMENT_NAME);
 
@@ -104,7 +104,7 @@ class PrivateEnvironmentBaseClusterServiceTest {
 
     @Test
     void testRegisterWhenPrivateEnvironmentDetailsIsNotPreset() {
-        DescribeEnvironmentResponse envDetails = Mockito.mock(Answers.RETURNS_DEEP_STUBS);
+        DescribeEnvironmentResponse envDetails = mock(Answers.RETURNS_DEEP_STUBS);
         when(envDetails.getEnvironment().getPvcEnvironmentDetails()).thenReturn(null);
         when(envDetails.getEnvironment().getEnvironmentName()).thenReturn(ENVIRONMENT_NAME);
 

@@ -1,116 +1,116 @@
 package com.sequenceiq.freeipa.client.model;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 import java.util.Optional;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-public class DnsRecordTest {
+class DnsRecordTest {
 
     private DnsRecord underTest;
 
-    @Before
+    @BeforeEach
     public void init() {
         underTest = new DnsRecord();
     }
 
     @Test
-    public void testIpRelatedARecordMatch() {
+    void testIpRelatedARecordMatch() {
         underTest.setArecord(List.of("192.168.1.2", "10.1.1.1"));
         assertTrue(underTest.isIpRelatedRecord("10.1.1.1", null));
     }
 
     @Test
-    public void testIpRelatedARecordNoMatch() {
+    void testIpRelatedARecordNoMatch() {
         underTest.setArecord(List.of("192.168.1.2", "10.1.1.1"));
         assertFalse(underTest.isIpRelatedRecord("10.1.1.2", null));
     }
 
     @Test
-    public void testIpRelatedPtrRecordMatch() {
+    void testIpRelatedPtrRecordMatch() {
         underTest.setIdnsname("2.1");
         underTest.setPtrrecord(List.of("server"));
         assertTrue(underTest.isIpRelatedRecord("10.1.1.2", "1.10.in-addr.arpa."));
     }
 
     @Test
-    public void testIpRelatedPtrRecordCClassMatch() {
+    void testIpRelatedPtrRecordCClassMatch() {
         underTest.setIdnsname("2");
         underTest.setPtrrecord(List.of("server"));
         assertTrue(underTest.isIpRelatedRecord("10.3.1.2", "1.3.10.in-addr.arpa."));
     }
 
     @Test
-    public void testIpRelatedPtrRecordAClassMatch() {
+    void testIpRelatedPtrRecordAClassMatch() {
         underTest.setIdnsname("2.3.4");
         underTest.setPtrrecord(List.of("server"));
         assertTrue(underTest.isIpRelatedRecord("10.4.3.2", "10.in-addr.arpa."));
     }
 
     @Test
-    public void testIpRelatedPtrRecordDifferentIp() {
+    void testIpRelatedPtrRecordDifferentIp() {
         underTest.setIdnsname("2.2");
         underTest.setPtrrecord(List.of("server"));
         assertFalse(underTest.isIpRelatedRecord("10.1.1.2", "1.10.in-addr.arpa."));
     }
 
     @Test
-    public void testIpRelatedPtrRecordDifferentZone() {
+    void testIpRelatedPtrRecordDifferentZone() {
         underTest.setIdnsname("2.1");
         underTest.setPtrrecord(List.of("server"));
         assertFalse(underTest.isIpRelatedRecord("10.1.1.2", "2.10.in-addr.arpa."));
     }
 
     @Test
-    public void testIpRelatedPtrRecordFalseIfNotPtrNotARecord() {
+    void testIpRelatedPtrRecordFalseIfNotPtrNotARecord() {
         assertFalse(underTest.isIpRelatedRecord("10.1.1.2", "2.10.in-addr.arpa."));
     }
 
     @Test
-    public void testIsSrvRecordTrue() {
+    void testIsSrvRecordTrue() {
         underTest.setSrvrecord(List.of("0 5 5060 example.com."));
         assertTrue(underTest.isSrvRecord());
     }
 
     @Test
-    public void testIsSrvRecordFalse() {
+    void testIsSrvRecordFalse() {
         underTest.setArecord(List.of("192.168.1.2"));
         assertFalse(underTest.isSrvRecord());
     }
 
     @Test
-    public void testIsSshfpRecordTrue() {
+    void testIsSshfpRecordTrue() {
         underTest.setIdnsname("server");
         underTest.setSshfprecord(List.of("1 1 ABCDEF"));
         assertTrue(underTest.isSshfpRecord());
     }
 
     @Test
-    public void testIsSshfpRecordFalse() {
+    void testIsSshfpRecordFalse() {
         underTest.setArecord(List.of("192.168.1.2"));
         assertFalse(underTest.isSshfpRecord());
     }
 
     @Test
-    public void testIsHostRelatedRecordFalseIfSrvRecrod() {
+    void testIsHostRelatedRecordFalseIfSrvRecrod() {
         underTest.setSrvrecord(List.of("0 5 5060 example.com."));
         assertFalse(underTest.isHostRelatedRecord("example.com.", "example.com"));
     }
 
     @Test
-    public void testIsHostRelatedSrvRecordFalseIfNotSrvRecrod() {
+    void testIsHostRelatedSrvRecordFalseIfNotSrvRecrod() {
         underTest.setPtrrecord(List.of("server"));
         assertFalse(underTest.isHostRelatedSrvRecord("server.example.com."));
         assertFalse(underTest.isHostRelatedSrvRecord("server"));
     }
 
     @Test
-    public void testIsHostRelatedSrvRecordFalseIfNoMatch() {
+    void testIsHostRelatedSrvRecordFalseIfNoMatch() {
         underTest.setSrvrecord(List.of("0 5 5060 example.com.", "0 5 5060 example1.com.", "0 5 5060 www.example2.com."));
         assertFalse(underTest.isHostRelatedSrvRecord("www.example.com."));
         assertFalse(underTest.isHostRelatedSrvRecord("www.example1.com."));
@@ -118,14 +118,14 @@ public class DnsRecordTest {
     }
 
     @Test
-    public void testIsHostRelatedSrvRecordTrueIfMatch() {
+    void testIsHostRelatedSrvRecordTrueIfMatch() {
         underTest.setSrvrecord(List.of("0 5 5060 example.com.", "0 5 5060 example1.com."));
         assertTrue(underTest.isHostRelatedSrvRecord("example.com."));
         assertTrue(underTest.isHostRelatedSrvRecord("example1.com."));
     }
 
     @Test
-    public void testIsHostRelatedRecordWhenARecord() {
+    void testIsHostRelatedRecordWhenARecord() {
         underTest.setIdnsname("server");
         underTest.setArecord(List.of("192.168.1.2"));
         assertTrue(underTest.isHostRelatedRecord("server.example.com", "example.com"));
@@ -133,14 +133,14 @@ public class DnsRecordTest {
     }
 
     @Test
-    public void testIsHostRelatedRecordWhenPtrRecord() {
+    void testIsHostRelatedRecordWhenPtrRecord() {
         underTest.setPtrrecord(List.of("server.example.com."));
         assertTrue(underTest.isHostRelatedRecord("server.example.com", "example.com"));
         assertFalse(underTest.isHostRelatedRecord("server1.example.com", "example.com"));
     }
 
     @Test
-    public void testIsHostRelatedRecordWhenSshfpRecord() {
+    void testIsHostRelatedRecordWhenSshfpRecord() {
         underTest.setIdnsname("server");
         underTest.setSshfprecord(List.of("1 1 ABCDEF"));
         assertTrue(underTest.isHostRelatedRecord("server.example.com", "example.com"));
@@ -148,7 +148,7 @@ public class DnsRecordTest {
     }
 
     @Test
-    public void testCalcZoneFromNsRecordWithValidNsRecord() {
+    void testCalcZoneFromNsRecordWithValidNsRecord() {
         underTest.setIdnsname("@");
         underTest.setNsrecord(List.of("ns1.example.com."));
         underTest.setDn("idnsname=191.84.10.in-addr.arpa.,cn=dns,dc=hybrid,dc=xcu2-8y8x,dc=wl,dc=cloudera,dc=site");
@@ -160,7 +160,7 @@ public class DnsRecordTest {
     }
 
     @Test
-    public void testCalcZoneFromNsRecordWithValidForwardZone() {
+    void testCalcZoneFromNsRecordWithValidForwardZone() {
         underTest.setIdnsname("@");
         underTest.setNsrecord(List.of("ns1.example.com.", "ns2.example.com."));
         underTest.setDn("idnsname=example.com.,cn=dns,dc=hybrid,dc=xcu2-8y8x,dc=wl,dc=cloudera,dc=site");
@@ -172,7 +172,7 @@ public class DnsRecordTest {
     }
 
     @Test
-    public void testCalcZoneFromNsRecordWithNonNsRecord() {
+    void testCalcZoneFromNsRecordWithNonNsRecord() {
         underTest.setIdnsname("server");
         underTest.setArecord(List.of("192.168.1.1"));
         underTest.setDn("idnsname=server,idnsname=example.com.,cn=dns,dc=hybrid,dc=xcu2-8y8x,dc=wl,dc=cloudera,dc=site");
@@ -183,7 +183,7 @@ public class DnsRecordTest {
     }
 
     @Test
-    public void testCalcZoneFromNsRecordWithEmptyNsRecord() {
+    void testCalcZoneFromNsRecordWithEmptyNsRecord() {
         underTest.setIdnsname("@");
         underTest.setNsrecord(List.of());
         underTest.setDn("idnsname=example.com.,cn=dns,dc=hybrid,dc=xcu2-8y8x,dc=wl,dc=cloudera,dc=site");
@@ -194,7 +194,7 @@ public class DnsRecordTest {
     }
 
     @Test
-    public void testCalcZoneFromNsRecordWithNullNsRecord() {
+    void testCalcZoneFromNsRecordWithNullNsRecord() {
         underTest.setIdnsname("@");
         underTest.setNsrecord(null);
         underTest.setDn("idnsname=example.com.,cn=dns,dc=hybrid,dc=xcu2-8y8x,dc=wl,dc=cloudera,dc=site");
@@ -205,7 +205,7 @@ public class DnsRecordTest {
     }
 
     @Test
-    public void testCalcZoneFromNsRecordWithNullDn() {
+    void testCalcZoneFromNsRecordWithNullDn() {
         underTest.setIdnsname("@");
         underTest.setNsrecord(List.of("ns1.example.com."));
         underTest.setDn(null);
@@ -216,7 +216,7 @@ public class DnsRecordTest {
     }
 
     @Test
-    public void testCalcZoneFromNsRecordWithMalformedDn() {
+    void testCalcZoneFromNsRecordWithMalformedDn() {
         underTest.setIdnsname("@");
         underTest.setNsrecord(List.of("ns1.example.com."));
         underTest.setDn("malformed-dn-without-comma");

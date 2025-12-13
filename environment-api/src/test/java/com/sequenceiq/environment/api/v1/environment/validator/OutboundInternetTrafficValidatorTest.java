@@ -1,8 +1,10 @@
 package com.sequenceiq.environment.api.v1.environment.validator;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.util.stream.Stream;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -25,7 +27,7 @@ public class OutboundInternetTrafficValidatorTest {
         EnvironmentNetworkRequest environmentNetworkRequest = new EnvironmentNetworkRequest();
         environmentNetworkRequest.setServiceEndpointCreation(serviceEndpointCreation);
         environmentNetworkRequest.setOutboundInternetTraffic(outboundInternetTraffic);
-        Assertions.assertTrue(underTest.isValid(environmentNetworkRequest, null));
+        assertTrue(underTest.isValid(environmentNetworkRequest, null));
     }
 
     @ParameterizedTest
@@ -34,7 +36,7 @@ public class OutboundInternetTrafficValidatorTest {
         EnvironmentNetworkRequest environmentNetworkRequest = new EnvironmentNetworkRequest();
         environmentNetworkRequest.setServiceEndpointCreation(serviceEndpointCreation);
         environmentNetworkRequest.setOutboundInternetTraffic(outboundInternetTraffic);
-        Assertions.assertFalse(underTest.isValid(environmentNetworkRequest, null));
+        assertFalse(underTest.isValid(environmentNetworkRequest, null));
     }
 
     private static Stream<Arguments> validOutboundInternetTrafficRequests() {

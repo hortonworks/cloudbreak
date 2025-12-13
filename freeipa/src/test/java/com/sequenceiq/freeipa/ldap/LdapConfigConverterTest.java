@@ -1,8 +1,8 @@
 package com.sequenceiq.freeipa.ldap;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -147,72 +147,72 @@ class LdapConfigConverterTest {
     }
 
     private void checkResponse(DescribeLdapConfigResponse response) {
-        Assert.assertEquals(LDAPNAME, response.getName());
-        Assert.assertEquals(LDAPDESC, response.getDescription());
-        Assert.assertEquals(ENVID, response.getEnvironmentCrn());
-        Assert.assertEquals(LDAP_PROTOCOL, response.getProtocol());
-        Assert.assertEquals(HOST, response.getHost());
-        Assert.assertEquals(PORT, response.getPort());
-        Assert.assertEquals(ADMIN, response.getAdminGroup());
-        Assert.assertEquals(CERT, response.getCertificate());
-        Assert.assertEquals(DirectoryType.LDAP, response.getDirectoryType());
-        Assert.assertEquals(DOMAIN, response.getDomain());
-        Assert.assertEquals(MEMBER, response.getGroupMemberAttribute());
-        Assert.assertEquals(GROUPOBJCLASS, response.getGroupObjectClass());
-        Assert.assertEquals(GROUPSEARCHBASE, response.getGroupSearchBase());
-        Assert.assertEquals(GROUPNAMEATTR, response.getGroupNameAttribute());
-        Assert.assertEquals(USERDNPATTERN, response.getUserDnPattern());
-        Assert.assertEquals(USERNAMEATTR, response.getUserNameAttribute());
-        Assert.assertEquals(USEROBJCLASS, response.getUserObjectClass());
-        Assert.assertEquals(USERSEARCHBASE, response.getUserSearchBase());
-        Assert.assertEquals(response.getBindDn().getSecretPath(), "binddn-secretpath");
-        Assert.assertEquals(response.getBindPassword().getSecretPath(), "pwd-secretpath");
+        assertEquals(LDAPNAME, response.getName());
+        assertEquals(LDAPDESC, response.getDescription());
+        assertEquals(ENVID, response.getEnvironmentCrn());
+        assertEquals(LDAP_PROTOCOL, response.getProtocol());
+        assertEquals(HOST, response.getHost());
+        assertEquals(PORT, response.getPort());
+        assertEquals(ADMIN, response.getAdminGroup());
+        assertEquals(CERT, response.getCertificate());
+        assertEquals(DirectoryType.LDAP, response.getDirectoryType());
+        assertEquals(DOMAIN, response.getDomain());
+        assertEquals(MEMBER, response.getGroupMemberAttribute());
+        assertEquals(GROUPOBJCLASS, response.getGroupObjectClass());
+        assertEquals(GROUPSEARCHBASE, response.getGroupSearchBase());
+        assertEquals(GROUPNAMEATTR, response.getGroupNameAttribute());
+        assertEquals(USERDNPATTERN, response.getUserDnPattern());
+        assertEquals(USERNAMEATTR, response.getUserNameAttribute());
+        assertEquals(USEROBJCLASS, response.getUserObjectClass());
+        assertEquals(USERSEARCHBASE, response.getUserSearchBase());
+        assertEquals(response.getBindDn().getSecretPath(), "binddn-secretpath");
+        assertEquals(response.getBindPassword().getSecretPath(), "pwd-secretpath");
     }
 
     private void checkLdapConfig(LdapConfig innerLdapConfig) {
-        Assert.assertEquals(LDAPNAME, innerLdapConfig.getName());
-        Assert.assertEquals(LDAPDESC, innerLdapConfig.getDescription());
-        Assert.assertEquals(ENVID, innerLdapConfig.getEnvironmentCrn());
-        Assert.assertEquals(LDAP_PROTOCOL, innerLdapConfig.getProtocol());
-        Assert.assertEquals(HOST, innerLdapConfig.getServerHost());
-        Assert.assertEquals(PORT, innerLdapConfig.getServerPort());
-        Assert.assertEquals(ADMIN, innerLdapConfig.getAdminGroup());
-        Assert.assertEquals(CERT, innerLdapConfig.getCertificate());
-        Assert.assertEquals(DirectoryType.LDAP, innerLdapConfig.getDirectoryType());
-        Assert.assertEquals(DOMAIN, innerLdapConfig.getDomain());
-        Assert.assertEquals(MEMBER, innerLdapConfig.getGroupMemberAttribute());
-        Assert.assertEquals(GROUPOBJCLASS, innerLdapConfig.getGroupObjectClass());
-        Assert.assertEquals(GROUPSEARCHBASE, innerLdapConfig.getGroupSearchBase());
-        Assert.assertEquals(GROUPNAMEATTR, innerLdapConfig.getGroupNameAttribute());
-        Assert.assertEquals(USERDNPATTERN, innerLdapConfig.getUserDnPattern());
-        Assert.assertEquals(USERNAMEATTR, innerLdapConfig.getUserNameAttribute());
-        Assert.assertEquals(USEROBJCLASS, innerLdapConfig.getUserObjectClass());
-        Assert.assertEquals(USERSEARCHBASE, innerLdapConfig.getUserSearchBase());
-        Assert.assertEquals(BINDDN, innerLdapConfig.getBindDn());
-        Assert.assertEquals(PWD, innerLdapConfig.getBindPassword());
+        assertEquals(LDAPNAME, innerLdapConfig.getName());
+        assertEquals(LDAPDESC, innerLdapConfig.getDescription());
+        assertEquals(ENVID, innerLdapConfig.getEnvironmentCrn());
+        assertEquals(LDAP_PROTOCOL, innerLdapConfig.getProtocol());
+        assertEquals(HOST, innerLdapConfig.getServerHost());
+        assertEquals(PORT, innerLdapConfig.getServerPort());
+        assertEquals(ADMIN, innerLdapConfig.getAdminGroup());
+        assertEquals(CERT, innerLdapConfig.getCertificate());
+        assertEquals(DirectoryType.LDAP, innerLdapConfig.getDirectoryType());
+        assertEquals(DOMAIN, innerLdapConfig.getDomain());
+        assertEquals(MEMBER, innerLdapConfig.getGroupMemberAttribute());
+        assertEquals(GROUPOBJCLASS, innerLdapConfig.getGroupObjectClass());
+        assertEquals(GROUPSEARCHBASE, innerLdapConfig.getGroupSearchBase());
+        assertEquals(GROUPNAMEATTR, innerLdapConfig.getGroupNameAttribute());
+        assertEquals(USERDNPATTERN, innerLdapConfig.getUserDnPattern());
+        assertEquals(USERNAMEATTR, innerLdapConfig.getUserNameAttribute());
+        assertEquals(USEROBJCLASS, innerLdapConfig.getUserObjectClass());
+        assertEquals(USERSEARCHBASE, innerLdapConfig.getUserSearchBase());
+        assertEquals(BINDDN, innerLdapConfig.getBindDn());
+        assertEquals(PWD, innerLdapConfig.getBindPassword());
     }
 
     private void checkCreateRequest(CreateLdapConfigRequest createLdapConfigRequest) {
-        Assert.assertEquals(LDAPNAME, createLdapConfigRequest.getName());
-        Assert.assertEquals(LDAPDESC, createLdapConfigRequest.getDescription());
-        Assert.assertEquals(ENVID, createLdapConfigRequest.getEnvironmentCrn());
-        Assert.assertEquals(LDAP_PROTOCOL, createLdapConfigRequest.getProtocol());
-        Assert.assertEquals(HOST, createLdapConfigRequest.getHost());
-        Assert.assertEquals(PORT, createLdapConfigRequest.getPort());
-        Assert.assertEquals(ADMIN, createLdapConfigRequest.getAdminGroup());
-        Assert.assertEquals(CERT, createLdapConfigRequest.getCertificate());
-        Assert.assertEquals(DirectoryType.LDAP, createLdapConfigRequest.getDirectoryType());
-        Assert.assertEquals(DOMAIN, createLdapConfigRequest.getDomain());
-        Assert.assertEquals(MEMBER, createLdapConfigRequest.getGroupMemberAttribute());
-        Assert.assertEquals(GROUPOBJCLASS, createLdapConfigRequest.getGroupObjectClass());
-        Assert.assertEquals(GROUPSEARCHBASE, createLdapConfigRequest.getGroupSearchBase());
-        Assert.assertEquals(GROUPNAMEATTR, createLdapConfigRequest.getGroupNameAttribute());
-        Assert.assertEquals(USERDNPATTERN, createLdapConfigRequest.getUserDnPattern());
-        Assert.assertEquals(USERNAMEATTR, createLdapConfigRequest.getUserNameAttribute());
-        Assert.assertEquals(USEROBJCLASS, createLdapConfigRequest.getUserObjectClass());
-        Assert.assertEquals(USERSEARCHBASE, createLdapConfigRequest.getUserSearchBase());
-        Assert.assertEquals("fake-user", createLdapConfigRequest.getBindDn());
-        Assert.assertEquals("fake-password", createLdapConfigRequest.getBindPassword());
+        assertEquals(LDAPNAME, createLdapConfigRequest.getName());
+        assertEquals(LDAPDESC, createLdapConfigRequest.getDescription());
+        assertEquals(ENVID, createLdapConfigRequest.getEnvironmentCrn());
+        assertEquals(LDAP_PROTOCOL, createLdapConfigRequest.getProtocol());
+        assertEquals(HOST, createLdapConfigRequest.getHost());
+        assertEquals(PORT, createLdapConfigRequest.getPort());
+        assertEquals(ADMIN, createLdapConfigRequest.getAdminGroup());
+        assertEquals(CERT, createLdapConfigRequest.getCertificate());
+        assertEquals(DirectoryType.LDAP, createLdapConfigRequest.getDirectoryType());
+        assertEquals(DOMAIN, createLdapConfigRequest.getDomain());
+        assertEquals(MEMBER, createLdapConfigRequest.getGroupMemberAttribute());
+        assertEquals(GROUPOBJCLASS, createLdapConfigRequest.getGroupObjectClass());
+        assertEquals(GROUPSEARCHBASE, createLdapConfigRequest.getGroupSearchBase());
+        assertEquals(GROUPNAMEATTR, createLdapConfigRequest.getGroupNameAttribute());
+        assertEquals(USERDNPATTERN, createLdapConfigRequest.getUserDnPattern());
+        assertEquals(USERNAMEATTR, createLdapConfigRequest.getUserNameAttribute());
+        assertEquals(USEROBJCLASS, createLdapConfigRequest.getUserObjectClass());
+        assertEquals(USERSEARCHBASE, createLdapConfigRequest.getUserSearchBase());
+        assertEquals("fake-user", createLdapConfigRequest.getBindDn());
+        assertEquals("fake-password", createLdapConfigRequest.getBindPassword());
     }
 
 }

@@ -1,14 +1,15 @@
 package com.sequenceiq.cloudbreak.cloud.template.context;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Assert;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -89,30 +90,30 @@ class VolumeMatcherTest {
 
         volumeMatcher.addVolumeResourcesToContext(workerInstances, workerInstanceResources, workerVolumeResources, context);
 
-        Assertions.assertNull(context.getComputeResources(1L));
+        assertNull(context.getComputeResources(1L));
 
         List<CloudResource> worker2 = context.getComputeResources(2L);
         assertEquals(1, worker2.size());
-        Assertions.assertTrue(worker2.stream().anyMatch(cloudResource -> "worker2".equals(cloudResource.getName())));
+        assertTrue(worker2.stream().anyMatch(cloudResource -> "worker2".equals(cloudResource.getName())));
 
         List<CloudResource> worker3 = context.getComputeResources(3L);
         assertEquals(2, worker3.size());
-        Assertions.assertTrue(worker3.stream().anyMatch(cloudResource -> "worker3".equals(cloudResource.getName())));
-        Assertions.assertTrue(worker3.stream().anyMatch(cloudResource -> "volume1".equals(cloudResource.getName())));
+        assertTrue(worker3.stream().anyMatch(cloudResource -> "worker3".equals(cloudResource.getName())));
+        assertTrue(worker3.stream().anyMatch(cloudResource -> "volume1".equals(cloudResource.getName())));
 
         volumeMatcher.addVolumeResourcesToContext(computeInstances, computeInstanceResources, computeVolumeResources, context);
 
-        Assertions.assertNull(context.getComputeResources(4L));
+        assertNull(context.getComputeResources(4L));
 
         List<CloudResource> compute2 = context.getComputeResources(5L);
         assertEquals(2, compute2.size());
-        Assertions.assertTrue(compute2.stream().anyMatch(cloudResource -> "compute2".equals(cloudResource.getName())));
-        Assertions.assertTrue(compute2.stream().anyMatch(cloudResource -> "volume3".equals(cloudResource.getName())));
+        assertTrue(compute2.stream().anyMatch(cloudResource -> "compute2".equals(cloudResource.getName())));
+        assertTrue(compute2.stream().anyMatch(cloudResource -> "volume3".equals(cloudResource.getName())));
 
         List<CloudResource> compute3 = context.getComputeResources(6L);
         assertEquals(2, compute3.size());
-        Assertions.assertTrue(compute3.stream().anyMatch(cloudResource -> "compute3".equals(cloudResource.getName())));
-        Assertions.assertTrue(compute3.stream().anyMatch(cloudResource -> "volume4".equals(cloudResource.getName())));
+        assertTrue(compute3.stream().anyMatch(cloudResource -> "compute3".equals(cloudResource.getName())));
+        assertTrue(compute3.stream().anyMatch(cloudResource -> "volume4".equals(cloudResource.getName())));
     }
 
     @Test
@@ -139,7 +140,7 @@ class VolumeMatcherTest {
                 Map.of(CloudInstance.FQDN, "worker3.example.com")));
         ResourceBuilderContext context = new ResourceBuilderContext("context", Location.location(Region.region("us-west-1")), 0);
 
-        CloudConnectorException cloudConnectorException = Assert.assertThrows(CloudConnectorException.class,
+        CloudConnectorException cloudConnectorException = assertThrows(CloudConnectorException.class,
                 () -> volumeMatcher.addVolumeResourcesToContext(workerInstances, workerInstanceResources,
                 workerVolumeResources, context));
         assertEquals("Can't find cloud instance by private ID: 2", cloudConnectorException.getMessage());

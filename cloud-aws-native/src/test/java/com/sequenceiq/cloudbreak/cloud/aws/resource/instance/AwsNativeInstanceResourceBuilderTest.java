@@ -27,7 +27,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -184,7 +183,7 @@ class AwsNativeInstanceResourceBuilderTest {
     @Test
     void testBuildWhenBuildableResorucesAreEmpty() {
         long privateId = 0;
-        CloudConnectorException actual = Assertions.assertThrows(CloudConnectorException.class,
+        CloudConnectorException actual = assertThrows(CloudConnectorException.class,
                 () -> underTest.build(awsContext, cloudInstance, privateId, ac, group, Collections.emptyList(), cloudStack));
         assertEquals("Buildable resources cannot be empty!", actual.getMessage());
     }
@@ -535,7 +534,7 @@ class AwsNativeInstanceResourceBuilderTest {
                 .awsErrorDetails(AwsErrorDetails.builder().errorCode(NOT_FOUND).build())
                 .build();
         when(amazonEc2Client.describeInstances(any())).thenThrow(amazonEC2Exception);
-        Ec2Exception actual = Assertions.assertThrows(Ec2Exception.class, () -> underTest.getResourceStatus(awsContext, ac, cloudResource));
+        Ec2Exception actual = assertThrows(Ec2Exception.class, () -> underTest.getResourceStatus(awsContext, ac, cloudResource));
         assertEquals(NOT_FOUND, actual.awsErrorDetails().errorCode());
     }
 
@@ -598,7 +597,7 @@ class AwsNativeInstanceResourceBuilderTest {
                 .awsErrorDetails(AwsErrorDetails.builder().errorCode("AnyOther").build())
                 .build();
         when(amazonEc2Client.describeInstances(any())).thenThrow(amazonEC2Exception);
-        Ec2Exception actual = Assertions.assertThrows(Ec2Exception.class, () -> underTest.getResourceStatus(awsContext, ac, cloudResource));
+        Ec2Exception actual = assertThrows(Ec2Exception.class, () -> underTest.getResourceStatus(awsContext, ac, cloudResource));
         assertEquals("AnyOther", actual.awsErrorDetails().errorCode());
     }
 
@@ -749,7 +748,7 @@ class AwsNativeInstanceResourceBuilderTest {
 
         CloudResource actual = underTest.delete(awsContext, ac, cloudResource);
 
-        Assertions.assertEquals(cloudResource, actual);
+        assertEquals(cloudResource, actual);
         verifyNoInteractions(awsMethodExecutor);
     }
 
@@ -771,7 +770,7 @@ class AwsNativeInstanceResourceBuilderTest {
         DescribeInstancesResponse emptyDescribeResp = DescribeInstancesResponse.builder().build();
         when(awsMethodExecutor.execute(any(), eq(emptyDescribeResp))).thenThrow(new RuntimeException());
 
-        Assertions.assertThrows(RuntimeException.class, () -> underTest.delete(awsContext, ac, cloudResource));
+        assertThrows(RuntimeException.class, () -> underTest.delete(awsContext, ac, cloudResource));
 
         verify(awsMethodExecutor, times(1)).execute(any(), any());
     }
@@ -791,7 +790,7 @@ class AwsNativeInstanceResourceBuilderTest {
 
         CloudResource actual = underTest.delete(awsContext, ac, cloudResource);
 
-        Assertions.assertEquals(cloudResource, actual);
+        assertEquals(cloudResource, actual);
         verify(awsMethodExecutor, times(2)).execute(any(), any());
     }
 
@@ -825,7 +824,7 @@ class AwsNativeInstanceResourceBuilderTest {
         when(awsMethodExecutor.execute(any(), eq(emptyDescribeResp))).thenReturn(describeResp);
         when(awsMethodExecutor.execute(ArgumentMatchers.<Supplier<TerminateInstancesResponse>>any(), eq(null))).thenThrow(new RuntimeException());
 
-        Assertions.assertThrows(RuntimeException.class, () -> underTest.delete(awsContext, ac, cloudResource));
+        assertThrows(RuntimeException.class, () -> underTest.delete(awsContext, ac, cloudResource));
 
         verify(awsMethodExecutor, times(2)).execute(any(), any());
     }

@@ -1,12 +1,12 @@
 package com.sequenceiq.cloudbreak.cloud.azure.image.marketplace;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -51,7 +51,7 @@ public class AzureMarketplaceImageProviderServiceTest {
                 .withImageName(INVALID_IMAGE_NAME)
                 .build();
         when(azureImageFormatValidator.isMarketplaceImageFormat(INVALID_IMAGE_NAME)).thenReturn(false);
-        Assertions.assertThrows(CloudConnectorException.class, () -> underTest.get(image));
+        assertThrows(CloudConnectorException.class, () -> underTest.get(image));
     }
 
     @Test
@@ -82,7 +82,7 @@ public class AzureMarketplaceImageProviderServiceTest {
                 .withPackageVersions(packageVersions)
                 .build();
 
-        CloudConnectorException exception = Assertions.assertThrows(CloudConnectorException.class, () -> underTest.getSourceImage(image));
+        CloudConnectorException exception = assertThrows(CloudConnectorException.class, () -> underTest.getSourceImage(image));
         assertEquals("Invalid Marketplace image URN in the image catalog! Please specify the image in an URN format, 4 segments separated by a colon "
                 + "(actual value is: cloudera:cdp-7_2:freeipa:1.0.2103081333:latest)!", exception.getMessage());
 
@@ -98,7 +98,7 @@ public class AzureMarketplaceImageProviderServiceTest {
                 .withPackageVersions(packageVersions)
                 .build();
 
-        CloudConnectorException exception = Assertions.assertThrows(CloudConnectorException.class, () -> underTest.getSourceImage(image));
+        CloudConnectorException exception = assertThrows(CloudConnectorException.class, () -> underTest.getSourceImage(image));
         assertEquals("Missing Marketplace image URN! Please specify the image in an URN format, "
                 + "4 segments separated by a colon in the image catalog", exception.getMessage());
 
@@ -110,7 +110,7 @@ public class AzureMarketplaceImageProviderServiceTest {
                 .withImageName("imageName")
                 .build();
 
-        CloudConnectorException exception = Assertions.assertThrows(CloudConnectorException.class, () -> underTest.getSourceImage(image));
+        CloudConnectorException exception = assertThrows(CloudConnectorException.class, () -> underTest.getSourceImage(image));
         assertEquals("Missing Marketplace image URN! Please specify the image in an URN format, "
                 + "4 segments separated by a colon in the image catalog", exception.getMessage());
 

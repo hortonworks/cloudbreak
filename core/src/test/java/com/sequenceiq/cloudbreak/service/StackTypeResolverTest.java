@@ -1,10 +1,10 @@
 package com.sequenceiq.cloudbreak.service;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.Map;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.cloudbreak.cloud.model.catalog.ImageStackDetails;
@@ -24,7 +24,7 @@ public class StackTypeResolverTest {
         CloudbreakImageCatalogException exception = assertThrows(CloudbreakImageCatalogException.class,
                 () -> underTest.determineStackType(imageStackDetails));
 
-        Assertions.assertEquals("Unsupported stack type: 'CDX'.", exception.getMessage());
+        assertEquals("Unsupported stack type: 'CDX'.", exception.getMessage());
     }
 
     @Test
@@ -34,7 +34,7 @@ public class StackTypeResolverTest {
 
         StackType stackType = underTest.determineStackType(imageStackDetails);
 
-        Assertions.assertEquals(StackType.CDH, stackType);
+        assertEquals(StackType.CDH, stackType);
     }
 
 }

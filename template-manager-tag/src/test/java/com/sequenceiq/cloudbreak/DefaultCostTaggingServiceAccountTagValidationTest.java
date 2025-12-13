@@ -1,16 +1,17 @@
 package com.sequenceiq.cloudbreak;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.AdditionalAnswers.returnsSecondArg;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-import org.junit.Before;
-import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -25,7 +26,7 @@ import com.sequenceiq.cloudbreak.tag.TagPreparationObject;
 import com.sequenceiq.cloudbreak.tag.request.CDPTagGenerationRequest;
 
 @ExtendWith(MockitoExtension.class)
-public class DefaultCostTaggingServiceAccountTagValidationTest {
+class DefaultCostTaggingServiceAccountTagValidationTest {
 
     @Mock
     private CentralTagUpdater centralTagUpdater;
@@ -33,9 +34,9 @@ public class DefaultCostTaggingServiceAccountTagValidationTest {
     @InjectMocks
     private DefaultCostTaggingService underTest;
 
-    @Before
-    public void before() {
-        when(centralTagUpdater.getTagText(any(TagPreparationObject.class), anyString())).then(returnsSecondArg());
+    @BeforeEach
+    void before() {
+        lenient().when(centralTagUpdater.getTagText(any(TagPreparationObject.class), anyString())).then(returnsSecondArg());
     }
 
     @Test
@@ -66,7 +67,7 @@ public class DefaultCostTaggingServiceAccountTagValidationTest {
 
         Map<String, String> result = underTest.prepareDefaultTags(tagRequest(userDefinedTags));
 
-        Assertions.assertEquals(result.get("accountTagKey2"), "accountTagValue2");
+        assertEquals(result.get("accountTagKey2"), "accountTagValue2");
     }
 
     @Test
@@ -80,8 +81,8 @@ public class DefaultCostTaggingServiceAccountTagValidationTest {
 
         Map<String, String> result = underTest.prepareDefaultTags(tagRequest(resourceTags));
 
-        Assertions.assertEquals(result.get("accountTagKey2"), "accountTagValue2");
-        Assertions.assertEquals(result.get("accountTagKey"), "accountTagValue");
+        assertEquals(result.get("accountTagKey2"), "accountTagValue2");
+        assertEquals(result.get("accountTagKey"), "accountTagValue");
     }
 
     @Test

@@ -1,13 +1,15 @@
 package com.sequenceiq.environment.environment.validation.validators;
 
 import static java.util.Collections.emptyList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 import java.util.List;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -55,7 +57,7 @@ public class SubnetUsageValidatorTest {
         when(freeIpaV1Endpoint.getUsedSubnetsByEnvironment(ENVIRONMENT_CRN)).thenReturn(new UsedSubnetsByEnvironmentResponse(emptyList()));
         when(databaseServerV4Endpoint.getUsedSubnetsByEnvironment(ENVIRONMENT_CRN)).thenReturn(new UsedSubnetsByEnvironmentResponse(emptyList()));
         underTest.validate(environment, network, resultBuilder);
-        Assertions.assertFalse(resultBuilder.build().hasError());
+        assertFalse(resultBuilder.build().hasError());
     }
 
     @Test
@@ -73,8 +75,8 @@ public class SubnetUsageValidatorTest {
                 .thenReturn(new UsedSubnetsByEnvironmentResponse(List.of(createUsedSubnetWithCrn("sub3", "REDBEAMS"))));
         underTest.validate(environment, network, resultBuilder);
         ValidationResult validationResult = resultBuilder.build();
-        Assertions.assertTrue(validationResult.hasError());
-        Assertions.assertEquals("1. The Data Hub uses the subnets of [sub1], cannot remove these from the environment\n" +
+        assertTrue(validationResult.hasError());
+        assertEquals("1. The Data Hub uses the subnets of [sub1], cannot remove these from the environment\n" +
                 "2. The External Database uses the subnets of [sub3], cannot remove these from the environment\n" +
                 "3. The FreeIPA uses the subnets of [sub2], cannot remove these from the environment", validationResult.getFormattedErrors());
     }

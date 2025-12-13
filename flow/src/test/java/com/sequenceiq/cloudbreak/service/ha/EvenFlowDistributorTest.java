@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.service.ha;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.security.SecureRandom;
 import java.util.ArrayList;
@@ -10,9 +10,9 @@ import java.util.Map;
 import java.util.Random;
 import java.util.stream.Collectors;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.ha.domain.Node;
 import com.sequenceiq.cloudbreak.ha.service.EvenFlowDistributor;
@@ -20,8 +20,8 @@ import com.sequenceiq.flow.api.model.operation.OperationType;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.domain.StateStatus;
 
-@RunWith(MockitoJUnitRunner.class)
-public class EvenFlowDistributorTest {
+@ExtendWith(MockitoExtension.class)
+class EvenFlowDistributorTest {
 
     private static final String MY_ID = "E80C7BD9-61CD-442E-AFDA-C3B30FEDE88F";
 
@@ -34,7 +34,7 @@ public class EvenFlowDistributorTest {
     private final EvenFlowDistributor flowDistributor = new EvenFlowDistributor();
 
     @Test
-    public void testOddFlowDistribution() {
+    void testOddFlowDistribution() {
         List<Node> nodes = getClusterNodes();
         List<String> flowLogs = getFlowIds(9);
         Map<Node, List<String>> result = flowDistributor.distribute(flowLogs, nodes);
@@ -45,7 +45,7 @@ public class EvenFlowDistributorTest {
     }
 
     @Test
-    public void testEvenFlowDistribution() {
+    void testEvenFlowDistribution() {
         List<Node> nodes = getClusterNodes();
         List<String> flowLogs = getFlowIds(12);
         Map<Node, List<String>> result = flowDistributor.distribute(flowLogs, nodes);
@@ -56,7 +56,7 @@ public class EvenFlowDistributorTest {
     }
 
     @Test
-    public void testEvenFlowOddNodesDistribution() {
+    void testEvenFlowOddNodesDistribution() {
         List<Node> nodes = getClusterNodes();
         nodes.remove(3);
         List<String> flowLogs = getFlowIds(12);
@@ -67,7 +67,7 @@ public class EvenFlowDistributorTest {
     }
 
     @Test
-    public void testOddFlowOddNodesDistribution() {
+    void testOddFlowOddNodesDistribution() {
         List<Node> nodes = getClusterNodes();
         nodes.remove(3);
         List<String> flowLogs = getFlowIds(11);
@@ -78,7 +78,7 @@ public class EvenFlowDistributorTest {
     }
 
     @Test
-    public void testFlowDistributionSingleNode() {
+    void testFlowDistributionSingleNode() {
         Node node = new Node(MY_ID);
         List<String> flowLogs = getFlowIds(11);
         Map<Node, List<String>> result = flowDistributor.distribute(flowLogs, Collections.singletonList(node));

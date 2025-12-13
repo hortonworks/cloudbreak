@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.service.user;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.never;
@@ -10,12 +10,13 @@ import static org.mockito.Mockito.when;
 
 import java.util.Optional;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.userprofile.requests.UserProfileV4Request;
 import com.sequenceiq.cloudbreak.domain.UserProfile;
@@ -23,7 +24,8 @@ import com.sequenceiq.cloudbreak.repository.UserProfileRepository;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 
-public class UserProfileServiceTest {
+@ExtendWith(MockitoExtension.class)
+class UserProfileServiceTest {
 
     private static final String USERNAME = "test@hortonworks.com";
 
@@ -41,15 +43,14 @@ public class UserProfileServiceTest {
 
     private final User user = new User();
 
-    @Before
+    @BeforeEach
     public void before() {
         user.setId(1L);
         user.setUserName(USERNAME);
-        MockitoAnnotations.initMocks(this);
     }
 
     @Test
-    public void getShouldAddUIProps() {
+    void getShouldAddUIProps() {
         when(userProfileRepository.save(any(UserProfile.class))).thenReturn(new UserProfile());
         ArgumentCaptor<UserProfile> userProfileCaptor = ArgumentCaptor.forClass(UserProfile.class);
         userProfileService.getOrCreate(user);
@@ -60,7 +61,7 @@ public class UserProfileServiceTest {
     }
 
     @Test
-    public void getWithUsername() {
+    void getWithUsername() {
         when(userProfileRepository.save(any(UserProfile.class))).thenReturn(new UserProfile());
         ArgumentCaptor<UserProfile> userProfileCaptor = ArgumentCaptor.forClass(UserProfile.class);
         UserProfile returnedUserProfile = userProfileService.getOrCreate(user);
@@ -73,13 +74,12 @@ public class UserProfileServiceTest {
     }
 
     @Test
-    public void getShouldntDeleteUserName() {
+    void getShouldntDeleteUserName() {
         UserProfile foundProfile = new UserProfile();
         foundProfile.setUser(user);
         foundProfile.setUserName(USERNAME);
 
         when(userProfileRepository.findOneByUser(anyLong())).thenReturn(Optional.of(foundProfile));
-        when(userProfileRepository.save(any(UserProfile.class))).thenReturn(new UserProfile());
 
         UserProfile returnedUserProfile = userProfileService.getOrCreate(user);
         verify(userProfileRepository, never()).save(any(UserProfile.class));

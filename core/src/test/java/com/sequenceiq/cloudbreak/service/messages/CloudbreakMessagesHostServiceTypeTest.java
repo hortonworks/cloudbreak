@@ -1,47 +1,39 @@
 package com.sequenceiq.cloudbreak.service.messages;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.when;
+
 import java.util.Collections;
+import java.util.Locale;
 
-import jakarta.inject.Inject;
-
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.MessageSource;
 
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
-import com.sequenceiq.cloudbreak.message.MessagesConfig;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = { MessagesConfig.class, TestConfig.class })
-public class CloudbreakMessagesHostServiceTypeTest {
+@ExtendWith(MockitoExtension.class)
+class CloudbreakMessagesHostServiceTypeTest {
 
-    @Inject
+    @Mock
+    private MessageSource messageSource;
+
+    @InjectMocks
     private CloudbreakMessagesService messagesService;
 
     @Test
-    public void shouldResolveMessageIfCodeProvided() {
-        // GIVEN
-
-        // WHEN
-        String message = messagesService.getMessage("test.message");
-        // THEN
-
-        Assert.assertEquals("Invalid message", "Hi my dear friend", message);
-
+    void shouldResolveMessageIfCodeProvided() {
+        when(messageSource.getMessage("test.message", null, Locale.getDefault())).thenReturn("Hi my dear friend");
+        assertEquals("Hi my dear friend", messagesService.getMessage("test.message"));
     }
 
     @Test
-    public void shouldResolveCodeAndMergeArgs() {
-        // GIVEN
-
-
-        // WHEN
-        String message = messagesService.getMessage("stack.infrastructure.time", Collections.singletonList(123));
-        // THEN
-        Assert.assertEquals("Invalid message resolution!", "Infrastructure creation took 123 seconds", message);
-
-
+    void shouldResolveCodeAndMergeArgs() {
+        when(messageSource.getMessage("stack.infrastructure.time", new Object[]{123}, Locale.getDefault()))
+                .thenReturn("Infrastructure creation took 123 seconds");
+        assertEquals("Infrastructure creation took 123 seconds", messagesService.getMessage("stack.infrastructure.time", Collections.singletonList(123)));
     }
 }

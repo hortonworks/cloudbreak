@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.structuredevent.service.telemetry.converter;
 
-import org.junit.jupiter.api.Assertions;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -37,24 +38,24 @@ public class StackDetailsToCDPImageDetailsConverterTest {
     public void testConvertWithNull() {
         UsageProto.CDPImageDetails cdpImageDetails = underTest.convert(null);
 
-        Assertions.assertEquals("", cdpImageDetails.getImageCatalog());
-        Assertions.assertEquals("", cdpImageDetails.getImageId());
-        Assertions.assertEquals("", cdpImageDetails.getImageCatalogUrl());
-        Assertions.assertEquals("", cdpImageDetails.getOsType());
-        Assertions.assertEquals("", cdpImageDetails.getImageName());
-        Assertions.assertEquals("", cdpImageDetails.getImageArchitecture());
+        assertEquals("", cdpImageDetails.getImageCatalog());
+        assertEquals("", cdpImageDetails.getImageId());
+        assertEquals("", cdpImageDetails.getImageCatalogUrl());
+        assertEquals("", cdpImageDetails.getOsType());
+        assertEquals("", cdpImageDetails.getImageName());
+        assertEquals("", cdpImageDetails.getImageArchitecture());
     }
 
     @Test
     public void testConvertWithEmpty() {
         UsageProto.CDPImageDetails cdpImageDetails = underTest.convert(new StackDetails());
 
-        Assertions.assertEquals("", cdpImageDetails.getImageCatalog());
-        Assertions.assertEquals("", cdpImageDetails.getImageId());
-        Assertions.assertEquals("", cdpImageDetails.getImageCatalogUrl());
-        Assertions.assertEquals("", cdpImageDetails.getOsType());
-        Assertions.assertEquals("", cdpImageDetails.getImageName());
-        Assertions.assertEquals("", cdpImageDetails.getImageArchitecture());
+        assertEquals("", cdpImageDetails.getImageCatalog());
+        assertEquals("", cdpImageDetails.getImageId());
+        assertEquals("", cdpImageDetails.getImageCatalogUrl());
+        assertEquals("", cdpImageDetails.getOsType());
+        assertEquals("", cdpImageDetails.getImageName());
+        assertEquals("", cdpImageDetails.getImageArchitecture());
     }
 
     @Test
@@ -63,12 +64,12 @@ public class StackDetailsToCDPImageDetailsConverterTest {
         stackDetails.setImage(new ImageDetails());
         UsageProto.CDPImageDetails cdpImageDetails = underTest.convert(stackDetails);
 
-        Assertions.assertEquals("", cdpImageDetails.getImageCatalog());
-        Assertions.assertEquals("", cdpImageDetails.getImageId());
-        Assertions.assertEquals("", cdpImageDetails.getImageCatalogUrl());
-        Assertions.assertEquals("", cdpImageDetails.getOsType());
-        Assertions.assertEquals("", cdpImageDetails.getImageName());
-        Assertions.assertEquals("x86_64", cdpImageDetails.getImageArchitecture());
+        assertEquals("", cdpImageDetails.getImageCatalog());
+        assertEquals("", cdpImageDetails.getImageId());
+        assertEquals("", cdpImageDetails.getImageCatalogUrl());
+        assertEquals("", cdpImageDetails.getOsType());
+        assertEquals("", cdpImageDetails.getImageName());
+        assertEquals("x86_64", cdpImageDetails.getImageArchitecture());
     }
 
     @Test
@@ -85,11 +86,11 @@ public class StackDetailsToCDPImageDetailsConverterTest {
 
         UsageProto.CDPImageDetails cdpImageDetails = underTest.convert(stackDetails);
 
-        Assertions.assertEquals(IMAGE_CATALOG, cdpImageDetails.getImageCatalog());
-        Assertions.assertEquals(IMAGE_ID, cdpImageDetails.getImageId());
-        Assertions.assertEquals(IMAGE_CATALOG_URL, cdpImageDetails.getImageCatalogUrl());
-        Assertions.assertEquals(OS_TYPE, cdpImageDetails.getOsType());
-        Assertions.assertEquals(IMAGE_NAME, cdpImageDetails.getImageName());
-        Assertions.assertEquals(IMAGE_ARCHITECTURE, cdpImageDetails.getImageArchitecture());
+        assertEquals(IMAGE_CATALOG, cdpImageDetails.getImageCatalog());
+        assertEquals(IMAGE_ID, cdpImageDetails.getImageId());
+        assertEquals(IMAGE_CATALOG_URL, cdpImageDetails.getImageCatalogUrl());
+        assertEquals(OS_TYPE, cdpImageDetails.getOsType());
+        assertEquals(IMAGE_NAME, cdpImageDetails.getImageName());
+        assertEquals(IMAGE_ARCHITECTURE, cdpImageDetails.getImageArchitecture());
     }
 }

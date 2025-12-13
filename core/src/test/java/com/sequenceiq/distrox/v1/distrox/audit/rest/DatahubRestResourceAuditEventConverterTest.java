@@ -1,13 +1,13 @@
 package com.sequenceiq.distrox.v1.distrox.audit.rest;
 
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -58,7 +58,7 @@ public class DatahubRestResourceAuditEventConverterTest {
         when(legacyRestCommonService.addClusterCrnAndNameIfPresent(event)).thenReturn(params);
         when(stackService.findStackByNameAndWorkspaceId(operation.getResourceName(), operation.getWorkspaceId())).thenReturn(Optional.empty());
         Map<String, Object> actual = underTest.requestParameters(event);
-        Assertions.assertEquals(0, actual.size());
+        assertEquals(0, actual.size());
     }
 
     @Test
@@ -79,7 +79,7 @@ public class DatahubRestResourceAuditEventConverterTest {
         when(legacyRestCommonService.addClusterCrnAndNameIfPresent(event)).thenReturn(params);
         when(stackService.findStackByNameAndWorkspaceId(operation.getResourceName(), operation.getWorkspaceId())).thenReturn(Optional.of(stack));
         Map<String, Object> actual = underTest.requestParameters(event);
-        Assertions.assertEquals(0, actual.size());
+        assertEquals(0, actual.size());
     }
 
     @Test
@@ -109,9 +109,9 @@ public class DatahubRestResourceAuditEventConverterTest {
         when(stackService.findStackByNameAndWorkspaceId(operation.getResourceName(), operation.getWorkspaceId())).thenReturn(Optional.of(stack));
         when(hostGroupService.getByClusterIdAndNameWithRecipes(345L, "gr")).thenReturn(hostGroup);
         Map<String, Object> actual = underTest.requestParameters(event);
-        Assertions.assertEquals(3, actual.size());
-        Assertions.assertEquals(2, actual.get("desiredCount"));
-        Assertions.assertEquals(0, actual.get("originalCount"));
-        Assertions.assertEquals("gr", actual.get("hostGroup"));
+        assertEquals(3, actual.size());
+        assertEquals(2, actual.get("desiredCount"));
+        assertEquals(0, actual.get("originalCount"));
+        assertEquals("gr", actual.get("hostGroup"));
     }
 }

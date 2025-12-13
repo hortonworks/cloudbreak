@@ -1,25 +1,25 @@
 package com.sequenceiq.redbeams.api.endpoint.v4.stacks;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.aws.AwsNetworkV4Parameters;
 
-public class NetworkV4StackBaseTest {
+class NetworkV4StackBaseTest {
 
     private NetworkV4StackBase underTest;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         underTest = new NetworkV4StackBase();
     }
 
     @Test
-    public void testAwsParameters() {
+    void testAwsParameters() {
         assertNull(underTest.getAws());
 
         AwsNetworkV4Parameters parameters = underTest.createAws();

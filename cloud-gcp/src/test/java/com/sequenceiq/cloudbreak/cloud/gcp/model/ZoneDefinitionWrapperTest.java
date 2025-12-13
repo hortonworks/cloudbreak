@@ -1,8 +1,9 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.model;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.util.ArrayList;
 
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 
 public class ZoneDefinitionWrapperTest {
@@ -15,10 +16,10 @@ public class ZoneDefinitionWrapperTest {
         zoneDefinitionWrapper.setSelfLink("link");
         zoneDefinitionWrapper.setKind("kind");
 
-        Assert.assertEquals("1", zoneDefinitionWrapper.getId());
-        Assert.assertEquals(true, zoneDefinitionWrapper.getItems().isEmpty());
-        Assert.assertEquals("link", zoneDefinitionWrapper.getSelfLink());
-        Assert.assertEquals("kind", zoneDefinitionWrapper.getKind());
+        assertEquals("1", zoneDefinitionWrapper.getId());
+        assertEquals(true, zoneDefinitionWrapper.getItems().isEmpty());
+        assertEquals("link", zoneDefinitionWrapper.getSelfLink());
+        assertEquals("kind", zoneDefinitionWrapper.getKind());
 
     }
 

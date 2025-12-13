@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.util;
 
-import org.junit.jupiter.api.Assertions;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,8 +16,8 @@ class PasswordUtilTest {
         String actual = PasswordUtil.generatePassword();
         long endInMillis = System.currentTimeMillis();
         LOGGER.info("Password has been generated within {}ms the generated password: '{}'", endInMillis - startInMillis, actual);
-        Assertions.assertEquals(26, actual.length());
-        Assertions.assertTrue(actual.chars().allMatch(charAsInt -> Character.isDigit(charAsInt)
+        assertEquals(26, actual.length());
+        assertTrue(actual.chars().allMatch(charAsInt -> Character.isDigit(charAsInt)
                 || Character.isUpperCase(charAsInt)
                 || Character.isLowerCase(charAsInt)));
     }
@@ -28,8 +30,8 @@ class PasswordUtilTest {
         long endInMillis = System.currentTimeMillis();
         LOGGER.info("Random string with only alphabetic chars has been generated within {}ms the generated password: '{}'", endInMillis - startInMillis,
                 actual);
-        Assertions.assertEquals(expectedCount, actual.length());
-        Assertions.assertTrue(actual.chars().allMatch(charAsInt -> Character.isUpperCase(charAsInt)
+        assertEquals(expectedCount, actual.length());
+        assertTrue(actual.chars().allMatch(charAsInt -> Character.isUpperCase(charAsInt)
                 || Character.isLowerCase(charAsInt)));
     }
 
@@ -41,7 +43,7 @@ class PasswordUtilTest {
         long endInMillis = System.currentTimeMillis();
         LOGGER.info("Random string with only numeric chars has been generated within {}ms the generated password: '{}'", endInMillis - startInMillis,
                 actual);
-        Assertions.assertEquals(expectedCount, actual.length());
-        Assertions.assertTrue(actual.chars().allMatch(Character::isDigit));
+        assertEquals(expectedCount, actual.length());
+        assertTrue(actual.chars().allMatch(Character::isDigit));
     }
 }

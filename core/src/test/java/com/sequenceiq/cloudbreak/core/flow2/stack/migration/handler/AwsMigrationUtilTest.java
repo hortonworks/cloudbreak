@@ -1,11 +1,16 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.migration.handler;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -13,12 +18,10 @@ import static org.mockito.Mockito.when;
 import java.util.Collections;
 import java.util.List;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.aws.AwsCloudFormationClient;
@@ -99,7 +102,7 @@ public class AwsMigrationUtilTest {
         when(amazonCloudFormationClient.describeStackResources(any())).thenThrow(CloudFormationException.builder()
                 .awsErrorDetails(AwsErrorDetails.builder().errorMessage("stack-name does not exist").build()).build());
         boolean actual = underTest.allInstancesDeletedFromCloudFormation(ac, cloudResource);
-        Assertions.assertTrue(actual);
+        assertTrue(actual);
         verify(cfStackUtil, never()).getInstanceIds(amazonAutoScalingClient, "id1");
         verify(cfStackUtil, never()).getInstanceIds(amazonAutoScalingClient, "id2");
     }
@@ -112,9 +115,9 @@ public class AwsMigrationUtilTest {
         when(awsClient.createCloudFormationClient(any(), any())).thenReturn(amazonCloudFormationClient);
         when(amazonCloudFormationClient.describeStackResources(any())).thenThrow(CloudFormationException.builder()
                 .awsErrorDetails(AwsErrorDetails.builder().errorMessage("something error happened").build()).build());
-        CloudFormationException actual = Assertions.assertThrows(CloudFormationException.class,
+        CloudFormationException actual = assertThrows(CloudFormationException.class,
                 () -> underTest.allInstancesDeletedFromCloudFormation(ac, cloudResource));
-        Assertions.assertEquals("something error happened", actual.awsErrorDetails().errorMessage());
+        assertEquals("something error happened", actual.awsErrorDetails().errorMessage());
     }
 
     @Test
@@ -133,7 +136,7 @@ public class AwsMigrationUtilTest {
         when(cfStackUtil.getInstanceIds(amazonAutoScalingClient, "id1")).thenReturn(Collections.emptyList());
         when(cfStackUtil.getInstanceIds(amazonAutoScalingClient, "id2")).thenReturn(Collections.emptyList());
         boolean actual = underTest.allInstancesDeletedFromCloudFormation(ac, cloudResource);
-        Assertions.assertTrue(actual);
+        assertTrue(actual);
         verify(cfStackUtil).getInstanceIds(amazonAutoScalingClient, "id1");
         verify(cfStackUtil).getInstanceIds(amazonAutoScalingClient, "id2");
     }
@@ -153,7 +156,7 @@ public class AwsMigrationUtilTest {
         when(awsClient.createAutoScalingClient(any(), any())).thenReturn(amazonAutoScalingClient);
         when(cfStackUtil.getInstanceIds(amazonAutoScalingClient, "id1")).thenReturn(List.of("instanceId1"));
         boolean actual = underTest.allInstancesDeletedFromCloudFormation(ac, cloudResource);
-        Assertions.assertFalse(actual);
+        assertFalse(actual);
         verify(cfStackUtil).getInstanceIds(amazonAutoScalingClient, "id1");
         verify(cfStackUtil, never()).getInstanceIds(amazonAutoScalingClient, "id2");
     }
@@ -174,7 +177,7 @@ public class AwsMigrationUtilTest {
         when(cfStackUtil.getInstanceIds(amazonAutoScalingClient, "id1")).thenReturn(Collections.emptyList());
         when(cfStackUtil.getInstanceIds(amazonAutoScalingClient, "id2")).thenReturn(List.of("instanceId1"));
         boolean actual = underTest.allInstancesDeletedFromCloudFormation(ac, cloudResource);
-        Assertions.assertFalse(actual);
+        assertFalse(actual);
         verify(cfStackUtil).getInstanceIds(amazonAutoScalingClient, "id1");
         verify(cfStackUtil).getInstanceIds(amazonAutoScalingClient, "id2");
     }
@@ -183,7 +186,7 @@ public class AwsMigrationUtilTest {
     void testChangeLoadbalancer() throws InterruptedException {
         when(ac.getCloudContext()).thenReturn(cloudContext);
         when(cloudContext.getId()).thenReturn(0L);
-        AwsMigrationUtil spiedUnderTest = Mockito.spy(underTest);
+        AwsMigrationUtil spiedUnderTest = spy(underTest);
         CollectLoadBalancerMetadataCloudPlatformRequest collectLoadBalancerMetadataRequest = mock(CollectLoadBalancerMetadataCloudPlatformRequest.class);
         doReturn(collectLoadBalancerMetadataRequest).when(spiedUnderTest).getCollectLoadBalancerMetadataRequest(any(), any(), any());
         when(collectLoadBalancerMetadataRequest.await()).thenReturn(new CollectLoadBalancerMetadataCloudPlatformResult(0L, List.of()));

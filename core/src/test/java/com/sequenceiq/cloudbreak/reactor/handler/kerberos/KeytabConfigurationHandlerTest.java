@@ -10,11 +10,11 @@ import static org.mockito.Mockito.when;
 
 import java.util.Optional;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.common.base64.Base64Util;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -33,8 +33,8 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.template.kerberos.KerberosDetailService;
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.ServiceKeytabResponse;
 
-@RunWith(MockitoJUnitRunner.class)
-public class KeytabConfigurationHandlerTest {
+@ExtendWith(MockitoExtension.class)
+class KeytabConfigurationHandlerTest {
 
     private static final Long STACK_ID = 123L;
 
@@ -79,7 +79,7 @@ public class KeytabConfigurationHandlerTest {
     private KeytabConfigurationHandler victim;
 
     @Test
-    public void shouldUpdateKeytabs() throws Exception {
+    void shouldUpdateKeytabs() throws Exception {
         KeytabConfigurationRequest keytabConfigurationRequest = new KeytabConfigurationRequest(STACK_ID, Boolean.FALSE);
         Stack stack = aStack();
         Optional<KerberosConfig> kerberosConfig = of(mock(KerberosConfig.class));
@@ -100,7 +100,7 @@ public class KeytabConfigurationHandlerTest {
     }
 
     @Test
-    public void shouldNotUpdateKeytabs() throws Exception {
+    void shouldNotUpdateKeytabs() throws Exception {
         KeytabConfigurationRequest keytabConfigurationRequest = new KeytabConfigurationRequest(STACK_ID, Boolean.FALSE);
         Stack stack = mock(Stack.class);
 

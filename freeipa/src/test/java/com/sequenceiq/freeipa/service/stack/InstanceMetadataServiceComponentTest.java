@@ -1,6 +1,8 @@
 package com.sequenceiq.freeipa.service.stack;
 
 import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.SUBNET_IDS;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -16,7 +18,6 @@ import java.util.stream.Collectors;
 import jakarta.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -111,16 +112,16 @@ public class InstanceMetadataServiceComponentTest {
                         InstanceMetaData::getAvailabilityZone,
                         Collectors.mapping(Function.identity(), Collectors.toList())));
 
-        Assertions.assertEquals(2, groupByAz.size());
-        Assertions.assertEquals(21, groupByAz.get("az").size());
-        Assertions.assertEquals(21, groupByAz.get("az1").size());
-        Assertions.assertEquals(4, groupBySub.size());
-        Assertions.assertEquals(7, groupBySub.get("sub1").size());
-        Assertions.assertEquals(7, groupBySub.get("sub2").size());
-        Assertions.assertEquals(7, groupBySub.get("sub3").size());
-        Assertions.assertEquals(21, groupBySub.get("sub4").size());
+        assertEquals(2, groupByAz.size());
+        assertEquals(21, groupByAz.get("az").size());
+        assertEquals(21, groupByAz.get("az1").size());
+        assertEquals(4, groupBySub.size());
+        assertEquals(7, groupBySub.get("sub1").size());
+        assertEquals(7, groupBySub.get("sub2").size());
+        assertEquals(7, groupBySub.get("sub3").size());
+        assertEquals(21, groupBySub.get("sub4").size());
         verify(instanceMetaDataRepository, times(42)).save(instanceMetaDataArgumentCaptor.capture());
-        Assertions.assertTrue(instanceMetaDataArgumentCaptor.getAllValues()
+        assertTrue(instanceMetaDataArgumentCaptor.getAllValues()
                 .stream()
                 .allMatch(im -> StringUtils.isNotEmpty(im.getSubnetId())));
     }
@@ -169,10 +170,10 @@ public class InstanceMetadataServiceComponentTest {
                         InstanceMetaData::getAvailabilityZone,
                         Collectors.mapping(Function.identity(), Collectors.toList())));
 
-        Assertions.assertEquals(2, groupByAz.size());
-        Assertions.assertEquals(2, groupBySub.size());
+        assertEquals(2, groupByAz.size());
+        assertEquals(2, groupBySub.size());
         verify(instanceMetaDataRepository, times(1)).save(instanceMetaDataArgumentCaptor.capture());
-        Assertions.assertTrue(instanceMetaDataArgumentCaptor.getAllValues()
+        assertTrue(instanceMetaDataArgumentCaptor.getAllValues()
                 .stream()
                 .allMatch(im -> StringUtils.isNotEmpty(im.getSubnetId())));
     }

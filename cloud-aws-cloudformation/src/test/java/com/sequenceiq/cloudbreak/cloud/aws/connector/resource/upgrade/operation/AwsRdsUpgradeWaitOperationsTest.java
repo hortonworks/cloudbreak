@@ -1,12 +1,12 @@
 package com.sequenceiq.cloudbreak.cloud.aws.connector.resource.upgrade.operation;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -49,7 +49,7 @@ public class AwsRdsUpgradeWaitOperationsTest {
     void testWaitUntilUpgradeStartsWhenPollingThrows() {
         doThrow(PollerException.class).when(upgradeStartPoller).waitForUpgradeToStart(any());
 
-        Assertions.assertThrows(CloudConnectorException.class, () ->
+        assertThrows(CloudConnectorException.class, () ->
             underTest.waitUntilUpgradeStarts(rdsClient, DescribeDbInstancesRequest.builder().build())
         );
     }

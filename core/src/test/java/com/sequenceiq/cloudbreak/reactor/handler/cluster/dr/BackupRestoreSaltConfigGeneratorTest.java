@@ -34,7 +34,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltConfig;
 
 @ExtendWith(MockitoExtension.class)
-public class BackupRestoreSaltConfigGeneratorTest {
+class BackupRestoreSaltConfigGeneratorTest {
 
     public static final String RANGER_ADMIN_GROUP = "ranger-admin";
 
@@ -59,21 +59,21 @@ public class BackupRestoreSaltConfigGeneratorTest {
     private MockedStatic<ThreadBasedUserCrnProvider> mockedUserCrnProvider;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         when(entitlementService.isDatalakeKnoxGatewayDbDrEnabled(anyString())).thenReturn(false);
         mockedUserCrnProvider = mockStatic(ThreadBasedUserCrnProvider.class);
         mockedUserCrnProvider.when(ThreadBasedUserCrnProvider::getAccountId).thenReturn(TEST_ACCOUNT_ID);
     }
 
     @AfterEach
-    public void tearDown() {
+    void tearDown() {
         if (mockedUserCrnProvider != null) {
             mockedUserCrnProvider.close();
         }
     }
 
     @Test
-    public void testCreateSaltConfig() throws URISyntaxException {
+    void testCreateSaltConfig() throws URISyntaxException {
         String cloudPlatform = "aws";
         String location = "/test/backups";
         Stack placeholderStack = new Stack();
@@ -91,7 +91,7 @@ public class BackupRestoreSaltConfigGeneratorTest {
     }
 
     @Test
-    public void testCreateSaltConfigWithKnoxGatewayEntitlement() throws URISyntaxException {
+    void testCreateSaltConfigWithKnoxGatewayEntitlement() throws URISyntaxException {
         when(entitlementService.isDatalakeKnoxGatewayDbDrEnabled(anyString())).thenReturn(true);
 
         String cloudPlatform = "aws";
@@ -111,7 +111,7 @@ public class BackupRestoreSaltConfigGeneratorTest {
     }
 
     @Test
-    public void testCreateSaltConfigWithHdfsLocation() throws URISyntaxException {
+    void testCreateSaltConfigWithHdfsLocation() throws URISyntaxException {
         // AWS platform
         String cloudPlatform = "aws";
         String location = "hdfs://test/backups";
@@ -142,7 +142,7 @@ public class BackupRestoreSaltConfigGeneratorTest {
     }
 
     @Test
-    public void testCreateSaltConfigWithSkipDatabaseNames() throws URISyntaxException {
+    void testCreateSaltConfigWithSkipDatabaseNames() throws URISyntaxException {
         String cloudPlatform = "aws";
         String location = "/test/backups";
         Stack placeholderStack = new Stack();
@@ -161,7 +161,7 @@ public class BackupRestoreSaltConfigGeneratorTest {
     }
 
     @Test
-    public void testObjectStorageUrlIsPrefixedWithS3aForAwsCloudplatform() throws URISyntaxException {
+    void testObjectStorageUrlIsPrefixedWithS3aForAwsCloudplatform() throws URISyntaxException {
         String cloudPlatform = "aws";
         String location = "/test/backups";
         Stack placeholderStack = new Stack();
@@ -177,7 +177,7 @@ public class BackupRestoreSaltConfigGeneratorTest {
     }
 
     @Test
-    public void testS3aSchemeIsPassedThroughUnchanged() throws Exception {
+    void testS3aSchemeIsPassedThroughUnchanged() throws Exception {
         String cloudPlatform = "aws";
         String location = "s3a://eng-sdx-daily-datalake/bderriso-provo/data/backup01";
         Stack placeholderStack = new Stack();
@@ -193,7 +193,7 @@ public class BackupRestoreSaltConfigGeneratorTest {
     }
 
     @Test
-    public void testObjectStorageUrlIsPrefixedWithAbfsForAzureCloudplatform() throws URISyntaxException {
+    void testObjectStorageUrlIsPrefixedWithAbfsForAzureCloudplatform() throws URISyntaxException {
         String cloudPlatform = "azure";
         String location = "/test/backups";
         Stack placeholderStack = new Stack();
@@ -209,7 +209,7 @@ public class BackupRestoreSaltConfigGeneratorTest {
     }
 
     @Test
-    public void testObjectStorageUrlIsNotChangedForCorrectAbfsAzurePrefix() throws URISyntaxException {
+    void testObjectStorageUrlIsNotChangedForCorrectAbfsAzurePrefix() throws URISyntaxException {
         String cloudPlatform = "azure";
         String location = "abfs://eng-sdx-daily-datalake/bderriso-provo/data/backup01";
         Stack placeholderStack = new Stack();
@@ -225,7 +225,7 @@ public class BackupRestoreSaltConfigGeneratorTest {
     }
 
     @Test
-    public void testObjectStorageUrlIsPrefixedWithGSForGCPCloudplatform() throws URISyntaxException {
+    void testObjectStorageUrlIsPrefixedWithGSForGCPCloudplatform() throws URISyntaxException {
         String cloudPlatform = "gcp";
         String location = "/test/backups";
         Stack placeholderStack = new Stack();
@@ -241,7 +241,7 @@ public class BackupRestoreSaltConfigGeneratorTest {
     }
 
     @Test
-    public void testGSSchemeIsPassedThroughUnchanged() throws Exception {
+    void testGSSchemeIsPassedThroughUnchanged() throws Exception {
         String cloudPlatform = "gcp";
         String location = "gs://eng-sdx-daily-datalake/bderriso-provo/data/backup01";
         Stack placeholderStack = new Stack();
@@ -257,7 +257,7 @@ public class BackupRestoreSaltConfigGeneratorTest {
     }
 
     @Test
-    public void testEnableCompressionFlagPropagated() throws URISyntaxException {
+    void testEnableCompressionFlagPropagated() throws URISyntaxException {
         String cloudPlatform = "azure";
         String location = "/test/backups";
         Stack placeholderStack = new Stack();
@@ -281,7 +281,7 @@ public class BackupRestoreSaltConfigGeneratorTest {
     }
 
     @Test
-    public void testCreateSaltConfigWithTempDirsWithoutKnoxEntitlement() {
+    void testCreateSaltConfigWithTempDirsWithoutKnoxEntitlement() {
         String tempBackupDir = "/custom/backup";
         String tempRestoreDir = "/custom/restore";
         SaltConfig inputSaltConfig = new SaltConfig();
@@ -298,7 +298,7 @@ public class BackupRestoreSaltConfigGeneratorTest {
     }
 
     @Test
-    public void testCreateSaltConfigWithTempDirsWithKnoxEntitlement() {
+    void testCreateSaltConfigWithTempDirsWithKnoxEntitlement() {
         when(entitlementService.isDatalakeKnoxGatewayDbDrEnabled(anyString())).thenReturn(true);
 
         String tempBackupDir = "/custom/backup";

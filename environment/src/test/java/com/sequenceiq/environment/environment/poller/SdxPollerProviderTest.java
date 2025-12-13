@@ -3,6 +3,7 @@ package com.sequenceiq.environment.environment.poller;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -11,7 +12,6 @@ import java.util.stream.Stream;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.mockito.Mockito;
 
 import com.dyngr.core.AttemptResult;
 import com.dyngr.core.AttemptState;
@@ -27,13 +27,13 @@ class SdxPollerProviderTest {
 
     private static final Long ENV_ID = 1000L;
 
-    private final SdxService sdxService = Mockito.mock(SdxService.class);
+    private final SdxService sdxService = mock(SdxService.class);
 
-    private final FlowIdentifier flowIdentifier1 = Mockito.mock(FlowIdentifier.class);
+    private final FlowIdentifier flowIdentifier1 = mock(FlowIdentifier.class);
 
-    private final FlowIdentifier flowIdentifier2 = Mockito.mock(FlowIdentifier.class);
+    private final FlowIdentifier flowIdentifier2 = mock(FlowIdentifier.class);
 
-    private final DatalakeMultipleFlowsResultEvaluator multipleFlowsResultEvaluator = Mockito.mock(DatalakeMultipleFlowsResultEvaluator.class);
+    private final DatalakeMultipleFlowsResultEvaluator multipleFlowsResultEvaluator = mock(DatalakeMultipleFlowsResultEvaluator.class);
 
     private SdxPollerProvider underTest = new SdxPollerProvider(sdxService, multipleFlowsResultEvaluator);
 

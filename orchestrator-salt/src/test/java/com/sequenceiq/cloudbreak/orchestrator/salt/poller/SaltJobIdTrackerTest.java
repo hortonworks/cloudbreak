@@ -9,6 +9,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doCallRealMethod;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -24,7 +25,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.google.common.collect.ArrayListMultimap;
@@ -59,7 +59,7 @@ class SaltJobIdTrackerTest {
     @Test
     void callWithNotStarted() throws Exception {
         String jobId = "1";
-        SaltJobRunner saltJobRunner = Mockito.mock(SaltJobRunner.class);
+        SaltJobRunner saltJobRunner = mock(SaltJobRunner.class);
         when(saltStateService.jobIsRunning(any(), any())).thenReturn(true);
         RunningJobsResponse jobsResponse = new RunningJobsResponse();
         jobsResponse.setResult(List.of());
@@ -88,7 +88,7 @@ class SaltJobIdTrackerTest {
     @Test
     void callWithNotStartedAndJobIsRunningFailsThenJobStateIsSet() throws Exception {
         String jobId = "1";
-        SaltJobRunner saltJobRunner = Mockito.mock(SaltJobRunner.class);
+        SaltJobRunner saltJobRunner = mock(SaltJobRunner.class);
         when(saltStateService.jobIsRunning(any(), any())).thenThrow(new RuntimeException());
         RunningJobsResponse jobsResponse = new RunningJobsResponse();
         jobsResponse.setResult(List.of());
@@ -107,7 +107,7 @@ class SaltJobIdTrackerTest {
     @SuppressFBWarnings("RV_RETURN_VALUE_IGNORED_NO_SIDE_EFFECT")
     @Test
     void callWithNotStartedWithAlreadyRunning() throws Exception {
-        SaltJobRunner saltJobRunner = Mockito.mock(SaltJobRunner.class);
+        SaltJobRunner saltJobRunner = mock(SaltJobRunner.class);
         RunningJobsResponse jobsResponse = new RunningJobsResponse();
         jobsResponse.setResult(List.of(Map.of("runningJob", Map.of())));
         when(saltStateService.getRunningJobs(saltConnector)).thenReturn(jobsResponse);
@@ -123,7 +123,7 @@ class SaltJobIdTrackerTest {
     @Test
     void callWithFailed() {
         String jobId = "1";
-        SaltJobRunner saltJobRunner = Mockito.mock(BaseSaltJobRunner.class);
+        SaltJobRunner saltJobRunner = mock(BaseSaltJobRunner.class);
         when(saltJobRunner.getJid()).thenReturn(JobId.jobId(jobId));
         when(saltJobRunner.getJobState()).thenCallRealMethod();
         doCallRealMethod().when(saltJobRunner).setJobState(any());
@@ -154,7 +154,7 @@ class SaltJobIdTrackerTest {
     @Test
     void callWithInProgressAndJobIsRunning() throws Exception {
         String jobId = "1";
-        SaltJobRunner saltJobRunner = Mockito.mock(BaseSaltJobRunner.class);
+        SaltJobRunner saltJobRunner = mock(BaseSaltJobRunner.class);
         when(saltJobRunner.getJid()).thenReturn(JobId.jobId(jobId));
         when(saltJobRunner.getJobState()).thenCallRealMethod();
         doCallRealMethod().when(saltJobRunner).setJobState(any());
@@ -181,12 +181,12 @@ class SaltJobIdTrackerTest {
     @Test
     void callWithInProgressAndJobIsFinished() throws Exception {
         String jobId = "1";
-        SaltJobRunner saltJobRunner = Mockito.mock(BaseSaltJobRunner.class);
+        SaltJobRunner saltJobRunner = mock(BaseSaltJobRunner.class);
         when(saltJobRunner.getJid()).thenReturn(JobId.jobId(jobId));
         when(saltJobRunner.getJobState()).thenCallRealMethod();
         doCallRealMethod().when(saltJobRunner).setJobState(any());
 
-        SaltErrorResolver saltErrorResolver = Mockito.mock(SaltErrorResolver.class);
+        SaltErrorResolver saltErrorResolver = mock(SaltErrorResolver.class);
         when(saltConnector.getSaltErrorResolver()).thenReturn(saltErrorResolver);
 
         saltJobRunner.setJobState(JobState.IN_PROGRESS);
@@ -215,13 +215,13 @@ class SaltJobIdTrackerTest {
     @Test
     void callWithInProgressAndMissingNodes() throws Exception {
         String jobId = "1";
-        SaltJobRunner saltJobRunner = Mockito.mock(BaseSaltJobRunner.class);
+        SaltJobRunner saltJobRunner = mock(BaseSaltJobRunner.class);
         when(saltJobRunner.getJid()).thenReturn(JobId.jobId(jobId));
         when(saltJobRunner.getJobState()).thenCallRealMethod();
         doCallRealMethod().when(saltJobRunner).setJobState(any());
         when(saltJobRunner.getNodesWithError()).thenCallRealMethod();
         doCallRealMethod().when(saltJobRunner).setNodesWithError(any());
-        SaltErrorResolver saltErrorResolver = Mockito.mock(SaltErrorResolver.class);
+        SaltErrorResolver saltErrorResolver = mock(SaltErrorResolver.class);
         when(saltConnector.getSaltErrorResolver()).thenReturn(saltErrorResolver);
         saltJobRunner.setJobState(JobState.IN_PROGRESS);
 
@@ -254,13 +254,13 @@ class SaltJobIdTrackerTest {
     @Test
     void callWithMissingNodesUsingStderrFailures() throws Exception {
         String jobId = "1";
-        SaltJobRunner saltJobRunner = Mockito.mock(BaseSaltJobRunner.class);
+        SaltJobRunner saltJobRunner = mock(BaseSaltJobRunner.class);
         when(saltJobRunner.getJid()).thenReturn(JobId.jobId(jobId));
         when(saltJobRunner.getJobState()).thenCallRealMethod();
         doCallRealMethod().when(saltJobRunner).setJobState(any());
         when(saltJobRunner.getNodesWithError()).thenCallRealMethod();
         doCallRealMethod().when(saltJobRunner).setNodesWithError(any());
-        SaltErrorResolver saltErrorResolver = Mockito.mock(SaltErrorResolver.class);
+        SaltErrorResolver saltErrorResolver = mock(SaltErrorResolver.class);
         when(saltConnector.getSaltErrorResolver()).thenReturn(saltErrorResolver);
         saltJobRunner.setJobState(JobState.IN_PROGRESS);
 
@@ -293,7 +293,7 @@ class SaltJobIdTrackerTest {
     @Test
     void callWithInProgressAndMissingNodesAndNoRetryOnFail() {
         String jobId = "1";
-        SaltJobRunner saltJobRunner = Mockito.mock(BaseSaltJobRunner.class);
+        SaltJobRunner saltJobRunner = mock(BaseSaltJobRunner.class);
         when(saltJobRunner.getJid()).thenReturn(JobId.jobId(jobId));
         when(saltJobRunner.getJobState()).thenCallRealMethod();
         doCallRealMethod().when(saltJobRunner).setJobState(any());
@@ -319,7 +319,7 @@ class SaltJobIdTrackerTest {
     @Test
     void callWithNotStartedAndSlsWithError() throws Exception {
         String jobId = "1";
-        SaltJobRunner saltJobRunner = Mockito.mock(BaseSaltJobRunner.class);
+        SaltJobRunner saltJobRunner = mock(BaseSaltJobRunner.class);
         when(saltJobRunner.getJid()).thenReturn(JobId.jobId(jobId));
         when(saltJobRunner.getJobState()).thenCallRealMethod();
         doCallRealMethod().when(saltJobRunner).setJobState(any());

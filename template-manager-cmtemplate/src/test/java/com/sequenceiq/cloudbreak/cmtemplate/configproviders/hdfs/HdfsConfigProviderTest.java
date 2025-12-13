@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.hdfs;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
@@ -14,11 +14,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.TestUtil;
@@ -43,8 +43,8 @@ import com.sequenceiq.common.api.filesystem.AdlsGen2FileSystem;
 import com.sequenceiq.common.api.filesystem.S3FileSystem;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 
-@RunWith(MockitoJUnitRunner.class)
-public class HdfsConfigProviderTest {
+@ExtendWith(MockitoExtension.class)
+class HdfsConfigProviderTest {
 
     @Mock
     private CmTemplateProcessor cmTemplate;
@@ -59,7 +59,7 @@ public class HdfsConfigProviderTest {
     private AdlsGen2ConfigProvider adlsConfigProvider;
 
     @Test
-    public void testGetHdfsServiceConfigsWithoutS3Guard() {
+    void testGetHdfsServiceConfigsWithoutS3Guard() {
         doNothing().when(s3ConfigProvider).getServiceConfigs(any(TemplatePreparationObject.class), any(StringBuilder.class));
 
         TemplatePreparationObject preparationObject = getTemplatePreparationObject(false, false, false);
@@ -72,7 +72,7 @@ public class HdfsConfigProviderTest {
     }
 
     @Test
-    public void testGetHdfsServiceConfigsWithS3FileSystemNoDynamoTable() {
+    void testGetHdfsServiceConfigsWithS3FileSystemNoDynamoTable() {
         doNothing().when(s3ConfigProvider).getServiceConfigs(any(TemplatePreparationObject.class), any(StringBuilder.class));
 
         TemplatePreparationObject preparationObject = getTemplatePreparationObject(true, false, false);
@@ -85,7 +85,7 @@ public class HdfsConfigProviderTest {
     }
 
     @Test
-    public void testGetHdfsServiceConfigsWithAdlsGen2FileSystem() {
+    void testGetHdfsServiceConfigsWithAdlsGen2FileSystem() {
         doNothing().when(adlsConfigProvider).populateServiceConfigs(any(TemplatePreparationObject.class), any(StringBuilder.class), anyString());
 
         TemplatePreparationObject preparationObject = getTemplatePreparationObject(false, false, false);
@@ -100,7 +100,7 @@ public class HdfsConfigProviderTest {
     }
 
     @Test
-    public void testGetRoleConfigsForGatewayRole() {
+    void testGetRoleConfigsForGatewayRole() {
         List<ApiClusterTemplateConfig> roleConfigs = underTest.getRoleConfigs(HdfsRoles.GATEWAY, cmTemplate, null);
         assertEquals(1, roleConfigs.size());
         assertEquals("hdfs_client_env_safety_valve", roleConfigs.get(0).getName());
@@ -108,7 +108,7 @@ public class HdfsConfigProviderTest {
     }
 
     @Test
-    public void testGetRoleConfigsForNonGatewayRole() {
+    void testGetRoleConfigsForNonGatewayRole() {
         List<ApiClusterTemplateConfig> roleConfigs = underTest.getRoleConfigs(HdfsRoles.BALANCER, cmTemplate, null);
         assertEquals(0, roleConfigs.size());
     }

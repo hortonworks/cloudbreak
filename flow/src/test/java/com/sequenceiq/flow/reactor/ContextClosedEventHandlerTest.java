@@ -1,9 +1,11 @@
 package com.sequenceiq.flow.reactor;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.TestComponent;
@@ -30,11 +32,11 @@ class ContextClosedEventHandlerTest {
         applicationContext.refresh();
 
         ExecutorService eventBusThreadPoolExecutor = applicationContext.getBean("eventBusThreadPoolExecutor", ExecutorService.class);
-        Assertions.assertFalse(eventBusThreadPoolExecutor.isShutdown());
+        assertFalse(eventBusThreadPoolExecutor.isShutdown());
 
         applicationContext.close();
 
-        Assertions.assertTrue(eventBusThreadPoolExecutor.isShutdown());
+        assertTrue(eventBusThreadPoolExecutor.isShutdown());
     }
 
     @TestComponent

@@ -2,10 +2,11 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.java;
 
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.services.restart.ClusterServicesRestartEvent.CLUSTER_SERVICES_RESTART_TRIGGER_EVENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Queue;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
@@ -33,7 +34,7 @@ class SetDefaultJavaVersionFlowChainFactoryTest {
         assertEquals(RestartClusterManagerFlowEvent.RESTART_CLUSTER_MANAGER_TRIGGER_EVENT.event(), thirdFlow.getSelector());
         ClusterServicesRestartTriggerEvent fourthFlow = (ClusterServicesRestartTriggerEvent) queue.poll();
         assertEquals(CLUSTER_SERVICES_RESTART_TRIGGER_EVENT.event(), fourthFlow.getSelector());
-        Assertions.assertTrue(fourthFlow.isRollingRestart());
+        assertTrue(fourthFlow.isRollingRestart());
     }
 
     @Test
@@ -52,7 +53,7 @@ class SetDefaultJavaVersionFlowChainFactoryTest {
         assertEquals(RestartClusterManagerFlowEvent.RESTART_CLUSTER_MANAGER_TRIGGER_EVENT.event(), thirdFlow.getSelector());
         ClusterServicesRestartTriggerEvent fourthFlow = (ClusterServicesRestartTriggerEvent) queue.poll();
         assertEquals(CLUSTER_SERVICES_RESTART_TRIGGER_EVENT.event(), fourthFlow.getSelector());
-        Assertions.assertFalse(fourthFlow.isRollingRestart());
+        assertFalse(fourthFlow.isRollingRestart());
     }
 
     @Test
@@ -102,7 +103,7 @@ class SetDefaultJavaVersionFlowChainFactoryTest {
         assertEquals(SaltUpdateEvent.SALT_UPDATE_EVENT.event(), secondFlow.getSelector());
         ClusterServicesRestartTriggerEvent thirdFlow = (ClusterServicesRestartTriggerEvent) queue.poll();
         assertEquals(CLUSTER_SERVICES_RESTART_TRIGGER_EVENT.event(), thirdFlow.getSelector());
-        Assertions.assertTrue(thirdFlow.isRollingRestart());
+        assertTrue(thirdFlow.isRollingRestart());
     }
 
 }

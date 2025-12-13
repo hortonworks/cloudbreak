@@ -1,9 +1,9 @@
 package com.sequenceiq.datalake.service.sdx.database;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -71,7 +71,7 @@ public class AwsDatabaseServerParameterSetterTest {
     void shouldThrowExceptionWhenAvailabilityTypeIsNotSupported() {
         SdxCluster sdxCluster = createSdxDatabase(SdxDatabaseAvailabilityType.NONE, null);
         IllegalArgumentException result =
-                Assertions.assertThrows(IllegalArgumentException.class,
+                assertThrows(IllegalArgumentException.class,
                         () -> underTest.setParameters(request, sdxCluster, null, "crn"));
 
         assertEquals("NONE database availability type is not supported on AWS.", result.getMessage());

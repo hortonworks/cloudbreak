@@ -1,8 +1,12 @@
 package com.sequenceiq.cloudbreak.structuredevent.service.telemetry.converter;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.util.Map;
 
-import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -23,8 +27,8 @@ class StructuredEventToCDPVersionDetailsConverterTest {
 
     @Test
     public void testConvertWithNull() {
-        Assert.assertNotNull("We should return empty object for not null", underTest.convert((StructuredFlowEvent) null));
-        Assert.assertNotNull("We should return empty object for not null", underTest.convert((StructuredSyncEvent) null));
+        assertNotNull(underTest.convert((StructuredFlowEvent) null), "We should return empty object for not null");
+        assertNotNull(underTest.convert((StructuredSyncEvent) null), "We should return empty object for not null");
     }
 
     @Test
@@ -33,25 +37,25 @@ class StructuredEventToCDPVersionDetailsConverterTest {
 
         UsageProto.CDPVersionDetails flowVersionDetails = underTest.convert(structuredFlowEvent);
 
-        Assert.assertEquals("", flowVersionDetails.getCmVersion());
-        Assert.assertEquals("", flowVersionDetails.getCdpdVersion());
-        Assert.assertEquals("", flowVersionDetails.getCrVersion());
-        Assert.assertEquals("", flowVersionDetails.getOsPatchLevel());
-        Assert.assertEquals("", flowVersionDetails.getSaltVersion());
-        Assert.assertEquals("", flowVersionDetails.getJavaVersion());
-        Assert.assertFalse(flowVersionDetails.getJavaVersionForced());
+        assertEquals("", flowVersionDetails.getCmVersion());
+        assertEquals("", flowVersionDetails.getCdpdVersion());
+        assertEquals("", flowVersionDetails.getCrVersion());
+        assertEquals("", flowVersionDetails.getOsPatchLevel());
+        assertEquals("", flowVersionDetails.getSaltVersion());
+        assertEquals("", flowVersionDetails.getJavaVersion());
+        assertFalse(flowVersionDetails.getJavaVersionForced());
 
         StructuredSyncEvent structuredSyncEvent = new StructuredSyncEvent();
 
         UsageProto.CDPVersionDetails syncVersionDetails = underTest.convert(structuredSyncEvent);
 
-        Assert.assertEquals("", syncVersionDetails.getCmVersion());
-        Assert.assertEquals("", syncVersionDetails.getCdpdVersion());
-        Assert.assertEquals("", syncVersionDetails.getCrVersion());
-        Assert.assertEquals("", syncVersionDetails.getOsPatchLevel());
-        Assert.assertEquals("", syncVersionDetails.getSaltVersion());
-        Assert.assertEquals("", flowVersionDetails.getJavaVersion());
-        Assert.assertFalse(flowVersionDetails.getJavaVersionForced());
+        assertEquals("", syncVersionDetails.getCmVersion());
+        assertEquals("", syncVersionDetails.getCdpdVersion());
+        assertEquals("", syncVersionDetails.getCrVersion());
+        assertEquals("", syncVersionDetails.getOsPatchLevel());
+        assertEquals("", syncVersionDetails.getSaltVersion());
+        assertEquals("", flowVersionDetails.getJavaVersion());
+        assertFalse(flowVersionDetails.getJavaVersionForced());
     }
 
     @Test
@@ -61,30 +65,30 @@ class StructuredEventToCDPVersionDetailsConverterTest {
 
         UsageProto.CDPVersionDetails flowVersionDetails = underTest.convert(structuredFlowEvent);
 
-        Assert.assertEquals("7.3.0-11", flowVersionDetails.getCmVersion());
-        Assert.assertEquals("7.2.7-22", flowVersionDetails.getCdpdVersion());
-        Assert.assertEquals("7.2.7", flowVersionDetails.getCrVersion());
-        Assert.assertEquals("2021-02-04", flowVersionDetails.getOsPatchLevel());
-        Assert.assertEquals("3000.5", flowVersionDetails.getSaltVersion());
-        Assert.assertEquals("bootstrap=something, cdh-build-number=22, cm-build-number=11, cm=7.3.0, date=2021-02-04," +
+        assertEquals("7.3.0-11", flowVersionDetails.getCmVersion());
+        assertEquals("7.2.7-22", flowVersionDetails.getCdpdVersion());
+        assertEquals("7.2.7", flowVersionDetails.getCrVersion());
+        assertEquals("2021-02-04", flowVersionDetails.getOsPatchLevel());
+        assertEquals("3000.5", flowVersionDetails.getSaltVersion());
+        assertEquals("bootstrap=something, cdh-build-number=22, cm-build-number=11, cm=7.3.0, date=2021-02-04," +
                 " java=8, salt=3000.5, stack=7.2.7", flowVersionDetails.getAll());
-        Assert.assertEquals("8", flowVersionDetails.getJavaVersion());
-        Assert.assertFalse(flowVersionDetails.getJavaVersionForced());
+        assertEquals("8", flowVersionDetails.getJavaVersion());
+        assertFalse(flowVersionDetails.getJavaVersionForced());
 
         StructuredSyncEvent structuredSyncEvent = new StructuredSyncEvent();
         structuredSyncEvent.setStack(createStackDetails());
 
         UsageProto.CDPVersionDetails syncVersionDetails = underTest.convert(structuredSyncEvent);
 
-        Assert.assertEquals("7.3.0-11", syncVersionDetails.getCmVersion());
-        Assert.assertEquals("7.2.7-22", syncVersionDetails.getCdpdVersion());
-        Assert.assertEquals("7.2.7", syncVersionDetails.getCrVersion());
-        Assert.assertEquals("2021-02-04", syncVersionDetails.getOsPatchLevel());
-        Assert.assertEquals("3000.5", syncVersionDetails.getSaltVersion());
-        Assert.assertEquals("bootstrap=something, cdh-build-number=22, cm-build-number=11, cm=7.3.0, date=2021-02-04," +
+        assertEquals("7.3.0-11", syncVersionDetails.getCmVersion());
+        assertEquals("7.2.7-22", syncVersionDetails.getCdpdVersion());
+        assertEquals("7.2.7", syncVersionDetails.getCrVersion());
+        assertEquals("2021-02-04", syncVersionDetails.getOsPatchLevel());
+        assertEquals("3000.5", syncVersionDetails.getSaltVersion());
+        assertEquals("bootstrap=something, cdh-build-number=22, cm-build-number=11, cm=7.3.0, date=2021-02-04," +
                 " java=8, salt=3000.5, stack=7.2.7", syncVersionDetails.getAll());
-        Assert.assertEquals("8", flowVersionDetails.getJavaVersion());
-        Assert.assertFalse(flowVersionDetails.getJavaVersionForced());
+        assertEquals("8", flowVersionDetails.getJavaVersion());
+        assertFalse(flowVersionDetails.getJavaVersionForced());
     }
 
     @Test
@@ -95,8 +99,8 @@ class StructuredEventToCDPVersionDetailsConverterTest {
         structuredFlowEvent.setStack(stackDetails);
 
         UsageProto.CDPVersionDetails flowVersionDetails = underTest.convert(structuredFlowEvent);
-        Assert.assertEquals("11", flowVersionDetails.getJavaVersion());
-        Assert.assertTrue(flowVersionDetails.getJavaVersionForced());
+        assertEquals("11", flowVersionDetails.getJavaVersion());
+        assertTrue(flowVersionDetails.getJavaVersionForced());
     }
 
     private StackDetails createStackDetails() {

@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -21,7 +22,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.client.HttpClientErrorException;
@@ -124,7 +124,7 @@ public class AzureImageTermsSignerServiceTest {
 
         verify(azureClient).getAccessToken();
         ArgumentCaptor<URI> argumentCaptor = ArgumentCaptor.forClass(URI.class);
-        InOrder inOrder = Mockito.inOrder(azureRestOperationsService);
+        InOrder inOrder = inOrder(azureRestOperationsService);
         inOrder.verify(azureRestOperationsService).httpGet(any(), eq(AzureImageTerms.class), eq(ACCESS_TOKEN));
         inOrder.verify(azureRestOperationsService).httpPut(argumentCaptor.capture(), any(), eq(AzureImageTerms.class), eq(ACCESS_TOKEN));
         URI signURI = argumentCaptor.getValue();

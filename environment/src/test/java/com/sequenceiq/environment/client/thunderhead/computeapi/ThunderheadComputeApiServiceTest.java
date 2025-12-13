@@ -1,10 +1,12 @@
 package com.sequenceiq.environment.client.thunderhead.computeapi;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -27,7 +29,7 @@ class ThunderheadComputeApiServiceTest {
 
     @Test
     void customConfigDescribableWhenDockerConfigIsNull() {
-        Assertions.assertThrows(NullPointerException.class,
+        assertThrows(NullPointerException.class,
                 () -> underTest.customConfigDescribable(null),
                 "customDockerRegistryParameters must not be null.");
     }
@@ -46,7 +48,7 @@ class ThunderheadComputeApiServiceTest {
 
         boolean actual = underTest.customConfigDescribable(customDockerRegistryParameters);
 
-        Assertions.assertTrue(actual);
+        assertTrue(actual);
     }
 
     @Test
@@ -61,6 +63,6 @@ class ThunderheadComputeApiServiceTest {
 
         boolean actual = underTest.customConfigDescribable(customDockerRegistryParameters);
 
-        Assertions.assertFalse(actual);
+        assertFalse(actual);
     }
 }

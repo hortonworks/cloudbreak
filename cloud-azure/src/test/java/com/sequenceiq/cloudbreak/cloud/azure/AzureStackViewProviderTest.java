@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
@@ -14,7 +15,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,7 +22,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -152,12 +151,12 @@ public class AzureStackViewProviderTest {
         when(addressPrefixProvider.getAddressPrefix(any())).thenThrow(new BadRequestException("Something bad happened..."));
 
         CloudConnectorException ex = assertThrows(CloudConnectorException.class, () -> underTest.getAzureStack(azureCredentialView, cloudStack, client, ac));
-        Assertions.assertEquals("Couldn't get address prefix: Something bad happened...", ex.getMessage());
+        assertEquals("Couldn't get address prefix: Something bad happened...", ex.getMessage());
     }
 
     @Test
     void testGetAzureStackShouldReturnWhenAddressPrefixCouldBeGathered() {
-        AzureStackViewProvider spiedUnderTest = Mockito.spy(underTest);
+        AzureStackViewProvider spiedUnderTest = spy(underTest);
         CloudCredential cloudCredential = createCloudCredential();
         AzureCredentialView azureCredentialView = new AzureCredentialView(cloudCredential);
         AuthenticatedContext ac = new AuthenticatedContext(createCloudContext(), cloudCredential);
@@ -182,7 +181,7 @@ public class AzureStackViewProviderTest {
 
         spiedUnderTest.getAzureStack(azureCredentialView, cloudStack, client, ac);
 
-        Assertions.assertEquals(96, actualAvailableAddresses[0]);
+        assertEquals(96, actualAvailableAddresses[0]);
     }
 
     @Test
@@ -193,7 +192,7 @@ public class AzureStackViewProviderTest {
 
         long actualAvailableAddresses = underTest.getAvailableAddresses(mockSubnet);
 
-        Assertions.assertEquals(51, actualAvailableAddresses);
+        assertEquals(51, actualAvailableAddresses);
     }
 
     @Test
@@ -202,7 +201,7 @@ public class AzureStackViewProviderTest {
         when(addressPrefixProvider.getAddressPrefix(mockSubnet)).thenThrow(new RuntimeException("Something bad happened..."));
 
         CloudConnectorException ex = assertThrows(CloudConnectorException.class, () -> underTest.getAvailableAddresses(mockSubnet));
-        Assertions.assertEquals("Couldn't get address prefix: Something bad happened...", ex.getMessage());
+        assertEquals("Couldn't get address prefix: Something bad happened...", ex.getMessage());
     }
 
     private CloudCredential createCloudCredential() {

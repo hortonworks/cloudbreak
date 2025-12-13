@@ -6,17 +6,17 @@ import static java.util.Collections.emptyMap;
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonMap;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.hamcrest.MatcherAssert;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.requests.DefaultClusterTemplateV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.FeatureState;
@@ -32,8 +32,8 @@ import com.sequenceiq.distrox.api.v1.distrox.model.DistroXV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.cluster.DistroXClusterV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.InstanceGroupV1Request;
 
-@RunWith(MockitoJUnitRunner.class)
-public class ClusterTemplateLoaderServiceTest {
+@ExtendWith(MockitoExtension.class)
+class ClusterTemplateLoaderServiceTest {
 
     @InjectMocks
     private ClusterTemplateLoaderService underTest;
@@ -42,16 +42,16 @@ public class ClusterTemplateLoaderServiceTest {
     private DefaultClusterTemplateCache defaultClusterTemplateCache;
 
     @Test
-    public void testIsDefaultClusterTemplateUpdateNecessaryForUserWhenNoDefaultClusterTemplateAndNoDefaultInDB() {
+    void testIsDefaultClusterTemplateUpdateNecessaryForUserWhenNoDefaultClusterTemplateAndNoDefaultInDB() {
         when(defaultClusterTemplateCache.defaultClusterTemplateRequestsForUser()).thenReturn(emptyMap());
 
         boolean actual = underTest.isDefaultClusterTemplateUpdateNecessaryForUser(emptyList());
 
-        assertThat(actual, is(false));
+        MatcherAssert.assertThat(actual, is(false));
     }
 
     @Test
-    public void testIsDefaultClusterTemplateUpdateNecessaryForUserWhenNoDefaultClusterTemplateAndHasDefaultInDB() {
+    void testIsDefaultClusterTemplateUpdateNecessaryForUserWhenNoDefaultClusterTemplateAndHasDefaultInDB() {
         ClusterTemplate clusterTemplate = new ClusterTemplate();
         clusterTemplate.setStatus(ResourceStatus.DEFAULT);
         clusterTemplate.setName("cluster-template");
@@ -60,11 +60,11 @@ public class ClusterTemplateLoaderServiceTest {
 
         boolean actual = underTest.isDefaultClusterTemplateUpdateNecessaryForUser(singleton(clusterTemplate));
 
-        assertThat(actual, is(true));
+        MatcherAssert.assertThat(actual, is(true));
     }
 
     @Test
-    public void testIsDefaultClusterTemplateUpdateNecessaryForUserWhenHasDefaultClusterTemplateAndNoDefaultInDB() {
+    void testIsDefaultClusterTemplateUpdateNecessaryForUserWhenHasDefaultClusterTemplateAndNoDefaultInDB() {
         DefaultClusterTemplateV4Request clusterTemplate = new DefaultClusterTemplateV4Request();
         clusterTemplate.setName("cluster-template");
 
@@ -73,11 +73,11 @@ public class ClusterTemplateLoaderServiceTest {
 
         boolean actual = underTest.isDefaultClusterTemplateUpdateNecessaryForUser(emptyList());
 
-        assertThat(actual, is(true));
+        MatcherAssert.assertThat(actual, is(true));
     }
 
     @Test
-    public void testIsDefaultClusterTemplateUpdateNecessaryForUserWhenTemplateContentsAreSame() {
+    void testIsDefaultClusterTemplateUpdateNecessaryForUserWhenTemplateContentsAreSame() {
         DefaultClusterTemplateV4Request clusterTemplateFromDefault = sameClusterTemplateRequest();
         ClusterTemplate clusterTemplate = sameClusterTemplate();
         clusterTemplate.setTemplateContent(Base64Util.encode(writeValueAsStringSilent(clusterTemplateFromDefault)));
@@ -87,11 +87,11 @@ public class ClusterTemplateLoaderServiceTest {
 
         boolean actual = underTest.isDefaultClusterTemplateUpdateNecessaryForUser(singleton(clusterTemplate));
 
-        assertThat(actual, is(false));
+        MatcherAssert.assertThat(actual, is(false));
     }
 
     @Test
-    public void testIsDefaultClusterTemplateUpdateNecessaryForUserWhenTemplateContentsAreSameButCrnIsNull() {
+    void testIsDefaultClusterTemplateUpdateNecessaryForUserWhenTemplateContentsAreSameButCrnIsNull() {
         DefaultClusterTemplateV4Request clusterTemplateFromDefault = sameClusterTemplateRequest();
         ClusterTemplate clusterTemplate = sameClusterTemplate();
         clusterTemplate.setResourceCrn(null);
@@ -102,11 +102,11 @@ public class ClusterTemplateLoaderServiceTest {
 
         boolean actual = underTest.isDefaultClusterTemplateUpdateNecessaryForUser(singleton(clusterTemplate));
 
-        assertThat(actual, is(true));
+        MatcherAssert.assertThat(actual, is(true));
     }
 
     @Test
-    public void testIsDefaultClusterTemplateUpdateNecessaryForUserWhenTemplateContentsAreNotSame() {
+    void testIsDefaultClusterTemplateUpdateNecessaryForUserWhenTemplateContentsAreNotSame() {
         DefaultClusterTemplateV4Request clusterTemplateFromDefault = clusterTemplateRequest("cluster-template");
         ClusterTemplate clusterTemplateFromDB = clusterTemplate("cluster-template", "gcp", "hostgroup2", "worker");
 
@@ -115,11 +115,11 @@ public class ClusterTemplateLoaderServiceTest {
 
         boolean actual = underTest.isDefaultClusterTemplateUpdateNecessaryForUser(singleton(clusterTemplateFromDB));
 
-        assertThat(actual, is(true));
+        MatcherAssert.assertThat(actual, is(true));
     }
 
     @Test
-    public void testIsDefaultClusterTemplateUpdateNecessaryForUserWhenOneTemplateContentsAreSameAndOtherOneTemplateContentsAreNotSame() {
+    void testIsDefaultClusterTemplateUpdateNecessaryForUserWhenOneTemplateContentsAreSameAndOtherOneTemplateContentsAreNotSame() {
         DefaultClusterTemplateV4Request clusterTemplateFromDefault1 = sameClusterTemplateRequest();
         ClusterTemplate clusterTemplateFromDB1 = sameClusterTemplate();
         DefaultClusterTemplateV4Request clusterTemplateFromDefault2 = clusterTemplateRequest("cluster-template2");
@@ -131,7 +131,7 @@ public class ClusterTemplateLoaderServiceTest {
 
         boolean actual = underTest.isDefaultClusterTemplateUpdateNecessaryForUser(Set.of(clusterTemplateFromDB1, clusterTemplateFromDB2));
 
-        assertThat(actual, is(true));
+        MatcherAssert.assertThat(actual, is(true));
     }
 
     private ClusterTemplate sameClusterTemplate() {

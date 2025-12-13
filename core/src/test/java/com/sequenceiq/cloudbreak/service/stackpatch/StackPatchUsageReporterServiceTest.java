@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.stackpatch;
 
+import static org.mockito.Mockito.verify;
+
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -8,7 +10,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.thunderhead.service.common.usage.UsageProto;
@@ -82,7 +83,7 @@ class StackPatchUsageReporterServiceTest {
     }
 
     private void verifyNonNullValues(UsageProto.CDPStackPatchEventType.Value eventType, String message) {
-        Mockito.verify(usageReporter).cdpStackPatcherEvent(eventCaptor.capture());
+        verify(usageReporter).cdpStackPatcherEvent(eventCaptor.capture());
         Assertions.assertThat(eventCaptor.getValue())
                 .returns(RESOURCE_CRN, UsageProto.CDPStackPatchEvent::getResourceCrn)
                 .returns(STACK_PATCH_TYPE.name(), UsageProto.CDPStackPatchEvent::getStackPatchType)

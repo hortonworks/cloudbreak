@@ -7,11 +7,11 @@ import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnviro
 import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentStatus.Value.CREATE_FINISHED;
 import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentStatus.Value.CREATE_STARTED;
 import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentStatus.Value.UNSET;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -54,47 +54,47 @@ class EnvironmentUseCaseMapperTest {
 
     @Test
     void testNullFlowDetailsMappedToUnset() {
-        Assertions.assertEquals(UNSET, underTest.useCase(null));
+        assertEquals(UNSET, underTest.useCase(null));
     }
 
     @Test
     void testEmptyFlowDetailsMappedToUnset() {
-        Assertions.assertEquals(UNSET, underTest.useCase(new FlowDetails()));
+        assertEquals(UNSET, underTest.useCase(new FlowDetails()));
     }
 
     @Test
     void testCorrectNextFlowStatesMappedCorrectly() {
-        Assertions.assertEquals(CREATE_STARTED,
+        assertEquals(CREATE_STARTED,
                 mapFlowDetailsToUseCase("INIT_STATE", "TestEnvironmentFlowConfig"));
-        Assertions.assertEquals(CREATE_FINISHED,
+        assertEquals(CREATE_FINISHED,
                 mapFlowDetailsToUseCase("FINISHED_STATE", "TestEnvironmentFlowConfig"));
-        Assertions.assertEquals(CREATE_FAILED,
+        assertEquals(CREATE_FAILED,
                 mapFlowDetailsToUseCase("FAILED_STATE", "TestEnvironmentFlowConfig"));
-        Assertions.assertEquals(UNSET,
+        assertEquals(UNSET,
                 mapFlowDetailsToUseCase("TEMP_STATE", "TestEnvironmentFlowConfig"));
-        Assertions.assertEquals(UNSET,
+        assertEquals(UNSET,
                 mapFlowDetailsToUseCase("NOT_THE_LATEST_FAILED_STATE", "TestEnvironmentFlowConfig"));
-        Assertions.assertEquals(UNSET,
+        assertEquals(UNSET,
                 mapFlowDetailsToUseCase("FINAL_STATE", "TestEnvironmentFlowConfig"));
     }
 
     @Test
     void testIncorrectNextFlowStatesMappedToUnsetUseCase() {
-        Assertions.assertEquals(UNSET,
+        assertEquals(UNSET,
                 mapFlowDetailsToUseCase("OTHER_STATE", "TestEnvironmentFlowConfig"));
-        Assertions.assertEquals(UNSET,
+        assertEquals(UNSET,
                 mapFlowDetailsToUseCase(null, "TestEnvironmentFlowConfig"));
-        Assertions.assertEquals(UNSET,
+        assertEquals(UNSET,
                 mapFlowDetailsToUseCase("", "TestEnvironmentFlowConfig"));
     }
 
     @Test
     void testIncorrectFlowConfigMappedToUnsetUseCase() {
-        Assertions.assertEquals(UNSET,
+        assertEquals(UNSET,
                 mapFlowDetailsToUseCase("INIT_STATE", "OtherFlowConfig"));
-        Assertions.assertEquals(UNSET,
+        assertEquals(UNSET,
                 mapFlowDetailsToUseCase("INIT_STATE", null));
-        Assertions.assertEquals(UNSET,
+        assertEquals(UNSET,
                 mapFlowDetailsToUseCase("INIT_STATE", ""));
     }
 

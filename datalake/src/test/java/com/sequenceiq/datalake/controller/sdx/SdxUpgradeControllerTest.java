@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.doAs;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
@@ -12,7 +13,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.UUID;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -126,7 +126,7 @@ class SdxUpgradeControllerTest {
         doThrow(new BadRequestException("Runtime upgrade feature is not enabled"))
                 .when(sdxRuntimeUpgradeService).checkForUpgradeByName(USER_CRN, CLUSTER_NAME, request, false);
 
-        BadRequestException exception = doAs(USER_CRN, () -> Assertions.assertThrows(BadRequestException.class,
+        BadRequestException exception = doAs(USER_CRN, () -> assertThrows(BadRequestException.class,
                 () -> underTest.upgradeClusterByName(CLUSTER_NAME, request)));
 
         assertEquals("Runtime upgrade feature is not enabled", exception.getMessage());
@@ -155,7 +155,7 @@ class SdxUpgradeControllerTest {
         doThrow(new BadRequestException("Runtime upgrade feature is not enabled"))
                 .when(sdxRuntimeUpgradeService).triggerUpgradeByName(USER_CRN, CLUSTER_NAME, request, false);
 
-        BadRequestException exception = doAs(USER_CRN, () -> Assertions.assertThrows(BadRequestException.class,
+        BadRequestException exception = doAs(USER_CRN, () -> assertThrows(BadRequestException.class,
                 () -> underTest.upgradeClusterByName(CLUSTER_NAME, request)));
 
         assertEquals("Runtime upgrade feature is not enabled", exception.getMessage());
@@ -184,7 +184,7 @@ class SdxUpgradeControllerTest {
         doThrow(new BadRequestException("Runtime upgrade feature is not enabled"))
                 .when(sdxRuntimeUpgradeService).triggerUpgradeByName(USER_CRN, CLUSTER_NAME, request, false);
 
-        BadRequestException exception = doAs(USER_CRN, () -> Assertions.assertThrows(BadRequestException.class,
+        BadRequestException exception = doAs(USER_CRN, () -> assertThrows(BadRequestException.class,
                 () -> underTest.upgradeClusterByName(CLUSTER_NAME, request)));
 
         assertEquals("Runtime upgrade feature is not enabled", exception.getMessage());
@@ -290,7 +290,7 @@ class SdxUpgradeControllerTest {
         doThrow(new NotFoundException("SDX cluster 'testCluster' not found."))
                 .when(sdxDatabaseServerUpgradeService).upgrade(eq(NameOrCrn.ofName(CLUSTER_NAME)), eq(targetMajorVersion), eq(false));
 
-        NotFoundException exception = doAs(USER_CRN, () -> Assertions.assertThrows(NotFoundException.class,
+        NotFoundException exception = doAs(USER_CRN, () -> assertThrows(NotFoundException.class,
                 () -> underTest.upgradeDatabaseServerByName(CLUSTER_NAME, request)));
 
         assertEquals(exception.getMessage(), "SDX cluster 'testCluster' not found.");

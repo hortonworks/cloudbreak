@@ -1,13 +1,13 @@
 package com.sequenceiq.environment.environment.service.stack;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -109,7 +109,7 @@ class StackPollerServiceTest {
 
         when(stackPollerProvider.stackUpdateConfigPoller(List.of(STACK_CRN_1), ENVIRONMENT_ID, FLOW_ID)).thenReturn(AttemptResults::justContinue);
 
-        DatahubOperationFailedException datahubOperationFailedException = Assertions.assertThrows(DatahubOperationFailedException.class,
+        DatahubOperationFailedException datahubOperationFailedException = assertThrows(DatahubOperationFailedException.class,
                 () -> underTest.updateStackConfigurations(ENVIRONMENT_ID, ENVIRONMENT_CRN, FLOW_ID));
 
         assertThat(datahubOperationFailedException).hasMessage("Stack config updating timed out");
@@ -124,7 +124,7 @@ class StackPollerServiceTest {
         when(stackPollerProvider.stackUpdateConfigPoller(List.of(STACK_CRN_1), ENVIRONMENT_ID, FLOW_ID))
                 .thenReturn(() -> AttemptResults.breakFor(new Exception("Foo")));
 
-        DatahubOperationFailedException datahubOperationFailedException = Assertions.assertThrows(DatahubOperationFailedException.class,
+        DatahubOperationFailedException datahubOperationFailedException = assertThrows(DatahubOperationFailedException.class,
                 () -> underTest.updateStackConfigurations(ENVIRONMENT_ID, ENVIRONMENT_CRN, FLOW_ID));
 
         assertThat(datahubOperationFailedException).hasMessage("Stack config updating aborted with error");

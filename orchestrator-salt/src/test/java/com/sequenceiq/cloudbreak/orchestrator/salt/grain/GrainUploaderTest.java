@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.orchestrator.salt.grain;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
@@ -12,12 +12,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.orchestrator.model.GrainProperties;
@@ -27,8 +27,8 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.runner.SaltCommandRunner;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 
-@RunWith(MockitoJUnitRunner.class)
-public class GrainUploaderTest {
+@ExtendWith(MockitoExtension.class)
+class GrainUploaderTest {
 
     @Mock
     private SaltCommandRunner saltCommandRunner;
@@ -46,14 +46,14 @@ public class GrainUploaderTest {
     private GrainUploader underTest;
 
     @Test
-    public void testWhenGrainPropertiesEmpty() throws Exception {
+    void testWhenGrainPropertiesEmpty() throws Exception {
         underTest.uploadGrains(Set.of(), List.of(), exitCriteriaModel, saltConnector, exitCriteria);
         verify(saltCommandRunner, times(0)).runSaltCommand(eq(saltConnector), any(GrainAddRunner.class), eq(exitCriteriaModel),
                 eq(exitCriteria));
     }
 
     @Test
-    public void testAllGrainsAppendCalled() throws Exception {
+    void testAllGrainsAppendCalled() throws Exception {
         Set<Node> allNodes = Set.of();
         GrainProperties gp1 = new GrainProperties();
         GrainProperties gp2 = new GrainProperties();

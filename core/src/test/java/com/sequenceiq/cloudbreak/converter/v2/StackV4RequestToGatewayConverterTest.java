@@ -1,7 +1,8 @@
 package com.sequenceiq.cloudbreak.converter.v2;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
@@ -11,11 +12,11 @@ import java.util.Arrays;
 import java.util.Set;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.GatewayType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
@@ -30,8 +31,8 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.GatewayTopology;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 
-@RunWith(MockitoJUnitRunner.class)
-public class StackV4RequestToGatewayConverterTest {
+@ExtendWith(MockitoExtension.class)
+class StackV4RequestToGatewayConverterTest {
 
     private static final Set<GatewayTopology> GATEWAY_TOPOLOGY = Set.of(new GatewayTopology());
 
@@ -44,16 +45,16 @@ public class StackV4RequestToGatewayConverterTest {
     @InjectMocks
     private StackV4RequestToGatewayConverter underTest;
 
-    @Test(expected = BadRequestException.class)
-    public void testWithInvalidGatewayRequest() {
+    @Test
+    void testWithInvalidGatewayRequest() {
         GatewayV4Request gatewayJson = new GatewayV4Request();
         StackV4Request source = generateStackV4Request(gatewayJson);
         when(gatewayJsonValidator.validate(gatewayJson)).thenReturn(ValidationResult.builder().error("invalid").build());
-        underTest.convert(source);
+        assertThrows(BadRequestException.class, () -> underTest.convert(source));
     }
 
     @Test
-    public void shouldCreateCorrectSsoUrlWhenClusterNameisProvided() {
+    void shouldCreateCorrectSsoUrlWhenClusterNameisProvided() {
         GatewayV4Request gatewayJson = new GatewayV4Request();
         gatewayJson.setPath("funnyPath");
         gatewayJson.setTopologies(Arrays.asList(getGatewayTopologyV4Request()));

@@ -1,7 +1,8 @@
 package com.sequenceiq.cloudbreak.structuredevent.service.telemetry.converter;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import org.apache.commons.lang3.StringUtils;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,18 +25,18 @@ public class StackDetailsToCDPFreeIPAStatusDetailsConverterTest {
     public void testConvertWithNull() {
         UsageProto.CDPFreeIPAStatusDetails freeIPAStatusDetails = underTest.convert(null);
 
-        Assertions.assertEquals("", freeIPAStatusDetails.getStackStatus());
-        Assertions.assertEquals("", freeIPAStatusDetails.getStackDetailedStatus());
-        Assertions.assertEquals("", freeIPAStatusDetails.getStackStatusReason());
+        assertEquals("", freeIPAStatusDetails.getStackStatus());
+        assertEquals("", freeIPAStatusDetails.getStackDetailedStatus());
+        assertEquals("", freeIPAStatusDetails.getStackStatusReason());
     }
 
     @Test
     public void testConvertWithEmpty() {
         UsageProto.CDPFreeIPAStatusDetails freeIPAStatusDetails = underTest.convert(new StackDetails());
 
-        Assertions.assertEquals("", freeIPAStatusDetails.getStackStatus());
-        Assertions.assertEquals("", freeIPAStatusDetails.getStackDetailedStatus());
-        Assertions.assertEquals("", freeIPAStatusDetails.getStackStatusReason());
+        assertEquals("", freeIPAStatusDetails.getStackStatus());
+        assertEquals("", freeIPAStatusDetails.getStackDetailedStatus());
+        assertEquals("", freeIPAStatusDetails.getStackStatusReason());
     }
 
     @Test
@@ -47,9 +48,9 @@ public class StackDetailsToCDPFreeIPAStatusDetailsConverterTest {
 
         UsageProto.CDPFreeIPAStatusDetails freeIPAStatusDetails = underTest.convert(stackDetails);
 
-        Assertions.assertEquals("AVAILABLE", freeIPAStatusDetails.getStackStatus());
-        Assertions.assertEquals("AVAILABLE", freeIPAStatusDetails.getStackDetailedStatus());
-        Assertions.assertEquals("statusreason", freeIPAStatusDetails.getStackStatusReason());
+        assertEquals("AVAILABLE", freeIPAStatusDetails.getStackStatus());
+        assertEquals("AVAILABLE", freeIPAStatusDetails.getStackDetailedStatus());
+        assertEquals("statusreason", freeIPAStatusDetails.getStackStatusReason());
     }
 
     @Test
@@ -58,27 +59,27 @@ public class StackDetailsToCDPFreeIPAStatusDetailsConverterTest {
 
         UsageProto.CDPFreeIPAStatusDetails freeIPAStatusDetails = underTest.convert(stackDetails);
 
-        Assertions.assertEquals("", freeIPAStatusDetails.getStackStatusReason());
+        assertEquals("", freeIPAStatusDetails.getStackStatusReason());
 
         stackDetails.setStatusReason("");
         freeIPAStatusDetails = underTest.convert(stackDetails);
 
-        Assertions.assertEquals("", freeIPAStatusDetails.getStackStatusReason());
+        assertEquals("", freeIPAStatusDetails.getStackStatusReason());
 
         stackDetails.setStatusReason(StringUtils.repeat("*", 10));
         freeIPAStatusDetails = underTest.convert(stackDetails);
 
-        Assertions.assertEquals(StringUtils.repeat("*", 10), freeIPAStatusDetails.getStackStatusReason());
+        assertEquals(StringUtils.repeat("*", 10), freeIPAStatusDetails.getStackStatusReason());
 
         stackDetails.setStatusReason(StringUtils.repeat("*", 1500));
         freeIPAStatusDetails = underTest.convert(stackDetails);
 
-        Assertions.assertEquals(StringUtils.repeat("*", 1500), freeIPAStatusDetails.getStackStatusReason());
+        assertEquals(StringUtils.repeat("*", 1500), freeIPAStatusDetails.getStackStatusReason());
 
         stackDetails.setStatusReason(StringUtils.repeat("*", 3000));
         freeIPAStatusDetails = underTest.convert(stackDetails);
 
-        Assertions.assertEquals(StringUtils.repeat("*", 1500), freeIPAStatusDetails.getStackStatusReason());
+        assertEquals(StringUtils.repeat("*", 1500), freeIPAStatusDetails.getStackStatusReason());
 
     }
 }

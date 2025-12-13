@@ -6,6 +6,7 @@ import static com.sequenceiq.common.api.type.ResourceType.GCP_INSTANCE;
 import static com.sequenceiq.common.api.type.ResourceType.GCP_RESERVED_IP;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyCollection;
@@ -21,7 +22,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -89,7 +89,7 @@ public class GcpResourceConnectorTest {
 
     @Test
     public void testGetDBStackTemplateWhenEverythingIsFine() throws TemplatingNotSupportedException {
-        Assert.assertTrue(underTest.getDBStackTemplate(null).equals(""));
+        assertTrue(underTest.getDBStackTemplate(null).equals(""));
     }
 
     @Test
@@ -101,7 +101,7 @@ public class GcpResourceConnectorTest {
     public void testGetTlsInfoWhenEverythingIsfine() {
         AuthenticatedContext authenticatedContext = mock(AuthenticatedContext.class);
         CloudStack cloudStack = mock(CloudStack.class);
-        Assert.assertEquals(false, underTest.getTlsInfo(authenticatedContext,  cloudStack).isUsePrivateIpToTls());
+        assertEquals(false, underTest.getTlsInfo(authenticatedContext,  cloudStack).isUsePrivateIpToTls());
     }
 
     @Test

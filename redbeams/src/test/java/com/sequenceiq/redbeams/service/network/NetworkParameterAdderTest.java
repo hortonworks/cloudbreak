@@ -10,11 +10,11 @@ import java.util.Map;
 import java.util.Set;
 
 import org.hamcrest.collection.IsMapContaining;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -27,7 +27,8 @@ import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvi
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 
-public class NetworkParameterAdderTest {
+@ExtendWith(MockitoExtension.class)
+class NetworkParameterAdderTest {
 
     private static final String TEST_VPC_CIDR = "1.2.3.4/16";
 
@@ -70,13 +71,8 @@ public class NetworkParameterAdderTest {
     @InjectMocks
     private final NetworkParameterAdder underTest = new NetworkParameterAdder();
 
-    @Before
-    public void setup() {
-        MockitoAnnotations.initMocks(this);
-    }
-
     @Test
-    public void testAddSubnetIdsWhenAws() {
+    void testAddSubnetIdsWhenAws() {
         Map<String, Object> parameters = underTest.addSubnetIds(List.of("subnet1", "subnet2"), List.of("az1", "az2"), CloudPlatform.AWS);
 
         assertThat(parameters, IsMapContaining.hasEntry(SUBNET_ID, "subnet1,subnet2"));
@@ -84,14 +80,14 @@ public class NetworkParameterAdderTest {
     }
 
     @Test
-    public void testAddSubnetIdsWhenAzure() {
+    void testAddSubnetIdsWhenAzure() {
         Map<String, Object> parameters = underTest.addSubnetIds(List.of("subnet1", "subnet2"), List.of(), CloudPlatform.AZURE);
 
         assertThat(parameters, IsMapContaining.hasEntry(SUBNETS, "subnet1,subnet2"));
     }
 
     @Test
-    public void testAddSubnetIdsWhenGcp() {
+    void testAddSubnetIdsWhenGcp() {
         Map<String, Object> parameters = underTest.addSubnetIds(List.of("subnet1", "subnet2"), List.of("az1", "az2"), CloudPlatform.GCP);
 
         assertThat(parameters, IsMapContaining.hasEntry(SUBNET_ID, "subnet1,subnet2"));
@@ -99,7 +95,7 @@ public class NetworkParameterAdderTest {
     }
 
     @Test
-    public void testAddParametersWhenAws() {
+    void testAddParametersWhenAws() {
         DBStack dbStack = new DBStack();
         dbStack.setCloudPlatform("AWS");
         DetailedEnvironmentResponse environment = getAwsDetailedEnvironmentResponse();
@@ -112,7 +108,7 @@ public class NetworkParameterAdderTest {
     }
 
     @Test
-    public void testAddParametersWhenAzure() {
+    void testAddParametersWhenAzure() {
         DBStack dbStack = new DBStack();
         dbStack.setCloudPlatform("AZURE");
         DetailedEnvironmentResponse environment = getAzureDetailedEnvironmentResponse();
@@ -138,7 +134,7 @@ public class NetworkParameterAdderTest {
     }
 
     @Test
-    public void testAddParametersWhenAzureWithFlexibleDelegated() {
+    void testAddParametersWhenAzureWithFlexibleDelegated() {
         DBStack dbStack = new DBStack();
         dbStack.setCloudPlatform("AZURE");
         Set<String> delegatedSubnetIds = Set.of("flexSubnetSmall", "flexSubnetLarge", "flexWithoutCidr");
@@ -206,7 +202,7 @@ public class NetworkParameterAdderTest {
     }
 
     @Test
-    public void testAddParametersWhenGcp() {
+    void testAddParametersWhenGcp() {
         DBStack dbStack = new DBStack();
         dbStack.setCloudPlatform("GCP");
         DetailedEnvironmentResponse environment = getGcpDetailedEnvironmentResponse();

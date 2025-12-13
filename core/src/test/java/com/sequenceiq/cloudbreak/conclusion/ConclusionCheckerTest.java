@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.conclusion;
 
 import static com.sequenceiq.cloudbreak.conclusion.ConclusionStepNode.stepNode;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.anyLong;
@@ -13,7 +14,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.Map;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.cloudbreak.conclusion.step.Conclusion;
@@ -86,7 +86,7 @@ class ConclusionCheckerTest {
         ConclusionChecker conclusionChecker = new ConclusionChecker(stepNode,
                 Map.of(SaltCheckerConclusionStep.class, firstStep, NodeServicesCheckerConclusionStep.class, secondStep));
 
-        RuntimeException runtimeException = Assertions.assertThrows(RuntimeException.class, () -> conclusionChecker.doCheck(1L));
+        RuntimeException runtimeException = assertThrows(RuntimeException.class, () -> conclusionChecker.doCheck(1L));
 
         verify(firstStep, times(1)).check(eq(1L));
         verify(secondStep, never()).check(eq(1L));

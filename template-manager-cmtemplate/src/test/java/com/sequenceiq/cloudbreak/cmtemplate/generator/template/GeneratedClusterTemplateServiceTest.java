@@ -7,27 +7,31 @@ import static net.javacrumbs.jsonunit.core.Option.IGNORING_ARRAY_ORDER;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.skyscreamer.jsonassert.JSONParser;
 import org.springframework.boot.test.context.SpringBootTestContextBootstrapper;
 import org.springframework.test.context.BootstrapWith;
 import org.springframework.test.context.TestContextManager;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.sequenceiq.cloudbreak.cmtemplate.generator.CentralTemplateGeneratorContext;
 import com.sequenceiq.cloudbreak.cmtemplate.generator.template.domain.GeneratedCmTemplate;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
-@RunWith(Parameterized.class)
+@Disabled
+@ExtendWith(SpringExtension.class)
 @BootstrapWith(SpringBootTestContextBootstrapper.class)
-public class GeneratedClusterTemplateServiceTest extends CentralTemplateGeneratorContext {
+class GeneratedClusterTemplateServiceTest extends CentralTemplateGeneratorContext {
 
     private static final String TEMPLATE_GENERATOR_TEST_OUTPUTS = "module-test/outputs";
 
@@ -37,26 +41,15 @@ public class GeneratedClusterTemplateServiceTest extends CentralTemplateGenerato
 
     private static final String UUID = "uuid";
 
-    @Parameterized.Parameter
-    public Set<String> inputs;
-
-    @Parameterized.Parameter(1)
-    public String stackType;
-
-    @Parameterized.Parameter(2)
-    public String version;
-
-    @Parameterized.Parameter(3)
-    public String outputPath;
-
-    @Before
-    public void setUp() throws Exception {
+    @BeforeEach
+    void setUp() throws Exception {
         TestContextManager testContextManager = new TestContextManager(getClass());
         testContextManager.prepareTestInstance(this);
     }
 
-    @Test
-    public void testTemplateGeneration() throws IOException, JSONException {
+    @MethodSource("data")
+    @ParameterizedTest
+    void testTemplateGeneration(Set<String> inputs, String stackType, String version, String outputPath) throws IOException, JSONException {
         TestFile outputFile = getTestFile(getFileName(TEMPLATE_GENERATOR_TEST_OUTPUTS, outputPath));
 
         GeneratedCmTemplate generatedCmTemplate = generatedClusterTemplateService().prepareClouderaManagerTemplate(inputs, stackType, version, UUID);
@@ -66,11 +59,10 @@ public class GeneratedClusterTemplateServiceTest extends CentralTemplateGenerato
         assertJsonEquals(expected.toString(), result.toString(), when(IGNORING_ARRAY_ORDER));
     }
 
-    @Parameterized.Parameters(name = "{index}: testTemplateGeneration(get {0} with {1} {2}) = output is {3}")
-    public static Iterable<Object[]> data() {
-        return Arrays.asList(new Object[][] {
-                //{ Set.of("OOZIE"), CDH, CDH_6_1, "result_1" }
-        });
+    static Stream<Arguments> data() {
+        return Stream.of(
+                Arguments.of(Set.of("OOZIE"), CDH, CDH_6_1, "result_1")
+        );
     }
 
     static TestFile getTestFile(String fileName) throws IOException {

@@ -1,10 +1,11 @@
 package com.sequenceiq.cloudbreak.cm;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -17,13 +18,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -42,8 +42,8 @@ import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 
-@RunWith(MockitoJUnitRunner.class)
-public class ClouderaManagerClusterDecommissionServiceTest {
+@ExtendWith(MockitoExtension.class)
+class ClouderaManagerClusterDecommissionServiceTest {
 
     private static final int GATEWAY_PORT = 8080;
 
@@ -83,8 +83,8 @@ public class ClouderaManagerClusterDecommissionServiceTest {
     @InjectMocks
     private ClouderaManagerClusterDecommissionService underTest;
 
-    @Before
-    public void before() {
+    @BeforeEach
+    void before() {
         underTest = new ClouderaManagerClusterDecommissionService(stack, clientConfig);
         ReflectionTestUtils.setField(underTest, "clouderaManagerApiFactory", clouderaManagerApiFactory);
         ReflectionTestUtils.setField(underTest, "clouderaManagerApiClientProvider", clouderaManagerApiClientProvider);
@@ -97,11 +97,11 @@ public class ClouderaManagerClusterDecommissionServiceTest {
     }
 
     @Test
-    public void testInitApiClientShouldCreateTheApiClient() throws ClusterClientInitException, ClouderaManagerClientInitException {
+    void testInitApiClientShouldCreateTheApiClient() throws ClusterClientInitException, ClouderaManagerClientInitException {
         ReflectionTestUtils.setField(underTest, "v31Client", null);
         ReflectionTestUtils.setField(underTest, "v45Client", null);
-        ApiClient v31Client = Mockito.mock(ApiClient.class);
-        ApiClient v45Client = Mockito.mock(ApiClient.class);
+        ApiClient v31Client = mock(ApiClient.class);
+        ApiClient v45Client = mock(ApiClient.class);
         when(clouderaManagerApiClientProvider.getV31Client(GATEWAY_PORT, USER, PASSWORD, clientConfig)).thenReturn(v31Client);
         when(clouderaManagerApiClientProvider.getV45Client(GATEWAY_PORT, USER, PASSWORD, clientConfig)).thenReturn(v45Client);
 
@@ -114,14 +114,14 @@ public class ClouderaManagerClusterDecommissionServiceTest {
     }
 
     @Test
-    public void testVerifyNodesAreRemovable() {
+    void testVerifyNodesAreRemovable() {
         underTest.verifyNodesAreRemovable(stack, Collections.emptyList());
 
         verify(clouderaManagerDecommissioner).verifyNodesAreRemovable(stack, Collections.emptyList(), v31Client);
     }
 
     @Test
-    public void testCollectDownscaleCandidates() {
+    void testCollectDownscaleCandidates() {
         String hostGroupName = "hgName";
         Integer scalingAdjustment = 1;
         Set<InstanceMetadataView> instanceMetadatas = new HashSet<>();
@@ -144,7 +144,7 @@ public class ClouderaManagerClusterDecommissionServiceTest {
     }
 
     @Test
-    public void testCollectHostsToRemove() {
+    void testCollectHostsToRemove() {
         String hostGroupName = "hgName";
         Set<String> hostNames = Collections.emptySet();
         Map<String, InstanceMetadataView> hosts = new HashMap<>();
@@ -157,7 +157,7 @@ public class ClouderaManagerClusterDecommissionServiceTest {
     }
 
     @Test
-    public void testDecommissionClusterNodes() {
+    void testDecommissionClusterNodes() {
         Map<String, InstanceMetadataView> hostsToRemove = new HashMap<>();
         Set<String> hosts = Set.of("host");
         when(clouderaManagerDecommissioner.decommissionNodes(stack, hostsToRemove, v31Client)).thenReturn(hosts);
@@ -169,14 +169,14 @@ public class ClouderaManagerClusterDecommissionServiceTest {
     }
 
     @Test
-    public void testRemoveManagementServices() {
+    void testRemoveManagementServices() {
         underTest.removeManagementServices();
 
         verify(clouderaManagerDecommissioner).stopAndRemoveMgmtService(stack, v31Client);
     }
 
     @Test
-    public void testDeleteHostFromCluster() {
+    void testDeleteHostFromCluster() {
         InstanceMetaData hostMetadata = new InstanceMetaData();
 
         underTest.deleteHostFromCluster(hostMetadata);
@@ -185,9 +185,9 @@ public class ClouderaManagerClusterDecommissionServiceTest {
     }
 
     @Test
-    public void testRestartStaleServices() throws CloudbreakException, ApiException {
-        ClouderaManagerModificationService modificationService = Mockito.mock(ClouderaManagerModificationService.class);
-        ClustersResourceApi clustersResourceApi = Mockito.mock(ClustersResourceApi.class);
+    void testRestartStaleServices() throws CloudbreakException, ApiException {
+        ClouderaManagerModificationService modificationService = mock(ClouderaManagerModificationService.class);
+        ClustersResourceApi clustersResourceApi = mock(ClustersResourceApi.class);
         when(applicationContext.getBean(ClouderaManagerModificationService.class, stack, clientConfig)).thenReturn(modificationService);
         when(clouderaManagerApiFactory.getClustersResourceApi(v31Client)).thenReturn(clustersResourceApi);
 
@@ -199,7 +199,7 @@ public class ClouderaManagerClusterDecommissionServiceTest {
     }
 
     @Test
-    public void testRemoveHostsFromClusterFailsWhenNoV45ClientAvailable() {
+    void testRemoveHostsFromClusterFailsWhenNoV45ClientAvailable() {
         ReflectionTestUtils.setField(underTest, "v45Client", null);
         ClusterClientInitException cloudbreakException = assertThrows(ClusterClientInitException.class,
                 () -> underTest.removeHostsFromCluster(List.of(new InstanceMetaData())));
@@ -209,7 +209,7 @@ public class ClouderaManagerClusterDecommissionServiceTest {
     }
 
     @Test
-    public void testRemoveHostsFromClusterWhenV45ClientAvailable() throws ClusterClientInitException {
+    void testRemoveHostsFromClusterWhenV45ClientAvailable() throws ClusterClientInitException {
         List<InstanceMetadataView> hosts = List.of(new InstanceMetaData());
         underTest.removeHostsFromCluster(hosts);
 
@@ -217,7 +217,7 @@ public class ClouderaManagerClusterDecommissionServiceTest {
     }
 
     @Test
-    public void stopRolesOnHostsTest() throws CloudbreakException {
+    void stopRolesOnHostsTest() throws CloudbreakException {
         Set<String> hosts = Set.of("host1", "host2");
         underTest.stopRolesOnHosts(hosts, true);
         verify(clouderaManagerDecommissioner, times(1)).stopRolesOnHosts(stack, v53Client, v51Client, hosts, true);

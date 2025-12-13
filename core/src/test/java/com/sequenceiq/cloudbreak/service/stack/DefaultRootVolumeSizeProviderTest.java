@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.stack;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.Collection;
@@ -8,9 +9,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.Mockito;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.StandardEnvironment;
 
@@ -19,16 +19,16 @@ import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformVariants;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 
-public class DefaultRootVolumeSizeProviderTest {
+class DefaultRootVolumeSizeProviderTest {
 
-    private final CloudPlatformConnectors mockConnectors = Mockito.mock(CloudPlatformConnectors.class);
+    private final CloudPlatformConnectors mockConnectors = mock(CloudPlatformConnectors.class);
 
     private final Environment environment = new StandardEnvironment();
 
     private DefaultRootVolumeSizeProvider underTest;
 
-    @Before
-    public void initConnectors() {
+    @BeforeEach
+    void initConnectors() {
         Map<Platform, Collection<Variant>> platformToVariants = new HashMap<>();
         Platform gcp = Platform.platform("GCP");
         Platform aws = Platform.platform("AWS");
@@ -41,21 +41,21 @@ public class DefaultRootVolumeSizeProviderTest {
     }
 
     @Test
-    public void testNoPropertySetForKnownPlatformGW() {
+    void testNoPropertySetForKnownPlatformGW() {
         underTest = new DefaultRootVolumeSizeProvider(mockConnectors, environment);
         int rootVolumeSize = underTest.getDefaultRootVolumeForPlatform("AWS", true);
         assertEquals(300L, rootVolumeSize);
     }
 
     @Test
-    public void testNoPropertySetForKnownPlatformNotGW() {
+    void testNoPropertySetForKnownPlatformNotGW() {
         underTest = new DefaultRootVolumeSizeProvider(mockConnectors, environment);
         int rootVolumeSize = underTest.getDefaultRootVolumeForPlatform("AWS", false);
         assertEquals(200L, rootVolumeSize);
     }
 
     @Test
-    public void testPropertySetForKnownPlatformGW() {
+    void testPropertySetForKnownPlatformGW() {
         System.setProperty("cb.platform.default.rootVolumeSize.GCP", "100");
         System.setProperty("cb.platform.default.gatewayRootVolumeSize.GCP", "150");
         underTest = new DefaultRootVolumeSizeProvider(mockConnectors, environment);
@@ -64,7 +64,7 @@ public class DefaultRootVolumeSizeProviderTest {
     }
 
     @Test
-    public void testPropertySetForKnownPlatformNotGW() {
+    void testPropertySetForKnownPlatformNotGW() {
         System.setProperty("cb.platform.default.rootVolumeSize.GCP", "100");
         System.setProperty("cb.platform.default.gatewayRootVolumeSize.GCP", "150");
         underTest = new DefaultRootVolumeSizeProvider(mockConnectors, environment);
@@ -73,14 +73,14 @@ public class DefaultRootVolumeSizeProviderTest {
     }
 
     @Test
-    public void testWithUnknownPlatformGW() {
+    void testWithUnknownPlatformGW() {
         underTest = new DefaultRootVolumeSizeProvider(mockConnectors, environment);
         int rootVolumeSize = underTest.getDefaultRootVolumeForPlatform("UNKNOWN_PLATFORM", true);
         assertEquals(300L, rootVolumeSize);
     }
 
     @Test
-    public void testWithUnknownPlatformNotGW() {
+    void testWithUnknownPlatformNotGW() {
         underTest = new DefaultRootVolumeSizeProvider(mockConnectors, environment);
         int rootVolumeSize = underTest.getDefaultRootVolumeForPlatform("UNKNOWN_PLATFORM", false);
         assertEquals(200L, rootVolumeSize);

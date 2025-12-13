@@ -1,15 +1,15 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.nifi;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
@@ -28,13 +28,13 @@ import com.sequenceiq.common.api.filesystem.GcsFileSystem;
 import com.sequenceiq.common.api.filesystem.S3FileSystem;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 
-@RunWith(MockitoJUnitRunner.class)
-public class NifiCloudStorageRoleConfigProviderTest {
+@ExtendWith(MockitoExtension.class)
+class NifiCloudStorageRoleConfigProviderTest {
 
     private final NifiCloudStorageRoleConfigProvider underTest = new NifiCloudStorageRoleConfigProvider();
 
     @Test
-    public void testGetNifiStorageRoleConfigsForCloud() {
+    void testGetNifiStorageRoleConfigsForCloud() {
         assertNifiStorageValues("s3a://testbucket/test-cluster/ni-fi");
         assertNifiStorageValues("s3a://testbucket/basepath1/testcluster/nifi");
         assertNifiStorageValues("s3a://test.bucket/testcluster/nifi");
@@ -45,7 +45,7 @@ public class NifiCloudStorageRoleConfigProviderTest {
     }
 
     @Test
-    public void testGetNifiStorageRoleConfigsWhenNoLocationConfigured() {
+    void testGetNifiStorageRoleConfigsWhenNoLocationConfigured() {
         TemplatePreparationObject preparationObject = getTemplatePreparationObject(null);
         String inputJson = getBlueprintText("input/clouderamanager-ds.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);

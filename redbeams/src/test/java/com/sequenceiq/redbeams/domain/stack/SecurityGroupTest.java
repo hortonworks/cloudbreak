@@ -1,25 +1,25 @@
 package com.sequenceiq.redbeams.domain.stack;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Set;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-public class SecurityGroupTest {
+class SecurityGroupTest {
 
     private static final Set SECURITY_GROUP_IDS = Set.of("id1", "id2", "id3");
 
     private SecurityGroup group;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         group = new SecurityGroup();
     }
 
     @Test
-    public void testGettersAndSetters() {
+    void testGettersAndSetters() {
         group.setId(1L);
         assertEquals(1L, group.getId().longValue());
 

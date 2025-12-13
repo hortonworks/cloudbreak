@@ -1,12 +1,14 @@
 package com.sequenceiq.cloudbreak.cm;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 import java.util.Optional;
 
 import org.apache.http.HttpStatus;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -46,7 +48,7 @@ class ClouderaManagerCommandsServiceTest {
 
         ApiCommand actualApiCommand = underTest.getApiCommand(apiClient, COMMAND_ID);
 
-        Assertions.assertEquals(actualApiCommand, apiCommand);
+        assertEquals(actualApiCommand, apiCommand);
     }
 
     @Test
@@ -56,7 +58,7 @@ class ClouderaManagerCommandsServiceTest {
 
         ApiCommand actualApiCommand = underTest.retryApiCommand(apiClient, COMMAND_ID);
 
-        Assertions.assertEquals(actualApiCommand, apiCommand);
+        assertEquals(actualApiCommand, apiCommand);
     }
 
     @Test
@@ -66,7 +68,7 @@ class ClouderaManagerCommandsServiceTest {
 
         Optional<ApiCommand> actualApiCommand = underTest.getApiCommandIfExist(apiClient, COMMAND_ID);
 
-        Assertions.assertEquals(actualApiCommand.get(), apiCommand);
+        assertEquals(actualApiCommand.get(), apiCommand);
     }
 
     @Test
@@ -75,7 +77,7 @@ class ClouderaManagerCommandsServiceTest {
 
         Optional<ApiCommand> actualApiCommand = underTest.getApiCommandIfExist(apiClient, COMMAND_ID);
 
-        Assertions.assertTrue(actualApiCommand.isEmpty());
+        assertTrue(actualApiCommand.isEmpty());
     }
 
     @Test
@@ -83,7 +85,7 @@ class ClouderaManagerCommandsServiceTest {
         when(clouderaManagerApiFactory.getCommandsResourceApi(apiClient)).thenReturn(commandsResourceApi);
         when(commandsResourceApi.readCommand(BigDecimal.ONE)).thenThrow(new ApiException("msg"));
 
-        Assertions.assertThrows(ApiException.class, () -> underTest.getApiCommandIfExist(apiClient, COMMAND_ID));
+        assertThrows(ApiException.class, () -> underTest.getApiCommandIfExist(apiClient, COMMAND_ID));
     }
 
     @Test
@@ -94,6 +96,6 @@ class ClouderaManagerCommandsServiceTest {
 
         Optional<ApiCommand> actualApiCommand = underTest.getApiCommandIfExist(apiClient, COMMAND_ID);
 
-        Assertions.assertTrue(actualApiCommand.isEmpty());
+        assertTrue(actualApiCommand.isEmpty());
     }
 }

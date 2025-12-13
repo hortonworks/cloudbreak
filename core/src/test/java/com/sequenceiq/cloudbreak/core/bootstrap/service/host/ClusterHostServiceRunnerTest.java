@@ -34,7 +34,6 @@ import java.util.Optional;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -369,7 +368,7 @@ class ClusterHostServiceRunnerTest {
         unreachableNodes.add("node1.example.com");
         when(stackUtil.collectReachableAndCheckNecessaryNodes(eq(stack), any())).thenThrow(new NodesUnreachableException("error", unreachableNodes));
 
-        CloudbreakServiceException cloudbreakServiceException = Assertions.assertThrows(CloudbreakServiceException.class,
+        CloudbreakServiceException cloudbreakServiceException = assertThrows(CloudbreakServiceException.class,
                 () -> underTest.runClusterServices(stack, Map.of(), true));
         assertEquals("Can not run cluster services on new nodes because the configuration management service is not responding on these nodes: " +
                 "[node1.example.com]", cloudbreakServiceException.getMessage());

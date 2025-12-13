@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.aws.connector.resource;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -189,7 +188,7 @@ class AwsUpscaleServiceTest {
         verify(awsCloudWatchService, times(1)).addCloudWatchAlarmsForSystemFailures(any(), eq("eu-west-1"),
                 any(AwsCredentialView.class), any());
         List<CloudResource> newInstances = captor.getValue();
-        assertEquals("Two new instances should be created", 2, newInstances.size());
+        assertEquals(2, newInstances.size(), "Two new instances should be created");
         assertThat(newInstances, hasItem(workerInstance4));
         assertThat(newInstances, hasItem(workerInstance5));
         verify(cfStackUtil, times(0)).addLoadBalancerTargets(any(), any(), any());
@@ -255,7 +254,7 @@ class AwsUpscaleServiceTest {
         AdjustmentTypeWithThreshold adjustmentTypeWithThreshold = new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, 0L);
         CloudConnectorException exception = assertThrows(CloudConnectorException.class,
                 () -> awsUpscaleService.upscale(authenticatedContext, cloudStack, cloudResourceList, adjustmentTypeWithThreshold));
-        Assertions.assertEquals("Autoscaling group update failed: Amazon Autoscaling Group was not able to reach the desired state (3 instances instead of 5). "
+        assertEquals("Autoscaling group update failed: Amazon Autoscaling Group was not able to reach the desired state (3 instances instead of 5). "
                 + "Original autoscaling group state has been recovered. Failure reason: autoscaling failed", exception.getMessage());
 
         verify(awsAutoScalingService, times(1)).updateAutoscalingGroup(any(AmazonAutoScalingClient.class), eq("workerASG"), eq(5));
@@ -336,7 +335,7 @@ class AwsUpscaleServiceTest {
 
         CloudConnectorException exception = assertThrows(CloudConnectorException.class,
                 () -> awsUpscaleService.upscale(authenticatedContext, cloudStack, cloudResourceList, adjustmentTypeWithThreshold));
-        Assertions.assertEquals("Failed to create some resource on AWS for upscaled nodes, please check your quotas on AWS. " +
+        assertEquals("Failed to create some resource on AWS for upscaled nodes, please check your quotas on AWS. " +
                 "Original autoscaling group state has been recovered. Exception: volume create error", exception.getMessage());
 
         verify(awsAutoScalingService, times(1)).updateAutoscalingGroup(any(AmazonAutoScalingClient.class), eq("workerASG"), eq(5));

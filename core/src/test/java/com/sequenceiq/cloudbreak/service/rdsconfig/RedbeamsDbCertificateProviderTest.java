@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.rdsconfig;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -8,7 +9,6 @@ import static org.mockito.Mockito.when;
 import java.util.Optional;
 import java.util.Set;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -111,7 +111,7 @@ class RedbeamsDbCertificateProviderTest {
         databaseServerV4Response.setSslConfig(sslConfig);
         when(dbServerConfigurer.getDatabaseServer(DB_SERVER_CRN)).thenReturn(databaseServerV4Response);
 
-        IllegalStateException illegalStateException = Assertions.assertThrows(IllegalStateException.class, () -> underTest.getRelatedSslCerts(stack));
+        IllegalStateException illegalStateException = assertThrows(IllegalStateException.class, () -> underTest.getRelatedSslCerts(stack));
 
         assertThat(illegalStateException)
                 .hasMessage("External DB SSL enforcement is enabled for cluster(crn:'stackCrn') and remote database('" + DB_SERVER_CRN + "')," +

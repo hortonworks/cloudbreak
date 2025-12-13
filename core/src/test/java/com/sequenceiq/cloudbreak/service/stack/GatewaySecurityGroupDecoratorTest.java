@@ -1,14 +1,14 @@
 package com.sequenceiq.cloudbreak.service.stack;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -16,14 +16,14 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.Tunnel;
 
-public class GatewaySecurityGroupDecoratorTest {
+class GatewaySecurityGroupDecoratorTest {
 
     private GatewaySecurityGroupDecorator underTest;
 
     private Stack stack;
 
-    @Before
-    public void init() {
+    @BeforeEach
+    void init() {
         underTest = new GatewaySecurityGroupDecorator();
         stack = new Stack();
         InstanceGroup instanceGroup = new InstanceGroup();
@@ -33,7 +33,7 @@ public class GatewaySecurityGroupDecoratorTest {
     }
 
     @Test
-    public void testConvertExtendsGatewaySecurityGroupsWithDefaultGatewayCidrsWithoutCCM() {
+    void testConvertExtendsGatewaySecurityGroupsWithDefaultGatewayCidrsWithoutCCM() {
         ReflectionTestUtils.setField(underTest, "defaultGatewayCidr", Set.of("0.0.0.0/0", "1.1.1.1/1"));
         ReflectionTestUtils.setField(underTest, "nginxPort", 9443);
 
@@ -51,7 +51,7 @@ public class GatewaySecurityGroupDecoratorTest {
     }
 
     @Test
-    public void testConvertDoesntExtendGatewaySecurityGroupsWithDefaultGatewayCidrsIfItsEmptyWithoutCCM() {
+    void testConvertDoesntExtendGatewaySecurityGroupsWithDefaultGatewayCidrsIfItsEmptyWithoutCCM() {
         ReflectionTestUtils.setField(underTest, "defaultGatewayCidr", Set.of());
         // WHEN
         underTest.extendGatewaySecurityGroupWithDefaultGatewayCidrs(stack, Tunnel.DIRECT);
@@ -64,7 +64,7 @@ public class GatewaySecurityGroupDecoratorTest {
     }
 
     @Test
-    public void testConvertDoesntExtendsGatewaySecurityGroupsWithDefaultGatewayCidrsWithCCM() {
+    void testConvertDoesntExtendsGatewaySecurityGroupsWithDefaultGatewayCidrsWithCCM() {
         ReflectionTestUtils.setField(underTest, "defaultGatewayCidr", Set.of("0.0.0.0/0", "1.1.1.1/1"));
         ReflectionTestUtils.setField(underTest, "nginxPort", 9443);
 
@@ -79,7 +79,7 @@ public class GatewaySecurityGroupDecoratorTest {
     }
 
     @Test
-    public void testConvertDoesntExtendGatewaySecurityGroupsWithDefaultGatewayCidrsIfItsEmptyWithCCM() {
+    void testConvertDoesntExtendGatewaySecurityGroupsWithDefaultGatewayCidrsIfItsEmptyWithCCM() {
         ReflectionTestUtils.setField(underTest, "defaultGatewayCidr", Set.of());
         // WHEN
         underTest.extendGatewaySecurityGroupWithDefaultGatewayCidrs(stack, Tunnel.CCM);

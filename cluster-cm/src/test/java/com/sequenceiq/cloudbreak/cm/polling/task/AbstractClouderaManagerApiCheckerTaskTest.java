@@ -1,9 +1,9 @@
 package com.sequenceiq.cloudbreak.cm.polling.task;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 
@@ -32,7 +32,7 @@ class AbstractClouderaManagerApiCheckerTaskTest {
                     }
                 };
         ClouderaManagerOperationFailedException clouderaManagerOperationFailedException =
-                Assertions.assertThrows(ClouderaManagerOperationFailedException.class, () -> {
+                assertThrows(ClouderaManagerOperationFailedException.class, () -> {
             for (int i = 0; i <= TOLERATED_ERROR_LIMIT; i++) {
                 abstractClouderaManagerApiCheckerTask.checkStatus(mock(ClouderaManagerCommandPollerObject.class));
             }

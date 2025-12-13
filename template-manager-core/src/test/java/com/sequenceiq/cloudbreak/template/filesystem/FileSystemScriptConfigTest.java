@@ -1,36 +1,37 @@
 package com.sequenceiq.cloudbreak.template.filesystem;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.util.Map;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.common.model.recipe.RecipeType;
 import com.sequenceiq.cloudbreak.common.type.ExecutionType;
 
-public class FileSystemScriptConfigTest {
+class FileSystemScriptConfigTest {
 
     @Test
-    public void testFileSystemScriptConfigWhenNoPropertiesPopulatedThenPropertiesShouldBeEmpty() {
+    void testFileSystemScriptConfigWhenNoPropertiesPopulatedThenPropertiesShouldBeEmpty() {
         FileSystemScriptConfig fileSystemScriptConfig = new FileSystemScriptConfig("test", RecipeType.POST_CLOUDERA_MANAGER_START, ExecutionType.ALL_NODES);
-        Assert.assertEquals(fileSystemScriptConfig.getProperties(), Maps.newHashMap());
-        Assert.assertEquals(fileSystemScriptConfig.getExecutionType(), ExecutionType.ALL_NODES);
-        Assert.assertEquals(fileSystemScriptConfig.getRecipeType(), RecipeType.POST_CLOUDERA_MANAGER_START);
-        Assert.assertEquals(fileSystemScriptConfig.getScriptLocation(), "test");
+        assertEquals(fileSystemScriptConfig.getProperties(), Maps.newHashMap());
+        assertEquals(fileSystemScriptConfig.getExecutionType(), ExecutionType.ALL_NODES);
+        assertEquals(fileSystemScriptConfig.getRecipeType(), RecipeType.POST_CLOUDERA_MANAGER_START);
+        assertEquals(fileSystemScriptConfig.getScriptLocation(), "test");
     }
 
     @Test
-    public void testFileSystemScriptConfigWhenPropertiesPopulatedThenPropertiesShouldNotBeEmpty() {
+    void testFileSystemScriptConfigWhenPropertiesPopulatedThenPropertiesShouldNotBeEmpty() {
         Map<String, String> map = Maps.newHashMap();
         map.put("test1", "testvalue1");
 
         FileSystemScriptConfig fileSystemScriptConfig =
                 new FileSystemScriptConfig("test", RecipeType.POST_CLOUDERA_MANAGER_START, ExecutionType.ALL_NODES, map);
-        Assert.assertEquals(fileSystemScriptConfig.getProperties(), map);
-        Assert.assertEquals(fileSystemScriptConfig.getExecutionType(), ExecutionType.ALL_NODES);
-        Assert.assertEquals(fileSystemScriptConfig.getRecipeType(), RecipeType.POST_CLOUDERA_MANAGER_START);
-        Assert.assertEquals(fileSystemScriptConfig.getScriptLocation(), "test");
+        assertEquals(fileSystemScriptConfig.getProperties(), map);
+        assertEquals(fileSystemScriptConfig.getExecutionType(), ExecutionType.ALL_NODES);
+        assertEquals(fileSystemScriptConfig.getRecipeType(), RecipeType.POST_CLOUDERA_MANAGER_START);
+        assertEquals(fileSystemScriptConfig.getScriptLocation(), "test");
     }
 
 }

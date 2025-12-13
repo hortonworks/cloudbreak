@@ -1,5 +1,9 @@
 package com.sequenceiq.cloudbreak;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -9,7 +13,6 @@ import java.util.Set;
 
 import jakarta.inject.Inject;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.api.function.Executable;
@@ -112,15 +115,15 @@ public class JpaTest {
                 } else {
                     method.invoke(repository, methodArgs(method));
                 }
-                Assertions.assertEquals(1, SqlStatementInspector.getSelectCountNumberAndReset(),
+                assertEquals(1, SqlStatementInspector.getSelectCountNumberAndReset(),
                         "find method should compile only one select!");
             } catch (IllegalAccessException | IllegalArgumentException e) {
-                Assertions.fail("Could not call find method", e);
+                fail("Could not call find method", e);
             } catch (InvocationTargetException e) {
                 if (e.getCause() instanceof UnsupportedOperationException) {
-                    Assertions.assertTrue(true, "find finished with UnsupportedOperation");
+                    assertTrue(true, "find finished with UnsupportedOperation");
                 } else {
-                    Assertions.fail("Could not call find method: " + method, e);
+                    fail("Could not call find method: " + method, e);
                 }
             }
         };

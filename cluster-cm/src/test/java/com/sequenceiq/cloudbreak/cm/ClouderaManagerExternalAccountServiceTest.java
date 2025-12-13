@@ -9,11 +9,11 @@ import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.api.swagger.ExternalAccountsResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
@@ -22,7 +22,8 @@ import com.cloudera.api.swagger.model.ApiExternalAccount;
 import com.cloudera.api.swagger.model.ApiExternalAccountList;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 
-public class ClouderaManagerExternalAccountServiceTest {
+@ExtendWith(MockitoExtension.class)
+class ClouderaManagerExternalAccountServiceTest {
 
     private static final String ACCOUNT = "cb-altus-access";
 
@@ -38,13 +39,8 @@ public class ClouderaManagerExternalAccountServiceTest {
     @InjectMocks
     private ClouderaManagerExternalAccountService underTest;
 
-    @Before
-    public void setUp() {
-        MockitoAnnotations.initMocks(this);
-    }
-
     @Test
-    public void testCreateExternalAccount() throws ApiException {
+    void testCreateExternalAccount() throws ApiException {
         ApiExternalAccountList apiExternalAccountList = new ApiExternalAccountList();
         when(clouderaManagerApiFactory.getExternalAccountsResourceApi(apiClient)).thenReturn(externalAccountsResourceApi);
         when(externalAccountsResourceApi.readAccounts(anyString(), anyString())).thenReturn(apiExternalAccountList);
@@ -57,7 +53,7 @@ public class ClouderaManagerExternalAccountServiceTest {
     }
 
     @Test
-    public void testUpdateExternalAccount() throws ApiException {
+    void testUpdateExternalAccount() throws ApiException {
         ApiExternalAccountList apiExternalAccountList = new ApiExternalAccountList();
         ApiExternalAccount item = new ApiExternalAccount();
         item.setName(ACCOUNT);

@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.core.flow2.diagnostics;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -362,7 +363,7 @@ class DiagnosticsFlowServiceTest {
         String msg = (String) failedParams.get(2);
         assertTrue(msg.startsWith("FAILED."));
         assertTrue(msg.contains(GATEWAY_FQDN));
-        org.junit.jupiter.api.Assertions.assertFalse(msg.contains(AWS_METADATA_WARNING));
+        assertFalse(msg.contains(AWS_METADATA_WARNING));
     }
 
     @DisplayName("15. Usage reporting details for failed network check includes failed hosts list")
@@ -402,7 +403,7 @@ class DiagnosticsFlowServiceTest {
             java.lang.reflect.Method m = DiagnosticsFlowService.class.getDeclaredMethod("getRemoteWriteUrl");
             m.setAccessible(true);
             Object result = m.invoke(underTest);
-            org.junit.jupiter.api.Assertions.assertNull(result);
+            assertNull(result);
         } finally {
             // restore (not strictly necessary for isolated tests but keeps state clean)
             f.set(underTest, original);
@@ -417,7 +418,7 @@ class DiagnosticsFlowServiceTest {
         when(preFlightCheckValidationService.preFlightCheckSupported(ENVIRONMENT_CRN, true)).thenReturn(true);
         when(monitoringConfiguration.getRemoteWriteUrl()).thenReturn(MONITORING_URL);
         // Throw on first usage event
-        org.mockito.Mockito.doThrow(new RuntimeException("fail")).when(usageReporter).cdpNetworkCheckEvent(any());
+        doThrow(new RuntimeException("fail")).when(usageReporter).cdpNetworkCheckEvent(any());
 
         underTest.nodeStatusNetworkReport(stack);
 

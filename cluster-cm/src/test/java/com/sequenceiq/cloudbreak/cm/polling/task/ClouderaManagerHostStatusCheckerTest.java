@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.cm.polling.task;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -11,11 +11,11 @@ import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Set;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.api.swagger.HostsResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
@@ -30,9 +30,8 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 
-@SuppressWarnings("checkstyle:Regexp")
-@RunWith(MockitoJUnitRunner.class)
-public class ClouderaManagerHostStatusCheckerTest {
+@ExtendWith(MockitoExtension.class)
+class ClouderaManagerHostStatusCheckerTest {
 
     private static final String VIEWTYPE = "FULL";
 
@@ -47,14 +46,14 @@ public class ClouderaManagerHostStatusCheckerTest {
 
     private ClouderaManagerHostStatusChecker underTest;
 
-    @Before
-    public void init() {
+    @BeforeEach
+    void init() {
         underTest = new ClouderaManagerHostStatusChecker(clouderaManagerApiPojoFactory, clusterEventService, false);
         when(clouderaManagerApiPojoFactory.getHostsResourceApi(any(ApiClient.class))).thenReturn(hostsResourceApi);
     }
 
     @Test
-    public void shouldBeFalseWhenNoHostsReturned() throws ApiException {
+    void shouldBeFalseWhenNoHostsReturned() throws ApiException {
         InstanceMetaData instanceMetaData = validInstanceMetadata();
         when(hostsResourceApi.readHosts(null, null, VIEWTYPE)).thenReturn(newApiHostList());
 
@@ -64,7 +63,7 @@ public class ClouderaManagerHostStatusCheckerTest {
     }
 
     @Test
-    public void shouldBeFalseWhenHostsReturnedHasNoHeartbeat() throws ApiException {
+    void shouldBeFalseWhenHostsReturnedHasNoHeartbeat() throws ApiException {
         InstanceMetaData instanceMetaData = validInstanceMetadata();
         ApiHost apiHost = new ApiHost().ipAddress(instanceMetaData.getPrivateIp());
         when(hostsResourceApi.readHosts(null, null, VIEWTYPE)).thenReturn(newApiHostList(apiHost));
@@ -75,7 +74,7 @@ public class ClouderaManagerHostStatusCheckerTest {
     }
 
     @Test
-    public void shouldBeFalseWhenHostsReturnedHasOldHeartbeat() throws ApiException {
+    void shouldBeFalseWhenHostsReturnedHasOldHeartbeat() throws ApiException {
         InstanceMetaData instanceMetaData = validInstanceMetadata();
         ApiHost apiHost = new ApiHost()
                 .ipAddress(instanceMetaData.getPrivateIp())
@@ -88,7 +87,7 @@ public class ClouderaManagerHostStatusCheckerTest {
     }
 
     @Test
-    public void shouldBeTrueWhenHostsReturnedHasRecentHeartbeat() throws ApiException {
+    void shouldBeTrueWhenHostsReturnedHasRecentHeartbeat() throws ApiException {
         InstanceMetaData instanceMetaData = validInstanceMetadata();
         ApiHost apiHost = getValidApiHost(instanceMetaData);
         when(hostsResourceApi.readHosts(null, null, VIEWTYPE)).thenReturn(newApiHostList(apiHost));
@@ -99,7 +98,7 @@ public class ClouderaManagerHostStatusCheckerTest {
     }
 
     @Test
-    public void shouldBeFalseWhenHostsReturnedHasDifferentIp() throws ApiException {
+    void shouldBeFalseWhenHostsReturnedHasDifferentIp() throws ApiException {
         InstanceMetaData instanceMetaData = validInstanceMetadata();
         ApiHost apiHost = new ApiHost()
                 .ipAddress("2.2.2.2")
@@ -112,7 +111,7 @@ public class ClouderaManagerHostStatusCheckerTest {
     }
 
     @Test
-    public void shouldBeFalseWhenHostsHasMissingHost() throws ApiException {
+    void shouldBeFalseWhenHostsHasMissingHost() throws ApiException {
         InstanceMetaData instanceMetaData = validInstanceMetadata();
         InstanceMetaData instanceMetaData2 = validInstanceMetadata();
         instanceMetaData2.setPrivateIp("2.2.2.2");
@@ -125,7 +124,7 @@ public class ClouderaManagerHostStatusCheckerTest {
     }
 
     @Test
-    public void shouldBeTrueWhenMultipleValidHosts() throws ApiException {
+    void shouldBeTrueWhenMultipleValidHosts() throws ApiException {
         InstanceMetaData instanceMetaData = validInstanceMetadata();
         InstanceMetaData instanceMetaData2 = validInstanceMetadata();
         instanceMetaData2.setPrivateIp("2.2.2.2");
@@ -139,7 +138,7 @@ public class ClouderaManagerHostStatusCheckerTest {
     }
 
     @Test
-    public void shouldBeFalseWhenOneHostHasDifferentIp() throws ApiException {
+    void shouldBeFalseWhenOneHostHasDifferentIp() throws ApiException {
         InstanceMetaData instanceMetaData = validInstanceMetadata();
         InstanceMetaData instanceMetaData2 = validInstanceMetadata();
         instanceMetaData2.setPrivateIp("2.2.2.2");
@@ -153,7 +152,7 @@ public class ClouderaManagerHostStatusCheckerTest {
     }
 
     @Test
-    public void shouldBeTrueWhenOneInstanceHasNoDiscoveryFqdn() throws ApiException {
+    void shouldBeTrueWhenOneInstanceHasNoDiscoveryFqdn() throws ApiException {
         InstanceMetaData instanceMetaData = validInstanceMetadata();
         InstanceMetaData instanceMetaData2 = validInstanceMetadata();
         instanceMetaData2.setPrivateIp("2.2.2.2");
@@ -167,7 +166,7 @@ public class ClouderaManagerHostStatusCheckerTest {
     }
 
     @Test
-    public void shouldBeTrueWhenOneInstanceIsTerminated() throws ApiException {
+    void shouldBeTrueWhenOneInstanceIsTerminated() throws ApiException {
         InstanceMetaData instanceMetaData = validInstanceMetadata();
         InstanceMetaData instanceMetaData2 = validInstanceMetadata();
         instanceMetaData2.setPrivateIp("2.2.2.2");
@@ -181,7 +180,7 @@ public class ClouderaManagerHostStatusCheckerTest {
     }
 
     @Test
-    public void shouldBeTrueWhenServicesOnOneInstanceAreUnhealthy() throws ApiException {
+    void shouldBeTrueWhenServicesOnOneInstanceAreUnhealthy() throws ApiException {
         InstanceMetaData instanceMetaData = validInstanceMetadata();
         InstanceMetaData instanceMetaData2 = validInstanceMetadata();
         instanceMetaData2.setPrivateIp("2.2.2.2");
@@ -196,7 +195,7 @@ public class ClouderaManagerHostStatusCheckerTest {
     }
 
     @Test
-    public void shouldBeTrueWhenOneInstanceIsDeletedOnProvider() throws ApiException {
+    void shouldBeTrueWhenOneInstanceIsDeletedOnProvider() throws ApiException {
         InstanceMetaData instanceMetaData = validInstanceMetadata();
         InstanceMetaData instanceMetaData2 = validInstanceMetadata();
         instanceMetaData2.setPrivateIp("2.2.2.2");
@@ -210,7 +209,7 @@ public class ClouderaManagerHostStatusCheckerTest {
     }
 
     @Test
-    public void shouldBeTrueWhenOneInstanceIsStopped() throws ApiException {
+    void shouldBeTrueWhenOneInstanceIsStopped() throws ApiException {
         InstanceMetaData instanceMetaData = validInstanceMetadata();
         InstanceMetaData instanceMetaData2 = validInstanceMetadata();
         instanceMetaData2.setPrivateIp("2.2.2.2");
@@ -224,7 +223,7 @@ public class ClouderaManagerHostStatusCheckerTest {
     }
 
     @Test
-    public void shouldBeTrueWhenOneInstanceIsFailed() throws ApiException {
+    void shouldBeTrueWhenOneInstanceIsFailed() throws ApiException {
         InstanceMetaData instanceMetaData = validInstanceMetadata();
         InstanceMetaData instanceMetaData2 = validInstanceMetadata();
         instanceMetaData2.setPrivateIp("2.2.2.2");
@@ -238,7 +237,7 @@ public class ClouderaManagerHostStatusCheckerTest {
     }
 
     @Test
-    public void shouldBeTrueWhenOneInstanceIsOrchestrationFailed() throws ApiException {
+    void shouldBeTrueWhenOneInstanceIsOrchestrationFailed() throws ApiException {
         InstanceMetaData instanceMetaData = validInstanceMetadata();
         InstanceMetaData instanceMetaData2 = validInstanceMetadata();
         instanceMetaData2.setPrivateIp("2.2.2.2");

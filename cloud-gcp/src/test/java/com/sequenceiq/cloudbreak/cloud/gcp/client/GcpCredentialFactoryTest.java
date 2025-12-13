@@ -1,12 +1,12 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.client;
 
-import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.codec.binary.Base64;
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -25,7 +25,7 @@ public class GcpCredentialFactoryTest {
     public void testGetServiceAccountCredentialJsonWhenJsonHasValidTextShouldReturnWithTheText() {
         CloudCredential cloudCredential = getCloudCredential("super-json");
         String serviceAccountCredentialJson = underTest.getServiceAccountCredentialJson(cloudCredential);
-        Assert.assertEquals("c3VwZXItanNvbg==", serviceAccountCredentialJson);
+        assertEquals("c3VwZXItanNvbg==", serviceAccountCredentialJson);
     }
 
     @Test
@@ -44,9 +44,9 @@ public class GcpCredentialFactoryTest {
     public void testPrepareCredentialWhenJsonHasClientEmailShouldThrowCredentialVerificationException() {
         CloudCredential cloudCredential = getCloudCredential("{\"project_id\":\"joska-project\", \"client_email\": \"client_email\"}");
         underTest.prepareCredential(cloudCredential);
-        Assert.assertEquals(cloudCredential.getParameters().get("projectId"), "joska-project");
-        Assert.assertEquals(cloudCredential.getParameters().get("serviceAccountId"), "client_email");
-        Assert.assertEquals(cloudCredential.getParameters().get("serviceAccountPrivateKey"), "");
+        assertEquals(cloudCredential.getParameters().get("projectId"), "joska-project");
+        assertEquals(cloudCredential.getParameters().get("serviceAccountId"), "client_email");
+        assertEquals(cloudCredential.getParameters().get("serviceAccountPrivateKey"), "");
     }
 
     private String getCredentialJson(String credentialJson) {

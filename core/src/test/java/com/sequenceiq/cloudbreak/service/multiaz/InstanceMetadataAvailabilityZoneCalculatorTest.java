@@ -26,7 +26,6 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.assertj.core.util.Strings;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -180,7 +179,7 @@ class InstanceMetadataAvailabilityZoneCalculatorTest {
         when(stackService.getByIdWithLists(anyLong())).thenReturn(stack);
         when(cloudPlatformConnectors.get(any()).availabilityZoneConnector()).thenReturn(availabilityZoneConnector);
 
-        Assertions.assertThrows(CloudbreakServiceException.class,
+        assertThrows(CloudbreakServiceException.class,
                 () -> underTest.populate(1L));
 
         verifyNoInteractions(instanceMetaDataService);
@@ -209,7 +208,7 @@ class InstanceMetadataAvailabilityZoneCalculatorTest {
                 .allMatch(im -> groupAvailabilityZonesForGroup.contains(im.getAvailabilityZone())));
         assertTrue(instancesExpectedToBeUpdated.stream()
                 .allMatch(im -> ("/" + im.getAvailabilityZone()).equals(im.getRackId())));
-        Assertions.assertTrue(savedInstanceMetadatas.getValue().stream()
+        assertTrue(savedInstanceMetadatas.getValue().stream()
                 .allMatch(im -> isNotEmpty(im.getSubnetId()) && subnetId.equals(im.getSubnetId())));
     }
 
@@ -276,7 +275,7 @@ class InstanceMetadataAvailabilityZoneCalculatorTest {
                 assertEquals(Long.valueOf(expectedCountByAzEntry.getValue()), actualInstanceCountByAz);
             }
         }
-        Assertions.assertTrue(stack.getNotDeletedInstanceMetaDataSet().stream()
+        assertTrue(stack.getNotDeletedInstanceMetaDataSet().stream()
                 .allMatch(im -> isNotEmpty(im.getSubnetId()) && subnetId.equals(im.getSubnetId())));
     }
 
@@ -338,7 +337,7 @@ class InstanceMetadataAvailabilityZoneCalculatorTest {
                 assertEquals(Long.valueOf(expectedCountBySubnetEntry.getValue()), actualInstanceCountByAz);
             }
         }
-        Assertions.assertTrue(stack.getNotDeletedInstanceMetaDataSet().stream().allMatch(im -> isNotEmpty(im.getSubnetId())));
+        assertTrue(stack.getNotDeletedInstanceMetaDataSet().stream().allMatch(im -> isNotEmpty(im.getSubnetId())));
     }
 
     @Test
@@ -368,7 +367,7 @@ class InstanceMetadataAvailabilityZoneCalculatorTest {
         notDeletedInstanceMetaDataSet.stream()
                 .filter(e -> e.getInstanceStatus().equals(InstanceStatus.CREATED))
                 .forEach(e -> assertTrue(Strings.isNullOrEmpty(e.getAvailabilityZone())));
-        Assertions.assertTrue(stack.getNotDeletedInstanceMetaDataSet().stream()
+        assertTrue(stack.getNotDeletedInstanceMetaDataSet().stream()
                 .filter(e -> e.getInstanceStatus().equals(InstanceStatus.CREATED))
                 .allMatch(im -> isNotEmpty(im.getSubnetId())));
     }
@@ -383,7 +382,7 @@ class InstanceMetadataAvailabilityZoneCalculatorTest {
 
         assertFalse(actual);
         verifyNoInteractions(instanceMetaDataService);
-        Assertions.assertTrue(stack.getNotDeletedInstanceMetaDataSet().stream()
+        assertTrue(stack.getNotDeletedInstanceMetaDataSet().stream()
                 .filter(e -> e.getInstanceStatus().equals(InstanceStatus.CREATED))
                 .allMatch(im -> isNotEmpty(im.getSubnetId())));
     }
@@ -426,7 +425,7 @@ class InstanceMetadataAvailabilityZoneCalculatorTest {
                 .forEach(im -> assertTrue(isNotEmpty(im.getAvailabilityZone())));
         savedInstanceMetadatas.getValue()
                 .forEach(im -> assertTrue(groupAvailabilityZonesForGroup.contains(im.getAvailabilityZone())));
-        Assertions.assertTrue(savedInstanceMetadatas.getValue().stream().allMatch(im -> subnetId.equals(im.getSubnetId())));
+        assertTrue(savedInstanceMetadatas.getValue().stream().allMatch(im -> subnetId.equals(im.getSubnetId())));
     }
 
     @Test
@@ -461,7 +460,7 @@ class InstanceMetadataAvailabilityZoneCalculatorTest {
                 .stream()
                 .filter(e -> e.getInstanceStatus().equals(InstanceStatus.CREATED))
                 .forEach(e -> assertTrue(targetedAzs.contains(e.getAvailabilityZone())));
-        Assertions.assertTrue(savedInstanceMetadatas.getValue().stream().allMatch(im -> subnetId.equals(im.getSubnetId())));
+        assertTrue(savedInstanceMetadatas.getValue().stream().allMatch(im -> subnetId.equals(im.getSubnetId())));
     }
 
     @Test
@@ -557,7 +556,7 @@ class InstanceMetadataAvailabilityZoneCalculatorTest {
             assertEquals(expectedAz, instanceMetaData.getAvailabilityZone());
             assertEquals("/" + expectedAz, instanceMetaData.getRackId());
         });
-        Assertions.assertTrue(savedInstanceMetadatas.getValue().stream().allMatch(im -> subnetId.equals(im.getSubnetId())));
+        assertTrue(savedInstanceMetadatas.getValue().stream().allMatch(im -> subnetId.equals(im.getSubnetId())));
     }
 
     @Test
@@ -617,7 +616,7 @@ class InstanceMetadataAvailabilityZoneCalculatorTest {
             assertEquals(expectedSubnetId, instanceMetaData.getSubnetId());
             assertEquals("/" + expectedAz, instanceMetaData.getRackId());
         });
-        Assertions.assertTrue(savedInstanceMetadatas.getValue().stream()
+        assertTrue(savedInstanceMetadatas.getValue().stream()
                 .allMatch(im -> expectedSubnetIdForAz.values().contains(im.getSubnetId())));
     }
 
@@ -651,7 +650,7 @@ class InstanceMetadataAvailabilityZoneCalculatorTest {
         notDeletedInstanceMetaDataSet.stream().filter(im -> "is1".equals(im.getInstanceGroup().getGroupName()))
                 .forEach(im -> zoneNodeCount.put(im.getAvailabilityZone(), 1 + zoneNodeCount.getOrDefault(im.getAvailabilityZone(), 0L)));
         assertEquals(Map.of("1", 1L, "2", 1L, "3", 1L), zoneNodeCount);
-        Assertions.assertTrue(notDeletedInstanceMetaDataSet.stream()
+        assertTrue(notDeletedInstanceMetaDataSet.stream()
                 .filter(im -> InstanceStatus.REQUESTED.equals(im.getInstanceStatus()))
                 .allMatch(im -> subnetId.equals(im.getSubnetId())));
     }
@@ -696,7 +695,7 @@ class InstanceMetadataAvailabilityZoneCalculatorTest {
         notDeletedInstanceMetaDataSet.stream().filter(im -> "is1".equals(im.getInstanceGroup().getGroupName()))
                 .forEach(im -> zoneNodeCount.put(im.getAvailabilityZone(), 1 + zoneNodeCount.getOrDefault(im.getAvailabilityZone(), 0L)));
         assertEquals(Map.of("1", 2L), zoneNodeCount);
-        Assertions.assertTrue(notDeletedInstanceMetaDataSet.stream()
+        assertTrue(notDeletedInstanceMetaDataSet.stream()
                 .filter(im -> InstanceStatus.REQUESTED.equals(im.getInstanceStatus()))
                 .allMatch(im -> subnetId.equals(im.getSubnetId())));
     }

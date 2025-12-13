@@ -1,49 +1,30 @@
 package com.sequenceiq.cloudbreak.service.upgrade.matrix;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.runners.Parameterized.Parameters;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collection;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.mockito.InjectMocks;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
-@RunWith(Parameterized.class)
-public class UpgradeMatrixServiceTest {
+class UpgradeMatrixServiceTest {
 
-    @InjectMocks
-    private UpgradeMatrixService underTest;
+    private UpgradeMatrixService underTest = new UpgradeMatrixService();
 
-    private final String currentVersion;
-
-    private final String targetVersion;
-
-    private final boolean expectedResult;
-
-    public UpgradeMatrixServiceTest(String currentVersion, String targetVersion, boolean expectedResult) {
-        this.currentVersion = currentVersion;
-        this.targetVersion = targetVersion;
-        this.expectedResult = expectedResult;
-    }
-
-    @Before
+    @BeforeEach
     public void before() throws IOException {
-        underTest = new UpgradeMatrixService();
         ReflectionTestUtils.setField(underTest, "upgradeMatrixDefinition", getUpgradeMatrixDefinition());
     }
 
-    @Parameters(name = "{index}: Upgrade from {0} to {1} is permitted: {2}")
-    public static Collection<Object[]> data() {
+    static Collection<Object[]> data() {
         return Arrays.asList(new Object[][] {
                 {"7a.2b.2c", "7.2.2", false},
                 {"17.12.12", "7.2.2", false},
@@ -123,8 +104,9 @@ public class UpgradeMatrixServiceTest {
         });
     }
 
-    @Test
-    public void testIsPermittedByUpgradeMatrix() {
+    @MethodSource("data")
+    @ParameterizedTest
+    void testIsPermittedByUpgradeMatrix(String currentVersion, String targetVersion, boolean expectedResult) {
         assertEquals(expectedResult, underTest.permitByUpgradeMatrix(currentVersion, targetVersion));
     }
 

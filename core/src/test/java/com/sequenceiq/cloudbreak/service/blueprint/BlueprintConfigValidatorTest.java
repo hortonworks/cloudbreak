@@ -1,77 +1,62 @@
 package com.sequenceiq.cloudbreak.service.blueprint;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.junit.MockitoJUnitRunner;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
-@RunWith(MockitoJUnitRunner.class)
-public class BlueprintConfigValidatorTest {
+class BlueprintConfigValidatorTest {
 
-    @Rule
-    public final ExpectedException thrown = ExpectedException.none();
-
-    @InjectMocks
-    private BlueprintConfigValidator underTest;
+    private BlueprintConfigValidator underTest = new BlueprintConfigValidator();
 
     @Test
-    public void testIfRoleConfigGroupsRefNamesMisspelledShouldDropException() {
+    void testIfRoleConfigGroupsRefNamesMisspelledShouldDropException() {
         Blueprint request = new Blueprint();
         request.setBlueprintText(FileReaderUtils.readFileFromClasspathQuietly("test/defaults/blueprints/blueprint-with-wrong-role-group-name.bp"));
-        thrown.expect(BadRequestException.class);
-        thrown.expectMessage("RoleConfigGroupsRefNames is probably missing or misspelled in your Cloudera Manager template.");
-        underTest.validate(request);
+        assertThrows(BadRequestException.class, () -> underTest.validate(request),
+                "RoleConfigGroupsRefNames is probably missing or misspelled in your Cloudera Manager template.");
     }
 
     @Test
-    public void testIfVolumeConfigPresentedShouldDropException() {
+    void testIfVolumeConfigPresentedShouldDropException() {
         Blueprint request = new Blueprint();
         request.setBlueprintText(FileReaderUtils.readFileFromClasspathQuietly("test/defaults/blueprints/blueprint-with-volume-config.bp"));
-        thrown.expect(BadRequestException.class);
-        thrown.expectMessage("Volume configuration should not be part of your Cloudera Manager template.");
-        underTest.validate(request);
+        assertThrows(BadRequestException.class, () -> underTest.validate(request), "Volume configuration should not be part of your Cloudera Manager template.");
     }
 
     @Test
-    public void testIfRoleConfigGroupsMisspelledShouldDropException() {
+    void testIfRoleConfigGroupsMisspelledShouldDropException() {
         Blueprint request = new Blueprint();
         request.setBlueprintText(FileReaderUtils.readFileFromClasspathQuietly("test/defaults/blueprints/blueprint-with-wrong-service-role-group-name.bp"));
-        thrown.expect(BadRequestException.class);
-        thrown.expectMessage("RoleConfigGroups is probably missing or misspelled in your Cloudera Manager template.");
-        underTest.validate(request);
+        assertThrows(BadRequestException.class, () -> underTest.validate(request),
+                "RoleConfigGroups is probably missing or misspelled in your Cloudera Manager template.");
     }
 
     @Test
-    public void testIfInstatiatorPresentedShouldDropException() {
+    void testIfInstatiatorPresentedShouldDropException() {
         Blueprint request = new Blueprint();
         request.setBlueprintText(FileReaderUtils.readFileFromClasspathQuietly("test/defaults/blueprints/blueprint-with-instantiator.bp"));
-        thrown.expect(BadRequestException.class);
-        thrown.expectMessage("Instantiator is present in your Cloudera Manager template which is probably incorrect.");
-        underTest.validate(request);
+        assertThrows(BadRequestException.class, () -> underTest.validate(request),
+                "Instantiator is present in your Cloudera Manager template which is probably incorrect.");
     }
 
     @Test
-    public void testIfPasswordPresentedWithStarsShouldDropException() {
+    void testIfPasswordPresentedWithStarsShouldDropException() {
         Blueprint request = new Blueprint();
         request.setBlueprintText(FileReaderUtils.readFileFromClasspathQuietly("test/defaults/blueprints/blueprint-with-password-placeholder.bp"));
-        thrown.expect(BadRequestException.class);
-        thrown.expectMessage("Password placeholder with **** is present in your Cloudera Manager template which is probably incorrect.");
-        underTest.validate(request);
+        assertThrows(BadRequestException.class, () -> underTest.validate(request),
+                "Password placeholder with **** is present in your Cloudera Manager template which is probably incorrect.");
     }
 
     @Test
-    public void testIfReposioriesPresentedShouldDropException() {
+    void testIfReposioriesPresentedShouldDropException() {
         Blueprint request = new Blueprint();
         request.setBlueprintText(FileReaderUtils.readFileFromClasspathQuietly("test/defaults/blueprints/blueprint-with-repositories.bp"));
-        thrown.expect(BadRequestException.class);
-        thrown.expectMessage("Repositories are present in your Cloudera Manager template, this must be removed.");
-        underTest.validate(request);
+        assertThrows(BadRequestException.class, () -> underTest.validate(request),
+                "Repositories are present in your Cloudera Manager template, this must be removed.");
     }
 
 }

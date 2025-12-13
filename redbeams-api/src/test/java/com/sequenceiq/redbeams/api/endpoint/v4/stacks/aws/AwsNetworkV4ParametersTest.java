@@ -1,31 +1,31 @@
 package com.sequenceiq.redbeams.api.endpoint.v4.stacks.aws;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 
-public class AwsNetworkV4ParametersTest {
+class AwsNetworkV4ParametersTest {
 
     private AwsNetworkV4Parameters underTest;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         underTest = new AwsNetworkV4Parameters();
     }
 
     @Test
-    public void testGettersAndSetters() {
+    void testGettersAndSetters() {
         underTest.setSubnetId("subnet-1234");
         assertEquals("subnet-1234", underTest.getSubnetId());
     }
 
     @Test
-    public void testAsMap() {
+    void testAsMap() {
         underTest.setSubnetId("subnet-1234");
 
         Map<String, Object> map = underTest.asMap();
@@ -34,12 +34,12 @@ public class AwsNetworkV4ParametersTest {
     }
 
     @Test
-    public void testGetCloudPlatform() {
+    void testGetCloudPlatform() {
         assertEquals(CloudPlatform.AWS, underTest.getCloudPlatform());
     }
 
     @Test
-    public void testParse() {
+    void testParse() {
         Map<String, Object> parameters = Map.of("subnetId", "subnet-1234");
 
         underTest.parse(parameters);

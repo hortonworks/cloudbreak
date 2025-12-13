@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -22,7 +23,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.aws.common.CommonAwsClient;
@@ -167,7 +167,7 @@ public class AwsNativeResourceConnectorTest {
         underTest.upscale(ac, cloudStack, resources, adjustmentTypeWithThreshold);
 
         verifyNoInteractions(loadBalancerLaunchService);
-        InOrder inOrder = Mockito.inOrder(cloudResourceHelper);
+        InOrder inOrder = inOrder(cloudResourceHelper);
         ArgumentCaptor<List> listArgumentCaptor = ArgumentCaptor.forClass(List.class);
         inOrder.verify(cloudResourceHelper, times(1)).updateDeleteOnTerminationFlag(listArgumentCaptor.capture(), eq(false), eq(cloudContext));
         List<CloudResource> volumeResourcesDeleteOnTerminationFlagSetToFalse = listArgumentCaptor.getValue();

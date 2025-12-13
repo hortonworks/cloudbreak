@@ -1,8 +1,8 @@
 package com.sequenceiq.it.cloudbreak.testcase.mock;
 
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.expectedMessage;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import jakarta.inject.Inject;
 import jakarta.ws.rs.BadRequestException;
@@ -368,7 +368,7 @@ public class ClusterTemplateTest extends AbstractMockTest {
             assertNotNull(entity.getResponses());
             long defaultCount = entity.getResponses().stream().filter(template -> ResourceStatus.DEFAULT.equals(template.getStatus())).count();
             long expectedCount = 775;
-            assertEquals("Should have " + expectedCount + " of default cluster templates.", expectedCount, defaultCount);
+            assertEquals(expectedCount, defaultCount, "Should have " + expectedCount + " of default cluster templates.");
         } catch (Exception e) {
             throw new TestFailException(String.format("Failed to validate default count of cluster templates: %s", e.getMessage()), e);
         }

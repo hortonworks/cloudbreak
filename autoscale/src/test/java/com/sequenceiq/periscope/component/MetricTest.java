@@ -3,14 +3,15 @@ package com.sequenceiq.periscope.component;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
 import static com.sequenceiq.periscope.component.MetricTest.PERISCOPE_NODE_ID;
 import static com.sequenceiq.periscope.component.MetricTest.THREADPOOL_MAX_SIZE;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsEmptyCollection.empty;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
@@ -26,12 +27,12 @@ import java.util.stream.Collectors;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManagerFactory;
 
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InOrder;
-import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
@@ -52,7 +53,6 @@ import org.springframework.context.annotation.FilterType;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.data.jpa.repository.JpaContext;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -98,9 +98,9 @@ import com.sequenceiq.periscope.service.ha.LeaderElectionService;
 import com.sequenceiq.periscope.service.security.CloudbreakAuthorizationService;
 import com.zaxxer.hikari.HikariDataSource;
 
-@Ignore
+@Disabled
 @SpringBootTest(classes = MetricTest.TestConfig.class, webEnvironment = WebEnvironment.RANDOM_PORT)
-@RunWith(SpringRunner.class)
+@ExtendWith(MockitoExtension.class)
 @TestPropertySource(properties = {
         "periscope.client.id=periscope",
         "periscope.client.secret=CLientSecret",
@@ -116,7 +116,7 @@ import com.zaxxer.hikari.HikariDataSource;
         "periscope.threadpool.max.size=" + THREADPOOL_MAX_SIZE,
         "periscope.threadpool.queue.size=10"
 })
-public class MetricTest {
+class MetricTest {
 
     static final String PERISCOPE_NODE_ID = "1";
 
@@ -221,7 +221,7 @@ public class MetricTest {
     private ExecutorService executorService;
 
     @Test
-    public void testCounterMetricsPresent() {
+    void testCounterMetricsPresent() {
         MultiValueMap<String, String> metrics = responseToMap(readMetricsEndpoint());
 
         List<String> missingMetrics = counterMetrics.stream().filter(x -> !metrics.containsKey(toReportedMetricName(x, true))).collect(Collectors.toList());
@@ -229,7 +229,7 @@ public class MetricTest {
     }
 
     @Test
-    public void testGaugeMetricsPresent() {
+    void testGaugeMetricsPresent() {
         MultiValueMap<String, String> metrics = responseToMap(readMetricsEndpoint());
 
         List<String> missingMetrics = expectedGaugeMetrics.stream()
@@ -239,7 +239,7 @@ public class MetricTest {
     }
 
     @Test
-    public void testMetricsWhenSuspendActiveCluster() {
+    void testMetricsWhenSuspendActiveCluster() {
         metricService.gauge(MetricType.CLUSTER_STATE_ACTIVE, 1);
         metricService.gauge(MetricType.CLUSTER_STATE_SUSPENDED, 0);
         when(clusterRepository.findByStackId(STACK_ID)).thenReturn(getACluster(ClusterState.RUNNING));
@@ -256,14 +256,14 @@ public class MetricTest {
         MultiValueMap<String, String> metrics = responseToMap(readMetricsEndpoint());
         assertEquals(0.0, Double.parseDouble(metrics.get(toReportedMetricName(PERISCOPE_METRICS_CLUSTER_STATE_ACTIVE, false)).get(0)), DELTA);
         assertEquals(1.0, Double.parseDouble(metrics.get(toReportedMetricName(PERISCOPE_METRICS_CLUSTER_STATE_SUSPENDED, false)).get(0)), DELTA);
-        InOrder inOrder = Mockito.inOrder(clusterRepository);
+        InOrder inOrder = inOrder(clusterRepository);
         inOrder.verify(clusterRepository).save(argThat(x -> x.getId() == 1L && !x.isRunning()));
         inOrder.verify(clusterRepository).countByStateAndAutoscalingEnabledAndPeriscopeNodeId(eq(ClusterState.RUNNING), eq(true), anyString());
         inOrder.verify(clusterRepository).countByStateAndAutoscalingEnabledAndPeriscopeNodeId(eq(ClusterState.SUSPENDED), eq(true), anyString());
     }
 
     @Test
-    public void testMetricsWhenRunSuspendedCluster() {
+    void testMetricsWhenRunSuspendedCluster() {
         metricService.gauge(MetricType.CLUSTER_STATE_SUSPENDED, 1);
         when(clusterRepository.findByStackId(STACK_ID)).thenReturn(getACluster(ClusterState.SUSPENDED));
         when(clusterRepository.findById(CLUSTER_ID)).thenReturn(Optional.of(getACluster(ClusterState.SUSPENDED)));
@@ -279,14 +279,14 @@ public class MetricTest {
         MultiValueMap<String, String> metrics = responseToMap(readMetricsEndpoint());
         assertEquals(1.0, Double.parseDouble(metrics.get(toReportedMetricName(PERISCOPE_METRICS_CLUSTER_STATE_ACTIVE, false)).get(0)), DELTA);
         assertEquals(0.0, Double.parseDouble(metrics.get(toReportedMetricName(PERISCOPE_METRICS_CLUSTER_STATE_SUSPENDED, false)).get(0)), DELTA);
-        InOrder inOrder = Mockito.inOrder(clusterRepository);
+        InOrder inOrder = inOrder(clusterRepository);
         inOrder.verify(clusterRepository).save(argThat(x -> x.getId() == CLUSTER_ID && x.isRunning()));
         inOrder.verify(clusterRepository).countByStateAndAutoscalingEnabledAndPeriscopeNodeId(eq(ClusterState.RUNNING), eq(true), anyString());
         inOrder.verify(clusterRepository).countByStateAndAutoscalingEnabledAndPeriscopeNodeId(eq(ClusterState.SUSPENDED), eq(true), anyString());
     }
 
     @Test
-    public void testMetricsWhenAutofailSuspendsCluster() {
+    void testMetricsWhenAutofailSuspendsCluster() {
         metricService.gauge(MetricType.CLUSTER_STATE_ACTIVE, 2);
         when(clusterRepository.findById(CLUSTER_ID)).thenReturn(Optional.of(getACluster(ClusterState.RUNNING)));
         when(clusterRepository.save(any())).thenAnswer(this::saveCluster);
@@ -303,7 +303,7 @@ public class MetricTest {
         MultiValueMap<String, String> metrics = responseToMap(readMetricsEndpoint());
         assertEquals(0.0, Double.parseDouble(metrics.get(toReportedMetricName(PERISCOPE_METRICS_CLUSTER_STATE_ACTIVE, false)).get(0)), DELTA);
         assertEquals(1.0, Double.parseDouble(metrics.get(toReportedMetricName(PERISCOPE_METRICS_CLUSTER_STATE_SUSPENDED, false)).get(0)), DELTA);
-        InOrder inOrder = Mockito.inOrder(clusterRepository);
+        InOrder inOrder = inOrder(clusterRepository);
         inOrder.verify(clusterRepository).save(argThat(x -> x.getId() == CLUSTER_ID && !x.isRunning()));
         inOrder.verify(clusterRepository).countByStateAndAutoscalingEnabledAndPeriscopeNodeId(eq(ClusterState.RUNNING), eq(true), anyString());
         inOrder.verify(clusterRepository).countByStateAndAutoscalingEnabledAndPeriscopeNodeId(eq(ClusterState.SUSPENDED), eq(true), anyString());
@@ -316,7 +316,7 @@ public class MetricTest {
     }
 
     @Test
-    public void testDeleteActiveCluster() {
+    void testDeleteActiveCluster() {
         metricService.gauge(MetricType.CLUSTER_STATE_ACTIVE, 1);
         when(clusterRepository.findByStackId(STACK_ID)).thenReturn(getACluster(ClusterState.RUNNING));
         when(clusterRepository.findById(CLUSTER_ID)).thenReturn(Optional.of(getACluster(ClusterState.RUNNING)));
@@ -332,14 +332,14 @@ public class MetricTest {
         MultiValueMap<String, String> metrics = responseToMap(readMetricsEndpoint());
         assertEquals(0.0, Double.parseDouble(metrics.get(toReportedMetricName(PERISCOPE_METRICS_CLUSTER_STATE_ACTIVE, false)).get(0)), DELTA);
         assertEquals(0.0, Double.parseDouble(metrics.get(toReportedMetricName(PERISCOPE_METRICS_CLUSTER_STATE_SUSPENDED, false)).get(0)), DELTA);
-        InOrder inOrder = Mockito.inOrder(clusterRepository);
+        InOrder inOrder = inOrder(clusterRepository);
         inOrder.verify(clusterRepository).delete(argThat(x -> x.getId() == CLUSTER_ID && x.isRunning()));
         inOrder.verify(clusterRepository).countByStateAndAutoscalingEnabledAndPeriscopeNodeId(eq(ClusterState.RUNNING), eq(true), anyString());
         inOrder.verify(clusterRepository).countByStateAndAutoscalingEnabledAndPeriscopeNodeId(eq(ClusterState.SUSPENDED), eq(true), anyString());
     }
 
     @Test
-    public void testLeaderElection() {
+    void testLeaderElection() {
         metricService.gauge(MetricType.LEADER, 0);
         PeriscopeNode periscopeNode = new PeriscopeNode();
         when(periscopeNodeRepository.findById(periscopeNodeConfig.getId())).thenReturn(Optional.of(periscopeNode));
@@ -351,7 +351,7 @@ public class MetricTest {
     }
 
     @Test
-    public void testThreadpoolMetricsWhenTaskIsSubmitted() {
+    void testThreadpoolMetricsWhenTaskIsSubmitted() {
         BlockingTaskManager blockingTaskManager = new BlockingTaskManager();
         executorService.submit(() -> {
         });

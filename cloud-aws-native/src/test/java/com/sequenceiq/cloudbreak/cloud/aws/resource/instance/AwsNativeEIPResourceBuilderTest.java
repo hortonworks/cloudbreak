@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.aws.resource.instance;
 
 import static java.util.Collections.emptyMap;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -12,7 +13,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -111,9 +111,9 @@ public class AwsNativeEIPResourceBuilderTest {
 
         List<CloudResource> actual = underTest.create(awsContext, cloudInstance, privateId, ac, group, image);
 
-        Assertions.assertEquals(1L, actual.size());
-        Assertions.assertEquals(resName, actual.get(0).getName());
-        Assertions.assertEquals(String.valueOf(privateId), actual.get(0).getReference());
+        assertEquals(1L, actual.size());
+        assertEquals(resName, actual.get(0).getName());
+        assertEquals(String.valueOf(privateId), actual.get(0).getReference());
     }
 
     @Test
@@ -130,7 +130,7 @@ public class AwsNativeEIPResourceBuilderTest {
 
         List<CloudResource> actual = underTest.create(awsContext, cloudInstance, privateId, ac, group, image);
 
-        Assertions.assertEquals(0L, actual.size());
+        assertEquals(0L, actual.size());
         verify(awsNetworkService).isMapPublicOnLaunch(List.of(subnetId), amazonEc2Client);
         verify(resourceNameService, never()).eip(name, groupName, privateId);
     }
@@ -145,7 +145,7 @@ public class AwsNativeEIPResourceBuilderTest {
 
         List<CloudResource> actual = underTest.create(awsContext, cloudInstance, privateId, ac, group, image);
 
-        Assertions.assertEquals(0L, actual.size());
+        assertEquals(0L, actual.size());
         verify(awsNetworkService, never()).isMapPublicOnLaunch(List.of(subnetId), amazonEc2Client);
         verify(resourceNameService, never()).eip(name, groupName, privateId);
     }
@@ -153,7 +153,7 @@ public class AwsNativeEIPResourceBuilderTest {
     @Test
     public void testBuildWhenNoBuildableResource() throws Exception {
         List<CloudResource> actual = underTest.build(awsContext, cloudInstance, 0L, ac, group, Collections.emptyList(), cloudStack);
-        Assertions.assertEquals(0L, actual.size());
+        assertEquals(0L, actual.size());
     }
 
     @Test
@@ -184,10 +184,10 @@ public class AwsNativeEIPResourceBuilderTest {
 
         List<CloudResource> actual = underTest.build(awsContext, cloudInstance, 0L, ac, group, List.of(cloudResource), cloudStack);
 
-        Assertions.assertEquals(1L, actual.size());
+        assertEquals(1L, actual.size());
         EIpAttributes eIpAttributes = actual.get(0).getParameter(CloudResource.ATTRIBUTES, EIpAttributes.class);
-        Assertions.assertEquals("allocId", eIpAttributes.getAllocateId());
-        Assertions.assertEquals("assocId", eIpAttributes.getAssociationId());
+        assertEquals("allocId", eIpAttributes.getAllocateId());
+        assertEquals("assocId", eIpAttributes.getAssociationId());
         ArgumentCaptor<AllocateAddressRequest> allocateAddressRequestArgumentCaptor = ArgumentCaptor.forClass(AllocateAddressRequest.class);
         verify(amazonEc2Client).allocateAddress(allocateAddressRequestArgumentCaptor.capture());
         AllocateAddressRequest allocateAddressRequest = allocateAddressRequestArgumentCaptor.getValue();

@@ -4,7 +4,9 @@ import static com.sequenceiq.cloudbreak.core.flow2.generator.FlowOfflineStateGra
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -24,7 +26,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.stream.Collectors;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -560,7 +561,7 @@ class ClusterRepairFlowEventChainFactoryTest {
 
         underTest.addAwsNativeEventMigrationIfNeeded(flowTriggers, triggerEvent, groupName, stackDto);
 
-        Assertions.assertTrue(flowTriggers.isEmpty());
+        assertTrue(flowTriggers.isEmpty());
     }
 
     @Test
@@ -574,7 +575,7 @@ class ClusterRepairFlowEventChainFactoryTest {
 
         underTest.addAwsNativeEventMigrationIfNeeded(flowTriggers, triggerEvent, groupName, stackDto);
 
-        Assertions.assertTrue(flowTriggers.isEmpty());
+        assertTrue(flowTriggers.isEmpty());
     }
 
     @Test
@@ -588,7 +589,7 @@ class ClusterRepairFlowEventChainFactoryTest {
 
         underTest.addAwsNativeEventMigrationIfNeeded(flowTriggers, triggerEvent, groupName, stackDto);
 
-        Assertions.assertTrue(flowTriggers.isEmpty());
+        assertTrue(flowTriggers.isEmpty());
     }
 
     @Test
@@ -602,7 +603,7 @@ class ClusterRepairFlowEventChainFactoryTest {
 
         underTest.addAwsNativeEventMigrationIfNeeded(flowTriggers, triggerEvent, groupName, stackDto);
 
-        Assertions.assertTrue(flowTriggers.isEmpty());
+        assertTrue(flowTriggers.isEmpty());
     }
 
     @Test
@@ -616,7 +617,7 @@ class ClusterRepairFlowEventChainFactoryTest {
 
         underTest.addAwsNativeEventMigrationIfNeeded(flowTriggers, triggerEvent, groupName, stackDto);
 
-        Assertions.assertFalse(flowTriggers.isEmpty());
+        assertFalse(flowTriggers.isEmpty());
         AwsVariantMigrationTriggerEvent actual = (AwsVariantMigrationTriggerEvent) flowTriggers.peek();
         assertEquals(groupName, actual.getHostGroupName());
     }
@@ -633,7 +634,7 @@ class ClusterRepairFlowEventChainFactoryTest {
 
         underTest.addAwsNativeEventMigrationIfNeeded(flowTriggers, triggerEvent, groupName, stackDto);
 
-        Assertions.assertFalse(flowTriggers.isEmpty());
+        assertFalse(flowTriggers.isEmpty());
         AwsVariantMigrationTriggerEvent actual = (AwsVariantMigrationTriggerEvent) flowTriggers.peek();
         assertEquals(groupName, actual.getHostGroupName());
     }
@@ -652,7 +653,7 @@ class ClusterRepairFlowEventChainFactoryTest {
 
         underTest.addAwsNativeEventMigrationIfNeeded(flowTriggers, triggerEvent, groupName, stackDto);
 
-        Assertions.assertTrue(flowTriggers.isEmpty());
+        assertTrue(flowTriggers.isEmpty());
     }
 
     @Test
@@ -667,7 +668,7 @@ class ClusterRepairFlowEventChainFactoryTest {
 
         underTest.addAwsNativeEventMigrationIfNeeded(flowTriggers, triggerEvent, groupName, stackDto);
 
-        Assertions.assertTrue(flowTriggers.isEmpty());
+        assertTrue(flowTriggers.isEmpty());
     }
 
     @Test

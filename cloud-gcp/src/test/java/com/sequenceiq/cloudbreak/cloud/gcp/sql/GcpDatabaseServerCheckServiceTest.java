@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.sql;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -9,7 +10,6 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.util.List;
 
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -66,7 +66,7 @@ public class GcpDatabaseServerCheckServiceTest {
 
         ExternalDatabaseStatus check = underTest.check(authenticatedContext, databaseStack);
 
-        Assert.assertEquals(ExternalDatabaseStatus.DELETED, check);
+        assertEquals(ExternalDatabaseStatus.DELETED, check);
     }
 
     @Test
@@ -97,7 +97,7 @@ public class GcpDatabaseServerCheckServiceTest {
 
         ExternalDatabaseStatus check = underTest.check(authenticatedContext, databaseStack);
 
-        Assert.assertEquals(ExternalDatabaseStatus.DELETED, check);
+        assertEquals(ExternalDatabaseStatus.DELETED, check);
     }
 
     @Test
@@ -128,7 +128,7 @@ public class GcpDatabaseServerCheckServiceTest {
 
         ExternalDatabaseStatus check = underTest.check(authenticatedContext, databaseStack);
 
-        Assert.assertEquals(ExternalDatabaseStatus.DELETED, check);
+        assertEquals(ExternalDatabaseStatus.DELETED, check);
     }
 
     @Test
@@ -159,7 +159,7 @@ public class GcpDatabaseServerCheckServiceTest {
 
         ExternalDatabaseStatus check = underTest.check(authenticatedContext, databaseStack);
 
-        Assert.assertEquals(ExternalDatabaseStatus.UPDATE_IN_PROGRESS, check);
+        assertEquals(ExternalDatabaseStatus.UPDATE_IN_PROGRESS, check);
     }
 
     @Test
@@ -190,7 +190,7 @@ public class GcpDatabaseServerCheckServiceTest {
 
         ExternalDatabaseStatus check = underTest.check(authenticatedContext, databaseStack);
 
-        Assert.assertEquals(ExternalDatabaseStatus.STOPPED, check);
+        assertEquals(ExternalDatabaseStatus.STOPPED, check);
     }
 
     @Test
@@ -224,7 +224,7 @@ public class GcpDatabaseServerCheckServiceTest {
 
         ExternalDatabaseStatus check = underTest.check(authenticatedContext, databaseStack);
 
-        Assert.assertEquals(ExternalDatabaseStatus.STARTED, check);
+        assertEquals(ExternalDatabaseStatus.STARTED, check);
     }
 
     @Test
@@ -258,7 +258,7 @@ public class GcpDatabaseServerCheckServiceTest {
 
         ExternalDatabaseStatus check = underTest.check(authenticatedContext, databaseStack);
 
-        Assert.assertEquals(ExternalDatabaseStatus.STOPPED, check);
+        assertEquals(ExternalDatabaseStatus.STOPPED, check);
     }
 
     @Test
@@ -278,7 +278,7 @@ public class GcpDatabaseServerCheckServiceTest {
         GcpResourceException gcpResourceException = assertThrows(GcpResourceException.class,
                 () -> underTest.check(authenticatedContext, databaseStack));
 
-        Assert.assertEquals("error", gcpResourceException.getMessage());
+        assertEquals("error", gcpResourceException.getMessage());
     }
 
     @Test
@@ -307,6 +307,6 @@ public class GcpDatabaseServerCheckServiceTest {
         GcpResourceException gcpResourceException = assertThrows(GcpResourceException.class,
                 () -> underTest.check(authenticatedContext, databaseStack));
 
-        Assert.assertEquals("error", gcpResourceException.getMessage());
+        assertEquals("error", gcpResourceException.getMessage());
     }
 }

@@ -1,7 +1,8 @@
 package com.sequenceiq.flow.core.config;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -9,57 +10,42 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.mockito.InjectMocks;
-import org.mockito.MockitoAnnotations;
+import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.flow.core.helloworld.config.HelloWorldEvent;
 import com.sequenceiq.flow.core.helloworld.config.HelloWorldFlowConfig;
 
-public class Flow2ConfigTest {
-    @Rule
-    public final ExpectedException thrown = ExpectedException.none();
+class Flow2ConfigTest {
 
-    @InjectMocks
-    private Flow2Config underTest;
-
-    @Before
-    public void setUp() {
-        underTest = new Flow2Config();
-        MockitoAnnotations.initMocks(this);
-    }
+    private Flow2Config underTest = new Flow2Config();
 
     @Test
-    public void testFlowConfigurationMapInit() {
+    void testFlowConfigurationMapInit() {
         List<FlowConfiguration<?>> flowConfigs = new ArrayList<>();
         flowConfigs.add(new HelloWorldFlowConfig());
         flowConfigs.add(new TestFlowConfig());
 
         Map<String, FlowConfiguration<?>> flowConfigMap = underTest.flowConfigurationMap(flowConfigs);
-        assertEquals("Not all flow type appeared in map!", countEvents(flowConfigs), flowConfigMap.size());
+        assertEquals(countEvents(flowConfigs), flowConfigMap.size(), "Not all flow type appeared in map!");
     }
 
     @Test
-    public void testFlowConfigurationMapInitIfAlreadyExists() {
+    void testFlowConfigurationMapInitIfAlreadyExists() {
         List<FlowConfiguration<?>> flowConfigs = new ArrayList<>();
         HelloWorldFlowConfig helloWorldFlowConfig = new HelloWorldFlowConfig();
         flowConfigs.add(helloWorldFlowConfig);
         flowConfigs.add(helloWorldFlowConfig);
-        thrown.expect(UnsupportedOperationException.class);
-        thrown.expectMessage("Event already registered: " + HelloWorldEvent.HELLOWORLD_TRIGGER_EVENT.event());
-        underTest.flowConfigurationMap(flowConfigs);
+        assertThrows(UnsupportedOperationException.class, () -> underTest.flowConfigurationMap(flowConfigs),
+                "Event already registered: " + HelloWorldEvent.HELLOWORLD_TRIGGER_EVENT.event());
     }
 
     @Test
-    public void testEmptyretRyableEvents() {
+    void testEmptyretRyableEvents() {
         assertTrue(underTest.retryableEvents(Collections.emptyList()).isEmpty());
     }
 
     @Test
-    public void testRetryableEvents() {
+    void testRetryableEvents() {
         HelloWorldFlowConfig helloWorldFlowConfig = new HelloWorldFlowConfig();
         TestFlowConfig testFlowConfig = new TestFlowConfig();
 

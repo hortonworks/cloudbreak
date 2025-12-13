@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.azure.resource;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
@@ -9,7 +11,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -56,7 +57,7 @@ public class AzureRegionProviderTest {
 
         assertRegionNames(actual, azureRegions);
         assertCoordinates(actual);
-        Assertions.assertEquals("North Europe", actual.getDefaultRegion());
+        assertEquals("North Europe", actual.getDefaultRegion());
     }
 
     @Test
@@ -67,7 +68,7 @@ public class AzureRegionProviderTest {
         CloudRegions actual = underTest.regions(null, azureRegions, List.of());
 
         assertRegionNames(actual, supportedAzureRegions);
-        Assertions.assertEquals("North Europe", actual.getDefaultRegion());
+        assertEquals("North Europe", actual.getDefaultRegion());
     }
 
     @Test
@@ -79,7 +80,7 @@ public class AzureRegionProviderTest {
 
         Map<com.sequenceiq.cloudbreak.cloud.model.Region, AzureCoordinate> actualRegions = underTest.filterEnabledRegions();
 
-        Assertions.assertEquals(regions, actualRegions);
+        assertEquals(regions, actualRegions);
     }
 
     @Test
@@ -92,7 +93,7 @@ public class AzureRegionProviderTest {
         Map<com.sequenceiq.cloudbreak.cloud.model.Region, AzureCoordinate> actualRegions = underTest.filterEnabledRegions(
                 com.sequenceiq.cloudbreak.cloud.model.Region.region("westus"), com.sequenceiq.cloudbreak.cloud.model.Region.region("westus2"));
 
-        Assertions.assertEquals(regions, actualRegions);
+        assertEquals(regions, actualRegions);
     }
 
     @Test
@@ -107,7 +108,7 @@ public class AzureRegionProviderTest {
         Map<com.sequenceiq.cloudbreak.cloud.model.Region, AzureCoordinate> actualRegions = underTest.filterEnabledRegions(
                 com.sequenceiq.cloudbreak.cloud.model.Region.region("westus"));
 
-        Assertions.assertEquals(Map.of(com.sequenceiq.cloudbreak.cloud.model.Region.region("westus"), azureCoordinate1), actualRegions);
+        assertEquals(Map.of(com.sequenceiq.cloudbreak.cloud.model.Region.region("westus"), azureCoordinate1), actualRegions);
     }
 
     @Test
@@ -119,7 +120,7 @@ public class AzureRegionProviderTest {
 
         Map<com.sequenceiq.cloudbreak.cloud.model.Region, AzureCoordinate> actualRegions = underTest.filterEnabledRegions(null);
 
-        Assertions.assertEquals(regions, actualRegions);
+        assertEquals(regions, actualRegions);
     }
 
     @Test
@@ -132,7 +133,7 @@ public class AzureRegionProviderTest {
         Map<com.sequenceiq.cloudbreak.cloud.model.Region, AzureCoordinate> actualRegions =
                 underTest.filterEnabledRegions(null, com.sequenceiq.cloudbreak.cloud.model.Region.region(""));
 
-        Assertions.assertEquals(regions, actualRegions);
+        assertEquals(regions, actualRegions);
     }
 
     @Test
@@ -146,7 +147,7 @@ public class AzureRegionProviderTest {
         Map<com.sequenceiq.cloudbreak.cloud.model.Region, AzureCoordinate> actualRegions =
                 underTest.filterEnabledRegions(null, com.sequenceiq.cloudbreak.cloud.model.Region.region("westus"));
 
-        Assertions.assertEquals(Map.of(com.sequenceiq.cloudbreak.cloud.model.Region.region("westus"), azureCoordinate), actualRegions);
+        assertEquals(Map.of(com.sequenceiq.cloudbreak.cloud.model.Region.region("westus"), azureCoordinate), actualRegions);
     }
 
     private String getTestRegions() throws IOException {
@@ -162,7 +163,7 @@ public class AzureRegionProviderTest {
     }
 
     private void assertRegionNames(CloudRegions actual, Collection<Region> azureRegions) {
-        Assertions.assertTrue(azureRegions.stream()
+        assertTrue(azureRegions.stream()
                 .allMatch(region -> actual.getCloudRegions().keySet()
                         .stream().map(com.sequenceiq.cloudbreak.cloud.model.Region::getRegionName)
                         .collect(Collectors.toSet())
@@ -171,7 +172,7 @@ public class AzureRegionProviderTest {
 
     private void assertCoordinates(CloudRegions actual) throws IOException {
         RegionCoordinateSpecifications regionCoordinateSpecifications = getRegionsFromFile();
-        Assertions.assertTrue(actual.getCoordinates().values().stream()
+        assertTrue(actual.getCoordinates().values().stream()
                 .allMatch(coordinate -> regionCoordinateSpecifications.getItems().stream()
                         .anyMatch(region -> region.getLatitude().equals(coordinate.getLatitude().toString()) &&
                                 region.getLongitude().equals(coordinate.getLongitude().toString()))));

@@ -1,11 +1,11 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -45,7 +45,7 @@ class AwsSessionCredentialClientTest {
 
         StsClient actual = underTest.awsSecurityTokenServiceClient(awsCredentialView);
 
-        Assertions.assertNotNull(actual);
+        assertNotNull(actual);
         verify(underTest, times(0)).getEndpointConfiguration(defaultRegion);
     }
 
@@ -55,7 +55,7 @@ class AwsSessionCredentialClientTest {
 
         StsClient actual = underTest.awsSecurityTokenServiceClient(awsCredentialView);
 
-        Assertions.assertNotNull(actual);
+        assertNotNull(actual);
         verify(underTest, times(1)).getEndpointConfiguration(defaultRegion);
     }
 
@@ -65,7 +65,7 @@ class AwsSessionCredentialClientTest {
 
         StsClient actual = underTest.awsSecurityTokenServiceClient(awsCredentialView);
 
-        Assertions.assertNotNull(actual);
+        assertNotNull(actual);
         verify(underTest, times(1)).getEndpointConfiguration(defaultRegion);
     }
 
@@ -75,7 +75,7 @@ class AwsSessionCredentialClientTest {
 
         StsClient actual = underTest.awsSecurityTokenServiceClient(awsCredentialView);
 
-        Assertions.assertNotNull(actual);
+        assertNotNull(actual);
         verify(underTest, times(1)).getEndpointConfiguration(defaultRegion);
     }
 

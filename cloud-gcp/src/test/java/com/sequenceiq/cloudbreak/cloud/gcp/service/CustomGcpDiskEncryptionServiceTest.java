@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.service;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -9,7 +10,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -42,7 +42,7 @@ public class CustomGcpDiskEncryptionServiceTest {
 
         underTest.addEncryptionKeyToDisk(instanceTemplate(EncryptionType.CUSTOM), disk);
 
-        Assert.assertTrue(disk.getDiskEncryptionKey().equals(customerEncryptionKey));
+        assertTrue(disk.getDiskEncryptionKey().equals(customerEncryptionKey));
         verify(customGcpDiskEncryptionCreatorService, times(1)).createCustomerEncryptionKey(any(InstanceTemplate.class));
     }
 
@@ -64,7 +64,7 @@ public class CustomGcpDiskEncryptionServiceTest {
 
         underTest.addEncryptionKeyToDisk(instanceTemplate(EncryptionType.CUSTOM), disk);
 
-        Assert.assertTrue(disk.getDiskEncryptionKey().equals(customerEncryptionKey));
+        assertTrue(disk.getDiskEncryptionKey().equals(customerEncryptionKey));
         verify(customGcpDiskEncryptionCreatorService, times(1)).createCustomerEncryptionKey(any(InstanceTemplate.class));
     }
 

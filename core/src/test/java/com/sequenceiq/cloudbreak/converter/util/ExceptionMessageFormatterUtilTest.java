@@ -1,15 +1,16 @@
 package com.sequenceiq.cloudbreak.converter.util;
 
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import jakarta.ws.rs.ForbiddenException;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class ExceptionMessageFormatterUtilTest {
+class ExceptionMessageFormatterUtilTest {
 
     @Test
-    public void formatAccessDeniedMessage() {
+    void formatAccessDeniedMessage() {
         Long id = 1L;
         String resourceName = "resourceName";
         String expected = "Access to resourceName '1' is denied or resourceName doesn't exist.";
@@ -17,7 +18,7 @@ public class ExceptionMessageFormatterUtilTest {
         try {
             ExceptionMessageFormatterUtil.formatAccessDeniedMessage(this::throwAccessDenied, resourceName, id);
         } catch (ForbiddenException e) {
-            Assert.assertEquals(expected, e.getMessage());
+            assertEquals(expected, e.getMessage());
         }
     }
 

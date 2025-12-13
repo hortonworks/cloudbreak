@@ -14,17 +14,17 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status.Family;
 import jakarta.ws.rs.core.Response.StatusType;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyWebApplicationException;
 import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponses;
 import com.sequenceiq.cloudbreak.util.JaxRSUtil;
 
-@RunWith(MockitoJUnitRunner.class)
-public class JaxRSUtilTest {
+@ExtendWith(MockitoExtension.class)
+class JaxRSUtilTest {
 
     @Mock
     private Response response;
@@ -33,7 +33,7 @@ public class JaxRSUtilTest {
     private StatusType statusType;
 
     @Test
-    public void testNoMediaType() {
+    void testNoMediaType() {
         when(response.getMediaType()).thenReturn(null);
         when(response.getStatusInfo()).thenReturn(statusType);
         when(statusType.getFamily()).thenReturn(Family.SUCCESSFUL);
@@ -45,7 +45,7 @@ public class JaxRSUtilTest {
     }
 
     @Test
-    public void testIncompatibleMediaType() {
+    void testIncompatibleMediaType() {
         when(response.getMediaType()).thenReturn(MediaType.TEXT_HTML_TYPE);
         when(response.getStatusInfo()).thenReturn(statusType);
         when(statusType.getFamily()).thenReturn(Family.SUCCESSFUL);
@@ -57,7 +57,7 @@ public class JaxRSUtilTest {
     }
 
     @Test
-    public void testReadEntity() {
+    void testReadEntity() {
         when(response.getMediaType()).thenReturn(MediaType.APPLICATION_JSON_TYPE);
         when(response.getStatusInfo()).thenReturn(statusType);
         when(statusType.getFamily()).thenReturn(Family.SUCCESSFUL);
@@ -68,7 +68,7 @@ public class JaxRSUtilTest {
     }
 
     @Test
-    public void testUnsuccessfulResponse() {
+    void testUnsuccessfulResponse() {
         when(response.getStatusInfo()).thenReturn(statusType);
         when(statusType.getFamily()).thenReturn(Family.SERVER_ERROR);
         when(statusType.getStatusCode()).thenReturn(500);
@@ -79,7 +79,7 @@ public class JaxRSUtilTest {
     }
 
     @Test
-    public void testClusterProxyError() {
+    void testClusterProxyError() {
         when(response.getStatusInfo()).thenReturn(statusType);
         when(statusType.getFamily()).thenReturn(Family.SERVER_ERROR);
         when(statusType.getStatusCode()).thenReturn(599);

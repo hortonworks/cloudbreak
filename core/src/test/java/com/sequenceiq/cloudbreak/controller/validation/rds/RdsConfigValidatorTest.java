@@ -10,11 +10,11 @@ import static org.mockito.Mockito.when;
 import java.util.Arrays;
 import java.util.List;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
@@ -24,8 +24,8 @@ import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
-@RunWith(MockitoJUnitRunner.class)
-public class RdsConfigValidatorTest {
+@ExtendWith(MockitoExtension.class)
+class RdsConfigValidatorTest {
 
     @InjectMocks
     private RdsConfigValidator subject = new RdsConfigValidator();
@@ -37,21 +37,21 @@ public class RdsConfigValidatorTest {
     private Workspace workspace;
 
     @Test
-    public void acceptsNoDatabases() {
+    void acceptsNoDatabases() {
         ClusterV4Request request = requestWithDatabases();
 
         subject.validateRdsConfigs(request, null, workspace);
     }
 
     @Test
-    public void acceptsMultipleDatabasesOfDifferentType() {
+    void acceptsMultipleDatabasesOfDifferentType() {
         ClusterV4Request request = requestWithDatabases(DatabaseType.HIVE, DatabaseType.HUE, DatabaseType.RANGER);
 
         subject.validateRdsConfigs(request, null, workspace);
     }
 
     @Test
-    public void rejectsMultipleDatabasesOfSameType() {
+    void rejectsMultipleDatabasesOfSameType() {
         ClusterV4Request request = requestWithDatabases(DatabaseType.HIVE, DatabaseType.HUE, DatabaseType.HIVE, DatabaseType.RANGER, DatabaseType.RANGER);
 
         BadRequestException exception = assertThrows(BadRequestException.class, () -> subject.validateRdsConfigs(request, null, workspace));

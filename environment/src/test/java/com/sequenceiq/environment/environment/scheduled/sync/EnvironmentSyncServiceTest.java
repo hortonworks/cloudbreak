@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.environment.scheduled.sync;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -8,7 +9,6 @@ import java.util.Arrays;
 import java.util.Optional;
 import java.util.Set;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -49,7 +49,7 @@ public class EnvironmentSyncServiceTest {
 
         EnvironmentStatus actual = underTest.getStatusByFreeipa(environment);
 
-        Assertions.assertEquals(expected, actual);
+        assertEquals(expected, actual);
     }
 
     @Test
@@ -61,7 +61,7 @@ public class EnvironmentSyncServiceTest {
         when(freeIpaService.internalDescribe(environment.getResourceCrn(), "cloudera")).thenReturn(Optional.empty());
 
         EnvironmentStatus actual = underTest.getStatusByFreeipa(environment);
-        Assertions.assertEquals(EnvironmentStatus.FREEIPA_DELETED_ON_PROVIDER_SIDE, actual);
+        assertEquals(EnvironmentStatus.FREEIPA_DELETED_ON_PROVIDER_SIDE, actual);
     }
 
     @Test
@@ -73,7 +73,7 @@ public class EnvironmentSyncServiceTest {
         when(freeIpaService.internalDescribe(environment.getResourceCrn(), "cloudera")).thenReturn(Optional.empty());
 
         EnvironmentStatus actual = underTest.getStatusByFreeipa(environment);
-        Assertions.assertEquals(EnvironmentStatus.AVAILABLE, actual);
+        assertEquals(EnvironmentStatus.AVAILABLE, actual);
     }
 
     @Test

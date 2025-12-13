@@ -19,7 +19,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
@@ -65,11 +64,11 @@ class NetworkCreationRequestFactoryTest {
 
     private static final Set<NetworkSubnetRequest> SUBNET_CIDRS = Collections.singleton(new NetworkSubnetRequest("10.10.1.1/24", PUBLIC));
 
-    private final DefaultSubnetCidrProvider defaultSubnetCidrProvider = Mockito.mock(DefaultSubnetCidrProvider.class);
+    private final DefaultSubnetCidrProvider defaultSubnetCidrProvider = mock(DefaultSubnetCidrProvider.class);
 
-    private final CredentialToCloudCredentialConverter credentialToCloudCredentialConverter = Mockito.mock(CredentialToCloudCredentialConverter.class);
+    private final CredentialToCloudCredentialConverter credentialToCloudCredentialConverter = mock(CredentialToCloudCredentialConverter.class);
 
-    private final AzureExistingPrivateDnsZonesService azureExistingPrivateDnsZonesService = Mockito.mock(AzureExistingPrivateDnsZonesService.class);
+    private final AzureExistingPrivateDnsZonesService azureExistingPrivateDnsZonesService = mock(AzureExistingPrivateDnsZonesService.class);
 
     private final EnvironmentTagProvider environmentTagProvider = mock(EnvironmentTagProvider.class);
 

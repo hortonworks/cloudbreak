@@ -15,7 +15,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.azure.resource.AzureRDSAutoMigrationException;
@@ -47,7 +46,7 @@ class DatabaseAutoMigrationUpdaterTest {
 
         underTest.updateDatabaseIfAutoMigrationHappened(dbStack, null);
 
-        verify(dbStackService, Mockito.never()).save(dbStack);
+        verify(dbStackService, never()).save(dbStack);
     }
 
     @Test
@@ -57,7 +56,7 @@ class DatabaseAutoMigrationUpdaterTest {
 
         underTest.updateDatabaseIfAutoMigrationHappened(dbStack, exception);
 
-        verify(dbStackService, Mockito.never()).save(dbStack);
+        verify(dbStackService, never()).save(dbStack);
     }
 
     @Test

@@ -1,12 +1,13 @@
 package com.sequenceiq.cloudbreak.recipe.moduletest;
 
+import static org.mockito.Mockito.mock;
+
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
 import jakarta.inject.Inject;
 
-import org.mockito.Mockito;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -64,22 +65,22 @@ public class CentralRecipeContext {
 
         @Bean
         public SecretEngine secretEngine() {
-            return Mockito.mock(SecretEngine.class);
+            return mock(SecretEngine.class);
         }
 
         @Bean
         public SecretService secretService() {
-            return Mockito.mock(SecretService.class);
+            return mock(SecretService.class);
         }
 
         @Bean
         public MetricService metricService() {
-            return Mockito.mock(MetricService.class);
+            return mock(MetricService.class);
         }
 
         @Bean
         public VaultTemplate vaultTemplate() {
-            return Mockito.mock(VaultTemplate.class);
+            return mock(VaultTemplate.class);
         }
 
         @Bean

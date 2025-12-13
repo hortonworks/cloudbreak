@@ -24,6 +24,7 @@ dependencies {
 
     implementation ("io.grpc:grpc-all:$grpcVersion") {
         exclude group: 'org.mockito'
+        exclude group: 'junit', module: 'junit'
     }
     testImplementation group: 'org.assertj',                         name: 'assertj-core',                   version: assertjVersion
     testImplementation group: 'org.mockito',                         name: 'mockito-core',                   version: mockitoVersion

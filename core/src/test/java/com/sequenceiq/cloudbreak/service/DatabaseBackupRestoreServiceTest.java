@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -7,16 +8,11 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
-import java.util.Optional;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.rules.ExpectedException;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
@@ -36,7 +32,7 @@ import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.core.FlowLogService;
 
 @ExtendWith(MockitoExtension.class)
-public class DatabaseBackupRestoreServiceTest {
+class DatabaseBackupRestoreServiceTest {
 
     private static final String CLUSTER_NAME = "cluster-name";
 
@@ -51,9 +47,6 @@ public class DatabaseBackupRestoreServiceTest {
         "there is an active flow running: ";
 
     private static final String MISSING_PARAM_EXCEPTION_MESSAGE = "Missing param";
-
-    @Rule
-    public final ExpectedException expectedException = ExpectedException.none();
 
     private final NameOrCrn ofName = NameOrCrn.ofName(CLUSTER_NAME);
 
@@ -80,18 +73,11 @@ public class DatabaseBackupRestoreServiceTest {
     @InjectMocks
     private DatabaseBackupRestoreService service;
 
-    @Before
-    public void setUp() {
-        MockitoAnnotations.initMocks(this);
-    }
-
     @Test
-    public void testSuccessfulBackup() {
+    void testSuccessfulBackup() {
         Stack stack = getStack();
 
-        when(stackService.findStackByNameAndWorkspaceId(any(), anyLong())).thenReturn(Optional.of(stack));
         when(stackService.getByNameOrCrnInWorkspace(any(), anyLong())).thenReturn(stack);
-        when(flowLogService.findAllByResourceIdAndFinalizedIsFalseOrderByCreatedDesc(1L)).thenReturn(Collections.EMPTY_LIST);
         when(flowManager.triggerDatalakeDatabaseBackup(anyLong(), any(), any(), anyBoolean(), any(), eq(0), anyBoolean()))
             .thenReturn(FlowIdentifier.notTriggered());
 
@@ -99,22 +85,19 @@ public class DatabaseBackupRestoreServiceTest {
     }
 
     @Test
-    public void testSuccessfulRestore() {
+    void testSuccessfulRestore() {
         Stack stack = getStack();
 
-        when(stackService.findStackByNameAndWorkspaceId(any(), anyLong())).thenReturn(Optional.of(stack));
         when(stackService.getByNameOrCrnInWorkspace(any(), anyLong())).thenReturn(stack);
-        when(flowLogService.findAllByResourceIdAndFinalizedIsFalseOrderByCreatedDesc(1L)).thenReturn(Collections.EMPTY_LIST);
         when(flowManager.triggerDatalakeDatabaseRestore(anyLong(), any(), any(), eq(0), eq(false))).thenReturn(FlowIdentifier.notTriggered());
 
         service.restoreDatabase(WORKSPACE_ID, ofName, null, null, 0, false);
     }
 
     @Test
-    public void testValidationSuccess() {
+    void testValidationSuccess() {
         Stack stack = getStack();
 
-        when(stackService.findStackByNameAndWorkspaceId(any(), anyLong())).thenReturn(Optional.of(stack));
         when(stackService.getByNameOrCrnInWorkspace(any(), anyLong())).thenReturn(stack);
         when(requestValidator.validate(any(), any(), any())).thenReturn(getValidationResult(null));
 
@@ -122,46 +105,35 @@ public class DatabaseBackupRestoreServiceTest {
     }
 
     @Test
-    public void testValidationFailure() {
+    void testValidationFailure() {
         Stack stack = getStack();
 
-        when(stackService.findStackByNameAndWorkspaceId(any(), anyLong())).thenReturn(Optional.of(stack));
         when(stackService.getByNameOrCrnInWorkspace(any(), anyLong())).thenReturn(stack);
         when(requestValidator.validate(any(), any(), any())).thenReturn(getValidationResult(MISSING_PARAM_EXCEPTION_MESSAGE));
 
-        expectedException.expect(BadRequestException.class);
-        expectedException.expectMessage(MISSING_PARAM_EXCEPTION_MESSAGE);
-
-        service.validate(WORKSPACE_ID, ofName, null, null);
+        assertThrows(BadRequestException.class, () -> service.validate(WORKSPACE_ID, ofName, null, null), MISSING_PARAM_EXCEPTION_MESSAGE);
     }
 
     @Test
-    public void testSuccessfulDatabaseBackupWithCustomizedMaxDurationInMin() {
+    void testSuccessfulDatabaseBackupWithCustomizedMaxDurationInMin() {
         int databaseMaxDurationInMin = 20;
         Stack stack = getStack();
 
-        when(stackService.findStackByNameAndWorkspaceId(any(), anyLong())).thenReturn(Optional.of(stack));
         when(stackService.getByNameOrCrnInWorkspace(any(), anyLong())).thenReturn(stack);
-        when(flowLogService.findAllByResourceIdAndFinalizedIsFalseOrderByCreatedDesc(1L)).thenReturn(Collections.EMPTY_LIST);
-        when(flowManager.triggerDatalakeDatabaseBackup(anyLong(), any(), any(), anyBoolean(), any(), eq(0), anyBoolean()))
+        when(flowManager.triggerDatalakeDatabaseBackup(anyLong(), any(), any(), anyBoolean(), any(), eq(databaseMaxDurationInMin), anyBoolean()))
             .thenReturn(FlowIdentifier.notTriggered());
 
         service.backupDatabase(WORKSPACE_ID, ofName, null, null, true, Collections.emptyList(), databaseMaxDurationInMin, false);
-
     }
 
     @Test
-    public void testSuccessfulDatabaseRestoreWithCustomizedMaxDurationInMin() {
+    void testSuccessfulDatabaseRestoreWithCustomizedMaxDurationInMin() {
         int databaseMaxDurationInMin = 20;
         Stack stack = getStack();
 
-        when(stackService.findStackByNameAndWorkspaceId(any(), anyLong())).thenReturn(Optional.of(stack));
         when(stackService.getByNameOrCrnInWorkspace(any(), anyLong())).thenReturn(stack);
-        when(flowLogService.findAllByResourceIdAndFinalizedIsFalseOrderByCreatedDesc(1L)).thenReturn(Collections.EMPTY_LIST);
-        when(flowManager.triggerDatalakeDatabaseRestore(anyLong(), any(), any(), eq(0), eq(false))).thenReturn(FlowIdentifier.notTriggered());
 
         service.backupDatabase(WORKSPACE_ID, ofName, null, null, true, Collections.emptyList(), databaseMaxDurationInMin, false);
-
     }
 
     private Stack getStack() {

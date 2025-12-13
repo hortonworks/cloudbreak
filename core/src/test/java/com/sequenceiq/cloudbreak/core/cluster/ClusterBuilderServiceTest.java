@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.core.cluster;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -14,7 +15,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -171,7 +171,7 @@ class ClusterBuilderServiceTest {
         when(stackView.getType()).thenReturn(StackType.WORKLOAD);
         when(mockClusterSetupService.prepareTemplate(any(), any(), any(), any(), any())).thenReturn(blueprintWithHandlebars);
 
-        IllegalStateException expectedException = Assertions.assertThrows(IllegalStateException.class, () ->
+        IllegalStateException expectedException = assertThrows(IllegalStateException.class, () ->
                 underTest.prepareExtendedTemplate(STACK_ID));
 
         assertEquals(String.format("Some of the template parameters has not been resolved! Please check your custom properties at cluster the " +

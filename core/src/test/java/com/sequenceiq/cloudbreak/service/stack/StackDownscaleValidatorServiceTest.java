@@ -2,24 +2,21 @@ package com.sequenceiq.cloudbreak.service.stack;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType.CORE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType.GATEWAY_PRIMARY;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import jakarta.ws.rs.ForbiddenException;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
-import org.mockito.Answers;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 
-@RunWith(MockitoJUnitRunner.class)
-public class StackDownscaleValidatorServiceTest {
+@ExtendWith(MockitoExtension.class)
+class StackDownscaleValidatorServiceTest {
 
     private static final Long STACK_ID = 1L;
 
@@ -33,48 +30,38 @@ public class StackDownscaleValidatorServiceTest {
 
     private static final String ACCESS_DENIED_EXCEPTION_MESSAGE = String.format("Private stack (%s) is only modifiable by the owner.", STACK_ID);
 
-    @Rule
-    public final ExpectedException expectedException = ExpectedException.none();
-
-    @Mock(answer = Answers.CALLS_REAL_METHODS)
-    private StackDownscaleValidatorService underTest;
+    private StackDownscaleValidatorService underTest = new StackDownscaleValidatorService();
 
     @Test
-    public void testCheckInstanceIsTheAmbariServerOrNotMethodWhenInstanceIsCoreTypeThenNoExceptionWouldInvoke() {
+    void testCheckInstanceIsTheAmbariServerOrNotMethodWhenInstanceIsCoreTypeThenNoExceptionWouldInvoke() {
         underTest.checkInstanceIsTheClusterManagerServerOrNot(INSTANCE_PUBLIC_IP, CORE);
     }
 
     @Test
-    public void testCheckInstanceIsTheAmbariServerOrNotMethodWhenTypeIsGatewayThenException() {
-        expectedException.expect(BadRequestException.class);
-        expectedException.expectMessage(CLUSTER_MANAGER_SERVER_HOST_EXCEPTION_MESSAGE);
-
-        underTest.checkInstanceIsTheClusterManagerServerOrNot(INSTANCE_PUBLIC_IP, GATEWAY_PRIMARY);
+    void testCheckInstanceIsTheAmbariServerOrNotMethodWhenTypeIsGatewayThenException() {
+        assertThrows(BadRequestException.class, () -> underTest.checkInstanceIsTheClusterManagerServerOrNot(INSTANCE_PUBLIC_IP, GATEWAY_PRIMARY),
+                CLUSTER_MANAGER_SERVER_HOST_EXCEPTION_MESSAGE);
     }
 
     @Test
-    public void testCheckInstanceIsTheAmbariServerOrNotMethodWhenTypeIsGatewayPrimaryThenException() {
-        expectedException.expect(BadRequestException.class);
-        expectedException.expectMessage(CLUSTER_MANAGER_SERVER_HOST_EXCEPTION_MESSAGE);
-
-        underTest.checkInstanceIsTheClusterManagerServerOrNot(INSTANCE_PUBLIC_IP, GATEWAY_PRIMARY);
+    void testCheckInstanceIsTheAmbariServerOrNotMethodWhenTypeIsGatewayPrimaryThenException() {
+        assertThrows(BadRequestException.class, () -> underTest.checkInstanceIsTheClusterManagerServerOrNot(INSTANCE_PUBLIC_IP, GATEWAY_PRIMARY),
+                CLUSTER_MANAGER_SERVER_HOST_EXCEPTION_MESSAGE);
     }
 
     @Test
-    public void testCheckUserHasRightToTerminateInstanceMethodWhenOwnerAndUserIdIsSameThenNoException() {
+    void testCheckUserHasRightToTerminateInstanceMethodWhenOwnerAndUserIdIsSameThenNoException() {
         underTest.checkUserHasRightToTerminateInstance("same", "same", STACK_ID);
     }
 
     @Test
-    public void testCheckUserHasRightToTerminateInstanceMethodWhenUserIdAndOwnerAreNotTheSameThenExceptionWouldInvoke() {
-        expectedException.expect(ForbiddenException.class);
-        expectedException.expectMessage(ACCESS_DENIED_EXCEPTION_MESSAGE);
-
-        underTest.checkUserHasRightToTerminateInstance("something here", "something else here", STACK_ID);
+    void testCheckUserHasRightToTerminateInstanceMethodWhenUserIdAndOwnerAreNotTheSameThenExceptionWouldInvoke() {
+        assertThrows(ForbiddenException.class, () -> underTest.checkUserHasRightToTerminateInstance("something here", "something else here", STACK_ID),
+                ACCESS_DENIED_EXCEPTION_MESSAGE);
     }
 
     @Test
-    public void testCheckClusterInValidStatusWhenValidStatus() {
+    void testCheckClusterInValidStatusWhenValidStatus() {
         Stack stack = new Stack();
         stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.AVAILABLE));
 
@@ -82,46 +69,36 @@ public class StackDownscaleValidatorServiceTest {
     }
 
     @Test
-    public void testCheckClusterInValidStatusWhenInStoppedStatus() {
+    void testCheckClusterInValidStatusWhenInStoppedStatus() {
         Stack stack = new Stack();
         stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.STOPPED));
 
-        expectedException.expect(BadRequestException.class);
-        expectedException.expectMessage("Cluster is in Stopped status. Please start the cluster for downscale.");
-
-        underTest.checkClusterInValidStatus(stack);
+        assertThrows(BadRequestException.class, () -> underTest.checkClusterInValidStatus(stack),
+                "Cluster is in Stopped status. Please start the cluster for downscale.");
     }
 
     @Test
-    public void testCheckInstanceIsTheAmbariServerOrNotMethodWhenTypeIsGatewayPrimaryAndNullPublicIpProvidedThenExceptionWithoutIp() {
-        expectedException.expect(BadRequestException.class);
-        expectedException.expectMessage(CLUSTER_MANAGER_HOST_EXCEPTION_MESSAGE_WITHOUT_IP);
-
-        underTest.checkInstanceIsTheClusterManagerServerOrNot(null, GATEWAY_PRIMARY);
+    void testCheckInstanceIsTheAmbariServerOrNotMethodWhenTypeIsGatewayPrimaryAndNullPublicIpProvidedThenExceptionWithoutIp() {
+        assertThrows(BadRequestException.class, () -> underTest.checkInstanceIsTheClusterManagerServerOrNot(null, GATEWAY_PRIMARY),
+                CLUSTER_MANAGER_HOST_EXCEPTION_MESSAGE_WITHOUT_IP);
     }
 
     @Test
-    public void testCheckInstanceIsTheAmbariServerOrNotMethodWhenTypeIsGatewayPrimaryAndEmptyPublicIpProvidedThenExceptionWithoutIp() {
-        expectedException.expect(BadRequestException.class);
-        expectedException.expectMessage(CLUSTER_MANAGER_HOST_EXCEPTION_MESSAGE_WITHOUT_IP);
-
-        underTest.checkInstanceIsTheClusterManagerServerOrNot("", GATEWAY_PRIMARY);
+    void testCheckInstanceIsTheAmbariServerOrNotMethodWhenTypeIsGatewayPrimaryAndEmptyPublicIpProvidedThenExceptionWithoutIp() {
+        assertThrows(BadRequestException.class, () -> underTest.checkInstanceIsTheClusterManagerServerOrNot("", GATEWAY_PRIMARY),
+                CLUSTER_MANAGER_HOST_EXCEPTION_MESSAGE_WITHOUT_IP);
     }
 
     @Test
-    public void testCheckInstanceIsTheAmbariServerOrNotMethodWhenTypeIsGatewayAndNullPublicIpProvidedThenExceptionWithoutIp() {
-        expectedException.expect(BadRequestException.class);
-        expectedException.expectMessage(CLUSTER_MANAGER_HOST_EXCEPTION_MESSAGE_WITHOUT_IP);
-
-        underTest.checkInstanceIsTheClusterManagerServerOrNot(null, GATEWAY_PRIMARY);
+    void testCheckInstanceIsTheAmbariServerOrNotMethodWhenTypeIsGatewayAndNullPublicIpProvidedThenExceptionWithoutIp() {
+        assertThrows(BadRequestException.class, () -> underTest.checkInstanceIsTheClusterManagerServerOrNot(null, GATEWAY_PRIMARY),
+                CLUSTER_MANAGER_HOST_EXCEPTION_MESSAGE_WITHOUT_IP);
     }
 
     @Test
-    public void testCheckInstanceIsTheAmbariServerOrNotMethodWhenTypeIsGatewayAndEmptyPublicIpProvidedThenExceptionWithoutIp() {
-        expectedException.expect(BadRequestException.class);
-        expectedException.expectMessage(CLUSTER_MANAGER_HOST_EXCEPTION_MESSAGE_WITHOUT_IP);
-
-        underTest.checkInstanceIsTheClusterManagerServerOrNot("", GATEWAY_PRIMARY);
+    void testCheckInstanceIsTheAmbariServerOrNotMethodWhenTypeIsGatewayAndEmptyPublicIpProvidedThenExceptionWithoutIp() {
+        assertThrows(BadRequestException.class, () -> underTest.checkInstanceIsTheClusterManagerServerOrNot("", GATEWAY_PRIMARY),
+                CLUSTER_MANAGER_HOST_EXCEPTION_MESSAGE_WITHOUT_IP);
     }
 
 }

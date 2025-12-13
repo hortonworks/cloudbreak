@@ -116,7 +116,6 @@ allprojects {
         force "org.ow2.asm:asm:9.9.1"
         force "com.google.protobuf:protobuf-java:$protobufVersion"
         force "com.google.guava:guava:$guavaVersion"
-        force "junit:junit:$junitVersion"
         force "com.fasterxml.jackson.dataformat:jackson-dataformat-xml:$jacksonVersion"
         force "ch.qos.logback:logback-classic:$logbackVersion"
         force "ch.qos.logback:logback-core:$logbackVersion"
@@ -169,10 +168,6 @@ subprojects {
     testImplementation group: 'org.junit.jupiter',         name: 'junit-jupiter',                  version: junitJupiterVersion
     testImplementation group: 'org.junit.jupiter',         name: 'junit-jupiter-engine',           version: junitJupiterVersion
     testImplementation group: 'org.junit.jupiter',         name: 'junit-jupiter-params',           version: junitJupiterVersion
-    //adds vintage engine automatically and ensures that Junit4 testcases are run by default for all projects
-    testImplementation(group: "org.junit.vintage",         name: "junit-vintage-engine",           version: junitJupiterVersion) {
-      exclude group: "org.hamcrest", module: "hamcrest-core"
-    }
     testRuntimeOnly    group: 'org.junit.platform',        name: 'junit-platform-launcher'
   }
 
@@ -387,6 +382,34 @@ subprojects {
       classpath = sourceSets.main.runtimeClasspath
     }
   }
+
+  tasks.register('dependencyInsightSpecific', DependencyInsightReportTask) {
+    description = 'Run dependencyInsight on this module for the specified dependency'
+    group = 'help'
+
+    def dependency = project.findProperty('dependency')
+    def configuration = project.findProperty('configuration') ?: 'compileClasspath'
+
+    if (!dependency) {
+      throw new GradleException('Please specify dependency: -Pdependency=<dep-name>')
+    }
+
+    def configObj = project.configurations.findByName(configuration)
+    if (configObj == null) {
+      throw new GradleException("Configuration '$configuration' not found in project ${project.name}")
+    }
+
+    showingAllVariants = false
+    setDependencySpec { it.requested.toString().contains(dependency) }
+    setConfiguration(configObj)
+    setShowSinglePathToDependency(true)
+  }
+}
+
+tasks.register('allDependencyInsightSpecific') {
+  description = 'Run dependencyInsightSpecific on all subprojects for the specified dependency'
+  group = 'help'
+  dependsOn subprojects.collect { it.tasks.named('dependencyInsightSpecific') }
 }
 
 class BuildInfoTask extends DefaultTask {

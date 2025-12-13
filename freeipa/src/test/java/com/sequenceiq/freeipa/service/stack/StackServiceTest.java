@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -16,7 +17,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.common.dal.ResourceBasicView;
@@ -190,7 +190,7 @@ class StackServiceTest {
 
     @Test
     void findAllWithDetailedStackStatuses() {
-        when(stackRepository.findAllWithDetailedStackStatuses(Mockito.eq(List.of(DetailedStackStatus.AVAILABLE)))).thenReturn(List.of(stack));
+        when(stackRepository.findAllWithDetailedStackStatuses(eq(List.of(DetailedStackStatus.AVAILABLE)))).thenReturn(List.of(stack));
         List<Stack> results = underTest.findAllWithDetailedStackStatuses(List.of(DetailedStackStatus.AVAILABLE));
 
         assertEquals(List.of(stack), results);

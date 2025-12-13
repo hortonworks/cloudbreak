@@ -2,20 +2,21 @@ package com.sequenceiq.freeipa.kerberos;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
@@ -61,13 +62,13 @@ public class KerberosConfigServiceTest {
         // GIVEN
         KerberosConfig kerberosConfig = new KerberosConfig();
         kerberosConfig.setEnvironmentCrn(ENVIRONMENT_CRN);
-        Mockito.when(crnService.getCurrentAccountId()).thenReturn(ACCOUNT_ID);
-        Mockito.when(crnService.createCrn(ACCOUNT_ID, CrnResourceDescriptor.KERBEROS)).thenReturn(RESOURCE_CRN);
-        Mockito.when(kerberosConfigRepository.save(kerberosConfig)).thenReturn(kerberosConfig);
+        when(crnService.getCurrentAccountId()).thenReturn(ACCOUNT_ID);
+        when(crnService.createCrn(ACCOUNT_ID, CrnResourceDescriptor.KERBEROS)).thenReturn(RESOURCE_CRN);
+        when(kerberosConfigRepository.save(kerberosConfig)).thenReturn(kerberosConfig);
         // WHEN
         underTest.createKerberosConfig(kerberosConfig);
         // THEN
-        Assertions.assertNotNull(kerberosConfig.getResourceCrn());
+        assertNotNull(kerberosConfig.getResourceCrn());
     }
 
     @Test
@@ -75,10 +76,10 @@ public class KerberosConfigServiceTest {
         // GIVEN
         KerberosConfig kerberosConfig = new KerberosConfig();
         kerberosConfig.setEnvironmentCrn(ENVIRONMENT_CRN);
-        Mockito.when(crnService.getCurrentAccountId()).thenReturn(ACCOUNT_ID);
-        Mockito.when(kerberosConfigRepository.findByAccountIdAndEnvironmentCrnAndClusterNameIsNullAndArchivedIsFalse(ACCOUNT_ID, ENVIRONMENT_CRN))
+        when(crnService.getCurrentAccountId()).thenReturn(ACCOUNT_ID);
+        when(kerberosConfigRepository.findByAccountIdAndEnvironmentCrnAndClusterNameIsNullAndArchivedIsFalse(ACCOUNT_ID, ENVIRONMENT_CRN))
                 .thenReturn(Optional.of(new KerberosConfig()));
-        BadRequestException ex = Assertions.assertThrows(BadRequestException.class, () -> {
+        BadRequestException ex = assertThrows(BadRequestException.class, () -> {
             // WHEN
             underTest.createKerberosConfig(kerberosConfig);
         });
@@ -90,8 +91,8 @@ public class KerberosConfigServiceTest {
     public void testGet() {
         // GIVEN
         KerberosConfig expectedKerberosConfig = new KerberosConfig();
-        Mockito.when(crnService.getCurrentAccountId()).thenReturn(ACCOUNT_ID);
-        Mockito.when(kerberosConfigRepository.findByAccountIdAndEnvironmentCrnAndClusterNameIsNullAndArchivedIsFalse(ACCOUNT_ID, ENVIRONMENT_CRN))
+        when(crnService.getCurrentAccountId()).thenReturn(ACCOUNT_ID);
+        when(kerberosConfigRepository.findByAccountIdAndEnvironmentCrnAndClusterNameIsNullAndArchivedIsFalse(ACCOUNT_ID, ENVIRONMENT_CRN))
                 .thenReturn(Optional.of(expectedKerberosConfig));
         // WHEN
         KerberosConfig actualResult = underTest.get(ENVIRONMENT_CRN);
@@ -104,8 +105,8 @@ public class KerberosConfigServiceTest {
         // GIVEN
         KerberosConfig expectedKerberosConfig1 = new KerberosConfig();
         KerberosConfig expectedKerberosConfig2 = new KerberosConfig();
-        Mockito.when(crnService.getCurrentAccountId()).thenReturn(ACCOUNT_ID);
-        Mockito.when(kerberosConfigRepository.findByAccountIdAndEnvironmentCrnAndArchivedIsFalse(ACCOUNT_ID, ENVIRONMENT_CRN))
+        when(crnService.getCurrentAccountId()).thenReturn(ACCOUNT_ID);
+        when(kerberosConfigRepository.findByAccountIdAndEnvironmentCrnAndArchivedIsFalse(ACCOUNT_ID, ENVIRONMENT_CRN))
                 .thenReturn(List.of(expectedKerberosConfig1, expectedKerberosConfig2));
         // WHEN
         List<KerberosConfig> actualResults = underTest.findAllInEnvironment(ENVIRONMENT_CRN);
@@ -119,7 +120,7 @@ public class KerberosConfigServiceTest {
         KerberosConfig expectedKerberosConfig1 = new KerberosConfig();
         KerberosConfig expectedKerberosConfig2 = new KerberosConfig();
         List<KerberosConfig> kerberosConfigs = List.of(expectedKerberosConfig1, expectedKerberosConfig2);
-        Mockito.when(kerberosConfigRepository.saveAll(any())).thenReturn(kerberosConfigs);
+        when(kerberosConfigRepository.saveAll(any())).thenReturn(kerberosConfigs);
         // WHEN
         List<KerberosConfig> actualResults = underTest.saveAll(List.of(expectedKerberosConfig1, expectedKerberosConfig2));
         // THEN
@@ -129,8 +130,8 @@ public class KerberosConfigServiceTest {
     @Test
     public void testGetNotFound() {
         // GIVEN
-        Mockito.when(crnService.getCurrentAccountId()).thenReturn(ACCOUNT_ID);
-        NotFoundException ex = Assertions.assertThrows(NotFoundException.class, () -> {
+        when(crnService.getCurrentAccountId()).thenReturn(ACCOUNT_ID);
+        NotFoundException ex = assertThrows(NotFoundException.class, () -> {
             // WHEN
             underTest.get(ENVIRONMENT_CRN);
             // THEN NotFoundException has to be thrown
@@ -143,20 +144,20 @@ public class KerberosConfigServiceTest {
     public void testDelete() {
         // GIVEN
         KerberosConfig expectedKerberosConfig = new KerberosConfig();
-        Mockito.when(crnService.getCurrentAccountId()).thenReturn(ACCOUNT_ID);
-        Mockito.when(kerberosConfigRepository.findByAccountIdAndEnvironmentCrnAndClusterNameIsNullAndArchivedIsFalse(ACCOUNT_ID, ENVIRONMENT_CRN))
+        when(crnService.getCurrentAccountId()).thenReturn(ACCOUNT_ID);
+        when(kerberosConfigRepository.findByAccountIdAndEnvironmentCrnAndClusterNameIsNullAndArchivedIsFalse(ACCOUNT_ID, ENVIRONMENT_CRN))
                 .thenReturn(Optional.of(expectedKerberosConfig));
         // WHEN
         underTest.delete(ENVIRONMENT_CRN);
         // THEN
-        Mockito.verify(kerberosConfigRepository).save(expectedKerberosConfig);
+        verify(kerberosConfigRepository).save(expectedKerberosConfig);
     }
 
     @Test
     public void testDeleteNotFound() {
         // GIVEN
-        Mockito.when(crnService.getCurrentAccountId()).thenReturn(ACCOUNT_ID);
-        NotFoundException ex = Assertions.assertThrows(NotFoundException.class, () -> {
+        when(crnService.getCurrentAccountId()).thenReturn(ACCOUNT_ID);
+        NotFoundException ex = assertThrows(NotFoundException.class, () -> {
             // WHEN
             underTest.delete(ENVIRONMENT_CRN);
         });

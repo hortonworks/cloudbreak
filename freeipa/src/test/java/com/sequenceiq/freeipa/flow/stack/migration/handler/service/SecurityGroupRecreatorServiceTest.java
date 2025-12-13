@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.flow.stack.migration.handler.service;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
@@ -9,7 +11,6 @@ import static org.mockito.Mockito.when;
 import java.util.Collections;
 import java.util.List;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -135,9 +136,9 @@ public class SecurityGroupRecreatorServiceTest {
         when(persistenceNotifier.notifyAllocation(any(CloudResource.class), any())).thenReturn(resourcePersisted);
         when(awsSecurityGroupResourceBuilder.create(awsContext, ac, group, network)).thenReturn(cloudResource);
 
-        Exception actual = Assertions.assertThrows(Exception.class, () -> underTest.recreate(request, awsContext, ac));
+        Exception actual = assertThrows(Exception.class, () -> underTest.recreate(request, awsContext, ac));
 
-        Assertions.assertEquals(value, actual);
+        assertEquals(value, actual);
 
         verify(awsSecurityGroupResourceBuilder, never()).build(any(), any(), any(), any(), any(), any());
         verify(awsSecurityGroupResourceBuilder).create(awsContext, ac, group, network);

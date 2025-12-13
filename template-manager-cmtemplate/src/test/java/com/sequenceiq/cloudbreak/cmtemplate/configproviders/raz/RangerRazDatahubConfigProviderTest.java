@@ -1,13 +1,13 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.raz;
 
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.GCP;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -159,7 +159,7 @@ public class RangerRazDatahubConfigProviderTest {
 
         ApiClusterTemplateService service = additionalServices.get("master");
         List<ApiClusterTemplateRoleConfigGroup> roleConfigGroups = service.getRoleConfigGroups();
-        Assertions.assertAll(
+        assertAll(
                 () -> assertEquals(1, additionalServices.size()),
                 () -> assertEquals("RANGER_RAZ", service.getServiceType()),
                 () -> assertEquals("ranger-RANGER_RAZ", service.getRefName()),

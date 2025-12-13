@@ -2,8 +2,12 @@ package com.sequenceiq.cloudbreak.service.publicendpoint;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_LB_REGISTER_PUBLIC_DNS_FAILED;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyList;
@@ -17,6 +21,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
@@ -30,9 +35,9 @@ import java.util.stream.Collectors;
 
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.x509.Extension;
+import org.bouncycastle.asn1.x509.GeneralNames;
 import org.bouncycastle.jcajce.provider.BouncyCastleFipsProvider;
 import org.bouncycastle.pkcs.PKCS10CertificationRequest;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -42,7 +47,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
-import org.testcontainers.shaded.org.bouncycastle.asn1.x509.GeneralNames;
 
 import com.sequenceiq.cloudbreak.PemDnsEntryCreateOrUpdateException;
 import com.sequenceiq.cloudbreak.TestUtil;
@@ -152,7 +156,7 @@ class GatewayPublicEndpointManagementServiceTest {
 
         underTest.renewCertificate(null);
 
-        verify(environmentClientService, Mockito.times(0)).getByCrn(Mockito.anyString());
+        verify(environmentClientService, times(0)).getByCrn(Mockito.anyString());
     }
 
     @Test
@@ -161,7 +165,7 @@ class GatewayPublicEndpointManagementServiceTest {
 
         underTest.renewCertificate(stack);
 
-        verify(environmentClientService, Mockito.times(0)).getByCrn(Mockito.anyString());
+        verify(environmentClientService, times(0)).getByCrn(Mockito.anyString());
     }
 
     @Test
@@ -183,10 +187,10 @@ class GatewayPublicEndpointManagementServiceTest {
         verify(dnsManagementService, times(0)).createOrUpdateDnsEntryWithIp(anyString(), anyString(), anyString(),
                 anyBoolean(), any());
         verify(clusterService, times(0)).save(cluster);
-        Mockito.verifyNoMoreInteractions(environmentClientService);
-        Mockito.verifyNoMoreInteractions(domainNameProvider);
-        Mockito.verifyNoMoreInteractions(dnsManagementService);
-        Mockito.verifyNoMoreInteractions(securityConfigService);
+        verifyNoMoreInteractions(environmentClientService);
+        verifyNoMoreInteractions(domainNameProvider);
+        verifyNoMoreInteractions(dnsManagementService);
+        verifyNoMoreInteractions(securityConfigService);
     }
 
     @Test
@@ -282,7 +286,7 @@ class GatewayPublicEndpointManagementServiceTest {
     void testGenerateCertAndSaveForStackAndUpdateDnsEntryWhenStackIsNull() throws IOException {
         Stack stack = null;
 
-        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> Assertions.assertDoesNotThrow(() -> underTest.generateCertAndSaveForStackAndUpdateDnsEntry(stack)));
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> assertDoesNotThrow(() -> underTest.generateCertAndSaveForStackAndUpdateDnsEntry(stack)));
     }
 
     @Test
@@ -342,7 +346,7 @@ class GatewayPublicEndpointManagementServiceTest {
             Set<String> actualSANs = Arrays.stream(GeneralNames.getInstance(asn1OctetString.getOctets()).getNames())
                     .map(generalName -> generalName.getName().toString())
                     .collect(Collectors.toSet());
-            Assertions.assertTrue(actualSANs.containsAll(expectedSANs));
+            assertTrue(actualSANs.containsAll(expectedSANs));
         });
     }
 
@@ -522,7 +526,7 @@ class GatewayPublicEndpointManagementServiceTest {
                         eq(List.of(primaryGatewayInstance.getPublicIpWrapper())));
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
-            Assertions.assertThrows(CloudbreakServiceException.class, () -> underTest.updateDnsEntry(stack, null));
+            assertThrows(CloudbreakServiceException.class, () -> underTest.updateDnsEntry(stack, null));
         });
     }
 
@@ -541,7 +545,7 @@ class GatewayPublicEndpointManagementServiceTest {
 
         String result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.updateDnsEntry(stack, null));
 
-        Assertions.assertNull(result);
+        assertNull(result);
     }
 
     @Test
@@ -585,7 +589,7 @@ class GatewayPublicEndpointManagementServiceTest {
 
         String result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.updateDnsEntry(stack, null));
 
-        Assertions.assertNotNull(result);
+        assertNotNull(result);
         assertEquals(fqdn, result);
         verify(dnsManagementService, times(1))
                 .createOrUpdateDnsEntryWithIp(eq("123"), eq(endpointName), eq(envName), eq(Boolean.FALSE),
@@ -612,7 +616,7 @@ class GatewayPublicEndpointManagementServiceTest {
 
         String result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.updateDnsEntry(stack, gatewayIp));
 
-        Assertions.assertNotNull(result);
+        assertNotNull(result);
         assertEquals(fqdn, result);
         verify(dnsManagementService, times(1))
                 .createOrUpdateDnsEntryWithIp(eq("123"), eq(endpointName), eq(envName), eq(Boolean.FALSE),
@@ -639,7 +643,7 @@ class GatewayPublicEndpointManagementServiceTest {
 
         String result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.updateDnsEntry(stack, gatewayIp));
 
-        Assertions.assertNotNull(result);
+        assertNotNull(result);
         assertEquals(fqdn, result);
         verify(dnsManagementService, times(1))
                 .createOrUpdateDnsEntryWithIp(eq("123"), eq(endpointName), eq(envName), eq(Boolean.FALSE),
@@ -660,7 +664,7 @@ class GatewayPublicEndpointManagementServiceTest {
 
         String result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.deleteDnsEntry(stack, envName));
 
-        Assertions.assertNotNull(result);
+        assertNotNull(result);
         assertEquals(gatewayIp, result);
         verify(dnsManagementService, times(1))
                 .deleteDnsEntryWithIp(eq("123"), eq(endpointName), eq(envName), eq(Boolean.FALSE),
@@ -685,7 +689,7 @@ class GatewayPublicEndpointManagementServiceTest {
 
         String result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.deleteDnsEntry(stack, null));
 
-        Assertions.assertNotNull(result);
+        assertNotNull(result);
         assertEquals(gatewayIp, result);
         verify(dnsManagementService, times(1))
                 .deleteDnsEntryWithIp(eq("123"), eq(endpointName), eq(envName), eq(Boolean.FALSE),
@@ -703,7 +707,7 @@ class GatewayPublicEndpointManagementServiceTest {
 
         String result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.deleteDnsEntry(stackMock, envName));
 
-        Assertions.assertNull(result);
+        assertNull(result);
         verifyNoInteractions(dnsManagementService);
     }
 

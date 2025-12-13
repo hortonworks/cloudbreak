@@ -1,28 +1,26 @@
 package com.sequenceiq.redbeams.api.endpoint.v4.database.request;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.util.Arrays;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
 
-@RunWith(Parameterized.class)
-public class DatabaseV4RequestValidationTest {
+class DatabaseV4RequestValidationTest {
 
     private static final String DATABASE_NAME = "mydb1";
 
@@ -46,20 +44,136 @@ public class DatabaseV4RequestValidationTest {
 
     private static Validator validator;
 
-    private final DatabaseV4Request underTest;
+    private DatabaseV4Request underTest;
 
-    private final Set<String> expectedErrorMessages;
+    static Stream<Arguments> data() {
+        return Stream.of(
+                Arguments.of(
+                        DATABASE_NAME,
+                        DATABASE_USERNAME,
+                        DATABASE_PASSWORD,
+                        DATABASE_PROTOCOL + DATABASE_HOST_PORT_DB,
+                        DATABASE_TYPE,
+                        ENVIRONMENT_CRN,
+                        Set.<String>of()
+                ),
+                Arguments.of(
+                        Strings.repeat("a", 101),
+                        DATABASE_USERNAME,
+                        DATABASE_PASSWORD,
+                        DATABASE_PROTOCOL + DATABASE_HOST_PORT_DB,
+                        DATABASE_TYPE,
+                        ENVIRONMENT_CRN,
+                        Set.<String>of("The length of the database's name must be between 5 to 100")
+                ),
+                Arguments.of(
+                        "abc",
+                        DATABASE_USERNAME,
+                        DATABASE_PASSWORD,
+                        DATABASE_PROTOCOL + DATABASE_HOST_PORT_DB,
+                        DATABASE_TYPE,
+                        ENVIRONMENT_CRN,
+                        Set.<String>of("The length of the database's name must be between 5 to 100")
+                ),
+                Arguments.of(
+                        "a-@#$%|:&*;",
+                        DATABASE_USERNAME,
+                        DATABASE_PASSWORD,
+                        DATABASE_PROTOCOL + DATABASE_HOST_PORT_DB,
+                        DATABASE_TYPE,
+                        ENVIRONMENT_CRN,
+                        Set.<String>of("The database's name may only contain lowercase characters")
+                ),
+                Arguments.of(
+                        DATABASE_NAME,
+                        null,
+                        DATABASE_PASSWORD,
+                        DATABASE_PROTOCOL + DATABASE_HOST_PORT_DB,
+                        DATABASE_TYPE,
+                        ENVIRONMENT_CRN,
+                        Set.<String>of("must not be null")
+                ),
+                Arguments.of(
+                        DATABASE_NAME,
+                        DATABASE_USERNAME,
+                        null,
+                        DATABASE_PROTOCOL + DATABASE_HOST_PORT_DB,
+                        DATABASE_TYPE,
+                        ENVIRONMENT_CRN,
+                        Set.<String>of("must not be null")
+                ),
+                Arguments.of(
+                        DATABASE_NAME,
+                        DATABASE_USERNAME,
+                        DATABASE_PASSWORD,
+                        DATABASE_HOST_PORT_DB,
+                        DATABASE_TYPE,
+                        ENVIRONMENT_CRN,
+                        Set.<String>of("JDBC connection URL is not valid", "Could not determine database vendor from JDBC URL")
+                ),
+                Arguments.of(
+                        DATABASE_NAME,
+                        DATABASE_USERNAME,
+                        DATABASE_PASSWORD,
+                        DATABASE_PROTOCOL + DATABASE_HOST_PORT_DB,
+                        Strings.repeat("a", 57),
+                        ENVIRONMENT_CRN,
+                        Set.<String>of("The length of the database's type must be between 3 and 56")
+                ),
+                Arguments.of(
+                        DATABASE_NAME,
+                        DATABASE_USERNAME,
+                        DATABASE_PASSWORD,
+                        DATABASE_PROTOCOL + DATABASE_HOST_PORT_DB,
+                        "ab",
+                        ENVIRONMENT_CRN,
+                        Set.<String>of("The length of the database's type must be between 3 and 56")
+                ),
+                Arguments.of(
+                        DATABASE_NAME,
+                        DATABASE_USERNAME,
+                        DATABASE_PASSWORD,
+                        DATABASE_PROTOCOL + DATABASE_HOST_PORT_DB,
+                        "a-@#$%|:&*;",
+                        ENVIRONMENT_CRN,
+                        Set.<String>of("The database's type may only contain alphanumeric characters")
+                ),
+                Arguments.of(
+                        DATABASE_NAME,
+                        DATABASE_USERNAME,
+                        DATABASE_PASSWORD,
+                        DATABASE_PROTOCOL + DATABASE_HOST_PORT_DB,
+                        DATABASE_TYPE,
+                        null,
+                        Set.<String>of("must not be null")
+                ),
+                Arguments.of(
+                        DATABASE_NAME,
+                        DATABASE_USERNAME,
+                        DATABASE_PASSWORD,
+                        DATABASE_PROTOCOL + DATABASE_HOST_PORT_DB,
+                        DATABASE_TYPE,
+                        "abc",
+                        Set.<String>of("Invalid Crn was provided. 'abc' does not match the Crn pattern")
+                ));
+    }
 
-    public DatabaseV4RequestValidationTest(
-        String databaseName,
-        String username,
-        String password,
-        String connectionUrl,
-        String type,
-        String environmentCrn,
-        Set<String> expectedErrorMessages) {
+    @BeforeAll
+    public static void setUpClass() {
+        validatorFactory = Validation.buildDefaultValidatorFactory();
+        validator = validatorFactory.getValidator();
+    }
+
+    @AfterAll
+    public static void tearDownClass() {
+        validatorFactory.close();
+    }
+
+    @MethodSource("data")
+    @ParameterizedTest
+    public void testValidation(String databaseName, String username, String password, String connectionUrl, String type, String environmentCrn,
+            Set<String> expectedErrorMessages) {
         underTest = new DatabaseV4Request();
-
         underTest.setName(databaseName);
         underTest.setConnectionUserName(username);
         underTest.setConnectionPassword(password);
@@ -67,136 +181,6 @@ public class DatabaseV4RequestValidationTest {
         underTest.setType(type);
         underTest.setEnvironmentCrn(environmentCrn);
 
-        this.expectedErrorMessages = expectedErrorMessages;
-    }
-
-    @Parameters
-    public static Iterable<Object[]> data() {
-        return Arrays.asList(new Object[][] {
-            {
-                DATABASE_NAME,
-                DATABASE_USERNAME,
-                DATABASE_PASSWORD,
-                DATABASE_PROTOCOL + DATABASE_HOST_PORT_DB,
-                DATABASE_TYPE,
-                ENVIRONMENT_CRN,
-                Set.<String>of()
-            },
-            {
-                Strings.repeat("a", 101),
-                DATABASE_USERNAME,
-                DATABASE_PASSWORD,
-                DATABASE_PROTOCOL + DATABASE_HOST_PORT_DB,
-                DATABASE_TYPE,
-                ENVIRONMENT_CRN,
-                Set.<String>of("The length of the database's name must be between 5 to 100")
-            },
-            {
-                "abc",
-                DATABASE_USERNAME,
-                DATABASE_PASSWORD,
-                DATABASE_PROTOCOL + DATABASE_HOST_PORT_DB,
-                DATABASE_TYPE,
-                ENVIRONMENT_CRN,
-                Set.<String>of("The length of the database's name must be between 5 to 100")
-            },
-            {
-                "a-@#$%|:&*;",
-                DATABASE_USERNAME,
-                DATABASE_PASSWORD,
-                DATABASE_PROTOCOL + DATABASE_HOST_PORT_DB,
-                DATABASE_TYPE,
-                ENVIRONMENT_CRN,
-                Set.<String>of("The database's name may only contain lowercase characters")
-            },
-            {
-                DATABASE_NAME,
-                null,
-                DATABASE_PASSWORD,
-                DATABASE_PROTOCOL + DATABASE_HOST_PORT_DB,
-                DATABASE_TYPE,
-                ENVIRONMENT_CRN,
-                Set.<String>of("must not be null")
-            },
-            {
-                DATABASE_NAME,
-                DATABASE_USERNAME,
-                null,
-                DATABASE_PROTOCOL + DATABASE_HOST_PORT_DB,
-                DATABASE_TYPE,
-                ENVIRONMENT_CRN,
-                Set.<String>of("must not be null")
-            },
-            {
-                DATABASE_NAME,
-                DATABASE_USERNAME,
-                DATABASE_PASSWORD,
-                DATABASE_HOST_PORT_DB,
-                DATABASE_TYPE,
-                ENVIRONMENT_CRN,
-                Set.<String>of("JDBC connection URL is not valid", "Could not determine database vendor from JDBC URL")
-            },
-            {
-                DATABASE_NAME,
-                DATABASE_USERNAME,
-                DATABASE_PASSWORD,
-                DATABASE_PROTOCOL + DATABASE_HOST_PORT_DB,
-                Strings.repeat("a", 57),
-                ENVIRONMENT_CRN,
-                Set.<String>of("The length of the database's type must be between 3 and 56")
-            },
-            {
-                DATABASE_NAME,
-                DATABASE_USERNAME,
-                DATABASE_PASSWORD,
-                DATABASE_PROTOCOL + DATABASE_HOST_PORT_DB,
-                "ab",
-                ENVIRONMENT_CRN,
-                Set.<String>of("The length of the database's type must be between 3 and 56")
-            },
-            {
-                DATABASE_NAME,
-                DATABASE_USERNAME,
-                DATABASE_PASSWORD,
-                DATABASE_PROTOCOL + DATABASE_HOST_PORT_DB,
-                "a-@#$%|:&*;",
-                ENVIRONMENT_CRN,
-                Set.<String>of("The database's type may only contain alphanumeric characters")
-            },
-            {
-                DATABASE_NAME,
-                DATABASE_USERNAME,
-                DATABASE_PASSWORD,
-                DATABASE_PROTOCOL + DATABASE_HOST_PORT_DB,
-                DATABASE_TYPE,
-                null,
-                Set.<String>of("must not be null")
-            },
-            {
-                DATABASE_NAME,
-                DATABASE_USERNAME,
-                DATABASE_PASSWORD,
-                DATABASE_PROTOCOL + DATABASE_HOST_PORT_DB,
-                DATABASE_TYPE,
-                "abc",
-                Set.<String>of("Invalid Crn was provided. 'abc' does not match the Crn pattern")
-            }
-        });
-    }
-
-    @BeforeClass
-    public static void setUpClass() {
-        validatorFactory = Validation.buildDefaultValidatorFactory();
-        validator = validatorFactory.getValidator();
-    }
-
-    @AfterClass
-    public static void tearDownClass() {
-        validatorFactory.close();
-    }
-
-    @Test
-    public void testValidation() {
         Set<ConstraintViolation<DatabaseV4Request>> violations = validator.validate(underTest);
 
         if (expectedErrorMessages.isEmpty()) {
@@ -206,8 +190,8 @@ public class DatabaseV4RequestValidationTest {
 
             for (ConstraintViolation<DatabaseV4Request> violation : violations) {
                 String violationMessage = violation.getMessage();
-                assertTrue("Unexpected message: " + violationMessage + ", expected: " + String.join(", ", expectedErrorMessages),
-                    expectedErrorMessages.stream().anyMatch(violationMessage::contains));
+                assertTrue(expectedErrorMessages.stream().anyMatch(violationMessage::contains),
+                        "Unexpected message: " + violationMessage + ", expected: " + String.join(", ", expectedErrorMessages));
             }
         }
     }

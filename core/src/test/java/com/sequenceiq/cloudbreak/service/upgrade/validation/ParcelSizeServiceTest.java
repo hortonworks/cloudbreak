@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.upgrade.validation;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpHeaders.CONTENT_LENGTH;
 
@@ -8,23 +9,17 @@ import java.util.Set;
 
 import jakarta.ws.rs.core.Response;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.Test;
 
-@RunWith(MockitoJUnitRunner.class)
-public class ParcelSizeServiceTest {
+class ParcelSizeServiceTest {
 
-    @InjectMocks
-    private ParcelSizeService underTest;
+    private ParcelSizeService underTest = new ParcelSizeService();
 
     @Test
-    public void testGetAllParcelSizeShouldReturnTheSizeOfTheParcels() {
-        Response response1 = Mockito.mock(Response.class);
+    void testGetAllParcelSizeShouldReturnTheSizeOfTheParcels() {
+        Response response1 = mock(Response.class);
         when(response1.getHeaderString(CONTENT_LENGTH)).thenReturn("10000");
-        Response response2 = Mockito.mock(Response.class);
+        Response response2 = mock(Response.class);
         when(response2.getHeaderString(CONTENT_LENGTH)).thenReturn("10000");
 
         long actual = underTest.getRequiredFreeSpace(Set.of(response1, response2));
@@ -33,10 +28,10 @@ public class ParcelSizeServiceTest {
     }
 
     @Test
-    public void testGetAllParcelSizeShouldReturnTheSizeOfTheParcelsWhenAContentLengthIsNotAvailable() {
-        Response response1 = Mockito.mock(Response.class);
+    void testGetAllParcelSizeShouldReturnTheSizeOfTheParcelsWhenAContentLengthIsNotAvailable() {
+        Response response1 = mock(Response.class);
         when(response1.getHeaderString(CONTENT_LENGTH)).thenReturn("10000");
-        Response response2 = Mockito.mock(Response.class);
+        Response response2 = mock(Response.class);
 
         long actual = underTest.getRequiredFreeSpace(Set.of(response1, response2));
 

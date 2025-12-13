@@ -1,8 +1,9 @@
 package com.sequenceiq.cloudbreak.structuredevent.service.telemetry.converter;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import org.apache.commons.lang3.StringUtils;
-import org.junit.Assert;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -23,8 +24,8 @@ public class StructuredEventToCDPStatusDetailsConverterTest {
 
     @Test
     public void testConvertWithNull() {
-        Assert.assertNotNull("We should return empty object for not null", underTest.convert((StructuredFlowEvent) null));
-        Assert.assertNotNull("We should return empty object for not null", underTest.convert((StructuredSyncEvent) null));
+        assertNotNull(underTest.convert((StructuredFlowEvent) null), "We should return empty object for not null");
+        assertNotNull(underTest.convert((StructuredSyncEvent) null), "We should return empty object for not null");
     }
 
     @Test
@@ -33,21 +34,21 @@ public class StructuredEventToCDPStatusDetailsConverterTest {
 
         UsageProto.CDPStatusDetails flowStatusDetails = underTest.convert(structuredFlowEvent);
 
-        Assert.assertEquals("", flowStatusDetails.getStackStatus());
-        Assert.assertEquals("", flowStatusDetails.getStackDetailedStatus());
-        Assert.assertEquals("", flowStatusDetails.getStackStatusReason());
-        Assert.assertEquals("", flowStatusDetails.getClusterStatus());
-        Assert.assertEquals("", flowStatusDetails.getClusterStatusReason());
+        assertEquals("", flowStatusDetails.getStackStatus());
+        assertEquals("", flowStatusDetails.getStackDetailedStatus());
+        assertEquals("", flowStatusDetails.getStackStatusReason());
+        assertEquals("", flowStatusDetails.getClusterStatus());
+        assertEquals("", flowStatusDetails.getClusterStatusReason());
 
         StructuredSyncEvent structuredSyncEvent = new StructuredSyncEvent();
 
         UsageProto.CDPStatusDetails syncStatusDetails = underTest.convert(structuredSyncEvent);
 
-        Assert.assertEquals("", syncStatusDetails.getStackStatus());
-        Assert.assertEquals("", syncStatusDetails.getStackDetailedStatus());
-        Assert.assertEquals("", syncStatusDetails.getStackStatusReason());
-        Assert.assertEquals("", syncStatusDetails.getClusterStatus());
-        Assert.assertEquals("", syncStatusDetails.getClusterStatusReason());
+        assertEquals("", syncStatusDetails.getStackStatus());
+        assertEquals("", syncStatusDetails.getStackDetailedStatus());
+        assertEquals("", syncStatusDetails.getStackStatusReason());
+        assertEquals("", syncStatusDetails.getClusterStatus());
+        assertEquals("", syncStatusDetails.getClusterStatusReason());
     }
 
     @Test
@@ -58,11 +59,11 @@ public class StructuredEventToCDPStatusDetailsConverterTest {
 
         UsageProto.CDPStatusDetails flowStatusDetails = underTest.convert(structuredFlowEvent);
 
-        Assert.assertEquals("AVAILABLE", flowStatusDetails.getStackStatus());
-        Assert.assertEquals("AVAILABLE", flowStatusDetails.getStackDetailedStatus());
-        Assert.assertEquals("statusreason", flowStatusDetails.getStackStatusReason());
-        Assert.assertEquals("AVAILABLE", flowStatusDetails.getClusterStatus());
-        Assert.assertEquals("statusreason", flowStatusDetails.getClusterStatusReason());
+        assertEquals("AVAILABLE", flowStatusDetails.getStackStatus());
+        assertEquals("AVAILABLE", flowStatusDetails.getStackDetailedStatus());
+        assertEquals("statusreason", flowStatusDetails.getStackStatusReason());
+        assertEquals("AVAILABLE", flowStatusDetails.getClusterStatus());
+        assertEquals("statusreason", flowStatusDetails.getClusterStatusReason());
 
         StructuredSyncEvent structuredSyncEvent = new StructuredSyncEvent();
         structuredSyncEvent.setStack(createStackDetails());
@@ -70,11 +71,11 @@ public class StructuredEventToCDPStatusDetailsConverterTest {
 
         UsageProto.CDPStatusDetails syncStatusDetails = underTest.convert(structuredSyncEvent);
 
-        Assert.assertEquals("AVAILABLE", syncStatusDetails.getStackStatus());
-        Assert.assertEquals("AVAILABLE", syncStatusDetails.getStackDetailedStatus());
-        Assert.assertEquals("statusreason", syncStatusDetails.getStackStatusReason());
-        Assert.assertEquals("AVAILABLE", syncStatusDetails.getClusterStatus());
-        Assert.assertEquals("statusreason", syncStatusDetails.getClusterStatusReason());
+        assertEquals("AVAILABLE", syncStatusDetails.getStackStatus());
+        assertEquals("AVAILABLE", syncStatusDetails.getStackDetailedStatus());
+        assertEquals("statusreason", syncStatusDetails.getStackStatusReason());
+        assertEquals("AVAILABLE", syncStatusDetails.getClusterStatus());
+        assertEquals("statusreason", syncStatusDetails.getClusterStatusReason());
     }
 
     @Test
@@ -87,36 +88,36 @@ public class StructuredEventToCDPStatusDetailsConverterTest {
 
         UsageProto.CDPStatusDetails flowStatusDetails = underTest.convert(structuredFlowEvent);
 
-        Assertions.assertEquals("", flowStatusDetails.getStackStatusReason());
-        Assertions.assertEquals("", flowStatusDetails.getClusterStatusReason());
+        assertEquals("", flowStatusDetails.getStackStatusReason());
+        assertEquals("", flowStatusDetails.getClusterStatusReason());
 
         stackDetails.setStatusReason("");
         clusterDetails.setStatusReason("");
         flowStatusDetails = underTest.convert(structuredFlowEvent);
 
-        Assertions.assertEquals("", flowStatusDetails.getStackStatusReason());
-        Assertions.assertEquals("", flowStatusDetails.getClusterStatusReason());
+        assertEquals("", flowStatusDetails.getStackStatusReason());
+        assertEquals("", flowStatusDetails.getClusterStatusReason());
 
         stackDetails.setStatusReason(StringUtils.repeat("*", 10));
         clusterDetails.setStatusReason(StringUtils.repeat("*", 10));
         flowStatusDetails = underTest.convert(structuredFlowEvent);
 
-        Assertions.assertEquals(StringUtils.repeat("*", 10), flowStatusDetails.getStackStatusReason());
-        Assertions.assertEquals(StringUtils.repeat("*", 10), flowStatusDetails.getClusterStatusReason());
+        assertEquals(StringUtils.repeat("*", 10), flowStatusDetails.getStackStatusReason());
+        assertEquals(StringUtils.repeat("*", 10), flowStatusDetails.getClusterStatusReason());
 
         stackDetails.setStatusReason(StringUtils.repeat("*", 1500));
         clusterDetails.setStatusReason(StringUtils.repeat("*", 1500));
         flowStatusDetails = underTest.convert(structuredFlowEvent);
 
-        Assertions.assertEquals(StringUtils.repeat("*", 1500), flowStatusDetails.getStackStatusReason());
-        Assertions.assertEquals(StringUtils.repeat("*", 1500), flowStatusDetails.getClusterStatusReason());
+        assertEquals(StringUtils.repeat("*", 1500), flowStatusDetails.getStackStatusReason());
+        assertEquals(StringUtils.repeat("*", 1500), flowStatusDetails.getClusterStatusReason());
 
         stackDetails.setStatusReason(StringUtils.repeat("*", 3000));
         clusterDetails.setStatusReason(StringUtils.repeat("*", 3000));
         flowStatusDetails = underTest.convert(structuredFlowEvent);
 
-        Assertions.assertEquals(StringUtils.repeat("*", 1500), flowStatusDetails.getStackStatusReason());
-        Assertions.assertEquals(StringUtils.repeat("*", 1500), flowStatusDetails.getClusterStatusReason());
+        assertEquals(StringUtils.repeat("*", 1500), flowStatusDetails.getStackStatusReason());
+        assertEquals(StringUtils.repeat("*", 1500), flowStatusDetails.getClusterStatusReason());
 
     }
 

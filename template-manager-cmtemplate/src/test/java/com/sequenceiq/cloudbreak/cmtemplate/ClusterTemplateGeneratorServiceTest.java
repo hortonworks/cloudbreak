@@ -1,13 +1,13 @@
 package com.sequenceiq.cloudbreak.cmtemplate;
 
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Set;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -51,6 +51,6 @@ class ClusterTemplateGeneratorServiceTest {
 
         verify(generatedCMTemplateService).prepareClouderaManagerTemplate(captor.capture(), anyString(), anyString(), anyString());
         Set<String> expectedServicesArgument = Set.of("HDFS", "HIVE", "ZOOKEEPER");
-        Assertions.assertEquals(expectedServicesArgument, captor.getValue());
+        assertEquals(expectedServicesArgument, captor.getValue());
     }
 }

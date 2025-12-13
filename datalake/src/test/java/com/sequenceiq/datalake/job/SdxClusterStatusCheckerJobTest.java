@@ -3,6 +3,7 @@ package com.sequenceiq.datalake.job;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -20,7 +21,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -117,7 +117,7 @@ class SdxClusterStatusCheckerJobTest {
 
     @Test
     public void doNotExecuteJobWhenThereIsARunningFlow() {
-        JobExecutionContext context = Mockito.mock(JobExecutionContext.class);
+        JobExecutionContext context = mock(JobExecutionContext.class);
         when(flowLogService.isOtherFlowRunning(any())).thenReturn(true);
         underTest.executeJob(context);
         verify(cloudbreakInternalCrnClient, times(0)).withInternalCrn();

@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.cm;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -9,13 +9,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationContext;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -30,8 +29,8 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 
-@RunWith(MockitoJUnitRunner.class)
-public class ClouderaManagerClusterCommissionServiceTest {
+@ExtendWith(MockitoExtension.class)
+class ClouderaManagerClusterCommissionServiceTest {
 
     private static final int GATEWAY_PORT = 8080;
 
@@ -62,8 +61,8 @@ public class ClouderaManagerClusterCommissionServiceTest {
 
     private Stack stack = createStack();
 
-    @Before
-    public void before() {
+    @BeforeEach
+    void before() {
         underTest = new ClouderaManagerClusterCommissionService(stack, clientConfig);
         ReflectionTestUtils.setField(underTest, "clouderaManagerApiClientProvider", clouderaManagerApiClientProvider);
         ReflectionTestUtils.setField(underTest, "clouderaManagerCommissioner", clouderaManagerCommissioner);
@@ -71,9 +70,9 @@ public class ClouderaManagerClusterCommissionServiceTest {
     }
 
     @Test
-    public void testInitApiClientShouldCreateTheApiClient() throws ClusterClientInitException, ClouderaManagerClientInitException {
+    void testInitApiClientShouldCreateTheApiClient() throws ClusterClientInitException, ClouderaManagerClientInitException {
         ReflectionTestUtils.setField(underTest, "client", null);
-        ApiClient client = Mockito.mock(ApiClient.class);
+        ApiClient client = mock(ApiClient.class);
         when(clouderaManagerApiClientProvider.getV31Client(GATEWAY_PORT, USER, PASSWORD, clientConfig)).thenReturn(client);
 
         underTest.initApiClient();
@@ -83,7 +82,7 @@ public class ClouderaManagerClusterCommissionServiceTest {
     }
 
     @Test
-    public void testCollectHostsToCommission() {
+    void testCollectHostsToCommission() {
         HostGroup hostGroup = mock(HostGroup.class);
         Set<String> hostnames = mock(Set.class);
         underTest.collectHostsToCommission(hostGroup, hostnames);
@@ -91,14 +90,14 @@ public class ClouderaManagerClusterCommissionServiceTest {
     }
 
     @Test
-    public void testRecommissionClusterNodes() {
+    void testRecommissionClusterNodes() {
         Map<String, InstanceMetaData> hosts = mock(Map.class);
         underTest.recommissionClusterNodes(hosts);
         verify(clouderaManagerCommissioner).recommissionNodes(stack, hosts, apiClient);
     }
 
     @Test
-    public void testRecommissionClusterHosts() {
+    void testRecommissionClusterHosts() {
         List<String> hosts = mock(List.class);
         underTest.recommissionHosts(hosts);
         verify(clouderaManagerCommissioner).recommissionHosts(stack, apiClient, hosts);

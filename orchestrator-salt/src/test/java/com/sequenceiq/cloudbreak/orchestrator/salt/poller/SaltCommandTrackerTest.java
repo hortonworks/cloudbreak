@@ -1,24 +1,24 @@
 package com.sequenceiq.cloudbreak.orchestrator.salt.poller;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.HashSet;
 import java.util.Set;
 
-import org.junit.Test;
-import org.mockito.Mockito;
+import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
 
-public class SaltCommandTrackerTest {
+class SaltCommandTrackerTest {
 
     @Test
-    public void callHasTargetNodesTest() throws Exception {
-        SaltConnector saltConnector = Mockito.mock(SaltConnector.class);
-        SaltJobRunner saltJobRunner = Mockito.mock(SaltJobRunner.class);
+    void callHasTargetNodesTest() throws Exception {
+        SaltConnector saltConnector = mock(SaltConnector.class);
+        SaltJobRunner saltJobRunner = mock(SaltJobRunner.class);
         Set<String> targets = new HashSet<>();
         targets.add("10.0.0.1");
         targets.add("10.0.0.2");
@@ -36,9 +36,9 @@ public class SaltCommandTrackerTest {
     }
 
     @Test
-    public void callTest() throws Exception {
-        SaltConnector saltConnector = Mockito.mock(SaltConnector.class);
-        SaltJobRunner saltJobRunner = Mockito.mock(SaltJobRunner.class);
+    void callTest() throws Exception {
+        SaltConnector saltConnector = mock(SaltConnector.class);
+        SaltJobRunner saltJobRunner = mock(SaltJobRunner.class);
         Set<String> targets = new HashSet<>();
         when(saltJobRunner.getTargetHostnames()).thenReturn(targets);
         SaltCommandTracker saltCommandTracker = new SaltCommandTracker(saltConnector, saltJobRunner);

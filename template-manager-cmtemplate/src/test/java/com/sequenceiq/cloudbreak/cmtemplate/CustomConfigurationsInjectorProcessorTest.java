@@ -1,5 +1,9 @@
 package com.sequenceiq.cloudbreak.cmtemplate;
 
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -8,7 +12,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplate;
@@ -53,19 +56,19 @@ class CustomConfigurationsInjectorProcessorTest {
 
     @Test
     void testProcessIfCorrectMethodsAreCalled() {
-        Mockito.when(templatePrepObj.getCustomConfigurationsView()).thenReturn(Optional.ofNullable(customConfigurations));
-        Mockito.when(processor.getTemplate()).thenReturn(cmTemplate);
-        Mockito.when(cmTemplate.getServices()).thenReturn(services);
+        when(templatePrepObj.getCustomConfigurationsView()).thenReturn(Optional.ofNullable(customConfigurations));
+        when(processor.getTemplate()).thenReturn(cmTemplate);
+        when(cmTemplate.getServices()).thenReturn(services);
         underTest.process(processor, templatePrepObj);
-        Mockito.verify(processor).getCustomServiceConfigsMap(customConfigurations.getConfigurations());
-        Mockito.verify(processor).getCustomRoleConfigsMap(customConfigurations.getConfigurations());
+        verify(processor).getCustomServiceConfigsMap(customConfigurations.getConfigurations());
+        verify(processor).getCustomRoleConfigsMap(customConfigurations.getConfigurations());
     }
 
     @Test
     void testProcessReturnsIfNoCustomConfigsAreProvided() {
-        Mockito.when(templatePrepObj.getCustomConfigurationsView()).thenReturn(Optional.empty());
+        when(templatePrepObj.getCustomConfigurationsView()).thenReturn(Optional.empty());
         underTest.process(processor, templatePrepObj);
-        Mockito.verify(processor, Mockito.times(0)).getCustomServiceConfigsMap(customConfigurations.getConfigurations());
-        Mockito.verify(processor, Mockito.times(0)).getCustomRoleConfigsMap(customConfigurations.getConfigurations());
+        verify(processor, times(0)).getCustomServiceConfigsMap(customConfigurations.getConfigurations());
+        verify(processor, times(0)).getCustomRoleConfigsMap(customConfigurations.getConfigurations());
     }
 }

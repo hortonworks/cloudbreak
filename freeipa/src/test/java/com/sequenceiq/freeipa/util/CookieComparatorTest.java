@@ -1,6 +1,6 @@
 package com.sequenceiq.freeipa.util;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -8,23 +8,23 @@ import java.text.SimpleDateFormat;
 import java.util.List;
 
 import org.apache.http.cookie.Cookie;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-public class CookieComparatorTest {
+class CookieComparatorTest {
 
     private CookieComparator underTest;
 
-    @Before
+    @BeforeEach
     public void before() {
         underTest = new CookieComparator();
     }
 
     @Test
-    public void testCookieName() {
+    void testCookieName() {
         Cookie c1 = mock(Cookie.class);
         Cookie c2 = mock(Cookie.class);
 
@@ -36,7 +36,7 @@ public class CookieComparatorTest {
     }
 
     @Test
-    public void testCookieDomain() {
+    void testCookieDomain() {
         Cookie c1 = mock(Cookie.class);
         Cookie c2 = mock(Cookie.class);
 
@@ -51,7 +51,7 @@ public class CookieComparatorTest {
     }
 
     @Test
-    public void testCookiePath() {
+    void testCookiePath() {
         Cookie c1 = mock(Cookie.class);
         Cookie c2 = mock(Cookie.class);
         Cookie c3 = mock(Cookie.class);
@@ -73,7 +73,7 @@ public class CookieComparatorTest {
     }
 
     @Test
-    public void testCookieExpiration() throws Exception {
+    void testCookieExpiration() throws Exception {
         Cookie c1 = mock(Cookie.class);
         Cookie c2 = mock(Cookie.class);
         Cookie c3 = mock(Cookie.class);

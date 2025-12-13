@@ -3,6 +3,7 @@ package com.sequenceiq.environment.experience.common;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -18,7 +19,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -95,7 +95,7 @@ class CommonExperienceServiceTest {
         underTest = new CommonExperienceService(mockExperienceConnectorService, mockExperienceServicesConfig, mockExperienceValidator,
                 mockCommonExperiencePathCreator);
 
-        IllegalArgumentException exception = Assertions.assertThrows(IllegalArgumentException.class,
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> underTest.getConnectedClustersForEnvironment(mockEnvironment));
 
         assertNotNull(exception);
@@ -110,7 +110,7 @@ class CommonExperienceServiceTest {
         underTest = new CommonExperienceService(mockExperienceConnectorService, mockExperienceServicesConfig, mockExperienceValidator,
                 mockCommonExperiencePathCreator);
 
-        IllegalArgumentException exception = Assertions.assertThrows(IllegalArgumentException.class,
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
                 () -> underTest.getConnectedClustersForEnvironment(mockEnvironment));
 
         assertNotNull(exception);

@@ -12,6 +12,7 @@ import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -30,7 +31,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.aws.AwsCloudFormationClient;
@@ -265,7 +265,7 @@ class AwsDownscaleServiceTest {
         mockDescribeInstances(amazonEC2Client);
 
         //create inOrder object passing any mocks that need to be verified in order
-        InOrder inOrder = Mockito.inOrder(amazonAutoScalingClient, amazonEC2Client);
+        InOrder inOrder = inOrder(amazonAutoScalingClient, amazonEC2Client);
 
         underTest.downscale(authenticatedContext, stack, resources, cloudInstances);
         verify(loadBalancerService).removeLoadBalancerTargets(any(), any(), any());

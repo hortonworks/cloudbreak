@@ -1,19 +1,15 @@
 package com.sequenceiq.cloudbreak.service.decorator.responseprovider;
 
 import static java.util.Collections.emptySet;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.util.Optional;
 import java.util.Set;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.TestUtil;
@@ -26,7 +22,8 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 
-public class StackResponseHardwareInfoProviderTest {
+@ExtendWith(MockitoExtension.class)
+class StackResponseHardwareInfoProviderTest {
 
     @InjectMocks
     private StackResponseHardwareInfoProvider underTest;
@@ -34,36 +31,29 @@ public class StackResponseHardwareInfoProviderTest {
     @Mock
     private HostGroupService hostGroupService;
 
-    @Before
-    public void setUp() {
-        MockitoAnnotations.initMocks(this);
-    }
-
     @Test
-    public void testProviderEntriesToStackResponseEmptyInstanceGroup() {
+    void testProviderEntriesToStackResponseEmptyInstanceGroup() {
 
         Stack stack = new Stack();
         stack.setInstanceGroups(emptySet());
 
         StackV4Response actual = underTest.providerEntriesToStackResponse(stack, new StackV4Response());
 
-        Assert.assertEquals(0L, actual.getHardwareInfoGroups().size());
+        assertEquals(0L, actual.getHardwareInfoGroups().size());
     }
 
     @Test
-    public void testProviderEntriesToStackResponseWhenOneInstanceMetadataPresented() {
-        when(hostGroupService.findHostGroupInClusterByName(anyLong(), anyString())).thenReturn(Optional.of(TestUtil.hostGroup()));
-
+    void testProviderEntriesToStackResponseWhenOneInstanceMetadataPresented() {
         Stack stack = TestUtil.stack();
         stack.setInstanceGroups(Sets.newHashSet(TestUtil.instanceGroup(1L, InstanceGroupType.GATEWAY, TestUtil.gcpTemplate(1L))));
 
         StackV4Response actual = underTest.providerEntriesToStackResponse(stack, new StackV4Response());
 
-        Assert.assertEquals(1L, actual.getHardwareInfoGroups().size());
+        assertEquals(1L, actual.getHardwareInfoGroups().size());
     }
 
     @Test
-    public void testProviderEntriesToStackResponseClusterNull() {
+    void testProviderEntriesToStackResponseClusterNull() {
 
         Stack stack = new Stack();
         InstanceMetaData instanceMetaData = new InstanceMetaData();
@@ -71,22 +61,22 @@ public class StackResponseHardwareInfoProviderTest {
 
         StackV4Response actual = underTest.providerEntriesToStackResponse(stack, new StackV4Response());
 
-        Assert.assertEquals(1L, actual.getHardwareInfoGroups().size());
+        assertEquals(1L, actual.getHardwareInfoGroups().size());
     }
 
     @Test
-    public void testProviderEntriesToStackResponseClusterNotNullButFQDNNull() {
+    void testProviderEntriesToStackResponseClusterNotNullButFQDNNull() {
         Stack stack = new Stack();
         InstanceMetaData instanceMetaData = new InstanceMetaData();
         stack.setInstanceGroups(getInstanceGroups(instanceMetaData));
 
         StackV4Response actual = underTest.providerEntriesToStackResponse(stack, new StackV4Response());
 
-        Assert.assertEquals(1L, actual.getHardwareInfoGroups().size());
+        assertEquals(1L, actual.getHardwareInfoGroups().size());
     }
 
     @Test
-    public void testProviderEntriesToStackResponseClusterNotNullAndFQDNNotNull() {
+    void testProviderEntriesToStackResponseClusterNotNullAndFQDNNotNull() {
 
         Stack stack = new Stack();
         Cluster cluster = new Cluster();
@@ -100,11 +90,11 @@ public class StackResponseHardwareInfoProviderTest {
         StackV4Response stackResponse = new StackV4Response();
         StackV4Response actual = underTest.providerEntriesToStackResponse(stack, stackResponse);
 
-        Assert.assertEquals(1L, actual.getHardwareInfoGroups().size());
+        assertEquals(1L, actual.getHardwareInfoGroups().size());
     }
 
     @Test
-    public void testProviderEntriesToStackResponseMultipleInstanceGroup() {
+    void testProviderEntriesToStackResponseMultipleInstanceGroup() {
 
         Stack stack = new Stack();
         stack.setCluster(new Cluster());
@@ -114,11 +104,11 @@ public class StackResponseHardwareInfoProviderTest {
 
         StackV4Response actual = underTest.providerEntriesToStackResponse(stack, new StackV4Response());
 
-        Assert.assertEquals(2L, actual.getHardwareInfoGroups().size());
+        assertEquals(2L, actual.getHardwareInfoGroups().size());
     }
 
     @Test
-    public void testProviderEntriesToStackResponseConvertsResult() {
+    void testProviderEntriesToStackResponseConvertsResult() {
 
         Stack stack = new Stack();
         Cluster cluster = new Cluster();
@@ -131,7 +121,7 @@ public class StackResponseHardwareInfoProviderTest {
 
         StackV4Response actual = underTest.providerEntriesToStackResponse(stack, new StackV4Response());
 
-        Assert.assertEquals(1L, actual.getHardwareInfoGroups().size());
+        assertEquals(1L, actual.getHardwareInfoGroups().size());
 
     }
 

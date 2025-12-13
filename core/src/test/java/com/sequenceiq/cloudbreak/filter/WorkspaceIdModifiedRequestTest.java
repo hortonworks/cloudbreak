@@ -1,20 +1,20 @@
 package com.sequenceiq.cloudbreak.filter;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 import jakarta.servlet.http.HttpServletRequest;
 
 import org.apache.commons.lang3.StringUtils;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class)
-public class WorkspaceIdModifiedRequestTest {
+@ExtendWith(MockitoExtension.class)
+class WorkspaceIdModifiedRequestTest {
 
     private static final String URL_WITHOUT_WORKSPACE_ID = "http://localhost/v4/user_profiles";
 
@@ -27,31 +27,31 @@ public class WorkspaceIdModifiedRequestTest {
 
     private WorkspaceIdModifiedRequest underTest;
 
-    @Before
+    @BeforeEach
     public void before() {
         underTest = new WorkspaceIdModifiedRequest(request, 1L);
     }
 
     @Test
-    public void testGetUriWithoutWorkspaceId() {
+    void testGetUriWithoutWorkspaceId() {
         when(request.getRequestURI()).thenReturn(URL_WITHOUT_WORKSPACE_ID);
         assertEquals(URL_WITHOUT_WORKSPACE_ID, underTest.getRequestURI());
     }
 
     @Test
-    public void testGetUriWithWorkspace() {
+    void testGetUriWithWorkspace() {
         when(request.getRequestURI()).thenReturn(URL_WITH_DIFFERENT_WORKSPACE_ID);
         assertEquals(URL_WITH_TENANT_DEFAULT_WORKSPACE_ID, underTest.getRequestURI());
     }
 
     @Test
-    public void testGetURLWithoutWorkspaceId() {
+    void testGetURLWithoutWorkspaceId() {
         when(request.getRequestURL()).thenReturn(new StringBuffer(URL_WITHOUT_WORKSPACE_ID));
         assertTrue(StringUtils.equals(URL_WITHOUT_WORKSPACE_ID, underTest.getRequestURL()));
     }
 
     @Test
-    public void testGetURLWithWorkspace() {
+    void testGetURLWithWorkspace() {
         when(request.getRequestURL()).thenReturn(new StringBuffer(URL_WITH_DIFFERENT_WORKSPACE_ID));
         assertTrue(StringUtils.equals(URL_WITH_TENANT_DEFAULT_WORKSPACE_ID, underTest.getRequestURL()));
     }

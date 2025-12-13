@@ -1,9 +1,10 @@
 package com.sequenceiq.cloudbreak.structuredevent.event.cdp;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 public class CDPOperationDetailsTest {
@@ -16,7 +17,7 @@ public class CDPOperationDetailsTest {
 
         String actual = underTest.getUTCDateTime();
         String expected = "10/05/2020 05:50:00 +0000";
-        Assertions.assertEquals(expected, actual);
+        assertEquals(expected, actual);
     }
 
     @Test
@@ -25,6 +26,6 @@ public class CDPOperationDetailsTest {
         underTest.setTimestamp(null);
         String actual = underTest.getUTCDateTime();
         String expected = "";
-        Assertions.assertEquals(expected, actual);
+        assertEquals(expected, actual);
     }
 }

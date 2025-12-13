@@ -1,12 +1,12 @@
 package com.sequenceiq.datalake.flow.verticalscale.handler;
 
 import static com.sequenceiq.datalake.flow.verticalscale.event.DatalakeVerticalScaleHandlerSelectors.VERTICAL_SCALING_DATALAKE_VALIDATION_HANDLER;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -43,7 +43,7 @@ public class DatalakeValidateVerticalScaleHandlerTest {
         Event event = new Event<>(datalakeVerticalScaleEvent);
         underTest.accept(event);
         verify(eventSender).sendEvent(eventCaptor.capture(), eq(event.getHeaders()));
-        Assertions.assertEquals(DatalakeVerticalScaleStateSelectors.VERTICAL_SCALING_DATALAKE_EVENT.selector(), eventCaptor.getValue().getSelector());
+        assertEquals(DatalakeVerticalScaleStateSelectors.VERTICAL_SCALING_DATALAKE_EVENT.selector(), eventCaptor.getValue().getSelector());
     }
 
     @Test
@@ -54,9 +54,9 @@ public class DatalakeValidateVerticalScaleHandlerTest {
         Event event = new Event<>(datalakeVerticalScaleEvent);
         underTest.accept(event);
         verify(eventSender).sendEvent(eventCaptor.capture(), eq(event.getHeaders()));
-        Assertions.assertEquals(DatalakeVerticalScaleStateSelectors.FAILED_VERTICAL_SCALING_DATALAKE_EVENT.selector(), eventCaptor.getValue().getSelector());
-        Assertions.assertEquals(DatalakeStatusEnum.DATALAKE_VERTICAL_SCALE_FAILED, eventCaptor.getValue().getDatalakeStatus());
-        Assertions.assertEquals("Test", eventCaptor.getValue().getException().getMessage());
+        assertEquals(DatalakeVerticalScaleStateSelectors.FAILED_VERTICAL_SCALING_DATALAKE_EVENT.selector(), eventCaptor.getValue().getSelector());
+        assertEquals(DatalakeStatusEnum.DATALAKE_VERTICAL_SCALE_FAILED, eventCaptor.getValue().getDatalakeStatus());
+        assertEquals("Test", eventCaptor.getValue().getException().getMessage());
     }
 
     private DatalakeVerticalScaleEvent getDatalakeVerticalScaleEvent() {

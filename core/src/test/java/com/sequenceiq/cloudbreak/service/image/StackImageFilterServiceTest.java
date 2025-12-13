@@ -2,14 +2,15 @@ package com.sequenceiq.cloudbreak.service.image;
 
 import static com.sequenceiq.common.model.ImageCatalogPlatform.imageCatalogPlatform;
 import static org.hamcrest.Matchers.empty;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -20,13 +21,12 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.hamcrest.MatcherAssert;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.auth.security.authentication.AuthenticatedUserService;
@@ -45,7 +45,8 @@ import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.common.model.ImageCatalogPlatform;
 
-public class StackImageFilterServiceTest {
+@ExtendWith(MockitoExtension.class)
+class StackImageFilterServiceTest {
 
     private static final String CUSTOM_IMAGE_CATALOG_URL = "http://localhost/custom-imagecatalog-url";
 
@@ -69,9 +70,6 @@ public class StackImageFilterServiceTest {
 
     private static final long ORG_ID = 100L;
 
-    @Rule
-    public final ExpectedException thrown = ExpectedException.none();
-
     @Mock
     private AuthenticatedUserService authenticatedUserService;
 
@@ -93,13 +91,8 @@ public class StackImageFilterServiceTest {
     @InjectMocks
     private StackImageFilterService underTest;
 
-    @Before
-    public void before() {
-        MockitoAnnotations.initMocks(this);
-    }
-
     @Test
-    public void testGetApplicableImagesCdh() throws CloudbreakImageCatalogException, CloudbreakImageNotFoundException {
+    void testGetApplicableImagesCdh() throws CloudbreakImageCatalogException, CloudbreakImageNotFoundException {
         Stack stack = getStack(DetailedStackStatus.AVAILABLE);
         setupLoggedInUser();
         when(imageCatalogService.getImages(anyLong(), anyString(), any(), any(), anyBoolean(), eq(null))).thenReturn(getStatedImages());
@@ -120,7 +113,7 @@ public class StackImageFilterServiceTest {
     }
 
     @Test
-    public void testGetApplicableImagesFiltersCurrentImage() throws CloudbreakImageCatalogException, CloudbreakImageNotFoundException {
+    void testGetApplicableImagesFiltersCurrentImage() throws CloudbreakImageCatalogException, CloudbreakImageNotFoundException {
         Stack stack = getStack(DetailedStackStatus.AVAILABLE);
         setupLoggedInUser();
         when(imageCatalogService.getImages(anyLong(), anyString(), any(), any(), anyBoolean(), eq(null))).thenReturn(getStatedImages());
@@ -140,7 +133,7 @@ public class StackImageFilterServiceTest {
     }
 
     @Test
-    public void testGetApplicableImagesWhenStackImageUpdateServiceRejectsAll() throws CloudbreakImageCatalogException, CloudbreakImageNotFoundException {
+    void testGetApplicableImagesWhenStackImageUpdateServiceRejectsAll() throws CloudbreakImageCatalogException, CloudbreakImageNotFoundException {
         Stack stack = getStack(DetailedStackStatus.AVAILABLE);
         setupLoggedInUser();
         when(imageCatalogService.getImages(anyLong(), anyString(), any(), any(), anyBoolean(), eq(null))).thenReturn(getStatedImages());
@@ -151,36 +144,34 @@ public class StackImageFilterServiceTest {
 
         Images images = underTest.getApplicableImages(ORG_ID, IMAGE_CATALOG_NAME, STACK_NAME, true);
 
-        assertThat(images.getBaseImages(), empty());
+        MatcherAssert.assertThat(images.getBaseImages(), empty());
         verify(imageCatalogService).getImages(eq(ORG_ID), eq(IMAGE_CATALOG_NAME), isNull(), eq(AWS), eq(true), eq(null));
         verify(componentConfigProviderService).getImage(STACK_ID);
         verify(stackImageUpdateService).isValidImage(eq(stack), eq(IMAGE_BASE_ID), eq(IMAGE_CATALOG_NAME), eq(CUSTOM_IMAGE_CATALOG_URL));
     }
 
     @Test
-    public void testGetApplicableImagesWhenStackNotInAvailableState() throws CloudbreakImageCatalogException {
+    void testGetApplicableImagesWhenStackNotInAvailableState() throws CloudbreakImageCatalogException {
         Stack stack = getStack(DetailedStackStatus.UPSCALE_IN_PROGRESS);
         when(stackService.getByNameInWorkspaceWithLists(eq(STACK_NAME), eq(ORG_ID))).thenReturn(Optional.ofNullable(stack));
         when(platformStringTransformer.getPlatformStringForImageCatalog(anyString(), anyString())).thenReturn(AWS);
 
         setupLoggedInUser();
-        thrown.expectMessage("To retrieve list of images for upgrade cluster have to be in AVAILABLE state");
-        thrown.expect(BadRequestException.class);
 
-        underTest.getApplicableImages(ORG_ID, IMAGE_CATALOG_NAME, STACK_NAME, false);
+        assertThrows(BadRequestException.class, () -> underTest.getApplicableImages(ORG_ID, IMAGE_CATALOG_NAME, STACK_NAME, false),
+                "To retrieve list of images for upgrade cluster have to be in AVAILABLE state");
     }
 
     @Test
-    public void testGetApplicableImagesWhenClusterNotInAvailableState() throws CloudbreakImageCatalogException {
+    void testGetApplicableImagesWhenClusterNotInAvailableState() throws CloudbreakImageCatalogException {
         Stack stack = getStack(DetailedStackStatus.CLUSTER_UPGRADE_FAILED);
         when(stackService.getByNameInWorkspaceWithLists(eq(STACK_NAME), eq(ORG_ID))).thenReturn(Optional.ofNullable(stack));
         when(platformStringTransformer.getPlatformStringForImageCatalog(anyString(), anyString())).thenReturn(AWS);
 
         setupLoggedInUser();
-        thrown.expectMessage("To retrieve list of images for upgrade cluster have to be in AVAILABLE state");
-        thrown.expect(BadRequestException.class);
 
-        underTest.getApplicableImages(ORG_ID, IMAGE_CATALOG_NAME, STACK_NAME, false);
+        assertThrows(BadRequestException.class, () -> underTest.getApplicableImages(ORG_ID, IMAGE_CATALOG_NAME, STACK_NAME, false),
+                "To retrieve list of images for upgrade cluster have to be in AVAILABLE state");
     }
 
     private StatedImages getStatedImages() {
@@ -222,7 +213,7 @@ public class StackImageFilterServiceTest {
 
     private CloudbreakUser setupLoggedInUser() {
         CloudbreakUser user = new CloudbreakUser("", "", "", "", "");
-        when(authenticatedUserService.getCbUser(any())).thenReturn(user);
+        lenient().when(authenticatedUserService.getCbUser(any())).thenReturn(user);
         return user;
     }
 }

@@ -1,30 +1,18 @@
 package com.sequenceiq.cloudbreak.domain.stack.instance;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.stream.Collectors;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 
-@RunWith(Parameterized.class)
-public class InstanceMetaDataReachableTest {
+class InstanceMetaDataReachableTest {
 
-    private InstanceStatus instanceStatus;
-
-    private boolean reachable;
-
-    public InstanceMetaDataReachableTest(InstanceStatus instanceStatus, boolean reachable) {
-        this.instanceStatus = instanceStatus;
-        this.reachable = reachable;
-    }
-
-    @Parameterized.Parameters(name = "{index}: status={0}, reachable={1}")
     public static Iterable<Object[]> data() {
         EnumSet<InstanceStatus> notReachableStates = EnumSet.of(
                 InstanceStatus.TERMINATED,
@@ -45,8 +33,9 @@ public class InstanceMetaDataReachableTest {
                 }).collect(Collectors.toList());
     }
 
-    @Test
-    public void testStatusIsReachable() {
+    @MethodSource("data")
+    @ParameterizedTest
+    void testStatusIsReachable(InstanceStatus instanceStatus, boolean reachable) {
         InstanceMetaData instanceMetaData = new InstanceMetaData();
         instanceMetaData.setInstanceStatus(instanceStatus);
 

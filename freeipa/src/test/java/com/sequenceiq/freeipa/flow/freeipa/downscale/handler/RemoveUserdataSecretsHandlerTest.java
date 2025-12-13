@@ -3,6 +3,7 @@ package com.sequenceiq.freeipa.flow.freeipa.downscale.handler;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -17,7 +18,6 @@ import java.util.stream.StreamSupport;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.ArgumentMatchers;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -117,9 +117,9 @@ class RemoveUserdataSecretsHandlerTest {
         List<Resource> secretResources = getResources(2);
         when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
         when(cloudInformationDecoratorProvider.getForStack(stack)).thenReturn(cloudInformationDecorator);
-        when(cloudInformationDecorator.getAuthorizedClientForLuksEncryptionKey(eq(stack), ArgumentMatchers.argThat(correctInstances::contains)))
+        when(cloudInformationDecorator.getAuthorizedClientForLuksEncryptionKey(eq(stack), argThat(correctInstances::contains)))
                 .thenReturn("secretArn");
-        when(resourceService.findAllByResourceId(ArgumentMatchers.argThat(iterable -> StreamSupport.stream(iterable.spliterator(), false)
+        when(resourceService.findAllByResourceId(argThat(iterable -> StreamSupport.stream(iterable.spliterator(), false)
                 .toList().containsAll(List.of(0L, 1L))))).thenReturn(secretResources);
 
         underTest.accept(new Event<>(new RemoveUserdataSecretsRequest(STACK_ID, CLOUD_CONTEXT, CLOUD_CREDENTIAL, List.of("fqdn-0", "fqdn-1"))));

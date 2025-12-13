@@ -4,14 +4,14 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType.DATALAK
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType.WORKLOAD;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseAvailabilityType.HA;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseAvailabilityType.NONE;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.when;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
@@ -38,7 +38,7 @@ class DatabaseVersionValidatorTest {
             boolean expectValidationFailure) {
         ServiceUpgradeValidationRequest request = createRequest(targetRuntime, databaseEngineVersion, databaseAvailabilityType, stackType);
         if (expectValidationFailure) {
-            Assertions.assertThrows(UpgradeValidationFailedException.class, () -> underTest.validate(request));
+            assertThrows(UpgradeValidationFailedException.class, () -> underTest.validate(request));
         } else {
             underTest.validate(request);
         }
@@ -72,8 +72,8 @@ class DatabaseVersionValidatorTest {
         }
         database.setExternalDatabaseEngineVersion(databaseEngineVersion);
 
-        Mockito.when(stackDto.getDatabase()).thenReturn(database);
-        Mockito.when(stackDto.getType()).thenReturn(stackType);
+        when(stackDto.getDatabase()).thenReturn(database);
+        when(stackDto.getType()).thenReturn(stackType);
         UpgradeImageInfo upgradeImageInfo = new UpgradeImageInfo(null, StatedImage.statedImage(Image.builder().withVersion(targetRuntime).build(), null, null));
         return new ServiceUpgradeValidationRequest(stackDto, false, false, upgradeImageInfo, false);
     }

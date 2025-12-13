@@ -1,26 +1,26 @@
 package com.sequenceiq.redbeams.domain.stack;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.redbeams.api.model.common.DetailedDBStackStatus;
 import com.sequenceiq.redbeams.api.model.common.Status;
 
-public class DBStackStatusTest {
+class DBStackStatusTest {
 
     private static final DBStack STACK = new DBStack();
 
     private DBStackStatus status;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         status = new DBStackStatus();
     }
 
     @Test
-    public void testGettersAndSetters() {
+    void testGettersAndSetters() {
         status.setId(1L);
         assertEquals(1L, status.getId().longValue());
 
@@ -42,7 +42,7 @@ public class DBStackStatusTest {
     }
 
     @Test
-    public void testConstructionFromDetailedStatus() {
+    void testConstructionFromDetailedStatus() {
         long now = System.currentTimeMillis();
         status = new DBStackStatus(STACK, DetailedDBStackStatus.PROVISION_REQUESTED, now);
         assertEquals(DetailedDBStackStatus.PROVISION_REQUESTED.getStatus(), status.getStatus());

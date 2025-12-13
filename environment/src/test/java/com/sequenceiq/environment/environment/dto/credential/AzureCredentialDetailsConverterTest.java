@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.environment.dto.credential;
 
-import org.junit.jupiter.api.Assertions;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -26,7 +27,7 @@ public class AzureCredentialDetailsConverterTest {
         azureCredentialAttributes.setCodeGrantFlowBased(new CodeGrantFlowAttributes());
         credentialAttributes.setAzure(azureCredentialAttributes);
         CredentialDetails.Builder builder = underTest.convertCredentialDetails(credentialAttributes, CredentialDetails.builder());
-        Assertions.assertEquals(CredentialType.AZURE_CODEGRANTFLOW, builder.build().getCredentialType());
+        assertEquals(CredentialType.AZURE_CODEGRANTFLOW, builder.build().getCredentialType());
     }
 
     @Test
@@ -38,7 +39,7 @@ public class AzureCredentialDetailsConverterTest {
         azureCredentialAttributes.setAppBased(appBasedAttributes);
         credentialAttributes.setAzure(azureCredentialAttributes);
         CredentialDetails.Builder builder = underTest.convertCredentialDetails(credentialAttributes, CredentialDetails.builder());
-        Assertions.assertEquals(CredentialType.AZURE_APPBASED_SECRET, builder.build().getCredentialType());
+        assertEquals(CredentialType.AZURE_APPBASED_SECRET, builder.build().getCredentialType());
     }
 
     @Test
@@ -50,7 +51,7 @@ public class AzureCredentialDetailsConverterTest {
         azureCredentialAttributes.setAppBased(appBasedAttributes);
         credentialAttributes.setAzure(azureCredentialAttributes);
         CredentialDetails.Builder builder = underTest.convertCredentialDetails(credentialAttributes, CredentialDetails.builder());
-        Assertions.assertEquals(CredentialType.AZURE_APPBASED_CERTIFICATE, builder.build().getCredentialType());
+        assertEquals(CredentialType.AZURE_APPBASED_CERTIFICATE, builder.build().getCredentialType());
     }
 
     @Test
@@ -61,13 +62,13 @@ public class AzureCredentialDetailsConverterTest {
         azureCredentialAttributes.setAppBased(appBasedAttributes);
         credentialAttributes.setAzure(azureCredentialAttributes);
         CredentialDetails.Builder builder = underTest.convertCredentialDetails(credentialAttributes, CredentialDetails.builder());
-        Assertions.assertEquals(CredentialType.AZURE_APPBASED_SECRET, builder.build().getCredentialType());
+        assertEquals(CredentialType.AZURE_APPBASED_SECRET, builder.build().getCredentialType());
     }
 
     @Test
     void convertCredentialDetailsWhenAttributesNull() {
         CredentialAttributes credentialAttributes = new CredentialAttributes();
         CredentialDetails.Builder builder = underTest.convertCredentialDetails(credentialAttributes, CredentialDetails.builder());
-        Assertions.assertEquals(CredentialType.UNKNOWN, builder.build().getCredentialType());
+        assertEquals(CredentialType.UNKNOWN, builder.build().getCredentialType());
     }
 }

@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.parameter.dto;
 
-import org.junit.jupiter.api.Assertions;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import org.junit.jupiter.api.Test;
 
 public class AwsParametersDtoTest {
@@ -11,7 +12,7 @@ public class AwsParametersDtoTest {
                         .withEncryptionKeyArn("dummy-key-arn")
                         .build())
                 .build();
-        Assertions.assertNotNull(dummyAwsParametersDto.getAwsDiskEncryptionParametersDto());
+        assertNotNull(dummyAwsParametersDto.getAwsDiskEncryptionParametersDto());
     }
 
 }

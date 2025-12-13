@@ -1,15 +1,16 @@
 package com.sequenceiq.redbeams.converter;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.CrnParseException;
 import com.sequenceiq.redbeams.TestData;
 
-public class CrnConverterTest {
+class CrnConverterTest {
 
     private static final String RESOURCE_NAME = "resourceName";
 
@@ -17,7 +18,7 @@ public class CrnConverterTest {
 
     private Crn validCrn;
 
-    @Before
+    @BeforeEach
     public void setup() {
         underTest = new CrnConverter();
 
@@ -25,21 +26,21 @@ public class CrnConverterTest {
     }
 
     @Test
-    public void testConvertToDbField() {
+    void testConvertToDbField() {
         String dbField = underTest.convertToDatabaseColumn(validCrn);
 
         assertEquals(validCrn.toString(), dbField);
     }
 
     @Test
-    public void testConvertToEntityAttribute() {
+    void testConvertToEntityAttribute() {
         Crn dbCrn = underTest.convertToEntityAttribute(validCrn.toString());
 
         assertEquals(validCrn, dbCrn);
     }
 
-    @Test(expected = CrnParseException.class)
-    public void testConvertToEntityAttributeInvalidCrnString() {
-        underTest.convertToEntityAttribute("nope");
+    @Test
+    void testConvertToEntityAttributeInvalidCrnString() {
+        assertThrows(CrnParseException.class, () -> underTest.convertToEntityAttribute("nope"));
     }
 }

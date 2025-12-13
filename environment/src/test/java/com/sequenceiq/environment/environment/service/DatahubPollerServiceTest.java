@@ -4,6 +4,7 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -13,7 +14,6 @@ import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
@@ -41,9 +41,9 @@ class DatahubPollerServiceTest {
 
     private static final String STACK_CRN = "stackCrn";
 
-    private final DatahubService datahubService = Mockito.mock(DatahubService.class);
+    private final DatahubService datahubService = mock(DatahubService.class);
 
-    private final FlowEndpoint flowEndpoint = Mockito.mock(FlowEndpoint.class);
+    private final FlowEndpoint flowEndpoint = mock(FlowEndpoint.class);
 
     private final DatahubPollerProvider datahubPollerProvider = new DatahubPollerProvider(datahubService, new ClusterPollerResultEvaluator(), flowEndpoint,
             new FlowResultPollerEvaluator());

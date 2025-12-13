@@ -1,6 +1,7 @@
 package com.sequenceiq.it.cloudbreak.testcase.e2e;
 
-import org.testng.Assert;
+import static org.junit.jupiter.api.Assertions.fail;
+
 import org.testng.annotations.Test;
 
 import com.sequenceiq.it.cloudbreak.context.Description;
@@ -37,6 +38,6 @@ public class UseSpotInstancesExampleTest extends AbstractE2ETest {
             then = "it should be retried"
     )
     public void failure(TestContext testContext) {
-        Assert.fail("fail");
+        fail("fail");
     }
 }

@@ -1,26 +1,26 @@
 package com.sequenceiq.cloudbreak.controller.validation.stack.cluster.gateway;
 
 import static com.sequenceiq.cloudbreak.controller.validation.stack.cluster.gateway.ExposedServiceUtil.exposedService;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.gateway.topology.GatewayTopologyV4Request;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.State;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 
-@RunWith(MockitoJUnitRunner.class)
-public class GatewayTopologyV4RequestValidatorTest {
+@ExtendWith(MockitoExtension.class)
+class GatewayTopologyV4RequestValidatorTest {
 
     @Mock
     private ExposedServiceListValidator exposedServiceListValidator;
@@ -29,7 +29,7 @@ public class GatewayTopologyV4RequestValidatorTest {
     private GatewayTopologyV4RequestValidator underTest;
 
     @Test
-    public void testWithNoTopologyName() {
+    void testWithNoTopologyName() {
         GatewayTopologyV4Request gatewayTopologyJson = new GatewayTopologyV4Request();
 
         ValidationResult result = underTest.validate(gatewayTopologyJson);
@@ -39,7 +39,7 @@ public class GatewayTopologyV4RequestValidatorTest {
     }
 
     @Test
-    public void testWithTopologyNameButNoServices() {
+    void testWithTopologyNameButNoServices() {
         GatewayTopologyV4Request gatewayTopologyJson = new GatewayTopologyV4Request();
         gatewayTopologyJson.setTopologyName("topology");
 
@@ -49,7 +49,7 @@ public class GatewayTopologyV4RequestValidatorTest {
     }
 
     @Test
-    public void testWithKnoxServiceButNoTopologyName() {
+    void testWithKnoxServiceButNoTopologyName() {
         GatewayTopologyV4Request gatewayTopologyJson = new GatewayTopologyV4Request();
         gatewayTopologyJson.setExposedServices(Collections.singletonList(exposedService("CLOUDERA_MANAGER_UI").getKnoxService()));
 
@@ -60,7 +60,7 @@ public class GatewayTopologyV4RequestValidatorTest {
     }
 
     @Test
-    public void testWithKnoxServiceAndTopologyName() {
+    void testWithKnoxServiceAndTopologyName() {
         GatewayTopologyV4Request gatewayTopologyJson = new GatewayTopologyV4Request();
         gatewayTopologyJson.setTopologyName("topology");
         gatewayTopologyJson.setExposedServices(Collections.singletonList(exposedService("CLOUDERA_MANAGER_UI").getKnoxService()));
@@ -71,7 +71,7 @@ public class GatewayTopologyV4RequestValidatorTest {
     }
 
     @Test
-    public void testWithInvalidKnoxService() {
+    void testWithInvalidKnoxService() {
         String invalidService = "INVALID_SERVICE";
         GatewayTopologyV4Request gatewayTopologyJson = new GatewayTopologyV4Request();
         gatewayTopologyJson.setTopologyName("topology");
@@ -87,7 +87,7 @@ public class GatewayTopologyV4RequestValidatorTest {
     }
 
     @Test
-    public void testWithInvalidKnoxServiceAndNoTopologyName() {
+    void testWithInvalidKnoxServiceAndNoTopologyName() {
         String invalidService = "INVALID_SERVICE";
         GatewayTopologyV4Request gatewayTopologyJson = new GatewayTopologyV4Request();
         gatewayTopologyJson.setExposedServices(Collections.singletonList(invalidService));

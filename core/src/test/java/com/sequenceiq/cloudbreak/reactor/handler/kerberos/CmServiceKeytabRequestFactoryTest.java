@@ -1,28 +1,23 @@
 package com.sequenceiq.cloudbreak.reactor.handler.kerberos;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.ServiceKeytabRequest;
 
-@RunWith(MockitoJUnitRunner.class)
-public class CmServiceKeytabRequestFactoryTest {
+class CmServiceKeytabRequestFactoryTest {
 
-    @InjectMocks
-    private CmServiceKeytabRequestFactory underTest;
+    private CmServiceKeytabRequestFactory underTest = new CmServiceKeytabRequestFactory();
 
     @Test
-    public void testAliasCreationWithFQDN() {
+    void testAliasCreationWithFQDN() {
         Stack stack = TestUtil.stack();
         GatewayConfig primaryGatewayConfig = create("fqdn.stest.cloudera.site");
 
@@ -35,7 +30,7 @@ public class CmServiceKeytabRequestFactoryTest {
     }
 
     @Test
-    public void testAliasCreationWithFQDNWithRepairFlag() {
+    void testAliasCreationWithFQDNWithRepairFlag() {
         Stack stack = TestUtil.stack();
         GatewayConfig primaryGatewayConfig = create("fqdn.stest.cloudera.site");
 
@@ -48,7 +43,7 @@ public class CmServiceKeytabRequestFactoryTest {
     }
 
     @Test
-    public void testAliasCreationWithHostname() {
+    void testAliasCreationWithHostname() {
         Stack stack = TestUtil.stack();
         GatewayConfig primaryGatewayConfig = create("fqdn");
 
@@ -56,8 +51,7 @@ public class CmServiceKeytabRequestFactoryTest {
 
         assertEquals("CM", request.getServiceName());
         assertEquals("fqdn", request.getServerHostName());
-        assertNull("Alias shall be null if it is identical with fqdn",
-                request.getServerHostNameAlias());
+        assertNull(request.getServerHostNameAlias(), "Alias shall be null if it is identical with fqdn");
 
     }
 

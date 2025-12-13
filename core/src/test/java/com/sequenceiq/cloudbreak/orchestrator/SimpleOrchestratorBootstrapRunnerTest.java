@@ -1,10 +1,10 @@
 package com.sequenceiq.cloudbreak.orchestrator;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.slf4j.MDC;
 
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorTimeoutException;
@@ -12,12 +12,12 @@ import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 
-public class SimpleOrchestratorBootstrapRunnerTest {
+class SimpleOrchestratorBootstrapRunnerTest {
 
     private static final String EXCEPTION_MESSAGE = "exceptionTest";
 
     @Test
-    public void bootstrapSuccessWithoutException() throws Exception {
+    void bootstrapSuccessWithoutException() throws Exception {
         MDC.put("test", "test");
         Boolean call = new OrchestratorBootstrapRunner(new MockBootstrapRunner(1),
                 new MockExitCriteria(),
@@ -27,7 +27,7 @@ public class SimpleOrchestratorBootstrapRunnerTest {
     }
 
     @Test
-    public void bootstrapSuccessWithException() throws Exception {
+    void bootstrapSuccessWithException() throws Exception {
         MDC.put("test", "test");
         OrchestratorBootstrapRunner runner = new OrchestratorBootstrapRunner(new MockBootstrapRunner(-1),
                 new MockExitCriteria(),

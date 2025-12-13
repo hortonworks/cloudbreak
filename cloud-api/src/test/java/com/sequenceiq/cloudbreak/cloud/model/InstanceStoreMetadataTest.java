@@ -1,9 +1,11 @@
 package com.sequenceiq.cloudbreak.cloud.model;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 public class InstanceStoreMetadataTest {
@@ -12,8 +14,8 @@ public class InstanceStoreMetadataTest {
     public void testEmpty() {
         InstanceStoreMetadata instanceStoreMetadata = new InstanceStoreMetadata();
 
-        Assertions.assertNull(instanceStoreMetadata.mapInstanceTypeToInstanceStoreCount("instance"));
-        Assertions.assertEquals(0, instanceStoreMetadata.mapInstanceTypeToInstanceStoreCountNullHandled("instance"));
+        assertNull(instanceStoreMetadata.mapInstanceTypeToInstanceStoreCount("instance"));
+        assertEquals(0, instanceStoreMetadata.mapInstanceTypeToInstanceStoreCountNullHandled("instance"));
     }
 
     @Test
@@ -26,8 +28,8 @@ public class InstanceStoreMetadataTest {
 
         InstanceStoreMetadata instanceStoreMetadata = new InstanceStoreMetadata(testMap);
 
-        Assertions.assertEquals(1, instanceStoreMetadata.mapInstanceTypeToInstanceStoreCount("instance1"));
-        Assertions.assertEquals(0, instanceStoreMetadata.mapInstanceTypeToInstanceStoreCountNullHandled("instance3"));
+        assertEquals(1, instanceStoreMetadata.mapInstanceTypeToInstanceStoreCount("instance1"));
+        assertEquals(0, instanceStoreMetadata.mapInstanceTypeToInstanceStoreCountNullHandled("instance3"));
     }
 
     @Test
@@ -36,14 +38,14 @@ public class InstanceStoreMetadataTest {
         VolumeParameterConfig singleStorage = new VolumeParameterConfig(VolumeParameterType.EPHEMERAL, 1, 1, 1, 1);
         instanceStoreMetadata.addInstanceStoreConfigToInstanceType("instance1", singleStorage);
 
-        Assertions.assertEquals(1, instanceStoreMetadata.mapInstanceTypeToInstanceStoreCount("instance1"));
-        Assertions.assertEquals(1, instanceStoreMetadata.mapInstanceTypeToInstanceStoreCountNullHandled("instance1"));
+        assertEquals(1, instanceStoreMetadata.mapInstanceTypeToInstanceStoreCount("instance1"));
+        assertEquals(1, instanceStoreMetadata.mapInstanceTypeToInstanceStoreCountNullHandled("instance1"));
 
         VolumeParameterConfig multipleStorage = new VolumeParameterConfig(VolumeParameterType.EPHEMERAL, 1, 1, 2, 2);
         instanceStoreMetadata.addInstanceStoreConfigToInstanceType("instance1", multipleStorage);
 
-        Assertions.assertEquals(2, instanceStoreMetadata.mapInstanceTypeToInstanceStoreCount("instance1"));
-        Assertions.assertEquals(2, instanceStoreMetadata.mapInstanceTypeToInstanceStoreCountNullHandled("instance1"));
+        assertEquals(2, instanceStoreMetadata.mapInstanceTypeToInstanceStoreCount("instance1"));
+        assertEquals(2, instanceStoreMetadata.mapInstanceTypeToInstanceStoreCountNullHandled("instance1"));
 
     }
 }

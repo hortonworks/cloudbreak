@@ -1,16 +1,13 @@
 package com.sequenceiq.freeipa.flow.freeipa.chain;
 
 import static com.sequenceiq.freeipa.flow.graph.FlowOfflineStateGraphGenerator.FLOW_CONFIGS_PACKAGE_NAME;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.List;
 import java.util.Queue;
 import java.util.stream.Collectors;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.InjectMocks;
-import org.mockito.MockitoAnnotations;
+import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
@@ -19,7 +16,7 @@ import com.sequenceiq.freeipa.flow.chain.FlowChainTriggers;
 import com.sequenceiq.freeipa.flow.chain.RepairFlowEventChainFactory;
 import com.sequenceiq.freeipa.flow.freeipa.repair.event.RepairEvent;
 
-public class RepairFlowEventChainFactoryTest {
+class RepairFlowEventChainFactoryTest {
 
     private static final long STACK_ID = 1L;
 
@@ -31,16 +28,10 @@ public class RepairFlowEventChainFactoryTest {
 
     private static final List<String> TERMINATED_INSTANCE_IDS = List.of("instance2");
 
-    @InjectMocks
-    private RepairFlowEventChainFactory underTest;
-
-    @Before
-    public void setup() {
-        MockitoAnnotations.initMocks(this);
-    }
+    private RepairFlowEventChainFactory underTest = new RepairFlowEventChainFactory();
 
     @Test
-    public void testRepair() {
+    void testRepair() {
         RepairEvent event = new RepairEvent(FlowChainTriggers.REPAIR_TRIGGER_EVENT, STACK_ID,
                 OPERATION_ID, INSTANCE_COUNT_BY_GROUP, INSTANCE_IDS_TO_REPAIR, TERMINATED_INSTANCE_IDS);
 

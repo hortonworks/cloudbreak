@@ -1,10 +1,10 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.context;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -36,12 +36,12 @@ public class GcpContextBuilderTest {
 
     @Test
     public void testPlatform() {
-        Assert.assertEquals(GcpConstants.GCP_PLATFORM, underTest.platform());
+        assertEquals(GcpConstants.GCP_PLATFORM, underTest.platform());
     }
 
     @Test
     public void testVariant() {
-        Assert.assertEquals(GcpConstants.GCP_VARIANT, underTest.variant());
+        assertEquals(GcpConstants.GCP_VARIANT, underTest.variant());
     }
 
     @Test
@@ -63,11 +63,11 @@ public class GcpContextBuilderTest {
                 auth,
                 mock(Network.class),
                 true);
-        Assert.assertEquals("ProjectId", gcpContext.getProjectId());
-        Assert.assertEquals(true, gcpContext.getNoPublicIp());
-        Assert.assertEquals("ServiceAccountId", gcpContext.getServiceAccountId());
-        Assert.assertEquals("location", gcpContext.getLocation().getRegion().getRegionName());
-        Assert.assertEquals("name", gcpContext.getName());
+        assertEquals("ProjectId", gcpContext.getProjectId());
+        assertEquals(true, gcpContext.getNoPublicIp());
+        assertEquals("ServiceAccountId", gcpContext.getServiceAccountId());
+        assertEquals("location", gcpContext.getLocation().getRegion().getRegionName());
+        assertEquals("name", gcpContext.getName());
     }
 
 }

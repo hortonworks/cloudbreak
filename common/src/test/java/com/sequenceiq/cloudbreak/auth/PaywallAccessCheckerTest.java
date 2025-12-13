@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.auth;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -16,7 +17,6 @@ import jakarta.ws.rs.core.Response;
 
 import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -73,14 +73,14 @@ class PaywallAccessCheckerTest {
     @Test
     public void testResponseNotOk() {
         when(invocationBuilder.get()).thenReturn(Response.serverError().build());
-        BadRequestException exception = Assertions.assertThrows(BadRequestException.class, () -> underTest.checkPaywallAccess(license, PAYWALL_URL));
+        BadRequestException exception = assertThrows(BadRequestException.class, () -> underTest.checkPaywallAccess(license, PAYWALL_URL));
         assertEquals(ERROR_MSG, exception.getMessage());
     }
 
     @Test
     public void testCantReachPaywall() {
         when(invocationBuilder.get()).thenThrow(new ProcessingException("test"));
-        BadRequestException exception = Assertions.assertThrows(BadRequestException.class, () -> underTest.checkPaywallAccess(license, PAYWALL_URL));
+        BadRequestException exception = assertThrows(BadRequestException.class, () -> underTest.checkPaywallAccess(license, PAYWALL_URL));
         assertEquals(ERROR_MSG, exception.getMessage());
     }
 }

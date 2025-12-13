@@ -1,12 +1,12 @@
 package com.sequenceiq.freeipa.api.v1.operation.model;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizationStatus;
 
-public class OperationStateTest {
+class OperationStateTest {
     @Test
-    public void testMappingExistsForAllSyncOperationType() {
+    void testMappingExistsForAllSyncOperationType() {
         for (SynchronizationStatus synchronizationStatus : SynchronizationStatus.values()) {
             OperationState.fromSynchronizationStatus(synchronizationStatus);
         }

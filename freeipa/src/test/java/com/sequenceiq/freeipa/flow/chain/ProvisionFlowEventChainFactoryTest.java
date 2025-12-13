@@ -1,10 +1,11 @@
 package com.sequenceiq.freeipa.flow.chain;
 
 import static com.sequenceiq.freeipa.flow.graph.FlowOfflineStateGraphGenerator.FLOW_CONFIGS_PACKAGE_NAME;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -33,8 +34,8 @@ class ProvisionFlowEventChainFactoryTest {
 
         FlowTriggerEventQueue flowTriggerEventQueue = underTest.createFlowTriggerEventQueue(triggerEvent);
 
-        Assertions.assertNotNull(flowTriggerEventQueue);
-        Assertions.assertEquals(3, flowTriggerEventQueue.getQueue().size());
+        assertNotNull(flowTriggerEventQueue);
+        assertEquals(3, flowTriggerEventQueue.getQueue().size());
         FlowChainConfigGraphGeneratorUtil.generateFor(underTest, FLOW_CONFIGS_PACKAGE_NAME, flowTriggerEventQueue);
     }
 }

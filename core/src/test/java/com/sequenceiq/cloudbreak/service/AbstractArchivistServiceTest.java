@@ -1,18 +1,16 @@
 package com.sequenceiq.cloudbreak.service;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.domain.ArchivableResource;
@@ -20,8 +18,8 @@ import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.model.WorkspaceAwareResource;
 import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
 
-@RunWith(MockitoJUnitRunner.class)
-public class AbstractArchivistServiceTest {
+@ExtendWith(MockitoExtension.class)
+class AbstractArchivistServiceTest {
 
     private static final long CURRENT_TIME_MILLIS = 123456L;
 
@@ -31,13 +29,8 @@ public class AbstractArchivistServiceTest {
     @InjectMocks
     private ArchivistServiceImplementation underTest;
 
-    @Before
-    public void init() {
-        MockitoAnnotations.initMocks(this);
-    }
-
     @Test
-    public void testDelete() {
+    void testDelete() {
         Resource resource = new Resource();
         when(clock.getCurrentTimeMillis()).thenReturn(CURRENT_TIME_MILLIS);
 

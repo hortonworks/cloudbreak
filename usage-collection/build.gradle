@@ -21,6 +21,7 @@ dependencies {
 
   implementation ("io.grpc:grpc-all:$grpcVersion") {
     exclude group: 'org.mockito'
+    exclude group: 'junit', module: 'junit'
   }
   testImplementation group: 'org.mockito',                     name: 'mockito-core', version: mockitoVersion
   testImplementation group: 'org.hamcrest',             name: 'hamcrest',     version: hamcrestVersion

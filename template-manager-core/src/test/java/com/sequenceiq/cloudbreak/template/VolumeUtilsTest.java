@@ -1,88 +1,88 @@
 package com.sequenceiq.cloudbreak.template;
 
 import static com.sequenceiq.cloudbreak.template.VolumeUtils.buildSingleVolumePath;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class VolumeUtilsTest {
+class VolumeUtilsTest {
 
     @Test
-    public void testBuildVolumePathStringWithZeroDisk() {
+    void testBuildVolumePathStringWithZeroDisk() {
         String directories = VolumeUtils.buildVolumePathString(0, "test");
 
         assertEquals("", directories);
     }
 
     @Test
-    public void testBuildVolumePathStringWithOneDisk() {
+    void testBuildVolumePathStringWithOneDisk() {
         String directories = VolumeUtils.buildVolumePathString(1, "test");
 
         assertEquals("/hadoopfs/fs1/test", directories);
     }
 
     @Test
-    public void testBuildVolumePathStringWithManyDisks() {
+    void testBuildVolumePathStringWithManyDisks() {
         String directories = VolumeUtils.buildVolumePathString(3, "test");
 
         assertEquals("/hadoopfs/fs1/test,/hadoopfs/fs2/test,/hadoopfs/fs3/test", directories);
     }
 
     @Test
-    public void testGetLogVolume() {
+    void testGetLogVolume() {
         String directories = VolumeUtils.getLogVolume("test");
 
         assertEquals("/hadoopfs/fs1/test", directories);
     }
 
     @Test
-    public void testBuildVolumePathStringZeroVolumesHandledWithZeroDisk() {
+    void testBuildVolumePathStringZeroVolumesHandledWithZeroDisk() {
         String directories = VolumeUtils.buildVolumePathStringZeroVolumeHandled(0, "test");
 
         assertEquals("/hadoopfs/root1/test", directories);
     }
 
     @Test
-    public void testBuildVolumePathStringZeroVolumesHandledWithOneDisk() {
+    void testBuildVolumePathStringZeroVolumesHandledWithOneDisk() {
         String directories = VolumeUtils.buildVolumePathStringZeroVolumeHandled(1, "test");
 
         assertEquals("/hadoopfs/fs1/test", directories);
     }
 
     @Test
-    public void testBuildVolumePathStringZeroVolumesHandledWithManyDisks() {
+    void testBuildVolumePathStringZeroVolumesHandledWithManyDisks() {
         String directories = VolumeUtils.buildVolumePathStringZeroVolumeHandled(3, "test");
 
         assertEquals("/hadoopfs/fs1/test,/hadoopfs/fs2/test,/hadoopfs/fs3/test", directories);
     }
 
     @Test
-    public void buildSingleVolumePathWithZeroDisk() {
+    void buildSingleVolumePathWithZeroDisk() {
         assertEquals("/hadoopfs/root1/test", buildSingleVolumePath(0, "test"));
     }
 
     @Test
-    public void buildSingleVolumePathWithOneDisk() {
+    void buildSingleVolumePathWithOneDisk() {
         assertEquals("/hadoopfs/fs1/test", buildSingleVolumePath(1, "test"));
     }
 
     @Test
-    public void buildSingleVolumePathWithManyDisks() {
+    void buildSingleVolumePathWithManyDisks() {
         assertEquals("/hadoopfs/fs1/test", buildSingleVolumePath(3, "test"));
     }
 
     @Test
-    public void testBuildSingleVolumePathWithVolumeId() {
+    void testBuildSingleVolumePathWithVolumeId() {
         assertEquals("/hadoopfs/fs5/test", buildSingleVolumePath(5, 10, "test"));
     }
 
     @Test
-    public void testBuildSingleVolumePathWithVolumeIdWhenThereAreNotEnoughVolumes() {
+    void testBuildSingleVolumePathWithVolumeIdWhenThereAreNotEnoughVolumes() {
         assertEquals("/hadoopfs/fs3/test", buildSingleVolumePath(5, 3, "test"));
     }
 
     @Test
-    public void testBuildSingleVolumePathWithVolumeIdWhenThereAreNoVolumes() {
+    void testBuildSingleVolumePathWithVolumeIdWhenThereAreNoVolumes() {
         assertEquals("/hadoopfs/root1/test", buildSingleVolumePath(5, 0, "test"));
     }
 }

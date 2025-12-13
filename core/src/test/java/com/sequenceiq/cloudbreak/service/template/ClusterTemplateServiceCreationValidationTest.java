@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.template;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -10,7 +11,6 @@ import java.util.Collections;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -109,7 +109,7 @@ class ClusterTemplateServiceCreationValidationTest {
         when(internalClusterTemplateValidator
                 .isInternalTemplateInNotInternalTenant(anyBoolean(), any(FeatureState.class))).thenReturn(true);
 
-        Assertions.assertThrows(BadRequestException.class, () -> underTest.createForLoggedInUser(clusterTemplate,
+        assertThrows(BadRequestException.class, () -> underTest.createForLoggedInUser(clusterTemplate,
                 WORKSPACE_ID, ACCOUNT_ID, CREATOR_ID),
                 "Datahub template in cluster definition should contain a – valid – cluster request!");
     }
@@ -131,7 +131,7 @@ class ClusterTemplateServiceCreationValidationTest {
         when(internalClusterTemplateValidator
                 .isInternalTemplateInNotInternalTenant(anyBoolean(), any(FeatureState.class))).thenReturn(true);
 
-        Assertions.assertThrows(BadRequestException.class, () -> underTest.createForLoggedInUser(clusterTemplate,
+        assertThrows(BadRequestException.class, () -> underTest.createForLoggedInUser(clusterTemplate,
                 WORKSPACE_ID, ACCOUNT_ID, CREATOR_ID),
                 "The Datahub template in the cluster definition must exist!");
     }
@@ -155,7 +155,7 @@ class ClusterTemplateServiceCreationValidationTest {
         when(internalClusterTemplateValidator
                 .isInternalTemplateInNotInternalTenant(anyBoolean(), any(FeatureState.class))).thenReturn(true);
 
-        Assertions.assertThrows(BadRequestException.class, () -> underTest.createForLoggedInUser(clusterTemplate,
+        assertThrows(BadRequestException.class, () -> underTest.createForLoggedInUser(clusterTemplate,
                 WORKSPACE_ID, ACCOUNT_ID, CREATOR_ID),
                 "Cluster definition should contain a Datahub template!");
     }

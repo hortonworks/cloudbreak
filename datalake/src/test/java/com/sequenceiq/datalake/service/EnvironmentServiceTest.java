@@ -1,14 +1,15 @@
 package com.sequenceiq.datalake.service;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.common.api.backup.response.BackupResponse;
@@ -21,8 +22,8 @@ import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureRe
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.ResourceGroupUsage;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
-@RunWith(MockitoJUnitRunner.class)
-public class EnvironmentServiceTest {
+@ExtendWith(MockitoExtension.class)
+class EnvironmentServiceTest {
 
     private static final String ENV_CRN = "crn:cdp:environments:us-west-1:460c0d8f-ae8e-4dce-9cd7-2351762eb9ac:environment:6b2b1600-8ac6-4c26-aa34-dab36f4bd243";
 
@@ -39,7 +40,7 @@ public class EnvironmentServiceTest {
     private EnvironmentService underTest;
 
     @Test
-    public void testSdxBackupLocationOnUpgradeRequestEnabled() {
+    void testSdxBackupLocationOnUpgradeRequestEnabled() {
         BackupResponse backupResponse = new BackupResponse();
         backupResponse.setStorageLocation(BACKUP_LOCATION);
         LoggingResponse loggingResponse = new LoggingResponse();
@@ -57,11 +58,11 @@ public class EnvironmentServiceTest {
                 .build());
 
         when(environmentEndpoint.getByCrn(anyString())).thenReturn(environmentResponse);
-        Assert.assertEquals(BACKUP_LOCATION, underTest.getBackupLocation(ENV_CRN));
+        assertEquals(BACKUP_LOCATION, underTest.getBackupLocation(ENV_CRN));
     }
 
     @Test
-    public void testSdxLogLocationOnUpgradeRequestEnabled() {
+    void testSdxLogLocationOnUpgradeRequestEnabled() {
         LoggingResponse loggingResponse = new LoggingResponse();
         loggingResponse.setStorageLocation(LOG_LOCATION);
         TelemetryResponse telemetryResponse = new TelemetryResponse();
@@ -76,11 +77,11 @@ public class EnvironmentServiceTest {
                 .build());
 
         when(environmentEndpoint.getByCrn(anyString())).thenReturn(environmentResponse);
-        Assert.assertEquals(LOG_LOCATION, underTest.getBackupLocation(ENV_CRN));
+        assertEquals(LOG_LOCATION, underTest.getBackupLocation(ENV_CRN));
     }
 
-    @Test(expected = BadRequestException.class)
-    public void testSdxNoLocationOnUpgradeRequestEnabled() {
+    @Test
+    void testSdxNoLocationOnUpgradeRequestEnabled() {
         DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
         environmentResponse.setCloudPlatform(CLOUD_PLATFORM);
         environmentResponse.setAzure(AzureEnvironmentParameters.builder()
@@ -90,7 +91,7 @@ public class EnvironmentServiceTest {
                 .build());
 
         when(environmentEndpoint.getByCrn(anyString())).thenReturn(environmentResponse);
-        underTest.getBackupLocation(ENV_CRN);
+        assertThrows(BadRequestException.class, () -> underTest.getBackupLocation(ENV_CRN));
     }
 
 }

@@ -1,29 +1,29 @@
 package com.sequenceiq.cloudbreak.service.rdsconfig;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
@@ -43,12 +43,10 @@ import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.model.WorkspaceStatus;
 
-public class RdsConfigServiceTest {
+@ExtendWith(MockitoExtension.class)
+class RdsConfigServiceTest {
 
     private static final String TEST_RDS_CONFIG_NAME = "RDSConfigTest";
-
-    @Rule
-    public final ExpectedException thrown = ExpectedException.none();
 
     @InjectMocks
     private RdsConfigService underTest;
@@ -84,9 +82,8 @@ public class RdsConfigServiceTest {
 
     private RDSConfig testRdsConfig;
 
-    @Before
+    @BeforeEach
     public void setUp() {
-        initMocks(this);
         defaultWorkspace = new Workspace();
         defaultWorkspace.setName("HortonWorkspace");
         defaultWorkspace.setId(1L);
@@ -96,14 +93,13 @@ public class RdsConfigServiceTest {
         testRdsConfig = new RDSConfig();
         testRdsConfig.setId(1L);
         testRdsConfig.setName(TEST_RDS_CONFIG_NAME);
-        doNothing().when(rdsConfigRepository).delete(any());
-        when(userService.getOrCreate(any())).thenReturn(user);
-        when(legacyRestRequestThreadLocalService.getCloudbreakUser()).thenReturn(cloudbreakUser);
-        when(workspaceService.get(anyLong(), any())).thenReturn(defaultWorkspace);
+        lenient().when(userService.getOrCreate(any())).thenReturn(user);
+        lenient().when(legacyRestRequestThreadLocalService.getCloudbreakUser()).thenReturn(cloudbreakUser);
+        lenient().when(workspaceService.get(anyLong(), any())).thenReturn(defaultWorkspace);
     }
 
     @Test
-    public void testRetrieveRdsConfigsInDefaultWorkspace() {
+    void testRetrieveRdsConfigsInDefaultWorkspace() {
         when(rdsConfigRepository.findAllByWorkspaceId(eq(1L))).thenReturn(Collections.singleton(testRdsConfig));
 
         Set<RDSConfig> rdsConfigs = underTest.retrieveRdsConfigsInWorkspace(defaultWorkspace);
@@ -113,7 +109,7 @@ public class RdsConfigServiceTest {
     }
 
     @Test
-    public void testGetExistingRdsConfigByNameAndDefaultWorkspace() {
+    void testGetExistingRdsConfigByNameAndDefaultWorkspace() {
         when(rdsConfigRepository.findByNameAndWorkspaceId(eq(TEST_RDS_CONFIG_NAME), eq(1L))).thenReturn(Optional.ofNullable(testRdsConfig));
 
         underTest.getByNameForWorkspace(TEST_RDS_CONFIG_NAME, defaultWorkspace);
@@ -122,12 +118,10 @@ public class RdsConfigServiceTest {
     }
 
     @Test
-    public void testGetNonExistingRdsConfigByNameAndDefaultWorkspace() {
+    void testGetNonExistingRdsConfigByNameAndDefaultWorkspace() {
         when(rdsConfigRepository.findByNameAndWorkspaceId(anyString(), eq(1L))).thenReturn(Optional.empty());
 
-        thrown.expect(NotFoundException.class);
-
-        underTest.getByNameForWorkspace(TEST_RDS_CONFIG_NAME + "X", defaultWorkspace);
+        assertThrows(NotFoundException.class, () -> underTest.getByNameForWorkspace(TEST_RDS_CONFIG_NAME + "X", defaultWorkspace));
     }
 
     private void mockClusterServiceWithEmptyList() {
@@ -147,7 +141,7 @@ public class RdsConfigServiceTest {
     }
 
     @Test
-    public void testNewRdsConfigCreation() throws TransactionExecutionException {
+    void testNewRdsConfigCreation() throws TransactionExecutionException {
         when(rdsConfigRepository.findByNameAndWorkspaceId(eq(TEST_RDS_CONFIG_NAME), eq(1L))).thenReturn(Optional.empty());
         when(workspaceService.get(eq(1L), any(User.class))).thenReturn(defaultWorkspace);
         when(workspaceService.retrieveForUser(any())).thenReturn(Collections.singleton(defaultWorkspace));
@@ -159,7 +153,7 @@ public class RdsConfigServiceTest {
     }
 
     @Test
-    public void testExistingRdsConfigCreation() {
+    void testExistingRdsConfigCreation() {
         when(rdsConfigRepository.findByNameAndWorkspaceId(eq(TEST_RDS_CONFIG_NAME), eq(1L))).thenReturn(Optional.ofNullable(testRdsConfig));
 
         RDSConfig rdsConfig = underTest.createIfNotExists(new User(), testRdsConfig, 1L);
@@ -169,7 +163,7 @@ public class RdsConfigServiceTest {
     }
 
     @Test
-    public void testDeleteDefaultRdsConfigs() {
+    void testDeleteDefaultRdsConfigs() {
         testRdsConfig.setStatus(ResourceStatus.USER_MANAGED);
         RDSConfig rdsConfig = new RDSConfig();
         rdsConfig.setId(2L);

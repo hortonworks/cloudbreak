@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigTestUti
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.knox.KnoxRoles.IDBROKER;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.knox.KnoxRoles.KNOX;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -13,10 +14,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -33,7 +32,7 @@ import com.sequenceiq.cloudbreak.template.filesystem.BaseFileSystemConfiguration
 import com.sequenceiq.cloudbreak.template.filesystem.wasb.WasbFileSystemConfigurationsView;
 import com.sequenceiq.cloudbreak.template.views.AccountMappingView;
 
-public class KnoxIdBrokerConfigProviderTest {
+class KnoxIdBrokerConfigProviderTest {
 
     // Note: We need a predictable iteration order, so cannot rely on Map.ofEntries()
     private static final Map<String, String> USER_MAPPINGS = fixedIterationMapOfEntries(
@@ -67,9 +66,6 @@ public class KnoxIdBrokerConfigProviderTest {
 
     private static final String IDBROKER_GCP_GROUP_MAPPING = "idbroker_gcp_group_mapping";
 
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
-
     @Mock
     private CmTemplateProcessor cmTemplate;
 
@@ -82,13 +78,13 @@ public class KnoxIdBrokerConfigProviderTest {
         return result;
     }
 
-    @Before
+    @BeforeEach
     public void setUp() {
         MockitoAnnotations.initMocks(this);
     }
 
     @Test
-    public void getRoleConfigWhenBadRole() {
+    void getRoleConfigWhenBadRole() {
         TemplatePreparationObject tpo = new Builder()
                 .build();
 
@@ -101,7 +97,7 @@ public class KnoxIdBrokerConfigProviderTest {
     }
 
     @Test
-    public void getRoleConfigWhenIdBrokerAndNoFileSystemAndAwsAndNoMappings() {
+    void getRoleConfigWhenIdBrokerAndNoFileSystemAndAwsAndNoMappings() {
         TemplatePreparationObject tpo = new Builder()
                 .withCloudPlatform(CloudPlatform.AWS)
                 .build();
@@ -118,7 +114,7 @@ public class KnoxIdBrokerConfigProviderTest {
     }
 
     @Test
-    public void getRoleConfigWhenIdBrokerAndNoFileSystemAndAws() {
+    void getRoleConfigWhenIdBrokerAndNoFileSystemAndAws() {
         TemplatePreparationObject tpo = new Builder()
                 .withCloudPlatform(CloudPlatform.AWS)
                 .withAccountMappingView(new AccountMappingView(GROUP_MAPPINGS, USER_MAPPINGS))
@@ -136,7 +132,7 @@ public class KnoxIdBrokerConfigProviderTest {
     }
 
     @Test
-    public void getRoleConfigWhenIdBrokerAndNoFileSystemAndAzure() {
+    void getRoleConfigWhenIdBrokerAndNoFileSystemAndAzure() {
         TemplatePreparationObject tpo = new Builder()
                 .withCloudPlatform(CloudPlatform.AZURE)
                 .withAccountMappingView(new AccountMappingView(GROUP_MAPPINGS, USER_MAPPINGS))
@@ -155,7 +151,7 @@ public class KnoxIdBrokerConfigProviderTest {
     }
 
     @Test
-    public void getRoleConfigWhenIdBrokerAndNoFileSystemAndGcp() {
+    void getRoleConfigWhenIdBrokerAndNoFileSystemAndGcp() {
         TemplatePreparationObject tpo = new Builder()
                 .withCloudPlatform(CloudPlatform.GCP)
                 .withAccountMappingView(new AccountMappingView(GROUP_MAPPINGS, USER_MAPPINGS))
@@ -173,7 +169,7 @@ public class KnoxIdBrokerConfigProviderTest {
     }
 
     @Test
-    public void getRoleConfigWhenIdBrokerAndNoFileSystemAndYarn() {
+    void getRoleConfigWhenIdBrokerAndNoFileSystemAndYarn() {
         TemplatePreparationObject tpo = new Builder()
                 .withCloudPlatform(CloudPlatform.YARN)
                 .withAccountMappingView(new AccountMappingView(GROUP_MAPPINGS, USER_MAPPINGS))
@@ -188,7 +184,7 @@ public class KnoxIdBrokerConfigProviderTest {
     }
 
     @Test
-    public void getRoleConfigWhenIdBrokerAndInvalidFileSystem() {
+    void getRoleConfigWhenIdBrokerAndInvalidFileSystem() {
         BaseFileSystemConfigurationsView fileSystemConfigurationsView = mock(BaseFileSystemConfigurationsView.class);
         when(fileSystemConfigurationsView.getType()).thenReturn("DOS");
 
@@ -197,14 +193,11 @@ public class KnoxIdBrokerConfigProviderTest {
                 .withFileSystemConfigurationView(fileSystemConfigurationsView)
                 .build();
 
-        thrown.expect(IllegalStateException.class);
-        thrown.expectMessage("Unknown file system type:");
-
-        underTest.getRoleConfigs(IDBROKER, cmTemplate, tpo);
+        assertThrows(IllegalStateException.class, () -> underTest.getRoleConfigs(IDBROKER, cmTemplate, tpo), "Unknown file system type:");
     }
 
     @Test
-    public void getRoleConfigWhenIdBrokerAndS3FileSystem() {
+    void getRoleConfigWhenIdBrokerAndS3FileSystem() {
         BaseFileSystemConfigurationsView fileSystemConfigurationsView = mock(BaseFileSystemConfigurationsView.class);
         when(fileSystemConfigurationsView.getType()).thenReturn("S3");
 
@@ -226,7 +219,7 @@ public class KnoxIdBrokerConfigProviderTest {
     }
 
     @Test
-    public void getRoleConfigWhenIdBrokerAndAdlsFileSystem() {
+    void getRoleConfigWhenIdBrokerAndAdlsFileSystem() {
         BaseFileSystemConfigurationsView fileSystemConfigurationsView = mock(BaseFileSystemConfigurationsView.class);
         when(fileSystemConfigurationsView.getType()).thenReturn("ADLS");
 
@@ -249,7 +242,7 @@ public class KnoxIdBrokerConfigProviderTest {
     }
 
     @Test
-    public void getRoleConfigWhenIdBrokerAndAdlsGen2FileSystemAndValidCMVersionValidEntity() {
+    void getRoleConfigWhenIdBrokerAndAdlsGen2FileSystemAndValidCMVersionValidEntity() {
         BaseFileSystemConfigurationsView fileSystemConfigurationsView = mock(BaseFileSystemConfigurationsView.class);
         when(fileSystemConfigurationsView.getType()).thenReturn("ADLS_GEN_2");
         when(fileSystemConfigurationsView.getIdBrokerIdentityId()).thenReturn(MANAGED_IDENTITY_STR);
@@ -275,7 +268,7 @@ public class KnoxIdBrokerConfigProviderTest {
     }
 
     @Test
-    public void getRoleConfigWhenIdBrokerAndAdlsGen2FileSystemAndInvalidCMVersion() {
+    void getRoleConfigWhenIdBrokerAndAdlsGen2FileSystemAndInvalidCMVersion() {
         BaseFileSystemConfigurationsView fileSystemConfigurationsView = mock(BaseFileSystemConfigurationsView.class);
         when(fileSystemConfigurationsView.getType()).thenReturn("ADLS_GEN_2");
 
@@ -298,7 +291,7 @@ public class KnoxIdBrokerConfigProviderTest {
     }
 
     @Test
-    public void getRoleConfigWhenIdBrokerAndAdlsGen2FileSystemAndValidCMVersionInvalidEntity() {
+    void getRoleConfigWhenIdBrokerAndAdlsGen2FileSystemAndValidCMVersionInvalidEntity() {
         BaseFileSystemConfigurationsView fileSystemConfigurationsView = mock(BaseFileSystemConfigurationsView.class);
         when(fileSystemConfigurationsView.getType()).thenReturn("ADLS_GEN_2");
 
@@ -321,7 +314,7 @@ public class KnoxIdBrokerConfigProviderTest {
     }
 
     @Test
-    public void getRoleConfigWhenIdBrokerAndWasbFileSystem() {
+    void getRoleConfigWhenIdBrokerAndWasbFileSystem() {
         WasbFileSystemConfigurationsView fileSystemConfigurationsView = mock(WasbFileSystemConfigurationsView.class);
         when(fileSystemConfigurationsView.getType()).thenReturn("WASB");
 
@@ -344,7 +337,7 @@ public class KnoxIdBrokerConfigProviderTest {
     }
 
     @Test
-    public void getRoleConfigWhenIdBrokerAndWasbIntegratedFileSystem() {
+    void getRoleConfigWhenIdBrokerAndWasbIntegratedFileSystem() {
         BaseFileSystemConfigurationsView fileSystemConfigurationsView = mock(BaseFileSystemConfigurationsView.class);
         when(fileSystemConfigurationsView.getType()).thenReturn("WASB_INTEGRATED");
 
@@ -367,7 +360,7 @@ public class KnoxIdBrokerConfigProviderTest {
     }
 
     @Test
-    public void getRoleConfigWhenIdBrokerAndGcsFileSystem() {
+    void getRoleConfigWhenIdBrokerAndGcsFileSystem() {
         BaseFileSystemConfigurationsView fileSystemConfigurationsView = mock(BaseFileSystemConfigurationsView.class);
         when(fileSystemConfigurationsView.getType()).thenReturn("GCS");
 
@@ -389,12 +382,12 @@ public class KnoxIdBrokerConfigProviderTest {
     }
 
     @Test
-    public void getServiceType() {
+    void getServiceType() {
         assertThat(underTest.getServiceType()).isEqualTo(KNOX);
     }
 
     @Test
-    public void getRoleTypes() {
+    void getRoleTypes() {
         assertThat(underTest.getRoleTypes()).containsOnly(IDBROKER);
     }
 

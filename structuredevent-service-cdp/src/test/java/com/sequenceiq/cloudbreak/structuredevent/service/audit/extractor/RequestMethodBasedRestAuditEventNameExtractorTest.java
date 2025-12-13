@@ -1,12 +1,12 @@
 package com.sequenceiq.cloudbreak.structuredevent.service.audit.extractor;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.params.provider.Arguments.of;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 import java.util.stream.Stream;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -46,7 +46,7 @@ class RequestMethodBasedRestAuditEventNameExtractorTest {
     void testGetEventNameBasedOnRequestMethodWhenEventDataIsNull() {
         AuditEventName actual = underTest.getEventNameBasedOnRequestMethod(null);
 
-        Assertions.assertEquals(AuditEventName.REST_AUDIT_UNKNOWN, actual);
+        assertEquals(AuditEventName.REST_AUDIT_UNKNOWN, actual);
     }
 
     @Test
@@ -54,7 +54,7 @@ class RequestMethodBasedRestAuditEventNameExtractorTest {
         when(restCallEvent.getRestCall()).thenReturn(null);
         AuditEventName actual = underTest.getEventNameBasedOnRequestMethod(restCallEvent);
 
-        Assertions.assertEquals(AuditEventName.REST_AUDIT_UNKNOWN, actual);
+        assertEquals(AuditEventName.REST_AUDIT_UNKNOWN, actual);
     }
 
     @ParameterizedTest(name = "test method string: {0}, expected event name: {1}")
@@ -64,7 +64,7 @@ class RequestMethodBasedRestAuditEventNameExtractorTest {
 
         AuditEventName actual = underTest.getEventNameBasedOnRequestMethod(restCallEvent);
 
-        Assertions.assertEquals(AuditEventName.REST_AUDIT_UNKNOWN, actual);
+        assertEquals(AuditEventName.REST_AUDIT_UNKNOWN, actual);
     }
 
     public static Stream<Arguments> requestMethodAsStringProvider() {

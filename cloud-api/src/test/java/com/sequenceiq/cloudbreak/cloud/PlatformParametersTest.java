@@ -3,13 +3,13 @@ package com.sequenceiq.cloudbreak.cloud;
 import static com.sequenceiq.cloudbreak.cloud.model.DiskType.diskType;
 import static com.sequenceiq.cloudbreak.cloud.model.DisplayName.displayName;
 import static com.sequenceiq.cloudbreak.cloud.model.Orchestrator.orchestrator;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -36,9 +36,9 @@ public class PlatformParametersTest {
     @Test
     public void getRegionByNameIfValueNotConfigured() {
         DiskTypes diskTypes = underTest.diskTypes();
-        Assertions.assertEquals(1L, diskTypes.displayNames().entrySet().size());
-        Assertions.assertEquals(1L, diskTypes.diskMapping().entrySet().size());
-        Assertions.assertEquals("testDiskType", diskTypes.defaultType().value());
+        assertEquals(1L, diskTypes.displayNames().entrySet().size());
+        assertEquals(1L, diskTypes.diskMapping().entrySet().size());
+        assertEquals("testDiskType", diskTypes.defaultType().value());
     }
 
     static class TestPlatformParameters implements PlatformParameters {

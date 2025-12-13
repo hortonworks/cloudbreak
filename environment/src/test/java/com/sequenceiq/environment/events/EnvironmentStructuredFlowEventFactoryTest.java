@@ -11,7 +11,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Answers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -45,7 +44,7 @@ class EnvironmentStructuredFlowEventFactoryTest {
     void createStructuredFlowEventWithUserCrn() {
         String userCrn = "exampleCrn";
         FlowDetails flowDetails = mock(FlowDetails.class);
-        Environment environment = Mockito.mock(Answers.RETURNS_DEEP_STUBS);
+        Environment environment = mock(Answers.RETURNS_DEEP_STUBS);
         when(environmentService.findEnvironmentByIdOrThrow(anyLong())).thenReturn(environment);
 
         CDPStructuredFlowEvent cdpStructuredFlowEvent = ThreadBasedUserCrnProvider.doAs(userCrn,

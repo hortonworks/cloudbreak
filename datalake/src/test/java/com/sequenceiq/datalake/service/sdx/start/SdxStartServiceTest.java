@@ -1,6 +1,7 @@
 package com.sequenceiq.datalake.service.sdx.start;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
@@ -16,7 +17,6 @@ import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -106,7 +106,7 @@ public class SdxStartServiceTest {
 
         doThrow(freeIpaException).when(freeipaService).checkFreeipaRunning("envCrn");
 
-        BadRequestException exception = Assertions.assertThrows(BadRequestException.class, () -> underTest.triggerStartIfClusterNotRunning(sdxCluster));
+        BadRequestException exception = assertThrows(BadRequestException.class, () -> underTest.triggerStartIfClusterNotRunning(sdxCluster));
         assertEquals("Freeipa should be in Available state but currently is " + Status.STOPPED, exception.getMessage());
     }
 
@@ -139,7 +139,7 @@ public class SdxStartServiceTest {
         when(webApplicationExceptionMessageExtractor.getErrorMessage(any())).thenReturn("Error message: \"error\"");
         doThrow(new ClientErrorException(Response.Status.BAD_REQUEST)).when(stackV4Endpoint).putStartInternal(eq(0L), eq(CLUSTER_NAME), nullable(String.class));
         when(sdxService.getById(CLUSTER_ID)).thenReturn(sdxCluster);
-        RuntimeException exception = Assertions.assertThrows(RuntimeException.class, () -> underTest.start(CLUSTER_ID));
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> underTest.start(CLUSTER_ID));
 
         verifyNoInteractions(cloudbreakFlowService);
         assertEquals("Cannot start cluster, error happened during operation: Error message: \"error\"", exception.getMessage());
@@ -152,7 +152,7 @@ public class SdxStartServiceTest {
         doThrow(new WebApplicationException(Response.Status.INTERNAL_SERVER_ERROR)).when(stackV4Endpoint)
                 .putStartInternal(eq(0L), eq(CLUSTER_NAME), nullable(String.class));
         when(sdxService.getById(CLUSTER_ID)).thenReturn(sdxCluster);
-        RuntimeException exception = Assertions.assertThrows(RuntimeException.class, () -> underTest.start(CLUSTER_ID));
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> underTest.start(CLUSTER_ID));
 
         verifyNoInteractions(cloudbreakFlowService);
         assertEquals("Cannot start cluster, error happened during operation: Error message: \"error\"", exception.getMessage());
@@ -174,7 +174,7 @@ public class SdxStartServiceTest {
         when(sdxService.getById(CLUSTER_ID)).thenReturn(sdxCluster);
         when(webApplicationExceptionMessageExtractor.getErrorMessage(any())).thenReturn("Error message: \"error\"");
         doThrow(new WebApplicationException(Response.Status.INTERNAL_SERVER_ERROR)).when(distroxService).startAttachedDistrox(eq(ENV_CRN));
-        RuntimeException exception = Assertions.assertThrows(RuntimeException.class, () -> underTest.startAllDatahubs(CLUSTER_ID));
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> underTest.startAllDatahubs(CLUSTER_ID));
 
         assertEquals("Can not start datahub, error happened during operation: Error message: \"error\"", exception.getMessage());
 

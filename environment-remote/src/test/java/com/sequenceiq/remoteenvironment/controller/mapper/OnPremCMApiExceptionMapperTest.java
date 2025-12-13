@@ -1,10 +1,11 @@
 package com.sequenceiq.remoteenvironment.controller.mapper;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.util.stream.Stream;
 
 import jakarta.ws.rs.core.Response;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -24,7 +25,7 @@ class OnPremCMApiExceptionMapperTest {
     void testGetResponseStatus(int cmStatusCode, Response.Status responseStatus) {
         Response.Status actualStatus = underTest.getResponseStatus(new OnPremCMApiException("msg", null, cmStatusCode));
 
-        Assertions.assertEquals(responseStatus, actualStatus);
+        assertEquals(responseStatus, actualStatus);
     }
 
     private static Stream<Arguments> responseStatuses() {

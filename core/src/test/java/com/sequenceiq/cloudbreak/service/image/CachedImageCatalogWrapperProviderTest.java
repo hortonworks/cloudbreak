@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.service.image;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
@@ -18,7 +20,6 @@ import jakarta.ws.rs.client.WebTarget;
 import jakarta.ws.rs.core.Response;
 
 import org.assertj.core.util.Lists;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -105,17 +106,17 @@ public class CachedImageCatalogWrapperProviderTest {
 
         assertNotNull(catalog);
         Optional<CloudbreakVersion> ver = catalog.getVersions().getCloudbreakVersions().stream().filter(v -> v.getVersions().contains(CB_VERSION)).findFirst();
-        Assertions.assertTrue(ver.isPresent(), "Check that the parsed ImageCatalog contains the desired version of Cloudbreak.");
+        assertTrue(ver.isPresent(), "Check that the parsed ImageCatalog contains the desired version of Cloudbreak.");
         List<String> imageIds = ver.get().getImageIds();
         assertNotNull(imageIds);
         Optional<String> imageIdOptional = imageIds.stream().findFirst();
-        Assertions.assertTrue(imageIdOptional.isPresent(), "Check that the parsed ImageCatalog contains image reference for the Cloudbreak version.");
+        assertTrue(imageIdOptional.isPresent(), "Check that the parsed ImageCatalog contains image reference for the Cloudbreak version.");
         String imageId = imageIdOptional.get();
         boolean baseImageFound = false;
         if (catalog.getImages().getBaseImages() != null) {
             baseImageFound = catalog.getImages().getBaseImages().stream().anyMatch(i -> i.getUuid().equals(imageId));
         }
-        Assertions.assertTrue(baseImageFound, "Check that the parsed ImageCatalog contains image for the Cloudbreak version.");
+        assertTrue(baseImageFound, "Check that the parsed ImageCatalog contains image for the Cloudbreak version.");
     }
 
     @Test
@@ -126,7 +127,7 @@ public class CachedImageCatalogWrapperProviderTest {
         String errorMessage = getErrorMessage(CB_IMAGE_CATALOG_NULL_FIELD_JSON);
 
         String expected = "Missing required creator property 'images' (index 0)";
-        Assertions.assertTrue(errorMessage.startsWith(expected), "Check that the 'images' field is missing");
+        assertTrue(errorMessage.startsWith(expected), "Check that the 'images' field is missing");
 
     }
 
@@ -252,7 +253,7 @@ public class CachedImageCatalogWrapperProviderTest {
         ReflectionTestUtils.setField(underTest, "etcConfigDir", path);
         ReflectionTestUtils.setField(underTest, "enabledLinuxTypes", Collections.emptyList());
 
-        Assertions.assertThrows(CloudbreakImageCatalogException.class, () -> underTest.getImageCatalogWrapper(catalogUrl));
+        assertThrows(CloudbreakImageCatalogException.class, () -> underTest.getImageCatalogWrapper(catalogUrl));
     }
 
     @Test
@@ -271,7 +272,7 @@ public class CachedImageCatalogWrapperProviderTest {
         ReflectionTestUtils.setField(underTest, "etcConfigDir", path);
         ReflectionTestUtils.setField(underTest, "enabledLinuxTypes", Collections.emptyList());
 
-        Assertions.assertThrows(CloudbreakImageCatalogException.class, () -> underTest.getImageCatalogWrapper(CB_IMAGE_CATALOG_FILTER_IMAGES_NULL_JSON));
+        assertThrows(CloudbreakImageCatalogException.class, () -> underTest.getImageCatalogWrapper(CB_IMAGE_CATALOG_FILTER_IMAGES_NULL_JSON));
     }
 
     @Test
@@ -280,7 +281,7 @@ public class CachedImageCatalogWrapperProviderTest {
         ReflectionTestUtils.setField(underTest, "etcConfigDir", path);
         ReflectionTestUtils.setField(underTest, "enabledLinuxTypes", Collections.emptyList());
 
-        Assertions.assertThrows(CloudbreakImageCatalogException.class, () -> underTest.getImageCatalogWrapper(FREEIPA_IMAGE_CATALOG_FILTER_IMAGES_NULL_JSON));
+        assertThrows(CloudbreakImageCatalogException.class, () -> underTest.getImageCatalogWrapper(FREEIPA_IMAGE_CATALOG_FILTER_IMAGES_NULL_JSON));
     }
 
     @Test

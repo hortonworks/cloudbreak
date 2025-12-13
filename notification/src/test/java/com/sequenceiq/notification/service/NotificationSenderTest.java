@@ -2,6 +2,7 @@ package com.sequenceiq.notification.service;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -29,9 +30,9 @@ class NotificationSenderTest {
 
     @BeforeEach
     void setUp() {
-        notificationService = org.mockito.Mockito.mock(NotificationDataAccessService.class);
-        centralNotificationSenderService = org.mockito.Mockito.mock(CentralNotificationSenderService.class);
-        notificationToNotificationDtoConverter = org.mockito.Mockito.mock(NotificationToNotificationDtoConverter.class);
+        notificationService = mock(NotificationDataAccessService.class);
+        centralNotificationSenderService = mock(CentralNotificationSenderService.class);
+        notificationToNotificationDtoConverter = mock(NotificationToNotificationDtoConverter.class);
         notificationSender = new NotificationSender(
                 centralNotificationSenderService,
                 notificationToNotificationDtoConverter

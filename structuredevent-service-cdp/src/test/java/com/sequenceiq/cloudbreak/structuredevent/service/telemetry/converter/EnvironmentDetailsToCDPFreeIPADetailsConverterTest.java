@@ -1,9 +1,9 @@
 package com.sequenceiq.cloudbreak.structuredevent.service.telemetry.converter;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.Mockito.when;
 
-import org.junit.Assert;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -42,8 +42,8 @@ class EnvironmentDetailsToCDPFreeIPADetailsConverterTest {
     public void testNull() {
         UsageProto.CDPFreeIPADetails freeIPADetails = underTest.convert(null);
 
-        Assertions.assertFalse(freeIPADetails.getSpot());
-        Assertions.assertEquals(-1, freeIPADetails.getNodes());
+        assertFalse(freeIPADetails.getSpot());
+        assertEquals(-1, freeIPADetails.getNodes());
     }
 
     @Test
@@ -52,8 +52,8 @@ class EnvironmentDetailsToCDPFreeIPADetailsConverterTest {
 
         UsageProto.CDPFreeIPADetails freeIPADetails = underTest.convert(environmentDetails);
 
-        Assertions.assertFalse(freeIPADetails.getSpot());
-        Assertions.assertEquals(-1, freeIPADetails.getNodes());
+        assertFalse(freeIPADetails.getSpot());
+        assertEquals(-1, freeIPADetails.getNodes());
     }
 
     @Test
@@ -62,8 +62,8 @@ class EnvironmentDetailsToCDPFreeIPADetailsConverterTest {
 
         UsageProto.CDPFreeIPADetails freeIPADetails = underTest.convert(environmentDetails);
 
-        Assert.assertEquals(false, freeIPADetails.getSpot());
-        Assert.assertEquals(0, freeIPADetails.getNodes());
+        assertEquals(false, freeIPADetails.getSpot());
+        assertEquals(0, freeIPADetails.getNodes());
     }
 
     @Test
@@ -73,8 +73,8 @@ class EnvironmentDetailsToCDPFreeIPADetailsConverterTest {
 
         UsageProto.CDPFreeIPADetails freeIPADetails = underTest.convert(environmentDetails);
 
-        Assert.assertEquals(false, freeIPADetails.getSpot());
-        Assert.assertEquals(3, freeIPADetails.getNodes());
+        assertEquals(false, freeIPADetails.getSpot());
+        assertEquals(3, freeIPADetails.getNodes());
     }
 
     @Test
@@ -87,7 +87,7 @@ class EnvironmentDetailsToCDPFreeIPADetailsConverterTest {
 
         UsageProto.CDPFreeIPADetails freeIPADetails = underTest.convert(environmentDetails);
 
-        Assert.assertEquals(true, freeIPADetails.getSpot());
-        Assert.assertEquals(1, freeIPADetails.getNodes());
+        assertEquals(true, freeIPADetails.getSpot());
+        assertEquals(1, freeIPADetails.getNodes());
     }
 }

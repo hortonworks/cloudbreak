@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cmtemplate.cloudstorage;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -10,12 +12,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.google.common.collect.Sets;
@@ -28,8 +29,8 @@ import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.common.api.cloudstorage.query.ConfigQueryEntry;
 import com.sequenceiq.common.model.FileSystemType;
 
-@RunWith(MockitoJUnitRunner.class)
-public class CmCloudStorageConfigDetailsTest {
+@ExtendWith(MockitoExtension.class)
+class CmCloudStorageConfigDetailsTest {
 
     private static final String BLUEPRINT_TEXT = "{}";
 
@@ -69,7 +70,7 @@ public class CmCloudStorageConfigDetailsTest {
 
     private CmCloudStorageConfigProvider underTest;
 
-    @Before
+    @BeforeEach
     public void before() throws IOException {
         String specifications = FileReaderUtils.readFileFromClasspath("definitions/cm-cloud-storage-location-specification.json");
         when(cloudbreakResourceReaderService.resourceDefinition("cm-cloud-storage-location-specification")).thenReturn(specifications);
@@ -78,7 +79,7 @@ public class CmCloudStorageConfigDetailsTest {
     }
 
     @Test
-    public void testWhenHiveMetasoreRangerAdminZeppelinRMIsPresentedAndNotAttachedThenShouldReturnWithBothConfigs() {
+    void testWhenHiveMetasoreRangerAdminZeppelinRMIsPresentedAndNotAttachedThenShouldReturnWithBothConfigs() {
         prepareBlueprintProcessorFactoryMock(HIVE_METASTORE, RANGER_ADMIN, RESOURCEMANAGER, ZEPPELIN_SERVER, NAMENODE);
         FileSystemConfigQueryObject fileSystemConfigQueryObject = FileSystemConfigQueryObject.Builder.builder()
                 .withStorageName(STORAGE_NAME)
@@ -89,34 +90,34 @@ public class CmCloudStorageConfigDetailsTest {
                 .build();
         Set<ConfigQueryEntry> bigCluster = underTest.queryParameters(fileSystemConfigQueryObject);
 
-        Assert.assertEquals(6L, bigCluster.size());
+        assertEquals(6L, bigCluster.size());
 
         Set<ConfigQueryEntry> rangerAdmins = serviceEntry(bigCluster, RANGER_ADMIN);
         Set<ConfigQueryEntry> yarnSite = serviceEntry(bigCluster, RESOURCEMANAGER);
         Set<ConfigQueryEntry> zeppelin = serviceEntry(bigCluster, ZEPPELIN_SERVER);
         Set<ConfigQueryEntry> hive = serviceEntry(bigCluster, HIVE_METASTORE);
 
-        Assert.assertEquals(1, rangerAdmins.size());
-        Assert.assertTrue(rangerAdmins.stream()
+        assertEquals(1, rangerAdmins.size());
+        assertTrue(rangerAdmins.stream()
                 .anyMatch(cqe -> cqe.getDefaultPath().equals("hwx-remote/ranger/audit")));
 
-        Assert.assertEquals(1, yarnSite.size());
-        Assert.assertTrue(yarnSite.stream()
+        assertEquals(1, yarnSite.size());
+        assertTrue(yarnSite.stream()
                 .anyMatch(cqe -> cqe.getDefaultPath().equals("hwx-remote/bigCluster/oplogs/yarn-app-logs")));
 
-        Assert.assertEquals(1, zeppelin.size());
-        Assert.assertTrue(zeppelin.stream()
+        assertEquals(1, zeppelin.size());
+        assertTrue(zeppelin.stream()
                 .anyMatch(cqe -> cqe.getDefaultPath().equals("hwx-remote/bigCluster/zeppelin/notebook")));
 
-        Assert.assertEquals(3, hive.size());
-        Assert.assertTrue(hive.stream()
+        assertEquals(3, hive.size());
+        assertTrue(hive.stream()
                 .anyMatch(cqe -> cqe.getDefaultPath().equals("hwx-remote/warehouse/tablespace/managed/hive")));
-        Assert.assertTrue(hive.stream()
+        assertTrue(hive.stream()
                 .anyMatch(cqe -> cqe.getDefaultPath().equals("hwx-remote/warehouse/tablespace/external/hive")));
     }
 
     @Test
-    public void testWhenHiveMetasoreAndRangerAdminIsPresentedDoubleAndNotAttachedThenShouldReturnWithRangerConfigs() {
+    void testWhenHiveMetasoreAndRangerAdminIsPresentedDoubleAndNotAttachedThenShouldReturnWithRangerConfigs() {
         Map<String, Set<String>> map = new HashMap<>();
         map.put("master", Sets.newHashSet(HIVE_METASTORE, RANGER_ADMIN, NAMENODE));
         map.put("slave_1", Sets.newHashSet(HIVE_METASTORE, RANGER_ADMIN));
@@ -131,24 +132,24 @@ public class CmCloudStorageConfigDetailsTest {
                 .build();
         Set<ConfigQueryEntry> bigCluster = underTest.queryParameters(fileSystemConfigQueryObject);
 
-        Assert.assertEquals(4L, bigCluster.size());
+        assertEquals(4L, bigCluster.size());
 
         Set<ConfigQueryEntry> rangerAdmins = serviceEntry(bigCluster, RANGER_ADMIN);
         Set<ConfigQueryEntry> hive = serviceEntry(bigCluster, HIVE_METASTORE);
 
-        Assert.assertEquals(1, rangerAdmins.size());
-        Assert.assertTrue(rangerAdmins.stream()
+        assertEquals(1, rangerAdmins.size());
+        assertTrue(rangerAdmins.stream()
                 .anyMatch(cqe -> cqe.getDefaultPath().equals("hwx-remote/ranger/audit")));
 
-        Assert.assertEquals(3, hive.size());
-        Assert.assertTrue(hive.stream()
+        assertEquals(3, hive.size());
+        assertTrue(hive.stream()
                 .anyMatch(cqe -> cqe.getDefaultPath().equals("hwx-remote/warehouse/tablespace/managed/hive")));
-        Assert.assertTrue(hive.stream()
+        assertTrue(hive.stream()
                 .anyMatch(cqe -> cqe.getDefaultPath().equals("hwx-remote/warehouse/tablespace/external/hive")));
     }
 
     @Test
-    public void testWhenHiveMetasoreAndRangerAdminIsPresentedDoubleAndAttachedThenShouldReturnWithRangerConfigs() {
+    void testWhenHiveMetasoreAndRangerAdminIsPresentedDoubleAndAttachedThenShouldReturnWithRangerConfigs() {
         Map<String, Set<String>> map = new HashMap<>();
         map.put("master", Sets.newHashSet(HIVE_METASTORE, RANGER_ADMIN, NAMENODE));
         map.put("slave_1", Sets.newHashSet(HIVE_METASTORE, RANGER_ADMIN));
@@ -163,17 +164,17 @@ public class CmCloudStorageConfigDetailsTest {
                 .build();
         Set<ConfigQueryEntry> bigCluster = underTest.queryParameters(fileSystemConfigQueryObject);
 
-        Assert.assertEquals(1L, bigCluster.size());
+        assertEquals(1L, bigCluster.size());
 
         Set<ConfigQueryEntry> rangerAdmins = serviceEntry(bigCluster, RANGER_ADMIN);
 
-        Assert.assertEquals(1, rangerAdmins.size());
-        Assert.assertTrue(rangerAdmins.stream()
+        assertEquals(1, rangerAdmins.size());
+        assertTrue(rangerAdmins.stream()
                 .anyMatch(cqe -> cqe.getDefaultPath().equals("hwx-remote/ranger/audit")));
     }
 
     @Test
-    public void testWhenOnlyRangerAdminIsPresentedThenShouldReturnWithOnlyRangerAdminConfigs() {
+    void testWhenOnlyRangerAdminIsPresentedThenShouldReturnWithOnlyRangerAdminConfigs() {
         prepareBlueprintProcessorFactoryMock(RANGER_ADMIN, NAMENODE);
         FileSystemConfigQueryObject fileSystemConfigQueryObject = FileSystemConfigQueryObject.Builder.builder()
                 .withStorageName(STORAGE_NAME)
@@ -184,18 +185,18 @@ public class CmCloudStorageConfigDetailsTest {
                 .build();
         Set<ConfigQueryEntry> bigCluster = underTest.queryParameters(fileSystemConfigQueryObject);
 
-        Assert.assertEquals(1L, bigCluster.size());
+        assertEquals(1L, bigCluster.size());
 
         Set<ConfigQueryEntry> rangerAdmins = serviceEntry(bigCluster, RANGER_ADMIN);
 
-        Assert.assertEquals(1, rangerAdmins.size());
+        assertEquals(1, rangerAdmins.size());
 
-        Assert.assertTrue(rangerAdmins.stream()
+        assertTrue(rangerAdmins.stream()
                 .anyMatch(cqe -> cqe.getDefaultPath().equals("hwx-remote/ranger/audit")));
     }
 
     @Test
-    public void testWhenAttachedClusterAndHiveMetastorePresentedThenShouldReturnWithNothing() {
+    void testWhenAttachedClusterAndHiveMetastorePresentedThenShouldReturnWithNothing() {
         prepareBlueprintProcessorFactoryMock(HIVE_METASTORE, NAMENODE);
         FileSystemConfigQueryObject fileSystemConfigQueryObject = FileSystemConfigQueryObject.Builder.builder()
                 .withStorageName(STORAGE_NAME)
@@ -206,11 +207,11 @@ public class CmCloudStorageConfigDetailsTest {
                 .build();
         Set<ConfigQueryEntry> bigCluster = underTest.queryParameters(fileSystemConfigQueryObject);
 
-        Assert.assertEquals(0L, bigCluster.size());
+        assertEquals(0L, bigCluster.size());
     }
 
     @Test
-    public void testWhenNotAttachedClusterAndOnlyHiveMetastoreIsPresentedThenShouldReturnWithOnlyHiveMetastoreConfigs() {
+    void testWhenNotAttachedClusterAndOnlyHiveMetastoreIsPresentedThenShouldReturnWithOnlyHiveMetastoreConfigs() {
         prepareBlueprintProcessorFactoryMock(HIVE_METASTORE, NAMENODE);
         FileSystemConfigQueryObject fileSystemConfigQueryObject = FileSystemConfigQueryObject.Builder.builder()
                 .withStorageName(STORAGE_NAME)
@@ -221,21 +222,21 @@ public class CmCloudStorageConfigDetailsTest {
                 .build();
         Set<ConfigQueryEntry> bigCluster = underTest.queryParameters(fileSystemConfigQueryObject);
 
-        Assert.assertEquals(3L, bigCluster.size());
+        assertEquals(3L, bigCluster.size());
 
         Set<ConfigQueryEntry> hive = serviceEntry(bigCluster, HIVE_METASTORE);
 
-        Assert.assertEquals(3, hive.size());
-        Assert.assertTrue(hive.stream().map(ConfigQueryEntry::getDefaultPath)
+        assertEquals(3, hive.size());
+        assertTrue(hive.stream().map(ConfigQueryEntry::getDefaultPath)
                 .anyMatch("hwx-remote/warehouse/tablespace/managed/hive"::equals));
-        Assert.assertTrue(hive.stream().map(ConfigQueryEntry::getDefaultPath)
+        assertTrue(hive.stream().map(ConfigQueryEntry::getDefaultPath)
                 .anyMatch("hwx-remote/warehouse/tablespace/external/hive"::equals));
-        Assert.assertTrue(hive.stream().map(ConfigQueryEntry::getDefaultPath)
+        assertTrue(hive.stream().map(ConfigQueryEntry::getDefaultPath)
                 .anyMatch("hwx-remote/warehouse/tablespace/external/hive"::equals));
     }
 
     @Test
-    public void testDatalakeClusterPaths() {
+    void testDatalakeClusterPaths() {
         prepareBlueprintProcessorFactoryMock(RANGER_ADMIN, RESOURCEMANAGER, NAMENODE);
         FileSystemConfigQueryObject fileSystemConfigQueryObject = FileSystemConfigQueryObject.Builder.builder()
                 .withStorageName(STORAGE_NAME)
@@ -245,22 +246,22 @@ public class CmCloudStorageConfigDetailsTest {
                 .withFileSystemType(FileSystemType.S3.name())
                 .build();
         Set<ConfigQueryEntry> bigCluster = underTest.queryParameters(fileSystemConfigQueryObject);
-        Assert.assertEquals(2L, bigCluster.size());
+        assertEquals(2L, bigCluster.size());
 
         Set<ConfigQueryEntry> rangerAdmin = serviceEntry(bigCluster, RANGER_ADMIN);
         Set<ConfigQueryEntry> yarn = serviceEntry(bigCluster, RESOURCEMANAGER);
 
-        Assert.assertEquals(1, rangerAdmin.size());
-        Assert.assertTrue(rangerAdmin.stream().map(ConfigQueryEntry::getDefaultPath)
+        assertEquals(1, rangerAdmin.size());
+        assertTrue(rangerAdmin.stream().map(ConfigQueryEntry::getDefaultPath)
                 .anyMatch("hwx-remote/ranger/audit"::equals));
 
-        Assert.assertEquals(1, yarn.size());
-        Assert.assertTrue(yarn.stream().map(ConfigQueryEntry::getDefaultPath)
+        assertEquals(1, yarn.size());
+        assertTrue(yarn.stream().map(ConfigQueryEntry::getDefaultPath)
                 .anyMatch("hwx-remote/oplogs/yarn-app-logs"::equals));
     }
 
     @Test
-    public void testStandaloneClusterPaths() {
+    void testStandaloneClusterPaths() {
         prepareBlueprintProcessorFactoryMock(RANGER_ADMIN, ZEPPELIN_SERVER, HBASE_MASTER, NAMENODE);
         FileSystemConfigQueryObject fileSystemConfigQueryObject = FileSystemConfigQueryObject.Builder.builder()
                 .withStorageName(STORAGE_NAME)
@@ -271,28 +272,28 @@ public class CmCloudStorageConfigDetailsTest {
                 .withFileSystemType(FileSystemType.S3.name())
                 .build();
         Set<ConfigQueryEntry> bigCluster = underTest.queryParameters(fileSystemConfigQueryObject);
-        Assert.assertEquals(3L, bigCluster.size());
+        assertEquals(3L, bigCluster.size());
 
         Set<ConfigQueryEntry> rangerAdmin = serviceEntry(bigCluster, RANGER_ADMIN);
         Set<ConfigQueryEntry> zeppelin = serviceEntry(bigCluster, ZEPPELIN_SERVER);
         Set<ConfigQueryEntry> hbaseMaster = serviceEntry(bigCluster, HBASE_MASTER);
 
 
-        Assert.assertEquals(1, rangerAdmin.size());
-        Assert.assertTrue(rangerAdmin.stream().map(ConfigQueryEntry::getDefaultPath)
+        assertEquals(1, rangerAdmin.size());
+        assertTrue(rangerAdmin.stream().map(ConfigQueryEntry::getDefaultPath)
                 .anyMatch("hwx-remote/ranger/audit"::equals));
 
-        Assert.assertEquals(1, zeppelin.size());
-        Assert.assertTrue(zeppelin.stream().map(ConfigQueryEntry::getDefaultPath)
+        assertEquals(1, zeppelin.size());
+        assertTrue(zeppelin.stream().map(ConfigQueryEntry::getDefaultPath)
                 .anyMatch("hwx-remote/bigCluster/zeppelin/notebook"::equals));
 
-        Assert.assertEquals(1, hbaseMaster.size());
-        Assert.assertTrue(hbaseMaster.stream().map(ConfigQueryEntry::getDefaultPath)
+        assertEquals(1, hbaseMaster.size());
+        assertTrue(hbaseMaster.stream().map(ConfigQueryEntry::getDefaultPath)
                 .anyMatch("hwx-remote/bigCluster/hbase"::equals));
     }
 
     @Test
-    public void testAttachedClusterPaths() {
+    void testAttachedClusterPaths() {
         prepareBlueprintProcessorFactoryMock(RANGER_ADMIN, RESOURCEMANAGER, ZEPPELIN_SERVER, HBASE_MASTER, NAMENODE);
         FileSystemConfigQueryObject fileSystemConfigQueryObject = FileSystemConfigQueryObject.Builder.builder()
                 .withStorageName(STORAGE_NAME)
@@ -303,32 +304,32 @@ public class CmCloudStorageConfigDetailsTest {
                 .withFileSystemType(FileSystemType.S3.name())
                 .build();
         Set<ConfigQueryEntry> bigCluster = underTest.queryParameters(fileSystemConfigQueryObject);
-        Assert.assertEquals(4L, bigCluster.size());
+        assertEquals(4L, bigCluster.size());
 
         Set<ConfigQueryEntry> rangerAdmin = serviceEntry(bigCluster, RANGER_ADMIN);
         Set<ConfigQueryEntry> yarnLogs = serviceEntry(bigCluster, RESOURCEMANAGER);
         Set<ConfigQueryEntry> zeppelin = serviceEntry(bigCluster, ZEPPELIN_SERVER);
         Set<ConfigQueryEntry> hbaseMaster = serviceEntry(bigCluster, HBASE_MASTER);
 
-        Assert.assertEquals(1, rangerAdmin.size());
-        Assert.assertTrue(rangerAdmin.stream().map(ConfigQueryEntry::getDefaultPath)
+        assertEquals(1, rangerAdmin.size());
+        assertTrue(rangerAdmin.stream().map(ConfigQueryEntry::getDefaultPath)
                 .anyMatch("hwx-remote/ranger/audit"::equals));
 
-        Assert.assertEquals(1, yarnLogs.size());
-        Assert.assertTrue(yarnLogs.stream().map(ConfigQueryEntry::getDefaultPath)
+        assertEquals(1, yarnLogs.size());
+        assertTrue(yarnLogs.stream().map(ConfigQueryEntry::getDefaultPath)
                 .anyMatch("hwx-remote/oplogs/yarn-app-logs"::equals));
 
-        Assert.assertEquals(1, zeppelin.size());
-        Assert.assertTrue(zeppelin.stream().map(ConfigQueryEntry::getDefaultPath)
+        assertEquals(1, zeppelin.size());
+        assertTrue(zeppelin.stream().map(ConfigQueryEntry::getDefaultPath)
                 .anyMatch("hwx-remote/bigCluster/zeppelin/notebook"::equals));
 
-        Assert.assertEquals(1, hbaseMaster.size());
-        Assert.assertTrue(hbaseMaster.stream().map(ConfigQueryEntry::getDefaultPath)
+        assertEquals(1, hbaseMaster.size());
+        assertTrue(hbaseMaster.stream().map(ConfigQueryEntry::getDefaultPath)
                 .anyMatch("hwx-remote/bigCluster/hbase"::equals));
     }
 
     @Test
-    public void testProfilerServicesWithAttachedCluster() {
+    void testProfilerServicesWithAttachedCluster() {
         prepareBlueprintProcessorFactoryMock(DATA_DISCOVERY_SERVICE_AGENT, PROFILER_ADMIN_AGENT, PROFILER_METRICS_AGENT, PROFILER_SCHEDULER_AGENT, NAMENODE);
         FileSystemConfigQueryObject fileSystemConfigQueryObject = FileSystemConfigQueryObject.Builder.builder()
                 .withStorageName(STORAGE_NAME)
@@ -338,41 +339,41 @@ public class CmCloudStorageConfigDetailsTest {
                 .withFileSystemType(FileSystemType.S3.name())
                 .build();
         Set<ConfigQueryEntry> bigCluster = underTest.queryParameters(fileSystemConfigQueryObject);
-        Assert.assertEquals(1L, bigCluster.size());
+        assertEquals(1L, bigCluster.size());
 
         Set<ConfigQueryEntry> dataDiscoveryService = serviceEntry(bigCluster, DATA_DISCOVERY_SERVICE_AGENT);
         Set<ConfigQueryEntry> profilerAdmin = serviceEntry(bigCluster, PROFILER_ADMIN_AGENT);
         Set<ConfigQueryEntry> profilerMetrics = serviceEntry(bigCluster, PROFILER_METRICS_AGENT);
         Set<ConfigQueryEntry> profilerScheduler = serviceEntry(bigCluster, PROFILER_SCHEDULER_AGENT);
 
-        Assert.assertEquals(1, dataDiscoveryService.size());
-        Assert.assertTrue(dataDiscoveryService.stream().map(ConfigQueryEntry::getDefaultPath)
+        assertEquals(1, dataDiscoveryService.size());
+        assertTrue(dataDiscoveryService.stream().map(ConfigQueryEntry::getDefaultPath)
                 .anyMatch("hwx-remote/dpprofiler"::equals));
-        Assert.assertTrue(dataDiscoveryService.stream().map(ConfigQueryEntry::getPropertyName)
+        assertTrue(dataDiscoveryService.stream().map(ConfigQueryEntry::getPropertyName)
                 .anyMatch("file_system_uri"::equals));
 
-        Assert.assertEquals(1, profilerAdmin.size());
-        Assert.assertTrue(profilerAdmin.stream().map(ConfigQueryEntry::getDefaultPath)
+        assertEquals(1, profilerAdmin.size());
+        assertTrue(profilerAdmin.stream().map(ConfigQueryEntry::getDefaultPath)
                 .anyMatch("hwx-remote/dpprofiler"::equals));
-        Assert.assertTrue(profilerAdmin.stream().map(ConfigQueryEntry::getPropertyName)
+        assertTrue(profilerAdmin.stream().map(ConfigQueryEntry::getPropertyName)
                 .anyMatch("file_system_uri"::equals));
 
 
-        Assert.assertEquals(1, profilerMetrics.size());
-        Assert.assertTrue(profilerMetrics.stream().map(ConfigQueryEntry::getDefaultPath)
+        assertEquals(1, profilerMetrics.size());
+        assertTrue(profilerMetrics.stream().map(ConfigQueryEntry::getDefaultPath)
                 .anyMatch("hwx-remote/dpprofiler"::equals));
-        Assert.assertTrue(profilerMetrics.stream().map(ConfigQueryEntry::getPropertyName)
+        assertTrue(profilerMetrics.stream().map(ConfigQueryEntry::getPropertyName)
                 .anyMatch("file_system_uri"::equals));
 
-        Assert.assertEquals(1, profilerScheduler.size());
-        Assert.assertTrue(profilerScheduler.stream().map(ConfigQueryEntry::getDefaultPath)
+        assertEquals(1, profilerScheduler.size());
+        assertTrue(profilerScheduler.stream().map(ConfigQueryEntry::getDefaultPath)
                 .anyMatch("hwx-remote/dpprofiler"::equals));
-        Assert.assertTrue(profilerScheduler.stream().map(ConfigQueryEntry::getPropertyName)
+        assertTrue(profilerScheduler.stream().map(ConfigQueryEntry::getPropertyName)
                 .anyMatch("file_system_uri"::equals));
     }
 
     @Test
-    public void testBasePathWhenNoHDFSServicesWithAttachedCluster() {
+    void testBasePathWhenNoHDFSServicesWithAttachedCluster() {
         prepareBlueprintProcessorFactoryMock();
         FileSystemConfigQueryObject fileSystemConfigQueryObject = FileSystemConfigQueryObject.Builder.builder()
                 .withStorageName(STORAGE_NAME)
@@ -382,14 +383,14 @@ public class CmCloudStorageConfigDetailsTest {
                 .withFileSystemType(FileSystemType.S3.name())
                 .build();
         Set<ConfigQueryEntry> bigCluster = underTest.queryParameters(fileSystemConfigQueryObject);
-        Assert.assertEquals(1L, bigCluster.size());
+        assertEquals(1L, bigCluster.size());
 
         Set<ConfigQueryEntry> defaultFS = missingServiceEntry(bigCluster, NAMENODE);
 
-        Assert.assertEquals(1, defaultFS.size());
-        Assert.assertTrue(defaultFS.stream().map(ConfigQueryEntry::getDefaultPath)
+        assertEquals(1, defaultFS.size());
+        assertTrue(defaultFS.stream().map(ConfigQueryEntry::getDefaultPath)
                 .anyMatch("hwx-remote/bigCluster"::equals));
-        Assert.assertTrue(defaultFS.stream().map(ConfigQueryEntry::getPropertyName)
+        assertTrue(defaultFS.stream().map(ConfigQueryEntry::getPropertyName)
                 .anyMatch("core_defaultfs"::equals));
     }
 
@@ -404,7 +405,7 @@ public class CmCloudStorageConfigDetailsTest {
     }
 
     @Test
-    public void testCopyOfContigEntries() {
+    void testCopyOfContigEntries() {
         prepareBlueprintProcessorFactoryMock(HIVE_SERVER, RANGER_ADMIN);
 
         Set<ConfigQueryEntry> bigCluster = getConfigQueryEntriesS3(STORAGE_NAME);
@@ -412,20 +413,20 @@ public class CmCloudStorageConfigDetailsTest {
         Set<ConfigQueryEntry> hiveServerEntries = serviceEntry(bigCluster, HIVE_SERVER);
         Set<ConfigQueryEntry> rangerAdminEntries = serviceEntry(bigCluster, RANGER_ADMIN);
 
-        Assert.assertEquals(0, hiveServerEntries.size());
-        Assert.assertEquals(1, rangerAdminEntries.size());
+        assertEquals(0, hiveServerEntries.size());
+        assertEquals(1, rangerAdminEntries.size());
 
         bigCluster = getConfigQueryEntriesS3(STORAGE_NAME + "copy");
 
         hiveServerEntries = serviceEntry(bigCluster, HIVE_SERVER);
         rangerAdminEntries = serviceEntry(bigCluster, RANGER_ADMIN);
 
-        Assert.assertEquals(0, hiveServerEntries.size());
-        Assert.assertEquals(1, rangerAdminEntries.size());
+        assertEquals(0, hiveServerEntries.size());
+        assertEquals(1, rangerAdminEntries.size());
     }
 
     @Test
-    public void testSubFolder() {
+    void testSubFolder() {
         prepareBlueprintProcessorFactoryMock(RANGER_ADMIN, ZEPPELIN_SERVER, HBASE_MASTER, NAMENODE);
 
         FileSystemConfigQueryObject fileSystemConfigQueryObject = FileSystemConfigQueryObject.Builder.builder()
@@ -437,23 +438,23 @@ public class CmCloudStorageConfigDetailsTest {
                 .withFileSystemType(FileSystemType.ADLS_GEN_2.name())
                 .build();
         Set<ConfigQueryEntry> bigCluster = underTest.queryParameters(fileSystemConfigQueryObject);
-        Assert.assertEquals(3L, bigCluster.size());
+        assertEquals(3L, bigCluster.size());
 
         Set<ConfigQueryEntry> rangerAdmin = serviceEntry(bigCluster, RANGER_ADMIN);
         Set<ConfigQueryEntry> zeppelin = serviceEntry(bigCluster, ZEPPELIN_SERVER);
         Set<ConfigQueryEntry> hbaseMaster = serviceEntry(bigCluster, HBASE_MASTER);
 
 
-        Assert.assertEquals(1, rangerAdmin.size());
-        Assert.assertTrue(rangerAdmin.stream().map(ConfigQueryEntry::getDefaultPath)
+        assertEquals(1, rangerAdmin.size());
+        assertTrue(rangerAdmin.stream().map(ConfigQueryEntry::getDefaultPath)
                 .anyMatch("hwx-remote.dfs.core.windows.net/subfolder/ranger/audit"::equals));
 
-        Assert.assertEquals(1, zeppelin.size());
-        Assert.assertTrue(zeppelin.stream().map(ConfigQueryEntry::getDefaultPath)
+        assertEquals(1, zeppelin.size());
+        assertTrue(zeppelin.stream().map(ConfigQueryEntry::getDefaultPath)
                 .anyMatch("hwx-remote.dfs.core.windows.net/subfolder/bigCluster/zeppelin/notebook"::equals));
 
-        Assert.assertEquals(1, hbaseMaster.size());
-        Assert.assertTrue(hbaseMaster.stream().map(ConfigQueryEntry::getDefaultPath)
+        assertEquals(1, hbaseMaster.size());
+        assertTrue(hbaseMaster.stream().map(ConfigQueryEntry::getDefaultPath)
                 .anyMatch("hwx-remote.dfs.core.windows.net/subfolder/bigCluster/hbase"::equals));
     }
 

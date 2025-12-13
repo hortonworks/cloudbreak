@@ -3,17 +3,18 @@ package com.sequenceiq.freeipa.ldap;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
@@ -69,7 +70,7 @@ public class LdapConfigServiceTest {
         when(ldapConfigRepository.findByAccountIdAndEnvironmentCrnAndClusterNameIsNullAndArchivedIsFalse(ACCOUNT_ID, ENVIRONMENT_CRN))
                 .thenReturn(Optional.of(new LdapConfig()));
 
-        BadRequestException ex = Assertions.assertThrows(BadRequestException.class, () -> {
+        BadRequestException ex = assertThrows(BadRequestException.class, () -> {
             underTest.createLdapConfig(ldapConfig);
         });
         assertEquals("LdapConfig in the [accountId] account's "
@@ -96,7 +97,7 @@ public class LdapConfigServiceTest {
         // GIVEN
         when(crnService.getCurrentAccountId()).thenReturn(ACCOUNT_ID);
 
-        NotFoundException ex = Assertions.assertThrows(NotFoundException.class, () -> {
+        NotFoundException ex = assertThrows(NotFoundException.class, () -> {
             // WHEN
             underTest.get(ENVIRONMENT_CRN);
         });
@@ -114,14 +115,14 @@ public class LdapConfigServiceTest {
         // WHEN
         underTest.delete(ENVIRONMENT_CRN);
         // THEN
-        Mockito.verify(ldapConfigRepository).save(ldapConfig);
+        verify(ldapConfigRepository).save(ldapConfig);
     }
 
     @Test
     public void testDeleteNotFound() {
         // GIVEN
         when(crnService.getCurrentAccountId()).thenReturn(ACCOUNT_ID);
-        NotFoundException ex = Assertions.assertThrows(NotFoundException.class, () -> {
+        NotFoundException ex = assertThrows(NotFoundException.class, () -> {
             // WHEN
             underTest.delete(ENVIRONMENT_CRN);
         });
@@ -156,7 +157,7 @@ public class LdapConfigServiceTest {
     public void testTestConnectionWithLdapConfigShouldThrowBadRequest() {
         // GIVEN
         LdapConfig ldapConfig = new LdapConfig();
-        Mockito.doThrow(new BadRequestException("connection failed")).when(ldapConfigValidator).validateLdapConnection(ldapConfig);
+        doThrow(new BadRequestException("connection failed")).when(ldapConfigValidator).validateLdapConnection(ldapConfig);
         // WHEN
         String actualResult = underTest.testConnection(null, ldapConfig);
         // THEN

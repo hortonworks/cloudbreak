@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service.upgrade.validation.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -14,7 +15,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
@@ -55,7 +55,7 @@ public class NifiUpgradeValidatorTest {
 
     @BeforeEach
     public void before() {
-        connector = Mockito.mock(ClusterApi.class);
+        connector = mock(ClusterApi.class);
         Blueprint blueprint = new Blueprint();
         blueprint.setBlueprintText(BLUEPRINT_TEXT);
         Cluster cluster = new Cluster();

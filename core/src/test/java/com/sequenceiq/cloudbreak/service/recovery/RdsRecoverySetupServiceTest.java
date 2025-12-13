@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -17,7 +18,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -42,7 +42,7 @@ public class RdsRecoverySetupServiceTest {
     private static final long STACK_ID = 1L;
 
     @InjectMocks
-    private PostgresConfigService postgresConfigService = Mockito.spy(PostgresConfigService.class);
+    private PostgresConfigService postgresConfigService = spy(PostgresConfigService.class);
 
     @Mock
     private HostOrchestrator hostOrchestrator;

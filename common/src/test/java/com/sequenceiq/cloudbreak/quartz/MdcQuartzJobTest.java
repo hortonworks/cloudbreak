@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.quartz;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
@@ -8,7 +10,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.Optional;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Answers;
@@ -30,8 +31,8 @@ public class MdcQuartzJobTest {
     public void testFillMdcContextWhenNoBuilderImplemented() {
         JobExecutionContext context = mock(JobExecutionContext.class);
         MdcQuartzJobTestClass underTest = new MdcQuartzJobTestClass();
-        IllegalArgumentException actual = Assertions.assertThrows(IllegalArgumentException.class, () -> underTest.fillMdcContext(context));
-        Assertions.assertEquals("Please implement one of them: getMdcContextObject() or getMdcContextConfigProvider()", actual.getMessage());
+        IllegalArgumentException actual = assertThrows(IllegalArgumentException.class, () -> underTest.fillMdcContext(context));
+        assertEquals("Please implement one of them: getMdcContextObject() or getMdcContextConfigProvider()", actual.getMessage());
     }
 
     @Test
@@ -65,10 +66,10 @@ public class MdcQuartzJobTest {
         doNothing().when(underTest).fillMdcContext(context);
         doThrow(new RuntimeException("uh-oh something wrong happened")).when(underTest).executeTracedJob(any());
 
-        JobExecutionException jobExecutionException = Assertions.assertThrows(
+        JobExecutionException jobExecutionException = assertThrows(
                 JobExecutionException.class,
                 () -> underTest.executeInternal(context));
 
-        Assertions.assertEquals("java.lang.RuntimeException: uh-oh something wrong happened", jobExecutionException.getMessage());
+        assertEquals("java.lang.RuntimeException: uh-oh something wrong happened", jobExecutionException.getMessage());
     }
 }

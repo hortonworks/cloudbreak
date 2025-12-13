@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.core.bootstrap.service;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -16,20 +16,20 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.common.service.HostDiscoveryService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 
-@RunWith(MockitoJUnitRunner.class)
-public class ClusterNodeNameGeneratorTest {
+@ExtendWith(MockitoExtension.class)
+class ClusterNodeNameGeneratorTest {
 
     @Mock
     private HostDiscoveryService hostDiscoveryService;
@@ -37,7 +37,7 @@ public class ClusterNodeNameGeneratorTest {
     @InjectMocks
     private ClusterNodeNameGenerator underTest;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         when(hostDiscoveryService.calculateHostname(anyString(), nullable(String.class),
                 nullable(String.class), anyLong(), anyBoolean())).thenCallRealMethod();
@@ -46,7 +46,7 @@ public class ClusterNodeNameGeneratorTest {
     }
 
     @Test
-    public void testGetNodeNameForInstanceWhenNewCluster() {
+    void testGetNodeNameForInstanceWhenNewCluster() {
         Stack nodeNameStack = new Stack();
         nodeNameStack.setHostgroupNameAsHostname(true);
         nodeNameStack.setCustomHostname("teststack");
@@ -71,7 +71,7 @@ public class ClusterNodeNameGeneratorTest {
     }
 
     @Test
-    public void testGetNodeNameForInstanceWhenScalingExistingPrivateIdBasedCluster() {
+    void testGetNodeNameForInstanceWhenScalingExistingPrivateIdBasedCluster() {
         Stack nodeNameStack = new Stack();
         nodeNameStack.setHostgroupNameAsHostname(true);
         nodeNameStack.setCustomHostname("teststack");
@@ -90,7 +90,7 @@ public class ClusterNodeNameGeneratorTest {
     }
 
     @Test
-    public void testGetNodeNameForInstanceWhenScalingFromZero() {
+    void testGetNodeNameForInstanceWhenScalingFromZero() {
         Stack nodeNameStack = new Stack();
         nodeNameStack.setHostgroupNameAsHostname(true);
         nodeNameStack.setCustomHostname("teststack");
@@ -108,7 +108,7 @@ public class ClusterNodeNameGeneratorTest {
     }
 
     @Test
-    public void testGetNodeNameForInstanceWhenScaling() {
+    void testGetNodeNameForInstanceWhenScaling() {
         Stack nodeNameStack = new Stack();
         nodeNameStack.setHostgroupNameAsHostname(true);
         nodeNameStack.setCustomHostname("teststack");
@@ -126,7 +126,7 @@ public class ClusterNodeNameGeneratorTest {
     }
 
     @Test
-    public void testGetNodeNameForInstanceWhenResizingAndWorker() {
+    void testGetNodeNameForInstanceWhenResizingAndWorker() {
         Stack nodeNameStack = new Stack();
         nodeNameStack.setHostgroupNameAsHostname(true);
         nodeNameStack.setCustomHostname("teststack");
@@ -156,8 +156,8 @@ public class ClusterNodeNameGeneratorTest {
             String generatedHostName = underTest.getNodeNameForInstanceMetadata(im, underTestStack, hostGroupNodeCount, clusterNodeNames);
             resultSet.add(generatedHostName);
         }
-        assertEquals("InstanceMetadata size should match", expectedNodeNames.size(), testInstanceMetadata.size());
-        assertEquals("Generated Hostname should match", expectedNodeNames, resultSet);
+        assertEquals(expectedNodeNames.size(), testInstanceMetadata.size(), "InstanceMetadata size should match");
+        assertEquals(expectedNodeNames, resultSet, "Generated Hostname should match");
     }
 
     private void initializeHostGroupInstanceMetadata(int nodeCount, InstanceGroup instanceGroup, List<String> fqdns) {

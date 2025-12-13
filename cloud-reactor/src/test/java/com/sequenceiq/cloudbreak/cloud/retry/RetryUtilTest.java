@@ -7,7 +7,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.cloudbreak.retry.CheckTask;
 import com.sequenceiq.cloudbreak.retry.ErrorTask;
@@ -15,7 +15,7 @@ import com.sequenceiq.cloudbreak.retry.ExceptionCheckTask;
 import com.sequenceiq.cloudbreak.retry.RetryTask;
 import com.sequenceiq.cloudbreak.retry.RetryUtil;
 
-public class RetryUtilTest {
+class RetryUtilTest {
 
     private final RetryTask task = mock(RetryTask.class);
 
@@ -26,14 +26,14 @@ public class RetryUtilTest {
     private final ExceptionCheckTask exceptionCheck = mock(ExceptionCheckTask.class);
 
     @Test
-    public void testRunWithoutException() {
+    void testRunWithoutException() {
         runRetryTask();
         verify(task, times(1)).run();
         verify(error, times(0)).run(new Exception());
     }
 
     @Test
-    public void testRunWithoutExceptionCheckOk() {
+    void testRunWithoutExceptionCheckOk() {
         when(check.check()).thenReturn(true);
         runRetryTaskWithCheck();
         verify(task, times(1)).run();
@@ -42,7 +42,7 @@ public class RetryUtilTest {
     }
 
     @Test
-    public void testRunWithoutExceptionCheckNok() {
+    void testRunWithoutExceptionCheckNok() {
         when(check.check()).thenReturn(false);
         runRetryTaskWithCheck();
         verify(task, times(3)).run();
@@ -51,7 +51,7 @@ public class RetryUtilTest {
     }
 
     @Test
-    public void testRunWithRecoverableException() {
+    void testRunWithRecoverableException() {
         when(exceptionCheck.check(any())).thenReturn(true);
         doThrow(new IllegalArgumentException()).when(task).run();
         runRetryTaskWithExceptionCheck();
@@ -61,7 +61,7 @@ public class RetryUtilTest {
     }
 
     @Test
-    public void testRunWithNotRecoverableException() {
+    void testRunWithNotRecoverableException() {
         when(exceptionCheck.check(any())).thenReturn(false);
         doThrow(new NullPointerException()).when(task).run();
         runRetryTaskWithExceptionCheck();

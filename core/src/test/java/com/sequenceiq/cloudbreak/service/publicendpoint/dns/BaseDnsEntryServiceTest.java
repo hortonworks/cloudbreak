@@ -17,7 +17,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -161,7 +160,7 @@ class BaseDnsEntryServiceTest {
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
             CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class, () -> underTest.createOrUpdate(stack));
-            Assertions.assertEquals("Failed to create DNS entry: 'Uh-Oh'", exception.getMessage());
+            assertEquals("Failed to create DNS entry: 'Uh-Oh'", exception.getMessage());
         });
 
         verify(dnsManagementService, times(0)).deleteDnsEntryWithIp(eq(ACCOUNT_ID), any(), eq(ENVIRONMENT_NAME), eq(false), anyList());
@@ -213,7 +212,7 @@ class BaseDnsEntryServiceTest {
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
             CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class,
                     () -> underTest.createOrUpdateCandidates(stack, Map.of(FQDN_1, PUBLIC_IP_1, FQDN_2, PUBLIC_IP_2)));
-            Assertions.assertEquals("Failed to create DNS entry: 'Uh-Oh'", exception.getMessage());
+            assertEquals("Failed to create DNS entry: 'Uh-Oh'", exception.getMessage());
         });
 
         verify(dnsManagementService, times(0)).deleteDnsEntryWithIp(eq(ACCOUNT_ID), any(), eq(ENVIRONMENT_NAME), eq(false), anyList());

@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.gcp.setup;
 
 import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -13,7 +14,6 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 
 import org.apache.http.HttpStatus;
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -74,7 +74,7 @@ public class GcpBucketRegisterServiceTest {
 
         String bucketName = underTest.register(authenticatedContext);
 
-        Assert.assertEquals("super-bucket", bucketName);
+        assertEquals("super-bucket", bucketName);
         verify(insert, times(0)).execute();
         verify(get, times(1)).execute();
     }
@@ -106,7 +106,7 @@ public class GcpBucketRegisterServiceTest {
 
         String bucketName = underTest.register(authenticatedContext);
 
-        Assert.assertEquals("super-bucket", bucketName);
+        assertEquals("super-bucket", bucketName);
         verify(insert, times(1)).execute();
         verify(get, times(1)).execute();
     }
@@ -140,7 +140,7 @@ public class GcpBucketRegisterServiceTest {
 
         String bucketName = underTest.register(authenticatedContext);
 
-        Assert.assertEquals("super-bucket", bucketName);
+        assertEquals("super-bucket", bucketName);
         verify(insert, times(1)).execute();
         verify(get, times(1)).execute();
     }
@@ -171,7 +171,7 @@ public class GcpBucketRegisterServiceTest {
 
         String bucketName = underTest.register(authenticatedContext);
 
-        Assert.assertEquals("super-bucket", bucketName);
+        assertEquals("super-bucket", bucketName);
         verify(insert, times(0)).execute();
         verify(get, times(1)).execute();
     }
@@ -208,7 +208,7 @@ public class GcpBucketRegisterServiceTest {
         GoogleJsonResponseException result = assertThrows(GoogleJsonResponseException.class,
                 () -> underTest.register(authenticatedContext));
 
-        Assert.assertEquals(404, result.getStatusCode());
+        assertEquals(404, result.getStatusCode());
         verify(insert, times(1)).execute();
         verify(get, times(1)).execute();
     }
@@ -245,7 +245,7 @@ public class GcpBucketRegisterServiceTest {
         GoogleJsonResponseException result = assertThrows(GoogleJsonResponseException.class,
                 () -> underTest.register(authenticatedContext));
 
-        Assert.assertEquals(404, result.getStatusCode());
+        assertEquals(404, result.getStatusCode());
         verify(insert, times(1)).execute();
         verify(get, times(1)).execute();
     }
@@ -282,7 +282,7 @@ public class GcpBucketRegisterServiceTest {
 
         String bucketName = underTest.register(authenticatedContext);
 
-        Assert.assertEquals("super-bucket", bucketName);
+        assertEquals("super-bucket", bucketName);
         verify(insert, times(1)).execute();
         verify(get, times(1)).execute();
     }

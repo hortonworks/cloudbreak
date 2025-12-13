@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.cmtemplate;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -9,17 +9,17 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplate;
 import com.cloudera.api.swagger.model.ApiClusterTemplateService;
 
-@RunWith(MockitoJUnitRunner.class)
-public class CmTemplateServiceTest {
+@ExtendWith(MockitoExtension.class)
+class CmTemplateServiceTest {
 
     private static final String SERVICE_TYPE = "NIFI";
 
@@ -32,14 +32,14 @@ public class CmTemplateServiceTest {
     private CmTemplateService underTest;
 
     @Test
-    public void testIsServiceTypePresentShouldReturnTrueWhenTheServiceTypeIsPresentInTheBlueprint() {
+    void testIsServiceTypePresentShouldReturnTrueWhenTheServiceTypeIsPresentInTheBlueprint() {
         CmTemplateProcessor templateProcessor = createTemplateProcessor(Set.of(SERVICE_TYPE, "SPARK"));
         when(cmTemplateProcessorFactory.get(BLUEPRINT)).thenReturn(templateProcessor);
         assertTrue(underTest.isServiceTypePresent(SERVICE_TYPE, BLUEPRINT));
     }
 
     @Test
-    public void testIsServiceTypePresentShouldReturnFalseWhenTheServiceTypeIsNotPresentInTheBlueprint() {
+    void testIsServiceTypePresentShouldReturnFalseWhenTheServiceTypeIsNotPresentInTheBlueprint() {
         CmTemplateProcessor templateProcessor = createTemplateProcessor(Set.of("ZOOKEEPER", "SPARK"));
         when(cmTemplateProcessorFactory.get(BLUEPRINT)).thenReturn(templateProcessor);
         assertFalse(underTest.isServiceTypePresent(SERVICE_TYPE, BLUEPRINT));

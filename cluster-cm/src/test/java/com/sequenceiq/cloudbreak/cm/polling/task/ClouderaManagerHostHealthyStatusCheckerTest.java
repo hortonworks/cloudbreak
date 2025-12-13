@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.cm.polling.task;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -11,11 +11,11 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Set;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.api.swagger.HostsResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
@@ -32,8 +32,8 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 
-@RunWith(MockitoJUnitRunner.class)
-public class ClouderaManagerHostHealthyStatusCheckerTest {
+@ExtendWith(MockitoExtension.class)
+class ClouderaManagerHostHealthyStatusCheckerTest {
 
     private static final String VIEW_TYPE = ClouderaManagerHostHealthyStatusChecker.VIEW_TYPE;
 
@@ -48,13 +48,13 @@ public class ClouderaManagerHostHealthyStatusCheckerTest {
 
     private ClouderaManagerHostHealthyStatusChecker underTest;
 
-    @Before
-    public void init() {
+    @BeforeEach
+    void init() {
         when(clouderaManagerApiPojoFactory.getHostsResourceApi(any(ApiClient.class))).thenReturn(hostsResourceApi);
     }
 
     @Test
-    public void testSingleGoodHostOnFirstInvocation() throws ApiException {
+    void testSingleGoodHostOnFirstInvocation() throws ApiException {
         Set<InstanceMetadataView> instanceMetadatas = Set.of(constructInstanceMetadata("h1", 1L));
         underTest = new ClouderaManagerHostHealthyStatusChecker(clouderaManagerApiPojoFactory, clusterEventService, instanceMetadatas);
 
@@ -67,7 +67,7 @@ public class ClouderaManagerHostHealthyStatusCheckerTest {
     }
 
     @Test
-    public void testHostNotMarkedAsGood() throws ApiException {
+    void testHostNotMarkedAsGood() throws ApiException {
         Set<InstanceMetadataView> instanceMetadatas = Set.of(constructInstanceMetadata("h1", 1L));
         underTest = new ClouderaManagerHostHealthyStatusChecker(clouderaManagerApiPojoFactory, clusterEventService, instanceMetadatas);
 
@@ -101,7 +101,7 @@ public class ClouderaManagerHostHealthyStatusCheckerTest {
     }
 
     @Test
-    public void testHostMarkedAsGoodDespiteMaintenanceCommissionState() throws ApiException {
+    void testHostMarkedAsGoodDespiteMaintenanceCommissionState() throws ApiException {
         Set<InstanceMetadataView> instanceMetadatas = Set.of(constructInstanceMetadata("h1", 1L));
         underTest = new ClouderaManagerHostHealthyStatusChecker(clouderaManagerApiPojoFactory, clusterEventService, instanceMetadatas);
 
@@ -134,7 +134,7 @@ public class ClouderaManagerHostHealthyStatusCheckerTest {
     }
 
     @Test
-    public void testSeriesOfInvocations() throws ApiException {
+    void testSeriesOfInvocations() throws ApiException {
         Set<InstanceMetadataView> instanceMetadatas = Set.of(constructInstanceMetadata("h1", 1L),
                 constructInstanceMetadata("h2", 2L),
                 constructInstanceMetadata("h3", 3L));
@@ -182,7 +182,7 @@ public class ClouderaManagerHostHealthyStatusCheckerTest {
     }
 
     @Test
-    public void testSeriesOfInvocationsWithConcerningHealthNotAllowed() throws ApiException {
+    void testSeriesOfInvocationsWithConcerningHealthNotAllowed() throws ApiException {
         Set<InstanceMetadataView> instanceMetadatas = Set.of(constructInstanceMetadata("h1", 1L),
                 constructInstanceMetadata("h2", 2L),
                 constructInstanceMetadata("h3", 3L));
@@ -233,7 +233,7 @@ public class ClouderaManagerHostHealthyStatusCheckerTest {
     }
 
     @Test
-    public void testSeriesOfInvocationsWithConcerningHealth() throws ApiException {
+    void testSeriesOfInvocationsWithConcerningHealth() throws ApiException {
         Set<InstanceMetadataView> instanceMetadatas = Set.of(constructInstanceMetadata("h1", 1L),
                 constructInstanceMetadata("h2", 2L),
                 constructInstanceMetadata("h3", 3L));

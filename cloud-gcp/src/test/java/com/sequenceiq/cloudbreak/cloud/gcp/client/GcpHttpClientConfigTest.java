@@ -1,9 +1,10 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.client;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -21,7 +22,7 @@ public class GcpHttpClientConfigTest {
     @Test
     public void testHttpTransport() throws GeneralSecurityException, IOException {
         NetHttpTransport expected = GoogleNetHttpTransport.newTrustedTransport();
-        Assert.assertEquals(expected.getClass(), underTest.httpTransport().getClass());
+        assertEquals(expected.getClass(), underTest.httpTransport().getClass());
     }
 
 }

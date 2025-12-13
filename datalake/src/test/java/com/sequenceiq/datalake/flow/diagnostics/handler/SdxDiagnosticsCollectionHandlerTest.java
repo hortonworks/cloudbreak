@@ -4,6 +4,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import java.util.Map;
 
@@ -11,7 +13,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.dyngr.exception.PollerException;
@@ -45,7 +46,7 @@ class SdxDiagnosticsCollectionHandlerTest {
         underTest.accept(event);
 
         SdxDiagnosticsSuccessEvent sdxDiagnosticsSuccessEvent = new SdxDiagnosticsSuccessEvent(1L, "userId", Map.of());
-        Mockito.verify(eventBus, Mockito.times(1)).notify(eq(sdxDiagnosticsSuccessEvent.selector()), any(Event.class));
+        verify(eventBus, times(1)).notify(eq(sdxDiagnosticsSuccessEvent.selector()), any(Event.class));
     }
 
     @Test
@@ -57,7 +58,7 @@ class SdxDiagnosticsCollectionHandlerTest {
         underTest.accept(event);
 
         SdxDiagnosticsFailedEvent sdxDiagnosticsFailedEvent = new SdxDiagnosticsFailedEvent(1L, "userId", Map.of(), exception);
-        Mockito.verify(eventBus, Mockito.times(1)).notify(eq(sdxDiagnosticsFailedEvent.selector()), any(Event.class));
+        verify(eventBus, times(1)).notify(eq(sdxDiagnosticsFailedEvent.selector()), any(Event.class));
     }
 
     @Test
@@ -69,7 +70,7 @@ class SdxDiagnosticsCollectionHandlerTest {
         underTest.accept(event);
 
         SdxDiagnosticsFailedEvent sdxDiagnosticsFailedEvent = new SdxDiagnosticsFailedEvent(1L, "userId", Map.of(), exception);
-        Mockito.verify(eventBus, Mockito.times(1)).notify(eq(sdxDiagnosticsFailedEvent.selector()), any(Event.class));
+        verify(eventBus, times(1)).notify(eq(sdxDiagnosticsFailedEvent.selector()), any(Event.class));
     }
 
     @Test
@@ -81,7 +82,7 @@ class SdxDiagnosticsCollectionHandlerTest {
         underTest.accept(event);
 
         SdxDiagnosticsFailedEvent sdxDiagnosticsFailedEvent = new SdxDiagnosticsFailedEvent(1L, "userId", Map.of(), exception);
-        Mockito.verify(eventBus, Mockito.times(1)).notify(eq(sdxDiagnosticsFailedEvent.selector()), any(Event.class));
+        verify(eventBus, times(1)).notify(eq(sdxDiagnosticsFailedEvent.selector()), any(Event.class));
     }
 
     @Test
@@ -93,7 +94,7 @@ class SdxDiagnosticsCollectionHandlerTest {
         underTest.accept(event);
 
         SdxDiagnosticsFailedEvent sdxDiagnosticsFailedEvent = new SdxDiagnosticsFailedEvent(1L, "userId", Map.of(), exception);
-        Mockito.verify(eventBus, Mockito.times(1)).notify(eq(sdxDiagnosticsFailedEvent.selector()), any(Event.class));
+        verify(eventBus, times(1)).notify(eq(sdxDiagnosticsFailedEvent.selector()), any(Event.class));
     }
 
     private Event<SdxDiagnosticsWaitRequest> initEvent() {

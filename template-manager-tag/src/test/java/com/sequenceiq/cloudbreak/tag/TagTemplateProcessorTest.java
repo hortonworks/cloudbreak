@@ -1,9 +1,11 @@
 package com.sequenceiq.cloudbreak.tag;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.io.IOException;
 
 import org.apache.commons.lang3.StringUtils;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -44,7 +46,7 @@ class TagTemplateProcessorTest {
 
         String actual = underTest.process(emptyString, getTagPreparationObject());
 
-        Assertions.assertEquals(emptyString, actual);
+        assertEquals(emptyString, actual);
     }
 
     @Test
@@ -53,7 +55,7 @@ class TagTemplateProcessorTest {
 
         String actual = underTest.process(notExistingExpressionReference, getTagPreparationObject());
 
-        Assertions.assertEquals(notExistingExpressionReference, actual);
+        assertEquals(notExistingExpressionReference, actual);
     }
 
     @Test
@@ -62,7 +64,7 @@ class TagTemplateProcessorTest {
 
         String actual = underTest.process(anExampleTextValue, getTagPreparationObject());
 
-        Assertions.assertEquals(anExampleTextValue, actual);
+        assertEquals(anExampleTextValue, actual);
     }
 
     @Test
@@ -74,7 +76,7 @@ class TagTemplateProcessorTest {
 
         String actual = underTest.process(accountIdReference, model);
 
-        Assertions.assertEquals(accountIdReference, actual);
+        assertEquals(accountIdReference, actual);
     }
 
     @Test
@@ -88,7 +90,7 @@ class TagTemplateProcessorTest {
 
         String actual = underTest.process(accountIdReference, model);
 
-        Assertions.assertEquals(emptyString, actual);
+        assertEquals(emptyString, actual);
     }
 
     @Test
@@ -97,7 +99,7 @@ class TagTemplateProcessorTest {
 
         String actual = underTest.process("{{{userName}}}", tagPreparationObject);
 
-        Assertions.assertEquals(USER_NAME_SHORT, actual);
+        assertEquals(USER_NAME_SHORT, actual);
     }
 
     @Test
@@ -109,7 +111,7 @@ class TagTemplateProcessorTest {
         String actual = underTest.process(templateWithMultipleReference, model);
 
         String expected = String.format(valuePattern, model.getAccountId(), USER_NAME_SHORT, model.getCloudPlatform());
-        Assertions.assertEquals(expected, actual);
+        assertEquals(expected, actual);
     }
 
     @ParameterizedTest
@@ -120,9 +122,9 @@ class TagTemplateProcessorTest {
 
         String actual = underTest.process(notExistingExpressionReference, tagPreparationObject);
 
-        Assertions.assertTrue(StringUtils.isNotEmpty(actual));
+        assertTrue(StringUtils.isNotEmpty(actual));
         Object expected = ReflectionTestUtils.getField(tagPreparationObject, propertyName);
-        Assertions.assertEquals(String.valueOf(expected), actual);
+        assertEquals(String.valueOf(expected), actual);
     }
 
     private TagPreparationObject getTagPreparationObject() {

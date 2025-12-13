@@ -1,6 +1,7 @@
 package com.sequenceiq.it.cloudbreak.encryptionprofile;
 
-import org.junit.jupiter.api.Assertions;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+
 import org.testng.annotations.Test;
 
 import com.sequenceiq.it.cloudbreak.assertion.encryptionprofile.EncryptionProfileAssertions;
@@ -27,7 +28,7 @@ public class EncryptionProfileAssertionsTest {
                 "basic_auth_users:\n" +
                 "  vmagent: $2y$10$RKSj4Ouf4pgzcLCvpLlX8.3UdTna7tbkInSGzly2s3OTqtZP.EijC";
 
-        Assertions.assertDoesNotThrow(() -> {
+        assertDoesNotThrow(() -> {
             underTest.validateCipherSuitesConfiguration(serviceName, configContent, instanceIp);
         });
     }

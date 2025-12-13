@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.migration.handler;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
@@ -11,7 +14,6 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 import java.util.Optional;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -89,7 +91,7 @@ public class DeleteCloudFormationHandlerTest {
         Event<DeleteCloudFormationResult> result = resultCaptor.getValue();
         verify(awsMigrationUtil, never()).allInstancesDeletedFromCloudFormation(any(), any());
 
-        Assertions.assertTrue(result.getData().isCloudFormationTemplateDeleted());
+        assertTrue(result.getData().isCloudFormationTemplateDeleted());
     }
 
     @Test
@@ -112,7 +114,7 @@ public class DeleteCloudFormationHandlerTest {
         verify(awsTerminateService).terminate(ac, cloudStack, List.of(cloudResource));
         verify(resourceNotifier).notifyDeletion(cloudResource, cloudContext);
 
-        Assertions.assertTrue(result.getData().isCloudFormationTemplateDeleted());
+        assertTrue(result.getData().isCloudFormationTemplateDeleted());
     }
 
     @Test
@@ -135,7 +137,7 @@ public class DeleteCloudFormationHandlerTest {
         verify(awsTerminateService, never()).terminate(ac, cloudStack, List.of(cloudResource));
         verify(resourceNotifier, never()).notifyDeletion(cloudResource, cloudContext);
 
-        Assertions.assertFalse(result.getData().isCloudFormationTemplateDeleted());
+        assertFalse(result.getData().isCloudFormationTemplateDeleted());
     }
 
     @Test
@@ -152,8 +154,8 @@ public class DeleteCloudFormationHandlerTest {
         verify(eventBus).notify(eq("AWSVARIANTMIGRATIONFAILEDEVENT"), resultCaptor.capture());
         Event<DeleteCloudFormationResult> result = resultCaptor.getValue();
 
-        Assertions.assertEquals(exception, result.getData().getErrorDetails());
-        Assertions.assertEquals(EventStatus.FAILED, result.getData().getStatus());
-        Assertions.assertEquals("CF delete issue", result.getData().getStatusReason());
+        assertEquals(exception, result.getData().getErrorDetails());
+        assertEquals(EventStatus.FAILED, result.getData().getStatus());
+        assertEquals("CF delete issue", result.getData().getStatusReason());
     }
 }

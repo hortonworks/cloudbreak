@@ -1,17 +1,17 @@
 package com.sequenceiq.cloudbreak.logger;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.slf4j.MDC;
 
 import com.sequenceiq.cloudbreak.TestUtil;
 
-public class MDCBuilderTest {
+class MDCBuilderTest {
 
     @Test
-    public void buildSimpleContext() {
+    void buildSimpleContext() {
         MDCBuilder.cleanupMdc();
         MDCBuilder.buildMdcContextFromCrn(null);
         assertNull(MDC.get(LoggerContextKey.TENANT.toString()));
@@ -19,7 +19,7 @@ public class MDCBuilderTest {
     }
 
     @Test
-    public void buildSimpleContextWithNull() {
+    void buildSimpleContextWithNull() {
         MDCBuilder.cleanupMdc();
         MDCBuilder.buildMdcContext();
         assertNull(MDC.get(LoggerContextKey.USER_CRN.toString()));
@@ -29,7 +29,7 @@ public class MDCBuilderTest {
     }
 
     @Test
-    public void buildContextWithStack() {
+    void buildContextWithStack() {
         MDCBuilder.cleanupMdc();
         MDCBuilder.buildMdcContext(TestUtil.stack());
         assertEquals("STACK", MDC.get(LoggerContextKey.RESOURCE_TYPE.toString()));
@@ -39,7 +39,7 @@ public class MDCBuilderTest {
     }
 
     @Test
-    public void buildContextWithCredential() {
+    void buildContextWithCredential() {
         MDCBuilder.cleanupMdc();
         MDCBuilder.buildMdcContext(TestUtil.awsCredential());
         assertEquals("CREDENTIAL", MDC.get(LoggerContextKey.RESOURCE_TYPE.toString()));
@@ -49,7 +49,7 @@ public class MDCBuilderTest {
     }
 
     @Test
-    public void buildMDCContext() {
+    void buildMDCContext() {
         MDCBuilder.buildMdc(MdcContext.builder()
                 .tenant("tenant")
                 .environmentCrn("envCrn")

@@ -1,10 +1,11 @@
 package com.sequenceiq.freeipa.service.freeipa.user;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -46,7 +47,7 @@ class UserSyncRequestValidatorTest {
     @Test
     void testValidateParametersBadEnv() {
         UserSyncRequestFilter filter = new UserSyncRequestFilter(Set.of(), Set.of(), Optional.empty());
-        Assertions.assertThrows(BadRequestException.class, () -> {
+        assertThrows(BadRequestException.class, () -> {
             underTest.validateParameters(ACCOUNT_ID, USER_CRN, Set.of(OTHER_CRN), filter);
         });
     }
@@ -54,7 +55,7 @@ class UserSyncRequestValidatorTest {
     @Test
     void testValidateParametersBadUser() {
         UserSyncRequestFilter filter = new UserSyncRequestFilter(Set.of(OTHER_CRN), Set.of(), Optional.empty());
-        Assertions.assertThrows(BadRequestException.class, () -> {
+        assertThrows(BadRequestException.class, () -> {
             underTest.validateParameters(ACCOUNT_ID, USER_CRN, Set.of(), filter);
         });
     }
@@ -62,7 +63,7 @@ class UserSyncRequestValidatorTest {
     @Test
     void testValidateParametersBadMachineUser() {
         UserSyncRequestFilter filter = new UserSyncRequestFilter(Set.of(), Set.of(OTHER_CRN), Optional.empty());
-        Assertions.assertThrows(BadRequestException.class, () -> {
+        assertThrows(BadRequestException.class, () -> {
             underTest.validateParameters(ACCOUNT_ID, USER_CRN, Set.of(), filter);
         });
     }
@@ -71,7 +72,7 @@ class UserSyncRequestValidatorTest {
     void testValidateParametersWrongAccount() {
         String differentAccount = UUID.randomUUID().toString();
         UserSyncRequestFilter filter = new UserSyncRequestFilter(Set.of(), Set.of(), Optional.empty());
-        Assertions.assertThrows(BadRequestException.class, () -> {
+        assertThrows(BadRequestException.class, () -> {
             underTest.validateParameters(differentAccount, USER_CRN, Set.of(ENV_CRN), filter);
         });
     }
@@ -85,7 +86,7 @@ class UserSyncRequestValidatorTest {
     @Test
     void testValidateParametersInvalidDeleteUsersRequest() {
         UserSyncRequestFilter filter = new UserSyncRequestFilter(Set.of(USER_CRN), Set.of(MACHINE_USER_CRN), Optional.of(WORKLOAD_USER));
-        Assertions.assertThrows(BadRequestException.class, () -> {
+        assertThrows(BadRequestException.class, () -> {
             underTest.validateParameters(ACCOUNT_ID, USER_CRN, Set.of(), filter);
         });
     }
@@ -97,14 +98,14 @@ class UserSyncRequestValidatorTest {
 
     @Test
     void testValidateCrnFilterNotCrn() {
-        Assertions.assertThrows(BadRequestException.class, () -> {
+        assertThrows(BadRequestException.class, () -> {
             underTest.validateCrnFilter(Set.of(NOT_CRN), Crn.ResourceType.ENVIRONMENT);
         });
     }
 
     @Test
     void testValidateCrnFilterWrongResourceType() {
-        Assertions.assertThrows(BadRequestException.class, () -> {
+        assertThrows(BadRequestException.class, () -> {
             underTest.validateCrnFilter(Set.of(ENV_CRN), Crn.ResourceType.USER);
         });
     }

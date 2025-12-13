@@ -17,9 +17,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
@@ -35,13 +35,13 @@ import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 
-@RunWith(MockitoJUnitRunner.class)
-public class StreamsMessagingManagerServiceConfigProviderTest {
+@ExtendWith(MockitoExtension.class)
+class StreamsMessagingManagerServiceConfigProviderTest {
 
     private final StreamsMessagingManagerServiceConfigProvider underTest = new StreamsMessagingManagerServiceConfigProvider();
 
     @Test
-    public void testGetStreamsMessagingManagerServerConfigs() {
+    void testGetStreamsMessagingManagerServerConfigs() {
         String inputJson = getBlueprintText("input/cdp-streaming.bp").replace("__CDH_VERSION__", "7.2.0");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
         TemplatePreparationObject preparationObject = getTemplatePreparationObject(null, false, cmTemplateProcessor);
@@ -59,7 +59,7 @@ public class StreamsMessagingManagerServiceConfigProviderTest {
     }
 
     @Test
-    public void testGetStreamsMessagingManagerServerConfigsWithSsl() {
+    void testGetStreamsMessagingManagerServerConfigsWithSsl() {
         String inputJson = getBlueprintText("input/cdp-streaming.bp").replace("__CDH_VERSION__", "7.2.0");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
         TemplatePreparationObject preparationObject = getTemplatePreparationObject(null, true, cmTemplateProcessor);

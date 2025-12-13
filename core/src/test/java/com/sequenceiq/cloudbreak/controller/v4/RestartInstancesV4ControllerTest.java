@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.controller.v4;
 
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -10,7 +11,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
@@ -36,7 +36,7 @@ class RestartInstancesV4ControllerTest {
 
     @Test
     void testInvocationStackCommonServiceRestartMultipleInstancesWithCrn() {
-        try (MockedStatic<ThreadBasedUserCrnProvider> utilities = Mockito.mockStatic(ThreadBasedUserCrnProvider.class)) {
+        try (MockedStatic<ThreadBasedUserCrnProvider> utilities = mockStatic(ThreadBasedUserCrnProvider.class)) {
             utilities.when(ThreadBasedUserCrnProvider::getAccountId).thenReturn(ACCOUNT_ID);
             underTest.restartInstancesForClusterCrn(STACK_CRN, INSTANCE_IDS);
             verify(stackCommonService, times(1)).restartMultipleInstances(NameOrCrn.ofCrn(STACK_CRN), ACCOUNT_ID, INSTANCE_IDS);
@@ -45,7 +45,7 @@ class RestartInstancesV4ControllerTest {
 
     @Test
     void testInvocationStackCommonServiceRestartMultipleInstancesWithName() {
-        try (MockedStatic<ThreadBasedUserCrnProvider> utilities = Mockito.mockStatic(ThreadBasedUserCrnProvider.class)) {
+        try (MockedStatic<ThreadBasedUserCrnProvider> utilities = mockStatic(ThreadBasedUserCrnProvider.class)) {
             utilities.when(ThreadBasedUserCrnProvider::getAccountId).thenReturn(ACCOUNT_ID);
             underTest.restartInstancesForClusterName(STACK_NAME, INSTANCE_IDS);
             verify(stackCommonService, times(1)).restartMultipleInstances(NameOrCrn.ofName(STACK_NAME), ACCOUNT_ID, INSTANCE_IDS);

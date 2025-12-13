@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.rotation.context.provider;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
@@ -13,7 +14,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -62,7 +62,7 @@ class UserKeyPairRotationContextProviderTest {
 
     @Test
     void testGetContext() {
-        try (MockedStatic<ThreadBasedUserCrnProvider> threadBasedUserCrnProvider = Mockito.mockStatic(ThreadBasedUserCrnProvider.class)) {
+        try (MockedStatic<ThreadBasedUserCrnProvider> threadBasedUserCrnProvider = mockStatic(ThreadBasedUserCrnProvider.class)) {
             threadBasedUserCrnProvider.when(() -> ThreadBasedUserCrnProvider.doAsInternalActor((Supplier<DetailedEnvironmentResponse>) any()))
                     .thenReturn(detailedEnvironmentResponse);
             when(stackService.getByCrn(any())).thenReturn(stackDto);

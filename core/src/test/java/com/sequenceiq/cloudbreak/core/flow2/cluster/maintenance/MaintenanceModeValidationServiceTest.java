@@ -1,10 +1,11 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.maintenance;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -15,11 +16,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
@@ -39,7 +41,8 @@ import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
-public class MaintenanceModeValidationServiceTest {
+@ExtendWith(MockitoExtension.class)
+class MaintenanceModeValidationServiceTest {
 
     private static final Long WORKSPACE_ID = 1L;
 
@@ -75,10 +78,8 @@ public class MaintenanceModeValidationServiceTest {
 
     private List<Warning> warnings;
 
-    @Before
-    public void setup() {
-        MockitoAnnotations.initMocks(this);
-
+    @BeforeEach
+    void setup() {
         cluster = new Cluster();
         cluster.setId(1L);
         stack = new Stack();
@@ -91,7 +92,7 @@ public class MaintenanceModeValidationServiceTest {
         cluster.setStack(stack);
 
         Workspace workspace = mock(Workspace.class);
-        when(workspace.getId()).thenReturn(WORKSPACE_ID);
+        lenient().when(workspace.getId()).thenReturn(WORKSPACE_ID);
         stack.setWorkspace(workspace);
 
         image = Image.builder()
@@ -127,8 +128,7 @@ public class MaintenanceModeValidationServiceTest {
     }
 
     @Test
-    public void testValidateStackRepositoryOk() throws IOException {
-
+    void testValidateStackRepositoryOk() throws IOException {
         StackRepoDetails repoDetails = new StackRepoDetails();
         repoDetails.setHdpVersion("2.6.5.0");
         Map stackMap = new HashMap<>();
@@ -146,8 +146,7 @@ public class MaintenanceModeValidationServiceTest {
     }
 
     @Test
-    public void testValidateStackRepositoryNok() throws IOException {
-
+    void testValidateStackRepositoryNok() throws IOException {
         StackRepoDetails repoDetails = new StackRepoDetails();
         repoDetails.setHdpVersion("2.6.5.2");
         Map stackMap = new HashMap<>();
@@ -165,8 +164,7 @@ public class MaintenanceModeValidationServiceTest {
     }
 
     @Test
-    public void testValidateImageCatalogOk() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
-
+    void testValidateImageCatalogOk() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         com.sequenceiq.cloudbreak.cloud.model.Image imageInComponent =
                 new com.sequenceiq.cloudbreak.cloud.model.Image(
                         "imageName",
@@ -186,12 +184,10 @@ public class MaintenanceModeValidationServiceTest {
         when(imageUpdateService.checkPackageVersions(any(Stack.class), any(StatedImage.class))).thenReturn(CheckResult.ok());
         warnings.addAll(underTest.validateImageCatalog(stack));
         assertEquals(0, warnings.size());
-
     }
 
     @Test
-    public void testValidateImageCatalogNok() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
-
+    void testValidateImageCatalogNok() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         com.sequenceiq.cloudbreak.cloud.model.Image imageInComponent =
                 new com.sequenceiq.cloudbreak.cloud.model.Image(
                         "imageName",
@@ -211,6 +207,5 @@ public class MaintenanceModeValidationServiceTest {
         when(imageUpdateService.checkPackageVersions(any(Stack.class), any(StatedImage.class))).thenReturn(CheckResult.failed("Failure"));
         warnings.addAll(underTest.validateImageCatalog(stack));
         assertEquals(1, warnings.size());
-
     }
 }

@@ -1,19 +1,19 @@
 package com.sequenceiq.cloudbreak.converter.v4.imagecatalog;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
@@ -21,8 +21,8 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.ImageStackDetails;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.StackRepoDetails;
 import com.sequenceiq.cloudbreak.converter.AbstractEntityConverterTest;
 
-@RunWith(MockitoJUnitRunner.class)
-public class ImageToImageV4ResponseConverterTest extends AbstractEntityConverterTest<Image> {
+@ExtendWith(MockitoExtension.class)
+class ImageToImageV4ResponseConverterTest extends AbstractEntityConverterTest<Image> {
 
     private static final String TEST_DATE = "2021.04.26.";
 
@@ -59,7 +59,7 @@ public class ImageToImageV4ResponseConverterTest extends AbstractEntityConverter
     }
 
     @Test
-    public void testConvert() {
+    void testConvert() {
 
         ImageV4Response result = underTest.convert(createSource());
 
@@ -67,7 +67,7 @@ public class ImageToImageV4ResponseConverterTest extends AbstractEntityConverter
     }
 
     @Test
-    public void testConvertWithoutCollections() {
+    void testConvertWithoutCollections() {
 
         ImageV4Response result = underTest.convert(getTestImageWithoutCollections(ARCHITECTURE));
 
@@ -75,14 +75,14 @@ public class ImageToImageV4ResponseConverterTest extends AbstractEntityConverter
     }
 
     @Test
-    public void testNullArchitecture() {
+    void testNullArchitecture() {
         ImageV4Response result = underTest.convert(getTestImageWithoutCollections(null));
 
         validateImageV4Response(result, true, "x86_64");
     }
 
     @Test
-    public void testUnknownArchitecture() {
+    void testUnknownArchitecture() {
         ImageV4Response result = underTest.convert(getTestImageWithoutCollections("aarch64"));
 
         validateImageV4Response(result, true, "unknown");

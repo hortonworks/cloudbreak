@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -14,7 +15,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -297,7 +297,7 @@ public class AwsNetworkCfTemplateProviderTest {
         NetworkCreationRequest networkCreationRequest = createNetworkRequest(false, PrivateEndpointType.NONE);
         List<SubnetRequest> subnetRequestList = createPublicSubnetRequestList();
 
-        Assertions.assertThrows(CloudConnectorException.class, () -> underTest.provide(networkCreationRequest, subnetRequestList));
+        assertThrows(CloudConnectorException.class, () -> underTest.provide(networkCreationRequest, subnetRequestList));
 
         verify(freeMarkerTemplateUtils).processTemplateIntoString(any(Template.class), anyMap());
     }

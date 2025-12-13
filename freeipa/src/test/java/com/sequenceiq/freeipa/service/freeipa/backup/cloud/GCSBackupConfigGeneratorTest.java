@@ -1,18 +1,15 @@
 package com.sequenceiq.freeipa.service.freeipa.backup.cloud;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentClusterType;
 
-/**
- *
- */
-public class GCSBackupConfigGeneratorTest {
+class GCSBackupConfigGeneratorTest {
 
     @Test
-    public void testSimpleCaseLocation() {
+    void testSimpleCaseLocation() {
         GCSBackupConfigGenerator gcsBackupConfigGenerator = new GCSBackupConfigGenerator();
         String location = gcsBackupConfigGenerator.generateBackupLocation(
                 "gs://mybucket",
@@ -23,7 +20,7 @@ public class GCSBackupConfigGeneratorTest {
     }
 
     @Test
-    public void testSuppliedFolderLocation() {
+    void testSuppliedFolderLocation() {
         GCSBackupConfigGenerator gcsBackupConfigGenerator = new GCSBackupConfigGenerator();
         String location = gcsBackupConfigGenerator.generateBackupLocation(
                 "gs://mybucket/something",
@@ -34,7 +31,7 @@ public class GCSBackupConfigGeneratorTest {
     }
 
     @Test
-    public void testNonPrefixedLocation() {
+    void testNonPrefixedLocation() {
         GCSBackupConfigGenerator gcsBackupConfigGenerator = new GCSBackupConfigGenerator();
         String location = gcsBackupConfigGenerator.generateBackupLocation(
                 "mybucket",
@@ -45,7 +42,7 @@ public class GCSBackupConfigGeneratorTest {
     }
 
     @Test
-    public void testMultiFolderLocation() {
+    void testMultiFolderLocation() {
         GCSBackupConfigGenerator gcsBackupConfigGenerator = new GCSBackupConfigGenerator();
         String location = gcsBackupConfigGenerator.generateBackupLocation(
                 "mybucket/something/deeper",

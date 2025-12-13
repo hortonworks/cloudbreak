@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.client;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -8,7 +9,6 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -51,6 +51,6 @@ public class GcpComputeFactoryTest {
         CloudCredential cloudCredential = mock(CloudCredential.class);
         doThrow(new GeneralSecurityException("error"))
                 .when(gcpCredentialFactory).buildCredential(any(CloudCredential.class), any(HttpTransport.class));
-        Assertions.assertThrows(CredentialVerificationException.class, () -> underTest.buildCompute(cloudCredential));
+        assertThrows(CredentialVerificationException.class, () -> underTest.buildCompute(cloudCredential));
     }
 }

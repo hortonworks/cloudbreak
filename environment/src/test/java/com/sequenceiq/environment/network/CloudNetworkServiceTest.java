@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.network;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -15,7 +16,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -653,7 +653,7 @@ class CloudNetworkServiceTest {
         argumentCaptor.getAllValues()
                 .forEach(capturedRequest -> {
                     Map<String, String> capturedFilters = capturedRequest.getFilters();
-                    Assertions.assertAll("Verify that GCP filters are in place",
+                    assertAll("Verify that GCP filters are in place",
                             () -> assertEquals(availabilityZones.stream().findFirst().get(), capturedFilters.get(GcpStackUtil.CUSTOM_AVAILABILITY_ZONE)),
                             () -> assertEquals(sharedProjectId, capturedFilters.get(GcpStackUtil.SHARED_PROJECT_ID)),
                             () -> assertEquals(String.valueOf(noPublicIp), capturedFilters.get(GcpStackUtil.NO_PUBLIC_IP)),

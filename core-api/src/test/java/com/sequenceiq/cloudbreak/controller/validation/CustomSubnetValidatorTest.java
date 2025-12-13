@@ -1,23 +1,24 @@
 package com.sequenceiq.cloudbreak.controller.validation;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 import jakarta.validation.ConstraintValidatorContext;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.validation.SubnetType;
 import com.sequenceiq.cloudbreak.validation.SubnetValidator;
 import com.sequenceiq.cloudbreak.validation.ValidSubnet;
 
-@RunWith(MockitoJUnitRunner.class)
-public class CustomSubnetValidatorTest extends AbstractValidatorTest {
+@ExtendWith(MockitoExtension.class)
+class CustomSubnetValidatorTest extends AbstractValidatorTest {
 
     @InjectMocks
     private SubnetValidator underTest;
@@ -28,69 +29,69 @@ public class CustomSubnetValidatorTest extends AbstractValidatorTest {
     @Mock
     private ValidSubnet validCustomSubnet;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         when(validCustomSubnet.value()).thenReturn(SubnetType.CUSTOM);
         underTest.initialize(validCustomSubnet);
     }
 
     @Test
-    public void validSubnet10Per8ReturnTrue() {
-        Assert.assertTrue(underTest.isValid("10.0.0.0/8", constraintValidatorContext));
+    void validSubnet10Per8ReturnTrue() {
+        assertTrue(underTest.isValid("10.0.0.0/8", constraintValidatorContext));
     }
 
     @Test
-    public void validSubnet172Dot16Per12ReturnTrue() {
-        Assert.assertTrue(underTest.isValid("172.16.0.0/12", constraintValidatorContext));
+    void validSubnet172Dot16Per12ReturnTrue() {
+        assertTrue(underTest.isValid("172.16.0.0/12", constraintValidatorContext));
     }
 
     @Test
-    public void validSubnet192Dot168Per16ReturnTrue() {
-        Assert.assertTrue(underTest.isValid("192.168.0.0/16", constraintValidatorContext));
+    void validSubnet192Dot168Per16ReturnTrue() {
+        assertTrue(underTest.isValid("192.168.0.0/16", constraintValidatorContext));
     }
 
     @Test
-    public void validSubnetNullReturnTrue() {
-        Assert.assertTrue(underTest.isValid(null, constraintValidatorContext));
+    void validSubnetNullReturnTrue() {
+        assertTrue(underTest.isValid(null, constraintValidatorContext));
     }
 
     @Test
-    public void invalidSubnetEmptyReturnFalse() {
-        Assert.assertFalse(underTest.isValid("", constraintValidatorContext));
+    void invalidSubnetEmptyReturnFalse() {
+        assertFalse(underTest.isValid("", constraintValidatorContext));
     }
 
     @Test
-    public void invalidSubnetNetmaskMissingWillReturnFalse() {
-        Assert.assertFalse(underTest.isValid("0.0.0.0", constraintValidatorContext));
+    void invalidSubnetNetmaskMissingWillReturnFalse() {
+        assertFalse(underTest.isValid("0.0.0.0", constraintValidatorContext));
     }
 
     @Test
-    public void nonRfc1918WillReturnTrue() {
-        Assert.assertTrue(underTest.isValid("172.32.0.0/12", constraintValidatorContext));
+    void nonRfc1918WillReturnTrue() {
+        assertTrue(underTest.isValid("172.32.0.0/12", constraintValidatorContext));
     }
 
     @Test
-    public void invalidSubnetWillReturnFalse() {
-        Assert.assertFalse(underTest.isValid("10.0.0.1/24", constraintValidatorContext));
+    void invalidSubnetWillReturnFalse() {
+        assertFalse(underTest.isValid("10.0.0.1/24", constraintValidatorContext));
     }
 
     @Test
-    public void invalidSubnetNetmaskHighWillReturnFalse() {
-        Assert.assertFalse(underTest.isValid("0.0.0.0/42", constraintValidatorContext));
+    void invalidSubnetNetmaskHighWillReturnFalse() {
+        assertFalse(underTest.isValid("0.0.0.0/42", constraintValidatorContext));
     }
 
     @Test
-    public void invalidIpWillReturnFalse() {
-        Assert.assertFalse(underTest.isValid("256.0.0.0/32", constraintValidatorContext));
+    void invalidIpWillReturnFalse() {
+        assertFalse(underTest.isValid("256.0.0.0/32", constraintValidatorContext));
     }
 
     @Test
-    public void validIpWillReturnTrue() {
-        Assert.assertTrue(underTest.isValid("100.0.0.0/32", constraintValidatorContext));
+    void validIpWillReturnTrue() {
+        assertTrue(underTest.isValid("100.0.0.0/32", constraintValidatorContext));
     }
 
     @Test
-    public void anywhereWillReturnTrue() {
-        Assert.assertTrue(underTest.isValid("0.0.0.0/0", constraintValidatorContext));
+    void anywhereWillReturnTrue() {
+        assertTrue(underTest.isValid("0.0.0.0/0", constraintValidatorContext));
     }
 }

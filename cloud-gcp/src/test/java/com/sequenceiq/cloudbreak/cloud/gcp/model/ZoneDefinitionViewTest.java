@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.model;
 
-import org.junit.Assert;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import org.junit.jupiter.api.Test;
 
 public class ZoneDefinitionViewTest {
@@ -17,14 +18,14 @@ public class ZoneDefinitionViewTest {
         zoneDefinitionView.setSelfLink("link");
         zoneDefinitionView.setKind("kind");
 
-        Assert.assertEquals("1", zoneDefinitionView.getId());
-        Assert.assertEquals("time", zoneDefinitionView.getCreationTimestamp());
-        Assert.assertEquals("link", zoneDefinitionView.getSelfLink());
-        Assert.assertEquals("description", zoneDefinitionView.getDescription());
-        Assert.assertEquals("kind", zoneDefinitionView.getKind());
-        Assert.assertEquals("name", zoneDefinitionView.getName());
-        Assert.assertEquals("region", zoneDefinitionView.getRegion());
-        Assert.assertEquals("status", zoneDefinitionView.getStatus());
+        assertEquals("1", zoneDefinitionView.getId());
+        assertEquals("time", zoneDefinitionView.getCreationTimestamp());
+        assertEquals("link", zoneDefinitionView.getSelfLink());
+        assertEquals("description", zoneDefinitionView.getDescription());
+        assertEquals("kind", zoneDefinitionView.getKind());
+        assertEquals("name", zoneDefinitionView.getName());
+        assertEquals("region", zoneDefinitionView.getRegion());
+        assertEquals("status", zoneDefinitionView.getStatus());
     }
 
 }

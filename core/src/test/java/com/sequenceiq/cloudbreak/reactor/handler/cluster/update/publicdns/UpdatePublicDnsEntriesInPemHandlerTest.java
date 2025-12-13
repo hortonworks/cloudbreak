@@ -1,12 +1,12 @@
 package com.sequenceiq.cloudbreak.reactor.handler.cluster.update.publicdns;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -53,8 +53,8 @@ class UpdatePublicDnsEntriesInPemHandlerTest {
         ArgumentCaptor<Event> eventArgumentCaptor = ArgumentCaptor.forClass(Event.class);
         verify(eventBus).notify(stringArgumentCaptor.capture(), eventArgumentCaptor.capture());
 
-        Assertions.assertEquals(UpdatePublicDnsEntriesFlowEvent.UPDATE_PUBLIC_DNS_ENTRIES_FAILED_EVENT.event(), stringArgumentCaptor.getValue());
-        Assertions.assertEquals(UpdatePublicDnsEntriesInPemFailed.class, eventArgumentCaptor.getValue().getData().getClass());
+        assertEquals(UpdatePublicDnsEntriesFlowEvent.UPDATE_PUBLIC_DNS_ENTRIES_FAILED_EVENT.event(), stringArgumentCaptor.getValue());
+        assertEquals(UpdatePublicDnsEntriesInPemFailed.class, eventArgumentCaptor.getValue().getData().getClass());
     }
 
     @Test
@@ -69,7 +69,7 @@ class UpdatePublicDnsEntriesInPemHandlerTest {
         verify(eventBus).notify(stringArgumentCaptor.capture(), eventArgumentCaptor.capture());
         verify(clusterPublicEndpointManagementService, times(1)).refreshDnsEntries(stackDto);
 
-        Assertions.assertEquals(UpdatePublicDnsEntriesFlowEvent.UPDATE_PUBLIC_DNS_ENTRIES_SUCCEEDED_EVENT.event(), stringArgumentCaptor.getValue());
-        Assertions.assertEquals(UpdatePublicDnsEntriesInPemFinished.class, eventArgumentCaptor.getValue().getData().getClass());
+        assertEquals(UpdatePublicDnsEntriesFlowEvent.UPDATE_PUBLIC_DNS_ENTRIES_SUCCEEDED_EVENT.event(), stringArgumentCaptor.getValue());
+        assertEquals(UpdatePublicDnsEntriesInPemFinished.class, eventArgumentCaptor.getValue().getData().getClass());
     }
 }

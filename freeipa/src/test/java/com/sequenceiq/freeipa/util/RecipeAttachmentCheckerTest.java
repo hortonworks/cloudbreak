@@ -2,6 +2,7 @@ package com.sequenceiq.freeipa.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -11,7 +12,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -105,7 +105,7 @@ class RecipeAttachmentCheckerTest {
         when(gatewayConfigService.getPrimaryGatewayConfig(stack)).thenReturn(gatewayConfig);
         when(hostOrchestrator.doesPhaseSlsExistWithTimeouts(eq(gatewayConfig), eq("recipes.runner"), anyInt(), anyInt()))
                 .thenThrow(new CloudbreakOrchestratorFailedException("error"));
-        BadRequestException badRequestException = Assertions.assertThrows(BadRequestException.class,
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> recipeAttachmentChecker.isRecipeAttachmentAvailable(1L));
         verify(gatewayConfigService, times(1)).getPrimaryGatewayConfig(any());
         verify(hostOrchestrator, times(1)).doesPhaseSlsExistWithTimeouts(eq(gatewayConfig), eq("recipes.runner"), anyInt(), anyInt());
@@ -122,7 +122,7 @@ class RecipeAttachmentCheckerTest {
         when(stackService.getStackById(1L)).thenReturn(stack);
         GatewayConfig gatewayConfig = mock(GatewayConfig.class);
         when(gatewayConfigService.getPrimaryGatewayConfig(stack)).thenReturn(gatewayConfig);
-        BadRequestException badRequestException = Assertions.assertThrows(BadRequestException.class,
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> recipeAttachmentChecker.isRecipeAttachmentAvailable(1L));
         verify(gatewayConfigService, times(1)).getPrimaryGatewayConfig(any());
         verify(hostOrchestrator, times(0)).doesPhaseSlsExistWithTimeouts(eq(gatewayConfig), eq("recipes.runner"), anyInt(), anyInt());

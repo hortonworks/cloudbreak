@@ -4,17 +4,17 @@ import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants.AwsVariant
 import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants.AwsVariant.AWS_VARIANT;
 import static com.sequenceiq.cloudbreak.validation.ValidationResult.State.ERROR;
 import static com.sequenceiq.cloudbreak.validation.ValidationResult.State.VALID;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.util.Set;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Sets;
@@ -39,8 +39,8 @@ import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 
-@RunWith(MockitoJUnitRunner.class)
-public class StackValidatorTest extends StackRequestValidatorTestBase {
+@ExtendWith(MockitoExtension.class)
+class StackValidatorTest extends StackRequestValidatorTestBase {
 
     private static final String TEST_BP_NAME = "testBpName";
 
@@ -77,12 +77,12 @@ public class StackValidatorTest extends StackRequestValidatorTestBase {
     @Mock
     private EntitlementService entitlementService;
 
-    public StackValidatorTest() {
+    StackValidatorTest() {
         super(LoggerFactory.getLogger(StackValidatorTest.class));
     }
 
     @Test
-    public void testWithZeroRootVolumeSize() {
+    void testWithZeroRootVolumeSize() {
         assertNotNull(templateValidator);
         Stack stackRequest = stackWithRootVolumeSize(0, StackType.WORKLOAD, AWS_VARIANT.variant());
         ValidationResult.ValidationResultBuilder builder = new ValidationResult.ValidationResultBuilder();
@@ -94,7 +94,7 @@ public class StackValidatorTest extends StackRequestValidatorTestBase {
     }
 
     @Test
-    public void testWithNegativeRootVolumeSize() {
+    void testWithNegativeRootVolumeSize() {
         Stack stack = stackWithRootVolumeSize(-1, StackType.WORKLOAD, AWS_VARIANT.variant());
         ValidationResult.ValidationResultBuilder builder = new ValidationResult.ValidationResultBuilder();
 
@@ -105,7 +105,7 @@ public class StackValidatorTest extends StackRequestValidatorTestBase {
     }
 
     @Test
-    public void testNullValueIsAllowedForRootVolumeSize() {
+    void testNullValueIsAllowedForRootVolumeSize() {
         Stack stack = stackWithRootVolumeSize(null, StackType.WORKLOAD, AWS_VARIANT.variant());
         ValidationResult.ValidationResultBuilder builder = new ValidationResult.ValidationResultBuilder();
 
@@ -116,7 +116,7 @@ public class StackValidatorTest extends StackRequestValidatorTestBase {
     }
 
     @Test
-    public void testWithPositiveRootVolumeSize() {
+    void testWithPositiveRootVolumeSize() {
         Stack stack = stackWithRootVolumeSize(1, StackType.WORKLOAD, AWS_VARIANT.variant());
         ValidationResult.ValidationResultBuilder builder = new ValidationResult.ValidationResultBuilder();
 
@@ -127,7 +127,7 @@ public class StackValidatorTest extends StackRequestValidatorTestBase {
     }
 
     @Test
-    public void testWithPositiveRootVolumeSizeWithDataLakeAndDatalakeEntitlementEnabledAndCFTemplate() {
+    void testWithPositiveRootVolumeSizeWithDataLakeAndDatalakeEntitlementEnabledAndCFTemplate() {
         Stack stack = stackWithRootVolumeSize(1, StackType.DATALAKE, AWS_VARIANT.variant());
         ValidationResult.ValidationResultBuilder builder = new ValidationResult.ValidationResultBuilder();
 
@@ -138,7 +138,7 @@ public class StackValidatorTest extends StackRequestValidatorTestBase {
     }
 
     @Test
-    public void testWithPositiveRootVolumeSizeWithDataLakeAndDatalakeEntitlementDisabledAndCFTemplate() {
+    void testWithPositiveRootVolumeSizeWithDataLakeAndDatalakeEntitlementDisabledAndCFTemplate() {
         Stack stack = stackWithRootVolumeSize(1, StackType.DATALAKE, AWS_VARIANT.variant());
         ValidationResult.ValidationResultBuilder builder = new ValidationResult.ValidationResultBuilder();
 
@@ -149,7 +149,7 @@ public class StackValidatorTest extends StackRequestValidatorTestBase {
     }
 
     @Test
-    public void testWithPositiveRootVolumeSizeWithDataLakeAndDatalakeEntitlementEnabledAndNative() {
+    void testWithPositiveRootVolumeSizeWithDataLakeAndDatalakeEntitlementEnabledAndNative() {
         Stack stack = stackWithRootVolumeSize(1, StackType.DATALAKE, AWS_NATIVE_VARIANT.variant());
         ValidationResult.ValidationResultBuilder builder = new ValidationResult.ValidationResultBuilder();
 
@@ -160,7 +160,7 @@ public class StackValidatorTest extends StackRequestValidatorTestBase {
     }
 
     @Test
-    public void testWithNativeVariantWhenEntitlementEnabledShouldBeValid() {
+    void testWithNativeVariantWhenEntitlementEnabledShouldBeValid() {
         Stack stack = stackWithRootVolumeSize(1, StackType.WORKLOAD, AWS_VARIANT.variant());
         stack.setPlatformVariant(AwsConstants.AwsVariant.AWS_NATIVE_VARIANT.variant().value());
         ValidationResult.ValidationResultBuilder builder = new ValidationResult.ValidationResultBuilder();

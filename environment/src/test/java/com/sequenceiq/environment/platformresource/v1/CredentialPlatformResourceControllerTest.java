@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.platformresource.v1;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
@@ -9,7 +10,6 @@ import static org.mockito.Mockito.when;
 
 import jakarta.ws.rs.BadRequestException;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -121,7 +121,7 @@ class CredentialPlatformResourceControllerTest {
 
     @Test
     void testGetNoSqlTablesShouldThrowBadRequestExceptionWhenTheSpecifiedCredentialCrnIsInvalid() {
-        Assertions.assertThrows(BadRequestException.class, () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.getNoSqlTables(null,
+        assertThrows(BadRequestException.class, () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.getNoSqlTables(null,
                 "new", "region", "aws", "az")));
 
     }

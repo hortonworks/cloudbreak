@@ -2,6 +2,8 @@ package com.sequenceiq.environment.proxy.service;
 
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.lenient;
 
 import java.util.Arrays;
@@ -11,7 +13,6 @@ import java.util.stream.Collectors;
 
 import jakarta.ws.rs.BadRequestException;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -109,7 +110,7 @@ class ProxyConfigModificationServiceTest {
 
         boolean result = underTest.shouldModify(environment, newProxyConfig);
 
-        Assertions.assertFalse(result);
+        assertFalse(result);
     }
 
     @Test
@@ -121,7 +122,7 @@ class ProxyConfigModificationServiceTest {
 
         boolean result = underTest.shouldModify(environment, proxyConfig);
 
-        Assertions.assertFalse(result);
+        assertFalse(result);
     }
 
     @Test
@@ -132,7 +133,7 @@ class ProxyConfigModificationServiceTest {
 
         boolean result = underTest.shouldModify(environment, proxyConfig);
 
-        Assertions.assertTrue(result);
+        assertTrue(result);
     }
 
     @Test
@@ -144,7 +145,7 @@ class ProxyConfigModificationServiceTest {
 
         boolean result = underTest.shouldModify(environment, new ProxyConfig());
 
-        Assertions.assertTrue(result);
+        assertTrue(result);
     }
 
     @Test
@@ -159,7 +160,7 @@ class ProxyConfigModificationServiceTest {
 
         boolean result = underTest.shouldModify(environment, newProxyConfig);
 
-        Assertions.assertTrue(result);
+        assertTrue(result);
     }
 
     private void setFreeipaStatus(Status status) {

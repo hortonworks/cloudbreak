@@ -1,20 +1,21 @@
 package com.sequenceiq.cloudbreak.util;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Test;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
-public class DeviceNameGeneratorTest {
+class DeviceNameGeneratorTest {
 
     private static final String DEVICE_TEMPLATE = "/dev/%s";
 
     @Test
     @DisplayName("test if it can generate all the device letters")
-    public void testNextForAllLetters() {
+    void testNextForAllLetters() {
         List<String> expectedDeviceList = List.of(
                 "/dev/b", "/dev/c", "/dev/d", "/dev/e",
                 "/dev/f", "/dev/g", "/dev/h", "/dev/i",
@@ -32,7 +33,7 @@ public class DeviceNameGeneratorTest {
 
     @Test
     @DisplayName("test if it can generate all the device letters with offset")
-    public void testNextForAllLettersWithOffset() {
+    void testNextForAllLettersWithOffset() {
         List<String> expectedDeviceList = List.of(
                 "/dev/f", "/dev/g", "/dev/h", "/dev/i",
                 "/dev/j", "/dev/k", "/dev/l", "/dev/m",
@@ -48,13 +49,15 @@ public class DeviceNameGeneratorTest {
         assertArrayEquals(expectedDeviceList.toArray(), result.toArray());
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     @DisplayName("test if it can handle more iteration than allowed")
     public void testNextForInvalidIteration() {
         int offset = 4;
         DeviceNameGenerator generator = new DeviceNameGenerator(DEVICE_TEMPLATE, offset);
-        for (int i = 0; i < DeviceNameGenerator.DEVICE_NAME_POSTFIX_LETTER.size(); i++) {
-            generator.next();
-        }
+        assertThrows(IllegalStateException.class, () -> {
+            for (int i = 0; i < DeviceNameGenerator.DEVICE_NAME_POSTFIX_LETTER.size(); i++) {
+                generator.next();
+            }
+        });
     }
 }

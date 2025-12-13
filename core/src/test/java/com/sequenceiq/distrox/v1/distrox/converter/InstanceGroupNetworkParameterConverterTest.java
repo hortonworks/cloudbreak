@@ -1,13 +1,14 @@
 package com.sequenceiq.distrox.v1.distrox.converter;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -56,7 +57,7 @@ class InstanceGroupNetworkParameterConverterTest {
     void convertMockNetworkParametersWhenNoNetworkConfigOnIgOrStackOrEnvLevel() {
         InstanceGroupMockNetworkV1Parameters providerSpecificNetworkParam = null;
 
-        BadRequestException exception = Assertions.assertThrows(BadRequestException.class,
+        BadRequestException exception = assertThrows(BadRequestException.class,
                 () -> underTest.convert(providerSpecificNetworkParam, environmentNetworkResponse, CloudPlatform.MOCK, networkV4Request));
 
         assertEquals("Subnet could not be selected for you request, please check your environment and it's network configuration.",
@@ -71,7 +72,7 @@ class InstanceGroupNetworkParameterConverterTest {
         InstanceGroupMockNetworkV4Parameters actual = underTest.convert(mockNetworkV1Parameters, environmentNetworkResponse, CloudPlatform.MOCK,
                 networkV4Request);
 
-        Assertions.assertTrue(actual.getSubnetIds().stream().allMatch(ENV_PREFERRED_SUBNET_ID::equals));
+        assertTrue(actual.getSubnetIds().stream().allMatch(ENV_PREFERRED_SUBNET_ID::equals));
     }
 
     @Test
@@ -82,7 +83,7 @@ class InstanceGroupNetworkParameterConverterTest {
         InstanceGroupMockNetworkV4Parameters actual = underTest.convert(mockNetworkV1Parameters, environmentNetworkResponse, CloudPlatform.MOCK,
                 networkV4Request);
 
-        Assertions.assertTrue(actual.getSubnetIds().stream().allMatch(STACK_LEVEL_SUBNET_ID::equals));
+        assertTrue(actual.getSubnetIds().stream().allMatch(STACK_LEVEL_SUBNET_ID::equals));
     }
 
     @Test
@@ -93,14 +94,14 @@ class InstanceGroupNetworkParameterConverterTest {
         InstanceGroupMockNetworkV4Parameters actual = underTest.convert(mockNetworkV1Parameters, environmentNetworkResponse, CloudPlatform.MOCK,
                 networkV4Request);
 
-        Assertions.assertTrue(actual.getSubnetIds().containsAll(INSTANCE_GROUP_SUBNETS));
+        assertTrue(actual.getSubnetIds().containsAll(INSTANCE_GROUP_SUBNETS));
     }
 
     @Test
     void convertAwsNetworkParametersWhenNoNetworkConfigOnIgOrStackOrEnvLevel() {
         InstanceGroupAwsNetworkV1Parameters providerSpecificNetworkParam = new InstanceGroupAwsNetworkV1Parameters();
 
-        BadRequestException exception = Assertions.assertThrows(BadRequestException.class,
+        BadRequestException exception = assertThrows(BadRequestException.class,
                 () -> underTest.convert(providerSpecificNetworkParam, environmentNetworkResponse, CloudPlatform.AWS, networkV4Request));
 
         assertEquals("Subnet could not be selected for you request, please check your environment and it's network configuration.",
@@ -116,7 +117,7 @@ class InstanceGroupNetworkParameterConverterTest {
         InstanceGroupAwsNetworkV4Parameters actual = underTest.convert(networkV1Parameters, environmentNetworkResponse, CloudPlatform.AWS,
                 networkV4Request);
 
-        Assertions.assertTrue(actual.getSubnetIds().stream().allMatch(ENV_PREFERRED_SUBNET_ID::equals));
+        assertTrue(actual.getSubnetIds().stream().allMatch(ENV_PREFERRED_SUBNET_ID::equals));
     }
 
     @Test
@@ -128,8 +129,8 @@ class InstanceGroupNetworkParameterConverterTest {
         InstanceGroupAwsNetworkV4Parameters actual = underTest.convert(networkV1Parameters, environmentNetworkResponse, CloudPlatform.AWS,
                 networkV4Request);
 
-        Assertions.assertTrue(actual.getSubnetIds().stream().allMatch(STACK_LEVEL_SUBNET_ID::equals));
-        Assertions.assertTrue(actual.getEndpointGatewaySubnetIds().containsAll(ENDPOINT_GATEWAY_SUBNET_IDS));
+        assertTrue(actual.getSubnetIds().stream().allMatch(STACK_LEVEL_SUBNET_ID::equals));
+        assertTrue(actual.getEndpointGatewaySubnetIds().containsAll(ENDPOINT_GATEWAY_SUBNET_IDS));
     }
 
     @Test
@@ -141,7 +142,7 @@ class InstanceGroupNetworkParameterConverterTest {
         InstanceGroupAwsNetworkV4Parameters actual = underTest.convert(networkV1Parameters, environmentNetworkResponse, CloudPlatform.AWS,
                 networkV4Request);
 
-        Assertions.assertTrue(actual.getSubnetIds().containsAll(INSTANCE_GROUP_SUBNETS));
+        assertTrue(actual.getSubnetIds().containsAll(INSTANCE_GROUP_SUBNETS));
     }
 
     @Test
@@ -153,15 +154,15 @@ class InstanceGroupNetworkParameterConverterTest {
         InstanceGroupAwsNetworkV4Parameters actual = underTest.convert(networkV1Parameters, environmentNetworkResponse, CloudPlatform.AWS,
                 networkV4Request);
 
-        Assertions.assertTrue(actual.getSubnetIds().containsAll(INSTANCE_GROUP_SUBNETS));
-        Assertions.assertTrue(actual.getEndpointGatewaySubnetIds().containsAll(ENDPOINT_GATEWAY_SUBNET_IDS));
+        assertTrue(actual.getSubnetIds().containsAll(INSTANCE_GROUP_SUBNETS));
+        assertTrue(actual.getEndpointGatewaySubnetIds().containsAll(ENDPOINT_GATEWAY_SUBNET_IDS));
     }
 
     @Test
     void convertAzureNetworkParametersWhenNoNetworkConfigOnIgOrStackOrEnvLevel() {
         InstanceGroupAzureNetworkV1Parameters providerSpecificNetworkParam = null;
 
-        BadRequestException exception = Assertions.assertThrows(BadRequestException.class,
+        BadRequestException exception = assertThrows(BadRequestException.class,
                 () -> underTest.convert(providerSpecificNetworkParam, environmentNetworkResponse, CloudPlatform.AZURE, networkV4Request));
 
         assertEquals("Subnet could not be selected for you request, please check your environment and it's network configuration.",
@@ -176,8 +177,8 @@ class InstanceGroupNetworkParameterConverterTest {
         InstanceGroupAzureNetworkV4Parameters actual = underTest.convert(networkV1Parameters, environmentNetworkResponse, CloudPlatform.AZURE,
                 networkV4Request);
 
-        Assertions.assertTrue(actual.getSubnetIds().stream().allMatch(ENV_PREFERRED_SUBNET_ID::equals));
-        Assertions.assertTrue(actual.getAvailabilityZones().isEmpty());
+        assertTrue(actual.getSubnetIds().stream().allMatch(ENV_PREFERRED_SUBNET_ID::equals));
+        assertTrue(actual.getAvailabilityZones().isEmpty());
     }
 
     @Test
@@ -189,8 +190,8 @@ class InstanceGroupNetworkParameterConverterTest {
         InstanceGroupAzureNetworkV4Parameters actual = underTest.convert(networkV1Parameters, environmentNetworkResponse, CloudPlatform.AZURE,
                 networkV4Request);
 
-        Assertions.assertTrue(actual.getSubnetIds().stream().allMatch(STACK_LEVEL_SUBNET_ID::equals));
-        Assertions.assertTrue(actual.getAvailabilityZones().containsAll(AZURE_AVAILABILITY_ZONES));
+        assertTrue(actual.getSubnetIds().stream().allMatch(STACK_LEVEL_SUBNET_ID::equals));
+        assertTrue(actual.getAvailabilityZones().containsAll(AZURE_AVAILABILITY_ZONES));
     }
 
     @Test
@@ -201,8 +202,8 @@ class InstanceGroupNetworkParameterConverterTest {
         InstanceGroupAzureNetworkV4Parameters actual = underTest.convert(networkV1Parameters, environmentNetworkResponse, CloudPlatform.AZURE,
                 networkV4Request);
 
-        Assertions.assertTrue(actual.getSubnetIds().containsAll(INSTANCE_GROUP_SUBNETS));
-        Assertions.assertTrue(actual.getAvailabilityZones().isEmpty());
+        assertTrue(actual.getSubnetIds().containsAll(INSTANCE_GROUP_SUBNETS));
+        assertTrue(actual.getAvailabilityZones().isEmpty());
     }
 
     @Test
@@ -214,15 +215,15 @@ class InstanceGroupNetworkParameterConverterTest {
         InstanceGroupAzureNetworkV4Parameters actual = underTest.convert(networkV1Parameters, environmentNetworkResponse, CloudPlatform.AZURE,
                 networkV4Request);
 
-        Assertions.assertTrue(actual.getSubnetIds().containsAll(INSTANCE_GROUP_SUBNETS));
-        Assertions.assertTrue(actual.getAvailabilityZones().containsAll(AZURE_AVAILABILITY_ZONES));
+        assertTrue(actual.getSubnetIds().containsAll(INSTANCE_GROUP_SUBNETS));
+        assertTrue(actual.getAvailabilityZones().containsAll(AZURE_AVAILABILITY_ZONES));
     }
 
     @Test
     void convertGcpNetworkParametersWhenNoNetworkConfigOnIgOrStackOrEnvLevel() {
         InstanceGroupGcpNetworkV1Parameters providerSpecificNetworkParam = new InstanceGroupGcpNetworkV1Parameters();
 
-        BadRequestException exception = Assertions.assertThrows(BadRequestException.class,
+        BadRequestException exception = assertThrows(BadRequestException.class,
                 () -> underTest.convert(providerSpecificNetworkParam, environmentNetworkResponse, CloudPlatform.GCP, networkV4Request));
 
         assertEquals("Subnet could not be selected for you request, please check your environment and it's network configuration.",
@@ -237,7 +238,7 @@ class InstanceGroupNetworkParameterConverterTest {
         InstanceGroupGcpNetworkV4Parameters actual = underTest.convert(networkV1Parameters, environmentNetworkResponse, CloudPlatform.GCP,
                 networkV4Request);
 
-        Assertions.assertTrue(actual.getSubnetIds().stream().allMatch(ENV_PREFERRED_SUBNET_ID::equals));
+        assertTrue(actual.getSubnetIds().stream().allMatch(ENV_PREFERRED_SUBNET_ID::equals));
     }
 
     @Test
@@ -248,7 +249,7 @@ class InstanceGroupNetworkParameterConverterTest {
         InstanceGroupGcpNetworkV4Parameters actual = underTest.convert(networkV1Parameters, environmentNetworkResponse, CloudPlatform.GCP,
                 networkV4Request);
 
-        Assertions.assertTrue(actual.getSubnetIds().stream().allMatch(STACK_LEVEL_SUBNET_ID::equals));
+        assertTrue(actual.getSubnetIds().stream().allMatch(STACK_LEVEL_SUBNET_ID::equals));
     }
 
     @Test
@@ -259,7 +260,7 @@ class InstanceGroupNetworkParameterConverterTest {
         InstanceGroupGcpNetworkV4Parameters actual = underTest.convert(networkV1Parameters, environmentNetworkResponse, CloudPlatform.GCP,
                 networkV4Request);
 
-        Assertions.assertTrue(actual.getSubnetIds().containsAll(INSTANCE_GROUP_SUBNETS));
+        assertTrue(actual.getSubnetIds().containsAll(INSTANCE_GROUP_SUBNETS));
     }
 
     static Object [] [] getAvailabilityZones() {

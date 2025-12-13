@@ -1,18 +1,18 @@
 package com.sequenceiq.redbeams.validation;
 
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
 import org.springframework.core.type.filter.AnnotationTypeFilter;
 
 import com.sequenceiq.cloudbreak.validation.ValidIfExactlyOneNonNull;
 
-public class ValidIfExactlyOneNonNullCheckerTest {
+class ValidIfExactlyOneNonNullCheckerTest {
 
     @Test
-    public void testAllAnnotatedClasses() throws NoSuchFieldException, ClassNotFoundException {
+    void testAllAnnotatedClasses() throws NoSuchFieldException, ClassNotFoundException {
         ClassPathScanningCandidateComponentProvider scanner = new ClassPathScanningCandidateComponentProvider(false);
         scanner.addIncludeFilter(new AnnotationTypeFilter(ValidIfExactlyOneNonNull.class));
         for (BeanDefinition def : scanner.findCandidateComponents("com.sequenceiq.redbeams")) {

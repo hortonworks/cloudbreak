@@ -1,33 +1,24 @@
 package com.sequenceiq.cloudbreak.core.bootstrap.service;
 
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.ContainerOrchestratorResolver;
 import com.sequenceiq.cloudbreak.orchestrator.container.ContainerOrchestrator;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 
-@RunWith(MockitoJUnitRunner.class)
-public class ContainerOrchestratorResolverTest {
+class ContainerOrchestratorResolverTest {
 
-    @Rule
-    public final ExpectedException thrown = ExpectedException.none();
-
-    @InjectMocks
-    private ContainerOrchestratorResolver underTest;
+    private ContainerOrchestratorResolver underTest = new ContainerOrchestratorResolver();
 
     @Test
-    public void getOrchestratorWhenExist() throws CloudbreakException {
+    void getOrchestratorWhenExist() throws CloudbreakException {
         Map<String, ContainerOrchestrator> map = new HashMap<>();
         TestOneMockContainerOrchestrator testOneMockContainerOrchestrator = new TestOneMockContainerOrchestrator();
         map.put(testOneMockContainerOrchestrator.name(), testOneMockContainerOrchestrator);
@@ -40,17 +31,15 @@ public class ContainerOrchestratorResolverTest {
     }
 
     @Test
-    public void getOrchestratorWhenNotExist() throws CloudbreakException {
+    void getOrchestratorWhenNotExist() throws CloudbreakException {
         Map<String, ContainerOrchestrator> map = new HashMap<>();
         TestOneMockContainerOrchestrator testOneMockContainerOrchestrator = new TestOneMockContainerOrchestrator();
         map.put(testOneMockContainerOrchestrator.name(), testOneMockContainerOrchestrator);
         TestTwoMockContainerOrchestrator testTwoMockContainerOrchestrator = new TestTwoMockContainerOrchestrator();
         map.put(testTwoMockContainerOrchestrator.name(), testTwoMockContainerOrchestrator);
         ReflectionTestUtils.setField(underTest, "containerOrchestrators", map);
-        thrown.expect(CloudbreakException.class);
-        thrown.expectMessage("ContainerOrchestrator not found: SWARM1");
 
-        underTest.get("SWARM1");
+        assertThrows(CloudbreakException.class, () -> underTest.get("SWARM1"), "ContainerOrchestrator not found: SWARM1");
     }
 
     private static class TestOneMockContainerOrchestrator extends MockContainerOrchestrator {

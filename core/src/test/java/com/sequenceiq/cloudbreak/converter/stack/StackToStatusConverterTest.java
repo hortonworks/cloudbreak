@@ -1,9 +1,8 @@
 package com.sequenceiq.cloudbreak.converter.stack;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
@@ -13,17 +12,12 @@ import com.sequenceiq.cloudbreak.converter.v4.stacks.StackToStatusConverter;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 
-public class StackToStatusConverterTest extends AbstractEntityConverterTest<Stack> {
+class StackToStatusConverterTest extends AbstractEntityConverterTest<Stack> {
 
-    private StackToStatusConverter underTest;
-
-    @Before
-    public void setUp() {
-        underTest = new StackToStatusConverter();
-    }
+    private StackToStatusConverter underTest = new StackToStatusConverter();
 
     @Test
-    public void testConvert() {
+    void testConvert() {
         // GIVEN
         // WHEN
         StackStatusV4Response result = underTest.convert(getSource());

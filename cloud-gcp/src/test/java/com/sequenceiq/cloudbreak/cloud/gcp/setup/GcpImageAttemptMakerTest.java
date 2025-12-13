@@ -1,12 +1,12 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.setup;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import org.junit.Assert;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -39,14 +39,14 @@ public class GcpImageAttemptMakerTest {
 
     @Test
     public void testGetRewriteTokenWhenTokenSpecified() {
-        Assert.assertEquals("token123", underTest.getRewriteToken());
+        assertEquals("token123", underTest.getRewriteToken());
     }
 
     @Test
     public void testSetRewriteTokenWhenTokenSpecified() {
-        Assert.assertEquals("token123", underTest.getRewriteToken());
+        assertEquals("token123", underTest.getRewriteToken());
         underTest.setRewriteToken("token456");
-        Assert.assertEquals("token456", underTest.getRewriteToken());
+        assertEquals("token456", underTest.getRewriteToken());
     }
 
     @Test
@@ -65,8 +65,8 @@ public class GcpImageAttemptMakerTest {
 
         AttemptResult process = underTest.process();
 
-        Assert.assertEquals("token", underTest.getRewriteToken());
-        Assert.assertEquals(AttemptState.FINISH, process.getState());
+        assertEquals("token", underTest.getRewriteToken());
+        assertEquals(AttemptState.FINISH, process.getState());
     }
 
     @Test
@@ -85,8 +85,8 @@ public class GcpImageAttemptMakerTest {
 
         AttemptResult process = underTest.process();
 
-        Assert.assertEquals("token", underTest.getRewriteToken());
-        Assert.assertEquals(AttemptState.CONTINUE, process.getState());
+        assertEquals("token", underTest.getRewriteToken());
+        assertEquals(AttemptState.CONTINUE, process.getState());
     }
 
     @Test
@@ -101,7 +101,7 @@ public class GcpImageAttemptMakerTest {
 
         AttemptResult process = underTest.process();
 
-        Assert.assertEquals(AttemptState.CONTINUE, process.getState());
+        assertEquals(AttemptState.CONTINUE, process.getState());
     }
 
     @Test
@@ -117,6 +117,6 @@ public class GcpImageAttemptMakerTest {
         for (int i = 0; i < 5; i++) {
             underTest.process();
         }
-        Assertions.assertThrows(NullPointerException.class, () -> underTest.process());
+        assertThrows(NullPointerException.class, () -> underTest.process());
     }
 }

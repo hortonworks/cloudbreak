@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.structuredevent.service;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -7,7 +10,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import org.apache.commons.lang3.reflect.FieldUtils;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -48,10 +50,10 @@ public class CDPFlowStructuredEventHandlerTest {
 
         FlowDetails flowDetails = flowDetailsCaptor.getValue();
         String unknown = "unknown";
-        Assertions.assertEquals(unknown, flowDetails.getFlowState());
-        Assertions.assertEquals(unknown, flowDetails.getNextFlowState());
-        Assertions.assertEquals(unknown, flowDetails.getFlowEvent());
-        Assertions.assertEquals(0L, flowDetails.getDuration());
+        assertEquals(unknown, flowDetails.getFlowState());
+        assertEquals(unknown, flowDetails.getNextFlowState());
+        assertEquals(unknown, flowDetails.getFlowEvent());
+        assertEquals(0L, flowDetails.getDuration());
     }
 
     @Test
@@ -72,7 +74,7 @@ public class CDPFlowStructuredEventHandlerTest {
         when(target.getId()).thenReturn("target");
         when(source.getId()).thenReturn("source");
         Object field = FieldUtils.readField(underTest, "exception", true);
-        Assertions.assertNotNull(field);
+        assertNotNull(field);
         underTest.transitionEnded(transition);
 
         ArgumentCaptor<FlowDetails> flowDetailsCaptor = ArgumentCaptor.forClass(FlowDetails.class);
@@ -80,11 +82,11 @@ public class CDPFlowStructuredEventHandlerTest {
         verify(cdpDefaultStructuredEventClient).sendStructuredEvent(event);
 
         FlowDetails flowDetails = flowDetailsCaptor.getValue();
-        Assertions.assertEquals("source", flowDetails.getFlowState());
-        Assertions.assertEquals("target", flowDetails.getNextFlowState());
-        Assertions.assertEquals("event", flowDetails.getFlowEvent());
+        assertEquals("source", flowDetails.getFlowState());
+        assertEquals("target", flowDetails.getNextFlowState());
+        assertEquals("event", flowDetails.getFlowEvent());
 
         field = FieldUtils.readField(underTest, "exception", true);
-        Assertions.assertNull(field);
+        assertNull(field);
     }
 }

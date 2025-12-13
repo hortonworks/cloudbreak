@@ -15,13 +15,13 @@ import java.util.function.Consumer;
 import jakarta.inject.Inject;
 
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.concurrent.CommonExecutorServiceFactory;
@@ -32,7 +32,7 @@ import com.sequenceiq.flow.service.flowlog.FlowLogDBService;
 
 import io.micrometer.core.instrument.MeterRegistry;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = {EventBusConfig.class, EventBusConfigTest.TestConfig.class})
 class EventBusConfigTest {
 
@@ -47,7 +47,7 @@ class EventBusConfigTest {
 
     @Test
     @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
-    public void unknownMessage() {
+    void unknownMessage() {
         FlowLog flowLog = new FlowLog();
         flowLog.setFlowId("123");
         when(flowLogDBService.findFirstByFlowIdOrderByCreatedDesc("123")).thenReturn(Optional.of(flowLog));
@@ -60,7 +60,7 @@ class EventBusConfigTest {
 
     @Test
     @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
-    public void uncaughtError() {
+    void uncaughtError() {
         FlowLog flowLog = new FlowLog();
         flowLog.setFlowId("123");
         when(flowLogDBService.findFirstByFlowIdOrderByCreatedDesc("123")).thenReturn(Optional.of(flowLog));

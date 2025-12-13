@@ -2,13 +2,14 @@ package com.sequenceiq.freeipa.client.operation;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,10 +51,10 @@ public class AbstractFreeIpaAddOperationTest {
 
     @Test
     public void testReturnValueByGetOperationInCaseOfDuplicate() throws FreeIpaClientException {
-        AbstractFreeIpaAddOperation<Object> getOperation = Mockito.mock(AbstractFreeIpaAddOperation.class);
+        AbstractFreeIpaAddOperation<Object> getOperation = mock(AbstractFreeIpaAddOperation.class);
         AbstractFreeipaOperation victim = new FreeIpaAddOperation(NAME, getOperation, FreeIpaAddOperationBehaviour.THROWS_DUPLICATE_ENTRY_EXEPTION);
 
-        Mockito.when(getOperation.invoke(freeIpaClient)).thenReturn(Optional.of(new Object()));
+        when(getOperation.invoke(freeIpaClient)).thenReturn(Optional.of(new Object()));
 
         Optional<Object> result = victim.invoke(freeIpaClient);
 

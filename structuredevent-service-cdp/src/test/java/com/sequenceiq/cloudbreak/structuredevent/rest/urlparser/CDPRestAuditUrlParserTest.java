@@ -1,12 +1,12 @@
 package com.sequenceiq.cloudbreak.structuredevent.rest.urlparser;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.params.provider.Arguments.of;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -28,11 +28,11 @@ class CDPRestAuditUrlParserTest {
     void testPatternExtractionParameterized(String requestedPath, boolean match, String expectedName, String expectedCrn, String expectedEvent) {
         Pattern pattern = underTest.getPattern();
         Matcher matcher = pattern.matcher(requestedPath);
-        Assertions.assertEquals(match, matcher.matches());
+        assertEquals(match, matcher.matches());
         if (matcher.matches()) {
-            Assertions.assertEquals(expectedName, underTest.getResourceName(matcher), "the name should match");
-            Assertions.assertEquals(expectedCrn, underTest.getResourceCrn(matcher), "the crn should match");
-            Assertions.assertEquals(expectedEvent, underTest.getResourceEvent(matcher), "the event should match");
+            assertEquals(expectedName, underTest.getResourceName(matcher), "the name should match");
+            assertEquals(expectedCrn, underTest.getResourceCrn(matcher), "the crn should match");
+            assertEquals(expectedEvent, underTest.getResourceEvent(matcher), "the event should match");
         }
     }
 

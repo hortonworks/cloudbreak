@@ -3,19 +3,19 @@ package com.sequenceiq.redbeams.service.cloud;
 import static com.sequenceiq.common.api.type.CommonStatus.CREATED;
 import static com.sequenceiq.common.api.type.CommonStatus.REQUESTED;
 import static com.sequenceiq.common.api.type.ResourceType.AZURE_DATABASE;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.Optional;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.common.api.type.ResourceType;
@@ -23,8 +23,8 @@ import com.sequenceiq.redbeams.converter.spi.DBResourceToCloudResourceConverter;
 import com.sequenceiq.redbeams.domain.stack.DBResource;
 import com.sequenceiq.redbeams.service.stack.DBResourceService;
 
-@RunWith(MockitoJUnitRunner.class)
-public class CloudResourceRetrieverServiceTest {
+@ExtendWith(MockitoExtension.class)
+class CloudResourceRetrieverServiceTest {
 
     private static final String RESOURCE = "resource1";
 
@@ -42,7 +42,7 @@ public class CloudResourceRetrieverServiceTest {
     private DBResourceService resourceService;
 
     @Test
-    public void testFindFirstByStatusAndTypeAndStackShouldReturnCloudResource() {
+    void testFindFirstByStatusAndTypeAndStackShouldReturnCloudResource() {
         DBResource resource = createResource();
         CloudResource cloudResource = createCloudResource();
 
@@ -58,7 +58,7 @@ public class CloudResourceRetrieverServiceTest {
     }
 
     @Test
-    public void testFindFirstByStatusAndTypeAndStackShouldReturnEmptyList() {
+    void testFindFirstByStatusAndTypeAndStackShouldReturnEmptyList() {
         when(resourceService.findByStatusAndTypeAndStack(CREATED, RESOURCE_TYPE, STACK_ID)).thenReturn(Optional.empty());
 
         Optional<CloudResource> actual = underTest.findByStatusAndTypeAndStack(CREATED, RESOURCE_TYPE, STACK_ID);

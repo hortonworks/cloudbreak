@@ -1,12 +1,13 @@
 package com.sequenceiq.redbeams.service;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.Map;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -54,7 +55,7 @@ class DatabaseCapabilityServiceTest {
 
         String defaultInstanceType = databaseCapabilityService.getDefaultInstanceType(connector, cloudCredential, cloudPlatformVariant, region);
 
-        Assertions.assertEquals("Standard_E4ds_v5", defaultInstanceType);
+        assertEquals("Standard_E4ds_v5", defaultInstanceType);
     }
 
     @Test
@@ -67,7 +68,7 @@ class DatabaseCapabilityServiceTest {
 
         String defaultInstanceType = databaseCapabilityService.getDefaultInstanceType(connector, cloudCredential, cloudPlatformVariant, region);
 
-        Assertions.assertNull(defaultInstanceType);
+        assertNull(defaultInstanceType);
     }
 
     @Test
@@ -78,6 +79,6 @@ class DatabaseCapabilityServiceTest {
 
         String defaultInstanceType = databaseCapabilityService.getDefaultInstanceType(connector, cloudCredential, cloudPlatformVariant, region);
 
-        Assertions.assertNull(defaultInstanceType);
+        assertNull(defaultInstanceType);
     }
 }

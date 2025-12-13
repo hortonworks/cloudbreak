@@ -1,6 +1,6 @@
 package com.sequenceiq.environment.environment.validation.network;
 
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.Mockito.mock;
 
 import java.util.List;

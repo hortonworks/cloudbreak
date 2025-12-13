@@ -1,21 +1,21 @@
 package com.sequenceiq.cloudbreak.service.rdsconfig;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.ConnectionNameFormat;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabasePropertiesV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
 
-public class DbUsernameConverterServiceTest {
+class DbUsernameConverterServiceTest {
 
     private static final String AZURE_DB_HOST_DOMAIN = ".database.azure.com";
 
     private final DbUsernameConverterService dbUsernameConverterService = new DbUsernameConverterService();
 
     @Test
-    public void testWhenToConnectionUsernameOnAzure() {
+    void testWhenToConnectionUsernameOnAzure() {
         String username = dbUsernameConverterService.toConnectionUsername(
                 createDatabaseServerV4Response(ConnectionNameFormat.USERNAME_WITH_HOSTNAME), "username");
 
@@ -23,7 +23,7 @@ public class DbUsernameConverterServiceTest {
     }
 
     @Test
-    public void testWhenToConnectionUsernameNotOnAzure() {
+    void testWhenToConnectionUsernameNotOnAzure() {
         String username = dbUsernameConverterService.toConnectionUsername(
                 createDatabaseServerV4Response(ConnectionNameFormat.USERNAME_ONLY), "username");
 
@@ -31,7 +31,7 @@ public class DbUsernameConverterServiceTest {
     }
 
     @Test
-    public void testWhenToConnectionUsernameOnAzureByHostname() {
+    void testWhenToConnectionUsernameOnAzureByHostname() {
         String username = dbUsernameConverterService.toConnectionUsername(
                 createDatabaseServerV4ResponseWithoutProps("hostname" + AZURE_DB_HOST_DOMAIN), "username");
 
@@ -39,7 +39,7 @@ public class DbUsernameConverterServiceTest {
     }
 
     @Test
-    public void testWhenToConnectionUsernameNotOnAzureByHostname() {
+    void testWhenToConnectionUsernameNotOnAzureByHostname() {
         String username = dbUsernameConverterService.toConnectionUsername(
                 createDatabaseServerV4ResponseWithoutProps("hostname"), "username");
 
@@ -47,7 +47,7 @@ public class DbUsernameConverterServiceTest {
     }
 
     @Test
-    public void testWhenToDatabaseUsername() {
+    void testWhenToDatabaseUsername() {
         String username = dbUsernameConverterService.toDatabaseUsername("username@hostname");
 
         assertEquals("username", username);

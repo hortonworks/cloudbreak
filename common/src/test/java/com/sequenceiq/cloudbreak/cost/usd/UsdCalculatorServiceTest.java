@@ -1,8 +1,9 @@
 package com.sequenceiq.cloudbreak.cost.usd;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.util.List;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -22,14 +23,14 @@ public class UsdCalculatorServiceTest {
     void calculateProviderCost() {
         double providerCost = underTest.calculateProviderCost(getClusterCostDto());
 
-        Assertions.assertEquals(15.00, providerCost);
+        assertEquals(15.00, providerCost);
     }
 
     @Test
     void calculateClouderaCost() {
         double clouderaCost = underTest.calculateClouderaCost(getClusterCostDto(), "WORKLOAD");
 
-        Assertions.assertEquals(6.00, clouderaCost);
+        assertEquals(6.00, clouderaCost);
     }
 
     private ClusterCostDto getClusterCostDto() {

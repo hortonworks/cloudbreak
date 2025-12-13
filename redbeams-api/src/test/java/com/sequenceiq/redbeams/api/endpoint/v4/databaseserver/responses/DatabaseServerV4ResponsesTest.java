@@ -1,23 +1,23 @@
 package com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Collections;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class DatabaseServerV4ResponsesTest {
+class DatabaseServerV4ResponsesTest {
 
     private DatabaseServerV4Responses responses;
 
     @Test
-    public void testEmpty() {
+    void testEmpty() {
         responses = new DatabaseServerV4Responses();
         assertEquals(0, responses.getResponses().size());
     }
 
     @Test
-    public void testNonEmpty() {
+    void testNonEmpty() {
         DatabaseServerV4Response response = new DatabaseServerV4Response();
         response.setId(1L);
 

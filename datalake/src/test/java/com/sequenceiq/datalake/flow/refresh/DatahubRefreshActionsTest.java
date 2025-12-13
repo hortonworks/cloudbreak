@@ -1,12 +1,12 @@
 package com.sequenceiq.datalake.flow.refresh;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import java.util.HashMap;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -74,7 +74,7 @@ public class DatahubRefreshActionsTest {
         ArgumentCaptor<DatahubRefreshStartEvent> captor = ArgumentCaptor.forClass(DatahubRefreshStartEvent.class);
         verify(reactorEventFactory, times(1)).createEvent(any(), captor.capture());
         DatahubRefreshStartEvent captorValue = captor.getValue();
-        Assertions.assertEquals(SDX_NAME, captorValue.getSdxName());
+        assertEquals(SDX_NAME, captorValue.getSdxName());
     }
 
     private void initActionPrivateFields(Action<?, ?> action) {

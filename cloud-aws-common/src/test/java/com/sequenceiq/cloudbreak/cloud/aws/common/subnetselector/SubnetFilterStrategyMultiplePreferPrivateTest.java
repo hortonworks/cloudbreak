@@ -6,6 +6,7 @@ import static com.sequenceiq.cloudbreak.cloud.aws.common.subnetselector.SubnetBu
 import static com.sequenceiq.cloudbreak.cloud.aws.common.subnetselector.SubnetBuilder.AZ_D;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -15,7 +16,6 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -34,8 +34,8 @@ public class SubnetFilterStrategyMultiplePreferPrivateTest {
 
     @Test
     public void testFilterHAMixedSubnetWhenOnlyPrivateSubnetHasUniqueAZPresentedShouldReturnOnlyPrivateSubnets() {
-        when(subnetSelectorService.collectPrivateSubnets(ArgumentMatchers.any())).thenCallRealMethod();
-        when(subnetSelectorService.collectPublicSubnets(ArgumentMatchers.any())).thenCallRealMethod();
+        when(subnetSelectorService.collectPrivateSubnets(any())).thenCallRealMethod();
+        when(subnetSelectorService.collectPublicSubnets(any())).thenCallRealMethod();
         List<CloudSubnet> subnets = new SubnetBuilder()
                 .withPrivateSubnet(AZ_A)
                 .withPrivateSubnet(AZ_B)
@@ -51,8 +51,8 @@ public class SubnetFilterStrategyMultiplePreferPrivateTest {
 
     @Test
     public void testFilterHAPrivateSubnetWhenMixedSubnetWithDifferentAzPresentedShouldReturnPrivateAnPublicSubnets() {
-        when(subnetSelectorService.collectPrivateSubnets(ArgumentMatchers.any())).thenCallRealMethod();
-        when(subnetSelectorService.collectPublicSubnets(ArgumentMatchers.any())).thenCallRealMethod();
+        when(subnetSelectorService.collectPrivateSubnets(any())).thenCallRealMethod();
+        when(subnetSelectorService.collectPublicSubnets(any())).thenCallRealMethod();
         List<CloudSubnet> subnets = new SubnetBuilder()
                 .withPrivateSubnet(AZ_A)
                 .withPrivateSubnet(AZ_B)
@@ -68,7 +68,7 @@ public class SubnetFilterStrategyMultiplePreferPrivateTest {
 
     @Test
     public void testFilterNonHAPrivateSubnetWhenOnlyPrivateSubnetPresentedShouldReturnPrivateSubnets() {
-        when(subnetSelectorService.collectPrivateSubnets(ArgumentMatchers.any())).thenCallRealMethod();
+        when(subnetSelectorService.collectPrivateSubnets(any())).thenCallRealMethod();
         List<CloudSubnet> subnets = new SubnetBuilder()
                 .withPrivateSubnet(AZ_A)
                 .withPrivateSubnet(AZ_B)
@@ -83,7 +83,7 @@ public class SubnetFilterStrategyMultiplePreferPrivateTest {
 
     @Test
     public void testFilterNonHAPrivateSubnetWhenMixedSubnetWithDifferentAzPresentedShouldReturnPrivateAnPublicSubnets() {
-        when(subnetSelectorService.collectPrivateSubnets(ArgumentMatchers.any())).thenCallRealMethod();
+        when(subnetSelectorService.collectPrivateSubnets(any())).thenCallRealMethod();
         List<CloudSubnet> subnets = new SubnetBuilder()
                 .withPrivateSubnet(AZ_A)
                 .withPrivateSubnet(AZ_B)
@@ -98,8 +98,8 @@ public class SubnetFilterStrategyMultiplePreferPrivateTest {
 
     @Test
     public void testFilterPrivateSubnetWhenOnlyPrivateAndPublicSubnetPresentedShouldReturnPrivateSubnets() {
-        when(subnetSelectorService.collectPrivateSubnets(ArgumentMatchers.any())).thenCallRealMethod();
-        when(subnetSelectorService.collectPublicSubnets(ArgumentMatchers.any())).thenCallRealMethod();
+        when(subnetSelectorService.collectPrivateSubnets(any())).thenCallRealMethod();
+        when(subnetSelectorService.collectPublicSubnets(any())).thenCallRealMethod();
         List<CloudSubnet> subnets = new SubnetBuilder()
                 .withPrivateSubnet(AZ_A)
                 .withPrivateSubnet(AZ_B)

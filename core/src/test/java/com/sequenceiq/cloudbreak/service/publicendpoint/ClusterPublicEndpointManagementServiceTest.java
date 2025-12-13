@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.publicendpoint;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doThrow;
@@ -13,7 +14,6 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -98,7 +98,7 @@ class ClusterPublicEndpointManagementServiceTest {
     void testProvisionWhenCertGenerationFails() {
         doThrow(new CloudbreakServiceException("Uh-Oh")).when(gatewayPublicEndpointManagementService).generateCertAndSaveForStackAndUpdateDnsEntry(stack);
 
-        Assertions.assertThrows(CloudbreakServiceException.class, () -> underTest.provision(stack));
+        assertThrows(CloudbreakServiceException.class, () -> underTest.provision(stack));
 
         verify(gatewayPublicEndpointManagementService, times(1)).generateCertAndSaveForStackAndUpdateDnsEntry(stack);
         verifyNoInteractions(dnsEntryServices);
@@ -112,7 +112,7 @@ class ClusterPublicEndpointManagementServiceTest {
         doCallRealMethod().when(dnsEntryServices).forEach(any());
         doThrow(new CloudbreakServiceException("Uh-Oh")).when(allHostPublicDnsEntryService).createOrUpdate(stack);
 
-        Assertions.assertThrows(CloudbreakServiceException.class, () -> underTest.provision(stack));
+        assertThrows(CloudbreakServiceException.class, () -> underTest.provision(stack));
 
         verify(gatewayPublicEndpointManagementService, times(1)).generateCertAndSaveForStackAndUpdateDnsEntry(stack);
         verify(allHostPublicDnsEntryService, times(1)).createOrUpdate(stack);
@@ -130,7 +130,7 @@ class ClusterPublicEndpointManagementServiceTest {
     void testProvisionLoadBalancerWhenRenewingCertificateFails() {
         doThrow(new CloudbreakServiceException("Uh-Oh")).when(gatewayPublicEndpointManagementService).renewCertificate(stack);
 
-        Assertions.assertThrows(CloudbreakServiceException.class, () -> underTest.provisionLoadBalancer(stack));
+        assertThrows(CloudbreakServiceException.class, () -> underTest.provisionLoadBalancer(stack));
 
         verify(gatewayPublicEndpointManagementService, times(1)).renewCertificate(stack);
     }
@@ -139,7 +139,7 @@ class ClusterPublicEndpointManagementServiceTest {
     void testProvisionLoadBalancerWhenUpdatingDnsEntryForLoadBalancerFails() {
         doThrow(new CloudbreakServiceException("Uh-Oh")).when(gatewayPublicEndpointManagementService).updateDnsEntryForLoadBalancers(stack);
 
-        Assertions.assertThrows(CloudbreakServiceException.class, () -> underTest.provisionLoadBalancer(stack));
+        assertThrows(CloudbreakServiceException.class, () -> underTest.provisionLoadBalancer(stack));
 
         verify(gatewayPublicEndpointManagementService, times(1)).renewCertificate(stack);
         verify(gatewayPublicEndpointManagementService, times(1)).updateDnsEntryForLoadBalancers(stack);

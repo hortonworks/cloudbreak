@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.service.cluster;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -9,20 +9,19 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.requests.RepoConfigValidationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.RepoConfigValidationV4Response;
 import com.sequenceiq.cloudbreak.auth.service.url.UrlAccessValidationService;
 
-@RunWith(MockitoJUnitRunner.class)
-public class RepositoryConfigValidationServiceTest {
+@ExtendWith(MockitoExtension.class)
+class RepositoryConfigValidationServiceTest {
 
     private static final String RPM_REPO_REPODATA_PATH = "/repodata/repomd.xml";
 
@@ -32,12 +31,8 @@ public class RepositoryConfigValidationServiceTest {
     @InjectMocks
     private RepositoryConfigValidationService underTest;
 
-    @Before
-    public void setUp() {
-    }
-
     @Test
-    public void testValidateForRequestsIsNull() {
+    void testValidateForRequestsIsNull() {
         RepoConfigValidationV4Response result = underTest.validate(null);
 
         assertFalse(result.getAmbariBaseUrl());
@@ -49,7 +44,7 @@ public class RepositoryConfigValidationServiceTest {
     }
 
     @Test
-    public void testValidateForRequestsWithNullValuedFields() {
+    void testValidateForRequestsWithNullValuedFields() {
         RepoConfigValidationV4Request request = new RepoConfigValidationV4Request();
         RepoConfigValidationV4Response result = underTest.validate(request);
 
@@ -62,7 +57,7 @@ public class RepositoryConfigValidationServiceTest {
     }
 
     @Test
-    public void testValidateForAmbariBaseUrlWhenTheRPMRepoIsReachable() {
+    void testValidateForAmbariBaseUrlWhenTheRPMRepoIsReachable() {
         String ambariBaseUrl = "http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos6/2.x/BUILDS/2.6.1.0-143";
         RepoConfigValidationV4Request request = new RepoConfigValidationV4Request();
         request.setAmbariBaseUrl(ambariBaseUrl);
@@ -80,7 +75,7 @@ public class RepositoryConfigValidationServiceTest {
     }
 
     @Test
-    public void testValidateForAmbariBaseUrlWhenTheDebRepoIsReachable() {
+    void testValidateForAmbariBaseUrlWhenTheDebRepoIsReachable() {
         String ambariBaseUrl = "http://s3.amazonaws.com/dev.hortonworks.com/ambari/ubuntu14/2.x/BUILDS/2.6.1.0-143";
         RepoConfigValidationV4Request request = new RepoConfigValidationV4Request();
         request.setAmbariBaseUrl(ambariBaseUrl);
@@ -100,7 +95,7 @@ public class RepositoryConfigValidationServiceTest {
     }
 
     @Test
-    public void testValidateForAmbariBaseUrlWhenNoRPMOrDebRepoIsReachable() {
+    void testValidateForAmbariBaseUrlWhenNoRPMOrDebRepoIsReachable() {
         String ambariBaseUrl = "http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos6/2.x/BUILDS/2.6.1.0-143";
         RepoConfigValidationV4Request request = new RepoConfigValidationV4Request();
         request.setAmbariBaseUrl(ambariBaseUrl);
@@ -119,7 +114,7 @@ public class RepositoryConfigValidationServiceTest {
     }
 
     @Test
-    public void testValidateForAmbariGpgKeyUrlWhenTheUrlIsReachable() {
+    void testValidateForAmbariGpgKeyUrlWhenTheUrlIsReachable() {
         String ambariGpgKeyUrl = "http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos6/2.x/BUILDS/2.6.1.0-143/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins";
         RepoConfigValidationV4Request request = new RepoConfigValidationV4Request();
         request.setAmbariGpgKeyUrl(ambariGpgKeyUrl);
@@ -132,7 +127,7 @@ public class RepositoryConfigValidationServiceTest {
     }
 
     @Test
-    public void testValidateForAmbariGpgUrlWhenTheUrlIsNotReachable() {
+    void testValidateForAmbariGpgUrlWhenTheUrlIsNotReachable() {
         String ambariGpgKeyUrl = "http://s3.amazonaws.com/dev.hortonworks.com/ambari/centos6/2.x/BUILDS/2.6.1.0-143/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins";
         RepoConfigValidationV4Request request = new RepoConfigValidationV4Request();
         request.setAmbariGpgKeyUrl(ambariGpgKeyUrl);
@@ -145,7 +140,7 @@ public class RepositoryConfigValidationServiceTest {
     }
 
     @Test
-    public void testValidateForStackBaseUrlWhenRPMRepoIsReachable() {
+    void testValidateForStackBaseUrlWhenRPMRepoIsReachable() {
         String stackBaseUrl = "http://public-repo-1.hortonworks.com/HDP/centos6/2.x/updates/2.5.5.0";
         RepoConfigValidationV4Request request = new RepoConfigValidationV4Request();
         request.setStackBaseURL(stackBaseUrl);
@@ -159,7 +154,7 @@ public class RepositoryConfigValidationServiceTest {
     }
 
     @Test
-    public void testValidateForStackBaseUrlWhenDebRepoIsReachable() {
+    void testValidateForStackBaseUrlWhenDebRepoIsReachable() {
         String stackBaseUrl = "http://public-repo-1.hortonworks.com/HDP/ubuntu14/2.x/updates/2.5.5.0";
         String rpmRepoDataTarget = stackBaseUrl + RPM_REPO_REPODATA_PATH;
         String debRepoDataTarget = stackBaseUrl + "/dists/HDP/InRelease";
@@ -179,7 +174,7 @@ public class RepositoryConfigValidationServiceTest {
     }
 
     @Test
-    public void testValidateForStackBaseUrlWhenNoRepoIsAvailable() {
+    void testValidateForStackBaseUrlWhenNoRepoIsAvailable() {
         String stackBaseUrl = "http://public-repo-1.hortonworks.com/HDP/ubuntu14/2.x/updates/2.5.5.0";
         RepoConfigValidationV4Request request = new RepoConfigValidationV4Request();
         request.setStackBaseURL(stackBaseUrl);
@@ -198,7 +193,7 @@ public class RepositoryConfigValidationServiceTest {
     }
 
     @Test
-    public void testValidateForStackUtilsBaseUrlWhenRPMRepoIsReachable() {
+    void testValidateForStackUtilsBaseUrlWhenRPMRepoIsReachable() {
         String hdpUtilsBaseUrl = "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.21/repos/sles12";
         RepoConfigValidationV4Request request = new RepoConfigValidationV4Request();
         request.setUtilsBaseURL(hdpUtilsBaseUrl);
@@ -212,7 +207,7 @@ public class RepositoryConfigValidationServiceTest {
     }
 
     @Test
-    public void testValidateForStackUtilsBaseUrlWhenDebRepoIsReachable() {
+    void testValidateForStackUtilsBaseUrlWhenDebRepoIsReachable() {
         String utilsBaseUrl = "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.21/repos/ubuntu14";
         String rpmRepoDataTarget = utilsBaseUrl + RPM_REPO_REPODATA_PATH;
         String debRepoDataTarget = utilsBaseUrl + "/dists/HDP-UTILS/InRelease";
@@ -232,7 +227,7 @@ public class RepositoryConfigValidationServiceTest {
     }
 
     @Test
-    public void testValidateForStackUtilsBaseUrlWhenNoRepoIsAvailable() {
+    void testValidateForStackUtilsBaseUrlWhenNoRepoIsAvailable() {
         String utilsBaseUrl = "http://public-repo-1.hortonworks.com/HDP-UTILS-1.1.0.21/repos/sles12";
         String rpmRepoDataTarget = utilsBaseUrl + RPM_REPO_REPODATA_PATH;
         String debRepoDataTarget = utilsBaseUrl + "/dists/HDP-UTILS/InRelease";

@@ -4,28 +4,28 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 
-public class AzureNetworkV4ParametersTest {
+class AzureNetworkV4ParametersTest {
 
     private AzureNetworkV4Parameters underTest;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         underTest = new AzureNetworkV4Parameters();
     }
 
     @Test
-    public void testGettersAndSetters() {
+    void testGettersAndSetters() {
         underTest.setSubnets("someSubnets");
         assertThat(underTest.getSubnets()).isEqualTo("someSubnets");
     }
 
     @Test
-    public void testAsMap() {
+    void testAsMap() {
         underTest.setSubnets("someSubnets");
 
         assertThat(underTest.asMap()).containsOnly(Map.entry("subnets", "someSubnets"),
@@ -33,12 +33,12 @@ public class AzureNetworkV4ParametersTest {
     }
 
     @Test
-    public void testGetCloudPlatform() {
+    void testGetCloudPlatform() {
         assertThat(underTest.getCloudPlatform()).isEqualTo(CloudPlatform.AZURE);
     }
 
     @Test
-    public void testParse() {
+    void testParse() {
         Map<String, Object> parameters = Map.of("subnets", "someSubnets");
 
         underTest.parse(parameters);

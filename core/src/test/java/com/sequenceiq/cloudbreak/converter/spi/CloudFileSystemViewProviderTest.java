@@ -1,6 +1,9 @@
 package com.sequenceiq.cloudbreak.converter.spi;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -10,14 +13,12 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import org.junit.Test;
-import org.junit.jupiter.api.Assertions;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudFileSystemView;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.knox.KnoxRoles;
@@ -32,8 +33,8 @@ import com.sequenceiq.common.model.CloudIdentityType;
 import com.sequenceiq.common.model.CloudStorageCdpService;
 import com.sequenceiq.common.model.FileSystemType;
 
-@RunWith(MockitoJUnitRunner.class)
-public class CloudFileSystemViewProviderTest {
+@ExtendWith(MockitoExtension.class)
+class CloudFileSystemViewProviderTest {
 
     private static final String ID_BROKER_INSTANCE_PROFILE = "idBrokerInstanceProfile";
 
@@ -60,19 +61,19 @@ public class CloudFileSystemViewProviderTest {
     private static final String COMPUTE_INSTANCE_GROUP_NAME = "computeGroup";
 
     @Spy
-    private final FileSystemConverter fileSystemConverter = new FileSystemConverter();
+    private FileSystemConverter fileSystemConverter;
 
     @Spy
-    private final CloudIdentityTypeDecider cloudIdentityTypeDecider = new CloudIdentityTypeDecider();
+    private CloudIdentityTypeDecider cloudIdentityTypeDecider;
 
     @Mock
     private InstanceGroupService instanceGroupService;
 
     @InjectMocks
-    private final CloudFileSystemViewProvider cloudFileSystemViewProvider = new CloudFileSystemViewProvider();
+    private CloudFileSystemViewProvider cloudFileSystemViewProvider;
 
     @Test
-    public void testBuild() {
+    void testBuild() {
         List<CloudIdentity> cloudIdentities = getCloudIdentities();
         CloudStorage cloudStorage = getCloudStorage(cloudIdentities);
         FileSystem fileSystem = getFileSystem(cloudStorage);
@@ -86,17 +87,17 @@ public class CloudFileSystemViewProviderTest {
 
         Optional<CloudFileSystemView> idBrokerGroupResult = cloudFileSystemViewProvider
                 .getCloudFileSystemView(fileSystem, componentsByHostGroup, idBrokerGroup);
-        Assertions.assertEquals(idBrokerGroupResult.get().getCloudIdentityType(), CloudIdentityType.ID_BROKER);
+        assertEquals(idBrokerGroupResult.get().getCloudIdentityType(), CloudIdentityType.ID_BROKER);
 
         Optional<CloudFileSystemView> computeGroupResult = cloudFileSystemViewProvider
                 .getCloudFileSystemView(fileSystem, componentsByHostGroup, computeGroup);
-        Assertions.assertEquals(computeGroupResult.get().getCloudIdentityType(), CloudIdentityType.LOG);
+        assertEquals(computeGroupResult.get().getCloudIdentityType(), CloudIdentityType.LOG);
 
-        Mockito.verify(instanceGroupService, Mockito.times(2)).setCloudIdentityType(any(), any());
+        verify(instanceGroupService, times(2)).setCloudIdentityType(any(), any());
     }
 
     @Test
-    public void testBuildWithNullComponents() {
+    void testBuildWithNullComponents() {
         List<CloudIdentity> cloudIdentities = getCloudIdentities();
         CloudStorage cloudStorage = getCloudStorage(cloudIdentities);
         FileSystem fileSystem = getFileSystem(cloudStorage);
@@ -110,11 +111,11 @@ public class CloudFileSystemViewProviderTest {
 
         Optional<CloudFileSystemView> idBrokerGroupResult = cloudFileSystemViewProvider
                 .getCloudFileSystemView(fileSystem, componentsByHostGroup, idBrokerGroup);
-        Assertions.assertEquals(idBrokerGroupResult.get().getCloudIdentityType(), CloudIdentityType.ID_BROKER);
+        assertEquals(idBrokerGroupResult.get().getCloudIdentityType(), CloudIdentityType.ID_BROKER);
 
         Optional<CloudFileSystemView> computeGroupResult = cloudFileSystemViewProvider
                 .getCloudFileSystemView(fileSystem, componentsByHostGroup, computeGroup);
-        Assertions.assertEquals(computeGroupResult.get().getCloudIdentityType(), CloudIdentityType.LOG);
+        assertEquals(computeGroupResult.get().getCloudIdentityType(), CloudIdentityType.LOG);
     }
 
     private List<CloudIdentity> getCloudIdentities() {

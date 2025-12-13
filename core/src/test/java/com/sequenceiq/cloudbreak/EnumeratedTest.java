@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak;
 
 import static java.lang.System.lineSeparator;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -9,15 +10,14 @@ import java.util.Set;
 
 import jakarta.persistence.Enumerated;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.reflections.Reflections;
 import org.reflections.scanners.FieldAnnotationsScanner;
 
-public class EnumeratedTest {
+class EnumeratedTest {
 
     @Test
-    public void testIfThereAreEnumeratedAnnotations() {
+    void testIfThereAreEnumeratedAnnotations() {
         Reflections reflections = new Reflections("com.sequenceiq",
                 new FieldAnnotationsScanner());
 
@@ -37,8 +37,7 @@ public class EnumeratedTest {
             fields.add(key + ": " + String.join(", ", value));
         });
 
-        Assert.assertTrue(
-                String.format("Classes with @Enumerated fields: %s%s%s%s", lineSeparator(),
-                        String.join(lineSeparator(), fields), lineSeparator(), "Use @Converter instead of @Enumerated"), enumeratedFields.isEmpty());
+        assertTrue(enumeratedFields.isEmpty(), String.format("Classes with @Enumerated fields: %s%s%s%s", lineSeparator(),
+                String.join(lineSeparator(), fields), lineSeparator(), "Use @Converter instead of @Enumerated"));
     }
 }

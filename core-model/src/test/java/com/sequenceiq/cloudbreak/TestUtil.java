@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.common.type.CloudConstants.AWS;
 import static com.sequenceiq.cloudbreak.common.type.CloudConstants.GCP;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 
 import java.lang.reflect.Field;
 import java.net.URL;
@@ -22,7 +23,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.ReflectionUtils;
@@ -705,7 +705,7 @@ public class TestUtil {
 
     public static RdsConfigWithoutCluster rdsConfigWithoutCluster(DatabaseType databaseType, DatabaseVendor databaseVendor,
         RdsSslMode sslMode) {
-        RdsConfigWithoutCluster rdsConfig = Mockito.mock(RdsConfigWithoutCluster.class);
+        RdsConfigWithoutCluster rdsConfig = mock(RdsConfigWithoutCluster.class);
         lenient().when(rdsConfig.getId()).thenReturn(generateUniqueId());
         String databaseName = databaseType.name() + rdsConfig.getId();
         lenient().when(rdsConfig.getName()).thenReturn(databaseName);

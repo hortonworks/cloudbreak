@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.recipe;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -9,7 +11,6 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 import java.util.Set;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -53,9 +54,9 @@ class RecipeCrnListProviderServiceTest {
         recipeResponse1.setCrn("crn1");
         recipeViewV4Responses.setResponses(Set.of(recipeResponse1));
         when(recipeV4Endpoint.list(any())).thenReturn(recipeViewV4Responses);
-        NotFoundException cloudbreakRuntimeException = Assertions.assertThrows(NotFoundException.class,
+        NotFoundException cloudbreakRuntimeException = assertThrows(NotFoundException.class,
                 () -> recipeCrnListProviderService.getResourceCrnListByResourceNameList(List.of("recipe1", "recipe2")));
-        Assertions.assertEquals("Following recipes does not exist: [recipe2]", cloudbreakRuntimeException.getMessage());
+        assertEquals("Following recipes does not exist: [recipe2]", cloudbreakRuntimeException.getMessage());
     }
 
     @Test
@@ -66,9 +67,9 @@ class RecipeCrnListProviderServiceTest {
         recipeResponse1.setCrn("crn1");
         recipeViewV4Responses.setResponses(Set.of(recipeResponse1));
         when(recipeV4Endpoint.list(any())).thenReturn(recipeViewV4Responses);
-        NotFoundException cloudbreakRuntimeException = Assertions.assertThrows(NotFoundException.class,
+        NotFoundException cloudbreakRuntimeException = assertThrows(NotFoundException.class,
                 () -> recipeCrnListProviderService.validateRequestedRecipesExistsByName(List.of("recipe1", "recipe2")));
-        Assertions.assertEquals("Following recipes does not exist: [recipe2]", cloudbreakRuntimeException.getMessage());
+        assertEquals("Following recipes does not exist: [recipe2]", cloudbreakRuntimeException.getMessage());
     }
 
     @Test

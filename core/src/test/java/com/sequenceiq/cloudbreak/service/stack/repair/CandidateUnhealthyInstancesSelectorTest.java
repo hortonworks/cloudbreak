@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.service.stack.repair;
 
 import static com.sequenceiq.cloudbreak.cloud.model.HostName.hostName;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -14,14 +14,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.model.HostName;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -30,8 +30,8 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 
-@RunWith(MockitoJUnitRunner.class)
-public class CandidateUnhealthyInstancesSelectorTest {
+@ExtendWith(MockitoExtension.class)
+class CandidateUnhealthyInstancesSelectorTest {
 
     @Mock
     private ClusterService clusterService;
@@ -47,14 +47,14 @@ public class CandidateUnhealthyInstancesSelectorTest {
 
     private Stack stack;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         stack = mock(Stack.class);
         when(stack.getId()).thenReturn(1L);
     }
 
     @Test
-    public void shouldSelectInstancesWithUnknownStatus() {
+    void shouldSelectInstancesWithUnknownStatus() {
         Map<HostName, String> hostStatuses = new HashMap<>();
         hostStatuses.put(hostName("ip-10-0-0-1.ec2.internal"), "HEALTHY");
         hostStatuses.put(hostName("ip-10-0-0-2.ec2.internal"), "UNKNOWN");
@@ -79,7 +79,7 @@ public class CandidateUnhealthyInstancesSelectorTest {
     }
 
     @Test
-    public void shouldReturnEmptyListIfAllInstancesHealthy() {
+    void shouldReturnEmptyListIfAllInstancesHealthy() {
         Map<HostName, String> hostStatuses = new HashMap<>();
         hostStatuses.put(hostName("ip-10-0-0-1.ec2.internal"), "HEALTHY");
         hostStatuses.put(hostName("ip-10-0-0-3.ec2.internal"), "HEALTHY");
@@ -92,7 +92,7 @@ public class CandidateUnhealthyInstancesSelectorTest {
     }
 
     @Test
-    public void shouldRemoveNonCoreGroupNodes() {
+    void shouldRemoveNonCoreGroupNodes() {
         Map<HostName, String> hostStatuses = new HashMap<>();
         hostStatuses.put(hostName("ip-10-0-0-1.ec2.internal"), "HEALTHY");
         hostStatuses.put(hostName("ip-10-0-0-2.ec2.internal"), "UNKNOWN");
@@ -109,7 +109,7 @@ public class CandidateUnhealthyInstancesSelectorTest {
 
         verify(instanceMetaDataService).findAllWorkerWithHostnamesInStack(eq(stack.getId()), hostNamesCaptor.capture());
         assertTrue(hostNamesCaptor.getValue().contains("ip-10-0-0-2.ec2.internal"));
-        assertTrue("it is not worker", hostNamesCaptor.getValue().contains("ip-10-0-0-3.ec2.internal"));
+        assertTrue(hostNamesCaptor.getValue().contains("ip-10-0-0-3.ec2.internal"), "it is not worker");
         assertTrue(hostNamesCaptor.getValue().contains("ip-10-0-0-4.ec2.internal"));
         assertEquals(3, hostNamesCaptor.getValue().size());
         assertEquals(2L, candidateUnhealthyInstances.size());

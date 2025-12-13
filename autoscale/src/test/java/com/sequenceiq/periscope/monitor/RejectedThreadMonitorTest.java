@@ -1,12 +1,12 @@
 package com.sequenceiq.periscope.monitor;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -37,7 +37,7 @@ public class RejectedThreadMonitorTest {
 
         Long[] collect = new Long[6];
         monitored.stream().map(RejectedThread::getRejectedCount).collect(Collectors.toList()).toArray(collect);
-        Assertions.assertArrayEquals(collect, new Long[]{10L, 6L, 6L, 4L, 3L, 2L});
+        assertArrayEquals(collect, new Long[]{10L, 6L, 6L, 4L, 3L, 2L});
     }
 
     private RejectedThread rejectedThread(long count) {

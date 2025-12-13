@@ -1,13 +1,15 @@
 package com.sequenceiq.cloudbreak.template.views;
 
 import static com.sequenceiq.cloudbreak.template.views.ExposedServiceUtil.exposedService;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.GatewayType;
@@ -17,7 +19,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.ExposedServices;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.GatewayTopology;
 
-public class GatewayViewTest {
+class GatewayViewTest {
 
     private static final Set<String> ALL_SERVICES = Set.of(
             "CM-API",
@@ -54,115 +56,115 @@ public class GatewayViewTest {
     );
 
     @Test
-    public void testInitializeGatewayView() {
+    void testInitializeGatewayView() {
         GatewayView gatewayView = new GatewayView(TestUtil.gatewayEnabled(), "/cb/secret/signkey", ALL_SERVICES);
 
-        Assert.assertEquals("/path", gatewayView.getPath());
-        Assert.assertEquals("simple", gatewayView.getSsoProvider());
-        Assert.assertEquals("tokencert", gatewayView.getTokenCert());
-        Assert.assertEquals("topology", gatewayView.getTopologyName());
-        Assert.assertEquals(Collections.emptySet(), gatewayView.getExposedServices());
-        Assert.assertEquals(GatewayType.CENTRAL, gatewayView.getGatewayType());
-        Assert.assertEquals(SSOType.SSO_PROVIDER, gatewayView.getSsoType());
+        assertEquals("/path", gatewayView.getPath());
+        assertEquals("simple", gatewayView.getSsoProvider());
+        assertEquals("tokencert", gatewayView.getTokenCert());
+        assertEquals("topology", gatewayView.getTopologyName());
+        assertEquals(Collections.emptySet(), gatewayView.getExposedServices());
+        assertEquals(GatewayType.CENTRAL, gatewayView.getGatewayType());
+        assertEquals(SSOType.SSO_PROVIDER, gatewayView.getSsoType());
     }
 
     @Test
-    public void testInitializeGatewayViewWithExposedServiceSetElement() {
+    void testInitializeGatewayViewWithExposedServiceSetElement() {
         GatewayTopology gatewayTopology = gatewayTopologyExposedServicesAsSet(exposedService("NAMENODE").getKnoxService());
         GatewayView gatewayView = new GatewayView(gatewayEnabled(gatewayTopology), "/cb/secret/signkey", ALL_SERVICES);
 
-        Assert.assertEquals("/path", gatewayView.getPath());
-        Assert.assertEquals("simple", gatewayView.getSsoProvider());
-        Assert.assertEquals("tokencert", gatewayView.getTokenCert());
-        Assert.assertEquals("topology", gatewayView.getTopologyName());
-        Assert.assertTrue(gatewayView.getExposedServices().contains(exposedService("NAMENODE").getKnoxService()));
-        Assert.assertEquals(GatewayType.CENTRAL, gatewayView.getGatewayType());
-        Assert.assertEquals(SSOType.SSO_PROVIDER, gatewayView.getSsoType());
+        assertEquals("/path", gatewayView.getPath());
+        assertEquals("simple", gatewayView.getSsoProvider());
+        assertEquals("tokencert", gatewayView.getTokenCert());
+        assertEquals("topology", gatewayView.getTopologyName());
+        assertTrue(gatewayView.getExposedServices().contains(exposedService("NAMENODE").getKnoxService()));
+        assertEquals(GatewayType.CENTRAL, gatewayView.getGatewayType());
+        assertEquals(SSOType.SSO_PROVIDER, gatewayView.getSsoType());
     }
 
     @Test
-    public void testInitializeGatewayViewWithEmptyExposedServiceSet() {
+    void testInitializeGatewayViewWithEmptyExposedServiceSet() {
         GatewayView gatewayView = new GatewayView(gatewayEnabled(gatewayTopologyExposedServicesAsSet()), "/cb/secret/signkey", ALL_SERVICES);
 
-        Assert.assertEquals("/path", gatewayView.getPath());
-        Assert.assertEquals("simple", gatewayView.getSsoProvider());
-        Assert.assertEquals("tokencert", gatewayView.getTokenCert());
-        Assert.assertEquals("topology", gatewayView.getTopologyName());
-        Assert.assertEquals(Collections.emptySet(), gatewayView.getExposedServices());
-        Assert.assertEquals(GatewayType.CENTRAL, gatewayView.getGatewayType());
-        Assert.assertEquals(SSOType.SSO_PROVIDER, gatewayView.getSsoType());
+        assertEquals("/path", gatewayView.getPath());
+        assertEquals("simple", gatewayView.getSsoProvider());
+        assertEquals("tokencert", gatewayView.getTokenCert());
+        assertEquals("topology", gatewayView.getTopologyName());
+        assertEquals(Collections.emptySet(), gatewayView.getExposedServices());
+        assertEquals(GatewayType.CENTRAL, gatewayView.getGatewayType());
+        assertEquals(SSOType.SSO_PROVIDER, gatewayView.getSsoType());
     }
 
     @Test
-    public void testInitializeGatewayViewWithService() {
+    void testInitializeGatewayViewWithService() {
         GatewayView gatewayView = new GatewayView(
                 gatewayEnabled(gatewayTopology(exposedService("NAMENODE").getKnoxService())), "/cb/secret/signkey", ALL_SERVICES);
 
-        Assert.assertEquals("/path", gatewayView.getPath());
-        Assert.assertEquals("simple", gatewayView.getSsoProvider());
-        Assert.assertEquals("tokencert", gatewayView.getTokenCert());
-        Assert.assertEquals("topology", gatewayView.getTopologyName());
-        Assert.assertEquals(1, gatewayView.getExposedServices().size());
-        Assert.assertTrue(gatewayView.getExposedServices().contains(exposedService("NAMENODE").getKnoxService()));
-        Assert.assertEquals(GatewayType.CENTRAL, gatewayView.getGatewayType());
-        Assert.assertEquals(SSOType.SSO_PROVIDER, gatewayView.getSsoType());
+        assertEquals("/path", gatewayView.getPath());
+        assertEquals("simple", gatewayView.getSsoProvider());
+        assertEquals("tokencert", gatewayView.getTokenCert());
+        assertEquals("topology", gatewayView.getTopologyName());
+        assertEquals(1, gatewayView.getExposedServices().size());
+        assertTrue(gatewayView.getExposedServices().contains(exposedService("NAMENODE").getKnoxService()));
+        assertEquals(GatewayType.CENTRAL, gatewayView.getGatewayType());
+        assertEquals(SSOType.SSO_PROVIDER, gatewayView.getSsoType());
     }
 
     @Test
-    public void testInitializeGatewayViewWithAll() {
+    void testInitializeGatewayViewWithAll() {
         GatewayView gatewayView = new GatewayView(
                 gatewayEnabled(gatewayTopology(exposedService("ALL").getServiceName())), "/cb/secret/signkey", ALL_SERVICES);
 
-        Assert.assertEquals("/path", gatewayView.getPath());
-        Assert.assertEquals("simple", gatewayView.getSsoProvider());
-        Assert.assertEquals("tokencert", gatewayView.getTokenCert());
-        Assert.assertEquals("topology", gatewayView.getTopologyName());
-        Assert.assertEquals(ALL_SERVICES.size(), gatewayView.getExposedServices().size());
-        Assert.assertTrue(gatewayView.getExposedServices().contains(exposedService("NAMENODE").getKnoxService()));
-        Assert.assertEquals(GatewayType.CENTRAL, gatewayView.getGatewayType());
-        Assert.assertEquals(SSOType.SSO_PROVIDER, gatewayView.getSsoType());
+        assertEquals("/path", gatewayView.getPath());
+        assertEquals("simple", gatewayView.getSsoProvider());
+        assertEquals("tokencert", gatewayView.getTokenCert());
+        assertEquals("topology", gatewayView.getTopologyName());
+        assertEquals(ALL_SERVICES.size(), gatewayView.getExposedServices().size());
+        assertTrue(gatewayView.getExposedServices().contains(exposedService("NAMENODE").getKnoxService()));
+        assertEquals(GatewayType.CENTRAL, gatewayView.getGatewayType());
+        assertEquals(SSOType.SSO_PROVIDER, gatewayView.getSsoType());
     }
 
     @Test
-    public void testInitializeGatewayViewWithAllAndOtherServiceThenFullListInExposedServices() {
+    void testInitializeGatewayViewWithAllAndOtherServiceThenFullListInExposedServices() {
         GatewayTopology gatewayTopology = gatewayTopology(exposedService("ALL").getServiceName(), exposedService("NAMENODE").getKnoxService());
         GatewayView gatewayView = new GatewayView(gatewayEnabled(gatewayTopology), "/cb/secret/signkey", ALL_SERVICES);
 
-        Assert.assertEquals("/path", gatewayView.getPath());
-        Assert.assertEquals("simple", gatewayView.getSsoProvider());
-        Assert.assertEquals("tokencert", gatewayView.getTokenCert());
-        Assert.assertEquals("topology", gatewayView.getTopologyName());
-        Assert.assertEquals(ALL_SERVICES.size(), gatewayView.getExposedServices().size());
-        Assert.assertTrue(gatewayView.getExposedServices().contains(exposedService("NAMENODE").getKnoxService()));
-        Assert.assertTrue(gatewayView.getExposedServices().contains(exposedService("RANGER_ADMIN").getKnoxService()));
-        Assert.assertEquals(GatewayType.CENTRAL, gatewayView.getGatewayType());
-        Assert.assertEquals(SSOType.SSO_PROVIDER, gatewayView.getSsoType());
+        assertEquals("/path", gatewayView.getPath());
+        assertEquals("simple", gatewayView.getSsoProvider());
+        assertEquals("tokencert", gatewayView.getTokenCert());
+        assertEquals("topology", gatewayView.getTopologyName());
+        assertEquals(ALL_SERVICES.size(), gatewayView.getExposedServices().size());
+        assertTrue(gatewayView.getExposedServices().contains(exposedService("NAMENODE").getKnoxService()));
+        assertTrue(gatewayView.getExposedServices().contains(exposedService("RANGER_ADMIN").getKnoxService()));
+        assertEquals(GatewayType.CENTRAL, gatewayView.getGatewayType());
+        assertEquals(SSOType.SSO_PROVIDER, gatewayView.getSsoType());
     }
 
     @Test
-    public void testInitializeGatewayViewWithEmptyGatewayTopology() {
+    void testInitializeGatewayViewWithEmptyGatewayTopology() {
         GatewayView gatewayView = new GatewayView(gatewayEnabled(), "/cb/secret/signkey", ALL_SERVICES);
 
-        Assert.assertEquals("/path", gatewayView.getPath());
-        Assert.assertEquals("simple", gatewayView.getSsoProvider());
-        Assert.assertEquals("tokencert", gatewayView.getTokenCert());
-        Assert.assertNull("topology is not null", gatewayView.getTopologyName());
-        Assert.assertNull("exposed services not null", gatewayView.getExposedServices());
-        Assert.assertEquals(GatewayType.CENTRAL, gatewayView.getGatewayType());
-        Assert.assertEquals(SSOType.SSO_PROVIDER, gatewayView.getSsoType());
+        assertEquals("/path", gatewayView.getPath());
+        assertEquals("simple", gatewayView.getSsoProvider());
+        assertEquals("tokencert", gatewayView.getTokenCert());
+        assertNull(gatewayView.getTopologyName(), "topology is not null");
+        assertNull(gatewayView.getExposedServices(), "exposed services not null");
+        assertEquals(GatewayType.CENTRAL, gatewayView.getGatewayType());
+        assertEquals(SSOType.SSO_PROVIDER, gatewayView.getSsoType());
     }
 
     @Test
-    public void testInitializeGatewayViewWithEmptyExposedServices() {
+    void testInitializeGatewayViewWithEmptyExposedServices() {
         GatewayView gatewayView = new GatewayView(gatewayEnabled(gatewayTopology()), "/cb/secret/signkey", ALL_SERVICES);
 
-        Assert.assertEquals("/path", gatewayView.getPath());
-        Assert.assertEquals("simple", gatewayView.getSsoProvider());
-        Assert.assertEquals("tokencert", gatewayView.getTokenCert());
-        Assert.assertEquals("topology", gatewayView.getTopologyName());
-        Assert.assertEquals(Collections.emptySet(), gatewayView.getExposedServices());
-        Assert.assertEquals(GatewayType.CENTRAL, gatewayView.getGatewayType());
-        Assert.assertEquals(SSOType.SSO_PROVIDER, gatewayView.getSsoType());
+        assertEquals("/path", gatewayView.getPath());
+        assertEquals("simple", gatewayView.getSsoProvider());
+        assertEquals("tokencert", gatewayView.getTokenCert());
+        assertEquals("topology", gatewayView.getTopologyName());
+        assertEquals(Collections.emptySet(), gatewayView.getExposedServices());
+        assertEquals(GatewayType.CENTRAL, gatewayView.getGatewayType());
+        assertEquals(SSOType.SSO_PROVIDER, gatewayView.getSsoType());
     }
 
     private GatewayTopology gatewayTopology(String... services) {

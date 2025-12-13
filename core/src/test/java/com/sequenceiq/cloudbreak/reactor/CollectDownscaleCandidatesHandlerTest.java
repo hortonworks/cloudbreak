@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.reactor;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -12,11 +12,12 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterDownscaleDetails;
 import com.sequenceiq.cloudbreak.dto.StackDto;
@@ -26,8 +27,8 @@ import com.sequenceiq.cloudbreak.reactor.api.event.resource.CollectDownscaleCand
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.CollectDownscaleCandidatesResult;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 
-@RunWith(org.mockito.junit.MockitoJUnitRunner.class)
-public class CollectDownscaleCandidatesHandlerTest {
+@ExtendWith(MockitoExtension.class)
+class CollectDownscaleCandidatesHandlerTest {
 
     private static final String HOST_GROUP_NAME = "master";
 
@@ -47,7 +48,7 @@ public class CollectDownscaleCandidatesHandlerTest {
     private CollectDownscaleCandidatesHandler testedClass;
 
     @Test
-    public void testFlowWithPrivateIds() {
+    void testFlowWithPrivateIds() {
         //given
         StackDto stack = generateStackData();
         when(stackDtoService.getById(STACK_ID)).thenReturn(stack);
@@ -64,7 +65,7 @@ public class CollectDownscaleCandidatesHandlerTest {
     }
 
     @Test
-    public void downScaleNotForced() {
+    void downScaleNotForced() {
         //given
         StackDto stack = generateStackData();
         Event<CollectDownscaleCandidatesRequest> event = generateTestDataEvent(Collections.singleton(PRIVATE_ID));
@@ -81,7 +82,7 @@ public class CollectDownscaleCandidatesHandlerTest {
     }
 
     @Test
-    public void downScaleForcedForced() {
+    void downScaleForcedForced() {
         //given
         StackDto stack = generateStackData();
         Event<CollectDownscaleCandidatesRequest> event = generateTestDataEvent(Collections.singleton(PRIVATE_ID),

@@ -4,8 +4,8 @@ import static com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion.
 import static com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion.CM_BUILD_NUMBER;
 import static com.sequenceiq.cloudbreak.cluster.model.ParcelStatus.ACTIVATED;
 import static com.sequenceiq.cloudbreak.cluster.model.ParcelStatus.DISTRIBUTED;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -15,11 +15,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
@@ -32,8 +32,8 @@ import com.sequenceiq.cloudbreak.service.parcel.ClouderaManagerProductTransforme
 import com.sequenceiq.cloudbreak.service.parcel.ParcelService;
 import com.sequenceiq.cloudbreak.service.upgrade.sync.component.CmServerQueryService;
 
-@RunWith(MockitoJUnitRunner.class)
-public class ParcelUrlProviderTest {
+@ExtendWith(MockitoExtension.class)
+class ParcelUrlProviderTest {
 
     private static final String IMAGE_ID = "image-id";
 
@@ -61,7 +61,7 @@ public class ParcelUrlProviderTest {
     private ParcelUrlProvider underTest;
 
     @Test
-    public void testGetRequiredParcelsFromImageShouldReturnRequiredParcelUrlsWhenTheStackTypeIsWorkload() {
+    void testGetRequiredParcelsFromImageShouldReturnRequiredParcelUrlsWhenTheStackTypeIsWorkload() {
         Stack stack = createStack(StackType.WORKLOAD);
         Image image = createImage(createStackRepoDetails(STACK_BASE_URL, STACK_REPO_VERSION));
         ClouderaManagerProduct cdh = createCmProduct("CDH", "7.2.15", "https://cdh.parcel");
@@ -85,7 +85,7 @@ public class ParcelUrlProviderTest {
     }
 
     @Test
-    public void testGetRequiredParcelsFromImageShouldReturnRequiredParcelUrlsWhenTheStackTypeIsDataLake() {
+    void testGetRequiredParcelsFromImageShouldReturnRequiredParcelUrlsWhenTheStackTypeIsDataLake() {
         Stack stack = createStack(StackType.DATALAKE);
         Image image = createImage(createStackRepoDetails(STACK_BASE_URL, STACK_REPO_VERSION));
         ClouderaManagerProduct cdh = createCmProduct("CDH", "7.2.15", "https://cdh.parcel");
@@ -104,7 +104,7 @@ public class ParcelUrlProviderTest {
     }
 
     @Test
-    public void testGetRequiredParcelsFromImageShouldReturnEmptyListWhenAllRequiredParcelIsAlreadyDistributed() {
+    void testGetRequiredParcelsFromImageShouldReturnEmptyListWhenAllRequiredParcelIsAlreadyDistributed() {
         Stack stack = createStack(StackType.WORKLOAD);
         Image image = createImage(createStackRepoDetails(STACK_BASE_URL, STACK_REPO_VERSION));
         ClouderaManagerProduct cdh = createCmProduct("CDH", "7.2.15", "https://cdh.parcel");

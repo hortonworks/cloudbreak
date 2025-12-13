@@ -1,44 +1,44 @@
 package com.sequenceiq.cloudbreak.validation.customimage;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.customimage.request.CustomImageCatalogV4VmImageRequest;
 
-public class UniqueRegionValidatorTest {
+class UniqueRegionValidatorTest {
 
     private UniqueRegionValidator victim;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         victim = new UniqueRegionValidator();
     }
 
     @Test
-    public void testValid() {
+    void testValid() {
         assertTrue(victim.isValid(withRegions("region1", "region2"), null));
     }
 
     @Test
-    public void testValidEmpty() {
+    void testValidEmpty() {
         assertTrue(victim.isValid(Collections.emptySet(), null));
     }
 
     @Test
-    public void testValidNull() {
+    void testValidNull() {
         assertTrue(victim.isValid(null, null));
     }
 
     @Test
-    public void testInvalid() {
+    void testInvalid() {
         assertFalse(victim.isValid(withRegions("region1", "region1"), null));
     }
 

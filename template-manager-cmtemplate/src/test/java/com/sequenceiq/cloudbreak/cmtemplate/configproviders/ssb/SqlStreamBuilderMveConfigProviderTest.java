@@ -2,17 +2,18 @@ package com.sequenceiq.cloudbreak.cmtemplate.configproviders.ssb;
 
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Set;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
@@ -24,13 +25,13 @@ import com.sequenceiq.cloudbreak.template.views.RdsView;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 
-@RunWith(MockitoJUnitRunner.class)
-public class SqlStreamBuilderMveConfigProviderTest {
+@ExtendWith(MockitoExtension.class)
+class SqlStreamBuilderMveConfigProviderTest {
 
     private final SqlStreamBuilderMveConfigProvider underTest = new SqlStreamBuilderMveConfigProvider();
 
     @Test
-    public void testNoConfigNeeded() {
+    void testNoConfigNeeded() {
         CmTemplateProcessor cmTemplateProcessor = initTemplateProcessor("7.2.10");
         TemplatePreparationObject preparationObject = initTemplatePreparationObject(cmTemplateProcessor);
 
@@ -38,7 +39,7 @@ public class SqlStreamBuilderMveConfigProviderTest {
     }
 
     @Test
-    public void testConfigNeeded() {
+    void testConfigNeeded() {
         CmTemplateProcessor cmTemplateProcessor = initTemplateProcessor("7.2.11");
         TemplatePreparationObject preparationObject = initTemplatePreparationObject(cmTemplateProcessor);
 
@@ -46,7 +47,7 @@ public class SqlStreamBuilderMveConfigProviderTest {
     }
 
     @Test
-    public void testProperSnapperDbConfig() {
+    void testProperSnapperDbConfig() {
         CmTemplateProcessor cmTemplateProcessor = initTemplateProcessor("7.2.11");
         TemplatePreparationObject preparationObject = initTemplatePreparationObject(cmTemplateProcessor);
 
@@ -76,9 +77,9 @@ public class SqlStreamBuilderMveConfigProviderTest {
 
         RdsView rdsConfig = mock(RdsView.class);
         when(rdsConfig.getType()).thenReturn(DatabaseType.SQL_STREAM_BUILDER_SNAPPER.toString());
-        when(rdsConfig.getConnectionURL()).thenReturn("jdbc:postgresql://testhost:5432/ssb_mve");
-        when(rdsConfig.getConnectionUserName()).thenReturn("ssb_test_user");
-        when(rdsConfig.getConnectionPassword()).thenReturn("ssb_test_pw");
+        lenient().when(rdsConfig.getConnectionURL()).thenReturn("jdbc:postgresql://testhost:5432/ssb_mve");
+        lenient().when(rdsConfig.getConnectionUserName()).thenReturn("ssb_test_user");
+        lenient().when(rdsConfig.getConnectionPassword()).thenReturn("ssb_test_pw");
 
         return TemplatePreparationObject.Builder.builder()
                 .withBlueprintView(blueprintView)

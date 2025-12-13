@@ -2,6 +2,7 @@ package com.sequenceiq.notification.generator;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -12,7 +13,6 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 import com.sequenceiq.notification.domain.ChannelType;
 import com.sequenceiq.notification.domain.NotificationType;
@@ -33,7 +33,7 @@ public class CentralNotificationGeneratorServiceTest {
 
         NotificationGeneratorService emailService = mock(NotificationGeneratorService.class);
         when(emailService.channelType()).thenReturn(ChannelType.EMAIL);
-        when(emailService.generate(Mockito.any(), Mockito.any())).thenReturn(Optional.of("email message"));
+        when(emailService.generate(any(), any())).thenReturn(Optional.of("email message"));
 
         CentralNotificationGeneratorService underTest = new CentralNotificationGeneratorService(List.of(emailService));
 
@@ -57,7 +57,7 @@ public class CentralNotificationGeneratorServiceTest {
 
         NotificationGeneratorService failingEmailService = mock(NotificationGeneratorService.class);
         when(failingEmailService.channelType()).thenReturn(ChannelType.EMAIL);
-        when(failingEmailService.generate(Mockito.any(), Mockito.any())).thenThrow(new RuntimeException("boom"));
+        when(failingEmailService.generate(any(), any())).thenThrow(new RuntimeException("boom"));
 
         CentralNotificationGeneratorService underTest = new CentralNotificationGeneratorService(List.of(failingEmailService));
 
@@ -109,7 +109,7 @@ public class CentralNotificationGeneratorServiceTest {
 
         NotificationGeneratorService emailService = mock(NotificationGeneratorService.class);
         when(emailService.channelType()).thenReturn(ChannelType.EMAIL);
-        when(emailService.generate(Mockito.any(), Mockito.any())).thenReturn(Optional.of("email new"));
+        when(emailService.generate(any(), any())).thenReturn(Optional.of("email new"));
 
         CentralNotificationGeneratorService underTest = new CentralNotificationGeneratorService(List.of(emailService));
         NotificationGeneratorDto result = underTest.generateNotification(original, NotificationType.AZURE_DEFAULT_OUTBOUND);

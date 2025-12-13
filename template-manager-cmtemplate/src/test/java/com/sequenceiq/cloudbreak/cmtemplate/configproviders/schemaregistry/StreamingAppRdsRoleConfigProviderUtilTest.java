@@ -5,14 +5,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.EnumMap;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 
-public class StreamingAppRdsRoleConfigProviderUtilTest {
+class StreamingAppRdsRoleConfigProviderUtilTest {
 
     @Test
-    public void testDataBaseTypeForCM() {
+    void testDataBaseTypeForCM() {
         EnumMap<DatabaseVendor, String> expected = new EnumMap<>(DatabaseVendor.class);
         for (DatabaseVendor vendor: DatabaseVendor.values()) {
             expected.put(vendor, vendor.databaseType());

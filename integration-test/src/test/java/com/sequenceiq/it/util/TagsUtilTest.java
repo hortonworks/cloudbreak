@@ -11,7 +11,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import org.mockito.Mockito;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -57,8 +56,8 @@ public class TagsUtilTest {
     @BeforeMethod
     public void setUp() {
         underTest = new TagsUtil();
-        testContext = Mockito.mock(MockedTestContext.class);
-        gcpLabelUtil = Mockito.mock(GcpLabelUtil.class);
+        testContext = mock(MockedTestContext.class);
+        gcpLabelUtil = mock(GcpLabelUtil.class);
         ReflectionTestUtils.setField(underTest, "gcpLabelUtil", gcpLabelUtil);
         when(testContext.getTestMethodName()).thenReturn(Optional.of(TEST_NAME));
         when(testContext.getActingUserName()).thenReturn(ACTING_USER_NAME);

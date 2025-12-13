@@ -1,13 +1,13 @@
 package com.sequenceiq.environment.api.v1.environment.model.request;
 
 import static com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest.LENGHT_INVALID_MSG;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Set;
 
 import jakarta.validation.ConstraintViolation;
 
 import org.hibernate.validator.HibernateValidator;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
@@ -28,7 +28,7 @@ class EnvironmentRequestNameLengthValidationTest {
         String shortEnvName = "alma";
         EnvironmentRequest environmentRequestWithLocation = createEnvironmentRequestWithLocation(shortEnvName);
         Set<ConstraintViolation<EnvironmentRequest>> constraintViolations = localValidatorFactory.validate(environmentRequestWithLocation);
-        Assertions.assertTrue(constraintViolations
+        assertTrue(constraintViolations
                 .stream()
                 .anyMatch(cv ->
                         LENGHT_INVALID_MSG.equals(cv.getMessage())
@@ -40,7 +40,7 @@ class EnvironmentRequestNameLengthValidationTest {
         String validName = "my-valid-environment-name";
         EnvironmentRequest environmentRequestWithLocation = createEnvironmentRequestWithLocation(validName);
         Set<ConstraintViolation<EnvironmentRequest>> constraintViolations = localValidatorFactory.validate(environmentRequestWithLocation);
-        Assertions.assertTrue(constraintViolations.isEmpty());
+        assertTrue(constraintViolations.isEmpty());
     }
 
     @Test
@@ -48,7 +48,7 @@ class EnvironmentRequestNameLengthValidationTest {
         String longEnvName = "my-D04CEC63-95AF-4D83-9198-512CB9DD901B";
         EnvironmentRequest environmentRequestWithLocation = createEnvironmentRequestWithLocation(longEnvName);
         Set<ConstraintViolation<EnvironmentRequest>> constraintViolations = localValidatorFactory.validate(environmentRequestWithLocation);
-        Assertions.assertTrue(constraintViolations
+        assertTrue(constraintViolations
                 .stream()
                 .anyMatch(cv ->
                         LENGHT_INVALID_MSG.equals(cv.getMessage())

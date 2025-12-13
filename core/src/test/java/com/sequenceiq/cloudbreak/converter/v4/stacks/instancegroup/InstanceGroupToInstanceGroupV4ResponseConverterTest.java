@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.converter.v4.stacks.instancegroup;
 
-import org.junit.jupiter.api.Assertions;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -36,7 +37,7 @@ class InstanceGroupToInstanceGroupV4ResponseConverterTest {
 
         InstanceGroupV4Response result = underTest.convert(source);
 
-        Assertions.assertEquals(originalType, result.getType());
+        assertEquals(originalType, result.getType());
     }
 
 }

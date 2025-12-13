@@ -6,6 +6,7 @@ import static com.sequenceiq.datalake.flow.create.SdxCreateState.INIT_STATE;
 import static com.sequenceiq.datalake.flow.create.SdxCreateState.SDX_CREATION_WAIT_RDS_STATE;
 import static com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupEvent.DATALAKE_TRIGGER_BACKUP_EVENT;
 import static com.sequenceiq.datalake.flow.dr.restore.DatalakeRestoreEvent.DATALAKE_TRIGGER_RESTORE_EVENT;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -19,7 +20,6 @@ import java.util.function.Consumer;
 
 import jakarta.ws.rs.InternalServerErrorException;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -79,7 +79,7 @@ public class SdxRetryServiceTest {
         sdxCluster.setClusterName("sdxclustername");
         when(flow2Handler.getFirstRetryableStateLogfromLatestFlow(anyLong())).thenThrow(new InternalServerErrorException());
 
-        Assertions.assertThrows(InternalServerErrorException.class, () -> sdxRetryService.retrySdx(sdxCluster));
+        assertThrows(InternalServerErrorException.class, () -> sdxRetryService.retrySdx(sdxCluster));
 
         verify(stackV4Endpoint, times(0)).retry(any(), any(), anyString());
     }

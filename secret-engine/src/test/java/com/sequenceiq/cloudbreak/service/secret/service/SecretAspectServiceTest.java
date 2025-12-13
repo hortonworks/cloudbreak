@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.service.secret.service;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
@@ -8,26 +11,20 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.Signature;
 import org.aspectj.lang.reflect.SourceLocation;
 import org.aspectj.runtime.internal.AroundClosure;
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.common.dal.model.AccountIdAwareResource;
 import com.sequenceiq.cloudbreak.service.secret.SecretOperationException;
 import com.sequenceiq.cloudbreak.service.secret.SecretValue;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 
-@RunWith(MockitoJUnitRunner.class)
-public class SecretAspectServiceTest {
-
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
+@ExtendWith(MockitoExtension.class)
+class SecretAspectServiceTest {
 
     @Mock
     private SecretService secretService;
@@ -36,7 +33,7 @@ public class SecretAspectServiceTest {
     private SecretAspectService underTest;
 
     @Test
-    public void testVaultPutWhenAccountIdDefinedThenMustWriteTheRightPath() throws Exception {
+    void testVaultPutWhenAccountIdDefinedThenMustWriteTheRightPath() throws Exception {
         VaultTest vaultTest = new VaultTest("justice-league", "super");
         VaultTestProceedingJoinPoint proceedingJoinPoint = new VaultTestProceedingJoinPoint(vaultTest);
 
@@ -47,36 +44,31 @@ public class SecretAspectServiceTest {
 
         underTest.proceedSave(proceedingJoinPoint);
 
-        Assert.assertTrue(keyCaptor.getValue().startsWith("justice-league/vaulttest/power/"));
-        Assert.assertEquals(valueCaptor.getValue(), "super");
+        assertTrue(keyCaptor.getValue().startsWith("justice-league/vaulttest/power/"));
+        assertEquals(valueCaptor.getValue(), "super");
     }
 
     @Test
-    public void testVaultPutWhenAccountIdNotImplementedThenShouldThrowIllegalArgumentException() throws Exception {
+    void testVaultPutWhenAccountIdNotImplementedThenShouldThrowIllegalArgumentException() throws Exception {
         VaultWrongTest vaultTest = new VaultWrongTest("super");
         VaultTestProceedingJoinPoint proceedingJoinPoint = new VaultTestProceedingJoinPoint(vaultTest);
 
-        thrown.expect(SecretOperationException.class);
-        thrown.expectMessage("VaultWrongTest must be a subclass of AccountIdAwareResource");
-
-        underTest.proceedSave(proceedingJoinPoint);
+        assertThrows(SecretOperationException.class, () -> underTest.proceedSave(proceedingJoinPoint),
+                "VaultWrongTest must be a subclass of AccountIdAwareResource");
     }
 
     @Test
-    public void testVaultPutWhenSecretServicePutMethodThrowRuntimeExceptionThenShouldThrowSecretOperationException() throws Exception {
+    void testVaultPutWhenSecretServicePutMethodThrowRuntimeExceptionThenShouldThrowSecretOperationException() throws Exception {
         VaultTest vaultTest = new VaultTest("justice-league", "super");
         VaultTestProceedingJoinPoint proceedingJoinPoint = new VaultTestProceedingJoinPoint(vaultTest);
 
         when(secretService.put(anyString(), anyString())).thenThrow(new RuntimeException("runtime"));
 
-        thrown.expect(SecretOperationException.class);
-        thrown.expectMessage("runtime");
-
-        underTest.proceedSave(proceedingJoinPoint);
+        assertThrows(SecretOperationException.class, () -> underTest.proceedSave(proceedingJoinPoint), "runtime");
     }
 
     @Test
-    public void testVaultDeleteWhenAccountIdDefinedThenMustWriteTheRightPath() throws Exception {
+    void testVaultDeleteWhenAccountIdDefinedThenMustWriteTheRightPath() throws Exception {
         VaultTest vaultTest = new VaultTest("justice-league",
                 new Secret("super", "justice-league/vaulttest/power/123-123-123-123"));
         VaultTestProceedingJoinPoint proceedingJoinPoint = new VaultTestProceedingJoinPoint(vaultTest);
@@ -87,7 +79,7 @@ public class SecretAspectServiceTest {
 
         underTest.proceedDelete(proceedingJoinPoint);
 
-        Assert.assertTrue(keyCaptor.getValue().startsWith("justice-league/vaulttest/power/123-123-123-123"));
+        assertTrue(keyCaptor.getValue().startsWith("justice-league/vaulttest/power/123-123-123-123"));
     }
 
     private static class VaultTestProceedingJoinPoint implements ProceedingJoinPoint {

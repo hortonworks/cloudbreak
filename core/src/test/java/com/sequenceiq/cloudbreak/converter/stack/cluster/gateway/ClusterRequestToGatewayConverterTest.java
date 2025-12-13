@@ -1,20 +1,19 @@
 package com.sequenceiq.cloudbreak.converter.stack.cluster.gateway;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.Collections;
 import java.util.List;
 
 import jakarta.inject.Inject;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.GatewayType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.SSOType;
@@ -32,13 +31,13 @@ import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.gateway.topology.Ga
 import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.gateway.topology.GatewayTopologyV4RequestToGatewayTopologyConverter;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 
-@RunWith(SpringJUnit4ClassRunner.class)
+@ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {GatewayV4RequestToGatewayConverter.class, ConversionConfig.class, GatewayConvertUtil.class,
         GatewayV4RequestValidator.class, GatewayTopologyV4RequestToGatewayTopologyConverter.class,
         GatewayTopologyV4RequestValidator.class,
         GatewayTopologyV4RequestToExposedServicesConverter.class,
         ConverterMockProvider.class, RepositoryMockProvider.class})
-public class ClusterRequestToGatewayConverterTest {
+class ClusterRequestToGatewayConverterTest {
 
     private static final String PATH = "path";
 
@@ -46,14 +45,11 @@ public class ClusterRequestToGatewayConverterTest {
 
     private static final String TOKEN_CERT = "tokenCert";
 
-    @Rule
-    public final ExpectedException thrown = ExpectedException.none();
-
     @Inject
     private GatewayV4RequestToGatewayConverter underTest;
 
     @Test
-    public void testConvertSsoType() {
+    void testConvertSsoType() {
         GatewayV4Request source = new GatewayV4Request();
         source.setTopologies(getTopologies());
 
@@ -63,7 +59,7 @@ public class ClusterRequestToGatewayConverterTest {
     }
 
     @Test
-    public void testConvertBasicProperties() {
+    void testConvertBasicProperties() {
         GatewayV4Request source = new GatewayV4Request();
         source.setPath(PATH);
         source.setSsoProvider(SSO_PROVIDER);
@@ -80,7 +76,7 @@ public class ClusterRequestToGatewayConverterTest {
     }
 
     @Test
-    public void testConvertNewTopologies() {
+    void testConvertNewTopologies() {
         GatewayV4Request source = new GatewayV4Request();
         GatewayTopologyV4Request topology1 = new GatewayTopologyV4Request();
         topology1.setTopologyName("topology1");
@@ -91,15 +87,15 @@ public class ClusterRequestToGatewayConverterTest {
         assertFalse(result.getTopologies().isEmpty());
     }
 
-    @Test(expected = BadRequestException.class)
-    public void testThrowsExceptionWhenRequestIsInvalid() {
+    @Test
+    void testThrowsExceptionWhenRequestIsInvalid() {
         GatewayV4Request source = new GatewayV4Request();
 
-        underTest.convert(source);
+        assertThrows(BadRequestException.class, () -> underTest.convert(source));
     }
 
     @Test
-    public void testWithEnableFalseAndDefinedTopologyInList() {
+    void testWithEnableFalseAndDefinedTopologyInList() {
         GatewayV4Request source = new GatewayV4Request();
         source.setTopologies(getTopologies());
         Gateway result = underTest.convert(source);

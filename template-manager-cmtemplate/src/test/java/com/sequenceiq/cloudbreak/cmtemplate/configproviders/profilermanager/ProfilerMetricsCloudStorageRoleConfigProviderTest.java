@@ -1,16 +1,16 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.profilermanager;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
@@ -24,17 +24,17 @@ import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.common.api.filesystem.S3FileSystem;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 
-@RunWith(MockitoJUnitRunner.class)
-public class ProfilerMetricsCloudStorageRoleConfigProviderTest {
+@ExtendWith(MockitoExtension.class)
+class ProfilerMetricsCloudStorageRoleConfigProviderTest {
     private ProfilerMetricsCloudStorageRoleConfigProvider underTest;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         underTest = new ProfilerMetricsCloudStorageRoleConfigProvider();
     }
 
     @Test
-    public void testProfilerMetricsCloudStorageRoleConfigs() {
+    void testProfilerMetricsCloudStorageRoleConfigs() {
         TemplatePreparationObject preparationObject = getTemplatePreparationObject(true);
         String inputJson = getBlueprintText("input/clouderamanager-profilers.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
@@ -49,7 +49,7 @@ public class ProfilerMetricsCloudStorageRoleConfigProviderTest {
     }
 
     @Test
-    public void testProfilerMetricsCloudStorageConfigsWhenNoCloudStorageProvided() {
+    void testProfilerMetricsCloudStorageConfigsWhenNoCloudStorageProvided() {
         TemplatePreparationObject preparationObject = getTemplatePreparationObject(false);
         String inputJson = getBlueprintText("input/clouderamanager-profilers.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);

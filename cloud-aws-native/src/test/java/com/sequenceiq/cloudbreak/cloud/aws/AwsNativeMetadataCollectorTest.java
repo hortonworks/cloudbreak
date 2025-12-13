@@ -27,7 +27,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -402,7 +401,7 @@ class AwsNativeMetadataCollectorTest {
         List<CloudLoadBalancerMetadata> cloudLoadBalancerMetadata = underTest.collectLoadBalancer(authenticatedContext, loadBalancerTypes, cloudResources);
 
         verify(loadBalancingClient, times(1)).describeLoadBalancers(any());
-        Assertions.assertTrue(cloudLoadBalancerMetadata.isEmpty());
+        assertTrue(cloudLoadBalancerMetadata.isEmpty());
     }
 
     @Test

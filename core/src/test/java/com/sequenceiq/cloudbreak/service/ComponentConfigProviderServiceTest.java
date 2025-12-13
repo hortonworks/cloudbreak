@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -22,7 +23,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
 
@@ -74,7 +74,7 @@ class ComponentConfigProviderServiceTest {
 
     @Test
     void testRestoreSecondToLastVersion() throws Exception {
-        try (MockedStatic<AuditReaderFactory> mockedAuditReader = Mockito.mockStatic(AuditReaderFactory.class)) {
+        try (MockedStatic<AuditReaderFactory> mockedAuditReader = mockStatic(AuditReaderFactory.class)) {
             mockedAuditReader.when(() -> AuditReaderFactory.get(entityManager)).thenReturn(auditReader);
 
             Stack stack = new Stack();
@@ -101,7 +101,7 @@ class ComponentConfigProviderServiceTest {
 
     @Test
     void testRestoreSecondToLastVersionNoRevertNeeded() throws Exception {
-        try (MockedStatic<AuditReaderFactory> mockedAuditReader = Mockito.mockStatic(AuditReaderFactory.class)) {
+        try (MockedStatic<AuditReaderFactory> mockedAuditReader = mockStatic(AuditReaderFactory.class)) {
             mockedAuditReader.when(() -> AuditReaderFactory.get(entityManager)).thenReturn(auditReader);
 
             Stack stack = new Stack();

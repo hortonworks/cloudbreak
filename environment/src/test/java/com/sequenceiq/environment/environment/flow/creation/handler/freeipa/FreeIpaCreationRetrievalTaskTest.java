@@ -3,13 +3,13 @@ package com.sequenceiq.environment.environment.flow.creation.handler.freeipa;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.DELETE_IN_PROGRESS;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.environment.environment.service.freeipa.FreeIpaService;
@@ -31,7 +31,7 @@ class FreeIpaCreationRetrievalTaskTest {
 
     private static final String FREE_IPA_CRN = "freeIpaCrn";
 
-    private final FreeIpaService freeIpaService = Mockito.mock(FreeIpaService.class);
+    private final FreeIpaService freeIpaService = mock(FreeIpaService.class);
 
     private final FreeIpaCreationRetrievalTask underTest = new FreeIpaCreationRetrievalTask(freeIpaService);
 

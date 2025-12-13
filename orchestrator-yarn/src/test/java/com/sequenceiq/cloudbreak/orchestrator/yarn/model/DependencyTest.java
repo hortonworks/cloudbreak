@@ -1,17 +1,17 @@
 package com.sequenceiq.cloudbreak.orchestrator.yarn.model;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.cloudbreak.orchestrator.yarn.model.core.Dependency;
 
-public class DependencyTest {
+class DependencyTest {
 
     private static final String ITEM = "item";
 
     @Test
-    public void testItem() {
+    void testItem() {
         Dependency dependency = new Dependency();
         dependency.setItem(ITEM);
         assertEquals(ITEM, dependency.getItem());

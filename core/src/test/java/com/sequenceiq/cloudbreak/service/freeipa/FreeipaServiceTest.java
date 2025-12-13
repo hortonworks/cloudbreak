@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.freeipa;
 
 import static com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType.ROTATE;
 import static com.sequenceiq.freeipa.rotation.FreeIpaSecretType.FREEIPA_LDAP_BIND_PASSWORD;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -15,7 +16,6 @@ import static org.mockito.Mockito.when;
 import java.util.Map;
 import java.util.Optional;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -136,7 +136,7 @@ class FreeipaServiceTest {
         when(kerberosDetailService.isIpaJoinable(kerberosConfig)).thenReturn(true);
         when(freeipaClientService.findByEnvironmentCrn(ENV_CRN)).thenReturn(Optional.of(freeipa));
 
-        Assertions.assertDoesNotThrow(() -> underTest.checkFreeipaRunning(ENV_CRN, STACK_NAME));
+        assertDoesNotThrow(() -> underTest.checkFreeipaRunning(ENV_CRN, STACK_NAME));
     }
 
     @Test

@@ -27,7 +27,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.api.swagger.ClouderaManagerResourceApi;
@@ -211,7 +210,7 @@ public class ClouderaManagerConfigServiceTest {
 
     @Test
     public void testGetRoleConfigValueByServiceTypeShouldReturnTheConfigValue() throws ApiException {
-        RoleConfigGroupsResourceApi roleConfigGroupsResourceApi = Mockito.mock(RoleConfigGroupsResourceApi.class);
+        RoleConfigGroupsResourceApi roleConfigGroupsResourceApi = mock(RoleConfigGroupsResourceApi.class);
         when(clouderaManagerApiFactory.getRoleConfigGroupsResourceApi(API_CLIENT)).thenReturn(roleConfigGroupsResourceApi);
         when(clouderaManagerApiFactory.getServicesResourceApi(API_CLIENT)).thenReturn(servicesResourceApi);
         List<ApiService> services = List.of(createApiService(NIFI_SERVICE, NIFI_SERVICE_TYPE), createApiService("SPARK", "SPARK-ROLE"));
@@ -236,7 +235,7 @@ public class ClouderaManagerConfigServiceTest {
 
     @Test
     public void testGetRoleConfigValueByServiceTypeShouldReturnTheConfigValueWhenTheValueIsNullAndDefaultValuePresent() throws ApiException {
-        RoleConfigGroupsResourceApi roleConfigGroupsResourceApi = Mockito.mock(RoleConfigGroupsResourceApi.class);
+        RoleConfigGroupsResourceApi roleConfigGroupsResourceApi = mock(RoleConfigGroupsResourceApi.class);
         when(clouderaManagerApiFactory.getRoleConfigGroupsResourceApi(API_CLIENT)).thenReturn(roleConfigGroupsResourceApi);
         when(clouderaManagerApiFactory.getServicesResourceApi(API_CLIENT)).thenReturn(servicesResourceApi);
         List<ApiService> services = List.of(createApiService(NIFI_SERVICE, NIFI_SERVICE_TYPE), createApiService("SPARK", "SPARK-ROLE"));
@@ -259,7 +258,7 @@ public class ClouderaManagerConfigServiceTest {
 
     @Test
     public void testGetRoleConfigValueByServiceTypeShouldReturnOptionalEmptyWhenServiceTypeNotFound() throws ApiException {
-        RoleConfigGroupsResourceApi roleConfigGroupsResourceApi = Mockito.mock(RoleConfigGroupsResourceApi.class);
+        RoleConfigGroupsResourceApi roleConfigGroupsResourceApi = mock(RoleConfigGroupsResourceApi.class);
         when(clouderaManagerApiFactory.getRoleConfigGroupsResourceApi(API_CLIENT)).thenReturn(roleConfigGroupsResourceApi);
         when(clouderaManagerApiFactory.getServicesResourceApi(API_CLIENT)).thenReturn(servicesResourceApi);
         List<ApiService> services = List.of(createApiService("SPARK", "SPARK-ROLE"));
@@ -277,7 +276,7 @@ public class ClouderaManagerConfigServiceTest {
 
     @Test
     public void testGetRoleConfigValueByServiceTypeShouldReturnOptionalEmptyWhenRoleTypeNotFound() throws ApiException {
-        RoleConfigGroupsResourceApi roleConfigGroupsResourceApi = Mockito.mock(RoleConfigGroupsResourceApi.class);
+        RoleConfigGroupsResourceApi roleConfigGroupsResourceApi = mock(RoleConfigGroupsResourceApi.class);
         when(clouderaManagerApiFactory.getRoleConfigGroupsResourceApi(API_CLIENT)).thenReturn(roleConfigGroupsResourceApi);
         when(clouderaManagerApiFactory.getServicesResourceApi(API_CLIENT)).thenReturn(servicesResourceApi);
         List<ApiService> services = List.of(createApiService(NIFI_SERVICE, NIFI_SERVICE_TYPE), createApiService("SPARK", "SPARK-ROLE"));
@@ -296,7 +295,7 @@ public class ClouderaManagerConfigServiceTest {
 
     @Test
     public void testGetRoleConfigValueByServiceTypeShouldReturnOptionalEmptyWhenTheConfigNotFound() throws ApiException {
-        RoleConfigGroupsResourceApi roleConfigGroupsResourceApi = Mockito.mock(RoleConfigGroupsResourceApi.class);
+        RoleConfigGroupsResourceApi roleConfigGroupsResourceApi = mock(RoleConfigGroupsResourceApi.class);
         when(clouderaManagerApiFactory.getRoleConfigGroupsResourceApi(API_CLIENT)).thenReturn(roleConfigGroupsResourceApi);
         when(clouderaManagerApiFactory.getServicesResourceApi(API_CLIENT)).thenReturn(servicesResourceApi);
         List<ApiService> services = List.of(createApiService(NIFI_SERVICE, NIFI_SERVICE_TYPE), createApiService("SPARK", "SPARK-ROLE"));

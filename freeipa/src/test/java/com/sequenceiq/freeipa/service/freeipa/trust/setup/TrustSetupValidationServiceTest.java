@@ -10,6 +10,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -24,7 +25,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.thunderhead.service.environments2api.model.DescribeEnvironmentResponse;
@@ -75,7 +75,7 @@ class TrustSetupValidationServiceTest {
 
     @BeforeEach
     void setupTest() {
-        orchestratorExceptionAnalyzer = Mockito.mockStatic(OrchestratorExceptionAnalyzer.class);
+        orchestratorExceptionAnalyzer = mockStatic(OrchestratorExceptionAnalyzer.class);
     }
 
     @AfterEach

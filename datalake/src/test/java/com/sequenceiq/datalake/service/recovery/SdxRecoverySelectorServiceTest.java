@@ -6,18 +6,18 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recovery.RecoveryStatus;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
@@ -28,8 +28,8 @@ import com.sequenceiq.sdx.api.model.SdxRecoverableResponse;
 import com.sequenceiq.sdx.api.model.SdxRecoveryRequest;
 import com.sequenceiq.sdx.api.model.SdxRecoveryResponse;
 
-@RunWith(MockitoJUnitRunner.class)
-public class SdxRecoverySelectorServiceTest {
+@ExtendWith(MockitoExtension.class)
+class SdxRecoverySelectorServiceTest {
 
     private final SdxRecoverableResponse recoverableResponse = new SdxRecoverableResponse("Some reason", RecoveryStatus.RECOVERABLE);
 
@@ -49,12 +49,10 @@ public class SdxRecoverySelectorServiceTest {
 
     private SdxRecoveryRequest request;
 
-    @Before
+    @BeforeEach
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
         sdxRecoverySelectorService = new SdxRecoverySelectorService(List.of(mockResizeRecoveryService, mockSdxUpgradeRecoveryService));
         request = new SdxRecoveryRequest();
-
     }
 
     public void setResizeTest() {
@@ -73,7 +71,7 @@ public class SdxRecoverySelectorServiceTest {
     }
 
     @Test
-    public void testRecoveryServiceCanRecoverFromUpgradeFailureByClusterName() {
+    void testRecoveryServiceCanRecoverFromUpgradeFailureByClusterName() {
         setUpgradeTest();
 
         SdxRecoveryResponse response = new SdxRecoveryResponse();
@@ -81,27 +79,27 @@ public class SdxRecoverySelectorServiceTest {
         SdxRecoveryResponse result = sdxRecoverySelectorService.triggerRecovery(cluster, request);
 
         // Basically, just check that we pass through
-        Mockito.verify(mockSdxUpgradeRecoveryService).validateRecovery(cluster, request);
-        Mockito.verify(mockSdxUpgradeRecoveryService).triggerRecovery(cluster, request);
-        Mockito.verify(mockResizeRecoveryService, never()).triggerRecovery(cluster, request);
+        verify(mockSdxUpgradeRecoveryService).validateRecovery(cluster, request);
+        verify(mockSdxUpgradeRecoveryService).triggerRecovery(cluster, request);
+        verify(mockResizeRecoveryService, never()).triggerRecovery(cluster, request);
         assertNotNull(result);
         assertEquals(response, result);
     }
 
     @Test
-    public void testRecoveryServiceCanValidateUpgradeFailureByClusterName() {
+    void testRecoveryServiceCanValidateUpgradeFailureByClusterName() {
         setUpgradeTest();
         SdxRecoverableResponse result = sdxRecoverySelectorService.validateRecovery(cluster);
 
         // Basically, just check that we pass through
-        Mockito.verify(mockSdxUpgradeRecoveryService).validateRecovery(cluster);
+        verify(mockSdxUpgradeRecoveryService).validateRecovery(cluster);
 
         assertNotNull(result);
         assertEquals(recoverableResponse, result);
     }
 
     @Test
-    public void testRecoveryServiceCanSwitchDespiteValidationError() {
+    void testRecoveryServiceCanSwitchDespiteValidationError() {
         setUpgradeTest();
         when(mockResizeRecoveryService.validateRecovery(cluster, request)).thenAnswer(invocation -> {
             throw new Exception("Error!");
@@ -113,15 +111,15 @@ public class SdxRecoverySelectorServiceTest {
         SdxRecoveryResponse result = sdxRecoverySelectorService.triggerRecovery(cluster, request);
 
         // Basically, just check that we pass through to the Upgrade Recovery Service despite error during resize recovery validation.
-        Mockito.verify(mockResizeRecoveryService, never()).triggerRecovery(cluster, request);
-        Mockito.verify(mockSdxUpgradeRecoveryService).triggerRecovery(cluster, request);
+        verify(mockResizeRecoveryService, never()).triggerRecovery(cluster, request);
+        verify(mockSdxUpgradeRecoveryService).triggerRecovery(cluster, request);
 
         assertNotNull(result);
         assertEquals(response, result);
     }
 
     @Test
-    public void testRecoveryServiceCanSwitchToResizeRecovery() {
+    void testRecoveryServiceCanSwitchToResizeRecovery() {
         setResizeTest();
 
         SdxRecoveryResponse response = new SdxRecoveryResponse();
@@ -130,29 +128,29 @@ public class SdxRecoverySelectorServiceTest {
         SdxRecoveryResponse result = sdxRecoverySelectorService.triggerRecovery(cluster, request);
 
         // Basically, just check that we pass through to the Resize Recovery Service
-        Mockito.verifyNoInteractions(mockSdxUpgradeRecoveryService);
-        Mockito.verify(mockResizeRecoveryService).triggerRecovery(cluster, request);
-        Mockito.verify(mockSdxUpgradeRecoveryService, never()).triggerRecovery(cluster, request);
+        verifyNoInteractions(mockSdxUpgradeRecoveryService);
+        verify(mockResizeRecoveryService).triggerRecovery(cluster, request);
+        verify(mockSdxUpgradeRecoveryService, never()).triggerRecovery(cluster, request);
 
         assertNotNull(result);
         assertEquals(response, result);
     }
 
     @Test
-    public void testRecoveryServiceCanValidateResizeRecovery() {
+    void testRecoveryServiceCanValidateResizeRecovery() {
         setResizeTest();
 
         SdxRecoverableResponse result = sdxRecoverySelectorService.validateRecovery(cluster);
 
         // Basically, just check that we pass through
-        Mockito.verify(mockResizeRecoveryService).validateRecovery(cluster);
-        Mockito.verify(mockSdxUpgradeRecoveryService, never()).validateRecovery(cluster);
+        verify(mockResizeRecoveryService).validateRecovery(cluster);
+        verify(mockSdxUpgradeRecoveryService, never()).validateRecovery(cluster);
         assertNotNull(result);
         assertEquals(recoverableResponse, result);
     }
 
     @Test
-    public void testNoValidRecoveryValidation() {
+    void testNoValidRecoveryValidation() {
         SdxRecoverableResponse nonrecoverableResponse2 = new SdxRecoverableResponse("Some non reason2", RecoveryStatus.NON_RECOVERABLE);
 
         when(mockResizeRecoveryService.validateRecovery(cluster)).thenReturn(nonrecoverableResponse);
@@ -160,8 +158,8 @@ public class SdxRecoverySelectorServiceTest {
 
         SdxRecoverableResponse result = sdxRecoverySelectorService.validateRecovery(cluster);
 
-        Mockito.verify(mockResizeRecoveryService).validateRecovery(cluster);
-        Mockito.verify(mockSdxUpgradeRecoveryService).validateRecovery(cluster);
+        verify(mockResizeRecoveryService).validateRecovery(cluster);
+        verify(mockSdxUpgradeRecoveryService).validateRecovery(cluster);
 
         assertNotNull(result);
         assertTrue(result.getStatus().nonRecoverable());
@@ -171,7 +169,7 @@ public class SdxRecoverySelectorServiceTest {
     }
 
     @Test
-    public void testNoValidRecoveryTrigger() {
+    void testNoValidRecoveryTrigger() {
         SdxRecoverableResponse nonrecoverableResponse2 = new SdxRecoverableResponse("Some non reason2", RecoveryStatus.NON_RECOVERABLE);
         SdxRecoveryRequest request = new SdxRecoveryRequest();
 
@@ -180,10 +178,10 @@ public class SdxRecoverySelectorServiceTest {
 
         BadRequestException result = assertThrows(BadRequestException.class, () -> sdxRecoverySelectorService.triggerRecovery(cluster, request));
 
-        Mockito.verify(mockResizeRecoveryService).validateRecovery(cluster, request);
-        Mockito.verify(mockSdxUpgradeRecoveryService).validateRecovery(cluster, request);
-        Mockito.verify(mockSdxUpgradeRecoveryService, never()).triggerRecovery(cluster, request);
-        Mockito.verify(mockSdxUpgradeRecoveryService, never()).triggerRecovery(cluster, request);
+        verify(mockResizeRecoveryService).validateRecovery(cluster, request);
+        verify(mockSdxUpgradeRecoveryService).validateRecovery(cluster, request);
+        verify(mockSdxUpgradeRecoveryService, never()).triggerRecovery(cluster, request);
+        verify(mockSdxUpgradeRecoveryService, never()).triggerRecovery(cluster, request);
 
         assertNotNull(result);
         assertEquals(33, result.getMessage().length(), result.getMessage());

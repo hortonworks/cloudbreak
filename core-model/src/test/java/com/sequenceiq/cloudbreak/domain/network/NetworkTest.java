@@ -1,17 +1,17 @@
 package com.sequenceiq.cloudbreak.domain.network;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import org.hibernate.annotations.Where;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.cloudbreak.domain.Network;
 
-public class NetworkTest {
+class NetworkTest {
 
     @Test
-    public void testHasWhereAnnotation() {
+    void testHasWhereAnnotation() {
         Where whereAnnotation = Network.class.getAnnotation(Where.class);
 
         assertNotNull(whereAnnotation);

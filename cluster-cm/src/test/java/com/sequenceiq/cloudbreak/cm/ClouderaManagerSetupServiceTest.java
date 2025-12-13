@@ -33,7 +33,6 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -215,7 +214,7 @@ class ClouderaManagerSetupServiceTest {
                 .thenReturn(mgmtServiceResourceApi);
         doThrow(ApiException.class).when(mgmtServiceResourceApi).autoConfigure();
 
-        Assertions.assertThrows(ClouderaManagerOperationFailedException.class, () -> underTest.autoConfigureClusterManager());
+        assertThrows(ClouderaManagerOperationFailedException.class, () -> underTest.autoConfigureClusterManager());
         verify(mgmtServiceResourceApi, times(1)).autoConfigure();
     }
 

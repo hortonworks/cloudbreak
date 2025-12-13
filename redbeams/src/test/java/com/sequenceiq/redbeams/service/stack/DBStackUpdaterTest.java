@@ -1,9 +1,12 @@
 package com.sequenceiq.redbeams.service.stack;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -15,14 +18,12 @@ import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Set;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -42,7 +43,7 @@ public class DBStackUpdaterTest {
 
     private static final Long STACK_ID = 1L;
 
-    private static final X509Certificate X_509_CERT = Mockito.mock(X509Certificate.class);
+    private static final X509Certificate X_509_CERT = mock(X509Certificate.class);
 
     @InjectMocks
     private DBStackUpdater underTest;
@@ -104,10 +105,10 @@ public class DBStackUpdaterTest {
         when(databaseServerSslCertificateConfig.getMaxVersionByCloudPlatformAndRegion("cloudPlatform", "region")).thenReturn(1);
 
         underTest.updateSslConfig(STACK_ID, cloudContext, cloudCredential, databaseStack);
-        Assertions.assertEquals(1, sslConfig.getSslCertificateActiveVersion());
-        Assertions.assertEquals(certPems, sslConfig.getSslCertificates());
-        Assertions.assertEquals("cloudPlatform", sslConfig.getSslCertificateActiveCloudProviderIdentifier());
-        Assertions.assertEquals(SslCertificateType.CLOUD_PROVIDER_OWNED, sslConfig.getSslCertificateType());
+        assertEquals(1, sslConfig.getSslCertificateActiveVersion());
+        assertEquals(certPems, sslConfig.getSslCertificates());
+        assertEquals("cloudPlatform", sslConfig.getSslCertificateActiveCloudProviderIdentifier());
+        assertEquals(SslCertificateType.CLOUD_PROVIDER_OWNED, sslConfig.getSslCertificateType());
 
         verify(sslConfigService).save(sslConfigArgumentCaptor.capture());
         verify(databaseServerSslCertificateSyncService).syncSslCertificateIfNeeded(any(), any(), any(), any());
@@ -153,11 +154,11 @@ public class DBStackUpdaterTest {
         RuntimeException actualException = assertThrows(RuntimeException.class, () ->
                 underTest.updateSslConfig(STACK_ID, cloudContext, cloudCredential, databaseStack));
 
-        Assertions.assertEquals(1, sslConfig.getSslCertificateActiveVersion());
-        Assertions.assertNotNull(actualException);
-        Assertions.assertEquals(certPems, sslConfig.getSslCertificates());
-        Assertions.assertEquals("cloudPlatform", sslConfig.getSslCertificateActiveCloudProviderIdentifier());
-        Assertions.assertEquals(SslCertificateType.CLOUD_PROVIDER_OWNED, sslConfig.getSslCertificateType());
+        assertEquals(1, sslConfig.getSslCertificateActiveVersion());
+        assertNotNull(actualException);
+        assertEquals(certPems, sslConfig.getSslCertificates());
+        assertEquals("cloudPlatform", sslConfig.getSslCertificateActiveCloudProviderIdentifier());
+        assertEquals(SslCertificateType.CLOUD_PROVIDER_OWNED, sslConfig.getSslCertificateType());
 
         verify(databaseServerSslCertificateSyncService).syncSslCertificateIfNeeded(any(), any(), any(), any());
     }
@@ -183,9 +184,9 @@ public class DBStackUpdaterTest {
         when(databaseServerSslCertificateConfig.getCertsByCloudPlatformAndRegion("cloudPlatform", "region")).thenReturn(certificateEntries);
         when(databaseServerSslCertificateConfig.getMaxVersionByCloudPlatformAndRegion("cloudPlatform", "region")).thenReturn(1);
 
-        NotFoundException actual = Assertions.assertThrows(NotFoundException.class, () ->
+        NotFoundException actual = assertThrows(NotFoundException.class, () ->
                 underTest.updateSslConfig(STACK_ID, cloudContext, cloudCredential, databaseStack));
-        Assertions.assertEquals("Active SSL cert cannot be found for name", actual.getMessage());
+        assertEquals("Active SSL cert cannot be found for name", actual.getMessage());
 
         verify(sslConfigService, never()).save(any(SslConfig.class));
     }

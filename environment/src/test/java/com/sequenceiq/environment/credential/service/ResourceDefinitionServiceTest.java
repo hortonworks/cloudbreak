@@ -1,12 +1,13 @@
 package com.sequenceiq.environment.credential.service;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 import jakarta.inject.Inject;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -53,7 +54,7 @@ public class ResourceDefinitionServiceTest {
         when(requestProvider.getResourceDefinitionRequest(any(), anyString())).thenReturn(resourceDefinitionRequest);
         when(resourceDefinitionRequest.await()).thenReturn(resourceDefinitionResult);
         when(resourceDefinitionResult.getDefinition()).thenReturn(SAMPLE_RESULT);
-        Assertions.assertEquals(
+        assertEquals(
                 SAMPLE_RESULT,
                 resourceDefinitionServiceUnderTest.getResourceDefinition(CLOUD_PLATFORM, RESOURCE)
         );
@@ -63,7 +64,7 @@ public class ResourceDefinitionServiceTest {
     public void testResourceDefinitionServiceUnanswered() throws InterruptedException {
         when(requestProvider.getResourceDefinitionRequest(any(), anyString())).thenReturn(resourceDefinitionRequest);
         when(resourceDefinitionRequest.await()).thenThrow(InterruptedException.class);
-        Assertions.assertThrows(OperationException.class, () ->
+        assertThrows(OperationException.class, () ->
                 resourceDefinitionServiceUnderTest.getResourceDefinition(CLOUD_PLATFORM, RESOURCE));
     }
 

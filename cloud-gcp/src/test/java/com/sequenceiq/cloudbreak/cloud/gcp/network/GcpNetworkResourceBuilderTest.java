@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.network;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -7,7 +9,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -48,7 +49,7 @@ public class GcpNetworkResourceBuilderTest {
 
         CloudResource cloudResource = underTest.create(gcpContext, authenticatedContext, network);
 
-        Assert.assertEquals("custom", cloudResource.getName());
+        assertEquals("custom", cloudResource.getName());
     }
 
     @Test
@@ -62,7 +63,7 @@ public class GcpNetworkResourceBuilderTest {
 
         CloudResource cloudResource = underTest.create(gcpContext, authenticatedContext, network);
 
-        Assert.assertEquals("test", cloudResource.getName());
+        assertEquals("test", cloudResource.getName());
     }
 
     @Test
@@ -94,11 +95,11 @@ public class GcpNetworkResourceBuilderTest {
 
         CloudResource delete = underTest.delete(gcpContext, authenticatedContext, resource, network);
 
-        Assert.assertEquals(ResourceType.GCP_NETWORK, delete.getType());
-        Assert.assertEquals(CommonStatus.CREATED, delete.getStatus());
-        Assert.assertEquals("super", delete.getName());
-        Assert.assertEquals("master", delete.getGroup());
-        Assert.assertEquals("id-123", delete.getInstanceId());
+        assertEquals(ResourceType.GCP_NETWORK, delete.getType());
+        assertEquals(CommonStatus.CREATED, delete.getStatus());
+        assertEquals("super", delete.getName());
+        assertEquals("master", delete.getGroup());
+        assertEquals("id-123", delete.getInstanceId());
     }
 
     @Test
@@ -120,16 +121,16 @@ public class GcpNetworkResourceBuilderTest {
 
         CloudResource delete = underTest.delete(gcpContext, authenticatedContext, resource, network);
 
-        Assert.assertEquals(null, delete);
+        assertEquals(null, delete);
     }
 
     @Test
     public void testResourceType() {
-        Assert.assertTrue(underTest.resourceType().equals(ResourceType.GCP_NETWORK));
+        assertTrue(underTest.resourceType().equals(ResourceType.GCP_NETWORK));
     }
 
     @Test
     public void testOrder() {
-        Assert.assertTrue(underTest.order() == 0);
+        assertTrue(underTest.order() == 0);
     }
 }

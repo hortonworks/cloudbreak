@@ -1,5 +1,7 @@
 package com.sequenceiq.remoteenvironment.scheduled;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -9,7 +11,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -75,10 +76,10 @@ class PrivateEnvironmentBaseClusterRegistrarJobTest {
         when(remoteEnvironmentService.listRemoteEnvironmentsInternal(privateControlPlane)).thenReturn(List.of(environmentResponse));
         when(remoteEnvironmentService.describeRemoteEnvironmentInternal(any(), any())).thenThrow(new RuntimeException("something went wrong"));
 
-        JobExecutionException jobExecutionException = Assertions.assertThrows(JobExecutionException.class,
+        JobExecutionException jobExecutionException = assertThrows(JobExecutionException.class,
                 () -> underTest.executeTracedJob(jobExecutionContext));
 
-        Assertions.assertEquals("Could not query and update private control planes.", jobExecutionException.getMessage());
+        assertEquals("Could not query and update private control planes.", jobExecutionException.getMessage());
         verify(privateControlPlaneService).findAll();
         verify(remoteEnvironmentService).listRemoteEnvironmentsInternal(privateControlPlane);
         verify(remoteEnvironmentService).describeRemoteEnvironmentInternal(any(), any());

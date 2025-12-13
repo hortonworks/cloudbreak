@@ -3,6 +3,7 @@ package com.sequenceiq.freeipa.flow.stack.image.change.action;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -17,7 +18,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
 
@@ -45,7 +45,7 @@ public class ImageRevisionReaderServiceTest {
 
     @Test
     void testGetRevisions() throws TransactionService.TransactionExecutionException {
-        try (MockedStatic<AuditReaderFactory> auditReaderFactory = Mockito.mockStatic(AuditReaderFactory.class)) {
+        try (MockedStatic<AuditReaderFactory> auditReaderFactory = mockStatic(AuditReaderFactory.class)) {
             setupInvokeAuditReaderGetRevisionsInTransaction(auditReaderFactory);
             when(auditReader.getRevisions(ImageEntity.class, IMAGE_ENTITY_ID)).thenReturn(List.of(1, 2, 3));
 
@@ -57,7 +57,7 @@ public class ImageRevisionReaderServiceTest {
 
     @Test
     void testFind() throws TransactionService.TransactionExecutionException {
-        try (MockedStatic<AuditReaderFactory> auditReaderFactory = Mockito.mockStatic(AuditReaderFactory.class)) {
+        try (MockedStatic<AuditReaderFactory> auditReaderFactory = mockStatic(AuditReaderFactory.class)) {
             ImageEntity imageEntity = new ImageEntity();
             imageEntity.setId(IMAGE_ENTITY_ID);
             setupInvokeAuditReaderFindInTransaction(auditReaderFactory);

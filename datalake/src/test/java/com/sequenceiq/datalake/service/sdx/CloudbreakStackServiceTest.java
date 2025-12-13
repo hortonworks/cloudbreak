@@ -3,8 +3,10 @@ package com.sequenceiq.datalake.service.sdx;
 import static com.sequenceiq.cloudbreak.common.imdupdate.InstanceMetadataUpdateType.IMDS_HTTP_TOKEN_REQUIRED;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -15,7 +17,6 @@ import java.util.function.Supplier;
 
 import jakarta.ws.rs.WebApplicationException;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -24,7 +25,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
@@ -95,7 +95,7 @@ public class CloudbreakStackServiceTest {
         SdxCluster sdxCluster = setupSdxCluster();
         when(stackV4Endpoint.get(WORKSPACE_ID, SDX_NAME, Set.of(), SDX_ACCOUNT_ID)).thenThrow(WebApplicationException.class);
 
-        Assertions.assertThrows(CloudbreakServiceException.class, () ->
+        assertThrows(CloudbreakServiceException.class, () ->
                 underTest.getStack(sdxCluster)
         );
     }
@@ -103,7 +103,7 @@ public class CloudbreakStackServiceTest {
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
     void testUpgradeRdsByClusterNameInternal(boolean forced) {
-        try (MockedStatic<ThreadBasedUserCrnProvider> threadBasedUserCrnProvider = Mockito.mockStatic(ThreadBasedUserCrnProvider.class)) {
+        try (MockedStatic<ThreadBasedUserCrnProvider> threadBasedUserCrnProvider = mockStatic(ThreadBasedUserCrnProvider.class)) {
             SdxCluster sdxCluster = setupSdxCluster();
             TargetMajorVersion targetMajorVersion = TargetMajorVersion.VERSION_11;
             FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW, "pollableId");
@@ -121,14 +121,14 @@ public class CloudbreakStackServiceTest {
     @ParameterizedTest
     @ValueSource(booleans = {true, false})
     void testUpgradeRdsByClusterNameInternalWhenErrorResponse(boolean forced) {
-        try (MockedStatic<ThreadBasedUserCrnProvider> threadBasedUserCrnProvider = Mockito.mockStatic(ThreadBasedUserCrnProvider.class)) {
+        try (MockedStatic<ThreadBasedUserCrnProvider> threadBasedUserCrnProvider = mockStatic(ThreadBasedUserCrnProvider.class)) {
             SdxCluster sdxCluster = setupSdxCluster();
             TargetMajorVersion targetMajorVersion = TargetMajorVersion.VERSION_11;
             threadBasedUserCrnProvider.when(ThreadBasedUserCrnProvider::getUserCrn).thenReturn(USER_CRN);
             threadBasedUserCrnProvider.when(() -> ThreadBasedUserCrnProvider.doAsInternalActor(any(Supplier.class)))
                     .thenThrow(new WebApplicationException());
 
-            Assertions.assertThrows(CloudbreakServiceException.class, () ->
+            assertThrows(CloudbreakServiceException.class, () ->
                     underTest.upgradeRdsByClusterNameInternal(sdxCluster, targetMajorVersion, forced)
             );
 

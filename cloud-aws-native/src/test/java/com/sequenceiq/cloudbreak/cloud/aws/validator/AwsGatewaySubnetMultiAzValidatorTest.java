@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.aws.validator;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -7,7 +8,6 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -116,7 +116,7 @@ class AwsGatewaySubnetMultiAzValidatorTest {
                 .build();
         when(ec2Client.describeSubnets(any())).thenReturn(describeSubnetsResponse);
 
-        Assertions.assertThrows(CloudConnectorException.class, () -> underTest.validate(authenticatedContext, cloudStack));
+        assertThrows(CloudConnectorException.class, () -> underTest.validate(authenticatedContext, cloudStack));
     }
 
     @Test
@@ -129,7 +129,7 @@ class AwsGatewaySubnetMultiAzValidatorTest {
         when(awsClient.createEc2Client(any(), any())).thenReturn(ec2Client);
         when(ec2Client.describeSubnets(any())).thenThrow(AwsServiceException.builder().message("Something went wrong").build());
 
-        Assertions.assertThrows(CloudConnectorException.class, () -> underTest.validate(authenticatedContext, cloudStack));
+        assertThrows(CloudConnectorException.class, () -> underTest.validate(authenticatedContext, cloudStack));
     }
 
     private CloudStack getCloudStack(Collection<Group> groups) {

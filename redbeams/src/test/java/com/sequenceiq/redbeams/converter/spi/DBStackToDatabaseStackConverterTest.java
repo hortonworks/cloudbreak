@@ -8,6 +8,7 @@ import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.RESOURCE_
 import static com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.CREATE_REQUESTED;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -22,7 +23,6 @@ import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -91,7 +91,7 @@ public class DBStackToDatabaseStackConverterTest {
         dbStack.setDescription("my stack");
         dbStack.setEnvironmentId("myenv");
         dbStack.setNetwork(NETWORK_ID);
-        lenient().when(sslConfigService.fetchById(ArgumentMatchers.isNull())).thenReturn(Optional.empty());
+        lenient().when(sslConfigService.fetchById(isNull())).thenReturn(Optional.empty());
     }
 
     @Test

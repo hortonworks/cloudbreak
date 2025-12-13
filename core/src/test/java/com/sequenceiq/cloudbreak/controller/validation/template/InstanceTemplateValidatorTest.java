@@ -1,8 +1,11 @@
 package com.sequenceiq.cloudbreak.controller.validation.template;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.util.Set;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -26,8 +29,8 @@ class InstanceTemplateValidatorTest {
 
         ValidationResult result = underTest.validate(instanceTemplate);
 
-        Assertions.assertNotNull(result);
-        Assertions.assertFalse(result.hasError());
+        assertNotNull(result);
+        assertFalse(result.hasError());
     }
 
     @Test
@@ -37,8 +40,8 @@ class InstanceTemplateValidatorTest {
 
         ValidationResult result = underTest.validate(instanceTemplate);
 
-        Assertions.assertNotNull(result);
-        Assertions.assertFalse(result.hasError());
+        assertNotNull(result);
+        assertFalse(result.hasError());
     }
 
     @Test
@@ -50,8 +53,8 @@ class InstanceTemplateValidatorTest {
 
         ValidationResult result = underTest.validate(instanceTemplate);
 
-        Assertions.assertNotNull(result);
-        Assertions.assertFalse(result.hasError());
+        assertNotNull(result);
+        assertFalse(result.hasError());
     }
 
     @Test
@@ -65,8 +68,8 @@ class InstanceTemplateValidatorTest {
 
         ValidationResult result = underTest.validate(instanceTemplate);
 
-        Assertions.assertNotNull(result);
-        Assertions.assertFalse(result.hasError());
+        assertNotNull(result);
+        assertFalse(result.hasError());
     }
 
     @Test
@@ -81,14 +84,14 @@ class InstanceTemplateValidatorTest {
 
         ValidationResult result = underTest.validate(instanceTemplate);
 
-        Assertions.assertNotNull(result);
-        Assertions.assertTrue(result.hasError());
+        assertNotNull(result);
+        assertTrue(result.hasError());
         String expectedMessage = String.format(InstanceTemplateValidator.INVALID_NUMBER_OF_VOLUMES_MESSAGE_PATTERN,
                 VolumeParameterConstants.MAXIMUM_NUMBER_OF_VOLUMES,
                 instanceTemplateName,
                 volumeCount
         );
-        Assertions.assertTrue(result.getErrors().contains(expectedMessage));
+        assertTrue(result.getErrors().contains(expectedMessage));
     }
 
     @Test
@@ -106,13 +109,13 @@ class InstanceTemplateValidatorTest {
 
         ValidationResult result = underTest.validate(instanceTemplate);
 
-        Assertions.assertNotNull(result);
-        Assertions.assertTrue(result.hasError());
+        assertNotNull(result);
+        assertTrue(result.hasError());
         String expectedMessage = String.format(InstanceTemplateValidator.INVALID_NUMBER_OF_VOLUMES_MESSAGE_PATTERN,
                 VolumeParameterConstants.MAXIMUM_NUMBER_OF_VOLUMES,
                 instanceTemplateName,
                 aVolumeCount + bVolumeCount
         );
-        Assertions.assertTrue(result.getErrors().contains(expectedMessage));
+        assertTrue(result.getErrors().contains(expectedMessage));
     }
 }

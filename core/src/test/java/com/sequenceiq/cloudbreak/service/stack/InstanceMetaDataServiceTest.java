@@ -1,6 +1,9 @@
 package com.sequenceiq.cloudbreak.service.stack;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
@@ -18,7 +21,6 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -419,28 +421,28 @@ class InstanceMetaDataServiceTest {
     void testAnyInstanceStoppedAndZeroStopped() {
         when(repository.countStoppedForStack(any())).thenReturn(0L);
         boolean anyInstanceStopped = underTest.anyInstanceStopped(1L);
-        Assertions.assertFalse(anyInstanceStopped);
+        assertFalse(anyInstanceStopped);
     }
 
     @Test
     void testAnyInstanceStoppedAnd2Stopped() {
         when(repository.countStoppedForStack(any())).thenReturn(2L);
         boolean anyInstanceStopped = underTest.anyInstanceStopped(1L);
-        Assertions.assertTrue(anyInstanceStopped);
+        assertTrue(anyInstanceStopped);
     }
 
     @Test
     void testGetFirstValidPrivateId() {
         when(repository.findLastPrivateIdForStack(1L, Pageable.ofSize(1))).thenReturn(new PageImpl<>(List.of(420L)));
         long result = underTest.getFirstValidPrivateId(1L);
-        Assertions.assertEquals(421L, result);
+        assertEquals(421L, result);
     }
 
     @Test
     void testGetFirstValidPrivateIdWhenNoExistingPrivateId() {
         when(repository.findLastPrivateIdForStack(1L, Pageable.ofSize(1))).thenReturn(new PageImpl<>(List.of()));
         long result = underTest.getFirstValidPrivateId(1L);
-        Assertions.assertEquals(0L, result);
+        assertEquals(0L, result);
     }
 
     private Stack stack(int instanceGroupCount) {

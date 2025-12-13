@@ -1,41 +1,41 @@
 package com.sequenceiq.cloudbreak.controller.validation;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.State;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 
-public class ValidationResultTest {
+class ValidationResultTest {
 
     private static final String ERROR_MESSAGE = "Error should appear now.";
 
     private ValidationResultBuilder underTest;
 
-    @Before
+    @BeforeEach
     public void setup() {
         underTest = ValidationResult.builder();
     }
 
     @Test
-    public void testIfErrorWorks() {
+    void testIfErrorWorks() {
         underTest.ifError(() -> true, ERROR_MESSAGE);
         ValidationResult result = underTest.build();
         assertError(result);
     }
 
     @Test
-    public void testErrorWorks() {
+    void testErrorWorks() {
         underTest.error(ERROR_MESSAGE);
         ValidationResult result = underTest.build();
         assertError(result);
     }
 
     @Test
-    public void testDuplicateErrors() {
+    void testDuplicateErrors() {
         underTest.error(ERROR_MESSAGE);
         underTest.error(ERROR_MESSAGE);
         ValidationResult result = underTest.build();

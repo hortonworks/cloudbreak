@@ -1,8 +1,10 @@
 package com.sequenceiq.environment.api.v1.proxy.validation;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.util.stream.Stream;
 
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -21,7 +23,7 @@ public class ProxyConfigAuthValidatorTest {
     @Test
     public void testValidProxyConfigWithoutAuth() {
         ProxyRequest proxyRequest = new ProxyRequest();
-        Assert.assertTrue(underTest.isValid(proxyRequest, null));
+        assertTrue(underTest.isValid(proxyRequest, null));
     }
 
     @Test
@@ -29,7 +31,7 @@ public class ProxyConfigAuthValidatorTest {
         ProxyRequest proxyRequest = new ProxyRequest();
         proxyRequest.setUserName("user");
         proxyRequest.setPassword("pwd");
-        Assert.assertTrue(underTest.isValid(proxyRequest, null));
+        assertTrue(underTest.isValid(proxyRequest, null));
     }
 
     @ParameterizedTest
@@ -38,7 +40,7 @@ public class ProxyConfigAuthValidatorTest {
         ProxyRequest proxyRequest = new ProxyRequest();
         proxyRequest.setUserName(user);
         proxyRequest.setPassword(password);
-        Assert.assertFalse(underTest.isValid(proxyRequest, null));
+        assertFalse(underTest.isValid(proxyRequest, null));
     }
 
     private static Stream<Arguments> invalidUserPasswords() {

@@ -1,11 +1,13 @@
 package com.sequenceiq.cloudbreak.quartz;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import java.util.Map;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.quartz.JobDataMap;
 
@@ -31,8 +33,8 @@ class JobDataMapProviderTest {
 
     @Test
     void provideForJoBResourceAdapter() {
-        JobResourceAdapter<?> jobResourceAdapter = Mockito.mock(JobResourceAdapter.class);
-        Mockito.when(jobResourceAdapter.toJobDataMap()).thenReturn(JOB_DATA_MAP);
+        JobResourceAdapter<?> jobResourceAdapter = mock(JobResourceAdapter.class);
+        when(jobResourceAdapter.toJobDataMap()).thenReturn(JOB_DATA_MAP);
 
         JobDataMap result = underTest.provide(jobResourceAdapter);
 

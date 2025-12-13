@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.structuredevent.rest.filter;
 import static com.sequenceiq.cloudbreak.structuredevent.rest.urlparser.CDPRestUrlParser.RESOURCE_CRN;
 import static com.sequenceiq.cloudbreak.structuredevent.rest.urlparser.CDPRestUrlParser.RESOURCE_ID;
 import static com.sequenceiq.cloudbreak.structuredevent.rest.urlparser.CDPRestUrlParser.RESOURCE_NAME;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -11,7 +13,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -52,9 +53,9 @@ public class DataCollectorComponentTest {
         params.put(RESOURCE_CRN, null);
         params.put(RESOURCE_NAME, null);
         ThreadBasedUserCrnProvider.doAs(userCrn, () -> underTest.fetchDataFromDbIfNeed(params));
-        Assertions.assertNull(params.get(RESOURCE_NAME));
-        Assertions.assertNull(params.get(RESOURCE_CRN));
-        Assertions.assertNull(params.get(RESOURCE_ID));
+        assertNull(params.get(RESOURCE_NAME));
+        assertNull(params.get(RESOURCE_CRN));
+        assertNull(params.get(RESOURCE_ID));
     }
 
     @Test
@@ -66,9 +67,9 @@ public class DataCollectorComponentTest {
         params.put(RESOURCE_NAME, "name");
         when(repo.findResourceBasicViewByNameAndAccountId("name", "acc")).thenReturn(Optional.empty());
         ThreadBasedUserCrnProvider.doAs(userCrn, () -> underTest.fetchDataFromDbIfNeed(params));
-        Assertions.assertEquals("name", params.get(RESOURCE_NAME));
-        Assertions.assertNull(params.get(RESOURCE_CRN));
-        Assertions.assertNull(params.get(RESOURCE_ID));
+        assertEquals("name", params.get(RESOURCE_NAME));
+        assertNull(params.get(RESOURCE_CRN));
+        assertNull(params.get(RESOURCE_ID));
 
         verify(repo).findResourceBasicViewByNameAndAccountId("name", "acc");
     }
@@ -88,9 +89,9 @@ public class DataCollectorComponentTest {
         when(repo.findResourceBasicViewByNameAndAccountId("name", "acc")).thenReturn(entityOpt);
 
         ThreadBasedUserCrnProvider.doAs(userCrn, () -> underTest.fetchDataFromDbIfNeed(params));
-        Assertions.assertEquals("name", params.get(RESOURCE_NAME));
-        Assertions.assertEquals("crn-ret", params.get(RESOURCE_CRN));
-        Assertions.assertEquals("342", params.get(RESOURCE_ID));
+        assertEquals("name", params.get(RESOURCE_NAME));
+        assertEquals("crn-ret", params.get(RESOURCE_CRN));
+        assertEquals("342", params.get(RESOURCE_ID));
 
         verify(repo).findResourceBasicViewByNameAndAccountId("name", "acc");
     }
@@ -104,9 +105,9 @@ public class DataCollectorComponentTest {
         params.put(RESOURCE_NAME, null);
         when(repo.findResourceBasicViewByResourceCrn("crn")).thenReturn(Optional.empty());
         ThreadBasedUserCrnProvider.doAs(userCrn, () -> underTest.fetchDataFromDbIfNeed(params));
-        Assertions.assertNull(params.get(RESOURCE_NAME));
-        Assertions.assertEquals("crn", params.get(RESOURCE_CRN));
-        Assertions.assertNull(params.get(RESOURCE_ID));
+        assertNull(params.get(RESOURCE_NAME));
+        assertEquals("crn", params.get(RESOURCE_CRN));
+        assertNull(params.get(RESOURCE_ID));
 
         verify(repo).findResourceBasicViewByResourceCrn("crn");
     }
@@ -127,9 +128,9 @@ public class DataCollectorComponentTest {
         when(repo.findResourceBasicViewByResourceCrn("crn")).thenReturn(entityOpt);
         ThreadBasedUserCrnProvider.doAs(userCrn, () -> underTest.fetchDataFromDbIfNeed(params));
 
-        Assertions.assertEquals("name-ret", params.get(RESOURCE_NAME));
-        Assertions.assertEquals("crn", params.get(RESOURCE_CRN));
-        Assertions.assertEquals("342", params.get(RESOURCE_ID));
+        assertEquals("name-ret", params.get(RESOURCE_NAME));
+        assertEquals("crn", params.get(RESOURCE_CRN));
+        assertEquals("342", params.get(RESOURCE_ID));
 
         verify(repo).findResourceBasicViewByResourceCrn("crn");
     }

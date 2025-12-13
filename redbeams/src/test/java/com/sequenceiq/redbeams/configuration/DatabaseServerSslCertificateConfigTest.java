@@ -2,6 +2,7 @@ package com.sequenceiq.redbeams.configuration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
 
 import java.io.IOException;
 import java.security.cert.X509Certificate;
@@ -13,7 +14,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.mockito.Mockito;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.common.domain.SslCertStatus;
@@ -28,7 +28,7 @@ class DatabaseServerSslCertificateConfigTest {
 
     private static final String CLOUD_PROVIDER_IDENTIFIER_3 = "OISTE-WISeKey-Global-Root-GC-CA";
 
-    private static final X509Certificate X_509_CERT = Mockito.mock(X509Certificate.class);
+    private static final X509Certificate X_509_CERT = mock(X509Certificate.class);
 
     private static final int VERSION_0 = 0;
 

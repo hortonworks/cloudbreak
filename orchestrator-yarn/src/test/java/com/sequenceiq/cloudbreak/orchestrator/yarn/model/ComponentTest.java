@@ -1,16 +1,16 @@
 package com.sequenceiq.cloudbreak.orchestrator.yarn.model;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.cloudbreak.orchestrator.yarn.model.core.Dependency;
 import com.sequenceiq.cloudbreak.orchestrator.yarn.model.core.YarnComponent;
 
-public class ComponentTest {
+class ComponentTest {
 
     private static final String NAME = "testComp";
 
@@ -19,28 +19,28 @@ public class ComponentTest {
     private static final int NUM_OF_CONTAINERS = 1;
 
     @Test
-    public void testLaunchCommand() {
+    void testLaunchCommand() {
         YarnComponent component = new YarnComponent();
         component.setLaunchCommand(LAUNCH_COMMAND);
         assertEquals(LAUNCH_COMMAND, component.getLaunchCommand());
     }
 
     @Test
-    public void testNumberOfContainers() {
+    void testNumberOfContainers() {
         YarnComponent component = new YarnComponent();
         component.setNumberOfContainers(NUM_OF_CONTAINERS);
         assertEquals(NUM_OF_CONTAINERS, component.getNumberOfContainers());
     }
 
     @Test
-    public void testName() {
+    void testName() {
         YarnComponent component = new YarnComponent();
         component.setName(NAME);
         assertEquals(NAME, component.getName());
     }
 
     @Test
-    public void testDependencies() {
+    void testDependencies() {
         Dependency dependency = new Dependency();
         YarnComponent component = new YarnComponent();
         List<Dependency> dependencies = new ArrayList<>();

@@ -3,12 +3,13 @@ package com.sequenceiq.environment.environment.dto;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.environment.environment.domain.EnvironmentAuthentication;
@@ -22,7 +23,7 @@ class AuthenticationDtoConverterTest {
 
     public static final String PUBLIC_KEY_ID = "id";
 
-    private final PublicKeyValidator publicKeyValidator = Mockito.mock(PublicKeyValidator.class);
+    private final PublicKeyValidator publicKeyValidator = mock(PublicKeyValidator.class);
 
     private final AuthenticationDtoConverter underTest = new AuthenticationDtoConverter(publicKeyValidator);
 
@@ -42,7 +43,7 @@ class AuthenticationDtoConverterTest {
 
         EnvironmentAuthentication result = underTest.dtoToAuthentication(dto);
 
-        verify(publicKeyValidator, Mockito.times(1)).validatePublicKey(anyString());
+        verify(publicKeyValidator, times(1)).validatePublicKey(anyString());
         assertEquals(dto.getLoginUserName(), result.getLoginUserName());
         assertEquals("ssh-rsa public-key login", result.getPublicKey());
         assertEquals(dto.getPublicKeyId(), result.getPublicKeyId());
@@ -60,7 +61,7 @@ class AuthenticationDtoConverterTest {
 
         AuthenticationDto result = underTest.authenticationToDto(environment);
 
-        verify(publicKeyValidator, Mockito.times(0)).validatePublicKey(anyString());
+        verify(publicKeyValidator, times(0)).validatePublicKey(anyString());
         assertEquals(environment.getLoginUserName(), result.getLoginUserName());
         assertEquals(environment.getPublicKey(), result.getPublicKey());
         assertEquals(environment.getPublicKeyId(), result.getPublicKeyId());
@@ -79,7 +80,7 @@ class AuthenticationDtoConverterTest {
 
         EnvironmentAuthentication environmentAuthentication = underTest.dtoToAuthentication(dto);
 
-        verify(publicKeyValidator, Mockito.times(1)).validatePublicKey(anyString());
+        verify(publicKeyValidator, times(1)).validatePublicKey(anyString());
         assertEquals("ssh-rsa AAAASASFAS3532== login", environmentAuthentication.getPublicKey());
     }
 

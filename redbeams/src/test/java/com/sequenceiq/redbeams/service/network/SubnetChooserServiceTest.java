@@ -1,8 +1,9 @@
 package com.sequenceiq.redbeams.service.network;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -12,14 +13,12 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.NetworkConnector;
@@ -31,8 +30,8 @@ import com.sequenceiq.cloudbreak.cloud.model.SubnetSelectionResult;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 
-@RunWith(MockitoJUnitRunner.class)
-public class SubnetChooserServiceTest {
+@ExtendWith(MockitoExtension.class)
+class SubnetChooserServiceTest {
 
     private static final String AVAILABILITY_ZONE_A = "AZ-a";
 
@@ -44,9 +43,6 @@ public class SubnetChooserServiceTest {
 
     private static final String SUBNET_3 = "subnet-3";
 
-    @Rule
-    public final ExpectedException thrown = ExpectedException.none();
-
     @Mock
     private CloudPlatformConnectors cloudPlatformConnectors;
 
@@ -54,7 +50,7 @@ public class SubnetChooserServiceTest {
     private SubnetChooserService underTest;
 
     @Test
-    public void testChooseSubnetsThenCloudPlatformConnectorGetIsCalled() {
+    void testChooseSubnetsThenCloudPlatformConnectorGetIsCalled() {
         List<CloudSubnet> subnets = List.of();
         setupConnector();
         DBStack dbStack = new DBStack();
@@ -70,7 +66,7 @@ public class SubnetChooserServiceTest {
     }
 
     @Test
-    public void testChooseSubnetsThenNetworkSelectorCalled() {
+    void testChooseSubnetsThenNetworkSelectorCalled() {
         List<CloudSubnet> subnets = List.of(
                 new CloudSubnet.Builder()
                         .id(SUBNET_1)
@@ -96,7 +92,7 @@ public class SubnetChooserServiceTest {
     }
 
     @Test
-    public void testChooseSubnetsWhenAwsNoHaThenHaIsFalse() {
+    void testChooseSubnetsWhenAwsNoHaThenHaIsFalse() {
         List<CloudSubnet> subnets = List.of();
         NetworkConnector networkConnector = setupConnector();
         DBStack dbStack = mock(DBStack.class);
@@ -111,7 +107,7 @@ public class SubnetChooserServiceTest {
     }
 
     @Test
-    public void testChooseSubnetsWhenAwsIsHaThenHaIsTrue() {
+    void testChooseSubnetsWhenAwsIsHaThenHaIsTrue() {
         List<CloudSubnet> subnets = List.of();
         NetworkConnector networkConnector = setupConnector();
         DBStack dbStack = mock(DBStack.class);
@@ -126,15 +122,13 @@ public class SubnetChooserServiceTest {
     }
 
     @Test
-    public void testChooseSubnetsWhenSubnetChooserReturnsErrorThenThrows() {
+    void testChooseSubnetsWhenSubnetChooserReturnsErrorThenThrows() {
         List<CloudSubnet> subnets = List.of();
         setupConnector("my error message");
         DBStack dbStack = mock(DBStack.class);
         when(dbStack.isHa()).thenReturn(true);
-        thrown.expect(BadRequestException.class);
-        thrown.expectMessage("my error message");
 
-        underTest.chooseSubnets(subnets, dbStack);
+        assertThrows(BadRequestException.class, () -> underTest.chooseSubnets(subnets, dbStack), "my error message");
     }
 
     private NetworkConnector setupConnector() {

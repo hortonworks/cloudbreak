@@ -1,14 +1,14 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.upscale;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Configuration;
@@ -30,7 +30,7 @@ import com.sequenceiq.common.api.type.AdjustmentType;
 
 @SpringBootTest(classes = { TestApplicationContext.class, UpscaleStackComponentTest.TestConfig.class },
         properties = "spring.main.allow-bean-definition-overriding=true")
-public class UpscaleStackComponentTest extends AbstractComponentTest<UpscaleStackResult> {
+class UpscaleStackComponentTest extends AbstractComponentTest<UpscaleStackResult> {
 
     @MockBean
     private StackUpscaleService stackUpscaleService;
@@ -39,7 +39,7 @@ public class UpscaleStackComponentTest extends AbstractComponentTest<UpscaleStac
     private CloudFormationStackUtil cfStackUtil;
 
     @Test
-    public void testUpscaleStack() throws QuotaExceededException, TransactionExecutionException {
+    void testUpscaleStack() throws QuotaExceededException, TransactionExecutionException {
         when(stackUpscaleService.upscale(any(), any(), any())).thenReturn(Collections.singletonList(new CloudResourceStatus(null, ResourceStatus.UPDATED)));
         UpscaleStackResult result = sendCloudRequest();
 
@@ -64,6 +64,6 @@ public class UpscaleStackComponentTest extends AbstractComponentTest<UpscaleStac
 
     @Configuration
     @Import({UpscaleStackHandler.class})
-    public static class TestConfig {
+    static class TestConfig {
     }
 }

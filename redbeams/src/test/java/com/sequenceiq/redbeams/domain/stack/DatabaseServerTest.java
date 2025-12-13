@@ -1,14 +1,14 @@
 package com.sequenceiq.redbeams.domain.stack;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.common.json.Json;
 
-public class DatabaseServerTest {
+class DatabaseServerTest {
 
     private static final SecurityGroup SECURITY_GROUP = new SecurityGroup();
 
@@ -16,13 +16,13 @@ public class DatabaseServerTest {
 
     private DatabaseServer server;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         server = new DatabaseServer();
     }
 
     @Test
-    public void testGettersAndSetters() {
+    void testGettersAndSetters() {
         server.setId(1L);
         assertEquals(1L, server.getId().longValue());
 

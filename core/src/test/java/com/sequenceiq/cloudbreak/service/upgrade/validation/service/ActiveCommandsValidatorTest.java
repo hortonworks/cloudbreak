@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.upgrade.validation.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Field;
@@ -8,7 +9,6 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Set;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -101,7 +101,7 @@ public class ActiveCommandsValidatorTest {
         when(clusterStatusService.getActiveCommandsList()).thenReturn(
                 List.of(createCommand(NON_INTERRUPTABLE_COMMAND_1), createCommand(NON_INTERRUPTABLE_COMMAND_2)));
         // WHEN
-        UpgradeValidationFailedException ex = Assertions.assertThrows(UpgradeValidationFailedException.class,
+        UpgradeValidationFailedException ex = assertThrows(UpgradeValidationFailedException.class,
                 () -> underTest.validate(request));
         // THEN exception is thrown
         assertEquals("There are active commands running on CM that are not interruptable, upgrade is not possible. " +
@@ -119,7 +119,7 @@ public class ActiveCommandsValidatorTest {
         when(clusterStatusService.getActiveCommandsList()).thenReturn(
                 List.of(createCommand(INTERRUPTABLE_COMMAND_1), createCommand(NON_INTERRUPTABLE_COMMAND_1)));
         // WHEN
-        UpgradeValidationFailedException ex = Assertions.assertThrows(UpgradeValidationFailedException.class,
+        UpgradeValidationFailedException ex = assertThrows(UpgradeValidationFailedException.class,
                 () -> underTest.validate(request));
         // THEN exception is thrown
         assertEquals("There are active commands running on CM that are not interruptable, upgrade is not possible. " +

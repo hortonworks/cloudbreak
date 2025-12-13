@@ -2,27 +2,27 @@ package com.sequenceiq.cloudbreak.cmtemplate.configproviders.oozie;
 
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.oozie.OozieRoleConfigProviderTest.getBlueprintText;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.oozie.OozieRoleConfigProviderTest.getTemplatePreparationObject;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 
-@RunWith(MockitoJUnitRunner.class)
-public class OozieHAConfigProviderTest {
+@ExtendWith(MockitoExtension.class)
+class OozieHAConfigProviderTest {
 
     private final OozieHAConfigProvider underTest = new OozieHAConfigProvider();
 
     @Test
-    public void testGetServiceConfigsWithSingleRolesPerHostGroup() {
+    void testGetServiceConfigsWithSingleRolesPerHostGroup() {
         String inputJson = getBlueprintText("input/clouderamanager-db-config.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
         TemplatePreparationObject preparationObject = getTemplatePreparationObject(inputJson, cmTemplateProcessor, 1, false, "7.2.2");
@@ -31,7 +31,7 @@ public class OozieHAConfigProviderTest {
     }
 
     @Test
-    public void testGetServiceConfigsWithOozieHA() {
+    void testGetServiceConfigsWithOozieHA() {
         String inputJson = getBlueprintText("input/de-ha.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
         TemplatePreparationObject preparationObject = getTemplatePreparationObject(inputJson, cmTemplateProcessor, 2, false, "7.2.2");
@@ -53,7 +53,7 @@ public class OozieHAConfigProviderTest {
     }
 
     @Test
-    public void testGetServiceConfigsWithOozieHAWithSSlTrue() {
+    void testGetServiceConfigsWithOozieHAWithSSlTrue() {
         String inputJson = getBlueprintText("input/de-ha.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
         TemplatePreparationObject preparationObject = getTemplatePreparationObject(inputJson, cmTemplateProcessor, 2, true, "7.2.2");
@@ -75,7 +75,7 @@ public class OozieHAConfigProviderTest {
     }
 
     @Test
-    public void testGetServiceConfigsWithNoOozie() {
+    void testGetServiceConfigsWithNoOozie() {
         String inputJson = getBlueprintText("input/clouderamanager.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
         TemplatePreparationObject preparationObject = getTemplatePreparationObject(inputJson, cmTemplateProcessor, 1, false, "7.2.2");

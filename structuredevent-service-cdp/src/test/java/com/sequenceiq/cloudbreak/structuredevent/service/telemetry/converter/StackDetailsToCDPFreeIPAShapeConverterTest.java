@@ -1,8 +1,9 @@
 package com.sequenceiq.cloudbreak.structuredevent.service.telemetry.converter;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.util.List;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,16 +27,16 @@ public class StackDetailsToCDPFreeIPAShapeConverterTest {
     public void testConvertWithNull() {
         UsageProto.CDPFreeIPAShape freeIPAShape = underTest.convert(null);
 
-        Assertions.assertEquals(-1, freeIPAShape.getNodes());
-        Assertions.assertEquals("", freeIPAShape.getHostGroupNodeCount());
+        assertEquals(-1, freeIPAShape.getNodes());
+        assertEquals("", freeIPAShape.getHostGroupNodeCount());
     }
 
     @Test
     public void testConvertWithEmpty() {
         UsageProto.CDPFreeIPAShape freeIPAShape = underTest.convert(new StackDetails());
 
-        Assertions.assertEquals(-1, freeIPAShape.getNodes());
-        Assertions.assertEquals("", freeIPAShape.getHostGroupNodeCount());
+        assertEquals(-1, freeIPAShape.getNodes());
+        assertEquals("", freeIPAShape.getHostGroupNodeCount());
     }
 
     @Test
@@ -48,7 +49,7 @@ public class StackDetailsToCDPFreeIPAShapeConverterTest {
 
         UsageProto.CDPFreeIPAShape freeIPAShape = underTest.convert(stackDetails);
 
-        Assertions.assertEquals(2, freeIPAShape.getNodes());
-        Assertions.assertEquals("master=2", freeIPAShape.getHostGroupNodeCount());
+        assertEquals(2, freeIPAShape.getNodes());
+        assertEquals("master=2", freeIPAShape.getHostGroupNodeCount());
     }
 }

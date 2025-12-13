@@ -30,7 +30,6 @@ import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.ArgumentMatchers;
 import org.mockito.BDDMockito;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -293,7 +292,7 @@ class Flow2HandlerTest {
         underTest.accept(event);
         verify(flowConfigurationMap, times(1)).get(anyString());
         verify(runningFlows, times(1)).put(eq(flow), isNull());
-        verify(flowLogService, times(1)).save(any(FlowEventContext.class), anyMap(), ArgumentMatchers.eq(helloWorldFlowConfig.getClass()), eq(flowState));
+        verify(flowLogService, times(1)).save(any(FlowEventContext.class), anyMap(), eq(helloWorldFlowConfig.getClass()), eq(flowState));
         verify(flow, times(1)).sendEvent(any());
     }
 

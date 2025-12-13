@@ -1,6 +1,8 @@
 package com.sequenceiq.flow.service;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -14,13 +16,12 @@ import java.util.function.Consumer;
 
 import jakarta.ws.rs.BadRequestException;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.ArgumentMatchers;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -34,8 +35,8 @@ import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.domain.StateStatus;
 import com.sequenceiq.flow.repository.FlowLogRepository;
 
-@RunWith(MockitoJUnitRunner.class)
-public class FlowRetryServiceTest {
+@ExtendWith(MockitoExtension.class)
+class FlowRetryServiceTest {
 
     private static final Long STACK_ID = 1L;
 
@@ -54,8 +55,8 @@ public class FlowRetryServiceTest {
 
     private TestFlowConfig flowConfig;
 
-    @Before
-    public void setUp() throws Exception {
+    @BeforeEach
+    void setUp() throws Exception {
         ReflectionTestUtils.setField(underTest, "retryableEvents", List.of(TestFlowConfig.TestFlowEvent.TEST_FAIL_HANDLED_EVENT.event()));
         ReflectionTestUtils.setField(underTest, "ignoredFromRetryEvents", Set.of(IGNORED_EVENT));
 
@@ -63,15 +64,15 @@ public class FlowRetryServiceTest {
         ReflectionTestUtils.setField(underTest, "flowConfigs", List.of(flowConfig));
     }
 
-    @Test(expected = BadRequestException.class)
-    public void retryPending() {
+    @Test
+    void retryPending() {
         List<FlowLog> pendingFlowLogs = Lists.newArrayList(
                 createFlowLog("INIT_STATE", StateStatus.SUCCESSFUL, Instant.now().toEpochMilli(), TestFlowEvent.TEST_FLOW_EVENT.event()),
                 createFlowLog("TEST_STATE", StateStatus.PENDING, Instant.now().toEpochMilli(), TestFlowEvent.TEST_FINISHED_EVENT.event())
                 );
         when(flowLogRepository.findAllByResourceIdOrderByCreatedDesc(STACK_ID, PageRequest.of(0, 50))).thenReturn(pendingFlowLogs);
         try {
-            underTest.retry(STACK_ID);
+            assertThrows(BadRequestException.class, () -> underTest.retry(STACK_ID));
         } finally {
             verify(flow2Handler, times(0)).restartFlow(any(FlowLog.class));
         }
@@ -90,7 +91,7 @@ public class FlowRetryServiceTest {
     }
 
     @Test
-    public void retry() {
+    void retry() {
         FlowLog lastSuccessfulState = createFlowLog("INTERMEDIATE_STATE", StateStatus.SUCCESSFUL, 5, TestFlowEvent.TEST_FINISHED_EVENT.event());
         List<FlowLog> pendingFlowLogs = Lists.newArrayList(
                 createFlowLog("FINISHED", StateStatus.SUCCESSFUL, 7, null),
@@ -104,11 +105,11 @@ public class FlowRetryServiceTest {
         when(flowLogRepository.findAllByResourceIdOrderByCreatedDesc(STACK_ID, PageRequest.of(0, 50))).thenReturn(pendingFlowLogs);
         underTest.retry(STACK_ID);
 
-        verify(flow2Handler, times(1)).restartFlow(ArgumentMatchers.eq(lastSuccessfulState));
+        verify(flow2Handler, times(1)).restartFlow(eq(lastSuccessfulState));
     }
 
     @Test
-    public void retryWithBeforeRestartFunction() {
+    void retryWithBeforeRestartFunction() {
         FlowLog lastSuccessfulState = createFlowLog("INTERMEDIATE_STATE", StateStatus.SUCCESSFUL, 5, TestFlowEvent.TEST_FINISHED_EVENT.event());
         List<FlowLog> pendingFlowLogs = Lists.newArrayList(
                 createFlowLog("FINISHED", StateStatus.SUCCESSFUL, 7, null),
@@ -125,11 +126,11 @@ public class FlowRetryServiceTest {
         underTest.retry(STACK_ID, beforeRestart);
 
         verify(beforeRestart, times(1)).accept(lastSuccessfulState);
-        verify(flow2Handler, times(1)).restartFlow(ArgumentMatchers.eq(lastSuccessfulState));
+        verify(flow2Handler, times(1)).restartFlow(eq(lastSuccessfulState));
     }
 
-    @Test(expected = BadRequestException.class)
-    public void retryNoFailed() {
+    @Test
+    void retryNoFailed() {
         List<FlowLog> pendingFlowLogs = Lists.newArrayList(
                 createFlowLog("FINISHED", StateStatus.SUCCESSFUL, 4, null),
                 createFlowLog("NEXT_STATE", StateStatus.FAILED, 3, TestFlowEvent.TEST_FINALIZED_EVENT.event()),
@@ -137,13 +138,13 @@ public class FlowRetryServiceTest {
                 createFlowLog("INIT_STATE", StateStatus.SUCCESSFUL, 1, TestFlowEvent.TEST_FLOW_EVENT.event())
         );
         when(flowLogRepository.findAllByResourceIdOrderByCreatedDesc(STACK_ID, PageRequest.of(0, 50))).thenReturn(pendingFlowLogs);
-        underTest.retry(STACK_ID);
+        assertThrows(BadRequestException.class, () -> underTest.retry(STACK_ID));
 
         verify(flow2Handler, never()).restartFlow(any(FlowLog.class));
     }
 
     @Test
-    public void retryLastFailedWithSuccessfulAfter() {
+    void retryLastFailedWithSuccessfulAfter() {
         FlowLog lastSuccessfulState = createFlowLog("1", "INTERMEDIATE_STATE", StateStatus.SUCCESSFUL, 5, TestFlowEvent.TEST_FINISHED_EVENT.event());
         List<FlowLog> pendingFlowLogs = Lists.newArrayList(
                 createFlowLog("2", IGNORED_EVENT, StateStatus.SUCCESSFUL, 7, null),
@@ -155,6 +156,6 @@ public class FlowRetryServiceTest {
         when(flowLogRepository.findAllByResourceIdOrderByCreatedDesc(STACK_ID, PageRequest.of(0, 50))).thenReturn(pendingFlowLogs);
         underTest.retry(STACK_ID);
 
-        verify(flow2Handler, times(1)).restartFlow(ArgumentMatchers.eq(lastSuccessfulState));
+        verify(flow2Handler, times(1)).restartFlow(eq(lastSuccessfulState));
     }
 }

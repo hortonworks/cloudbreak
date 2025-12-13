@@ -1,10 +1,10 @@
 package com.sequenceiq.cloudbreak.cloud.handler;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -17,10 +17,10 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 
 @SpringBootTest(classes = { TestApplicationContext.class, InstanceStateComponentTest.TestConfig.class },
         properties = "spring.main.allow-bean-definition-overriding=true")
-public class InstanceStateComponentTest extends AbstractComponentTest<GetInstancesStateResult> {
+class InstanceStateComponentTest extends AbstractComponentTest<GetInstancesStateResult> {
 
     @Test
-    public void testInstanceState() {
+    void testInstanceState() {
         GetInstancesStateResult result = sendCloudRequest();
 
         assertEquals(InstanceStatus.STARTED, result.getStatuses().get(0).getStatus());
@@ -40,6 +40,6 @@ public class InstanceStateComponentTest extends AbstractComponentTest<GetInstanc
 
     @Configuration
     @Import({InstanceStateHandler.class, InstanceStateQuery.class})
-    public static class TestConfig {
+    static class TestConfig {
     }
 }

@@ -3,19 +3,19 @@ package com.sequenceiq.cloudbreak.service.recovery;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.CLUSTER_RECOVERY_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.DATALAKE_RECOVERY_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.DATALAKE_RECOVERY_TEARDOWN_FINISHED;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.cloud.event.resource.TerminateStackResult;
@@ -29,7 +29,8 @@ import com.sequenceiq.cloudbreak.service.metrics.MetricType;
 import com.sequenceiq.cloudbreak.service.stack.flow.TerminationService;
 import com.sequenceiq.cloudbreak.view.StackView;
 
-public class RecoveryTeardownServiceTest {
+@ExtendWith(MockitoExtension.class)
+class RecoveryTeardownServiceTest {
 
     private static final String ERROR_MESSAGE = "error message";
 
@@ -56,16 +57,10 @@ public class RecoveryTeardownServiceTest {
     @InjectMocks
     private RecoveryTeardownService underTest;
 
-    @Before
-    public void setUp() {
-        MockitoAnnotations.openMocks(this);
-    }
-
     @Test
-    public void testTeardownFinished() {
+    void testTeardownFinished() {
         TerminateStackResult terminateStackResult = new TerminateStackResult(STACK_ID);
         ArgumentCaptor<ResourceEvent> captor = ArgumentCaptor.forClass(ResourceEvent.class);
-        when(stackTerminationContext.getStack()).thenReturn(stack);
         when(stack.getId()).thenReturn(STACK_ID);
 
         underTest.handleRecoveryTeardownSuccess(stack, terminateStackResult);
@@ -77,7 +72,7 @@ public class RecoveryTeardownServiceTest {
     }
 
     @Test
-    public void testTeardownFailure() {
+    void testTeardownFailure() {
         ArgumentCaptor<ResourceEvent> captor = ArgumentCaptor.forClass(ResourceEvent.class);
         Exception exception = new Exception(ERROR_MESSAGE);
         String stackUpdateMessage = "Recovery failed: " + exception.getMessage();

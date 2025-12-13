@@ -10,17 +10,17 @@ import java.io.IOException;
 
 import jakarta.ws.rs.core.Response;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyError;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyException;
 
-public class FreeIpaHealthCheckClusterProxyErrorRpcListenerTest {
+class FreeIpaHealthCheckClusterProxyErrorRpcListenerTest {
 
     private final FreeIpaClusterProxyErrorRpcListener clusterProxyErrorRpcListener = new FreeIpaClusterProxyErrorRpcListener();
 
     @Test
-    public void testClusterProxyError() throws IOException {
+    void testClusterProxyError() throws IOException {
         ClusterProxyError clusterProxyError = new ClusterProxyError("status", "cluster-proxy.proxy.timeout", "message", true);
         Response response = mock(Response.class);
         when(response.readEntity(any(Class.class))).thenReturn(clusterProxyError);
@@ -30,7 +30,7 @@ public class FreeIpaHealthCheckClusterProxyErrorRpcListenerTest {
     }
 
     @Test
-    public void testClusterProxyNotAClusterProxyError() throws IOException {
+    void testClusterProxyNotAClusterProxyError() throws IOException {
         ClusterProxyError clusterProxyError = new ClusterProxyError("status", "error from something other than cluster proxy", "message", true);
         Response response = mock(Response.class);
         when(response.readEntity(any(Class.class))).thenReturn(clusterProxyError);
@@ -40,7 +40,7 @@ public class FreeIpaHealthCheckClusterProxyErrorRpcListenerTest {
     }
 
     @Test
-    public void testClusterProxyNoError() throws IOException {
+    void testClusterProxyNoError() throws IOException {
         Response response = mock(Response.class);
         when(response.readEntity(any(Class.class))).thenThrow(new RuntimeException("no cluster proxy error"));
         assertDoesNotThrow(() -> {

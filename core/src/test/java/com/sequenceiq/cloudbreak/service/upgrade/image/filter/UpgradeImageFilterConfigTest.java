@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.service.upgrade.image.filter;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.List;
 import java.util.Set;
@@ -8,13 +8,13 @@ import java.util.Set;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.conf.UpgradeImageFilterConfig;
@@ -30,19 +30,19 @@ import com.sequenceiq.cloudbreak.service.upgrade.image.locked.LockedComponentChe
 import com.sequenceiq.cloudbreak.service.upgrade.validation.PythonVersionBasedRuntimeVersionValidator;
 import com.sequenceiq.cloudbreak.service.validation.SeLinuxValidationService;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(MockitoExtension.class)
 @SpringBootTest(classes = {UpgradeImageFilterConfigTest.TestAppContext.class, UpgradeImageFilterConfig.class})
-public class UpgradeImageFilterConfigTest {
+class UpgradeImageFilterConfigTest {
 
     @Inject
     @Named("orderedUpgradeImageFilters")
-    public List<UpgradeImageFilter> orderedUpgradeImageFilters;
+    private List<UpgradeImageFilter> orderedUpgradeImageFilters;
 
     @Inject
     private Set<UpgradeImageFilter> upgradeImageFilters;
 
     @Test
-    public void testImageUpgradeFiltersOrder() {
+    void testImageUpgradeFiltersOrder() {
         assertEquals(upgradeImageFilters.size(), orderedUpgradeImageFilters.size());
         for (int i = 0; i < orderedUpgradeImageFilters.size(); i++) {
             assertEquals(i, orderedUpgradeImageFilters.get(i).getFilterOrderNumber().intValue());

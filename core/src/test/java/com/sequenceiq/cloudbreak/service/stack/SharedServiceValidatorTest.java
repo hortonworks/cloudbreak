@@ -1,17 +1,17 @@
 package com.sequenceiq.cloudbreak.service.stack;
 
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
@@ -26,8 +26,8 @@ import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
-@RunWith(MockitoJUnitRunner.class)
-public class SharedServiceValidatorTest {
+@ExtendWith(MockitoExtension.class)
+class SharedServiceValidatorTest {
 
     private static final String DATALAKE_NAME = "datalake";
 
@@ -57,7 +57,7 @@ public class SharedServiceValidatorTest {
     private SharedServiceValidator underTest;
 
     @Test
-    public void testWithValidRequest() {
+    void testWithValidRequest() {
         StackV4Request stackRequest = getStackV4Request(CloudPlatform.GCP);
         when(stackViewService.findByName(eq(DATALAKE_NAME), anyLong())).thenReturn(Optional.ofNullable(getStackView()));
 

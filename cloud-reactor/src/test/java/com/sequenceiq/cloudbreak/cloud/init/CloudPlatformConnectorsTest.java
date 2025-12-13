@@ -2,16 +2,14 @@ package com.sequenceiq.cloudbreak.cloud.init;
 
 import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
 import static com.sequenceiq.cloudbreak.cloud.model.Variant.variant;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.Collections;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.google.common.collect.Lists;
@@ -33,15 +31,12 @@ import com.sequenceiq.cloudbreak.cloud.ValidatorType;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 
-public class CloudPlatformConnectorsTest {
-
-    @Rule
-    public final ExpectedException thrown = ExpectedException.none();
+class CloudPlatformConnectorsTest {
 
     private final CloudPlatformConnectors c = new CloudPlatformConnectors();
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         List<CloudConnector> connectorList = Lists.newArrayList();
         connectorList.add(getConnector("MULTIWITHDEFAULT", "ONE"));
         connectorList.add(getConnector("MULTIWITHDEFAULT", "TWO"));
@@ -52,34 +47,33 @@ public class CloudPlatformConnectorsTest {
     }
 
     @Test
-    public void getDefaultForGcp() {
+    void getDefaultForGcp() {
         CloudConnector conn = c.getDefault(platform("SINGLE"));
         assertEquals("SINGLE", conn.variant().value());
     }
 
     @Test
-    public void getWithNullVariant() {
+    void getWithNullVariant() {
         CloudConnector conn = c.get(platform("MULTIWITHDEFAULT"), variant(null));
         //should fall back to default
         assertEquals("ONE", conn.variant().value());
     }
 
     @Test
-    public void getWithEmptyVariant() {
+    void getWithEmptyVariant() {
         CloudConnector conn = c.get(platform("MULTIWITHDEFAULT"), variant(""));
         //should fall back to default
         assertEquals("ONE", conn.variant().value());
     }
 
     @Test
-    public void getConnectorDefaultWithNoDefault() {
+    void getConnectorDefaultWithNoDefault() {
         List<CloudConnector> connectorList = Lists.newArrayList();
         connectorList.add(getConnector("NODEFAULT", "ONE"));
         connectorList.add(getConnector("NODEFAULT", "TWO"));
         ReflectionTestUtils.setField(c, "cloudConnectors", connectorList);
-        thrown.expect(IllegalStateException.class);
-        thrown.expectMessage(is("No default variant is specified for platform: 'StringType{value='NODEFAULT'}'"));
-        c.cloudPlatformConnectors();
+        assertThrows(IllegalStateException.class, () -> c.cloudPlatformConnectors(),
+                "No default variant is specified for platform: 'StringType{value='NODEFAULT'}'");
     }
 
     private CloudConnector getConnector(String platform, String variant) {

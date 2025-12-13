@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.rotation.service.usage;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 
@@ -9,7 +10,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -20,7 +20,7 @@ import com.sequenceiq.cloudbreak.usage.service.SecretRotationUsageSenderService;
 @ExtendWith(MockitoExtension.class)
 public class SecretRotationUsageServiceTest {
 
-    private static final SecretType SECRET_TYPE = Mockito.mock(SecretType.class);
+    private static final SecretType SECRET_TYPE = mock(SecretType.class);
 
     private static final String RESOURCE_CRN = "resourceCrn";
 

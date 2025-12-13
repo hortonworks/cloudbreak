@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.user;
 
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -13,13 +13,13 @@ import static org.mockito.Mockito.when;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.invocation.InvocationOnMock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
 
 import com.google.common.collect.Sets;
@@ -38,8 +38,8 @@ import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.repository.workspace.UserRepository;
 
-@RunWith(MockitoJUnitRunner.class)
-public class UserServiceTest {
+@ExtendWith(MockitoExtension.class)
+class UserServiceTest {
 
     @Mock
     private TenantService tenantService;
@@ -63,7 +63,7 @@ public class UserServiceTest {
     private UserService underTest;
 
     @Test
-    public void testCreateUser() throws TransactionExecutionException {
+    void testCreateUser() throws TransactionExecutionException {
         doAnswer(invocation -> ((Supplier<?>) invocation.getArgument(0)).get()).when(transactionService).requiresNew(any(Supplier.class));
         when(userRepository.findByTenantNameAndUserId(anyString(), anyString())).thenReturn(Optional.empty());
         when(tenantService.findByName(anyString())).thenReturn(Optional.empty());
@@ -80,7 +80,7 @@ public class UserServiceTest {
     }
 
     @Test
-    public void testCreateUserWithDuplicateException() throws TransactionExecutionException {
+    void testCreateUserWithDuplicateException() throws TransactionExecutionException {
         doAnswer(invocation -> ((Supplier<?>) invocation.getArgument(0)).get()).when(transactionService).requiresNew(any(Supplier.class));
         when(tenantService.findByName(anyString())).thenReturn(Optional.empty());
         when(tenantService.save(any())).thenReturn(createTenant());
@@ -120,7 +120,7 @@ public class UserServiceTest {
     }
 
     @Test
-    public void testPersistModifiedInternalUser() throws TransactionExecutionException {
+    void testPersistModifiedInternalUser() throws TransactionExecutionException {
         doAnswer(invocation -> ((Supplier<?>) invocation.getArgument(0)).get()).when(transactionService).requiresNew(any(Supplier.class));
         when(userRepository.findByTenantNameAndUserId(anyString(), anyString())).thenReturn(Optional.empty());
         when(tenantService.findByName(anyString())).thenReturn(Optional.empty());

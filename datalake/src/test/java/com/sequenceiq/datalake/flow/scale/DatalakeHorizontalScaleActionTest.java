@@ -8,13 +8,11 @@ import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.openMocks;
 
 import java.time.Instant;
 import java.util.HashMap;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
@@ -43,9 +41,8 @@ import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.sdx.api.model.DatalakeHorizontalScaleRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 
-@SuppressWarnings({"rawtypes", "unchecked"})
 @ExtendWith(MockitoExtension.class)
-public class DatalakeHorizontalScaleActionTest {
+class DatalakeHorizontalScaleActionTest {
 
     private static final Long SDX_ID = 1L;
 
@@ -83,13 +80,8 @@ public class DatalakeHorizontalScaleActionTest {
     @Mock
     private EventBus eventBus;
 
-    @Before
-    public void setup() {
-        openMocks(this);
-    }
-
     @Test
-    public void testStartTriggersCall() throws Exception {
+    void testStartTriggersCall() throws Exception {
         when(sdxService.getById(any())).thenReturn(getSdxCluster());
         DatalakeHorizontalScaleRequest scaleRequest = new DatalakeHorizontalScaleRequest();
         scaleRequest.setDesiredCount(1);
@@ -114,7 +106,7 @@ public class DatalakeHorizontalScaleActionTest {
     }
 
     @Test
-    public void testValidationFail() throws Exception {
+    void testValidationFail() throws Exception {
         when(sdxService.getById(any())).thenReturn(getSdxCluster());
         doCallRealMethod().when(sdxHorizontalScalingService).validateHorizontalScaleRequest(any(SdxCluster.class), any(DatalakeHorizontalScaleRequest.class));
         DatalakeHorizontalScaleRequest scaleRequest = new DatalakeHorizontalScaleRequest();
@@ -140,9 +132,7 @@ public class DatalakeHorizontalScaleActionTest {
     }
 
     @Test
-    public void testFailHandling() throws Exception {
-        when(sdxService.getById(any())).thenReturn(getSdxCluster());
-        doCallRealMethod().when(sdxHorizontalScalingService).validateHorizontalScaleRequest(any(SdxCluster.class), any(DatalakeHorizontalScaleRequest.class));
+    void testFailHandling() throws Exception {
         DatalakeHorizontalScaleRequest scaleRequest = new DatalakeHorizontalScaleRequest();
         scaleRequest.setDesiredCount(1);
         scaleRequest.setGroup("master");
@@ -164,9 +154,7 @@ public class DatalakeHorizontalScaleActionTest {
     }
 
     @Test
-    public void testFailHandlingWithException() throws Exception {
-        when(sdxService.getById(any())).thenReturn(getSdxCluster());
-        doCallRealMethod().when(sdxHorizontalScalingService).validateHorizontalScaleRequest(any(SdxCluster.class), any(DatalakeHorizontalScaleRequest.class));
+    void testFailHandlingWithException() throws Exception {
         DatalakeHorizontalScaleRequest scaleRequest = new DatalakeHorizontalScaleRequest();
         scaleRequest.setDesiredCount(1);
         scaleRequest.setGroup("master");

@@ -1,12 +1,17 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.ccm.upgrade;
 
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.ccm.upgrade.UpgradeCcmEvent.UPGRADE_CCM_EVENT;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -23,13 +28,11 @@ import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.client.Client;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
-import org.mockito.Mockito;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.MockReset;
@@ -203,8 +206,8 @@ class UpgradeCcmFlowIntegrationTest {
         InOrder inOrder = result.left;
         inOrder.verify(upgradeCcmService).updateTunnel(STACK_ID, Tunnel.CCM);
         UpgradeCcmFailedEvent failure = result.right;
-        Assertions.assertTrue(failure.getFailureOrigin().equals(PushSaltStateHandler.class));
-        Assertions.assertNull(failure.getRevertTime());
+        assertTrue(failure.getFailureOrigin().equals(PushSaltStateHandler.class));
+        assertNull(failure.getRevertTime());
     }
 
     @Test
@@ -215,8 +218,8 @@ class UpgradeCcmFlowIntegrationTest {
         inOrder.verify(upgradeCcmService).updateTunnel(STACK_ID, Tunnel.CCM);
         inOrder.verify(upgradeCcmService).pushSaltState(STACK_ID, CLUSTER_ID);
         UpgradeCcmFailedEvent failure = result.right;
-        Assertions.assertTrue(failure.getFailureOrigin().equals(RevertSaltStatesHandler.class));
-        Assertions.assertNotNull(failure.getRevertTime());
+        assertTrue(failure.getFailureOrigin().equals(RevertSaltStatesHandler.class));
+        assertNotNull(failure.getRevertTime());
     }
 
     @Test
@@ -229,8 +232,8 @@ class UpgradeCcmFlowIntegrationTest {
         inOrder.verify(upgradeCcmService).healthCheck(STACK_ID);
         inOrder.verify(upgradeCcmService).pushSaltState(STACK_ID, CLUSTER_ID);
         UpgradeCcmFailedEvent failure = result.right;
-        Assertions.assertTrue(failure.getFailureOrigin().equals(RevertAllHandler.class));
-        Assertions.assertNotNull(failure.getRevertTime());
+        assertTrue(failure.getFailureOrigin().equals(RevertAllHandler.class));
+        assertNotNull(failure.getRevertTime());
     }
 
     @Test
@@ -254,8 +257,8 @@ class UpgradeCcmFlowIntegrationTest {
         StackStatus stackStatus = new StackStatus(stack, Status.CREATE_FAILED, "no reason at all",
                 DetailedStackStatus.PROVISION_FAILED);
         stack.setStackStatus(stackStatus);
-        FlowNotTriggerableException actualException = Assertions.assertThrows(FlowNotTriggerableException.class, this::triggerFlow);
-        Assertions.assertTrue(actualException.getMessage().contains("Cluster Connectivity Manager upgrade could not "
+        FlowNotTriggerableException actualException = assertThrows(FlowNotTriggerableException.class, this::triggerFlow);
+        assertTrue(actualException.getMessage().contains("Cluster Connectivity Manager upgrade could not "
                 + "be triggered, because the cluster's state is not available."), "FlowNotTriggerableException exception message is not right");
     }
 
@@ -269,7 +272,7 @@ class UpgradeCcmFlowIntegrationTest {
     public UpgradeCcmFailedEvent flowFinished(boolean success) {
         ArgumentCaptor<FlowLog> flowLog = ArgumentCaptor.forClass(FlowLog.class);
         verify(flowLogRepository, times(2)).save(flowLog.capture());
-        Assertions.assertTrue(flowLog.getAllValues().stream().anyMatch(FlowLog::getFinalized), "flow has not finalized");
+        assertTrue(flowLog.getAllValues().stream().anyMatch(FlowLog::getFinalized), "flow has not finalized");
 
         ArgumentCaptor<UpgradeCcmFailedEvent> captor = ArgumentCaptor.forClass(UpgradeCcmFailedEvent.class);
         UpgradeCcmFailedEvent result = null;
@@ -287,7 +290,7 @@ class UpgradeCcmFlowIntegrationTest {
         int i = 0;
 
         Tunnel oldTunnel = Tunnel.CCM;
-        InOrder inOrder = Mockito.inOrder(upgradeCcmService);
+        InOrder inOrder = inOrder(upgradeCcmService);
         inOrder.verify(upgradeCcmService, times(expected[i++])).updateTunnel(STACK_ID, Tunnel.latestUpgradeTarget());
         inOrder.verify(upgradeCcmService, times(expected[i++])).pushSaltState(STACK_ID, CLUSTER_ID);
         inOrder.verify(upgradeCcmService, times(expected[i++])).reconfigureNginx(STACK_ID);

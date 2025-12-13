@@ -1,6 +1,7 @@
 package com.sequenceiq.environment;
 
 import static java.util.stream.Collectors.toSet;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -8,7 +9,6 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.reflections.ReflectionUtils;
@@ -50,9 +50,9 @@ class RepositoryRestrictionTest {
                 String allowedNamesRegexp = repo.getSimpleName().replace("Repository", ".*Service");
                 Set<String> filteredNames = compoNames.stream().filter(name -> !name.matches(allowedNamesRegexp)).collect(toSet());
 
-                Assertions.assertTrue(filteredNames.isEmpty(), getExceptionMessage(repo.getSimpleName(), compoNames));
+                assertTrue(filteredNames.isEmpty(), getExceptionMessage(repo.getSimpleName(), compoNames));
             } else {
-                Assertions.assertTrue(count.get() <= 1, getExceptionMessage(repo.getSimpleName(), compoNames));
+                assertTrue(count.get() <= 1, getExceptionMessage(repo.getSimpleName(), compoNames));
             }
         });
     }

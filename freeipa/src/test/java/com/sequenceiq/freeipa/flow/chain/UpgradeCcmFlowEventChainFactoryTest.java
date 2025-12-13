@@ -1,8 +1,9 @@
 package com.sequenceiq.freeipa.flow.chain;
 
 import static com.sequenceiq.freeipa.flow.graph.FlowOfflineStateGraphGenerator.FLOW_CONFIGS_PACKAGE_NAME;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.common.api.type.Tunnel;
@@ -21,8 +22,8 @@ class UpgradeCcmFlowEventChainFactoryTest {
 
         FlowTriggerEventQueue flowTriggerEventQueue = underTest.createFlowTriggerEventQueue(event);
 
-        Assertions.assertNotNull(flowTriggerEventQueue);
-        Assertions.assertEquals(2, flowTriggerEventQueue.getQueue().size());
+        assertNotNull(flowTriggerEventQueue);
+        assertEquals(2, flowTriggerEventQueue.getQueue().size());
         FlowChainConfigGraphGeneratorUtil.generateFor(underTest, FLOW_CONFIGS_PACKAGE_NAME, flowTriggerEventQueue);
     }
 }

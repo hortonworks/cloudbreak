@@ -1,32 +1,34 @@
 package com.sequenceiq.cloudbreak.dto;
 
-import org.junit.Assert;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class ProxyAuthenticationTest {
+import org.junit.jupiter.api.Test;
+
+class ProxyAuthenticationTest {
     @Test
     public void testBuilderBuildProperProxyAuthentication() {
         ProxyAuthentication proxyAuthentication = ProxyAuthentication.builder()
                 .withUserName("user")
                 .withPassword("pwd")
                 .build();
-        Assert.assertEquals("user", proxyAuthentication.getUserName());
-        Assert.assertEquals("pwd", proxyAuthentication.getPassword());
+        assertEquals("user", proxyAuthentication.getUserName());
+        assertEquals("pwd", proxyAuthentication.getPassword());
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testBuilderShouldThrowIllegalArgumentExcepitonWhenPasswordNotProvided() {
-        ProxyAuthentication.builder()
+        assertThrows(IllegalArgumentException.class, () -> ProxyAuthentication.builder()
                 .withUserName("user")
                 .withPassword("")
-                .build();
+                .build());
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test
     public void testBuilderShouldThrowIllegalArgumentExcepitonWhenUserNameNotProvided() {
-        ProxyAuthentication.builder()
+        assertThrows(IllegalArgumentException.class, () -> ProxyAuthentication.builder()
                 .withUserName(null)
                 .withPassword("pwd")
-                .build();
+                .build());
     }
 }

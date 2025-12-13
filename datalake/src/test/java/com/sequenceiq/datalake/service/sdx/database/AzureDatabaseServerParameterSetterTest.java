@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -174,7 +173,7 @@ public class AzureDatabaseServerParameterSetterTest {
     @Test
     public void shouldThrowExceptionWhenAvailabilityTypeIsNotSupported() {
         IllegalArgumentException result =
-                Assertions.assertThrows(IllegalArgumentException.class,
+                assertThrows(IllegalArgumentException.class,
                         () -> underTest.setParameters(request, createSdxCluster(SdxDatabaseAvailabilityType.NONE, null), null, "crn"));
 
         assertEquals("NONE database availability type is not supported on Azure.", result.getMessage());

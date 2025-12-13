@@ -1,10 +1,11 @@
 package com.sequenceiq.environment;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.reflections.Reflections;
@@ -33,7 +34,7 @@ public class ToStringTest {
                 missingToStrings.add(clazz.getName());
             }
         }
-        Assertions.assertEquals(0, missingToStrings.size(),
+        assertEquals(0, missingToStrings.size(),
                 String.format("These classes do not have toString(): %s. Please add that", String.join(",\n", missingToStrings)));
     }
 
@@ -56,7 +57,7 @@ public class ToStringTest {
                 }
             }
         }
-        Assertions.assertEquals(0, missingToStrings.size(),
+        assertEquals(0, missingToStrings.size(),
                 String.format("These classes do not have toString(): %s. Please add that", String.join(",\n", missingToStrings)));
     }
 

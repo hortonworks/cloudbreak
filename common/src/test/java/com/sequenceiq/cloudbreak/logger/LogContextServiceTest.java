@@ -1,7 +1,8 @@
 package com.sequenceiq.cloudbreak.logger;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -39,30 +40,30 @@ class LogContextServiceTest {
     void testBuildMDCParamsWithCrnParamInRequest() {
         underTest.buildMDCParams(new TestController(), new String[] { "clusterName", "request", "environmentCrn" },
                 new Object[] { CLUSTER_NAME, new TestRequest(CLUSTER_CRN), ENVIRONMENT_CRN });
-        Assertions.assertEquals(CLUSTER_CRN, MDC.get(LoggerContextKey.RESOURCE_CRN.toString()));
-        Assertions.assertEquals(CLUSTER_NAME, MDC.get(LoggerContextKey.RESOURCE_NAME.toString()));
-        Assertions.assertEquals(ENVIRONMENT_CRN, MDC.get(LoggerContextKey.ENVIRONMENT_CRN.toString()));
-        Assertions.assertEquals(RESOURCE_TYPE, MDC.get(LoggerContextKey.RESOURCE_TYPE.toString()));
+        assertEquals(CLUSTER_CRN, MDC.get(LoggerContextKey.RESOURCE_CRN.toString()));
+        assertEquals(CLUSTER_NAME, MDC.get(LoggerContextKey.RESOURCE_NAME.toString()));
+        assertEquals(ENVIRONMENT_CRN, MDC.get(LoggerContextKey.ENVIRONMENT_CRN.toString()));
+        assertEquals(RESOURCE_TYPE, MDC.get(LoggerContextKey.RESOURCE_TYPE.toString()));
     }
 
     @Test
     void testBuildMDCParamsWithCrnMethodParam() {
         underTest.buildMDCParams(new TestController(), new String[] { "clusterName", "clusterCrn", "environmentCrn" },
                 new Object[] { CLUSTER_NAME, CLUSTER_CRN, ENVIRONMENT_CRN });
-        Assertions.assertEquals(CLUSTER_CRN, MDC.get(LoggerContextKey.RESOURCE_CRN.toString()));
-        Assertions.assertEquals(CLUSTER_NAME, MDC.get(LoggerContextKey.RESOURCE_NAME.toString()));
-        Assertions.assertEquals(ENVIRONMENT_CRN, MDC.get(LoggerContextKey.ENVIRONMENT_CRN.toString()));
-        Assertions.assertEquals(RESOURCE_TYPE, MDC.get(LoggerContextKey.RESOURCE_TYPE.toString()));
+        assertEquals(CLUSTER_CRN, MDC.get(LoggerContextKey.RESOURCE_CRN.toString()));
+        assertEquals(CLUSTER_NAME, MDC.get(LoggerContextKey.RESOURCE_NAME.toString()));
+        assertEquals(ENVIRONMENT_CRN, MDC.get(LoggerContextKey.ENVIRONMENT_CRN.toString()));
+        assertEquals(RESOURCE_TYPE, MDC.get(LoggerContextKey.RESOURCE_TYPE.toString()));
     }
 
     @Test
     void testBuildMDCParamsWithCrnAndInitatorUserCrnMethodParam() {
         underTest.buildMDCParams(new TestController(), new String[] { "clusterName", "clusterCrn", "environmentCrn", "initiatorUserCrn" },
                 new Object[] { CLUSTER_NAME, CLUSTER_CRN, ENVIRONMENT_CRN, INITIATOR_USER_CRN });
-        Assertions.assertEquals(CLUSTER_CRN, MDC.get(LoggerContextKey.RESOURCE_CRN.toString()));
-        Assertions.assertEquals(CLUSTER_NAME, MDC.get(LoggerContextKey.RESOURCE_NAME.toString()));
-        Assertions.assertEquals(ENVIRONMENT_CRN, MDC.get(LoggerContextKey.ENVIRONMENT_CRN.toString()));
-        Assertions.assertEquals(RESOURCE_TYPE, MDC.get(LoggerContextKey.RESOURCE_TYPE.toString()));
+        assertEquals(CLUSTER_CRN, MDC.get(LoggerContextKey.RESOURCE_CRN.toString()));
+        assertEquals(CLUSTER_NAME, MDC.get(LoggerContextKey.RESOURCE_NAME.toString()));
+        assertEquals(ENVIRONMENT_CRN, MDC.get(LoggerContextKey.ENVIRONMENT_CRN.toString()));
+        assertEquals(RESOURCE_TYPE, MDC.get(LoggerContextKey.RESOURCE_TYPE.toString()));
     }
 
     private static final class TestRequest {

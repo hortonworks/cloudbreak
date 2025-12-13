@@ -1,9 +1,11 @@
 package com.sequenceiq.environment.network.service.extended;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkSubnetRequest;
@@ -23,16 +25,16 @@ class AwsSubnetCidrProviderTest {
 
         Cidrs actual = underTest.provide(networkCidr, true);
 
-        Assertions.assertEquals(NUMBER_OF_PRIVATE_SUBNETS, actual.getPrivateSubnets().size());
-        Assertions.assertEquals(NUMBER_OF_PUBLIC_SUBNETS, actual.getPublicSubnets().size());
+        assertEquals(NUMBER_OF_PRIVATE_SUBNETS, actual.getPrivateSubnets().size());
+        assertEquals(NUMBER_OF_PUBLIC_SUBNETS, actual.getPublicSubnets().size());
 
-        Assertions.assertTrue(getCidrs(actual.getPublicSubnets()).contains("10.10.0.0/24"));
-        Assertions.assertTrue(getCidrs(actual.getPublicSubnets()).contains("10.10.1.0/24"));
-        Assertions.assertTrue(getCidrs(actual.getPublicSubnets()).contains("10.10.2.0/24"));
+        assertTrue(getCidrs(actual.getPublicSubnets()).contains("10.10.0.0/24"));
+        assertTrue(getCidrs(actual.getPublicSubnets()).contains("10.10.1.0/24"));
+        assertTrue(getCidrs(actual.getPublicSubnets()).contains("10.10.2.0/24"));
 
-        Assertions.assertTrue(getCidrs(actual.getPrivateSubnets()).contains("10.10.160.0/19"));
-        Assertions.assertTrue(getCidrs(actual.getPrivateSubnets()).contains("10.10.192.0/19"));
-        Assertions.assertTrue(getCidrs(actual.getPrivateSubnets()).contains("10.10.224.0/19"));
+        assertTrue(getCidrs(actual.getPrivateSubnets()).contains("10.10.160.0/19"));
+        assertTrue(getCidrs(actual.getPrivateSubnets()).contains("10.10.192.0/19"));
+        assertTrue(getCidrs(actual.getPrivateSubnets()).contains("10.10.224.0/19"));
     }
 
     private Set<String> getCidrs(Set<NetworkSubnetRequest> networkSubnetRequests) {

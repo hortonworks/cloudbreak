@@ -1,17 +1,17 @@
 package com.sequenceiq.cloudbreak.converter.v4.databases;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.requests.DatabaseV4Request;
@@ -20,8 +20,8 @@ import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.converter.v4.database.DatabaseV4RequestToRDSConfigConverter;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 
-@RunWith(MockitoJUnitRunner.class)
-public class DatabaseV4RequestToRDSConfigConverterTest {
+@ExtendWith(MockitoExtension.class)
+class DatabaseV4RequestToRDSConfigConverterTest {
 
     private static final String NAME = "test";
 
@@ -31,13 +31,13 @@ public class DatabaseV4RequestToRDSConfigConverterTest {
     @InjectMocks
     private DatabaseV4RequestToRDSConfigConverter underTest;
 
-    @Before
-    public void before() {
-        when(resourceNameGenerator.generateName(APIResourceType.RDS_CONFIG)).thenReturn(NAME);
+    @BeforeEach
+    void before() {
+        lenient().when(resourceNameGenerator.generateName(APIResourceType.RDS_CONFIG)).thenReturn(NAME);
     }
 
     @Test
-    public void postgresJdbcConverterTestWhenDatabaseCanBeDetectedThenShouldReturnPostgresVendorProperties() {
+    void postgresJdbcConverterTestWhenDatabaseCanBeDetectedThenShouldReturnPostgresVendorProperties() {
         DatabaseV4Request rdsConfigRequest = rdsConfigRequest();
         rdsConfigRequest.setConnectionURL("jdbc:postgresql://test.eu-west-1.rds.amazonaws.com:5432/test");
 
@@ -47,7 +47,7 @@ public class DatabaseV4RequestToRDSConfigConverterTest {
     }
 
     @Test
-    public void mysqlJdbcConverterTestWhenDatabaseCanBeDetectedThenShouldReturnMysqlVendorProperties() {
+    void mysqlJdbcConverterTestWhenDatabaseCanBeDetectedThenShouldReturnMysqlVendorProperties() {
         DatabaseV4Request rdsConfigRequest = rdsConfigRequest();
         rdsConfigRequest.setConnectionURL("jdbc:mysql://test.eu-west-1.rds.amazonaws.com:5432/test");
 
@@ -57,7 +57,7 @@ public class DatabaseV4RequestToRDSConfigConverterTest {
     }
 
     @Test
-    public void oracleJdbcConverterTestWhenValidOracleJdbcUrl() {
+    void oracleJdbcConverterTestWhenValidOracleJdbcUrl() {
         DatabaseV4Request rdsConfigRequest = rdsConfigRequest();
         rdsConfigRequest.setConnectionURL("jdbc:oracle:thin:@test.eu-west-1.rds.amazonaws.com:5432:test");
 
@@ -68,7 +68,7 @@ public class DatabaseV4RequestToRDSConfigConverterTest {
     }
 
     @Test
-    public void rdsConfigConverterTestWhenValidMySQLJdbcUrl() {
+    void rdsConfigConverterTestWhenValidMySQLJdbcUrl() {
         DatabaseV4Request rdsConfigRequest = rdsConfigRequest();
         rdsConfigRequest.setConnectionURL("jdbc:mysql://test.eu-west-1.rds.amazonaws.com:5432/test");
 
@@ -78,7 +78,7 @@ public class DatabaseV4RequestToRDSConfigConverterTest {
     }
 
     @Test
-    public void rdsConfigConverterTestWhenValidPostgresJdbcUrl() {
+    void rdsConfigConverterTestWhenValidPostgresJdbcUrl() {
         DatabaseV4Request rdsConfigRequest = rdsConfigRequest();
         rdsConfigRequest.setConnectionURL("jdbc:postgresql://test.eu-west-1.rds.amazonaws.com:5432/test");
 
@@ -88,7 +88,7 @@ public class DatabaseV4RequestToRDSConfigConverterTest {
     }
 
     @Test
-    public void rdsConfigConverterTestWhenValidPostgresWithSubnameJdbcUrl() {
+    void rdsConfigConverterTestWhenValidPostgresWithSubnameJdbcUrl() {
         DatabaseV4Request rdsConfigRequest = rdsConfigRequest();
         rdsConfigRequest.setConnectionURL("jdbc:postgresql:subname://test.eu-west-1.rds.amazonaws.com:5432/test");
 
@@ -98,19 +98,19 @@ public class DatabaseV4RequestToRDSConfigConverterTest {
     }
 
     @Test
-    public void testConverterWhenNameIsNullThenShouldReturnGeneratedName() {
+    void testConverterWhenNameIsNullThenShouldReturnGeneratedName() {
         DatabaseV4Request rdsConfigRequest = rdsConfigRequest();
         rdsConfigRequest.setName(null);
 
         RDSConfig rdsConfig = underTest.convert(rdsConfigRequest);
 
-        Assert.assertEquals(rdsConfigRequest.getConnectionPassword(), rdsConfig.getConnectionPassword());
-        Assert.assertEquals(rdsConfigRequest.getConnectionUserName(), rdsConfig.getConnectionUserName());
-        Assert.assertEquals(rdsConfigRequest.getConnectionURL(), rdsConfig.getConnectionURL());
-        Assert.assertEquals(rdsConfigRequest.getType(), rdsConfig.getType());
-        Assert.assertEquals(NAME, rdsConfig.getName());
-        Assert.assertEquals(DatabaseVendor.POSTGRES.connectionDriver(), rdsConfig.getConnectionDriver());
-        Assert.assertEquals(DatabaseVendor.POSTGRES, rdsConfig.getDatabaseEngine());
+        assertEquals(rdsConfigRequest.getConnectionPassword(), rdsConfig.getConnectionPassword());
+        assertEquals(rdsConfigRequest.getConnectionUserName(), rdsConfig.getConnectionUserName());
+        assertEquals(rdsConfigRequest.getConnectionURL(), rdsConfig.getConnectionURL());
+        assertEquals(rdsConfigRequest.getType(), rdsConfig.getType());
+        assertEquals(NAME, rdsConfig.getName());
+        assertEquals(DatabaseVendor.POSTGRES.connectionDriver(), rdsConfig.getConnectionDriver());
+        assertEquals(DatabaseVendor.POSTGRES, rdsConfig.getDatabaseEngine());
         verify(resourceNameGenerator, times(1)).generateName(any(APIResourceType.class));
     }
 
@@ -125,13 +125,13 @@ public class DatabaseV4RequestToRDSConfigConverterTest {
     }
 
     private void assertResult(DatabaseV4Request rdsConfigRequest, RDSConfig rdsConfig, DatabaseVendor databaseVendor) {
-        Assert.assertEquals(rdsConfigRequest.getConnectionPassword(), rdsConfig.getConnectionPassword());
-        Assert.assertEquals(rdsConfigRequest.getConnectionUserName(), rdsConfig.getConnectionUserName());
-        Assert.assertEquals(rdsConfigRequest.getConnectionURL(), rdsConfig.getConnectionURL());
-        Assert.assertEquals(rdsConfigRequest.getType(), rdsConfig.getType());
-        Assert.assertEquals(rdsConfigRequest.getName(), rdsConfig.getName());
-        Assert.assertEquals(databaseVendor.connectionDriver(), rdsConfig.getConnectionDriver());
-        Assert.assertEquals(databaseVendor, rdsConfig.getDatabaseEngine());
+        assertEquals(rdsConfigRequest.getConnectionPassword(), rdsConfig.getConnectionPassword());
+        assertEquals(rdsConfigRequest.getConnectionUserName(), rdsConfig.getConnectionUserName());
+        assertEquals(rdsConfigRequest.getConnectionURL(), rdsConfig.getConnectionURL());
+        assertEquals(rdsConfigRequest.getType(), rdsConfig.getType());
+        assertEquals(rdsConfigRequest.getName(), rdsConfig.getName());
+        assertEquals(databaseVendor.connectionDriver(), rdsConfig.getConnectionDriver());
+        assertEquals(databaseVendor, rdsConfig.getDatabaseEngine());
         verify(resourceNameGenerator, times(0)).generateName(any(APIResourceType.class));
     }
 }

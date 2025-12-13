@@ -15,7 +15,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -60,7 +59,7 @@ class ClusterSyncHandlerTest {
     @Test
     void testAcceptWhenStackIsAvailableAndVerifyServiceCalls() throws Exception {
         long stackId = 1L;
-        ClusterSyncRequest clusterSyncRequestEvent = Mockito.mock(ClusterSyncRequest.class);
+        ClusterSyncRequest clusterSyncRequestEvent = mock(ClusterSyncRequest.class);
         Stack stack = mock(Stack.class);
         Cluster cluster = mock(Cluster.class);
         when(clusterSyncRequestEvent.getResourceId()).thenReturn(stackId);
@@ -81,7 +80,7 @@ class ClusterSyncHandlerTest {
     @Test
     void testAcceptWhenStackIsInMaintenanceModeAndVerifyServiceCalls() throws Exception {
         long stackId = 1L;
-        ClusterSyncRequest clusterSyncRequestEvent = Mockito.mock(ClusterSyncRequest.class);
+        ClusterSyncRequest clusterSyncRequestEvent = mock(ClusterSyncRequest.class);
         Stack stack = mock(Stack.class);
         Cluster cluster = mock(Cluster.class);
         when(clusterSyncRequestEvent.getResourceId()).thenReturn(stackId);
@@ -102,7 +101,7 @@ class ClusterSyncHandlerTest {
     @Test
     void testAcceptWhenClusterIsEmptyAndVerifyServiceCalls() throws Exception {
         long stackId = 1L;
-        ClusterSyncRequest clusterSyncRequestEvent = Mockito.mock(ClusterSyncRequest.class);
+        ClusterSyncRequest clusterSyncRequestEvent = mock(ClusterSyncRequest.class);
         Stack stack = mock(Stack.class);
         when(clusterSyncRequestEvent.getResourceId()).thenReturn(stackId);
         when(stackService.getByIdWithListsInTransaction(anyLong())).thenReturn(stack);
@@ -120,7 +119,7 @@ class ClusterSyncHandlerTest {
     @Test
     void testAcceptWhenLastServiceCallThrowException() throws Exception {
         long stackId = 1L;
-        ClusterSyncRequest clusterSyncRequestEvent = Mockito.mock(ClusterSyncRequest.class);
+        ClusterSyncRequest clusterSyncRequestEvent = mock(ClusterSyncRequest.class);
         Stack stack = mock(Stack.class);
         Cluster cluster = mock(Cluster.class);
         when(clusterSyncRequestEvent.getResourceId()).thenReturn(stackId);

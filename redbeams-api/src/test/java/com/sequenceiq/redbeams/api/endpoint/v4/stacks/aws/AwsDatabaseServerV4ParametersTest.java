@@ -1,25 +1,25 @@
 package com.sequenceiq.redbeams.api.endpoint.v4.stacks.aws;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 
-public class AwsDatabaseServerV4ParametersTest {
+class AwsDatabaseServerV4ParametersTest {
 
     private AwsDatabaseServerV4Parameters underTest;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         underTest = new AwsDatabaseServerV4Parameters();
     }
 
     @Test
-    public void testGettersAndSetters() {
+    void testGettersAndSetters() {
         underTest.setBackupRetentionPeriod(3);
         assertEquals(3, underTest.getBackupRetentionPeriod().intValue());
 
@@ -34,7 +34,7 @@ public class AwsDatabaseServerV4ParametersTest {
     }
 
     @Test
-    public void testAsMap() {
+    void testAsMap() {
         underTest.setBackupRetentionPeriod(3);
         underTest.setEngineVersion("1.2.3");
         underTest.setMultiAZ("true");
@@ -49,12 +49,12 @@ public class AwsDatabaseServerV4ParametersTest {
     }
 
     @Test
-    public void testGetCloudPlatform() {
+    void testGetCloudPlatform() {
         assertEquals(CloudPlatform.AWS, underTest.getCloudPlatform());
     }
 
     @Test
-    public void testParse() {
+    void testParse() {
         Map<String, Object> parameters = Map.of("backupRetentionPeriod", 3, "engineVersion", "1.2.3",
             "multiAZ", "true", "storageType", "gp2");
 

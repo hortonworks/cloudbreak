@@ -1,5 +1,8 @@
 package com.sequenceiq.environment.service.integration;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -15,7 +18,6 @@ import java.util.concurrent.Executors;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.client.Client;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -197,36 +199,36 @@ public class CredentialExperienceTest {
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn");
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         CredentialPrerequisitesResponse res = testSkeleton("AWS", Boolean.TRUE);
-        Assertions.assertNotNull(res.getAws().getPolicies());
-        Assertions.assertEquals(3, res.getAws().getPolicies().size());
+        assertNotNull(res.getAws().getPolicies());
+        assertEquals(3, res.getAws().getPolicies().size());
         ArgumentCaptor<String> a = ArgumentCaptor.forClass(String.class);
         ArgumentCaptor<String> b = ArgumentCaptor.forClass(String.class);
         verify(commonExperienceConnectorService).collectPolicy(a.capture(), b.capture());
-        Assertions.assertTrue(a.getValue().contains("{cloudProvider}"));
-        Assertions.assertTrue(res.getAws().getPolicies().containsKey("Environment"));
-        Assertions.assertTrue(res.getAws().getPolicies().containsKey("Data Warehouses"));
-        Assertions.assertTrue(res.getAws().getPolicies().containsKey("Kubernetes cluster manager"));
-        Assertions.assertTrue(res.getAws().getPolicies().get("Environment").equals(MINIMAL_POLICY));
-        Assertions.assertTrue(res.getAws().getPolicies().get("Data Warehouses").equals(COMMON_POLICY));
-        Assertions.assertTrue(res.getAws().getPolicies().get("Kubernetes cluster manager").equals(LIFTIE_POLICY));
+        assertTrue(a.getValue().contains("{cloudProvider}"));
+        assertTrue(res.getAws().getPolicies().containsKey("Environment"));
+        assertTrue(res.getAws().getPolicies().containsKey("Data Warehouses"));
+        assertTrue(res.getAws().getPolicies().containsKey("Kubernetes cluster manager"));
+        assertTrue(res.getAws().getPolicies().get("Environment").equals(MINIMAL_POLICY));
+        assertTrue(res.getAws().getPolicies().get("Data Warehouses").equals(COMMON_POLICY));
+        assertTrue(res.getAws().getPolicies().get("Kubernetes cluster manager").equals(LIFTIE_POLICY));
     }
 
     @Test
     public void testAwsEntitlementDisabled() {
         CredentialPrerequisitesResponse res = testSkeleton("AWS", Boolean.FALSE);
-        Assertions.assertNotNull(res.getAws().getPolicies());
-        Assertions.assertEquals(1, res.getAws().getPolicies().size());
+        assertNotNull(res.getAws().getPolicies());
+        assertEquals(1, res.getAws().getPolicies().size());
 
         verify(commonExperienceConnectorService, never()).collectPolicy(anyString(), anyString());
-        Assertions.assertTrue(res.getAws().getPolicies().containsKey("Environment"));
-        Assertions.assertTrue(res.getAws().getPolicies().get("Environment").equals(MINIMAL_POLICY));
+        assertTrue(res.getAws().getPolicies().containsKey("Environment"));
+        assertTrue(res.getAws().getPolicies().get("Environment").equals(MINIMAL_POLICY));
     }
 
     @Test
     public void testAzureEntitlementAllowed() {
         CredentialPrerequisitesResponse res = testSkeleton("AZURE", Boolean.FALSE);
-        Assertions.assertNotNull(res.getAzure().getPolicies());
-        Assertions.assertEquals(0, res.getAzure().getPolicies().size());
+        assertNotNull(res.getAzure().getPolicies());
+        assertEquals(0, res.getAzure().getPolicies().size());
 
         verify(commonExperienceConnectorService, never()).collectPolicy(anyString(), anyString());
     }

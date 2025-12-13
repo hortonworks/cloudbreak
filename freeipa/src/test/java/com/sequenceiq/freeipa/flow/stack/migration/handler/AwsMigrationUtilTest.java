@@ -1,5 +1,8 @@
 package com.sequenceiq.freeipa.flow.stack.migration.handler;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -8,7 +11,6 @@ import static org.mockito.Mockito.when;
 import java.util.Collections;
 import java.util.List;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -72,7 +74,7 @@ public class AwsMigrationUtilTest {
         when(amazonCloudFormationClient.describeStackResources(any()))
                 .thenReturn(DescribeStackResourcesResponse.builder().stackResources(Collections.emptyList()).build());
         boolean actual = underTest.allInstancesDeletedFromCloudFormation(ac, cloudResource);
-        Assertions.assertTrue(actual);
+        assertTrue(actual);
         verify(cfStackUtil, never()).getInstanceIds(amazonAutoScalingClient, "id1");
         verify(cfStackUtil, never()).getInstanceIds(amazonAutoScalingClient, "id2");
     }
@@ -93,7 +95,7 @@ public class AwsMigrationUtilTest {
         when(cfStackUtil.getInstanceIds(amazonAutoScalingClient, "id1")).thenReturn(Collections.emptyList());
         when(cfStackUtil.getInstanceIds(amazonAutoScalingClient, "id2")).thenReturn(Collections.emptyList());
         boolean actual = underTest.allInstancesDeletedFromCloudFormation(ac, cloudResource);
-        Assertions.assertTrue(actual);
+        assertTrue(actual);
         verify(cfStackUtil).getInstanceIds(amazonAutoScalingClient, "id1");
         verify(cfStackUtil).getInstanceIds(amazonAutoScalingClient, "id2");
     }
@@ -113,7 +115,7 @@ public class AwsMigrationUtilTest {
         when(awsClient.createAutoScalingClient(any(), any())).thenReturn(amazonAutoScalingClient);
         when(cfStackUtil.getInstanceIds(amazonAutoScalingClient, "id1")).thenReturn(List.of("instanceId1"));
         boolean actual = underTest.allInstancesDeletedFromCloudFormation(ac, cloudResource);
-        Assertions.assertFalse(actual);
+        assertFalse(actual);
         verify(cfStackUtil).getInstanceIds(amazonAutoScalingClient, "id1");
         verify(cfStackUtil, never()).getInstanceIds(amazonAutoScalingClient, "id2");
     }
@@ -134,7 +136,7 @@ public class AwsMigrationUtilTest {
         when(cfStackUtil.getInstanceIds(amazonAutoScalingClient, "id1")).thenReturn(Collections.emptyList());
         when(cfStackUtil.getInstanceIds(amazonAutoScalingClient, "id2")).thenReturn(List.of("instanceId1"));
         boolean actual = underTest.allInstancesDeletedFromCloudFormation(ac, cloudResource);
-        Assertions.assertFalse(actual);
+        assertFalse(actual);
         verify(cfStackUtil).getInstanceIds(amazonAutoScalingClient, "id1");
         verify(cfStackUtil).getInstanceIds(amazonAutoScalingClient, "id2");
     }
@@ -145,7 +147,7 @@ public class AwsMigrationUtilTest {
         stack.setPlatformvariant("AWS");
         when(entitlementService.awsVariantMigrationEnable(ACCOUNT_ID)).thenReturn(false);
         String actual = underTest.calculateUpgradeVariant(stack, ACCOUNT_ID);
-        Assertions.assertEquals("AWS", actual);
+        assertEquals("AWS", actual);
     }
 
     @Test
@@ -154,7 +156,7 @@ public class AwsMigrationUtilTest {
         stack.setPlatformvariant("AWS");
         when(entitlementService.awsVariantMigrationEnable(ACCOUNT_ID)).thenReturn(true);
         String actual = underTest.calculateUpgradeVariant(stack, ACCOUNT_ID);
-        Assertions.assertEquals("AWS_NATIVE", actual);
+        assertEquals("AWS_NATIVE", actual);
     }
 
     @Test
@@ -163,7 +165,7 @@ public class AwsMigrationUtilTest {
         stack.setPlatformvariant("GCP");
         when(entitlementService.awsVariantMigrationEnable(ACCOUNT_ID)).thenReturn(true);
         String actual = underTest.calculateUpgradeVariant(stack, ACCOUNT_ID);
-        Assertions.assertEquals("GCP", actual);
+        assertEquals("GCP", actual);
     }
 
     @Test
@@ -175,7 +177,7 @@ public class AwsMigrationUtilTest {
         when(entitlementService.awsVariantMigrationEnable(ACCOUNT_ID)).thenReturn(true);
 
         boolean actual = underTest.isAwsVariantMigrationIsFeasible(stack, "AWS_NATIVE");
-        Assertions.assertTrue(actual);
+        assertTrue(actual);
     }
 
     @Test
@@ -185,7 +187,7 @@ public class AwsMigrationUtilTest {
         stack.setResourceCrn(RESOURCE_CRN);
 
         boolean actual = underTest.isAwsVariantMigrationIsFeasible(stack, "AWS");
-        Assertions.assertFalse(actual);
+        assertFalse(actual);
         verify(entitlementService, never()).awsVariantMigrationEnable(any());
     }
 
@@ -198,7 +200,7 @@ public class AwsMigrationUtilTest {
         when(entitlementService.awsVariantMigrationEnable(ACCOUNT_ID)).thenReturn(false);
 
         boolean actual = underTest.isAwsVariantMigrationIsFeasible(stack, "AWS_NATIVE");
-        Assertions.assertFalse(actual);
+        assertFalse(actual);
     }
 
     @Test
@@ -208,7 +210,7 @@ public class AwsMigrationUtilTest {
         stack.setResourceCrn(RESOURCE_CRN);
 
         boolean actual = underTest.isAwsVariantMigrationIsFeasible(stack, "AWS_NATIVE");
-        Assertions.assertFalse(actual);
+        assertFalse(actual);
         verify(entitlementService, never()).awsVariantMigrationEnable(any());
     }
 }

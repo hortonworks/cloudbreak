@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.network.dao.domain.converter;
 
-import org.junit.Assert;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.common.api.type.ServiceEndpointCreation;
@@ -11,18 +12,18 @@ public class ServiceEndpointCreationConverterTest {
     @Test
     public void testConvertToDatabaseColumnWhenEnabledIsReturnAsEnabled() {
         String defaultString = serviceEndpointCreationConverter.convertToDatabaseColumn(ServiceEndpointCreation.ENABLED);
-        Assert.assertEquals("ENABLED", defaultString);
+        assertEquals("ENABLED", defaultString);
     }
 
     @Test
     public void testConvertToEntityAttributeWhenEnabledIsReturnAsEnabled() {
         ServiceEndpointCreation serviceEndpointCreation = serviceEndpointCreationConverter.convertToEntityAttribute("ENABLED");
-        Assert.assertEquals(ServiceEndpointCreation.ENABLED, serviceEndpointCreation);
+        assertEquals(ServiceEndpointCreation.ENABLED, serviceEndpointCreation);
     }
 
     @Test
     public void testConvertToEntityAttributeWhenNotKnownIsReturnAsDisabled() {
         ServiceEndpointCreation serviceEndpointCreation = serviceEndpointCreationConverter.convertToEntityAttribute("not-known");
-        Assert.assertEquals(ServiceEndpointCreation.DISABLED, serviceEndpointCreation);
+        assertEquals(ServiceEndpointCreation.DISABLED, serviceEndpointCreation);
     }
 }

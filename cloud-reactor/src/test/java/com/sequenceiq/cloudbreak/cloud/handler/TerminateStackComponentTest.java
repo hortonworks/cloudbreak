@@ -1,9 +1,9 @@
 package com.sequenceiq.cloudbreak.cloud.handler;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -19,10 +19,10 @@ import com.sequenceiq.cloudbreak.cloud.task.PollTaskFactory;
 
 @SpringBootTest(classes = { TestApplicationContext.class, TerminateStackComponentTest.TestConfig.class },
         properties = "spring.main.allow-bean-definition-overriding=true")
-public class TerminateStackComponentTest extends AbstractComponentTest<TerminateStackResult> {
+class TerminateStackComponentTest extends AbstractComponentTest<TerminateStackResult> {
 
     @Test
-    public void testTerminateStack() {
+    void testTerminateStack() {
         TerminateStackResult result = sendCloudRequest();
 
         assertEquals(EventStatus.OK, result.getStatus());
@@ -41,7 +41,7 @@ public class TerminateStackComponentTest extends AbstractComponentTest<Terminate
 
     @Configuration
     @Import({TerminateStackHandler.class, PollTaskFactory.class, SyncPollingScheduler.class, PollResourcesStateTask.class})
-    public static class TestConfig {
+    static class TestConfig {
     }
 
 }

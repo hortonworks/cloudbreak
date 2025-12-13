@@ -1,25 +1,25 @@
 package com.sequenceiq.redbeams.domain.stack;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.cloudbreak.common.json.Json;
 
-public class NetworkTest {
+class NetworkTest {
 
     private static final Json ATTRIBUTES = new Json("{}");
 
     private Network network;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         network = new Network();
     }
 
     @Test
-    public void testGettersAndSetters() {
+    void testGettersAndSetters() {
         network.setId(1L);
         assertEquals(1L, network.getId().longValue());
 

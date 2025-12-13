@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.oozie;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 
@@ -11,9 +11,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
@@ -30,13 +30,13 @@ import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 
-@RunWith(MockitoJUnitRunner.class)
-public class OozieRoleConfigProviderTest {
+@ExtendWith(MockitoExtension.class)
+class OozieRoleConfigProviderTest {
 
     private final OozieRoleConfigProvider underTest = new OozieRoleConfigProvider();
 
     @Test
-    public void testGetRoleConfigsWithSingleRolesPerHostGroup() {
+    void testGetRoleConfigsWithSingleRolesPerHostGroup() {
         String inputJson = getBlueprintText("input/clouderamanager-db-config.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
         TemplatePreparationObject preparationObject = getTemplatePreparationObject(inputJson, cmTemplateProcessor,
@@ -63,7 +63,7 @@ public class OozieRoleConfigProviderTest {
     }
 
     @Test
-    public void testGetRoleConfigsWithSingleRolesPerHostGroupWhenSSLIsTrue() {
+    void testGetRoleConfigsWithSingleRolesPerHostGroupWhenSSLIsTrue() {
         String inputJson = getBlueprintText("input/clouderamanager-db-config.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
         TemplatePreparationObject preparationObject = getTemplatePreparationObject(inputJson, cmTemplateProcessor,
@@ -85,12 +85,11 @@ public class OozieRoleConfigProviderTest {
 
         assertEquals("oozie_config_safety_valve", oozieServer.get(3).getName());
         assertEquals("<property><name>oozie.service.JPAService.jdbc.url</name><value>" +
-                        "jdbc:postgresql://testhost:5432/ooziedb?sslmode=verify-full&amp;sslrootcert=</value></property>",
-                oozieServer.get(3).getValue());
+                        "jdbc:postgresql://testhost:5432/ooziedb?sslmode=verify-full&amp;sslrootcert=</value></property>", oozieServer.get(3).getValue());
     }
 
     @Test
-    public void testGetRoleConfigsWithSingleRolesPerHostGroupWhenSSLIsTrueAndVersionHigherThan7112() {
+    void testGetRoleConfigsWithSingleRolesPerHostGroupWhenSSLIsTrueAndVersionHigherThan7112() {
         String inputJson = getBlueprintText("input/clouderamanager-db-config.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
         TemplatePreparationObject preparationObject = getTemplatePreparationObject(inputJson, cmTemplateProcessor,
@@ -109,8 +108,7 @@ public class OozieRoleConfigProviderTest {
 
         assertEquals("oozie_database_connection_properties", oozieServer.get(2).getName());
         assertEquals("<property><name>sslmode</name><value>verify-full</value></property>" +
-                        "<property><name>sslrootcert</name><value>/hadoopfs/fs/cert</value></property>",
-                oozieServer.get(2).getValue());
+                        "<property><name>sslrootcert</name><value>/hadoopfs/fs/cert</value></property>", oozieServer.get(2).getValue());
 
         assertEquals("oozie_database_type", oozieServer.get(3).getName());
         assertEquals("postgresql", oozieServer.get(3).getValue());
@@ -123,7 +121,7 @@ public class OozieRoleConfigProviderTest {
     }
 
     @Test
-    public void testGetRoleConfigsWithOozieHA() {
+    void testGetRoleConfigsWithOozieHA() {
         String inputJson = getBlueprintText("input/de-ha.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
         TemplatePreparationObject preparationObject = getTemplatePreparationObject(inputJson, cmTemplateProcessor,
@@ -150,7 +148,7 @@ public class OozieRoleConfigProviderTest {
     }
 
     @Test
-    public void testGetRoleConfigsWithNoOozie() {
+    void testGetRoleConfigsWithNoOozie() {
         String inputJson = getBlueprintText("input/clouderamanager.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
         TemplatePreparationObject preparationObject = getTemplatePreparationObject(inputJson, cmTemplateProcessor, 1, false, "7.2.2");

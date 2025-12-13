@@ -3,6 +3,7 @@ package com.sequenceiq.environment.network;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -20,7 +21,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -125,7 +125,7 @@ class NetworkServiceTest {
 
         BaseNetwork result = underTest.saveNetwork(environment, networkDto, "accountId", Map.of(), Map.of());
 
-        Assertions.assertNull(result.getNetworkCidr());
+        assertNull(result.getNetworkCidr());
         verify(environmentNetworkService, times(0)).getNetworkCidr(eq(network), anyString(), eq(credential));
     }
 
@@ -258,7 +258,7 @@ class NetworkServiceTest {
         NetworkDto networkDto = NetworkDto.builder().withRegistrationType(RegistrationType.CREATE_NEW).build();
         EnvironmentEditDto environmentEditDto = EnvironmentEditDto.builder().withNetwork(networkDto).build();
 
-        BadRequestException exception = Assertions.assertThrows(BadRequestException.class,
+        BadRequestException exception = assertThrows(BadRequestException.class,
                 () -> underTest.validate(baseNetwork, environmentEditDto, environment));
         String baseMessage = "Subnets of this environment could not be modified, because its network has been created by Cloudera. " +
                 "You need to re-install the environment into an existing VPC/VNet.";

@@ -167,10 +167,6 @@ dependencies {
   implementation group: 'com.squareup.okhttp3',          name: 'okhttp',                         version: okhttpVersion
   implementation group: 'com.dyngr',                     name: 'polling',                        version: dyngrPollingVersion
 
-  implementation(group: "org.junit.vintage",             name: "junit-vintage-engine",           version: junitJupiterVersion) {
-    exclude group: "org.hamcrest", module: "hamcrest-core"
-  }
-
   implementation ("org.uncommons:reportng:1.1.4") {
     exclude group: "velocity"
   }

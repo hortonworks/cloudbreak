@@ -1,8 +1,8 @@
 package com.sequenceiq.freeipa;
 
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,7 +13,7 @@ import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.io.filefilter.RegexFileFilter;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
 
 import com.hubspot.jinjava.Jinjava;
@@ -21,12 +21,12 @@ import com.hubspot.jinjava.interpret.JinjavaInterpreter;
 import com.hubspot.jinjava.interpret.TemplateError;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
-public class FreeipaJinjaTester {
+class FreeipaJinjaTester {
 
     @Test
-    public void verifyFreeipaSaltFilesFiles() throws IOException {
+    void verifyFreeipaSaltFilesFiles() throws IOException {
         Collection<File> files = collectAllSlsFiles("freeipa-salt");
-        assertTrue("At least one sls file should be verified", files.size() > 0);
+        assertTrue(files.size() > 0, "At least one sls file should be verified");
         for (File slsFile : files) {
             verifySingleSaltFile(slsFile.toPath());
         }

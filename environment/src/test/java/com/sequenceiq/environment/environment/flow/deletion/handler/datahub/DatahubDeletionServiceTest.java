@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -16,7 +17,6 @@ import java.util.concurrent.TimeUnit;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.dyngr.exception.UserBreakException;
@@ -33,7 +33,7 @@ class DatahubDeletionServiceTest {
 
     private static final String ENV_CRN = "envCrn";
 
-    private final DatahubService datahubService = Mockito.mock(DatahubService.class);
+    private final DatahubService datahubService = mock(DatahubService.class);
 
     private final DatahubDeletionService underTest = new DatahubDeletionService(datahubService);
 

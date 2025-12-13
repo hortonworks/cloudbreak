@@ -1,24 +1,24 @@
 package com.sequenceiq.redbeams.api.endpoint.v4.database.responses;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 import com.sequenceiq.redbeams.api.endpoint.v4.ResourceStatus;
 
-public class DatabaseV4ResponseTest {
+class DatabaseV4ResponseTest {
 
     private DatabaseV4Response response;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         response = new DatabaseV4Response();
     }
 
     @Test
-    public void testGettersAndSetters() {
+    void testGettersAndSetters() {
         response.setCrn("crn:mydb");
         assertEquals("crn:mydb", response.getCrn());
 

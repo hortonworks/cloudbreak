@@ -4,8 +4,8 @@ import static com.sequenceiq.cloudbreak.cloud.aws.common.DistroxEnabledInstanceT
 import static com.sequenceiq.cloudbreak.cloud.aws.common.DistroxEnabledInstanceTypes.AWS_ENABLED_X86_TYPES_LIST;
 import static com.sequenceiq.cloudbreak.cloud.azure.DistroxEnabledInstanceTypes.AZURE_ENABLED_TYPES_LIST;
 import static com.sequenceiq.cloudbreak.cloud.gcp.DistroxEnabledInstanceTypes.GCP_ENABLED_TYPES_LIST;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -15,14 +15,14 @@ import java.util.Set;
 import jakarta.inject.Inject;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.requests.DefaultClusterTemplateV4Request;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
@@ -42,15 +42,15 @@ import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.distrox.v1.distrox.service.InternalClusterTemplateValidator;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = AllowedInstanceTypeTest.TestAppContext.class)
-public class AllowedInstanceTypeTest {
+class AllowedInstanceTypeTest {
 
     @Inject
     private DefaultClusterTemplateCache templateCache;
 
     @Test
-    public void validateAwsClusterTemplatesByInstanceType() {
+    void validateAwsClusterTemplatesByInstanceType() {
         Map<String, Pair<DefaultClusterTemplateV4Request, String>> stringClusterTemplateMap = templateCache.defaultClusterTemplateRequests();
         Set<String> allowedAwsTypes = new HashSet<>();
         allowedAwsTypes.addAll(AWS_ENABLED_X86_TYPES_LIST);
@@ -64,7 +64,7 @@ public class AllowedInstanceTypeTest {
     }
 
     @Test
-    public void validateAzureClusterTemplatesByInstanceType() {
+    void validateAzureClusterTemplatesByInstanceType() {
         Map<String, Pair<DefaultClusterTemplateV4Request, String>> stringClusterTemplateMap = templateCache.defaultClusterTemplateRequests();
         stringClusterTemplateMap.entrySet()
                 .stream()
@@ -75,7 +75,7 @@ public class AllowedInstanceTypeTest {
     }
 
     @Test
-    public void validateGcpClusterTemplatesByInstanceType() {
+    void validateGcpClusterTemplatesByInstanceType() {
         Map<String, Pair<DefaultClusterTemplateV4Request, String>> stringClusterTemplateMap = templateCache.defaultClusterTemplateRequests();
         stringClusterTemplateMap.entrySet()
                 .stream()

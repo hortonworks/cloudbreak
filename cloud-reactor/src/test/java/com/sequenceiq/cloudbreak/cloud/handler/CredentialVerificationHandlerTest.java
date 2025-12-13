@@ -1,9 +1,11 @@
 package com.sequenceiq.cloudbreak.cloud.handler;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -36,8 +38,8 @@ public class CredentialVerificationHandlerTest {
 
         CredentialVerificationResult actual = underTest.createCredentialVerificationResult(request, credentialStatus);
 
-        Assertions.assertEquals(credentialStatus, actual.getCloudCredentialStatus());
-        Assertions.assertNull(actual.getErrorDetails());
+        assertEquals(credentialStatus, actual.getCloudCredentialStatus());
+        assertNull(actual.getErrorDetails());
     }
 
     @Test
@@ -52,7 +54,7 @@ public class CredentialVerificationHandlerTest {
 
         CredentialVerificationResult actual = underTest.createCredentialVerificationResult(request, credentialStatus);
 
-        Assertions.assertEquals(credentialStatus, actual.getCloudCredentialStatus());
-        Assertions.assertNotNull(actual.getErrorDetails());
+        assertEquals(credentialStatus, actual.getCloudCredentialStatus());
+        assertNotNull(actual.getErrorDetails());
     }
 }

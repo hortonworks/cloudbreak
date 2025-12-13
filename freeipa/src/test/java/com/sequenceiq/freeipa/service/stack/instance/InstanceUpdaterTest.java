@@ -8,18 +8,18 @@ import static org.mockito.Mockito.when;
 
 import java.util.Set;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 
-@RunWith(MockitoJUnitRunner.class)
-public class InstanceUpdaterTest {
+@ExtendWith(MockitoExtension.class)
+class InstanceUpdaterTest {
 
     @Mock
     private InstanceMetaDataService instanceMetaDataService;
@@ -31,7 +31,7 @@ public class InstanceUpdaterTest {
     private InstanceUpdater underTest;
 
     @Test
-    public void testUpdateStatuses() {
+    void testUpdateStatuses() {
 
         InstanceMetaData instanceMetaData1 = mock(InstanceMetaData.class);
         InstanceMetaData instanceMetaData2 = mock(InstanceMetaData.class);

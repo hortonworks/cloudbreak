@@ -1,19 +1,18 @@
 package com.sequenceiq.cloudbreak.converter.v4.filesystems;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.filesystems.responses.FileSystemParameterV4Response;
 import com.sequenceiq.common.api.cloudstorage.query.ConfigQueryEntry;
 import com.sequenceiq.common.model.CloudStorageCdpService;
 
-public class ConfigQueryEntryToFileSystemParameterV4ResponseConverterTest {
+class ConfigQueryEntryToFileSystemParameterV4ResponseConverterTest {
 
     private static final String TEST_RELATED_SERVICE = "testForExampleAmbari";
 
@@ -33,15 +32,10 @@ public class ConfigQueryEntryToFileSystemParameterV4ResponseConverterTest {
 
     private static final String TEST_PROTOCOL = "http";
 
-    private ConfigQueryEntryToFileSystemParameterV4ResponseConverter underTest;
-
-    @Before
-    public void setUp() {
-        underTest = new ConfigQueryEntryToFileSystemParameterV4ResponseConverter();
-    }
+    private final ConfigQueryEntryToFileSystemParameterV4ResponseConverter underTest = new ConfigQueryEntryToFileSystemParameterV4ResponseConverter();
 
     @Test
-    public void testConvertCheckAllPropertyPassedProperly() {
+    void testConvertCheckAllPropertyPassedProperly() {
         FileSystemParameterV4Response expected = new FileSystemParameterV4Response();
         expected.setType(CloudStorageCdpService.RANGER_AUDIT.name());
         expected.setDefaultPath(TEST_PATH_VALUE);

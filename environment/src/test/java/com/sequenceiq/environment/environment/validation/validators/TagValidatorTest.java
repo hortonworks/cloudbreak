@@ -1,5 +1,8 @@
 package com.sequenceiq.environment.environment.validation.validators;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -14,11 +17,9 @@ import java.util.concurrent.Executors;
 
 import jakarta.inject.Inject;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mockito;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -65,14 +66,14 @@ class TagValidatorTest {
 
     public void testNegative(String tag, String value, String messagePortion) {
         ValidationResult result = tagValidatorUnderTest.validateTags(CloudConstants.AZURE, Map.of(tag, value));
-        Assertions.assertTrue(result.hasError(), "tag validation should fail");
-        Assertions.assertEquals(1, result.getErrors().size(), "tag validation should have one error only");
-        Assertions.assertTrue(result.getErrors().get(0).contains(messagePortion));
+        assertTrue(result.hasError(), "tag validation should fail");
+        assertEquals(1, result.getErrors().size(), "tag validation should have one error only");
+        assertTrue(result.getErrors().get(0).contains(messagePortion));
     }
 
     public void testPositive(String tag, String value) {
         ValidationResult result = tagValidatorUnderTest.validateTags(CloudConstants.AZURE, Map.of(tag, value));
-        Assertions.assertFalse(result.hasError(), "tag validation should pass");
+        assertFalse(result.hasError(), "tag validation should pass");
     }
 
     @Configuration
@@ -92,7 +93,7 @@ class TagValidatorTest {
         @Bean
         CloudConnector cloud() {
             PlatformParameters parameter = parameters();
-            CloudConnector mock = Mockito.mock(CloudConnector.class);
+            CloudConnector mock = mock(CloudConnector.class);
             when(mock.parameters()).thenReturn(parameter);
             when(mock.platform()).thenReturn(Platform.platform(CloudConstants.AZURE));
             when(mock.variant()).thenReturn(Variant.variant(CloudConstants.AZURE));
@@ -101,7 +102,7 @@ class TagValidatorTest {
 
         @Bean
         PlatformParameters parameters() {
-            PlatformParameters mock = Mockito.mock(PlatformParameters.class);
+            PlatformParameters mock = mock(PlatformParameters.class);
             when(mock.tagValidator()).thenReturn(azureTagValidator);
             return mock;
         }

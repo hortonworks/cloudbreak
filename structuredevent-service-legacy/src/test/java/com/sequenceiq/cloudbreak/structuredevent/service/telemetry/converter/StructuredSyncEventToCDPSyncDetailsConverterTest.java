@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.structuredevent.service.telemetry.converter;
 
-import org.junit.Assert;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -22,8 +23,8 @@ public class StructuredSyncEventToCDPSyncDetailsConverterTest {
     public void testConvertWithNull() {
         UsageProto.CDPSyncDetails details = underTest.convert(null);
 
-        Assert.assertEquals(0, details.getClusterCreationStarted());
-        Assert.assertEquals(0, details.getClusterCreationFinished());
+        assertEquals(0, details.getClusterCreationStarted());
+        assertEquals(0, details.getClusterCreationFinished());
     }
 
     @Test
@@ -32,8 +33,8 @@ public class StructuredSyncEventToCDPSyncDetailsConverterTest {
 
         UsageProto.CDPSyncDetails details = underTest.convert(structuredSyncEvent);
 
-        Assert.assertEquals(0, details.getClusterCreationStarted());
-        Assert.assertEquals(0, details.getClusterCreationFinished());
+        assertEquals(0, details.getClusterCreationStarted());
+        assertEquals(0, details.getClusterCreationFinished());
     }
 
     @Test
@@ -44,8 +45,8 @@ public class StructuredSyncEventToCDPSyncDetailsConverterTest {
 
         UsageProto.CDPSyncDetails details = underTest.convert(structuredSyncEvent);
 
-        Assert.assertEquals(0L, details.getClusterCreationStarted());
-        Assert.assertEquals(0L, details.getClusterCreationFinished());
+        assertEquals(0L, details.getClusterCreationStarted());
+        assertEquals(0L, details.getClusterCreationFinished());
     }
 
     @Test
@@ -56,6 +57,6 @@ public class StructuredSyncEventToCDPSyncDetailsConverterTest {
 
         UsageProto.CDPSyncDetails details = underTest.convert(structuredSyncEvent);
 
-        Assert.assertEquals("UNKNOWN", details.getDatabaseType());
+        assertEquals("UNKNOWN", details.getDatabaseType());
     }
 }

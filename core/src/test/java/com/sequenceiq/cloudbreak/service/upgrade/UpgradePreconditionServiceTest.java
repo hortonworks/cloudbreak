@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.service.upgrade;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
@@ -10,11 +10,11 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
@@ -25,8 +25,8 @@ import com.sequenceiq.cloudbreak.service.spot.SpotInstanceUsageCondition;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackStopRestrictionService;
 
-@RunWith(MockitoJUnitRunner.class)
-public class UpgradePreconditionServiceTest {
+@ExtendWith(MockitoExtension.class)
+class UpgradePreconditionServiceTest {
 
     private static final String ACCOUNT_ID = "accountId";
 
@@ -50,7 +50,7 @@ public class UpgradePreconditionServiceTest {
     private StackDto stackDto = new StackDto();
 
     @Test
-    public void testCheckForRunningAttachedClustersShouldReturnErrorMessageWhenThereAreClustersInNotProperState() {
+    void testCheckForRunningAttachedClustersShouldReturnErrorMessageWhenThereAreClustersInNotProperState() {
         StackDto dataHubStack1 = createStackDtoDelegate(Status.AVAILABLE, "stack-1", "stack-crn-1");
         StackDto dataHubStack2 = createStackDtoDelegate(Status.DELETE_COMPLETED, "stack-2", "stack-crn-2");
         StackDto dataHubStack3 = createStackDtoDelegate(Status.STOPPED, "stack-3", "stack-crn-2");
@@ -65,7 +65,7 @@ public class UpgradePreconditionServiceTest {
     }
 
     @Test
-    public void testCheckForRunningAttachedClustersShouldNotReturnErrorMessageWhenEntitlementIsTrue() {
+    void testCheckForRunningAttachedClustersShouldNotReturnErrorMessageWhenEntitlementIsTrue() {
         when(entitlementService.isUpgradeAttachedDatahubsCheckSkipped(ACCOUNT_ID)).thenReturn(Boolean.TRUE);
 
         StackDto dataHubStack1 = createStackDtoDelegate(Status.AVAILABLE, "stack-1", "stack-crn-1");
@@ -82,7 +82,7 @@ public class UpgradePreconditionServiceTest {
     }
 
     @Test
-    public void testCheckForRunningAttachedClustersShouldNotReturnErrorMessageWhenSkipDataHubValidationParameterIsTrue() {
+    void testCheckForRunningAttachedClustersShouldNotReturnErrorMessageWhenSkipDataHubValidationParameterIsTrue() {
         StackDto dataHubStack1 = createStackDtoDelegate(Status.AVAILABLE, "stack-1", "stack-crn-1");
         StackDto dataHubStack2 = createStackDtoDelegate(Status.DELETE_COMPLETED, "stack-2", "stack-crn-2");
         StackDto dataHubStack3 = createStackDtoDelegate(Status.STOPPED, "stack-3", "stack-crn-2");
@@ -98,7 +98,7 @@ public class UpgradePreconditionServiceTest {
     }
 
     @Test
-    public void testCheckForRunningAttachedClustersShouldNotReturnErrorMessageWhenRollingUpgradeIsEnabled() {
+    void testCheckForRunningAttachedClustersShouldNotReturnErrorMessageWhenRollingUpgradeIsEnabled() {
         StackDto dataHubStack1 = createStackDtoDelegate(Status.AVAILABLE, "stack-1", "stack-crn-1");
         StackDto dataHubStack2 = createStackDtoDelegate(Status.DELETE_COMPLETED, "stack-2", "stack-crn-2");
         StackDto dataHubStack3 = createStackDtoDelegate(Status.STOPPED, "stack-3", "stack-crn-2");
@@ -114,7 +114,7 @@ public class UpgradePreconditionServiceTest {
     }
 
     @Test
-    public void testCheckForRunningAttachedClustersShouldNotReturnErrorMessageWhenThereAreOnlyOneClusterIsRunningWithEphemeralVolume() {
+    void testCheckForRunningAttachedClustersShouldNotReturnErrorMessageWhenThereAreOnlyOneClusterIsRunningWithEphemeralVolume() {
         StackDto dataHubStack1 = createStackDtoDelegate(Status.AVAILABLE, "stack-1", "stack-crn-1");
         StackDto dataHubStack2 = createStackDtoDelegate(Status.DELETE_COMPLETED, "stack-2", "stack-crn-2");
         StackDto dataHubStack3 = createStackDtoDelegate(Status.STOPPED, "stack-3", "stack-crn-3");
@@ -130,7 +130,7 @@ public class UpgradePreconditionServiceTest {
     }
 
     @Test
-    public void testCheckForRunningAttachedClustersShouldNotReturnErrorMessageWhenThereAreOnlyOneClusterIsRunningWithSpotInstance() {
+    void testCheckForRunningAttachedClustersShouldNotReturnErrorMessageWhenThereAreOnlyOneClusterIsRunningWithSpotInstance() {
         StackDto dataHubStack1 = createStackDtoDelegate(Status.AVAILABLE, "stack-1", "stack-crn-1");
         StackDto dataHubStack2 = createStackDtoDelegate(Status.DELETE_COMPLETED, "stack-2", "stack-crn-2");
         StackDto dataHubStack3 = createStackDtoDelegate(Status.STOPPED, "stack-3", "stack-crn-3");
@@ -147,7 +147,7 @@ public class UpgradePreconditionServiceTest {
     }
 
     @Test
-    public void testCheckForUpgradeableAttachedClustersShouldReturnErrorMessageWhenThereIsNoNonUpgradeableCluster() {
+    void testCheckForUpgradeableAttachedClustersShouldReturnErrorMessageWhenThereIsNoNonUpgradeableCluster() {
         StackDto dataHubStack1 = createStackDtoDelegate(Status.STOPPED, "stack-1", "stack-crn-1");
         StackDto dataHubStack2 = createStackDtoDelegate(Status.DELETE_COMPLETED, "stack-2", "stack-crn-2");
         List<StackDto> datahubs = List.of(dataHubStack1, dataHubStack2);
@@ -159,7 +159,7 @@ public class UpgradePreconditionServiceTest {
     }
 
     @Test
-    public void testCheckForUpgradeableAttachedClustersShouldNotReturnErrorMessageWhenThereIsNoNonUpgradeableCluster() {
+    void testCheckForUpgradeableAttachedClustersShouldNotReturnErrorMessageWhenThereIsNoNonUpgradeableCluster() {
         StackDto dataHubStack1 = createStackDtoDelegate(Status.STOPPED, "stack-1", "stack-crn-1");
         StackDto dataHubStack2 = createStackDtoDelegate(Status.DELETE_COMPLETED, "stack-2", "stack-crn-2");
         StackDto dataHubStack3 = createStackDtoDelegate(Status.STOPPED, "stack-3", "stack-crn-3");
@@ -174,7 +174,7 @@ public class UpgradePreconditionServiceTest {
     }
 
     @Test
-    public void testCheckForAttachedClustersShouldReturnBothErrorMessagesWhenBothValidationsFail() {
+    void testCheckForAttachedClustersShouldReturnBothErrorMessagesWhenBothValidationsFail() {
         StackDto dataHubStack1 = createStackDtoDelegate(Status.AVAILABLE, "stack-1", "stack-crn-1");
         StackDto dataHubStack2 = createStackDtoDelegate(Status.DELETE_COMPLETED, "stack-2", "stack-crn-2");
         StackDto dataHubStack3 = createStackDtoDelegate(Status.STOPPED, "stack-3", "stack-crn-3");
@@ -183,14 +183,13 @@ public class UpgradePreconditionServiceTest {
 
         String actualRunning = underTest.checkForRunningAttachedClusters(ENVIRONMENT_CRN, Boolean.FALSE, false, ACCOUNT_ID);
 
-        assertEquals("There are attached Data Hub clusters in incorrect state: stack-1. Please stop those to be able to perform the upgrade.",
-                actualRunning);
+        assertEquals("There are attached Data Hub clusters in incorrect state: stack-1. Please stop those to be able to perform the upgrade.", actualRunning);
 
         verify(spotInstanceUsageCondition).isStackRunsOnSpotInstances(dataHubStack1);
     }
 
     @Test
-    public void testCheckClustersShouldNotReturnErrorMessageForCustomBlueprints() {
+    void testCheckClustersShouldNotReturnErrorMessageForCustomBlueprints() {
         StackDto dataHubStack1 = createStackDtoDelegate(Status.AVAILABLE, "stack-1", "stack-crn-1");
         StackDto dataHubStack2 = createStackDtoDelegate(Status.DELETE_COMPLETED, "stack-2", "stack-crn-2");
         StackDto dataHubStack3 = createStackDtoDelegate(Status.STOPPED, "stack-3", "stack-crn-3");
@@ -199,14 +198,13 @@ public class UpgradePreconditionServiceTest {
 
         String actualRunning = underTest.checkForRunningAttachedClusters(ENVIRONMENT_CRN, Boolean.FALSE, false, ACCOUNT_ID);
 
-        assertEquals("There are attached Data Hub clusters in incorrect state: stack-1. Please stop those to be able to perform the upgrade.",
-                actualRunning);
+        assertEquals("There are attached Data Hub clusters in incorrect state: stack-1. Please stop those to be able to perform the upgrade.", actualRunning);
 
         verify(spotInstanceUsageCondition).isStackRunsOnSpotInstances(dataHubStack1);
     }
 
     @Test
-    public void testDataHubsNotAttached() {
+    void testDataHubsNotAttached() {
         List<StackDto> datahubs = List.of();
         when(stackDtoService.findAllByEnvironmentCrnAndStackType(ENVIRONMENT_CRN, List.of(StackType.WORKLOAD))).thenReturn(datahubs);
 

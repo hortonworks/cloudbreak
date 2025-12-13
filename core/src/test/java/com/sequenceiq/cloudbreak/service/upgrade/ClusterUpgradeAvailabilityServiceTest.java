@@ -27,7 +27,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
@@ -170,7 +169,7 @@ class ClusterUpgradeAvailabilityServiceTest {
     void testCheckForUpgradesByNameShouldReturnImagesWhenThereAreAvailableImagesUsingImageCatalogByName() throws CloudbreakImageNotFoundException {
         Stack stack = createStack(createStackStatus(Status.AVAILABLE), StackType.WORKLOAD);
         com.sequenceiq.cloudbreak.cloud.model.Image currentImage = createCurrentImage();
-        Result result = Mockito.mock(Result.class);
+        Result result = mock(Result.class);
         Image properImage = mock(com.sequenceiq.cloudbreak.cloud.model.catalog.Image.class);
         ImageFilterParams imageFilterParams = createImageFilterParams(stack, currentImage);
         UpgradeV4Response response = new UpgradeV4Response();
@@ -194,7 +193,7 @@ class ClusterUpgradeAvailabilityServiceTest {
             throws CloudbreakImageNotFoundException {
         Stack stack = createStack(createStackStatus(Status.AVAILABLE), StackType.WORKLOAD);
         com.sequenceiq.cloudbreak.cloud.model.Image currentImage = createCurrentImage();
-        Result result = Mockito.mock(Result.class);
+        Result result = mock(Result.class);
         Image properImage = mock(com.sequenceiq.cloudbreak.cloud.model.catalog.Image.class);
         ImageFilterParams imageFilterParams = createImageFilterParams(stack, currentImage);
         UpgradeV4Response response = new UpgradeV4Response();

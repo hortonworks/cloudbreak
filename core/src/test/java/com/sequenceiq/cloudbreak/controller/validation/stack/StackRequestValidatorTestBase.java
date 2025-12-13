@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.controller.validation.stack;
 
 import static java.lang.String.format;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 

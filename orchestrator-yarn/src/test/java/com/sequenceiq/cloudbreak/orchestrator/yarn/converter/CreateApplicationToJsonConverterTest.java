@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.orchestrator.yarn.converter;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,7 +14,7 @@ import com.sequenceiq.cloudbreak.orchestrator.yarn.model.core.Resource;
 import com.sequenceiq.cloudbreak.orchestrator.yarn.model.core.YarnComponent;
 import com.sequenceiq.cloudbreak.orchestrator.yarn.model.request.CreateApplicationRequest;
 
-public class CreateApplicationToJsonConverterTest {
+class CreateApplicationToJsonConverterTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CreateApplicationToJsonConverterTest.class);
 
@@ -43,7 +43,7 @@ public class CreateApplicationToJsonConverterTest {
     private static final int RESOURCE_MEMORY = 1024;
 
     @Test
-    public void testConvert() throws Exception {
+    void testConvert() throws Exception {
 
         //CreateApplicationRequest object
         CreateApplicationRequest createApplicationRequest = new CreateApplicationRequest();

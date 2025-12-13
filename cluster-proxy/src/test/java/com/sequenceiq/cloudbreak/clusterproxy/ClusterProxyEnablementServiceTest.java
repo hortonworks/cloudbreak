@@ -1,31 +1,23 @@
 package com.sequenceiq.cloudbreak.clusterproxy;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 
-import java.util.Arrays;
 import java.util.Set;
+import java.util.stream.Stream;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
-@RunWith(Parameterized.class)
-public class ClusterProxyEnablementServiceTest {
-
-    @Parameterized.Parameter
-    public String cloudPlatform;
-
-    @Parameterized.Parameter(1)
-    public boolean clusterProxyIntegrationEnabled;
-
-    @Parameterized.Parameter(2)
-    public boolean clusterProxyApplicable;
+@ExtendWith(MockitoExtension.class)
+class ClusterProxyEnablementServiceTest {
 
     @Mock
     private ClusterProxyConfiguration clusterProxyConfiguration;
@@ -33,30 +25,29 @@ public class ClusterProxyEnablementServiceTest {
     @InjectMocks
     private ClusterProxyEnablementService clusterProxyEnablementService;
 
-    @Before
-    public void setUp() throws Exception {
-        initMocks(this);
+    @BeforeEach
+    void setUp() {
         ReflectionTestUtils.setField(clusterProxyEnablementService, "clusterProxyDisabledPlatforms", Set.of("MOCK"));
     }
 
-    @Test
-    public void isClusterProxyApplicable() {
+    @ParameterizedTest(name = "{index}: clusterProxyEnablementService.clusterProxyApplicable(get cloudPlatform {0} "
+            + "with clusterProxyIntegrationEnabled {1}) = output is clusterProxyApplicable {2}")
+    @MethodSource("data")
+    void isClusterProxyApplicable(String cloudPlatform, boolean clusterProxyIntegrationEnabled, boolean clusterProxyApplicable) {
         when(clusterProxyConfiguration.isClusterProxyIntegrationEnabled()).thenReturn(clusterProxyIntegrationEnabled);
 
-        Assert.assertEquals(clusterProxyApplicable, clusterProxyEnablementService.isClusterProxyApplicable(cloudPlatform));
+        assertEquals(clusterProxyApplicable, clusterProxyEnablementService.isClusterProxyApplicable(cloudPlatform));
     }
 
-    @Parameterized.Parameters(name = "{index}: clusterProxyEnablementService.clusterProxyApplicable(get cloudPlatform '{0}' "
-            + "with clusterProxyIntegrationEnabled '{1}') = output is clusterProxyApplicable '{2}'")
-    public static Iterable<Object[]> data() {
-        return Arrays.asList(new Object[][] {
-                { "MOCK", true, false },
-                { "MOCK", false, false },
-                { "AWS", true, true },
-                { "AWS", false, false },
-                { "AZURE", true, true },
-                { "AZURE", false, false }
-        });
+    static Stream<Arguments> data() {
+        return Stream.of(
+                Arguments.of("MOCK", true, false),
+                Arguments.of("MOCK", false, false),
+                Arguments.of("AWS", true, true),
+                Arguments.of("AWS", false, false),
+                Arguments.of("AZURE", true, true),
+                Arguments.of("AZURE", false, false)
+        );
     }
 
 }

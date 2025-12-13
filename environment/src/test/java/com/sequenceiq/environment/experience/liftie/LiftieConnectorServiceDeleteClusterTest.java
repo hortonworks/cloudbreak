@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.experience.liftie;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
@@ -11,7 +12,6 @@ import static org.mockito.Mockito.when;
 import java.net.URI;
 import java.util.Optional;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -47,7 +47,7 @@ class LiftieConnectorServiceDeleteClusterTest extends LiftieConnectorServiceTest
     void testWhenCallExecutionReturnsNullThenNoResponseReadingHappens() {
         when(getMockRetryableWebTarget().delete(getMockInvocationBuilder())).thenReturn(null);
 
-        Assertions.assertThrows(ExperienceOperationFailedException.class, () -> getUnderTest().deleteCluster(TEST_CLUSTER_ID));
+        assertThrows(ExperienceOperationFailedException.class, () -> getUnderTest().deleteCluster(TEST_CLUSTER_ID));
 
         verify(getMockRetryableWebTarget(), times(ONCE)).delete(any());
         verify(getMockRetryableWebTarget(), times(ONCE)).delete(getMockInvocationBuilder());
@@ -58,7 +58,7 @@ class LiftieConnectorServiceDeleteClusterTest extends LiftieConnectorServiceTest
     void testWhenCallExecutionReturnsNullThenThenIllegalStateExceptionShouldInvoke() {
         when(getMockRetryableWebTarget().delete(getMockInvocationBuilder())).thenReturn(null);
 
-        ExperienceOperationFailedException expectedException = Assertions.assertThrows(
+        ExperienceOperationFailedException expectedException = assertThrows(
                 ExperienceOperationFailedException.class,
                 () -> getUnderTest().deleteCluster(TEST_CLUSTER_ID));
 
@@ -70,7 +70,7 @@ class LiftieConnectorServiceDeleteClusterTest extends LiftieConnectorServiceTest
         when(getMockRetryableWebTarget().delete(getMockInvocationBuilder())).thenReturn(getMockResponse());
         doThrow(RuntimeException.class).when(getMockResponseReader()).read(any(), any(), any());
 
-        ExperienceOperationFailedException expectedException = Assertions.assertThrows(
+        ExperienceOperationFailedException expectedException = assertThrows(
                 ExperienceOperationFailedException.class,
                 () -> getUnderTest().deleteCluster(TEST_CLUSTER_ID));
 
@@ -82,7 +82,7 @@ class LiftieConnectorServiceDeleteClusterTest extends LiftieConnectorServiceTest
         when(getMockRetryableWebTarget().delete(getMockInvocationBuilder())).thenReturn(getMockResponse());
         when(getMockResponseReader().read(LIFTIE_CLUSTER_ENDPOINT_PATH, getMockResponse(), DeleteClusterResponse.class)).thenReturn(Optional.empty());
 
-        ExperienceOperationFailedException expectedException = Assertions.assertThrows(
+        ExperienceOperationFailedException expectedException = assertThrows(
                 ExperienceOperationFailedException.class,
                 () -> getUnderTest().deleteCluster(TEST_CLUSTER_ID));
 

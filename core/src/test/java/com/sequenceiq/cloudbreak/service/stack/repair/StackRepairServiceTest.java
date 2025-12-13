@@ -14,13 +14,13 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatcher;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
@@ -30,8 +30,8 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.repair.StackRepairService.StackRepairFlowSubmitter;
 
-@RunWith(MockitoJUnitRunner.class)
-public class StackRepairServiceTest {
+@ExtendWith(MockitoExtension.class)
+class StackRepairServiceTest {
 
     @Mock
     private InstanceMetaDataService instanceMetaDataService;
@@ -47,14 +47,14 @@ public class StackRepairServiceTest {
 
     private Stack stack;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         stack = mock(Stack.class);
         when(stack.getId()).thenReturn(1L);
     }
 
     @Test
-    public void shouldIgnoreIfNoInstancesToRepair() {
+    void shouldIgnoreIfNoInstancesToRepair() {
         underTest.add(stack, Collections.emptySet());
 
         verifyNoInteractions(executorService);
@@ -62,7 +62,7 @@ public class StackRepairServiceTest {
     }
 
     @Test
-    public void shouldGroupUnhealthyInstancesByHostGroup() {
+    void shouldGroupUnhealthyInstancesByHostGroup() {
         String instanceId1 = "i-0f1e0605506aaaaaa";
         String instanceId2 = "i-0f1e0605506bbbbbb";
         String instanceId3 = "i-0f1e0605506cccccc";

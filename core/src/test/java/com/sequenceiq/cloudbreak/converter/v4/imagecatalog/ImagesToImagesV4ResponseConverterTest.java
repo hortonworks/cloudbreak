@@ -1,7 +1,8 @@
 package com.sequenceiq.cloudbreak.converter.v4.imagecatalog;
 
 import static com.sequenceiq.cloudbreak.RepoTestUtil.getDefaultCDHInfo;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -11,12 +12,11 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.UUID;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImagesV4Response;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
@@ -28,8 +28,8 @@ import com.sequenceiq.cloudbreak.cloud.model.component.ImageBasedDefaultCDHEntri
 import com.sequenceiq.cloudbreak.cloud.model.component.ImageBasedDefaultCDHInfo;
 import com.sequenceiq.cloudbreak.converter.AbstractEntityConverterTest;
 
-@RunWith(MockitoJUnitRunner.class)
-public class ImagesToImagesV4ResponseConverterTest extends AbstractEntityConverterTest<Images> {
+@ExtendWith(MockitoExtension.class)
+class ImagesToImagesV4ResponseConverterTest extends AbstractEntityConverterTest<Images> {
 
     public static final String REDHAT_7 = "redhat7";
 
@@ -48,7 +48,7 @@ public class ImagesToImagesV4ResponseConverterTest extends AbstractEntityConvert
     }
 
     @Test
-    public void testConvert() {
+    void testConvert() {
         setupStackEntries();
         ImagesV4Response result = underTest.convert(createSource());
         assertEquals(1, result.getCdhImages().size());
@@ -86,6 +86,6 @@ public class ImagesToImagesV4ResponseConverterTest extends AbstractEntityConvert
         DefaultCDHInfo cdhInfo = getDefaultCDHInfo("6.1.0-1.cdh6.1.0.p0.770702");
         Image image = mock(Image.class);
         cdhEntries.put("6.1.0", new ImageBasedDefaultCDHInfo(cdhInfo, image));
-        when(imageBasedDefaultCDHEntries.getEntries(Mockito.any(Images.class))).thenReturn(cdhEntries);
+        when(imageBasedDefaultCDHEntries.getEntries(any(Images.class))).thenReturn(cdhEntries);
     }
 }

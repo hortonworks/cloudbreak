@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.c
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.kafka.KafkaRoles.KAFKA_BROKER;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.kafka.KafkaRoles.KAFKA_SERVICE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -12,7 +13,6 @@ import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
@@ -76,7 +76,7 @@ class KafkaVolumeConfigProviderTest {
         HostgroupView coreBroker = VolumeConfigProviderTestHelper.hostGroupWithVolumeCount(coreBrokerVolumeCount);
         TemplatePreparationObject source = mock(TemplatePreparationObject.class);
         when(source.getHostGroupsWithComponent(KAFKA_BROKER)).thenReturn(Stream.of(broker, coreBroker));
-        Mockito.lenient().when(source.getStackType()).thenReturn(stackType);
+        lenient().when(source.getStackType()).thenReturn(stackType);
 
         return source;
     }

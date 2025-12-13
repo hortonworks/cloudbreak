@@ -24,7 +24,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -283,7 +282,7 @@ class StackV4RequestToStackConverterTest extends AbstractJsonConverterTest<Stack
     void testConvertWithLoginUserName() {
         setDefaultRegions(AWS);
         // WHEN
-        BadRequestException expectedException = Assertions.assertThrows(BadRequestException.class,
+        BadRequestException expectedException = assertThrows(BadRequestException.class,
                 () -> underTest.convert(getRequest("stack-with-loginusername.json")));
 
         // THEN

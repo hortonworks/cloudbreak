@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.common.service;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -12,7 +13,6 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -63,7 +63,7 @@ class LockServiceTest {
     public void lockAndRunIfLockWasSuccessfulButRunnableThrowExecptionTest() {
         when(jdbcTemplate.query(anyString(), any(RowMapper.class))).thenReturn(List.of(true));
         when(jdbcTemplate.queryForObject(anyString(), eq(Boolean.class))).thenReturn(true);
-        Assertions.assertThrows(RuntimeException.class, () -> lockService.lockAndRunIfLockWasSuccessful(() -> {
+        assertThrows(RuntimeException.class, () -> lockService.lockAndRunIfLockWasSuccessful(() -> {
             throw new RuntimeException("runnable failed");
         }, LockNumber.QUARTZ));
         verify(jdbcTemplate, times(1)).queryForObject(eq("SELECT pg_advisory_unlock(647)"), eq(Boolean.class));

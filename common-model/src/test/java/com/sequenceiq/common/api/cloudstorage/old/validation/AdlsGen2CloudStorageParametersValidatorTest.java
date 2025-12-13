@@ -1,8 +1,10 @@
 package com.sequenceiq.common.api.cloudstorage.old.validation;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import jakarta.validation.ConstraintValidatorContext;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
@@ -20,42 +22,42 @@ public class AdlsGen2CloudStorageParametersValidatorTest {
 
     @Test
     public void testAdlsGen2ParametersValidationWithLongAccountName() {
-        Assertions.assertFalse(testValidator(create("ab", null)));
+        assertFalse(testValidator(create("ab", null)));
     }
 
     @Test
     public void testAdlsGen2ParametersValidationWithShortAccountName() {
-        Assertions.assertFalse(testValidator(create("abcdefghijklm123456789123456789", null)));
+        assertFalse(testValidator(create("abcdefghijklm123456789123456789", null)));
     }
 
     @Test
     public void testAdlsGen2ParametersValidationWithInvalidAccountName() {
-        Assertions.assertFalse(testValidator(create(":?<>;/", null)));
+        assertFalse(testValidator(create(":?<>;/", null)));
     }
 
     @Test
     public void testAdlsGen2ParametersValidationWithNullAccountKey() {
-        Assertions.assertFalse(testValidator(create("validaccountname", null)));
+        assertFalse(testValidator(create("validaccountname", null)));
     }
 
     @Test
     public void testAdlsGen2ParametersValidationWithNullParams() {
-        Assertions.assertFalse(testValidator(create(null, null, null)));
+        assertFalse(testValidator(create(null, null, null)));
     }
 
     @Test
     public void testAdlsGen2ParametersValidationWithManagedIdentity() {
-        Assertions.assertTrue(testValidator(create(null, null, MANAGED_IDENTITY_ID)));
+        assertTrue(testValidator(create(null, null, MANAGED_IDENTITY_ID)));
     }
 
     @Test
     public void testAdlsGen2ParametersValidationWithInvalidAccountKey() {
-        Assertions.assertFalse(testValidator(create("validaccountname", "';'';';;'][['][")));
+        assertFalse(testValidator(create("validaccountname", "';'';';;'][['][")));
     }
 
     @Test
     public void testAdlsGen2ParametersValidation() {
-        Assertions.assertTrue(testValidator(create("validaccountname",
+        assertTrue(testValidator(create("validaccountname",
                 "utgWEh7k/rB7CAwSsTWY8tjskMJc5N4glKm+DYpRvdnQ0kOy5l04kvPeFmQMQjQhJvjCwVZtmPk/fvORZP3zwCR=")));
     }
 

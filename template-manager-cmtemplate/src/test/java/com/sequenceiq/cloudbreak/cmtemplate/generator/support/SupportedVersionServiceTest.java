@@ -1,22 +1,23 @@
 package com.sequenceiq.cloudbreak.cmtemplate.generator.support;
 
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.context.SpringBootTestContextBootstrapper;
 import org.springframework.test.context.BootstrapWith;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.sequenceiq.cloudbreak.cmtemplate.generator.CentralTemplateGeneratorContext;
 import com.sequenceiq.cloudbreak.cmtemplate.generator.support.domain.SupportedVersions;
 
-@RunWith(SpringRunner.class)
+@ExtendWith(SpringExtension.class)
 @BootstrapWith(SpringBootTestContextBootstrapper.class)
-public class SupportedVersionServiceTest extends CentralTemplateGeneratorContext {
+class SupportedVersionServiceTest extends CentralTemplateGeneratorContext {
 
     @Test
-    public void testServicesAndDependencies() {
+    void testServicesAndDependencies() {
         SupportedVersions supportedVersions = supportedVersionService().collectSupportedVersions();
-        Assert.assertTrue(!supportedVersions.getSupportedVersions().isEmpty());
+        assertTrue(!supportedVersions.getSupportedVersions().isEmpty());
     }
 }

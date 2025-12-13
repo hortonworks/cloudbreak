@@ -16,7 +16,6 @@ import jakarta.ws.rs.WebApplicationException;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.mockito.Mockito;
 
 import com.dyngr.core.AttemptResult;
 import com.dyngr.core.AttemptState;
@@ -28,9 +27,9 @@ import com.sequenceiq.flow.service.flowlog.FlowLogDBService;
 
 public class StackPollerProviderTest {
 
-    private final StackService stackService = Mockito.mock(StackService.class);
+    private final StackService stackService = mock(StackService.class);
 
-    private final FlowLogDBService flowLogDBService = Mockito.mock(FlowLogDBService.class);
+    private final FlowLogDBService flowLogDBService = mock(FlowLogDBService.class);
 
     private final StackPollerProvider underTest = new StackPollerProvider(stackService, flowLogDBService);
 
@@ -48,7 +47,7 @@ public class StackPollerProviderTest {
             doThrow(crn2Exception).when(stackService).triggerConfigUpdateForStack("crn2");
         }
         FlowLogWithoutPayload flowLog = getFlowLog(flowState);
-        Mockito.when(flowLogDBService.getLastFlowLog("1")).thenReturn(Optional.of(flowLog));
+        when(flowLogDBService.getLastFlowLog("1")).thenReturn(Optional.of(flowLog));
         AttemptResult<Void> result = underTest.stackUpdateConfigPoller(stackCrns, 1L, "1").process();
         assertEquals(expectedResult, result.getState());
     }

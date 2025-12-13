@@ -1,12 +1,12 @@
 package com.sequenceiq.cloudbreak.cloud.handler;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import jakarta.inject.Inject;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Configuration;
@@ -24,7 +24,7 @@ import com.sequenceiq.cloudbreak.cloud.task.PollTaskFactory;
 
 @SpringBootTest(classes = { TestApplicationContext.class, GetSSHFingerprintsComponentTest.TestConfig.class },
         properties = "spring.main.allow-bean-definition-overriding=true")
-public class GetSSHFingerprintsComponentTest extends AbstractComponentTest<GetSSHFingerprintsResult> {
+class GetSSHFingerprintsComponentTest extends AbstractComponentTest<GetSSHFingerprintsResult> {
     @Inject
     @Qualifier("instance")
     private CloudInstance instance;
@@ -34,7 +34,7 @@ public class GetSSHFingerprintsComponentTest extends AbstractComponentTest<GetSS
     private CloudInstance instanceBad;
 
     @Test
-    public void testGetSSHFingerprints() {
+    void testGetSSHFingerprints() {
         GetSSHFingerprintsResult result = sendCloudRequest();
 
         assertEquals(EventStatus.OK, result.getStatus());
@@ -42,7 +42,7 @@ public class GetSSHFingerprintsComponentTest extends AbstractComponentTest<GetSS
     }
 
     @Test
-    public void testGetSSHFingerprintsWithBadFingerprint() {
+    void testGetSSHFingerprintsWithBadFingerprint() {
         GetSSHFingerprintsResult result = sendCloudRequest(getBadRequest());
 
         assertEquals(EventStatus.FAILED, result.getStatus());
@@ -65,6 +65,6 @@ public class GetSSHFingerprintsComponentTest extends AbstractComponentTest<GetSS
 
     @Configuration
     @Import({GetSSHFingerprintsHandler.class, PollTaskFactory.class, SyncPollingScheduler.class, PollInstanceConsoleOutputTask.class})
-    public static class TestConfig {
+    static class TestConfig {
     }
 }

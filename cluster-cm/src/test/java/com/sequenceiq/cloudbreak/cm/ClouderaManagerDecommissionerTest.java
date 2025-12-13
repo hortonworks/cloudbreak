@@ -1,9 +1,9 @@
 package com.sequenceiq.cloudbreak.cm;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -30,7 +30,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -180,7 +179,7 @@ public class ClouderaManagerDecommissionerTest {
         // WHEN
         InstanceGroupDto firstInstanceGroup = instanceGroups.iterator().next();
 
-        NodeIsBusyException e = Assertions.assertThrows(NodeIsBusyException.class,
+        NodeIsBusyException e = assertThrows(NodeIsBusyException.class,
                 () -> underTest.verifyNodesAreRemovable(stack,
                         firstInstanceGroup.getInstanceMetadataViews(),
                         new ApiClient()));
@@ -406,10 +405,10 @@ public class ClouderaManagerDecommissionerTest {
         Set<InstanceMetadataView> downscaleCandidates = underTest.collectDownscaleCandidates(mock(ApiClient.class), stack, "hgName", -2,
                 new HashSet<>(downscaledHostGroup.getInstanceMetadataViews()));
         assertEquals(2, downscaleCandidates.size());
-        assertTrue("Assert if downscaleCandidates contains hg0-instanceid-4",
-                downscaleCandidates.stream().anyMatch(instanceMetaData -> "hg0-instanceid-4".equals(instanceMetaData.getInstanceId())));
-        assertTrue("Assert if downscaleCandidates contains hg0-instanceid-4",
-                downscaleCandidates.stream().anyMatch(instanceMetaData -> "hg0-instanceid-5".equals(instanceMetaData.getInstanceId())));
+        assertTrue(downscaleCandidates.stream().anyMatch(instanceMetaData -> "hg0-instanceid-4".equals(instanceMetaData.getInstanceId())),
+                "Assert if downscaleCandidates contains hg0-instanceid-4");
+        assertTrue(downscaleCandidates.stream().anyMatch(instanceMetaData -> "hg0-instanceid-5".equals(instanceMetaData.getInstanceId())),
+                "Assert if downscaleCandidates contains hg0-instanceid-4");
     }
 
     @Test
@@ -468,10 +467,10 @@ public class ClouderaManagerDecommissionerTest {
         Set<InstanceMetadataView> downscaleCandidates = underTest.collectDownscaleCandidates(mock(ApiClient.class), stack, "hgName", -2,
                 new HashSet<>(downscaledHostGroup.getInstanceMetadataViews()));
         assertEquals(2, downscaleCandidates.size());
-        assertTrue("Assert if downscaleCandidates contains hg0-host-2, because FQDN is missing",
-                downscaleCandidates.stream().anyMatch(instanceMetaData -> "hg0-instanceid-2".equals(instanceMetaData.getInstanceId())));
-        assertTrue("Assert if downscaleCandidates contains hg0-host-5",
-                downscaleCandidates.stream().anyMatch(instanceMetaData -> "hg0-host-5".equals(instanceMetaData.getDiscoveryFQDN())));
+        assertTrue(downscaleCandidates.stream().anyMatch(instanceMetaData -> "hg0-instanceid-2".equals(instanceMetaData.getInstanceId())),
+                "Assert if downscaleCandidates contains hg0-host-2, because FQDN is missing");
+        assertTrue(downscaleCandidates.stream().anyMatch(instanceMetaData -> "hg0-host-5".equals(instanceMetaData.getDiscoveryFQDN())),
+                "Assert if downscaleCandidates contains hg0-host-5");
     }
 
     @Test
@@ -561,8 +560,8 @@ public class ClouderaManagerDecommissionerTest {
 
         Set<InstanceMetadataView> removableInstances = underTest.collectDownscaleCandidates(v51Client, stack, "compute", 2, instanceMetaDataSet);
         assertEquals(2, removableInstances.size());
-        Assertions.assertTrue(removableInstances.contains(unknown1));
-        Assertions.assertTrue(removableInstances.contains(unknown2));
+        assertTrue(removableInstances.contains(unknown1));
+        assertTrue(removableInstances.contains(unknown2));
     }
 
     @Test
@@ -592,9 +591,9 @@ public class ClouderaManagerDecommissionerTest {
 
         Set<InstanceMetadataView> removableInstances = underTest.collectDownscaleCandidates(v51Client, stack, "compute", 3, instanceMetaDataSet);
         assertEquals(3, removableInstances.size());
-        Assertions.assertTrue(removableInstances.contains(unknown1));
-        Assertions.assertTrue(removableInstances.contains(unknown2));
-        Assertions.assertTrue(removableInstances.contains(bad1));
+        assertTrue(removableInstances.contains(unknown1));
+        assertTrue(removableInstances.contains(unknown2));
+        assertTrue(removableInstances.contains(bad1));
     }
 
     @Test
@@ -624,10 +623,10 @@ public class ClouderaManagerDecommissionerTest {
 
         Set<InstanceMetadataView> removableInstances = underTest.collectDownscaleCandidates(v51Client, stack, "compute", 4, instanceMetaDataSet);
         assertEquals(4, removableInstances.size());
-        Assertions.assertTrue(removableInstances.contains(failed1));
-        Assertions.assertTrue(removableInstances.contains(failed2));
-        Assertions.assertTrue(removableInstances.contains(healthy2));
-        Assertions.assertTrue(removableInstances.contains(bad1));
+        assertTrue(removableInstances.contains(failed1));
+        assertTrue(removableInstances.contains(failed2));
+        assertTrue(removableInstances.contains(healthy2));
+        assertTrue(removableInstances.contains(bad1));
     }
 
     static Object[][] testDataMultiAz() {
@@ -772,7 +771,7 @@ public class ClouderaManagerDecommissionerTest {
                 .map(InstanceMetadataView::getDiscoveryFQDN)
                 .collect(Collectors.toSet());
 
-        Assertions.assertTrue(matchExpectedHosts(removableHosts, expectedHosts), () -> String.format("removableHosts: %s, expectedHosts: %s",
+        assertTrue(matchExpectedHosts(removableHosts, expectedHosts), () -> String.format("removableHosts: %s, expectedHosts: %s",
                 removableHosts, expectedHosts));
     }
 
@@ -1090,7 +1089,7 @@ public class ClouderaManagerDecommissionerTest {
     }
 
     private InstanceMetaData createInstanceMetadata(String instanceId, InstanceStatus servicesHealthy, String runningInstanceFqdn,
-                                                    String instanceGroupName, String availabilityZone) {
+            String instanceGroupName, String availabilityZone) {
         InstanceMetaData instanceMetaData = new InstanceMetaData();
         instanceMetaData.setInstanceId(instanceId);
         instanceMetaData.setInstanceStatus(servicesHealthy);

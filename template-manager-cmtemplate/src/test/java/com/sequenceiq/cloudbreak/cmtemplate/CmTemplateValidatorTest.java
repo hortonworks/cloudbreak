@@ -27,7 +27,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -361,7 +360,7 @@ public class CmTemplateValidatorTest {
         Set<String> components = new HashSet<>();
         components.add("KAFKA_BROKER");
         componentsByHostGroup.put("compute", components);
-        Mockito.lenient().when(processor.getComponentsByHostGroup()).thenReturn(componentsByHostGroup);
+        lenient().when(processor.getComponentsByHostGroup()).thenReturn(componentsByHostGroup);
         Optional<ClouderaManagerProduct> product = Optional.of(clouderaManagerRepo);
         if (!allowUpscale) {
             Throwable exception = assertThrows(BadRequestException.class,

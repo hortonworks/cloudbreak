@@ -1,6 +1,8 @@
 package com.sequenceiq.datalake.service.sdx;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anySet;
@@ -13,7 +15,6 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 import java.util.stream.Stream;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -76,7 +77,7 @@ class StorageValidationServiceTest {
         cloudStorageRequest.setFileSystemType(FileSystemType.ADLS_GEN_2);
         cloudStorageRequest.setAdlsGen2(null);
 
-        Assertions.assertThrows(BadRequestException.class,
+        assertThrows(BadRequestException.class,
                 () -> underTest.validateCloudStorage("AZURE", cloudStorageRequest));
     }
 
@@ -101,7 +102,7 @@ class StorageValidationServiceTest {
         adlsGen2.setManagedIdentity(null);
         cloudStorageRequest.setAdlsGen2(adlsGen2);
 
-        Assertions.assertThrows(BadRequestException.class,
+        assertThrows(BadRequestException.class,
                 () -> underTest.validateCloudStorage("AZURE", cloudStorageRequest));
     }
 
@@ -112,7 +113,7 @@ class StorageValidationServiceTest {
         cloudStorageRequest.setFileSystemType(FileSystemType.S3);
         cloudStorageRequest.setS3(null);
 
-        Assertions.assertThrows(BadRequestException.class,
+        assertThrows(BadRequestException.class,
                 () -> underTest.validateCloudStorage("AWS", cloudStorageRequest));
     }
 
@@ -137,7 +138,7 @@ class StorageValidationServiceTest {
         s3.setInstanceProfile(null);
         cloudStorageRequest.setS3(s3);
 
-        Assertions.assertThrows(BadRequestException.class,
+        assertThrows(BadRequestException.class,
                 () -> underTest.validateCloudStorage("AWS", cloudStorageRequest));
     }
 
@@ -148,7 +149,7 @@ class StorageValidationServiceTest {
         cloudStorageRequest.setFileSystemType(FileSystemType.GCS);
         cloudStorageRequest.setGcs(null);
 
-        Assertions.assertThrows(BadRequestException.class,
+        assertThrows(BadRequestException.class,
                 () -> underTest.validateCloudStorage("GCP", cloudStorageRequest));
     }
 
@@ -173,7 +174,7 @@ class StorageValidationServiceTest {
         gcs.setServiceAccountEmail(null);
         cloudStorageRequest.setGcs(gcs);
 
-        Assertions.assertThrows(BadRequestException.class,
+        assertThrows(BadRequestException.class,
                 () -> underTest.validateCloudStorage("GCP", cloudStorageRequest));
     }
 
@@ -185,7 +186,7 @@ class StorageValidationServiceTest {
         params.setInstanceProfile("instanceProfile");
         cloudStorageRequest.setS3(params);
 
-        BadRequestException exception = Assertions.assertThrows(BadRequestException.class,
+        BadRequestException exception = assertThrows(BadRequestException.class,
                 () -> underTest.validateCloudStorage(CloudPlatform.AWS.toString(), cloudStorageRequest));
         assertEquals(exception.getMessage(), "AWS baselocation missing protocol. please specify s3a://");
     }
@@ -208,14 +209,14 @@ class StorageValidationServiceTest {
         sdxClusterRequest.setCloudStorage(sdxCloudStorageRequest);
         DetailedEnvironmentResponse environment = new DetailedEnvironmentResponse();
         environment.setCloudPlatform("AWS");
-        BadRequestException exception = Assertions.assertThrows(BadRequestException.class,
+        BadRequestException exception = assertThrows(BadRequestException.class,
                 () -> underTest.validateCloudStorage(CloudPlatform.AWS.toString(), sdxCloudStorageRequest));
         assertEquals(exception.getMessage(), "instance profile must be defined for S3");
     }
 
     @Test
     public void validateBackupStorageSdxClusterFailure() {
-        BadRequestException exception = Assertions.assertThrows(BadRequestException.class,
+        BadRequestException exception = assertThrows(BadRequestException.class,
                 () -> underTest.validateBackupStorage(sdxCluster, BackupOperationType.ANY, null));
         assertEquals(exception.getMessage(), "Failed to validate backup storage");
     }
@@ -224,7 +225,7 @@ class StorageValidationServiceTest {
     public void validateBackupStorageEnvironmentServiceFailure() {
         when(sdxCluster.getEnvName()).thenReturn("test environment");
         when(environmentService.getDetailedEnvironmentResponseByName(anyString())).thenReturn(new DetailedEnvironmentResponse());
-        BadRequestException exception = Assertions.assertThrows(BadRequestException.class,
+        BadRequestException exception = assertThrows(BadRequestException.class,
                 () -> underTest.validateBackupStorage(sdxCluster, BackupOperationType.ANY,  null));
         assertEquals(exception.getMessage(), "Failed to validate backup storage");
     }
@@ -249,12 +250,12 @@ class StorageValidationServiceTest {
         ValidationResult validationResult = underTest.validateBackupStorage(sdxCluster, BackupOperationType.ANY, null);
         verify(cloudStorageValidator, times(1)).validateBackupLocation(cloudStorageRequestArgumentCaptor.capture(),
                 eq(BackupOperationType.ANY), detailedEnvironmentResponseArgumentCaptor.capture(), eq(null), any(), any());
-        Assertions.assertEquals(2, cloudStorageRequestArgumentCaptor.getValue().getLocations().size());
-        Assertions.assertEquals(2, cloudStorageRequestArgumentCaptor.getValue().getIdentities().size());
-        Assertions.assertNull(cloudStorageRequestArgumentCaptor.getValue().getAws());
-        Assertions.assertEquals("test-environment", detailedEnvironmentResponseArgumentCaptor.getValue().getParentEnvironmentName());
-        Assertions.assertEquals(DEFAULT_BACKUP_LOCATION, detailedEnvironmentResponseArgumentCaptor.getValue().getBackupLocation());
-        Assertions.assertEquals(ValidationResult.State.VALID, validationResult.getState());
+        assertEquals(2, cloudStorageRequestArgumentCaptor.getValue().getLocations().size());
+        assertEquals(2, cloudStorageRequestArgumentCaptor.getValue().getIdentities().size());
+        assertNull(cloudStorageRequestArgumentCaptor.getValue().getAws());
+        assertEquals("test-environment", detailedEnvironmentResponseArgumentCaptor.getValue().getParentEnvironmentName());
+        assertEquals(DEFAULT_BACKUP_LOCATION, detailedEnvironmentResponseArgumentCaptor.getValue().getBackupLocation());
+        assertEquals(ValidationResult.State.VALID, validationResult.getState());
     }
 
     @Test
@@ -274,11 +275,11 @@ class StorageValidationServiceTest {
         ValidationResult validationResult = underTest.validateBackupStorage(sdxCluster, BackupOperationType.ANY, BACKUP_LOCATION);
         verify(cloudStorageValidator, times(1)).validateBackupLocation(cloudStorageRequestArgumentCaptor.capture(),
                 eq(BackupOperationType.ANY), detailedEnvironmentResponseArgumentCaptor.capture(), eq(BACKUP_LOCATION), any(), any());
-        Assertions.assertEquals(2, cloudStorageRequestArgumentCaptor.getValue().getLocations().size());
-        Assertions.assertEquals(2, cloudStorageRequestArgumentCaptor.getValue().getIdentities().size());
-        Assertions.assertNull(cloudStorageRequestArgumentCaptor.getValue().getAws());
-        Assertions.assertEquals("test-environment", detailedEnvironmentResponseArgumentCaptor.getValue().getParentEnvironmentName());
-        Assertions.assertEquals(ValidationResult.State.VALID, validationResult.getState());
+        assertEquals(2, cloudStorageRequestArgumentCaptor.getValue().getLocations().size());
+        assertEquals(2, cloudStorageRequestArgumentCaptor.getValue().getIdentities().size());
+        assertNull(cloudStorageRequestArgumentCaptor.getValue().getAws());
+        assertEquals("test-environment", detailedEnvironmentResponseArgumentCaptor.getValue().getParentEnvironmentName());
+        assertEquals(ValidationResult.State.VALID, validationResult.getState());
     }
 
     public static Stream<Arguments> storageBaseLocationsWhiteSpaceValidation() {

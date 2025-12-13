@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -19,7 +20,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
@@ -56,7 +56,7 @@ class AltusIAMServiceTest {
 
     @Test
     void testGenerateMachineUserWithAccessKeyForLegacyCmWhenFipsEnabled() {
-        try (MockedStatic<Security> mockedStatic = Mockito.mockStatic(Security.class)) {
+        try (MockedStatic<Security> mockedStatic = mockStatic(Security.class)) {
             Provider provider = mock(Provider.class);
             mockedStatic.when(() -> Security.getProvider(anyString())).thenReturn(provider);
             when(umsClient.createMachineUserAndGenerateKeys(anyString(), anyString(), anyString(), anyString(), anyMap(), any()))

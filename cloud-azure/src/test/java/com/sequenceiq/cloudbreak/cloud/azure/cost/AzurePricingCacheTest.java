@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.azure.cost;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
@@ -10,7 +13,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -46,8 +48,8 @@ class AzurePricingCacheTest {
 
         Optional<Double> price = spiedUnderTest.getPriceForInstanceType(REGION, INSTANCE_TYPE, null);
 
-        Assertions.assertTrue(price.isPresent());
-        Assertions.assertEquals(0.69, price.get());
+        assertTrue(price.isPresent());
+        assertEquals(0.69, price.get());
     }
 
     @Test
@@ -56,8 +58,8 @@ class AzurePricingCacheTest {
 
         Optional<Integer> cpu = underTest.getCpuCountForInstanceType(REGION, INSTANCE_TYPE, null);
 
-        Assertions.assertTrue(cpu.isPresent());
-        Assertions.assertEquals(69, cpu.get());
+        assertTrue(cpu.isPresent());
+        assertEquals(69, cpu.get());
     }
 
     @Test
@@ -66,8 +68,8 @@ class AzurePricingCacheTest {
 
         Optional<Integer> memory = underTest.getMemoryForInstanceType(REGION, INSTANCE_TYPE, null);
 
-        Assertions.assertTrue(memory.isPresent());
-        Assertions.assertEquals(420, memory.get());
+        assertTrue(memory.isPresent());
+        assertEquals(420, memory.get());
     }
 
     @Test
@@ -76,12 +78,12 @@ class AzurePricingCacheTest {
         Optional<Double> standardssd = underTest.getStoragePricePerGBHour("westus2", "StandardSSD_LRS", 500);
         Optional<Double> standardhdd = underTest.getStoragePricePerGBHour("westus2", "StandardHDD", 500);
 
-        Assertions.assertTrue(premiumssd.isPresent());
-        Assertions.assertTrue(standardssd.isPresent());
-        Assertions.assertTrue(standardhdd.isPresent());
-        Assertions.assertEquals(0.00018489, premiumssd.get(), 0.00001);
-        Assertions.assertEquals(0.00010666, standardssd.get(), 0.00001);
-        Assertions.assertEquals(0.00006044, standardhdd.get(), 0.00001);
+        assertTrue(premiumssd.isPresent());
+        assertTrue(standardssd.isPresent());
+        assertTrue(standardhdd.isPresent());
+        assertEquals(0.00018489, premiumssd.get(), 0.00001);
+        assertEquals(0.00010666, standardssd.get(), 0.00001);
+        assertEquals(0.00006044, standardhdd.get(), 0.00001);
     }
 
     @Test
@@ -92,10 +94,10 @@ class AzurePricingCacheTest {
         Optional<Double> price1 = spiedUnderTest.getPriceForInstanceType(REGION, INSTANCE_TYPE, null);
         Optional<Double> price2 = spiedUnderTest.getPriceForInstanceType(REGION, INSTANCE_TYPE, null);
 
-        Assertions.assertTrue(price1.isPresent());
-        Assertions.assertTrue(price2.isPresent());
-        Assertions.assertEquals(0.69, price1.get());
-        Assertions.assertEquals(0.69, price2.get());
+        assertTrue(price1.isPresent());
+        assertTrue(price2.isPresent());
+        assertEquals(0.69, price1.get());
+        assertEquals(0.69, price2.get());
     }
 
     @Test
@@ -105,41 +107,41 @@ class AzurePricingCacheTest {
         Optional<Integer> cpu1 = underTest.getCpuCountForInstanceType(REGION, INSTANCE_TYPE, null);
         Optional<Integer> cpu2 = underTest.getCpuCountForInstanceType(REGION, INSTANCE_TYPE, null);
 
-        Assertions.assertTrue(cpu1.isPresent());
-        Assertions.assertTrue(cpu2.isPresent());
-        Assertions.assertEquals(69, cpu1.get());
-        Assertions.assertEquals(69, cpu2.get());
+        assertTrue(cpu1.isPresent());
+        assertTrue(cpu2.isPresent());
+        assertEquals(69, cpu1.get());
+        assertEquals(69, cpu2.get());
     }
 
     @Test
     void getStoragePriceWithZeroVolumeSize() {
         Optional<Double> price = underTest.getStoragePricePerGBHour("eastus", "StandardSSD_LRS", 0);
 
-        Assertions.assertTrue(price.isEmpty());
+        assertTrue(price.isEmpty());
     }
 
     @Test
     void getStoragePriceWithNullStorageType() {
         Optional<Double> price = underTest.getStoragePricePerGBHour("eastus", null, 100);
 
-        Assertions.assertTrue(price.isPresent());
-        Assertions.assertEquals(AZURE_DEFAULT_STORAGE_PRICE / 100, price.get(), 0.00001);
+        assertTrue(price.isPresent());
+        assertEquals(AZURE_DEFAULT_STORAGE_PRICE / 100, price.get(), 0.00001);
     }
 
     @Test
     void getStoragePriceWithUnknownStorageType() {
         Optional<Double> price = underTest.getStoragePricePerGBHour("eastus", "unknown", 100);
 
-        Assertions.assertTrue(price.isPresent());
-        Assertions.assertEquals(AZURE_DEFAULT_STORAGE_PRICE / 100, price.get(), 0.00001);
+        assertTrue(price.isPresent());
+        assertEquals(AZURE_DEFAULT_STORAGE_PRICE / 100, price.get(), 0.00001);
     }
 
     @Test
     void getStoragePrice() {
         Optional<Double> price = underTest.getStoragePricePerGBHour("eastus", "StandardSSD_LRS", 1000);
 
-        Assertions.assertTrue(price.isPresent());
-        Assertions.assertNotEquals(0.0, price.get());
+        assertTrue(price.isPresent());
+        assertNotEquals(0.0, price.get());
     }
 
     private PriceResponse getPriceResponse() {

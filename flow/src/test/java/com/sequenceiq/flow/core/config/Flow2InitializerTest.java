@@ -1,6 +1,7 @@
 package com.sequenceiq.flow.core.config;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
@@ -10,7 +11,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -72,7 +72,7 @@ class Flow2InitializerTest {
         flowConfigs.add(new HelloWorldFlowConfig());
         given(flowEventChainFactory.initEvent()).willReturn(HelloWorldEvent.HELLOWORLD_TRIGGER_EVENT.name());
         flowChainFactories.add(flowEventChainFactory);
-        RuntimeException runtimeException = Assertions.assertThrows(RuntimeException.class, () -> underTest.init());
+        RuntimeException runtimeException = assertThrows(RuntimeException.class, () -> underTest.init());
         assertEquals("HELLOWORLD_TRIGGER_EVENT is a flow selector and a flow chain selector. It should be only in one category.",
                 runtimeException.getMessage());
         verify(reactor, times(0)).on(any(), any(Consumer.class));

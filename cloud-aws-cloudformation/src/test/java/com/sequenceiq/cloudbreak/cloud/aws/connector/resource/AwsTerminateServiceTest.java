@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.aws.connector.resource;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -12,7 +13,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Supplier;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Answers;
@@ -130,7 +130,7 @@ public class AwsTerminateServiceTest {
         verify(awsComputeResourceService, times(1)).deleteComputeResources(any(), any(), any());
         verify(cloudFormationRetryClient, never()).deleteStack(any());
         verify(amazonAutoScalingClient, never()).describeAutoScalingGroups(any());
-        Assertions.assertEquals(0, result.size(), "Resources result should be empty");
+        assertEquals(0, result.size(), "Resources result should be empty");
     }
 
     @Test
@@ -141,7 +141,7 @@ public class AwsTerminateServiceTest {
         verify(awsComputeResourceService, times(1)).deleteComputeResources(any(), any(), any());
         verify(cloudFormationRetryClient, never()).deleteStack(any());
         verify(amazonAutoScalingClient, never()).describeAutoScalingGroups(any());
-        Assertions.assertEquals(0, result.size(), "Resources result should be empty");
+        assertEquals(0, result.size(), "Resources result should be empty");
     }
 
     @Test
@@ -162,7 +162,7 @@ public class AwsTerminateServiceTest {
         verify(awsComputeResourceService, times(1)).deleteComputeResources(any(), any(), any());
         verify(cloudFormationRetryClient, never()).deleteStack(any());
         verify(amazonAutoScalingClient, never()).describeAutoScalingGroups(any());
-        Assertions.assertEquals(0, result.size(), "Resources result should be empty");
+        assertEquals(0, result.size(), "Resources result should be empty");
 
     }
 
@@ -194,7 +194,7 @@ public class AwsTerminateServiceTest {
         verify(awsComputeResourceService, times(1)).deleteComputeResources(any(), any(), any());
         verify(retryService, times(1)).testWith2SecDelayMax5Times(any(Supplier.class));
         verify(amazonAutoScalingClient, times(1)).describeAutoScalingGroups(any());
-        Assertions.assertEquals(0, result.size(), "Resources result should have one size list");
+        assertEquals(0, result.size(), "Resources result should have one size list");
     }
 
     private AuthenticatedContext authenticatedContext() {

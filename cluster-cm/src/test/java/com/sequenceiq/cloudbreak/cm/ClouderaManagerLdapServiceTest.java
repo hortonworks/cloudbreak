@@ -1,18 +1,20 @@
 package com.sequenceiq.cloudbreak.cm;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.cloudera.api.swagger.AuthRolesResourceApi;
@@ -39,7 +41,8 @@ import com.sequenceiq.cloudbreak.dto.LdapView;
 import com.sequenceiq.cloudbreak.util.TestConstants;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 
-public class ClouderaManagerLdapServiceTest {
+@ExtendWith(MockitoExtension.class)
+class ClouderaManagerLdapServiceTest {
     @Mock
     private ClouderaManagerResourceApi clouderaManagerResourceApi;
 
@@ -70,8 +73,8 @@ public class ClouderaManagerLdapServiceTest {
 
     private HttpClientConfig httpClientConfig;
 
-    @Before
-    public void init() throws ClouderaManagerClientInitException {
+    @BeforeEach
+    void init() throws ClouderaManagerClientInitException {
         User user = new User();
         stack = new Stack();
         stack.setCreator(user);
@@ -79,17 +82,16 @@ public class ClouderaManagerLdapServiceTest {
         cluster.setName("clusterName");
         stack.setCluster(cluster);
         httpClientConfig = new HttpClientConfig("apiAddress");
-        MockitoAnnotations.initMocks(this);
         String cmUser = cluster.getCloudbreakClusterManagerUser();
         String cmPassword = cluster.getCloudbreakClusterManagerPassword();
-        when(clouderaManagerApiClientProvider.getV31Client(stack.getGatewayPort(), cmUser, cmPassword, httpClientConfig)).thenReturn(apiClient);
-        when(clouderaManagerApiFactory.getClouderaManagerResourceApi(apiClient)).thenReturn(clouderaManagerResourceApi);
-        when(clouderaManagerApiFactory.getExternalUserMappingsResourceApi(apiClient)).thenReturn(externalUserMappingsResourceApi);
-        when(clouderaManagerApiFactory.getAuthRolesResourceApi(apiClient)).thenReturn(authRolesResourceApi);
+        lenient().when(clouderaManagerApiClientProvider.getV31Client(stack.getGatewayPort(), cmUser, cmPassword, httpClientConfig)).thenReturn(apiClient);
+        lenient().when(clouderaManagerApiFactory.getClouderaManagerResourceApi(apiClient)).thenReturn(clouderaManagerResourceApi);
+        lenient().when(clouderaManagerApiFactory.getExternalUserMappingsResourceApi(apiClient)).thenReturn(externalUserMappingsResourceApi);
+        lenient().when(clouderaManagerApiFactory.getAuthRolesResourceApi(apiClient)).thenReturn(authRolesResourceApi);
     }
 
     @Test
-    public void testSetupLdapWithoutGroupMapping() throws ApiException, ClouderaManagerClientInitException {
+    void testSetupLdapWithoutGroupMapping() throws ApiException, ClouderaManagerClientInitException {
         // GIVEN
         LdapView ldapConfig = getLdapConfig();
         when(authRolesResourceApi.readAuthRolesMetadata(null)).thenReturn(new ApiAuthRoleMetadataList());
@@ -100,7 +102,7 @@ public class ClouderaManagerLdapServiceTest {
     }
 
     @Test
-    public void testSetupLdapWithFullAdminGroupMapping() throws ApiException, ClouderaManagerClientInitException {
+    void testSetupLdapWithFullAdminGroupMapping() throws ApiException, ClouderaManagerClientInitException {
         // GIVEN
         ReflectionTestUtils.setField(underTest, "adminRole", "ROLE_ADMIN");
         ReflectionTestUtils.setField(underTest, "limitedAdminRole", "NO_ROLE_LIMITED_CLUSTER_ADMIN");
@@ -129,7 +131,7 @@ public class ClouderaManagerLdapServiceTest {
     }
 
     @Test
-    public void testSetupLdapWithLimitedAdminGroupMapping() throws ApiException, ClouderaManagerClientInitException {
+    void testSetupLdapWithLimitedAdminGroupMapping() throws ApiException, ClouderaManagerClientInitException {
         // GIVEN
         ReflectionTestUtils.setField(underTest, "adminRole", "ROLE_ADMIN");
         ReflectionTestUtils.setField(underTest, "limitedAdminRole", "ROLE_LIMITED_CLUSTER_ADMIN");
@@ -156,7 +158,7 @@ public class ClouderaManagerLdapServiceTest {
     }
 
     @Test
-    public void testSetupLdapWithNoRoleAdmin() throws ApiException, ClouderaManagerClientInitException {
+    void testSetupLdapWithNoRoleAdmin() throws ApiException, ClouderaManagerClientInitException {
         // GIVEN
         ReflectionTestUtils.setField(underTest, "adminRole", "ROLE_CONFIGURATOR");
         ReflectionTestUtils.setField(underTest, "limitedAdminRole", "ROLE_CONFIGURATOR_2");
@@ -172,7 +174,7 @@ public class ClouderaManagerLdapServiceTest {
     }
 
     @Test
-    public void testSetupLdapWithoutLdap() throws ApiException, ClouderaManagerClientInitException {
+    void testSetupLdapWithoutLdap() throws ApiException, ClouderaManagerClientInitException {
         // GIVEN
         // WHEN
         underTest.setupLdap(stack, cluster, httpClientConfig, null, null);

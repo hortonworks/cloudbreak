@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common.validator;
 
 import static com.sequenceiq.cloudbreak.common.type.TemporaryStorage.EPHEMERAL_VOLUMES;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -16,7 +18,6 @@ import java.util.stream.IntStream;
 
 import jakarta.inject.Inject;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
@@ -153,7 +154,7 @@ public class AwsStorageValidatorsTest {
         cloudVmTypes.setCloudVmResponses(responses);
         when(awsPlatformResources.virtualMachines(any(), eq(Region.region("region")), any())).thenReturn(cloudVmTypes);
         when(entitlementService.getEntitlements(any())).thenReturn(new ArrayList<>());
-        Assertions.assertThrows(CloudConnectorException.class,
+        assertThrows(CloudConnectorException.class,
                 () -> awsStorageValidatorUnderTest.validate(authenticatedContext, cloudStack),
                 "The following instance types does not support instance storage: [noStorage]");
     }
@@ -190,12 +191,12 @@ public class AwsStorageValidatorsTest {
         tests.add(DynamicTest.dynamicTest("value could start with aws", () -> testTagsWithExpectedTeBeFair(VALID, "aws1234567890")));
 
         tests.add(DynamicTest.dynamicTest("too many tags",
-                () -> Assertions.assertThrows(IllegalArgumentException.class,
+                () -> assertThrows(IllegalArgumentException.class,
                         () -> awsTagValidatorUnderTest.validate(authenticatedContext, getTestCloudStackWithTags(getManyTags(51))))));
         tests.add(DynamicTest.dynamicTest("so many tags but valid",
-                () -> Assertions.assertDoesNotThrow(() -> awsTagValidatorUnderTest.validate(authenticatedContext, getTestCloudStackWithTags(getManyTags(50))))));
+                () -> assertDoesNotThrow(() -> awsTagValidatorUnderTest.validate(authenticatedContext, getTestCloudStackWithTags(getManyTags(50))))));
         tests.add(DynamicTest.dynamicTest("no tags at all",
-                () -> Assertions.assertDoesNotThrow(() -> awsTagValidatorUnderTest.validate(authenticatedContext, getTestCloudStackWithTags(getManyTags(0))))));
+                () -> assertDoesNotThrow(() -> awsTagValidatorUnderTest.validate(authenticatedContext, getTestCloudStackWithTags(getManyTags(0))))));
 
         return tests;
     }
@@ -209,13 +210,13 @@ public class AwsStorageValidatorsTest {
     private void testTagsWithExpectedException(String key, String value) {
         Map<String, String> tags = new HashMap<>();
         tags.put(key, value);
-        Assertions.assertThrows(IllegalArgumentException.class, () -> awsTagValidatorUnderTest.validate(authenticatedContext, getTestCloudStackWithTags(tags)));
+        assertThrows(IllegalArgumentException.class, () -> awsTagValidatorUnderTest.validate(authenticatedContext, getTestCloudStackWithTags(tags)));
     }
 
     private void testTagsWithExpectedTeBeFair(String key, String value) {
         Map<String, String> tags = new HashMap<>();
         tags.put(key, value);
-        Assertions.assertDoesNotThrow(() -> awsTagValidatorUnderTest.validate(authenticatedContext, getTestCloudStackWithTags(tags)));
+        assertDoesNotThrow(() -> awsTagValidatorUnderTest.validate(authenticatedContext, getTestCloudStackWithTags(tags)));
     }
 
     private Map<String, String> getManyTags(int numberOfTags) {

@@ -1,29 +1,29 @@
 package com.sequenceiq.redbeams.domain;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.redbeams.TestData;
 import com.sequenceiq.redbeams.api.endpoint.v4.ResourceStatus;
 
-public class DatabaseConfigTest {
+class DatabaseConfigTest {
 
     private DatabaseConfig config;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         config = new DatabaseConfig();
     }
 
     @Test
-    public void testGettersAndSetters() {
+    void testGettersAndSetters() {
         config.setId(1L);
         assertEquals(1L, config.getId().longValue());
 
@@ -79,7 +79,7 @@ public class DatabaseConfigTest {
     }
 
     @Test
-    public void testUnsetRelationsToEntitiesToBeDeleted() {
+    void testUnsetRelationsToEntitiesToBeDeleted() {
         config.setServer(new DatabaseServerConfig());
 
         config.unsetRelationsToEntitiesToBeDeleted();

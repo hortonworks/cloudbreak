@@ -1,16 +1,15 @@
 package com.sequenceiq.cloudbreak.controller.validation.stack.cluster.gateway;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Arrays;
 
-import jakarta.inject.Inject;
-
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.gateway.GatewayV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.gateway.topology.GatewayTopologyV4Request;
@@ -18,15 +17,15 @@ import com.sequenceiq.cloudbreak.config.ConversionConfig;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.State;
 
-@RunWith(SpringJUnit4ClassRunner.class)
+@ExtendWith(MockitoExtension.class)
 @ContextConfiguration(classes = {GatewayV4RequestValidator.class, ConversionConfig.class})
-public class GatewayV4RequestValidatorTest {
+class GatewayV4RequestValidatorTest {
 
-    @Inject
+    @InjectMocks
     private GatewayV4RequestValidator underTest;
 
     @Test
-    public void testValidationWithNameDuplicates() {
+    void testValidationWithNameDuplicates() {
         GatewayV4Request gatewayJson = new GatewayV4Request();
         GatewayTopologyV4Request topology1 = new GatewayTopologyV4Request();
         topology1.setTopologyName("Apple");
@@ -42,7 +41,7 @@ public class GatewayV4RequestValidatorTest {
     }
 
     @Test
-    public void testValidationWithoutNameDuplicates() {
+    void testValidationWithoutNameDuplicates() {
         GatewayV4Request gatewayJsonV4Request = new GatewayV4Request();
         GatewayTopologyV4Request topology1 = new GatewayTopologyV4Request();
         topology1.setTopologyName("Apple");
@@ -57,7 +56,7 @@ public class GatewayV4RequestValidatorTest {
     }
 
     @Test
-    public void testValidationWithMissingTopology() {
+    void testValidationWithMissingTopology() {
         GatewayV4Request gatewayJson = new GatewayV4Request();
         ValidationResult result = underTest.validate(gatewayJson);
 

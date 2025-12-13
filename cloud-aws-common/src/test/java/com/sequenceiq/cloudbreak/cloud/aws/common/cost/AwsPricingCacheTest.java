@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common.cost;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
@@ -11,7 +14,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -79,7 +81,7 @@ public class AwsPricingCacheTest {
         Optional<Double> price = underTest.getPriceForInstanceType(REGION, INSTANCE_TYPE,
                 new ExtendedCloudCredential(new CloudCredential(), "", "", "", List.of()));
 
-        Assertions.assertTrue(price.isEmpty());
+        assertTrue(price.isEmpty());
     }
 
     @Test
@@ -87,8 +89,8 @@ public class AwsPricingCacheTest {
         Optional<Double> price = underTest.getPriceForInstanceType(REGION, INSTANCE_TYPE,
                 new ExtendedCloudCredential(new CloudCredential(), "", "", "", List.of()));
 
-        Assertions.assertTrue(price.isPresent());
-        Assertions.assertEquals(0.69, price.get());
+        assertTrue(price.isPresent());
+        assertEquals(0.69, price.get());
     }
 
     @Test
@@ -98,8 +100,8 @@ public class AwsPricingCacheTest {
         Optional<Integer> cpu = underTest.getCpuCountForInstanceType(REGION, INSTANCE_TYPE,
                 new ExtendedCloudCredential(new CloudCredential(), "", "", "", List.of()));
 
-        Assertions.assertTrue(cpu.isPresent());
-        Assertions.assertEquals(69, cpu.get());
+        assertTrue(cpu.isPresent());
+        assertEquals(69, cpu.get());
     }
 
     @Test
@@ -109,8 +111,8 @@ public class AwsPricingCacheTest {
         Optional<Integer> memory = underTest.getMemoryForInstanceType(REGION, INSTANCE_TYPE,
                 new ExtendedCloudCredential(new CloudCredential(), "", "", "", List.of()));
 
-        Assertions.assertTrue(memory.isPresent());
-        Assertions.assertEquals(420, memory.get());
+        assertTrue(memory.isPresent());
+        assertEquals(420, memory.get());
     }
 
     @Test
@@ -120,41 +122,41 @@ public class AwsPricingCacheTest {
         Optional<Double> price2 = underTest.getPriceForInstanceType(REGION, INSTANCE_TYPE,
                 new ExtendedCloudCredential(new CloudCredential(), "", "", "", List.of()));
 
-        Assertions.assertTrue(price1.isPresent());
-        Assertions.assertTrue(price2.isPresent());
-        Assertions.assertEquals(0.69, price1.get());
-        Assertions.assertEquals(0.69, price2.get());
+        assertTrue(price1.isPresent());
+        assertTrue(price2.isPresent());
+        assertEquals(0.69, price1.get());
+        assertEquals(0.69, price2.get());
     }
 
     @Test
     void getStoragePriceWithZeroVolumeSize() {
         Optional<Double> price = underTest.getStoragePricePerGBHour(REGION, "gp2", 0);
 
-        Assertions.assertTrue(price.isEmpty());
+        assertTrue(price.isEmpty());
     }
 
     @Test
     void getStoragePriceWithNullStorageType() {
         Optional<Double> price = underTest.getStoragePricePerGBHour(REGION, "unknown", 100);
 
-        Assertions.assertTrue(price.isPresent());
-        Assertions.assertEquals(AWS_DEFAULT_STORAGE_PRICE, price.get(), 0.0001);
+        assertTrue(price.isPresent());
+        assertEquals(AWS_DEFAULT_STORAGE_PRICE, price.get(), 0.0001);
     }
 
     @Test
     void getStoragePriceWithUnknownStorageType() {
         Optional<Double> price = underTest.getStoragePricePerGBHour(REGION, "unknown", 100);
 
-        Assertions.assertTrue(price.isPresent());
-        Assertions.assertEquals(AWS_DEFAULT_STORAGE_PRICE, price.get(), 0.0001);
+        assertTrue(price.isPresent());
+        assertEquals(AWS_DEFAULT_STORAGE_PRICE, price.get(), 0.0001);
     }
 
     @Test
     void getStoragePrice() {
         Optional<Double> price = underTest.getStoragePricePerGBHour(REGION, "gp2", 1000);
 
-        Assertions.assertTrue(price.isPresent());
-        Assertions.assertNotEquals(0.0, price.get());
+        assertTrue(price.isPresent());
+        assertNotEquals(0.0, price.get());
     }
 
     private CloudVmTypes getCloudVmTypes() {

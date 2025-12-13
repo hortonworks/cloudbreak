@@ -1,30 +1,31 @@
 package com.sequenceiq.cloudbreak.domain.converter;
 
-import org.junit.Assert;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.DatalakeRequired;
 
-public class DatalakeRequiredConverterTest {
+class DatalakeRequiredConverterTest {
 
     private final DatalakeRequiredConverter datalakeRequiredConverter = new DatalakeRequiredConverter();
 
     @Test
-    public void testConvertToDatabaseColumnWhenRequiredIsReturnAsRequired() {
+    void testConvertToDatabaseColumnWhenRequiredIsReturnAsRequired() {
         String defaultString = datalakeRequiredConverter.convertToDatabaseColumn(DatalakeRequired.REQUIRED);
-        Assert.assertEquals("REQUIRED", defaultString);
+        assertEquals("REQUIRED", defaultString);
     }
 
     @Test
-    public void testConvertToEntityAttributeWheRequiredIsReturnAsRequired() {
+    void testConvertToEntityAttributeWheRequiredIsReturnAsRequired() {
         DatalakeRequired datalakeRequired = datalakeRequiredConverter.convertToEntityAttribute("REQUIRED");
-        Assert.assertEquals(DatalakeRequired.REQUIRED, datalakeRequired);
+        assertEquals(DatalakeRequired.REQUIRED, datalakeRequired);
     }
 
     @Test
-    public void testConvertToEntityAttributeWhenNotKnownIsReturnAsOptional() {
+    void testConvertToEntityAttributeWhenNotKnownIsReturnAsOptional() {
         DatalakeRequired datalakeRequired = datalakeRequiredConverter.convertToEntityAttribute("not-known");
-        Assert.assertEquals(DatalakeRequired.OPTIONAL, datalakeRequired);
+        assertEquals(DatalakeRequired.OPTIONAL, datalakeRequired);
     }
 
 }

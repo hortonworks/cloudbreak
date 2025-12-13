@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.setup;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -36,6 +36,6 @@ public class GcpImageAttemptMakerFactoryTest {
                 "destKey",
                 storage
         );
-        Assert.assertEquals(expected.getRewriteToken(), result.getRewriteToken());
+        assertEquals(expected.getRewriteToken(), result.getRewriteToken());
     }
 }

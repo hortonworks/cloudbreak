@@ -1,9 +1,9 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.knox;
 
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
-import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -14,12 +14,12 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateRoleConfigGroup;
@@ -52,8 +52,8 @@ import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.util.TestConstants;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 
-@RunWith(MockitoJUnitRunner.class)
-public class KnoxGatewayConfigProviderTest {
+@ExtendWith(MockitoExtension.class)
+class KnoxGatewayConfigProviderTest {
     private static final String TEST_USER_CRN = "crn:cdp:iam:us-west-1:1234:user:1";
 
     private static final String GATEWAY_SECURITY_DIR = "/mnt/cdp-luks/var/lib/knox/gateway/data/security";
@@ -76,7 +76,7 @@ public class KnoxGatewayConfigProviderTest {
     private final KnoxGatewayConfigProvider underTest = new KnoxGatewayConfigProvider();
 
     @Test
-    public void testGetAdditionalServicesWhenNoKnoxRequested() {
+    void testGetAdditionalServicesWhenNoKnoxRequested() {
         HostgroupView master = new HostgroupView("master", 1, InstanceGroupType.GATEWAY, 1);
         HostgroupView worker = new HostgroupView("worker", 2, InstanceGroupType.CORE, 2);
         TemplatePreparationObject preparationObject = Builder.builder().withHostgroupViews(Set.of(master, worker)).build();
@@ -89,7 +89,7 @@ public class KnoxGatewayConfigProviderTest {
     }
 
     @Test
-    public void testGetAdditionalServicesWhenKnoxRequestedAndBlueprintDoesNoContainKnox() {
+    void testGetAdditionalServicesWhenKnoxRequestedAndBlueprintDoesNoContainKnox() {
         HostgroupView master = new HostgroupView("master", 1, InstanceGroupType.GATEWAY, 1);
         HostgroupView worker = new HostgroupView("worker", 2, InstanceGroupType.CORE, 2);
         Gateway gateway = new Gateway();
@@ -113,7 +113,7 @@ public class KnoxGatewayConfigProviderTest {
     }
 
     @Test
-    public void testGetAdditionalServicesWhenKnoxRequestedAndBlueprintDoesNoContainKnoxWithMultiGateway() {
+    void testGetAdditionalServicesWhenKnoxRequestedAndBlueprintDoesNoContainKnoxWithMultiGateway() {
         HostgroupView master = new HostgroupView("master", 1, InstanceGroupType.GATEWAY, 1);
         HostgroupView master2 = new HostgroupView("master2", 1, InstanceGroupType.GATEWAY, 1);
         HostgroupView worker = new HostgroupView("worker", 2, InstanceGroupType.CORE, 2);
@@ -145,7 +145,7 @@ public class KnoxGatewayConfigProviderTest {
     }
 
     @Test
-    public void testGetAdditionalServicesWhenKnoxRequestedAndBlueprintContainsIt() {
+    void testGetAdditionalServicesWhenKnoxRequestedAndBlueprintContainsIt() {
         HostgroupView master = new HostgroupView("master", 1, InstanceGroupType.GATEWAY, 1);
         HostgroupView worker = new HostgroupView("worker", 2, InstanceGroupType.CORE, 2);
         Gateway gateway = new Gateway();
@@ -162,7 +162,7 @@ public class KnoxGatewayConfigProviderTest {
     }
 
     @Test
-    public void roleConfigsWithGateway() {
+    void roleConfigsWithGateway() {
         ReflectionTestUtils.setField(underTest, "knoxGatewaySecurityDir", GATEWAY_SECURITY_DIR);
         ReflectionTestUtils.setField(underTest, "knoxIdBrokerSecurityDir", IDBROKER_SECURITY_DIR);
 
@@ -231,7 +231,7 @@ public class KnoxGatewayConfigProviderTest {
     }
 
     @Test
-    public void roleConfigsWithGatewayOn731() {
+    void roleConfigsWithGatewayOn731() {
         ReflectionTestUtils.setField(underTest, "knoxGatewaySecurityDir", GATEWAY_SECURITY_DIR);
         ReflectionTestUtils.setField(underTest, "knoxIdBrokerSecurityDir", IDBROKER_SECURITY_DIR);
 
@@ -303,7 +303,7 @@ public class KnoxGatewayConfigProviderTest {
     }
 
     @Test
-    public void roleConfigsWithGatewayWhenOdbcEntitlementFalse() {
+    void roleConfigsWithGatewayWhenOdbcEntitlementFalse() {
         GatewayTopology topology = new GatewayTopology();
         topology.setTopologyName("my-topology");
         topology.setExposedServices(Json.silent(new ExposedServices()));
@@ -370,7 +370,7 @@ public class KnoxGatewayConfigProviderTest {
     }
 
     @Test
-    public void roleConfigsWithoutGateway() {
+    void roleConfigsWithoutGateway() {
         GeneralClusterConfigs gcc = new GeneralClusterConfigs();
         gcc.setPassword("secret");
         gcc.setAccountId(Optional.of("1234"));
@@ -415,7 +415,7 @@ public class KnoxGatewayConfigProviderTest {
     }
 
     @Test
-    public void roleConfigsWithGatewayWithLdapConfig() {
+    void roleConfigsWithGatewayWithLdapConfig() {
         Gateway gateway = new Gateway();
         gateway.setKnoxMasterSecret("admin");
         gateway.setPath("/a/b/c");
@@ -474,7 +474,7 @@ public class KnoxGatewayConfigProviderTest {
     }
 
     @Test
-    public void roleConfigsWithGatewayWithLdapConfigWhenOdbcEntitlementFalse() {
+    void roleConfigsWithGatewayWithLdapConfigWhenOdbcEntitlementFalse() {
         Gateway gateway = new Gateway();
         gateway.setKnoxMasterSecret("admin");
         gateway.setPath("/a/b/c");
@@ -535,7 +535,7 @@ public class KnoxGatewayConfigProviderTest {
     }
 
     @Test
-    public void roleConfigsWithGatewayOnGovCloud() {
+    void roleConfigsWithGatewayOnGovCloud() {
         Gateway gateway = new Gateway();
         gateway.setKnoxMasterSecret("admin");
         gateway.setPath("/a/b/c");
@@ -597,7 +597,7 @@ public class KnoxGatewayConfigProviderTest {
     }
 
     @Test
-    public void testGatewayWhitelistConfig() {
+    void testGatewayWhitelistConfig() {
         TemplatePreparationObject noKerberosTPO = Builder.builder()
                 .withGeneralClusterConfigs(new GeneralClusterConfigs())
                 .build();

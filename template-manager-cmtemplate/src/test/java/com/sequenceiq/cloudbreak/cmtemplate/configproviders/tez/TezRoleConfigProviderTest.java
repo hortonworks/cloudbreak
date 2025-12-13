@@ -1,15 +1,15 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.tez;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
@@ -23,19 +23,19 @@ import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.common.api.filesystem.S3FileSystem;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 
-@RunWith(MockitoJUnitRunner.class)
-public class TezRoleConfigProviderTest {
+@ExtendWith(MockitoExtension.class)
+class TezRoleConfigProviderTest {
 
     private final TezRoleConfigProvider underTest = new TezRoleConfigProvider();
 
     @Test
-    public void testGetTezClientRoleConfigs() {
+    void testGetTezClientRoleConfigs() {
         validateClientConfig("s3a://hive/warehouse/external", "s3a://hive/warehouse/external/sys.db");
         validateClientConfig("s3a://hive/warehouse/external/", "s3a://hive/warehouse/external/sys.db");
     }
 
     @Test
-    public void testGetTezClientRoleConfigsWhenNoStorageConfigured() {
+    void testGetTezClientRoleConfigsWhenNoStorageConfigured() {
         TemplatePreparationObject preparationObject = getTemplatePreparationObject();
         String inputJson = getBlueprintText("input/clouderamanager-ds.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);

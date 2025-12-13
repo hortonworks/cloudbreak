@@ -2,9 +2,9 @@ package com.sequenceiq.cloudbreak.cloud.gcp;
 
 import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -12,24 +12,24 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 
-public class GcpAuthenticatorTest {
+class GcpAuthenticatorTest {
 
     private GcpAuthenticator underTest = new GcpAuthenticator();
 
     @Test
-    public void testPlatform() {
+    void testPlatform() {
         Platform platform = underTest.platform();
-        Assert.assertEquals(GcpConstants.GCP_PLATFORM, platform);
+        assertEquals(GcpConstants.GCP_PLATFORM, platform);
     }
 
     @Test
-    public void testVariant() {
+    void testVariant() {
         Variant variant = underTest.variant();
-        Assert.assertEquals(GcpConstants.GCP_VARIANT, variant);
+        assertEquals(GcpConstants.GCP_VARIANT, variant);
     }
 
     @Test
-    public void testAuthenticate() {
+    void testAuthenticate() {
         CloudContext cloudContext = CloudContext.Builder.builder()
                 .withAccountId("accountId")
                 .withCrn("crn")
@@ -42,7 +42,7 @@ public class GcpAuthenticatorTest {
         CloudCredential cloudCredential = new CloudCredential();
         AuthenticatedContext expected = new AuthenticatedContext(cloudContext, cloudCredential);
         AuthenticatedContext result = underTest.authenticate(cloudContext, cloudCredential);
-        Assert.assertEquals(result.getCloudContext(), expected.getCloudContext());
-        Assert.assertEquals(result.getCloudCredential(), expected.getCloudCredential());
+        assertEquals(result.getCloudContext(), expected.getCloudContext());
+        assertEquals(result.getCloudCredential(), expected.getCloudCredential());
     }
 }

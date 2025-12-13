@@ -7,18 +7,18 @@ import static org.mockito.Mockito.when;
 
 import java.util.Optional;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.structuredevent.repository.CDPStructuredEventRepository;
 import com.sequenceiq.cloudbreak.util.TimeUtil;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
-@RunWith(MockitoJUnitRunner.class)
-public class StructuredEventCleanupServiceTest {
+@ExtendWith(MockitoExtension.class)
+class StructuredEventCleanupServiceTest {
 
     private static final long STACK_ID = 1L;
 
@@ -35,14 +35,14 @@ public class StructuredEventCleanupServiceTest {
     private CDPStructuredEventRepository mockCDPStructuredEventRepository;
 
     @Test
-    public void testCleanUpStructuredEventsWhenNoResourceCrnFoundForStackIdThenNoCleanUpHappens() {
+    void testCleanUpStructuredEventsWhenNoResourceCrnFoundForStackIdThenNoCleanUpHappens() {
         underTest.cleanUpStructuredEvents(STACK_ID);
 
         verifyNoMoreInteractions(mockCDPStructuredEventRepository);
     }
 
     @Test
-    public void testCleanUpStructuredEventsWhenResourceCrnExistsThenTransactionHappens() {
+    void testCleanUpStructuredEventsWhenResourceCrnExistsThenTransactionHappens() {
         String accountId = "accountId";
         when(stackService.findAccountById(STACK_ID)).thenReturn(Optional.of(accountId));
         when(mockTimeUtil.getTimestampThatMonthsBeforeNow(3)).thenReturn(1L);

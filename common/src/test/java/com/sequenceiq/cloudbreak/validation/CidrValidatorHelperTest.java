@@ -1,11 +1,12 @@
 package com.sequenceiq.cloudbreak.validation;
 
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 
@@ -46,7 +47,7 @@ class CidrValidatorHelperTest {
     Collection<DynamicTest> testFactoryForCidr() {
         return Arrays.stream(validateCidrDataProvider())
                 .map(x -> DynamicTest.dynamicTest(String.format("%s should be %b", (String) x[0], (Boolean) x[1]),
-                        () -> Assertions.assertEquals(CidrValidatorHelper.isCidrPatternMatched((String) x[0]), (Boolean) x[1])))
+                        () -> assertEquals(CidrValidatorHelper.isCidrPatternMatched((String) x[0]), (Boolean) x[1])))
                 .collect(Collectors.toList());
     }
 

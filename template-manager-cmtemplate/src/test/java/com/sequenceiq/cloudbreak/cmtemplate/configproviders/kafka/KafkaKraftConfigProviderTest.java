@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cmtemplate.configproviders.kafka;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -12,7 +13,6 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
@@ -81,7 +81,7 @@ public class KafkaKraftConfigProviderTest {
         TemplatePreparationObject source = mock(TemplatePreparationObject.class);
 
         when(source.getBlueprintView()).thenReturn(blueprintView);
-        Mockito.lenient().when(source.getStackType()).thenReturn(StackType.WORKLOAD);
+        lenient().when(source.getStackType()).thenReturn(StackType.WORKLOAD);
 
         assertThrows(CloudbreakRuntimeException.class, () -> {
             kraftConfigProvider.getRoleConfigs(KafkaRoles.KAFKA_BROKER, processor, source);
@@ -121,8 +121,8 @@ public class KafkaKraftConfigProviderTest {
         TemplatePreparationObject source = mock(TemplatePreparationObject.class);
 
         when(source.getBlueprintView()).thenReturn(blueprintView);
-        Mockito.lenient().when(source.getHostGroupsWithComponent(KafkaRoles.KAFKA_KRAFT)).thenReturn(Stream.of(kraft));
-        Mockito.lenient().when(source.getStackType()).thenReturn(stackType);
+        lenient().when(source.getHostGroupsWithComponent(KafkaRoles.KAFKA_KRAFT)).thenReturn(Stream.of(kraft));
+        lenient().when(source.getStackType()).thenReturn(stackType);
 
         return source;
     }
@@ -133,9 +133,9 @@ public class KafkaKraftConfigProviderTest {
         TemplatePreparationObject source = mock(TemplatePreparationObject.class);
 
         when(source.getBlueprintView()).thenReturn(blueprintView);
-        Mockito.lenient().when(source.getHostGroupsWithComponent(KafkaRoles.KAFKA_BROKER)).thenReturn(Stream.of(kafka));
-        Mockito.lenient().when(source.getHostGroupsWithComponent(ZooKeeperRoles.ZOOKEEPER_SERVER)).thenReturn(Stream.of(zookeeper));
-        Mockito.lenient().when(source.getStackType()).thenReturn(stackType);
+        lenient().when(source.getHostGroupsWithComponent(KafkaRoles.KAFKA_BROKER)).thenReturn(Stream.of(kafka));
+        lenient().when(source.getHostGroupsWithComponent(ZooKeeperRoles.ZOOKEEPER_SERVER)).thenReturn(Stream.of(zookeeper));
+        lenient().when(source.getStackType()).thenReturn(stackType);
 
         return source;
     }

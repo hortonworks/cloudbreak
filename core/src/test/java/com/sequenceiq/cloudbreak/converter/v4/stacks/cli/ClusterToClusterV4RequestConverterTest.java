@@ -2,9 +2,9 @@ package com.sequenceiq.cloudbreak.converter.v4.stacks.cli;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus.DEFAULT;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus.USER_MANAGED;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -14,13 +14,12 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerV4Request;
@@ -33,8 +32,8 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
 
-@RunWith(MockitoJUnitRunner.class)
-public class ClusterToClusterV4RequestConverterTest {
+@ExtendWith(MockitoExtension.class)
+class ClusterToClusterV4RequestConverterTest {
 
     @InjectMocks
     private ClusterToClusterV4RequestConverter underTest;
@@ -53,9 +52,8 @@ public class ClusterToClusterV4RequestConverterTest {
 
     private Blueprint blueprint;
 
-    @Before
+    @BeforeEach
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
         blueprint = new Blueprint();
         blueprint.setName("CD Stub");
 
@@ -63,7 +61,7 @@ public class ClusterToClusterV4RequestConverterTest {
     }
 
     @Test
-    public void testConvertWhenClouderaManagerConversionSuccessfulThenExpectedClouderaManagerV4RequestShouldPlacedIn() {
+    void testConvertWhenClouderaManagerConversionSuccessfulThenExpectedClouderaManagerV4RequestShouldPlacedIn() {
         ClouderaManagerV4Request expected = mock(ClouderaManagerV4Request.class);
         when(clouderaManagerV4RequestConverter.convert(cluster)).thenReturn(expected);
 
@@ -72,7 +70,7 @@ public class ClusterToClusterV4RequestConverterTest {
     }
 
     @Test
-    public void testConvertWhenThereIsNoFileSystemThenCloudStorageIsNull() {
+    void testConvertWhenThereIsNoFileSystemThenCloudStorageIsNull() {
         when(cluster.getFileSystem()).thenReturn(null);
 
         ClusterV4Request result = underTest.convert(cluster);
@@ -81,7 +79,7 @@ public class ClusterToClusterV4RequestConverterTest {
     }
 
     @Test
-    public void testConvertWhenFileSystemNotNullThenExpectedCloudStorageRequestShouldBePlaced() {
+    void testConvertWhenFileSystemNotNullThenExpectedCloudStorageRequestShouldBePlaced() {
         FileSystem fileSystem = new FileSystem();
         CloudStorageRequest expected = new CloudStorageRequest();
         when(cluster.getFileSystem()).thenReturn(fileSystem);
@@ -94,7 +92,7 @@ public class ClusterToClusterV4RequestConverterTest {
     }
 
     @Test
-    public void testConvertNameIsPassedProperly() {
+    void testConvertNameIsPassedProperly() {
         String expected = "name";
         when(cluster.getName()).thenReturn(expected);
 
@@ -104,7 +102,7 @@ public class ClusterToClusterV4RequestConverterTest {
     }
 
     @Test
-    public void testConvertWhenProxyConfigIsNullThenProxyNameShouldBeNull() {
+    void testConvertWhenProxyConfigIsNullThenProxyNameShouldBeNull() {
         when(cluster.getProxyConfigCrn()).thenReturn(null);
 
         ClusterV4Request result = underTest.convert(cluster);
@@ -113,7 +111,7 @@ public class ClusterToClusterV4RequestConverterTest {
     }
 
     @Test
-    public void testConvertWhenProxyConfigNotNullThenProxyConfigNameShouldBePassed() {
+    void testConvertWhenProxyConfigNotNullThenProxyConfigNameShouldBePassed() {
         String expected = "proxy name value";
         when(cluster.getProxyConfigCrn()).thenReturn(expected);
 
@@ -123,7 +121,7 @@ public class ClusterToClusterV4RequestConverterTest {
     }
 
     @Test
-    public void testConvertWhenRdsConfigNullThenRdsConfigNamesShouldBeEmpty() {
+    void testConvertWhenRdsConfigNullThenRdsConfigNamesShouldBeEmpty() {
         when(cluster.getRdsConfigs()).thenReturn(null);
 
         ClusterV4Request result = underTest.convert(cluster);
@@ -132,7 +130,7 @@ public class ClusterToClusterV4RequestConverterTest {
     }
 
     @Test
-    public void testConvertWhenRdsConfigIsNotNullButItsEmptyThenRdsConfigNamesShouldBeEmpty() {
+    void testConvertWhenRdsConfigIsNotNullButItsEmptyThenRdsConfigNamesShouldBeEmpty() {
         when(cluster.getRdsConfigs()).thenReturn(Collections.emptySet());
 
         ClusterV4Request result = underTest.convert(cluster);
@@ -141,7 +139,7 @@ public class ClusterToClusterV4RequestConverterTest {
     }
 
     @Test
-    public void testConvertWhenRdsConfigsContainsElementsThenUserManagedOnesNameShouldBeStored() {
+    void testConvertWhenRdsConfigsContainsElementsThenUserManagedOnesNameShouldBeStored() {
         RDSConfig notUserManaged = new RDSConfig();
         notUserManaged.setId(0L);
         notUserManaged.setStatus(DEFAULT);
@@ -162,7 +160,7 @@ public class ClusterToClusterV4RequestConverterTest {
     }
 
     @Test
-    public void testConvertWhenEncryptionProfileIsNotNull() {
+    void testConvertWhenEncryptionProfileIsNotNull() {
         String expected = "epCrn";
 
         when(cluster.getEncryptionProfileCrn()).thenReturn(expected);

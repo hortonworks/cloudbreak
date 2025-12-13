@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.orchestrator.salt;
 
 
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,7 +12,7 @@ import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
 import org.apache.commons.io.filefilter.RegexFileFilter;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.core.io.ClassPathResource;
 
 import com.hubspot.jinjava.Jinjava;
@@ -20,10 +20,10 @@ import com.hubspot.jinjava.interpret.JinjavaInterpreter;
 import com.hubspot.jinjava.interpret.TemplateError;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
-public class CbJinjaTester {
+class CbJinjaTester {
 
     @Test
-    public void verifyCbSaltFilesFiles() throws IOException {
+    void verifyCbSaltFilesFiles() throws IOException {
         Collection<File> files = collectAllSlsFiles("salt");
         for (File slsFile : files) {
             verifySingleSaltFile(slsFile.toPath());
@@ -31,7 +31,7 @@ public class CbJinjaTester {
     }
 
     @Test
-    public void verifyCbSaltCommonFilesFiles() throws IOException {
+    void verifyCbSaltCommonFilesFiles() throws IOException {
         Collection<File> files = collectAllSlsFiles("salt-common");
         for (File slsFile : files) {
             verifySingleSaltFile(slsFile.toPath());

@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.publicendpoint.dns;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -14,7 +15,6 @@ import java.util.Set;
 import java.util.UUID;
 
 import org.apache.commons.lang3.RandomUtils;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -79,9 +79,9 @@ class AllHostPublicDnsEntryServiceTest {
         Map<String, List<String>> result = underTest.getComponentLocation(stack);
 
         InstanceMetadataView primaryGatewayInstance = stack.getPrimaryGatewayInstance();
-        Assertions.assertFalse(result.containsKey(primaryGatewayInstance.getInstanceGroupName()), "Result should not contain primary gateway's group name");
-        Assertions.assertFalse(resultContainsInstanceMetadata(primaryGatewayInstance, result), "Result should not contain primary gateway's instance metadata");
-        Assertions.assertEquals(2, result.size(), "Result should contain all non primary gateway instance group");
+        assertFalse(result.containsKey(primaryGatewayInstance.getInstanceGroupName()), "Result should not contain primary gateway's group name");
+        assertFalse(resultContainsInstanceMetadata(primaryGatewayInstance, result), "Result should not contain primary gateway's instance metadata");
+        assertEquals(2, result.size(), "Result should contain all non primary gateway instance group");
     }
 
     @Test
@@ -100,10 +100,10 @@ class AllHostPublicDnsEntryServiceTest {
 
         Map<String, List<String>> result = underTest.getComponentLocation(stack);
 
-        Assertions.assertTrue(result.containsKey(primaryGatewayInstance.getInstanceGroupName()), "Result should contain primary gateway's group name");
-        Assertions.assertTrue(resultContainsInstanceMetadata(otherGatewayInstanceMetadata, result), "Result should contain other gateway's instance metadata");
-        Assertions.assertFalse(resultContainsInstanceMetadata(primaryGatewayInstance, result), "Result should not contain primary gateway's instance metadata");
-        Assertions.assertEquals(3, result.size(), "Result should contain all instance group");
+        assertTrue(result.containsKey(primaryGatewayInstance.getInstanceGroupName()), "Result should contain primary gateway's group name");
+        assertTrue(resultContainsInstanceMetadata(otherGatewayInstanceMetadata, result), "Result should contain other gateway's instance metadata");
+        assertFalse(resultContainsInstanceMetadata(primaryGatewayInstance, result), "Result should not contain primary gateway's instance metadata");
+        assertEquals(3, result.size(), "Result should contain all instance group");
     }
 
     @Test
@@ -112,7 +112,7 @@ class AllHostPublicDnsEntryServiceTest {
 
         Map<String, List<String>> result = underTest.getComponentLocation(stack);
 
-        Assertions.assertTrue(result.isEmpty(), "Result couldn't contain any hostname as primary gateway does not exist");
+        assertTrue(result.isEmpty(), "Result couldn't contain any hostname as primary gateway does not exist");
     }
 
     @Test
@@ -123,7 +123,7 @@ class AllHostPublicDnsEntryServiceTest {
 
         Map<String, List<String>> result = underTest.getComponentLocation(stack);
 
-        Assertions.assertTrue(result.isEmpty(), "Result couldn't contain any hostname as nodes do not have discovery FQDN");
+        assertTrue(result.isEmpty(), "Result couldn't contain any hostname as nodes do not have discovery FQDN");
     }
 
     @Test
@@ -136,7 +136,7 @@ class AllHostPublicDnsEntryServiceTest {
 
         Map<String, List<String>> result = underTest.getComponentLocation(stack);
 
-        Assertions.assertTrue(result.isEmpty(), "Result couldn't contain any hostname as nodes do not have discovery FQDN except gateway");
+        assertTrue(result.isEmpty(), "Result couldn't contain any hostname as nodes do not have discovery FQDN except gateway");
     }
 
     @ParameterizedTest

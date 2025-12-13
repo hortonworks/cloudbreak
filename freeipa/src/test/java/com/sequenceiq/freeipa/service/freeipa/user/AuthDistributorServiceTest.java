@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.service.freeipa.user;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
@@ -7,7 +8,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -51,7 +51,7 @@ class AuthDistributorServiceTest {
         when(entitlementService.isSdxSaasIntegrationEnabled("accountId")).thenReturn(Boolean.TRUE);
         doThrow(new RuntimeException("error")).when(umsUsersStateToAuthDistributorUserStateConverter).convert(any());
         UmsUsersState umsUsersState = UmsUsersState.newBuilder().setUsersState(UsersState.newBuilder().build()).build();
-        Assertions.assertDoesNotThrow(() -> underTest.updateAuthViewForEnvironment("envCrn", umsUsersState, "accountId", "operationId"));
+        assertDoesNotThrow(() -> underTest.updateAuthViewForEnvironment("envCrn", umsUsersState, "accountId", "operationId"));
 
         verify(grpcAuthDistributorClient, never()).updateAuthViewForEnvironment(eq("envCrn"), any());
     }
@@ -61,7 +61,7 @@ class AuthDistributorServiceTest {
         when(entitlementService.isSdxSaasIntegrationEnabled("accountId")).thenReturn(Boolean.TRUE);
         doThrow(new RuntimeException("error")).when(grpcAuthDistributorClient).updateAuthViewForEnvironment(eq("envCrn"), any());
         UmsUsersState umsUsersState = UmsUsersState.newBuilder().setUsersState(UsersState.newBuilder().build()).build();
-        Assertions.assertDoesNotThrow(() -> underTest.updateAuthViewForEnvironment("envCrn", umsUsersState, "accountId", "operationId"));
+        assertDoesNotThrow(() -> underTest.updateAuthViewForEnvironment("envCrn", umsUsersState, "accountId", "operationId"));
 
         verify(umsUsersStateToAuthDistributorUserStateConverter).convert(eq(umsUsersState));
     }
@@ -87,7 +87,7 @@ class AuthDistributorServiceTest {
     public void testRemoveAuthViewForEnvironmentWhenGrpcFails() {
         when(entitlementService.isSdxSaasIntegrationEnabled("accountId")).thenReturn(Boolean.TRUE);
         doThrow(new RuntimeException("error")).when(grpcAuthDistributorClient).removeAuthViewForEnvironment(eq("envCrn"));
-        Assertions.assertDoesNotThrow(() -> underTest.removeAuthViewForEnvironment("envCrn", "accountId"));
+        assertDoesNotThrow(() -> underTest.removeAuthViewForEnvironment("envCrn", "accountId"));
     }
 
     @Test

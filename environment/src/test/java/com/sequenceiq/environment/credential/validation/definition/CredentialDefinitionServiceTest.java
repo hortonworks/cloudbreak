@@ -2,6 +2,7 @@ package com.sequenceiq.environment.credential.validation.definition;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
@@ -10,7 +11,6 @@ import java.util.List;
 
 import jakarta.inject.Inject;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.function.Executable;
@@ -126,7 +126,7 @@ public class CredentialDefinitionServiceTest {
 
     @Test
     public void testCredentialDefinitionServiceIsNotNull() {
-        Assertions.assertNotNull(credentialDefinitionServiceUnderTest);
+        assertNotNull(credentialDefinitionServiceUnderTest);
     }
 
     @Test

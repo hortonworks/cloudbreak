@@ -1,12 +1,12 @@
 package com.sequenceiq.cloudbreak.co2;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Map;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -40,7 +40,7 @@ public class CO2CostCalculatorServiceTest {
 
         double result = underTest.calculateCO2InGrams(getClusterCO2Dto());
 
-        Assertions.assertEquals(12.5311847852, result, 0.00001);
+        assertEquals(12.5311847852, result, 0.00001);
     }
 
     private ClusterCO2Dto getClusterCO2Dto() {

@@ -1,30 +1,31 @@
 package com.sequenceiq.cloudbreak.domain.converter;
 
-import org.junit.Assert;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 
-public class ResourceStatusConverterTest {
+class ResourceStatusConverterTest {
 
     private final ResourceStatusConverter resourceStatusConverter = new ResourceStatusConverter();
 
     @Test
-    public void testConvertToDatabaseColumnWhenDefaultIsReturnAsDefault() {
+    void testConvertToDatabaseColumnWhenDefaultIsReturnAsDefault() {
         String defaultString = resourceStatusConverter.convertToDatabaseColumn(ResourceStatus.DEFAULT);
-        Assert.assertEquals("DEFAULT", defaultString);
+        assertEquals("DEFAULT", defaultString);
     }
 
     @Test
-    public void testConvertToEntityAttributeWhenDefaultIsReturnAsDefault() {
+    void testConvertToEntityAttributeWhenDefaultIsReturnAsDefault() {
         ResourceStatus resourceStatus = resourceStatusConverter.convertToEntityAttribute("DEFAULT");
-        Assert.assertEquals(ResourceStatus.DEFAULT, resourceStatus);
+        assertEquals(ResourceStatus.DEFAULT, resourceStatus);
     }
 
     @Test
-    public void testConvertToEntityAttributeWhenNotKnownIsReturnAsUserManaged() {
+    void testConvertToEntityAttributeWhenNotKnownIsReturnAsUserManaged() {
         ResourceStatus resourceStatus = resourceStatusConverter.convertToEntityAttribute("not-known");
-        Assert.assertEquals(ResourceStatus.USER_MANAGED, resourceStatus);
+        assertEquals(ResourceStatus.USER_MANAGED, resourceStatus);
     }
 
 }

@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.template.compute;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -9,7 +10,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -99,6 +99,6 @@ class ResourceStopStartCallableTest {
         } else {
             verify(builder, times(1)).stop(context, auth, cloudInstance);
         }
-        Assertions.assertTrue(actualStatuses.contains(cloudVmInstanceStatus));
+        assertTrue(actualStatuses.contains(cloudVmInstanceStatus));
     }
 }

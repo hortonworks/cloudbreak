@@ -1,12 +1,12 @@
 package com.sequenceiq.cloudbreak.dto;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -33,14 +33,14 @@ class DatabaseSslDetailsTest {
 
     @Test
     void constructorTestNullCertsSet() {
-        Assertions.assertThrows(NullPointerException.class, () -> new DatabaseSslDetails(null, false));
+        assertThrows(NullPointerException.class, () -> new DatabaseSslDetails(null, false));
     }
 
     @Test
     void setSslCertsTestNull() {
         DatabaseSslDetails underTest = new DatabaseSslDetails(Set.of(), false);
 
-        Assertions.assertThrows(NullPointerException.class, () -> underTest.setSslCerts(null));
+        assertThrows(NullPointerException.class, () -> underTest.setSslCerts(null));
     }
 
     @SafeVarargs

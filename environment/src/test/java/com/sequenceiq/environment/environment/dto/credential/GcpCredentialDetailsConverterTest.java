@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.environment.dto.credential;
 
-import org.junit.jupiter.api.Assertions;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -25,7 +26,7 @@ public class GcpCredentialDetailsConverterTest {
         gcpCredentialAttributes.setJson(new JsonAttributes());
         credentialAttributes.setGcp(gcpCredentialAttributes);
         CredentialDetails.Builder builder = underTest.convertCredentialDetails(credentialAttributes, CredentialDetails.builder());
-        Assertions.assertEquals(CredentialType.GCP_JSON, builder.build().getCredentialType());
+        assertEquals(CredentialType.GCP_JSON, builder.build().getCredentialType());
     }
 
     @Test
@@ -35,7 +36,7 @@ public class GcpCredentialDetailsConverterTest {
         gcpCredentialAttributes.setP12(new P12Attributes());
         credentialAttributes.setGcp(gcpCredentialAttributes);
         CredentialDetails.Builder builder = underTest.convertCredentialDetails(credentialAttributes, CredentialDetails.builder());
-        Assertions.assertEquals(CredentialType.GCP_P12, builder.build().getCredentialType());
+        assertEquals(CredentialType.GCP_P12, builder.build().getCredentialType());
     }
 
     @Test
@@ -44,13 +45,13 @@ public class GcpCredentialDetailsConverterTest {
         GcpCredentialAttributes gcpCredentialAttributes = new GcpCredentialAttributes();
         credentialAttributes.setGcp(gcpCredentialAttributes);
         CredentialDetails.Builder builder = underTest.convertCredentialDetails(credentialAttributes, CredentialDetails.builder());
-        Assertions.assertEquals(CredentialType.UNKNOWN, builder.build().getCredentialType());
+        assertEquals(CredentialType.UNKNOWN, builder.build().getCredentialType());
     }
 
     @Test
     void convertCredentialDetailsWhenAttributesNull() {
         CredentialAttributes credentialAttributes = new CredentialAttributes();
         CredentialDetails.Builder builder = underTest.convertCredentialDetails(credentialAttributes, CredentialDetails.builder());
-        Assertions.assertEquals(CredentialType.UNKNOWN, builder.build().getCredentialType());
+        assertEquals(CredentialType.UNKNOWN, builder.build().getCredentialType());
     }
 }

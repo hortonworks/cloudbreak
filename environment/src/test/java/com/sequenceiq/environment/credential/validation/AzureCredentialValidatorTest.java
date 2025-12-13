@@ -1,6 +1,9 @@
 package com.sequenceiq.environment.credential.validation;
 
-import org.junit.jupiter.api.Assertions;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -34,7 +37,7 @@ public class AzureCredentialValidatorTest {
         credentialRequest.setAzure(azureCredentialRequestParameters);
         ValidationResult.ValidationResultBuilder validationResultBuilder = new ValidationResult.ValidationResultBuilder();
         ValidationResult validationResult = underTest.validateCreate(credentialRequest, validationResultBuilder);
-        Assertions.assertFalse(validationResult.hasError());
+        assertFalse(validationResult.hasError());
     }
 
     @Test
@@ -49,7 +52,7 @@ public class AzureCredentialValidatorTest {
         credentialRequest.setAzure(azureCredentialRequestParameters);
         ValidationResult.ValidationResultBuilder validationResultBuilder = new ValidationResult.ValidationResultBuilder();
         ValidationResult validationResult = underTest.validateCreate(credentialRequest, validationResultBuilder);
-        Assertions.assertFalse(validationResult.hasError());
+        assertFalse(validationResult.hasError());
     }
 
     @Test
@@ -62,10 +65,10 @@ public class AzureCredentialValidatorTest {
         credentialRequest.setAzure(azureCredentialRequestParameters);
         ValidationResult.ValidationResultBuilder validationResultBuilder = new ValidationResult.ValidationResultBuilder();
         ValidationResult validationResult = underTest.validateCreate(credentialRequest, validationResultBuilder);
-        Assertions.assertTrue(validationResult.hasError());
-        Assertions.assertEquals(validationResult.getErrors().size(), 2);
-        Assertions.assertTrue(validationResult.getErrors().get(0).startsWith("subscriptionId is mandatory for"));
-        Assertions.assertTrue(validationResult.getErrors().get(1).startsWith("tenantId is mandatory for"));
+        assertTrue(validationResult.hasError());
+        assertEquals(validationResult.getErrors().size(), 2);
+        assertTrue(validationResult.getErrors().get(0).startsWith("subscriptionId is mandatory for"));
+        assertTrue(validationResult.getErrors().get(1).startsWith("tenantId is mandatory for"));
     }
 
     @Test
@@ -75,9 +78,9 @@ public class AzureCredentialValidatorTest {
         credentialRequest.setAzure(azureCredentialRequestParameters);
         ValidationResult.ValidationResultBuilder validationResultBuilder = new ValidationResult.ValidationResultBuilder();
         ValidationResult validationResult = underTest.validateCreate(credentialRequest, validationResultBuilder);
-        Assertions.assertTrue(validationResult.hasError());
-        Assertions.assertEquals(validationResult.getErrors().size(), 1);
-        Assertions.assertEquals(validationResult.getErrors().get(0), "appBaseRequest or roleBasedRequest have to be defined in azure specific parameters");
+        assertTrue(validationResult.hasError());
+        assertEquals(validationResult.getErrors().size(), 1);
+        assertEquals(validationResult.getErrors().get(0), "appBaseRequest or roleBasedRequest have to be defined in azure specific parameters");
     }
 
     @Test
@@ -89,10 +92,10 @@ public class AzureCredentialValidatorTest {
         credentialRequest.setAzure(azureCredentialRequestParameters);
         ValidationResult.ValidationResultBuilder validationResultBuilder = new ValidationResult.ValidationResultBuilder();
         ValidationResult validationResult = underTest.validateCreate(credentialRequest, validationResultBuilder);
-        Assertions.assertTrue(validationResult.hasError());
-        Assertions.assertEquals(validationResult.getErrors().size(), 2);
-        Assertions.assertTrue(validationResult.getErrors().get(0).startsWith("subscriptionId is mandatory for"));
-        Assertions.assertTrue(validationResult.getErrors().get(1).startsWith("tenantId is mandatory for"));
+        assertTrue(validationResult.hasError());
+        assertEquals(validationResult.getErrors().size(), 2);
+        assertTrue(validationResult.getErrors().get(0).startsWith("subscriptionId is mandatory for"));
+        assertTrue(validationResult.getErrors().get(1).startsWith("tenantId is mandatory for"));
     }
 
     @Test
@@ -100,9 +103,9 @@ public class AzureCredentialValidatorTest {
         CredentialRequest credentialRequest = new CredentialRequest();
         ValidationResult.ValidationResultBuilder validationResultBuilder = new ValidationResult.ValidationResultBuilder();
         ValidationResult validationResult = underTest.validateCreate(credentialRequest, validationResultBuilder);
-        Assertions.assertTrue(validationResult.hasError());
-        Assertions.assertEquals(validationResult.getErrors().size(), 1);
-        Assertions.assertEquals(validationResult.getErrors().get(0), "Azure specific parameters are missing from the credential creation request");
+        assertTrue(validationResult.hasError());
+        assertEquals(validationResult.getErrors().size(), 1);
+        assertEquals(validationResult.getErrors().get(0), "Azure specific parameters are missing from the credential creation request");
     }
 
     @Test
@@ -118,7 +121,7 @@ public class AzureCredentialValidatorTest {
         newCred.setAttributes(new Json(credentialAttributes).getValue());
         ValidationResult.ValidationResultBuilder validationResultBuilder = new ValidationResult.ValidationResultBuilder();
         ValidationResult validationResult = underTest.validateUpdate(origCred, newCred, validationResultBuilder);
-        Assertions.assertFalse(validationResult.hasError());
+        assertFalse(validationResult.hasError());
     }
 
     @Test
@@ -127,9 +130,9 @@ public class AzureCredentialValidatorTest {
         Credential newCred = new Credential();
         ValidationResult.ValidationResultBuilder validationResultBuilder = new ValidationResult.ValidationResultBuilder();
         ValidationResult validationResult = underTest.validateUpdate(origCred, newCred, validationResultBuilder);
-        Assertions.assertTrue(validationResult.hasError());
-        Assertions.assertEquals(validationResult.getErrors().size(), 1);
-        Assertions.assertEquals(validationResult.getErrors().get(0), "Credential attributes are missing from the credential modification request");
+        assertTrue(validationResult.hasError());
+        assertEquals(validationResult.getErrors().size(), 1);
+        assertEquals(validationResult.getErrors().get(0), "Credential attributes are missing from the credential modification request");
     }
 
     @Test
@@ -139,9 +142,9 @@ public class AzureCredentialValidatorTest {
         newCred.setAttributes("not a json");
         ValidationResult.ValidationResultBuilder validationResultBuilder = new ValidationResult.ValidationResultBuilder();
         ValidationResult validationResult = underTest.validateUpdate(origCred, newCred, validationResultBuilder);
-        Assertions.assertTrue(validationResult.hasError());
-        Assertions.assertEquals(validationResult.getErrors().size(), 1);
-        Assertions.assertTrue(validationResult.getErrors().get(0).startsWith("Provider specific attributes cannot be read"));
+        assertTrue(validationResult.hasError());
+        assertEquals(validationResult.getErrors().size(), 1);
+        assertTrue(validationResult.getErrors().get(0).startsWith("Provider specific attributes cannot be read"));
     }
 
     @Test
@@ -155,10 +158,10 @@ public class AzureCredentialValidatorTest {
         newCred.setAttributes(new Json(credentialAttributes).getValue());
         ValidationResult.ValidationResultBuilder validationResultBuilder = new ValidationResult.ValidationResultBuilder();
         ValidationResult validationResult = underTest.validateUpdate(origCred, newCred, validationResultBuilder);
-        Assertions.assertTrue(validationResult.hasError());
-        Assertions.assertEquals(validationResult.getErrors().size(), 2);
-        Assertions.assertEquals(validationResult.getErrors().get(0), "subscriptionId is mandatory for azure credential modification");
-        Assertions.assertEquals(validationResult.getErrors().get(1), "tenantId is mandatory for azure credential modification");
+        assertTrue(validationResult.hasError());
+        assertEquals(validationResult.getErrors().size(), 2);
+        assertEquals(validationResult.getErrors().get(0), "subscriptionId is mandatory for azure credential modification");
+        assertEquals(validationResult.getErrors().get(1), "tenantId is mandatory for azure credential modification");
     }
 
     @Test
@@ -170,8 +173,8 @@ public class AzureCredentialValidatorTest {
         newCred.setAttributes(new Json(credentialAttributes).getValue());
         ValidationResult.ValidationResultBuilder validationResultBuilder = new ValidationResult.ValidationResultBuilder();
         ValidationResult validationResult = underTest.validateUpdate(origCred, newCred, validationResultBuilder);
-        Assertions.assertTrue(validationResult.hasError());
-        Assertions.assertEquals(validationResult.getErrors().size(), 1);
-        Assertions.assertEquals(validationResult.getErrors().get(0), "Azure specific parameters are missing from the credential modification request");
+        assertTrue(validationResult.hasError());
+        assertEquals(validationResult.getErrors().size(), 1);
+        assertEquals(validationResult.getErrors().get(0), "Azure specific parameters are missing from the credential modification request");
     }
 }

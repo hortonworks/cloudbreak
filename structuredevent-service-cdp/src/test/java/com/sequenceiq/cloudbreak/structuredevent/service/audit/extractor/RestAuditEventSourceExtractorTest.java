@@ -1,9 +1,11 @@
 package com.sequenceiq.cloudbreak.structuredevent.service.audit.extractor;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -33,9 +35,9 @@ class RestAuditEventSourceExtractorTest {
         if (validInput) {
             RestAuditEventSourceExtractor underTest = new RestAuditEventSourceExtractor(applicationName);
             Crn.Service service = underTest.eventSource();
-            Assertions.assertTrue(StringUtils.containsIgnoreCase(applicationName, service.getName()));
+            assertTrue(StringUtils.containsIgnoreCase(applicationName, service.getName()));
         } else {
-            Assertions.assertThrows(IllegalStateException.class, () -> new RestAuditEventSourceExtractor(applicationName));
+            assertThrows(IllegalStateException.class, () -> new RestAuditEventSourceExtractor(applicationName));
         }
     }
 }

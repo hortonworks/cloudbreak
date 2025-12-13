@@ -1,18 +1,16 @@
 package com.sequenceiq.cloudbreak.structuredevent.converter;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.openMocks;
 
 import java.time.Instant;
 import java.util.Set;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -37,7 +35,7 @@ import com.sequenceiq.common.api.type.CertExpirationState;
 import com.sequenceiq.common.model.FileSystemType;
 
 @ExtendWith(MockitoExtension.class)
-public class ClusterToClusterDetailsConverterTest {
+class ClusterToClusterDetailsConverterTest {
 
     @Mock
     private RdsConfigToRdsDetailsConverter rdsConfigToRdsDetailsConverter;
@@ -48,16 +46,11 @@ public class ClusterToClusterDetailsConverterTest {
     @InjectMocks
     private ClusterToClusterDetailsConverter underTest;
 
-    @Before
-    public void setup() {
-        openMocks(this);
-    }
-
     @Test
-    public void convertWithoutRDS() {
+    void convertWithoutRDS() {
         when(rdsConfigWithoutClusterService.findByClusterId(any())).thenReturn(Set.of());
         ClusterDetails result = underTest.convert(getClusterView(), getStackView(), getGatewayView());
-        Assertions.assertAll(
+        assertAll(
                 () -> assertEquals(1L, result.getId()),
                 () -> assertEquals("name", result.getName()),
                 () -> assertEquals("description", result.getDescription()),
@@ -73,10 +66,10 @@ public class ClusterToClusterDetailsConverterTest {
     }
 
     @Test
-    public void convertWithoutRDSAndGateway() {
+    void convertWithoutRDSAndGateway() {
         when(rdsConfigWithoutClusterService.findByClusterId(any())).thenReturn(Set.of());
         ClusterDetails result = underTest.convert(getClusterView(), getStackView(), null);
-        Assertions.assertAll(
+        assertAll(
                 () -> assertEquals(1L, result.getId()),
                 () -> assertEquals("name", result.getName()),
                 () -> assertEquals("description", result.getDescription()),

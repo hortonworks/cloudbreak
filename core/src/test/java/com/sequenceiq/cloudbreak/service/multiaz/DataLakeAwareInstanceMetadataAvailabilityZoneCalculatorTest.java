@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.multiaz;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.times;
@@ -13,7 +14,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -152,7 +152,7 @@ class DataLakeAwareInstanceMetadataAvailabilityZoneCalculatorTest {
         verify(underTest, times(1)).updateInstancesMetaData(any());
         verify(underTest, times(1)).populateSupportedOnStack(stack);
         verify(underTest, times(0)).populate(stack);
-        Assertions.assertTrue(stack.getNotTerminatedInstanceMetaDataSet().stream()
+        assertTrue(stack.getNotTerminatedInstanceMetaDataSet().stream()
                 .allMatch(im -> StringUtils.isNotEmpty(im.getSubnetId()) && subnetId.equals(im.getSubnetId())));
     }
 
@@ -249,7 +249,7 @@ class DataLakeAwareInstanceMetadataAvailabilityZoneCalculatorTest {
                         assertEquals(Long.valueOf(1), actualInstanceCountByAz);
                     });
         }
-        Assertions.assertTrue(stack.getNotTerminatedInstanceMetaDataSet().stream()
+        assertTrue(stack.getNotTerminatedInstanceMetaDataSet().stream()
                 .allMatch(im -> StringUtils.isNotEmpty(im.getSubnetId()) && subnetId.equals(im.getSubnetId())));
     }
 
@@ -289,7 +289,7 @@ class DataLakeAwareInstanceMetadataAvailabilityZoneCalculatorTest {
                         assertEquals(Long.valueOf(1), actualInstanceCountByAz);
                     });
         }
-        Assertions.assertTrue(stack.getNotTerminatedInstanceMetaDataSet().stream()
+        assertTrue(stack.getNotTerminatedInstanceMetaDataSet().stream()
                 .allMatch(im -> StringUtils.isNotEmpty(im.getSubnetId()) && subnetId.equals(im.getSubnetId())));
     }
 
@@ -334,7 +334,7 @@ class DataLakeAwareInstanceMetadataAvailabilityZoneCalculatorTest {
                     .count();
             assertEquals(Long.valueOf(expectedCountByZone), actualCount);
         }
-        Assertions.assertTrue(stack.getNotTerminatedInstanceMetaDataSet().stream()
+        assertTrue(stack.getNotTerminatedInstanceMetaDataSet().stream()
                 .allMatch(im -> StringUtils.isNotEmpty(im.getSubnetId()) && subnetId.equals(im.getSubnetId())));
     }
 }

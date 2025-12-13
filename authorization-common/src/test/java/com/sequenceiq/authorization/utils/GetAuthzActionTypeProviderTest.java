@@ -1,12 +1,12 @@
 package com.sequenceiq.authorization.utils;
 
 import static com.sequenceiq.authorization.utils.GetAuthzActionTypeProvider.getActionsForResourceType;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.params.provider.EnumSource.Mode.EXCLUDE;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
@@ -25,7 +25,7 @@ class GetAuthzActionTypeProviderTest {
             }
         }
 
-        Assertions.assertTrue(missingTypesFromPairs.isEmpty(),
+        assertTrue(missingTypesFromPairs.isEmpty(),
                 String.format("The following %s(s) has no get/fetch action pair: [%s]", AuthorizationResourceAction.class.getSimpleName(),
                         String.join(", ", missingTypesFromPairs)));
     }

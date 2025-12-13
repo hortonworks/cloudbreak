@@ -2,12 +2,12 @@ package com.sequenceiq.cloudbreak.cloud.gcp.group;
 
 import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -67,7 +67,7 @@ public class AbstractGcpGroupBuilderTest {
         AuthenticatedContext authenticatedContext = new AuthenticatedContext(context, credential);
         List<CloudResource> resourceList = new ArrayList<>();
         List<CloudResourceStatus> cloudResourceStatuses = underTest.checkResources(gcpContext, authenticatedContext, resourceList);
-        Assert.assertEquals(true, cloudResourceStatuses.isEmpty());
+        assertEquals(true, cloudResourceStatuses.isEmpty());
     }
 
 }

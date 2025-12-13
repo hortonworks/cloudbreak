@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cmtemplate.configproviders.srm;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.kafka.KafkaRoles.KAFKA_BROKER;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -13,7 +14,6 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
@@ -112,7 +112,7 @@ class StreamsReplicationManagerConfigProviderTest {
         when(generalClusterConfig.getAutoTlsEnabled()).thenReturn(sslEnabled);
 
         HostgroupView hostGroupBroker = mock(HostgroupView.class);
-        Mockito.lenient().when(hostGroupBroker.getHosts()).thenReturn(Sets.newTreeSet(Arrays.asList("broker-1", "broker-2")));
+        lenient().when(hostGroupBroker.getHosts()).thenReturn(Sets.newTreeSet(Arrays.asList("broker-1", "broker-2")));
         when(hostGroupBroker.getName()).thenReturn("broker");
 
         HostgroupView hostGroupCoreBroker = mock(HostgroupView.class);

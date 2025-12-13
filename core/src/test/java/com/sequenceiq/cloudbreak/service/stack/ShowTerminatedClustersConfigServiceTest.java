@@ -1,10 +1,10 @@
 package com.sequenceiq.cloudbreak.service.stack;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -13,12 +13,12 @@ import static org.mockito.Mockito.when;
 import java.time.Duration;
 import java.time.Instant;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.common.service.Clock;
@@ -27,7 +27,8 @@ import com.sequenceiq.cloudbreak.domain.UserProfile;
 import com.sequenceiq.cloudbreak.service.stack.ShowTerminatedClusterConfigService.ShowTerminatedClustersAfterConfig;
 import com.sequenceiq.cloudbreak.service.user.UserProfileService;
 
-public class ShowTerminatedClustersConfigServiceTest {
+@ExtendWith(MockitoExtension.class)
+class ShowTerminatedClustersConfigServiceTest {
 
     private static final Duration DURATION_D1_H2_M3 = Duration.ofDays(1).plusHours(2).plusMinutes(3);
 
@@ -53,11 +54,6 @@ public class ShowTerminatedClustersConfigServiceTest {
     @InjectMocks
     private ShowTerminatedClusterConfigService underTest;
 
-    @Before
-    public void setup() {
-        MockitoAnnotations.initMocks(this);
-    }
-
     private void init(Boolean showTerminatedOn) {
         ReflectionTestUtils.setField(underTest, "showTerminatedOn", showTerminatedOn);
         ReflectionTestUtils.setField(underTest, "timeoutDays", DEFAULT_TIMEOUT_DAYS);
@@ -67,7 +63,7 @@ public class ShowTerminatedClustersConfigServiceTest {
     }
 
     @Test
-    public void testGetWhenUserHasPreference() {
+    void testGetWhenUserHasPreference() {
         init(false);
         when(clock.nowMinus(DEFAULT_DURATION)).thenReturn(Instant.ofEpochSecond(0));
 
@@ -79,9 +75,8 @@ public class ShowTerminatedClustersConfigServiceTest {
     }
 
     @Test
-    public void testGetWhenUserHasNoPreference() {
+    void testGetWhenUserHasNoPreference() {
         init(false);
-        when(userProfileService.getOrCreateForLoggedInUser()).thenReturn(new UserProfileBuilder().withNullClusterPrefs().build());
         when(clock.nowMinus(any())).thenReturn(Instant.ofEpochSecond(0));
 
         ShowTerminatedClustersAfterConfig showTerminatedClustersAfterConfig = underTest.get();
@@ -93,9 +88,8 @@ public class ShowTerminatedClustersConfigServiceTest {
     }
 
     @Test
-    public void testGetConfigWhenUserHasPreference() {
+    void testGetConfigWhenUserHasPreference() {
         init(false);
-        when(userProfileService.getOrCreateForLoggedInUser()).thenReturn(new UserProfileBuilder().withShowClusterPrefs(true, DEFAULT_DURATION).build());
 
         ShowTerminatedClustersConfig showTerminatedClustersConfig = underTest.getConfig();
 
@@ -108,9 +102,8 @@ public class ShowTerminatedClustersConfigServiceTest {
     }
 
     @Test
-    public void testGetConfigWhenUserHasNoPreference() {
+    void testGetConfigWhenUserHasNoPreference() {
         init(false);
-        when(userProfileService.getOrCreateForLoggedInUser()).thenReturn(new UserProfileBuilder().withNullClusterPrefs().build());
 
         ShowTerminatedClustersConfig showTerminatedClustersConfig = underTest.getConfig();
 
@@ -123,7 +116,7 @@ public class ShowTerminatedClustersConfigServiceTest {
     }
 
     @Test
-    public void testSetWhenUserHasNoPreference() {
+    void testSetWhenUserHasNoPreference() {
         init(false);
         when(userProfileService.getOrCreateForLoggedInUser()).thenReturn(new UserProfileBuilder().withNullClusterPrefs().build());
 
@@ -139,7 +132,7 @@ public class ShowTerminatedClustersConfigServiceTest {
     }
 
     @Test
-    public void testSetWhenUserHasPreference() {
+    void testSetWhenUserHasPreference() {
         init(false);
         when(userProfileService.getOrCreateForLoggedInUser()).thenReturn(new UserProfileBuilder().withShowClusterPrefs(false, DEFAULT_DURATION).build());
 
@@ -155,7 +148,7 @@ public class ShowTerminatedClustersConfigServiceTest {
     }
 
     @Test
-    public void testSetWhenTimeoutIsNotSetAndNoUserPreference() {
+    void testSetWhenTimeoutIsNotSetAndNoUserPreference() {
         init(false);
         when(userProfileService.getOrCreateForLoggedInUser()).thenReturn(new UserProfileBuilder().withNullClusterPrefs().build());
 
@@ -171,7 +164,7 @@ public class ShowTerminatedClustersConfigServiceTest {
     }
 
     @Test
-    public void testSetWhenTimeoutIsNotSet() {
+    void testSetWhenTimeoutIsNotSet() {
         init(true);
         when(userProfileService.getOrCreateForLoggedInUser()).thenReturn(new UserProfileBuilder().withShowClusterPrefs(true, DURATION_D4_H5_M6).build());
 
@@ -187,7 +180,7 @@ public class ShowTerminatedClustersConfigServiceTest {
     }
 
     @Test
-    public void testDeleteWhenUserHasNoPreference() {
+    void testDeleteWhenUserHasNoPreference() {
         init(false);
         when(userProfileService.getOrCreateForLoggedInUser()).thenReturn(new UserProfileBuilder().withNullClusterPrefs().build());
 
@@ -199,7 +192,7 @@ public class ShowTerminatedClustersConfigServiceTest {
     }
 
     @Test
-    public void testDeleteWhenUserHasPreference() {
+    void testDeleteWhenUserHasPreference() {
         init(false);
         when(userProfileService.getOrCreateForLoggedInUser()).thenReturn(new UserProfileBuilder().withShowClusterPrefs(false, DEFAULT_DURATION).build());
 

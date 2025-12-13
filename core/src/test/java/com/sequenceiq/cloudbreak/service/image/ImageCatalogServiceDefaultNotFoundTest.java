@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.image;
 
 import static com.sequenceiq.common.model.ImageCatalogPlatform.imageCatalogPlatform;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
@@ -14,14 +15,13 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.jupiter.api.Assertions;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -45,8 +45,8 @@ import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.common.model.Architecture;
 
-@RunWith(MockitoJUnitRunner.class)
-public class ImageCatalogServiceDefaultNotFoundTest {
+@ExtendWith(MockitoExtension.class)
+class ImageCatalogServiceDefaultNotFoundTest {
 
     private static final String USER_CRN = "crn:altus:iam:us-west-1:1111:user:1111";
 
@@ -119,8 +119,8 @@ public class ImageCatalogServiceDefaultNotFoundTest {
     @InjectMocks
     private VersionBasedImageCatalogService versionBasedImageCatalogService;
 
-    @Before
-    public void beforeTest() {
+    @BeforeEach
+    void beforeTest() {
         ReflectionTestUtils.setField(underTest, "cbVersion", "5.0.0");
         ReflectionTestUtils.setField(underTest, "defaultCatalogUrl", "");
         ReflectionTestUtils.setField(underTest, "imageCatalogServiceProxy", imageCatalogServiceProxy);
@@ -129,12 +129,12 @@ public class ImageCatalogServiceDefaultNotFoundTest {
         ReflectionTestUtils.setField(versionBasedImageCatalogService, "versionBasedImageProvider", versionBasedImageProvider);
 
         when(preferencesService.enabledPlatforms()).thenReturn(new HashSet<>(Arrays.asList(PROVIDERS)));
-        when(imageOsService.isSupported(any())).thenReturn(true);
+        lenient().when(imageOsService.isSupported(any())).thenReturn(true);
         lenient().when(entitlementService.isEntitledToUseOS(any(), any())).thenReturn(true);
     }
 
     @Test
-    public void testGetDefaultImageShouldThrowNotFoundException() throws Exception {
+    void testGetDefaultImageShouldThrowNotFoundException() throws Exception {
         ImageFilter imageFilter = ImageFilter.builder()
                 .withImageCatalog(imageCatalog)
                 .withPlatforms(Set.of(imageCatalogPlatform("gcp")))
@@ -143,7 +143,7 @@ public class ImageCatalogServiceDefaultNotFoundTest {
         try {
             underTest.getImagePrewarmedDefaultPreferred(imageFilter);
         } catch (CloudbreakImageNotFoundException exception) {
-            Assertions.assertEquals(
+            assertEquals(
                     "Could not find any image for platform 'gcp redhat8', runtime 'null' and Cloudbreak version '5.0.0' in 'null' image catalog.",
                     exception.getMessage());
         }
@@ -152,7 +152,7 @@ public class ImageCatalogServiceDefaultNotFoundTest {
     }
 
     @Test
-    public void testGetDefaultImageShouldThrowNotFoundException2() throws Exception {
+    void testGetDefaultImageShouldThrowNotFoundException2() throws Exception {
         String catalogJson = FileReaderUtils.readFileFromClasspath(DEFAULT_CDH_IMAGE_CATALOG);
         CloudbreakImageCatalogV3 catalog = JsonUtil.readValue(catalogJson, CloudbreakImageCatalogV3.class);
         when(imageCatalogProvider.getImageCatalogV3(DEFAULT_CDH_IMAGE_CATALOG)).thenReturn(catalog);
@@ -169,7 +169,7 @@ public class ImageCatalogServiceDefaultNotFoundTest {
             try {
                 underTest.getImagePrewarmedDefaultPreferred(imageFilter);
             } catch (CloudbreakImageNotFoundException exception) {
-                Assertions.assertEquals(
+                assertEquals(
                         "Could not find any image for platform 'aws centos7', runtime 'null' " +
                                 "and Cloudbreak version '5.0.0' in 'null' image catalog.",
                         exception.getMessage());
@@ -183,7 +183,7 @@ public class ImageCatalogServiceDefaultNotFoundTest {
     }
 
     @Test
-    public void testGetDefaultImageShouldThrowNotFoundException3() throws Exception {
+    void testGetDefaultImageShouldThrowNotFoundException3() throws Exception {
         String catalogJson = FileReaderUtils.readFileFromClasspath(DEFAULT_CDH_IMAGE_CATALOG);
         CloudbreakImageCatalogV3 catalog = JsonUtil.readValue(catalogJson, CloudbreakImageCatalogV3.class);
         when(imageCatalogProvider.getImageCatalogV3(DEFAULT_CDH_IMAGE_CATALOG)).thenReturn(catalog);
@@ -201,7 +201,7 @@ public class ImageCatalogServiceDefaultNotFoundTest {
             try {
                 underTest.getImagePrewarmedDefaultPreferred(imageFilter);
             } catch (CloudbreakImageNotFoundException exception) {
-                Assertions.assertEquals(
+                assertEquals(
                         "Could not find any image for platform 'aws centos7-arm64', runtime 'null' " +
                                 "and Cloudbreak version '5.0.0' in 'null' image catalog.",
                         exception.getMessage());

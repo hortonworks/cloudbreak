@@ -1,9 +1,10 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recovery;
 
-import org.junit.Test;
-import org.junit.jupiter.api.Assertions;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class RecoveryValidationV4ResponseTest {
+import org.junit.jupiter.api.Test;
+
+class RecoveryValidationV4ResponseTest {
 
     private static final String RECOVERABLE_MESSAGE_1 = "recoverable message 1";
 
@@ -14,38 +15,38 @@ public class RecoveryValidationV4ResponseTest {
     private static final String NON_RECOVERABLE_MESSAGE_2 = "non-recoverable message 2";
 
     @Test
-    public void testMergeTwoRecoverableResponses() {
+    void testMergeTwoRecoverableResponses() {
         RecoveryValidationV4Response baseResponse = new RecoveryValidationV4Response(RECOVERABLE_MESSAGE_1, RecoveryStatus.RECOVERABLE);
         RecoveryValidationV4Response otherResponse = new RecoveryValidationV4Response(RECOVERABLE_MESSAGE_2, RecoveryStatus.RECOVERABLE);
         RecoveryValidationV4Response mergedResponse = baseResponse.merge(otherResponse);
-        Assertions.assertEquals("recoverable message 1 recoverable message 2", mergedResponse.getReason());
-        Assertions.assertEquals(RecoveryStatus.RECOVERABLE, mergedResponse.getStatus());
+        assertEquals("recoverable message 1 recoverable message 2", mergedResponse.getReason());
+        assertEquals(RecoveryStatus.RECOVERABLE, mergedResponse.getStatus());
     }
 
     @Test
-    public void testMergeTwoNonRecoverableResponses() {
+    void testMergeTwoNonRecoverableResponses() {
         RecoveryValidationV4Response baseResponse = new RecoveryValidationV4Response(NON_RECOVERABLE_MESSAGE_1, RecoveryStatus.NON_RECOVERABLE);
         RecoveryValidationV4Response otherResponse = new RecoveryValidationV4Response(NON_RECOVERABLE_MESSAGE_2, RecoveryStatus.NON_RECOVERABLE);
         RecoveryValidationV4Response mergedResponse = baseResponse.merge(otherResponse);
-        Assertions.assertEquals("non-recoverable message 1 Next issue: non-recoverable message 2", mergedResponse.getReason());
-        Assertions.assertEquals(RecoveryStatus.NON_RECOVERABLE, mergedResponse.getStatus());
+        assertEquals("non-recoverable message 1 Next issue: non-recoverable message 2", mergedResponse.getReason());
+        assertEquals(RecoveryStatus.NON_RECOVERABLE, mergedResponse.getStatus());
     }
 
     @Test
-    public void testMergeRecoverableAndNonRecoverableResponses() {
+    void testMergeRecoverableAndNonRecoverableResponses() {
         RecoveryValidationV4Response baseResponse = new RecoveryValidationV4Response(RECOVERABLE_MESSAGE_1, RecoveryStatus.RECOVERABLE);
         RecoveryValidationV4Response otherResponse = new RecoveryValidationV4Response(NON_RECOVERABLE_MESSAGE_1, RecoveryStatus.NON_RECOVERABLE);
         RecoveryValidationV4Response mergedResponse = baseResponse.merge(otherResponse);
-        Assertions.assertEquals("non-recoverable message 1", mergedResponse.getReason());
-        Assertions.assertEquals(RecoveryStatus.NON_RECOVERABLE, mergedResponse.getStatus());
+        assertEquals("non-recoverable message 1", mergedResponse.getReason());
+        assertEquals(RecoveryStatus.NON_RECOVERABLE, mergedResponse.getStatus());
     }
 
     @Test
-    public void testMergeNonrecoverableAndRecoverableResponses() {
+    void testMergeNonrecoverableAndRecoverableResponses() {
         RecoveryValidationV4Response baseResponse = new RecoveryValidationV4Response(NON_RECOVERABLE_MESSAGE_1, RecoveryStatus.NON_RECOVERABLE);
         RecoveryValidationV4Response otherResponse = new RecoveryValidationV4Response(RECOVERABLE_MESSAGE_1, RecoveryStatus.RECOVERABLE);
         RecoveryValidationV4Response mergedResponse = baseResponse.merge(otherResponse);
-        Assertions.assertEquals("non-recoverable message 1", mergedResponse.getReason());
-        Assertions.assertEquals(RecoveryStatus.NON_RECOVERABLE, mergedResponse.getStatus());
+        assertEquals("non-recoverable message 1", mergedResponse.getReason());
+        assertEquals(RecoveryStatus.NON_RECOVERABLE, mergedResponse.getStatus());
     }
 }

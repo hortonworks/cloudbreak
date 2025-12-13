@@ -1,7 +1,9 @@
 package com.sequenceiq.cloudbreak.service.sharedservice;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
@@ -12,7 +14,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.Optional;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -104,7 +105,7 @@ public class DatalakeServiceTest {
         SharedServiceConfigsView res = underTest.createSharedServiceConfigsView("pwd", StackType.WORKLOAD, "envcrn");
 
         verify(platformAwareSdxConnector, times(1)).getSdxAccessViewByEnvironmentCrn(anyString());
-        Assertions.assertFalse(res.isDatalakeCluster());
+        assertFalse(res.isDatalakeCluster());
 
     }
 
@@ -113,7 +114,7 @@ public class DatalakeServiceTest {
         SharedServiceConfigsView res = underTest.createSharedServiceConfigsView("pwd", StackType.DATALAKE, null);
 
         verify(stackService, times(0)).getByCrnOrElseNull("crn");
-        Assertions.assertTrue(res.isDatalakeCluster());
+        assertTrue(res.isDatalakeCluster());
     }
 
     @Test
@@ -121,7 +122,7 @@ public class DatalakeServiceTest {
         SharedServiceConfigsView res = underTest.createSharedServiceConfigsView("pwd", StackType.WORKLOAD, null);
 
         verify(stackService, times(0)).getByCrnOrElseNull("crn");
-        Assertions.assertFalse(res.isDatalakeCluster());
+        assertFalse(res.isDatalakeCluster());
     }
 
     @Test

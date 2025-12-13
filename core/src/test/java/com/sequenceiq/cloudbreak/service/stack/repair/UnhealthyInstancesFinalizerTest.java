@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.service.stack.repair;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -12,11 +12,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
@@ -31,8 +31,8 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 
-@RunWith(MockitoJUnitRunner.class)
-public class UnhealthyInstancesFinalizerTest {
+@ExtendWith(MockitoExtension.class)
+class UnhealthyInstancesFinalizerTest {
 
     private static final String ENV_CRN = "envCrn";
 
@@ -49,7 +49,7 @@ public class UnhealthyInstancesFinalizerTest {
     private UnhealthyInstancesFinalizer underTest;
 
     @Test
-    public void shouldFinalizeInstancesMarkedAsTerminated() {
+    void shouldFinalizeInstancesMarkedAsTerminated() {
         Stack stack = TestUtil.stack(Status.AVAILABLE, TestUtil.awsCredential());
 
         CloudCredential cloudCredential = mock(CloudCredential.class);
@@ -80,7 +80,7 @@ public class UnhealthyInstancesFinalizerTest {
     }
 
     @Test
-    public void shouldFinalizeInstancesThatAreNotFound() {
+    void shouldFinalizeInstancesThatAreNotFound() {
         Stack stack = TestUtil.stack(Status.AVAILABLE, TestUtil.awsCredential());
 
         CloudCredential cloudCredential = mock(CloudCredential.class);

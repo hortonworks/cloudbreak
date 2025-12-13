@@ -1,5 +1,9 @@
 package com.sequenceiq.cloudbreak.structuredevent.rest.filter;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -14,7 +18,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang3.RandomStringUtils;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -56,8 +59,8 @@ public class StructuredEventFilterUtilTest {
         StringBuilder sb = new StringBuilder();
         InputStream actual = RestFilterRequestBodyLogger.logInboundEntity(sb, bais, Charset.defaultCharset(), true);
 
-        Assertions.assertEquals(bais, actual);
-        Assertions.assertTrue(sb.toString().endsWith("...more...\n"));
+        assertEquals(bais, actual);
+        assertTrue(sb.toString().endsWith("...more...\n"));
     }
 
     @Test
@@ -76,8 +79,8 @@ public class StructuredEventFilterUtilTest {
         StringBuilder sb = new StringBuilder();
         InputStream actual = RestFilterRequestBodyLogger.logInboundEntity(sb, inputStream, Charset.defaultCharset(), true);
 
-        Assertions.assertNotEquals(inputStream, actual);
-        Assertions.assertTrue(sb.toString().endsWith("...more...\n"));
+        assertNotEquals(inputStream, actual);
+        assertTrue(sb.toString().endsWith("...more...\n"));
     }
 
     @Test
@@ -90,9 +93,9 @@ public class StructuredEventFilterUtilTest {
         StringBuilder sb = new StringBuilder();
         InputStream actual = RestFilterRequestBodyLogger.logInboundEntity(sb, bais, Charset.defaultCharset(), true);
 
-        Assertions.assertEquals(bais, actual);
-        Assertions.assertFalse(sb.toString().endsWith("...more...\n"));
-        Assertions.assertEquals(sb.length(), 21);
+        assertEquals(bais, actual);
+        assertFalse(sb.toString().endsWith("...more...\n"));
+        assertEquals(sb.length(), 21);
     }
 
     @Test

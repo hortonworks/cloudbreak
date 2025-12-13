@@ -1,12 +1,12 @@
 package com.sequenceiq.cloudbreak.cloud.aws.connector.resource;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -115,7 +115,7 @@ class AwsDatabaseSslCertRotationServiceTest {
         CloudConnectorException exception = assertThrows(CloudConnectorException.class,
                 () -> rotationService.applyCertificateChange(ac, dbStack, desiredCertificate));
 
-        Assert.assertEquals(exception.getMessage(), "error");
+        assertEquals(exception.getMessage(), "error");
     }
 
     @Test
@@ -158,6 +158,6 @@ class AwsDatabaseSslCertRotationServiceTest {
         CloudConnectorException exception = assertThrows(CloudConnectorException.class,
                 () -> rotationService.applyCertificateChange(ac, dbStack, desiredCertificate));
 
-        Assert.assertEquals(exception.getMessage(), "error");
+        assertEquals(exception.getMessage(), "error");
     }
 }

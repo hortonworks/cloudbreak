@@ -1,5 +1,9 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
@@ -14,7 +18,6 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -81,7 +84,7 @@ class InstanceMetadataInstanceIdUpdaterTest {
         doThrow(new TransactionService.TransactionExecutionException("the transaction failed", new RuntimeException()))
                 .when(transactionService).required(any(Runnable.class));
 
-        Assertions.assertThrows(TransactionService.TransactionRuntimeExecutionException.class,
+        assertThrows(TransactionService.TransactionRuntimeExecutionException.class,
                 () -> underTest.updateWithInstanceIdAndStatus(stackCreationContext, affectedResources));
     }
 
@@ -99,7 +102,7 @@ class InstanceMetadataInstanceIdUpdaterTest {
         when(resourceConnector.getInstanceResourceType())
                 .thenThrow(new UnsupportedOperationException("the update is not supported, there is no instance resource type for the platform"));
 
-        Assertions.assertDoesNotThrow(() -> underTest.updateWithInstanceIdAndStatus(stackCreationContext, affectedResources));
+        assertDoesNotThrow(() -> underTest.updateWithInstanceIdAndStatus(stackCreationContext, affectedResources));
 
         verifyNoInteractions(instanceMetaDataService);
     }
@@ -124,7 +127,7 @@ class InstanceMetadataInstanceIdUpdaterTest {
         ArgumentCaptor<List<InstanceMetaData>> instanceMetadataListCaptor = ArgumentCaptor.forClass(List.class);
         verify(instanceMetaDataService, times(1)).saveAll(instanceMetadataListCaptor.capture());
         List<InstanceMetaData> instanceMetadataList = instanceMetadataListCaptor.getValue();
-        Assertions.assertTrue(instanceMetadataList.isEmpty());
+        assertTrue(instanceMetadataList.isEmpty());
     }
 
     @Test
@@ -156,8 +159,8 @@ class InstanceMetadataInstanceIdUpdaterTest {
         ArgumentCaptor<List<InstanceMetaData>> instanceMetadataListCaptor = ArgumentCaptor.forClass(List.class);
         verify(instanceMetaDataService, times(1)).saveAll(instanceMetadataListCaptor.capture());
         List<InstanceMetaData> instanceMetadataList = instanceMetadataListCaptor.getValue();
-        Assertions.assertFalse(instanceMetadataList.isEmpty());
-        Assertions.assertTrue(instanceMetadataList.stream()
+        assertFalse(instanceMetadataList.isEmpty());
+        assertTrue(instanceMetadataList.stream()
                 .allMatch(im -> resourceInstanceIds.contains(im.getInstanceId()) && im.getInstanceStatus() == InstanceStatus.CREATED));
     }
 

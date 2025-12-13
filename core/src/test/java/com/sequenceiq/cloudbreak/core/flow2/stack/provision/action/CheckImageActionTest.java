@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.core.flow2.stack.provision.action;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
@@ -14,7 +15,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Timer;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -117,7 +117,7 @@ public class CheckImageActionTest {
         CheckImageResult checkImageResult = new CheckImageResult(1L, ImageStatus.CREATE_FAILED, ANY_STATUS_PROGRESS_VALUE);
         when(stackCreationService.checkImage(stackContext)).thenReturn(checkImageResult);
 
-        Assertions.assertThrows(CloudbreakServiceException.class, () ->
+        assertThrows(CloudbreakServiceException.class, () ->
                 underTest.doExecute(stackContext, stackEvent, variables),
                 "Image copy failed."
         );

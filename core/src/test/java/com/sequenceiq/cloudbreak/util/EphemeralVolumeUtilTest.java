@@ -1,6 +1,9 @@
 package com.sequenceiq.cloudbreak.util;
 
-import org.junit.Assert;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpPlatformParameters;
@@ -13,12 +16,12 @@ public class EphemeralVolumeUtilTest {
 
     @Test
     public void testGetEphemeralVolumeValuesMustReturnTwoLengthSet() {
-        Assert.assertEquals(2, EphemeralVolumeUtil.getEphemeralVolumeValues().size());
+        assertEquals(2, EphemeralVolumeUtil.getEphemeralVolumeValues().size());
     }
 
     @Test
     public void testGetEphemeralVolumeWhichMustBeProvisionedMustReturnOneLengthSet() {
-        Assert.assertEquals(1, EphemeralVolumeUtil.getEphemeralVolumeWhichMustBeProvisioned().size());
+        assertEquals(1, EphemeralVolumeUtil.getEphemeralVolumeWhichMustBeProvisioned().size());
     }
 
     @Test
@@ -26,7 +29,7 @@ public class EphemeralVolumeUtilTest {
         VolumeTemplate volumeTemplate = new VolumeTemplate();
         volumeTemplate.setVolumeType(AwsDiskType.Gp2.value());
 
-        Assert.assertFalse(EphemeralVolumeUtil.volumeIsEphemeral(volumeTemplate));
+        assertFalse(EphemeralVolumeUtil.volumeIsEphemeral(volumeTemplate));
     }
 
     @Test
@@ -34,7 +37,7 @@ public class EphemeralVolumeUtilTest {
         VolumeTemplate volumeTemplate = new VolumeTemplate();
         volumeTemplate.setVolumeType(GcpPlatformParameters.GcpDiskType.LOCAL_SSD.value());
 
-        Assert.assertTrue(EphemeralVolumeUtil.volumeIsEphemeral(volumeTemplate));
+        assertTrue(EphemeralVolumeUtil.volumeIsEphemeral(volumeTemplate));
     }
 
     @Test
@@ -42,7 +45,7 @@ public class EphemeralVolumeUtilTest {
         VolumeTemplate volumeTemplate = new VolumeTemplate();
         volumeTemplate.setVolumeType(AwsDiskType.Gp2.value());
 
-        Assert.assertFalse(EphemeralVolumeUtil.volumeIsEphemeralWhichMustBeProvisioned(volumeTemplate));
+        assertFalse(EphemeralVolumeUtil.volumeIsEphemeralWhichMustBeProvisioned(volumeTemplate));
     }
 
     @Test
@@ -50,7 +53,7 @@ public class EphemeralVolumeUtilTest {
         VolumeTemplate volumeTemplate = new VolumeTemplate();
         volumeTemplate.setVolumeType(GcpPlatformParameters.GcpDiskType.LOCAL_SSD.value());
 
-        Assert.assertTrue(EphemeralVolumeUtil.volumeIsEphemeralWhichMustBeProvisioned(volumeTemplate));
+        assertTrue(EphemeralVolumeUtil.volumeIsEphemeralWhichMustBeProvisioned(volumeTemplate));
     }
 
     @Test
@@ -63,7 +66,7 @@ public class EphemeralVolumeUtilTest {
                 CloudVolumeUsageType.GENERAL
         );
 
-        Assert.assertFalse(EphemeralVolumeUtil.volumeIsEphemeralWhichMustBeProvisioned(volumeTemplate));
+        assertFalse(EphemeralVolumeUtil.volumeIsEphemeralWhichMustBeProvisioned(volumeTemplate));
     }
 
     @Test
@@ -76,17 +79,17 @@ public class EphemeralVolumeUtilTest {
                 CloudVolumeUsageType.GENERAL
         );
 
-        Assert.assertTrue(EphemeralVolumeUtil.volumeIsEphemeralWhichMustBeProvisioned(volumeTemplate));
+        assertTrue(EphemeralVolumeUtil.volumeIsEphemeralWhichMustBeProvisioned(volumeTemplate));
     }
 
     @Test
     public void testVolumeIsEphemeralWhichMustBeProvisionedWhenGp2MustFalse() {
-        Assert.assertFalse(EphemeralVolumeUtil.volumeIsEphemeralWhichMustBeProvisioned(AwsDiskType.Gp2.value()));
+        assertFalse(EphemeralVolumeUtil.volumeIsEphemeralWhichMustBeProvisioned(AwsDiskType.Gp2.value()));
     }
 
     @Test
     public void testVolumeIsEphemeralWhichMustBeProvisionedWhenLocalSsdMustTrue() {
-        Assert.assertTrue(EphemeralVolumeUtil.volumeIsEphemeralWhichMustBeProvisioned(GcpPlatformParameters.GcpDiskType.LOCAL_SSD.value()));
+        assertTrue(EphemeralVolumeUtil.volumeIsEphemeralWhichMustBeProvisioned(GcpPlatformParameters.GcpDiskType.LOCAL_SSD.value()));
     }
 
 }

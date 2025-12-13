@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.compute;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -10,7 +11,6 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.util.List;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -61,7 +61,7 @@ class GcpInstanceStateCheckerTest {
         List<CloudVmInstanceStatus> actual = underTest.checkBasedOnOperation(gcpContext, List.of());
 
         verifyNoInteractions(gcpStackUtil);
-        Assertions.assertTrue(actual.isEmpty());
+        assertTrue(actual.isEmpty());
     }
 
     @Test
@@ -70,7 +70,7 @@ class GcpInstanceStateCheckerTest {
         CloudInstance cloudInstance = getCloudInstanceWithOperation(AVAILABILITY_ZONE, OPERATION_ID);
         when(gcpStackUtil.zoneOperation(gcpCompute, PROJECT_ID, OPERATION_ID, AVAILABILITY_ZONE)).thenThrow(new IOException("Something went wrong!"));
 
-        Assertions.assertThrows(GcpResourceException.class, () -> underTest.checkBasedOnOperation(gcpContext, List.of(cloudInstance)));
+        assertThrows(GcpResourceException.class, () -> underTest.checkBasedOnOperation(gcpContext, List.of(cloudInstance)));
 
         verify(gcpStackUtil).zoneOperation(gcpCompute, PROJECT_ID, OPERATION_ID, AVAILABILITY_ZONE);
     }
@@ -84,7 +84,7 @@ class GcpInstanceStateCheckerTest {
         GoogleJsonResponseException googleJsonResponseException = new GoogleJsonResponseException(builder, null);
         when(gcpStackUtil.zoneOperation(gcpCompute, PROJECT_ID, OPERATION_ID, AVAILABILITY_ZONE)).thenThrow(googleJsonResponseException);
 
-        Assertions.assertThrows(GcpResourceException.class, () -> underTest.checkBasedOnOperation(gcpContext, List.of(cloudInstance)));
+        assertThrows(GcpResourceException.class, () -> underTest.checkBasedOnOperation(gcpContext, List.of(cloudInstance)));
 
         verify(gcpStackUtil).zoneOperation(gcpCompute, PROJECT_ID, OPERATION_ID, AVAILABILITY_ZONE);
     }
@@ -100,7 +100,7 @@ class GcpInstanceStateCheckerTest {
         GoogleJsonResponseException googleJsonResponseException = new GoogleJsonResponseException(builder, googleErrorDetail);
         when(gcpStackUtil.zoneOperation(gcpCompute, PROJECT_ID, OPERATION_ID, AVAILABILITY_ZONE)).thenThrow(googleJsonResponseException);
 
-        Assertions.assertThrows(GcpResourceException.class, () -> underTest.checkBasedOnOperation(gcpContext, List.of(cloudInstance)));
+        assertThrows(GcpResourceException.class, () -> underTest.checkBasedOnOperation(gcpContext, List.of(cloudInstance)));
 
         verify(gcpStackUtil).zoneOperation(gcpCompute, PROJECT_ID, OPERATION_ID, AVAILABILITY_ZONE);
     }
@@ -115,7 +115,7 @@ class GcpInstanceStateCheckerTest {
         when(gcpStackUtil.zoneOperation(gcpCompute, PROJECT_ID, OPERATION_ID, AVAILABILITY_ZONE)).thenReturn(get);
         when(gcpStackUtil.isOperationFinished(operation)).thenReturn(Boolean.TRUE);
 
-        Assertions.assertThrows(GcpResourceException.class, () -> underTest.checkBasedOnOperation(gcpContext, List.of(cloudInstance)));
+        assertThrows(GcpResourceException.class, () -> underTest.checkBasedOnOperation(gcpContext, List.of(cloudInstance)));
 
         verify(gcpStackUtil).zoneOperation(gcpCompute, PROJECT_ID, OPERATION_ID, AVAILABILITY_ZONE);
     }
@@ -205,7 +205,7 @@ class GcpInstanceStateCheckerTest {
         when(gcpStackUtil.zoneOperation(gcpCompute, PROJECT_ID, OPERATION_ID, AVAILABILITY_ZONE)).thenThrow(googleJsonResponseException);
         when(gcpStackUtil.getComputeInstanceWithId(gcpCompute, PROJECT_ID, AVAILABILITY_ZONE, instanceId)).thenThrow(new IOException("something went wrong"));
 
-        Assertions.assertThrows(GcpResourceException.class, () -> underTest.checkBasedOnOperation(gcpContext, List.of(cloudInstance)));
+        assertThrows(GcpResourceException.class, () -> underTest.checkBasedOnOperation(gcpContext, List.of(cloudInstance)));
 
         verify(gcpStackUtil).zoneOperation(gcpCompute, PROJECT_ID, OPERATION_ID, AVAILABILITY_ZONE);
         verify(gcpStackUtil).getComputeInstanceWithId(gcpCompute, PROJECT_ID, AVAILABILITY_ZONE, instanceId);
@@ -229,7 +229,7 @@ class GcpInstanceStateCheckerTest {
         when(gcpStackUtil.getComputeInstanceWithId(gcpCompute, PROJECT_ID, AVAILABILITY_ZONE, instanceId))
                 .thenThrow(new GoogleJsonResponseException(builder, googleErrorDetail2));
 
-        Assertions.assertThrows(GcpResourceException.class, () -> underTest.checkBasedOnOperation(gcpContext, List.of(cloudInstance)));
+        assertThrows(GcpResourceException.class, () -> underTest.checkBasedOnOperation(gcpContext, List.of(cloudInstance)));
 
         verify(gcpStackUtil).zoneOperation(gcpCompute, PROJECT_ID, OPERATION_ID, AVAILABILITY_ZONE);
         verify(gcpStackUtil).getComputeInstanceWithId(gcpCompute, PROJECT_ID, AVAILABILITY_ZONE, instanceId);

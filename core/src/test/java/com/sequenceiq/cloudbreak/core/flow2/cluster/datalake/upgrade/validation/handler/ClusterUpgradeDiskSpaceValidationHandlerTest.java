@@ -8,11 +8,11 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.exception.UpgradeValidationFailedException;
@@ -23,8 +23,8 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.upgrade.validation.DiskSpaceValidationService;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
-@RunWith(MockitoJUnitRunner.class)
-public class ClusterUpgradeDiskSpaceValidationHandlerTest {
+@ExtendWith(MockitoExtension.class)
+class ClusterUpgradeDiskSpaceValidationHandlerTest {
 
     private static final long STACK_ID = 1L;
 
@@ -43,7 +43,7 @@ public class ClusterUpgradeDiskSpaceValidationHandlerTest {
     private Stack stack;
 
     @Test
-    public void testHandlerToRetrieveTheImageFromTheCurrentImageCatalog() {
+    void testHandlerToRetrieveTheImageFromTheCurrentImageCatalog() {
         when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
 
         Selectable nextFlowStepSelector = underTest.doAccept(createEvent());
@@ -54,7 +54,7 @@ public class ClusterUpgradeDiskSpaceValidationHandlerTest {
     }
 
     @Test
-    public void testHandlerShouldReturnValidationFailedEventWhenTheDiskValidationFailed() {
+    void testHandlerShouldReturnValidationFailedEventWhenTheDiskValidationFailed() {
         when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
         doThrow(new UpgradeValidationFailedException("Validation failed")).when(diskSpaceValidationService)
                 .validateFreeSpaceForUpgrade(stack, REQUIRED_FREE_SPACE);

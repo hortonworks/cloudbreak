@@ -6,6 +6,7 @@ import static com.sequenceiq.cloudbreak.cloud.aws.common.subnetselector.SubnetBu
 import static com.sequenceiq.cloudbreak.cloud.aws.common.subnetselector.SubnetBuilder.AZ_D;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
@@ -17,7 +18,6 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -36,8 +36,8 @@ public class SubnetFilterStrategyMultiplePreferPublicTest {
 
     @BeforeEach
     public void setup() {
-        when(subnetSelectorService.collectPublicSubnets(ArgumentMatchers.any())).thenCallRealMethod();
-        lenient().when(subnetSelectorService.collectPrivateSubnets(ArgumentMatchers.any())).thenCallRealMethod();
+        when(subnetSelectorService.collectPublicSubnets(any())).thenCallRealMethod();
+        lenient().when(subnetSelectorService.collectPrivateSubnets(any())).thenCallRealMethod();
     }
 
     @Test

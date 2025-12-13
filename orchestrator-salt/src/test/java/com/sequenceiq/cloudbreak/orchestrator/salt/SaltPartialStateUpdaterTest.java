@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -16,7 +17,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrap;
@@ -71,7 +71,7 @@ public class SaltPartialStateUpdaterTest {
 
     @Test
     void testUpdatePartialSaltDefinition() throws CloudbreakOrchestratorFailedException {
-        Callable<Boolean> callable = Mockito.mock(Callable.class);
+        Callable<Boolean> callable = mock(Callable.class);
         lenient().when(saltRunner.runnerWithConfiguredErrorCount(orchestratorBootstrapArgumentCaptor.capture(), any(), any())).thenReturn(callable);
         when(saltService.getPrimaryGatewayConfig(gatewayConfigs)).thenReturn(gatewayConfig);
 

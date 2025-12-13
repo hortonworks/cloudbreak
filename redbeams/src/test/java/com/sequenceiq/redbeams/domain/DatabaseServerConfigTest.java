@@ -1,17 +1,17 @@
 package com.sequenceiq.redbeams.domain;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
 import org.hibernate.annotations.Where;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
@@ -20,17 +20,17 @@ import com.sequenceiq.redbeams.TestData;
 import com.sequenceiq.redbeams.api.endpoint.v4.ResourceStatus;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 
-public class DatabaseServerConfigTest {
+class DatabaseServerConfigTest {
 
     private DatabaseServerConfig config;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         config = new DatabaseServerConfig();
     }
 
     @Test
-    public void testGettersAndSetters() {
+    void testGettersAndSetters() {
         config.setId(1L);
         assertEquals(1L, config.getId().longValue());
 
@@ -89,7 +89,7 @@ public class DatabaseServerConfigTest {
     }
 
     @Test
-    public void testHasWhereAnnotation() {
+    void testHasWhereAnnotation() {
         Where whereAnnotation = DatabaseServerConfig.class.getAnnotation(Where.class);
 
         assertNotNull(whereAnnotation);
@@ -97,7 +97,7 @@ public class DatabaseServerConfigTest {
     }
 
     @Test
-    public void testCreateDatabaseConfig() {
+    void testCreateDatabaseConfig() {
         config.setId(1L);
         config.setAccountId("myaccount");
         Crn crn = TestData.getTestCrn("databaseServer", "myserver");
@@ -136,7 +136,7 @@ public class DatabaseServerConfigTest {
     }
 
     @Test
-    public void testUnsetRelationsToEntitiesToBeDeleted() {
+    void testUnsetRelationsToEntitiesToBeDeleted() {
         config.setDbStack(new DBStack());
         Set<DatabaseConfig> databases = new HashSet<>();
         databases.add(new DatabaseConfig());

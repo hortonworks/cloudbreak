@@ -1,10 +1,11 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.yarn;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -12,10 +13,10 @@ import java.util.List;
 import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.cloudera.api.swagger.model.ApiClusterTemplateService;
@@ -24,8 +25,8 @@ import com.sequenceiq.cloudbreak.cmtemplate.configproviders.hive.HiveRoles;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.views.BlueprintView;
 
-@RunWith(MockitoJUnitRunner.class)
-public class YarnResourceManagerRoleConfigProviderTest {
+@ExtendWith(MockitoExtension.class)
+class YarnResourceManagerRoleConfigProviderTest {
 
     @Mock
     private CmTemplateProcessor cmTemplateProcessor;
@@ -39,7 +40,7 @@ public class YarnResourceManagerRoleConfigProviderTest {
     private YarnResourceManagerRoleConfigProvider underTest = new YarnResourceManagerRoleConfigProvider();
 
     @Test
-    public void testGetConfigsWhenRoleIsResourceManager() {
+    void testGetConfigsWhenRoleIsResourceManager() {
         setupMocks(true, true, "7.2.10");
         List<ApiClusterTemplateConfig> serviceConfigs = underTest.getRoleConfigs(YarnRoles.RESOURCEMANAGER, cmTemplateProcessor, source);
         assertEquals(2, serviceConfigs.size());
@@ -48,7 +49,7 @@ public class YarnResourceManagerRoleConfigProviderTest {
     }
 
     @Test
-    public void testGetConfigsWhenRoleIsResourceManagerPlacementVersionPasses() {
+    void testGetConfigsWhenRoleIsResourceManagerPlacementVersionPasses() {
         setupMocks(true, true, "7.2.11");
         List<ApiClusterTemplateConfig> serviceConfigs = underTest.getRoleConfigs(YarnRoles.RESOURCEMANAGER, cmTemplateProcessor, source);
         assertEquals(3, serviceConfigs.size());
@@ -64,12 +65,11 @@ public class YarnResourceManagerRoleConfigProviderTest {
                 "<name>yarn.resourcemanager.am.placement-preference-with-node-attributes</name>" +
                 "<value>ORDER NODES IN NodeInstanceType WITH worker &gt; compute</value></property><property>" +
                 "<name>yarn.resourcemanager.non-am.placement-preference-with-node-attributes</name>" +
-                "<value>ORDER NODES IN NodeInstanceType WITH compute &gt; worker</value></property>",
-                rmSafetyValve.getValue());
+                "<value>ORDER NODES IN NodeInstanceType WITH compute &gt; worker</value></property>", rmSafetyValve.getValue());
     }
 
     @Test
-    public void testGetConfigsWhenRoleIsNotResourceManager() {
+    void testGetConfigsWhenRoleIsNotResourceManager() {
         setupMocks(false, false, null);
         List<ApiClusterTemplateConfig> serviceConfigs = underTest.getRoleConfigs(YarnRoles.NODEMANAGER, cmTemplateProcessor, source);
         assertEquals(0, serviceConfigs.size());
@@ -78,52 +78,52 @@ public class YarnResourceManagerRoleConfigProviderTest {
     }
 
     @Test
-    public void testIsConfigurableWhenLlapIsPresent() {
+    void testIsConfigurableWhenLlapIsPresent() {
         setupMocks(true, true, null);
         assertTrue(underTest.isConfigurationNeeded(cmTemplateProcessor, source));
     }
 
     @Test
-    public void testIsConfigurableWhenLlapIsNotPresent() {
+    void testIsConfigurableWhenLlapIsNotPresent() {
         setupMocks(false, true, null);
         assertFalse(underTest.isConfigurationNeeded(cmTemplateProcessor, source));
     }
 
     @Test
-    public void testIsConfigurableWhenLlapAbsentCDPVersionPasses1() {
+    void testIsConfigurableWhenLlapAbsentCDPVersionPasses1() {
         setupMocks(false, true, "7.2.11");
         assertTrue(underTest.isConfigurationNeeded(cmTemplateProcessor, source));
     }
 
     @Test
-    public void testIsConfigurableWhenLlapAbsentCDPVersionPasses2() {
+    void testIsConfigurableWhenLlapAbsentCDPVersionPasses2() {
         setupMocks(false, true, "7.2.12");
         assertTrue(underTest.isConfigurationNeeded(cmTemplateProcessor, source));
     }
 
     @Test
-    public void testIsConfigurableWhenLlapAbsentCDPVersionPasses3() {
+    void testIsConfigurableWhenLlapAbsentCDPVersionPasses3() {
         setupMocks(false, true, "7.3.0");
         assertTrue(underTest.isConfigurationNeeded(cmTemplateProcessor, source));
     }
 
     @Test
-    public void testIsConfigurableWhenLlapAbsentCDPVersionFails() {
+    void testIsConfigurableWhenLlapAbsentCDPVersionFails() {
         setupMocks(false, true, "7.2.10");
         assertFalse(underTest.isConfigurationNeeded(cmTemplateProcessor, source));
     }
 
     private void setupMocks(boolean hasLlap, boolean hasRm, String version) {
-        when(blueprintView.getProcessor()).thenReturn(cmTemplateProcessor);
-        when(source.getBlueprintView()).thenReturn(blueprintView);
+        lenient().when(blueprintView.getProcessor()).thenReturn(cmTemplateProcessor);
+        lenient().when(source.getBlueprintView()).thenReturn(blueprintView);
         if (hasRm) {
-            when(cmTemplateProcessor.isRoleTypePresentInService(anyString(), anyList())).thenReturn(true);
+            lenient().when(cmTemplateProcessor.isRoleTypePresentInService(anyString(), anyList())).thenReturn(true);
         }
         if (hasLlap) {
             when(cmTemplateProcessor.getServiceByType(HiveRoles.HIVELLAP)).thenReturn(Optional.of(mock(ApiClusterTemplateService.class)));
         }
 
-        when(cmTemplateProcessor.getStackVersion()).thenReturn(version);
+        lenient().when(cmTemplateProcessor.getStackVersion()).thenReturn(version);
     }
 
 }

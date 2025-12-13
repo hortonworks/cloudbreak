@@ -19,12 +19,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
-import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
@@ -50,8 +48,7 @@ import com.sequenceiq.flow.graph.FlowChainConfigGraphGeneratorUtil;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 
 @ExtendWith(MockitoExtension.class)
-@RunWith(MockitoJUnitRunner.class)
-public class DatalakeResizeFlowEventChainFactoryTest {
+class DatalakeResizeFlowEventChainFactoryTest {
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:1234:user:1";
 
     private static final String BACKUP_LOCATION = "s3a://path/to/backup";
@@ -71,14 +68,14 @@ public class DatalakeResizeFlowEventChainFactoryTest {
 
     private SdxCluster newSdxCluster;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         oldSdxCluster = getValidSdxCluster(OLD_SDX_ID, OLD_CLUSTER_NAME);
         newSdxCluster = getValidSdxCluster(NEW_SDX_ID, NEW_CLUSTER_NAME);
     }
 
     @Test
-    public void chainCreationTestValidationOnly() {
+    void chainCreationTestValidationOnly() {
         DatalakeResizeFlowChainStartEvent event = new DatalakeResizeFlowChainStartEvent(oldSdxCluster.getId(), newSdxCluster, USER_CRN, BACKUP_LOCATION,
                 true, true, new DatalakeDrSkipOptions(false, false, false, false), true);
         FlowTriggerEventQueue flowTriggerEventQueue = factory.createFlowTriggerEventQueue(event);
@@ -94,7 +91,7 @@ public class DatalakeResizeFlowEventChainFactoryTest {
     }
 
     @Test
-    public void chainCreationTestSkipValidation() {
+    void chainCreationTestSkipValidation() {
         DatalakeResizeFlowChainStartEvent event = new DatalakeResizeFlowChainStartEvent(oldSdxCluster.getId(), newSdxCluster, USER_CRN, BACKUP_LOCATION,
                 true, true, new DatalakeDrSkipOptions(true, false, false, false), false);
         FlowTriggerEventQueue flowTriggerEventQueue = factory.createFlowTriggerEventQueue(event);
@@ -116,7 +113,7 @@ public class DatalakeResizeFlowEventChainFactoryTest {
     }
 
     @Test
-    public void chainCreationTestSkipBackup() {
+    void chainCreationTestSkipBackup() {
         DatalakeResizeFlowChainStartEvent event = new DatalakeResizeFlowChainStartEvent(oldSdxCluster.getId(), newSdxCluster, USER_CRN, BACKUP_LOCATION,
                 false, true, new DatalakeDrSkipOptions(false, false, false, false), false);
         FlowTriggerEventQueue flowTriggerEventQueue = factory.createFlowTriggerEventQueue(event);
@@ -139,7 +136,7 @@ public class DatalakeResizeFlowEventChainFactoryTest {
     }
 
     @Test
-    public void chainCreationTestSkipRestore() {
+    void chainCreationTestSkipRestore() {
         DatalakeResizeFlowChainStartEvent event = new DatalakeResizeFlowChainStartEvent(oldSdxCluster.getId(), newSdxCluster, USER_CRN, BACKUP_LOCATION,
                 true, false, new DatalakeDrSkipOptions(false, false, false, false), false);
         FlowTriggerEventQueue flowTriggerEventQueue = factory.createFlowTriggerEventQueue(event);
@@ -162,7 +159,7 @@ public class DatalakeResizeFlowEventChainFactoryTest {
     }
 
     @Test
-    public void chainCreationTestSkipBackupAndRestore() {
+    void chainCreationTestSkipBackupAndRestore() {
         DatalakeResizeFlowChainStartEvent event = new DatalakeResizeFlowChainStartEvent(oldSdxCluster.getId(), newSdxCluster, USER_CRN, BACKUP_LOCATION,
                 false, false, new DatalakeDrSkipOptions(false, false, false, false), false);
         FlowTriggerEventQueue flowTriggerEventQueue = factory.createFlowTriggerEventQueue(event);
@@ -184,7 +181,7 @@ public class DatalakeResizeFlowEventChainFactoryTest {
     }
 
     @Test
-    public void fullChainCreationTest() {
+    void fullChainCreationTest() {
         DatalakeResizeFlowChainStartEvent event = new DatalakeResizeFlowChainStartEvent(oldSdxCluster.getId(), newSdxCluster, USER_CRN, BACKUP_LOCATION,
                 true, true, new DatalakeDrSkipOptions(false, false, false, false), false);
         FlowTriggerEventQueue flowTriggerEventQueue = factory.createFlowTriggerEventQueue(event);

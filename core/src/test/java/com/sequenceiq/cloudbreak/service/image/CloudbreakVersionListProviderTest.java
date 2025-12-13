@@ -1,23 +1,23 @@
 package com.sequenceiq.cloudbreak.service.image;
 
 import static java.util.Arrays.asList;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakVersion;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Versions;
 
-@RunWith(MockitoJUnitRunner.class)
-public class CloudbreakVersionListProviderTest {
+@ExtendWith(MockitoExtension.class)
+class CloudbreakVersionListProviderTest {
 
     private static final List<String> CLOUDBREAK_VERSIONS =
             List.of("2.39.0-b124", "2.39.0-b147", "2.40.0-b143", "2.40.0-b163", "2.41.0-b110");
@@ -38,7 +38,7 @@ public class CloudbreakVersionListProviderTest {
     private CloudbreakVersionListProvider underTest;
 
     @Test
-    public void testGetVersionsWithCloudbreakVersions() {
+    void testGetVersionsWithCloudbreakVersions() {
 
         CloudbreakImageCatalogV3 catalog = new CloudbreakImageCatalogV3(null, new Versions(cloudbreakVersions(), null));
         List<CloudbreakVersion> versions = underTest.getVersions(catalog);
@@ -50,7 +50,7 @@ public class CloudbreakVersionListProviderTest {
     }
 
     @Test
-    public void testGetVersionsWithFreeipaVersions() {
+    void testGetVersionsWithFreeipaVersions() {
 
         CloudbreakImageCatalogV3 catalog = new CloudbreakImageCatalogV3(null, new Versions(null, freeipaVersions()));
         List<CloudbreakVersion> versions = underTest.getVersions(catalog);
@@ -62,7 +62,7 @@ public class CloudbreakVersionListProviderTest {
     }
 
     @Test
-    public void testGetVersionsWithNullCatalog() {
+    void testGetVersionsWithNullCatalog() {
 
         List<CloudbreakVersion> versions = underTest.getVersions(null);
 
@@ -71,7 +71,7 @@ public class CloudbreakVersionListProviderTest {
     }
 
     @Test
-    public void testGetVersionsWithNullCatalogVersions() {
+    void testGetVersionsWithNullCatalogVersions() {
 
         CloudbreakImageCatalogV3 catalog = new CloudbreakImageCatalogV3(null, null);
         List<CloudbreakVersion> versions = underTest.getVersions(catalog);

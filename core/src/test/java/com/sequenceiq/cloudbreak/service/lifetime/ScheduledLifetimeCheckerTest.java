@@ -9,11 +9,11 @@ import java.time.Duration;
 import java.util.Collections;
 import java.util.Optional;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.common.service.Clock;
@@ -24,8 +24,8 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
-@RunWith(MockitoJUnitRunner.class)
-public class ScheduledLifetimeCheckerTest {
+@ExtendWith(MockitoExtension.class)
+class ScheduledLifetimeCheckerTest {
 
     private static final Long STACK_ID = 1L;
 
@@ -42,7 +42,7 @@ public class ScheduledLifetimeCheckerTest {
     private Clock clock;
 
     @Test
-    public void testValidateWhenOnlyOneStackIsAliveAndNotExceeded() {
+    void testValidateWhenOnlyOneStackIsAliveAndNotExceeded() {
         StackTtlViewImpl stack = new StackTtlViewImpl();
         stack.setId(STACK_ID);
 
@@ -54,7 +54,7 @@ public class ScheduledLifetimeCheckerTest {
     }
 
     @Test
-    public void testValidateWhenOnlyOneStackIsAliveAndTTLNotSet() {
+    void testValidateWhenOnlyOneStackIsAliveAndTTLNotSet() {
         StackTtlViewImpl stack = new StackTtlViewImpl();
         stack.setId(STACK_ID);
 
@@ -66,7 +66,7 @@ public class ScheduledLifetimeCheckerTest {
     }
 
     @Test
-    public void testValidateWhenOnlyOneStackIsAliveAndTTLIsLetter() {
+    void testValidateWhenOnlyOneStackIsAliveAndTTLIsLetter() {
         StackTtlViewImpl stack = new StackTtlViewImpl();
         stack.setId(STACK_ID);
 
@@ -78,22 +78,7 @@ public class ScheduledLifetimeCheckerTest {
     }
 
     @Test
-    public void testValidateWhenOnlyOneStackIsAliveAndTTLIsSetAndDeleteInProgressAndClusterNull() {
-        StackTtlViewImpl stack = new StackTtlViewImpl();
-        stack.setId(STACK_ID);
-        StackStatus stackStatus = new StackStatus();
-        stackStatus.setStatus(Status.DELETE_IN_PROGRESS);
-        stack.setStatus(stackStatus);
-
-        when(stackService.getAllAlive()).thenReturn(Collections.singletonList(stack));
-
-        underTest.validate();
-
-        verify(flowManager, times(0)).triggerTermination(stack.getId());
-    }
-
-    @Test
-    public void testValidateWhenOnlyOneStackIsAliveAndTTLIsSetAndDeleteInProgressAndCreationFinished() {
+    void testValidateWhenOnlyOneStackIsAliveAndTTLIsSetAndDeleteInProgressAndClusterNull() {
         StackTtlViewImpl stack = new StackTtlViewImpl();
         stack.setId(STACK_ID);
         StackStatus stackStatus = new StackStatus();
@@ -108,7 +93,7 @@ public class ScheduledLifetimeCheckerTest {
     }
 
     @Test
-    public void testValidateWhenOnlyOneStackIsAliveAndTTLIsSetAndDeleteInProgressAndCreationNotFinished() {
+    void testValidateWhenOnlyOneStackIsAliveAndTTLIsSetAndDeleteInProgressAndCreationFinished() {
         StackTtlViewImpl stack = new StackTtlViewImpl();
         stack.setId(STACK_ID);
         StackStatus stackStatus = new StackStatus();
@@ -123,7 +108,22 @@ public class ScheduledLifetimeCheckerTest {
     }
 
     @Test
-    public void testValidateWhenOnlyOneStackIsAliveAndTTLIsSetAndAvailableAndClusterNull() {
+    void testValidateWhenOnlyOneStackIsAliveAndTTLIsSetAndDeleteInProgressAndCreationNotFinished() {
+        StackTtlViewImpl stack = new StackTtlViewImpl();
+        stack.setId(STACK_ID);
+        StackStatus stackStatus = new StackStatus();
+        stackStatus.setStatus(Status.DELETE_IN_PROGRESS);
+        stack.setStatus(stackStatus);
+
+        when(stackService.getAllAlive()).thenReturn(Collections.singletonList(stack));
+
+        underTest.validate();
+
+        verify(flowManager, times(0)).triggerTermination(stack.getId());
+    }
+
+    @Test
+    void testValidateWhenOnlyOneStackIsAliveAndTTLIsSetAndAvailableAndClusterNull() {
         StackTtlViewImpl stack = new StackTtlViewImpl();
         stack.setId(STACK_ID);
         StackStatus stackStatus = new StackStatus();
@@ -138,7 +138,7 @@ public class ScheduledLifetimeCheckerTest {
     }
 
     @Test
-    public void testValidateWhenOnlyOneStackIsAliveAndTTLIsSetAndStoppedAndCreationNotFinished() {
+    void testValidateWhenOnlyOneStackIsAliveAndTTLIsSetAndStoppedAndCreationNotFinished() {
         StackTtlViewImpl stack = new StackTtlViewImpl();
         stack.setId(STACK_ID);
         StackStatus stackStatus = new StackStatus();
@@ -153,7 +153,7 @@ public class ScheduledLifetimeCheckerTest {
     }
 
     @Test
-    public void testValidateWhenClusterExceededByRunningTimeMoreThanTTL() {
+    void testValidateWhenClusterExceededByRunningTimeMoreThanTTL() {
         StackTtlViewImpl stack = new StackTtlViewImpl();
         stack.setId(STACK_ID);
         long startTimeMillis = 0;
@@ -179,7 +179,7 @@ public class ScheduledLifetimeCheckerTest {
     }
 
     @Test
-    public void testValidateWhenClusterNotExceededByTTLMoreThanRunningTime() {
+    void testValidateWhenClusterNotExceededByTTLMoreThanRunningTime() {
         StackTtlViewImpl stack = new StackTtlViewImpl();
         stack.setId(STACK_ID);
         Workspace workspace = new Workspace();

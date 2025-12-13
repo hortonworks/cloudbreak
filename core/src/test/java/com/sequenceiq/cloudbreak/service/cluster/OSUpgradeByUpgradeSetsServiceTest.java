@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.cluster;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -14,7 +15,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -60,7 +60,7 @@ class OSUpgradeByUpgradeSetsServiceTest {
         upgradeSets.add(new OrderedOSUpgradeSet(0, Set.of("i-1", "i-3", "i-5")));
         upgradeSets.add(new OrderedOSUpgradeSet(0, Set.of("i-1", "i-4")));
         upgradeSets.add(new OrderedOSUpgradeSet(1, Set.of("i-6")));
-        BadRequestException badRequestException = Assertions.assertThrows(BadRequestException.class, () ->
+        BadRequestException badRequestException = assertThrows(BadRequestException.class, () ->
                 osUpgradeByUpgradeSetsService.osUpgradeByUpgradeSets(stackView, new ImageChangeDto(1L, "imageId"), upgradeSets));
         assertEquals("There are duplicated order number(s): 0 appears 2 times", badRequestException.getMessage());
     }
@@ -73,7 +73,7 @@ class OSUpgradeByUpgradeSetsServiceTest {
         upgradeSets.add(new OrderedOSUpgradeSet(0, Set.of("i-1", "i-3", "i-5")));
         upgradeSets.add(new OrderedOSUpgradeSet(1, Set.of("i-1", "i-4")));
         upgradeSets.add(new OrderedOSUpgradeSet(2, Set.of("i-6")));
-        BadRequestException badRequestException = Assertions.assertThrows(BadRequestException.class, () ->
+        BadRequestException badRequestException = assertThrows(BadRequestException.class, () ->
                 osUpgradeByUpgradeSetsService.osUpgradeByUpgradeSets(stackView, new ImageChangeDto(1L, "imageId"), upgradeSets));
         assertEquals("There are duplicated element(s): i-1 appears 2 times", badRequestException.getMessage());
     }
@@ -98,7 +98,7 @@ class OSUpgradeByUpgradeSetsServiceTest {
         ArrayList<OrderedOSUpgradeSet> upgradeSets = new ArrayList<>();
         upgradeSets.add(new OrderedOSUpgradeSet(0, Set.of("i-1", "i-3")));
         upgradeSets.add(new OrderedOSUpgradeSet(1, Set.of("i-2")));
-        BadRequestException badRequestException = Assertions.assertThrows(BadRequestException.class, () ->
+        BadRequestException badRequestException = assertThrows(BadRequestException.class, () ->
                 osUpgradeByUpgradeSetsService.osUpgradeByUpgradeSets(stackView, new ImageChangeDto(1L, "imageId"), upgradeSets));
         assertEquals("All instance must be selected, following instances are not selected for upgrade: [i-4]", badRequestException.getMessage());
     }
@@ -119,7 +119,7 @@ class OSUpgradeByUpgradeSetsServiceTest {
         ArrayList<OrderedOSUpgradeSet> upgradeSets = new ArrayList<>();
         upgradeSets.add(new OrderedOSUpgradeSet(0, Set.of("i-1", "i-3")));
         upgradeSets.add(new OrderedOSUpgradeSet(1, Set.of("i-2")));
-        BadRequestException badRequestException = Assertions.assertThrows(BadRequestException.class, () ->
+        BadRequestException badRequestException = assertThrows(BadRequestException.class, () ->
                 osUpgradeByUpgradeSetsService.osUpgradeByUpgradeSets(stackView, new ImageChangeDto(1L, "imageId"), upgradeSets));
         assertEquals("These instances does not exists: [i-3]", badRequestException.getMessage());
     }
@@ -146,7 +146,7 @@ class OSUpgradeByUpgradeSetsServiceTest {
         ArrayList<OrderedOSUpgradeSet> upgradeSets = new ArrayList<>();
         upgradeSets.add(new OrderedOSUpgradeSet(0, Set.of("i-1", "i-3")));
         upgradeSets.add(new OrderedOSUpgradeSet(1, Set.of("i-2", "i-4")));
-        BadRequestException badRequestException = Assertions.assertThrows(BadRequestException.class, () ->
+        BadRequestException badRequestException = assertThrows(BadRequestException.class, () ->
                 osUpgradeByUpgradeSetsService.osUpgradeByUpgradeSets(stackView, new ImageChangeDto(1L, "imageId"), upgradeSets));
         assertEquals("validation error", badRequestException.getMessage());
     }

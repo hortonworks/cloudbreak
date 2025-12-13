@@ -1,17 +1,18 @@
 package com.sequenceiq.cloudbreak.polling;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 
-public class SimpleStatusCheckerTaskTest {
+class SimpleStatusCheckerTaskTest {
 
     private SimpleStatusCheckerTask<Object> underTest;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         underTest = new SimpleStatusCheckerTask<>() {
             @Override
             public boolean checkStatus(Object o) {
@@ -35,18 +36,16 @@ public class SimpleStatusCheckerTaskTest {
         };
     }
 
-    @Test(expected = CloudbreakServiceException.class)
-    public void testHandleException() {
-        underTest.handleException(new RuntimeException());
-        Assert.fail("This shall not pass, since handleException is expected to throw an Exception");
+    @Test
+    void testHandleException() {
+        assertThrows(CloudbreakServiceException.class, () -> underTest.handleException(new RuntimeException()));
     }
 
-    @Test(expected = SimpleStatusCheckerTaskTestException.class)
-    public void testWeThrowChildException() {
+    @Test
+    void testWeThrowChildException() {
         // Child of SimpleStatusCheckerTaskTestException should be thrown and we shall not wrap it
         // since SimpleStatusCheckerTaskTestException is a child of CloudbreakServiceException
-        underTest.handleException(new SimpleStatusCheckerTaskTestException());
-        Assert.fail("This shall not pass, since handleException is expected to throw an Exception");
+        assertThrows(SimpleStatusCheckerTaskTestException.class, () -> underTest.handleException(new SimpleStatusCheckerTaskTestException()));
     }
 
     static class SimpleStatusCheckerTaskTestException extends CloudbreakServiceException {

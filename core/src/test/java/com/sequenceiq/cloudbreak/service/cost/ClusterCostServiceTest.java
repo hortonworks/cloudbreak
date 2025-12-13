@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.cost;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -7,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -71,10 +71,10 @@ public class ClusterCostServiceTest {
         ThreadBasedUserCrnProvider.doAs("crn:cdp:iam:us-west-1:1234:user:1", () -> {
             Map<String, RealTimeCost> costs = underTest.getCosts(List.of("RESOURCE_CRN"), List.of("ENV_CRN"));
 
-            Assertions.assertEquals(1, costs.size());
+            assertEquals(1, costs.size());
             RealTimeCost realTimeCost = costs.get("RESOURCE_CRN");
-            Assertions.assertEquals(0.5, realTimeCost.getHourlyProviderUsd());
-            Assertions.assertEquals(0.5, realTimeCost.getHourlyClouderaUsd());
+            assertEquals(0.5, realTimeCost.getHourlyProviderUsd());
+            assertEquals(0.5, realTimeCost.getHourlyClouderaUsd());
         });
     }
 
@@ -89,9 +89,9 @@ public class ClusterCostServiceTest {
         ThreadBasedUserCrnProvider.doAs("crn:cdp:iam:us-west-1:1234:user:1", () -> {
             Map<String, RealTimeCO2> costs = underTest.getCO2(List.of("RESOURCE_CRN"), List.of("ENV_CRN"));
 
-            Assertions.assertEquals(1, costs.size());
+            assertEquals(1, costs.size());
             RealTimeCO2 realTimeCO2 = costs.get("RESOURCE_CRN");
-            Assertions.assertEquals(10.0, realTimeCO2.getHourlyCO2InGrams());
+            assertEquals(10.0, realTimeCO2.getHourlyCO2InGrams());
         });
     }
 

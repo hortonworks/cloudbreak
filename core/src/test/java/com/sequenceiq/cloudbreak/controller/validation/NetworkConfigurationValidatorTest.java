@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.controller.validation;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.annotation.Annotation;
 import java.util.Collections;
@@ -14,36 +15,26 @@ import jakarta.validation.Payload;
 import jakarta.validation.metadata.ConstraintDescriptor;
 import jakarta.validation.metadata.ValidateUnwrappedValue;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.controller.validation.network.NetworkConfigurationValidator;
 
-@RunWith(MockitoJUnitRunner.class)
-public class NetworkConfigurationValidatorTest {
+class NetworkConfigurationValidatorTest {
 
-    @Rule
-    public final ExpectedException thrown = ExpectedException.none();
-
-    @InjectMocks
-    private NetworkConfigurationValidator underTest;
+    private NetworkConfigurationValidator underTest = new NetworkConfigurationValidator();
 
     @Test
-    public void validNetworkRequestReturnTrue() {
+    void validNetworkRequestReturnTrue() {
         assertTrue(underTest.validateNetworkForStack(TestUtil.network(), TestUtil.generateGcpInstanceGroupsByNodeCount(1, 2, 3)));
     }
 
     @Test
-    public void inValidNetworkRequestReturnFalse() {
-        thrown.expect(BadRequestException.class);
-        thrown.expectMessage("Cannot assign more than 0 addresses in the selected subnet.");
-        underTest.validateNetworkForStack(TestUtil.network("10.0.0.1/32"), TestUtil.generateGcpInstanceGroupsByNodeCount(10000, 10000, 10000));
+    void inValidNetworkRequestReturnFalse() {
+        assertThrows(BadRequestException.class,
+                () -> underTest.validateNetworkForStack(TestUtil.network("10.0.0.1/32"), TestUtil.generateGcpInstanceGroupsByNodeCount(10000, 10000, 10000)),
+                "Cannot assign more than 0 addresses in the selected subnet.");
     }
 
     private static class DummyAnnotation implements Annotation {

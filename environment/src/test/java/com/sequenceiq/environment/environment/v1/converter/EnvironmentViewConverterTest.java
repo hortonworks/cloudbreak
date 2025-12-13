@@ -13,10 +13,10 @@ import static com.sequenceiq.environment.environment.service.EnvironmentTestData
 import static com.sequenceiq.environment.environment.service.EnvironmentTestData.REGIONS;
 import static com.sequenceiq.environment.environment.service.EnvironmentTestData.newTestEnvironment;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.environment.credential.v1.converter.CredentialViewConverter;
@@ -28,7 +28,7 @@ import com.sequenceiq.environment.environment.domain.EnvironmentViewConverter;
 @ExtendWith(MockitoExtension.class)
 class EnvironmentViewConverterTest {
 
-    private final CredentialViewConverter credentialViewConverter = Mockito.mock(CredentialViewConverter.class);
+    private final CredentialViewConverter credentialViewConverter = mock(CredentialViewConverter.class);
 
     private final EnvironmentViewConverter underTest = new EnvironmentViewConverter(credentialViewConverter);
 

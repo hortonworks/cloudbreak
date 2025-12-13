@@ -3,6 +3,9 @@ package com.sequenceiq.cloudbreak.cloud.azure;
 import static com.sequenceiq.common.api.type.ResourceType.AZURE_KEYVAULT_KEY;
 import static com.sequenceiq.common.api.type.ResourceType.AZURE_MANAGED_IDENTITY;
 import static com.sequenceiq.common.api.type.ResourceType.AZURE_RESOURCE_GROUP;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -14,7 +17,6 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -85,10 +87,10 @@ class AzureEncryptionResourcesValidationTest {
         when(authenticatedContext.getParameter(AzureClient.class)).thenReturn(azureClient);
         when(azureClientService.createAuthenticatedContext(cloudContext, cloudCredential)).thenReturn(authenticatedContext);
         // WHEN
-        BadRequestException actualException = Assertions.assertThrows(BadRequestException.class,
+        BadRequestException actualException = assertThrows(BadRequestException.class,
                 () -> underTest.validateEncryptionParameters(validationRequest));
         // THEN
-        Assertions.assertEquals("Vault key and vault resource group is mandatory parameters", actualException.getMessage());
+        assertEquals("Vault key and vault resource group is mandatory parameters", actualException.getMessage());
     }
 
     @Test
@@ -167,10 +169,10 @@ class AzureEncryptionResourcesValidationTest {
         Identity identity = mock(Identity.class);
         when(azureClient.getIdentityById("managedIdentityReference")).thenReturn(null);
         // WHEN
-        BadRequestException actualException = Assertions.assertThrows(BadRequestException.class,
+        BadRequestException actualException = assertThrows(BadRequestException.class,
                 () -> underTest.validateEncryptionParameters(validationRequest));
         // THEN
-        Assertions.assertTrue(actualException.getMessage().startsWith("Managed identity does not exist"));
+        assertTrue(actualException.getMessage().startsWith("Managed identity does not exist"));
     }
 
     @Test
@@ -189,10 +191,10 @@ class AzureEncryptionResourcesValidationTest {
         Vault vault = mock(Vault.class);
         when(azureClient.getKeyVault("resourceGroup", "vaultName")).thenReturn(null);
         // WHEN
-        BadRequestException actualException = Assertions.assertThrows(BadRequestException.class,
+        BadRequestException actualException = assertThrows(BadRequestException.class,
                 () -> underTest.validateEncryptionParameters(validationRequest));
         // THEN
-        Assertions.assertTrue(actualException.getMessage().contains("resource group either does not exist or user does not have permission to access it."));
+        assertTrue(actualException.getMessage().contains("resource group either does not exist or user does not have permission to access it."));
     }
 
     @Test
@@ -214,9 +216,9 @@ class AzureEncryptionResourcesValidationTest {
         Throwable expectedException = new RuntimeException("exception");
         doThrow(expectedException).when(azurePermissionValidator).validateCMKManagedIdentityPermissions(azureClient, identity, vault);
         // WHEN
-        Throwable actualException = Assertions.assertThrows(Throwable.class, () -> underTest.validateEncryptionParameters(validationRequest));
+        Throwable actualException = assertThrows(Throwable.class, () -> underTest.validateEncryptionParameters(validationRequest));
         // THEN
-        Assertions.assertEquals(expectedException, actualException);
+        assertEquals(expectedException, actualException);
     }
 
     @Test
@@ -237,10 +239,10 @@ class AzureEncryptionResourcesValidationTest {
         when(azureClient.getKeyVault("resourceGroup", "vaultName")).thenReturn(vault);
         when(azureClient.isValidKeyVaultAccessPolicyListForServicePrincipal(List.of(), "id")).thenReturn(false);
         // WHEN
-        BadRequestException actualException = Assertions.assertThrows(BadRequestException.class,
+        BadRequestException actualException = assertThrows(BadRequestException.class,
                 () -> underTest.validateEncryptionParameters(validationRequest));
         // THEN
-        Assertions.assertTrue(actualException.getMessage().startsWith("Missing Key Vault AccessPolicies (get key, wrap key, unwrap key)"));
+        assertTrue(actualException.getMessage().startsWith("Missing Key Vault AccessPolicies (get key, wrap key, unwrap key)"));
     }
 
     private CloudResource createCloudResource(ResourceType resourceType, String name, String reference) {

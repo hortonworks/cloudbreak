@@ -1,8 +1,9 @@
 package com.sequenceiq.cloudbreak.structuredevent.service.converter;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.io.Serializable;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -40,7 +41,7 @@ public class CDPStructuredEventEntityToCDPStructuredEventConverterTest {
         eventEntity.setEventType(StructuredEventType.FLOW);
         eventEntity.setStructuredEventJson(new Json(event));
         CDPStructuredFlowEvent<String> actual = (CDPStructuredFlowEvent<String>) underTest.convert(eventEntity);
-        Assertions.assertEquals("accountId", operationDetails.getAccountId());
-        Assertions.assertEquals("payload", actual.getPayload());
+        assertEquals("accountId", operationDetails.getAccountId());
+        assertEquals("payload", actual.getPayload());
     }
 }

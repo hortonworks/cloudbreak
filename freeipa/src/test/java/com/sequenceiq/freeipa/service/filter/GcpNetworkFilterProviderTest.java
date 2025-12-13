@@ -9,13 +9,13 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.freeipa.entity.Network;
 
-public class GcpNetworkFilterProviderTest {
+class GcpNetworkFilterProviderTest {
 
     private static final String SHARED_PROJECT_ID = "sharedProjectId";
 
@@ -39,7 +39,7 @@ public class GcpNetworkFilterProviderTest {
 
     private Collection<String> subnetIds;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         gcpNetworkFilterProvider = new GcpNetworkFilterProvider();
         network = new Network();
@@ -51,7 +51,7 @@ public class GcpNetworkFilterProviderTest {
     }
 
     @Test
-    public void provide() {
+    void provide() {
         Map<String, String> provide = gcpNetworkFilterProvider.provide(network, networkId, subnetIds);
         assertEquals(TEST_SUBNET_ID1, provide.get(SUBNET_IDS));
         assertEquals(TEST_NETWORK, provide.get(NETWORK_ID));
@@ -59,7 +59,7 @@ public class GcpNetworkFilterProviderTest {
     }
 
     @Test
-    public void provideProjectLocalVPC() {
+    void provideProjectLocalVPC() {
         Map<String, Object> parameters = new HashMap<>();
         network.setAttributes(new Json(parameters));
         Map<String, String> provide = gcpNetworkFilterProvider.provide(network, networkId, subnetIds);
@@ -69,7 +69,7 @@ public class GcpNetworkFilterProviderTest {
     }
 
     @Test
-    public void provideMultipleSubnets() {
+    void provideMultipleSubnets() {
         subnetIds = new ArrayList<>();
         subnetIds.add(TEST_SUBNET_ID1);
         subnetIds.add(TEST_SUBNET_ID2);

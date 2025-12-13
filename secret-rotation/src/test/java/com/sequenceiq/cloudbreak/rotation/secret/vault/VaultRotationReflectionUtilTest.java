@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -16,7 +17,6 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.CrudRepository;
 
@@ -71,7 +71,7 @@ public class VaultRotationReflectionUtilTest {
 
     @Test
     void testSaveEntity() {
-        try (MockedStatic<StaticApplicationContext> appContext = Mockito.mockStatic(StaticApplicationContext.class)) {
+        try (MockedStatic<StaticApplicationContext> appContext = mockStatic(StaticApplicationContext.class)) {
             SampleRepo sampleRepo = mock(SampleRepo.class);
             when(sampleRepo.getEntityClass()).thenReturn(Sample.class);
             appContext.when(() -> StaticApplicationContext.getAllMatchingBeans(any())).thenReturn(List.of(sampleRepo));
@@ -84,7 +84,7 @@ public class VaultRotationReflectionUtilTest {
 
     @Test
     void testSaveEntityWhenRepoIsIncorrect() {
-        try (MockedStatic<StaticApplicationContext> appContext = Mockito.mockStatic(StaticApplicationContext.class)) {
+        try (MockedStatic<StaticApplicationContext> appContext = mockStatic(StaticApplicationContext.class)) {
             appContext.when(() -> StaticApplicationContext.getAllMatchingBeans(any())).thenReturn(List.of(mock(JpaRepository.class)));
 
             assertThrows(SecretRotationException.class, () -> VaultRotationReflectionUtil.saveEntity(new Sample()),

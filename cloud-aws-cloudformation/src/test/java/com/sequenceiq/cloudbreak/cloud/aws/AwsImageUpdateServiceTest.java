@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -10,7 +11,6 @@ import static org.mockito.Mockito.when;
 import java.util.Map;
 
 import org.apache.commons.lang3.NotImplementedException;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -76,7 +76,7 @@ public class AwsImageUpdateServiceTest {
     void shouldThrowExceptionWhenTemplateDoesNotMatchNeither() {
         when(stack.getTemplate()).thenReturn("gibberish");
 
-        Assertions.assertThrows(NotImplementedException.class, () -> underTest.updateImage(ac, stack, cfResource));
+        assertThrows(NotImplementedException.class, () -> underTest.updateImage(ac, stack, cfResource));
 
         String cfName = cfResource.getName();
         verify(awsLaunchTemplateUpdateService, never()).updateFieldsOnAllLaunchTemplate(eq(ac), eq(cfName), anyMap(), eq(stack));

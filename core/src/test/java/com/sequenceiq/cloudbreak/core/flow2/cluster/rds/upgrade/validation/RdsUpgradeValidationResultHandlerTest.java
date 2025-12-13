@@ -3,18 +3,18 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.rds.upgrade.validation;
 import static com.sequenceiq.common.model.AzureDatabaseType.AZURE_DATABASE_TYPE_KEY;
 import static com.sequenceiq.common.model.AzureDatabaseType.FLEXIBLE_SERVER;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.ArgumentMatchers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.domain.stack.Database;
@@ -37,13 +37,13 @@ class RdsUpgradeValidationResultHandlerTest {
     void testHandleUpgradeValidationWarningNoMigration() {
         underTest.handleUpgradeValidationWarning(1L, "reason");
         verify(stackDtoService, never()).getDatabaseByStackId(1L);
-        verify(databaseService, never()).save(ArgumentMatchers.any());
+        verify(databaseService, never()).save(any());
     }
 
     @Test
     void testHandleUpgradeValidationWarningMigration() {
         Database database = new Database();
-        Mockito.when(stackDtoService.getDatabaseByStackId(1L)).thenReturn(Optional.of(database));
+        when(stackDtoService.getDatabaseByStackId(1L)).thenReturn(Optional.of(database));
 
         underTest.handleUpgradeValidationWarning(1L, AzureDatabaseType.AZURE_AUTOMIGRATION_ERROR_PREFIX);
 

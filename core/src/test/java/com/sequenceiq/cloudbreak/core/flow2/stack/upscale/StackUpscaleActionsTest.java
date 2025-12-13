@@ -10,6 +10,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.AbstractStackUp
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.AbstractStackUpscaleAction.TRIGGERED_VARIANT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -33,7 +34,6 @@ import java.util.Set;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -348,7 +348,7 @@ class StackUpscaleActionsTest {
         assertEquals(Map.of(INSTANCE_GROUP_NAME, ADJUSTMENT_ZERO), variables.get(HOST_GROUP_WITH_ADJUSTMENT));
         assertEquals(Map.of(INSTANCE_GROUP_NAME, Set.of("hostname")), variables.get(HOST_GROUP_WITH_HOSTNAMES));
         assertEquals(false, variables.get(REPAIR));
-        Assertions.assertNull(variables.get(TRIGGERED_VARIANT));
+        assertNull(variables.get(TRIGGERED_VARIANT));
         assertEquals(networkScaleDetails, variables.get(NETWORK_SCALE_DETAILS));
     }
 

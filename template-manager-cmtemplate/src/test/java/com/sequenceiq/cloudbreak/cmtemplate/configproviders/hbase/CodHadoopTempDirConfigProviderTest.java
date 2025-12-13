@@ -1,28 +1,28 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.hbase;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 
-@RunWith(MockitoJUnitRunner.class)
-public class CodHadoopTempDirConfigProviderTest extends AbstractHbaseConfigProviderTest {
+@ExtendWith(MockitoExtension.class)
+class CodHadoopTempDirConfigProviderTest extends AbstractHbaseConfigProviderTest {
 
     @InjectMocks
     private final CodHadoopTempDirConfigProvider underTest = new CodHadoopTempDirConfigProvider();
 
     @Test
-    public void testHadoopTmpDirForCodCluster() {
+    void testHadoopTmpDirForCodCluster() {
         TemplatePreparationObject preparationObject =
                 getTemplatePreparationObject(true, false, "7.2.1",
                         Map.of("is_cod_cluster", "true"),
@@ -38,7 +38,7 @@ public class CodHadoopTempDirConfigProviderTest extends AbstractHbaseConfigProvi
     }
 
     @Test
-    public void testNoConfigChangeForNonCodCluster() {
+    void testNoConfigChangeForNonCodCluster() {
         TemplatePreparationObject preparationObject =
                 getTemplatePreparationObject(true, false, "7.2.1");
         String inputJson = getBlueprintText("input/clouderamanager.bp");
@@ -50,7 +50,7 @@ public class CodHadoopTempDirConfigProviderTest extends AbstractHbaseConfigProvi
     }
 
     @Test
-    public void testNoConfigChangeForYcloudCluster() {
+    void testNoConfigChangeForYcloudCluster() {
         TemplatePreparationObject preparationObject =
                 getTemplatePreparationObject(true, false, "7.2.1",
                         Map.of("is_cod_cluster", "true"),

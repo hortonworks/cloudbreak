@@ -1,18 +1,15 @@
 package com.sequenceiq.freeipa.service.freeipa.backup.cloud;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentClusterType;
 
-/**
- *
- */
-public class S3BackupConfigGeneratorTest {
+class S3BackupConfigGeneratorTest {
 
     @Test
-    public void testSimpleCaseLocation() {
+    void testSimpleCaseLocation() {
         S3BackupConfigGenerator s3BackupConfigGenerator = new S3BackupConfigGenerator();
         String location = s3BackupConfigGenerator.generateBackupLocation(
                 "s3://mybucket",
@@ -23,7 +20,7 @@ public class S3BackupConfigGeneratorTest {
     }
 
     @Test
-    public void testSuppliedFolderLocation() {
+    void testSuppliedFolderLocation() {
         S3BackupConfigGenerator s3BackupConfigGenerator = new S3BackupConfigGenerator();
         String location = s3BackupConfigGenerator.generateBackupLocation(
                 "s3://mybucket/something",
@@ -34,7 +31,7 @@ public class S3BackupConfigGeneratorTest {
     }
 
     @Test
-    public void testS3aLocation() {
+    void testS3aLocation() {
         S3BackupConfigGenerator s3BackupConfigGenerator = new S3BackupConfigGenerator();
         String location = s3BackupConfigGenerator.generateBackupLocation(
                 "s3a://mybucket",
@@ -45,7 +42,7 @@ public class S3BackupConfigGeneratorTest {
     }
 
     @Test
-    public void testNonPrefixedLocation() {
+    void testNonPrefixedLocation() {
         S3BackupConfigGenerator s3BackupConfigGenerator = new S3BackupConfigGenerator();
         String location = s3BackupConfigGenerator.generateBackupLocation(
                 "mybucket",
@@ -56,7 +53,7 @@ public class S3BackupConfigGeneratorTest {
     }
 
     @Test
-    public void testMultiFolderLocation() {
+    void testMultiFolderLocation() {
         S3BackupConfigGenerator s3BackupConfigGenerator = new S3BackupConfigGenerator();
         String location = s3BackupConfigGenerator.generateBackupLocation(
                 "mybucket/something/deeper",

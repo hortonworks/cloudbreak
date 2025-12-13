@@ -1,17 +1,17 @@
 package com.sequenceiq.cloudbreak.common.provider;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import org.hamcrest.MatcherAssert;
-import org.hamcrest.Matchers;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.google.common.collect.Sets;
@@ -19,8 +19,8 @@ import com.sequenceiq.cloudbreak.cloud.CloudConstant;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 
-@RunWith(MockitoJUnitRunner.class)
-public class SimpleEnabledCloudPlatformServiceTest {
+@ExtendWith(MockitoExtension.class)
+class SimpleEnabledCloudPlatformServiceTest {
 
     public static final String AWS = "AWS";
 
@@ -30,7 +30,7 @@ public class SimpleEnabledCloudPlatformServiceTest {
     @Spy
     private final List<CloudConstant> cloudConstants = new ArrayList<>();
 
-    @Before
+    @BeforeEach
     public void setup() {
         cloudConstants.addAll(Sets.newHashSet(createCloudConstant(AWS)));
     }
@@ -40,19 +40,19 @@ public class SimpleEnabledCloudPlatformServiceTest {
     }
 
     @Test
-    public void testEnabledPlatformsWhenEnabledPlatformsIsEmpty() {
+    void testEnabledPlatformsWhenEnabledPlatformsIsEmpty() {
         ReflectionTestUtils.setField(underTest, ProviderPreferencesService.class, "enabledPlatforms", "", null);
         Set<String> actual = underTest.enabledPlatforms();
 
-        MatcherAssert.assertThat(actual, Matchers.containsInAnyOrder(AWS));
+        assertThat(actual).containsExactlyInAnyOrder(AWS);
     }
 
     @Test
-    public void testEnabledPlatformsWhenEnabledPlatformsIsNotEmpty() {
+    void testEnabledPlatformsWhenEnabledPlatformsIsNotEmpty() {
         ReflectionTestUtils.setField(underTest, ProviderPreferencesService.class, "enabledPlatforms", "AWS,PL1,PL2", null);
         Set<String> actual = underTest.enabledPlatforms();
 
-        MatcherAssert.assertThat(actual, Matchers.containsInAnyOrder(AWS, "PL1", "PL2"));
+        assertThat(actual).containsExactlyInAnyOrder(AWS, "PL1", "PL2");
     }
 
     private static class TestCloudConstant implements CloudConstant {

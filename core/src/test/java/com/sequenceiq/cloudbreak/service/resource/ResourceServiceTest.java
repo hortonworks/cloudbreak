@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.resource;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -10,7 +11,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
@@ -38,7 +38,7 @@ class ResourceServiceTest {
     public void testGetAllAsCloudResourceStatusWhenNoResource() {
         List<Resource> resources = new ArrayList<>();
 
-        Mockito.when(resourceRepository.findAllByStackId(1L)).thenReturn(resources);
+        when(resourceRepository.findAllByStackId(1L)).thenReturn(resources);
         List<CloudResourceStatus> actual = underTest.getAllAsCloudResourceStatus(1L);
 
         assertEquals(0L, actual.size());
@@ -56,8 +56,8 @@ class ResourceServiceTest {
                 .withParameters(Collections.emptyMap())
                 .build();
 
-        Mockito.when(resourceRepository.findAllByStackId(1L)).thenReturn(resources);
-        Mockito.when(cloudResourceToResourceConverter.convert(resource)).thenReturn(cloudResource);
+        when(resourceRepository.findAllByStackId(1L)).thenReturn(resources);
+        when(cloudResourceToResourceConverter.convert(resource)).thenReturn(cloudResource);
 
         List<CloudResourceStatus> actual = underTest.getAllAsCloudResourceStatus(1L);
 

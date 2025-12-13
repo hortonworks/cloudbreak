@@ -4,6 +4,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -14,7 +15,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -87,7 +87,7 @@ public class AzureRestOperationServiceTest {
     void testHttpGetActionThrowsWhenHttpStatusCodeException(HttpStatus httpStatus) {
         when(restTemplate.exchange(any(), eq(MyResponse.class))).thenThrow(new HttpClientErrorException(httpStatus));
 
-        Exception exception = Assertions.assertThrows(AzureRestResponseException.class,
+        Exception exception = assertThrows(AzureRestResponseException.class,
                 () -> underTest.httpGet(uri, MyResponse.class, TOKEN));
 
         assertThat(exception.getMessage(), startsWith("Error during http GET operation"));
@@ -114,7 +114,7 @@ public class AzureRestOperationServiceTest {
     void testHttpPutActionThrowsWhenHttpStatusCodeException(HttpStatus httpStatus) {
         when(restTemplate.exchange(any(), eq(MyResponse.class))).thenThrow(new HttpClientErrorException(httpStatus));
 
-        Exception exception = Assertions.assertThrows(AzureRestResponseException.class,
+        Exception exception = assertThrows(AzureRestResponseException.class,
                 () -> underTest.httpPut(uri, REQUEST_BODY, MyResponse.class, TOKEN));
 
         assertThat(exception.getMessage(), startsWith("Error during http PUT operation"));

@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -27,7 +28,6 @@ import java.util.stream.Stream;
 
 import jakarta.ws.rs.BadRequestException;
 
-import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -116,7 +116,7 @@ class EnvironmentServiceTest {
         when(environmentDtoConverter.environmentToDto(any())).thenReturn(new EnvironmentDto());
 
         EnvironmentDto environmentDto = environmentServiceUnderTest.internalGetByCrn("crn");
-        Assert.assertNotNull(environmentDto);
+        assertNotNull(environmentDto);
     }
 
     @Test

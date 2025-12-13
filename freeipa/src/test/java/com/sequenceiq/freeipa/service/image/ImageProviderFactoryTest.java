@@ -1,15 +1,15 @@
 package com.sequenceiq.freeipa.service.image;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class)
-public class ImageProviderFactoryTest {
+@ExtendWith(MockitoExtension.class)
+class ImageProviderFactoryTest {
 
     @Mock
     private FreeIpaImageProvider freeIpaImageProvider;
@@ -21,35 +21,35 @@ public class ImageProviderFactoryTest {
     private ImageProviderFactory victim;
 
     @Test
-    public void shouldReturnFreeIpaImageProviderInCaseOfNullCatalog() {
+    void shouldReturnFreeIpaImageProviderInCaseOfNullCatalog() {
         ImageProvider actual = victim.getImageProvider(null);
 
         assertEquals(freeIpaImageProvider, actual);
     }
 
     @Test
-    public void shouldReturnFreeIpaImageProviderInCaseOfEmptyCatalog() {
+    void shouldReturnFreeIpaImageProviderInCaseOfEmptyCatalog() {
         ImageProvider actual = victim.getImageProvider("");
 
         assertEquals(freeIpaImageProvider, actual);
     }
 
     @Test
-    public void shouldReturnFreeIpaImageProviderInCaseOfUrlCatalog() {
+    void shouldReturnFreeIpaImageProviderInCaseOfUrlCatalog() {
         ImageProvider actual = victim.getImageProvider("http://someCatalog");
 
         assertEquals(freeIpaImageProvider, actual);
     }
 
     @Test
-    public void shouldReturnFreeIpaImageProviderInCaseOfJsonFileCatalog() {
+    void shouldReturnFreeIpaImageProviderInCaseOfJsonFileCatalog() {
         ImageProvider actual = victim.getImageProvider("someCatalog.json");
 
         assertEquals(freeIpaImageProvider, actual);
     }
 
     @Test
-    public void shouldReturnFreeIpaImageProviderInCaseOfNamedCatalog() {
+    void shouldReturnFreeIpaImageProviderInCaseOfNamedCatalog() {
         ImageProvider actual = victim.getImageProvider("someCatalog");
 
         assertEquals(coreImageProvider, actual);

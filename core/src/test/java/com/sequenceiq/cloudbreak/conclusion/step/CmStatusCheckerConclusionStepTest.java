@@ -11,6 +11,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
@@ -24,7 +25,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.google.common.collect.Sets;
@@ -69,9 +69,9 @@ class CmStatusCheckerConclusionStepTest {
     @InjectMocks
     private CmStatusCheckerConclusionStep underTest;
 
-    private ClusterApi connector = Mockito.mock(ClusterApi.class);
+    private ClusterApi connector = mock(ClusterApi.class);
 
-    private ClusterStatusService clusterStatusService = Mockito.mock(ClusterStatusService.class);
+    private ClusterStatusService clusterStatusService = mock(ClusterStatusService.class);
 
     @BeforeEach
     public void setUp() {

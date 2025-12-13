@@ -1,24 +1,24 @@
 package com.sequenceiq.cloudbreak.domain.stack;
 
 import static com.sequenceiq.cloudbreak.domain.stack.ResourceUtil.getLatestResourceByInstanceId;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.common.api.type.ResourceType;
 
-public class ResourceUtilTest {
+class ResourceUtilTest {
 
     @Test
-    public void selectResourceWithLatestIdIfThereAreMultipleForGivenInstanceId() {
+    void selectResourceWithLatestIdIfThereAreMultipleForGivenInstanceId() {
         List<Resource> volumeSets = new ArrayList<>();
         volumeSets.add(getVolumeSetResource("anInstanceId", 1L));
         volumeSets.add(getVolumeSetResource("anInstanceId", 2L));
@@ -34,7 +34,7 @@ public class ResourceUtilTest {
     }
 
     @Test
-    public void selectAllResourcesIfThereAreOnlyOneForEachGivenInstanceId() {
+    void selectAllResourcesIfThereAreOnlyOneForEachGivenInstanceId() {
         List<Resource> volumeSets = new ArrayList<>();
         volumeSets.add(getVolumeSetResource("anInstanceId", 1L));
         volumeSets.add(getVolumeSetResource("secInstanceId", 2L));

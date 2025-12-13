@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -25,7 +26,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
@@ -109,7 +109,7 @@ class ClusterUpscaleServiceTest {
         Cluster cluster = new Cluster();
         cluster.setId(2L);
         when(stackDtoService.getById(eq(STACK_ID))).thenReturn(stackDto);
-        inOrder = Mockito.inOrder(parcelService, recipeEngine, clusterStatusService, clusterCommissionService, clusterApi, clusterHostServiceRunner,
+        inOrder = inOrder(parcelService, recipeEngine, clusterStatusService, clusterCommissionService, clusterApi, clusterHostServiceRunner,
                 clusterService);
         lenient().when(stackDto.getCluster()).thenReturn(cluster);
         lenient().when(stackDto.getId()).thenReturn(STACK_ID);

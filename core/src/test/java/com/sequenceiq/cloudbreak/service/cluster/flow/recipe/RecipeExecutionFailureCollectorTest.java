@@ -1,21 +1,21 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow.recipe;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.google.common.collect.ArrayListMultimap;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 
-public class RecipeExecutionFailureCollectorTest {
+class RecipeExecutionFailureCollectorTest {
 
     private static final String EXCEPTION_MESSAGE = "\"Comment: Command \"/opt/scripts/recipe-runner.sh post-cloudera-manager-start failingRecipe1\" run\n"
             + "Stdout: /opt/scripts/recipe-runner.sh post-cloudera-manager-start failingRecipe1 : Timed out after 10 seconds\""
@@ -27,42 +27,42 @@ public class RecipeExecutionFailureCollectorTest {
     private final RecipeExecutionFailureCollector recipeExecutionFailureHandler = new RecipeExecutionFailureCollector();
 
     @Test
-    public void testCanProcessWithUnprocessableMessage() {
+    void testCanProcessWithUnprocessableMessage() {
         ArrayListMultimap<String, String> nodesWithErrors = getNodesWithErrors();
         CloudbreakOrchestratorFailedException exception = new CloudbreakOrchestratorFailedException("Something went wrong", nodesWithErrors);
         assertFalse(recipeExecutionFailureHandler.canProcessExecutionFailure(exception));
     }
 
     @Test
-    public void testCanProcessProcessableMessage() {
+    void testCanProcessProcessableMessage() {
         ArrayListMultimap<String, String> nodesWithErrors = getNodesWithErrors();
         CloudbreakOrchestratorFailedException exception = new CloudbreakOrchestratorFailedException(EXCEPTION_MESSAGE, nodesWithErrors);
         assertTrue(recipeExecutionFailureHandler.canProcessExecutionFailure(exception));
     }
 
     @Test
-    public void testRecipePhaseExtract() {
+    void testRecipePhaseExtract() {
         String example = "Name: /opt/scripts/recipe-runner.sh pre-service-deployment failing-recipe";
         String result = recipeExecutionFailureHandler.getRecipePhase(example);
         assertEquals("pre-service-deployment", result);
     }
 
     @Test
-    public void testRecipeNameExtract() {
+    void testRecipeNameExtract() {
         String example = "Name: /opt/scripts/recipe-runner.sh pre-service-deployment failing-recipe";
         String result = recipeExecutionFailureHandler.getFailedRecipeName(example);
         assertEquals("failing-recipe", result);
     }
 
     @Test
-    public void testRecipePhaseMultiline() {
+    void testRecipePhaseMultiline() {
         String example = getSingleLineError();
         String result = recipeExecutionFailureHandler.getRecipePhase(example);
         assertEquals("post-cloudera-manager-start", result);
     }
 
     @Test
-    public void testCollectErros2() {
+    void testCollectErros2() {
         ArrayListMultimap<String, String> nodesWithErrors = getNodesWithErrors();
         CloudbreakOrchestratorFailedException exception = new CloudbreakOrchestratorFailedException(EXCEPTION_MESSAGE, nodesWithErrors);
         List<RecipeExecutionFailureCollector.RecipeFailure> failure = recipeExecutionFailureHandler.collectErrors(exception);
@@ -75,7 +75,7 @@ public class RecipeExecutionFailureCollectorTest {
     }
 
     @Test
-    public void testCollectErrors() {
+    void testCollectErrors() {
         ArrayListMultimap<String, String> nodesWithErrors = getNodesWithErrors();
         CloudbreakOrchestratorFailedException exception = new CloudbreakOrchestratorFailedException(EXCEPTION_MESSAGE, nodesWithErrors);
 
@@ -106,7 +106,7 @@ public class RecipeExecutionFailureCollectorTest {
     }
 
     @Test
-    public void testGetInstanceMetadataByHostWithNullFqdn() {
+    void testGetInstanceMetadataByHostWithNullFqdn() {
         String host = "fqdn";
 
         final InstanceMetaData im1 = new InstanceMetaData();

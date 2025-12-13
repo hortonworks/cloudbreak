@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.gcp;
 
 import static com.sequenceiq.cloudbreak.cloud.gcp.DistroxEnabledInstanceTypes.GCP_ENABLED_TYPES_LIST;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import java.util.HashSet;
@@ -8,7 +9,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.assertj.core.api.Assertions;
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -43,44 +43,44 @@ public class GcpPlatformParametersTest {
     @Test
     public void testDiskTypes() {
         DiskTypes diskTypes = underTest.diskTypes();
-        Assert.assertEquals(5, diskTypes.diskMapping().keySet().size());
+        assertEquals(5, diskTypes.diskMapping().keySet().size());
     }
 
     @Test
     public void testTagValidator() {
         TagValidator tagValidator = underTest.tagValidator();
-        Assert.assertEquals(tagValidator, gcpTagValidator);
+        assertEquals(tagValidator, gcpTagValidator);
     }
 
     @Test
     public void testScriptParams() {
         ScriptParams scriptParams = underTest.scriptParams();
-        Assert.assertEquals(scriptParams.getStartLabel(), Integer.valueOf(97));
-        Assert.assertEquals(scriptParams.getDiskPrefix(), "sd");
+        assertEquals(scriptParams.getStartLabel(), Integer.valueOf(97));
+        assertEquals(scriptParams.getDiskPrefix(), "sd");
     }
 
     @Test
     public void testTagSpecification() {
         TagSpecification tagSpecification = underTest.tagSpecification();
-        Assert.assertEquals(tagSpecification, tagSpecification);
+        assertEquals(tagSpecification, tagSpecification);
     }
 
     @Test
     public void testPlatforName() {
         String platforName = underTest.platforName();
-        Assert.assertEquals(GcpConstants.GCP_PLATFORM.value(), platforName);
+        assertEquals(GcpConstants.GCP_PLATFORM.value(), platforName);
     }
 
     @Test
     public void testIsAutoTlsSupported() {
         boolean autoTlsSupported = underTest.isAutoTlsSupported();
-        Assert.assertEquals(true, autoTlsSupported);
+        assertEquals(true, autoTlsSupported);
     }
 
     @Test
     public void testAdditionalStackParameters() {
         List<StackParamValidation> stackParamValidations = underTest.additionalStackParameters();
-        Assert.assertEquals(1, stackParamValidations.size());
+        assertEquals(1, stackParamValidations.size());
     }
 
     @Test
@@ -93,7 +93,7 @@ public class GcpPlatformParametersTest {
     @Test
     public void testOrchestratorParams() {
         PlatformOrchestrator platformOrchestrator = underTest.orchestratorParams();
-        Assert.assertEquals(1, platformOrchestrator.types().size());
+        assertEquals(1, platformOrchestrator.types().size());
     }
 
     @Test

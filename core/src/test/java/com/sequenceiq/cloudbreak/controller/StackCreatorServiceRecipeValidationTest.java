@@ -1,5 +1,9 @@
 package com.sequenceiq.cloudbreak.controller;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -14,8 +18,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
 
-import org.junit.Assert;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -117,10 +119,10 @@ class StackCreatorServiceRecipeValidationTest {
 
         when(recipeService.get(any(NameOrCrn.class), eq(WORKSPACE_ID))).thenThrow(new NotFoundException("Recipe not found"));
 
-        BadRequestException exception = Assertions.assertThrows(BadRequestException.class, () -> underTest.createStack(user, workspace, request, false));
+        BadRequestException exception = assertThrows(BadRequestException.class, () -> underTest.createStack(user, workspace, request, false));
 
-        Assert.assertNotNull(exception);
-        Assertions.assertEquals(String.format("The given recipe does not exist for the instance group \"%s\": %s", INSTANCE_GROUP_MASTER,
+        assertNotNull(exception);
+        assertEquals(String.format("The given recipe does not exist for the instance group \"%s\": %s", INSTANCE_GROUP_MASTER,
                 notExistingRecipeName), exception.getMessage());
 
         verify(recipeService, times(1)).get(any(NameOrCrn.class), anyLong());
@@ -136,10 +138,10 @@ class StackCreatorServiceRecipeValidationTest {
 
         when(recipeService.get(any(NameOrCrn.class), eq(WORKSPACE_ID))).thenThrow(new NotFoundException("Recipe not found"));
 
-        BadRequestException exception = Assertions.assertThrows(BadRequestException.class, () -> underTest.createStack(user, workspace, request, false));
+        BadRequestException exception = assertThrows(BadRequestException.class, () -> underTest.createStack(user, workspace, request, false));
 
-        Assert.assertNotNull(exception);
-        Assertions.assertTrue(exception.getMessage()
+        assertNotNull(exception);
+        assertTrue(exception.getMessage()
                 .matches(String.format("The given recipes does not exists for the instance group \"%s\": (\\w+), (\\w+)", INSTANCE_GROUP_MASTER)));
 
         verify(recipeService, times(2)).get(any(NameOrCrn.class), anyLong());
@@ -159,10 +161,10 @@ class StackCreatorServiceRecipeValidationTest {
         doAnswer(withNotFoundExceptionIfRecipeNameMatchesOtherwiseGiveRecipe(notExistingRecipe))
                 .when(recipeService).get(any(NameOrCrn.class), eq(WORKSPACE_ID));
 
-        BadRequestException exception = Assertions.assertThrows(BadRequestException.class, () -> underTest.createStack(user, workspace, request, false));
+        BadRequestException exception = assertThrows(BadRequestException.class, () -> underTest.createStack(user, workspace, request, false));
 
-        Assert.assertNotNull(exception);
-        Assertions.assertEquals(String.format("The given recipe does not exist for the instance group \"%s\": %s", INSTANCE_GROUP_COMPUTE, notExistingRecipe),
+        assertNotNull(exception);
+        assertEquals(String.format("The given recipe does not exist for the instance group \"%s\": %s", INSTANCE_GROUP_COMPUTE, notExistingRecipe),
                 exception.getMessage());
 
         verify(recipeService, times(3)).get(any(NameOrCrn.class), anyLong());

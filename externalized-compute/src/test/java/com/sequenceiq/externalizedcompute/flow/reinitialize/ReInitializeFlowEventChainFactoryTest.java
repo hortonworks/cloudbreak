@@ -1,8 +1,8 @@
 package com.sequenceiq.externalizedcompute.flow.reinitialize;
 
 import static com.sequenceiq.externalizedcompute.flow.graph.FlowOfflineStateGraphGenerator.FLOW_CONFIGS_PACKAGE;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.externalizedcompute.flow.ExternalizedComputeClusterEvent;
@@ -20,7 +20,7 @@ class ReInitializeFlowEventChainFactoryTest {
 
         FlowTriggerEventQueue flowTriggerEventQueue = underTest.createFlowTriggerEventQueue(externalizedComputeClusterEvent);
 
-        Assertions.assertEquals(2, flowTriggerEventQueue.getQueue().size());
+        assertEquals(2, flowTriggerEventQueue.getQueue().size());
         FlowChainConfigGraphGeneratorUtil.generateFor(underTest, FLOW_CONFIGS_PACKAGE, flowTriggerEventQueue);
     }
 

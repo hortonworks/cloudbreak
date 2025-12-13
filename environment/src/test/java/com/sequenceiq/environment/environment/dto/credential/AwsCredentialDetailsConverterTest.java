@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.environment.dto.credential;
 
-import org.junit.jupiter.api.Assertions;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -25,7 +26,7 @@ public class AwsCredentialDetailsConverterTest {
         awsCredentialAttributes.setKeyBased(new KeyBasedCredentialAttributes());
         credentialAttributes.setAws(awsCredentialAttributes);
         CredentialDetails.Builder builder = underTest.convertCredentialDetails(credentialAttributes, CredentialDetails.builder());
-        Assertions.assertEquals(CredentialType.AWS_KEY_BASED, builder.build().getCredentialType());
+        assertEquals(CredentialType.AWS_KEY_BASED, builder.build().getCredentialType());
     }
 
     @Test
@@ -35,13 +36,13 @@ public class AwsCredentialDetailsConverterTest {
         awsCredentialAttributes.setRoleBased(new RoleBasedCredentialAttributes());
         credentialAttributes.setAws(awsCredentialAttributes);
         CredentialDetails.Builder builder = underTest.convertCredentialDetails(credentialAttributes, CredentialDetails.builder());
-        Assertions.assertEquals(CredentialType.AWS_ROLE_BASED, builder.build().getCredentialType());
+        assertEquals(CredentialType.AWS_ROLE_BASED, builder.build().getCredentialType());
     }
 
     @Test
     void convertCredentialDetailsWhenAttributesNull() {
         CredentialAttributes credentialAttributes = new CredentialAttributes();
         CredentialDetails.Builder builder = underTest.convertCredentialDetails(credentialAttributes, CredentialDetails.builder());
-        Assertions.assertEquals(CredentialType.UNKNOWN, builder.build().getCredentialType());
+        assertEquals(CredentialType.UNKNOWN, builder.build().getCredentialType());
     }
 }

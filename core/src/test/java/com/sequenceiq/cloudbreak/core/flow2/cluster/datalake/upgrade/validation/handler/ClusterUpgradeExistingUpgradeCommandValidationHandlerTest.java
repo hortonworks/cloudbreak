@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.FAILED_CLUSTER_UPGRADE_VALIDATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.FINISH_CLUSTER_UPGRADE_EXISTING_UPGRADE_COMMAND_VALIDATION_EVENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -10,12 +11,12 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
@@ -34,8 +35,8 @@ import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
-@RunWith(MockitoJUnitRunner.class)
-public class ClusterUpgradeExistingUpgradeCommandValidationHandlerTest {
+@ExtendWith(MockitoExtension.class)
+class ClusterUpgradeExistingUpgradeCommandValidationHandlerTest {
 
     private static final Long STACK_ID = 1L;
 
@@ -66,20 +67,17 @@ public class ClusterUpgradeExistingUpgradeCommandValidationHandlerTest {
     @InjectMocks
     private ClusterUpgradeExistingUpgradeCommandValidationHandler underTest;
 
-    public ClusterUpgradeExistingUpgradeCommandValidationHandlerTest() {
-    }
-
-    @Before
+    @BeforeEach
     public void setup() {
         when(stackDtoService.getById(STACK_ID)).thenReturn(stack);
-        when(stack.getStack()).thenReturn(stackView);
-        when(stackView.getName()).thenReturn(STACK_NAME);
+        lenient().when(stack.getStack()).thenReturn(stackView);
+        lenient().when(stackView.getName()).thenReturn(STACK_NAME);
         when(clusterApiConnectors.getConnector(stack)).thenReturn(connector);
         when(connector.clusterStatusService()).thenReturn(clusterStatusService);
     }
 
     @Test
-    public void testUpgradeCommandDoesNotExistThenValidationShouldPass() {
+    void testUpgradeCommandDoesNotExistThenValidationShouldPass() {
 
         when(clusterStatusService.findCommand(stack, ClusterCommandType.UPGRADE_CLUSTER)).thenReturn(Optional.empty());
 
@@ -89,7 +87,7 @@ public class ClusterUpgradeExistingUpgradeCommandValidationHandlerTest {
     }
 
     @Test
-    public void testUpgradeCommandNotActiveNotSuccessfulNotRetryableThenValidationShouldPass() {
+    void testUpgradeCommandNotActiveNotSuccessfulNotRetryableThenValidationShouldPass() {
 
         ClusterManagerCommand command = new ClusterManagerCommand();
         command.setActive(false);
@@ -104,7 +102,7 @@ public class ClusterUpgradeExistingUpgradeCommandValidationHandlerTest {
     }
 
     @Test
-    public void testUpgradeCommandNotActiveSuccessfulNotRetryableThenValidationShouldPass() {
+    void testUpgradeCommandNotActiveSuccessfulNotRetryableThenValidationShouldPass() {
 
         ClusterManagerCommand command = new ClusterManagerCommand();
         command.setActive(false);
@@ -119,7 +117,7 @@ public class ClusterUpgradeExistingUpgradeCommandValidationHandlerTest {
     }
 
     @Test
-    public void testUpgradeCommandNotActiveNotSuccessfulRetryableAndEmptyActiveRuntimeParcelVersionThenValidationShouldPass() {
+    void testUpgradeCommandNotActiveNotSuccessfulRetryableAndEmptyActiveRuntimeParcelVersionThenValidationShouldPass() {
 
         ClusterManagerCommand command = new ClusterManagerCommand();
         command.setActive(false);
@@ -135,7 +133,7 @@ public class ClusterUpgradeExistingUpgradeCommandValidationHandlerTest {
     }
 
     @Test
-    public void testUpgradeCommandNotActiveNotSuccessfulRetryableAndActiveRuntimeParcelVersionAndTargetBuildMatchThenValidationShouldPass() {
+    void testUpgradeCommandNotActiveNotSuccessfulRetryableAndActiveRuntimeParcelVersionAndTargetBuildMatchThenValidationShouldPass() {
 
         ClusterManagerCommand command = new ClusterManagerCommand();
         command.setActive(false);
@@ -152,7 +150,7 @@ public class ClusterUpgradeExistingUpgradeCommandValidationHandlerTest {
     }
 
     @Test
-    public void testUpgradeCommandNotActiveNotSuccessfulRetryableAndActiveRuntimeParcelVersionAndTargetBuildNotMatchThenValidationShouldFail() {
+    void testUpgradeCommandNotActiveNotSuccessfulRetryableAndActiveRuntimeParcelVersionAndTargetBuildNotMatchThenValidationShouldFail() {
 
         ClusterManagerCommand command = new ClusterManagerCommand();
         command.setActive(false);
@@ -184,7 +182,7 @@ public class ClusterUpgradeExistingUpgradeCommandValidationHandlerTest {
         packageVersions.put(ImagePackageVersion.CDH_BUILD_NUMBER.getKey(), buildNumber);
         packageVersions.put(ImagePackageVersion.STACK.getKey(), STACK_VERSION);
 
-        when(targetImage.getPackageVersions()).thenReturn(packageVersions);
+        lenient().when(targetImage.getPackageVersions()).thenReturn(packageVersions);
         ClusterUpgradeExistingUpgradeCommandValidationEvent clusterUpgradeImageValidationEvent =
                 new ClusterUpgradeExistingUpgradeCommandValidationEvent(1L, targetImage);
         HandlerEvent<ClusterUpgradeExistingUpgradeCommandValidationEvent> handlerEvent = mock(HandlerEvent.class);

@@ -1,26 +1,26 @@
 package com.sequenceiq.redbeams.converter.v4.databaseserver;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.DatabaseServerV4Request;
 import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
 
-public class DatabaseServerConfigToDatabaseServerV4RequestConverterTest {
+class DatabaseServerConfigToDatabaseServerV4RequestConverterTest {
 
     private DatabaseServerConfigToDatabaseServerV4RequestConverter converter;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         converter = new DatabaseServerConfigToDatabaseServerV4RequestConverter();
     }
 
     @Test
-    public void testConversion() {
+    void testConversion() {
         DatabaseServerConfig server = new DatabaseServerConfig();
         server.setName("myserver");
         server.setDescription("mine not yours");

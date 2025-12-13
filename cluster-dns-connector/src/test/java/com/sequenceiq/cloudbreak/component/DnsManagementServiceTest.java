@@ -1,5 +1,9 @@
 package com.sequenceiq.cloudbreak.component;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -9,7 +13,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -37,7 +40,7 @@ class DnsManagementServiceTest {
         when(grpcClusterDnsClient.generateManagedDomain(anyString(), any(), anyString(), any()))
                 .thenThrow(new RuntimeException("Something went wrong"));
 
-        Assertions.assertThrows(RuntimeException.class, () -> underTest.generateManagedDomain("accountId", "anEnvironmentName"));
+        assertThrows(RuntimeException.class, () -> underTest.generateManagedDomain("accountId", "anEnvironmentName"));
         verify(grpcClusterDnsClient).generateManagedDomain(anyString(), any(), anyString(), any());
     }
 
@@ -48,7 +51,7 @@ class DnsManagementServiceTest {
 
         String result = underTest.generateManagedDomain("accountId", "anEnvironmentName");
 
-        Assertions.assertNull(result);
+        assertNull(result);
         verify(grpcClusterDnsClient).generateManagedDomain(anyString(), any(), anyString(), any());
     }
 
@@ -60,7 +63,7 @@ class DnsManagementServiceTest {
 
         String result = underTest.generateManagedDomain("accountId", "anEnvironmentName");
 
-        Assertions.assertNull(result);
+        assertNull(result);
         verify(grpcClusterDnsClient).generateManagedDomain(anyString(), any(), anyString(), any());
     }
 
@@ -72,8 +75,8 @@ class DnsManagementServiceTest {
 
         String result = underTest.generateManagedDomain("accountId", "anEnvironmentName");
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(EXAMPLE_CLDR_DOMAIN, result);
+        assertNotNull(result);
+        assertEquals(EXAMPLE_CLDR_DOMAIN, result);
         verify(grpcClusterDnsClient).generateManagedDomain(anyString(), any(), anyString(), any());
     }
 
@@ -87,8 +90,8 @@ class DnsManagementServiceTest {
 
         String result = underTest.generateManagedDomain("accountId", "anEnvironmentName");
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(EXAMPLE_CLDR_DOMAIN, result);
+        assertNotNull(result);
+        assertEquals(EXAMPLE_CLDR_DOMAIN, result);
         verify(grpcClusterDnsClient).generateManagedDomain(anyString(), any(), anyString(), any());
     }
 
@@ -125,9 +128,9 @@ class DnsManagementServiceTest {
         when(grpcClusterDnsClient.createOrUpdateDnsEntryWithIp(eq("accountId"), eq("endpointName"), eq("environmentName"), eq(false), eq(ips), any()))
                 .thenThrow(new RuntimeException("Something really bad happened...."));
 
-        PemDnsEntryCreateOrUpdateException actualException = Assertions.assertThrows(PemDnsEntryCreateOrUpdateException.class,
+        PemDnsEntryCreateOrUpdateException actualException = assertThrows(PemDnsEntryCreateOrUpdateException.class,
                 () -> underTest.createOrUpdateDnsEntryWithIp("accountId", "endpointName", "environmentName", false, ips));
-        Assertions.assertEquals(
+        assertEquals(
                 "Failed to create DNS entry with endpoint name: 'endpointName', environment name: 'environmentName' and IPs: '10.0.1.11,10.1.1.21'",
                 actualException.getMessage());
     }
@@ -152,9 +155,9 @@ class DnsManagementServiceTest {
         when(grpcClusterDnsClient.createOrUpdateDnsEntryWithCloudDns(eq("accountId"), eq("endpointName"), eq("environmentName"),
                 eq("cloudFQDN"), eq("hostedZoneId"), any())).thenThrow(new RuntimeException("Something really bad happened...."));
 
-        PemDnsEntryCreateOrUpdateException actualException = Assertions.assertThrows(PemDnsEntryCreateOrUpdateException.class,
+        PemDnsEntryCreateOrUpdateException actualException = assertThrows(PemDnsEntryCreateOrUpdateException.class,
                 () -> underTest.createOrUpdateDnsEntryWithCloudDns("accountId", "endpointName", "environmentName", "cloudFQDN", "hostedZoneId"));
-        Assertions.assertEquals(
+        assertEquals(
                 "Failed to create DNS entry with endpoint name: 'endpointName', environment name: 'environmentName' and cloud DNS: 'cloudFQDN'",
                 actualException.getMessage());
     }

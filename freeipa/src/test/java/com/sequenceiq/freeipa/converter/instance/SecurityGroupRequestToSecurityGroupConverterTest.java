@@ -1,18 +1,18 @@
 package com.sequenceiq.freeipa.converter.instance;
 
-import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Set;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.common.converter.ResourceNameGenerator;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.security.SecurityGroupRequest;
@@ -21,8 +21,8 @@ import com.sequenceiq.freeipa.converter.instance.securityrule.SecurityRuleReques
 import com.sequenceiq.freeipa.entity.SecurityGroup;
 import com.sequenceiq.freeipa.entity.SecurityRule;
 
-@RunWith(MockitoJUnitRunner.class)
-public class SecurityGroupRequestToSecurityGroupConverterTest {
+@ExtendWith(MockitoExtension.class)
+class SecurityGroupRequestToSecurityGroupConverterTest {
 
     @InjectMocks
     private SecurityGroupRequestToSecurityGroupConverter underTest;
@@ -34,7 +34,7 @@ public class SecurityGroupRequestToSecurityGroupConverterTest {
     private SecurityRuleRequestToSecurityRuleConverter securityRuleConverter;
 
     @Test
-    public void testConvertWithNullSecurityRulesAndNullGroupIds() {
+    void testConvertWithNullSecurityRulesAndNullGroupIds() {
         SecurityGroupRequest securityGroupRequest = new SecurityGroupRequest();
         securityGroupRequest.setSecurityRules(null);
         securityGroupRequest.setSecurityGroupIds(null);
@@ -48,7 +48,7 @@ public class SecurityGroupRequestToSecurityGroupConverterTest {
     }
 
     @Test
-    public void testConvertWithEmptySecurityRulesAndProvidedGroupIds() {
+    void testConvertWithEmptySecurityRulesAndProvidedGroupIds() {
         SecurityGroupRequest securityGroupRequest = new SecurityGroupRequest();
         securityGroupRequest.setSecurityGroupIds(Set.of("sg-1", "sg-2"));
         securityGroupRequest.setSecurityRules(List.of());
@@ -62,7 +62,7 @@ public class SecurityGroupRequestToSecurityGroupConverterTest {
     }
 
     @Test
-    public void testConvertWithSecurityRulesAndEmptyGroupIds() {
+    void testConvertWithSecurityRulesAndEmptyGroupIds() {
         SecurityGroupRequest securityGroupRequest = new SecurityGroupRequest();
         SecurityRuleRequest ruleRequest = new SecurityRuleRequest();
         ruleRequest.setModifiable(false);

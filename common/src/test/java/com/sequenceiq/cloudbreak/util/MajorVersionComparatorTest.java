@@ -2,8 +2,8 @@ package com.sequenceiq.cloudbreak.util;
 
 import static com.sequenceiq.cloudbreak.util.MajorVersionComparatorTest.VersionedImpl.versioned;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -25,7 +25,7 @@ public class MajorVersionComparatorTest {
         Versioned v1 = versioned("notANumber.13");
         Versioned v2 = versioned("10.11");
 
-        Assertions.assertThrows(NumberFormatException.class, () ->
+        assertThrows(NumberFormatException.class, () ->
             underTest.compare(v1, v2)
         );
     }
@@ -35,7 +35,7 @@ public class MajorVersionComparatorTest {
         Versioned v1 = versioned("10.11");
         Versioned v2 = versioned("notANumber.13");
 
-        Assertions.assertThrows(NumberFormatException.class, () ->
+        assertThrows(NumberFormatException.class, () ->
                 underTest.compare(v1, v2)
         );
     }

@@ -1,25 +1,25 @@
 package com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 import com.sequenceiq.redbeams.api.endpoint.v4.ResourceStatus;
 import com.sequenceiq.redbeams.api.model.common.Status;
 
-public class DatabaseServerV4ResponseTest {
+class DatabaseServerV4ResponseTest {
 
     private DatabaseServerV4Response response;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         response = new DatabaseServerV4Response();
     }
 
     @Test
-    public void testGettersAndSetters() {
+    void testGettersAndSetters() {
         response.setId(1L);
         assertEquals(1L, response.getId().longValue());
 

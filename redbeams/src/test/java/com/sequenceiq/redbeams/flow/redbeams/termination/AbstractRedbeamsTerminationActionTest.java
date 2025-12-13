@@ -1,13 +1,13 @@
 package com.sequenceiq.redbeams.flow.redbeams.termination;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.util.Optional;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.statemachine.StateContext;
@@ -31,7 +31,7 @@ import com.sequenceiq.redbeams.flow.redbeams.common.RedbeamsEvent;
 import com.sequenceiq.redbeams.service.CredentialService;
 import com.sequenceiq.redbeams.service.stack.DBStackService;
 
-public class AbstractRedbeamsTerminationActionTest {
+class AbstractRedbeamsTerminationActionTest {
 
     @Mock
     private DBStackService dbStackService;
@@ -63,7 +63,7 @@ public class AbstractRedbeamsTerminationActionTest {
     @Mock
     private StateContext<RedbeamsTerminationState, RedbeamsTerminationEvent> stateContext;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         initMocks(this);
 
@@ -87,7 +87,7 @@ public class AbstractRedbeamsTerminationActionTest {
     }
 
     @Test
-    public void testCreateFlowContext() {
+    void testCreateFlowContext() {
         when(dbStackService.findById(Long.valueOf(1L))).thenReturn(Optional.of(dbStack));
         when(credentialService.getCredentialByEnvCrn("myenv")).thenReturn(credential);
         when(credentialConverter.convert(credential)).thenReturn(cloudCredential);
@@ -100,7 +100,7 @@ public class AbstractRedbeamsTerminationActionTest {
         assertEquals(Platform.platform(dbStack.getCloudPlatform()), ctx.getCloudContext().getPlatform());
         assertEquals(Variant.variant(dbStack.getPlatformVariant()), ctx.getCloudContext().getVariant());
         assertEquals(Location.location(Region.region(dbStack.getRegion()), AvailabilityZone.availabilityZone(dbStack.getAvailabilityZone())),
-            ctx.getCloudContext().getLocation());
+                ctx.getCloudContext().getLocation());
         assertEquals(dbStack.getOwnerCrn().getAccountId(), ctx.getCloudContext().getAccountId());
 
         assertEquals(cloudCredential, ctx.getCloudCredential());

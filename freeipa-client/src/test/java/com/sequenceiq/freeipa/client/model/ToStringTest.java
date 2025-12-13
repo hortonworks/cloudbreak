@@ -1,7 +1,7 @@
 package com.sequenceiq.freeipa.client.model;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -31,7 +31,7 @@ public class ToStringTest {
         for (Class<?> clazz : classes) {
             if (!clazz.getName().endsWith("Test")) {
                 Method toString = ReflectionUtils.findMethod(clazz, "toString");
-                assertNotNull(clazz + " toString method is null", toString);
+                assertNotNull(toString, clazz + " toString method is null");
                 assertEquals(clazz.getName(), toString.getDeclaringClass().getName());
             }
         }

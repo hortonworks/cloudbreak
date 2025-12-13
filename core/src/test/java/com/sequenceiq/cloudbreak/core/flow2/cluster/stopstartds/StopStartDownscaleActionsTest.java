@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartds;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anySet;
@@ -23,7 +24,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -215,8 +215,8 @@ public class StopStartDownscaleActionsTest {
         assertThat(argumentCaptor.getValue()).isInstanceOf(StopStartDownscaleDecommissionViaCMRequest.class);
 
         StopStartDownscaleDecommissionViaCMRequest req = (StopStartDownscaleDecommissionViaCMRequest) argumentCaptor.getValue();
-        Assert.assertEquals(instanceIdsToRemove, req.getInstanceIdsToDecommission());
-        Assert.assertEquals(INSTANCE_GROUP_NAME_ACTIONABLE, req.getHostGroupName());
+        assertEquals(instanceIdsToRemove, req.getInstanceIdsToDecommission());
+        assertEquals(INSTANCE_GROUP_NAME_ACTIONABLE, req.getHostGroupName());
     }
 
     @Test
@@ -258,7 +258,7 @@ public class StopStartDownscaleActionsTest {
         assertThat(argumentCaptor.getValue()).isInstanceOf(StopStartDownscaleStopInstancesRequest.class);
 
         StopStartDownscaleStopInstancesRequest req = (StopStartDownscaleStopInstancesRequest) argumentCaptor.getValue();
-        Assert.assertEquals(expectedCloudInstances, req.getCloudInstancesToStop());
+        assertEquals(expectedCloudInstances, req.getCloudInstancesToStop());
     }
 
     @Test
@@ -303,7 +303,7 @@ public class StopStartDownscaleActionsTest {
         assertThat(argumentCaptor.getValue()).isInstanceOf(StopStartDownscaleStopInstancesRequest.class);
 
         StopStartDownscaleStopInstancesRequest req = (StopStartDownscaleStopInstancesRequest) argumentCaptor.getValue();
-        Assert.assertEquals(expectedCloudInstances, req.getCloudInstancesToStop());
+        assertEquals(expectedCloudInstances, req.getCloudInstancesToStop());
     }
 
     @Test
@@ -347,7 +347,7 @@ public class StopStartDownscaleActionsTest {
         assertThat(argumentCaptor.getValue()).isInstanceOf(StopStartDownscaleStopInstancesRequest.class);
 
         StopStartDownscaleStopInstancesRequest req = (StopStartDownscaleStopInstancesRequest) argumentCaptor.getValue();
-        Assert.assertEquals(expectedCloudInstances, req.getCloudInstancesToStop());
+        assertEquals(expectedCloudInstances, req.getCloudInstancesToStop());
     }
 
     @Test

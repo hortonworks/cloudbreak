@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.rotaterdscert;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -10,7 +11,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.Optional;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -95,8 +95,7 @@ class StackRotateRdsCertificateServiceTest {
         when(blueprint.getBlueprintUpgradeOption()).thenReturn(null);
         when(entitlementService.cdpSkipRdsSslCertificateRollingRotationValidation(ACCOUNT_ID)).thenReturn(false);
 
-        BadRequestException exception = Assertions
-                .assertThrows(BadRequestException.class, () -> underTest.rotateRdsCertificate(NameOrCrn.ofCrn(CRN), ACCOUNT_ID));
+        BadRequestException exception = assertThrows(BadRequestException.class, () -> underTest.rotateRdsCertificate(NameOrCrn.ofCrn(CRN), ACCOUNT_ID));
 
         assertEquals("The cluster is not supporting rolling restart of services and you are not entitled to use RDS SSL certificate rotation " +
                 "without rolling restart. Please contact Cloudera to enable 'CDP_SKIP_CERTIFICATE_ROTATION_VALIDATION' entitlement for your account",
@@ -113,8 +112,7 @@ class StackRotateRdsCertificateServiceTest {
         when(blueprint.getBlueprintUpgradeOption()).thenReturn(BlueprintUpgradeOption.DISABLED);
         when(entitlementService.cdpSkipRdsSslCertificateRollingRotationValidation(ACCOUNT_ID)).thenReturn(false);
 
-        BadRequestException exception = Assertions
-                .assertThrows(BadRequestException.class, () -> underTest.rotateRdsCertificate(NameOrCrn.ofCrn(CRN), ACCOUNT_ID));
+        BadRequestException exception = assertThrows(BadRequestException.class, () -> underTest.rotateRdsCertificate(NameOrCrn.ofCrn(CRN), ACCOUNT_ID));
 
         assertEquals("The cluster is not supporting rolling restart of services and you are not entitled to use RDS SSL certificate rotation " +
                 "without rolling restart. Please contact Cloudera to enable 'CDP_SKIP_CERTIFICATE_ROTATION_VALIDATION' entitlement for your account",

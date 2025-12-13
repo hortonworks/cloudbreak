@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartus;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyList;
@@ -22,7 +23,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -215,8 +215,8 @@ public class StopStartUpscaleActionsTest {
 
         StopStartUpscaleStartInstancesRequest req = (StopStartUpscaleStartInstancesRequest) argumentCaptor.getValue();
 
-        Assert.assertEquals(15, req.getAllInstancesInHg().size());
-        Assert.assertEquals(10, req.getStoppedCloudInstancesInHg().size());
+        assertEquals(15, req.getAllInstancesInHg().size());
+        assertEquals(10, req.getStoppedCloudInstancesInHg().size());
     }
 
     @Test
@@ -312,10 +312,10 @@ public class StopStartUpscaleActionsTest {
 
         ArgumentCaptor<List> instancesCaptor = ArgumentCaptor.forClass(List.class);
         verify(stopStartUpscaleFlowService).instancesStarted(eq(STACK_ID), instancesCaptor.capture(), anyList());
-        Assert.assertEquals(adjustment, instancesCaptor.getValue().size());
+        assertEquals(adjustment, instancesCaptor.getValue().size());
         verify(stopStartUpscaleFlowService).upscaleCommissioningNodes(eq(STACK_ID), eq(INSTANCE_GROUP_NAME_ACTIONABLE),
                 instancesCaptor.capture(), eq(Collections.emptyList()));
-        Assert.assertEquals(adjustment, instancesCaptor.getValue().size());
+        assertEquals(adjustment, instancesCaptor.getValue().size());
         verifyNoMoreInteractions(stopStartUpscaleFlowService);
         ArgumentCaptor<Object> argumentCaptor = ArgumentCaptor.forClass(Object.class);
         verify(reactorEventFactory).createEvent(anyMap(), argumentCaptor.capture());
@@ -323,7 +323,7 @@ public class StopStartUpscaleActionsTest {
         assertThat(argumentCaptor.getValue()).isInstanceOf(StopStartUpscaleCommissionViaCMRequest.class);
 
         StopStartUpscaleCommissionViaCMRequest req = (StopStartUpscaleCommissionViaCMRequest) argumentCaptor.getValue();
-        Assert.assertEquals(adjustment, req.getStartedInstancesToCommission().size());
+        assertEquals(adjustment, req.getStartedInstancesToCommission().size());
     }
 
     @Test
@@ -401,13 +401,13 @@ public class StopStartUpscaleActionsTest {
 
         ArgumentCaptor<List> instancesCaptor = ArgumentCaptor.forClass(List.class);
         verify(stopStartUpscaleFlowService).instancesStarted(eq(STACK_ID), instancesCaptor.capture(), anyList());
-        Assert.assertEquals(expectedCount, instancesCaptor.getValue().size());
+        assertEquals(expectedCount, instancesCaptor.getValue().size());
         verify(stopStartUpscaleFlowService).logInstancesFailedToStart(eq(STACK_ID), instancesCaptor.capture());
-        Assert.assertEquals(2, instancesCaptor.getValue().size());
+        assertEquals(2, instancesCaptor.getValue().size());
         verify(stopStartUpscaleFlowService).warnNotEnoughInstances(eq(STACK_ID), eq(INSTANCE_GROUP_NAME_ACTIONABLE), eq(adjustment), eq(expectedCount));
         verify(stopStartUpscaleFlowService).upscaleCommissioningNodes(eq(STACK_ID), eq(INSTANCE_GROUP_NAME_ACTIONABLE),
                 instancesCaptor.capture(), eq(Collections.emptyList()));
-        Assert.assertEquals(expectedCount, instancesCaptor.getValue().size());
+        assertEquals(expectedCount, instancesCaptor.getValue().size());
         verifyNoMoreInteractions(stopStartUpscaleFlowService);
         ArgumentCaptor<Object> argumentCaptor = ArgumentCaptor.forClass(Object.class);
         verify(reactorEventFactory).createEvent(anyMap(), argumentCaptor.capture());
@@ -415,7 +415,7 @@ public class StopStartUpscaleActionsTest {
         assertThat(argumentCaptor.getValue()).isInstanceOf(StopStartUpscaleCommissionViaCMRequest.class);
 
         StopStartUpscaleCommissionViaCMRequest req = (StopStartUpscaleCommissionViaCMRequest) argumentCaptor.getValue();
-        Assert.assertEquals(expectedCount, req.getStartedInstancesToCommission().size());
+        assertEquals(expectedCount, req.getStartedInstancesToCommission().size());
     }
 
     @Test

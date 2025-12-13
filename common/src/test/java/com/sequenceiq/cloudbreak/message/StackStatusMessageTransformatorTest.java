@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.message;
 
-import org.junit.jupiter.api.Assertions;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -26,7 +27,7 @@ class StackStatusMessageTransformatorTest {
                 "to the Cloudera server. Please check your connection and proxy settings and make sure the instance " +
                 "can reach *.ccm.cdp.cloudera.com. Refer to Cloudera documentation " +
                 "at https://docs.cloudera.com/management-console/cloud/connection-to-private-subnets/topics/mc-ccm-troubleshooting.html";
-        Assertions.assertEquals(expected, result);
+        assertEquals(expected, result);
     }
 
     @Test
@@ -41,7 +42,7 @@ class StackStatusMessageTransformatorTest {
                 "the Cloudera server. Please check your connection and proxy settings and make sure the instance can " +
                 "reach *.v2.ccm.cdp.cloudera.com Please check your instance on the cloud provider side if it is up and " +
                 "running. Restart it if it could not start up properly.";
-        Assertions.assertEquals(expected, result);
+        assertEquals(expected, result);
     }
 
     @Test
@@ -49,7 +50,7 @@ class StackStatusMessageTransformatorTest {
         String result = underTest.transformMessage("com.sequenceiq.environment.exception.FreeIpaOperationFailedException: Random error happened");
 
         String expected = "com.sequenceiq.environment.exception.FreeIpaOperationFailedException: Random error happened";
-        Assertions.assertEquals(expected, result);
+        assertEquals(expected, result);
     }
 
     @Test
@@ -57,7 +58,7 @@ class StackStatusMessageTransformatorTest {
         String result = underTest.transformMessage("");
 
         String expected = "";
-        Assertions.assertEquals(expected, result);
+        assertEquals(expected, result);
     }
 
     @Test
@@ -65,7 +66,7 @@ class StackStatusMessageTransformatorTest {
         String result = underTest.transformMessage(" ");
 
         String expected = " ";
-        Assertions.assertEquals(expected, result);
+        assertEquals(expected, result);
     }
 
     @Test
@@ -73,6 +74,6 @@ class StackStatusMessageTransformatorTest {
         String result = underTest.transformMessage(null);
 
         String expected = null;
-        Assertions.assertEquals(expected, result);
+        assertEquals(expected, result);
     }
 }

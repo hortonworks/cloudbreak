@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -21,7 +22,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
@@ -213,7 +213,7 @@ class RedbeamsTerminationServiceTest {
     private void verifyTermination(long id) {
         verify(dbStackStatusUpdater).updateStatus(id, DetailedDBStackStatus.DELETE_REQUESTED);
         ArgumentCaptor<RedbeamsEvent> eventCaptor = ArgumentCaptor.forClass(RedbeamsEvent.class);
-        InOrder inOrder = Mockito.inOrder(cancelService, flowManager);
+        InOrder inOrder = inOrder(cancelService, flowManager);
         inOrder.verify(cancelService).cancelRunningFlows(id);
         inOrder.verify(flowManager).notify(eq(RedbeamsTerminationEvent.REDBEAMS_TERMINATION_EVENT.selector()), eventCaptor.capture());
         RedbeamsEvent event = eventCaptor.getValue();

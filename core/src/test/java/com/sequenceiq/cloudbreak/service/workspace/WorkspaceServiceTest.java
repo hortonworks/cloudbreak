@@ -6,13 +6,13 @@ import static org.mockito.Mockito.when;
 
 import java.util.function.Supplier;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
@@ -21,8 +21,8 @@ import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceRepository;
 
-@RunWith(MockitoJUnitRunner.class)
-public class WorkspaceServiceTest {
+@ExtendWith(MockitoExtension.class)
+class WorkspaceServiceTest {
 
     private static final String WORKSPACE_NAME = "test-workspace";
 
@@ -43,7 +43,7 @@ public class WorkspaceServiceTest {
 
     private final User initiator = new User();
 
-    @Before
+    @BeforeEach
     public void setup() throws TransactionExecutionException {
         initiator.setId(1L);
         initiator.setUserId("initiator");
@@ -59,7 +59,7 @@ public class WorkspaceServiceTest {
     }
 
     @Test
-    public void testWorkspaceCreation() {
+    void testWorkspaceCreation() {
         when(workspaceRepository.save(any())).thenReturn(testWorkspace);
 
         underTest.create(testWorkspace);

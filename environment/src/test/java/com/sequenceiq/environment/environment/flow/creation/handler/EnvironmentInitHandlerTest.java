@@ -21,7 +21,6 @@ import java.util.Set;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -69,19 +68,19 @@ class EnvironmentInitHandlerTest {
 
     private static final String ACCOUNT_ID = "accountId";
 
-    private final EventSender eventSender = Mockito.mock(EventSender.class);
+    private final EventSender eventSender = mock(EventSender.class);
 
-    private final EnvironmentService environmentService = Mockito.mock(EnvironmentService.class);
+    private final EnvironmentService environmentService = mock(EnvironmentService.class);
 
-    private final EnvironmentNetworkService environmentNetworkService = Mockito.mock(EnvironmentNetworkService.class);
+    private final EnvironmentNetworkService environmentNetworkService = mock(EnvironmentNetworkService.class);
 
-    private final EventBus eventBus = Mockito.mock(EventBus.class);
+    private final EventBus eventBus = mock(EventBus.class);
 
-    private final VirtualGroupService virtualGroupService = Mockito.mock(VirtualGroupService.class);
+    private final VirtualGroupService virtualGroupService = mock(VirtualGroupService.class);
 
-    private final Map<CloudPlatform, EnvironmentNetworkConverter> environmentNetworkConverterMap = Mockito.mock(HashMap.class);
+    private final Map<CloudPlatform, EnvironmentNetworkConverter> environmentNetworkConverterMap = mock(HashMap.class);
 
-    private final PemBasedEnvironmentDomainProvider domainProvider = Mockito.mock(PemBasedEnvironmentDomainProvider.class);
+    private final PemBasedEnvironmentDomainProvider domainProvider = mock(PemBasedEnvironmentDomainProvider.class);
 
     private final EnvironmentInitHandler environmentInitHandler
             = new EnvironmentInitHandler(eventSender, environmentService, environmentNetworkService,

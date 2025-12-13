@@ -1,8 +1,8 @@
 package com.sequenceiq.freeipa.ldap;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -22,7 +22,7 @@ public class LdapConfigValidatorTest {
     public void testInvalidLdapConnection() {
         LdapConfig ldapConfig = ldapConfig();
         ldapConfig.setProtocol("ldap://");
-        BadRequestException ex = Assertions.assertThrows(BadRequestException.class, () -> {
+        BadRequestException ex = assertThrows(BadRequestException.class, () -> {
             underTest.validateLdapConnection(ldapConfig);
         });
         assertEquals("Failed to connect to LDAP server: Invalid name: /localhost:389", ex.getMessage());

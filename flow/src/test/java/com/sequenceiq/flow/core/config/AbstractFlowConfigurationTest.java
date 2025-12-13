@@ -1,20 +1,23 @@
 package com.sequenceiq.flow.core.config;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.ArgumentMatchers;
-import org.mockito.BDDMockito;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.task.SyncTaskExecutor;
 import org.springframework.statemachine.config.builders.StateMachineConfigurationBuilder;
@@ -38,12 +41,13 @@ import com.sequenceiq.flow.core.listener.FlowEventCommonListener;
 import com.sequenceiq.flow.core.listener.FlowTransitionContext;
 import com.sequenceiq.flow.core.restart.DefaultRestartAction;
 
-public class AbstractFlowConfigurationTest {
+@ExtendWith(MockitoExtension.class)
+class AbstractFlowConfigurationTest {
 
     private static final Event[] EVENTS = new Event[0];
 
     @InjectMocks
-    private FlowConfiguration<?> underTest;
+    private FlowConfiguration<?> underTest = new TestFlowConfiguration();
 
     @Mock
     private ApplicationContext applicationContext;
@@ -66,17 +70,13 @@ public class AbstractFlowConfigurationTest {
 
     private FlowEdgeConfig<State, Event> edgeConfig;
 
-    @Before
-    public void setup() throws Exception {
-        underTest = new TestFlowConfiguration();
-        MockitoAnnotations.initMocks(this);
-        BDDMockito.given(applicationContext.getBean(ArgumentMatchers.anyString(), ArgumentMatchers.any(Class.class))).willReturn(action);
-        BDDMockito.given(applicationContext.getBean(ArgumentMatchers.eq(FlowEventListener.class), ArgumentMatchers.eq(State.INIT),
-                        ArgumentMatchers.eq(State.FINAL), ArgumentMatchers.anyString(), ArgumentMatchers.anyString(),
-                        ArgumentMatchers.eq("flowChainId"), ArgumentMatchers.eq("flowId"), ArgumentMatchers.anyLong()))
-                .willReturn(flowEventListener);
-        BDDMockito.given(applicationContext.getBean(ArgumentMatchers.eq(FlowEventCommonListener.class), any(FlowTransitionContext.class)))
-                .willReturn(flowEventCommonListener);
+    @BeforeEach
+    void setup() throws Exception {
+        when(applicationContext.getBean(anyString(), any(Class.class))).thenReturn(action);
+        when(applicationContext.getBean(eq(FlowEventListener.class), eq(State.INIT), eq(State.FINAL), anyString(),
+                anyString(), eq("flowChainId"), eq("flowId"), anyLong()))
+                .thenReturn(flowEventListener);
+        when(applicationContext.getBean(eq(FlowEventCommonListener.class), any(FlowTransitionContext.class))).thenReturn(flowEventCommonListener);
         transitions = new Builder<State, Event>()
                 .defaultFailureEvent(Event.FAILURE)
                 .from(State.INIT).to(State.DO).event(Event.START).noFailureEvent()
@@ -86,13 +86,13 @@ public class AbstractFlowConfigurationTest {
                 .build();
         edgeConfig = new FlowEdgeConfig<>(State.INIT, State.FINAL, State.FAILED, Event.FAIL_HANDLED);
         ((AbstractFlowConfiguration<State, Event>) underTest).init();
-        verify(applicationContext, Mockito.times(8)).getBean(ArgumentMatchers.anyString(), ArgumentMatchers.any(Class.class));
+        verify(applicationContext, times(8)).getBean(anyString(), any(Class.class));
         flow = underTest.createFlow("flowId", "flowChainId", 0L, "flowChainType");
         flow.initialize(Map.of());
     }
 
     @Test
-    public void testHappyFlowConfiguration() {
+    void testHappyFlowConfiguration() {
         flow.sendEvent(flowEventContext(Event.START.name()));
         flow.sendEvent(flowEventContext(Event.CONTINUE.name()));
         flow.sendEvent(flowEventContext(Event.FINISHED.name()));
@@ -100,23 +100,23 @@ public class AbstractFlowConfigurationTest {
     }
 
     @Test
-    public void testUnhappyFlowConfigurationWithDefaultFailureHandler() {
+    void testUnhappyFlowConfigurationWithDefaultFailureHandler() {
         flow.sendEvent(flowEventContext(Event.START.name()));
         flow.sendEvent(flowEventContext(Event.FAILURE.name()));
         flow.sendEvent(flowEventContext(Event.FAIL_HANDLED.name()));
     }
 
     @Test
-    public void testUnhappyFlowConfigurationWithCustomFailureHandler() {
+    void testUnhappyFlowConfigurationWithCustomFailureHandler() {
         flow.sendEvent(flowEventContext(Event.START.name()));
         flow.sendEvent(flowEventContext(Event.CONTINUE.name()));
         flow.sendEvent(flowEventContext(Event.FAILURE2.name()));
-        assertEquals("Must be on the FAILED2 state", State.FAILED2, flow.getCurrentState());
+        assertEquals(State.FAILED2, flow.getCurrentState(), "Must be on the FAILED2 state");
         flow.sendEvent(flowEventContext(Event.FAIL_HANDLED.name()));
     }
 
     @Test
-    public void testUnacceptedFlowConfiguration1() {
+    void testUnacceptedFlowConfiguration1() {
         flow.sendEvent(flowEventContext(Event.START.name()));
         flow.sendEvent(flowEventContext(Event.FINISHED.name()));
 
@@ -124,7 +124,7 @@ public class AbstractFlowConfigurationTest {
     }
 
     @Test
-    public void testUnacceptedFlowConfiguration2() {
+    void testUnacceptedFlowConfiguration2() {
         flow.sendEvent(flowEventContext(Event.START.name()));
         flow.sendEvent(flowEventContext(Event.FAILURE2.name()));
 
@@ -132,7 +132,7 @@ public class AbstractFlowConfigurationTest {
     }
 
     @Test
-    public void testUnacceptedFlowConfiguration3() {
+    void testUnacceptedFlowConfiguration3() {
         flow.sendEvent(flowEventContext(Event.START.name()));
         flow.sendEvent(flowEventContext(Event.CONTINUE.name()));
         flow.sendEvent(flowEventContext(Event.FAIL_HANDLED.name()));
@@ -141,7 +141,7 @@ public class AbstractFlowConfigurationTest {
     }
 
     @Test
-    public void testUnacceptedFlowConfiguration4() {
+    void testUnacceptedFlowConfiguration4() {
         flow.sendEvent(flowEventContext(Event.START.name()));
         flow.sendEvent(flowEventContext(Event.CONTINUE.name()));
         flow.sendEvent(flowEventContext(Event.FAILURE.name()));
@@ -211,7 +211,7 @@ public class AbstractFlowConfigurationTest {
 
         @Override
         public Event[] getInitEvents() {
-            return new Event[] {Event.START};
+            return new Event[]{Event.START};
         }
 
         @Override

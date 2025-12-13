@@ -16,7 +16,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -263,8 +262,8 @@ public class AzureTemplateBuilderDbTest {
     }
 
     private <T> void checkParameter(JsonNode parameter, String type, String valueStr) {
-        Assertions.assertEquals(type, parameter.get("type").asText());
-        Assertions.assertEquals(valueStr, parameter.get("defaultValue").asText());
+        assertEquals(type, parameter.get("type").asText());
+        assertEquals(valueStr, parameter.get("defaultValue").asText());
     }
 
     private DatabaseStack createDatabaseStack(boolean useSslEnforcement, String template) {

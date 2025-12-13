@@ -6,12 +6,12 @@ import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.securitygroup.SecurityGroupV4Request;
 import com.sequenceiq.cloudbreak.common.converter.ResourceNameGenerator;
@@ -21,8 +21,8 @@ import com.sequenceiq.cloudbreak.converter.v4.stacks.instancegroup.securitygroup
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.SecurityRule;
 
-@RunWith(MockitoJUnitRunner.class)
-public class SecurityGroupRequestToSecurityGroupConverterTest extends AbstractJsonConverterTest<SecurityGroupV4Request> {
+@ExtendWith(MockitoExtension.class)
+class SecurityGroupRequestToSecurityGroupConverterTest extends AbstractJsonConverterTest<SecurityGroupV4Request> {
 
     @InjectMocks
     private SecurityGroupV4RequestToSecurityGroupConverter underTest;
@@ -33,13 +33,13 @@ public class SecurityGroupRequestToSecurityGroupConverterTest extends AbstractJs
     @Mock
     private SecurityRuleV4RequestToSecurityRuleConverter securityRuleV4RequestToSecurityRuleConverter;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         when(resourceNameGenerator.generateName(APIResourceType.SECURITY_GROUP)).thenReturn("name");
     }
 
     @Test
-    public void testConvert() {
+    void testConvert() {
         // GIVEN
         given(securityRuleV4RequestToSecurityRuleConverter.convert(any())).willReturn(new SecurityRule());
         // WHEN
@@ -49,7 +49,7 @@ public class SecurityGroupRequestToSecurityGroupConverterTest extends AbstractJs
     }
 
     @Test
-    public void testConvertWithNoSecurityRules() {
+    void testConvertWithNoSecurityRules() {
         // WHEN
         SecurityGroup result = underTest.convert(getRequest("security-group/security-group-id.json"));
         // THEN

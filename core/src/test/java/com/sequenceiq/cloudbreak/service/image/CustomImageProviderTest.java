@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.service.image;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -12,10 +12,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
@@ -27,8 +24,7 @@ import com.sequenceiq.cloudbreak.domain.VmImage;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.common.api.type.ImageType;
 
-@RunWith(MockitoJUnitRunner.class)
-public class CustomImageProviderTest {
+class CustomImageProviderTest {
 
     private static final String CUSTOM_IMAGE_CATALOG_URL = "http://localhost/custom-imagecatalog-url";
 
@@ -44,11 +40,10 @@ public class CustomImageProviderTest {
 
     private static final String CUSTOM_BASE_PARCEL_URL = "https://myarchive.test.com";
 
-    @InjectMocks
-    private CustomImageProvider underTest;
+    private CustomImageProvider underTest = new CustomImageProvider();
 
     @Test
-    public void testMergeSourceImageAndCustomImagePropertiesInCaseOfRuntimeImage() throws Exception {
+    void testMergeSourceImageAndCustomImagePropertiesInCaseOfRuntimeImage() throws Exception {
 
         StatedImage statedImage = getStatedImageFromCatalog(V3_CB_CATALOG_FILE, "949bffa3-17d4-4076-9d5a-bf3d23c1086b");
         CustomImage customImage = getCustomImage(ImageType.RUNTIME, CUSTOM_IMAGE_ID, CUSTOM_BASE_PARCEL_URL);
@@ -65,7 +60,7 @@ public class CustomImageProviderTest {
     }
 
     @Test
-    public void testMergeSourceImageAndCustomImagePropertiesInCaseOfFreeipaImage() throws Exception {
+    void testMergeSourceImageAndCustomImagePropertiesInCaseOfFreeipaImage() throws Exception {
 
         StatedImage statedImage = getStatedImageFromCatalog(V3_FREEIPA_CATALOG_FILE, "3b6ae396-df40-4e2b-7c2b-54b15822614c");
         CustomImage customImage = getCustomImage(ImageType.FREEIPA, CUSTOM_IMAGE_ID, CUSTOM_BASE_PARCEL_URL);

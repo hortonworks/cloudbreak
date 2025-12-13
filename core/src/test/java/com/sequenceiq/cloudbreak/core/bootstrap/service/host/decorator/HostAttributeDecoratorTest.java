@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -11,11 +11,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
@@ -29,9 +29,10 @@ import com.sequenceiq.cloudbreak.template.model.ServiceAttributes;
 import com.sequenceiq.cloudbreak.template.model.ServiceComponent;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 
-@RunWith(MockitoJUnitRunner.class)
-public class HostAttributeDecoratorTest {
+@ExtendWith(MockitoExtension.class)
+class HostAttributeDecoratorTest {
 
+    @InjectMocks
     private HostAttributeDecorator underTest;
 
     @Mock
@@ -46,13 +47,8 @@ public class HostAttributeDecoratorTest {
     @Mock
     private StackUtil stackUtil;
 
-    @Before
-    public void setup() {
-        underTest = new HostAttributeDecorator(cmTemplateProcessorFactory, stackUtil);
-    }
-
     @Test
-    public void testAddHostAttributes() {
+    void testAddHostAttributes() {
 
         when(stack.getBlueprintJsonText()).thenReturn("");
         when(stackUtil.collectNodes(any())).thenReturn(Set.of(new Node(null, null, null, null, "fqdn1", "hg1"),

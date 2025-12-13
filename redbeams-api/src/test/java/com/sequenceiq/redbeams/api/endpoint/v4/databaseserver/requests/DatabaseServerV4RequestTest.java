@@ -1,21 +1,21 @@
 package com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-public class DatabaseServerV4RequestTest {
+class DatabaseServerV4RequestTest {
 
     private DatabaseServerV4Request request;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         request = new DatabaseServerV4Request();
     }
 
     @Test
-    public void testGettersAndSetters() {
+    void testGettersAndSetters() {
         request.setConnectionUserName("root");
         assertEquals("root", request.getConnectionUserName());
 

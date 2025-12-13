@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.upgrade;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -7,14 +8,13 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.jupiter.api.Assertions;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
@@ -32,26 +32,14 @@ import com.sequenceiq.cloudbreak.service.freeipa.FreeipaService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stackstatus.StackStatusService;
 
-@RunWith(Parameterized.class)
-public class ClusterRecoveryServiceTest {
+@ExtendWith(MockitoExtension.class)
+class ClusterRecoveryServiceTest {
 
     private static final Stack STACK = TestUtil.stack();
 
     private static final long WORKSPACE_ID = 0L;
 
     private static final String STACK_NAME = STACK.getName();
-
-    @Parameterized.Parameter
-    public List<StackStatus> stackStatusList;
-
-    @Parameterized.Parameter(1)
-    public boolean freeIpaStatus;
-
-    @Parameterized.Parameter(2)
-    public RecoveryStatus expectedRecoveryStatus;
-
-    @Parameterized.Parameter(3)
-    public String expectedMessage;
 
     @Mock
     private StackService stackService;
@@ -71,13 +59,9 @@ public class ClusterRecoveryServiceTest {
     @InjectMocks
     private ClusterRecoveryService underTest;
 
-    @Before
-    public void init() {
-        MockitoAnnotations.initMocks(this);
-    }
-
-    @Test
-    public void testIfClusterRecoverable() {
+    @MethodSource("data")
+    @ParameterizedTest
+    void testIfClusterRecoverable(List<StackStatus> stackStatusList, boolean freeIpaStatus, RecoveryStatus expectedRecoveryStatus, String expectedMessage) {
         NameOrCrn stackNameOrCrn = NameOrCrn.ofName(STACK_NAME);
 
         when(stackService.getByNameOrCrnInWorkspace(stackNameOrCrn, WORKSPACE_ID)).thenReturn(STACK);
@@ -86,12 +70,12 @@ public class ClusterRecoveryServiceTest {
 
         RecoveryValidationV4Response response = underTest.validateRecovery(WORKSPACE_ID, stackNameOrCrn);
 
-        Assertions.assertEquals(expectedRecoveryStatus, response.getStatus());
-        Assertions.assertEquals(expectedMessage, response.getReason());
+        assertEquals(expectedRecoveryStatus, response.getStatus());
+        assertEquals(expectedMessage, response.getReason());
     }
 
     @Test
-    public void testRestorePreviousImageVersion() throws Exception {
+    void testRestorePreviousImageVersion() throws Exception {
         NameOrCrn stackNameOrCrn = NameOrCrn.ofName(STACK.getName());
         when(stackService.getByNameOrCrnInWorkspace(stackNameOrCrn, WORKSPACE_ID)).thenReturn(STACK);
         Component component = new Component();
@@ -103,8 +87,7 @@ public class ClusterRecoveryServiceTest {
         verify(flowManager).triggerDatalakeClusterRecovery(STACK.getId());
     }
 
-    @Parameterized.Parameters(name = "{index}: Cluster with available={1} FreeIPA is {2} with previous statuses {0} with message: {3}")
-    public static Collection<Object[]> data() {
+    static Collection<Object[]> data() {
         return Arrays.asList(new Object[][] {
                 {List.of(
                         getStackStatus(DetailedStackStatus.AVAILABLE)),

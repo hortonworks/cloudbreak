@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Collection;
 import java.util.Set;
@@ -9,11 +9,11 @@ import java.util.Set;
 import jakarta.validation.ConstraintViolation;
 
 import org.hibernate.validator.HibernateValidator;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
-public class ClusterV4RequestTest {
+class ClusterV4RequestTest {
 
     private static final String NOT_NULL_VIOLATION_TEMPLATE = "{javax.validation.constraints.NotNull.message}";
 
@@ -21,8 +21,8 @@ public class ClusterV4RequestTest {
 
     private ClusterV4Request underTest;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         underTest = new ClusterV4Request();
         localValidatorFactory = new LocalValidatorFactoryBean();
         localValidatorFactory.setProviderClass(HibernateValidator.class);
@@ -30,21 +30,21 @@ public class ClusterV4RequestTest {
     }
 
     @Test
-    public void testClusterRequestCreationWhenNameHasMeetsTheRequirementsThenEverythingGoesFine() {
+    void testClusterRequestCreationWhenNameHasMeetsTheRequirementsThenEverythingGoesFine() {
         underTest.setName("some-name");
         Set<ConstraintViolation<ClusterV4Request>> constraintViolations = localValidatorFactory.validate(underTest);
         assertFalse(constraintViolations.stream().anyMatch(violation -> !NOT_NULL_VIOLATION_TEMPLATE.equalsIgnoreCase(violation.getMessageTemplate())));
     }
 
     @Test
-    public void testClusterRequestCreationWhenNameDoesNotContainsHyphenThenEverythingGoesFine() {
+    void testClusterRequestCreationWhenNameDoesNotContainsHyphenThenEverythingGoesFine() {
         underTest.setName("somename");
         Set<ConstraintViolation<ClusterV4Request>> constraintViolations = localValidatorFactory.validate(underTest);
         assertFalse(constraintViolations.stream().anyMatch(violation -> !NOT_NULL_VIOLATION_TEMPLATE.equalsIgnoreCase(violation.getMessageTemplate())));
     }
 
     @Test
-    public void rejectsInvalidPassword() {
+    void rejectsInvalidPassword() {
         underTest.setPassword("x");
 
         Set<ConstraintViolation<ClusterV4Request>> constraintViolations = localValidatorFactory.validate(underTest);
@@ -55,7 +55,7 @@ public class ClusterV4RequestTest {
     }
 
     @Test
-    public void rejectsEmptyPassword() {
+    void rejectsEmptyPassword() {
         underTest.setPassword("");
 
         Set<ConstraintViolation<ClusterV4Request>> constraintViolations = localValidatorFactory.validate(underTest);
@@ -66,7 +66,7 @@ public class ClusterV4RequestTest {
     }
 
     @Test
-    public void rejectsTooShortPassword() {
+    void rejectsTooShortPassword() {
         underTest.setPassword("asdf123");
 
         Set<ConstraintViolation<ClusterV4Request>> constraintViolations = localValidatorFactory.validate(underTest);
@@ -77,7 +77,7 @@ public class ClusterV4RequestTest {
     }
 
     @Test
-    public void rejectsPasswordWithoutNumber() {
+    void rejectsPasswordWithoutNumber() {
         underTest.setPassword("asdfasdf");
 
         Set<ConstraintViolation<ClusterV4Request>> constraintViolations = localValidatorFactory.validate(underTest);
@@ -88,7 +88,7 @@ public class ClusterV4RequestTest {
     }
 
     @Test
-    public void rejectsPasswordWithoutLetter() {
+    void rejectsPasswordWithoutLetter() {
         underTest.setPassword("12345678");
 
         Set<ConstraintViolation<ClusterV4Request>> constraintViolations = localValidatorFactory.validate(underTest);
@@ -99,7 +99,7 @@ public class ClusterV4RequestTest {
     }
 
     @Test
-    public void acceptsOKPassword() {
+    void acceptsOKPassword() {
         underTest.setPassword("minimum8");
 
         Set<ConstraintViolation<ClusterV4Request>> constraintViolations = localValidatorFactory.validate(underTest);

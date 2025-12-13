@@ -20,7 +20,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
@@ -72,7 +71,7 @@ class GcpEnvironmentNetworkValidatorTest {
 
         underTest.validateDuringRequest(networkDto, validationResultBuilder);
 
-        verify(validationResultBuilder, Mockito.times(1)).error(underTest.missingParamsErrorMsg(CloudPlatform.GCP));
+        verify(validationResultBuilder, times(1)).error(underTest.missingParamsErrorMsg(CloudPlatform.GCP));
     }
 
     @Test

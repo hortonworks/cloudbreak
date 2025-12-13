@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.environment.service.sdx;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -9,7 +10,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Function;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -44,7 +44,7 @@ public class SdxPollerServiceTest {
         List<FlowIdentifier> actual = underTest.getExecuteSdxOperationsAndGetCrns(ENV_NAME, consumer, Set.of(SdxClusterStatusResponse.STOPPED));
 
         verify(consumer, never()).apply(any());
-        Assertions.assertEquals(1, actual.size());
+        assertEquals(1, actual.size());
     }
 
     @Test
@@ -57,7 +57,7 @@ public class SdxPollerServiceTest {
         List<FlowIdentifier> actual = underTest.getExecuteSdxOperationsAndGetCrns(ENV_NAME, consumer, Set.of(SdxClusterStatusResponse.STOPPED));
 
         verify(consumer).apply(any());
-        Assertions.assertEquals(1, actual.size());
+        assertEquals(1, actual.size());
     }
 
     @Test
@@ -75,7 +75,7 @@ public class SdxPollerServiceTest {
 
         verify(consumer).apply("crn");
         verify(consumer, never()).apply("crn1");
-        Assertions.assertEquals(2, actual.size());
+        assertEquals(2, actual.size());
     }
 
 }

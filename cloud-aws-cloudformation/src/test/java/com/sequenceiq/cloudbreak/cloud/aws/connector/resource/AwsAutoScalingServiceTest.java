@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.aws.connector.resource;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -11,7 +13,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -65,10 +66,10 @@ public class AwsAutoScalingServiceTest {
         mockDescribeAutoscalingGroup();
 
         Date date = new Date();
-        AmazonAutoscalingFailedException expected = Assertions.assertThrows(AmazonAutoscalingFailedException.class, () ->
+        AmazonAutoscalingFailedException expected = assertThrows(AmazonAutoscalingFailedException.class, () ->
                 underTest.checkLastScalingActivity(amazonAutoScalingClient, "asGroup", date, group));
 
-        Assertions.assertEquals(expected.getMessage(), "Description Cause");
+        assertEquals(expected.getMessage(), "Description Cause");
     }
 
     @Test

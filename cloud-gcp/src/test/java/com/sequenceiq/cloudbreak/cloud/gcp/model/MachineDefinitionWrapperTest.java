@@ -1,8 +1,9 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.model;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.util.HashMap;
 
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 
 public class MachineDefinitionWrapperTest {
@@ -15,10 +16,10 @@ public class MachineDefinitionWrapperTest {
         machineDefinitionWrapper.setSelfLink("link");
         machineDefinitionWrapper.setKind("kind");
 
-        Assert.assertEquals("1", machineDefinitionWrapper.getId());
-        Assert.assertEquals(true, machineDefinitionWrapper.getItems().isEmpty());
-        Assert.assertEquals("link", machineDefinitionWrapper.getSelfLink());
-        Assert.assertEquals("kind", machineDefinitionWrapper.getKind());
+        assertEquals("1", machineDefinitionWrapper.getId());
+        assertEquals(true, machineDefinitionWrapper.getItems().isEmpty());
+        assertEquals("link", machineDefinitionWrapper.getSelfLink());
+        assertEquals("kind", machineDefinitionWrapper.getKind());
     }
 
 }

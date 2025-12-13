@@ -10,6 +10,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -27,7 +28,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
 
@@ -88,7 +88,7 @@ class ClusterComponentConfigProviderTest {
 
     @Test
     void testRestorePreviousVersionWhenMultipleOlderVersionsThenHighestIsSelected() throws TransactionService.TransactionExecutionException {
-        try (MockedStatic<AuditReaderFactory> auditReaderFactory = Mockito.mockStatic(AuditReaderFactory.class)) {
+        try (MockedStatic<AuditReaderFactory> auditReaderFactory = mockStatic(AuditReaderFactory.class)) {
             ClusterComponent clusterComponent = createClusterComponent(CLUSTER_COMPONENT_ID);
             setupInvokeAuditReaderInTransaction(auditReaderFactory);
             when(auditReader.getRevisions(ClusterComponent.class, CLUSTER_COMPONENT_ID))
@@ -104,7 +104,7 @@ class ClusterComponentConfigProviderTest {
 
     @Test
     void testRestorePreviousVersionWhenNoRevisionInfoThenNothingSaved() throws TransactionService.TransactionExecutionException {
-        try (MockedStatic<AuditReaderFactory> auditReaderFactory = Mockito.mockStatic(AuditReaderFactory.class)) {
+        try (MockedStatic<AuditReaderFactory> auditReaderFactory = mockStatic(AuditReaderFactory.class)) {
             ClusterComponent clusterComponent = createClusterComponent(CLUSTER_COMPONENT_ID);
             setupInvokeAuditReaderInTransaction(auditReaderFactory);
             when(auditReader.getRevisions(ClusterComponent.class, CLUSTER_COMPONENT_ID)).thenReturn(List.of());

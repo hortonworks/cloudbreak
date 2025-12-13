@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.converter.util;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -9,11 +9,11 @@ import static org.mockito.Mockito.when;
 import java.util.Arrays;
 import java.util.Collections;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.gateway.GatewayV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.gateway.topology.GatewayTopologyV4Request;
@@ -21,8 +21,8 @@ import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.gateway.topology.Ga
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.GatewayTopology;
 
-@RunWith(MockitoJUnitRunner.class)
-public class GatewayConvertUtilTest {
+@ExtendWith(MockitoExtension.class)
+class GatewayConvertUtilTest {
 
     @Mock
     private GatewayTopologyV4RequestToGatewayTopologyConverter gatewayTopologyV4RequestToGatewayTopologyConverter;
@@ -31,7 +31,7 @@ public class GatewayConvertUtilTest {
     private GatewayConvertUtil underTest;
 
     @Test
-    public void testSetMultipleTopologies() {
+    void testSetMultipleTopologies() {
         GatewayV4Request source = new GatewayV4Request();
 
         GatewayTopologyV4Request topology1 = new GatewayTopologyV4Request();
@@ -53,7 +53,7 @@ public class GatewayConvertUtilTest {
     }
 
     @Test
-    public void testGatewayPathConversionWhenNoPathInGatewayJson() {
+    void testGatewayPathConversionWhenNoPathInGatewayJson() {
         Gateway gateway = new Gateway();
         GatewayV4Request gatewayJson = new GatewayV4Request();
         underTest.setGatewayPathAndSsoProvider(gatewayJson, gateway);
@@ -62,7 +62,7 @@ public class GatewayConvertUtilTest {
     }
 
     @Test
-    public void testGatewayPathConversionWhenPathIsInGatewayJson() {
+    void testGatewayPathConversionWhenPathIsInGatewayJson() {
         Gateway gateway = new Gateway();
         String gatewayPath = "gatewayPath";
         GatewayV4Request gatewayJson = new GatewayV4Request();

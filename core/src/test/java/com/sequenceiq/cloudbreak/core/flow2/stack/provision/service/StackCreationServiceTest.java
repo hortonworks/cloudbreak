@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.core.flow2.stack.provision.service;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -16,7 +17,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -65,11 +65,11 @@ class StackCreationServiceTest {
     @BeforeEach
     void setUp() {
         ReflectionTestUtils.setField(underTest, "ephemeralVolumeChecker", new InstanceGroupEphemeralVolumeChecker());
-        CloudConnector cloudConnector = Mockito.mock(CloudConnector.class);
+        CloudConnector cloudConnector = mock(CloudConnector.class);
         when(cloudPlatformConnectors.get(any())).thenReturn(cloudConnector);
-        MetadataCollector metadataCollector = Mockito.mock(MetadataCollector.class);
+        MetadataCollector metadataCollector = mock(MetadataCollector.class);
         when(cloudConnector.metadata()).thenReturn(metadataCollector);
-        Authenticator authenticator = Mockito.mock(Authenticator.class);
+        Authenticator authenticator = mock(Authenticator.class);
         when(cloudConnector.authentication()).thenReturn(authenticator);
         InstanceStoreMetadata instanceStoreMetadata = getInstanceStoreMetadata();
         when(metadataCollector.collectInstanceStorageCount(any(), any())).thenReturn(instanceStoreMetadata);

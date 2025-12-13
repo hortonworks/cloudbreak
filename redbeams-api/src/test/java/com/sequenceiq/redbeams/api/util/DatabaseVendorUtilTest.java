@@ -1,18 +1,18 @@
 package com.sequenceiq.redbeams.api.util;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.EnumSet;
 import java.util.Optional;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 
-public class DatabaseVendorUtilTest {
+class DatabaseVendorUtilTest {
 
     /*
      * This set takes into account the fact that some database vendors will
@@ -26,23 +26,23 @@ public class DatabaseVendorUtilTest {
 
     private DatabaseVendorUtil underTest;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         underTest = new DatabaseVendorUtil();
     }
 
     @Test
-    public void testValidUrls() {
+    void testValidUrls() {
         for (DatabaseVendor databaseVendor : TO_TEST) {
             String jdbcUrl = "jdbc:" + databaseVendor.jdbcUrlDriverId() + ":etc";
             Optional<DatabaseVendor> foundVendor = underTest.getVendorByJdbcUrl(jdbcUrl);
             assertFalse(foundVendor.isEmpty());
-            assertEquals("Expected " + databaseVendor + " but got " + foundVendor.get(), databaseVendor, foundVendor.get());
+            assertEquals(databaseVendor, foundVendor.get(), "Expected " + databaseVendor + " but got " + foundVendor.get());
         }
     }
 
     @Test
-    public void testUnrecognizedUrl() {
+    void testUnrecognizedUrl() {
         assertTrue(underTest.getVendorByJdbcUrl("unrecognized").isEmpty());
     }
 

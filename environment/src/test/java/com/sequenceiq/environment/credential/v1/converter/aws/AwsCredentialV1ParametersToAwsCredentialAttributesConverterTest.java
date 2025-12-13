@@ -1,9 +1,12 @@
 package com.sequenceiq.environment.credential.v1.converter.aws;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+
 import java.util.Optional;
 
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -37,9 +40,9 @@ class AwsCredentialV1ParametersToAwsCredentialAttributesConverterTest {
 
         AwsCredentialAttributes actual = underTest.convert(source, Optional.empty());
 
-        Assertions.assertNotNull(actual);
-        Assertions.assertNull(actual.getDefaultRegion());
-        Assertions.assertEquals(roleBasedParameters.getRoleArn(), actual.getRoleBased().getRoleArn());
+        assertNotNull(actual);
+        assertNull(actual.getDefaultRegion());
+        assertEquals(roleBasedParameters.getRoleArn(), actual.getRoleBased().getRoleArn());
     }
 
     @Test
@@ -53,10 +56,10 @@ class AwsCredentialV1ParametersToAwsCredentialAttributesConverterTest {
 
         AwsCredentialAttributes actual = underTest.convert(source, Optional.empty());
 
-        Assertions.assertNotNull(actual);
-        Assertions.assertNull(actual.getDefaultRegion());
-        Assertions.assertEquals(keyBasedParameters.getAccessKey(), actual.getKeyBased().getAccessKey());
-        Assertions.assertEquals(keyBasedParameters.getSecretKey(), actual.getKeyBased().getSecretKey());
+        assertNotNull(actual);
+        assertNull(actual.getDefaultRegion());
+        assertEquals(keyBasedParameters.getAccessKey(), actual.getKeyBased().getAccessKey());
+        assertEquals(keyBasedParameters.getSecretKey(), actual.getKeyBased().getSecretKey());
     }
 
     @Test
@@ -69,9 +72,9 @@ class AwsCredentialV1ParametersToAwsCredentialAttributesConverterTest {
 
         AwsCredentialAttributes actual = underTest.convert(source, Optional.of(credential));
 
-        Assertions.assertNotNull(actual);
-        Assertions.assertNull(actual.getDefaultRegion());
-        Assertions.assertEquals(roleBasedParameters.getRoleArn(), actual.getRoleBased().getRoleArn());
+        assertNotNull(actual);
+        assertNull(actual.getDefaultRegion());
+        assertEquals(roleBasedParameters.getRoleArn(), actual.getRoleBased().getRoleArn());
     }
 
     @ParameterizedTest
@@ -86,9 +89,9 @@ class AwsCredentialV1ParametersToAwsCredentialAttributesConverterTest {
 
         AwsCredentialAttributes actual = underTest.convert(source, Optional.of(credential));
 
-        Assertions.assertNotNull(actual);
-        Assertions.assertEquals(roleBasedParameters.getRoleArn(), actual.getRoleBased().getRoleArn());
-        Assertions.assertEquals(source.getDefaultRegion(), actual.getDefaultRegion());
+        assertNotNull(actual);
+        assertEquals(roleBasedParameters.getRoleArn(), actual.getRoleBased().getRoleArn());
+        assertEquals(source.getDefaultRegion(), actual.getDefaultRegion());
     }
 
     @NotNull

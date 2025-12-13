@@ -6,6 +6,8 @@ import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.ST
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.STOP_FAILED;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.STOP_IN_PROGRESS;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.UPDATE_IN_PROGRESS;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -13,13 +15,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.platform.commons.util.StringUtils;
-import org.mockito.Mockito;
 
 import com.dyngr.core.AttemptResult;
 import com.dyngr.core.AttemptState;
@@ -42,7 +42,7 @@ class FreeIpaPollerProviderTest {
 
     private static final String OPERATION_ID = "operationId";
 
-    private final FreeIpaService freeIpaService = Mockito.mock(FreeIpaService.class);
+    private final FreeIpaService freeIpaService = mock(FreeIpaService.class);
 
     private final FreeIpaPollerProvider underTest = new FreeIpaPollerProvider(freeIpaService);
 
@@ -107,8 +107,8 @@ class FreeIpaPollerProviderTest {
 
         AttemptResult<Void> result = underTest.stopPoller(ENV_ID, CRN).process();
 
-        Assertions.assertEquals(attemptState, result.getState());
-        Assertions.assertEquals(message, result.getMessage());
+        assertEquals(attemptState, result.getState());
+        assertEquals(message, result.getMessage());
     }
 
     @ParameterizedTest
@@ -120,8 +120,8 @@ class FreeIpaPollerProviderTest {
 
         AttemptResult<Void> result = underTest.startPoller(ENV_ID, CRN).process();
 
-        Assertions.assertEquals(attemptState, result.getState());
-        Assertions.assertEquals(message, result.getMessage());
+        assertEquals(attemptState, result.getState());
+        assertEquals(message, result.getMessage());
     }
 
     @Test
@@ -130,7 +130,7 @@ class FreeIpaPollerProviderTest {
 
         AttemptResult<Void> result = underTest.startPoller(ENV_ID, CRN).process();
 
-        Assertions.assertEquals(AttemptState.FINISH, result.getState());
+        assertEquals(AttemptState.FINISH, result.getState());
     }
 
     @ParameterizedTest
@@ -140,8 +140,8 @@ class FreeIpaPollerProviderTest {
 
         AttemptResult<Void> result = underTest.syncUsersPoller(ENV_ID, CRN, OPERATION_ID).process();
 
-        Assertions.assertEquals(attemptState, result.getState());
-        Assertions.assertEquals(message, result.getMessage());
+        assertEquals(attemptState, result.getState());
+        assertEquals(message, result.getMessage());
     }
 
     @ParameterizedTest
@@ -151,8 +151,8 @@ class FreeIpaPollerProviderTest {
         when(freeIpaService.getOperationStatus("123")).thenReturn(status);
         AttemptResult<Void> result = underTest.upgradeCcmPoller(ENV_ID, CRN, "123");
 
-        Assertions.assertEquals(attemptState, result.getState());
-        Assertions.assertEquals(message, result.getMessage());
+        assertEquals(attemptState, result.getState());
+        assertEquals(message, result.getMessage());
     }
 
     private DescribeFreeIpaResponse getDescribeFreeIpaResponse(Status status, String name) {

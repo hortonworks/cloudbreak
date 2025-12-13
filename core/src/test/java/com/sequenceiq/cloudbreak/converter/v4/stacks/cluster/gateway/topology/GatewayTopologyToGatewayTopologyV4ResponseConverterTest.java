@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.gateway.topology;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -9,27 +9,21 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.gateway.topology.GatewayTopologyV4Response;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.ExposedServices;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.GatewayTopology;
 
-public class GatewayTopologyToGatewayTopologyV4ResponseConverterTest {
+class GatewayTopologyToGatewayTopologyV4ResponseConverterTest {
 
     private static final String TOPOLOGY = "myTopology";
 
-    private GatewayTopologyToGatewayTopologyV4ResponseConverter underTest;
-
-    @Before
-    public void setUp() {
-        underTest = new GatewayTopologyToGatewayTopologyV4ResponseConverter();
-    }
+    private GatewayTopologyToGatewayTopologyV4ResponseConverter underTest = new GatewayTopologyToGatewayTopologyV4ResponseConverter();
 
     @Test
-    public void testConvertWithNoServicesAndException() throws IOException {
+    void testConvertWithNoServicesAndException() throws IOException {
         GatewayTopology source = mock(GatewayTopology.class);
         when(source.getTopologyName()).thenReturn(TOPOLOGY);
 
@@ -46,7 +40,7 @@ public class GatewayTopologyToGatewayTopologyV4ResponseConverterTest {
     }
 
     @Test
-    public void testConvertWithNoServicesAndEmptyList() throws IOException {
+    void testConvertWithNoServicesAndEmptyList() throws IOException {
         GatewayTopology source = mock(GatewayTopology.class);
         when(source.getTopologyName()).thenReturn(TOPOLOGY);
 
@@ -67,7 +61,7 @@ public class GatewayTopologyToGatewayTopologyV4ResponseConverterTest {
     }
 
     @Test
-    public void testConvertWithSomeServices() throws IOException {
+    void testConvertWithSomeServices() throws IOException {
         GatewayTopology source = mock(GatewayTopology.class);
         when(source.getTopologyName()).thenReturn(TOPOLOGY);
 

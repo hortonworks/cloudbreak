@@ -2,6 +2,7 @@ package com.sequenceiq.environment.platformresource.v1;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -16,7 +17,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -82,7 +82,7 @@ public class EnvironmentPlatformResourceControllerTest {
     private void setupMocks(PlatformResourceRequest request) {
         Region region = new Region();
         region.setName("west-us2");
-        try (MockedStatic<ThreadBasedUserCrnProvider> mockedThreadBasedUserCrnProvider = Mockito.mockStatic(ThreadBasedUserCrnProvider.class)) {
+        try (MockedStatic<ThreadBasedUserCrnProvider> mockedThreadBasedUserCrnProvider = mockStatic(ThreadBasedUserCrnProvider.class)) {
             mockedThreadBasedUserCrnProvider.when(() -> ThreadBasedUserCrnProvider.getAccountId()).thenReturn(null);
         }
         EnvironmentDto environmentDto = mock(EnvironmentDto.class);

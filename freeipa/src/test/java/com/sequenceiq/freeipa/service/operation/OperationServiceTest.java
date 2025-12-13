@@ -2,6 +2,7 @@ package com.sequenceiq.freeipa.service.operation;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
@@ -9,7 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -95,8 +95,8 @@ class OperationServiceTest {
         ArrayList<FailureDetails> failureDetails = new ArrayList<>();
         failureDetails.add(new FailureDetails());
         Operation actualOperation = underTest.updateOperation(ACCOUNT_ID, OPERATION_ID, successDetails, failureDetails);
-        Assertions.assertEquals(2, actualOperation.getSuccessList().size());
-        Assertions.assertEquals(2, actualOperation.getFailureList().size());
+        assertEquals(2, actualOperation.getSuccessList().size());
+        assertEquals(2, actualOperation.getFailureList().size());
     }
 
     @Test
@@ -109,8 +109,8 @@ class OperationServiceTest {
         ArrayList<FailureDetails> failureDetails = new ArrayList<>();
         failureDetails.add(new FailureDetails());
         Operation actualOperation = underTest.completeOperation(ACCOUNT_ID, OPERATION_ID, successDetails, failureDetails);
-        Assertions.assertEquals(1, actualOperation.getSuccessList().size());
-        Assertions.assertEquals(1, actualOperation.getFailureList().size());
+        assertEquals(1, actualOperation.getSuccessList().size());
+        assertEquals(1, actualOperation.getFailureList().size());
     }
 
     @Test
@@ -134,7 +134,7 @@ class OperationServiceTest {
         failureDetails.add(new FailureDetails());
         failureDetails.add(new FailureDetails());
         Operation actualOperation = underTest.failOperation(ACCOUNT_ID, OPERATION_ID, "failed", successDetails, failureDetails);
-        Assertions.assertEquals(4, actualOperation.getSuccessList().size());
-        Assertions.assertEquals(5, actualOperation.getFailureList().size());
+        assertEquals(4, actualOperation.getSuccessList().size());
+        assertEquals(5, actualOperation.getFailureList().size());
     }
 }

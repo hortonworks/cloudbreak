@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.network.v1;
 
-import org.junit.jupiter.api.Assertions;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.environment.network.dao.domain.RegistrationType;
@@ -20,6 +21,6 @@ class AzureRegistrationTypeResolverTest {
                         .build())
                 .build();
         RegistrationType registrationType = azureRegistrationTypeResolver.getRegistrationType(networkDto);
-        Assertions.assertEquals(RegistrationType.EXISTING, registrationType);
+        assertEquals(RegistrationType.EXISTING, registrationType);
     }
 }

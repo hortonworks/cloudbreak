@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -14,7 +15,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.eventbus.Event;
@@ -41,9 +41,9 @@ class CollectAdditionalHostnamesHandlerTest {
     void testResultContainsServerFqdns() throws Exception {
         String fqdn1 = "foo1.example.com";
         String fqdn2 = "foo2.example.com";
-        FreeIpaClient mockIpaClient = Mockito.mock(FreeIpaClient.class);
-        IpaServer mockIpaServer1 = Mockito.mock(IpaServer.class);
-        IpaServer mockIpaServer2 = Mockito.mock(IpaServer.class);
+        FreeIpaClient mockIpaClient = mock(FreeIpaClient.class);
+        IpaServer mockIpaServer1 = mock(IpaServer.class);
+        IpaServer mockIpaServer2 = mock(IpaServer.class);
         when(freeIpaClientFactory.getFreeIpaClientForStackId(any())).thenReturn(mockIpaClient);
         when(mockIpaClient.findAllServers()).thenReturn(Set.of(mockIpaServer1, mockIpaServer2));
         when(mockIpaServer1.getFqdn()).thenReturn(fqdn1);

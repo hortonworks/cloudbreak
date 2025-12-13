@@ -7,11 +7,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
@@ -22,8 +22,8 @@ import com.sequenceiq.cloudbreak.service.cluster.FinalizeClusterInstallHandlerSe
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 
-@RunWith(MockitoJUnitRunner.class)
-public class ClusterCreationSuccessHandlerTest {
+@ExtendWith(MockitoExtension.class)
+class ClusterCreationSuccessHandlerTest {
 
     @Mock
     private ClusterService clusterService;
@@ -35,7 +35,7 @@ public class ClusterCreationSuccessHandlerTest {
     private final FinalizeClusterInstallHandlerService underTest = new FinalizeClusterInstallHandlerService();
 
     @Test
-    public void testFinalizeClusterInstallWhenEverythingGoesFine() {
+    void testFinalizeClusterInstallWhenEverythingGoesFine() {
         Stack stack = TestUtil.stack();
         Cluster cluster = TestUtil.cluster();
 

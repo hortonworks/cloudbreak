@@ -1,12 +1,12 @@
 package com.sequenceiq.environment.api;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.reflections.scanners.Scanners.SubTypes;
 
 import java.lang.reflect.Constructor;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.reflections.Reflections;
@@ -34,7 +34,7 @@ public class ConstructorTest {
                 }
             }
         }
-        Assertions.assertEquals(0, missingConstructors.size(),
+        assertEquals(0, missingConstructors.size(),
                 String.format("These classes do not have constructor(): %s. Please add that", String.join(",\n", missingConstructors)));
     }
 

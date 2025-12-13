@@ -2,8 +2,8 @@ package com.sequenceiq.redbeams.converter.spi;
 
 
 import static com.sequenceiq.common.api.type.ResourceType.AZURE_DATABASE;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -29,10 +29,10 @@ class DBResourceToCloudResourceConverterTest {
     @Test
     void testConvert() {
         CloudResource cloudResource = underTest.convert(createResource());
-        Assertions.assertEquals(RESOURCE_NAME, cloudResource.getName());
-        Assertions.assertEquals(RESOURCE_TYPE, cloudResource.getType());
-        Assertions.assertEquals(RESOURCE_REFERENCE, cloudResource.getReference());
-        Assertions.assertEquals(CommonStatus.CREATED, cloudResource.getStatus());
+        assertEquals(RESOURCE_NAME, cloudResource.getName());
+        assertEquals(RESOURCE_TYPE, cloudResource.getType());
+        assertEquals(RESOURCE_REFERENCE, cloudResource.getReference());
+        assertEquals(CommonStatus.CREATED, cloudResource.getStatus());
     }
 
     private DBResource createResource() {

@@ -1,11 +1,10 @@
 package com.sequenceiq.cloudbreak.aspect;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.any;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
@@ -17,15 +16,12 @@ import java.util.List;
 
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.hamcrest.core.IsInstanceOf;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.common.dal.model.AccountIdAwareResource;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
@@ -37,11 +33,8 @@ import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 import com.sequenceiq.cloudbreak.workspace.model.TenantAwareResource;
 
-@RunWith(MockitoJUnitRunner.class)
-public class SecretAspectsTest {
-
-    @Rule
-    public final ExpectedException thrown = ExpectedException.none();
+@ExtendWith(MockitoExtension.class)
+class SecretAspectsTest {
 
     @InjectMocks
     private SecretAspects underTest;
@@ -58,20 +51,15 @@ public class SecretAspectsTest {
     @Mock
     private Tenant tenant;
 
-    @Before
-    public void setup() {
-
-    }
-
     @Test
-    public void testproceedSaveEntityNotContainsSecret() {
+    void testproceedSaveEntityNotContainsSecret() {
         when(proceedingJoinPoint.getArgs()).thenReturn(new String[] { "test" });
 
         underTest.proceedOnRepositorySave(proceedingJoinPoint);
     }
 
     @Test
-    public void testproceedSaveEntitySecretIsNull() throws Exception {
+    void testproceedSaveEntitySecretIsNull() throws Exception {
         DummyTenantAwareResourceEntity dummyEntity = new DummyTenantAwareResourceEntity(null);
         when(proceedingJoinPoint.getArgs()).thenReturn(new Object[] { dummyEntity });
 
@@ -81,7 +69,7 @@ public class SecretAspectsTest {
     }
 
     @Test
-    public void testproceedSaveEntitySecretRawIsNull() throws Exception {
+    void testproceedSaveEntitySecretRawIsNull() throws Exception {
         DummyTenantAwareResourceEntity dummyEntity = new DummyTenantAwareResourceEntity(new Secret(null));
         when(proceedingJoinPoint.getArgs()).thenReturn(new Object[] { dummyEntity });
 
@@ -91,7 +79,7 @@ public class SecretAspectsTest {
     }
 
     @Test
-    public void testproceedSaveEntitySecretSecretNotNull() throws Exception {
+    void testproceedSaveEntitySecretSecretNotNull() throws Exception {
         DummyTenantAwareResourceEntity dummyEntity = new DummyTenantAwareResourceEntity(new Secret(null, ""));
         when(proceedingJoinPoint.getArgs()).thenReturn(new Object[] { dummyEntity });
 
@@ -101,20 +89,22 @@ public class SecretAspectsTest {
     }
 
     @Test
-    public void testproceedSaveEntityNotTenantAwareResource() throws Exception {
+    void testproceedSaveEntityNotTenantAwareResource() throws Exception {
         DummyEntity dummyEntity = new DummyEntity(new Secret(""));
         when(proceedingJoinPoint.getArgs()).thenReturn(new Object[] { dummyEntity });
 
-        thrown.expect(CloudbreakServiceException.class);
-        thrown.expectCause(any(IllegalArgumentException.class));
-
-        underTest.proceedOnRepositorySave(proceedingJoinPoint);
+        try {
+            underTest.proceedOnRepositorySave(proceedingJoinPoint);
+        } catch (Exception e) {
+            assertThat(e, IsInstanceOf.instanceOf(CloudbreakServiceException.class));
+            assertThat(e.getCause(), IsInstanceOf.instanceOf(IllegalArgumentException.class));
+        }
 
         verifySecretManagementIgnoredDuringSave(null);
     }
 
     @Test
-    public void testproceedSaveEntity() throws Exception {
+    void testproceedSaveEntity() throws Exception {
         DummyTenantAwareResourceEntity dummyEntity = new DummyTenantAwareResourceEntity(new Secret("raw"));
         when(proceedingJoinPoint.getArgs()).thenReturn(new Object[] { dummyEntity });
         when(tenant.getName()).thenReturn("tenant");
@@ -127,7 +117,7 @@ public class SecretAspectsTest {
     }
 
     @Test
-    public void testproceedSaveAllEntity() throws Exception {
+    void testproceedSaveAllEntity() throws Exception {
         DummyTenantAwareResourceEntity dummyEntity = new DummyTenantAwareResourceEntity(new Secret("raw"));
         when(proceedingJoinPoint.getArgs()).thenReturn(new Object[] { List.of(dummyEntity) });
         when(tenant.getName()).thenReturn("tenant");
@@ -140,14 +130,14 @@ public class SecretAspectsTest {
     }
 
     @Test
-    public void testproceedDeleteEntityNotContainsSecret() {
+    void testproceedDeleteEntityNotContainsSecret() {
         when(proceedingJoinPoint.getArgs()).thenReturn(new String[] { "test" });
 
         underTest.proceedOnRepositoryDelete(proceedingJoinPoint);
     }
 
     @Test
-    public void testproceedDeleteEntityPathIsNull() {
+    void testproceedDeleteEntityPathIsNull() {
         DummyEntity dummyEntity = new DummyEntity(null);
         when(proceedingJoinPoint.getArgs()).thenReturn(new Object[] { dummyEntity });
 
@@ -157,7 +147,7 @@ public class SecretAspectsTest {
     }
 
     @Test
-    public void testproceedDeleteEntitySecretIsNull() {
+    void testproceedDeleteEntitySecretIsNull() {
         DummyEntity dummyEntity = new DummyEntity(new Secret(null, null));
         when(proceedingJoinPoint.getArgs()).thenReturn(new Object[] { dummyEntity });
 
@@ -167,7 +157,7 @@ public class SecretAspectsTest {
     }
 
     @Test
-    public void testproceedDeleteEntity() {
+    void testproceedDeleteEntity() {
         DummyEntity dummyEntity = new DummyEntity(new Secret(null, "path"));
         when(proceedingJoinPoint.getArgs()).thenReturn(new Object[] { dummyEntity });
 
@@ -177,7 +167,7 @@ public class SecretAspectsTest {
     }
 
     @Test
-    public void testproceedDeleteAllEntity() {
+    void testproceedDeleteAllEntity() {
         DummyEntity dummyEntity = new DummyEntity(new Secret(null, "path"));
         when(proceedingJoinPoint.getArgs()).thenReturn(new Object[] { List.of(dummyEntity) });
 
@@ -187,7 +177,7 @@ public class SecretAspectsTest {
     }
 
     @Test
-    public void testProceedSaveInCorrectPathWhenAccountIdIsDefined() throws Exception {
+    void testProceedSaveInCorrectPathWhenAccountIdIsDefined() throws Exception {
         DummyAccountIdAwareResourceEntity dummyEntity = new DummyAccountIdAwareResourceEntity("accountId", "secret");
         when(proceedingJoinPoint.getArgs()).thenReturn(new Object[] { dummyEntity });
 
@@ -203,7 +193,7 @@ public class SecretAspectsTest {
     }
 
     @Test
-    public void testThrowCloudbreakServiceExceptionWhenAccountIdIsNullOnEntity() throws Exception {
+    void testThrowCloudbreakServiceExceptionWhenAccountIdIsNullOnEntity() throws Exception {
         DummyAccountIdAwareResourceEntity dummyEntity = new DummyAccountIdAwareResourceEntity(null, "secret");
         when(proceedingJoinPoint.getArgs()).thenReturn(new Object[] { dummyEntity });
 
@@ -212,7 +202,7 @@ public class SecretAspectsTest {
     }
 
     @Test
-    public void testThrowCloudbreakServiceExceptionWhenEntityIsNotAccountIdAwareResource() throws Exception {
+    void testThrowCloudbreakServiceExceptionWhenEntityIsNotAccountIdAwareResource() throws Exception {
         DummyEntity dummyEntity = new DummyEntity(new Secret("secret"));
         when(proceedingJoinPoint.getArgs()).thenReturn(new Object[] { dummyEntity });
 
@@ -221,7 +211,7 @@ public class SecretAspectsTest {
     }
 
     @Test
-    public void testProceedDeleteInCorrectPathWhenAccountIdIsDefined() {
+    void testProceedDeleteInCorrectPathWhenAccountIdIsDefined() {
         DummyAccountIdAwareResourceEntity dummyEntity = new DummyAccountIdAwareResourceEntity("accountId",
                 new Secret("secret", "accountId/dummyaccountidawareresourceentity/secret/test-123"));
         when(proceedingJoinPoint.getArgs()).thenReturn(new Object[] { dummyEntity });

@@ -19,6 +19,7 @@ dependencies {
 
   implementation ("io.grpc:grpc-all:$grpcVersion") {
     exclude group: 'org.mockito'
+    exclude group: 'junit', module: 'junit'
   }
   implementation group: 'com.github.rholder',                    name: 'guava-retrying',                 version: '2.0.0'
 

@@ -22,7 +22,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
@@ -104,7 +103,7 @@ public class ImageReaderServiceTest {
 
     @Test
     public void testGetPreWarmParcelNamesFromImageShouldReturnTheParcelNames() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
-        Image currentImage = Mockito.mock(Image.class);
+        Image currentImage = mock(Image.class);
         Set<ClouderaManagerProduct> products = Set.of(new ClouderaManagerProduct().withName(PARCEL_NAME));
 
         when(imageService.getCurrentImage(WORKSPACE_ID, STACK_ID)).thenReturn(StatedImage.statedImage(currentImage, null, null));

@@ -1,10 +1,9 @@
 package com.sequenceiq.cloudbreak.service;
 
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
@@ -13,7 +12,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -123,7 +121,7 @@ public class DefaultClouderaManagerRepoServiceTest {
         CloudbreakImageCatalogException exception = assertThrows(CloudbreakImageCatalogException.class,
                 () -> underTest.getClouderaManagerRepo(image));
 
-        Assertions.assertEquals("Unsupported stack type: 'CDX'.", exception.getMessage());
+        assertEquals("Unsupported stack type: 'CDX'.", exception.getMessage());
     }
 
     @Test
@@ -137,7 +135,7 @@ public class DefaultClouderaManagerRepoServiceTest {
         CloudbreakImageCatalogException exception = assertThrows(CloudbreakImageCatalogException.class,
                 () -> underTest.getClouderaManagerRepo(image));
 
-        Assertions.assertEquals("Cloudera Manager repo was not found in image for os: 'redhat8'.", exception.getMessage());
+        assertEquals("Cloudera Manager repo was not found in image for os: 'redhat8'.", exception.getMessage());
     }
 
     @Test
@@ -154,6 +152,6 @@ public class DefaultClouderaManagerRepoServiceTest {
         CloudbreakImageCatalogException exception = assertThrows(CloudbreakImageCatalogException.class,
                 () -> underTest.getClouderaManagerRepo(image));
 
-        Assertions.assertEquals("Cloudera Manager repo was not found in image for os: 'redhat8'.", exception.getMessage());
+        assertEquals("Cloudera Manager repo was not found in image for os: 'redhat8'.", exception.getMessage());
     }
 }

@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.conf;
 
-import org.junit.Assert;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -26,19 +27,19 @@ public class GcpConfigTest {
     @Test
     public void testGetTagSpecification() {
         TagSpecification expected = new TagSpecification(1, 2, 3, "apple0", 4, 5, "apple1");
-        Assert.assertEquals(expected.getKeyValidator(), underTest.getTagSpecification().getKeyValidator());
-        Assert.assertEquals(expected.getValueValidator(), underTest.getTagSpecification().getValueValidator());
-        Assert.assertEquals(expected.getMaxAmount(), underTest.getTagSpecification().getMaxAmount());
-        Assert.assertEquals(expected.getMaxKeyLength(), underTest.getTagSpecification().getMaxKeyLength());
-        Assert.assertEquals(expected.getMinKeyLength(), underTest.getTagSpecification().getMinKeyLength());
-        Assert.assertEquals(expected.getMinValueLength(), underTest.getTagSpecification().getMinValueLength());
-        Assert.assertEquals(expected.getMaxValueLength(), underTest.getTagSpecification().getMaxValueLength());
+        assertEquals(expected.getKeyValidator(), underTest.getTagSpecification().getKeyValidator());
+        assertEquals(expected.getValueValidator(), underTest.getTagSpecification().getValueValidator());
+        assertEquals(expected.getMaxAmount(), underTest.getTagSpecification().getMaxAmount());
+        assertEquals(expected.getMaxKeyLength(), underTest.getTagSpecification().getMaxKeyLength());
+        assertEquals(expected.getMinKeyLength(), underTest.getTagSpecification().getMinKeyLength());
+        assertEquals(expected.getMinValueLength(), underTest.getTagSpecification().getMinValueLength());
+        assertEquals(expected.getMaxValueLength(), underTest.getTagSpecification().getMaxValueLength());
 
     }
 
     @Test
     public void testJsonFactory() {
-        Assert.assertEquals(JacksonFactory.getDefaultInstance(), underTest.jsonFactory());
+        assertEquals(JacksonFactory.getDefaultInstance(), underTest.jsonFactory());
     }
 
 }

@@ -1,21 +1,21 @@
 package com.sequenceiq.thunderhead.util;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.Map;
 import java.util.Properties;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class IniUtilTest {
+class IniUtilTest {
 
     private final IniUtil underTest = new IniUtil();
 
     @Test
-    public void testParseIniFromReader() throws IOException {
+    void testParseIniFromReader() throws IOException {
         // GIVEN
         StringReader srData = new StringReader("[default]\naltus_access_key_id=accesKey\naltus_private_key=privateKey");
         // WHEN

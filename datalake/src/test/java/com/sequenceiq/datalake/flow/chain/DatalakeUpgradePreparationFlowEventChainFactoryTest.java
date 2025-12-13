@@ -1,6 +1,8 @@
 package com.sequenceiq.datalake.flow.chain;
 
-import org.junit.jupiter.api.Assertions;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.datalake.flow.datalake.upgrade.event.DatalakeUpgradePreparationFlowChainStartEvent;
@@ -20,8 +22,8 @@ class DatalakeUpgradePreparationFlowEventChainFactoryTest {
 
         FlowTriggerEventQueue eventQueue = underTest.createFlowTriggerEventQueue(event);
 
-        Assertions.assertNotNull(eventQueue);
-        Assertions.assertEquals(2, eventQueue.getQueue().size());
+        assertNotNull(eventQueue);
+        assertEquals(2, eventQueue.getQueue().size());
         FlowChainConfigGraphGeneratorUtil.generateFor(underTest, FlowOfflineStateGraphGenerator.FLOW_CONFIGS_PACKAGE_NAME, eventQueue);
     }
 

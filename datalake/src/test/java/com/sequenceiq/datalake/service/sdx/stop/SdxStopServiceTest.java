@@ -3,6 +3,7 @@ package com.sequenceiq.datalake.service.sdx.stop;
 import static com.sequenceiq.datalake.service.sdx.stop.SdxStopService.UNSTOPPABLE_FLOWS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
@@ -19,7 +20,6 @@ import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -139,7 +139,7 @@ public class SdxStopServiceTest {
         doThrow(new ClientErrorException(Response.Status.BAD_REQUEST)).when(stackV4Endpoint)
                 .putStopInternal(eq(0L), eq(CLUSTER_NAME), nullable(String.class));
         when(sdxService.getById(CLUSTER_ID)).thenReturn(sdxCluster);
-        RuntimeException exception = Assertions.assertThrows(RuntimeException.class, () -> underTest.stop(CLUSTER_ID));
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> underTest.stop(CLUSTER_ID));
         assertEquals("Cannot stop cluster, error happened during operation: Error message: \"error\"", exception.getMessage());
     }
 
@@ -150,7 +150,7 @@ public class SdxStopServiceTest {
         doThrow(new WebApplicationException(Response.Status.INTERNAL_SERVER_ERROR)).when(stackV4Endpoint)
                 .putStopInternal(eq(0L), eq(CLUSTER_NAME), nullable(String.class));
         when(sdxService.getById(CLUSTER_ID)).thenReturn(sdxCluster);
-        RuntimeException exception = Assertions.assertThrows(RuntimeException.class, () -> underTest.stop(CLUSTER_ID));
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> underTest.stop(CLUSTER_ID));
         assertEquals("Cannot stop cluster, error happened during operation: error", exception.getMessage());
     }
 
@@ -160,7 +160,7 @@ public class SdxStopServiceTest {
         FlowLog flowLog = new FlowLog();
         when(flowLogService.getLastFlowLog(anyLong())).thenReturn(Optional.of(flowLog));
         when(flowChainLogService.getFlowChainType(any())).thenReturn(null);
-        Assertions.assertTrue(underTest.checkIfStoppable(sdxCluster).isEmpty());
+        assertTrue(underTest.checkIfStoppable(sdxCluster).isEmpty());
     }
 
     @Test
@@ -169,7 +169,7 @@ public class SdxStopServiceTest {
         FlowLog flowLog = new FlowLog();
         flowLog.setFinalized(true);
         when(flowLogService.getLastFlowLog(anyLong())).thenReturn(Optional.of(flowLog));
-        Assertions.assertTrue(underTest.checkIfStoppable(sdxCluster).isEmpty());
+        assertTrue(underTest.checkIfStoppable(sdxCluster).isEmpty());
     }
 
     private SdxCluster sdxCluster() {

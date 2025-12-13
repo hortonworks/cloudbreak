@@ -4,9 +4,9 @@ import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.IDBROKER;
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.MASTER;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 import static java.util.Objects.isNull;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -125,10 +125,10 @@ public class YcloudHybridCloudTest extends AbstractMockTest {
                 .then(this::checkEnvIsListedByNameAndParentName);
     }
 
-    private void createAndValidateChildEnvironment(MockedTestContext testContext)  {
+    private void createAndValidateChildEnvironment(MockedTestContext testContext) {
         testContext
                 .given(CHILD_ENVIRONMENT, EnvironmentTestDto.class)
-                    .withParentEnvironment()
+                .withParentEnvironment()
                 .when(environmentTestClient.create(), RunningParameter.key(CHILD_ENVIRONMENT))
                 .await(EnvironmentStatus.AVAILABLE, RunningParameter.key(CHILD_ENVIRONMENT))
                 .when(environmentTestClient.describe(), RunningParameter.key(CHILD_ENVIRONMENT))
@@ -147,7 +147,7 @@ public class YcloudHybridCloudTest extends AbstractMockTest {
 
         testContext
                 .given(StackMatrixTestDto.class)
-                    .withOs(CENTOS7)
+                .withOs(CENTOS7)
                 .when(utilTestClient.stackMatrixV4())
                 .then((tc, dto, client) -> {
                     ClouderaManagerStackDescriptorV4Response response = dto.getResponse().getCdh().get(commonClusterManagerProperties().getRuntimeVersion());
@@ -161,27 +161,27 @@ public class YcloudHybridCloudTest extends AbstractMockTest {
 
         testContext
                 .given(cmProduct, ClouderaManagerProductTestDto.class)
-                    .withName(CDH)
-                    .withVersion(validationParameters.get(CDH_VERSION_KEY))
-                    .withParcel(validationParameters.get(CDH_PARCEL_KEY))
+                .withName(CDH)
+                .withVersion(validationParameters.get(CDH_VERSION_KEY))
+                .withParcel(validationParameters.get(CDH_PARCEL_KEY))
                 .given(cmRepository, ClouderaManagerRepositoryTestDto.class)
-                    .withVersion(validationParameters.get(CM_VERSION_KEY))
-                    .withBaseUrl(validationParameters.get(CM_REPOSITORY_BASE_URL_KEY))
+                .withVersion(validationParameters.get(CM_VERSION_KEY))
+                .withBaseUrl(validationParameters.get(CM_REPOSITORY_BASE_URL_KEY))
                 .given(clouderaManager, ClouderaManagerTestDto.class)
-                    .withClouderaManagerProduct(cmProduct)
-                    .withClouderaManagerRepository(cmRepository)
+                .withClouderaManagerProduct(cmProduct)
+                .withClouderaManagerRepository(cmRepository)
                 .given(cluster, ClusterTestDto.class)
-                    .withBlueprintName(getDefaultSDXBlueprintName())
-                    .withValidateBlueprint(Boolean.FALSE)
-                    .withClouderaManager(clouderaManager)
+                .withBlueprintName(getDefaultSDXBlueprintName())
+                .withValidateBlueprint(Boolean.FALSE)
+                .withClouderaManager(clouderaManager)
                 .given(MASTER_INSTANCE_GROUP, InstanceGroupTestDto.class).withHostGroup(MASTER).withNodeCount(1)
                 .given(IDBROKER_INSTANCE_GROUP, InstanceGroupTestDto.class).withHostGroup(IDBROKER).withNodeCount(1)
                 .given(stack, StackTestDto.class)
-                    .withCluster(cluster)
-                    .withInstanceGroups(MASTER_INSTANCE_GROUP, IDBROKER_INSTANCE_GROUP)
+                .withCluster(cluster)
+                .withInstanceGroups(MASTER_INSTANCE_GROUP, IDBROKER_INSTANCE_GROUP)
                 .given(sdxInternal, SdxInternalTestDto.class)
-                    .withStackRequest(key(cluster), key(stack))
-                    .withEnvironmentKey(RunningParameter.key(CHILD_ENVIRONMENT))
+                .withStackRequest(key(cluster), key(stack))
+                .withEnvironmentKey(RunningParameter.key(CHILD_ENVIRONMENT))
                 .when(sdxTestClient.createInternal(), key(sdxInternal))
                 .await(SdxClusterStatusResponse.RUNNING)
                 .then(this::validateRequestParameters)
@@ -236,7 +236,7 @@ public class YcloudHybridCloudTest extends AbstractMockTest {
 
     private void validateInstanceGroups(List<InstanceGroupV4Request> instanceGroups) {
         assertNotNull(instanceGroups);
-        assertEquals("The result instance group list has " + instanceGroups.size() + " items instead of 2", 2, instanceGroups.size());
+        assertEquals(2, instanceGroups.size(), "The result instance group list has " + instanceGroups.size() + " items instead of 2");
         Set<String> groups = instanceGroups.stream()
                 .map(InstanceGroupV4Request::getName)
                 .collect(Collectors.toSet());
@@ -251,7 +251,7 @@ public class YcloudHybridCloudTest extends AbstractMockTest {
 
     private void validateProducts(List<ClouderaManagerProductV4Request> products) {
         assertNotNull(products);
-        assertEquals("The result product list has " + products.size() + " items instead of 1", 1, products.size());
+        assertEquals(1, products.size(), "The result product list has " + products.size() + " items instead of 1");
         assertEquals(CDH, products.get(0).getName());
         assertEquals(validationParameters.get(CDH_VERSION_KEY), products.get(0).getVersion());
         assertEquals(validationParameters.get(CDH_PARCEL_KEY), products.get(0).getParcel());

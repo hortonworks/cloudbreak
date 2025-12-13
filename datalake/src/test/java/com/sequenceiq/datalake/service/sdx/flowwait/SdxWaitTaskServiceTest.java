@@ -1,5 +1,6 @@
 package com.sequenceiq.datalake.service.sdx.flowwait;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.verify;
@@ -7,7 +8,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.concurrent.TimeUnit;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -70,7 +70,7 @@ public class SdxWaitTaskServiceTest {
             setupPolling(polling);
             doThrow(new PollerException()).when(pollingOptions).run(sdxWaitTask);
 
-            Assertions.assertThrows(SdxWaitException.class, () -> {
+            assertThrows(SdxWaitException.class, () -> {
                 underTest.waitFor(sdxWaitTask);
             });
 

@@ -12,11 +12,11 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -28,8 +28,8 @@ import org.springframework.web.client.RestTemplate;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 
-@RunWith(MockitoJUnitRunner.class)
-public class ClusterProxyRegistrationClientTest {
+@ExtendWith(MockitoExtension.class)
+class ClusterProxyRegistrationClientTest {
     private static final String STACK_CRN = "stack-crn";
 
     private static final String ENVIORONMENT_CRN = "environment-crn";
@@ -52,7 +52,7 @@ public class ClusterProxyRegistrationClientTest {
 
     private ClusterProxyRegistrationClient service;
 
-    @Before
+    @BeforeEach
     public void setup() {
         RestTemplate restTemplate = new RestTemplate();
         mockServer = MockRestServiceServer.createServer(restTemplate);
@@ -68,7 +68,7 @@ public class ClusterProxyRegistrationClientTest {
     }
 
     @Test
-    public void shouldRegisterProxyConfigurationWithClusterProxy() throws URISyntaxException, JsonProcessingException {
+    void shouldRegisterProxyConfigurationWithClusterProxy() throws URISyntaxException, JsonProcessingException {
         ClusterServiceConfig clusterServiceConfig = clusterServiceConfig();
         ConfigRegistrationRequest request = configRegistrationRequest(STACK_CRN, ENVIORONMENT_CRN, CLUSTER_ID, clusterServiceConfig, CERTIFICATES);
 
@@ -86,7 +86,7 @@ public class ClusterProxyRegistrationClientTest {
     }
 
     @Test
-    public void shouldUpdateKnoxUrlWithClusterProxy() throws URISyntaxException, JsonProcessingException {
+    void shouldUpdateKnoxUrlWithClusterProxy() throws URISyntaxException, JsonProcessingException {
         ConfigUpdateRequest request = configUpdateRequest(STACK_CRN, KNOX_URI);
         mockServer.expect(once(), MockRestRequestMatchers.requestTo(new URI(CLUSTER_PROXY_URL + UPDATE_CONFIG_PATH)))
                 .andExpect(content().json(JsonUtil.writeValueAsStringSilent(request)))
@@ -97,7 +97,7 @@ public class ClusterProxyRegistrationClientTest {
     }
 
     @Test
-    public void shouldDeregisterCluster() throws URISyntaxException, JsonProcessingException {
+    void shouldDeregisterCluster() throws URISyntaxException, JsonProcessingException {
         ConfigDeleteRequest request = new ConfigDeleteRequest(STACK_CRN);
         mockServer.expect(once(), MockRestRequestMatchers.requestTo(new URI(CLUSTER_PROXY_URL + REMOVE_CONFIG_PATH)))
                 .andExpect(content().json(JsonUtil.writeValueAsStringSilent(request)))
@@ -125,7 +125,7 @@ public class ClusterProxyRegistrationClientTest {
         return new ConfigUpdateRequest(stackCrn, knoxUri);
     }
 
-    @After
+    @AfterEach
     public void teardown() {
         mockServer.verify();
     }

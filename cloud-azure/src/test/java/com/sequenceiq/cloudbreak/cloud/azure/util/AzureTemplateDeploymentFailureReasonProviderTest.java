@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -15,7 +16,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.azure.core.management.exception.ManagementException;
@@ -113,7 +113,7 @@ class AzureTemplateDeploymentFailureReasonProviderTest {
     }
 
     private DeploymentOperation createDeploymentOperation(String status, String message) {
-        DeploymentOperation deploymentOperation = Mockito.mock(DeploymentOperation.class);
+        DeploymentOperation deploymentOperation = mock(DeploymentOperation.class);
         when(deploymentOperation.provisioningState()).thenReturn(status);
         lenient().when(deploymentOperation.statusMessage()).thenReturn(message);
         return deploymentOperation;

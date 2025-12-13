@@ -1,24 +1,24 @@
 package com.sequenceiq.cloudbreak.orchestrator.yarn.model.response;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class CreateApplicationResponseTest {
+class CreateApplicationResponseTest {
 
     private static final String URI = "/services/v1/applications/demo-app";
 
     private static final String STATE = "ACCEPTED";
 
     @Test
-    public void testUri() {
+    void testUri() {
         CreateApplicationResponse createApplicationResponse = new CreateApplicationResponse();
         createApplicationResponse.setUri(URI);
         assertEquals(URI, createApplicationResponse.getUri());
     }
 
     @Test
-    public void testState() {
+    void testState() {
         CreateApplicationResponse createApplicationResponse = new CreateApplicationResponse();
         createApplicationResponse.setState(STATE);
         assertEquals(STATE, createApplicationResponse.getState());

@@ -1,9 +1,12 @@
 package com.sequenceiq.cloudbreak.converter.v4.blueprint;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.util.List;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.BlueprintV4Response;
@@ -12,28 +15,28 @@ import com.sequenceiq.cloudbreak.common.json.JsonToString;
 import com.sequenceiq.cloudbreak.converter.AbstractEntityConverterTest;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 
-public class BlueprintToBlueprintV4ResponseConverterTest extends AbstractEntityConverterTest<Blueprint> {
+class BlueprintToBlueprintV4ResponseConverterTest extends AbstractEntityConverterTest<Blueprint> {
 
     private static final JsonToString JSON_TO_STRING = new JsonToString();
 
     private BlueprintToBlueprintV4ResponseConverter underTest = new BlueprintToBlueprintV4ResponseConverter();
 
     @Test
-    public void testConvert() {
+    void testConvert() {
         BlueprintV4Response result = underTest.convert(createSource());
         assertAllFieldsNotNull(result, List.of("created"));
     }
 
     @Test
-    public void testConvertContainsEmptyMapInTagsProperty() {
+    void testConvertContainsEmptyMapInTagsProperty() {
         Blueprint source = createSource();
         source.setTags(new Json(""));
         BlueprintV4Response result = underTest.convert(source);
-        Assert.assertTrue(result.getTags().isEmpty());
+        assertTrue(result.getTags().isEmpty());
     }
 
     @Test
-    public void testConvertContainsExpectedSingleKeyValuePairInTagsProperty() {
+    void testConvertContainsExpectedSingleKeyValuePairInTagsProperty() {
         String key = "name";
         String name = "greg";
         Blueprint source = createSource();
@@ -41,14 +44,14 @@ public class BlueprintToBlueprintV4ResponseConverterTest extends AbstractEntityC
 
         BlueprintV4Response result = underTest.convert(source);
 
-        Assert.assertNotNull(result.getTags());
-        Assert.assertTrue(result.getTags().containsKey(key));
-        Assert.assertNotNull(result.getTags().get(key));
-        Assert.assertEquals(name, result.getTags().get(key));
+        assertNotNull(result.getTags());
+        assertTrue(result.getTags().containsKey(key));
+        assertNotNull(result.getTags().get(key));
+        assertEquals(name, result.getTags().get(key));
     }
 
     @Test
-    public void testConvertContainsExpectedMultipleKeyValuePairInTagsProperty() {
+    void testConvertContainsExpectedMultipleKeyValuePairInTagsProperty() {
         String nameKey = "name";
         String nameValue = "test";
         String ageKey = "address";
@@ -58,17 +61,17 @@ public class BlueprintToBlueprintV4ResponseConverterTest extends AbstractEntityC
 
         BlueprintV4Response result = underTest.convert(source);
 
-        Assert.assertNotNull(result.getTags());
-        Assert.assertTrue(result.getTags().containsKey(nameKey));
-        Assert.assertTrue(result.getTags().containsKey(ageKey));
-        Assert.assertNotNull(result.getTags().get(nameKey));
-        Assert.assertNotNull(result.getTags().get(ageKey));
-        Assert.assertEquals(nameValue, result.getTags().get(nameKey));
-        Assert.assertEquals(ageValue, result.getTags().get(ageKey));
+        assertNotNull(result.getTags());
+        assertTrue(result.getTags().containsKey(nameKey));
+        assertTrue(result.getTags().containsKey(ageKey));
+        assertNotNull(result.getTags().get(nameKey));
+        assertNotNull(result.getTags().get(ageKey));
+        assertEquals(nameValue, result.getTags().get(nameKey));
+        assertEquals(ageValue, result.getTags().get(ageKey));
     }
 
     @Test
-    public void testConvertContainsExpectedMultipleKeyValuePairWhenItsTypesAreDifferentInTagsProperty() {
+    void testConvertContainsExpectedMultipleKeyValuePairWhenItsTypesAreDifferentInTagsProperty() {
         String nameKey = "name";
         String nameValue = "test";
         String intKey = "number";
@@ -78,52 +81,52 @@ public class BlueprintToBlueprintV4ResponseConverterTest extends AbstractEntityC
 
         BlueprintV4Response result = underTest.convert(source);
 
-        Assert.assertNotNull(result.getTags());
-        Assert.assertTrue(result.getTags().containsKey(nameKey));
-        Assert.assertTrue(result.getTags().containsKey(intKey));
-        Assert.assertNotNull(result.getTags().get(nameKey));
-        Assert.assertNotNull(result.getTags().get(intKey));
-        Assert.assertEquals(nameValue, result.getTags().get(nameKey));
-        Assert.assertEquals(intValue, result.getTags().get(intKey));
+        assertNotNull(result.getTags());
+        assertTrue(result.getTags().containsKey(nameKey));
+        assertTrue(result.getTags().containsKey(intKey));
+        assertNotNull(result.getTags().get(nameKey));
+        assertNotNull(result.getTags().get(intKey));
+        assertEquals(nameValue, result.getTags().get(nameKey));
+        assertEquals(intValue, result.getTags().get(intKey));
     }
 
     @Test
-    public void testConvertWhereEveryDataHasTransferredCorrectlyToResponseAndEntityDescriptionIsNullThenResultDescriptionShouldBeEmpty() {
+    void testConvertWhereEveryDataHasTransferredCorrectlyToResponseAndEntityDescriptionIsNullThenResultDescriptionShouldBeEmpty() {
         Blueprint source = createSource();
         source.setDescription(null);
         source.setTags(JSON_TO_STRING.convertToEntityAttribute("{}"));
 
         BlueprintV4Response result = underTest.convert(source);
 
-        Assert.assertNotNull(result);
-        Assert.assertEquals(source.getResourceCrn(), result.getCrn());
-        Assert.assertEquals(source.getName(), result.getName());
-        Assert.assertNotNull(result.getDescription());
-        Assert.assertTrue(result.getDescription().isEmpty());
-        Assert.assertEquals(Integer.valueOf(source.getHostGroupCount()), result.getHostGroupCount());
-        Assert.assertEquals(source.getStatus(), result.getStatus());
-        Assert.assertNotNull(result.getTags());
-        Assert.assertTrue(result.getTags().isEmpty());
-        Assert.assertEquals(source.getBlueprintJsonText(), result.getBlueprint());
+        assertNotNull(result);
+        assertEquals(source.getResourceCrn(), result.getCrn());
+        assertEquals(source.getName(), result.getName());
+        assertNotNull(result.getDescription());
+        assertTrue(result.getDescription().isEmpty());
+        assertEquals(Integer.valueOf(source.getHostGroupCount()), result.getHostGroupCount());
+        assertEquals(source.getStatus(), result.getStatus());
+        assertNotNull(result.getTags());
+        assertTrue(result.getTags().isEmpty());
+        assertEquals(source.getBlueprintJsonText(), result.getBlueprint());
     }
 
     @Test
-    public void testConvertWhereEveryDataHasTransferredCorrectlyToResponseAndEntityDescriptionIsNotNullThenResultDescriptionShouldBeEmpty() {
+    void testConvertWhereEveryDataHasTransferredCorrectlyToResponseAndEntityDescriptionIsNotNullThenResultDescriptionShouldBeEmpty() {
         Blueprint source = createSource();
         source.setDescription("some description");
         source.setTags(JSON_TO_STRING.convertToEntityAttribute("{}"));
 
         BlueprintV4Response result = underTest.convert(source);
 
-        Assert.assertNotNull(result);
-        Assert.assertEquals(source.getResourceCrn(), result.getCrn());
-        Assert.assertEquals(source.getName(), result.getName());
-        Assert.assertEquals(source.getDescription(), result.getDescription());
-        Assert.assertEquals(Integer.valueOf(source.getHostGroupCount()), result.getHostGroupCount());
-        Assert.assertEquals(source.getStatus(), result.getStatus());
-        Assert.assertNotNull(result.getTags());
-        Assert.assertTrue(result.getTags().isEmpty());
-        Assert.assertEquals(source.getBlueprintJsonText(), result.getBlueprint());
+        assertNotNull(result);
+        assertEquals(source.getResourceCrn(), result.getCrn());
+        assertEquals(source.getName(), result.getName());
+        assertEquals(source.getDescription(), result.getDescription());
+        assertEquals(Integer.valueOf(source.getHostGroupCount()), result.getHostGroupCount());
+        assertEquals(source.getStatus(), result.getStatus());
+        assertNotNull(result.getTags());
+        assertTrue(result.getTags().isEmpty());
+        assertEquals(source.getBlueprintJsonText(), result.getBlueprint());
     }
 
     @Override

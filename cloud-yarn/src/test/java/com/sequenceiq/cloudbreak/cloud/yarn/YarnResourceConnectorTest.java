@@ -1,9 +1,9 @@
 package com.sequenceiq.cloudbreak.cloud.yarn;
 
 import static com.sequenceiq.common.api.type.ResourceType.YARN_APPLICATION;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -18,12 +18,12 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
@@ -54,8 +54,8 @@ import com.sequenceiq.common.api.type.AdjustmentType;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 
-@RunWith(MockitoJUnitRunner.class)
-public class YarnResourceConnectorTest {
+@ExtendWith(MockitoExtension.class)
+class YarnResourceConnectorTest {
 
     private static final String USER_NAME = "horton@hortonworks.com";
 
@@ -109,7 +109,7 @@ public class YarnResourceConnectorTest {
     private YarnApplicationCreationService yarnApplicationCreationService;
 
     @Test
-    public void testLaunchWithStackDefaultParameters() throws Exception {
+    void testLaunchWithStackDefaultParameters() throws Exception {
         ArgumentCaptor<CreateApplicationRequest> createRequestCaptor = ArgumentCaptor.forClass(CreateApplicationRequest.class);
         ArgumentCaptor<ApplicationDetailRequest> requestCaptor = ArgumentCaptor.forClass(ApplicationDetailRequest.class);
 
@@ -126,7 +126,7 @@ public class YarnResourceConnectorTest {
     }
 
     @Test
-    public void testLaunch() throws Exception {
+    void testLaunch() throws Exception {
         ArgumentCaptor<CreateApplicationRequest> createRequestCaptor = ArgumentCaptor.forClass(CreateApplicationRequest.class);
         ArgumentCaptor<ApplicationDetailRequest> requestCaptor = ArgumentCaptor.forClass(ApplicationDetailRequest.class);
 
@@ -284,7 +284,7 @@ public class YarnResourceConnectorTest {
     }
 
     @Test
-    public void testLaunchApplicationAlreadyCreated() throws Exception {
+    void testLaunchApplicationAlreadyCreated() throws Exception {
         when(authenticatedContextMock.getCloudContext()).thenReturn(
                 CloudContext.Builder.builder()
                         .withId(1L)

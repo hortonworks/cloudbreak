@@ -15,10 +15,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
@@ -32,17 +32,17 @@ import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 
-@RunWith(MockitoJUnitRunner.class)
-public class ProfilerMetricsRoleConfigProviderTest {
+@ExtendWith(MockitoExtension.class)
+class ProfilerMetricsRoleConfigProviderTest {
     private ProfilerMetricsRoleConfigProvider underTest;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         underTest = new ProfilerMetricsRoleConfigProvider();
     }
 
     @Test
-    public void testGetRoleConfigsWithSingleRolesPerHostGroup() {
+    void testGetRoleConfigsWithSingleRolesPerHostGroup() {
         TemplatePreparationObject preparationObject = getTemplatePreparationObject(RdsSslMode.DISABLED);
         String inputJson = getBlueprintText("input/clouderamanager-db-config.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
@@ -73,7 +73,7 @@ public class ProfilerMetricsRoleConfigProviderTest {
     }
 
     @Test
-    public void testGetRoleConfigsWithSingleRolesPerHostGroupWithSSL() {
+    void testGetRoleConfigsWithSingleRolesPerHostGroupWithSSL() {
         TemplatePreparationObject preparationObject = getTemplatePreparationObject(RdsSslMode.ENABLED);
         String inputJson = getBlueprintText("input/clouderamanager-db-config.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
@@ -115,7 +115,7 @@ public class ProfilerMetricsRoleConfigProviderTest {
     }
 
     @Test
-    public void testGetRoleConfigsInGatewayHostGroup() {
+    void testGetRoleConfigsInGatewayHostGroup() {
         HostgroupView master = new HostgroupView("master", 1, InstanceGroupType.CORE, 1);
         HostgroupView gateway = new HostgroupView("gateway", 1, InstanceGroupType.GATEWAY, 1);
 

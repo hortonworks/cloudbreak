@@ -1,13 +1,15 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.kafka;
 
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.stream.Stream;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -44,7 +46,7 @@ class KafkaDelegationTokenConfigProviderTest {
 
         boolean result = underTest.isConfigurationNeeded(cmTemplateProcessor, templatePreparationObject);
 
-        Assertions.assertFalse(result);
+        assertFalse(result);
     }
 
     @Test
@@ -53,7 +55,7 @@ class KafkaDelegationTokenConfigProviderTest {
 
         boolean result = underTest.isConfigurationNeeded(null, templatePreparationObject);
 
-        Assertions.assertFalse(result);
+        assertFalse(result);
     }
 
     @Test
@@ -70,7 +72,7 @@ class KafkaDelegationTokenConfigProviderTest {
 
         boolean result = underTest.isConfigurationNeeded(cmTemplateProcessor, templatePreparationObject);
 
-        Assertions.assertTrue(result);
+        assertTrue(result);
     }
 
     @Test
@@ -82,6 +84,6 @@ class KafkaDelegationTokenConfigProviderTest {
         List<ApiClusterTemplateConfig> result = underTest.getServiceConfigs(cmTemplateProcessor, templatePreparationObject);
         List<ApiClusterTemplateConfig> expected = List.of(config(KafkaConfigs.DELEGATION_TOKEN_ENABLE, "true"));
 
-        Assertions.assertEquals(expected, result);
+        assertEquals(expected, result);
     }
 }

@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak;
 
 import static java.lang.System.lineSeparator;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -13,17 +14,16 @@ import java.util.stream.Stream;
 
 import jakarta.persistence.Convert;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.reflections.Reflections;
 import org.reflections.scanners.FieldAnnotationsScanner;
 
 import com.sequenceiq.cloudbreak.converter.DefaultEnumConverter;
 
-public class DefaultEnumConverterCompatibilityTest {
+class DefaultEnumConverterCompatibilityTest {
 
     @Test
-    public void testDefaultEnumConverterCompatibility() {
+    void testDefaultEnumConverterCompatibility() {
         Reflections reflections = new Reflections("com.sequenceiq",
                 new FieldAnnotationsScanner());
 
@@ -53,7 +53,7 @@ public class DefaultEnumConverterCompatibilityTest {
             fields.add(key + ": " + String.join(", ", value));
         });
 
-        Assert.assertTrue(String.format("Classes with incompatible DefaultEnumConverter: %s%s", lineSeparator(),
-                        String.join(lineSeparator(), fields)), incompatibleFields.isEmpty());
+        assertTrue(incompatibleFields.isEmpty(), String.format("Classes with incompatible DefaultEnumConverter: %s%s", lineSeparator(),
+                        String.join(lineSeparator(), fields)));
     }
 }

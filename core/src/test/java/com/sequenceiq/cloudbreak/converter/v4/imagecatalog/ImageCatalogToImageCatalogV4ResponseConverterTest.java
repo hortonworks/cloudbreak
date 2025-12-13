@@ -1,8 +1,9 @@
 package com.sequenceiq.cloudbreak.converter.v4.imagecatalog;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 import jakarta.inject.Inject;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -41,7 +42,7 @@ public class ImageCatalogToImageCatalogV4ResponseConverterTest {
 
     @Test
     public void testImageCatalogResponseHasCreated() {
-        Assertions.assertNotNull(converterUnderTest.convert(IMAGE_CATALOG).getCreated());
+        assertNotNull(converterUnderTest.convert(IMAGE_CATALOG).getCreated());
     }
 
     @Configuration

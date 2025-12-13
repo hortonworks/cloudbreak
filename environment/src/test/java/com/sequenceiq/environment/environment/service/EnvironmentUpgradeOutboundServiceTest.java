@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
@@ -15,7 +16,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
@@ -50,7 +50,7 @@ class EnvironmentUpgradeOutboundServiceTest {
         stackResponse.setStackOutboundTypeMap(Map.of("cluster1", OutboundType.PUBLIC_IP));
         stackResponse.setMessage(VALIDATION_MESSAGE);
 
-        try (MockedStatic<ThreadBasedUserCrnProvider> userCrnProviderMock = Mockito.mockStatic(ThreadBasedUserCrnProvider.class)) {
+        try (MockedStatic<ThreadBasedUserCrnProvider> userCrnProviderMock = mockStatic(ThreadBasedUserCrnProvider.class)) {
             userCrnProviderMock.when(ThreadBasedUserCrnProvider::getUserCrn).thenReturn(USER_CRN);
             userCrnProviderMock.when(() -> ThreadBasedUserCrnProvider.doAsInternalActor(any(Supplier.class)))
                     .thenAnswer(invocation -> ((Supplier<?>) invocation.getArgument(0)).get());
@@ -75,7 +75,7 @@ class EnvironmentUpgradeOutboundServiceTest {
         stackResponse.setStackOutboundTypeMap(null);
         stackResponse.setMessage(null);
 
-        try (MockedStatic<ThreadBasedUserCrnProvider> userCrnProviderMock = Mockito.mockStatic(ThreadBasedUserCrnProvider.class)) {
+        try (MockedStatic<ThreadBasedUserCrnProvider> userCrnProviderMock = mockStatic(ThreadBasedUserCrnProvider.class)) {
             userCrnProviderMock.when(ThreadBasedUserCrnProvider::getUserCrn).thenReturn(USER_CRN);
             userCrnProviderMock.when(() -> ThreadBasedUserCrnProvider.doAsInternalActor(any(Supplier.class)))
                     .thenAnswer(invocation -> ((Supplier<?>) invocation.getArgument(0)).get());
@@ -100,7 +100,7 @@ class EnvironmentUpgradeOutboundServiceTest {
         stackResponse.setStackOutboundTypeMap(Map.of());
         stackResponse.setMessage(VALIDATION_MESSAGE);
 
-        try (MockedStatic<ThreadBasedUserCrnProvider> userCrnProviderMock = Mockito.mockStatic(ThreadBasedUserCrnProvider.class)) {
+        try (MockedStatic<ThreadBasedUserCrnProvider> userCrnProviderMock = mockStatic(ThreadBasedUserCrnProvider.class)) {
             userCrnProviderMock.when(ThreadBasedUserCrnProvider::getUserCrn).thenReturn(USER_CRN);
             userCrnProviderMock.when(() -> ThreadBasedUserCrnProvider.doAsInternalActor(any(Supplier.class)))
                     .thenAnswer(invocation -> ((Supplier<?>) invocation.getArgument(0)).get());

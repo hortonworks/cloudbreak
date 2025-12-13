@@ -7,6 +7,7 @@ import static com.sequenceiq.cloudbreak.cloud.azure.image.marketplace.AzureImage
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -20,7 +21,6 @@ import static org.mockito.Mockito.when;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -117,7 +117,7 @@ public class AzureImageFormatValidatorTest {
                 .build();
         when(entitlementService.azureOnlyMarketplaceImagesEnabled(TEST_ACCOUNT_ID)).thenReturn(true);
 
-        CloudConnectorException exception = Assertions.assertThrows(CloudConnectorException.class,
+        CloudConnectorException exception = assertThrows(CloudConnectorException.class,
                 () -> ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.validate(authenticatedContext, cloudStack)));
 
         String expected = "Your image https://cldrwestus2.blob.core.windows.net/images/cb-cdh-726-210326090153.vhd seems to be a VHD image, " +
@@ -137,7 +137,7 @@ public class AzureImageFormatValidatorTest {
 
         when(entitlementService.azureMarketplaceImagesEnabled(TEST_ACCOUNT_ID)).thenReturn(false);
 
-        Assertions.assertThrows(CloudConnectorException.class,
+        assertThrows(CloudConnectorException.class,
                 () -> ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN,
                         () -> ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.validate(authenticatedContext, cloudStack))));
         verify(azureImageTermsSignerService, never()).getImageTermStatus(eq(AZURE_SUBSCRIPTION_ID), any(), any());
@@ -170,7 +170,7 @@ public class AzureImageFormatValidatorTest {
         when(entitlementService.azureMarketplaceImagesEnabled(TEST_ACCOUNT_ID)).thenReturn(true);
         when(azureImageTermsSignerService.getImageTermStatus(anyString(), any(), any())).thenReturn(NOT_ACCEPTED);
 
-        CloudPlatformValidationWarningException exception = Assertions.assertThrows(CloudPlatformValidationWarningException.class,
+        CloudPlatformValidationWarningException exception = assertThrows(CloudPlatformValidationWarningException.class,
                 () -> ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.validate(authenticatedContext, cloudStack)));
 
         assertEquals(WARN_NON_ACCEPTED, exception.getMessage());
@@ -195,17 +195,17 @@ public class AzureImageFormatValidatorTest {
 
         switch (expectedResult) {
             case FAIL -> {
-                exception = Assertions.assertThrows(CloudConnectorException.class,
+                exception = assertThrows(CloudConnectorException.class,
                         () -> ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.validate(authenticatedContext, cloudStack)));
                 assertEquals(FAIL, exception.getMessage());
             }
             case WARN_NON_ACCEPTED -> {
-                exception = Assertions.assertThrows(CloudPlatformValidationWarningException.class,
+                exception = assertThrows(CloudPlatformValidationWarningException.class,
                         () -> ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.validate(authenticatedContext, cloudStack)));
                 assertEquals(WARN_NON_ACCEPTED, exception.getMessage());
             }
             case WARN_NON_READABLE -> {
-                exception = Assertions.assertThrows(CloudPlatformValidationWarningException.class,
+                exception = assertThrows(CloudPlatformValidationWarningException.class,
                         () -> ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.validate(authenticatedContext, cloudStack)));
                 assertEquals(WARN_NON_READABLE, exception.getMessage());
             }
@@ -245,7 +245,7 @@ public class AzureImageFormatValidatorTest {
                 .image(image)
                 .build();
 
-        CloudConnectorException exception = Assertions.assertThrows(CloudConnectorException.class,
+        CloudConnectorException exception = assertThrows(CloudConnectorException.class,
                 () -> ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.validate(authenticatedContext, cloudStack)));
         String expected = "Your image name cldrwestus2.blob.core.windows.net/images/cb-cdh-726-210326090153.vhd\" is invalid. " +
                 "Please check the desired format in the documentation!";

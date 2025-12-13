@@ -2,6 +2,7 @@ package com.sequenceiq.redbeams.configuration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
 
 import java.security.cert.X509Certificate;
 import java.util.Date;
@@ -9,7 +10,6 @@ import java.util.Date;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.mockito.Mockito;
 
 class SslCertificateEntryTest {
 
@@ -25,7 +25,7 @@ class SslCertificateEntryTest {
 
     private static final String AWS = "aws";
 
-    private static final X509Certificate X_509_CERT = Mockito.mock(X509Certificate.class);
+    private static final X509Certificate X_509_CERT = mock(X509Certificate.class);
 
     private static final int VERSION_0 = 0;
 

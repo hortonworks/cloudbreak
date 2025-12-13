@@ -110,7 +110,6 @@ ext {
   assertjVersion = '3.21.0'
   awaitilityVersion = '3.1.6'
   hamcrestVersion = '2.2'
-  junitVersion = '4.13.2'
   junitJupiterVersion = '5.10.0'
   mockitoVersion = '5.1.1'
   mockitoInlineVersion = '5.1.1'

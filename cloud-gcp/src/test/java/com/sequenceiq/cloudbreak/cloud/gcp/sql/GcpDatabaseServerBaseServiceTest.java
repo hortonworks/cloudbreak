@@ -1,12 +1,13 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.sql;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
 
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -27,15 +28,15 @@ public class GcpDatabaseServerBaseServiceTest {
 
     @Test
     public void testResourceType() {
-        Assert.assertTrue(underTest.resourceType().equals(ResourceType.GCP_DATABASE));
+        assertTrue(underTest.resourceType().equals(ResourceType.GCP_DATABASE));
     }
 
     @Test
     public void testGetDatabaseCloudResource() {
         CloudResource gcpDatabase = underTest.getDatabaseCloudResource("test", "az1");
 
-        Assert.assertEquals(ResourceType.GCP_DATABASE, gcpDatabase.getType());
-        Assert.assertEquals("test", gcpDatabase.getName());
+        assertEquals(ResourceType.GCP_DATABASE, gcpDatabase.getType());
+        assertEquals("test", gcpDatabase.getName());
     }
 
     @Test
@@ -48,7 +49,7 @@ public class GcpDatabaseServerBaseServiceTest {
 
         String result = underTest.checkException(googleJsonResponseException);
 
-        Assert.assertEquals("error", result);
+        assertEquals("error", result);
     }
 
     @Test
@@ -67,7 +68,7 @@ public class GcpDatabaseServerBaseServiceTest {
 
         GcpResourceException gcpResourceException = assertThrows(GcpResourceException.class,
                 () -> underTest.verifyOperation(operation, List.of(cloudResource)));
-        Assert.assertEquals("Failed to execute database operation: error1,: [ resourceType: GCP_DATABASE,  resourceName: google-resource ]",
+        assertEquals("Failed to execute database operation: error1,: [ resourceType: GCP_DATABASE,  resourceName: google-resource ]",
                 gcpResourceException.getMessage());
     }
 

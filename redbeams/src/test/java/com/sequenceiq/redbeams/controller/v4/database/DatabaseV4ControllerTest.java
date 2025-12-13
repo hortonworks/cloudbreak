@@ -1,19 +1,20 @@
 package com.sequenceiq.redbeams.controller.v4.database;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
@@ -25,7 +26,8 @@ import com.sequenceiq.redbeams.converter.database.DatabaseV4RequestToDatabaseCon
 import com.sequenceiq.redbeams.domain.DatabaseConfig;
 import com.sequenceiq.redbeams.service.dbconfig.DatabaseConfigService;
 
-public class DatabaseV4ControllerTest {
+@ExtendWith(MockitoExtension.class)
+class DatabaseV4ControllerTest {
 
     private static final Crn CRN = CrnTestUtil.getDatabaseCrnBuilder()
             .setAccountId("account")
@@ -60,10 +62,8 @@ public class DatabaseV4ControllerTest {
 
     private DatabaseV4Response response2;
 
-    @Before
+    @BeforeEach
     public void setUp() {
-        initMocks(this);
-
         db = new DatabaseConfig();
         db.setId(1L);
         db.setName(DB_NAME);
@@ -84,10 +84,9 @@ public class DatabaseV4ControllerTest {
     }
 
     @Test
-    public void testList() {
+    void testList() {
         Set<DatabaseConfig> dbSet = Collections.singleton(db);
         when(service.findAll(ENVIRONMENT_CRN)).thenReturn(dbSet);
-        when(databaseV4RequestToDatabaseConfigConverter.convert(any())).thenReturn(db);
 
         DatabaseV4Responses responses = underTest.list(ENVIRONMENT_CRN);
 
@@ -95,7 +94,7 @@ public class DatabaseV4ControllerTest {
     }
 
     @Test
-    public void testGetByCrn() {
+    void testGetByCrn() {
         when(service.getByCrn(DB_CRN)).thenReturn(db);
         when(databaseConfigToDatabaseV4ResponseConverter.convert(any())).thenReturn(new DatabaseV4Response());
 
@@ -105,7 +104,7 @@ public class DatabaseV4ControllerTest {
     }
 
     @Test
-    public void testGetByName() {
+    void testGetByName() {
         when(service.getByName(DB_NAME, ENVIRONMENT_CRN)).thenReturn(db);
         when(databaseConfigToDatabaseV4ResponseConverter.convert(any())).thenReturn(new DatabaseV4Response());
 
@@ -115,7 +114,7 @@ public class DatabaseV4ControllerTest {
     }
 
     @Test
-    public void testRegister() {
+    void testRegister() {
         when(databaseV4RequestToDatabaseConfigConverter.convert(any())).thenReturn(db);
         when(service.register(db, false)).thenReturn(db);
         when(databaseConfigToDatabaseV4ResponseConverter.convert(db)).thenReturn(response);
@@ -126,7 +125,7 @@ public class DatabaseV4ControllerTest {
     }
 
     @Test
-    public void testDeleteByCrn() {
+    void testDeleteByCrn() {
         when(service.deleteByCrn(DB_CRN)).thenReturn(db);
         when(databaseConfigToDatabaseV4ResponseConverter.convert(db)).thenReturn(response);
 
@@ -136,7 +135,7 @@ public class DatabaseV4ControllerTest {
     }
 
     @Test
-    public void testDeleteByName() {
+    void testDeleteByName() {
         when(service.deleteByName(DB_NAME, ENVIRONMENT_CRN)).thenReturn(db);
         when(databaseConfigToDatabaseV4ResponseConverter.convert(db)).thenReturn(response);
 
@@ -146,7 +145,7 @@ public class DatabaseV4ControllerTest {
     }
 
     @Test
-    public void testDeleteMultiple() {
+    void testDeleteMultiple() {
         Set<String> crnSet = new HashSet<>();
         crnSet.add(DB_CRN);
         crnSet.add(DB_CRN + "2");

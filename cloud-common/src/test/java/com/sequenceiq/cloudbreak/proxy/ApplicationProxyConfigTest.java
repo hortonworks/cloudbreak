@@ -1,20 +1,20 @@
 package com.sequenceiq.cloudbreak.proxy;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
-@RunWith(MockitoJUnitRunner.class)
-public class ApplicationProxyConfigTest {
+@ExtendWith(MockitoExtension.class)
+class ApplicationProxyConfigTest {
 
     private final ApplicationProxyConfig proxyConfig = new ApplicationProxyConfig();
 
     @Test
-    public void testIsUseProxyForClusterConnectionWhenProxyProvided() {
+    void testIsUseProxyForClusterConnectionWhenProxyProvided() {
         ReflectionTestUtils.setField(proxyConfig, "httpsProxyHost", "10.0.0.2");
         ReflectionTestUtils.setField(proxyConfig, "httpsProxyPort", "3128");
         ReflectionTestUtils.setField(proxyConfig, "useProxyForClusterConnection", true);
@@ -25,7 +25,7 @@ public class ApplicationProxyConfigTest {
     }
 
     @Test
-    public void testIsUseProxyForClusterConnectionWhenProxyProvidedButClusterInSameVnet() {
+    void testIsUseProxyForClusterConnectionWhenProxyProvidedButClusterInSameVnet() {
         ReflectionTestUtils.setField(proxyConfig, "httpsProxyHost", "10.0.0.2");
         ReflectionTestUtils.setField(proxyConfig, "httpsProxyPort", "3128");
         ReflectionTestUtils.setField(proxyConfig, "useProxyForClusterConnection", false);
@@ -36,7 +36,7 @@ public class ApplicationProxyConfigTest {
     }
 
     @Test
-    public void testIsUseProxyForClusterConnectionWhenProxyHostIsMissing() {
+    void testIsUseProxyForClusterConnectionWhenProxyHostIsMissing() {
         ReflectionTestUtils.setField(proxyConfig, "httpsProxyPort", "3128");
         ReflectionTestUtils.setField(proxyConfig, "useProxyForClusterConnection", true);
 
@@ -46,7 +46,7 @@ public class ApplicationProxyConfigTest {
     }
 
     @Test
-    public void testIsUseProxyForClusterConnectionWhenProxyPortIsMissing() {
+    void testIsUseProxyForClusterConnectionWhenProxyPortIsMissing() {
         ReflectionTestUtils.setField(proxyConfig, "httpsProxyHost", "10.0.0.2");
         ReflectionTestUtils.setField(proxyConfig, "useProxyForClusterConnection", true);
 
@@ -56,7 +56,7 @@ public class ApplicationProxyConfigTest {
     }
 
     @Test
-    public void testIsUseProxyForClusterConnectionWhenProxyHostIsEmpty() {
+    void testIsUseProxyForClusterConnectionWhenProxyHostIsEmpty() {
         ReflectionTestUtils.setField(proxyConfig, "httpsProxyHost", "");
         ReflectionTestUtils.setField(proxyConfig, "httpsProxyPort", "3128");
         ReflectionTestUtils.setField(proxyConfig, "useProxyForClusterConnection", true);
@@ -67,7 +67,7 @@ public class ApplicationProxyConfigTest {
     }
 
     @Test
-    public void testIsUseProxyForClusterConnectionWhenProxyPortIsEmpty() {
+    void testIsUseProxyForClusterConnectionWhenProxyPortIsEmpty() {
         ReflectionTestUtils.setField(proxyConfig, "httpsProxyHost", "10.0.0.2");
         ReflectionTestUtils.setField(proxyConfig, "httpsProxyPort", "");
         ReflectionTestUtils.setField(proxyConfig, "useProxyForClusterConnection", true);
@@ -78,7 +78,7 @@ public class ApplicationProxyConfigTest {
     }
 
     @Test
-    public void testIsProxyAuthRequired() {
+    void testIsProxyAuthRequired() {
         ReflectionTestUtils.setField(proxyConfig, "httpsProxyHost", "10.0.0.2");
         ReflectionTestUtils.setField(proxyConfig, "httpsProxyPort", "3128");
         ReflectionTestUtils.setField(proxyConfig, "httpsProxyUser", "user");
@@ -90,7 +90,7 @@ public class ApplicationProxyConfigTest {
     }
 
     @Test
-    public void testIsProxyAuthRequiredWhenUserIsNull() {
+    void testIsProxyAuthRequiredWhenUserIsNull() {
         ReflectionTestUtils.setField(proxyConfig, "httpsProxyHost", "10.0.0.2");
         ReflectionTestUtils.setField(proxyConfig, "httpsProxyPort", "3128");
         ReflectionTestUtils.setField(proxyConfig, "httpsProxyPassword", "pass");
@@ -101,7 +101,7 @@ public class ApplicationProxyConfigTest {
     }
 
     @Test
-    public void testIsProxyAuthRequiredWhenPasswordIsNull() {
+    void testIsProxyAuthRequiredWhenPasswordIsNull() {
         ReflectionTestUtils.setField(proxyConfig, "httpsProxyHost", "10.0.0.2");
         ReflectionTestUtils.setField(proxyConfig, "httpsProxyPort", "3128");
         ReflectionTestUtils.setField(proxyConfig, "httpsProxyUser", "user");
@@ -112,7 +112,7 @@ public class ApplicationProxyConfigTest {
     }
 
     @Test
-    public void testIsProxyAuthRequiredWhenProxyHostIsMissing() {
+    void testIsProxyAuthRequiredWhenProxyHostIsMissing() {
         ReflectionTestUtils.setField(proxyConfig, "httpsProxyHost", "");
         ReflectionTestUtils.setField(proxyConfig, "httpsProxyPort", "3128");
         ReflectionTestUtils.setField(proxyConfig, "httpsProxyUser", "user");
@@ -124,7 +124,7 @@ public class ApplicationProxyConfigTest {
     }
 
     @Test
-    public void testIsProxyAuthRequiredWhenProxyPortIsMissing() {
+    void testIsProxyAuthRequiredWhenProxyPortIsMissing() {
         ReflectionTestUtils.setField(proxyConfig, "httpsProxyHost", "10.0.0.2");
         ReflectionTestUtils.setField(proxyConfig, "httpsProxyPort", "");
         ReflectionTestUtils.setField(proxyConfig, "httpsProxyUser", "user");

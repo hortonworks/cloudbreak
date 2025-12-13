@@ -1,20 +1,22 @@
 package com.sequenceiq.cloudbreak.converter.v4.stacks;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.altus.AltusDatabusConfiguration;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
@@ -41,7 +43,8 @@ import com.sequenceiq.common.api.type.FeatureSetting;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 
-public class TelemetryConverterTest {
+@ExtendWith(MockitoExtension.class)
+class TelemetryConverterTest {
 
     private static final String INSTANCE_PROFILE_VALUE = "myInstanceProfile";
 
@@ -61,19 +64,18 @@ public class TelemetryConverterTest {
 
     private TelemetryConverter underTest;
 
-    @Before
+    @BeforeEach
     public void setUp() {
-        MockitoAnnotations.openMocks(this);
         AltusDatabusConfiguration altusDatabusConfiguration = new AltusDatabusConfiguration(DATABUS_ENDPOINT, DATABUS_S3_BUCKET, true, "****", "****");
         MonitoringConfiguration monitoringConfig = new MonitoringConfiguration();
-        when(entitlementService.isComputeMonitoringEnabled(anyString())).thenReturn(true);
+        lenient().when(entitlementService.isComputeMonitoringEnabled(anyString())).thenReturn(true);
         TelemetryConfiguration telemetryConfiguration =
                 new TelemetryConfiguration(altusDatabusConfiguration, monitoringConfig, null);
         underTest = new TelemetryConverter(telemetryConfiguration, entitlementService, true, true, monitoringUrlResolver);
     }
 
     @Test
-    public void testConvertToResponse() {
+    void testConvertToResponse() {
         // GIVEN
         Logging logging = new Logging();
         S3CloudStorageV1Parameters s3Params = new S3CloudStorageV1Parameters();
@@ -88,7 +90,7 @@ public class TelemetryConverterTest {
     }
 
     @Test
-    public void testConvertFromRequest() {
+    void testConvertFromRequest() {
         // GIVEN
         TelemetryRequest telemetryRequest = new TelemetryRequest();
         LoggingRequest logging = new LoggingRequest();
@@ -113,7 +115,7 @@ public class TelemetryConverterTest {
     }
 
     @Test
-    public void testConvertToResponseWithEnabledFeatures() {
+    void testConvertToResponseWithEnabledFeatures() {
         // GIVEN
         Logging logging = new Logging();
         S3CloudStorageV1Parameters s3Params = new S3CloudStorageV1Parameters();
@@ -132,7 +134,7 @@ public class TelemetryConverterTest {
     }
 
     @Test
-    public void testConvertFromRequestWithAttributes() {
+    void testConvertFromRequestWithAttributes() {
         // GIVEN
         TelemetryRequest telemetryRequest = new TelemetryRequest();
         Map<String, Object> fluentAttributes = new HashMap<>();
@@ -145,7 +147,7 @@ public class TelemetryConverterTest {
     }
 
     @Test
-    public void testConvertWhenWorkloadAnalyticsIsNotNullThenItsAttributesShouldBePassed() {
+    void testConvertWhenWorkloadAnalyticsIsNotNullThenItsAttributesShouldBePassed() {
         WorkloadAnalytics workloadAnalytics = new WorkloadAnalytics();
         workloadAnalytics.setDatabusEndpoint(DATABUS_ENDPOINT);
         workloadAnalytics.setAttributes(Map.of("someAttributeKey", "someOtherStuffForValue"));
@@ -160,7 +162,7 @@ public class TelemetryConverterTest {
     }
 
     @Test
-    public void testConvertWhenMonitoringIsDisabledThenItShouldBeFalseInTheResult() {
+    void testConvertWhenMonitoringIsDisabledThenItShouldBeFalseInTheResult() {
         when(entitlementService.isComputeMonitoringEnabled(anyString())).thenReturn(false);
         TelemetryRequest input = new TelemetryRequest();
 
@@ -171,7 +173,7 @@ public class TelemetryConverterTest {
     }
 
     @Test
-    public void testConvertWhenMonitoringIsDisabledButUrlIsInRequest() {
+    void testConvertWhenMonitoringIsDisabledButUrlIsInRequest() {
         when(entitlementService.isComputeMonitoringEnabled(anyString())).thenReturn(false);
         TelemetryRequest input = new TelemetryRequest();
         MonitoringRequest monitoring = new MonitoringRequest();
@@ -185,7 +187,7 @@ public class TelemetryConverterTest {
     }
 
     @Test
-    public void testConvertFromRequestWithDefaultFeatures() {
+    void testConvertFromRequestWithDefaultFeatures() {
         // GIVEN
         TelemetryRequest telemetryRequest = new TelemetryRequest();
         // WHEN
@@ -195,7 +197,7 @@ public class TelemetryConverterTest {
     }
 
     @Test
-    public void testConvertFromEnvAndSdxResponseWithoutInputs() {
+    void testConvertFromEnvAndSdxResponseWithoutInputs() {
         // GIVEN
         SdxClusterResponse sdxClusterResponse = null;
         // WHEN
@@ -208,12 +210,11 @@ public class TelemetryConverterTest {
     }
 
     @Test
-    public void testConvertFromEnvAndSdxResponseWithDefaultDisabled() {
+    void testConvertFromEnvAndSdxResponseWithDefaultDisabled() {
         // GIVEN
         SdxClusterResponse sdxClusterResponse = null;
         AltusDatabusConfiguration altusDatabusConfiguration = new AltusDatabusConfiguration(DATABUS_ENDPOINT, DATABUS_S3_BUCKET, false, "", null);
         MonitoringConfiguration monitoringConfig = new MonitoringConfiguration();
-        when(entitlementService.isComputeMonitoringEnabled(anyString())).thenReturn(true);
         TelemetryConfiguration telemetryConfiguration =
                 new TelemetryConfiguration(altusDatabusConfiguration, monitoringConfig, null);
         TelemetryConverter converter = new TelemetryConverter(telemetryConfiguration, entitlementService, true, false, monitoringUrlResolver);
@@ -227,7 +228,7 @@ public class TelemetryConverterTest {
     }
 
     @Test
-    public void testConvertFromEnvAndSdxResponseWithoutWAInput() {
+    void testConvertFromEnvAndSdxResponseWithoutWAInput() {
         // GIVEN
         TelemetryResponse response = new TelemetryResponse();
         LoggingResponse loggingResponse = new LoggingResponse();
@@ -255,7 +256,7 @@ public class TelemetryConverterTest {
     }
 
     @Test
-    public void testConvertFromEnvAndSdxResponseWithWAEnabled() {
+    void testConvertFromEnvAndSdxResponseWithWAEnabled() {
         // GIVEN
         TelemetryResponse response = new TelemetryResponse();
         SdxClusterResponse sdxClusterResponse = new SdxClusterResponse();
@@ -277,7 +278,7 @@ public class TelemetryConverterTest {
     }
 
     @Test
-    public void testConvertFromEnvAndSdxResponseWithWADisabled() {
+    void testConvertFromEnvAndSdxResponseWithWADisabled() {
         // GIVEN
         TelemetryResponse response = new TelemetryResponse();
         SdxClusterResponse sdxClusterResponse = new SdxClusterResponse();
@@ -296,7 +297,7 @@ public class TelemetryConverterTest {
     }
 
     @Test
-    public void testConvertFromEnvAndSdxResponseWithWADisabledGlobally() {
+    void testConvertFromEnvAndSdxResponseWithWADisabledGlobally() {
         // GIVEN
         TelemetryResponse response = new TelemetryResponse();
         SdxClusterResponse sdxClusterResponse = new SdxClusterResponse();
@@ -306,7 +307,6 @@ public class TelemetryConverterTest {
         sdxClusterResponse.setEnvironmentName("envName");
         AltusDatabusConfiguration altusDatabusConfiguration = new AltusDatabusConfiguration(DATABUS_ENDPOINT, DATABUS_S3_BUCKET, false, "", null);
         MonitoringConfiguration monitoringConfig = new MonitoringConfiguration();
-        when(entitlementService.isComputeMonitoringEnabled(anyString())).thenReturn(true);
         TelemetryConfiguration telemetryConfiguration =
                 new TelemetryConfiguration(altusDatabusConfiguration, monitoringConfig, null);
         TelemetryConverter converter = new TelemetryConverter(telemetryConfiguration, entitlementService, false, true, monitoringUrlResolver);
@@ -317,7 +317,7 @@ public class TelemetryConverterTest {
     }
 
     @Test
-    public void testConvertFromEnvAndSdxResponseWithMonitoring() {
+    void testConvertFromEnvAndSdxResponseWithMonitoring() {
         // GIVEN
         TelemetryResponse response = new TelemetryResponse();
         FeaturesResponse featuresResponse = new FeaturesResponse();
@@ -334,7 +334,7 @@ public class TelemetryConverterTest {
     }
 
     @Test
-    public void testConvertWithCloudStorageLoggingNotEnabled() {
+    void testConvertWithCloudStorageLoggingNotEnabled() {
         // GIVEN
         TelemetryResponse response = new TelemetryResponse();
         FeaturesResponse featuresResponse = new FeaturesResponse();
@@ -349,7 +349,7 @@ public class TelemetryConverterTest {
     }
 
     @Test
-    public void testConvertToRequest() {
+    void testConvertToRequest() {
         // GIVEN
         Telemetry telemetry = new Telemetry();
         telemetry.setDatabusEndpoint(DATABUS_ENDPOINT);
@@ -381,7 +381,7 @@ public class TelemetryConverterTest {
     }
 
     @Test
-    public void testConvertToRequestWithEmptyTelemetry() {
+    void testConvertToRequestWithEmptyTelemetry() {
         // GIVEN
         Telemetry telemetry = new Telemetry();
         // WHEN

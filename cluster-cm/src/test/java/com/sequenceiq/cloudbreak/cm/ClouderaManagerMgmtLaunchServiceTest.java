@@ -8,11 +8,11 @@ import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.api.swagger.MgmtServiceResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
@@ -24,8 +24,8 @@ import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 
-@RunWith(MockitoJUnitRunner.class)
-public class ClouderaManagerMgmtLaunchServiceTest {
+@ExtendWith(MockitoExtension.class)
+class ClouderaManagerMgmtLaunchServiceTest {
 
     @InjectMocks
     private ClouderaManagerMgmtLaunchService underTest;
@@ -42,7 +42,7 @@ public class ClouderaManagerMgmtLaunchServiceTest {
     private Stack stack = new Stack();
 
     @Test
-    public void testStartManagementServicesShouldSendStartCommandWhenTheManagementServicesAreNotStarted() throws ApiException {
+    void testStartManagementServicesShouldSendStartCommandWhenTheManagementServicesAreNotStarted() throws ApiException {
         MgmtServiceResourceApi mgmtServiceResourceApi = mock(MgmtServiceResourceApi.class);
         ApiService apiService = mock(ApiService.class);
         ApiCommand apiCommand = getApiCommand();
@@ -60,7 +60,7 @@ public class ClouderaManagerMgmtLaunchServiceTest {
     }
 
     @Test
-    public void testStartManagementServicesShouldNotSendStartCommandWhenTheManagementServicesAreStarted() throws ApiException {
+    void testStartManagementServicesShouldNotSendStartCommandWhenTheManagementServicesAreStarted() throws ApiException {
         MgmtServiceResourceApi mgmtServiceResourceApi = mock(MgmtServiceResourceApi.class);
         ApiService apiService = mock(ApiService.class);
 

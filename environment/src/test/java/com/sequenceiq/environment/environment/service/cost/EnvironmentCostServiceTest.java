@@ -1,12 +1,13 @@
 package com.sequenceiq.environment.environment.service.cost;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Map;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -56,13 +57,13 @@ public class EnvironmentCostServiceTest {
         ThreadBasedUserCrnProvider.doAs("crn:cdp:iam:us-west-1:1234:user:1", () -> {
             Map<String, EnvironmentRealTimeCost> environmentCosts = underTest.getCosts(List.of("ENVIRONMENT_CRN"), List.of("DATALAKE_CRN", "DATAHUB_CRN"));
 
-            Assertions.assertEquals(1, environmentCosts.entrySet().size());
+            assertEquals(1, environmentCosts.entrySet().size());
             EnvironmentRealTimeCost environmentRealTimeCost = environmentCosts.get("ENVIRONMENT_CRN");
-            Assertions.assertEquals("FREEIPA_NAME", environmentRealTimeCost.getFreeipa().getResourceName());
-            Assertions.assertEquals("DATALAKE_NAME", environmentRealTimeCost.getDatalake().getResourceName());
-            Assertions.assertEquals(1, environmentRealTimeCost.getDatahubs().size());
+            assertEquals("FREEIPA_NAME", environmentRealTimeCost.getFreeipa().getResourceName());
+            assertEquals("DATALAKE_NAME", environmentRealTimeCost.getDatalake().getResourceName());
+            assertEquals(1, environmentRealTimeCost.getDatahubs().size());
             RealTimeCost datahubRealTimeCost = environmentRealTimeCost.getDatahubs().get("DATAHUB_CRN");
-            Assertions.assertNotNull(datahubRealTimeCost);
+            assertNotNull(datahubRealTimeCost);
         });
     }
 
@@ -75,13 +76,13 @@ public class EnvironmentCostServiceTest {
         ThreadBasedUserCrnProvider.doAs("crn:cdp:iam:us-west-1:1234:user:1", () -> {
             Map<String, EnvironmentRealTimeCO2> environmentCO2s = underTest.getCO2(List.of("ENVIRONMENT_CRN"), List.of("DATALAKE_CRN", "DATAHUB_CRN"));
 
-            Assertions.assertEquals(1, environmentCO2s.entrySet().size());
+            assertEquals(1, environmentCO2s.entrySet().size());
             EnvironmentRealTimeCO2 environmentRealTimeCO2 = environmentCO2s.get("ENVIRONMENT_CRN");
-            Assertions.assertEquals("FREEIPA_NAME", environmentRealTimeCO2.getFreeipa().getResourceName());
-            Assertions.assertEquals("DATALAKE_NAME", environmentRealTimeCO2.getDatalake().getResourceName());
-            Assertions.assertEquals(1, environmentRealTimeCO2.getDatahubs().size());
+            assertEquals("FREEIPA_NAME", environmentRealTimeCO2.getFreeipa().getResourceName());
+            assertEquals("DATALAKE_NAME", environmentRealTimeCO2.getDatalake().getResourceName());
+            assertEquals(1, environmentRealTimeCO2.getDatahubs().size());
             RealTimeCO2 datahubRealTimeCO2 = environmentRealTimeCO2.getDatahubs().get("DATAHUB_CRN");
-            Assertions.assertNotNull(datahubRealTimeCO2);
+            assertNotNull(datahubRealTimeCO2);
         });
 
     }

@@ -1,6 +1,8 @@
 package com.sequenceiq.authorization.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -24,7 +26,6 @@ import jakarta.ws.rs.ForbiddenException;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -147,7 +148,7 @@ public class CommonPermissionCheckingUtilsTest {
 
         Object result = underTest.proceed(proceedingJoinPoint, methodSignature, 0L);
 
-        Assertions.assertNull(result);
+        assertNull(result);
         verify(methodSignature, times(1)).toLongString();
         verify(proceedingJoinPoint, times(1)).proceed();
     }
@@ -161,8 +162,8 @@ public class CommonPermissionCheckingUtilsTest {
 
         Object result = underTest.proceed(proceedingJoinPoint, methodSignature, 0L);
 
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(expected, result);
+        assertNotNull(result);
+        assertEquals(expected, result);
         verify(methodSignature, times(0)).toLongString();
         verify(proceedingJoinPoint, times(1)).proceed();
     }

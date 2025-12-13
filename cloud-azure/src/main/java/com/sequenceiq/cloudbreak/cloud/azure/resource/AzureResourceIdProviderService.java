@@ -1,9 +1,10 @@
 package com.sequenceiq.cloudbreak.cloud.azure.resource;
 
+import static org.springframework.util.Assert.hasText;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-import org.springframework.util.Assert;
 
 import com.sequenceiq.cloudbreak.cloud.azure.AzureStorage;
 
@@ -13,9 +14,9 @@ public class AzureResourceIdProviderService {
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureResourceIdProviderService.class);
 
     public String generateImageId(String subscriptionId, String resourceGroup, String imageName) {
-        Assert.hasText(subscriptionId, "Subscription id must not be null or empty.");
-        Assert.hasText(resourceGroup, "Resource group must not be null or empty.");
-        Assert.hasText(imageName, "Image name must not be null or empty.");
+        hasText(subscriptionId, "Subscription id must not be null or empty.");
+        hasText(resourceGroup, "Resource group must not be null or empty.");
+        hasText(imageName, "Image name must not be null or empty.");
 
         String resourceReference = String.format("%s/providers/Microsoft.Compute/%s/%s",
                 generateCommonPart(subscriptionId, resourceGroup),
@@ -26,9 +27,9 @@ public class AzureResourceIdProviderService {
     }
 
     public String generateDeploymentId(String subscriptionId, String resourceGroup, String deploymentName) {
-        Assert.hasText(subscriptionId, "Subscription id must not be null or empty.");
-        Assert.hasText(resourceGroup, "Resource group must not be null or empty.");
-        Assert.hasText(deploymentName, "Deployment name must not be null or empty.");
+        hasText(subscriptionId, "Subscription id must not be null or empty.");
+        hasText(resourceGroup, "Resource group must not be null or empty.");
+        hasText(deploymentName, "Deployment name must not be null or empty.");
 
         String resourceReference = String.format("%s/providers/Microsoft.Resources/deployments/%s",
                 generateCommonPart(subscriptionId, resourceGroup),
@@ -38,9 +39,9 @@ public class AzureResourceIdProviderService {
     }
 
     public String generateDnsZoneId(String subscriptionId, String resourceGroup, String service) {
-        Assert.hasText(subscriptionId, "Subscription id must not be null or empty.");
-        Assert.hasText(resourceGroup, "Resource group must not be null or empty.");
-        Assert.hasText(service, "Service name must not be null or empty.");
+        hasText(subscriptionId, "Subscription id must not be null or empty.");
+        hasText(resourceGroup, "Resource group must not be null or empty.");
+        hasText(service, "Service name must not be null or empty.");
 
         String resourceReference = String.format("%s/providers/Microsoft.Network/privateDnsZones/%s",
                 generateCommonPart(subscriptionId, resourceGroup),
@@ -51,7 +52,7 @@ public class AzureResourceIdProviderService {
 
     public String generateNetworkLinkId(String subscriptionId, String resourceGroup, String service, String networkId) {
         String dnsZoneId = generateDnsZoneId(subscriptionId, resourceGroup, service);
-        Assert.hasText(networkId, "Network id must not be null or empty.");
+        hasText(networkId, "Network id must not be null or empty.");
         String resourceReference = String.format("%s/virtualNetworkLinks/%s",
                 dnsZoneId,
                 networkId);

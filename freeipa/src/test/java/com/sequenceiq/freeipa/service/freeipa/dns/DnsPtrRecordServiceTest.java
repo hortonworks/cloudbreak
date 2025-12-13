@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.service.freeipa.dns;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -12,7 +14,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -119,9 +120,9 @@ public class DnsPtrRecordServiceTest {
         addDnsPtrRecordRequest.setIp(ip);
         addDnsPtrRecordRequest.setReverseDnsZone(reverseZone);
         addDnsPtrRecordRequest.setFqdn(fqdn);
-        FreeIpaClientException actualException = Assertions.assertThrows(FreeIpaClientException.class,
+        FreeIpaClientException actualException = assertThrows(FreeIpaClientException.class,
                 () -> underTest.addDnsPtrRecord(addDnsPtrRecordRequest, ACCOUNT_ID));
-        Assertions.assertEquals(String.format("Reverse dns zone %s is not matching with ip %s", StringUtils.appendIfMissing(reverseZone, "."), ip),
+        assertEquals(String.format("Reverse dns zone %s is not matching with ip %s", StringUtils.appendIfMissing(reverseZone, "."), ip),
                 actualException.getMessage());
     }
 
@@ -173,9 +174,9 @@ public class DnsPtrRecordServiceTest {
         addDnsPtrRecordRequest.setReverseDnsZone("2.1.in-addr.arpa");
         addDnsPtrRecordRequest.setFqdn("fqdn");
         when(freeIpaClient.showDnsRecord("2.1.in-addr.arpa.", "4.3")).thenReturn(createPtrRecord("4.3", "different."));
-        DnsRecordConflictException actualException = Assertions.assertThrows(DnsRecordConflictException.class,
+        DnsRecordConflictException actualException = assertThrows(DnsRecordConflictException.class,
                 () -> underTest.addDnsPtrRecord(addDnsPtrRecordRequest, ACCOUNT_ID));
-        Assertions.assertEquals("PTR record already exists and the target doesn't match", actualException.getMessage());
+        assertEquals("PTR record already exists and the target doesn't match", actualException.getMessage());
     }
 
     @Test
@@ -190,9 +191,9 @@ public class DnsPtrRecordServiceTest {
         addDnsPtrRecordRequest.setIp("1.2.3.4");
         addDnsPtrRecordRequest.setFqdn("fqdn");
         when(freeIpaClient.findAllDnsZone()).thenReturn(createDnsZones("2.2.in-addr.arpa", "noreverse"));
-        FreeIpaClientException actualException = Assertions.assertThrows(FreeIpaClientException.class,
+        FreeIpaClientException actualException = assertThrows(FreeIpaClientException.class,
                 () -> underTest.addDnsPtrRecord(addDnsPtrRecordRequest, ACCOUNT_ID));
-        Assertions.assertEquals("No matching reverse dns zone found for 1.2.3.4 ip", actualException.getMessage());
+        assertEquals("No matching reverse dns zone found for 1.2.3.4 ip", actualException.getMessage());
     }
 
     @Test
@@ -237,9 +238,9 @@ public class DnsPtrRecordServiceTest {
         deleteDnsPtrRecordRequest.setEnvironmentCrn(ENV_CRN);
         deleteDnsPtrRecordRequest.setIp("1.2.3.4");
         deleteDnsPtrRecordRequest.setReverseDnsZone("2.2.in-addr-arpa");
-        FreeIpaClientException actualException = Assertions.assertThrows(FreeIpaClientException.class,
+        FreeIpaClientException actualException = assertThrows(FreeIpaClientException.class,
                 () -> underTest.deleteDnsPtrRecord(deleteDnsPtrRecordRequest, ACCOUNT_ID));
-        Assertions.assertEquals("Reverse dns zone 2.2.in-addr-arpa. is not matching with ip 1.2.3.4", actualException.getMessage());
+        assertEquals("Reverse dns zone 2.2.in-addr-arpa. is not matching with ip 1.2.3.4", actualException.getMessage());
     }
 
     private Stack createStack() {

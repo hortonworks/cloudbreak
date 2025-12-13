@@ -2,13 +2,13 @@ package com.sequenceiq.cloudbreak.concurrent;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
-import org.mockito.Mockito;
 import org.springframework.core.task.TaskDecorator;
 
 class CompositeTaskDecoratorTest {
@@ -33,7 +33,7 @@ class CompositeTaskDecoratorTest {
         DoSomething before = mock(DoSomething.class);
         DoSomething after = mock(DoSomething.class);
         Runnable runnable = mock(Runnable.class);
-        InOrder inOrder = Mockito.inOrder(before, after, runnable);
+        InOrder inOrder = inOrder(before, after, runnable);
 
         CompositeTaskDecorator underTest = new CompositeTaskDecorator(List.of(TestDecorator.around(before, after)));
         Runnable decoratedRunnable = underTest.decorate(runnable);
@@ -52,7 +52,7 @@ class CompositeTaskDecoratorTest {
         DoSomething before2 = mock(DoSomething.class);
         DoSomething after2 = mock(DoSomething.class);
         Runnable runnable = mock(Runnable.class);
-        InOrder inOrder = Mockito.inOrder(before1, after1, before2, after2, runnable);
+        InOrder inOrder = inOrder(before1, after1, before2, after2, runnable);
 
         CompositeTaskDecorator underTest = new CompositeTaskDecorator(List.of(
                 TestDecorator.around(before1, after1),

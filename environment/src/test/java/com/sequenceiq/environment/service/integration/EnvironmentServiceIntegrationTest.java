@@ -26,7 +26,6 @@ import jakarta.ws.rs.ForbiddenException;
 import jakarta.ws.rs.NotFoundException;
 
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -207,7 +206,7 @@ public class EnvironmentServiceIntegrationTest {
                 });
         when(resourceDefinitionRequest.await()).thenReturn(new ResourceDefinitionResult(1L, DEFINITION_AWS));
 
-        Assertions.assertThrows(ForbiddenException.class, () -> client.credentialV1Endpoint().create(credentialRequest));
+        assertThrows(ForbiddenException.class, () -> client.credentialV1Endpoint().create(credentialRequest));
     }
 
     @Test

@@ -2,13 +2,13 @@ package com.sequenceiq.cloudbreak.template.views;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.mockito.Mockito;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
@@ -277,7 +277,7 @@ public class RdsViewProviderTest {
     @MethodSource("embeddedDbAndCloudPlatformDataProvider")
     public void testCreateRdsViewWithRdsViewWithoutCluster(boolean externalDb, String cloudPlatform) {
         String sslMode = "GCP".equals(cloudPlatform) && externalDb ? "verify-ca" : "verify-full";
-        RdsConfigWithoutCluster rdsView = Mockito.mock(RdsConfigWithoutCluster.class);
+        RdsConfigWithoutCluster rdsView = mock(RdsConfigWithoutCluster.class);
         when(rdsView.isArchived()).thenReturn(true);
         when(rdsView.getConnectionDriver()).thenReturn("driver");
         when(rdsView.getConnectionURL()).thenReturn("jdbc:mysql://ozzie-mysql.cmseikcocinw.us-east-1.rds.amazonaws.com:3306/ozzie");

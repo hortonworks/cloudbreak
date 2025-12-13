@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow.recipe;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -11,14 +12,13 @@ import static org.mockito.Mockito.when;
 import java.util.Optional;
 import java.util.Set;
 
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel;
@@ -39,8 +39,8 @@ import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.cloudbreak.view.StackView;
 
-@RunWith(MockitoJUnitRunner.class)
-public class OrchestratorRecipeExecutorTest {
+@ExtendWith(MockitoExtension.class)
+class OrchestratorRecipeExecutorTest {
 
     @Mock
     private GatewayConfigService gatewayConfigService;
@@ -82,7 +82,7 @@ public class OrchestratorRecipeExecutorTest {
     private ArgumentCaptor<ExitCriteriaModel> exitCriteriaModelCaptor;
 
     @Test
-    public void preServiceDeploymentRecipesShouldUseReachableNodes() throws CloudbreakException, CloudbreakOrchestratorFailedException,
+    void preServiceDeploymentRecipesShouldUseReachableNodes() throws CloudbreakException, CloudbreakOrchestratorFailedException,
             CloudbreakOrchestratorTimeoutException {
         when(stack.getId()).thenReturn(1L);
         Cluster cluster = new Cluster();
@@ -100,7 +100,7 @@ public class OrchestratorRecipeExecutorTest {
     }
 
     @Test
-    public void postClusterManagerStartRecipesShouldUseReachableNodes() throws CloudbreakException, CloudbreakOrchestratorFailedException,
+    void postClusterManagerStartRecipesShouldUseReachableNodes() throws CloudbreakException, CloudbreakOrchestratorFailedException,
             CloudbreakOrchestratorTimeoutException {
         when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenReturn(gatewayConfig);
         Set<Node> nodes = Set.of(this.node);
@@ -115,7 +115,7 @@ public class OrchestratorRecipeExecutorTest {
     }
 
     @Test
-    public void postClusterInstallShouldUseReachableNodes() throws CloudbreakException, CloudbreakOrchestratorFailedException,
+    void postClusterInstallShouldUseReachableNodes() throws CloudbreakException, CloudbreakOrchestratorFailedException,
             CloudbreakOrchestratorTimeoutException {
         when(stack.getId()).thenReturn(1L);
         Cluster cluster = new Cluster();
@@ -133,7 +133,7 @@ public class OrchestratorRecipeExecutorTest {
     }
 
     @Test
-    public void testPreTerminationRecipes() throws CloudbreakException, CloudbreakOrchestratorFailedException, CloudbreakOrchestratorTimeoutException {
+    void testPreTerminationRecipes() throws CloudbreakException, CloudbreakOrchestratorFailedException, CloudbreakOrchestratorTimeoutException {
         when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenReturn(gatewayConfig);
         Set<Node> nodes = Set.of(node);
         when(stackUtil.collectReachableNodes(any())).thenReturn(nodes);
@@ -147,7 +147,7 @@ public class OrchestratorRecipeExecutorTest {
     }
 
     @Test
-    public void testGetSingleRecipeExecutionFailureMessageWithInstanceMetaData() {
+    void testGetSingleRecipeExecutionFailureMessageWithInstanceMetaData() {
         final InstanceMetaData instanceMetaData = new InstanceMetaData();
         instanceMetaData.setDiscoveryFQDN("fqdn");
         final InstanceGroup instanceGroup = new InstanceGroup();
@@ -158,11 +158,11 @@ public class OrchestratorRecipeExecutorTest {
         final RecipeExecutionFailureCollector.RecipeFailure recipeFailure = new RecipeExecutionFailureCollector.RecipeFailure("fqdn", "phase", "recipe");
         final String message = underTest.getSingleRecipeExecutionFailureMessage(Set.of(instanceMetaData), recipeFailure);
 
-        Assert.assertEquals("[Recipe: 'recipe' - \nHostgroup: 'instance-group' - \nInstance: 'fqdn']", message);
+        assertEquals("[Recipe: 'recipe' - \nHostgroup: 'instance-group' - \nInstance: 'fqdn']", message);
     }
 
     @Test
-    public void testGetSingleRecipeExecutionFailureMessageWithoutInstanceMetaData() {
+    void testGetSingleRecipeExecutionFailureMessageWithoutInstanceMetaData() {
         final InstanceMetaData instanceMetaData = new InstanceMetaData();
         instanceMetaData.setDiscoveryFQDN("other-fqdn");
         final InstanceGroup instanceGroup = new InstanceGroup();
@@ -173,6 +173,6 @@ public class OrchestratorRecipeExecutorTest {
         final RecipeExecutionFailureCollector.RecipeFailure recipeFailure = new RecipeExecutionFailureCollector.RecipeFailure("fqdn", "phase", "recipe");
         final String message = underTest.getSingleRecipeExecutionFailureMessage(Set.of(instanceMetaData), recipeFailure);
 
-        Assert.assertEquals("[Recipe: 'recipe' - \nInstance: 'fqdn' (missing metadata)]", message);
+        assertEquals("[Recipe: 'recipe' - \nInstance: 'fqdn' (missing metadata)]", message);
     }
 }

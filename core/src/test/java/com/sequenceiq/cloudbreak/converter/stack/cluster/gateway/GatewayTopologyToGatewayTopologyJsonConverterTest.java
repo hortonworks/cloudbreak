@@ -5,9 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.gateway.topology.GatewayTopologyV4Request;
 import com.sequenceiq.cloudbreak.common.json.Json;
@@ -15,13 +13,12 @@ import com.sequenceiq.cloudbreak.converter.v4.stacks.cli.GatewayTopologyToGatewa
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.ExposedServices;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.GatewayTopology;
 
-@RunWith(MockitoJUnitRunner.class)
-public class GatewayTopologyToGatewayTopologyJsonConverterTest {
+class GatewayTopologyToGatewayTopologyJsonConverterTest {
 
     private final GatewayTopologyToGatewayTopologyV4RequestConverter underTest = new GatewayTopologyToGatewayTopologyV4RequestConverter();
 
     @Test
-    public void testConvert() {
+    void testConvert() {
         String topologyName = "topology1";
         GatewayTopology gatewayTopology = new GatewayTopology();
         gatewayTopology.setTopologyName(topologyName);

@@ -1,22 +1,23 @@
 package com.sequenceiq.cloudbreak.domain;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import jakarta.persistence.Entity;
 
 import org.apache.commons.lang3.reflect.FieldUtils;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.reflections.Reflections;
 
 import com.sequenceiq.cloudbreak.common.dal.model.AccountIdAwareResource;
 import com.sequenceiq.cloudbreak.service.secret.SecretValue;
 import com.sequenceiq.cloudbreak.workspace.model.TenantAwareResource;
 
-public class EntityTest {
+class EntityTest {
     @Test
-    public void testIfClassesWithSecretFieldsAreInheritedFromTenantOrWorkspaceOrAccountIdAwareResources() {
+    void testIfClassesWithSecretFieldsAreInheritedFromTenantOrWorkspaceOrAccountIdAwareResources() {
         Reflections reflections = new Reflections("com.sequenceiq");
         Set<Class<?>> entityClasses = reflections.getTypesAnnotatedWith(Entity.class);
         Set<Class<?>> wrongClasses = entityClasses.stream()
@@ -24,9 +25,8 @@ public class EntityTest {
                 .filter(cls -> !TenantAwareResource.class.isAssignableFrom(cls))
                 .filter(cls -> !AccountIdAwareResource.class.isAssignableFrom(cls))
                 .collect(Collectors.toSet());
-        Assert.assertTrue(
-                String.format("Classes with Secret fields should be inherited from TenantAwareResource, WorkspaceAwareResource " +
-                                "or AccountIdAwareResource. Wrong classes: %s",
-                        wrongClasses.stream().map(Class::getName).collect(Collectors.joining(", "))), wrongClasses.isEmpty());
+        assertTrue(wrongClasses.isEmpty(), String.format("Classes with Secret fields should be inherited from TenantAwareResource, WorkspaceAwareResource " +
+                        "or AccountIdAwareResource. Wrong classes: %s",
+                wrongClasses.stream().map(Class::getName).collect(Collectors.joining(", "))));
     }
 }

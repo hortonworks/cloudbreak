@@ -1,10 +1,10 @@
 package com.sequenceiq.cloudbreak.cloud.gcp;
 
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -28,19 +28,19 @@ public class GcpIdentityServiceTest {
     @Test
     public void testPlatform() {
         Platform platform = underTest.platform();
-        Assert.assertEquals(GcpConstants.GCP_PLATFORM, platform);
+        assertEquals(GcpConstants.GCP_PLATFORM, platform);
     }
 
     @Test
     public void testVariant() {
         Variant variant = underTest.variant();
-        Assert.assertEquals(GcpConstants.GCP_VARIANT, variant);
+        assertEquals(GcpConstants.GCP_VARIANT, variant);
     }
 
     @Test
     public void testAccountID() {
         when(gcpStackUtil.getProjectId(any(CloudCredential.class))).thenReturn("accountId");
         String accountId = underTest.getAccountId("region", new CloudCredential());
-        Assert.assertEquals(accountId, "accountId");
+        assertEquals(accountId, "accountId");
     }
 }

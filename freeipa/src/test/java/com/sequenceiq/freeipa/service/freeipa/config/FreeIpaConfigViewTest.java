@@ -6,7 +6,7 @@ import static org.mockito.Mockito.mock;
 
 import java.util.Map;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -17,7 +17,7 @@ import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.freeipa.service.freeipa.config.FreeIpaConfigView.Builder;
 
 @ExtendWith(MockitoExtension.class)
-public class FreeIpaConfigViewTest {
+class FreeIpaConfigViewTest {
 
     private static final String KERBEROS_SECRET_LOCATION = "kerberosSecretLocation";
 
@@ -27,7 +27,7 @@ public class FreeIpaConfigViewTest {
 
     private final EncryptionProfileProvider encryptionProfileProvider = new EncryptionProfileProvider();
 
-    @ParameterizedTest()
+    @ParameterizedTest
     @ValueSource(booleans = {true, false})
     void testToMap(boolean secretEncryptionEnabled) {
         FreeIpaBackupConfigView backupConfigView = mock(FreeIpaBackupConfigView.class);
@@ -45,7 +45,7 @@ public class FreeIpaConfigViewTest {
     }
 
     @Test
-    public void testToMapForTlsv13() {
+    void testToMapForTlsv13() {
         FreeIpaBackupConfigView backupConfigView = mock(FreeIpaBackupConfigView.class);
         FreeIpaConfigView freeIpaConfigView = new Builder()
                 .withBackupConfig(backupConfigView)

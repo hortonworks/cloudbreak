@@ -2,19 +2,19 @@ package com.sequenceiq.cloudbreak.common.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@RunWith(MockitoJUnitRunner.class)
-public class HostDiscoveryServiceTest {
+@ExtendWith(MockitoExtension.class)
+class HostDiscoveryServiceTest {
 
     @InjectMocks
     private HostDiscoveryService underTest;
 
     @Test
-    public void testGatewayFqdnGeneration() {
+    void testGatewayFqdnGeneration() {
         String gatewayHostName = "datahub-master0";
         String defaultDomain = "env.xcu2-8y8x.dev.cldr.work";
         String gatewayFqdn = underTest.determineGatewayFqdn(gatewayHostName, defaultDomain);

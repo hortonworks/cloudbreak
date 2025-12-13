@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.gcp.sql;
 import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
 import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -14,7 +15,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -101,8 +101,8 @@ public class GcpDatabaseServerTerminateServiceTest {
         doNothing().when(databasePollerService).terminateDatabasePoller(any(AuthenticatedContext.class), anyList());
 
         List<CloudResource> terminate = underTest.terminate(authenticatedContext, databaseStack, persistenceNotifier);
-        Assert.assertEquals(1, terminate.size());
-        Assert.assertEquals("server-1", terminate.get(0).getName());
+        assertEquals(1, terminate.size());
+        assertEquals("server-1", terminate.get(0).getName());
     }
 
     @Test
@@ -149,7 +149,7 @@ public class GcpDatabaseServerTerminateServiceTest {
 
         GcpResourceException gcpResourceException = assertThrows(GcpResourceException.class,
                 () -> underTest.terminate(authenticatedContext, databaseStack, persistenceNotifier));
-        Assert.assertEquals("error: [ resourceType: GCP_DATABASE,  resourceName: server-1 ]",
+        assertEquals("error: [ resourceType: GCP_DATABASE,  resourceName: server-1 ]",
                 gcpResourceException.getMessage());
     }
 
@@ -182,7 +182,7 @@ public class GcpDatabaseServerTerminateServiceTest {
 
         GcpResourceException gcpResourceException = assertThrows(GcpResourceException.class,
                 () -> underTest.terminate(authenticatedContext, databaseStack, persistenceNotifier));
-        Assert.assertEquals("error: [ resourceType: GCP_DATABASE,  resourceName: server-1 ]",
+        assertEquals("error: [ resourceType: GCP_DATABASE,  resourceName: server-1 ]",
                 gcpResourceException.getMessage());
     }
 }

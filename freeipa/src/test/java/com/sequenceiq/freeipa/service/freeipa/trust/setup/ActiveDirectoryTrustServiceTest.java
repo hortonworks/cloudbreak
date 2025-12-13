@@ -13,7 +13,6 @@ import static org.mockito.Mockito.when;
 import java.util.Locale;
 import java.util.OptionalInt;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -158,7 +157,7 @@ class ActiveDirectoryTrustServiceTest {
     @Test
     void testKdcType() {
         KdcType type = underTest.kdcType();
-        Assertions.assertEquals(KdcType.ACTIVE_DIRECTORY, type);
+        assertEquals(KdcType.ACTIVE_DIRECTORY, type);
     }
 
     @Test
@@ -176,7 +175,7 @@ class ActiveDirectoryTrustServiceTest {
 
         verify(underTest.getHostOrchestrator()).runOrchestratorState(params.capture());
         OrchestratorStateParams capturedParams = params.getValue();
-        Assertions.assertEquals("trustsetup.adtrust_install", capturedParams.getState());
+        assertEquals("trustsetup.adtrust_install", capturedParams.getState());
     }
 
     @Test

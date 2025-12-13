@@ -3,17 +3,15 @@ package com.sequenceiq.cloudbreak.datalakedr.converter;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import org.junit.Before;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatalakeDataInfoObject;
 
 @ExtendWith(MockitoExtension.class)
-public class DatalakeDataInfoJsonToObjectConverterTest {
+class DatalakeDataInfoJsonToObjectConverterTest {
     private static final String OPERATION_ID = "operation-id";
 
     private static final Long HIVE_SIZE = 12153503L;
@@ -94,13 +92,8 @@ public class DatalakeDataInfoJsonToObjectConverterTest {
     @InjectMocks
     private DatalakeDataInfoJsonToObjectConverter datalakeDataInfoJsonToObjectConverter;
 
-    @Before
-    public void setUp() {
-        MockitoAnnotations.openMocks(this);
-    }
-
     @Test
-    public void testSuccessfulParse() {
+    void testSuccessfulParse() {
         DatalakeDataInfoObject out = datalakeDataInfoJsonToObjectConverter.convert(OPERATION_ID, TEST_DATA_SIZES_RESPONSE);
         assertEquals(out.getDatabaseSizeInBytes(), TOTAL_DB_SIZE);
         assertEquals(out.getHbaseAtlasEntityAuditEventsTableSizeInBytes(), ATLAS_ENTITY_SIZE);
@@ -113,7 +106,7 @@ public class DatalakeDataInfoJsonToObjectConverterTest {
     }
 
     @Test
-    public void testParseMissingDatabaseAndFreespace() {
+    void testParseMissingDatabaseAndFreespace() {
         DatalakeDataInfoObject out = datalakeDataInfoJsonToObjectConverter.convert(OPERATION_ID, TEST_DATA_SIZES_RESPONSE_MISSING_DATABASE_AND_FREESPACE);
         assertEquals(out.getDatabaseSizeInBytes(), 0);
         assertEquals(out.getHbaseAtlasEntityAuditEventsTableSizeInBytes(), ATLAS_ENTITY_SIZE);
@@ -126,7 +119,7 @@ public class DatalakeDataInfoJsonToObjectConverterTest {
     }
 
     @Test
-    public void testParseMissingHbaseAndSomeSolr() {
+    void testParseMissingHbaseAndSomeSolr() {
         DatalakeDataInfoObject out = datalakeDataInfoJsonToObjectConverter.convert(OPERATION_ID, TEST_DATA_SIZES_RESPONSE_MISSING_HBASE_AND_SOME_SOLR);
         assertEquals(out.getDatabaseSizeInBytes(), TOTAL_DB_SIZE);
         assertEquals(out.getHbaseAtlasEntityAuditEventsTableSizeInBytes(), 0);
@@ -139,7 +132,7 @@ public class DatalakeDataInfoJsonToObjectConverterTest {
     }
 
     @Test
-    public void testInvalidJson() {
+    void testInvalidJson() {
         assertThrows(IllegalStateException.class, () -> datalakeDataInfoJsonToObjectConverter.convert(OPERATION_ID, "{}"));
     }
 }

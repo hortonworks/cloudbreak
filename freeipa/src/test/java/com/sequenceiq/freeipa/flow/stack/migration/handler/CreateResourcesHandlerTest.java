@@ -1,11 +1,12 @@
 package com.sequenceiq.freeipa.flow.stack.migration.handler;
 
 import static java.util.Collections.emptyList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -80,7 +81,7 @@ public class CreateResourcesHandlerTest {
 
         verify(eventBus).notify(eq("CREATERESOURCESRESULT"), resultCaptor.capture());
         Event<CreateResourcesResult> result = resultCaptor.getValue();
-        Assertions.assertNotNull(result);
+        assertNotNull(result);
     }
 
     @Test
@@ -98,7 +99,7 @@ public class CreateResourcesHandlerTest {
 
         verify(eventBus).notify(eq("AWSVARIANTMIGRATIONFAILEDEVENT"), resultCaptor.capture());
         Event<CreateResourcesResult> result = resultCaptor.getValue();
-        Assertions.assertNotNull(result);
-        Assertions.assertEquals(value, result.getData().getErrorDetails());
+        assertNotNull(result);
+        assertEquals(value, result.getData().getErrorDetails());
     }
 }

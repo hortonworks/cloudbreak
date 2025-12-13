@@ -1,13 +1,14 @@
 package com.sequenceiq.environment.environment.service.domain;
 
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -37,7 +38,7 @@ class PemBasedEnvironmentDomainProviderTest {
         when(dnsManagementService.generateManagedDomain(anyString(), eq(anEnvName))).thenReturn(null);
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
-                Assertions.assertThrows(EnvironmentServiceException.class, () -> underTest.generate(environment)));
+                assertThrows(EnvironmentServiceException.class, () -> underTest.generate(environment)));
 
         verify(dnsManagementService, times(1)).generateManagedDomain(anyString(), eq(anEnvName));
     }
@@ -50,7 +51,7 @@ class PemBasedEnvironmentDomainProviderTest {
         when(dnsManagementService.generateManagedDomain(anyString(), eq(anEnvName))).thenReturn("");
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
-                Assertions.assertThrows(EnvironmentServiceException.class, () -> underTest.generate(environment)));
+                assertThrows(EnvironmentServiceException.class, () -> underTest.generate(environment)));
 
         verify(dnsManagementService, times(1)).generateManagedDomain(anyString(), eq(anEnvName));
     }
@@ -64,7 +65,7 @@ class PemBasedEnvironmentDomainProviderTest {
                 .thenThrow(new RuntimeException("ooo something went wrong, no domain generation from our side."));
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
-                Assertions.assertThrows(EnvironmentServiceException.class, () -> underTest.generate(environment)));
+                assertThrows(EnvironmentServiceException.class, () -> underTest.generate(environment)));
 
         verify(dnsManagementService, times(1)).generateManagedDomain(anyString(), eq(anEnvName));
     }
@@ -79,7 +80,7 @@ class PemBasedEnvironmentDomainProviderTest {
 
         String result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.generate(environment));
 
-        Assertions.assertEquals(expectedDomain, result);
+        assertEquals(expectedDomain, result);
         verify(dnsManagementService, times(1)).generateManagedDomain(anyString(), eq(anEnvName));
     }
 }

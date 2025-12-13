@@ -1,23 +1,23 @@
 package com.sequenceiq.cloudbreak.template.kerberos;
 
 import static java.util.Optional.of;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.type.KerberosType;
 
-public class KerberosDetailServiceTest {
+class KerberosDetailServiceTest {
 
     private KerberosDetailService victim = new KerberosDetailService();
 
     @Test
-    public void shouldUpdateKeyTabsInCaseOfYarnChildEnvironment() {
+    void shouldUpdateKeyTabsInCaseOfYarnChildEnvironment() {
         KerberosConfig kerberosConfig = mock(KerberosConfig.class);
 
         when(kerberosConfig.getType()).thenReturn(KerberosType.FREEIPA);
@@ -26,7 +26,7 @@ public class KerberosDetailServiceTest {
     }
 
     @Test
-    public void shouldNotUpdateKeyTabsInCaseOfYarnNonChildEnvironment() {
+    void shouldNotUpdateKeyTabsInCaseOfYarnNonChildEnvironment() {
         KerberosConfig kerberosConfig = mock(KerberosConfig.class);
 
         when(kerberosConfig.getType()).thenReturn(KerberosType.FREEIPA);

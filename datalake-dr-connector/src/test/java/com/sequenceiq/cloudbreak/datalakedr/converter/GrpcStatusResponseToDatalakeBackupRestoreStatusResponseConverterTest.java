@@ -3,21 +3,20 @@ package com.sequenceiq.cloudbreak.datalakedr.converter;
 import static com.sequenceiq.cloudbreak.datalakedr.converter.GrpcStatusResponseToDatalakeBackupRestoreStatusResponseConverter.FAILED_STATE;
 import static com.sequenceiq.cloudbreak.datalakedr.converter.GrpcStatusResponseToDatalakeBackupRestoreStatusResponseConverter.SUCCESSFUL_STATE;
 import static com.sequenceiq.cloudbreak.datalakedr.converter.GrpcStatusResponseToDatalakeBackupRestoreStatusResponseConverter.VALIDATION_FAILED_STATE;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.assertj.core.api.Assertions;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.cloudera.thunderhead.service.datalakedr.datalakeDRProto;
 import com.sequenceiq.cloudbreak.datalakedr.model.DatalakeBackupStatusResponse;
 import com.sequenceiq.cloudbreak.datalakedr.model.DatalakeOperationStatus;
 import com.sequenceiq.cloudbreak.datalakedr.model.DatalakeRestoreStatusResponse;
 
-public class GrpcStatusResponseToDatalakeBackupRestoreStatusResponseConverterTest {
+class GrpcStatusResponseToDatalakeBackupRestoreStatusResponseConverterTest {
 
     private static final String FAILURE_REASON = "Failed operation";
 
@@ -25,15 +24,10 @@ public class GrpcStatusResponseToDatalakeBackupRestoreStatusResponseConverterTes
 
     private static final String PRECHECKS_FAILED_REASON = "Precheck Failed";
 
-    private GrpcStatusResponseToDatalakeBackupRestoreStatusResponseConverter underTest;
-
-    @Before
-    public void setUp() {
-        underTest = new GrpcStatusResponseToDatalakeBackupRestoreStatusResponseConverter();
-    }
+    private GrpcStatusResponseToDatalakeBackupRestoreStatusResponseConverter underTest = new GrpcStatusResponseToDatalakeBackupRestoreStatusResponseConverter();
 
     @Test
-    public void testSuccessfulBackup() {
+    void testSuccessfulBackup() {
         datalakeDRProto.BackupRestoreOperationStatus.Builder status = datalakeDRProto.BackupRestoreOperationStatus.newBuilder().setStatus("SUCCESSFUL");
         datalakeDRProto.SolrBackupRestoreState.Builder solr = datalakeDRProto.SolrBackupRestoreState.newBuilder()
                 .setFulltextIndexCollection(status)
@@ -63,7 +57,7 @@ public class GrpcStatusResponseToDatalakeBackupRestoreStatusResponseConverterTes
     }
 
     @Test
-    public void testBackupContainsRangerAudits() {
+    void testBackupContainsRangerAudits() {
         datalakeDRProto.BackupRestoreOperationStatus.Builder status = datalakeDRProto.BackupRestoreOperationStatus.newBuilder().setStatus("SUCCESSFUL");
         datalakeDRProto.SolrBackupRestoreState.Builder solr = datalakeDRProto.SolrBackupRestoreState.newBuilder()
                 .setRangerAuditsCollection(status);
@@ -80,7 +74,7 @@ public class GrpcStatusResponseToDatalakeBackupRestoreStatusResponseConverterTes
     }
 
     @Test
-    public void testBackupContainsAtlasMetadata() {
+    void testBackupContainsAtlasMetadata() {
         datalakeDRProto.BackupRestoreOperationStatus.Builder status = datalakeDRProto.BackupRestoreOperationStatus.newBuilder().setStatus("SUCCESSFUL");
         datalakeDRProto.SolrBackupRestoreState.Builder solr = datalakeDRProto.SolrBackupRestoreState.newBuilder()
                 .setFulltextIndexCollection(status)
@@ -116,7 +110,7 @@ public class GrpcStatusResponseToDatalakeBackupRestoreStatusResponseConverterTes
     }
 
     @Test
-    public void testBackupContainsPermissions() {
+    void testBackupContainsPermissions() {
         datalakeDRProto.BackupRestoreOperationStatus.Builder status = datalakeDRProto.BackupRestoreOperationStatus.newBuilder().setStatus("SUCCESSFUL");
         datalakeDRProto.DatabaseBackupRestoreState.Builder database = datalakeDRProto.DatabaseBackupRestoreState.newBuilder().setDatabase(status);
 
@@ -132,7 +126,7 @@ public class GrpcStatusResponseToDatalakeBackupRestoreStatusResponseConverterTes
     }
 
     @Test
-    public void testInProgressBackup() {
+    void testInProgressBackup() {
         datalakeDRProto.BackupDatalakeStatusResponse.Builder builder =
                 datalakeDRProto.BackupDatalakeStatusResponse.newBuilder()
                         .setOverallState("IN_PROGRESS");
@@ -143,7 +137,7 @@ public class GrpcStatusResponseToDatalakeBackupRestoreStatusResponseConverterTes
     }
 
     @Test
-    public void testFailedBackupAdminOperations() {
+    void testFailedBackupAdminOperations() {
         datalakeDRProto.AdminOperationsBackupRestoreState.Builder adminBuilder =
                 datalakeDRProto.AdminOperationsBackupRestoreState.newBuilder()
                         .setStopServices(createStatus(FAILED_STATE, FAILURE_REASON))
@@ -165,7 +159,7 @@ public class GrpcStatusResponseToDatalakeBackupRestoreStatusResponseConverterTes
     }
 
     @Test
-    public void testFailedHbaseBackupSameFailureReason() {
+    void testFailedHbaseBackupSameFailureReason() {
         datalakeDRProto.HbaseBackupRestoreState.Builder hbaseBuilder =
                 datalakeDRProto.HbaseBackupRestoreState.newBuilder()
                         .setAtlasJanusTable(createStatus(FAILED_STATE, FAILURE_REASON))
@@ -186,7 +180,7 @@ public class GrpcStatusResponseToDatalakeBackupRestoreStatusResponseConverterTes
     }
 
     @Test
-    public void testFailedHbaseBackupDifferentFailureReasons() {
+    void testFailedHbaseBackupDifferentFailureReasons() {
         datalakeDRProto.HbaseBackupRestoreState.Builder hbaseBuilder =
                 datalakeDRProto.HbaseBackupRestoreState.newBuilder()
                         .setAtlasJanusTable(createStatus(FAILED_STATE, FAILURE_REASON))
@@ -209,7 +203,7 @@ public class GrpcStatusResponseToDatalakeBackupRestoreStatusResponseConverterTes
     }
 
     @Test
-    public void testFailedSolrBackupSameFailureReason() {
+    void testFailedSolrBackupSameFailureReason() {
         datalakeDRProto.SolrBackupRestoreState.Builder solrBuilder =
                 datalakeDRProto.SolrBackupRestoreState.newBuilder()
                         .setEdgeIndexCollection(createStatus(FAILED_STATE, FAILURE_REASON))
@@ -232,7 +226,7 @@ public class GrpcStatusResponseToDatalakeBackupRestoreStatusResponseConverterTes
     }
 
     @Test
-    public void testFailedSolrBackupDifferentFailureReasons() {
+    void testFailedSolrBackupDifferentFailureReasons() {
         datalakeDRProto.SolrBackupRestoreState.Builder solrBuilder =
                 datalakeDRProto.SolrBackupRestoreState.newBuilder()
                         .setEdgeIndexCollection(createStatus(FAILED_STATE, FAILURE_REASON))
@@ -255,7 +249,7 @@ public class GrpcStatusResponseToDatalakeBackupRestoreStatusResponseConverterTes
     }
 
     @Test
-    public void testFailedDatabaseBackup() {
+    void testFailedDatabaseBackup() {
         datalakeDRProto.DatabaseBackupRestoreState.Builder databaseBuilder =
                 datalakeDRProto.DatabaseBackupRestoreState.newBuilder()
                         .setDatabase(createStatus(FAILED_STATE, FAILURE_REASON));
@@ -275,7 +269,7 @@ public class GrpcStatusResponseToDatalakeBackupRestoreStatusResponseConverterTes
     }
 
     @Test
-    public void testInvalidBackupStatus() {
+    void testInvalidBackupStatus() {
         datalakeDRProto.BackupDatalakeStatusResponse.Builder builder =
                 datalakeDRProto.BackupDatalakeStatusResponse.newBuilder()
                         .setOverallState("INVALID_STATUS");
@@ -284,7 +278,7 @@ public class GrpcStatusResponseToDatalakeBackupRestoreStatusResponseConverterTes
     }
 
     @Test
-    public void testSuccessfulRestore() {
+    void testSuccessfulRestore() {
         datalakeDRProto.RestoreDatalakeStatusResponse.Builder builder =
             datalakeDRProto.RestoreDatalakeStatusResponse.newBuilder()
                 .setOverallState("SUCCESSFUL");
@@ -296,7 +290,7 @@ public class GrpcStatusResponseToDatalakeBackupRestoreStatusResponseConverterTes
     }
 
     @Test
-    public void testInProgressRestore() {
+    void testInProgressRestore() {
         datalakeDRProto.RestoreDatalakeStatusResponse.Builder builder =
                 datalakeDRProto.RestoreDatalakeStatusResponse.newBuilder()
                         .setOverallState("IN_PROGRESS");
@@ -307,7 +301,7 @@ public class GrpcStatusResponseToDatalakeBackupRestoreStatusResponseConverterTes
     }
 
     @Test
-    public void testFailedRestoreAdminOperations() {
+    void testFailedRestoreAdminOperations() {
         datalakeDRProto.AdminOperationsBackupRestoreState.Builder adminBuilder =
                 datalakeDRProto.AdminOperationsBackupRestoreState.newBuilder()
                         .setStopServices(createStatus(FAILED_STATE, FAILURE_REASON))
@@ -330,7 +324,7 @@ public class GrpcStatusResponseToDatalakeBackupRestoreStatusResponseConverterTes
     }
 
     @Test
-    public void testFailedHbaseRestoreSameFailureReason() {
+    void testFailedHbaseRestoreSameFailureReason() {
         datalakeDRProto.HbaseBackupRestoreState.Builder hbaseBuilder =
                 datalakeDRProto.HbaseBackupRestoreState.newBuilder()
                         .setAtlasJanusTable(createStatus(FAILED_STATE, FAILURE_REASON))
@@ -351,7 +345,7 @@ public class GrpcStatusResponseToDatalakeBackupRestoreStatusResponseConverterTes
     }
 
     @Test
-    public void testFailedHbaseRestoreDifferentFailureReasons() {
+    void testFailedHbaseRestoreDifferentFailureReasons() {
         datalakeDRProto.HbaseBackupRestoreState.Builder hbaseBuilder =
                 datalakeDRProto.HbaseBackupRestoreState.newBuilder()
                         .setAtlasJanusTable(createStatus(FAILED_STATE, FAILURE_REASON))
@@ -374,7 +368,7 @@ public class GrpcStatusResponseToDatalakeBackupRestoreStatusResponseConverterTes
     }
 
     @Test
-    public void testFailedSolrRestoreSameFailureReason() {
+    void testFailedSolrRestoreSameFailureReason() {
         datalakeDRProto.SolrBackupRestoreState.Builder solrBuilder =
                 datalakeDRProto.SolrBackupRestoreState.newBuilder()
                         .setEdgeIndexCollection(createStatus(FAILED_STATE, FAILURE_REASON))
@@ -397,7 +391,7 @@ public class GrpcStatusResponseToDatalakeBackupRestoreStatusResponseConverterTes
     }
 
     @Test
-    public void testFailedSolrRestoreDifferentFailureReasons() {
+    void testFailedSolrRestoreDifferentFailureReasons() {
         datalakeDRProto.SolrBackupRestoreState.Builder solrBuilder =
                 datalakeDRProto.SolrBackupRestoreState.newBuilder()
                         .setEdgeIndexCollection(createStatus(FAILED_STATE, FAILURE_REASON))
@@ -424,7 +418,7 @@ public class GrpcStatusResponseToDatalakeBackupRestoreStatusResponseConverterTes
     }
 
     @Test
-    public void testFailedSolrRestoreSameFailureReasonWithDelete() {
+    void testFailedSolrRestoreSameFailureReasonWithDelete() {
         datalakeDRProto.SolrBackupRestoreState.Builder solrBuilder =
                 datalakeDRProto.SolrBackupRestoreState.newBuilder()
                         .setEdgeIndexCollection(createStatus(FAILED_STATE, FAILURE_REASON))
@@ -453,7 +447,7 @@ public class GrpcStatusResponseToDatalakeBackupRestoreStatusResponseConverterTes
     }
 
     @Test
-    public void testFailedSolrRestoreSameFailureReasonWithDeleteDifferentReasons() {
+    void testFailedSolrRestoreSameFailureReasonWithDeleteDifferentReasons() {
         datalakeDRProto.SolrBackupRestoreState.Builder solrBuilder =
                 datalakeDRProto.SolrBackupRestoreState.newBuilder()
                         .setEdgeIndexCollection(createStatus(FAILED_STATE, FAILURE_REASON))
@@ -488,7 +482,7 @@ public class GrpcStatusResponseToDatalakeBackupRestoreStatusResponseConverterTes
     }
 
     @Test
-    public void testFailedDatabaseRestore() {
+    void testFailedDatabaseRestore() {
         datalakeDRProto.DatabaseBackupRestoreState.Builder databaseBuilder =
                 datalakeDRProto.DatabaseBackupRestoreState.newBuilder()
                         .setDatabase(createStatus(FAILED_STATE, FAILURE_REASON));
@@ -508,7 +502,7 @@ public class GrpcStatusResponseToDatalakeBackupRestoreStatusResponseConverterTes
     }
 
     @Test
-    public void testInvalidRestoreStatus() {
+    void testInvalidRestoreStatus() {
         datalakeDRProto.RestoreDatalakeStatusResponse.Builder builder =
                 datalakeDRProto.RestoreDatalakeStatusResponse.newBuilder()
                         .setOverallState("INVALID_STATUS");
@@ -517,7 +511,7 @@ public class GrpcStatusResponseToDatalakeBackupRestoreStatusResponseConverterTes
     }
 
     @Test
-    public void testBackupLegacyFailureReason() {
+    void testBackupLegacyFailureReason() {
         datalakeDRProto.BackupDatalakeStatusResponse.Builder builder =
                 datalakeDRProto.BackupDatalakeStatusResponse.newBuilder()
                         .setOverallState(FAILED_STATE)
@@ -530,7 +524,7 @@ public class GrpcStatusResponseToDatalakeBackupRestoreStatusResponseConverterTes
     }
 
     @Test
-    public void testRestoreLegacyFailureReason() {
+    void testRestoreLegacyFailureReason() {
         datalakeDRProto.RestoreDatalakeStatusResponse.Builder builder =
                 datalakeDRProto.RestoreDatalakeStatusResponse.newBuilder()
                         .setOverallState(FAILED_STATE)
@@ -543,7 +537,7 @@ public class GrpcStatusResponseToDatalakeBackupRestoreStatusResponseConverterTes
     }
 
     @Test
-    public void testPreCheckBackupFailed() {
+    void testPreCheckBackupFailed() {
         datalakeDRProto.BackupDatalakeResponse.Builder builder =
                 datalakeDRProto.BackupDatalakeResponse.newBuilder()
                         .setOverallState(VALIDATION_FAILED_STATE)
@@ -554,7 +548,7 @@ public class GrpcStatusResponseToDatalakeBackupRestoreStatusResponseConverterTes
     }
 
     @Test
-    public void testPreCheckRestoreFailed() {
+    void testPreCheckRestoreFailed() {
         datalakeDRProto.RestoreDatalakeResponse.Builder builder =
                 datalakeDRProto.RestoreDatalakeResponse.newBuilder()
                         .setOverallState(VALIDATION_FAILED_STATE)
@@ -565,7 +559,7 @@ public class GrpcStatusResponseToDatalakeBackupRestoreStatusResponseConverterTes
     }
 
     @Test
-    public void testPrecheckBackupSuccess() {
+    void testPrecheckBackupSuccess() {
         datalakeDRProto.RestoreDatalakeResponse.Builder builder =
                 datalakeDRProto.RestoreDatalakeResponse.newBuilder()
                         .setOverallState("SUCCESSFUL");

@@ -1,11 +1,13 @@
 package com.sequenceiq.environment.api.v1.credential.model.parameters.aws;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.util.Set;
 
 import jakarta.validation.ConstraintViolation;
 
 import org.hibernate.validator.HibernateValidator;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
@@ -28,7 +30,7 @@ class RoleBasedParametersRoleArnLengthTest {
         String tooShortRoleArn = "tooShortArn";
         RoleBasedParameters request = getRoleBasedParametersRequest(tooShortRoleArn);
         Set<ConstraintViolation<RoleBasedParameters>> constraintViolations = localValidatorFactory.validate(request);
-        Assertions.assertTrue(constraintViolations
+        assertTrue(constraintViolations
                 .stream()
                 .anyMatch(cv ->
                         RoleBasedParameters.ROLE_ARN_LENGTH_VALIDATION_ERROR_MSG.equals(cv.getMessage())
@@ -40,7 +42,7 @@ class RoleBasedParametersRoleArnLengthTest {
         String tooLongRoleArn = PasswordUtil.getRandomAlphabetic(2049);
         RoleBasedParameters request = getRoleBasedParametersRequest(tooLongRoleArn);
         Set<ConstraintViolation<RoleBasedParameters>> constraintViolations = localValidatorFactory.validate(request);
-        Assertions.assertTrue(constraintViolations
+        assertTrue(constraintViolations
                 .stream()
                 .anyMatch(cv ->
                         RoleBasedParameters.ROLE_ARN_LENGTH_VALIDATION_ERROR_MSG.equals(cv.getMessage())
@@ -52,7 +54,7 @@ class RoleBasedParametersRoleArnLengthTest {
         String basicRoleArn = "arn:aws-us-gov:iam::000000000000:role/cdpe2e-basic";
         RoleBasedParameters request = getRoleBasedParametersRequest(basicRoleArn);
         Set<ConstraintViolation<RoleBasedParameters>> constraintViolations = localValidatorFactory.validate(request);
-        Assertions.assertFalse(constraintViolations
+        assertFalse(constraintViolations
                 .stream()
                 .anyMatch(cv ->
                         RoleBasedParameters.ROLE_ARN_LENGTH_VALIDATION_ERROR_MSG.equals(cv.getMessage())
@@ -64,7 +66,7 @@ class RoleBasedParametersRoleArnLengthTest {
         String roleArnOver100Chars = "arn:aws-us-gov:iam::000000000000:role/cdpe2e-xaccountaccess-stage-xaccountaccess-fxaccountaccess-xaccountaccess";
         RoleBasedParameters request = getRoleBasedParametersRequest(roleArnOver100Chars);
         Set<ConstraintViolation<RoleBasedParameters>> constraintViolations = localValidatorFactory.validate(request);
-        Assertions.assertFalse(constraintViolations
+        assertFalse(constraintViolations
                 .stream()
                 .anyMatch(cv ->
                         RoleBasedParameters.ROLE_ARN_LENGTH_VALIDATION_ERROR_MSG.equals(cv.getMessage())

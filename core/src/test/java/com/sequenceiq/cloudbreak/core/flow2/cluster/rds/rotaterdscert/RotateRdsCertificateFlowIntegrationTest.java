@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.cert.RotateRdsCer
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -23,7 +24,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
-import org.mockito.Mockito;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.MockReset;
@@ -190,7 +190,7 @@ class RotateRdsCertificateFlowIntegrationTest {
         Arrays.fill(expected, 0, calledOnceCount, 1);
         int i = 0;
 
-        InOrder inOrder = Mockito.inOrder(rotateRdsCertificateService);
+        InOrder inOrder = inOrder(rotateRdsCertificateService);
         inOrder.verify(rotateRdsCertificateService, times(expected[i])).checkPrerequisitesState(STACK_ID);
         inOrder.verify(rotateRdsCertificateService, times(expected[i++])).checkPrerequisites(STACK_ID, ROTATE);
         inOrder.verify(rotateRdsCertificateService, times(expected[i])).getLatestRdsCertificateState(STACK_ID);

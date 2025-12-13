@@ -2,18 +2,19 @@ package com.sequenceiq.cloudbreak.controller.validation.stack;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Set;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Sets;
@@ -34,8 +35,8 @@ import com.sequenceiq.common.api.type.EncryptionType;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
-@RunWith(MockitoJUnitRunner.class)
-public class StackAwsEncryptionValidatorTest extends StackRequestValidatorTestBase {
+@ExtendWith(MockitoExtension.class)
+class StackAwsEncryptionValidatorTest extends StackRequestValidatorTestBase {
 
     private static final String ENV_CRN = "crn:cdp:environments:us-west-1:account:environment:env";
 
@@ -59,17 +60,17 @@ public class StackAwsEncryptionValidatorTest extends StackRequestValidatorTestBa
     @InjectMocks
     private StackValidator underTest;
 
-    public StackAwsEncryptionValidatorTest() {
+    StackAwsEncryptionValidatorTest() {
         super(LoggerFactory.getLogger(StackAwsEncryptionValidatorTest.class));
     }
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         CredentialResponse credentialResponse = new CredentialResponse();
         credentialResponse.setName("cred");
 
         when(subject.getEnvironmentCrn()).thenReturn(ENV_CRN);
-        when(subject.getRegion()).thenReturn("region");
+        lenient().when(subject.getRegion()).thenReturn("region");
         DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
         environmentResponse.setCredential(credentialResponse);
         environmentResponse.setCrn(ENV_CRN);
@@ -78,7 +79,7 @@ public class StackAwsEncryptionValidatorTest extends StackRequestValidatorTestBa
     }
 
     @Test
-    public void testValidateEncryptionKeyWhenTemplateParametersHasTypeKeyAndItsTypeIsEncryptionTypeWithDefaultValueThenThereIsNoEncryptionKeyCheck() {
+    void testValidateEncryptionKeyWhenTemplateParametersHasTypeKeyAndItsTypeIsEncryptionTypeWithDefaultValueThenThereIsNoEncryptionKeyCheck() {
         AwsInstanceTemplateV4Parameters parameters = new AwsInstanceTemplateV4Parameters();
         parameters.setEncryption(encryption(EncryptionType.DEFAULT, null));
         when(subject.getInstanceGroups()).thenReturn(getInstanceGroupWithRequest(createRequestWithParameters(parameters)));
@@ -91,7 +92,7 @@ public class StackAwsEncryptionValidatorTest extends StackRequestValidatorTestBa
     }
 
     @Test
-    public void testValidateEncryptionKeyWhenTemplateParametersHasTypeKeyAndItsTypeIsEncryptionTypeWithNoneValueThenThereIsNoEncryptionKeyCheck() {
+    void testValidateEncryptionKeyWhenTemplateParametersHasTypeKeyAndItsTypeIsEncryptionTypeWithNoneValueThenThereIsNoEncryptionKeyCheck() {
         AwsInstanceTemplateV4Parameters parameters = new AwsInstanceTemplateV4Parameters();
         parameters.setEncryption(encryption(EncryptionType.NONE, null));
         when(subject.getInstanceGroups()).thenReturn(getInstanceGroupWithRequest(createRequestWithParameters(parameters)));
@@ -104,7 +105,7 @@ public class StackAwsEncryptionValidatorTest extends StackRequestValidatorTestBa
     }
 
     @Test
-    public void testValidateEncryptionKeyWhenEncryptionKeysCouldNotBeRetrievedThenThereIsNoEncryptionKeyCheck() {
+    void testValidateEncryptionKeyWhenEncryptionKeysCouldNotBeRetrievedThenThereIsNoEncryptionKeyCheck() {
         AwsInstanceTemplateV4Parameters parameters = new AwsInstanceTemplateV4Parameters();
         parameters.setEncryption(encryption(EncryptionType.CUSTOM, null));
         when(subject.getInstanceGroups()).thenReturn(getInstanceGroupWithRequest(createRequestWithParameters(parameters)));
@@ -117,7 +118,7 @@ public class StackAwsEncryptionValidatorTest extends StackRequestValidatorTestBa
     }
 
     @Test
-    public void testValidateEncryptionKeyWhenThereIsNoReturningEncryptionKeyFromControllerThenThereIsNoEncryptionKeyCheck() {
+    void testValidateEncryptionKeyWhenThereIsNoReturningEncryptionKeyFromControllerThenThereIsNoEncryptionKeyCheck() {
         AwsInstanceTemplateV4Parameters parameters = new AwsInstanceTemplateV4Parameters();
         parameters.setEncryption(encryption(EncryptionType.CUSTOM, null));
 
@@ -131,7 +132,7 @@ public class StackAwsEncryptionValidatorTest extends StackRequestValidatorTestBa
     }
 
     @Test
-    public void testValidateEncryptionKeyWhenEncryptionKeysExistAndContainsKeyEntryAndItsValueIsInTheListedKeysThenEverythingShouldGoFine() {
+    void testValidateEncryptionKeyWhenEncryptionKeysExistAndContainsKeyEntryAndItsValueIsInTheListedKeysThenEverythingShouldGoFine() {
         AwsInstanceTemplateV4Parameters parameters = new AwsInstanceTemplateV4Parameters();
         parameters.setEncryption(encryption(EncryptionType.CUSTOM, TEST_ENCRYPTION_KEY));
         when(subject.getInstanceGroups()).thenReturn(getInstanceGroupWithRequest(createRequestWithParameters(parameters)));

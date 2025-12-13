@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.aws.common.metrics;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.only;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -18,7 +19,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.common.metrics.MetricService;
@@ -103,7 +103,7 @@ class AwsMetricPublisherTest {
 
     @Test
     void publishShouldReturnWhenRecordingMetricFails() {
-        Mockito.doThrow(new RuntimeException("failed")).when(metricService).incrementMetricCounter(anyString(), any());
+        doThrow(new RuntimeException("failed")).when(metricService).incrementMetricCounter(anyString(), any());
         Map<SdkMetric<?>, List<MetricRecord<?>>> metrics = defaultMetrics();
         metrics.put(CoreMetric.API_CALL_SUCCESSFUL, List.of(new DefaultMetricRecord<>(CoreMetric.API_CALL_SUCCESSFUL, Boolean.FALSE)));
         metrics.put(CoreMetric.API_CALL_DURATION, List.of(new DefaultMetricRecord<>(CoreMetric.API_CALL_DURATION, Duration.ofMinutes(1))));

@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -18,7 +19,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.api.swagger.ServicesResourceApi;
@@ -97,7 +97,7 @@ class ClouderaManagerServiceManagementServiceTest {
         when(servicesResourceApi.readServices(TEST_CLUSTER_NAME, DataView.SUMMARY.name())).thenReturn(apiServiceList);
         when(clouderaManagerApiFactory.getServicesResourceApi(any())).thenReturn(servicesResourceApi);
         when(servicesResourceApi.stopCommand(TEST_CLUSTER_NAME, SERVICE_NAME)).thenReturn(new ApiCommand().id(COMMAND_ID));
-        when(clouderaManagerPollingServiceProvider.startPollingServiceStop(stack, apiClient, COMMAND_ID)).thenReturn(Mockito.mock(ExtendedPollingResult.class));
+        when(clouderaManagerPollingServiceProvider.startPollingServiceStop(stack, apiClient, COMMAND_ID)).thenReturn(mock(ExtendedPollingResult.class));
 
         underTest.stopClouderaManagerService(apiClient, stack, SERVICE_TYPE, true);
 
@@ -148,7 +148,7 @@ class ClouderaManagerServiceManagementServiceTest {
         when(servicesResourceApi.readServices(TEST_CLUSTER_NAME, DataView.SUMMARY.name())).thenReturn(apiServiceList);
         when(clouderaManagerApiFactory.getServicesResourceApi(any())).thenReturn(servicesResourceApi);
         when(servicesResourceApi.startCommand(TEST_CLUSTER_NAME, SERVICE_NAME)).thenReturn(new ApiCommand().id(COMMAND_ID));
-        when(clouderaManagerPollingServiceProvider.startPollingServiceStart(stack, apiClient, COMMAND_ID)).thenReturn(Mockito.mock(ExtendedPollingResult.class));
+        when(clouderaManagerPollingServiceProvider.startPollingServiceStart(stack, apiClient, COMMAND_ID)).thenReturn(mock(ExtendedPollingResult.class));
 
         underTest.startClouderaManagerService(apiClient, stack, SERVICE_TYPE, true);
 
@@ -185,7 +185,7 @@ class ClouderaManagerServiceManagementServiceTest {
         when(servicesResourceApi.readServices(TEST_CLUSTER_NAME, DataView.SUMMARY.name())).thenReturn(apiServiceList);
         when(clouderaManagerApiFactory.getServicesResourceApi(any())).thenReturn(servicesResourceApi);
         when(clouderaManagerPollingServiceProvider.startPollingServiceDeletion(stack, apiClient, SERVICE_TYPE))
-                .thenReturn(Mockito.mock(ExtendedPollingResult.class));
+                .thenReturn(mock(ExtendedPollingResult.class));
 
         underTest.deleteClouderaManagerService(apiClient, stack, SERVICE_TYPE);
 

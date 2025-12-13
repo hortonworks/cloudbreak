@@ -6,6 +6,7 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_UPSCALE_QUOTA_
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_VERTICALSCALE_ISSUE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -21,7 +22,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Answers;
@@ -256,7 +256,7 @@ class StackUpscaleServiceTest {
                 .build();
         UpscaleStackRequest<UpscaleStackResult> upscaleStackRequest = new UpscaleStackRequest<>(mock(CloudContext.class), mock(CloudCredential.class),
                 cloudStack, new ArrayList<>(), adjustmentTypeWithThreshold, false);
-        Assertions.assertThrows(CloudConnectorException.class, () -> underTest.upscale(mock(AuthenticatedContext.class), upscaleStackRequest,
+        assertThrows(CloudConnectorException.class, () -> underTest.upscale(mock(AuthenticatedContext.class), upscaleStackRequest,
                 connector));
         verify(flowMessageService, times(1)).fireEventAndLog(upscaleStackRequest.getResourceId(), UPDATE_IN_PROGRESS.name(), STACK_UPSCALE_QUOTA_ISSUE,
                 "quota error");
@@ -310,7 +310,7 @@ class StackUpscaleServiceTest {
                 .build();
         UpscaleStackRequest<UpscaleStackResult> upscaleStackRequest = new UpscaleStackRequest<>(mock(CloudContext.class), mock(CloudCredential.class),
                 cloudStack, new ArrayList<>(), adjustmentTypeWithThreshold, false);
-        Assertions.assertThrows(CloudConnectorException.class, () -> underTest.upscale(mock(AuthenticatedContext.class), upscaleStackRequest,
+        assertThrows(CloudConnectorException.class, () -> underTest.upscale(mock(AuthenticatedContext.class), upscaleStackRequest,
                 connector));
         verify(flowMessageService, times(1)).fireEventAndLog(upscaleStackRequest.getResourceId(), UPDATE_IN_PROGRESS.name(), STACK_UPSCALE_QUOTA_ISSUE,
                 "quota error");
@@ -431,7 +431,7 @@ class StackUpscaleServiceTest {
                 .build();
         UpscaleStackRequest<UpscaleStackResult> upscaleStackRequest = new UpscaleStackRequest<>(mock(CloudContext.class), mock(CloudCredential.class),
                 cloudStack, new ArrayList<>(), adjustmentTypeWithThreshold, false);
-        Assertions.assertThrows(CloudConnectorException.class, () -> underTest.upscale(mock(AuthenticatedContext.class), upscaleStackRequest,
+        assertThrows(CloudConnectorException.class, () -> underTest.upscale(mock(AuthenticatedContext.class), upscaleStackRequest,
                 connector));
         verify(flowMessageService, times(1)).fireEventAndLog(upscaleStackRequest.getResourceId(), UPDATE_IN_PROGRESS.name(), STACK_UPSCALE_QUOTA_ISSUE,
                 "quota error");

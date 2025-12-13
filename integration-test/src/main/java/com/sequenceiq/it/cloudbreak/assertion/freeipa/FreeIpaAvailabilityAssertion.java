@@ -3,6 +3,7 @@ package com.sequenceiq.it.cloudbreak.assertion.freeipa;
 import static com.sequenceiq.freeipa.api.v1.operation.model.OperationState.COMPLETED;
 import static com.sequenceiq.freeipa.api.v1.operation.model.OperationState.RUNNING;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.doNotWaitForFlow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.time.Duration;
 import java.util.List;
@@ -17,7 +18,6 @@ import jakarta.ws.rs.core.Response;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.junit.jupiter.api.Assertions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -269,7 +269,7 @@ public class FreeIpaAvailabilityAssertion {
             String cmd = String.format(CHECK_DNS_LOOKUPS_CMD, instanceGroupMetadata.getDiscoveryFQDN(), instanceGroupMetadata.getPrivateIp());
             Map<String, Pair<Integer, String>> results = sshJClientActions.executeSshCommandOnHost(
                     sdxTestDto.getResponse().getStackV4Response().getInstanceGroups(), List.of(HostGroupType.MASTER.getName()), cmd, false);
-            results.values().forEach(result -> Assertions.assertEquals(0, result.getLeft()));
+            results.values().forEach(result -> assertEquals(0, result.getLeft()));
         } catch (Exception e) {
             LOGGER.error("FreeIPA upgrade DNS lookups test failed with unexpected error", e);
             throw new TestFailException("FreeIPA upgrade DNS lookups test failed with unexpected error: " + e.getMessage(), e);

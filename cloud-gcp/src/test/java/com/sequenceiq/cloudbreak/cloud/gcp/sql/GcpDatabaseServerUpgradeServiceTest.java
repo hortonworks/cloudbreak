@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilit
 import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -17,7 +18,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -111,7 +111,7 @@ public class GcpDatabaseServerUpgradeServiceTest {
         ArgumentCaptor<CloudResource> notifyUpdateArgumentCaptor = ArgumentCaptor.forClass(CloudResource.class);
         verify(persistenceNotifier).notifyUpdate(notifyUpdateArgumentCaptor.capture(), any());
         CloudResource updatedResource = notifyUpdateArgumentCaptor.getValue();
-        Assertions.assertEquals("server-1", updatedResource.getName());
+        assertEquals("server-1", updatedResource.getName());
     }
 
     @Test

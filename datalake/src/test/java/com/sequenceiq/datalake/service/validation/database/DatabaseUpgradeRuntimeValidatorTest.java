@@ -3,6 +3,7 @@ package com.sequenceiq.datalake.service.validation.database;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
@@ -13,7 +14,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -47,7 +47,7 @@ public class DatabaseUpgradeRuntimeValidatorTest {
 
     @Test
     void testValidateRuntimeVersionForUpgradeWhenVersionAtLeastTheMinimum() {
-        try (MockedStatic<ThreadBasedUserCrnProvider> utilities = Mockito.mockStatic(ThreadBasedUserCrnProvider.class)) {
+        try (MockedStatic<ThreadBasedUserCrnProvider> utilities = mockStatic(ThreadBasedUserCrnProvider.class)) {
             utilities.when(ThreadBasedUserCrnProvider::getAccountId).thenReturn(ACCOUNT_ID);
 
             boolean upgradeAllowed = underTest.isRuntimeVersionAllowedForUpgrade(RUNTIME_VERSION_MINIMUM_ACCEPTED_VERSION, ENGINE_VERSION);
@@ -58,7 +58,7 @@ public class DatabaseUpgradeRuntimeValidatorTest {
 
     @Test
     void testValidateRuntimeVersionForUpgradeWhenVersionBelowMinimumButEntitlementPresent() {
-        try (MockedStatic<ThreadBasedUserCrnProvider> utilities = Mockito.mockStatic(ThreadBasedUserCrnProvider.class)) {
+        try (MockedStatic<ThreadBasedUserCrnProvider> utilities = mockStatic(ThreadBasedUserCrnProvider.class)) {
             utilities.when(ThreadBasedUserCrnProvider::getAccountId).thenReturn(ACCOUNT_ID);
             when(entitlementService.isPostgresUpgradeExceptionEnabled(ACCOUNT_ID)).thenReturn(true);
 
@@ -70,7 +70,7 @@ public class DatabaseUpgradeRuntimeValidatorTest {
 
     @Test
     void testValidateRuntimeVersionForUpgradeWhenVersionBelowMinimumAndNoEntitlement() {
-        try (MockedStatic<ThreadBasedUserCrnProvider> utilities = Mockito.mockStatic(ThreadBasedUserCrnProvider.class)) {
+        try (MockedStatic<ThreadBasedUserCrnProvider> utilities = mockStatic(ThreadBasedUserCrnProvider.class)) {
             utilities.when(ThreadBasedUserCrnProvider::getAccountId).thenReturn(ACCOUNT_ID);
             when(entitlementService.isPostgresUpgradeExceptionEnabled(ACCOUNT_ID)).thenReturn(false);
 

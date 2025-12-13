@@ -2,10 +2,10 @@ package com.sequenceiq.cloudbreak.cloud.gcp;
 
 import static com.sequenceiq.cloudbreak.cloud.gcp.GcpConstants.GCP_PLATFORM;
 import static com.sequenceiq.cloudbreak.cloud.gcp.GcpConstants.GCP_VARIANT;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Collections;
 
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -65,87 +65,87 @@ public class GcpConnectorTest {
 
     @Test
     public void testAuthentication() {
-        Assert.assertEquals(authenticator, underTest.authentication());
+        assertEquals(authenticator, underTest.authentication());
     }
 
     @Test
     public void testValidators() {
-        Assert.assertEquals(Collections.singletonList(gcpTagValidator), underTest.validators(ValidatorType.ALL));
+        assertEquals(Collections.singletonList(gcpTagValidator), underTest.validators(ValidatorType.ALL));
     }
 
     @Test
     public void testProvisionSetup() {
-        Assert.assertEquals(provisionSetup, underTest.setup());
+        assertEquals(provisionSetup, underTest.setup());
     }
 
     @Test
     public void testPlatformParameters() {
-        Assert.assertEquals(gcpPlatformParameters, underTest.parameters());
+        assertEquals(gcpPlatformParameters, underTest.parameters());
     }
 
     @Test
     public void testCloudConstant() {
-        Assert.assertEquals(gcpConstants, underTest.cloudConstant());
+        assertEquals(gcpConstants, underTest.cloudConstant());
     }
 
     @Test
     public void testCredentials() {
-        Assert.assertEquals(gcpCredentialConnector, underTest.credentials());
+        assertEquals(gcpCredentialConnector, underTest.credentials());
     }
 
     @Test
     public void testVariant() {
-        Assert.assertEquals(GCP_VARIANT, underTest.variant());
+        assertEquals(GCP_VARIANT, underTest.variant());
     }
 
     @Test
     public void testPlatform() {
-        Assert.assertEquals(GCP_PLATFORM, underTest.platform());
+        assertEquals(GCP_PLATFORM, underTest.platform());
     }
 
     @Test
     public void testEncryptionResources() {
-        Assert.assertEquals(null, underTest.encryptionResources());
+        assertEquals(null, underTest.encryptionResources());
     }
 
     @Test
     public void testIdentityService() {
-        Assert.assertEquals(gcpIdentityService, underTest.identityService());
+        assertEquals(gcpIdentityService, underTest.identityService());
     }
 
     @Test
     public void testInstances() {
-        Assert.assertEquals(instanceConnector, underTest.instances());
+        assertEquals(instanceConnector, underTest.instances());
     }
 
     @Test
     public void testMetadata() {
-        Assert.assertEquals(metadataCollector, underTest.metadata());
+        assertEquals(metadataCollector, underTest.metadata());
     }
 
     @Test
     public void testNetworkConnector() {
-        Assert.assertEquals(gcpNetworkConnector, underTest.networkConnector());
+        assertEquals(gcpNetworkConnector, underTest.networkConnector());
     }
 
     @Test
     public void testResources() {
-        Assert.assertEquals(resourceConnector, underTest.resources());
+        assertEquals(resourceConnector, underTest.resources());
     }
 
     @Test
     public void testObjectStorage() {
-        Assert.assertEquals(gcpObjectStorageConnector, underTest.objectStorage());
+        assertEquals(gcpObjectStorageConnector, underTest.objectStorage());
     }
 
     @Test
     public void testPlatformResources() {
-        Assert.assertEquals(gcpPlatformResources, underTest.platformResources());
+        assertEquals(gcpPlatformResources, underTest.platformResources());
     }
 
     @Test
     public void testAvailabilityZoneConnector() {
-        Assert.assertEquals(gcpAvailabilityZoneConnector, underTest.availabilityZoneConnector());
+        assertEquals(gcpAvailabilityZoneConnector, underTest.availabilityZoneConnector());
     }
 
 }

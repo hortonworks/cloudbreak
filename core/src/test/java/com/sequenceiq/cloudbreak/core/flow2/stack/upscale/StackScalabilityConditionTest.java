@@ -1,26 +1,26 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.upscale;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Collections;
 import java.util.Set;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 
-public class StackScalabilityConditionTest {
+class StackScalabilityConditionTest {
 
     private static final String GROUP_NAME = "worker";
 
     private StackScalabilityCondition underTest = new StackScalabilityCondition();
 
     @Test
-    public void testIsScalableShouldReturnFalseWhenThereArePendingInstances() {
+    void testIsScalableShouldReturnFalseWhenThereArePendingInstances() {
         Set<InstanceMetaData> instanceMetaData = createInstanceMetadataWithPendingInstance();
         Stack stack = createStac(instanceMetaData);
 
@@ -30,7 +30,7 @@ public class StackScalabilityConditionTest {
     }
 
     @Test
-    public void testIsScalableShouldReturnTrueWhenThereAreNoPendingInstances() {
+    void testIsScalableShouldReturnTrueWhenThereAreNoPendingInstances() {
         Set<InstanceMetaData> instanceMetaData = createInstanceMetadataWithRegisteredInstances();
         Stack stack = createStac(instanceMetaData);
 

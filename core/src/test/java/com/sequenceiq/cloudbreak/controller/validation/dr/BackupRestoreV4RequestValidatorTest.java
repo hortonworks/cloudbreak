@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.controller.validation.dr;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -10,11 +10,9 @@ import java.util.Locale;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +25,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 
 @ExtendWith(MockitoExtension.class)
-public class BackupRestoreV4RequestValidatorTest {
+class BackupRestoreV4RequestValidatorTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(BackupRestoreV4RequestValidatorTest.class);
 
     private static final String BACKUP_ID = "backupId";
@@ -55,18 +53,13 @@ public class BackupRestoreV4RequestValidatorTest {
     @InjectMocks
     private BackupRestoreV4RequestValidator requestValidator;
 
-    @Before
-    public void setUp() {
-        MockitoAnnotations.openMocks(this);
-    }
-
     @Test
-    public void testAWSSuccessfulValidation() {
+    void testAWSSuccessfulValidation() {
         testValidSchemes(CloudPlatform.AWS.name(), AWS_VALID_SCHEMES_CASE_INSENSITIVE);
     }
 
     @Test
-    public void testAWSWrongScheme() {
+    void testAWSWrongScheme() {
         Stack stack = getStack(CloudPlatform.AWS.name());
         String backupLocation = "abfs://" + LOCATION;
         ValidationResult validationResult = requestValidator.validate(stack, backupLocation, BACKUP_ID);
@@ -75,12 +68,12 @@ public class BackupRestoreV4RequestValidatorTest {
     }
 
     @Test
-    public void testAzureSuccessfulValidation() {
+    void testAzureSuccessfulValidation() {
         testValidSchemes(CloudPlatform.AZURE.name(), AZURE_VALID_SCHEMES_CASE_INSENSITIVE);
     }
 
     @Test
-    public void testAzureWrongScheme() {
+    void testAzureWrongScheme() {
         Stack stack = getStack(CloudPlatform.AZURE.name());
         String backupLocation = "s3://test/backup";
         ValidationResult validationResult = requestValidator.validate(stack, backupLocation, BACKUP_ID);
@@ -89,12 +82,12 @@ public class BackupRestoreV4RequestValidatorTest {
     }
 
     @Test
-    public void testGCPSuccessfulValidation() {
+    void testGCPSuccessfulValidation() {
         testValidSchemes(CloudPlatform.GCP.name(), GCP_VALID_SCHEMES_CASE_INSENSITIVE);
     }
 
     @Test
-    public void testGCPWrongScheme() {
+    void testGCPWrongScheme() {
         Stack stack = getStack(CloudPlatform.GCP.name());
         String backupLocation = "s3a://test/backup";
         ValidationResult validationResult = requestValidator.validate(stack, backupLocation, BACKUP_ID);
@@ -103,7 +96,7 @@ public class BackupRestoreV4RequestValidatorTest {
     }
 
     @Test
-    public void testUnsupportedCloudPlatformWithoutScheme() {
+    void testUnsupportedCloudPlatformWithoutScheme() {
         Stack stack = getStack(CloudPlatform.YARN.name());
         ValidationResult validationResult = requestValidator.validate(stack, LOCATION, BACKUP_ID);
         assert validationResult.hasError();
@@ -111,7 +104,7 @@ public class BackupRestoreV4RequestValidatorTest {
     }
 
     @Test
-    public void testUnsupportedCloudPlatformWithScheme() {
+    void testUnsupportedCloudPlatformWithScheme() {
         Stack stack = getStack(CloudPlatform.YARN.name());
         ValidationResult validationResult = requestValidator.validate(stack, "s3a://" + LOCATION, BACKUP_ID);
         assert validationResult.hasError();
@@ -122,7 +115,7 @@ public class BackupRestoreV4RequestValidatorTest {
     }
 
     @Test
-    public void testMissingBackupId() {
+    void testMissingBackupId() {
         Stack stack = getStack(CloudPlatform.AWS.name());
         ValidationResult validationResult = requestValidator.validate(stack, LOCATION, null);
         assert validationResult.hasError();
@@ -130,7 +123,7 @@ public class BackupRestoreV4RequestValidatorTest {
     }
 
     @Test
-    public void testMissingBackupLocation() {
+    void testMissingBackupLocation() {
         Stack stack = getStack(CloudPlatform.AWS.name());
         ValidationResult validationResult = requestValidator.validate(stack, null, BACKUP_ID);
         assert validationResult.hasError();
@@ -138,7 +131,7 @@ public class BackupRestoreV4RequestValidatorTest {
     }
 
     @Test
-    public void testMultipleErrorsUnsupportedPlatformNullLocationNullBackupId() {
+    void testMultipleErrorsUnsupportedPlatformNullLocationNullBackupId() {
         Stack stack = getStack(CloudPlatform.YARN.name());
         ValidationResult validationResult = requestValidator.validate(stack, null, null);
         assert validationResult.hasError();
@@ -150,7 +143,7 @@ public class BackupRestoreV4RequestValidatorTest {
     }
 
     @Test
-    public void testMultipleErrorsUnsupportedPlatformValidLocationNullBackupId() {
+    void testMultipleErrorsUnsupportedPlatformValidLocationNullBackupId() {
         Stack stack = getStack(CloudPlatform.YARN.name());
         String backupLocation = "gs://test/backup";
         ValidationResult validationResult = requestValidator.validate(stack, backupLocation, null);
@@ -163,7 +156,7 @@ public class BackupRestoreV4RequestValidatorTest {
     }
 
     @Test
-    public void testMultipleErrorsSupportedPlatformInvalidLocationNullBackupId() {
+    void testMultipleErrorsSupportedPlatformInvalidLocationNullBackupId() {
         Stack stack = getStack(CloudPlatform.GCP.name());
         String backupLocation = "s3a://test/backup";
         ValidationResult validationResult = requestValidator.validate(stack, backupLocation, null);
@@ -191,8 +184,8 @@ public class BackupRestoreV4RequestValidatorTest {
             }
         }
 
-        assertTrue("Validation failed for valid schemes under cloud platform \"" + cloudPlatform +
-                "\"! Check logs for the exact schemes that failed.", validationPassed);
+        assertTrue(validationPassed, "Validation failed for valid schemes under cloud platform \"" + cloudPlatform +
+                "\"! Check logs for the exact schemes that failed.");
     }
 
     private Stack getStack(String cloudPlatform) {

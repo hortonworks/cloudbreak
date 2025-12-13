@@ -1,9 +1,9 @@
 package com.sequenceiq.cloudbreak.cloud.handler;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -16,10 +16,10 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 
 @SpringBootTest(classes = { TestApplicationContext.class, CollectMetadataComponentTest.TestConfig.class },
         properties = "spring.main.allow-bean-definition-overriding=true")
-public class CollectMetadataComponentTest extends AbstractComponentTest<CollectMetadataResult> {
+class CollectMetadataComponentTest extends AbstractComponentTest<CollectMetadataResult> {
 
     @Test
-    public void testCollectMetadata() {
+    void testCollectMetadata() {
         CollectMetadataResult result = sendCloudRequest();
 
         assertEquals(1L, result.getResults().size());
@@ -44,6 +44,6 @@ public class CollectMetadataComponentTest extends AbstractComponentTest<CollectM
 
     @Configuration
     @Import({CollectMetadataHandler.class})
-    public static class TestConfig {
+    static class TestConfig {
     }
 }

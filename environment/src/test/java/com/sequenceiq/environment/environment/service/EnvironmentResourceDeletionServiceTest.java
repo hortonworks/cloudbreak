@@ -1,12 +1,14 @@
 package com.sequenceiq.environment.environment.service;
 
 import static com.sequenceiq.environment.environment.service.EnvironmentTestData.ENVIRONMENT_NAME;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -18,12 +20,10 @@ import jakarta.ws.rs.ProcessingException;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -127,7 +127,7 @@ class EnvironmentResourceDeletionServiceTest {
 
     @Test
     void testWhenDeleteClusterDefinitionsOnCloudbreakThrowsWebApplicationExceptionThenItShouldBeCatchedAndEnvironmentServiceExceptionShouldBeThrown() {
-        WebApplicationException exception = Mockito.mock(WebApplicationException.class);
+        WebApplicationException exception = mock(WebApplicationException.class);
 
         ClusterTemplateViewV4Response templateViewV4ResponseUserManaged = new ClusterTemplateViewV4Response();
         templateViewV4ResponseUserManaged.setName("name");
@@ -138,11 +138,11 @@ class EnvironmentResourceDeletionServiceTest {
                 .thenReturn(Set.of(templateViewV4ResponseUserManaged));
         when(clusterTemplateV4Endpoint.listByEnv(anyLong(), anyString())).thenReturn(clusterTemplateViewV4Responses);
         doThrow(exception).when(clusterTemplateV4Endpoint).deleteMultiple(eq(WORKSPACE_ID), any(), any(), eq(ENVIRONMENT_CRN));
-        Response response = Mockito.mock(Response.class);
+        Response response = mock(Response.class);
         when(exception.getResponse()).thenReturn(response);
         when(response.readEntity(any(Class.class))).thenReturn("error");
 
-        Assertions.assertThrows(EnvironmentServiceException.class,
+        assertThrows(EnvironmentServiceException.class,
                 () -> environmentResourceDeletionServiceUnderTest.deleteClusterDefinitionsOnCloudbreak(ENVIRONMENT_CRN));
 
         verify(clusterTemplateV4Endpoint).deleteMultiple(anyLong(), any(), any(), anyString());
@@ -159,7 +159,7 @@ class EnvironmentResourceDeletionServiceTest {
         when(clusterTemplateV4Endpoint.listByEnv(anyLong(), anyString())).thenReturn(clusterTemplateViewV4Responses);
         when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn("crn:cdp:datahub:us-west-1:altus:user:__internal__actor__");
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
-        Assertions.assertThrows(EnvironmentServiceException.class,
+        assertThrows(EnvironmentServiceException.class,
                 () -> environmentResourceDeletionServiceUnderTest.deleteClusterDefinitionsOnCloudbreak(ENVIRONMENT_CRN));
 
         verify(clusterTemplateV4Endpoint, times(1)).deleteMultiple(anyLong(), any(), any(), anyString());

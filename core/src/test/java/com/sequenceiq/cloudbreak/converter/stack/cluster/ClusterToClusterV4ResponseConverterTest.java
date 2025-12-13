@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.converter.stack.cluster;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -12,12 +12,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.TestUtil;
@@ -46,11 +46,10 @@ import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigWithoutClusterServic
 import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 import com.sequenceiq.cloudbreak.service.secret.model.StringToSecretResponseConverter;
 import com.sequenceiq.cloudbreak.util.StackUtil;
-import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.api.type.CertExpirationState;
 
-@RunWith(MockitoJUnitRunner.class)
-public class ClusterToClusterV4ResponseConverterTest extends AbstractEntityConverterTest<Cluster> {
+@ExtendWith(MockitoExtension.class)
+class ClusterToClusterV4ResponseConverterTest extends AbstractEntityConverterTest<Cluster> {
 
     public static final String CERT_EXPIRATION_DETAILS = "Cert will expire in 60 days";
 
@@ -90,14 +89,13 @@ public class ClusterToClusterV4ResponseConverterTest extends AbstractEntityConve
     @Mock
     private ClusterToClouderaManagerV4ResponseConverter clusterToClouderaManagerV4ResponseConverter;
 
-    @Before
+    @BeforeEach
     public void setUp() {
-        when(workspaceToWorkspaceResourceV4ResponseConverter.convert(any(Workspace.class)))
-                .thenReturn(new WorkspaceResourceV4Response());
+        when(workspaceToWorkspaceResourceV4ResponseConverter.convert(any())).thenReturn(new WorkspaceResourceV4Response());
     }
 
     @Test
-    public void testConvert() {
+    void testConvert() {
         // GIVEN
         StackDtoDelegate stackDtoDelegate = mock(StackDtoDelegate.class);
         Cluster source = getSource();
@@ -141,7 +139,7 @@ public class ClusterToClusterV4ResponseConverterTest extends AbstractEntityConve
     }
 
     @Test
-    public void testConvertWithoutUpSinceField() {
+    void testConvertWithoutUpSinceField() {
         // GIVEN
         StackDtoDelegate stackDtoDelegate = mock(StackDtoDelegate.class);
         when(proxyConfigDtoService.getByCrn(anyString())).thenReturn(ProxyConfig.builder().withCrn("crn").withName("name").build());
@@ -156,7 +154,7 @@ public class ClusterToClusterV4ResponseConverterTest extends AbstractEntityConve
     }
 
     @Test
-    public void testConvertWithoutMasterComponent() {
+    void testConvertWithoutMasterComponent() {
         // GIVEN
         StackDtoDelegate stackDtoDelegate = mock(StackDtoDelegate.class);
         when(stackDtoDelegate.getStack()).thenReturn(new Stack());
@@ -170,7 +168,7 @@ public class ClusterToClusterV4ResponseConverterTest extends AbstractEntityConve
     }
 
     @Test
-    public void testExposedServices() {
+    void testExposedServices() {
         StackDtoDelegate stackDtoDelegate = mock(StackDtoDelegate.class);
         Map<String, Collection<ClusterExposedServiceV4Response>> exposedServiceResponseMap = new HashMap<>();
         exposedServiceResponseMap.put("topology1", getExpiosedServices());

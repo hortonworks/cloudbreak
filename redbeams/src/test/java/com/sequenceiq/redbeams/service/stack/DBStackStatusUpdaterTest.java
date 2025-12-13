@@ -1,16 +1,17 @@
 package com.sequenceiq.redbeams.service.stack;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.util.Optional;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.redbeams.api.model.common.DetailedDBStackStatus;
@@ -19,7 +20,8 @@ import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.domain.stack.DBStackStatus;
 import com.sequenceiq.redbeams.service.store.RedbeamsInMemoryStateStoreUpdaterService;
 
-public class DBStackStatusUpdaterTest {
+@ExtendWith(MockitoExtension.class)
+class DBStackStatusUpdaterTest {
 
     @Mock
     private DBStackService dbStackService;
@@ -39,10 +41,8 @@ public class DBStackStatusUpdaterTest {
 
     private long now;
 
-    @Before
-    public void setUp() {
-        initMocks(this);
-
+    @BeforeEach
+    void setUp() {
         dbStack = new DBStack();
         dbStack.setId(1L);
         dbStackOptional = Optional.of(dbStack);
@@ -55,7 +55,7 @@ public class DBStackStatusUpdaterTest {
     }
 
     @Test
-    public void testUpdateStatus() {
+    void testUpdateStatus() {
         dbStack.setDBStackStatus(new DBStackStatus(dbStack, DetailedDBStackStatus.CREATING_INFRASTRUCTURE, now));
 
         DBStack savedStack = underTest.updateStatus(1L, DetailedDBStackStatus.PROVISIONED, "because").get();

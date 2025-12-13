@@ -1,9 +1,10 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.model;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 
 public class MachineDefinitionViewTest {
@@ -26,19 +27,19 @@ public class MachineDefinitionViewTest {
 
         MachineDefinitionView machineDefinitionView = new MachineDefinitionView(map);
 
-        Assert.assertEquals("1", machineDefinitionView.getId());
-        Assert.assertEquals("description", machineDefinitionView.getDescription());
-        Assert.assertEquals("link", machineDefinitionView.getSelfLink());
-        Assert.assertEquals("time", machineDefinitionView.getCreationTimestamp());
-        Assert.assertEquals("cpu", machineDefinitionView.getGuestCpus());
-        Assert.assertEquals("kind", machineDefinitionView.getKind());
-        Assert.assertEquals("1", machineDefinitionView.getMaximumPersistentDisks());
-        Assert.assertEquals("1", machineDefinitionView.getMaximumPersistentDisksSizeGb());
-        Assert.assertEquals(Integer.valueOf(1), machineDefinitionView.getMaximumNumberWithLimit());
-        Assert.assertEquals("memory", machineDefinitionView.getMemoryMb());
-        Assert.assertEquals("name", machineDefinitionView.getName());
-        Assert.assertEquals("price", machineDefinitionView.getPrice());
-        Assert.assertEquals("zone", machineDefinitionView.getZone());
+        assertEquals("1", machineDefinitionView.getId());
+        assertEquals("description", machineDefinitionView.getDescription());
+        assertEquals("link", machineDefinitionView.getSelfLink());
+        assertEquals("time", machineDefinitionView.getCreationTimestamp());
+        assertEquals("cpu", machineDefinitionView.getGuestCpus());
+        assertEquals("kind", machineDefinitionView.getKind());
+        assertEquals("1", machineDefinitionView.getMaximumPersistentDisks());
+        assertEquals("1", machineDefinitionView.getMaximumPersistentDisksSizeGb());
+        assertEquals(Integer.valueOf(1), machineDefinitionView.getMaximumNumberWithLimit());
+        assertEquals("memory", machineDefinitionView.getMemoryMb());
+        assertEquals("name", machineDefinitionView.getName());
+        assertEquals("price", machineDefinitionView.getPrice());
+        assertEquals("zone", machineDefinitionView.getZone());
     }
 
 }

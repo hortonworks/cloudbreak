@@ -1,6 +1,15 @@
 package com.sequenceiq.freeipa.service.freeipa.flow;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.HashSet;
@@ -8,14 +17,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.googlecode.jsonrpc4j.JsonRpcClientException;
@@ -112,10 +119,10 @@ class FreeIpaTopologyServiceTest {
     }
 
     private void assertSetEquivalence(Set<?> s1, Set<?> s2) {
-        Assertions.assertNotNull(s1);
-        Assertions.assertNotNull(s2);
-        Assertions.assertEquals(s1.size(), s2.size());
-        Assertions.assertTrue(s1.containsAll(s2));
+        assertNotNull(s1);
+        assertNotNull(s2);
+        assertEquals(s1.size(), s2.size());
+        assertTrue(s1.containsAll(s2));
     }
 
     private static Object[][] testUpdateReplicationTopologyParameters() {
@@ -155,22 +162,22 @@ class FreeIpaTopologyServiceTest {
         }
         List<TopologySegment> topologySegments2 = new LinkedList<>();
         topologySegments2.addAll(topologySegments1);
-        when(freeIpaClient.findTopologySegments(Mockito.anyString()))
+        when(freeIpaClient.findTopologySegments(anyString()))
                 .thenReturn(topologySegments1)
                 .thenReturn(topologySegments1)
                 .thenReturn(topologySegments2)
                 .thenReturn(topologySegments2);
         if (expectedSegmentsToAdd > 0) {
-            when(freeIpaClient.addTopologySegment(Mockito.anyString(), Mockito.any())).thenReturn(new TopologySegment());
+            when(freeIpaClient.addTopologySegment(anyString(), any())).thenReturn(new TopologySegment());
         }
         if (expectedSegmentsToRemove > 0) {
-            when(freeIpaClient.deleteTopologySegment(Mockito.anyString(), Mockito.any())).thenReturn(new TopologySegment());
+            when(freeIpaClient.deleteTopologySegment(anyString(), any())).thenReturn(new TopologySegment());
         }
         underTest.updateReplicationTopology(1L, Set.of(), freeIpaClient);
-        Mockito.verify(freeIpaClient, Mockito.times(expectedSegmentsToAdd)).addTopologySegment(Mockito.eq("ca"), Mockito.any());
-        Mockito.verify(freeIpaClient, Mockito.times(expectedSegmentsToAdd)).addTopologySegment(Mockito.eq("domain"), Mockito.any());
-        Mockito.verify(freeIpaClient, Mockito.times(expectedSegmentsToRemove)).deleteTopologySegment(Mockito.eq("ca"), Mockito.any());
-        Mockito.verify(freeIpaClient, Mockito.times(expectedSegmentsToRemove)).deleteTopologySegment(Mockito.eq("domain"), Mockito.any());
+        verify(freeIpaClient, times(expectedSegmentsToAdd)).addTopologySegment(eq("ca"), any());
+        verify(freeIpaClient, times(expectedSegmentsToAdd)).addTopologySegment(eq("domain"), any());
+        verify(freeIpaClient, times(expectedSegmentsToRemove)).deleteTopologySegment(eq("ca"), any());
+        verify(freeIpaClient, times(expectedSegmentsToRemove)).deleteTopologySegment(eq("domain"), any());
     }
 
     @MethodSource("testUpdateReplicationTopologyParameters")
@@ -200,22 +207,22 @@ class FreeIpaTopologyServiceTest {
         }
         List<TopologySegment> topologySegments2 = new LinkedList<>();
         topologySegments2.addAll(topologySegments1);
-        when(freeIpaClient.findTopologySegments(Mockito.anyString()))
+        when(freeIpaClient.findTopologySegments(anyString()))
                 .thenReturn(topologySegments1)
                 .thenReturn(topologySegments1)
                 .thenReturn(topologySegments2)
                 .thenReturn(topologySegments2);
         if (expectedSegmentsToAdd > 0) {
-            when(freeIpaClient.addTopologySegment(Mockito.anyString(), Mockito.any())).thenReturn(new TopologySegment());
+            when(freeIpaClient.addTopologySegment(anyString(), any())).thenReturn(new TopologySegment());
         }
         if (expectedSegmentsToRemove > 0) {
-            when(freeIpaClient.deleteTopologySegment(Mockito.anyString(), Mockito.any())).thenReturn(new TopologySegment());
+            when(freeIpaClient.deleteTopologySegment(anyString(), any())).thenReturn(new TopologySegment());
         }
         underTest.updateReplicationTopologyWithRetry(stack, Set.of());
-        Mockito.verify(freeIpaClient, Mockito.times(expectedSegmentsToAdd)).addTopologySegment(Mockito.eq("ca"), Mockito.any());
-        Mockito.verify(freeIpaClient, Mockito.times(expectedSegmentsToAdd)).addTopologySegment(Mockito.eq("domain"), Mockito.any());
-        Mockito.verify(freeIpaClient, Mockito.times(expectedSegmentsToRemove)).deleteTopologySegment(Mockito.eq("ca"), Mockito.any());
-        Mockito.verify(freeIpaClient, Mockito.times(expectedSegmentsToRemove)).deleteTopologySegment(Mockito.eq("domain"), Mockito.any());
+        verify(freeIpaClient, times(expectedSegmentsToAdd)).addTopologySegment(eq("ca"), any());
+        verify(freeIpaClient, times(expectedSegmentsToAdd)).addTopologySegment(eq("domain"), any());
+        verify(freeIpaClient, times(expectedSegmentsToRemove)).deleteTopologySegment(eq("ca"), any());
+        verify(freeIpaClient, times(expectedSegmentsToRemove)).deleteTopologySegment(eq("domain"), any());
     }
 
     @Test
@@ -234,13 +241,13 @@ class FreeIpaTopologyServiceTest {
         segment.setLeftNode("ipaserver1.example.com");
         segment.setRightNode("ipaserver2.example.com");
         topologySegments.add(segment);
-        when(freeIpaClient.findTopologySegments(Mockito.anyString())).thenReturn(topologySegments);
-        when(freeIpaClient.deleteTopologySegment(Mockito.anyString(), Mockito.any())).thenReturn(new TopologySegment());
+        when(freeIpaClient.findTopologySegments(anyString())).thenReturn(topologySegments);
+        when(freeIpaClient.deleteTopologySegment(anyString(), any())).thenReturn(new TopologySegment());
 
         underTest.updateReplicationTopology(1L, Set.of("ipaserver2.example.com"), freeIpaClient);
 
-        Mockito.verify(freeIpaClient, Mockito.never()).addTopologySegment(Mockito.any(), Mockito.any());
-        Mockito.verify(freeIpaClient, Mockito.times(1)).deleteTopologySegment(Mockito.eq("ca"), Mockito.any());
+        verify(freeIpaClient, never()).addTopologySegment(any(), any());
+        verify(freeIpaClient, times(1)).deleteTopologySegment(eq("ca"), any());
     }
 
     @Test
@@ -259,15 +266,15 @@ class FreeIpaTopologyServiceTest {
         segment.setLeftNode("ipaserver1.example.com");
         segment.setRightNode("ipaserver2.example.com");
         topologySegments.add(segment);
-        when(freeIpaClient.findTopologySegments(Mockito.anyString())).thenReturn(topologySegments);
+        when(freeIpaClient.findTopologySegments(anyString())).thenReturn(topologySegments);
         String message = "already deleted";
-        when(freeIpaClient.deleteTopologySegment(Mockito.anyString(), Mockito.any()))
+        when(freeIpaClient.deleteTopologySegment(anyString(), any()))
                 .thenThrow(new FreeIpaClientException(message, new JsonRpcClientException(NOT_FOUND, message, null)));
 
         underTest.updateReplicationTopology(1L, Set.of("ipaserver2.example.com"), freeIpaClient);
 
-        Mockito.verify(freeIpaClient, Mockito.never()).addTopologySegment(Mockito.any(), Mockito.any());
-        Mockito.verify(freeIpaClient, Mockito.times(1)).deleteTopologySegment(Mockito.eq("ca"), Mockito.any());
+        verify(freeIpaClient, never()).addTopologySegment(any(), any());
+        verify(freeIpaClient, times(1)).deleteTopologySegment(eq("ca"), any());
     }
 
 }

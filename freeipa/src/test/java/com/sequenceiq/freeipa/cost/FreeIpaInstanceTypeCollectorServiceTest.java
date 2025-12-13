@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.cost;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
@@ -11,7 +13,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -78,16 +79,16 @@ public class FreeIpaInstanceTypeCollectorServiceTest {
         ThreadBasedUserCrnProvider.doAs("crn:cdp:iam:us-west-1:1234:user:1", () -> {
             Optional<ClusterCostDto> clusterCostDto = underTest.getAllInstanceTypesForCost(getStack("AZURE"));
 
-            Assertions.assertTrue(clusterCostDto.isPresent());
-            Assertions.assertEquals("AVAILABLE", clusterCostDto.get().getStatus());
-            Assertions.assertEquals(REGION.toLowerCase(Locale.ROOT), clusterCostDto.get().getRegion());
+            assertTrue(clusterCostDto.isPresent());
+            assertEquals("AVAILABLE", clusterCostDto.get().getStatus());
+            assertEquals(REGION.toLowerCase(Locale.ROOT), clusterCostDto.get().getRegion());
             InstanceGroupCostDto instanceGroupCostDto = clusterCostDto.get().getInstanceGroups().get(0);
-            Assertions.assertEquals(1.0, instanceGroupCostDto.getTotalProviderPrice());
-            Assertions.assertEquals(1.0, instanceGroupCostDto.getTotalClouderaPrice());
+            assertEquals(1.0, instanceGroupCostDto.getTotalProviderPrice());
+            assertEquals(1.0, instanceGroupCostDto.getTotalClouderaPrice());
             DiskCostDto diskCostDto1 = instanceGroupCostDto.getDisksPerInstance().get(0);
             DiskCostDto diskCostDto2 = instanceGroupCostDto.getDisksPerInstance().get(1);
-            Assertions.assertEquals(750, diskCostDto1.getTotalDiskSizeInGb() + diskCostDto2.getTotalDiskSizeInGb());
-            Assertions.assertEquals(MAGIC_PRICE_PER_DISK_GB * 3 * 250, diskCostDto1.getTotalDiskPrice() + diskCostDto2.getTotalDiskPrice(), 0.001);
+            assertEquals(750, diskCostDto1.getTotalDiskSizeInGb() + diskCostDto2.getTotalDiskSizeInGb());
+            assertEquals(MAGIC_PRICE_PER_DISK_GB * 3 * 250, diskCostDto1.getTotalDiskPrice() + diskCostDto2.getTotalDiskPrice(), 0.001);
         });
     }
 
@@ -102,19 +103,19 @@ public class FreeIpaInstanceTypeCollectorServiceTest {
         ThreadBasedUserCrnProvider.doAs("crn:cdp:iam:us-west-1:1234:user:1", () -> {
             Optional<ClusterCO2Dto> clusterCO2Dto = underTest.getAllInstanceTypesForCO2(getStack("AWS"));
 
-            Assertions.assertTrue(clusterCO2Dto.isPresent());
-            Assertions.assertEquals("AVAILABLE", clusterCO2Dto.get().getStatus());
-            Assertions.assertEquals(REGION, clusterCO2Dto.get().getRegion());
+            assertTrue(clusterCO2Dto.isPresent());
+            assertEquals("AVAILABLE", clusterCO2Dto.get().getStatus());
+            assertEquals(REGION, clusterCO2Dto.get().getRegion());
             Optional<InstanceGroupCO2Dto> instanceGroupCO2DtoOptional = clusterCO2Dto.get().getInstanceGroups().stream().findFirst();
-            Assertions.assertTrue(instanceGroupCO2DtoOptional.isPresent());
+            assertTrue(instanceGroupCO2DtoOptional.isPresent());
             InstanceGroupCO2Dto instanceGroupCO2Dto = instanceGroupCO2DtoOptional.get();
-            Assertions.assertEquals(8, instanceGroupCO2Dto.getvCPUs());
-            Assertions.assertEquals(16, instanceGroupCO2Dto.getMemory());
+            assertEquals(8, instanceGroupCO2Dto.getvCPUs());
+            assertEquals(16, instanceGroupCO2Dto.getMemory());
             List<DiskCO2Dto> diskCO2Dtos = instanceGroupCO2Dto.getDisksPerInstance();
             int totalDiskCount = diskCO2Dtos.stream().mapToInt(DiskCO2Dto::getCount).sum();
-            Assertions.assertEquals(3, totalDiskCount);
+            assertEquals(3, totalDiskCount);
             int totalDiskSize = diskCO2Dtos.stream().mapToInt(disk -> disk.getSize() * disk.getCount()).sum();
-            Assertions.assertEquals(750, totalDiskSize);
+            assertEquals(750, totalDiskSize);
         });
     }
 

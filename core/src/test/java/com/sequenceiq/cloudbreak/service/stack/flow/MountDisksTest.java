@@ -10,13 +10,13 @@ import static org.mockito.Mockito.when;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
@@ -36,8 +36,8 @@ import com.sequenceiq.cloudbreak.service.stack.flow.diskvalidator.DiskValidator;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.common.api.type.ResourceType;
 
-@RunWith(MockitoJUnitRunner.class)
-public class MountDisksTest {
+@ExtendWith(MockitoExtension.class)
+class MountDisksTest {
 
     @Mock
     private StackService stackService;
@@ -79,7 +79,7 @@ public class MountDisksTest {
     private ArgumentCaptor<Set<Node>> allNodesCaptor;
 
     @Test
-    public void mountDisksOnNewNodesShouldUseReachableNodes() throws CloudbreakException, CloudbreakOrchestratorFailedException {
+    void mountDisksOnNewNodesShouldUseReachableNodes() throws CloudbreakException, CloudbreakOrchestratorFailedException {
         when(entitlementService.isXfsForEphemeralDisksSupported(any())).thenReturn(Boolean.FALSE);
         Set<String> newNodeAddresses = Set.of("node-1");
         when(stackService.getByIdWithListsInTransaction(1L)).thenReturn(stack);

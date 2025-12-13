@@ -2,10 +2,10 @@ package com.sequenceiq.datalake.controller.sdx;
 
 import static com.sequenceiq.common.model.ProviderSyncState.BASIC_SKU_MIGRATION_NEEDED;
 import static com.sequenceiq.common.model.ProviderSyncState.VALID;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 import static org.springframework.util.Assert.notNull;
@@ -56,8 +56,8 @@ class SdxClusterConverterTest {
         for (DatalakeStatusEnum value : DatalakeStatusEnum.values()) {
             notNull(SdxClusterStatusResponse.valueOf(value.name()), value.name());
         }
-        assertThrows("null Response conversion", NullPointerException.class, () -> SdxClusterStatusResponse.valueOf(null));
-        assertThrows("null Status conversion", NullPointerException.class, () -> DatalakeStatusEnum.valueOf(null));
+        assertThrows(NullPointerException.class, () -> SdxClusterStatusResponse.valueOf(null), "null Response conversion");
+        assertThrows(NullPointerException.class, () -> DatalakeStatusEnum.valueOf(null), "null Status conversion");
     }
 
     @Test

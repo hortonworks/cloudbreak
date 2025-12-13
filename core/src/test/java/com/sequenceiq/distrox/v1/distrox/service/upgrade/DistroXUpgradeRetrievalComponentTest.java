@@ -33,7 +33,6 @@ import jakarta.inject.Inject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -621,7 +620,7 @@ public class DistroXUpgradeRetrievalComponentTest {
     }
 
     private StackDto createMockStackDto() {
-        StackDto stackDto = Mockito.mock(StackDto.class);
+        StackDto stackDto = mock(StackDto.class);
         when(stackDto.getResourceCrn()).thenReturn(CLUSTER_CRN);
         when(stackDto.getId()).thenReturn(STACK_ID);
         when(stackDto.getName()).thenReturn("stack-name");

@@ -14,6 +14,7 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -364,9 +365,9 @@ class AzurePublicIpSyncerTest {
         CloudResource network = createCloudResource("network1", AZURE_NETWORK);
         List<CloudResource> resources = List.of(publicIpResource1, publicIpResource2, network);
 
-        PublicIpAddress publicIpAddress2 = org.mockito.Mockito.mock(PublicIpAddress.class);
-        PublicIPSkuType publicIPSkuType2 = org.mockito.Mockito.mock(PublicIPSkuType.class);
-        PublicIpAddressSku publicIpAddressSku2 = org.mockito.Mockito.mock(PublicIpAddressSku.class);
+        PublicIpAddress publicIpAddress2 = mock(PublicIpAddress.class);
+        PublicIPSkuType publicIPSkuType2 = mock(PublicIPSkuType.class);
+        PublicIpAddressSku publicIpAddressSku2 = mock(PublicIpAddressSku.class);
 
         when(azureClient.getPublicIpAddresses(anySet(), anyString())).thenReturn(List.of(publicIpAddress, publicIpAddress2));
 

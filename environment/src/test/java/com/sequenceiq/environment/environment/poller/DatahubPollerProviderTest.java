@@ -24,7 +24,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -113,8 +112,8 @@ class DatahubPollerProviderTest {
         StackV4Response stack1 = getStackV4Response(s1Status, c1Status, "crn1");
         StackV4Response stack2 = getStackV4Response(s2Status, c2Status, "crn2");
 
-        Mockito.when(datahubService.getByCrn("crn1", Collections.emptySet())).thenReturn(stack1);
-        Mockito.when(datahubService.getByCrn("crn2", Collections.emptySet())).thenReturn(stack2);
+        when(datahubService.getByCrn("crn1", Collections.emptySet())).thenReturn(stack1);
+        when(datahubService.getByCrn("crn2", Collections.emptySet())).thenReturn(stack2);
 
         AttemptResult<Void> result = underTest.stopDatahubClustersPoller(pollingCrn, ENV_ID).process();
 
@@ -131,8 +130,8 @@ class DatahubPollerProviderTest {
         StackV4Response stack1 = getStackV4Response(s1Status, c1Status, "crn1");
         StackV4Response stack2 = getStackV4Response(s2Status, c2Status, "crn2");
 
-        Mockito.when(datahubService.getByCrn("crn1", Collections.emptySet())).thenReturn(stack1);
-        Mockito.when(datahubService.getByCrn("crn2", Collections.emptySet())).thenReturn(stack2);
+        when(datahubService.getByCrn("crn1", Collections.emptySet())).thenReturn(stack1);
+        when(datahubService.getByCrn("crn2", Collections.emptySet())).thenReturn(stack2);
 
         AttemptResult<Void> result = underTest.startDatahubClustersPoller(pollingCrn, ENV_ID).process();
 

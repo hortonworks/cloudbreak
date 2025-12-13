@@ -15,7 +15,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -178,7 +177,7 @@ public class AwsRdsUpgradeValidatorProviderTest {
         when(awsRdsVersionOperations.getAllUpgradeTargetVersions(rdsClient, currentVersion)).thenReturn(validUpgradeTargets);
         when(awsRdsVersionOperations.getHighestUpgradeVersionForTargetMajorVersion(validUpgradeTargets, targetVersion)).thenReturn(Optional.empty());
 
-        Assertions.assertThrows(CloudConnectorException.class, () ->
+        assertThrows(CloudConnectorException.class, () ->
                 underTest.getHighestUpgradeTargetVersion(rdsClient, targetVersion, currentVersion)
         );
     }

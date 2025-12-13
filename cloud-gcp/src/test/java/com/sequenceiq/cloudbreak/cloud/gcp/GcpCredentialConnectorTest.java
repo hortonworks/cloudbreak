@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.gcp;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
@@ -14,16 +16,11 @@ import jakarta.ws.rs.BadRequestException;
 
 import org.apache.commons.codec.binary.Base64;
 import org.hamcrest.core.IsInstanceOf;
-import org.junit.Assert;
-import org.junit.Rule;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.rules.ExpectedException;
 import org.mockito.Answers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.google.api.client.testing.http.MockHttpTransport;
@@ -45,7 +42,7 @@ import com.sequenceiq.cloudbreak.cloud.response.GranularPolicyResponse;
 import com.sequenceiq.common.model.CredentialType;
 
 @ExtendWith(MockitoExtension.class)
-public class GcpCredentialConnectorTest {
+class GcpCredentialConnectorTest {
 
     private static final Long WORKSPACE_ID = 1L;
 
@@ -69,9 +66,6 @@ public class GcpCredentialConnectorTest {
         CREDENTIAL_PARAMETERS.put("gcp", GCP_PARAMETERS);
     }
 
-    @Rule
-    public final ExpectedException expectedException = ExpectedException.none();
-
     @InjectMocks
     private GcpCredentialConnector underTest;
 
@@ -90,11 +84,6 @@ public class GcpCredentialConnectorTest {
     @Mock
     private GcpCredentialFactory gcpCredentialFactory;
 
-    @BeforeEach
-    public void setUp() {
-        MockitoAnnotations.initMocks(this);
-    }
-
     /**
      * Test that if some exception terminates the credential check operation,
      * or the checked credential is not valid. If that so, than the expected
@@ -104,7 +93,7 @@ public class GcpCredentialConnectorTest {
      *                     checker method.
      */
     @Test
-    public void testForNullExceptionOnVerifyPermissionCheck() throws IOException {
+    void testForNullExceptionOnVerifyPermissionCheck() throws IOException {
         AuthenticatedContext authContext = createAuthContext();
         String expectionReasonMessage = "exception message";
         when(contextBuilder.contextInit(authContext.getCloudContext(), authContext, null, false)).thenReturn(context);
@@ -112,10 +101,10 @@ public class GcpCredentialConnectorTest {
 
         CloudCredentialStatus status = underTest.verify(authContext, CREDENTIAL_VERIFICATION_CONTEXT);
 
-        Assert.assertNotNull("The returned CloudCredentialStatus instance is null!", status);
-        Assert.assertEquals("Invalid credential status has specified!", CredentialStatus.FAILED, status.getStatus());
+        assertNotNull(status, "The returned CloudCredentialStatus instance is null!");
+        assertEquals(CredentialStatus.FAILED, status.getStatus(), "Invalid credential status has specified!");
         assertThat("Not the specified exception has come with the status", status.getException(), IsInstanceOf.instanceOf(BadRequestException.class));
-        Assert.assertEquals("Not the expected exception message has come with the status", expectionReasonMessage, status.getException().getMessage());
+        assertEquals(expectionReasonMessage, status.getException().getMessage(), "Not the expected exception message has come with the status");
     }
 
     /**
@@ -123,14 +112,14 @@ public class GcpCredentialConnectorTest {
      * CredentialStatus is VERIFIED.
      */
     @Test
-    public void testPassingVerifyPermissionCheck() {
+    void testPassingVerifyPermissionCheck() {
         AuthenticatedContext authContext = createAuthContext();
         when(contextBuilder.contextInit(authContext.getCloudContext(), authContext, null, false)).thenReturn(context);
 
         CloudCredentialStatus status = underTest.verify(authContext, CREDENTIAL_VERIFICATION_CONTEXT);
 
-        Assert.assertNotNull("The returned CloudCredentialStatus instance is null!", status);
-        Assert.assertEquals("Invalid credential status has specified!", CredentialStatus.VERIFIED, status.getStatus());
+        assertNotNull(status, "The returned CloudCredentialStatus instance is null!");
+        assertEquals(CredentialStatus.VERIFIED, status.getStatus(), "Invalid credential status has specified!");
     }
 
     /**
@@ -139,15 +128,15 @@ public class GcpCredentialConnectorTest {
      * status should come back.
      */
     @Test
-    public void testForFailedStatusBecauseMissingPrjId() throws InvalidGcpContextException {
+    void testForFailedStatusBecauseMissingPrjId() throws InvalidGcpContextException {
         final AuthenticatedContext authContext = createAuthContext();
         when(contextBuilder.contextInit(authContext.getCloudContext(), authContext, null, false)).thenReturn(context);
         doThrow(new NullPointerException()).when(gcpCredentialVerifier).checkGcpContextValidity(context);
 
         CloudCredentialStatus status = underTest.verify(authContext, CREDENTIAL_VERIFICATION_CONTEXT);
 
-        Assert.assertNotNull("The returned CloudCredentialStatus instance is null!", status);
-        Assert.assertEquals("Invalid credential status has specified!", CredentialStatus.FAILED, status.getStatus());
+        assertNotNull(status, "The returned CloudCredentialStatus instance is null!");
+        assertEquals(CredentialStatus.FAILED, status.getStatus(), "Invalid credential status has specified!");
     }
 
     /**
@@ -156,15 +145,15 @@ public class GcpCredentialConnectorTest {
      * status should come back.
      */
     @Test
-    public void testForFailedStatusBecauseMissingServiceAccId() throws InvalidGcpContextException {
+    void testForFailedStatusBecauseMissingServiceAccId() throws InvalidGcpContextException {
         final AuthenticatedContext authContext = createAuthContext();
         when(contextBuilder.contextInit(authContext.getCloudContext(), authContext, null, false)).thenReturn(context);
         doThrow(new NullPointerException()).when(gcpCredentialVerifier).checkGcpContextValidity(context);
 
         CloudCredentialStatus status = underTest.verify(authContext, CREDENTIAL_VERIFICATION_CONTEXT);
 
-        Assert.assertNotNull("The returned CloudCredentialStatus instance is null!", status);
-        Assert.assertEquals("Invalid credential status has specified!", CredentialStatus.FAILED, status.getStatus());
+        assertNotNull(status, "The returned CloudCredentialStatus instance is null!");
+        assertEquals(CredentialStatus.FAILED, status.getStatus(), "Invalid credential status has specified!");
     }
 
     /**
@@ -173,15 +162,15 @@ public class GcpCredentialConnectorTest {
      * status should come back.
      */
     @Test
-    public void testForFailedStatusBecauseMissingCompute() throws IOException {
+    void testForFailedStatusBecauseMissingCompute() throws IOException {
         final AuthenticatedContext authContext = createAuthContext();
         when(contextBuilder.contextInit(authContext.getCloudContext(), authContext, null, false)).thenReturn(context);
         doThrow(new NullPointerException()).when(gcpCredentialVerifier).preCheckOfGooglePermission(context);
 
         CloudCredentialStatus status = underTest.verify(authContext, CREDENTIAL_VERIFICATION_CONTEXT);
 
-        Assert.assertNotNull("The returned CloudCredentialStatus instance is null!", status);
-        Assert.assertEquals("Invalid credential status has specified!", CredentialStatus.FAILED, status.getStatus());
+        assertNotNull(status, "The returned CloudCredentialStatus instance is null!");
+        assertEquals(CredentialStatus.FAILED, status.getStatus(), "Invalid credential status has specified!");
     }
 
 
@@ -191,11 +180,11 @@ public class GcpCredentialConnectorTest {
      * should be DELETED.
      */
     @Test
-    public void testDeletePositive() {
+    void testDeletePositive() {
         CloudCredentialStatus status = underTest.delete(createAuthContext());
 
-        Assert.assertNotNull("The returned CloudCredentialStatus instance is null!", status);
-        Assert.assertEquals("Invalid credential status has specified!", CredentialStatus.DELETED, status.getStatus());
+        assertNotNull(status, "The returned CloudCredentialStatus instance is null!");
+        assertEquals(CredentialStatus.DELETED, status.getStatus(), "Invalid credential status has specified!");
     }
 
     /**
@@ -204,15 +193,15 @@ public class GcpCredentialConnectorTest {
      * should be CREATED.
      */
     @Test
-    public void testCreatePositive() {
+    void testCreatePositive() {
         CloudCredentialStatus status = underTest.create(createAuthContext());
 
-        Assert.assertNotNull("The returned CloudCredentialStatus instance is null!", status);
-        Assert.assertEquals("Invalid credential status has specified!", CredentialStatus.CREATED, status.getStatus());
+        assertNotNull(status, "The returned CloudCredentialStatus instance is null!");
+        assertEquals(CredentialStatus.CREATED, status.getStatus(), "Invalid credential status has specified!");
     }
 
     @Test
-    public void testPrerequisites() {
+    void testPrerequisites() {
         final AuthenticatedContext authContext = createAuthContext();
 
         String expectedMinimalCommands = "minimalCommandsJson";
@@ -242,8 +231,8 @@ public class GcpCredentialConnectorTest {
                 new GcpCredentialPrerequisites(Base64.encodeBase64String("prerequisites".getBytes()), minimalRequiredPermissions, granularPolicies)
         );
 
-        Assert.assertEquals(credentialPrerequisitesResponse, prerequisites);
-        Assert.assertEquals(credentialPrerequisitesResponse.getGcp().getPolicies(), prerequisites.getGcp().getPolicies());
+        assertEquals(credentialPrerequisitesResponse, prerequisites);
+        assertEquals(credentialPrerequisitesResponse.getGcp().getPolicies(), prerequisites.getGcp().getPolicies());
     }
 
     private AuthenticatedContext createAuthContext() {

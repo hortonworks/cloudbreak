@@ -1,8 +1,9 @@
 package com.sequenceiq.cloudbreak.cm;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.eq;
@@ -16,12 +17,12 @@ import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.Optional;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.api.swagger.ClustersResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
@@ -36,8 +37,8 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 
-@RunWith(MockitoJUnitRunner.class)
-public class ClouderaManagerUpgradeServiceTest {
+@ExtendWith(MockitoExtension.class)
+class ClouderaManagerUpgradeServiceTest {
 
     private static final String COMMAND_NAME = "UpgradeCluster";
 
@@ -69,7 +70,7 @@ public class ClouderaManagerUpgradeServiceTest {
     private ClouderaManagerCommandsService clouderaManagerCommandsService;
 
     @Test
-    public void testCallUpgradeCdhCommandShouldUpgradeCdpRuntimeWhenTheUpgradeCommendIsNotPresent() throws CloudbreakException, ApiException {
+    void testCallUpgradeCdhCommandShouldUpgradeCdpRuntimeWhenTheUpgradeCommendIsNotPresent() throws CloudbreakException, ApiException {
         Stack stack = createStack();
         ApiCommand apiCommand = createApiCommand();
         boolean rollingUpgradeEnabled = false;
@@ -93,7 +94,7 @@ public class ClouderaManagerUpgradeServiceTest {
     }
 
     @Test
-    public void testCallUpgradeCdhCommandShouldUpgradeCdpRuntimeWhenTheUpgradeCommendIsNotPresentAndTheRollingUpgradeIsEnabled()
+    void testCallUpgradeCdhCommandShouldUpgradeCdpRuntimeWhenTheUpgradeCommendIsNotPresentAndTheRollingUpgradeIsEnabled()
             throws CloudbreakException, ApiException {
         Stack stack = createStack();
         ApiCommand apiCommand = createApiCommand();
@@ -118,7 +119,7 @@ public class ClouderaManagerUpgradeServiceTest {
     }
 
     @Test
-    public void testCallUpgradeCdhCommandShouldNotUpgradeCdpRuntimeWhenTheUpgradeCommandIsAlreadyPresentAndActive() throws CloudbreakException, ApiException {
+    void testCallUpgradeCdhCommandShouldNotUpgradeCdpRuntimeWhenTheUpgradeCommandIsAlreadyPresentAndActive() throws CloudbreakException, ApiException {
         Stack stack = createStack();
         ApiCommand apiCommand = createApiCommand();
         apiCommand.setActive(Boolean.TRUE);
@@ -142,7 +143,7 @@ public class ClouderaManagerUpgradeServiceTest {
     }
 
     @Test
-    public void testCallUpgradeCdhCommandShouldUpgradeCdpRuntimeWhenTheUpgradeCommandIsAlreadyPresentAndInactiveAndNotRetryable()
+    void testCallUpgradeCdhCommandShouldUpgradeCdpRuntimeWhenTheUpgradeCommandIsAlreadyPresentAndInactiveAndNotRetryable()
             throws CloudbreakException, ApiException {
         Stack stack = createStack();
         boolean rollingUpgradeEnabled = false;
@@ -172,7 +173,7 @@ public class ClouderaManagerUpgradeServiceTest {
     }
 
     @Test
-    public void testCallUpgradeCdhCommandShouldRetryCdpRuntimeWhenTheUpgradeCommandIsAlreadyPresentAndInactiveAndRetryable()
+    void testCallUpgradeCdhCommandShouldRetryCdpRuntimeWhenTheUpgradeCommandIsAlreadyPresentAndInactiveAndRetryable()
             throws CloudbreakException, ApiException {
         Stack stack = createStack();
         boolean rollingUpgradeEnabled = false;
@@ -197,8 +198,8 @@ public class ClouderaManagerUpgradeServiceTest {
         verifyNoMoreInteractions(clustersResourceApi);
     }
 
-    @Test(expected = CancellationException.class)
-    public void testCallUpgradeCdhCommandShouldThrowCancellationExceptionWhenTheCommandIsExited() throws CloudbreakException, ApiException {
+    @Test
+    void testCallUpgradeCdhCommandShouldThrowCancellationExceptionWhenTheCommandIsExited() throws CloudbreakException, ApiException {
         Stack stack = createStack();
         ApiCommand apiCommand = createApiCommand();
         ExtendedPollingResult pollingResult = new ExtendedPollingResult.ExtendedPollingResultBuilder().exit().build();
@@ -208,11 +209,12 @@ public class ClouderaManagerUpgradeServiceTest {
         when(clouderaManagerPollingServiceProvider.startPollingCdpRuntimeUpgrade(stack, apiClient, COMMAND_ID, rollingUpgradeEnabled)).thenReturn(pollingResult);
         doThrow(new CancellationException("Exit")).when(pollingResultErrorHandler).handlePollingResult(eq(pollingResult), any(), any());
 
-        underTest.callUpgradeCdhCommand(STACK_PRODUCT_VERSION, clustersResourceApi, stack, apiClient, rollingUpgradeEnabled);
+        assertThrows(CancellationException.class,
+                () -> underTest.callUpgradeCdhCommand(STACK_PRODUCT_VERSION, clustersResourceApi, stack, apiClient, rollingUpgradeEnabled), "Exit");
     }
 
-    @Test(expected = CloudbreakException.class)
-    public void testCallUpgradeCdhCommandShouldThrowCloudbreakExceptionWhenTheCommandFailedWithTimeout() throws CloudbreakException, ApiException {
+    @Test
+    void testCallUpgradeCdhCommandShouldThrowCloudbreakExceptionWhenTheCommandFailedWithTimeout() throws CloudbreakException, ApiException {
         Stack stack = createStack();
         ApiCommand apiCommand = createApiCommand();
         ExtendedPollingResult pollingResult = new ExtendedPollingResult.ExtendedPollingResultBuilder().timeout().build();
@@ -222,13 +224,14 @@ public class ClouderaManagerUpgradeServiceTest {
         when(clouderaManagerPollingServiceProvider.startPollingCdpRuntimeUpgrade(stack, apiClient, COMMAND_ID, rollingUpgradeEnabled)).thenReturn(pollingResult);
         doThrow(new CloudbreakException("Timeout")).when(pollingResultErrorHandler).handlePollingResult(eq(pollingResult), any(), any());
 
-        underTest.callUpgradeCdhCommand(STACK_PRODUCT_VERSION, clustersResourceApi, stack, apiClient, rollingUpgradeEnabled);
+        assertThrows(CloudbreakException.class,
+                () -> underTest.callUpgradeCdhCommand(STACK_PRODUCT_VERSION, clustersResourceApi, stack, apiClient, rollingUpgradeEnabled), "Timeout");
 
         verify(clouderaManagerPollingServiceProvider).startPollingCdpRuntimeUpgrade(stack, apiClient, COMMAND_ID, rollingUpgradeEnabled);
     }
 
     @Test
-    public void testCallUpgradeCdhCommandShouldExitWithoutErrorWhenTheClusterAlreadyUpgraded() throws CloudbreakException, ApiException {
+    void testCallUpgradeCdhCommandShouldExitWithoutErrorWhenTheClusterAlreadyUpgraded() throws CloudbreakException, ApiException {
         Stack stack = createStack();
         ApiException apiException = new ApiException(0, "error", Collections.emptyMap(), "Cannot upgrade because the version is already CDH");
 
@@ -241,7 +244,7 @@ public class ClouderaManagerUpgradeServiceTest {
     }
 
     @Test
-    public void testCallPostRuntimeUpgradeCommandForNewSubmit() throws ApiException, CloudbreakException {
+    void testCallPostRuntimeUpgradeCommandForNewSubmit() throws ApiException, CloudbreakException {
         Stack stack = createStack();
         ApiCommand apiCommand = createApiCommand();
         when(syncApiCommandRetriever.getCommandId("PostClouderaRuntimeUpgradeCommand", clustersResourceApi, stack)).thenReturn(Optional.empty());
@@ -257,7 +260,7 @@ public class ClouderaManagerUpgradeServiceTest {
     }
 
     @Test
-    public void testCallPostRuntimeUpgradeCommandWhenItsAlreadyRunning() throws ApiException, CloudbreakException {
+    void testCallPostRuntimeUpgradeCommandWhenItsAlreadyRunning() throws ApiException, CloudbreakException {
         Stack stack = createStack();
         ApiCommand apiCommand = createApiCommand();
         apiCommand.setActive(Boolean.TRUE);
@@ -277,7 +280,7 @@ public class ClouderaManagerUpgradeServiceTest {
     }
 
     @Test
-    public void testCallPostRuntimeUpgradeCommandWhenItsAlreadySucceededAndShouldBeSubmittedAgain() throws ApiException, CloudbreakException {
+    void testCallPostRuntimeUpgradeCommandWhenItsAlreadySucceededAndShouldBeSubmittedAgain() throws ApiException, CloudbreakException {
         Stack stack = createStack();
         ApiCommand apiCommand = createApiCommand();
         apiCommand.setActive(Boolean.FALSE);

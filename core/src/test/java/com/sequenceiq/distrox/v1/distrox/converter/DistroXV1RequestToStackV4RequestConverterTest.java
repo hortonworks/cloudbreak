@@ -3,6 +3,7 @@ package com.sequenceiq.distrox.v1.distrox.converter;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -19,7 +20,6 @@ import java.util.Optional;
 import java.util.Set;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -301,7 +301,7 @@ class DistroXV1RequestToStackV4RequestConverterTest {
         verify(environmentClientService, times(1)).getByCrn(any());
         verify(environmentClientService, times(1)).getByCrn(source.getEnvironmentCrn());
 
-        Assertions.assertEquals(env.getName(), result.getEnvironmentName());
+        assertEquals(env.getName(), result.getEnvironmentName());
     }
 
     @Test
@@ -314,7 +314,7 @@ class DistroXV1RequestToStackV4RequestConverterTest {
 
         verify(environmentClientService, never()).getByCrn(any());
 
-        Assertions.assertNull(result.getEnvironmentName());
+        assertNull(result.getEnvironmentName());
     }
 
     @Test
@@ -372,9 +372,9 @@ class DistroXV1RequestToStackV4RequestConverterTest {
 
         verify(networkConverter).convertToNetworkV4Request(networkConverterCaptor.capture());
 
-        Assertions.assertEquals(networkV4Request, actual);
+        assertEquals(networkV4Request, actual);
         Pair<NetworkV1Request, DetailedEnvironmentResponse> captured = networkConverterCaptor.getValue();
-        Assertions.assertEquals("sub1", captured.getKey().getAws().getSubnetId());
+        assertEquals("sub1", captured.getKey().getAws().getSubnetId());
     }
 
     @Test
@@ -404,9 +404,9 @@ class DistroXV1RequestToStackV4RequestConverterTest {
 
         verify(networkConverter).convertToNetworkV4Request(networkConverterCaptor.capture());
 
-        Assertions.assertEquals(networkV4Request, actual);
+        assertEquals(networkV4Request, actual);
         Pair<NetworkV1Request, DetailedEnvironmentResponse> captured = networkConverterCaptor.getValue();
-        Assertions.assertEquals("sub1", captured.getKey().getAws().getSubnetId());
+        assertEquals("sub1", captured.getKey().getAws().getSubnetId());
     }
 
     @Test
@@ -440,9 +440,9 @@ class DistroXV1RequestToStackV4RequestConverterTest {
 
         verify(networkConverter).convertToNetworkV4Request(networkConverterCaptor.capture());
 
-        Assertions.assertEquals(networkV4Request, actual);
+        assertEquals(networkV4Request, actual);
         Pair<NetworkV1Request, DetailedEnvironmentResponse> captured = networkConverterCaptor.getValue();
-        Assertions.assertEquals("sub1", captured.getKey().getAws().getSubnetId());
+        assertEquals("sub1", captured.getKey().getAws().getSubnetId());
     }
 
     @Test
@@ -479,9 +479,9 @@ class DistroXV1RequestToStackV4RequestConverterTest {
 
         verify(networkConverter).convertToNetworkV4Request(networkConverterCaptor.capture());
 
-        Assertions.assertEquals(networkV4Request, actual);
+        assertEquals(networkV4Request, actual);
         Pair<NetworkV1Request, DetailedEnvironmentResponse> captured = networkConverterCaptor.getValue();
-        Assertions.assertEquals("subnet1", captured.getKey().getAws().getSubnetId());
+        assertEquals("subnet1", captured.getKey().getAws().getSubnetId());
     }
 
     @Test
@@ -519,9 +519,9 @@ class DistroXV1RequestToStackV4RequestConverterTest {
 
         verify(networkConverter).convertToNetworkV4Request(networkConverterCaptor.capture());
 
-        Assertions.assertEquals(networkV4Request, actual);
+        assertEquals(networkV4Request, actual);
         Pair<NetworkV1Request, DetailedEnvironmentResponse> captured = networkConverterCaptor.getValue();
-        Assertions.assertEquals("subnet1", captured.getKey().getAws().getSubnetId());
+        assertEquals("subnet1", captured.getKey().getAws().getSubnetId());
     }
 
     @Test
@@ -559,9 +559,9 @@ class DistroXV1RequestToStackV4RequestConverterTest {
 
         verify(networkConverter).convertToNetworkV4Request(networkConverterCaptor.capture());
 
-        Assertions.assertEquals(networkV4Request, actual);
+        assertEquals(networkV4Request, actual);
         Pair<NetworkV1Request, DetailedEnvironmentResponse> captured = networkConverterCaptor.getValue();
-        Assertions.assertEquals("sub1", captured.getKey().getAws().getSubnetId());
+        assertEquals("sub1", captured.getKey().getAws().getSubnetId());
     }
 
     @Test

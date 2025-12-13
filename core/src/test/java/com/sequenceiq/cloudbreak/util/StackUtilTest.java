@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.util;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -21,7 +22,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -186,7 +186,7 @@ class StackUtilTest {
         nodes.add(new Node("1.1.1.1", "1.1.1.1", "1", "m5.xlarge", "node1.example.com", "worker"));
         when(hostOrchestrator.getResponsiveNodes(nodesCaptor.capture(), any(), eq(Boolean.FALSE))).thenReturn(new NodeReachabilityResult(nodes, Set.of()));
 
-        NodesUnreachableException nodesUnreachableException = Assertions.assertThrows(NodesUnreachableException.class,
+        NodesUnreachableException nodesUnreachableException = assertThrows(NodesUnreachableException.class,
                 () -> stackUtil.collectReachableAndCheckNecessaryNodes(stack, necessaryNodes));
 
         assertEquals(1, nodesUnreachableException.getUnreachableNodes().size());

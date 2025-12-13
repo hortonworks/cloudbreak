@@ -45,7 +45,10 @@ dependencies {
   api group: 'software.amazon.awssdk', name: 'ebs', version: awsSdkVersion
   api group: 'software.amazon.awssdk', name: 'networkfirewall', version: awsSdkVersion
   api group: 'software.amazon.awssdk', name: 'pricing', version: awsSdkVersion
-  api group: 'software.amazon.awssdk', name: 'test-utils', version: awsSdkVersion
+  api (group: 'software.amazon.awssdk', name: 'test-utils', version: awsSdkVersion) {
+    exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+    exclude group: 'junit', module: 'junit'
+  }
   api group: 'software.amazon.awssdk', name: 'apache-client', version: awsSdkVersion
   api group: 'software.amazon.awssdk', name: 'secretsmanager', version: awsSdkVersion
   api group: 'software.amazon.awssdk', name: 'iam-policy-builder', version: awsSdkVersion
@@ -56,7 +59,6 @@ dependencies {
 
   implementation group: 'org.springframework', name: 'spring-aspects', version: springFrameworkVersion
 
-  testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-migrationsupport', version: junitJupiterVersion
   testImplementation group: 'org.hamcrest', name: 'hamcrest', version: hamcrestVersion
   testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: springBootVersion
   testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-freemarker', version: springBootVersion

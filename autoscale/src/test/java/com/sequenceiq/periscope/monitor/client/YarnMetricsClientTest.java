@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -21,7 +22,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -120,7 +120,7 @@ public class YarnMetricsClientTest {
         SSLContext sslContext = mock(SSLContext.class);
         when(sslContextProvider.getSSLContext(tlsConfig.getServerCert(), Optional.empty(), tlsConfig.getClientCert(), tlsConfig.getClientKey()))
                 .thenReturn(sslContext);
-        try (MockedStatic<UriBuilder> mockedStatic = Mockito.mockStatic(UriBuilder.class)) {
+        try (MockedStatic<UriBuilder> mockedStatic = mockStatic(UriBuilder.class)) {
             UriBuilder uriBuilder = mock(UriBuilder.class);
             mockedStatic.when(() -> UriBuilder.fromPath(anyString())).thenReturn(uriBuilder);
             yarnMetricsClient.getYarnMetricsForCluster(getAutoScaleCluster("MOCK"), null, "pollingUserCrn",
@@ -139,7 +139,7 @@ public class YarnMetricsClientTest {
         when(tlsSecurityService.getTls(any())).thenReturn(tlsConfig);
         when(tlsHttpClientConfigurationService.isClusterProxyApplicable(cloudProvider)).thenReturn(true);
         when(clusterProxyConfigurationService.getClusterProxyUrl()).thenReturn(Optional.of("https://localhost:10080"));
-        try (MockedStatic<UriBuilder> mockedStatic = Mockito.mockStatic(UriBuilder.class)) {
+        try (MockedStatic<UriBuilder> mockedStatic = mockStatic(UriBuilder.class)) {
             UriBuilder uriBuilder = mock(UriBuilder.class);
             mockedStatic.when(() -> UriBuilder.fromPath(anyString())).thenReturn(uriBuilder);
             yarnMetricsClient.getYarnMetricsForCluster(getAutoScaleCluster(cloudProvider), null, "pollingUserCrn",

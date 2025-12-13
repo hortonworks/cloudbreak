@@ -1,9 +1,10 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.view;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseEngine;
@@ -33,14 +34,14 @@ public class GcpDatabaseServerViewTest {
 
         GcpDatabaseServerView gcpDatabaseServerView = new GcpDatabaseServerView(databaseServer);
 
-        Assert.assertEquals("POSTGRES", gcpDatabaseServerView.getDatabaseType());
-        Assert.assertEquals("POSTGRES_1", gcpDatabaseServerView.getDatabaseVersion());
-        Assert.assertEquals("driver", gcpDatabaseServerView.getDbServerName());
-        Assert.assertEquals("rootUserName", gcpDatabaseServerView.getAdminLoginName());
-        Assert.assertEquals(Integer.valueOf(99), gcpDatabaseServerView.getPort());
-        Assert.assertEquals("rootPassword", gcpDatabaseServerView.getAdminPassword());
-        Assert.assertEquals(Long.valueOf(50L), gcpDatabaseServerView.getAllocatedStorageInGb());
-        Assert.assertEquals("1", gcpDatabaseServerView.getDbVersion());
+        assertEquals("POSTGRES", gcpDatabaseServerView.getDatabaseType());
+        assertEquals("POSTGRES_1", gcpDatabaseServerView.getDatabaseVersion());
+        assertEquals("driver", gcpDatabaseServerView.getDbServerName());
+        assertEquals("rootUserName", gcpDatabaseServerView.getAdminLoginName());
+        assertEquals(Integer.valueOf(99), gcpDatabaseServerView.getPort());
+        assertEquals("rootPassword", gcpDatabaseServerView.getAdminPassword());
+        assertEquals(Long.valueOf(50L), gcpDatabaseServerView.getAllocatedStorageInGb());
+        assertEquals("1", gcpDatabaseServerView.getDbVersion());
 
     }
 }

@@ -1,13 +1,13 @@
 package com.sequenceiq.periscope.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 import java.text.ParseException;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -93,7 +93,7 @@ class DateServiceTest {
 
     @Test
     void testValidateTimeZoneWhenInvalid() {
-        Assertions.assertThrows(ParseException.class,
+        assertThrows(ParseException.class,
                 () -> underTest.validateTimeZone("GMTzen"));
     }
 

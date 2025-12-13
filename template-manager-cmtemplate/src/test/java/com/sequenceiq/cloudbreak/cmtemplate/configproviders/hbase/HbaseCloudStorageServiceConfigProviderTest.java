@@ -1,19 +1,19 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.hbase;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.lenient;
 
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -21,8 +21,8 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 
-@RunWith(MockitoJUnitRunner.class)
-public class HbaseCloudStorageServiceConfigProviderTest extends AbstractHbaseConfigProviderTest {
+@ExtendWith(MockitoExtension.class)
+class HbaseCloudStorageServiceConfigProviderTest extends AbstractHbaseConfigProviderTest {
 
     private static final String TEST_USER_CRN = "crn:cdp:iam:us-west-1:1234:user:1";
 
@@ -32,13 +32,13 @@ public class HbaseCloudStorageServiceConfigProviderTest extends AbstractHbaseCon
     @Mock
     private EntitlementService entitlementService;
 
-    @Before
+    @BeforeEach
     public void setUp() {
-        when(entitlementService.sdxHbaseCloudStorageEnabled(anyString())).thenReturn(true);
+        lenient().when(entitlementService.sdxHbaseCloudStorageEnabled(anyString())).thenReturn(true);
     }
 
     @Test
-    public void testGetHbaseStorageServiceConfigsWhenAttachedCluster() {
+    void testGetHbaseStorageServiceConfigsWhenAttachedCluster() {
         TemplatePreparationObject preparationObject = getTemplatePreparationObject(true, false);
         String inputJson = getBlueprintText("input/clouderamanager.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
@@ -51,7 +51,7 @@ public class HbaseCloudStorageServiceConfigProviderTest extends AbstractHbaseCon
     }
 
     @Test
-    public void testGetHbaseStorageServiceConfigsWhenDataLake721() {
+    void testGetHbaseStorageServiceConfigsWhenDataLake721() {
         TemplatePreparationObject preparationObject = getTemplatePreparationObject(true, true, "7.2.1");
         String inputJson = getBlueprintText("input/clouderamanager.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
@@ -64,7 +64,7 @@ public class HbaseCloudStorageServiceConfigProviderTest extends AbstractHbaseCon
     }
 
     @Test
-    public void testGetHbaseStorageServiceConfigsWhenDataLake722() {
+    void testGetHbaseStorageServiceConfigsWhenDataLake722() {
         TemplatePreparationObject preparationObject = getTemplatePreparationObject(true, true, "7.2.2");
         String inputJson = getBlueprintText("input/clouderamanager.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
@@ -77,7 +77,7 @@ public class HbaseCloudStorageServiceConfigProviderTest extends AbstractHbaseCon
     }
 
     @Test
-    public void testGetHbaseServiceConfigsWhenNoStorageConfiguredWithAttachedCluster() {
+    void testGetHbaseServiceConfigsWhenNoStorageConfiguredWithAttachedCluster() {
         TemplatePreparationObject preparationObject = getTemplatePreparationObject(false, false);
         String inputJson = getBlueprintText("input/clouderamanager.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
@@ -87,7 +87,7 @@ public class HbaseCloudStorageServiceConfigProviderTest extends AbstractHbaseCon
     }
 
     @Test
-    public void testGetHbaseServiceConfigsWhenNoStorageConfiguredWithDataLake() {
+    void testGetHbaseServiceConfigsWhenNoStorageConfiguredWithDataLake() {
         TemplatePreparationObject preparationObject = getTemplatePreparationObject(false, true);
         String inputJson = getBlueprintText("input/clouderamanager.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
@@ -97,7 +97,7 @@ public class HbaseCloudStorageServiceConfigProviderTest extends AbstractHbaseCon
     }
 
     @Test
-    public void testConfigurationNotNeededWhenDataLake721() {
+    void testConfigurationNotNeededWhenDataLake721() {
         TemplatePreparationObject preparationObject = getTemplatePreparationObject(true, true, "7.2.1");
         String inputJson = getBlueprintText("input/clouderamanager.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
@@ -107,7 +107,7 @@ public class HbaseCloudStorageServiceConfigProviderTest extends AbstractHbaseCon
     }
 
     @Test
-    public void testConfigurationNotNeededWhenDataLake726() {
+    void testConfigurationNotNeededWhenDataLake726() {
         TemplatePreparationObject preparationObject = getTemplatePreparationObject(true, true, "7.2.6");
         String inputJson = getBlueprintText("input/clouderamanager.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
@@ -117,7 +117,7 @@ public class HbaseCloudStorageServiceConfigProviderTest extends AbstractHbaseCon
     }
 
     @Test
-    public void testConfigurationNeededWhenDatalake727() {
+    void testConfigurationNeededWhenDatalake727() {
         TemplatePreparationObject preparationObject = getTemplatePreparationObject(true, true, "7.2.7");
         String inputJson = getBlueprintText("input/clouderamanager.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
@@ -127,7 +127,7 @@ public class HbaseCloudStorageServiceConfigProviderTest extends AbstractHbaseCon
     }
 
     @Test
-    public void testConfigurationNeededWhenDatalake728() {
+    void testConfigurationNeededWhenDatalake728() {
         TemplatePreparationObject preparationObject = getTemplatePreparationObject(true, true, "7.2.8");
         String inputJson = getBlueprintText("input/clouderamanager.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
@@ -137,7 +137,7 @@ public class HbaseCloudStorageServiceConfigProviderTest extends AbstractHbaseCon
     }
 
     @Test
-    public void testIsConfigurationNeededWhenAttachedCluster() {
+    void testIsConfigurationNeededWhenAttachedCluster() {
         TemplatePreparationObject preparationObject = getTemplatePreparationObject(true, false);
         String inputJson = getBlueprintText("input/clouderamanager.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);

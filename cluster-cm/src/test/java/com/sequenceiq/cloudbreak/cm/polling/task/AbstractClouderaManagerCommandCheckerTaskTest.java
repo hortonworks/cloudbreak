@@ -1,9 +1,11 @@
 package com.sequenceiq.cloudbreak.cm.polling.task;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -13,13 +15,10 @@ import java.net.ConnectException;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
-import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 
 import com.cloudera.api.swagger.CommandsResourceApi;
@@ -33,8 +32,8 @@ import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerCommandPollerObject;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 
-@RunWith(MockitoJUnitRunner.class)
-public class AbstractClouderaManagerCommandCheckerTaskTest {
+@ExtendWith(MockitoExtension.class)
+class AbstractClouderaManagerCommandCheckerTaskTest {
 
     private static final int ID = 1;
 
@@ -44,27 +43,24 @@ public class AbstractClouderaManagerCommandCheckerTaskTest {
 
     private static final int TEN = 10;
 
-    @Rule
-    public final ExpectedException expectedEx = ExpectedException.none();
+    private final ApiClient apiClient = mock(ApiClient.class);
 
-    private final ApiClient apiClient = Mockito.mock(ApiClient.class);
+    private final ClouderaManagerApiPojoFactory clouderaManagerApiPojoFactory = mock(ClouderaManagerApiPojoFactory.class);
 
-    private final ClouderaManagerApiPojoFactory clouderaManagerApiPojoFactory = Mockito.mock(ClouderaManagerApiPojoFactory.class);
+    private final CommandsResourceApi commandsResourceApi = mock(CommandsResourceApi.class);
 
-    private final CommandsResourceApi commandsResourceApi = Mockito.mock(CommandsResourceApi.class);
-
-    private final ClusterEventService clusterEventService = Mockito.mock(ClusterEventService.class);
+    private final ClusterEventService clusterEventService = mock(ClusterEventService.class);
 
     private final AbstractClouderaManagerCommandCheckerTask<ClouderaManagerCommandPollerObject> underTest
             = new ClouderaManagerDefaultListenerTask(clouderaManagerApiPojoFactory, clusterEventService, "Decommission host");
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         when(clouderaManagerApiPojoFactory.getCommandsResourceApi(apiClient)).thenReturn(commandsResourceApi);
     }
 
     @Test
-    public void testPollingWithFiveInternalServerErrors() throws ApiException {
+    void testPollingWithFiveInternalServerErrors() throws ApiException {
         Stack stack = new Stack();
         BigDecimal id = new BigDecimal(ID);
         ClouderaManagerCommandPollerObject pollerObject = new ClouderaManagerCommandPollerObject(stack, apiClient, id);
@@ -80,24 +76,23 @@ public class AbstractClouderaManagerCommandCheckerTaskTest {
     }
 
     @Test
-    public void testPollingWithSixInternalServerErrors() throws ApiException {
+    void testPollingWithSixInternalServerErrors() throws ApiException {
         Stack stack = new Stack();
         BigDecimal id = new BigDecimal(1);
         ClouderaManagerCommandPollerObject pollerObject = new ClouderaManagerCommandPollerObject(stack, apiClient, id);
         when(commandsResourceApi.readCommand(id)).thenAnswer(new Http500Answer(SIX));
 
-        expectedEx.expect(ClouderaManagerOperationFailedException.class);
-        expectedEx.expectMessage("Operation is considered failed.");
-
-        for (int i = 0; i < SIX; i++) {
-            boolean inProgress = underTest.checkStatus(pollerObject);
-            assertFalse(inProgress);
-        }
-        underTest.checkStatus(pollerObject);
+        assertThrows(ClouderaManagerOperationFailedException.class, () -> {
+            for (int i = 0; i < SIX; i++) {
+                boolean inProgress = underTest.checkStatus(pollerObject);
+                assertFalse(inProgress);
+            }
+            underTest.checkStatus(pollerObject);
+        }, "Operation is considered failed.");
     }
 
     @Test
-    public void testPollingWithFiveSocketExceptions() throws ApiException {
+    void testPollingWithFiveSocketExceptions() throws ApiException {
         Stack stack = new Stack();
         BigDecimal id = new BigDecimal(ID);
         ClouderaManagerCommandPollerObject pollerObject = new ClouderaManagerCommandPollerObject(stack, apiClient, id);
@@ -118,7 +113,7 @@ public class AbstractClouderaManagerCommandCheckerTaskTest {
     }
 
     @Test
-    public void testPollingWithThreeInternalServerErrorAndThreeSocketExceptions() throws ApiException {
+    void testPollingWithThreeInternalServerErrorAndThreeSocketExceptions() throws ApiException {
         Stack stack = new Stack();
         BigDecimal id = new BigDecimal(1);
         ClouderaManagerCommandPollerObject pollerObject = new ClouderaManagerCommandPollerObject(stack, apiClient, id);
@@ -128,18 +123,17 @@ public class AbstractClouderaManagerCommandCheckerTaskTest {
         when(commandsResourceApi.readCommand(id)).thenAnswer(new ExceptionThrowingApiCommandAnswer(internalServerError, internalServerError,
                 internalServerError, socketApiException, socketApiException, socketApiException));
 
-        expectedEx.expect(ClouderaManagerOperationFailedException.class);
-        expectedEx.expectMessage("Operation is considered failed.");
-
-        for (int i = 0; i < SIX; i++) {
-            boolean inProgress = underTest.checkStatus(pollerObject);
-            assertFalse(inProgress);
-        }
-        underTest.checkStatus(pollerObject);
+        assertThrows(ClouderaManagerOperationFailedException.class, () -> {
+            for (int i = 0; i < SIX; i++) {
+                boolean inProgress = underTest.checkStatus(pollerObject);
+                assertFalse(inProgress);
+            }
+            underTest.checkStatus(pollerObject);
+        }, "Operation is considered failed.");
     }
 
     @Test
-    public void testPollingWithConnectException() throws ApiException {
+    void testPollingWithConnectException() throws ApiException {
         Stack stack = new Stack();
         stack.setId(1L);
         StackStatus stackStatus = new StackStatus();

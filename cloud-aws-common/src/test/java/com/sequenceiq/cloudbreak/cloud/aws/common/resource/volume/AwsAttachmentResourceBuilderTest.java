@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.aws.common.resource.volume;
 
 import static com.sequenceiq.cloudbreak.cloud.model.CloudResource.ATTRIBUTES;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -12,7 +13,6 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -109,7 +109,7 @@ class AwsAttachmentResourceBuilderTest {
         when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
         AwsContext awsContext = mock(AwsContext.class);
         when(awsContext.getComputeResources(1L)).thenReturn(buildableResource);
-        CloudbreakServiceException runtimeException = Assertions.assertThrows(CloudbreakServiceException.class,
+        CloudbreakServiceException runtimeException = assertThrows(CloudbreakServiceException.class,
                 () -> awsAttachmentResourceBuilder.build(awsContext, null, 1L, authenticatedContext,
                         mock(Group.class), buildableResource, null));
         assertEquals("Volume attachment were unsuccessful. " + errorMessage, runtimeException.getMessage());
@@ -141,7 +141,7 @@ class AwsAttachmentResourceBuilderTest {
         when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
         AwsContext awsContext = mock(AwsContext.class);
         when(awsContext.getComputeResources(1L)).thenReturn(buildableResource);
-        CloudbreakServiceException runtimeException = Assertions.assertThrows(CloudbreakServiceException.class,
+        CloudbreakServiceException runtimeException = assertThrows(CloudbreakServiceException.class,
                 () -> awsAttachmentResourceBuilder.build(awsContext, null, 1L, authenticatedContext,
                         mock(Group.class), buildableResource, null));
         assertEquals("Volume attachment were unsuccessful. The related instance is not available. Usually this happens when an AWS policy " +

@@ -1,14 +1,14 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.hive;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
@@ -22,13 +22,13 @@ import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.common.api.filesystem.S3FileSystem;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 
-@RunWith(MockitoJUnitRunner.class)
-public class HiveLLAPServiceConfigProviderTest {
+@ExtendWith(MockitoExtension.class)
+class HiveLLAPServiceConfigProviderTest {
 
     private final HiveLLAPServiceConfigProvider underTest = new HiveLLAPServiceConfigProvider();
 
     @Test
-    public void testGetHiveLlapServiceConfigs() {
+    void testGetHiveLlapServiceConfigs() {
         TemplatePreparationObject preparationObject = getTemplatePreparationObject(true);
         String inputJson = getBlueprintText("input/clouderamanager-ds.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
@@ -41,7 +41,7 @@ public class HiveLLAPServiceConfigProviderTest {
     }
 
     @Test
-    public void testGetHiveLlapServiceConfigsWhenNoStorageConfigured() {
+    void testGetHiveLlapServiceConfigsWhenNoStorageConfigured() {
         TemplatePreparationObject preparationObject = getTemplatePreparationObject(false);
         String inputJson = getBlueprintText("input/clouderamanager-ds.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);

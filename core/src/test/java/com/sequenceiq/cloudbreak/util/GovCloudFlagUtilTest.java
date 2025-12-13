@@ -1,22 +1,22 @@
 package com.sequenceiq.cloudbreak.util;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 
-public class GovCloudFlagUtilTest {
+class GovCloudFlagUtilTest {
 
     @Test
-    public void testNullObject() {
+    void testNullObject() {
         assertFalse(GovCloudFlagUtil.extractGovCloudFlag(null));
     }
 
     @Test
-    public void testBooleanObject() {
+    void testBooleanObject() {
         assertFalse(GovCloudFlagUtil.extractGovCloudFlag(false));
         assertTrue(GovCloudFlagUtil.extractGovCloudFlag(true));
         assertFalse(GovCloudFlagUtil.extractGovCloudFlag(Boolean.FALSE));
@@ -24,14 +24,14 @@ public class GovCloudFlagUtilTest {
     }
 
     @Test
-    public void testStringObject() {
+    void testStringObject() {
         assertFalse(GovCloudFlagUtil.extractGovCloudFlag("false"));
         assertFalse(GovCloudFlagUtil.extractGovCloudFlag("anythingelse"));
         assertTrue(GovCloudFlagUtil.extractGovCloudFlag("true"));
     }
 
     @Test
-    public void testDifferentObject() {
+    void testDifferentObject() {
         assertFalse(GovCloudFlagUtil.extractGovCloudFlag(new User()));
         assertFalse(GovCloudFlagUtil.extractGovCloudFlag(Credential.builder().build()));
     }

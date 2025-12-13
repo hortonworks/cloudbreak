@@ -1,6 +1,7 @@
 package com.sequenceiq.freeipa.service.stack.instance;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -13,11 +14,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstanceMetaData;
@@ -30,8 +31,8 @@ import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.image.ImageService;
 
-@RunWith(MockitoJUnitRunner.class)
-public class MetadataSetupServiceTest {
+@ExtendWith(MockitoExtension.class)
+class MetadataSetupServiceTest {
 
     private static final Long STACK_ID = 1L;
 
@@ -71,7 +72,7 @@ public class MetadataSetupServiceTest {
     private MetadataSetupService underTest;
 
     @Test
-    public void testCleanupRequestedInstances() {
+    void testCleanupRequestedInstances() {
         Stack stack = new Stack();
         stack.setId(STACK_ID);
 
@@ -94,7 +95,7 @@ public class MetadataSetupServiceTest {
     }
 
     @Test
-    public void testSaveInstanceMetaData() {
+    void testSaveInstanceMetaData() {
         Stack stack = new Stack();
         stack.setId(STACK_ID);
         Map<String, String> data = Map.of("1", "instance1", "2", "instance2", "3", "instance3");
@@ -119,7 +120,7 @@ public class MetadataSetupServiceTest {
             when(instanceTemplate.getPrivateId()).thenReturn(null);
             when(cloudInstance.getTemplate()).thenReturn(instanceTemplate);
             when(cloudInstance.getInstanceId()).thenReturn(entry.getValue());
-            when(cloudInstance.getAvailabilityZone()).thenReturn(entry.getKey());
+            lenient().when(cloudInstance.getAvailabilityZone()).thenReturn(entry.getKey());
             return cloudVmMetaDataStatus;
         }).collect(Collectors.toList());
 

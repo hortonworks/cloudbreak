@@ -1,6 +1,9 @@
 package com.sequenceiq.cloudbreak.cm.client.tracing;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -12,9 +15,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 class StackBasedCmApiNameExtractorTest {
 
@@ -23,7 +24,7 @@ class StackBasedCmApiNameExtractorTest {
     @Test
     void testWithValidStackTrace() {
         String stackTraceString = getValidStackTraceString();
-        StackWalker stackWalkerMock = Mockito.mock(StackWalker.class);
+        StackWalker stackWalkerMock = mock(StackWalker.class);
         Stream<? extends StackWalker.StackFrame> stream = stringToStackFrameStream(stackTraceString);
         when(stackWalkerMock.walk(any(Function.class))).thenAnswer(invocation -> {
             Function argument = invocation.getArgument(0);
@@ -32,13 +33,13 @@ class StackBasedCmApiNameExtractorTest {
 
         Optional<String> cmApiName = underTest.getCmApiName(stackWalkerMock);
 
-        Assertions.assertEquals("ClouderaManagerResourceApi.getVersionWithHttpInfo", cmApiName.get());
+        assertEquals("ClouderaManagerResourceApi.getVersionWithHttpInfo", cmApiName.get());
     }
 
     @Test
     void testWithMissingCmApiClass() {
         String stackTraceString = getInvalidStackTraceString();
-        StackWalker stackWalkerMock = Mockito.mock(StackWalker.class);
+        StackWalker stackWalkerMock = mock(StackWalker.class);
         Stream<? extends StackWalker.StackFrame> stream = stringToStackFrameStream(stackTraceString);
         when(stackWalkerMock.walk(any(Function.class))).thenAnswer(invocation -> {
             Function argument = invocation.getArgument(0);
@@ -47,7 +48,7 @@ class StackBasedCmApiNameExtractorTest {
 
         Optional<String> cmApiName = underTest.getCmApiName(stackWalkerMock);
 
-        Assertions.assertTrue(cmApiName.isEmpty());
+        assertTrue(cmApiName.isEmpty());
     }
 
     Stream<? extends StackWalker.StackFrame> stringToStackFrameStream(String stackTraceString) {

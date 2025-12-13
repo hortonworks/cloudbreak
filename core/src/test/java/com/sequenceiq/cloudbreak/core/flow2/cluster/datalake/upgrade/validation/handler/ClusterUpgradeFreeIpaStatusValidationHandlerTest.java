@@ -7,12 +7,12 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeFreeIpaStatusValidationEvent;
@@ -21,8 +21,8 @@ import com.sequenceiq.cloudbreak.service.freeipa.FreeipaService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
-@RunWith(MockitoJUnitRunner.class)
-public class ClusterUpgradeFreeIpaStatusValidationHandlerTest {
+@ExtendWith(MockitoExtension.class)
+class ClusterUpgradeFreeIpaStatusValidationHandlerTest {
 
     private static final Long STACK_ID = 1L;
 
@@ -42,7 +42,7 @@ public class ClusterUpgradeFreeIpaStatusValidationHandlerTest {
     @Mock
     private StackView stackView;
 
-    @Before
+    @BeforeEach
     public void setup() {
         when(stackService.getViewByIdWithoutAuth(STACK_ID)).thenReturn(stackView);
         when(stackView.getEnvironmentCrn()).thenReturn(ENV_CRN);
@@ -50,7 +50,7 @@ public class ClusterUpgradeFreeIpaStatusValidationHandlerTest {
     }
 
     @Test
-    public void testFreeIpaValidationReturnsNotAvailableThenThrowError() {
+    void testFreeIpaValidationReturnsNotAvailableThenThrowError() {
 
         when(freeipaService.checkFreeipaRunning(ENV_CRN, STACK_NAME)).thenReturn(false);
 
@@ -62,7 +62,7 @@ public class ClusterUpgradeFreeIpaStatusValidationHandlerTest {
     }
 
     @Test
-    public void testFreeIpaValidationReturnsAvailableThenPass() {
+    void testFreeIpaValidationReturnsAvailableThenPass() {
 
         when(freeipaService.checkFreeipaRunning(ENV_CRN, STACK_NAME)).thenReturn(true);
 

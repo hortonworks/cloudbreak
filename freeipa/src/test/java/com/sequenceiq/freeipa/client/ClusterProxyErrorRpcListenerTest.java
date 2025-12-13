@@ -4,13 +4,13 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.IOException;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyException;
 
-public class ClusterProxyErrorRpcListenerTest {
+class ClusterProxyErrorRpcListenerTest {
 
     private static final String JSON
             = "{\"status\":504,\"code\":\"cluster-proxy.proxy.timeout\",\"message\":\"Error message\"}";
@@ -31,7 +31,7 @@ public class ClusterProxyErrorRpcListenerTest {
     }
 
     @Test
-    public void testClusterProxyError() throws IOException {
+    void testClusterProxyError() throws IOException {
         ObjectNode jsonNode = toObjectNode(JSON);
         assertThrows(ClusterProxyException.class, () -> {
             clusterProxyErrorRpcListener.onBeforeResponseProcessed(null, jsonNode);
@@ -39,7 +39,7 @@ public class ClusterProxyErrorRpcListenerTest {
     }
 
     @Test
-    public void testClusterProxyErrorMissingField() throws IOException {
+    void testClusterProxyErrorMissingField() throws IOException {
         ObjectNode jsonNode = toObjectNode(JSON_MISSING_STATUS_FIELD);
         assertThrows(ClusterProxyException.class, () -> {
             clusterProxyErrorRpcListener.onBeforeResponseProcessed(null, jsonNode);
@@ -47,13 +47,13 @@ public class ClusterProxyErrorRpcListenerTest {
     }
 
     @Test
-    public void testClusterProxyErrorNoStatusCode() throws IOException {
+    void testClusterProxyErrorNoStatusCode() throws IOException {
         ObjectNode jsonNode = toObjectNode(JSON_MISSING_CODE_FIELD);
         clusterProxyErrorRpcListener.onBeforeResponseProcessed(null, jsonNode);
     }
 
     @Test
-    public void testClusterProxyErroCodeWithoutClusterProxyPrefix() throws IOException {
+    void testClusterProxyErroCodeWithoutClusterProxyPrefix() throws IOException {
         ObjectNode jsonNode = toObjectNode(JSON_CODE_WITHOUT_CLUSTER_PROXY_PREFIX);
         clusterProxyErrorRpcListener.onBeforeResponseProcessed(null, jsonNode);
     }

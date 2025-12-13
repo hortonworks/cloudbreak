@@ -4,17 +4,18 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationContext;
 
 import com.cloudera.api.swagger.ClouderaManagerResourceApi;
@@ -35,8 +36,8 @@ import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.template.kerberos.KerberosDetailService;
 import com.sequenceiq.cloudbreak.type.KerberosType;
 
-@RunWith(MockitoJUnitRunner.class)
-public class ClouderaManagerKerberosServiceTest {
+@ExtendWith(MockitoExtension.class)
+class ClouderaManagerKerberosServiceTest {
 
     @Mock
     private ClouderaManagerPollingServiceProvider clouderaManagerPollingServiceProvider;
@@ -86,8 +87,8 @@ public class ClouderaManagerKerberosServiceTest {
 
     private HttpClientConfig clientConfig;
 
-    @Before
-    public void init() throws ClouderaManagerClientInitException {
+    @BeforeEach
+    void init() throws ClouderaManagerClientInitException {
         stack = new Stack();
         stack.setName("clusterName");
         stack.setGatewayPort(1);
@@ -98,15 +99,15 @@ public class ClouderaManagerKerberosServiceTest {
         stack.setCluster(cluster);
         stack.setResourceCrn("crn:cdp:cloudbreak:us-west-1:someone:stack:12345");
         clientConfig = new HttpClientConfig("1.2.3.4", null, null, null);
-        when(clouderaManagerApiClientProvider.getV31Client(anyInt(), anyString(), anyString(), any())).thenReturn(client);
+        lenient().when(clouderaManagerApiClientProvider.getV31Client(anyInt(), anyString(), anyString(), any())).thenReturn(client);
         when(clouderaManagerApiFactory.getClouderaManagerResourceApi(client)).thenReturn(clouderaManagerResourceApi);
-        when(clouderaManagerApiFactory.getClustersResourceApi(client)).thenReturn(clustersResourceApi);
         when(applicationContext.getBean(eq(ClouderaManagerModificationService.class), eq(stack), eq(clientConfig))).thenReturn(modificationService);
-        when(applicationContext.getBean(eq(ClouderaManagerClusterDecommissionService.class), eq(stack), eq(clientConfig))).thenReturn(decommissionService);
+        lenient().when(applicationContext.getBean(eq(ClouderaManagerClusterDecommissionService.class), eq(stack), eq(clientConfig)))
+                .thenReturn(decommissionService);
     }
 
     @Test
-    public void testConfigureKerberosViaApi() throws CloudbreakException, ApiException {
+    void testConfigureKerberosViaApi() throws CloudbreakException, ApiException, ClouderaManagerClientInitException {
         KerberosConfig kerberosConfig = KerberosConfig.KerberosConfigBuilder.aKerberosConfig()
                 .withType(KerberosType.ACTIVE_DIRECTORY)
                 .withRealm("TESTREALM")
@@ -117,6 +118,7 @@ public class ClouderaManagerKerberosServiceTest {
                 .withPassword("pw")
                 .build();
 
+        when(clouderaManagerApiFactory.getClustersResourceApi(client)).thenReturn(clustersResourceApi);
         when(clustersResourceApi.configureForKerberos(eq(cluster.getName()), any(ApiConfigureForKerberosArguments.class)))
                 .thenReturn(new ApiCommand().id(BigDecimal.TEN));
         when(clouderaManagerResourceApi.generateCredentialsCommand()).thenReturn(new ApiCommand().id(BigDecimal.ZERO));
@@ -132,7 +134,7 @@ public class ClouderaManagerKerberosServiceTest {
     }
 
     @Test
-    public void deleteCredentials() throws ApiException, CloudbreakException, ClouderaManagerClientInitException {
+    void deleteCredentials() throws ApiException, CloudbreakException {
         when(clouderaManagerApiFactory.getClouderaManagerResourceApi(client)).thenReturn(clouderaManagerResourceApi);
         when(clouderaManagerResourceApi.deleteCredentialsCommand("all")).thenReturn(new ApiCommand().id(BigDecimal.ZERO));
 

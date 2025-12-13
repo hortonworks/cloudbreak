@@ -7,6 +7,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -28,7 +29,6 @@ import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -253,7 +253,7 @@ class BlueprintServiceTest {
         doNothing().when(clusterService).deleteBlueprintsOnSpecificClusters(anyLong());
         when(clusterService.findByStackResourceCrn(anyLong())).thenReturn(Set.of(blueprintClusterView));
 
-        BadRequestException exception = Assertions.assertThrows(BadRequestException.class, () -> underTest.delete(blueprint));
+        BadRequestException exception = assertThrows(BadRequestException.class, () -> underTest.delete(blueprint));
         assertEquals("The cluster with name ['c1'] uses cluster template 'name'. "
                         + "Please remove the cluster before deleting the cluster template.",
                 exception.getMessage());
@@ -271,7 +271,7 @@ class BlueprintServiceTest {
         doNothing().when(clusterService).deleteBlueprintsOnSpecificClusters(anyLong());
         when(clusterService.findByStackResourceCrn(anyLong())).thenReturn(Set.of(blueprintClusterView));
 
-        BadRequestException exception = Assertions.assertThrows(BadRequestException.class, () -> underTest.delete(blueprint));
+        BadRequestException exception = assertThrows(BadRequestException.class, () -> underTest.delete(blueprint));
         assertEquals("The cluster with name ['c1'] uses cluster template 'name'. "
                         + "Please remove the cluster before deleting the cluster template.",
                 exception.getMessage());
@@ -474,7 +474,7 @@ class BlueprintServiceTest {
         Blueprint blueprint = new Blueprint();
         blueprint.setBlueprintText(someBlueprintText);
 
-        Assertions.assertThrows(BadRequestException.class, () -> underTest.createForLoggedInUser(blueprint, 1L, "someAccountId", "someone"));
+        assertThrows(BadRequestException.class, () -> underTest.createForLoggedInUser(blueprint, 1L, "someAccountId", "someone"));
     }
 
     @Test
@@ -488,7 +488,7 @@ class BlueprintServiceTest {
         Blueprint blueprint = new Blueprint();
         blueprint.setBlueprintText(someBlueprintText);
 
-        Assertions.assertThrows(BadRequestException.class, () -> underTest.createWithInternalUser(blueprint, 1L, "someAccountId"));
+        assertThrows(BadRequestException.class, () -> underTest.createWithInternalUser(blueprint, 1L, "someAccountId"));
     }
 
     @Test
@@ -531,7 +531,7 @@ class BlueprintServiceTest {
         when(clusterTemplateViewService.findAllByStackIds(List.of(0L))).thenReturn(Set.of(clusterTemplateView));
         doNothing().when(clusterService).deleteBlueprintsOnSpecificClusters(anyLong());
         when(clusterService.findByStackResourceCrn(anyLong())).thenReturn(Set.of(blueprintClusterView1, blueprintClusterView2));
-        BadRequestException actual = Assertions.assertThrows(BadRequestException.class, () -> underTest.prepareDeletion(blueprint));
+        BadRequestException actual = assertThrows(BadRequestException.class, () -> underTest.prepareDeletion(blueprint));
         assertEquals("There are clusters or cluster definitions associated with cluster template 'TemplateName'. "
                 + "The cluster template used by 1 cluster(s) (Workload Name) and 1 cluster definitions (ClusterDefinition). "
                 + "Please remove these before deleting the cluster template.", actual.getMessage());
@@ -552,7 +552,7 @@ class BlueprintServiceTest {
         blueprintClusterView.setName("ClusterDefinition");
         doNothing().when(clusterService).deleteBlueprintsOnSpecificClusters(anyLong());
         when(clusterService.findByStackResourceCrn(anyLong())).thenReturn(Set.of(blueprintClusterView));
-        BadRequestException actual = Assertions.assertThrows(BadRequestException.class, () -> underTest.prepareDeletion(blueprint));
+        BadRequestException actual = assertThrows(BadRequestException.class, () -> underTest.prepareDeletion(blueprint));
         assertEquals("The cluster definition with name ['ClusterDefinition'] uses cluster template 'TemplateName'. "
                 + "Please remove the cluster definition before deleting the cluster template.", actual.getMessage());
     }
@@ -568,7 +568,7 @@ class BlueprintServiceTest {
         blueprintClusterView.setName("Cluster Name");
         doNothing().when(clusterService).deleteBlueprintsOnSpecificClusters(anyLong());
         when(clusterService.findByStackResourceCrn(anyLong())).thenReturn(Set.of(blueprintClusterView));
-        BadRequestException actual = Assertions.assertThrows(BadRequestException.class, () -> underTest.prepareDeletion(blueprint));
+        BadRequestException actual = assertThrows(BadRequestException.class, () -> underTest.prepareDeletion(blueprint));
         assertEquals("The cluster with name ['Cluster Name'] uses cluster template 'TemplateName'. "
                 + "Please remove the cluster before deleting the cluster template.", actual.getMessage());
     }

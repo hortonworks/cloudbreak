@@ -13,7 +13,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.Map;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,7 +21,6 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
@@ -75,13 +73,13 @@ class EnvironmentNetworkServiceTest {
     @Mock
     private NetworkConnector networkConnector;
 
-    private final CloudPlatformConnectors cloudPlatformConnectors = Mockito.mock(CloudPlatformConnectors.class);
+    private final CloudPlatformConnectors cloudPlatformConnectors = mock(CloudPlatformConnectors.class);
 
-    private final NetworkCreationRequestFactory networkCreationRequestFactory = Mockito.mock(NetworkCreationRequestFactory.class);
+    private final NetworkCreationRequestFactory networkCreationRequestFactory = mock(NetworkCreationRequestFactory.class);
 
-    private final Map<CloudPlatform, EnvironmentNetworkConverter> environmentNetworkConverterMap = Mockito.mock(Map.class);
+    private final Map<CloudPlatform, EnvironmentNetworkConverter> environmentNetworkConverterMap = mock(Map.class);
 
-    private final CredentialToCloudCredentialConverter credentialToCloudCredentialConverter = Mockito.mock(CredentialToCloudCredentialConverter.class);
+    private final CredentialToCloudCredentialConverter credentialToCloudCredentialConverter = mock(CredentialToCloudCredentialConverter.class);
 
     @InjectMocks
     private final EnvironmentNetworkService underTest = new EnvironmentNetworkService(
@@ -102,7 +100,7 @@ class EnvironmentNetworkServiceTest {
         BaseNetwork baseNetwork = new AwsNetwork();
         NetworkCreationRequest networkCreationRequest = new NetworkCreationRequest.Builder().build();
         CreatedCloudNetwork createdCloudNetwork = new CreatedCloudNetwork();
-        AwsEnvironmentNetworkConverter networkConverter = Mockito.mock(AwsEnvironmentNetworkConverter.class);
+        AwsEnvironmentNetworkConverter networkConverter = mock(AwsEnvironmentNetworkConverter.class);
 
         when(cloudConnector.networkConnector()).thenReturn(networkConnector);
         when(networkCreationRequestFactory.create(environmentDto)).thenReturn(networkCreationRequest);
@@ -151,7 +149,7 @@ class EnvironmentNetworkServiceTest {
         when(cloudPlatformConnectors.get(any(CloudPlatformVariant.class))).thenReturn(cloudConnector);
         when(cloudConnector.networkConnector()).thenReturn(null);
 
-        Assertions.assertThrows(NetworkConnectorNotFoundException.class, () -> underTest.createCloudNetwork(environmentDto, new AzureNetwork()));
+        assertThrows(NetworkConnectorNotFoundException.class, () -> underTest.createCloudNetwork(environmentDto, new AzureNetwork()));
 
         verify(cloudPlatformConnectors, times(1)).get(any());
     }

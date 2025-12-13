@@ -1,33 +1,33 @@
 package com.sequenceiq.cloudbreak.orchestrator.model;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-public class GrainPropertiesTest {
+class GrainPropertiesTest {
 
     private GrainProperties underTest;
 
-    @Before
+    @BeforeEach
     public void init() {
         underTest = new GrainProperties();
     }
 
     @Test
-    public void whenPropertyIsEmptyThenHostsPerGrainMapEmpty() {
+    void whenPropertyIsEmptyThenHostsPerGrainMapEmpty() {
         Map<Entry<String, String>, Collection<String>> hostsPerGrainMap = underTest.getHostsPerGrainMap();
         assertTrue(hostsPerGrainMap.isEmpty());
     }
 
     @Test
-    public void testWhenEveryHostsHaveDifferentGrain() {
+    void testWhenEveryHostsHaveDifferentGrain() {
         underTest.put("HOST1", Map.of("GRAINKEY1", "GRAINVALUE1"));
         underTest.put("HOST2", Map.of("GRAINKEY2", "GRAINVALUE2"));
         Map<Entry<String, String>, Collection<String>> hostsPerGrainMap = underTest.getHostsPerGrainMap();
@@ -39,7 +39,7 @@ public class GrainPropertiesTest {
     }
 
     @Test
-    public void testWhenEveryHostsHaveDifferentGrainValue() {
+    void testWhenEveryHostsHaveDifferentGrainValue() {
         underTest.put("HOST1", Map.of("GRAINKEY1", "GRAINVALUE1"));
         underTest.put("HOST2", Map.of("GRAINKEY1", "GRAINVALUE2"));
         Map<Entry<String, String>, Collection<String>> hostsPerGrainMap = underTest.getHostsPerGrainMap();
@@ -51,7 +51,7 @@ public class GrainPropertiesTest {
     }
 
     @Test
-    public void testWhenEveryHostsHaveDifferentGrainKey() {
+    void testWhenEveryHostsHaveDifferentGrainKey() {
         underTest.put("HOST1", Map.of("GRAINKEY1", "GRAINVALUE1"));
         underTest.put("HOST2", Map.of("GRAINKEY2", "GRAINVALUE1"));
         Map<Entry<String, String>, Collection<String>> hostsPerGrainMap = underTest.getHostsPerGrainMap();
@@ -63,7 +63,7 @@ public class GrainPropertiesTest {
     }
 
     @Test
-    public void testWhenEveryHostsHaveSameGrain() {
+    void testWhenEveryHostsHaveSameGrain() {
         underTest.put("HOST1", Map.of("GRAINKEY1", "GRAINVALUE1"));
         underTest.put("HOST2", Map.of("GRAINKEY1", "GRAINVALUE1"));
         Map<Entry<String, String>, Collection<String>> hostsPerGrainMap = underTest.getHostsPerGrainMap();
@@ -73,7 +73,7 @@ public class GrainPropertiesTest {
     }
 
     @Test
-    public void testComplexCase() {
+    void testComplexCase() {
         underTest.put("HOST1", Map.of("GRAINKEY1", "GRAINVALUE1"));
         underTest.put("HOST2", Map.of("GRAINKEY1", "GRAINVALUE1"));
         underTest.put("HOST3", Map.of("GRAINKEY3", "GRAINVALUE3"));
@@ -89,7 +89,7 @@ public class GrainPropertiesTest {
     }
 
     @Test
-    public void testMultipleGrainPerHostCase() {
+    void testMultipleGrainPerHostCase() {
         underTest.put("HOST1", Map.of("GRAINKEY1", "GRAINVALUE1"));
         underTest.put("HOST2", Map.of("GRAINKEY1", "GRAINVALUE1", "GRAINKEY2", "GRAINVALUE2"));
         underTest.put("HOST3", Map.of("GRAINKEY3", "GRAINVALUE3"));

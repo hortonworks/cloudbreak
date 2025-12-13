@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.init.blueprint;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
@@ -11,11 +11,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.requests.BlueprintV4Request;
@@ -30,8 +30,8 @@ import com.sequenceiq.cloudbreak.domain.BlueprintFile;
 import com.sequenceiq.cloudbreak.domain.BlueprintHybridOption;
 import com.sequenceiq.cloudbreak.domain.BlueprintUpgradeOption;
 
-@RunWith(MockitoJUnitRunner.class)
-public class DefaulBlueprintCacheTest {
+@ExtendWith(MockitoExtension.class)
+class DefaulBlueprintCacheTest {
 
     @Mock
     private BlueprintUtils blueprintUtils;
@@ -52,7 +52,7 @@ public class DefaulBlueprintCacheTest {
     private DefaultBlueprintCache underTest;
 
     @Test
-    public void testEmptyValues() {
+    void testEmptyValues() {
         when(blueprintEntities.getDefaults()).thenReturn(new HashMap<>());
 
         // GIVEN
@@ -63,11 +63,11 @@ public class DefaulBlueprintCacheTest {
         Map<String, BlueprintFile> defaultBlueprints = underTest.defaultBlueprints();
 
         // WHEN
-        assertTrue("No blueprint passed, defaults is expected to be empty", defaultBlueprints.isEmpty());
+        assertTrue(defaultBlueprints.isEmpty(), "No blueprint passed, defaults is expected to be empty");
     }
 
     @Test
-    public void testOnlyReleasedBps() throws IOException {
+    void testOnlyReleasedBps() throws IOException {
 
         // GIVEN
         Blueprint bp1 = new Blueprint();
@@ -114,7 +114,7 @@ public class DefaulBlueprintCacheTest {
     }
 
     @Test
-    public void testLoadBlueprintsFromFileWithEnums() throws IOException {
+    void testLoadBlueprintsFromFileWithEnums() throws IOException {
 
         // GIVEN
         Blueprint bp1 = new Blueprint();

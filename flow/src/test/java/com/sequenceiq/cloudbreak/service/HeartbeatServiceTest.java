@@ -1,16 +1,16 @@
 package com.sequenceiq.cloudbreak.service;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -33,14 +33,14 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -68,8 +68,8 @@ import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.domain.StateStatus;
 import com.sequenceiq.flow.service.FlowCancelService;
 
-@RunWith(MockitoJUnitRunner.class)
-public class HeartbeatServiceTest {
+@ExtendWith(MockitoExtension.class)
+class HeartbeatServiceTest {
 
     private static final String MY_ID = "E80C7BD9-61CD-442E-AFDA-C3B30FEDE88F";
 
@@ -124,12 +124,12 @@ public class HeartbeatServiceTest {
     @Captor
     private ArgumentCaptor<List<FlowLog>> flowLogListCaptor;
 
-    @Before
+    @BeforeEach
     public void init() throws TransactionExecutionException {
-        when(nodeConfig.isNodeIdSpecified()).thenReturn(true);
-        when(nodeConfig.getId()).thenReturn(MY_ID);
+        lenient().when(nodeConfig.isNodeIdSpecified()).thenReturn(true);
+        lenient().when(nodeConfig.getId()).thenReturn(MY_ID);
         ReflectionTestUtils.setField(heartbeatService, "heartbeatThresholdRate", 70000);
-        doAnswer(invocation -> {
+        lenient().doAnswer(invocation -> {
             try {
                 return ((Supplier<?>) invocation.getArgument(0)).get();
             } catch (RuntimeException e) {
@@ -139,7 +139,7 @@ public class HeartbeatServiceTest {
     }
 
     @Test
-    public void testOneNodeTakesAllFlows() {
+    void testOneNodeTakesAllFlows() {
         List<Node> clusterNodes = getClusterNodes();
         clusterNodes.get(0).setLastUpdated(200_000L); // myself
         // set all nodes to failed except myself
@@ -191,7 +191,7 @@ public class HeartbeatServiceTest {
     }
 
     @Test
-    public void testOneNodeTakesAllFlowsWithCleanup() {
+    void testOneNodeTakesAllFlowsWithCleanup() {
         List<Node> clusterNodes = getClusterNodes();
         clusterNodes.get(0).setLastUpdated(200_000L); // myself
         // set all nodes to failed except myself
@@ -243,7 +243,7 @@ public class HeartbeatServiceTest {
     }
 
     @Test
-    public void testOneNodeTakesAllFlowsWithInvalidFlows() {
+    void testOneNodeTakesAllFlowsWithInvalidFlows() {
         List<Node> clusterNodes = getClusterNodes();
         clusterNodes.get(0).setLastUpdated(200_000L); // myself
         // set all nodes to failed except myself
@@ -306,7 +306,7 @@ public class HeartbeatServiceTest {
     }
 
     @Test
-    public void testOneNodeTakesAllFlowsWithTerminationFlowShouldBeDistributed() {
+    void testOneNodeTakesAllFlowsWithTerminationFlowShouldBeDistributed() {
         List<Node> clusterNodes = getClusterNodes();
         clusterNodes.get(0).setLastUpdated(200_000L); // myself
         // set all nodes to failed except myself
@@ -364,7 +364,7 @@ public class HeartbeatServiceTest {
     }
 
     @Test
-    public void testDistributionConcurrency() {
+    void testDistributionConcurrency() {
         List<Node> clusterNodes = getClusterNodes();
         clusterNodes.get(0).setLastUpdated(200_000L); // myself
         clusterNodes.get(1).setLastUpdated(50_000L); // failed node
@@ -406,7 +406,7 @@ public class HeartbeatServiceTest {
     }
 
     @Test
-    public void testDistributionConcurrencyWithDifferentFlows() {
+    void testDistributionConcurrencyWithDifferentFlows() {
         List<Node> clusterNodes = getClusterNodes();
         clusterNodes.get(0).setLastUpdated(200_000L); // myself
         clusterNodes.get(1).setLastUpdated(50_000L); // failed node
@@ -446,7 +446,7 @@ public class HeartbeatServiceTest {
     }
 
     @Test
-    public void testHeartbeatWhenEverytingWorks() {
+    void testHeartbeatWhenEverytingWorks() {
         class TestRetry implements Retry {
 
             @Override
@@ -505,7 +505,7 @@ public class HeartbeatServiceTest {
     }
 
     @Test
-    public void testHeartbeatWhenInstanceCanNotReachTheDatabase() {
+    void testHeartbeatWhenInstanceCanNotReachTheDatabase() {
         class TestRetryWithFail implements Retry {
 
             @Override
@@ -578,7 +578,7 @@ public class HeartbeatServiceTest {
     }
 
     @Test
-    public void testDistributeFlows() throws TransactionExecutionException {
+    void testDistributeFlows() throws TransactionExecutionException {
         ReflectionTestUtils.setField(heartbeatService, "heartbeatThresholdRate", 70);
 
         List<Node> clusterNodes = getClusterNodes();

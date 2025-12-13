@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.image;
 
-import org.junit.Assert;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -19,7 +20,7 @@ public class CsdParcelNameMatcherTest {
 
         boolean result = underTest.matching(csdUrl, parcelName);
 
-        Assert.assertEquals(expectedToMatch, result);
+        assertEquals(expectedToMatch, result);
     }
 
     static Object[][] testCsdAndNameMatchingData() {

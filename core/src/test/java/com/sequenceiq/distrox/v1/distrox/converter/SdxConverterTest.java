@@ -1,6 +1,9 @@
 package com.sequenceiq.distrox.v1.distrox.converter;
 
-import org.junit.jupiter.api.Assertions;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -23,7 +26,7 @@ public class SdxConverterTest {
     public void testGetSharedServiceWhenSdxNullAndEnvironmentHasNotSdx() {
         SharedServiceV4Request sdxRequest = underTest.getSharedService(null);
 
-        Assertions.assertNull(sdxRequest);
+        assertNull(sdxRequest);
     }
 
     @ParameterizedTest
@@ -36,7 +39,7 @@ public class SdxConverterTest {
 
         SharedServiceV4Request sdxRequest = underTest.getSharedService(sdxClusterResponse);
 
-        Assertions.assertEquals("some-sdx", sdxRequest.getDatalakeName());
+        assertEquals("some-sdx", sdxRequest.getDatalakeName());
     }
 
     @Test
@@ -47,8 +50,8 @@ public class SdxConverterTest {
         sdxClusterResponse.setStatusReason("external db creation in progress");
         sdxClusterResponse.setStatus(SdxClusterStatusResponse.EXTERNAL_DATABASE_CREATION_IN_PROGRESS);
 
-        BadRequestException exception = Assertions.assertThrows(BadRequestException.class, () -> underTest.getSharedService(sdxClusterResponse));
-        Assertions.assertEquals(exception.getMessage(), "Your current Environment some-env contains one Data Lake " +
+        BadRequestException exception = assertThrows(BadRequestException.class, () -> underTest.getSharedService(sdxClusterResponse));
+        assertEquals(exception.getMessage(), "Your current Environment some-env contains one Data Lake " +
                 "the name of which is some-sdx. This Data Lake should be in running/available state but currently it " +
                 "is in 'EXTERNAL_DATABASE_CREATION_IN_PROGRESS' instead of Running. Please make sure your Data Lake" +
                 " is up and running before you provision the Data Hub. If your Data Lake is in stopped state, please" +

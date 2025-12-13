@@ -1,20 +1,20 @@
 package com.sequenceiq.cloudbreak.domain;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Set;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.cloudbreak.domain.stack.Component;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 
-public class StackTest {
+class StackTest {
 
     @Test
-    public void testGetGatewayGroup() {
+    void testGetGatewayGroup() {
         InstanceGroup master = new InstanceGroup();
         InstanceGroup data = new InstanceGroup();
         InstanceGroup compute = new InstanceGroup();
@@ -34,7 +34,7 @@ public class StackTest {
     }
 
     @Test
-    public void testPopulateStackIdForComponents() {
+    void testPopulateStackIdForComponents() {
         Stack stack = new Stack();
         Long stackId = 100L;
         stack.setId(stackId);

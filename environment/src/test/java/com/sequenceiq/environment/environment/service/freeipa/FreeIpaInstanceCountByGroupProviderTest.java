@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.environment.service.freeipa;
 
-import org.junit.jupiter.api.Assertions;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -25,7 +26,7 @@ class FreeIpaInstanceCountByGroupProviderTest {
 
         int actual = underTest.getInstanceCount(attachedFreeIpaRequest);
 
-        Assertions.assertEquals(DEFAULT_INSTANCE_COUNT_BY_GROUP, actual);
+        assertEquals(DEFAULT_INSTANCE_COUNT_BY_GROUP, actual);
     }
 
     @Test
@@ -36,13 +37,13 @@ class FreeIpaInstanceCountByGroupProviderTest {
 
         int actual = underTest.getInstanceCount(attachedFreeIpaRequest);
 
-        Assertions.assertEquals(expectedInstanceCountByGroup, actual);
+        assertEquals(expectedInstanceCountByGroup, actual);
     }
 
     @Test
     void getDefaultInstanceCountShouldReturn() {
         int actual = underTest.getDefaultInstanceCount();
 
-        Assertions.assertEquals(DEFAULT_INSTANCE_COUNT_BY_GROUP, actual);
+        assertEquals(DEFAULT_INSTANCE_COUNT_BY_GROUP, actual);
     }
 }

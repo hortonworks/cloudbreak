@@ -1,16 +1,17 @@
 package com.sequenceiq.cloudbreak.orchestrator.salt.utils;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.io.IOException;
 import java.util.Set;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 
-public class GrainsJsonPropertyUtilTest {
+class GrainsJsonPropertyUtilTest {
 
     private JsonNode testNode;
 
@@ -18,29 +19,29 @@ public class GrainsJsonPropertyUtilTest {
 
     private Set<String> resultSet;
 
-    @Before
-    public void setUp() throws IOException {
+    @BeforeEach
+    void setUp() throws IOException {
         testNode = JsonUtil.readTree("[\"ipa_member\", \"managet_agent\", \"kerberized\"]");
         testNodeEmpty = JsonUtil.readTree("");
         resultSet = Set.of("ipa_member", "managet_agent", "kerberized");
     }
 
     @Test
-    public void testGetProperties() {
+    void testGetProperties() {
         Set<String> result = GrainsJsonPropertyUtil.getPropertySet(testNode);
-        Assert.assertTrue(result.containsAll(resultSet));
+        assertTrue(result.containsAll(resultSet));
     }
 
     @Test
-    public void testGetPropertiesNullNode() {
+    void testGetPropertiesNullNode() {
         Set<String> result = GrainsJsonPropertyUtil.getPropertySet(null);
-        Assert.assertTrue(result.isEmpty());
+        assertTrue(result.isEmpty());
     }
 
     @Test
-    public void testGetPropertiesEmptyNode() {
+    void testGetPropertiesEmptyNode() {
         Set<String> result = GrainsJsonPropertyUtil.getPropertySet(testNodeEmpty);
-        Assert.assertTrue(result.isEmpty());
+        assertTrue(result.isEmpty());
     }
 
 }

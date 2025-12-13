@@ -1,17 +1,18 @@
 package com.sequenceiq.cloudbreak.template.model;
 
-import org.junit.Assert;
-import org.junit.Test;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class ConfigPropertyTest {
+import org.junit.jupiter.api.Test;
+
+class ConfigPropertyTest {
 
     @Test
-    public void testConfigPropertyIfInitialized() {
+    void testConfigPropertyIfInitialized() {
         ConfigProperty configProperty = new ConfigProperty("namenode", "/fs1", "hadoopfs");
 
-        Assert.assertEquals("/fs1", configProperty.getDirectory());
-        Assert.assertEquals("hadoopfs", configProperty.getPrefix());
-        Assert.assertEquals("namenode", configProperty.getName());
+        assertEquals("/fs1", configProperty.getDirectory());
+        assertEquals("hadoopfs", configProperty.getPrefix());
+        assertEquals("namenode", configProperty.getName());
     }
 
 }

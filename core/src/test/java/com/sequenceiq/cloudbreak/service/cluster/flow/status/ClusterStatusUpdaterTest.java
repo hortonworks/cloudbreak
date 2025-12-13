@@ -4,15 +4,17 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_AMBARI_CLUST
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
@@ -30,7 +32,8 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 
-public class ClusterStatusUpdaterTest {
+@ExtendWith(MockitoExtension.class)
+class ClusterStatusUpdaterTest {
     private static final Long TEST_STACK_ID = 0L;
 
     private static final Long TEST_CLUSTER_ID = 0L;
@@ -63,17 +66,15 @@ public class ClusterStatusUpdaterTest {
     @Mock
     private ClusterStatusService clusterStatusService;
 
-    @Before
-    public void setUp() {
-        underTest = new ClusterStatusUpdater();
-        MockitoAnnotations.initMocks(this);
-        when(clusterApiConnectors.getConnector(any(Stack.class))).thenReturn(clusterApi);
-        when(clusterApi.clusterStatusService()).thenReturn(clusterStatusService);
-        when(clusterStatusService.getStatus(anyBoolean())).thenReturn(ClusterStatusResult.of(ClusterStatus.STARTED));
+    @BeforeEach
+    void setUp() {
+        lenient().when(clusterApiConnectors.getConnector(any(Stack.class))).thenReturn(clusterApi);
+        lenient().when(clusterApi.clusterStatusService()).thenReturn(clusterStatusService);
+        lenient().when(clusterStatusService.getStatus(anyBoolean())).thenReturn(ClusterStatusResult.of(ClusterStatus.STARTED));
     }
 
     @Test
-    public void testUpdateClusterStatusShouldUpdateStackStatusWhenStackStatusChanged() {
+    void testUpdateClusterStatusShouldUpdateStackStatusWhenStackStatusChanged() {
         // GIVEN
         Stack stack = createStackWithCluster(DetailedStackStatus.NODE_FAILURE);
         when(clusterStatusService.getStatus(anyBoolean())).thenReturn(ClusterStatusResult.of(ClusterStatus.INSTALLED));
@@ -86,7 +87,7 @@ public class ClusterStatusUpdaterTest {
     }
 
     @Test
-    public void testUpdateStackStatusWhenStackIsAvailableAndClusterStatusIsInstalled() {
+    void testUpdateStackStatusWhenStackIsAvailableAndClusterStatusIsInstalled() {
         // GIVEN
         Stack stack = createStackWithCluster(DetailedStackStatus.NODE_FAILURE);
         when(clusterStatusService.getStatus(anyBoolean())).thenReturn(ClusterStatusResult.of(ClusterStatus.INSTALLED));
@@ -99,7 +100,7 @@ public class ClusterStatusUpdaterTest {
     }
 
     @Test
-    public void testUpdateClusterStatusShouldOnlyNotifyWhenStackStatusIsInDeletionPhase() {
+    void testUpdateClusterStatusShouldOnlyNotifyWhenStackStatusIsInDeletionPhase() {
         // GIVEN
         Stack stack = createStackWithCluster(DetailedStackStatus.DELETE_IN_PROGRESS);
         // WHEN
@@ -111,7 +112,7 @@ public class ClusterStatusUpdaterTest {
     }
 
     @Test
-    public void testUpdateClusterStatusShouldOnlyNotifyWhenStackStatusIsInStopPhase() {
+    void testUpdateClusterStatusShouldOnlyNotifyWhenStackStatusIsInStopPhase() {
         // GIVEN
         Stack stack = createStackWithCluster(DetailedStackStatus.STOPPED);
         // WHEN
@@ -123,7 +124,7 @@ public class ClusterStatusUpdaterTest {
     }
 
     @Test
-    public void testUpdateClusterStatusShouldOnlyNotifyWhenStackStatusIsInModificationPhase() {
+    void testUpdateClusterStatusShouldOnlyNotifyWhenStackStatusIsInModificationPhase() {
         // GIVEN
         Stack stack = createStackWithCluster(DetailedStackStatus.UPSCALE_IN_PROGRESS);
         // WHEN

@@ -1,16 +1,16 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.hive;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
@@ -21,13 +21,13 @@ import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 
-@RunWith(MockitoJUnitRunner.class)
-public class HiveServer2ConfigProviderTest {
+@ExtendWith(MockitoExtension.class)
+class HiveServer2ConfigProviderTest {
 
     private final HiveServer2RoleConfigProvider underTest = new HiveServer2RoleConfigProvider();
 
     @Test
-    public void testGetRoleConfigsWithSingleRolesPerHostGroup() {
+    void testGetRoleConfigsWithSingleRolesPerHostGroup() {
         TemplatePreparationObject preparationObject = getTemplatePreparationObject();
         String inputJson = getBlueprintText("input/clouderamanager.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
@@ -41,12 +41,11 @@ public class HiveServer2ConfigProviderTest {
         String expected = "<property><name>hive.server2.wm.namespace</name><value>"
                 + preparationObject.getGeneralClusterConfigs().getUuid()
                 + "</value></property>";
-        assertEquals(expected,
-                hiveserver2.get(0).getValue());
+        assertEquals(expected, hiveserver2.get(0).getValue());
     }
 
     @Test
-    public void testIsConfigurationNeededShouldReturnFalseWhenNoHiveServer2Role() {
+    void testIsConfigurationNeededShouldReturnFalseWhenNoHiveServer2Role() {
         TemplatePreparationObject preparationObject = getTemplatePreparationObject();
         String inputJson = getBlueprintText("input/clouderamanager-no-hs2.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
@@ -57,7 +56,7 @@ public class HiveServer2ConfigProviderTest {
     }
 
     @Test
-    public void testIsConfigurationNeededShouldReturnTrueWhenHiveServer2RoleProvided() {
+    void testIsConfigurationNeededShouldReturnTrueWhenHiveServer2RoleProvided() {
         TemplatePreparationObject preparationObject = getTemplatePreparationObject();
         String inputJson = getBlueprintText("input/clouderamanager.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);

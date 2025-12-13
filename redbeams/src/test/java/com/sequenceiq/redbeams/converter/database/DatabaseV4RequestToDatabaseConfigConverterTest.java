@@ -1,6 +1,6 @@
 package com.sequenceiq.redbeams.converter.database;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -8,11 +8,11 @@ import static org.mockito.Mockito.when;
 
 import java.util.Optional;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.common.converter.ResourceNameGenerator;
@@ -22,7 +22,8 @@ import com.sequenceiq.redbeams.api.endpoint.v4.database.request.DatabaseV4Reques
 import com.sequenceiq.redbeams.api.util.DatabaseVendorUtil;
 import com.sequenceiq.redbeams.domain.DatabaseConfig;
 
-public class DatabaseV4RequestToDatabaseConfigConverterTest {
+@ExtendWith(MockitoExtension.class)
+class DatabaseV4RequestToDatabaseConfigConverterTest {
 
     private static final String TYPE = "type";
 
@@ -52,13 +53,8 @@ public class DatabaseV4RequestToDatabaseConfigConverterTest {
     @InjectMocks
     private DatabaseV4RequestToDatabaseConfigConverter underTest;
 
-    @Before
-    public void setup() {
-        MockitoAnnotations.initMocks(this);
-    }
-
     @Test
-    public void testConvert() {
+    void testConvert() {
         DatabaseV4Request request = new DatabaseV4Request();
         request.setType(TYPE);
         request.setName(NAME);

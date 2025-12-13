@@ -1,16 +1,16 @@
 package com.sequenceiq.redbeams.service.dbconfig;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.core.Is.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
@@ -29,13 +29,12 @@ import jakarta.ws.rs.ForbiddenException;
 
 import org.hamcrest.core.Every;
 import org.hibernate.exception.ConstraintViolationException;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.validation.MapBindingResult;
@@ -60,7 +59,8 @@ import com.sequenceiq.redbeams.service.crn.CrnService;
 import com.sequenceiq.redbeams.service.drivers.DriverFunctions;
 import com.sequenceiq.redbeams.service.validation.DatabaseConnectionValidator;
 
-public class DatabaseConfigServiceTest {
+@ExtendWith(MockitoExtension.class)
+class DatabaseConfigServiceTest {
 
     private static final long CURRENT_TIME_MILLIS = 1000L;
 
@@ -92,9 +92,6 @@ public class DatabaseConfigServiceTest {
 
     private static final String ERROR_MESSAGE = "error message";
 
-    @Rule
-    public ExpectedException thrown = ExpectedException.none();
-
     @Mock
     private DatabaseConfigRepository repository;
 
@@ -124,21 +121,19 @@ public class DatabaseConfigServiceTest {
 
     private DatabaseConfig db;
 
-    @Before
+    @BeforeEach
     public void setup() throws TransactionService.TransactionExecutionException {
-        MockitoAnnotations.initMocks(this);
-
         db = new DatabaseConfig();
         db.setId(1L);
         db.setName("mydb");
 
-        doNothing().when(ownerAssignmentService).assignResourceOwnerRoleIfEntitled(anyString(), anyString());
-        doNothing().when(ownerAssignmentService).notifyResourceDeleted(anyString());
+        lenient().doNothing().when(ownerAssignmentService).assignResourceOwnerRoleIfEntitled(anyString(), anyString());
+        lenient().doNothing().when(ownerAssignmentService).notifyResourceDeleted(anyString());
         lenient().doAnswer(invocation -> ((Supplier<?>) invocation.getArgument(0)).get()).when(transactionService).required(any(Supplier.class));
     }
 
     @Test
-    public void testFindAll() {
+    void testFindAll() {
         when(repository.findByEnvironmentId("myenv")).thenReturn(Collections.singleton(db));
 
         Set<DatabaseConfig> dbs = underTest.findAll("myenv");
@@ -148,7 +143,7 @@ public class DatabaseConfigServiceTest {
     }
 
     @Test
-    public void testRegister() {
+    void testRegister() {
         DatabaseConfig configToRegister = new DatabaseConfig();
         configToRegister.setConnectionDriver("org.postgresql.MyCustomDriver");
         configToRegister.setResourceCrn(null);
@@ -170,7 +165,7 @@ public class DatabaseConfigServiceTest {
     }
 
     @Test
-    public void testRegisterWithoutConnectionDriver() {
+    void testRegisterWithoutConnectionDriver() {
         DatabaseConfig configToRegister = new DatabaseConfig();
         configToRegister.setConnectionDriver(null);
         configToRegister.setDatabaseVendor(DatabaseVendor.POSTGRES);
@@ -186,8 +181,7 @@ public class DatabaseConfigServiceTest {
     }
 
     @Test
-    public void testRegisterConnectionFailure() {
-        thrown.expect(IllegalArgumentException.class);
+    void testRegisterConnectionFailure() {
         DatabaseConfig configToRegister = new DatabaseConfig();
         configToRegister.setConnectionDriver("org.postgresql.MyCustomDriver");
         doAnswer((Answer) invocation -> {
@@ -196,12 +190,11 @@ public class DatabaseConfigServiceTest {
             return null;
         }).when(connectionValidator).validate(any(), any());
 
-        underTest.register(configToRegister, true);
-
+        assertThrows(IllegalArgumentException.class, () -> underTest.register(configToRegister, true));
     }
 
     @Test
-    public void testDeleteByNameRegisteredDatabase() {
+    void testDeleteByNameRegisteredDatabase() {
         DatabaseConfig databaseConfig = getDatabaseConfig(ResourceStatus.USER_MANAGED, DATABASE_NAME);
         when(repository.findByEnvironmentIdAndName(ENVIRONMENT_CRN, DATABASE_NAME)).thenReturn(Optional.of(databaseConfig));
 
@@ -212,15 +205,14 @@ public class DatabaseConfigServiceTest {
     }
 
     @Test
-    public void testDeleteByNameNotFound() {
-        thrown.expect(NotFoundException.class);
+    void testDeleteByNameNotFound() {
         when(repository.findByEnvironmentIdAndName(ENVIRONMENT_CRN, DATABASE_NAME)).thenReturn(Optional.empty());
 
-        underTest.deleteByName(DATABASE_NAME, ENVIRONMENT_CRN);
+        assertThrows(NotFoundException.class, () -> underTest.deleteByName(DATABASE_NAME, ENVIRONMENT_CRN));
     }
 
     @Test
-    public void testDeleteByNameCreatedDatabase() {
+    void testDeleteByNameCreatedDatabase() {
         DatabaseServerConfig server = new DatabaseServerConfig();
         server.setId(1L);
         server.setName("myserver");
@@ -238,7 +230,7 @@ public class DatabaseConfigServiceTest {
     }
 
     @Test
-    public void testDeleteByCrnRegisteredDatabase() {
+    void testDeleteByCrnRegisteredDatabase() {
         DatabaseConfig databaseConfig = getDatabaseConfig(ResourceStatus.USER_MANAGED, DATABASE_NAME);
         when(repository.findByResourceCrn(DB_CRN)).thenReturn(Optional.of(databaseConfig));
 
@@ -249,15 +241,14 @@ public class DatabaseConfigServiceTest {
     }
 
     @Test
-    public void testDeleteByCrnNotFound() {
-        thrown.expect(NotFoundException.class);
+    void testDeleteByCrnNotFound() {
         when(repository.findByResourceCrn(DB_CRN)).thenReturn(Optional.empty());
 
-        underTest.deleteByCrn(DB_CRN_STRING);
+        assertThrows(NotFoundException.class, () -> underTest.deleteByCrn(DB_CRN_STRING));
     }
 
     @Test
-    public void testDeleteByCrnCreatedDatabase() {
+    void testDeleteByCrnCreatedDatabase() {
         DatabaseServerConfig server = new DatabaseServerConfig();
         server.setId(1L);
         server.setName("myserver");
@@ -275,16 +266,13 @@ public class DatabaseConfigServiceTest {
     }
 
     @Test
-    public void testDeleteCreatedDatabaseForce() {
+    void testDeleteCreatedDatabaseForce() {
         DatabaseConfig databaseConfig = getDatabaseConfig(ResourceStatus.SERVICE_MANAGED, DATABASE_NAME);
         DatabaseServerConfig server = new DatabaseServerConfig();
         server.setId(1L);
         server.setName("myserver");
 
         databaseConfig.setServer(server);
-        when(repository.findByResourceCrn(DB_CRN)).thenReturn(Optional.of(databaseConfig));
-
-        doThrow(new RuntimeException()).when(driverFunctions).execWithDatabaseDriver(eq(server), any());
 
         underTest.delete(databaseConfig, true, true);
 
@@ -293,21 +281,18 @@ public class DatabaseConfigServiceTest {
     }
 
     @Test
-    public void testDeleteCreatedDatabaseNoForce() {
-        thrown.expect(RuntimeException.class);
-
+    void testDeleteCreatedDatabaseNoForce() {
         DatabaseConfig databaseConfig = getDatabaseConfig(ResourceStatus.SERVICE_MANAGED, DATABASE_NAME);
         DatabaseServerConfig server = new DatabaseServerConfig();
         server.setId(1L);
         server.setName("myserver");
 
         databaseConfig.setServer(server);
-        when(repository.findByResourceCrn(DB_CRN)).thenReturn(Optional.of(databaseConfig));
 
         doThrow(new RuntimeException()).when(driverFunctions).execWithDatabaseDriver(eq(server), any());
 
         try {
-            underTest.delete(databaseConfig, false, false);
+            assertThrows(RuntimeException.class, () -> underTest.delete(databaseConfig, false, false));
         } finally {
             assertFalse(databaseConfig.isArchived());
             verify(repository, never()).save(databaseConfig);
@@ -315,14 +300,13 @@ public class DatabaseConfigServiceTest {
     }
 
     @Test
-    public void testDeleteCreatedDatabaseSkipDeletionOnServer() {
+    void testDeleteCreatedDatabaseSkipDeletionOnServer() {
         DatabaseConfig databaseConfig = getDatabaseConfig(ResourceStatus.SERVICE_MANAGED, DATABASE_NAME);
         DatabaseServerConfig server = new DatabaseServerConfig();
         server.setId(1L);
         server.setName("myserver");
 
         databaseConfig.setServer(server);
-        when(repository.findByResourceCrn(DB_CRN)).thenReturn(Optional.of(databaseConfig));
 
         underTest.delete(databaseConfig, false, true);
 
@@ -333,7 +317,7 @@ public class DatabaseConfigServiceTest {
     }
 
     @Test
-    public void testDeleteMultipleByCrn() {
+    void testDeleteMultipleByCrn() {
         Set<DatabaseConfig> databaseConfigs = new HashSet<>();
         databaseConfigs.add(getDatabaseConfig(ResourceStatus.USER_MANAGED, DATABASE_NAME));
         databaseConfigs.add(getDatabaseConfig(ResourceStatus.USER_MANAGED, DATABASE_NAME2));
@@ -346,30 +330,26 @@ public class DatabaseConfigServiceTest {
     }
 
     @Test
-    public void testDeleteMultipleByCrnWhenNotFound() {
-        thrown.expect(NotFoundException.class);
-        thrown.expectMessage(String.format("Database(s) not found: %s", DB2_CRN_STRING));
+    void testDeleteMultipleByCrnWhenNotFound() {
         DatabaseConfig databaseConfig = getDatabaseConfig(ResourceStatus.SERVICE_MANAGED, DATABASE_NAME);
         databaseConfig.setResourceCrn(DB_CRN);
         Set<Crn> databasesToDelete = Set.of(DB_CRN, DB2_CRN);
         when(repository.findByResourceCrnIn(databasesToDelete)).thenReturn(Set.of(databaseConfig));
 
-        underTest.deleteMultipleByCrn(Set.of(DB_CRN_STRING, DB2_CRN_STRING));
+        assertThrows(NotFoundException.class, () -> underTest.deleteMultipleByCrn(Set.of(DB_CRN_STRING, DB2_CRN_STRING)),
+                String.format("Database(s) not found: %s", DB2_CRN_STRING));
 
         assertFalse(databaseConfig.isArchived());
     }
 
     @Test
-    public void testRegisterEntityWithNameExists() {
-        thrown.expect(BadRequestException.class);
-        thrown.expectMessage("database config already exists with name");
-
+    void testRegisterEntityWithNameExists() {
         DatabaseConfig configToSave = new DatabaseConfig();
         configToSave.setName("name");
 
         when(repository.findByName(anyString())).thenReturn(Optional.of(configToSave));
 
-        underTest.register(configToSave, false);
+        assertThrows(BadRequestException.class, () -> underTest.register(configToSave, false), "database config already exists with name");
     }
 
     private DatabaseConfig getDatabaseConfig(ResourceStatus resourceStatus, String name) {
@@ -386,19 +366,18 @@ public class DatabaseConfigServiceTest {
     }
 
     @Test
-    public void testRegisterHasNoAccess() {
-        thrown.expect(ForbiddenException.class);
+    void testRegisterHasNoAccess() {
         DatabaseConfig configToRegister = new DatabaseConfig();
         configToRegister.setConnectionDriver("org.postgresql.MyCustomDriver");
         when(clock.getCurrentTimeMillis()).thenReturn(CURRENT_TIME_MILLIS);
         when(crnService.createCrn(configToRegister)).thenReturn(TestData.getTestCrn("database", "name"));
         when(repository.save(configToRegister)).thenThrow(new ForbiddenException("User has no right to access resource"));
 
-        underTest.register(configToRegister, false);
+        assertThrows(ForbiddenException.class, () -> underTest.register(configToRegister, false));
     }
 
     @Test
-    public void testTestNewConnectionSucceed() {
+    void testTestNewConnectionSucceed() {
         DatabaseConfig newConfig = new DatabaseConfig();
 
         String result = underTest.testConnection(newConfig);
@@ -408,7 +387,7 @@ public class DatabaseConfigServiceTest {
     }
 
     @Test
-    public void testTestNewConnectionFails() {
+    void testTestNewConnectionFails() {
         DatabaseConfig newConfig = new DatabaseConfig();
         doAnswer((Answer) invocation -> {
             MapBindingResult errors = invocation.getArgument(1, MapBindingResult.class);
@@ -423,7 +402,7 @@ public class DatabaseConfigServiceTest {
     }
 
     @Test
-    public void testExistingConnectionSucceed() {
+    void testExistingConnectionSucceed() {
         DatabaseConfig existingDatabaseConfig = new DatabaseConfig();
         when(repository.findByEnvironmentIdAndName(ENVIRONMENT_CRN, DATABASE_NAME)).thenReturn(Optional.of(existingDatabaseConfig));
 
@@ -434,7 +413,7 @@ public class DatabaseConfigServiceTest {
     }
 
     @Test
-    public void testExistingConnectionFails() {
+    void testExistingConnectionFails() {
         DatabaseConfig existingDatabaseConfig = new DatabaseConfig();
         when(repository.findByEnvironmentIdAndName(ENVIRONMENT_CRN, DATABASE_NAME)).thenReturn(Optional.of(existingDatabaseConfig));
         doAnswer((Answer) invocation -> {
@@ -450,7 +429,7 @@ public class DatabaseConfigServiceTest {
     }
 
     @Test
-    public void testGetByCrnFound() {
+    void testGetByCrnFound() {
         when(repository.findByResourceCrn(DB_CRN)).thenReturn(Optional.of(db));
 
         DatabaseConfig foundDb = underTest.getByCrn(DB_CRN_STRING);
@@ -459,16 +438,14 @@ public class DatabaseConfigServiceTest {
     }
 
     @Test
-    public void testGetByCrnNotFound() {
-        thrown.expect(NotFoundException.class);
-
+    void testGetByCrnNotFound() {
         when(repository.findByResourceCrn(DB_CRN)).thenReturn(Optional.empty());
 
-        underTest.getByCrn(DB_CRN_STRING);
+        assertThrows(NotFoundException.class, () -> underTest.getByCrn(DB_CRN_STRING));
     }
 
     @Test
-    public void testGetByNameFound() {
+    void testGetByNameFound() {
         when(repository.findByEnvironmentIdAndName("id", db.getName())).thenReturn(Optional.of(db));
 
         DatabaseConfig foundDb = underTest.getByName(db.getName(), "id");
@@ -477,12 +454,10 @@ public class DatabaseConfigServiceTest {
     }
 
     @Test
-    public void testGetByNameNotFound() {
-        thrown.expect(NotFoundException.class);
-
+    void testGetByNameNotFound() {
         when(repository.findByEnvironmentIdAndName("id", db.getName())).thenReturn(Optional.empty());
 
-        underTest.getByName(db.getName(), "id");
+        assertThrows(NotFoundException.class, () -> underTest.getByName(db.getName(), "id"));
     }
 
 }

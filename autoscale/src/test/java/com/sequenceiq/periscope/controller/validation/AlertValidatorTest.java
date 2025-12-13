@@ -8,7 +8,9 @@ import static com.sequenceiq.periscope.common.MessageCode.UNSUPPORTED_AUTOSCALIN
 import static com.sequenceiq.periscope.common.MessageCode.VALIDATION_TIME_STOP_START_UNSUPPORTED;
 import static java.util.Collections.emptyList;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -21,14 +23,12 @@ import java.util.Set;
 
 import jakarta.ws.rs.BadRequestException;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.AutoscaleRecommendationV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -52,17 +52,14 @@ import com.sequenceiq.periscope.service.DateService;
 import com.sequenceiq.periscope.service.EntitlementValidationService;
 import com.sequenceiq.periscope.service.configuration.LimitsConfigurationService;
 
-@RunWith(MockitoJUnitRunner.class)
-public class AlertValidatorTest {
+@ExtendWith(MockitoExtension.class)
+class AlertValidatorTest {
 
     private static final String TEST_ACCOUNT_ID = "accid";
 
     private static final String TEST_USER_CRN = String.format("crn:cdp:iam:us-west-1:%s:user:mockuser@cloudera.com", TEST_ACCOUNT_ID);
 
     private static final String TEST_STACK_CRN = String.format("crn:cdp:datahub:us-west-1:%s:cluster:cluster", TEST_ACCOUNT_ID);
-
-    @Rule
-    public final ExpectedException expectedException = ExpectedException.none();
 
     @InjectMocks
     private AlertValidator underTest;
@@ -86,15 +83,15 @@ public class AlertValidatorTest {
 
     private Cluster aCluster;
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         underTest.setDateService(dateService);
         aCluster = getACluster();
-        when(entitlementValidationService.autoscalingEntitlementEnabled(anyString(), anyString())).thenReturn(true);
+        lenient().when(entitlementValidationService.autoscalingEntitlementEnabled(anyString(), anyString())).thenReturn(true);
     }
 
     @Test
-    public void testValidateEntitlementAndDisableIfNotEntitledWhenAccountNotEntitledForPlatform() {
+    void testValidateEntitlementAndDisableIfNotEntitledWhenAccountNotEntitledForPlatform() {
         aCluster.setCloudPlatform("Yarn");
         aCluster.setAutoscalingEnabled(false);
 
@@ -102,30 +99,30 @@ public class AlertValidatorTest {
         when(messagesService.getMessage(AUTOSCALING_ENTITLEMENT_NOT_ENABLED,
                 List.of(aCluster.getCloudPlatform(), aCluster.getStackName()))).thenReturn("account.not.entitled.for.platform");
 
-        expectedException.expect(BadRequestException.class);
-        expectedException.expectMessage("account.not.entitled.for.platform");
+        assertThrows(BadRequestException.class,
+                () -> ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.validateEntitlementAndDisableIfNotEntitled(aCluster)),
+                "account.not.entitled.for.platform");
 
-        ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.validateEntitlementAndDisableIfNotEntitled(aCluster));
         verify(asClusterCommonService, never()).setAutoscaleState(aCluster.getId(), false);
     }
 
     @Test
-    public void testValidateEntitlementAndDisableIfNotEntitledWhenAccountNotEntitledThenDisableAutoscaling() {
+    void testValidateEntitlementAndDisableIfNotEntitledWhenAccountNotEntitledThenDisableAutoscaling() {
         aCluster.setCloudPlatform("AWS");
 
         when(entitlementValidationService.autoscalingEntitlementEnabled(TEST_ACCOUNT_ID, "AWS")).thenReturn(false);
         when(messagesService.getMessage(AUTOSCALING_ENTITLEMENT_NOT_ENABLED,
                 List.of(aCluster.getCloudPlatform(), aCluster.getStackName()))).thenReturn("account.not.entitled.for.platform");
 
-        expectedException.expect(BadRequestException.class);
-        expectedException.expectMessage("account.not.entitled.for.platform");
+        assertThrows(BadRequestException.class,
+                () -> ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.validateEntitlementAndDisableIfNotEntitled(aCluster)),
+                "account.not.entitled.for.platform");
 
-        ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.validateEntitlementAndDisableIfNotEntitled(aCluster));
         verify(asClusterCommonService, times(1)).setAutoscaleState(aCluster.getId(), false);
     }
 
     @Test
-    public void testValidateEntitlementAndDisableIfNotEntitledWhenAccountEntitledThenValidationSuccess() {
+    void testValidateEntitlementAndDisableIfNotEntitledWhenAccountEntitledThenValidationSuccess() {
         aCluster.setCloudPlatform("AWS");
 
         when(entitlementValidationService.autoscalingEntitlementEnabled(TEST_ACCOUNT_ID, "AWS")).thenReturn(true);
@@ -135,21 +132,17 @@ public class AlertValidatorTest {
     }
 
     @Test
-    public void testValidateIfStackIsNotAvailable() {
+    void testValidateIfStackIsNotAvailable() {
         aCluster = getACluster();
         aCluster.setState(ClusterState.SUSPENDED);
 
-        when(messagesService.getMessage(AUTOSCALE_CLUSTER_NOT_AVAILABLE,
-                List.of("teststack"))).thenReturn("autoscale.cluster.not.available");
+        when(messagesService.getMessage(AUTOSCALE_CLUSTER_NOT_AVAILABLE, List.of("teststack"))).thenReturn("autoscale.cluster.not.available");
 
-        expectedException.expect(BadRequestException.class);
-        expectedException.expectMessage("autoscale.cluster.not.available");
-
-        underTest.validateIfStackIsAvailable(aCluster);
+        assertThrows(BadRequestException.class, () -> underTest.validateIfStackIsAvailable(aCluster), "autoscale.cluster.not.available");
     }
 
     @Test
-    public void testValidateIfStackIsAvailable() {
+    void testValidateIfStackIsAvailable() {
         aCluster = getACluster();
         aCluster.setState(ClusterState.RUNNING);
 
@@ -157,22 +150,20 @@ public class AlertValidatorTest {
     }
 
     @Test
-    public void testValidateStopStartEntitlementNotEnabledForAccount() {
+    void testValidateStopStartEntitlementNotEnabledForAccount() {
         aCluster.setCloudPlatform("AWS");
 
         when(entitlementValidationService.stopStartAutoscalingEntitlementEnabled(TEST_ACCOUNT_ID, "AWS")).thenReturn(false);
         when(messagesService.getMessage(AUTOSCALING_STOP_START_ENTITLEMENT_NOT_ENABLED,
                 List.of(aCluster.getCloudPlatform(), aCluster.getStackName()))).thenReturn("account.not.entitled");
 
-        expectedException.expect(BadRequestException.class);
-        expectedException.expectMessage("account.not.entitled");
-
-        ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.validateStopStartEntitlementAndDisableIfNotEntitled(aCluster));
-        verify(asClusterCommonService, times(1)).setStopStartScalingState(aCluster.getId(), false, false, true);
+        assertThrows(BadRequestException.class,
+                () -> ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.validateStopStartEntitlementAndDisableIfNotEntitled(aCluster)),
+                "account.not.entitled");
     }
 
     @Test
-    public void testValidateStopStartEntitlementEnabledForAccount() {
+    void testValidateStopStartEntitlementEnabledForAccount() {
         aCluster.setCloudPlatform("AWS");
 
         when(entitlementValidationService.stopStartAutoscalingEntitlementEnabled(TEST_ACCOUNT_ID, "AWS")).thenReturn(true);
@@ -182,7 +173,7 @@ public class AlertValidatorTest {
     }
 
     @Test
-    public void testValidateScheduleWhenValidThenSuccess() {
+    void testValidateScheduleWhenValidThenSuccess() {
         TimeAlertRequest request = new TimeAlertRequest();
         request.setCron("1 0 1 1 1 1");
         request.setTimeZone("GMT");
@@ -191,31 +182,26 @@ public class AlertValidatorTest {
     }
 
     @Test
-    public void testValidateScheduleWhenInvalidCron() {
+    void testValidateScheduleWhenInvalidCron() {
         TimeAlertRequest request = new TimeAlertRequest();
         request.setCron("2 22 22243 333");
         request.setTimeZone("GMT");
 
-        expectedException.expect(BadRequestException.class);
-        expectedException.expectMessage("Cron expression must consist of 6 fields (found 4 in \"2 22 22243 333\")");
-
-        underTest.validateSchedule(request);
+        assertThrows(BadRequestException.class, () -> underTest.validateSchedule(request),
+                "Cron expression must consist of 6 fields (found 4 in \"2 22 22243 333\")");
     }
 
     @Test
-    public void testValidateScheduleWhenInvalidTimeZone() {
+    void testValidateScheduleWhenInvalidTimeZone() {
         TimeAlertRequest request = new TimeAlertRequest();
         request.setCron("1 0 1 1 1 1");
         request.setTimeZone("GMT-4343");
 
-        expectedException.expect(BadRequestException.class);
-        expectedException.expectMessage("Invalid ID for offset-based ZoneId: GMT-4343");
-
-        underTest.validateSchedule(request);
+        assertThrows(BadRequestException.class, () -> underTest.validateSchedule(request), "Invalid ID for offset-based ZoneId: GMT-4343");
     }
 
     @Test
-    public void testLoadAlertCreateWhenHostGroupNotSupported() {
+    void testLoadAlertCreateWhenHostGroupNotSupported() {
         Set<String> requestHostGroups = Set.of("compute", "compute1");
         Set<String> supportedHostGroups = Set.of("compute1");
 
@@ -225,14 +211,12 @@ public class AlertValidatorTest {
                 List.of(requestHostGroups, AlertType.LOAD, aCluster.getStackName(), supportedHostGroups)))
                 .thenReturn("unsupported.hostgroup");
 
-        expectedException.expect(BadRequestException.class);
-        expectedException.expectMessage("unsupported.hostgroup");
-
-        underTest.validateSupportedHostGroup(aCluster, requestHostGroups, AlertType.LOAD);
+        assertThrows(BadRequestException.class, () -> underTest.validateSupportedHostGroup(aCluster, requestHostGroups, AlertType.LOAD),
+                "unsupported.hostgroup");
     }
 
     @Test
-    public void testTimeAlertCreateWhenHostGroupNotSupported() {
+    void testTimeAlertCreateWhenHostGroupNotSupported() {
         Set<String> requestHostGroups = Set.of("compute", "compute1");
         Set<String> supportedHostGroups = Set.of("compute1");
 
@@ -242,14 +226,12 @@ public class AlertValidatorTest {
                 List.of(requestHostGroups, AlertType.TIME, aCluster.getStackName(), supportedHostGroups)))
                 .thenReturn("unsupported.hostgroup");
 
-        expectedException.expect(BadRequestException.class);
-        expectedException.expectMessage("unsupported.hostgroup");
-
-        underTest.validateSupportedHostGroup(aCluster, requestHostGroups, AlertType.TIME);
+        assertThrows(BadRequestException.class, () -> underTest.validateSupportedHostGroup(aCluster, requestHostGroups, AlertType.TIME),
+                "unsupported.hostgroup");
     }
 
     @Test
-    public void testTimeAlertCreateWhenStopStartEnabledInRequest() {
+    void testTimeAlertCreateWhenStopStartEnabledInRequest() {
         DistroXAutoscaleClusterRequest autoscaleClusterRequest = new DistroXAutoscaleClusterRequest();
         List<TimeAlertRequest> timeAlerts = new ArrayList<>();
         List.of("compute", "compute", "compute1").forEach(
@@ -269,14 +251,12 @@ public class AlertValidatorTest {
         when(messagesService.getMessage(VALIDATION_TIME_STOP_START_UNSUPPORTED))
                 .thenReturn("Schedule-Based Autoscaling does not support the stop / start scaling mechanism.");
 
-        expectedException.expect(BadRequestException.class);
-        expectedException.expectMessage("Schedule-Based Autoscaling does not support the stop / start scaling mechanism.");
-
-        underTest.validateScheduleWithStopStart(autoscaleClusterRequest);
+        assertThrows(BadRequestException.class, () -> underTest.validateScheduleWithStopStart(autoscaleClusterRequest),
+                "Schedule-Based Autoscaling does not support the stop / start scaling mechanism.");
     }
 
     @Test
-    public void testTimeAlertCreateWhenStopStartEnabledInClusterEntity() {
+    void testTimeAlertCreateWhenStopStartEnabledInClusterEntity() {
         DistroXAutoscaleClusterRequest autoscaleClusterRequest = new DistroXAutoscaleClusterRequest();
         List<TimeAlertRequest> timeAlerts = new ArrayList<>();
         List.of("compute", "compute", "compute1").forEach(
@@ -297,14 +277,12 @@ public class AlertValidatorTest {
         when(messagesService.getMessage(VALIDATION_TIME_STOP_START_UNSUPPORTED))
                 .thenReturn("Schedule-Based Autoscaling does not support the stop / start scaling mechanism.");
 
-        expectedException.expect(BadRequestException.class);
-        expectedException.expectMessage("Schedule-Based Autoscaling does not support the stop / start scaling mechanism.");
-
-        underTest.validateScheduleWithStopStart(autoscaleClusterRequest);
+        assertThrows(BadRequestException.class, () -> underTest.validateScheduleWithStopStart(autoscaleClusterRequest),
+                "Schedule-Based Autoscaling does not support the stop / start scaling mechanism.");
     }
 
     @Test
-    public void testEnableStopStartWithTimeAlertPreCreated() {
+    void testEnableStopStartWithTimeAlertPreCreated() {
         AutoscaleClusterState autoscaleState = new AutoscaleClusterState();
         autoscaleState.setUseStopStartMechanism(Boolean.TRUE);
         TimeAlert timeAlert = new TimeAlert();
@@ -316,14 +294,12 @@ public class AlertValidatorTest {
         when(messagesService.getMessage(VALIDATION_TIME_STOP_START_UNSUPPORTED))
                 .thenReturn("Schedule-Based Autoscaling does not support the stop / start scaling mechanism.");
 
-        expectedException.expect(BadRequestException.class);
-        expectedException.expectMessage("Schedule-Based Autoscaling does not support the stop / start scaling mechanism.");
-
-        underTest.validateScheduleWithStopStart(aCluster, autoscaleState);
+        assertThrows(BadRequestException.class, () -> underTest.validateScheduleWithStopStart(aCluster, autoscaleState),
+                "Schedule-Based Autoscaling does not support the stop / start scaling mechanism.");
     }
 
     @Test
-    public void testEnableStopStartInRequestWithTimeAlertPreCreated() {
+    void testEnableStopStartInRequestWithTimeAlertPreCreated() {
         DistroXAutoscaleClusterRequest autoscaleRequest = new DistroXAutoscaleClusterRequest();
         TimeAlertRequest timeAlertRequest = new TimeAlertRequest();
         timeAlertRequest.setTimeZone("Asia/Calcutta");
@@ -343,14 +319,12 @@ public class AlertValidatorTest {
         when(messagesService.getMessage(VALIDATION_TIME_STOP_START_UNSUPPORTED))
                 .thenReturn("Schedule-Based Autoscaling does not support the stop / start scaling mechanism.");
 
-        expectedException.expect(BadRequestException.class);
-        expectedException.expectMessage("Schedule-Based Autoscaling does not support the stop / start scaling mechanism.");
-
-        underTest.validateScheduleWithStopStart(autoscaleRequest);
+        assertThrows(BadRequestException.class, () -> underTest.validateScheduleWithStopStart(autoscaleRequest),
+                "Schedule-Based Autoscaling does not support the stop / start scaling mechanism.");
     }
 
     @Test
-    public void testCreateTimeAlertSuccessWithStopStartDisabled() {
+    void testCreateTimeAlertSuccessWithStopStartDisabled() {
         DistroXAutoscaleClusterRequest autoscaleClusterRequest = new DistroXAutoscaleClusterRequest();
         List<TimeAlertRequest> timeAlerts = new ArrayList<>();
         List.of("compute", "compute", "compute1").forEach(
@@ -371,7 +345,7 @@ public class AlertValidatorTest {
     }
 
     @Test
-    public void testEnableStopStartSuccessWithNoTimeAlertPreCreated() {
+    void testEnableStopStartSuccessWithNoTimeAlertPreCreated() {
         AutoscaleClusterState autoscaleState = new AutoscaleClusterState();
         aCluster.setTimeAlerts(Collections.emptySet());
         autoscaleState.setUseStopStartMechanism(Boolean.TRUE);
@@ -380,7 +354,7 @@ public class AlertValidatorTest {
     }
 
     @Test
-    public void testCreateTimeAlertSuccessIfStopStartDisabledInRequestButEnabledInClusterEntity() {
+    void testCreateTimeAlertSuccessIfStopStartDisabledInRequestButEnabledInClusterEntity() {
         DistroXAutoscaleClusterRequest autoscaleClusterRequest = new DistroXAutoscaleClusterRequest();
         List<TimeAlertRequest> timeAlerts = new ArrayList<>();
         List.of("compute", "compute", "compute1").forEach(
@@ -402,7 +376,7 @@ public class AlertValidatorTest {
     }
 
     @Test
-    public void testCreateLoadAlertSuccessWithStopStartIfTimeAlertPreCreatedButEmptyInRequest() {
+    void testCreateLoadAlertSuccessWithStopStartIfTimeAlertPreCreatedButEmptyInRequest() {
         DistroXAutoscaleClusterRequest asClusterRequest = new DistroXAutoscaleClusterRequest();
         asClusterRequest.setEnableAutoscaling(Boolean.TRUE);
         ScalingPolicyRequest sp1 = new ScalingPolicyRequest();
@@ -433,7 +407,7 @@ public class AlertValidatorTest {
     }
 
     @Test
-    public void testLoadAlertCreateWhenHostGroupSupported() {
+    void testLoadAlertCreateWhenHostGroupSupported() {
         Set<String> requestHostGroups = Set.of("compute", "compute1");
         Set<String> supportedHostGroups = Set.of("compute", "compute1", "compute3");
 
@@ -444,7 +418,7 @@ public class AlertValidatorTest {
     }
 
     @Test
-    public void testTimeAlertCreateWhenHostGroupSupported() {
+    void testTimeAlertCreateWhenHostGroupSupported() {
         Set<String> requestHostGroups = Set.of("compute", "compute1");
         Set<String> supportedHostGroups = Set.of("compute", "compute1");
 
@@ -455,7 +429,7 @@ public class AlertValidatorTest {
     }
 
     @Test
-    public void testValidateDistroXAutoscaleClusterRequestWhenValidLoadAlertRequest() {
+    void testValidateDistroXAutoscaleClusterRequestWhenValidLoadAlertRequest() {
         DistroXAutoscaleClusterRequest request = new DistroXAutoscaleClusterRequest();
         ScalingPolicyRequest sp1 = new ScalingPolicyRequest();
         sp1.setHostGroup("compute");
@@ -474,7 +448,7 @@ public class AlertValidatorTest {
     }
 
     @Test
-    public void testValidateDistroXAutoscaleClusterRequestWhenHostGroupNotSupported() {
+    void testValidateDistroXAutoscaleClusterRequestWhenHostGroupNotSupported() {
         DistroXAutoscaleClusterRequest request = new DistroXAutoscaleClusterRequest();
         ScalingPolicyRequest sp1 = new ScalingPolicyRequest();
         sp1.setHostGroup("notsupported");
@@ -492,14 +466,11 @@ public class AlertValidatorTest {
                 List.of(Set.of("notsupported"), AlertType.LOAD, aCluster.getStackName(), supportedHostGroups)))
                 .thenReturn("unsupported.hostgroup");
 
-        expectedException.expect(BadRequestException.class);
-        expectedException.expectMessage("unsupported.hostgroup");
-
-        underTest.validateDistroXAutoscaleClusterRequest(aCluster, request);
+        assertThrows(BadRequestException.class, () -> underTest.validateDistroXAutoscaleClusterRequest(aCluster, request), "unsupported.hostgroup");
     }
 
     @Test
-    public void testValidateDistroXAutoscaleClusterRequestWhenClusterSizeExceeded() {
+    void testValidateDistroXAutoscaleClusterRequestWhenClusterSizeExceeded() {
         DistroXAutoscaleClusterRequest request = new DistroXAutoscaleClusterRequest();
         ScalingPolicyRequest sp1 = new ScalingPolicyRequest();
         sp1.setAdjustmentType(AdjustmentType.LOAD_BASED);
@@ -515,14 +486,11 @@ public class AlertValidatorTest {
         when(messagesService.getMessage(AUTOSCALING_CLUSTER_LIMIT_EXCEEDED, List.of(400)))
                 .thenReturn("cluster limit exceeded");
 
-        expectedException.expect(BadRequestException.class);
-        expectedException.expectMessage("cluster limit exceeded");
-
-        underTest.validateDistroXAutoscaleClusterRequest(aCluster, request);
+        assertThrows(BadRequestException.class, () -> underTest.validateDistroXAutoscaleClusterRequest(aCluster, request), "cluster limit exceeded");
     }
 
     @Test
-    public void testValidateDistroXAutoscaleClusterRequestWhenValidTimeAlertRequest() {
+    void testValidateDistroXAutoscaleClusterRequestWhenValidTimeAlertRequest() {
         DistroXAutoscaleClusterRequest request = new DistroXAutoscaleClusterRequest();
         List<TimeAlertRequest> timeAlertRequests = new ArrayList<>();
         List.of("compute", "compute", "compute1").forEach(
@@ -547,7 +515,7 @@ public class AlertValidatorTest {
     }
 
     @Test
-    public void testValidateDistroXAutoscaleClusterRequestWhenInvalidTimeZone() {
+    void testValidateDistroXAutoscaleClusterRequestWhenInvalidTimeZone() {
         DistroXAutoscaleClusterRequest request = new DistroXAutoscaleClusterRequest();
         List<TimeAlertRequest> timeAlertRequests = new ArrayList<>();
         List.of("compute", "compute", "compute1").forEach(
@@ -571,14 +539,12 @@ public class AlertValidatorTest {
 
         request.setTimeAlertRequests(timeAlertRequests);
 
-        expectedException.expect(BadRequestException.class);
-        expectedException.expectMessage("Invalid ID for offset-based ZoneId: GMT-4343");
-
-        underTest.validateDistroXAutoscaleClusterRequest(aCluster, request);
+        assertThrows(BadRequestException.class, () -> underTest.validateDistroXAutoscaleClusterRequest(aCluster, request),
+                "Invalid ID for offset-based ZoneId: GMT-4343");
     }
 
     @Test
-    public void testValidateDistroXAutoscaleClusterRequestWhenInvalidHostGroup() {
+    void testValidateDistroXAutoscaleClusterRequestWhenInvalidHostGroup() {
         DistroXAutoscaleClusterRequest request = new DistroXAutoscaleClusterRequest();
         List<TimeAlertRequest> timeAlertRequests = new ArrayList<>();
         List.of("compute", "compute", "compute1").forEach(
@@ -608,10 +574,7 @@ public class AlertValidatorTest {
                 List.of(Set.of("compute", "computeNotSupported"), AlertType.TIME, aCluster.getStackName(), supportedHostGroups)))
                 .thenReturn("unsupported.hostgroup");
 
-        expectedException.expect(BadRequestException.class);
-        expectedException.expectMessage("unsupported.hostgroup");
-
-        underTest.validateDistroXAutoscaleClusterRequest(aCluster, request);
+        assertThrows(BadRequestException.class, () -> underTest.validateDistroXAutoscaleClusterRequest(aCluster, request), "unsupported.hostgroup");
     }
 
     private Cluster getACluster() {

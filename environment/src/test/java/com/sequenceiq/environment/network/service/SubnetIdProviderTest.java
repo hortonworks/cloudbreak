@@ -1,7 +1,9 @@
 package com.sequenceiq.environment.network.service;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -11,7 +13,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -73,7 +74,7 @@ class SubnetIdProviderTest {
     void testProvideShouldReturnNullWhenNetworkNull() {
         ProvidedSubnetIds actual = underTest.subnets(null, Tunnel.DIRECT, CloudPlatform.AWS, false);
 
-        Assertions.assertNull(actual);
+        assertNull(actual);
     }
 
     @Test
@@ -84,7 +85,7 @@ class SubnetIdProviderTest {
 
         ProvidedSubnetIds providedSubnetIds = underTest.subnets(networkDto, Tunnel.DIRECT, CloudPlatform.AWS, false);
 
-        Assertions.assertNull(providedSubnetIds);
+        assertNull(providedSubnetIds);
     }
 
     @Test
@@ -118,7 +119,7 @@ class SubnetIdProviderTest {
 
         ProvidedSubnetIds providedSubnetIds = underTest.subnets(networkDto, Tunnel.DIRECT, CloudPlatform.AWS, false);
 
-        Assertions.assertNotNull(providedSubnetIds);
+        assertNotNull(providedSubnetIds);
     }
 
     @Test
@@ -152,7 +153,7 @@ class SubnetIdProviderTest {
 
         ProvidedSubnetIds providedSubnetIds = underTest.subnets(networkDto, Tunnel.DIRECT, CloudPlatform.AWS, false);
 
-        Assertions.assertNotNull(providedSubnetIds);
+        assertNotNull(providedSubnetIds);
     }
 
     @Test
@@ -198,7 +199,7 @@ class SubnetIdProviderTest {
 
         ProvidedSubnetIds providedSubnetIds = underTest.subnets(networkDto, Tunnel.DIRECT, CloudPlatform.AWS, false);
 
-        Assertions.assertNotNull(providedSubnetIds);
+        assertNotNull(providedSubnetIds);
     }
 
     @Test
@@ -233,7 +234,7 @@ class SubnetIdProviderTest {
 
         ProvidedSubnetIds providedSubnetIds = underTest.subnets(networkDto, Tunnel.DIRECT, CloudPlatform.AWS, false);
 
-        Assertions.assertNull(providedSubnetIds);
+        assertNull(providedSubnetIds);
     }
 
     private NetworkConnector setupConnectorWithSelectionResult(List<CloudSubnet> selectedSubnets) {

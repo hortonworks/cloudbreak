@@ -9,6 +9,7 @@ import static com.sequenceiq.cloudbreak.cloud.aws.component.ComponentTestUtil.SI
 import static java.util.Arrays.asList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
@@ -16,6 +17,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -30,12 +32,10 @@ import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
@@ -245,7 +245,7 @@ public class AwsRepairTest {
         setup();
         setupRetryService();
         downscaleStack();
-        Mockito.reset(amazonEC2Client, amazonEfsClient, amazonCloudFormationClient, amazonAutoScalingClient,
+        reset(amazonEC2Client, amazonEfsClient, amazonCloudFormationClient, amazonAutoScalingClient,
                 persistenceNotifier);
         upscaleStack();
     }
@@ -390,7 +390,7 @@ public class AwsRepairTest {
                     assertEquals(Integer.valueOf(sizeDisk), volumeSetAttributes.getVolumes().get(0).getSize());
                     assertEquals("standard", volumeSetAttributes.getVolumes().get(0).getType());
                     assertEquals(fstab, volumeSetAttributes.getFstab());
-                }, () -> Assertions.fail("Volume resource was not saved for " + instanceId));
+                }, () -> fail("Volume resource was not saved for " + instanceId));
     }
 
     private void downscaleStack() throws IOException {

@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.common.domain.SslCertStatus.OUTDATED;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -15,7 +16,6 @@ import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -123,7 +123,7 @@ class StackV4ControllerTest {
         StackCcmUpgradeV4Response actual = new StackCcmUpgradeV4Response(CcmUpgradeResponseType.TRIGGERED, flowId, null, STACK_CRN);
         when(stackCcmUpgradeService.upgradeCcm(NameOrCrn.ofCrn(STACK_CRN))).thenReturn(actual);
         StackCcmUpgradeV4Response result = underTest.upgradeCcmByCrnInternal(WORKSPACE_ID, STACK_CRN, USER_CRN);
-        Assertions.assertSame(actual, result);
+        assertSame(actual, result);
     }
 
     @Test
@@ -184,7 +184,7 @@ class StackV4ControllerTest {
         when(stackRotateRdsCertificateService.rotateRdsCertificate(NameOrCrn.ofCrn(STACK_CRN), ACCOUNT_ID)).thenReturn(actual);
         StackRotateRdsCertificateV4Response result = doAs(USER_CRN, () ->
                 underTest.rotateRdsCertificateByCrnInternal(WORKSPACE_ID, STACK_CRN, USER_CRN));
-        Assertions.assertSame(actual, result);
+        assertSame(actual, result);
     }
 
     @Test

@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
@@ -12,7 +13,6 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -92,7 +92,7 @@ class AwsSyncUserDataServiceTest {
         when(cloudStack.getGroups()).thenReturn(groups);
         when(cloudStack.getUserDataByType(InstanceGroupType.GATEWAY)).thenReturn(userdata);
 
-        Assertions.assertThrows(IllegalStateException.class, () -> underTest.syncUserData(ac, cloudStack, resources));
+        assertThrows(IllegalStateException.class, () -> underTest.syncUserData(ac, cloudStack, resources));
     }
 
     @ParameterizedTest(name = "{0}")

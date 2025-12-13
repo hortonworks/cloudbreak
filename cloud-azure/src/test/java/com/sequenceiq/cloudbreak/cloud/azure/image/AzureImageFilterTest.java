@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import java.util.Collection;
@@ -22,7 +23,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -61,7 +61,7 @@ class AzureImageFilterTest {
     private AzureImageFormatValidator azureImageFormatValidator;
 
     @InjectMocks
-    private AzureMarketplaceImageProviderService azureMarketplaceImageProviderService = Mockito.spy(new AzureMarketplaceImageProviderService());
+    private AzureMarketplaceImageProviderService azureMarketplaceImageProviderService = spy(new AzureMarketplaceImageProviderService());
 
     @InjectMocks
     private AzureImageFilter underTest;

@@ -23,7 +23,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -381,7 +380,7 @@ class AzureDatabaseServerParameterDecoratorTest {
         BadRequestException exception = assertThrows(BadRequestException.class, () ->
                 underTest.validate(databaseServerV4StackRequest, databaseServerParameter, environmentResponse, true));
 
-        Assert.assertEquals(exception.getMessage(),
+        assertEquals(exception.getMessage(),
                 "Azure Data Hub which requested in multi availability zone option must use external database.");
     }
 
@@ -400,7 +399,7 @@ class AzureDatabaseServerParameterDecoratorTest {
         BadRequestException exception = assertThrows(BadRequestException.class, () ->
                 underTest.validate(databaseServerV4StackRequest, databaseServerParameter, environmentResponse, true));
 
-        Assert.assertEquals(exception.getMessage(),
+        assertEquals(exception.getMessage(),
                 "Non HA Database is not supported for Azure multi availability zone Data Hubs.");
     }
 
@@ -420,7 +419,7 @@ class AzureDatabaseServerParameterDecoratorTest {
         BadRequestException exception = assertThrows(BadRequestException.class, () ->
                 underTest.validate(databaseServerV4StackRequest, databaseServerParameter, environmentResponse, true));
 
-        Assert.assertEquals(exception.getMessage(),
+        assertEquals(exception.getMessage(),
                 "Azure Data Hub which requested in multi availability zone option must use Flexible server.");
     }
 
@@ -444,7 +443,7 @@ class AzureDatabaseServerParameterDecoratorTest {
         BadRequestException exception = assertThrows(BadRequestException.class, () ->
                 underTest.validate(databaseServerV4StackRequest, databaseServerParameter, environmentResponse, true));
 
-        Assert.assertEquals(exception.getMessage(),
+        assertEquals(exception.getMessage(),
                 "Azure Data Hub which requested with multi availability zone option must use Zone redundant " +
                         "Flexible server and the eu-west-1 region currently does not support that. " +
                         "You can see the limitations on the following url https://learn.microsoft.com/en-us/azure/postgresql/flexible-server/overview. " +

@@ -1,12 +1,12 @@
 package com.sequenceiq.datalake.service.sdx;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -44,7 +44,7 @@ class StackRequestHandlerTest {
         StackV4Request response = underTest.getStackRequest(SdxClusterShape.LIGHT_DUTY, stackV4Request, CloudPlatform.AWS,
                 "7.2.7", imageSettingsV4Request, Architecture.X86_64);
 
-        Assertions.assertNotNull(response.getImage());
+        assertNotNull(response.getImage());
         assertEquals("cdp-default", response.getImage().getCatalog());
         assertEquals("imageId_1", response.getImage().getId());
     }

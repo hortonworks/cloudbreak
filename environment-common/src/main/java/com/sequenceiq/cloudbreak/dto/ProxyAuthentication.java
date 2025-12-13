@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.dto;
 
-import java.io.Serializable;
+import static org.springframework.util.Assert.hasLength;
 
-import org.springframework.util.Assert;
+import java.io.Serializable;
 
 public class ProxyAuthentication implements Serializable {
     private final String userName;
@@ -45,8 +45,8 @@ public class ProxyAuthentication implements Serializable {
         }
 
         public ProxyAuthentication build() {
-            Assert.hasLength(userName, "Username cannot be empty");
-            Assert.hasLength(password, "Password cannot be empty");
+            hasLength(userName, "Username cannot be empty");
+            hasLength(password, "Password cannot be empty");
             return new ProxyAuthentication(userName, password);
         }
     }

@@ -1,5 +1,8 @@
 package com.sequenceiq.freeipa.service.freeipa.flow;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -7,15 +10,12 @@ import static org.mockito.Mockito.when;
 
 import java.util.Map;
 
-import org.junit.Assert;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -73,7 +73,7 @@ class PasswordPolicyServiceTest {
     void testUpdatePasswordPolicyShouldThrowExceptionWhenThePasswordPolicyRetrieveThrowsAnException() throws FreeIpaClientException {
         when(freeIpaClient.getPasswordPolicy()).thenThrow(new FreeIpaClientException("Error"));
 
-        Assertions.assertThrows(FreeIpaClientException.class, () -> {
+        assertThrows(FreeIpaClientException.class, () -> {
             underTest.updatePasswordPolicy(freeIpaClient);
         });
     }
@@ -81,9 +81,9 @@ class PasswordPolicyServiceTest {
     @Test
     void testUpdatePasswordPolicyShouldThrowExceptionWhenThePasswordPolicyUpdateThrowsAnException() throws FreeIpaClientException {
         when(freeIpaClient.getPasswordPolicy()).thenReturn(new PasswordPolicy());
-        doThrow(new FreeIpaClientException("Error")).when(freeIpaClient).updatePasswordPolicy(Mockito.any());
+        doThrow(new FreeIpaClientException("Error")).when(freeIpaClient).updatePasswordPolicy(any());
 
-        Assertions.assertThrows(FreeIpaClientException.class, () -> {
+        assertThrows(FreeIpaClientException.class, () -> {
             underTest.updatePasswordPolicy(freeIpaClient);
         });
     }
@@ -106,12 +106,12 @@ class PasswordPolicyServiceTest {
         ArgumentCaptor<Map<String, Object>> paramCaptor = ArgumentCaptor.forClass(Map.class);
         verify(freeIpaClient).updatePasswordPolicy(paramCaptor.capture());
         Map<String, Object> captorValue = paramCaptor.getValue();
-        Assert.assertEquals(MIN_PASSWORD_LENGTH_VALUE, captorValue.get(MIN_PASSWORD_LENGTH));
-        Assert.assertEquals(MIN_CHARACTER_CLASSES_VALUE, captorValue.get(MIN_CHARACTER_CLASSES));
-        Assert.assertEquals(MAX_PASSWORD_LIFETIME_DAYS_VALUE, captorValue.get(MAX_PASSWORD_LIFETIME_DAYS));
-        Assert.assertEquals(MAX_FAILURES_BEFORE_LOCK_VALUE, captorValue.get(MAX_FAILURES_BEFORE_LOCK));
-        Assert.assertEquals(FAILURE_RESET_INTERVALL_SECONDS_VALUE, captorValue.get(FAILURE_RESET_INTERVALL_SECONDS));
-        Assert.assertEquals(LOCKOUT_DURATION_SECONDS_VALUE, captorValue.get(LOCKOUT_DURATION_SECONDS));
+        assertEquals(MIN_PASSWORD_LENGTH_VALUE, captorValue.get(MIN_PASSWORD_LENGTH));
+        assertEquals(MIN_CHARACTER_CLASSES_VALUE, captorValue.get(MIN_CHARACTER_CLASSES));
+        assertEquals(MAX_PASSWORD_LIFETIME_DAYS_VALUE, captorValue.get(MAX_PASSWORD_LIFETIME_DAYS));
+        assertEquals(MAX_FAILURES_BEFORE_LOCK_VALUE, captorValue.get(MAX_FAILURES_BEFORE_LOCK));
+        assertEquals(FAILURE_RESET_INTERVALL_SECONDS_VALUE, captorValue.get(FAILURE_RESET_INTERVALL_SECONDS));
+        assertEquals(LOCKOUT_DURATION_SECONDS_VALUE, captorValue.get(LOCKOUT_DURATION_SECONDS));
     }
 
     @Test
@@ -126,12 +126,12 @@ class PasswordPolicyServiceTest {
         ArgumentCaptor<Map<String, Object>> paramCaptor = ArgumentCaptor.forClass(Map.class);
         verify(freeIpaClient).updatePasswordPolicy(paramCaptor.capture());
         Map<String, Object> captorValue = paramCaptor.getValue();
-        Assert.assertEquals(MIN_PASSWORD_LENGTH_VALUE, captorValue.get(MIN_PASSWORD_LENGTH));
-        Assert.assertEquals(MIN_CHARACTER_CLASSES_VALUE, captorValue.get(MIN_CHARACTER_CLASSES));
-        Assert.assertEquals(MAX_PASSWORD_LIFETIME_DAYS_VALUE, captorValue.get(MAX_PASSWORD_LIFETIME_DAYS));
-        Assert.assertEquals(MAX_FAILURES_BEFORE_LOCK_VALUE, captorValue.get(MAX_FAILURES_BEFORE_LOCK));
-        Assert.assertEquals(FAILURE_RESET_INTERVALL_SECONDS_VALUE, captorValue.get(FAILURE_RESET_INTERVALL_SECONDS));
-        Assert.assertEquals(LOCKOUT_DURATION_SECONDS_VALUE, captorValue.get(LOCKOUT_DURATION_SECONDS));
+        assertEquals(MIN_PASSWORD_LENGTH_VALUE, captorValue.get(MIN_PASSWORD_LENGTH));
+        assertEquals(MIN_CHARACTER_CLASSES_VALUE, captorValue.get(MIN_CHARACTER_CLASSES));
+        assertEquals(MAX_PASSWORD_LIFETIME_DAYS_VALUE, captorValue.get(MAX_PASSWORD_LIFETIME_DAYS));
+        assertEquals(MAX_FAILURES_BEFORE_LOCK_VALUE, captorValue.get(MAX_FAILURES_BEFORE_LOCK));
+        assertEquals(FAILURE_RESET_INTERVALL_SECONDS_VALUE, captorValue.get(FAILURE_RESET_INTERVALL_SECONDS));
+        assertEquals(LOCKOUT_DURATION_SECONDS_VALUE, captorValue.get(LOCKOUT_DURATION_SECONDS));
     }
 
     @Test

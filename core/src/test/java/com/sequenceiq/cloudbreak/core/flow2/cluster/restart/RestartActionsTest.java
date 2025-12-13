@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.restart;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyMap;
@@ -17,7 +18,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -149,7 +149,7 @@ class RestartActionsTest {
 
         verify(instanceMetaDataToCloudInstanceConverter, times(1)).convert(anyCollection(), any());
         RestartInstancesRequest req = (RestartInstancesRequest) argumentCaptor.getValue();
-        Assert.assertEquals(5, req.getCloudInstances().size());
+        assertEquals(5, req.getCloudInstances().size());
     }
 
     @Test

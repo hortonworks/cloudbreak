@@ -10,11 +10,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cluster.model.ParcelOperationStatus;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
@@ -22,8 +22,8 @@ import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.domain.view.ClusterComponentView;
 import com.sequenceiq.cloudbreak.service.stack.CentralCDHVersionCoordinator;
 
-@RunWith(MockitoJUnitRunner.class)
-public class ClusterComponentUpdaterTest {
+@ExtendWith(MockitoExtension.class)
+class ClusterComponentUpdaterTest {
 
     private static final long CLUSTER_ID = 1L;
 
@@ -41,7 +41,7 @@ public class ClusterComponentUpdaterTest {
     private ClusterComponentConfigProvider clusterComponentConfigProvider;
 
     @Test
-    public void testRemoveUnusedCdhProductsFromClusterComponentsWhenThereIsNoComponentToDelete() {
+    void testRemoveUnusedCdhProductsFromClusterComponentsWhenThereIsNoComponentToDelete() {
         Set<ClusterComponentView> clusterComponentsByBlueprint = createComponents(Set.of(CDH, FLINK));
         Set<ClusterComponentView> clusterComponentsFromDb = createComponents(Set.of(CDH, FLINK));
 
@@ -54,7 +54,7 @@ public class ClusterComponentUpdaterTest {
     }
 
     @Test
-    public void testRemoveUnusedCdhProductsFromClusterComponentsWhenThereIsNoComponentToDeleteAndAnExtraComponentIsPresent() {
+    void testRemoveUnusedCdhProductsFromClusterComponentsWhenThereIsNoComponentToDeleteAndAnExtraComponentIsPresent() {
         Set<ClusterComponentView> clusterComponentsByBlueprint = createComponents(Set.of(CDH, FLINK));
         Set<ClusterComponentView> clusterComponentsFromDb = createComponents(Set.of(CDH, FLINK));
 
@@ -67,7 +67,7 @@ public class ClusterComponentUpdaterTest {
     }
 
     @Test
-    public void testRemoveUnusedCdhProductsFromClusterComponentsWhenThereIsOneComponentToDelete() {
+    void testRemoveUnusedCdhProductsFromClusterComponentsWhenThereIsOneComponentToDelete() {
         Set<ClusterComponentView> clusterComponentsByBlueprint = createComponents(Set.of(CDH));
         ClusterComponentView flinkComponent = createComponent(FLINK);
         ClusterComponentView cdhComponent = createComponent(CDH);

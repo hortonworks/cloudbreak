@@ -4,6 +4,7 @@ import static com.azure.resourcemanager.compute.models.NetworkAccessPolicy.DENY_
 import static com.azure.resourcemanager.compute.models.PublicNetworkAccess.DISABLED;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -29,7 +30,6 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -387,10 +387,10 @@ class AzureClientTest {
                 .withPermissions(new Permissions().withKeys(List.of(KeyPermissions.WRAP_KEY, KeyPermissions.UNWRAP_KEY))));
 
         assertTrue(underTest.isValidKeyVaultAccessPolicyListForServicePrincipal(accessPolicies, "100"));
-        Assertions.assertFalse(underTest.isValidKeyVaultAccessPolicyListForServicePrincipal(accessPolicies, "200"));
-        Assertions.assertFalse(underTest.isValidKeyVaultAccessPolicyListForServicePrincipal(accessPolicies, "300"));
-        Assertions.assertFalse(underTest.isValidKeyVaultAccessPolicyListForServicePrincipal(accessPolicies, "400"));
-        Assertions.assertFalse(underTest.isValidKeyVaultAccessPolicyListForServicePrincipal(accessPolicies, "dummy"));
+        assertFalse(underTest.isValidKeyVaultAccessPolicyListForServicePrincipal(accessPolicies, "200"));
+        assertFalse(underTest.isValidKeyVaultAccessPolicyListForServicePrincipal(accessPolicies, "300"));
+        assertFalse(underTest.isValidKeyVaultAccessPolicyListForServicePrincipal(accessPolicies, "400"));
+        assertFalse(underTest.isValidKeyVaultAccessPolicyListForServicePrincipal(accessPolicies, "dummy"));
     }
 
     @Test
@@ -477,7 +477,7 @@ class AzureClientTest {
         Map<String, List<String>> zoneInfo = underTest.getAvailabilityZones("westus2");
         assertEquals(azureZoneInfo.size(), zoneInfo.size());
         azureZoneInfo.entrySet().stream().forEach(entry -> {
-            Assertions.assertTrue(zoneInfo.containsKey(entry.getKey()));
+            assertTrue(zoneInfo.containsKey(entry.getKey()));
             assertEquals(entry.getValue(), zoneInfo.get(entry.getKey()));
         });
     }

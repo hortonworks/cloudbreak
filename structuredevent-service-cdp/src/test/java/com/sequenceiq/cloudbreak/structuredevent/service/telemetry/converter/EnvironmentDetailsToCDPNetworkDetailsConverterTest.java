@@ -9,7 +9,6 @@ import static org.mockito.Mockito.when;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -87,29 +86,29 @@ class EnvironmentDetailsToCDPNetworkDetailsConverterTest {
 
         UsageProto.CDPNetworkDetails networkDetails = underTest.convert(environmentDetails);
 
-        Assert.assertEquals("EXISTING",
+        assertEquals("EXISTING",
                 networkDetails.getNetworkType());
-        Assert.assertEquals("ENABLED",
+        assertEquals("ENABLED",
                 networkDetails.getServiceEndpointCreation());
-        Assert.assertEquals("EXISTING",
+        assertEquals("EXISTING",
                 networkDetails.getNetworkType());
-        Assert.assertEquals(3,
+        assertEquals(3,
                 networkDetails.getNumberPrivateSubnets());
-        Assert.assertEquals(2,
+        assertEquals(2,
                 networkDetails.getNumberPublicSubnets());
-        Assert.assertEquals(1,
+        assertEquals(1,
                 networkDetails.getNumberPrivateLoadBalancerSubnets());
-        Assert.assertEquals(2,
+        assertEquals(2,
                 networkDetails.getNumberPublicLoadBalancerSubnets());
-        Assert.assertEquals("DISABLED",
+        assertEquals("DISABLED",
                 networkDetails.getPublicEndpointAccessGateway());
-        Assert.assertEquals("CIDR_WIDE_OPEN",
+        assertEquals("CIDR_WIDE_OPEN",
                 networkDetails.getSecurityAccessType());
-        Assert.assertEquals("CCM",
+        assertEquals("CCM",
                 networkDetails.getConnectivity());
-        Assert.assertEquals("ONE_WAY_TLS",
+        assertEquals("ONE_WAY_TLS",
                 networkDetails.getControlPlaneAndCCMAgentConnectionSecurity());
-        Assert.assertEquals("cldr.com",
+        assertEquals("cldr.com",
                 networkDetails.getDomain());
     }
 
@@ -125,7 +124,7 @@ class EnvironmentDetailsToCDPNetworkDetailsConverterTest {
 
         UsageProto.CDPNetworkDetails networkDetails = underTest.convert(environmentDetails);
 
-        Assert.assertEquals("ENABLED",
+        assertEquals("ENABLED",
                 networkDetails.getPublicEndpointAccessGateway());
     }
 
@@ -140,11 +139,11 @@ class EnvironmentDetailsToCDPNetworkDetailsConverterTest {
 
         UsageProto.CDPNetworkDetails networkDetails = underTest.convert(environmentDetails);
 
-        Assert.assertEquals(true,
+        assertEquals(true,
                 networkDetails.getProxyDetails().getProxy());
-        Assert.assertEquals("http",
+        assertEquals("http",
                 networkDetails.getProxyDetails().getProtocol());
-        Assert.assertEquals("BASIC",
+        assertEquals("BASIC",
                 networkDetails.getProxyDetails().getAuthentication());
     }
 
@@ -159,11 +158,11 @@ class EnvironmentDetailsToCDPNetworkDetailsConverterTest {
 
         UsageProto.CDPNetworkDetails networkDetails = underTest.convert(environmentDetails);
 
-        Assert.assertEquals(true,
+        assertEquals(true,
                 networkDetails.getProxyDetails().getProxy());
-        Assert.assertEquals("https",
+        assertEquals("https",
                 networkDetails.getProxyDetails().getProtocol());
-        Assert.assertEquals("NONE",
+        assertEquals("NONE",
                 networkDetails.getProxyDetails().getAuthentication());
     }
 
@@ -173,11 +172,11 @@ class EnvironmentDetailsToCDPNetworkDetailsConverterTest {
 
         UsageProto.CDPNetworkDetails networkDetails = underTest.convert(environmentDetails);
 
-        Assert.assertEquals(false,
+        assertEquals(false,
                 networkDetails.getProxyDetails().getProxy());
-        Assert.assertEquals("",
+        assertEquals("",
                 networkDetails.getProxyDetails().getProtocol());
-        Assert.assertEquals("",
+        assertEquals("",
                 networkDetails.getProxyDetails().getAuthentication());
     }
 

@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.stackpatch;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
@@ -10,7 +12,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -58,7 +59,7 @@ class UserDataCcmV2SetupPatchServiceTest {
 
         boolean actual = underTest.isAffected(stack);
 
-        Assertions.assertEquals(expectedResult, actual);
+        assertEquals(expectedResult, actual);
     }
 
     @Test
@@ -75,9 +76,9 @@ class UserDataCcmV2SetupPatchServiceTest {
         ArgumentCaptor<Map<InstanceGroupType, String>> userDataMapCaptor = ArgumentCaptor.forClass(Map.class);
         verify(userDataService, times(1)).createOrUpdateUserData(eq(stack.getId()), userDataMapCaptor.capture());
         Map<InstanceGroupType, String> capturedUserDataMap = userDataMapCaptor.getValue();
-        Assertions.assertEquals(coreUserData, capturedUserDataMap.get(InstanceGroupType.CORE));
-        Assertions.assertEquals("export CDP_API_ENDPOINT_URL=\"\"\n", capturedUserDataMap.get(InstanceGroupType.GATEWAY));
-        Assertions.assertTrue(actual);
+        assertEquals(coreUserData, capturedUserDataMap.get(InstanceGroupType.CORE));
+        assertEquals("export CDP_API_ENDPOINT_URL=\"\"\n", capturedUserDataMap.get(InstanceGroupType.GATEWAY));
+        assertTrue(actual);
     }
 
     @Test
@@ -94,9 +95,9 @@ class UserDataCcmV2SetupPatchServiceTest {
         ArgumentCaptor<Map<InstanceGroupType, String>> userDataMapCaptor = ArgumentCaptor.forClass(Map.class);
         verify(userDataService, times(1)).createOrUpdateUserData(eq(stack.getId()), userDataMapCaptor.capture());
         Map<InstanceGroupType, String> capturedUserDataMap = userDataMapCaptor.getValue();
-        Assertions.assertEquals(coreUserData, capturedUserDataMap.get(InstanceGroupType.CORE));
+        assertEquals(coreUserData, capturedUserDataMap.get(InstanceGroupType.CORE));
         String expectedUserDataScript = FileReaderUtils.readFileFromClasspath("/input/userdata/expected-gateway-user-data.sh");
-        Assertions.assertEquals(expectedUserDataScript, capturedUserDataMap.get(InstanceGroupType.GATEWAY));
-        Assertions.assertTrue(actual);
+        assertEquals(expectedUserDataScript, capturedUserDataMap.get(InstanceGroupType.GATEWAY));
+        assertTrue(actual);
     }
 }

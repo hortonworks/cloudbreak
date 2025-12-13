@@ -5,6 +5,8 @@ import static com.sequenceiq.cloudbreak.cloud.aws.common.DistroxEnabledInstanceT
 import static com.sequenceiq.cloudbreak.cloud.azure.DistroxEnabledInstanceTypes.AZURE_ENABLED_TYPES_LIST;
 import static com.sequenceiq.cloudbreak.cloud.gcp.DistroxEnabledInstanceTypes.GCP_ENABLED_TYPES_LIST;
 import static com.sequenceiq.cloudbreak.util.FileReaderUtils.readFileFromClasspath;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -19,7 +21,6 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.assertj.core.util.Strings;
-import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -50,21 +51,20 @@ public class DefaultClusterTemplateValidationTest {
 
     @Test
     public void testInstancesWhichAreInTheDefinitions() {
-        Assert.assertTrue("Template list can not be empty.", !templates.entrySet().isEmpty());
+        assertFalse(templates.entrySet().isEmpty(), "Template list can not be empty.");
         for (Map.Entry<String, DefaultClusterTemplateV4Request> entry : templates.entrySet()) {
             String cloudPlatform = entry.getValue().getCloudPlatform();
             if (cloudPlatformsWhichSupportsInstanceTypes.contains(cloudPlatform)) {
                 for (InstanceGroupV1Request instanceGroup : entry.getValue().getDistroXTemplate().getInstanceGroups()) {
                     String instanceType = instanceGroup.getTemplate().getInstanceType();
                     List<String> enabledInstances = instanceTypes.get(cloudPlatform);
-                    Assert.assertTrue(String.format("Instance type in the template is null in the '%s' template.", entry.getKey()),
-                            !Strings.isNullOrEmpty(instanceType));
-                    Assert.assertTrue(String.format("Enabled instance list is empty for %s provider.", cloudPlatform),
-                            !enabledInstances.isEmpty());
-                    Assert.assertTrue(
+                    assertFalse(Strings.isNullOrEmpty(instanceType),
+                            String.format("Instance type in the template is null in the '%s' template.", entry.getKey()));
+                    assertFalse(enabledInstances.isEmpty(),
+                            String.format("Enabled instance list is empty for %s provider.", cloudPlatform));
+                    assertTrue(enabledInstances.contains(instanceType),
                             String.format("'%s' template contains an instance type which is not supported which is '%s'.",
-                                    entry.getKey(), instanceType),
-                            enabledInstances.contains(instanceType));
+                                    entry.getKey(), instanceType));
                 }
             }
         }

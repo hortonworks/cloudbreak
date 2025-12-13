@@ -1,21 +1,20 @@
 package com.sequenceiq.cloudbreak;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.AdditionalAnswers.returnsSecondArg;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.lenient;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.tag.CentralTagUpdater;
 import com.sequenceiq.cloudbreak.tag.DefaultCostTaggingService;
@@ -24,8 +23,8 @@ import com.sequenceiq.cloudbreak.tag.request.CDPTagGenerationRequest;
 import com.sequenceiq.cloudbreak.tag.request.CDPTagMergeRequest;
 import com.sequenceiq.common.model.DefaultApplicationTag;
 
-@RunWith(MockitoJUnitRunner.class)
-public class DefaultCostTaggingServiceTest {
+@ExtendWith(MockitoExtension.class)
+class DefaultCostTaggingServiceTest {
 
     @InjectMocks
     private DefaultCostTaggingService underTest;
@@ -33,50 +32,49 @@ public class DefaultCostTaggingServiceTest {
     @Mock
     private CentralTagUpdater centralTagUpdater;
 
-    @Before
+    @BeforeEach
     public void before() {
-        MockitoAnnotations.initMocks(this);
-        when(centralTagUpdater.getTagText(any(TagPreparationObject.class), anyString())).then(returnsSecondArg());
+        lenient().when(centralTagUpdater.getTagText(any(TagPreparationObject.class), anyString())).then(returnsSecondArg());
     }
 
     @Test
-    public void testPrepareDefaultTagsForAWSShouldReturnAllDefaultMap() {
+    void testPrepareDefaultTagsForAWSShouldReturnAllDefaultMap() {
         Map<String, String> result = underTest.prepareDefaultTags(tagRequest("AWS"));
 
-        Assert.assertEquals(4L, result.size());
-        Assert.assertEquals("environment-crn", result.get(DefaultApplicationTag.ENVIRONMENT_CRN.key()));
-        Assert.assertEquals("creator-crn", result.get(DefaultApplicationTag.CREATOR_CRN.key()));
-        Assert.assertEquals("resource-crn", result.get(DefaultApplicationTag.RESOURCE_CRN.key()));
-        Assert.assertEquals("resource-id", result.get(DefaultApplicationTag.RESOURCE_ID.key()));
+        assertEquals(4L, result.size());
+        assertEquals("environment-crn", result.get(DefaultApplicationTag.ENVIRONMENT_CRN.key()));
+        assertEquals("creator-crn", result.get(DefaultApplicationTag.CREATOR_CRN.key()));
+        assertEquals("resource-crn", result.get(DefaultApplicationTag.RESOURCE_CRN.key()));
+        assertEquals("resource-id", result.get(DefaultApplicationTag.RESOURCE_ID.key()));
     }
 
     @Test
-    public void testPrepareDefaultTagsForAWSAndAdditionalTagsShouldReturnAllDefaultMapPlusTagsWhichAreNotEmpty() {
+    void testPrepareDefaultTagsForAWSAndAdditionalTagsShouldReturnAllDefaultMapPlusTagsWhichAreNotEmpty() {
         Map<String, String> result = underTest.prepareDefaultTags(tagRequest("AWS", new HashMap<>(), new HashMap<>()));
 
-        Assert.assertEquals(4L, result.size());
-        Assert.assertEquals("environment-crn", result.get(DefaultApplicationTag.ENVIRONMENT_CRN.key()));
-        Assert.assertEquals("creator-crn", result.get(DefaultApplicationTag.CREATOR_CRN.key()));
-        Assert.assertEquals("resource-crn", result.get(DefaultApplicationTag.RESOURCE_CRN.key()));
-        Assert.assertEquals("resource-id", result.get(DefaultApplicationTag.RESOURCE_ID.key()));
+        assertEquals(4L, result.size());
+        assertEquals("environment-crn", result.get(DefaultApplicationTag.ENVIRONMENT_CRN.key()));
+        assertEquals("creator-crn", result.get(DefaultApplicationTag.CREATOR_CRN.key()));
+        assertEquals("resource-crn", result.get(DefaultApplicationTag.RESOURCE_CRN.key()));
+        assertEquals("resource-id", result.get(DefaultApplicationTag.RESOURCE_ID.key()));
     }
 
     @Test
-    public void testPrepareDefaultTagsForAZUREWhenOwnerPresentedShouldReturnAllDefaultMap() {
+    void testPrepareDefaultTagsForAZUREWhenOwnerPresentedShouldReturnAllDefaultMap() {
         Map<String, String> sourceMap = new HashMap<>();
         sourceMap.put(DefaultApplicationTag.owner.key(), "appletree");
 
         Map<String, String> result = underTest.prepareDefaultTags(tagRequest("AZURE", sourceMap, new HashMap<>()));
 
-        Assert.assertEquals(4L, result.size());
-        Assert.assertEquals("environment-crn", result.get(DefaultApplicationTag.ENVIRONMENT_CRN.key()));
-        Assert.assertEquals("creator-crn", result.get(DefaultApplicationTag.CREATOR_CRN.key()));
-        Assert.assertEquals("resource-crn", result.get(DefaultApplicationTag.RESOURCE_CRN.key()));
-        Assert.assertEquals("resource-id", result.get(DefaultApplicationTag.RESOURCE_ID.key()));
+        assertEquals(4L, result.size());
+        assertEquals("environment-crn", result.get(DefaultApplicationTag.ENVIRONMENT_CRN.key()));
+        assertEquals("creator-crn", result.get(DefaultApplicationTag.CREATOR_CRN.key()));
+        assertEquals("resource-crn", result.get(DefaultApplicationTag.RESOURCE_CRN.key()));
+        assertEquals("resource-id", result.get(DefaultApplicationTag.RESOURCE_ID.key()));
     }
 
     @Test
-    public void testMergeTagsShouldReturnWithAnUnion() {
+    void testMergeTagsShouldReturnWithAnUnion() {
         Map<String, String> envMap = new HashMap<>();
         envMap.put("", "apple1");
         envMap.put("apple2", "");
@@ -90,15 +88,15 @@ public class DefaultCostTaggingServiceTest {
 
         Map<String, String> result = underTest.mergeTags(mergeRequest("AWS", envMap, requestTag));
 
-        Assert.assertEquals(4L, result.size());
-        Assert.assertEquals("pear3", result.get("pear3"));
-        Assert.assertEquals("pear4", result.get("pear4"));
-        Assert.assertEquals("apple3", result.get("apple3"));
-        Assert.assertEquals("apple4", result.get("apple4"));
+        assertEquals(4L, result.size());
+        assertEquals("pear3", result.get("pear3"));
+        assertEquals("pear4", result.get("pear4"));
+        assertEquals("apple3", result.get("apple3"));
+        assertEquals("apple4", result.get("apple4"));
     }
 
     @Test
-    public void testAccountTagUserTagEqualityNoError() {
+    void testAccountTagUserTagEqualityNoError() {
         Map<String, String> envMap = new HashMap<>();
         envMap.put("apple1", "apple1");
         envMap.put("apple2", "apple2");
@@ -112,7 +110,7 @@ public class DefaultCostTaggingServiceTest {
     }
 
     @Test
-    public void testAccountTagUserTagConflictGeneratesError() {
+    void testAccountTagUserTagConflictGeneratesError() {
         Map<String, String> envMap = new HashMap<>();
         envMap.put("apple1", "apple1");
         envMap.put("apple2", "apple2");
@@ -125,14 +123,14 @@ public class DefaultCostTaggingServiceTest {
 
         Map<String, String> result = underTest.prepareDefaultTags(tagRequest);
 
-        Assert.assertEquals(7L, result.size());
-        Assert.assertEquals("owner", result.get("owner"));
-        Assert.assertEquals("creator-crn", result.get("Cloudera-Creator-Resource-Name"));
-        Assert.assertEquals("apple1", result.get("apple1"));
-        Assert.assertEquals("resource-crn", result.get("Cloudera-Resource-Name"));
-        Assert.assertEquals("resource-id", result.get("Cloudera-Resource-ID"));
-        Assert.assertEquals("environment-crn", result.get("Cloudera-Environment-Resource-Name"));
-        Assert.assertEquals("apple2", result.get("apple2"));
+        assertEquals(7L, result.size());
+        assertEquals("owner", result.get("owner"));
+        assertEquals("creator-crn", result.get("Cloudera-Creator-Resource-Name"));
+        assertEquals("apple1", result.get("apple1"));
+        assertEquals("resource-crn", result.get("Cloudera-Resource-Name"));
+        assertEquals("resource-id", result.get("Cloudera-Resource-ID"));
+        assertEquals("environment-crn", result.get("Cloudera-Environment-Resource-Name"));
+        assertEquals("apple2", result.get("apple2"));
     }
 
     private CDPTagGenerationRequest tagRequest(String platform) {

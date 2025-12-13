@@ -8,13 +8,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.network.InstanceGroupNetworkV4Request;
@@ -33,11 +31,8 @@ import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.network.InstanceGroupNetwork;
 
-@RunWith(MockitoJUnitRunner.class)
-public class InstanceGroupV4RequestToInstanceGroupConverterTest extends AbstractJsonConverterTest<InstanceGroupV4Request> {
-
-    @Rule
-    public final ExpectedException thrown = ExpectedException.none();
+@ExtendWith(MockitoExtension.class)
+class InstanceGroupV4RequestToInstanceGroupConverterTest extends AbstractJsonConverterTest<InstanceGroupV4Request> {
 
     @InjectMocks
     private InstanceGroupV4RequestToInstanceGroupConverter underTest;
@@ -55,7 +50,7 @@ public class InstanceGroupV4RequestToInstanceGroupConverterTest extends Abstract
     private InstanceTemplateV4RequestToTemplateConverter instanceTemplateV4RequestToTemplateConverter;
 
     @Test
-    public void testConvert() {
+    void testConvert() {
         InstanceGroupV4Request request = getRequest("instance-group.json");
         // GIVEN
         given(providerParameterCalculator.get(request)).willReturn(getMappable());

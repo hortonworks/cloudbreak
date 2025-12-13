@@ -1,12 +1,12 @@
 package com.sequenceiq.mock.clouderamanager;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -29,7 +29,7 @@ public class DefaultModelServiceTest {
         CloudStack cloudStack = mock(CloudStack.class);
         SpiDto spiDto = new SpiDto("", cloudStack);
         String actual = underTest.generateAddress("192", spiDto, 1, Collections.emptyList());
-        Assertions.assertEquals("192.1.0.0", actual);
+        assertEquals("192.1.0.0", actual);
     }
 
     @Test
@@ -39,7 +39,7 @@ public class DefaultModelServiceTest {
         SpiDto spiDto = new SpiDto("", cloudStack);
         spiDto.getVmMetaDataStatuses().add(new CloudVmMetaDataStatus(cloudVmInstanceStatus, new CloudInstanceMetaData("192.1.0.0", "1.1.1.1")));
         String actual = underTest.generateAddress("192", spiDto, 1, Collections.emptyList());
-        Assertions.assertEquals("192.1.0.1", actual);
+        assertEquals("192.1.0.1", actual);
     }
 
     @Test
@@ -51,7 +51,7 @@ public class DefaultModelServiceTest {
         spiDto.getVmMetaDataStatuses().add(new CloudVmMetaDataStatus(cloudVmInstanceStatus, new CloudInstanceMetaData("192.1.0.1", "1.1.1.1")));
         spiDto.getVmMetaDataStatuses().add(new CloudVmMetaDataStatus(cloudVmInstanceStatus, new CloudInstanceMetaData("192.1.0.4", "1.1.1.1")));
         String actual = underTest.generateAddress("192", spiDto, 1, Collections.emptyList());
-        Assertions.assertEquals("192.1.0.2", actual);
+        assertEquals("192.1.0.2", actual);
     }
 
     @Test
@@ -61,7 +61,7 @@ public class DefaultModelServiceTest {
         generate(spiDto, 256);
 
         String actual = underTest.generateAddress("192", spiDto, 1, Collections.emptyList());
-        Assertions.assertEquals("192.1.1.0", actual);
+        assertEquals("192.1.1.0", actual);
     }
 
     @Test
@@ -73,7 +73,7 @@ public class DefaultModelServiceTest {
         spiDto.getVmMetaDataStatuses().remove(10);
 
         String actual = underTest.generateAddress("192", spiDto, 1, Collections.emptyList());
-        Assertions.assertEquals("192.1.0.10", actual);
+        assertEquals("192.1.0.10", actual);
     }
 
     @Test
@@ -84,7 +84,7 @@ public class DefaultModelServiceTest {
         List<CloudVmMetaDataStatus> current = new ArrayList<>();
         current.add(new CloudVmMetaDataStatus(cloudVmInstanceStatus, new CloudInstanceMetaData("192.1.0.0", "1.1.1.1")));
         String actual = underTest.generateAddress("192", spiDto, 1, current);
-        Assertions.assertEquals("192.1.0.1", actual);
+        assertEquals("192.1.0.1", actual);
     }
 
     private void generate(SpiDto spiDto, int count) {

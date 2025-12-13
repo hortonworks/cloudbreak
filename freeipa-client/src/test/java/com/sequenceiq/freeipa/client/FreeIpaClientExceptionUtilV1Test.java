@@ -1,5 +1,9 @@
 package com.sequenceiq.freeipa.client;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
@@ -7,7 +11,6 @@ import java.io.IOException;
 import java.util.Optional;
 import java.util.Set;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 
@@ -26,8 +29,8 @@ public class FreeIpaClientExceptionUtilV1Test {
 
     @Test
     public void testIsNotFoundException() throws Exception {
-        Assertions.assertFalse(FreeIpaClientExceptionUtil.isNotFoundException(new FreeIpaClientException(MESSAGE)));
-        Assertions.assertFalse(FreeIpaClientExceptionUtil.isNotFoundException(new FreeIpaClientException(MESSAGE,
+        assertFalse(FreeIpaClientExceptionUtil.isNotFoundException(new FreeIpaClientException(MESSAGE)));
+        assertFalse(FreeIpaClientExceptionUtil.isNotFoundException(new FreeIpaClientException(MESSAGE,
                 new JsonRpcClientException(DUPLICATE_ENTRY, MESSAGE, null))));
         assertTrue(FreeIpaClientExceptionUtil.isNotFoundException(new FreeIpaClientException(MESSAGE,
                 new JsonRpcClientException(NOT_FOUND, MESSAGE, null))));
@@ -35,20 +38,20 @@ public class FreeIpaClientExceptionUtilV1Test {
 
     @Test
     public void testIsDuplicateEntryException() throws Exception {
-        Assertions.assertFalse(FreeIpaClientExceptionUtil.isDuplicateEntryException(new FreeIpaClientException(MESSAGE)));
+        assertFalse(FreeIpaClientExceptionUtil.isDuplicateEntryException(new FreeIpaClientException(MESSAGE)));
         assertTrue(FreeIpaClientExceptionUtil.isDuplicateEntryException(new FreeIpaClientException(MESSAGE,
                 new JsonRpcClientException(DUPLICATE_ENTRY, MESSAGE, null))));
-        Assertions.assertFalse(FreeIpaClientExceptionUtil.isDuplicateEntryException(new FreeIpaClientException(MESSAGE,
+        assertFalse(FreeIpaClientExceptionUtil.isDuplicateEntryException(new FreeIpaClientException(MESSAGE,
                 new JsonRpcClientException(NOT_FOUND, MESSAGE, null))));
     }
 
     @Test
     public void testIsExceptionWithErrorCode() throws Exception {
-        Assertions.assertFalse(FreeIpaClientExceptionUtil.isExceptionWithErrorCode(
+        assertFalse(FreeIpaClientExceptionUtil.isExceptionWithErrorCode(
                 new FreeIpaClientException(MESSAGE,
                         new IllegalStateException(MESSAGE)),
                 Set.of(FreeIpaErrorCodes.DUPLICATE_ENTRY)));
-        Assertions.assertFalse(FreeIpaClientExceptionUtil.isExceptionWithErrorCode(
+        assertFalse(FreeIpaClientExceptionUtil.isExceptionWithErrorCode(
                 new FreeIpaClientException(MESSAGE,
                         new JsonRpcClientException(NOT_FOUND, MESSAGE, null)),
                 Set.of(FreeIpaErrorCodes.DUPLICATE_ENTRY)));
@@ -64,11 +67,11 @@ public class FreeIpaClientExceptionUtilV1Test {
 
     @Test
     public void testIsExceptionWithErrorCodeWrappedFreeIpaClientException() throws Exception {
-        Assertions.assertFalse(FreeIpaClientExceptionUtil.isExceptionWithErrorCode(
+        assertFalse(FreeIpaClientExceptionUtil.isExceptionWithErrorCode(
                 new FreeIpaClientException(MESSAGE, new FreeIpaClientException(MESSAGE,
                         new IllegalStateException(MESSAGE))),
                 Set.of(FreeIpaErrorCodes.DUPLICATE_ENTRY)));
-        Assertions.assertFalse(FreeIpaClientExceptionUtil.isExceptionWithErrorCode(
+        assertFalse(FreeIpaClientExceptionUtil.isExceptionWithErrorCode(
                 new FreeIpaClientException(MESSAGE, new FreeIpaClientException(MESSAGE,
                         new JsonRpcClientException(NOT_FOUND, MESSAGE, null))),
                 Set.of(FreeIpaErrorCodes.DUPLICATE_ENTRY)));
@@ -87,46 +90,46 @@ public class FreeIpaClientExceptionUtilV1Test {
         assertTrue(FreeIpaClientExceptionUtil.convertToRetryableIfNeeded(
                 new FreeIpaClientException(MESSAGE, new JsonRpcClientException(AUTHENTICATION_ERROR, MESSAGE, null)))
                 instanceof RetryableFreeIpaClientException);
-        Assertions.assertFalse(FreeIpaClientExceptionUtil.convertToRetryableIfNeeded(
+        assertFalse(FreeIpaClientExceptionUtil.convertToRetryableIfNeeded(
                 new FreeIpaClientException(MESSAGE, new JsonRpcClientException(NOT_FOUND, MESSAGE, null)))
                 instanceof RetryableFreeIpaClientException);
         assertTrue(FreeIpaClientExceptionUtil.convertToRetryableIfNeeded(
                 new FreeIpaClientException(MESSAGE, HttpStatus.UNAUTHORIZED.value()))
                 instanceof RetryableFreeIpaClientException);
-        Assertions.assertFalse(FreeIpaClientExceptionUtil.convertToRetryableIfNeeded(
+        assertFalse(FreeIpaClientExceptionUtil.convertToRetryableIfNeeded(
                 new FreeIpaClientException(MESSAGE, HttpStatus.OK.value()))
                 instanceof RetryableFreeIpaClientException);
         assertTrue(FreeIpaClientExceptionUtil.convertToRetryableIfNeeded(
                 new FreeIpaClientException(MESSAGE, new IOException()))
                 instanceof RetryableFreeIpaClientException);
-        Assertions.assertFalse(FreeIpaClientExceptionUtil.convertToRetryableIfNeeded(
+        assertFalse(FreeIpaClientExceptionUtil.convertToRetryableIfNeeded(
                 new FreeIpaClientException(MESSAGE, new IllegalStateException()))
                 instanceof RetryableFreeIpaClientException);
     }
 
     @Test
     public void testGetAncestorCauseBeforeFreeIpaClientExceptions() {
-        Assertions.assertNull(FreeIpaClientExceptionUtil.getAncestorCauseBeforeFreeIpaClientExceptions(new FreeIpaClientException(MESSAGE)));
+        assertNull(FreeIpaClientExceptionUtil.getAncestorCauseBeforeFreeIpaClientExceptions(new FreeIpaClientException(MESSAGE)));
         Throwable ancestor = new IllegalStateException(MESSAGE);
-        Assertions.assertEquals(ancestor,
+        assertEquals(ancestor,
                 FreeIpaClientExceptionUtil.getAncestorCauseBeforeFreeIpaClientExceptions(new FreeIpaClientException(MESSAGE, ancestor)));
-        Assertions.assertEquals(ancestor,
+        assertEquals(ancestor,
                 FreeIpaClientExceptionUtil.getAncestorCauseBeforeFreeIpaClientExceptions(
                         new FreeIpaClientException(MESSAGE, new FreeIpaClientException(MESSAGE, ancestor))));
-        Assertions.assertEquals(ancestor,
+        assertEquals(ancestor,
                 FreeIpaClientExceptionUtil.getAncestorCauseBeforeFreeIpaClientExceptions(
                         new FreeIpaClientException(MESSAGE, new FreeIpaClientException(MESSAGE, new FreeIpaClientException(MESSAGE, ancestor)))));
     }
 
     @Test
     public void testIsExceptionWithIOExceptionCause() {
-        Assertions.assertTrue(FreeIpaClientExceptionUtil.isExceptionWithIOExceptionCause(new FreeIpaClientException(MESSAGE, new IOException())));
-        Assertions.assertFalse(FreeIpaClientExceptionUtil.isExceptionWithIOExceptionCause(new FreeIpaClientException(MESSAGE, new IllegalStateException())));
-        Assertions.assertTrue(FreeIpaClientExceptionUtil.isExceptionWithIOExceptionCause(
+        assertTrue(FreeIpaClientExceptionUtil.isExceptionWithIOExceptionCause(new FreeIpaClientException(MESSAGE, new IOException())));
+        assertFalse(FreeIpaClientExceptionUtil.isExceptionWithIOExceptionCause(new FreeIpaClientException(MESSAGE, new IllegalStateException())));
+        assertTrue(FreeIpaClientExceptionUtil.isExceptionWithIOExceptionCause(
                 new FreeIpaClientException(MESSAGE, new FreeIpaClientException(MESSAGE, new IOException()))));
-        Assertions.assertFalse(FreeIpaClientExceptionUtil.isExceptionWithIOExceptionCause(
+        assertFalse(FreeIpaClientExceptionUtil.isExceptionWithIOExceptionCause(
                 new FreeIpaClientException(MESSAGE, new FreeIpaClientException(MESSAGE, new IllegalStateException()))));
-        Assertions.assertTrue(FreeIpaClientExceptionUtil.isExceptionWithIOExceptionCause(
+        assertTrue(FreeIpaClientExceptionUtil.isExceptionWithIOExceptionCause(
                 new FreeIpaClientException(MESSAGE, new FreeIpaClientException(MESSAGE,
                         new RuntimeException("stream closed", new JsonParseException(mock(JsonParser.class), "stream closed"))))));
     }
@@ -148,7 +151,7 @@ public class FreeIpaClientExceptionUtilV1Test {
 
     @Test
     public void testIgnoreNotFoundWithOtherEx() {
-        Assertions.assertThrows(FreeIpaClientException.class, () -> FreeIpaClientExceptionUtil.ignoreNotFoundException(
+        assertThrows(FreeIpaClientException.class, () -> FreeIpaClientExceptionUtil.ignoreNotFoundException(
                 () -> {
                     throw new FreeIpaClientException("ERROR", new JsonRpcClientException(FreeIpaErrorCodes.COMMAND_ERROR.getValue(), "ERROR", null));
                 },
@@ -174,7 +177,7 @@ public class FreeIpaClientExceptionUtilV1Test {
 
     @Test
     public void testIgnoreNotFoundWithValueWithOtherEx() {
-        Assertions.assertThrows(FreeIpaClientException.class, () -> FreeIpaClientExceptionUtil.ignoreNotFoundException(
+        assertThrows(FreeIpaClientException.class, () -> FreeIpaClientExceptionUtil.ignoreNotFoundException(
                 () -> {
                     throw new FreeIpaClientException("ERROR", new JsonRpcClientException(FreeIpaErrorCodes.COMMAND_ERROR.getValue(), "ERROR", null));
                 },

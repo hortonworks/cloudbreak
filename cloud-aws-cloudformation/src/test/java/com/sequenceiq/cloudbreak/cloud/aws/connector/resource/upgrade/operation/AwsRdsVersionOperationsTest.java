@@ -12,7 +12,6 @@ import static org.mockito.Mockito.when;
 import java.util.Optional;
 import java.util.Set;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -48,14 +47,14 @@ public class AwsRdsVersionOperationsTest {
 
     @Test
     void getDBParameterGroupFamilyTestWhenPgSqlAndVersionIsNull() {
-        Assertions.assertThrows(IllegalStateException.class, () ->
+        assertThrows(IllegalStateException.class, () ->
                 underTest.getDBParameterGroupFamily(DatabaseEngine.POSTGRESQL, null)
         );
     }
 
     @Test
     void getDBParameterGroupFamilyTestWhenPgSqlAndVersionIsEmpty() {
-        Assertions.assertThrows(IllegalStateException.class, () ->
+        assertThrows(IllegalStateException.class, () ->
                 underTest.getDBParameterGroupFamily(DatabaseEngine.POSTGRESQL, "")
         );
     }
@@ -63,7 +62,7 @@ public class AwsRdsVersionOperationsTest {
     // Note: There is no easy way to test the "bad engine variant" case as enum classes are final and hard to mock.
     @Test
     void getDBParameterGroupFamilyTestWhenPgSqlAndBadVersionFormat() {
-        Assertions.assertThrows(IllegalStateException.class, () ->
+        assertThrows(IllegalStateException.class, () ->
                 underTest.getDBParameterGroupFamily(DatabaseEngine.POSTGRESQL, "latest")
         );
     }
@@ -77,7 +76,7 @@ public class AwsRdsVersionOperationsTest {
 
     @Test
     void getDBParameterGroupFamilyTestWhenPgSqlAndMajorVersionNumericOverflow() {
-        Assertions.assertThrows(NumberFormatException.class, () ->
+        assertThrows(NumberFormatException.class, () ->
                 underTest.getDBParameterGroupFamily(DatabaseEngine.POSTGRESQL, "12345678901234567890.1")
         );
     }
@@ -102,7 +101,7 @@ public class AwsRdsVersionOperationsTest {
     @ParameterizedTest(name = "{0}")
     @MethodSource("unsupportedMajorVersionDataProvider")
     void getDBParameterGroupFamilyTestWhenPgSqlAndUnsupportedMajorVersion(String testCaseName, String version) {
-        Assertions.assertThrows(IllegalStateException.class, () ->
+        assertThrows(IllegalStateException.class, () ->
                 underTest.getDBParameterGroupFamily(DatabaseEngine.POSTGRESQL, version)
         );
     }
@@ -173,7 +172,7 @@ public class AwsRdsVersionOperationsTest {
                 .errorMessage("error").errorCode("Something").build()).build();
         when(rdsClient.describeDBEngineVersions(any())).thenThrow(exception);
 
-        CloudConnectorException ex = Assertions.assertThrows(CloudConnectorException.class, () ->
+        CloudConnectorException ex = assertThrows(CloudConnectorException.class, () ->
                 underTest.getAllUpgradeTargetVersions(rdsClient, rdsEngineVersion));
 
         assertEquals("Exception occurred when querying valid upgrade targets: error " +
@@ -187,7 +186,7 @@ public class AwsRdsVersionOperationsTest {
         RuntimeException exception = new RuntimeException("error");
         when(rdsClient.describeDBEngineVersions(any())).thenThrow(exception);
 
-        CloudConnectorException ex = Assertions.assertThrows(CloudConnectorException.class, () ->
+        CloudConnectorException ex = assertThrows(CloudConnectorException.class, () ->
                 underTest.getAllUpgradeTargetVersions(rdsClient, rdsEngineVersion));
 
         assertEquals("Exception occurred when querying valid upgrade targets: error", ex.getMessage());

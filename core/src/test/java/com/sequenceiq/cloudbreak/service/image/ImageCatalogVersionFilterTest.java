@@ -1,17 +1,17 @@
 package com.sequenceiq.cloudbreak.service.image;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakVersion;
 
-public class ImageCatalogVersionFilterTest {
+class ImageCatalogVersionFilterTest {
 
     private ImageCatalogVersionFilter underTest = new ImageCatalogVersionFilter();
 
@@ -34,7 +34,7 @@ public class ImageCatalogVersionFilterTest {
     private List<CloudbreakVersion> versions;
 
     @Test
-    public void getLatestCloudbreakVersion() {
+    void getLatestCloudbreakVersion() {
         List<String> list1 = generateVersionList(devVersion, unReleasedVersion);
         List<String> list2 = generateVersionList(releasedVersion, extendedUnreleasedVersion);
         versions = generateCloudBreakVersions(list1, list2);
@@ -42,7 +42,7 @@ public class ImageCatalogVersionFilterTest {
     }
 
     @Test
-    public void getLatestCloudbreakVersionWhenREVersioningExistsAndNewest() {
+    void getLatestCloudbreakVersionWhenREVersioningExistsAndNewest() {
         List<String> list1 = generateVersionList(devVersion, unReleasedVersion);
         List<String> list2 = generateVersionList(releasedVersion, extendedUnreleasedVersion);
         List<String> rEVersionList = generateVersionList(rEVersionOlder, rEVersionNewest);
@@ -54,7 +54,7 @@ public class ImageCatalogVersionFilterTest {
     }
 
     @Test
-    public void getLatestCloudbreakVersionWhenREVersioningExistsAndNotNewest() {
+    void getLatestCloudbreakVersionWhenREVersioningExistsAndNotNewest() {
         List<String> list1 = generateVersionList(devVersion, unReleasedVersion);
         List<String> list2 = generateVersionList(rEVersionOlder, extendedUnreleasedVersion);
         versions = generateCloudBreakVersions(list1, list2);
@@ -65,7 +65,7 @@ public class ImageCatalogVersionFilterTest {
     }
 
     @Test
-    public void filterUnreleasedVersions() {
+    void filterUnreleasedVersions() {
         List<String> list1 = generateVersionList(devVersion, unReleasedVersion);
         List<String> list2 = generateVersionList(releasedVersion, extendedUnreleasedVersion);
         versions = generateCloudBreakVersions(list1, list2);
@@ -74,40 +74,40 @@ public class ImageCatalogVersionFilterTest {
     }
 
     @Test
-    public void isVersionUnspecified() {
+    void isVersionUnspecified() {
         assertTrue(underTest.isVersionUnspecified(unspecifiedVersion));
         assertFalse(underTest.isVersionUnspecified(unReleasedVersion));
     }
 
     @Test
-    public void extractUnreleasedVersion() {
+    void extractUnreleasedVersion() {
         String extractedVersion = underTest.extractUnreleasedVersion(unReleasedVersion);
         assertEquals(" 2.6.0-rc.13", extractedVersion);
     }
 
     @Test
-    public void extractReleasedVersion() {
+    void extractReleasedVersion() {
         assertEquals("2.7.0", underTest.extractReleasedVersion(releasedVersion));
     }
 
     @Test
-    public void extractReleaseVersionFromDev() {
+    void extractReleaseVersionFromDev() {
         assertEquals("2.6.0", underTest.extractReleasedVersion(devVersion));
     }
 
     @Test
-    public void extractReleaseVersionFromRc() {
+    void extractReleaseVersionFromRc() {
         assertEquals("2.4.0", underTest.extractReleasedVersion(latestRcVersion));
     }
 
     @Test
-    public void extractReleasedFallbackOriginalVersion() {
+    void extractReleasedFallbackOriginalVersion() {
         String extractedVersion = underTest.extractReleasedVersion(unReleasedVersion);
         assertEquals(unReleasedVersion, extractedVersion);
     }
 
     @Test
-    public void extractExtendedUnreleasedVersion() {
+    void extractExtendedUnreleasedVersion() {
         String extractedVersion = underTest.extractExtendedUnreleasedVersion(extendedUnreleasedVersion);
         assertEquals(extendedUnreleasedVersion, extractedVersion);
     }

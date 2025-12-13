@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.core.bootstrap.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doThrow;
@@ -12,7 +13,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.Set;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -62,7 +62,7 @@ class ClusterServiceRunnerTest {
         when(stackDtoService.getById(anyLong())).thenReturn(stackDto);
         doThrow(new RuntimeException("Stg. failed")).when(hostRunner).redeployGatewayCertificate(any());
 
-        Assertions.assertThrows(RuntimeException.class, () -> underTest.redeployGatewayCertificate(0L));
+        assertThrows(RuntimeException.class, () -> underTest.redeployGatewayCertificate(0L));
     }
 
     @Test

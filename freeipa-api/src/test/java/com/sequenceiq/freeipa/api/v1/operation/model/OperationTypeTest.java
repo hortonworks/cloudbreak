@@ -4,16 +4,16 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Locale;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SyncOperationType;
 
-public class OperationTypeTest {
+class OperationTypeTest {
 
     @Test
-    public void testMappingExistsForAllSyncOperationType() {
+    void testMappingExistsForAllSyncOperationType() {
         for (SyncOperationType syncOperationType : SyncOperationType.values()) {
             OperationType.fromSyncOperationType(syncOperationType);
         }

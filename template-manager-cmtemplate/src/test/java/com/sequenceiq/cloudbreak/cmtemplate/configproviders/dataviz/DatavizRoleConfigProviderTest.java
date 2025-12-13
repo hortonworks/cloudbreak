@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cmtemplate.configproviders.dataviz;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -12,7 +13,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
@@ -73,7 +73,7 @@ class DatavizRoleConfigProviderTest {
 
         List<ApiClusterTemplateConfig> result = null;
 
-        try (MockedStatic<ConfigUtils> utilities = Mockito.mockStatic(ConfigUtils.class)) {
+        try (MockedStatic<ConfigUtils> utilities = mockStatic(ConfigUtils.class)) {
             utilities.when(() -> ConfigUtils.getRdsViewOfType(any(), any())).thenReturn(rdsView);
             utilities.when(() -> ConfigUtils.config(any(), any())).thenCallRealMethod();
 
@@ -102,7 +102,7 @@ class DatavizRoleConfigProviderTest {
         when(rdsView.getSslCertificateFilePath()).thenReturn("/etc/ssl/certs/ca.crt");
 
         List<ApiClusterTemplateConfig> result = null;
-        try (MockedStatic<ConfigUtils> utilities = Mockito.mockStatic(ConfigUtils.class)) {
+        try (MockedStatic<ConfigUtils> utilities = mockStatic(ConfigUtils.class)) {
             utilities.when(() -> ConfigUtils.getRdsViewOfType(any(), any())).thenReturn(rdsView);
             utilities.when(() -> ConfigUtils.config(any(), any())).thenCallRealMethod();
             utilities.when(() -> ConfigUtils.getSafetyValveProperty(any(), any())).thenCallRealMethod();

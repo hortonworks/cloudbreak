@@ -1,8 +1,10 @@
 package com.sequenceiq.cloudbreak.cloud.aws.connector.resource.upgrade;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -10,14 +12,12 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.aws.AwsCloudFormationClient;
@@ -101,7 +101,7 @@ public class AwsRdsUpgradeServiceTest {
                 .thenReturn(resources);
         underTest.upgrade(ac, databaseStack, targetMajorVersion, persistenceNotifier, List.of());
 
-        InOrder inOrder = Mockito.inOrder(awsRdsUpgradeValidatorProvider, awsRdsUpgradeSteps);
+        InOrder inOrder = inOrder(awsRdsUpgradeValidatorProvider, awsRdsUpgradeSteps);
         inOrder.verify(awsRdsUpgradeValidatorProvider).validateRdsIsAvailableOrUpgrading(rdsInfo);
         inOrder.verify(awsRdsUpgradeSteps).upgradeRds(ac, rdsClient, databaseServer, rdsInfo, targetMajorVersion);
         inOrder.verify(awsRdsUpgradeSteps).waitForUpgrade(rdsClient, databaseServer);
@@ -116,7 +116,7 @@ public class AwsRdsUpgradeServiceTest {
 
         underTest.upgrade(ac, databaseStack, targetMajorVersion, persistenceNotifier, List.of());
 
-        InOrder inOrder = Mockito.inOrder(awsRdsUpgradeValidatorProvider, awsRdsUpgradeSteps);
+        InOrder inOrder = inOrder(awsRdsUpgradeValidatorProvider, awsRdsUpgradeSteps);
         inOrder.verify(awsRdsUpgradeValidatorProvider).validateRdsIsAvailableOrUpgrading(rdsInfo);
         inOrder.verify(awsRdsUpgradeSteps).waitForUpgrade(rdsClient, databaseServer);
         verify(awsRdsUpgradeSteps, never()).upgradeRds(ac, rdsClient, databaseServer, rdsInfo, targetMajorVersion);
@@ -129,7 +129,7 @@ public class AwsRdsUpgradeServiceTest {
         when(awsRdsUpgradeValidatorProvider.isRdsMajorVersionSmallerThanTarget(rdsInfo, targetMajorVersion)).thenReturn(true);
         doThrow(CloudConnectorException.class).when(awsRdsUpgradeValidatorProvider).validateRdsIsAvailableOrUpgrading(rdsInfo);
 
-        Assertions.assertThrows(CloudConnectorException.class, () ->
+        assertThrows(CloudConnectorException.class, () ->
             underTest.upgrade(ac, databaseStack, targetMajorVersion, persistenceNotifier, List.of())
         );
 
@@ -144,11 +144,11 @@ public class AwsRdsUpgradeServiceTest {
         when(awsRdsUpgradeValidatorProvider.isRdsMajorVersionSmallerThanTarget(rdsInfo, targetMajorVersion)).thenReturn(true);
         doThrow(CloudConnectorException.class).when(awsRdsUpgradeSteps).upgradeRds(ac, rdsClient, databaseServer, rdsInfo, targetMajorVersion);
 
-        Assertions.assertThrows(CloudConnectorException.class, () ->
+        assertThrows(CloudConnectorException.class, () ->
                 underTest.upgrade(ac, databaseStack, targetMajorVersion, persistenceNotifier, List.of())
         );
 
-        InOrder inOrder = Mockito.inOrder(awsRdsUpgradeValidatorProvider, awsRdsUpgradeSteps);
+        InOrder inOrder = inOrder(awsRdsUpgradeValidatorProvider, awsRdsUpgradeSteps);
         inOrder.verify(awsRdsUpgradeValidatorProvider).validateRdsIsAvailableOrUpgrading(rdsInfo);
         inOrder.verify(awsRdsUpgradeSteps).upgradeRds(ac, rdsClient, databaseServer, rdsInfo, targetMajorVersion);
         verify(awsRdsUpgradeSteps, never()).waitForUpgrade(rdsClient, databaseServer);

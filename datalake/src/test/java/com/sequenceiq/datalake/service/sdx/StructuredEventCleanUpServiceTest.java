@@ -7,18 +7,18 @@ import static org.mockito.Mockito.when;
 
 import java.util.Optional;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.structuredevent.service.db.CDPStructuredEventDBService;
 import com.sequenceiq.cloudbreak.util.TimeUtil;
 
-@RunWith(MockitoJUnitRunner.class)
-public class StructuredEventCleanUpServiceTest {
+@ExtendWith(MockitoExtension.class)
+class StructuredEventCleanUpServiceTest {
 
     private static final Long TEST_SDX_ID = 1L;
 
@@ -37,7 +37,7 @@ public class StructuredEventCleanUpServiceTest {
     private StructuredEventCleanUpService underTest;
 
     @Test
-    public void testCleanUpWhenSdxServiceDoesNotFindAccountIdForIdThenNothingHappens() {
+    void testCleanUpWhenSdxServiceDoesNotFindAccountIdForIdThenNothingHappens() {
         when(mockSdxService.findResourceCrnById(TEST_SDX_ID)).thenReturn(Optional.empty());
 
         underTest.cleanUpStructuredEvents(TEST_SDX_ID);
@@ -48,7 +48,7 @@ public class StructuredEventCleanUpServiceTest {
     }
 
     @Test
-    public void testCleanUpStructuredEventsWhenSdxServiceCanFindResourceCrnForIdThenTransactionHappens() throws TransactionExecutionException {
+    void testCleanUpStructuredEventsWhenSdxServiceCanFindResourceCrnForIdThenTransactionHappens() throws TransactionExecutionException {
         when(mockSdxService.findResourceCrnById(TEST_SDX_ID)).thenReturn(TEST_ACCOUNT_ID);
         long timestamp = 1234567;
         when(mockTimeUtil.getTimestampThatMonthsBeforeNow(3)).thenReturn(timestamp);

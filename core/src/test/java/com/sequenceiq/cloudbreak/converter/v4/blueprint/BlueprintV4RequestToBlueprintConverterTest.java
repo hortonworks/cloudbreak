@@ -1,10 +1,12 @@
 package com.sequenceiq.cloudbreak.converter.v4.blueprint;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -54,7 +56,7 @@ public class BlueprintV4RequestToBlueprintConverterTest extends AbstractJsonConv
         BlueprintV4Request request = new BlueprintV4Request();
         String blueprint = "{}";
         request.setBlueprint(blueprint);
-        Assertions.assertThrows(BadRequestException.class, () -> underTest.convert(request));
+        assertThrows(BadRequestException.class, () -> underTest.convert(request));
     }
 
     @Test
@@ -63,13 +65,13 @@ public class BlueprintV4RequestToBlueprintConverterTest extends AbstractJsonConv
         BlueprintV4Request request = getRequest("blueprint.json");
         request.setUrl(wrongUrl);
 
-        BadRequestException badRequestException = Assertions.assertThrows(BadRequestException.class, () -> underTest.convert(request));
+        BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> underTest.convert(request));
         assertEquals(String.format("Cannot download cluster template from: %s", wrongUrl), badRequestException.getMessage());
     }
 
     @Test
     public void testWithInvalidDashInHostgroupName() {
-        Assertions.assertThrows(BadRequestException.class, () -> underTest.convert(getRequest("blueprint-hostgroup-name-with-dash.json")));
+        assertThrows(BadRequestException.class, () -> underTest.convert(getRequest("blueprint-hostgroup-name-with-dash.json")));
     }
 
     @Test
@@ -77,12 +79,12 @@ public class BlueprintV4RequestToBlueprintConverterTest extends AbstractJsonConv
         BlueprintV4Request request = new BlueprintV4Request();
         request.setBlueprint(FileReaderUtils.readFileFromClasspathQuietly("defaults/blueprints/7.2.12/cdp-sdx.bp"));
         Blueprint result = underTest.convert(request);
-        Assertions.assertNotNull(result);
+        assertNotNull(result);
         assertEquals("CDH", result.getStackType());
         assertEquals("7.2.12", result.getStackVersion());
         assertEquals(2, result.getHostGroupCount());
-        Assertions.assertNotNull(result.getBlueprintJsonText());
-        Assertions.assertNotEquals("", result.getBlueprintJsonText());
+        assertNotNull(result.getBlueprintJsonText());
+        assertNotEquals("", result.getBlueprintJsonText());
     }
 
     @Test
@@ -90,7 +92,7 @@ public class BlueprintV4RequestToBlueprintConverterTest extends AbstractJsonConv
         BlueprintV4Request request = new BlueprintV4Request();
         request.setBlueprint("{ \"blueprint\": {}");
 
-        BadRequestException badRequestException = Assertions.assertThrows(BadRequestException.class, () -> underTest.convert(request));
+        BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> underTest.convert(request));
         assertEquals("Invalid cluster template: Failed to parse JSON.", badRequestException.getMessage());
     }
 
@@ -99,7 +101,7 @@ public class BlueprintV4RequestToBlueprintConverterTest extends AbstractJsonConv
         BlueprintV4Request request = new BlueprintV4Request();
         request.setBlueprint("{ \"blueprint\": { \"cdhVersion\": \"7.0.0\", { } }");
 
-        BadRequestException badRequestException = Assertions.assertThrows(BadRequestException.class, () -> underTest.convert(request));
+        BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> underTest.convert(request));
         assertEquals("Invalid cluster template: Failed to parse JSON.", badRequestException.getMessage());
     }
 

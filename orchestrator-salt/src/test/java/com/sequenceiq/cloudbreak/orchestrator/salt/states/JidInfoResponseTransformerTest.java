@@ -7,9 +7,9 @@ import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.hasValue;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,18 +18,18 @@ import java.util.Map;
 import java.util.regex.Matcher;
 
 import org.apache.commons.io.IOUtils;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.JidInfoResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.RunnerInfo;
 
-public class JidInfoResponseTransformerTest {
+class JidInfoResponseTransformerTest {
 
     private JidInfoResponse saltResponseData;
 
-    @Before
+    @BeforeEach
     public void setUp() throws IOException {
         try (InputStream responseStream = JidInfoResponseTransformerTest.class.getResourceAsStream("/jid_real_response.json")) {
             saltResponseData = JsonUtil.readValue(IOUtils.toString(responseStream), JidInfoResponse.class);
@@ -37,7 +37,7 @@ public class JidInfoResponseTransformerTest {
     }
 
     @Test
-    public void testWithOrdering() {
+    void testWithOrdering() {
         Map<String, List<RunnerInfo>> res = JidInfoResponseTransformer.getHighStates(saltResponseData);
         for (List<RunnerInfo> value : res.values()) {
             int current = -1;
@@ -45,13 +45,13 @@ public class JidInfoResponseTransformerTest {
             for (RunnerInfo runnerInfo : runnerInfoList) {
                 int former = current;
                 current = Math.max(current, runnerInfo.getRunNum());
-                assertTrue("SaltStates are not properly ordered", former < current);
+                assertTrue(former < current, "SaltStates are not properly ordered");
             }
         }
     }
 
     @Test
-    public void testResultSummaryWithStderr() {
+    void testResultSummaryWithStderr() {
         Map<String, List<RunnerInfo>> res = JidInfoResponseTransformer.getHighStates(saltResponseData);
         RunnerInfo extraInfo = res.get("host-10-0-0-6.aws").get(18);
         Map<String, String> expectedErrorResultSummary = Map.of(
@@ -65,7 +65,7 @@ public class JidInfoResponseTransformerTest {
     }
 
     @Test
-    public void testResultSummary() {
+    void testResultSummary() {
         Map<String, List<RunnerInfo>> res = JidInfoResponseTransformer.getHighStates(saltResponseData);
         RunnerInfo noExtraInfo = res.get("host-10-0-0-6.aws").get(0);
         Map<String, String> expectedErrorResultSummary = Map.of(
@@ -79,7 +79,7 @@ public class JidInfoResponseTransformerTest {
     }
 
     @Test
-    public void testFailedStateResponse() throws IOException {
+    void testFailedStateResponse() throws IOException {
         try (InputStream responseStream = JidInfoResponseTransformerTest.class.getResourceAsStream("/jid_failed_response.json")) {
             saltResponseData = JsonUtil.readValue(IOUtils.toString(responseStream), JidInfoResponse.class);
         }
@@ -89,7 +89,7 @@ public class JidInfoResponseTransformerTest {
     }
 
     @Test
-    public void testSaltHighstateAlreadyRunning() throws IOException {
+    void testSaltHighstateAlreadyRunning() throws IOException {
         SaltExecutionWentWrongException execEx = assertThrows(SaltExecutionWentWrongException.class, () -> {
             try (InputStream responseStream = JidInfoResponseTransformerTest.class.getResourceAsStream("/jid_highstate_already_running_response.json")) {
                 JidInfoResponse saltResponseData = JsonUtil.readValue(IOUtils.toString(responseStream), JidInfoResponse.class);
@@ -102,7 +102,7 @@ public class JidInfoResponseTransformerTest {
     }
 
     @Test
-    public void testInvalidStateResponse() throws IOException {
+    void testInvalidStateResponse() throws IOException {
         try (InputStream responseStream = JidInfoResponseTransformerTest.class.getResourceAsStream("/jid_invalid_response1.json")) {
             saltResponseData = JsonUtil.readValue(IOUtils.toString(responseStream), JidInfoResponse.class);
         }
@@ -111,7 +111,7 @@ public class JidInfoResponseTransformerTest {
     }
 
     @Test
-    public void testEmptyStateResponse() throws IOException {
+    void testEmptyStateResponse() throws IOException {
         try (InputStream responseStream = JidInfoResponseTransformerTest.class.getResourceAsStream("/jid_empty_response.json")) {
             saltResponseData = JsonUtil.readValue(IOUtils.toString(responseStream), JidInfoResponse.class);
         }
@@ -120,7 +120,7 @@ public class JidInfoResponseTransformerTest {
     }
 
     @Test
-    public void testHighStateEmptyStateResponse() throws IOException {
+    void testHighStateEmptyStateResponse() throws IOException {
         JidInfoResponse saltResponseData = null;
         try (InputStream responseStream = JidInfoResponseTransformerTest.class.getResourceAsStream("/jid_empty_response.json")) {
             saltResponseData = JsonUtil.readValue(IOUtils.toString(responseStream), JidInfoResponse.class);
@@ -129,43 +129,43 @@ public class JidInfoResponseTransformerTest {
         assertEquals(0, result.size());
     }
 
-    @Test(expected = SaltExecutionWentWrongException.class)
-    public void testInvalidHighStateJidResponseWithWrongObjects() throws IOException {
+    @Test
+    void testInvalidHighStateJidResponseWithWrongObjects() throws IOException {
         try (InputStream responseStream = JidInfoResponseTransformerTest.class.getResourceAsStream("/jid_invalid_response1.json")) {
             JidInfoResponse saltResponseData = JsonUtil.readValue(IOUtils.toString(responseStream), JidInfoResponse.class);
-            JidInfoResponseTransformer.getHighStates(saltResponseData);
+            assertThrows(SaltExecutionWentWrongException.class, () -> JidInfoResponseTransformer.getHighStates(saltResponseData));
         }
     }
 
-    @Test(expected = SaltExecutionWentWrongException.class)
-    public void testInvalidHighStateJidResponseWithUnresponsiveMinions() throws IOException {
+    @Test
+    void testInvalidHighStateJidResponseWithUnresponsiveMinions() throws IOException {
         try (InputStream responseStream = JidInfoResponseTransformerTest.class.getResourceAsStream("/jid_minion_no_return.json")) {
             JidInfoResponse saltResponseData = JsonUtil.readValue(IOUtils.toString(responseStream), JidInfoResponse.class);
-            JidInfoResponseTransformer.getHighStates(saltResponseData);
+            assertThrows(SaltExecutionWentWrongException.class, () -> JidInfoResponseTransformer.getHighStates(saltResponseData));
         }
     }
 
-    @Test(expected = SaltExecutionWentWrongException.class)
-    public void testInvalidHighStateJidResponseWithNonEmptyList() throws IOException {
+    @Test
+    void testInvalidHighStateJidResponseWithNonEmptyList() throws IOException {
         try (InputStream responseStream = JidInfoResponseTransformerTest.class.getResourceAsStream("/jid_invalid_response2.json")) {
             JidInfoResponse saltResponseData = JsonUtil.readValue(IOUtils.toString(responseStream), JidInfoResponse.class);
-            JidInfoResponseTransformer.getHighStates(saltResponseData);
+            assertThrows(SaltExecutionWentWrongException.class, () -> JidInfoResponseTransformer.getHighStates(saltResponseData));
         }
     }
 
-    @Test(expected = UnsupportedOperationException.class)
-    public void testInvalidHighStateJidResponseWithNullObject() throws IOException {
+    @Test
+    void testInvalidHighStateJidResponseWithNullObject() throws IOException {
         try (InputStream responseStream = JidInfoResponseTransformerTest.class.getResourceAsStream("/jid_invalid_response3.json")) {
             JidInfoResponse saltResponseData = JsonUtil.readValue(IOUtils.toString(responseStream), JidInfoResponse.class);
-            JidInfoResponseTransformer.getHighStates(saltResponseData);
+            assertThrows(UnsupportedOperationException.class, () -> JidInfoResponseTransformer.getHighStates(saltResponseData));
         }
     }
 
-    @Test(expected = UnsupportedOperationException.class)
-    public void testInvalidHighStateJidResponseWithStringObject() throws IOException {
+    @Test
+    void testInvalidHighStateJidResponseWithStringObject() throws IOException {
         try (InputStream responseStream = JidInfoResponseTransformerTest.class.getResourceAsStream("/jid_invalid_response4.json")) {
             JidInfoResponse saltResponseData = JsonUtil.readValue(IOUtils.toString(responseStream), JidInfoResponse.class);
-            JidInfoResponseTransformer.getHighStates(saltResponseData);
+            assertThrows(UnsupportedOperationException.class, () -> JidInfoResponseTransformer.getHighStates(saltResponseData));
         }
     }
 }

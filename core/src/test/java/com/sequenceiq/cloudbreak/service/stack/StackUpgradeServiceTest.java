@@ -2,6 +2,10 @@ package com.sequenceiq.cloudbreak.service.stack;
 
 import static com.sequenceiq.cloudbreak.util.TestConstants.DISABLE_VARIANT_CHANGE;
 import static com.sequenceiq.cloudbreak.util.TestConstants.DO_NOT_KEEP_VARIANT;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -10,7 +14,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -75,7 +78,7 @@ public class StackUpgradeServiceTest {
         stack.setPlatformVariant("AWS");
         when(entitlementService.awsVariantMigrationEnable(ACCOUNT_ID)).thenReturn(false);
         String actual = underTest.calculateUpgradeVariant(stack, USER_CRN, DO_NOT_KEEP_VARIANT);
-        Assertions.assertEquals("AWS", actual);
+        assertEquals("AWS", actual);
     }
 
     @Test
@@ -83,21 +86,21 @@ public class StackUpgradeServiceTest {
         stack.setPlatformVariant("AWS");
         when(entitlementService.awsVariantMigrationEnable(ACCOUNT_ID)).thenReturn(true);
         String actual = underTest.calculateUpgradeVariant(stack, USER_CRN, DO_NOT_KEEP_VARIANT);
-        Assertions.assertEquals("AWS_NATIVE", actual);
+        assertEquals("AWS_NATIVE", actual);
     }
 
     @Test
     public void testCalculateUpgradeVariantWhenMigrationEnabledAndVariantIsAwsButVariantChangeIsUnWelcomed() {
         stack.setPlatformVariant("AWS");
         String actual = underTest.calculateUpgradeVariant(stack, USER_CRN, DISABLE_VARIANT_CHANGE);
-        Assertions.assertEquals("AWS", actual);
+        assertEquals("AWS", actual);
     }
 
     @Test
     public void testCalculateUpgradeVariantWhenMigrationEnabledWhenVariantIsNotAWS() {
         stack.setPlatformVariant("GCP");
         String actual = underTest.calculateUpgradeVariant(stack, USER_CRN, DO_NOT_KEEP_VARIANT);
-        Assertions.assertEquals("GCP", actual);
+        assertEquals("GCP", actual);
     }
 
     @Test
@@ -105,7 +108,7 @@ public class StackUpgradeServiceTest {
         stack.setPlatformVariant("AWS");
         when(entitlementService.awsVariantMigrationEnable(ACCOUNT_ID)).thenReturn(true);
         boolean actual = underTest.awsVariantMigrationIsFeasible(stack, "AWS_NATIVE");
-        Assertions.assertTrue(actual);
+        assertTrue(actual);
     }
 
     @Test
@@ -113,28 +116,28 @@ public class StackUpgradeServiceTest {
         stack.setPlatformVariant("AWS");
         when(entitlementService.awsVariantMigrationEnable(ACCOUNT_ID)).thenReturn(false);
         boolean actual = underTest.awsVariantMigrationIsFeasible(stack, "AWS_NATIVE");
-        Assertions.assertFalse(actual);
+        assertFalse(actual);
     }
 
     @Test
     public void testAwsVariantMigrationIsFeasibleWhenOriginalVariantIsAwsAndTriggeredVariantIsAwsAndMigrationDisabled() {
         stack.setPlatformVariant("AWS");
         boolean actual = underTest.awsVariantMigrationIsFeasible(stack, "AWS");
-        Assertions.assertFalse(actual);
+        assertFalse(actual);
     }
 
     @Test
     public void testAwsVariantMigrationIsFeasibleWhenOriginalVariantIsAwsNativeAndTriggeredVariantIsAwsNativeAndMigrationDisabled() {
         stack.setPlatformVariant("AWS_NATIVE");
         boolean actual = underTest.awsVariantMigrationIsFeasible(stack, "AWS_NATIVE");
-        Assertions.assertFalse(actual);
+        assertFalse(actual);
     }
 
     @Test
     public void testAwsVariantMigrationIsFeasibleWhenOriginalVariantIsAwsNativeAndTriggeredVariantIsNullAndMigrationDisabled() {
         stack.setPlatformVariant("AWS_NATIVE");
         boolean actual = underTest.awsVariantMigrationIsFeasible(stack, null);
-        Assertions.assertFalse(actual);
+        assertFalse(actual);
     }
 
     @ParameterizedTest
@@ -144,7 +147,7 @@ public class StackUpgradeServiceTest {
 
         boolean actual = underTest.allNodesSelectedForRepair(stackDto, fqdnsToRepair);
 
-        Assertions.assertFalse(actual);
+        assertFalse(actual);
     }
 
     @Test
@@ -158,7 +161,7 @@ public class StackUpgradeServiceTest {
 
         boolean actual = underTest.allNodesSelectedForRepair(stackDto, Set.of("master"));
 
-        Assertions.assertFalse(actual);
+        assertFalse(actual);
     }
 
     @Test
@@ -172,7 +175,7 @@ public class StackUpgradeServiceTest {
 
         boolean actual = underTest.allNodesSelectedForRepair(stackDto, Set.of("master", "gateway"));
 
-        Assertions.assertTrue(actual);
+        assertTrue(actual);
     }
 
     @Test
@@ -189,7 +192,7 @@ public class StackUpgradeServiceTest {
 
         String calculateUpgradeVariant = underTest.calculateUpgradeVariant(stackDto, USER_CRN, false, mapRepairValidationResult);
 
-        Assertions.assertNull(calculateUpgradeVariant);
+        assertNull(calculateUpgradeVariant);
     }
 
     @Test
@@ -209,7 +212,7 @@ public class StackUpgradeServiceTest {
 
         String calculateUpgradeVariant = underTest.calculateUpgradeVariant(stackDto, USER_CRN, false, mapRepairValidationResult);
 
-        Assertions.assertEquals("AWS",  calculateUpgradeVariant);
+        assertEquals("AWS",  calculateUpgradeVariant);
     }
 
     @ParameterizedTest
@@ -229,7 +232,7 @@ public class StackUpgradeServiceTest {
 
         String calculateUpgradeVariant = underTest.calculateUpgradeVariant(stackDto, USER_CRN, false, mapRepairValidationResult);
 
-        Assertions.assertEquals(platformVariant,  calculateUpgradeVariant);
+        assertEquals(platformVariant,  calculateUpgradeVariant);
     }
 
     @Test
@@ -249,7 +252,7 @@ public class StackUpgradeServiceTest {
 
         String calculateUpgradeVariant = underTest.calculateUpgradeVariant(stackDto, USER_CRN, false, mapRepairValidationResult);
 
-        Assertions.assertEquals("AWS_NATIVE",  calculateUpgradeVariant);
+        assertEquals("AWS_NATIVE",  calculateUpgradeVariant);
     }
 
     private InstanceMetaData getInstanceMetadatatWithFqdn(String discoveredFqdn) {

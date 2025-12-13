@@ -1,18 +1,19 @@
 package com.sequenceiq.cloudbreak.controller.validation.template.azure;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
@@ -57,7 +58,7 @@ public class ResourceDiskPropertyCalculatorTest {
 
         underTest.updateWithResourceDiskAttached(credential, template, vmType);
 
-        Mockito.verify(templateService, Mockito.times(1)).savePure(any(Template.class));
+        verify(templateService, times(1)).savePure(any(Template.class));
     }
 
     @Test
@@ -67,9 +68,8 @@ public class ResourceDiskPropertyCalculatorTest {
         BadRequestException thrown = assertThrows(BadRequestException.class, () ->
                 underTest.updateWithResourceDiskAttached(credential, template, null));
 
-        Assert.assertEquals(thrown.getMessage(),
-                "The virtual machine type for Azure probably not supported in you subscription. " +
-                        "Please make sure you select an instance which enabled for CDP.");
+        assertEquals("The virtual machine type for Azure probably not supported in you subscription. " +
+                "Please make sure you select an instance which enabled for CDP.", thrown.getMessage());
     }
 
     @Test
@@ -78,7 +78,7 @@ public class ResourceDiskPropertyCalculatorTest {
 
         underTest.updateWithResourceDiskAttached(credential, template, vmType);
 
-        Mockito.verify(templateService, Mockito.times(0)).savePure(any(Template.class));
+        verify(templateService, times(0)).savePure(any(Template.class));
     }
 
 }

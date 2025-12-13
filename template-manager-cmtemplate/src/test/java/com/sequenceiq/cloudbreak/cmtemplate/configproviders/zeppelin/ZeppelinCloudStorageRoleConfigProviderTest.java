@@ -1,15 +1,15 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.zeppelin;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
@@ -28,13 +28,13 @@ import com.sequenceiq.common.api.filesystem.GcsFileSystem;
 import com.sequenceiq.common.api.filesystem.S3FileSystem;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 
-@RunWith(MockitoJUnitRunner.class)
-public class ZeppelinCloudStorageRoleConfigProviderTest {
+@ExtendWith(MockitoExtension.class)
+class ZeppelinCloudStorageRoleConfigProviderTest {
 
     private final ZeppelinCloudStorageRoleConfigProvider underTest = new ZeppelinCloudStorageRoleConfigProvider();
 
     @Test
-    public void testGetZeppelinStorageRoleConfigsForCloud() {
+    void testGetZeppelinStorageRoleConfigsForCloud() {
         assertZeppelinStorageValues("s3a://testbucket/test-cluster/zep-pelin");
         assertZeppelinStorageValues("s3a://testbucket/basepath1/testcluster/zeppelin");
         assertZeppelinStorageValues("s3a://test.bucket/testcluster/zeppelin");
@@ -45,7 +45,7 @@ public class ZeppelinCloudStorageRoleConfigProviderTest {
     }
 
     @Test
-    public void testGetZeppelinStorageRoleConfigsWhenNoLocationConfigured() {
+    void testGetZeppelinStorageRoleConfigsWhenNoLocationConfigured() {
         TemplatePreparationObject preparationObject = getTemplatePreparationObject(null);
         String inputJson = getBlueprintText("input/clouderamanager-ds.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);

@@ -5,10 +5,12 @@ import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -16,14 +18,12 @@ import static org.mockito.Mockito.when;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.dyngr.exception.PollerStoppedException;
@@ -118,7 +118,7 @@ public class AwsRdsUpgradeOperationsTest {
     void testWaitForUpgrade() {
         underTest.waitForRdsUpgrade(rdsClient, DB_INSTANCE_IDENTIFIER);
 
-        InOrder inOrder = Mockito.inOrder(awsRdsUpgradeWaitOperations);
+        InOrder inOrder = inOrder(awsRdsUpgradeWaitOperations);
         ArgumentCaptor<DescribeDbInstancesRequest> describeDBInstancesRequestCaptor = ArgumentCaptor.forClass(DescribeDbInstancesRequest.class);
         inOrder.verify(awsRdsUpgradeWaitOperations).waitUntilUpgradeStarts(eq(rdsClient), describeDBInstancesRequestCaptor.capture());
         inOrder.verify(awsRdsUpgradeWaitOperations).waitUntilUpgradeFinishes(eq(rdsClient), describeDBInstancesRequestCaptor.capture());
@@ -134,7 +134,7 @@ public class AwsRdsUpgradeOperationsTest {
     void testWaitForUpgradeWhenWaitingOnUpgradeStartTimesOut() {
         doThrow(PollerStoppedException.class).when(awsRdsUpgradeWaitOperations).waitUntilUpgradeStarts(eq(rdsClient), any());
 
-        Assertions.assertThrows(PollerStoppedException.class, () ->
+        assertThrows(PollerStoppedException.class, () ->
                 underTest.waitForRdsUpgrade(rdsClient, DB_INSTANCE_IDENTIFIER)
         );
 

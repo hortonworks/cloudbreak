@@ -1,29 +1,29 @@
 package com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.util.HashMap;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.DatabaseServerV4StackRequest;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.NetworkV4StackRequest;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.aws.AwsDBStackV4Parameters;
 
-public class AllocateDatabaseServerV4RequestTest {
+class AllocateDatabaseServerV4RequestTest {
 
     private AllocateDatabaseServerV4Request request;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         request = new AllocateDatabaseServerV4Request();
     }
 
     @Test
-    public void testGettersAndSetters() {
+    void testGettersAndSetters() {
         request.setName("myallocation");
         assertEquals("myallocation", request.getName());
 
@@ -41,7 +41,7 @@ public class AllocateDatabaseServerV4RequestTest {
     }
 
     @Test
-    public void testAwsParameters() {
+    void testAwsParameters() {
         assertNull(request.getAws());
 
         AwsDBStackV4Parameters parameters = request.createAws();

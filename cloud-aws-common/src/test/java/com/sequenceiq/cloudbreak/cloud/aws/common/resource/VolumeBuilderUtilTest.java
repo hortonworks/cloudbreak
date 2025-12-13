@@ -1,6 +1,11 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common.resource;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -8,7 +13,6 @@ import static org.mockito.Mockito.when;
 import java.util.HashMap;
 import java.util.List;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -85,7 +89,7 @@ public class VolumeBuilderUtilTest {
         when(amazonEc2Client.describeImages(any())).thenReturn(DescribeImagesResponse.builder().images(ecImage).build());
         when(cloudStack.getImage()).thenReturn(image);
         BlockDeviceMapping actual = underTest.getRootVolume(awsInstanceView, group, cloudStack, ac);
-        Assertions.assertNotNull(actual);
+        assertNotNull(actual);
     }
 
     @Test
@@ -94,8 +98,8 @@ public class VolumeBuilderUtilTest {
 
         List<BlockDeviceMapping> actual = underTest.getEphemeral(awsInstanceView);
 
-        Assertions.assertNotNull(actual);
-        Assertions.assertTrue(actual.isEmpty());
+        assertNotNull(actual);
+        assertTrue(actual.isEmpty());
     }
 
     @Test
@@ -104,8 +108,8 @@ public class VolumeBuilderUtilTest {
 
         List<BlockDeviceMapping> actual = underTest.getEphemeral(awsInstanceView);
 
-        Assertions.assertNotNull(actual);
-        Assertions.assertFalse(actual.isEmpty());
+        assertNotNull(actual);
+        assertFalse(actual.isEmpty());
         BlockDeviceMapping theSingleBlockDeviceMapping = actual.get(0);
         assertEquals("/dev/xvdb", theSingleBlockDeviceMapping.deviceName());
         assertEquals("ephemeral0", theSingleBlockDeviceMapping.virtualName());
@@ -118,13 +122,13 @@ public class VolumeBuilderUtilTest {
 
         List<BlockDeviceMapping> actual = underTest.getEphemeral(awsInstanceView);
 
-        Assertions.assertNotNull(actual);
-        Assertions.assertFalse(actual.isEmpty());
+        assertNotNull(actual);
+        assertFalse(actual.isEmpty());
         assertEquals(storageCount, actual.size());
-        Assertions.assertTrue(actual.stream()
+        assertTrue(actual.stream()
                 .anyMatch(deviceMapping -> "/dev/xvdb".equals(deviceMapping.deviceName())
                         && "ephemeral0".equals(deviceMapping.virtualName())));
-        Assertions.assertTrue(actual.stream()
+        assertTrue(actual.stream()
                 .anyMatch(deviceMapping -> "/dev/xvdz".equals(deviceMapping.deviceName())
                         && "ephemeral24".equals(deviceMapping.virtualName())));
     }
@@ -134,7 +138,7 @@ public class VolumeBuilderUtilTest {
         when(cloudStack.getImage()).thenReturn(image);
         when(ac.getParameter(AmazonEc2Client.class)).thenReturn(amazonEc2Client);
         when(amazonEc2Client.describeImages(any())).thenReturn(DescribeImagesResponse.builder().build());
-        CloudConnectorException actual = Assertions.assertThrows(CloudConnectorException.class, () -> underTest.getRootDeviceName(ac, cloudStack));
+        CloudConnectorException actual = assertThrows(CloudConnectorException.class, () -> underTest.getRootDeviceName(ac, cloudStack));
         assertEquals("AMI is not available: 'null'.", actual.getMessage());
     }
 
@@ -144,7 +148,7 @@ public class VolumeBuilderUtilTest {
         when(ac.getParameter(AmazonEc2Client.class)).thenReturn(amazonEc2Client);
         when(amazonEc2Client.describeImages(any()))
                 .thenReturn(DescribeImagesResponse.builder().images((software.amazon.awssdk.services.ec2.model.Image) null).build());
-        CloudConnectorException actual = Assertions.assertThrows(CloudConnectorException.class, () -> underTest.getRootDeviceName(ac, cloudStack));
+        CloudConnectorException actual = assertThrows(CloudConnectorException.class, () -> underTest.getRootDeviceName(ac, cloudStack));
         assertEquals("Couldn't describe AMI 'null'.", actual.getMessage());
     }
 
@@ -156,8 +160,8 @@ public class VolumeBuilderUtilTest {
         when(awsInstanceView.getKmsKey()).thenReturn("kmsKey");
 
         EbsBlockDevice actual = underTest.getRootEbs(awsInstanceView, group);
-        Assertions.assertTrue(actual.deleteOnTermination());
-        Assertions.assertTrue(actual.encrypted());
+        assertTrue(actual.deleteOnTermination());
+        assertTrue(actual.encrypted());
         assertEquals("gp3", actual.volumeType().toString());
         assertEquals(1, actual.volumeSize());
         assertEquals("kmsKey", actual.kmsKeyId());
@@ -172,8 +176,8 @@ public class VolumeBuilderUtilTest {
         when(awsInstanceView.getKmsKey()).thenReturn("kmsKey");
 
         EbsBlockDevice actual = underTest.getRootEbs(awsInstanceView, group);
-        Assertions.assertTrue(actual.deleteOnTermination());
-        Assertions.assertTrue(actual.encrypted());
+        assertTrue(actual.deleteOnTermination());
+        assertTrue(actual.encrypted());
         assertEquals("gp2", actual.volumeType().toString());
         assertEquals(1, actual.volumeSize());
         assertEquals("kmsKey", actual.kmsKeyId());
@@ -186,11 +190,11 @@ public class VolumeBuilderUtilTest {
         when(awsInstanceView.isKmsCustom()).thenReturn(false);
 
         EbsBlockDevice actual = underTest.getRootEbs(awsInstanceView, group);
-        Assertions.assertTrue(actual.deleteOnTermination());
-        Assertions.assertNull(actual.encrypted());
+        assertTrue(actual.deleteOnTermination());
+        assertNull(actual.encrypted());
         assertEquals("gp3", actual.volumeType().toString());
         assertEquals(1, actual.volumeSize());
-        Assertions.assertNull(actual.kmsKeyId());
+        assertNull(actual.kmsKeyId());
     }
 
     @Test
@@ -200,11 +204,11 @@ public class VolumeBuilderUtilTest {
         when(awsInstanceView.isKmsCustom()).thenReturn(false);
 
         EbsBlockDevice actual = underTest.getRootEbs(awsInstanceView, group);
-        Assertions.assertTrue(actual.deleteOnTermination());
-        Assertions.assertNull(actual.encrypted());
+        assertTrue(actual.deleteOnTermination());
+        assertNull(actual.encrypted());
         assertEquals("gp3", actual.volumeType().toString());
         assertEquals(1, actual.volumeSize());
-        Assertions.assertNull(actual.kmsKeyId());
+        assertNull(actual.kmsKeyId());
     }
 
     @Test
@@ -214,11 +218,11 @@ public class VolumeBuilderUtilTest {
         when(awsInstanceView.isKmsCustom()).thenReturn(false);
 
         EbsBlockDevice actual = underTest.getRootEbs(awsInstanceView, group);
-        Assertions.assertTrue(actual.deleteOnTermination());
-        Assertions.assertNull(actual.encrypted());
+        assertTrue(actual.deleteOnTermination());
+        assertNull(actual.encrypted());
         assertEquals("gp3", actual.volumeType().toString());
         assertEquals(1, actual.volumeSize());
-        Assertions.assertNull(actual.kmsKeyId());
+        assertNull(actual.kmsKeyId());
     }
 
     @Test

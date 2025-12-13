@@ -1,6 +1,7 @@
 package com.sequenceiq.general;
 
 import static java.util.stream.Collectors.toSet;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
@@ -12,7 +13,6 @@ import java.util.stream.Stream;
 
 import jakarta.inject.Inject;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -52,7 +52,7 @@ class RepositoryRestrictionTest {
                     compoNames.add(service.getSimpleName());
                 }
             });
-            Assertions.assertTrue(count.get() <= 1, getExceptionMessage(repo.getSimpleName(), compoNames));
+            assertTrue(count.get() <= 1, getExceptionMessage(repo.getSimpleName(), compoNames));
         });
     }
 

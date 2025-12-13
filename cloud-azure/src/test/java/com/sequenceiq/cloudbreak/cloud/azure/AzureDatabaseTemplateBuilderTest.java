@@ -1,11 +1,12 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.util.Map;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -57,7 +58,7 @@ class AzureDatabaseTemplateBuilderTest {
         when(azureDatabaseTemplateProvider.getTemplate(databaseStack)).thenReturn(template);
         when(freeMarkerTemplateUtils.processTemplateIntoString(template, Map.of())).thenReturn("template");
         String actualResult = underTest.build(cloudContext, databaseStack);
-        Assertions.assertEquals(actualResult, "template");
+        assertEquals(actualResult, "template");
     }
 
     @Test
@@ -73,7 +74,7 @@ class AzureDatabaseTemplateBuilderTest {
         when(azureDatabaseTemplateModelBuilderMap.get(AzureDatabaseType.SINGLE_SERVER)).thenReturn(azureDatabaseTemplateModelBuilder);
         when(azureDatabaseTemplateProvider.getTemplate(databaseStack)).thenReturn(template);
         when(freeMarkerTemplateUtils.processTemplateIntoString(template, Map.of())).thenThrow(new IOException("exception"));
-        CloudConnectorException exception = Assertions.assertThrows(CloudConnectorException.class, () -> underTest.build(cloudContext, databaseStack));
-        Assertions.assertEquals("Failed to process the ARM TemplateBuilder", exception.getMessage());
+        CloudConnectorException exception = assertThrows(CloudConnectorException.class, () -> underTest.build(cloudContext, databaseStack));
+        assertEquals("Failed to process the ARM TemplateBuilder", exception.getMessage());
     }
 }

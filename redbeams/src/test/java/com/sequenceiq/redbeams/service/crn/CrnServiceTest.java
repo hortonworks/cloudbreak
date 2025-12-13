@@ -1,13 +1,14 @@
 package com.sequenceiq.redbeams.service.crn;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.lenient;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
@@ -17,7 +18,8 @@ import com.sequenceiq.redbeams.domain.DatabaseConfig;
 import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
 import com.sequenceiq.redbeams.service.UuidGeneratorService;
 
-public class CrnServiceTest {
+@ExtendWith(MockitoExtension.class)
+class CrnServiceTest {
 
     private static final String TEST_ACCOUNT_ID = "accountId";
 
@@ -37,25 +39,24 @@ public class CrnServiceTest {
     @Mock
     private RegionAwareCrnGenerator regionAwareCrnGenerator;
 
-    @Before
+    @BeforeEach
     public void setUp() {
-        initMocks(this);
-        when(uuidGeneratorService.randomUuid()).thenReturn("uuid");
+        lenient().when(uuidGeneratorService.randomUuid()).thenReturn("uuid");
         CrnTestUtil.mockCrnGenerator(regionAwareCrnGenerator);
     }
 
     @Test
-    public void testGetCurrentAccountId() {
+    void testGetCurrentAccountId() {
         assertEquals(TEST_ACCOUNT_ID, ThreadBasedUserCrnProvider.doAs(CRN.toString(), () -> crnService.getCurrentAccountId()));
     }
 
     @Test
-    public void testGetCurrentUserId() {
+    void testGetCurrentUserId() {
         assertEquals(TEST_USER_ID, ThreadBasedUserCrnProvider.doAs(CRN.toString(), () -> crnService.getCurrentUserId()));
     }
 
     @Test
-    public void testCreateCrnDatabaseConfig() {
+    void testCreateCrnDatabaseConfig() {
         DatabaseConfig resource = new DatabaseConfig();
         Crn crn = ThreadBasedUserCrnProvider.doAs(CRN.toString(), () -> crnService.createCrn(resource));
 
@@ -66,7 +67,7 @@ public class CrnServiceTest {
     }
 
     @Test
-    public void testCreateCrnDatabaseServerConfig() {
+    void testCreateCrnDatabaseServerConfig() {
         DatabaseServerConfig resource = new DatabaseServerConfig();
         Crn crn = ThreadBasedUserCrnProvider.doAs(CRN.toString(), () -> crnService.createCrn(resource));
 

@@ -4,7 +4,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -15,11 +15,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
@@ -39,7 +39,8 @@ import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
-public class ClusterDownscaleServiceTest {
+@ExtendWith(MockitoExtension.class)
+class ClusterDownscaleServiceTest {
 
     private static final Long STACK_ID = 1L;
 
@@ -74,15 +75,8 @@ public class ClusterDownscaleServiceTest {
     @InjectMocks
     private ClusterDownscaleService underTest;
 
-    @Before
-    public void setUp() {
-        MockitoAnnotations.initMocks(this);
-    }
-
     @Test
-    public void testClusterDownscaleStartedWhenScalingAdjustmentIsGivenAndItIsPositiveThenInstanceGroupEventWillBeCalledThisNumber() {
-        doNothing().when(flowMessageService).fireEventAndLog(STACK_ID, Status.UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_SCALING_DOWN);
-
+    void testClusterDownscaleStartedWhenScalingAdjustmentIsGivenAndItIsPositiveThenInstanceGroupEventWillBeCalledThisNumber() {
         underTest.clusterDownscaleStarted(STACK_ID, new ClusterDownscaleTriggerEvent(null, STACK_ID, Map.of(HOST_GROUP_NAME, 1),
                 Map.of(HOST_GROUP_NAME, PRIVATE_IDS), Map.of(), null, details));
 
@@ -91,16 +85,13 @@ public class ClusterDownscaleServiceTest {
         verify(flowMessageService, times(1)).fireEventAndLog(STACK_ID, Status.UPDATE_IN_PROGRESS.name(),
                 ResourceEvent.CLUSTER_SCALING_DOWN, "worker");
         verify(clusterService, times(1)).updateClusterStatusByStackId(STACK_ID, DetailedStackStatus.DOWNSCALE_IN_PROGRESS);
-        verify(stackDtoService, times(0)).getById(anyLong());
-        verify(stackDtoService, times(0)).getById(STACK_ID);
-        verify(flowMessageService, times(0)).fireInstanceGroupEventAndLog(eq(STACK_ID), anyString(), anyString(),
-                any(ResourceEvent.class), anyString());
+        verify(stackDtoService, never()).getById(anyLong());
+        verify(stackDtoService, never()).getById(STACK_ID);
+        verify(flowMessageService, never()).fireInstanceGroupEventAndLog(eq(STACK_ID), anyString(), anyString(), any(ResourceEvent.class), anyString());
     }
 
     @Test
-    public void testClusterDownscaleStartedWhenScalingAdjustmentIsGivenAndItIsNegativeThenInstanceGroupEventWillBeCalledWithTheAbsoluteValueOfThisNumber() {
-        doNothing().when(flowMessageService).fireEventAndLog(STACK_ID, Status.UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_SCALING_DOWN);
-
+    void testClusterDownscaleStartedWhenScalingAdjustmentIsGivenAndItIsNegativeThenInstanceGroupEventWillBeCalledWithTheAbsoluteValueOfThisNumber() {
         underTest.clusterDownscaleStarted(STACK_ID, new ClusterDownscaleTriggerEvent(null, STACK_ID, Map.of(HOST_GROUP_NAME, -1),
                 Map.of(HOST_GROUP_NAME, PRIVATE_IDS), Map.of(), null, details));
 
@@ -109,34 +100,30 @@ public class ClusterDownscaleServiceTest {
         verify(flowMessageService, times(1)).fireEventAndLog(STACK_ID, Status.UPDATE_IN_PROGRESS.name(),
                 ResourceEvent.CLUSTER_SCALING_DOWN, "worker");
         verify(clusterService, times(1)).updateClusterStatusByStackId(STACK_ID, DetailedStackStatus.DOWNSCALE_IN_PROGRESS);
-        verify(stackDtoService, times(0)).getById(anyLong());
-        verify(stackDtoService, times(0)).getById(STACK_ID);
-        verify(flowMessageService, times(0)).fireInstanceGroupEventAndLog(eq(STACK_ID), anyString(), anyString(),
-                any(ResourceEvent.class), anyString());
+        verify(stackDtoService, never()).getById(anyLong());
+        verify(stackDtoService, never()).getById(STACK_ID);
+        verify(flowMessageService, never()).fireInstanceGroupEventAndLog(eq(STACK_ID), anyString(), anyString(), any(ResourceEvent.class), anyString());
     }
 
     @Test
-    public void testClusterDownscaleStartedWhenScalingAdjustmentIsNullAndItIsNegativeThenInstanceGroupEventWillBeCalledWithTheAbsoluteValueOfThisNumber() {
-        doNothing().when(flowMessageService).fireEventAndLog(STACK_ID, Status.UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_SCALING_DOWN);
+    void testClusterDownscaleStartedWhenScalingAdjustmentIsNullAndItIsNegativeThenInstanceGroupEventWillBeCalledWithTheAbsoluteValueOfThisNumber() {
         when(instanceMetaDataService.getAllAvailableHostNamesByPrivateIds(anyLong(), any())).thenReturn(List.of("host1"));
 
         underTest.clusterDownscaleStarted(STACK_ID, new ClusterDownscaleTriggerEvent(null, STACK_ID, null,
                 Map.of(HOST_GROUP_NAME, PRIVATE_IDS), Map.of(), null, details));
 
-        verify(flowMessageService, times(0)).fireEventAndLog(STACK_ID,
+        verify(flowMessageService, never()).fireEventAndLog(STACK_ID,
                 Status.UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_REMOVING_NODES, "1");
         verify(flowMessageService, times(1)).fireEventAndLog(STACK_ID, Status.UPDATE_IN_PROGRESS.name(),
                 ResourceEvent.CLUSTER_SCALING_DOWN, "worker");
         verify(clusterService, times(1)).updateClusterStatusByStackId(STACK_ID, DetailedStackStatus.DOWNSCALE_IN_PROGRESS);
-        verify(stackDtoService, times(0)).getById(anyLong());
-        verify(stackDtoService, times(0)).getById(STACK_ID);
-        verify(flowMessageService, times(0)).fireInstanceGroupEventAndLog(eq(STACK_ID), anyString(), anyString(),
-                any(ResourceEvent.class), anyString());
+        verify(stackDtoService, never()).getById(anyLong());
+        verify(stackDtoService, never()).getById(STACK_ID);
+        verify(flowMessageService, never()).fireInstanceGroupEventAndLog(eq(STACK_ID), anyString(), anyString(), any(ResourceEvent.class), anyString());
     }
 
     @Test
-    public void testClusterDownscaleStartedWhenZombieHostgroupsIsGivenThenInstanceGroupEventWillBeCalledWith() {
-        doNothing().when(flowMessageService).fireEventAndLog(STACK_ID, Status.UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_SCALING_DOWN_ZOMBIE_NODES);
+    void testClusterDownscaleStartedWhenZombieHostgroupsIsGivenThenInstanceGroupEventWillBeCalledWith() {
         when(details.isPurgeZombies()).thenReturn(Boolean.TRUE);
         Stack stack = TestUtil.stack();
         stack.setId(STACK_ID);
@@ -144,7 +131,6 @@ public class ClusterDownscaleServiceTest {
         InstanceGroup instanceGroup = stack.getInstanceGroups().iterator().next();
         instanceGroup.setGroupName(HOST_GROUP_NAME);
         instanceGroup.getInstanceMetaData().iterator().next().setInstanceStatus(InstanceStatus.ZOMBIE);
-        when(stackDto.getStack()).thenReturn(stack);
         when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
         when(stackDto.getZombieInstanceMetaData()).thenReturn(new ArrayList<>(instanceGroup.getInstanceMetaData()));
 
@@ -156,7 +142,6 @@ public class ClusterDownscaleServiceTest {
                 ResourceEvent.CLUSTER_SCALING_DOWN_ZOMBIE_NODES, "worker");
         verify(clusterService, times(1)).updateClusterStatusByStackId(STACK_ID, DetailedStackStatus.DOWNSCALE_IN_PROGRESS);
         verify(stackDtoService, times(1)).getById(STACK_ID);
-        verify(flowMessageService, times(0)).fireInstanceGroupEventAndLog(eq(STACK_ID), anyString(), anyString(),
-                any(ResourceEvent.class), anyString());
+        verify(flowMessageService, never()).fireInstanceGroupEventAndLog(eq(STACK_ID), anyString(), anyString(), any(ResourceEvent.class), anyString());
     }
 }

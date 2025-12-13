@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.gcp;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -8,7 +10,6 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.util.List;
 
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -66,13 +67,13 @@ public class GcpCloudSubnetProviderTest {
         when(regionListObject.getItems()).thenReturn(List.of(regionObject));
 
         List<CreatedSubnet> provide = underTest.provide(request, List.of("10.0.0.0/16", "10.0.0.1/16"));
-        Assert.assertEquals(2, provide.size());
-        Assert.assertTrue(provide.stream()
+        assertEquals(2, provide.size());
+        assertTrue(provide.stream()
                 .map(e -> e.getAvailabilityZone())
                 .filter(e -> e.equals("euwest1a"))
                 .findFirst()
                 .isPresent());
-        Assert.assertTrue(provide.stream()
+        assertTrue(provide.stream()
                 .map(e -> e.getAvailabilityZone())
                 .filter(e -> e.equals("euwest1b"))
                 .findFirst()
@@ -108,13 +109,13 @@ public class GcpCloudSubnetProviderTest {
         when(regionListObject.getItems()).thenReturn(List.of(regionObject));
 
         List<CreatedSubnet> provide = underTest.provide(request, List.of("10.0.0.0/16", "10.0.0.1/16"));
-        Assert.assertEquals(2, provide.size());
-        Assert.assertTrue(provide.stream()
+        assertEquals(2, provide.size());
+        assertTrue(provide.stream()
                 .map(e -> e.getAvailabilityZone())
                 .filter(e -> e.equals("euwest1a"))
                 .findFirst()
                 .isPresent());
-        Assert.assertTrue(provide.stream()
+        assertTrue(provide.stream()
                 .map(e -> e.getAvailabilityZone())
                 .filter(e -> e.equals("euwest1a"))
                 .findFirst()

@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common.view;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -101,7 +101,7 @@ public class AwsInstanceViewTest {
                 Map.of(AwsInstanceTemplate.PLACEMENT_GROUP_STRATEGY, AwsPlacementGroupStrategy.PARTITION.name()),
                 0L, "imageId", TemporaryStorage.ATTACHED_VOLUMES, 0L);
         AwsInstanceView actual = new AwsInstanceView(instanceTemplate);
-        assertEquals("Placement Group Strategy should be partition.", actual.getPlacementGroupStrategy(), AwsPlacementGroupStrategy.PARTITION);
+        assertEquals(AwsPlacementGroupStrategy.PARTITION, actual.getPlacementGroupStrategy(), "Placement Group Strategy should be partition.");
     }
 
     @Test
@@ -110,7 +110,7 @@ public class AwsInstanceViewTest {
                 Map.of(AwsInstanceTemplate.PLACEMENT_GROUP_STRATEGY, AwsPlacementGroupStrategy.SPREAD.name()),
                 0L, "imageId", TemporaryStorage.ATTACHED_VOLUMES, 0L);
         AwsInstanceView actual = new AwsInstanceView(instanceTemplate);
-        assertEquals("Placement Group Strategy should be spread.", actual.getPlacementGroupStrategy(), AwsPlacementGroupStrategy.SPREAD);
+        assertEquals(AwsPlacementGroupStrategy.SPREAD, actual.getPlacementGroupStrategy(), "Placement Group Strategy should be spread.");
     }
 
     @Test
@@ -119,7 +119,7 @@ public class AwsInstanceViewTest {
                 Map.of(AwsInstanceTemplate.PLACEMENT_GROUP_STRATEGY, AwsPlacementGroupStrategy.CLUSTER.name()),
                 0L, "imageId", TemporaryStorage.ATTACHED_VOLUMES, 0L);
         AwsInstanceView actual = new AwsInstanceView(instanceTemplate);
-        assertEquals("Placement Group Strategy should be cluster.", actual.getPlacementGroupStrategy(), AwsPlacementGroupStrategy.CLUSTER);
+        assertEquals(AwsPlacementGroupStrategy.CLUSTER, actual.getPlacementGroupStrategy(), "Placement Group Strategy should be cluster.");
     }
 
     @Test
@@ -127,7 +127,7 @@ public class AwsInstanceViewTest {
         InstanceTemplate instanceTemplate = new InstanceTemplate("", "", 0L, Collections.emptyList(), InstanceStatus.STARTED,
                 Map.of(), 0L, "imageId", TemporaryStorage.ATTACHED_VOLUMES, 0L);
         AwsInstanceView actual = new AwsInstanceView(instanceTemplate);
-        assertEquals("Placement Group Strategy should be none.", actual.getPlacementGroupStrategy(), AwsPlacementGroupStrategy.NONE);
+        assertEquals(AwsPlacementGroupStrategy.NONE, actual.getPlacementGroupStrategy(), "Placement Group Strategy should be none.");
     }
 
     @Test
@@ -136,6 +136,6 @@ public class AwsInstanceViewTest {
                 Map.of(AwsInstanceTemplate.PLACEMENT_GROUP_STRATEGY, AwsPlacementGroupStrategy.NONE.name()),
                 0L, "imageId", TemporaryStorage.ATTACHED_VOLUMES, 0L);
         AwsInstanceView actual = new AwsInstanceView(instanceTemplate);
-        assertEquals("Placement Group Strategy should be none.", actual.getPlacementGroupStrategy(), AwsPlacementGroupStrategy.NONE);
+        assertEquals(AwsPlacementGroupStrategy.NONE, actual.getPlacementGroupStrategy(), "Placement Group Strategy should be none.");
     }
 }

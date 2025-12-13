@@ -1,9 +1,10 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common.util;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,21 +37,21 @@ public class AwsStackNameCommonUtilTest {
         when(ac.getCloudContext()).thenReturn(cloudContext);
         when(cloudContext.getName()).thenReturn("stack-name");
         String actual = underTest.getInstanceName(ac, "group-name", 1L);
-        Assertions.assertEquals("stack-name-group-name1", actual);
+        assertEquals("stack-name-group-name1", actual);
     }
 
     @Test
     public void testGetInstanceNameWhenEmptyGroup() {
         AuthenticatedContext ac = mock(AuthenticatedContext.class);
-        IllegalArgumentException actual = Assertions.assertThrows(IllegalArgumentException.class, () -> underTest.getInstanceName(ac, "", 1L));
-        Assertions.assertEquals("Group name cannot be empty, instance name cannot be generated", actual.getMessage());
+        IllegalArgumentException actual = assertThrows(IllegalArgumentException.class, () -> underTest.getInstanceName(ac, "", 1L));
+        assertEquals("Group name cannot be empty, instance name cannot be generated", actual.getMessage());
     }
 
     @Test
     public void testGetInstanceNameWhenNullGroup() {
         AuthenticatedContext ac = mock(AuthenticatedContext.class);
-        IllegalArgumentException actual = Assertions.assertThrows(IllegalArgumentException.class, () -> underTest.getInstanceName(ac, null, 1L));
-        Assertions.assertEquals("Group name cannot be empty, instance name cannot be generated", actual.getMessage());
+        IllegalArgumentException actual = assertThrows(IllegalArgumentException.class, () -> underTest.getInstanceName(ac, null, 1L));
+        assertEquals("Group name cannot be empty, instance name cannot be generated", actual.getMessage());
     }
 
     @Test
@@ -60,7 +61,7 @@ public class AwsStackNameCommonUtilTest {
         when(ac.getCloudContext()).thenReturn(cloudContext);
         when(cloudContext.getName()).thenReturn("very-very-very-long-stack-name-for-cutting");
         String actual = underTest.getInstanceName(ac, "group-name", PRIVATE_ID);
-        Assertions.assertEquals("very-very-very-long-stack-name-for-c-group-name233", actual);
-        Assertions.assertEquals(MAX_RESOURCE_NAME_LENGTH, actual.length());
+        assertEquals("very-very-very-long-stack-name-for-c-group-name233", actual);
+        assertEquals(MAX_RESOURCE_NAME_LENGTH, actual.length());
     }
 }

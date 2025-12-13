@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.gcp;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -18,7 +19,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -165,7 +165,7 @@ public class GcpNetworkConnectorTest {
 
         CreatedCloudNetwork networkWithSubnets = underTest.createNetworkWithSubnets(networkCreationRequest);
 
-        Assert.assertEquals(1, networkWithSubnets.getSubnets().size());
+        assertEquals(1, networkWithSubnets.getSubnets().size());
     }
 
     @Test
@@ -244,7 +244,7 @@ public class GcpNetworkConnectorTest {
 
         GcpResourceException gcpResourceException = assertThrows(GcpResourceException.class,
                 () -> underTest.createNetworkWithSubnets(networkCreationRequest));
-        Assert.assertEquals("error", gcpResourceException.getMessage());
+        assertEquals("error", gcpResourceException.getMessage());
         verify(gcpStackUtil, times(1))
                 .getMissingServiceAccountKeyError(any(TokenResponseException.class), anyString());
     }
@@ -328,7 +328,7 @@ public class GcpNetworkConnectorTest {
 
         GcpResourceException gcpResourceException = assertThrows(GcpResourceException.class,
                 () -> underTest.createNetworkWithSubnets(networkCreationRequest));
-        Assert.assertEquals("google-error: [ resourceType: GCP_NETWORK,  resourceName: super-env ]", gcpResourceException.getMessage());
+        assertEquals("google-error: [ resourceType: GCP_NETWORK,  resourceName: super-env ]", gcpResourceException.getMessage());
         verify(gcpStackUtil, times(0))
                 .getMissingServiceAccountKeyError(any(TokenResponseException.class), anyString());
     }
@@ -406,7 +406,7 @@ public class GcpNetworkConnectorTest {
 
         GcpResourceException gcpResourceException = assertThrows(GcpResourceException.class,
                 () -> underTest.createNetworkWithSubnets(networkCreationRequest));
-        Assert.assertEquals("Network creation failed due to IO exception: [ resourceType: GCP_NETWORK,  resourceName: super-env ]",
+        assertEquals("Network creation failed due to IO exception: [ resourceType: GCP_NETWORK,  resourceName: super-env ]",
                 gcpResourceException.getMessage());
         verify(gcpStackUtil, times(0))
                 .getMissingServiceAccountKeyError(any(TokenResponseException.class), anyString());
@@ -466,14 +466,14 @@ public class GcpNetworkConnectorTest {
     public void testSubnetCountInDifferentAzMax() {
         int subnetCountInDifferentAzMax = underTest.subnetCountInDifferentAzMax();
 
-        Assert.assertEquals(3, subnetCountInDifferentAzMax);
+        assertEquals(3, subnetCountInDifferentAzMax);
     }
 
     @Test
     public void testSubnetCountInDifferentAzMin() {
         int subnetCountInDifferentAzMin = underTest.subnetCountInDifferentAzMin();
 
-        Assert.assertEquals(1, subnetCountInDifferentAzMin);
+        assertEquals(1, subnetCountInDifferentAzMin);
     }
 
     private CreatedSubnet createdSubnet() {

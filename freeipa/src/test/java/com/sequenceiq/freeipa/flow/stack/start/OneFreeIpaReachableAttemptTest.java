@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.flow.stack.start;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -7,7 +8,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.Set;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -59,7 +59,7 @@ class OneFreeIpaReachableAttemptTest {
     public void testAttemptSucceed() throws Exception {
         response.setResult(Boolean.TRUE);
         when(freeIpaInstanceHealthDetailsService.checkFreeIpaHealth(any(), any())).thenReturn(response);
-        Assertions.assertEquals(AttemptState.FINISH, oneFreeIpaReachableAttemptUnderTest.process().getState());
+        assertEquals(AttemptState.FINISH, oneFreeIpaReachableAttemptUnderTest.process().getState());
         verify(freeIpaInstanceHealthDetailsService, times(1)).checkFreeIpaHealth(any(), any());
     }
 
@@ -68,8 +68,8 @@ class OneFreeIpaReachableAttemptTest {
         response.setResult(Boolean.TRUE);
         oneFreeIpaReachableAttemptUnderTest = new OneFreeIpaReachableAttempt(freeIpaInstanceHealthDetailsService, stack, instanceSet, 2);
         when(freeIpaInstanceHealthDetailsService.checkFreeIpaHealth(any(), any())).thenReturn(response);
-        Assertions.assertEquals(AttemptState.CONTINUE, oneFreeIpaReachableAttemptUnderTest.process().getState());
-        Assertions.assertEquals(AttemptState.FINISH, oneFreeIpaReachableAttemptUnderTest.process().getState());
+        assertEquals(AttemptState.CONTINUE, oneFreeIpaReachableAttemptUnderTest.process().getState());
+        assertEquals(AttemptState.FINISH, oneFreeIpaReachableAttemptUnderTest.process().getState());
         verify(freeIpaInstanceHealthDetailsService, times(3)).checkFreeIpaHealth(any(), any());
     }
 
@@ -78,12 +78,12 @@ class OneFreeIpaReachableAttemptTest {
         response.setResult(Boolean.TRUE);
         oneFreeIpaReachableAttemptUnderTest = new OneFreeIpaReachableAttempt(freeIpaInstanceHealthDetailsService, stack, instanceSet, 2);
         when(freeIpaInstanceHealthDetailsService.checkFreeIpaHealth(any(), any())).thenReturn(response);
-        Assertions.assertEquals(AttemptState.CONTINUE, oneFreeIpaReachableAttemptUnderTest.process().getState());
+        assertEquals(AttemptState.CONTINUE, oneFreeIpaReachableAttemptUnderTest.process().getState());
         response.setResult(Boolean.FALSE);
-        Assertions.assertEquals(AttemptState.CONTINUE, oneFreeIpaReachableAttemptUnderTest.process().getState());
+        assertEquals(AttemptState.CONTINUE, oneFreeIpaReachableAttemptUnderTest.process().getState());
         response.setResult(Boolean.TRUE);
-        Assertions.assertEquals(AttemptState.CONTINUE, oneFreeIpaReachableAttemptUnderTest.process().getState());
-        Assertions.assertEquals(AttemptState.FINISH, oneFreeIpaReachableAttemptUnderTest.process().getState());
+        assertEquals(AttemptState.CONTINUE, oneFreeIpaReachableAttemptUnderTest.process().getState());
+        assertEquals(AttemptState.FINISH, oneFreeIpaReachableAttemptUnderTest.process().getState());
         verify(freeIpaInstanceHealthDetailsService, times(7)).checkFreeIpaHealth(any(), any());
     }
 
@@ -91,7 +91,7 @@ class OneFreeIpaReachableAttemptTest {
     public void testAttemptFailed() throws Exception {
         response.setResult(Boolean.FALSE);
         when(freeIpaInstanceHealthDetailsService.checkFreeIpaHealth(any(), any())).thenReturn(response);
-        Assertions.assertEquals(oneFreeIpaReachableAttemptUnderTest.process().getState(), AttemptState.CONTINUE);
+        assertEquals(oneFreeIpaReachableAttemptUnderTest.process().getState(), AttemptState.CONTINUE);
         verify(freeIpaInstanceHealthDetailsService, times(2)).checkFreeIpaHealth(any(), any());
     }
 
@@ -99,19 +99,19 @@ class OneFreeIpaReachableAttemptTest {
     public void testAttemptFailedWithException() throws Exception {
         response.setResult(Boolean.FALSE);
         when(freeIpaInstanceHealthDetailsService.checkFreeIpaHealth(any(), any())).thenThrow(FreeIpaClientException.class);
-        Assertions.assertEquals(oneFreeIpaReachableAttemptUnderTest.process().getState(), AttemptState.CONTINUE);
+        assertEquals(oneFreeIpaReachableAttemptUnderTest.process().getState(), AttemptState.CONTINUE);
         verify(freeIpaInstanceHealthDetailsService, times(2)).checkFreeIpaHealth(any(), any());
     }
 
     @Test
     public void tesStackPollGroupEmpty() throws Exception {
         InMemoryStateStore.deleteStack(ID);
-        Assertions.assertEquals(oneFreeIpaReachableAttemptUnderTest.process().getState(), AttemptState.BREAK);
+        assertEquals(oneFreeIpaReachableAttemptUnderTest.process().getState(), AttemptState.BREAK);
     }
 
     @Test
     public void tesStackPollGroupCancelled() throws Exception {
         InMemoryStateStore.putStack(ID, PollGroup.CANCELLED);
-        Assertions.assertEquals(oneFreeIpaReachableAttemptUnderTest.process().getState(), AttemptState.BREAK);
+        assertEquals(oneFreeIpaReachableAttemptUnderTest.process().getState(), AttemptState.BREAK);
     }
 }

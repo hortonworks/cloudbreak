@@ -10,6 +10,7 @@ import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInA
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
@@ -39,7 +40,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.io.IOUtils;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -310,13 +310,13 @@ class SaltStateServiceTest {
     void testJobIsRunningReturnsExceptionOnNullResult() throws CloudbreakOrchestratorFailedException {
         RunningJobsResponse runningJobsResponse = new RunningJobsResponse();
         when(saltConnector.run(eq("jobs.active"), any(), eq(RunningJobsResponse.class))).thenReturn(runningJobsResponse);
-        Assertions.assertThrows(CloudbreakOrchestratorFailedException.class, () -> underTest.jobIsRunning(saltConnector, "1"));
+        assertThrows(CloudbreakOrchestratorFailedException.class, () -> underTest.jobIsRunning(saltConnector, "1"));
     }
 
     @Test
     void testJobIsRunningReturnsExceptionOnNullResponse() throws CloudbreakOrchestratorFailedException {
         when(saltConnector.run(eq("jobs.active"), any(), eq(RunningJobsResponse.class))).thenReturn(null);
-        Assertions.assertThrows(CloudbreakOrchestratorFailedException.class, () -> underTest.jobIsRunning(saltConnector, "1"));
+        assertThrows(CloudbreakOrchestratorFailedException.class, () -> underTest.jobIsRunning(saltConnector, "1"));
     }
 
     @Test
@@ -609,7 +609,7 @@ class SaltStateServiceTest {
         RuntimeException exception = new RuntimeException();
         when(saltConnector.run(Glob.ALL, "cmd.run", LOCAL, CommandExecutionResponse.class, "command")).thenThrow(exception);
         // WHEN
-        Retry.ActionFailedException actionFailedException = Assertions.assertThrows(Retry.ActionFailedException.class,
+        Retry.ActionFailedException actionFailedException = assertThrows(Retry.ActionFailedException.class,
                 () -> underTest.runCommand(spy(RetryService.class), saltConnector, "command"));
         assertEquals("Salt run command failed", actionFailedException.getMessage());
     }
@@ -619,7 +619,7 @@ class SaltStateServiceTest {
         String jobId = "2";
         JidInfoResponse emptyJidInfo = new JidInfoResponse();
         when(saltConnector.run(eq("jobs.lookup_jid"), any(), any(), eq("jid"), any(), any(), any())).thenReturn(emptyJidInfo);
-        SaltEmptyResponseException saltEmptyResponseException = Assertions.assertThrows(
+        SaltEmptyResponseException saltEmptyResponseException = assertThrows(
                 SaltEmptyResponseException.class, () -> underTest.jidInfo(saltConnector, jobId, StateType.HIGH));
         assertTrue(saltEmptyResponseException.getMessage().contains("jobs.lookup_jid returns an empty response"));
     }
@@ -629,7 +629,7 @@ class SaltStateServiceTest {
         String jobId = "2";
         JidInfoResponse emptyJidInfo = new JidInfoResponse();
         when(saltConnector.run(eq("jobs.lookup_jid"), any(), any(), eq("jid"), any())).thenReturn(emptyJidInfo);
-        SaltEmptyResponseException saltEmptyResponseException = Assertions.assertThrows(
+        SaltEmptyResponseException saltEmptyResponseException = assertThrows(
                 SaltEmptyResponseException.class, () -> underTest.jidInfo(saltConnector, jobId, StateType.SIMPLE));
         assertTrue(saltEmptyResponseException.getMessage().contains("jobs.lookup_jid returns an empty response"));
     }

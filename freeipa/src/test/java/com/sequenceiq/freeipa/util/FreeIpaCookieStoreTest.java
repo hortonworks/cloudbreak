@@ -9,13 +9,10 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.http.cookie.Cookie;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-@ExtendWith(MockitoExtension.class)
-public class FreeIpaCookieStoreTest {
+class FreeIpaCookieStoreTest {
 
     private FreeIpaCookieStore underTest;
 
@@ -27,7 +24,7 @@ public class FreeIpaCookieStoreTest {
 
     private Cookie expiredCookie;
 
-    @Before
+    @BeforeEach
     public void before() throws Exception {
         underTest = new FreeIpaCookieStore();
         cookie1 = createCookie("name", "example.com", "/path", new SimpleDateFormat("yyyy-mm-dd").parse("2050-01-01"));
@@ -37,7 +34,7 @@ public class FreeIpaCookieStoreTest {
     }
 
     @Test
-    public void testAddCookie() {
+    void testAddCookie() {
         assertEquals(underTest.getCookies().size(), 0);
         underTest.addCookie(cookie1);
         assertEquals(underTest.getCookies().size(), 1);
@@ -48,7 +45,7 @@ public class FreeIpaCookieStoreTest {
     }
 
     @Test
-    public void testGetCookiesOrder() {
+    void testGetCookiesOrder() {
         underTest.addCookie(cookie1);
         underTest.addCookie(cookie2);
         assertEquals(underTest.getCookies(), List.of(cookie2, cookie1));
@@ -57,7 +54,7 @@ public class FreeIpaCookieStoreTest {
     }
 
     @Test
-    public void testClear() {
+    void testClear() {
         underTest.addCookie(cookie1);
         assertFalse(underTest.getCookies().isEmpty());
         underTest.clear();
@@ -65,7 +62,7 @@ public class FreeIpaCookieStoreTest {
     }
 
     @Test
-    public void testClearExpired() throws Exception {
+    void testClearExpired() throws Exception {
         underTest.addCookie(cookie1);
         underTest.addCookie(cookie2);
         underTest.addCookie(expiredCookie);

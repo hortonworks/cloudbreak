@@ -3,6 +3,7 @@ package com.sequenceiq.environment.exception.mapper;
 import static java.util.Collections.emptySet;
 import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.when;
 
 import java.util.List;
 
@@ -21,7 +22,6 @@ import org.glassfish.jersey.internal.inject.ServiceHolderImpl;
 import org.glassfish.jersey.spi.ExceptionMappers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -43,7 +43,7 @@ public class SearchCauseExceptionMapperTest {
     @BeforeEach
     public void setup() {
         List<ServiceHolder<ExceptionMapper>> ret = exceptionMappers.stream().map(em -> new ServiceHolderImpl<>(em, emptySet())).collect(toList());
-        Mockito.when(injectionManager.getAllServiceHolders(ExceptionMapper.class)).thenReturn(ret);
+        when(injectionManager.getAllServiceHolders(ExceptionMapper.class)).thenReturn(ret);
         Provider<ExceptionMappers> mappers = () -> new ExceptionMapperFactory(injectionManager);
 
         Providers providers = new JaxrsProviders(null, null, mappers);

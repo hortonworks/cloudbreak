@@ -2,6 +2,7 @@ package com.sequenceiq.environment.environment.dto;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
@@ -11,7 +12,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -123,7 +123,7 @@ class EnvironmentTagsDtoConverterTest {
         UnsupportedOperationException unsupportedOperationException = new UnsupportedOperationException("This operation is not supported");
         when(costTagging.prepareDefaultTags(any(CDPTagGenerationRequest.class))).thenThrow(unsupportedOperationException);
 
-        BadRequestException badRequestException = Assertions.assertThrows(BadRequestException.class,
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> underTest.getTags(creationDto));
 
         assertThat(badRequestException).hasMessage("Failed to convert dynamic userDefinedTags. This operation is not supported");
@@ -153,7 +153,7 @@ class EnvironmentTagsDtoConverterTest {
         when(crnUserDetailsService.getUmsUser(CREATOR)).thenReturn(new CrnUser(null, CREATOR, USER_NAME, null, ACCOUNT_ID, null));
         when(costTagging.prepareDefaultTags(any(CDPTagGenerationRequest.class))).thenThrow(new AccountTagValidationFailed("Error validating tags"));
 
-        BadRequestException badRequestException = Assertions.assertThrows(BadRequestException.class,
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> underTest.getTags(creationDto));
 
         assertThat(badRequestException).hasMessage("Error validating tags");

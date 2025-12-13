@@ -33,6 +33,7 @@ dependencies {
   implementation     group: 'org.bouncycastle',                    name: 'bcpkix-fips',                    version: bouncycastlePkixFipsVersion
   implementation ("io.grpc:grpc-all:$grpcVersion") {
     exclude group: 'org.mockito'
+    exclude group: 'junit', module: 'junit'
   }
 
   testImplementation group: 'org.mockito', name: 'mockito-core', version: mockitoVersion

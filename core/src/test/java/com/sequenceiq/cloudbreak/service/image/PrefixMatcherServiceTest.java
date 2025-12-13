@@ -1,25 +1,25 @@
 package com.sequenceiq.cloudbreak.service.image;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.util.Collection;
 
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakVersion;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
-@RunWith(MockitoJUnitRunner.class)
-public class PrefixMatcherServiceTest {
+@ExtendWith(MockitoExtension.class)
+class PrefixMatcherServiceTest {
 
     private static final String CATALOG_FILE = "com/sequenceiq/cloudbreak/service/image/cb-image-catalog-v2.json";
 
@@ -35,14 +35,14 @@ public class PrefixMatcherServiceTest {
     @Spy
     private ImageCatalogVersionFilter versionFilter;
 
-    @BeforeClass
-    public static void beforeClass() throws IOException {
+    @BeforeAll
+    static void beforeClass() throws IOException {
         versionsFromV2Catalog = getVersions(CATALOG_FILE);
         versionsFromV3Catalog = getVersions(RC_CATALOG_FILE);
     }
 
     @Test
-    public void testPrefixMatchForCBVersionWithUnreleasedVersion() {
+    void testPrefixMatchForCBVersionWithUnreleasedVersion() {
         PrefixMatchImages actual = underTest.prefixMatchForCBVersion("2.1.0-dev.200", versionsFromV2Catalog);
 
         assertTrue(actual.getvMImageUUIDs().contains("f6e778fc-7f17-4535-9021-515351df3691"));
@@ -56,7 +56,7 @@ public class PrefixMatcherServiceTest {
     }
 
     @Test
-    public void testPrefixMatchForCBVersionWithReleasedVersion() {
+    void testPrefixMatchForCBVersionWithReleasedVersion() {
         PrefixMatchImages actual = underTest.prefixMatchForCBVersion("2.1.0", versionsFromV2Catalog);
 
         assertNotNull(actual);
@@ -68,7 +68,7 @@ public class PrefixMatcherServiceTest {
     }
 
     @Test
-    public void testPrefixMatchForCBVersionWithRcVersion() {
+    void testPrefixMatchForCBVersionWithRcVersion() {
         PrefixMatchImages actual = underTest.prefixMatchForCBVersion("2.7.0-rc.2", versionsFromV3Catalog);
 
         assertTrue(actual.getvMImageUUIDs().contains("d4d57241-0be9-4ebf-9e00-5baea7bbed49"));

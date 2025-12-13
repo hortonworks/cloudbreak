@@ -1,16 +1,18 @@
 package com.sequenceiq.freeipa.kerberosmgmt;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
@@ -52,23 +54,23 @@ public class KerberosMgmtVaultComponentV1Test {
     @Test
     public void testCleanupSecretsForCluster() throws Exception {
         List<String> emptyListing = new ArrayList<>();
-        Mockito.when(secretService.listEntriesWithoutAppPath(anyString())).thenReturn(emptyListing);
+        when(secretService.listEntriesWithoutAppPath(anyString())).thenReturn(emptyListing);
         underTest.cleanupSecrets(ENVIRONMENT_ID, CLUSTER_ID, ACCOUNT);
-        Mockito.verify(secretService).deleteByPathPostfix("account1/HostKeytab/serviceprincipal/12345-6789/54321-9876/");
-        Mockito.verify(secretService).deleteByPathPostfix("account1/HostKeytab/keytab/12345-6789/54321-9876/");
-        Mockito.verify(secretService).deleteByPathPostfix("account1/ServiceKeytab/serviceprincipal/12345-6789/54321-9876/");
-        Mockito.verify(secretService).deleteByPathPostfix("account1/ServiceKeytab/keytab/12345-6789/54321-9876/");
+        verify(secretService).deleteByPathPostfix("account1/HostKeytab/serviceprincipal/12345-6789/54321-9876/");
+        verify(secretService).deleteByPathPostfix("account1/HostKeytab/keytab/12345-6789/54321-9876/");
+        verify(secretService).deleteByPathPostfix("account1/ServiceKeytab/serviceprincipal/12345-6789/54321-9876/");
+        verify(secretService).deleteByPathPostfix("account1/ServiceKeytab/keytab/12345-6789/54321-9876/");
     }
 
     @Test
     public void testCleanupSecretsForWholeEnvironment() throws Exception {
         List<String> emptyListing = new ArrayList<>();
-        Mockito.when(secretService.listEntriesWithoutAppPath(anyString())).thenReturn(emptyListing);
+        when(secretService.listEntriesWithoutAppPath(anyString())).thenReturn(emptyListing);
         underTest.cleanupSecrets(ENVIRONMENT_ID, null, ACCOUNT);
-        Mockito.verify(secretService).deleteByPathPostfix("account1/HostKeytab/serviceprincipal/12345-6789/");
-        Mockito.verify(secretService).deleteByPathPostfix("account1/HostKeytab/keytab/12345-6789/");
-        Mockito.verify(secretService).deleteByPathPostfix("account1/ServiceKeytab/serviceprincipal/12345-6789/");
-        Mockito.verify(secretService).deleteByPathPostfix("account1/ServiceKeytab/keytab/12345-6789/");
+        verify(secretService).deleteByPathPostfix("account1/HostKeytab/serviceprincipal/12345-6789/");
+        verify(secretService).deleteByPathPostfix("account1/HostKeytab/keytab/12345-6789/");
+        verify(secretService).deleteByPathPostfix("account1/ServiceKeytab/serviceprincipal/12345-6789/");
+        verify(secretService).deleteByPathPostfix("account1/ServiceKeytab/keytab/12345-6789/");
     }
 
     @Test
@@ -87,17 +89,17 @@ public class KerberosMgmtVaultComponentV1Test {
         subdir2Listing.add(file1);
         subdir2Listing.add(file2);
         List<String> fileListing = new ArrayList<>();
-        Mockito.when(secretService.listEntriesWithoutAppPath(dir1)).thenReturn(dir1Listing);
-        Mockito.when(secretService.listEntriesWithoutAppPath(dir1 + subdir1)).thenReturn(subdir1Listing);
-        Mockito.when(secretService.listEntriesWithoutAppPath(dir1 + subdir2)).thenReturn(subdir2Listing);
-        Mockito.when(secretService.listEntriesWithoutAppPath(dir1 + subdir1 + file1)).thenReturn(fileListing);
-        Mockito.when(secretService.listEntriesWithoutAppPath(dir1 + subdir2 + file1)).thenReturn(fileListing);
-        Mockito.when(secretService.listEntriesWithoutAppPath(dir1 + subdir2 + file2)).thenReturn(fileListing);
+        when(secretService.listEntriesWithoutAppPath(dir1)).thenReturn(dir1Listing);
+        when(secretService.listEntriesWithoutAppPath(dir1 + subdir1)).thenReturn(subdir1Listing);
+        when(secretService.listEntriesWithoutAppPath(dir1 + subdir2)).thenReturn(subdir2Listing);
+        when(secretService.listEntriesWithoutAppPath(dir1 + subdir1 + file1)).thenReturn(fileListing);
+        when(secretService.listEntriesWithoutAppPath(dir1 + subdir2 + file1)).thenReturn(fileListing);
+        when(secretService.listEntriesWithoutAppPath(dir1 + subdir2 + file2)).thenReturn(fileListing);
         underTest.recursivelyCleanupVault(dir1);
-        Mockito.verify(secretService).deleteByPathPostfix(dir1 + subdir1 + file1);
-        Mockito.verify(secretService).deleteByPathPostfix(dir1 + subdir2 + file1);
-        Mockito.verify(secretService).deleteByPathPostfix(dir1 + subdir2 + file2);
-        Mockito.verifyNoMoreInteractions(secretService);
+        verify(secretService).deleteByPathPostfix(dir1 + subdir1 + file1);
+        verify(secretService).deleteByPathPostfix(dir1 + subdir2 + file1);
+        verify(secretService).deleteByPathPostfix(dir1 + subdir2 + file2);
+        verifyNoMoreInteractions(secretService);
     }
 
     @Test
@@ -111,11 +113,11 @@ public class KerberosMgmtVaultComponentV1Test {
         serviceKeytabRequest.setClusterCrn(CLUSTER_ID);
         serviceKeytabRequest.setServerHostName(HOST);
         serviceKeytabRequest.setServiceName(SERVICE);
-        Mockito.when(secretService.put(anyString(), anyString())).thenReturn(SECRET);
-        Mockito.when(stringToSecretResponseConverter.convert(anyString())).thenReturn(expectedSecretResponse);
-        Assertions.assertEquals(expectedSecretResponse, underTest.getSecretResponseForPrincipal(serviceKeytabRequest, ACCOUNT, PRINCIPAL));
-        Mockito.verify(secretService).put(expectedPath, PRINCIPAL);
-        Mockito.verify(stringToSecretResponseConverter).convert(SECRET);
+        when(secretService.put(anyString(), anyString())).thenReturn(SECRET);
+        when(stringToSecretResponseConverter.convert(anyString())).thenReturn(expectedSecretResponse);
+        assertEquals(expectedSecretResponse, underTest.getSecretResponseForPrincipal(serviceKeytabRequest, ACCOUNT, PRINCIPAL));
+        verify(secretService).put(expectedPath, PRINCIPAL);
+        verify(stringToSecretResponseConverter).convert(SECRET);
     }
 
     @Test
@@ -129,11 +131,11 @@ public class KerberosMgmtVaultComponentV1Test {
         serviceKeytabRequest.setClusterCrn(CLUSTER_ID);
         serviceKeytabRequest.setServerHostName(HOST);
         serviceKeytabRequest.setServiceName(SERVICE);
-        Mockito.when(secretService.put(anyString(), anyString())).thenReturn(SECRET);
-        Mockito.when(stringToSecretResponseConverter.convert(anyString())).thenReturn(expectedSecretResponse);
-        Assertions.assertEquals(expectedSecretResponse, underTest.getSecretResponseForKeytab(serviceKeytabRequest, ACCOUNT, KEYTAB));
-        Mockito.verify(secretService).put(expectedPath, KEYTAB);
-        Mockito.verify(stringToSecretResponseConverter).convert(SECRET);
+        when(secretService.put(anyString(), anyString())).thenReturn(SECRET);
+        when(stringToSecretResponseConverter.convert(anyString())).thenReturn(expectedSecretResponse);
+        assertEquals(expectedSecretResponse, underTest.getSecretResponseForKeytab(serviceKeytabRequest, ACCOUNT, KEYTAB));
+        verify(secretService).put(expectedPath, KEYTAB);
+        verify(stringToSecretResponseConverter).convert(SECRET);
     }
 
     @Test
@@ -146,11 +148,11 @@ public class KerberosMgmtVaultComponentV1Test {
         hostKeytabRequest.setEnvironmentCrn(ENVIRONMENT_ID);
         hostKeytabRequest.setClusterCrn(CLUSTER_ID);
         hostKeytabRequest.setServerHostName(HOST);
-        Mockito.when(secretService.put(anyString(), anyString())).thenReturn(SECRET);
-        Mockito.when(stringToSecretResponseConverter.convert(anyString())).thenReturn(expectedSecretResponse);
-        Assertions.assertEquals(expectedSecretResponse, underTest.getSecretResponseForPrincipal(hostKeytabRequest, ACCOUNT, PRINCIPAL));
-        Mockito.verify(secretService).put(expectedPath, PRINCIPAL);
-        Mockito.verify(stringToSecretResponseConverter).convert(SECRET);
+        when(secretService.put(anyString(), anyString())).thenReturn(SECRET);
+        when(stringToSecretResponseConverter.convert(anyString())).thenReturn(expectedSecretResponse);
+        assertEquals(expectedSecretResponse, underTest.getSecretResponseForPrincipal(hostKeytabRequest, ACCOUNT, PRINCIPAL));
+        verify(secretService).put(expectedPath, PRINCIPAL);
+        verify(stringToSecretResponseConverter).convert(SECRET);
     }
 
     @Test
@@ -163,11 +165,11 @@ public class KerberosMgmtVaultComponentV1Test {
         hostKeytabRequest.setEnvironmentCrn(ENVIRONMENT_ID);
         hostKeytabRequest.setClusterCrn(CLUSTER_ID);
         hostKeytabRequest.setServerHostName(HOST);
-        Mockito.when(secretService.put(anyString(), anyString())).thenReturn(SECRET);
-        Mockito.when(stringToSecretResponseConverter.convert(anyString())).thenReturn(expectedSecretResponse);
-        Assertions.assertEquals(expectedSecretResponse, underTest.getSecretResponseForKeytab(hostKeytabRequest, ACCOUNT, KEYTAB));
-        Mockito.verify(secretService).put(expectedPath, KEYTAB);
-        Mockito.verify(stringToSecretResponseConverter).convert(SECRET);
+        when(secretService.put(anyString(), anyString())).thenReturn(SECRET);
+        when(stringToSecretResponseConverter.convert(anyString())).thenReturn(expectedSecretResponse);
+        assertEquals(expectedSecretResponse, underTest.getSecretResponseForKeytab(hostKeytabRequest, ACCOUNT, KEYTAB));
+        verify(secretService).put(expectedPath, KEYTAB);
+        verify(stringToSecretResponseConverter).convert(SECRET);
     }
 
 }

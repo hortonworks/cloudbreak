@@ -7,11 +7,11 @@ import static org.mockito.Mockito.when;
 import java.util.Collections;
 import java.util.List;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
@@ -19,8 +19,8 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
-@RunWith(MockitoJUnitRunner.class)
-public class DataLakeStatusCheckerServiceTest {
+@ExtendWith(MockitoExtension.class)
+class DataLakeStatusCheckerServiceTest {
 
     private static final String ENVIRONMENT_CRN = "evn-crn";
 
@@ -31,7 +31,7 @@ public class DataLakeStatusCheckerServiceTest {
     private SdxClientService sdxClientService;
 
     @Test
-    public void testValidateRunningStateShouldNotThrowExceptionWhenTheSdxIsNotAvailable() {
+    void testValidateRunningStateShouldNotThrowExceptionWhenTheSdxIsNotAvailable() {
         Stack stack = createStack();
         when(sdxClientService.getByEnvironmentCrn(ENVIRONMENT_CRN)).thenReturn(Collections.emptyList());
 
@@ -39,7 +39,7 @@ public class DataLakeStatusCheckerServiceTest {
     }
 
     @Test
-    public void testValidateRunningStateShouldNotThrowExceptionWhenTheSdxIsInRunningState() {
+    void testValidateRunningStateShouldNotThrowExceptionWhenTheSdxIsInRunningState() {
         Stack stack = createStack();
         List<SdxClusterResponse> sdxClusterResponses = createSdxResponse(SdxClusterStatusResponse.RUNNING, "Running");
         when(sdxClientService.getByEnvironmentCrn(ENVIRONMENT_CRN)).thenReturn(sdxClusterResponses);
@@ -47,17 +47,17 @@ public class DataLakeStatusCheckerServiceTest {
         underTest.validateRunningState(stack);
     }
 
-    @Test(expected = BadRequestException.class)
-    public void testValidateRunningStateShouldThrowExceptionWhenTheSdxIsInUpgradeState() {
+    @Test
+    void testValidateRunningStateShouldThrowExceptionWhenTheSdxIsInUpgradeState() {
         Stack stack = createStack();
         List<SdxClusterResponse> sdxClusterResponses = createSdxResponse(SdxClusterStatusResponse.DATALAKE_UPGRADE_IN_PROGRESS, "Upgrading");
         when(sdxClientService.getByEnvironmentCrn(ENVIRONMENT_CRN)).thenReturn(sdxClusterResponses);
 
-        underTest.validateRunningState(stack);
+        assertThrows(BadRequestException.class, () -> underTest.validateRunningState(stack));
     }
 
     @Test
-    public void testValidateAvailableStateShouldNotThrowExceptionWhenInBackup() {
+    void testValidateAvailableStateShouldNotThrowExceptionWhenInBackup() {
         Stack stack = createStack();
         List<SdxClusterResponse> sdxClusterResponses = createSdxResponse(SdxClusterStatusResponse.DATALAKE_BACKUP_INPROGRESS, "Backup in Progress");
 
@@ -67,7 +67,7 @@ public class DataLakeStatusCheckerServiceTest {
     }
 
     @Test
-    public void testValidateAvailableStateShouldNotThrowExceptionWhenRollingUpgradeInProgress() {
+    void testValidateAvailableStateShouldNotThrowExceptionWhenRollingUpgradeInProgress() {
         Stack stack = createStack();
         List<SdxClusterResponse> sdxClusterResponses = createSdxResponse(SdxClusterStatusResponse.DATALAKE_ROLLING_UPGRADE_IN_PROGRESS,
                 "Rolling upgrade in Progress");
@@ -78,7 +78,7 @@ public class DataLakeStatusCheckerServiceTest {
     }
 
     @Test
-    public void testValidateAvailableStateShouldThrowExceptionWhenSdxIsNotAvailable() {
+    void testValidateAvailableStateShouldThrowExceptionWhenSdxIsNotAvailable() {
         Stack stack = createStack();
         List<SdxClusterResponse> sdxClusterResponses = createSdxResponse(SdxClusterStatusResponse.DATALAKE_VERTICAL_SCALE_ON_DATALAKE_IN_PROGRESS,
                 "Vertical Scale in Progress");
@@ -91,7 +91,7 @@ public class DataLakeStatusCheckerServiceTest {
     }
 
     @Test
-    public void testValidateAvailableStateShouldThrowExceptionWhenSdxIsNotAvailableAndStatusDetailIsNull() {
+    void testValidateAvailableStateShouldThrowExceptionWhenSdxIsNotAvailableAndStatusDetailIsNull() {
         Stack stack = createStack();
         List<SdxClusterResponse> sdxClusterResponses = createSdxResponse(SdxClusterStatusResponse.DATALAKE_VERTICAL_SCALE_ON_DATALAKE_IN_PROGRESS,
                 null);

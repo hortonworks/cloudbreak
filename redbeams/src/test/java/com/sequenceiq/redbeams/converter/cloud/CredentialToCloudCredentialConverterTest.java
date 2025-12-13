@@ -1,30 +1,28 @@
 package com.sequenceiq.redbeams.converter.cloud;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.redbeams.dto.Credential;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-
-public class CredentialToCloudCredentialConverterTest {
+class CredentialToCloudCredentialConverterTest {
 
     private Credential credential;
 
     private CredentialToCloudCredentialConverter underTest;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         underTest = new CredentialToCloudCredentialConverter();
     }
 
     @Test
-    public void testConvert() {
+    void testConvert() {
         credential = new Credential("userCrn", "userId", "{ \"foo\": \"bar\" }", "account");
 
         CloudCredential cloudCredential = underTest.convert(credential);
@@ -36,7 +34,7 @@ public class CredentialToCloudCredentialConverterTest {
     }
 
     @Test
-    public void testConvertNoAttributes() {
+    void testConvertNoAttributes() {
         credential = new Credential("userCrn", "userId", null, "account");
 
         CloudCredential cloudCredential = underTest.convert(credential);
@@ -46,9 +44,8 @@ public class CredentialToCloudCredentialConverterTest {
         assertTrue(cloudCredential.getParameters().isEmpty());
     }
 
-    @SuppressFBWarnings(value = "NP", justification = "Converter may be passed a null")
     @Test
-    public void testConvertNull() {
+    void testConvertNull() {
         assertNull(underTest.convert(null));
     }
 

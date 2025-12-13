@@ -11,12 +11,12 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatcher;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.eventbus.Event;
@@ -30,8 +30,8 @@ import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 
-@RunWith(MockitoJUnitRunner.class)
-public class UnhealthyInstancesDetectionHandlerTest {
+@ExtendWith(MockitoExtension.class)
+class UnhealthyInstancesDetectionHandlerTest {
 
     @Mock
     private StackDtoService stackDtoService;
@@ -49,7 +49,7 @@ public class UnhealthyInstancesDetectionHandlerTest {
     private UnhealthyInstancesDetectionHandler unhealthyInstancesDetectionHandler;
 
     @Test
-    public void shouldNotInvokeFinalizerIfNoCandidateUnhealthyInstancesWereSelected() {
+    void shouldNotInvokeFinalizerIfNoCandidateUnhealthyInstancesWereSelected() {
 
         long stackId = 1L;
         UnhealthyInstancesDetectionRequest unhealthyInstancesDetectionRequest = new UnhealthyInstancesDetectionRequest(stackId);
@@ -70,7 +70,7 @@ public class UnhealthyInstancesDetectionHandlerTest {
     }
 
     @Test
-    public void shouldCreateResponseWithExactInstances() {
+    void shouldCreateResponseWithExactInstances() {
         long stackId = 1L;
         UnhealthyInstancesDetectionRequest unhealthyInstancesDetectionRequest = new UnhealthyInstancesDetectionRequest(stackId);
         Event<UnhealthyInstancesDetectionRequest> event = mock(Event.class);

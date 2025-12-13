@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -17,7 +18,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.repository.CrudRepository;
 
@@ -101,7 +101,7 @@ public class VaultRotationExecutorTest {
         VaultRotationContext rotationContext = VaultRotationContext.builder()
                 .withNewSecretMap(Map.of(new Sample(), Map.of(SecretMarker.DP_CLUSTER_MANAGER_USER, "new")))
                 .build();
-        try (MockedStatic<StaticApplicationContext> appContext = Mockito.mockStatic(StaticApplicationContext.class)) {
+        try (MockedStatic<StaticApplicationContext> appContext = mockStatic(StaticApplicationContext.class)) {
             SampleRepo sampleRepo = mock(SampleRepo.class);
             when(sampleRepo.getEntityClass()).thenReturn(Sample.class);
             appContext.when(() -> StaticApplicationContext.getAllMatchingBeans(any())).thenReturn(List.of(sampleRepo));
@@ -119,7 +119,7 @@ public class VaultRotationExecutorTest {
         VaultRotationContext rotationContext = VaultRotationContext.builder()
                 .withNewSecretMap(Map.of(new Sample(), Map.of(SecretMarker.DP_CLUSTER_MANAGER_USER, "new")))
                 .build();
-        try (MockedStatic<StaticApplicationContext> appContext = Mockito.mockStatic(StaticApplicationContext.class)) {
+        try (MockedStatic<StaticApplicationContext> appContext = mockStatic(StaticApplicationContext.class)) {
             SampleRepo sampleRepo = mock(SampleRepo.class);
             when(sampleRepo.getEntityClass()).thenReturn(Sample.class);
             appContext.when(() -> StaticApplicationContext.getAllMatchingBeans(any())).thenReturn(List.of(sampleRepo));
@@ -137,7 +137,7 @@ public class VaultRotationExecutorTest {
         VaultRotationContext rotationContext = VaultRotationContext.builder()
                 .withNewSecretMap(Map.of(new Sample(), Map.of(SecretMarker.DP_CLUSTER_MANAGER_USER, "new")))
                 .build();
-        try (MockedStatic<StaticApplicationContext> appContext = Mockito.mockStatic(StaticApplicationContext.class)) {
+        try (MockedStatic<StaticApplicationContext> appContext = mockStatic(StaticApplicationContext.class)) {
             SampleRepo sampleRepo = mock(SampleRepo.class);
             when(sampleRepo.getEntityClass()).thenReturn(Sample.class);
             appContext.when(() -> StaticApplicationContext.getAllMatchingBeans(any())).thenReturn(List.of(sampleRepo));

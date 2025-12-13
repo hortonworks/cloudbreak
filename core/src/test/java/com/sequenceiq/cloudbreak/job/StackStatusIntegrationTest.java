@@ -8,6 +8,7 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -27,7 +28,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -247,7 +247,7 @@ class StackStatusIntegrationTest {
     }
 
     private void setUpClusterApi() {
-        ClusterApi clusterApi = Mockito.mock(ClusterApi.class);
+        ClusterApi clusterApi = mock(ClusterApi.class);
         when(clusterApi.clusterStatusService()).thenReturn(clusterStatusService);
 
         when(clusterApiConnectors.getConnector(stackDto)).thenReturn(clusterApi);

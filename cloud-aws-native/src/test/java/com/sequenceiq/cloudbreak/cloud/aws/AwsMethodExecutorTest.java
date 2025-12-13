@@ -1,6 +1,10 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
-import org.junit.jupiter.api.Assertions;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -21,7 +25,7 @@ public class AwsMethodExecutorTest {
     public void testExecuteWhenNoException() {
         boolean actual = underTest.execute(() -> true, false);
 
-        Assertions.assertTrue(actual);
+        assertTrue(actual);
     }
 
     @Test
@@ -34,12 +38,12 @@ public class AwsMethodExecutorTest {
             throw amazonEC2Exception;
         }, false);
 
-        Assertions.assertFalse(actual);
+        assertFalse(actual);
     }
 
     @Test
     public void testExecuteWhenHasAmazonEc2ExceptionWithoutNotFoundErrorCodes() {
-        Ec2Exception actual = Assertions.assertThrows(Ec2Exception.class, () -> underTest.execute(() -> {
+        Ec2Exception actual = assertThrows(Ec2Exception.class, () -> underTest.execute(() -> {
             Ec2Exception amazonEC2Exception = (Ec2Exception) Ec2Exception.builder()
                     .message("")
                     .awsErrorDetails(AwsErrorDetails.builder().errorCode("Resource.AnyError").build())
@@ -47,6 +51,6 @@ public class AwsMethodExecutorTest {
             throw amazonEC2Exception;
         }, false));
 
-        Assertions.assertEquals(actual.awsErrorDetails().errorCode(), "Resource.AnyError");
+        assertEquals(actual.awsErrorDetails().errorCode(), "Resource.AnyError");
     }
 }

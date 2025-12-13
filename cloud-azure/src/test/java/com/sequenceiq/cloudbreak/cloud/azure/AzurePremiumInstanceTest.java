@@ -1,8 +1,9 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.util.Arrays;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -176,6 +177,6 @@ public class AzurePremiumInstanceTest {
     @ParameterizedTest(name = "{index}: instanceType is premium({0})={1}")
     @MethodSource("data")
     public void testPremiumInstanceWhichDependsOnThePremiumVariable(String instanceType, boolean premiumInstance) {
-        Assertions.assertEquals(premiumInstance, underTest.validPremiumConfiguration(instanceType));
+        assertEquals(premiumInstance, underTest.validPremiumConfiguration(instanceType));
     }
 }

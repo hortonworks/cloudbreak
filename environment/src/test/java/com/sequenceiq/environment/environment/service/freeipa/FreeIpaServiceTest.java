@@ -2,6 +2,7 @@ package com.sequenceiq.environment.environment.service.freeipa;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
@@ -18,7 +19,6 @@ import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -141,7 +141,7 @@ class FreeIpaServiceTest {
     void internalDescribeFreeipaNotFoundTest() {
         ExceptionResponse exceptionResponse = new ExceptionResponse("Freeipa not found");
         final Response response = mock(Response.class);
-        Mockito.when(response.readEntity(Mockito.any(Class.class))).thenReturn(exceptionResponse);
+        when(response.readEntity(Mockito.any(Class.class))).thenReturn(exceptionResponse);
         NotFoundException notFoundException = mock(NotFoundException.class);
         when(notFoundException.getResponse()).thenReturn(response);
         when(freeIpaV1Endpoint.describeInternal(eq(ENVCRN), eq("1111"))).thenThrow(notFoundException);
@@ -153,7 +153,7 @@ class FreeIpaServiceTest {
     void internalDescribeApiNotFoundTest() {
         when(freeIpaV1Endpoint.describeInternal(eq(ENVCRN), eq("1111")))
                 .thenThrow(new jakarta.ws.rs.NotFoundException());
-        FreeIpaOperationFailedException freeIpaOperationFailedException = Assertions.assertThrows(FreeIpaOperationFailedException.class,
+        FreeIpaOperationFailedException freeIpaOperationFailedException = assertThrows(FreeIpaOperationFailedException.class,
                 () -> underTest.internalDescribe(ENVCRN, "1111"));
         String errorMessage = freeIpaOperationFailedException.getMessage();
         assertThat(errorMessage).isEqualTo("Freeipa internal describe response is NOT FOUND, but response reason is not the expected type");

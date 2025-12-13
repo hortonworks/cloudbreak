@@ -1,23 +1,23 @@
 package com.sequenceiq.redbeams.api.endpoint.v4.stacks.azure;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 
-public class AzureDBStackV4ParametersTest {
+class AzureDBStackV4ParametersTest {
 
     private AzureDBStackV4Parameters underTest;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         underTest = new AzureDBStackV4Parameters();
     }
 
     @Test
-    public void testGetCloudPlatform() {
+    void testGetCloudPlatform() {
         assertEquals(CloudPlatform.AZURE, underTest.getCloudPlatform());
     }
 

@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.structuredevent.service.telemetry.converter;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
@@ -9,7 +10,6 @@ import static org.mockito.Mockito.doReturn;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -64,8 +64,8 @@ public class StructuredEventToCDPClusterDetailsConverterTest {
 
     @Test
     public void testConvertWithNull() {
-        Assertions.assertNotNull(underTest.convert((StructuredFlowEvent) null), "We should return empty object for not null");
-        Assertions.assertNotNull(underTest.convert((StructuredSyncEvent) null), "We should return empty object for not null");
+        assertNotNull(underTest.convert((StructuredFlowEvent) null), "We should return empty object for not null");
+        assertNotNull(underTest.convert((StructuredSyncEvent) null), "We should return empty object for not null");
     }
 
     @Test

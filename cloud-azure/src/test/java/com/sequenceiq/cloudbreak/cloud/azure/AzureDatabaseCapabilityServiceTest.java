@@ -6,6 +6,11 @@ import static com.sequenceiq.common.model.AzureHighAvailabiltyMode.SAME_ZONE;
 import static com.sequenceiq.common.model.AzureHighAvailabiltyMode.ZONE_REDUNDANT;
 import static com.sequenceiq.common.model.DatabaseCapabilityType.AZURE_FLEXIBLE;
 import static com.sequenceiq.common.model.DatabaseCapabilityType.AZURE_SINGLE_SERVER;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
@@ -17,7 +22,6 @@ import java.util.Optional;
 import java.util.TreeSet;
 
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -103,18 +107,18 @@ class AzureDatabaseCapabilityServiceTest {
         Region region1Label = Region.region(azureRegion1.label());
         Region region2Name = Region.region(azureRegion2.name());
         Region region2Label = Region.region(azureRegion2.label());
-        Assertions.assertTrue(capabilities.getEnabledRegions().get(databaseAvailabiltyType(SAME_ZONE.name())).contains(region1Label));
-        Assertions.assertTrue(capabilities.getEnabledRegions().get(databaseAvailabiltyType(SAME_ZONE.name())).contains(region1Name));
-        Assertions.assertTrue(capabilities.getEnabledRegions().get(databaseAvailabiltyType(SAME_ZONE.name())).contains(region2Label));
-        Assertions.assertTrue(capabilities.getEnabledRegions().get(databaseAvailabiltyType(SAME_ZONE.name())).contains(region2Name));
-        Assertions.assertFalse(capabilities.getEnabledRegions().get(databaseAvailabiltyType(ZONE_REDUNDANT.name())).contains(region1Label));
-        Assertions.assertFalse(capabilities.getEnabledRegions().get(databaseAvailabiltyType(ZONE_REDUNDANT.name())).contains(region1Name));
-        Assertions.assertTrue(capabilities.getEnabledRegions().get(databaseAvailabiltyType(ZONE_REDUNDANT.name())).contains(region2Label));
-        Assertions.assertTrue(capabilities.getEnabledRegions().get(databaseAvailabiltyType(ZONE_REDUNDANT.name())).contains(region2Name));
-        Assertions.assertEquals(capabilities.getRegionDefaultInstanceTypeMap().get(region1Label), "Standard_E4ds_v6");
-        Assertions.assertEquals(capabilities.getRegionDefaultInstanceTypeMap().get(region1Name), "Standard_E4ds_v6");
-        Assertions.assertEquals(capabilities.getRegionDefaultInstanceTypeMap().get(region2Label), "Standard_E4s_v1");
-        Assertions.assertEquals(capabilities.getRegionDefaultInstanceTypeMap().get(region2Name), "Standard_E4s_v1");
+        assertTrue(capabilities.getEnabledRegions().get(databaseAvailabiltyType(SAME_ZONE.name())).contains(region1Label));
+        assertTrue(capabilities.getEnabledRegions().get(databaseAvailabiltyType(SAME_ZONE.name())).contains(region1Name));
+        assertTrue(capabilities.getEnabledRegions().get(databaseAvailabiltyType(SAME_ZONE.name())).contains(region2Label));
+        assertTrue(capabilities.getEnabledRegions().get(databaseAvailabiltyType(SAME_ZONE.name())).contains(region2Name));
+        assertFalse(capabilities.getEnabledRegions().get(databaseAvailabiltyType(ZONE_REDUNDANT.name())).contains(region1Label));
+        assertFalse(capabilities.getEnabledRegions().get(databaseAvailabiltyType(ZONE_REDUNDANT.name())).contains(region1Name));
+        assertTrue(capabilities.getEnabledRegions().get(databaseAvailabiltyType(ZONE_REDUNDANT.name())).contains(region2Label));
+        assertTrue(capabilities.getEnabledRegions().get(databaseAvailabiltyType(ZONE_REDUNDANT.name())).contains(region2Name));
+        assertEquals(capabilities.getRegionDefaultInstanceTypeMap().get(region1Label), "Standard_E4ds_v6");
+        assertEquals(capabilities.getRegionDefaultInstanceTypeMap().get(region1Name), "Standard_E4ds_v6");
+        assertEquals(capabilities.getRegionDefaultInstanceTypeMap().get(region2Label), "Standard_E4s_v1");
+        assertEquals(capabilities.getRegionDefaultInstanceTypeMap().get(region2Name), "Standard_E4s_v1");
     }
 
     @Test
@@ -143,18 +147,18 @@ class AzureDatabaseCapabilityServiceTest {
         Region region1Label = Region.region(azureRegion1.label());
         Region region2Name = Region.region(azureRegion2.name());
         Region region2Label = Region.region(azureRegion2.label());
-        Assertions.assertTrue(capabilities.getEnabledRegions().get(databaseAvailabiltyType(SAME_ZONE.name())).contains(region1Label));
-        Assertions.assertTrue(capabilities.getEnabledRegions().get(databaseAvailabiltyType(SAME_ZONE.name())).contains(region1Name));
-        Assertions.assertTrue(capabilities.getEnabledRegions().get(databaseAvailabiltyType(SAME_ZONE.name())).contains(region2Label));
-        Assertions.assertTrue(capabilities.getEnabledRegions().get(databaseAvailabiltyType(SAME_ZONE.name())).contains(region2Name));
-        Assertions.assertFalse(capabilities.getEnabledRegions().get(databaseAvailabiltyType(ZONE_REDUNDANT.name())).contains(region1Label));
-        Assertions.assertFalse(capabilities.getEnabledRegions().get(databaseAvailabiltyType(ZONE_REDUNDANT.name())).contains(region1Name));
-        Assertions.assertTrue(capabilities.getEnabledRegions().get(databaseAvailabiltyType(ZONE_REDUNDANT.name())).contains(region2Label));
-        Assertions.assertTrue(capabilities.getEnabledRegions().get(databaseAvailabiltyType(ZONE_REDUNDANT.name())).contains(region2Name));
-        Assertions.assertEquals(capabilities.getRegionDefaultInstanceTypeMap().get(region1Label), "MO_Gen5_4");
-        Assertions.assertEquals(capabilities.getRegionDefaultInstanceTypeMap().get(region1Name), "MO_Gen5_4");
-        Assertions.assertEquals(capabilities.getRegionDefaultInstanceTypeMap().get(region2Label), "MO_Gen5_4");
-        Assertions.assertEquals(capabilities.getRegionDefaultInstanceTypeMap().get(region2Name), "MO_Gen5_4");
+        assertTrue(capabilities.getEnabledRegions().get(databaseAvailabiltyType(SAME_ZONE.name())).contains(region1Label));
+        assertTrue(capabilities.getEnabledRegions().get(databaseAvailabiltyType(SAME_ZONE.name())).contains(region1Name));
+        assertTrue(capabilities.getEnabledRegions().get(databaseAvailabiltyType(SAME_ZONE.name())).contains(region2Label));
+        assertTrue(capabilities.getEnabledRegions().get(databaseAvailabiltyType(SAME_ZONE.name())).contains(region2Name));
+        assertFalse(capabilities.getEnabledRegions().get(databaseAvailabiltyType(ZONE_REDUNDANT.name())).contains(region1Label));
+        assertFalse(capabilities.getEnabledRegions().get(databaseAvailabiltyType(ZONE_REDUNDANT.name())).contains(region1Name));
+        assertTrue(capabilities.getEnabledRegions().get(databaseAvailabiltyType(ZONE_REDUNDANT.name())).contains(region2Label));
+        assertTrue(capabilities.getEnabledRegions().get(databaseAvailabiltyType(ZONE_REDUNDANT.name())).contains(region2Name));
+        assertEquals(capabilities.getRegionDefaultInstanceTypeMap().get(region1Label), "MO_Gen5_4");
+        assertEquals(capabilities.getRegionDefaultInstanceTypeMap().get(region1Name), "MO_Gen5_4");
+        assertEquals(capabilities.getRegionDefaultInstanceTypeMap().get(region2Label), "MO_Gen5_4");
+        assertEquals(capabilities.getRegionDefaultInstanceTypeMap().get(region2Name), "MO_Gen5_4");
     }
 
     @Test
@@ -186,15 +190,15 @@ class AzureDatabaseCapabilityServiceTest {
         Region region1Label = Region.region(azureRegion1.label());
         Region region2Name = Region.region(azureRegion2.name());
         Region region2Label = Region.region(azureRegion2.label());
-        Assertions.assertTrue(capabilities.getEnabledRegions().get(databaseAvailabiltyType(SAME_ZONE.name())).contains(region1Label));
-        Assertions.assertTrue(capabilities.getEnabledRegions().get(databaseAvailabiltyType(SAME_ZONE.name())).contains(region1Name));
-        Assertions.assertFalse(capabilities.getEnabledRegions().get(databaseAvailabiltyType(SAME_ZONE.name())).contains(region2Label));
-        Assertions.assertFalse(capabilities.getEnabledRegions().get(databaseAvailabiltyType(SAME_ZONE.name())).contains(region2Name));
-        Assertions.assertTrue(capabilities.getEnabledRegions().get(databaseAvailabiltyType(ZONE_REDUNDANT.name())).isEmpty());
-        Assertions.assertEquals(capabilities.getRegionDefaultInstanceTypeMap().get(region1Label), "Standard_E4ds_v6");
-        Assertions.assertEquals(capabilities.getRegionDefaultInstanceTypeMap().get(region1Name), "Standard_E4ds_v6");
-        Assertions.assertNull(capabilities.getRegionDefaultInstanceTypeMap().get(region2Label));
-        Assertions.assertNull(capabilities.getRegionDefaultInstanceTypeMap().get(region2Name));
+        assertTrue(capabilities.getEnabledRegions().get(databaseAvailabiltyType(SAME_ZONE.name())).contains(region1Label));
+        assertTrue(capabilities.getEnabledRegions().get(databaseAvailabiltyType(SAME_ZONE.name())).contains(region1Name));
+        assertFalse(capabilities.getEnabledRegions().get(databaseAvailabiltyType(SAME_ZONE.name())).contains(region2Label));
+        assertFalse(capabilities.getEnabledRegions().get(databaseAvailabiltyType(SAME_ZONE.name())).contains(region2Name));
+        assertTrue(capabilities.getEnabledRegions().get(databaseAvailabiltyType(ZONE_REDUNDANT.name())).isEmpty());
+        assertEquals(capabilities.getRegionDefaultInstanceTypeMap().get(region1Label), "Standard_E4ds_v6");
+        assertEquals(capabilities.getRegionDefaultInstanceTypeMap().get(region1Name), "Standard_E4ds_v6");
+        assertNull(capabilities.getRegionDefaultInstanceTypeMap().get(region2Label));
+        assertNull(capabilities.getRegionDefaultInstanceTypeMap().get(region2Name));
     }
 
     @Test
@@ -226,10 +230,10 @@ class AzureDatabaseCapabilityServiceTest {
         Region region1Label = Region.region(azureRegion1.label());
         Region region2Name = Region.region(azureRegion2.name());
         Region region2Label = Region.region(azureRegion2.label());
-        Assertions.assertEquals(capabilities.getRegionDefaultInstanceTypeMap().get(region1Label), "Standard_E4ds_v4");
-        Assertions.assertEquals(capabilities.getRegionDefaultInstanceTypeMap().get(region1Name), "Standard_E4ds_v4");
-        Assertions.assertNull(capabilities.getRegionDefaultInstanceTypeMap().get(region2Label));
-        Assertions.assertNull(capabilities.getRegionDefaultInstanceTypeMap().get(region2Name));
+        assertEquals(capabilities.getRegionDefaultInstanceTypeMap().get(region1Label), "Standard_E4ds_v4");
+        assertEquals(capabilities.getRegionDefaultInstanceTypeMap().get(region1Name), "Standard_E4ds_v4");
+        assertNull(capabilities.getRegionDefaultInstanceTypeMap().get(region2Label));
+        assertNull(capabilities.getRegionDefaultInstanceTypeMap().get(region2Name));
     }
 
     @Test
@@ -261,10 +265,10 @@ class AzureDatabaseCapabilityServiceTest {
         Region region1Label = Region.region(azureRegion1.label());
         Region region2Name = Region.region(azureRegion2.name());
         Region region2Label = Region.region(azureRegion2.label());
-        Assertions.assertEquals(capabilities.getRegionDefaultInstanceTypeMap().get(region1Label), "Standard_E4ds_v4");
-        Assertions.assertEquals(capabilities.getRegionDefaultInstanceTypeMap().get(region1Name), "Standard_E4ds_v4");
-        Assertions.assertNull(capabilities.getRegionDefaultInstanceTypeMap().get(region2Label));
-        Assertions.assertNull(capabilities.getRegionDefaultInstanceTypeMap().get(region2Name));
+        assertEquals(capabilities.getRegionDefaultInstanceTypeMap().get(region1Label), "Standard_E4ds_v4");
+        assertEquals(capabilities.getRegionDefaultInstanceTypeMap().get(region1Name), "Standard_E4ds_v4");
+        assertNull(capabilities.getRegionDefaultInstanceTypeMap().get(region2Label));
+        assertNull(capabilities.getRegionDefaultInstanceTypeMap().get(region2Name));
     }
 
     @Test
@@ -300,10 +304,10 @@ class AzureDatabaseCapabilityServiceTest {
         Region region1Label = Region.region(azureRegion1.label());
         Region region2Name = Region.region(azureRegion2.name());
         Region region2Label = Region.region(azureRegion2.label());
-        Assertions.assertEquals(capabilities.getRegionDefaultInstanceTypeMap().get(region1Label), "instanceType22");
-        Assertions.assertEquals(capabilities.getRegionDefaultInstanceTypeMap().get(region1Name), "instanceType22");
-        Assertions.assertNull(capabilities.getRegionDefaultInstanceTypeMap().get(region2Label));
-        Assertions.assertNull(capabilities.getRegionDefaultInstanceTypeMap().get(region2Name));
+        assertEquals(capabilities.getRegionDefaultInstanceTypeMap().get(region1Label), "instanceType22");
+        assertEquals(capabilities.getRegionDefaultInstanceTypeMap().get(region1Name), "instanceType22");
+        assertNull(capabilities.getRegionDefaultInstanceTypeMap().get(region2Label));
+        assertNull(capabilities.getRegionDefaultInstanceTypeMap().get(region2Name));
     }
 
     @Test
@@ -320,7 +324,7 @@ class AzureDatabaseCapabilityServiceTest {
         Optional<PlatformDBStorageCapabilities> capabilities = azureDatabaseCapabilityService.databaseStorageCapabilities(
                 cloudCredential, Region.region("westus"));
 
-        Assertions.assertEquals(new TreeSet<>(List.of(128L, 256L, 512L)), capabilities.get().supportedStorageSizeInMb());
+        assertEquals(new TreeSet<>(List.of(128L, 256L, 512L)), capabilities.get().supportedStorageSizeInMb());
     }
 
     @Test
@@ -336,7 +340,7 @@ class AzureDatabaseCapabilityServiceTest {
         Optional<PlatformDBStorageCapabilities> capabilities = azureDatabaseCapabilityService.databaseStorageCapabilities(
                 cloudCredential, Region.region("westus"));
 
-        Assertions.assertTrue(capabilities.get().supportedStorageSizeInMb().isEmpty());
+        assertTrue(capabilities.get().supportedStorageSizeInMb().isEmpty());
     }
 
     @Test
@@ -350,7 +354,7 @@ class AzureDatabaseCapabilityServiceTest {
         Optional<PlatformDBStorageCapabilities> capabilities = azureDatabaseCapabilityService.databaseStorageCapabilities(
                 cloudCredential, Region.region("westus"));
 
-        Assertions.assertTrue(capabilities.get().supportedStorageSizeInMb().isEmpty());
+        assertTrue(capabilities.get().supportedStorageSizeInMb().isEmpty());
     }
 
     @Test
@@ -361,7 +365,7 @@ class AzureDatabaseCapabilityServiceTest {
         Optional<PlatformDBStorageCapabilities> capabilities = azureDatabaseCapabilityService.databaseStorageCapabilities(
                 cloudCredential, Region.region("westus"));
 
-        Assertions.assertTrue(capabilities.isEmpty());
+        assertTrue(capabilities.isEmpty());
     }
 
     @Test
@@ -392,17 +396,17 @@ class AzureDatabaseCapabilityServiceTest {
                 .databaseCapabilities(cloudCredential, Region.region("westus"), Map.of(DATABASE_TYPE, AZURE_FLEXIBLE.name()));
 
         Map<Region, Map<String, List<String>>> supportedServerVersionsToUpgrade = capabilities.getSupportedServerVersionsToUpgrade();
-        Assertions.assertNotNull(supportedServerVersionsToUpgrade);
+        assertNotNull(supportedServerVersionsToUpgrade);
         Map<String, List<String>> westusServerVersions = supportedServerVersionsToUpgrade.get(Region.region("westus"));
-        Assertions.assertNotNull(westusServerVersions);
-        Assertions.assertTrue(westusServerVersions.get("14").contains("16"));
-        Assertions.assertFalse(westusServerVersions.get("14").contains("14"));
-        Assertions.assertFalse(westusServerVersions.get("14").contains("17"));
-        Assertions.assertTrue(westusServerVersions.get("15").contains("16"));
-        Assertions.assertFalse(westusServerVersions.get("15").contains("17"));
-        Assertions.assertFalse(westusServerVersions.get("15").contains("14"));
-        Assertions.assertTrue(westusServerVersions.get("16").isEmpty());
-        Assertions.assertNull(westusServerVersions.get("17"));
+        assertNotNull(westusServerVersions);
+        assertTrue(westusServerVersions.get("14").contains("16"));
+        assertFalse(westusServerVersions.get("14").contains("14"));
+        assertFalse(westusServerVersions.get("14").contains("17"));
+        assertTrue(westusServerVersions.get("15").contains("16"));
+        assertFalse(westusServerVersions.get("15").contains("17"));
+        assertFalse(westusServerVersions.get("15").contains("14"));
+        assertTrue(westusServerVersions.get("16").isEmpty());
+        assertNull(westusServerVersions.get("17"));
     }
 
     private AzureCoordinate azureCoordinate(String name) {

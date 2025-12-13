@@ -1,9 +1,9 @@
 package com.sequenceiq.cloudbreak.service.image;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -100,7 +100,7 @@ public class GenerateImageCatalogServiceTest {
         when(stackImageService.getCurrentImage(STACK_ID)).thenReturn(image);
         when(image.getImageCatalogUrl()).thenReturn(null);
 
-        Assertions.assertThrows(CloudbreakServiceException.class, () -> victim.generateImageCatalogForStack(stack));
+        assertThrows(CloudbreakServiceException.class, () -> victim.generateImageCatalogForStack(stack));
     }
 
     @Test
@@ -116,7 +116,7 @@ public class GenerateImageCatalogServiceTest {
         when(statedImage.getImage()).thenReturn(catalogImage);
         when(catalogImage.getSourceImageId()).thenReturn(SOURCE_IMAGE_ID);
 
-        Assertions.assertThrows(CloudbreakServiceException.class, () -> victim.generateImageCatalogForStack(stack));
+        assertThrows(CloudbreakServiceException.class, () -> victim.generateImageCatalogForStack(stack));
     }
 
     @Test
@@ -130,7 +130,7 @@ public class GenerateImageCatalogServiceTest {
         when(workspace.getId()).thenReturn(WORKSPACE_ID);
         when(imageCatalogService.getImage(WORKSPACE_ID, IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, IMAGE_ID)).thenThrow(new CloudbreakImageNotFoundException(""));
 
-        Assertions.assertThrows(NotFoundException.class, () -> victim.generateImageCatalogForStack(stack));
+        assertThrows(NotFoundException.class, () -> victim.generateImageCatalogForStack(stack));
     }
 
     @Test
@@ -145,6 +145,6 @@ public class GenerateImageCatalogServiceTest {
         when(workspace.getId()).thenReturn(WORKSPACE_ID);
         when(imageCatalogService.getImage(WORKSPACE_ID, IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, IMAGE_ID)).thenThrow(new CloudbreakImageCatalogException(""));
 
-        Assertions.assertThrows(CloudbreakServiceException.class, () -> victim.generateImageCatalogForStack(stack));
+        assertThrows(CloudbreakServiceException.class, () -> victim.generateImageCatalogForStack(stack));
     }
 }

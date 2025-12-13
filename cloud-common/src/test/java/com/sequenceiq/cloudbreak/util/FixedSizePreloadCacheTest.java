@@ -1,18 +1,18 @@
 package com.sequenceiq.cloudbreak.util;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.concurrent.TimeUnit;
 
 import org.awaitility.Awaitility;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class FixedSizePreloadCacheTest {
+class FixedSizePreloadCacheTest {
 
     @Test
-    public void testPopWhenOnTheFlyGenerationNeeded() {
+    void testPopWhenOnTheFlyGenerationNeeded() {
         FixedSizePreloadCache<String> cache = new FixedSizePreloadCache<>(0, () -> Thread.currentThread().getName());
         String actual = cache.pop();
 
@@ -20,7 +20,7 @@ public class FixedSizePreloadCacheTest {
     }
 
     @Test
-    public void testPopWhenReplacementNeeded() {
+    void testPopWhenReplacementNeeded() {
         Iterator<String> items = Arrays.asList("a", "b", "c").iterator();
         FixedSizePreloadCache<String> cache = new FixedSizePreloadCache<>(1, items::next);
 

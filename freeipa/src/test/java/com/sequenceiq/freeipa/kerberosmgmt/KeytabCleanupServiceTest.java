@@ -2,6 +2,7 @@ package com.sequenceiq.freeipa.kerberosmgmt;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -15,7 +16,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.HostRequest;
@@ -107,7 +107,7 @@ public class KeytabCleanupServiceTest {
 
     @Test
     public void testDeleteServicePrincipal() throws Exception {
-        FreeIpaClient mockIpaClient = Mockito.mock(FreeIpaClient.class);
+        FreeIpaClient mockIpaClient = mock(FreeIpaClient.class);
         ServicePrincipalRequest request = new ServicePrincipalRequest();
         request.setEnvironmentCrn(ENVIRONMENT_ID);
         request.setServerHostName(HOST);
@@ -132,7 +132,7 @@ public class KeytabCleanupServiceTest {
     public void testDeleteHost() throws Exception {
         Set<Service> services = new HashSet<>();
         services.add(service);
-        FreeIpaClient mockIpaClient = Mockito.mock(FreeIpaClient.class);
+        FreeIpaClient mockIpaClient = mock(FreeIpaClient.class);
         HostRequest request = new HostRequest();
         request.setEnvironmentCrn(ENVIRONMENT_ID);
         request.setServerHostName(HOST);
@@ -157,7 +157,7 @@ public class KeytabCleanupServiceTest {
     public void testRemoveHostRelatedKerberosConfiguration() throws Exception {
         Set<Service> services = new HashSet<>();
         services.add(service);
-        FreeIpaClient mockIpaClient = Mockito.mock(FreeIpaClient.class);
+        FreeIpaClient mockIpaClient = mock(FreeIpaClient.class);
         HostRequest request = new HostRequest();
         request.setEnvironmentCrn(ENVIRONMENT_ID);
         request.setServerHostName(HOST);

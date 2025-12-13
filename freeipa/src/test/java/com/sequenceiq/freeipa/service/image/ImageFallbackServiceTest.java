@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.lenient;
@@ -16,7 +17,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -185,10 +185,10 @@ class ImageFallbackServiceTest {
 
         Optional<String> result = underTest.determineFallbackImageIfPermitted(context);
         if (permitted) {
-            Assertions.assertTrue(result.isPresent());
+            assertTrue(result.isPresent());
             assertEquals("fallback-image-name", result.get());
         } else {
-            Assertions.assertTrue(result.isEmpty());
+            assertTrue(result.isEmpty());
         }
     }
 

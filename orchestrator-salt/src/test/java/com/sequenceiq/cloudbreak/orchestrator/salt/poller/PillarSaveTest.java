@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.orchestrator.salt.poller;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -10,8 +11,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.http.HttpStatus;
 
@@ -22,10 +22,10 @@ import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponses;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.Pillar;
 
-public class PillarSaveTest {
+class PillarSaveTest {
 
     @Test
-    public void testDiscovery() throws Exception {
+    void testDiscovery() throws Exception {
         SaltConnector saltConnector = mock(SaltConnector.class);
         GenericResponses responses = new GenericResponses();
         GenericResponse response = new GenericResponse();
@@ -47,9 +47,9 @@ public class PillarSaveTest {
         Map<String, Map<String, Map<String, Object>>> pillarJson = (Map<String, Map<String, Map<String, Object>>>) pillar.getJson();
         Map<String, Map<String, Object>> hostMap = pillarJson.entrySet().iterator().next().getValue();
         for (Node node : nodes) {
-            Assert.assertEquals(node.getHostname(), hostMap.get(node.getPrivateIp()).get("fqdn"));
-            Assert.assertEquals(node.getHostname().split("\\.")[0], hostMap.get(node.getPrivateIp()).get("hostname"));
-            Assert.assertEquals(Boolean.TRUE, hostMap.get(node.getPrivateIp()).get("public_address"));
+            assertEquals(node.getHostname(), hostMap.get(node.getPrivateIp()).get("fqdn"));
+            assertEquals(node.getHostname().split("\\.")[0], hostMap.get(node.getPrivateIp()).get("hostname"));
+            assertEquals(Boolean.TRUE, hostMap.get(node.getPrivateIp()).get("public_address"));
         }
     }
 

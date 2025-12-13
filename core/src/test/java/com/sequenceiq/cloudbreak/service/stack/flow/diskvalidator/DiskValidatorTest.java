@@ -12,6 +12,7 @@ import static com.sequenceiq.cloudbreak.service.stack.flow.diskvalidator.DiskVal
 import static com.sequenceiq.cloudbreak.service.stack.flow.diskvalidator.LsblkFetcher.LSBLK_COMMAND;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -31,7 +32,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -102,10 +102,10 @@ class DiskValidatorTest {
     private MetricService metricService;
 
     @InjectMocks
-    private LsblkFetcher lsblkFetcher = Mockito.spy(new LsblkFetcher());
+    private LsblkFetcher lsblkFetcher = spy(new LsblkFetcher());
 
     @InjectMocks
-    private VolumeIdWithDeviceFetcher volumeIdWithDeviceFetcher = Mockito.spy(new VolumeIdWithDeviceFetcher());
+    private VolumeIdWithDeviceFetcher volumeIdWithDeviceFetcher = spy(new VolumeIdWithDeviceFetcher());
 
     @InjectMocks
     private DiskValidator underTest;

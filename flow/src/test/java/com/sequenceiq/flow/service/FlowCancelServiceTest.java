@@ -1,5 +1,6 @@
 package com.sequenceiq.flow.service;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -11,12 +12,11 @@ import static org.mockito.Mockito.when;
 
 import java.util.Map;
 
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
@@ -29,8 +29,8 @@ import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 
-@RunWith(MockitoJUnitRunner.class)
-public class FlowCancelServiceTest {
+@ExtendWith(MockitoExtension.class)
+class FlowCancelServiceTest {
 
     @Mock
     private EventBus reactor;
@@ -51,13 +51,13 @@ public class FlowCancelServiceTest {
     private FlowCancelService underTest;
 
     @Test
-    public void testCancelRunningFlows() {
+    void testCancelRunningFlows() {
         Map<String, Object> parameters = Map.of();
         when(eventParameterFactory.createEventParameters(1L)).thenReturn(parameters);
         when(eventFactory.createEventWithErrHandler(eq(parameters), any(Payload.class)))
                 .thenAnswer(invocation -> {
                     Payload payload = invocation.getArgument(1, Payload.class);
-                    Assert.assertEquals(Long.valueOf(1L), payload.getResourceId());
+                    assertEquals(Long.valueOf(1L), payload.getResourceId());
                     return new Event<>(payload);
                 });
 
@@ -67,7 +67,7 @@ public class FlowCancelServiceTest {
     }
 
     @Test
-    public void testCancelFlowSilentlyIgnoresException() throws TransactionExecutionException {
+    void testCancelFlowSilentlyIgnoresException() throws TransactionExecutionException {
         doThrow(new TransactionExecutionException("asdf", new RuntimeException())).when(flow2Handler).cancelFlow(anyLong(), anyString());
         FlowLog flowLog = new FlowLog();
         flowLog.setFlowId("asdf");
@@ -77,7 +77,7 @@ public class FlowCancelServiceTest {
     }
 
     @Test
-    public void testCancelFlow() throws TransactionExecutionException {
+    void testCancelFlow() throws TransactionExecutionException {
         FlowLog flowLog = new FlowLog();
         flowLog.setResourceId(1L);
         flowLog.setFlowId("flowid");
@@ -88,14 +88,14 @@ public class FlowCancelServiceTest {
     }
 
     @Test
-    public void testCancelTooOldTerminationFlowForResource() {
+    void testCancelTooOldTerminationFlowForResource() {
         underTest.cancelTooOldTerminationFlowForResource(1L, "asf");
 
         verify(flowLogService, times(1)).cancelTooOldTerminationFlowForResource(eq(1L), anyLong());
     }
 
     @Test
-    public void testCancelTooOldTerminationFlowIgnoresExceptions() {
+    void testCancelTooOldTerminationFlowIgnoresExceptions() {
         doThrow(new RuntimeException()).when(flowLogService).cancelTooOldTerminationFlowForResource(eq(1L), anyLong());
 
         underTest.cancelTooOldTerminationFlowForResource(1L, "asf");

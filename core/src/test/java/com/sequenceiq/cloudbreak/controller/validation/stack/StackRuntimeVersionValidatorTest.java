@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.controller.validation.stack;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.any;
@@ -14,13 +15,11 @@ import java.util.List;
 import java.util.Optional;
 
 import org.apache.commons.lang3.reflect.FieldUtils;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
@@ -44,8 +43,8 @@ import com.sequenceiq.cloudbreak.service.stack.StackViewService;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
-@RunWith(MockitoJUnitRunner.class)
-public class StackRuntimeVersionValidatorTest {
+@ExtendWith(MockitoExtension.class)
+class StackRuntimeVersionValidatorTest {
 
     private static final String DATA_HUB_VERSION = "7.2.0";
 
@@ -56,9 +55,6 @@ public class StackRuntimeVersionValidatorTest {
     private static final String USER_CRN = "crn:altus:iam:us-west-1:" + UUID + ":user:" + UUID;
 
     private static final String SDX_VERSION = "7.2.0";
-
-    @Rule
-    public final ExpectedException thrown = ExpectedException.none();
 
     @InjectMocks
     private StackRuntimeVersionValidator underTest;
@@ -76,7 +72,7 @@ public class StackRuntimeVersionValidatorTest {
     private RuntimeVersionService runtimeVersionService;
 
     @Test
-    public void testValidationWhenEntitlementOn() {
+    void testValidationWhenEntitlementOn() {
         when(entitlementService.isDifferentDataHubAndDataLakeVersionAllowed(any())).thenReturn(true);
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.validate(new StackV4Request(), mock(Image.class), StackType.WORKLOAD));
@@ -86,7 +82,7 @@ public class StackRuntimeVersionValidatorTest {
     }
 
     @Test
-    public void testValidationWhenDataHubVersionIsNotPresent() {
+    void testValidationWhenDataHubVersionIsNotPresent() {
         StackV4Request request = createStackRequestWithoutCm();
         when(entitlementService.isDifferentDataHubAndDataLakeVersionAllowed(any())).thenReturn(false);
 
@@ -97,7 +93,7 @@ public class StackRuntimeVersionValidatorTest {
     }
 
     @Test
-    public void testValidationWhenImageContainsVersionAndVersionsAreEquals() {
+    void testValidationWhenImageContainsVersionAndVersionsAreEquals() {
         when(stackViewService.findDatalakeViewByEnvironmentCrn(anyString())).thenReturn(Optional.empty());
         when(entitlementService.isDifferentDataHubAndDataLakeVersionAllowed(any())).thenReturn(false);
         when(sdxClientService.getByEnvironmentCrn(ENVIRONMENT_CRN)).thenReturn(createSdxClusterResponse());
@@ -109,7 +105,7 @@ public class StackRuntimeVersionValidatorTest {
     }
 
     @Test
-    public void testValidationWhenRequestContainsVersionAndVersionsAreEquals() {
+    void testValidationWhenRequestContainsVersionAndVersionsAreEquals() {
         when(stackViewService.findDatalakeViewByEnvironmentCrn(anyString())).thenReturn(Optional.empty());
         when(entitlementService.isDifferentDataHubAndDataLakeVersionAllowed(any())).thenReturn(false);
         when(sdxClientService.getByEnvironmentCrn(ENVIRONMENT_CRN)).thenReturn(createSdxClusterResponse());
@@ -121,33 +117,33 @@ public class StackRuntimeVersionValidatorTest {
     }
 
     @Test
-    public void testValidationWhenImageContainsVersionAndVersionsAreNotEquals() {
+    void testValidationWhenImageContainsVersionAndVersionsAreNotEquals() {
         when(stackViewService.findDatalakeViewByEnvironmentCrn(anyString())).thenReturn(Optional.empty());
         when(entitlementService.isDifferentDataHubAndDataLakeVersionAllowed(any())).thenReturn(false);
         when(sdxClientService.getByEnvironmentCrn(ENVIRONMENT_CRN)).thenReturn(createSdxClusterResponse());
 
-        thrown.expect(BadRequestException.class);
-        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.validate(createStackRequestWithoutCm(), createImage("7.2.2"), StackType.WORKLOAD));
+        assertThrows(BadRequestException.class, () -> ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> underTest.validate(createStackRequestWithoutCm(), createImage("7.2.2"), StackType.WORKLOAD)));
 
         verify(entitlementService).isDifferentDataHubAndDataLakeVersionAllowed(any());
         verify(sdxClientService).getByEnvironmentCrn(ENVIRONMENT_CRN);
     }
 
     @Test
-    public void testValidationWhenStackContainsVersionAndVersionsAreNotEquals() {
+    void testValidationWhenStackContainsVersionAndVersionsAreNotEquals() {
         when(stackViewService.findDatalakeViewByEnvironmentCrn(anyString())).thenReturn(Optional.empty());
         when(entitlementService.isDifferentDataHubAndDataLakeVersionAllowed(any())).thenReturn(false);
         when(sdxClientService.getByEnvironmentCrn(ENVIRONMENT_CRN)).thenReturn(createSdxClusterResponse());
 
-        thrown.expect(BadRequestException.class);
-        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.validate(createStackRequest("7.2.2"), mock(Image.class), StackType.WORKLOAD));
+        assertThrows(BadRequestException.class,
+                () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.validate(createStackRequest("7.2.2"), mock(Image.class), StackType.WORKLOAD)));
 
         verify(entitlementService).isDifferentDataHubAndDataLakeVersionAllowed(any());
         verify(sdxClientService).getByEnvironmentCrn(ENVIRONMENT_CRN);
     }
 
     @Test
-    public void testValidationWhenDataLakeVersionIsNotPresent() {
+    void testValidationWhenDataLakeVersionIsNotPresent() {
         when(stackViewService.findDatalakeViewByEnvironmentCrn(anyString())).thenReturn(Optional.empty());
         when(entitlementService.isDifferentDataHubAndDataLakeVersionAllowed(any())).thenReturn(false);
         when(sdxClientService.getByEnvironmentCrn(ENVIRONMENT_CRN)).thenReturn(createSdxClusterResponse(null, SdxClusterStatusResponse.RUNNING));
@@ -159,22 +155,22 @@ public class StackRuntimeVersionValidatorTest {
     }
 
     @Test
-    public void testValidationWhenDataLakeIsNotRunning() {
+    void testValidationWhenDataLakeIsNotRunning() {
         when(stackViewService.findDatalakeViewByEnvironmentCrn(anyString())).thenReturn(Optional.empty());
         when(entitlementService.isDifferentDataHubAndDataLakeVersionAllowed(any())).thenReturn(false);
         when(sdxClientService.getByEnvironmentCrn(ENVIRONMENT_CRN)).thenReturn(
                 createSdxClusterResponse(null, SdxClusterStatusResponse.STACK_CREATION_IN_PROGRESS));
 
-        thrown.expect(BadRequestException.class);
-        thrown.expectMessage("Datalake myDatalake is not available yet, thus we cannot check runtime version!");
-        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.validate(createStackRequest(DATA_HUB_VERSION), mock(Image.class), StackType.WORKLOAD));
+        assertThrows(BadRequestException.class, () -> ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                        () -> underTest.validate(createStackRequest(DATA_HUB_VERSION), mock(Image.class), StackType.WORKLOAD)),
+                "Datalake myDatalake is not available yet, thus we cannot check runtime version!");
 
         verify(entitlementService).isDifferentDataHubAndDataLakeVersionAllowed(any());
         verify(sdxClientService).getByEnvironmentCrn(ENVIRONMENT_CRN);
     }
 
     @Test
-    public void testValidationWhenCbHasDlStackButCdhProductMissing() throws IllegalAccessException {
+    void testValidationWhenCbHasDlStackButCdhProductMissing() throws IllegalAccessException {
         when(stackViewService.findDatalakeViewByEnvironmentCrn(anyString())).thenReturn(Optional.of(createDatalakeStack(Status.AVAILABLE)));
         when(runtimeVersionService.getRuntimeVersion(anyLong())).thenReturn(Optional.empty());
         when(entitlementService.isDifferentDataHubAndDataLakeVersionAllowed(any())).thenReturn(false);
@@ -189,7 +185,7 @@ public class StackRuntimeVersionValidatorTest {
     }
 
     @Test
-    public void testValidationWhenCbHasDlStack() throws IllegalAccessException {
+    void testValidationWhenCbHasDlStack() throws IllegalAccessException {
         when(stackViewService.findDatalakeViewByEnvironmentCrn(anyString())).thenReturn(Optional.of(createDatalakeStack(Status.AVAILABLE)));
         when(runtimeVersionService.getRuntimeVersion(anyLong())).thenReturn(Optional.of(DATA_HUB_VERSION));
         when(entitlementService.isDifferentDataHubAndDataLakeVersionAllowed(any())).thenReturn(false);
@@ -203,7 +199,7 @@ public class StackRuntimeVersionValidatorTest {
     }
 
     @Test
-    public void testValidationWhenCbHasDlStackButNotRunning() throws IllegalAccessException {
+    void testValidationWhenCbHasDlStackButNotRunning() throws IllegalAccessException {
         when(stackViewService.findDatalakeViewByEnvironmentCrn(anyString())).thenReturn(Optional.of(createDatalakeStack(Status.CREATE_IN_PROGRESS)));
         when(entitlementService.isDifferentDataHubAndDataLakeVersionAllowed(any())).thenReturn(false);
         when(sdxClientService.getByEnvironmentCrn(ENVIRONMENT_CRN)).thenReturn(createSdxClusterResponse(null, SdxClusterStatusResponse.RUNNING));

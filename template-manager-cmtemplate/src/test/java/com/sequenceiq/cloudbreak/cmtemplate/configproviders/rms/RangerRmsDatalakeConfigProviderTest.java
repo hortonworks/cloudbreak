@@ -19,7 +19,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -93,7 +92,7 @@ public class RangerRmsDatalakeConfigProviderTest {
             assertTrue(additionalServices.containsKey(RMS_HOST_GROUP));
             ApiClusterTemplateService clusterTemplateService = additionalServices.get(RMS_HOST_GROUP);
             List<ApiClusterTemplateRoleConfigGroup> roleConfigGroups = clusterTemplateService.getRoleConfigGroups();
-            Assertions.assertAll(
+            assertAll(
                     () -> assertEquals(1, additionalServices.size()),
                     () -> assertEquals(RangerRmsRoles.RANGER_RMS_SERVICE_TYPE, clusterTemplateService.getServiceType()),
                     () -> assertEquals(RangerRmsRoles.RANGER_RMS_SERVICE_REF_NAME, clusterTemplateService.getRefName()),

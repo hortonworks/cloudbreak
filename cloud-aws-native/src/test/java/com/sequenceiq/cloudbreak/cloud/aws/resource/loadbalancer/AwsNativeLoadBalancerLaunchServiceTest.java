@@ -6,6 +6,7 @@ import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsSdkErrorCodes.DUPLIC
 import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -22,7 +23,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -209,7 +209,7 @@ class AwsNativeLoadBalancerLaunchServiceTest {
                 .findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER, STACK_ID)).thenReturn(List.of());
         when(loadBalancingClient.registerLoadBalancer(any())).thenThrow(ElasticLoadBalancingV2Exception.builder().message("something went wrong").build());
 
-        Assertions.assertThrows(CloudConnectorException.class,
+        assertThrows(CloudConnectorException.class,
                 () -> underTest.launchLoadBalancerResources(authenticatedContext, stack, persistenceNotifier, loadBalancingClient, true));
     }
 
@@ -232,7 +232,7 @@ class AwsNativeLoadBalancerLaunchServiceTest {
                 .thenReturn(TG_NAME_INTERNAL_NEW);
         when(loadBalancingClient.createTargetGroup(any())).thenThrow(ElasticLoadBalancingV2Exception.builder().message("something went wrong").build());
 
-        Assertions.assertThrows(CloudConnectorException.class,
+        assertThrows(CloudConnectorException.class,
                 () -> underTest.launchLoadBalancerResources(authenticatedContext, stack, persistenceNotifier, loadBalancingClient, true));
 
         ArgumentCaptor<CloudResource> cloudResourceArgumentCaptor = ArgumentCaptor.forClass(CloudResource.class);
@@ -256,7 +256,7 @@ class AwsNativeLoadBalancerLaunchServiceTest {
                 .thenReturn(TG_NAME_INTERNAL_NEW);
         when(loadBalancingClient.createTargetGroup(any())).thenThrow(ElasticLoadBalancingV2Exception.builder().message("something went wrong").build());
 
-        Assertions.assertThrows(CloudConnectorException.class,
+        assertThrows(CloudConnectorException.class,
                 () -> underTest.launchLoadBalancerResources(authenticatedContext, stack, persistenceNotifier, loadBalancingClient, true));
 
         ArgumentCaptor<CloudResource> cloudResourceArgumentCaptor = ArgumentCaptor.forClass(CloudResource.class);
@@ -287,7 +287,7 @@ class AwsNativeLoadBalancerLaunchServiceTest {
                 .findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER_LISTENER, STACK_ID)).thenReturn(List.of());
         when(loadBalancingClient.registerListener(any())).thenThrow(ElasticLoadBalancingV2Exception.builder().message("something went wrong").build());
 
-        Assertions.assertThrows(CloudConnectorException.class,
+        assertThrows(CloudConnectorException.class,
                 () -> underTest.launchLoadBalancerResources(authenticatedContext, stack, persistenceNotifier, loadBalancingClient, true));
 
         ArgumentCaptor<CloudResource> cloudResourceArgumentCaptor = ArgumentCaptor.forClass(CloudResource.class);
@@ -329,7 +329,7 @@ class AwsNativeLoadBalancerLaunchServiceTest {
                 .findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.ELASTIC_LOAD_BALANCER_LISTENER, STACK_ID)).thenReturn(List.of());
         when(loadBalancingClient.registerListener(any())).thenThrow(ElasticLoadBalancingV2Exception.builder().message("something went wrong").build());
 
-        Assertions.assertThrows(CloudConnectorException.class,
+        assertThrows(CloudConnectorException.class,
                 () -> underTest.launchLoadBalancerResources(authenticatedContext, stack, persistenceNotifier, loadBalancingClient, true));
 
         ArgumentCaptor<CloudResource> cloudResourceArgumentCaptor = ArgumentCaptor.forClass(CloudResource.class);
@@ -369,7 +369,7 @@ class AwsNativeLoadBalancerLaunchServiceTest {
         when(loadBalancingClient.registerListener(any())).thenReturn(createListenerResponse);
         when(loadBalancingClient.registerTargets(any())).thenThrow(ElasticLoadBalancingV2Exception.builder().message("something went wrong").build());
 
-        Assertions.assertThrows(CloudConnectorException.class,
+        assertThrows(CloudConnectorException.class,
                 () -> underTest.launchLoadBalancerResources(authenticatedContext, stack, persistenceNotifier, loadBalancingClient, true));
 
         ArgumentCaptor<CloudResource> cloudResourceArgumentCaptor = ArgumentCaptor.forClass(CloudResource.class);
@@ -417,7 +417,7 @@ class AwsNativeLoadBalancerLaunchServiceTest {
         when(loadBalancingClient.describeListeners(any())).thenReturn(describeListenersResponse);
         when(loadBalancingClient.registerTargets(any())).thenThrow(ElasticLoadBalancingV2Exception.builder().message("something went wrong").build());
 
-        Assertions.assertThrows(CloudConnectorException.class,
+        assertThrows(CloudConnectorException.class,
                 () -> underTest.launchLoadBalancerResources(authenticatedContext, stack, persistenceNotifier, loadBalancingClient, true));
 
         ArgumentCaptor<CloudResource> cloudResourceArgumentCaptor = ArgumentCaptor.forClass(CloudResource.class);

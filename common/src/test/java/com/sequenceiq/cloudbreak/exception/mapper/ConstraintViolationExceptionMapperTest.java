@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.exception.mapper;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -12,7 +14,6 @@ import jakarta.validation.ConstraintViolationException;
 import jakarta.ws.rs.core.Response;
 
 import org.hibernate.validator.internal.engine.path.PathImpl;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -38,7 +39,7 @@ public class ConstraintViolationExceptionMapperTest {
         String actual = JsonUtil.writeValueAsStringSilentSafe(entity);
         String expected = "{\"message\":\"something validation error occurred\"," +
                 "\"payload\":[{\"field\":\"path.smgth\",\"result\":\"something validation error occurred\"}]}";
-        Assertions.assertEquals(expected, actual);
+        assertEquals(expected, actual);
     }
 
     @Test
@@ -51,13 +52,13 @@ public class ConstraintViolationExceptionMapperTest {
         ConstraintViolationException exception = new ConstraintViolationException("Error message", Set.of(constraintViolation1, constraintViolation2));
         Response response = underTest.toResponse(exception);
         ExceptionResponse entity = (ExceptionResponse) response.getEntity();
-        Assertions.assertTrue(entity.getMessage().contains("More than one validation errors happened: \n"));
-        Assertions.assertTrue(entity.getMessage().contains("something validation error occurred"));
-        Assertions.assertTrue(entity.getMessage().contains("other validation error happened"));
+        assertTrue(entity.getMessage().contains("More than one validation errors happened: \n"));
+        assertTrue(entity.getMessage().contains("something validation error occurred"));
+        assertTrue(entity.getMessage().contains("other validation error happened"));
         List<String> result = ((List<ValidationResultResponse>) entity.getPayload()).stream()
                 .map(v -> v.getField() + ":" + v.getResult())
                 .collect(Collectors.toList());
-        Assertions.assertTrue(result.contains("path.smgth:something validation error occurred"));
-        Assertions.assertTrue(result.contains(":other validation error happened"));
+        assertTrue(result.contains("path.smgth:something validation error occurred"));
+        assertTrue(result.contains(":other validation error happened"));
     }
 }

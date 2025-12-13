@@ -1,8 +1,14 @@
 package com.sequenceiq.freeipa.kerberosmgmt;
 
-import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -10,12 +16,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.googlecode.jsonrpc4j.JsonRpcClientException;
@@ -61,7 +65,7 @@ public class KerberosMgmtRoleComponentV1Test {
         host.setFqdn(HOST);
         RoleRequest roleRequest = null;
         underTest.addRoleAndPrivileges(Optional.empty(), Optional.of(host), roleRequest, mockIpaClient);
-        Mockito.verifyNoInteractions(mockIpaClient);
+        verifyNoInteractions(mockIpaClient);
     }
 
     @Test
@@ -76,23 +80,23 @@ public class KerberosMgmtRoleComponentV1Test {
         roleRequest.setPrivileges(privileges);
         Role role = new Role();
         role.setCn(ROLE);
-        Mockito.when(mockIpaClient.addRole(anyString())).thenReturn(role);
+        when(mockIpaClient.addRole(anyString())).thenReturn(role);
         Privilege privilege = new Privilege();
         Set<String> hosts = new HashSet<>();
         hosts.add(HOST);
         Set<String> noServices = new HashSet<>();
-        Mockito.when(mockIpaClient.showRole(roleRequest.getRoleName()))
+        when(mockIpaClient.showRole(roleRequest.getRoleName()))
                 .thenThrow(new FreeIpaClientException("notfound", new JsonRpcClientException(NOT_FOUND, "notfound", null)))
                 .thenReturn(role);
-        Mockito.when(mockIpaClient.showPrivilege(any())).thenReturn(privilege);
-        Mockito.when(mockIpaClient.addRolePrivileges(any(), any())).thenReturn(role);
-        Mockito.when(mockIpaClient.addRoleMember(any(), any(), any(), any(), any(), any())).thenReturn(role);
+        when(mockIpaClient.showPrivilege(any())).thenReturn(privilege);
+        when(mockIpaClient.addRolePrivileges(any(), any())).thenReturn(role);
+        when(mockIpaClient.addRoleMember(any(), any(), any(), any(), any(), any())).thenReturn(role);
 
         underTest.addRoleAndPrivileges(Optional.empty(), Optional.of(host), roleRequest, mockIpaClient);
 
-        Mockito.verify(mockIpaClient).addRole(ROLE);
-        Mockito.verify(mockIpaClient).addRolePrivileges(ROLE, privileges);
-        Mockito.verify(mockIpaClient).addRoleMember(ROLE, null, null, hosts, null, noServices);
+        verify(mockIpaClient).addRole(ROLE);
+        verify(mockIpaClient).addRolePrivileges(ROLE, privileges);
+        verify(mockIpaClient).addRoleMember(ROLE, null, null, hosts, null, noServices);
     }
 
     @Test
@@ -111,15 +115,15 @@ public class KerberosMgmtRoleComponentV1Test {
         Set<String> hosts = new HashSet<>();
         hosts.add(HOST);
         Set<String> noServices = new HashSet<>();
-        Mockito.when(mockIpaClient.showPrivilege(any())).thenReturn(privilege);
-        Mockito.when(mockIpaClient.addRolePrivileges(any(), any())).thenReturn(role);
-        Mockito.when(mockIpaClient.showRole(anyString())).thenReturn(role);
-        Mockito.when(mockIpaClient.addRoleMember(any(), any(), any(), any(), any(), any())).thenReturn(role);
+        when(mockIpaClient.showPrivilege(any())).thenReturn(privilege);
+        when(mockIpaClient.addRolePrivileges(any(), any())).thenReturn(role);
+        when(mockIpaClient.showRole(anyString())).thenReturn(role);
+        when(mockIpaClient.addRoleMember(any(), any(), any(), any(), any(), any())).thenReturn(role);
 
         underTest.addRoleAndPrivileges(Optional.empty(), Optional.of(host), roleRequest, mockIpaClient);
 
-        Mockito.verify(mockIpaClient).addRolePrivileges(ROLE, privileges);
-        Mockito.verify(mockIpaClient).addRoleMember(ROLE, null, null, hosts, null, noServices);
+        verify(mockIpaClient).addRolePrivileges(ROLE, privileges);
+        verify(mockIpaClient).addRoleMember(ROLE, null, null, hosts, null, noServices);
     }
 
     @Test
@@ -134,24 +138,24 @@ public class KerberosMgmtRoleComponentV1Test {
         roleRequest.setPrivileges(privileges);
         Role role = new Role();
         role.setCn(ROLE);
-        Mockito.when(mockIpaClient.addRole(anyString())).thenThrow(new FreeIpaClientException("duplicate",
+        when(mockIpaClient.addRole(anyString())).thenThrow(new FreeIpaClientException("duplicate",
                 new JsonRpcClientException(FreeIpaErrorCodes.DUPLICATE_ENTRY.getValue(), "duplicate", null)));
         Privilege privilege = new Privilege();
         Set<String> hosts = new HashSet<>();
         hosts.add(HOST);
         Set<String> noServices = new HashSet<>();
-        Mockito.when(mockIpaClient.showRole(roleRequest.getRoleName()))
+        when(mockIpaClient.showRole(roleRequest.getRoleName()))
                 .thenThrow(new FreeIpaClientException("notfound", new JsonRpcClientException(NOT_FOUND, "notfound", null)))
                 .thenReturn(role);
-        Mockito.when(mockIpaClient.showPrivilege(any())).thenReturn(privilege);
-        Mockito.when(mockIpaClient.addRolePrivileges(any(), any())).thenReturn(role);
-        Mockito.when(mockIpaClient.addRoleMember(any(), any(), any(), any(), any(), any())).thenReturn(role);
+        when(mockIpaClient.showPrivilege(any())).thenReturn(privilege);
+        when(mockIpaClient.addRolePrivileges(any(), any())).thenReturn(role);
+        when(mockIpaClient.addRoleMember(any(), any(), any(), any(), any(), any())).thenReturn(role);
 
         underTest.addRoleAndPrivileges(Optional.empty(), Optional.of(host), roleRequest, mockIpaClient);
 
-        Mockito.verify(mockIpaClient).addRole(ROLE);
-        Mockito.verify(mockIpaClient).addRolePrivileges(ROLE, privileges);
-        Mockito.verify(mockIpaClient).addRoleMember(ROLE, null, null, hosts, null, noServices);
+        verify(mockIpaClient).addRole(ROLE);
+        verify(mockIpaClient).addRolePrivileges(ROLE, privileges);
+        verify(mockIpaClient).addRoleMember(ROLE, null, null, hosts, null, noServices);
     }
 
     @Test
@@ -166,8 +170,8 @@ public class KerberosMgmtRoleComponentV1Test {
         roleRequest.setPrivileges(privileges);
         Role role = new Role();
         role.setCn(ROLE);
-        Mockito.when(mockIpaClient.addRole(anyString())).thenThrow(new FreeIpaClientException("expected"));
-        Mockito.when(mockIpaClient.showRole(roleRequest.getRoleName()))
+        when(mockIpaClient.addRole(anyString())).thenThrow(new FreeIpaClientException("expected"));
+        when(mockIpaClient.showRole(roleRequest.getRoleName()))
                 .thenThrow(new FreeIpaClientException("notfound", new JsonRpcClientException(NOT_FOUND, "notfound", null)))
                 .thenReturn(role);
 
@@ -182,7 +186,7 @@ public class KerberosMgmtRoleComponentV1Test {
 
         underTest.addRoleAndPrivileges(Optional.of(service), Optional.empty(), null, mockIpaClient);
 
-        Mockito.verifyNoInteractions(mockIpaClient);
+        verifyNoInteractions(mockIpaClient);
     }
 
     @Test
@@ -198,40 +202,40 @@ public class KerberosMgmtRoleComponentV1Test {
         roleRequest.setPrivileges(privileges);
         Role role = new Role();
         role.setCn(ROLE);
-        Mockito.when(mockIpaClient.addRole(anyString())).thenReturn(role);
+        when(mockIpaClient.addRole(anyString())).thenReturn(role);
         Privilege privilege = new Privilege();
         Set<String> noHosts = new HashSet<>();
         Set<String> services = new HashSet<>();
         services.add(SERVICE);
-        Mockito.when(mockIpaClient.showRole(roleRequest.getRoleName()))
+        when(mockIpaClient.showRole(roleRequest.getRoleName()))
                 .thenThrow(new FreeIpaClientException("notfound", new JsonRpcClientException(NOT_FOUND, "notfound", null)))
                 .thenReturn(role);
-        Mockito.when(mockIpaClient.showPrivilege(any())).thenReturn(privilege);
-        Mockito.when(mockIpaClient.addRolePrivileges(any(), any())).thenReturn(role);
-        Mockito.when(mockIpaClient.addRoleMember(any(), any(), any(), any(), any(), any())).thenReturn(role);
+        when(mockIpaClient.showPrivilege(any())).thenReturn(privilege);
+        when(mockIpaClient.addRolePrivileges(any(), any())).thenReturn(role);
+        when(mockIpaClient.addRoleMember(any(), any(), any(), any(), any(), any())).thenReturn(role);
 
         underTest.addRoleAndPrivileges(Optional.of(service), Optional.empty(), roleRequest, mockIpaClient);
 
-        Mockito.verify(mockIpaClient).addRole(ROLE);
-        Mockito.verify(mockIpaClient).addRolePrivileges(ROLE, privileges);
-        Mockito.verify(mockIpaClient).addRoleMember(ROLE, null, null, noHosts, null, services);
+        verify(mockIpaClient).addRole(ROLE);
+        verify(mockIpaClient).addRolePrivileges(ROLE, privileges);
+        verify(mockIpaClient).addRoleMember(ROLE, null, null, noHosts, null, services);
     }
 
     @Test
     public void testDeleteRoleIfNoLongerUsedWhenRoleIsNull() throws Exception {
         underTest.deleteRoleIfItIsNoLongerUsed(null, mockIpaClient);
 
-        Mockito.verifyNoInteractions(mockIpaClient);
+        verifyNoInteractions(mockIpaClient);
     }
 
     @Test
     public void testDeleteRoleIfNoLongerUsedWhenRoleDoesNotExist() throws Exception {
-        Mockito.when(mockIpaClient.showRole(anyString())).thenThrow(new FreeIpaClientException(ERROR_MESSAGE,
+        when(mockIpaClient.showRole(anyString())).thenThrow(new FreeIpaClientException(ERROR_MESSAGE,
                 new JsonRpcClientException(NOT_FOUND, ERROR_MESSAGE, null)));
 
         underTest.deleteRoleIfItIsNoLongerUsed(ROLE, mockIpaClient);
 
-        Mockito.verify(mockIpaClient, Mockito.never()).deleteRole(ROLE);
+        verify(mockIpaClient, never()).deleteRole(ROLE);
     }
 
     @Test
@@ -241,11 +245,11 @@ public class KerberosMgmtRoleComponentV1Test {
         List<String> hosts = new ArrayList<>();
         hosts.add(HOST);
         role.setMemberHost(hosts);
-        Mockito.when(mockIpaClient.showRole(anyString())).thenReturn(role);
+        when(mockIpaClient.showRole(anyString())).thenReturn(role);
 
         underTest.deleteRoleIfItIsNoLongerUsed(ROLE, mockIpaClient);
 
-        Mockito.verify(mockIpaClient, Mockito.never()).deleteRole(ROLE);
+        verify(mockIpaClient, never()).deleteRole(ROLE);
     }
 
     @Test
@@ -255,22 +259,22 @@ public class KerberosMgmtRoleComponentV1Test {
         List<String> services = new ArrayList<>();
         services.add(SERVICE);
         role.setMemberService(services);
-        Mockito.when(mockIpaClient.showRole(anyString())).thenReturn(role);
+        when(mockIpaClient.showRole(anyString())).thenReturn(role);
 
         underTest.deleteRoleIfItIsNoLongerUsed(ROLE, mockIpaClient);
 
-        Mockito.verify(mockIpaClient, Mockito.never()).deleteRole(ROLE);
+        verify(mockIpaClient, never()).deleteRole(ROLE);
     }
 
     @Test
     public void testDeleteRoleIfNoLongerUsedWhenRoleIsNotUsed() throws Exception {
         Role role = new Role();
         role.setCn(ROLE);
-        Mockito.when(mockIpaClient.showRole(anyString())).thenReturn(role);
+        when(mockIpaClient.showRole(anyString())).thenReturn(role);
 
         underTest.deleteRoleIfItIsNoLongerUsed(ROLE, mockIpaClient);
 
-        Mockito.verify(mockIpaClient).deleteRole(ROLE);
+        verify(mockIpaClient).deleteRole(ROLE);
     }
 
     @Test
@@ -282,9 +286,9 @@ public class KerberosMgmtRoleComponentV1Test {
         privileges.add(PRIVILEGE2);
         roleRequest.setPrivileges(privileges);
         Privilege privilege = new Privilege();
-        Mockito.when(mockIpaClient.showPrivilege(any())).thenReturn(privilege);
+        when(mockIpaClient.showPrivilege(any())).thenReturn(privilege);
 
-        Assertions.assertTrue(underTest.privilegesExist(roleRequest, mockIpaClient));
+        assertTrue(underTest.privilegesExist(roleRequest, mockIpaClient));
     }
 
     @Test
@@ -295,9 +299,9 @@ public class KerberosMgmtRoleComponentV1Test {
         privileges.add(PRIVILEGE1);
         privileges.add(PRIVILEGE2);
         roleRequest.setPrivileges(privileges);
-        Mockito.when(mockIpaClient.showPrivilege(any())).thenThrow(new FreeIpaClientException(ERROR_MESSAGE,
+        when(mockIpaClient.showPrivilege(any())).thenThrow(new FreeIpaClientException(ERROR_MESSAGE,
                 new JsonRpcClientException(NOT_FOUND, ERROR_MESSAGE, null)));
 
-        Assertions.assertFalse(underTest.privilegesExist(roleRequest, mockIpaClient));
+        assertFalse(underTest.privilegesExist(roleRequest, mockIpaClient));
     }
 }

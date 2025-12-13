@@ -8,6 +8,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.hamcrest.core.IsNot.not;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -24,7 +25,6 @@ import java.util.Set;
 import org.assertj.core.api.Assertions;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -980,7 +980,7 @@ public class CloudFormationTemplateBuilderTest {
         String templateString = cloudFormationTemplateBuilder.build(modelContext);
 
         //THEN
-        Assert.assertTrue("Invalid JSON: " + templateString, JsonUtil.isValid(templateString));
+        assertTrue(JsonUtil.isValid(templateString), "Invalid JSON: " + templateString);
         assertThat(templateString, stringContainsInOrder("OnDemandPercentageAboveBaseCapacity", "40"));
         assertThat(templateString, containsString("SecurityGroupIngress"));
         assertThat(templateString, stringContainsInOrder("SpotMaxPrice", "0.9"));

@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -25,7 +26,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
@@ -135,7 +135,7 @@ class EnvironmentControllerTest {
         NameOrCrn environmentCRN = NameOrCrn.ofName(ENV_CRN);
         Environment env = new Environment();
         env.setStatus(EnvironmentStatus.CREATE_FAILED);
-        try (MockedStatic<ThreadBasedUserCrnProvider> mockedThreadBasedUserCrnProvider = Mockito.mockStatic(ThreadBasedUserCrnProvider.class)) {
+        try (MockedStatic<ThreadBasedUserCrnProvider> mockedThreadBasedUserCrnProvider = mockStatic(ThreadBasedUserCrnProvider.class)) {
             mockedThreadBasedUserCrnProvider.when(ThreadBasedUserCrnProvider::getAccountId).thenReturn(accountId);
             when(environmentModificationService.getEnvironment(accountId, environmentCRN)).thenReturn(env);
             try {
@@ -155,7 +155,7 @@ class EnvironmentControllerTest {
         EnvironmentEditDto environmentEditDto = EnvironmentEditDto.builder().build();
         EnvironmentDto environmentDto = EnvironmentDto.builder().withName(ENV_CRN).build();
         environmentDto.setName("environmentName");
-        try (MockedStatic<ThreadBasedUserCrnProvider> mockedThreadBasedUserCrnProvider = Mockito.mockStatic(ThreadBasedUserCrnProvider.class)) {
+        try (MockedStatic<ThreadBasedUserCrnProvider> mockedThreadBasedUserCrnProvider = mockStatic(ThreadBasedUserCrnProvider.class)) {
             mockedThreadBasedUserCrnProvider.when(ThreadBasedUserCrnProvider::getAccountId).thenReturn(accountId);
             when(environmentModificationService.getEnvironment(accountId, environmentCRN)).thenReturn(env);
             when(environmentApiConverter.initEditDto(env, null)).thenReturn(environmentEditDto);
@@ -173,7 +173,7 @@ class EnvironmentControllerTest {
         NameOrCrn environmentCRN = NameOrCrn.ofName(ENV_CRN);
         Environment env = new Environment();
         env.setStatus(EnvironmentStatus.CREATE_FAILED);
-        try (MockedStatic<ThreadBasedUserCrnProvider> mockedThreadBasedUserCrnProvider = Mockito.mockStatic(ThreadBasedUserCrnProvider.class)) {
+        try (MockedStatic<ThreadBasedUserCrnProvider> mockedThreadBasedUserCrnProvider = mockStatic(ThreadBasedUserCrnProvider.class)) {
             mockedThreadBasedUserCrnProvider.when(ThreadBasedUserCrnProvider::getAccountId).thenReturn(accountId);
             when(environmentModificationService.getEnvironment(accountId, environmentCRN)).thenReturn(env);
             try {
@@ -193,7 +193,7 @@ class EnvironmentControllerTest {
         EnvironmentChangeCredentialDto environmentChangeCredentialDto = EnvironmentChangeCredentialDto.builder().build();
         EnvironmentDto environmentDto = EnvironmentDto.builder().withName(ENV_CRN).build();
         environmentDto.setName("environmentName");
-        try (MockedStatic<ThreadBasedUserCrnProvider> mockedThreadBasedUserCrnProvider = Mockito.mockStatic(ThreadBasedUserCrnProvider.class)) {
+        try (MockedStatic<ThreadBasedUserCrnProvider> mockedThreadBasedUserCrnProvider = mockStatic(ThreadBasedUserCrnProvider.class)) {
             mockedThreadBasedUserCrnProvider.when(ThreadBasedUserCrnProvider::getAccountId).thenReturn(accountId);
             when(environmentModificationService.getEnvironment(accountId, environmentCRN)).thenReturn(env);
             when(environmentApiConverter.convertEnvironmentChangeCredentialDto(null)).thenReturn(environmentChangeCredentialDto);

@@ -1,18 +1,18 @@
 package com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator;
 
 import static com.sequenceiq.cloudbreak.tls.EncryptionProfileProvider.CipherSuitesLimitType.BLACKBOX_EXPORTER;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -25,11 +25,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
@@ -63,7 +65,8 @@ import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.environment.api.v1.encryptionprofile.model.EncryptionProfileResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
-public class TelemetryDecoratorTest {
+@ExtendWith(MockitoExtension.class)
+class TelemetryDecoratorTest {
 
     private TelemetryDecorator underTest;
 
@@ -89,7 +92,7 @@ public class TelemetryDecoratorTest {
     private ComponentConfigProviderService componentConfigProviderService;
 
     @Spy
-    private Telemetry telemetry = new Telemetry();
+    private Telemetry telemetry;
 
     @Mock
     private ClusterComponentConfigProvider clusterComponentConfigProvider;
@@ -107,10 +110,10 @@ public class TelemetryDecoratorTest {
     private TelemetryFeatureService telemetryFeatureService;
 
     @Spy
-    private Monitoring monitoring = new Monitoring();
+    private Monitoring monitoring;
 
-    @Before
-    public void setUp() throws CloudbreakImageNotFoundException {
+    @BeforeEach
+    void setUp() throws CloudbreakImageNotFoundException {
         initMocks();
         underTest = new TelemetryDecorator(
                 altusMachineUserService,
@@ -128,19 +131,19 @@ public class TelemetryDecoratorTest {
     }
 
     @Test
-    public void testCreateTelemetryContext() {
+    void testCreateTelemetryContext() {
         // GIVEN
         DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
 
-        given(environmentService.getByCrn(anyString())).willReturn(detailedEnvironmentResponse);
-        given(telemetry.isComputeMonitoringEnabled()).willReturn(true);
-        given(telemetry.getLogging()).willReturn(logging);
-        given(telemetry.isCloudStorageLoggingEnabled()).willReturn(true);
-        given(logging.getS3()).willReturn(new S3CloudStorageV1Parameters());
-        given(entitlementService.isComputeMonitoringEnabled(anyString())).willReturn(true);
-        given(telemetry.getMonitoring()).willReturn(monitoring);
-        given(monitoring.getRemoteWriteUrl()).willReturn("https://remotewrite:80/api/v1/write");
-        given(clusterComponentConfigProvider.getSaltStateComponentCbVersion(2L)).willReturn("2.65.0-b62");
+        when(environmentService.getByCrn(anyString())).thenReturn(detailedEnvironmentResponse);
+        when(telemetry.isComputeMonitoringEnabled()).thenReturn(true);
+        when(telemetry.getLogging()).thenReturn(logging);
+        when(telemetry.isCloudStorageLoggingEnabled()).thenReturn(true);
+        when(logging.getS3()).thenReturn(new S3CloudStorageV1Parameters());
+        when(entitlementService.isComputeMonitoringEnabled(anyString())).thenReturn(true);
+        when(telemetry.getMonitoring()).thenReturn(monitoring);
+        when(monitoring.getRemoteWriteUrl()).thenReturn("https://remotewrite:80/api/v1/write");
+        when(clusterComponentConfigProvider.getSaltStateComponentCbVersion(2L)).thenReturn("2.65.0-b62");
         // WHEN
         TelemetryContext result = underTest.createTelemetryContext(createStack());
         // THEN
@@ -153,10 +156,10 @@ public class TelemetryDecoratorTest {
     }
 
     @Test
-    public void testCreateTelemetryContextWithDatalakeForcesCreateOfDatabusCredential() {
+    void testCreateTelemetryContextWithDatalakeForcesCreateOfDatabusCredential() {
         DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
 
-        given(environmentService.getByCrn(anyString())).willReturn(detailedEnvironmentResponse);
+        when(environmentService.getByCrn(anyString())).thenReturn(detailedEnvironmentResponse);
         // WHEN
         TelemetryContext result = underTest.createTelemetryContext(createStack(StackType.DATALAKE));
         // THEN
@@ -166,10 +169,10 @@ public class TelemetryDecoratorTest {
     }
 
     @Test
-    public void testCreateTelemetryContextWithDatahubDoesntForceCreateOfDatabusCredential() {
+    void testCreateTelemetryContextWithDatahubDoesntForceCreateOfDatabusCredential() {
         DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
 
-        given(environmentService.getByCrn(anyString())).willReturn(detailedEnvironmentResponse);
+        when(environmentService.getByCrn(anyString())).thenReturn(detailedEnvironmentResponse);
         // WHEN
         TelemetryContext result = underTest.createTelemetryContext(createStack(StackType.WORKLOAD));
         // THEN
@@ -179,16 +182,16 @@ public class TelemetryDecoratorTest {
     }
 
     @Test
-    public void testCreateTelemetryContextWithMonitoringOnly() {
+    void testCreateTelemetryContextWithMonitoringOnly() {
         // GIVEN
         DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
 
-        given(environmentService.getByCrn(anyString())).willReturn(detailedEnvironmentResponse);
-        given(telemetry.isComputeMonitoringEnabled()).willReturn(true);
-        given(entitlementService.isComputeMonitoringEnabled(anyString())).willReturn(true);
-        given(telemetry.getMonitoring()).willReturn(monitoring);
-        given(monitoring.getRemoteWriteUrl()).willReturn("https://remotewrite:80/api/v1/write");
-        given(clusterComponentConfigProvider.getSaltStateComponentCbVersion(2L)).willReturn("2.65.0-b62");
+        when(environmentService.getByCrn(anyString())).thenReturn(detailedEnvironmentResponse);
+        when(telemetry.isComputeMonitoringEnabled()).thenReturn(true);
+        when(entitlementService.isComputeMonitoringEnabled(anyString())).thenReturn(true);
+        when(telemetry.getMonitoring()).thenReturn(monitoring);
+        when(monitoring.getRemoteWriteUrl()).thenReturn("https://remotewrite:80/api/v1/write");
+        when(clusterComponentConfigProvider.getSaltStateComponentCbVersion(2L)).thenReturn("2.65.0-b62");
         // WHEN
         TelemetryContext result = underTest.createTelemetryContext(createStack());
         // THEN
@@ -199,15 +202,14 @@ public class TelemetryDecoratorTest {
     }
 
     @Test
-    public void testMonitoringIsTurnedOffIfEntitlementIsNotGranted() {
+    void testMonitoringIsTurnedOffIfEntitlementIsNotGranted() {
         // GIVEN
         DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
 
-        given(environmentService.getByCrn(anyString())).willReturn(detailedEnvironmentResponse);
-        given(telemetry.isComputeMonitoringEnabled()).willReturn(true);
-        given(entitlementService.isComputeMonitoringEnabled(anyString())).willReturn(false);
+        when(environmentService.getByCrn(anyString())).thenReturn(detailedEnvironmentResponse);
+        when(telemetry.isComputeMonitoringEnabled()).thenReturn(true);
+        when(entitlementService.isComputeMonitoringEnabled(anyString())).thenReturn(false);
         telemetry.setMonitoring(monitoring);
-        given(monitoring.getRemoteWriteUrl()).willReturn("https://remotewrite:80/api/v1/write");
         // WHEN
         TelemetryContext result = underTest.createTelemetryContext(createStack());
         // THEN
@@ -219,7 +221,7 @@ public class TelemetryDecoratorTest {
     }
 
     @Test
-    public void testMonitoringIsTurnedOnIfEntitlementIsGranted() {
+    void testMonitoringIsTurnedOnIfEntitlementIsGranted() {
         // GIVEN
         DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
         EncryptionProfileResponse encryptionProfileResponse = new EncryptionProfileResponse();
@@ -230,17 +232,17 @@ public class TelemetryDecoratorTest {
             )
         );
 
-        given(environmentService.getByCrn(anyString())).willReturn(detailedEnvironmentResponse);
-        given(encryptionProfileProvider.getTlsCipherSuitesIanaList(anyMap(), eq(BLACKBOX_EXPORTER)))
-                .willReturn(List.of("TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"));
-        given(telemetry.isComputeMonitoringEnabled()).willReturn(false);
-        given(entitlementService.isComputeMonitoringEnabled(anyString())).willReturn(true);
-        given(clusterComponentConfigProvider.getSaltStateComponentCbVersion(2L)).willReturn("2.66.0-b100");
+        when(environmentService.getByCrn(anyString())).thenReturn(detailedEnvironmentResponse);
+        when(encryptionProfileProvider.getTlsCipherSuitesIanaList(anyMap(), eq(BLACKBOX_EXPORTER)))
+                .thenReturn(List.of("TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384"));
+        when(telemetry.isComputeMonitoringEnabled()).thenReturn(false);
+        when(entitlementService.isComputeMonitoringEnabled(anyString())).thenReturn(true);
+        when(clusterComponentConfigProvider.getSaltStateComponentCbVersion(2L)).thenReturn("2.66.0-b100");
         telemetry.setMonitoring(monitoring);
-        given(monitoringUrlResolver.resolve(anyString(), anyBoolean())).willReturn("http://nope/receive");
-        given(monitoringUrlResolver.resolve(anyString(), anyBoolean())).willReturn("http://nope/receive");
-        given(encryptionProfileService.getEncryptionProfileByCrnOrDefault(any(), any()))
-                .willReturn(encryptionProfileResponse);
+        when(monitoringUrlResolver.resolve(anyString(), anyBoolean())).thenReturn("http://nope/receive");
+        when(monitoringUrlResolver.resolve(anyString(), anyBoolean())).thenReturn("http://nope/receive");
+        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(any(), any()))
+                .thenReturn(encryptionProfileResponse);
         // WHEN
         TelemetryContext result = underTest.createTelemetryContext(createStack());
         // THEN
@@ -253,16 +255,16 @@ public class TelemetryDecoratorTest {
     }
 
     @Test
-    public void testCreateTelemetryContextWithMonitoringOnlyAndMajorVersionChanged() {
+    void testCreateTelemetryContextWithMonitoringOnlyAndMajorVersionChanged() {
         // GIVEN
         DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
 
-        given(environmentService.getByCrn(anyString())).willReturn(detailedEnvironmentResponse);
-        given(telemetry.isComputeMonitoringEnabled()).willReturn(true);
-        given(entitlementService.isComputeMonitoringEnabled(anyString())).willReturn(true);
-        given(telemetry.getMonitoring()).willReturn(monitoring);
-        given(monitoring.getRemoteWriteUrl()).willReturn("https://remotewrite:80/api/v1/write");
-        given(clusterComponentConfigProvider.getSaltStateComponentCbVersion(2L)).willReturn("3.65.0-b620000");
+        when(environmentService.getByCrn(anyString())).thenReturn(detailedEnvironmentResponse);
+        when(telemetry.isComputeMonitoringEnabled()).thenReturn(true);
+        when(entitlementService.isComputeMonitoringEnabled(anyString())).thenReturn(true);
+        when(telemetry.getMonitoring()).thenReturn(monitoring);
+        when(monitoring.getRemoteWriteUrl()).thenReturn("https://remotewrite:80/api/v1/write");
+        when(clusterComponentConfigProvider.getSaltStateComponentCbVersion(2L)).thenReturn("3.65.0-b620000");
         // WHEN
         TelemetryContext result = underTest.createTelemetryContext(createStack());
         // THEN
@@ -274,14 +276,14 @@ public class TelemetryDecoratorTest {
     }
 
     @Test
-    public void testMonitoringIsTurnedOffIfEntitlementIsGrantedButSaltVersionIsTooOld() {
+    void testMonitoringIsTurnedOffIfEntitlementIsGrantedButSaltVersionIsTooOld() {
         // GIVEN
         DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
 
-        given(environmentService.getByCrn(anyString())).willReturn(detailedEnvironmentResponse);
-        given(telemetry.isComputeMonitoringEnabled()).willReturn(false);
-        given(entitlementService.isComputeMonitoringEnabled(anyString())).willReturn(true);
-        given(clusterComponentConfigProvider.getSaltStateComponentCbVersion(2L)).willReturn("2.65.0-b61");
+        when(environmentService.getByCrn(anyString())).thenReturn(detailedEnvironmentResponse);
+        when(telemetry.isComputeMonitoringEnabled()).thenReturn(false);
+        when(entitlementService.isComputeMonitoringEnabled(anyString())).thenReturn(true);
+        when(clusterComponentConfigProvider.getSaltStateComponentCbVersion(2L)).thenReturn("2.65.0-b61");
         telemetry.setMonitoring(monitoring);
         // WHEN
         TelemetryContext result = underTest.createTelemetryContext(createStack());
@@ -293,14 +295,14 @@ public class TelemetryDecoratorTest {
     }
 
     @Test
-    public void testMonitoringIsTurnedOffIfEntitlementIsGrantedButSaltVersionIsVeryOld() {
+    void testMonitoringIsTurnedOffIfEntitlementIsGrantedButSaltVersionIsVeryOld() {
         // GIVEN
         DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
 
-        given(environmentService.getByCrn(anyString())).willReturn(detailedEnvironmentResponse);
-        given(telemetry.isComputeMonitoringEnabled()).willReturn(false);
-        given(entitlementService.isComputeMonitoringEnabled(anyString())).willReturn(true);
-        given(clusterComponentConfigProvider.getSaltStateComponentCbVersion(2L)).willReturn("2.21.0-b10000");
+        when(environmentService.getByCrn(anyString())).thenReturn(detailedEnvironmentResponse);
+        when(telemetry.isComputeMonitoringEnabled()).thenReturn(false);
+        when(entitlementService.isComputeMonitoringEnabled(anyString())).thenReturn(true);
+        when(clusterComponentConfigProvider.getSaltStateComponentCbVersion(2L)).thenReturn("2.21.0-b10000");
         telemetry.setMonitoring(monitoring);
         // WHEN
         TelemetryContext result = underTest.createTelemetryContext(createStack());
@@ -312,14 +314,14 @@ public class TelemetryDecoratorTest {
     }
 
     @Test
-    public void testMonitoringIsTurnedOffIfEntitlementIsGrantedButSaltVersionIsUnkown() {
+    void testMonitoringIsTurnedOffIfEntitlementIsGrantedButSaltVersionIsUnkown() {
         // GIVEN
         DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
 
-        given(environmentService.getByCrn(anyString())).willReturn(detailedEnvironmentResponse);
-        given(telemetry.isComputeMonitoringEnabled()).willReturn(false);
-        given(entitlementService.isComputeMonitoringEnabled(anyString())).willReturn(true);
-        given(clusterComponentConfigProvider.getSaltStateComponentCbVersion(2L)).willReturn(null);
+        when(environmentService.getByCrn(anyString())).thenReturn(detailedEnvironmentResponse);
+        when(telemetry.isComputeMonitoringEnabled()).thenReturn(false);
+        when(entitlementService.isComputeMonitoringEnabled(anyString())).thenReturn(true);
+        when(clusterComponentConfigProvider.getSaltStateComponentCbVersion(2L)).thenReturn(null);
         telemetry.setMonitoring(monitoring);
         // WHEN
         TelemetryContext result = underTest.createTelemetryContext(createStack());
@@ -331,13 +333,13 @@ public class TelemetryDecoratorTest {
     }
 
     @Test
-    public void testCreateTelemetryContextLoggingWithoutCloudStorage() {
+    void testCreateTelemetryContextLoggingWithoutCloudStorage() {
         // GIVEN
         DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
 
-        given(environmentService.getByCrn(anyString())).willReturn(detailedEnvironmentResponse);
-        given(telemetry.getLogging()).willReturn(logging);
-        given(telemetry.isCloudStorageLoggingEnabled()).willReturn(true);
+        when(environmentService.getByCrn(anyString())).thenReturn(detailedEnvironmentResponse);
+        when(telemetry.getLogging()).thenReturn(logging);
+        when(telemetry.isCloudStorageLoggingEnabled()).thenReturn(true);
         // WHEN
         TelemetryContext result = underTest.createTelemetryContext(createStack());
         // THEN
@@ -345,11 +347,11 @@ public class TelemetryDecoratorTest {
     }
 
     @Test
-    public void testCreateTelemetryContextWithDefaults() {
+    void testCreateTelemetryContextWithDefaults() {
         // GIVEN
         DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
 
-        given(environmentService.getByCrn(anyString())).willReturn(detailedEnvironmentResponse);
+        when(environmentService.getByCrn(anyString())).thenReturn(detailedEnvironmentResponse);
         // WHEN
         TelemetryContext result = underTest.createTelemetryContext(createStack());
         // THEN
@@ -366,24 +368,23 @@ public class TelemetryDecoratorTest {
         MonitoringCredential monitoringCredential = new MonitoringCredential();
         monitoringCredential.setAccessKey("myAccessKey");
         monitoringCredential.setPrivateKey("mySecretKey");
-        given(componentConfigProviderService.getTelemetry(anyLong())).willReturn(telemetry);
-        given(componentConfigProviderService.getImage(anyLong())).willReturn(image);
-        given(telemetry.getDatabusEndpoint()).willReturn("https://dbus-dev.com");
-        given(altusMachineUserService.isAnyMonitoringFeatureSupported(any(Telemetry.class))).willReturn(true);
-        given(altusMachineUserService.storeDataBusCredential(any(Optional.class), any(Stack.class), any(CdpAccessKeyType.class)))
-                .willReturn(dataBusCredential);
-        given(altusMachineUserService.generateDatabusMachineUserForFluent(any(Stack.class), any(Telemetry.class), any(CdpAccessKeyType.class)))
-                .willReturn(Optional.of(altusCredential));
-        given(altusMachineUserService.generateMonitoringMachineUser(any(Stack.class), any(Telemetry.class), any(CdpAccessKeyType.class)))
-                .willReturn(Optional.of(altusCredential));
-        given(altusMachineUserService.storeMonitoringCredential(any(Optional.class), any(Stack.class), any(CdpAccessKeyType.class)))
-                .willReturn(monitoringCredential);
-        given(entitlementService.useDataBusCNameEndpointEnabled(anyString())).willReturn(false);
-        given(entitlementService.isDatahubDatabusEndpointValidationEnabled(anyString())).willReturn(true);
-        given(dataBusEndpointProvider.getDataBusEndpoint(anyString(), anyBoolean())).willReturn("https://dbus-dev.com");
-        given(dataBusEndpointProvider.getDatabusS3Endpoint(anyString(), anyString())).willReturn("https://cloudera-dbus-dev.amazonaws.com");
-        given(vmLogsService.getVmLogs()).willReturn(new ArrayList<>());
-        given(altusMachineUserService.getCdpAccessKeyType(any())).willReturn(CdpAccessKeyType.ECDSA);
+        when(componentConfigProviderService.getTelemetry(anyLong())).thenReturn(telemetry);
+        when(componentConfigProviderService.getImage(anyLong())).thenReturn(image);
+        when(telemetry.getDatabusEndpoint()).thenReturn("https://dbus-dev.com");
+        lenient().when(altusMachineUserService.isAnyMonitoringFeatureSupported(any(Telemetry.class))).thenReturn(true);
+        when(altusMachineUserService.storeDataBusCredential(any(Optional.class), any(Stack.class), any(CdpAccessKeyType.class))).thenReturn(dataBusCredential);
+        when(altusMachineUserService.generateDatabusMachineUserForFluent(any(Stack.class), any(Telemetry.class), any(CdpAccessKeyType.class)))
+                .thenReturn(Optional.of(altusCredential));
+        lenient().when(altusMachineUserService.generateMonitoringMachineUser(any(Stack.class), any(Telemetry.class), any(CdpAccessKeyType.class)))
+                .thenReturn(Optional.of(altusCredential));
+        lenient().when(altusMachineUserService.storeMonitoringCredential(any(Optional.class), any(Stack.class), any(CdpAccessKeyType.class)))
+                .thenReturn(monitoringCredential);
+        when(entitlementService.useDataBusCNameEndpointEnabled(anyString())).thenReturn(false);
+        lenient().when(entitlementService.isDatahubDatabusEndpointValidationEnabled(anyString())).thenReturn(true);
+        when(dataBusEndpointProvider.getDataBusEndpoint(anyString(), anyBoolean())).thenReturn("https://dbus-dev.com");
+        when(dataBusEndpointProvider.getDatabusS3Endpoint(anyString(), anyString())).thenReturn("https://cloudera-dbus-dev.amazonaws.com");
+        when(vmLogsService.getVmLogs()).thenReturn(new ArrayList<>());
+        when(altusMachineUserService.getCdpAccessKeyType(any())).thenReturn(CdpAccessKeyType.ECDSA);
     }
 
     private StackDto createStack() {

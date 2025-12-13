@@ -10,6 +10,7 @@ import static java.time.temporal.ChronoUnit.MINUTES;
 import static java.util.Arrays.asList;
 import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -18,7 +19,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import jakarta.inject.Inject;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -88,10 +88,10 @@ class FlowLogRepositoryTest {
                 PageRequest.of(0, 4));
 
         assertThat(result.getContent().size()).isEqualTo(4);
-        Assertions.assertTrue(result.getContent().contains(flowLog1));
-        Assertions.assertTrue(result.getContent().contains(flowLog2));
-        Assertions.assertTrue(result.getContent().contains(flowLog3));
-        Assertions.assertTrue(result.getContent().contains(flowLog4));
+        assertTrue(result.getContent().contains(flowLog1));
+        assertTrue(result.getContent().contains(flowLog2));
+        assertTrue(result.getContent().contains(flowLog3));
+        assertTrue(result.getContent().contains(flowLog4));
     }
 
     @Test
@@ -115,18 +115,18 @@ class FlowLogRepositoryTest {
                 PageRequest.of(0, 2));
 
         assertThat(resultPaginated.getContent().size()).isEqualTo(2);
-        Assertions.assertTrue(resultPaginated.getContent().contains(flowLog3));
-        Assertions.assertTrue(resultPaginated.getContent().contains(flowLog4));
+        assertTrue(resultPaginated.getContent().contains(flowLog3));
+        assertTrue(resultPaginated.getContent().contains(flowLog4));
         assertThat(resultPaginated.getTotalElements()).isEqualTo(4);
 
-        Assertions.assertTrue(resultPaginated.hasNext());
+        assertTrue(resultPaginated.hasNext());
 
         resultPaginated = underTest.findAllByFlowIdsCreatedDesc(Set.of(flowId1, flowId2, flowId3, flowId4),
                 resultPaginated.nextPageable());
 
         assertThat(resultPaginated.getContent().size()).isEqualTo(2);
-        Assertions.assertTrue(resultPaginated.getContent().contains(flowLog1));
-        Assertions.assertTrue(resultPaginated.getContent().contains(flowLog2));
+        assertTrue(resultPaginated.getContent().contains(flowLog1));
+        assertTrue(resultPaginated.getContent().contains(flowLog2));
         assertThat(resultPaginated.getTotalElements()).isEqualTo(4);
     }
 

@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.upgrade.sync.component;
 
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_SYNC_VERSIONS_FROM_CM_MISSING_VERSIONS;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.UPDATE_IN_PROGRESS;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -16,7 +17,6 @@ import java.util.Optional;
 import java.util.Set;
 
 import org.assertj.core.util.Lists;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -102,8 +102,8 @@ class CmVersionQueryServiceTest {
 
         Map<String, List<PackageInfo>> packageInfo = underTest.queryCmPackageInfo(stack);
 
-        Assertions.assertEquals(2, packageInfo.get(HOST_1).size());
-        Assertions.assertEquals(2, packageInfo.get(HOST_2).size());
+        assertEquals(2, packageInfo.get(HOST_1).size());
+        assertEquals(2, packageInfo.get(HOST_2).size());
 
         Map<String, Optional<String>> packages = Maps.newHashMap();
         packages.put(CLOUDERA_MANAGER_AGENT, Optional.of(VALID_PATTERN));
@@ -120,9 +120,9 @@ class CmVersionQueryServiceTest {
 
         PackageInfo packageInfo = underTest.checkCmPackageInfoConsistency(hostPackageMap, STACK_ID);
 
-        Assertions.assertEquals("1", packageInfo.getVersion());
-        Assertions.assertEquals("1000", packageInfo.getBuildNumber());
-        Assertions.assertEquals("1-1000", packageInfo.getFullVersionPrettyPrinted());
+        assertEquals("1", packageInfo.getVersion());
+        assertEquals("1000", packageInfo.getBuildNumber());
+        assertEquals("1-1000", packageInfo.getFullVersionPrettyPrinted());
     }
 
     @Test
@@ -134,7 +134,7 @@ class CmVersionQueryServiceTest {
         CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class, () ->
                 underTest.checkCmPackageInfoConsistency(hostPackageMap, STACK_ID));
 
-        Assertions.assertEquals("Error during sync! The following package(s) has multiple versions present on the machines. "
+        assertEquals("Error during sync! The following package(s) has multiple versions present on the machines. "
                 + "Package: [PackageInfo{name='cloudera-manager-agent', version='2', buildNumber='2000'}, "
                 + "PackageInfo{name='cloudera-manager-agent', version='1', buildNumber='1000'}]", exception.getMessage());
     }
@@ -151,8 +151,8 @@ class CmVersionQueryServiceTest {
 
         PackageInfo packageInfo = underTest.checkCmPackageInfoConsistency(hostPackageMap, STACK_ID);
 
-        Assertions.assertEquals(packageInfo.getVersion(), OTHER_VERSION);
-        Assertions.assertEquals(packageInfo.getBuildNumber(), OTHER_BUILD_NUMBER);
+        assertEquals(packageInfo.getVersion(), OTHER_VERSION);
+        assertEquals(packageInfo.getBuildNumber(), OTHER_BUILD_NUMBER);
     }
 
     @Test
@@ -167,8 +167,8 @@ class CmVersionQueryServiceTest {
 
         PackageInfo packageInfo = underTest.checkCmPackageInfoConsistency(hostPackageMap, STACK_ID);
 
-        Assertions.assertEquals(C_VERSION, packageInfo.getVersion());
-        Assertions.assertEquals(HIGHER_BUILD_NUMBER, packageInfo.getBuildNumber());
+        assertEquals(C_VERSION, packageInfo.getVersion());
+        assertEquals(HIGHER_BUILD_NUMBER, packageInfo.getBuildNumber());
     }
 
     @Test
@@ -180,7 +180,7 @@ class CmVersionQueryServiceTest {
         CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class, () ->
                 underTest.checkCmPackageInfoConsistency(hostPackageMap, STACK_ID));
 
-        Assertions.assertEquals("Error during sync! CM server and agent versions cannot be determined!", exception.getMessage());
+        assertEquals("Error during sync! CM server and agent versions cannot be determined!", exception.getMessage());
 
     }
 
@@ -198,8 +198,8 @@ class CmVersionQueryServiceTest {
                 getPackageInfo(CLOUDERA_MANAGER_AGENT, "false", "null")));
 
         PackageInfo packageInfo = underTest.checkCmPackageInfoConsistency(hostPackageMap, STACK_ID);
-        Assertions.assertEquals(C_VERSION, packageInfo.getVersion());
-        Assertions.assertEquals(HIGHER_BUILD_NUMBER, packageInfo.getBuildNumber());
+        assertEquals(C_VERSION, packageInfo.getVersion());
+        assertEquals(HIGHER_BUILD_NUMBER, packageInfo.getBuildNumber());
 
         verify(eventService).fireCloudbreakEvent(eq(STACK_ID), eq(UPDATE_IN_PROGRESS.name()),
                 eq(STACK_SYNC_VERSIONS_FROM_CM_MISSING_VERSIONS), eq(List.of(String.join(", ", HOST_1, HOST_3))));
@@ -219,8 +219,8 @@ class CmVersionQueryServiceTest {
                 getPackageInfo(CLOUDERA_MANAGER_AGENT, "false", "null")));
 
         PackageInfo packageInfo = underTest.checkCmPackageInfoConsistency(hostPackageMap, STACK_ID);
-        Assertions.assertEquals(C_VERSION, packageInfo.getVersion());
-        Assertions.assertEquals(LOWER_BUILD_NUMBER, packageInfo.getBuildNumber());
+        assertEquals(C_VERSION, packageInfo.getVersion());
+        assertEquals(LOWER_BUILD_NUMBER, packageInfo.getBuildNumber());
 
         verify(eventService).fireCloudbreakEvent(eq(STACK_ID), eq(UPDATE_IN_PROGRESS.name()),
                 eq(STACK_SYNC_VERSIONS_FROM_CM_MISSING_VERSIONS), eq(List.of(String.join(", ", HOST_1, HOST_3, HOST_2))));
@@ -242,7 +242,7 @@ class CmVersionQueryServiceTest {
         CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class, () ->
                 underTest.checkCmPackageInfoConsistency(hostPackageMap, STACK_ID));
 
-        Assertions.assertEquals("Error during sync! CM server and agent versions cannot be determined!", exception.getMessage());
+        assertEquals("Error during sync! CM server and agent versions cannot be determined!", exception.getMessage());
     }
 
     private Stack createStack() {

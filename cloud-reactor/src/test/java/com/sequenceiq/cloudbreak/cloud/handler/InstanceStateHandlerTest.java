@@ -11,12 +11,13 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatcher;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.event.resource.GetInstancesStateRequest;
 import com.sequenceiq.cloudbreak.cloud.event.resource.GetInstancesStateResult;
@@ -28,7 +29,8 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 
-public class InstanceStateHandlerTest {
+@ExtendWith(MockitoExtension.class)
+class InstanceStateHandlerTest {
 
     @Mock
     private InstanceStateQuery instanceStateQuery;
@@ -45,20 +47,18 @@ public class InstanceStateHandlerTest {
 
     private List<CloudInstance> instances;
 
-    @Before
-    public void init() {
+    @BeforeEach
+    void init() {
         instances = Arrays.asList(
                 new CloudInstance("host1", null, null, "subnet-1", "az1"),
                 new CloudInstance("host2", null, null, "subnet-1", "az1")
         );
         request = new GetInstancesStateRequest<>(null, null, instances);
         event = new Event<>(request);
-
-        MockitoAnnotations.initMocks(this);
     }
 
     @Test
-    public void handlesInstanceStatusWhenAvailable() {
+    void handlesInstanceStatusWhenAvailable() {
         List<CloudVmInstanceStatus> allStarted = allInstancesInStatus(InstanceStatus.STARTED);
         when(instanceStateQuery.getCloudVmInstanceStatuses(any(), any(), eq(instances)))
                 .thenReturn(allStarted);
@@ -69,7 +69,7 @@ public class InstanceStateHandlerTest {
     }
 
     @Test
-    public void returnsUnknownStatusWhenUnsupported() {
+    void returnsUnknownStatusWhenUnsupported() {
         when(instanceStateQuery.getCloudVmInstanceStatuses(any(), any(), eq(instances)))
                 .thenThrow(new CloudOperationNotSupportedException("No check on mock cloud"));
 
@@ -79,7 +79,7 @@ public class InstanceStateHandlerTest {
     }
 
     @Test
-    public void returnsErrorWhenFailsToSync() {
+    void returnsErrorWhenFailsToSync() {
         String message = "Some error happened";
         CloudConnectorException exception = new CloudConnectorException(message);
         when(instanceStateQuery.getCloudVmInstanceStatuses(any(), any(), eq(instances)))

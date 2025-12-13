@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.core.bootstrap.service;
 
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_BOOTSTRAPPER_ERROR_INVALID_NODECOUNT;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -19,13 +20,11 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
 
 import com.sequenceiq.cloudbreak.TestUtil;
@@ -49,11 +48,8 @@ import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProvider
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.common.api.type.ResourceType;
 
-@RunWith(MockitoJUnitRunner.class)
-public class ClusterBootstrapperErrorHandlerTest {
-
-    @Rule
-    public final ExpectedException thrown = ExpectedException.none();
+@ExtendWith(MockitoExtension.class)
+class ClusterBootstrapperErrorHandlerTest {
 
     @Mock
     private ResourceService resourceService;
@@ -83,7 +79,7 @@ public class ClusterBootstrapperErrorHandlerTest {
     private ClusterBootstrapperErrorHandler underTest;
 
     @Test
-    public void clusterBootstrapErrorHandlerWhenNodeCountLessThanOneAfterTheRollbackThenClusterProvisionFailed() throws CloudbreakOrchestratorFailedException {
+    void clusterBootstrapErrorHandlerWhenNodeCountLessThanOneAfterTheRollbackThenClusterProvisionFailed() throws CloudbreakOrchestratorFailedException {
         Stack stack = TestUtil.stack();
 
         when(orchestrator.getAvailableNodes(any(GatewayConfig.class), anySet())).thenReturn(new ArrayList<>());
@@ -111,11 +107,10 @@ public class ClusterBootstrapperErrorHandlerTest {
                     return Optional.empty();
                 });
         when(cloudbreakMessagesService.getMessage(eq(CLUSTER_BOOTSTRAPPER_ERROR_INVALID_NODECOUNT.getMessage()), any())).thenReturn("invalide.nodecount");
-        thrown.expect(CloudbreakOrchestratorFailedException.class);
-        thrown.expectMessage("invalide.nodecount");
 
         StackDto stackDto = mock(StackDto.class);
-        underTest.terminateFailedNodes(null, orchestrator, stackDto,
+
+        assertThrows(CloudbreakOrchestratorFailedException.class, () -> underTest.terminateFailedNodes(null, orchestrator, stackDto,
                 GatewayConfig.builder()
                         .withConnectionAddress("10.0.0.1")
                         .withPublicAddress("198.0.0.1")
@@ -124,11 +119,11 @@ public class ClusterBootstrapperErrorHandlerTest {
                         .withInstanceId("instanceId")
                         .withKnoxGatewayEnabled(false)
                         .build(),
-                prepareNodes(stack));
+                prepareNodes(stack)));
     }
 
     @Test
-    public void clusterBootstrapErrorHandlerWhenNodeCountHigherThanZeroAfterTheRollbackThenClusterProvisionFailed()
+    void clusterBootstrapErrorHandlerWhenNodeCountHigherThanZeroAfterTheRollbackThenClusterProvisionFailed()
             throws CloudbreakOrchestratorFailedException {
         Stack stack = TestUtil.stack();
 

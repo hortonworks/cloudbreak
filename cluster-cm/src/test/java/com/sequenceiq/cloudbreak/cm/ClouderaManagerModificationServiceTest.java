@@ -22,6 +22,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -50,7 +51,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -846,7 +846,7 @@ class ClouderaManagerModificationServiceTest {
         verify(clouderaManagerParcelManagementService, times(1)).activateParcels(products, parcelResourceApi, parcelsResourceApi, stack, v31Client);
         verifyNoInteractions(clouderaManagerUpgradeService);
 
-        InOrder inOrder = Mockito.inOrder(clouderaManagerPollingServiceProvider, clouderaManagerParcelManagementService, clustersResourceApi,
+        InOrder inOrder = inOrder(clouderaManagerPollingServiceProvider, clouderaManagerParcelManagementService, clustersResourceApi,
                 clouderaManagerRestartService);
         inOrder.verify(clouderaManagerPollingServiceProvider).startPollingCmStartup(stack, v31Client);
         inOrder.verify(clouderaManagerPollingServiceProvider).startPollingCmHostStatus(stack, v31Client);
@@ -940,7 +940,7 @@ class ClouderaManagerModificationServiceTest {
         assertEquals(GROUP_NAME, entityTagListCaptor.getValue().get(0).getValue());
         verify(hostsResourceApi, times(0)).reallocateMemory(any());
 
-        InOrder inOrder = Mockito.inOrder(clouderaManagerPollingServiceProvider, clouderaManagerParcelManagementService,
+        InOrder inOrder = inOrder(clouderaManagerPollingServiceProvider, clouderaManagerParcelManagementService,
                 clustersResourceApi, clouderaManagerUpgradeService, clouderaManagerApiClientProvider, clouderaManagerRestartService);
         inOrder.verify(clouderaManagerPollingServiceProvider).startPollingCmStartup(stack, v31Client);
         inOrder.verify(clouderaManagerPollingServiceProvider).startPollingCmHostStatus(stack, v31Client);
@@ -1026,7 +1026,7 @@ class ClouderaManagerModificationServiceTest {
         verify(hostsResourceApi, times(1)).reallocateMemory(apiHostNameListArgumentCaptor.capture());
         assertEquals("original", apiHostNameListArgumentCaptor.getValue().getItems().getFirst());
 
-        InOrder inOrder = Mockito.inOrder(clouderaManagerPollingServiceProvider, clouderaManagerParcelManagementService, clustersResourceApi,
+        InOrder inOrder = inOrder(clouderaManagerPollingServiceProvider, clouderaManagerParcelManagementService, clustersResourceApi,
                 clouderaManagerApiClientProvider, clouderaManagerUpgradeService);
         inOrder.verify(clouderaManagerPollingServiceProvider).startPollingCmStartup(stack, v31Client);
         inOrder.verify(clouderaManagerPollingServiceProvider).startPollingCmHostStatus(stack, v31Client);
@@ -1101,7 +1101,7 @@ class ClouderaManagerModificationServiceTest {
         verify(clouderaManagerParcelManagementService).activateParcels(any(), eq(parcelResourceApi), eq(parcelsResourceApi), eq(stack), eq(v31Client));
         verify(clouderaManagerCommonCommandService, times(1)).getApiCommand(any(), any(), any(), any());
 
-        InOrder inOrder = Mockito.inOrder(clouderaManagerPollingServiceProvider, clouderaManagerParcelManagementService, clouderaManagerUpgradeService,
+        InOrder inOrder = inOrder(clouderaManagerPollingServiceProvider, clouderaManagerParcelManagementService, clouderaManagerUpgradeService,
                 clustersResourceApi, clouderaManagerCommonCommandService, servicesResourceApi);
         inOrder.verify(clouderaManagerPollingServiceProvider).startPollingCmStartup(stack, v31Client);
         inOrder.verify(clouderaManagerPollingServiceProvider).startPollingCmHostStatus(stack, v31Client);

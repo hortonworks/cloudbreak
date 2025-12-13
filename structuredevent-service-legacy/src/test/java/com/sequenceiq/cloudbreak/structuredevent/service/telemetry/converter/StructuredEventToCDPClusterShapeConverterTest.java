@@ -1,11 +1,13 @@
 package com.sequenceiq.cloudbreak.structuredevent.service.telemetry.converter;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import org.junit.Assert;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -31,17 +33,17 @@ class StructuredEventToCDPClusterShapeConverterTest {
     public void testConvertWithNull() {
         UsageProto.CDPClusterShape flowClusterShape = underTest.convert((StructuredFlowEvent) null);
 
-        Assert.assertEquals("", flowClusterShape.getClusterTemplateName());
-        Assert.assertEquals(-1, flowClusterShape.getNodes());
-        Assert.assertEquals("", flowClusterShape.getDefinitionDetails());
-        Assert.assertFalse(flowClusterShape.getTemporaryStorageUsed());
+        assertEquals("", flowClusterShape.getClusterTemplateName());
+        assertEquals(-1, flowClusterShape.getNodes());
+        assertEquals("", flowClusterShape.getDefinitionDetails());
+        assertFalse(flowClusterShape.getTemporaryStorageUsed());
 
         UsageProto.CDPClusterShape syncClusterShape = underTest.convert((StructuredSyncEvent) null);
 
-        Assert.assertEquals("", syncClusterShape.getClusterTemplateName());
-        Assert.assertEquals(-1, syncClusterShape.getNodes());
-        Assert.assertEquals("", syncClusterShape.getDefinitionDetails());
-        Assert.assertFalse(syncClusterShape.getTemporaryStorageUsed());
+        assertEquals("", syncClusterShape.getClusterTemplateName());
+        assertEquals(-1, syncClusterShape.getNodes());
+        assertEquals("", syncClusterShape.getDefinitionDetails());
+        assertFalse(syncClusterShape.getTemporaryStorageUsed());
     }
 
     @Test
@@ -50,19 +52,19 @@ class StructuredEventToCDPClusterShapeConverterTest {
 
         UsageProto.CDPClusterShape flowClusterShape = underTest.convert(structuredFlowEvent);
 
-        Assert.assertEquals("", flowClusterShape.getClusterTemplateName());
-        Assert.assertEquals(-1, flowClusterShape.getNodes());
-        Assert.assertEquals("", flowClusterShape.getDefinitionDetails());
-        Assert.assertFalse(flowClusterShape.getTemporaryStorageUsed());
+        assertEquals("", flowClusterShape.getClusterTemplateName());
+        assertEquals(-1, flowClusterShape.getNodes());
+        assertEquals("", flowClusterShape.getDefinitionDetails());
+        assertFalse(flowClusterShape.getTemporaryStorageUsed());
 
         StructuredSyncEvent structuredSyncEvent = new StructuredSyncEvent();
 
         UsageProto.CDPClusterShape syncClusterShape = underTest.convert(structuredSyncEvent);
 
-        Assert.assertEquals("", syncClusterShape.getClusterTemplateName());
-        Assert.assertEquals(-1, syncClusterShape.getNodes());
-        Assert.assertEquals("", syncClusterShape.getDefinitionDetails());
-        Assert.assertFalse(syncClusterShape.getTemporaryStorageUsed());
+        assertEquals("", syncClusterShape.getClusterTemplateName());
+        assertEquals(-1, syncClusterShape.getNodes());
+        assertEquals("", syncClusterShape.getDefinitionDetails());
+        assertFalse(syncClusterShape.getTemporaryStorageUsed());
     }
 
     @Test
@@ -75,11 +77,11 @@ class StructuredEventToCDPClusterShapeConverterTest {
 
         UsageProto.CDPClusterShape flowClusterShape = underTest.convert(structuredFlowEvent);
 
-        Assert.assertEquals("My Blueprint", flowClusterShape.getClusterTemplateName());
-        Assert.assertEquals(10, flowClusterShape.getNodes());
-        Assert.assertEquals("compute=3, gw=4, master=1, worker=2", flowClusterShape.getHostGroupNodeCount());
-        Assert.assertTrue(flowClusterShape.getTemporaryStorageUsed());
-        Assert.assertEquals("{\"services\":[\"service1\",\"service2\",\"service3\"]," +
+        assertEquals("My Blueprint", flowClusterShape.getClusterTemplateName());
+        assertEquals(10, flowClusterShape.getNodes());
+        assertEquals("compute=3, gw=4, master=1, worker=2", flowClusterShape.getHostGroupNodeCount());
+        assertTrue(flowClusterShape.getTemporaryStorageUsed());
+        assertEquals("{\"services\":[\"service1\",\"service2\",\"service3\"]," +
                         "\"roles\":[\"role1\",\"role2\"],\"runtimeVersion\":\"7.2.15\"}", flowClusterShape.getClusterTemplateOverridesDetails());
 
         StructuredSyncEvent structuredSyncEvent = new StructuredSyncEvent();
@@ -90,11 +92,11 @@ class StructuredEventToCDPClusterShapeConverterTest {
 
         UsageProto.CDPClusterShape syncClusterShape = underTest.convert(structuredSyncEvent);
 
-        Assert.assertEquals("My Blueprint", syncClusterShape.getClusterTemplateName());
-        Assert.assertEquals(10, syncClusterShape.getNodes());
-        Assert.assertEquals("compute=3, gw=4, master=1, worker=2", syncClusterShape.getHostGroupNodeCount());
-        Assert.assertTrue(syncClusterShape.getTemporaryStorageUsed());
-        Assert.assertEquals("{\"services\":[\"service1\",\"service2\",\"service3\"]," +
+        assertEquals("My Blueprint", syncClusterShape.getClusterTemplateName());
+        assertEquals(10, syncClusterShape.getNodes());
+        assertEquals("compute=3, gw=4, master=1, worker=2", syncClusterShape.getHostGroupNodeCount());
+        assertTrue(syncClusterShape.getTemporaryStorageUsed());
+        assertEquals("{\"services\":[\"service1\",\"service2\",\"service3\"]," +
                 "\"roles\":[\"role1\",\"role2\"],\"runtimeVersion\":\"7.2.15\"}", syncClusterShape.getClusterTemplateOverridesDetails());
     }
 
@@ -126,11 +128,11 @@ class StructuredEventToCDPClusterShapeConverterTest {
 
         UsageProto.CDPClusterShape flowClusterShape = underTest.convert(structuredFlowEvent);
 
-        Assert.assertEquals("My Blueprint", flowClusterShape.getClusterTemplateName());
-        Assert.assertEquals(10, flowClusterShape.getNodes());
-        Assert.assertEquals("compute=3, gw=4, master=1, worker=2", flowClusterShape.getHostGroupNodeCount());
-        Assert.assertTrue(flowClusterShape.getTemporaryStorageUsed());
-        Assert.assertEquals("{\"services\":{\"HIVE_ON_TEZ\":1,\"HIVE\":1,\"LIVY\":1,\"DAS\":1,\"HDFS\":1," +
+        assertEquals("My Blueprint", flowClusterShape.getClusterTemplateName());
+        assertEquals(10, flowClusterShape.getNodes());
+        assertEquals("compute=3, gw=4, master=1, worker=2", flowClusterShape.getHostGroupNodeCount());
+        assertTrue(flowClusterShape.getTemporaryStorageUsed());
+        assertEquals("{\"services\":{\"HIVE_ON_TEZ\":1,\"HIVE\":1,\"LIVY\":1,\"DAS\":1,\"HDFS\":1," +
                 "\"OOZIE\":1,\"TEZ\":1,\"HUE\":1,\"SQOOP_CLIENT\":1,\"ZOOKEEPER\":1,\"YARN\":1,\"SPARK_ON_YARN\":1}}",
                 flowClusterShape.getClusterTemplateDetails());
 
@@ -143,11 +145,11 @@ class StructuredEventToCDPClusterShapeConverterTest {
 
         UsageProto.CDPClusterShape syncClusterShape = underTest.convert(structuredSyncEvent);
 
-        Assert.assertEquals("My Blueprint", syncClusterShape.getClusterTemplateName());
-        Assert.assertEquals(10, syncClusterShape.getNodes());
-        Assert.assertEquals("compute=3, gw=4, master=1, worker=2", syncClusterShape.getHostGroupNodeCount());
-        Assert.assertTrue(syncClusterShape.getTemporaryStorageUsed());
-        Assert.assertEquals("{\"services\":{\"HIVE_ON_TEZ\":1,\"HIVE\":1,\"LIVY\":1,\"DAS\":1,\"HDFS\":1," +
+        assertEquals("My Blueprint", syncClusterShape.getClusterTemplateName());
+        assertEquals(10, syncClusterShape.getNodes());
+        assertEquals("compute=3, gw=4, master=1, worker=2", syncClusterShape.getHostGroupNodeCount());
+        assertTrue(syncClusterShape.getTemporaryStorageUsed());
+        assertEquals("{\"services\":{\"HIVE_ON_TEZ\":1,\"HIVE\":1,\"LIVY\":1,\"DAS\":1,\"HDFS\":1," +
                         "\"OOZIE\":1,\"TEZ\":1,\"HUE\":1,\"SQOOP_CLIENT\":1,\"ZOOKEEPER\":1,\"YARN\":1,\"SPARK_ON_YARN\":1}}",
                 syncClusterShape.getClusterTemplateDetails());
     }
@@ -165,11 +167,11 @@ class StructuredEventToCDPClusterShapeConverterTest {
 
         UsageProto.CDPClusterShape flowClusterShape = underTest.convert(structuredFlowEvent);
 
-        Assert.assertEquals("My Blueprint", flowClusterShape.getClusterTemplateName());
-        Assert.assertEquals(10, flowClusterShape.getNodes());
-        Assert.assertEquals("compute=3, gw=4, master=1, worker=2", flowClusterShape.getHostGroupNodeCount());
-        Assert.assertTrue(flowClusterShape.getTemporaryStorageUsed());
-        Assert.assertEquals("{\"services\":{}}", flowClusterShape.getClusterTemplateDetails());
+        assertEquals("My Blueprint", flowClusterShape.getClusterTemplateName());
+        assertEquals(10, flowClusterShape.getNodes());
+        assertEquals("compute=3, gw=4, master=1, worker=2", flowClusterShape.getHostGroupNodeCount());
+        assertTrue(flowClusterShape.getTemporaryStorageUsed());
+        assertEquals("{\"services\":{}}", flowClusterShape.getClusterTemplateDetails());
 
         StructuredSyncEvent structuredSyncEvent = new StructuredSyncEvent();
         structuredSyncEvent.setStack(createStackDetails());
@@ -180,11 +182,11 @@ class StructuredEventToCDPClusterShapeConverterTest {
 
         UsageProto.CDPClusterShape syncClusterShape = underTest.convert(structuredSyncEvent);
 
-        Assert.assertEquals("My Blueprint", syncClusterShape.getClusterTemplateName());
-        Assert.assertEquals(10, syncClusterShape.getNodes());
-        Assert.assertEquals("compute=3, gw=4, master=1, worker=2", syncClusterShape.getHostGroupNodeCount());
-        Assert.assertTrue(syncClusterShape.getTemporaryStorageUsed());
-        Assert.assertEquals("{\"services\":{}}", syncClusterShape.getClusterTemplateDetails());
+        assertEquals("My Blueprint", syncClusterShape.getClusterTemplateName());
+        assertEquals(10, syncClusterShape.getNodes());
+        assertEquals("compute=3, gw=4, master=1, worker=2", syncClusterShape.getHostGroupNodeCount());
+        assertTrue(syncClusterShape.getTemporaryStorageUsed());
+        assertEquals("{\"services\":{}}", syncClusterShape.getClusterTemplateDetails());
     }
 
     @Test
@@ -197,18 +199,18 @@ class StructuredEventToCDPClusterShapeConverterTest {
 
         UsageProto.CDPClusterShape flowClusterShape = underTest.convert(structuredFlowEvent);
 
-        Assert.assertEquals(2, flowClusterShape.getNodes());
-        Assert.assertEquals("master=2", flowClusterShape.getHostGroupNodeCount());
-        Assert.assertEquals("null", flowClusterShape.getClusterTemplateOverridesDetails());
+        assertEquals(2, flowClusterShape.getNodes());
+        assertEquals("master=2", flowClusterShape.getHostGroupNodeCount());
+        assertEquals("null", flowClusterShape.getClusterTemplateOverridesDetails());
 
         StructuredSyncEvent structuredSyncEvent = new StructuredSyncEvent();
         structuredSyncEvent.setStack(stackDetails);
 
         UsageProto.CDPClusterShape syncClusterShape = underTest.convert(structuredSyncEvent);
 
-        Assert.assertEquals(2, syncClusterShape.getNodes());
-        Assert.assertEquals("master=2", syncClusterShape.getHostGroupNodeCount());
-        Assert.assertEquals("null", syncClusterShape.getClusterTemplateOverridesDetails());
+        assertEquals(2, syncClusterShape.getNodes());
+        assertEquals("master=2", syncClusterShape.getHostGroupNodeCount());
+        assertEquals("null", syncClusterShape.getClusterTemplateOverridesDetails());
     }
 
     @Test
@@ -221,18 +223,18 @@ class StructuredEventToCDPClusterShapeConverterTest {
 
         UsageProto.CDPClusterShape flowClusterShape = underTest.convert(structuredFlowEvent);
 
-        Assert.assertEquals(2, flowClusterShape.getNodes());
-        Assert.assertEquals("master=2", flowClusterShape.getHostGroupNodeCount());
-        Assert.assertFalse(flowClusterShape.getTemporaryStorageUsed());
+        assertEquals(2, flowClusterShape.getNodes());
+        assertEquals("master=2", flowClusterShape.getHostGroupNodeCount());
+        assertFalse(flowClusterShape.getTemporaryStorageUsed());
 
         StructuredSyncEvent structuredSyncEvent = new StructuredSyncEvent();
         structuredSyncEvent.setStack(stackDetails);
 
         UsageProto.CDPClusterShape syncClusterShape = underTest.convert(structuredSyncEvent);
 
-        Assert.assertEquals(2, syncClusterShape.getNodes());
-        Assert.assertEquals("master=2", syncClusterShape.getHostGroupNodeCount());
-        Assert.assertFalse(syncClusterShape.getTemporaryStorageUsed());
+        assertEquals(2, syncClusterShape.getNodes());
+        assertEquals("master=2", syncClusterShape.getHostGroupNodeCount());
+        assertFalse(syncClusterShape.getTemporaryStorageUsed());
     }
 
     @Test
@@ -241,7 +243,7 @@ class StructuredEventToCDPClusterShapeConverterTest {
 
         UsageProto.CDPClusterShape flowClusterShape = underTest.convert(structuredFlowEvent);
 
-        Assertions.assertEquals("", flowClusterShape.getDefinitionDetails());
+        assertEquals("", flowClusterShape.getDefinitionDetails());
 
         StackDetails stackDetails = new StackDetails();
         InstanceGroupDetails master = createInstanceGroupDetails("master", 2, null);
@@ -250,7 +252,7 @@ class StructuredEventToCDPClusterShapeConverterTest {
 
         flowClusterShape = underTest.convert(structuredFlowEvent);
 
-        Assertions.assertEquals("[{\"groupName\":\"master\",\"nodeCount\":2,\"volumes\":[],\"attributes\":{},\"runningInstances\":{}}]",
+        assertEquals("[{\"groupName\":\"master\",\"nodeCount\":2,\"volumes\":[],\"attributes\":{},\"runningInstances\":{}}]",
                 flowClusterShape.getDefinitionDetails());
 
         master = createInstanceGroupDetails("master", 2, null);
@@ -260,7 +262,7 @@ class StructuredEventToCDPClusterShapeConverterTest {
         flowClusterShape = underTest.convert(structuredFlowEvent);
 
         int definitionLength = StringUtils.length(flowClusterShape.getDefinitionDetails());
-        Assertions.assertTrue(definitionLength >= 0 && definitionLength <= 3000);
+        assertTrue(definitionLength >= 0 && definitionLength <= 3000);
 
         master = createInstanceGroupDetails("master", 2, null);
         stackDetails.setInstanceGroups(Collections.nCopies(110, master));
@@ -268,7 +270,7 @@ class StructuredEventToCDPClusterShapeConverterTest {
 
         flowClusterShape = underTest.convert(structuredFlowEvent);
 
-        Assertions.assertEquals("", flowClusterShape.getDefinitionDetails());
+        assertEquals("", flowClusterShape.getDefinitionDetails());
     }
 
     private StackDetails createStackDetails() {

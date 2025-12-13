@@ -11,7 +11,6 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 import java.util.UUID;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -76,7 +75,7 @@ class EnvironmentAccessCheckerTest {
         List<AuthorizationProto.RightCheck> capturedRightChecks = argumentCaptor.getValue();
         assertEquals(2, capturedRightChecks.size());
         AuthorizationProto.RightCheck hasAccess = capturedRightChecks.get(0);
-        Assertions.assertEquals(UserSyncConstants.ACCESS_ENVIRONMENT, hasAccess.getRight());
+        assertEquals(UserSyncConstants.ACCESS_ENVIRONMENT, hasAccess.getRight());
         assertEquals(ENV_CRN, hasAccess.getResource());
         AuthorizationProto.RightCheck isAdmin = capturedRightChecks.get(1);
         assertEquals(UserSyncConstants.ADMIN_FREEIPA, isAdmin.getRight());

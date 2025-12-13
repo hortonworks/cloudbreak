@@ -1,8 +1,8 @@
 package com.sequenceiq.datalake.configuration;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -211,8 +211,8 @@ class CDPConfigServiceTest {
         mockSupportedRuntimes(supportedVersions);
         cdpConfigService.initCdpStackRequests();
         List<String> gcpSupportedVersions = List.of(RUNTIME_729);
-        assertArrayEquals("Templates are only available from 7.2.9",
-                gcpSupportedVersions.toArray(), cdpConfigService.getDatalakeVersions("GCP", null).toArray());
+        assertArrayEquals(gcpSupportedVersions.toArray(), cdpConfigService.getDatalakeVersions("GCP", null).toArray(),
+                "Templates are only available from 7.2.9");
     }
 
     @Test

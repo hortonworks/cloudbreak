@@ -2,14 +2,15 @@ package com.sequenceiq.periscope.endpointtests;
 
 import static com.sequenceiq.periscope.api.model.AdjustmentType.LOAD_BASED;
 import static com.sequenceiq.periscope.api.model.AdjustmentType.NODE_COUNT;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.util.AssertionErrors.assertEquals;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +22,6 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.BadRequestException;
 
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -216,8 +216,8 @@ class DistroXAutoScaleClusterV1EndpointTest {
         clusterPertain.setWorkspaceId(workspaceId);
         clusterPertain.setUserId(userId);
         clusterPertain.setUserCrn(userCrn);
-                testCluster.setClusterPertain(clusterPertainRepository.findFirstByUserCrn(clusterPertain.getUserCrn())
-                        .orElseGet(() -> clusterPertainRepository.save(clusterPertain)));
+        testCluster.setClusterPertain(clusterPertainRepository.findFirstByUserCrn(clusterPertain.getUserCrn())
+                .orElseGet(() -> clusterPertainRepository.save(clusterPertain)));
         clusterRepository.save(testCluster);
         return testCluster;
     }
@@ -266,14 +266,14 @@ class DistroXAutoScaleClusterV1EndpointTest {
         DistroXAutoscaleClusterResponse xAutoscaleClusterResponse = distroXAutoScaleClusterV1Endpoint
                 .enableAutoscaleForClusterCrn(TEST_CLUSTER_CRN, AutoscaleClusterState.enable());
         assertTrue(xAutoscaleClusterResponse.isAutoscalingEnabled(), "Autoscaling should be enabled");
-        Assertions.assertEquals(ClusterState.RUNNING, xAutoscaleClusterResponse.getState());
+        assertEquals(ClusterState.RUNNING, xAutoscaleClusterResponse.getState());
 
         cluster.setState(ClusterState.SUSPENDED);
         clusterRepository.save(cluster);
         xAutoscaleClusterResponse = distroXAutoScaleClusterV1Endpoint
                 .enableAutoscaleForClusterCrn(TEST_CLUSTER_CRN, AutoscaleClusterState.disable());
         assertFalse(xAutoscaleClusterResponse.isAutoscalingEnabled(), "Autoscaling should be disabled");
-        Assertions.assertEquals(ClusterState.PENDING, xAutoscaleClusterResponse.getState());
+        assertEquals(ClusterState.PENDING, xAutoscaleClusterResponse.getState());
     }
 
     @Test
@@ -339,7 +339,7 @@ class DistroXAutoScaleClusterV1EndpointTest {
         DistroXAutoscaleClusterResponse xAutoscaleClusterResponse = distroXAutoScaleClusterV1Endpoint
                 .updateAutoscaleConfigByClusterCrn(TEST_CLUSTER_CRN, distroXAutoscaleClusterRequest);
 
-        assertEquals("Retrieved Alerts Size Should Match", 1, xAutoscaleClusterResponse.getLoadAlerts().size());
+        assertEquals(1, xAutoscaleClusterResponse.getLoadAlerts().size(), "Retrieved Alerts Size Should Match");
         assertTrue(xAutoscaleClusterResponse.isAutoscalingEnabled(), "Autoscaling should be enabled");
         xAutoscaleClusterResponse.getLoadAlerts().stream().forEach(this::validateLoadAlertResponse);
     }
@@ -355,7 +355,7 @@ class DistroXAutoScaleClusterV1EndpointTest {
         DistroXAutoscaleClusterResponse xAutoscaleClusterResponse =
                 distroXAutoScaleClusterV1Endpoint.updateAutoscaleConfigByClusterName(TEST_CLUSTER_NAME, distroXAutoscaleClusterRequest);
 
-        assertEquals("Retrieved Alerts Size Should Match", 1, xAutoscaleClusterResponse.getLoadAlerts().size());
+        assertEquals(1, xAutoscaleClusterResponse.getLoadAlerts().size(), "Retrieved Alerts Size Should Match");
         assertTrue(xAutoscaleClusterResponse.isAutoscalingEnabled(), "Autoscaling should be enabled");
         xAutoscaleClusterResponse.getLoadAlerts().stream().forEach(this::validateLoadAlertResponse);
     }
@@ -371,10 +371,10 @@ class DistroXAutoScaleClusterV1EndpointTest {
         DistroXAutoscaleClusterResponse xAutoscaleClusterResponse =
                 distroXAutoScaleClusterV1Endpoint.updateAutoscaleConfigByClusterCrn(TEST_CLUSTER_CRN, distroXAutoscaleClusterRequest);
 
-        assertEquals("Retrieved Alerts Size Should Match", 1, xAutoscaleClusterResponse.getLoadAlerts().size());
+        assertEquals(1, xAutoscaleClusterResponse.getLoadAlerts().size(), "Retrieved Alerts Size Should Match");
         distroXAutoScaleClusterV1Endpoint.deleteAlertsForClusterCrn(TEST_CLUSTER_CRN);
         xAutoscaleClusterResponse = distroXAutoScaleClusterV1Endpoint.getClusterByCrn(TEST_CLUSTER_CRN);
-        assertEquals("Retrieved Alerts Size Should Match", 0, xAutoscaleClusterResponse.getLoadAlerts().size());
+        assertEquals(0, xAutoscaleClusterResponse.getLoadAlerts().size(), "Retrieved Alerts Size Should Match");
     }
 
     @Test
@@ -389,7 +389,7 @@ class DistroXAutoScaleClusterV1EndpointTest {
         DistroXAutoscaleClusterResponse xAutoscaleClusterResponse =
                 distroXAutoScaleClusterV1Endpoint.updateAutoscaleConfigByClusterCrn(TEST_CLUSTER_CRN, distroXAutoscaleClusterRequest);
 
-        assertEquals("Retrieved Alerts Size Should Match", 2, xAutoscaleClusterResponse.getTimeAlerts().size());
+        assertEquals(2, xAutoscaleClusterResponse.getTimeAlerts().size(), "Retrieved Alerts Size Should Match");
         assertTrue(xAutoscaleClusterResponse.isAutoscalingEnabled(), "Autoscaling should be enabled");
         xAutoscaleClusterResponse.getTimeAlerts().stream().forEach(this::validateTimeAlertResponse);
     }
@@ -406,7 +406,7 @@ class DistroXAutoScaleClusterV1EndpointTest {
         DistroXAutoscaleClusterResponse xAutoscaleClusterResponse =
                 distroXAutoScaleClusterV1Endpoint.updateAutoscaleConfigByClusterName(TEST_CLUSTER_NAME, distroXAutoscaleClusterRequest);
 
-        assertEquals("Retrieved Alerts Size Should Match", 2, xAutoscaleClusterResponse.getTimeAlerts().size());
+        assertEquals(2, xAutoscaleClusterResponse.getTimeAlerts().size(), "Retrieved Alerts Size Should Match");
         assertTrue(xAutoscaleClusterResponse.isAutoscalingEnabled(), "Autoscaling should be enabled");
         xAutoscaleClusterResponse.getTimeAlerts().stream().forEach(this::validateTimeAlertResponse);
     }
@@ -422,11 +422,11 @@ class DistroXAutoScaleClusterV1EndpointTest {
 
         DistroXAutoscaleClusterResponse xAutoscaleClusterResponse =
                 distroXAutoScaleClusterV1Endpoint.updateAutoscaleConfigByClusterName(TEST_CLUSTER_NAME, distroXAutoscaleClusterRequest);
-        assertEquals("Retrieved Alerts Size Should Match", 2, xAutoscaleClusterResponse.getTimeAlerts().size());
+        assertEquals(2, xAutoscaleClusterResponse.getTimeAlerts().size(), "Retrieved Alerts Size Should Match");
 
         distroXAutoScaleClusterV1Endpoint.deleteAlertsForClusterName(TEST_CLUSTER_NAME);
         xAutoscaleClusterResponse = distroXAutoScaleClusterV1Endpoint.getClusterByName(TEST_CLUSTER_NAME);
-        assertEquals("Retrieved Alerts Size Should Match", 0, xAutoscaleClusterResponse.getTimeAlerts().size());
+        assertEquals(0, xAutoscaleClusterResponse.getTimeAlerts().size(), "Retrieved Alerts Size Should Match");
     }
 
     @Test
@@ -439,7 +439,7 @@ class DistroXAutoScaleClusterV1EndpointTest {
         distroXAutoscaleClusterRequest.setLoadAlertRequests(loadAlertRequests);
         distroXAutoscaleClusterRequest.setEnableAutoscaling(true);
 
-        Assertions.assertThrows(BadRequestException.class,
+        assertThrows(BadRequestException.class,
                 () -> distroXAutoScaleClusterV1Endpoint
                         .updateAutoscaleConfigByClusterName(TEST_CLUSTER_NAME, distroXAutoscaleClusterRequest));
     }
@@ -451,7 +451,7 @@ class DistroXAutoScaleClusterV1EndpointTest {
         distroXAutoscaleClusterRequest.setLoadAlertRequests(loadAlertRequests);
         distroXAutoscaleClusterRequest.setEnableAutoscaling(true);
 
-        Assertions.assertThrows(BadRequestException.class,
+        assertThrows(BadRequestException.class,
                 () -> distroXAutoScaleClusterV1Endpoint
                         .updateAutoscaleConfigByClusterCrn(TEST_CLUSTER_CRN, distroXAutoscaleClusterRequest));
     }
@@ -463,7 +463,7 @@ class DistroXAutoScaleClusterV1EndpointTest {
         distroXAutoscaleClusterRequest.setLoadAlertRequests(loadAlertRequests);
         distroXAutoscaleClusterRequest.setEnableAutoscaling(true);
 
-        Assertions.assertThrows(BadRequestException.class,
+        assertThrows(BadRequestException.class,
                 () -> distroXAutoScaleClusterV1Endpoint
                         .updateAutoscaleConfigByClusterCrn(TEST_CLUSTER_CRN, distroXAutoscaleClusterRequest));
     }
@@ -476,7 +476,7 @@ class DistroXAutoScaleClusterV1EndpointTest {
         distroXAutoscaleClusterRequest.setEnableAutoscaling(true);
         distroXAutoscaleClusterRequest.setUseStopStartMechanism(true);
 
-        Assertions.assertThrows(BadRequestException.class,
+        assertThrows(BadRequestException.class,
                 () -> distroXAutoScaleClusterV1Endpoint.updateAutoscaleConfigByClusterName(TEST_CLUSTER_NAME, distroXAutoscaleClusterRequest));
     }
 
@@ -502,7 +502,7 @@ class DistroXAutoScaleClusterV1EndpointTest {
         List<TimeAlertRequest> timeAlertRequests = getTimeAlertRequests(2, List.of("compute", "compute"));
         distroXAutoscaleClusterRequest.setTimeAlertRequests(timeAlertRequests);
 
-        Assertions.assertThrows(BadRequestException.class,
+        assertThrows(BadRequestException.class,
                 () -> distroXAutoScaleClusterV1Endpoint.updateAutoscaleConfigByClusterName(TEST_CLUSTER_NAME, distroXAutoscaleClusterRequest));
     }
 
@@ -519,7 +519,7 @@ class DistroXAutoScaleClusterV1EndpointTest {
         assertFalse(xAutoscaleClusterResponse.isStopStartScalingEnabled(), "StopStart scaling should be disabled");
 
         distroXAutoscaleClusterRequest.setUseStopStartMechanism(true);
-        Assertions.assertThrows(BadRequestException.class,
+        assertThrows(BadRequestException.class,
                 () -> distroXAutoScaleClusterV1Endpoint.updateAutoscaleConfigByClusterName(TEST_CLUSTER_NAME, distroXAutoscaleClusterRequest));
     }
 
@@ -665,7 +665,7 @@ class DistroXAutoScaleClusterV1EndpointTest {
         autoscaleRequest.setUseStopStartMechanism(true);
         List<LoadAlertRequest> loadAlertRequests = getLoadAlertRequests(1, List.of("compute"));
         autoscaleRequest.setLoadAlertRequests(loadAlertRequests);
-        Assertions.assertThrows(BadRequestException.class,
+        assertThrows(BadRequestException.class,
                 () -> distroXAutoScaleClusterV1Endpoint2.updateAutoscaleConfigByClusterName(TEST_CLUSTER_NAME_2, autoscaleRequest));
     }
 
@@ -677,7 +677,7 @@ class DistroXAutoScaleClusterV1EndpointTest {
         autoscaleRequest.setUseStopStartMechanism(true);
         List<TimeAlertRequest> timeAlertRequests = getTimeAlertRequests(1, List.of("compute"));
         autoscaleRequest.setTimeAlertRequests(timeAlertRequests);
-        Assertions.assertThrows(BadRequestException.class,
+        assertThrows(BadRequestException.class,
                 () -> distroXAutoScaleClusterV1Endpoint2.updateAutoscaleConfigByClusterName(TEST_CLUSTER_NAME_2, autoscaleRequest));
     }
 
@@ -828,19 +828,19 @@ class DistroXAutoScaleClusterV1EndpointTest {
     }
 
     private void validateLoadAlertResponse(LoadAlertResponse alertResponse) {
-        assertEquals("Retrieved HostGroup Should Match", "compute", alertResponse.getScalingPolicy().getHostGroup());
-        assertEquals("Retrieved AdjustmentType Should Match", LOAD_BASED, alertResponse.getScalingPolicy().getAdjustmentType());
-        assertEquals("Retrieved MinResourceValue Should Match", MIN_RESOURCE_COUNT, alertResponse.getLoadAlertConfiguration().getMinResourceValue());
-        assertEquals("Retrieved MaxResourceValue Should Match", MAX_RESOURCE_COUNT, alertResponse.getLoadAlertConfiguration().getMaxResourceValue());
-        assertEquals("Retrieved CoolDownMins Should Match", COOL_DOWN_MINUTES, alertResponse.getLoadAlertConfiguration().getCoolDownMinutes());
+        assertEquals("compute", alertResponse.getScalingPolicy().getHostGroup(), "Retrieved HostGroup Should Match");
+        assertEquals(LOAD_BASED, alertResponse.getScalingPolicy().getAdjustmentType(), "Retrieved AdjustmentType Should Match");
+        assertEquals(MIN_RESOURCE_COUNT, alertResponse.getLoadAlertConfiguration().getMinResourceValue(), "Retrieved MinResourceValue Should Match");
+        assertEquals(MAX_RESOURCE_COUNT, alertResponse.getLoadAlertConfiguration().getMaxResourceValue(), "Retrieved MaxResourceValue Should Match");
+        assertEquals(COOL_DOWN_MINUTES, alertResponse.getLoadAlertConfiguration().getCoolDownMinutes(), "Retrieved CoolDownMins Should Match");
     }
 
     private void validateTimeAlertResponse(TimeAlertResponse alertResponse) {
-        assertEquals("Retrieved HostGroup Should Match", "compute", alertResponse.getScalingPolicy().getHostGroup());
-        assertEquals("Retrieved AdjustmentType Should Match", NODE_COUNT, alertResponse.getScalingPolicy().getAdjustmentType());
-        assertEquals("Retrieved Adjustment Should Match", TEST_SCHEDULE_NODE_COUNT, alertResponse.getScalingPolicy().getScalingAdjustment());
-        assertEquals("Retrieved Cron Should Match", TEST_SCHEDULE_CRON, alertResponse.getCron());
-        assertEquals("Retrieved TimeZone Should Match", TEST_SCHEDULE_TIMEZONE, alertResponse.getTimeZone());
+        assertEquals("compute", alertResponse.getScalingPolicy().getHostGroup(), "Retrieved HostGroup Should Match");
+        assertEquals(NODE_COUNT, alertResponse.getScalingPolicy().getAdjustmentType(), "Retrieved AdjustmentType Should Match");
+        assertEquals(TEST_SCHEDULE_NODE_COUNT, alertResponse.getScalingPolicy().getScalingAdjustment(), "Retrieved Adjustment Should Match");
+        assertEquals(TEST_SCHEDULE_CRON, alertResponse.getCron(), "Retrieved Cron Should Match");
+        assertEquals(TEST_SCHEDULE_TIMEZONE, alertResponse.getTimeZone(), "Retrieved TimeZone Should Match");
     }
 
     private List<LoadAlertRequest> getLoadAlertRequests(Integer loadAlertRequestCount, List<String> computeGroups) {

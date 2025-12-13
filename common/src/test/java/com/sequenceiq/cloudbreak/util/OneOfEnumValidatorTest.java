@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.util;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.lang.annotation.Annotation;
 import java.util.Collections;
 import java.util.List;
@@ -16,7 +19,6 @@ import jakarta.validation.metadata.ValidateUnwrappedValue;
 import org.hibernate.validator.internal.engine.constraintvalidation.ConstraintValidatorContextImpl;
 import org.hibernate.validator.internal.engine.path.PathImpl;
 import org.hibernate.validator.messageinterpolation.ExpressionLanguageFeatureLevel;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.util.ReflectionUtils;
@@ -33,7 +35,7 @@ public class OneOfEnumValidatorTest {
 
     @Test
     void testIsValidSuccess() {
-        Assertions.assertTrue(underTest.isValid(ValidatorEnum.GP2.name(), null));
+        assertTrue(underTest.isValid(ValidatorEnum.GP2.name(), null));
     }
 
     @Test
@@ -46,7 +48,7 @@ public class OneOfEnumValidatorTest {
                 ExpressionLanguageFeatureLevel.NONE,
                 ExpressionLanguageFeatureLevel.NONE
         );
-        Assertions.assertFalse(underTest.isValid("UNSUPPORTED_TYPE", constraintValidatorContext));
+        assertFalse(underTest.isValid("UNSUPPORTED_TYPE", constraintValidatorContext));
     }
 
     class ValidatorTest {

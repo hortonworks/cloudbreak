@@ -1,9 +1,10 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.view;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.cloudbreak.cloud.model.Network;
@@ -21,8 +22,8 @@ public class GcpDatabaseNetworkViewTest {
 
         GcpDatabaseNetworkView gcpDatabaseNetworkView = new GcpDatabaseNetworkView(network);
 
-        Assert.assertEquals("zone", gcpDatabaseNetworkView.getAvailabilityZone());
-        Assert.assertEquals("id", gcpDatabaseNetworkView.getSharedProjectId());
-        Assert.assertEquals("subnet-1", gcpDatabaseNetworkView.getSubnetId());
+        assertEquals("zone", gcpDatabaseNetworkView.getAvailabilityZone());
+        assertEquals("id", gcpDatabaseNetworkView.getSharedProjectId());
+        assertEquals("subnet-1", gcpDatabaseNetworkView.getSubnetId());
     }
 }

@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
 import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.ACCEPTANCE_POLICY_PARAMETER;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -18,7 +19,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -310,7 +310,7 @@ public class AzureResourceConnectorTest {
         when(client.createTemplateDeployment(any(), any(), any(), any())).thenReturn(deployment);
 
         List<CloudResourceStatus> cloudResourceStatuses = underTest.launchLoadBalancers(ac, stack, notifier);
-        Assertions.assertEquals(1, cloudResourceStatuses.size());
+        assertEquals(1, cloudResourceStatuses.size());
 
         verify(azureCloudResourceService, times(1)).getInstanceCloudResources(STACK_NAME, instances, groups, RESOURCE_GROUP_NAME);
         verify(azureMarketplaceImageProviderService, never()).getSourceImage(eq(imageModel));
@@ -341,7 +341,7 @@ public class AzureResourceConnectorTest {
                 .thenReturn(List.of(new CloudResourceStatus(instances.get(0), ResourceStatus.DELETED)));
         List<CloudResourceStatus> statuses = underTest.terminate(ac, stack, new ArrayList<>(instances));
         for (CloudResourceStatus status : statuses) {
-            Assertions.assertEquals(ResourceStatus.DELETED, status.getStatus());
+            assertEquals(ResourceStatus.DELETED, status.getStatus());
         }
     }
 

@@ -1,9 +1,10 @@
 package com.sequenceiq.environment.environment.flow.creation.handler.freeipa.gcp;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -45,7 +46,7 @@ class FreeIpaGcpNetworkProviderTest {
 
         String result = underTest.availabilityZone(networkRequest, environmentDto);
 
-        Assertions.assertEquals(result, availabilityZone);
+        assertEquals(result, availabilityZone);
     }
 
     @Test
@@ -72,7 +73,7 @@ class FreeIpaGcpNetworkProviderTest {
 
         String result = underTest.availabilityZone(networkRequest, environmentDto);
 
-        Assertions.assertEquals(result, availabilityZone);
+        assertEquals(result, availabilityZone);
     }
 
     @Test
@@ -103,7 +104,7 @@ class FreeIpaGcpNetworkProviderTest {
 
         String result = underTest.availabilityZone(networkRequest, environmentDto);
 
-        Assertions.assertEquals(result, customAvailabilityZone);
+        assertEquals(result, customAvailabilityZone);
     }
 
     @Test
@@ -133,6 +134,6 @@ class FreeIpaGcpNetworkProviderTest {
 
         String result = underTest.availabilityZone(networkRequest, environmentDto);
 
-        Assertions.assertEquals(result, subnetAvailabilityZone);
+        assertEquals(result, subnetAvailabilityZone);
     }
 }

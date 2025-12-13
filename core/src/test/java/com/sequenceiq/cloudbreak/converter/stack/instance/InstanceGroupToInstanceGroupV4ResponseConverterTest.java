@@ -1,16 +1,16 @@
 package com.sequenceiq.cloudbreak.converter.stack.instance;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.util.Set;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.TestUtil;
@@ -27,8 +27,8 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 
-@RunWith(MockitoJUnitRunner.class)
-public class InstanceGroupToInstanceGroupV4ResponseConverterTest extends AbstractEntityConverterTest<InstanceGroup> {
+@ExtendWith(MockitoExtension.class)
+class InstanceGroupToInstanceGroupV4ResponseConverterTest extends AbstractEntityConverterTest<InstanceGroup> {
 
     @InjectMocks
     private InstanceGroupToInstanceGroupV4ResponseConverter underTest;
@@ -46,7 +46,7 @@ public class InstanceGroupToInstanceGroupV4ResponseConverterTest extends Abstrac
     private InstanceMetaDataToInstanceMetaDataV4ResponseConverter instanceMetaDataToInstanceMetaDataV4ResponseConverter;
 
     @Test
-    public void testConvert() {
+    void testConvert() {
         InstanceGroup source = getSource();
         for (InstanceMetaData allInstanceMetaDatum : source.getAllInstanceMetaData()) {
             when(instanceMetaDataToInstanceMetaDataV4ResponseConverter.convert(any()))

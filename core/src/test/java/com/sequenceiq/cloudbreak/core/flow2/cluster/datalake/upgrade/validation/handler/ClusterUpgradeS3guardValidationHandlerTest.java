@@ -7,11 +7,11 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeS3guardValidationEvent;
@@ -22,8 +22,8 @@ import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnviro
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
-@RunWith(MockitoJUnitRunner.class)
-public class ClusterUpgradeS3guardValidationHandlerTest {
+@ExtendWith(MockitoExtension.class)
+class ClusterUpgradeS3guardValidationHandlerTest {
 
     private static final long STACK_ID = 1L;
 
@@ -43,7 +43,7 @@ public class ClusterUpgradeS3guardValidationHandlerTest {
     private DetailedEnvironmentResponse detailedEnvironmentResponse;
 
     @Test
-    public void testHandlerToCheckNonS3guardEnvironment() {
+    void testHandlerToCheckNonS3guardEnvironment() {
         when(stackService.findEnvironmentCrnByStackId(STACK_ID)).thenReturn(RETURN_ENVIRONMENT);
         when(environmentService.getByCrn(RETURN_ENVIRONMENT)).thenReturn(detailedEnvironmentResponse);
 
@@ -55,7 +55,7 @@ public class ClusterUpgradeS3guardValidationHandlerTest {
     }
 
     @Test
-    public void testHandlerToCheckS3guardEnvironment() {
+    void testHandlerToCheckS3guardEnvironment() {
         when(stackService.findEnvironmentCrnByStackId(STACK_ID)).thenReturn(RETURN_ENVIRONMENT);
         AwsEnvironmentParameters awsEnvironmentParameters = new AwsEnvironmentParameters();
         detailedEnvironmentResponse = new DetailedEnvironmentResponse();
@@ -70,7 +70,7 @@ public class ClusterUpgradeS3guardValidationHandlerTest {
     }
 
     @Test
-    public void testHandlerToCheckS3guardException() {
+    void testHandlerToCheckS3guardException() {
         when(stackService.findEnvironmentCrnByStackId(STACK_ID)).thenReturn(RETURN_ENVIRONMENT);
         doThrow(new RuntimeException("Test")).when(environmentService).getByCrn(RETURN_ENVIRONMENT);
 
@@ -82,7 +82,7 @@ public class ClusterUpgradeS3guardValidationHandlerTest {
     }
 
     @Test
-    public void testHandlerToCheckReturnedSelector() {
+    void testHandlerToCheckReturnedSelector() {
         String returnedSelector = underTest.selector();
         assertEquals(VALIDATE_S3GUARD_EVENT.name(), returnedSelector);
     }

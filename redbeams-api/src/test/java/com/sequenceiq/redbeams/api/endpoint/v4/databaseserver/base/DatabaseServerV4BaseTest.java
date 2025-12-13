@@ -1,21 +1,21 @@
 package com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.base;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-public class DatabaseServerV4BaseTest {
+class DatabaseServerV4BaseTest {
 
     private DatabaseServerV4Base base;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         base = new DatabaseServerV4BaseTestImpl();
     }
 
     @Test
-    public void testGettersAndSetters() {
+    void testGettersAndSetters() {
         base.setName("myserver");
         assertEquals("myserver", base.getName());
 

@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.aws.connector.resource;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -11,7 +12,6 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -19,7 +19,6 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.aws.AwsContextService;
@@ -59,8 +58,8 @@ class AwsComputeResourceServiceTest {
 
     @Test
     void deleteComputeResourcesWhenNoAwsNativeResourcesAffected() {
-        AuthenticatedContext authenticatedContext = Mockito.mock(AuthenticatedContext.class);
-        CloudStack cloudStack = Mockito.mock(CloudStack.class);
+        AuthenticatedContext authenticatedContext = mock(AuthenticatedContext.class);
+        CloudStack cloudStack = mock(CloudStack.class);
         List<CloudResource> cloudResources = List.of(getCloudResource("cfstack", ResourceType.CLOUDFORMATION_STACK));
         AwsContext awsContext = mock(AwsContext.class);
         when(contextBuilder.contextInit(any(), any(), any(), eq(true))).thenReturn(awsContext);
@@ -72,15 +71,15 @@ class AwsComputeResourceServiceTest {
 
     @Test
     void deleteComputeResourcesWhenNoAwsNativeResourcesAffectedAndComputeResourceDeletionFails() {
-        AuthenticatedContext authenticatedContext = Mockito.mock(AuthenticatedContext.class);
-        CloudStack cloudStack = Mockito.mock(CloudStack.class);
+        AuthenticatedContext authenticatedContext = mock(AuthenticatedContext.class);
+        CloudStack cloudStack = mock(CloudStack.class);
         List<CloudResource> cloudResources = List.of(getCloudResource("cfstack", ResourceType.CLOUDFORMATION_STACK));
         AwsContext awsContext = mock(AwsContext.class);
         when(contextBuilder.contextInit(any(), any(), any(), eq(true))).thenReturn(awsContext);
         when(computeResourceService.deleteResources(awsContext, authenticatedContext, cloudResources, false, true))
                 .thenThrow(new RuntimeException("Uh-Oh something bad happened"));
 
-        Assertions.assertThrows(RuntimeException.class, () -> underTest.deleteComputeResources(authenticatedContext, cloudStack, cloudResources));
+        assertThrows(RuntimeException.class, () -> underTest.deleteComputeResources(authenticatedContext, cloudStack, cloudResources));
 
         verify(computeResourceService, times(1)).deleteResources(awsContext, authenticatedContext, cloudResources, false, true);
     }
@@ -88,13 +87,13 @@ class AwsComputeResourceServiceTest {
     @ParameterizedTest
     @EnumSource(value = ResourceType.class, names = { "AWS_INSTANCE", "AWS_CLOUD_WATCH" })
     void deleteComputeResourcesWhenAwsNativeComputeResourcesAffected(ResourceType awsNativeResourceType) {
-        AuthenticatedContext authenticatedContext = Mockito.mock(AuthenticatedContext.class);
+        AuthenticatedContext authenticatedContext = mock(AuthenticatedContext.class);
         CloudContext cloudContext = new CloudContext.Builder()
                 .withPlatform(CloudPlatform.AWS.name())
                 .withVariant(AwsConstants.AWS_DEFAULT_VARIANT)
                 .build();
         when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
-        CloudStack cloudStack = Mockito.mock(CloudStack.class);
+        CloudStack cloudStack = mock(CloudStack.class);
         CloudResource nativeResource = getCloudResource("nativeResource", awsNativeResourceType);
         List<CloudResource> cloudResources = List.of(
                 getCloudResource("cfstack", ResourceType.CLOUDFORMATION_STACK),
@@ -120,13 +119,13 @@ class AwsComputeResourceServiceTest {
 
     @Test
     void deleteComputeResourcesWhenAwsNativeGroupResourcesAffected() throws Exception {
-        AuthenticatedContext authenticatedContext = Mockito.mock(AuthenticatedContext.class);
+        AuthenticatedContext authenticatedContext = mock(AuthenticatedContext.class);
         CloudContext cloudContext = new CloudContext.Builder()
                 .withPlatform(CloudPlatform.AWS.name())
                 .withVariant(AwsConstants.AWS_DEFAULT_VARIANT)
                 .build();
         when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
-        CloudStack cloudStack = Mockito.mock(CloudStack.class);
+        CloudStack cloudStack = mock(CloudStack.class);
         CloudResource nativeResource = getCloudResource("nativeResource", ResourceType.AWS_SECURITY_GROUP);
         List<CloudResource> cloudResources = List.of(
                 getCloudResource("cfstack", ResourceType.CLOUDFORMATION_STACK),
@@ -155,13 +154,13 @@ class AwsComputeResourceServiceTest {
     @ParameterizedTest
     @EnumSource(value = ResourceType.class, names = { "AWS_INSTANCE", "AWS_CLOUD_WATCH" })
     void deleteComputeResourcesWhenAwsNativeResourcesAffectedAndAwsNativeComputeResourcesDeletionFails(ResourceType awsNativeResourceType) {
-        AuthenticatedContext authenticatedContext = Mockito.mock(AuthenticatedContext.class);
+        AuthenticatedContext authenticatedContext = mock(AuthenticatedContext.class);
         CloudContext cloudContext = new CloudContext.Builder()
                 .withPlatform(CloudPlatform.AWS.name())
                 .withVariant(AwsConstants.AWS_DEFAULT_VARIANT)
                 .build();
         when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
-        CloudStack cloudStack = Mockito.mock(CloudStack.class);
+        CloudStack cloudStack = mock(CloudStack.class);
         CloudResource nativeResource = getCloudResource("nativeResource", awsNativeResourceType);
         List<CloudResource> cloudResources = List.of(
                 getCloudResource("cfstack", ResourceType.CLOUDFORMATION_STACK),
@@ -178,7 +177,7 @@ class AwsComputeResourceServiceTest {
         when(computeResourceService.deleteResources(eq(awsContext), any(), eq(nonDeletedNativeResources), eq(false), eq(true)))
                 .thenThrow(new RuntimeException("test"));
 
-        Assertions.assertThrows(RuntimeException.class, () -> underTest.deleteComputeResources(authenticatedContext, cloudStack, cloudResources));
+        assertThrows(RuntimeException.class, () -> underTest.deleteComputeResources(authenticatedContext, cloudStack, cloudResources));
 
         verify(computeResourceService, times(1)).deleteResources(awsContext, authenticatedContext, cloudResources, false, true);
         ArgumentCaptor<AuthenticatedContext> acCaptor = ArgumentCaptor.forClass(AuthenticatedContext.class);
@@ -189,13 +188,13 @@ class AwsComputeResourceServiceTest {
 
     @Test
     void deleteComputeResourcesWhenAwsNativeResourcesAffectedAndAwsNativeGroupResourcesDeletionFails() throws Exception {
-        AuthenticatedContext authenticatedContext = Mockito.mock(AuthenticatedContext.class);
+        AuthenticatedContext authenticatedContext = mock(AuthenticatedContext.class);
         CloudContext cloudContext = new CloudContext.Builder()
                 .withPlatform(CloudPlatform.AWS.name())
                 .withVariant(AwsConstants.AWS_DEFAULT_VARIANT)
                 .build();
         when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
-        CloudStack cloudStack = Mockito.mock(CloudStack.class);
+        CloudStack cloudStack = mock(CloudStack.class);
         CloudResource nativeGroupResource = getCloudResource("nativeResource", ResourceType.AWS_SECURITY_GROUP);
         CloudResource nativeComputeResource = getCloudResource("nativeResource", ResourceType.AWS_INSTANCE);
         List<CloudResource> cloudResources = List.of(
@@ -214,7 +213,7 @@ class AwsComputeResourceServiceTest {
         when(groupResourceService.deleteResources(eq(awsContext), any(), eq(nonDeletedNativeResources), any(), eq(false)))
                 .thenThrow(new RuntimeException("test"));
 
-        Assertions.assertThrows(CloudConnectorException.class, () -> underTest.deleteComputeResources(authenticatedContext, cloudStack, cloudResources));
+        assertThrows(CloudConnectorException.class, () -> underTest.deleteComputeResources(authenticatedContext, cloudStack, cloudResources));
 
         verify(computeResourceService, times(1)).deleteResources(awsContext, authenticatedContext, cloudResources, false, true);
         ArgumentCaptor<AuthenticatedContext> acCaptor = ArgumentCaptor.forClass(AuthenticatedContext.class);

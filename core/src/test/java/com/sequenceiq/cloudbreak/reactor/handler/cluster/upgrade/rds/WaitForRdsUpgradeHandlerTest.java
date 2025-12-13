@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade.rds;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
@@ -11,7 +13,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.stream.Stream;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -61,7 +62,7 @@ class WaitForRdsUpgradeHandlerTest {
         WaitForDatabaseServerUpgradeResult actualResult = (WaitForDatabaseServerUpgradeResult) underTest.doAccept(
                 new HandlerEvent<>(new Event<>(waitForDatabaseServerUpgradeRequest)));
 
-        Assertions.assertEquals(flowIdentifier, actualResult.getFlowIdentifier());
+        assertEquals(flowIdentifier, actualResult.getFlowIdentifier());
         verify(databaseService, times(1)).waitForDatabaseFlowToBeFinished(cluster, flowIdentifier);
     }
 
@@ -77,7 +78,7 @@ class WaitForRdsUpgradeHandlerTest {
         WaitForDatabaseServerUpgradeResult actualResult = (WaitForDatabaseServerUpgradeResult) underTest.doAccept(
                 new HandlerEvent<>(new Event<>(waitForDatabaseServerUpgradeRequest)));
 
-        Assertions.assertNull(actualResult.getFlowIdentifier());
+        assertNull(actualResult.getFlowIdentifier());
         verify(databaseService, never()).waitForDatabaseFlowToBeFinished(any(), any());
     }
 
@@ -97,7 +98,7 @@ class WaitForRdsUpgradeHandlerTest {
         UpgradeRdsFailedEvent actualResult = (UpgradeRdsFailedEvent) underTest.doAccept(
                 new HandlerEvent<>(new Event<>(waitForDatabaseServerUpgradeRequest)));
 
-        Assertions.assertEquals(exception, actualResult.getException());
+        assertEquals(exception, actualResult.getException());
     }
 
     private static Stream<Arguments> exceptions() {

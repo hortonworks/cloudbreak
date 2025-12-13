@@ -1,13 +1,13 @@
 package com.sequenceiq.cloudbreak.orchestrator.yarn.api;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-public class YarnEndpointTest {
+class YarnEndpointTest {
 
     @Test
-    public void testRemoveLeadingAndTrailingSlash() {
+    void testRemoveLeadingAndTrailingSlash() {
         String testString = "//test/";
         String expectedString = "test";
         YarnEndpoint yarnEndpoint = new YarnEndpoint("", "");

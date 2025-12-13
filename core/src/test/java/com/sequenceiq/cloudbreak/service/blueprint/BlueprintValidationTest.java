@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.service.blueprint;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
@@ -10,12 +10,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.validation.MapBindingResult;
 
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
@@ -23,8 +23,8 @@ import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.template.model.ServiceComponent;
 
-@RunWith(MockitoJUnitRunner.class)
-public class BlueprintValidationTest {
+@ExtendWith(MockitoExtension.class)
+class BlueprintValidationTest {
     public static final String BLUEPRINT_TEXT_EMPTY = "";
 
     @Mock
@@ -40,14 +40,14 @@ public class BlueprintValidationTest {
 
     private MapBindingResult errors = new MapBindingResult(new HashMap(), "blueprint");
 
-    @Before
-    public void setup() {
+    @BeforeEach
+    void setup() {
         blueprint.setBlueprintText("test");
         when(cmTemplateProcessorFactory.get(anyString())).thenReturn(cmTemplateProcessor);
     }
 
     @Test
-    public void testValidationEmptyText() {
+    void testValidationEmptyText() {
         blueprint.setBlueprintText(BLUEPRINT_TEXT_EMPTY);
 
         blueprintValidator.validate(blueprint, errors);
@@ -57,7 +57,7 @@ public class BlueprintValidationTest {
     }
 
     @Test
-    public void testValidationSameHostgroupName() {
+    void testValidationSameHostgroupName() {
         when(cmTemplateProcessor.getHostTemplateNames()).thenReturn(List.of("master", "master"));
         blueprintValidator.validate(blueprint, errors);
         assertTrue(errors.hasErrors());
@@ -66,7 +66,7 @@ public class BlueprintValidationTest {
     }
 
     @Test
-    public void testValidationRoleTypeMissing() {
+    void testValidationRoleTypeMissing() {
         when(cmTemplateProcessor.getServiceComponentsByHostGroup()).thenReturn(
                 Map.of("test", Set.of(ServiceComponent.of("test1", null)))
         );

@@ -1,12 +1,12 @@
 package com.sequenceiq.redbeams.dto;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
-public class CredentialTest {
+class CredentialTest {
 
     private static final String CRN = "crn";
 
@@ -18,13 +18,13 @@ public class CredentialTest {
 
     private Credential underTest;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         underTest = new Credential(CRN, NAME, ATTRIBUTES, "acc");
     }
 
     @Test
-    public void testGetters() {
+    void testGetters() {
         assertEquals(CRN, underTest.getCrn());
         assertEquals(NAME, underTest.getName());
         assertEquals(ATTRIBUTES, underTest.getAttributes());
@@ -33,7 +33,7 @@ public class CredentialTest {
     }
 
     @Test
-    public void testAzureParameters() {
+    void testAzureParameters() {
         Credential.AzureParameters azure = new Credential.AzureParameters(SUBSCRIPTION_ID);
         underTest = new Credential(CRN, NAME, ATTRIBUTES, azure, "acc");
 

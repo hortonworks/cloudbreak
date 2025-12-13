@@ -1,5 +1,6 @@
 package com.sequenceiq.periscope.service;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -13,7 +14,6 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 import java.util.Set;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -105,9 +105,9 @@ class AltusMachineUserServiceTest {
         verify(freeIpaCommunicator, times(1)).synchronizeAllUsers(synchronizeUserCaptor.capture());
 
         SynchronizeAllUsersRequest synchronizeAllUsersRequest = synchronizeUserCaptor.getValue();
-        Assertions.assertEquals(synchronizeAllUsersRequest.getEnvironments(), Set.of(testEnvironmentCrn), "Environment Crn Should match");
-        Assertions.assertEquals(synchronizeAllUsersRequest.getMachineUsers(), Set.of(autoscaleMachineUserCrn), "Machine User Crn Should match");
-        Assertions.assertEquals(synchronizeAllUsersRequest.getAccountId(), cluster.getClusterPertain().getTenant(), "Account Id Should match");
+        assertEquals(synchronizeAllUsersRequest.getEnvironments(), Set.of(testEnvironmentCrn), "Environment Crn Should match");
+        assertEquals(synchronizeAllUsersRequest.getMachineUsers(), Set.of(autoscaleMachineUserCrn), "Machine User Crn Should match");
+        assertEquals(synchronizeAllUsersRequest.getAccountId(), cluster.getClusterPertain().getTenant(), "Account Id Should match");
     }
 
     @Test
@@ -134,9 +134,9 @@ class AltusMachineUserServiceTest {
         verify(freeIpaCommunicator, times(1)).synchronizeAllUsers(synchronizeUserCaptor.capture());
 
         SynchronizeAllUsersRequest synchronizeAllUsersRequest = synchronizeUserCaptor.getValue();
-        Assertions.assertEquals(synchronizeAllUsersRequest.getEnvironments(), Set.of(testEnvironmentCrn), "Environment Crn Should match");
-        Assertions.assertEquals(synchronizeAllUsersRequest.getMachineUsers(), Set.of(autoscaleMachineUserCrn), "Machine User Crn Should match");
-        Assertions.assertEquals(synchronizeAllUsersRequest.getAccountId(), cluster.getClusterPertain().getTenant(), "Account Id Should match");
+        assertEquals(synchronizeAllUsersRequest.getEnvironments(), Set.of(testEnvironmentCrn), "Environment Crn Should match");
+        assertEquals(synchronizeAllUsersRequest.getMachineUsers(), Set.of(autoscaleMachineUserCrn), "Machine User Crn Should match");
+        assertEquals(synchronizeAllUsersRequest.getAccountId(), cluster.getClusterPertain().getTenant(), "Account Id Should match");
     }
 
     @Test
@@ -171,10 +171,10 @@ class AltusMachineUserServiceTest {
         ArgumentCaptor<SynchronizeAllUsersRequest> synchronizeUserCaptor = ArgumentCaptor.forClass(SynchronizeAllUsersRequest.class);
         verify(freeIpaCommunicator, times(1)).synchronizeAllUsers(synchronizeUserCaptor.capture());
         SynchronizeAllUsersRequest synchronizeAllUsersRequest = synchronizeUserCaptor.getValue();
-        Assertions.assertEquals(synchronizeAllUsersRequest.getDeletedWorkloadUsers(), Set.of("workloadUserName"), "WorkloadUserName Should match");
-        Assertions.assertEquals(synchronizeAllUsersRequest.getEnvironments(), Set.of(testEnvironmentCrn), "Environment Crn Should match");
-        Assertions.assertEquals(synchronizeAllUsersRequest.getMachineUsers(), Set.of(autoscaleMachineUserCrn), "Machine User Crn Should match");
-        Assertions.assertEquals(synchronizeAllUsersRequest.getAccountId(), testAccountId, "Account Id Should match");
+        assertEquals(synchronizeAllUsersRequest.getDeletedWorkloadUsers(), Set.of("workloadUserName"), "WorkloadUserName Should match");
+        assertEquals(synchronizeAllUsersRequest.getEnvironments(), Set.of(testEnvironmentCrn), "Environment Crn Should match");
+        assertEquals(synchronizeAllUsersRequest.getMachineUsers(), Set.of(autoscaleMachineUserCrn), "Machine User Crn Should match");
+        assertEquals(synchronizeAllUsersRequest.getAccountId(), testAccountId, "Account Id Should match");
     }
 
     protected Cluster getACluster() {

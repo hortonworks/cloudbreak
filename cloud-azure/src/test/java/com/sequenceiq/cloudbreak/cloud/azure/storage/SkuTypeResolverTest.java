@@ -1,8 +1,9 @@
 package com.sequenceiq.cloudbreak.cloud.azure.storage;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.util.Arrays;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -21,7 +22,7 @@ public class SkuTypeResolverTest {
     public void testResolving(DiskTypeSkuPair pair) {
         StorageAccountSkuType result = underTest.resolveFromAzureDiskType(pair.getAzureDiskType());
 
-        Assertions.assertEquals(pair.getExpectedStorageAccountSkuType().name(), result.name());
+        assertEquals(pair.getExpectedStorageAccountSkuType().name(), result.name());
     }
 
     public static Iterable<DiskTypeSkuPair> data() {

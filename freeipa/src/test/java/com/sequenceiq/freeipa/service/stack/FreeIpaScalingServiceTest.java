@@ -5,6 +5,7 @@ import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Availabil
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.AvailabilityType.TWO_NODE_BASED;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -18,7 +19,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -89,7 +89,7 @@ class FreeIpaScalingServiceTest {
         doThrow(new BadRequestException("validation failed")).when(validationService).validateStackForUpscale(allInstances, stack,
                 new ScalingPath(TWO_NODE_BASED, HA));
 
-        BadRequestException exception = Assertions.assertThrows(BadRequestException.class, () -> underTest.upscale(ACCOUNT_ID, request));
+        BadRequestException exception = assertThrows(BadRequestException.class, () -> underTest.upscale(ACCOUNT_ID, request));
 
         assertEquals(exception.getMessage(), "validation failed");
     }
@@ -142,7 +142,7 @@ class FreeIpaScalingServiceTest {
         when(stack.getNotDeletedInstanceMetaDataSet()).thenReturn(allInstances);
         UpscaleRequest request = createUpscaleRequest();
 
-        BadRequestException exception = Assertions.assertThrows(BadRequestException.class, () -> underTest.upscale(ACCOUNT_ID, request));
+        BadRequestException exception = assertThrows(BadRequestException.class, () -> underTest.upscale(ACCOUNT_ID, request));
 
         assertEquals(exception.getMessage(), "upscale operation couldn't be started with: operationError");
     }
@@ -158,7 +158,7 @@ class FreeIpaScalingServiceTest {
         doThrow(new BadRequestException("validation failed")).when(validationService).validateStackForDownscale(allInstances, stack,
                 new ScalingPath(TWO_NODE_BASED, NON_HA), null, false);
 
-        BadRequestException exception = Assertions.assertThrows(BadRequestException.class, () -> underTest.downscale(ACCOUNT_ID, request));
+        BadRequestException exception = assertThrows(BadRequestException.class, () -> underTest.downscale(ACCOUNT_ID, request));
 
         assertEquals(exception.getMessage(), "validation failed");
     }
@@ -235,7 +235,7 @@ class FreeIpaScalingServiceTest {
         when(stack.getNotTerminatedInstanceMetaDataSet()).thenReturn(allInstances);
         DownscaleRequest request = createDownscaleRequest();
 
-        BadRequestException exception = Assertions.assertThrows(BadRequestException.class, () -> underTest.downscale(ACCOUNT_ID, request));
+        BadRequestException exception = assertThrows(BadRequestException.class, () -> underTest.downscale(ACCOUNT_ID, request));
 
         assertEquals(exception.getMessage(), "downscale operation couldn't be started with: operationError");
     }

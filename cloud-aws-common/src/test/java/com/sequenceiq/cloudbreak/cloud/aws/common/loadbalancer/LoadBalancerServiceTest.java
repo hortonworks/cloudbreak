@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer;
 
 import static java.util.Collections.emptyList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -9,7 +10,6 @@ import static org.mockito.Mockito.when;
 import java.util.Collections;
 import java.util.List;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -88,7 +88,7 @@ public class LoadBalancerServiceTest {
         verify(amazonElbClient).deregisterTargets(argumentCaptor.capture());
 
         DeregisterTargetsRequest deregisterTargetsRequest = argumentCaptor.getValue();
-        Assertions.assertEquals("targetArn", deregisterTargetsRequest.targetGroupArn());
-        Assertions.assertEquals("instanceId", deregisterTargetsRequest.targets().get(0).id());
+        assertEquals("targetArn", deregisterTargetsRequest.targetGroupArn());
+        assertEquals("instanceId", deregisterTargetsRequest.targets().get(0).id());
     }
 }

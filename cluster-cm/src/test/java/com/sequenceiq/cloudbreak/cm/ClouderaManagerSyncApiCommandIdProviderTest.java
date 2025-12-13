@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -23,7 +24,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.api.swagger.ClustersResourceApi;
@@ -69,7 +69,7 @@ public class ClouderaManagerSyncApiCommandIdProviderTest {
 
     @BeforeEach
     public void setUp() {
-        underTest = Mockito.spy(new ClouderaManagerSyncApiCommandIdProvider(
+        underTest = spy(new ClouderaManagerSyncApiCommandIdProvider(
                 syncApiCommandRetriever, clouderaManagerPollingServiceProvider, syncApiCommandPollerConfig, executorService));
         stack = new Stack();
         stack.setName("mycluster");

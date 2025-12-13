@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.utils;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import com.openpojo.reflection.PojoClass;
 import com.openpojo.reflection.PojoClassFilter;
@@ -22,7 +22,7 @@ import com.sequenceiq.common.model.annotations.Immutable;
 import com.sequenceiq.common.model.annotations.TransformGetterType;
 import com.sequenceiq.common.model.annotations.TransformSetterType;
 
-public class ModelTest {
+class ModelTest {
 
     private static final String DOMAIN_PACKAGE = "com.sequenceiq.cloudbreak.api.model";
 
@@ -52,7 +52,7 @@ public class ModelTest {
                     && pojoClass.getAnnotation(Immutable.class) == null);
 
     @Test
-    public void testPojoStructureAndBehavior() {
+    void testPojoStructureAndBehavior() {
         List<PojoClass> pojoClasses = PojoClassFactory.getPojoClassesRecursively(DOMAIN_PACKAGE, POJO_CLASS_FILTER);
 
         Validator validator = ValidatorBuilder.create()
@@ -67,7 +67,7 @@ public class ModelTest {
     }
 
     @Test
-    public void testImmutableStructureAndBehavior() {
+    void testImmutableStructureAndBehavior() {
         List<PojoClass> pojoClasses = PojoClassFactory.getPojoClassesRecursively(DOMAIN_PACKAGE, IMMUTABLE_CLASS_FILTER);
 
         Validator validator = ValidatorBuilder.create()
@@ -80,7 +80,7 @@ public class ModelTest {
     }
 
     @Test
-    public void testGetterTypeChangerPojoStructureAndBehavior() {
+    void testGetterTypeChangerPojoStructureAndBehavior() {
         List<PojoClass> pojoClasses = PojoClassFactory.getPojoClassesRecursively(DOMAIN_PACKAGE, GETTER_TYPE_CHANGER_CLASS_FILTER);
 
         Validator validator = ValidatorBuilder.create()
@@ -94,7 +94,7 @@ public class ModelTest {
     }
 
     @Test
-    public void testSetterTypeChangerPojoStructureAndBehavior() {
+    void testSetterTypeChangerPojoStructureAndBehavior() {
         List<PojoClass> pojoClasses = PojoClassFactory.getPojoClassesRecursively(DOMAIN_PACKAGE, SETTER_TYPE_CHANGER_CLASS_FILTER);
 
         Validator validator = ValidatorBuilder.create()

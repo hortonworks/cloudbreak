@@ -1,9 +1,11 @@
 package com.sequenceiq.cloudbreak.service.stack;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.util.List;
 import java.util.Optional;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -19,7 +21,7 @@ public class RuntimeVersionServiceTest {
         ClouderaManagerProduct cdhProduct = getCdhProduct();
         Optional<String> actual = RuntimeVersionService.getRuntimeVersionFromClouderaManagerProducts(List.of(cdhProduct));
 
-        Assertions.assertTrue(actual.isEmpty());
+        assertTrue(actual.isEmpty());
     }
 
     @Test
@@ -28,7 +30,7 @@ public class RuntimeVersionServiceTest {
         ClouderaManagerProduct cdhProduct = getCdhProduct("version");
         Optional<String> actual = RuntimeVersionService.getRuntimeVersionFromClouderaManagerProducts(List.of(cdhProduct));
 
-        Assertions.assertFalse(actual.isEmpty());
+        assertFalse(actual.isEmpty());
     }
 
     private ClouderaManagerProduct getCdhProduct(String version) {

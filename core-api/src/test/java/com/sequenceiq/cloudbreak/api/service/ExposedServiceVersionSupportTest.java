@@ -1,8 +1,9 @@
 package com.sequenceiq.cloudbreak.api.service;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.util.Optional;
 
-import org.junit.Assert;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -31,7 +32,7 @@ public class ExposedServiceVersionSupportTest {
     @ParameterizedTest
     @MethodSource("maxVersionSupportedParameters")
     public void testMaxSupportedVersion(Optional<String> blueprintVersion, String maxSupportedVersion, boolean include) {
-        Assert.assertEquals(include, underTest.maxVersionSupported(blueprintVersion, maxSupportedVersion));
+        assertEquals(include, underTest.maxVersionSupported(blueprintVersion, maxSupportedVersion));
     }
 
     static Object[][] minVersionSupportedParameters() {
@@ -50,6 +51,6 @@ public class ExposedServiceVersionSupportTest {
     @ParameterizedTest
     @MethodSource("minVersionSupportedParameters")
     public void testMinSupportedVersion(Optional<String> blueprintVersion, String minSupportedVersion, boolean include) {
-        Assert.assertEquals(include, underTest.minVersionSupported(blueprintVersion, minSupportedVersion));
+        assertEquals(include, underTest.minVersionSupported(blueprintVersion, minSupportedVersion));
     }
 }

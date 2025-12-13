@@ -1,7 +1,9 @@
 package com.sequenceiq.environment.proxy.v1.service;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.lenient;
@@ -14,7 +16,6 @@ import java.util.function.Supplier;
 import jakarta.ws.rs.BadRequestException;
 
 import org.hibernate.JDBCException;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -119,7 +120,7 @@ public class ProxyConfigServiceTest {
     @Test
     public void testListInAccountEmpty() {
         when(proxyConfigRepository.findAllInAccount(ACCOUNT_ID)).thenReturn(Set.of());
-        Assertions.assertTrue(underTestProxyConfigService.listInAccount(ACCOUNT_ID).isEmpty(), "lisInAccount should be empty but it is not");
+        assertTrue(underTestProxyConfigService.listInAccount(ACCOUNT_ID).isEmpty(), "lisInAccount should be empty but it is not");
     }
 
     @Test
@@ -132,7 +133,7 @@ public class ProxyConfigServiceTest {
     @Test
     public void testCreate() {
         when(proxyConfigRepository.save(PROXY_CONFIG)).thenReturn(PROXY_CONFIG);
-        Assertions.assertDoesNotThrow(() -> underTestProxyConfigService.create(PROXY_CONFIG, ACCOUNT_ID, CREATOR));
+        assertDoesNotThrow(() -> underTestProxyConfigService.create(PROXY_CONFIG, ACCOUNT_ID, CREATOR));
     }
 
     @Test

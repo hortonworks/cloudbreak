@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
@@ -8,11 +11,9 @@ import java.util.Map;
 
 import jakarta.inject.Inject;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mockito;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -120,22 +121,22 @@ class AwsTagValidatorTest {
 
     public void testNegative(String tag, String value, String messagePortion) {
         ValidationResult result = tagValidatorUnderTest.validateTags(Map.of(tag, value));
-        Assertions.assertTrue(result.hasError(), "tag validation should fail");
-        Assertions.assertTrue(result.getErrors().size() == 1, "tag validation should have one error only");
-        Assertions.assertTrue(result.getErrors().get(0).contains(messagePortion));
+        assertTrue(result.hasError(), "tag validation should fail");
+        assertTrue(result.getErrors().size() == 1, "tag validation should have one error only");
+        assertTrue(result.getErrors().get(0).contains(messagePortion));
     }
 
     public void testEmptyTagKey(String tag, String value) {
         ValidationResult result = tagValidatorUnderTest.validateTags(Map.of(tag, value));
-        Assertions.assertTrue(result.hasError(), "tag validation should fail");
-        Assertions.assertTrue(result.getErrors().size() == 2, "tag validation should have one error only");
-        Assertions.assertTrue(result.getErrors().get(0).contains("not well formatted"));
-        Assertions.assertTrue(result.getErrors().get(1).contains("too short"));
+        assertTrue(result.hasError(), "tag validation should fail");
+        assertTrue(result.getErrors().size() == 2, "tag validation should have one error only");
+        assertTrue(result.getErrors().get(0).contains("not well formatted"));
+        assertTrue(result.getErrors().get(1).contains("too short"));
     }
 
     public void testPositive(String tag, String value) {
         ValidationResult result = tagValidatorUnderTest.validateTags(Map.of(tag, value));
-        Assertions.assertFalse(result.hasError(), "tag validation should pass");
+        assertFalse(result.hasError(), "tag validation should pass");
     }
 
     @Configuration
@@ -155,7 +156,7 @@ class AwsTagValidatorTest {
         @Bean
         CloudConnector cloud() {
             PlatformParameters parameter = parameters();
-            CloudConnector mock = Mockito.mock(CloudConnector.class);
+            CloudConnector mock = mock(CloudConnector.class);
             when(mock.parameters()).thenReturn(parameter);
             when(mock.platform()).thenReturn(Platform.platform(CloudConstants.AWS));
             when(mock.variant()).thenReturn(Variant.variant(CloudConstants.AWS));
@@ -164,7 +165,7 @@ class AwsTagValidatorTest {
 
         @Bean
         PlatformParameters parameters() {
-            PlatformParameters mock = Mockito.mock(PlatformParameters.class);
+            PlatformParameters mock = mock(PlatformParameters.class);
             when(mock.tagValidator()).thenReturn(awsTagValidator);
             return mock;
         }

@@ -3,6 +3,7 @@ package com.sequenceiq.freeipa.service.recipe;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -26,7 +27,6 @@ import java.util.stream.StreamSupport;
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.core.Response;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -129,10 +129,10 @@ class FreeIpaRecipeServiceTest {
         List<RecipeModel> recipes = freeIpaRecipeService.getRecipes(1L);
         RecipeModel recipeModel1 = recipes.stream().filter(recipeModel -> "recipe1".equals(recipeModel.getName())).findFirst().get();
         RecipeModel recipeModel2 = recipes.stream().filter(recipeModel -> "recipe2".equals(recipeModel.getName())).findFirst().get();
-        Assertions.assertEquals(RecipeType.PRE_SERVICE_DEPLOYMENT, recipeModel1.getRecipeType());
-        Assertions.assertEquals(RecipeType.PRE_TERMINATION, recipeModel2.getRecipeType());
-        Assertions.assertEquals("bash1", recipeModel1.getGeneratedScript());
-        Assertions.assertEquals("bash2", recipeModel2.getGeneratedScript());
+        assertEquals(RecipeType.PRE_SERVICE_DEPLOYMENT, recipeModel1.getRecipeType());
+        assertEquals(RecipeType.PRE_TERMINATION, recipeModel2.getRecipeType());
+        assertEquals("bash1", recipeModel1.getGeneratedScript());
+        assertEquals("bash2", recipeModel2.getGeneratedScript());
         assertThat(recipeSet.getValue()).containsExactlyInAnyOrder("recipe1", "recipe2");
     }
 
@@ -162,7 +162,7 @@ class FreeIpaRecipeServiceTest {
         when(recipeV4Endpoint.getRequestsByNames(eq(0L), anySet(), any())).thenThrow(notFoundException);
         List<FreeIpaStackRecipe> freeIpaStackRecipes = List.of(new FreeIpaStackRecipe(1L, "recipe1"), new FreeIpaStackRecipe(1L, "recipe2"));
         when(freeIpaStackRecipeRepository.findByStackId(1L)).thenReturn(freeIpaStackRecipes);
-        CloudbreakServiceException cloudbreakServiceException = Assertions.assertThrows(CloudbreakServiceException.class,
+        CloudbreakServiceException cloudbreakServiceException = assertThrows(CloudbreakServiceException.class,
                 () -> freeIpaRecipeService.getRecipes(1L));
         assertEquals("Missing recipe(s): recipe2 not found", cloudbreakServiceException.getMessage());
     }
@@ -217,10 +217,10 @@ class FreeIpaRecipeServiceTest {
         List<RecipeModel> recipes = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> freeIpaRecipeService.getRecipes(1L));
         RecipeModel recipeModel1 = recipes.stream().filter(recipeModel -> "recipe1".equals(recipeModel.getName())).findFirst().get();
         RecipeModel recipeModel2 = recipes.stream().filter(recipeModel -> "recipe2".equals(recipeModel.getName())).findFirst().get();
-        Assertions.assertEquals(RecipeType.PRE_SERVICE_DEPLOYMENT, recipeModel1.getRecipeType());
-        Assertions.assertEquals(RecipeType.PRE_TERMINATION, recipeModel2.getRecipeType());
-        Assertions.assertEquals("bash1", recipeModel1.getGeneratedScript());
-        Assertions.assertEquals("bash2", recipeModel2.getGeneratedScript());
+        assertEquals(RecipeType.PRE_SERVICE_DEPLOYMENT, recipeModel1.getRecipeType());
+        assertEquals(RecipeType.PRE_TERMINATION, recipeModel2.getRecipeType());
+        assertEquals("bash1", recipeModel1.getGeneratedScript());
+        assertEquals("bash2", recipeModel2.getGeneratedScript());
         boolean hasRecipeType = ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
                 freeIpaRecipeService.hasRecipeType(1L, RecipeType.PRE_TERMINATION));
         assertTrue(hasRecipeType);
@@ -239,8 +239,8 @@ class FreeIpaRecipeServiceTest {
         when(freeIpaStackRecipeRepository.findByStackId(1L)).thenReturn(freeIpaStackRecipes);
         List<RecipeModel> recipes = freeIpaRecipeService.getRecipes(1L);
         RecipeModel recipeModel1 = recipes.stream().filter(recipeModel -> "recipe1".equals(recipeModel.getName())).findFirst().get();
-        Assertions.assertEquals(RecipeType.PRE_SERVICE_DEPLOYMENT, recipeModel1.getRecipeType());
-        Assertions.assertEquals("bash1", recipeModel1.getGeneratedScript());
+        assertEquals(RecipeType.PRE_SERVICE_DEPLOYMENT, recipeModel1.getRecipeType());
+        assertEquals("bash1", recipeModel1.getGeneratedScript());
         boolean hasRecipeType = freeIpaRecipeService.hasRecipeType(1L, RecipeType.PRE_TERMINATION);
         assertFalse(hasRecipeType);
         assertThat(recipeSet.getValue()).containsExactly("recipe1");
@@ -271,7 +271,7 @@ class FreeIpaRecipeServiceTest {
         when(stackService.getResourceBasicViewByEnvironmentCrnAndAccountId("crn", accid)).thenReturn(getBasicView(1L, "crn"));
         when(freeIpaStackRecipeRepository.findByStackId(1L)).thenReturn(freeIpaStackRecipes);
         when(recipeAttachmentChecker.isRecipeAttachmentAvailable(1L)).thenReturn(false);
-        BadRequestException badRequestException = Assertions.assertThrows(BadRequestException.class, () -> freeIpaRecipeService.attachRecipes(accid,
+        BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> freeIpaRecipeService.attachRecipes(accid,
                 recipeAttachDetachRequest));
         verify(recipeAttachmentChecker, times(1)).isRecipeAttachmentAvailable(1L);
         assertEquals("Recipe attachment is not supported for this FreeIpa, please upgrade it first", badRequestException.getMessage());
@@ -358,7 +358,7 @@ class FreeIpaRecipeServiceTest {
         RecipeAttachDetachRequest recipeAttachDetachRequest = new RecipeAttachDetachRequest();
         recipeAttachDetachRequest.setRecipes(recipes);
         recipeAttachDetachRequest.setEnvironmentCrn("crn");
-        BadRequestException badRequestException = Assertions.assertThrows(BadRequestException.class,
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> freeIpaRecipeService.detachRecipes("accid", recipeAttachDetachRequest));
         assertEquals("recipe3 recipe(s) are not attached to freeipa stack!", badRequestException.getMessage());
         verifyNoInteractions(recipeUsageService);

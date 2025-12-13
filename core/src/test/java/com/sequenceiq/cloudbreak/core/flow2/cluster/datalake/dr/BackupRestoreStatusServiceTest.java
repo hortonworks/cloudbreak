@@ -7,17 +7,17 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.DATALAKE_DATABASE_BA
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.DATALAKE_DATABASE_RESTORE;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.DATALAKE_DATABASE_RESTORE_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.DATALAKE_DATABASE_RESTORE_FINISHED;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
@@ -25,7 +25,8 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 
-public class BackupRestoreStatusServiceTest {
+@ExtendWith(MockitoExtension.class)
+class BackupRestoreStatusServiceTest {
 
     private static final String ERROR_MESSAGE = "error message";
 
@@ -58,13 +59,8 @@ public class BackupRestoreStatusServiceTest {
     @InjectMocks
     private BackupRestoreStatusService service;
 
-    @Before
-    public void setUp() {
-        MockitoAnnotations.initMocks(this);
-    }
-
     @Test
-    public void testBackupStarted() {
+    void testBackupStarted() {
         ArgumentCaptor<ResourceEvent> captor = ArgumentCaptor.forClass(ResourceEvent.class);
         service.backupDatabase(STACK_ID, BACKUP_ID, false);
         verify(stackUpdater, times(1)).updateStackStatus(STACK_ID, DetailedStackStatus.DATABASE_BACKUP_IN_PROGRESS,
@@ -74,7 +70,7 @@ public class BackupRestoreStatusServiceTest {
     }
 
     @Test
-    public void testBackupFinished() {
+    void testBackupFinished() {
         ArgumentCaptor<ResourceEvent> captor = ArgumentCaptor.forClass(ResourceEvent.class);
         service.backupDatabaseFinished(STACK_ID, false);
         verify(stackUpdater, times(1)).updateStackStatus(STACK_ID, DetailedStackStatus.DATABASE_BACKUP_FINISHED,
@@ -84,7 +80,7 @@ public class BackupRestoreStatusServiceTest {
     }
 
     @Test
-    public void testBackupFailure() {
+    void testBackupFailure() {
         ArgumentCaptor<ResourceEvent> captor = ArgumentCaptor.forClass(ResourceEvent.class);
         service.handleDatabaseBackupFailure(STACK_ID, ERROR_MESSAGE, DetailedStackStatus.DATABASE_BACKUP_FAILED, false);
         verify(stackUpdater, times(1)).updateStackStatus(STACK_ID, DetailedStackStatus.DATABASE_BACKUP_FAILED, ERROR_MESSAGE);
@@ -93,7 +89,7 @@ public class BackupRestoreStatusServiceTest {
     }
 
     @Test
-    public void testRestoreStarted() {
+    void testRestoreStarted() {
         ArgumentCaptor<ResourceEvent> captor = ArgumentCaptor.forClass(ResourceEvent.class);
         service.restoreDatabase(STACK_ID, BACKUP_ID, false);
         verify(stackUpdater, times(1)).updateStackStatus(STACK_ID, DetailedStackStatus.DATABASE_RESTORE_IN_PROGRESS,
@@ -103,7 +99,7 @@ public class BackupRestoreStatusServiceTest {
     }
 
     @Test
-    public void testRestoreFinished() {
+    void testRestoreFinished() {
         ArgumentCaptor<ResourceEvent> captor = ArgumentCaptor.forClass(ResourceEvent.class);
         service.restoreDatabaseFinished(STACK_ID, false);
         verify(stackUpdater, times(1)).updateStackStatus(STACK_ID, DetailedStackStatus.DATABASE_RESTORE_FINISHED,
@@ -113,7 +109,7 @@ public class BackupRestoreStatusServiceTest {
     }
 
     @Test
-    public void testRestoreFailure() {
+    void testRestoreFailure() {
         ArgumentCaptor<ResourceEvent> captor = ArgumentCaptor.forClass(ResourceEvent.class);
         service.handleDatabaseRestoreFailure(STACK_ID, ERROR_MESSAGE, DetailedStackStatus.DATABASE_RESTORE_FAILED, false);
         verify(stackUpdater, times(1)).updateStackStatus(STACK_ID, DetailedStackStatus.DATABASE_RESTORE_FAILED, ERROR_MESSAGE);
@@ -122,7 +118,7 @@ public class BackupRestoreStatusServiceTest {
     }
 
     @Test
-    public void testBackupFailureParseStderr() {
+    void testBackupFailureParseStderr() {
         ArgumentCaptor<ResourceEvent> captor = ArgumentCaptor.forClass(ResourceEvent.class);
         service.handleDatabaseBackupFailure(STACK_ID, RAW_STDERR, DetailedStackStatus.DATABASE_BACKUP_FAILED, false);
         verify(stackUpdater, times(1)).updateStackStatus(STACK_ID, DetailedStackStatus.DATABASE_BACKUP_FAILED, PARSED_STDERR);
@@ -131,7 +127,7 @@ public class BackupRestoreStatusServiceTest {
     }
 
     @Test
-    public void testRestoreFailureParseStderr() {
+    void testRestoreFailureParseStderr() {
         ArgumentCaptor<ResourceEvent> captor = ArgumentCaptor.forClass(ResourceEvent.class);
         service.handleDatabaseRestoreFailure(STACK_ID, RAW_STDERR, DetailedStackStatus.DATABASE_RESTORE_FAILED, false);
         verify(stackUpdater, times(1)).updateStackStatus(STACK_ID, DetailedStackStatus.DATABASE_RESTORE_FAILED, PARSED_STDERR);

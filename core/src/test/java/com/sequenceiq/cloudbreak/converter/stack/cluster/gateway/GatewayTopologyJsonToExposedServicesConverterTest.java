@@ -1,18 +1,17 @@
 package com.sequenceiq.cloudbreak.converter.stack.cluster.gateway;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.gateway.topology.GatewayTopologyV4Request;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
@@ -21,17 +20,14 @@ import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.gateway.topology.Ga
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.ExposedServices;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 
-@RunWith(MockitoJUnitRunner.class)
-public class GatewayTopologyJsonToExposedServicesConverterTest {
+@ExtendWith(MockitoExtension.class)
+class GatewayTopologyJsonToExposedServicesConverterTest {
 
     private static final String TOPOLOGY_NAME = "topologyName";
 
     private static final String CLOUDERA_MANAGER_UI = "CM-UI";
 
     private static final String INVALID = "INVALID";
-
-    @Rule
-    public final ExpectedException thrown = ExpectedException.none();
 
     @Mock
     private ExposedServiceListValidator exposedServiceListValidator;
@@ -40,20 +36,17 @@ public class GatewayTopologyJsonToExposedServicesConverterTest {
     private GatewayTopologyV4RequestToExposedServicesConverter underTest;
 
     @Test
-    public void testWithInvalidExposedService() {
+    void testWithInvalidExposedService() {
         GatewayTopologyV4Request gatewayTopologyJson = new GatewayTopologyV4Request();
         gatewayTopologyJson.setTopologyName(TOPOLOGY_NAME);
         gatewayTopologyJson.setExposedServices(Collections.singletonList(INVALID));
         when(exposedServiceListValidator.validate(anyList())).thenReturn(new ValidationResultBuilder().error(INVALID).build());
 
-        thrown.expect(BadRequestException.class);
-        thrown.expectMessage(INVALID);
-
-        underTest.convert(gatewayTopologyJson);
+        assertThrows(BadRequestException.class, () -> underTest.convert(gatewayTopologyJson), INVALID);
     }
 
     @Test
-    public void testWithSingleExposedService() {
+    void testWithSingleExposedService() {
         GatewayTopologyV4Request gatewayTopologyJson = new GatewayTopologyV4Request();
         gatewayTopologyJson.setTopologyName(TOPOLOGY_NAME);
         gatewayTopologyJson.setExposedServices(Collections.singletonList(CLOUDERA_MANAGER_UI));

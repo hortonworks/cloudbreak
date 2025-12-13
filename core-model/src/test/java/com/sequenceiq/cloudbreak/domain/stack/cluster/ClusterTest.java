@@ -1,8 +1,10 @@
 package com.sequenceiq.cloudbreak.domain.stack.cluster;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+
 import java.util.stream.Stream;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -16,7 +18,7 @@ public class ClusterTest {
         // WHEN
         String actualPwd = cluster.getTrustStorePwd();
         // THEN
-        Assertions.assertNull(actualPwd);
+        assertNull(actualPwd);
     }
 
     @ParameterizedTest
@@ -29,7 +31,7 @@ public class ClusterTest {
         // WHEN
         String actualPwd = cluster.getTrustStorePwd();
         // THEN
-        Assertions.assertEquals(expectedPwd, actualPwd);
+        assertEquals(expectedPwd, actualPwd);
     }
 
     @Test
@@ -39,7 +41,7 @@ public class ClusterTest {
         // WHEN
         String actualPwd = cluster.getKeyStorePwd();
         // THEN
-        Assertions.assertNull(actualPwd);
+        assertNull(actualPwd);
     }
 
     @ParameterizedTest
@@ -52,7 +54,7 @@ public class ClusterTest {
         // WHEN
         String actualPwd = cluster.getKeyStorePwd();
         // THEN
-        Assertions.assertEquals(expectedPwd, actualPwd);
+        assertEquals(expectedPwd, actualPwd);
     }
 
     private static Stream<Arguments> passwords() {

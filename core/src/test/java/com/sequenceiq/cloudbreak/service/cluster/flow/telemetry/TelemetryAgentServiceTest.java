@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -16,11 +17,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
@@ -32,7 +33,8 @@ import com.sequenceiq.cloudbreak.orchestrator.host.TelemetryOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 
-public class TelemetryAgentServiceTest {
+@ExtendWith(MockitoExtension.class)
+class TelemetryAgentServiceTest {
 
     @InjectMocks
     private TelemetryAgentService underTest;
@@ -43,14 +45,8 @@ public class TelemetryAgentServiceTest {
     @Mock
     private GatewayConfigService gatewayConfigService;
 
-    @Before
-    public void setUp() {
-        MockitoAnnotations.initMocks(this);
-        underTest = new TelemetryAgentService(telemetryOrchestrator, gatewayConfigService);
-    }
-
     @Test
-    public void testStopTelemetryAgent() throws Exception {
+    void testStopTelemetryAgent() throws Exception {
         // GIVEN
         doNothing().when(telemetryOrchestrator).stopTelemetryAgent(anyList(), anySet(), any(ExitCriteriaModel.class));
         // WHEN
@@ -60,7 +56,7 @@ public class TelemetryAgentServiceTest {
     }
 
     @Test
-    public void testStopTelemetryAgentThrowsException() throws Exception {
+    void testStopTelemetryAgentThrowsException() throws Exception {
         // GIVEN
         given(gatewayConfigService.getAllGatewayConfigs(any(StackDto.class))).willReturn(null);
         doThrow(new CloudbreakOrchestratorFailedException("error")).when(telemetryOrchestrator)
@@ -73,7 +69,7 @@ public class TelemetryAgentServiceTest {
 
     private StackDto createStack() {
         StackDto stack = mock(StackDto.class);
-        when(stack.getId()).thenReturn(1L);
+        lenient().when(stack.getId()).thenReturn(1L);
         InstanceGroup instanceGroup = new InstanceGroup();
         instanceGroup.setInstanceMetaData(createInstanceMetadataSet());
         instanceGroup.setTemplate(new Template());

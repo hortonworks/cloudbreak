@@ -1,8 +1,12 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.service.checker;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
@@ -10,10 +14,8 @@ import java.net.SocketTimeoutException;
 import java.util.List;
 
 import org.apache.http.conn.ConnectTimeoutException;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 import com.google.api.services.sqladmin.SQLAdmin;
 import com.google.api.services.sqladmin.model.Operation;
@@ -35,9 +37,9 @@ class GcpDatabaseResourceCheckerTest {
 
     @BeforeEach
     void setUp() throws IOException {
-        sqlAdminGetOperation = Mockito.mock(SQLAdmin.Operations.Get.class);
-        sqlAdmin = Mockito.mock(SQLAdmin.class);
-        underTest = Mockito.spy(new GcpDatabaseResourceChecker());
+        sqlAdminGetOperation = mock(SQLAdmin.Operations.Get.class);
+        sqlAdmin = mock(SQLAdmin.class);
+        underTest = spy(new GcpDatabaseResourceChecker());
 
         CloudContext cloudContext = new CloudContext.Builder()
                 .withName("aDatabaseStackName")
@@ -53,21 +55,21 @@ class GcpDatabaseResourceCheckerTest {
     void testCheckWhenOperationSdkCallThrowChildOfInterruptedExceptionDueToSocketTimeOutShouldThrowRetryableException() throws IOException {
         when(sqlAdminGetOperation.execute()).thenThrow(new SocketTimeoutException("Read timed out"));
 
-        Assertions.assertThrows(CloudConnectorException.class, () -> underTest.check(sqlAdmin, authenticatedContext, "anOperationId"));
+        assertThrows(CloudConnectorException.class, () -> underTest.check(sqlAdmin, authenticatedContext, "anOperationId"));
     }
 
     @Test
     void testCheckWhenOperationSdkCallThrowChildOfInterruptedExceptionDueToConnectionTimeOutShouldThrowRetryableException() throws IOException {
         when(sqlAdminGetOperation.execute()).thenThrow(new ConnectTimeoutException("Connect timed out"));
 
-        Assertions.assertThrows(CloudConnectorException.class, () -> underTest.check(sqlAdmin, authenticatedContext, "anOperationId"));
+        assertThrows(CloudConnectorException.class, () -> underTest.check(sqlAdmin, authenticatedContext, "anOperationId"));
     }
 
     @Test
     void testCheckWhenOperationSdkCallThrowRuntimeExceptionShouldThrowNonRetryableException() throws IOException {
         when(sqlAdminGetOperation.execute()).thenThrow(new IOException("Something unexpected bad happened."));
 
-        Assertions.assertThrows(IOException.class, () -> underTest.check(sqlAdmin, authenticatedContext, "anOperationId"));
+        assertThrows(IOException.class, () -> underTest.check(sqlAdmin, authenticatedContext, "anOperationId"));
     }
 
     @Test
@@ -79,7 +81,7 @@ class GcpDatabaseResourceCheckerTest {
         operation.setError(new OperationErrors().setErrors(List.of(operationError)));
         when(sqlAdminGetOperation.execute()).thenReturn(operation);
 
-        Assertions.assertThrows(CloudConnectorException.class, () -> underTest.check(sqlAdmin, authenticatedContext, "anOperationId"));
+        assertThrows(CloudConnectorException.class, () -> underTest.check(sqlAdmin, authenticatedContext, "anOperationId"));
     }
 
     @Test
@@ -89,6 +91,6 @@ class GcpDatabaseResourceCheckerTest {
 
         Operation result = underTest.check(sqlAdmin, authenticatedContext, "anOperationId");
 
-        Assertions.assertEquals(operation, result);
+        assertEquals(operation, result);
     }
 }

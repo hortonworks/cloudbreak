@@ -1,48 +1,23 @@
 package com.sequenceiq.cloudbreak.structuredevent.rest.urlparsers;
 
 import static com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService.DATAHUB_RESOURCE_TYPE;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Arrays;
 import java.util.regex.Matcher;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 
-@RunWith(Parameterized.class)
-public class DistroXV1RestUrlParserTest {
+class DistroXV1RestUrlParserTest {
 
-    @Parameterized.Parameter
-    public String url;
+    private DistroXV1RestUrlParser underTest = new DistroXV1RestUrlParser();
 
-    @Parameterized.Parameter(1)
-    public boolean match;
-
-    @Parameterized.Parameter(2)
-    public String resourceCrn;
-
-    @Parameterized.Parameter(3)
-    public String resourceName;
-
-    @Parameterized.Parameter(4)
-    public String resourceType;
-
-    @Parameterized.Parameter(5)
-    public String resourceEvent;
-
-    private DistroXV1RestUrlParser underTest;
-
-    @Before
-    public void init() {
-        underTest = new DistroXV1RestUrlParser();
-    }
-
-    @Test
-    public void testMatch() {
+    @MethodSource("data")
+    @ParameterizedTest
+    void testMatch(String url, boolean match, String resourceCrn, String resourceName, String resourceType, String resourceEvent) {
         Matcher matcher = underTest.getPattern().matcher(url);
         if (match) {
             assertTrue(matcher.matches());
@@ -55,9 +30,7 @@ public class DistroXV1RestUrlParserTest {
         }
     }
 
-    @Parameterized.Parameters(name
-            = "{index}: testMatch(url: {0}, should match {1}, resourceCrn: {2}, resourceName: {3}, resourceType: {4}, resourceEvent: {5}")
-    public static Iterable<Object[]> data() {
+    static Iterable<Object[]> data() {
         return Arrays.asList(new Object[][]{
                 {"v1/distrox/name/asdf", true, null, "asdf", DATAHUB_RESOURCE_TYPE, "asdf"},
                 {"v1/distrox/random/asdf", false, null, null, DATAHUB_RESOURCE_TYPE, null},

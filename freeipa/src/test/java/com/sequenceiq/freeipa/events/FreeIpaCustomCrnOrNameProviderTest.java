@@ -1,13 +1,14 @@
 package com.sequenceiq.freeipa.events;
 
 import static com.sequenceiq.cloudbreak.structuredevent.rest.urlparser.CDPRestUrlParser.RESOURCE_ID;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -38,8 +39,8 @@ public class FreeIpaCustomCrnOrNameProviderTest {
         restRequestDetails.setRequestUri("http://localhost/any/path");
         Map<String, String> restParams = new HashMap<>();
         underTest.provide(restCallDetails, null, restParams, "name", "crn");
-        Assertions.assertFalse(restParams.containsKey("name"));
-        Assertions.assertFalse(restParams.containsKey("crn"));
+        assertFalse(restParams.containsKey("name"));
+        assertFalse(restParams.containsKey("crn"));
     }
 
     @Test
@@ -50,8 +51,8 @@ public class FreeIpaCustomCrnOrNameProviderTest {
         restRequestDetails.setRequestUri("http://localhost/any/path?asdda=asdasd");
         Map<String, String> restParams = new HashMap<>();
         underTest.provide(restCallDetails, null, restParams, "name", "crn");
-        Assertions.assertFalse(restParams.containsKey("name"));
-        Assertions.assertFalse(restParams.containsKey("crn"));
+        assertFalse(restParams.containsKey("name"));
+        assertFalse(restParams.containsKey("crn"));
     }
 
     @Test
@@ -75,8 +76,8 @@ public class FreeIpaCustomCrnOrNameProviderTest {
 
         Map<String, String> restParams = new HashMap<>();
         Map<String, String> expected = ThreadBasedUserCrnProvider.doAs(userCrn, () -> underTest.provide(restCallDetails, null, restParams, "name", "crn"));
-        Assertions.assertEquals("stackName", expected.get("name"));
-        Assertions.assertEquals("stackCrn", expected.get("crn"));
-        Assertions.assertEquals("2922", expected.get(RESOURCE_ID));
+        assertEquals("stackName", expected.get("name"));
+        assertEquals("stackCrn", expected.get("crn"));
+        assertEquals("2922", expected.get(RESOURCE_ID));
     }
 }

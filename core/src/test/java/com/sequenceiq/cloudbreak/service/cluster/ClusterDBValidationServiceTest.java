@@ -1,11 +1,12 @@
 package com.sequenceiq.cloudbreak.service.cluster;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.Set;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -34,7 +35,7 @@ public class ClusterDBValidationServiceTest {
         // WHEN
         Boolean actualResult = underTest.isGatewayRepairEnabled(cluster);
         // THEN
-        Assertions.assertTrue(actualResult);
+        assertTrue(actualResult);
     }
 
     @Test
@@ -46,7 +47,7 @@ public class ClusterDBValidationServiceTest {
         // WHEN
         Boolean actualResult = underTest.isGatewayRepairEnabled(cluster);
         // THEN
-        Assertions.assertTrue(actualResult);
+        assertTrue(actualResult);
     }
 
     @Test
@@ -60,7 +61,7 @@ public class ClusterDBValidationServiceTest {
         // WHEN
         Boolean actualResult = underTest.isGatewayRepairEnabled(cluster);
         // THEN
-        Assertions.assertTrue(actualResult);
+        assertTrue(actualResult);
     }
 
     @Test
@@ -74,7 +75,7 @@ public class ClusterDBValidationServiceTest {
         // WHEN
         Boolean actualResult = underTest.isGatewayRepairEnabled(cluster);
         // THEN
-        Assertions.assertFalse(actualResult);
+        assertFalse(actualResult);
     }
 
     @Test
@@ -85,7 +86,7 @@ public class ClusterDBValidationServiceTest {
         // WHEN
         Boolean actualResult = underTest.isGatewayRepairEnabled(cluster);
         // THEN
-        Assertions.assertFalse(actualResult);
+        assertFalse(actualResult);
     }
 
     private RdsConfigWithoutCluster createRdsConfig(Long id, ResourceStatus resourceStatus, DatabaseType databaseType) {

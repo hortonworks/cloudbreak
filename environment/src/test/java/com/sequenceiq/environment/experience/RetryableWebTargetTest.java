@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.experience;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -10,7 +11,6 @@ import java.lang.reflect.Method;
 import jakarta.ws.rs.client.Invocation;
 import jakarta.ws.rs.core.Response;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.retry.annotation.Backoff;
@@ -37,28 +37,28 @@ class RetryableWebTargetTest {
     void testGetHasRetryableAnnotationWithMaxAttemptWithExpectedAmount() throws NoSuchMethodException {
         Retryable retryableAnnotation = getRetryableAnnotationForMethod(GET_METHOD_NAME);
 
-        Assertions.assertEquals(RETRYABLE_MAX_ATTEMPT, retryableAnnotation.maxAttempts());
+        assertEquals(RETRYABLE_MAX_ATTEMPT, retryableAnnotation.maxAttempts());
     }
 
     @Test
     void testDeleteHasRetryableAnnotationWithMaxAttemptWithExpectedAmount() throws NoSuchMethodException {
         Retryable retryableAnnotation = getRetryableAnnotationForMethod(DELETE_METHOD_NAME);
 
-        Assertions.assertEquals(RETRYABLE_MAX_ATTEMPT, retryableAnnotation.maxAttempts());
+        assertEquals(RETRYABLE_MAX_ATTEMPT, retryableAnnotation.maxAttempts());
     }
 
     @Test
     void testGetHasRetryableAnnotationWithBackoffWithExpectedAmount() throws NoSuchMethodException {
         Backoff backoff = getRetryableAnnotationForMethod(GET_METHOD_NAME).backoff();
 
-        Assertions.assertEquals(RETRYABLE_BACKOFF_DELAY, backoff.delay());
+        assertEquals(RETRYABLE_BACKOFF_DELAY, backoff.delay());
     }
 
     @Test
     void testDeleteHasRetryableAnnotationWithBackoffWithExpectedAmount() throws NoSuchMethodException {
         Backoff backoff = getRetryableAnnotationForMethod(DELETE_METHOD_NAME).backoff();
 
-        Assertions.assertEquals(RETRYABLE_BACKOFF_DELAY, backoff.delay());
+        assertEquals(RETRYABLE_BACKOFF_DELAY, backoff.delay());
     }
 
     @Test
@@ -69,7 +69,7 @@ class RetryableWebTargetTest {
 
         Response result = underTest.get(mockBuilder);
 
-        Assertions.assertEquals(expectedResult, result);
+        assertEquals(expectedResult, result);
         verify(mockBuilder, times(1)).get();
     }
 
@@ -81,7 +81,7 @@ class RetryableWebTargetTest {
 
         Response result = underTest.delete(mockBuilder);
 
-        Assertions.assertEquals(expectedResult, result);
+        assertEquals(expectedResult, result);
         verify(mockBuilder, times(1)).delete();
     }
 

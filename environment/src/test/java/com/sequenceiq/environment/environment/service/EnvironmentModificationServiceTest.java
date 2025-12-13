@@ -23,7 +23,6 @@ import java.util.UUID;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.BadRequestException;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -940,7 +939,7 @@ class EnvironmentModificationServiceTest {
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> environmentModificationServiceUnderTest.edit(environment, environmentDto));
 
-        Assertions.assertEquals("The custom docker registry CRN is not valid for example", badRequestException.getMessage());
+        assertEquals("The custom docker registry CRN is not valid for example", badRequestException.getMessage());
     }
 
     private Environment environmentMock() {

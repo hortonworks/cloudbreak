@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.job.dynamicentitlement.scheduler;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import javax.sql.DataSource;
 

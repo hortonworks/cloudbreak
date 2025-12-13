@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -20,7 +21,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -77,7 +77,7 @@ public class MultiAzValidatorTest {
 
         underTest.validateMultiAzForStack(stack, builder);
 
-        Mockito.verify(builder, Mockito.times(0)).error(anyString());
+        verify(builder, times(0)).error(anyString());
     }
 
     @Test
@@ -113,7 +113,7 @@ public class MultiAzValidatorTest {
 
         underTest.validateMultiAzForStack(stack, builder);
 
-        Mockito.verify(builder, Mockito.times(0)).error(anyString());
+        verify(builder, times(0)).error(anyString());
     }
 
     @Test
@@ -129,7 +129,7 @@ public class MultiAzValidatorTest {
 
         underTest.validateMultiAzForStack(stack, builder);
 
-        Mockito.verify(builder, Mockito.times(0)).error(anyString());
+        verify(builder, times(0)).error(anyString());
     }
 
     @Test

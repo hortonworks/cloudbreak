@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.azure.upscale;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
@@ -14,12 +14,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.azure.core.management.exception.ManagementError;
 import com.azure.resourcemanager.compute.models.ApiError;
@@ -29,8 +29,6 @@ import com.sequenceiq.cloudbreak.cloud.azure.AzureTestUtils;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureUtils;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureVirtualMachineService;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
-import com.sequenceiq.cloudbreak.cloud.azure.connector.resource.AzureComputeResourceService;
-import com.sequenceiq.cloudbreak.cloud.azure.template.AzureTemplateDeploymentService;
 import com.sequenceiq.cloudbreak.cloud.azure.view.AzureStackView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -42,13 +40,12 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
-import com.sequenceiq.cloudbreak.cloud.transform.CloudResourceHelper;
 import com.sequenceiq.cloudbreak.service.Retry;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
 
-@RunWith(MockitoJUnitRunner.class)
-public class AzureVerticalScaleServiceTest {
+@ExtendWith(MockitoExtension.class)
+class AzureVerticalScaleServiceTest {
 
     private static final Map<String, Object> PARAMETERS = Collections.emptyMap();
 
@@ -64,16 +61,7 @@ public class AzureVerticalScaleServiceTest {
     private AzureVerticalScaleService underTest;
 
     @Mock
-    private AzureTemplateDeploymentService azureTemplateDeploymentService;
-
-    @Mock
     private AzureUtils azureUtils;
-
-    @Mock
-    private CloudResourceHelper cloudResourceHelper;
-
-    @Mock
-    private AzureComputeResourceService azureComputeResourceService;
 
     @Mock
     private AzureClient client;
@@ -90,13 +78,13 @@ public class AzureVerticalScaleServiceTest {
     @Mock
     private AzureVirtualMachineService azureVirtualMachineService;
 
-    @Before
-    public void before() {
+    @BeforeEach
+    void before() {
         when(azureUtils.getStackName(any(CloudContext.class))).thenReturn(STACK_NAME);
     }
 
     @Test
-    public void testVerticalScaleWhenAzureAnswersTheVerticalScaleShouldHappen() throws QuotaExceededException {
+    void testVerticalScaleWhenAzureAnswersTheVerticalScaleShouldHappen() throws QuotaExceededException {
         CloudContext cloudContext = createCloudContext();
         AuthenticatedContext ac = new AuthenticatedContext(cloudContext, null);
         CloudResource template = createCloudResource(TEMPLATE, ResourceType.ARM_TEMPLATE);
@@ -114,7 +102,7 @@ public class AzureVerticalScaleServiceTest {
     }
 
     @Test
-    public void testVerticalScaleWhenDropExceptionThenVerticalScaleDoesNotHappen() {
+    void testVerticalScaleWhenDropExceptionThenVerticalScaleDoesNotHappen() {
         CloudContext cloudContext = createCloudContext();
         AuthenticatedContext ac = new AuthenticatedContext(cloudContext, null);
         CloudResource template = createCloudResource(TEMPLATE, ResourceType.ARM_TEMPLATE);

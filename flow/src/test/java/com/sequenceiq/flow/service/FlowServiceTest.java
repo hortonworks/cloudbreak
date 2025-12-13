@@ -1,7 +1,10 @@
 package com.sequenceiq.flow.service;
 
-import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
@@ -23,7 +26,6 @@ import java.util.Set;
 
 import jakarta.ws.rs.BadRequestException;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -156,7 +158,7 @@ public class FlowServiceTest {
 
         BadRequestException e = assertThrows(BadRequestException.class, () -> underTest.getLastFlowById(FLOW_ID));
 
-        Assertions.assertEquals(e.getMessage(), "Not found flow for this flow id!");
+        assertEquals(e.getMessage(), "Not found flow for this flow id!");
         verify(flowLogDBService).findFirstByFlowIdOrderByCreatedDesc(anyString());
     }
 
@@ -164,7 +166,7 @@ public class FlowServiceTest {
     void testGetFlowLogsByFlowIdEmpty() {
         when(flowLogDBService.findAllByFlowIdOrderByCreatedDesc(anyString())).thenReturn(List.of());
 
-        Assertions.assertEquals(0, underTest.getFlowLogsByFlowId(FLOW_ID).size());
+        assertEquals(0, underTest.getFlowLogsByFlowId(FLOW_ID).size());
 
         verify(flowLogDBService).findAllByFlowIdOrderByCreatedDesc(anyString());
     }
@@ -173,7 +175,7 @@ public class FlowServiceTest {
     void testGetFlowLogsByFlowId() {
         when(flowLogDBService.findAllByFlowIdOrderByCreatedDesc(anyString())).thenReturn(List.of(new FlowLog()));
 
-        Assertions.assertEquals(1, underTest.getFlowLogsByFlowId(FLOW_ID).size());
+        assertEquals(1, underTest.getFlowLogsByFlowId(FLOW_ID).size());
 
         verify(flowLogDBService).findAllByFlowIdOrderByCreatedDesc(anyString());
         verify(flowLogConverter).convert(any());
@@ -257,8 +259,8 @@ public class FlowServiceTest {
         ));
 
         FlowCheckResponse flowCheckResponse = underTest.getFlowState(FLOW_ID);
-        Assertions.assertTrue(flowCheckResponse.getHasActiveFlow());
-        Assertions.assertNotNull(flowCheckResponse.getFlowId());
+        assertTrue(flowCheckResponse.getHasActiveFlow());
+        assertNotNull(flowCheckResponse.getFlowId());
 
         verify(flowLogDBService).findAllWithoutPayloadByFlowIdOrderByCreatedDesc(anyString());
         verifyNoMoreInteractions(flowChainLogService);
@@ -272,8 +274,8 @@ public class FlowServiceTest {
         ));
 
         FlowCheckResponse flowCheckResponse = underTest.getFlowState(FLOW_ID);
-        Assertions.assertFalse(flowCheckResponse.getHasActiveFlow());
-        Assertions.assertNotNull(flowCheckResponse.getFlowId());
+        assertFalse(flowCheckResponse.getHasActiveFlow());
+        assertNotNull(flowCheckResponse.getFlowId());
 
         verify(flowLogDBService).findAllWithoutPayloadByFlowIdOrderByCreatedDesc(anyString());
         verify(flowChainLogService).hasEventInFlowChainQueue(List.of());
@@ -284,7 +286,7 @@ public class FlowServiceTest {
         setUpFlow(FLOW_ID, Collections.emptyList());
 
         NotFoundException e = assertThrows(NotFoundException.class, () -> underTest.getFlowState(FLOW_ID));
-        Assertions.assertEquals("Flow 'FLOW_ID' not found.", e.getMessage());
+        assertEquals("Flow 'FLOW_ID' not found.", e.getMessage());
     }
 
     @Test
@@ -308,9 +310,9 @@ public class FlowServiceTest {
         setUpFlowChain(flowChainLog(), false, List.of(latestFlowLog, secondToLatestFlowLog));
         FlowCheckResponse flowCheckResponse = underTest.getFlowChainState(FLOW_CHAIN_ID);
 
-        Assertions.assertEquals("CURRENT_STATE_FIRST", flowCheckResponse.getCurrentState());
-        Assertions.assertEquals("NEXT_EVENT_FIRST", flowCheckResponse.getNextEvent());
-        Assertions.assertEquals("FLOW_TYPE_FIRST", flowCheckResponse.getFlowType());
+        assertEquals("CURRENT_STATE_FIRST", flowCheckResponse.getCurrentState());
+        assertEquals("NEXT_EVENT_FIRST", flowCheckResponse.getNextEvent());
+        assertEquals("FLOW_TYPE_FIRST", flowCheckResponse.getFlowType());
     }
 
     @Test
@@ -335,9 +337,9 @@ public class FlowServiceTest {
 
         FlowCheckResponse flowCheckResponse = underTest.getFlowState(FLOW_ID);
 
-        Assertions.assertEquals("CURRENT_STATE_FIRST", flowCheckResponse.getCurrentState());
-        Assertions.assertEquals("NEXT_EVENT_FIRST", flowCheckResponse.getNextEvent());
-        Assertions.assertEquals("FLOW_TYPE_FIRST", flowCheckResponse.getFlowType());
+        assertEquals("CURRENT_STATE_FIRST", flowCheckResponse.getCurrentState());
+        assertEquals("NEXT_EVENT_FIRST", flowCheckResponse.getNextEvent());
+        assertEquals("FLOW_TYPE_FIRST", flowCheckResponse.getFlowType());
     }
 
     @Test
@@ -348,9 +350,9 @@ public class FlowServiceTest {
         ));
 
         FlowCheckResponse flowCheckResponse = underTest.getFlowState(FLOW_ID);
-        Assertions.assertEquals(INTERMEDIATE_STATE, flowCheckResponse.getCurrentState());
-        Assertions.assertEquals(NEXT_EVENT, flowCheckResponse.getNextEvent());
-        Assertions.assertNull(flowCheckResponse.getFlowType());
+        assertEquals(INTERMEDIATE_STATE, flowCheckResponse.getCurrentState());
+        assertEquals(NEXT_EVENT, flowCheckResponse.getNextEvent());
+        assertNull(flowCheckResponse.getFlowType());
     }
 
     @Test
@@ -361,10 +363,10 @@ public class FlowServiceTest {
         ));
 
         FlowCheckResponse flowCheckResponse = underTest.getFlowState(FLOW_ID);
-        Assertions.assertEquals(INTERMEDIATE_STATE, flowCheckResponse.getCurrentState());
-        Assertions.assertEquals(NO_NEXT_EVENT, flowCheckResponse.getNextEvent());
-        Assertions.assertNull(flowCheckResponse.getNextEvent());
-        Assertions.assertNull(flowCheckResponse.getFlowType());
+        assertEquals(INTERMEDIATE_STATE, flowCheckResponse.getCurrentState());
+        assertEquals(NO_NEXT_EVENT, flowCheckResponse.getNextEvent());
+        assertNull(flowCheckResponse.getNextEvent());
+        assertNull(flowCheckResponse.getFlowType());
     }
 
     @Test
@@ -375,9 +377,9 @@ public class FlowServiceTest {
         ));
 
         FlowCheckResponse flowCheckResponse = underTest.getFlowState(FLOW_ID);
-        Assertions.assertNull(flowCheckResponse.getCurrentState());
-        Assertions.assertNull(flowCheckResponse.getNextEvent());
-        Assertions.assertNull(flowCheckResponse.getFlowType());
+        assertNull(flowCheckResponse.getCurrentState());
+        assertNull(flowCheckResponse.getNextEvent());
+        assertNull(flowCheckResponse.getFlowType());
     }
 
     @Test
@@ -388,8 +390,8 @@ public class FlowServiceTest {
                 flowLog(FlowConstants.INIT_STATE, NEXT_EVENT, 1)));
 
         FlowCheckResponse flowCheckResponse = underTest.getFlowChainState(FLOW_CHAIN_ID);
-        Assertions.assertFalse(flowCheckResponse.getHasActiveFlow());
-        Assertions.assertEquals(FLOW_CHAIN_ID, flowCheckResponse.getFlowChainId());
+        assertFalse(flowCheckResponse.getHasActiveFlow());
+        assertEquals(FLOW_CHAIN_ID, flowCheckResponse.getFlowChainId());
     }
 
     @Test
@@ -398,8 +400,8 @@ public class FlowServiceTest {
 
         FlowCheckResponse flowCheckResponse = underTest.getFlowChainState(FLOW_CHAIN_ID);
 
-        Assertions.assertFalse(flowCheckResponse.getHasActiveFlow());
-        Assertions.assertEquals(FLOW_CHAIN_ID, flowCheckResponse.getFlowChainId());
+        assertFalse(flowCheckResponse.getHasActiveFlow());
+        assertEquals(FLOW_CHAIN_ID, flowCheckResponse.getFlowChainId());
         verify(flowChainLogService).findByFlowChainIdOrderByCreatedDesc(anyString());
         verifyNoMoreInteractions(flowLogDBService);
     }
@@ -412,8 +414,8 @@ public class FlowServiceTest {
 
         FlowCheckResponse flowCheckResponse = underTest.getFlowChainState(FLOW_CHAIN_ID);
 
-        Assertions.assertTrue(flowCheckResponse.getHasActiveFlow());
-        Assertions.assertEquals(FLOW_CHAIN_ID, flowCheckResponse.getFlowChainId());
+        assertTrue(flowCheckResponse.getHasActiveFlow());
+        assertEquals(FLOW_CHAIN_ID, flowCheckResponse.getFlowChainId());
     }
 
     @Test
@@ -424,8 +426,8 @@ public class FlowServiceTest {
 
         FlowCheckResponse flowCheckResponse = underTest.getFlowChainState(FLOW_CHAIN_ID);
 
-        Assertions.assertTrue(flowCheckResponse.getHasActiveFlow());
-        Assertions.assertEquals(FLOW_CHAIN_ID, flowCheckResponse.getFlowChainId());
+        assertTrue(flowCheckResponse.getHasActiveFlow());
+        assertEquals(FLOW_CHAIN_ID, flowCheckResponse.getFlowChainId());
     }
 
     @Test
@@ -435,8 +437,8 @@ public class FlowServiceTest {
                 flowLog(FlowConstants.INIT_STATE, NEXT_EVENT, 1)));
         FlowCheckResponse flowCheckResponse = underTest.getFlowChainState(FLOW_CHAIN_ID);
 
-        Assertions.assertFalse(flowCheckResponse.getHasActiveFlow());
-        Assertions.assertEquals(FLOW_CHAIN_ID, flowCheckResponse.getFlowChainId());
+        assertFalse(flowCheckResponse.getHasActiveFlow());
+        assertEquals(FLOW_CHAIN_ID, flowCheckResponse.getFlowChainId());
     }
 
     @Test
@@ -449,8 +451,8 @@ public class FlowServiceTest {
 
         FlowCheckResponse flowCheckResponse = underTest.getFlowChainState(FLOW_CHAIN_ID);
 
-        Assertions.assertTrue(flowCheckResponse.getHasActiveFlow());
-        Assertions.assertEquals(FLOW_CHAIN_ID, flowCheckResponse.getFlowChainId());
+        assertTrue(flowCheckResponse.getHasActiveFlow());
+        assertEquals(FLOW_CHAIN_ID, flowCheckResponse.getFlowChainId());
     }
 
     @Test
@@ -467,8 +469,8 @@ public class FlowServiceTest {
 
         FlowCheckResponse flowCheckResponse = underTest.getFlowChainState(FLOW_CHAIN_ID);
 
-        Assertions.assertFalse(flowCheckResponse.getHasActiveFlow());
-        Assertions.assertEquals(FLOW_CHAIN_ID, flowCheckResponse.getFlowChainId());
+        assertFalse(flowCheckResponse.getHasActiveFlow());
+        assertEquals(FLOW_CHAIN_ID, flowCheckResponse.getFlowChainId());
     }
 
     @Test
@@ -481,8 +483,8 @@ public class FlowServiceTest {
 
         FlowCheckResponse flowCheckResponse = underTest.getFlowChainState(FLOW_CHAIN_ID);
 
-        Assertions.assertTrue(flowCheckResponse.getHasActiveFlow());
-        Assertions.assertEquals(FLOW_CHAIN_ID, flowCheckResponse.getFlowChainId());
+        assertTrue(flowCheckResponse.getHasActiveFlow());
+        assertEquals(FLOW_CHAIN_ID, flowCheckResponse.getFlowChainId());
     }
 
     @Test
@@ -492,8 +494,8 @@ public class FlowServiceTest {
                 flowLog(FlowConstants.INIT_STATE, NEXT_EVENT, 1)));
 
         FlowCheckResponse flowCheckResponse = underTest.getFlowChainState(FLOW_CHAIN_ID);
-        Assertions.assertEquals(INTERMEDIATE_STATE, flowCheckResponse.getCurrentState());
-        Assertions.assertEquals(FAIL_HANDLED_NEXT_EVENT, flowCheckResponse.getNextEvent());
+        assertEquals(INTERMEDIATE_STATE, flowCheckResponse.getCurrentState());
+        assertEquals(FAIL_HANDLED_NEXT_EVENT, flowCheckResponse.getNextEvent());
     }
 
     @Test
@@ -504,9 +506,9 @@ public class FlowServiceTest {
                 flowLog(FlowConstants.INIT_STATE, NEXT_EVENT, 1)));
 
         FlowCheckResponse flowCheckResponse = underTest.getFlowChainState(FLOW_CHAIN_ID);
-        Assertions.assertEquals(FlowConstants.FINISHED_STATE, flowCheckResponse.getCurrentState());
-        Assertions.assertEquals(NO_NEXT_EVENT, flowCheckResponse.getNextEvent());
-        Assertions.assertNull(flowCheckResponse.getNextEvent());
+        assertEquals(FlowConstants.FINISHED_STATE, flowCheckResponse.getCurrentState());
+        assertEquals(NO_NEXT_EVENT, flowCheckResponse.getNextEvent());
+        assertNull(flowCheckResponse.getNextEvent());
     }
 
     @Test
@@ -519,8 +521,8 @@ public class FlowServiceTest {
         flowCheckResponse.setFlowChainId(FLOW_CHAIN_ID);
         flowCheckResponse.setHasActiveFlow(false);
         underTest.setEndTimeOnFlowCheckResponse(flowCheckResponse, relatedFlowLogs);
-        Assertions.assertEquals(FLOW_CHAIN_ID, flowCheckResponse.getFlowChainId());
-        Assertions.assertEquals(3L, flowCheckResponse.getEndTime().longValue());
+        assertEquals(FLOW_CHAIN_ID, flowCheckResponse.getFlowChainId());
+        assertEquals(3L, flowCheckResponse.getEndTime().longValue());
     }
 
     @Test
@@ -532,8 +534,8 @@ public class FlowServiceTest {
 
         underTest.setEndTimeOnFlowCheckResponse(flowCheckResponse, relatedFlowLogs);
 
-        Assertions.assertEquals(FLOW_CHAIN_ID, flowCheckResponse.getFlowChainId());
-        Assertions.assertNull(flowCheckResponse.getEndTime());
+        assertEquals(FLOW_CHAIN_ID, flowCheckResponse.getFlowChainId());
+        assertNull(flowCheckResponse.getEndTime());
     }
 
     @Test
@@ -547,8 +549,8 @@ public class FlowServiceTest {
 
         underTest.setEndTimeOnFlowCheckResponse(flowCheckResponse, relatedFlowLogs);
 
-        Assertions.assertTrue(flowCheckResponse.getHasActiveFlow());
-        Assertions.assertEquals(FLOW_CHAIN_ID, flowCheckResponse.getFlowChainId());
+        assertTrue(flowCheckResponse.getHasActiveFlow());
+        assertEquals(FLOW_CHAIN_ID, flowCheckResponse.getFlowChainId());
     }
 
     @Test
@@ -562,8 +564,8 @@ public class FlowServiceTest {
 
         underTest.setEndTimeOnFlowCheckResponse(flowCheckResponse, relatedFlowLogs);
 
-        Assertions.assertEquals(FLOW_CHAIN_ID, flowCheckResponse.getFlowChainId());
-        Assertions.assertNull(flowCheckResponse.getEndTime());
+        assertEquals(FLOW_CHAIN_ID, flowCheckResponse.getFlowChainId());
+        assertNull(flowCheckResponse.getEndTime());
     }
 
     @Test
@@ -575,15 +577,15 @@ public class FlowServiceTest {
 
         underTest.setEndTimeOnFlowCheckResponse(flowCheckResponse, relatedFlowLogs);
 
-        Assertions.assertEquals(FLOW_CHAIN_ID, flowCheckResponse.getFlowChainId());
-        Assertions.assertNull(flowCheckResponse.getEndTime());
+        assertEquals(FLOW_CHAIN_ID, flowCheckResponse.getFlowChainId());
+        assertNull(flowCheckResponse.getEndTime());
     }
 
     @Test
     void testGetFlowLogsByIdsEmpty() {
         when(flowLogDBService.getFlowLogsByFlowIdsCreatedDesc(anySet(), any())).thenReturn(new PageImpl<>(List.of()));
 
-        Assertions.assertEquals(0, underTest.getFlowLogsByIds(List.of(FLOW_ID), PAGEABLE).getContent().size());
+        assertEquals(0, underTest.getFlowLogsByIds(List.of(FLOW_ID), PAGEABLE).getContent().size());
 
         verify(flowLogDBService).getFlowLogsByFlowIdsCreatedDesc(anySet(), any());
     }
@@ -592,7 +594,7 @@ public class FlowServiceTest {
     void testGetFlowLogsByIds() {
         when(flowLogDBService.getFlowLogsByFlowIdsCreatedDesc(anySet(), any())).thenReturn(new PageImpl<>(List.of(new FlowLog())));
 
-        Assertions.assertEquals(1, underTest.getFlowLogsByIds(List.of(FLOW_ID), PAGEABLE).getContent().size());
+        assertEquals(1, underTest.getFlowLogsByIds(List.of(FLOW_ID), PAGEABLE).getContent().size());
 
         verify(flowLogDBService).getFlowLogsByFlowIdsCreatedDesc(anySet(), any());
         verify(flowLogConverter).convert(any());
@@ -606,8 +608,8 @@ public class FlowServiceTest {
                 flowLog(FlowConstants.INIT_STATE, NEXT_EVENT, 1)));
 
         Page<FlowCheckResponse> flowCheckResponse = underTest.getFlowChainsByChainIds(List.of(FLOW_CHAIN_ID), PAGEABLE);
-        Assertions.assertFalse(flowCheckResponse.getContent().get(0).getHasActiveFlow());
-        Assertions.assertEquals(FLOW_CHAIN_ID, flowCheckResponse.getContent().get(0).getFlowChainId());
+        assertFalse(flowCheckResponse.getContent().get(0).getHasActiveFlow());
+        assertEquals(FLOW_CHAIN_ID, flowCheckResponse.getContent().get(0).getFlowChainId());
     }
 
     @Test
@@ -617,7 +619,7 @@ public class FlowServiceTest {
 
         Page<FlowCheckResponse> flowCheckResponse = underTest.getFlowChainsByChainIds(List.of(FLOW_CHAIN_ID), PAGEABLE);
 
-        Assertions.assertEquals(0, flowCheckResponse.getContent().size());
+        assertEquals(0, flowCheckResponse.getContent().size());
         verify(flowChainLogService).findAllByFlowChainIdInOrderByCreatedDesc(anySet(), any());
         verify(flowLogDBService).getFlowLogsWithoutPayloadByFlowChainIdsCreatedDesc(new HashSet<>());
     }
@@ -630,8 +632,8 @@ public class FlowServiceTest {
 
         Page<FlowCheckResponse> flowCheckResponse = underTest.getFlowChainsByChainIds(List.of(FLOW_CHAIN_ID), PAGEABLE);
 
-        Assertions.assertTrue(flowCheckResponse.getContent().get(0).getHasActiveFlow());
-        Assertions.assertEquals(FLOW_CHAIN_ID, flowCheckResponse.getContent().get(0).getFlowChainId());
+        assertTrue(flowCheckResponse.getContent().get(0).getHasActiveFlow());
+        assertEquals(FLOW_CHAIN_ID, flowCheckResponse.getContent().get(0).getFlowChainId());
     }
 
     @Test
@@ -642,8 +644,8 @@ public class FlowServiceTest {
 
         Page<FlowCheckResponse> flowCheckResponse = underTest.getFlowChainsByChainIds(List.of(FLOW_CHAIN_ID), PAGEABLE);
 
-        Assertions.assertTrue(flowCheckResponse.getContent().get(0).getHasActiveFlow());
-        Assertions.assertEquals(FLOW_CHAIN_ID, flowCheckResponse.getContent().get(0).getFlowChainId());
+        assertTrue(flowCheckResponse.getContent().get(0).getHasActiveFlow());
+        assertEquals(FLOW_CHAIN_ID, flowCheckResponse.getContent().get(0).getFlowChainId());
     }
 
     @Test
@@ -653,8 +655,8 @@ public class FlowServiceTest {
                 flowLog(FlowConstants.INIT_STATE, NEXT_EVENT, 1)));
         Page<FlowCheckResponse> flowCheckResponse = underTest.getFlowChainsByChainIds(List.of(FLOW_CHAIN_ID), PAGEABLE);
 
-        Assertions.assertFalse(flowCheckResponse.getContent().get(0).getHasActiveFlow());
-        Assertions.assertEquals(FLOW_CHAIN_ID, flowCheckResponse.getContent().get(0).getFlowChainId());
+        assertFalse(flowCheckResponse.getContent().get(0).getHasActiveFlow());
+        assertEquals(FLOW_CHAIN_ID, flowCheckResponse.getContent().get(0).getFlowChainId());
     }
 
     @Test
@@ -667,8 +669,8 @@ public class FlowServiceTest {
 
         Page<FlowCheckResponse> flowCheckResponse = underTest.getFlowChainsByChainIds(List.of(FLOW_CHAIN_ID), PAGEABLE);
 
-        Assertions.assertTrue(flowCheckResponse.getContent().get(0).getHasActiveFlow());
-        Assertions.assertEquals(FLOW_CHAIN_ID, flowCheckResponse.getContent().get(0).getFlowChainId());
+        assertTrue(flowCheckResponse.getContent().get(0).getHasActiveFlow());
+        assertEquals(FLOW_CHAIN_ID, flowCheckResponse.getContent().get(0).getFlowChainId());
     }
 
     @Test
@@ -685,8 +687,8 @@ public class FlowServiceTest {
 
         Page<FlowCheckResponse> flowCheckResponse = underTest.getFlowChainsByChainIds(List.of(FLOW_CHAIN_ID), PAGEABLE);
 
-        Assertions.assertFalse(flowCheckResponse.getContent().get(0).getHasActiveFlow());
-        Assertions.assertEquals(FLOW_CHAIN_ID, flowCheckResponse.getContent().get(0).getFlowChainId());
+        assertFalse(flowCheckResponse.getContent().get(0).getHasActiveFlow());
+        assertEquals(FLOW_CHAIN_ID, flowCheckResponse.getContent().get(0).getFlowChainId());
     }
 
     @Test
@@ -699,8 +701,8 @@ public class FlowServiceTest {
 
         Page<FlowCheckResponse> flowCheckResponse = underTest.getFlowChainsByChainIds(List.of(FLOW_CHAIN_ID), PAGEABLE);
 
-        Assertions.assertTrue(flowCheckResponse.getContent().get(0).getHasActiveFlow());
-        Assertions.assertEquals(FLOW_CHAIN_ID, flowCheckResponse.getContent().get(0).getFlowChainId());
+        assertTrue(flowCheckResponse.getContent().get(0).getHasActiveFlow());
+        assertEquals(FLOW_CHAIN_ID, flowCheckResponse.getContent().get(0).getFlowChainId());
     }
 
     @Test
@@ -713,9 +715,9 @@ public class FlowServiceTest {
 
         Page<FlowCheckResponse> flowCheckResponse = underTest.getFlowChainsByChainIds(List.of(FLOW_CHAIN_ID), PAGEABLE);
 
-        Assertions.assertTrue(flowCheckResponse.getContent().get(0).getHasActiveFlow());
-        Assertions.assertEquals(FLOW_CHAIN_ID, flowCheckResponse.getContent().get(0).getFlowChainId());
-        Assertions.assertNull(flowCheckResponse.getContent().get(0).getEndTime());
+        assertTrue(flowCheckResponse.getContent().get(0).getHasActiveFlow());
+        assertEquals(FLOW_CHAIN_ID, flowCheckResponse.getContent().get(0).getFlowChainId());
+        assertNull(flowCheckResponse.getContent().get(0).getEndTime());
     }
 
     @Test
@@ -724,9 +726,9 @@ public class FlowServiceTest {
 
         OperationStatusResponse operation = underTest.getOperationStatus(RESOURCE_CRN, FLOW_ID);
 
-        Assertions.assertEquals(FLOW_ID, operation.getOperationId());
-        Assertions.assertEquals("CreateDataHub", operation.getOperationName());
-        Assertions.assertEquals(OperationProgressStatus.FINISHED, operation.getOperationStatus());
+        assertEquals(FLOW_ID, operation.getOperationId());
+        assertEquals("CreateDataHub", operation.getOperationName());
+        assertEquals(OperationProgressStatus.FINISHED, operation.getOperationStatus());
     }
 
     @Test
@@ -735,9 +737,9 @@ public class FlowServiceTest {
 
         OperationStatusResponse operation = underTest.getOperationStatus(RESOURCE_CRN, FLOW_ID);
 
-        Assertions.assertEquals(FLOW_ID, operation.getOperationId());
-        Assertions.assertEquals("CreateDataHub", operation.getOperationName());
-        Assertions.assertEquals(OperationProgressStatus.RUNNING, operation.getOperationStatus());
+        assertEquals(FLOW_ID, operation.getOperationId());
+        assertEquals("CreateDataHub", operation.getOperationName());
+        assertEquals(OperationProgressStatus.RUNNING, operation.getOperationStatus());
     }
 
     @Test
@@ -746,9 +748,9 @@ public class FlowServiceTest {
 
         OperationStatusResponse operation = underTest.getOperationStatus(RESOURCE_CRN, FLOW_CHAIN_ID);
 
-        Assertions.assertEquals(FLOW_CHAIN_ID, operation.getOperationId());
-        Assertions.assertEquals("UpgradeDataHub", operation.getOperationName());
-        Assertions.assertEquals(OperationProgressStatus.FINISHED, operation.getOperationStatus());
+        assertEquals(FLOW_CHAIN_ID, operation.getOperationId());
+        assertEquals("UpgradeDataHub", operation.getOperationName());
+        assertEquals(OperationProgressStatus.FINISHED, operation.getOperationStatus());
     }
 
     @Test
@@ -757,9 +759,9 @@ public class FlowServiceTest {
 
         OperationStatusResponse operation = underTest.getOperationStatus(RESOURCE_CRN, FLOW_CHAIN_ID);
 
-        Assertions.assertEquals(FLOW_CHAIN_ID, operation.getOperationId());
-        Assertions.assertEquals("UpgradeDataHub", operation.getOperationName());
-        Assertions.assertEquals(OperationProgressStatus.RUNNING, operation.getOperationStatus());
+        assertEquals(FLOW_CHAIN_ID, operation.getOperationId());
+        assertEquals("UpgradeDataHub", operation.getOperationName());
+        assertEquals(OperationProgressStatus.RUNNING, operation.getOperationStatus());
     }
 
     @Test
@@ -772,9 +774,9 @@ public class FlowServiceTest {
 
         OperationStatusResponse operation = underTest.getOperationStatus(RESOURCE_CRN, null);
 
-        Assertions.assertEquals(FLOW_ID, operation.getOperationId());
-        Assertions.assertEquals("CreateDataHub", operation.getOperationName());
-        Assertions.assertEquals(OperationProgressStatus.FINISHED, operation.getOperationStatus());
+        assertEquals(FLOW_ID, operation.getOperationId());
+        assertEquals("CreateDataHub", operation.getOperationName());
+        assertEquals(OperationProgressStatus.FINISHED, operation.getOperationStatus());
     }
 
     @Test
@@ -787,9 +789,9 @@ public class FlowServiceTest {
 
         OperationStatusResponse operation = underTest.getOperationStatus(RESOURCE_CRN, null);
 
-        Assertions.assertEquals(FLOW_CHAIN_ID, operation.getOperationId());
-        Assertions.assertEquals("UpgradeDataHub", operation.getOperationName());
-        Assertions.assertEquals(OperationProgressStatus.FINISHED, operation.getOperationStatus());
+        assertEquals(FLOW_CHAIN_ID, operation.getOperationId());
+        assertEquals("UpgradeDataHub", operation.getOperationName());
+        assertEquals(OperationProgressStatus.FINISHED, operation.getOperationStatus());
     }
 
     @Test
@@ -826,9 +828,9 @@ public class FlowServiceTest {
 
         Page<FlowCheckResponse> flowCheckResponse = underTest.getFlowChainsByChainIds(List.of(FLOW_CHAIN_ID), PAGEABLE);
 
-        Assertions.assertTrue(flowCheckResponse.getContent().get(0).getHasActiveFlow());
-        Assertions.assertEquals(FLOW_CHAIN_ID, flowCheckResponse.getContent().get(0).getFlowChainId());
-        Assertions.assertNull(flowCheckResponse.getContent().get(0).getEndTime());
+        assertTrue(flowCheckResponse.getContent().get(0).getHasActiveFlow());
+        assertEquals(FLOW_CHAIN_ID, flowCheckResponse.getContent().get(0).getFlowChainId());
+        assertNull(flowCheckResponse.getContent().get(0).getEndTime());
     }
 
     private void setUpRunningFlow() {
