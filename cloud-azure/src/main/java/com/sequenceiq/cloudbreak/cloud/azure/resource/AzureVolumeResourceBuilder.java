@@ -52,6 +52,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
+import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes.Volume;
 import com.sequenceiq.cloudbreak.cloud.model.instance.AzureInstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.service.ResourceRetriever;
@@ -142,7 +143,7 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
                                 .withDeleteOnTermination(Boolean.TRUE)
                                 .withVolumes(
                                         withVolumesFromTemplate ? template.getVolumes().stream()
-                                                .map(volume -> new VolumeSetAttributes.Volume(
+                                                .map(volume -> new Volume(
                                                         resourceNameService.attachedDisk(stackName, groupName, privateId,
                                                                 template.getVolumes().indexOf(volume), hashableString),
                                                         null, volume.getSize(), volume.getType(), volume.getVolumeUsageType()))
@@ -191,53 +192,118 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
     public List<CloudResource> build(CloudInstance instance, AuthenticatedContext auth, Group group,
             List<CloudResource> buildableResource, CloudStack cloudStack, Integer offSet, Map<String, String> additionalTags) throws Exception {
         LOGGER.info("Create volumes on provider");
-        AzureClient client = getAzureClient(auth);
 
-        Map<String, List<VolumeSetAttributes.Volume>> volumeSetMap = Collections.synchronizedMap(new HashMap<>());
+        List<CloudResource> requestedResources = filterRequestedResources(buildableResource);
+        Map<String, List<Volume>> volumeSetMap = createVolumesAsync(requestedResources, auth, group, cloudStack, instance, offSet, additionalTags);
 
-        List<Future<?>> futures = new ArrayList<>();
-        List<CloudResource> requestedResources = buildableResource.stream()
+        return updateResourcesWithCreatedVolumes(buildableResource, volumeSetMap);
+    }
+
+    private List<CloudResource> filterRequestedResources(List<CloudResource> buildableResource) {
+        return buildableResource.stream()
                 .filter(cloudResource -> CommonStatus.REQUESTED.equals(cloudResource.getStatus()))
-                .collect(toList());
+                .toList();
+    }
+
+    private Map<String, List<Volume>> createVolumesAsync(List<CloudResource> requestedResources, AuthenticatedContext auth,
+            Group group, CloudStack cloudStack, CloudInstance instance, Integer offSet, Map<String, String> additionalTags) throws Exception {
+        AzureClient client = getAzureClient(auth);
         CloudContext cloudContext = auth.getCloudContext();
         String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, cloudStack);
         String region = cloudContext.getLocation().getRegion().getRegionName();
         String diskEncryptionSetId = getDiskEncryptionSetId(group);
+        int deviceOffset = offSet != null ? offSet : getDeviceOffset(instance);
+        Map<String, String> mergedTags = getTags(cloudStack.getTags(), additionalTags);
+
+        Map<String, List<Volume>> volumeSetMap = Collections.synchronizedMap(new HashMap<>());
+        List<Future<?>> futures = new ArrayList<>();
+
         for (CloudResource resource : requestedResources) {
-            volumeSetMap.put(resource.getName(), Collections.synchronizedList(new ArrayList<>()));
-            VolumeSetAttributes volumeSet = getVolumeSetAttributes(resource);
-            DeviceNameGenerator generator = new DeviceNameGenerator(DEVICE_NAME_TEMPLATE, offSet != null ? offSet : getDeviceOffset(instance));
-            futures.addAll(volumeSet.getVolumes().stream()
-                    .map(volume -> intermediateBuilderExecutor.submit(() -> {
-                        Disk result = client.getDiskByName(resourceGroupName, getDiskName(volume.getId()));
-                        if (result == null) {
-                            result = client.createManagedDisk(
-                                    new AzureDisk(volume.getId(), volume.getSize(), AzureDiskType.getByValue(
-                                            volume.getType()), region, resourceGroupName, getTags(cloudStack.getTags(), additionalTags), diskEncryptionSetId,
-                                    resource.getAvailabilityZone()));
-                        } else {
-                            LOGGER.info("Managed disk for resource group: {}, name: {} already exists: {}", resourceGroupName, volume.getId(), result);
-                        }
-                        String volumeId = result.id();
-                        volumeSetMap.get(resource.getName()).add(new VolumeSetAttributes.Volume(volumeId, volume.getDevice() != null ? volume.getDevice() :
-                                generator.next(), volume.getSize(), volume.getType(), volume.getCloudVolumeUsageType()));
-                    }))
-                    .collect(toList()));
+            VolumeSetAttributes volumeSetAttributes = getVolumeSetAttributes(resource);
+            List<Volume> originalVolumes = volumeSetAttributes.getVolumes();
+
+            List<Volume> orderedVolumes = createOrderedVolumeList(originalVolumes.size());
+            volumeSetMap.put(resource.getName(), orderedVolumes);
+
+            List<String> deviceNames = generateDeviceNames(originalVolumes, deviceOffset);
+            AzureDisk diskTemplate = new AzureDisk(null, 0, null, region, resourceGroupName, mergedTags, diskEncryptionSetId, null);
+            submitVolumeCreationTasks(futures, resource, originalVolumes, deviceNames, orderedVolumes, diskTemplate, client);
         }
 
+        awaitVolumeCreation(futures);
+        return volumeSetMap;
+    }
+
+    private List<Volume> createOrderedVolumeList(int size) {
+        return Collections.synchronizedList(new ArrayList<>(Collections.nCopies(size, null)));
+    }
+
+    private List<String> generateDeviceNames(List<Volume> volumes, int deviceOffset) {
+        DeviceNameGenerator generator = new DeviceNameGenerator(DEVICE_NAME_TEMPLATE, deviceOffset);
+        List<String> deviceNames = new ArrayList<>(volumes.size());
+        for (Volume volume : volumes) {
+            deviceNames.add(volume.getDevice() != null ? volume.getDevice() : generator.next());
+        }
+        return deviceNames;
+    }
+
+    private void submitVolumeCreationTasks(List<Future<?>> futures, CloudResource resource, List<Volume> originalVolumes,
+            List<String> deviceNames, List<Volume> orderedVolumes, AzureDisk diskTemplate, AzureClient client) {
+        for (int index = 0; index < originalVolumes.size(); index++) {
+            final int volumeIndex = index;
+            Volume originalVolume = originalVolumes.get(volumeIndex);
+
+            Future<?> future = intermediateBuilderExecutor.submit(() ->
+                createVolumeAndPlaceAtIndex(originalVolume, volumeIndex, deviceNames, orderedVolumes, resource, diskTemplate, client));
+            futures.add(future);
+        }
+    }
+
+    private void createVolumeAndPlaceAtIndex(Volume originalVolume, int volumeIndex, List<String> deviceNames,
+            List<Volume> orderedVolumes, CloudResource resource, AzureDisk diskTemplate, AzureClient client) {
+        Disk disk = getOrCreateDisk(originalVolume, resource, diskTemplate, client);
+        Volume createdVolume = new Volume(
+                disk.id(), deviceNames.get(volumeIndex), originalVolume.getSize(),
+                originalVolume.getType(), originalVolume.getCloudVolumeUsageType());
+        orderedVolumes.set(volumeIndex, createdVolume);
+    }
+
+    private Disk getOrCreateDisk(Volume originalVolume, CloudResource resource, AzureDisk diskTemplate, AzureClient client) {
+        String diskName = getDiskName(originalVolume.getId());
+        Disk existingDisk = client.getDiskByName(diskTemplate.getResourceGroupName(), diskName);
+        if (existingDisk != null) {
+            LOGGER.info("Managed disk for resource group: {}, name: {} already exists: {}",
+                    diskTemplate.getResourceGroupName(), originalVolume.getId(), existingDisk);
+            return existingDisk;
+        } else {
+            AzureDisk azureDisk = new AzureDisk(originalVolume.getId(), originalVolume.getSize(),
+                    AzureDiskType.getByValue(originalVolume.getType()), diskTemplate.getRegion(),
+                    diskTemplate.getResourceGroupName(), diskTemplate.getTags(),
+                    diskTemplate.getDiskEncryptionSetId(), resource.getAvailabilityZone());
+            return client.createManagedDisk(azureDisk);
+        }
+    }
+
+    private void awaitVolumeCreation(List<Future<?>> futures) throws Exception {
+        LOGGER.debug("Waiting for volumes creation requests ({} futures)", futures.size());
         for (Future<?> future : futures) {
             future.get();
         }
+    }
 
+    private List<CloudResource> updateResourcesWithCreatedVolumes(List<CloudResource> buildableResource,
+            Map<String, List<Volume>> volumeSetMap) {
         return buildableResource.stream()
-                .peek(resource -> {
-                    List<VolumeSetAttributes.Volume> volumes = volumeSetMap.get(resource.getName());
-                    if (!CollectionUtils.isEmpty(volumes)) {
-                        getVolumeSetAttributes(resource).setVolumes(volumes);
-                    }
-                    resource.setStatus(CommonStatus.CREATED);
-                })
+                .map(resource -> updateResourceWithVolumes(resource, volumeSetMap.get(resource.getName())))
                 .collect(toList());
+    }
+
+    private CloudResource updateResourceWithVolumes(CloudResource resource, List<Volume> volumes) {
+        if (!CollectionUtils.isEmpty(volumes)) {
+            getVolumeSetAttributes(resource).setVolumes(volumes);
+        }
+        resource.setStatus(CommonStatus.CREATED);
+        return resource;
     }
 
     private int getDeviceOffset(CloudInstance instance) {
@@ -291,7 +357,7 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
 
     private List<String> getVolumeIds(CloudResource cloudResource) {
         return getVolumeSetAttributes(cloudResource).getVolumes().stream()
-                .map(VolumeSetAttributes.Volume::getId)
+                .map(Volume::getId)
                 .collect(toList());
     }
 
@@ -394,7 +460,7 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
                 .map(this::getVolumeSetAttributes)
                 .map(VolumeSetAttributes::getVolumes)
                 .flatMap(List::stream)
-                .map(VolumeSetAttributes.Volume::getId)
+                .map(Volume::getId)
                 .collect(toList());
         List<String> actualIdList = existingDisks.stream()
                 .map(Disk::id)

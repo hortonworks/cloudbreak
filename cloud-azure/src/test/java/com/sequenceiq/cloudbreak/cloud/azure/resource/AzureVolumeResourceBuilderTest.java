@@ -105,6 +105,8 @@ public class AzureVolumeResourceBuilderTest {
 
     private static final String INSTANCE_ID = "instance1";
 
+    private static final String MICROSOFT_DISK_PREFIX = "/subscriptions/sub/resourceGroups/rg/providers/Microsoft.Compute/disks/";
+
     @Mock
     private AzureContext context;
 
@@ -702,5 +704,131 @@ public class AzureVolumeResourceBuilderTest {
         List<Collection<String>> allDeletedVolumes = collectionCaptor.getAllValues();
         deletedVolumes.values().stream().forEach(deletedVols -> assertEquals(true,
                 allDeletedVolumes.stream().anyMatch(deletedVolumesAtAzure -> CollectionUtils.isEqualCollection(deletedVols, deletedVolumesAtAzure))));
+    }
+
+    static Object[][] volumeOrderingTestData() {
+        return new Object[][]{
+                {List.of("disk-1", "disk-2", "disk-3"), List.of(100, 200, 300), 3},
+                {List.of("disk-a", "disk-b", "disk-c", "disk-d"), List.of(50, 100, 150, 200), 4},
+                {List.of("vol-1", "vol-2"), List.of(500, 1000), 2}
+        };
+    }
+
+    @ParameterizedTest
+    @MethodSource("volumeOrderingTestData")
+    void testConsistentVolumeOrderingWithMultipleRunsAndVariousConfigurations(List<String> diskIds, List<Integer> sizes, int volumeCount) throws Exception {
+        initAsyncTaskExecutor();
+
+        List<VolumeSetAttributes.Volume> volumes = new ArrayList<>();
+        List<Disk> mockDisks = new ArrayList<>();
+
+        for (int i = 0; i < volumeCount; i++) {
+            volumes.add(new VolumeSetAttributes.Volume(diskIds.get(i), null, sizes.get(i), "StandardSSD_LRS", CloudVolumeUsageType.GENERAL));
+            Disk disk = mock(Disk.class);
+            when(disk.id()).thenReturn(String.format(MICROSOFT_DISK_PREFIX + "%s", diskIds.get(i)));
+            mockDisks.add(disk);
+            when(azureClient.getDiskByName(eq(RESOURCE_GROUP), eq(diskIds.get(i)))).thenReturn(null);
+        }
+
+        when(azureClient.createManagedDisk(any(AzureDisk.class))).thenAnswer(invocation -> {
+            AzureDisk azureDisk = invocation.getArgument(0);
+            String diskId = azureDisk.getDiskName();
+            int index = diskIds.indexOf(diskId);
+            return mockDisks.get(Math.max(index, 0));
+        });
+
+        List<List<String>> deviceNamesFromMultipleRuns = new ArrayList<>();
+        List<List<String>> volumeIdsFromMultipleRuns = new ArrayList<>();
+
+        for (int run = 0; run < 100; run++) {
+            CloudResource volumeSetResource = CloudResource.builder()
+                    .withType(ResourceType.AZURE_VOLUMESET)
+                    .withStatus(CommonStatus.REQUESTED)
+                    .withName("volumeset-1")
+                    .withAvailabilityZone(AVAILABILITY_ZONE)
+                    .withParameters(Map.of(CloudResource.ATTRIBUTES,
+                            new VolumeSetAttributes(AVAILABILITY_ZONE, true, FSTAB, volumes, 100, "StandardSSD_LRS")))
+                    .build();
+
+            List<CloudResource> result = underTest.build(cloudInstance, auth, group, List.of(volumeSetResource), cloudStack, null, null);
+
+            assertThat(result).hasSize(1);
+            VolumeSetAttributes resultAttributes = result.getFirst().getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
+            List<VolumeSetAttributes.Volume> resultVolumes = resultAttributes.getVolumes();
+
+            assertThat(resultVolumes).hasSize(volumeCount);
+
+            List<String> deviceNames = resultVolumes.stream()
+                    .map(VolumeSetAttributes.Volume::getDevice)
+                    .collect(java.util.stream.Collectors.toList());
+            List<String> volumeIds = resultVolumes.stream()
+                    .map(v -> v.getId().substring(v.getId().lastIndexOf('/') + 1))
+                    .collect(java.util.stream.Collectors.toList());
+
+            deviceNamesFromMultipleRuns.add(deviceNames);
+            volumeIdsFromMultipleRuns.add(volumeIds);
+
+            assertThat(deviceNames).doesNotContainNull().doesNotHaveDuplicates();
+            assertThat(volumeIds).isEqualTo(diskIds);
+
+            for (int i = 0; i < volumeCount; i++) {
+                assertThat(resultVolumes.get(i).getSize()).isEqualTo(sizes.get(i));
+            }
+        }
+
+        List<String> firstRunDeviceNames = deviceNamesFromMultipleRuns.getFirst();
+        for (int i = 1; i < deviceNamesFromMultipleRuns.size(); i++) {
+            assertThat(deviceNamesFromMultipleRuns.get(i)).as("Run %d device names should match run 0", i).isEqualTo(firstRunDeviceNames);
+            assertThat(volumeIdsFromMultipleRuns.get(i)).as("Run %d volume IDs should match original order", i).isEqualTo(diskIds);
+        }
+    }
+
+    @Test
+    void testConsistentOrderingWithPreassignedDeviceNames() throws Exception {
+        initAsyncTaskExecutor();
+
+        List<VolumeSetAttributes.Volume> volumes = new ArrayList<>();
+        volumes.add(new VolumeSetAttributes.Volume("disk-1", "/dev/sdc", 100, "StandardSSD_LRS", CloudVolumeUsageType.GENERAL));
+        volumes.add(new VolumeSetAttributes.Volume("disk-2", null, 200, "StandardSSD_LRS", CloudVolumeUsageType.GENERAL));
+        volumes.add(new VolumeSetAttributes.Volume("disk-3", "/dev/sdf", 300, "StandardSSD_LRS", CloudVolumeUsageType.GENERAL));
+
+        CloudResource volumeSetResource = CloudResource.builder()
+                .withType(ResourceType.AZURE_VOLUMESET)
+                .withStatus(CommonStatus.REQUESTED)
+                .withName("volumeset-1")
+                .withAvailabilityZone(AVAILABILITY_ZONE)
+                .withParameters(Map.of(CloudResource.ATTRIBUTES,
+                        new VolumeSetAttributes(AVAILABILITY_ZONE, true, FSTAB, volumes, 100, "StandardSSD_LRS")))
+                .build();
+
+        Disk disk1 = mock(Disk.class);
+        Disk disk2 = mock(Disk.class);
+        Disk disk3 = mock(Disk.class);
+        when(disk1.id()).thenReturn(MICROSOFT_DISK_PREFIX + "disk-1");
+        when(disk2.id()).thenReturn(MICROSOFT_DISK_PREFIX + "disk-2");
+        when(disk3.id()).thenReturn(MICROSOFT_DISK_PREFIX + "disk-3");
+
+        when(azureClient.getDiskByName(eq(RESOURCE_GROUP), eq("disk-1"))).thenReturn(null);
+        when(azureClient.getDiskByName(eq(RESOURCE_GROUP), eq("disk-2"))).thenReturn(null);
+        when(azureClient.getDiskByName(eq(RESOURCE_GROUP), eq("disk-3"))).thenReturn(null);
+
+        when(azureClient.createManagedDisk(any(AzureDisk.class)))
+                .thenReturn(disk1)
+                .thenReturn(disk2)
+                .thenReturn(disk3);
+
+        List<CloudResource> result = underTest.build(cloudInstance, auth, group, List.of(volumeSetResource), cloudStack, null, null);
+
+        assertThat(result).hasSize(1);
+        VolumeSetAttributes resultAttributes = result.getFirst().getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
+        List<VolumeSetAttributes.Volume> resultVolumes = resultAttributes.getVolumes();
+
+        assertThat(resultVolumes).hasSize(3);
+        assertThat(resultVolumes.get(0).getDevice()).as("First volume should keep preassigned device name").isEqualTo("/dev/sdc");
+        assertThat(resultVolumes.get(1).getDevice()).as("Second volume should have generated device name").isNotNull();
+        assertThat(resultVolumes.get(2).getDevice()).as("Third volume should keep preassigned device name").isEqualTo("/dev/sdf");
+        assertThat(resultVolumes.get(0).getId()).contains("disk-1");
+        assertThat(resultVolumes.get(1).getId()).contains("disk-2");
+        assertThat(resultVolumes.get(2).getId()).contains("disk-3");
     }
 }
