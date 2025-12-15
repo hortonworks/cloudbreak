@@ -1,4 +1,4 @@
-package com.sequenceiq.freeipa.service.crossrealm;
+package com.sequenceiq.freeipa.service.crossrealm.commands;
 
 import java.io.IOException;
 import java.util.Map;

@@ -27,6 +27,8 @@ import com.sequenceiq.cloudbreak.common.type.KdcType;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorStateParams;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.commands.ActiveDirectoryTrustSetupCommands;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.commands.BaseClusterTrustSetupCommands;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.commands.TrustSetupCommandsResponse;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
@@ -36,10 +38,10 @@ import com.sequenceiq.freeipa.entity.CrossRealmTrust;
 import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.LoadBalancer;
 import com.sequenceiq.freeipa.entity.Stack;
-import com.sequenceiq.freeipa.service.crossrealm.ActiveDirectoryBaseClusterKrb5ConfBuilder;
-import com.sequenceiq.freeipa.service.crossrealm.ActiveDirectoryCommandsBuilder;
 import com.sequenceiq.freeipa.service.crossrealm.CrossRealmTrustService;
 import com.sequenceiq.freeipa.service.crossrealm.TrustCommandType;
+import com.sequenceiq.freeipa.service.crossrealm.commands.activedirectory.ActiveDirectoryBaseClusterTrustCommandsBuilder;
+import com.sequenceiq.freeipa.service.crossrealm.commands.activedirectory.ActiveDirectoryTrustInstructionsBuilder;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 import com.sequenceiq.freeipa.service.freeipa.trust.statusvalidation.TrustStatusValidationService;
 import com.sequenceiq.freeipa.service.rotation.SaltStateParamsService;
@@ -91,10 +93,10 @@ class ActiveDirectoryTrustServiceTest {
     private FreeIpaClient freeIpaClient;
 
     @Mock
-    private ActiveDirectoryCommandsBuilder activeDirectoryCommandsBuilder;
+    private ActiveDirectoryTrustInstructionsBuilder activeDirectoryTrustInstructionsBuilder;
 
     @Mock
-    private ActiveDirectoryBaseClusterKrb5ConfBuilder adBaseClusterKrb5ConfBuilder;
+    private ActiveDirectoryBaseClusterTrustCommandsBuilder activeDirectoryBaseClusterTrustCommandsBuilder;
 
     @Test
     void returnsCommandsResponseWithADExpectedFields() {
@@ -102,17 +104,20 @@ class ActiveDirectoryTrustServiceTest {
         FreeIpa freeIpa = mock(FreeIpa.class);
         LoadBalancer loadBalancer = mock(LoadBalancer.class);
         CrossRealmTrust crossRealmTrust = mock(CrossRealmTrust.class);
-
-        when(activeDirectoryCommandsBuilder.buildCommands(TrustCommandType.SETUP, stack, freeIpa, crossRealmTrust)).thenReturn("active directory commands");
-        when(adBaseClusterKrb5ConfBuilder.buildCommands(stack.getResourceName(), TrustCommandType.SETUP, freeIpa, crossRealmTrust)).thenReturn("krb5 conf");
+        ActiveDirectoryTrustSetupCommands activeDirectoryTrustSetupCommands = new ActiveDirectoryTrustSetupCommands();
+        BaseClusterTrustSetupCommands baseClusterTrustSetupCommands = new BaseClusterTrustSetupCommands();
+        when(activeDirectoryTrustInstructionsBuilder.buildInstructions(TrustCommandType.SETUP, stack, freeIpa, crossRealmTrust))
+                .thenReturn(activeDirectoryTrustSetupCommands);
+        when(activeDirectoryBaseClusterTrustCommandsBuilder.buildBaseClusterCommands(stack, TrustCommandType.SETUP, freeIpa, crossRealmTrust, loadBalancer))
+                .thenReturn(baseClusterTrustSetupCommands);
 
         TrustSetupCommandsResponse response = underTest.buildTrustSetupCommandsResponse(TrustCommandType.SETUP, "env-crn", stack, freeIpa,
                 crossRealmTrust, loadBalancer);
 
         assertEquals("env-crn", response.getEnvironmentCrn());
         assertEquals(KdcType.ACTIVE_DIRECTORY.name(), response.getKdcType());
-        assertEquals("active directory commands", response.getActiveDirectoryCommands().getCommands());
-        assertEquals("krb5 conf", response.getBaseClusterCommands().getKrb5Conf());
+        assertEquals(activeDirectoryTrustSetupCommands, response.getActiveDirectoryCommands());
+        assertEquals(baseClusterTrustSetupCommands, response.getBaseClusterCommands());
     }
 
     @Test

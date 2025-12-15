@@ -20,8 +20,6 @@ import org.springframework.util.StringUtils;
 
 import com.sequenceiq.cloudbreak.common.type.KdcType;
 import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorStateParams;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.commands.BaseClusterTrustSetupCommands;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.commands.MitTrustSetupCommands;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.commands.TrustSetupCommandsResponse;
 import com.sequenceiq.freeipa.entity.CrossRealmTrust;
 import com.sequenceiq.freeipa.entity.FreeIpa;
@@ -29,27 +27,22 @@ import com.sequenceiq.freeipa.entity.LoadBalancer;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.kerberos.KerberosConfig;
 import com.sequenceiq.freeipa.kerberos.KerberosConfigService;
-import com.sequenceiq.freeipa.service.crossrealm.MitBaseClusterKrb5ConfBuilder;
-import com.sequenceiq.freeipa.service.crossrealm.MitDnsInstructionsBuilder;
-import com.sequenceiq.freeipa.service.crossrealm.MitKdcCommandsBuilder;
 import com.sequenceiq.freeipa.service.crossrealm.TrustCommandType;
+import com.sequenceiq.freeipa.service.crossrealm.commands.mit.MitBaseClusterTrustCommandsBuilder;
+import com.sequenceiq.freeipa.service.crossrealm.commands.mit.MitTrustInstructionsBuilder;
 
 @Service
 public class MitKdcTrustService extends TrustProvider {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(MitKdcTrustService.class);
 
     @Inject
     private KerberosConfigService kerberosConfigService;
 
     @Inject
-    private MitKdcCommandsBuilder mitKdcCommandsBuilder;
+    private MitTrustInstructionsBuilder mitTrustInstructionsBuilder;
 
     @Inject
-    private MitDnsInstructionsBuilder mitDnsInstructionsBuilder;
-
-    @Inject
-    private MitBaseClusterKrb5ConfBuilder mitBaseClusterKrb5ConfBuilder;
+    private MitBaseClusterTrustCommandsBuilder mitBaseClusterTrustCommandsBuilder;
 
     @Override
     public KdcType kdcType() {
@@ -95,17 +88,9 @@ public class MitKdcTrustService extends TrustProvider {
         TrustSetupCommandsResponse response = new TrustSetupCommandsResponse();
         response.setEnvironmentCrn(environmentCrn);
         response.setKdcType(kdcType().name());
-
-        MitTrustSetupCommands mitCommands = new MitTrustSetupCommands();
-        mitCommands.setKdcCommands(mitKdcCommandsBuilder.buildCommands(trustCommandType, freeIpa, crossRealmTrust));
-        mitCommands.setDnsSetupInstructions(mitDnsInstructionsBuilder.buildCommands(trustCommandType, stack, freeIpa));
-        response.setMitCommands(mitCommands);
-
-        BaseClusterTrustSetupCommands baseClusterTrustSetupCommands = new BaseClusterTrustSetupCommands();
-        String krb5Conf = mitBaseClusterKrb5ConfBuilder.buildCommands(stack.getResourceName(), trustCommandType, freeIpa, crossRealmTrust, loadBalancer);
-        baseClusterTrustSetupCommands.setKrb5Conf(krb5Conf);
-        response.setBaseClusterCommands(baseClusterTrustSetupCommands);
-
+        response.setMitCommands(mitTrustInstructionsBuilder.buildInstructions(trustCommandType, stack, freeIpa, crossRealmTrust));
+        response.setBaseClusterCommands(mitBaseClusterTrustCommandsBuilder.buildBaseClusterCommands(stack, trustCommandType, freeIpa,
+                crossRealmTrust, loadBalancer));
         return response;
     }
 

@@ -67,4 +67,9 @@ public class DocumentationLinkProvider {
     public static String hybridSecurityRequirements() {
         return "https://docs.cloudera.com/hybrid-cloud/latest/creating-hybrid-envs/topics/hc-security-requirements.html";
     }
+
+    public static String onPremisesTrustedRealmsLink() {
+        return "https://docs.cloudera.com/cdp-private-cloud-base/7.3.1/security-kerberos-authentication/topics" +
+                "/cm-security-kerberos-authentication-add-trusted-realms.html";
+    }
 }

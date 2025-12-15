@@ -21,6 +21,10 @@ import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.freeipa.entity.CrossRealmTrust;
 import com.sequenceiq.freeipa.kerberos.KerberosConfigService;
 import com.sequenceiq.freeipa.repository.CrossRealmTrustRepository;
+import com.sequenceiq.freeipa.service.crossrealm.commands.activedirectory.ActiveDirectoryBaseClusterTrustCommandsBuilder;
+import com.sequenceiq.freeipa.service.crossrealm.commands.activedirectory.ActiveDirectoryTrustInstructionsBuilder;
+import com.sequenceiq.freeipa.service.crossrealm.commands.mit.MitBaseClusterTrustCommandsBuilder;
+import com.sequenceiq.freeipa.service.crossrealm.commands.mit.MitTrustInstructionsBuilder;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 import com.sequenceiq.freeipa.service.freeipa.dns.DnsZoneService;
 import com.sequenceiq.freeipa.service.freeipa.trust.setup.ActiveDirectoryTrustService;
@@ -73,19 +77,16 @@ class CrossRealmTrustServiceTest {
     private StackHelper stackHelper;
 
     @MockBean
-    private MitKdcCommandsBuilder mitKdcCommandsBuilder;
+    private MitBaseClusterTrustCommandsBuilder mitBaseClusterTrustCommandsBuilder;
 
     @MockBean
-    private MitDnsInstructionsBuilder mitDnsInstructionsBuilder;
+    private MitTrustInstructionsBuilder mitTrustInstructionsBuilder;
 
     @MockBean
-    private MitBaseClusterKrb5ConfBuilder mitBaseClusterKrb5ConfBuilder;
+    private ActiveDirectoryTrustInstructionsBuilder activeDirectoryTrustInstructionsBuilder;
 
     @MockBean
-    private ActiveDirectoryCommandsBuilder activeDirectoryCommandsBuilder;
-
-    @MockBean
-    private ActiveDirectoryBaseClusterKrb5ConfBuilder activeDirectoryBaseClusterKrb5ConfBuilder;
+    private ActiveDirectoryBaseClusterTrustCommandsBuilder activeDirectoryBaseClusterTrustCommandsBuilder;
 
     @Test
     void testGetTrustProvider() {

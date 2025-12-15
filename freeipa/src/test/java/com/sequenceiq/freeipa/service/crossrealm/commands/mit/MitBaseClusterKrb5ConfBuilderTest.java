@@ -1,4 +1,4 @@
-package com.sequenceiq.freeipa.service.crossrealm;
+package com.sequenceiq.freeipa.service.crossrealm.commands.mit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
 import com.sequenceiq.freeipa.entity.CrossRealmTrust;
 import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.LoadBalancer;
+import com.sequenceiq.freeipa.service.crossrealm.TrustCommandType;
 import com.sequenceiq.freeipa.service.loadbalancer.FreeIpaLoadBalancerService;
 
 import freemarker.template.Configuration;

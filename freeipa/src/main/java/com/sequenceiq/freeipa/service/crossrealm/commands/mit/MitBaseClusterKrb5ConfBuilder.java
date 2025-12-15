@@ -1,4 +1,4 @@
-package com.sequenceiq.freeipa.service.crossrealm;
+package com.sequenceiq.freeipa.service.crossrealm.commands.mit;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -8,6 +8,8 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.freeipa.entity.CrossRealmTrust;
 import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.LoadBalancer;
+import com.sequenceiq.freeipa.service.crossrealm.TrustCommandType;
+import com.sequenceiq.freeipa.service.crossrealm.commands.AbstractFreemarkerTemplateBuilder;
 
 @Component
 public class MitBaseClusterKrb5ConfBuilder extends AbstractFreemarkerTemplateBuilder {

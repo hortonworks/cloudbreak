@@ -1,10 +1,8 @@
-package com.sequenceiq.freeipa.service.crossrealm;
+package com.sequenceiq.freeipa.service.crossrealm.commands.activedirectory;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.lenient;
 
 import java.io.IOException;
-import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,21 +19,22 @@ import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
 import com.sequenceiq.freeipa.entity.CrossRealmTrust;
 import com.sequenceiq.freeipa.entity.FreeIpa;
-import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.service.crossrealm.TrustCommandType;
+import com.sequenceiq.freeipa.service.loadbalancer.FreeIpaLoadBalancerService;
 
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
 
 @ExtendWith(MockitoExtension.class)
-class MitKdcCommandsBuilderTest {
+class ActiveDirectoryBaseClusterKrb5ConfBuilderTest {
     @Mock
-    private StackHelper stackHelper;
+    private FreeIpaLoadBalancerService freeIpaLoadBalancerService;
 
     @Spy
     private FreeMarkerTemplateUtils freeMarkerTemplateUtils;
 
     @InjectMocks
-    private MitKdcCommandsBuilder underTest;
+    private ActiveDirectoryBaseClusterKrb5ConfBuilder underTest;
 
     @BeforeEach
     void setup() throws IOException, TemplateException {
@@ -51,18 +50,16 @@ class MitKdcCommandsBuilderTest {
     @EnumSource(TrustCommandType.class)
     void testBuildCommands(TrustCommandType trustCommandType) throws IOException {
         // GIVEN
-        Stack stack = new Stack();
-        stack.setId(1L);
         FreeIpa freeIpa = new FreeIpa();
         freeIpa.setDomain("freeipa.org");
         CrossRealmTrust crossRealmTrust = new CrossRealmTrust();
-        crossRealmTrust.setTrustSecret("trustsecret");
-        crossRealmTrust.setKdcRealm("kdc.realm");
-        lenient().when(stackHelper.getServerIps(stack)).thenReturn(List.of("ipaIp1", "ipaIp2", "ipaIp3"));
+        crossRealmTrust.setTrustSecret("trustSecret");
+        crossRealmTrust.setKdcRealm("ad.org");
+        crossRealmTrust.setKdcFqdn("adHostName.ad.org");
         // WHEN
-        String result = underTest.buildCommands(trustCommandType, freeIpa, crossRealmTrust);
+        String result = underTest.buildCommands("resourceName", trustCommandType, freeIpa, crossRealmTrust);
         // THEN
-        String fileName = String.format("crossrealmtrust/mit/mit_kdc_%s_commands.sh", trustCommandType.name().toLowerCase());
+        String fileName = String.format("crossrealmtrust/basecluster/ad_basecluster_krb5conf_%s.sh", trustCommandType.name().toLowerCase());
         String expectedOutput = FileReaderUtils.readFileFromClasspath(fileName);
         assertEquals(expectedOutput, result);
     }

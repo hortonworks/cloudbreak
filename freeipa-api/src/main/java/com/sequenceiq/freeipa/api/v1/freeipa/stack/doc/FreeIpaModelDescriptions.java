@@ -146,6 +146,8 @@ public class FreeIpaModelDescriptions {
         public static final String AD_TRUST_SETUP_COMMANDS = "Active Directory commands to be executed for cross-realm trust setup.";
         public static final String MIT_TRUST_SETUP_COMMANDS = "MIT Kerberos commands to be executed for cross-realm trust setup.";
         public static final String BASE_CLUSTER_KRB5_CONF = "krb5.conf content to be used on base cluster for cross-realm trust setup.";
+        public static final String BASE_CLUSTER_CM_INSTRUCTIONS = "Setup instructions on the on-premises cluster's Cloudera Manager";
+        public static final String BASE_CLUSTER_CM_INSTRUCTIONS_DOCLINK = "Documentation link for the on-premises cluster's Cloudera Manager setup";
         public static final String DNS_SETUP_INSTRUCTIONS = "DNS setup instructions for cross-realm trust setup.";
         public static final String TRUST_DETAILS = "Cross realm trust details.";
         public static final String TRUST_STATUS = "The cross realm trust status.";

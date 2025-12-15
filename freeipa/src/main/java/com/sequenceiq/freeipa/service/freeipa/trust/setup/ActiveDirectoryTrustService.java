@@ -15,8 +15,6 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.type.KdcType;
 import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorStateParams;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.commands.ActiveDirectoryTrustSetupCommands;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.commands.BaseClusterTrustSetupCommands;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.commands.TrustSetupCommandsResponse;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
@@ -26,9 +24,9 @@ import com.sequenceiq.freeipa.entity.CrossRealmTrust;
 import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.LoadBalancer;
 import com.sequenceiq.freeipa.entity.Stack;
-import com.sequenceiq.freeipa.service.crossrealm.ActiveDirectoryBaseClusterKrb5ConfBuilder;
-import com.sequenceiq.freeipa.service.crossrealm.ActiveDirectoryCommandsBuilder;
 import com.sequenceiq.freeipa.service.crossrealm.TrustCommandType;
+import com.sequenceiq.freeipa.service.crossrealm.commands.activedirectory.ActiveDirectoryBaseClusterTrustCommandsBuilder;
+import com.sequenceiq.freeipa.service.crossrealm.commands.activedirectory.ActiveDirectoryTrustInstructionsBuilder;
 
 @Service
 public class ActiveDirectoryTrustService extends TrustProvider {
@@ -36,10 +34,10 @@ public class ActiveDirectoryTrustService extends TrustProvider {
     private static final Logger LOGGER = LoggerFactory.getLogger(ActiveDirectoryTrustService.class);
 
     @Inject
-    private ActiveDirectoryCommandsBuilder activeDirectoryCommandsBuilder;
+    private ActiveDirectoryTrustInstructionsBuilder activeDirectoryTrustInstructionsBuilder;
 
     @Inject
-    private ActiveDirectoryBaseClusterKrb5ConfBuilder adBaseClusterKrb5ConfBuilder;
+    private ActiveDirectoryBaseClusterTrustCommandsBuilder activeDirectoryBaseClusterTrustCommandsBuilder;
 
     @Override
     public KdcType kdcType() {
@@ -90,16 +88,9 @@ public class ActiveDirectoryTrustService extends TrustProvider {
         TrustSetupCommandsResponse response = new TrustSetupCommandsResponse();
         response.setEnvironmentCrn(environmentCrn);
         response.setKdcType(kdcType().name());
-
-        ActiveDirectoryTrustSetupCommands adCommands = new ActiveDirectoryTrustSetupCommands();
-        adCommands.setCommands(activeDirectoryCommandsBuilder.buildCommands(trustCommandType, stack, freeIpa, crossRealmTrust));
-        response.setActiveDirectoryCommands(adCommands);
-
-        BaseClusterTrustSetupCommands baseClusterTrustSetupCommands = new BaseClusterTrustSetupCommands();
-        baseClusterTrustSetupCommands.setKrb5Conf(adBaseClusterKrb5ConfBuilder.buildCommands(stack.getResourceName(), trustCommandType, freeIpa,
-                crossRealmTrust));
-        response.setBaseClusterCommands(baseClusterTrustSetupCommands);
-
+        response.setActiveDirectoryCommands(activeDirectoryTrustInstructionsBuilder.buildInstructions(trustCommandType, stack, freeIpa, crossRealmTrust));
+        response.setBaseClusterCommands(activeDirectoryBaseClusterTrustCommandsBuilder.buildBaseClusterCommands(stack, trustCommandType, freeIpa,
+                crossRealmTrust, loadBalancer));
         return response;
     }
 }
