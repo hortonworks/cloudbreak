@@ -32,6 +32,7 @@ import com.sequenceiq.cloudbreak.service.upgrade.ImageFilterParamsFactory;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradeImageInfo;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradeImageInfoFactory;
 import com.sequenceiq.cloudbreak.service.upgrade.image.locked.LockedComponentChecker;
+import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.common.model.OsType;
 
 @Service
@@ -110,6 +111,7 @@ public class OsChangeUtil {
         Map<String, String> requiredParcelsFromTargetImage = getRequiredParcelsFromTargetImage(targetImage, stackRelatedParcels);
         return images.stream()
                 .filter(image -> currentOsType.matches(image.getOs(), image.getOsType()) &&
+                        Architecture.fromStringWithFallback(image.getArchitecture()) == Architecture.fromStringWithFallback(targetImage.getArchitecture()) &&
                         containsSameComponentVersions(image, targetImage.getCmBuildNumber(), requiredParcelsFromTargetImage))
                 .findFirst();
     }
