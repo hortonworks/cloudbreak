@@ -50,29 +50,38 @@ public class SaltSyncService {
     @Measure(SaltSyncService.class)
     public Optional<Set<String>> checkSaltMinions(GatewayConfig gatewayConfig) {
         try (SaltConnector sc = saltService.createSaltConnectorWithCustomTimeout(gatewayConfig, CONNECT_TIMEOUT_MS, READ_TIMEOUT_MS, PROXY_TIMEOUT_MS)) {
-            MinionStatusFromFileResponse response = saltStateService.collectNodeStatusWithLimitedRetry(sc, SALT_CHECK_JSON_LOCATION);
-            Map<String, String> resultMap = response.getResult().iterator().next();
-            if (resultMap.containsKey(sc.getHostname())) {
-                String resultString = resultMap.get(sc.getHostname());
-                if (isValid(resultString)) {
-                    try {
-                        MinionStatusWithTimestamp minionResponse = readValue(resultString, MinionStatusWithTimestamp.class);
-                        Instant responseTimestamp = ofEpochSecond(minionResponse.getTimestamp());
-                        Instant now = Instant.now();
-                        if (!responseTimestamp.isBefore(now.minus(TIMESTAMP_DIFFERENCE_THRESHOLD)) && !emptyIfNull(minionResponse.getDown()).isEmpty()) {
-                            return Optional.of(new HashSet<>(minionResponse.getDown()));
-                        }
-                    } catch (IOException e) {
-                        LOGGER.debug("JSON format of salt status check file is not valid , skipping status check!");
+            if (saltStateService.fileExists(sc, SALT_CHECK_JSON_LOCATION)) {
+                MinionStatusFromFileResponse response = saltStateService.collectNodeStatusWithLimitedRetry(sc, SALT_CHECK_JSON_LOCATION);
+                Map<String, String> resultMap = response.getResult().iterator().next();
+                if (resultMap.containsKey(sc.getHostname())) {
+                    String resultString = resultMap.get(sc.getHostname());
+                    if (isValid(resultString)) {
+                        return handleStatusJsonContent(resultString);
                     }
+                } else {
+                    LOGGER.error("Result map of salt sync call does not contain key for salt master host, " +
+                            "please double check the implementation to review this anomaly.");
                 }
             } else {
-                LOGGER.error("Result map of salt sync call does not contain key for salt master host, " +
-                        "please double check the implementation to review this anomaly.");
+                LOGGER.error("Salt check json file does not exists, skipping salt status check!");
             }
         } catch (Exception e) {
             LOGGER.error("Error occurred during check of salt check result json file: ", e);
             return Optional.of(Set.of(gatewayConfig.getHostname()));
+        }
+        return Optional.empty();
+    }
+
+    private static Optional<Set<String>> handleStatusJsonContent(String resultString) {
+        try {
+            MinionStatusWithTimestamp minionResponse = readValue(resultString, MinionStatusWithTimestamp.class);
+            Instant responseTimestamp = ofEpochSecond(minionResponse.getTimestamp());
+            Instant now = Instant.now();
+            if (!responseTimestamp.isBefore(now.minus(TIMESTAMP_DIFFERENCE_THRESHOLD)) && !emptyIfNull(minionResponse.getDown()).isEmpty()) {
+                return Optional.of(new HashSet<>(minionResponse.getDown()));
+            }
+        } catch (IOException e) {
+            LOGGER.debug("JSON format of salt status check file is not valid , skipping status check!");
         }
         return Optional.empty();
     }

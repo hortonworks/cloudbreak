@@ -319,6 +319,12 @@ public class SaltStateService {
         return minionStatus;
     }
 
+    public boolean fileExists(SaltConnector sc, String fileLocation) {
+        return measure(() -> sc.runWithLimitedRetry(new HostList(List.of(sc.getHostname())), "file.file_exists", LOCAL,
+                        PingResponse.class, fileLocation), LOGGER, "Checking if file exists took {}ms").getResult().stream()
+                .anyMatch(map -> map.values().stream().anyMatch(Boolean::booleanValue));
+    }
+
     @Retryable(retryFor = WebApplicationException.class, backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
     public PingResponse ping(SaltConnector sc, Target<String> target) {
         return measure(() -> sc.run(target, "test.ping", LOCAL, PingResponse.class), LOGGER, "Ping took {}ms");

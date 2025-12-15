@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -55,6 +56,7 @@ public class SaltSyncServiceTest {
         SaltConnector saltConnector = mock(SaltConnector.class);
         when(saltConnector.getHostname()).thenReturn(HOST_1);
         when(saltService.createSaltConnectorWithCustomTimeout(any(), anyInt(), anyInt(), anyInt())).thenReturn(saltConnector);
+        when(saltStateService.fileExists(any(), any())).thenReturn(Boolean.TRUE);
         MinionStatusFromFileResponse response = new MinionStatusFromFileResponse();
         MinionStatusWithTimestamp status = new MinionStatusWithTimestamp();
         status.setTimestamp(System.currentTimeMillis());
@@ -72,6 +74,7 @@ public class SaltSyncServiceTest {
         SaltConnector saltConnector = mock(SaltConnector.class);
         when(saltConnector.getHostname()).thenReturn(HOST_1);
         when(saltService.createSaltConnectorWithCustomTimeout(any(), anyInt(), anyInt(), anyInt())).thenReturn(saltConnector);
+        when(saltStateService.fileExists(any(), any())).thenReturn(Boolean.TRUE);
         MinionStatusFromFileResponse response = new MinionStatusFromFileResponse();
         MinionStatusWithTimestamp status = new MinionStatusWithTimestamp();
         status.setTimestamp(System.currentTimeMillis());
@@ -91,6 +94,7 @@ public class SaltSyncServiceTest {
         SaltConnector saltConnector = mock(SaltConnector.class);
         when(saltConnector.getHostname()).thenReturn(HOST_1);
         when(saltService.createSaltConnectorWithCustomTimeout(any(), anyInt(), anyInt(), anyInt())).thenReturn(saltConnector);
+        when(saltStateService.fileExists(any(), any())).thenReturn(Boolean.TRUE);
         MinionStatusFromFileResponse response = new MinionStatusFromFileResponse();
         response.setResult(List.of(Map.of(HOST_1, JsonUtil.writeValueAsString("anything"))));
         when(saltStateService.collectNodeStatusWithLimitedRetry(any(), any())).thenReturn(response);
@@ -106,6 +110,7 @@ public class SaltSyncServiceTest {
         SaltConnector saltConnector = mock(SaltConnector.class);
         when(saltConnector.getHostname()).thenReturn(HOST_1);
         when(saltService.createSaltConnectorWithCustomTimeout(any(), anyInt(), anyInt(), anyInt())).thenReturn(saltConnector);
+        when(saltStateService.fileExists(any(), any())).thenReturn(Boolean.TRUE);
         MinionStatusFromFileResponse response = new MinionStatusFromFileResponse();
         MinionStatusWithTimestamp status = new MinionStatusWithTimestamp();
         status.setTimestamp(Instant.now().minusSeconds(Duration.ofMinutes(15).toSeconds()).getEpochSecond());
@@ -135,6 +140,7 @@ public class SaltSyncServiceTest {
     public void testCheckMinionsIfSaltCallFails() throws JsonProcessingException {
         SaltConnector saltConnector = mock(SaltConnector.class);
         when(saltService.createSaltConnectorWithCustomTimeout(any(), anyInt(), anyInt(), anyInt())).thenReturn(saltConnector);
+        when(saltStateService.fileExists(any(), any())).thenReturn(Boolean.TRUE);
         when(saltStateService.collectNodeStatusWithLimitedRetry(any(), any())).thenThrow(new RuntimeException("anything"));
 
         Optional<Set<String>> failedMinions = underTest.checkSaltMinions(GW);
@@ -142,5 +148,18 @@ public class SaltSyncServiceTest {
         assertTrue(failedMinions.isPresent());
         assertEquals(HOST_1, failedMinions.get().iterator().next());
         verify(saltStateService).collectNodeStatusWithLimitedRetry(any(), any());
+    }
+
+    @Test
+    public void testCheckMinionsIfJsonFileMissing() throws JsonProcessingException {
+        SaltConnector saltConnector = mock(SaltConnector.class);
+        when(saltService.createSaltConnectorWithCustomTimeout(any(), anyInt(), anyInt(), anyInt())).thenReturn(saltConnector);
+        when(saltStateService.fileExists(any(), any())).thenReturn(Boolean.FALSE);
+
+        Optional<Set<String>> failedMinions = underTest.checkSaltMinions(GW);
+
+        assertFalse(failedMinions.isPresent());
+        verify(saltStateService, times(0)).collectNodeStatusWithLimitedRetry(any(), any());
+        verify(saltStateService).fileExists(any(), any());
     }
 }
