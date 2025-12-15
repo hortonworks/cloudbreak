@@ -109,6 +109,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.OBSERVABILI
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.OBSERVABILITY_SAAS_PREMIUM;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.OBSERVABILITY_SAAS_TRIAL;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.OJDBC_TOKEN_DH;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.PERSONAL_VIEW_CB_BY_RIGHT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.TARGETING_SUBNETS_FOR_ENDPOINT_ACCESS_GATEWAY;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.UI_EDP_PROGRESS_BAR;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.WORKLOAD_IAM_SYNC;
@@ -615,6 +616,9 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.allow.auto.java.upgrade}")
     private boolean allowAutoJavaUpgrade;
+
+    @Value("${auth.mock.personal.view.cb.by.right.enabled}")
+    private boolean personalViewCbByRightEnabled;
 
     @Inject
     private MockEnvironmentUserResourceRole mockEnvironmentUserResourceRole;
@@ -1143,9 +1147,11 @@ public class MockUserManagementService extends UserManagementImplBase {
         if (preferMinifiLoggingEnabled) {
             builder.addEntitlements(createEntitlement(CDP_CB_PREFER_MINIFI_LOGGING));
         }
-
         if (allowAutoJavaUpgrade) {
             builder.addEntitlements(createEntitlement(CDP_ALLOW_AUTO_JAVA_UPGRADE));
+        }
+        if (personalViewCbByRightEnabled) {
+            builder.addEntitlements(createEntitlement(PERSONAL_VIEW_CB_BY_RIGHT));
         }
 
         responseObserver.onNext(
