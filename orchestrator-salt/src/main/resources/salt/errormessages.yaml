@@ -6,3 +6,4 @@
 'check_databus_network_connectivity': 'Cloudera DataBus API network connectivity check failed. Please check cloudera documentation at https://docs.cloudera.com/cdp/latest regarding outbound traffic requirements. If the network connection issue is temporarily, you can retry the operation.'
 'check_logging_agent_running_systemctl': 'A running cdp-logging-agent or td-agent is required on your node(s) to collect and send diagnostics to ENG (engineering).'
 '/var/cb-init-executed': 'User data script failed, please check /var/log/user-data.log for more details.'
+'/var/log/user-data.log': 'User data script failed, please check /var/log/user-data.log for more details.'
