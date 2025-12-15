@@ -8,6 +8,7 @@ import static com.sequenceiq.cloudbreak.cloud.model.component.StackType.CDH;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
 import static com.sequenceiq.common.model.OsType.CENTOS7;
 import static com.sequenceiq.common.model.OsType.RHEL8;
+import static com.sequenceiq.common.model.OsType.RHEL9;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -15,6 +16,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -49,6 +51,7 @@ import com.sequenceiq.cloudbreak.service.upgrade.ImageFilterParamsFactory;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradeImageInfo;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradeImageInfoFactory;
 import com.sequenceiq.cloudbreak.service.upgrade.image.locked.LockedComponentChecker;
+import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.common.model.ImageCatalogPlatform;
 import com.sequenceiq.common.model.OsType;
 
@@ -225,6 +228,33 @@ class OsChangeUtilTest {
     }
 
     @Test
+    void testFindHelperImageIfNecessaryShouldNotReturnImageWithDifferentCpuArchitecture()
+            throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+        Image image1 = createImage("image1", RHEL8, Architecture.X86_64);
+        Image image2 = createImage("image2-arm", RHEL8, Architecture.ARM64);
+        Image image3 = createImage("image3", RHEL9, Architecture.X86_64);
+        List<Image> candidateImages = List.of(image1, image2, image3);
+
+        UpgradeImageInfo upgradeImageInfo = createUpgradeImageInfo(RHEL8, RHEL9);
+        when(upgradeImageInfoFactory.create(TARGET_IMAGE_ID, STACK_ID)).thenReturn(upgradeImageInfo);
+        when(stackDtoService.getById(STACK_ID)).thenReturn(stack);
+        when(platformStringTransformer.getPlatformStringForImageCatalogSet(AWS.name(), PLATFORM_VARIANT)).thenReturn(Set.of(imageCatalogPlatform));
+        when(imageCatalogService.getAllCdhImages(ACCOUNT_ID, WORKSPACE_ID, IMAGE_CATALOG_NAME, Set.of(imageCatalogPlatform))).thenReturn(candidateImages);
+
+        when(imageFilterParamsFactory.getStackRelatedParcels(stack)).thenReturn(Map.of(CDH.name(), CDH_VERSION, CFM.getKey(), "1.2.3"));
+        Map<String, String> packageVersions = Map.of(CDH.name(), CDH_VERSION, CFM.getKey(), "1.2.3");
+        when(lockedComponentChecker.isUpgradePermitted(image1, packageVersions, CM_BUILD_NUMBER)).thenReturn(false);
+        when(currentImageUsageCondition.getOSUsedByInstances(STACK_ID)).thenReturn(Set.of(RHEL8));
+        when(osChangeUpgradeCondition.isNextMajorOsImage(Set.of(RHEL8), upgradeImageInfo.targetStatedImage().getImage())).thenReturn(true);
+        when(osChangeUpgradeCondition.getPreviousOs(RHEL9)).thenReturn(Optional.of(RHEL8));
+
+        Optional<Image> actual = doAs(ACTOR, () -> underTest.findHelperImageIfNecessary(TARGET_IMAGE_ID, STACK_ID));
+
+        assertFalse(actual.isPresent());
+        verify(lockedComponentChecker, never()).isUpgradePermitted(image2, packageVersions, CM_BUILD_NUMBER);
+    }
+
+    @Test
     void testFindHelperImageIfNecessaryShouldReturnOptionalEmptyWhenWhereIsNoImageWithTheSamePackages()
             throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         Image image1 = createImage("image1", CENTOS7);
@@ -251,6 +281,10 @@ class OsChangeUtilTest {
 
     private Image createImage(String imageId, OsType os) {
         return Image.builder().withUuid(imageId).withOs(os.getOs()).withOsType(os.getOsType()).build();
+    }
+
+    private Image createImage(String imageId, OsType os, Architecture architecture) {
+        return Image.builder().withUuid(imageId).withOs(os.getOs()).withOsType(os.getOsType()).withArchitecture(architecture.getName()).build();
     }
 
     private Image createTargetImage(OsType os) {
