@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.cm;
 
+import static org.apache.commons.lang3.BooleanUtils.isFalse;
+import static org.apache.commons.lang3.BooleanUtils.isTrue;
+
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Map;
@@ -11,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.cloudera.api.swagger.ClustersResourceApi;
 import com.cloudera.api.swagger.RoleConfigGroupsResourceApi;
 import com.cloudera.api.swagger.ServicesResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
@@ -19,6 +23,7 @@ import com.cloudera.api.swagger.model.ApiCommand;
 import com.cloudera.api.swagger.model.ApiService;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
+import com.sequenceiq.cloudbreak.cm.commands.SyncApiCommandRetriever;
 import com.sequenceiq.cloudbreak.cm.exception.ClouderaManagerOperationFailedException;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
 import com.sequenceiq.cloudbreak.cm.util.ClouderaManagerConstants;
@@ -55,7 +60,10 @@ public class ClouderaManagerKraftMigrationService {
     private ClouderaManagerConfigService configService;
 
     @Inject
-    private ClouderaManagerRestartService clouderaManagerRestartService;
+    private SyncApiCommandRetriever syncApiCommandRetriever;
+
+    @Inject
+    private ClouderaManagerCommandsService clouderaManagerCommandsService;
 
     public void enableZookeeperMigrationMode(ApiClient client, StackDtoDelegate stackDtoDelegate) {
         String clusterName = stackDtoDelegate.getCluster().getName();
@@ -79,25 +87,14 @@ public class ClouderaManagerKraftMigrationService {
     }
 
     public void finalizeZookeeperToKraftMigration(ApiClient client, StackDtoDelegate stackDtoDelegate) {
-        ServicesResourceApi api = clouderaManagerApiFactory.getServicesResourceApi(client);
         String clusterName = stackDtoDelegate.getCluster().getName();
+        LOGGER.info("{} command initiated for cluster {}", KRAFT_FINALIZE_MIGRATION_COMMAND_NAME, clusterName);
 
         try {
-            Collection<ApiService> apiServices = readServices(client, stackDtoDelegate);
+            Optional<ApiService> optionalKafkaService = findKafkaService(client, clusterName);
 
-            Optional<ApiService> optionalApiService = apiServices.stream()
-                    .filter(service -> KAFKA_SERVICE_TYPE.equals(service.getType()))
-                    .findFirst();
-
-            if (optionalApiService.isPresent()) {
-                ApiService service = optionalApiService.get();
-                LOGGER.info("Finalizing Zookeeper to KRaft migration. Calling /clusters/{}/services/{}/commands/{} CM endpoint",
-                        clusterName, service.getName(), KRAFT_FINALIZE_MIGRATION_COMMAND_NAME);
-
-                ApiCommand kraftMigrationCommand = api.serviceCommandByName(
-                        clusterName, KRAFT_FINALIZE_MIGRATION_COMMAND_NAME, service.getName());
-
-                pollFinalizeZookeeperToKraftMigrationCommand(client, stackDtoDelegate, kraftMigrationCommand.getId());
+            if (optionalKafkaService.isPresent()) {
+                executeOrRetryKraftMigrationCommand(client, optionalKafkaService.get(), stackDtoDelegate, KRAFT_FINALIZE_MIGRATION_COMMAND_NAME);
             } else {
                 LOGGER.warn("Cannot finalize Zookeeper to KRaft migration. No {} service type found for cluster {}",
                         KAFKA_SERVICE_TYPE, clusterName);
@@ -109,25 +106,14 @@ public class ClouderaManagerKraftMigrationService {
     }
 
     public void migrateZookeeperToKraft(ApiClient client, StackDtoDelegate stackDtoDelegate) {
-        ServicesResourceApi api = clouderaManagerApiFactory.getServicesResourceApi(client);
         String clusterName = stackDtoDelegate.getCluster().getName();
+        LOGGER.info("{} command initiated for cluster {}", KRAFT_MIGRATION_COMMAND_NAME, clusterName);
 
         try {
-            Collection<ApiService> apiServices = readServices(client, stackDtoDelegate);
+            Optional<ApiService> optionalKafkaService = findKafkaService(client, clusterName);
 
-            Optional<ApiService> optionalApiService = apiServices.stream()
-                    .filter(service -> KAFKA_SERVICE_TYPE.equals(service.getType()))
-                    .findFirst();
-
-            if (optionalApiService.isPresent()) {
-                ApiService service = optionalApiService.get();
-                LOGGER.info("Migrating Zookeeper to KRaft. Calling /clusters/{}/services/{}/commands/{} CM endpoint",
-                        clusterName, service.getName(), KRAFT_MIGRATION_COMMAND_NAME);
-
-                ApiCommand kraftMigrationCommand = api.serviceCommandByName(
-                        clusterName, KRAFT_MIGRATION_COMMAND_NAME, service.getName());
-
-                pollKraftMigrationCommand(client, stackDtoDelegate, kraftMigrationCommand.getId());
+            if (optionalKafkaService.isPresent()) {
+                executeOrRetryKraftMigrationCommand(client, optionalKafkaService.get(), stackDtoDelegate, KRAFT_MIGRATION_COMMAND_NAME);
             } else {
                 LOGGER.error("Cannot migrate Zookeeper to KRaft. No {} service type found for cluster {}",
                         KAFKA_SERVICE_TYPE, clusterName);
@@ -139,25 +125,14 @@ public class ClouderaManagerKraftMigrationService {
     }
 
     public void rollbackZookeeperToKraftMigration(ApiClient client, StackDtoDelegate stackDtoDelegate) {
-        ServicesResourceApi api = clouderaManagerApiFactory.getServicesResourceApi(client);
         String clusterName = stackDtoDelegate.getCluster().getName();
+        LOGGER.info("{} command initiated for cluster {}", KRAFT_ROLLBACK_MIGRATION_COMMAND_NAME, clusterName);
 
         try {
-            Collection<ApiService> apiServices = readServices(client, stackDtoDelegate);
+            Optional<ApiService> optionalKafkaService = findKafkaService(client, clusterName);
 
-            Optional<ApiService> optionalApiService = apiServices.stream()
-                    .filter(service -> KAFKA_SERVICE_TYPE.equals(service.getType()))
-                    .findFirst();
-
-            if (optionalApiService.isPresent()) {
-                ApiService service = optionalApiService.get();
-                LOGGER.info("Rolling back Zookeeper to KRaft migration. Calling /clusters/{}/services/{}/commands/{} CM endpoint",
-                        clusterName, service.getName(), KRAFT_ROLLBACK_MIGRATION_COMMAND_NAME);
-
-                ApiCommand kraftMigrationCommand = api.serviceCommandByName(
-                        clusterName, KRAFT_ROLLBACK_MIGRATION_COMMAND_NAME, service.getName());
-
-                pollRollbackZookeeperToKraftMigrationCommand(client, stackDtoDelegate, kraftMigrationCommand.getId());
+            if (optionalKafkaService.isPresent()) {
+                executeOrRetryKraftMigrationCommand(client, optionalKafkaService.get(), stackDtoDelegate, KRAFT_ROLLBACK_MIGRATION_COMMAND_NAME);
             } else {
                 LOGGER.error("Cannot rollback Zookeeper to KRaft migration. No {} service type found for cluster {}",
                         KAFKA_SERVICE_TYPE, clusterName);
@@ -178,7 +153,7 @@ public class ClouderaManagerKraftMigrationService {
                     "Cluster was terminated while waiting for command API to be available for Zookeeper to KRaft migration");
         } else if (pollingResult.isTimeout()) {
             throw new CloudbreakException(
-                    "Timeout during waiting for command API to be available (Zookeeper to KRaft migration).");
+                    "Timeout during waiting for command API to be available (Zookeeper to KRaft migration)");
         }
     }
 
@@ -189,10 +164,10 @@ public class ClouderaManagerKraftMigrationService {
 
         if (pollingResult.isExited()) {
             throw new CancellationException(
-                    "Cluster was terminated while waiting for command API to be available for Zookeeper to KRaft migration");
+                    "Cluster was terminated while waiting for command API to be available for Zookeeper to KRaft migration finalization");
         } else if (pollingResult.isTimeout()) {
             throw new CloudbreakException(
-                    "Timeout during waiting for command API to be available (Zookeeper to KRaft migration).");
+                    "Timeout during waiting for command API to be available (Zookeeper to KRaft migration finalization)");
         }
     }
 
@@ -203,15 +178,87 @@ public class ClouderaManagerKraftMigrationService {
 
         if (pollingResult.isExited()) {
             throw new CancellationException(
-                    "Cluster was terminated while waiting for command API to be available for Zookeeper to KRaft migration");
+                    "Cluster was terminated while waiting for command API to be available for Zookeeper to KRaft migration rollback");
         } else if (pollingResult.isTimeout()) {
             throw new CloudbreakException(
-                    "Timeout during waiting for command API to be available (Zookeeper to KRaft migration).");
+                    "Timeout during waiting for command API to be available (Zookeeper to KRaft migration rollback)");
         }
     }
 
-    private Collection<ApiService> readServices(ApiClient client, StackDtoDelegate stack) throws ApiException {
+    private Collection<ApiService> readServices(ApiClient client, String clusterName) throws ApiException {
         ServicesResourceApi api = clouderaManagerApiFactory.getServicesResourceApi(client);
-        return api.readServices(stack.getName(), ClouderaManagerConstants.SUMMARY).getItems();
+        return api.readServices(clusterName, ClouderaManagerConstants.SUMMARY).getItems();
+    }
+
+    private void executeOrRetryKraftMigrationCommand(ApiClient client, ApiService service, StackDtoDelegate stackDtoDelegate, String commandName)
+            throws ApiException, CloudbreakException {
+        ServicesResourceApi api = clouderaManagerApiFactory.getServicesResourceApi(client);
+        String clusterName = stackDtoDelegate.getCluster().getName();
+        ClustersResourceApi clustersResourceApi = clouderaManagerApiFactory.getClustersResourceApi(client);
+        Optional<BigDecimal> optionalLastKraftMigrationCommand = findLastCommandIdByCommandName(clustersResourceApi, stackDtoDelegate, commandName);
+        ApiCommand kraftMigrationCommand;
+        if (optionalLastKraftMigrationCommand.isPresent()) {
+            LOGGER.debug("Previous {} command found for cluster {}", commandName, clusterName);
+            BigDecimal lastKraftMigrationCommandId = optionalLastKraftMigrationCommand.get();
+            ApiCommand lastKraftMigrationCommand = clouderaManagerCommandsService.getApiCommand(client, lastKraftMigrationCommandId);
+            Boolean commandActive = lastKraftMigrationCommand.isActive();
+            Boolean commandSuccess = lastKraftMigrationCommand.isSuccess();
+            Boolean commandCanRetry = lastKraftMigrationCommand.isCanRetry();
+            if (isTrue(commandActive)) {
+                LOGGER.debug("{} is already running with id: [{}]", commandName, lastKraftMigrationCommandId);
+            } else {
+                if (isFalse(commandSuccess) && isTrue(commandCanRetry)) {
+                    LOGGER.debug("Retrying last failed {} command with id {}", commandName, lastKraftMigrationCommandId);
+                    BigDecimal retriedCommandId = clouderaManagerCommandsService.retryApiCommand(client, lastKraftMigrationCommandId).getId();
+                    pollCommandByType(client, stackDtoDelegate, retriedCommandId, commandName);
+                } else {
+                    LOGGER.debug("Last {} command ({}) is not active, it was {} successful and {} retryable, submitting it now",
+                            commandName,
+                            lastKraftMigrationCommandId,
+                            commandSuccess ? "" : "not",
+                            commandCanRetry ? "" : "not");
+                    kraftMigrationCommand = api.serviceCommandByName(clusterName, commandName, service.getName());
+                    pollCommandByType(client, stackDtoDelegate, kraftMigrationCommand.getId(), commandName);
+                }
+            }
+        } else {
+            LOGGER.debug("Submitting new {} command for {} cluster", commandName, clusterName);
+            kraftMigrationCommand = api.serviceCommandByName(clusterName, commandName, service.getName());
+            pollCommandByType(client, stackDtoDelegate, kraftMigrationCommand.getId(), commandName);
+        }
+    }
+
+    private Optional<BigDecimal> findLastCommandIdByCommandName(ClustersResourceApi clustersResourceApi, StackDtoDelegate stack, String commandName) {
+        try {
+            return syncApiCommandRetriever.getCommandId(commandName, clustersResourceApi, stack.getStack());
+        } catch (CloudbreakException | ApiException e) {
+            LOGGER.warn("Unexpected error during CM command table fetching, assuming no such command exists", e);
+            return Optional.empty();
+        }
+    }
+
+    private void pollCommandByType(ApiClient client, StackDtoDelegate stackDtoDelegate, BigDecimal commandId, String commandName)
+            throws CloudbreakException {
+        switch (commandName) {
+            case KRAFT_MIGRATION_COMMAND_NAME:
+                pollKraftMigrationCommand(client, stackDtoDelegate, commandId);
+                break;
+            case KRAFT_FINALIZE_MIGRATION_COMMAND_NAME:
+                pollFinalizeZookeeperToKraftMigrationCommand(client, stackDtoDelegate, commandId);
+                break;
+            case KRAFT_ROLLBACK_MIGRATION_COMMAND_NAME:
+                pollRollbackZookeeperToKraftMigrationCommand(client, stackDtoDelegate, commandId);
+                break;
+            default:
+                throw new CloudbreakException("Unknown KRaft migration command: " + commandName);
+        }
+    }
+
+    private Optional<ApiService> findKafkaService(ApiClient client, String clusterName) throws ApiException {
+        Collection<ApiService> apiServices = readServices(client, clusterName);
+
+        return apiServices.stream()
+                .filter(service -> KAFKA_SERVICE_TYPE.equals(service.getType()))
+                .findFirst();
     }
 }
