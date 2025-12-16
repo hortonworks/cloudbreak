@@ -105,7 +105,7 @@ public class RunningParameter {
         return new RunningParameter().withWaitForFlowFail();
     }
 
-    public static RunningParameter  pollingInterval(Duration pollingInterval) {
+    public static RunningParameter pollingInterval(Duration pollingInterval) {
         return new RunningParameter().withPollingInterval(pollingInterval);
     }
 

@@ -1,0 +1,209 @@
+{
+  "cluster": {
+    "blueprintName": "7.3.1 - SDX Enterprise: Apache Hive Metastore, Apache Ranger, Apache Atlas",
+    "validateBlueprint": false
+  },
+  "network": {
+    "mock": {
+      "vpcId": "mock-me-once-more",
+      "internetGatewayId": "youshallnotpass",
+      "subnetId": "1234567"
+    }
+  },
+  "image": {
+    "catalog": "mock-static-sdx-image-catalog",
+    "id": "f6e778fc-7f17-4535-9021-515351df3691"
+  },
+  "customDomain": {
+    "domainName": "cloudera.site",
+    "hostgroupNameAsHostname": true
+  },
+  "instanceGroups": [
+    {
+      "name": "master",
+      "template": {
+        "instanceType": "large",
+        "attachedVolumes": [
+          {
+            "count": 1,
+            "size": 128,
+            "type": "magnetic"
+          }
+        ]
+      },
+      "nodeCount": 2,
+      "type": "CORE",
+      "recoveryMode": "MANUAL",
+      "recipeNames": []
+    },
+    {
+      "name": "gateway",
+      "template": {
+        "instanceType": "large",
+        "attachedVolumes": [
+          {
+            "count": 1,
+            "size": 128,
+            "type": "magnetic"
+          }
+        ]
+      },
+      "nodeCount": 2,
+      "type": "GATEWAY",
+      "recoveryMode": "MANUAL",
+      "recipeNames": []
+    },
+    {
+      "name": "core",
+      "template": {
+        "instanceType": "large",
+        "attachedVolumes": [
+          {
+            "count": 1,
+            "size": 512,
+            "type": "magnetic"
+          }
+        ]
+      },
+      "nodeCount": 3,
+      "type": "CORE",
+      "recoveryMode": "MANUAL",
+      "recipeNames": []
+    },
+    {
+      "name": "auxiliary",
+      "template": {
+        "instanceType": "large",
+        "attachedVolumes": [
+          {
+            "count": 1,
+            "size": 128,
+            "type": "magnetic"
+          }
+        ]
+      },
+      "nodeCount": 1,
+      "type": "CORE",
+      "recoveryMode": "MANUAL",
+      "recipeNames": []
+    },
+    {
+      "name": "solr_scale_out",
+      "template": {
+        "instanceType": "large",
+        "attachedVolumes": [
+          {
+            "count": 1,
+            "size": 256,
+            "type": "magnetic"
+          }
+        ]
+      },
+      "nodeCount": 0,
+      "type": "CORE",
+      "recoveryMode": "MANUAL",
+      "recipeNames": []
+    },
+    {
+      "name":"storage_scale_out",
+      "template": {
+        "instanceType": "large",
+        "attachedVolumes": [
+          {
+            "count": 1,
+            "size": 256,
+            "type": "magnetic"
+          }
+        ]
+      },
+      "nodeCount": 0,
+      "type": "CORE",
+      "recoveryMode": "MANUAL",
+      "recipeNames": []
+    },
+    {
+      "name": "kafka_scale_out",
+      "template": {
+        "instanceType": "large",
+        "attachedVolumes": [
+          {
+            "count": 1,
+            "size": 128,
+            "type": "magnetic"
+          }
+        ]
+      },
+      "nodeCount": 0,
+      "type": "CORE",
+      "recoveryMode": "MANUAL",
+      "recipeNames": []
+    },
+    {
+      "name": "raz_scale_out",
+      "template": {
+        "instanceType": "large",
+        "attachedVolumes": [
+          {
+            "count": 0,
+            "size": 0,
+            "type": "magnetic"
+          }
+        ]
+      },
+      "nodeCount": 0,
+      "type": "CORE",
+      "recoveryMode": "MANUAL",
+      "recipeNames": []
+    },
+    {
+      "name": "atlas_scale_out",
+      "template": {
+        "instanceType": "large",
+        "attachedVolumes": [
+          {
+            "count": 0,
+            "size": 0,
+            "type": "magnetic"
+          }
+        ]
+      },
+      "nodeCount": 0,
+      "type": "CORE",
+      "recoveryMode": "MANUAL",
+      "recipeNames": []
+    },
+    {
+      "name": "hms_scale_out",
+      "template": {
+        "instanceType": "large",
+        "attachedVolumes": [
+          {
+            "count": 0,
+            "size": 0,
+            "type": "magnetic"
+          }
+        ]
+      },
+      "nodeCount": 0,
+      "type": "CORE",
+      "recoveryMode": "MANUAL",
+      "recipeNames": []
+    },
+    {
+      "name": "idbroker",
+      "template": {
+        "instanceType": "large",
+        "attachedVolumes": [
+          {
+            "count": 0,
+            "type": "magnetic"
+          }
+        ]
+      },
+      "nodeCount": 2,
+      "type": "CORE",
+      "recoveryMode": "MANUAL",
+      "recipeNames": []
+    }
+  ]
+}

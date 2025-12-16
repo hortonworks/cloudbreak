@@ -50,6 +50,7 @@ import com.sequenceiq.cloudbreak.structuredevent.rest.endpoint.CDPStructuredEven
 import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.assertion.util.InstanceIPCollectorUtil;
+import com.sequenceiq.it.cloudbreak.await.Await;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.cloud.HostGroupType;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonCloudProperties;
@@ -399,6 +400,10 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
 
     public SdxInternalTestDto await(SdxClusterStatusResponse status, RunningParameter runningParameter) {
         return getTestContext().await(this, Map.of("status", status), runningParameter);
+    }
+
+    public SdxInternalTestDto await(SdxClusterStatusResponse status, RunningParameter runningParameter, Await<SdxInternalTestDto, SdxClient> customAction) {
+        return getTestContext().await(this, Map.of("status", status), runningParameter, customAction);
     }
 
     public SdxInternalTestDto awaitForFlow() {

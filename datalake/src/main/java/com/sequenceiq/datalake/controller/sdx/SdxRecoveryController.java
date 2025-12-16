@@ -11,12 +11,14 @@ import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 import com.sequenceiq.datalake.entity.SdxCluster;
+import com.sequenceiq.datalake.service.SdxResizeOperationService;
 import com.sequenceiq.datalake.service.recovery.SdxRecoverySelectorService;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.sdx.api.endpoint.SdxRecoveryEndpoint;
 import com.sequenceiq.sdx.api.model.SdxRecoverableResponse;
 import com.sequenceiq.sdx.api.model.SdxRecoveryRequest;
 import com.sequenceiq.sdx.api.model.SdxRecoveryResponse;
+import com.sequenceiq.sdx.api.model.SdxResizeOperationResponse;
 
 @Controller
 public class SdxRecoveryController implements SdxRecoveryEndpoint {
@@ -26,6 +28,9 @@ public class SdxRecoveryController implements SdxRecoveryEndpoint {
 
     @Inject
     private SdxRecoverySelectorService sdxRecoverySelectorService;
+
+    @Inject
+    private SdxResizeOperationService sdxResizeOperationService;
 
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.RECOVER_DATALAKE)
@@ -53,5 +58,11 @@ public class SdxRecoveryController implements SdxRecoveryEndpoint {
     public SdxRecoverableResponse getClusterRecoverableByCrn(@ResourceCrn String crn) {
         SdxCluster cluster = sdxService.getByCrn(ThreadBasedUserCrnProvider.getUserCrn(), crn);
         return sdxRecoverySelectorService.validateRecovery(cluster);
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
+    public SdxResizeOperationResponse getResizeStatus(@ResourceCrn String environmentCrn) {
+        return sdxResizeOperationService.getResizeOperationByStatusFromFlowLog(environmentCrn);
     }
 }

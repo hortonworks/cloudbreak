@@ -40,6 +40,26 @@ public class MeasuredTestContext extends MockedTestContext {
     }
 
     @Override
+    public int getMaxRetry() {
+        return wrappedTestContext.getMaxRetry();
+    }
+
+    @Override
+    public int getMaxRetryCount() {
+        return wrappedTestContext.getMaxRetryCount();
+    }
+
+    @Override
+    public long getPollingInterval() {
+        return wrappedTestContext.getPollingInterval();
+    }
+
+    @Override
+    public Duration getPollingDurationOrTheDefault(RunningParameter runningParameter) {
+        return wrappedTestContext.getPollingDurationOrTheDefault(runningParameter);
+    }
+
+    @Override
     public <T extends CloudbreakTestDto> T then(T entity, Class<? extends MicroserviceClient> clientClass, Assertion<T, ?
             extends MicroserviceClient> assertion, RunningParameter runningParameter) {
         return wrappedTestContext.then(entity, clientClass, assertion, runningParameter);

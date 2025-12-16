@@ -58,6 +58,14 @@ public class ModelDescriptions {
 
     public static final String OPERATION_STATUS_REASON = "Operation status reason.";
 
+    public static final String OPERATION_ACTIVE = "Operation is active or completed.";
+
+    public static final String OPERATION_FAILED = "Operation is failed or not.";
+
+    public static final String RESIZE_RETRY = "Data Lake resize operation retry is allowed or not.";
+
+    public static final String RESIZE_ROLLBACK = "Data Lake resize operation rollback is allowed or not.";
+
     public static final String STACK_REQUEST = "Stack request.";
 
     public static final String STACK_RESPONSE = "Stack response.";

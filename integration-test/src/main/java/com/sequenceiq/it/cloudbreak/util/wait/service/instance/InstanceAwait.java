@@ -22,12 +22,14 @@ public class InstanceAwait {
     private static final Logger LOGGER = LoggerFactory.getLogger(InstanceAwait.class);
 
     public <E extends Enum<E>> CloudbreakTestDto await(CloudbreakTestDto entity, Map<List<String>, E> desiredStatuses, TestContext testContext,
-            RunningParameter runningParameter, Duration pollingInterval, int maxRetry) {
+            RunningParameter runningParameter) {
         if (entity == null) {
             throw new RuntimeException("Cloudbreak key has been provided but no result in resource map!");
         }
         try {
             Log.await(LOGGER, String.format("%s for %s", entity.getName(), desiredStatuses));
+            Duration pollingInterval = testContext.getPollingDurationOrTheDefault(runningParameter);
+            int maxRetry = testContext.getMaxRetry();
             MicroserviceClient client = testContext.getMicroserviceClient(entity.getClass(), testContext.setActingUser(runningParameter).getAccessKey());
 
             desiredStatuses.forEach((instanceIds, instanceStatus) -> {
@@ -61,13 +63,14 @@ public class InstanceAwait {
         return entity;
     }
 
-    public <E extends Enum<E>> CloudbreakTestDto awaitExistence(CloudbreakTestDto entity, TestContext testContext,
-            RunningParameter runningParameter, Duration pollingInterval, int maxRetry) {
+    public <E extends Enum<E>> CloudbreakTestDto awaitExistence(CloudbreakTestDto entity, TestContext testContext, RunningParameter runningParameter) {
         if (entity == null) {
             throw new RuntimeException("Cloudbreak key has been provided but no result in resource map!");
         }
         try {
             Log.await(LOGGER, String.format("%s for instance existence", entity.getName()));
+            Duration pollingInterval = testContext.getPollingDurationOrTheDefault(runningParameter);
+            int maxRetry = testContext.getMaxRetry();
             MicroserviceClient client = testContext.getMicroserviceClient(entity.getClass(), testContext.setActingUser(runningParameter).getAccessKey());
 
             InstanceWaitObject instanceWaitObject = client.waitInstancesObject(entity, testContext, List.of(), null);

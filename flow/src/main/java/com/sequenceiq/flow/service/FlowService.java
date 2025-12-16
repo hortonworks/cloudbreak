@@ -360,7 +360,7 @@ public class FlowService {
 
     private void setStateEventFlowTypeOnFlowCheckResponse(FlowCheckResponse flowCheckResponse, List<FlowLogWithoutPayload> relatedFlowLogs,
             String marker, String id) {
-        if (flowCheckResponse.getHasActiveFlow() && !relatedFlowLogs.isEmpty()) {
+        if ((flowCheckResponse.getHasActiveFlow() || flowCheckResponse.getLatestFlowFinalizedAndFailed()) && !relatedFlowLogs.isEmpty()) {
             LOGGER.info("Setting current state, next event, and flow type into flow check response using {} {}", marker, id);
             FlowLogWithoutPayload latestFlowLog = relatedFlowLogs.get(0);
             flowCheckResponse.setCurrentState(latestFlowLog.getCurrentState());

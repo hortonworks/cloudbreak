@@ -37,9 +37,11 @@ import org.testng.Reporter;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.type.Tunnel;
+import com.sequenceiq.flow.api.FlowPublicEndpoint;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.actor.CloudbreakUser;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
+import com.sequenceiq.it.cloudbreak.await.Await;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CloudProviderAssertionProxy;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CloudProviderProxy;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonCloudProperties;
@@ -103,7 +105,7 @@ public abstract class TestContext implements ApplicationContextAware {
     private TestContext testContext;
 
     @Inject
-    private FlowUtil flowUtilSingleStatus;
+    private FlowUtil flowUtil;
 
     @Inject
     private TestClients testClients;
@@ -113,6 +115,9 @@ public abstract class TestContext implements ApplicationContextAware {
 
     @Value("${integrationtest.testsuite.cleanUp:true}")
     private boolean cleanUp;
+
+    @Value("${integrationtest.testsuite.pollingInterval:1000}")
+    private long pollingInterval;
 
     @Value("#{'${integrationtest.cloudProvider}'.equals('MOCK') ? 300 : ${integrationtest.testsuite.maxRetry:2700}}")
     private int maxRetry;
@@ -159,12 +164,33 @@ public abstract class TestContext implements ApplicationContextAware {
     @Value("${integrationtest.selinux.validate:false}")
     private boolean validateSelinux;
 
+    public int getMaxRetry() {
+        return maxRetry;
+    }
+
+    public int getMaxRetryCount() {
+        return maxRetryCount;
+    }
+
+    public long getPollingInterval() {
+        return getPollingDurationOrTheDefault(RunningParameter.emptyRunningParameter()).toMillis();
+    }
+
+    public Duration getPollingDurationOrTheDefault(RunningParameter runningParameter) {
+        Duration pollingInterval = Optional.of(runningParameter)
+                .or(() -> Optional.of(RunningParameter.emptyRunningParameter()))
+                .map(RunningParameter::getPollingInterval)
+                .orElse(Duration.of(this.pollingInterval, ChronoUnit.MILLIS));
+        LOGGER.info("Polling interval is: '{}'", pollingInterval);
+        return pollingInterval;
+    }
+
     public TestUsers getTestUsers() {
         checkNonEmpty("integrationtest.cloudbreak.server", defaultServer);
         if ((StringUtils.containsIgnoreCase(defaultServer, "dps.mow")
                 || StringUtils.containsIgnoreCase(defaultServer, "cdp.mow")
                 || StringUtils.containsIgnoreCase(defaultServer, "cdp-priv.mow"))
-            && this instanceof E2ETestContext) {
+                && this instanceof E2ETestContext) {
             testUsers.setSelector(TestUserSelectors.UMS_PREFERED);
         }
         return testUsers;
@@ -801,23 +827,33 @@ public abstract class TestContext implements ApplicationContextAware {
     }
 
     public <T extends CloudbreakTestDto, E extends Enum<E>> T awaitWithClient(T entity, Map<String, E> desiredStatuses, MicroserviceClient client) {
-        return awaitWithClient(entity, desiredStatuses, emptyRunningParameter(), client);
+        return awaitWithClient(entity, desiredStatuses, emptyRunningParameter(), client, null);
     }
 
     public <T extends CloudbreakTestDto, E extends Enum<E>> T await(T entity, Map<String, E> desiredStatuses, RunningParameter runningParameter) {
         MicroserviceClient client = getTestContext().getMicroserviceClient(entity.getClass(), getTestContext().setActingUser(runningParameter)
                 .getAccessKey());
 
-        return awaitWithClient(entity, desiredStatuses, runningParameter, client);
+        return awaitWithClient(entity, desiredStatuses, runningParameter, client, null);
     }
 
-    private <T extends CloudbreakTestDto, E extends Enum<E>> T awaitWithClient(T entity, Map<String, E> desiredStatuses, RunningParameter runningParameter,
-            MicroserviceClient client) {
+    public <T extends CloudbreakTestDto, E extends Enum<E>, U extends MicroserviceClient> T await(T entity, Map<String, E> desiredStatuses,
+            RunningParameter runningParameter, Await<T, U> customAwait) {
+        U client = getTestContext().getMicroserviceClient(entity.getClass(), getTestContext().setActingUser(runningParameter)
+                .getAccessKey());
+        return awaitWithClient(entity, desiredStatuses, runningParameter, client, customAwait);
+    }
+
+    private <T extends CloudbreakTestDto, E extends Enum<E>, U extends MicroserviceClient> T awaitWithClient(T entity, Map<String, E> desiredStatuses,
+            RunningParameter runningParameter, U client, Await<T, U> customAwait) {
         checkShutdown();
         String key = getKeyForAwait(entity, entity.getClass(), runningParameter);
-        CloudbreakTestDto awaitEntity = get(key);
+        T awaitEntity = get(key);
         if (awaitEntity == null) {
             awaitEntity = entity;
+        }
+        if (customAwait != null) {
+            customAwait.await(getTestContext(), awaitEntity, client, runningParameter);
         }
         if (runningParameter.isWaitForFlow()) {
             awaitForFlow(awaitEntity, runningParameter);
@@ -834,7 +870,7 @@ public abstract class TestContext implements ApplicationContextAware {
             Log.await(LOGGER, String.format("Cloudbreak await should be skipped because of previous error. await [%s]", desiredStatuses));
         } else {
             resourceAwait.await(awaitEntity, desiredStatuses, getTestContext(), runningParameter,
-                    flowUtilSingleStatus.getPollingDurationOrTheDefault(runningParameter), maxRetry, maxRetryCount, client);
+                    getPollingDurationOrTheDefault(runningParameter), maxRetry, maxRetryCount, client);
         }
         return entity;
     }
@@ -849,8 +885,7 @@ public abstract class TestContext implements ApplicationContextAware {
         }
         String key = getKeyForAwait(entity, entity.getClass(), runningParameter);
         CloudbreakTestDto awaitEntity = get(key);
-        instanceAwait.await(awaitEntity, desiredStatuses, getTestContext(), runningParameter,
-                flowUtilSingleStatus.getPollingDurationOrTheDefault(runningParameter), maxRetry);
+        instanceAwait.await(awaitEntity, desiredStatuses, getTestContext(), runningParameter);
         return entity;
     }
 
@@ -862,10 +897,7 @@ public abstract class TestContext implements ApplicationContextAware {
         }
         String key = getKeyForAwait(entity, entity.getClass(), runningParameter);
         CloudbreakTestDto awaitEntity = get(key);
-        instanceAwait.awaitExistence(
-                awaitEntity, getTestContext(), runningParameter,
-                flowUtilSingleStatus.getPollingDurationOrTheDefault(runningParameter), maxRetry
-        );
+        instanceAwait.awaitExistence(awaitEntity, getTestContext(), runningParameter);
         return entity;
     }
 
@@ -886,12 +918,12 @@ public abstract class TestContext implements ApplicationContextAware {
                     Objects.requireNonNull(Crn.fromString(awaitEntity.getCrn())).getAccountId(), awaitEntity));
             Log.await(LOGGER, String.format(" Cloudbreak await for flow on resource: %s at account: %s - for entity: %s ", awaitEntity.getCrn(),
                     Objects.requireNonNull(Crn.fromString(awaitEntity.getCrn())).getAccountId(), awaitEntity));
-
-
             MicroserviceClient msClient = getAdminMicroserviceClient(awaitEntity.getClass(), Objects.requireNonNull(Crn.fromString(awaitEntity.getCrn()))
                     .getAccountId());
-
-            flowUtilSingleStatus.waitBasedOnLastKnownFlow(awaitEntity, msClient, getTestContext(), runningParameter);
+            FlowPublicEndpoint flowPublicEndpoint = msClient.flowPublicEndpoint();
+            if (flowPublicEndpoint != null) {
+                flowUtil.waitForLastKnownFlow(awaitEntity, flowPublicEndpoint, getTestContext(), runningParameter);
+            }
         }
         entity.setLastKnownFlowId(null);
         return entity;

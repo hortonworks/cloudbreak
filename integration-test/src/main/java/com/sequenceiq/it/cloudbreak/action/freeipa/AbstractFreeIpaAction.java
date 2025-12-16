@@ -13,7 +13,6 @@ import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.AbstractFreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.microservice.FreeIpaClient;
-import com.sequenceiq.it.cloudbreak.util.wait.FlowUtil;
 
 public abstract class AbstractFreeIpaAction<U extends AbstractFreeIpaTestDto> implements Action<U, FreeIpaClient> {
 
@@ -22,14 +21,14 @@ public abstract class AbstractFreeIpaAction<U extends AbstractFreeIpaTestDto> im
     @Override
     public U action(TestContext testContext, U testDto, FreeIpaClient client) throws Exception {
         int retries = 0;
-        while (retries <= testDto.getFlowUtil().getMaxRetry()) {
+        while (retries <= testContext.getMaxRetry()) {
             try {
                 return freeIpaAction(testContext, testDto, client);
             } catch (InternalServerErrorException e) {
                 String message = e.getResponse().readEntity(String.class);
                 LOGGER.info("Exception during executing FreeIPA action: ", e);
                 if (message.contains("Flows under operation")) {
-                    waitTillFlowInOperation(testDto.getFlowUtil());
+                    waitTillFlowInOperation(testContext);
                     retries++;
                 } else {
                     throw e;
@@ -38,7 +37,7 @@ public abstract class AbstractFreeIpaAction<U extends AbstractFreeIpaTestDto> im
                 LOGGER.info("Exception during executing FreeIPA action: ", e);
                 Response response = e.getResponse();
                 if (CONFLICT.getStatusCode() == response.getStatus()) {
-                    waitTillFlowInOperation(testDto.getFlowUtil());
+                    waitTillFlowInOperation(testContext);
                     retries++;
                 } else {
                     throw e;
@@ -50,9 +49,9 @@ public abstract class AbstractFreeIpaAction<U extends AbstractFreeIpaTestDto> im
 
     protected abstract U freeIpaAction(TestContext testContext, U testDto, FreeIpaClient client) throws Exception;
 
-    private void waitTillFlowInOperation(FlowUtil flowUtil) {
+    private void waitTillFlowInOperation(TestContext testContext) {
         try {
-            Thread.sleep(flowUtil.getPollingInterval());
+            Thread.sleep(testContext.getPollingInterval());
         } catch (InterruptedException e) {
             LOGGER.warn("Exception has been occurred during wait for flow to end: ", e);
         }

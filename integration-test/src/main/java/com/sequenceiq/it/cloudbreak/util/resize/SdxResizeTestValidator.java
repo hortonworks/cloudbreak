@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.I
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.loadbalancer.LoadBalancerResponse;
 import com.sequenceiq.common.api.type.LoadBalancerType;
+import com.sequenceiq.it.cloudbreak.assertion.CBAssertion;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
@@ -34,6 +35,7 @@ import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxInstanceGroupDiskRequest;
 import com.sequenceiq.sdx.api.model.SdxInstanceGroupRequest;
+import com.sequenceiq.sdx.api.model.SdxResizeOperationResponse;
 
 @Component
 @Scope("prototype")
@@ -95,7 +97,8 @@ public class SdxResizeTestValidator {
     }
 
     public void setExpectedShape(SdxClusterShape expectedShape) {
-        this.expectedShape = expectedShape; }
+        this.expectedShape = expectedShape;
+    }
 
     public void setExpectedCrn(String expectedCrn) {
         this.expectedCrn.set(expectedCrn);
@@ -288,7 +291,7 @@ public class SdxResizeTestValidator {
                 .when(freeIpaTestClient.describe())
                 .then((tc, testDto, client) -> {
                     validateDnsEntryInFreeIpa(testDto, tc, client);
-                return testDto;
+                    return testDto;
                 });
     }
 
@@ -360,5 +363,13 @@ public class SdxResizeTestValidator {
         throw new TestFailException(
                 " The DL's field '" + testField + "' is '" + actual + "' instead of '" + expected + '\''
         );
+    }
+
+    public void validateResizeStatusFailed(SdxResizeOperationResponse resizeStatus, String statusReason, boolean retry, boolean rollback) {
+        CBAssertion.assertEquals(resizeStatus.getActive(), false);
+        CBAssertion.assertEquals(resizeStatus.getFailed(), true);
+        CBAssertion.assertEquals(resizeStatus.getStatusReason(), statusReason);
+        CBAssertion.assertEquals(resizeStatus.getRetryAllowed(), retry);
+        CBAssertion.assertEquals(resizeStatus.getRollbackAllowed(), rollback);
     }
 }

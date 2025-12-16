@@ -11,10 +11,13 @@ import jakarta.ws.rs.core.MediaType;
 
 import org.springframework.validation.annotation.Validated;
 
+import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
+import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.sdx.api.model.SdxRecoverableResponse;
 import com.sequenceiq.sdx.api.model.SdxRecoveryRequest;
 import com.sequenceiq.sdx.api.model.SdxRecoveryResponse;
+import com.sequenceiq.sdx.api.model.SdxResizeOperationResponse;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -54,4 +57,11 @@ public interface SdxRecoveryEndpoint {
     @Operation(summary = "validates if the data lake is recoverable or not", operationId = "getClusterRecoverableByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     SdxRecoverableResponse getClusterRecoverableByCrn(@PathParam("crn") String crn);
+
+    @GET
+    @Path("{environmentCrn}/resize/status")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Re-size SDX cluster", operationId = "resizeSdx",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    SdxResizeOperationResponse getResizeStatus(@PathParam("environmentCrn") @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) String environmentCrn);
 }
