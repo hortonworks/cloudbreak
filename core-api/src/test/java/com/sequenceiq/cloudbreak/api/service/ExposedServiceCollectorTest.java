@@ -994,7 +994,7 @@ class ExposedServiceCollectorTest {
                 Map.entry("EFM-API", 10090),
                 Map.entry("SSB-SSE-UI", 18121),
                 Map.entry("SSB-SSE-WS", 18121),
-                Map.entry("LAKEHOUSE_OPTIMIZER", 8087)
+                Map.entry("LAKEHOUSE_OPTIMIZER", 8085)
         );
     }
 
