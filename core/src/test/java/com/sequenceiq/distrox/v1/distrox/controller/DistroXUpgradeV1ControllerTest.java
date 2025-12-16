@@ -1,10 +1,20 @@
 package com.sequenceiq.distrox.v1.distrox.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
+
+import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,9 +30,15 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.StackCc
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
 import com.sequenceiq.cloudbreak.api.model.CcmUpgradeResponseType;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.cloud.model.StackTags;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.upgrade.ccm.StackCcmUpgradeService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.tag.ClusterTemplateApplicationTag;
+import com.sequenceiq.cloudbreak.util.CodUtil;
 import com.sequenceiq.common.model.UpgradeShowAvailableImages;
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXCcmUpgradeV1Response;
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXUpgradeV1Request;
@@ -87,6 +103,7 @@ class DistroXUpgradeV1ControllerTest {
         when(upgradeAvailabilityService.checkForUpgrade(NameOrCrn.ofName(CLUSTER_NAME), WORKSPACE_ID, upgradeV4Request, USER_CRN))
                 .thenReturn(upgradeV4Response);
         when(upgradeConverter.convert(upgradeV4Response)).thenReturn(distroXUpgradeV1Response);
+        when(stackService.getByNameOrCrnInWorkspace(any(), anyLong())).thenReturn(mock(Stack.class));
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.upgradeClusterByName(CLUSTER_NAME, distroxUpgradeRequest));
 
@@ -105,6 +122,7 @@ class DistroXUpgradeV1ControllerTest {
         when(upgradeAvailabilityService.checkForUpgrade(NameOrCrn.ofName(CLUSTER_NAME), WORKSPACE_ID, upgradeV4Request, USER_CRN))
                 .thenReturn(upgradeV4Response);
         when(upgradeConverter.convert(upgradeV4Response)).thenReturn(distroXUpgradeV1Response);
+        when(stackService.getByNameOrCrnInWorkspace(any(), anyLong())).thenReturn(mock(Stack.class));
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.upgradeClusterByName(CLUSTER_NAME, distroxUpgradeRequest));
 
@@ -122,6 +140,7 @@ class DistroXUpgradeV1ControllerTest {
         UpgradeV4Response upgradeV4Response = new UpgradeV4Response();
         when(upgradeService.triggerUpgrade(NameOrCrn.ofName(CLUSTER_NAME), WORKSPACE_ID, USER_CRN, upgradeV4Request, false)).thenReturn(upgradeV4Response);
         when(upgradeConverter.convert(upgradeV4Response)).thenReturn(distroXUpgradeV1Response);
+        when(stackService.getByNameOrCrnInWorkspace(any(), anyLong())).thenReturn(mock(Stack.class));
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.upgradeClusterByName(CLUSTER_NAME, distroxUpgradeRequest));
 
@@ -139,10 +158,28 @@ class DistroXUpgradeV1ControllerTest {
         when(upgradeService.triggerUpgrade(NameOrCrn.ofCrn(CLUSTER_NAME), WORKSPACE_ID, USER_CRN, upgradeV4Request, false))
                 .thenReturn(upgradeV4Response);
         when(upgradeConverter.convert(upgradeV4Response)).thenReturn(distroXUpgradeV1Response);
+        when(stackService.getByNameOrCrnInWorkspace(any(), anyLong())).thenReturn(mock(Stack.class));
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.upgradeClusterByCrn(CLUSTER_NAME, distroxUpgradeRequest));
 
         verify(upgradeService).triggerUpgrade(NameOrCrn.ofCrn(CLUSTER_NAME), WORKSPACE_ID, USER_CRN, upgradeV4Request, false);
+    }
+
+    @Test
+    public void testUpgradeOnNonInternalEndpointWhenCodCluster() {
+        DistroXUpgradeV1Request distroxUpgradeRequest = new DistroXUpgradeV1Request();
+        UpgradeV4Request upgradeV4Request = new UpgradeV4Request();
+        upgradeV4Request.setDryRun(Boolean.FALSE);
+        Stack stack = new Stack();
+        StackTags stackTags = new StackTags(Map.of(), Map.of(ClusterTemplateApplicationTag.SERVICE_TYPE.key(), CodUtil.OPERATIONAL_DB), Map.of());
+        stack.setTags(new Json(stackTags));
+        when(stackService.getByNameOrCrnInWorkspace(any(), anyLong())).thenReturn(stack);
+
+        BadRequestException exception = assertThrows(BadRequestException.class,
+                () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.upgradeClusterByCrn(CLUSTER_NAME, distroxUpgradeRequest)));
+        assertEquals("Please note that COD cluster upgrades are supported only through the Operational Database UI or CLI!", exception.getMessage());
+
+        verify(upgradeService, never()).triggerUpgrade(any(), anyLong(), anyString(), any(), anyBoolean());
     }
 
     @Test
@@ -189,6 +226,7 @@ class DistroXUpgradeV1ControllerTest {
         when(upgradeService.triggerUpgrade(NameOrCrn.ofCrn(CLUSTER_NAME), WORKSPACE_ID, USER_CRN, upgradeV4Request, false))
                 .thenReturn(upgradeV4Response);
         when(upgradeConverter.convert(upgradeV4Response)).thenReturn(distroXUpgradeV1Response);
+        when(stackService.getByNameOrCrnInWorkspace(any(), anyLong())).thenReturn(mock(Stack.class));
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.upgradeClusterByCrn(CLUSTER_NAME, distroxUpgradeRequest));
 

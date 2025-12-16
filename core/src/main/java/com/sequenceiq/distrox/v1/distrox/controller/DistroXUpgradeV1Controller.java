@@ -19,11 +19,15 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.Upgrade
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.security.internal.InitiatorUserCrn;
 import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.upgrade.ccm.StackCcmUpgradeService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.util.CodUtil;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXUpgradeV1Endpoint;
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXCcmUpgradeV1Response;
+import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXUpgradeShowAvailableImages;
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXUpgradeV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXUpgradeV1Response;
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.rds.DistroXRdsUpgradeV1Request;
@@ -80,6 +84,7 @@ public class DistroXUpgradeV1Controller implements DistroXUpgradeV1Endpoint {
     public DistroXUpgradeV1Response upgradeClusterByName(@ResourceName String clusterName, DistroXUpgradeV1Request distroxUpgradeRequest) {
         validateClusterName(clusterName);
         NameOrCrn nameOrCrn = NameOrCrn.ofName(clusterName);
+        validateCodCluster(nameOrCrn, distroxUpgradeRequest.getShowAvailableImages());
         return upgradeCluster(distroxUpgradeRequest, nameOrCrn, false);
     }
 
@@ -87,6 +92,7 @@ public class DistroXUpgradeV1Controller implements DistroXUpgradeV1Endpoint {
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.UPGRADE_DATAHUB)
     public DistroXUpgradeV1Response upgradeClusterByCrn(@ResourceCrn String clusterCrn, DistroXUpgradeV1Request distroxUpgradeRequest) {
         NameOrCrn nameOrCrn = NameOrCrn.ofCrn(clusterCrn);
+        validateCodCluster(nameOrCrn, distroxUpgradeRequest.getShowAvailableImages());
         return upgradeCluster(distroxUpgradeRequest, nameOrCrn, false);
     }
 
@@ -168,6 +174,15 @@ public class DistroXUpgradeV1Controller implements DistroXUpgradeV1Endpoint {
 
     private void validateClusterName(String clusterName) {
         stackService.checkLiveStackExistenceByName(clusterName, ThreadBasedUserCrnProvider.getAccountId(), StackType.WORKLOAD);
+    }
+
+    private void validateCodCluster(NameOrCrn nameOrCrn, DistroXUpgradeShowAvailableImages showAvailableImages) {
+        if (DistroXUpgradeShowAvailableImages.SHOW != showAvailableImages && DistroXUpgradeShowAvailableImages.LATEST_ONLY != showAvailableImages) {
+            Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, restRequestThreadLocalService.getRequestedWorkspaceId());
+            if (CodUtil.isCodCluster(stack)) {
+                throw new BadRequestException("Please note that COD cluster upgrades are supported only through the Operational Database UI or CLI!");
+            }
+        }
     }
 
 }

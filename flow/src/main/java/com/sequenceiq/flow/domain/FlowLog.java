@@ -296,6 +296,7 @@ public class FlowLog {
                 "resourceId=" + resourceId +
                 ", created=" + created +
                 ", flowId='" + flowId + '\'' +
+                ", flowChainId='" + flowChainId + '\'' +
                 ", cloudbreakNodeId='" + cloudbreakNodeId + '\'' +
                 ", currentState='" + currentState + '\'' +
                 ", stateStatus=" + stateStatus +
