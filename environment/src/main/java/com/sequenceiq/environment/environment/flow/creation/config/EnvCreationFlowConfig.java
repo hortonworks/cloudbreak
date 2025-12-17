@@ -6,6 +6,7 @@ import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnviro
 import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentStatus.Value.UNSET;
 import static com.sequenceiq.environment.environment.flow.creation.EnvCreationState.COMPUTE_CLUSTER_CREATION_STARTED_STATE;
 import static com.sequenceiq.environment.environment.flow.creation.EnvCreationState.COMPUTE_CLUSTER_CREATION_WAITING_STATE;
+import static com.sequenceiq.environment.environment.flow.creation.EnvCreationState.DISTRIBUTION_LIST_CREATION_STATE;
 import static com.sequenceiq.environment.environment.flow.creation.EnvCreationState.ENVIRONMENT_CREATION_VALIDATION_STATE;
 import static com.sequenceiq.environment.environment.flow.creation.EnvCreationState.ENVIRONMENT_INITIALIZATION_STATE;
 import static com.sequenceiq.environment.environment.flow.creation.EnvCreationState.ENVIRONMENT_RESOURCE_ENCRYPTION_INITIALIZATION_STARTED_STATE;
@@ -22,6 +23,7 @@ import static com.sequenceiq.environment.environment.flow.creation.event.EnvCrea
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.HANDLED_FAILED_ENV_CREATION_EVENT;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.START_COMPUTE_CLUSTER_CREATION_EVENT;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.START_COMPUTE_CLUSTER_CREATION_WAITING_EVENT;
+import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.START_DISTRIBUTION_LIST_CREATION_EVENT;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.START_ENVIRONMENT_INITIALIZATION_EVENT;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.START_ENVIRONMENT_RESOURCE_ENCRYPTION_INITIALIZATION_EVENT;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.START_ENVIRONMENT_VALIDATION_EVENT;
@@ -89,7 +91,12 @@ public class EnvCreationFlowConfig extends AbstractFlowConfiguration<EnvCreation
             .failureState(ENV_CREATION_FAILED_STATE)
             .defaultFailureEvent()
 
-            .from(COMPUTE_CLUSTER_CREATION_WAITING_STATE).to(ENV_CREATION_FINISHED_STATE)
+            .from(COMPUTE_CLUSTER_CREATION_WAITING_STATE).to(DISTRIBUTION_LIST_CREATION_STATE)
+            .event(START_DISTRIBUTION_LIST_CREATION_EVENT)
+            .failureState(ENV_CREATION_FAILED_STATE)
+            .defaultFailureEvent()
+
+            .from(DISTRIBUTION_LIST_CREATION_STATE).to(ENV_CREATION_FINISHED_STATE)
             .event(FINISH_ENV_CREATION_EVENT)
             .failureState(ENV_CREATION_FAILED_STATE)
             .defaultFailureEvent()

@@ -93,7 +93,7 @@ class ComputeClusterCreationWaitingHandlerTest {
         assertThat(envCreationEvent).isNotNull();
         assertThat(envCreationEvent.getResourceCrn()).isEqualTo(ENVIRONMENT_CRN);
         assertThat(envCreationEvent.getResourceId()).isEqualTo(ENVIRONMENT_ID);
-        assertThat(envCreationEvent.selector()).isEqualTo("FINISH_ENV_CREATION_EVENT");
+        assertThat(envCreationEvent.selector()).isEqualTo("START_DISTRIBUTION_LIST_CREATION_EVENT");
         verify(externalizedComputeService, times(1)).getDefaultComputeClusterName(anyString());
         verify(externalizedComputeService, times(1)).awaitComputeClusterCreation(environment, "clusterName");
 
@@ -103,7 +103,8 @@ class ComputeClusterCreationWaitingHandlerTest {
     void sendEnvCreationFailureEventWhenNoEnvironmentFound() {
         doNothing().when(eventBus).notify(anyString(), failureEventCaptor.capture());
         EnvironmentDto environmentDto = createEnvironmentDto();
-        when(environmentService.findEnvironmentByIdOrThrow(anyLong())).thenThrow(NotFoundException.notFound("environment", environmentDto.getId()).get());
+        when(environmentService.findEnvironmentByIdOrThrow(anyLong()))
+                .thenThrow(NotFoundException.notFound("environment", environmentDto.getId()).get());
 
         underTest.accept(Event.wrap(environmentDto));
 

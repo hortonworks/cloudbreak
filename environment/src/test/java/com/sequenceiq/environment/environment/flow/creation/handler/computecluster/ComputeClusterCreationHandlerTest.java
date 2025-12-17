@@ -102,7 +102,9 @@ class ComputeClusterCreationHandlerTest {
     void sendEnvCreationFailureEventWhenNoEnvironmentFound() {
         doNothing().when(eventBus).notify(anyString(), failureEventCaptor.capture());
         EnvironmentDto environmentDto = createEnvironmentDto();
-        when(environmentService.findEnvironmentByIdOrThrow(anyLong())).thenThrow(NotFoundException.notFound("environment", environmentDto.getId()).get());
+        when(environmentService.findEnvironmentByIdOrThrow(anyLong()))
+                .thenThrow(NotFoundException.notFound("environment", environmentDto.getId()).get());
+
 
         underTest.accept(Event.wrap(environmentDto));
 

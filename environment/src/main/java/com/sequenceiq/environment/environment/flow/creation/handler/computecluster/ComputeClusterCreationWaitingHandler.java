@@ -1,7 +1,7 @@
 package com.sequenceiq.environment.environment.flow.creation.handler.computecluster;
 
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationHandlerSelectors.WAIT_COMPUTE_CLUSTER_CREATION_EVENT;
-import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.FINISH_ENV_CREATION_EVENT;
+import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.START_DISTRIBUTION_LIST_CREATION_EVENT;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,7 +62,7 @@ public class ComputeClusterCreationWaitingHandler extends ExceptionCatcherEventH
         LOGGER.debug("Compute cluster creation waiting successfully finished.");
         return EnvCreationEvent.builder()
                 .withResourceId(environmentDto.getResourceId())
-                .withSelector(FINISH_ENV_CREATION_EVENT.selector())
+                .withSelector(START_DISTRIBUTION_LIST_CREATION_EVENT.selector())
                 .withResourceCrn(environmentDto.getResourceCrn())
                 .withResourceName(environmentDto.getName())
                 .build();
