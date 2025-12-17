@@ -287,14 +287,11 @@ public class EnvironmentCreationService {
         String cloudPlatform = creationDto.getCloudPlatform().toLowerCase(Locale.ROOT);
         switch (cloudPlatform) {
             case "azure":
-                String encryptionRole = Optional.ofNullable(creationDto.getParameters())
+                Optional.ofNullable(creationDto.getParameters())
                         .map(ParametersDto::getAzureParametersDto)
                         .map(AzureParametersDto::getAzureResourceEncryptionParametersDto)
                         .map(AzureResourceEncryptionParametersDto::getUserManagedIdentity)
-                        .orElse(null);
-                if (encryptionRole != null) {
-                    resultBuilder.merge(validatorService.validateEncryptionRole(encryptionRole));
-                }
+                        .ifPresent(encryptionRole -> resultBuilder.merge(validatorService.validateEncryptionRole(encryptionRole)));
                 break;
             default:
                 break;

@@ -38,9 +38,11 @@ public class DatahubPollerProvider {
 
     private final FlowResultPollerEvaluator flowResultPollerEvaluator;
 
-    public DatahubPollerProvider(DatahubService datahubService, ClusterPollerResultEvaluator clusterPollerResultEvaluator, FlowEndpoint flowEndpoint,
+    public DatahubPollerProvider(
+            DatahubService datahubService,
+            ClusterPollerResultEvaluator clusterPollerResultEvaluator,
+            FlowEndpoint flowEndpoint,
             FlowResultPollerEvaluator flowResultPollerEvaluator) {
-
         this.datahubService = datahubService;
         this.clusterPollerResultEvaluator = clusterPollerResultEvaluator;
         this.flowEndpoint = flowEndpoint;

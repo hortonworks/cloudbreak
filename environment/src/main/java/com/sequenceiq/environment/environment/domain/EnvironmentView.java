@@ -617,5 +617,4 @@ public class EnvironmentView extends CompactView implements AuthResource {
                 ", encryptionProfileCrn=" + encryptionProfileCrn +
                 '}';
     }
-
 }

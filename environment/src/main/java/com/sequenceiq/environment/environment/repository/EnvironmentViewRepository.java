@@ -17,6 +17,7 @@ import org.springframework.data.repository.query.Param;
 import com.sequenceiq.environment.environment.EnvironmentDeletionType;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.EnvironmentView;
+import com.sequenceiq.environment.environment.dto.CompactViewDto;
 
 @Transactional(TxType.REQUIRED)
 public interface EnvironmentViewRepository extends JpaRepository<EnvironmentView, Long> {
@@ -58,6 +59,11 @@ public interface EnvironmentViewRepository extends JpaRepository<EnvironmentView
             + "AND ev.archived = false")
     Optional<EnvironmentView> findByResourceCrnAndAccountIdAndArchivedIsFalse(@Param("resourceCrn") String resourceCrn, @Param("accountId") String accountId);
 
+    @Query("SELECT new com.sequenceiq.environment.environment.dto.CompactViewDto(ev.id, ev.name) FROM EnvironmentView ev "
+            + "WHERE ev.resourceCrn = :resourceCrn "
+            + "AND ev.archived = false")
+    Optional<CompactViewDto> findCompactViewByResourceCrnAndArchivedIsFalse(@Param("resourceCrn") String resourceCrn);
+
     @Query("SELECT ev FROM EnvironmentView ev "
             + "LEFT JOIN FETCH ev.credential "
             + "LEFT JOIN FETCH ev.network "
@@ -98,4 +104,8 @@ public interface EnvironmentViewRepository extends JpaRepository<EnvironmentView
             + "WHERE pe.id = :parentEnvironmentId AND e.accountId = :accountId AND e.archived = false")
     List<String> findNameWithAccountIdAndParentEnvIdAndArchivedIsFalse(@Param("accountId") String accountId,
             @Param("parentEnvironmentId") Long parentEnvironmentId);
+
+    @Query("SELECT e.resourceCrn from Environment e WHERE e.archived = false and e.cloudPlatform = :cloudPlatform")
+    List<String> findAllResourceCrnByArchivedIsFalseAndCloudPlatform(String cloudPlatform);
+
 }

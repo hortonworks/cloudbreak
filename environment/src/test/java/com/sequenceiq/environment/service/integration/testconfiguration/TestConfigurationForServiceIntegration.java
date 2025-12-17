@@ -13,6 +13,8 @@ import com.sequenceiq.environment.environment.service.LoadBalancerPollerConfig;
 import com.sequenceiq.environment.service.integration.DummySecretService;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaV1Endpoint;
+import com.sequenceiq.notification.repository.NotificationDataAccessService;
+import com.sequenceiq.notification.repository.NotificationRepository;
 
 @TestConfiguration
 @EntityScan(basePackages = {"com.sequenceiq.flow.domain",
@@ -39,6 +41,12 @@ public class TestConfigurationForServiceIntegration {
 
     @MockBean
     private VirtualMachineConfiguration virtualMachineConfiguration;
+
+    @MockBean
+    private NotificationRepository notificationRepository;
+
+    @MockBean
+    private NotificationDataAccessService notificationService;
 
     @Bean
     public SecretService secretService() {

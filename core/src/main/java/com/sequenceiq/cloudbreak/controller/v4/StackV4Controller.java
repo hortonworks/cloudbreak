@@ -474,7 +474,7 @@ public class StackV4Controller extends NotificationController implements StackV4
 
     @Override
     @InternalOnly
-    public StackOutboundTypeValidationV4Response validateStackOutboundTypes(Long workspaceId, String envCrn, @InitiatorUserCrn String initiatorUserCrn) {
+    public StackOutboundTypeValidationV4Response validateStackOutboundTypes(Long workspaceId, @ResourceCrn String envCrn) {
         return defaultOutboundUpgradeService.getStacksWithOutboundType(workspaceId, envCrn);
     }
 

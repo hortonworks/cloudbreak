@@ -15,8 +15,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
 import com.sequenceiq.environment.environment.EnvironmentDeletionType;
-import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.EnvironmentView;
+import com.sequenceiq.environment.environment.dto.CompactViewDto;
 import com.sequenceiq.environment.environment.repository.EnvironmentViewRepository;
 
 @Service
@@ -68,6 +68,15 @@ public class EnvironmentViewService {
                 .orElseThrow(notFound("Environment with CRN", crn));
     }
 
+    public String getNameByCrn(String crn) {
+        return getCompactViewByCrn(crn).map(CompactViewDto::getName)
+                .orElseThrow(notFound("Environment with CRN", crn));
+    }
+
+    public Optional<CompactViewDto> getCompactViewByCrn(String crn) {
+        return environmentViewRepository.findCompactViewByResourceCrnAndArchivedIsFalse(crn);
+    }
+
     public EnvironmentView getById(Long id) {
         return environmentViewRepository.findByIdAndArchivedIsFalse(id)
                 .orElseThrow(notFound("Environment with id", id));
@@ -97,21 +106,17 @@ public class EnvironmentViewService {
         }
     }
 
-    public void editStatusAndStatusReason(EnvironmentView environment, EnvironmentStatus status, String statusReason) {
-        LOGGER.debug("Update environment status and status reason to {}, {}", status, statusReason);
-        int count = environmentViewRepository.updateStatusAndStatusReasonById(environment.getId(), status, statusReason);
-        if (count == 1) {
-            environment.setStatusReason(statusReason);
-            environment.setStatus(status);
-            LOGGER.debug("Environment status and status reason updated successfully.");
-        }
-    }
-
     public List<String> findNameWithAccountIdAndParentEnvIdAndArchivedIsFalse(String accountId, Long parentEnvironmentId) {
         return environmentViewRepository.findNameWithAccountIdAndParentEnvIdAndArchivedIsFalse(accountId, parentEnvironmentId);
     }
 
     public Set<EnvironmentView> findAllByProxyConfigIdAndArchivedIsFalse(Long proxyConfigId) {
         return environmentViewRepository.findAllByProxyConfigIdAndArchivedIsFalse(proxyConfigId);
+    }
+
+    public List<String> findAllResourceCrnsByArchivedIsFalseAndCloudPlatform(String cloudPlatform) {
+        List<String> crnList = environmentViewRepository.findAllResourceCrnByArchivedIsFalseAndCloudPlatform(cloudPlatform);
+        LOGGER.debug("Found {} environments, with crn-s {} and platform {}", crnList.size(), crnList, cloudPlatform);
+        return crnList;
     }
 }

@@ -25,6 +25,7 @@ import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.operation.OperationView;
 import com.sequenceiq.freeipa.api.v1.freeipa.crossrealm.TrustV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.flow.FreeIpaV1FlowEndpoint;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaInternalV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.attachchildenv.AttachChildEnvironmentRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.CreateFreeIpaRequest;
@@ -54,6 +55,8 @@ public class FreeIpaService {
 
     private final FreeIpaV1Endpoint freeIpaV1Endpoint;
 
+    private final FreeIpaInternalV1Endpoint freeIpaInternalV1Endpoint;
+
     private final TrustV1Endpoint trustV1Endpoint;
 
     private final TrustV2Endpoint trustV2Endpoint;
@@ -70,6 +73,7 @@ public class FreeIpaService {
 
     public FreeIpaService(
             FreeIpaV1Endpoint freeIpaV1Endpoint,
+            FreeIpaInternalV1Endpoint freeIpaInternalV1Endpoint,
             TrustV1Endpoint trustV1Endpoint,
             TrustV2Endpoint trustV2Endpoint,
             OperationV1Endpoint operationV1Endpoint,
@@ -78,6 +82,7 @@ public class FreeIpaService {
             WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor,
             EventSenderService eventService) {
         this.freeIpaV1Endpoint = freeIpaV1Endpoint;
+        this.freeIpaInternalV1Endpoint = freeIpaInternalV1Endpoint;
         this.operationV1Endpoint = operationV1Endpoint;
         this.userV1Endpoint = userV1Endpoint;
         this.trustV1Endpoint = trustV1Endpoint;
@@ -358,11 +363,11 @@ public class FreeIpaService {
 
     public OutboundType getNetworkOutbound(String crn) {
         OutboundType outboundType = ThreadBasedUserCrnProvider.doAsInternalActor(
-                initiatorUserCrn -> {
-                    OutboundType defaultOutbound = freeIpaV1Endpoint.getOutboundType(crn, initiatorUserCrn);
+                () -> {
+                    OutboundType defaultOutbound = freeIpaInternalV1Endpoint.getOutboundType(crn);
                     LOGGER.info("Default outbound type for environment {} is {}", crn, defaultOutbound);
                     return defaultOutbound;
-                });
+                }, Crn.safeFromString(crn).getAccountId());
         return outboundType != null ? outboundType : OutboundType.NOT_DEFINED;
     }
 }

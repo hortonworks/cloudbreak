@@ -56,6 +56,7 @@ import com.sequenceiq.environment.environment.dto.EnvironmentDtoConverter;
 import com.sequenceiq.environment.environment.dto.EnvironmentHybridDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.environment.repository.EnvironmentRepository;
+import com.sequenceiq.environment.environment.service.datahub.DatahubService;
 import com.sequenceiq.environment.environment.validation.EnvironmentValidatorService;
 import com.sequenceiq.environment.experience.ExperienceCluster;
 import com.sequenceiq.environment.experience.ExperienceConnectorService;
@@ -77,6 +78,8 @@ public class EnvironmentService extends AbstractAccountAwareResourceService<Envi
 
     private final EnvironmentValidatorService validatorService;
 
+    private final EnvironmentViewService environmentViewService;
+
     private final EnvironmentRepository environmentRepository;
 
     private final ResourceService resourceService;
@@ -86,6 +89,8 @@ public class EnvironmentService extends AbstractAccountAwareResourceService<Envi
     private final EnvironmentDtoConverter environmentDtoConverter;
 
     private final GrpcUmsClient grpcUmsClient;
+
+    private final DatahubService datahubClientService;
 
     private final RoleCrnGenerator roleCrnGenerator;
 
@@ -101,8 +106,10 @@ public class EnvironmentService extends AbstractAccountAwareResourceService<Envi
             PlatformParameterService platformParameterService,
             EnvironmentDtoConverter environmentDtoConverter,
             OwnerAssignmentService ownerAssignmentService,
+            DatahubService datahubClientService,
             GrpcUmsClient grpcUmsClient,
             RoleCrnGenerator roleCrnGenerator,
+            EnvironmentViewService environmentViewService,
             ExperienceConnectorService experienceConnectorService) {
         this.validatorService = validatorService;
         this.environmentRepository = environmentRepository;
@@ -111,7 +118,9 @@ public class EnvironmentService extends AbstractAccountAwareResourceService<Envi
         this.environmentDtoConverter = environmentDtoConverter;
         this.grpcUmsClient = grpcUmsClient;
         this.roleCrnGenerator = roleCrnGenerator;
+        this.datahubClientService = datahubClientService;
         this.experienceConnectorService = experienceConnectorService;
+        this.environmentViewService = environmentViewService;
     }
 
     public Environment save(Environment environment) {
@@ -424,15 +433,15 @@ public class EnvironmentService extends AbstractAccountAwareResourceService<Envi
             grpcUmsClient.assignResourceRole(userCrn,
                     environmentCrn,
                     roleCrnGenerator.getBuiltInEnvironmentAdminResourceRoleCrn(Crn.safeFromString(environmentCrn).getAccountId()));
-            LOGGER.debug("EnvironmentAdmin role of {} environemnt is successfully assigned to the {} user", environmentCrn, userCrn);
+            LOGGER.debug("EnvironmentAdmin role of {} environment is successfully assigned to the {} user", environmentCrn, userCrn);
         } catch (StatusRuntimeException ex) {
             if (Code.ALREADY_EXISTS.equals(ex.getStatus().getCode())) {
-                LOGGER.debug("EnvironmentAdmin role of {} environemnt is already assigned to the {} user", environmentCrn, userCrn);
+                LOGGER.debug("EnvironmentAdmin role of {} environment is already assigned to the {} user", environmentCrn, userCrn);
             } else {
-                LOGGER.warn(String.format("EnvironmentAdmin role of %s environment cannot be assigned to the %s user", environmentCrn, userCrn), ex);
+                LOGGER.warn("EnvironmentAdmin role of {} environment cannot be assigned to the {} user", environmentCrn, userCrn, ex);
             }
         } catch (RuntimeException rex) {
-            LOGGER.warn(String.format("EnvironmentAdmin role of %s environment cannot be assigned to the %s user", environmentCrn, userCrn), rex);
+            LOGGER.warn("EnvironmentAdmin role of {} environment cannot be assigned to the {} user", environmentCrn, userCrn, rex);
         }
     }
 
@@ -507,7 +516,7 @@ public class EnvironmentService extends AbstractAccountAwareResourceService<Envi
         try {
             Optional<Environment> environmentOptional = environmentRepository.findByResourceCrnArchivedIsTrue(crn);
             if (environmentOptional.isPresent()) {
-                // detaching all related entity on environment and orphan removal must delete all of them
+                // detaching all related entities on environment and orphan removal must delete all of them
                 Environment environment = environmentOptional.get();
                 environment.setAuthentication(null);
                 environment.setParameters(null);

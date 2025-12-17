@@ -26,7 +26,7 @@ import com.sequenceiq.environment.api.v1.environment.model.response.OutboundType
 import com.sequenceiq.environment.environment.service.freeipa.FreeIpaService;
 
 @ExtendWith(MockitoExtension.class)
-class EnvironmentUpgradeOutboundServiceTest {
+class EnvironmentOutboundServiceTest {
 
     private static final String ENVIRONMENT_CRN = "crn:cdp:environments:us-west-1:tenantId:environment:environmentId";
 
@@ -41,7 +41,7 @@ class EnvironmentUpgradeOutboundServiceTest {
     private StackV4Endpoint stackV4Endpoint;
 
     @InjectMocks
-    private EnvironmentUpgradeOutboundService underTest;
+    private EnvironmentOutboundService underTest;
 
     @Test
     void validateOutboundTypesShouldReturnValidResponseWhenCalled() {
@@ -52,7 +52,7 @@ class EnvironmentUpgradeOutboundServiceTest {
 
         try (MockedStatic<ThreadBasedUserCrnProvider> userCrnProviderMock = Mockito.mockStatic(ThreadBasedUserCrnProvider.class)) {
             userCrnProviderMock.when(ThreadBasedUserCrnProvider::getUserCrn).thenReturn(USER_CRN);
-            userCrnProviderMock.when(() -> ThreadBasedUserCrnProvider.doAsInternalActor(any(Supplier.class)))
+            userCrnProviderMock.when(() -> ThreadBasedUserCrnProvider.doAsInternalActor(any(Supplier.class), any()))
                     .thenAnswer(invocation -> ((Supplier<?>) invocation.getArgument(0)).get());
 
             when(freeIpaService.getNetworkOutbound(ENVIRONMENT_CRN)).thenReturn(OutboundType.PUBLIC_IP);
@@ -77,7 +77,7 @@ class EnvironmentUpgradeOutboundServiceTest {
 
         try (MockedStatic<ThreadBasedUserCrnProvider> userCrnProviderMock = Mockito.mockStatic(ThreadBasedUserCrnProvider.class)) {
             userCrnProviderMock.when(ThreadBasedUserCrnProvider::getUserCrn).thenReturn(USER_CRN);
-            userCrnProviderMock.when(() -> ThreadBasedUserCrnProvider.doAsInternalActor(any(Supplier.class)))
+            userCrnProviderMock.when(() -> ThreadBasedUserCrnProvider.doAsInternalActor(any(Supplier.class), any()))
                     .thenAnswer(invocation -> ((Supplier<?>) invocation.getArgument(0)).get());
 
             when(freeIpaService.getNetworkOutbound(ENVIRONMENT_CRN)).thenReturn(null);
@@ -102,7 +102,7 @@ class EnvironmentUpgradeOutboundServiceTest {
 
         try (MockedStatic<ThreadBasedUserCrnProvider> userCrnProviderMock = Mockito.mockStatic(ThreadBasedUserCrnProvider.class)) {
             userCrnProviderMock.when(ThreadBasedUserCrnProvider::getUserCrn).thenReturn(USER_CRN);
-            userCrnProviderMock.when(() -> ThreadBasedUserCrnProvider.doAsInternalActor(any(Supplier.class)))
+            userCrnProviderMock.when(() -> ThreadBasedUserCrnProvider.doAsInternalActor(any(Supplier.class), any()))
                     .thenAnswer(invocation -> ((Supplier<?>) invocation.getArgument(0)).get());
 
             when(freeIpaService.getNetworkOutbound(ENVIRONMENT_CRN)).thenReturn(OutboundType.DEFAULT);

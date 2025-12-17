@@ -69,7 +69,7 @@ public class FreeIpaApiClientConfig {
     }
 
     @Bean
-    @ConditionalOnBean(name = "freeIpaInternalApiClientWebTarget")
+    @ConditionalOnBean(name = "freeIpaApiClientWebTarget")
     FreeIpaInternalV1Endpoint freeIpaInternalV1Endpoint(WebTarget freeIpaApiClientWebTarget) {
         return new WebTargetEndpointFactory().createEndpoint(freeIpaApiClientWebTarget, FreeIpaInternalV1Endpoint.class);
     }

@@ -610,9 +610,7 @@ public interface StackV4Endpoint {
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     StackOutboundTypeValidationV4Response validateStackOutboundTypes(
             @PathParam("workspaceId") Long workspaceId,
-            @NotEmpty @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @PathParam("envCrn") String envCrn,
-            @NotEmpty @ValidCrn(resource = {CrnResourceDescriptor.USER, CrnResourceDescriptor.MACHINE_USER})
-            @QueryParam("initiatorUserCrn") String initiatorUserCrn
+            @NotEmpty @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @PathParam("envCrn") String envCrn
     );
 
     @PUT

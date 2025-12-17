@@ -11,6 +11,7 @@ import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.telemetry
 import com.sequenceiq.common.api.type.CcmV2TlsType;
 import com.sequenceiq.common.api.type.EnvironmentType;
 import com.sequenceiq.common.api.type.Tunnel;
+import com.sequenceiq.environment.api.v1.environment.model.NotificationParameters;
 import com.sequenceiq.environment.environment.EnvironmentDeletionType;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.EnvironmentTags;
@@ -105,6 +106,8 @@ public class EnvironmentDtoBase implements Payload, AccountAwareResource {
     private String remoteEnvironmentCrn;
 
     private String encryptionProfileCrn;
+
+    private NotificationParameters notificationParameters;
 
     @Override
     public Long getResourceId() {
@@ -468,6 +471,14 @@ public class EnvironmentDtoBase implements Payload, AccountAwareResource {
         this.encryptionProfileCrn = encryptionProfileCrn;
     }
 
+    public NotificationParameters getNotificationParameters() {
+        return notificationParameters;
+    }
+
+    public void setNotificationParameters(NotificationParameters notificationParameters) {
+        this.notificationParameters = notificationParameters;
+    }
+
     public EnvironmentTelemetryDetails getTelemetryDetails() {
         return telemetry == null ? null : EnvironmentTelemetryDetails.builder()
                 .withStorageLocationBase(Optional.of(telemetry.getLogging()).map(EnvironmentLogging::getStorageLocation).orElse(null))
@@ -489,6 +500,7 @@ public class EnvironmentDtoBase implements Payload, AccountAwareResource {
                 ", environmentType=" + environmentType +
                 ", remoteEnvironmentCrn=" + remoteEnvironmentCrn +
                 ", encryptionProfileCrn=" + encryptionProfileCrn +
+                ", notificationParameters=" + notificationParameters +
                 '}';
     }
 

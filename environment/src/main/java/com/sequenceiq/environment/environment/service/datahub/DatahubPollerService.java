@@ -37,7 +37,9 @@ public class DatahubPollerService {
 
     private final WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
 
-    public DatahubPollerService(DatahubService datahubService, DatahubPollerProvider datahubPollerProvider,
+    public DatahubPollerService(
+            DatahubService datahubService,
+            DatahubPollerProvider datahubPollerProvider,
             WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor) {
         this.datahubService = datahubService;
         this.datahubPollerProvider = datahubPollerProvider;
