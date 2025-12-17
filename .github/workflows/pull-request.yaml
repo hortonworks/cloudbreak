@@ -667,8 +667,9 @@ jobs:
             integration-test/environment.log
             integration-test/freeipa.log
             integration-test/thunderhead-mock.log
-            integration-test/cluster-proxy.log
-            integration-test/cluster-proxy-health.log
+            integration-test/jumpgate-interop.log
+            integration-test/jumpgate-admin.log
+            integration-test/jumpgate-proxy.log
             integration-test/dev-gateway.log
             integration-test/core-gateway.log
       - name: schema_compatibility_test_collect_test_artifacts
