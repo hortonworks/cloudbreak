@@ -54,6 +54,10 @@
                  <value>AND</value>
              </param>
              <param>
+                <name>{{ aclsauthz_prefix ~ "apikey.acl" }}</name>
+                <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
+             </param>
+             <param>
                  <name>{{ aclsauthz_prefix ~ "atlas.acl" }}</name>
                  <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
              </param>
@@ -429,6 +433,17 @@
 
     </gateway>
 
+    <service>
+        <role>APIKEY</role>
+        <param>
+            <name>apikey.knox.token.exp.server-managed</name>
+            <value>true</value>
+        </param>
+        <param>
+            <name>apikey.knox.token.user.limit.exceeded.action</name>
+            <value>RETURN_ERROR</value>
+        </param>
+    </service>
     {% if 'CM-API' in salt['pillar.get']('gateway:location') -%}
     {% if 'CM-API' in exposed -%}
     <service>

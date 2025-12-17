@@ -60,6 +60,14 @@
                 <value>AND</value>
             </param>
             <param>
+                <name>{{ aclsauthz_prefix ~ "knox-auth-service.acl" }}</name>
+                <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
+            </param>
+            <param>
+                <name>{{ aclsauthz_prefix ~ "apikey.acl" }}</name>
+                <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
+            </param>
+            <param>
                 <name>{{ aclsauthz_prefix ~ "atlas-api.acl" }}</name>
                 <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
             </param>
@@ -299,6 +307,36 @@
         </provider>
     </gateway>
 
+    <service>
+        <role>KNOX-AUTH-SERVICE</role>
+        <param>
+            <name>preauth.auth.header.actor.id.name</name>
+            <value>x-cdp-actor-username</value>
+        </param>
+        <param>
+            <name>preauth.auth.header.actor.groups.prefix</name>
+            <value>x-cdp-actor-groups</value>
+        </param>
+        <param>
+            <name>preauth.group.filter.pattern</name>
+            <value>[^\s]+</value>
+        </param>
+        <param>
+            <name>ignore.additional.path</name>
+            <value>true</value>
+        </param>
+    </service>
+    <service>
+        <role>APIKEY</role>
+        <param>
+            <name>apikey.knox.token.exp.server-managed</name>
+            <value>true</value>
+        </param>
+        <param>
+            <name>apikey.knox.token.user.limit.exceeded.action</name>
+            <value>RETURN_ERROR</value>
+        </param>
+    </service>
     {% if 'ATLAS_SERVER' in salt['pillar.get']('gateway:location') -%}
     {% if 'ATLAS_API' in exposed -%}
     <service>
