@@ -4,10 +4,14 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.List;
+import java.util.Locale;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,7 +19,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.commands.TrustSetupCommandsResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetaDataResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.TrustResponse;
+import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
@@ -46,6 +52,14 @@ public class HybridTrustTests extends AbstractE2ETest {
     private static final String DELETE_BATCH_COMMAND = "del /f /q %%TEMP%%\\%s";
 
     private static final String BATCH_FILENAME = "trustsetup-%s.bat";
+
+    private static final String AD_TRUST_VALIDATE_COMMAND = "nltest /dsgetdc:%s /force";
+
+    private static final String FREEIPA_TRUST_VALIDATE_COMMAND = "export PW=$(sudo grep -v \"^#\" /srv/pillar/freeipa/init.sls | jq -r '.freeipa.password'); " +
+            "kinit admin <<<$PW > /dev/null 2>&1; " +
+            "kvno ldap/%s@%s";
+
+    private static final String FAILURE_TOKEN = "===FAILURE===";
 
     @Value("${integrationtest.trust.activedirectory.ip}")
     private String activeDirectoryIp;
@@ -103,35 +117,68 @@ public class HybridTrustTests extends AbstractE2ETest {
                 .await(EnvironmentStatus.TRUST_SETUP_FINISH_REQUIRED)
                 .given(FreeIpaTrustCommandsDto.class)
                 .when(freeIpaTestClient.trustCleanupCommands())
-                .then((tc, dto, client) -> cleanUpActiveDirectory(dto, false))
-                .given(FreeIpaTestDto.class)
-                .then((tc, dto, client) -> setupActiveDirectory(dto, tc, client))
+                .then(cleanUpActiveDirectory(false))
+                .given(FreeIpaTrustCommandsDto.class)
+                .when(freeIpaTestClient.trustSetupCommands())
+                .then(setupActiveDirectory())
                 .given(EnvironmentTestDto.class)
                 .when(environmentTestClient.finishTrustSetup())
                 .await(EnvironmentStatus.AVAILABLE)
+                .given(FreeIpaTestDto.class)
+                .then(validateTrustOnFreeIpa())
+                .then(validateTrustOnActiveDirectory())
+                .given(EnvironmentTestDto.class)
                 .when(environmentTestClient.delete())
                 .await(EnvironmentStatus.ARCHIVED)
                 .given(FreeIpaTrustCommandsDto.class)
-                .then((tc, dto, client) -> cleanUpActiveDirectory(dto, true))
+                .when(freeIpaTestClient.trustCleanupCommands())
+                .then(cleanUpActiveDirectory(true))
                 .validate();
     }
 
-    private FreeIpaTestDto setupActiveDirectory(FreeIpaTestDto freeipaTestDto, TestContext testContext, FreeIpaClient freeipaClient) {
-        TrustSetupCommandsResponse response = freeipaClient.getDefaultClient().getTrustV1Endpoint()
-                .getTrustSetupCommands(testContext.get(EnvironmentTestDto.class).getResponse().getCrn());
-        executeCommands(freeipaTestDto.getRequest().getName(), response.getActiveDirectoryCommands().getCommands(), true);
-        return freeipaTestDto;
+    private Assertion<FreeIpaTrustCommandsDto, FreeIpaClient> setupActiveDirectory() {
+        return (testContext, testDto, client) -> {
+            String commands = testDto.getResponse().getActiveDirectoryCommands().getCommands();
+            executeActiveDirectoryCommands(testDto.getFreeIpaName() + "-setup", commands, true);
+            return testDto;
+        };
     }
 
-    private FreeIpaTrustCommandsDto cleanUpActiveDirectory(FreeIpaTrustCommandsDto freeipaTestDto, boolean validateError) {
-        executeCommands(freeipaTestDto.getFreeIpaName() + "-cleanup", freeipaTestDto.getResponse().getActiveDirectoryCommands().getCommands(), validateError);
-        return freeipaTestDto;
+    private Assertion<FreeIpaTrustCommandsDto, FreeIpaClient> cleanUpActiveDirectory(boolean validateError) {
+        return (testContext, testDto, client) -> {
+            String commands = testDto.getResponse().getActiveDirectoryCommands().getCommands();
+            executeActiveDirectoryCommands(testDto.getFreeIpaName() + "-cleanup", commands, validateError);
+            return testDto;
+        };
     }
 
-    private void executeCommands(String name, String commands, boolean validateError) {
+    private Assertion<FreeIpaTestDto, FreeIpaClient> validateTrustOnFreeIpa() {
+        return (testContext, testDto, client) -> {
+            List<String> freeIpaIps = testDto.getAllInstanceIps(testContext);
+            TrustResponse trust = testDto.getResponse().getTrust();
+            String command = String.format(FREEIPA_TRUST_VALIDATE_COMMAND, trust.getFqdn(), trust.getRealm().toUpperCase(Locale.ROOT));
+            executeFreeIpaCommand(freeIpaIps, command, true);
+            return testDto;
+        };
+    }
+
+    private Assertion<FreeIpaTestDto, FreeIpaClient> validateTrustOnActiveDirectory() {
+        return (testContext, testDto, client) ->  {
+            String freeIpaInstanceFqdn = testDto.getResponse().getInstanceGroups().getFirst().getMetaData().stream()
+                    .map(InstanceMetaDataResponse::getDiscoveryFQDN)
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalStateException("Failed to find FreeIPA instance FQDN"));
+            String realm = testDto.getResponse().getFreeIpa().getDomain().toLowerCase(Locale.ROOT);
+            String command = String.format(AD_TRUST_VALIDATE_COMMAND, realm);
+            executeActiveDirectoryCommands(testDto.getName() + "-validate", command, true);
+            return testDto;
+        };
+    }
+
+    private void executeActiveDirectoryCommands(String name, String commands, boolean validateError) {
         try (SSHClient sshClient = sshJClient.createSshClient(activeDirectoryIp, activeDirectoryUser, null, commonCloudProperties.getDefaultPrivateKeyFile())) {
             String batchCommands = Arrays.stream(commands.split("\n"))
-                    .map(command -> "'" + command + "'")
+                    .map(this::wrapCommand)
                     .collect(Collectors.joining(","));
             String batchFileName = String.format(BATCH_FILENAME, name);
             String uploadBatchCommand = "powershell -EncodedCommand " + Base64.getEncoder().encodeToString(
@@ -151,10 +198,31 @@ public class HybridTrustTests extends AbstractE2ETest {
         }
     }
 
+    /**
+     * Return code is not handled correctly for batch script execution on Windows Server, so as a workaround echo a special failure token when a command fails
+     * Set and rem commands are excluded to make sure we are not introducing unnecessary whitespace
+     */
+    private String wrapCommand(String command) {
+        return '\''
+                + (StringUtils.isNotEmpty(command) && !command.startsWith("set") && !command.startsWith("REM")
+                        ? String.format("%s || echo: && echo %s", command, FAILURE_TOKEN)
+                        : command)
+                + '\'';
+    }
+
+    private void executeFreeIpaCommand(List<String> freeIpaIps, String command, boolean validateError) {
+        freeIpaIps.forEach(freeIpaIp -> {
+            Pair<Integer, String> result = sshJClient.executeCommand(freeIpaIp, command);
+            validateCommandResult(command, result, validateError);
+        });
+    }
+
     private void validateCommandResult(String command, Pair<Integer, String> sshResult, boolean validateError) {
-        LOGGER.info("Result of the {} command:\n{}", command, sshResult);
-        if (validateError && sshResult.getLeft() != 0) {
-            throw new TestFailException("The command execution of '" + command + "' failed. Return code is " + sshResult.getLeft());
+        Integer returnCode = sshResult.getLeft();
+        String output = sshResult.getRight();
+        LOGGER.info("Result of the {} command:\nReturn code: {}\nOutput: {}", command, returnCode, output);
+        if (validateError && (returnCode != 0 || Arrays.asList(Objects.requireNonNullElse(output, "").split("\r?\n")).contains(FAILURE_TOKEN))) {
+            throw new TestFailException("The command execution of '" + command + "' failed.");
         }
     }
 }

@@ -38,6 +38,7 @@ import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaStopAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaSynchronizeAllUsersAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaSynchronizeAllUsersInternalAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaTrustCleanupCommandsAction;
+import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaTrustSetupCommandsAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaUpgradeAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaUpscaleAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeipaInstanceMetadataUpdateAction;
@@ -196,6 +197,10 @@ public class FreeIpaTestClient {
 
     public Action<FreeIpaTestDto, FreeIpaClient> updateDisks(int size, String volumeType) {
         return new FreeIpaDiskUpdateAction(size, volumeType);
+    }
+
+    public Action<FreeIpaTrustCommandsDto, FreeIpaClient> trustSetupCommands() {
+        return new FreeIpaTrustSetupCommandsAction();
     }
 
     public Action<FreeIpaTrustCommandsDto, FreeIpaClient> trustCleanupCommands() {

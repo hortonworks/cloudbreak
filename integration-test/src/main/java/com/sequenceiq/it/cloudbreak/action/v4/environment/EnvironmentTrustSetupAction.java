@@ -18,6 +18,7 @@ public class EnvironmentTrustSetupAction implements Action<EnvironmentTrustSetup
     public EnvironmentTrustSetupDto action(TestContext testContext, EnvironmentTrustSetupDto testDto, EnvironmentClient client) throws Exception {
         SetupCrossRealmTrustResponse response = client.getDefaultClient().hybridEndpoint().setupByCrn(
                 testContext.get(EnvironmentTestDto.class).getResourceCrn(), testDto.getRequest());
+        testDto.setResponse(testDto.getRequest());
         testDto.setLastKnownFlowId(response.getFlowIdentifier().getPollableId());
         Log.when(LOGGER, "Environment trust setup  action posted");
         return testDto;
