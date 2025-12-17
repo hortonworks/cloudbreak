@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.altus.model.UserWithResourceRole;
 import com.sequenceiq.cloudbreak.auth.altus.service.RoleCrnGenerator;
@@ -113,7 +114,7 @@ public class DistributionListManagementService {
                     resourceCrn);
             DistributionList distributionList = updateDistributionList(
                     existingDistributionList,
-                    getEmailList(getUserWithResourceRoles(accountId, resourceCrnAsString)),
+                    getEmailList(accountId, getUserWithResourceRoles(accountId, resourceCrnAsString)),
                     channelPreferenceConverter.convert(eventChannelPreferences));
             return Optional.ofNullable(distributionList);
         } else {
@@ -128,7 +129,7 @@ public class DistributionListManagementService {
     private Optional<DistributionList> createDistributionList(String accountId, String resourceCrnAsString, String resourceName,
             List<EventChannelPreference> eventChannelPreferences) {
         // This is a security requirement of Notification Service
-        Set<String> emailList = getEmailList(getUserWithResourceRoles(accountId, resourceCrnAsString));
+        Set<String> emailList = getEmailList(accountId, getUserWithResourceRoles(accountId, resourceCrnAsString));
         createAccountMetadataForResource(
                 resourceCrnAsString,
                 emailList);
@@ -158,12 +159,22 @@ public class DistributionListManagementService {
                 resourceCrnAsString);
     }
 
-    private Set<String> getEmailList(List<UserWithResourceRole> userWithResourceRoles) {
-        Set<String> emailList =
-                userWithResourceRoles.stream()
-                        .map(UserWithResourceRole::userCrn)
-                        .map(e -> e)
-                        .collect(Collectors.toSet());
+    private Set<String> getEmailList(String accountId, List<UserWithResourceRole> userWithResourceRoles) {
+        if (CollectionUtils.isEmpty(userWithResourceRoles)) {
+            LOGGER.debug("No users with resource roles found");
+            return Set.of();
+        }
+
+        List<String> userCrns = userWithResourceRoles.stream()
+                .map(UserWithResourceRole::userCrn)
+                .toList();
+
+        LOGGER.debug("Fetching user details for {} user CRNs", userCrns.size());
+        List<UserManagementProto.User> users = grpcUmsClient.listUsers(accountId, userCrns);
+
+        Set<String> emailList = users.stream()
+                .map(UserManagementProto.User::getEmail)
+                .collect(Collectors.toSet());
         LOGGER.debug("Extracted email list contains {} emails", emailList.size());
         return emailList;
     }

@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.notification.domain.ChannelType;
+import com.sequenceiq.notification.domain.DistributionList;
 import com.sequenceiq.notification.sender.converter.NotificationDtosToCreateDistributionListRequestConverter;
 import com.sequenceiq.notification.sender.dto.CreateDistributionListRequest;
 import com.sequenceiq.notification.sender.dto.NotificationDto;
@@ -39,9 +40,22 @@ public class CentralNotificationSenderService {
         this.distributionListConverter = distributionListConverter;
     }
 
+    // This is required to handle existing resources
+    public List<DistributionList> processDistributionList(NotificationSendingDtos notificationSendingDtos) {
+        List<DistributionList> distributionLists = List.of();
+        Set<CreateDistributionListRequest> requests = distributionListConverter.convert(notificationSendingDtos);
+        if (!requests.isEmpty()) {
+            // Distribution list is returned if it is created or a System managed list gets updated
+            distributionLists = distributionListManagementService.createOrUpdateLists(requests);
+            LOGGER.debug("Created or updated distribution lists for {} resource CRNs", requests.size());
+        } else {
+            LOGGER.debug("No distribution list creation/update needed for provided notifications");
+        }
+        return distributionLists;
+    }
+
     public List<NotificationDto> sendNotificationToDeliverySystem(NotificationSendingDtos notificationSendingDtos) {
         List<NotificationDto> notificationsSent = new ArrayList<>();
-        processDistributionList(notificationSendingDtos);
         notificationSendingDtos.notifications()
                 .forEach(notification -> {
                     try {
@@ -59,17 +73,6 @@ public class CentralNotificationSenderService {
                 });
 
         return notificationsSent;
-    }
-
-    // This is required to handle existing resources
-    private void processDistributionList(NotificationSendingDtos notificationSendingDtos) {
-        Set<CreateDistributionListRequest> requests = distributionListConverter.convert(notificationSendingDtos);
-        if (!requests.isEmpty()) {
-            distributionListManagementService.createOrUpdateLists(requests);
-            LOGGER.debug("Created or updated distribution lists for {} resource CRNs", requests.size());
-        } else {
-            LOGGER.debug("No distribution list creation/update needed for provided notifications");
-        }
     }
 
 }

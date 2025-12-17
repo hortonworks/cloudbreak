@@ -133,7 +133,7 @@ class CentralNotificationSenderServiceTest {
     }
 
     @Test
-    void sendNotificationToDeliverySystemCreatesDistributionListsForDistinctCrns() {
+    void processDistributionListCreatesDistributionListsForDistinctCrns() {
         NotificationDto notification1 = NotificationDto.builder()
                 .message("message1")
                 .resourceCrn("crn1")
@@ -167,7 +167,7 @@ class CentralNotificationSenderServiceTest {
         Set<CreateDistributionListRequest> expectedResourceCrns = Set.of(request1, request2);
         when(converter.convert(dtos)).thenReturn(expectedResourceCrns);
 
-        underTest.sendNotificationToDeliverySystem(dtos);
+        underTest.processDistributionList(dtos);
 
         verify(distributionListManagementService).createOrUpdateLists(expectedResourceCrns);
     }
