@@ -261,6 +261,22 @@ class DistroXAutoScaleClusterV1EndpointTest {
     }
 
     @Test
+    void testDisableAutoscaleForClusterCrn() {
+        Cluster cluster = clusterRepository.findByStackNameAndTenant(TEST_CLUSTER_NAME, TEST_ACCOUNT_ID).get();
+        DistroXAutoscaleClusterResponse xAutoscaleClusterResponse = distroXAutoScaleClusterV1Endpoint
+                .enableAutoscaleForClusterCrn(TEST_CLUSTER_CRN, AutoscaleClusterState.enable());
+        assertTrue(xAutoscaleClusterResponse.isAutoscalingEnabled(), "Autoscaling should be enabled");
+        Assertions.assertEquals(ClusterState.RUNNING, xAutoscaleClusterResponse.getState());
+
+        cluster.setState(ClusterState.SUSPENDED);
+        clusterRepository.save(cluster);
+        xAutoscaleClusterResponse = distroXAutoScaleClusterV1Endpoint
+                .enableAutoscaleForClusterCrn(TEST_CLUSTER_CRN, AutoscaleClusterState.disable());
+        assertFalse(xAutoscaleClusterResponse.isAutoscalingEnabled(), "Autoscaling should be disabled");
+        Assertions.assertEquals(ClusterState.PENDING, xAutoscaleClusterResponse.getState());
+    }
+
+    @Test
     void testEnableAutoscaleForClusterName() {
         DistroXAutoscaleClusterResponse xAutoscaleClusterResponse =
                 distroXAutoScaleClusterV1Endpoint.enableAutoscaleForClusterName(TEST_CLUSTER_NAME, AutoscaleClusterState.enable());

@@ -21,9 +21,11 @@ import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.periscope.api.endpoint.v1.DistroXAutoScaleClusterV1Endpoint;
 import com.sequenceiq.periscope.api.model.AutoscaleClusterState;
+import com.sequenceiq.periscope.api.model.ClusterState;
 import com.sequenceiq.periscope.api.model.DistroXAutoscaleClusterRequest;
 import com.sequenceiq.periscope.api.model.DistroXAutoscaleClusterResponse;
 import com.sequenceiq.periscope.api.model.DistroXAutoscaleClusterServerCertUpdateRequest;
+import com.sequenceiq.periscope.api.model.StateJson;
 import com.sequenceiq.periscope.controller.validation.AlertValidator;
 import com.sequenceiq.periscope.converter.DistroXAutoscaleClusterResponseConverter;
 import com.sequenceiq.periscope.converter.LoadAlertRequestConverter;
@@ -135,6 +137,10 @@ public class DistroXAutoScaleClusterV1Controller implements DistroXAutoScaleClus
     }
 
     private DistroXAutoscaleClusterResponse updateClusterAutoScaleState(Cluster cluster, AutoscaleClusterState autoscaleState) {
+        setPendingState(!autoscaleState.isEnableAutoscaling(), cluster.getId());
+        if (autoscaleState.isEnableAutoscaling()) {
+            alertValidator.validateIfStackIsAvailable(cluster);
+        }
         if (Boolean.TRUE.equals(autoscaleState.getUseStopStartMechanism())) {
             alertValidator.validateStopStartEntitlementAndDisableIfNotEntitled(cluster);
         }
@@ -151,8 +157,11 @@ public class DistroXAutoScaleClusterV1Controller implements DistroXAutoScaleClus
 
     private DistroXAutoscaleClusterResponse updateClusterAutoScaleConfig(Cluster cluster,
             DistroXAutoscaleClusterRequest autoscaleClusterRequest) {
+        setPendingState(!autoscaleClusterRequest.getEnableAutoscaling(), cluster.getId());
 
-        alertValidator.validateIfStackIsAvailable(cluster);
+        if (autoscaleClusterRequest.getEnableAutoscaling()) {
+            alertValidator.validateIfStackIsAvailable(cluster);
+        }
         alertValidator.validateEntitlementAndDisableIfNotEntitled(cluster);
         alertValidator.validateDistroXAutoscaleClusterRequest(cluster, autoscaleClusterRequest);
         alertValidator.validateScheduleWithStopStart(autoscaleClusterRequest);
@@ -184,5 +193,13 @@ public class DistroXAutoScaleClusterV1Controller implements DistroXAutoScaleClus
         }
         asClusterCommonService.processAutoscalingConfigChanged(updatedCluster);
         return createClusterJsonResponse(updatedCluster);
+    }
+
+    private void setPendingState(Boolean disableAutoscaling, Long clusterId) {
+        if (disableAutoscaling) {
+            StateJson stateJson = new StateJson();
+            stateJson.setState(ClusterState.PENDING);
+            asClusterCommonService.setState(clusterId, stateJson);
+        }
     }
 }
