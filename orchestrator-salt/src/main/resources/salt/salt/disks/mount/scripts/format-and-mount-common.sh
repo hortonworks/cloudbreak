@@ -85,11 +85,17 @@ get_disk_uuid() {
 }
 
 get_root_disk() {
-    root_partition=$(lsblk | grep /$ | cut -f1 -d' ' )
-    if [[ $root_partition =~ "nvme" ]]; then
-        echo "/dev/$(lsblk | grep /$ | cut -f1 -d' ' | sed 's/p\w//g' | cut -c 3-)"
+    # 1. Get source (e.g., /dev/sdc3[/root]) and strip the bracketed part
+    local root_part=$(findmnt -n -o SOURCE / | sed 's/\[.*//')
+
+    # 2. Ask lsblk for the parent (e.g., sdc)
+    local parent_disk=$(lsblk -no pkname "$root_part")
+
+    # 3. Fallback logic
+    if [[ -z "$parent_disk" ]]; then
+        echo "$root_part"
     else
-        echo "/dev/$(lsblk | grep /$ | cut -f1 -d' ' | sed 's/[0-9]//g' | cut -c 3-)"
+        echo "/dev/$parent_disk"
     fi
 }
 
