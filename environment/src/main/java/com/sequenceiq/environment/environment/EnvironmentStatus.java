@@ -79,6 +79,9 @@ public enum EnvironmentStatus {
     // Deleting structured events for the environment
     EVENT_CLEANUP_IN_PROGRESS(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.EVENT_CLEANUP_IN_PROGRESS),
 
+    // Deleting distribution list for the environment
+    DISTRIBUTION_LIST_CLEANUP_IN_PROGRESS(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.DISTRIBUTION_LIST_CLEANUP_IN_PROGRESS),
+
     // Deleting all the ID broker mapping for the environment
     IDBROKER_MAPPINGS_DELETE_IN_PROGRESS(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.IDBROKER_MAPPINGS_DELETE_IN_PROGRESS),
     // Deleting all the Dynamo DB table for the environment (If user choosing create new)
@@ -285,6 +288,7 @@ public enum EnvironmentStatus {
             DATALAKE_CLUSTERS_DELETE_IN_PROGRESS,
             PUBLICKEY_DELETE_IN_PROGRESS,
             EVENT_CLEANUP_IN_PROGRESS,
+            DISTRIBUTION_LIST_CLEANUP_IN_PROGRESS,
             EXPERIENCE_DELETE_IN_PROGRESS,
             ENVIRONMENT_RESOURCE_ENCRYPTION_DELETE_IN_PROGRESS,
             ENVIRONMENT_ENCRYPTION_RESOURCES_DELETED

@@ -5,6 +5,7 @@ import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnviro
 import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentStatus.Value.DELETE_STARTED;
 import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentStatus.Value.UNSET;
 import static com.sequenceiq.environment.environment.flow.deletion.EnvDeleteState.CLUSTER_DEFINITION_DELETE_STARTED_STATE;
+import static com.sequenceiq.environment.environment.flow.deletion.EnvDeleteState.DISTRIBUTION_LIST_DELETE_STATE;
 import static com.sequenceiq.environment.environment.flow.deletion.EnvDeleteState.ENVIRONMENT_RESOURCE_ENCRYPTION_DELETE_STARTED_STATE;
 import static com.sequenceiq.environment.environment.flow.deletion.EnvDeleteState.ENV_DELETE_FAILED_STATE;
 import static com.sequenceiq.environment.environment.flow.deletion.EnvDeleteState.ENV_DELETE_FINISHED_STATE;
@@ -23,6 +24,7 @@ import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDele
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.FINISH_ENV_DELETE_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.HANDLED_FAILED_ENV_DELETE_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.START_CLUSTER_DEFINITION_CLEANUP_EVENT;
+import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.START_DISTRIBUTION_LIST_DELETE_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.START_ENVIRONMENT_RESOURCE_ENCRYPTION_DELETE_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.START_EVENT_CLEANUP_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.START_FREEIPA_DELETE_EVENT;
@@ -91,7 +93,10 @@ public class EnvDeleteFlowConfig extends AbstractFlowConfiguration<EnvDeleteStat
             .from(UMS_RESOURCE_DELETE_STARTED_STATE).to(EVENT_CLEANUP_STARTED_STATE)
             .event(START_EVENT_CLEANUP_EVENT).defaultFailureEvent()
 
-            .from(EVENT_CLEANUP_STARTED_STATE).to(ENV_DELETE_FINISHED_STATE)
+            .from(EVENT_CLEANUP_STARTED_STATE).to(DISTRIBUTION_LIST_DELETE_STATE)
+            .event(START_DISTRIBUTION_LIST_DELETE_EVENT).defaultFailureEvent()
+
+            .from(DISTRIBUTION_LIST_DELETE_STATE).to(ENV_DELETE_FINISHED_STATE)
             .event(FINISH_ENV_DELETE_EVENT).defaultFailureEvent()
 
             .from(ENV_DELETE_FINISHED_STATE).to(FINAL_STATE)

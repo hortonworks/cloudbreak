@@ -1,7 +1,7 @@
 package com.sequenceiq.environment.environment.flow.deletion.handler;
 
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.CLEANUP_EVENTS_EVENT;
-import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.FINISH_ENV_DELETE_EVENT;
+import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.START_DISTRIBUTION_LIST_DELETE_EVENT;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,7 +41,7 @@ public class StructuredEventCleanupHandler extends EventSenderAwareHandler<Envir
                 .withResourceCrn(environmentDto.getResourceCrn())
                 .withResourceName(environmentDto.getName())
                 .withForceDelete(environmentDeletionDto.isForceDelete())
-                .withSelector(FINISH_ENV_DELETE_EVENT.selector())
+                .withSelector(START_DISTRIBUTION_LIST_DELETE_EVENT.selector())
                 .build();
         try {
             cleanUpStructuredEvents(environmentDto.getResourceCrn());
