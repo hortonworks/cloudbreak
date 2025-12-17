@@ -456,7 +456,7 @@ public class AzureCloudProvider extends AbstractCloudProvider {
                     .getDefaultClient()
                     .imageCatalogV4Endpoint()
                     .getImagesByName(cloudbreakClient.getWorkspaceId(), imageCatalogTestDto.getRequest().getName(), null,
-                            CloudPlatform.AZURE.name(), runtimeVersion, null, false, false, null)
+                            CloudPlatform.AZURE.name(), runtimeVersion, null, false, true, null)
                     .getCdhImages().stream()
                     .filter(image -> image.getImageSetsByProvider().entrySet()
                             .stream()
