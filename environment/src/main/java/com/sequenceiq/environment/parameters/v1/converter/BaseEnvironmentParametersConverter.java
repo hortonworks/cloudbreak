@@ -35,6 +35,7 @@ public abstract class BaseEnvironmentParametersConverter implements EnvironmentP
         Builder builder = ParametersDto.builder()
                 .withId(source.getId())
                 .withAccountId(source.getAccountId())
+                .withDistributionList(source.getDistributionList())
                 .withName(source.getName());
 
         postConvertToDto(builder, source);

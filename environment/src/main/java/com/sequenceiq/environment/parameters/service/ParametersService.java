@@ -13,10 +13,10 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.parameter.dto.ParametersDto;
-import com.sequenceiq.environment.parameters.dao.domain.AzureParameters;
 import com.sequenceiq.environment.parameters.dao.domain.BaseParameters;
 import com.sequenceiq.environment.parameters.dao.repository.BaseParametersRepository;
 import com.sequenceiq.environment.parameters.v1.converter.EnvironmentParametersConverter;
+import com.sequenceiq.notification.domain.DistributionList;
 
 @Service
 public class ParametersService {
@@ -63,19 +63,22 @@ public class ParametersService {
         return savedParameters;
     }
 
-    public void updateResourceGroupName(Environment environment, String resourceGroupName) {
-        if (!CloudPlatform.AZURE.name().equals(environment.getCloudPlatform())) {
-            return;
-        }
-        Optional<BaseParameters> baseParametersOptional = baseParametersRepository.findByEnvironmentId(environment.getId());
-        if (baseParametersOptional.isEmpty()) {
-            return;
-        }
+    public void updateDistributionListDetails(Long environmentId, DistributionList distributionList) {
+        if (distributionList == null) {
+            LOGGER.warn("Distribution list id null for environment id: {}, nothing to do", environmentId);
+        } else {
+            Optional<BaseParameters> baseParametersOptional = baseParametersRepository.findByEnvironmentId(environmentId);
+            if (baseParametersOptional.isEmpty()) {
+                LOGGER.warn("Environment parameters not found for environment id: {}", environmentId);
+            } else {
+                BaseParameters baseParameters = baseParametersOptional.get();
+                String uuid = distributionList.generateDistributionListUuid();
 
-        BaseParameters baseParameters = baseParametersOptional.get();
-        AzureParameters azureParameters = (AzureParameters) baseParameters;
-        azureParameters.setResourceGroupName(resourceGroupName);
-        baseParametersRepository.save(baseParameters);
+                baseParameters.setDistributionList(uuid);
+                baseParametersRepository.save(baseParameters);
+                LOGGER.debug("Distribution list updated for environment id: {} with uuid {}", environmentId, uuid);
+            }
+        }
     }
 
     private CloudPlatform getCloudPlatform(Environment environment) {
