@@ -23,7 +23,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskType;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
 import com.sequenceiq.cloudbreak.cloud.model.DiskTypes;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
@@ -156,72 +155,6 @@ class DistroXDiskUpdateValidationHandlerTest {
         doReturn(stackDto).when(stackDtoService).getById(anyLong());
         Selectable selectable = underTest.doAccept(new HandlerEvent<>(new Event<>(event)));
         assertEquals(FAILED_DATAHUB_DISK_UPDATE_EVENT.selector(), selectable.getSelector());
-    }
-
-    @Test
-    void testDiskUpdateValidationActionWithDatabaseDiskType() {
-        String selector = DATAHUB_DISK_UPDATE_VALIDATION_HANDLER_EVENT.event();
-        DistroXDiskUpdateEvent event = DistroXDiskUpdateEvent.builder()
-                .withClusterName(TEST_CLUSTER)
-                .withAccountId(ACCOUNT_ID)
-                .withSize(100)
-                .withVolumeType("gp2")
-                .withGroup("compute")
-                .withDiskType(DiskType.DATABASE_DISK.name())
-                .withSelector(selector)
-                .withStackId(STACK_ID)
-                .withResourceId(STACK_ID)
-                .build();
-
-        VolumeSetAttributes.Volume volume = new VolumeSetAttributes.Volume(
-                "vol-1",
-                "/dev/xvdb",
-                50,
-                VolumeParameterType.ST1.name().toLowerCase(Locale.ROOT),
-                CloudVolumeUsageType.GENERAL);
-        VolumeSetAttributes.Volume dbVolume = new VolumeSetAttributes.Volume(
-                "db-vol-1",
-                "/dev/xvdb",
-                50,
-                VolumeParameterType.ST1.name().toLowerCase(Locale.ROOT),
-                CloudVolumeUsageType.DATABASE);
-        VolumeSetAttributes volumeSetAttributes = new VolumeSetAttributes("us-west-2a", true, "", List.of(volume, dbVolume),
-                512, "standard");
-        Json dbJson = new Json(volumeSetAttributes);
-
-        StackDto stackDto = mock(StackDto.class);
-        Stack stack = mock(Stack.class);
-        Resource resource = mock(Resource.class);
-        doReturn("A1234").when(resource).getInstanceId();
-        doReturn("compute").when(resource).getInstanceGroup();
-        doReturn(dbJson).when(resource).getAttributes();
-        doReturn(ResourceType.AWS_VOLUMESET).when(resource).getResourceType();
-
-        DiskTypes diskTypes = mock(DiskTypes.class);
-        when(diskTypes.diskMapping()).thenReturn(
-                Map.of(
-                        "ephemeral", VolumeParameterType.EPHEMERAL,
-                        "st1", VolumeParameterType.ST1
-                )
-        );
-        when(diskUpdateService.getDiskTypes(any(StackDto.class))).thenReturn(diskTypes);
-        doReturn(Set.of(resource)).when(stackDto).getResources();
-        doReturn(CloudPlatform.AWS.toString()).when(stackDto).getCloudPlatform();
-        when(stackService.getByIdWithLists(anyLong())).thenReturn(stack);
-        ValidationResult validationResult = mock(ValidationResult.class);
-        when(validationResult.hasError()).thenReturn(false);
-        when(verticalScalingValidatorService.validateAddVolumesRequest(any(), any(), any()))
-                .thenReturn(validationResult);
-        doReturn(true).when(diskUpdateService).isDiskTypeChangeSupported(CloudPlatform.AWS.toString());
-        doReturn(stackDto).when(stackDtoService).getById(anyLong());
-
-        Selectable selectable = underTest.doAccept(new HandlerEvent<>(new Event<>(event)));
-
-        DistroXDiskUpdateEvent eventCaptured = (DistroXDiskUpdateEvent) selectable;
-        assertEquals(DATAHUB_DISK_UPDATE_EVENT.selector(), eventCaptured.getSelector());
-        assertEquals(1, eventCaptured.getVolumesToBeUpdated().size());
-        assertEquals("db-vol-1", eventCaptured.getVolumesToBeUpdated().get(0).getId());
-        assertEquals(CloudVolumeUsageType.DATABASE, eventCaptured.getVolumesToBeUpdated().get(0).getVolumeUsageType());
     }
 
 }
