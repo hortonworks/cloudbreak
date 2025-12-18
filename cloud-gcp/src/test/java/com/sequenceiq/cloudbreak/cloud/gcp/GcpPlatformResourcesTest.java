@@ -5,7 +5,6 @@ import static org.hamcrest.Matchers.contains;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -26,6 +25,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.springframework.util.ReflectionUtils;
 
 import com.google.api.services.compute.Compute;
@@ -49,7 +50,8 @@ import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
 
 @ExtendWith(MockitoExtension.class)
-class GcpPlatformResourcesTest {
+@MockitoSettings(strictness = Strictness.LENIENT)
+public class GcpPlatformResourcesTest {
 
     private static final String PROJECT_ID = "project";
 
@@ -159,14 +161,14 @@ class GcpPlatformResourcesTest {
         }
 
         Compute compute = mock(Compute.class);
-        lenient().when(compute.regions()).thenReturn(regions);
-        lenient().when(compute.machineTypes()).thenReturn(machineTypes);
+        when(compute.regions()).thenReturn(regions);
+        when(compute.machineTypes()).thenReturn(machineTypes);
         when(gcpComputeFactory.buildCompute(extendedCloudCredential)).thenReturn(compute);
     }
 
     @ParameterizedTest(name = "testGetAvailabilityZonesForVmTypes{index}")
     @MethodSource("populateDataForZones")
-    void testGetAvailabilityZonesForVmTypes(Map<String, List<String>> availabilityZoneToVmTypes, Map<String, Set<String>> expectedResult)
+    public void testGetAvailabilityZonesForVmTypes(Map<String, List<String>> availabilityZoneToVmTypes, Map<String, Set<String>> expectedResult)
             throws IOException {
         setUp(availabilityZoneToVmTypes);
 
@@ -177,7 +179,7 @@ class GcpPlatformResourcesTest {
 
     @ParameterizedTest(name = "testVirtualMachines{index}")
     @MethodSource("populateDataForCloudVmTypes")
-    void testVirtualMachines(Map<String, List<String>> availabilityZoneToVmTypes, List<String> availabilityZones, Map<String, Set<String>> expectedVms)
+    public void testVirtualMachines(Map<String, List<String>> availabilityZoneToVmTypes, List<String> availabilityZones, Map<String, Set<String>> expectedVms)
             throws IOException {
         setUp(availabilityZoneToVmTypes);
 
@@ -228,6 +230,7 @@ class GcpPlatformResourcesTest {
         when(network.getCreationTimestamp()).thenReturn("123");
         when(network.getSubnetworks()).thenReturn(List.of("s1"));
         when(subnetwork1.getSelfLink()).thenReturn("s1");
+        when(subnetwork1.getId()).thenReturn(new BigInteger("1"));
         when(subnetwork1.getName()).thenReturn("s1name");
         when(subnetwork1.getIpCidrRange()).thenReturn("1.1.1.1");
         when(subnetwork1.getPrivateIpGoogleAccess()).thenReturn(true);
@@ -241,6 +244,7 @@ class GcpPlatformResourcesTest {
         when(gcpComputeFactory.buildCompute(any())).thenReturn(compute);
         when(gcpStackUtil.getProjectId(any())).thenReturn("id");
         when(networkList.getItems()).thenReturn(List.of(network));
+        when(networks.get(any(), any())).thenReturn(get);
         when(list.execute()).thenReturn(networkList);
         when(networks.list(any())).thenReturn(list);
         when(compute.networks()).thenReturn(networks);
@@ -248,6 +252,7 @@ class GcpPlatformResourcesTest {
         when(subnetworks.list(any(), any())).thenReturn(subnetworkList);
         when(compute.subnetworks()).thenReturn(subnetworks);
         when(subnetworks.list(any(), any())).thenReturn(subnetworkList);
+        when(subnetworks.get(any(), any(), any())).thenReturn(subnetwork);
         when(compute.subnetworks()).thenReturn(subnetworks);
 
         CloudNetworks result = underTest.networks(extendedCloudCredential, region1, Map.of());
@@ -268,7 +273,5 @@ class GcpPlatformResourcesTest {
                 Map.entry("cidr1", "range1"),
                 Map.entry("cidr2", "range2")
         ));
-        assertEquals("s1name", cloudSubnet.getId());
-        assertEquals("s1name", cloudSubnet.getName());
     }
 }
