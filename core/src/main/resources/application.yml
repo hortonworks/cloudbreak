@@ -903,4 +903,4 @@ vm:
         minRuntimeVersion: 7.1.0
         maxRuntimeVersion: 7.3.1
       - version: 17
-        minRuntimeVersion: 7.3.1.600
+        minRuntimeVersion: 7.3.1.500
