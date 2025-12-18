@@ -19,7 +19,7 @@ include:
 {% if 'None' != configure_remote_db %}
 backup_postgresql_db:
   cmd.run:
-    - name: /opt/salt/scripts/backup_db.sh -s {{object_storage_url}} -h {{remote_db_url}} -p {{remote_db_port}} -u {{remote_admin}} -r {{ranger_admin_group}} -c {{close_connections}} -z {{compression_level}} -l {{local_backup_dir}} {{database_name}}
+    - name: /opt/salt/scripts/backup_db.sh -s {{object_storage_url}} -h {{remote_db_url}} -p {{remote_db_port}} -u {{remote_admin}} -r {{ranger_admin_group}} -c {{close_connections}} -d "{{database_name}}" -z {{compression_level}} -l {{local_backup_dir}}
     - require:
       - sls: postgresql.disaster_recovery
 
@@ -36,7 +36,7 @@ add_root_role_to_database:
 
 backup_postgresql_db:
   cmd.run:
-    - name: /opt/salt/scripts/backup_db.sh -s {{object_storage_url}} -r {{ranger_admin_group}} -c {{close_connections}} -z {{compression_level}} -l {{local_backup_dir}} {{database_name}}
+    - name: /opt/salt/scripts/backup_db.sh -s {{object_storage_url}} -r {{ranger_admin_group}} -c {{close_connections}} -d "{{database_name}}" -z {{compression_level}} -l {{local_backup_dir}}
     - require:
       - cmd: add_root_role_to_database
 {% endif %}

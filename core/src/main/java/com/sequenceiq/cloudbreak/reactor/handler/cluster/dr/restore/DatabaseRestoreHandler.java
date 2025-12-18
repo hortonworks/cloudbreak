@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.reactor.handler.cluster.dr.restore;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -27,6 +28,7 @@ import com.sequenceiq.cloudbreak.reactor.handler.cluster.dr.RangerVirtualGroupSe
 import com.sequenceiq.cloudbreak.sdx.BackupConstants;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.datalake.SdxClientService;
+import com.sequenceiq.cloudbreak.service.salt.PartialSaltStateUpdateService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
@@ -58,6 +60,9 @@ public class DatabaseRestoreHandler extends ExceptionCatcherEventHandler<Databas
     @Inject
     private SdxClientService sdxClientService;
 
+    @Inject
+    private PartialSaltStateUpdateService partialSaltStateUpdateService;
+
     @Override
     public String selector() {
         return EventSelectorUtil.selector(DatabaseRestoreRequest.class);
@@ -75,6 +80,7 @@ public class DatabaseRestoreHandler extends ExceptionCatcherEventHandler<Databas
         Long stackId = request.getResourceId();
         LOGGER.debug("Restoring database on stack {}, backup id {}", stackId, request.getBackupId());
         try {
+            partialSaltStateUpdateService.performSaltUpdate(stackId, List.of("postgresql/disaster_recovery"));
             StackDto stackDto = stackDtoService.getById(stackId);
             String tempBackupDir = BackupConstants.DEFAULT_LOCAL_BACKUP_DIR;
             String tempRestoreDir = BackupConstants.DEFAULT_LOCAL_BACKUP_DIR;

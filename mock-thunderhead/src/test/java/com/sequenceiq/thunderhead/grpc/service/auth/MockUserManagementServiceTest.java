@@ -157,7 +157,10 @@ public class MockUserManagementServiceTest {
                 {"configureEncryptionProfileEnabled true", "configureEncryptionProfileEnabled", true, "CDP_CB_CONFIGURE_ENCRYPTION_PROFILE", true},
 
                 {"verticalScaleHaEnabled false", "verticalScaleHaEnabled", false, "CDP_CB_VERTICAL_SCALE_HA", false},
-                {"verticalScaleHaEnabled true", "verticalScaleHaEnabled", true, "CDP_CB_VERTICAL_SCALE_HA", true}
+                {"verticalScaleHaEnabled true", "verticalScaleHaEnabled", true, "CDP_CB_VERTICAL_SCALE_HA", true},
+
+                {"datalakeKnoxGatewayDbDrEnabled false", "datalakeKnoxGatewayDbDrEnabled", false, "CDP_DATALAKE_KNOX_GATEWAY_DB_DR", false},
+                {"datalakeKnoxGatewayDbDrEnabled true", "datalakeKnoxGatewayDbDrEnabled", true, "CDP_DATALAKE_KNOX_GATEWAY_DB_DR", true},
         };
     }
 

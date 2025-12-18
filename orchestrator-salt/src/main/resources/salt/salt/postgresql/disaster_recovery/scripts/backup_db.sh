@@ -60,8 +60,8 @@ usage() {
   doLog "  -u username : PostgresSQL user name."
   doLog "  -r group : Ranger admin group."
   doLog "  -c bool : Whether or not to close connections for the database while it is being backed up."
-  doLog "  -z compression_level : (optional)  database dump compression level 0-9"
-  doLog "  -d \"db1 db2 db3\" : (optional) Names of the databases to backup. If not given, will backup ranger and hive databases."
+  doLog "  -d \"db1 db2 db3\" : Names of the databases to backup (space-separated, at least one required)."
+  doLog "  -z compression_level : (optional) Database dump compression level 0-9."
   doLog "  -l local_backup_dir : (optional) Local backup base directory. If not given, will use /var/tmp."
 }
 
@@ -72,6 +72,7 @@ USERNAME=""
 RANGERGROUP=""
 CLOSECONNECTIONS=""
 COMPRESSION=""
+DATABASENAMES=""
 LOCAL_BACKUP_BASE_DIR=""
 
 while getopts "s:h:p:u:r:c:z:d:l:" OPTION; do
@@ -97,6 +98,9 @@ while getopts "s:h:p:u:r:c:z:d:l:" OPTION; do
     z  )
         COMPRESSION=$OPTARG
         ;;
+    d  )
+        DATABASENAMES="$OPTARG"
+        ;;
     l  )
         LOCAL_BACKUP_BASE_DIR="$OPTARG"
         ;;
@@ -107,15 +111,13 @@ while getopts "s:h:p:u:r:c:z:d:l:" OPTION; do
     esac
 done
 
-shift $((OPTIND-1))
-DATABASENAMES="$@"
-
 
 [ -z "$BACKUP_LOCATION" ]  || [[ $BACKUP_LOCATION == \-* ]] && doLog "backup location is not specified, use the -s option"
 [ -z "$RANGERGROUP" ] || [[ $RANGERGROUP == \-* ]] && doLog "Ranger admin group is not specified, use the -r option"
 [ -z "$CLOSECONNECTIONS" ] || [[ $CLOSECONNECTIONS == \-* ]] && doLog "Whether to close connections flag is not specified, use the -c option"
+[ -z "$DATABASENAMES" ] || [[ $DATABASENAMES == \-* ]] && doLog "Database names are not specified, use the -d option"
 
-[ -z "$BACKUP_LOCATION" ] || [ -z "$RANGERGROUP" ] || [ -z "$CLOSECONNECTIONS" ] && doLog "At least one mandatory parameter is not set!" && usage && exit 1
+[ -z "$BACKUP_LOCATION" ] || [ -z "$RANGERGROUP" ] || [ -z "$CLOSECONNECTIONS" ] || [ -z "$DATABASENAMES" ] && doLog "ERROR At least one mandatory parameter is not set!" && usage && exit 1
 
 doLog "Backup with compression level $COMPRESSION"
 
@@ -274,19 +276,13 @@ run_backup() {
   mkdir -p "$DATE_DIR" || error_exit "Could not create local directory for backups."
 
   doLog "INFO Conditional variable for closing connections to database during backup is set to ${CLOSECONNECTIONS}"
+  doLog "INFO Backing up databases: ${DATABASENAMES}"
 
-  if [[ -z "$DATABASENAMES" || "$DATABASENAMES" == "DEFAULT" ]]; then
-    doLog "INFO No database name provided. Will backup hive, ranger, profiler_agent and profiler_metric databases."
-    backup_database_for_service "hive"
-    backup_database_for_service "ranger"
-    backup_database_for_service "profiler_agent"
-    backup_database_for_service "profiler_metric"
-  else
-    for db in $DATABASENAMES; do
-      doLog "INFO Backing up ${db}."
-      backup_database_for_service "${db}"
-    done
-  fi
+  for db in $DATABASENAMES; do
+    TRIMMED_DB=$(echo "$db" | tr -d '"')
+    doLog "INFO Backing up ${TRIMMED_DB}."
+    backup_database_for_service "${TRIMMED_DB}"
+  done
 
   rmdir -v "$DATE_DIR" > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2)
 }

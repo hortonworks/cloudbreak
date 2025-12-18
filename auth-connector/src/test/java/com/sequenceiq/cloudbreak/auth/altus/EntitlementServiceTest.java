@@ -212,6 +212,9 @@ class EntitlementServiceTest {
 
                 {"CDP_CB_PREFER_MINIFI_LOGGING", (EntitlementCheckFunction) EntitlementService::isPreferMinifiLogging, false},
                 {"CDP_CB_PREFER_MINIFI_LOGGING", (EntitlementCheckFunction) EntitlementService::isPreferMinifiLogging, true},
+
+                {"CDP_DATALAKE_KNOX_GATEWAY_DB_DR", (EntitlementCheckFunction) EntitlementService::isDatalakeKnoxGatewayDbDrEnabled, false},
+                {"CDP_DATALAKE_KNOX_GATEWAY_DB_DR", (EntitlementCheckFunction) EntitlementService::isDatalakeKnoxGatewayDbDrEnabled, true},
         };
     }
 
