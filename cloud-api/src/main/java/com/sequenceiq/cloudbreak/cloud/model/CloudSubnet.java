@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.model;
 
 import java.io.Serializable;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -43,7 +42,6 @@ public class CloudSubnet extends DynamicModel implements Serializable {
     }
 
     public CloudSubnet(CloudSubnet.Builder builder) {
-        super(builder.parameters);
         this.id = builder.id;
         this.name = builder.name;
         this.availabilityZone = builder.availabilityZone;
@@ -158,7 +156,6 @@ public class CloudSubnet extends DynamicModel implements Serializable {
                 .igwAvailable(igwAvailable)
                 .deploymentRestrictions(deploymentRestrictions)
                 .type(type)
-                .parameters(getParameters())
                 .build();
     }
 
@@ -232,8 +229,6 @@ public class CloudSubnet extends DynamicModel implements Serializable {
 
         private Set<DeploymentRestriction> deploymentRestrictions = Set.of();
 
-        private Map<String, Object> parameters = new HashMap<>();
-
         public Builder() {
         }
 
@@ -289,16 +284,6 @@ public class CloudSubnet extends DynamicModel implements Serializable {
 
         public Builder deploymentRestrictions(Set<DeploymentRestriction> deploymentRestrictions) {
             this.deploymentRestrictions = deploymentRestrictions != null ? deploymentRestrictions : Set.of();
-            return this;
-        }
-
-        public Builder parameters(Map<String, Object> parameters) {
-            this.parameters.putAll(parameters);
-            return this;
-        }
-
-        public Builder parameter(String key, Object value) {
-            this.parameters.put(key, value);
             return this;
         }
 
