@@ -394,8 +394,8 @@ class DiskUpdateServiceTest {
         InstanceMetaData instanceMetaData = mock(InstanceMetaData.class);
         doReturn("test-instance-fqdn").when(instanceMetaData).getDiscoveryFQDN();
         doReturn("test-instance-1").when(instanceMetaData).getInstanceId();
-        List<InstanceMetaData> instanceMetaDataList = List.of(instanceMetaData);
-        doReturn(instanceMetaDataList).when(stack).getInstanceMetaDataAsList();
+        Set<InstanceMetaData> instanceMetaDataList = Set.of(instanceMetaData);
+        doReturn(instanceMetaDataList).when(stack).getNotTerminatedInstanceMetaDataSet();
         Map<String, Map<String, String>> fstabInformation = Map.of("test-instance-fqdn", Map.of("uuids", "test-uuid", "fstab", "test-fstab"));
         doReturn(fstabInformation).when(hostOrchestrator).resizeDisksOnNodes(anyList(), anySet(), anySet(), any());
         VolumeSetAttributes volumeSetAttributes = mock(VolumeSetAttributes.class);
