@@ -59,4 +59,12 @@ public class DocumentationLinkProvider {
         return String.format("https://docs.cloudera.com/cdp-private-cloud-base/" +
                 "%s/security-kerberos-authentication/topics/cm-security-kerberos-authentication-add-trusted-realms.html", runtimeVersion);
     }
+
+    public static String hybridDnsArchitectureLink() {
+        return "https://docs.cloudera.com/hybrid-cloud/latest/creating-hybrid-envs/topics/hc-hybrid-domain-name-resolution-architecture.html";
+    }
+
+    public static String hybridSecurityRequirements() {
+        return "https://docs.cloudera.com/hybrid-cloud/latest/creating-hybrid-envs/topics/hc-security-requirements.html";
+    }
 }

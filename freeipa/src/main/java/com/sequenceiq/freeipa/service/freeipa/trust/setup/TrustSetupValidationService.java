@@ -2,7 +2,9 @@ package com.sequenceiq.freeipa.service.freeipa.trust.setup;
 
 import static com.sequenceiq.cloudbreak.orchestrator.salt.utils.OrchestratorExceptionAnalyzer.COMMENT;
 import static com.sequenceiq.cloudbreak.orchestrator.salt.utils.OrchestratorExceptionAnalyzer.HostSaltCommands;
-import static com.sequenceiq.cloudbreak.orchestrator.salt.utils.OrchestratorExceptionAnalyzer.SaltCommand;
+import static com.sequenceiq.cloudbreak.orchestrator.salt.utils.OrchestratorExceptionAnalyzer.NAME;
+import static com.sequenceiq.cloudbreak.orchestrator.salt.utils.OrchestratorExceptionAnalyzer.STDERR;
+import static com.sequenceiq.cloudbreak.orchestrator.salt.utils.OrchestratorExceptionAnalyzer.STDOUT;
 import static com.sequenceiq.cloudbreak.orchestrator.salt.utils.OrchestratorExceptionAnalyzer.getHostSaltCommands;
 import static com.sequenceiq.freeipa.service.freeipa.trust.TrustSaltStateParamsConstants.DNS_IP;
 import static com.sequenceiq.freeipa.service.freeipa.trust.TrustSaltStateParamsConstants.FREEIPA;
@@ -13,6 +15,7 @@ import static com.sequenceiq.freeipa.service.freeipa.trust.TrustSaltStateParamsC
 import static com.sequenceiq.freeipa.service.freeipa.trust.TrustSaltStateParamsConstants.TRUST_SETUP_PILLAR;
 import static com.sequenceiq.freeipa.util.IpaTrustAdPackageAvailabilityChecker.IPA_SERVER_TRUST_AD_PACKAGE;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -33,6 +36,7 @@ import com.sequenceiq.cloudbreak.common.type.KdcType;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorStateParams;
+import com.sequenceiq.cloudbreak.util.DocumentationLinkProvider;
 import com.sequenceiq.freeipa.entity.CrossRealmTrust;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.crossrealm.CrossRealmTrustService;
@@ -47,11 +51,44 @@ import com.sequenceiq.remoteenvironment.api.v1.environment.model.DescribeRemoteE
 
 @Service
 public class TrustSetupValidationService {
+
+    protected static final String DOCS = "docs";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(TrustSetupValidationService.class);
 
     private static final String AD_DNS_VALIDATION_STATE = "trustsetup/validation/ad_dns_validation";
 
     private static final String AD_REVERSE_DNS_VALIDATION_STATE = "trustsetup/validation/ad_reverse_dns_validation";
+
+    private static final String PACKAGE_VALIDATION_COMMENT = """
+            Trust setup requires certain packages to be present on the image. You can check the package versions of an image in the image catalog. \
+            Please upgrade to an appropriate image before proceeding with Hybrid Environment configuration.
+
+            Required packages: %s""";
+
+    private static final String DNS_VALIDATION_COMMENT = """
+            The fully qualified domain name (FQDN) of the Key Distribution Center (KDC) must be resolvable to the corresponding KDC IP address by the provided \
+            DNS server.
+
+            Ensure that the DNS zone contains a valid A record mapping the KDC FQDN to the correct KDCP IP address. If this record is missing or incorrect, \
+            Kerberos authentication requests will fail.
+
+            This enables resources in either environment to communicate with each other.""";
+
+    private static final String REVERSE_DNS_VALIDATION_COMMENT = """
+            The IP address of the Key Distribution Center (KDC) must be resolvable to the fully qualified domain name (FQDN) of the corresponding KDC by the \
+            provided DNS server.
+
+            Ensure that the DNS zone contains a valid PTR (reverse lookup) record so that the KDC IP address resolves back to the same FQDN.
+
+            This enables resources in either environment to communicate with each other.""";
+
+    private static final String SECURITY_VALIDATION_COMMENT = """
+            The base cluster selected as a Hybrid Environment Data Lake must be secured by Kerberos.
+            Ensure that Kerberos authentication is enabled and fully configured on the on-premises Data Lake before proceeding with Hybrid Environment \
+            configuration.
+
+            This enables secure communication with the services, regardless of whether they reside in a public cloud or on-premises.""";
 
     @Inject
     private CrossRealmTrustService crossRealmTrustService;
@@ -93,19 +130,20 @@ public class TrustSetupValidationService {
         if (KdcType.ACTIVE_DIRECTORY.equals(crossRealmTrust.getKdcType()) && !packageAvailabilityChecker.isPackageAvailable(stackId)) {
             LOGGER.warn("Missing package [{}] required for AD trust setup", IPA_SERVER_TRUST_AD_PACKAGE);
             return new TaskResult(TaskResultType.ERROR, "Package validation failed",
-                    Map.of(COMMENT, "The following packages are missing from the FreeIPA nodes: - " + IPA_SERVER_TRUST_AD_PACKAGE + "\n" +
-                            "Please use the latest FreeIPA image available"));
+                    Map.of(COMMENT, String.format(PACKAGE_VALIDATION_COMMENT, (IPA_SERVER_TRUST_AD_PACKAGE))));
         } else {
             return new TaskResult(TaskResultType.INFO, "Valid image trust packages", Map.of());
         }
     }
 
     private TaskResult validateDns(Stack stack, CrossRealmTrust crossRealmTrust) {
-        return executeSaltState(stack, crossRealmTrust, AD_DNS_VALIDATION_STATE, "DNS validation");
+        return executeSaltState(stack, crossRealmTrust, AD_DNS_VALIDATION_STATE, "DNS validation",
+                DNS_VALIDATION_COMMENT, DocumentationLinkProvider.hybridDnsArchitectureLink());
     }
 
     private TaskResult validateReverseDns(Stack stack, CrossRealmTrust crossRealmTrust) {
-        return executeSaltState(stack, crossRealmTrust, AD_REVERSE_DNS_VALIDATION_STATE, "Reverse DNS validation");
+        return executeSaltState(stack, crossRealmTrust, AD_REVERSE_DNS_VALIDATION_STATE, "Reverse DNS validation",
+                REVERSE_DNS_VALIDATION_COMMENT, DocumentationLinkProvider.hybridDnsArchitectureLink());
     }
 
     private TaskResult validateKerberization(CrossRealmTrust crossRealmTrust) {
@@ -122,7 +160,8 @@ public class TrustSetupValidationService {
                         .orElse(false);
                 return kerberized ? new TaskResult(TaskResultType.INFO, "The on-premises cluster is kerberized", Map.of()) :
                         new TaskResult(TaskResultType.ERROR, "Security validation failed",
-                                Map.of(COMMENT, "The on-premises cluster is not Kerberized.\nCurrently only on-premises Kerberized clusters are supported."));
+                                Map.of(COMMENT, SECURITY_VALIDATION_COMMENT,
+                                        DOCS, DocumentationLinkProvider.hybridSecurityRequirements()));
             } else {
                 return new TaskResult(TaskResultType.ERROR, "Security validation failed",
                         Map.of(COMMENT, "Remote environment CRN is missing.\nPlease contact Cloudera support."));
@@ -134,7 +173,7 @@ public class TrustSetupValidationService {
         }
     }
 
-    private TaskResult executeSaltState(Stack stack, CrossRealmTrust crossRealmTrust, String stateName, String messagePrefix) {
+    private TaskResult executeSaltState(Stack stack, CrossRealmTrust crossRealmTrust, String stateName, String messagePrefix, String comment, String docs) {
         try {
             OrchestratorStateParams stateParams = saltStateParamsService.createStateParams(stack, stateName, true,
                     MAX_RETRY, MAX_RETRY_ON_ERROR);
@@ -150,11 +189,23 @@ public class TrustSetupValidationService {
             return new TaskResult(TaskResultType.ERROR, messagePrefix + " failed", hostSaltCommands.stream()
                     .findFirst()
                     .flatMap(hsc -> hsc.saltCommands().stream().findFirst())
-                    .map(SaltCommand::params)
+                    .map(saltCommand -> getAdditionalParams(saltCommand.params(), comment, docs))
                     .orElse(Map.of(COMMENT, orchestratorException.getMessage())));
         } catch (Exception ex) {
             LOGGER.error("{} failed for KDC: {}", messagePrefix, crossRealmTrust.getKdcFqdn(), ex);
-            return new TaskResult(TaskResultType.ERROR, ex.getMessage(), Map.of());
+            return new TaskResult(TaskResultType.ERROR, messagePrefix + " failed", Map.of(COMMENT, ex.getMessage()));
         }
+    }
+
+    private Map<String, String> getAdditionalParams(Map<String, String> saltCommandParams, String comment, String docs) {
+        Map<String, String> additionalParams = new HashMap<>();
+        additionalParams.put(NAME, saltCommandParams.get(NAME));
+        additionalParams.put(STDOUT, saltCommandParams.get(STDOUT));
+        additionalParams.put(STDERR, saltCommandParams.get(STDERR));
+        additionalParams.put(COMMENT, comment);
+        if (docs != null) {
+            additionalParams.put(DOCS, docs);
+        }
+        return additionalParams;
     }
 }

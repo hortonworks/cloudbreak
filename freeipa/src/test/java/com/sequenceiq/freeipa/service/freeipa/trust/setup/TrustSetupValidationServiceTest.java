@@ -1,6 +1,7 @@
 package com.sequenceiq.freeipa.service.freeipa.trust.setup;
 
 import static com.sequenceiq.cloudbreak.orchestrator.salt.utils.OrchestratorExceptionAnalyzer.COMMENT;
+import static com.sequenceiq.freeipa.service.freeipa.trust.setup.TrustSetupValidationService.DOCS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -36,9 +37,11 @@ import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFa
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorStateParams;
 import com.sequenceiq.cloudbreak.orchestrator.salt.utils.OrchestratorExceptionAnalyzer;
+import com.sequenceiq.cloudbreak.util.DocumentationLinkProvider;
 import com.sequenceiq.freeipa.entity.CrossRealmTrust;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.crossrealm.CrossRealmTrustService;
+import com.sequenceiq.freeipa.service.freeipa.trust.operation.TaskResult;
 import com.sequenceiq.freeipa.service.freeipa.trust.operation.TaskResults;
 import com.sequenceiq.freeipa.service.rotation.SaltStateParamsService;
 import com.sequenceiq.freeipa.service.stack.StackService;
@@ -106,8 +109,8 @@ class TrustSetupValidationServiceTest {
         assertEquals(1L, validationResult.getErrors().size());
         assertEquals("Package validation failed",
                 validationResult.getErrors().get(0).message());
-        assertEquals("The following packages are missing from the FreeIPA nodes: - ipa-server-trust-ad\nPlease use the latest FreeIPA image available",
-                validationResult.getErrors().get(0).additionalParams().get(COMMENT));
+        Map<String, String> additionalParams = validationResult.getErrors().get(0).additionalParams();
+        assertTrue(additionalParams.get(COMMENT).startsWith("Trust setup requires certain packages to be present on the image"));
     }
 
     @Test
@@ -119,7 +122,9 @@ class TrustSetupValidationServiceTest {
         TaskResults result = underTest.validateTrustSetup(4L);
 
         assertEquals(1, result.getErrors().size());
-        assertEquals("DNS validation error", result.getErrors().get(0).message());
+        TaskResult taskResult = result.getErrors().get(0);
+        assertEquals("DNS validation failed", taskResult.message());
+        assertEquals("DNS validation error", taskResult.additionalParams().get(COMMENT));
     }
 
     @Test
@@ -128,15 +133,18 @@ class TrustSetupValidationServiceTest {
         when(packageAvailabilityChecker.isPackageAvailable(4L)).thenReturn(true);
         CloudbreakOrchestratorFailedException orchestratorException = new CloudbreakOrchestratorFailedException("Dns validation error");
         doThrow(orchestratorException).doNothing().when(hostOrchestrator).runOrchestratorState(any());
-        Map<String, String> params = Map.of("key1", "value1", "key2", "value2");
+        Map<String, String> params = Map.of("stdout", "out", "stderr", "err");
         when(OrchestratorExceptionAnalyzer.getHostSaltCommands(orchestratorException)).thenReturn(Set.of(
                 new OrchestratorExceptionAnalyzer.HostSaltCommands("host", List.of(new OrchestratorExceptionAnalyzer.SaltCommand("command", params)))));
 
         TaskResults result = underTest.validateTrustSetup(4L);
 
         assertEquals(1, result.getErrors().size());
-        assertEquals(result.getErrors().get(0).message(), "DNS validation failed");
-        assertEquals(params, result.getErrors().get(0).additionalParams());
+        TaskResult taskResult = result.getErrors().get(0);
+        assertEquals(taskResult.message(), "DNS validation failed");
+        assertTrue(taskResult.additionalParams().entrySet().containsAll(params.entrySet()));
+        assertTrue(taskResult.additionalParams().get(COMMENT).startsWith("The fully qualified domain name"));
+        assertEquals(DocumentationLinkProvider.hybridDnsArchitectureLink(), taskResult.additionalParams().get(DOCS));
     }
 
     @Test
@@ -149,8 +157,8 @@ class TrustSetupValidationServiceTest {
 
         assertEquals(4L, result.getErrors().size());
         assertEquals("Package validation failed", result.getErrors().get(0).message());
-        assertEquals("DNS validation error", result.getErrors().get(1).message());
-        assertEquals("Reverse DNS validation error", result.getErrors().get(2).message());
+        assertEquals("DNS validation failed", result.getErrors().get(1).message());
+        assertEquals("Reverse DNS validation failed", result.getErrors().get(2).message());
         assertEquals("Security validation failed", result.getErrors().get(3).message());
     }
 
@@ -162,9 +170,11 @@ class TrustSetupValidationServiceTest {
         TaskResults result = underTest.validateTrustSetup(4L);
 
         assertEquals(1L, result.getErrors().size());
-        assertEquals("Security validation failed", result.getErrors().get(0).message());
-        assertEquals("The on-premises cluster is not Kerberized.\nCurrently only on-premises Kerberized clusters are supported.",
-                result.getErrors().get(0).additionalParams().get(COMMENT));
+        TaskResult taskResult = result.getErrors().get(0);
+        assertEquals("Security validation failed", taskResult.message());
+        assertTrue(taskResult.additionalParams().get(COMMENT)
+                .startsWith("The base cluster selected as a Hybrid Environment Data Lake must be secured by Kerberos"));
+        assertEquals(DocumentationLinkProvider.hybridSecurityRequirements(), taskResult.additionalParams().get(DOCS));
     }
 
     @Test
