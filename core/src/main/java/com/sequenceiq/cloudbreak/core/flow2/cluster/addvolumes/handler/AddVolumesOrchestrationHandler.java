@@ -93,7 +93,7 @@ public class AddVolumesOrchestrationHandler extends ExceptionCatcherEventHandler
     private void parseFstabAndPersistDiskInformation(Map<String, Map<String, String>> fstabInformation, Stack stack) {
         LOGGER.debug("Parsing fstab information from host orchestrator mounting additional volumes - {}", fstabInformation);
         fstabInformation.forEach((hostname, value) -> {
-            Optional<String> instanceIdOptional = stack.getInstanceMetaDataAsList().stream()
+            Optional<String> instanceIdOptional = stack.getNotTerminatedInstanceMetaDataSet().stream()
                     .filter(instanceMetaData -> hostname.equals(instanceMetaData.getDiscoveryFQDN()))
                     .map(InstanceMetaData::getInstanceId)
                     .findFirst();
