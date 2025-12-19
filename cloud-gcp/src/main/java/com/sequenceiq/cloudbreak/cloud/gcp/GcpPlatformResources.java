@@ -235,7 +235,7 @@ public class GcpPlatformResources implements PlatformResources {
                             boolean igwAvailable = !Strings.isNullOrEmpty(subnetwork.getGatewayAddress());
                             subnets.add(
                                     new CloudSubnet.Builder()
-                                            .id(subnetwork.getName())
+                                            .id(subnetwork.getId().toString())
                                             .name(subnetwork.getName())
                                             .availabilityZone(zone)
                                             .cidr(subnetwork.getIpCidrRange())
