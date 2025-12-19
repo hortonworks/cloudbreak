@@ -342,7 +342,7 @@ public class UpgradeDistroxFlowEventChainFactory implements FlowEventChainFactor
         Map<String, List<String>> repairableFqdns = repairableNodes.entrySet().stream()
                 .collect(toMap(entry -> entry.getKey().value(),
                         entry -> entry.getValue().stream()
-                                .filter(instanceMetadata -> stackImageId == null || !stackImageId.equals(getImageIdFromInstance(instanceMetadata)))
+                                .filter(instanceMetadata -> stackImageId == null || !stackImageId.equals(getInstanceId(instanceMetadata)))
                                 .map(InstanceMetaData::getDiscoveryFQDN)
                                 .filter(Objects::nonNull)
                                 .collect(toList())));
@@ -351,7 +351,7 @@ public class UpgradeDistroxFlowEventChainFactory implements FlowEventChainFactor
                 .collect(toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
-    private String getImageIdFromInstance(InstanceMetadataView instanceMetadata) {
+    private String getInstanceId(InstanceMetadataView instanceMetadata) {
         try {
             if (instanceMetadata != null && instanceMetadata.getImage() != null) {
                 return instanceMetadata.getImage().get(com.sequenceiq.cloudbreak.cloud.model.Image.class).getImageId();
