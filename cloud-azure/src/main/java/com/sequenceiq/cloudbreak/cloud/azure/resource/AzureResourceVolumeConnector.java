@@ -106,7 +106,7 @@ public class AzureResourceVolumeConnector implements ResourceVolumeConnector {
                 if (volumeSetAttributes.getDiscoveryFQDN() == null) {
                     volumeSetAttributes.setDiscoveryFQDN(fqdn);
                 }
-                int offset = volumes.size() + group.getReferenceInstanceTemplate().getTemporaryStorageCount().intValue();
+                int offset = volumes.size();
                 Collection<String> availableVolumes = fqdnToAvailableVolumes.getOrDefault(fqdn, new ArrayList<>());
                 LOGGER.info("Available volumes for {} are {}", fqdn, availableVolumes);
                 int remainingVolumesToAdd = Math.max(0, volToAddPerInstance - availableVolumes.size());
@@ -114,8 +114,7 @@ public class AzureResourceVolumeConnector implements ResourceVolumeConnector {
                 addNewVolumes(remainingVolumesToAdd, authenticatedContext, volumeRequest, cloudInstance, group, volumes, cloudStack);
                 resource.setStatus(CommonStatus.REQUESTED);
                 try {
-                    azureVolumeResourceBuilder.build(cloudInstance, authenticatedContext, group, List.of(resource), cloudStack, offset,
-                            Map.of(TAG_NAME, fqdn));
+                    azureVolumeResourceBuilder.build(authenticatedContext, group, List.of(resource), cloudStack, offset, Map.of(TAG_NAME, fqdn));
                 } catch (Exception e) {
                     throw new CloudbreakServiceException(e.getMessage());
                 }

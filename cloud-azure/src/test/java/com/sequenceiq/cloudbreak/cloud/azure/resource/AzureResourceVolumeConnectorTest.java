@@ -210,8 +210,8 @@ class AzureResourceVolumeConnectorTest {
             if (cloudResourceExist) {
                 assertEquals(existingDiskInfo.get(count)[0] + availableDisksToAdd + newDisksToAdd, getVolumes(resources.get(count)).size());
                 if (newDisksToAdd > 0) {
-                    verify(azureVolumeResourceBuilder).build(group.getInstances().get(count), authenticatedContext, group, List.of(resources.get(count)),
-                            cloudStack, existingDiskInfo.get(count)[0] + 1, Map.of(TAG_NAME, String.format("fqdn%s", count)));
+                    verify(azureVolumeResourceBuilder).build(authenticatedContext, group, List.of(resources.get(count)),
+                            cloudStack, existingDiskInfo.get(count)[0], Map.of(TAG_NAME, String.format("fqdn%s", count)));
                 }
             }
         }

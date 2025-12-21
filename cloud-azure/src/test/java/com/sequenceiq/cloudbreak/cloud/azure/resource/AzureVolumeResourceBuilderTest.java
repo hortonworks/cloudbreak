@@ -99,7 +99,7 @@ public class AzureVolumeResourceBuilderTest {
 
     private static final String DEVICE = "device";
 
-    private static final String DEVICE_DEV_SDC = "/dev/sdc";
+    private static final String DEVICE_DEV_SDC = "/dev/disk/azure/scsi1/lun0";
 
     private static final String DISK_ENCRYPTION_SET_ID = "diskEncryptionSetId";
 
@@ -450,7 +450,7 @@ public class AzureVolumeResourceBuilderTest {
                 Map.of(), null, null))).thenReturn(disk);
         when(cloudStack.getTags()).thenReturn(Map.of("existingTag", "existingTagValue"));
 
-        List<CloudResource> result = underTest.build(cloudInstance, auth, group, List.of(volumeSetResource), cloudStack, 5, Map.of("newTag", "newTagValue"));
+        List<CloudResource> result = underTest.build(auth, group, List.of(volumeSetResource), cloudStack, 5, Map.of("newTag", "newTagValue"));
 
         assertThat(result).isNotNull();
         assertThat(result).hasSize(1);
@@ -463,7 +463,7 @@ public class AzureVolumeResourceBuilderTest {
         assertTrue("newTagValue".equals(azureDisk.getTags().get("newTag")));
 
 
-        verifyVolumeSetResource(result.get(0), DISK_ID_ON_AZURE, "/dev/sdg");
+        verifyVolumeSetResource(result.get(0), DISK_ID_ON_AZURE, "/dev/disk/azure/scsi1/lun5");
     }
 
     @Test
@@ -750,7 +750,7 @@ public class AzureVolumeResourceBuilderTest {
                             new VolumeSetAttributes(AVAILABILITY_ZONE, true, FSTAB, volumes, 100, "StandardSSD_LRS")))
                     .build();
 
-            List<CloudResource> result = underTest.build(cloudInstance, auth, group, List.of(volumeSetResource), cloudStack, null, null);
+            List<CloudResource> result = underTest.build(auth, group, List.of(volumeSetResource), cloudStack, null, null);
 
             assertThat(result).hasSize(1);
             VolumeSetAttributes resultAttributes = result.getFirst().getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
@@ -817,7 +817,7 @@ public class AzureVolumeResourceBuilderTest {
                 .thenReturn(disk2)
                 .thenReturn(disk3);
 
-        List<CloudResource> result = underTest.build(cloudInstance, auth, group, List.of(volumeSetResource), cloudStack, null, null);
+        List<CloudResource> result = underTest.build(auth, group, List.of(volumeSetResource), cloudStack, null, null);
 
         assertThat(result).hasSize(1);
         VolumeSetAttributes resultAttributes = result.getFirst().getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);

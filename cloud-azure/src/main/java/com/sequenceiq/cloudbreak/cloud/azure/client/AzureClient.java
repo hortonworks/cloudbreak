@@ -124,6 +124,7 @@ import com.sequenceiq.cloudbreak.cloud.azure.AzureLoadBalancerFrontend;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureManagedPrivateDnsZoneServiceType;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureVmCapabilities;
 import com.sequenceiq.cloudbreak.cloud.azure.image.marketplace.AzureMarketplaceImage;
+import com.sequenceiq.cloudbreak.cloud.azure.resource.domain.AzureDiskWithLun;
 import com.sequenceiq.cloudbreak.cloud.azure.status.AzureStatusMapper;
 import com.sequenceiq.cloudbreak.cloud.azure.util.AzureExceptionHandler;
 import com.sequenceiq.cloudbreak.cloud.azure.util.RegionUtil;
@@ -318,17 +319,17 @@ public class AzureClient {
     }
 
     @Retryable(retryFor = RetryException.class)
-    public void attachDisksToVm(List<Disk> disks, VirtualMachine vm) {
+    public void attachDisksToVmWithLun(List<AzureDiskWithLun> disks, VirtualMachine vm) {
         // This is needed because of bug https://github.com/Azure/azure-libraries-for-java/issues/632
         // It affects the VM-s launched from Azure Marketplace images
         vm.innerModel().withPlan(null);
         VirtualMachine.Update update = vm.update();
-        CachingTypes cachingTypes = getCachingType(disks);
+        CachingTypes cachingTypes = getCachingType(disks.getFirst().disk());
         update.withDataDiskDefaultCachingType(cachingTypes);
 
-        for (Disk disk : disks) {
-            LOGGER.debug("attach managed disk {} to VM {}", disk.id(), vm.id());
-            update.withExistingDataDisk(disk);
+        for (AzureDiskWithLun disk : disks) {
+            LOGGER.debug("attach managed disk {} to VM {}", disk.disk().id(), vm.id());
+            update.withExistingDataDisk(disk.disk(), disk.lun(), cachingTypes);
         }
         try {
             update.apply();
@@ -343,15 +344,14 @@ public class AzureClient {
         }
     }
 
-    private CachingTypes getCachingType(List<Disk> disks) {
-        Disk firstDisk = disks.get(0);
+    private CachingTypes getCachingType(Disk disk) {
         CachingTypes cachingTypes = CachingTypes.READ_WRITE;
-        if (firstDisk.sizeInGB() > MAX_AZURE_MANAGED_DISK_SIZE_WITH_CACHE) {
+        if (disk.sizeInGB() > MAX_AZURE_MANAGED_DISK_SIZE_WITH_CACHE) {
             cachingTypes = CachingTypes.NONE;
-        } else if (ULTRA_SSD_LRS.equals(firstDisk.sku())
-                || PREMIUM_LRS.equals(firstDisk.sku())
-                || STANDARD_LRS.equals(firstDisk.sku())
-                || STANDARD_SSD_LRS.equals(firstDisk.sku())) {
+        } else if (ULTRA_SSD_LRS.equals(disk.sku())
+                || PREMIUM_LRS.equals(disk.sku())
+                || STANDARD_LRS.equals(disk.sku())
+                || STANDARD_SSD_LRS.equals(disk.sku())) {
             cachingTypes = CachingTypes.READ_ONLY;
         }
         return cachingTypes;

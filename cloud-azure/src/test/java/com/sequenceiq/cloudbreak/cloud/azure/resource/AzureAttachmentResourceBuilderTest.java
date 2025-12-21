@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -35,12 +36,14 @@ import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureResourceGroupMetadataProvider;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.context.AzureContext;
+import com.sequenceiq.cloudbreak.cloud.azure.resource.domain.AzureDiskWithLun;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
+import com.sequenceiq.cloudbreak.constant.AzureConstants;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
 
@@ -188,33 +191,43 @@ public class AzureAttachmentResourceBuilderTest {
     }
 
     private static Object [] [] getDataAttachDisks() {
+        Pair<String, Integer> disk1 = createDiskNameLunPair("disk", 1);
+        Pair<String, Integer> disk2 = createDiskNameLunPair("disk", 2);
+        Pair<String, Integer> disk3 = createDiskNameLunPair("disk", 3);
+        Pair<String, Integer> disk4 = createDiskNameLunPair("disk", 4);
         return new Object [] [] {
-                { "FewDisksTobeAttachedOneDisk", List.of("disk1", "disk2"), List.of("disk1"), List.of("disk2") },
-                { "FewDisksTobeAttachedMultipleDisk", List.of("disk1", "disk2", "disk3"), List.of("disk1"), List.of("disk3", "disk2") },
-                { "NoDisksTobeAttached", List.of("disk1", "disk2"), List.of("disk1", "disk2"), List.of() },
-                { "AllDisksTobeAttachedOneDisk", List.of("disk1"), List.of(""), List.of("disk1") },
-                { "AllDisksTobeAttachedMultipleDisk", List.of("disk1", "disk2", "disk3"), List.of("disk4"), List.of("disk1", "disk2", "disk3") }
+                { "FewDisksTobeAttachedOneDisk", List.of(disk1, disk2), List.of(disk1), List.of(disk2) },
+                { "FewDisksTobeAttachedMultipleDisk", List.of(disk1, disk2, disk3), List.of(disk1), List.of(disk3, disk2) },
+                { "NoDisksTobeAttached", List.of(disk1, disk2), List.of(disk1, disk2), List.of() },
+                { "AllDisksTobeAttachedOneDisk", List.of(disk1), List.of(Pair.of("", -1)), List.of(disk1) },
+                { "AllDisksTobeAttachedMultipleDisk", List.of(disk1, disk2, disk3), List.of(disk4), List.of(disk1, disk2, disk3) }
         };
+    }
+
+    private static Pair<String, Integer> createDiskNameLunPair(String namePrefix, int index) {
+        return Pair.of(namePrefix + index, index);
     }
 
     @ParameterizedTest(name = "testAttachDisk{0}")
     @MethodSource("getDataAttachDisks")
-    public void testAttachDisk(String testName, List<String> disksToAttached, List<String> disksIdsAlreadyAttached, List<String> expectedDiskIdsToBeAttached) {
+    public void testAttachDisk(String testName, List<Pair<String, Integer>> disksToAttached, List<Pair<String, Integer>> disksIdsAlreadyAttached,
+            List<Pair<String, Integer>> expectedDiskIdsToBeAttached) {
         AzureClient azureClient = mock(AzureClient.class);
         AuthenticatedContext auth = mock(AuthenticatedContext.class);
         VirtualMachine virtualMachine = mock(VirtualMachine.class);
         CloudContext cloudContext = mock(CloudContext.class);
         CloudStack cloudStack = mock(CloudStack.class);
         List<VolumeSetAttributes.Volume> volumes = new ArrayList<>();
-        List<Disk> expectedDiskToBeAttached = new ArrayList<>();
-        for (String volumeId : disksToAttached) {
-            VolumeSetAttributes.Volume volume = new VolumeSetAttributes.Volume(volumeId, null, null, null, null);
+        List<AzureDiskWithLun> expectedDiskToBeAttached = new ArrayList<>();
+        for (Pair<String, Integer> volumeId : disksToAttached) {
+            VolumeSetAttributes.Volume volume = new VolumeSetAttributes.Volume(volumeId.getLeft(), AzureConstants.LUN_DEVICE_PATH_PREFIX + volumeId.getRight(),
+                    null, null, null);
             volumes.add(volume);
             Disk disk = mock(Disk.class);
-            when(disk.id()).thenReturn(volumeId);
-            when(azureClient.getDiskById(volumeId)).thenReturn(disk);
+            when(disk.id()).thenReturn(volumeId.getLeft());
+            when(azureClient.getDiskById(volumeId.getLeft())).thenReturn(disk);
             if (expectedDiskIdsToBeAttached.contains(volumeId)) {
-                expectedDiskToBeAttached.add(disk);
+                expectedDiskToBeAttached.add(new AzureDiskWithLun(disk, volumeId.getRight()));
             }
         }
         VolumeSetAttributes volumeSetAttributes = new VolumeSetAttributes(null, null, null,
@@ -226,7 +239,7 @@ public class AzureAttachmentResourceBuilderTest {
         Map<Integer, VirtualMachineDataDisk> vmDisks = new HashMap<>();
         for (int index = 0; index < disksIdsAlreadyAttached.size(); index++) {
             VirtualMachineDataDisk virtualMachineDataDisk = mock(VirtualMachineDataDisk.class);
-            when(virtualMachineDataDisk.id()).thenReturn(disksIdsAlreadyAttached.get(index));
+            when(virtualMachineDataDisk.id()).thenReturn(disksIdsAlreadyAttached.get(index).getLeft());
             vmDisks.put(index, virtualMachineDataDisk);
         }
 
@@ -235,14 +248,13 @@ public class AzureAttachmentResourceBuilderTest {
         when(auth.getParameter(eq(AzureClient.class))).thenReturn(azureClient);
         when(azureClient.getVirtualMachineByResourceGroup(any(), any())).thenReturn(virtualMachine);
 
-
         when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, cloudStack)).thenReturn("resourceGroup");
         underTest.attachDisks(cloudInstance, auth, cloudResource, cloudStack);
         if (CollectionUtils.isEmpty(expectedDiskToBeAttached)) {
-            verify(azureClient, never()).attachDisksToVm(any(), any());
+            verify(azureClient, never()).attachDisksToVmWithLun(any(), any());
         } else {
-            ArgumentCaptor<List<Disk>> captor = ArgumentCaptor.forClass(List.class);
-            verify(azureClient).attachDisksToVm(captor.capture(), eq(virtualMachine));
+            ArgumentCaptor<List<AzureDiskWithLun>> captor = ArgumentCaptor.forClass(List.class);
+            verify(azureClient).attachDisksToVmWithLun(captor.capture(), eq(virtualMachine));
             assertEquals(true, CollectionUtils.isEqualCollection(expectedDiskToBeAttached, captor.getValue()));
         }
     }

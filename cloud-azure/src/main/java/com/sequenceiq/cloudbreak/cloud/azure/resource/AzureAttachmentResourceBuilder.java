@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.azure.resource;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
@@ -18,6 +19,7 @@ import com.azure.resourcemanager.compute.models.VirtualMachineDataDisk;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureResourceGroupMetadataProvider;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
 import com.sequenceiq.cloudbreak.cloud.azure.context.AzureContext;
+import com.sequenceiq.cloudbreak.cloud.azure.resource.domain.AzureDiskWithLun;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
@@ -27,12 +29,12 @@ import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cloud.template.compute.PreserveResourceException;
+import com.sequenceiq.cloudbreak.constant.AzureConstants;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
 
 @Component
 public class AzureAttachmentResourceBuilder extends AbstractAzureComputeBuilder {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureAttachmentResourceBuilder.class);
 
     @Inject
@@ -79,7 +81,7 @@ public class AzureAttachmentResourceBuilder extends AbstractAzureComputeBuilder 
 
     private void attachVolumesIfNeeded(AzureClient client, VirtualMachine vm, Set<String> diskIds, List<VolumeSetAttributes.Volume> volumes,
             String volumeFqdn, Object instanceFqdn) {
-        List<Disk> disks = new ArrayList<>();
+        List<AzureDiskWithLun> disks = new ArrayList<>();
         for (VolumeSetAttributes.Volume volume : volumes) {
             Disk disk = client.getDiskById(volume.getId());
             if (!diskIds.contains(disk.id())) {
@@ -87,7 +89,9 @@ public class AzureAttachmentResourceBuilder extends AbstractAzureComputeBuilder 
                 if (disk.isAttachedToVirtualMachine()) {
                     detachDiskFromVmByVmId(client, disk);
                 }
-                disks.add(disk);
+                Matcher matcher = AzureConstants.LUN_DEVICE_REGEX_PATTERN.matcher(StringUtils.isNotBlank(volume.getDevice()) ? volume.getDevice() : "");
+                int lunIndex = matcher.matches() ? Integer.parseInt(matcher.group(1)) : -1;
+                disks.add(new AzureDiskWithLun(disk, lunIndex));
             } else {
                 LOGGER.info("Managed disk {} is already attached to VM {}", disk, vm);
             }
@@ -111,9 +115,9 @@ public class AzureAttachmentResourceBuilder extends AbstractAzureComputeBuilder 
         client.detachDiskFromVm(disk.id(), client.getVirtualMachine(disk.virtualMachineId()));
     }
 
-    private void attachDisksToVm(AzureClient client, List<Disk> disks, VirtualMachine vm) {
+    private void attachDisksToVm(AzureClient client, List<AzureDiskWithLun> disks, VirtualMachine vm) {
         LOGGER.info("Going to attach disks ({}) to virtual machine ([name: {}])", disks, vm.name());
-        client.attachDisksToVm(disks, vm);
+        client.attachDisksToVmWithLun(disks, vm);
     }
 
     @Override

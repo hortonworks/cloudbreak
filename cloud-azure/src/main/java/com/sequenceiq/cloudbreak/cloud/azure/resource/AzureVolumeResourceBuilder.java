@@ -54,20 +54,17 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes.Volume;
-import com.sequenceiq.cloudbreak.cloud.model.instance.AzureInstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.service.ResourceRetriever;
 import com.sequenceiq.cloudbreak.cloud.template.compute.PreserveResourceException;
-import com.sequenceiq.cloudbreak.util.DeviceNameGenerator;
+import com.sequenceiq.cloudbreak.constant.AzureConstants;
+import com.sequenceiq.cloudbreak.util.IndexingDeviceNameGenerator;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
 
 @Component
 public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureVolumeResourceBuilder.class);
-
-    private static final String DEVICE_NAME_TEMPLATE = "/dev/sd%s";
 
     @Inject
     @Qualifier("intermediateBuilderExecutor")
@@ -189,15 +186,15 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
     @Override
     public List<CloudResource> build(AzureContext context, CloudInstance instance, long privateId, AuthenticatedContext auth, Group group,
             List<CloudResource> buildableResource, CloudStack cloudStack) throws Exception {
-        return build(instance, auth, group, buildableResource, cloudStack, null, null);
+        return build(auth, group, buildableResource, cloudStack, null, null);
     }
 
-    public List<CloudResource> build(CloudInstance instance, AuthenticatedContext auth, Group group,
+    public List<CloudResource> build(AuthenticatedContext auth, Group group,
             List<CloudResource> buildableResource, CloudStack cloudStack, Integer offSet, Map<String, String> additionalTags) throws Exception {
         LOGGER.info("Create volumes on provider");
 
         List<CloudResource> requestedResources = filterRequestedResources(buildableResource);
-        Map<String, List<Volume>> volumeSetMap = createVolumesAsync(requestedResources, auth, group, cloudStack, instance, offSet, additionalTags);
+        Map<String, List<Volume>> volumeSetMap = createVolumesAsync(requestedResources, auth, group, cloudStack, offSet, additionalTags);
 
         return updateResourcesWithCreatedVolumes(buildableResource, volumeSetMap);
     }
@@ -209,13 +206,13 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
     }
 
     private Map<String, List<Volume>> createVolumesAsync(List<CloudResource> requestedResources, AuthenticatedContext auth,
-            Group group, CloudStack cloudStack, CloudInstance instance, Integer offSet, Map<String, String> additionalTags) throws Exception {
+            Group group, CloudStack cloudStack, Integer offSet, Map<String, String> additionalTags) throws Exception {
         AzureClient client = getAzureClient(auth);
         CloudContext cloudContext = auth.getCloudContext();
         String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, cloudStack);
         String region = cloudContext.getLocation().getRegion().getRegionName();
         String diskEncryptionSetId = getDiskEncryptionSetId(group);
-        int deviceOffset = offSet != null ? offSet : getDeviceOffset(instance);
+        int deviceOffset = offSet != null ? offSet : 0;
         Map<String, String> mergedTags = getTags(cloudStack.getTags(), additionalTags);
 
         Map<String, List<Volume>> volumeSetMap = Collections.synchronizedMap(new HashMap<>());
@@ -242,7 +239,7 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
     }
 
     private List<String> generateDeviceNames(List<Volume> volumes, int deviceOffset) {
-        DeviceNameGenerator generator = new DeviceNameGenerator(DEVICE_NAME_TEMPLATE, deviceOffset);
+        IndexingDeviceNameGenerator generator = new IndexingDeviceNameGenerator(AzureConstants.LUN_DEVICE_NAME_TEMPLATE, deviceOffset);
         List<String> deviceNames = new ArrayList<>(volumes.size());
         for (Volume volume : volumes) {
             deviceNames.add(volume.getDevice() != null ? volume.getDevice() : generator.next());
@@ -307,14 +304,6 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
         }
         resource.setStatus(CommonStatus.CREATED);
         return resource;
-    }
-
-    private int getDeviceOffset(CloudInstance instance) {
-        Object resourceDiskAttachedObject = instance.getParameters().get(AzureInstanceTemplate.RESOURCE_DISK_ATTACHED);
-        if (resourceDiskAttachedObject == null) {
-            return 1;
-        }
-        return instance.getParameter(AzureInstanceTemplate.RESOURCE_DISK_ATTACHED, Boolean.class) ? 1 : 0;
     }
 
     private String getDiskEncryptionSetId(Group group) {

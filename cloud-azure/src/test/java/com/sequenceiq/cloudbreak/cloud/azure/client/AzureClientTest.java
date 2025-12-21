@@ -104,6 +104,7 @@ import com.sequenceiq.cloudbreak.cloud.azure.AzureDisk;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureDiskType;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureLoadBalancerFrontend;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureTestUtils;
+import com.sequenceiq.cloudbreak.cloud.azure.resource.domain.AzureDiskWithLun;
 import com.sequenceiq.cloudbreak.cloud.azure.util.AzureExceptionHandler;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 
@@ -231,7 +232,7 @@ class AzureClientTest {
         int sizeInGb = 4096;
 
         Disk disk = mock(Disk.class);
-        List<Disk> disks = List.of(disk);
+        List<AzureDiskWithLun> disks = List.of(new AzureDiskWithLun(disk, 0));
         VirtualMachine virtualMachine = mock(VirtualMachine.class);
         VirtualMachineInner virtualMachineInner = mock(VirtualMachineInner.class);
         VirtualMachine.Update virtualMachineUpdate = mock(VirtualMachine.Update.class);
@@ -239,13 +240,13 @@ class AzureClientTest {
         when(virtualMachine.innerModel()).thenReturn(virtualMachineInner);
         when(virtualMachineInner.withPlan(null)).thenReturn(virtualMachineInner);
         when(virtualMachine.update()).thenReturn(virtualMachineUpdate);
-        when(virtualMachineUpdate.withExistingDataDisk(any(Disk.class))).thenReturn(virtualMachineUpdate);
+        when(virtualMachineUpdate.withExistingDataDisk(any(Disk.class), any(Integer.class), any(CachingTypes.class))).thenReturn(virtualMachineUpdate);
         when(virtualMachineUpdate.withDataDiskDefaultCachingType(any(CachingTypes.class))).thenReturn(virtualMachineUpdate);
         when(virtualMachineUpdate.apply()).thenReturn(virtualMachine);
         when(disk.sizeInGB()).thenReturn(sizeInGb);
         ArgumentCaptor<CachingTypes> captor = ArgumentCaptor.forClass(CachingTypes.class);
 
-        underTest.attachDisksToVm(disks, virtualMachine);
+        underTest.attachDisksToVmWithLun(disks, virtualMachine);
         verify(virtualMachineUpdate, times(1)).withDataDiskDefaultCachingType(captor.capture());
         assertEquals(CachingTypes.NONE, captor.getValue());
     }
@@ -256,7 +257,7 @@ class AzureClientTest {
         DiskSkuTypes diskSkuTypes = DiskSkuTypes.PREMIUM_LRS;
 
         Disk disk = mock(Disk.class);
-        List<Disk> disks = List.of(disk);
+        List<AzureDiskWithLun> disks = List.of(new AzureDiskWithLun(disk, 0));
         VirtualMachine virtualMachine = mock(VirtualMachine.class);
         VirtualMachineInner virtualMachineInner = mock(VirtualMachineInner.class);
         VirtualMachine.Update virtualMachineUpdate = mock(VirtualMachine.Update.class);
@@ -264,14 +265,14 @@ class AzureClientTest {
         when(virtualMachine.innerModel()).thenReturn(virtualMachineInner);
         when(virtualMachineInner.withPlan(null)).thenReturn(virtualMachineInner);
         when(virtualMachine.update()).thenReturn(virtualMachineUpdate);
-        when(virtualMachineUpdate.withExistingDataDisk(any(Disk.class))).thenReturn(virtualMachineUpdate);
+        when(virtualMachineUpdate.withExistingDataDisk(any(Disk.class), any(Integer.class), any(CachingTypes.class))).thenReturn(virtualMachineUpdate);
         when(virtualMachineUpdate.withDataDiskDefaultCachingType(any(CachingTypes.class))).thenReturn(virtualMachineUpdate);
         when(virtualMachineUpdate.apply()).thenReturn(virtualMachine);
         when(disk.sizeInGB()).thenReturn(sizeInGb);
         when(disk.sku()).thenReturn(diskSkuTypes);
         ArgumentCaptor<CachingTypes> captor = ArgumentCaptor.forClass(CachingTypes.class);
 
-        underTest.attachDisksToVm(disks, virtualMachine);
+        underTest.attachDisksToVmWithLun(disks, virtualMachine);
         verify(virtualMachineUpdate, times(1)).withDataDiskDefaultCachingType(captor.capture());
         assertEquals(CachingTypes.READ_ONLY, captor.getValue());
     }
@@ -282,7 +283,7 @@ class AzureClientTest {
         DiskSkuTypes diskSkuTypes = DiskSkuTypes.ULTRA_SSD_LRS;
 
         Disk disk = mock(Disk.class);
-        List<Disk> disks = List.of(disk);
+        List<AzureDiskWithLun> disks = List.of(new AzureDiskWithLun(disk, 0));
         VirtualMachine virtualMachine = mock(VirtualMachine.class);
         VirtualMachineInner virtualMachineInner = mock(VirtualMachineInner.class);
         VirtualMachine.Update virtualMachineUpdate = mock(VirtualMachine.Update.class);
@@ -290,14 +291,14 @@ class AzureClientTest {
         when(virtualMachine.innerModel()).thenReturn(virtualMachineInner);
         when(virtualMachineInner.withPlan(null)).thenReturn(virtualMachineInner);
         when(virtualMachine.update()).thenReturn(virtualMachineUpdate);
-        when(virtualMachineUpdate.withExistingDataDisk(any(Disk.class))).thenReturn(virtualMachineUpdate);
+        when(virtualMachineUpdate.withExistingDataDisk(any(Disk.class), any(Integer.class), any(CachingTypes.class))).thenReturn(virtualMachineUpdate);
         when(virtualMachineUpdate.withDataDiskDefaultCachingType(any(CachingTypes.class))).thenReturn(virtualMachineUpdate);
         when(virtualMachineUpdate.apply()).thenReturn(virtualMachine);
         when(disk.sizeInGB()).thenReturn(sizeInGb);
         when(disk.sku()).thenReturn(diskSkuTypes);
         ArgumentCaptor<CachingTypes> captor = ArgumentCaptor.forClass(CachingTypes.class);
 
-        underTest.attachDisksToVm(disks, virtualMachine);
+        underTest.attachDisksToVmWithLun(disks, virtualMachine);
         verify(virtualMachineUpdate, times(1)).withDataDiskDefaultCachingType(captor.capture());
         assertEquals(CachingTypes.READ_ONLY, captor.getValue());
     }
@@ -309,7 +310,7 @@ class AzureClientTest {
         when(azureExceptionHandler.isDiskAlreadyAttached(any())).thenReturn(true);
         when(virtualMachineUpdate.apply()).thenThrow(new ApiErrorException("", null, null));
 
-        underTest.attachDisksToVm(getDisksForAttachDiskFailureTest(), virtualMachine);
+        underTest.attachDisksToVmWithLun(getDisksForAttachDiskFailureTest(), virtualMachine);
         verify(virtualMachineUpdate).apply();
     }
 
@@ -321,7 +322,7 @@ class AzureClientTest {
         when(azureExceptionHandler.isConcurrentWrite(any())).thenReturn(true);
         when(virtualMachineUpdate.apply()).thenThrow(new ApiErrorException("", null, null));
 
-        assertThrows(RetryException.class, () -> underTest.attachDisksToVm(getDisksForAttachDiskFailureTest(), virtualMachine));
+        assertThrows(RetryException.class, () -> underTest.attachDisksToVmWithLun(getDisksForAttachDiskFailureTest(), virtualMachine));
         verify(virtualMachineUpdate).apply();
     }
 
@@ -333,7 +334,7 @@ class AzureClientTest {
         when(azureExceptionHandler.isDiskAlreadyAttached(any())).thenReturn(false);
         when(virtualMachineUpdate.apply()).thenThrow(new ApiErrorException("", null, null));
 
-        assertThrows(ApiErrorException.class, () -> underTest.attachDisksToVm(getDisksForAttachDiskFailureTest(), virtualMachine));
+        assertThrows(ApiErrorException.class, () -> underTest.attachDisksToVmWithLun(getDisksForAttachDiskFailureTest(), virtualMachine));
         verify(virtualMachineUpdate).apply();
     }
 
@@ -343,16 +344,16 @@ class AzureClientTest {
         when(virtualMachineInner.withPlan(null)).thenReturn(virtualMachineInner);
         VirtualMachine.Update virtualMachineUpdate = mock(VirtualMachine.Update.class);
         when(virtualMachine.update()).thenReturn(virtualMachineUpdate);
-        when(virtualMachineUpdate.withExistingDataDisk(any(Disk.class))).thenReturn(virtualMachineUpdate);
+        when(virtualMachineUpdate.withExistingDataDisk(any(Disk.class), any(Integer.class), any(CachingTypes.class))).thenReturn(virtualMachineUpdate);
         when(virtualMachineUpdate.withDataDiskDefaultCachingType(any(CachingTypes.class))).thenReturn(virtualMachineUpdate);
         return virtualMachineUpdate;
     }
 
-    private List<Disk> getDisksForAttachDiskFailureTest() {
+    private List<AzureDiskWithLun> getDisksForAttachDiskFailureTest() {
         int sizeInGb = 4095;
         DiskSkuTypes diskSkuTypes = DiskSkuTypes.ULTRA_SSD_LRS;
         Disk disk = mock(Disk.class);
-        List<Disk> disks = List.of(disk);
+        List<AzureDiskWithLun> disks = List.of(new AzureDiskWithLun(disk, 0));
         when(disk.sizeInGB()).thenReturn(sizeInGb);
         when(disk.sku()).thenReturn(diskSkuTypes);
         return disks;
