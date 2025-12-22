@@ -15,7 +15,7 @@ dependencies {
   implementation project(':grpc-common')
 
   implementation     group: 'org.springframework.boot',            name: 'spring-boot-starter-jersey',     version: springBootVersion
-  implementation     group: 'net.bytebuddy',                       name: 'byte-buddy',                     version: '1.18.2'
+  implementation     group: 'net.bytebuddy',                       name: 'byte-buddy',                     version: '1.18.3'
   implementation     group: 'com.google.protobuf',                 name: 'protobuf-java-util', version: protobufVersion
 
   implementation ("io.grpc:grpc-all:$grpcVersion") {
