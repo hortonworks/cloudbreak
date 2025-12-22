@@ -46,7 +46,7 @@ dependencies {
     implementation (group: 'com.google.auth',               name: 'google-auth-library-oauth2-http',           version: '1.41.0') {
         exclude group: 'com.google.http-client', module:'google-http-client'
     }
-    implementation (group: 'com.google.http-client',        name: 'google-http-client-jackson2',               version: '2.0.2') {
+    implementation (group: 'com.google.http-client',        name: 'google-http-client-jackson2',               version: '2.0.3') {
         exclude group: 'com.google.http-client', module:'google-http-client'
     }
     implementation (group: 'com.google.api-client',        name: 'google-api-client',                          version: '2.8.1') {
