@@ -35,7 +35,6 @@ import com.sequenceiq.freeipa.entity.Operation;
 import com.sequenceiq.freeipa.entity.Resource;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.StackStatus;
-import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
 import com.sequenceiq.freeipa.service.operation.OperationService;
 import com.sequenceiq.freeipa.service.resource.ResourceAttributeUtil;
 import com.sequenceiq.freeipa.service.resource.ResourceService;
@@ -52,9 +51,6 @@ class FreeIpaUpgradeDefaultOutboundServiceTest {
     private static final Long STACK_ID = 1L;
 
     private static final String OPERATION_ID = "operation-123";
-
-    @Mock
-    private FreeIpaFlowManager flowManager;
 
     @Mock
     private StackService stackService;
@@ -235,17 +231,6 @@ class FreeIpaUpgradeDefaultOutboundServiceTest {
         OutboundType result = underTest.getCurrentDefaultOutbound(ENVIRONMENT_CRN, ACCOUNT_ID);
 
         assertEquals(OutboundType.NOT_DEFINED, result);
-    }
-
-    @Test
-    void getCurrentDefaultOutboundShouldThrowExceptionWhenStackIsNotAvailable() {
-        stackStatus.setStatus(Status.CREATE_IN_PROGRESS);
-        when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(stack);
-
-        BadRequestException exception = assertThrows(BadRequestException.class,
-                () -> underTest.getCurrentDefaultOutbound(ENVIRONMENT_CRN, ACCOUNT_ID));
-
-        assertEquals("FreeIPA stack 'test-stack' must be AVAILABLE to start Default Outbound upgrade.", exception.getMessage());
     }
 
     @Test

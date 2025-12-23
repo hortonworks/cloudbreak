@@ -1,34 +1,21 @@
 package com.sequenceiq.environment.environment.dto;
 
-import java.io.Serializable;
+import com.sequenceiq.environment.environment.domain.CompactView;
 
 /**
  * DTO for compact view projections, used when only basic environment information is needed.
  */
-public class CompactViewDto implements Serializable {
-
-    private final Long id;
-
-    private final String name;
+public class CompactViewDto extends CompactView {
 
     public CompactViewDto(Long id, String name) {
-        this.id = id;
-        this.name = name;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
+        super(id, name);
     }
 
     @Override
     public String toString() {
         return "CompactViewDto{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
+                "id=" + getId() +
+                ", name='" + getName() + '\'' +
                 '}';
     }
 }

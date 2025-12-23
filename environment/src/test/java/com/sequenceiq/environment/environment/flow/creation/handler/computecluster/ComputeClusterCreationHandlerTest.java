@@ -105,7 +105,6 @@ class ComputeClusterCreationHandlerTest {
         when(environmentService.findEnvironmentByIdOrThrow(anyLong()))
                 .thenThrow(NotFoundException.notFound("environment", environmentDto.getId()).get());
 
-
         underTest.accept(Event.wrap(environmentDto));
 
         assertEquals(EnvCreationFailureEvent.class, failureEventCaptor.getValue().getData().getClass());

@@ -12,12 +12,12 @@ import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.cloudbreak.auth.security.internal.RequestObject;
 import com.sequenceiq.notification.domain.DistributionList;
 import com.sequenceiq.notification.domain.test.TestOnlyInternalRegisterAzureOutboundNotificationRequest;
-import com.sequenceiq.notification.endpoint.TestOnlyInternalNotificationV1Endpoint;
+import com.sequenceiq.notification.endpoint.InternalNotificationV1Endpoint;
 import com.sequenceiq.notification.service.TestOnlyInternalNotificationService;
 
 @Controller
 @ConditionalOnProperty(name = "thunderheadnotification.enabled", havingValue = "true")
-public class TestOnlyInternalNotificationV1Controller implements TestOnlyInternalNotificationV1Endpoint {
+public class InternalNotificationV1Controller implements InternalNotificationV1Endpoint {
 
     @Inject
     private TestOnlyInternalNotificationService testOnlyInternalNotificationService;

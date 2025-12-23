@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.configuration.api;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -43,6 +44,7 @@ import com.sequenceiq.environment.terms.v1.TermsController;
 import com.sequenceiq.environment.util.v1.UtilController;
 import com.sequenceiq.flow.controller.FlowController;
 import com.sequenceiq.flow.controller.FlowPublicController;
+import com.sequenceiq.notification.controller.InternalNotificationV1Controller;
 
 import io.swagger.v3.oas.models.OpenAPI;
 
@@ -50,41 +52,13 @@ import io.swagger.v3.oas.models.OpenAPI;
 @ApplicationPath(EnvironmentApi.API_ROOT_CONTEXT)
 public class EndpointConfig extends ResourceConfig {
 
-    private static final List<Class<?>> CONTROLLERS = List.of(
-            CredentialV1Controller.class,
-            CredentialInternalV1Controller.class,
-            AuditCredentialV1Controller.class,
-            AccountTagController.class,
-            AccountTelemetryController.class,
-            ProxyController.class,
-            EncryptionProfileController.class,
-            EnvironmentController.class,
-            EnvironmentHybridEndpoint.class,
-            EnvironmentHybridV2Endpoint.class,
-            EnvironmentDefaultComputeClusterController.class,
-            EnvironmentInternalV1Controller.class,
-            OperationController.class,
-            CredentialPlatformResourceController.class,
-            EnvironmentPlatformResourceController.class,
-            UtilController.class,
-            FlowController.class,
-            FlowPublicController.class,
-            AuthorizationInfoController.class,
-            AuthorizationUtilEndpoint.class,
-            CDPStructuredEventV1Controller.class,
-            EnvironmentCostController.class,
-            EnvironmentCO2Controller.class,
-            AzureMarketplaceTermsController.class,
-            TermsController.class,
-            CDPEventV1Endpoint.class,
-            ExpressOnboardingController.class,
-            OpenApiController.class);
-
     private final String contextPath;
 
     private final String applicationVersion;
 
     private final Boolean auditEnabled;
+
+    private final boolean thunderheadNotificationEnabled;
 
     private final List<ExceptionMapper<?>> exceptionMappers;
 
@@ -92,9 +66,11 @@ public class EndpointConfig extends ResourceConfig {
 
     private final OpenApiProvider openApiProvider;
 
-    public EndpointConfig(@Value("${info.app.version:unspecified}") String applicationVersion,
+    public EndpointConfig(
+            @Value("${info.app.version:unspecified}") String applicationVersion,
             @Value("${environment.structuredevent.rest.enabled}") Boolean auditEnabled,
             @Value("${server.servlet.context-path:}") String contextPath,
+            @Value("${thunderheadnotification.enabled:true}") boolean thunderheadNotificationEnabled,
             List<ExceptionMapper<?>> exceptionMappers,
             List<MessageBodyWriter<?>> messageBodyWriters,
             OpenApiProvider openApiProvider) {
@@ -104,6 +80,7 @@ public class EndpointConfig extends ResourceConfig {
         this.exceptionMappers = exceptionMappers;
         this.messageBodyWriters = messageBodyWriters;
         this.openApiProvider = openApiProvider;
+        this.thunderheadNotificationEnabled = thunderheadNotificationEnabled;
         registerFilters();
         registerEndpoints();
         registerExceptionMappers();
@@ -118,7 +95,7 @@ public class EndpointConfig extends ResourceConfig {
                 applicationVersion,
                 "https://localhost" + contextPath + EnvironmentApi.API_ROOT_CONTEXT
         );
-        openApiProvider.createConfig(openAPI, CONTROLLERS.stream().map(Class::getName).collect(Collectors.toSet()));
+        openApiProvider.createConfig(openAPI, controllers().stream().map(Class::getName).collect(Collectors.toSet()));
     }
 
     private void registerExceptionMappers() {
@@ -134,7 +111,43 @@ public class EndpointConfig extends ResourceConfig {
     }
 
     private void registerEndpoints() {
-        CONTROLLERS.forEach(this::register);
+        controllers().forEach(this::register);
+    }
+
+    private List<Class<?>> controllers() {
+        List<Class<?>> controllers = new ArrayList<>(List.of(
+                CredentialV1Controller.class,
+                CredentialInternalV1Controller.class,
+                AuditCredentialV1Controller.class,
+                AccountTagController.class,
+                AccountTelemetryController.class,
+                ProxyController.class,
+                EncryptionProfileController.class,
+                EnvironmentController.class,
+                EnvironmentHybridEndpoint.class,
+                EnvironmentHybridV2Endpoint.class,
+                EnvironmentDefaultComputeClusterController.class,
+                EnvironmentInternalV1Controller.class,
+                OperationController.class,
+                CredentialPlatformResourceController.class,
+                EnvironmentPlatformResourceController.class,
+                UtilController.class,
+                FlowController.class,
+                FlowPublicController.class,
+                AuthorizationInfoController.class,
+                AuthorizationUtilEndpoint.class,
+                CDPStructuredEventV1Controller.class,
+                EnvironmentCostController.class,
+                EnvironmentCO2Controller.class,
+                AzureMarketplaceTermsController.class,
+                TermsController.class,
+                CDPEventV1Endpoint.class,
+                ExpressOnboardingController.class,
+                OpenApiController.class));
+        if (thunderheadNotificationEnabled) {
+            controllers.add(InternalNotificationV1Controller.class);
+        }
+        return controllers;
     }
 
     private void registerFilters() {

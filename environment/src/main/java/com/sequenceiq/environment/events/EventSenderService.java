@@ -45,9 +45,13 @@ public class EventSenderService {
 
     private final CloudbreakMessagesService cloudbreakMessagesService;
 
-    public EventSenderService(WebSocketNotificationService webSocketNotificationService, EnvironmentResponseConverter environmentResponseConverter,
-            CDPDefaultStructuredEventClient cdpDefaultStructuredEventClient, NodeConfig nodeConfig, @Value("${info.app.version:}") String serviceVersion,
-            CloudbreakMessagesService cloudbreakMessagesService) {
+    public EventSenderService(
+            WebSocketNotificationService webSocketNotificationService,
+            EnvironmentResponseConverter environmentResponseConverter,
+            CDPDefaultStructuredEventClient cdpDefaultStructuredEventClient,
+            NodeConfig nodeConfig,
+            CloudbreakMessagesService cloudbreakMessagesService,
+            @Value("${info.app.version:}") String serviceVersion) {
         this.webSocketNotificationService = webSocketNotificationService;
         this.environmentResponseConverter = environmentResponseConverter;
         this.cdpDefaultStructuredEventClient = cdpDefaultStructuredEventClient;

@@ -29,6 +29,7 @@ import org.springframework.data.repository.support.Repositories;
 @EntityScan(basePackages = {"com.sequenceiq.flow.domain",
         "com.sequenceiq.cloudbreak.rotation",
         "com.sequenceiq.environment",
+        "com.sequenceiq.notification",
         "com.sequenceiq.cloudbreak.ha.domain",
         "com.sequenceiq.notification.domain",
         "com.sequenceiq.cloudbreak.structuredevent.domain"})

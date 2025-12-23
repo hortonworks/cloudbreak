@@ -17,6 +17,7 @@ import static org.mockito.Mockito.when;
 import java.util.Map;
 import java.util.Set;
 
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -407,6 +408,45 @@ class EnvironmentResponseConverterTest {
         verify(proxyConfigToProxyResponseConverter).convertToView(environmentViewDto.getProxyConfig());
         verify(networkDtoToResponseConverter).convert(environmentViewDto.getNetwork(), environmentViewDto.getExperimentalFeatures().getTunnel(), false);
         verify(dataServicesConverter).convertToResponse(environmentViewDto.getDataServices());
+    }
+
+    @Test
+    void testDtoToDetailedResponseWithDistributionList() {
+        EnvironmentDto environment = createEnvironmentDtoBuilder(AWS).build();
+        String distributionListId = "dl-123";
+        environment.setParameters(ParametersDto.builder().withDistributionList(distributionListId).build());
+
+        DetailedEnvironmentResponse actual = underTest.dtoToDetailedResponse(environment);
+
+        assertNotNull(actual.getNotificationParameters(), "NotificationParameters should be created when distribution list is set.");
+        assertEquals(distributionListId, actual.getNotificationParameters().getDistributionListId());
+    }
+
+    @Test
+    void testDtoToDetailedResponseWithoutDistributionList() {
+        EnvironmentDto environment = createEnvironmentDtoBuilder(AWS).build();
+        assertNull(environment.getParameters().getDistributionList());
+
+        DetailedEnvironmentResponse actual = underTest.dtoToDetailedResponse(environment);
+
+        assertNull(actual.getNotificationParameters(), "NotificationParameters should be null when distribution list is absent.");
+    }
+
+    @Test
+    void testDtoToDetailedResponseWithNullParameters() {
+        EnvironmentDto environment = createEnvironmentDtoBuilder(AWS).build();
+        environment.setParameters(null);
+        DetailedEnvironmentResponse actual = underTest.dtoToDetailedResponse(environment);
+        assertNull(actual.getNotificationParameters(), "NotificationParameters should be null when parameters object itself is null.");
+    }
+
+    @Test
+    void testDtoToDetailedResponseWithEmptyDistributionList() {
+        EnvironmentDto environment = createEnvironmentDtoBuilder(AWS).build();
+        environment.setParameters(ParametersDto.builder().withDistributionList("").build());
+        DetailedEnvironmentResponse actual = underTest.dtoToDetailedResponse(environment);
+        assertNotNull(actual.getNotificationParameters(), "NotificationParameters should still be created for empty string distribution list.");
+        assertEquals("", actual.getNotificationParameters().getDistributionListId());
     }
 
     private void assertParameters(EnvironmentDtoBase environment, EnvironmentBaseResponse actual, CloudPlatform cloudPlatform) {

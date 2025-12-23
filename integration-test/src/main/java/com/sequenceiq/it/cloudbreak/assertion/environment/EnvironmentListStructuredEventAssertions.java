@@ -6,6 +6,7 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_DATABASE
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_DATAHUB_CLUSTERS_DELETION_STARTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_DATALAKE_CLUSTERS_DELETION_STARTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_DELETION_FINISHED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_DISTRIBUTION_LIST_CLEANUP_STARTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_EVENT_CLEANUP_STARTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_FREEIPA_CREATION_STARTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_FREEIPA_DELETION_STARTED;
@@ -95,6 +96,7 @@ public class EnvironmentListStructuredEventAssertions {
             ENVIRONMENT_S3GUARD_TABLE_DELETION_STARTED,
             ENVIRONMENT_UMS_RESOURCE_DELETION_STARTED,
             ENVIRONMENT_EVENT_CLEANUP_STARTED,
+            ENVIRONMENT_DISTRIBUTION_LIST_CLEANUP_STARTED,
             ENVIRONMENT_DATAHUB_CLUSTERS_DELETION_STARTED,
             ENVIRONMENT_DATALAKE_CLUSTERS_DELETION_STARTED,
             ENVIRONMENT_DELETION_FINISHED,

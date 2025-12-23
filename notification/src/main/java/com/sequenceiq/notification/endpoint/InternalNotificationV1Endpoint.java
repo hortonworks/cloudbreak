@@ -24,7 +24,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @Path("/internal/test_notification")
 @Consumes(MediaType.APPLICATION_JSON)
 @Tag(name = "/internal/test_notification")
-public interface TestOnlyInternalNotificationV1Endpoint {
+public interface InternalNotificationV1Endpoint {
 
     @POST
     @Path("send_weekly")

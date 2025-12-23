@@ -47,7 +47,6 @@ import com.sequenceiq.environment.credential.v1.converter.CredentialToExtendedCl
 
 @Service
 public class PlatformParameterService {
-    private static final String NOT_FOUND_FORMAT_MESSAGE = "Credential with name:";
 
     @Inject
     private CloudParameterService cloudParameterService;

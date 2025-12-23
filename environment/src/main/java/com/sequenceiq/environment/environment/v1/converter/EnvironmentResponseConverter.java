@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.util.NullUtil;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.v1.environment.model.AzureExternalizedComputeParams;
+import com.sequenceiq.environment.api.v1.environment.model.NotificationParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsDiskEncryptionParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
@@ -152,7 +153,8 @@ public class EnvironmentResponseConverter {
                 .withEnableComputeCluster(environmentDto.isEnableComputeCluster())
                 .withEnvironmentType(environmentDto.getEnvironmentType() != null ? environmentDto.getEnvironmentType().toString() :  null)
                 .withRemoteEnvironmentCrn(environmentDto.getRemoteEnvironmentCrn())
-                .withEncryptionProfileCrn(environmentDto.getEncryptionProfileCrn());
+                .withEncryptionProfileCrn(environmentDto.getEncryptionProfileCrn())
+                .withNotificationParameters(getIfNotNull(environmentDto.getParameters(), this::distributionListToNotificationParameters));
 
         NullUtil.doIfNotNull(environmentDto.getProxyConfig(),
                 proxyConfig -> builder.withProxyConfig(proxyConfigToProxyResponseConverter.convert(environmentDto.getProxyConfig())));
@@ -377,6 +379,14 @@ public class EnvironmentResponseConverter {
         return GcpResourceEncryptionParameters.builder()
                 .withEncryptionKey(gcpResourceEncryptionParametersDto.getEncryptionKey())
                 .build();
+    }
+
+    private NotificationParameters distributionListToNotificationParameters(ParametersDto parameters) {
+        return Optional.ofNullable(parameters.getDistributionList())
+                .map(dl -> NotificationParameters.newBuilder()
+                        .withDistributionListId(dl)
+                        .build())
+                .orElse(null);
     }
 
     private ResourceGroupUsage resourceGroupUsagePatternToResourceGroupUsage(ResourceGroupUsagePattern resourceGroupUsagePattern) {

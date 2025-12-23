@@ -243,6 +243,9 @@ spring:
 
 notification:
   urls: http://localhost:3000/notifications
+  register:
+    azuredefaultoutbound:
+      enabled: false
 
 crn:
   partition: cdp

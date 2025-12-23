@@ -29,6 +29,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_ENFO
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_ENFORCE_AWS_NATIVE_FOR_SINGLE_AZ_FREEIPA;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_GCP_MULTIAZ;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_GCP_SECURE_BOOT;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_NOTIFICATION_SENDING_ENABLED;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_PREFER_MINIFI_LOGGING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_SECRET_ENCRYPTION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_SUPPORTS_TLS_1_3_ONLY;
@@ -1193,6 +1194,7 @@ public class MockUserManagementService extends UserManagementImplBase {
                                 .addEntitlements(createEntitlement(CDP_SKIP_CERTIFICATE_ROTATION_VALIDATION))
                                 .addEntitlements(createEntitlement(CDP_SECURITY_ENFORCING_SELINUX))
                                 .addEntitlements(createEntitlement(CDP_CB_CM_TEMPLATE_SYNC))
+                                .addEntitlements(createEntitlement(CDP_CB_NOTIFICATION_SENDING_ENABLED))
                                 .setGlobalPasswordPolicy(workloadPasswordPolicy)
                                 .setAccountId(getAccountId(request.getExternalAccountId(), accountId))
                                 .setExternalAccountId(getExternalAccountId(request.getExternalAccountId(), accountId))
@@ -1323,7 +1325,7 @@ public class MockUserManagementService extends UserManagementImplBase {
             StreamObserver<ListResourceAssigneesResponse> responseObserver) {
         LOGGER.info("List resource assignees for resource: {}", request.getResourceCrn());
         responseObserver.onNext(ListResourceAssigneesResponse.newBuilder()
-                .setResourceAssignee(0, createResourceAssignee())
+                .addResourceAssignee(createResourceAssignee(UmsResourceRole.ENVIRONMENT_ADMIN))
                 .build());
         responseObserver.onCompleted();
     }
@@ -1657,10 +1659,10 @@ public class MockUserManagementService extends UserManagementImplBase {
                 .build();
     }
 
-    private ResourceAssignee createResourceAssignee() {
+    private ResourceAssignee createResourceAssignee(UmsResourceRole resourceRole) {
         return ResourceAssignee.newBuilder()
                 .setAssigneeCrn(GrpcActorContext.ACTOR_CONTEXT.get().getActorCrn())
-                .setResourceRoleCrn("crn:altus:iam:us-west-1:altus:resourceRole:WorkspaceManager")
+                .setResourceRoleCrn(String.format("crn:altus:iam:us-west-1:altus:resourceRole:%s", resourceRole.getResourceRoleName()))
                 .build();
     }
 

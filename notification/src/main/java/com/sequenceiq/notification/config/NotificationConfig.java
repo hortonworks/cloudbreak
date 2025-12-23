@@ -28,7 +28,7 @@ public class NotificationConfig {
         return enabled && entitlementService.isCdpCbNotificationSendingEnabled(resourceCrn.getAccountId());
     }
 
-    public boolean isEnabledByAccountID(String acountId) {
-        return enabled && entitlementService.isCdpCbNotificationSendingEnabled(acountId);
+    public boolean isEnabledByAccountID(String accountId) {
+        return enabled && entitlementService.isCdpCbNotificationSendingEnabled(accountId);
     }
 }

@@ -1,5 +1,7 @@
 package com.sequenceiq.environment.environment.scheduled.archiver;
 
+import static com.sequenceiq.cloudbreak.util.TimeUtil.ONE_HOUR_IN_MINUTES;
+
 import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.util.Date;
@@ -30,8 +32,6 @@ public class EnvironmentArchiverJobService implements JobSchedulerService {
     private static final String JOB_GROUP = "archiver-job-group";
 
     private static final String TRIGGER_GROUP = "archiver-triggers";
-
-    private static final int ONE_HOUR_IN_MINUTES = 60;
 
     @Inject
     private TransactionalScheduler scheduler;

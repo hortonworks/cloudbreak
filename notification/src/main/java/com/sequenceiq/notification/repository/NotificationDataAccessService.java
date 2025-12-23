@@ -71,14 +71,14 @@ public class NotificationDataAccessService {
     }
 
     public Set<Notification> collectUnsentNotifications(List<Notification> registrationTargets) {
-        Set<Notification> missingRecordsFromTheDatabase = new HashSet<>();
+        Set<Notification> unsentRecordsFromTheDatabase = new HashSet<>();
         for (Map.Entry<NotificationType, List<Notification>> registrationTargetEntry : groupNotificationsByType(registrationTargets)) {
-            missingRecordsFromTheDatabase.addAll(collectExistingUnsentNotificationsFromDatabaseForASpecificType(
+            unsentRecordsFromTheDatabase.addAll(collectExistingUnsentNotificationsFromDatabaseForASpecificType(
                     registrationTargetEntry.getValue(),
                     collectExistingPairsInDB(registrationTargetEntry)
             ));
         }
-        return missingRecordsFromTheDatabase;
+        return unsentRecordsFromTheDatabase;
     }
 
     private Set<Map.Entry<NotificationType, List<Notification>>> groupNotificationsByType(List<Notification> registrationTargets) {
@@ -94,8 +94,10 @@ public class NotificationDataAccessService {
         );
     }
 
-    private Set<Notification> collectExistingUnsentNotificationsFromDatabaseForASpecificType(List<Notification> entries, Set<String> existingPairsInDB) {
-        return entries.stream().filter(n -> !existingPairsInDB.contains(n.getResourceCrn())).collect(Collectors.toSet());
+    private Set<Notification> collectExistingUnsentNotificationsFromDatabaseForASpecificType(List<Notification> entries, Set<String> existingCrns) {
+        return entries.stream()
+                .filter(n -> existingCrns.contains(n.getResourceCrn()))
+                .collect(Collectors.toSet());
     }
 
     private Set<String> collectCrns(List<Notification> registrationTargetCrns) {

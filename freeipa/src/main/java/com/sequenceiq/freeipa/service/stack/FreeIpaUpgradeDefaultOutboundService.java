@@ -82,10 +82,6 @@ public class FreeIpaUpgradeDefaultOutboundService {
     }
 
     private OutboundType getCurrentDefaultOutbound(Stack stack) {
-        if (!stack.getStackStatus().getStatus().isDefaultOutboundUpgradeablePhase()) {
-            throw new BadRequestException(
-                    String.format("FreeIPA stack '%s' must be AVAILABLE to start Default Outbound upgrade.", stack.getName()));
-        }
 
         List<Resource> networkResources = resourceService.findByStackIdAndType(stack.getId(), ResourceType.AZURE_NETWORK);
         if (networkResources.size() == 1) {

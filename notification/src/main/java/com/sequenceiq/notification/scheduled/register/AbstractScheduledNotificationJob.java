@@ -8,6 +8,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 
 import org.quartz.JobBuilder;
@@ -26,19 +27,20 @@ import com.sequenceiq.cloudbreak.quartz.MdcQuartzJob;
 import com.sequenceiq.cloudbreak.quartz.configuration.scheduler.TransactionalScheduler;
 import com.sequenceiq.cloudbreak.quartz.model.JobInitializer;
 import com.sequenceiq.notification.domain.NotificationType;
+import com.sequenceiq.notification.domain.Subscription;
 import com.sequenceiq.notification.generator.dto.NotificationGeneratorDto;
 import com.sequenceiq.notification.generator.dto.NotificationGeneratorDtos;
 import com.sequenceiq.notification.service.NotificationSendingService;
 
-public abstract class ScheduledBaseNotificationRegisterAndSenderJob extends MdcQuartzJob implements JobInitializer, JobSchedulerService {
+public abstract class AbstractScheduledNotificationJob extends MdcQuartzJob implements JobInitializer, JobSchedulerService, SubscriptionAware {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ScheduledBaseNotificationRegisterAndSenderJob.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractScheduledNotificationJob.class);
 
     private final TransactionalScheduler scheduler;
 
     private final NotificationSendingService notificationSendingService;
 
-    public ScheduledBaseNotificationRegisterAndSenderJob(
+    public AbstractScheduledNotificationJob(
             TransactionalScheduler scheduler,
             NotificationSendingService notificationSendingService) {
         this.scheduler = scheduler;
@@ -61,6 +63,10 @@ public abstract class ScheduledBaseNotificationRegisterAndSenderJob extends MdcQ
         return Optional.of("0 0 0 ? * 1");
     }
 
+    protected NotificationSendingService getNotificationSendingService() {
+        return notificationSendingService;
+    }
+
     @Override
     protected Optional<MdcContextInfoProvider> getMdcContextConfigProvider() {
         return Optional.empty();
@@ -68,11 +74,19 @@ public abstract class ScheduledBaseNotificationRegisterAndSenderJob extends MdcQ
 
     @Override
     protected void executeTracedJob(JobExecutionContext context) {
-        NotificationGeneratorDtos notificationData = NotificationGeneratorDtos.builder()
-                .notification(data())
-                .notificationType(notificationType())
-                .build();
-        LOGGER.debug("Sending notifications: {}", notificationData);
+        try {
+            NotificationGeneratorDtos notificationData = NotificationGeneratorDtos.builder()
+                    .notification(data())
+                    .notificationType(notificationType())
+                    .build();
+            LOGGER.debug("Sending notifications: {}", notificationData);
+            processNotifications(notificationData);
+        } catch (Exception e) {
+            LOGGER.error("Error occurred while executing notification job '{}': {}", getName(), e.getMessage(), e);
+        }
+    }
+
+    protected void processNotifications(NotificationGeneratorDtos notificationData) {
         notificationSendingService.processAndImmediatelySend(notificationData);
     }
 
@@ -93,6 +107,11 @@ public abstract class ScheduledBaseNotificationRegisterAndSenderJob extends MdcQ
         return scheduler;
     }
 
+    @Override
+    public void onSubscriptionsProcessed(List<? extends Subscription> subscriptions) {
+        LOGGER.debug("Processed subscriptions: {}", subscriptions);
+    }
+
     public void schedule() {
         JobDetail jobDetail = buildJobDetail();
         Trigger trigger = buildJobTrigger(jobDetail);
@@ -105,7 +124,7 @@ public abstract class ScheduledBaseNotificationRegisterAndSenderJob extends MdcQ
             LOGGER.info("Scheduling notification job for key: '{}' and group: '{}'", jobKey.getName(), jobKey.getGroup());
             getScheduler().scheduleJob(jobDetail, trigger);
         } catch (Exception e) {
-            LOGGER.error(String.format("Error during scheduling quartz job: %s", jobDetail), e);
+            LOGGER.error("Error during scheduling quartz job: {}", jobDetail, e);
         }
     }
 

@@ -86,12 +86,12 @@ import com.sequenceiq.environment.environment.service.EnvironmentCreationService
 import com.sequenceiq.environment.environment.service.EnvironmentDeletionService;
 import com.sequenceiq.environment.environment.service.EnvironmentLoadBalancerService;
 import com.sequenceiq.environment.environment.service.EnvironmentModificationService;
+import com.sequenceiq.environment.environment.service.EnvironmentOutboundService;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.environment.service.EnvironmentStackConfigUpdateService;
 import com.sequenceiq.environment.environment.service.EnvironmentStartService;
 import com.sequenceiq.environment.environment.service.EnvironmentStopService;
 import com.sequenceiq.environment.environment.service.EnvironmentUpgradeCcmService;
-import com.sequenceiq.environment.environment.service.EnvironmentUpgradeOutboundService;
 import com.sequenceiq.environment.environment.service.EnvironmentVerticalScaleService;
 import com.sequenceiq.environment.environment.service.SupportedOperatingSystemService;
 import com.sequenceiq.environment.environment.service.cloudstorage.CloudStorageValidator;
@@ -158,7 +158,7 @@ public class EnvironmentController implements EnvironmentEndpoint {
 
     private final ExternalizedComputeFlowService externalizedComputeFlowService;
 
-    private final EnvironmentUpgradeOutboundService environmentUpgradeOutboundService;
+    private final EnvironmentOutboundService environmentOutboundService;
 
     public EnvironmentController(
             EnvironmentApiConverter environmentApiConverter,
@@ -184,7 +184,7 @@ public class EnvironmentController implements EnvironmentEndpoint {
             ExternalizedComputeFlowService externalizedComputeFlowService,
             EnvironmentReactorFlowManager environmentReactorFlowManager,
             RedBeamsService redBeamsService,
-            EnvironmentUpgradeOutboundService environmentUpgradeOutboundService) {
+            EnvironmentOutboundService environmentOutboundService) {
         this.environmentApiConverter = environmentApiConverter;
         this.environmentResponseConverter = environmentResponseConverter;
         this.environmentService = environmentService;
@@ -207,7 +207,7 @@ public class EnvironmentController implements EnvironmentEndpoint {
         this.supportedOperatingSystemService = supportedOperatingSystemService;
         this.externalizedComputeFlowService = externalizedComputeFlowService;
         this.redBeamsService = redBeamsService;
-        this.environmentUpgradeOutboundService = environmentUpgradeOutboundService;
+        this.environmentOutboundService = environmentOutboundService;
     }
 
     @Override
@@ -548,7 +548,7 @@ public class EnvironmentController implements EnvironmentEndpoint {
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
     public OutboundTypeValidationResponse validateOutboundTypes(@ResourceCrn String crn) {
-        return environmentUpgradeOutboundService.validateOutboundTypes(crn);
+        return environmentOutboundService.validateOutboundTypes(crn);
     }
 
     @Override

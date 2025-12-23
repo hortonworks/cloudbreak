@@ -1,7 +1,6 @@
 package com.sequenceiq.notification.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -89,7 +88,7 @@ class NotificationDataAccessServiceTest {
     }
 
     @Test
-    void hasExistingUnsentRecordByResourceCrnAndType() {
+    void hasNoExistingUnsentRecordByResourceCrnAndType() {
         String resourceCrn = "crn1";
         NotificationType type = NotificationType.AZURE_DEFAULT_OUTBOUND;
         Notification notification = new Notification();
@@ -100,7 +99,7 @@ class NotificationDataAccessServiceTest {
 
         Set<Notification> notifications = notificationService.collectUnsentNotifications(List.of(notification));
 
-        assertFalse(notifications.isEmpty());
+        assertTrue(notifications.isEmpty());
     }
 
     @Test
@@ -115,7 +114,10 @@ class NotificationDataAccessServiceTest {
 
         Set<Notification> notifications = notificationService.collectUnsentNotifications(List.of(notification));
 
-        assertTrue(notifications.isEmpty());
+        assertEquals(1, notifications.size());
+        Notification actualNotification = notifications.iterator().next();
+        assertEquals(resourceCrn, actualNotification.getResourceCrn());
+        assertEquals(type, actualNotification.getType());
     }
 
     @Test
