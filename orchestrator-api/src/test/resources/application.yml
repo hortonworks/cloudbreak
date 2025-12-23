@@ -1,0 +1,16 @@
+# Test configuration for retry error patterns
+retry:
+  errors:
+    patterns-no-retry:
+      # Trust status validation script failure
+      - 'Failed to execute: \{Comment=Command "/opt/salt/scripts/trust_status_validation\.sh"'
+
+      # Configuration file loading failure
+      - "Failed to execute: .*Stderr=Configuration file could not be loaded\\."
+
+      # Parameter validation failure
+      - "Failed to execute: .*Parameter validation failed:"
+
+      # Java version determination failure
+      - "Failed to execute: .*Stdout=Failed to determine the current java version\\."
+
