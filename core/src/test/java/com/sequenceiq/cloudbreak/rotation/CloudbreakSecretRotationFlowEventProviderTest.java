@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.rotation;
 
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.CM_ADMIN_PASSWORD;
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.CM_INTERMEDIATE_CA_CERT;
+import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.EMBEDDED_DB_SSL_CERT;
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.SALT_BOOT_SECRETS;
 import static com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType.ROTATE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -45,20 +46,20 @@ class CloudbreakSecretRotationFlowEventProviderTest {
     }
 
     @Test
-    public void testSaltUpdateCheckIfExecutionSpecified() {
+    public void testSaltUpdateCheck() {
+        assertTrue(underTest.saltUpdateNeeded(
+                new SecretRotationFlowChainTriggerEvent(null, null, null, List.of(SALT_BOOT_SECRETS), null, null)));
+        assertFalse(underTest.saltUpdateNeeded(
+                new SecretRotationFlowChainTriggerEvent(null, null, null, List.of(CM_ADMIN_PASSWORD), ROTATE, null)));
         assertFalse(underTest.saltUpdateNeeded(
                 new SecretRotationFlowChainTriggerEvent(null, null, null, List.of(SALT_BOOT_SECRETS), ROTATE, null)));
     }
 
     @Test
-    public void testSaltUpdateCheckIfSecretNotRequires() {
-        assertFalse(underTest.saltUpdateNeeded(
-                new SecretRotationFlowChainTriggerEvent(null, null, null, List.of(CM_ADMIN_PASSWORD), ROTATE, null)));
-    }
-
-    @Test
-    public void testSaltUpdateCheck() {
-        assertTrue(underTest.saltUpdateNeeded(
+    public void testSaltHighstateCheck() {
+        assertFalse(underTest.skipSaltHighstate(
                 new SecretRotationFlowChainTriggerEvent(null, null, null, List.of(SALT_BOOT_SECRETS), null, null)));
+        assertTrue(underTest.skipSaltHighstate(
+                new SecretRotationFlowChainTriggerEvent(null, null, null, List.of(EMBEDDED_DB_SSL_CERT), null, null)));
     }
 }

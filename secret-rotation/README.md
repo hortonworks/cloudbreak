@@ -17,6 +17,12 @@ Rotation framework has been created based on this idea.
   - finalize: cleans up the leftover after the successful execution of rotation
 - `RotationContext`: Used to hold relevant data for the rotation of the given `SecretRotationStep`
 - `RotationContextProvider`: This class assembles the payloads for the various rotation steps.
+- `SecretTypeFlag`: This enum class contains specific flags/options for secret types:
+  - `INTERNAL`: the given secret type can be used internally, which usually means the rotation endpoint can be called with internal actor only for that secret type.
+  - `POST_FLOW`: the given secret type has a corresponding, specific flow, which needed to be executed after the rotation flow. The flow should be defined in the corresponding `SecretRotationFlowEventProvider` implementation.
+  - `SKIP_SALT_UPDATE`: every rotation flowchain begins with a salt update flow to update salt states if needed. If there is no salt related action for the given secret type, you can use this, to skip the salt update flow.
+  - `SKIP_SALT_HIGHSTATE`: you have also option to skip salt highstate part of the salt update flow, if you need to update salt states, but you do not want to execute salt highstate for the entire cluster/resource.
+  - `SKIP_STATUS_CHECK`: normally, we allow rotation for working clusters, but this option allows us to execute the rotation for resources with other statuses too, if needed and possible.
 
 ## Secret rotation flow
 - during secret rotation we are creating a flowchain and every secret will have an own flow in the flowchain

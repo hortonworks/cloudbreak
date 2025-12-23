@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.rotation.flow.chain;
 
 import java.util.Set;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.NotImplementedException;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
@@ -12,6 +13,10 @@ public interface SecretRotationFlowEventProvider {
 
     default boolean saltUpdateNeeded(SecretRotationFlowChainTriggerEvent event) {
         return event.getExecutionType() == null && event.getSecretTypes().stream().anyMatch(SecretType::saltUpdateNeeded);
+    }
+
+    default boolean skipSaltHighstate(SecretRotationFlowChainTriggerEvent event) {
+        return CollectionUtils.emptyIfNull(event.getSecretTypes()).stream().allMatch(SecretType::skipSaltHighstate);
     }
 
     Selectable getSaltUpdateTriggerEvent(SecretRotationFlowChainTriggerEvent event);

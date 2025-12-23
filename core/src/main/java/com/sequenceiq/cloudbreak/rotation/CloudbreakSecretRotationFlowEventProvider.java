@@ -21,7 +21,7 @@ public class CloudbreakSecretRotationFlowEventProvider implements SecretRotation
 
     @Override
     public Selectable getSaltUpdateTriggerEvent(SecretRotationFlowChainTriggerEvent event) {
-        return new SaltUpdateTriggerEvent(event.getResourceId(), event.accepted(), true);
+        return new SaltUpdateTriggerEvent(event.getResourceId(), event.accepted(), skipSaltHighstate(event));
     }
 
     @Override

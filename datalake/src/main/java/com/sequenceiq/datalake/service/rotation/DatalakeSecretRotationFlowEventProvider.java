@@ -27,7 +27,7 @@ public class DatalakeSecretRotationFlowEventProvider implements SecretRotationFl
     @Override
     public Selectable getSaltUpdateTriggerEvent(SecretRotationFlowChainTriggerEvent event) {
         return new SaltUpdateTriggerEvent(SaltUpdateEvent.SALT_UPDATE_EVENT.event(), event.getResourceId(),
-                ThreadBasedUserCrnProvider.getUserCrn(), event.accepted(), true);
+                ThreadBasedUserCrnProvider.getUserCrn(), event.accepted(), skipSaltHighstate(event));
     }
 
     @Override

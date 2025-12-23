@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.rotation;
 
 import static com.sequenceiq.cloudbreak.rotation.SecretTypeFlag.INTERNAL;
+import static com.sequenceiq.cloudbreak.rotation.SecretTypeFlag.SKIP_SALT_HIGHSTATE;
 import static com.sequenceiq.cloudbreak.rotation.SecretTypeFlag.SKIP_SALT_UPDATE;
 import static com.sequenceiq.cloudbreak.rotation.SecretTypeFlag.SKIP_STATUS_CHECK;
 
@@ -25,5 +26,9 @@ public interface SecretType extends SerializableRotationEnum {
 
     default boolean statusCheckNeeded() {
         return !getFlags().contains(SKIP_STATUS_CHECK);
+    }
+
+    default boolean skipSaltHighstate() {
+        return getFlags().contains(SKIP_SALT_HIGHSTATE);
     }
 }
