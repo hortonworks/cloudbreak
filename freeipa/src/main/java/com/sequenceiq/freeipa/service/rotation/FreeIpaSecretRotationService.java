@@ -78,6 +78,6 @@ public class FreeIpaSecretRotationService implements SecretRotationFlowEventProv
 
     @Override
     public Selectable getSaltUpdateTriggerEvent(SecretRotationFlowChainTriggerEvent event) {
-        return new SaltUpdateTriggerEvent(event.getResourceId(), event.accepted(), true, false, null);
+        return new SaltUpdateTriggerEvent(event.getResourceId(), event.accepted(), true, false, null, true);
     }
 }

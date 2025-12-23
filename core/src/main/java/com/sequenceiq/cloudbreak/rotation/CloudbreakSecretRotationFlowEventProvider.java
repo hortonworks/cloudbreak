@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.rotation;
 
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.salt.update.SaltUpdateEvent.SALT_UPDATE_EVENT;
-
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
@@ -14,6 +12,7 @@ import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.certrotate.ClusterCertificatesRotationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterCertificatesRotationTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.SaltUpdateTriggerEvent;
 import com.sequenceiq.cloudbreak.rotation.flow.chain.SecretRotationFlowChainTriggerEvent;
 import com.sequenceiq.cloudbreak.rotation.flow.chain.SecretRotationFlowEventProvider;
 
@@ -22,7 +21,7 @@ public class CloudbreakSecretRotationFlowEventProvider implements SecretRotation
 
     @Override
     public Selectable getSaltUpdateTriggerEvent(SecretRotationFlowChainTriggerEvent event) {
-        return new StackEvent(SALT_UPDATE_EVENT.event(), event.getResourceId(), event.accepted());
+        return new SaltUpdateTriggerEvent(event.getResourceId(), event.accepted(), true);
     }
 
     @Override
