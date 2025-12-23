@@ -1,6 +1,7 @@
 package com.sequenceiq.freeipa.service.rotation;
 
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorStateParams;
 import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorStateRetryParams;
+import com.sequenceiq.cloudbreak.orchestrator.host.RetryPredicates;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.GatewayConfigService;
@@ -27,12 +29,20 @@ public class SaltStateParamsService {
     @Inject
     private ExitCriteriaProvider exitCriteriaProvider;
 
+    @Inject
+    private RetryPredicates retryPredicates;
+
     public OrchestratorStateParams createStateParams(Stack stack, String saltState, boolean onlyOnPrimary, int maxRetry, int maxRetryOnError) {
-        return createStateParams(stack, saltState, onlyOnPrimary, maxRetry, maxRetryOnError, -1);
+        return createStateParams(stack, saltState, onlyOnPrimary, maxRetry, maxRetryOnError, -1, retryPredicates.retryTransientErrors());
     }
 
     public OrchestratorStateParams createStateParams(Stack stack, String saltState, boolean onlyOnPrimary, int maxRetry, int maxRetryOnError,
-            int sleepTime) {
+            Predicate<Exception> retryPredicate) {
+        return createStateParams(stack, saltState, onlyOnPrimary, maxRetry, maxRetryOnError, -1, retryPredicate);
+    }
+
+    public OrchestratorStateParams createStateParams(Stack stack, String saltState, boolean onlyOnPrimary, int maxRetry, int maxRetryOnError,
+            int sleepTime, Predicate<Exception> retryPredicate) {
         Set<Node> nodes = freeIpaNodeUtilService.mapInstancesToNodes(stack.getNotDeletedInstanceMetaDataSet());
         GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
         if (onlyOnPrimary) {
@@ -40,27 +50,28 @@ public class SaltStateParamsService {
                     .filter(node -> node.getHostname().equals(primaryGatewayConfig.getHostname()))
                     .collect(Collectors.toSet());
         }
-        return getOrchestratorStateParams(stack, saltState, maxRetry, maxRetryOnError, sleepTime, primaryGatewayConfig, nodes);
+        OrchestratorStateRetryParams orchestratorStateRetryParams = getOrchestratorStateRetryParams(maxRetry, maxRetryOnError, sleepTime, retryPredicate);
+        return getOrchestratorStateParams(stack, saltState, primaryGatewayConfig, nodes, orchestratorStateRetryParams);
     }
 
-    public OrchestratorStateParams createStateParamsForReachableNodes(Stack stack, String saltState, int maxRetry, int maxRetryOnError) {
-        Set<Node> nodes = freeIpaNodeUtilService.mapInstancesToNodes(stack.getNotDeletedInstanceMetaDataSet());
-        GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
-        return getOrchestratorStateParams(stack, saltState, maxRetry, maxRetryOnError, -1, primaryGatewayConfig, nodes);
-    }
-
-    private OrchestratorStateParams getOrchestratorStateParams(Stack stack, String saltState, int maxRetry, int maxRetryOnError, int sleepTime,
-            GatewayConfig primaryGatewayConfig, Set<Node> targetNodes) {
+    private OrchestratorStateParams getOrchestratorStateParams(Stack stack, String saltState,
+            GatewayConfig primaryGatewayConfig, Set<Node> targetNodes, OrchestratorStateRetryParams retryParams) {
         OrchestratorStateParams stateParams = new OrchestratorStateParams();
         stateParams.setState(saltState);
         stateParams.setPrimaryGatewayConfig(primaryGatewayConfig);
         stateParams.setTargetHostNames(targetNodes.stream().map(Node::getHostname).collect(Collectors.toSet()));
+        stateParams.setStateRetryParams(retryParams);
+        stateParams.setExitCriteriaModel(exitCriteriaProvider.get(stack));
+        return stateParams;
+    }
+
+    private OrchestratorStateRetryParams getOrchestratorStateRetryParams(int maxRetry, int maxRetryOnError, int sleepTime,
+            Predicate<Exception> retryPredicate) {
         OrchestratorStateRetryParams retryParams = new OrchestratorStateRetryParams();
         retryParams.setMaxRetryOnError(maxRetryOnError);
         retryParams.setMaxRetry(maxRetry);
         retryParams.setSleepTime(sleepTime);
-        stateParams.setStateRetryParams(retryParams);
-        stateParams.setExitCriteriaModel(exitCriteriaProvider.get(stack));
-        return stateParams;
+        retryParams.setRetryPredicate(retryPredicate);
+        return retryParams;
     }
 }

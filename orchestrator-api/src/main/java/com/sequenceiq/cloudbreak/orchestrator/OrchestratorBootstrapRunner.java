@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.orchestrator;
 
 import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.function.Predicate;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,14 +49,22 @@ public class OrchestratorBootstrapRunner implements Callable<Boolean> {
 
     private final int maxRetryOnError;
 
+    private final Predicate<Exception> retryPredicate;
+
     public OrchestratorBootstrapRunner(OrchestratorBootstrap orchestratorBootstrap, ExitCriteria exitCriteria,
             ExitCriteriaModel exitCriteriaModel, Map<String, String> mdcReplica) {
-        this(orchestratorBootstrap, exitCriteria, exitCriteriaModel, mdcReplica, MAX_RETRY_COUNT, SLEEP_TIME, MAX_RETRY_ON_ERROR);
+        this(orchestratorBootstrap, exitCriteria, exitCriteriaModel, mdcReplica, MAX_RETRY_COUNT, SLEEP_TIME, MAX_RETRY_ON_ERROR, null);
     }
 
     public OrchestratorBootstrapRunner(OrchestratorBootstrap orchestratorBootstrap, ExitCriteria exitCriteria,
             ExitCriteriaModel exitCriteriaModel, Map<String, String> mdcReplica,
             int maxRetryCount, int sleepTime, int maxRetryOnError) {
+        this(orchestratorBootstrap, exitCriteria, exitCriteriaModel, mdcReplica, maxRetryCount, sleepTime, maxRetryOnError, null);
+    }
+
+    public OrchestratorBootstrapRunner(OrchestratorBootstrap orchestratorBootstrap, ExitCriteria exitCriteria,
+            ExitCriteriaModel exitCriteriaModel, Map<String, String> mdcReplica,
+            int maxRetryCount, int sleepTime, int maxRetryOnError, Predicate<Exception> retryPredicate) {
         this.orchestratorBootstrap = orchestratorBootstrap;
         mdcMap = mdcReplica;
         this.exitCriteria = exitCriteria;
@@ -63,6 +72,7 @@ public class OrchestratorBootstrapRunner implements Callable<Boolean> {
         this.maxRetryCount = maxRetryCount;
         this.sleepTime = sleepTime;
         this.maxRetryOnError = maxRetryOnError;
+        this.retryPredicate = retryPredicate;
     }
 
     @Override
@@ -114,14 +124,22 @@ public class OrchestratorBootstrapRunner implements Callable<Boolean> {
             } catch (Exception ex) {
                 actualException = ex;
                 String elapsedTimeLog = createElapseTimeLog(initialStartTime, startTime);
-                LOGGER.debug("Orchestrator component {} failed to start, retrying [{}/{}], error count [{}/{}]. {}, Reason: {}, additional info: {}",
-                        type, retryCount, maxRetryCount, errorCount, maxRetryOnError, elapsedTimeLog, actualException, orchestratorBootstrap, actualException);
-                retryCount++;
-                errorCount++;
-                if (belowAttemptThreshold(retryCount, errorCount)) {
-                    trySleeping();
-                } else {
+                boolean shouldRetryException = shouldRetry(ex);
+                if (!shouldRetryException) {
+                    LOGGER.info("Orchestrator component {} failed with non-retryable error. {}, Reason: {}, additional info: {}",
+                            type, elapsedTimeLog, actualException, orchestratorBootstrap);
                     success = Boolean.FALSE;
+                } else {
+                    LOGGER.debug("Orchestrator component {} failed to start, retrying [{}/{}], error count [{}/{}]. {}, Reason: {}, additional info: {}",
+                            type, retryCount, maxRetryCount, errorCount, maxRetryOnError, elapsedTimeLog, actualException, orchestratorBootstrap,
+                            actualException);
+                    retryCount++;
+                    errorCount++;
+                    if (belowAttemptThreshold(retryCount, errorCount)) {
+                        trySleeping();
+                    } else {
+                        success = Boolean.FALSE;
+                    }
                 }
             }
         }
@@ -192,5 +210,12 @@ public class OrchestratorBootstrapRunner implements Callable<Boolean> {
         }
         LOGGER.debug("isExitNeeded: {}", exitNeeded);
         return exitNeeded;
+    }
+
+    private boolean shouldRetry(Exception exception) {
+        if (retryPredicate == null) {
+            return true;
+        }
+        return retryPredicate.test(exception);
     }
 }

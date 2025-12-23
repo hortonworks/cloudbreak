@@ -46,12 +46,18 @@ public class SaltRunner {
             OrchestratorStateRetryParams orchestratorStateRetryParams) {
         int sleepTime = orchestratorStateRetryParams.getSleepTime() == -1 ? SLEEP_TIME : orchestratorStateRetryParams.getSleepTime();
         return runner(bootstrap, exitCriteria, exitCriteriaModel, orchestratorStateRetryParams.getMaxRetry(),
-                orchestratorStateRetryParams.getMaxRetryOnError(), sleepTime);
+                orchestratorStateRetryParams.getMaxRetryOnError(), sleepTime, orchestratorStateRetryParams.getRetryPredicate());
     }
 
     private Callable<Boolean> runner(OrchestratorBootstrap bootstrap, ExitCriteria exitCriteria, ExitCriteriaModel exitCriteriaModel, int maxRetry,
             int maxRetryOnError, int sleepTime) {
         return new OrchestratorBootstrapRunner(bootstrap, exitCriteria, exitCriteriaModel, MDC.getCopyOfContextMap(), maxRetry, sleepTime, maxRetryOnError);
+    }
+
+    private Callable<Boolean> runner(OrchestratorBootstrap bootstrap, ExitCriteria exitCriteria, ExitCriteriaModel exitCriteriaModel, int maxRetry,
+            int maxRetryOnError, int sleepTime, java.util.function.Predicate<Exception> retryPredicate) {
+        return new OrchestratorBootstrapRunner(bootstrap, exitCriteria, exitCriteriaModel, MDC.getCopyOfContextMap(), maxRetry, sleepTime,
+                maxRetryOnError, retryPredicate);
     }
 
     private int calculateMaxRetryOnError(int maxRetry) {
