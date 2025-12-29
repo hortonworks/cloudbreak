@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.salt.update;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import jakarta.inject.Inject;
 
@@ -30,12 +29,11 @@ import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StartAmbariServ
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StartClusterManagerServicesSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.UploadRecipesRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.recipe.UploadRecipesSuccess;
+import com.sequenceiq.cloudbreak.util.SaltUpdateSkipHighstateFlagUtil;
 import com.sequenceiq.flow.core.PayloadConverter;
 
 @Configuration
 public class SaltUpdateActions {
-
-    private static final String SKIP_HIGHSTATE = "skipHighstate";
 
     @Inject
     private SaltUpdateService saltUpdateService;
@@ -46,8 +44,7 @@ public class SaltUpdateActions {
 
             @Override
             protected void prepareExecution(SaltUpdateTriggerEvent payload, Map<Object, Object> variables) {
-                Boolean skipHighstate = Optional.ofNullable(payload.isSkipHighstate()).orElse(Boolean.FALSE);
-                variables.put(SKIP_HIGHSTATE, skipHighstate);
+                SaltUpdateSkipHighstateFlagUtil.putToVariables(payload.isSkipHighstate(), variables);
             }
 
             @Override
@@ -88,17 +85,7 @@ public class SaltUpdateActions {
         return new AbstractClusterAction<>(UploadRecipesSuccess.class) {
             @Override
             protected void doExecute(ClusterViewContext context, UploadRecipesSuccess payload, Map<Object, Object> variables) {
-                if (skipHighstate(variables)) {
-                    sendEvent(context, new StartClusterManagerServicesSuccess(context.getStackId()));
-                } else {
-                    sendEvent(context, new KeytabConfigurationRequest(context.getStackId(), Boolean.FALSE));
-                }
-            }
-
-            private static Boolean skipHighstate(Map<Object, Object> variables) {
-                return Optional.ofNullable(variables.get(SKIP_HIGHSTATE))
-                        .map(Boolean.class::cast)
-                        .orElse(Boolean.FALSE);
+                sendEvent(context, new KeytabConfigurationRequest(context.getStackId(), Boolean.FALSE));
             }
         };
     }
@@ -108,14 +95,12 @@ public class SaltUpdateActions {
         return new AbstractClusterAction<>(KeytabConfigurationSuccess.class) {
             @Override
             protected void doExecute(ClusterViewContext context, KeytabConfigurationSuccess payload, Map<Object, Object> variables) {
-                saltUpdateService.startingClusterServices(context.getStackId());
-                sendEvent(context);
-            }
-
-            @Override
-            protected Selectable createRequest(ClusterViewContext context) {
-                return new StartAmbariServicesRequest(context.getStackId(),
-                        false, false);
+                if (SaltUpdateSkipHighstateFlagUtil.getFromVariables(variables)) {
+                    sendEvent(context, new StartClusterManagerServicesSuccess(context.getStackId()));
+                } else {
+                    saltUpdateService.startingClusterServices(context.getStackId());
+                    sendEvent(context, new StartAmbariServicesRequest(context.getStackId(), false, false));
+                }
             }
         };
     }

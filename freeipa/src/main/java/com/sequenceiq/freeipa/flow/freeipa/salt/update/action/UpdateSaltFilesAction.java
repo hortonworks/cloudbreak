@@ -1,7 +1,6 @@
 package com.sequenceiq.freeipa.flow.freeipa.salt.update.action;
 
 import java.util.Map;
-import java.util.Optional;
 
 import jakarta.inject.Inject;
 
@@ -9,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.util.SaltUpdateSkipHighstateFlagUtil;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.flow.OperationAwareAction;
 import com.sequenceiq.freeipa.flow.chain.FlowChainAwareAction;
@@ -31,8 +31,7 @@ public class UpdateSaltFilesAction extends AbstractStackProvisionAction<SaltUpda
 
     @Override
     protected void prepareExecution(SaltUpdateTriggerEvent payload, Map<Object, Object> variables) {
-        Boolean skipHighstate = Optional.ofNullable(payload.isSkipHighstate()).orElse(Boolean.FALSE);
-        variables.put(SaltUpdateActions.SKIP_HIGHSTATE, skipHighstate);
+        SaltUpdateSkipHighstateFlagUtil.putToVariables(payload.isSkipHighstate(), variables);
     }
 
     @Override

@@ -46,10 +46,6 @@ public class SaltUpdateFlowConfig extends StackStatusFinalizerAbstractFlowConfig
                     .to(RUN_HIGHSTATE_STATE)
                     .event(UPDATE_ORCHESTRATOR_CONFIG_FINISHED_EVENT)
                     .failureEvent(UPDATE_ORCHESTRATOR_CONFIG_FAILED_EVENT)
-                    .from(UPDATE_ORCHESTRATOR_CONFIG_STATE)
-                    .to(SALT_UPDATE_FINISHED_STATE)
-                    .event(HIGHSTATE_FINISHED_EVENT)
-                    .failureEvent(UPDATE_ORCHESTRATOR_CONFIG_FAILED_EVENT)
 
                     .from(RUN_HIGHSTATE_STATE)
                     .to(SALT_UPDATE_FINISHED_STATE)

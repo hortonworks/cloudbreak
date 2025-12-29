@@ -1,7 +1,6 @@
 package com.sequenceiq.freeipa.flow.freeipa.salt.update.action;
 
 import java.util.Map;
-import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,7 +8,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.action.Action;
 
-import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.util.SaltUpdateSkipHighstateFlagUtil;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.bootstrap.BootstrapMachinesSuccess;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.orchestrator.OrchestratorConfigRequest;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.orchestrator.OrchestratorConfigSuccess;
@@ -21,8 +20,6 @@ import com.sequenceiq.freeipa.flow.stack.provision.action.AbstractStackProvision
 
 @Configuration
 public class SaltUpdateActions {
-
-    public static final String SKIP_HIGHSTATE = "skipHighstate";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SaltUpdateActions.class);
 
@@ -38,17 +35,7 @@ public class SaltUpdateActions {
             @Override
             protected void doExecute(StackContext context, BootstrapMachinesSuccess payload, Map<Object, Object> variables) {
                 LOGGER.info("Reupload pillar files");
-                if (skipHighstate(variables)) {
-                    sendEvent(context, new InstallFreeIpaServicesSuccess(context.getStack().getId()));
-                } else {
-                    sendEvent(context, new OrchestratorConfigRequest(context.getStack().getId()));
-                }
-            }
-
-            private static Boolean skipHighstate(Map<Object, Object> variables) {
-                return Optional.ofNullable(variables.get(SKIP_HIGHSTATE))
-                        .map(Boolean.class::cast)
-                        .orElse(Boolean.FALSE);
+                sendEvent(context, new OrchestratorConfigRequest(context.getStack().getId()));
             }
         };
     }
@@ -59,12 +46,11 @@ public class SaltUpdateActions {
             @Override
             protected void doExecute(StackContext context, OrchestratorConfigSuccess payload, Map<Object, Object> variables) throws Exception {
                 LOGGER.info("Run highstate");
-                sendEvent(context);
-            }
-
-            @Override
-            protected Selectable createRequest(StackContext context) {
-                return new InstallFreeIpaServicesRequest(context.getStack().getId());
+                if (SaltUpdateSkipHighstateFlagUtil.getFromVariables(variables)) {
+                    sendEvent(context, new InstallFreeIpaServicesSuccess(context.getStack().getId()));
+                } else {
+                    sendEvent(context, new InstallFreeIpaServicesRequest(context.getStack().getId()));
+                }
             }
         };
     }
