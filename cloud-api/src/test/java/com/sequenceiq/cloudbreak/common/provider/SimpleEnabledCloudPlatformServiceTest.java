@@ -71,5 +71,12 @@ public class SimpleEnabledCloudPlatformServiceTest {
         public Variant variant() {
             return Variant.variant(name);
         }
+
+        @Override
+        public String[] variants() {
+            return new String[] {
+                    name
+            };
+        }
     }
 }

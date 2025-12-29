@@ -47,4 +47,9 @@ public class GcpAvailabilityZoneConnector implements AvailabilityZoneConnector, 
     public Variant variant() {
         return GcpConstants.GCP_VARIANT;
     }
+
+    @Override
+    public String[] variants() {
+        return GcpConstants.VARIANTS;
+    }
 }

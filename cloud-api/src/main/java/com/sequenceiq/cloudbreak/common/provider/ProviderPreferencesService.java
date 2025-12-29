@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -91,6 +92,12 @@ public class ProviderPreferencesService {
             }
         }
         return result;
+    }
+
+    public Optional<CloudConstant> cloudConstantByName(String name) {
+        return cloudConstants.stream()
+                .filter(cloudConstant -> cloudConstant.platform().value().equalsIgnoreCase(name))
+                .findFirst();
     }
 
     public boolean isGovCloudDeployment() {

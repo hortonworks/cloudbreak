@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,10 +27,11 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.TagsV4Request;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
-import com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants;
+import com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants.AwsVariant;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.provider.ProviderPreferencesService;
 import com.sequenceiq.cloudbreak.common.type.Versioned;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.TelemetryConverter;
 import com.sequenceiq.cloudbreak.service.datalake.SdxClientService;
@@ -95,6 +97,9 @@ public class DistroXV1RequestToStackV4RequestConverter {
     @Inject
     private EntitlementService entitlementService;
 
+    @Inject
+    private ProviderPreferencesService providerPreferencesService;
+
     public StackV4Request convert(DistroXV1Request source) {
         DetailedEnvironmentResponse environment = Optional.ofNullable(environmentClientService.getByName(source.getEnvironmentName()))
                 .orElseThrow(() -> new BadRequestException("No environment name provided hence unable to obtain some important data"));
@@ -151,25 +156,45 @@ public class DistroXV1RequestToStackV4RequestConverter {
     }
 
     private boolean enforceAwsBasedOnValueProvided(String cloudProvider, String variant, boolean govCloud, boolean multiAzEnabled) {
-        return CloudPlatform.AWS.name().equals(cloudProvider)
+        return CloudPlatform.AWS.name().equals(cloudProvider) && variantAvailable(variant, govCloud, multiAzEnabled);
+    }
+
+    private void calculateVariant(DetailedEnvironmentResponse environment, DistroXV1Request source, StackV4Request request, String runtime) {
+        Boolean govCloud = environment.getCredential().getGovCloud();
+        String cloudPlatform = environment.getCloudPlatform();
+        String variant = source.getVariant();
+        if (enforceAwsNativeForSingleAz(cloudPlatform, govCloud)) {
+            request.setVariant(AwsVariant.AWS_NATIVE_VARIANT.variant().value());
+        } else if (enforceAwsNativeBasedOnRuntime(cloudPlatform, runtime, govCloud)) {
+            request.setVariant(AwsVariant.AWS_NATIVE_VARIANT.variant().value());
+        } else {
+            request.setVariant(variant);
+        }
+
+        if (enforceAwsBasedOnValueProvided(cloudPlatform, variant, govCloud, source.isEnableMultiAz())
+                && variantSupported(cloudPlatform, variant)) {
+            request.setVariant(variant);
+        }
+    }
+
+    private boolean variantAvailable(String variant, boolean govCloud,  boolean multiAzEnabled) {
+        return StringUtils.isNotBlank(variant)
                 && variant != null
                 && !govCloud
                 && !multiAzEnabled;
     }
 
-    private void calculateVariant(DetailedEnvironmentResponse environment, DistroXV1Request source, StackV4Request request, String runtime) {
-        if (enforceAwsNativeForSingleAz(environment.getCloudPlatform(), environment.getCredential().getGovCloud())) {
-            request.setVariant(AwsConstants.AwsVariant.AWS_NATIVE_VARIANT.variant().value());
-        } else if (enforceAwsNativeBasedOnRuntime(environment.getCloudPlatform(), runtime, environment.getCredential().getGovCloud())) {
-            request.setVariant(AwsConstants.AwsVariant.AWS_NATIVE_VARIANT.variant().value());
-        } else {
-            request.setVariant(source.getVariant());
-        }
-
-        if (enforceAwsBasedOnValueProvided(environment.getCloudPlatform(), source.getVariant(), environment.getCredential().getGovCloud(),
-                source.isEnableMultiAz())) {
-            request.setVariant(source.getVariant());
-        }
+    private boolean variantSupported(String cloudPlatform, String variant) {
+        providerPreferencesService.cloudConstantByName(cloudPlatform).ifPresent(cloudConstant -> {
+            if (!cloudConstant.hasVariants(variant)) {
+                throw new BadRequestException(String.format("Variant %s is not supported for cloud platform %s. Supported Variants are: %s",
+                        variant,
+                        cloudPlatform,
+                        String.join(", ", cloudConstant.variants())
+                ));
+            }
+        });
+        return true;
     }
 
     private void checkMultipleGatewayNodes(DistroXV1Request distroXV1Request) {

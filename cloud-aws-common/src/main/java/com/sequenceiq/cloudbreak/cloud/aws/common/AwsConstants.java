@@ -10,6 +10,12 @@ import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 @Service
 public class AwsConstants implements CloudConstant {
 
+    public static final String[] VARIANTS = new String[] {
+                CloudConstants.AWS,
+                CloudConstants.AWS_NATIVE_GOV,
+                CloudConstants.AWS_NATIVE
+    };
+
     public static final Platform AWS_PLATFORM = Platform.platform(CloudConstants.AWS);
 
     public static final Variant AWS_DEFAULT_VARIANT = AwsVariant.AWS_VARIANT.variant();
@@ -25,6 +31,11 @@ public class AwsConstants implements CloudConstant {
     @Override
     public Variant variant() {
         return AwsVariant.AWS_VARIANT.variant();
+    }
+
+    @Override
+    public String[] variants() {
+        return VARIANTS;
     }
 
     public enum AwsVariant {

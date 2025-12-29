@@ -3,6 +3,7 @@ package com.sequenceiq.distrox.v1.distrox.converter;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -14,6 +15,7 @@ import static org.mockito.Mockito.when;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -35,8 +37,14 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.TagsV4Request;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.cloud.CloudConstant;
+import com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
+import com.sequenceiq.cloudbreak.cloud.model.Platform;
+import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.model.network.SubnetType;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.provider.ProviderPreferencesService;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.TelemetryConverter;
 import com.sequenceiq.cloudbreak.service.datalake.SdxClientService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
@@ -105,6 +113,9 @@ class DistroXV1RequestToStackV4RequestConverterTest {
     @Mock
     private EntitlementService entitlementService;
 
+    @Mock
+    private ProviderPreferencesService providerPreferencesService;
+
     @InjectMocks
     private DistroXV1RequestToStackV4RequestConverter underTest;
 
@@ -170,6 +181,7 @@ class DistroXV1RequestToStackV4RequestConverterTest {
         SdxClusterResponse sdxClusterResponse = new SdxClusterResponse();
         sdxClusterResponse.setRuntime("7.3.1");
         when(sdxClientService.getByEnvironmentCrn(anyString())).thenReturn(List.of(sdxClusterResponse));
+        when(providerPreferencesService.cloudConstantByName(any())).thenReturn(Optional.of(new AwsMockConstants()));
 
         DistroXV1Request source = new DistroXV1Request();
         source.setEnvironmentName("envname");
@@ -178,14 +190,42 @@ class DistroXV1RequestToStackV4RequestConverterTest {
         databaseRequest.setAvailabilityType(DistroXDatabaseAvailabilityType.HA);
         databaseRequest.setDatabaseEngineVersion("13");
         source.setExternalDatabase(databaseRequest);
+
         StackV4Request convert = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.convert(source));
+
         assertThat(convert.getExternalDatabase()).isNotNull();
         assertThat(convert.getExternalDatabase().getAvailabilityType()).isEqualTo(DatabaseAvailabilityType.HA);
         assertThat(convert.getExternalDatabase().getDatabaseEngineVersion()).isEqualTo("13");
-
         when(entitlementService.enforceAwsNativeForSingleAzDatahubEnabled(anyString())).thenReturn(Boolean.FALSE);
         convert = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.convert(source));
         assertThat(convert.getVariant()).isEqualTo("AWS");
+    }
+
+    @Test
+    void testConvertWithAwsNativeVariantIsWrong() {
+        DetailedEnvironmentResponse environmentResponse = createAwsEnvironment();
+        when(environmentClientService.getByName(anyString())).thenReturn(environmentResponse);
+        when(environmentResponse.getCredential().getGovCloud()).thenReturn(false);
+        when(networkConverter.convertToNetworkV4Request(any())).thenReturn(createAwsNetworkV4Request());
+        when(databaseRequestConverter.convert(any(DistroXDatabaseRequest.class))).thenReturn(createDatabaseRequest());
+        when(entitlementService.enforceAwsNativeForSingleAzDatahubEnabled(anyString())).thenReturn(Boolean.TRUE);
+        SdxClusterResponse sdxClusterResponse = new SdxClusterResponse();
+        sdxClusterResponse.setRuntime("7.3.1");
+        when(sdxClientService.getByEnvironmentCrn(anyString())).thenReturn(List.of(sdxClusterResponse));
+        when(providerPreferencesService.cloudConstantByName(any())).thenReturn(Optional.of(new AwsMockConstants()));
+
+        DistroXV1Request source = new DistroXV1Request();
+        source.setEnvironmentName("envname");
+        source.setVariant("AWS_NOT_VARIANT");
+        DistroXDatabaseRequest databaseRequest = new DistroXDatabaseRequest();
+        databaseRequest.setAvailabilityType(DistroXDatabaseAvailabilityType.HA);
+        databaseRequest.setDatabaseEngineVersion("13");
+        source.setExternalDatabase(databaseRequest);
+        Exception exception = assertThrows(BadRequestException.class, () -> {
+            ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.convert(source));
+        });
+        assertThat(exception.getMessage()).isEqualTo("Variant AWS_NOT_VARIANT is not supported for cloud platform AWS. " +
+                "Supported Variants are: AWS, AWS_NATIVE_GOV, AWS_NATIVE");
     }
 
     @Test
@@ -654,6 +694,24 @@ class DistroXV1RequestToStackV4RequestConverterTest {
         EnvironmentNetworkAwsParams awsNetwork = new EnvironmentNetworkAwsParams();
         awsNetwork.setVpcId("myvpc");
         return awsNetwork;
+    }
+
+    public class AwsMockConstants implements CloudConstant {
+
+        @Override
+        public String[] variants() {
+            return AwsConstants.VARIANTS;
+        }
+
+        @Override
+        public Platform platform() {
+            return AwsConstants.AWS_PLATFORM;
+        }
+
+        @Override
+        public Variant variant() {
+            return AwsConstants.AWS_DEFAULT_VARIANT;
+        }
     }
 
 }

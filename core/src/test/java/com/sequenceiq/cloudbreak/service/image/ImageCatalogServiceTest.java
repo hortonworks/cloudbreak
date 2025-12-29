@@ -63,6 +63,7 @@ import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.cloud.CloudConstant;
+import com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
@@ -1455,6 +1456,11 @@ public class ImageCatalogServiceTest {
         @Override
         public Variant variant() {
             return Variant.variant("AWS");
+        }
+
+        @Override
+        public String[] variants() {
+            return AwsConstants.VARIANTS;
         }
     }
 }

@@ -7,9 +7,14 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.cloud.CloudConstant;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
+import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 
 @Service
 public class AzureConstants implements CloudConstant {
+
+    public static final String[] VARIANTS = new String[] {
+            CloudConstants.AZURE,
+    };
 
     public static final Platform PLATFORM = Platform.platform(AZURE);
 
@@ -29,5 +34,10 @@ public class AzureConstants implements CloudConstant {
     @Override
     public Variant variant() {
         return VARIANT;
+    }
+
+    @Override
+    public String[] variants() {
+        return VARIANTS;
     }
 }

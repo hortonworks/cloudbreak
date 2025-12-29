@@ -5,10 +5,15 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.cloud.CloudConstant;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
+import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 
 @Service
 class MockConstants implements CloudConstant {
     public static final String MOCK_ENDPOINT_PARAMETER = "mockEndpoint";
+
+    public static final String[] VARIANTS = new String[] {
+            CloudConstants.MOCK,
+    };
 
     static final String MOCK = "MOCK";
 
@@ -27,5 +32,10 @@ class MockConstants implements CloudConstant {
     @Override
     public Variant variant() {
         return MOCK_VARIANT;
+    }
+
+    @Override
+    public String[] variants() {
+        return VARIANTS;
     }
 }

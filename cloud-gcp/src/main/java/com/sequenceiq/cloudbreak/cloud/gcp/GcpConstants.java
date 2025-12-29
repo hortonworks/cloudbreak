@@ -7,9 +7,14 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.cloud.CloudConstant;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
+import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 
 @Service
 public class GcpConstants implements CloudConstant {
+
+    public static final String[] VARIANTS = new String[] {
+            CloudConstants.GCP,
+    };
 
     public static final Platform GCP_PLATFORM = Platform.platform(GCP);
 
@@ -26,5 +31,10 @@ public class GcpConstants implements CloudConstant {
     @Override
     public Variant variant() {
         return GCP_VARIANT;
+    }
+
+    @Override
+    public String[] variants() {
+        return VARIANTS;
     }
 }
