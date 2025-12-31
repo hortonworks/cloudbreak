@@ -20,7 +20,7 @@
     },
     "DBInstanceClassParameter": {
         "Type": "String",
-        "Default": "db.t3.medium",
+        "Default": "db.m5.large",
         "Description": "DB instance class"
     },
     "DBInstanceIdentifierParameter": {

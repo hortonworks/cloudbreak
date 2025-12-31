@@ -22,6 +22,7 @@ import software.amazon.awssdk.services.rds.model.DescribeDbInstancesRequest;
 import software.amazon.awssdk.services.rds.model.DescribeDbInstancesResponse;
 import software.amazon.awssdk.services.rds.model.DescribeDbParameterGroupsRequest;
 import software.amazon.awssdk.services.rds.model.DescribeDbParameterGroupsResponse;
+import software.amazon.awssdk.services.rds.model.DescribeOrderableDbInstanceOptionsRequest;
 import software.amazon.awssdk.services.rds.model.InvalidDbParameterGroupStateException;
 import software.amazon.awssdk.services.rds.model.ModifyDbInstanceRequest;
 import software.amazon.awssdk.services.rds.model.ModifyDbInstanceResponse;
@@ -34,6 +35,7 @@ import software.amazon.awssdk.services.rds.model.StartDbInstanceRequest;
 import software.amazon.awssdk.services.rds.model.StartDbInstanceResponse;
 import software.amazon.awssdk.services.rds.model.StopDbInstanceRequest;
 import software.amazon.awssdk.services.rds.model.StopDbInstanceResponse;
+import software.amazon.awssdk.services.rds.paginators.DescribeOrderableDBInstanceOptionsIterable;
 import software.amazon.awssdk.services.rds.waiters.RdsWaiter;
 
 public class AmazonRdsClient extends AmazonClient {
@@ -64,6 +66,11 @@ public class AmazonRdsClient extends AmazonClient {
 
     public DescribeDbInstancesResponse describeDBInstances(DescribeDbInstancesRequest describeDBInstancesRequest) {
         return client.describeDBInstances(describeDBInstancesRequest);
+    }
+
+    public DescribeOrderableDBInstanceOptionsIterable describeOrderableDbInstanceOptionsResponse(
+            DescribeOrderableDbInstanceOptionsRequest describeOrderableDbInstanceOptionsRequest) {
+        return client.describeOrderableDBInstanceOptionsPaginator(describeOrderableDbInstanceOptionsRequest);
     }
 
     public boolean isDbParameterGroupPresent(String dbParameterGroupName) {

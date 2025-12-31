@@ -55,6 +55,7 @@ import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfig;
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfigs;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.CloudDatabaseVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKeys;
 import com.sequenceiq.cloudbreak.cloud.model.CloudGateWays;
 import com.sequenceiq.cloudbreak.cloud.model.CloudIpPools;
@@ -67,6 +68,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudSshKeys;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.Coordinate;
+import com.sequenceiq.cloudbreak.cloud.model.DefaultPlatformDatabaseCapabilities;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStoreMetadata;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformDBStorageCapabilities;
@@ -304,6 +306,11 @@ public class AzurePlatformResources implements PlatformResources {
         return virtualMachinesNonExtended(cloudCredential, region, filters);
     }
 
+    @Override
+    public CloudDatabaseVmTypes databaseVirtualMachines(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
+        return azureDatabaseCapabilityService.databaseVmTypes(cloudCredential, region);
+    }
+
     @Cacheable(cacheNames = "cloudResourceVmTypeCache", key = "#cloudCredential?.id + #region.getRegionName() + #filters")
     public CloudVmTypes virtualMachinesNonExtended(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
         AzureClient client = azureClientService.getClient(cloudCredential);
@@ -399,6 +406,11 @@ public class AzurePlatformResources implements PlatformResources {
             "#cloudCredential?.id + #region.getRegionName() + #filters[T(com.sequenceiq.cloudbreak.cloud.CloudParameterConst).DATABASE_TYPE] + 'databases'")
     public PlatformDatabaseCapabilities databaseCapabilities(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
         return azureDatabaseCapabilityService.databaseCapabilities(cloudCredential, region, filters);
+    }
+
+    @Override
+    public DefaultPlatformDatabaseCapabilities defaultDatabaseCapabilities() {
+        return azureDatabaseCapabilityService.defaultPlatformDatabaseCapabilities();
     }
 
     @Override

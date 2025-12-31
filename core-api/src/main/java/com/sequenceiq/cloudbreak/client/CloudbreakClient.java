@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.restartinstances.RestartInstanc
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.DatalakeV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.DiskUpdateEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.support.SupportV1Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.userprofile.UserProfileV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.UtilV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.WorkspaceAwareUtilV4Endpoint;
@@ -89,4 +90,6 @@ public interface CloudbreakClient {
     AuthorizationUtilEndpoint authorizationUtilEndpoint();
 
     EventV4Endpoint eventV4Endpoint();
+
+    SupportV1Endpoint supportV1Endpoint();
 }

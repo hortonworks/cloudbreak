@@ -44,6 +44,7 @@ import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.distrox.v1.distrox.service.InternalClusterTemplateValidator;
 
 @Service
@@ -228,6 +229,37 @@ public class DefaultClusterTemplateCache {
             defaultTemplates.put(key, clusterTemplate);
         });
         return defaultTemplates;
+    }
+
+    public Set<String> getDefaultInstanceTypesFromTemplates(String cloudPlatform, Architecture architecture) {
+        return defaultClusterTemplateRequests()
+                .entrySet()
+                .stream()
+                .map(e -> collectInstancesForPlatform(cloudPlatform, architecture, e))
+                .flatMap(Set::stream)
+                .collect(Collectors.toSet());
+    }
+
+    private Set<String> collectInstancesForPlatform(String cloudPlatform, Architecture architecture,
+            Map.Entry<String, Pair<DefaultClusterTemplateV4Request, String>> entry) {
+        if (isPlatformMatch(cloudPlatform, entry) && isArchitectureMatch(architecture, entry)) {
+            return entry.getValue().getKey().getDistroXTemplate().getInstanceGroups()
+                    .stream()
+                    .map(template -> template.getTemplate().getInstanceType())
+                    .collect(Collectors.toSet());
+        } else {
+            return Set.of();
+        }
+    }
+
+    private boolean isArchitectureMatch(Architecture architecture, Map.Entry<String, Pair<DefaultClusterTemplateV4Request, String>> entry) {
+        String templateArchitecture = entry.getValue().getKey().getDistroXTemplate().getArchitecture();
+        templateArchitecture = templateArchitecture == null ? Architecture.X86_64.name() : templateArchitecture;
+        return architecture.name().equalsIgnoreCase(templateArchitecture);
+    }
+
+    private boolean isPlatformMatch(String cloudPlatform, Map.Entry<String, Pair<DefaultClusterTemplateV4Request, String>> entry) {
+        return cloudPlatform != null && entry.getValue().getKey().getCloudPlatform().equalsIgnoreCase(cloudPlatform);
     }
 
     public List<ClusterTemplate> defaultClusterTemplatesByNames(Collection<String> templateNamesMissingFromDb, Set<Blueprint> blueprints) {

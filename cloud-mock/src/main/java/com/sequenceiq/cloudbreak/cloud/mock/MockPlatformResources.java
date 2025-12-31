@@ -30,6 +30,7 @@ import com.sequenceiq.cloudbreak.cloud.PlatformResources;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfigs;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.CloudDatabaseVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKeys;
 import com.sequenceiq.cloudbreak.cloud.model.CloudGateWays;
 import com.sequenceiq.cloudbreak.cloud.model.CloudIpPools;
@@ -261,6 +262,11 @@ public class MockPlatformResources implements PlatformResources {
     @Cacheable(cacheNames = "cloudResourceVmTypeCache", key = "#cloudCredential?.id + #region.getRegionName()")
     public CloudVmTypes virtualMachines(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
         return new CloudVmTypes(vmTypes, defaultVmTypes);
+    }
+
+    @Override
+    public CloudDatabaseVmTypes databaseVirtualMachines(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
+        return new CloudDatabaseVmTypes();
     }
 
     @Override

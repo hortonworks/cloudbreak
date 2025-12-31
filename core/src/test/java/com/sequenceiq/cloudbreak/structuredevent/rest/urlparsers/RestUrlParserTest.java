@@ -104,6 +104,7 @@ public class RestUrlParserTest {
             "/imd_update",
             "internal/get_database_certificate_status",
             "internal/manage_db_user",
+            "support/internal/defaults",
             "internal/get_clusters_names_by_encryption_profile"
     };
 

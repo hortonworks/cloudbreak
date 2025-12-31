@@ -5,6 +5,7 @@ import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
@@ -45,5 +46,13 @@ public interface SupportV4Endpoint {
     SslCertificateEntryResponse getLatestCertificate(
             @QueryParam("cloudPlatform") String cloudPlatform,
             @QueryParam("region") String region);
+
+    @GET
+    @Path("/internal/defaults/{cloudPlatform}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "get instances by platform",
+            operationId = "getPlatformSupportRequirementsByPlatform",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    RedBeamsPlatformSupportRequirements getInstanceTypesByPlatform(@PathParam("cloudPlatform") String cloudPlatform);
 
 }

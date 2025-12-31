@@ -16,6 +16,7 @@ import com.sequenceiq.sdx.api.endpoint.SdxRecoveryEndpoint;
 import com.sequenceiq.sdx.api.endpoint.SdxRestoreEndpoint;
 import com.sequenceiq.sdx.api.endpoint.SdxRotationEndpoint;
 import com.sequenceiq.sdx.api.endpoint.SdxUpgradeEndpoint;
+import com.sequenceiq.sdx.api.endpoint.SupportV1Endpoint;
 
 public interface SdxClient {
 
@@ -50,4 +51,6 @@ public interface SdxClient {
     CDPStructuredEventV1Endpoint structuredEventsV1Endpoint();
 
     SdxEventEndpoint sdxEventEndpoint();
+
+    SupportV1Endpoint supportV1Endpoint();
 }

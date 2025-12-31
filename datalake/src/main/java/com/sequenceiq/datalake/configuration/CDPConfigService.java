@@ -45,6 +45,7 @@ import com.sequenceiq.datalake.service.imagecatalog.ImageCatalogService;
 import com.sequenceiq.datalake.service.sdx.CDPConfigKey;
 import com.sequenceiq.sdx.api.model.AdvertisedRuntime;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
+import com.sequenceiq.sdx.api.model.support.DatalakePlatformSupportRequirements;
 
 @Service
 public class CDPConfigService {
@@ -123,6 +124,26 @@ public class CDPConfigService {
         } catch (IOException e) {
             throw new IllegalStateException("Can't read CDP template files", e);
         }
+    }
+
+    public DatalakePlatformSupportRequirements collectRequirementByPlatform(String platform) {
+        DatalakePlatformSupportRequirements requirements = new DatalakePlatformSupportRequirements();
+        if (StringUtils.isNotBlank(platform)) {
+            cdpStackRequests.entrySet().stream()
+                    .filter(e -> e.getKey().getCloudPlatform().equalsIgnoreCase(platform))
+                    .forEach(e -> {
+                        StackV4Request stackV4Request = getConfigForKey(e.getKey());
+                        stackV4Request.getInstanceGroups().forEach(ig -> {
+                            String instanceType = ig.getTemplate().getInstanceType();
+                            if (e.getKey().getArchitecture().equals(Architecture.ARM64)) {
+                                requirements.getDefaultArmInstanceTypeRequirements().add(instanceType);
+                            } else {
+                                requirements.getDefaultX86InstanceTypeRequirements().add(instanceType);
+                            }
+                        });
+                    });
+        }
+        return requirements;
     }
 
     public StackV4Request getConfigForKey(CDPConfigKey cdpConfigKey) {

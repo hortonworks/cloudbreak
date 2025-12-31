@@ -28,6 +28,7 @@ import com.sequenceiq.freeipa.api.v1.ldap.LdapConfigV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.operation.OperationV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.progress.ProgressV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.recipe.RecipeV1Endpoint;
+import com.sequenceiq.freeipa.api.v1.support.SupportV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.util.UtilV1Endpoint;
 import com.sequenceiq.freeipa.api.v2.freeipa.FreeIpaV2Endpoint;
 import com.sequenceiq.freeipa.api.v2.freeipa.crossrealm.TrustV2Endpoint;
@@ -84,6 +85,12 @@ public class FreeIpaApiClientConfig {
     @ConditionalOnBean(name = "freeIpaApiClientWebTarget")
     TrustV2Endpoint trustV2Endpoint(WebTarget freeIpaApiClientWebTarget) {
         return new WebTargetEndpointFactory().createEndpoint(freeIpaApiClientWebTarget, TrustV2Endpoint.class);
+    }
+
+    @Bean
+    @ConditionalOnBean(name = "freeIpaApiClientWebTarget")
+    SupportV1Endpoint freeIpaSupportV1Endpoint(WebTarget freeIpaApiClientWebTarget) {
+        return new WebTargetEndpointFactory().createEndpoint(freeIpaApiClientWebTarget, SupportV1Endpoint.class);
     }
 
     @Bean

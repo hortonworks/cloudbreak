@@ -9,9 +9,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.support.SupportV1Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.support.response.DataHubPlatformSupportRequirements;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
@@ -32,19 +33,19 @@ public class DatahubService {
 
     private final DistroXInternalV1Endpoint distroXInternalV1Endpoint;
 
-    private final StackV4Endpoint stackV4Endpoint;
-
     private final DistroXUpgradeV1Endpoint distroXUpgradeV1Endpoint;
+
+    private final SupportV1Endpoint distroxSupportV1Endpoint;
 
     private final WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
 
     public DatahubService(
-            StackV4Endpoint stackV4Endpoint,
             DistroXV1Endpoint distroXV1Endpoint,
             DistroXInternalV1Endpoint distroXInternalV1Endpoint,
             DistroXUpgradeV1Endpoint distroXUpgradeV1Endpoint,
+            SupportV1Endpoint distroxSupportV1Endpoint,
             WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor) {
-        this.stackV4Endpoint = stackV4Endpoint;
+        this.distroxSupportV1Endpoint = distroxSupportV1Endpoint;
         this.distroXV1Endpoint = distroXV1Endpoint;
         this.distroXInternalV1Endpoint = distroXInternalV1Endpoint;
         this.distroXUpgradeV1Endpoint = distroXUpgradeV1Endpoint;
@@ -70,6 +71,12 @@ public class DatahubService {
             LOGGER.error("Failed to list Datahub clusters for environment '{}' due to: '{}'.", environmentCrn, errorMessage, e);
             throw new DatahubOperationFailedException(errorMessage, e);
         }
+    }
+
+    public DataHubPlatformSupportRequirements getInstanceTypesByPlatform(String platform) {
+        return ThreadBasedUserCrnProvider.doAsInternalActor(
+                () -> distroxSupportV1Endpoint.getInstanceTypesByPlatform(platform)
+        );
     }
 
     public StackV4Response getByCrn(String crn, Set<String> entries) {

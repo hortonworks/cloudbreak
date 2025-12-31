@@ -55,17 +55,20 @@ import com.google.api.services.compute.model.Subnetwork;
 import com.google.api.services.compute.model.SubnetworkList;
 import com.google.api.services.iam.v1.Iam;
 import com.google.api.services.iam.v1.model.ListServiceAccountsResponse;
+import com.google.api.services.sqladmin.SQLAdmin;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.PlatformResources;
 import com.sequenceiq.cloudbreak.cloud.gcp.client.GcpCloudKMSFactory;
 import com.sequenceiq.cloudbreak.cloud.gcp.client.GcpComputeFactory;
 import com.sequenceiq.cloudbreak.cloud.gcp.client.GcpIamFactory;
+import com.sequenceiq.cloudbreak.cloud.gcp.client.GcpSQLAdminFactory;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfig;
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfigs;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.CloudDatabaseVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKey;
 import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKeys;
 import com.sequenceiq.cloudbreak.cloud.model.CloudGateWays;
@@ -79,6 +82,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudSshKeys;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.Coordinate;
+import com.sequenceiq.cloudbreak.cloud.model.DefaultPlatformDatabaseCapabilities;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformDatabaseCapabilities;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
@@ -143,6 +147,9 @@ public class GcpPlatformResources implements PlatformResources {
 
     @Inject
     private GcpStackUtil gcpStackUtil;
+
+    @Inject
+    private GcpSQLAdminFactory gcpSQLAdminFactory;
 
     @Inject
     private ExtremeDiskCalculator extremeDiskCalculator;
@@ -493,6 +500,28 @@ public class GcpPlatformResources implements PlatformResources {
     }
 
     @Override
+    public CloudDatabaseVmTypes databaseVirtualMachines(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
+        Map<Region, Set<String>> cloudVmResponses = new HashMap<>();
+        Map<Region, String> defaultCloudVmResponses = new HashMap<>();
+        SQLAdmin sqlAdmin = gcpSQLAdminFactory.buildSQLAdmin(cloudCredential, cloudCredential.getName());
+        String projectId = gcpStackUtil.getProjectId(cloudCredential);
+
+        try {
+            cloudVmResponses.put(region, sqlAdmin.tiers().list(projectId)
+                    .execute()
+                    .getItems()
+                    .stream()
+                    .map(e -> e.getTier())
+                    .collect(Collectors.toSet())
+            );
+            defaultCloudVmResponses.put(region, gcpDatabaseVmDefault);
+        } catch (IOException e) {
+            return new CloudDatabaseVmTypes(cloudVmResponses, defaultCloudVmResponses);
+        }
+        return new CloudDatabaseVmTypes(cloudVmResponses, defaultCloudVmResponses);
+    }
+
+    @Override
     @Cacheable(cacheNames = "cloudResourceVmTypeCache", key = "#cloudCredential?.id + #region.getRegionName() + 'distrox'")
     public CloudVmTypes virtualMachinesForDistroX(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
         CloudVmTypes cloudVmTypes = virtualMachines(cloudCredential, region, filters);
@@ -691,6 +720,18 @@ public class GcpPlatformResources implements PlatformResources {
         } catch (Exception e) {
             return new PlatformDatabaseCapabilities(new HashMap<>(), new HashMap<>(), new HashMap<>());
         }
+    }
+
+    @Override
+    public DefaultPlatformDatabaseCapabilities defaultDatabaseCapabilities() {
+        DefaultPlatformDatabaseCapabilities defaultPlatformDatabaseCapabilities = new DefaultPlatformDatabaseCapabilities();
+        Set<String> defaultDbInstanceTypes = new HashSet<>();
+        // in case of custom type we will not able to validate
+        if (!gcpDatabaseVmDefault.contains("custom")) {
+            defaultDbInstanceTypes = Set.of(gcpDatabaseVmDefault);
+        }
+        defaultPlatformDatabaseCapabilities.setDefaultX86InstanceTypeRequirements(defaultDbInstanceTypes);
+        return defaultPlatformDatabaseCapabilities;
     }
 
     public Map<String, Set<String>> getAvailabilityZonesForVmTypes(ExtendedCloudCredential cloudCredential, Region region) {

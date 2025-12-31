@@ -11,6 +11,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfigs;
+import com.sequenceiq.cloudbreak.cloud.model.CloudDatabaseVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKeys;
 import com.sequenceiq.cloudbreak.cloud.model.CloudGateWays;
 import com.sequenceiq.cloudbreak.cloud.model.CloudIpPools;
@@ -67,6 +68,11 @@ class PlatformResourcesTest {
 
         @Override
         public CloudVmTypes virtualMachines(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
+            return null;
+        }
+
+        @Override
+        public CloudDatabaseVmTypes databaseVirtualMachines(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
             return null;
         }
 

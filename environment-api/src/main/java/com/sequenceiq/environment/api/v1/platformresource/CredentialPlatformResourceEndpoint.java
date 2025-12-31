@@ -23,6 +23,7 @@ import com.sequenceiq.environment.api.v1.platformresource.model.PlatformIpPoolsR
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformNetworksResponse;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformNoSqlTablesResponse;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformPrivateDnsZonesResponse;
+import com.sequenceiq.environment.api.v1.platformresource.model.PlatformRequirementsResponse;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformResourceGroupsResponse;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformSecurityGroupsResponse;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformSshKeysResponse;
@@ -218,4 +219,14 @@ public interface CredentialPlatformResourceEndpoint {
             @QueryParam("credentialCrn") String credentialCrn,
             @QueryParam("platformVariant") String platformVariant);
 
+    @GET
+    @Path("requirements")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = OpDescription.GET_REQUIREMENTS, description = CONNECTOR_NOTES,
+            operationId = "getRequirements",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    PlatformRequirementsResponse getRequirements(
+            @QueryParam("credentialName") String credentialName,
+            @QueryParam("credentialCrn") String credentialCrn,
+            @QueryParam("region") String region);
 }

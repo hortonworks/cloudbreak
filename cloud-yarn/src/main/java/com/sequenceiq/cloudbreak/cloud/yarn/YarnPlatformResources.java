@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.PlatformResources;
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfigs;
+import com.sequenceiq.cloudbreak.cloud.model.CloudDatabaseVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKeys;
 import com.sequenceiq.cloudbreak.cloud.model.CloudGateWays;
 import com.sequenceiq.cloudbreak.cloud.model.CloudIpPools;
@@ -103,6 +104,11 @@ public class YarnPlatformResources implements PlatformResources {
     @Override
     public CloudVmTypes virtualMachines(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
         return new CloudVmTypes();
+    }
+
+    @Override
+    public CloudDatabaseVmTypes databaseVirtualMachines(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
+        return new CloudDatabaseVmTypes();
     }
 
     @Override

@@ -17,9 +17,11 @@ import com.sequenceiq.sdx.api.endpoint.OperationEndpoint;
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
 import com.sequenceiq.sdx.api.endpoint.SdxInternalEndpoint;
 import com.sequenceiq.sdx.api.endpoint.SdxUpgradeEndpoint;
+import com.sequenceiq.sdx.api.endpoint.SupportV1Endpoint;
 import com.sequenceiq.sdx.api.model.SdxCcmUpgradeResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 import com.sequenceiq.sdx.api.model.SdxStopValidationResponse;
+import com.sequenceiq.sdx.api.model.support.DatalakePlatformSupportRequirements;
 
 @Service
 public class SdxService {
@@ -32,17 +34,24 @@ public class SdxService {
 
     private final SdxInternalEndpoint sdxInternalEndpoint;
 
+    private final SupportV1Endpoint sdxSupportV1Endpoint;
+
     private final OperationEndpoint sdxOperationEndpoint;
 
     private final WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
 
-    public SdxService(SdxEndpoint sdxEndpoint, SdxUpgradeEndpoint sdxUpgradeEndpoint, SdxInternalEndpoint sdxInternalEndpoint,
-            OperationEndpoint sdxOperationEndpoint, WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor) {
-
+    public SdxService(
+            SdxEndpoint sdxEndpoint,
+            SdxUpgradeEndpoint sdxUpgradeEndpoint,
+            SupportV1Endpoint sdxSupportV1Endpoint,
+            SdxInternalEndpoint sdxInternalEndpoint,
+            OperationEndpoint sdxOperationEndpoint,
+            WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor) {
         this.sdxEndpoint = sdxEndpoint;
         this.sdxUpgradeEndpoint = sdxUpgradeEndpoint;
         this.sdxInternalEndpoint = sdxInternalEndpoint;
         this.sdxOperationEndpoint = sdxOperationEndpoint;
+        this.sdxSupportV1Endpoint = sdxSupportV1Endpoint;
         this.webApplicationExceptionMessageExtractor = webApplicationExceptionMessageExtractor;
     }
 
@@ -79,6 +88,12 @@ public class SdxService {
             ), e);
             throw new SdxOperationFailedException(errorMessage, e);
         }
+    }
+
+    public DatalakePlatformSupportRequirements getInstanceTypesByPlatform(String platform) {
+        return ThreadBasedUserCrnProvider.doAsInternalActor(
+                () -> sdxSupportV1Endpoint.getInstanceTypesByPlatform(platform)
+        );
     }
 
     public SdxCcmUpgradeResponse upgradeCcm(String environmentCrn) {

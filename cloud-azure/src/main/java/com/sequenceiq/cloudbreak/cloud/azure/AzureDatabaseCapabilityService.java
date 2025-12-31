@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
@@ -38,7 +39,9 @@ import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClientService;
 import com.sequenceiq.cloudbreak.cloud.azure.resource.AzureRegionProvider;
 import com.sequenceiq.cloudbreak.cloud.azure.resource.domain.AzureCoordinate;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.CloudDatabaseVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseAvailabiltyType;
+import com.sequenceiq.cloudbreak.cloud.model.DefaultPlatformDatabaseCapabilities;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformDBStorageCapabilities;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformDatabaseCapabilities;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
@@ -79,6 +82,21 @@ public class AzureDatabaseCapabilityService {
         Map<Region, String> regionInstanceTypeMap = getRegionInstanceTypeMap(regions, capabilityMap, filters);
         Map<Region, Map<String, List<String>>> supportedServerVersionsToUpgrade = getSupportedServerVersionsToUpgrade(regions, capabilityMap);
         return new PlatformDatabaseCapabilities(enabledRegions, regionInstanceTypeMap, supportedServerVersionsToUpgrade);
+    }
+
+    public CloudDatabaseVmTypes databaseVmTypes(CloudCredential cloudCredential, Region region) {
+        AzureClient client = azureClientService.getClient(cloudCredential);
+        Map<Region, AzureCoordinate> regions = azureRegionProvider.filterEnabledRegions(region);
+        Map<Region, Optional<FlexibleServerCapability>> capabilityMap = client.getFlexibleServerClient().getFlexibleServerCapabilityMap(regions);
+        Map<Region, Set<String>> types = getRegionInstancesTypeMap(regions, capabilityMap);
+        Map<Region, String> regionInstanceTypeMap = getRegionInstanceTypeMap(regions, capabilityMap, Map.of(DATABASE_TYPE, AZURE_FLEXIBLE.name()));
+        return new CloudDatabaseVmTypes(types, regionInstanceTypeMap);
+    }
+
+    public DefaultPlatformDatabaseCapabilities defaultPlatformDatabaseCapabilities() {
+        DefaultPlatformDatabaseCapabilities defaultPlatformDatabaseCapabilities = new DefaultPlatformDatabaseCapabilities();
+        defaultPlatformDatabaseCapabilities.setDefaultArmInstanceTypeRequirements(Set.of(defaultFlexibleInstanceType));
+        return defaultPlatformDatabaseCapabilities;
     }
 
     public Optional<PlatformDBStorageCapabilities> databaseStorageCapabilities(CloudCredential cloudCredential, Region region) {
@@ -150,6 +168,24 @@ public class AzureDatabaseCapabilityService {
             putRegion(instanceTypeMap, entry.getKey(), instanceType);
         }
         LOGGER.debug("Default flexible server instance types by regions [{}]", instanceTypeMap);
+        return instanceTypeMap;
+    }
+
+    private Map<Region, Set<String>> getRegionInstancesTypeMap(Map<Region, AzureCoordinate> regions, Map<Region,
+            Optional<FlexibleServerCapability>> capabilityMap) {
+        Map<Region, Set<String>> instanceTypeMap = new HashMap<>();
+
+        for (Map.Entry<Region, AzureCoordinate> entry : regions.entrySet()) {
+            Optional<FlexibleServerCapability> serverCapability = capabilityMap.getOrDefault(entry.getKey(), Optional.empty());
+            Set<String> types = serverCapability.stream()
+                    .map(FlexibleServerCapability::supportedServerEditions)
+                    .flatMap(Collection::stream)
+                    .filter(this::matchesServerEdition)
+                    .flatMap(serverEdition -> serverEdition.supportedServerSkus().stream())
+                    .map(ServerSkuCapability::name)
+                    .collect(Collectors.toSet());
+            putRegion(instanceTypeMap, entry.getKey(), types);
+        }
         return instanceTypeMap;
     }
 

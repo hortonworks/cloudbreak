@@ -20,11 +20,13 @@ import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
 import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetCdpPlatformRegionsRequest;
+import com.sequenceiq.cloudbreak.cloud.event.platform.GetDefaultPlatformDatabaseCapabilityRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetDiskTypesRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformCloudAccessConfigsRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformCloudGatewaysRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformCloudIpPoolsRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformDatabaseCapabilityRequest;
+import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformDatabaseVmTypesRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformEncryptionKeysRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformInstanceGroupParameterRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformNetworksRequest;
@@ -40,6 +42,7 @@ import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformVmTypesRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetVirtualMachineRecommendtaionRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.PlatformParametersRequest;
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfigs;
+import com.sequenceiq.cloudbreak.cloud.model.CloudDatabaseVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKeys;
 import com.sequenceiq.cloudbreak.cloud.model.CloudGateWays;
 import com.sequenceiq.cloudbreak.cloud.model.CloudIpPools;
@@ -48,6 +51,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSecurityGroups;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSshKeys;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
+import com.sequenceiq.cloudbreak.cloud.model.DefaultPlatformDatabaseCapabilities;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceGroupParameterRequest;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceGroupParameterResponse;
@@ -121,6 +125,13 @@ public class CloudParameterService {
     }
 
     @Retryable(value = GetCloudParameterException.class, maxAttempts = 5, backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000))
+    public DefaultPlatformDatabaseCapabilities getDefaultDatabaseCapabilities(String platform) {
+        LOGGER.debug("Get default database capabilities");
+        GetDefaultPlatformDatabaseCapabilityRequest request = new GetDefaultPlatformDatabaseCapabilityRequest(platform);
+        return executeRequestAndHandleErrors(request, "default database capabilities").getDefaultPlatformDatabaseCapabilities();
+    }
+
+    @Retryable(value = GetCloudParameterException.class, maxAttempts = 5, backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000))
     public CloudNetworks getCloudNetworks(ExtendedCloudCredential cloudCredential, String region, String variant, Map<String, String> filters) {
         LOGGER.debug("Get platform cloudnetworks");
         GetPlatformNetworksRequest request = new GetPlatformNetworksRequest(cloudCredential, cloudCredential, variant, region, filters);
@@ -156,6 +167,15 @@ public class CloudParameterService {
         GetPlatformVmTypesRequest request =
                 new GetPlatformVmTypesRequest(cloudCredential, cloudCredential, variant, region, stackType, hasEnableDistroxInstanceTypesEnabled, filters);
         return executeRequestAndHandleErrors(request, "Vm types").getCloudVmTypes();
+    }
+
+    @Retryable(value = GetCloudParameterException.class, maxAttempts = 5, backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000))
+    public CloudDatabaseVmTypes getDatabaseVmTypes(ExtendedCloudCredential cloudCredential, String region, String variant,
+            CdpResourceType stackType, Map<String, String> filters) {
+        LOGGER.debug("Get platform database vmtypes");
+        GetPlatformDatabaseVmTypesRequest request =
+                new GetPlatformDatabaseVmTypesRequest(cloudCredential, cloudCredential, variant, region, stackType, filters);
+        return executeRequestAndHandleErrors(request, "Database vm types").getCloudDatabaseVmTypes();
     }
 
     @Retryable(value = GetCloudParameterException.class, maxAttempts = 5, backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000))

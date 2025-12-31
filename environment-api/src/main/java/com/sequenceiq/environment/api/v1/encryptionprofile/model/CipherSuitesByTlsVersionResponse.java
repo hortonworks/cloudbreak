@@ -12,6 +12,9 @@ public class CipherSuitesByTlsVersionResponse {
     @Schema(description = ModelDescriptions.DESCRIPTION)
     private Set<TlsVersionResponse> tlsVersions;
 
+    public CipherSuitesByTlsVersionResponse() {
+    }
+
     public CipherSuitesByTlsVersionResponse(Set<TlsVersionResponse> tlsVersions) {
         this.tlsVersions = tlsVersions;
     }

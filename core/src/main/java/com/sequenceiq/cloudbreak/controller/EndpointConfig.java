@@ -60,6 +60,7 @@ import com.sequenceiq.distrox.v1.distrox.controller.DistroXUpgradeV1Controller;
 import com.sequenceiq.distrox.v1.distrox.controller.DistroXV1Controller;
 import com.sequenceiq.distrox.v1.distrox.controller.DistroXV1EventController;
 import com.sequenceiq.distrox.v1.distrox.controller.DistroXV1RotationController;
+import com.sequenceiq.distrox.v1.support.controller.SupportV1Controller;
 import com.sequenceiq.flow.controller.FlowController;
 import com.sequenceiq.flow.controller.FlowPublicController;
 
@@ -110,8 +111,9 @@ public class EndpointConfig extends ResourceConfig {
             DistroXCostV1Controller.class,
             ClusterCO2V4Controller.class,
             DistroXCO2V1Controller.class,
-            OpenApiController.class,
-            EncryptionV4Controller.class
+            EncryptionV4Controller.class,
+            SupportV1Controller.class,
+            OpenApiController.class
     );
 
     @Value("${info.app.version:unspecified}")

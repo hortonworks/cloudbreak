@@ -21,6 +21,7 @@ import com.sequenceiq.freeipa.api.v1.ldap.LdapConfigV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.operation.OperationV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.progress.ProgressV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.recipe.RecipeV1Endpoint;
+import com.sequenceiq.freeipa.api.v1.support.SupportV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.util.UtilV1Endpoint;
 import com.sequenceiq.freeipa.api.v2.freeipa.FreeIpaV2Endpoint;
 import com.sequenceiq.freeipa.api.v2.freeipa.crossrealm.TrustV2Endpoint;
@@ -49,6 +50,11 @@ public class FreeIpaApiKeyEndpoints extends AbstractKeyBasedServiceEndpoint impl
     @Override
     public TrustV2Endpoint getCrossRealmV2Endpoint() {
         return getEndpoint(TrustV2Endpoint.class);
+    }
+
+    @Override
+    public SupportV1Endpoint getSupportV1Endpoint() {
+        return getEndpoint(SupportV1Endpoint.class);
     }
 
     @Override

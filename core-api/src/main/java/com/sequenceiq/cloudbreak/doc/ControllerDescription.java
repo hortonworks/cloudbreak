@@ -31,6 +31,7 @@ public class ControllerDescription {
             + "to be used for a database for certain services. After you register the RDBMS with Cloudbreak, you can use it for multiple clusters.";
     public static final String LDAP_V4_CONFIG_DESCRIPTION = "Operations on LDAP server configurations by workspace";
     public static final String CLUSTER_TEMPLATE_V4_DESCRIPTION = "Operations on ClusterTemplates by workspace";
+    public static final String SUPPORT_V1_DESCRIPTION = "Operations on Support";
     public static final String IMAGE_CATALOG_V4_DESCRIPTION = "Operations on Image Catalog by workspace";
     public static final String CUSTOM_IMAGE_CATALOG_V4_DESCRIPTION = "Operations on Custom Image Catalog by workspace";
     public static final String SMARTSENSE_SUBSCRIPTION_V4_DESCRIPTION = "Operations on SmartSense subscriptions by workspace";

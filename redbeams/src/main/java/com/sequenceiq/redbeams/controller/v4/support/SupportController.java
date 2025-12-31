@@ -1,12 +1,14 @@
 package com.sequenceiq.redbeams.controller.v4.support;
 
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Set;
 
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.ws.rs.BadRequestException;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.AccountIdNotNeeded;
@@ -14,9 +16,12 @@ import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.auth.security.internal.RequestObject;
+import com.sequenceiq.cloudbreak.cloud.model.DefaultPlatformDatabaseCapabilities;
+import com.sequenceiq.cloudbreak.cloud.service.CloudParameterService;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.SslCertificateEntryResponse;
 import com.sequenceiq.redbeams.api.endpoint.v4.support.CertificateSwapV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.support.CertificateSwapV4Response;
+import com.sequenceiq.redbeams.api.endpoint.v4.support.RedBeamsPlatformSupportRequirements;
 import com.sequenceiq.redbeams.api.endpoint.v4.support.SupportV4Endpoint;
 import com.sequenceiq.redbeams.configuration.DatabaseServerSslCertificateConfig;
 import com.sequenceiq.redbeams.configuration.SslCertificateEntry;
@@ -37,6 +42,9 @@ public class SupportController implements SupportV4Endpoint {
 
     @Inject
     private SslCertificateEntryToSslCertificateEntryResponseConverter sslCertificateEntryToSslCertificateEntryResponseConverter;
+
+    @Inject
+    private CloudParameterService cloudParameterService;
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_DATABASE_SERVER)
@@ -71,5 +79,21 @@ public class SupportController implements SupportV4Endpoint {
         throw new BadRequestException(String.format("Could not found latest certificate for %s cloud and %s region.",
                 cloudPlatform,
                 region));
+    }
+
+    @Override
+    @InternalOnly
+    @AccountIdNotNeeded
+    public RedBeamsPlatformSupportRequirements getInstanceTypesByPlatform(String cloudPlatform) {
+        RedBeamsPlatformSupportRequirements requirements = new RedBeamsPlatformSupportRequirements();
+        if (StringUtils.isNotBlank(cloudPlatform)) {
+            DefaultPlatformDatabaseCapabilities defaultDatabaseCapabilities =
+                    cloudParameterService.getDefaultDatabaseCapabilities(cloudPlatform.toLowerCase(Locale.ROOT));
+            requirements.setDefaultX86InstanceTypeRequirements(
+                    defaultDatabaseCapabilities.getDefaultX86InstanceTypeRequirements());
+            requirements.setDefaultArmInstanceTypeRequirements(
+                    defaultDatabaseCapabilities.getDefaultArmInstanceTypeRequirements());
+        }
+        return requirements;
     }
 }

@@ -48,6 +48,8 @@ import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizationStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizeAllUsersRequest;
 import com.sequenceiq.freeipa.api.v1.operation.OperationV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationStatus;
+import com.sequenceiq.freeipa.api.v1.support.SupportV1Endpoint;
+import com.sequenceiq.freeipa.api.v1.support.response.FreeIpaPlatformSupportRequirements;
 import com.sequenceiq.freeipa.api.v2.freeipa.crossrealm.TrustV2Endpoint;
 import com.sequenceiq.freeipa.api.v2.freeipa.stack.model.crossrealm.PrepareCrossRealmTrustV2Request;
 
@@ -64,6 +66,8 @@ public class FreeIpaService {
 
     private final TrustV2Endpoint trustV2Endpoint;
 
+    private final SupportV1Endpoint supportV1Endpoint;
+
     private final OperationV1Endpoint operationV1Endpoint;
 
     private final UserV1Endpoint userV1Endpoint;
@@ -79,6 +83,7 @@ public class FreeIpaService {
             FreeIpaInternalV1Endpoint freeIpaInternalV1Endpoint,
             TrustV1Endpoint trustV1Endpoint,
             TrustV2Endpoint trustV2Endpoint,
+            SupportV1Endpoint supportV1Endpoint,
             OperationV1Endpoint operationV1Endpoint,
             FreeIpaV1FlowEndpoint flowEndpoint,
             UserV1Endpoint userV1Endpoint,
@@ -90,6 +95,7 @@ public class FreeIpaService {
         this.userV1Endpoint = userV1Endpoint;
         this.trustV1Endpoint = trustV1Endpoint;
         this.trustV2Endpoint = trustV2Endpoint;
+        this.supportV1Endpoint = supportV1Endpoint;
         this.webApplicationExceptionMessageExtractor = webApplicationExceptionMessageExtractor;
         this.eventService = eventService;
         this.flowEndpoint = flowEndpoint;
@@ -144,6 +150,10 @@ public class FreeIpaService {
             LOGGER.error(String.format("Failed to describe FreeIpa cluster for environment '%s' due to: '%s'.", envCrn, errorMessage), e);
             throw new FreeIpaOperationFailedException(errorMessage, e);
         }
+    }
+
+    public FreeIpaPlatformSupportRequirements internalGetInstanceTypesByPlatform(String platform) {
+        return ThreadBasedUserCrnProvider.doAsInternalActor(() -> supportV1Endpoint.getInstanceTypesByPlatform(platform));
     }
 
     public void delete(String environmentCrn, boolean forced) {

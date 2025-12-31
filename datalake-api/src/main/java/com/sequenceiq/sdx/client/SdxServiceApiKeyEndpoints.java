@@ -19,6 +19,7 @@ import com.sequenceiq.sdx.api.endpoint.SdxRecoveryEndpoint;
 import com.sequenceiq.sdx.api.endpoint.SdxRestoreEndpoint;
 import com.sequenceiq.sdx.api.endpoint.SdxRotationEndpoint;
 import com.sequenceiq.sdx.api.endpoint.SdxUpgradeEndpoint;
+import com.sequenceiq.sdx.api.endpoint.SupportV1Endpoint;
 
 public class SdxServiceApiKeyEndpoints extends AbstractKeyBasedServiceEndpoint implements SdxClient {
 
@@ -104,5 +105,10 @@ public class SdxServiceApiKeyEndpoints extends AbstractKeyBasedServiceEndpoint i
     @Override
     public SdxEventEndpoint sdxEventEndpoint() {
         return getEndpoint(SdxEventEndpoint.class);
+    }
+
+    @Override
+    public SupportV1Endpoint supportV1Endpoint() {
+        return getEndpoint(SupportV1Endpoint.class);
     }
 }

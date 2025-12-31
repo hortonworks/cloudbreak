@@ -36,6 +36,7 @@ import com.sequenceiq.datalake.controller.sdx.SdxRecoveryController;
 import com.sequenceiq.datalake.controller.sdx.SdxRestoreController;
 import com.sequenceiq.datalake.controller.sdx.SdxRotationController;
 import com.sequenceiq.datalake.controller.sdx.SdxUpgradeController;
+import com.sequenceiq.datalake.controller.sdx.SupportV1Controller;
 import com.sequenceiq.datalake.controller.util.UtilController;
 import com.sequenceiq.flow.controller.FlowPublicController;
 import com.sequenceiq.sdx.api.SdxApi;
@@ -68,6 +69,7 @@ public class EndpointConfig extends ResourceConfig {
             SdxEventController.class,
             SdxCostController.class,
             SdxCO2Controller.class,
+            SupportV1Controller.class,
             OpenApiController.class
     );
 

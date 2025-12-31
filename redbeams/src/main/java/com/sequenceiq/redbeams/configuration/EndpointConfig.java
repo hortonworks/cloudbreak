@@ -44,6 +44,7 @@ public class EndpointConfig extends ResourceConfig {
             AuthorizationInfoController.class,
             SupportController.class,
             AuthorizationUtilEndpoint.class,
+            SupportController.class,
             OpenApiController.class
     );
 

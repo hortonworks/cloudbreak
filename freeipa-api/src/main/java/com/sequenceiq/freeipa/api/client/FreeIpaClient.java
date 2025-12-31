@@ -18,6 +18,7 @@ import com.sequenceiq.freeipa.api.v1.ldap.LdapConfigV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.operation.OperationV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.progress.ProgressV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.recipe.RecipeV1Endpoint;
+import com.sequenceiq.freeipa.api.v1.support.SupportV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.util.UtilV1Endpoint;
 import com.sequenceiq.freeipa.api.v2.freeipa.FreeIpaV2Endpoint;
 import com.sequenceiq.freeipa.api.v2.freeipa.crossrealm.TrustV2Endpoint;
@@ -67,4 +68,6 @@ public interface FreeIpaClient {
     RecipeV1Endpoint getRecipeV1Endpoint();
 
     TrustV1Endpoint getTrustV1Endpoint();
+
+    SupportV1Endpoint getSupportV1Endpoint();
 }

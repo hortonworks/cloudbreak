@@ -41,6 +41,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.filter.MinimalHardwareFilter;
 import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
+import com.sequenceiq.cloudbreak.service.database.DbOverrideConfig;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = DatabaseServerSslCertificateConfigIntegrationTest.TestAppContext.class)
@@ -348,6 +349,9 @@ class DatabaseServerSslCertificateConfigIntegrationTest {
 
         @MockBean
         private AmazonKmsUtil amazonKmsUtil;
+
+        @MockBean
+        private DbOverrideConfig dbOverrideConfig;
 
     }
 

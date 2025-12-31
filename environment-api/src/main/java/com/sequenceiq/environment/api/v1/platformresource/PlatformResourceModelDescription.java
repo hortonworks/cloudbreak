@@ -11,7 +11,7 @@ public class PlatformResourceModelDescription {
     public static final String AVAILABILITY_ZONES = "availability zones";
     public static final String DEFAULT_REGIOS = "default regions";
     public static final String TAG_SPECIFICATIONS = "tag specifications";
-    public static final String VIRTUAL_MACHNES = "virtual machines";
+    public static final String VIRTUAL_MACHINES = "virtual machines";
     public static final String DEFAULT_VIRTUAL_MACHINES = "default virtual machines";
     public static final String CONNECTOR_V1_DESCRIPTION = "Returns cloud provider specific resource types";
 
@@ -27,6 +27,7 @@ public class PlatformResourceModelDescription {
         public static final String GET_SECURITYGROUPS = "retrieve securitygroups properties";
         public static final String GET_SSHKEYS = "retrieve sshkeys properties";
         public static final String GET_VMTYPES_BY_CREDENTIAL = "retrieve vmtype properties by credential";
+        public static final String GET_DATABASE_VMTYPES_BY_CREDENTIAL = "retrieve database vmtype properties by credential";
         public static final String GET_GATEWAYS = "retrieve gateways with properties";
         public static final String GET_IPPOOLS = "retrieve ip pools with properties";
         public static final String GET_ACCESSCONFIGS = "retrieve access configs with properties";
@@ -34,6 +35,7 @@ public class PlatformResourceModelDescription {
         public static final String GET_NOSQL_TABLES = "retrieve nosql tables";
         public static final String GET_RESOURCE_GROUPS = "retrieve resource groups";
         public static final String GET_PRIVATE_DNS_ZONES = "retrieve private DNS zones";
+        public static final String GET_REQUIREMENTS = "retrieve requirements";
     }
 
     public static class OpEnvDescription {

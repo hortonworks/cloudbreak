@@ -55,6 +55,7 @@ import com.sequenceiq.environment.api.v1.platformresource.model.PlatformNetworks
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformNoSqlTablesResponse;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformPrivateDnsZoneResponse;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformPrivateDnsZonesResponse;
+import com.sequenceiq.environment.api.v1.platformresource.model.PlatformRequirementsResponse;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformResourceGroupResponse;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformResourceGroupsResponse;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformSecurityGroupsResponse;
@@ -62,9 +63,11 @@ import com.sequenceiq.environment.api.v1.platformresource.model.PlatformSshKeysR
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformVmtypesResponse;
 import com.sequenceiq.environment.api.v1.platformresource.model.RegionResponse;
 import com.sequenceiq.environment.api.v1.platformresource.model.TagSpecificationsResponse;
+import com.sequenceiq.environment.environment.service.EnvironmentRequirementService;
 import com.sequenceiq.environment.platformresource.PlatformParameterService;
 import com.sequenceiq.environment.platformresource.PlatformResourceRequest;
 import com.sequenceiq.environment.platformresource.v1.converter.CloudAccessConfigsToPlatformAccessConfigsV1ResponseConverter;
+import com.sequenceiq.environment.platformresource.v1.converter.CloudDatabaseVmTypesToPlatformDatabaseVmTypesV1ResponseConverter;
 import com.sequenceiq.environment.platformresource.v1.converter.CloudEncryptionKeysToPlatformEncryptionKeysV1ResponseConverter;
 import com.sequenceiq.environment.platformresource.v1.converter.CloudGatewayssToPlatformGatewaysV1ResponseConverter;
 import com.sequenceiq.environment.platformresource.v1.converter.CloudIpPoolsToPlatformIpPoolsV1ResponseConverter;
@@ -85,6 +88,9 @@ public class CredentialPlatformResourceController implements CredentialPlatformR
 
     @Inject
     private PlatformParameterService platformParameterService;
+
+    @Inject
+    private EnvironmentRequirementService environmentRequirementService;
 
     @Inject
     private CommonPermissionCheckingUtils commonPermissionCheckingUtils;
@@ -115,6 +121,9 @@ public class CredentialPlatformResourceController implements CredentialPlatformR
 
     @Inject
     private CloudSshKeysToPlatformSshKeysV1ResponseConverter cloudSshKeysToPlatformSshKeysV1ResponseConverter;
+
+    @Inject
+    private CloudDatabaseVmTypesToPlatformDatabaseVmTypesV1ResponseConverter cloudDatabaseVmTypesToPlatformDatabaseVmTypesV1ResponseConverter;
 
     @Inject
     private CloudAccessConfigsToPlatformAccessConfigsV1ResponseConverter cloudAccessConfigsToPlatformAccessConfigsV1ResponseConverter;
@@ -467,6 +476,15 @@ public class CredentialPlatformResourceController implements CredentialPlatformR
         PlatformPrivateDnsZonesResponse response = new PlatformPrivateDnsZonesResponse(platformPrivateDnsZones);
         LOGGER.debug("Resp /platform_resources/private_dns_zones, request: {}, privateDnsZones: {}, response: {}", request, privateDnsZones, response);
         return response;
+    }
+
+    @Override
+    @CustomPermissionCheck
+    // This endpoint used only for validating new regions. NOT for customer usage!
+    public PlatformRequirementsResponse getRequirements(String credentialName, String credentialCrn, String region) {
+        customCheckUtil.run(() -> permissionCheckByCredential(credentialName, credentialCrn));
+        PlatformResourceRequest requirements = platformParameterService.getRequirements(getAccountId(), credentialName, credentialCrn, region);
+        return environmentRequirementService.getPlatformRequirementsResponse(requirements);
     }
 
     private String getAccountId() {

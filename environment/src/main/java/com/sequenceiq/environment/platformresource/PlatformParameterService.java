@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetCdpPlatformRegionsRequest;
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfigs;
+import com.sequenceiq.cloudbreak.cloud.model.CloudDatabaseVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKeys;
 import com.sequenceiq.cloudbreak.cloud.model.CloudGateWays;
 import com.sequenceiq.cloudbreak.cloud.model.CloudIpPools;
@@ -342,6 +343,34 @@ public class PlatformParameterService {
         return platformResourceRequest;
     }
 
+    public PlatformResourceRequest getRequirements(
+            String accountId,
+            String credentialName,
+            String credentialCrn,
+            String region) {
+        PlatformResourceRequest platformResourceRequest = new PlatformResourceRequest();
+        if (!Strings.isNullOrEmpty(credentialName)) {
+            Optional<Credential> credential = credentialService.getOptionalByNameForAccountId(credentialName, accountId, ENVIRONMENT);
+            if (credential.isEmpty()) {
+                credential = credentialService.getOptionalByNameForAccountId(credentialName, accountId, AUDIT);
+            }
+            platformResourceRequest.setCredential(credentialService.extractCredential(credential, credentialName));
+        } else if (!Strings.isNullOrEmpty(credentialCrn)) {
+            Optional<Credential> credential = credentialService.getOptionalByCrnForAccountId(credentialCrn, accountId, ENVIRONMENT);
+            if (credential.isEmpty()) {
+                credential = credentialService.getOptionalByCrnForAccountId(credentialCrn, accountId, AUDIT);
+            }
+            platformResourceRequest.setCredential(credentialService.extractCredential(credential, credentialCrn));
+        } else {
+            throw new BadRequestException("The credentialCrn or the credentialName must be specified in the request");
+        }
+        platformResourceRequest.setRegion(region);
+        platformResourceRequest.setCloudPlatform(platformResourceRequest.getCredential().getCloudPlatform());
+        platformResourceRequest.setCdpResourceType(CdpResourceType.DEFAULT);
+        platformResourceRequest.setFilters(Map.of());
+        return platformResourceRequest;
+    }
+
     public void initFilterMap(PlatformResourceRequest platformResourceRequest) {
         if (platformResourceRequest.getFilters() == null) {
             platformResourceRequest.setFilters(new HashMap<>());
@@ -351,6 +380,16 @@ public class PlatformParameterService {
     public CloudVmTypes getVmTypesByCredential(PlatformResourceRequest request) {
         checkFieldIsNotEmpty(request.getRegion(), "region");
         return cloudParameterService.getVmTypesV2(
+                extendedCloudCredentialConverter.convert(request.getCredential()),
+                request.getRegion(),
+                request.getPlatformVariant(),
+                request.getCdpResourceType(),
+                request.getFilters());
+    }
+
+    public CloudDatabaseVmTypes getDatabaseVmTypesByCredential(PlatformResourceRequest request) {
+        checkFieldIsNotEmpty(request.getRegion(), "region");
+        return cloudParameterService.getDatabaseVmTypes(
                 extendedCloudCredentialConverter.convert(request.getCredential()),
                 request.getRegion(),
                 request.getPlatformVariant(),

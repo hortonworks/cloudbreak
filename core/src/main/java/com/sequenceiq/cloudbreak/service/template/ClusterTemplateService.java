@@ -25,6 +25,7 @@ import jakarta.ws.rs.ForbiddenException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 
@@ -57,6 +58,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterTemplate;
 import com.sequenceiq.cloudbreak.domain.view.ClusterTemplateView;
 import com.sequenceiq.cloudbreak.init.clustertemplate.ClusterTemplateLoaderService;
+import com.sequenceiq.cloudbreak.init.clustertemplate.DefaultClusterTemplateCache;
 import com.sequenceiq.cloudbreak.repository.cluster.ClusterTemplateRepository;
 import com.sequenceiq.cloudbreak.service.AbstractWorkspaceAwareResourceService;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
@@ -73,6 +75,7 @@ import com.sequenceiq.cloudbreak.structuredevent.LegacyRestRequestThreadLocalSer
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
+import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.distrox.v1.distrox.service.EnvironmentServiceDecorator;
 import com.sequenceiq.distrox.v1.distrox.service.InternalClusterTemplateValidator;
 
@@ -146,6 +149,9 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
 
     @Inject
     private DatabaseService databaseService;
+
+    @Autowired
+    private DefaultClusterTemplateCache defaultClusterTemplateCache;
 
     @Override
     protected WorkspaceResourceRepository<ClusterTemplate, Long> repository() {
@@ -340,6 +346,10 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
 
     private String getTemplateString(ClusterTemplate clusterTemplate) {
         return new String(BaseEncoding.base64().decode(clusterTemplate.getTemplateContent()));
+    }
+
+    public Set<String> getDefaultInstanceTypesFromTemplates(String cloudPlatform, Architecture architecture) {
+        return defaultClusterTemplateCache.getDefaultInstanceTypesFromTemplates(cloudPlatform, architecture);
     }
 
     public Set<ClusterTemplateViewV4Response> listInWorkspaceAndCleanUpInvalids(Long workspaceId, String accountId) {

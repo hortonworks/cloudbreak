@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.RecipeV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.DatalakeV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.DiskUpdateEndpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.support.SupportV1Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.userprofile.UserProfileV4Endpoint;
 import com.sequenceiq.cloudbreak.client.ApiClientRequestFilter;
 import com.sequenceiq.cloudbreak.client.ThreadLocalUserCrnWebTargetBuilder;
@@ -191,5 +192,11 @@ public class CloudbreakApiClientConfig {
     @ConditionalOnBean(name = "cloudbreakApiClientWebTarget")
     EncryptionV4Endpoint encryptionV4Endpoint(WebTarget cloudbreakApiClientWebTarget) {
         return new WebTargetEndpointFactory().createEndpoint(cloudbreakApiClientWebTarget, EncryptionV4Endpoint.class);
+    }
+
+    @Bean
+    @ConditionalOnBean(name = "cloudbreakApiClientWebTarget")
+    SupportV1Endpoint cloudbreakSupportV1Endpoint(WebTarget cloudbreakApiClientWebTarget) {
+        return new WebTargetEndpointFactory().createEndpoint(cloudbreakApiClientWebTarget, SupportV1Endpoint.class);
     }
 }

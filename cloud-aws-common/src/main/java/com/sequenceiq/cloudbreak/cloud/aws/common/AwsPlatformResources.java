@@ -14,6 +14,7 @@ import static com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType.ST1;
 import static com.sequenceiq.cloudbreak.cloud.model.network.SubnetType.PRIVATE;
 import static com.sequenceiq.cloudbreak.cloud.model.network.SubnetType.PUBLIC;
 import static com.sequenceiq.cloudbreak.constant.AwsPlatformResourcesFilterConstants.ARCHITECTURE;
+import static com.sequenceiq.common.model.Architecture.ARM64;
 import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static org.apache.commons.collections4.CollectionUtils.emptyIfNull;
@@ -68,6 +69,7 @@ import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfig;
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfigs;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.CloudDatabaseVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKey;
 import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKeys;
 import com.sequenceiq.cloudbreak.cloud.model.CloudGateWay;
@@ -84,6 +86,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.ConfigSpecification;
 import com.sequenceiq.cloudbreak.cloud.model.Coordinate;
+import com.sequenceiq.cloudbreak.cloud.model.DefaultPlatformDatabaseCapabilities;
 import com.sequenceiq.cloudbreak.cloud.model.DisplayName;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStoreMetadata;
@@ -114,6 +117,7 @@ import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.filter.MinimalHardwareFilter;
 import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
+import com.sequenceiq.cloudbreak.service.database.DbOverrideConfig;
 import com.sequenceiq.cloudbreak.util.PermanentlyFailedException;
 import com.sequenceiq.common.model.Architecture;
 
@@ -169,7 +173,10 @@ import software.amazon.awssdk.services.kms.model.KmsException;
 import software.amazon.awssdk.services.kms.model.ListAliasesRequest;
 import software.amazon.awssdk.services.kms.model.ListAliasesResponse;
 import software.amazon.awssdk.services.rds.model.Certificate;
+import software.amazon.awssdk.services.rds.model.DBEngineVersion;
 import software.amazon.awssdk.services.rds.model.DescribeCertificatesRequest;
+import software.amazon.awssdk.services.rds.model.DescribeDbEngineVersionsRequest;
+import software.amazon.awssdk.services.rds.model.DescribeOrderableDbInstanceOptionsRequest;
 
 @Service
 public class AwsPlatformResources implements PlatformResources {
@@ -179,6 +186,8 @@ public class AwsPlatformResources implements PlatformResources {
     private static final int UNAUTHORIZED = 403;
 
     private static final String ENABLED_AVAILABILITY_ZONES_FILE = "enabled-availability-zones";
+
+    private static final String POSTGRES = "postgres";
 
     private static final String SUPPORTED = "supported";
 
@@ -229,6 +238,9 @@ public class AwsPlatformResources implements PlatformResources {
     @Inject
     private AmazonKmsUtil amazonKmsUtil;
 
+    @Inject
+    private DbOverrideConfig dbOverrideConfig;
+
     @Value("${cb.aws.vm.parameter.definition.path:}")
     private String awsVmParameterDefinitionPath;
 
@@ -237,6 +249,9 @@ public class AwsPlatformResources implements PlatformResources {
 
     @Value("${cb.aws.default.database.vmtype:db.m5.large}")
     private String awsDatabaseVmDefault;
+
+    @Value("${cb.aws.default.database.arm.vmtype:db.m7g.large}")
+    private String awsArmDatabaseVmDefault;
 
     @Value("${cb.aws.fetch.max.items:500}")
     private Integer fetchMaxItems;
@@ -718,6 +733,49 @@ public class AwsPlatformResources implements PlatformResources {
     }
 
     @Override
+    public CloudDatabaseVmTypes databaseVirtualMachines(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
+        Map<Region, Set<String>> cloudVmResponses = new HashMap<>();
+        Map<Region, String> defaultCloudVmResponses = new HashMap<>();
+        String architecture = filters.getOrDefault("architecture", Architecture.X86_64.getName());
+        if (region != null && !Strings.isNullOrEmpty(region.value())) {
+            AwsCredentialView awsCredentialView = new AwsCredentialView(cloudCredential);
+            AmazonRdsClient rdsClient = awsClient.createRdsClient(awsCredentialView, region.getRegionName());
+            Set<String> instanceTypes = new HashSet<>();
+            boolean armRequired = ARM64.getName().equals(architecture);
+            DescribeDbEngineVersionsRequest engineVersionsRequest = DescribeDbEngineVersionsRequest.builder()
+                    .engine(POSTGRES)
+                    .build();
+
+            Optional<DBEngineVersion> postgres = rdsClient.describeDBEngineVersions(engineVersionsRequest)
+                    .dbEngineVersions()
+                    .stream()
+                    .filter(version -> version.engineVersion().startsWith(dbOverrideConfig.findMinEngineVersion()))
+                    .findFirst();
+            if (postgres.isPresent()) {
+                DescribeOrderableDbInstanceOptionsRequest request = DescribeOrderableDbInstanceOptionsRequest.builder()
+                        .engine(POSTGRES)
+                        .maxRecords(SEGMENT)
+                        .engineVersion(postgres.get().engineVersion())
+                        .build();
+                rdsClient.describeOrderableDbInstanceOptionsResponse(request)
+                        .stream()
+                        .flatMap(response -> response.orderableDBInstanceOptions().stream())
+                        .filter(e -> armRequired ? isArmInstance(e.dbInstanceClass()) : !isArmInstance(e.dbInstanceClass()))
+                        .forEach(option -> instanceTypes.add(option.dbInstanceClass()));
+                cloudVmResponses.put(region, instanceTypes);
+                defaultCloudVmResponses.put(region, awsDatabaseVmDefault);
+            }
+
+        }
+        return new CloudDatabaseVmTypes(cloudVmResponses, defaultCloudVmResponses);
+    }
+
+    private boolean isArmInstance(String instanceClass) {
+        // Pattern matches db.m6g, db.t4g, db.r6g, etc.
+        return instanceClass.matches("db\\.[a-z][0-9]g\\..*");
+    }
+
+    @Override
     @Cacheable(cacheNames = "cloudResourceVmTypeCache", key = "#cloudCredential?.id + #region.getRegionName() + #filters + 'distrox'")
     public CloudVmTypes virtualMachinesForDistroX(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
         List<Architecture> architectures = getArchitectures(filters);
@@ -728,7 +786,7 @@ public class AwsPlatformResources implements PlatformResources {
     private List<Architecture> getArchitectures(Map<String, String> filters) {
         String architectureString = filters.getOrDefault(ARCHITECTURE, Architecture.X86_64.getName());
         if (Architecture.ALL_ARCHITECTURE.equals(architectureString)) {
-            return List.of(Architecture.X86_64, Architecture.ARM64);
+            return List.of(Architecture.X86_64, ARM64);
         } else {
             return List.of(Architecture.fromStringWithFallback(architectureString));
         }
@@ -740,7 +798,7 @@ public class AwsPlatformResources implements PlatformResources {
             if (architectures.contains(Architecture.X86_64)) {
                 predicate = predicate.or(enabledDistroxInstanceTypeFilter);
             }
-            if (architectures.contains(Architecture.ARM64)) {
+            if (architectures.contains(ARM64)) {
                 predicate = predicate.or(enabledDistroxInstanceTypeArmFilter);
             }
             return predicate;
@@ -758,8 +816,11 @@ public class AwsPlatformResources implements PlatformResources {
             for (Region actualRegion : regions.getCloudRegions().keySet()) {
                 Coordinate coordinate = regionCoordinates.get(actualRegion);
                 String defaultDbVmType;
-                if (Architecture.ARM64.getName().equals(architecture)) {
+                if (ARM64.getName().equals(architecture)) {
                     defaultDbVmType = coordinate.getDefaultArmDbVmType();
+                    if (defaultDbVmType == null) {
+                        defaultDbVmType = awsArmDatabaseVmDefault;
+                    }
                 } else {
                     defaultDbVmType = coordinate.getDefaultDbVmType();
                     if (defaultDbVmType == null) {
@@ -772,6 +833,14 @@ public class AwsPlatformResources implements PlatformResources {
         } catch (Exception e) {
             return new PlatformDatabaseCapabilities(new HashMap<>(), new HashMap<>(), new HashMap<>());
         }
+    }
+
+    @Override
+    public DefaultPlatformDatabaseCapabilities defaultDatabaseCapabilities() {
+        DefaultPlatformDatabaseCapabilities defaultPlatformDatabaseCapabilities = new DefaultPlatformDatabaseCapabilities();
+        defaultPlatformDatabaseCapabilities.setDefaultX86InstanceTypeRequirements(Set.of(awsDatabaseVmDefault));
+        defaultPlatformDatabaseCapabilities.setDefaultArmInstanceTypeRequirements(Set.of(awsArmDatabaseVmDefault));
+        return defaultPlatformDatabaseCapabilities;
     }
 
     private CloudVmTypes getCloudVmTypes(ExtendedCloudCredential cloudCredential, boolean dataHubArmEnabled, Region region, Map<String, String> filters,
@@ -796,7 +865,7 @@ public class AwsPlatformResources implements PlatformResources {
                 if (architectures.contains(Architecture.X86_64)) {
                     processorArchitectures.add("x86_64");
                 }
-                if (dataHubArmEnabled && architectures.contains(Architecture.ARM64)) {
+                if (dataHubArmEnabled && architectures.contains(ARM64)) {
                     processorArchitectures.add("arm64");
                 }
                 DescribeInstanceTypesRequest request = DescribeInstanceTypesRequest.builder()

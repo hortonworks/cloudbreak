@@ -6,6 +6,7 @@ public enum CdpResourceType {
     DATAHUB,
     DATALAKE,
     FREEIPA,
+    DATABASE,
     DEFAULT;
 
     public static CdpResourceType fromStackType(String type) {

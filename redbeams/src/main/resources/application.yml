@@ -147,6 +147,8 @@ cb:
 
   aws:
     spotinstances.enabled: true
+    database:
+      defaultInstanceType: db.m5.large
     disabled.instance.types:
     hostkey.verify: false
     external.id: provision-ambari

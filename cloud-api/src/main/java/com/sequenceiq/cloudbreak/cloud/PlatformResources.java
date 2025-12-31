@@ -6,6 +6,7 @@ import java.util.Optional;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfigs;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.CloudDatabaseVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKeys;
 import com.sequenceiq.cloudbreak.cloud.model.CloudGateWays;
 import com.sequenceiq.cloudbreak.cloud.model.CloudIpPools;
@@ -14,6 +15,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSecurityGroups;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSshKeys;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
+import com.sequenceiq.cloudbreak.cloud.model.DefaultPlatformDatabaseCapabilities;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformDBStorageCapabilities;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformDatabaseCapabilities;
@@ -79,6 +81,15 @@ public interface PlatformResources {
      * @return the {@link CloudVmTypes} contains every vmtype per region
      */
     CloudVmTypes virtualMachines(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters);
+
+    /**
+     * Return the virtual machines in the defined region
+     * @param cloudCredential credentials to connect to the cloud provider
+     * @param region region of the resources (if null then the method will query every region)
+     * @param filters the filter statement
+     * @return the {@link CloudVmTypes} contains every vmtype per region
+     */
+    CloudDatabaseVmTypes databaseVirtualMachines(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters);
 
     /**
      * Return the virtual machines in the defined region
@@ -184,6 +195,10 @@ public interface PlatformResources {
     }
 
     default PlatformDatabaseCapabilities databaseCapabilities(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
+        throw new UnsupportedOperationException("Interface not implemented.");
+    }
+
+    default DefaultPlatformDatabaseCapabilities defaultDatabaseCapabilities() {
         throw new UnsupportedOperationException("Interface not implemented.");
     }
 
