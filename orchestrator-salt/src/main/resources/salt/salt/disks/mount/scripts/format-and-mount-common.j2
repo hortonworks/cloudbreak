@@ -134,7 +134,9 @@ are_all_attached_volume_names_present() {
         fi
     done
     local device_name_array=($ATTACHED_VOLUME_NAME_LIST)
+    {% raw %}
     return $([[ $existing_device_count -eq ${#device_name_array[@]} ]])
+    {% endraw %}
 }
 
 strip_serial_id() {
@@ -150,16 +152,11 @@ get_nvme_device_names() {
     declare -A serial_id_to_device_path_map
     declare -A serial_id_stripped_to_device_path_map
 
-    STR=$(cat /etc/os-release)
-    SUB="VERSION_ID=\"9.6\""
-    nvme_command_output=""
-
-    if [[ "$STR" == *"$SUB"* ]]
-    then
-        nvme_command_output=$(nvme list | sed '1,2d' | tr -s ' ' | awk '{print $3"="$1}')
-    else
-        nvme_command_output=$(nvme list -o json | jq -r '.Devices[] | "\(.SerialNumber)=\(.DevicePath)"')
-    fi
+{%- if grains['os_family'] == 'RedHat' and grains['osmajorrelease'] | int >= 9 %}
+    nvme_command_output=$(nvme list | sed '1,2d' | tr -s ' ' | awk '{print $3"="$1}')
+{%- else %}
+    nvme_command_output=$(nvme list -o json | jq -r '.Devices[] | "\(.SerialNumber)=\(.DevicePath)"')
+{%- endif %}
 
     for nvme_device in $nvme_command_output; do
         IFS='=' read -r -a split_array <<< "$nvme_device"

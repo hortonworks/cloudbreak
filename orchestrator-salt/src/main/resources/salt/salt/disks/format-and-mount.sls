@@ -3,7 +3,8 @@
 format_and_mount_common:
   file.managed:
     - name: /opt/salt/scripts/format-and-mount-common.sh
-    - source: salt://disks/mount/scripts/format-and-mount-common.sh
+    - source: salt://disks/mount/scripts/format-and-mount-common.j2
+    - template: jinja
     - makedirs: True
     - mode: 755
 
