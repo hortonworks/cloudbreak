@@ -212,7 +212,7 @@ public class DynamicEntitlementRefreshService {
             LOGGER.info("Changed entitlements for FreeIpa: {}, salt refresh needed: {}", changedEntitlements, true);
             String selector = FlowChainTriggers.REFRESH_ENTITLEMENT_PARAM_CHAIN_TRIGGER_EVENT;
             Acceptable triggerEvent = new RefreshEntitlementParamsFlowChainTriggerEvent(selector, null,
-                    stack.getId(), stack.getEnvironmentCrn(), changedEntitlements, isSaltRefreshNeeded(changedEntitlements));
+                    stack.getId(), stack.getEnvironmentCrn(), changedEntitlements, isSaltRefreshNeeded(changedEntitlements), stack.getTunnel());
             return flowManager.notify(selector, triggerEvent);
         } else {
             LOGGER.info("Couldn't start refresh entitlement params flow. Watched entitlements didn't change");

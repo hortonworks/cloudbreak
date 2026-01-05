@@ -35,15 +35,11 @@ import com.sequenceiq.freeipa.flow.freeipa.salt.update.SaltUpdateTriggerEvent;
 import com.sequenceiq.freeipa.flow.stack.dynamicentitlement.RefreshEntitlementParamsFlowChainTriggerEvent;
 import com.sequenceiq.freeipa.flow.stack.dynamicentitlement.RefreshEntitlementParamsTriggerEvent;
 import com.sequenceiq.freeipa.rotation.FreeIpaSecretType;
-import com.sequenceiq.freeipa.service.stack.StackService;
 
 @Component
 public class RefreshEntitlementParamsFlowEventChainFactory implements FlowEventChainFactory<RefreshEntitlementParamsFlowChainTriggerEvent>, FreeIpaUseCaseAware {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RefreshEntitlementParamsFlowEventChainFactory.class);
-
-    @Inject
-    private StackService stackService;
 
     @Inject
     private EntitlementService entitlementService;
@@ -66,13 +62,18 @@ public class RefreshEntitlementParamsFlowEventChainFactory implements FlowEventC
         Crn resourceCrn = Crn.fromString(event.getResourceCrn());
         if (Optional.ofNullable(event.getChangedEntitlements().get(Entitlement.CDP_JUMPGATE_ROOT_CA_AUTO_ROTATION.name())).orElse(Boolean.FALSE) &&
                 entitlementService.isJumpgateRootCertAutoRotationEnabled(resourceCrn.getAccountId()) &&
-                entitlementService.isJumpgateNewRootCertEnabled(resourceCrn.getAccountId())) {
+                entitlementService.isJumpgateNewRootCertEnabled(resourceCrn.getAccountId()) &&
+                isCcmV2JumpgateTunnel(event)) {
             flowEventChain.add(getSecretRotationTriggerEvent(event.getResourceId(), event.getResourceCrn(), event));
             LOGGER.debug("Jumpgate secret rotation flow is added to RefreshEntitlementParamsFlow.");
         }
         flowEventChain.add(RefreshEntitlementParamsTriggerEvent.fromChainTrigger(event, true, true));
         flowEventChain.add(new FlowChainFinalizePayload(getName(), event.getResourceId(), event.accepted()));
         return new FlowTriggerEventQueue(getName(), event, flowEventChain);
+    }
+
+    private boolean isCcmV2JumpgateTunnel(RefreshEntitlementParamsFlowChainTriggerEvent event) {
+        return event.getTunnel() != null && event.getTunnel().useCcmV2Jumpgate();
     }
 
     private SecretRotationTriggerEvent getSecretRotationTriggerEvent(Long freeIpaId, String environmentCrn, Acceptable event) {

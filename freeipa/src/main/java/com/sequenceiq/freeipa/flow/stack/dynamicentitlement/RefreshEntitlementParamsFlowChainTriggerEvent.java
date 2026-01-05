@@ -5,6 +5,7 @@ import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.flow.reactor.api.event.BaseFlowEvent;
 
 public class RefreshEntitlementParamsFlowChainTriggerEvent extends BaseFlowEvent {
@@ -15,6 +16,8 @@ public class RefreshEntitlementParamsFlowChainTriggerEvent extends BaseFlowEvent
 
     private final String operationId;
 
+    private final Tunnel tunnel;
+
     @JsonCreator
     public RefreshEntitlementParamsFlowChainTriggerEvent(
             @JsonProperty("selector") String selector,
@@ -22,11 +25,13 @@ public class RefreshEntitlementParamsFlowChainTriggerEvent extends BaseFlowEvent
             @JsonProperty("resourceId") Long stackId,
             @JsonProperty("resourceCrn") String resourceCrn,
             @JsonProperty("changedEntitlements") Map<String, Boolean> changedEntitlements,
-            @JsonProperty("saltRefreshNeeded") Boolean saltRefreshNeeded) {
+            @JsonProperty("saltRefreshNeeded") Boolean saltRefreshNeeded,
+            @JsonProperty("tunnel") Tunnel tunnel) {
         super(selector, stackId, resourceCrn);
         this.changedEntitlements = changedEntitlements;
         this.saltRefreshNeeded = saltRefreshNeeded;
         this.operationId = operationId;
+        this.tunnel = tunnel;
     }
 
     public Map<String, Boolean> getChangedEntitlements() {
@@ -41,10 +46,16 @@ public class RefreshEntitlementParamsFlowChainTriggerEvent extends BaseFlowEvent
         return operationId;
     }
 
+    public Tunnel getTunnel() {
+        return tunnel;
+    }
+
     @Override
     public boolean equalsEvent(BaseFlowEvent other) {
         return isClassAndEqualsEvent(RefreshEntitlementParamsFlowChainTriggerEvent.class, other,
-                event -> Objects.equals(operationId, event.operationId) &&
+                event ->
+                        Objects.equals(tunnel, event.tunnel) &&
+                        Objects.equals(operationId, event.operationId) &&
                         Objects.equals(changedEntitlements, event.changedEntitlements) &&
                         Objects.equals(saltRefreshNeeded, event.saltRefreshNeeded));
     }
@@ -56,6 +67,7 @@ public class RefreshEntitlementParamsFlowChainTriggerEvent extends BaseFlowEvent
                 ", changedEntitlements=" + changedEntitlements +
                 ", saltRefreshNeeded=" + saltRefreshNeeded +
                 ", resourceId=" + getResourceId() +
+                ", tunnel=" + tunnel +
                 "} " + super.toString();
     }
 }
