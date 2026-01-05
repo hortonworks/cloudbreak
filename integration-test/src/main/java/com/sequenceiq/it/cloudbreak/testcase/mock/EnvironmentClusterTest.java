@@ -1,6 +1,5 @@
 package com.sequenceiq.it.cloudbreak.testcase.mock;
 
-import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.expectedMessage;
 
 import jakarta.inject.Inject;
@@ -65,7 +64,7 @@ public class EnvironmentClusterTest extends AbstractMockTest {
         testContext
                 .given(FreeIpaTestDto.class)
                 .when(freeIpaTestClient.create())
-                .await(AVAILABLE)
+                .awaitForCreationFlow()
                 .given(SdxInternalTestDto.class)
                 .when(sdxTestClient.createInternal())
                 .awaitForFlow()
@@ -90,7 +89,7 @@ public class EnvironmentClusterTest extends AbstractMockTest {
                 .when(environmentTestClient.describe())
                 .given(FreeIpaTestDto.class)
                 .when(freeIpaTestClient.create())
-                .await(AVAILABLE)
+                .awaitForCreationFlow()
                 .given(SdxInternalTestDto.class)
                 .when(sdxTestClient.createInternal())
                 .awaitForFlow()
@@ -121,7 +120,7 @@ public class EnvironmentClusterTest extends AbstractMockTest {
                 .given(FreeIpaTestDto.class)
                 .withEnvironment()
                 .when(freeIpaTestClient.create())
-                .await(AVAILABLE)
+                .awaitForCreationFlow()
                 .given(SdxInternalTestDto.class)
                 .withEnvironment()
                 .when(sdxTestClient.createInternal())

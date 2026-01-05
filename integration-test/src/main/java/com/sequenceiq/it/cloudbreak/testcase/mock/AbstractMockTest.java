@@ -49,7 +49,7 @@ public abstract class AbstractMockTest extends AbstractIntegrationTest {
         testContext
                 .given(FreeIpaTestDto.class)
                 .when(freeIpaTestClient.create())
-                .await(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE)
+                .awaitForCreationFlow()
                 .validate();
     }
 

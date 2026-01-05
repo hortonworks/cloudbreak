@@ -40,7 +40,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.CreateFreeIpaRequest;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.CreateFreeIpaV1Response;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.health.HealthDetailsFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.health.NodeHealthDetails;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.reboot.RebootInstancesRequest;
@@ -531,7 +531,7 @@ class RepairInstancesServiceTest {
     public void testRebuild() throws Exception {
         Stack stack = createStack(Status.DELETE_COMPLETED, List.of(InstanceStatus.TERMINATED, InstanceStatus.TERMINATED), 2);
         CreateFreeIpaRequest createFreeIpaRequest = new CreateFreeIpaRequest();
-        DescribeFreeIpaResponse response = new DescribeFreeIpaResponse();
+        CreateFreeIpaV1Response response = new CreateFreeIpaV1Response();
 
         when(stackService.getByCrnAndAccountIdEvenIfTerminated(ENVIRONMENT_ID1, ACCOUNT_ID, FREEIPA_CRN)).thenReturn(stack);
         when(stackService.findByEnvironmentCrnAndAccountId(ENVIRONMENT_ID1, ACCOUNT_ID)).thenReturn(Optional.empty());

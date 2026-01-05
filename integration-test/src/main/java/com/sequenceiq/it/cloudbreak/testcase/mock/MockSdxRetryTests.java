@@ -5,7 +5,6 @@ import jakarta.inject.Inject;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
@@ -47,7 +46,7 @@ public class MockSdxRetryTests extends AbstractMockTest {
                 .await(EnvironmentStatus.AVAILABLE)
                 .given(FreeIpaTestDto.class)
                 .when(freeIpaTestClient.create())
-                .await(Status.AVAILABLE)
+                .awaitForCreationFlow()
                 .given(SdxInternalTestDto.class)
                 .when(sdxTestClient.createInternal())
                 .mockSpi().launch().post()

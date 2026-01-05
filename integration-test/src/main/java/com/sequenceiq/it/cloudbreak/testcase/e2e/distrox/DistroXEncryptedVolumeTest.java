@@ -22,7 +22,6 @@ import com.sequenceiq.distrox.api.v1.distrox.model.database.DistroXDatabaseAvail
 import com.sequenceiq.distrox.api.v1.distrox.model.database.DistroXDatabaseRequest;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
 import com.sequenceiq.it.cloudbreak.ResourceGroupTest;
 import com.sequenceiq.it.cloudbreak.assertion.distrox.AwsAvailabilityZoneAssertion;
@@ -205,7 +204,7 @@ public class DistroXEncryptedVolumeTest extends AbstractE2ETest {
                 .withEnvironment()
                 .withTelemetry("telemetry")
                 .when(freeIpaTestClient.create())
-                .await(Status.AVAILABLE)
+                .awaitForCreationFlow()
                 .awaitForHealthyInstances()
                 .given(FreeIpaUserSyncTestDto.class)
                 .when(freeIpaTestClient.getLastSyncOperationStatus())

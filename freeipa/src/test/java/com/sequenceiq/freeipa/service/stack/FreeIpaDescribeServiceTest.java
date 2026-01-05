@@ -21,7 +21,7 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.CreateFreeIpaV1Response;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image;
 import com.sequenceiq.freeipa.converter.stack.StackToDescribeFreeIpaResponseConverter;
 import com.sequenceiq.freeipa.entity.FreeIpa;
@@ -83,7 +83,7 @@ class FreeIpaDescribeServiceTest {
 
     @Test
     void describe() {
-        DescribeFreeIpaResponse describeResponse = mock(DescribeFreeIpaResponse.class);
+        CreateFreeIpaV1Response describeResponse = mock(CreateFreeIpaV1Response.class);
         ImageEntity image = mock(ImageEntity.class);
         FreeIpa freeIpa = mock(FreeIpa.class);
         UserSyncStatus userSyncStatus = mock(UserSyncStatus.class);
@@ -100,7 +100,7 @@ class FreeIpaDescribeServiceTest {
 
     @Test
     void describeAll() {
-        DescribeFreeIpaResponse describeResponse = mock(DescribeFreeIpaResponse.class);
+        CreateFreeIpaV1Response describeResponse = mock(CreateFreeIpaV1Response.class);
         ImageEntity image = mock(ImageEntity.class);
         FreeIpa freeIpa = mock(FreeIpa.class);
         UserSyncStatus userSyncStatus = mock(UserSyncStatus.class);

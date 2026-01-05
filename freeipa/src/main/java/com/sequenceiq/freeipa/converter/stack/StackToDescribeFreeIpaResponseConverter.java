@@ -19,10 +19,12 @@ import com.sequenceiq.common.api.type.EnvironmentType;
 import com.sequenceiq.common.model.CloudIdentityType;
 import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.FreeIpaServerResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetaDataResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.region.PlacementResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.CreateFreeIpaV1Response;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.FreeIpaLoadBalancerResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.SecurityResponse;
@@ -87,9 +89,9 @@ public class StackToDescribeFreeIpaResponseConverter {
     @Inject
     private CrossRealmTrustService crossRealmTrustService;
 
-    public DescribeFreeIpaResponse convert(Stack stack, ImageEntity image, FreeIpa freeIpa, Optional<UserSyncStatus> userSyncStatus,
+    public CreateFreeIpaV1Response convert(Stack stack, ImageEntity image, FreeIpa freeIpa, Optional<UserSyncStatus> userSyncStatus,
             Boolean includeAllInstances, DetailedEnvironmentResponse environmentResponse) {
-        DescribeFreeIpaResponse describeFreeIpaResponse = new DescribeFreeIpaResponse();
+        CreateFreeIpaV1Response describeFreeIpaResponse = new CreateFreeIpaV1Response();
         describeFreeIpaResponse.setName(stack.getName());
         describeFreeIpaResponse.setEnvironmentCrn(stack.getEnvironmentCrn());
         describeFreeIpaResponse.setCrn(stack.getResourceCrn());
@@ -120,6 +122,20 @@ public class StackToDescribeFreeIpaResponseConverter {
             describeFreeIpaResponse.setTrust(convertTrust(stack));
         }
         return describeFreeIpaResponse;
+    }
+
+    public CreateFreeIpaV1Response convertToCreate(Stack stack, ImageEntity image, FreeIpa freeIpa, Optional<UserSyncStatus> userSyncStatus,
+        Boolean includeAllInstances, DetailedEnvironmentResponse environmentResponse, FlowIdentifier flowIdentifier) {
+        CreateFreeIpaV1Response createFreeIpaV1Response = convert(
+                stack,
+                image,
+                freeIpa,
+                userSyncStatus,
+                includeAllInstances,
+                environmentResponse
+        );
+        createFreeIpaV1Response.setFlowIdentifier(flowIdentifier);
+        return createFreeIpaV1Response;
     }
 
     private void decorateFreeIpaServerResponseWithLoadBalancerInfo(Long stackId, DescribeFreeIpaResponse describeFreeIpaResponse) {

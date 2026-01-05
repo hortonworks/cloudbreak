@@ -80,7 +80,7 @@ public class FreeIpaRecipeDetachTest extends AbstractMockTest {
                 .withFreeIpaHa(1, 2)
                 .when(freeIpaTestClient.create())
                 .enableVerification()
-                .await(Status.AVAILABLE)
+                .awaitForCreationFlow()
                 .mockSalt().saltFileDistribute().post()
                 .parameters(Map.of("file", preRecipeName, "path", "/srv/salt/pre-recipes/scripts", "permissions", "0600"),
                         DefaultResponseConfigure.ParameterCheck.HAS_THESE_PARAMETERS)

@@ -73,7 +73,7 @@ public class FreeIpaCreationTest extends AbstractMockTest {
                 .withRecipes(Set.of(preRecipeName, postInstallRecipeName, preTerminationRecipeName))
                 .when(freeIpaTestClient.create())
                 .enableVerification()
-                .await(Status.AVAILABLE)
+                .awaitForCreationFlow()
                 .then(FreeIpaKerberosTestAssertion.validate())
                 .then(FreeIpaLdapTestAssertion.validate())
                 .when(freeIpaTestClient.delete())

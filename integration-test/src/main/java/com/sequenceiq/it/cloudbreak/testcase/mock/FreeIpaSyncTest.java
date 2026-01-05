@@ -37,7 +37,7 @@ public class FreeIpaSyncTest extends AbstractMockTest {
         testContext
                 .given(FreeIpaTestDto.class)
                 .when(freeIpaTestClient.create())
-                .await(Status.AVAILABLE)
+                .awaitForCreationFlow()
                 .given(FreeIpaUserSyncTestDto.class)
                 .when(freeIpaTestClient.getLastSyncOperationStatus())
                 .await(OperationState.COMPLETED)

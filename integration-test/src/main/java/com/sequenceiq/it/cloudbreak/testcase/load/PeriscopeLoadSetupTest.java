@@ -15,7 +15,6 @@ import org.testng.annotations.Test;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.it.cloudbreak.action.v4.imagecatalog.ImageCatalogCreateRetryAction;
 import com.sequenceiq.it.cloudbreak.assertion.audit.DatahubAuditGrpcServiceAssertion;
 import com.sequenceiq.it.cloudbreak.client.BlueprintTestClient;
@@ -149,7 +148,7 @@ public class PeriscopeLoadSetupTest extends AbstractClouderaManagerTest {
         freeIpaTestDto.withName(freeIpaName)
                 .withEnvironmentCrn(environmentDetails.getCrn())
                 .when(freeIpaTestClient.create())
-                .await(Status.AVAILABLE);
+                .awaitForCreationFlow();
         SdxInternalTestDto sdxInternalTestDto = testContext.given(dataLakeName, SdxInternalTestDto.class);
         StackV4Request stackV4Request = sdxInternalTestDto.getRequest().getStackV4Request();
         sdxInternalTestDto.withName(dataLakeName)

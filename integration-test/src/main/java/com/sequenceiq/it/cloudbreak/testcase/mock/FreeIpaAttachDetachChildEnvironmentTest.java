@@ -6,7 +6,6 @@ import jakarta.ws.rs.BadRequestException;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.it.cloudbreak.assertion.freeipa.FreeIpaChildEnvironmentAssertion;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
@@ -42,7 +41,7 @@ public class FreeIpaAttachDetachChildEnvironmentTest extends AbstractMockTest {
         testContext
                 .given(FreeIpaTestDto.class)
                 .when(freeIpaTestClient.create())
-                .await(Status.AVAILABLE)
+                .awaitForCreationFlow()
                 .given(FreeIpaChildEnvironmentTestDto.CHILD_ENVIRONMENT_KEY, EnvironmentTestDto.class)
                     .withNetwork()
                     .withCreateFreeIpa(Boolean.FALSE)
@@ -63,7 +62,7 @@ public class FreeIpaAttachDetachChildEnvironmentTest extends AbstractMockTest {
         testContext
                 .given(FreeIpaTestDto.class)
                 .when(freeIpaTestClient.create())
-                .await(Status.AVAILABLE)
+                .awaitForCreationFlow()
                 .given(FreeIpaChildEnvironmentTestDto.CHILD_ENVIRONMENT_KEY, EnvironmentTestDto.class)
                     .withNetwork()
                     .withCreateFreeIpa(Boolean.FALSE)
@@ -86,7 +85,7 @@ public class FreeIpaAttachDetachChildEnvironmentTest extends AbstractMockTest {
         testContext
                 .given(FreeIpaTestDto.class)
                 .when(freeIpaTestClient.create())
-                .await(Status.AVAILABLE)
+                .awaitForCreationFlow()
                 .given(FreeIpaChildEnvironmentTestDto.CHILD_ENVIRONMENT_KEY, EnvironmentTestDto.class)
                     .withNetwork()
                     .withCreateFreeIpa(Boolean.FALSE)

@@ -18,7 +18,6 @@ import com.sequenceiq.common.api.telemetry.request.LoggingRequest;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.it.cloudbreak.assertion.audit.DatahubAuditGrpcServiceAssertion;
 import com.sequenceiq.it.cloudbreak.client.BlueprintTestClient;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
@@ -221,7 +220,7 @@ public class DistroXClusterCreationTest extends AbstractClouderaManagerTest {
                 .when(getEnvironmentTestClient().describe(), key(storageEnvKey))
                 .given(FreeIpaTestDto.class).withEnvironment(storageEnvKey)
                 .when(freeIpaTestClient.create())
-                .await(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE)
+                .awaitForCreationFlow()
                 .given(sdxInternal, SdxInternalTestDto.class)
                 .withDatabase(sdxDatabaseRequestWithCreateTrue())
                 .withCloudStorage(testStorage())
@@ -272,7 +271,7 @@ public class DistroXClusterCreationTest extends AbstractClouderaManagerTest {
                 .await(EnvironmentStatus.AVAILABLE)
                 .given(FreeIpaTestDto.class).withEnvironment(envKey)
                 .when(freeIpaTestClient.create())
-                .await(Status.AVAILABLE)
+                .awaitForCreationFlow()
                 .given(sdxInternal, SdxInternalTestDto.class)
                 .withDatabase(sdxDatabaseRequestWithCreateTrue())
                 .withEnvironmentKey(key(envKey))

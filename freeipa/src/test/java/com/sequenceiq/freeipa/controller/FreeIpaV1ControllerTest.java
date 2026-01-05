@@ -348,8 +348,10 @@ class FreeIpaV1ControllerTest {
     void testUpdateRootVolumeByCrn() {
         DiskUpdateRequest diskUpdateRequest = mock(DiskUpdateRequest.class);
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW_CHAIN, "1");
+        UpdateRootVolumeResponse updateRootVolumeResponse = new UpdateRootVolumeResponse();
+        updateRootVolumeResponse.setFlowIdentifier(flowIdentifier);
         when(rootVolumeUpdateService.updateRootVolume(ENVIRONMENT_CRN, diskUpdateRequest, "hortonworks"))
-                .thenReturn(new UpdateRootVolumeResponse(flowIdentifier));
+                .thenReturn(updateRootVolumeResponse);
 
         UpdateRootVolumeResponse result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.updateRootVolumeByCrn(ENVIRONMENT_CRN, diskUpdateRequest));
 
@@ -360,7 +362,8 @@ class FreeIpaV1ControllerTest {
     @Test
     void testModifySelinuxByCrn() {
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW_CHAIN, "1");
-        ModifySeLinuxResponse response = new ModifySeLinuxResponse(flowIdentifier);
+        ModifySeLinuxResponse response = new ModifySeLinuxResponse();
+        response.setFlowIdentifier(flowIdentifier);
         when(seLinuxModificationService.modifySeLinuxByCrn(eq(ENVIRONMENT_CRN), any(), eq(SeLinux.ENFORCING))).thenReturn(response);
 
         ModifySeLinuxResponse result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.modifySelinuxByCrn(ENVIRONMENT_CRN, SeLinux.ENFORCING));

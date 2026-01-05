@@ -29,6 +29,7 @@ echo -e "\n\033[0;92m+++ INTEGRATION TEST RESULTS COMPRESS STARTED +++\n";
 
 # Check integration test results
 compress_if_exists suites_log suites.tar.gz
+compress_if_exists test-output test-output.tar.gz
 compress_if_exists integcb/logs integcb-logs.tar.gz
 
 end=`date +%s`

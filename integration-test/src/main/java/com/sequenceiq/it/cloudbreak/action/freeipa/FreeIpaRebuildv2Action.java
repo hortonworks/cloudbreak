@@ -35,6 +35,8 @@ public class FreeIpaRebuildv2Action extends AbstractFreeIpaAction<FreeIpaTestDto
                 .rebuildv2(request);
         testDto.setOperationId(response.getOperationStatus().getOperationId());
         testDto.setLastKnownFlowId(response.getFlowIdentifier().getPollableId());
+        testDto.setFlow("FreeIpaRebuildV2Flow", response.getFlowIdentifier());
+
         Log.whenJson(LOGGER, format(" FreeIPA rebuilt successfully:%n"), response);
         Log.when(LOGGER, format(" FreeIPA CRN: %s", testDto.getResponse().getCrn()));
         return testDto;

@@ -4,6 +4,7 @@ import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedS
 import static com.sequenceiq.freeipa.flow.stack.start.StackStartEvent.STACK_START_EVENT;
 
 import java.util.List;
+import java.util.Optional;
 
 import jakarta.inject.Inject;
 
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
@@ -28,7 +30,7 @@ public class FreeIpaStartService {
     @Inject
     private FreeIpaFlowManager flowManager;
 
-    public void start(String environmentCrn, String accountId) {
+    public Optional<FlowIdentifier> start(String environmentCrn, String accountId) {
         MDCBuilder.addEnvCrn(environmentCrn);
         MDCBuilder.addAccountId(accountId);
         List<Stack> stacks = stackService.findAllByEnvironmentCrnAndAccountId(environmentCrn, accountId);
@@ -36,15 +38,24 @@ public class FreeIpaStartService {
             LOGGER.debug("No FreeIPA found in environment");
             throw new NotFoundException("No FreeIPA found in environment");
         }
-        stacks.stream()
+        Optional<Stack> firstExistingFreeIpa = stacks.stream()
                 .filter(s -> s.getStackStatus().getStatus().isStartable())
-                .forEach(this::triggerStackStart);
+                .findFirst();
+        if (firstExistingFreeIpa.isPresent()) {
+            return triggerStackStart(firstExistingFreeIpa.get());
+        }
+        return Optional.empty();
     }
 
-    private void triggerStackStart(Stack stack) {
+    private Optional<FlowIdentifier> triggerStackStart(Stack stack) {
         MDCBuilder.buildMdcContext(stack);
         LOGGER.debug("Trigger start event, new status: {}", START_REQUESTED);
-        flowManager.notify(STACK_START_EVENT.event(), new StackEvent(STACK_START_EVENT.event(), stack.getId()));
+        return Optional.ofNullable(
+                flowManager.notify(
+                        STACK_START_EVENT.event(),
+                        new StackEvent(STACK_START_EVENT.event(), stack.getId())
+                )
+        );
     }
 
 }

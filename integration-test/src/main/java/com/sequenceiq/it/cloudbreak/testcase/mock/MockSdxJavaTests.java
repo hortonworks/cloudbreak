@@ -55,7 +55,7 @@ public class MockSdxJavaTests extends AbstractMockTest {
                 .await(EnvironmentStatus.AVAILABLE)
                 .given(FreeIpaTestDto.class)
                 .when(freeIpaTestClient.create())
-                .await(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE)
+                .awaitForCreationFlow()
                 .given(sdxInternal, SdxInternalTestDto.class)
                 .withJavaVersion(8)
                 .when(sdxTestClient.createInternal(), key(sdxInternal))

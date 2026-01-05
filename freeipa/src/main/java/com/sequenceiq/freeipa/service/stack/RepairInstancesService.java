@@ -28,7 +28,7 @@ import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.CreateFreeIpaRequest;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.CreateFreeIpaV1Response;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.health.NodeHealthDetails;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.reboot.RebootInstancesRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.rebuild.RebuildRequest;
@@ -282,7 +282,7 @@ public class RepairInstancesService {
         return operationToOperationStatusConverter.convert(operation);
     }
 
-    public DescribeFreeIpaResponse rebuild(String accountId, RebuildRequest rebuildRequest) {
+    public CreateFreeIpaV1Response rebuild(String accountId, RebuildRequest rebuildRequest) {
         if (!entitlementService.isFreeIpaRebuildEnabled(accountId)) {
             throwBadRequest("The FreeIPA rebuild capability is disabled.");
         }

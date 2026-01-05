@@ -50,6 +50,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.binduser.BindUserCreate
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageChangeRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.CreateFreeIpaRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.FreeIpaRecommendationResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.CreateFreeIpaV1Response;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.detachchildenv.DetachChildEnvironmentRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.health.HealthDetailsFreeIpaResponse;
@@ -69,6 +70,8 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.UpscaleRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.UpscaleResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.VerticalScaleRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.VerticalScaleResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.start.StartFreeIpaV1Response;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.stop.StopFreeIpaV1Response;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationStatus;
 import com.sequenceiq.freeipa.authorization.FreeIpaFiltering;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
@@ -211,7 +214,7 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
     @Override
     @CheckPermissionByRequestProperty(path = "environmentCrn", type = CRN, action = EDIT_ENVIRONMENT)
     @CheckPermissionByRequestProperty(path = "recipes", type = NAME_LIST, action = DESCRIBE_RECIPE, skipOnNull = true)
-    public DescribeFreeIpaResponse create(@RequestObject CreateFreeIpaRequest request) {
+    public CreateFreeIpaV1Response create(@RequestObject CreateFreeIpaRequest request) {
         ValidationResult validationResult = createFreeIpaRequestValidator.validate(request);
         if (validationResult.getState() == State.ERROR) {
             LOGGER.debug("FreeIPA request has validation error(s): {}.", validationResult.getFormattedErrors());
@@ -344,7 +347,7 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
 
     @Override
     @CheckPermissionByRequestProperty(path = "environmentCrn", type = CRN, action = REPAIR_FREEIPA)
-    public DescribeFreeIpaResponse rebuild(@RequestObject RebuildRequest request) {
+    public CreateFreeIpaV1Response rebuild(@RequestObject RebuildRequest request) {
         String accountId = crnService.getCurrentAccountId();
         return repairInstancesService.rebuild(accountId, request);
     }
@@ -365,16 +368,24 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.START_ENVIRONMENT)
-    public void start(@ResourceCrn String environmentCrn) {
-        String accountId = crnService.getCurrentAccountId();
-        freeIpaStartService.start(environmentCrn, accountId);
+    public StartFreeIpaV1Response start(@ResourceCrn String environmentCrn) {
+        StartFreeIpaV1Response startFreeIpaV1Response = new StartFreeIpaV1Response();
+        startFreeIpaV1Response.setFlowIdentifier(
+                freeIpaStartService.start(environmentCrn, crnService.getCurrentAccountId())
+                    .orElse(null)
+        );
+        return startFreeIpaV1Response;
     }
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.STOP_ENVIRONMENT)
-    public void stop(@ResourceCrn String environmentCrn) {
-        String accountId = crnService.getCurrentAccountId();
-        freeIpaStopService.stop(environmentCrn, accountId);
+    public StopFreeIpaV1Response stop(@ResourceCrn String environmentCrn) {
+        StopFreeIpaV1Response stopFreeIpaV1Response = new StopFreeIpaV1Response();
+        stopFreeIpaV1Response.setFlowIdentifier(
+                freeIpaStopService.stop(environmentCrn, crnService.getCurrentAccountId())
+                    .orElse(null)
+        );
+        return stopFreeIpaV1Response;
     }
 
     @Override

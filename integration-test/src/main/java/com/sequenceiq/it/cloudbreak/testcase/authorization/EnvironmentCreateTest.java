@@ -19,7 +19,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.sequenceiq.authorization.info.model.RightV4;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.it.cloudbreak.actor.CloudbreakUser;
 import com.sequenceiq.it.cloudbreak.assertion.util.CheckResourceRightFalseAssertion;
 import com.sequenceiq.it.cloudbreak.assertion.util.CheckResourceRightTrueAssertion;
@@ -148,12 +147,12 @@ public class EnvironmentCreateTest extends AbstractMockTest {
                 //testing authorized freeipa calls for the environment
                 .given(FreeIpaTestDto.class)
                 .when(freeIpaTestClient.create())
-                .await(Status.AVAILABLE)
+                .awaitForCreationFlow()
                 .when(freeIpaTestClient.describe())
                 .when(freeIpaTestClient.stop())
-                .await(Status.STOPPED)
+                .awaitForFlow()
                 .when(freeIpaTestClient.start())
-                .await(Status.AVAILABLE)
+                .awaitForFlow()
                 //testing unathorized freeipa calls for the environment
                 .whenException(freeIpaTestClient.describe(), ForbiddenException.class, expectedMessage("Doesn't have 'environments/describeEnvironment'" +
                         " right on environment " + environmentFreeIpaPattern(testContext)).withWho(user))

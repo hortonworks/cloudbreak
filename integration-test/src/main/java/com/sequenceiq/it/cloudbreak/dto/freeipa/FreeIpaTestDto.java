@@ -118,8 +118,11 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
     @Override
     public FreeIpaTestDto valid() {
         return withName(getResourcePropertyProvider().getName(getCloudPlatform()))
-                .withEnvironment(getTestContext().given(EnvironmentTestDto.class).withTunnel(getTestContext().getTunnel()))
-                .withPlacement(getTestContext().given(PlacementSettingsTestDto.class))
+                .withEnvironment(getTestContext()
+                .given(EnvironmentTestDto.class)
+                .withTunnel(getTestContext().getTunnel()))
+                .withPlacement(getTestContext()
+                .given(PlacementSettingsTestDto.class))
                 .withInstanceGroupsEntity()
                 .withNetwork(getTestContext().given(NetworkV4TestDto.class))
                 .withGatewayPort(getCloudProvider().gatewayPort(this))
@@ -664,6 +667,20 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
     public FreeIpaTestDto withInstanceType(String instanceType) {
         getRequest().getInstanceGroups().forEach(group -> group.getInstanceTemplate().setInstanceType(instanceType));
         return this;
+    }
+
+    public FreeIpaTestDto awaitForCreationFlow() {
+        // need to wait for available state to ensure that environment sync also finished
+        return awaitForFlow(emptyRunningParameter()).await(Status.AVAILABLE);
+    }
+
+    public FreeIpaTestDto awaitForFlow() {
+        return awaitForFlow(emptyRunningParameter());
+    }
+
+    @Override
+    public FreeIpaTestDto awaitForFlow(RunningParameter runningParameter) {
+        return getTestContext().awaitForFlow(this, runningParameter);
     }
 
     public List<String> getAllInstanceIps(TestContext testContext) {

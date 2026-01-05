@@ -20,6 +20,7 @@ public class FreeIpaModelDescriptions {
     public static final String CLOUD_PLATFORM = "Cloud Platform for FreeIPA";
     public static final String USE_CCM = "whether to use CCM for communicating with the freeipa instance";
     public static final String TUNNEL = "Configuration that the connection going directly or with cluster proxy or with CCM and cluster proxy.";
+    public static final String FLOWIDENTIFIER = "Flow identifier of the operation.";
     public static final String VARIANT = "Configuration of cloud platform variant.";
     public static final String TAGS = "Tags for freeipa server.";
     public static final String USERSYNC_STATUS_DETAILS = "user sync status details for the environment";

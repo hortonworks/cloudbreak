@@ -5,6 +5,7 @@ import static java.lang.String.format;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.start.StartFreeIpaV1Response;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
@@ -20,9 +21,10 @@ public class FreeIpaStartAction extends AbstractFreeIpaAction<FreeIpaTestDto> {
         String environmentCrn = testContext.given(EnvironmentTestDto.class).getCrn();
         Log.when(LOGGER, format(" FreeIPA CRN: %s", environmentCrn));
         Log.whenJson(LOGGER, format(" FreeIPA start request: %n"), testDto.getRequest());
-        client.getDefaultClient()
+        StartFreeIpaV1Response start = client.getDefaultClient()
                 .getFreeIpaV1Endpoint()
                 .start(environmentCrn);
+        testDto.setFlow("FreeIpaStartFlow", start.getFlowIdentifier());
         return testDto;
     }
 }

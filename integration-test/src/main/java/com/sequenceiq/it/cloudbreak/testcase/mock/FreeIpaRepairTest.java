@@ -87,7 +87,7 @@ public class FreeIpaRepairTest extends AbstractMockTest {
                 .withFreeIpaHa(1, 2)
                 .when(freeIpaTestClient.create())
                 .enableVerification()
-                .await(Status.AVAILABLE)
+                .awaitForCreationFlow()
                 .when(freeIpaTestClient.attachRecipes(List.of(preRecipeName, postInstallRecipeName, preTerminationRecipeName)))
                 .when(freeIpaTestClient.repair(InstanceMetadataType.GATEWAY_PRIMARY))
                 .await(Status.UPDATE_IN_PROGRESS, waitForFlow().withWaitForFlow(Boolean.FALSE))

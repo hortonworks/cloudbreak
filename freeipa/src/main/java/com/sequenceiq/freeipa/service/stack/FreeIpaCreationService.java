@@ -40,11 +40,12 @@ import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.common.model.OsType;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.environment.dto.FreeIpaLoadBalancerType;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.freeipa.api.model.Backup;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.CreateFreeIpaRequest;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.CreateFreeIpaV1Response;
 import com.sequenceiq.freeipa.converter.image.ImageConverter;
 import com.sequenceiq.freeipa.converter.stack.CreateFreeIpaRequestToStackConverter;
 import com.sequenceiq.freeipa.converter.stack.StackToDescribeFreeIpaResponseConverter;
@@ -152,7 +153,7 @@ public class FreeIpaCreationService {
     @Value("${info.app.version:}")
     private String appVersion;
 
-    public DescribeFreeIpaResponse launchFreeIpa(CreateFreeIpaRequest request, String accountId) {
+    public CreateFreeIpaV1Response launchFreeIpa(CreateFreeIpaRequest request, String accountId) {
         String userCrn = crnService.getUserCrn();
         Future<String> ownerFuture = initiateOwnerFetching(userCrn);
         Credential credential = credentialService.getCredentialByEnvCrn(request.getEnvironmentCrn());
@@ -210,13 +211,20 @@ public class FreeIpaCreationService {
                 FreeIpa freeIpa = freeIpaService.create(savedStack, request.getFreeIpa(), image.getOsType());
                 return Triple.of(savedStack, image, freeIpa);
             });
-            flowManager.notify(FlowChainTriggers.PROVISION_TRIGGER_EVENT,
+            FlowIdentifier flowIdentifier = flowManager.notify(FlowChainTriggers.PROVISION_TRIGGER_EVENT,
                     new ProvisionTriggerEvent(FlowChainTriggers.PROVISION_TRIGGER_EVENT,
                             stackImageFreeIpaTuple.getLeft().getId(),
                             getFreeIpaLoadBalancerType(request)));
             InMemoryStateStore.putStack(stack.getId(), PollGroup.POLLABLE);
-            return stackToDescribeFreeIpaResponseConverter.convert(stackImageFreeIpaTuple.getLeft(), stackImageFreeIpaTuple.getMiddle(),
-                    stackImageFreeIpaTuple.getRight(), Optional.empty(), false, environment);
+            return stackToDescribeFreeIpaResponseConverter.convertToCreate(
+                    stackImageFreeIpaTuple.getLeft(),
+                    stackImageFreeIpaTuple.getMiddle(),
+                    stackImageFreeIpaTuple.getRight(),
+                    Optional.empty(),
+                    false,
+                    environment,
+                    flowIdentifier
+            );
         } catch (TransactionService.TransactionExecutionException e) {
             LOGGER.error("Creation of FreeIPA failed", e);
             throw new BadRequestException("Creation of FreeIPA failed: " + e.getCause().getMessage(), e);

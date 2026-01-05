@@ -11,7 +11,6 @@ import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.UsedImageStacksV4Response;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.util.model.UsedImageStacksV1Response;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
@@ -93,7 +92,7 @@ public class UsedImagesTest extends AbstractMockTest {
                 .given(FreeIpaTestDto.class)
                     .withCatalog(getImageCatalogMockServerSetup().getFreeIpaImageCatalogUrlWitdDefaultImageUuid(freeipaImageUuid))
                 .when(freeIpaTestClient.create())
-                .await(Status.AVAILABLE)
+                .awaitForCreationFlow()
                 .when(freeIpaTestClient.describe())
 
                 .given(SdxInternalTestDto.class)

@@ -19,7 +19,6 @@ import org.testng.annotations.Test;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.customdomain.CustomDomainSettingsV4Request;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.cloud.HostGroupType;
@@ -109,7 +108,7 @@ public class MockSdxRepairTests extends AbstractMockTest {
                 .await(EnvironmentStatus.AVAILABLE)
                 .given(FreeIpaTestDto.class)
                 .when(freeIpaTestClient.create())
-                .await(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE)
+                .awaitForCreationFlow()
                 .given(sdxInternal, SdxInternalTestDto.class)
                 .withDatabase(sdxDatabaseRequest)
                 .withCustomDomain(customDomain)
@@ -176,7 +175,7 @@ public class MockSdxRepairTests extends AbstractMockTest {
                 .withName(Optional.ofNullable(testContext.getExistingResourceNames().get(FreeIpaTestDto.class))
                         .orElse(resourcePropertyProvider().getName(CloudPlatform.MOCK)))
                 .when(freeIpaTestClient.create())
-                .await(Status.AVAILABLE)
+                .awaitForCreationFlow()
                 .given(sdxInternal, SdxInternalTestDto.class)
                 .withName(Optional.ofNullable(testContext.getExistingResourceNames().get(SdxInternalTestDto.class))
                         .orElse(resourcePropertyProvider().getName(CloudPlatform.MOCK)))

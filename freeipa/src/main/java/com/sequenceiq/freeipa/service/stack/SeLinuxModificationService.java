@@ -80,7 +80,9 @@ public class SeLinuxModificationService {
             FlowIdentifier flowIdentifier = flowManager.notify(MODIFY_SELINUX_START_EVENT.event(),
                     new FreeIpaModifySeLinuxEvent(MODIFY_SELINUX_START_EVENT.event(), stack.getId(),
                             operation.getOperationId(), selinuxMode));
-            return new ModifySeLinuxResponse(flowIdentifier);
+            ModifySeLinuxResponse modifySeLinuxResponse = new ModifySeLinuxResponse();
+            modifySeLinuxResponse.setFlowIdentifier(flowIdentifier);
+            return modifySeLinuxResponse;
         } catch (Exception e) {
             LOGGER.error("Couldn't start SELinux enablement flow", e);
             operationService.failOperation(accountId, operation.getOperationId(), "Couldn't start Freeipa SELinux enablement flow: " + e.getMessage());

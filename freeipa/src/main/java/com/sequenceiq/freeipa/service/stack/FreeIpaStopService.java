@@ -3,6 +3,7 @@ package com.sequenceiq.freeipa.service.stack;
 import static com.sequenceiq.freeipa.flow.stack.stop.StackStopEvent.STACK_STOP_EVENT;
 
 import java.util.List;
+import java.util.Optional;
 
 import jakarta.inject.Inject;
 import jakarta.ws.rs.BadRequestException;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
@@ -31,7 +33,7 @@ public class FreeIpaStopService {
     @Inject
     private StackUpdater stackUpdater;
 
-    public void stop(String environmentCrn, String accountId) {
+    public Optional<FlowIdentifier> stop(String environmentCrn, String accountId) {
         MDCBuilder.addEnvCrn(environmentCrn);
         MDCBuilder.addAccountId(accountId);
         List<Stack> stacks = stackService.findAllByEnvironmentCrnAndAccountId(environmentCrn, accountId);
@@ -40,17 +42,27 @@ public class FreeIpaStopService {
             throw new NotFoundException("No FreeIPA found in environment");
         }
 
-        stacks.stream()
+        Optional<Stack> firstExistingFreeIpa = stacks.stream()
                 .filter(s -> s.isAvailable() || s.isStopFailed())
-                .forEach(this::triggerStackStopIfNeeded);
+                .findFirst();
+        if (firstExistingFreeIpa.isPresent()) {
+            return triggerStackStopIfNeeded(firstExistingFreeIpa.get());
+        }
+        return Optional.empty();
     }
 
-    private void triggerStackStopIfNeeded(Stack stack) {
+    private Optional<FlowIdentifier> triggerStackStopIfNeeded(Stack stack) {
         MDCBuilder.buildMdcContext(stack);
         if (isStopNeeded(stack)) {
             LOGGER.debug("Trigger stop event, stack status: {}", stack.getStackStatus());
-            flowManager.notify(STACK_STOP_EVENT.event(), new StackEvent(STACK_STOP_EVENT.event(), stack.getId()));
+            return Optional.ofNullable(
+                    flowManager.notify(
+                        STACK_STOP_EVENT.event(),
+                        new StackEvent(STACK_STOP_EVENT.event(), stack.getId())
+                    )
+            );
         }
+        return Optional.empty();
     }
 
     private boolean isStopNeeded(Stack stack) {

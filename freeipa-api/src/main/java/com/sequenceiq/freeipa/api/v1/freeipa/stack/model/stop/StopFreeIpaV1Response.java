@@ -1,4 +1,4 @@
-package com.sequenceiq.freeipa.api.v1.freeipa.stack.model;
+package com.sequenceiq.freeipa.api.v1.freeipa.stack.model.stop;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -6,10 +6,12 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.BaseFlowIdentifi
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ModifySeLinuxResponse extends BaseFlowIdentifierResponse {
+public class StopFreeIpaV1Response extends BaseFlowIdentifierResponse {
 
     @Override
     public String toString() {
-        return "SetSeLinuxToEnforcingResponse {flowIdentifier=" + super.toString() + "}";
+        return "StopFreeIpaV1Response{" +
+                super.toString() +
+                '}';
     }
 }

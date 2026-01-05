@@ -775,6 +775,7 @@ jobs:
           retention-days: 5
           path: |
             integration-test/integcb-logs.tar.gz
+            integration-test/test-output.tar.gz
             integration-test/cloudbreak.log
             integration-test/datalake.log
             integration-test/redbeams.log
@@ -876,6 +877,7 @@ jobs:
           retention-days: 5
           path: |
             integration-test/integcb-logs.tar.gz
+            integration-test/test-output.tar.gz
             integration-test/cloudbreak.log
             integration-test/datalake.log
             integration-test/redbeams.log

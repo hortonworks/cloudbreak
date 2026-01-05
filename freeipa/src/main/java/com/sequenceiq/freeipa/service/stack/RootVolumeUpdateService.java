@@ -80,7 +80,9 @@ public class RootVolumeUpdateService {
             updateTemplate(stack, request);
             List<String> instanceIds = stack.getInstanceGroups().stream()
                     .flatMap(ig -> ig.getInstanceMetaDataSet().stream()).map(InstanceMetaData::getInstanceId).toList();
-            return new UpdateRootVolumeResponse(triggerRootVolumeUpdate(stack, accountId, instanceIds));
+            UpdateRootVolumeResponse updateRootVolumeResponse = new UpdateRootVolumeResponse();
+            updateRootVolumeResponse.setFlowIdentifier(triggerRootVolumeUpdate(stack, accountId, instanceIds));
+            return updateRootVolumeResponse;
         }
         throw new BadRequestException("Root Volume Update for type '" + request.getVolumeType() + "'is not supported for cloud platform: "
                 + stack.getCloudPlatform());

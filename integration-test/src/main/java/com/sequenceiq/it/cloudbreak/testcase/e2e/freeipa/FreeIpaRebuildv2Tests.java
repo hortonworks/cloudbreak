@@ -65,7 +65,7 @@ public class FreeIpaRebuildv2Tests extends AbstractE2ETest {
                     .withFreeIpaHa(instanceGroupCount, instanceCountByGroup)
                     .withTelemetry("telemetry")
                 .when(freeIpaTestClient.create(), key(freeIpa))
-                .await(FREEIPA_AVAILABLE)
+                .awaitForCreationFlow()
                 .then((tc, testDto, client) -> {
                     validateAz(testDto.getRequest().getEnvironmentCrn(), client, tc);
                     return testDto;

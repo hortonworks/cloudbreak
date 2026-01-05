@@ -47,9 +47,9 @@ public class SecretEncryptionTests extends PreconditionGovTest {
                 .then(secretEncryptionAssertions::validate)
 
                 .when(getFreeIpaTestClient().stop())
-                .await(Status.STOPPED)
+                .awaitForFlow()
                 .when(getFreeIpaTestClient().start())
-                .await(Status.AVAILABLE)
+                .awaitForFlow()
                 .awaitForHealthyInstances()
                 .then(secretEncryptionAssertions::validate)
 

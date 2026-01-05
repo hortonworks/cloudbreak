@@ -9,7 +9,6 @@ import jakarta.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.it.cloudbreak.ResourcePropertyProvider;
 import com.sequenceiq.it.cloudbreak.action.v4.imagecatalog.ImageCatalogCreateRetryAction;
 import com.sequenceiq.it.cloudbreak.actor.CloudbreakUser;
@@ -204,7 +203,7 @@ public class ResourceCreator {
     public FreeIpaTestDto create(FreeIpaTestDto testDto) {
         testDto.withCatalog(imageCatalogMockServerSetup.getFreeIpaImageCatalogUrl())
                 .when(freeIpaTestClient.create())
-                .await(Status.AVAILABLE)
+                .awaitForCreationFlow()
                 .validate();
         return testDto;
     }

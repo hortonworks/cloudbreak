@@ -43,6 +43,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.binduser.BindUserCreate
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageChangeRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.CreateFreeIpaRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.FreeIpaRecommendationResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.CreateFreeIpaV1Response;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.detachchildenv.DetachChildEnvironmentRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.health.HealthDetailsFreeIpaResponse;
@@ -62,6 +63,8 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.UpscaleRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.UpscaleResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.VerticalScaleRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.VerticalScaleResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.start.StartFreeIpaV1Response;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.stop.StopFreeIpaV1Response;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationStatus;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -80,7 +83,7 @@ public interface FreeIpaV1Endpoint {
     @Operation(summary = FreeIpaOperationDescriptions.CREATE, description = FreeIpaNotes.FREEIPA_NOTES,
             operationId = "createFreeIpaV1",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    DescribeFreeIpaResponse create(@Valid CreateFreeIpaRequest request);
+    CreateFreeIpaV1Response create(@Valid CreateFreeIpaRequest request);
 
     @POST
     @Path("/attach_child_environment")
@@ -178,7 +181,7 @@ public interface FreeIpaV1Endpoint {
     @Operation(summary = FreeIpaOperationDescriptions.REBUILD, description = FreeIpaNotes.FREEIPA_NOTES,
             operationId = "rebuildV1",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    DescribeFreeIpaResponse rebuild(@Valid RebuildRequest request) throws Exception;
+    CreateFreeIpaV1Response rebuild(@Valid RebuildRequest request) throws Exception;
 
     @GET
     @Path("ca.crt")
@@ -226,14 +229,14 @@ public interface FreeIpaV1Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = FreeIpaOperationDescriptions.START, description = FreeIpaNotes.FREEIPA_NOTES, operationId = "startV1",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    void start(@QueryParam("environment") @NotEmpty String environmentCrn);
+    StartFreeIpaV1Response start(@QueryParam("environment") @NotEmpty String environmentCrn);
 
     @PUT
     @Path("stop")
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = FreeIpaOperationDescriptions.STOP, description = FreeIpaNotes.FREEIPA_NOTES, operationId = "stopV1",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    void stop(@QueryParam("environment") @NotEmpty String environmentCrn);
+    StopFreeIpaV1Response stop(@QueryParam("environment") @NotEmpty String environmentCrn);
 
     /**
      * @deprecated use rotate_secret endpoint with secret type SALT_PASSWORD instead

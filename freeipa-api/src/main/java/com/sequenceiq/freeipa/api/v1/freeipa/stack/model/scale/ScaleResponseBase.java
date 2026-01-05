@@ -1,25 +1,15 @@
 package com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale;
 
-import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.AvailabilityType;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.BaseFlowIdentifierResponse;
 
-public abstract class ScaleResponseBase {
-
-    private FlowIdentifier flowIdentifier;
+public abstract class ScaleResponseBase extends BaseFlowIdentifierResponse {
 
     private AvailabilityType originalAvailabilityType;
 
     private AvailabilityType targetAvailabilityType;
 
     private String operationId;
-
-    public FlowIdentifier getFlowIdentifier() {
-        return flowIdentifier;
-    }
-
-    public void setFlowIdentifier(FlowIdentifier flowIdentifier) {
-        this.flowIdentifier = flowIdentifier;
-    }
 
     public String getOperationId() {
         return operationId;
@@ -48,7 +38,7 @@ public abstract class ScaleResponseBase {
     @Override
     public String toString() {
         return "ScaleResponse{" +
-                "flowIdentifier=" + flowIdentifier +
+                super.toString() +
                 ", originalAvailabilityType=" + originalAvailabilityType +
                 ", targetAvailabilityType=" + targetAvailabilityType +
                 ", operationId='" + operationId + '\'' +

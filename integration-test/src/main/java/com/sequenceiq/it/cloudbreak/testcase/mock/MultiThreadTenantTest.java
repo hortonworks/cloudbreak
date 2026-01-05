@@ -214,7 +214,7 @@ public class MultiThreadTenantTest extends AbstractTestNGSpringContextTests {
                 .await(EnvironmentStatus.AVAILABLE)
                 .given(FreeIpaTestDto.class).withEnvironment()
                 .when(freeIpaTestClient.create())
-                .await(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE)
+                .awaitForCreationFlow()
                 .given(SdxInternalTestDto.class)
                 .when(sdxTestClient.createInternal())
                 .await(SdxClusterStatusResponse.RUNNING)

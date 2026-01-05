@@ -13,7 +13,6 @@ import jakarta.ws.rs.ForbiddenException;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
@@ -89,7 +88,7 @@ public class ChangeImageCatalogTest extends AbstractIntegrationTest {
                 .await(EnvironmentStatus.AVAILABLE)
                 .given(FreeIpaTestDto.class)
                 .when(freeIpaTestClient.create())
-                .await(Status.AVAILABLE)
+                .awaitForCreationFlow()
                 .when(freeIpaTestClient.describe())
                 .given(FreeipaChangeImageCatalogTestDto.class)
                     .withImageCatalog(testContext.given(FreeIpaTestDto.class)
@@ -141,7 +140,7 @@ public class ChangeImageCatalogTest extends AbstractIntegrationTest {
                 .await(EnvironmentStatus.AVAILABLE)
                 .given(FreeIpaTestDto.class)
                 .when(freeIpaTestClient.create())
-                .await(Status.AVAILABLE)
+                .awaitForCreationFlow()
                 .given(SdxInternalTestDto.class)
                 .when(sdxTestClient.createInternal())
                 .awaitForFlow()
@@ -193,7 +192,7 @@ public class ChangeImageCatalogTest extends AbstractIntegrationTest {
                 .await(EnvironmentStatus.AVAILABLE)
                 .given(FreeIpaTestDto.class)
                 .when(freeIpaTestClient.create())
-                .await(Status.AVAILABLE)
+                .awaitForCreationFlow()
                 .given(SdxInternalTestDto.class)
                 .when(sdxTestClient.createInternal())
                 .awaitForFlow()
@@ -249,7 +248,7 @@ public class ChangeImageCatalogTest extends AbstractIntegrationTest {
                 .await(EnvironmentStatus.AVAILABLE)
                 .given(FreeIpaTestDto.class)
                 .when(freeIpaTestClient.create())
-                .await(Status.AVAILABLE)
+                .awaitForCreationFlow()
                 .given(SdxInternalTestDto.class)
                 .when(sdxTestClient.createInternal())
                 .awaitForFlow()
@@ -305,7 +304,7 @@ public class ChangeImageCatalogTest extends AbstractIntegrationTest {
                 .await(EnvironmentStatus.AVAILABLE)
                 .given(FreeIpaTestDto.class)
                 .when(freeIpaTestClient.create())
-                .await(Status.AVAILABLE)
+                .awaitForCreationFlow()
                 .given(SdxInternalTestDto.class)
                 .when(sdxTestClient.createInternal())
                 .awaitForFlow()

@@ -914,9 +914,9 @@ public abstract class TestContext implements ApplicationContextAware {
         if (!getExceptionMap().isEmpty() && runningParameter.isSkipOnFail()) {
             Log.await(LOGGER, "Cloudbreak await for flow should be skipped because of previous error.");
         } else {
-            LOGGER.info(String.format(" Cloudbreak await for flow on resource: %s at account: %s - for entity: %s ", awaitEntity.getCrn(),
+            LOGGER.info(String.format("Cloudbreak await for flow on resource: %s at account: %s - for entity: %s ", awaitEntity.getCrn(),
                     Objects.requireNonNull(Crn.fromString(awaitEntity.getCrn())).getAccountId(), awaitEntity));
-            Log.await(LOGGER, String.format(" Cloudbreak await for flow on resource: %s at account: %s - for entity: %s ", awaitEntity.getCrn(),
+            Log.await(LOGGER, String.format("Cloudbreak await for flow on resource: %s at account: %s - for entity: %s ", awaitEntity.getCrn(),
                     Objects.requireNonNull(Crn.fromString(awaitEntity.getCrn())).getAccountId(), awaitEntity));
             MicroserviceClient msClient = getAdminMicroserviceClient(awaitEntity.getClass(), Objects.requireNonNull(Crn.fromString(awaitEntity.getCrn()))
                     .getAccountId());
