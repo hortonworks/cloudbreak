@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
-import com.sequenceiq.cloudbreak.auth.altus.model.Entitlement;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
@@ -35,9 +34,7 @@ public class WebSocketNotificationAssemblingService {
         notification.setEventMessage(messagesService.getMessage(resourceEvent.getMessage(), messageArgs));
         String accountId = getAccountId();
         if (accountId != null) {
-            notification.setSubscriptionRequired(
-                    entitlementsService.isEntitledFor(accountId, Entitlement.PERSONAL_VIEW_CB_BY_RIGHT)
-            );
+            notification.setSubscriptionRequired(entitlementsService.listFilteringEnabled(accountId));
         }
         notification.setTenantName(getAccountId());
         notification.setUserId(ThreadBasedUserCrnProvider.getUserCrn());
@@ -59,9 +56,7 @@ public class WebSocketNotificationAssemblingService {
         n.getNotification().setUserId(userId);
         String accountId = getTenantName(userId);
         if (accountId != null) {
-            n.getNotification().setSubscriptionRequired(
-                    entitlementsService.isEntitledFor(accountId, Entitlement.PERSONAL_VIEW_CB_BY_RIGHT)
-            );
+            n.getNotification().setSubscriptionRequired(entitlementsService.listFilteringEnabled(accountId));
         }
         return n;
     }

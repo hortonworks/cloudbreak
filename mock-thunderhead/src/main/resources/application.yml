@@ -115,6 +115,7 @@ auth:
     cloudprivatelinks.enabled: true
     prefer.minifi.logging.enabled: false
     allow.auto.java.upgrade: true
+    personal.view.cb.by.right.enabled: true
 crn:
   partition: cdp
   region: us-west-1
