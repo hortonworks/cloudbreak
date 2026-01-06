@@ -23,6 +23,7 @@ import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.health.HealthDetailsFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.health.NodeHealthDetails;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.rotate.FreeipaSecretTypeResponse;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
@@ -43,6 +44,7 @@ import com.sequenceiq.it.cloudbreak.microservice.FreeIpaClient;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
 import com.sequenceiq.it.cloudbreak.util.EnvironmentUtil;
+import com.sequenceiq.it.cloudbreak.util.FreeIpaUtil;
 import com.sequenceiq.it.cloudbreak.util.SdxUtil;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
 import com.sequenceiq.it.cloudbreak.util.ssh.SshJUtil;
@@ -77,6 +79,9 @@ public class DatalakeCcmUpgradeAndRotationTest extends AbstractE2ETest implement
 
     @Inject
     private ImageValidatorE2ETestUtil imageValidatorE2ETestUtil;
+
+    @Inject
+    private FreeIpaUtil freeIpaUtil;
 
     @Override
     protected void setupTest(TestContext testContext) {
@@ -161,6 +166,7 @@ public class DatalakeCcmUpgradeAndRotationTest extends AbstractE2ETest implement
                     .withSecrets(List.of(CCMV2_JUMPGATE_AGENT_ACCESS_KEY))
                 .when(freeIpaTestClient.rotateSecret())
                 .awaitForFlow()
+                .then(validateRotationResult())
                 .given(FreeIpaHealthDetailsDto.class)
                     .withEnvironmentCrn()
                 .when(freeIpaTestClient.getHealthDetails())
@@ -168,7 +174,20 @@ public class DatalakeCcmUpgradeAndRotationTest extends AbstractE2ETest implement
                 .validate();
     }
 
-    private static Assertion<FreeIpaHealthDetailsDto, FreeIpaClient> validateCcmV2JumpgateAgentAccessKeyRotation() {
+    private Assertion<FreeIpaRotationTestDto, FreeIpaClient> validateRotationResult() {
+        return (tc, testDto, client) -> {
+            List<FreeipaSecretTypeResponse> secretTypes = freeIpaUtil.getSecretTypes(testDto, client);
+            boolean jumpgateRotationFinished = secretTypes.stream()
+                    .anyMatch(secretType -> CCMV2_JUMPGATE_AGENT_ACCESS_KEY.value().equals(secretType.getSecretType())
+                            && secretType.getLastUpdated() != null);
+            if (!jumpgateRotationFinished) {
+                throw new TestFailException(format("Secret rotation was never finished successfully for %s", CCMV2_JUMPGATE_AGENT_ACCESS_KEY));
+            }
+            return testDto;
+        };
+    }
+
+    private Assertion<FreeIpaHealthDetailsDto, FreeIpaClient> validateCcmV2JumpgateAgentAccessKeyRotation() {
         return (testContext, freeIpaHealthDetailsDto, freeIpaClient) -> {
             HealthDetailsFreeIpaResponse healthDetailsResponse = freeIpaHealthDetailsDto.getResponse();
             if (healthDetailsResponse != null) {
