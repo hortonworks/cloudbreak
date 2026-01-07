@@ -21,6 +21,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.TestUtil;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
@@ -87,14 +88,18 @@ public class ClusterManagerUpgradeManagementServiceTest {
 
     private static Stream<Arguments> cmVersions() {
         return Stream.of(
-                Arguments.of(OLD_CM_VERSION, CM_VERSION, true, false, true, true),
-                Arguments.of(OLD_CM_VERSION, CM_VERSION, true, false, false, false),
-                Arguments.of(OLD_CM_VERSION, CM_VERSION, true, true, true, false),
-                Arguments.of(OLD_CM_VERSION, CM_VERSION, true, true, false, false),
-                Arguments.of(CM_VERSION,     CM_VERSION, false, false, true, true),
-                Arguments.of(CM_VERSION,     CM_VERSION, false, false, false, false),
-                Arguments.of(CM_VERSION,     CM_VERSION, false, true, false, false),
-                Arguments.of(CM_VERSION,     CM_VERSION, false, true, true, false)
+                Arguments.of(OLD_CM_VERSION, CM_VERSION, true, false, true, true, "7.3.1", false),
+                Arguments.of(OLD_CM_VERSION, CM_VERSION, true, false, false, false, "7.3.1", false),
+                Arguments.of(OLD_CM_VERSION, CM_VERSION, true, true, true, false, "7.3.1", false),
+                Arguments.of(OLD_CM_VERSION, CM_VERSION, true, true, false, false, "7.3.1", false),
+                Arguments.of(OLD_CM_VERSION, CM_VERSION, true, false, true, true, "7.3.1", false),
+                Arguments.of(OLD_CM_VERSION, CM_VERSION, true, false, true, true, "7.3.1", true),
+                Arguments.of(OLD_CM_VERSION, CM_VERSION, true, false, true, false, "7.3.2", true),
+                Arguments.of(OLD_CM_VERSION, CM_VERSION, true, false, true, true, "7.3.2", false),
+                Arguments.of(CM_VERSION,     CM_VERSION, false, false, true, true, "7.3.1", false),
+                Arguments.of(CM_VERSION,     CM_VERSION, false, false, false, false, "7.3.1", false),
+                Arguments.of(CM_VERSION,     CM_VERSION, false, true, false, false, "7.3.1", false),
+                Arguments.of(CM_VERSION,     CM_VERSION, false, true, true, false, "7.3.1", false)
         );
     }
 
@@ -104,6 +109,7 @@ public class ClusterManagerUpgradeManagementServiceTest {
         cluster = TestUtil.cluster();
         when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
         when(stackDto.getCluster()).thenReturn(cluster);
+        when(stackDto.getStack()).thenReturn(stack);
         when(cmServerQueryService.queryCmVersion(stackDto)).thenReturn(Optional.empty());
         lenient().when(clusterApiConnectors.getConnector(stackDto)).thenReturn(clusterApi);
         lenient().when(clusterApi.clusterSetupService()).thenReturn(clusterSetupService);
@@ -112,12 +118,14 @@ public class ClusterManagerUpgradeManagementServiceTest {
     @ParameterizedTest
     @MethodSource("cmVersions")
     public void testUpgradeClusterManager(String oldCmVersion, String newCmVersion, boolean cmUpgradeNecessary, boolean rollingUpgradeEnabled,
-            boolean runtimeUpgradeNecessary, boolean stopServices) throws CloudbreakOrchestratorException, CloudbreakException {
+            boolean runtimeUpgradeNecessary, boolean stopServices, String targetRuntimeVersion, boolean datalake)
+            throws CloudbreakOrchestratorException, CloudbreakException {
         when(clouderaManagerRepo.getFullVersion()).thenReturn(newCmVersion);
         when(clusterComponentConfigProvider.getClouderaManagerRepoDetails(cluster.getId())).thenReturn(clouderaManagerRepo);
         when(cmServerQueryService.queryCmVersion(stackDto)).thenReturn(Optional.of(oldCmVersion)).thenReturn(Optional.of(newCmVersion));
+        stack.setType(datalake ? StackType.DATALAKE : StackType.WORKLOAD);
 
-        underTest.upgradeClusterManager(STACK_ID, rollingUpgradeEnabled, runtimeUpgradeNecessary);
+        underTest.upgradeClusterManager(STACK_ID, rollingUpgradeEnabled, runtimeUpgradeNecessary, targetRuntimeVersion);
 
         if (stopServices) {
             verify(clusterApi).stopCluster(true);
@@ -140,7 +148,7 @@ public class ClusterManagerUpgradeManagementServiceTest {
                 .thenThrow(new CloudbreakServiceException("version mismatch error"))
                 .thenReturn(Optional.of(CM_VERSION));
 
-        underTest.upgradeClusterManager(STACK_ID, false, true);
+        underTest.upgradeClusterManager(STACK_ID, false, true, null);
 
         verify(clusterApiConnectors, times(3)).getConnector(stackDto);
         verify(clusterApi).stopCluster(true);
@@ -156,7 +164,7 @@ public class ClusterManagerUpgradeManagementServiceTest {
         when(clusterComponentConfigProvider.getClouderaManagerRepoDetails(cluster.getId())).thenReturn(clouderaManagerRepo);
         when(cmServerQueryService.queryCmVersion(stackDto)).thenReturn(Optional.of(OLD_CM_VERSION)).thenReturn(Optional.of("wrong"));
 
-        assertThrows(CloudbreakServiceException.class, () -> underTest.upgradeClusterManager(STACK_ID, true, true));
+        assertThrows(CloudbreakServiceException.class, () -> underTest.upgradeClusterManager(STACK_ID, true, true, null));
 
         verify(cmServerQueryService, times(2)).queryCmVersion(stackDto);
         verify(clusterUpgradeService).upgradeClusterManager(STACK_ID);
@@ -171,7 +179,7 @@ public class ClusterManagerUpgradeManagementServiceTest {
         when(clusterComponentConfigProvider.getClouderaManagerRepoDetails(cluster.getId())).thenReturn(clouderaManagerRepo);
         when(cmServerQueryService.queryCmVersion(stackDto)).thenReturn(Optional.of(CM_VERSION_WITH_P));
 
-        underTest.upgradeClusterManager(STACK_ID, true, true);
+        underTest.upgradeClusterManager(STACK_ID, true, true, null);
 
         verify(clusterComponentConfigProvider).getClouderaManagerRepoDetails(cluster.getId());
         verify(cmServerQueryService).queryCmVersion(stackDto);

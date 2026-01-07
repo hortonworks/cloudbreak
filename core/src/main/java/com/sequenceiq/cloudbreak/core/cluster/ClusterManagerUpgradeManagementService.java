@@ -5,12 +5,14 @@ import java.util.Optional;
 import jakarta.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
+import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.ClusterUpgradeService;
 import com.sequenceiq.cloudbreak.dto.StackDto;
@@ -43,12 +45,12 @@ public class ClusterManagerUpgradeManagementService {
     @Inject
     private ClusterManagerUpgradeService clusterManagerUpgradeService;
 
-    public void upgradeClusterManager(Long stackId, boolean rollingUpgradeEnabled, boolean runtimeUpgradeNecessary)
+    public void upgradeClusterManager(Long stackId, boolean rollingUpgradeEnabled, boolean runtimeUpgradeNecessary, String targetRuntimeVersion)
             throws CloudbreakOrchestratorException, CloudbreakException {
         StackDto stackDto = stackDtoService.getById(stackId);
         ClouderaManagerRepo clouderaManagerRepo = clusterComponentConfigProvider.getClouderaManagerRepoDetails(stackDto.getCluster().getId());
         boolean clusterManagerUpgradeNecessary = isClusterManagerUpgradeNecessary(clouderaManagerRepo.getFullVersion(), stackDto);
-        stopClusterServicesIfNecessary(rollingUpgradeEnabled, runtimeUpgradeNecessary, stackDto);
+        stopClusterServicesIfNecessary(rollingUpgradeEnabled, runtimeUpgradeNecessary, stackDto, targetRuntimeVersion);
         if (clusterManagerUpgradeNecessary) {
             clusterUpgradeService.upgradeClusterManager(stackId);
             clusterManagerUpgradeService.upgradeClouderaManager(stackDto, clouderaManagerRepo);
@@ -90,16 +92,20 @@ public class ClusterManagerUpgradeManagementService {
     }
 
     private String stripEndingMagicP(String version) {
-        return StringUtils.removeEnd(version, "p");
+        return Strings.CS.removeEnd(version, "p");
     }
 
-    private void stopClusterServicesIfNecessary(boolean rollingUpgradeEnabled, boolean runtimeUpgradeNecessary, StackDto stackDto) throws CloudbreakException {
-        if (runtimeUpgradeNecessary && !rollingUpgradeEnabled) {
+    private void stopClusterServicesIfNecessary(boolean rollingUpgradeEnabled, boolean runtimeUpgradeNecessary, StackDto stackDto, String targetRuntimeVersion)
+            throws CloudbreakException {
+        boolean skipStopForDlUpgradeTo732 = stackDto.getStack().isDatalake()
+                && StringUtils.isNotBlank(targetRuntimeVersion)
+                && CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited(targetRuntimeVersion, CMRepositoryVersionUtil.CLOUDERA_STACK_VERSION_7_3_2);
+        if (!runtimeUpgradeNecessary || rollingUpgradeEnabled || skipStopForDlUpgradeTo732) {
+            LOGGER.debug("Not necessary to stop services because the rolling upgrade option is: {} or runtime upgrade is necessary: {} or skipping for DL {}",
+                    rollingUpgradeEnabled, runtimeUpgradeNecessary, skipStopForDlUpgradeTo732);
+        } else {
             LOGGER.debug("Stopping cluster services.");
             clusterApiConnectors.getConnector(stackDto).stopCluster(true);
-        } else {
-            LOGGER.debug("Not necessary to stop services because the rolling upgrade option is: {} or runtime upgrade is necessary: {}",
-                    rollingUpgradeEnabled, runtimeUpgradeNecessary);
         }
     }
 

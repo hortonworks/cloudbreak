@@ -40,24 +40,24 @@ class ClusterManagerUpgradeHandlerTest {
 
     @Test
     void testDoAcceptShouldReturnSuccessEvent() throws CloudbreakOrchestratorException, CloudbreakException {
-        ClusterManagerUpgradeRequest request = new ClusterManagerUpgradeRequest(STACK_ID, Collections.emptySet(), true);
+        ClusterManagerUpgradeRequest request = new ClusterManagerUpgradeRequest(STACK_ID, Collections.emptySet(), true, null);
         when(clusterUpgradeService.isRuntimeUpgradeNecessary(request.getUpgradeCandidateProducts())).thenReturn(false);
 
         Selectable result = underTest.doAccept(new HandlerEvent<>(Event.wrap(request)));
 
         assertEquals(CLUSTER_MANAGER_UPGRADE_FINISHED_EVENT.event(), result.selector());
-        verify(clusterManagerUpgradeManagementService).upgradeClusterManager(STACK_ID, true, false);
+        verify(clusterManagerUpgradeManagementService).upgradeClusterManager(STACK_ID, true, false, null);
     }
 
     @Test
     void testDoAcceptShouldReturnFailureEvent() throws CloudbreakOrchestratorException, CloudbreakException {
-        ClusterManagerUpgradeRequest request = new ClusterManagerUpgradeRequest(STACK_ID, Collections.emptySet(), true);
+        ClusterManagerUpgradeRequest request = new ClusterManagerUpgradeRequest(STACK_ID, Collections.emptySet(), true, "123");
         when(clusterUpgradeService.isRuntimeUpgradeNecessary(request.getUpgradeCandidateProducts())).thenReturn(true);
-        doThrow(new CloudbreakException("error")).when(clusterManagerUpgradeManagementService).upgradeClusterManager(STACK_ID, true, true);
+        doThrow(new CloudbreakException("error")).when(clusterManagerUpgradeManagementService).upgradeClusterManager(STACK_ID, true, true, "123");
 
         Selectable result = underTest.doAccept(new HandlerEvent<>(Event.wrap(request)));
 
         assertEquals(CLUSTER_UPGRADE_FAILED_EVENT.event(), result.selector());
-        verify(clusterManagerUpgradeManagementService).upgradeClusterManager(STACK_ID, true, true);
+        verify(clusterManagerUpgradeManagementService).upgradeClusterManager(STACK_ID, true, true, "123");
     }
 }

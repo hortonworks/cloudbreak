@@ -100,6 +100,9 @@ public class ClusterUpgradeActions {
     @Bean(name = "CLUSTER_MANAGER_UPGRADE_STATE")
     public Action<?, ?> upgradeClusterManager() {
         return new AbstractClusterUpgradeAction<>(ClusterUpgradeInitSuccess.class) {
+            @Inject
+            private ClusterUpgradeService  clusterUpgradeService;
+
             @Override
             protected ClusterUpgradeContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext,
                     ClusterUpgradeInitSuccess payload) {
@@ -111,7 +114,9 @@ public class ClusterUpgradeActions {
                 StatedImage targetStatedImage = getTargetImage(variables);
                 imageComponentUpdaterService.updateComponentsForUpgrade(targetStatedImage, payload.getResourceId());
                 boolean rollingUpgradeEnabled = rollingUpgradeEnabled(variables);
-                Selectable event = new ClusterManagerUpgradeRequest(context.getStackId(), payload.getUpgradeCandidateProducts(), rollingUpgradeEnabled);
+                String targetRuntimeVersion = clusterUpgradeService.getStackVersionFromImage(targetStatedImage.getImage()).orElse(null);
+                Selectable event = new ClusterManagerUpgradeRequest(context.getStackId(), payload.getUpgradeCandidateProducts(),
+                        rollingUpgradeEnabled, targetRuntimeVersion);
                 sendEvent(context, event.selector(), event);
             }
 

@@ -71,19 +71,20 @@ public class AzureVirtualMachineService {
     private List<VirtualMachine> getVirtualMachinesByPrivateInstanceIds(
             AzureClient azureClient, String resourceGroup, Collection<String> privateInstanceIds) {
         List<VirtualMachine> virtualMachines = azureClient.getVirtualMachines(resourceGroup).getWhile(vms -> !hasMissingVm(vms, privateInstanceIds));
-        if (!virtualMachines.isEmpty()) {
+        if (virtualMachines != null && !virtualMachines.isEmpty()) {
+            return virtualMachines;
+        } else {
+            LOGGER.info("We could not receive any VM in resource group. Let's try to fetch VMs by instance ids.");
+            for (String privateInstanceId : privateInstanceIds) {
+                VirtualMachine virtualMachineByResourceGroup = azureClient.getVirtualMachineByResourceGroup(resourceGroup, privateInstanceId);
+                if (virtualMachineByResourceGroup == null) {
+                    LOGGER.info("Could not find vm with private id: " + privateInstanceId);
+                } else {
+                    virtualMachines.add(virtualMachineByResourceGroup);
+                }
+            }
             return virtualMachines;
         }
-        LOGGER.info("We could not receive any VM in resource group. Let's try to fetch VMs by instance ids.");
-        for (String privateInstanceId : privateInstanceIds) {
-            VirtualMachine virtualMachineByResourceGroup = azureClient.getVirtualMachineByResourceGroup(resourceGroup, privateInstanceId);
-            if (virtualMachineByResourceGroup == null) {
-                LOGGER.info("Could not find vm with private id: " + privateInstanceId);
-            } else {
-                virtualMachines.add(virtualMachineByResourceGroup);
-            }
-        }
-        return virtualMachines;
     }
 
     private Map<String, VirtualMachine> getVirtualMachinesByNameEmptyAllowed(

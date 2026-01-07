@@ -65,7 +65,7 @@ public class ClusterUpgradeService {
 
     public void clusterUpgradeFinished(long stackId, Map<String, String> currentImagePackages, StatedImage targetImage, boolean rollingUpgradeEnabled) {
         Image targetIm = targetImage.getImage();
-        String clusterStackVersion = NullUtil.getIfNotNull(targetIm.getStackDetails(), ImageStackDetails::getVersion);
+        Optional<String> clusterStackVersion = getStackVersionFromImage(targetIm);
         String currentRuntimeBuildNumber = getCurrentStackBuildNumber(currentImagePackages);
         boolean clusterRuntimeUpgradeNeeded =
                 isUpdateNeeded(currentRuntimeBuildNumber, NullUtil.getIfNotNull(targetIm.getStackDetails(), ImageStackDetails::getStackBuildNumber));
@@ -74,10 +74,10 @@ public class ClusterUpgradeService {
                 rollingUpgradeEnabled ? CLUSTER_ROLLING_UPGRADE_FINISHED : DetailedStackStatus.CLUSTER_UPGRADE_FINISHED,
                 "Cluster was successfully upgraded.");
 
-        getStackVersionFromImage(targetIm).ifPresentOrElse(s -> stackUpdater.updateStackVersion(stackId, s),
+        clusterStackVersion.ifPresentOrElse(s -> stackUpdater.updateStackVersion(stackId, s),
                 () -> LOGGER.warn("Cluster runtime could not be upgraded for stack with id {}", stackId));
         if (clusterRuntimeUpgradeNeeded) {
-            flowMessageService.fireEventAndLog(stackId, Status.AVAILABLE.name(), CLUSTER_UPGRADE_FINISHED, clusterStackVersion);
+            flowMessageService.fireEventAndLog(stackId, Status.AVAILABLE.name(), CLUSTER_UPGRADE_FINISHED, clusterStackVersion.orElse(null));
         } else {
             flowMessageService.fireEventAndLog(stackId, Status.AVAILABLE.name(), CLUSTER_UPGRADE_FINISHED_NOVERSION);
         }
@@ -87,7 +87,7 @@ public class ClusterUpgradeService {
         return CollectionUtils.isNotEmpty(upgradeCandidateProducts);
     }
 
-    private Optional<String> getStackVersionFromImage(Image image) {
+    public Optional<String> getStackVersionFromImage(Image image) {
         return Optional.ofNullable(image.getStackDetails())
                 .map(ImageStackDetails::getVersion);
     }
