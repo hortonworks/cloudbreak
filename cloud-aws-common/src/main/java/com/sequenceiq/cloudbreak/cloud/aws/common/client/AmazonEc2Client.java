@@ -54,7 +54,6 @@ import software.amazon.awssdk.services.ec2.model.DescribeImagesResponse;
 import software.amazon.awssdk.services.ec2.model.DescribeInstanceStatusRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeInstanceStatusResponse;
 import software.amazon.awssdk.services.ec2.model.DescribeInstanceTypeOfferingsRequest;
-import software.amazon.awssdk.services.ec2.model.DescribeInstanceTypeOfferingsResponse;
 import software.amazon.awssdk.services.ec2.model.DescribeInstanceTypesRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeInstanceTypesResponse;
 import software.amazon.awssdk.services.ec2.model.DescribeInstancesRequest;
@@ -112,6 +111,7 @@ import software.amazon.awssdk.services.ec2.model.StopInstancesRequest;
 import software.amazon.awssdk.services.ec2.model.StopInstancesResponse;
 import software.amazon.awssdk.services.ec2.model.TerminateInstancesRequest;
 import software.amazon.awssdk.services.ec2.model.TerminateInstancesResponse;
+import software.amazon.awssdk.services.ec2.paginators.DescribeInstanceTypeOfferingsIterable;
 import software.amazon.awssdk.services.ec2.waiters.Ec2Waiter;
 
 public class AmazonEc2Client extends AmazonClient {
@@ -309,8 +309,8 @@ public class AmazonEc2Client extends AmazonClient {
         return client.describeImages(describeImagesRequest);
     }
 
-    public DescribeInstanceTypeOfferingsResponse describeInstanceTypeOfferings(DescribeInstanceTypeOfferingsRequest request) {
-        return client.describeInstanceTypeOfferings(request);
+    public DescribeInstanceTypeOfferingsIterable describeInstanceTypeOfferings(DescribeInstanceTypeOfferingsRequest request) {
+        return client.describeInstanceTypeOfferingsPaginator(request);
     }
 
     public DescribeInstanceTypesResponse describeInstanceTypes(DescribeInstanceTypesRequest request) {

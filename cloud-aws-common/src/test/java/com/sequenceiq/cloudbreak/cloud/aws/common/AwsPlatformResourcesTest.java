@@ -69,12 +69,12 @@ import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
 
 import software.amazon.awssdk.awscore.exception.AwsErrorDetails;
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
+import software.amazon.awssdk.core.pagination.sync.SdkIterable;
 import software.amazon.awssdk.services.dynamodb.model.ListTablesRequest;
 import software.amazon.awssdk.services.dynamodb.model.ListTablesResponse;
 import software.amazon.awssdk.services.ec2.model.ArchitectureType;
 import software.amazon.awssdk.services.ec2.model.AvailabilityZone;
 import software.amazon.awssdk.services.ec2.model.DescribeInstanceTypeOfferingsRequest;
-import software.amazon.awssdk.services.ec2.model.DescribeInstanceTypeOfferingsResponse;
 import software.amazon.awssdk.services.ec2.model.DescribeInstanceTypesRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeInstanceTypesResponse;
 import software.amazon.awssdk.services.ec2.model.DescribeRegionsRequest;
@@ -96,6 +96,7 @@ import software.amazon.awssdk.services.ec2.model.Region;
 import software.amazon.awssdk.services.ec2.model.Subnet;
 import software.amazon.awssdk.services.ec2.model.VCpuInfo;
 import software.amazon.awssdk.services.ec2.model.Vpc;
+import software.amazon.awssdk.services.ec2.paginators.DescribeInstanceTypeOfferingsIterable;
 import software.amazon.awssdk.services.iam.model.InstanceProfile;
 import software.amazon.awssdk.services.iam.model.ListInstanceProfilesRequest;
 import software.amazon.awssdk.services.iam.model.ListInstanceProfilesResponse;
@@ -181,9 +182,6 @@ public class AwsPlatformResourcesTest {
         DescribeRegionsResponse describeRegionsResponse = DescribeRegionsResponse.builder()
                 .regions(Collections.singletonList(Region.builder().regionName(REGION_NAME).build()))
                 .build();
-        DescribeInstanceTypeOfferingsResponse describeInstanceTypeOfferingsResponse = DescribeInstanceTypeOfferingsResponse.builder()
-                .instanceTypeOfferings(Collections.singletonList(InstanceTypeOffering.builder().instanceType("m5.2xlarge").build()))
-                .build();
 
         when(awsDefaultZoneProvider.getDefaultZone(any(CloudCredential.class))).thenReturn(REGION_NAME);
         when(awsClient.createEc2Client(any(AwsCredentialView.class))).thenReturn(amazonEC2Client);
@@ -191,8 +189,15 @@ public class AwsPlatformResourcesTest {
         when(amazonEC2Client.describeRegions(any(DescribeRegionsRequest.class))).thenReturn(describeRegionsResponse);
         when(awsAvailabilityZoneProvider.describeAvailabilityZones(any(), any(), any()))
                 .thenReturn(List.of(availabilityZone));
-        when(amazonEC2Client.describeInstanceTypeOfferings(any(DescribeInstanceTypeOfferingsRequest.class)))
-                .thenReturn(describeInstanceTypeOfferingsResponse);
+
+        List<InstanceTypeOffering> offerings = Collections.singletonList(InstanceTypeOffering.builder().instanceType("m5.2xlarge").build());
+        DescribeInstanceTypeOfferingsIterable describeInstanceTypeOfferingsIterable = mock(DescribeInstanceTypeOfferingsIterable.class);
+        SdkIterable<InstanceTypeOffering> sdkIterable = mock(SdkIterable.class);
+        when(sdkIterable.stream()).thenAnswer(invocation -> offerings.stream());
+        when(describeInstanceTypeOfferingsIterable.instanceTypeOfferings()).thenReturn(sdkIterable);
+        when(amazonEC2Client.describeInstanceTypeOfferings(any()))
+                .thenReturn(describeInstanceTypeOfferingsIterable);
+
         when(amazonEC2Client.describeInstanceTypes(any(DescribeInstanceTypesRequest.class)))
                 .thenReturn(describeInstanceTypesResponse);
 
@@ -512,12 +517,15 @@ public class AwsPlatformResourcesTest {
                 .locationType(LocationType.AVAILABILITY_ZONE)
                 .filters(Filter.builder().name("location").values(AZ_NAME).build())
                 .build();
-        DescribeInstanceTypeOfferingsResponse describeInstanceTypesByAzResponse = DescribeInstanceTypeOfferingsResponse.builder()
-                .instanceTypeOfferings(List.of(InstanceTypeOffering.builder().instanceType("vm1").build(),
-                        InstanceTypeOffering.builder().instanceType("vm2").build()))
-                .build();
+
+        List<InstanceTypeOffering> offerings = List.of(InstanceTypeOffering.builder().instanceType("vm1").build(),
+                InstanceTypeOffering.builder().instanceType("vm2").build());
+        DescribeInstanceTypeOfferingsIterable describeInstanceTypeOfferingsIterable = mock(DescribeInstanceTypeOfferingsIterable.class);
+        SdkIterable<InstanceTypeOffering> sdkIterable = mock(SdkIterable.class);
+        when(sdkIterable.stream()).thenAnswer(invocation -> offerings.stream());
+        when(describeInstanceTypeOfferingsIterable.instanceTypeOfferings()).thenReturn(sdkIterable);
         when(amazonEC2Client.describeInstanceTypeOfferings(eq(describeInstanceTypesByAzRequest)))
-                .thenReturn(describeInstanceTypesByAzResponse);
+                .thenReturn(describeInstanceTypeOfferingsIterable);
 
         ReflectionTestUtils.setField(underTest, "defaultVmTypes", Map.of(
                 region, vmType("vm1"),
