@@ -22,6 +22,8 @@ public class NetworkConstants {
 
     public static final String FLEXIBLE_SERVER_DELEGATED_SUBNET_ID = "flexibleServerDelegatedSubnetId";
 
+    public static final String PROVIDER_SIDE_ID = "providerSideId";
+
     private NetworkConstants() {
     }
 }

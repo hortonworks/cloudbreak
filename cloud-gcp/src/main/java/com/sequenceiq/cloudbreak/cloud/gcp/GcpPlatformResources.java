@@ -235,7 +235,7 @@ public class GcpPlatformResources implements PlatformResources {
                             boolean igwAvailable = !Strings.isNullOrEmpty(subnetwork.getGatewayAddress());
                             subnets.add(
                                     new CloudSubnet.Builder()
-                                            .id(subnetwork.getId().toString())
+                                            .id(subnetwork.getName())
                                             .name(subnetwork.getName())
                                             .availabilityZone(zone)
                                             .cidr(subnetwork.getIpCidrRange())
@@ -245,6 +245,7 @@ public class GcpPlatformResources implements PlatformResources {
                                             .mapPublicIpOnLaunch(!subnetwork.getPrivateIpGoogleAccess())
                                             .igwAvailable(igwAvailable)
                                             .type(igwAvailable ? PUBLIC : PRIVATE)
+                                            .parameter(NetworkConstants.PROVIDER_SIDE_ID, subnetwork.getId())
                                             .build()
                             );
                         }
