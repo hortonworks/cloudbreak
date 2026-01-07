@@ -175,7 +175,14 @@ public class ClusterBootstrapperTest {
         Cluster cluster = new Cluster();
         cluster.setGateway(new Gateway());
         when(stack.getCluster()).thenReturn(cluster);
-        GatewayConfig gatewayConfig = new GatewayConfig("host1", "1.1.1.1", "1.1.1.1", 22, "i-1839", false);
+        GatewayConfig gatewayConfig = GatewayConfig.builder()
+                        .withConnectionAddress("host1")
+                        .withPublicAddress("1.1.1.1")
+                        .withPrivateAddress("1.1.1.1")
+                        .withGatewayPort(22)
+                        .withInstanceId("i-1839")
+                        .withKnoxGatewayEnabled(false)
+                        .build();
         when(gatewayConfigService.getAllGatewayConfigs(any())).thenReturn(List.of(gatewayConfig));
         when(componentConfigProviderService.getImage(anyLong())).thenReturn(image);
         when(hostClusterAvailabilityPollingService.pollWithAbsoluteTimeout(any(), any(), anyInt(), anyLong()))
@@ -210,7 +217,14 @@ public class ClusterBootstrapperTest {
         Cluster cluster = new Cluster();
         cluster.setGateway(new Gateway());
         when(stack.getCluster()).thenReturn(cluster);
-        GatewayConfig gatewayConfig = new GatewayConfig("host1", "1.1.1.1", "1.1.1.1", 22, "i-1839", false);
+        GatewayConfig gatewayConfig = GatewayConfig.builder()
+                .withConnectionAddress("host1")
+                .withPublicAddress("1.1.1.1")
+                .withPrivateAddress("1.1.1.1")
+                .withGatewayPort(22)
+                .withInstanceId("i-1839")
+                .withKnoxGatewayEnabled(false)
+                .build();
         when(gatewayConfigService.getAllGatewayConfigs(any())).thenReturn(List.of(gatewayConfig));
         when(componentConfigProviderService.getImage(anyLong())).thenReturn(image);
         when(hostClusterAvailabilityPollingService.pollWithAbsoluteTimeout(any(), any(), anyInt(), anyLong()))
@@ -245,7 +259,14 @@ public class ClusterBootstrapperTest {
         Cluster cluster = new Cluster();
         cluster.setGateway(new Gateway());
         when(stack.getCluster()).thenReturn(cluster);
-        GatewayConfig gatewayConfig = new GatewayConfig("host1", "1.1.1.1", "1.1.1.1", 22, "i-1839", false);
+        GatewayConfig gatewayConfig = GatewayConfig.builder()
+                .withConnectionAddress("host1")
+                .withPublicAddress("1.1.1.1")
+                .withPrivateAddress("1.1.1.1")
+                .withGatewayPort(22)
+                .withInstanceId("i-1839")
+                .withKnoxGatewayEnabled(false)
+                .build();
         when(gatewayConfigService.getAllGatewayConfigs(any())).thenReturn(List.of(gatewayConfig));
         when(componentConfigProviderService.getImage(anyLong())).thenReturn(image);
         when(hostClusterAvailabilityPollingService.pollWithAbsoluteTimeout(any(), any(), anyInt(), anyLong()))
@@ -273,7 +294,14 @@ public class ClusterBootstrapperTest {
         Cluster cluster = new Cluster();
         cluster.setGateway(new Gateway());
         when(stack.getCluster()).thenReturn(cluster);
-        GatewayConfig gatewayConfig = new GatewayConfig("host1", "1.1.1.1", "1.1.1.1", 22, "i-1839", false);
+        GatewayConfig gatewayConfig = GatewayConfig.builder()
+                .withConnectionAddress("host1")
+                .withPublicAddress("1.1.1.1")
+                .withPrivateAddress("1.1.1.1")
+                .withGatewayPort(22)
+                .withInstanceId("i-1839")
+                .withKnoxGatewayEnabled(false)
+                .build();
         when(gatewayConfigService.getAllGatewayConfigs(any())).thenReturn(List.of(gatewayConfig));
         when(componentConfigProviderService.getImage(anyLong())).thenReturn(image);
         when(hostClusterAvailabilityPollingService.pollWithAbsoluteTimeout(any(), any(), anyInt(), anyLong()))
@@ -300,8 +328,22 @@ public class ClusterBootstrapperTest {
         Cluster cluster = new Cluster();
         cluster.setGateway(new Gateway());
         when(stack.getCluster()).thenReturn(cluster);
-        GatewayConfig deadConfig = new GatewayConfig("host1", "1.1.1.1", "1.1.1.1", 22, "i-1839", false);
-        GatewayConfig aliveConfig = new GatewayConfig("host2", "1.1.1.2", "1.1.1.2", 22, "i-1839", false);
+        GatewayConfig deadConfig = GatewayConfig.builder()
+                .withConnectionAddress("host1")
+                .withPublicAddress("1.1.1.1")
+                .withPrivateAddress("1.1.1.1")
+                .withGatewayPort(22)
+                .withInstanceId("i-1839")
+                .withKnoxGatewayEnabled(false)
+                .build();
+        GatewayConfig aliveConfig = GatewayConfig.builder()
+                .withConnectionAddress("host2")
+                .withPublicAddress("1.1.1.2")
+                .withPrivateAddress("1.1.1.2")
+                .withGatewayPort(22)
+                .withInstanceId("i-1839")
+                .withKnoxGatewayEnabled(false)
+                .build();
         when(gatewayConfigService.getAllGatewayConfigs(any())).thenReturn(List.of(deadConfig, aliveConfig));
         when(componentConfigProviderService.getImage(anyLong())).thenReturn(image);
         when(hostClusterAvailabilityPollingService.pollWithAbsoluteTimeout(any(), any(), anyInt(), anyLong()))
@@ -332,8 +374,22 @@ public class ClusterBootstrapperTest {
         Cluster cluster = new Cluster();
         cluster.setGateway(new Gateway());
         when(stack.getCluster()).thenReturn(cluster);
-        GatewayConfig deadConfig1 = new GatewayConfig("host1", "1.1.1.1", "1.1.1.1", 22, "i-1839", false);
-        GatewayConfig deadConfig2 = new GatewayConfig("host2", "1.1.1.2", "1.1.1.2", 22, "i-1839", false);
+        GatewayConfig deadConfig1 = GatewayConfig.builder()
+                .withConnectionAddress("host1")
+                .withPublicAddress("1.1.1.1")
+                .withPrivateAddress("1.1.1.1")
+                .withGatewayPort(22)
+                .withInstanceId("i-1839")
+                .withKnoxGatewayEnabled(false)
+                .build();
+        GatewayConfig deadConfig2 = GatewayConfig.builder()
+                .withConnectionAddress("host2")
+                .withPublicAddress("1.1.1.2")
+                .withPrivateAddress("1.1.1.2")
+                .withGatewayPort(22)
+                .withInstanceId("i-1839")
+                .withKnoxGatewayEnabled(false)
+                .build();
         when(gatewayConfigService.getAllGatewayConfigs(any())).thenReturn(List.of(deadConfig1, deadConfig2));
         when(componentConfigProviderService.getImage(anyLong())).thenReturn(image);
         when(hostClusterAvailabilityPollingService.pollWithAbsoluteTimeout(any(), any(), anyInt(), anyLong()))

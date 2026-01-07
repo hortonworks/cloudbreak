@@ -62,12 +62,25 @@ public class CmServiceKeytabRequestFactoryTest {
     }
 
     private GatewayConfig create(String fqdn) {
-        return new GatewayConfig("1.1.1.1", "10.0.0.1",
-                "172.16.252.43", fqdn,
-                9443, "instanceid", "servercert", "clientcert", "clientkey",
-                "saltpasswd", "saltbootpassword", "signkey", false,
-                true, "masterPrivateKey", "masterPublicKey",
-                "privatekey", "publickey", null, null, null, null);
+        return GatewayConfig.builder()
+                .withConnectionAddress("172.16.252.43")
+                .withPublicAddress("1.1.1.1")
+                .withPrivateAddress("10.0.0.1")
+                .withServerCert("servercert")
+                .withClientCert("clientcert")
+                .withClientKey("clientkey")
+                .withSaltBootPassword("saltbootpassword")
+                .withSaltPassword("saltpasswd")
+                .withSaltSignPublicKey("signkey")
+                .withSaltMasterPublicKey("masterPublicKey")
+                .withSaltMasterPrivateKey("masterPrivateKey")
+                .withSaltMasterPrivateKey("privatekey")
+                .withSaltMasterPublicKey("publickey")
+                .withGatewayPort(9443)
+                .withInstanceId("instanceid")
+                .withHostname(fqdn)
+                .withKnoxGatewayEnabled(false)
+                .build();
 
     }
 }

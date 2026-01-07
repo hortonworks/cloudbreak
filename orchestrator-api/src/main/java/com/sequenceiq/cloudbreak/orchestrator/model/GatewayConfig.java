@@ -59,39 +59,32 @@ public final class GatewayConfig {
 
     private Optional<String> saltVersion = Optional.empty();
 
-    public GatewayConfig(String connectionAddress, String publicAddress, String privateAddress,
-            Integer gatewayPort, String instanceId, Boolean knoxGatewayEnabled) {
-        this(connectionAddress, publicAddress, privateAddress, null, gatewayPort,
-                instanceId, null, null, null, null, null, null, knoxGatewayEnabled, true, null, null, null, null, null, null, null, null);
-    }
+    private GatewayServiceConfig gatewayServiceConfig;
 
-    public GatewayConfig(String connectionAddress, String publicAddress, String privateAddress, String hostname,
-            Integer gatewayPort, String instanceId, String serverCert, String clientCert, String clientKey, String saltPassword, String saltBootPassword,
-            String signatureKey, Boolean knoxGatewayEnabled, boolean primary, String saltMasterPrivateKey, String saltMasterPublicKey,
-            String saltSignPrivateKey, String saltSignPublicKey, String userFacingCert, String userFacingKey,
-            String alternativeUserFacingCert, String alternativeUserFacingKey) {
-        this.connectionAddress = connectionAddress;
-        this.publicAddress = publicAddress;
-        this.privateAddress = privateAddress;
-        this.hostname = hostname;
-        this.gatewayPort = gatewayPort;
-        this.instanceId = instanceId;
-        this.serverCert = serverCert;
-        this.clientCert = clientCert;
-        this.clientKey = clientKey;
-        this.saltPassword = saltPassword;
-        this.saltBootPassword = saltBootPassword;
-        this.signatureKey = signatureKey;
-        this.knoxGatewayEnabled = knoxGatewayEnabled;
-        this.primary = primary;
-        this.saltMasterPrivateKey = saltMasterPrivateKey;
-        this.saltMasterPublicKey = saltMasterPublicKey;
-        this.saltSignPrivateKey = saltSignPrivateKey;
-        this.saltSignPublicKey = saltSignPublicKey;
-        this.userFacingCert = userFacingCert;
-        this.userFacingKey = userFacingKey;
-        this.alternativeUserFacingCert = alternativeUserFacingCert;
-        this.alternativeUserFacingKey = alternativeUserFacingKey;
+    public GatewayConfig(GatewayConfig.Builder gatewayConfigBuilder) {
+        this.connectionAddress = gatewayConfigBuilder.connectionAddress;
+        this.publicAddress = gatewayConfigBuilder.publicAddress;
+        this.privateAddress = gatewayConfigBuilder.privateAddress;
+        this.hostname = gatewayConfigBuilder.hostname;
+        this.gatewayPort = gatewayConfigBuilder.gatewayPort;
+        this.instanceId = gatewayConfigBuilder.instanceId;
+        this.serverCert = gatewayConfigBuilder.serverCert;
+        this.clientCert = gatewayConfigBuilder.clientCert;
+        this.clientKey = gatewayConfigBuilder.clientKey;
+        this.saltPassword = gatewayConfigBuilder.saltPassword;
+        this.saltBootPassword = gatewayConfigBuilder.saltBootPassword;
+        this.signatureKey = gatewayConfigBuilder.signatureKey;
+        this.knoxGatewayEnabled = gatewayConfigBuilder.knoxGatewayEnabled;
+        this.primary = gatewayConfigBuilder.primary;
+        this.saltMasterPrivateKey = gatewayConfigBuilder.saltMasterPrivateKey;
+        this.saltMasterPublicKey = gatewayConfigBuilder.saltMasterPublicKey;
+        this.saltSignPrivateKey = gatewayConfigBuilder.saltSignPrivateKey;
+        this.saltSignPublicKey = gatewayConfigBuilder.saltSignPublicKey;
+        this.userFacingCert = gatewayConfigBuilder.userFacingCert;
+        this.userFacingKey = gatewayConfigBuilder.userFacingKey;
+        this.alternativeUserFacingCert = gatewayConfigBuilder.alternativeUserFacingCert;
+        this.alternativeUserFacingKey = gatewayConfigBuilder.alternativeUserFacingKey;
+        this.gatewayServiceConfig = gatewayConfigBuilder.gatewayServiceConfig;
     }
 
     public static Builder builder() {
@@ -197,6 +190,10 @@ public final class GatewayConfig {
         return alternativeUserFacingKey;
     }
 
+    public GatewayServiceConfig getGatewayServiceConfig() {
+        return gatewayServiceConfig;
+    }
+
     public GatewayConfig withPath(String path) {
         this.path = Optional.of(path);
         return this;
@@ -220,10 +217,33 @@ public final class GatewayConfig {
     }
 
     public Builder toBuilder() {
-        return new Builder(this.connectionAddress, this.publicAddress, this.privateAddress, this.hostname, this.serverCert, this.clientCert, this.clientKey,
-                this.gatewayPort, this.instanceId, this.saltPassword, this.saltBootPassword, this.signatureKey, this.knoxGatewayEnabled, this.primary,
-                this.saltMasterPrivateKey, this.saltMasterPublicKey, this.saltSignPrivateKey, this.saltSignPublicKey, this.userFacingCert, this.userFacingKey,
-                this.path, this.protocol, this.saltVersion, this.alternativeUserFacingCert, this.alternativeUserFacingKey);
+        return  GatewayConfig.builder()
+                .withConnectionAddress(this.connectionAddress)
+                .withPublicAddress(this.publicAddress)
+                .withPrivateAddress(this.privateAddress)
+                .withHostname(this.hostname)
+                .withGatewayPort(this.gatewayPort)
+                .withInstanceId(this.instanceId)
+                .withServerCert(this.serverCert)
+                .withClientCert(this.clientCert)
+                .withClientKey(this.clientKey)
+                .withSaltBootPassword(this.saltBootPassword)
+                .withSaltPassword(this.saltPassword)
+                .withSignatureKey(this.signatureKey)
+                .withPath(this.path)
+                .withProtocol(this.protocol)
+                .withSaltVersion(this.saltVersion.orElse(null))
+                .withKnoxGatewayEnabled(this.knoxGatewayEnabled)
+                .withPrimary(this.primary)
+                .withSaltMasterPrivateKey(this.saltMasterPrivateKey)
+                .withSaltMasterPublicKey(this.saltMasterPublicKey)
+                .withSaltSignPrivateKey(this.saltSignPrivateKey)
+                .withSaltSignPublicKey(this.saltSignPublicKey)
+                .withUserFacingCert(this.userFacingCert)
+                .withUserFacingKey(this.userFacingKey)
+                .withAlternativeUserFacingCert(this.alternativeUserFacingCert)
+                .withAlternativeUserFacingKey(this.alternativeUserFacingKey)
+                .withGatewayServiceConfig(this.gatewayServiceConfig);
     }
 
     @Override
@@ -240,6 +260,7 @@ public final class GatewayConfig {
                 ", path=" + path +
                 ", protocol='" + protocol + '\'' +
                 ", saltVersion=" + saltVersion +
+                ", gatewayServiceConfig=" + gatewayServiceConfig +
                 '}';
     }
 
@@ -288,6 +309,8 @@ public final class GatewayConfig {
 
         private String alternativeUserFacingKey;
 
+        private GatewayServiceConfig gatewayServiceConfig;
+
         private Optional<String> path = Optional.empty();
 
         private String protocol = "https";
@@ -295,39 +318,6 @@ public final class GatewayConfig {
         private Optional<String> saltVersion = Optional.empty();
 
         public Builder() {
-        }
-
-        public Builder(String connectionAddress, String publicAddress, String privateAddress, String hostname,
-                String serverCert, String clientCert, String clientKey,
-                Integer gatewayPort, String instanceId, String saltPassword, String saltBootPassword, String signatureKey, Boolean knoxGatewayEnabled,
-                boolean primary, String saltMasterPrivateKey, String saltMasterPublicKey, String saltSignPrivateKey, String saltSignPublicKey,
-                String userFacingCert, String userFacingKey, Optional<String> path, String protocol, Optional<String> saltVersion,
-                String alternativeUserFacingCert, String alternativeUserFacingKey) {
-            this.connectionAddress = connectionAddress;
-            this.publicAddress = publicAddress;
-            this.privateAddress = privateAddress;
-            this.hostname = hostname;
-            this.serverCert = serverCert;
-            this.clientCert = clientCert;
-            this.clientKey = clientKey;
-            this.gatewayPort = gatewayPort;
-            this.instanceId = instanceId;
-            this.saltPassword = saltPassword;
-            this.saltBootPassword = saltBootPassword;
-            this.signatureKey = signatureKey;
-            this.knoxGatewayEnabled = knoxGatewayEnabled;
-            this.primary = primary;
-            this.saltMasterPrivateKey = saltMasterPrivateKey;
-            this.saltMasterPublicKey = saltMasterPublicKey;
-            this.saltSignPrivateKey = saltSignPrivateKey;
-            this.saltSignPublicKey = saltSignPublicKey;
-            this.userFacingCert = userFacingCert;
-            this.userFacingKey = userFacingKey;
-            this.alternativeUserFacingCert = alternativeUserFacingCert;
-            this.alternativeUserFacingKey = alternativeUserFacingKey;
-            this.path = path;
-            this.protocol = protocol;
-            this.saltVersion = saltVersion;
         }
 
         public Builder withConnectionAddress(String connectionAddress) {
@@ -455,11 +445,13 @@ public final class GatewayConfig {
             return this;
         }
 
+        public Builder withGatewayServiceConfig(GatewayServiceConfig gatewayServiceConfig) {
+            this.gatewayServiceConfig = gatewayServiceConfig;
+            return this;
+        }
+
         public GatewayConfig build() {
-            GatewayConfig gatewayConfig =
-                    new GatewayConfig(connectionAddress, publicAddress, privateAddress, hostname, gatewayPort, instanceId, serverCert, clientCert, clientKey,
-                            saltPassword, saltBootPassword, signatureKey, knoxGatewayEnabled, primary, saltMasterPrivateKey, saltMasterPublicKey,
-                            saltSignPrivateKey, saltSignPublicKey, userFacingCert, userFacingKey, alternativeUserFacingCert, alternativeUserFacingKey);
+            GatewayConfig gatewayConfig = new GatewayConfig(this);
             path.ifPresent(gatewayConfig::withPath);
             gatewayConfig.withProtocol(protocol);
             saltVersion.ifPresent(gatewayConfig::withSaltVersion);

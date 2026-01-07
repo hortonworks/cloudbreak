@@ -54,6 +54,7 @@ else gateway.knox_data_root ~ '/security' %}
     - context:
       exposed: {{ topology.exposed }}
       ports: {{ salt['pillar.get']('gateway:ports') }}
+      protocols: {{ salt['pillar.get']('gateway:protocols') }}
       topology_name: {{ topology.name }}
       protocol: {{ salt['pillar.get']('gateway:protocol') }}
     - mode: 644
@@ -65,6 +66,7 @@ else gateway.knox_data_root ~ '/security' %}
     - context:
       exposed: {{ topology.exposed }}
       ports: {{ salt['pillar.get']('gateway:ports') }}
+      protocols: {{ salt['pillar.get']('gateway:protocols') }}
       topology_name: {{ topology.name }}
       protocol: {{ salt['pillar.get']('gateway:protocol') }}
     - mode: 644
@@ -76,6 +78,7 @@ else gateway.knox_data_root ~ '/security' %}
     - context:
       exposed: {{ topology.exposed }}
       ports: {{ salt['pillar.get']('gateway:ports') }}
+      protocols: {{ salt['pillar.get']('gateway:protocols') }}
       topology_name: {{ topology.name }}
       protocol: {{ salt['pillar.get']('gateway:protocol') }}
     - mode: 644

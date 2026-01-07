@@ -78,6 +78,11 @@ public class ClouderaManagerPreCreationService implements ClusterPreCreationApi 
     }
 
     @Override
+    public Map<String, String> getServiceProtocols(Blueprint blueprint, boolean tls) {
+        return clouderaManagerBlueprintPortConfigCollector.getServiceProtocols(blueprint, tls);
+    }
+
+    @Override
     public ServiceLocationMap getServiceLocations() {
         return volumePathBuilder.buildServiceLocationMap();
     }

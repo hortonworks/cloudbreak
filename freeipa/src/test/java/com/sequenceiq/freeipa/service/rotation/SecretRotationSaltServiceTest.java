@@ -59,7 +59,18 @@ public class SecretRotationSaltServiceTest {
 
     @Test
     void testExecuteSaltState() throws CloudbreakOrchestratorFailedException {
-        when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenReturn(new GatewayConfig(null, null, null, null, null, null));
+        when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenReturn(
+                GatewayConfig.builder()
+                        .withConnectionAddress("host")
+                        .withPublicAddress("1.1.1.1")
+                        .withPrivateAddress("1.1.1.1")
+                        .withGatewayPort(22)
+                        .withPrimary(true)
+                        .withHostname("host")
+                        .withInstanceId("instanceId")
+                        .withKnoxGatewayEnabled(false)
+                        .build()
+        );
         when(exitCriteriaProvider.get(any())).thenReturn(new StackBasedExitCriteriaModel(null));
         doNothing().when(hostOrchestrator).executeSaltState(any(), any(), any(), any(), any(), any());
 

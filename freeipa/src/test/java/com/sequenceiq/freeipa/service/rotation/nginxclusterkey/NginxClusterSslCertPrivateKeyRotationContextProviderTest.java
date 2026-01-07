@@ -70,8 +70,18 @@ public class NginxClusterSslCertPrivateKeyRotationContextProviderTest {
     @Test
     void testSwitchCert() throws CloudbreakOrchestratorFailedException {
         when(stackService.getByEnvironmentCrnAndAccountIdWithLists(any(), any())).thenReturn(mock(Stack.class));
-        when(gatewayConfigService.getGatewayConfigs(any(), any())).thenReturn(List.of(new GatewayConfig(null, null, null,
-                "host", null, "instanceId", null, null, null, null, null, null, null, true, null, null, null, null, null, null, null, null)));
+        when(gatewayConfigService.getGatewayConfigs(any(), any())).thenReturn(List.of(
+                GatewayConfig.builder()
+                        .withConnectionAddress("host")
+                        .withPublicAddress("1.1.1.1")
+                        .withPrivateAddress("1.1.1.1")
+                        .withGatewayPort(22)
+                        .withPrimary(true)
+                        .withHostname("host")
+                        .withInstanceId("instanceId")
+                        .withKnoxGatewayEnabled(false)
+                        .build()
+        ));
         when(secretRotationSaltService.executeCommand(any(), anySet(), any())).thenReturn(Map.of("host", "cert"));
         ArgumentCaptor<String> newCertCaptor = ArgumentCaptor.forClass(String.class);
         doNothing().when(instanceMetaDataService).updateServerCert(newCertCaptor.capture(), any(), any());

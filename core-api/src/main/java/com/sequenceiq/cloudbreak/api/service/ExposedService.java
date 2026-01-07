@@ -38,6 +38,8 @@ public class ExposedService {
 
     private boolean withoutProxyPath;
 
+    private String minHttpsVersion;
+
     public String getName() {
         return name;
     }
@@ -178,6 +180,14 @@ public class ExposedService {
         this.withoutProxyPath = withoutProxyPath;
     }
 
+    public String getMinHttpsVersion() {
+        return minHttpsVersion;
+    }
+
+    public void setMinHttpsVersion(String minHttpsVersion) {
+        this.minHttpsVersion = minHttpsVersion;
+    }
+
     //CHECKSTYLE:OFF: CyclomaticComplexity
     @Override
     public boolean equals(Object o) {
@@ -203,6 +213,7 @@ public class ExposedService {
                 Objects.equals(maxVersion, that.maxVersion) &&
                 Objects.equals(entitlement, that.entitlement) &&
                 Objects.equals(withoutProxyPath, that.withoutProxyPath) &&
+                Objects.equals(minHttpsVersion, that.minHttpsVersion) &&
                 Objects.equals(tlsPort, that.tlsPort);
     }
     //CHECKSTYLE:ON
@@ -210,7 +221,7 @@ public class ExposedService {
     @Override
     public int hashCode() {
         return Objects.hash(name, displayName, serviceName, knoxService, knoxUrl, ssoSupported, port, tlsPort,
-                apiOnly, apiIncluded, visibleForDatahub, visibleForDatalake, minVersion,
+                apiOnly, apiIncluded, visibleForDatahub, visibleForDatalake, minVersion, minHttpsVersion,
                 maxVersion, entitlement, withoutProxyPath);
     }
 
@@ -232,6 +243,7 @@ public class ExposedService {
                 ", minVersion=" + minVersion +
                 ", maxVersion=" + maxVersion +
                 ", entitlement=" + entitlement +
+                ", minHttpsVersion=" + minHttpsVersion +
                 ", withoutProxyPath=" + withoutProxyPath +
                 '}';
     }

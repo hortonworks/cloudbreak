@@ -449,7 +449,7 @@
     <service>
         <role>CM-API</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['CM-API'] -%}
-        <url>{{ protocol }}://{{ hostloc }}:{{ ports['CM-API'] }}/api</url>
+        <url>{{ protocols['CM-API'] }}://{{ hostloc }}:{{ ports['CM-API'] }}/api</url>
         <param>
             <name>httpclient.connectionTimeout</name>
             <value>5m</value>
@@ -468,7 +468,7 @@
     <service>
         <role>CM-UI</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['CM-API'] -%}
-        <url>{{ protocol }}://{{ hostloc }}:{{ ports['CM-UI'] }}</url>
+        <url>{{ protocols['CM-UI'] }}://{{ hostloc }}:{{ ports['CM-UI'] }}</url>
         {%- endfor %}
     </service>
     {%- endif %}
@@ -479,7 +479,7 @@
     <service>
         <role>WEBHDFS</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['NAMENODE'] -%}
-        <url>{{ protocol }}://{{ hostloc }}:{{ ports['WEBHDFS'] }}/webhdfs</url>
+        <url>{{ protocols['WEBHDFS'] }}://{{ hostloc }}:{{ ports['WEBHDFS'] }}/webhdfs</url>
         {%- endfor %}
     </service>
     {%- endif %}
@@ -501,7 +501,7 @@
     <service>
         <role>HDFSUI</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['NAMENODE'] -%}
-        <url>{{ protocol }}://{{ hostloc }}:{{ ports['HDFSUI'] }}</url>
+        <url>{{ protocols['HDFSUI'] }}://{{ hostloc }}:{{ ports['HDFSUI'] }}</url>
         {%- endfor %}
     </service>
     {%- endif %}
@@ -512,7 +512,7 @@
     <service>
         <role>RANGER</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['RANGER_ADMIN'] -%}
-        <url>{{ protocol }}://{{ hostloc }}:{{ ports['RANGER'] }}</url>
+        <url>{{ protocols['RANGER'] }}://{{ hostloc }}:{{ ports['RANGER'] }}</url>
         {%- endfor %}
         <param>
             <name>replayBufferSize</name>
@@ -522,7 +522,7 @@
     <service>
         <role>RANGERUI</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['RANGER_ADMIN'] -%}
-        <url>{{ protocol }}://{{ hostloc }}:{{ ports['RANGER'] }}</url>
+        <url>{{ protocols['RANGER'] }}://{{ hostloc }}:{{ ports['RANGER'] }}</url>
         {%- endfor %}
         <param>
              <name>replayBufferSize</name>
@@ -537,7 +537,7 @@
     <service>
         <role>HIVE</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['HIVESERVER2'] -%}
-        <url>{{ protocol }}://{{ hostloc }}:{{ ports['HIVE'] }}/cliservice</url>
+        <url>{{ protocols['HIVE'] }}://{{ hostloc }}:{{ ports['HIVE'] }}/cliservice</url>
         {%- endfor %}
         <param>
             <name>replayBufferSize</name>
@@ -552,13 +552,13 @@
     <service>
         <role>YARNUIV2</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['RESOURCEMANAGER'] -%}
-        <url>{{ protocol }}://{{ hostloc }}:{{ ports['YARNUIV2'] }}</url>
+        <url>{{ protocols['YARNUIV2'] }}://{{ hostloc }}:{{ ports['YARNUIV2'] }}</url>
         {%- endfor %}
     </service>
     <service>
         <role>RESOURCEMANAGER</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['RESOURCEMANAGER'] -%}
-        <url>{{ protocol }}://{{ hostloc }}:{{ ports['YARNUIV2'] }}/ws</url>
+        <url>{{ protocols['YARNUIV2'] }}://{{ hostloc }}:{{ ports['YARNUIV2'] }}/ws</url>
         {%- endfor %}
     </service>
     {%- endif %}
@@ -569,7 +569,7 @@
     <service>
         <role>JOBHISTORYUI</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['JOBHISTORY'] -%}
-        <url>{{ protocol }}://{{ hostloc }}:{{ ports['JOBHISTORYUI'] }}</url>
+        <url>{{ protocols['JOBHISTORYUI'] }}://{{ hostloc }}:{{ ports['JOBHISTORYUI'] }}</url>
         {%- endfor %}
     </service>
     {%- endif %}
@@ -580,7 +580,7 @@
     <service>
         <role>SPARKHISTORYUI</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['SPARK_YARN_HISTORY_SERVER'] -%}
-        <url>{{ protocol }}://{{ hostloc }}:{{ ports['SPARKHISTORYUI'] }}/</url>
+        <url>{{ protocols['SPARKHISTORYUI'] }}://{{ hostloc }}:{{ ports['SPARKHISTORYUI'] }}/</url>
         {%- endfor %}
     </service>
     {%- endif %}
@@ -591,7 +591,7 @@
     <service>
         <role>SPARK3HISTORYUI</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['SPARK3_YARN_HISTORY_SERVER'] -%}
-        <url>{{ protocol }}://{{ hostloc }}:{{ ports['SPARK3HISTORYUI'] }}/</url>
+        <url>{{ protocols['SPARK3HISTORYUI'] }}://{{ hostloc }}:{{ ports['SPARK3HISTORYUI'] }}/</url>
         {%- endfor %}
     </service>
     {%- endif %}
@@ -602,13 +602,13 @@
     <service>
         <role>ZEPPELINUI</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['ZEPPELIN_SERVER'] -%}
-        <url>{{ protocol }}://{{ hostloc }}:{{ ports['ZEPPELIN'] }}</url>
+        <url>{{ protocols['ZEPPELIN'] }}://{{ hostloc }}:{{ ports['ZEPPELIN'] }}</url>
         {%- endfor %}
     </service>
     <service>
         <role>ZEPPELINWS</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['ZEPPELIN_SERVER'] -%}
-        <url>{% if protocol == 'https' %}wss{% else %}ws{% endif %}://{{ hostloc }}:{{ ports['ZEPPELIN'] }}</url>
+        <url>{% if protocols['ZEPPELIN'] == 'https' %}wss{% else %}ws{% endif %}://{{ hostloc }}:{{ ports['ZEPPELIN'] }}</url>
         {%- endfor %}
     </service>
     {%- endif %}
@@ -619,13 +619,13 @@
     <service>
         <role>OOZIEUI</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['OOZIE_SERVER'] -%}
-        <url>{{ protocol }}://{{ hostloc }}:{{ ports['OOZIE'] }}/oozie/</url>
+        <url>{{ protocols['OOZIE'] }}://{{ hostloc }}:{{ ports['OOZIE'] }}/oozie/</url>
         {%- endfor %}
     </service>
     <service>
         <role>OOZIE</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['OOZIE_SERVER'] -%}
-        <url>{{ protocol }}://{{ hostloc }}:{{ ports['OOZIE'] }}/oozie/</url>
+        <url>{{ protocols['OOZIE'] }}://{{ hostloc }}:{{ ports['OOZIE'] }}/oozie/</url>
         {%- endfor %}
     </service>
     {%- endif %}
@@ -636,7 +636,7 @@
     <service>
         <role>ATLAS</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['ATLAS_SERVER'] -%}
-        <url>{{ protocol }}://{{ hostloc }}:{{ ports['ATLAS'] }}</url>
+        <url>{{ protocols['ATLAS'] }}://{{ hostloc }}:{{ ports['ATLAS'] }}</url>
         {%- endfor %}
         <param>
               <name>replayBufferSize</name>
@@ -654,7 +654,7 @@
     <service>
         <role>ATLAS-API</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['ATLAS_SERVER'] -%}
-        <url>{{ protocol }}://{{ hostloc }}:{{ ports['ATLAS'] }}</url>
+        <url>{{ protocols['ATLAS'] }}://{{ hostloc }}:{{ ports['ATLAS'] }}</url>
         {%- endfor %}
         <param>
               <name>replayBufferSize</name>
@@ -677,7 +677,7 @@
    <service>
         <role>LIVYSERVER</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['LIVY_SERVER'] -%}
-        <url>{{ protocol }}://{{ hostloc }}:{{ ports['LIVYSERVER1'] }}</url>
+        <url>{{ protocols['LIVYSERVER1'] }}://{{ hostloc }}:{{ ports['LIVYSERVER1'] }}</url>
         {%- endfor %}
    </service>
    {%- endif %}
@@ -688,7 +688,7 @@
    <service>
         <role>LIVY_FOR_SPARK3</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['LIVY_SERVER_FOR_SPARK3'] -%}
-        <url>{{ protocol }}://{{ hostloc }}:{{ ports['LIVY_FOR_SPARK3'] }}</url>
+        <url>{{ protocols['LIVY_FOR_SPARK3'] }}://{{ hostloc }}:{{ ports['LIVY_FOR_SPARK3'] }}</url>
         {%- endfor %}
    </service>
    {%- endif %}
@@ -699,7 +699,7 @@
     <service>
         <role>SOLR</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['SOLR_SERVER'] -%}
-        <url>{{ protocol }}://{{ hostloc }}:{{ ports['SOLR'] }}/solr</url>
+        <url>{{ protocols['SOLR'] }}://{{ hostloc }}:{{ ports['SOLR'] }}/solr</url>
         {%- endfor %}
     </service>
     {%- endif %}
@@ -710,7 +710,7 @@
     <service>
         <role>HUE</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['HUE_LOAD_BALANCER'] -%}
-        <url>{{ protocol }}://{{ hostloc }}:{{ ports['HUE'] }}</url>
+        <url>{{ protocols['HUE'] }}://{{ hostloc }}:{{ ports['HUE'] }}</url>
         <param>
             <name>httpclient.connectionTimeout</name>
             <value>5m</value>
@@ -733,7 +733,7 @@
     <service>
         <role>HBASEUI</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['MASTER'] -%}
-        <url>{{ protocol }}://{{ hostloc }}:{{ ports['HBASEUI'] }}</url>
+        <url>{{ protocols['HBASEUI'] }}://{{ hostloc }}:{{ ports['HBASEUI'] }}</url>
         {%- endfor %}
     </service>
     {%- endif %}
@@ -753,7 +753,7 @@
             <value>2m</value>
         </param>
         {% for hostloc in salt['pillar.get']('gateway:location')['NIFI_NODE'] -%}
-        <url>{{ protocol }}://{{ hostloc }}:{{ ports['NIFI'] }}</url>
+        <url>{{ protocols['NIFI'] }}://{{ hostloc }}:{{ ports['NIFI'] }}</url>
         {%- endfor %}
     </service>
     {%- endif %}
@@ -773,7 +773,7 @@
                 <value>2m</value>
             </param>
             {% for hostloc in salt['pillar.get']('gateway:location')['NIFI_REGISTRY_SERVER'] -%}
-            <url>{{ protocol }}://{{ hostloc }}:{{ ports['NIFI-REGISTRY'] }}</url>
+            <url>{{ protocols['NIFI-REGISTRY'] }}://{{ hostloc }}:{{ ports['NIFI-REGISTRY'] }}</url>
             {%- endfor %}
         </service>
     {%- endif %}
@@ -784,7 +784,7 @@
             <service>
                 <role>EFM-UI</role>
                 {% for hostloc in salt['pillar.get']('gateway:location')['EFM_SERVER'] -%}
-                <url>{{ protocol }}://{{ hostloc }}:{{ ports['EFM-UI'] }}</url>
+                <url>{{ protocols['EFM-UI'] }}://{{ hostloc }}:{{ ports['EFM-UI'] }}</url>
                 {%- endfor %}
             </service>
         {%- endif %}
@@ -795,7 +795,7 @@
             <service>
                 <role>SMM-UI</role>
                 {% for hostloc in salt['pillar.get']('gateway:location')['STREAMS_MESSAGING_MANAGER_UI'] -%}
-                <url>{{ protocol }}://{{ hostloc }}:{{ ports['SMM-UI'] }}</url>
+                <url>{{ protocols['SMM-UI'] }}://{{ hostloc }}:{{ ports['SMM-UI'] }}</url>
                 {%- endfor %}
                 <param>
                     <name>httpclient.connectionTimeout</name>
@@ -818,7 +818,7 @@
             <service>
                 <role>SCHEMA-REGISTRY</role>
                 {% for hostloc in salt['pillar.get']('gateway:location')['SCHEMA_REGISTRY_SERVER'] -%}
-                <url>{{ protocol }}://{{ hostloc }}:{{ ports['SCHEMA-REGISTRY'] }}</url>
+                <url>{{ protocols['SCHEMA-REGISTRY'] }}://{{ hostloc }}:{{ ports['SCHEMA-REGISTRY'] }}</url>
                 {%- endfor %}
                 <param>
                     <name>replayBufferSize</name>
@@ -833,7 +833,7 @@
     <service>
         <role>DATA-DISCOVERY-SERVICE-API</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['DATA_DISCOVERY_SERVICE_AGENT'] -%}
-        <url>{{ protocol }}://{{ hostloc }}:{{ ports['DATA-DISCOVERY-SERVICE-API'] }}</url>
+        <url>{{ protocols['DATA-DISCOVERY-SERVICE-API'] }}://{{ hostloc }}:{{ ports['DATA-DISCOVERY-SERVICE-API'] }}</url>
         {%- endfor %}
     </service>
     {%- endif %}
@@ -844,7 +844,7 @@
     <service>
         <role>PROFILER-ADMIN-API</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['PROFILER_ADMIN_AGENT'] -%}
-        <url>{{ protocol }}://{{ hostloc }}:{{ ports['PROFILER-ADMIN-API'] }}</url>
+        <url>{{ protocols['PROFILER-ADMIN-API'] }}://{{ hostloc }}:{{ ports['PROFILER-ADMIN-API'] }}</url>
         {%- endfor %}
     </service>
     {%- endif %}
@@ -855,7 +855,7 @@
     <service>
         <role>PROFILER-METRICS-API</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['PROFILER_METRICS_AGENT'] -%}
-        <url>{{ protocol }}://{{ hostloc }}:{{ ports['PROFILER-METRICS-API'] }}</url>
+        <url>{{ protocols['PROFILER-METRICS-API'] }}://{{ hostloc }}:{{ ports['PROFILER-METRICS-API'] }}</url>
         {%- endfor %}
     </service>
     {%- endif %}
@@ -866,7 +866,7 @@
     <service>
         <role>PROFILER-SCHEDULER-API</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['PROFILER_SCHEDULER_AGENT'] -%}
-        <url>{{ protocol }}://{{ hostloc }}:{{ ports['PROFILER-SCHEDULER-API'] }}</url>
+        <url>{{ protocols['PROFILER-SCHEDULER-API'] }}://{{ hostloc }}:{{ ports['PROFILER-SCHEDULER-API'] }}</url>
         {%- endfor %}
     </service>
     {%- endif %}
@@ -877,7 +877,7 @@
     <service>
         <role>IMPALAUI</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['IMPALA_DEBUG_UI'] -%}
-        <url>{{ protocol }}://{{ hostloc }}:{{ ports['IMPALA_DEBUG_UI'] }}</url>
+        <url>{{ protocols['IMPALA_DEBUG_UI'] }}://{{ hostloc }}:{{ ports['IMPALA_DEBUG_UI'] }}</url>
         {%- endfor %}
     </service>
     {%- endif %}
@@ -888,7 +888,7 @@
     <service>
         <role>KUDUUI</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['KUDU_MASTER'] -%}
-        <url>{{ protocol }}://{{ hostloc }}:{{ ports['KUDUUI'] }}</url>
+        <url>{{ protocols['KUDUUI'] }}://{{ hostloc }}:{{ ports['KUDUUI'] }}</url>
         {%- endfor %}
     </service>
     {%- endif %}
@@ -898,7 +898,7 @@
         <service>
             <role>KUDUUI</role>
             {% for hostloc in salt['pillar.get']('gateway:location')['KUDU_TSERVER'] -%}
-            <url>{{ protocol }}://{{ hostloc }}:{{ ports['KUDUUIT'] }}</url>
+            <url>{{ protocols['KUDUUIT'] }}://{{ hostloc }}:{{ ports['KUDUUIT'] }}</url>
             {%- endfor %}
         </service>
     {%- endif %}
@@ -909,7 +909,7 @@
     <service>
         <role>DAS</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['DAS_WEBAPP'] -%}
-        <url>{{ protocol }}://{{ hostloc }}:{{ ports['DAS'] }}</url>
+        <url>{{ protocols['DAS'] }}://{{ hostloc }}:{{ ports['DAS'] }}</url>
         {%- endfor %}
     </service>
     {%- endif %}
@@ -920,7 +920,7 @@
     <service>
         <role>QUERY_PROCESSOR</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['QUERY_PROCESSOR'] -%}
-        <url>{{ protocol }}://{{ hostloc }}:{{ ports['QUERY_PROCESSOR'] }}</url>
+        <url>{{ protocols['QUERY_PROCESSOR'] }}://{{ hostloc }}:{{ ports['QUERY_PROCESSOR'] }}</url>
         {%- endfor %}
     </service>
     {%- endif %}
@@ -931,7 +931,7 @@
     <service>
         <role>FLINK</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['FLINK_HISTORY_SERVER'] -%}
-        <url>{{ protocol }}://{{ hostloc }}:{{ ports['FLINK'] }}</url>
+        <url>{{ protocols['FLINK'] }}://{{ hostloc }}:{{ ports['FLINK'] }}</url>
         {%- endfor %}
     </service>
     {%- endif %}
@@ -942,7 +942,7 @@
     <service>
         <role>SSB-SSC-UI</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['STREAMING_SQL_CONSOLE'] -%}
-        <url>{{ protocol }}://{{ hostloc }}:{{ ports['SSB-SSC-UI'] }}</url>
+        <url>{{ protocols['SSB-SSC-UI'] }}://{{ hostloc }}:{{ ports['SSB-SSC-UI'] }}</url>
         {%- endfor %}
     </service>
     {%- endif %}
@@ -950,7 +950,7 @@
     <service>
         <role>SSB-SSC-WS</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['STREAMING_SQL_CONSOLE'] -%}
-        <url>{% if protocol == 'https' %}wss{% else %}ws{% endif %}://{{ hostloc }}:{{ ports['SSB-SSC-WS'] }}</url>
+        <url>{% if protocols['SSB-SSC-WS'] == 'https' %}wss{% else %}ws{% endif %}://{{ hostloc }}:{{ ports['SSB-SSC-WS'] }}</url>
         {%- endfor %}
     </service>
     {%- endif %}
@@ -961,7 +961,7 @@
     <service>
         <role>SSB-SSE-UI</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['STREAMING_SQL_ENGINE'] -%}
-        <url>{{ protocol }}://{{ hostloc }}:{{ ports['SSB-SSE-UI'] }}</url>
+        <url>{{ protocols['SSB-SSE-UI'] }}://{{ hostloc }}:{{ ports['SSB-SSE-UI'] }}</url>
         <param>
             <name>httpclient.connectionTimeout</name>
             <value>5m</value>
@@ -977,7 +977,7 @@
     <service>
         <role>SSB-SSE-WS</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['STREAMING_SQL_ENGINE'] -%}
-        <url>{% if protocol == 'https' %}wss{% else %}ws{% endif %}://{{ hostloc }}:{{ ports['SSB-SSE-WS'] }}</url>
+        <url>{% if protocols['SSB-SSE-WS'] == 'https' %}wss{% else %}ws{% endif %}://{{ hostloc }}:{{ ports['SSB-SSE-WS'] }}</url>
         {%- endfor %}
     </service>
     {%- endif %}
@@ -988,7 +988,7 @@
     <service>
         <role>DLM</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['DLM_SERVER'] -%}
-        <url>http://{{ hostloc }}:{{ ports['DLM'] }}</url>
+        <url>{{ protocols['DLM'] }}://{{ hostloc }}:{{ ports['DLM'] }}</url>
         {%- endfor %}
     </service>
     {%- endif %}
@@ -999,7 +999,7 @@
     <service>
         <role>LAKEHOUSE_OPTIMIZER</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['CLO_SERVER'] -%}
-        <url>http://{{ hostloc }}:{{ ports['LAKEHOUSE_OPTIMIZER'] }}</url>
+        <url>{{ protocols['LAKEHOUSE_OPTIMIZER'] }}://{{ hostloc }}:{{ ports['LAKEHOUSE_OPTIMIZER'] }}</url>
         {%- endfor %}
     </service>
     {%- endif %}

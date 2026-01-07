@@ -103,16 +103,27 @@ public class TlsSecurityService {
         String saltMasterPublicKey = saltSecurityConfig.getSaltMasterPublicKey() != null
                 ? new String(decodeBase64(saltSecurityConfig.getSaltMasterPublicKey())) : null;
         GatewayConfig gatewayConfig =
-                new GatewayConfig(connectionIp, gatewayInstance.getPublicIpWrapper(), gatewayInstance.getPrivateIp(), gatewayInstance.getDiscoveryFQDN(),
-                        getGatewayPort(stack.getGatewayport(), stack), gatewayInstance.getInstanceId(), conf.getServerCert(),
-                        conf.getClientCert(), conf.getClientKey(), saltClientConfig.getSaltPassword(), saltClientConfig.getSaltBootPassword(),
-                        saltClientConfig.getSignatureKeyPem(), knoxGatewayEnabled,
-                        InstanceMetadataType.GATEWAY_PRIMARY.equals(gatewayInstance.getInstanceMetadataType()),
-                        saltMasterPrivateKey, saltMasterPublicKey,
-                        new String(decodeBase64(saltSignPrivateKeyB64)), new String(decodeBase64(saltSecurityConfig.getSaltSignPublicKey())),
-                        null, null, null, null);
-        gatewayConfig.withSaltVersion(getInstanceSaltVersion(gatewayInstance));
-
+                GatewayConfig.builder()
+                        .withConnectionAddress(connectionIp)
+                        .withPublicAddress(gatewayInstance.getPublicIpWrapper())
+                        .withPrivateAddress(gatewayInstance.getPrivateIp())
+                        .withHostname(gatewayInstance.getDiscoveryFQDN())
+                        .withGatewayPort(getGatewayPort(stack.getGatewayport(), stack))
+                        .withInstanceId(gatewayInstance.getInstanceId())
+                        .withServerCert(conf.getServerCert())
+                        .withClientCert(conf.getClientCert())
+                        .withClientKey(conf.getClientKey())
+                        .withSaltPassword(saltClientConfig.getSaltPassword())
+                        .withSaltBootPassword(saltClientConfig.getSaltBootPassword())
+                        .withSignatureKey(saltClientConfig.getSignatureKeyPem())
+                        .withKnoxGatewayEnabled(knoxGatewayEnabled)
+                        .withPrimary(InstanceMetadataType.GATEWAY_PRIMARY.equals(gatewayInstance.getInstanceMetadataType()))
+                        .withSaltMasterPrivateKey(saltMasterPrivateKey)
+                        .withSaltMasterPublicKey(saltMasterPublicKey)
+                        .withSaltSignPrivateKey(new String(decodeBase64(saltSignPrivateKeyB64)))
+                        .withSaltSignPublicKey(new String(decodeBase64(saltSecurityConfig.getSaltSignPublicKey())))
+                        .withSaltVersion(getInstanceSaltVersion(gatewayInstance))
+                        .build();
         if (clusterProxyService.isCreateConfigForClusterProxy(stack)) {
             gatewayConfig
                     .withPath(clusterProxyService.getProxyPathPgwAsFallBack(stack, gatewayInstance.getDiscoveryFQDN()))

@@ -894,7 +894,8 @@
       "visibleForDatalake": false,
       "visibleForDatahub": true,
       "minVersion": "7.2.18",
-      "maxVersion": "7.3.0"
+      "maxVersion": "7.3.0",
+      "minHttpsVersion": "7.3.2"
     },
     {
       "name": "LAKEHOUSE_OPTIMIZER",
@@ -904,12 +905,13 @@
       "knoxUrl": "/clo/",
       "ssoSupported": false,
       "port": 8085,
-      "tlsPort": 8085,
+      "tlsPort": 8087,
       "apiOnly": true,
       "apiIncluded": true,
       "visibleForDatalake": false,
       "visibleForDatahub": true,
-      "minVersion": "7.3.1"
+      "minVersion": "7.3.1",
+      "minHttpsVersion": "7.3.2"
     }
   ]
 }

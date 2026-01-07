@@ -101,8 +101,16 @@ public class ClusterProxyServiceTest {
         aStack.setTunnel(ccmv2Mode);
         aStack.setCcmV2AgentCrn("testAgentCrn");
 
-        GatewayConfig gatewayConfig = new GatewayConfig("connectionAddress", "publicIpAddress", PRIVATE_IP_ADDRESS,
-                ServiceFamilies.GATEWAY.getDefaultPort(), "testInstanceId", true);
+        GatewayConfig gatewayConfig =  GatewayConfig.builder()
+                .withConnectionAddress("connectionAddress")
+                .withPublicAddress("publicIpAddress")
+                .withPrivateAddress(PRIVATE_IP_ADDRESS)
+                .withGatewayPort(22)
+                .withPrimary(true)
+                .withHostname("host")
+                .withInstanceId("testInstanceId")
+                .withKnoxGatewayEnabled(false)
+                .build();
         ConfigRegistrationResponse configRegResponse = mock(ConfigRegistrationResponse.class);
 
         when(stackService.getStackById(STACK_ID)).thenReturn(aStack);
@@ -146,13 +154,34 @@ public class ClusterProxyServiceTest {
         FreeIpa freeIpa = new FreeIpa();
         freeIpa.setDomain("test.freeipa.domain");
 
-        GatewayConfig primaryGateway = new GatewayConfig("primaryAddress", "primaryPublicAddress", "primaryPrivateAddress",
-                ServiceFamilies.GATEWAY.getDefaultPort(), "privateInstanceId", true);
-        GatewayConfig gatewayConfig1 = new GatewayConfig("connectionAddress1", "publicIpAddress1", PRIVATE_IP_ADDRESS_1,
-                ServiceFamilies.GATEWAY.getDefaultPort(), "testInstanceId1", true);
+        GatewayConfig primaryGateway = GatewayConfig.builder()
+                        .withConnectionAddress("primaryAddress")
+                        .withPublicAddress("primaryPublicAddress")
+                        .withPrivateAddress("primaryPrivateAddress")
+                        .withGatewayPort(ServiceFamilies.GATEWAY.getDefaultPort())
+                        .withInstanceId("privateInstanceId")
+                        .withHostname("host")
+                        .withKnoxGatewayEnabled(false)
+                        .build();
+        GatewayConfig gatewayConfig1 = GatewayConfig.builder()
+                .withConnectionAddress("connectionAddress1")
+                .withPublicAddress("publicIpAddress1")
+                .withPrivateAddress(PRIVATE_IP_ADDRESS_1)
+                .withGatewayPort(ServiceFamilies.GATEWAY.getDefaultPort())
+                .withInstanceId("testInstanceId1")
+                .withHostname("host")
+                .withKnoxGatewayEnabled(false)
+                .build();
         ReflectionTestUtils.setField(gatewayConfig1, "hostname", "hostname1");
-        GatewayConfig gatewayConfig2 = new GatewayConfig("connectionAddress2", "publicIpAddress2", PRIVATE_IP_ADDRESS_2,
-                ServiceFamilies.GATEWAY.getDefaultPort(), "testInstanceId2", true);
+        GatewayConfig gatewayConfig2 = GatewayConfig.builder()
+                .withConnectionAddress("connectionAddress2")
+                .withPublicAddress("publicIpAddress2")
+                .withPrivateAddress(PRIVATE_IP_ADDRESS_2)
+                .withGatewayPort(ServiceFamilies.GATEWAY.getDefaultPort())
+                .withHostname("host")
+                .withInstanceId("testInstanceId2")
+                .withKnoxGatewayEnabled(false)
+                .build();
         ReflectionTestUtils.setField(gatewayConfig2, "hostname", "hostname2");
         ConfigRegistrationResponse configRegResponse = mock(ConfigRegistrationResponse.class);
 
@@ -201,8 +230,16 @@ public class ClusterProxyServiceTest {
         aStack.setTunnel(Tunnel.CCM);
         aStack.setMinaSshdServiceId("minaSshdServiceId");
 
-        GatewayConfig gatewayConfig = new GatewayConfig("connectionAddress", "publicAddress", PRIVATE_ADDRESS,
-                9443, "instanceId", false);
+        GatewayConfig gatewayConfig = GatewayConfig.builder()
+                .withConnectionAddress("connectionAddress")
+                .withPublicAddress("publicAddress")
+                .withPrivateAddress(PRIVATE_ADDRESS)
+                .withGatewayPort(9443)
+                .withInstanceId("instanceId")
+                .withHostname("host")
+                .withInstanceId("instanceId")
+                .withKnoxGatewayEnabled(false)
+                .build();
 
         ConfigRegistrationResponse configRegResponse = mock(ConfigRegistrationResponse.class);
 
@@ -235,8 +272,16 @@ public class ClusterProxyServiceTest {
     public void testClusterProxyRegistrationWhenCCMDisabled() {
         Stack aStack = getAStack();
 
-        GatewayConfig gatewayConfig = new GatewayConfig("connectionAddress", "publicAddress", PRIVATE_ADDRESS,
-                9443, "instanceId", false);
+        GatewayConfig gatewayConfig = GatewayConfig.builder()
+                .withConnectionAddress("primaryAddress2")
+                .withPublicAddress("publicAddress")
+                .withPrivateAddress(PRIVATE_ADDRESS)
+                .withGatewayPort(9443)
+                .withInstanceId("privateInstanceId2")
+                .withHostname("host")
+                .withInstanceId("instanceId")
+                .withKnoxGatewayEnabled(false)
+                .build();
         ConfigRegistrationResponse configRegResponse = mock(ConfigRegistrationResponse.class);
 
         when(stackService.getStackById(STACK_ID)).thenReturn(aStack);

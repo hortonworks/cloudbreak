@@ -56,7 +56,16 @@ public class SecretRotationSaltServiceTest {
 
     @Test
     void testValidateSalt() throws CloudbreakOrchestratorFailedException {
-        when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenReturn(new GatewayConfig(null, null, null, null, null, null));
+        when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenReturn(
+                GatewayConfig.builder()
+                        .withConnectionAddress("host1")
+                        .withPublicAddress("1.1.1.1")
+                        .withPrivateAddress("1.1.1.1")
+                        .withGatewayPort(22)
+                        .withInstanceId("i-1839")
+                        .withKnoxGatewayEnabled(false)
+                        .build()
+        );
         when(hostOrchestrator.ping(any())).thenReturn(Map.of());
 
         underTest.validateSalt(new StackDto());
@@ -66,7 +75,16 @@ public class SecretRotationSaltServiceTest {
 
     @Test
     void testExecuteSaltState() throws CloudbreakOrchestratorFailedException {
-        when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenReturn(new GatewayConfig(null, null, null, null, null, null));
+        when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenReturn(
+                GatewayConfig.builder()
+                        .withConnectionAddress("host1")
+                        .withPublicAddress("1.1.1.1")
+                        .withPrivateAddress("1.1.1.1")
+                        .withGatewayPort(22)
+                        .withInstanceId("i-1839")
+                        .withKnoxGatewayEnabled(false)
+                        .build()
+        );
         when(exitCriteriaProvider.get(any())).thenReturn(new ClusterDeletionBasedExitCriteriaModel(null, null));
         doNothing().when(hostOrchestrator).executeSaltState(any(), any(), any(), any(), any(), any());
 

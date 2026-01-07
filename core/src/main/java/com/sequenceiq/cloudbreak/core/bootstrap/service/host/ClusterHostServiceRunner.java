@@ -110,6 +110,7 @@ import com.sequenceiq.cloudbreak.orchestrator.host.GrainOperation;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorGrainRunnerParams;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
+import com.sequenceiq.cloudbreak.orchestrator.model.GatewayServiceConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.GrainProperties;
 import com.sequenceiq.cloudbreak.orchestrator.model.NodeReachabilityResult;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltConfig;
@@ -926,6 +927,7 @@ public class ClusterHostServiceRunner {
         gateway.putAll(createKnoxRelatedGatewayConfiguration(stackDto, virtualGroupRequest, connector));
         gateway.putAll(createGatewayUserFacingCertAndFqdn(gatewayConfig, stackDto));
         gateway.putAll(createGatewayAlternativeUserFacingCert(gatewayConfig));
+        gateway.put("gatewayServiceConfig", createGatewayServiceConfig(gatewayConfig));
 
         gateway.put("kerberos", kerberosConfig != null);
 
@@ -944,6 +946,15 @@ public class ClusterHostServiceRunner {
             gateway.putAll(loadBalancerProperties);
         }
         return Map.of("gateway", new SaltPillarProperties("/gateway/init.sls", singletonMap("gateway", gateway)));
+    }
+
+    private Map<String, Object> createGatewayServiceConfig(GatewayConfig gatewayConfig) {
+        Map<String, Object> gatewayServiceConfigMap = new HashMap<>();
+        GatewayServiceConfig gatewayServiceConfig = gatewayConfig.getGatewayServiceConfig();
+        if (gatewayServiceConfig != null) {
+            gatewayServiceConfigMap.put("lakeHouseOptimizerSupportHttps", gatewayServiceConfig.getLakeHouseOptimizerSupportHttps());
+        }
+        return gatewayServiceConfigMap;
     }
 
     private void addRangerServiceIfAvailable(GatewayConfig gatewayConfig, StackDto stackDto, Map<String, List<String>> serviceLocations) {
@@ -980,8 +991,8 @@ public class ClusterHostServiceRunner {
             if (stackDto.getBlueprint() != null) {
                 ClusterView cluster = stackDto.getCluster();
                 Boolean autoTlsEnabled = cluster.getAutoTlsEnabled();
-                Map<String, Integer> servicePorts = connector.getServicePorts(stackDto.getBlueprint(), autoTlsEnabled);
-                gateway.put("ports", servicePorts);
+                gateway.put("ports", connector.getServicePorts(stackDto.getBlueprint(), autoTlsEnabled));
+                gateway.put("protocols", connector.getServiceProtocols(stackDto.getBlueprint(), autoTlsEnabled));
                 gateway.put("protocol", autoTlsEnabled ? "https" : "http");
             }
             if (SSOType.SSO_PROVIDER_FROM_UMS.equals(clusterGateway.getSsoType())) {

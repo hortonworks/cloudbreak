@@ -70,7 +70,15 @@ public class ClusterKerberosServiceTest {
         when(stackView.getEnvironmentCrn()).thenReturn("");
         when(stack.getStack()).thenReturn(stackView);
         kerberosConfig = KerberosConfig.KerberosConfigBuilder.aKerberosConfig().build();
-        when(gatewayConfigService.getPrimaryGatewayConfig(stack)).thenReturn(new GatewayConfig("a", "a", "a", 1, "a", false));
+        when(gatewayConfigService.getPrimaryGatewayConfig(stack)).thenReturn(GatewayConfig.builder()
+                .withConnectionAddress("host1")
+                .withPublicAddress("1.1.1.1")
+                .withPrivateAddress("1.1.1.1")
+                .withGatewayPort(22)
+                .withInstanceId("i-1839")
+                .withKnoxGatewayEnabled(false)
+                .build()
+        );
     }
 
     @Test

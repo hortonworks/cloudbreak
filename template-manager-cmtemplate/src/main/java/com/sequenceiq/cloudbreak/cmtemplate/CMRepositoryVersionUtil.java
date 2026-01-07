@@ -194,6 +194,19 @@ public class CMRepositoryVersionUtil {
         return supported;
     }
 
+    public static boolean isCLOHttpsSupported(List<ClouderaManagerProduct> cdhProducts) {
+        Optional<ClouderaManagerProduct> cdhProduct = cdhProducts.stream()
+                .filter(p -> "CDH".equals(p.getName()))
+                .findAny();
+        if (cdhProduct.isPresent()) {
+            return isVersionNewerOrEqualThanLimited(
+                    cdhProduct.get().getVersion().split("-")[0],
+                    CLOUDERA_STACK_VERSION_7_3_2
+            );
+        }
+        return false;
+    }
+
     public static boolean isKnoxDatabaseSupported(ClouderaManagerRepo clouderaManagerRepoDetails,
         Optional<ClouderaManagerProduct> cdhProduct,
         Optional<Integer> cdhPatchVersion) {

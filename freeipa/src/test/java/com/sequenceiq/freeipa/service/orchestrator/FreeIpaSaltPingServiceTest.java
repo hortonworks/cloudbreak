@@ -42,7 +42,16 @@ class FreeIpaSaltPingServiceTest {
     @Test
     void testSaltPingWhenPingSucceeded() throws CloudbreakOrchestratorFailedException {
         Stack stack = new Stack();
-        GatewayConfig gatewayConfig = new GatewayConfig("connectionAddress", "publicAddress", "privateAddress", 1234, "instanceId", Boolean.FALSE);
+        GatewayConfig gatewayConfig = GatewayConfig.builder()
+                .withConnectionAddress("host")
+                .withPublicAddress("1.1.1.1")
+                .withPrivateAddress("1.1.1.1")
+                .withGatewayPort(22)
+                .withPrimary(true)
+                .withHostname("host")
+                .withInstanceId("instanceId")
+                .withKnoxGatewayEnabled(false)
+                .build();
         when(gatewayConfigService.getPrimaryGatewayConfigForSalt(stack)).thenReturn(gatewayConfig);
         Node node = new Node("privateIp", "publicIp", "instanceId", "instanceType", "fqdn", "hostgroup");
         when(freeIpaNodeUtilService.mapInstancesToNodes(anySet())).thenReturn(Set.of(node));
@@ -53,7 +62,16 @@ class FreeIpaSaltPingServiceTest {
     @Test
     void testSaltPingWhenPingFailed() throws CloudbreakOrchestratorFailedException {
         Stack stack = new Stack();
-        GatewayConfig gatewayConfig = new GatewayConfig("connectionAddress", "publicAddress", "privateAddress", 1234, "instanceId", Boolean.FALSE);
+        GatewayConfig gatewayConfig = GatewayConfig.builder()
+                .withConnectionAddress("host")
+                .withPublicAddress("1.1.1.1")
+                .withPrivateAddress("1.1.1.1")
+                .withGatewayPort(22)
+                .withPrimary(true)
+                .withHostname("host")
+                .withInstanceId("instanceId")
+                .withKnoxGatewayEnabled(false)
+                .build();
         when(gatewayConfigService.getPrimaryGatewayConfigForSalt(stack)).thenReturn(gatewayConfig);
         Node node = new Node("privateIp", "publicIp", "instanceId", "instanceType", "fqdn", "hostgroup");
         when(freeIpaNodeUtilService.mapInstancesToNodes(anySet())).thenReturn(Set.of(node));

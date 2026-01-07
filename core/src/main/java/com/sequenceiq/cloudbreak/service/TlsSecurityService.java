@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service;
 
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isCLOHttpsSupported;
 import static org.apache.commons.codec.binary.Base64.decodeBase64;
 
 import java.security.KeyPair;
@@ -25,6 +26,7 @@ import com.sequenceiq.cloudbreak.aspect.Measure;
 import com.sequenceiq.cloudbreak.certificate.PkiUtil;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.client.SaltClientConfig;
+import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyConfiguration;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyEnablementService;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
@@ -32,6 +34,7 @@ import com.sequenceiq.cloudbreak.core.flow2.cluster.provision.service.ClusterPro
 import com.sequenceiq.cloudbreak.domain.SaltSecurityConfig;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
+import com.sequenceiq.cloudbreak.orchestrator.model.GatewayServiceConfig;
 import com.sequenceiq.cloudbreak.service.securityconfig.SecurityConfigService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
@@ -63,6 +66,9 @@ public class TlsSecurityService {
 
     @Inject
     private ClusterProxyService clusterProxyService;
+
+    @Inject
+    private ClusterComponentConfigProvider clusterComponentConfigProvider;
 
     @Value("${cb.security.keypair.cache.size:10}")
     private int keyPairCacheSize;
@@ -133,21 +139,44 @@ public class TlsSecurityService {
                 ? new String(decodeBase64(saltSecurityConfig.getSaltMasterPrivateKey())) : null;
         String saltMasterPublicKey = saltSecurityConfig.getSaltMasterPublicKey() != null
                 ? new String(decodeBase64(saltSecurityConfig.getSaltMasterPublicKey())) : null;
-        GatewayConfig gatewayConfig = new GatewayConfig(connectionIp, gatewayInstance.getPublicIpWrapper(), gatewayInstance.getPrivateIp(),
-                gatewayInstance.getDiscoveryFQDN(), getGatewayPort(gatewayPort, stack), gatewayInstance.getInstanceId(),
-                conf.getServerCert(), conf.getClientCert(), conf.getClientKey(), saltClientConfig.getSaltPassword(), saltClientConfig.getSaltBootPassword(),
-                saltClientConfig.getSignatureKeyPem(), knoxGatewayEnabled,
-                InstanceMetadataType.GATEWAY_PRIMARY.equals(gatewayInstance.getInstanceMetadataType()),
-                saltMasterPrivateKey, saltMasterPublicKey,
-                new String(decodeBase64(saltSecurityConfig.getSaltSignPrivateKey())), new String(decodeBase64(saltSecurityConfig.getSaltSignPublicKey())),
-                securityConfig.getUserFacingCert(), securityConfig.getUserFacingKey(), securityConfig.getAlternativeUserFacingCert(),
-                securityConfig.getAlternativeUserFacingKey());
+        GatewayConfig gatewayConfig = GatewayConfig.builder()
+                .withConnectionAddress(connectionIp)
+                .withPublicAddress(gatewayInstance.getPublicIpWrapper())
+                .withPrivateAddress(gatewayInstance.getPrivateIp())
+                .withHostname(gatewayInstance.getDiscoveryFQDN())
+                .withGatewayPort(getGatewayPort(gatewayPort, stack))
+                .withInstanceId(gatewayInstance.getInstanceId())
+                .withServerCert(conf.getServerCert())
+                .withClientCert(conf.getClientCert())
+                .withClientKey(conf.getClientKey())
+                .withSaltBootPassword(saltClientConfig.getSaltBootPassword())
+                .withSaltPassword(saltClientConfig.getSaltPassword())
+                .withSignatureKey(saltClientConfig.getSignatureKeyPem())
+                .withKnoxGatewayEnabled(knoxGatewayEnabled)
+                .withPrimary(InstanceMetadataType.GATEWAY_PRIMARY.equals(gatewayInstance.getInstanceMetadataType()))
+                .withSaltMasterPrivateKey(saltMasterPrivateKey)
+                .withSaltMasterPublicKey(saltMasterPublicKey)
+                .withSaltSignPrivateKey(new String(decodeBase64(saltSecurityConfig.getSaltSignPrivateKey())))
+                .withSaltSignPublicKey(new String(decodeBase64(saltSecurityConfig.getSaltSignPublicKey())))
+                .withUserFacingCert(securityConfig.getUserFacingCert())
+                .withUserFacingKey(securityConfig.getUserFacingKey())
+                .withAlternativeUserFacingCert(securityConfig.getAlternativeUserFacingCert())
+                .withAlternativeUserFacingKey(securityConfig.getAlternativeUserFacingKey())
+                .withGatewayServiceConfig(getGatewayServiceConfig(stack))
+                .build();
         if (clusterProxyService.isCreateConfigForClusterProxy(stack)) {
             gatewayConfig
                     .withPath(clusterProxyService.getProxyPath(stack.getResourceCrn(), gatewayInstance.getInstanceId()))
                     .withProtocol(clusterProxyConfiguration.getClusterProxyProtocol());
         }
         return gatewayConfig;
+    }
+
+    private GatewayServiceConfig getGatewayServiceConfig(StackView stack) {
+        return GatewayServiceConfig.builder()
+                .withLakeHouseOptimizerSupportHttps(isCLOHttpsSupported(
+                        clusterComponentConfigProvider.getClouderaManagerProductDetails(stack.getClusterId())))
+                .build();
     }
 
     public String getGatewayIp(SecurityConfig securityConfig, InstanceMetadataView gatewayInstance, StackView stack) {

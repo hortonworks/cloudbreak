@@ -27,6 +27,10 @@ public class ExposedServiceCollector {
 
     public static final String ALL = "ALL";
 
+    public static final String HTTPS = "https";
+
+    public static final String HTTP = "http";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(ExposedServiceCollector.class);
 
     private final MultiValuedMap<String, ExposedService> exposedServices = new HashSetValuedHashMap<>();
@@ -153,7 +157,7 @@ public class ExposedServiceCollector {
     public Collection<ExposedService> knoxServicesForComponents(Optional<String> bpVersion, Collection<String> components) {
         return filterSupportedKnoxServices(bpVersion)
                 .stream()
-                .filter(exposedService -> isVersionSupported(bpVersion, exposedService))
+                .filter(exposedService -> getProperProtocol(bpVersion, exposedService))
                 .filter(exposedService ->
                         components.contains(exposedService.getServiceName())
                                 || exposedService.getServiceName().equalsIgnoreCase(getKnoxServiceName())
@@ -189,8 +193,16 @@ public class ExposedServiceCollector {
         return exposedServices.values()
                 .stream()
                 .filter(x -> hasServicePort(tls, x))
-                .filter(x -> isVersionSupported(bpVersion, x))
-                .collect(Collectors.toMap(ExposedService::getKnoxService, v -> tls ? v.getTlsPort() : v.getPort()));
+                .filter(x -> getProperProtocol(bpVersion, x))
+                .collect(Collectors.toMap(ExposedService::getKnoxService, v -> getProperPort(bpVersion, v, tls)));
+    }
+
+    public Map<String, String> getAllServiceProtocols(Optional<String> bpVersion, boolean tls) {
+        return exposedServices.values()
+                .stream()
+                .filter(x -> hasServicePort(tls, x))
+                .filter(x -> getProperProtocol(bpVersion, x))
+                .collect(Collectors.toMap(ExposedService::getKnoxService, v -> getProperProtocol(bpVersion, v, tls)));
     }
 
     private void readExposedServices() {
@@ -209,11 +221,11 @@ public class ExposedServiceCollector {
     private Collection<ExposedService> filterSupportedKnoxServices(Optional<String> bpVersion) {
         return exposedServices.values().stream()
                 .filter(x -> StringUtils.isNotEmpty(x.getKnoxService()))
-                .filter(x -> isVersionSupported(bpVersion, x))
+                .filter(x -> getProperProtocol(bpVersion, x))
                 .collect(Collectors.toList());
     }
 
-    private boolean isVersionSupported(Optional<String> bpVersion, ExposedService exposedService) {
+    private boolean getProperProtocol(Optional<String> bpVersion, ExposedService exposedService) {
         return exposedServiceVersionSupportService.maxVersionSupported(bpVersion, exposedService.getMaxVersion())
                 && exposedServiceVersionSupportService.minVersionSupported(bpVersion, exposedService.getMinVersion());
     }
@@ -229,5 +241,22 @@ public class ExposedServiceCollector {
                 .stream()
                 .findFirst()
                 .orElseThrow(() -> new IllegalStateException("Given service \"" + serviceName + "\" not found"));
+    }
+
+    private String getProperProtocol(Optional<String> bpVersion, ExposedService exposedService, boolean tls) {
+        if (StringUtils.isNotBlank(exposedService.getMinHttpsVersion())) {
+            return exposedServiceVersionSupportService.minVersionSupported(bpVersion, exposedService.getMinHttpsVersion()) && tls ? HTTPS : HTTP;
+        } else {
+            return tls ? HTTPS : HTTP;
+        }
+    }
+
+    private Integer getProperPort(Optional<String> bpVersion, ExposedService exposedService, boolean tls) {
+        if (StringUtils.isNotBlank(exposedService.getMinHttpsVersion())) {
+            return exposedServiceVersionSupportService.minVersionSupported(bpVersion, exposedService.getMinHttpsVersion()) && tls
+                    ? exposedService.getTlsPort() : exposedService.getPort();
+        } else {
+            return tls ? exposedService.getTlsPort() : exposedService.getPort();
+        }
     }
 }

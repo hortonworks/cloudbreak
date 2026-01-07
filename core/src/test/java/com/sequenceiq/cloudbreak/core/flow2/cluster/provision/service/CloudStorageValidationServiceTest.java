@@ -211,7 +211,15 @@ class CloudStorageValidationServiceTest {
     }
 
     private List<GatewayConfig> getGatewayConfigs() {
-        return List.of(new GatewayConfig("1", "ip1", "ip1", 1, "i1", true));
+        return List.of(GatewayConfig.builder()
+                .withConnectionAddress("1")
+                .withPublicAddress("ip1")
+                .withPrivateAddress("ip1")
+                .withGatewayPort(1)
+                .withInstanceId("i1")
+                .withKnoxGatewayEnabled(true)
+                .build()
+        );
     }
 
     private Set<Node> getNodes() {

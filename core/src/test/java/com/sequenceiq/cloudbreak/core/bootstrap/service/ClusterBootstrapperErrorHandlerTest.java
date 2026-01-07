@@ -115,9 +115,16 @@ public class ClusterBootstrapperErrorHandlerTest {
         thrown.expectMessage("invalide.nodecount");
 
         StackDto stackDto = mock(StackDto.class);
-
         underTest.terminateFailedNodes(null, orchestrator, stackDto,
-                new GatewayConfig("10.0.0.1", "198.0.0.1", "10.0.0.1", 443, "instanceId", false), prepareNodes(stack));
+                GatewayConfig.builder()
+                        .withConnectionAddress("10.0.0.1")
+                        .withPublicAddress("198.0.0.1")
+                        .withPrivateAddress("10.0.0.1")
+                        .withGatewayPort(443)
+                        .withInstanceId("instanceId")
+                        .withKnoxGatewayEnabled(false)
+                        .build(),
+                prepareNodes(stack));
     }
 
     @Test
@@ -154,7 +161,15 @@ public class ClusterBootstrapperErrorHandlerTest {
                 });
         StackDto stackDto = mock(StackDto.class);
         underTest.terminateFailedNodes(null, orchestrator, stackDto,
-                new GatewayConfig("10.0.0.1", "198.0.0.1", "10.0.0.1", 443, "instanceId", false), prepareNodes(stack));
+                GatewayConfig.builder()
+                        .withConnectionAddress("10.0.0.1")
+                        .withPublicAddress("198.0.0.1")
+                        .withPrivateAddress("10.0.0.1")
+                        .withGatewayPort(443)
+                        .withInstanceId("instanceId")
+                        .withKnoxGatewayEnabled(false)
+                        .build(),
+                prepareNodes(stack));
 
         verify(eventService, times(4)).fireCloudbreakEvent(anyLong(), anyString(), any(ResourceEvent.class), nullable(Collection.class));
         verify(instanceGroupService, times(3)).save(any(InstanceGroup.class));

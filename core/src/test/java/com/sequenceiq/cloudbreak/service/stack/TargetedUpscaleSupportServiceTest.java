@@ -101,7 +101,16 @@ public class TargetedUpscaleSupportServiceTest {
             "unboundEliminationSupported {1}, domainDnsResolverType {2}.")
     @MethodSource("testUpdatingStackDnsResolverData")
     public void testUpdatingStackDnsResolver(Boolean unboundConfigPresentOnAnyNodes, Boolean unboundEliminationSupported, DnsResolverType result) {
-        lenient().when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenReturn(new GatewayConfig(null, null, null, null, null, null));
+        lenient().when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenReturn(
+                GatewayConfig.builder()
+                        .withConnectionAddress("host1")
+                        .withPublicAddress("1.1.1.1")
+                        .withPrivateAddress("1.1.1.1")
+                        .withGatewayPort(22)
+                        .withInstanceId("i-1839")
+                        .withKnoxGatewayEnabled(false)
+                        .build()
+        );
         lenient().when(stackUtil.collectReachableNodes(any())).thenReturn(Set.of());
         lenient().when(hostOrchestrator.unboundClusterConfigPresentOnAnyNodes(any(), any())).thenReturn(unboundConfigPresentOnAnyNodes);
         when(entitlementService.isUnboundEliminationSupported(any())).thenReturn(unboundEliminationSupported);

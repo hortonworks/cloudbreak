@@ -49,7 +49,16 @@ public class EmbeddedDbSslCertRotationContextProviderTest {
 
     @Test
     void testPrevalidateIfNotEmbedded() {
-        when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenReturn(new GatewayConfig(null, null, null, null, null, null));
+        when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenReturn(
+                GatewayConfig.builder()
+                        .withConnectionAddress("host1")
+                        .withPublicAddress("1.1.1.1")
+                        .withPrivateAddress("1.1.1.1")
+                        .withGatewayPort(22)
+                        .withInstanceId("i-1839")
+                        .withKnoxGatewayEnabled(false)
+                        .build()
+        );
         when(exitCriteriaProvider.get(any())).thenReturn(ClusterDeletionBasedExitCriteriaModel.nonCancellableModel());
         StackDto stack = mock(StackDto.class);
         when(stackDtoService.getByCrn(any())).thenReturn(stack);
@@ -69,7 +78,16 @@ public class EmbeddedDbSslCertRotationContextProviderTest {
 
     @Test
     void testPrevalidateIfSslDisabled() {
-        when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenReturn(new GatewayConfig(null, null, null, null, null, null));
+        when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenReturn(
+                GatewayConfig.builder()
+                        .withConnectionAddress("host1")
+                        .withPublicAddress("1.1.1.1")
+                        .withPrivateAddress("1.1.1.1")
+                        .withGatewayPort(22)
+                        .withInstanceId("i-1839")
+                        .withKnoxGatewayEnabled(false)
+                        .build()
+        );
         when(exitCriteriaProvider.get(any())).thenReturn(ClusterDeletionBasedExitCriteriaModel.nonCancellableModel());
         StackDto stack = mock(StackDto.class);
         when(stackDtoService.getByCrn(any())).thenReturn(stack);

@@ -49,7 +49,16 @@ class GatewayConfigServiceTest {
         Stack stack = stack();
         InstanceMetaData instance = instance();
         when(instanceMetaDataRepository.findNotTerminatedForStack(eq(STACK_ID))).thenReturn(Set.of(instance));
-        GatewayConfig gatewayConfig = new GatewayConfig("conn", "pub", "priv", 1, "instance1", false);
+        GatewayConfig gatewayConfig =  GatewayConfig.builder()
+                .withConnectionAddress("host")
+                .withPublicAddress("1.1.1.1")
+                .withPrivateAddress("1.1.1.1")
+                .withGatewayPort(22)
+                .withPrimary(true)
+                .withHostname("host")
+                .withInstanceId("instanceId")
+                .withKnoxGatewayEnabled(false)
+                .build();
         when(tlsSecurityService.buildGatewayConfig(eq(stack()), eq(instance), any(), anyBoolean())).thenReturn(gatewayConfig);
 
         GatewayConfig result = underTest.getPrimaryGatewayConfig(stack);
@@ -64,8 +73,26 @@ class GatewayConfigServiceTest {
         Stack stack = stack();
         InstanceMetaData instance = instance();
         when(instanceMetaDataRepository.findNotTerminatedForStack(eq(STACK_ID))).thenReturn(Set.of(instance));
-        GatewayConfig gatewayConfig = new GatewayConfig("conn", "pub", "priv", 1, "instance1", false);
-        GatewayConfig overriddenGatewayConfig = new GatewayConfig("conn", "pub", "priv", 1, "instance2", false);
+        GatewayConfig gatewayConfig = GatewayConfig.builder()
+                .withConnectionAddress("host")
+                .withPublicAddress("1.1.1.1")
+                .withPrivateAddress("1.1.1.1")
+                .withGatewayPort(22)
+                .withPrimary(true)
+                .withHostname("host")
+                .withInstanceId("instanceId1")
+                .withKnoxGatewayEnabled(false)
+                .build();
+        GatewayConfig overriddenGatewayConfig =  GatewayConfig.builder()
+                .withConnectionAddress("host")
+                .withPublicAddress("1.1.1.1")
+                .withPrivateAddress("1.1.1.1")
+                .withGatewayPort(22)
+                .withPrimary(true)
+                .withHostname("host")
+                .withInstanceId("instanceId2")
+                .withKnoxGatewayEnabled(false)
+                .build();
         when(tlsSecurityService.buildGatewayConfig(eq(stack()), eq(instance), any(), anyBoolean())).thenReturn(gatewayConfig);
         when(saltService.getPrimaryGatewayConfig(anyList())).thenReturn(overriddenGatewayConfig);
 

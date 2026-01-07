@@ -7,8 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -31,7 +29,6 @@ import com.sequenceiq.cloudbreak.domain.SaltSecurityConfig;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
-import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.SecretRotationSaltService;
 import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
@@ -42,7 +39,6 @@ import com.sequenceiq.cloudbreak.rotation.secret.vault.VaultRotationContext;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.saltsecurityconf.SaltSecurityConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
-import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 
 @ExtendWith(MockitoExtension.class)
 class SaltSignKeyPairRotationContextProviderTest {
@@ -144,7 +140,6 @@ class SaltSignKeyPairRotationContextProviderTest {
     @Test
     void testSaltSignKeyPairCustomJobPreValidatePhaseNodeMissingPingResponse() throws CloudbreakOrchestratorFailedException {
         saltSecurityConfig.setSaltSignPrivateKey(OLD_PRIVATE_KEY);
-        GatewayConfig primaryGatewayConfig = new GatewayConfig("conn", "public", "private", 1234, "instance1", Boolean.FALSE);
         doThrow(new SecretRotationException("Salt ping failed")).when(secretRotationSaltService).validateSalt(eq(stack));
 
         Map<SecretRotationStep, RotationContext> contexts = underTest.getContexts(RESOURCE_CRN);
@@ -160,7 +155,6 @@ class SaltSignKeyPairRotationContextProviderTest {
     @Test
     void testSaltSignKeyPairCustomJobPostValidatePhaseNodeMissingPingResponse() throws CloudbreakOrchestratorFailedException {
         saltSecurityConfig.setSaltSignPrivateKey(OLD_PRIVATE_KEY);
-        GatewayConfig primaryGatewayConfig = new GatewayConfig("conn", "public", "private", 1234, "instance1", Boolean.FALSE);
         doThrow(new SecretRotationException("Salt ping failed")).when(secretRotationSaltService).validateSalt(eq(stack));
 
         Map<SecretRotationStep, RotationContext> contexts = underTest.getContexts(RESOURCE_CRN);
@@ -188,12 +182,5 @@ class SaltSignKeyPairRotationContextProviderTest {
         verify(saltSecurityConfigService, times(1)).save(saltSecurityConfigArgumentCaptor.capture());
         SaltSecurityConfig savedSaltSecurityConfig = saltSecurityConfigArgumentCaptor.getValue();
         assertNull(savedSaltSecurityConfig.getLegacySaltSignPublicKey());
-    }
-
-    private InstanceMetadataView instance(String instanceId, boolean reachable) {
-        InstanceMetadataView instanceMetadataView = mock(InstanceMetadataView.class);
-        lenient().when(instanceMetadataView.getInstanceId()).thenReturn(instanceId);
-        when(instanceMetadataView.isReachable()).thenReturn(reachable);
-        return instanceMetadataView;
     }
 }

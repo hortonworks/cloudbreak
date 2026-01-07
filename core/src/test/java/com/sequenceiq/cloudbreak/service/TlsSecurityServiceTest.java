@@ -17,6 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.certificate.PkiUtil;
 import com.sequenceiq.cloudbreak.client.SaltClientConfig;
+import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyEnablementService;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.provision.service.ClusterProxyService;
 import com.sequenceiq.cloudbreak.domain.SaltSecurityConfig;
@@ -42,6 +43,9 @@ class TlsSecurityServiceTest {
 
     @Mock
     private ClusterProxyEnablementService clusterProxyEnablementService;
+
+    @Mock
+    private ClusterComponentConfigProvider clusterComponentConfigProvider;
 
     @Test
     void testBuildGatewayConfigWhenNoSaltMasterKeyPairPresent() {

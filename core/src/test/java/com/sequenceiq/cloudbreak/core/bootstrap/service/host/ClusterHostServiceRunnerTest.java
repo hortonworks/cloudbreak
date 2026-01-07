@@ -670,7 +670,16 @@ class ClusterHostServiceRunnerTest {
         when(environmentService.getByCrn(anyString())).thenReturn(detailedEnvironmentResponse);
         when(stackUtil.collectNodes(any())).thenReturn(nodes);
         when(stackUtil.collectReachableNodes(any())).thenReturn(nodes);
-        List<GatewayConfig> gwConfigs = List.of(new GatewayConfig("addr", "endpoint", "privateAddr", 123, "instance", false));
+        List<GatewayConfig> gwConfigs = List.of(
+                GatewayConfig.builder()
+                        .withConnectionAddress("addr")
+                        .withPublicAddress("endpoint")
+                        .withPrivateAddress("privateAddr")
+                        .withGatewayPort(123)
+                        .withInstanceId("instanceId")
+                        .withKnoxGatewayEnabled(false)
+                        .build()
+        );
         when(gatewayConfigService.getAllGatewayConfigs(stack)).thenReturn(gwConfigs);
         when(stack.getPlatformVariant()).thenReturn(AwsConstants.AwsVariant.AWS_NATIVE_GOV_VARIANT.variant().value());
         when(encryptionProfileProvider.getTlsVersions(any(), any())).thenReturn("TLSv1.2,TLSv1.3");
@@ -737,7 +746,16 @@ class ClusterHostServiceRunnerTest {
 
     @Test
     void testRedeployStates() throws CloudbreakOrchestratorException {
-        List<GatewayConfig> gwConfigs = List.of(new GatewayConfig("addr", "endpoint", "privateAddr", 123, "instance", false));
+        List<GatewayConfig> gwConfigs = List.of(
+                GatewayConfig.builder()
+                        .withConnectionAddress("addr")
+                        .withPublicAddress("endpoint")
+                        .withPrivateAddress("privateAddr")
+                        .withGatewayPort(123)
+                        .withInstanceId("instanceId")
+                        .withKnoxGatewayEnabled(false)
+                        .build()
+        );
         when(gatewayConfigService.getAllGatewayConfigs(stack)).thenReturn(gwConfigs);
         underTest.redeployStates(stack);
         verify(hostOrchestrator).uploadStates(gatewayConfigsCaptor.capture(), any());
@@ -747,7 +765,16 @@ class ClusterHostServiceRunnerTest {
 
     @Test
     void testCreateCronForUserHomeCreation() throws CloudbreakException, CloudbreakOrchestratorFailedException {
-        List<GatewayConfig> gatewayConfigs = List.of(new GatewayConfig("addr", "endpoint", "privateAddr", 123, "instance", false));
+        List<GatewayConfig> gatewayConfigs = List.of(
+                GatewayConfig.builder()
+                        .withConnectionAddress("addr")
+                        .withPublicAddress("endpoint")
+                        .withPrivateAddress("privateAddr")
+                        .withGatewayPort(123)
+                        .withInstanceId("instanceId")
+                        .withKnoxGatewayEnabled(false)
+                        .build()
+        );
         when(gatewayConfigService.getAllGatewayConfigs(stack)).thenReturn(gatewayConfigs);
         when(stackUtil.collectReachableAndUnreachableCandidateNodes(eq(stack), any()))
                 .thenReturn(new NodeReachabilityResult(Set.of(TestUtil.node()), new HashSet<>()));

@@ -16,6 +16,7 @@ import com.google.common.io.BaseEncoding;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
+import com.sequenceiq.cloudbreak.orchestrator.model.GatewayServiceConfig;
 import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.executor.AbstractRotationExecutor;
@@ -159,6 +160,7 @@ public class SaltBootConfigRotationExecutor extends AbstractRotationExecutor<Sal
         return gatewayConfig.toBuilder()
                 .withSaltBootPassword(saltBootPassword)
                 .withSignatureKey(new String(BASE64.decode(saltBootPrivateKey)))
+                .withGatewayServiceConfig(GatewayServiceConfig.builder().build())
                 .build();
     }
 }

@@ -176,9 +176,26 @@ class SaltOrchestratorTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        gatewayConfig = new GatewayConfig("172.16.252.43", "1.1.1.1", "10.0.0.1", "10-0-0-1", 9443, "instanceid", "servercert", "clientcert", "clientkey",
-                "saltpasswd", "saltbootpassword", "signkey", false, true, "masterPrivateKey", "masterPublicKey", "privatekey", "publickey", null, null,
-                null, null);
+        gatewayConfig = GatewayConfig.builder()
+                .withConnectionAddress("172.16.252.43")
+                .withPublicAddress("10.0.0.1")
+                .withPrivateAddress("10.0.0.1")
+                .withHostname("10-0-0-1")
+                .withGatewayPort(9443)
+                .withInstanceId("instanceid")
+                .withServerCert("servercert")
+                .withClientCert("clientcert")
+                .withClientKey("clientkey")
+                .withSaltPassword("saltpasswd")
+                .withSaltBootPassword("saltbootpassword")
+                .withSignatureKey("signkey")
+                .withKnoxGatewayEnabled(false)
+                .withPrimary(true)
+                .withSaltMasterPrivateKey("masterPrivateKey")
+                .withSaltMasterPublicKey("masterPublicKey")
+                .withSaltSignPrivateKey("privatekey")
+                .withSaltSignPublicKey("publickey")
+                .build();
         targets = new HashSet<>();
         NodeVolumes nodeVolumes = mock(NodeVolumes.class);
         targets.add(new Node("10.0.0.1", "1.1.1.1", "instanceid1", "hg", "10-0-0-1.example.com", "hg",

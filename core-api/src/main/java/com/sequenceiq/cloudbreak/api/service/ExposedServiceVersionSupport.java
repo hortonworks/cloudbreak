@@ -15,7 +15,7 @@ public class ExposedServiceVersionSupport {
     private final VersionComparator versionComparator = new VersionComparator();
 
     public boolean minVersionSupported(Optional<String> blueprintVersionOptional, String minVersionString) {
-        boolean shouldInclude = false;
+        boolean shouldInclude;
         if (Strings.isNullOrEmpty(minVersionString)) {
             shouldInclude = true;
         } else if (blueprintVersionOptional.isEmpty()) {
@@ -29,7 +29,7 @@ public class ExposedServiceVersionSupport {
     }
 
     public boolean maxVersionSupported(Optional<String> blueprintVersionOptional, String maxVersionString) {
-        boolean shouldInclude = false;
+        boolean shouldInclude;
         if (Strings.isNullOrEmpty(maxVersionString)) {
             shouldInclude = true;
         } else if (blueprintVersionOptional.isEmpty()) {

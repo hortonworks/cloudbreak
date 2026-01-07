@@ -39,8 +39,11 @@ public class SaltSyncServiceTest {
 
     private static final String HOST_2 = "host2";
 
-    private static final GatewayConfig GW = new GatewayConfig(null, null, null, HOST_1, null, null, null, null, null, null, null, null, Boolean.TRUE, true,
-            null, null, null, null, null, null, null, null);
+    private static final GatewayConfig GW = GatewayConfig.builder()
+                    .withHostname(HOST_1)
+                    .withKnoxGatewayEnabled(true)
+                    .withPrimary(true)
+                    .build();
 
     @Mock
     private SaltStateService saltStateService;

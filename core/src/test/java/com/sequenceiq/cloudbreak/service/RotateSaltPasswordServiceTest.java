@@ -93,8 +93,22 @@ class RotateSaltPasswordServiceTest {
         lenient().when(stack.getStatus()).thenReturn(Status.AVAILABLE);
         lenient().when(stack.getNotTerminatedAndNotZombieGatewayInstanceMetadata()).thenReturn(List.of(instanceMetadataView));
 
-        GatewayConfig gw1 = new GatewayConfig("host1", "1.1.1.1", "1.1.1.1", 22, "i-1839", false);
-        GatewayConfig gw2 = new GatewayConfig("host2", "1.1.1.2", "1.1.1.2", 22, "i-1839", false);
+        GatewayConfig gw1 = GatewayConfig.builder()
+                .withConnectionAddress("host1")
+                .withPublicAddress("1.1.1.1")
+                .withPrivateAddress("1.1.1.1")
+                .withGatewayPort(22)
+                .withInstanceId("i-1839")
+                .withKnoxGatewayEnabled(false)
+                .build();
+        GatewayConfig gw2 = GatewayConfig.builder()
+                .withConnectionAddress("host2")
+                .withPublicAddress("1.1.1.2")
+                .withPrivateAddress("1.1.1.2")
+                .withGatewayPort(22)
+                .withInstanceId("i-1839")
+                .withKnoxGatewayEnabled(false)
+                .build();
         gatewayConfigs = List.of(gw1, gw2);
         lenient().when(gatewayConfigService.getAllGatewayConfigs(any())).thenReturn(gatewayConfigs);
 

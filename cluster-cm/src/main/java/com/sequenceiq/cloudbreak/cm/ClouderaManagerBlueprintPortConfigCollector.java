@@ -26,4 +26,11 @@ public class ClouderaManagerBlueprintPortConfigCollector {
 
         return exposedServiceCollector.getAllServicePorts(processor.getVersion(), tls);
     }
+
+    public Map<String, String> getServiceProtocols(Blueprint blueprint, boolean tls) {
+        String blueprintText = blueprint.getBlueprintJsonText();
+        CmTemplateProcessor processor = cmTemplateProcessorFactory.get(blueprintText);
+
+        return exposedServiceCollector.getAllServiceProtocols(processor.getVersion(), tls);
+    }
 }

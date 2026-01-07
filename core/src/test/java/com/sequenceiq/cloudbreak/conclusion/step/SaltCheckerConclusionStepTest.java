@@ -66,7 +66,16 @@ public class SaltCheckerConclusionStepTest {
     @Test
     public void checkShouldFallbackIfOrchestratorCallFailsAndBeSuccessfulIfNoUnreachableNodeFound()
             throws NodesUnreachableException, CloudbreakOrchestratorFailedException {
-        when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenReturn(new GatewayConfig(null, null, null, null, null, null));
+        when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenReturn(
+                GatewayConfig.builder()
+                        .withConnectionAddress("host1")
+                        .withPublicAddress("1.1.1.1")
+                        .withPrivateAddress("1.1.1.1")
+                        .withGatewayPort(22)
+                        .withInstanceId("i-1839")
+                        .withKnoxGatewayEnabled(false)
+                        .build()
+        );
         when(stackDtoService.getById(eq(1L))).thenReturn(stackDto);
         when(saltOrchestrator.isBootstrapApiAvailable(any())).thenReturn(Boolean.TRUE);
         when(saltOrchestrator.ping(any())).thenThrow(new CloudbreakServiceException("any"));
@@ -107,7 +116,16 @@ public class SaltCheckerConclusionStepTest {
 
     @Test
     public void checkShouldFailAndReturnConclusionIfSaltBootIsUnavailableOnMasterFound() throws CloudbreakOrchestratorFailedException {
-        when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenReturn(new GatewayConfig(null, null, null, null, null, null));
+        when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenReturn(
+                GatewayConfig.builder()
+                        .withConnectionAddress("host1")
+                        .withPublicAddress("1.1.1.1")
+                        .withPrivateAddress("1.1.1.1")
+                        .withGatewayPort(22)
+                        .withInstanceId("i-1839")
+                        .withKnoxGatewayEnabled(false)
+                        .build()
+        );
         when(stackDtoService.getById(eq(1L))).thenReturn(stackDto);
         when(saltOrchestrator.isBootstrapApiAvailable(any())).thenReturn(Boolean.FALSE);
         when(cloudbreakMessagesService.getMessageWithArgs(eq(SALT_MASTER_SERVICES_UNHEALTHY), any())).thenReturn("master error");
@@ -126,7 +144,16 @@ public class SaltCheckerConclusionStepTest {
 
     @Test
     public void checkShouldFailAndReturnConclusionIfUnhealthyMinionsFound() throws CloudbreakOrchestratorFailedException {
-        when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenReturn(new GatewayConfig(null, null, null, null, null, null));
+        when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenReturn(
+                GatewayConfig.builder()
+                        .withConnectionAddress("host1")
+                        .withPublicAddress("1.1.1.1")
+                        .withPrivateAddress("1.1.1.1")
+                        .withGatewayPort(22)
+                        .withInstanceId("i-1839")
+                        .withKnoxGatewayEnabled(false)
+                        .build()
+        );
         when(stackDtoService.getById(eq(1L))).thenReturn(stackDto);
         when(saltOrchestrator.isBootstrapApiAvailable(any())).thenReturn(Boolean.TRUE);
         when(saltOrchestrator.ping(any())).thenReturn(Map.of("host1", Boolean.TRUE, "host2", Boolean.FALSE));
@@ -146,7 +173,16 @@ public class SaltCheckerConclusionStepTest {
 
     @Test
     public void checkShouldSucceedIfOnlyHealthyMinionsFound() throws CloudbreakOrchestratorFailedException {
-        when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenReturn(new GatewayConfig(null, null, null, null, null, null));
+        when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenReturn(
+                GatewayConfig.builder()
+                        .withConnectionAddress("host1")
+                        .withPublicAddress("1.1.1.1")
+                        .withPrivateAddress("1.1.1.1")
+                        .withGatewayPort(22)
+                        .withInstanceId("i-1839")
+                        .withKnoxGatewayEnabled(false)
+                        .build()
+        );
         when(stackDtoService.getById(eq(1L))).thenReturn(stackDto);
         when(saltOrchestrator.isBootstrapApiAvailable(any())).thenReturn(Boolean.TRUE);
         when(saltOrchestrator.ping(any())).thenReturn(Map.of("host1", Boolean.TRUE, "host2", Boolean.TRUE));
