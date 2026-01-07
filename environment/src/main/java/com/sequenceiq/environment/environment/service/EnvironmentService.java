@@ -62,6 +62,7 @@ import com.sequenceiq.environment.experience.ExperienceConnectorService;
 import com.sequenceiq.environment.platformresource.PlatformParameterService;
 import com.sequenceiq.environment.platformresource.PlatformResourceRequest;
 import com.sequenceiq.environment.proxy.domain.ProxyConfig;
+import com.sequenceiq.environment.resourcepersister.ResourceService;
 import com.sequenceiq.flow.core.PayloadContextProvider;
 import com.sequenceiq.flow.core.ResourceIdProvider;
 
@@ -77,6 +78,8 @@ public class EnvironmentService extends AbstractAccountAwareResourceService<Envi
     private final EnvironmentValidatorService validatorService;
 
     private final EnvironmentRepository environmentRepository;
+
+    private final ResourceService resourceService;
 
     private final PlatformParameterService platformParameterService;
 
@@ -94,6 +97,7 @@ public class EnvironmentService extends AbstractAccountAwareResourceService<Envi
     public EnvironmentService(
             EnvironmentValidatorService validatorService,
             EnvironmentRepository environmentRepository,
+            ResourceService resourceService,
             PlatformParameterService platformParameterService,
             EnvironmentDtoConverter environmentDtoConverter,
             OwnerAssignmentService ownerAssignmentService,
@@ -102,6 +106,7 @@ public class EnvironmentService extends AbstractAccountAwareResourceService<Envi
             ExperienceConnectorService experienceConnectorService) {
         this.validatorService = validatorService;
         this.environmentRepository = environmentRepository;
+        this.resourceService = resourceService;
         this.platformParameterService = platformParameterService;
         this.environmentDtoConverter = environmentDtoConverter;
         this.grpcUmsClient = grpcUmsClient;
@@ -519,6 +524,10 @@ public class EnvironmentService extends AbstractAccountAwareResourceService<Envi
                 measure(() -> environmentRepository.deleteEnvironmentNetwork(environment.getId()),
                         LOGGER,
                         "Environment network delete took {} ms for environment {}", crn
+                );
+                measure(() -> resourceService.deleteAllByEnvironmentId(environment.getId()),
+                        LOGGER,
+                        "Environment resources delete took {} ms for environment {}", crn
                 );
             }
             measure(() -> environmentRepository.deleteByResourceCrn(crn),

@@ -4,9 +4,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
@@ -20,6 +22,8 @@ import static org.mockito.Mockito.when;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 import jakarta.ws.rs.BadRequestException;
 
@@ -27,6 +31,9 @@ import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -42,12 +49,17 @@ import com.sequenceiq.cloudbreak.util.TestConstants;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
+import com.sequenceiq.environment.environment.domain.EnvironmentAuthentication;
 import com.sequenceiq.environment.environment.domain.ExperimentalFeatures;
 import com.sequenceiq.environment.environment.domain.RegionWrapper;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDtoConverter;
 import com.sequenceiq.environment.environment.repository.EnvironmentRepository;
 import com.sequenceiq.environment.environment.validation.EnvironmentValidatorService;
+import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
+import com.sequenceiq.environment.parameters.dao.domain.BaseParameters;
+import com.sequenceiq.environment.proxy.domain.ProxyConfig;
+import com.sequenceiq.environment.resourcepersister.ResourceService;
 
 @ExtendWith(MockitoExtension.class)
 class EnvironmentServiceTest {
@@ -71,6 +83,9 @@ class EnvironmentServiceTest {
 
     @Mock
     private RoleCrnGenerator roleCrnGenerator;
+
+    @Mock
+    private ResourceService resourceService;
 
     private Environment environment;
 
@@ -274,6 +289,130 @@ class EnvironmentServiceTest {
         verify(environmentRepository, times(1)).updateEnvironmentStatusAndStatusReason(id, deleteFailedStatus, reason);
         verify(environment).setStatus(deleteFailedStatus);
         verify(environment).setStatusReason(reason);
+    }
+
+    @Test
+    void deleteByResourceCrnWhenEnvironmentNotFound() {
+        String crn = "crn:cdp:environments:us-west-1:accountId:environment:123";
+        when(environmentRepository.findByResourceCrnArchivedIsTrue(crn)).thenReturn(Optional.empty());
+
+        environmentServiceUnderTest.deleteByResourceCrn(crn);
+
+        verify(environmentRepository).findByResourceCrnArchivedIsTrue(crn);
+        verify(environmentRepository).deleteByResourceCrn(crn);
+        verify(environmentRepository, times(0)).save(any());
+        verify(environmentRepository, times(0)).deleteEnvironmentNetwork(any());
+        verify(resourceService, times(0)).deleteAllByEnvironmentId(any());
+    }
+
+    private static Stream<Arguments> deleteByResourceCrnSuccessfulDeletionScenarios() {
+        return Stream.of(
+                Arguments.of("all relations", true, true, true, true, true),
+                Arguments.of("minimal relations", false, false, false, false, false),
+                Arguments.of("null network", true, false, false, false, false),
+                Arguments.of("network with environment reference", false, false, true, false, false)
+        );
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("deleteByResourceCrnSuccessfulDeletionScenarios")
+    void deleteByResourceCrnSuccessfulDeletion(String scenario, boolean withAuth, boolean withParams,
+            boolean withNetwork, boolean withParent, boolean withProxy) {
+        String crn = "crn:cdp:environments:us-west-1:accountId:environment:test-" + scenario.replaceAll(" ", "-");
+        Long envId = 1L;
+        Environment env = new Environment();
+        env.setId(envId);
+        env.setResourceCrn(crn);
+
+        BaseNetwork network = null;
+        if (withAuth) {
+            env.setAuthentication(mock(EnvironmentAuthentication.class));
+        }
+        if (withParams) {
+            env.setParameters(mock(BaseParameters.class));
+        }
+        if (withNetwork) {
+            network = mock(BaseNetwork.class);
+            env.setNetwork(network);
+        }
+        if (withParent) {
+            env.setParentEnvironment(mock(Environment.class));
+        }
+        if (withProxy) {
+            env.setProxyConfig(mock(ProxyConfig.class));
+        }
+
+        when(environmentRepository.findByResourceCrnArchivedIsTrue(crn)).thenReturn(Optional.of(env));
+        when(environmentRepository.save(any(Environment.class))).thenReturn(env);
+
+        environmentServiceUnderTest.deleteByResourceCrn(crn);
+
+        verify(environmentRepository).findByResourceCrnArchivedIsTrue(crn);
+        if (withNetwork) {
+            verify(network).setEnvironment(null);
+        }
+        ArgumentCaptor<Environment> environmentCaptor = ArgumentCaptor.forClass(Environment.class);
+        verify(environmentRepository).save(environmentCaptor.capture());
+        Environment savedEnv = environmentCaptor.getValue();
+        assertNull(savedEnv.getAuthentication());
+        assertNull(savedEnv.getParameters());
+        assertNull(savedEnv.getNetwork());
+        assertNull(savedEnv.getParentEnvironment());
+        assertNull(savedEnv.getProxyConfig());
+        verify(environmentRepository).deleteEnvironmentNetwork(envId);
+        verify(resourceService).deleteAllByEnvironmentId(envId);
+        verify(environmentRepository).deleteByResourceCrn(crn);
+    }
+
+    private static Stream<Arguments> deleteByResourceCrnExceptionScenarios() {
+        return Stream.of(
+                Arguments.of("network detach",
+                        (Consumer<EnvironmentRepository>) repo -> when(repo.save(any(Environment.class))).thenThrow(new RuntimeException("Database error")),
+                        (Consumer<ResourceService>) repo -> { },
+                        1, 0, 0, 0),
+                Arguments.of("environment network delete",
+                        (Consumer<EnvironmentRepository>) repo ->
+                                doThrow(new RuntimeException("Network delete error")).when(repo).deleteEnvironmentNetwork(anyLong()),
+                        (Consumer<ResourceService>) repo -> { },
+                        1, 1, 0, 0),
+                Arguments.of("resource delete",
+                        (Consumer<EnvironmentRepository>) repo -> { },
+                        (Consumer<ResourceService>) repo ->
+                                doThrow(new RuntimeException("Resource delete error")).when(repo).deleteAllByEnvironmentId(anyLong()),
+                        1, 1, 1, 0),
+                Arguments.of("final delete",
+                        (Consumer<EnvironmentRepository>) repo ->
+                                doThrow(new RuntimeException("Final delete error")).when(repo).deleteByResourceCrn(anyString()),
+                        (Consumer<ResourceService>) repo -> { },
+                        1, 1, 1, 1)
+        );
+    }
+
+    @ParameterizedTest(name = "{0} throws exception")
+    @MethodSource("deleteByResourceCrnExceptionScenarios")
+    void deleteByResourceCrnExceptionHandling(String failurePoint,
+            Consumer<EnvironmentRepository> envRepoSetup,
+            Consumer<ResourceService> resourceServiceSetup,
+            int saveCallCount, int deleteNetworkCallCount, int deleteResourcesCallCount, int deleteCrnCallCount) {
+        String crn = "crn:cdp:environments:us-west-1:accountId:environment:exception-" + failurePoint.replaceAll(" ", "-");
+        Long envId = 1L;
+        Environment env = new Environment();
+        env.setId(envId);
+        env.setResourceCrn(crn);
+
+        when(environmentRepository.findByResourceCrnArchivedIsTrue(crn)).thenReturn(Optional.of(env));
+        lenient().when(environmentRepository.save(any(Environment.class))).thenReturn(env);
+
+        envRepoSetup.accept(environmentRepository);
+        resourceServiceSetup.accept(resourceService);
+
+        environmentServiceUnderTest.deleteByResourceCrn(crn);
+
+        verify(environmentRepository).findByResourceCrnArchivedIsTrue(crn);
+        verify(environmentRepository, times(saveCallCount)).save(any(Environment.class));
+        verify(environmentRepository, times(deleteNetworkCallCount)).deleteEnvironmentNetwork(envId);
+        verify(resourceService, times(deleteResourcesCallCount)).deleteAllByEnvironmentId(envId);
+        verify(environmentRepository, times(deleteCrnCallCount)).deleteByResourceCrn(crn);
     }
 
     @Configuration

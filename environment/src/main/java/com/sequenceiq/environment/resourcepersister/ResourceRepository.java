@@ -41,4 +41,8 @@ public interface ResourceRepository extends CrudRepository<Resource, Long> {
     @Modifying
     @Query("DELETE FROM Resource r WHERE r.resourceReference = :resourceReference AND r.resourceType = :type")
     void deleteByReferenceAndType(@Param("resourceReference") String resourceReference, @Param("type") ResourceType type);
+
+    @Modifying
+    @Query("DELETE FROM Resource r WHERE r.environment.id = :environmentId")
+    void deleteAllByEnvironmentId(@Param("environmentId") Long environmentId);
 }

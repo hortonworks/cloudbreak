@@ -51,4 +51,8 @@ public class ResourceService {
     public void deleteByReferenceAndType(String reference, ResourceType type) {
         repository.deleteByReferenceAndType(reference, type);
     }
+
+    public void deleteAllByEnvironmentId(Long environmentId) {
+        repository.deleteAllByEnvironmentId(environmentId);
+    }
 }
