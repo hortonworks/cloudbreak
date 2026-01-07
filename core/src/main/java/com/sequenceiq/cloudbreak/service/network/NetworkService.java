@@ -74,4 +74,8 @@ public class NetworkService extends AbstractArchivistService<Network> {
         return networkRepository;
     }
 
+    public Network savePure(Network network) {
+        return networkRepository.save(network);
+    }
+
 }

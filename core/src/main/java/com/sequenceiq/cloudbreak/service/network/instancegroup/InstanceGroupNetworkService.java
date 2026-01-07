@@ -38,4 +38,8 @@ public class InstanceGroupNetworkService {
     public InstanceGroupNetwork savePure(InstanceGroupNetwork instanceGroupNetwork) {
         return networkRepository.save(instanceGroupNetwork);
     }
+
+    public Iterable<InstanceGroupNetwork> saveAll(Iterable<InstanceGroupNetwork> instanceGroupNetworks) {
+        return networkRepository.saveAll(instanceGroupNetworks);
+    }
 }
