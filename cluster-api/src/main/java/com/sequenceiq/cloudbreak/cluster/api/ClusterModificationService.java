@@ -30,6 +30,8 @@ public interface ClusterModificationService {
 
     void rollbackZookeeperToKraftMigration(StackDtoDelegate stackDtoDelegate) throws CloudbreakException;
 
+    void installKraftAsStopped(StackDtoDelegate stackDtoDelegate) throws CloudbreakException;
+
     void stopCluster(boolean full) throws CloudbreakException;
 
     void startCluster() throws CloudbreakException;

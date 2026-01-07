@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft;
 
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.INSTALLING_KRAFT_SERVICE_FOR_MIGRATION_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.ZOOKEEPER_TO_KRAFT_MIGRATION_CONFIGURATION_COMPLETE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.ZOOKEEPER_TO_KRAFT_MIGRATION_CONFIGURATION_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.ZOOKEEPER_TO_KRAFT_MIGRATION_CONFIGURATION_IN_PROGRESS;
@@ -7,6 +8,7 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_FAI
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftConfigurationHandlerSelectors.MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftConfigurationHandlerSelectors.MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_VALIDATION_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftConfigurationHandlerSelectors.MIGRATE_ZOOKEEPER_TO_KRAFT_INSTALL_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftConfigurationStateSelectors.FINALIZE_MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftConfigurationStateSelectors.HANDLED_FAILED_MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_EVENT;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_KRAFT_MIGRATION_FAILED_EVENT;
@@ -35,6 +37,7 @@ import com.sequenceiq.flow.core.FlowState;
 
 @Configuration
 public class MigrateZookeeperToKraftConfigurationActions {
+
     private static final Logger LOGGER = getLogger(MigrateZookeeperToKraftConfigurationActions.class);
 
     @Inject
@@ -50,20 +53,48 @@ public class MigrateZookeeperToKraftConfigurationActions {
             @Override
             protected MigrateZookeeperToKraftContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext,
                     MigrateZookeeperToKraftConfigurationTriggerEvent payload) {
-                return MigrateZookeeperToKraftContext.from(flowParameters, payload);
+                return MigrateZookeeperToKraftContext.from(flowParameters, payload, payload.isKraftInstallNeeded());
             }
 
             @Override
             protected void doExecute(MigrateZookeeperToKraftContext context, MigrateZookeeperToKraftConfigurationTriggerEvent payload,
                     Map<Object, Object> variables) {
                 LOGGER.debug("Migrate Zookeeper to KRaft configuration validation state started {}", payload);
-                Long stackId = payload.getResourceId();
                 String nextEvent = MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_VALIDATION_EVENT.event();
-                sendEvent(context, nextEvent, new MigrateZookeeperToKraftConfigurationEvent(nextEvent, payload.getResourceId()));
+                sendEvent(context, nextEvent, new MigrateZookeeperToKraftConfigurationEvent(nextEvent, payload.getResourceId(), context.isKraftInstallNeeded()));
             }
 
             @Override
             protected Object getFailurePayload(MigrateZookeeperToKraftConfigurationTriggerEvent payload, Optional<MigrateZookeeperToKraftContext> flowContext,
+                    Exception ex) {
+                return new MigrateZookeeperToKraftConfigurationFailureEvent(payload.getResourceId(), ex);
+            }
+        };
+    }
+
+    @Bean(name = "MIGRATE_ZOOKEEPER_TO_KRAFT_INSTALL_STATE")
+    public Action<?, ?> migrateZookeeperToKraftInstallAction() {
+        return new AbstractMigrateZookeeperToKraftAction<>(MigrateZookeeperToKraftConfigurationEvent.class) {
+
+            @Override
+            protected MigrateZookeeperToKraftContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext,
+                    MigrateZookeeperToKraftConfigurationEvent payload) {
+                return MigrateZookeeperToKraftContext.from(flowParameters, payload, payload.isKraftInstallNeeded());
+            }
+
+            @Override
+            protected void doExecute(MigrateZookeeperToKraftContext context, MigrateZookeeperToKraftConfigurationEvent payload,
+                    Map<Object, Object> variables) {
+                LOGGER.debug("Installing KRaft during Zookeeper to KRaft migration state started {}", payload);
+                Long stackId = payload.getResourceId();
+                stackUpdater.updateStackStatus(stackId, INSTALLING_KRAFT_SERVICE_FOR_MIGRATION_IN_PROGRESS);
+
+                String nextEvent = MIGRATE_ZOOKEEPER_TO_KRAFT_INSTALL_EVENT.event();
+                sendEvent(context, nextEvent, new MigrateZookeeperToKraftConfigurationEvent(nextEvent, payload.getResourceId(), context.isKraftInstallNeeded()));
+            }
+
+            @Override
+            protected Object getFailurePayload(MigrateZookeeperToKraftConfigurationEvent payload, Optional<MigrateZookeeperToKraftContext> flowContext,
                     Exception ex) {
                 return new MigrateZookeeperToKraftConfigurationFailureEvent(payload.getResourceId(), ex);
             }
@@ -77,7 +108,7 @@ public class MigrateZookeeperToKraftConfigurationActions {
             @Override
             protected MigrateZookeeperToKraftContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext,
                     MigrateZookeeperToKraftConfigurationEvent payload) {
-                return MigrateZookeeperToKraftContext.from(flowParameters, payload);
+                return MigrateZookeeperToKraftContext.from(flowParameters, payload, payload.isKraftInstallNeeded());
             }
 
             @Override
@@ -88,7 +119,7 @@ public class MigrateZookeeperToKraftConfigurationActions {
                 stackUpdater.updateStackStatus(stackId, ZOOKEEPER_TO_KRAFT_MIGRATION_CONFIGURATION_IN_PROGRESS);
                 flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), CLUSTER_KRAFT_MIGRATION_STARTED_EVENT);
                 String nextEvent = MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_EVENT.event();
-                sendEvent(context, nextEvent, new MigrateZookeeperToKraftConfigurationEvent(nextEvent, payload.getResourceId()));
+                sendEvent(context, nextEvent, new MigrateZookeeperToKraftConfigurationEvent(nextEvent, payload.getResourceId(), context.isKraftInstallNeeded()));
             }
 
             @Override
@@ -106,7 +137,7 @@ public class MigrateZookeeperToKraftConfigurationActions {
             @Override
             protected MigrateZookeeperToKraftContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext,
                     MigrateZookeeperToKraftConfigurationEvent payload) {
-                return MigrateZookeeperToKraftContext.from(flowParameters, payload);
+                return MigrateZookeeperToKraftContext.from(flowParameters, payload, payload.isKraftInstallNeeded());
             }
 
             @Override
@@ -116,7 +147,7 @@ public class MigrateZookeeperToKraftConfigurationActions {
                 Long stackId = payload.getResourceId();
                 stackUpdater.updateStackStatus(stackId, ZOOKEEPER_TO_KRAFT_MIGRATION_CONFIGURATION_COMPLETE);
                 String nextEvent = FINALIZE_MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_EVENT.event();
-                sendEvent(context, nextEvent, new MigrateZookeeperToKraftConfigurationEvent(nextEvent, payload.getResourceId()));
+                sendEvent(context, nextEvent, new MigrateZookeeperToKraftConfigurationEvent(nextEvent, payload.getResourceId(), context.isKraftInstallNeeded()));
             }
 
             @Override
@@ -154,4 +185,5 @@ public class MigrateZookeeperToKraftConfigurationActions {
             }
         };
     }
+
 }

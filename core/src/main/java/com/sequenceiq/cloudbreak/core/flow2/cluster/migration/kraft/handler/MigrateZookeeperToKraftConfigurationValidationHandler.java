@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.handler;
 
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftConfigurationHandlerSelectors.MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_VALIDATION_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftConfigurationStateSelectors.START_MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftConfigurationStateSelectors.START_MIGRATE_ZOOKEEPER_TO_KRAFT_INSTALLATION_EVENT;
 
 import java.util.Collections;
 
@@ -26,6 +26,7 @@ import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
 @Component
 public class MigrateZookeeperToKraftConfigurationValidationHandler extends ExceptionCatcherEventHandler<MigrateZookeeperToKraftConfigurationEvent> {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(MigrateZookeeperToKraftConfigurationValidationHandler.class);
 
     @Inject
@@ -54,7 +55,8 @@ public class MigrateZookeeperToKraftConfigurationValidationHandler extends Excep
             LOGGER.error("Migrate Zookeeper to KRaft configuration validation failed.", e);
             return new MigrateZookeeperToKraftConfigurationFailureEvent(stackId, e);
         }
-        return new MigrateZookeeperToKraftConfigurationEvent(START_MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_EVENT.name(), event.getData().getResourceId());
+        return new MigrateZookeeperToKraftConfigurationEvent(START_MIGRATE_ZOOKEEPER_TO_KRAFT_INSTALLATION_EVENT.name(), event.getData().getResourceId(),
+                event.getData().isKraftInstallNeeded());
     }
 
     @Override

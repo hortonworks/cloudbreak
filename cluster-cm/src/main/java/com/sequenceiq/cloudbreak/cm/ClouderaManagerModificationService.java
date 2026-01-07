@@ -48,6 +48,7 @@ import com.cloudera.api.swagger.HostsResourceApi;
 import com.cloudera.api.swagger.MgmtServiceResourceApi;
 import com.cloudera.api.swagger.ParcelResourceApi;
 import com.cloudera.api.swagger.ParcelsResourceApi;
+import com.cloudera.api.swagger.RolesResourceApi;
 import com.cloudera.api.swagger.ServicesResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
@@ -67,8 +68,12 @@ import com.cloudera.api.swagger.model.ApiHostRef;
 import com.cloudera.api.swagger.model.ApiHostRefList;
 import com.cloudera.api.swagger.model.ApiParcel;
 import com.cloudera.api.swagger.model.ApiParcelList;
+import com.cloudera.api.swagger.model.ApiRole;
+import com.cloudera.api.swagger.model.ApiRoleList;
+import com.cloudera.api.swagger.model.ApiRoleState;
 import com.cloudera.api.swagger.model.ApiService;
 import com.cloudera.api.swagger.model.ApiServiceList;
+import com.cloudera.api.swagger.model.ApiServiceRef;
 import com.cloudera.api.swagger.model.ApiServiceState;
 import com.cloudera.api.swagger.model.HTTPMethod;
 import com.google.common.annotations.VisibleForTesting;
@@ -253,6 +258,52 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     @Override
     public void rollbackZookeeperToKraftMigration(StackDtoDelegate stackDtoDelegate) {
         clouderaManagerKraftMigrationService.rollbackZookeeperToKraftMigration(v31Client, stackDtoDelegate);
+    }
+
+    @Override
+    public void installKraftAsStopped(StackDtoDelegate stackDtoDelegate) throws CloudbreakException {
+        ServicesResourceApi servicesResourceApi = clouderaManagerApiFactory.getServicesResourceApi(v31Client);
+        RolesResourceApi rolesResourceApi = clouderaManagerApiFactory.getRolesResourceApi(v31Client);
+
+        try {
+            LOGGER.debug("Retrieving Kafka service from CM.");
+            ApiServiceList apiServiceList = servicesResourceApi.readServices(stack.getName(), DataView.FULL.name());
+
+            String kafkaServiceName = apiServiceList.getItems().stream().filter(apiService -> apiService.getType().equals("KAFKA"))
+                    .map(ApiService::getName)
+                    .findFirst()
+                    .orElseThrow(() -> new ClouderaManagerOperationFailedException("Kafka service not found in the cluster!"));
+
+            String zookeeperServiceName = apiServiceList.getItems().stream().filter(apiService -> apiService.getType().equals("ZOOKEEPER"))
+                    .map(ApiService::getName)
+                    .findFirst()
+                    .orElseThrow(() -> new ClouderaManagerOperationFailedException("Zookeeper service not found in the cluster!"));
+
+            ApiRoleList zookeeperRoles = rolesResourceApi.readRoles(stack.getName(), zookeeperServiceName, null, DataView.FULL.name());
+            List<ApiHostRef> zookeeperHosts = zookeeperRoles.getItems().stream().map(ApiRole::getHostRef).toList();
+            LOGGER.debug("Found {} Zookeeper hosts: {}", zookeeperHosts.size(), zookeeperHosts);
+            ApiRoleList kraftRoleList = new ApiRoleList();
+            zookeeperHosts.forEach(zookeeperHost -> {
+                ApiRole kraftRole = new ApiRole()
+                        .type("KRAFT")
+                        .roleState(ApiRoleState.STOPPED)
+                        .hostRef(zookeeperHost)
+                        .serviceRef(new ApiServiceRef()
+                                .clusterName(stack.getName())
+                                .serviceName(kafkaServiceName)
+                        );
+                kraftRoleList.addItemsItem(kraftRole);
+            });
+
+            LOGGER.debug("Creating KRaft role for Kafka service on host(s): {}", zookeeperHosts.stream().map(ApiHostRef::getHostname).toArray());
+            rolesResourceApi.createRoles(stack.getName(), kafkaServiceName, kraftRoleList);
+        } catch (ClouderaManagerOperationFailedException cmOpFailedExc) {
+            LOGGER.warn("CM operation failed due to: {}", cmOpFailedExc.getMessage(), cmOpFailedExc);
+            throw new CloudbreakException(cmOpFailedExc);
+        } catch (ApiException e) {
+            LOGGER.warn("Exception occurred during communicating with CM - {}", e.getMessage(), e);
+            throw new CloudbreakException(e);
+        }
     }
 
     @Override

@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.handler;
 
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftConfigurationHandlerSelectors.MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_VALIDATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftConfigurationStateSelectors.FAILED_MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftConfigurationStateSelectors.START_MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftConfigurationStateSelectors.START_MIGRATE_ZOOKEEPER_TO_KRAFT_INSTALLATION_EVENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.mockito.Mockito.doNothing;
@@ -32,6 +32,11 @@ import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
 @ExtendWith(MockitoExtension.class)
 class MigrateZookeeperToKraftConfigurationValidationHandlerTest {
+
+    private static final boolean NO_KRAFT_INSTALL_NEEDED = false;
+
+    private static final boolean KRAFT_INSTALL_NEEDED = true;
+
     private static final long STACK_ID = 1L;
 
     @Mock
@@ -50,7 +55,8 @@ class MigrateZookeeperToKraftConfigurationValidationHandlerTest {
     void testDoAcceptSuccess() {
         StackDto stackDto = new StackDto();
         MigrateZookeeperToKraftConfigurationEvent request =
-                new MigrateZookeeperToKraftConfigurationEvent(MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_VALIDATION_EVENT.selector(), STACK_ID);
+                new MigrateZookeeperToKraftConfigurationEvent(MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_VALIDATION_EVENT.selector(), STACK_ID,
+                        NO_KRAFT_INSTALL_NEEDED);
         HandlerEvent<MigrateZookeeperToKraftConfigurationEvent> event = new HandlerEvent<>(new Event<>(request));
         when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
         KraftMigrationStatusResponse response = new KraftMigrationStatusResponse(KraftMigrationStatus.ZOOKEEPER_INSTALLED.name(), "MIGRATE",
@@ -61,14 +67,15 @@ class MigrateZookeeperToKraftConfigurationValidationHandlerTest {
         Selectable result = underTest.doAccept(event);
 
         assertInstanceOf(MigrateZookeeperToKraftConfigurationEvent.class, result);
-        assertEquals(START_MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_EVENT.name(), result.getSelector());
+        assertEquals(START_MIGRATE_ZOOKEEPER_TO_KRAFT_INSTALLATION_EVENT.name(), result.getSelector());
     }
 
     @Test
     void testDoAcceptFailure() {
         StackDto stackDto = new StackDto();
         MigrateZookeeperToKraftConfigurationEvent request =
-                new MigrateZookeeperToKraftConfigurationEvent(MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_VALIDATION_EVENT.selector(), STACK_ID);
+                new MigrateZookeeperToKraftConfigurationEvent(MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_VALIDATION_EVENT.selector(), STACK_ID,
+                        NO_KRAFT_INSTALL_NEEDED);
         HandlerEvent<MigrateZookeeperToKraftConfigurationEvent> event = new HandlerEvent<>(new Event<>(request));
         when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
         KraftMigrationStatusResponse response = new KraftMigrationStatusResponse(KraftMigrationStatus.BROKERS_IN_KRAFT.name(), "ROLLBACK",

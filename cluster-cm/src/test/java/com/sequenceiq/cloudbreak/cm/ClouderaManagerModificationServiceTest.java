@@ -42,6 +42,7 @@ import java.util.Set;
 import java.util.function.Supplier;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -65,6 +66,7 @@ import com.cloudera.api.swagger.HostsResourceApi;
 import com.cloudera.api.swagger.MgmtServiceResourceApi;
 import com.cloudera.api.swagger.ParcelResourceApi;
 import com.cloudera.api.swagger.ParcelsResourceApi;
+import com.cloudera.api.swagger.RolesResourceApi;
 import com.cloudera.api.swagger.ServicesResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
@@ -79,10 +81,14 @@ import com.cloudera.api.swagger.model.ApiEntityTag;
 import com.cloudera.api.swagger.model.ApiHost;
 import com.cloudera.api.swagger.model.ApiHostList;
 import com.cloudera.api.swagger.model.ApiHostNameList;
+import com.cloudera.api.swagger.model.ApiHostRef;
 import com.cloudera.api.swagger.model.ApiHostRefList;
 import com.cloudera.api.swagger.model.ApiParcel;
 import com.cloudera.api.swagger.model.ApiParcelList;
 import com.cloudera.api.swagger.model.ApiRestartClusterArgs;
+import com.cloudera.api.swagger.model.ApiRole;
+import com.cloudera.api.swagger.model.ApiRoleList;
+import com.cloudera.api.swagger.model.ApiRoleState;
 import com.cloudera.api.swagger.model.ApiService;
 import com.cloudera.api.swagger.model.ApiServiceList;
 import com.cloudera.api.swagger.model.ApiServiceState;
@@ -134,6 +140,10 @@ class ClouderaManagerModificationServiceTest {
     private static final String HOSTNAME = "host1";
 
     private static final String GROUP_NAME = "group1";
+
+    private static final String ZOOKEEPER_SERVICE_NAME = "ZOOKEEPER";
+
+    private static final String KAFKA_SERVICE_NAME = "KAFKA";
 
     private final ExtendedPollingResult success = new ExtendedPollingResult.ExtendedPollingResultBuilder().success().build();
 
@@ -255,6 +265,9 @@ class ClouderaManagerModificationServiceTest {
     @Mock
     private ClouderaManagerKraftMigrationService clouderaManagerKraftMigrationService;
 
+    @Mock
+    private RolesResourceApi rolesResourceApi;
+
     private Cluster cluster;
 
     private HostGroup hostGroup;
@@ -281,6 +294,152 @@ class ClouderaManagerModificationServiceTest {
         stack.setResourceCrn("crn:cdp:cloudbreak:us-west-1:someone:stack:12345");
         hostGroup = new HostGroup();
         hostGroup.setName(HOST_GROUP_NAME);
+    }
+
+    @Test
+    @DisplayName("installKraftAsStopped should create KRaft role per Zookeeper host")
+    void installKraftAsStoppedCreatesKraftRolePerZookeeperHost() throws Exception {
+        when(clouderaManagerApiFactory.getServicesResourceApi(v31Client)).thenReturn(servicesResourceApi);
+        when(clouderaManagerApiFactory.getRolesResourceApi(v31Client)).thenReturn(rolesResourceApi);
+
+        when(servicesResourceApi.readServices(eq(STACK_NAME), anyString())).thenReturn(new ApiServiceList().items(List.of(
+                new ApiService().type(KAFKA_SERVICE_NAME).name("kafka-1"),
+                new ApiService().type(ZOOKEEPER_SERVICE_NAME).name("zookeeper-1")
+        )));
+
+        ApiHostRef h1 = new ApiHostRef().hostname("host-1.example");
+        ApiHostRef h2 = new ApiHostRef().hostname("host-2.example");
+        when(rolesResourceApi.readRoles(eq(STACK_NAME), eq("zookeeper-1"), eq(null), anyString()))
+                .thenReturn(new ApiRoleList().items(List.of(
+                        new ApiRole().hostRef(h1),
+                        new ApiRole().hostRef(h2)
+                )));
+
+        underTest.installKraftAsStopped(stack);
+
+        ArgumentCaptor<ApiRoleList> roleListCaptor = ArgumentCaptor.forClass(ApiRoleList.class);
+        verify(rolesResourceApi).createRoles(eq(STACK_NAME), eq("kafka-1"), roleListCaptor.capture());
+
+        ApiRoleList created = roleListCaptor.getValue();
+        assertThat(created).isNotNull();
+        assertThat(created.getItems()).hasSize(2);
+
+        ApiRole r1 = created.getItems().get(0);
+        assertEquals("KRAFT", r1.getType());
+        assertEquals(ApiRoleState.STOPPED, r1.getRoleState());
+        assertEquals("host-1.example", r1.getHostRef().getHostname());
+        assertEquals(STACK_NAME, r1.getServiceRef().getClusterName());
+        assertEquals("kafka-1", r1.getServiceRef().getServiceName());
+
+        ApiRole r2 = created.getItems().get(1);
+        assertEquals("KRAFT", r2.getType());
+        assertEquals(ApiRoleState.STOPPED, r2.getRoleState());
+        assertEquals("host-2.example", r2.getHostRef().getHostname());
+        assertEquals(STACK_NAME, r2.getServiceRef().getClusterName());
+        assertEquals("kafka-1", r2.getServiceRef().getServiceName());
+    }
+
+    @Test
+    @DisplayName("installKraftAsStopped should not create KRaft role for non-Kafka service")
+    void installKraftAsStoppedWhenKafkaMissing() throws Exception {
+        when(clouderaManagerApiFactory.getServicesResourceApi(v31Client)).thenReturn(servicesResourceApi);
+        when(clouderaManagerApiFactory.getRolesResourceApi(v31Client)).thenReturn(rolesResourceApi);
+
+        when(servicesResourceApi.readServices(eq(STACK_NAME), anyString()))
+                .thenReturn(new ApiServiceList().items(List.of(new ApiService().type(ZOOKEEPER_SERVICE_NAME).name("zookeeper-1"))));
+
+        CloudbreakException ex = assertThrows(CloudbreakException.class, () -> underTest.installKraftAsStopped(stack));
+
+        assertThat(ex.getCause()).isInstanceOf(ClouderaManagerOperationFailedException.class);
+        assertEquals("Kafka service not found in the cluster!", ex.getCause().getMessage());
+    }
+
+    @Test
+    @DisplayName("installKraftAsStopped should not create KRaft role for missing Zookeeper service")
+    void installKraftAsStoppedZookeeperMissing() throws Exception {
+        when(clouderaManagerApiFactory.getServicesResourceApi(v31Client)).thenReturn(servicesResourceApi);
+        when(clouderaManagerApiFactory.getRolesResourceApi(v31Client)).thenReturn(rolesResourceApi);
+
+        when(servicesResourceApi.readServices(eq(STACK_NAME), anyString()))
+                .thenReturn(new ApiServiceList().items(List.of(new ApiService().type(KAFKA_SERVICE_NAME).name("kafka-1"))));
+
+        CloudbreakException ex = assertThrows(CloudbreakException.class, () -> underTest.installKraftAsStopped(stack));
+
+        assertThat(ex.getCause()).isInstanceOf(ClouderaManagerOperationFailedException.class);
+        assertEquals("Zookeeper service not found in the cluster!", ex.getCause().getMessage());
+    }
+
+    @Test
+    @DisplayName("installKraftAsStopped should not create KRaft role for missing Kafka service")
+    void installKraftAsStoppedNoZookeeperHosts() throws Exception {
+        when(clouderaManagerApiFactory.getServicesResourceApi(v31Client)).thenReturn(servicesResourceApi);
+        when(clouderaManagerApiFactory.getRolesResourceApi(v31Client)).thenReturn(rolesResourceApi);
+
+        when(servicesResourceApi.readServices(eq(STACK_NAME), anyString())).thenReturn(new ApiServiceList().items(List.of(
+                new ApiService().type(KAFKA_SERVICE_NAME).name("kafka-1"),
+                new ApiService().type(ZOOKEEPER_SERVICE_NAME).name("zookeeper-1")
+        )));
+        when(rolesResourceApi.readRoles(eq(STACK_NAME), eq("zookeeper-1"), eq(null), anyString()))
+                .thenReturn(new ApiRoleList().items(List.of()));
+
+        underTest.installKraftAsStopped(stack);
+
+        ArgumentCaptor<ApiRoleList> roleListCaptor = ArgumentCaptor.forClass(ApiRoleList.class);
+        verify(rolesResourceApi).createRoles(eq(STACK_NAME), eq("kafka-1"), roleListCaptor.capture());
+        assertThat(roleListCaptor.getValue().getItems()).isNull();
+    }
+
+    @Test
+    @DisplayName("installKraftAsStopped should throw CloudbreakException when readServices throws ApiException")
+    void installKraftAsStoppedReadServicesThrowsApiException() throws Exception {
+        when(clouderaManagerApiFactory.getServicesResourceApi(v31Client)).thenReturn(servicesResourceApi);
+        when(clouderaManagerApiFactory.getRolesResourceApi(v31Client)).thenReturn(rolesResourceApi);
+
+        ApiException apiException = new ApiException("boom");
+        when(servicesResourceApi.readServices(eq(STACK_NAME), anyString())).thenThrow(apiException);
+
+        CloudbreakException ex = assertThrows(CloudbreakException.class, () -> underTest.installKraftAsStopped(stack));
+        assertThat(ex.getCause()).isSameAs(apiException);
+    }
+
+    @Test
+    @DisplayName("installKraftAsStopped should throw CloudbreakException when readRoles throws ApiException")
+    void installKraftAsStoppedReadRolesThrowsApiException() throws Exception {
+        when(clouderaManagerApiFactory.getServicesResourceApi(v31Client)).thenReturn(servicesResourceApi);
+        when(clouderaManagerApiFactory.getRolesResourceApi(v31Client)).thenReturn(rolesResourceApi);
+
+        when(servicesResourceApi.readServices(eq(STACK_NAME), anyString())).thenReturn(new ApiServiceList().items(List.of(
+                new ApiService().type(KAFKA_SERVICE_NAME).name("kafka-1"),
+                new ApiService().type(ZOOKEEPER_SERVICE_NAME).name("zookeeper-1")
+        )));
+
+        ApiException apiException = new ApiException("boom");
+        when(rolesResourceApi.readRoles(eq(STACK_NAME), eq("zookeeper-1"), eq(null), anyString())).thenThrow(apiException);
+
+        CloudbreakException ex = assertThrows(CloudbreakException.class, () -> underTest.installKraftAsStopped(stack));
+        assertThat(ex.getCause()).isSameAs(apiException);
+    }
+
+    @Test
+    @DisplayName("installKraftAsStopped should throw CloudbreakException when createRoles throws ApiException")
+    void installKraftAsStoppedCreateRolesThrowsApiException() throws Exception {
+        when(clouderaManagerApiFactory.getServicesResourceApi(v31Client)).thenReturn(servicesResourceApi);
+        when(clouderaManagerApiFactory.getRolesResourceApi(v31Client)).thenReturn(rolesResourceApi);
+
+        when(servicesResourceApi.readServices(eq(STACK_NAME), anyString())).thenReturn(new ApiServiceList().items(List.of(
+                new ApiService().type(KAFKA_SERVICE_NAME).name("kafka-1"),
+                new ApiService().type(ZOOKEEPER_SERVICE_NAME).name("zookeeper-1")
+        )));
+
+        ApiHostRef h1 = new ApiHostRef().hostname("host-1.example");
+        when(rolesResourceApi.readRoles(eq(STACK_NAME), eq("zookeeper-1"), eq(null), anyString()))
+                .thenReturn(new ApiRoleList().items(List.of(new ApiRole().hostRef(h1))));
+
+        ApiException apiException = new ApiException("boom");
+        when(rolesResourceApi.createRoles(eq(STACK_NAME), eq("kafka-1"), any(ApiRoleList.class))).thenThrow(apiException);
+
+        CloudbreakException ex = assertThrows(CloudbreakException.class, () -> underTest.installKraftAsStopped(stack));
+        assertThat(ex.getCause()).isSameAs(apiException);
     }
 
     @Test

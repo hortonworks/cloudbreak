@@ -48,7 +48,8 @@ public class MigrateZookeeperToKraftConfigurationHandler extends ExceptionCatche
             LOGGER.error("Migrate Zookeeper to KRaft configuration failed.", e);
             return new MigrateZookeeperToKraftConfigurationFailureEvent(stackId, e);
         }
-        return new MigrateZookeeperToKraftConfigurationEvent(FINISH_MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_EVENT.name(), event.getData().getResourceId());
+        return new MigrateZookeeperToKraftConfigurationEvent(FINISH_MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_EVENT.name(), event.getData().getResourceId(),
+                event.getData().isKraftInstallNeeded());
     }
 
     @Override

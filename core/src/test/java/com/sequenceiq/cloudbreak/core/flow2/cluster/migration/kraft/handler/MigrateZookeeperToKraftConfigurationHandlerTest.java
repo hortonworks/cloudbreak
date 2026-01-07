@@ -28,6 +28,9 @@ import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
 @ExtendWith(MockitoExtension.class)
 class MigrateZookeeperToKraftConfigurationHandlerTest {
+
+    private static final boolean NO_KRAFT_INSTALL_NEEDED = false;
+
     private static final long STACK_ID = 1L;
 
     @Mock
@@ -45,7 +48,8 @@ class MigrateZookeeperToKraftConfigurationHandlerTest {
     @Test
     void testDoAcceptSuccess() throws Exception {
         StackDto stackDto = new StackDto();
-        MigrateZookeeperToKraftConfigurationEvent request = new MigrateZookeeperToKraftConfigurationEvent(MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT.selector(), STACK_ID);
+        MigrateZookeeperToKraftConfigurationEvent request = new MigrateZookeeperToKraftConfigurationEvent(MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT.selector(),
+                STACK_ID, NO_KRAFT_INSTALL_NEEDED);
         HandlerEvent<MigrateZookeeperToKraftConfigurationEvent> event = new HandlerEvent<>(new Event<>(request));
         when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
         when(clusterApiConnectors.getConnector(stackDto)).thenReturn(clusterApi);
@@ -60,7 +64,8 @@ class MigrateZookeeperToKraftConfigurationHandlerTest {
     @Test
     void testDoAcceptFailure() throws Exception {
         StackDto stackDto = new StackDto();
-        MigrateZookeeperToKraftConfigurationEvent request = new MigrateZookeeperToKraftConfigurationEvent(MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT.selector(), STACK_ID);
+        MigrateZookeeperToKraftConfigurationEvent request = new MigrateZookeeperToKraftConfigurationEvent(MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT.selector(),
+                STACK_ID, NO_KRAFT_INSTALL_NEEDED);
         HandlerEvent<MigrateZookeeperToKraftConfigurationEvent> event = new HandlerEvent<>(new Event<>(request));
         when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
         when(clusterApiConnectors.getConnector(stackDto)).thenReturn(clusterApi);

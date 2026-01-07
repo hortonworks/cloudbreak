@@ -26,6 +26,7 @@ import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
 
 @Component
 public class MigrateZookeeperToKraftFlowEventChainFactory implements FlowEventChainFactory<MigrateZookeeperToKraftFlowChainTriggerEvent> {
+
     private static final String KRAFT_HOST_GROUP_NAME = "kraft";
 
     private static final int KRAFT_HOST_GROUP_SIZE = 3;
@@ -41,18 +42,26 @@ public class MigrateZookeeperToKraftFlowEventChainFactory implements FlowEventCh
     @Override
     public FlowTriggerEventQueue createFlowTriggerEventQueue(MigrateZookeeperToKraftFlowChainTriggerEvent event) {
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
-        int kraftNodeCount = getKraftNodeCountByStackId(event.getResourceId());
-        int nodeAdjustment = getKraftNodeAdjustment(kraftNodeCount);
-        flowEventChain.add(getKraftMigrationConfigurationTriggerEvent(event));
-        if (isKraftUpscaleNeeded(kraftNodeCount)) {
-            flowEventChain.add(getStackUpscaleTriggerEvent(event, nodeAdjustment));
+        boolean kraftInstallNeeded = true;
+        if (isKraftHostGroupPresent(event.getResourceId())) {
+            kraftInstallNeeded = false;
+            int kraftNodeCount = getKraftNodeCountByStackId(event.getResourceId());
+            int nodeAdjustment = getKraftNodeAdjustment(kraftNodeCount);
+            if (isKraftUpscaleNeeded(kraftNodeCount)) {
+                flowEventChain.add(getStackUpscaleTriggerEvent(event, nodeAdjustment));
+            }
         }
+        flowEventChain.add(getKraftMigrationConfigurationTriggerEvent(event, kraftInstallNeeded));
         flowEventChain.add(getKraftMigrationTriggerEvent(event));
         return new FlowTriggerEventQueue(getName(), event, flowEventChain);
     }
 
     private boolean isKraftUpscaleNeeded(int kraftNodeCount) {
         return kraftNodeCount < KRAFT_HOST_GROUP_SIZE;
+    }
+
+    private boolean isKraftHostGroupPresent(long stackId) {
+        return stackService.getByIdWithLists(stackId).getInstanceGroups().stream().anyMatch(ig -> KRAFT_HOST_GROUP_NAME.equalsIgnoreCase(ig.getGroupName()));
     }
 
     private int getKraftNodeCountByStackId(long stackId) {
@@ -68,9 +77,9 @@ public class MigrateZookeeperToKraftFlowEventChainFactory implements FlowEventCh
         return KRAFT_HOST_GROUP_SIZE - kraftNodeCount;
     }
 
-    private Selectable getKraftMigrationConfigurationTriggerEvent(MigrateZookeeperToKraftFlowChainTriggerEvent event) {
+    private Selectable getKraftMigrationConfigurationTriggerEvent(MigrateZookeeperToKraftFlowChainTriggerEvent event, boolean kraftInstallNeeded) {
         Long stackId = event.getResourceId();
-        return new MigrateZookeeperToKraftConfigurationTriggerEvent(stackId, event.accepted());
+        return new MigrateZookeeperToKraftConfigurationTriggerEvent(stackId, kraftInstallNeeded, event.accepted());
     }
 
     private Selectable getStackUpscaleTriggerEvent(MigrateZookeeperToKraftFlowChainTriggerEvent event, int nodeAdjustment) {

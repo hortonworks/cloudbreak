@@ -68,6 +68,10 @@ public interface ClusterApi {
         clusterModificationService().rollbackZookeeperToKraftMigration(stackDtoDelegate);
     }
 
+    default void installKraftAsStopped(StackDtoDelegate stackDtoDelegate) throws CloudbreakException {
+        clusterModificationService().installKraftAsStopped(stackDtoDelegate);
+    }
+
     default List<String> upscaleCluster(Map<HostGroup, Set<InstanceMetaData>> instanceMetaDatasByHostGroup) throws CloudbreakException {
         return clusterModificationService().upscaleCluster(instanceMetaDatasByHostGroup);
     }
