@@ -197,8 +197,6 @@ public class AwsPlatformResources implements PlatformResources {
 
     private static final int MINIMUM_ST1_SIZE = 125;
 
-    private static final int MAX_RESULTS = 1000;
-
     private static final int ONE_THOUSAND_TWENTY_FOUR = 1024;
 
     @Inject
@@ -871,7 +869,6 @@ public class AwsPlatformResources implements PlatformResources {
         return DescribeInstanceTypeOfferingsRequest.builder()
                 .locationType(LocationType.REGION)
                 .filters(Filter.builder().name("location").values(region.getRegionName()).build())
-                .maxResults(MAX_RESULTS)
                 .build();
     }
 
