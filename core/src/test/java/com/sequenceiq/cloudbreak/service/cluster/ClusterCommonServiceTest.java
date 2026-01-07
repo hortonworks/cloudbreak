@@ -167,10 +167,10 @@ public class ClusterCommonServiceTest {
         when(stack.isAvailable()).thenReturn(true);
 
         CertificatesRotationV4Request certificatesRotationV4Request = new CertificatesRotationV4Request();
-        when(clusterOperationService.rotateAutoTlsCertificates(STACK_ID, certificatesRotationV4Request)).thenReturn(flowIdentifier);
+        when(clusterOperationService.rotateAutoTlsCertificates(STACK_ID, null, certificatesRotationV4Request)).thenReturn(flowIdentifier);
         when(stackDtoService.getStackViewByNameOrCrn(nameOrCrn, ACCOUNT_ID)).thenReturn(stack);
         underTest.rotateAutoTlsCertificates(nameOrCrn, ACCOUNT_ID, certificatesRotationV4Request);
-        verify(clusterOperationService, times(1)).rotateAutoTlsCertificates(STACK_ID, certificatesRotationV4Request);
+        verify(clusterOperationService, times(1)).rotateAutoTlsCertificates(STACK_ID, null, certificatesRotationV4Request);
     }
 
     @Test

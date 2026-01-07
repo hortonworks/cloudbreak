@@ -1,7 +1,7 @@
 package com.sequenceiq.datalake.service.rotation.context.provider;
 
 import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.CLOUDBREAK_ROTATE_POLLING;
-import static com.sequenceiq.sdx.rotation.DatalakeSecretType.CM_INTERMEDIATE_CA_CERT;
+import static com.sequenceiq.sdx.rotation.DatalakeSecretType.PRIVATE_HOST_CERTS;
 
 import java.util.Map;
 
@@ -15,15 +15,15 @@ import com.sequenceiq.cloudbreak.rotation.common.RotationContextProvider;
 import com.sequenceiq.cloudbreak.rotation.secret.poller.PollerRotationContext;
 
 @Component
-public class DatalakeCMIntermediateCacertRotationContextProvider implements RotationContextProvider {
+public class DatalakePrivateHostsCertRotationContextProvider implements RotationContextProvider {
 
     @Override
     public Map<SecretRotationStep, RotationContext> getContexts(String resourceCrn) {
-        return Map.of(CLOUDBREAK_ROTATE_POLLING, new PollerRotationContext(resourceCrn, CloudbreakSecretType.CM_INTERMEDIATE_CA_CERT));
+        return Map.of(CLOUDBREAK_ROTATE_POLLING, new PollerRotationContext(resourceCrn, CloudbreakSecretType.PRIVATE_HOST_CERTS));
     }
 
     @Override
     public SecretType getSecret() {
-        return CM_INTERMEDIATE_CA_CERT;
+        return PRIVATE_HOST_CERTS;
     }
 }

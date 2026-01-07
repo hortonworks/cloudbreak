@@ -48,7 +48,6 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.InstanceGroupAdjustmentV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.CertificatesRotationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupAdjustmentV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackAddVolumesRequest;
@@ -79,7 +78,6 @@ import com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.Dis
 import com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.event.DistroXDiskUpdateEvent;
 import com.sequenceiq.cloudbreak.core.flow2.dto.NetworkScaleDetails;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterAndStackDownscaleTriggerEvent;
-import com.sequenceiq.cloudbreak.core.flow2.event.ClusterCertificatesRotationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterCredentialChangeTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterCredentialChangeTriggerEvent.Type;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterDownscaleDetails;
@@ -488,13 +486,6 @@ public class ReactorFlowManager {
         DatabaseRestoreTriggerEvent databaseRestoreTriggerEvent =
             new DatabaseRestoreTriggerEvent(selector, stackId, location, backupId, databaseMaxDurationInMin, dryRun);
         return reactorNotifier.notify(stackId, selector, databaseRestoreTriggerEvent);
-    }
-
-    public FlowIdentifier triggerAutoTlsCertificatesRotation(Long stackId, CertificatesRotationV4Request certificatesRotationV4Request) {
-        String selector = FlowChainTriggers.ROTATE_CLUSTER_CERTIFICATES_CHAIN_TRIGGER_EVENT;
-        ClusterCertificatesRotationTriggerEvent clusterCertificatesRotationTriggerEvent = new ClusterCertificatesRotationTriggerEvent(selector, stackId,
-                certificatesRotationV4Request.getCertificateRotationType(), certificatesRotationV4Request.getSkipSaltUpdate());
-        return reactorNotifier.notify(stackId, selector, clusterCertificatesRotationTriggerEvent);
     }
 
     public FlowIdentifier triggerStackLoadBalancerUpdate(Long stackId) {

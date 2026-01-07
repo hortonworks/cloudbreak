@@ -13,10 +13,10 @@ import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
 
 @ExtendWith(MockitoExtension.class)
-public class AbstractCMIntermediateCacertRotationContextProviderTest {
+public class AbstractCMHostCertRotationContextProviderTest {
 
     @InjectMocks
-    private DatahubCMIntermediateCacertRotationContextProvider underTest;
+    private CMIntermediateCacertRotationContextProvider underTest;
 
     @Test
     void testGetContexts() {

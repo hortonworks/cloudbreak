@@ -336,7 +336,8 @@ public class ClusterCommonService {
         StackView stack = stackDtoService.getStackViewByNameOrCrn(nameOrCrn, accountId);
         MDCBuilder.buildMdcContext(stack);
         validateOperationOnStack(stack, "Certificates rotation");
-        return new CertificatesRotationV4Response(clusterOperationService.rotateAutoTlsCertificates(stack.getId(), certificatesRotationV4Request));
+        FlowIdentifier flowIdentifier = clusterOperationService.rotateAutoTlsCertificates(stack.getId(), stack.getResourceCrn(), certificatesRotationV4Request);
+        return new CertificatesRotationV4Response(flowIdentifier);
     }
 
     public UpdateRecipesV4Response refreshRecipes(NameOrCrn nameOrCrn, Long workspaceId, UpdateRecipesV4Request request) {

@@ -15,6 +15,7 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_FAILED_NODES
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_RECOVERED_NODES_REPORTED_CLUSTER_EVENT;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_START_IGNORED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_STOP_IGNORED;
+import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.PRIVATE_HOST_CERTS;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 
 import java.io.IOException;
@@ -604,8 +605,8 @@ public class ClusterOperationService {
         return flowManager.triggerPillarConfigurationUpdate(stackId);
     }
 
-    public FlowIdentifier rotateAutoTlsCertificates(Long stackId, CertificatesRotationV4Request certificatesRotationV4Request) {
-        return flowManager.triggerAutoTlsCertificatesRotation(stackId, certificatesRotationV4Request);
+    public FlowIdentifier rotateAutoTlsCertificates(Long stackId, String crn, CertificatesRotationV4Request certificatesRotationV4Request) {
+        return flowManager.triggerSecretRotation(stackId, crn, List.of(PRIVATE_HOST_CERTS), null, Map.of());
     }
 
     public FlowIdentifier deleteVolumes(Long stackId, StackDeleteVolumesRequest deleteRequest) {

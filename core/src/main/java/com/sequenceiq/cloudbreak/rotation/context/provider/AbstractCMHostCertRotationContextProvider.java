@@ -12,9 +12,9 @@ import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContextProvider;
 import com.sequenceiq.cloudbreak.rotation.secret.custom.CustomJobRotationContext;
 
-public abstract class AbstractCMIntermediateCacertRotationContextProvider implements RotationContextProvider {
+public abstract class AbstractCMHostCertRotationContextProvider implements RotationContextProvider {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractCMIntermediateCacertRotationContextProvider.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractCMHostCertRotationContextProvider.class);
 
     @Override
     public Map<SecretRotationStep, RotationContext> getContexts(String resourceCrn) {
@@ -24,7 +24,9 @@ public abstract class AbstractCMIntermediateCacertRotationContextProvider implem
     private CustomJobRotationContext getCustomJobRotationContext(String resourceCrn) {
         return CustomJobRotationContext.builder()
                 .withResourceCrn(resourceCrn)
-                .withRotationJob(() -> LOGGER.info("CMCA rotation will be executed with different flow along rotation of host certificates."))
+                .withRotationJob(() -> LOGGER.info("{} will be executed with different flow.", getRotationTypeMessage()))
                 .build();
     }
+
+    protected abstract String getRotationTypeMessage();
 }

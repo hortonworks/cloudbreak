@@ -1,6 +1,9 @@
 package com.sequenceiq.cloudbreak.rotation;
 
-import java.util.Objects;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.CertificateRotationType.ALL;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.CertificateRotationType.HOST_CERTS;
+
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -30,17 +33,26 @@ public class CloudbreakSecretRotationFlowEventProvider implements SecretRotation
                 .filter(secretType -> secretType.getFlags().contains(SecretTypeFlag.POST_FLOW))
                 .map(secretType -> (CloudbreakSecretType) secretType)
                 .map(secretTypeToPostFlowEvent(triggerEvent))
-                .filter(Objects::nonNull)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
                 .collect(Collectors.toSet());
     }
 
-    private static Function<CloudbreakSecretType, StackEvent> secretTypeToPostFlowEvent(
+    private static Function<CloudbreakSecretType, Optional<StackEvent>> secretTypeToPostFlowEvent(
             SecretRotationFlowChainTriggerEvent event) {
         return cloudbreakSecretType -> switch (cloudbreakSecretType) {
-            case CM_INTERMEDIATE_CA_CERT ->
-                    new ClusterCertificatesRotationTriggerEvent(ClusterCertificatesRotationEvent.CLUSTER_CMCA_ROTATION_EVENT.event(),
-                            event.getResourceId(), CertificateRotationType.ALL, Boolean.TRUE);
-            default -> null;
+            case CM_INTERMEDIATE_CA_CERT -> getCertRotationEvent(ALL, event);
+            case PRIVATE_HOST_CERTS -> getCertRotationEvent(HOST_CERTS, event);
+            default -> Optional.empty();
         };
+    }
+
+    private static Optional<StackEvent> getCertRotationEvent(CertificateRotationType certificateRotationType,
+            SecretRotationFlowChainTriggerEvent event) {
+        if (event.getExecutionType() == null || event.getExecutionType().equals(RotationFlowExecutionType.ROTATE)) {
+            return Optional.of(new ClusterCertificatesRotationTriggerEvent(ClusterCertificatesRotationEvent.CLUSTER_CMCA_ROTATION_EVENT.event(),
+                    event.getResourceId(), certificateRotationType, Boolean.TRUE));
+        }
+        return Optional.empty();
     }
 }

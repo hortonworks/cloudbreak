@@ -13,6 +13,7 @@ import static com.sequenceiq.sdx.rotation.DatalakeSecretType.EXTERNAL_DATABASE_R
 import static com.sequenceiq.sdx.rotation.DatalakeSecretType.IDBROKER_CERT;
 import static com.sequenceiq.sdx.rotation.DatalakeSecretType.LDAP_BIND_PASSWORD;
 import static com.sequenceiq.sdx.rotation.DatalakeSecretType.NGINX_CLUSTER_SSL_CERT_PRIVATE_KEY;
+import static com.sequenceiq.sdx.rotation.DatalakeSecretType.PRIVATE_HOST_CERTS;
 import static com.sequenceiq.sdx.rotation.DatalakeSecretType.SALT_BOOT_SECRETS;
 import static com.sequenceiq.sdx.rotation.DatalakeSecretType.SALT_MASTER_KEY_PAIR;
 import static com.sequenceiq.sdx.rotation.DatalakeSecretType.SALT_PASSWORD;
@@ -185,6 +186,7 @@ public class InternalSdxRepairWithRecipeTest extends PreconditionSdxE2ETest {
                     SSSD_IPA_PASSWORD,
                     CM_SERVICE_SHARED_DB,
                     CM_INTERMEDIATE_CA_CERT,
+                    PRIVATE_HOST_CERTS,
                     NGINX_CLUSTER_SSL_CERT_PRIVATE_KEY
             ));
         }
