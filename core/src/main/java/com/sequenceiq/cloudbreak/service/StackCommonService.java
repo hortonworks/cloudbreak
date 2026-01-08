@@ -590,12 +590,14 @@ public class StackCommonService {
     }
 
     public FlowIdentifier putAddVolumesInWorkspace(NameOrCrn nameOrCrn, String accountId, StackAddVolumesRequest addVolumesRequest) {
-        StackView stackView = stackDtoService.getStackViewByNameOrCrn(nameOrCrn, accountId);
-        Stack stack = stackService.getByIdWithLists(stackView.getId());
-        MDCBuilder.buildMdcContext(stack);
-        LOGGER.debug("Validating Stack Add Volumes Request for Stack ID {}", stack.getId());
-        validateAddVolumesRequest(stack, addVolumesRequest);
-        return clusterCommonService.putAddVolumes(stack.getResourceCrn(), addVolumesRequest);
+        // TODO CB-31498 - This code is temporarily disabled as it is not working properly
+        throw new BadRequestException("Add Disks feature is disabled.");
+//        StackView stackView = stackDtoService.getStackViewByNameOrCrn(nameOrCrn, accountId);
+//        Stack stack = stackService.getByIdWithLists(stackView.getId());
+//        MDCBuilder.buildMdcContext(stack);
+//        LOGGER.debug("Validating Stack Add Volumes Request for Stack ID {}", stack.getId());
+//        validateAddVolumesRequest(stack, addVolumesRequest);
+//        return clusterCommonService.putAddVolumes(stack.getResourceCrn(), addVolumesRequest);
     }
 
     public FlowIdentifier rotateRdsCertificate(StackView stack) {
