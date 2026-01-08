@@ -60,6 +60,7 @@ public class DistroxEnabledInstanceTypes {
             "n2d-highmem-8",
             "n2d-highmem-16",
             "n2d-highmem-32",
+            "n2d-highmem-48",
             "n2d-highmem-64",
             "n2d-highmem-80",
             "n2d-highmem-96",
