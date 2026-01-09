@@ -1,5 +1,11 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.config;
 
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.DISK_UPDATE_FAILED;
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.DISK_UPDATE_FINISHED;
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.DISK_UPDATE_STARTED;
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.UNSET;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.AddVolumesState.ADD_VOLUMES_FAILED_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.AddVolumesState.ADD_VOLUMES_FINISHED_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.DistroXDiskUpdateState.DATAHUB_DISK_UPDATE_FAILED_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.DistroXDiskUpdateState.DATAHUB_DISK_UPDATE_FINISHED_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.DistroXDiskUpdateState.DATAHUB_DISK_UPDATE_STATE;
@@ -19,14 +25,17 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
+import com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value;
 import com.sequenceiq.cloudbreak.core.flow2.StackStatusFinalizerAbstractFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.DistroXDiskUpdateState;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.DistroXDiskUpdateStateSelectors;
+import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.ClusterUseCaseAware;
+import com.sequenceiq.flow.core.FlowState;
 import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
 @Component
 public class DistroXDiskUpdateFlowConfig extends StackStatusFinalizerAbstractFlowConfig<DistroXDiskUpdateState, DistroXDiskUpdateStateSelectors>
-        implements RetryableFlowConfiguration<DistroXDiskUpdateStateSelectors> {
+        implements RetryableFlowConfiguration<DistroXDiskUpdateStateSelectors>, ClusterUseCaseAware {
 
     private static final List<Transition<DistroXDiskUpdateState, DistroXDiskUpdateStateSelectors>> TRANSITIONS =
             new Transition.Builder<DistroXDiskUpdateState, DistroXDiskUpdateStateSelectors>()
@@ -100,4 +109,16 @@ public class DistroXDiskUpdateFlowConfig extends StackStatusFinalizerAbstractFlo
         return HANDLED_FAILED_DATAHUB_DISK_UPDATE_EVENT;
     }
 
+    @Override
+    public Value getUseCaseForFlowState(Enum<? extends FlowState> flowState) {
+        if (INIT_STATE.equals(flowState)) {
+            return DISK_UPDATE_STARTED;
+        } else if (ADD_VOLUMES_FINISHED_STATE.equals(flowState)) {
+            return DISK_UPDATE_FINISHED;
+        } else if (ADD_VOLUMES_FAILED_STATE.equals(flowState)) {
+            return DISK_UPDATE_FAILED;
+        } else {
+            return UNSET;
+        }
+    }
 }

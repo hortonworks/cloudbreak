@@ -1,5 +1,9 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes;
 
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.ADD_VOLUMES_FAILED;
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.ADD_VOLUMES_FINISHED;
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.ADD_VOLUMES_STARTED;
+import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value.UNSET;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.AddVolumesEvent.ADD_VOLUMES_CM_CONFIGURATION_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.AddVolumesEvent.ADD_VOLUMES_FAILURE_HANDLED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.AddVolumesEvent.ADD_VOLUMES_FINISHED_EVENT;
@@ -23,13 +27,16 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
+import com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value;
 import com.sequenceiq.cloudbreak.core.flow2.StackStatusFinalizerAbstractFlowConfig;
+import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.ClusterUseCaseAware;
+import com.sequenceiq.flow.core.FlowState;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.Transition.Builder;
 import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
 @Component
 public class AddVolumesFlowConfig extends StackStatusFinalizerAbstractFlowConfig<AddVolumesState, AddVolumesEvent>
-        implements RetryableFlowConfiguration<AddVolumesEvent> {
+        implements RetryableFlowConfiguration<AddVolumesEvent>, ClusterUseCaseAware {
 
     private static final List<Transition<AddVolumesState, AddVolumesEvent>> TRANSITIONS =
             new Builder<AddVolumesState, AddVolumesEvent>()
@@ -111,5 +118,18 @@ public class AddVolumesFlowConfig extends StackStatusFinalizerAbstractFlowConfig
     @Override
     public AddVolumesEvent getRetryableEvent() {
         return ADD_VOLUMES_FAILURE_HANDLED_EVENT;
+    }
+
+    @Override
+    public Value getUseCaseForFlowState(Enum<? extends FlowState> flowState) {
+        if (INIT_STATE.equals(flowState)) {
+            return ADD_VOLUMES_STARTED;
+        } else if (ADD_VOLUMES_FINISHED_STATE.equals(flowState)) {
+            return ADD_VOLUMES_FINISHED;
+        } else if (ADD_VOLUMES_FAILED_STATE.equals(flowState)) {
+            return ADD_VOLUMES_FAILED;
+        } else {
+            return UNSET;
+        }
     }
 }

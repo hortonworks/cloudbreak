@@ -2680,6 +2680,20 @@ message CDPClusterStatus {
     SET_DEFAULT_JAVA_VERSION_FINISHED = 78;
     // The status when the process of setting the default Java version has failed.
     SET_DEFAULT_JAVA_VERSION_FAILED = 79;
+
+    // The status when a disk update operation has started.
+    DISK_UPDATE_STARTED = 80;
+    // The status when a disk update operation has completed successfully.
+    DISK_UPDATE_FINISHED = 81;
+    // The status when a disk update operation has failed.
+    DISK_UPDATE_FAILED = 82;
+
+    // The status when adding additional volumes to instances has started.
+    ADD_VOLUMES_STARTED = 83;
+    // The status when adding additional volumes to instances has completed successfully.
+    ADD_VOLUMES_FINISHED = 84;
+    // The status when adding additional volumes to instances has failed.
+    ADD_VOLUMES_FAILED = 85;
   }
 }
 
