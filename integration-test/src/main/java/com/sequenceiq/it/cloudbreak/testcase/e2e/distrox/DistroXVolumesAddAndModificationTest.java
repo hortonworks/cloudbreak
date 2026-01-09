@@ -160,7 +160,8 @@ public class DistroXVolumesAddAndModificationTest extends AbstractE2EWithReusabl
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT, timeOut = 9000000)
+    // TODO CB-31498 Disabling Add Disk feature as it's not working properly
+    @Test(dataProvider = TEST_CONTEXT, timeOut = 9000000, enabled = false)
     @Description(
             given = "there is an available environment with a running datahub",
             when = "delete disks is called on the Datahub's coordinator group and then add volumes is called",
