@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.type.KdcType;
 import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorStateParams;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.commands.ActiveDirectoryTrustSetupCommands;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.commands.TrustSetupCommandsResponse;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
@@ -80,6 +81,19 @@ public class ActiveDirectoryTrustService extends TrustProvider {
         ignoreNotFoundException(() -> client.deleteTrust(realm),
                 "Deleting trust for [{}] but it was not found", realm);
         LOGGER.debug("Deleting trust for crossRealm [{}]", crossRealmTrust);
+    }
+
+    @Override
+    public TrustSetupCommandsResponse buildTrustValidationCommandsResponse(String environmentCrn, Stack stack, FreeIpa freeIpa,
+            CrossRealmTrust crossRealmTrust, LoadBalancer loadBalancer) {
+        TrustSetupCommandsResponse response = new TrustSetupCommandsResponse();
+        response.setEnvironmentCrn(environmentCrn);
+        response.setKdcType(kdcType().name());
+
+        ActiveDirectoryTrustSetupCommands adCommands = activeDirectoryTrustInstructionsBuilder
+                .buildInstructions(TrustCommandType.VALIDATION, stack, freeIpa, crossRealmTrust);
+        response.setActiveDirectoryCommands(adCommands);
+        return response;
     }
 
     @Override

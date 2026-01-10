@@ -126,6 +126,9 @@ public abstract class TrustProvider {
         LOGGER.debug("Deleting DNS forward zone for crossRealm [{}]", crossRealmTrust);
     }
 
+    public abstract TrustSetupCommandsResponse buildTrustValidationCommandsResponse(String environmentCrn, Stack stack,
+            FreeIpa freeIpa, CrossRealmTrust crossRealmTrust, LoadBalancer loadBalancer);
+
     public abstract TrustSetupCommandsResponse buildTrustSetupCommandsResponse(TrustCommandType trustCommandType, String environmentCrn, Stack stack,
             FreeIpa freeIpa, CrossRealmTrust crossRealmTrust, LoadBalancer loadBalancer);
 

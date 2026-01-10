@@ -20,6 +20,7 @@ import org.springframework.util.StringUtils;
 
 import com.sequenceiq.cloudbreak.common.type.KdcType;
 import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorStateParams;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.commands.MitTrustSetupCommands;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.commands.TrustSetupCommandsResponse;
 import com.sequenceiq.freeipa.entity.CrossRealmTrust;
 import com.sequenceiq.freeipa.entity.FreeIpa;
@@ -29,6 +30,7 @@ import com.sequenceiq.freeipa.kerberos.KerberosConfig;
 import com.sequenceiq.freeipa.kerberos.KerberosConfigService;
 import com.sequenceiq.freeipa.service.crossrealm.TrustCommandType;
 import com.sequenceiq.freeipa.service.crossrealm.commands.mit.MitBaseClusterTrustCommandsBuilder;
+import com.sequenceiq.freeipa.service.crossrealm.commands.mit.MitKdcCommandsBuilder;
 import com.sequenceiq.freeipa.service.crossrealm.commands.mit.MitTrustInstructionsBuilder;
 
 @Service
@@ -80,6 +82,20 @@ public class MitKdcTrustService extends TrustProvider {
         Stack stack = getStackService().getByIdWithListsInTransaction(stackId);
         OrchestratorStateParams stateParams = createDeleteKdcPrincipalsOrchestratorStateParams(stack);
         getHostOrchestrator().runOrchestratorState(stateParams);
+    }
+
+    @Override
+    public TrustSetupCommandsResponse buildTrustValidationCommandsResponse(String environmentCrn, Stack stack, FreeIpa freeIpa, CrossRealmTrust crossRealmTrust,
+            LoadBalancer loadBalancer) {
+        TrustSetupCommandsResponse response = new TrustSetupCommandsResponse();
+        response.setEnvironmentCrn(environmentCrn);
+        response.setKdcType(kdcType().name());
+
+        MitTrustSetupCommands mitCommands = new MitTrustSetupCommands();
+        MitKdcCommandsBuilder mitKdcCommandsBuilder = new MitKdcCommandsBuilder();
+        mitCommands.setKdcCommands(mitKdcCommandsBuilder.buildCommands(TrustCommandType.VALIDATION, freeIpa, crossRealmTrust));
+        response.setMitCommands(mitCommands);
+        return response;
     }
 
     @Override

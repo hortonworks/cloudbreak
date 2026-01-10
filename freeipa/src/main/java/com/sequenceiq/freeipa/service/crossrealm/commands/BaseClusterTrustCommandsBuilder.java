@@ -41,6 +41,7 @@ public abstract class BaseClusterTrustCommandsBuilder {
         return switch (trustCommandType) {
             case SETUP -> messagesService.getMessage(ADD_EXPLANATION);
             case CLEANUP -> messagesService.getMessage(REMOVE_EXPLANATION);
+            case VALIDATION -> null;
             case null -> null;
         };
     }
@@ -49,6 +50,7 @@ public abstract class BaseClusterTrustCommandsBuilder {
         return switch (trustCommandType) {
             case SETUP -> DocumentationLinkProvider.onPremisesTrustedRealmsLink();
             case CLEANUP -> null;
+            case VALIDATION -> null;
             case null -> null;
         };
     }

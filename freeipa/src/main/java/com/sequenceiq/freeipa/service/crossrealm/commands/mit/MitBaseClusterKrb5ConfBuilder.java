@@ -30,6 +30,7 @@ public class MitBaseClusterKrb5ConfBuilder extends AbstractFreemarkerTemplateBui
         return switch (trustCommandType) {
             case SETUP -> String.format("Create a new file called cdp_%s_krb5.conf under /etc/krb5.conf.d with the following content", resourceName);
             case CLEANUP -> String.format("Delete the following Kerberos configuration file /etc/krb5.conf.d/cdp_%s_krb5.conf", resourceName);
+            case VALIDATION -> "Execute the following commands to validate the cross-realm trust setup towards the trusted domain";
         };
     }
 

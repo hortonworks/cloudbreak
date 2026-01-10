@@ -36,4 +36,18 @@ class ActiveDirectoryTrustInstructionsBuilderTest {
 
         Assertions.assertEquals("active directory commands", actualResult.getCommands());
     }
+
+    @Test
+    void testValidationInstructions() {
+        Stack stack = mock(Stack.class);
+        FreeIpa freeIpa = mock(FreeIpa.class);
+        CrossRealmTrust crossRealmTrust = mock(CrossRealmTrust.class);
+
+        when(activeDirectoryKdcCommandsBuilder.buildCommands(TrustCommandType.VALIDATION, stack, freeIpa, crossRealmTrust))
+                .thenReturn("active directory validation commands");
+
+        ActiveDirectoryTrustSetupCommands actualResult = underTest.buildInstructions(TrustCommandType.VALIDATION, stack, freeIpa, crossRealmTrust);
+
+        Assertions.assertEquals("active directory validation commands", actualResult.getCommands());
+    }
 }

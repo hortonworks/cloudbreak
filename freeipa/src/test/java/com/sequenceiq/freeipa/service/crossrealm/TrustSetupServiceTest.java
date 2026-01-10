@@ -260,4 +260,17 @@ class TrustSetupServiceTest {
                 () -> underTest.getTrustCommands(ACCOUNT_ID, ENV_CRN, TrustCommandType.SETUP));
         assertTrue(ex.getMessage().contains("trust is not in state, where trust setup commands can be generated"));
     }
+
+    @Test
+    void returnsTrustValidationCommandsResponse() {
+        TrustSetupCommandsResponse expectedResponse = mock(TrustSetupCommandsResponse.class);
+        crossRealmTrust.setTrustStatus(TrustStatus.TRUST_ACTIVE);
+        when(crossRealmTrustService.getTrustProvider(STACK_ID)).thenReturn(adTrustProvider);
+        when(adTrustProvider.buildTrustValidationCommandsResponse(ENV_CRN, stack, freeIpa, crossRealmTrust, loadBalancer))
+                .thenReturn(expectedResponse);
+
+        TrustSetupCommandsResponse response = underTest.getTrustCommands(ACCOUNT_ID, ENV_CRN, TrustCommandType.VALIDATION);
+
+        assertSame(expectedResponse, response);
+    }
 }

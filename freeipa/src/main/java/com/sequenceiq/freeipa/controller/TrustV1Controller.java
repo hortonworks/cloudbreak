@@ -68,6 +68,13 @@ public class TrustV1Controller implements TrustV1Endpoint {
     }
 
     @Override
+    @CheckPermissionByResourceCrn(action = ADMIN_FREEIPA)
+    public TrustSetupCommandsResponse getTrustValidationCommands(@ResourceCrn String environmentCrn) {
+        String accountId = crnService.getCurrentAccountId();
+        return trustSetupService.getTrustCommands(accountId, environmentCrn, TrustCommandType.VALIDATION);
+    }
+
+    @Override
     @InternalOnly
     public CancelCrossRealmTrustResponse cancelByCrn(@ResourceCrn String environmentCrn) {
         String accountId = crnService.getCurrentAccountId();

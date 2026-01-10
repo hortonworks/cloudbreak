@@ -67,6 +67,15 @@ public interface TrustV1Endpoint {
     TrustSetupCommandsResponse getTrustCleanupCommands(
             @NotNull @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @QueryParam("environment") String environmentCrn);
 
+    @GET
+    @Path("/trust_validation_commands")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = FreeIpaOperationDescriptions.TRUST_VALIDATION_COMMANDS, description = FreeIpaNotes.FREEIPA_NOTES,
+            operationId = "getTrustValidationCommandsV1", responses = @ApiResponse(responseCode = "200", description = "successful operation",
+            useReturnTypeSchema = true))
+    TrustSetupCommandsResponse getTrustValidationCommands(
+            @NotNull @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @QueryParam("environment") String environmentCrn);
+
     @POST
     @Path("/cancel")
     @Produces(MediaType.APPLICATION_JSON)

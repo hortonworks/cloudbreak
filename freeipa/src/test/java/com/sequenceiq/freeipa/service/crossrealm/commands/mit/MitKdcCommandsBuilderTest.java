@@ -50,7 +50,7 @@ class MitKdcCommandsBuilderTest {
     }
 
     @ParameterizedTest
-    @EnumSource(TrustCommandType.class)
+    @EnumSource(value = TrustCommandType.class, mode = EnumSource.Mode.EXCLUDE, names = "VALIDATION")
     void testBuildCommands(TrustCommandType trustCommandType) throws IOException {
         // GIVEN
         Stack stack = new Stack();

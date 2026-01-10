@@ -48,7 +48,7 @@ class MitBaseClusterKrb5ConfBuilderTest {
     }
 
     @ParameterizedTest
-    @EnumSource(TrustCommandType.class)
+    @EnumSource(value = TrustCommandType.class, mode = EnumSource.Mode.EXCLUDE, names = "VALIDATION")
     void testBuildCommands(TrustCommandType trustCommandType) throws IOException {
         // GIVEN
         FreeIpa freeIpa = new FreeIpa();

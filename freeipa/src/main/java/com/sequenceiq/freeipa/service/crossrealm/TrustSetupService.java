@@ -231,7 +231,11 @@ public class TrustSetupService {
         FreeIpa freeIpa = freeIpaService.findByStack(stack);
         LoadBalancer loadBalancer = loadBalancerService.getByStackId(stack.getId());
         TrustProvider trustProvider = crossRealmTrustService.getTrustProvider(stack.getId());
-        return trustProvider.buildTrustSetupCommandsResponse(trustCommandType, environmentCrn, stack, freeIpa, crossRealmTrust, loadBalancer);
+        return switch (trustCommandType) {
+            case VALIDATION -> trustProvider.buildTrustValidationCommandsResponse(environmentCrn, stack, freeIpa, crossRealmTrust, loadBalancer);
+            case SETUP, CLEANUP ->
+                    trustProvider.buildTrustSetupCommandsResponse(trustCommandType, environmentCrn, stack, freeIpa, crossRealmTrust, loadBalancer);
+        };
     }
 
     private boolean isFinishTrustSetupPossible(Stack stack, CrossRealmTrust crossRealmTrust) {
