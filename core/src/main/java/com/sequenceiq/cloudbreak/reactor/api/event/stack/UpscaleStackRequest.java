@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.reactor.api.event.stack;
 
 import java.util.List;
-import java.util.StringJoiner;
 
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.resource.CloudStackRequest;
@@ -40,10 +39,10 @@ public class UpscaleStackRequest<T> extends CloudStackRequest<T> {
 
     @Override
     public String toString() {
-        return new StringJoiner(", ", UpscaleStackRequest.class.getSimpleName() + "[", "]")
-                .add("resourceList=" + resourceList)
-                .add("adjustmentTypeWithThreshold=" + adjustmentTypeWithThreshold)
-                .toString();
+        return "UpscaleStackRequest{" +
+                "migrationNeed=" + migrationNeed +
+                ", adjustmentTypeWithThreshold=" + adjustmentTypeWithThreshold +
+                ", resourceList=" + resourceList +
+                "} " + super.toString();
     }
-
 }

@@ -87,6 +87,7 @@ import com.sequenceiq.it.cloudbreak.search.ClusterLogsStorageUrl;
 import com.sequenceiq.it.cloudbreak.search.Searchable;
 import com.sequenceiq.it.cloudbreak.search.StorageUrl;
 import com.sequenceiq.it.cloudbreak.util.FreeIpaInstanceUtil;
+import com.sequenceiq.it.cloudbreak.util.LogCollectorUtil;
 import com.sequenceiq.it.cloudbreak.util.StructuredEventUtil;
 import com.sequenceiq.it.cloudbreak.util.yarn.YarnCloudFunctionality;
 
@@ -107,6 +108,9 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
 
     @Inject
     private CommonCloudProperties commonCloudProperties;
+
+    @Inject
+    private LogCollectorUtil logCollectorUtil;
 
     private CloudPlatform cloudPlatformFromStack;
 
@@ -597,6 +601,7 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
                     getTestContext().getMicroserviceClient(FreeIpaClient.class).getDefaultClient().structuredEventsV1Endpoint();
             structuredEvents = StructuredEventUtil.getAuditEvents(cdpStructuredEventV1Endpoint, resourceCrn);
         }
+        collectLogFiles();
         List<Searchable> listOfSearchables = List.of(this);
         return new Clue(
                 resourceName,
@@ -607,6 +612,17 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
                 structuredEvents,
                 getResponse(),
                 hasSpotTermination);
+    }
+
+    private void collectLogFiles() {
+        try {
+            List<String> ipAddresses = getResponse().getInstanceGroups().stream().flatMap(ig -> ig.getMetaData().stream())
+                    .map(imd -> imd.getPublicIp() != null && !Objects.equals(imd.getPublicIp(), "N/A") ? imd.getPublicIp() : imd.getPrivateIp()).toList();
+            LOGGER.debug("Collected FreeIPA IP addresses: {}", ipAddresses);
+            logCollectorUtil.collectLogFiles(getResponse().getStatusReason(), ipAddresses);
+        } catch (Exception e) {
+            LOGGER.warn("Failed to collect FreeIPA log files for investigation.", e);
+        }
     }
 
     @Override

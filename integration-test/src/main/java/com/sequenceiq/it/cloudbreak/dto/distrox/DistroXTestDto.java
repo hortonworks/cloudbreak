@@ -72,6 +72,7 @@ import com.sequenceiq.it.cloudbreak.search.Searchable;
 import com.sequenceiq.it.cloudbreak.search.StorageUrl;
 import com.sequenceiq.it.cloudbreak.util.AuditUtil;
 import com.sequenceiq.it.cloudbreak.util.InstanceUtil;
+import com.sequenceiq.it.cloudbreak.util.LogCollectorUtil;
 import com.sequenceiq.it.cloudbreak.util.ResponseUtil;
 import com.sequenceiq.it.cloudbreak.util.yarn.YarnCloudFunctionality;
 
@@ -99,6 +100,9 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
 
     @Inject
     private YarnCloudFunctionality yarnCloudFunctionality;
+
+    @Inject
+    private LogCollectorUtil logCollectorUtil;
 
     private CloudPlatform cloudPlatformFromStack;
 
@@ -409,6 +413,7 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
         String resourceName = getResponse().getName();
         String resourceCrn = getResponse().getCrn();
         setCloudPlatformFromStack(getResponse());
+        collectLogFiles();
         AuditEventV4Responses auditEvents = AuditUtil.getAuditEvents(
                 getTestContext().getMicroserviceClient(CloudbreakClient.class),
                 CloudbreakEventService.DATAHUB_RESOURCE_TYPE,
@@ -427,6 +432,16 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
                 List.of(),
                 getResponse(),
                 hasSpotTermination);
+    }
+
+    private void collectLogFiles() {
+        try {
+            List<String> ipAddresses = getResponse().getInstanceGroups().stream().flatMap(ig -> ig.getMetadata().stream())
+                    .map(imd -> imd.getPublicIp() != null && !Objects.equals(imd.getPublicIp(), "N/A") ? imd.getPublicIp() : imd.getPrivateIp()).toList();
+            logCollectorUtil.collectLogFiles(getResponse().getStatusReason(), ipAddresses);
+        } catch (Exception e) {
+            LOGGER.warn("Failed to collect datahub log files for investigation.", e);
+        }
     }
 
     @Override

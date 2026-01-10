@@ -67,7 +67,7 @@ public class SshJClientActions {
     @Inject
     private EncryptionProfileAssertions encryptionProfileAssertions;
 
-    private List<String> getInstanceMetadataIps(Set<InstanceMetaDataResponse> instanceMetaDatas, boolean publicIp) {
+    private List<String> getInstanceMetadataIps(Collection<InstanceMetaDataResponse> instanceMetaDatas, boolean publicIp) {
         return instanceMetaDatas.stream().map(instanceMetaDataResponse -> {
             if (publicIp) {
                 return instanceMetaDataResponse.getPublicIp();
@@ -275,6 +275,11 @@ public class SshJClientActions {
             String sshCommand, boolean publicIp, String privateKeyFilePath) {
         return getInstanceIpsFromGroups(instanceGroups, publicIp).stream()
                 .collect(Collectors.toMap(ip -> ip, ip -> executeSshCommand(ip, "cloudbreak", null, privateKeyFilePath, sshCommand)));
+    }
+
+    public Map<String, Pair<Integer, String>> executeSshCommandOnHosts(List<String> ipAddresses, String sshCommand) {
+        return ipAddresses.stream()
+                .collect(Collectors.toMap(ip -> ip, ip -> executeSshCommand(ip, sshCommand)));
     }
 
     public Map<String, Pair<Integer, String>> executeSshCommandOnHost(Set<InstanceMetaDataResponse> instanceMetaDatas, String sshCommand, boolean publicIp) {

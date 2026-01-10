@@ -21,10 +21,13 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.util.Strings;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.audits.responses.AuditEventV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
@@ -54,6 +57,7 @@ import com.sequenceiq.it.cloudbreak.microservice.SdxClient;
 import com.sequenceiq.it.cloudbreak.search.Searchable;
 import com.sequenceiq.it.cloudbreak.util.AuditUtil;
 import com.sequenceiq.it.cloudbreak.util.InstanceUtil;
+import com.sequenceiq.it.cloudbreak.util.LogCollectorUtil;
 import com.sequenceiq.it.cloudbreak.util.ResponseUtil;
 import com.sequenceiq.it.cloudbreak.util.StructuredEventUtil;
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
@@ -92,6 +96,9 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
 
     @Inject
     private CommonCloudProperties commonCloudProperties;
+
+    @Inject
+    private LogCollectorUtil logCollectorUtil;
 
     public SdxTestDto(TestContext testContex) {
         super(new SdxClusterRequest(), testContex);
@@ -467,6 +474,7 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
         String resourceCrn = getResponse().getCrn();
         StackV4Response stackResponse = getResponse().getStackV4Response();
         setCloudPlatformFromStack(stackResponse);
+        collectLogFiles(stackResponse);
         AuditEventV4Responses auditEvents = AuditUtil.getAuditEvents(
                 getTestContext().getMicroserviceClient(CloudbreakClient.class),
                 CloudbreakEventService.DATALAKE_RESOURCE_TYPE,
@@ -488,6 +496,17 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
                 structuredEvents,
                 getResponse(),
                 hasSpotTermination(stackResponse));
+    }
+
+    private void collectLogFiles(StackV4Response stackResponse) {
+        Multimap<String, Pair<String, String>> collectedLogFiles = ArrayListMultimap.create();
+        try {
+            List<String> ipAddresses = stackResponse.getInstanceGroups().stream().flatMap(ig -> ig.getMetadata().stream())
+                    .map(imd -> imd.getPublicIp() != null && !Objects.equals(imd.getPublicIp(), "N/A") ? imd.getPublicIp() : imd.getPrivateIp()).toList();
+            logCollectorUtil.collectLogFiles(stackResponse.getStatusReason(), ipAddresses);
+        } catch (Exception e) {
+            LOGGER.warn("Failed to collect datalake log files for investigation.", e);
+        }
     }
 
     @Override

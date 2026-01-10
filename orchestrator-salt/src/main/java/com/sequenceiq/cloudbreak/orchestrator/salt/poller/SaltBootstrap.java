@@ -71,6 +71,7 @@ public class SaltBootstrap implements OrchestratorBootstrap {
     @Override
     public Boolean call() throws Exception {
         LOGGER.debug("Bootstrapping of nodes [{}/{}]", originalTargets.size() - targets.size(), originalTargets.size());
+
         if (!targets.isEmpty()) {
             LOGGER.debug("Missing targets for SaltBootstrap: {}", targets);
 

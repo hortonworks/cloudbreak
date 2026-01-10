@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -52,6 +53,7 @@ import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentS
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.assign.Assignable;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
@@ -67,7 +69,9 @@ import com.sequenceiq.it.cloudbreak.dto.DeletableEnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.microservice.EnvironmentClient;
+import com.sequenceiq.it.cloudbreak.microservice.FreeIpaClient;
 import com.sequenceiq.it.cloudbreak.search.Searchable;
+import com.sequenceiq.it.cloudbreak.util.LogCollectorUtil;
 import com.sequenceiq.it.cloudbreak.util.StructuredEventUtil;
 
 @Prototype
@@ -98,6 +102,9 @@ public class EnvironmentTestDto
 
     @Inject
     private CommonCloudProperties commonCloudProperties;
+
+    @Inject
+    private LogCollectorUtil logCollectorUtil;
 
     public EnvironmentTestDto(TestContext testContext) {
         super(new EnvironmentRequest(), testContext);
@@ -621,6 +628,9 @@ public class EnvironmentTestDto
                     getTestContext().getMicroserviceClient(EnvironmentClient.class).getDefaultClient().structuredEventsV1Endpoint();
             structuredEvents = StructuredEventUtil.getAuditEvents(cdpStructuredEventV1Endpoint, getResponse().getCrn());
         }
+        if (getResponse().getCreateFreeIpa()) {
+            collectFreeIpaLogFiles();
+        }
         List<Searchable> listOfSearchables = List.of(this);
         return new Clue(
                 getResponse().getName(),
@@ -631,6 +641,20 @@ public class EnvironmentTestDto
                 structuredEvents,
                 getResponse(),
                 false);
+    }
+
+    private void collectFreeIpaLogFiles() {
+        LOGGER.debug("Collecting logs for '{}' Environment's FreeIPA", getResourceCrn());
+        try {
+            DescribeFreeIpaResponse freeIpaResponse = getTestContext().getMicroserviceClient(FreeIpaClient.class)
+                    .getDefaultClient().getFreeIpaV1Endpoint().describe(getResourceCrn());
+            List<String> freeipaIpAddresses = freeIpaResponse.getInstanceGroups().stream().flatMap(ig -> ig.getMetaData().stream())
+                    .map(imd -> imd.getPublicIp() != null && !Objects.equals(imd.getPublicIp(), "N/A") ? imd.getPublicIp() : imd.getPrivateIp()).toList();
+            LOGGER.debug("Collected Environment's FreeIPA IP addresses for '{}': {}", getResourceCrn(), freeipaIpAddresses);
+            logCollectorUtil.collectLogFiles(getResponse().getStatusReason(), freeipaIpAddresses);
+        } catch (Exception e) {
+            LOGGER.warn("Failed to collect Environment's FreeIPA log files for investigation.", e);
+        }
     }
 
     public void setLastKnownFlow(FlowIdentifier flowIdentifier) {
