@@ -1,5 +1,6 @@
 package com.sequenceiq.periscope.monitor.client;
 
+import static com.sequenceiq.cloudbreak.common.request.HeaderConstants.ACTOR_CRN_HEADER;
 import static com.sequenceiq.periscope.domain.MetricType.YARN_FORBIDDEN_EXCEPTION;
 
 import java.util.List;
@@ -48,8 +49,6 @@ public class YarnMetricsClient {
     private static final String YARN_API_CLUSTER_PROXY_URL = "%s/proxy/%s/resourcemanager/v1/cluster/scaling";
 
     private static final String YARN_API_QUERY_PARAM_MOCK_CLOUD_RECOMMEND_ONLY = "actionType=verify";
-
-    private static final String HEADER_ACTOR_CRN = "x-cdp-actor-crn";
 
     private static final String PARAM_UPSCALE_FACTOR_NODE_RESOURCE_TYPE = "upscaling-factor-in-node-resource-types";
 
@@ -169,7 +168,7 @@ public class YarnMetricsClient {
             return requestLogging.logResponseTime(
                     () -> restClient.target(yarnMetricsURI).request()
                             .accept(MediaType.APPLICATION_JSON_VALUE)
-                            .header(HEADER_ACTOR_CRN, pollingUserCrn)
+                            .header(ACTOR_CRN_HEADER, pollingUserCrn)
                             .post(Entity.json(yarnScalingServiceV1Request), YarnScalingServiceV1Response.class),
                     String.format("YarnScalingAPI query for cluster crn '%s'", cluster.getStackCrn()));
         } catch (Exception ex) {

@@ -8,9 +8,7 @@ public class FilterOrderConstants {
 
     public static final int CRN_FILTER_ORDER = Integer.MIN_VALUE + 2;
 
-    public static final int MDC_FILTER_ORDER = Integer.MIN_VALUE + 3;
-
-    public static final int SLASH_FILTER_ORDER = Integer.MIN_VALUE + 4;
+    public static final int SLASH_FILTER_ORDER = Integer.MIN_VALUE + 3;
 
     // Spring Security Filters
 

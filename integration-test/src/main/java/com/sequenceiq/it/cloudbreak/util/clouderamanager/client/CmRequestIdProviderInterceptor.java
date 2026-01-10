@@ -1,6 +1,6 @@
 package com.sequenceiq.it.cloudbreak.util.clouderamanager.client;
 
-import static com.sequenceiq.cloudbreak.logger.MDCRequestIdOnlyFilter.REQUEST_ID_HEADER;
+import static com.sequenceiq.cloudbreak.common.request.HeaderConstants.REQUEST_ID_HEADER;
 
 import java.io.IOException;
 

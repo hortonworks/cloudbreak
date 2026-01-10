@@ -1,5 +1,7 @@
 package com.sequenceiq.periscope.filter;
 
+import static com.sequenceiq.cloudbreak.common.request.HeaderConstants.REQUEST_ID_HEADER;
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -17,7 +19,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.sequenceiq.cloudbreak.auth.security.authentication.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
-import com.sequenceiq.cloudbreak.logger.MDCRequestIdOnlyFilter;
 import com.sequenceiq.periscope.api.AutoscaleApi;
 import com.sequenceiq.periscope.service.AuditService;
 
@@ -55,7 +56,7 @@ public class AuditFilter extends OncePerRequestFilter {
             boolean mutating = Set.of("POST", "PUT", "DELETE").contains(request.getMethod());
             String sourceIp = Optional.ofNullable(request.getHeader("x-real-ip")).orElse(request.getRemoteAddr());
             String userAgent = Optional.ofNullable(request.getHeader("user-agent")).orElse("");
-            String requestId = request.getHeader(MDCRequestIdOnlyFilter.REQUEST_ID_HEADER);
+            String requestId = request.getHeader(REQUEST_ID_HEADER);
             auditService.auditRestApi(requestParameters, mutating, userAgent,
                     cloudbreakUser, requestId, sourceIp);
         }

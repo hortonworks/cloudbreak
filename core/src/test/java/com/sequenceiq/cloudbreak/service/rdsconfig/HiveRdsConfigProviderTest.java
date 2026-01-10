@@ -40,7 +40,7 @@ public class HiveRdsConfigProviderTest {
     private static final Crn CDL_CRN =
         Crn.safeFromString("crn:cdp:sdxsvc:us-west-1:9d74eee4-1cad-45d7-b645-7ccf9edbb73d:instance:ab79a335-70cc-4c06-90af-ea74efe02636");
 
-    private static final String ACTOR_CRN = "crn:cdp:users:us-west-1:1" + ":user:" + UUID.randomUUID();
+    private static final String ACTOR_CRN = "crn:cdp:iam:us-west-1:1" + ":user:" + UUID.randomUUID();
 
     @InjectMocks
     private HiveRdsConfigProvider underTest;

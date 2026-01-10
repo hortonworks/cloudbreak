@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.reactor.handler.orchestration;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.START_FAILED;
-import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_START_FAILED;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.CREATE_FAILED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_CREATE_FAILED;
 
 import jakarta.inject.Inject;
 
@@ -41,7 +41,7 @@ public class ClusterCreationFailedHandler extends ExceptionCatcherEventHandler<C
     protected Selectable doAccept(HandlerEvent<ClusterCreationFailedRequest> event) {
         ClusterCreationFailedRequest request = event.getData();
         LOGGER.info("Handle ClusterCreationFailedRequest, stackId: {}", request.getResourceId());
-        conclusionCheckerService.runConclusionChecker(request.getResourceId(), START_FAILED.name(), CLUSTER_START_FAILED, request.getConclusionCheckerType());
+        conclusionCheckerService.runConclusionChecker(request.getResourceId(), CREATE_FAILED.name(), CLUSTER_CREATE_FAILED, request.getConclusionCheckerType());
         return new StackEvent(ClusterCreationEvent.CLUSTER_CREATION_FAILURE_HANDLED_EVENT.event(), request.getResourceId());
     }
 }

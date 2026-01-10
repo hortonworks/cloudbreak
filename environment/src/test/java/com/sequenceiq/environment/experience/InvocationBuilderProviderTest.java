@@ -1,7 +1,7 @@
 package com.sequenceiq.environment.experience;
 
-import static com.sequenceiq.cloudbreak.client.AbstractUserCrnServiceEndpoint.CRN_HEADER;
-import static com.sequenceiq.cloudbreak.logger.MDCRequestIdOnlyFilter.REQUEST_ID_HEADER;
+import static com.sequenceiq.cloudbreak.common.request.HeaderConstants.ACTOR_CRN_HEADER;
+import static com.sequenceiq.cloudbreak.common.request.HeaderConstants.REQUEST_ID_HEADER;
 import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -69,8 +69,8 @@ class InvocationBuilderProviderTest {
     void testCreateInvocationBuilderWebTargetShouldSetCrnHeader() {
         underTest.createInvocationBuilder(mockWebTarget);
 
-        verify(mockBuilder, times(1)).header(eq(CRN_HEADER), any());
-        verify(mockBuilder, times(1)).header(CRN_HEADER, ThreadBasedUserCrnProvider.getUserCrn());
+        verify(mockBuilder, times(1)).header(eq(ACTOR_CRN_HEADER), any());
+        verify(mockBuilder, times(1)).header(ACTOR_CRN_HEADER, ThreadBasedUserCrnProvider.getUserCrn());
     }
 
     @Test
@@ -105,8 +105,8 @@ class InvocationBuilderProviderTest {
         when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         underTest.createInvocationBuilderForInternalActor(mockWebTarget);
 
-        verify(mockBuilder, times(1)).header(eq(CRN_HEADER), any());
-        verify(mockBuilder, times(1)).header(CRN_HEADER, "crn");
+        verify(mockBuilder, times(1)).header(eq(ACTOR_CRN_HEADER), any());
+        verify(mockBuilder, times(1)).header(ACTOR_CRN_HEADER, "crn");
     }
 
     @Test

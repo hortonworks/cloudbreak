@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.logger;
 
+import static com.sequenceiq.cloudbreak.common.request.HeaderConstants.REQUEST_ID_HEADER;
+
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -23,8 +25,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import com.sequenceiq.cloudbreak.logger.MdcContext.Builder;
 
 public class MDCRequestIdOnlyFilter extends OncePerRequestFilter {
-
-    public static final String REQUEST_ID_HEADER = "x-cdp-request-id";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MDCRequestIdOnlyFilter.class);
 

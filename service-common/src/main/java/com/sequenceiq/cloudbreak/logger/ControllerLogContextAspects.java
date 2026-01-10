@@ -1,4 +1,4 @@
-package com.sequenceiq.environment.logger;
+package com.sequenceiq.cloudbreak.logger;
 
 import java.util.Arrays;
 
@@ -14,22 +14,21 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.anonymizer.AnonymizerUtil;
-import com.sequenceiq.cloudbreak.logger.LogContextService;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 
 @Component
 @Aspect
 public class ControllerLogContextAspects {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(ControllerLogContextAspects.class);
 
     @Inject
     private LogContextService logContextService;
 
-    @Pointcut("execution(public * com.sequenceiq.environment..*.*Controller.*(..))")
+    @Pointcut("execution(public * com.sequenceiq..*.*Controller.*(..))")
     public void interceptControllerMethodCalls() {
     }
 
-    @Before("com.sequenceiq.environment.logger.ControllerLogContextAspects.interceptControllerMethodCalls()")
+    @Before("com.sequenceiq.cloudbreak.logger.ControllerLogContextAspects.interceptControllerMethodCalls()")
     public void buildLogContextForControllerCalls(JoinPoint joinPoint) {
         try {
             Object[] args = joinPoint.getArgs();

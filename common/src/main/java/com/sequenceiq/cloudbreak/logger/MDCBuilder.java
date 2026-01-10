@@ -169,11 +169,11 @@ public class MDCBuilder {
         getOrGenerateRequestId();
     }
 
-    public static void buildMdcContextFromCrn(Crn crn) {
-        if (crn != null) {
+    public static void buildMdcContextFromCrn(Crn userCrn) {
+        if (userCrn != null) {
             MdcContext.builder()
-                    .tenant(crn.getAccountId())
-                    .userCrn(crn.toString())
+                    .tenant(userCrn.getAccountId())
+                    .userCrn(userCrn.toString())
                     .buildMdc();
         }
     }
