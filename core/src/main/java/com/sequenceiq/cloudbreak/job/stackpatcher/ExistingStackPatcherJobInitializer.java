@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.domain.stack.StackPatch;
 import com.sequenceiq.cloudbreak.domain.stack.StackPatchType;
+import com.sequenceiq.cloudbreak.domain.stack.StackPatchTypeStatus;
 import com.sequenceiq.cloudbreak.job.AbstractStackJobInitializer;
 import com.sequenceiq.cloudbreak.job.stackpatcher.config.ExistingStackPatcherConfig;
 import com.sequenceiq.cloudbreak.quartz.model.JobResource;
@@ -37,6 +38,9 @@ public class ExistingStackPatcherJobInitializer extends AbstractStackJobInitiali
         Set<StackPatchType> enabledStackPatchTypes = getEnabledStackPatchTypes();
         LOGGER.info("Existing stack patch types enabled: {}", enabledStackPatchTypes);
 
+        Set<StackPatchType> deprecatedStackPatchTypes = getDeprecatedStackPatchTypes();
+        LOGGER.info("Existing stack patch types deprecated: {}", deprecatedStackPatchTypes);
+
         List<JobResource> stacks = getAliveJobResources();
         Set<Long> stackIds = stacks.stream()
                 .map(JobResource::getLocalId)
@@ -58,12 +62,24 @@ public class ExistingStackPatcherJobInitializer extends AbstractStackJobInitiali
                 }
             }
         });
+
+        List<StackPatch> deprecatedStackPatches = stackPatchService.findAllByTypes(deprecatedStackPatchTypes);
+        stackPatchService.deleteAll(deprecatedStackPatches);
     }
 
     private Set<StackPatchType> getEnabledStackPatchTypes() {
         return config.getPatchConfigs().entrySet().stream()
                 .filter(entry -> entry.getValue().isEnabled())
                 .map(Map.Entry::getKey)
+                .filter(stackPatchType -> !StackPatchTypeStatus.DEPRECATED.equals(stackPatchType.getStatus()))
+                .collect(Collectors.toSet());
+    }
+
+    private Set<StackPatchType> getDeprecatedStackPatchTypes() {
+        return config.getPatchConfigs().entrySet().stream()
+                .filter(entry -> !entry.getValue().isEnabled())
+                .map(Map.Entry::getKey)
+                .filter(stackPatchType -> StackPatchTypeStatus.DEPRECATED.equals(stackPatchType.getStatus()))
                 .collect(Collectors.toSet());
     }
 }

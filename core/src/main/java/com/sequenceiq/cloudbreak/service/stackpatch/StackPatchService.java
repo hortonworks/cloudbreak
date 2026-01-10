@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service.stackpatch;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import jakarta.inject.Inject;
 
@@ -69,7 +70,15 @@ public class StackPatchService {
         return stackPatchRepository.findByTypeAndStackIdIn(stackPatchType, stackIds);
     }
 
+    public List<StackPatch> findAllByTypes(Set<StackPatchType> stackPatchTypes) {
+        return stackPatchRepository.findByTypeIn(stackPatchTypes);
+    }
+
     public void deleteByStackId(Long stackId) {
         stackPatchRepository.deleteByStackId(stackId);
+    }
+
+    public void deleteAll(List<StackPatch> patches) {
+        stackPatchRepository.deleteAllInBatch(patches);
     }
 }

@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackPatch;
 import com.sequenceiq.cloudbreak.domain.stack.StackPatchStatus;
 import com.sequenceiq.cloudbreak.domain.stack.StackPatchType;
+import com.sequenceiq.cloudbreak.domain.stack.StackPatchTypeStatus;
 import com.sequenceiq.cloudbreak.logger.MdcContextInfoProvider;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.job.StatusCheckerJob;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
@@ -61,15 +62,19 @@ public class ExistingStackPatcherJob extends StatusCheckerJob {
             ExistingStackPatchService existingStackPatchService = existingStackPatcherServiceProvider.provide(stackPatchTypeName);
             StackPatchType stackPatchType = existingStackPatchService.getStackPatchType();
             StackPatch stackPatch = stackPatchService.getOrCreate(stack, stackPatchType);
-            if (!Status.getUnschedulableStatuses().contains(stackStatus)) {
-                boolean success = applyStackPatch(existingStackPatchService, stackPatch);
-                if (success) {
+            if (StackPatchTypeStatus.DEPRECATED.equals(stackPatchType.getStatus())) {
+                unscheduleJob(context, stackPatch);
+            } else {
+                if (!Status.getUnschedulableStatuses().contains(stackStatus)) {
+                    boolean success = applyStackPatch(existingStackPatchService, stackPatch);
+                    if (success) {
+                        unscheduleJob(context, stackPatch);
+                    }
+                } else {
+                    LOGGER.debug("Existing stack patching will be unscheduled, because stack {} status is {}", stack.getResourceCrn(), stackStatus);
+                    stackPatchService.updateStatus(stackPatch, StackPatchStatus.UNSCHEDULED);
                     unscheduleJob(context, stackPatch);
                 }
-            } else {
-                LOGGER.debug("Existing stack patching will be unscheduled, because stack {} status is {}", stack.getResourceCrn(), stackStatus);
-                stackPatchService.updateStatus(stackPatch, StackPatchStatus.UNSCHEDULED);
-                unscheduleJob(context, stackPatch);
             }
         } catch (UnknownStackPatchTypeException e) {
             String message = "Unknown stack patch type: " + stackPatchTypeName;

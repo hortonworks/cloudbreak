@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.job.stackpatcher;
 
-import static com.sequenceiq.cloudbreak.domain.stack.StackPatchType.LOGGING_AGENT_AUTO_RESTART;
-import static com.sequenceiq.cloudbreak.domain.stack.StackPatchType.METERING_AZURE_METADATA;
-import static com.sequenceiq.cloudbreak.domain.stack.StackPatchType.UNBOUND_RESTART;
+import static com.sequenceiq.cloudbreak.domain.stack.StackPatchType.TEST_PATCH_1;
+import static com.sequenceiq.cloudbreak.domain.stack.StackPatchType.TEST_PATCH_2;
+import static com.sequenceiq.cloudbreak.domain.stack.StackPatchType.TEST_PATCH_3;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
@@ -82,7 +82,7 @@ class ExistingStackPatcherJobInitializerTest {
     @Test
     void emptyEnabled() {
         StackPatchTypeConfig disabledConfig = getConfig(false);
-        when(config.getPatchConfigs()).thenReturn(Map.of(UNBOUND_RESTART, disabledConfig));
+        when(config.getPatchConfigs()).thenReturn(Map.of(TEST_PATCH_2, disabledConfig));
 
         underTest.initJobs();
 
@@ -92,51 +92,51 @@ class ExistingStackPatcherJobInitializerTest {
     @Test
     void multipleEnabled() {
         when(config.getPatchConfigs()).thenReturn(Map.of(
-                UNBOUND_RESTART, getConfig(true),
-                LOGGING_AGENT_AUTO_RESTART, getConfig(true),
-                METERING_AZURE_METADATA, getConfig(false)));
+                TEST_PATCH_1, getConfig(true),
+                TEST_PATCH_2, getConfig(true),
+                TEST_PATCH_3, getConfig(false)));
 
         underTest.initJobs();
 
         verify(jobService, times(4)).schedule(captor.capture());
         Assertions.assertThat(captor.getAllValues())
-                .anyMatch(a -> a.getJobResource().getLocalId().equals(ID_1) && a.getStackPatchType().equals(UNBOUND_RESTART))
-                .anyMatch(a -> a.getJobResource().getLocalId().equals(ID_1) && a.getStackPatchType().equals(LOGGING_AGENT_AUTO_RESTART))
-                .anyMatch(a -> a.getJobResource().getLocalId().equals(ID_2) && a.getStackPatchType().equals(UNBOUND_RESTART))
-                .anyMatch(a -> a.getJobResource().getLocalId().equals(ID_2) && a.getStackPatchType().equals(LOGGING_AGENT_AUTO_RESTART));
+                .anyMatch(a -> a.getJobResource().getLocalId().equals(ID_1) && a.getStackPatchType().equals(TEST_PATCH_2))
+                .anyMatch(a -> a.getJobResource().getLocalId().equals(ID_1) && a.getStackPatchType().equals(TEST_PATCH_1))
+                .anyMatch(a -> a.getJobResource().getLocalId().equals(ID_2) && a.getStackPatchType().equals(TEST_PATCH_2))
+                .anyMatch(a -> a.getJobResource().getLocalId().equals(ID_2) && a.getStackPatchType().equals(TEST_PATCH_1));
     }
 
     @Test
     void alreadyScheduledShouldBeRescheduled() {
-        when(config.getPatchConfigs()).thenReturn(Map.of(UNBOUND_RESTART, getConfig(true)));
-        doReturn(List.of(createStackPatch(stack1, UNBOUND_RESTART))).when(stackPatchService).findAllByTypeForStackIds(eq(UNBOUND_RESTART), any());
+        when(config.getPatchConfigs()).thenReturn(Map.of(TEST_PATCH_2, getConfig(true)));
+        doReturn(List.of(createStackPatch(stack1, TEST_PATCH_2))).when(stackPatchService).findAllByTypeForStackIds(eq(TEST_PATCH_2), any());
 
         underTest.initJobs();
 
-        verify(stackPatchService).findAllByTypeForStackIds(UNBOUND_RESTART, Set.of(Long.valueOf(ID_1), Long.valueOf(ID_2)));
+        verify(stackPatchService).findAllByTypeForStackIds(TEST_PATCH_2, Set.of(Long.valueOf(ID_1), Long.valueOf(ID_2)));
         verify(jobService, times(2)).schedule(captor.capture());
         Assertions.assertThat(captor.getAllValues())
-                .anyMatch(a -> a.getJobResource().getLocalId().equals(ID_1) && a.getStackPatchType().equals(UNBOUND_RESTART))
-                .anyMatch(a -> a.getJobResource().getLocalId().equals(ID_2) && a.getStackPatchType().equals(UNBOUND_RESTART));
-        verify(stackPatchService).getOrCreate(Long.valueOf(ID_1), UNBOUND_RESTART);
-        verify(stackPatchService).getOrCreate(Long.valueOf(ID_2), UNBOUND_RESTART);
+                .anyMatch(a -> a.getJobResource().getLocalId().equals(ID_1) && a.getStackPatchType().equals(TEST_PATCH_2))
+                .anyMatch(a -> a.getJobResource().getLocalId().equals(ID_2) && a.getStackPatchType().equals(TEST_PATCH_2));
+        verify(stackPatchService).getOrCreate(Long.valueOf(ID_1), TEST_PATCH_2);
+        verify(stackPatchService).getOrCreate(Long.valueOf(ID_2), TEST_PATCH_2);
     }
 
     @Test
     void alreadyFixedShouldNotBeRescheduled() {
-        when(config.getPatchConfigs()).thenReturn(Map.of(UNBOUND_RESTART, getConfig(true)));
-        StackPatch stackPatch = createStackPatch(stack1, UNBOUND_RESTART);
+        when(config.getPatchConfigs()).thenReturn(Map.of(TEST_PATCH_2, getConfig(true)));
+        StackPatch stackPatch = createStackPatch(stack1, TEST_PATCH_2);
         stackPatch.setStatus(StackPatchStatus.FIXED);
-        doReturn(List.of(stackPatch)).when(stackPatchService).findAllByTypeForStackIds(eq(UNBOUND_RESTART), any());
+        doReturn(List.of(stackPatch)).when(stackPatchService).findAllByTypeForStackIds(eq(TEST_PATCH_2), any());
 
         underTest.initJobs();
 
         verify(jobService, times(1)).schedule(captor.capture());
         Assertions.assertThat(captor.getAllValues())
-                .noneMatch(a -> a.getJobResource().getLocalId().equals(ID_1) && a.getStackPatchType().equals(UNBOUND_RESTART))
-                .anyMatch(a -> a.getJobResource().getLocalId().equals(ID_2) && a.getStackPatchType().equals(UNBOUND_RESTART));
-        verify(stackPatchService, never()).getOrCreate(Long.valueOf(ID_1), UNBOUND_RESTART);
-        verify(stackPatchService).getOrCreate(Long.valueOf(ID_2), UNBOUND_RESTART);
+                .noneMatch(a -> a.getJobResource().getLocalId().equals(ID_1) && a.getStackPatchType().equals(TEST_PATCH_2))
+                .anyMatch(a -> a.getJobResource().getLocalId().equals(ID_2) && a.getStackPatchType().equals(TEST_PATCH_2));
+        verify(stackPatchService, never()).getOrCreate(Long.valueOf(ID_1), TEST_PATCH_2);
+        verify(stackPatchService).getOrCreate(Long.valueOf(ID_2), TEST_PATCH_2);
     }
 
     private StackPatchTypeConfig getConfig(boolean enabled) {

@@ -44,7 +44,7 @@ import com.sequenceiq.cloudbreak.service.stackpatch.StackPatchService;
 @ExtendWith(MockitoExtension.class)
 class ExistingStackPatcherJobTest {
 
-    private static final StackPatchType STACK_PATCH_TYPE = StackPatchType.UNBOUND_RESTART;
+    private static final StackPatchType STACK_PATCH_TYPE = StackPatchType.TEST_PATCH_1;
 
     @Mock
     private StackService stackService;
@@ -186,7 +186,7 @@ class ExistingStackPatcherJobTest {
 
     @Test
     void shouldFailWhenStackPatcherServiceProviderFails() throws UnknownStackPatchTypeException {
-        String stackPatchTypeName = StackPatchType.LOGGING_AGENT_AUTO_RESTART.name();
+        String stackPatchTypeName = StackPatchType.TEST_PATCH_1.name();
         when(jobDetail.getJobDataMap()).thenReturn(new JobDataMap(Map.of(STACK_PATCH_TYPE_NAME, stackPatchTypeName)));
         doThrow(UnknownStackPatchTypeException.class).when(existingStackPatcherServiceProvider).provide(anyString());
 

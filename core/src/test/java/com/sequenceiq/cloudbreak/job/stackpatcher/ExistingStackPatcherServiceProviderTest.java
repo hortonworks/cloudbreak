@@ -22,7 +22,7 @@ import com.sequenceiq.cloudbreak.service.stackpatch.ExistingStackPatchService;
 @ExtendWith(MockitoExtension.class)
 class ExistingStackPatcherServiceProviderTest {
 
-    private static final StackPatchType STACK_PATCH_TYPE = StackPatchType.UNBOUND_RESTART;
+    private static final StackPatchType STACK_PATCH_TYPE = StackPatchType.MOCK;
 
     @InjectMocks
     private ExistingStackPatcherServiceProvider underTest;
@@ -70,7 +70,7 @@ class ExistingStackPatcherServiceProviderTest {
 
     @Test
     void shouldFailWithTypeWithoutService() {
-        StackPatchType stackPatchType = StackPatchType.LOGGING_AGENT_AUTO_RESTART;
+        StackPatchType stackPatchType = StackPatchType.TEST_PATCH_1;
         assertThatThrownBy(() -> underTest.provide(stackPatchType))
                 .isInstanceOf(UnknownStackPatchTypeException.class)
                 .hasMessage("No stack patcher implementation found for type " + stackPatchType);

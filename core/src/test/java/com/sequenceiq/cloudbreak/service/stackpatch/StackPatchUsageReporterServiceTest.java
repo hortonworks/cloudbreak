@@ -24,7 +24,7 @@ class StackPatchUsageReporterServiceTest {
 
     private static final String RESOURCE_CRN = "crn";
 
-    private static final StackPatchType STACK_PATCH_TYPE = StackPatchType.UNBOUND_RESTART;
+    private static final StackPatchType STACK_PATCH_TYPE = StackPatchType.TEST_PATCH_1;
 
     private Stack stack;
 

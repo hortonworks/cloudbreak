@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.repository;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import jakarta.transaction.Transactional;
 
@@ -21,6 +22,8 @@ public interface StackPatchRepository extends JpaRepository<StackPatch, Long> {
     Optional<StackPatch> findByStackIdAndType(Long stackId, StackPatchType stackPatchType);
 
     List<StackPatch> findByTypeAndStackIdIn(StackPatchType stackPatchType, Collection<Long> stackIds);
+
+    List<StackPatch> findByTypeIn(Set<StackPatchType> stackPatchTypes);
 
     @Modifying
     @Query("DELETE FROM StackPatch se WHERE se.stackId = :stackId")
