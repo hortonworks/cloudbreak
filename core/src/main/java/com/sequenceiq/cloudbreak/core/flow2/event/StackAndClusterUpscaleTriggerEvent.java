@@ -34,8 +34,6 @@ public class StackAndClusterUpscaleTriggerEvent extends StackScaleTriggerEvent {
 
     private DiskUpdateRequest diskUpdateRequest;
 
-    private final boolean skipDeletingZombieNodesEnabled;
-
     public StackAndClusterUpscaleTriggerEvent(String selector, Long stackId, Map<String, Integer> hostGroupWithAdjustment, ScalingType scalingType,
         NetworkScaleDetails networkScaleDetails, AdjustmentTypeWithThreshold adjustmentTypeWithThreshold, String triggeredStackVariant) {
         super(selector, stackId, hostGroupWithAdjustment, Collections.emptyMap(), Collections.emptyMap(), networkScaleDetails, adjustmentTypeWithThreshold,
@@ -48,7 +46,6 @@ public class StackAndClusterUpscaleTriggerEvent extends StackScaleTriggerEvent {
         clusterManagerType = ClusterManagerType.CLOUDERA_MANAGER;
         rollingRestartEnabled = false;
         this.diskUpdateRequest = null;
-        this.skipDeletingZombieNodesEnabled = false;
     }
 
     @JsonCreator
@@ -67,8 +64,7 @@ public class StackAndClusterUpscaleTriggerEvent extends StackScaleTriggerEvent {
             @JsonProperty("clusterManagerType") ClusterManagerType clusterManagerType,
             @JsonProperty("adjustmentTypeWithThreshold") AdjustmentTypeWithThreshold adjustmentTypeWithThreshold,
             @JsonProperty("triggeredStackVariant") String triggeredStackVariant,
-            @JsonProperty("rollingRestartEnabled") boolean rollingRestartEnabled,
-            @JsonProperty("skipDeletingZombieNodesEnabled") boolean skipDeletingZombieNodesEnabled) {
+            @JsonProperty("rollingRestartEnabled") boolean rollingRestartEnabled) {
         super(selector, stackId, hostGroupWithAdjustment, hostGroupWithPrivateIds, hostGroupWithHostNames, adjustmentTypeWithThreshold, triggeredStackVariant,
                 accepted);
         this.scalingType = scalingType;
@@ -79,7 +75,6 @@ public class StackAndClusterUpscaleTriggerEvent extends StackScaleTriggerEvent {
         this.clusterManagerType = clusterManagerType;
         this.rollingRestartEnabled = rollingRestartEnabled;
         this.diskUpdateRequest = null;
-        this.skipDeletingZombieNodesEnabled = skipDeletingZombieNodesEnabled;
     }
 
     public DiskUpdateRequest getDiskUpdateRequest() {
@@ -118,10 +113,6 @@ public class StackAndClusterUpscaleTriggerEvent extends StackScaleTriggerEvent {
         return rollingRestartEnabled;
     }
 
-    public boolean isSkipDeletingZombieNodesEnabled() {
-        return skipDeletingZombieNodesEnabled;
-    }
-
     @Override
     public StackAndClusterUpscaleTriggerEvent setRepair() {
         super.setRepair();
@@ -138,7 +129,6 @@ public class StackAndClusterUpscaleTriggerEvent extends StackScaleTriggerEvent {
                 .add("restartServices=" + restartServices)
                 .add("clusterManagerType=" + clusterManagerType)
                 .add("rollingRestartEnabled=" + rollingRestartEnabled)
-                .add("skipDeletingZombieNodesEnabled=" + skipDeletingZombieNodesEnabled)
                 .add(super.toString())
                 .toString();
     }

@@ -79,7 +79,7 @@ public class MigrateZookeeperToKraftFlowEventChainFactory implements FlowEventCh
                 Collections.singletonMap(KRAFT_HOST_GROUP_NAME, nodeAdjustment), Collections.emptyMap(), Collections.emptyMap(),
                 ScalingType.UPSCALE_TOGETHER, false, false, event.accepted(), false, false,
                 ClusterManagerType.CLOUDERA_MANAGER, new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, (long) nodeAdjustment),
-                variant.getVariant().value(), false, true);
+                variant.getVariant().value(), false);
     }
 
     private Selectable getKraftMigrationTriggerEvent(MigrateZookeeperToKraftFlowChainTriggerEvent event) {

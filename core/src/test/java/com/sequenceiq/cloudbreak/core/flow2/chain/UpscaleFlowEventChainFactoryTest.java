@@ -51,7 +51,7 @@ class UpscaleFlowEventChainFactoryTest {
         StackAndClusterUpscaleTriggerEvent triggerEvent = new StackAndClusterUpscaleTriggerEvent(FlowChainTriggers.FULL_UPSCALE_TRIGGER_EVENT,
                 0L, Map.of(), Map.of(), hostGroupWithHostNames, ScalingType.UPSCALE_TOGETHER, true, true,
                 null, false, true, null, null, "",
-                false, false);
+                false);
 
         FlowTriggerEventQueue flowTriggerEventQueue = underTest.createFlowTriggerEventQueue(triggerEvent);
 
@@ -67,7 +67,7 @@ class UpscaleFlowEventChainFactoryTest {
         StackAndClusterUpscaleTriggerEvent triggerEvent = new StackAndClusterUpscaleTriggerEvent(FlowChainTriggers.FULL_UPSCALE_TRIGGER_EVENT,
                 0L, Map.of(), Map.of(), hostGroupWithHostNames, ScalingType.UPSCALE_TOGETHER, true, true,
                 null, false, true, null, null, "",
-                false, false);
+                false);
 
         FlowTriggerEventQueue flowTriggerEventQueue = underTest.createFlowTriggerEventQueue(triggerEvent);
 
