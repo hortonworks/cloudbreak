@@ -57,6 +57,8 @@ import com.sequenceiq.remoteenvironment.DescribeEnvironmentPropertiesV2Response;
 import com.sequenceiq.remoteenvironment.DescribeEnvironmentV2Response;
 import com.sequenceiq.remoteenvironment.exception.OnPremCMApiException;
 
+import okhttp3.OkHttpClient;
+
 @ExtendWith(MockitoExtension.class)
 class ClassicClusterDescribeServiceTest {
     @Mock
@@ -100,6 +102,7 @@ class ClassicClusterDescribeServiceTest {
         lenient().when(clouderaManagerApiFactory.getClouderaManagerResourceApi(apiV51Client)).thenReturn(cmResourceApi);
         lenient().when(clouderaManagerApiFactory.getParcelsResourceApi(apiV51Client)).thenReturn(parcelsResourceApi);
         lenient().when(clouderaManagerApiFactory.getCdpResourceApi(apiClient)).thenReturn(cdpResourceApi);
+        lenient().when(apiV51Client.getHttpClient()).thenReturn(new OkHttpClient());
         ReflectionTestUtils.setField(underTest, "taskExecutor", taskExecutor);
     }
 

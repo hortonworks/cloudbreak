@@ -18,7 +18,6 @@ import com.cloudera.thunderhead.service.environments2api.model.PvcEnvironmentDet
 import com.cloudera.thunderhead.service.environments2api.model.Service;
 import com.cloudera.thunderhead.service.environments2api.model.ServiceEndPoint;
 import com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto;
-import com.sequenceiq.cloudbreak.common.network.NetworkUtil;
 
 @Component
 public class ClassicClusterToEnvironmentConverter {
@@ -67,8 +66,7 @@ public class ClassicClusterToEnvironmentConverter {
                 .kerberized(kerberosInfo.getKerberized())
                 .kdcType(kerberosInfo.getKdcType())
                 .kdcHost(kerberosInfo.getKdcHost())
-                .kdcHostIp(StringUtils.isNotBlank(kerberosInfo.getKdcHostIp()) ? kerberosInfo.getKdcHostIp() :
-                        NetworkUtil.resolveHostAddress(kerberosInfo.getKdcHost()).orElse(null))
+                .kdcHostIp(StringUtils.isNotBlank(kerberosInfo.getKdcHostIp()) ? kerberosInfo.getKdcHostIp() : null)
                 .kerberosRealm(kerberosInfo.getKerberosRealm());
     }
 
