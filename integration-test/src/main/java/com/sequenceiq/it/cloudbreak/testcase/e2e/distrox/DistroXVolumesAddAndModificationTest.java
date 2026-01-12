@@ -160,14 +160,14 @@ public class DistroXVolumesAddAndModificationTest extends AbstractE2EWithReusabl
                 .validate();
     }
 
-    // TODO CB-31498 Disabling Add Disk feature as it's not working properly
-    @Test(dataProvider = TEST_CONTEXT, timeOut = 9000000, enabled = false)
-    @Description(
-            given = "there is an available environment with a running datahub",
-            when = "delete disks is called on the Datahub's coordinator group and then add volumes is called",
-            then = "attached EBS volumes on datahubs must be deleted and new volumes must be added, " +
-                    "the new datahub should be up and running"
-    )
+//    TODO CB-31498 Disabling Add Disk feature as it's not working properly
+//    @Test(dataProvider = TEST_CONTEXT, timeOut = 9000000 )
+//    @Description(
+//            given = "there is an available environment with a running datahub",
+//            when = "delete disks is called on the Datahub's coordinator group and then add volumes is called",
+//            then = "attached EBS volumes on datahubs must be deleted and new volumes must be added, " +
+//                    "the new datahub should be up and running"
+//    )
     public void testDistroXDeleteAndAddVolumes(TestContext testContext) {
         CloudPlatform cloudPlatform = testContext.getCloudPlatform();
 
