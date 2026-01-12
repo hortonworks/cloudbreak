@@ -151,7 +151,8 @@ class ExposedServiceCollectorTest {
                 "RANGER_RAZ_SERVER",
                 "KAFKA_BROKER",
                 "DLM_SERVER",
-                "CLO_SERVER");
+                "CLO_SERVER",
+                "DATAVIZ_WEBSERVER");
     }
 
     @Test
@@ -219,7 +220,8 @@ class ExposedServiceCollectorTest {
                 "RANGERRAZ",
                 "KAFKA_BROKER",
                 "DLM",
-                "LAKEHOUSE_OPTIMIZER");
+                "LAKEHOUSE_OPTIMIZER",
+                "DATAVIZ");
     }
 
     @Test
@@ -579,7 +581,8 @@ class ExposedServiceCollectorTest {
                 Map.entry("EFM-API", "https"),
                 Map.entry("SSB-SSE-UI", "https"),
                 Map.entry("SSB-SSE-WS", "https"),
-                Map.entry("LAKEHOUSE_OPTIMIZER", "https")
+                Map.entry("LAKEHOUSE_OPTIMIZER", "https"),
+                Map.entry("DATAVIZ", "https")
         );
     }
 
@@ -769,7 +772,8 @@ class ExposedServiceCollectorTest {
                 Map.entry("EFM-API", "http"),
                 Map.entry("SSB-SSE-UI", "http"),
                 Map.entry("SSB-SSE-WS", "http"),
-                Map.entry("LAKEHOUSE_OPTIMIZER", "http")
+                Map.entry("LAKEHOUSE_OPTIMIZER", "http"),
+                Map.entry("DATAVIZ", "http")
         );
     }
 
@@ -1439,7 +1443,8 @@ class ExposedServiceCollectorTest {
                 Map.entry("EFM-API", 10090),
                 Map.entry("SSB-SSE-UI", 18121),
                 Map.entry("SSB-SSE-WS", 18121),
-                Map.entry("LAKEHOUSE_OPTIMIZER", 8087)
+                Map.entry("LAKEHOUSE_OPTIMIZER", 8087),
+                Map.entry("DATAVIZ", 8100)
         );
     }
 

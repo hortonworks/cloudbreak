@@ -736,4 +736,15 @@
     </service>
     {%- endif %}
     {%- endif %}
+
+    {% if 'DATAVIZ_WEBSERVER' in salt['pillar.get']('gateway:location') -%}
+    {% if 'DATAVIZ' in exposed -%}
+    <service>
+        <role>DATAVIZ</role>
+        {% for hostloc in salt['pillar.get']('gateway:location')['DATAVIZ_WEBSERVER'] -%}
+        <url>{{ protocols['DATAVIZ'] }}://{{ hostloc }}:{{ ports['DATAVIZ'] }}</url>
+        {%- endfor %}
+    </service>
+    {%- endif %}
+    {%- endif %}
 </topology>
