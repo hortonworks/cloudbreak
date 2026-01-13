@@ -34,7 +34,10 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.model.AltusCredential;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
+import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
+import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.cmtemplate.metering.MeteringServiceFieldResolver;
@@ -75,6 +78,8 @@ public class ClouderaManagerMgmtTelemetryService {
     private static final String TELEMETRY_ALTUS_URL = "telemetry_altus_url";
 
     private static final String TELEMETRY_SAFETY_VALVE = "telemetrypublisher_safety_valve";
+
+    private static final String CDP_METADATA_SAFETY_VALVE = "telemetrypublisher_cdp_metadata_safety_valve";
 
     private static final String TELEMETRY_PROXY_ENABLED = "telemetrypublisher_proxy_enabled";
 
@@ -126,6 +131,16 @@ public class ClouderaManagerMgmtTelemetryService {
     private static final String SMON_PROMETHEUS_ADAPTER_ENABLED = "prometheus_adapter_enabled";
 
     private static final String IGNORE_CM_EXCEPTION = "Could not find config to delete with template name";
+
+    private static final String RUNTIME_SUFFIX = "_RUNTIME";
+
+    //This buildNumber consists of changes where we introduce a new safety valve to hide critical dbus headers.
+    private static final Long CDP_METADATA_SAFETY_VALVE_BUILD_GBN = 72192358L;
+
+    private static final String CDP_METADATA_MIN_CM_VERSION = "7.13.2.0";
+
+    @Inject
+    private ClusterComponentConfigProvider clusterComponentConfigProvider;
 
     @Inject
     private ClouderaManagerExternalAccountService externalAccountService;
@@ -186,7 +201,8 @@ public class ClouderaManagerMgmtTelemetryService {
             String sdxContextName, String sdxStackCrn, ProxyConfig proxyConfig) throws ApiException {
         if (isAnalyticsEnabled(stack, telemetry)) {
             MgmtRoleConfigGroupsResourceApi mgmtRoleConfigGroupsResourceApi = clouderaManagerApiFactory.getMgmtRoleConfigGroupsResourceApi(client);
-            ApiConfigList configList = buildTelemetryConfigList(stack, telemetry.getWorkloadAnalytics(), sdxContextName, sdxStackCrn, proxyConfig);
+            ApiConfigList configList = buildTelemetryConfigList(
+                    stack, telemetry.getWorkloadAnalytics(), sdxContextName, sdxStackCrn, proxyConfig);
             mgmtRoleConfigGroupsResourceApi.updateConfig(String.format(MGMT_CONFIG_GROUP_NAME_PATTERN, TELEMETRYPUBLISHER),
                     configList, "Set configs for Telemetry publisher by CB");
         }
@@ -237,15 +253,21 @@ public class ClouderaManagerMgmtTelemetryService {
             String sdxCrn, ProxyConfig proxyConfig) {
         Map<String, String> configsToUpdate = new HashMap<>();
         Map<String, String> telemetrySafetyValveMap = new HashMap<>();
-        if (stack != null && stack.getType() == StackType.DATALAKE) {
-            telemetrySafetyValveMap.put(TELEMETRY_WA_CLUSTER_TYPE_HEADER, TELEMETRY_WA_DEFAULT_CLUSTER_TYPE + "_RUNTIME");
-        } else {
-            telemetrySafetyValveMap.put(TELEMETRY_WA_CLUSTER_TYPE_HEADER, TELEMETRY_WA_DEFAULT_CLUSTER_TYPE);
+        Map<String, String> cdpMetadataSafetyValveMap = new HashMap<>();
+        if (stack == null || stack.getType() != StackType.DATALAKE) {
             // the HMS metadata extractor is true by default in the Observability, but this make impact on the DHs performance therefore we should disable it.
             // Enabling this temporarily, but will be reverted once DL telemetry issues are fixed.
             telemetrySafetyValveMap.put(TELEMETRY_CONFIG_EXTRACTOR_HMS_METADATA_ENABLED, "true");
         }
-        enrichWithEnvironmentMetadata(sdxContextName, sdxCrn, stack, wa, telemetrySafetyValveMap);
+
+        if (stack != null && hasCdpMetadataKey(stack)) {
+            populateClusterType(stack, cdpMetadataSafetyValveMap);
+            enrichWithEnvironmentMetadata(sdxContextName, sdxCrn, stack, wa, cdpMetadataSafetyValveMap);
+            configsToUpdate.put(CDP_METADATA_SAFETY_VALVE, createStringFromSafetyValveMap(cdpMetadataSafetyValveMap));
+        } else {
+            populateClusterType(stack, telemetrySafetyValveMap);
+            enrichWithEnvironmentMetadata(sdxContextName, sdxCrn, stack, wa, telemetrySafetyValveMap);
+        }
         telemetrySafetyValveMap.put(TELEMETRY_UPLOAD_LOGS, "true");
         configsToUpdate.put(TELEMETRY_SAFETY_VALVE, createStringFromSafetyValveMap(telemetrySafetyValveMap));
         if (proxyConfig != null) {
@@ -259,6 +281,45 @@ public class ClouderaManagerMgmtTelemetryService {
             // TODO: no_proxy config should be added
         }
         return makeApiConfigList(configsToUpdate);
+    }
+
+    // This check ensures backward compatibility with older safety valve configuration.
+    private boolean hasCdpMetadataKey(StackDtoDelegate stack) {
+        ClouderaManagerRepo clouderaManagerRepo = clusterComponentConfigProvider.getClouderaManagerRepoDetails(stack.getCluster().getId());
+        String currentCMVersion = clouderaManagerRepo.getVersion();
+        String currentBuildGbn = clouderaManagerRepo.getBuildNumber();
+        if (StringUtils.isBlank(currentCMVersion) || StringUtils.isBlank(currentBuildGbn)) {
+            LOGGER.debug("CM version or build GBN is blank, CDP metadata key not supported");
+            return false;
+        }
+        if (CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited(currentCMVersion, () -> CDP_METADATA_MIN_CM_VERSION)) {
+            if (CMRepositoryVersionUtil.isVersionEqualToLimited(currentCMVersion, () -> CDP_METADATA_MIN_CM_VERSION)) {
+                boolean result = isGbnAtOrAboveThreshold(currentBuildGbn);
+                LOGGER.debug("CM version {} equals threshold {}, build GBN check result: {}", currentCMVersion, CDP_METADATA_MIN_CM_VERSION, result);
+                return result;
+            }
+            LOGGER.debug("CM version {} is above threshold {}, CDP metadata key supported", currentCMVersion, CDP_METADATA_MIN_CM_VERSION);
+            return true;
+        }
+        LOGGER.debug("CM version {} is below threshold {}, CDP metadata key not supported", currentCMVersion, CDP_METADATA_MIN_CM_VERSION);
+        return false;
+    }
+
+    private boolean isGbnAtOrAboveThreshold(String buildGbn) {
+        try {
+            return Long.parseLong(buildGbn) >= CDP_METADATA_SAFETY_VALVE_BUILD_GBN;
+        } catch (NumberFormatException ex) {
+            LOGGER.warn("Invalid Build GBN found: {}", buildGbn);
+            return false;
+        }
+    }
+
+    private void populateClusterType(StackDtoDelegate stack, Map<String, String> safetyValveMap) {
+        if (stack != null && stack.getType() == StackType.DATALAKE) {
+            safetyValveMap.put(TELEMETRY_WA_CLUSTER_TYPE_HEADER, TELEMETRY_WA_DEFAULT_CLUSTER_TYPE + RUNTIME_SUFFIX);
+        } else {
+            safetyValveMap.put(TELEMETRY_WA_CLUSTER_TYPE_HEADER, TELEMETRY_WA_DEFAULT_CLUSTER_TYPE);
+        }
     }
 
     private ApiConfigList buildTelemetryCMConfigList(WorkloadAnalytics workloadAnalytics, String databusUrl) {
@@ -278,18 +339,18 @@ public class ClouderaManagerMgmtTelemetryService {
             String sdxCrn,
             StackDtoDelegate stack,
             WorkloadAnalytics workloadAnalytics,
-            Map<String, String> telemetrySafetyValveMap) {
+            Map<String, String> safetyValveMap) {
 
         String sdxName = getSdxName(stack, sdxContextName);
         String sdxId = getSdxId(sdxCrn, sdxName);
 
-        telemetrySafetyValveMap.put(DATABUS_HEADER_SDX_NAME, sdxName);
-        telemetrySafetyValveMap.put(DATABUS_HEADER_SDX_ID, sdxId);
+        safetyValveMap.put(DATABUS_HEADER_SDX_NAME, sdxName);
+        safetyValveMap.put(DATABUS_HEADER_SDX_ID, sdxId);
 
-        addDatalakeSpecificValues(stack, telemetrySafetyValveMap);
+        addDatalakeSpecificValues(stack, safetyValveMap);
 
-        addStackMetadata(stack, telemetrySafetyValveMap);
-        addWorkloadAnalyticsAttributes(workloadAnalytics, telemetrySafetyValveMap);
+        addStackMetadata(stack, safetyValveMap);
+        addWorkloadAnalyticsAttributes(workloadAnalytics, safetyValveMap);
     }
 
     private String getSdxId(String sdxCrn, String sdxContextName) {
@@ -306,28 +367,28 @@ public class ClouderaManagerMgmtTelemetryService {
         return String.format("%s-%s", stack.getCluster().getName(), stack.getCluster().getId().toString());
     }
 
-    private void addStackMetadata(StackDtoDelegate stack, Map<String, String> telemetrySafetyValveMap) {
+    private void addStackMetadata(StackDtoDelegate stack, Map<String, String> safetyValveMap) {
         if (stack == null) {
             return;
         }
-        addIfNotEmpty(telemetrySafetyValveMap, DATABUS_HEADER_ENVIRONMENT_CRN, stack.getEnvironmentCrn());
-        addIfNotEmpty(telemetrySafetyValveMap, DATABUS_HEADER_CLOUDPROVIDER_NAME, stack.getCloudPlatform());
-        addIfNotEmpty(telemetrySafetyValveMap, DATABUS_HEADER_CLOUDPROVIDER_REGION, stack.getRegion());
+        addIfNotEmpty(safetyValveMap, DATABUS_HEADER_ENVIRONMENT_CRN, stack.getEnvironmentCrn());
+        addIfNotEmpty(safetyValveMap, DATABUS_HEADER_CLOUDPROVIDER_NAME, stack.getCloudPlatform());
+        addIfNotEmpty(safetyValveMap, DATABUS_HEADER_CLOUDPROVIDER_REGION, stack.getRegion());
 
         if (stack.getType() == StackType.WORKLOAD) {
-            addIfNotEmpty(telemetrySafetyValveMap, DATABUS_HEADER_DATAHUB_CRN, stack.getResourceCrn());
-            addIfNotEmpty(telemetrySafetyValveMap, DATABUS_HEADER_DATAHUB_NAME, stack.getName());
-            addIfNotEmpty(telemetrySafetyValveMap, DATABUS_HEADER_DATAHUB_TYPE, getDatahubType(stack).orElse("UNDEFINED"));
-            addIfNotEmpty(telemetrySafetyValveMap, DATABUS_HEADER_DATALAKE_CRN, stack.getDatalakeCrn());
+            addIfNotEmpty(safetyValveMap, DATABUS_HEADER_DATAHUB_CRN, stack.getResourceCrn());
+            addIfNotEmpty(safetyValveMap, DATABUS_HEADER_DATAHUB_NAME, stack.getName());
+            addIfNotEmpty(safetyValveMap, DATABUS_HEADER_DATAHUB_TYPE, getDatahubType(stack).orElse("UNDEFINED"));
+            addIfNotEmpty(safetyValveMap, DATABUS_HEADER_DATALAKE_CRN, stack.getDatalakeCrn());
         } else if (stack.getType() == StackType.DATALAKE) {
-            addIfNotEmpty(telemetrySafetyValveMap, DATABUS_HEADER_DATALAKE_CRN, stack.getResourceCrn());
+            addIfNotEmpty(safetyValveMap, DATABUS_HEADER_DATALAKE_CRN, stack.getResourceCrn());
         }
     }
 
-    private void addWorkloadAnalyticsAttributes(WorkloadAnalytics workloadAnalytics, Map<String, String> telemetrySafetyValveMap) {
+    private void addWorkloadAnalyticsAttributes(WorkloadAnalytics workloadAnalytics, Map<String, String> safetyValveMap) {
         if (workloadAnalytics != null && workloadAnalytics.getAttributes() != null) {
             for (Map.Entry<String, Object> entry : workloadAnalytics.getAttributes().entrySet()) {
-                telemetrySafetyValveMap.put(entry.getKey(), ObjectUtils.defaultIfNull(entry.getValue().toString(), ""));
+                safetyValveMap.put(entry.getKey(), ObjectUtils.defaultIfNull(entry.getValue().toString(), ""));
             }
         }
     }
@@ -338,8 +399,8 @@ public class ClouderaManagerMgmtTelemetryService {
         }
     }
 
-    private String createStringFromSafetyValveMap(Map<String, String> telemetrySafetyValveMap) {
-        return telemetrySafetyValveMap.entrySet()
+    private String createStringFromSafetyValveMap(Map<String, String> safetyValveMap) {
+        return safetyValveMap.entrySet()
                 .stream()
                 .map(e -> e.getKey() + '=' + e.getValue())
                 .collect(joining("\n"));
@@ -355,10 +416,10 @@ public class ClouderaManagerMgmtTelemetryService {
         return telemetry.isComputeMonitoringEnabled() && telemetry.isMonitoringFeatureEnabled();
     }
 
-    private void addDatalakeSpecificValues(StackDtoDelegate stack, Map<String, String> telemetrySafetyValveMap) {
+    private void addDatalakeSpecificValues(StackDtoDelegate stack, Map<String, String> safetyValveMap) {
         if (stack != null && stack.getType() == StackType.DATALAKE) {
-            telemetrySafetyValveMap.put(TELEMETRY_CONFIG_EXTRACTOR_METRIC_ENABLED, "false");
-            telemetrySafetyValveMap.put(TELEMETRY_CONFIG_EXTRACTOR_EVENT_ENABLED, "false");
+            safetyValveMap.put(TELEMETRY_CONFIG_EXTRACTOR_METRIC_ENABLED, "false");
+            safetyValveMap.put(TELEMETRY_CONFIG_EXTRACTOR_EVENT_ENABLED, "false");
         }
     }
 
