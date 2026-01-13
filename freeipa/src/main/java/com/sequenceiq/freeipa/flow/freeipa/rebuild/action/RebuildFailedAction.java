@@ -1,5 +1,9 @@
 package com.sequenceiq.freeipa.flow.freeipa.rebuild.action;
 
+import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus.REBUILD_FAILED;
+import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus.REBUILD_VALIDATION_FAILED;
+import static com.sequenceiq.freeipa.flow.freeipa.rebuild.FreeIpaRebuildFlowEvent.REBUILD_FAILURE_HANDLED_EVENT;
+
 import java.util.List;
 import java.util.Map;
 
@@ -10,7 +14,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.flow.core.PayloadConverter;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.entity.Stack;
-import com.sequenceiq.freeipa.flow.freeipa.rebuild.FreeIpaRebuildFlowEvent;
+import com.sequenceiq.freeipa.flow.freeipa.common.FreeIpaFailedFlowAnalyzer;
 import com.sequenceiq.freeipa.flow.freeipa.rebuild.converter.DownscaleStackCollectResourcesResultToRebuildFailureEvent;
 import com.sequenceiq.freeipa.flow.freeipa.rebuild.converter.DownscaleStackResultToRebuildFailureEvent;
 import com.sequenceiq.freeipa.flow.freeipa.rebuild.converter.InstanceFailureEventToRebuildFailureEvent;
@@ -30,6 +34,9 @@ public class RebuildFailedAction extends AbstractRebuildAction<RebuildFailureEve
     @Inject
     private OperationService operationService;
 
+    @Inject
+    private FreeIpaFailedFlowAnalyzer freeIpaFailedFlowAnalyzer;
+
     protected RebuildFailedAction() {
         super(RebuildFailureEvent.class);
     }
@@ -37,10 +44,12 @@ public class RebuildFailedAction extends AbstractRebuildAction<RebuildFailureEve
     @Override
     protected void doExecute(StackContext context, RebuildFailureEvent payload, Map<Object, Object> variables) throws Exception {
         Stack stack = context.getStack();
+        DetailedStackStatus detailedStackStatus = freeIpaFailedFlowAnalyzer.isValidationFailedError(payload) ?
+                REBUILD_VALIDATION_FAILED : REBUILD_FAILED;
         String statusReason = "Failed to rebuild FreeIPA: " + getErrorReason(payload.getException());
-        stackUpdater().updateStackStatus(stack, DetailedStackStatus.REBUILD_FAILED, statusReason);
+        stackUpdater().updateStackStatus(stack, detailedStackStatus, statusReason);
         operationService.failOperation(stack.getAccountId(), getOperationId(variables), statusReason);
-        sendEvent(context, new StackEvent(FreeIpaRebuildFlowEvent.REBUILD_FAILURE_HANDLED_EVENT.event(), payload.getResourceId()));
+        sendEvent(context, new StackEvent(REBUILD_FAILURE_HANDLED_EVENT.event(), payload.getResourceId()));
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.flow.freeipa.verticalscale.handler;
 
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
 import static com.sequenceiq.freeipa.flow.freeipa.verticalscale.event.FreeIpaVerticalScaleEvent.STACK_VERTICALSCALE_FINISHED_FAILURE_EVENT;
 
 import java.util.List;
@@ -72,6 +73,7 @@ public class FreeIpaVerticalScaleHandler implements CloudPlatformEventHandler<Fr
                     request.getResourceId(),
                     "Failure while trying to vertically upscale on the provider side",
                     Set.of(),
+                    ERROR,
                     Map.of(),
                     e);
             eventBus.notify(STACK_VERTICALSCALE_FINISHED_FAILURE_EVENT.event(), new Event<>(event.getHeaders(), result));

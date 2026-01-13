@@ -62,6 +62,7 @@ import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.PayloadConverter;
 import com.sequenceiq.flow.reactor.api.event.DelayEvent;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.FailureDetails;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SuccessDetails;
 import com.sequenceiq.freeipa.converter.cloud.ResourceToCloudResourceConverter;
@@ -70,6 +71,7 @@ import com.sequenceiq.freeipa.entity.InstanceGroup;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Resource;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.flow.freeipa.common.FreeIpaFailedFlowAnalyzer;
 import com.sequenceiq.freeipa.flow.freeipa.loadbalancer.event.update.LoadBalancerUpdateRequest;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.bootstrap.BootstrapMachinesRequest;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.bootstrap.BootstrapMachinesSuccess;
@@ -243,7 +245,6 @@ public class FreeIpaUpscaleActions {
             protected void doExecute(StackContext context, UpscaleCreateUserdataSecretsSuccess payload, Map<Object, Object> variables) {
                 Stack stack = context.getStack();
                 stackUpdater.updateStackStatus(stack, getInProgressStatus(variables), "Adding instances");
-
                 List<CloudInstance> newInstances = buildNewInstances(context.getStack(), getInstanceCountByGroup(variables));
                 LOGGER.debug("Freeipa upscale new instances: {}", newInstances);
                 if (newInstances.isEmpty()) {
@@ -743,6 +744,9 @@ public class FreeIpaUpscaleActions {
             @Inject
             private EnvironmentService environmentService;
 
+            @Inject
+            private FreeIpaFailedFlowAnalyzer freeIpaFailedFlowAnalyzer;
+
             @Override
             protected StackContext createFlowContext(FlowParameters flowParameters, StateContext<UpscaleState, UpscaleFlowEvent> stateContext,
                     UpscaleFailureEvent payload) {
@@ -755,25 +759,51 @@ public class FreeIpaUpscaleActions {
             protected void doExecute(StackContext context, UpscaleFailureEvent payload, Map<Object, Object> variables) {
                 LOGGER.error("Upscale failed with payload: {}", payload);
                 Stack stack = context.getStack();
-                String errorReason = getErrorReason(payload.getException());
-                stackUpdater.updateStackStatus(context.getStack(), getFailedStatus(variables), errorReason);
                 String environmentCrn = stack.getEnvironmentCrn();
-                SuccessDetails successDetails = new SuccessDetails(environmentCrn);
-                successDetails.getAdditionalDetails()
-                        .put(payload.getFailedPhase(), payload.getSuccess() == null ? List.of() : new ArrayList<>(payload.getSuccess()));
-                String message = "Upscale failed during [" + payload.getFailedPhase() + "]. Reason: " + errorReason;
-                FailureDetails failureDetails = new FailureDetails(environmentCrn, message);
+                Exception exception = payload.getException();
+                Set<InstanceMetaData> notDeletedInstanceMetaDataSet = stack.getNotDeletedInstanceMetaDataSet();
+                DetailedStackStatus upscaleFailed = getFailedStatus(payload, variables);
+                stackUpdater.updateStackStatus(
+                        context.getStack(),
+                        upscaleFailed,
+                        getErrorReason(exception)
+                );
+                setNodeCountToInstanceGroup(variables, stack);
+                if (!isChainedAction(variables)) {
+                    environmentService.setFreeIpaNodeCount(
+                            environmentCrn,
+                            notDeletedInstanceMetaDataSet.size()
+                    );
+                }
+                operationService.failOperation(
+                        stack.getAccountId(),
+                        getOperationId(variables),
+                        getFailureMessage(payload, getErrorReason(exception)),
+                        List.of(getSuccessDetails(payload, environmentCrn)),
+                        List.of(getFailureDetails(payload, environmentCrn))
+                );
+                instanceMetaDataService.updateInstanceStatusOnUpscaleFailure(notDeletedInstanceMetaDataSet);
+                enableStatusChecker(stack, "Failed upscaling FreeIPA");
+                sendEvent(context, FAIL_HANDLED_EVENT.event(), payload);
+            }
+
+            private String getFailureMessage(UpscaleFailureEvent payload, String errorReason) {
+                return "Upscale failed during [" + payload.getFailedPhase() + "]. Reason: " + errorReason;
+            }
+
+            private FailureDetails getFailureDetails(UpscaleFailureEvent payload, String environmentCrn) {
+                FailureDetails failureDetails = new FailureDetails(environmentCrn, getFailureMessage(payload, getErrorReason(payload.getException())));
                 if (payload.getFailureDetails() != null) {
                     failureDetails.getAdditionalDetails().putAll(payload.getFailureDetails());
                 }
-                setNodeCountToInstanceGroup(variables, stack);
-                if (!isChainedAction(variables)) {
-                    environmentService.setFreeIpaNodeCount(stack.getEnvironmentCrn(), stack.getNotDeletedInstanceMetaDataSet().size());
-                }
-                operationService.failOperation(stack.getAccountId(), getOperationId(variables), message, List.of(successDetails), List.of(failureDetails));
-                instanceMetaDataService.updateInstanceStatusOnUpscaleFailure(stack.getNotDeletedInstanceMetaDataSet());
-                enableStatusChecker(stack, "Failed upscaling FreeIPA");
-                sendEvent(context, FAIL_HANDLED_EVENT.event(), payload);
+                return failureDetails;
+            }
+
+            private SuccessDetails getSuccessDetails(UpscaleFailureEvent payload, String environmentCrn) {
+                SuccessDetails successDetails = new SuccessDetails(environmentCrn);
+                successDetails.getAdditionalDetails()
+                        .put(payload.getFailedPhase(), payload.getSuccess() == null ? List.of() : new ArrayList<>(payload.getSuccess()));
+                return successDetails;
             }
 
             @Override
