@@ -7,6 +7,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.Migra
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -25,6 +26,7 @@ import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
+import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
 @ExtendWith(MockitoExtension.class)
@@ -48,17 +50,26 @@ public class MigrateZookeeperToKraftRestartKafkaConnectNodesHandlerTest {
     @Mock
     private ClusterModificationService clusterModificationService;
 
+    @Mock
+    private StackDto stackDto;
+
+    @Mock
+    private ClusterView clusterView;
+
     @InjectMocks
     private MigrateZookeeperToKraftRestartKafkaConnectNodesHandler underTest;
 
     @Test
     void testDoAcceptSuccess() {
-        StackDto stackDto = new StackDto();
+        String clusterName = "testCluster";
         MigrateZookeeperToKraftEvent request = new MigrateZookeeperToKraftEvent(RESTART_KAFKA_CONNECT_NODES_EVENT.selector(), STACK_ID);
         HandlerEvent<MigrateZookeeperToKraftEvent> event = new HandlerEvent<>(new Event<>(request));
+        when(stackDto.getCluster()).thenReturn(clusterView);
+        when(clusterView.getName()).thenReturn(clusterName);
         when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
         when(clusterApiConnectors.getConnector(stackDto)).thenReturn(clusterApi);
         when(clusterApi.clusterModificationService()).thenReturn(clusterModificationService);
+        when(clusterModificationService.isRolePresent(clusterName, KAFKA_CONNECT_ROLE, KAFKA_SERVICE_TYPE)).thenReturn(true);
 
         Selectable result = underTest.doAccept(event);
 
@@ -68,13 +79,36 @@ public class MigrateZookeeperToKraftRestartKafkaConnectNodesHandlerTest {
     }
 
     @Test
-    void testDoAcceptFailure() {
-        StackDto stackDto = new StackDto();
-        MigrateZookeeperToKraftEvent request = new MigrateZookeeperToKraftEvent(RESTART_KAFKA_BROKER_NODES_EVENT.selector(), STACK_ID);
+    void testDoAcceptSuccessWhenConnectRoleNotFound() {
+        String clusterName = "testCluster";
+        MigrateZookeeperToKraftEvent request = new MigrateZookeeperToKraftEvent(RESTART_KAFKA_CONNECT_NODES_EVENT.selector(), STACK_ID);
         HandlerEvent<MigrateZookeeperToKraftEvent> event = new HandlerEvent<>(new Event<>(request));
+        when(stackDto.getCluster()).thenReturn(clusterView);
+        when(clusterView.getName()).thenReturn(clusterName);
         when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
         when(clusterApiConnectors.getConnector(stackDto)).thenReturn(clusterApi);
         when(clusterApi.clusterModificationService()).thenReturn(clusterModificationService);
+        when(clusterModificationService.isRolePresent(clusterName, KAFKA_CONNECT_ROLE, KAFKA_SERVICE_TYPE)).thenReturn(false);
+
+        Selectable result = underTest.doAccept(event);
+
+        assertInstanceOf(MigrateZookeeperToKraftEvent.class, result);
+        assertEquals(START_MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT.name(), result.getSelector());
+
+        verify(clusterModificationService, times(0)).restartServiceRoleByType(KAFKA_SERVICE_TYPE, KAFKA_CONNECT_ROLE);
+    }
+
+    @Test
+    void testDoAcceptFailure() {
+        String clusterName = "testCluster";
+        MigrateZookeeperToKraftEvent request = new MigrateZookeeperToKraftEvent(RESTART_KAFKA_BROKER_NODES_EVENT.selector(), STACK_ID);
+        HandlerEvent<MigrateZookeeperToKraftEvent> event = new HandlerEvent<>(new Event<>(request));
+        when(stackDto.getCluster()).thenReturn(clusterView);
+        when(clusterView.getName()).thenReturn(clusterName);
+        when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
+        when(clusterApiConnectors.getConnector(stackDto)).thenReturn(clusterApi);
+        when(clusterApi.clusterModificationService()).thenReturn(clusterModificationService);
+        when(clusterModificationService.isRolePresent(clusterName, KAFKA_CONNECT_ROLE, KAFKA_SERVICE_TYPE)).thenReturn(true);
 
         doThrow(new RuntimeException("error")).when(clusterModificationService).restartServiceRoleByType(KAFKA_SERVICE_TYPE, KAFKA_CONNECT_ROLE);
 

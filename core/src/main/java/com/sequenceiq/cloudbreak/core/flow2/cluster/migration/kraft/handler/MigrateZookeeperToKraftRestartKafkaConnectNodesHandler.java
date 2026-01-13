@@ -47,7 +47,11 @@ public class MigrateZookeeperToKraftRestartKafkaConnectNodesHandler extends Exce
         StackDto stackDto = stackDtoService.getById(stackId);
         ClusterModificationService clusterModificationService = getClusterModificationService(stackDto);
         try {
-            clusterModificationService.restartServiceRoleByType(KAFKA_SERVICE_TYPE, KAFKA_CONNECT_ROLE);
+            if (clusterModificationService.isRolePresent(stackDto.getCluster().getName(), KAFKA_CONNECT_ROLE, KAFKA_SERVICE_TYPE)) {
+                clusterModificationService.restartServiceRoleByType(KAFKA_SERVICE_TYPE, KAFKA_CONNECT_ROLE);
+            } else {
+                LOGGER.debug("{} role is not present in cluster. Skipping the restart step.", KAFKA_CONNECT_ROLE);
+            }
         } catch (Exception e) {
             LOGGER.error("Migrate Zookeeper to KRaft (restart Kafka connect nodes) failed.", e);
             return new MigrateZookeeperToKraftFailureEvent(stackId, e);

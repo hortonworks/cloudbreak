@@ -47,7 +47,11 @@ public class MigrateZookeeperToKraftRestartKafkaBrokerNodesHandler extends Excep
         StackDto stackDto = stackDtoService.getById(stackId);
         ClusterModificationService clusterModificationService = getClusterModificationService(stackDto);
         try {
-            clusterModificationService.restartServiceRoleByType(KAFKA_SERVICE_TYPE, KAFKA_BROKER_ROLE);
+            if (clusterModificationService.isRolePresent(stackDto.getCluster().getName(), KAFKA_BROKER_ROLE, KAFKA_SERVICE_TYPE)) {
+                clusterModificationService.restartServiceRoleByType(KAFKA_SERVICE_TYPE, KAFKA_BROKER_ROLE);
+            } else {
+                LOGGER.debug("{} role is not present in cluster. Skipping the restart step.", KAFKA_BROKER_ROLE);
+            }
         } catch (Exception e) {
             LOGGER.error("Migrate Zookeeper to KRaft (restart Kafka broker nodes) failed.", e);
             return new MigrateZookeeperToKraftFailureEvent(stackId, e);

@@ -25,6 +25,7 @@ import com.cloudera.api.swagger.model.ApiConfig;
 import com.cloudera.api.swagger.model.ApiConfigList;
 import com.cloudera.api.swagger.model.ApiRoleConfigGroup;
 import com.cloudera.api.swagger.model.ApiRoleConfigGroupList;
+import com.cloudera.api.swagger.model.ApiRoleList;
 import com.cloudera.api.swagger.model.ApiService;
 import com.cloudera.api.swagger.model.ApiServiceConfig;
 import com.cloudera.api.swagger.model.ApiServiceList;
@@ -156,7 +157,13 @@ public class ClouderaManagerConfigService {
         ServicesResourceApi servicesResourceApi = clouderaManagerApiFactory.getServicesResourceApi(apiClient);
         try {
             String serviceName = getServiceNameValue(clusterName, serviceType, servicesResourceApi);
-            getRoleConfigGroupNameByTypeAndServiceName(roleType, clusterName, serviceName, roleConfigGroupsResourceApi);
+            String roleConfigGroupName = getRoleConfigGroupNameByTypeAndServiceName(roleType, clusterName, serviceName, roleConfigGroupsResourceApi);
+            ApiRoleList roleList = roleConfigGroupsResourceApi.readRoles(clusterName, roleConfigGroupName, serviceName);
+            if (roleList.getItems().isEmpty()) {
+                LOGGER.debug("Role not found for cluster {}, roleType {}, and serviceType {}", clusterName, roleType, serviceType);
+                return false;
+            }
+
             return true;
         } catch (NotFoundException e) {
             LOGGER.debug("Role not found for cluster {}, roleType {}, and serviceType {}", clusterName, roleType, serviceType, e);
