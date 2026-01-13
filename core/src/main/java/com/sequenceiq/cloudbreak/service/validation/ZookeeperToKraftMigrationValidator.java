@@ -3,18 +3,19 @@ package com.sequenceiq.cloudbreak.service.validation;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENABLE_ZOOKEEPER_TO_KRAFT_MIGRATION;
 
 import java.util.Comparator;
-import java.util.Set;
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Predicate;
 
-import jakarta.inject.Inject;
-
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cluster.status.KraftMigrationStatus;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.type.Versioned;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.util.VersionComparator;
 
 @Component
@@ -22,11 +23,14 @@ public class ZookeeperToKraftMigrationValidator {
 
     private static final String ZOOKEEPER_TO_KRAFT_MIGRATION_MIN_VERSION = "7.3.2";
 
-    @Value("${cb.cm.zookeeperToKraftMigration.supportedTemplates}")
-    private Set<String> kraftMigrationSupportedTemplates;
+    private final EntitlementService entitlementService;
 
-    @Inject
-    private EntitlementService entitlementService;
+    private final BlueprintService blueprintService;
+
+    public ZookeeperToKraftMigrationValidator(EntitlementService entitlementService, BlueprintService blueprintService) {
+        this.entitlementService = entitlementService;
+        this.blueprintService = blueprintService;
+    }
 
     public void validateZookeeperToKraftMigrationState(String kraftMigrationState) {
         if (KraftMigrationStatus.BROKERS_IN_KRAFT.name().equals(kraftMigrationState)
@@ -61,23 +65,14 @@ public class ZookeeperToKraftMigrationValidator {
         }
     }
 
-    public boolean isMigrationFromZookeeperToKraftSupported(StackDto stack, String accountId) {
-        boolean clusterAvailable = stack.getStatus().isAvailable();
-        boolean kraftMigrationEntitlementEnabled = entitlementService.isZookeeperToKRaftMigrationEnabled(accountId);
-
-        return clusterAvailable && hasStreamsMessagingTemplateType(stack) && isZookeeperToKRaftMigrationSupportedForStackVersion(stack.getStackVersion())
-                && kraftMigrationEntitlementEnabled;
-    }
-
     public void validateZookeeperToKraftMigrationEligibility(StackDto stack, String accountId) {
         if (!stack.getStatus().isAvailable()) {
             throw new BadRequestException("Zookeeper to KRaft migration can only be performed when the cluster is in Available state. " +
                     "Please ensure the cluster is fully operational before starting the migration.");
         }
 
-        if (!hasStreamsMessagingTemplateType(stack)) {
-            throw new BadRequestException("Zookeeper to KRaft migration is supported only for the following template types: "
-                    + String.join(", ", kraftMigrationSupportedTemplates));
+        if (!isKafkaServicePresent(stack)) {
+            throw new BadRequestException("Zookeeper to KRaft migration is supported only for templates where Kafka is present.");
         }
 
         if (!isZookeeperToKRaftMigrationSupportedForStackVersion(stack.getStackVersion())) {
@@ -90,18 +85,25 @@ public class ZookeeperToKraftMigrationValidator {
         }
     }
 
+    public boolean isMigrationFromZookeeperToKraftSupported(StackDto stack, String accountId) {
+        boolean clusterAvailable = stack.getStatus().isAvailable();
+        boolean kraftMigrationEntitlementEnabled = entitlementService.isZookeeperToKRaftMigrationEnabled(accountId);
+
+        return clusterAvailable && isKafkaServicePresent(stack) && isZookeeperToKRaftMigrationSupportedForStackVersion(stack.getStackVersion())
+                && kraftMigrationEntitlementEnabled;
+    }
+
     private boolean isZookeeperToKRaftMigrationSupportedForStackVersion(String version) {
         Comparator<Versioned> versionComparator = new VersionComparator();
         return versionComparator.compare(() -> version, () -> ZOOKEEPER_TO_KRAFT_MIGRATION_MIN_VERSION) == 0;
     }
 
-    private boolean hasStreamsMessagingTemplateType(StackDto stack) {
-        if (stack.getBlueprint() == null || stack.getBlueprint().getName() == null) {
-            return false;
-        }
-
-        String blueprintName = stack.getBlueprint().getName();
-
-        return kraftMigrationSupportedTemplates.stream().anyMatch(blueprintName::contains);
+    private boolean isKafkaServicePresent(StackDto stack) {
+        Predicate<Blueprint> bpPredicate =
+                bp -> blueprintService.anyOfTheServiceTypesPresentOnBlueprint(bp.getBlueprintJsonText(), List.of("KAFKA"));
+        return Optional.ofNullable(stack.getBlueprint())
+                .filter(bpPredicate)
+                .isPresent();
     }
+
 }
