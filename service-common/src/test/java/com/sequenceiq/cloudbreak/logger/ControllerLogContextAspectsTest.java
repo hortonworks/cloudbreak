@@ -1,19 +1,19 @@
-package com.sequenceiq.redbeams.aspect;
+package com.sequenceiq.cloudbreak.logger;
 
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.reflect.CodeSignature;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.logger.LogContextService;
-
-public class ControllerLogContextAspectsTest {
+@ExtendWith(MockitoExtension.class)
+class ControllerLogContextAspectsTest {
 
     @Mock
     private LogContextService logContextService;
@@ -27,15 +27,13 @@ public class ControllerLogContextAspectsTest {
     @InjectMocks
     private ControllerLogContextAspects underTest;
 
-    @Before
-    public void setUp() throws Exception {
-        initMocks(this);
-
+    @BeforeEach
+    void setUp() {
         when(joinPoint.getSignature()).thenReturn(sig);
     }
 
     @Test
-    public void testMDCUpdates() {
+    void testMDCUpdates() {
         String[] paramNames = { "param1", "param2" };
         when(sig.getParameterNames()).thenReturn(paramNames);
 

@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.clusterproxy;
 
+import static com.sequenceiq.cloudbreak.common.request.HeaderConstants.ACTOR_CRN_HEADER;
+
 import java.util.List;
 
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -13,8 +15,6 @@ import org.springframework.web.client.RestTemplate;
 @Component
 @Scope("prototype")
 public class ClusterProxyProxyClientFactory {
-
-    private static final String ACTOR_CRN_HEADER = "x-cdp-actor-crn";
 
     private final RestTemplateBuilder restTemplateBuilder;
 

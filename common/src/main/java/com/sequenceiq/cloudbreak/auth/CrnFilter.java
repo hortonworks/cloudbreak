@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.auth;
 
+import static com.sequenceiq.cloudbreak.common.request.HeaderConstants.ACTOR_CRN_HEADER;
+
 import java.io.IOException;
 
 import jakarta.servlet.FilterChain;
@@ -13,7 +15,7 @@ public class CrnFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        String userCrn = request.getHeader("x-cdp-actor-crn");
+        String userCrn = request.getHeader(ACTOR_CRN_HEADER);
         ThreadBasedUserCrnProvider.doAsForServlet(userCrn, () -> filterChain.doFilter(request, response));
     }
 }

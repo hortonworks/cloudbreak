@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.structuredevent.util;
 
+import static com.sequenceiq.cloudbreak.common.request.HeaderConstants.REQUEST_ID_HEADER;
+
 import java.io.OutputStream;
 import java.util.List;
 import java.util.Map;
@@ -16,7 +18,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Lists;
-import com.sequenceiq.cloudbreak.logger.MDCRequestIdOnlyFilter;
 import com.sequenceiq.cloudbreak.structuredevent.event.rest.RestRequestDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.rest.RestResponseDetails;
 import com.sequenceiq.cloudbreak.structuredevent.filter.CDPJaxRsFilterPropertyKeys;
@@ -38,7 +39,7 @@ public class RestFilterPropertyUtil {
         restRequest.setHeaders(convertHeaders(requestContext));
         restRequest.setMediaType(getMediaType(requestContext.getMediaType()));
         restRequest.setMethod(requestContext.getMethod());
-        String requestId = requestContext.getHeaderString(MDCRequestIdOnlyFilter.REQUEST_ID_HEADER);
+        String requestId = requestContext.getHeaderString(REQUEST_ID_HEADER);
         restRequest.setRequestId(requestId);
         return restRequest;
     }

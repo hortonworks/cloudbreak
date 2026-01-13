@@ -57,7 +57,7 @@ public class UserSyncServiceTest {
     private static final String ENV_CRN_2 = "crn:cdp:environments:us-west-1:"
             + ACCOUNT_ID + ":environment:" + UUID.randomUUID();
 
-    private static final String ACTOR_CRN = "crn:cdp:users:us-west-1:"
+    private static final String ACTOR_CRN = "crn:cdp:iam:us-west-1:"
             + ACCOUNT_ID + ":user:" + UUID.randomUUID();
 
     private static final String INTERNAL_ACTOR = "crn:cdp:iam:us-west-1:altus:user:__internal__actor__";

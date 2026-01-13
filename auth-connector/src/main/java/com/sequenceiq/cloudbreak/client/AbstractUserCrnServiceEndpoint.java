@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.client;
 
+import static com.sequenceiq.cloudbreak.common.request.HeaderConstants.ACTOR_CRN_HEADER;
+
 import java.util.Collections;
 
 import jakarta.ws.rs.client.WebTarget;
@@ -10,8 +12,6 @@ import jakarta.ws.rs.core.MultivaluedMap;
 import org.glassfish.jersey.client.proxy.WebResourceFactory;
 
 public abstract class AbstractUserCrnServiceEndpoint {
-
-    public static final String CRN_HEADER = "x-cdp-actor-crn";
 
     private static final Form EMPTY_FORM = new Form();
 
@@ -26,7 +26,7 @@ public abstract class AbstractUserCrnServiceEndpoint {
 
     protected <E> E getEndpoint(Class<E> clazz) {
         MultivaluedMap<String, Object> headers = new MultivaluedHashMap<>();
-        headers.add(CRN_HEADER, crn);
+        headers.add(ACTOR_CRN_HEADER, crn);
         return newEndpoint(clazz, headers);
     }
 

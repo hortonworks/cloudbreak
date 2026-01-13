@@ -1,7 +1,7 @@
 package com.sequenceiq.environment.experience;
 
-import static com.sequenceiq.cloudbreak.client.AbstractUserCrnServiceEndpoint.CRN_HEADER;
-import static com.sequenceiq.cloudbreak.logger.MDCRequestIdOnlyFilter.REQUEST_ID_HEADER;
+import static com.sequenceiq.cloudbreak.common.request.HeaderConstants.ACTOR_CRN_HEADER;
+import static com.sequenceiq.cloudbreak.common.request.HeaderConstants.REQUEST_ID_HEADER;
 import static jakarta.ws.rs.core.MediaType.APPLICATION_JSON;
 
 import jakarta.inject.Inject;
@@ -24,7 +24,7 @@ public class InvocationBuilderProvider {
         return webTarget
                 .request()
                 .accept(APPLICATION_JSON)
-                .header(CRN_HEADER, ThreadBasedUserCrnProvider.getUserCrn())
+                .header(ACTOR_CRN_HEADER, ThreadBasedUserCrnProvider.getUserCrn())
                 .header(REQUEST_ID_HEADER, MDCBuilder.getOrGenerateRequestId());
     }
 
@@ -32,7 +32,7 @@ public class InvocationBuilderProvider {
         return webTarget
                 .request()
                 .accept(APPLICATION_JSON)
-                .header(CRN_HEADER, regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString())
+                .header(ACTOR_CRN_HEADER, regionAwareInternalCrnGeneratorFactory.iam().getInternalCrnForServiceAsString())
                 .header(REQUEST_ID_HEADER, MDCBuilder.getOrGenerateRequestId());
     }
 

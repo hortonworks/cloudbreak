@@ -1,5 +1,6 @@
 package com.sequenceiq.periscope.filter;
 
+import static com.sequenceiq.cloudbreak.common.request.HeaderConstants.REQUEST_ID_HEADER;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -27,7 +28,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.auth.security.authentication.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
-import com.sequenceiq.cloudbreak.logger.MDCRequestIdOnlyFilter;
 import com.sequenceiq.periscope.service.AuditService;
 
 @ExtendWith(MockitoExtension.class)
@@ -49,72 +49,6 @@ public class AuditFilterTest {
 
     @Mock
     private AuthenticatedUserService authenticatedUserService;
-
-    @BeforeEach
-    public void setup() {
-        MockitoAnnotations.initMocks(this);
-        underTest = new AuditFilter(true, auditService, authenticatedUserService, false);
-    }
-
-    @Test
-    public void testDoFilterInternalWhenAuditAndMutating() throws Exception {
-        CloudbreakUser user = new CloudbreakUser("userid", "usercrn", "username", "useremail", "usertenant");
-        when(authenticatedUserService.getCbUser(any(HttpServletRequest.class)))
-                .thenReturn(user);
-        when(request.getRequestURI()).thenReturn("/as/api/v1/distrox/crn/testcrn/autoscale_config");
-        when(request.getMethod()).thenReturn("POST");
-        when(request.getHeader("x-real-ip")).thenReturn("127.0.0.1");
-        when(request.getHeader("user-agent")).thenReturn("test-user-agent");
-        when(request.getHeader(MDCRequestIdOnlyFilter.REQUEST_ID_HEADER)).thenReturn("requestId");
-
-        underTest.doFilterInternal(request, response, filterChain);
-
-        Map<String, Object> requestParameters = Map.of(
-                "method", "POST",
-                "uri", "/as/api/v1/distrox/crn/testcrn/autoscale_config");
-        verify(auditService, times(1)).auditRestApi(eq(requestParameters), eq(true), eq("test-user-agent"),
-                eq(user), eq("requestId"), eq("127.0.0.1"));
-    }
-
-    @Test
-    public void testDoFilterInternalWhenAuditAndNotMutating() throws Exception {
-        CloudbreakUser user = new CloudbreakUser("userid", "usercrn", "username", "useremail", "usertenant");
-        when(authenticatedUserService.getCbUser(any(HttpServletRequest.class)))
-                .thenReturn(user);
-        when(request.getRequestURI()).thenReturn("/as/api/v1/distrox/crn/testcrn/autoscale_config");
-        when(request.getMethod()).thenReturn("GET");
-        when(request.getHeader("x-real-ip")).thenReturn("127.0.0.1");
-        when(request.getHeader("user-agent")).thenReturn("test-user-agent");
-        when(request.getHeader(MDCRequestIdOnlyFilter.REQUEST_ID_HEADER)).thenReturn("requestId");
-
-        underTest.doFilterInternal(request, response, filterChain);
-
-        Map<String, Object> requestParameters = Map.of(
-                "method", "GET",
-                "uri", "/as/api/v1/distrox/crn/testcrn/autoscale_config");
-        verify(auditService, times(1)).auditRestApi(eq(requestParameters), eq(false), eq("test-user-agent"),
-                eq(user), eq("requestId"), eq("127.0.0.1"));
-    }
-
-    @Test
-    public void testDoFilterInternalWhenNotAnAuditUrl() throws Exception {
-        when(authenticatedUserService.getCbUser(any(HttpServletRequest.class)))
-                .thenReturn(new CloudbreakUser("userid", "usercrn", "username", "useremail", "usertenant"));
-        when(request.getRequestURI()).thenReturn("/as/api/healthcheck");
-
-        underTest.doFilterInternal(request, response, filterChain);
-        verifyNoInteractions(auditService);
-    }
-
-    @ParameterizedTest(name = "{0}: testMatch(url: {1}, should match {2}")
-    @MethodSource("patternMatching")
-    public void testIncludePathPattern(String url, boolean match) {
-        if (match) {
-            assertTrue(underTest.includePathPattern(url));
-        } else {
-            assertFalse(underTest.includePathPattern(url));
-        }
-    }
 
     private static Iterable<Object[]> patternMatching() {
         return Arrays.asList(new Object[][]{
@@ -152,17 +86,6 @@ public class AuditFilterTest {
                 {"/as/info", false},
                 {"/as/metrics", false},
         });
-    }
-
-    @ParameterizedTest(name = "{0}: testMatch(url: {1}, should match {2}")
-    @MethodSource("patternMatchingOnAllEndpoints")
-    public void testIncludePathPatternWithAuditEnabledOnAllEndpoints(String url, boolean match) {
-        underTest = new AuditFilter(true, auditService, authenticatedUserService, true);
-        if (match) {
-            assertTrue(underTest.includePathPattern(url));
-        } else {
-            assertFalse(underTest.includePathPattern(url));
-        }
     }
 
     private static Iterable<Object[]> patternMatchingOnAllEndpoints() {
@@ -207,5 +130,82 @@ public class AuditFilterTest {
                 {"/as/info", false},
                 {"/as/metrics", false},
         });
+    }
+
+    @BeforeEach
+    public void setup() {
+        MockitoAnnotations.initMocks(this);
+        underTest = new AuditFilter(true, auditService, authenticatedUserService, false);
+    }
+
+    @Test
+    public void testDoFilterInternalWhenAuditAndMutating() throws Exception {
+        CloudbreakUser user = new CloudbreakUser("userid", "usercrn", "username", "useremail", "usertenant");
+        when(authenticatedUserService.getCbUser(any(HttpServletRequest.class)))
+                .thenReturn(user);
+        when(request.getRequestURI()).thenReturn("/as/api/v1/distrox/crn/testcrn/autoscale_config");
+        when(request.getMethod()).thenReturn("POST");
+        when(request.getHeader("x-real-ip")).thenReturn("127.0.0.1");
+        when(request.getHeader("user-agent")).thenReturn("test-user-agent");
+        when(request.getHeader(REQUEST_ID_HEADER)).thenReturn("requestId");
+
+        underTest.doFilterInternal(request, response, filterChain);
+
+        Map<String, Object> requestParameters = Map.of(
+                "method", "POST",
+                "uri", "/as/api/v1/distrox/crn/testcrn/autoscale_config");
+        verify(auditService, times(1)).auditRestApi(eq(requestParameters), eq(true), eq("test-user-agent"),
+                eq(user), eq("requestId"), eq("127.0.0.1"));
+    }
+
+    @Test
+    public void testDoFilterInternalWhenAuditAndNotMutating() throws Exception {
+        CloudbreakUser user = new CloudbreakUser("userid", "usercrn", "username", "useremail", "usertenant");
+        when(authenticatedUserService.getCbUser(any(HttpServletRequest.class)))
+                .thenReturn(user);
+        when(request.getRequestURI()).thenReturn("/as/api/v1/distrox/crn/testcrn/autoscale_config");
+        when(request.getMethod()).thenReturn("GET");
+        when(request.getHeader("x-real-ip")).thenReturn("127.0.0.1");
+        when(request.getHeader("user-agent")).thenReturn("test-user-agent");
+        when(request.getHeader(REQUEST_ID_HEADER)).thenReturn("requestId");
+
+        underTest.doFilterInternal(request, response, filterChain);
+
+        Map<String, Object> requestParameters = Map.of(
+                "method", "GET",
+                "uri", "/as/api/v1/distrox/crn/testcrn/autoscale_config");
+        verify(auditService, times(1)).auditRestApi(eq(requestParameters), eq(false), eq("test-user-agent"),
+                eq(user), eq("requestId"), eq("127.0.0.1"));
+    }
+
+    @Test
+    public void testDoFilterInternalWhenNotAnAuditUrl() throws Exception {
+        when(authenticatedUserService.getCbUser(any(HttpServletRequest.class)))
+                .thenReturn(new CloudbreakUser("userid", "usercrn", "username", "useremail", "usertenant"));
+        when(request.getRequestURI()).thenReturn("/as/api/healthcheck");
+
+        underTest.doFilterInternal(request, response, filterChain);
+        verifyNoInteractions(auditService);
+    }
+
+    @ParameterizedTest(name = "{0}: testMatch(url: {1}, should match {2}")
+    @MethodSource("patternMatching")
+    public void testIncludePathPattern(String url, boolean match) {
+        if (match) {
+            assertTrue(underTest.includePathPattern(url));
+        } else {
+            assertFalse(underTest.includePathPattern(url));
+        }
+    }
+
+    @ParameterizedTest(name = "{0}: testMatch(url: {1}, should match {2}")
+    @MethodSource("patternMatchingOnAllEndpoints")
+    public void testIncludePathPatternWithAuditEnabledOnAllEndpoints(String url, boolean match) {
+        underTest = new AuditFilter(true, auditService, authenticatedUserService, true);
+        if (match) {
+            assertTrue(underTest.includePathPattern(url));
+        } else {
+            assertFalse(underTest.includePathPattern(url));
+        }
     }
 }

@@ -1,6 +1,6 @@
 package com.sequenceiq.freeipa.client;
 
-import static com.sequenceiq.cloudbreak.logger.MDCRequestIdOnlyFilter.REQUEST_ID_HEADER;
+import static com.sequenceiq.cloudbreak.common.request.HeaderConstants.REQUEST_ID_HEADER;
 
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpRequestInterceptor;

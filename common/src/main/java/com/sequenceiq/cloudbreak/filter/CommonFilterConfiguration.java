@@ -10,7 +10,6 @@ import org.springframework.context.annotation.Configuration;
 import com.sequenceiq.cloudbreak.auth.CrnFilter;
 import com.sequenceiq.cloudbreak.exception.ErrorResponseHandler;
 import com.sequenceiq.cloudbreak.exception.ExceptionHandlerFilter;
-import com.sequenceiq.cloudbreak.logger.MDCContextFilter;
 import com.sequenceiq.cloudbreak.logger.MDCRequestIdOnlyFilter;
 import com.sequenceiq.cloudbreak.logger.RestLoggerFilter;
 
@@ -47,15 +46,6 @@ public class CommonFilterConfiguration {
         CrnFilter filter = new CrnFilter();
         registrationBean.setFilter(filter);
         registrationBean.setOrder(FilterOrderConstants.CRN_FILTER_ORDER);
-        return registrationBean;
-    }
-
-    @Bean
-    public FilterRegistrationBean<MDCContextFilter> mdcContextFilterRegistrationBean() {
-        FilterRegistrationBean<MDCContextFilter> registrationBean = new FilterRegistrationBean<>();
-        MDCContextFilter filter = new MDCContextFilter();
-        registrationBean.setFilter(filter);
-        registrationBean.setOrder(FilterOrderConstants.MDC_FILTER_ORDER);
         return registrationBean;
     }
 

@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.openapi;
 
+import static com.sequenceiq.cloudbreak.common.request.HeaderConstants.ACTOR_CRN_HEADER;
 import static com.sequenceiq.cloudbreak.constant.OpenApiConstants.INFO_CONTACT_NAME;
 import static com.sequenceiq.cloudbreak.constant.OpenApiConstants.INFO_CONTACT_URL;
 import static com.sequenceiq.cloudbreak.constant.OpenApiConstants.INFO_LICENSE_TYPE;
@@ -49,7 +50,7 @@ public class OpenApiProvider {
         Components components = new Components();
         SecurityScheme securityScheme = new SecurityScheme();
         securityScheme.setType(SecurityScheme.Type.APIKEY);
-        securityScheme.setName("x-cdp-actor-crn");
+        securityScheme.setName(ACTOR_CRN_HEADER);
         securityScheme.setIn(HEADER);
         components.setSecuritySchemes(Map.of("Authorization", securityScheme));
         return components;

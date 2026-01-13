@@ -236,6 +236,7 @@ public class ThreadBasedUserCrnProvider {
     private static void addUserCrnAndTenantToMdcContext(String userCrn) {
         MdcContext.Builder builder = MdcContext.builder();
         doIfNotNull(userCrn, builder::userCrn);
+        doIfNotNull(getAccountIdIfAvailable(userCrn), builder::tenant);
         builder.buildMdc();
     }
 }
