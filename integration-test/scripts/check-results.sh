@@ -6,7 +6,8 @@
 #this value changed 2022.11.24 from 4.5 to 4.6 (new test was added: DistroXUpgradeTests.testDistroXOsUpgradeByUpgradeSets)
 #this value changed 2023.11.13 from 4.9 to 5.1 (new test was added: DistroXUpgradeTests.testDistroXBatchOsUpgrade)
 #this value changed 2023.11.15 from 5.1 to 5.5 (new test was added: Cloudera runtime 7.3.0 introduced)
-: ${INTEGRATIONTEST_MAX_PG_NETWORK_OUTPUT:="5.5GB"}
+#this value changed 2026.01.22 from 5.5 to 5.7 (new test was added: MockSdxPemTests)
+: ${INTEGRATIONTEST_MAX_PG_NETWORK_OUTPUT:="5.7GB"}
 
 status_code=0
 

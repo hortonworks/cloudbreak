@@ -147,6 +147,7 @@ class GatewayPublicEndpointManagementServiceTest {
     @BeforeEach
     void setUp() throws TransactionService.TransactionExecutionException {
         ReflectionTestUtils.setField(underTest, "certGenerationEnabled", Boolean.TRUE);
+        ReflectionTestUtils.setField(underTest, "certGenerationEnabledForMock", Boolean.TRUE);
         lenient().when(transactionService.required(any(Supplier.class))).then(invocationOnMock -> ((Supplier) invocationOnMock.getArgument(0)).get());
     }
 

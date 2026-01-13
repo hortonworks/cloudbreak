@@ -810,7 +810,9 @@ clusterProxy:
 
 gateway:
   cert:
-    generation.enabled: false
+    generation:
+        enabled: true
+        enabled-for-mock: true
     polling:
       attempt: 50
       intervall: 10

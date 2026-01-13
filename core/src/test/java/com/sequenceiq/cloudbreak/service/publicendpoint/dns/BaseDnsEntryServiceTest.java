@@ -24,6 +24,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.PemDnsEntryCreateOrUpdateException;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType;
@@ -97,6 +98,7 @@ class BaseDnsEntryServiceTest {
     @BeforeEach
     void setupEach() {
         underTest.setCertGenerationEnabled(true);
+        ReflectionTestUtils.setField(underTest, "certGenerationEnabledForMock", Boolean.TRUE);
     }
 
     @Test

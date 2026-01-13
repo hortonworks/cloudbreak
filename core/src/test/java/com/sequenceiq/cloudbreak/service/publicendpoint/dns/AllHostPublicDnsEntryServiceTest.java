@@ -22,6 +22,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.PemDnsEntryCreateOrUpdateException;
 import com.sequenceiq.cloudbreak.TestUtil;
@@ -143,6 +144,7 @@ class AllHostPublicDnsEntryServiceTest {
     @CsvSource({"1", "2", "3"})
     void testCreateOrUpdateHybridOnPrem(int ecsMasterNodeCount) throws PemDnsEntryCreateOrUpdateException {
         underTest.setCertGenerationEnabled(true);
+        ReflectionTestUtils.setField(underTest, "certGenerationEnabledForMock", Boolean.TRUE);
         Stack stack = new Stack();
         stack.setEnvironmentCrn(ENVIRONMENT_CRN);
         Cluster cluster = new Cluster();

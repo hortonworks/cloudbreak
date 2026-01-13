@@ -27,6 +27,7 @@ import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentModifyProxy
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentReInitializeDefaultExternalizedComputeClusterAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentRefreshAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentStartAction;
+import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentStartWithoutDatahubAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentStopAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentTrustSetupAction;
 import com.sequenceiq.it.cloudbreak.action.v4.environment.EnvironmentVerticalScaleAction;
@@ -103,6 +104,10 @@ public class EnvironmentTestClient {
 
     public Action<EnvironmentTestDto, EnvironmentClient> start() {
         return new EnvironmentStartAction();
+    }
+
+    public Action<EnvironmentTestDto, EnvironmentClient> startWithoutDatahub() {
+        return new EnvironmentStartWithoutDatahubAction();
     }
 
     public Action<EnvironmentTestDto, EnvironmentClient> changeAuthentication() {

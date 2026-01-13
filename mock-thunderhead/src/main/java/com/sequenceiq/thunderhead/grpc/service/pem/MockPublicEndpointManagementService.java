@@ -4,6 +4,8 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 import java.security.cert.X509Certificate;
 import java.util.Base64;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -32,6 +34,8 @@ import io.grpc.stub.StreamObserver;
 public class MockPublicEndpointManagementService extends PublicEndpointManagementGrpc.PublicEndpointManagementImplBase {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MockPublicEndpointManagementService.class);
+
+    private final Map<String, Map<String, Integer>> environmentsToDeny = new HashMap<>();
 
     @Inject
     private LegacyEnvironmentNameBasedDomainNameProvider environmentNameBasedDomainNameProvider;
@@ -110,7 +114,13 @@ public class MockPublicEndpointManagementService extends PublicEndpointManagemen
     @Override
     public void createDnsEntry(PublicEndpointManagementProto.CreateDnsEntryRequest request,
             StreamObserver<PublicEndpointManagementProto.CreateDnsEntryResponse> responseObserver) {
-        responseObserver.onNext(PublicEndpointManagementProto.CreateDnsEntryResponse.newBuilder().build());
+        PublicEndpointManagementProto.CreateDnsEntryResponse response = PublicEndpointManagementProto.CreateDnsEntryResponse.newBuilder().build();
+        LOGGER.info("createDnsEntry request: {}, response: {}", request, response);
+        if (isRequestDeniable(request, responseObserver)) {
+            return;
+        }
+
+        responseObserver.onNext(response);
         responseObserver.onCompleted();
     }
 
@@ -119,5 +129,72 @@ public class MockPublicEndpointManagementService extends PublicEndpointManagemen
             StreamObserver<PublicEndpointManagementProto.DeleteDnsEntryResponse> responseObserver) {
         responseObserver.onNext(PublicEndpointManagementProto.DeleteDnsEntryResponse.newBuilder().build());
         responseObserver.onCompleted();
+    }
+
+    private boolean isRequestDeniable(PublicEndpointManagementProto.CreateDnsEntryRequest request,
+            StreamObserver<PublicEndpointManagementProto.CreateDnsEntryResponse> responseObserver) {
+        String environment = request.getEnvironment();
+        String endpoint = request.getEndpoint();
+
+        if (environment.contains("denydns")) {
+            LOGGER.info("Request was denied for environment: {}", environment);
+            responseObserver.onError(new Throwable("This environment/endpoint is denied"));
+            return true;
+        }
+
+        if (environment.contains("deny2nddnsatdl") &&
+                isInTheDeniableMap(environment, endpoint) &&
+                request.getDnsTarget().getTargetIPs().getIP(0).contains("datalake")
+        ) {
+            LOGGER.info("Second request was denied for environment {} with endpoint: {} ", environment, endpoint);
+            addOrIncreaseEnvironmentsToDenyMap(environment, endpoint);
+            responseObserver.onError(new Throwable("This environment/endpoint is denied"));
+            removeFromMapIfItWasDeniedAfterRetries(environment, endpoint);
+            return true;
+        }
+
+        if (environment.contains("deny2nddnsatdh") &&
+                isInTheDeniableMap(environment, endpoint) &&
+                request.getDnsTarget().getTargetIPs().getIP(0).contains("datahub")
+        ) {
+            LOGGER.info("Second request was denied for environment {} with endpoint: {} ", environment, endpoint);
+            addOrIncreaseEnvironmentsToDenyMap(environment, endpoint);
+            responseObserver.onError(new Throwable("This environment/endpoint is denied"));
+            removeFromMapIfItWasDeniedAfterRetries(environment, endpoint);
+            return true;
+        }
+
+        if (environment.contains("deny")) {
+            addOrIncreaseEnvironmentsToDenyMap(environment, endpoint);
+        }
+
+        LOGGER.info("Request is allowed for environment {} with endpoint: {} ", environment, endpoint);
+        return false;
+    }
+
+    private void addOrIncreaseEnvironmentsToDenyMap(String environment, String endpoint) {
+        LOGGER.info("Environment {} with endpoint {} was added to the HashTable",
+                environment,
+                endpoint);
+        // if environment and endpoint does not exist set it to one, otherwise increase it by one
+        environmentsToDeny.computeIfAbsent(environment, k -> new HashMap<>())
+                .compute(endpoint, (k, v) -> v == null ? 1 : v + 1);
+        LOGGER.info("endpoint {} was called {} times",
+                endpoint,
+                environmentsToDeny.get(environment).get(endpoint));
+    }
+
+    private boolean isInTheDeniableMap(String environment, String endpoint) {
+        return (environmentsToDeny.containsKey(environment) &&
+                environmentsToDeny.get(environment).containsKey(endpoint));
+    }
+
+    private void removeFromMapIfItWasDeniedAfterRetries(String environment, String endpoint) {
+        // first successful create + 3 denied with retries
+        if (environmentsToDeny.get(environment).get(endpoint) == 4) {
+            LOGGER.info("Environment {} was removed from the HashTable", environment);
+            environmentsToDeny.remove(environment);
+        }
+
     }
 }

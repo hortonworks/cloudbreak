@@ -13,8 +13,11 @@ import software.amazon.awssdk.utils.StringUtils;
 
 public abstract class BasePublicEndpointManagementService {
 
-    @Value("${gateway.cert.generation.enabled:false}")
+    @Value("${gateway.cert.generation.enabled:true}")
     private boolean certGenerationEnabled;
+
+    @Value("${gateway.cert.generation.enabled-for-mock:true}")
+    private boolean certGenerationEnabledForMock;
 
     @Inject
     private DnsManagementService dnsManagementService;
@@ -26,7 +29,10 @@ public abstract class BasePublicEndpointManagementService {
     private CertificateCreationService certificateCreationService;
 
     public boolean manageCertificateAndDnsInPem(StackView stackView) {
-        return certGenerationEnabled && !StringUtils.equals(CloudPlatform.MOCK.name(), stackView.getCloudPlatform());
+        if (StringUtils.equals(CloudPlatform.MOCK.name(), stackView.getCloudPlatform())) {
+            return certGenerationEnabledForMock;
+        }
+        return certGenerationEnabled;
     }
 
     public DnsManagementService getDnsManagementService() {

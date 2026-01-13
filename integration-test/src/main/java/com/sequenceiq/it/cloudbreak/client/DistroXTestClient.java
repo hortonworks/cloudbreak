@@ -43,6 +43,7 @@ import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXShowBlueprintAction
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXSkuMigrationAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXStartAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXStopAction;
+import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXUpdatePublicDnsEntriesAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXUpgradeAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXUpgradeInternalAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXVerticalScaleAction;
@@ -209,5 +210,9 @@ public class DistroXTestClient {
 
     public Action<DistroXTestDto, CloudbreakClient> attachRecipe() {
         return new DistroXAttachRecipeAction();
+    }
+
+    public Action<DistroXTestDto, CloudbreakClient> updatePublicDnsEntries() {
+        return new DistroXUpdatePublicDnsEntriesAction();
     }
 }

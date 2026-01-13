@@ -44,6 +44,10 @@ public class ResourcePropertyProvider {
         return trim(prefix() + '-' + uuid(), ENVIRONMENT_NAME_MAX_LENGTH);
     }
 
+    public String getEnvironmentName(String additionalPrefix) {
+        return trim(prefix() + '-' + additionalPrefix + '-' + uuid(), ENVIRONMENT_NAME_MAX_LENGTH);
+    }
+
     public String getEnvironmentName(CloudPlatform cloudPlatform) {
         return trim(prefix(cloudPlatform) + '-' + uuid(), ENVIRONMENT_NAME_MAX_LENGTH);
     }

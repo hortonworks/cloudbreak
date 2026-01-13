@@ -36,6 +36,7 @@ import com.sequenceiq.it.cloudbreak.action.sdx.SdxInstanceMetadataUpdateAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxInternalOsUpgradeAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxInternalResizeRecoveryAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxInternalSkuMigrationAction;
+import com.sequenceiq.it.cloudbreak.action.sdx.SdxInternalUpdatePublicDnsEntriesAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxInternalUpgradeAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxListAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxOsUpgradeAction;
@@ -59,6 +60,7 @@ import com.sequenceiq.it.cloudbreak.action.sdx.SdxStopAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxStopByNameAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxSyncAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxSyncInternalAction;
+import com.sequenceiq.it.cloudbreak.action.sdx.SdxUpdatePublicDnsEntriesAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxUpgradeAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxUpgradeDatabaseServerAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxUpgradeRecoveryAction;
@@ -311,5 +313,13 @@ public class SdxTestClient {
 
     public Action<SdxInternalTestDto, SdxClient> skuMigrationInternal() {
         return new SdxInternalSkuMigrationAction();
+    }
+
+    public Action<SdxTestDto, SdxClient> updatePublicDnsEntries() {
+        return new SdxUpdatePublicDnsEntriesAction();
+    }
+
+    public Action<SdxInternalTestDto, SdxClient> updatePublicDnsEntriesInternal() {
+        return new SdxInternalUpdatePublicDnsEntriesAction();
     }
 }
