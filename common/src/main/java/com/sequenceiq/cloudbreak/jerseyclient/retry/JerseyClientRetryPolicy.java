@@ -21,9 +21,8 @@ public class JerseyClientRetryPolicy implements RetryPolicy {
         if (lastThrowable == null) {
             return true;
         } else {
-            LOGGER.debug(String.format("Retry attempt %s. %s", context.getRetryCount(), context.getLastThrowable()));
-            if (lastThrowable instanceof WebApplicationException) {
-                WebApplicationException wae = (WebApplicationException) lastThrowable;
+            LOGGER.debug("Retry attempt {}. {}", context.getRetryCount(), context.getLastThrowable().toString());
+            if (lastThrowable instanceof WebApplicationException wae) {
                 Response.StatusType statusInfo = wae.getResponse().getStatusInfo();
                 if (statusInfo.getFamily() == Response.Status.Family.CLIENT_ERROR) {
                     return false;
@@ -46,7 +45,7 @@ public class JerseyClientRetryPolicy implements RetryPolicy {
 
     @Override
     public void registerThrowable(RetryContext context, Throwable throwable) {
-        RetryContextSupport contextSupport = RetryContextSupport.class.cast(context);
+        RetryContextSupport contextSupport = (RetryContextSupport) context;
         contextSupport.registerThrowable(throwable);
         if (throwable != null) {
             LOGGER.warn("Exception occurred during a REST API call.", throwable);

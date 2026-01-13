@@ -10,6 +10,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
@@ -19,6 +21,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Component;
 
@@ -51,10 +54,11 @@ import com.cloudera.thunderhead.service.environments2api.model.ServiceEndPoint;
 import com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto;
 import com.sequenceiq.cloudbreak.cm.DataView;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
-import com.sequenceiq.cloudbreak.common.network.NetworkUtil;
 import com.sequenceiq.remoteenvironment.DescribeEnvironmentPropertiesV2Response;
 import com.sequenceiq.remoteenvironment.DescribeEnvironmentV2Response;
 import com.sequenceiq.remoteenvironment.exception.OnPremCMApiException;
+
+import okhttp3.OkHttpClient;
 
 @Component
 class ClassicClusterDescribeService {
@@ -80,6 +84,12 @@ class ClassicClusterDescribeService {
     @Inject
     private ClassicClusterToEnvironmentConverter classicClusterToEnvironmentConverter;
 
+    @Value("${remoteenvironment.timeout.cm.version}")
+    private int versionFetchTimeout;
+
+    @Value("${remoteenvironment.timeout.cm.resources}")
+    private int resourcesFetchTimeout;
+
     public DescribeEnvironmentV2Response describe(OnPremisesApiProto.Cluster cluster) {
         DescribeEnvironmentV2Response describeEnvironmentV2Response = new DescribeEnvironmentV2Response();
         describeEnvironmentV2Response.setAdditionalProperties(createEnvironmentProperties(cluster));
@@ -101,7 +111,7 @@ class ClassicClusterDescribeService {
         environment.setPvcEnvironmentDetails(pvcEnvironmentDetails);
         environment.setStatus(pvcEnvironmentDetails.getPrivateDatalakeDetails().getStatus().name());
         environment.setClouderaManagerClusterUuid(cluster.getCmClusterUuid());
-        populateVersions(cluster, environment, cmResources);
+        populateVersions(environment, cmResources);
         return environment;
     }
 
@@ -196,7 +206,6 @@ class ClassicClusterDescribeService {
             kerberosInfo.setKerberosRealm(apiKerberosInfo.getKerberosRealm());
             String kdcHost = apiKerberosInfo.getKdcHost();
             kerberosInfo.setKdcHost(kdcHost);
-            kerberosInfo.setKdcHostIp(NetworkUtil.resolveHostAddress(kdcHost).orElse(null));
         } else {
             kerberosInfo.setKerberized(false);
         }
@@ -226,7 +235,7 @@ class ClassicClusterDescribeService {
                 .orElse("");
     }
 
-    private void populateVersions(OnPremisesApiProto.Cluster cluster, Environment environment, CMResources cmResources) {
+    private void populateVersions(Environment environment, CMResources cmResources) {
         environment.setClouderaManagerVersion(cmResources.apiVersionInfo().getVersion());
         if (cmResources.cdpParcel() != null) {
             environment.setCdpRuntimeVersion(cmResources.cdpParcel().getVersion());
@@ -236,39 +245,58 @@ class ClassicClusterDescribeService {
     private CMResources populateCmResources(OnPremisesApiProto.Cluster cluster) {
         ApiClient apiClient = apiClientProvider.getClouderaManagerRootClient(cluster);
         ApiClient apiV51Client = apiClientProvider.getClouderaManagerV51Client(cluster);
-        ClustersResourceApi clustersResourceApi = clouderaManagerApiFactory.getClustersResourceApi(apiV51Client);
-        ClouderaManagerResourceApi cmResourceApi = clouderaManagerApiFactory.getClouderaManagerResourceApi(apiV51Client);
-        ParcelsResourceApi parcelsResourceApi = clouderaManagerApiFactory.getParcelsResourceApi(apiV51Client);
-        CdpResourceApi cdpResourceApi = clouderaManagerApiFactory.getCdpResourceApi(apiClient);
-        String clusterName = cluster.getName();
-
-        Future<ApiParcel> cdpParcel = taskExecutor.submit(() -> parcelsResourceApi.readParcels(clusterName, DataView.SUMMARY.name()).getItems().stream()
-                        .filter(parcel -> CDP_PARCEL_PRODUCT_NAME.equals(parcel.getProduct()) && CDP_PARCEL_ACTIVATED.equals(parcel.getStage()))
-                        .findFirst()
-                        .orElse(null));
-        Future<ApiHostList> hostList = taskExecutor.submit(() -> clustersResourceApi.listHosts(clusterName, null, null, DataView.SUMMARY.name()));
-        Future<ApiCluster> apiCluster = taskExecutor.submit(() -> clustersResourceApi.readCluster(clusterName));
-        Future<ApiRemoteDataContext> remoteDataContext = taskExecutor.submit(() -> cdpResourceApi.getRemoteContextByCluster(cluster.getName()));
-        Future<ApiCmServerList> cmServerList = taskExecutor.submit(cmResourceApi::readInstances);
-        Future<ApiKerberosInfo> kerberosInfo = taskExecutor.submit(() -> clustersResourceApi.getKerberosInfo(clusterName));
-
+        OkHttpClient originalHttpClient = apiV51Client.getHttpClient();
+        OkHttpClient versionHttpClient = originalHttpClient.newBuilder()
+                .connectTimeout(versionFetchTimeout, TimeUnit.SECONDS)
+                .readTimeout(versionFetchTimeout, TimeUnit.SECONDS)
+                .build();
+        apiV51Client.setHttpClient(versionHttpClient);
+        ClouderaManagerResourceApi resourceApi = clouderaManagerApiFactory.getClouderaManagerResourceApi(apiV51Client);
         try {
-            return new CMResources(
-                    cmResourceApi.getVersion(),
-                    cdpParcel.get(),
-                    hostList.get(),
-                    apiCluster.get(),
-                    remoteDataContext.get(),
-                    cmServerList.get(),
-                    kerberosInfo.get());
+            ApiVersionInfo version = resourceApi.getVersion();
+            apiV51Client.setHttpClient(originalHttpClient);
+            ClustersResourceApi clustersResourceApi = clouderaManagerApiFactory.getClustersResourceApi(apiV51Client);
+            ClouderaManagerResourceApi cmResourceApi = clouderaManagerApiFactory.getClouderaManagerResourceApi(apiV51Client);
+            ParcelsResourceApi parcelsResourceApi = clouderaManagerApiFactory.getParcelsResourceApi(apiV51Client);
+            CdpResourceApi cdpResourceApi = clouderaManagerApiFactory.getCdpResourceApi(apiClient);
+            String clusterName = cluster.getName();
+
+            Future<ApiParcel> cdpParcel = taskExecutor.submit(() -> parcelsResourceApi.readParcels(clusterName, DataView.SUMMARY.name()).getItems().stream()
+                    .filter(parcel -> CDP_PARCEL_PRODUCT_NAME.equals(parcel.getProduct()) && CDP_PARCEL_ACTIVATED.equals(parcel.getStage()))
+                    .findFirst()
+                    .orElse(null));
+            Future<ApiHostList> hostList = taskExecutor.submit(() -> clustersResourceApi.listHosts(clusterName, null, null, DataView.SUMMARY.name()));
+            Future<ApiCluster> apiCluster = taskExecutor.submit(() -> clustersResourceApi.readCluster(clusterName));
+            Future<ApiRemoteDataContext> remoteDataContext = taskExecutor.submit(() -> cdpResourceApi.getRemoteContextByCluster(cluster.getName()));
+            Future<ApiCmServerList> cmServerList = taskExecutor.submit(cmResourceApi::readInstances);
+            Future<ApiKerberosInfo> kerberosInfo = taskExecutor.submit(() -> clustersResourceApi.getKerberosInfo(clusterName));
+
+            try {
+                return new CMResources(
+                        version,
+                        cdpParcel.get(resourcesFetchTimeout, TimeUnit.SECONDS),
+                        hostList.get(resourcesFetchTimeout, TimeUnit.SECONDS),
+                        apiCluster.get(resourcesFetchTimeout, TimeUnit.SECONDS),
+                        remoteDataContext.get(resourcesFetchTimeout, TimeUnit.SECONDS),
+                        cmServerList.get(resourcesFetchTimeout, TimeUnit.SECONDS),
+                        kerberosInfo.get(resourcesFetchTimeout, TimeUnit.SECONDS));
+            } catch (ExecutionException e) {
+                String message = String.format("Failed to gather additional info from Cloudera Manager at %s", cluster.getManagerUri());
+                LOGGER.error(message, e);
+                if (e.getCause() instanceof ApiException apiException) {
+                    throw new OnPremCMApiException(message + ": " + apiException.getMessage(), apiException);
+                } else {
+                    throw new OnPremCMApiException(message);
+                }
+            } catch (InterruptedException | TimeoutException e) {
+                String message = String.format("Failed to gather additional info from Cloudera Manager at %s", cluster.getManagerUri());
+                LOGGER.error(message, e);
+                throw new OnPremCMApiException(message);
+            }
         } catch (ApiException e) {
-            String message = String.format("Failed to gather additional info from Cloudera Manager at %s",  cluster.getManagerUri());
+            String message = String.format("Failed to reach Cloudera Manager at %s", cluster.getManagerUri());
             LOGGER.error(message, e);
-            throw new OnPremCMApiException(message + ": " + e.getMessage(), e);
-        } catch (ExecutionException | InterruptedException e) {
-            String message = String.format("Failed to gather additional info from Cloudera Manager at %s",  cluster.getManagerUri());
-            LOGGER.error(message, e);
-            throw new OnPremCMApiException(message);
+            throw new OnPremCMApiException(message, e);
         }
     }
 

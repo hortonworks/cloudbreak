@@ -108,6 +108,10 @@ remoteenvironment:
   intermediate.threadpool:
     core.size: 40
     capacity.size: 4000
+  timeout:
+    cm:
+      version: 5
+      resources: 90
 
 cdp.structuredevent:
   rest:
