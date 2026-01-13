@@ -912,6 +912,21 @@
       "visibleForDatahub": true,
       "minVersion": "7.3.1",
       "minHttpsVersion": "7.3.2"
+    },
+    {
+      "name": "DATAVIZ",
+      "displayName": "Cloudera Data Visualization",
+      "serviceName": "DATAVIZ_WEBSERVER",
+      "knoxService": "DATAVIZ",
+      "knoxUrl": "/dataviz/",
+      "ssoSupported": false,
+      "port": 8100,
+      "tlsPort": 8100,
+      "apiOnly": true,
+      "apiIncluded": true,
+      "visibleForDatalake": false,
+      "visibleForDatahub": true,
+      "minVersion": "7.3.2"
     }
   ]
 }

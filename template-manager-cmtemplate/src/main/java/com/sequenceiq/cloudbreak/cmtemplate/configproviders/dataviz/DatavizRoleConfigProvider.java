@@ -65,7 +65,6 @@ public class DatavizRoleConfigProvider extends AbstractRdsRoleConfigProvider {
         if (datavizRdsView.isUseSsl()) {
             configs.add(config(DATAVIZ_SAFETY_VALVE, getSafetyValveSslConfig(datavizRdsView)));
         }
-
         return configs;
     }
 
