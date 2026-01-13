@@ -27,6 +27,8 @@ import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.environment.service.freeipa.FreeIpaService;
 import com.sequenceiq.environment.environment.service.recipe.EnvironmentRecipeService;
 import com.sequenceiq.environment.exception.FreeIpaOperationFailedException;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.flow.core.FlowConstants;
 import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
@@ -160,9 +162,10 @@ public class FreeIpaDeletionHandler extends EventSenderAwareHandler<EnvironmentD
 
     private void deleteFreeIpa(Environment environment, boolean forced, String flowId, Long resourceId) {
         freeIpaService.delete(environment.getResourceCrn(), forced);
+        FlowIdentifier flowIdentifier = flowId != null ? new FlowIdentifier(FlowType.FLOW, flowId) : null;
         ExtendedPollingResult result = freeIpaPollingService.pollWithTimeout(
                 new FreeIpaDeletionRetrievalTask(freeIpaService, flowLogService),
-                new FreeIpaPollerObject(environment.getId(), environment.getResourceCrn(), flowId, resourceId),
+                new FreeIpaPollerObject(environment.getId(), environment.getResourceCrn(), flowIdentifier, resourceId),
                 FreeIpaDeletionRetrievalTask.FREEIPA_RETRYING_INTERVAL,
                 FreeIpaDeletionRetrievalTask.FREEIPA_RETRYING_COUNT,
                 FreeIpaDeletionRetrievalTask.FREEIPA_FAILURE_COUNT);

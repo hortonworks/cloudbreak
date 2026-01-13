@@ -36,6 +36,11 @@ import com.sequenceiq.cloudbreak.common.exception.ExceptionResponse;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.environment.events.EventSenderService;
 import com.sequenceiq.environment.exception.FreeIpaOperationFailedException;
+import com.sequenceiq.flow.api.FlowEndpoint;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.flow.api.model.FlowLogResponse;
+import com.sequenceiq.flow.api.model.FlowType;
+import com.sequenceiq.freeipa.api.v1.freeipa.flow.FreeIpaV1FlowEndpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.UserV1Endpoint;
@@ -68,6 +73,12 @@ class FreeIpaServiceTest {
     private FreeIpaV1Endpoint freeIpaV1Endpoint;
 
     @Mock
+    private FlowEndpoint flowEndpoint;
+
+    @Mock
+    private FreeIpaV1FlowEndpoint freeIpaV1FlowEndpoint;
+
+    @Mock
     private UserV1Endpoint userV1Endpoint;
 
     @Mock
@@ -93,23 +104,6 @@ class FreeIpaServiceTest {
         lenient().when(regionAwareInternalCrnGeneratorFactory.iam()).thenReturn(regionAwareInternalCrnGenerator);
         lenient().when(regionAwareInternalCrnGenerator.getInternalCrnForServiceAsString()).thenReturn(USERCRN);
     }
-
-//    @Test
-//    void getSyncOperationStatusSuccess() {
-//        SyncOperationStatus status = createStatus(SynchronizationStatus.COMPLETED, "nope");
-//        when(userV1Endpoint.getSyncOperationStatusInternal(any(), eq(OPERATION))).thenReturn(status);
-//        SyncOperationStatus result = ThreadBasedUserCrnProvider.doAsInternalActor(() ->
-//                underTest.getSyncOperationStatus(ENVCRN, OPERATION));
-//        assertThat(result).isEqualTo(status);
-//    }
-
-//    @Test
-//    void getSyncOperationStatusFailure() {
-//        when(webApplicationExceptionMessageExtractor.getErrorMessage(any())).thenReturn("custom error");
-//        when(userV1Endpoint.getSyncOperationStatusInternal(any(), eq(OPERATION))).thenThrow(new WebApplicationException("network error"));
-//        assertThatThrownBy(() -> ThreadBasedUserCrnProvider.doAsInternalActor(() ->
-//                underTest.getSyncOperationStatus(ENVCRN, OPERATION))).isInstanceOf(FreeIpaOperationFailedException.class);
-//    }
 
     @Test
     void synchronizeAllUsersInEnvironmentOngoing() {
@@ -186,6 +180,26 @@ class FreeIpaServiceTest {
         assertThatThrownBy(() -> ThreadBasedUserCrnProvider.doAs(USERCRN, () -> underTest.getOperationStatus("operationId")))
                 .hasMessage("custom error")
                 .isExactlyInstanceOf(FreeIpaOperationFailedException.class);
+    }
+
+    @Test
+    void getLastFlowIdWithFlowTest() {
+        FlowLogResponse flowLogResponse = new FlowLogResponse();
+        flowLogResponse.setFlowId("flowId123");
+        when(freeIpaV1FlowEndpoint.getLastFlowByResourceCrn(ENVCRN)).thenReturn(flowLogResponse);
+        FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAs(USERCRN, () -> underTest.getLastFlowId(ENVCRN));
+        assertThat(flowIdentifier.getType()).isEqualTo(FlowType.FLOW);
+        assertThat(flowIdentifier.getPollableId()).isEqualTo("flowId123");
+    }
+
+    @Test
+    void getLastFlowIdWithFlowChainTest() {
+        FlowLogResponse flowLogResponse = new FlowLogResponse();
+        flowLogResponse.setFlowChainId("flowId123");
+        when(freeIpaV1FlowEndpoint.getLastFlowByResourceCrn(ENVCRN)).thenReturn(flowLogResponse);
+        FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAs(USERCRN, () -> underTest.getLastFlowId(ENVCRN));
+        assertThat(flowIdentifier.getType()).isEqualTo(FlowType.FLOW_CHAIN);
+        assertThat(flowIdentifier.getPollableId()).isEqualTo("flowId123");
     }
 
     @Test

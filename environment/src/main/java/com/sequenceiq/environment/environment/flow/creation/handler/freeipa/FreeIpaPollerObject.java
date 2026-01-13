@@ -1,24 +1,26 @@
 package com.sequenceiq.environment.environment.flow.creation.handler.freeipa;
 
+import com.sequenceiq.flow.api.model.FlowIdentifier;
+
 public class FreeIpaPollerObject {
 
     private final Long environmentId;
 
     private final String environmentCrn;
 
-    private final String flowId;
+    private final FlowIdentifier flowIdentifier;
 
     private final Long resourceId;
 
-    public FreeIpaPollerObject(Long environmentId, String environmentCrn) {
-        this(environmentId, environmentCrn, null, null);
+    public FreeIpaPollerObject(Long environmentId, String environmentCrn, FlowIdentifier flowIdentifier) {
+        this(environmentId, environmentCrn, flowIdentifier, null);
     }
 
-    public FreeIpaPollerObject(Long environmentId, String environmentCrn, String flowId, Long resourceId) {
+    public FreeIpaPollerObject(Long environmentId, String environmentCrn, FlowIdentifier flowIdentifier, Long resourceId) {
         this.environmentId = environmentId;
         this.environmentCrn = environmentCrn;
-        this.flowId = flowId;
         this.resourceId = resourceId;
+        this.flowIdentifier = flowIdentifier;
     }
 
     public String getEnvironmentCrn() {
@@ -29,11 +31,11 @@ public class FreeIpaPollerObject {
         return environmentId;
     }
 
-    public String getFlowId() {
-        return flowId;
-    }
-
     public Long getResourceId() {
         return resourceId;
+    }
+
+    public FlowIdentifier getFlowIdentifier() {
+        return flowIdentifier;
     }
 }

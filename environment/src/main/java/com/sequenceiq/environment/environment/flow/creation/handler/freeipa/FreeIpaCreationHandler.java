@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Strings;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
@@ -51,6 +52,7 @@ import com.sequenceiq.environment.environment.service.freeipa.FreeIpaService;
 import com.sequenceiq.environment.environment.v1.converter.BackupConverter;
 import com.sequenceiq.environment.environment.v1.converter.TelemetryApiConverter;
 import com.sequenceiq.environment.exception.FreeIpaOperationFailedException;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
 import com.sequenceiq.freeipa.api.v1.dns.DnsV1Endpoint;
@@ -176,12 +178,15 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
         Optional<DescribeFreeIpaResponse> freeIpa = freeIpaService.describe(environmentDto.getResourceCrn());
         if (freeIpa.isEmpty()) {
             LOGGER.info("FreeIpa for environmentCrn '{}' was not found, creating a new one.", environmentDto.getResourceCrn());
-            CreateFreeIpaRequest createFreeIpaRequest = createFreeIpaRequest(environmentDto, platformVariant);
-            freeIpaService.create(createFreeIpaRequest);
-            awaitFreeIpaCreation(environmentDto);
+            awaitFreeIpaCreation(
+                    environmentDto,
+                    freeIpaService.create(createFreeIpaRequest(environmentDto, platformVariant)));
         } else {
             LOGGER.info("FreeIpa for environmentCrn '{}' already exists. Using this one.", environmentDto.getResourceCrn());
-            awaitFreeIpaCreation(environmentDto);
+            FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAsInternalActor(
+                    () -> freeIpaService.getLastFlowId(freeIpa.get().getCrn())
+            );
+            awaitFreeIpaCreation(environmentDto, flowIdentifier);
         }
         AddDnsZoneForSubnetIdsRequest addDnsZoneForSubnetIdsRequest = createAddDnsZoneForSubnetIdsRequest(environmentDto);
         if (shouldSendSubnetIdsToFreeIpa(addDnsZoneForSubnetIdsRequest)) {
@@ -413,10 +418,10 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
         return securityRuleRequest;
     }
 
-    private void awaitFreeIpaCreation(EnvironmentDto environment) {
+    private void awaitFreeIpaCreation(EnvironmentDto environment, FlowIdentifier flowIdentifier) {
         ExtendedPollingResult pollWithTimeout = freeIpaPollingService.pollWithTimeout(
                 new FreeIpaCreationRetrievalTask(freeIpaService),
-                new FreeIpaPollerObject(environment.getId(), environment.getResourceCrn()),
+                new FreeIpaPollerObject(environment.getId(), environment.getResourceCrn(), flowIdentifier),
                 FreeIpaCreationRetrievalTask.FREEIPA_RETRYING_INTERVAL,
                 FreeIpaCreationRetrievalTask.FREEIPA_RETRYING_COUNT,
                 FreeIpaCreationRetrievalTask.FREEIPA_FAILURE_COUNT);

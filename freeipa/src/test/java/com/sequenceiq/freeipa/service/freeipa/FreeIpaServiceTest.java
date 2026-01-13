@@ -14,6 +14,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.common.dal.ResourceBasicView;
+import com.sequenceiq.flow.api.FlowEndpoint;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.util.CrnService;
@@ -32,6 +33,9 @@ public class FreeIpaServiceTest {
 
     @Mock
     private CrnService crnService;
+
+    @Mock
+    private FlowEndpoint flowEndpoint;
 
     @InjectMocks
     private FreeIpaService underTest;

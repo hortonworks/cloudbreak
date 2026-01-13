@@ -6,6 +6,7 @@ import java.util.Set;
 import jakarta.ws.rs.NotFoundException;
 import jakarta.ws.rs.WebApplicationException;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -22,6 +23,8 @@ import com.sequenceiq.environment.events.EventSenderService;
 import com.sequenceiq.environment.exception.FreeIpaOperationFailedException;
 import com.sequenceiq.flow.api.model.FlowCheckResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.flow.api.model.FlowLogResponse;
+import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.flow.api.model.operation.OperationView;
 import com.sequenceiq.freeipa.api.v1.freeipa.crossrealm.TrustV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.flow.FreeIpaV1FlowEndpoint;
@@ -92,13 +95,17 @@ public class FreeIpaService {
         this.flowEndpoint = flowEndpoint;
     }
 
-    public DescribeFreeIpaResponse create(CreateFreeIpaRequest createFreeIpaRequest) {
+    public FlowIdentifier create(CreateFreeIpaRequest createFreeIpaRequest) {
         try {
-            return freeIpaV1Endpoint.create(createFreeIpaRequest);
+            return freeIpaV1Endpoint.create(createFreeIpaRequest).getFlowIdentifier();
         } catch (WebApplicationException e) {
             Optional<DescribeFreeIpaResponse> describe = describe(createFreeIpaRequest.getEnvironmentCrn());
             if (describe.isPresent()) {
-                return describe.get();
+                FlowLogResponse lastFlow = flowEndpoint.getLastFlowByResourceCrn(describe.get().getCrn());
+                return new FlowIdentifier(
+                        StringUtils.isNotBlank(lastFlow.getFlowChainId()) ? FlowType.FLOW_CHAIN : FlowType.FLOW,
+                        StringUtils.isNotBlank(lastFlow.getFlowChainId()) ? lastFlow.getFlowChainId() : lastFlow.getFlowId()
+                );
             }
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
             LOGGER.error(String.format("Failed to create FreeIpa cluster for environment '%s' due to: '%s'",
@@ -211,6 +218,27 @@ public class FreeIpaService {
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
             LOGGER.error("Failed to get operation status '{}' in account {} due to: '{}'", operationId, accountId, errorMessage, e);
+            throw new FreeIpaOperationFailedException(errorMessage, e);
+        }
+    }
+
+    @Retryable(value = FreeIpaOperationFailedException.class, maxAttempts = 3, backoff = @Backoff(delay = 2000))
+    public FlowIdentifier getLastFlowId(String resourcesCrn) {
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        try {
+            LOGGER.debug("Getting FreeIPA Operation status for resource {}", resourcesCrn);
+
+            FlowLogResponse flowLogResponse = flowEndpoint.getLastFlowByResourceCrn(resourcesCrn);
+            if (StringUtils.isNotBlank(flowLogResponse.getFlowChainId())) {
+                return new FlowIdentifier(FlowType.FLOW_CHAIN, flowLogResponse.getFlowChainId());
+            } else if (StringUtils.isNotBlank(flowLogResponse.getFlowId())) {
+                return new FlowIdentifier(FlowType.FLOW, flowLogResponse.getFlowId());
+            } else {
+                throw new IllegalStateException(String.format("FreeIPA flow for resourceCrn %s is not triggered", resourcesCrn));
+            }
+        } catch (WebApplicationException e) {
+            String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
+            LOGGER.error("Failed to get operation status '{}' in account {} due to: '{}'", resourcesCrn, accountId, errorMessage, e);
             throw new FreeIpaOperationFailedException(errorMessage, e);
         }
     }

@@ -46,7 +46,7 @@ public class FreeIpaDeletionRetrievalTask extends SimpleStatusCheckerTask<FreeIp
                     throw new FreeIpaOperationFailedException("FreeIpa deletion operation failed: " + freeIpaResponse.getStatusReason());
                 }
                 if (!freeIpaResponse.getStatus().isSuccessfullyDeleted()) {
-                    if (!isFlowRunning(freeIpaPollerObject.getFlowId(), freeIpaPollerObject.getResourceId())) {
+                    if (!isFlowRunning(freeIpaPollerObject.getFlowIdentifier().getPollableId(), freeIpaPollerObject.getResourceId())) {
                         throw new FreeIpaOperationFailedException("FreeIpa deletion operation failed. Termination flow is finished but FreeIpa is not deleted");
                     } else {
                         return false;

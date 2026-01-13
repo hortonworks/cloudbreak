@@ -5,11 +5,14 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.polling.SimpleStatusCheckerTask;
 import com.sequenceiq.environment.environment.service.freeipa.FreeIpaService;
 import com.sequenceiq.environment.exception.FreeIpaOperationFailedException;
 import com.sequenceiq.environment.store.EnvironmentInMemoryStateStore;
+import com.sequenceiq.flow.api.model.FlowCheckResponse;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 
 public class FreeIpaCreationRetrievalTask extends SimpleStatusCheckerTask<FreeIpaPollerObject> {
@@ -37,28 +40,56 @@ public class FreeIpaCreationRetrievalTask extends SimpleStatusCheckerTask<FreeIp
             if (freeIpaOptional.isEmpty()) {
                 throw new FreeIpaOperationFailedException("FreeIpa cluster not found for environment: " + environmentCrn);
             }
-            DescribeFreeIpaResponse freeIpa = freeIpaOptional.get();
-            if (freeIpa.getStatus().isDeletionInProgress() || freeIpa.getStatus().isSuccessfullyDeleted()) {
-                LOGGER.error("FreeIpa '{}' '{}' is getting terminated (status:'{}'), polling is cancelled.",
-                        freeIpa.getName(),
-                        freeIpa.getCrn(),
-                        freeIpa.getStatus());
-                throw new FreeIpaOperationFailedException("FreeIpa instance deleted under the creation process.");
-            }
-            if (freeIpa.getStatus().isFailed()) {
-                LOGGER.error("FreeIpa '{}' '{}' is in failed state (status:'{}'), polling is cancelled.",
-                        freeIpa.getName(),
-                        freeIpa.getCrn(),
-                        freeIpa.getStatus());
-                throw new FreeIpaOperationFailedException(String.format("Reason: '%s'", freeIpa.getStatusReason()));
-            }
-            if (freeIpa.getAvailabilityStatus() != null && freeIpa.getAvailabilityStatus().isAvailable()) {
-                return true;
+            checkIfFreeIpaInDeletion(freeIpaOptional.get());
+            if (freeIpaPollerObject.getFlowIdentifier() != null) {
+                return flowPoller(freeIpaPollerObject.getFlowIdentifier(), freeIpaOptional.get());
+            } else {
+                // For backward compatibility. Can be removed after 2.105 release
+                checkIfFreeIpaFailed(freeIpaOptional.get());
+                if (checkFreeIpaAvailable(freeIpaOptional)) {
+                    return true;
+                }
             }
         } catch (Exception e) {
             throw new FreeIpaOperationFailedException("FreeIpa creation operation failed. " + e.getMessage(), e);
         }
         return false;
+    }
+
+    private boolean checkFreeIpaAvailable(Optional<DescribeFreeIpaResponse> freeIpaOptional) {
+        return freeIpaOptional.get().getAvailabilityStatus() != null
+                && freeIpaOptional.get().getAvailabilityStatus().isAvailable();
+    }
+
+    private boolean flowPoller(FlowIdentifier flowIdentifier, DescribeFreeIpaResponse describeFreeIpaResponse) {
+        FlowCheckResponse flowCheckResponse = ThreadBasedUserCrnProvider.doAsInternalActor(() -> freeIpaService.checkFlow(flowIdentifier));
+        if (flowCheckResponse.getHasActiveFlow()) {
+            return false;
+        } else if (flowCheckResponse.getLatestFlowFinalizedAndFailed()) {
+            throw new FreeIpaOperationFailedException("FreeIpa creation operation failed :" + describeFreeIpaResponse.getStatusReason());
+        } else {
+            return true;
+        }
+    }
+
+    private void checkIfFreeIpaInDeletion(DescribeFreeIpaResponse freeIpa) {
+        if (freeIpa.getStatus().isDeletionInProgress() || freeIpa.getStatus().isSuccessfullyDeleted()) {
+            LOGGER.error("FreeIpa '{}' '{}' is getting terminated (status:'{}'), polling is cancelled.",
+                    freeIpa.getName(),
+                    freeIpa.getCrn(),
+                    freeIpa.getStatus());
+            throw new FreeIpaOperationFailedException("FreeIpa instance deleted under the creation process.");
+        }
+    }
+
+    private void checkIfFreeIpaFailed(DescribeFreeIpaResponse freeIpa) {
+        if (freeIpa.getStatus().isFailed()) {
+            LOGGER.error("FreeIpa '{}' '{}' is in failed state (status:'{}'), polling is cancelled.",
+                    freeIpa.getName(),
+                    freeIpa.getCrn(),
+                    freeIpa.getStatus());
+            throw new FreeIpaOperationFailedException(String.format("Reason: '%s'", freeIpa.getStatusReason()));
+        }
     }
 
     @Override

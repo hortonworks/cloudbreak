@@ -19,6 +19,8 @@ import com.sequenceiq.environment.environment.flow.creation.handler.freeipa.Free
 import com.sequenceiq.environment.environment.service.freeipa.FreeIpaService;
 import com.sequenceiq.environment.exception.FreeIpaOperationFailedException;
 import com.sequenceiq.environment.store.EnvironmentInMemoryStateStore;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
@@ -49,7 +51,8 @@ class FreeIpaDeletionRetrievalTaskTest {
 
     @Test
     void testWhenFreeIpaReturnsDeleteFailedShouldThrowException() {
-        FreeIpaPollerObject freeIpaPollerObject = new FreeIpaPollerObject(ENV_ID, ENV_CRN, FLOW_ID, RESOURCE_ID);
+        FreeIpaPollerObject freeIpaPollerObject =
+                new FreeIpaPollerObject(ENV_ID, ENV_CRN, new FlowIdentifier(FlowType.FLOW, FLOW_ID), RESOURCE_ID);
         DescribeFreeIpaResponse describeFreeIpaResponse = mock(DescribeFreeIpaResponse.class);
 
         when(freeIpaService.describe(ENV_CRN)).thenReturn(Optional.of(describeFreeIpaResponse));
@@ -60,7 +63,8 @@ class FreeIpaDeletionRetrievalTaskTest {
 
     @Test
     void testWhenFreeIpaReturnsDeleteCompletedShouldReturnTrue() {
-        FreeIpaPollerObject freeIpaPollerObject = new FreeIpaPollerObject(ENV_ID, ENV_CRN, FLOW_ID, RESOURCE_ID);
+        FreeIpaPollerObject freeIpaPollerObject =
+                new FreeIpaPollerObject(ENV_ID, ENV_CRN, new FlowIdentifier(FlowType.FLOW, FLOW_ID), RESOURCE_ID);
         DescribeFreeIpaResponse describeFreeIpaResponse = mock(DescribeFreeIpaResponse.class);
 
         when(freeIpaService.describe(ENV_CRN)).thenReturn(Optional.of(describeFreeIpaResponse));
@@ -71,7 +75,8 @@ class FreeIpaDeletionRetrievalTaskTest {
 
     @Test
     void testWhenFreeIpaReturnsNonFinalStatusAndFlowIsRunningShouldReturnFalse() {
-        FreeIpaPollerObject freeIpaPollerObject = new FreeIpaPollerObject(ENV_ID, ENV_CRN, FLOW_ID, RESOURCE_ID);
+        FreeIpaPollerObject freeIpaPollerObject =
+                new FreeIpaPollerObject(ENV_ID, ENV_CRN, new FlowIdentifier(FlowType.FLOW, FLOW_ID), RESOURCE_ID);
         DescribeFreeIpaResponse describeFreeIpaResponse = mock(DescribeFreeIpaResponse.class);
         FlowLog flowLog = mock(FlowLog.class);
 
@@ -85,7 +90,8 @@ class FreeIpaDeletionRetrievalTaskTest {
 
     @Test
     void testWhenFreeIpaReturnsNotFinalStatusAndFlowIsFinishedShouldThrowException() {
-        FreeIpaPollerObject freeIpaPollerObject = new FreeIpaPollerObject(ENV_ID, ENV_CRN, FLOW_ID, RESOURCE_ID);
+        FreeIpaPollerObject freeIpaPollerObject =
+                new FreeIpaPollerObject(ENV_ID, ENV_CRN, new FlowIdentifier(FlowType.FLOW, FLOW_ID), RESOURCE_ID);
         DescribeFreeIpaResponse describeFreeIpaResponse = mock(DescribeFreeIpaResponse.class);
         FlowLog flowLog = mock(FlowLog.class);
 
@@ -98,7 +104,8 @@ class FreeIpaDeletionRetrievalTaskTest {
 
     @Test
     void testCheckStatusWithMissingFreeIpaShouldReturnTrue() {
-        FreeIpaPollerObject freeIpaPollerObject = new FreeIpaPollerObject(ENV_ID, ENV_CRN, FLOW_ID, RESOURCE_ID);
+        FreeIpaPollerObject freeIpaPollerObject =
+                new FreeIpaPollerObject(ENV_ID, ENV_CRN, new FlowIdentifier(FlowType.FLOW, FLOW_ID), RESOURCE_ID);
         when(freeIpaService.describe(ENV_CRN)).thenReturn(Optional.empty());
 
         assertTrue(underTest.checkStatus(freeIpaPollerObject));
