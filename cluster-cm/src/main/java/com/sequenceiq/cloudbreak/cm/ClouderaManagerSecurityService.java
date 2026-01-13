@@ -450,7 +450,6 @@ public class ClouderaManagerSecurityService implements ClusterSecurityService {
     private ApiBatchRequest createHostCertsBatchRequest(ApiHostList hostList, String sshUser, KeyPair sshKeyPair, String subAltName) {
         ApiGenerateHostCertsArguments apiGenerateHostCertsArguments = createApiGenerateHostCertsArguments(sshUser, sshKeyPair, subAltName);
         List<ApiBatchRequestElement> batchRequestElements = hostList.getItems().stream()
-                .filter(host -> host.getClusterRef() != null)
                 .map(host -> new ApiBatchRequestElement()
                         .method(HTTPMethod.POST)
                         .url(ClouderaManagerApiClientProvider.API_V_31 + "/hosts/" + URLUtils.encodeString(host.getHostId()) + "/commands/generateHostCerts")
