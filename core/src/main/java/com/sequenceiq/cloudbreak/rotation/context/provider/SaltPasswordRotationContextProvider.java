@@ -64,14 +64,12 @@ public class SaltPasswordRotationContextProvider implements RotationContextProvi
                 .withRotationJob(() -> {
                     try {
                         rotateSaltPasswordService.rotateSaltPassword(stack);
+                        rotateSaltPasswordService.validatePasswordAfterRotation(stack);
                     } catch (CloudbreakOrchestratorException e) {
                         throw new SecretRotationException(e);
                     }
                 })
-                .withPostValidateJob(() -> {
-                    rotateSaltPasswordService.validatePasswordAfterRotation(stack);
-                    secretRotationSaltService.validateSalt(stack);
-                })
+                .withPostValidateJob(() -> secretRotationSaltService.validateSalt(stack))
                 .build();
     }
 

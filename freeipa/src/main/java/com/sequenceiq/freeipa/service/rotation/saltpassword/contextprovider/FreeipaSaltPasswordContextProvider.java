@@ -52,11 +52,11 @@ public class FreeipaSaltPasswordContextProvider implements RotationContextProvid
     private CustomJobRotationContext getCustomJobRotationContext(Stack stack) {
         return CustomJobRotationContext.builder()
                 .withResourceCrn(stack.getEnvironmentCrn())
-                .withRotationJob(() -> rotateSaltPasswordService.rotateSaltPassword(stack))
-                .withPostValidateJob(() -> {
+                .withRotationJob(() -> {
+                    rotateSaltPasswordService.rotateSaltPassword(stack);
                     rotateSaltPasswordService.validatePasswordAfterRotation(stack);
-                    secretRotationSaltService.validateSalt(stack);
                 })
+                .withPostValidateJob(() -> secretRotationSaltService.validateSalt(stack))
                 .build();
     }
 
