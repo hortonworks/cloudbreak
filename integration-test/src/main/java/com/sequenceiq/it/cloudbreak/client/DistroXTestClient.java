@@ -44,6 +44,7 @@ import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXSkuMigrationAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXStartAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXStopAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXUpgradeAction;
+import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXUpgradeInternalAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXVerticalScaleAction;
 import com.sequenceiq.it.cloudbreak.action.v4.stack.StackGetWithResourcesAction;
 import com.sequenceiq.it.cloudbreak.action.v4.util.RenewDistroXCertificateAction;
@@ -134,6 +135,10 @@ public class DistroXTestClient {
 
     public Action<DistroXTestDto, CloudbreakClient> upgrade() {
         return new DistroXUpgradeAction();
+    }
+
+    public Action<DistroXTestDto, CloudbreakClient> upgradeInternal() {
+        return new DistroXUpgradeInternalAction();
     }
 
     public Action<DistroXTestDto, CloudbreakClient> osUpgradeByUpgradeSets() {

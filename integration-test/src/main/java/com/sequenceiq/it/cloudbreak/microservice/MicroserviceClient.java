@@ -6,7 +6,6 @@ import java.util.Set;
 
 import com.sequenceiq.flow.api.FlowPublicEndpoint;
 import com.sequenceiq.it.cloudbreak.actor.CloudbreakUser;
-import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
@@ -25,12 +24,12 @@ public abstract class MicroserviceClient<C, I, E extends Enum<E>, W extends Wait
         return getClass().getSimpleName() + "[" + acting + "]";
     }
 
-    public void setActing(CloudbreakUser acting) {
-        this.acting = acting;
-    }
-
     public CloudbreakUser getActing() {
         return acting;
+    }
+
+    public void setActing(CloudbreakUser acting) {
+        this.acting = acting;
     }
 
     public Set<String> supportedTestDtos() {
@@ -64,8 +63,8 @@ public abstract class MicroserviceClient<C, I, E extends Enum<E>, W extends Wait
     }
 
     public void checkIfInternalClientAllowed(TestContext testContext) {
-        if (!(testContext instanceof MockedTestContext)) {
-            throw new TestFailException("You can use internal client only for mock tests!");
+        if (testContext.isMowTest()) {
+            throw new TestFailException("You cannot use internal client for mow-dev tests!");
         }
     }
 }

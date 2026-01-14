@@ -124,7 +124,7 @@ public class DistroXUpgradeTests extends AbstractE2ETest {
                 .withReplaceVms(DistroXUpgradeReplaceVms.ENABLED)
                 .withRollingUpgradeEnabled(true)
                 .given(DistroXTestDto.class)
-                .when(distroXTestClient.upgrade())
+                .when(distroXTestClient.upgradeInternal())
                 .await(STACK_AVAILABLE, timeoutChecker(new AttemptBasedTimeoutChecker(RUNTIME_AND_OS_UPGRADE_MAX_ATTEMPTS)))
                 .awaitForHealthyInstances()
 

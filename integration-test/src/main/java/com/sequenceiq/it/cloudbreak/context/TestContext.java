@@ -82,8 +82,6 @@ public abstract class TestContext implements ApplicationContextAware {
 
     private static final String TEST_METHOD_NAME = "TEST_METHOD_NAME";
 
-    private ApplicationContext applicationContext;
-
     private final Map<String, CloudbreakTestDto> resourceNames = new ConcurrentHashMap<>();
 
     private final Map<String, CloudbreakTestDto> resourceCrns = new ConcurrentHashMap<>();
@@ -92,13 +90,15 @@ public abstract class TestContext implements ApplicationContextAware {
 
     private final Map<Class<? extends CloudbreakTestDto>, String> existingResourceNames = new ConcurrentHashMap<>();
 
-    private boolean shutdown;
-
     private final Map<String, String> statuses = new HashMap<>();
 
     private final Map<String, Object> selections = new HashMap<>();
 
     private final Map<String, Capture> captures = new HashMap<>();
+
+    private ApplicationContext applicationContext;
+
+    private boolean shutdown;
 
     private volatile Map<String, Object> contextParameters = new HashMap<>();
 
@@ -493,14 +493,14 @@ public abstract class TestContext implements ApplicationContextAware {
         return Optional.ofNullable(description);
     }
 
-    public TestContext setTestMethodName(String testMethodName) {
-        this.contextParameters.put(TEST_METHOD_NAME, testMethodName);
-        return this;
-    }
-
     public Optional<String> getTestMethodName() {
         return Optional.ofNullable(this.contextParameters.get(TEST_METHOD_NAME))
                 .map(Object::toString);
+    }
+
+    public TestContext setTestMethodName(String testMethodName) {
+        this.contextParameters.put(TEST_METHOD_NAME, testMethodName);
+        return this;
     }
 
     public String getActingUserAccessKey() {
@@ -527,18 +527,6 @@ public abstract class TestContext implements ApplicationContextAware {
      */
     public String getWorkloadUserName() {
         return getTestUsers().getActingUser().getWorkloadUserName();
-    }
-
-    /**
-     * Updates the acting user with the provided one.
-     *
-     * @param actingUser Provided acting user (CloudbreakUser)
-     */
-    public void setActingUser(CloudbreakUser actingUser) {
-        LOGGER.info(" Acting user has been set:: \nDisplay Name: {} \nAccess Key: {} \nSecret Key: {} \nCRN: {} \nAdmin: {} \nDescription: {} ",
-                actingUser.getDisplayName(), actingUser.getAccessKey(), actingUser.getSecretKey(), actingUser.getCrn(), actingUser.getAdmin(),
-                actingUser.getDescription());
-        getTestUsers().setActingUser(actingUser);
     }
 
     /**
@@ -579,6 +567,18 @@ public abstract class TestContext implements ApplicationContextAware {
      */
     public CloudbreakUser getActingUser() {
         return getTestUsers().getActingUser();
+    }
+
+    /**
+     * Updates the acting user with the provided one.
+     *
+     * @param actingUser Provided acting user (CloudbreakUser)
+     */
+    public void setActingUser(CloudbreakUser actingUser) {
+        LOGGER.info(" Acting user has been set:: \nDisplay Name: {} \nAccess Key: {} \nSecret Key: {} \nCRN: {} \nAdmin: {} \nDescription: {} ",
+                actingUser.getDisplayName(), actingUser.getAccessKey(), actingUser.getSecretKey(), actingUser.getCrn(), actingUser.getAdmin(),
+                actingUser.getDescription());
+        getTestUsers().setActingUser(actingUser);
     }
 
     public String getActingUserOwnerTag() {
@@ -1113,7 +1113,7 @@ public abstract class TestContext implements ApplicationContextAware {
         shutdown();
     }
 
-    private static boolean shouldRemoveMockInfrastructureTestCalls(CloudbreakTestDto testDto) {
+    private boolean shouldRemoveMockInfrastructureTestCalls(CloudbreakTestDto testDto) {
         Set<String> testCallRemovableResources = Set.of(
                 EnvironmentTestDto.ENVIRONMENT_RESOURCE_NAME,
                 FreeIpaTestDto.FREEIPA_RESOURCE_NAME,
@@ -1217,6 +1217,10 @@ public abstract class TestContext implements ApplicationContextAware {
 
     public String getWorkloadPassword() {
         return getActingUser().getWorkloadPassword();
+    }
+
+    public boolean isMowTest() {
+        return defaultServer != null && defaultServer.contains("mow");
     }
 
     @Override
