@@ -109,11 +109,12 @@ public class GetDatalakeDataSizesHandler extends ExceptionCatcherEventHandler<Ge
         GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stackDto);
         String gatewayHost = primaryGatewayConfig.getHostname();
         Set<String> serviceHost = getServiceHost(stackDto, gatewayHost);
-        SaltConfig saltConfig = saltConfigGenerator.createSaltConfig(new SaltConfig(), tempBackupDir, tempRestoreDir);
 
         try {
             ExitCriteriaModel exitModel = ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedModel(stackId, stackDto.getCluster().getId());
-            String databaseSizes = runSaltStateAndGetResult(primaryGatewayConfig, GET_DATABASE_SIZES_STATE, Set.of(gatewayHost), stackId);
+            SaltConfig saltConfig = saltConfigGenerator.createSaltConfig(new SaltConfig(), tempBackupDir, tempRestoreDir);
+            String databaseSizes = runSaltStateWithParams(primaryGatewayConfig, GET_DATABASE_SIZES_STATE, Set.of(gatewayHost), saltConfig, stackId,
+                    exitModel);
             String dbBackupAvailableSpace = runSaltStateWithParams(primaryGatewayConfig, GET_NODE_FREE_SPACE_STATE, Set.of(gatewayHost), saltConfig, stackId,
                     exitModel);
             String solrHBaseSizes = runSaltStateAndGetResult(primaryGatewayConfig, GET_SOLR_HBASE_DATA_SIZES_STATE, serviceHost, stackId);

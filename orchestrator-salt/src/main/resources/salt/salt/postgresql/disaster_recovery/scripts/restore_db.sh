@@ -26,6 +26,19 @@ doLog() {
   echo "$(date "+%Y-%m-%dT%H:%M:%SZ") $type_of_msg ""$msg" >>$LOGFILE
 }
 
+usage() {
+  doLog "There might be missing values in /srv/pillar/postgresql/disaster_recovery.sls or /srv/pillar/postgresql/postgre.sls."
+  doLog "This might be caused by the command not being run on the Primary Gateway node or due to never having run a backup/restore via the CDP CLI before."
+  doLog "Script accepts the following inputs:"
+  doLog "  -s path : Object Storage Service url to retrieve backups."
+  doLog "  -h host : PostgresSQL host name."
+  doLog "  -p port : PostgresSQL port."
+  doLog "  -u username : PostgresSQL user name."
+  doLog "  -r group : Ranger admin group."
+  doLog "  -d \"db1 db2 db3\" : Names of the databases to restore (space-separated, at least one required)."
+  doLog "  -l local_backup_dir : (optional) Local backup base directory. If not given, will use /var/tmp."
+}
+
 validate_directory() {
   local dir_path="$1"
 
@@ -50,38 +63,53 @@ validate_directory() {
   return 0
 }
 
-if [[ $# -lt 5 || $# -gt 7 || "$1" == "None" || -z "$1" ]]; then
-  doLog "ERROR: Invalid inputs provided"
-  doLog "A total of $# inputs were provided."
-  if [[ $# -gt 0 ]]; then
-    doLog "Below are the inputs passed in. If some of them are empty, it could be incorrect:"
-    COUNTER=1
-    for input in "$@"
-    do
-      echo "  $COUNTER. $input"
-      let COUNTER++
-    done
-  fi
-  doLog "There might be missing values in /srv/pillar/postgresql/disaster_recovery.sls or /srv/pillar/postgresql/postgre.sls."
-  doLog "This might be caused by the command not being run on the Primary Gateway node or due to never having run a backup/restore via the CDP CLI before."
-  doLog "Script accepts at least 5 and at most 7 inputs:"
-  doLog "  1. Object Storage Service url to retrieve backups."
-  doLog "  2. PostgresSQL host name."
-  doLog "  3. PostgresSQL port."
-  doLog "  4. PostgresSQL user name."
-  doLog "  5. Ranger admin group."
-  doLog "  6. (optional) Name of the database to restore. If not given or 'DEFAULT', will restore ranger and hive databases."
-  doLog "  7. (optional) Local backup base directory. If not given, will use /var/tmp."
-  exit 1
-fi
+BACKUP_LOCATION=""
+HOST=""
+PORT=""
+USERNAME=""
+RANGERGROUP=""
+DATABASENAMES=""
+LOCAL_BACKUP_BASE_DIR=""
 
-BACKUP_LOCATION="$1/*" # Trailing slash and glob so we copy the _items_ in the directory not the directory itself.
-HOST="$2"
-PORT="$3"
-USERNAME="$4"
-RANGERGROUP="$5"
-DATABASENAME="${6-}"
-LOCAL_BACKUP_BASE_DIR="${7:-/var/tmp}"
+while getopts "s:h:p:u:r:d:l:" OPTION; do
+    case $OPTION in
+    s  )
+        BACKUP_LOCATION="$OPTARG"
+        ;;
+    h  )
+        HOST="$OPTARG"
+        ;;
+    p  )
+        PORT="$OPTARG"
+        ;;
+    u  )
+        USERNAME="$OPTARG"
+        ;;
+    r  )
+        RANGERGROUP="$OPTARG"
+        ;;
+    d  )
+        DATABASENAMES="$OPTARG"
+        ;;
+    l  )
+        LOCAL_BACKUP_BASE_DIR="$OPTARG"
+        ;;
+    \? ) echo "Unknown option: -$OPTARG" >&2;
+         usage
+         exit 1;;
+    :  ) echo "Missing option argument for -$OPTARG" >&2; exit 1;;
+    esac
+done
+
+[ -z "$BACKUP_LOCATION" ]  || [[ $BACKUP_LOCATION == \-* ]] && doLog "INFO Object storage URL is not specified, use the -s option"
+[ -z "$RANGERGROUP" ] || [[ $RANGERGROUP == \-* ]] && doLog "INFO Ranger admin group is not specified, use the -r option"
+[ -z "$DATABASENAMES" ] || [[ $DATABASENAMES == \-* ]] && doLog "INFO Database names are not specified, use the -d option"
+
+[ -z "$BACKUP_LOCATION" ] || [ -z "$RANGERGROUP" ] || [ -z "$DATABASENAMES" ] && doLog "ERROR At least one mandatory parameter is not set!" && usage && exit 1
+
+# Trailing slash and glob so we copy the _items_ in the directory not the directory itself.
+BACKUP_LOCATION="${BACKUP_LOCATION}/*"
+LOCAL_BACKUP_BASE_DIR="${LOCAL_BACKUP_BASE_DIR:-/var/tmp}"
 
 if ! validate_directory "$LOCAL_BACKUP_BASE_DIR"; then
   doLog "ERROR Local backup directory is not valid"
@@ -98,17 +126,11 @@ export PGSSLMODE="{{ postgresql.ssl_verification_mode }}"
 {%- endif %}
 
 errorExit() {
-  if [[ -z "$DATABASENAME" || "$DATABASENAME" == "DEFAULT" ]]; then
-    limit_incomming_connection "hive" -1
-    limit_incomming_connection "ranger" -1
-    limit_incomming_connection "profiler_agent" -1
-    limit_incomming_connection "profiler_metric" -1
-  else
-    for db in $DATABASENAME; do
-      doLog "Limiting incomming connections to ${db}."
-      limit_incomming_connection "${db}" -1
-    done
-  fi
+  for db in $DATABASENAMES; do
+    TRIMMED_DB=$(echo "$db" | tr -d '"')
+    doLog "Limiting incomming connections to ${TRIMMED_DB}."
+    limit_incomming_connection "${TRIMMED_DB}" -1
+  done
 
   if [ -d "$BACKUPS_DIR" ] && [[ $BACKUPS_DIR == */postgres_restore_staging* || $BACKUPS_DIR == */postgres_backup_staging* ]]; then
       rm -rfv "$BACKUPS_DIR" > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2)
@@ -237,16 +259,12 @@ run_restore() {
 
   hdfs --loglevel ERROR dfs -copyToLocal -f "$BACKUP_LOCATION" "$BACKUPS_DIR" > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2) || errorExit "Could not copy backups from ${BACKUP_LOCATION}."
 
-  if [[ -z "$DATABASENAME" || "$DATABASENAME" == "DEFAULT" ]]; then
-    echo "No database name provided. Will restore hive, ranger, profiler_agent and profiler_metric databases."
-    restore_db_from_local "hive"
-    restore_db_from_local "ranger"
-    restore_db_from_local "profiler_agent"
-    restore_db_from_local "profiler_metric"
-  else
-    echo "Restoring ${DATABASENAME}."
-    restore_db_from_local "${DATABASENAME}"
-  fi
+  doLog "INFO Restoring databases: ${DATABASENAMES}"
+  for db in $DATABASENAMES; do
+    TRIMMED_DB=$(echo "$db" | tr -d '"')
+    doLog "INFO Restoring ${TRIMMED_DB}."
+    restore_db_from_local "${TRIMMED_DB}"
+  done
 
   rm -rfv "$BACKUPS_DIR" > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2)
 }

@@ -3,7 +3,6 @@
 set -o nounset
 set -o pipefail
 
-# Logging configuration.
 LOG_FILE=/var/log/get_datalake_database_sizes.log
 doLog() {
   if [ -n "${1-}" ]; then
@@ -11,20 +10,43 @@ doLog() {
   fi
 }
 
-# Import validation.
-if [[ $# -lt 3 ]]; then
-  doLog "Invalid inputs provided"
-  doLog "Script requires the following inputs:"
-  doLog "  1. PostgreSQL host name."
-  doLog "  2. PostgreSQL port."
-  doLog "  3. PostgreSQL user name."
-  exit 1
-fi
+usage() {
+  doLog "Script accepts the following inputs:"
+  doLog "  -h host : PostgreSQL host name."
+  doLog "  -p port : PostgreSQL port."
+  doLog "  -u username : PostgreSQL user name."
+  doLog "  -d \"db1 db2 db3\" : Database names (space-separated, at least one required)."
+}
 
-# Global variables for the script.
-PSQL_HOST="$1"
-PSQL_PORT="$2"
-PSQL_USERNAME="$3"
+PSQL_HOST=""
+PSQL_PORT=""
+PSQL_USERNAME=""
+DATABASENAMES=""
+
+while getopts "h:p:u:d:" OPTION; do
+    case $OPTION in
+    h  )
+        PSQL_HOST="$OPTARG"
+        ;;
+    p  )
+        PSQL_PORT="$OPTARG"
+        ;;
+    u  )
+        PSQL_USERNAME="$OPTARG"
+        ;;
+    d  )
+        DATABASENAMES="$OPTARG"
+        ;;
+    \? ) echo "Unknown option: -$OPTARG" >&2;
+         usage
+         exit 1;;
+    :  ) echo "Missing option argument for -$OPTARG" >&2; exit 1;;
+    esac
+done
+
+[ -z "$DATABASENAMES" ] || [[ $DATABASENAMES == \-* ]] && doLog "Database names are not specified, use the -d option"
+
+[ -z "$DATABASENAMES" ] && doLog "At least one mandatory parameter is not set!" && usage && exit 1
 
 # PSQL SSL configuration.
 export PGSSLMODE=require
@@ -53,11 +75,11 @@ doesDatabaseExist() {
 }
 
 getDataSizesForDatabases() {
-  DATABASES='"hive" "ranger" "profiler_agent" "profiler_metric"'
+  doLog "Processing databases: ${DATABASENAMES}"
   RESULT=""
   CUR_DB_SIZE=0
   TRIMMED_DB=""
-  for DB in $DATABASES; do
+  for DB in $DATABASENAMES; do
     TRIMMED_DB=$(echo "$DB" | tr -d '"')
     if doesDatabaseExist "$TRIMMED_DB" ; then
       CUR_DB_SIZE=$(runPSQLCommand "select sum(pg_table_size(quote_ident(tablename)::regclass)) from pg_tables where schemaname not in ('pg_catalog','information_schema');" "$TRIMMED_DB")
