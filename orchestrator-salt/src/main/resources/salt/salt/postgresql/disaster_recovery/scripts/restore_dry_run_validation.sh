@@ -24,15 +24,61 @@ doLog() {
   fi
 }
 
-BACKUP_LOCATION="$1/*" # Trailing slash and glob so we copy the _items_ in the directory not the directory itself.
-HOST="$2"
-PORT="$3"
-USERNAME="$4"
-RAZ_ENABLED="$6"
+usage() {
+  doLog "INFO Script accepts the following inputs:"
+  doLog "INFO   -s path : Object Storage Service url to place backups."
+  doLog "INFO   -h host : PostgreSQL host name."
+  doLog "INFO   -p port : PostgreSQL port."
+  doLog "INFO   -u username : PostgreSQL user name."
+  doLog "INFO   -d \"db1 db2 db3\" : Database names (space-separated, at least one required)."
+  doLog "INFO   -r raz_enabled : RAZ enabled flag."
+  doLog "INFO   -l local_dir : Local backup directory (optional, defaults to /var/tmp)."
+}
+
+BACKUP_LOCATION=""
+HOST=""
+PORT=""
+USERNAME=""
+DATABASENAMES=""
+RAZ_ENABLED=""
+LOCAL_BACKUP_BASE_DIR="/var/tmp"
 SERVICE=""
 FAILED=0
 
-LOCAL_BACKUP_BASE_DIR="${7:-/var/tmp}"
+while getopts "s:h:p:u:d:r:l:" OPTION; do
+    case $OPTION in
+    s  )
+        BACKUP_LOCATION="$OPTARG/*"  # Trailing slash and glob so we copy the _items_ in the directory not the directory itself.
+        ;;
+    h  )
+        HOST="$OPTARG"
+        ;;
+    p  )
+        PORT="$OPTARG"
+        ;;
+    u  )
+        USERNAME="$OPTARG"
+        ;;
+    d  )
+        DATABASENAMES="$OPTARG"
+        ;;
+    r  )
+        RAZ_ENABLED="$OPTARG"
+        ;;
+    l  )
+        LOCAL_BACKUP_BASE_DIR="$OPTARG"
+        ;;
+    \? ) echo "Unknown option: -$OPTARG" >&2;
+         usage
+         exit 1;;
+    :  ) echo "Missing option argument for -$OPTARG" >&2; exit 1;;
+    esac
+done
+
+[ -z "$BACKUP_LOCATION" ]  || [[ $BACKUP_LOCATION == \-* ]] && doLog "INFO Object storage URL is not specified, use the -s option"
+[ -z "$DATABASENAMES" ] || [[ $DATABASENAMES == \-* ]] && doLog "INFO Database names are not specified, use the -d option"
+
+[ -z "$BACKUP_LOCATION" ] || [ -z "$DATABASENAMES" ] && doLog "ERROR At least one mandatory parameter is not set!" && usage && exit 1
 # Script appends its own suffix
 BACKUPS_DIR="${LOCAL_BACKUP_BASE_DIR}/postgres_dry_run_restore"
 
@@ -96,22 +142,18 @@ copy_to_local() {
 
 execute_run() {
   doLog "INFO Validate Database connection, and the database existence"
+  doLog "INFO Checking databases: ${DATABASENAMES}"
 
-  is_database_exists "hive"
-  if [ "$?" -eq 1 ]; then
-    doLog "ERROR database for $SERVICE doesn't exist"
-    ((FAILED++))
-  else
-    doLog "INFO database for $SERVICE exist"
-  fi
-
-  is_database_exists "ranger"
-  if [ "$?" -eq 1 ]; then
-    doLog "ERROR database for $SERVICE doesn't exist"
-    ((FAILED++))
-  else
-    doLog "INFO database for $SERVICE exist"
-  fi
+  for DB in $DATABASENAMES; do
+    TRIMMED_DB=$(echo "$DB" | tr -d '"')
+    is_database_exists "$TRIMMED_DB"
+    if [ "$?" -eq 1 ]; then
+      doLog "ERROR database $TRIMMED_DB doesn't exist"
+      ((FAILED++))
+    else
+      doLog "INFO database $TRIMMED_DB exists"
+    fi
+  done
 
   doLog "INFO backup dir:" "$BACKUPS_DIR"
   mkdir -p "$BACKUPS_DIR"

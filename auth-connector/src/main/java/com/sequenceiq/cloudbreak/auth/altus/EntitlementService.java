@@ -49,6 +49,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATAHUB
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_BACKUP_LONG_TIMEOUT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_BACKUP_ON_RESIZE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_DB_BACKUP_ENABLE_COMPRESSION;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_KNOX_GATEWAY_DB_DR;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_RESIZE_RECOVERY;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_BACKUP_RESTORE_PERMISSION_CHECKS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_LOAD_BALANCER;
@@ -650,5 +651,9 @@ public class EntitlementService {
 
     public boolean isAutoJavaUpgaradeEnabled(String accountId) {
         return isEntitlementRegistered(accountId, Entitlement.CDP_ALLOW_AUTO_JAVA_UPGRADE);
+    }
+
+    public boolean isDatalakeKnoxGatewayDbDrEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_DATALAKE_KNOX_GATEWAY_DB_DR);
     }
 }

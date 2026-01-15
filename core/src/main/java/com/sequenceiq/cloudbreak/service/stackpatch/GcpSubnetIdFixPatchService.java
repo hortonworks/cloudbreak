@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.stackpatch;
 
+import static com.sequenceiq.cloudbreak.util.NullUtil.putIfPresent;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -165,12 +167,11 @@ public class GcpSubnetIdFixPatchService extends ExistingStackPatchService {
     }
 
     private Map<String, String> getProviderSideIdToSubnetIdMap(Stack stack, Map<String, Object> stackNetworkAttributes, Set<String> environmentSubnetIds) {
+        Map<String, String> filters = new HashMap<>();
+        putIfPresent(filters, GcpStackUtil.NETWORK_ID, (String) stackNetworkAttributes.get(GcpStackUtil.NETWORK_ID));
+        putIfPresent(filters, GcpStackUtil.SHARED_PROJECT_ID, (String) stackNetworkAttributes.get(GcpStackUtil.SHARED_PROJECT_ID));
+        putIfPresent(filters, NetworkConstants.SUBNET_IDS, environmentSubnetIds.stream().collect(Collectors.joining(",")));
         ExtendedCloudCredential extendedCloudCredential = credentialClientService.getExtendedCloudCredential(stack.getEnvironmentCrn());
-        Map<String, String> filters = Map.of(
-                GcpStackUtil.NETWORK_ID, (String) stackNetworkAttributes.get(GcpStackUtil.NETWORK_ID),
-                GcpStackUtil.SHARED_PROJECT_ID, (String) stackNetworkAttributes.get(GcpStackUtil.SHARED_PROJECT_ID),
-                NetworkConstants.SUBNET_IDS, environmentSubnetIds.stream().collect(Collectors.joining(","))
-        );
         CloudNetworks cloudNetworks = cloudParameterService.getCloudNetworks(extendedCloudCredential, stack.getRegion(), stack.getPlatformVariant(), filters);
         Map<String, String> providerSideIdToSubnetIdMap = cloudNetworks.getCloudNetworkResponses().values().stream()
                 .flatMap(Set::stream)

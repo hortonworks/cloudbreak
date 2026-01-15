@@ -219,6 +219,46 @@ class GcpSubnetIdFixPatchServiceTest {
     }
 
     @Test
+    void testDoApplyWhenNoSharedProjectIdInStackNetworkAttributes() throws ExistingStackPatchApplyException, TransactionService.TransactionExecutionException {
+        Set<String> environmentSubnetIds = Set.of("sn-1", "sn-2", "sn-3");
+        Stack stack = getStackForDoApply(environmentSubnetIds, "sn-1-provider-id",
+                Map.of("master", List.of("sn-1-provider-id"), "compute", List.of("sn-1-provider-id")), List.of("sn-1-provider-id", "sn-2-provider-id"),
+                Map.of("subnetId", "sn-1-provider-id", "networkId", NETWORK_ID));
+        ExtendedCloudCredential extendedCloudCredential = mock();
+        when(credentialClientService.getExtendedCloudCredential(ENVIRONMENT_CRN)).thenReturn(extendedCloudCredential);
+        CloudNetworks cloudNetworks = mock();
+        CloudNetwork cloudNetwork = mock();
+        CloudNetwork irrelevantCloudNetwork = mock();
+        when(cloudParameterService.getCloudNetworks(eq(extendedCloudCredential), eq(REGION), eq(PLATFORM_VARIANT), anyMap())).thenReturn(cloudNetworks);
+        when(cloudNetworks.getCloudNetworkResponses()).thenReturn(Map.of(REGION, Set.of(cloudNetwork, irrelevantCloudNetwork)));
+        Set<CloudSubnet> cloudSubnets = getCloudSubnets(environmentSubnetIds);
+        when(cloudNetwork.getSubnetsMeta()).thenReturn(cloudSubnets);
+        Set<CloudSubnet> irrelevantCloudSubnets = getCloudSubnets(Set.of("sn-4", "sn-5"));
+        when(irrelevantCloudNetwork.getSubnetsMeta()).thenReturn(irrelevantCloudSubnets);
+        doAnswer(invocation -> {
+            Runnable runnable = invocation.getArgument(0);
+            runnable.run();
+            return null;
+        }).when(transactionService).required(any(Runnable.class));
+
+        assertTrue(underTest.doApply(stack));
+
+        verify(cloudParameterService).getCloudNetworks(eq(extendedCloudCredential), eq(REGION), eq(PLATFORM_VARIANT), filterCaptor.capture());
+        Map<String, String> capturedFilter = filterCaptor.getValue();
+        assertThat(capturedFilter).containsExactlyInAnyOrderEntriesOf(Map.of(
+                "networkId", NETWORK_ID,
+                "subnetIds", environmentSubnetIds.stream().collect(Collectors.joining(","))
+        ));
+        verify(networkService).savePure(stack.getNetwork());
+        verify(instanceGroupNetworkService).saveAll(instanceGroupNetworkCaptor.capture());
+        List<InstanceGroupNetwork> capturedInstanceGroupNetworks = instanceGroupNetworkCaptor.getValue();
+        assertThat(capturedInstanceGroupNetworks).hasSize(2);
+        verify(resourceService).saveAll(resourceCaptor.capture());
+        List<Resource> capturedResources = resourceCaptor.getValue();
+        assertThat(capturedResources).hasSize(2);
+    }
+
+    @Test
     void testDoApplyWhenTransactionFails() throws ExistingStackPatchApplyException, TransactionService.TransactionExecutionException {
         Stack stack = getStackForDoApply(Set.of(), "sn-1", Map.of(), List.of());
         ExtendedCloudCredential extendedCloudCredential = mock();
@@ -248,15 +288,19 @@ class GcpSubnetIdFixPatchServiceTest {
 
     private Stack getStackForDoApply(Set<String> environmentSubnetIds, String stackSubnetId, Map<String, List<String>> instanceGroupSubnetIds,
             List<String> subnetResourceIds) {
-        Stack stack = mock();
-        when(stack.getRegion()).thenReturn(REGION);
-        when(stack.getPlatformVariant()).thenReturn(PLATFORM_VARIANT);
-        Network network = mock();
         Map<String, String> stackNetworkAttributes = Map.of(
                 "subnetId", stackSubnetId,
                 "networkId", NETWORK_ID,
                 "sharedProjectId", SHARED_PROJECT_ID
         );
+        return getStackForDoApply(environmentSubnetIds, stackSubnetId, instanceGroupSubnetIds, subnetResourceIds, stackNetworkAttributes);
+    }
+
+    private Stack getStackForDoApply(Set<String> environmentSubnetIds, String stackSubnetId, Map<String, List<String>> instanceGroupSubnetIds,
+            List<String> subnetResourceIds, Map<String, String> stackNetworkAttributes) {
+        Stack stack = mock();
+        when(stack.getRegion()).thenReturn(REGION);
+        when(stack.getPlatformVariant()).thenReturn(PLATFORM_VARIANT);
         setupMocksForStack(stack, environmentSubnetIds, stackNetworkAttributes, instanceGroupSubnetIds, subnetResourceIds);
         return stack;
     }
