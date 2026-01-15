@@ -140,8 +140,8 @@ class SaltStateServiceTest {
         response.setResult(result);
         when(saltConnector.run(any(), eq("state.highstate"), any(), eq(ApplyResponse.class))).thenReturn(response);
 
-        String jid = underTest.highstate(saltConnector);
-        assertEquals(jobId, jid);
+        ApplyResponse applyResponse = underTest.highstate(saltConnector);
+        assertEquals(jobId, applyResponse.getJid());
         verify(saltConnector, times(1)).run(eq(Glob.ALL), eq("state.highstate"), eq(LOCAL_ASYNC), eq(ApplyResponse.class));
     }
 
@@ -157,8 +157,8 @@ class SaltStateServiceTest {
         response.setResult(result);
         when(saltConnector.run(any(), eq("state.highstate"), any(), eq(ApplyResponse.class))).thenReturn(response);
 
-        String jid = underTest.highstate(saltConnector, target);
-        assertEquals(jobId, jid);
+        ApplyResponse applyResponse = underTest.highstate(saltConnector, target);
+        assertEquals(jobId, applyResponse.getJid());
         verify(saltConnector, times(1)).run(eq(target), eq("state.highstate"), eq(LOCAL_ASYNC), eq(ApplyResponse.class));
     }
 
