@@ -2,7 +2,6 @@ package com.sequenceiq.it.cloudbreak.testcase.e2e.gov;
 
 import org.testng.annotations.Test;
 
-import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
 import com.sequenceiq.it.cloudbreak.context.Description;
@@ -34,7 +33,7 @@ public class BasicFreeIpaTests extends PreconditionGovTest {
                     .withResourceEncryption(testContext.isResourceEncryptionEnabled())
                     .withFreeIpa(attachedFreeIpaHARequestForTest())
                 .when(getEnvironmentTestClient().create())
-                .await(EnvironmentStatus.AVAILABLE)
+                .awaitForCreationFlow()
                 .given(FreeIpaTestDto.class)
                     .withEnvironment()
                 .when(getFreeIpaTestClient().describe())

@@ -112,7 +112,8 @@ class SdxCreateActionsTest {
     @BeforeEach
     void setUp() {
         flowParameters = new FlowParameters(FLOW_ID, FLOW_TRIGGER_USER_CRN);
-        detailedEnvironmentResponse = DetailedEnvironmentResponse.builder().build();
+        detailedEnvironmentResponse = DetailedEnvironmentResponse.builder()
+                .build();
 
         lenient().when(runningFlows.getFlowChainId(FLOW_ID)).thenReturn(FLOW_CHAIN_ID);
         lenient().when(reactorEventFactory.createEvent(anyMap(), any())).thenReturn((Event<Object>) event);

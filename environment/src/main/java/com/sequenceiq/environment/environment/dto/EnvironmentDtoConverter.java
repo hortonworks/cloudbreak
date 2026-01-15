@@ -117,7 +117,7 @@ public class EnvironmentDtoConverter {
     }
 
     public EnvironmentDto environmentToDto(Environment environment) {
-        EnvironmentDto.Builder builder = EnvironmentDto.builder()
+        EnvironmentDto.EnvironmentDtoBuilder builder = EnvironmentDto.builder()
                 .withId(environment.getId())
                 .withResourceCrn(environment.getResourceCrn())
                 .withName(environment.getName())

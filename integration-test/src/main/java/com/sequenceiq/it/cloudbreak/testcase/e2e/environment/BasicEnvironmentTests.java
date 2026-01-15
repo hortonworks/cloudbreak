@@ -4,7 +4,6 @@ import jakarta.inject.Inject;
 
 import org.testng.annotations.Test;
 
-import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
@@ -48,7 +47,7 @@ public class BasicEnvironmentTests extends AbstractE2ETest {
                 .withCreateFreeIpa(Boolean.TRUE)
                 .withOneFreeIpaNode()
                 .when(environmentTestClient.create())
-                .await(EnvironmentStatus.AVAILABLE)
+                .awaitForCreationFlow()
                 .then((tc, testDto, cc) -> environmentTestClient.describe().action(tc, testDto, cc))
                 .when(environmentTestClient.cascadingDelete())
                 .validate();

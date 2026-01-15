@@ -13,7 +13,6 @@ import jakarta.inject.Inject;
 
 import org.testng.annotations.Test;
 
-import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.AvailabilityType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetadataType;
@@ -90,7 +89,7 @@ public class FreeIpaRecipeTests extends AbstractE2ETest {
 
         setUpEnvironmentTestDto(testContext, Boolean.TRUE, INSTANCE_COUNT_BY_GROUP)
                 .when(getEnvironmentTestClient().create())
-                .await(EnvironmentStatus.AVAILABLE)
+                .awaitForCreationFlow()
                 .given(FreeIpaTestDto.class)
                 .when(freeIpaTestClient.describe())
                 .await(Status.AVAILABLE)
@@ -128,7 +127,7 @@ public class FreeIpaRecipeTests extends AbstractE2ETest {
         setUpEnvironmentTestDto(testContext, Boolean.TRUE, 1)
                 .withFreeIpaRecipe(Set.of(preRecipeName, postInstallRecipeName))
                 .when(getEnvironmentTestClient().create())
-                .await(EnvironmentStatus.AVAILABLE)
+                .awaitForCreationFlow()
                 .given(FreeIpaTestDto.class)
                 .when(freeIpaTestClient.describe())
                 .await(Status.AVAILABLE)

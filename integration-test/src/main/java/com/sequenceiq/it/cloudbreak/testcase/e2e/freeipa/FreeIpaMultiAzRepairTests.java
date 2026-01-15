@@ -16,7 +16,6 @@ import org.springframework.util.StringUtils;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.common.model.SeLinux;
-import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetaDataResponse;
@@ -63,7 +62,7 @@ public class FreeIpaMultiAzRepairTests extends AbstractE2ETest {
                 .withEnableMultiAzFreeIpa()
                 .withFreeIpaSeLinux(SeLinux.ENFORCING)
                 .when(getEnvironmentTestClient().create())
-                .await(EnvironmentStatus.AVAILABLE)
+                .awaitForCreationFlow()
                 .given(FreeIpaTestDto.class)
                 .when(freeIpaTestClient.describe())
                 .await(FREEIPA_AVAILABLE)

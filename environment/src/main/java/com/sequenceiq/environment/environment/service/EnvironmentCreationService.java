@@ -30,8 +30,8 @@ import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.domain.ExperimentalFeatures;
 import com.sequenceiq.environment.environment.dto.AuthenticationDtoConverter;
+import com.sequenceiq.environment.environment.dto.CreateEnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentCreationDto;
-import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDtoConverter;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry;
 import com.sequenceiq.environment.environment.flow.EnvironmentReactorFlowManager;
@@ -49,6 +49,7 @@ import com.sequenceiq.environment.parameter.dto.GcpResourceEncryptionParametersD
 import com.sequenceiq.environment.parameter.dto.ParametersDto;
 import com.sequenceiq.environment.parameters.service.ParametersService;
 import com.sequenceiq.environment.proxy.domain.ProxyConfig;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
 
 @Service
 public class EnvironmentCreationService {
@@ -109,7 +110,7 @@ public class EnvironmentCreationService {
         this.seLinuxValidationService = seLinuxValidationService;
     }
 
-    public EnvironmentDto create(EnvironmentCreationDto creationDto) {
+    public CreateEnvironmentDto create(EnvironmentCreationDto creationDto) {
         LOGGER.info("Environment creation initiated.");
 
         loadBalancerEntitlementService.validateNetworkForEndpointGateway(creationDto.getCloudPlatform(), creationDto.getName(),
@@ -136,6 +137,7 @@ public class EnvironmentCreationService {
         validateCreation(creationDto, environment);
         validateRecipes(creationDto);
         validateSecurity(creationDto);
+        FlowIdentifier flowIdentifier;
         try {
             environment = environmentService.save(environment);
             saveFreeIpaRecipes(creationDto, environment);
@@ -144,14 +146,18 @@ public class EnvironmentCreationService {
                     getIfNotNull(creationDto.getNetwork(), NetworkDto::getEndpointGatewaySubnetMetas));
             createAndSetParameters(environment, creationDto.getParameters());
             environmentService.save(environment);
-            reactorFlowManager.triggerCreationFlow(environment.getId(), environment.getName(), creationDto.getCreator(), environment.getResourceCrn());
+            flowIdentifier = reactorFlowManager.triggerCreationFlow(
+                    environment.getId(), environment.getName(), creationDto.getCreator(), environment.getResourceCrn());
         } catch (Exception e) {
             environment.setStatus(EnvironmentStatus.CREATE_FAILED);
             environment.setStatusReason(e.getMessage());
             environmentService.save(environment);
             throw e;
         }
-        return environmentDtoConverter.environmentToDto(environment);
+        return CreateEnvironmentDto.builder()
+                .withEnvironmentDto(environmentDtoConverter.environmentToDto(environment))
+                .withFlowIdentifier(flowIdentifier)
+                .build();
     }
 
     private void validateSecurity(EnvironmentCreationDto creationDto) {

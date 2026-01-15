@@ -71,7 +71,7 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
                 '}';
     }
 
-    public static final class Builder {
+    public static class Builder<T extends DetailedEnvironmentResponse, B extends Builder<T, B>> {
         private String crn;
 
         private String name;
@@ -167,32 +167,32 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
 
         private NotificationParameters notificationParameters;
 
-        private Builder() {
+        protected Builder() {
         }
 
-        public Builder withCrn(String crn) {
+        public B withCrn(String crn) {
             this.crn = crn;
-            return this;
+            return (B) this;
         }
 
-        public Builder withName(String name) {
+        public B withName(String name) {
             this.name = name;
-            return this;
+            return (B) this;
         }
 
-        public Builder withOriginalName(String originalName) {
+        public B withOriginalName(String originalName) {
             this.originalName = originalName;
-            return this;
+            return (B) this;
         }
 
-        public Builder withDescription(String description) {
+        public B withDescription(String description) {
             this.description = description;
-            return this;
+            return (B) this;
         }
 
-        public Builder withRegions(CompactRegionResponse regions) {
+        public B withRegions(CompactRegionResponse regions) {
             this.regions = regions;
-            return this;
+            return (B) this;
         }
 
         /**
@@ -200,208 +200,211 @@ public class DetailedEnvironmentResponse extends EnvironmentBaseResponse {
          * and can become invalid, usage of it can be error-prone
          */
         @Deprecated
-        public Builder withCreator(String creator) {
+        public B withCreator(String creator) {
             this.creator = creator;
-            return this;
+            return (B) this;
         }
 
-        public Builder withCloudPlatform(String cloudPlatform) {
+        public B withCloudPlatform(String cloudPlatform) {
             this.cloudPlatform = cloudPlatform;
-            return this;
+            return (B) this;
         }
 
-        public Builder withCredential(CredentialResponse credential) {
+        public B withCredential(CredentialResponse credential) {
             this.credential = credential;
-            return this;
+            return (B) this;
         }
 
-        public Builder withLocation(LocationResponse location) {
+        public B withLocation(LocationResponse location) {
             this.location = location;
-            return this;
+            return (B) this;
         }
 
-        public Builder withNetwork(EnvironmentNetworkResponse network) {
+        public B withNetwork(EnvironmentNetworkResponse network) {
             this.network = network;
-            return this;
+            return (B) this;
         }
 
-        public Builder withTelemetry(TelemetryResponse telemetry) {
+        public B withTelemetry(TelemetryResponse telemetry) {
             this.telemetry = telemetry;
-            return this;
+            return (B) this;
         }
 
-        public Builder withBackup(BackupResponse backup) {
+        public B withBackup(BackupResponse backup) {
             this.backup = backup;
-            return this;
+            return (B) this;
         }
 
-        public Builder withEnvironmentStatus(EnvironmentStatus environmentStatus) {
+        public B withEnvironmentStatus(EnvironmentStatus environmentStatus) {
             this.environmentStatus = environmentStatus;
-            return this;
+            return (B) this;
         }
 
-        public Builder withCreateFreeIpa(boolean createFreeIpa) {
+        public B withCreateFreeIpa(boolean createFreeIpa) {
             this.createFreeIpa = createFreeIpa;
-            return this;
+            return (B) this;
         }
 
-        public Builder withFreeIpa(FreeIpaResponse freeIpa) {
+        public B withFreeIpa(FreeIpaResponse freeIpa) {
             this.freeIpa = freeIpa;
-            return this;
+            return (B) this;
         }
 
-        public Builder withStatusReason(String statusReason) {
+        public B withStatusReason(String statusReason) {
             this.statusReason = statusReason;
-            return this;
+            return (B) this;
         }
 
-        public Builder withCreated(Long created) {
+        public B withCreated(Long created) {
             this.created = created;
-            return this;
+            return (B) this;
         }
 
-        public Builder withAuthentication(EnvironmentAuthenticationResponse authentication) {
+        public B withAuthentication(EnvironmentAuthenticationResponse authentication) {
             this.authentication = authentication;
-            return this;
+            return (B) this;
         }
 
-        public Builder withSecurityAccess(SecurityAccessResponse securityAccess) {
+        public B withSecurityAccess(SecurityAccessResponse securityAccess) {
             this.securityAccess = securityAccess;
-            return this;
+            return (B) this;
         }
 
-        public Builder withTunnel(Tunnel tunnel) {
+        public B withTunnel(Tunnel tunnel) {
             this.tunnel = tunnel;
-            return this;
+            return (B) this;
         }
 
-        public Builder withIdBrokerMappingSource(IdBrokerMappingSource idBrokerMappingSource) {
+        public B withIdBrokerMappingSource(IdBrokerMappingSource idBrokerMappingSource) {
             this.idBrokerMappingSource = idBrokerMappingSource;
-            return this;
+            return (B) this;
         }
 
-        public Builder withCloudStorageValidation(CloudStorageValidation cloudStorageValidation) {
+        public B withCloudStorageValidation(CloudStorageValidation cloudStorageValidation) {
             this.cloudStorageValidation = cloudStorageValidation;
-            return this;
+            return (B) this;
         }
 
-        public Builder withAdminGroupName(String adminGroupName) {
+        public B withAdminGroupName(String adminGroupName) {
             this.adminGroupName = adminGroupName;
-            return this;
+            return (B) this;
         }
 
-        public Builder withAws(AwsEnvironmentParameters aws) {
+        public B withAws(AwsEnvironmentParameters aws) {
             this.aws = aws;
-            return this;
+            return (B) this;
         }
 
-        public Builder withAzure(AzureEnvironmentParameters azure) {
+        public B withAzure(AzureEnvironmentParameters azure) {
             this.azure = azure;
-            return this;
+            return (B) this;
         }
 
-        public Builder withYarn(YarnEnvironmentParameters yarn) {
+        public B withYarn(YarnEnvironmentParameters yarn) {
             this.yarn = yarn;
-            return this;
+            return (B) this;
         }
 
-        public Builder withTag(TagResponse tag) {
+        public B withTag(TagResponse tag) {
             this.tag = tag;
-            return this;
+            return (B) this;
         }
 
-        public Builder withParentEnvironmentCrn(String parentEnvironmentCrn) {
+        public B withParentEnvironmentCrn(String parentEnvironmentCrn) {
             this.parentEnvironmentCrn = parentEnvironmentCrn;
-            return this;
+            return (B) this;
         }
 
-        public Builder withParentEnvironmentName(String parentEnvironmentName) {
+        public B withParentEnvironmentName(String parentEnvironmentName) {
             this.parentEnvironmentName = parentEnvironmentName;
-            return this;
+            return (B) this;
         }
 
-        public Builder withParentEnvironmentCloudPlatform(String parentEnvironmentCloudPlatform) {
+        public B withParentEnvironmentCloudPlatform(String parentEnvironmentCloudPlatform) {
             this.parentEnvironmentCloudPlatform = parentEnvironmentCloudPlatform;
-            return this;
+            return (B) this;
         }
 
-        public Builder withProxyConfig(ProxyResponse proxyConfig) {
+        public B withProxyConfig(ProxyResponse proxyConfig) {
             this.proxyConfig = proxyConfig;
-            return this;
+            return (B) this;
         }
 
-        public Builder withGcp(GcpEnvironmentParameters gcp) {
+        public B withGcp(GcpEnvironmentParameters gcp) {
             this.gcp = gcp;
-            return this;
+            return (B) this;
         }
 
-        public Builder withEnvironmentServiceVersion(String environmentServiceVersion) {
+        public B withEnvironmentServiceVersion(String environmentServiceVersion) {
             this.environmentServiceVersion = environmentServiceVersion;
-            return this;
+            return (B) this;
         }
 
-        public Builder withAccountId(String accountId) {
+        public B withAccountId(String accountId) {
             this.accountId = accountId;
-            return this;
+            return (B) this;
         }
 
-        public Builder withCcmV2TlsType(CcmV2TlsType ccmV2TlsType) {
+        public B withCcmV2TlsType(CcmV2TlsType ccmV2TlsType) {
             this.ccmV2TlsType = ccmV2TlsType;
-            return this;
+            return (B) this;
         }
 
-        public Builder withDeletionType(EnvironmentDeletionType deletionType) {
+        public B withDeletionType(EnvironmentDeletionType deletionType) {
             this.deletionType = deletionType;
-            return this;
+            return (B) this;
         }
 
-        public Builder withEnvironmentDomain(String environmentDomainName) {
+        public B withEnvironmentDomain(String environmentDomainName) {
             environmentDomain = environmentDomainName;
-            return this;
+            return (B) this;
         }
 
-        public Builder withDataServices(DataServicesResponse dataServices) {
+        public B withDataServices(DataServicesResponse dataServices) {
             this.dataServices = dataServices;
-            return this;
+            return (B) this;
         }
 
-        public Builder withEnableSecretEncryption(boolean enableSecretEncryption) {
+        public B withEnableSecretEncryption(boolean enableSecretEncryption) {
             this.enableSecretEncryption = enableSecretEncryption;
-            return this;
+            return (B) this;
         }
 
-        public Builder withExternalizedComputeCluster(ExternalizedComputeClusterResponse externalizedComputeCluster) {
+        public B withExternalizedComputeCluster(ExternalizedComputeClusterResponse externalizedComputeCluster) {
             this.externalizedComputeCluster = externalizedComputeCluster;
-            return this;
+            return (B) this;
         }
 
-        public Builder withEnableComputeCluster(boolean enableComputeCluster) {
+        public B withEnableComputeCluster(boolean enableComputeCluster) {
             this.enableComputeCluster = enableComputeCluster;
-            return this;
+            return (B) this;
         }
 
-        public Builder withEnvironmentType(String environmentType) {
+        public B withEnvironmentType(String environmentType) {
             this.environmentType = environmentType;
-            return this;
+            return (B) this;
         }
 
-        public Builder withRemoteEnvironmentCrn(String remoteEnvironmentCrn) {
+        public B withRemoteEnvironmentCrn(String remoteEnvironmentCrn) {
             this.remoteEnvironmentCrn = remoteEnvironmentCrn;
-            return this;
+            return (B) this;
         }
 
-        public Builder withEncryptionProfileCrn(String encryptionProfileCrn) {
+        public B withEncryptionProfileCrn(String encryptionProfileCrn) {
             this.encryptionProfileCrn = encryptionProfileCrn;
-            return this;
+            return (B) this;
         }
 
-        public Builder withNotificationParameters(NotificationParameters notificationParameters) {
+        public B withNotificationParameters(NotificationParameters notificationParameters) {
             this.notificationParameters = notificationParameters;
-            return this;
+            return (B) this;
         }
 
-        public DetailedEnvironmentResponse build() {
-            DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
+        public T build() {
+            return build((T) new DetailedEnvironmentResponse());
+        }
+
+        protected T build(T detailedEnvironmentResponse) {
             detailedEnvironmentResponse.setCrn(crn);
             detailedEnvironmentResponse.setName(name);
             detailedEnvironmentResponse.setOriginalName(originalName);

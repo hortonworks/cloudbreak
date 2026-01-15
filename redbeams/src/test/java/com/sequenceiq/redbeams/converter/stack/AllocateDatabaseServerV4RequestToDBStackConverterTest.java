@@ -207,8 +207,7 @@ class AllocateDatabaseServerV4RequestToDBStackConverterTest {
                 .withLocation(LocationResponse.LocationResponseBuilder.aLocationResponse().withName(REGION).build())
                 .withName(ENVIRONMENT_NAME)
                 .withTag(new TagResponse())
-                .withAzure(azureEnvironmentParameters)
-                .build();
+                .withAzure(azureEnvironmentParameters).build();
         when(environmentService.getByCrn(ENVIRONMENT_CRN)).thenReturn(environment);
 
         SslConfig sslConfig = new SslConfig();

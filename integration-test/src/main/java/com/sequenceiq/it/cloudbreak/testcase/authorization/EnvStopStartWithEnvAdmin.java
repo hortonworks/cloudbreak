@@ -102,7 +102,7 @@ public class EnvStopStartWithEnvAdmin extends AbstractIntegrationTest {
                 .withTelemetryDisabled()
                 .withCreateFreeIpa(false)
                 .when(environmentTestClient.create())
-                .await(EnvironmentStatus.AVAILABLE)
+                .awaitForCreationFlow()
                 // testing unauthorized calls for environment
                 .whenException(environmentTestClient.describe(), ForbiddenException.class,
                         expectedMessage("Doesn't have 'environments/describeEnvironment' right on environment "

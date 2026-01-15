@@ -16,7 +16,6 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.AvailabilityType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupResponse;
@@ -62,7 +61,7 @@ public class FreeIpaMultiAzScalingTests extends AbstractE2ETest {
         setUpEnvironmentTestDto(testContext, Boolean.TRUE, 1)
                 .withEnableMultiAzFreeIpa()
                 .when(getEnvironmentTestClient().create())
-                .await(EnvironmentStatus.AVAILABLE)
+                .awaitForCreationFlow()
                 .when(getEnvironmentTestClient().describe())
                 .given(FreeIpaTestDto.class)
                 .when(getFreeIpaTestClient().describe())

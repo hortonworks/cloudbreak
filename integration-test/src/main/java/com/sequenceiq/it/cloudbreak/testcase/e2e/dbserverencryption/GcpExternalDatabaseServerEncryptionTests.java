@@ -22,7 +22,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.I
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
 import com.sequenceiq.distrox.api.v1.distrox.model.database.DistroXDatabaseAvailabilityType;
 import com.sequenceiq.distrox.api.v1.distrox.model.database.DistroXDatabaseRequest;
-import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxDatabaseServerAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXDatabaseServerAction;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
@@ -111,7 +110,7 @@ public class GcpExternalDatabaseServerEncryptionTests extends PreconditionSdxE2E
                 .withFreeIpaImage(commonCloudProperties().getImageValidation().getFreeIpaImageCatalog(),
                         commonCloudProperties().getImageValidation().getFreeIpaImageUuid())
                 .when(environmentTestClient.create())
-                .await(EnvironmentStatus.AVAILABLE)
+                .awaitForCreationFlow()
                 .given(EnvironmentTestDto.class)
                 .when(environmentTestClient.describe())
                 .given(sdx, SdxTestDto.class)

@@ -10,7 +10,6 @@ import jakarta.ws.rs.ForbiddenException;
 
 import org.testng.annotations.Test;
 
-import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
@@ -76,7 +75,7 @@ public class DatalakeDatahubCreateAuthTest extends AbstractIntegrationTest {
                 .when(credentialTestClient.create())
                 .given(EnvironmentTestDto.class)
                 .when(environmentTestClient.create())
-                .await(EnvironmentStatus.AVAILABLE)
+                .awaitForCreationFlow()
                 .validate();
 
         EnvironmentTestDto environment = testContext.get(EnvironmentTestDto.class);

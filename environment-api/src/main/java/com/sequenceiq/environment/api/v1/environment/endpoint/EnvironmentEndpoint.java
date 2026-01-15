@@ -35,6 +35,7 @@ import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentEd
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentLoadBalancerUpdateRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.UpdateAzureResourceEncryptionParametersRequest;
+import com.sequenceiq.environment.api.v1.environment.model.response.CreateEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentCrnResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentDatabaseServerCertificateStatusV4Responses;
@@ -62,7 +63,7 @@ public interface EnvironmentEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = EnvironmentOpDescription.CREATE, description = ENVIRONMENT_NOTES, operationId = "createEnvironmentV1",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    DetailedEnvironmentResponse post(@Valid EnvironmentRequest request);
+    CreateEnvironmentResponse post(@Valid EnvironmentRequest request);
 
     @GET
     @Path("/name/{name}")

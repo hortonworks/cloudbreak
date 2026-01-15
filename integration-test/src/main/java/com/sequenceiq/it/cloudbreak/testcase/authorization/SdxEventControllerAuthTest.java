@@ -15,7 +15,6 @@ import jakarta.ws.rs.ForbiddenException;
 
 import org.testng.annotations.Test;
 
-import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.it.cloudbreak.actor.CloudbreakUser;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
@@ -89,7 +88,7 @@ public class SdxEventControllerAuthTest extends AbstractIntegrationTest {
                 .when(credentialTestClient.create())
                 .given(EnvironmentTestDto.class)
                 .when(environmentTestClient.create())
-                .await(EnvironmentStatus.AVAILABLE)
+                .awaitForCreationFlow()
                 .validate();
 
         EnvironmentTestDto environment = testContext.get(EnvironmentTestDto.class);

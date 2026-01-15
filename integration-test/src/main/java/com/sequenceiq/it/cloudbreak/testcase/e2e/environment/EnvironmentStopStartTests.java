@@ -166,7 +166,7 @@ public class EnvironmentStopStartTests extends AbstractE2ETest {
                     .withDatabase(sdxDatabaseRequest)
                 .when(sdxTestClient.createInternal())
                 .given(EnvironmentTestDto.class)
-                .await(EnvironmentStatus.AVAILABLE)
+                .awaitForCreationFlow()
                 .then(cloudProviderSideTagAssertion.verifyEnvironmentTags(ENV_TAGS))
                 .init(FreeIpaTestDto.class)
                 .when(freeIpaTestClient.describe())

@@ -14,7 +14,6 @@ import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
-import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.it.cloudbreak.action.v4.imagecatalog.ImageCatalogCreateRetryAction;
 import com.sequenceiq.it.cloudbreak.assertion.audit.DatahubAuditGrpcServiceAssertion;
 import com.sequenceiq.it.cloudbreak.client.BlueprintTestClient;
@@ -142,7 +141,7 @@ public class PeriscopeLoadSetupTest extends AbstractClouderaManagerTest {
                 .withName(envName)
                 .withCredentialName(credentialName)
                 .when(environmentTestClient.create())
-                .await(EnvironmentStatus.AVAILABLE)
+                .awaitForCreationFlow()
                 .when(environmentTestClient.describe());
         FreeIpaTestDto freeIpaTestDto = testContext.given(freeIpaName, FreeIpaTestDto.class);
         freeIpaTestDto.withName(freeIpaName)

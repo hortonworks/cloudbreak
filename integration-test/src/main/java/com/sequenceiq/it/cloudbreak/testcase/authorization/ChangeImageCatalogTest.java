@@ -12,7 +12,6 @@ import jakarta.ws.rs.ForbiddenException;
 
 import org.testng.annotations.Test;
 
-import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
@@ -85,7 +84,7 @@ public class ChangeImageCatalogTest extends AbstractIntegrationTest {
                 .when(credentialTestClient.create())
                 .given(EnvironmentTestDto.class)
                 .when(environmentTestClient.create())
-                .await(EnvironmentStatus.AVAILABLE)
+                .awaitForCreationFlow()
                 .given(FreeIpaTestDto.class)
                 .when(freeIpaTestClient.create())
                 .awaitForCreationFlow()
@@ -137,7 +136,7 @@ public class ChangeImageCatalogTest extends AbstractIntegrationTest {
                 .when(credentialTestClient.create())
                 .given(EnvironmentTestDto.class)
                 .when(environmentTestClient.create())
-                .await(EnvironmentStatus.AVAILABLE)
+                .awaitForCreationFlow()
                 .given(FreeIpaTestDto.class)
                 .when(freeIpaTestClient.create())
                 .awaitForCreationFlow()
@@ -189,7 +188,7 @@ public class ChangeImageCatalogTest extends AbstractIntegrationTest {
                 .when(credentialTestClient.create())
                 .given(EnvironmentTestDto.class)
                 .when(environmentTestClient.create())
-                .await(EnvironmentStatus.AVAILABLE)
+                .awaitForCreationFlow()
                 .given(FreeIpaTestDto.class)
                 .when(freeIpaTestClient.create())
                 .awaitForCreationFlow()
@@ -245,7 +244,7 @@ public class ChangeImageCatalogTest extends AbstractIntegrationTest {
                 .given(EnvironmentTestDto.class)
                 .withTelemetryDisabled()
                 .when(environmentTestClient.create())
-                .await(EnvironmentStatus.AVAILABLE)
+                .awaitForCreationFlow()
                 .given(FreeIpaTestDto.class)
                 .when(freeIpaTestClient.create())
                 .awaitForCreationFlow()
@@ -301,7 +300,7 @@ public class ChangeImageCatalogTest extends AbstractIntegrationTest {
                 .given(EnvironmentTestDto.class)
                 .withTelemetryDisabled()
                 .when(environmentTestClient.create())
-                .await(EnvironmentStatus.AVAILABLE)
+                .awaitForCreationFlow()
                 .given(FreeIpaTestDto.class)
                 .when(freeIpaTestClient.create())
                 .awaitForCreationFlow()

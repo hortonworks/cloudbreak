@@ -15,7 +15,6 @@ import com.sequenceiq.cloudbreak.util.BouncyCastleFipsProviderLoader;
 import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.distrox.api.v1.distrox.model.database.DistroXDatabaseAvailabilityType;
 import com.sequenceiq.distrox.api.v1.distrox.model.database.DistroXDatabaseRequest;
-import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
 import com.sequenceiq.it.cloudbreak.client.AzureMarketplaceTermsClient;
 import com.sequenceiq.it.cloudbreak.client.BlueprintTestClient;
@@ -123,7 +122,7 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
         testContext.given(EnvironmentTestDto.class)
                 .withCreateFreeIpa(Boolean.FALSE)
                 .when(environmentTestClient.create())
-                .await(EnvironmentStatus.AVAILABLE)
+                .awaitForCreationFlow()
                 .when(environmentTestClient.describe())
                 .validate();
     }
@@ -402,8 +401,7 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
 
     protected void waitForEnvironmentCreation(TestContext testContext) {
         testContext.given(EnvironmentTestDto.class)
-                .awaitForFlow()
-                .await(EnvironmentStatus.AVAILABLE)
+                .awaitForCreationFlow()
                 .when(environmentTestClient.describe())
                 .validate();
     }

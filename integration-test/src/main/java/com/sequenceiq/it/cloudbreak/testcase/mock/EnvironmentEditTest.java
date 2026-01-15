@@ -10,7 +10,6 @@ import jakarta.ws.rs.BadRequestException;
 
 import org.testng.annotations.Test;
 
-import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
@@ -67,8 +66,7 @@ public class EnvironmentEditTest extends AbstractMockTest {
                 .given(EnvironmentTestDto.class)
                 .withCreateFreeIpa(false)
                 .when(environmentTestClient.create())
-                .await(EnvironmentStatus.AVAILABLE)
-
+                .awaitForCreationFlow()
                 .given(EnvironmentAuthenticationTestDto.class)
                 .withPublicKeyId(randomPublicKeyId)
                 .withPublicKey(null)
@@ -103,8 +101,7 @@ public class EnvironmentEditTest extends AbstractMockTest {
                 .given(EnvironmentTestDto.class)
                 .withCreateFreeIpa(false)
                 .when(environmentTestClient.create())
-                .await(EnvironmentStatus.AVAILABLE)
-
+                .awaitForCreationFlow()
                 .given(EnvironmentAuthenticationTestDto.class)
                 .withPublicKey(PUBLIC_KEY)
                 .withPublicKeyId(null)
@@ -143,8 +140,7 @@ public class EnvironmentEditTest extends AbstractMockTest {
                 .given(EnvironmentTestDto.class)
                 .withCreateFreeIpa(false)
                 .when(environmentTestClient.create())
-                .await(EnvironmentStatus.AVAILABLE)
-
+                .awaitForCreationFlow()
                 .given(EnvironmentAuthenticationTestDto.class)
                 .withPublicKeyId(value)
                 .withPublicKey(INVALID_PUBLIC_KEY)
@@ -171,8 +167,7 @@ public class EnvironmentEditTest extends AbstractMockTest {
                 .given(EnvironmentTestDto.class)
                 .withCreateFreeIpa(false)
                 .when(environmentTestClient.create())
-                .await(EnvironmentStatus.AVAILABLE)
-
+                .awaitForCreationFlow()
                 .given(EnvironmentAuthenticationTestDto.class)
                 .withPublicKey(PUBLIC_KEY)
                 .given(EnvironmentTestDto.class)
@@ -198,8 +193,7 @@ public class EnvironmentEditTest extends AbstractMockTest {
                 .given(EnvironmentTestDto.class)
                 .withCreateFreeIpa(false)
                 .when(environmentTestClient.create())
-                .await(EnvironmentStatus.AVAILABLE)
-
+                .awaitForCreationFlow()
                 .given(EnvironmentSecurityAccessTestDto.class)
                 .withCidr("151.151.0.0/16")
                 .given(EnvironmentTestDto.class)

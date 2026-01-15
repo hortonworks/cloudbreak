@@ -2,7 +2,6 @@ package com.sequenceiq.it.cloudbreak.testcase.e2e.gov;
 
 import org.testng.annotations.Test;
 
-import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -32,7 +31,7 @@ public class BasicEnvironmentTests extends PreconditionGovTest {
                     .withCreateFreeIpa(Boolean.FALSE)
                 .when(getEnvironmentTestClient().create())
                 .given(EnvironmentTestDto.class)
-                .await(EnvironmentStatus.AVAILABLE)
+                .awaitForCreationFlow()
                 .when(getEnvironmentTestClient().describe())
                 .validate();
     }
@@ -59,7 +58,7 @@ public class BasicEnvironmentTests extends PreconditionGovTest {
                             commonCloudProperties().getImageValidation().getFreeIpaImageUuid())
                 .when(getEnvironmentTestClient().create())
                 .given(EnvironmentTestDto.class)
-                .await(EnvironmentStatus.AVAILABLE)
+                .awaitForCreationFlow()
                 .when(getEnvironmentTestClient().describe())
                 .given(FreeIpaUserSyncTestDto.class)
                 .when(getFreeIpaTestClient().getLastSyncOperationStatus())

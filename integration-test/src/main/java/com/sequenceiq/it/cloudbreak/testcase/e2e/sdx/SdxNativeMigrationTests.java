@@ -13,7 +13,6 @@ import org.assertj.core.api.Assertions;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
-import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.network.AwsNetworkParameters;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.network.NetworkRequest;
@@ -82,7 +81,7 @@ public class SdxNativeMigrationTests extends AbstractE2ETest {
         setUpEnvironmentTestDto(testContext, Boolean.TRUE, 3)
                 .withFreeIpaImage(testContext.getCloudProvider().getFreeIpaUpgradeImageCatalog(), testContext.getCloudProvider().getFreeIpaUpgradeImageId())
                 .when(getEnvironmentTestClient().create())
-                .await(EnvironmentStatus.AVAILABLE)
+                .awaitForCreationFlow()
                 .given(FreeIpaTestDto.class)
                 .when(freeIpaTestClient.describe())
                 .given(ClusterTestDto.class)

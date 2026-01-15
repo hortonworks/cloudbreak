@@ -15,7 +15,6 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.distrox.api.v1.distrox.model.database.DistroXDatabaseRequest;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
-import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
 import com.sequenceiq.it.cloudbreak.assertion.distrox.AwsAvailabilityZoneAssertion;
 import com.sequenceiq.it.cloudbreak.assertion.salt.SaltHighStateDurationAssertions;
@@ -85,7 +84,7 @@ public class EncryptedTestUtil {
                 .withTunnel(testContext.getTunnel())
                 .withCreateFreeIpa(Boolean.FALSE)
                 .when(environmentTestClient.create())
-                .await(EnvironmentStatus.AVAILABLE);
+                .awaitForCreationFlow();
     }
 
     public void deleteDatahub(TestContext testContext, String preTerminationRecipeName, String baseLocationForPreTermination) {

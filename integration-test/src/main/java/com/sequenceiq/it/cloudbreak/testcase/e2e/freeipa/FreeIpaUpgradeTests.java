@@ -7,7 +7,6 @@ import jakarta.inject.Inject;
 
 import org.testng.annotations.Test;
 
-import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.it.cloudbreak.assertion.freeipa.FreeIpaAvailabilityAssertion;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
@@ -67,7 +66,7 @@ public class FreeIpaUpgradeTests extends AbstractE2ETest implements ImageValidat
         setUpEnvironmentTestDto(testContext, Boolean.TRUE, 3)
                 .withFreeIpaImage(testContext.getCloudProvider().getFreeIpaUpgradeImageCatalog(), testContext.getCloudProvider().getFreeIpaUpgradeImageId())
                 .when(getEnvironmentTestClient().create())
-                .await(EnvironmentStatus.AVAILABLE)
+                .awaitForCreationFlow()
                 .given(FreeIpaTestDto.class)
                 .when(freeIpaTestClient.describe())
                 .given(SdxTestDto.class)

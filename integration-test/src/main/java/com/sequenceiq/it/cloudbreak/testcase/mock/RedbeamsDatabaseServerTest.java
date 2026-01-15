@@ -10,7 +10,6 @@ import jakarta.ws.rs.BadRequestException;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.auth.crn.TestCrnGenerator;
-import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.it.cloudbreak.client.RedbeamsDatabaseServerTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
@@ -45,7 +44,7 @@ public class RedbeamsDatabaseServerTest extends AbstractMockTest {
                 .withCreateFreeIpa(Boolean.FALSE)
                 .withName(resourcePropertyProvider().getEnvironmentName())
                 .when(getEnvironmentTestClient().create())
-                .await(EnvironmentStatus.AVAILABLE)
+                .awaitForCreationFlow()
                 .given(RedbeamsDatabaseServerTestDto.class)
                 .withName(databaseName)
                 .withClusterCrn(clusterCrn)
@@ -70,7 +69,7 @@ public class RedbeamsDatabaseServerTest extends AbstractMockTest {
                 .withCreateFreeIpa(Boolean.FALSE)
                 .withName(resourcePropertyProvider().getEnvironmentName())
                 .when(getEnvironmentTestClient().create())
-                .await(EnvironmentStatus.AVAILABLE)
+                .awaitForCreationFlow()
                 .given(RedbeamsDatabaseServerTestDto.class)
                 .withName(databaseName)
                 .withClusterCrn(clusterCrn)
@@ -98,7 +97,7 @@ public class RedbeamsDatabaseServerTest extends AbstractMockTest {
                 .withCreateFreeIpa(Boolean.FALSE)
                 .withName(resourcePropertyProvider().getEnvironmentName())
                 .when(getEnvironmentTestClient().create())
-                .await(EnvironmentStatus.AVAILABLE)
+                .awaitForCreationFlow()
                 .given(RedbeamsDatabaseServerTestDto.class)
                 .withName(databaseName)
                 .withClusterCrn(TestCrnGenerator.getEnvironmentCrn("res", "acc"))

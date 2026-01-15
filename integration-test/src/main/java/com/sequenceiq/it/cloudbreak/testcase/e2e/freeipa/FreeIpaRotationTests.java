@@ -23,7 +23,6 @@ import org.testng.annotations.Test;
 
 import com.google.api.client.util.Lists;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetaDataResponse;
@@ -90,7 +89,7 @@ public class FreeIpaRotationTests extends AbstractE2ETest {
         setUpEnvironmentTestDto(testContext, Boolean.TRUE, 2)
                 .withFreeIpaOs(RHEL8.getOs())
                 .when(getEnvironmentTestClient().create())
-                .await(EnvironmentStatus.AVAILABLE)
+                .awaitForCreationFlow()
                 .given(FreeIpaTestDto.class)
                 .when(freeIpaTestClient.describe())
                 .then((tc, testDto, client) -> {

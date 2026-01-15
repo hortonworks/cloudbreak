@@ -52,7 +52,7 @@ public class EnvironmentExperienceTest extends AbstractMockTest {
                 .when(environmentTestClient.create())
                 .enableVerification(LIFTIE_API_ROOT)
                 .enableVerification()
-                .await(EnvironmentStatus.AVAILABLE);
+                .awaitForCreationFlow();
         String envName = testContext.given(EnvironmentTestDto.class).getName();
         String crn = testContext.given(EnvironmentTestDto.class).getCrn();
         String tenant = testContext.getActingUserCrn().getAccountId();

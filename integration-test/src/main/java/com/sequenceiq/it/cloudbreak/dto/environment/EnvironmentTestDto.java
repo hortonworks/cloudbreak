@@ -1,6 +1,8 @@
 package com.sequenceiq.it.cloudbreak.dto.environment;
 
 import static com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.ARCHIVED;
+import static com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.AVAILABLE;
+import static com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.TRUST_SETUP_REQUIRED;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.emptyRunningParameter;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 import static java.util.Objects.isNull;
@@ -529,6 +531,15 @@ public class EnvironmentTestDto
         credentialEndpoint.deleteByName(entity.getName(), true, false);
         setName(entity.getName());
         testContext.await(this, Map.of("status", ARCHIVED));
+    }
+
+    public EnvironmentTestDto awaitForCreationFlow() {
+        return awaitForFlow(emptyRunningParameter()).await(AVAILABLE);
+    }
+
+    public EnvironmentTestDto awaitForHybridCreationFlow() {
+        return awaitForFlow()
+                .await(TRUST_SETUP_REQUIRED, emptyRunningParameter());
     }
 
     public EnvironmentTestDto await(EnvironmentStatus status) {

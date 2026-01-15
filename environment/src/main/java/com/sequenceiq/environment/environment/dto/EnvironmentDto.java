@@ -8,10 +8,10 @@ import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.Environme
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.credential.CredentialDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.proxy.ProxyDetails;
 import com.sequenceiq.environment.credential.domain.Credential;
-import com.sequenceiq.environment.environment.dto.EnvironmentDto.Builder;
+import com.sequenceiq.environment.environment.dto.EnvironmentDto.EnvironmentDtoBuilder;
 import com.sequenceiq.environment.proxy.domain.ProxyConfig;
 
-@JsonDeserialize(builder = Builder.class)
+@JsonDeserialize(builder = EnvironmentDtoBuilder.class)
 public class EnvironmentDto extends EnvironmentDtoBase implements EnvironmentDetails {
 
     private Credential credential;
@@ -22,8 +22,8 @@ public class EnvironmentDto extends EnvironmentDtoBase implements EnvironmentDet
 
     private ExternalizedComputeClusterDto externalizedComputeCluster;
 
-    public static Builder builder() {
-        return new Builder();
+    public static EnvironmentDtoBuilder builder() {
+        return new EnvironmentDtoBuilder();
     }
 
     public Credential getCredential() {
@@ -86,7 +86,7 @@ public class EnvironmentDto extends EnvironmentDtoBase implements EnvironmentDet
     }
 
     @JsonPOJOBuilder
-    public static final class Builder extends EnvironmentDtoBaseBuilder<EnvironmentDto, Builder> {
+    public static class EnvironmentDtoBuilder extends EnvironmentDtoBaseBuilder<EnvironmentDto, EnvironmentDtoBuilder> {
 
         private Credential credential;
 
@@ -96,25 +96,22 @@ public class EnvironmentDto extends EnvironmentDtoBase implements EnvironmentDet
 
         private ExternalizedComputeClusterDto externalizedComputeCluster;
 
-        private Builder() {
-        }
-
-        public Builder withCredential(Credential credential) {
+        public EnvironmentDtoBuilder withCredential(Credential credential) {
             this.credential = credential;
             return this;
         }
 
-        public Builder withProxyConfig(ProxyConfig proxyConfig) {
+        public EnvironmentDtoBuilder withProxyConfig(ProxyConfig proxyConfig) {
             this.proxyConfig = proxyConfig;
             return this;
         }
 
-        public Builder withCredentialDetails(CredentialDetails credentialDetails) {
+        public EnvironmentDtoBuilder withCredentialDetails(CredentialDetails credentialDetails) {
             this.credentialDetails = credentialDetails;
             return this;
         }
 
-        public Builder withExternalizedComputeCluster(ExternalizedComputeClusterDto externalizedComputeCluster) {
+        public EnvironmentDtoBuilder withExternalizedComputeCluster(ExternalizedComputeClusterDto externalizedComputeCluster) {
             this.externalizedComputeCluster = externalizedComputeCluster;
             return this;
         }

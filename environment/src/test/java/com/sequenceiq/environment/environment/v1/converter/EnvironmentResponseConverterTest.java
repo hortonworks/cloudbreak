@@ -454,7 +454,7 @@ class EnvironmentResponseConverterTest {
                 gcpEnvironmentParameters.getGcpResourceEncryptionParameters().getEncryptionKey());
     }
 
-    private EnvironmentDto.Builder createEnvironmentDtoBuilder(CloudPlatform cloudPlatform) {
+    private EnvironmentDto.EnvironmentDtoBuilder createEnvironmentDtoBuilder(CloudPlatform cloudPlatform) {
         return EnvironmentDto.builder()
                 .withProxyConfig(new ProxyConfig())
                 .withCredential(new Credential())

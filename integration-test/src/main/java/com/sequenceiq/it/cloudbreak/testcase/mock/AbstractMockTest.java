@@ -5,7 +5,6 @@ import jakarta.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.cloud.v4.mock.MockProperties;
@@ -72,7 +71,7 @@ public abstract class AbstractMockTest extends AbstractIntegrationTest {
                 .given(EnvironmentTestDto.class)
                     .withFreeIpaImage(freeIpaImageCatalogUrl, imageId)
                 .when(environmentTestClient.create())
-                .await(EnvironmentStatus.AVAILABLE)
+                .awaitForCreationFlow()
                 .when(environmentTestClient.describe())
                 .validate();
     }

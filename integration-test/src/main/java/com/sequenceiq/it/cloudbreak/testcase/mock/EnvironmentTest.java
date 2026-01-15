@@ -173,7 +173,7 @@ public class EnvironmentTest extends AbstractMockTest {
                 .when(credentialTestClient.create())
                 .given(EnvironmentTestDto.class)
                 .when(environmentTestClient.create())
-                .await(EnvironmentStatus.AVAILABLE)
+                .awaitForCreationFlow()
                 .getResponse().setCrn(invalidCrn);
         testContext
                 .given(EnvironmentTestDto.class)
@@ -266,7 +266,7 @@ public class EnvironmentTest extends AbstractMockTest {
                 .withFreeIpaRecipe(Set.of(preCMRecipeName, preTerminationRecipeName))
                 .withFreeIpaImage(imageCatalogMockServerSetup.getFreeIpaImageCatalogUrl(), "f6e778fc-7f17-4535-9021-515351df3691")
                 .when(environmentTestClient.create())
-                .await(EnvironmentStatus.AVAILABLE)
+                .awaitForCreationFlow()
                 .given(FreeIpaTestDto.class)
                 .when(freeIpaTestClient.describe())
                 .then((testContext1, testDto, client) -> {

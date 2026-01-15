@@ -18,7 +18,6 @@ import org.testng.annotations.Test;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.sequenceiq.authorization.info.model.RightV4;
-import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.it.cloudbreak.actor.CloudbreakUser;
 import com.sequenceiq.it.cloudbreak.assertion.util.CheckResourceRightFalseAssertion;
 import com.sequenceiq.it.cloudbreak.assertion.util.CheckResourceRightTrueAssertion;
@@ -85,7 +84,7 @@ public class EnvironmentCreateTest extends AbstractMockTest {
                 .given(EnvironmentTestDto.class)
                 .withCreateFreeIpa(false)
                 .when(environmentTestClient.create())
-                .await(EnvironmentStatus.AVAILABLE)
+                .awaitForCreationFlow()
                 // testing unauthorized calls for environment
                 .whenException(environmentTestClient.describe(), ForbiddenException.class, expectedMessage(
                         "Doesn't have 'environments/describeEnvironment' right on environment "

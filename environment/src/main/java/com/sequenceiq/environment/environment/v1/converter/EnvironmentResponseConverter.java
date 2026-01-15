@@ -24,6 +24,7 @@ import com.sequenceiq.environment.api.v1.environment.model.request.azure.Resourc
 import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpResourceEncryptionParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.yarn.YarnEnvironmentParameters;
+import com.sequenceiq.environment.api.v1.environment.model.response.CreateEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentAuthenticationResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentDeletionType;
@@ -38,6 +39,7 @@ import com.sequenceiq.environment.credential.v1.converter.CredentialViewConverte
 import com.sequenceiq.environment.encryptionprofile.v1.converter.EncryptionProfileToEncryptionProfileResponseConverter;
 import com.sequenceiq.environment.environment.domain.EnvironmentTags;
 import com.sequenceiq.environment.environment.dto.AuthenticationDto;
+import com.sequenceiq.environment.environment.dto.CreateEnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentViewDto;
 import com.sequenceiq.environment.environment.dto.ExternalizedComputeClusterDto;
@@ -99,9 +101,19 @@ public class EnvironmentResponseConverter {
         this.encryptionProfileResponseConverter = encryptionProfileResponseConverter;
     }
 
+    public CreateEnvironmentResponse dtoToCreateResponse(CreateEnvironmentDto environmentDto) {
+        return dtoToDetailedResponseBuilder(CreateEnvironmentResponse.builder(), environmentDto.getEnvironmentDto())
+                .withFlowIdentifier(environmentDto.getFlowIdentifier())
+                .build();
+    }
+
     public DetailedEnvironmentResponse dtoToDetailedResponse(EnvironmentDto environmentDto) {
-        DetailedEnvironmentResponse.Builder builder = DetailedEnvironmentResponse.builder()
-                .withCrn(environmentDto.getResourceCrn())
+        return dtoToDetailedResponseBuilder(DetailedEnvironmentResponse.builder(), environmentDto)
+                .build();
+    }
+
+    public <B extends DetailedEnvironmentResponse.Builder> B dtoToDetailedResponseBuilder(B builder, EnvironmentDto environmentDto) {
+        builder.withCrn(environmentDto.getResourceCrn())
                 .withOriginalName(environmentDto.getOriginalName())
                 .withName(environmentDto.getName())
                 .withDescription(environmentDto.getDescription())
@@ -150,7 +162,7 @@ public class EnvironmentResponseConverter {
         NullUtil.doIfNotNull(environmentDto.getExternalizedComputeCluster(),
                 externalizedComputeCluster -> builder.withExternalizedComputeCluster(externalizedComputeClusterDtoToResponse(externalizedComputeCluster,
                         environmentDto.getNetwork())));
-        return builder.build();
+        return builder;
     }
 
     private ExternalizedComputeClusterResponse externalizedComputeClusterDtoToResponse(ExternalizedComputeClusterDto externalizedComputeClusterDto,

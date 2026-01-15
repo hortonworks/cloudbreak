@@ -5,7 +5,6 @@ import jakarta.inject.Inject;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.common.api.type.Tunnel;
-import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -28,7 +27,7 @@ public class SdxWithCcmResizeRecoveryTests extends PreconditionSdxE2ETest {
     protected void initiateEnvironmentCreation(TestContext testContext) {
         environmentUtil.createEnvironmentWithDefinedCcm(testContext, Tunnel.CCMV2_JUMPGATE)
                 .when(environmentTestClient.create())
-                .await(EnvironmentStatus.AVAILABLE)
+                .awaitForCreationFlow()
                 .validate();
     }
 

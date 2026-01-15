@@ -15,7 +15,6 @@ import jakarta.inject.Inject;
 import org.slf4j.Logger;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
@@ -183,7 +182,8 @@ public class PerformanceTest extends AbstractMockTest {
     }
 
     private void waitingForEnv(TestContext testContext, String name) {
-        testContext.given(name, EnvironmentTestDto.class).await(EnvironmentStatus.AVAILABLE)
+        testContext.given(name, EnvironmentTestDto.class)
+                .awaitForCreationFlow()
                 .when(environmentTestClient.describe())
                 .validate();
     }

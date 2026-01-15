@@ -25,7 +25,6 @@ import org.testng.annotations.Listeners;
 import com.azure.resourcemanager.resources.models.ResourceGroup;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.model.Architecture;
-import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.it.cloudbreak.assertion.encryption.SecretEncryptionAssertions;
 import com.sequenceiq.it.cloudbreak.assertion.safelogic.SafeLogicAssertions;
 import com.sequenceiq.it.cloudbreak.assertion.selinux.SELinuxAssertions;
@@ -171,7 +170,7 @@ public abstract class AbstractE2ETest extends AbstractIntegrationTest {
     protected void createEnvironment(TestContext testContext, Boolean createFreeIpa, int freeIpaInstanceCount) {
         setUpEnvironmentTestDto(testContext, createFreeIpa, freeIpaInstanceCount)
                 .when(getEnvironmentTestClient().create())
-                .await(EnvironmentStatus.AVAILABLE)
+                .awaitForCreationFlow()
                 .when(getEnvironmentTestClient().describe())
                 .validate();
         if (createFreeIpa) {

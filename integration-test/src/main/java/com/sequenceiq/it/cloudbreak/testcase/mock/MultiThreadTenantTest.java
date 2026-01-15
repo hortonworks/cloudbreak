@@ -22,7 +22,6 @@ import org.testng.annotations.Test;
 
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
-import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.it.cloudbreak.ResourcePropertyProvider;
 import com.sequenceiq.it.cloudbreak.action.v4.imagecatalog.ImageCatalogCreateRetryAction;
 import com.sequenceiq.it.cloudbreak.client.BlueprintTestClient;
@@ -211,7 +210,7 @@ public class MultiThreadTenantTest extends AbstractTestNGSpringContextTests {
                 .given(EnvironmentNetworkTestDto.class)
                 .given(EnvironmentTestDto.class).withNetwork()
                 .when(environmentTestClient.create())
-                .await(EnvironmentStatus.AVAILABLE)
+                .awaitForCreationFlow()
                 .given(FreeIpaTestDto.class).withEnvironment()
                 .when(freeIpaTestClient.create())
                 .awaitForCreationFlow()

@@ -8,7 +8,6 @@ import jakarta.inject.Inject;
 
 import org.testng.annotations.Test;
 
-import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.it.cloudbreak.await.sdx.SdxResizeAwait;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
@@ -71,7 +70,7 @@ public class MockSdxResizeTests extends AbstractMockTest {
                 .withName(resourcePropertyProvider().getEnvironmentName())
                 .withBackup("mock://location/of/the/backup")
                 .when(getEnvironmentTestClient().create())
-                .await(EnvironmentStatus.AVAILABLE)
+                .awaitForCreationFlow()
                 .given(FreeIpaTestDto.class)
                 .when(freeIpaTestClient.create())
                 .awaitForCreationFlow()
@@ -178,7 +177,7 @@ public class MockSdxResizeTests extends AbstractMockTest {
                 .withName(resourcePropertyProvider().getEnvironmentName())
                 .withBackup("mock://location/of/the/backup/cancel")
                 .when(getEnvironmentTestClient().create())
-                .await(EnvironmentStatus.AVAILABLE)
+                .awaitForCreationFlow()
                 .given(FreeIpaTestDto.class)
                 .when(freeIpaTestClient.create())
                 .awaitForCreationFlow()
@@ -221,7 +220,7 @@ public class MockSdxResizeTests extends AbstractMockTest {
                 .withName(resourcePropertyProvider().getEnvironmentName())
                 .withBackup("mock://location/of/the/backup/cancel")
                 .when(getEnvironmentTestClient().create())
-                .await(EnvironmentStatus.AVAILABLE)
+                .awaitForCreationFlow()
                 .given(FreeIpaTestDto.class)
                 .when(freeIpaTestClient.create())
                 .await(Status.AVAILABLE)
@@ -254,7 +253,7 @@ public class MockSdxResizeTests extends AbstractMockTest {
                 .withName(resourcePropertyProvider().getEnvironmentName())
                 .withBackup("mock://location/of/the/backup")
                 .when(getEnvironmentTestClient().create())
-                .await(EnvironmentStatus.AVAILABLE)
+                .awaitForCreationFlow()
                 .given(FreeIpaTestDto.class)
                 .when(freeIpaTestClient.create())
                 .awaitForCreationFlow()

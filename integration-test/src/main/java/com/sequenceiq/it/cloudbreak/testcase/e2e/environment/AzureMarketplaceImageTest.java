@@ -7,7 +7,6 @@ import org.testng.annotations.Test;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.type.ServiceEndpointCreation;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
-import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.environment.api.v1.environment.model.response.FreeIpaImageResponse;
 import com.sequenceiq.it.cloudbreak.ResourceGroupTest;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
@@ -71,7 +70,7 @@ public class AzureMarketplaceImageTest extends AbstractE2ETest {
                     .withOneFreeIpaNode()
                     .withMarketplaceFreeIpaImage()
                 .when(environmentTestClient.create())
-                .await(EnvironmentStatus.AVAILABLE)
+                .awaitForCreationFlow()
                 .then((tc, testDto, cc) -> environmentTestClient.describe().action(tc, testDto, cc))
                 .then(assertMarketplaceImage())
 

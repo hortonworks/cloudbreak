@@ -12,7 +12,6 @@ import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageComponentVersions;
 import com.sequenceiq.cloudbreak.auth.crn.TestCrnGenerator;
-import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.assertion.datalake.SdxUpgradeTestAssertion;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
@@ -83,7 +82,7 @@ public class MockSdxUpgradeTests extends AbstractMockTest {
                 .withCreateFreeIpa(Boolean.FALSE)
                 .withName(resourcePropertyProvider().getEnvironmentName())
                 .when(getEnvironmentTestClient().create())
-                .await(EnvironmentStatus.AVAILABLE)
+                .awaitForCreationFlow()
                 .given(FreeIpaTestDto.class)
                 .when(freeIpaTestClient.create())
                 .awaitForCreationFlow()
@@ -128,7 +127,7 @@ public class MockSdxUpgradeTests extends AbstractMockTest {
                 .withCreateFreeIpa(Boolean.FALSE)
                 .withName(resourcePropertyProvider().getEnvironmentName())
                 .when(getEnvironmentTestClient().create())
-                .await(EnvironmentStatus.AVAILABLE)
+                .awaitForCreationFlow()
                 .given(FreeIpaTestDto.class)
                 .when(freeIpaTestClient.create())
                 .awaitForCreationFlow()
@@ -197,7 +196,7 @@ public class MockSdxUpgradeTests extends AbstractMockTest {
                 .withName(resourcePropertyProvider().getEnvironmentName())
                 .withBackup("location/of/the/backup")
                 .when(getEnvironmentTestClient().create())
-                .await(EnvironmentStatus.AVAILABLE)
+                .awaitForCreationFlow()
                 .given(FreeIpaTestDto.class)
                 .when(freeIpaTestClient.create())
                 .awaitForCreationFlow()
@@ -236,7 +235,7 @@ public class MockSdxUpgradeTests extends AbstractMockTest {
                 .withName(resourcePropertyProvider().getEnvironmentName())
                 .withBackup("location/of/the/backup")
                 .when(getEnvironmentTestClient().create())
-                .await(EnvironmentStatus.AVAILABLE)
+                .awaitForCreationFlow()
                 .given(FreeIpaTestDto.class)
                 .when(freeIpaTestClient.create())
                 .awaitForCreationFlow()
@@ -287,7 +286,7 @@ public class MockSdxUpgradeTests extends AbstractMockTest {
                 .withName(resourcePropertyProvider().getEnvironmentName())
                 .withBackup("location/of/the/backup/cancel")
                 .when(getEnvironmentTestClient().create())
-                .await(EnvironmentStatus.AVAILABLE)
+                .awaitForCreationFlow()
                 .given(FreeIpaTestDto.class)
                 .when(freeIpaTestClient.create())
                 .awaitForCreationFlow()

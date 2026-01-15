@@ -8,7 +8,6 @@ import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.it.cloudbreak.ResourcePropertyProvider;
 import com.sequenceiq.it.cloudbreak.action.v4.imagecatalog.ImageCatalogCreateRetryAction;
 import com.sequenceiq.it.cloudbreak.actor.CloudbreakUser;
@@ -194,7 +193,7 @@ public class ResourceCreator {
     public EnvironmentTestDto create(EnvironmentTestDto testDto) {
         testDto.withCreateFreeIpa(Boolean.FALSE)
                 .when(environmentTestClient.create())
-                .await(EnvironmentStatus.AVAILABLE)
+                .awaitForCreationFlow()
                 .when(environmentTestClient.describe())
                 .validate();
         return testDto;

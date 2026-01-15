@@ -37,6 +37,7 @@ import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentNetworkRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
+import com.sequenceiq.environment.api.v1.environment.model.response.CreateEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponses;
@@ -44,6 +45,7 @@ import com.sequenceiq.environment.authorization.EnvironmentFiltering;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.domain.ExperimentalFeatures;
+import com.sequenceiq.environment.environment.dto.CreateEnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentChangeCredentialDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentCreationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
@@ -158,7 +160,8 @@ class EnvironmentControllerTest {
             when(environmentModificationService.getEnvironment(accountId, environmentCRN)).thenReturn(env);
             when(environmentApiConverter.initEditDto(env, null)).thenReturn(environmentEditDto);
             when(environmentModificationService.edit(env, environmentEditDto)).thenReturn(environmentDto);
-            when(environmentResponseConverter.dtoToDetailedResponse(environmentDto)).thenReturn(DetailedEnvironmentResponse.builder().build());
+            when(environmentResponseConverter.dtoToDetailedResponse(environmentDto))
+                    .thenReturn(DetailedEnvironmentResponse.builder().build());
             DetailedEnvironmentResponse response = underTest.editByName(ENV_CRN, null);
             assertEquals(DetailedEnvironmentResponse.class, response.getClass());
         }
@@ -196,7 +199,8 @@ class EnvironmentControllerTest {
             when(environmentApiConverter.convertEnvironmentChangeCredentialDto(null)).thenReturn(environmentChangeCredentialDto);
             when(environmentModificationService.changeCredentialByEnvironmentName(accountId, ENV_CRN, environmentChangeCredentialDto))
                     .thenReturn(environmentDto);
-            when(environmentResponseConverter.dtoToDetailedResponse(environmentDto)).thenReturn(DetailedEnvironmentResponse.builder().build());
+            when(environmentResponseConverter.dtoToDetailedResponse(environmentDto))
+                    .thenReturn(DetailedEnvironmentResponse.builder().build());
             DetailedEnvironmentResponse response = underTest.changeCredentialByEnvironmentName(ENV_CRN, null);
             assertEquals(DetailedEnvironmentResponse.class, response.getClass());
         }
@@ -225,8 +229,9 @@ class EnvironmentControllerTest {
 
     private void setupServiceResponses() {
         when(environmentApiConverter.initCreationDto(any())).thenReturn(EnvironmentCreationDto.builder().build());
-        when(environmentCreationService.create(any())).thenReturn(EnvironmentDto.builder().build());
-        when(environmentResponseConverter.dtoToDetailedResponse(any())).thenReturn(new DetailedEnvironmentResponse());
+        when(environmentCreationService.create(any()))
+                .thenReturn(CreateEnvironmentDto.builder().build());
+        when(environmentResponseConverter.dtoToCreateResponse(any())).thenReturn(new CreateEnvironmentResponse());
     }
 
     public static Stream<Arguments> ccmScenarios() {

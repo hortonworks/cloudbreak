@@ -11,7 +11,6 @@ import jakarta.inject.Inject;
 import org.springframework.util.CollectionUtils;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetaDataResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
@@ -44,7 +43,7 @@ public class AzureMultiAzFreeIpaTest extends AbstractE2ETest {
         setUpEnvironmentTestDto(testContext, Boolean.TRUE, 3)
                 .withEnableMultiAzFreeIpa()
                 .when(getEnvironmentTestClient().create())
-                .await(EnvironmentStatus.AVAILABLE)
+                .awaitForCreationFlow()
                 .given(FreeIpaTestDto.class)
                 .then((tc, testDto, client) -> {
                     validateMultiAz(testDto.getRequest().getEnvironmentCrn(), client, testDto.getName(), tc);

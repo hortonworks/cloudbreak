@@ -57,6 +57,7 @@ import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentEd
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentLoadBalancerUpdateRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.UpdateAzureResourceEncryptionParametersRequest;
+import com.sequenceiq.environment.api.v1.environment.model.response.CreateEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentCrnResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentDatabaseServerCertificateStatusV4Response;
@@ -71,6 +72,7 @@ import com.sequenceiq.environment.credential.service.CredentialService;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCredentialV1ResponseConverter;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
+import com.sequenceiq.environment.environment.dto.CreateEnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentChangeCredentialDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentCreationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
@@ -213,10 +215,10 @@ public class EnvironmentController implements EnvironmentEndpoint {
     @CheckPermissionByRequestProperty(path = "credentialName", type = NAME, action = DESCRIBE_CREDENTIAL)
     @CheckPermissionByRequestProperty(path = "encryptionProfileCrn", type = CRN, action = DESCRIBE_ENCRYPTION_PROFILE, skipOnNull = true)
     @CheckPermissionByRequestProperty(path = "freeIpa.recipes", type = NAME_LIST, action = DESCRIBE_RECIPE, skipOnNull = true)
-    public DetailedEnvironmentResponse post(@RequestObject EnvironmentRequest request) {
+    public CreateEnvironmentResponse post(@RequestObject EnvironmentRequest request) {
         EnvironmentCreationDto environmentCreationDto = environmentApiConverter.initCreationDto(request);
-        EnvironmentDto envDto = environmentCreationService.create(environmentCreationDto);
-        return environmentResponseConverter.dtoToDetailedResponse(envDto);
+        CreateEnvironmentDto envDto = environmentCreationService.create(environmentCreationDto);
+        return environmentResponseConverter.dtoToCreateResponse(envDto);
     }
 
     @Override

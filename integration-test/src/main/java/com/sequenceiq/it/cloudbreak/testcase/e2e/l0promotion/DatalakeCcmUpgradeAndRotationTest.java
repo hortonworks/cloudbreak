@@ -114,7 +114,7 @@ public class DatalakeCcmUpgradeAndRotationTest extends AbstractE2ETest implement
         environmentUtil
                 .createEnvironmentWithDefinedCcm(testContext, ccmVersion)
                 .when(environmentTestClient.create())
-                .await(EnvironmentStatus.AVAILABLE)
+                .awaitForCreationFlow()
                 .when(environmentTestClient.describe())
                 .given(FreeIpaUserSyncTestDto.class)
                 .when(freeIpaTestClient.getLastSyncOperationStatus())

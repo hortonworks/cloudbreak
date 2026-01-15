@@ -86,7 +86,7 @@ public class UsedImagesTest extends AbstractMockTest {
                     .withNetwork()
                     .withCreateFreeIpa(Boolean.FALSE)
                 .when(environmentTestClient.create())
-                .await(EnvironmentStatus.AVAILABLE)
+                .awaitForCreationFlow()
                 .when(environmentTestClient.describe())
 
                 .given(FreeIpaTestDto.class)

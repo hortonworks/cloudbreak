@@ -13,7 +13,6 @@ import org.testng.annotations.Test;
 import com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType;
 import com.sequenceiq.distrox.api.v1.distrox.model.database.DistroXDatabaseAvailabilityType;
 import com.sequenceiq.distrox.api.v1.distrox.model.database.DistroXDatabaseRequest;
-import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
 import com.sequenceiq.freeipa.rotation.FreeIpaSecretType;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
@@ -89,7 +88,7 @@ public class MonitoringTests extends AbstractE2ETest implements ImageValidatorE2
                     .withCreateFreeIpa(Boolean.TRUE)
                     .withOneFreeIpaNode()
                 .when(environmentTestClient.create())
-                .await(EnvironmentStatus.AVAILABLE)
+                .awaitForCreationFlow()
                 .given(FreeIpaUserSyncTestDto.class)
                 .when(freeIpaTestClient.getLastSyncOperationStatus())
                 .await(OperationState.COMPLETED)
@@ -131,7 +130,7 @@ public class MonitoringTests extends AbstractE2ETest implements ImageValidatorE2
                     .withTunnel(testContext.getTunnel())
                     .withCreateFreeIpa(Boolean.FALSE)
                 .when(environmentTestClient.create())
-                .await(EnvironmentStatus.AVAILABLE)
+                .awaitForCreationFlow()
                 .given(FreeIpaTestDto.class)
                     .withEnvironment()
                     .withTelemetry("telemetry")

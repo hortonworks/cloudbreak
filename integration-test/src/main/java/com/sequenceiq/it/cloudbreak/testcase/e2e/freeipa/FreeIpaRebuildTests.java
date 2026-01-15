@@ -6,7 +6,6 @@ import jakarta.inject.Inject;
 
 import org.testng.annotations.Test;
 
-import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
@@ -40,7 +39,7 @@ public class FreeIpaRebuildTests extends AbstractE2ETest {
 
         setUpEnvironmentTestDto(testContext, Boolean.TRUE, instanceCountByGroup)
                 .when(getEnvironmentTestClient().create())
-                .await(EnvironmentStatus.AVAILABLE)
+                .awaitForCreationFlow()
                 .given(FreeIpaTestDto.class)
                 .when(freeIpaTestClient.describe())
                 .when(freeIpaTestClient.delete())
@@ -67,7 +66,7 @@ public class FreeIpaRebuildTests extends AbstractE2ETest {
 
         setUpEnvironmentTestDto(testContext, Boolean.TRUE, instanceCountByGroup)
                 .when(getEnvironmentTestClient().create())
-                .await(EnvironmentStatus.AVAILABLE)
+                .awaitForCreationFlow()
                 .given(FreeIpaTestDto.class)
                 .when(freeIpaTestClient.describe())
                 .when(freeIpaTestClient.delete())

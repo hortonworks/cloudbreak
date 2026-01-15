@@ -56,7 +56,7 @@ public class FullVerticalScaleTest extends AbstractClouderaManagerTest {
                 .withCreateFreeIpa(Boolean.FALSE)
                 .withNewNetwork()
                 .when(environmentTestClient.create())
-                .awaitForFlow()
+                .awaitForCreationFlow()
                 .when(environmentTestClient.describe())
                 .validate();
     }

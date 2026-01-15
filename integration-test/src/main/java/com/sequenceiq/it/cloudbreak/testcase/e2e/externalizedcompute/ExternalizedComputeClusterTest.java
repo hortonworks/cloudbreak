@@ -73,7 +73,7 @@ public class ExternalizedComputeClusterTest extends AbstractE2ETest {
                 .withOneFreeIpaNode()
                 .withTelemetry("telemetry")
                 .when(environmentTestClient.create())
-                .await(EnvironmentStatus.AVAILABLE)
+                .awaitForCreationFlow()
                 .then((tc, testDto, client) -> {
                     validateListClusterResponseAndGetClusterCrn(tc, environmentName);
                     return testDto;
@@ -101,7 +101,7 @@ public class ExternalizedComputeClusterTest extends AbstractE2ETest {
                 .withTelemetry("telemetry")
                 .withTunnel(Tunnel.CCMV2_JUMPGATE)
                 .when(environmentTestClient.create())
-                .await(EnvironmentStatus.AVAILABLE)
+                .awaitForCreationFlow()
                 .when(environmentTestClient.createDefaultExternalizedComputeCluster())
                 .awaitForFlow()
                 .await(EnvironmentStatus.AVAILABLE)
