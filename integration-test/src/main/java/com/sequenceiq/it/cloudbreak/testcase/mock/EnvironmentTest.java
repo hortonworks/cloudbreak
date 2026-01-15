@@ -2,6 +2,7 @@ package com.sequenceiq.it.cloudbreak.testcase.mock;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type.PRE_SERVICE_DEPLOYMENT;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type.PRE_TERMINATION;
+import static com.sequenceiq.it.cloudbreak.context.RunningParameter.emptyRunningParameter;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.expectedMessage;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
@@ -22,7 +23,6 @@ import org.testng.annotations.Test;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.TestCrnGenerator;
-import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
 import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
@@ -102,7 +102,7 @@ public class EnvironmentTest extends AbstractMockTest {
                         "wrong-crn",
                         "cloudera").toString())
                 .when(environmentTestClient.create())
-                .await(EnvironmentStatus.CREATE_FAILED)
+                .awaitForFlow(emptyRunningParameter().withWaitForFlowFail())
                 .when(environmentTestClient.list())
                 .then(this::checkEnvAboutDockerRegistryValidationFailure)
                 .validate();
@@ -123,7 +123,7 @@ public class EnvironmentTest extends AbstractMockTest {
                         "9d74eee4-1cad-45d7-b645-7csdfsdfsdfds",
                         "cloudera").toString())
                 .when(environmentTestClient.create())
-                .await(EnvironmentStatus.CREATE_FAILED)
+                .awaitForFlow(emptyRunningParameter().withWaitForFlowFail())
                 .when(environmentTestClient.list())
                 .then(this::checkEnvAboutDockerRegistryValidationFailure)
                 .validate();
@@ -291,8 +291,8 @@ public class EnvironmentTest extends AbstractMockTest {
 
     private EnvironmentTestDto checkEnvAboutDockerRegistryValidationFailure(TestContext testContext, EnvironmentTestDto environment,
         EnvironmentClient environmentClient) {
-        Collection<SimpleEnvironmentResponse> simpleEnvironmentV4Respons = environment.getResponseSimpleEnvSet();
-        List<SimpleEnvironmentResponse> result = simpleEnvironmentV4Respons.stream()
+        Collection<SimpleEnvironmentResponse> simpleEnvironmentV4Response = environment.getResponseSimpleEnvSet();
+        List<SimpleEnvironmentResponse> result = simpleEnvironmentV4Response.stream()
                 .filter(env -> environment.getName().equals(env.getName()))
                 .collect(Collectors.toList());
         if (result.isEmpty()) {

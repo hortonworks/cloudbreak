@@ -100,7 +100,7 @@ public class ExternalizedComputeClusterTest extends AbstractMockTest {
                 .withOneFreeIpaNode()
                 .withFreeIpaImage(imageCatalogMockServerSetup.getFreeIpaImageCatalogUrl(), "f6e778fc-7f17-4535-9021-515351df3691")
                 .when(environmentTestClient.create())
-                .await(EnvironmentStatus.AVAILABLE)
+                .awaitForFlow(emptyRunningParameter().withWaitForFlowFail())
                 .when(environmentTestClient.describe())
                 .then((testContext1, envDto, client) -> {
                     String statusReason = envDto.getResponse().getStatusReason();
