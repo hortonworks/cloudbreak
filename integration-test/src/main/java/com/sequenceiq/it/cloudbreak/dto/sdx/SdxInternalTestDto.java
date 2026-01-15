@@ -767,8 +767,8 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
         return getResponse().getStackV4Response().getVariant();
     }
 
-    public List<String> getAllInstanceIps(TestContext testContext) {
-        SdxClient sdxClient = testContext.getMicroserviceClient(client());
-        return InstanceIPCollectorUtil.getAllInstanceIps(this, sdxClient, false);
+    public List<String> getAllInstanceIps() {
+        refresh();
+        return InstanceIPCollectorUtil.getAllInstanceIps(this, false);
     }
 }

@@ -19,7 +19,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetaDataResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.TrustResponse;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
@@ -108,9 +107,9 @@ public class HybridTrustTests extends AbstractE2ETest {
                     .withTrustSetup()
                 .when(environmentTestClient.create())
                 .awaitForHybridCreationFlow()
-                .when(environmentTestClient.describe())
+                .refresh()
                 .given(FreeIpaTestDto.class)
-                .when(freeIpaTestClient.describe())
+                .refresh()
                 .given(EnvironmentTrustSetupDto.class)
                 .when(environmentTestClient.setupTrust())
                 .await(EnvironmentStatus.TRUST_SETUP_FINISH_REQUIRED)
@@ -124,14 +123,16 @@ public class HybridTrustTests extends AbstractE2ETest {
                 .when(environmentTestClient.finishTrustSetup())
                 .await(EnvironmentStatus.AVAILABLE)
                 .given(FreeIpaTestDto.class)
+                .refresh()
                 .then(validateTrustOnFreeIpa())
                 .then(validateTrustOnActiveDirectory())
+                .given(FreeIpaTrustCommandsDto.class)
+                .when(freeIpaTestClient.trustCleanupCommands())
                 .given(EnvironmentTestDto.class)
                 .when(environmentTestClient.delete())
                 .await(EnvironmentStatus.ARCHIVED)
                 .given(FreeIpaTrustCommandsDto.class)
-                .when(freeIpaTestClient.trustCleanupCommands())
-                .then(cleanUpActiveDirectory(true))
+                .then(cleanUpActiveDirectory(false))
                 .validate();
     }
 
@@ -153,7 +154,7 @@ public class HybridTrustTests extends AbstractE2ETest {
 
     private Assertion<FreeIpaTestDto, FreeIpaClient> validateTrustOnFreeIpa() {
         return (testContext, testDto, client) -> {
-            List<String> freeIpaIps = testDto.getAllInstanceIps(testContext);
+            List<String> freeIpaIps = testDto.getAllInstanceIps();
             TrustResponse trust = testDto.getResponse().getTrust();
             String command = String.format(FREEIPA_TRUST_VALIDATE_COMMAND, trust.getFqdn(), trust.getRealm().toUpperCase(Locale.ROOT));
             executeFreeIpaCommand(freeIpaIps, command, true);
@@ -163,10 +164,6 @@ public class HybridTrustTests extends AbstractE2ETest {
 
     private Assertion<FreeIpaTestDto, FreeIpaClient> validateTrustOnActiveDirectory() {
         return (testContext, testDto, client) ->  {
-            String freeIpaInstanceFqdn = testDto.getResponse().getInstanceGroups().getFirst().getMetaData().stream()
-                    .map(InstanceMetaDataResponse::getDiscoveryFQDN)
-                    .findFirst()
-                    .orElseThrow(() -> new IllegalStateException("Failed to find FreeIPA instance FQDN"));
             String realm = testDto.getResponse().getFreeIpa().getDomain().toLowerCase(Locale.ROOT);
             String command = String.format(AD_TRUST_VALIDATE_COMMAND, realm);
             executeActiveDirectoryCommands(testDto.getName() + "-validate", command, true);

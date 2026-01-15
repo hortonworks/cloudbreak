@@ -11,7 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.it.cloudbreak.assertion.util.InstanceIPCollectorUtil;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
@@ -47,7 +46,7 @@ public class SecretEncryptionAssertions {
 
     public FreeIpaTestDto validate(TestContext testContext, FreeIpaTestDto freeIpaTestDto, FreeIpaClient freeIpaClient) {
         if (shouldValidate(testContext)) {
-            validate(freeIpaTestDto, freeIpaClient);
+            validate(freeIpaTestDto);
         } else {
             logValidationSkipped();
         }
@@ -56,7 +55,7 @@ public class SecretEncryptionAssertions {
 
     public SdxInternalTestDto validate(TestContext testContext, SdxInternalTestDto sdxInternalTestDto, SdxClient sdxClient) {
         if (shouldValidate(testContext)) {
-            validate(sdxInternalTestDto, sdxClient);
+            validate(sdxInternalTestDto);
         } else {
             logValidationSkipped();
         }
@@ -65,7 +64,7 @@ public class SecretEncryptionAssertions {
 
     public DistroXTestDto validate(TestContext testContext, DistroXTestDto distroXTestDto, CloudbreakClient cloudbreakClient) {
         if (shouldValidate(testContext)) {
-            validate(distroXTestDto, cloudbreakClient);
+            validate(distroXTestDto);
         } else {
             logValidationSkipped();
         }
@@ -76,15 +75,15 @@ public class SecretEncryptionAssertions {
         if (shouldValidate(testContext)) {
             FreeIpaTestDto freeIpaTestDto = testContext.get(FreeIpaTestDto.class);
             if (freeIpaTestDto != null) {
-                validate(freeIpaTestDto, testContext.getMicroserviceClient(FreeIpaClient.class));
+                validate(freeIpaTestDto);
             }
             SdxInternalTestDto sdxInternalTestDto = testContext.get(SdxInternalTestDto.class);
             if (sdxInternalTestDto != null) {
-                validate(sdxInternalTestDto, testContext.getMicroserviceClient(SdxClient.class));
+                validate(sdxInternalTestDto);
             }
             DistroXTestDto distroXTestDto = testContext.get(DistroXTestDto.class);
             if (distroXTestDto != null) {
-                validate(distroXTestDto, testContext.getMicroserviceClient(CloudbreakClient.class));
+                validate(distroXTestDto);
             }
         } else {
             logValidationSkipped();
@@ -99,8 +98,8 @@ public class SecretEncryptionAssertions {
         LOGGER.info("The secret encryption validation is skipped because the environment is not a GovCloud environment.");
     }
 
-    private void validate(FreeIpaTestDto freeIpaTestDto, FreeIpaClient freeIpaClient) {
-        List<String> instanceIps = InstanceIPCollectorUtil.getAllInstanceIps(freeIpaTestDto, freeIpaClient, false);
+    private void validate(FreeIpaTestDto freeIpaTestDto) {
+        List<String> instanceIps = freeIpaTestDto.getAllInstanceIps();
         Map<String, String> failedInstancesWithCommandOutput = getFailedInstancesWithCommandOutput(instanceIps);
         if (!failedInstancesWithCommandOutput.isEmpty()) {
             throw new TestFailException("The secret encryption validation did not succeed on all the FreeIPA instances. Failed instances with command output: "
@@ -108,8 +107,8 @@ public class SecretEncryptionAssertions {
         }
     }
 
-    private void validate(SdxInternalTestDto sdxInternalTestDto, SdxClient sdxClient) {
-        List<String> instanceIps = InstanceIPCollectorUtil.getAllInstanceIps(sdxInternalTestDto, sdxClient, false);
+    private void validate(SdxInternalTestDto sdxInternalTestDto) {
+        List<String> instanceIps = sdxInternalTestDto.getAllInstanceIps();
         Map<String, String> failedInstancesWithCommandOutput = getFailedInstancesWithCommandOutput(instanceIps);
         if (!failedInstancesWithCommandOutput.isEmpty()) {
             throw new TestFailException("The secret encryption validation did not succeed on all the SDX instances. Failed instances with command output: "
@@ -117,8 +116,8 @@ public class SecretEncryptionAssertions {
         }
     }
 
-    private void validate(DistroXTestDto distroXTestDto, CloudbreakClient cloudbreakClient) {
-        List<String> instanceIps = InstanceIPCollectorUtil.getAllInstanceIps(distroXTestDto, cloudbreakClient, false);
+    private void validate(DistroXTestDto distroXTestDto) {
+        List<String> instanceIps = distroXTestDto.getAllInstanceIps();
         Map<String, String> failedInstancesWithCommandOutput = getFailedInstancesWithCommandOutput(instanceIps);
         if (!failedInstancesWithCommandOutput.isEmpty()) {
             throw new TestFailException("The secret encryption validation did not succeed on all the DistroX instances. Failed instances with command output: "

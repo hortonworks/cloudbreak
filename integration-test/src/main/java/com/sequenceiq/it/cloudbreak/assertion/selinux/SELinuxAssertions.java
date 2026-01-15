@@ -80,19 +80,19 @@ public class SELinuxAssertions {
         FreeIpaTestDto freeIpaTestDto = testContext.get(FreeIpaTestDto.class);
         if (freeIpaTestDto != null) {
             validateAll(validationBuilder, testContext, "FreeIpa",
-                    freeIpaTestDto.getAllInstanceIps(testContext), freeIpaTestDto.getSelinuxMode(), true);
+                    freeIpaTestDto.getAllInstanceIps(), freeIpaTestDto.getSelinuxMode(), true);
         }
 
         SdxInternalTestDto sdxInternalTestDto = testContext.get(SdxInternalTestDto.class);
         if (sdxInternalTestDto != null) {
             validateAll(validationBuilder, testContext, "DataLake",
-                    sdxInternalTestDto.getAllInstanceIps(testContext), sdxInternalTestDto.getSelinuxMode(), true);
+                    sdxInternalTestDto.getAllInstanceIps(), sdxInternalTestDto.getSelinuxMode(), true);
         }
 
         DistroXTestDto distroXTestDto = testContext.get(DistroXTestDto.class);
         if (distroXTestDto != null) {
             validateAll(validationBuilder, testContext, "DataHub",
-                    distroXTestDto.getAllInstanceIps(testContext), distroXTestDto.getSelinuxMode(), true);
+                    distroXTestDto.getAllInstanceIps(), distroXTestDto.getSelinuxMode(), true);
         }
 
         ValidationResult validationResult = validationBuilder.build();
@@ -109,7 +109,7 @@ public class SELinuxAssertions {
 
     public FreeIpaTestDto validateAll(TestContext testContext, FreeIpaTestDto testDto, boolean throwIfAnyError, boolean generateDenyReport) {
         ValidationResult validationResult = validateAll("FreeIPA", testContext,
-                testDto.getAllInstanceIps(testContext), testDto.getSelinuxMode(), generateDenyReport).build();
+                testDto.getAllInstanceIps(), testDto.getSelinuxMode(), generateDenyReport).build();
         if (throwIfAnyError) {
             throwIfAnyError(validationResult);
         } else {
@@ -124,7 +124,7 @@ public class SELinuxAssertions {
 
     public SdxInternalTestDto validateAll(TestContext testContext, SdxInternalTestDto testDto, boolean throwIfAnyError, boolean generateDenyReport) {
         ValidationResult validationResult = validateAll("DataLake", testContext,
-                testDto.getAllInstanceIps(testContext), testDto.getSelinuxMode(), generateDenyReport).build();
+                testDto.getAllInstanceIps(), testDto.getSelinuxMode(), generateDenyReport).build();
         if (throwIfAnyError) {
             throwIfAnyError(validationResult);
         } else {
@@ -139,7 +139,7 @@ public class SELinuxAssertions {
 
     public DistroXTestDto validateAll(TestContext testContext, DistroXTestDto testDto, boolean throwIfAnyError, boolean generateDenyReport) {
         ValidationResult validationResult = validateAll("DataHub", testContext,
-                testDto.getAllInstanceIps(testContext), testDto.getSelinuxMode(), generateDenyReport).build();
+                testDto.getAllInstanceIps(), testDto.getSelinuxMode(), generateDenyReport).build();
         if (throwIfAnyError) {
             throwIfAnyError(validationResult);
         } else {

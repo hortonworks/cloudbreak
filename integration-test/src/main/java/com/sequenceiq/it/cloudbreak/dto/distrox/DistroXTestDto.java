@@ -555,8 +555,8 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
                 .orElse(SeLinux.PERMISSIVE);
     }
 
-    public List<String> getAllInstanceIps(TestContext testContext) {
-        CloudbreakClient cloudbreakClient = testContext.getMicroserviceClient(client());
-        return InstanceIPCollectorUtil.getAllInstanceIps(this, cloudbreakClient, false);
+    public List<String> getAllInstanceIps() {
+        refresh();
+        return InstanceIPCollectorUtil.getAllInstanceIps(this, false);
     }
 }
