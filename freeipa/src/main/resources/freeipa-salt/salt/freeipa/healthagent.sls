@@ -69,6 +69,7 @@ setup-healthagent-certs:
     - group: root
     - mode: 600
     - target: /cdp/ipahealthagent/config.yaml
+    - force: True
     - require:
         - file: /cdp/ipahealthagent/config.yaml
 

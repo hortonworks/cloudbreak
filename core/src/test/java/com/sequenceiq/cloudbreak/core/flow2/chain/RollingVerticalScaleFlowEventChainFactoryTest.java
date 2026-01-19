@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.view.InstanceGroupView;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
+import com.sequenceiq.common.api.type.OrchestratorType;
 import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
 import com.sequenceiq.flow.graph.FlowChainConfigGraphGeneratorUtil;
 
@@ -41,6 +42,8 @@ class RollingVerticalScaleFlowEventChainFactoryTest {
     private static final String INSTANCE_ID_1 = "i-instance-1";
 
     private static final String INSTANCE_ID_2 = "i-instance-2";
+
+    private static final String INSTANCE_ID_3 = "i-instance-3";
 
     @InjectMocks
     private RollingVerticalScaleFlowEventChainFactory underTest;
@@ -165,6 +168,62 @@ class RollingVerticalScaleFlowEventChainFactoryTest {
         assertEquals(request, triggerEvent.getStackVerticalScaleV4Request());
         flowTriggerEventQueue.getQueue().addAll(restrainedQueueData);
         FlowChainConfigGraphGeneratorUtil.generateFor(underTest, FLOW_CONFIGS_PACKAGE, flowTriggerEventQueue);
+    }
+
+    @Test
+    void testAllAtOnceOrchestratorCreatesSingleFlowWithAllInstances() {
+        StackVerticalScaleV4Request request = new StackVerticalScaleV4Request();
+        request.setGroup(HOST_GROUP);
+        request.setOrchestratorType(OrchestratorType.ALL_AT_ONCE);
+        RollingVerticalScaleFlowChainTriggerEvent event = new RollingVerticalScaleFlowChainTriggerEvent(
+                FlowChainTriggers.ROLLING_VERTICALSCALE_CHAIN_TRIGGER_EVENT, STACK_ID, request);
+
+        mockStackWithInstances(List.of(INSTANCE_ID_1, INSTANCE_ID_2, INSTANCE_ID_3));
+
+        FlowTriggerEventQueue flowTriggerEventQueue = underTest.createFlowTriggerEventQueue(event);
+
+        Queue<Selectable> queue = flowTriggerEventQueue.getQueue();
+        assertEquals(1, queue.size());
+        RollingVerticalScaleTriggerEvent triggerEvent = (RollingVerticalScaleTriggerEvent) queue.poll();
+        assertEquals(List.of(INSTANCE_ID_1, INSTANCE_ID_2, INSTANCE_ID_3), triggerEvent.getInstanceIds());
+    }
+
+    @Test
+    void testOneByOneOrchestratorCreatesSingleInstanceFlows() {
+        StackVerticalScaleV4Request request = new StackVerticalScaleV4Request();
+        request.setGroup(HOST_GROUP);
+        request.setOrchestratorType(OrchestratorType.ONE_BY_ONE);
+        RollingVerticalScaleFlowChainTriggerEvent event = new RollingVerticalScaleFlowChainTriggerEvent(
+                FlowChainTriggers.ROLLING_VERTICALSCALE_CHAIN_TRIGGER_EVENT, STACK_ID, request);
+
+        mockStackWithInstances(List.of(INSTANCE_ID_1, INSTANCE_ID_2, INSTANCE_ID_3));
+
+        FlowTriggerEventQueue flowTriggerEventQueue = underTest.createFlowTriggerEventQueue(event);
+
+        Queue<Selectable> queue = flowTriggerEventQueue.getQueue();
+        assertEquals(3, queue.size());
+        List<RollingVerticalScaleTriggerEvent> triggerEvents = queue.stream()
+                .map(RollingVerticalScaleTriggerEvent.class::cast)
+                .toList();
+        assertEquals(List.of(List.of(INSTANCE_ID_1), List.of(INSTANCE_ID_2), List.of(INSTANCE_ID_3)),
+                triggerEvents.stream().map(RollingVerticalScaleTriggerEvent::getInstanceIds).toList());
+    }
+
+    private void mockStackWithInstances(List<String> instanceIds) {
+        when(stackDtoService.getById(eq(STACK_ID))).thenReturn(stackDto);
+        when(stackDto.getInstanceGroupDtos()).thenReturn(List.of(instanceGroupDto));
+        when(instanceGroupDto.getInstanceGroup()).thenReturn(instanceGroupView);
+        when(instanceGroupView.getGroupName()).thenReturn(HOST_GROUP);
+        List<InstanceMetadataView> metadataViews = instanceIds.stream()
+                .map(this::mockInstanceMetadataView)
+                .toList();
+        when(instanceGroupDto.getInstanceMetadataViews()).thenReturn(metadataViews);
+    }
+
+    private InstanceMetadataView mockInstanceMetadataView(String instanceId) {
+        InstanceMetadataView metadataView = mock(InstanceMetadataView.class);
+        when(metadataView.getInstanceId()).thenReturn(instanceId);
+        return metadataView;
     }
 }
 

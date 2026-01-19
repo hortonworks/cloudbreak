@@ -852,11 +852,11 @@ existing-stack-patcher:
     user-data-migration:
       enabled: false
     user-data-ccmv2-setup:
-      enabled: true
+      enabled: false
     embedded-db-certificate-rotation:
-      enabled: true
+      enabled: false
     gcp-subnet-id-fix:
-      enabled: true
+      enabled: false
 
 dynamic-entitlement:
   entitlements:

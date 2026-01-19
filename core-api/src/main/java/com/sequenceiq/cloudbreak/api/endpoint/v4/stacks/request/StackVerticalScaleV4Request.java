@@ -9,6 +9,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.InstanceGroupModelDescription;
+import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackVerticalScaleModelDescription;
+import com.sequenceiq.common.api.type.OrchestratorType;
 import com.sequenceiq.common.model.JsonEntity;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -25,6 +27,10 @@ public class StackVerticalScaleV4Request implements JsonEntity {
     @NotNull
     @Schema(description = InstanceGroupModelDescription.TEMPLATE)
     private InstanceTemplateV4Request template;
+
+    @Schema(description = StackVerticalScaleModelDescription.ORCHESTRATOR_TYPE,
+            allowableValues = {"ALL_AT_ONCE", "ONE_BY_ONE"}, defaultValue = "ALL_AT_ONCE")
+    private OrchestratorType orchestratorType = OrchestratorType.ALL_AT_ONCE;
 
     private Long stackId;
 
@@ -54,11 +60,20 @@ public class StackVerticalScaleV4Request implements JsonEntity {
         this.template = template;
     }
 
+    public OrchestratorType getOrchestratorType() {
+        return orchestratorType;
+    }
+
+    public void setOrchestratorType(OrchestratorType orchestratorType) {
+        this.orchestratorType = orchestratorType == null ? OrchestratorType.ALL_AT_ONCE : orchestratorType;
+    }
+
     @Override
     public String toString() {
         return new StringJoiner(", ", StackVerticalScaleV4Request.class.getSimpleName() + "[", "]")
                 .add("group=" + group)
                 .add("instanceTemplateRequested=" + template.getInstanceType())
+                .add("orchestratorType=" + orchestratorType)
                 .toString();
     }
 }
