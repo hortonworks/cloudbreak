@@ -329,6 +329,12 @@
                  <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000</value>
              </param>
              {%- endif %}
+             {% if 'SPARK3HISTORYUI' in exposed and 'SPARK3_YARN_HISTORY_SERVER' in salt['pillar.get']('gateway:location') -%}
+             <param>
+                 <name>SPARK3HISTORYUI</name>
+                 <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000</value>
+             </param>
+             {%- endif %}
              {% if 'ZEPPELIN' in exposed and 'ZEPPELIN_SERVER' in salt['pillar.get']('gateway:location') -%}
              <param>
                  <name>ZEPPELINUI</name>
