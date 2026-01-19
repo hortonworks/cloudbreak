@@ -103,6 +103,7 @@ import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.InstanceGroup;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.events.EventSenderService;
 import com.sequenceiq.freeipa.flow.FlowIntegrationTestConfig;
 import com.sequenceiq.freeipa.flow.StackStatusFinalizer;
 import com.sequenceiq.freeipa.flow.freeipa.common.FreeIpaFailedFlowAnalyzer;
@@ -372,6 +373,9 @@ class RebuildFlowIntegrationTest {
 
     @MockBean
     private StackStatusFinalizer stackStatusFinalizer;
+
+    @MockBean
+    private EventSenderService eventSenderService;
 
     @BeforeEach
     public void setup() throws FreeIpaClientException, QuotaExceededException, CloudbreakOrchestratorException {

@@ -14,19 +14,19 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.flow.core.AbstractAction;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.freeipa.converter.cloud.CredentialToCloudCredentialConverter;
 import com.sequenceiq.freeipa.converter.cloud.StackToCloudStackConverter;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.OperationAwareAction;
+import com.sequenceiq.freeipa.flow.stack.AbstractStackAction;
 import com.sequenceiq.freeipa.flow.stack.StackContext;
 import com.sequenceiq.freeipa.flow.stack.image.change.ImageChangeState;
 import com.sequenceiq.freeipa.flow.stack.image.change.event.ImageChangeEvents;
 import com.sequenceiq.freeipa.service.CredentialService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
-public abstract class AbstractImageChangeAction<P extends Payload> extends AbstractAction<ImageChangeState, ImageChangeEvents, StackContext, P>
+public abstract class AbstractImageChangeAction<P extends Payload> extends AbstractStackAction<ImageChangeState, ImageChangeEvents, StackContext, P>
         implements OperationAwareAction {
 
     @Inject

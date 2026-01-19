@@ -104,6 +104,7 @@ import com.sequenceiq.freeipa.entity.InstanceGroup;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.StackStatus;
+import com.sequenceiq.freeipa.events.EventSenderService;
 import com.sequenceiq.freeipa.flow.FlowIntegrationTestConfig;
 import com.sequenceiq.freeipa.flow.StackStatusFinalizer;
 import com.sequenceiq.freeipa.flow.freeipa.common.FreeIpaFailedFlowAnalyzer;
@@ -288,6 +289,9 @@ class FreeIpaUpscaleFlowIntegrationTest {
 
     @MockBean
     private StackStatusFinalizer stackStatusFinalizer;
+
+    @MockBean
+    private EventSenderService eventSenderService;
 
     private ResourceConnector resourceConnector = mock(ResourceConnector.class);
 

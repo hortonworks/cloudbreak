@@ -54,6 +54,7 @@ import com.sequenceiq.freeipa.converter.cloud.ResourceToCloudResourceConverter;
 import com.sequenceiq.freeipa.converter.cloud.StackToCloudStackConverter;
 import com.sequenceiq.freeipa.entity.ImageEntity;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.events.EventSenderService;
 import com.sequenceiq.freeipa.flow.FlowIntegrationTestConfig;
 import com.sequenceiq.freeipa.flow.StackStatusFinalizer;
 import com.sequenceiq.freeipa.flow.stack.update.action.UserDataUpdateActions;
@@ -66,6 +67,7 @@ import com.sequenceiq.freeipa.service.image.userdata.UserDataService;
 import com.sequenceiq.freeipa.service.operation.OperationService;
 import com.sequenceiq.freeipa.service.resource.ResourceService;
 import com.sequenceiq.freeipa.service.stack.StackService;
+import com.sequenceiq.freeipa.service.stack.StackUpdater;
 
 import io.micrometer.core.instrument.MeterRegistry;
 
@@ -144,6 +146,12 @@ class UpdateUserDataFlowIntegrationTest {
 
     @MockBean
     private StackStatusFinalizer stackStatusFinalizer;
+
+    @MockBean
+    private EventSenderService eventSenderService;
+
+    @MockBean
+    private StackUpdater stackUpdater;
 
     @Mock
     private ResourceConnector resourcesApi;

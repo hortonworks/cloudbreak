@@ -859,7 +859,10 @@ public enum ResourceEvent {
 
     FREEIPA_CREATION_STARTED("freeipa.creation.started"),
     FREEIPA_CREATION_FINISHED("freeipa.creation.finished"),
-    FREEIPA_CREATION_FAILED("freeipa.creation.failed");
+    FREEIPA_CREATION_FAILED("freeipa.creation.failed"),
+    FREEIPA_IMAGE_CHANGE_STARTED("freeipa.image.change.started"),
+    FREEIPA_IMAGE_CHANGE_FINISHED("freeipa.image.change.finished"),
+    FREEIPA_IMAGE_CHANGE_FAILED("freeipa.image.change.failed"),;
 
     private final String message;
 

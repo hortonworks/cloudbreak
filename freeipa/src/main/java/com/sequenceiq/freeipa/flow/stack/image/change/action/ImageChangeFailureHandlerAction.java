@@ -2,13 +2,17 @@ package com.sequenceiq.freeipa.flow.stack.image.change.action;
 
 import static com.sequenceiq.freeipa.flow.stack.image.change.event.ImageChangeEvents.IMAGE_CHANGE_FAILURE_HANDLED_EVENT;
 
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.entity.ImageEntity;
 import com.sequenceiq.freeipa.flow.OperationAwareAction;
 import com.sequenceiq.freeipa.flow.stack.AbstractStackFailureAction;
@@ -47,6 +51,10 @@ class ImageChangeFailureHandlerAction extends AbstractStackFailureAction<ImageCh
         if (isOperationIdSet(variables)) {
             operationService.failOperation(context.getStack().getAccountId(), getOperationId(variables), payload.getException().getMessage());
         }
+        getStackUpdater().updateStackStatus(context.getStack(), DetailedStackStatus.IMAGE_CHANGE_FAILED,
+                "Image change failed with: " + payload.getException().getMessage());
+        getEventService().sendEventAndNotification(context.getStack(), context.getFlowTriggerUserCrn(), ResourceEvent.FREEIPA_IMAGE_CHANGE_FAILED,
+                List.of(Optional.ofNullable(payload.getException()).map(Throwable::getMessage).orElse("Unknown")));
         sendEvent(context, new StackEvent(IMAGE_CHANGE_FAILURE_HANDLED_EVENT.event(), context.getStack().getId()));
     }
 }

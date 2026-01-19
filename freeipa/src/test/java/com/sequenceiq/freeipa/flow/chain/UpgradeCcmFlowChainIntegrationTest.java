@@ -66,6 +66,7 @@ import com.sequenceiq.freeipa.converter.cloud.ResourceToCloudResourceConverter;
 import com.sequenceiq.freeipa.converter.cloud.StackToCloudStackConverter;
 import com.sequenceiq.freeipa.entity.ImageEntity;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.events.EventSenderService;
 import com.sequenceiq.freeipa.flow.FlowIntegrationTestConfig;
 import com.sequenceiq.freeipa.flow.StackStatusFinalizer;
 import com.sequenceiq.freeipa.flow.stack.update.UpdateUserDataFlowConfig;
@@ -95,6 +96,7 @@ import com.sequenceiq.freeipa.service.image.userdata.UserDataService;
 import com.sequenceiq.freeipa.service.operation.OperationService;
 import com.sequenceiq.freeipa.service.resource.ResourceService;
 import com.sequenceiq.freeipa.service.stack.StackService;
+import com.sequenceiq.freeipa.service.stack.StackUpdater;
 import com.sequenceiq.freeipa.service.upgrade.ccm.CcmParametersConfigService;
 
 import io.micrometer.core.instrument.MeterRegistry;
@@ -180,6 +182,12 @@ class UpgradeCcmFlowChainIntegrationTest {
 
     @Mock
     private ResourceConnector resourcesApi;
+
+    @MockBean
+    private EventSenderService eventSenderService;
+
+    @MockBean
+    private StackUpdater stackUpdater;
 
     @BeforeEach
     public void setup() {

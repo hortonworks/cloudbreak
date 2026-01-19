@@ -29,7 +29,9 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.PrepareImageType;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.flow.core.PayloadConverter;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.converter.cloud.ResourceToCloudResourceConverter;
 import com.sequenceiq.freeipa.converter.image.ImageConverter;
 import com.sequenceiq.freeipa.entity.ImageEntity;
@@ -79,6 +81,7 @@ public class ImageChangeActions {
             @Override
             protected void doExecute(StackContext context, ImageChangeEvent payload, Map<Object, Object> variables) {
                 Stack stack = context.getStack();
+                getStackUpdater().updateStackStatus(context.getStack(), DetailedStackStatus.IMAGE_CHANGE_IN_PROGRESS, "Preparing image on cloud provider side");
                 CloudContext cloudContext = context.getCloudContext();
 
                 ImageEntity imageEntity = imageService.getByStack(stack);
@@ -120,12 +123,12 @@ public class ImageChangeActions {
             @Override
             protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
                 Stack stack = context.getStack();
-                Long stackId = stack.getId();
                 ImageEntity image = stack.getImage();
                 if (imageFallbackService.imageFallbackPermitted(image, stack)) {
+                    getStackUpdater().updateStackStatus(stack, DetailedStackStatus.IMAGE_CHANGE_IN_PROGRESS, "Setting up fallback image");
                     imageFallbackService.performImageFallback(image, stack);
                 }
-                ImageFallbackSuccess imageFallbackSuccess = new ImageFallbackSuccess(stackId);
+                ImageFallbackSuccess imageFallbackSuccess = new ImageFallbackSuccess(stack.getId());
                 sendEvent(context, IMAGE_FALLBACK_FINISHED_EVENT.event(), imageFallbackSuccess);
             }
 
@@ -153,6 +156,7 @@ public class ImageChangeActions {
 
             @Override
             protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) throws Exception {
+                getStackUpdater().updateStackStatus(context.getStack(), DetailedStackStatus.IMAGE_CHANGE_IN_PROGRESS, "Setting up image on provider side");
                 CloudStack cloudStack = getCloudStackConverter().convert(context.getStack());
                 Collection<Resource> resources = resourceService.findAllByStackId(context.getStack().getId());
                 List<CloudResource> cloudResources =
@@ -175,6 +179,8 @@ public class ImageChangeActions {
         return new AbstractImageChangeAction<>(CloudPlatformResult.class) {
             @Override
             protected void doExecute(StackContext context, CloudPlatformResult payload, Map<Object, Object> variables) throws Exception {
+                getStackUpdater().updateStackStatus(context.getStack(), DetailedStackStatus.IMAGE_CHANGE_FINISHED, "Image successfully changed");
+                getEventService().sendEventAndNotification(context.getStack(), context.getFlowTriggerUserCrn(), ResourceEvent.FREEIPA_IMAGE_CHANGE_FINISHED);
                 sendEvent(context, new StackEvent(IMAGE_CHANGE_FINISHED_EVENT.event(), context.getStack().getId()));
             }
 

@@ -56,6 +56,7 @@ import com.sequenceiq.freeipa.converter.cloud.StackToCloudStackConverter;
 import com.sequenceiq.freeipa.entity.InstanceGroup;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.events.EventSenderService;
 import com.sequenceiq.freeipa.flow.FlowIntegrationTestConfig;
 import com.sequenceiq.freeipa.flow.StackStatusFinalizer;
 import com.sequenceiq.freeipa.flow.freeipa.trust.setup.action.FreeIpaTrustSetupConfigureDnsAction;
@@ -157,6 +158,9 @@ class TrustSetupFlowIntegrationTest {
 
     @MockBean
     private StackStatusFinalizer stackStatusFinalizer;
+
+    @MockBean
+    private EventSenderService eventSenderService;
 
     @Inject
     private StackService stackService;

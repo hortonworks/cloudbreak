@@ -14,6 +14,8 @@ import jakarta.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.entity.ImageEntity;
 import com.sequenceiq.freeipa.flow.stack.StackContext;
 import com.sequenceiq.freeipa.flow.stack.StackFailureEvent;
@@ -40,6 +42,10 @@ public class ImageChangeAction extends AbstractImageChangeAction<ImageChangeEven
         ImageEntity originalImageEntity = storeOriginalImageRevision(payload, variables);
         ImageEntity newImageEntity = imageService.changeImage(context.getStack(), payload.getRequest());
         variables.put(ImageChangeActions.IMAGE_CHANGED_IN_DB, Boolean.TRUE);
+        getStackUpdater().updateStackStatus(context.getStack(), DetailedStackStatus.IMAGE_CHANGE_IN_PROGRESS, String.format("Changing image from [%s] to [%s]",
+            originalImageEntity.getImageId(), newImageEntity.getImageId()));
+        getEventService().sendEventAndNotification(context.getStack(), context.getFlowTriggerUserCrn(), ResourceEvent.FREEIPA_IMAGE_CHANGE_STARTED,
+                List.of(newImageEntity.getImageId()));
         if (originalImageEntity.equals(newImageEntity)) {
             LOGGER.info("New and original image is the same, no change is required");
             sendEvent(context, new ImageChangeEvent(IMAGE_CHANGE_NOT_REQUIRED_EVENT.event(), payload.getResourceId(), payload.getRequest()));
@@ -64,7 +70,7 @@ public class ImageChangeAction extends AbstractImageChangeAction<ImageChangeEven
 
     private void storeRevisionInfo(Map<Object, Object> variables, Long imageEntityId, List<Number> revisions) {
         if (!revisions.isEmpty()) {
-            Number latestRevision = revisions.get(revisions.size() - 1);
+            Number latestRevision = revisions.getLast();
             LOGGER.info("Original image revision is [{}] for image with id [{}]", latestRevision, imageEntityId);
             variables.put(ImageChangeActions.ORIGINAL_IMAGE_REVISION, latestRevision);
             variables.put(ImageChangeActions.IMAGE_ENTITY_ID, imageEntityId);
