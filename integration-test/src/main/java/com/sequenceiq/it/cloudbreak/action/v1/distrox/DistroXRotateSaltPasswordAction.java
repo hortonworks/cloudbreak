@@ -18,7 +18,7 @@ public class DistroXRotateSaltPasswordAction implements Action<DistroXTestDto, C
     @Override
     public DistroXTestDto action(TestContext testContext, DistroXTestDto testDto, CloudbreakClient client) throws Exception {
         Log.whenJson(LOGGER, format(" DistroX rotate salt password request for crn %n"), testDto.getCrn());
-        FlowIdentifier flowIdentifier = client.getDefaultClient().distroXV1Endpoint().rotateSaltPasswordByCrn(testDto.getCrn());
+        FlowIdentifier flowIdentifier = client.getDefaultClient(testContext).distroXV1Endpoint().rotateSaltPasswordByCrn(testDto.getCrn());
         testDto.setFlow("DistroX rotate salt password",  flowIdentifier);
         Log.whenJson(LOGGER, format(" DistroX rotate salt password started: %n"), testDto.getCrn());
         return testDto;

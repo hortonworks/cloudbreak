@@ -249,7 +249,7 @@ public class DatalakeCcmUpgradeAndRotationTest extends AbstractE2ETest implement
                     SdxRepairRequest clusterRepairRequest = new SdxRepairRequest();
                     clusterRepairRequest.setNodesIds(instancesToRepair);
                     LOGGER.debug("Sending repair request to SDX: '{}'", clusterRepairRequest);
-                    FlowIdentifier flowIdentifier = client.getDefaultClient().sdxEndpoint().repairCluster(sdxName, clusterRepairRequest);
+                    FlowIdentifier flowIdentifier = client.getDefaultClient(tc).sdxEndpoint().repairCluster(sdxName, clusterRepairRequest);
                     LOGGER.info("Repair with flow id '{}' has been initiated on the SDX with name '{}'", flowIdentifier, sdxName);
                     testDto.setFlow("SDX repair", flowIdentifier);
                     return testDto;

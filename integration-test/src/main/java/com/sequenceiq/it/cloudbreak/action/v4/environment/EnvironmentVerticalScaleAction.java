@@ -24,7 +24,7 @@ public class EnvironmentVerticalScaleAction extends AbstractEnvironmentAction {
     protected EnvironmentTestDto environmentAction(TestContext testContext, EnvironmentTestDto testDto, EnvironmentClient client) {
         if (testContext.getCloudProvider().verticalScalingSupported()) {
             VerticalScalingTestDto verticalScalingTestDto = testContext.get(verticalScaleKey);
-            FlowIdentifier flowIdentifier = client.getDefaultClient()
+            FlowIdentifier flowIdentifier = client.getDefaultClient(testContext)
                     .environmentV1Endpoint()
                     .verticalScalingByCrn(testDto.getResponse().getCrn(), verticalScalingTestDto.getRequest());
             testDto.setLastKnownFlow(flowIdentifier);

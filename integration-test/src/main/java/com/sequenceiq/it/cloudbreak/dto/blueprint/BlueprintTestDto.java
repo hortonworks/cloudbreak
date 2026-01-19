@@ -26,7 +26,7 @@ public class BlueprintTestDto extends AbstractCloudbreakTestDto<BlueprintV4Reque
 
     @Override
     public void deleteForCleanup() {
-        getClientForCleanup().getDefaultClient().blueprintV4Endpoint().deleteByCrn(0L, getCrn());
+        getClientForCleanup().getDefaultClient(getTestContext()).blueprintV4Endpoint().deleteByCrn(0L, getCrn());
     }
 
     public BlueprintTestDto valid() {

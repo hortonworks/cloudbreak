@@ -43,7 +43,7 @@ public class FreeIpaRepairAction extends AbstractFreeIpaAction<FreeIpaTestDto> {
                 .collect(Collectors.toList());
         request.setInstanceIds(instanceIds);
         Log.whenJson(LOGGER, format(" FreeIPA repair request: %n"), request);
-        client.getDefaultClient()
+        client.getDefaultClient(testContext)
                 .getFreeIpaV1Endpoint()
                 .repairInstances(request);
         return testDto;

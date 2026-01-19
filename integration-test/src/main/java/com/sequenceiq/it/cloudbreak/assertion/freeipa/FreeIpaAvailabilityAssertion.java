@@ -69,7 +69,7 @@ public class FreeIpaAvailabilityAssertion {
     public Assertion<FreeIpaTestDto, FreeIpaClient> available() {
         return (testContext, testDto, client) -> {
             try {
-                com.sequenceiq.freeipa.api.client.FreeIpaClient ipaClient = client.getDefaultClient();
+                com.sequenceiq.freeipa.api.client.FreeIpaClient ipaClient = client.getDefaultClient(testContext);
                 String environmentCrn = testDto.getResponse().getEnvironmentCrn();
                 String accountId = Crn.safeFromString(environmentCrn).getAccountId();
 
@@ -94,7 +94,7 @@ public class FreeIpaAvailabilityAssertion {
 
     public Assertion<FreeIpaOperationStatusTestDto, FreeIpaClient> availableDuringOperation() {
         return (testContext, testDto, client) -> {
-            com.sequenceiq.freeipa.api.client.FreeIpaClient ipaClient = client.getDefaultClient();
+            com.sequenceiq.freeipa.api.client.FreeIpaClient ipaClient = client.getDefaultClient(testContext);
             FreeIpaTestDto freeIpaTestDto = testContext.get(FreeIpaTestDto.class);
             String environmentCrn = freeIpaTestDto.getResponse().getEnvironmentCrn();
             String accountId = Crn.safeFromString(environmentCrn).getAccountId();

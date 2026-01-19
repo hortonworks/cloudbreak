@@ -34,6 +34,7 @@ import org.apache.commons.collections4.ListUtils;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
+import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.util.wait.service.WaitObject;
 
@@ -55,16 +56,20 @@ public class CloudbreakWaitObject implements WaitObject {
 
     private StackStatusV4Response stackStatus;
 
-    public CloudbreakWaitObject(CloudbreakClient client, String name, Map<String, Status> desiredStatuses, String accountId, Set<Status> ignoredFailedStatuses) {
+    private final TestContext testContext;
+
+    public CloudbreakWaitObject(CloudbreakClient client, String name, Map<String, Status> desiredStatuses, String accountId, Set<Status> ignoredFailedStatuses,
+            TestContext testContext) {
         this.client = client;
         this.name = name;
         this.desiredStatuses = desiredStatuses;
         this.accountId = accountId;
         this.ignoredFailedStatuses = ignoredFailedStatuses;
+        this.testContext = testContext;
     }
 
     public DistroXV1Endpoint getDistroxEndpoint() {
-        return client.getDefaultClient().distroXV1Endpoint();
+        return client.getDefaultClient(testContext).distroXV1Endpoint();
     }
 
     public Long getWorkspaceId() {

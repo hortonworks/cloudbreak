@@ -1,5 +1,7 @@
 package com.sequenceiq.it.cloudbreak.microservice;
 
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -13,6 +15,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGenerator;
 import com.sequenceiq.cloudbreak.client.ApiKeyRequestFilter;
 import com.sequenceiq.cloudbreak.client.CloudbreakApiKeyClient;
+import com.sequenceiq.cloudbreak.client.CloudbreakApiKeyEndpoints;
 import com.sequenceiq.cloudbreak.client.CloudbreakInternalCrnClient;
 import com.sequenceiq.cloudbreak.client.CloudbreakServiceCrnEndpoints;
 import com.sequenceiq.cloudbreak.client.CloudbreakServiceUserCrnClient;
@@ -59,35 +62,59 @@ public class CloudbreakClient extends MicroserviceClient<com.sequenceiq.cloudbre
 
     private WebTarget rawClient;
 
+    private com.sequenceiq.cloudbreak.client.CloudbreakClient alternativeCloudbreakClient;
+
+    private CloudbreakInternalCrnClient alternativeCloudbreakInternalCrnClient;
+
+    private WebTarget alternativeRawClient;
+
     private Long workspaceId;
 
     public CloudbreakClient(CloudbreakUser cloudbreakUser, RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator, String serviceAddress,
-            String internalAddress) {
+            String internalAddress, String alternativeServiceAddress, String alternativeInternalAddress) {
         setActing(cloudbreakUser);
         ConfigKey configKey = new ConfigKey(false, true, true);
-        cloudbreakClient = new CloudbreakApiKeyClient(serviceAddress, configKey)
-                .withKeys(cloudbreakUser.getAccessKey(), cloudbreakUser.getSecretKey());
-        cloudbreakInternalCrnClient = createCloudbreakInternalCrnClient(
-                internalAddress,
-                regionAwareInternalCrnGenerator);
+
+        cloudbreakClient = createCloudbreakClient(cloudbreakUser, serviceAddress, configKey);
+        cloudbreakInternalCrnClient = createCloudbreakInternalCrnClient(internalAddress, regionAwareInternalCrnGenerator);
         rawClient = createRawWebTarget(configKey, serviceAddress, CoreApi.API_ROOT_CONTEXT,
                 cloudbreakUser.getAccessKey(), cloudbreakUser.getSecretKey());
+
+        if (isNotEmpty(alternativeServiceAddress) && isNotEmpty(alternativeInternalAddress)) {
+            alternativeCloudbreakClient = createCloudbreakClient(cloudbreakUser, alternativeServiceAddress, configKey);
+            alternativeCloudbreakInternalCrnClient = createCloudbreakInternalCrnClient(alternativeInternalAddress, regionAwareInternalCrnGenerator);
+            alternativeRawClient = createRawWebTarget(configKey, serviceAddress, CoreApi.API_ROOT_CONTEXT,
+                    cloudbreakUser.getAccessKey(), cloudbreakUser.getSecretKey());
+        }
+    }
+
+    private CloudbreakApiKeyEndpoints createCloudbreakClient(CloudbreakUser cloudbreakUser, String serviceAddress, ConfigKey configKey) {
+        return new CloudbreakApiKeyClient(serviceAddress, configKey)
+                .withKeys(cloudbreakUser.getAccessKey(), cloudbreakUser.getSecretKey());
     }
 
     @Override
-    public FlowPublicEndpoint flowPublicEndpoint() {
-        return cloudbreakClient.flowPublicEndpoint();
+    public FlowPublicEndpoint flowPublicEndpoint(TestContext testContext) {
+        if (testContext.shouldUseAlternativeEndpoints()) {
+            return alternativeCloudbreakClient.flowPublicEndpoint();
+        } else {
+            return cloudbreakClient.flowPublicEndpoint();
+        }
     }
 
     @Override
     public CloudbreakWaitObject waitObject(CloudbreakTestDto entity, String name, Map<String, Status> desiredStatuses,
             TestContext testContext, Set<Status> ignoredFailedStatuses) {
-        return new CloudbreakWaitObject(this, name, desiredStatuses, testContext.getActingUserCrn().getAccountId(), ignoredFailedStatuses);
+        return new CloudbreakWaitObject(this, name, desiredStatuses, testContext.getActingUserCrn().getAccountId(), ignoredFailedStatuses, testContext);
     }
 
     @Override
-    public com.sequenceiq.cloudbreak.client.CloudbreakClient getDefaultClient() {
-        return cloudbreakClient;
+    public com.sequenceiq.cloudbreak.client.CloudbreakClient getDefaultClient(TestContext testContext) {
+        if (testContext.shouldUseAlternativeEndpoints()) {
+            return alternativeCloudbreakClient;
+        } else {
+            return cloudbreakClient;
+        }
     }
 
     private WebTarget createRawWebTarget(ConfigKey configKey, String serviceAddress, String apiRoot,
@@ -98,7 +125,7 @@ public class CloudbreakClient extends MicroserviceClient<com.sequenceiq.cloudbre
         return webTarget;
     }
 
-    public CloudbreakInternalCrnClient createCloudbreakInternalCrnClient(String serverRoot,
+    private CloudbreakInternalCrnClient createCloudbreakInternalCrnClient(String serverRoot,
             RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator) {
         CloudbreakServiceUserCrnClient cbUserCrnClient = new CloudbreakUserCrnClientBuilder(serverRoot)
                 .withCertificateValidation(false)
@@ -112,8 +139,12 @@ public class CloudbreakClient extends MicroserviceClient<com.sequenceiq.cloudbre
         return WORKSPACE_ID;
     }
 
-    public WebTarget getRawClient() {
-        return rawClient;
+    public WebTarget getRawClient(TestContext testContext) {
+        if (testContext.shouldUseAlternativeEndpoints()) {
+            return alternativeRawClient;
+        } else {
+            return rawClient;
+        }
     }
 
     @Override
@@ -144,12 +175,24 @@ public class CloudbreakClient extends MicroserviceClient<com.sequenceiq.cloudbre
     @Override
     public CloudbreakServiceCrnEndpoints getInternalClient(TestContext testContext) {
         checkIfInternalClientAllowed(testContext);
-        return cloudbreakInternalCrnClient.withInternalCrn();
+        CloudbreakInternalCrnClient client;
+        if (testContext.shouldUseAlternativeEndpoints()) {
+            client = alternativeCloudbreakInternalCrnClient;
+        } else {
+            client = cloudbreakInternalCrnClient;
+        }
+        return client.withInternalCrn();
     }
 
     @Override
     public CloudbreakServiceCrnEndpoints getInternalClientWithoutChecks(TestContext testContext) {
-        return cloudbreakInternalCrnClient.withInternalCrn();
+        CloudbreakInternalCrnClient client;
+        if (testContext.shouldUseAlternativeEndpoints()) {
+            client = alternativeCloudbreakInternalCrnClient;
+        } else {
+            client = cloudbreakInternalCrnClient;
+        }
+        return client.withInternalCrn();
     }
 
     @Override

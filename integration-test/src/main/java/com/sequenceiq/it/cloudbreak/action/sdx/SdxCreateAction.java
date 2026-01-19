@@ -19,17 +19,18 @@ public class SdxCreateAction implements Action<SdxTestDto, SdxClient> {
 
     @Override
     public SdxTestDto action(TestContext testContext, SdxTestDto testDto, SdxClient client) throws Exception {
-        Log.when(LOGGER, " SDX endpoint: %s" + client.getDefaultClient().sdxEndpoint() + ", SDX's environment: " + testDto.getRequest().getEnvironment());
+        Log.when(LOGGER, " SDX endpoint: %s" + client.getDefaultClient(testContext).sdxEndpoint() + ", SDX's environment: "
+                + testDto.getRequest().getEnvironment());
         Log.whenJson(LOGGER, " SDX create request: ", testDto.getRequest());
-        SdxClusterResponse sdxClusterResponse = client.getDefaultClient()
+        SdxClusterResponse sdxClusterResponse = client.getDefaultClient(testContext)
                 .sdxEndpoint()
                 .create(testDto.getName(), testDto.getRequest());
         testDto.setFlow("SDX create", sdxClusterResponse.getFlowIdentifier());
-        SdxClusterDetailResponse detailedResponse = client.getDefaultClient()
+        SdxClusterDetailResponse detailedResponse = client.getDefaultClient(testContext)
                 .sdxEndpoint()
                 .getDetailByCrn(sdxClusterResponse.getCrn(), Collections.emptySet());
         testDto.setResponse(detailedResponse);
-        Log.whenJson(LOGGER, " SDX create response: ", client.getDefaultClient().sdxEndpoint().get(testDto.getName()));
+        Log.whenJson(LOGGER, " SDX create response: ", client.getDefaultClient(testContext).sdxEndpoint().get(testDto.getName()));
         return testDto;
     }
 }

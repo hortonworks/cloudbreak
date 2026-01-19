@@ -59,12 +59,12 @@ public class CloudbreakInstanceWaitObject implements InstanceWaitObject {
         StackV4Response stackResponse = null;
         try {
             stackResponse = testContext.getMicroserviceClient(CloudbreakClient.class)
-                    .getDefaultClient().distroXV1Endpoint().getByName(name, Set.of());
+                    .getDefaultClient(testContext).distroXV1Endpoint().getByName(name, Set.of());
             instanceGroups = stackResponse.getInstanceGroups();
             instanceResourceType = "Data Hub";
         } catch (NotFoundException e) {
             LOGGER.info("SDX '{}' instance groups are present for validation.", name);
-            stackResponse = testContext.getSdxClient().getDefaultClient().sdxEndpoint().getDetail(name, Set.of()).getStackV4Response();
+            stackResponse = testContext.getSdxClient().getDefaultClient(testContext).sdxEndpoint().getDetail(name, Set.of()).getStackV4Response();
             instanceGroups = stackResponse.getInstanceGroups();
         } catch (Exception e) {
             String errorMsg = "Instance groups cannot be determined.";

@@ -80,7 +80,7 @@ public class DistroXUpgradeTests extends AbstractMockTest {
                     DistroXUpgradeV1Request request = new DistroXUpgradeV1Request();
                     request.setRuntime(targetRuntimeVersion);
                     request.setDryRun(true);
-                    DistroXUpgradeV1Response distroXUpgradeV1Response = client.getDefaultClient().distroXUpgradeV1Endpoint()
+                    DistroXUpgradeV1Response distroXUpgradeV1Response = client.getDefaultClient(tc).distroXUpgradeV1Endpoint()
                             .upgradeClusterByName(entity.getName(), request);
                     ImageComponentVersions componentVersions = distroXUpgradeV1Response.upgradeCandidates().getFirst().getComponentVersions();
                     entity.mockCm().setCmVersion(componentVersions.getCm() + "-" + componentVersions.getCmGBN());

@@ -19,7 +19,7 @@ public class LdapTestDto extends AbstractFreeIpaTestDto<CreateLdapConfigRequest,
 
     @Override
     public void deleteForCleanup() {
-        getClientForCleanup().getDefaultClient().getLdapConfigV1Endpoint().delete(getResponse().getEnvironmentCrn());
+        getClientForCleanup().getDefaultClient(getTestContext()).getLdapConfigV1Endpoint().delete(getResponse().getEnvironmentCrn());
     }
 
     public String getName() {

@@ -14,7 +14,7 @@ public class SdxEnableRangerRazAction implements Action<SdxTestDto, SdxClient> {
 
     @Override
     public SdxTestDto action(TestContext testContext, SdxTestDto testDto, SdxClient client) throws Exception {
-        client.getDefaultClient().sdxEndpoint().enableRangerRazByCrn(testDto.getCrn());
+        client.getDefaultClient(testContext).sdxEndpoint().enableRangerRazByCrn(testDto.getCrn());
         return testDto;
     }
 }

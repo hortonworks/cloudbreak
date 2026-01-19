@@ -14,7 +14,8 @@ public class ExternalizedComputeClusterDescribeAction implements
     public ExternalizedComputeClusterTestDto action(TestContext testContext, ExternalizedComputeClusterTestDto testDto,
             ExternalizedComputeClusterClient client) throws Exception {
         Log.when("Describe externalized compute cluster: " + testDto.getResponse().getName());
-        ExternalizedComputeClusterResponse computeCluster = client.getDefaultClient().externalizedComputeClusterEndpoint().describe(testDto.getEnvironmentCrn(),
+        ExternalizedComputeClusterResponse computeCluster = client.getDefaultClient(testContext)
+                .externalizedComputeClusterEndpoint().describe(testDto.getEnvironmentCrn(),
                 testDto.getResponse().getName());
         Log.whenJson("Describe externalized compute cluster: ", computeCluster);
         testDto.setResponse(computeCluster);

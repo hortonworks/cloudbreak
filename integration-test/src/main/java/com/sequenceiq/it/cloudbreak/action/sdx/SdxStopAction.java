@@ -23,9 +23,9 @@ public class SdxStopAction implements Action<SdxInternalTestDto, SdxClient> {
     public SdxInternalTestDto action(TestContext testContext, SdxInternalTestDto testDto, SdxClient client) throws Exception {
         Log.when(LOGGER, format(" Stop SDX: %s ", testDto.getName()));
         Log.whenJson(LOGGER, " SDX stop request: ", testDto.getRequest());
-        FlowIdentifier flowIdentifier = client.getDefaultClient().sdxEndpoint().stopByName(testDto.getName());
+        FlowIdentifier flowIdentifier = client.getDefaultClient(testContext).sdxEndpoint().stopByName(testDto.getName());
         testDto.setFlow("SDX stop", flowIdentifier);
-        SdxClusterDetailResponse detailedResponse = client.getDefaultClient()
+        SdxClusterDetailResponse detailedResponse = client.getDefaultClient(testContext)
                 .sdxEndpoint()
                 .getDetail(testDto.getName(), Collections.emptySet());
         testDto.setResponse(detailedResponse);

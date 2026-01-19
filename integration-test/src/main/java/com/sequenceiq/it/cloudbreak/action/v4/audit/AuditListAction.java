@@ -19,7 +19,7 @@ public class AuditListAction implements Action<AuditTestDto, CloudbreakClient> {
 
     @Override
     public AuditTestDto action(TestContext testContext, AuditTestDto testDto, CloudbreakClient client) throws Exception {
-        Collection<AuditEventV4Response> responses = client.getDefaultClient()
+        Collection<AuditEventV4Response> responses = client.getDefaultClient(testContext)
                 .auditV4Endpoint()
                 .getAuditEvents(client.getWorkspaceId(), testDto.getResourceType(), testDto.getResourceId(), null)
                 .getResponses();

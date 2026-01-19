@@ -15,7 +15,7 @@ public class SecurityRulesAction implements Action<SecurityRulesTestDto, Cloudbr
 
     @Override
     public SecurityRulesTestDto action(TestContext testContext, SecurityRulesTestDto testDto, CloudbreakClient cloudbreakClient) throws Exception {
-        testDto.setResponse(cloudbreakClient.getDefaultClient().utilV4Endpoint().getDefaultSecurityRules());
+        testDto.setResponse(cloudbreakClient.getDefaultClient(testContext).utilV4Endpoint().getDefaultSecurityRules());
         Log.whenJson(LOGGER, "default security rules response:\n", testDto.getResponse());
         return testDto;
     }

@@ -17,7 +17,7 @@ public class DistroXSkuMigrationAction implements Action<DistroXTestDto, Cloudbr
     @Override
     public DistroXTestDto action(TestContext testContext, DistroXTestDto testDto, CloudbreakClient client) throws Exception {
         Log.when(LOGGER, "SKU migration for name: " + testDto.getName());
-        FlowIdentifier flowIdentifier = client.getDefaultClient().distroXV1Endpoint()
+        FlowIdentifier flowIdentifier = client.getDefaultClient(testContext).distroXV1Endpoint()
                 .triggerSkuMigrationByName(testDto.getName(), true);
         testDto.setFlow("SKU migration for " + testDto.getName(), flowIdentifier);
         Log.when(LOGGER, "SKU migration started with flow id: " + flowIdentifier);

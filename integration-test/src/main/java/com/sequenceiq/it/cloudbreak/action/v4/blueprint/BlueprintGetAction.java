@@ -19,7 +19,7 @@ public class BlueprintGetAction implements Action<BlueprintTestDto, CloudbreakCl
     public BlueprintTestDto action(TestContext testContext, BlueprintTestDto testDto, CloudbreakClient client) throws Exception {
         Log.whenJson(LOGGER, format(" Blueprint getByName request: %n"), testDto.getName());
         testDto.setResponse(
-                client.getDefaultClient()
+                client.getDefaultClient(testContext)
                         .blueprintV4Endpoint()
                         .getByName(client.getWorkspaceId(), testDto.getName()));
         Log.whenJson(LOGGER, format(" Blueprint getByName successfully:%n"), testDto.getResponse());

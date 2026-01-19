@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
@@ -63,9 +64,9 @@ public class SshEnaDriverCheckActions {
      * @param stackV4Response the stacj response object, we run the validation against this stack
      * @param client a cpnnection to the server
      */
-    public void checkEnaDriverOnAws(StackV4Response stackV4Response, CloudbreakClient client) {
+    public void checkEnaDriverOnAws(StackV4Response stackV4Response, CloudbreakClient client, TestContext testContext) {
         if (stackV4Response.getCloudPlatform() == CloudPlatform.AWS) {
-            InstanceMetaDataV4Response metadata = getInstanceMetadata(stackV4Response.getName(), client, "master");
+            InstanceMetaDataV4Response metadata = getInstanceMetadata(stackV4Response.getName(), client, "master", testContext);
             checkEnaDriver(metadata.getPrivateIp());
             checkEnaSupport(metadata.getInstanceId());
         } else {
@@ -74,8 +75,8 @@ public class SshEnaDriverCheckActions {
         }
     }
 
-    private InstanceMetaDataV4Response getInstanceMetadata(String name, CloudbreakClient cloudbreakClient, String group) {
-        InstanceMetaDataV4Response instanceMetaDataResponse = cloudbreakClient.getDefaultClient().distroXV1Endpoint()
+    private InstanceMetaDataV4Response getInstanceMetadata(String name, CloudbreakClient cloudbreakClient, String group, TestContext testContext) {
+        InstanceMetaDataV4Response instanceMetaDataResponse = cloudbreakClient.getDefaultClient(testContext).distroXV1Endpoint()
                 .getByName(name, Collections.emptySet())
                 .getInstanceGroups()
                 .stream()

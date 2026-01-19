@@ -59,7 +59,7 @@ public class SecretRotationCheckUtil {
     private SshSaltPasswordActions sshSaltPasswordActions;
 
     public SdxInternalTestDto checkLdapLogin(String datalakeCrn, SdxInternalTestDto testDto, SdxClient client) {
-        checkLdapLogin(getInstanceGroupResponses(datalakeCrn, client));
+        checkLdapLogin(getInstanceGroupResponses(datalakeCrn, client, testDto.getTestContext()));
         return testDto;
     }
 
@@ -68,8 +68,8 @@ public class SecretRotationCheckUtil {
         return testDto;
     }
 
-    public void checkSSHLoginWithNewKeys(String datalakeCrn, SdxClient client) {
-        checkSSHLoginWithNewKeys(getInstanceGroupResponses(datalakeCrn, client));
+    public void checkSSHLoginWithNewKeys(String datalakeCrn, SdxClient client, TestContext testContext) {
+        checkSSHLoginWithNewKeys(getInstanceGroupResponses(datalakeCrn, client, testContext));
     }
 
     public void checkSSHLoginWithNewKeys(TestContext testContext, DistroXTestDto testDto, CloudbreakClient client) {
@@ -109,8 +109,8 @@ public class SecretRotationCheckUtil {
         }
     }
 
-    private Collection<InstanceGroupV4Response> getInstanceGroupResponses(String datalakeCrn, SdxClient client) {
-        return client.getDefaultClient()
+    private Collection<InstanceGroupV4Response> getInstanceGroupResponses(String datalakeCrn, SdxClient client, TestContext testContext) {
+        return client.getDefaultClient(testContext)
                 .sdxEndpoint()
                 .getDetailByCrn(datalakeCrn, Collections.emptySet())
                 .getStackV4Response()
@@ -118,7 +118,7 @@ public class SecretRotationCheckUtil {
     }
 
     private Collection<InstanceGroupV4Response> getInstanceGroupResponses(TestContext testContext, DistroXTestDto testDto, CloudbreakClient client) {
-        return client.getDefaultClient()
+        return client.getDefaultClient(testContext)
                 .stackV4Endpoint()
                 .get(client.getWorkspaceId(), testDto.getName(), Collections.emptySet(), testContext.getActingUserCrn().getAccountId())
                 .getInstanceGroups();

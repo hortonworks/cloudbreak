@@ -63,7 +63,7 @@ public class StackTestDto extends StackTestDtoBase<StackTestDto> implements Purg
     public void deleteForCleanup() {
         try {
             CloudbreakClient client = getClientForCleanup();
-            client.getDefaultClient().stackV4Endpoint().delete(0L, getName(), true, Crn.fromString(getCrn()).getAccountId());
+            client.getDefaultClient(getTestContext()).stackV4Endpoint().delete(0L, getName(), true, Crn.fromString(getCrn()).getAccountId());
             awaitWithClient(STACK_DELETED, client);
         } catch (NotFoundException nfe) {
             LOGGER.info("resource not found, thus cleanup not needed.");
@@ -74,7 +74,7 @@ public class StackTestDto extends StackTestDtoBase<StackTestDto> implements Purg
 
     @Override
     public List<StackV4Response> getAll(CloudbreakClient client) {
-        StackV4Endpoint stackEndpoint = client.getDefaultClient().stackV4Endpoint();
+        StackV4Endpoint stackEndpoint = client.getDefaultClient(getTestContext()).stackV4Endpoint();
         return stackEndpoint.list(client.getWorkspaceId(), null, false).getResponses().stream()
                 .filter(s -> s.getName() != null)
                 .map(s -> {
@@ -92,7 +92,7 @@ public class StackTestDto extends StackTestDtoBase<StackTestDto> implements Purg
     @Override
     public void delete(TestContext testContext, StackV4Response entity, CloudbreakClient client) {
         try {
-            client.getDefaultClient().stackV4Endpoint().delete(client.getWorkspaceId(), entity.getName(), true,
+            client.getDefaultClient(getTestContext()).stackV4Endpoint().delete(client.getWorkspaceId(), entity.getName(), true,
                     Crn.fromString(entity.getCrn()).getAccountId());
             testContext.await(this, STACK_DELETED, key("wait-purge-stack-" + entity.getName()));
         } catch (Exception e) {
@@ -144,7 +144,8 @@ public class StackTestDto extends StackTestDtoBase<StackTestDto> implements Purg
                 getTestContext().getMicroserviceClient(CloudbreakClient.class),
                 CloudbreakEventService.DATAHUB_RESOURCE_TYPE,
                 getResponse().getId(),
-                null);
+                null,
+                getTestContext());
         boolean hasSpotTermination = (getResponse().getInstanceGroups() == null) ? false : getResponse().getInstanceGroups().stream()
                 .flatMap(ig -> ig.getMetadata().stream())
                 .anyMatch(metadata -> InstanceStatus.DELETED_BY_PROVIDER == metadata.getInstanceStatus());

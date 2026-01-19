@@ -29,7 +29,7 @@ public class DistroXUpgradeInternalAction implements Action<DistroXTestDto, Clou
                 .distroXUpgradeV1Endpoint()
                 .upgradeClusterByCrnInternal(testDto.getCrn(), upgradeRequest, testContext.getActingUserCrn().toString(), false);
         testDto.setFlow("DistroX upgrade internal flow identifier", response.flowIdentifier());
-        StackV4Response stackV4Response = client.getDefaultClient()
+        StackV4Response stackV4Response = client.getDefaultClient(testContext)
                 .distroXV1Endpoint()
                 .getByName(testDto.getName(), Collections.emptySet());
         testDto.setResponse(stackV4Response);

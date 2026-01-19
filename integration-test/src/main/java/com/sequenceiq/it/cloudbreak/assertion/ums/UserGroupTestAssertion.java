@@ -29,7 +29,7 @@ public class UserGroupTestAssertion {
         return (testContext, umsGroupTestDto, umsClient) -> {
             String accountId = testContext.getActingUserCrn().getAccountId();
 
-            List<String> groupMembers = umsClient.getDefaultClient().listMembersFromGroup(accountId, groupName);
+            List<String> groupMembers = umsClient.getDefaultClient(testContext).listMembersFromGroup(accountId, groupName);
             boolean memberPresent = groupMembers.stream().anyMatch(memberCrn -> groupMember.getCrn().equals(memberCrn));
             LOGGER.info("Member is present '{}' at group '{}', group members: [{}]", memberPresent, groupName, groupMembers);
             if (expectedPresence) {
@@ -56,7 +56,7 @@ public class UserGroupTestAssertion {
             String accountId = testContext.getActingUserCrn().getAccountId();
             umsGroupTestDto.withName(groupName);
             try {
-                Group foundGroup = umsClient.getDefaultClient().listGroups(accountId, List.of(groupName))
+                Group foundGroup = umsClient.getDefaultClient(testContext).listGroups(accountId, List.of(groupName))
                         .stream()
                         .filter(group -> StringUtils.equalsIgnoreCase(group.getGroupName(), groupName))
                         .findFirst()

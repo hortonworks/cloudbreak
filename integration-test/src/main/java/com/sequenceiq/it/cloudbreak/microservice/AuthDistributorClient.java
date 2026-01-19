@@ -9,6 +9,7 @@ import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory
 import com.sequenceiq.cloudbreak.authdistributor.GrpcAuthDistributorClient;
 import com.sequenceiq.cloudbreak.authdistributor.config.AuthDistributorConfig;
 import com.sequenceiq.flow.api.FlowPublicEndpoint;
+import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.authdistributor.FetchAuthViewTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.util.wait.service.WaitObject;
@@ -29,7 +30,7 @@ public class AuthDistributorClient<E extends Enum<E>, W extends WaitObject> exte
     }
 
     @Override
-    public FlowPublicEndpoint flowPublicEndpoint() {
+    public FlowPublicEndpoint flowPublicEndpoint(TestContext testContext) {
         throw new TestFailException("Flow does not support by auth distributor client");
     }
 
@@ -39,7 +40,7 @@ public class AuthDistributorClient<E extends Enum<E>, W extends WaitObject> exte
     }
 
     @Override
-    public GrpcAuthDistributorClient getDefaultClient() {
+    public GrpcAuthDistributorClient getDefaultClient(TestContext testContext) {
         return grpcAuthDistributorClient;
     }
 

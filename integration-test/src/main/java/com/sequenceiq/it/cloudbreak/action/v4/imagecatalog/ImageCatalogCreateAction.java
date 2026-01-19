@@ -20,7 +20,7 @@ public class ImageCatalogCreateAction implements Action<ImageCatalogTestDto, Clo
         Log.whenJson(LOGGER, format(" Image catalog post request:%n"), testDto.getRequest());
         try {
             testDto.setResponse(
-                    client.getDefaultClient()
+                    client.getDefaultClient(testContext)
                             .imageCatalogV4Endpoint()
                             .create(client.getWorkspaceId(), testDto.getRequest()));
         } catch (Exception e) {

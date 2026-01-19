@@ -35,7 +35,7 @@ public class RevokeEntitlementAction implements Action<UmsTestDto, UmsClient> {
     public UmsTestDto action(TestContext testContext, UmsTestDto testDto, UmsClient client) throws Exception {
         Log.when(LOGGER, format(" Revoke UMS entitlement for account '%s'. ", accountId));
         try {
-            client.getDefaultClient().revokeEntitlement(accountId, entitlementName);
+            client.getDefaultClient(testContext).revokeEntitlement(accountId, entitlementName);
             //This is necessary because the ttl on the ums account caching
             Thread.sleep(Duration.of(WAIT_IN_SECONDS, ChronoUnit.SECONDS));
             Log.when(LOGGER, format(" UMS entitlement has been revoked for account '%s'. ", accountId));

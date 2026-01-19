@@ -106,7 +106,7 @@ public class EnvironmentListStructuredEventAssertions {
 
     public EnvironmentTestDto checkCreateEvents(TestContext testContext, EnvironmentTestDto testDto, EnvironmentClient client) {
         List<CDPStructuredEvent> auditEvents = getAuditEvents(
-                client.getDefaultClient().structuredEventsV1Endpoint(),
+                client.getDefaultClient(testContext).structuredEventsV1Endpoint(),
                 testDto.getCrn());
         eventAssertionCommon.checkNotificationEvents(auditEvents, ENV_CREATE_NOTIFICATION_EVENTS);
         eventAssertionCommon.noFlowEventsAreAllowedInDB(auditEvents);
@@ -116,7 +116,7 @@ public class EnvironmentListStructuredEventAssertions {
 
     public EnvironmentTestDto checkDeleteEvents(TestContext testContext, EnvironmentTestDto testDto, EnvironmentClient client) {
         List<CDPStructuredEvent> auditEvents = getAuditEvents(
-                client.getDefaultClient().structuredEventsV1Endpoint(),
+                client.getDefaultClient(testContext).structuredEventsV1Endpoint(),
                 testDto.getCrn());
         eventAssertionCommon.checkNotificationEvents(auditEvents, ENV_DELETE_NOTIFICATION_EVENTS);
         eventAssertionCommon.noFlowEventsAreAllowedInDB(auditEvents);
@@ -126,7 +126,7 @@ public class EnvironmentListStructuredEventAssertions {
 
     public EnvironmentTestDto checkStopEvents(TestContext testContext, EnvironmentTestDto testDto, EnvironmentClient client) {
         List<CDPStructuredEvent> auditEvents = getAuditEvents(
-                client.getDefaultClient().structuredEventsV1Endpoint(),
+                client.getDefaultClient(testContext).structuredEventsV1Endpoint(),
                 testDto.getCrn());
         eventAssertionCommon.checkNotificationEvents(auditEvents, ENV_STOP_NOTIFICATION_EVENTS);
         eventAssertionCommon.noFlowEventsAreAllowedInDB(auditEvents);
@@ -136,7 +136,7 @@ public class EnvironmentListStructuredEventAssertions {
 
     public EnvironmentTestDto checkStartEvents(TestContext testContext, EnvironmentTestDto testDto, EnvironmentClient client) {
         List<CDPStructuredEvent> auditEvents = getAuditEvents(
-                client.getDefaultClient().structuredEventsV1Endpoint(),
+                client.getDefaultClient(testContext).structuredEventsV1Endpoint(),
                 testDto.getCrn());
         eventAssertionCommon.checkNotificationEvents(auditEvents, ENV_START_NOTIFICATION_EVENTS);
         eventAssertionCommon.noFlowEventsAreAllowedInDB(auditEvents);

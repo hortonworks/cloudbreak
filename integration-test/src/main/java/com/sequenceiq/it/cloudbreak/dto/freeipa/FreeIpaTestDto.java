@@ -550,7 +550,7 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
 
     @Override
     public Collection<ListFreeIpaResponse> getAll(FreeIpaClient client) {
-        return client.getDefaultClient().getFreeIpaV1Endpoint().list();
+        return client.getDefaultClient(getTestContext()).getFreeIpaV1Endpoint().list();
     }
 
     @Override
@@ -560,7 +560,7 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
 
     @Override
     public void delete(TestContext testContext, ListFreeIpaResponse entity, FreeIpaClient client) {
-        client.getDefaultClient().getFreeIpaV1Endpoint().delete(entity.getEnvironmentCrn(), false);
+        client.getDefaultClient(getTestContext()).getFreeIpaV1Endpoint().delete(entity.getEnvironmentCrn(), false);
     }
 
     @Override
@@ -577,7 +577,7 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
     public void deleteForCleanup() {
         try {
             FreeIpaClient client = getClientForCleanup();
-            client.getDefaultClient().getFreeIpaV1Endpoint().delete(getResponse().getEnvironmentCrn(), false);
+            client.getDefaultClient(getTestContext()).getFreeIpaV1Endpoint().delete(getResponse().getEnvironmentCrn(), false);
             getTestContext().awaitWithClient(this, Map.of("status", DELETE_COMPLETED), client);
         } catch (NotFoundException nfe) {
             LOGGER.info("resource not found, thus cleanup not needed.");
@@ -598,7 +598,7 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
         List<CDPStructuredEvent> structuredEvents = List.of();
         if (getResponse() != null && resourceCrn != null) {
             CDPStructuredEventV1Endpoint cdpStructuredEventV1Endpoint =
-                    getTestContext().getMicroserviceClient(FreeIpaClient.class).getDefaultClient().structuredEventsV1Endpoint();
+                    getTestContext().getMicroserviceClient(FreeIpaClient.class).getDefaultClient(getTestContext()).structuredEventsV1Endpoint();
             structuredEvents = StructuredEventUtil.getAuditEvents(cdpStructuredEventV1Endpoint, resourceCrn);
         }
         collectLogFiles();

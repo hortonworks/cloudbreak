@@ -1,5 +1,7 @@
 package com.sequenceiq.it.cloudbreak.microservice;
 
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
+
 import java.util.Map;
 import java.util.Set;
 
@@ -22,9 +24,19 @@ public class PeriscopeClient extends MicroserviceClient<com.sequenceiq.periscope
 
     private AutoscaleUserCrnClient periscopeClient;
 
-    public PeriscopeClient(CloudbreakUser cloudbreakUser, String periscopeAddress) {
+    private AutoscaleUserCrnClient alternativePeriscopeClient;
+
+    public PeriscopeClient(CloudbreakUser cloudbreakUser, String periscopeAddress, String alternativePeriscopeAddress) {
         setActing(cloudbreakUser);
-        periscopeClient = new AutoscaleUserCrnClientBuilder(periscopeAddress)
+        periscopeClient = createPeriscopeClient(periscopeAddress);
+
+        if (isNotEmpty(alternativePeriscopeAddress)) {
+            alternativePeriscopeClient = createPeriscopeClient(alternativePeriscopeAddress);
+        }
+    }
+
+    private AutoscaleUserCrnClient createPeriscopeClient(String periscopeAddress) {
+        return new AutoscaleUserCrnClientBuilder(periscopeAddress)
                 .withDebug(true)
                 .withCertificateValidation(false)
                 .withIgnorePreValidation(false)
@@ -32,7 +44,7 @@ public class PeriscopeClient extends MicroserviceClient<com.sequenceiq.periscope
     }
 
     @Override
-    public FlowPublicEndpoint flowPublicEndpoint() {
+    public FlowPublicEndpoint flowPublicEndpoint(TestContext testContext) {
         LOGGER.info("Flow is not supported by periscope client");
         return null;
     }
@@ -44,8 +56,12 @@ public class PeriscopeClient extends MicroserviceClient<com.sequenceiq.periscope
     }
 
     @Override
-    public com.sequenceiq.periscope.client.AutoscaleUserCrnClient getDefaultClient() {
-        return periscopeClient;
+    public com.sequenceiq.periscope.client.AutoscaleUserCrnClient getDefaultClient(TestContext testContext) {
+        if (testContext.shouldUseAlternativeEndpoints()) {
+            return alternativePeriscopeClient;
+        } else {
+            return periscopeClient;
+        }
     }
 
     @Override

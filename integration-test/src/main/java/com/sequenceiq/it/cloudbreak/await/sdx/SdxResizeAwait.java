@@ -22,7 +22,7 @@ public class SdxResizeAwait implements Await<SdxInternalTestDto, SdxClient> {
 
     @Override
     public SdxInternalTestDto await(TestContext testContext, SdxInternalTestDto testDto, SdxClient client, RunningParameter runningParameter) {
-        SdxRecoveryEndpoint sdxRecoveryEndpoint = client.getDefaultClient().sdxRecoveryEndpoint();
+        SdxRecoveryEndpoint sdxRecoveryEndpoint = client.getDefaultClient(testContext).sdxRecoveryEndpoint();
         try {
             Polling.stopAfterAttempt(testContext.getMaxRetry())
                     .waitPeriodly(testContext.getPollingInterval(), TimeUnit.MILLISECONDS)

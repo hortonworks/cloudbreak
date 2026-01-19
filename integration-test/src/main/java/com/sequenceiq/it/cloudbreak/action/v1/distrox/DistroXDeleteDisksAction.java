@@ -23,12 +23,12 @@ public class DistroXDeleteDisksAction implements Action<DistroXTestDto, Cloudbre
 
     @Override
     public DistroXTestDto action(TestContext testContext, DistroXTestDto testDto, CloudbreakClient client) throws Exception {
-        Log.when(LOGGER, "DistroX endpoint: %s" + client.getDefaultClient().distroXV1Endpoint() + ", DistroX's environment: " +
+        Log.when(LOGGER, "DistroX endpoint: %s" + client.getDefaultClient(testContext).distroXV1Endpoint() + ", DistroX's environment: " +
                 testDto.getRequest().getEnvironmentName());
         StackDeleteVolumesRequest diskDeleteRequest = new StackDeleteVolumesRequest();
         diskDeleteRequest.setGroup(instanceGroup);
         Log.whenJson(LOGGER, "DistroX Delete request: ", diskDeleteRequest);
-        FlowIdentifier flowIdentifier = client.getDefaultClient()
+        FlowIdentifier flowIdentifier = client.getDefaultClient(testContext)
                 .distroXV1Endpoint()
                 .deleteVolumesByStackName(testDto.getName(), diskDeleteRequest);
         testDto.setFlow("DistroX Delete Flow", flowIdentifier);

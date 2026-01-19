@@ -16,7 +16,7 @@ public class EnvironmentStartWithoutDatahubAction extends AbstractEnvironmentAct
 
     @Override
     protected EnvironmentTestDto environmentAction(TestContext testContext, EnvironmentTestDto testDto, EnvironmentClient client) throws Exception {
-        FlowIdentifier flowIdentifier = client.getDefaultClient()
+        FlowIdentifier flowIdentifier = client.getDefaultClient(testContext)
                 .environmentV1Endpoint()
                 .postStartByCrn(testDto.getResponse().getCrn(), DataHubStartAction.DO_NOT_START);
         testDto.setLastKnownFlow(flowIdentifier);

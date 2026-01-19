@@ -17,7 +17,7 @@ public class ProxyConfigDeleteAction implements Action<ProxyTestDto, Environment
     public ProxyTestDto action(TestContext testContext, ProxyTestDto testDto, EnvironmentClient client) throws Exception {
         Log.when(LOGGER, " Proxy config delete request: " + testDto.getName());
         testDto.setResponse(
-                client.getDefaultClient()
+                client.getDefaultClient(testContext)
                         .proxyV1Endpoint()
                         .deleteByName(testDto.getName()));
         Log.whenJson(LOGGER, " Proxy config was deleted successfully:\n", testDto.getResponse());

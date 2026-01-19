@@ -38,7 +38,7 @@ public class DistroXSetDefaultJavaVersionAction implements Action<DistroXTestDto
         setDefaultJavaVersionRequest.setRestartServices(restartServices);
         setDefaultJavaVersionRequest.setRestartCM(restartCM);
         setDefaultJavaVersionRequest.setRollingRestart(rollingRestart);
-        FlowIdentifier flowIdentifier = client.getDefaultClient().distroXV1Endpoint()
+        FlowIdentifier flowIdentifier = client.getDefaultClient(testContext).distroXV1Endpoint()
                 .setDefaultJavaVersionByName(testDto.getName(), setDefaultJavaVersionRequest);
         testDto.setFlow("Set default Java version on DistroX cluster", flowIdentifier);
         Log.when(LOGGER, "Set default Java version on DistroX flow: " + flowIdentifier);

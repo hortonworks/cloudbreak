@@ -23,10 +23,10 @@ public class SdxScaleAction implements Action<SdxScaleTestDto, SdxClient> {
     public SdxScaleTestDto action(TestContext testContext, SdxScaleTestDto testDto, SdxClient client) throws Exception {
         Log.when(LOGGER, format(" Scaling SDX: %s ", testDto.getName()));
         Log.whenJson(LOGGER, " Scaling SDX request: ", testDto.getRequest());
-        FlowIdentifier flowIdentifier = client.getDefaultClient().sdxEndpoint().horizontalScaleByName(testDto.getName(),
+        FlowIdentifier flowIdentifier = client.getDefaultClient(testContext).sdxEndpoint().horizontalScaleByName(testDto.getName(),
                 testDto.getRequest());
         testDto.setFlow("SDX scale", flowIdentifier);
-        SdxClusterDetailResponse detailedResponse = client.getDefaultClient()
+        SdxClusterDetailResponse detailedResponse = client.getDefaultClient(testContext)
                 .sdxEndpoint()
                 .getDetail(testDto.getName(), Collections.emptySet());
         testDto.setResponse(detailedResponse);

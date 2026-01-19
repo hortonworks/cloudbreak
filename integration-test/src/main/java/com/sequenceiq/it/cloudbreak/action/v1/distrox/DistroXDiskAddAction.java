@@ -33,7 +33,7 @@ public class DistroXDiskAddAction implements Action<DistroXTestDto, CloudbreakCl
 
     @Override
     public DistroXTestDto action(TestContext testContext, DistroXTestDto testDto, CloudbreakClient client) throws Exception {
-        Log.when(LOGGER, "DistroX endpoint: %s" + client.getDefaultClient().distroXV1Endpoint() + ", DistroX's environment: " +
+        Log.when(LOGGER, "DistroX endpoint: %s" + client.getDefaultClient(testContext).distroXV1Endpoint() + ", DistroX's environment: " +
                 testDto.getRequest().getEnvironmentName());
         StackAddVolumesRequest stackAddVolumesRequest = new StackAddVolumesRequest();
         stackAddVolumesRequest.setInstanceGroup(instanceGroup);
@@ -43,7 +43,7 @@ public class DistroXDiskAddAction implements Action<DistroXTestDto, CloudbreakCl
         stackAddVolumesRequest.setCloudVolumeUsageType(CloudVolumeUsageType.GENERAL.toString());
 
         Log.whenJson(LOGGER, "DistroX Disk Add request: ", stackAddVolumesRequest);
-        FlowIdentifier flowIdentifier = client.getDefaultClient()
+        FlowIdentifier flowIdentifier = client.getDefaultClient(testContext)
                 .distroXV1Endpoint()
                 .addVolumesByStackName(testDto.getName(), stackAddVolumesRequest);
         testDto.setFlow("DistroX Disk Add Flow", flowIdentifier);

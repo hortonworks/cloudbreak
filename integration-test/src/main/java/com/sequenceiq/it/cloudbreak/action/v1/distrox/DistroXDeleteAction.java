@@ -16,7 +16,7 @@ public class DistroXDeleteAction implements Action<DistroXTestDto, CloudbreakCli
     @Override
     public DistroXTestDto action(TestContext testContext, DistroXTestDto testDto, CloudbreakClient client) throws Exception {
         testContext.skipSafeLogicValidation();
-        client.getDefaultClient()
+        client.getDefaultClient(testContext)
                 .distroXV1Endpoint()
                 .deleteByName(testDto.getName(), false);
         Log.when(LOGGER, " Stack deletion was successful.");

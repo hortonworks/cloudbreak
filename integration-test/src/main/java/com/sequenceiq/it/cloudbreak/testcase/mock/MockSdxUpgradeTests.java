@@ -169,7 +169,7 @@ public class MockSdxUpgradeTests extends AbstractMockTest {
             request.setLockComponents(true);
             request.setDryRun(true);
             SdxUpgradeResponse upgradeResponse =
-                    sdxClient.getDefaultClient().sdxUpgradeEndpoint().upgradeClusterByName(entity.getName(), request);
+                    sdxClient.getDefaultClient(tc).sdxUpgradeEndpoint().upgradeClusterByName(entity.getName(), request);
             ImageComponentVersions componentVersions = upgradeResponse.getUpgradeCandidates().get(0).getComponentVersions();
             entity.mockCm().setCmVersion(componentVersions.getCm() + "-" + componentVersions.getCmGBN());
             return entity;

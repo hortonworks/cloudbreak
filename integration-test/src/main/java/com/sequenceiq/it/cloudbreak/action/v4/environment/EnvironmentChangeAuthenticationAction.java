@@ -22,7 +22,7 @@ public class EnvironmentChangeAuthenticationAction implements Action<Environment
         environmentAuthenticationRequest.setPublicKey(testDto.getRequest().getAuthentication().getPublicKey());
         environmentAuthenticationRequest.setPublicKeyId(testDto.getRequest().getAuthentication().getPublicKeyId());
         request.setAuthentication(environmentAuthenticationRequest);
-        testDto.setResponse(environmentClient.getDefaultClient()
+        testDto.setResponse(environmentClient.getDefaultClient(testContext)
                 .environmentV1Endpoint()
                 .editByCrn(testDto.getResponse().getCrn(), request));
         Log.when(LOGGER, "Environment edit authentication action posted");

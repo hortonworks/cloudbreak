@@ -33,7 +33,7 @@ public class RecipeTestAssertion {
     }
 
     private static <T extends AbstractSdxTestDto> List<InstanceGroupV4Response> getInstanceGroups(T testDto, SdxClient client) {
-        return client.getDefaultClient()
+        return client.getDefaultClient(testDto.getTestContext())
                 .sdxEndpoint()
                 .getDetailByCrn(testDto.getCrn(), Collections.emptySet())
                 .getStackV4Response().getInstanceGroups();

@@ -15,6 +15,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
+import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.microservice.RedbeamsClient;
 import com.sequenceiq.it.cloudbreak.util.wait.service.WaitObject;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.DatabaseServerV4Endpoint;
@@ -33,15 +34,18 @@ public class RedbeamsWaitObject implements WaitObject {
 
     private DatabaseServerV4Response databaseServerV4Response;
 
-    public RedbeamsWaitObject(RedbeamsClient client, String crn, Status desiredStatus, Set<Status> ignoredFailedStatuses) {
+    private TestContext testContext;
+
+    public RedbeamsWaitObject(RedbeamsClient client, String crn, Status desiredStatus, Set<Status> ignoredFailedStatuses, TestContext testContext) {
         this.client = client;
         this.crn = crn;
         this.desiredStatus = desiredStatus;
         this.ignoredFailedStatuses = ignoredFailedStatuses;
+        this.testContext = testContext;
     }
 
     public DatabaseServerV4Endpoint getEndpoint() {
-        return client.getDefaultClient().databaseServerV4Endpoint();
+        return client.getDefaultClient(testContext).databaseServerV4Endpoint();
     }
 
     public String getCrn() {

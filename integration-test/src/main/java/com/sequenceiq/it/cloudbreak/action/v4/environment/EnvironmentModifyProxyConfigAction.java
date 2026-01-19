@@ -23,7 +23,7 @@ public class EnvironmentModifyProxyConfigAction extends AbstractEnvironmentActio
     @Override
     protected EnvironmentTestDto environmentAction(TestContext testContext, EnvironmentTestDto testDto, EnvironmentClient client) throws Exception {
         EnvironmentEditRequest request = createEditRequest();
-        client.getDefaultClient()
+        client.getDefaultClient(testContext)
                 .environmentV1Endpoint()
                 .editByCrn(testDto.getResponse().getCrn(), request);
         Log.when(LOGGER, "Environment modify proxy config action posted");

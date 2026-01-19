@@ -18,7 +18,7 @@ public class ImageCatalogDeleteAction implements Action<ImageCatalogTestDto, Clo
     public ImageCatalogTestDto action(TestContext testContext, ImageCatalogTestDto testDto, CloudbreakClient cloudbreakClient) throws Exception {
         Log.when(LOGGER, format(" Image catalog DELETE request:%n", testDto.getRequest().getName()));
         testDto.setResponse(
-                cloudbreakClient.getDefaultClient()
+                cloudbreakClient.getDefaultClient(testContext)
                         .imageCatalogV4Endpoint()
                         .deleteByName(cloudbreakClient.getWorkspaceId(), testDto.getName()));
         Log.whenJson(LOGGER, format(" Image catalog has been deleted successfully:%n"), testDto.getResponse());

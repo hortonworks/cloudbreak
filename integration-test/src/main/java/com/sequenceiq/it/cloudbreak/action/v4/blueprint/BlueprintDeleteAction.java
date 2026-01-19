@@ -19,7 +19,7 @@ public class BlueprintDeleteAction implements Action<BlueprintTestDto, Cloudbrea
     public BlueprintTestDto action(TestContext testContext, BlueprintTestDto testDto, CloudbreakClient client) throws Exception {
         Log.when(LOGGER, format(" Blueprint deleteByName request: %n", testDto.getRequest().getName()));
         testDto.setResponse(
-                client.getDefaultClient()
+                client.getDefaultClient(testContext)
                         .blueprintV4Endpoint()
                         .deleteByName(client.getWorkspaceId(), testDto.getName()));
         Log.whenJson(LOGGER, format(" Blueprint deleted successfully:%n"), testDto.getResponse());

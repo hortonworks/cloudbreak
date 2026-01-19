@@ -22,13 +22,14 @@ public class SdxUpgradeRecoveryAction implements Action<SdxTestDto, SdxClient> {
     public SdxTestDto action(TestContext testContext, SdxTestDto testDto, SdxClient client) throws Exception {
         SdxRecoveryRequest recoveryRequest = testDto.getSdxRecoveryRequest();
 
-        Log.when(LOGGER, " SDX endpoint: %s" + client.getDefaultClient().sdxEndpoint() + ", SDX's environment: " + testDto.getRequest().getEnvironment());
+        Log.when(LOGGER, " SDX endpoint: %s" + client.getDefaultClient(testContext).sdxEndpoint() + ", SDX's environment: "
+                + testDto.getRequest().getEnvironment());
         Log.whenJson(LOGGER, " SDX recovery request: ", recoveryRequest);
-        SdxRecoveryResponse recoveryResponse = client.getDefaultClient()
+        SdxRecoveryResponse recoveryResponse = client.getDefaultClient(testContext)
                 .sdxRecoveryEndpoint()
                 .recoverClusterByName(testDto.getName(), recoveryRequest);
         testDto.setFlow("SDX upgrade recovery", recoveryResponse.getFlowIdentifier());
-        SdxClusterDetailResponse detailedResponse = client.getDefaultClient()
+        SdxClusterDetailResponse detailedResponse = client.getDefaultClient(testContext)
                 .sdxEndpoint()
                 .getDetail(testDto.getName(), Collections.emptySet());
         testDto.setResponse(detailedResponse);

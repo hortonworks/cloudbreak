@@ -19,15 +19,16 @@ public class SdxCreateInternalAction implements Action<SdxInternalTestDto, SdxCl
 
     @Override
     public SdxInternalTestDto action(TestContext testContext, SdxInternalTestDto testDto, SdxClient client) throws Exception {
-        Log.when(LOGGER, " SDX endpoint: %s" + client.getDefaultClient().sdxEndpoint() + ", SDX's environment: " + testDto.getRequest().getEnvironment());
+        Log.when(LOGGER, " SDX endpoint: %s" + client.getDefaultClient(testContext).sdxEndpoint() + ", SDX's environment: "
+                + testDto.getRequest().getEnvironment());
         Log.whenJson(LOGGER, " SDX create request: ", testDto.getRequest());
         if (!StringUtils.equals(testContext.getExistingResourceNames().get(SdxInternalTestDto.class), testDto.getName())) {
-            SdxClusterResponse sdxClusterResponse = client.getDefaultClient().sdxInternalEndpoint().create(testDto.getName(), testDto.getRequest());
+            SdxClusterResponse sdxClusterResponse = client.getDefaultClient(testContext).sdxInternalEndpoint().create(testDto.getName(), testDto.getRequest());
             testDto.setFlow("SDX create internal", sdxClusterResponse.getFlowIdentifier());
-            testDto.setResponse(client.getDefaultClient().sdxEndpoint().getDetailByCrn(sdxClusterResponse.getCrn(), Collections.emptySet()));
+            testDto.setResponse(client.getDefaultClient(testContext).sdxEndpoint().getDetailByCrn(sdxClusterResponse.getCrn(), Collections.emptySet()));
         } else {
             Log.whenJson(LOGGER, " SDX already exists %s.", testDto.getName());
-            testDto.setResponse(client.getDefaultClient().sdxEndpoint().getDetail(testDto.getName(), Collections.emptySet()));
+            testDto.setResponse(client.getDefaultClient(testContext).sdxEndpoint().getDetail(testDto.getName(), Collections.emptySet()));
         }
         Log.whenJson(LOGGER, " SDX create response: ", testDto.getResponse());
         return testDto;

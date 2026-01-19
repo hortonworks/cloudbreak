@@ -37,7 +37,7 @@ public class FreeipaInstanceMetadataUpdateAction extends AbstractFreeIpaAction<F
         InstanceMetadataUpdateRequest request = new InstanceMetadataUpdateRequest();
         request.setEnvironmentCrn(environmentCrn);
         request.setUpdateType(targetUpdateType);
-        FlowIdentifier flowIdentifier = client.getDefaultClient().getFreeIpaV1Endpoint().instanceMetadataUpdate(request);
+        FlowIdentifier flowIdentifier = client.getDefaultClient(testContext).getFreeIpaV1Endpoint().instanceMetadataUpdate(request);
         testDto.setFlow("FreeIPA instance metadata update",  flowIdentifier);
         Log.whenJson(LOGGER, format(" FreeIPA instance metadata update: %n"), environmentCrn);
         return testDto;

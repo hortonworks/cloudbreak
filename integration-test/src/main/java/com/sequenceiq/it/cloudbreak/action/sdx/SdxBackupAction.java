@@ -38,16 +38,16 @@ public class SdxBackupAction implements Action<SdxTestDto, SdxClient> {
         Log.when(LOGGER, format(" SDX '%s' backup has been started to '%s' by name '%s'... ", sdxName, backupLocation, backupName));
         Log.whenJson(LOGGER, " SDX backup request: ", testDto.getRequest());
         LOGGER.info(format(" SDX '%s' backup has been started to '%s' by name '%s'... ", sdxName, backupLocation, backupName));
-        SdxBackupResponse sdxBackupResponse = client.getDefaultClient()
+        SdxBackupResponse sdxBackupResponse = client.getDefaultClient(testContext)
                 .sdxBackupEndpoint()
                 .backupDatalakeByName(sdxName, backupLocation, backupName, false, false, false, false,
                         0);
         testDto.setFlow("SDX backup", sdxBackupResponse.getFlowIdentifier());
-        SdxClusterDetailResponse detailedResponse = client.getDefaultClient()
+        SdxClusterDetailResponse detailedResponse = client.getDefaultClient(testContext)
                 .sdxEndpoint()
                 .getDetail(sdxName, Collections.emptySet());
         testDto.setResponse(detailedResponse);
-        Log.whenJson(LOGGER, " SDX response after backup: ", client.getDefaultClient().sdxEndpoint().get(sdxName));
+        Log.whenJson(LOGGER, " SDX response after backup: ", client.getDefaultClient(testContext).sdxEndpoint().get(sdxName));
         return testDto;
     }
 }

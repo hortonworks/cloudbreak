@@ -34,7 +34,7 @@ public class RecipeTestDto extends DeletableTestDto<RecipeV4Request, RecipeV4Res
     public void deleteForCleanup() {
         try {
             CloudbreakClient client = getClientForCleanup();
-            client.getDefaultClient().recipeV4Endpoint().deleteByCrn(client.getWorkspaceId(), getResponse().getCrn());
+            client.getDefaultClient(getTestContext()).recipeV4Endpoint().deleteByCrn(client.getWorkspaceId(), getResponse().getCrn());
         } catch (NotFoundException nfe) {
             LOGGER.info("recipe not found, thus cleanup not needed.");
         }
@@ -94,7 +94,7 @@ public class RecipeTestDto extends DeletableTestDto<RecipeV4Request, RecipeV4Res
 
     @Override
     public List<RecipeViewV4Response> getAll(CloudbreakClient client) {
-        RecipeV4Endpoint recipeV4Endpoint = client.getDefaultClient().recipeV4Endpoint();
+        RecipeV4Endpoint recipeV4Endpoint = client.getDefaultClient(getTestContext()).recipeV4Endpoint();
         return recipeV4Endpoint.list(client.getWorkspaceId()).getResponses().stream()
                 .filter(s -> s.getName() != null)
                 .collect(Collectors.toList());
@@ -108,7 +108,7 @@ public class RecipeTestDto extends DeletableTestDto<RecipeV4Request, RecipeV4Res
     @Override
     public void delete(TestContext testContext, RecipeViewV4Response entity, CloudbreakClient client) {
         try {
-            client.getDefaultClient().recipeV4Endpoint().deleteByName(client.getWorkspaceId(), entity.getName());
+            client.getDefaultClient(getTestContext()).recipeV4Endpoint().deleteByName(client.getWorkspaceId(), entity.getName());
         } catch (Exception e) {
             LOGGER.warn("Something went wrong on {} purge. {}", entity.getName(), ResponseUtil.getErrorMessage(e), e);
         }

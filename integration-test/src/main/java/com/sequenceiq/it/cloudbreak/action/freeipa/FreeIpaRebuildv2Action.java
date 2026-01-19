@@ -30,7 +30,7 @@ public class FreeIpaRebuildv2Action extends AbstractFreeIpaAction<FreeIpaTestDto
         request.setFullBackupStorageLocation(testContext.getCloudProvider().getFreeIpaRebuildFullBackup());
         request.setDataBackupStorageLocation(testContext.getCloudProvider().getFreeIpaRebuildDataBackup());
         Log.whenJson(LOGGER, format(" FreeIPA rebuild request: %n"), request);
-        RebuildV2Response response = client.getDefaultClient()
+        RebuildV2Response response = client.getDefaultClient(testContext)
                 .getFreeIpaV2Endpoint()
                 .rebuildv2(request);
         testDto.setOperationId(response.getOperationStatus().getOperationId());

@@ -50,7 +50,7 @@ public class FreeIpaInstanceWaitObject implements InstanceWaitObject {
     public void fetchData() {
         try {
             instanceGroups = testContext.getMicroserviceClient(FreeIpaClient.class)
-                    .getDefaultClient().getFreeIpaV1Endpoint().describe(environmentCrn).getInstanceGroups();
+                    .getDefaultClient(testContext).getFreeIpaV1Endpoint().describe(environmentCrn).getInstanceGroups();
         } catch (Exception e) {
             LOGGER.error("FreeIpa instance groups cannot be determined, because of: {}", e.getMessage(), e);
             throw new TestFailException("FreeIpa instance groups cannot be determined", e);

@@ -29,9 +29,9 @@ public class UnassignResourceRoleGroupAction extends AbstractUmsAction<UmsTestDt
         Log.when(LOGGER, format(" Revoke resource role '%s' from group '%s' at resource '%s' ", resourceRole, groupCrn, resourceCrn));
         Log.whenJson(LOGGER, format(" Revoke resource role request:%n "), testDto.getRequest());
         LOGGER.info(format(" Revoking resource role '%s' from group '%s' at resource '%s'... ", resourceRole, groupCrn, resourceCrn));
-        Multimap<String, String> assignedResourceRoles = client.getDefaultClient().listAssignedResourceRoles(groupCrn);
+        Multimap<String, String> assignedResourceRoles = client.getDefaultClient(testContext).listAssignedResourceRoles(groupCrn);
         if (assignedResourceRoles.get(resourceCrn).contains(resourceRole)) {
-            client.getDefaultClient().unassignResourceRole(groupCrn, resourceCrn, resourceRole);
+            client.getDefaultClient(testContext).unassignResourceRole(groupCrn, resourceCrn, resourceRole);
             // wait for UmsRightsCache to expire
             Thread.sleep(7000);
             LOGGER.info(format(" Resource role '%s' has been revoked at resource '%s' from group '%s' ", resourceRole, resourceCrn, groupCrn));

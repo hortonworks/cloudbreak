@@ -37,13 +37,13 @@ public class FreeIpaFindUsersAction implements Action<FreeIpaTestDto, FreeIpaCli
         Log.when(LOGGER, format(" Checking users [%s] are present at environment '%s'", users, environmentCrn));
         Log.whenJson(LOGGER, format(" FreeIpa '%s' find users request:%n ", testDto.getResponse().getCrn()), checkUsersRequest);
         if (expectedPresence) {
-            if (!client.getDefaultClient().getClientTestV1Endpoint().checkUsers(checkUsersRequest).getResult()) {
+            if (!client.getDefaultClient(testContext).getClientTestV1Endpoint().checkUsers(checkUsersRequest).getResult()) {
                 throw new TestFailException("Given freeipa users cannot be found, please check FMS logs for details!");
             }
             LOGGER.info(format(" Users [%s] are present at environment '%s'", users, environmentCrn));
             Log.when(LOGGER, format(" Users [%s] are present at environment '%s'", users, environmentCrn));
         } else {
-            if (client.getDefaultClient().getClientTestV1Endpoint().checkUsers(checkUsersRequest).getResult()) {
+            if (client.getDefaultClient(testContext).getClientTestV1Endpoint().checkUsers(checkUsersRequest).getResult()) {
                 throw new TestFailException("Given freeipa users have been found, please check FMS logs for details!");
             }
             LOGGER.info(format(" Users [%s] have been removed successfully from environment '%s'", users, environmentCrn));

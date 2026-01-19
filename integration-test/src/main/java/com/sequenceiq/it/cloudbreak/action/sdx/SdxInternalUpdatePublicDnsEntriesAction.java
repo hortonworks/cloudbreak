@@ -17,7 +17,7 @@ public class SdxInternalUpdatePublicDnsEntriesAction implements Action<SdxIntern
     @Override
     public SdxInternalTestDto action(TestContext testContext, SdxInternalTestDto testDto, SdxClient client) throws Exception {
         Log.when(LOGGER, "Update public dns entries by name: " + testDto.getName());
-        FlowIdentifier flowIdentifier = client.getDefaultClient().sdxEndpoint().updatePublicDnsEntriesByName(testDto.getName());
+        FlowIdentifier flowIdentifier = client.getDefaultClient(testContext).sdxEndpoint().updatePublicDnsEntriesByName(testDto.getName());
         testDto.setFlow("Update public dns entries started by name: " + testDto.getName(), flowIdentifier);
         Log.when(LOGGER, "Public dns entries update started with flow id: " + flowIdentifier);
         return testDto;

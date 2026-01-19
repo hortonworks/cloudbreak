@@ -27,7 +27,7 @@ public class FreeIpaRebuildAction extends AbstractFreeIpaAction<FreeIpaTestDto> 
         request.setEnvironmentCrn(environmentCrn);
         request.setSourceCrn(testDto.getCrn());
         Log.whenJson(LOGGER, format(" FreeIPA rebuild request: %n"), request);
-        CreateFreeIpaV1Response rebuild = client.getDefaultClient()
+        CreateFreeIpaV1Response rebuild = client.getDefaultClient(testContext)
                 .getFreeIpaV1Endpoint()
                 .rebuild(request);
 

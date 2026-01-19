@@ -17,8 +17,9 @@ public class SdxInternalResizeRecoveryAction implements Action<SdxInternalTestDt
     @Override
     public SdxInternalTestDto action(TestContext testContext, SdxInternalTestDto testDto, SdxClient client) throws Exception {
         SdxRecoveryRequest recoveryRequest = testDto.getSdxRecoveryRequest();
-        Log.when(LOGGER, " SDX endpoint: %s" + client.getDefaultClient().sdxEndpoint() + ", SDX's environment: " + testDto.getRequest().getEnvironment());
-        SdxRecoveryResponse recoveryResponse = client.getDefaultClient()
+        Log.when(LOGGER, " SDX endpoint: %s" + client.getDefaultClient(testContext).sdxEndpoint() + ", SDX's environment: "
+                + testDto.getRequest().getEnvironment());
+        SdxRecoveryResponse recoveryResponse = client.getDefaultClient(testContext)
                 .sdxRecoveryEndpoint()
                 .recoverClusterByName(testDto.getName(), recoveryRequest);
         testDto.setFlow("SDX resize recovery", recoveryResponse.getFlowIdentifier());

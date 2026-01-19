@@ -20,7 +20,7 @@ public class ExternalizedComputeClusterDescribeDefaultNotExistsAction implements
             ExternalizedComputeClusterClient client) throws Exception {
         Log.when("Describe externalized compute clusters by environment crn: " + testDto.getEnvironmentCrn());
         List<ExternalizedComputeClusterResponse> computeClusters =
-                client.getDefaultClient().externalizedComputeClusterEndpoint().list(testDto.getEnvironmentCrn());
+                client.getDefaultClient(testContext).externalizedComputeClusterEndpoint().list(testDto.getEnvironmentCrn());
         Log.whenJson("Describe externalized compute clusters by environment crn: ", computeClusters);
         if (!CollectionUtils.isEmpty(computeClusters)) {
             throw new TestFailException("There are " + computeClusters.size() + " external compute clusters");

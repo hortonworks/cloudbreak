@@ -28,14 +28,14 @@ public class SdxSyncAction implements Action<SdxTestDto, SdxClient> {
         Log.when(LOGGER, format(" SDX '%s' sync has been started... ", sdxName));
         Log.whenJson(LOGGER, " SDX sync request: ", testDto.getRequest());
         LOGGER.info(format(" SDX '%s' sync has been started... ", sdxName));
-        client.getDefaultClient()
+        client.getDefaultClient(testContext)
                 .sdxEndpoint()
                 .sync(sdxName);
-        SdxClusterDetailResponse detailedResponse = client.getDefaultClient()
+        SdxClusterDetailResponse detailedResponse = client.getDefaultClient(testContext)
                 .sdxEndpoint()
                 .getDetail(sdxName, Collections.emptySet());
         testDto.setResponse(detailedResponse);
-        Log.whenJson(LOGGER, " SDX response after sync: ", client.getDefaultClient().sdxEndpoint().get(sdxName));
+        Log.whenJson(LOGGER, " SDX response after sync: ", client.getDefaultClient(testContext).sdxEndpoint().get(sdxName));
 
         return testDto;
     }

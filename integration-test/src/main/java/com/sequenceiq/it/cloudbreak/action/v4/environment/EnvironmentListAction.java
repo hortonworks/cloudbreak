@@ -11,7 +11,7 @@ public class EnvironmentListAction implements Action<EnvironmentTestDto, Environ
     @Override
     public EnvironmentTestDto action(TestContext testContext, EnvironmentTestDto testDto, EnvironmentClient environmentClient) throws Exception {
         testDto.setResponseSimpleEnvSet(
-                environmentClient.getDefaultClient()
+                environmentClient.getDefaultClient(testContext)
                         .environmentV1Endpoint()
                         .list(null)
                         .getResponses());

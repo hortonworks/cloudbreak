@@ -79,7 +79,7 @@ public class SdxAzureMultiAzVerticalScaleTest extends PreconditionSdxE2ETest {
                 .awaitForFlow()
                 .then((tc, dto, client) -> {
                     CloudbreakClient cbClient = tc.getMicroserviceClient(CloudbreakClient.class);
-                    StackV4Response stackV4Response = cbClient.getDefaultClient().stackV4Endpoint().getByCrn(0L, dto.getCrn(), Set.of());
+                    StackV4Response stackV4Response = cbClient.getDefaultClient(testContext).stackV4Endpoint().getByCrn(0L, dto.getCrn(), Set.of());
                     String instanceType = stackV4Response.getInstanceGroups().stream().filter(ig -> ig.getName().equals(targetInstanceGroup))
                             .findFirst().get().getTemplate().getInstanceType();
                     if (!instanceType.equals(targetInstanceType)) {

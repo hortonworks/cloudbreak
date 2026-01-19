@@ -18,7 +18,7 @@ public class SdxChangeImageCatalogAction implements Action<SdxChangeImageCatalog
 
     public SdxChangeImageCatalogTestDto action(TestContext testContext, SdxChangeImageCatalogTestDto testDto, SdxClient client) throws Exception {
         Log.whenJson(LOGGER, format(" SDX put request:%n"), testDto.getRequest());
-        client.getDefaultClient()
+        client.getDefaultClient(testContext)
                 .sdxEndpoint()
                 .changeImageCatalog(testContext.given(SdxInternalTestDto.class).getResponse().getName(), testDto.getRequest());
         Log.when(LOGGER, format(" SDX change image catalog to: %s", testDto.getRequest().getImageCatalog()));

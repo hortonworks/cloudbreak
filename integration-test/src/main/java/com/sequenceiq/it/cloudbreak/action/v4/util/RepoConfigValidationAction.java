@@ -16,7 +16,7 @@ public class RepoConfigValidationAction implements Action<RepoConfigValidationTe
     @Override
     public RepoConfigValidationTestDto action(TestContext testContext, RepoConfigValidationTestDto testDto, CloudbreakClient cloudbreakClient) throws Exception {
         Log.whenJson(LOGGER, "Posting repository config request:\n", testDto.getRequest());
-        testDto.setResponse(cloudbreakClient.getDefaultClient().utilV4Endpoint().repositoryConfigValidationRequest(testDto.getRequest()));
+        testDto.setResponse(cloudbreakClient.getDefaultClient(testContext).utilV4Endpoint().repositoryConfigValidationRequest(testDto.getRequest()));
         Log.whenJson(LOGGER, "Posting repository config response:\n", testDto.getResponse());
 
         return testDto;

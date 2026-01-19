@@ -32,7 +32,7 @@ public class DistroXOSUpgradeByUpgradeSetsAction implements Action<DistroXTestDt
                 .distroXUpgradeV1Endpoint()
                 .osUpgradeByUpgradeSetsInternal(testDto.getCrn(), numberedOsUpgradeSetRequest);
         testDto.setFlow("DistroX upgrade flow identifier", flowIdentifier);
-        StackV4Response stackV4Response = client.getDefaultClient()
+        StackV4Response stackV4Response = client.getDefaultClient(testContext)
                 .distroXV1Endpoint()
                 .getByName(testDto.getName(), Collections.emptySet());
         testDto.setResponse(stackV4Response);

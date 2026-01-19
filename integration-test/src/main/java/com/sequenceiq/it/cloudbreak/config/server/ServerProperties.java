@@ -148,6 +148,48 @@ public class ServerProperties {
     @Value("${integrationtest.environmentpublicapi.contextPath:}")
     private String environmentPublicApiContextPath;
 
+    @Value("${integrationtest.cloudbreak.alternative.server:}")
+    private String alternativeCloudbreakServer;
+
+    @Value("${cloudbreak.alternative.url:localhost:" + DEFAULT_CLOUDBREAK_PORT + "}")
+    private String alternativeCloudbreakUrl;
+
+    @Value("${integrationtest.environment.alternative.server:}")
+    private String alternativeEnvironmentServer;
+
+    @Value("${environment.alternative.url:localhost:" + DEFAULT_ENVIRONMENT_PORT + "}")
+    private String alternativeEnvironmentUrl;
+
+    @Value("${integrationtest.freeipa.alternative.server:}")
+    private String alternativeFreeipaServer;
+
+    @Value("${freeipa.alternative.url:localhost:" + DEFAULT_FREEIPA_PORT + "}")
+    private String alternativeFreeipaUrl;
+
+    @Value("${integrationtest.redbeams.alternative.server:}")
+    private String alternativeRedbeamsServer;
+
+    @Value("${integrationtest.sdx.alternative.server:}")
+    private String alternativeSdxServer;
+
+    @Value("${sdx.alternative.url:localhost:" + DEFAULT_SDX_PORT + "}")
+    private String alternativeSdxUrl;
+
+    @Value("${integrationtest.externalizedcompute.alternative.server:}")
+    private String alternativeExternalizedComputeServer;
+
+    @Value("${externalizedcompute.alternative.url:localhost:" + DEFAULT_EXTERNALIZED_COMPUTE_PORT + "}")
+    private String alternativeExternalizedComputeUrl;
+
+    @Value("${integrationtest.remoteenvironment.alternative.server:}")
+    private String alternativeRemoteEnvironmentServer;
+
+    @Value("${integrationtest.environmentpublicapi.alternative.server:}")
+    private String alternativeEnvironmentPublicApiServer;
+
+    @Value("${integrationtest.periscope.alternative.server:}")
+    private String alternativePeriscopeServer;
+
     private String cbVersion;
 
     @Inject
@@ -172,6 +214,22 @@ public class ServerProperties {
         return "http://" + cloudbreakUrl + cbRootContextPath;
     }
 
+    public String getAlternativeCloudbreakAddress() {
+        if (StringUtils.isNotEmpty(alternativeCloudbreakServer)) {
+            if (cloudbreakPort != 0) {
+                return alternativeCloudbreakServer + ":" + cloudbreakPort + cbRootContextPath;
+            } else {
+                return alternativeCloudbreakServer + cbRootContextPath;
+            }
+        } else {
+            return null;
+        }
+    }
+
+    public String getAlternativeCloudbreakInternalAddress() {
+        return "http://" + alternativeCloudbreakUrl + cbRootContextPath;
+    }
+
     public String getEnvironmentAddress() {
         if (environmentPort != 0) {
             return environmentServer + ":" + environmentPort + environmentRootContextPath;
@@ -182,6 +240,22 @@ public class ServerProperties {
 
     public String getEnvironmentInternalAddress() {
         return "http://" + environmentUrl + environmentRootContextPath;
+    }
+
+    public String getAlternativeEnvironmentAddress() {
+        if (StringUtils.isNotEmpty(alternativeEnvironmentServer)) {
+            if (environmentPort != 0) {
+                return alternativeEnvironmentServer + ":" + environmentPort + environmentRootContextPath;
+            } else {
+                return alternativeEnvironmentServer + environmentRootContextPath;
+            }
+        } else {
+            return null;
+        }
+    }
+
+    public String getAlternativeEnvironmentInternalAddress() {
+        return "http://" + alternativeEnvironmentUrl + environmentRootContextPath;
     }
 
     public String getFreeipaAddress() {
@@ -196,6 +270,22 @@ public class ServerProperties {
         return "http://" + freeipaUrl + freeIpaRootContextPath;
     }
 
+    public String getAlternativeFreeipaAddress() {
+        if (StringUtils.isNotEmpty(alternativeFreeipaServer)) {
+            if (freeipaPort != 0) {
+                return alternativeFreeipaServer + ":" + freeipaPort + freeIpaRootContextPath;
+            } else {
+                return alternativeFreeipaServer + freeIpaRootContextPath;
+            }
+        } else {
+            return null;
+        }
+    }
+
+    public String getAlternativeFreeipaInternalAddress() {
+        return "http://" + alternativeFreeipaUrl + freeIpaRootContextPath;
+    }
+
     public String getRedbeamsAddress() {
         if (redbeamsPort != 0) {
             return redbeamsServer + ":" + redbeamsPort + redbeamsRootContextPath;
@@ -204,8 +294,28 @@ public class ServerProperties {
         }
     }
 
+    public String getAlternativeRedbeamsAddress() {
+        if (StringUtils.isNotEmpty(alternativeRedbeamsServer)) {
+            if (redbeamsPort != 0) {
+                return alternativeRedbeamsServer + ":" + redbeamsPort + redbeamsRootContextPath;
+            } else {
+                return alternativeRedbeamsServer + redbeamsRootContextPath;
+            }
+        } else {
+            return null;
+        }
+    }
+
     public String getPeriscopeAddress() {
         return periscopeServer + ":" + periscopePort + periscopeRootContextPath;
+    }
+
+    public String getAlternativePeriscopeAddress() {
+        if (StringUtils.isNotEmpty(alternativePeriscopeServer)) {
+            return alternativePeriscopeServer + ":" + periscopePort + periscopeRootContextPath;
+        } else {
+            return null;
+        }
     }
 
     public String getSdxAddress() {
@@ -216,11 +326,43 @@ public class ServerProperties {
         }
     }
 
+    public String getSdxInternalAddress() {
+        return "http://" + sdxUrl + sdxRootContextPath;
+    }
+
+    public String getAlternativeSdxAddress() {
+        if (StringUtils.isNotEmpty(alternativeSdxServer)) {
+            if (sdxPort != 0) {
+                return alternativeSdxServer + ":" + sdxPort + sdxRootContextPath;
+            } else {
+                return alternativeSdxServer + sdxRootContextPath;
+            }
+        } else {
+            return null;
+        }
+    }
+
+    public String getAlternativeSdxInternalAddress() {
+        return "http://" + alternativeSdxUrl + sdxRootContextPath;
+    }
+
     public String getRemoteEnvironmentAddress() {
         if (remoteEnvironmentPort != 0) {
             return remoteEnvironmentServer + ":" + remoteEnvironmentPort + remoteEnvironmentContextPath;
         } else {
             return remoteEnvironmentServer + remoteEnvironmentContextPath;
+        }
+    }
+
+    public String getAlternativeRemoteEnvironmentAddress() {
+        if (StringUtils.isNotEmpty(alternativeRemoteEnvironmentServer)) {
+            if (remoteEnvironmentPort != 0) {
+                return alternativeRemoteEnvironmentServer + ":" + remoteEnvironmentPort + remoteEnvironmentContextPath;
+            } else {
+                return alternativeRemoteEnvironmentServer + remoteEnvironmentContextPath;
+            }
+        } else {
+            return null;
         }
     }
 
@@ -236,8 +378,40 @@ public class ServerProperties {
         return "http://" + externalizedComputeUrl + externalizedComputeRootContextPath;
     }
 
-    public String getSdxInternalAddress() {
-        return "http://" + sdxUrl + sdxRootContextPath;
+    public String getAlternativeExternalizedComputeAddress() {
+        if (StringUtils.isNotEmpty(alternativeExternalizedComputeServer)) {
+            if (externalizedComputePort != 0) {
+                return alternativeExternalizedComputeServer + ":" + externalizedComputePort + externalizedComputeRootContextPath;
+            } else {
+                return alternativeExternalizedComputeServer + externalizedComputeRootContextPath;
+            }
+        } else {
+            return null;
+        }
+    }
+
+    public String getAlternativeExternalizedComputeInternalAddress() {
+        return "http://" + alternativeExternalizedComputeUrl + externalizedComputeRootContextPath;
+    }
+
+    public String getEnvironmentPublicApiAddress() {
+        if (environmentPublicApiPort != 0) {
+            return environmentPublicApiServer + ":" + environmentPublicApiPort + environmentPublicApiContextPath;
+        } else {
+            return environmentPublicApiServer + environmentPublicApiContextPath;
+        }
+    }
+
+    public String getAlternativeEnvironmentPublicApiAddress() {
+        if (StringUtils.isNotEmpty(alternativeEnvironmentPublicApiServer)) {
+            if (environmentPublicApiPort != 0) {
+                return alternativeEnvironmentPublicApiServer + ":" + environmentPublicApiPort + environmentPublicApiContextPath;
+            } else {
+                return alternativeEnvironmentPublicApiServer + environmentPublicApiContextPath;
+            }
+        } else {
+            return null;
+        }
     }
 
     public String getUmsHost() {
@@ -254,14 +428,6 @@ public class ServerProperties {
 
     public String getMockImageCatalogAddr() {
         return mockImageCatalogAddr + ":" + mockImageCatalogPort;
-    }
-
-    public String getEnvironmentPublicApiAddress() {
-        if (environmentPublicApiPort != 0) {
-            return environmentPublicApiServer + ":" + environmentPublicApiPort + environmentPublicApiContextPath;
-        } else {
-            return environmentPublicApiServer + environmentPublicApiContextPath;
-        }
     }
 
     public String getCbVersion() {

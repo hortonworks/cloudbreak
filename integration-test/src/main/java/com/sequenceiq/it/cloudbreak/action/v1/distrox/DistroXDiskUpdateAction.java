@@ -33,7 +33,7 @@ public class DistroXDiskUpdateAction implements Action<DistroXTestDto, Cloudbrea
 
     @Override
     public DistroXTestDto action(TestContext testContext, DistroXTestDto testDto, CloudbreakClient client) throws Exception {
-        Log.when(LOGGER, "DistroX endpoint: %s" + client.getDefaultClient().distroXV1Endpoint() + ", DistroX's environment: " +
+        Log.when(LOGGER, "DistroX endpoint: %s" + client.getDefaultClient(testContext).distroXV1Endpoint() + ", DistroX's environment: " +
                 testDto.getRequest().getEnvironmentName());
         DiskUpdateRequest diskUpdateRequest = new DiskUpdateRequest();
         diskUpdateRequest.setGroup(instanceGroup);
@@ -43,11 +43,11 @@ public class DistroXDiskUpdateAction implements Action<DistroXTestDto, Cloudbrea
         Log.whenJson(LOGGER, "DistroX Disk Update request: ", diskUpdateRequest);
         FlowIdentifier flowIdentifier;
         if (DiskType.ADDITIONAL_DISK.equals(diskType)) {
-            flowIdentifier = client.getDefaultClient()
+            flowIdentifier = client.getDefaultClient(testContext)
                     .distroXV1Endpoint()
                     .diskUpdateByName(testDto.getName(), diskUpdateRequest);
         } else {
-            flowIdentifier = client.getDefaultClient()
+            flowIdentifier = client.getDefaultClient(testContext)
                     .distroXV1Endpoint()
                     .updateRootVolumeByDatahubName(testDto.getName(), diskUpdateRequest);
         }

@@ -16,7 +16,7 @@ public class ProxyConfigListAction implements Action<ProxyTestDto, EnvironmentCl
     @Override
     public ProxyTestDto action(TestContext testContext, ProxyTestDto testDto, EnvironmentClient client) throws Exception {
         testDto.setResponses(
-                Sets.newHashSet(client.getDefaultClient()
+                Sets.newHashSet(client.getDefaultClient(testContext)
                         .proxyV1Endpoint()
                         .list().getResponses()));
         return testDto;

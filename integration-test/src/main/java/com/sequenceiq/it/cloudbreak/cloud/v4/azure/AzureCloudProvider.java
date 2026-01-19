@@ -453,7 +453,7 @@ public class AzureCloudProvider extends AbstractCloudProvider {
             String runtimeVersion) {
         try {
             Optional<ImageV4Response> prewarmedImagesForRuntime = cloudbreakClient
-                    .getDefaultClient()
+                    .getDefaultClient(testContext)
                     .imageCatalogV4Endpoint()
                     .getImagesByName(cloudbreakClient.getWorkspaceId(), imageCatalogTestDto.getRequest().getName(), null,
                             CloudPlatform.AZURE.name(), runtimeVersion, null, false, true, null)

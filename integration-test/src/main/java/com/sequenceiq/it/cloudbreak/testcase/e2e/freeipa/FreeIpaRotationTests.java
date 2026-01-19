@@ -93,7 +93,8 @@ public class FreeIpaRotationTests extends AbstractE2ETest {
                 .given(FreeIpaTestDto.class)
                 .when(freeIpaTestClient.describe())
                 .then((tc, testDto, client) -> {
-                    Set<InstanceMetaDataResponse> instanceMetaDataResponses = getInstanceMetaDataResponses(testDto.getRequest().getEnvironmentCrn(), client);
+                    Set<InstanceMetaDataResponse> instanceMetaDataResponses = getInstanceMetaDataResponses(testDto.getRequest().getEnvironmentCrn(), client,
+                            testDto.getTestContext());
                     getPasswordAndLastChangedFromPillar(originalPasswordLastChangedMap, originalPasswordsFromPillarMap, instanceMetaDataResponses);
                     checkDirectoryManagerPassword(instanceMetaDataResponses, originalPasswordsFromPillarMap);
                     return testDto;
@@ -131,7 +132,7 @@ public class FreeIpaRotationTests extends AbstractE2ETest {
 
     private FreeIpaRotationTestDto checkDirectoryManagerPasswordAfterRotation(Map<String, String> originalPasswordLastChangedMap,
             Map<String, String> originalPasswordsFromPillarMap, FreeIpaRotationTestDto testDto, FreeIpaClient client) {
-        Set<InstanceMetaDataResponse> instanceMetaDataResponses = getInstanceMetaDataResponses(testDto.getEnvironmentCrn(), client);
+        Set<InstanceMetaDataResponse> instanceMetaDataResponses = getInstanceMetaDataResponses(testDto.getEnvironmentCrn(), client, testDto.getTestContext());
         Map<String, String> passwordFromPillar = getPasswordFromPillar(instanceMetaDataResponses);
         passwordFromPillar.forEach((key, value) -> {
             String originalPassword = originalPasswordsFromPillarMap.get(key);
@@ -178,8 +179,8 @@ public class FreeIpaRotationTests extends AbstractE2ETest {
         }
     }
 
-    private Set<InstanceMetaDataResponse> getInstanceMetaDataResponses(String environmentCrn, FreeIpaClient<?> client) {
-        DescribeFreeIpaResponse describeFreeIpaResponse = client.getDefaultClient().getFreeIpaV1Endpoint().describe(environmentCrn);
+    private Set<InstanceMetaDataResponse> getInstanceMetaDataResponses(String environmentCrn, FreeIpaClient<?> client, TestContext testContext) {
+        DescribeFreeIpaResponse describeFreeIpaResponse = client.getDefaultClient(testContext).getFreeIpaV1Endpoint().describe(environmentCrn);
         return describeFreeIpaResponse.getInstanceGroups().stream()
                 .map(InstanceGroupResponse::getMetaData)
                 .flatMap(Set::stream)

@@ -23,11 +23,11 @@ public class DistroXStartAction implements Action<DistroXTestDto, CloudbreakClie
     public DistroXTestDto action(TestContext testContext, DistroXTestDto testDto, CloudbreakClient client) throws Exception {
         Log.when(LOGGER, format(" Starting Distrox: %s ", testDto.getName()));
         Log.whenJson(LOGGER, " Distrox start request: ", testDto.getRequest());
-        FlowIdentifier flowIdentifier = client.getDefaultClient()
+        FlowIdentifier flowIdentifier = client.getDefaultClient(testContext)
                 .distroXV1Endpoint()
                 .putStartByName(testDto.getName());
         testDto.setFlow("DistroX start", flowIdentifier);
-        StackV4Response stackV4Response = client.getDefaultClient()
+        StackV4Response stackV4Response = client.getDefaultClient(testContext)
                 .distroXV1Endpoint().getByName(testDto.getName(), Collections.emptySet());
         testDto.setResponse(stackV4Response);
         Log.whenJson(LOGGER, " Distrox start response: ", stackV4Response);

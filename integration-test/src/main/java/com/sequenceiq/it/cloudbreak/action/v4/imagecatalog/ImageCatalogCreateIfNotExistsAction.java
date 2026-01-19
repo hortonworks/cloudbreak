@@ -21,7 +21,7 @@ public class ImageCatalogCreateIfNotExistsAction implements Action<ImageCatalogT
     public ImageCatalogTestDto action(TestContext testContext, ImageCatalogTestDto testDto, CloudbreakClient client) throws IOException {
         Log.when(LOGGER, "Create Imagecatalog with name: " + testDto.getRequest().getName());
         try {
-            testDto.setResponse(client.getDefaultClient().imageCatalogV4Endpoint().create(client.getWorkspaceId(), testDto.getRequest()));
+            testDto.setResponse(client.getDefaultClient(testContext).imageCatalogV4Endpoint().create(client.getWorkspaceId(), testDto.getRequest()));
             Log.whenJson(LOGGER, "Imagecatalog created successfully: ", testDto.getRequest());
         } catch (BadRequestException e) {
             Log.when(LOGGER, "Cannot create Imagecatalog, trying to fetch existed one: " + testDto.getRequest().getName());
@@ -35,7 +35,7 @@ public class ImageCatalogCreateIfNotExistsAction implements Action<ImageCatalogT
 
     private static void fetchIfExistsOrThrowOriginalException(ImageCatalogTestDto testDto, CloudbreakClient client, BadRequestException originalException) {
         try {
-            testDto.setResponse(client.getDefaultClient().imageCatalogV4Endpoint()
+            testDto.setResponse(client.getDefaultClient(testDto.getTestContext()).imageCatalogV4Endpoint()
                     .getByName(client.getWorkspaceId(), testDto.getRequest().getName(), Boolean.FALSE, Boolean.FALSE));
             Log.whenJson(LOGGER, "Imagecatalog fetched successfully: ", testDto.getRequest());
         } catch (Exception e) {

@@ -21,7 +21,7 @@ public class FreeIpaGetHealthDetailsAction implements Action<FreeIpaHealthDetail
         String environmentCrn = testContext.given(EnvironmentTestDto.class).getCrn();
         Log.when(LOGGER, format(" Getting FreeIpa Health Details for environment: [%s] and freeIpa: %s", environmentCrn,
                 testDto.getFreeIpaCrn()));
-        testDto.setResponse(client.getDefaultClient()
+        testDto.setResponse(client.getDefaultClient(testContext)
                 .getFreeIpaV1Endpoint()
                 .healthDetails(environmentCrn));
         Log.whenJson(LOGGER, format(" FreeIpa Health Details respone: %n"), testDto.getResponse());

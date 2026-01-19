@@ -38,10 +38,10 @@ public class DistroXScaleStartInstancesAction implements Action<DistroXTestDto, 
         updateStackRequest.setWithClusterEvent(true);
         Log.when(LOGGER, String.format(" Starting instances [%s] for distrox '%s' Compute scaling... ", testDto.getInstanceIdsForAction(), testDto.getName()));
         Log.whenJson(LOGGER, " Distrox Compute scale start instances request: ", testDto.getRequest());
-        testDto.setFlow("scale start", client.getDefaultClient()
+        testDto.setFlow("scale start", client.getDefaultClient(testContext)
                 .autoscaleEndpoint()
                 .putStackStartInstancesByName(testDto.getName(), updateStackRequest));
-        StackV4Response stackV4Response = client.getDefaultClient()
+        StackV4Response stackV4Response = client.getDefaultClient(testContext)
                 .distroXV1Endpoint()
                 .getByName(testDto.getName(), new HashSet<>(Arrays.asList("hardware_info", "events")));
         testDto.setResponse(stackV4Response);

@@ -19,7 +19,7 @@ public class ImageCatalogCreateWithoutNameLoggingAction implements Action<ImageC
     public ImageCatalogTestDto action(TestContext testContext, ImageCatalogTestDto testDto, CloudbreakClient client) throws Exception {
         Log.whenJson(LOGGER, format(" Image catalog post request:%n"), testDto.getRequest());
         testDto.setResponse(
-                client.getDefaultClient()
+                client.getDefaultClient(testContext)
                         .imageCatalogV4Endpoint()
                         .create(client.getWorkspaceId(), testDto.getRequest()));
         Log.whenJson(LOGGER, format(" Image catalog created  successfully:%n"), testDto.getResponse());

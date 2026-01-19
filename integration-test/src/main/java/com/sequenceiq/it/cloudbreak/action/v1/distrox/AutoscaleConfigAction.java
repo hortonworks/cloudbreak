@@ -17,7 +17,7 @@ public class AutoscaleConfigAction implements Action<AutoScaleConfigDto, Perisco
     @Override
     public AutoScaleConfigDto action(TestContext testContext, AutoScaleConfigDto testDto, PeriscopeClient client) throws Exception {
         Log.whenJson(LOGGER, " DistroXAutoscaleClusterRequest : ", testDto.getRequest());
-        DistroXAutoscaleClusterResponse distroXAutoscaleClusterResponse = client.getDefaultClient()
+        DistroXAutoscaleClusterResponse distroXAutoscaleClusterResponse = client.getDefaultClient(testContext)
                 .withCrn(testContext.getActingUserCrn().toString()).distroXAutoScaleClusterV1Endpoint()
                 .updateAutoscaleConfigByClusterName(testDto.getName(), testDto.getRequest());
         Log.whenJson(LOGGER, " DistroXAutoscaleClusterResponse: ", distroXAutoscaleClusterResponse);

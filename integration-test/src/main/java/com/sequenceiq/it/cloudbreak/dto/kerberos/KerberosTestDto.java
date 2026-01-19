@@ -16,7 +16,7 @@ public class KerberosTestDto extends AbstractFreeIpaTestDto<CreateKerberosConfig
 
     @Override
     public void deleteForCleanup() {
-        getClientForCleanup().getDefaultClient().getKerberosConfigV1Endpoint().delete(getResponse().getEnvironmentCrn());
+        getClientForCleanup().getDefaultClient(getTestContext()).getKerberosConfigV1Endpoint().delete(getResponse().getEnvironmentCrn());
     }
 
     @Override

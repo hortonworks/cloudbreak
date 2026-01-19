@@ -19,7 +19,7 @@ public class FreeIpaUserSyncSuccess implements Assertion<FreeIpaUserSyncTestDto,
     @Override
     public FreeIpaUserSyncTestDto doAssertion(TestContext testContext, FreeIpaUserSyncTestDto freeIpaUserSyncTestDto, FreeIpaClient freeIpaClient)
             throws Exception {
-        SyncOperationStatus syncOperationStatus = freeIpaClient.getDefaultClient()
+        SyncOperationStatus syncOperationStatus = freeIpaClient.getDefaultClient(testContext)
                 .getUserV1Endpoint()
                 .getLastSyncOperationStatus(testContext.given(EnvironmentTestDto.class).getCrn());
         if (syncOperationStatus.getFailure() != null && !syncOperationStatus.getFailure().isEmpty()) {

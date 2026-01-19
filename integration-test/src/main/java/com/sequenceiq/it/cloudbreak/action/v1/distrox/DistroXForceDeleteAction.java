@@ -17,11 +17,11 @@ public class DistroXForceDeleteAction implements Action<DistroXTestDto, Cloudbre
 
     @Override
     public DistroXTestDto action(TestContext testContext, DistroXTestDto testDto, CloudbreakClient client) throws Exception {
-        client.getDefaultClient()
+        client.getDefaultClient(testContext)
                 .distroXV1Endpoint()
                 .deleteByName(testDto.getName(), true);
         testDto.setResponse(
-                client.getDefaultClient()
+                client.getDefaultClient(testContext)
                         .distroXV1Endpoint()
                         .getByName(testDto.getName(), new HashSet<>()));
         Log.when(LOGGER, " Stack deletion was successful.");

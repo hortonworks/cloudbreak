@@ -11,6 +11,7 @@ import java.util.Set;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
+import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.microservice.FreeIpaClient;
 import com.sequenceiq.it.cloudbreak.util.wait.service.WaitObject;
 
@@ -28,20 +29,24 @@ public class FreeIpaWaitObject implements WaitObject {
 
     private DescribeFreeIpaResponse freeIpa;
 
-    public FreeIpaWaitObject(FreeIpaClient freeIpaClient, String name, String environmentCrn, Status desiredStatus, Set<Status> ignoredFailedStatuses) {
+    private TestContext testContext;
+
+    public FreeIpaWaitObject(FreeIpaClient freeIpaClient, String name, String environmentCrn, Status desiredStatus, Set<Status> ignoredFailedStatuses,
+            TestContext testContext) {
         this.client = freeIpaClient;
         this.environmentCrn = environmentCrn;
         this.desiredStatus = desiredStatus;
         this.ignoredFailedStatuses = ignoredFailedStatuses;
         this.name = name;
+        this.testContext = testContext;
     }
 
-    protected FreeIpaWaitObject(FreeIpaClient freeIpaClient, String name, String environmentCrn, Status desiredStatus) {
-        this(freeIpaClient, name, environmentCrn, desiredStatus, Set.of());
+    protected FreeIpaWaitObject(FreeIpaClient freeIpaClient, String name, String environmentCrn, Status desiredStatus, TestContext testContext) {
+        this(freeIpaClient, name, environmentCrn, desiredStatus, Set.of(), testContext);
     }
 
     public FreeIpaV1Endpoint getEndpoint() {
-        return client.getDefaultClient().getFreeIpaV1Endpoint();
+        return client.getDefaultClient(testContext).getFreeIpaV1Endpoint();
     }
 
     protected FreeIpaClient getClient() {

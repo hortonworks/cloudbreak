@@ -27,13 +27,14 @@ public class SdxResizeAction implements Action<SdxInternalTestDto, SdxClient> {
     public SdxInternalTestDto action(TestContext testContext, SdxInternalTestDto testDto, SdxClient client) throws Exception {
         SdxClusterResizeRequest clusterResizeRequest = testDto.getSdxResizeRequest();
 
-        Log.when(LOGGER, " SDX endpoint: %s" + client.getDefaultClient().sdxEndpoint() + ", SDX's environment: " + testDto.getRequest().getEnvironment());
+        Log.when(LOGGER, " SDX endpoint: %s" + client.getDefaultClient(testContext).sdxEndpoint() + ", SDX's environment: "
+                + testDto.getRequest().getEnvironment());
         Log.whenJson(LOGGER, " SDX resize request: ", clusterResizeRequest);
-        SdxClusterResponse sdxClusterResponse = client.getDefaultClient()
+        SdxClusterResponse sdxClusterResponse = client.getDefaultClient(testContext)
                 .sdxEndpoint()
                 .resize(testDto.getName(), clusterResizeRequest);
         testDto.setFlow("SDX resize", sdxClusterResponse.getFlowIdentifier());
-        SdxClusterDetailResponse detailedResponse = client.getDefaultClient()
+        SdxClusterDetailResponse detailedResponse = client.getDefaultClient(testContext)
                 .sdxEndpoint()
                 .getDetail(testDto.getName(), Collections.emptySet());
         testDto.setResponse(detailedResponse);

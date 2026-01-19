@@ -53,7 +53,8 @@ public class FreeIpaScalingTests extends AbstractE2ETest {
         testContext
                 .given(freeIpa, FreeIpaTestDto.class)
                 .then((tc, testDto, client) -> {
-                    Set<InstanceMetaDataResponse> instanceMetaDataResponses = getInstanceMetaDataResponses(testDto.getRequest().getEnvironmentCrn(), client);
+                    Set<InstanceMetaDataResponse> instanceMetaDataResponses = getInstanceMetaDataResponses(testDto.getRequest().getEnvironmentCrn(), client,
+                            tc);
                     primaryGatewayInstanceId.add(getPrimaryGatewayId(instanceMetaDataResponses));
                     return testDto;
                 })
@@ -63,7 +64,8 @@ public class FreeIpaScalingTests extends AbstractE2ETest {
                 .when(freeIpaTestClient.upscale(), key(freeIpa))
                 .await(FREEIPA_AVAILABLE)
                 .then((tc, testDto, client) -> {
-                    Set<InstanceMetaDataResponse> instanceMetaDataResponses = getInstanceMetaDataResponses(testDto.getRequest().getEnvironmentCrn(), client);
+                    Set<InstanceMetaDataResponse> instanceMetaDataResponses = getInstanceMetaDataResponses(testDto.getRequest().getEnvironmentCrn(), client,
+                            tc);
                     assertInstanceCount(testDto.getRequest().getTargetAvailabilityType(), instanceMetaDataResponses);
                     assertPrimaryGatewayHasNotChanged(primaryGatewayInstanceId, instanceMetaDataResponses);
                     return testDto;
@@ -73,8 +75,10 @@ public class FreeIpaScalingTests extends AbstractE2ETest {
                     .withAvailabilityType(AvailabilityType.TWO_NODE_BASED)
                 .when(freeIpaTestClient.downscale())
                 .await(FREEIPA_AVAILABLE)
+                .useAlternativeServiceEndpointIfConfigured()
                 .then((tc, testDto, client) -> {
-                    Set<InstanceMetaDataResponse> instanceMetaDataResponses = getInstanceMetaDataResponses(testDto.getRequest().getEnvironmentCrn(), client);
+                    Set<InstanceMetaDataResponse> instanceMetaDataResponses = getInstanceMetaDataResponses(testDto.getRequest().getEnvironmentCrn(), client,
+                            tc);
                     assertInstanceCount(testDto.getRequest().getTargetAvailabilityType(), instanceMetaDataResponses);
                     assertPrimaryGatewayHasNotChanged(primaryGatewayInstanceId, instanceMetaDataResponses);
                     return testDto;
@@ -85,7 +89,8 @@ public class FreeIpaScalingTests extends AbstractE2ETest {
                 .when(freeIpaTestClient.upscale(), key(freeIpa))
                 .await(FREEIPA_AVAILABLE)
                 .then((tc, testDto, client) -> {
-                    Set<InstanceMetaDataResponse> instanceMetaDataResponses = getInstanceMetaDataResponses(testDto.getRequest().getEnvironmentCrn(), client);
+                    Set<InstanceMetaDataResponse> instanceMetaDataResponses = getInstanceMetaDataResponses(testDto.getRequest().getEnvironmentCrn(), client,
+                            tc);
                     assertInstanceCount(testDto.getRequest().getTargetAvailabilityType(), instanceMetaDataResponses);
                     assertPrimaryGatewayHasNotChanged(primaryGatewayInstanceId, instanceMetaDataResponses);
                     return testDto;
@@ -104,8 +109,8 @@ public class FreeIpaScalingTests extends AbstractE2ETest {
         return primaryGatewayOptional.get().getInstanceId();
     }
 
-    private Set<InstanceMetaDataResponse> getInstanceMetaDataResponses(String environmentCrn, FreeIpaClient client) {
-        DescribeFreeIpaResponse describeFreeIpaResponse = client.getDefaultClient().getFreeIpaV1Endpoint().describe(environmentCrn);
+    private Set<InstanceMetaDataResponse> getInstanceMetaDataResponses(String environmentCrn, FreeIpaClient client, TestContext testContext) {
+        DescribeFreeIpaResponse describeFreeIpaResponse = client.getDefaultClient(testContext).getFreeIpaV1Endpoint().describe(environmentCrn);
         Set<InstanceMetaDataResponse> instanceMetaDataResponses = describeFreeIpaResponse.getInstanceGroups().stream()
                 .map(InstanceGroupResponse::getMetaData)
                 .flatMap(Set::stream)

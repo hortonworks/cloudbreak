@@ -23,7 +23,7 @@ public class CredentialTestAssertion {
     public Assertion<CredentialTestDto, EnvironmentClient> checkStructuredEvents() {
         return (testContext, entity, client) -> {
             List<CDPStructuredEvent> auditEvents = getAuditEvents(
-                    client.getDefaultClient().structuredEventsV1Endpoint(),
+                    client.getDefaultClient(testContext).structuredEventsV1Endpoint(),
                     entity.getCrn());
             eventAssertionCommon.noRestEventsAreAllowedInDB(auditEvents);
             return entity;

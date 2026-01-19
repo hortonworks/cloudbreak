@@ -493,7 +493,7 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
 
     @Override
     public List<SdxClusterResponse> getAll(SdxClient client) {
-        SdxEndpoint sdxEndpoint = client.getDefaultClient().sdxEndpoint();
+        SdxEndpoint sdxEndpoint = client.getDefaultClient(getTestContext()).sdxEndpoint();
         return sdxEndpoint.list(null, false).stream()
                 .filter(s -> s.getName() != null)
                 .map(s -> {
@@ -512,7 +512,7 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
     public void delete(TestContext testContext, SdxClusterResponse entity, SdxClient client) {
         String sdxName = entity.getName();
         try {
-            client.getDefaultClient().sdxEndpoint().delete(getName(), false);
+            client.getDefaultClient(getTestContext()).sdxEndpoint().delete(getName(), false);
             testContext.await(this, Map.of("status", DELETED), key("wait-purge-sdx-" + getName()));
         } catch (Exception e) {
             LOGGER.warn("Something went wrong on {} purge. {}", sdxName, ResponseUtil.getErrorMessage(e), e);
@@ -638,11 +638,12 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
                 getTestContext().getMicroserviceClient(CloudbreakClient.class),
                 CloudbreakEventService.DATALAKE_RESOURCE_TYPE,
                 null,
-                resourceCrn);
+                resourceCrn,
+                getTestContext());
         List<CDPStructuredEvent> structuredEvents = List.of();
         if (getResponse() != null && resourceCrn != null) {
             CDPStructuredEventV1Endpoint cdpStructuredEventV1Endpoint =
-                    getTestContext().getMicroserviceClient(SdxClient.class).getDefaultClient().structuredEventsV1Endpoint();
+                    getTestContext().getMicroserviceClient(SdxClient.class).getDefaultClient(getTestContext()).structuredEventsV1Endpoint();
             structuredEvents = StructuredEventUtil.getAuditEvents(cdpStructuredEventV1Endpoint, resourceCrn);
         }
         List<Searchable> listOfSearchables = List.of(this);
@@ -669,7 +670,7 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
     @Override
     public void deleteForCleanup() {
         try {
-            setFlow("SDX Internal deletion", getClientForCleanup().getDefaultClient().sdxEndpoint().deleteByCrn(getCrn(), true));
+            setFlow("SDX Internal deletion", getClientForCleanup().getDefaultClient(getTestContext()).sdxEndpoint().deleteByCrn(getCrn(), true));
             awaitForFlow();
         } catch (NotFoundException nfe) {
             LOGGER.info("SDX Internal resource not found, thus cleanup not needed.");
@@ -724,7 +725,7 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
     }
 
     private void refreshResponse(TestContext testContext, SdxClient client) {
-        setResponse(client.getDefaultClient()
+        setResponse(client.getDefaultClient(getTestContext())
                 .sdxEndpoint()
                 .getDetail(getName(), new HashSet<>())
         );

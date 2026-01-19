@@ -11,7 +11,7 @@ public class EnvironmentForceDeleteAction implements Action<EnvironmentTestDto, 
 
     @Override
     public EnvironmentTestDto action(TestContext testContext, EnvironmentTestDto testDto, EnvironmentClient environmentClient) throws Exception {
-        SimpleEnvironmentResponse delete = environmentClient.getDefaultClient()
+        SimpleEnvironmentResponse delete = environmentClient.getDefaultClient(testContext)
                 .environmentV1Endpoint()
                 .deleteByCrn(testDto.getResponse().getCrn(), true, true);
         testDto.setResponseSimpleEnv(delete);

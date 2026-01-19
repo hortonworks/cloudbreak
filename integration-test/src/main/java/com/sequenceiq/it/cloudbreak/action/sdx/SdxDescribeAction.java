@@ -21,7 +21,7 @@ public class SdxDescribeAction implements Action<SdxTestDto, SdxClient> {
     public SdxTestDto action(TestContext testContext, SdxTestDto testDto, SdxClient client) throws Exception {
         Log.when(LOGGER, format(" SDX environment Crn: %s ", testDto.getRequest().getEnvironment()));
         Log.whenJson(LOGGER, " SDX get details request: ", testDto.getRequest());
-        testDto.setResponse(client.getDefaultClient()
+        testDto.setResponse(client.getDefaultClient(testContext)
                 .sdxEndpoint()
                 .getDetail(testDto.getName(), Collections.emptySet()));
         Log.whenJson(LOGGER, " SDX get details response: ", testDto.getResponse());

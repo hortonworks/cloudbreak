@@ -125,7 +125,7 @@ public class MockSdxResizeTests extends AbstractMockTest {
                 .thenReturn("This is a bad request error", 400, 1)
                 .awaitForFlowFail()
                 .then((tc, dto, client) -> {
-                    SdxResizeOperationResponse resizeStatus = client.getDefaultClient().sdxRecoveryEndpoint()
+                    SdxResizeOperationResponse resizeStatus = client.getDefaultClient(tc).sdxRecoveryEndpoint()
                             .getResizeStatus(dto.getResponse().getEnvironmentCrn());
                     resizeTestValidator.validateResizeStatusFailed(resizeStatus, "New Data Lake creation failed.", true, true);
                     return dto;
@@ -151,7 +151,7 @@ public class MockSdxResizeTests extends AbstractMockTest {
                 .thenReturn("This is a bad request error", 400, 1)
                 .awaitForFlowFail()
                 .then((tc, dto, client) -> {
-                    SdxResizeOperationResponse resizeStatus = client.getDefaultClient().sdxRecoveryEndpoint()
+                    SdxResizeOperationResponse resizeStatus = client.getDefaultClient(tc).sdxRecoveryEndpoint()
                             .getResizeStatus(dto.getResponse().getEnvironmentCrn());
                     resizeTestValidator.validateResizeStatusFailed(resizeStatus, "New Data Lake creation failed.", true, true);
                     return dto;

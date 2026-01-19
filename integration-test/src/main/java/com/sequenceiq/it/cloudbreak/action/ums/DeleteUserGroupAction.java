@@ -27,7 +27,7 @@ public class DeleteUserGroupAction implements Action<UmsGroupTestDto, UmsClient>
         testDto.withName(groupName);
         Log.when(LOGGER, format(" Deleting user group '%s' at account '%s'. ", groupName, accountId));
         Log.whenJson(LOGGER, format(" Delete user group request:%n "), testDto.getRequest());
-        client.getDefaultClient().deleteGroup(accountId, groupName);
+        client.getDefaultClient(testContext).deleteGroup(accountId, groupName);
         LOGGER.info(format(" User group '%s' has been deleted at account '%s'. ", groupName, accountId));
         Log.when(LOGGER, format(" User group '%s' has been deleted at account '%s'. ", groupName, accountId));
         return testDto;

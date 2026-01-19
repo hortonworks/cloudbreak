@@ -17,7 +17,7 @@ public class CredentialDeleteAction implements Action<CredentialTestDto, Environ
     public CredentialTestDto action(TestContext testContext, CredentialTestDto testDto, EnvironmentClient environmentClient) throws Exception {
         Log.when(LOGGER, " Credential delete request, name:" + testDto.getName());
         testDto.setResponse(
-                environmentClient.getDefaultClient()
+                environmentClient.getDefaultClient(testContext)
                         .credentialV1Endpoint()
                         .deleteByName(testDto.getName()));
         Log.whenJson(LOGGER, " Credential deleted successfully:\n", testDto.getResponse());

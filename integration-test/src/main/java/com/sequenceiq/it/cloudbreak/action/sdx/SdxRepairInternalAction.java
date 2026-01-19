@@ -29,11 +29,11 @@ public class SdxRepairInternalAction implements Action<SdxInternalTestDto, SdxCl
     public SdxInternalTestDto action(TestContext testContext, SdxInternalTestDto testDto, SdxClient client) throws Exception {
         Log.when(LOGGER, format(" Starting repair on SDX Internal: %s ", testDto.getName()));
         Log.whenJson(LOGGER, " SDX Internal repair request: ", testDto.getSdxRepairRequest(hostGroups));
-        FlowIdentifier flowIdentifier = client.getDefaultClient()
+        FlowIdentifier flowIdentifier = client.getDefaultClient(testContext)
                 .sdxEndpoint()
                 .repairCluster(testDto.getName(), testDto.getSdxRepairRequest(hostGroups));
         testDto.setFlow("SDX Internal repair", flowIdentifier);
-        SdxClusterDetailResponse detailedResponse = client.getDefaultClient()
+        SdxClusterDetailResponse detailedResponse = client.getDefaultClient(testContext)
                 .sdxEndpoint()
                 .getDetail(testDto.getName(), Collections.emptySet());
         testDto.setResponse(detailedResponse);

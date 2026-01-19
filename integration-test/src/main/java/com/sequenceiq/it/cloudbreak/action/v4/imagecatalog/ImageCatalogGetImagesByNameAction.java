@@ -44,7 +44,7 @@ public class ImageCatalogGetImagesByNameAction implements Action<ImageCatalogTes
         Log.when(LOGGER, "Get Imagecatalog by name: " + testDto.getRequest().getName());
         try {
             ImageCatalogV4Endpoint imageCatalogV4Endpoint = cloudbreakClient
-                    .getDefaultClient()
+                    .getDefaultClient(testContext)
                     .imageCatalogV4Endpoint();
 
             testDto.setResponseByProvider(getImagesV4Response(testDto, cloudbreakClient, imageCatalogV4Endpoint));

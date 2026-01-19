@@ -38,7 +38,7 @@ public class FreeIpaUserSyncWaitObject extends FreeIpaWaitObject {
 
     public FreeIpaUserSyncWaitObject(FreeIpaClient freeIpaClient, String freeipaName, String environmentCrn,
             UserSyncState desiredUserSyncState, Set<UserSyncState> ignoredFailedStatuses, TestContext testContext) {
-        super(freeIpaClient, freeipaName, environmentCrn, Status.AVAILABLE);
+        super(freeIpaClient, freeipaName, environmentCrn, Status.AVAILABLE, testContext);
         this.desiredUserSyncState = desiredUserSyncState;
         this.ignoredFailedStatuses = ignoredFailedStatuses;
         this.testContext = testContext;
@@ -48,12 +48,12 @@ public class FreeIpaUserSyncWaitObject extends FreeIpaWaitObject {
     public void fetchData() {
         super.fetchData();
         String environmentCrn = getEnvironmentCrn();
-        environmentUserSyncState = getClient().getDefaultClient().getUserV1Endpoint().getUserSyncState(environmentCrn);
+        environmentUserSyncState = getClient().getDefaultClient(testContext).getUserV1Endpoint().getUserSyncState(environmentCrn);
         if (environmentUserSyncState.getState() == UserSyncState.STALE) {
             try {
                 LOGGER.info("FreeIPA user sync state is STALE, try to fetch from public env api");
                 EnvironmentPublicApiClient environmentPublicApiClient = testContext.getMicroserviceClient(EnvironmentPublicApiClient.class);
-                LastSyncStatusResponse lastSyncStatusResponse = environmentPublicApiClient.getDefaultClient()
+                LastSyncStatusResponse lastSyncStatusResponse = environmentPublicApiClient.getDefaultClient(testContext)
                         .lastSyncStatus(new LastSyncStatusRequest().environment(environmentCrn));
                 if (Optional.ofNullable(lastSyncStatusResponse).map(LastSyncStatusResponse::getStatus).orElse(SyncStatus.NEVER_RUN) != SyncStatus.NEVER_RUN) {
                     environmentUserSyncState = mapEnvironmentUserSyncState(lastSyncStatusResponse);

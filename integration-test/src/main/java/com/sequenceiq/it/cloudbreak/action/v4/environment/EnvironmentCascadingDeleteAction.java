@@ -17,7 +17,7 @@ public class EnvironmentCascadingDeleteAction implements Action<EnvironmentTestD
     @Override
     public EnvironmentTestDto action(TestContext testContext, EnvironmentTestDto testDto, EnvironmentClient environmentClient) throws Exception {
         Log.when(LOGGER, "Environment cascading delete request, crn: " +  testDto.getResponse().getCrn());
-        SimpleEnvironmentResponse delete = environmentClient.getDefaultClient()
+        SimpleEnvironmentResponse delete = environmentClient.getDefaultClient(testContext)
                 .environmentV1Endpoint()
                 .deleteByCrn(testDto.getResponse().getCrn(), true, false);
         testDto.setResponseSimpleEnv(delete);

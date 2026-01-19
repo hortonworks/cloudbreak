@@ -20,7 +20,7 @@ public class FreeipaRotateSaltPasswordAction extends AbstractFreeIpaAction<FreeI
     public FreeIpaTestDto freeIpaAction(TestContext testContext, FreeIpaTestDto testDto, FreeIpaClient client) throws Exception {
         String environmentCrn = testContext.given(EnvironmentTestDto.class).getCrn();
         Log.whenJson(LOGGER, format(" FreeIPA rotate salt password request for environment %n"), environmentCrn);
-        FlowIdentifier flowIdentifier = client.getDefaultClient().getFreeIpaV1Endpoint().rotateSaltPassword(environmentCrn);
+        FlowIdentifier flowIdentifier = client.getDefaultClient(testContext).getFreeIpaV1Endpoint().rotateSaltPassword(environmentCrn);
         testDto.setFlow("FreeIPA rotate salt password",  flowIdentifier);
         Log.whenJson(LOGGER, format(" FreeIPA rotate salt password started: %n"), environmentCrn);
         return testDto;

@@ -23,7 +23,7 @@ public class FreeIpaDownscaleAction extends AbstractFreeIpaAction<FreeIpaDownsca
         String environmentCrn = testContext.given(EnvironmentTestDto.class).getCrn();
         downscaleRequest.setEnvironmentCrn(environmentCrn);
         downscaleRequest.setTargetAvailabilityType(testDto.getRequest().getTargetAvailabilityType());
-        testDto.setResponse(client.getDefaultClient()
+        testDto.setResponse(client.getDefaultClient(testContext)
                 .getFreeIpaV1Endpoint()
                 .downscale(downscaleRequest));
         testDto.setFlow("FreeIPA downscale",  testDto.getResponse().getFlowIdentifier());

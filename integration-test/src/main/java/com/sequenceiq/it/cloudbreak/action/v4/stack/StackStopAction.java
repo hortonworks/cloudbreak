@@ -16,7 +16,7 @@ public class StackStopAction implements Action<StackTestDto, CloudbreakClient> {
     @Override
     public StackTestDto action(TestContext testContext, StackTestDto testDto, CloudbreakClient client) throws Exception {
         Log.when(LOGGER, String.format(" Stack stop request: %s", testDto.getRequest().getName()));
-        client.getDefaultClient().stackV4Endpoint().putStop(client.getWorkspaceId(), testDto.getName(),
+        client.getDefaultClient(testContext).stackV4Endpoint().putStop(client.getWorkspaceId(), testDto.getName(),
                 testContext.getActingUserCrn().getAccountId());
         Log.when(LOGGER, " Stack was stop requested successfully");
 

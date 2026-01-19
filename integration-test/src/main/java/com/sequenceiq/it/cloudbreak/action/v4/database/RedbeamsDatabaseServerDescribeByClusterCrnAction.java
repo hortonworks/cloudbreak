@@ -27,7 +27,7 @@ public class RedbeamsDatabaseServerDescribeByClusterCrnAction implements Action<
     public RedbeamsDatabaseServerTestDto action(TestContext testContext, RedbeamsDatabaseServerTestDto testDto, RedbeamsClient client) throws Exception {
         UpgradeDatabaseServerV4Request upgradeDatabaseServerV4Request = new UpgradeDatabaseServerV4Request();
         upgradeDatabaseServerV4Request.setUpgradeTargetMajorVersion(UpgradeTargetMajorVersion.VERSION_11);
-        testDto.setResponse(client.getDefaultClient()
+        testDto.setResponse(client.getDefaultClient(testContext)
                 .databaseServerV4Endpoint()
                 .getByClusterCrn(environmentCrn, clusterCrn));
         return testDto;

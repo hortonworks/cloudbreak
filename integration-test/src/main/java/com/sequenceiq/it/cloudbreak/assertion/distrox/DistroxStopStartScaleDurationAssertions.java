@@ -51,7 +51,7 @@ public class DistroxStopStartScaleDurationAssertions implements Assertion<Distro
         String startMessage = scalingUp ? "Scaling up (via instance start) for host group" : "Scaling down (via instance stop) for host group";
         String stopMessage = scalingUp ? "Scaled up (via instance start) host group" : "Scaled down (via instance stop) host group";
 
-        StructuredEventContainer structuredEventContainer = client.getDefaultClient()
+        StructuredEventContainer structuredEventContainer = client.getDefaultClient(testContext)
                 .eventV4Endpoint()
                 .structured(testDto.getName(), testContext.getActingUserCrn().getAccountId());
         List<StructuredNotificationEvent> structuredNotificationEvents = structuredEventContainer.getNotification();

@@ -88,7 +88,7 @@ public class RedbeamsDatabaseTestDto extends DeletableRedbeamsTestDto<DatabaseV4
 
     @Override
     public List<DatabaseV4Response> getAll(RedbeamsClient client) {
-        DatabaseV4Endpoint databaseV4Endpoint = client.getDefaultClient().databaseV4Endpoint();
+        DatabaseV4Endpoint databaseV4Endpoint = client.getDefaultClient(getTestContext()).databaseV4Endpoint();
         return databaseV4Endpoint.list(getTestContext().given(EnvironmentTestDto.class).getCrn()).getResponses().stream()
                 .filter(s -> s.getName() != null)
                 .collect(Collectors.toList());
@@ -102,7 +102,7 @@ public class RedbeamsDatabaseTestDto extends DeletableRedbeamsTestDto<DatabaseV4
     @Override
     public void delete(TestContext testContext, DatabaseV4Response entity, RedbeamsClient client) {
         try {
-            client.getDefaultClient().databaseV4Endpoint().deleteByName(testContext.given(EnvironmentTestDto.class).getCrn(), entity.getName());
+            client.getDefaultClient(getTestContext()).databaseV4Endpoint().deleteByName(testContext.given(EnvironmentTestDto.class).getCrn(), entity.getName());
         } catch (Exception e) {
             LOGGER.warn("Something went wrong on {} purge. {}", entity.getName(), ResponseUtil.getErrorMessage(e), e);
         }

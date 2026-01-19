@@ -19,7 +19,7 @@ public class StackMatrixAction implements Action<StackMatrixTestDto, CloudbreakC
     @Override
     public StackMatrixTestDto action(TestContext testContext, StackMatrixTestDto testDto, CloudbreakClient cloudbreakClient) throws Exception {
         ImageCatalogTestDto imageCatalogTestDto = testContext.get(ImageCatalogTestDto.class);
-        testDto.setResponse(cloudbreakClient.getDefaultClient().utilV4Endpoint().getStackMatrix(
+        testDto.setResponse(cloudbreakClient.getDefaultClient(testContext).utilV4Endpoint().getStackMatrix(
                 imageCatalogTestDto != null ? imageCatalogTestDto.getName() : null,
                 testDto.getCloudPlatform().name(),
                 testDto.isGovCloud(),

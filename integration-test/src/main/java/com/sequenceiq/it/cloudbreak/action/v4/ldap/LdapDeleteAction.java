@@ -17,12 +17,12 @@ public class LdapDeleteAction implements Action<LdapTestDto, FreeIpaClient> {
     @Override
     public LdapTestDto action(TestContext testContext, LdapTestDto testDto, FreeIpaClient client) throws Exception {
         Log.when(LOGGER, " LDAP config delete request: " + testDto.getName());
-        client.getDefaultClient()
+        client.getDefaultClient(testContext)
             .getLdapConfigV1Endpoint()
             .delete(testDto.getName());
         try {
             testDto.setResponse(
-                    client.getDefaultClient()
+                    client.getDefaultClient(testContext)
                             .getLdapConfigV1Endpoint()
                             .describe(testDto.getName()));
         } catch (NotFoundException e) {

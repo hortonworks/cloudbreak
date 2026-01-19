@@ -15,7 +15,7 @@ public class RenewDistroXCertificateAction implements Action<RenewDistroXCertifi
     @Override
     public RenewDistroXCertificateTestDto action(TestContext testContext, RenewDistroXCertificateTestDto renewCertificateTestDto,
             CloudbreakClient cloudbreakClient) throws Exception {
-        cloudbreakClient.getDefaultClient().distroXV1Endpoint().renewCertificate(renewCertificateTestDto.getStackCrn());
+        cloudbreakClient.getDefaultClient(testContext).distroXV1Endpoint().renewCertificate(renewCertificateTestDto.getStackCrn());
         return renewCertificateTestDto;
     }
 }

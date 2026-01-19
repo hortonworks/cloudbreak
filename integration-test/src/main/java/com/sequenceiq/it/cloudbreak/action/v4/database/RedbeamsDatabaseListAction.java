@@ -19,7 +19,7 @@ public class RedbeamsDatabaseListAction implements Action<RedbeamsDatabaseTestDt
 
     @Override
     public RedbeamsDatabaseTestDto action(TestContext testContext, RedbeamsDatabaseTestDto testDto, RedbeamsClient client) throws Exception {
-        Collection<DatabaseV4Response> responses = client.getDefaultClient()
+        Collection<DatabaseV4Response> responses = client.getDefaultClient(testContext)
                 .databaseV4Endpoint()
                 .list(testDto.getRequest().getEnvironmentCrn())
                 .getResponses();

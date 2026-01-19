@@ -39,7 +39,7 @@ public class SdxRotateSecretAction implements Action<SdxInternalTestDto, SdxClie
         request.setSecrets(secretTypes.stream().map(Enum::name).collect(Collectors.toList()));
         request.setCrn(testDto.getCrn());
         request.setAdditionalProperties(additionalProperties);
-        testDto.setFlow("secret rotation", client.getDefaultClient().sdxRotationEndpoint().rotateSecrets(request));
+        testDto.setFlow("secret rotation", client.getDefaultClient(testContext).sdxRotationEndpoint().rotateSecrets(request));
         return testDto;
     }
 }

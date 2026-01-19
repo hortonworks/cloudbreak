@@ -40,7 +40,8 @@ public class HybridCloudAssertions {
     public Assertion<SdxInternalTestDto, SdxClient> validateDatalakeSshAuthentication() {
         return (testContext, testDto, client) -> {
             String environmentCrn = testDto.getResponse().getEnvironmentCrn();
-            com.sequenceiq.freeipa.api.client.FreeIpaClient freeIpaClient = testContext.getMicroserviceClient(FreeIpaClient.class).getDefaultClient();
+            com.sequenceiq.freeipa.api.client.FreeIpaClient freeIpaClient = testContext.getMicroserviceClient(FreeIpaClient.class)
+                    .getDefaultClient(testContext);
             checkUserSyncState(environmentCrn, freeIpaClient);
 
             for (InstanceGroupV4Response ig : testDto.getResponse().getStackV4Response().getInstanceGroups()) {

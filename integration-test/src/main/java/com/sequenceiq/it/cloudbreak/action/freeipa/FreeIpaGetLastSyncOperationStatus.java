@@ -45,7 +45,7 @@ public class FreeIpaGetLastSyncOperationStatus extends AbstractFreeIpaAction<Fre
 
     private SyncOperationStatus getSyncOperationStatus(TestContext testContext, FreeIpaUserSyncTestDto testDto, FreeIpaClient client) {
         try {
-            return client.getDefaultClient()
+            return client.getDefaultClient(testContext)
                     .getUserV1Endpoint()
                     .getLastSyncOperationStatus(testDto.getEnvironmentCrn());
         } catch (jakarta.ws.rs.NotFoundException e) {

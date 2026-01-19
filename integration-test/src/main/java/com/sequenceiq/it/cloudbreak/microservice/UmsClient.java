@@ -10,6 +10,7 @@ import com.sequenceiq.cloudbreak.auth.altus.config.UmsChannelConfig;
 import com.sequenceiq.cloudbreak.auth.altus.config.UmsClientConfig;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.flow.api.FlowPublicEndpoint;
+import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.ums.UmsGroupTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ums.UmsTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
@@ -33,7 +34,7 @@ public class UmsClient<E extends Enum<E>, W extends WaitObject> extends Microser
     }
 
     @Override
-    public FlowPublicEndpoint flowPublicEndpoint() {
+    public FlowPublicEndpoint flowPublicEndpoint(TestContext testContext) {
         throw new TestFailException("Flow does not support by ums client");
     }
 
@@ -43,7 +44,7 @@ public class UmsClient<E extends Enum<E>, W extends WaitObject> extends Microser
     }
 
     @Override
-    public GrpcUmsClient getDefaultClient() {
+    public GrpcUmsClient getDefaultClient(TestContext testContext) {
         return umsClient;
     }
 

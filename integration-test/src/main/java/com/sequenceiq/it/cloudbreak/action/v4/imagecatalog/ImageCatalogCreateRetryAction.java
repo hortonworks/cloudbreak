@@ -26,7 +26,7 @@ public class ImageCatalogCreateRetryAction implements Action<ImageCatalogTestDto
         do {
             try {
                 response =
-                        client.getDefaultClient()
+                        client.getDefaultClient(testContext)
                                 .imageCatalogV4Endpoint()
                                 .create(client.getWorkspaceId(), testDto.getRequest());
             } catch (Exception e) {

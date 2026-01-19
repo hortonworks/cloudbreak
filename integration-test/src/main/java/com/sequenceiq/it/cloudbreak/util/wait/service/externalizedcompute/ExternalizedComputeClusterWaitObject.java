@@ -8,6 +8,7 @@ import java.util.function.Predicate;
 import com.sequenceiq.externalizedcompute.api.endpoint.ExternalizedComputeClusterEndpoint;
 import com.sequenceiq.externalizedcompute.api.model.ExternalizedComputeClusterApiStatus;
 import com.sequenceiq.externalizedcompute.api.model.ExternalizedComputeClusterResponse;
+import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.microservice.ExternalizedComputeClusterClient;
 import com.sequenceiq.it.cloudbreak.util.wait.service.WaitObject;
 
@@ -23,16 +24,19 @@ public class ExternalizedComputeClusterWaitObject implements WaitObject {
 
     private ExternalizedComputeClusterResponse computeCluster;
 
+    private TestContext testContext;
+
     public ExternalizedComputeClusterWaitObject(ExternalizedComputeClusterClient externalizedComputeClusterClient, String environmentCrn, String name,
-            ExternalizedComputeClusterApiStatus desiredStatus) {
+            ExternalizedComputeClusterApiStatus desiredStatus, TestContext testContext) {
         this.externalizedComputeClusterClient = externalizedComputeClusterClient;
         this.environmentCrn = environmentCrn;
         this.name = name;
         this.desiredStatus = desiredStatus;
+        this.testContext = testContext;
     }
 
     public ExternalizedComputeClusterEndpoint getEndpoint() {
-        return externalizedComputeClusterClient.getDefaultClient().externalizedComputeClusterEndpoint();
+        return externalizedComputeClusterClient.getDefaultClient(testContext).externalizedComputeClusterEndpoint();
     }
 
     @Override

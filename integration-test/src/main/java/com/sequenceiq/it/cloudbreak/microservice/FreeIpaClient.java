@@ -1,5 +1,7 @@
 package com.sequenceiq.it.cloudbreak.microservice;
 
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -50,20 +52,34 @@ public class FreeIpaClient<E extends Enum<E>> extends MicroserviceClient<com.seq
 
     private FreeipaInternalCrnClient freeipaInternalCrnClient;
 
+    private com.sequenceiq.freeipa.api.client.FreeIpaClient alternativeFreeIpaClient;
+
+    private FreeipaInternalCrnClient alternativeFreeipaInternalCrnClient;
+
     public FreeIpaClient(CloudbreakUser cloudbreakUser, RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator,
-            String freeipaAddress, String freeipaInternalAddress) {
+            String freeipaAddress, String freeipaInternalAddress, String alternativeFreeipaAddress, String alternativeFreeipaInternalAddress) {
         setActing(cloudbreakUser);
-        freeIpaClient = new FreeIpaApiKeyClient(freeipaAddress,
-                new ConfigKey(false, true, true, TIMEOUT))
+        freeIpaClient = createFreeIpaClient(freeipaAddress, cloudbreakUser);
+        freeipaInternalCrnClient = createFreeipaInternalClient(freeipaInternalAddress, regionAwareInternalCrnGenerator);
+
+        if (isNotEmpty(alternativeFreeipaAddress) && isNotEmpty(alternativeFreeipaInternalAddress)) {
+            alternativeFreeIpaClient = createFreeIpaClient(alternativeFreeipaAddress, cloudbreakUser);
+            alternativeFreeipaInternalCrnClient = createFreeipaInternalClient(alternativeFreeipaInternalAddress, regionAwareInternalCrnGenerator);
+        }
+    }
+
+    private com.sequenceiq.freeipa.api.client.FreeIpaClient createFreeIpaClient(String address, CloudbreakUser cloudbreakUser) {
+        return new FreeIpaApiKeyClient(address, new ConfigKey(false, true, true, TIMEOUT))
                 .withKeys(cloudbreakUser.getAccessKey(), cloudbreakUser.getSecretKey());
-        freeipaInternalCrnClient = createFreeipaInternalClient(
-                freeipaInternalAddress,
-                regionAwareInternalCrnGenerator);
     }
 
     @Override
-    public FlowPublicEndpoint flowPublicEndpoint() {
-        return freeIpaClient.getFlowPublicEndpoint();
+    public FlowPublicEndpoint flowPublicEndpoint(TestContext testContext) {
+        if (testContext.shouldUseAlternativeEndpoints()) {
+            return alternativeFreeIpaClient.getFlowPublicEndpoint();
+        } else {
+            return freeIpaClient.getFlowPublicEndpoint();
+        }
     }
 
     @Override
@@ -80,17 +96,18 @@ public class FreeIpaClient<E extends Enum<E>> extends MicroserviceClient<com.seq
                         desiredUserSyncState, (Set<UserSyncState>) ignoredFailedStatuses, testContext);
             } else {
                 return new FreeIpaOperationWaitObject(this, freeIpaSyncTestDto.getOperationId(), freeIpaSyncTestDto.getName(),
-                        freeIpaSyncTestDto.getEnvironmentCrn(), (OperationState) desiredStatuses.get("status"), (Set<OperationState>) ignoredFailedStatuses);
+                        freeIpaSyncTestDto.getEnvironmentCrn(), (OperationState) desiredStatuses.get("status"), (Set<OperationState>) ignoredFailedStatuses,
+                        testContext);
             }
         } else if (entity instanceof FreeIpaOperationStatusTestDto) {
             FreeIpaOperationStatusTestDto testDto = (FreeIpaOperationStatusTestDto) entity;
             return new FreeIpaOperationWaitObject(this, testDto.getOperationId(), testDto.getName(),
                     testContext.get(EnvironmentTestDto.class).getResponse().getCrn(), (OperationState) desiredStatuses.get("status"),
-                    (Set<OperationState>) ignoredFailedStatuses);
+                    (Set<OperationState>) ignoredFailedStatuses, testContext);
         } else {
             EnvironmentAware environmentAware = (EnvironmentAware) entity;
             return new FreeIpaWaitObject(this, entity.getName(), environmentAware.getEnvironmentCrn(), (Status) desiredStatuses.get("status"),
-                    (Set<Status>) ignoredFailedStatuses);
+                    (Set<Status>) ignoredFailedStatuses, testContext);
         }
     }
 
@@ -109,11 +126,15 @@ public class FreeIpaClient<E extends Enum<E>> extends MicroserviceClient<com.seq
     }
 
     @Override
-    public com.sequenceiq.freeipa.api.client.FreeIpaClient getDefaultClient() {
-        return freeIpaClient;
+    public com.sequenceiq.freeipa.api.client.FreeIpaClient getDefaultClient(TestContext testContext) {
+        if (testContext.shouldUseAlternativeEndpoints()) {
+            return alternativeFreeIpaClient;
+        } else {
+            return freeIpaClient;
+        }
     }
 
-    public FreeipaInternalCrnClient createFreeipaInternalClient(String serverRoot,
+    private FreeipaInternalCrnClient createFreeipaInternalClient(String serverRoot,
             RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator) {
         FreeIpaApiUserCrnClient freeIpaApiUserCrnClient = new FreeIpaApiUserCrnClientBuilder(serverRoot)
                 .withCertificateValidation(false)
@@ -144,7 +165,13 @@ public class FreeIpaClient<E extends Enum<E>> extends MicroserviceClient<com.seq
     @Override
     public FreeIpaApiUserCrnEndpoint getInternalClient(TestContext testContext) {
         checkIfInternalClientAllowed(testContext);
-        return freeipaInternalCrnClient.withInternalCrn();
+        FreeipaInternalCrnClient client;
+        if (testContext.shouldUseAlternativeEndpoints()) {
+            client = alternativeFreeipaInternalCrnClient;
+        } else {
+            client = freeipaInternalCrnClient;
+        }
+        return client.withInternalCrn();
     }
 
     @Override

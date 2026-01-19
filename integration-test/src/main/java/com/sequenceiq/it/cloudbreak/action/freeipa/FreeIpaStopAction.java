@@ -21,7 +21,7 @@ public class FreeIpaStopAction extends AbstractFreeIpaAction<FreeIpaTestDto> {
         String environmentCrn = testContext.given(EnvironmentTestDto.class).getCrn();
         Log.when(LOGGER, format(" FreeIPA CRN: %s", environmentCrn));
         Log.whenJson(LOGGER, format(" FreeIPA stop request: %n"), testDto.getRequest());
-        StopFreeIpaV1Response stop = client.getDefaultClient()
+        StopFreeIpaV1Response stop = client.getDefaultClient(testContext)
                 .getFreeIpaV1Endpoint()
                 .stop(environmentCrn);
         testDto.setFlow("FreeIpaStopFlow", stop.getFlowIdentifier());

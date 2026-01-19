@@ -17,7 +17,7 @@ public class StackBlueprintRequestAction implements Action<StackTestDto, Cloudbr
     @Override
     public StackTestDto action(TestContext testContext, StackTestDto testDto, CloudbreakClient client) throws Exception {
         Log.whenJson(LOGGER, " Stack get generated blueprint:\n", testDto.getRequest());
-        GeneratedBlueprintV4Response bp = client.getDefaultClient().stackV4Endpoint().postStackForBlueprint(
+        GeneratedBlueprintV4Response bp = client.getDefaultClient(testContext).stackV4Endpoint().postStackForBlueprint(
                 client.getWorkspaceId(),
                 testDto.getName(),
                 testDto.getRequest(),

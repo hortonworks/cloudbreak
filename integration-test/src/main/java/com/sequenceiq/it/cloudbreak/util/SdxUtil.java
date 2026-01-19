@@ -69,6 +69,6 @@ public class SdxUtil {
     }
 
     private SdxClusterDetailResponse getSdxClusterDetailResponse(AbstractSdxTestDto testDto, SdxClient sdxClient) {
-        return sdxClient.getDefaultClient().sdxEndpoint().getDetail(testDto.getName(), new HashSet<>());
+        return sdxClient.getDefaultClient(testDto.getTestContext()).sdxEndpoint().getDetail(testDto.getName(), new HashSet<>());
     }
 }

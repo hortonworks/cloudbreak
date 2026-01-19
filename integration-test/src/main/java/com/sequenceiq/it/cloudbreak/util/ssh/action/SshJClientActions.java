@@ -94,8 +94,8 @@ public class SshJClientActions {
     }
 
     private List<String> getFreeIpaInstanceGroupIps(InstanceMetadataType istanceMetadataType, String environmentCrn, FreeIpaClient freeipaClient,
-            boolean publicIp) {
-        return freeipaClient.getDefaultClient().getFreeIpaV1Endpoint()
+            boolean publicIp, TestContext testContext) {
+        return freeipaClient.getDefaultClient(testContext).getFreeIpaV1Endpoint()
                 .describe(environmentCrn).getInstanceGroups().stream()
                 .filter(instanceGroup -> instanceGroup.getType().equals(InstanceGroupType.MASTER))
                 .map(InstanceGroupResponse::getMetaData)
@@ -172,7 +172,8 @@ public class SshJClientActions {
     public <T extends AbstractFreeIpaTestDto> T checkFilesByNameAndPath(T testDto, String environmentCrn, FreeIpaClient freeipaClient,
             InstanceMetadataType istanceMetadataType, String filePath, String fileName, long requiredNumberOfFiles, String user, String password) {
         String fileListCommand = format("find %s -type f -name %s", filePath, fileName);
-        Map<String, Long> filesByIp = getFreeIpaInstanceGroupIps(istanceMetadataType, environmentCrn, freeipaClient, false).stream()
+        Map<String, Long> filesByIp = getFreeIpaInstanceGroupIps(istanceMetadataType, environmentCrn, freeipaClient, false, testDto.getTestContext())
+                .stream()
                 .collect(Collectors.toMap(ip -> ip, ip -> executefileListCommand(ip, user, password, fileListCommand)));
 
         validateRequiredNumberOfFiles(filesByIp, filePath, requiredNumberOfFiles);
@@ -299,7 +300,8 @@ public class SshJClientActions {
     }
 
     public FreeIpaTestDto checkNoOutboundInternetTraffic(FreeIpaTestDto testDto, FreeIpaClient freeIpaClient) {
-        getFreeIpaInstanceGroupIps(InstanceMetadataType.GATEWAY_PRIMARY, testDto.getResponse().getEnvironmentCrn(), freeIpaClient, true)
+        getFreeIpaInstanceGroupIps(InstanceMetadataType.GATEWAY_PRIMARY, testDto.getResponse().getEnvironmentCrn(), freeIpaClient, true,
+                testDto.getTestContext())
                 .forEach(this::checkNoOutboundInternetTraffic);
         return testDto;
     }
@@ -404,7 +406,8 @@ public class SshJClientActions {
 
     public FreeIpaTestDto checkMonitoringStatus(FreeIpaTestDto testDto, String environmentCrn, FreeIpaClient freeipaClient,
             List<String> verifyMetricNames, List<String> acceptableNokNames) {
-        List<String> instanceIps = getFreeIpaInstanceGroupIps(InstanceMetadataType.GATEWAY_PRIMARY, environmentCrn, freeipaClient, false);
+        List<String> instanceIps = getFreeIpaInstanceGroupIps(InstanceMetadataType.GATEWAY_PRIMARY, environmentCrn, freeipaClient, false,
+                testDto.getTestContext());
         return checkMonitoringStatus(testDto, instanceIps, verifyMetricNames, acceptableNokNames);
     }
 
@@ -489,7 +492,8 @@ public class SshJClientActions {
     }
 
     public FreeIpaTestDto checkFilesystemFreeBytesGeneratedMetric(FreeIpaTestDto testDto, String environmentCrn, FreeIpaClient freeipaClient) {
-        List<String> instanceIps = getFreeIpaInstanceGroupIps(InstanceMetadataType.GATEWAY_PRIMARY, environmentCrn, freeipaClient, false);
+        List<String> instanceIps = getFreeIpaInstanceGroupIps(InstanceMetadataType.GATEWAY_PRIMARY, environmentCrn, freeipaClient, false,
+                testDto.getTestContext());
         return checkFilesystemFreeBytesGeneratedMetric(testDto, instanceIps);
     }
 
@@ -590,12 +594,14 @@ public class SshJClientActions {
     }
 
     public FreeIpaTestDto checkCipherSuiteConfiguration(FreeIpaTestDto testDto, String environmentCrn, FreeIpaClient freeipaClient) {
-        List<String> instanceIps = getFreeIpaInstanceGroupIps(InstanceMetadataType.GATEWAY_PRIMARY, environmentCrn, freeipaClient, false);
+        List<String> instanceIps = getFreeIpaInstanceGroupIps(InstanceMetadataType.GATEWAY_PRIMARY, environmentCrn, freeipaClient, false,
+                testDto.getTestContext());
         return checkCipherSuiteConfiguration(testDto, instanceIps);
     }
 
     public FreeIpaTestDto checkNetworkStatus(FreeIpaTestDto testDto, String environmentCrn, FreeIpaClient freeipaClient) {
-        List<String> instanceIps = getFreeIpaInstanceGroupIps(InstanceMetadataType.GATEWAY_PRIMARY, environmentCrn, freeipaClient, false);
+        List<String> instanceIps = getFreeIpaInstanceGroupIps(InstanceMetadataType.GATEWAY_PRIMARY, environmentCrn, freeipaClient, false,
+                testDto.getTestContext());
         return checkCdpNetworkStatus(testDto, instanceIps);
     }
 
@@ -614,7 +620,8 @@ public class SshJClientActions {
     }
 
     public FreeIpaTestDto checkFluentdStatus(FreeIpaTestDto testDto, String environmentCrn, FreeIpaClient freeipaClient) {
-        List<String> instanceIps = getFreeIpaInstanceGroupIps(InstanceMetadataType.GATEWAY_PRIMARY, environmentCrn, freeipaClient, false);
+        List<String> instanceIps = getFreeIpaInstanceGroupIps(InstanceMetadataType.GATEWAY_PRIMARY, environmentCrn, freeipaClient, false,
+                testDto.getTestContext());
         return checkFluentdStatus(testDto, instanceIps);
     }
 
@@ -642,7 +649,8 @@ public class SshJClientActions {
     }
 
     public FreeIpaTestDto checkCdpServiceStatus(FreeIpaTestDto testDto, String environmentCrn, FreeIpaClient freeipaClient) {
-        List<String> instanceIps = getFreeIpaInstanceGroupIps(InstanceMetadataType.GATEWAY_PRIMARY, environmentCrn, freeipaClient, false);
+        List<String> instanceIps = getFreeIpaInstanceGroupIps(InstanceMetadataType.GATEWAY_PRIMARY, environmentCrn, freeipaClient, false,
+                testDto.getTestContext());
         return doCheckCdpServiceStatus(testDto, instanceIps, List.of("infraServices", "freeipaServices"));
     }
 
@@ -673,7 +681,8 @@ public class SshJClientActions {
 
     public FreeIpaTestDto checkSystemctlServiceStatus(FreeIpaTestDto testDto, String environmentCrn, FreeIpaClient freeipaClient,
             Map<String, Boolean> serviceStatusesByName) {
-        List<String> instanceIps = getFreeIpaInstanceGroupIps(InstanceMetadataType.GATEWAY_PRIMARY, environmentCrn, freeipaClient, false);
+        List<String> instanceIps = getFreeIpaInstanceGroupIps(InstanceMetadataType.GATEWAY_PRIMARY, environmentCrn, freeipaClient, false,
+                testDto.getTestContext());
         return checkSystemctlServiceStatus(testDto, instanceIps, serviceStatusesByName);
     }
 
@@ -764,7 +773,8 @@ public class SshJClientActions {
 
         String[] cmds = {kinitCmd, findDnsRecordCmd};
         String environmentCrn = freeIpaTestDto.getEnvironmentCrn();
-        List<String> instanceIps = getFreeIpaInstanceGroupIps(InstanceMetadataType.GATEWAY_PRIMARY, environmentCrn, freeipaClient, false);
+        List<String> instanceIps = getFreeIpaInstanceGroupIps(InstanceMetadataType.GATEWAY_PRIMARY, environmentCrn, freeipaClient, false,
+                freeIpaTestDto.getTestContext());
 
         for (String ip: instanceIps) {
             for (String cmd: cmds) {

@@ -97,7 +97,7 @@ public class FreeIpaRebuildv2Tests extends AbstractE2ETest {
 
     private void validateAz(String environmentCrn, FreeIpaClient client, TestContext tc) {
         if (tc.getCloudPlatform() == CloudPlatform.GCP) {
-            DescribeFreeIpaResponse freeIpaResponse = client.getDefaultClient().getFreeIpaV1Endpoint().describe(environmentCrn);
+            DescribeFreeIpaResponse freeIpaResponse = client.getDefaultClient(tc).getFreeIpaV1Endpoint().describe(environmentCrn);
             Map<String, String> instanceZoneMap = freeIpaResponse.getInstanceGroups().stream()
                     .map(ig -> ig.getMetaData())
                     .filter(Objects::nonNull)

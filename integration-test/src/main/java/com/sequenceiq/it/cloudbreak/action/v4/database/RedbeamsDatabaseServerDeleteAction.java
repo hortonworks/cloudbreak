@@ -18,7 +18,7 @@ public class RedbeamsDatabaseServerDeleteAction implements Action<RedbeamsDataba
     public RedbeamsDatabaseServerTestDto action(TestContext testContext, RedbeamsDatabaseServerTestDto testDto, RedbeamsClient client) throws Exception {
         Log.as(LOGGER, " Database server delete request:\n");
         //can't set response because it's not the same type
-        DatabaseServerV4Response response = client.getDefaultClient()
+        DatabaseServerV4Response response = client.getDefaultClient(testContext)
                 .databaseServerV4Endpoint()
                 .deleteByCrn(testDto.getResponse().getCrn(), false);
         Log.whenJson(LOGGER, " Database deleted successfully:\n", response);

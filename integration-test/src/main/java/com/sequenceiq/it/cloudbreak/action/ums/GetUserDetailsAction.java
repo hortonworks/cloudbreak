@@ -26,7 +26,7 @@ public class GetUserDetailsAction implements Action<UmsTestDto, UmsClient> {
     public UmsTestDto action(TestContext testContext, UmsTestDto testDto, UmsClient client) throws Exception {
         Log.when(LOGGER, format(" Getting UMS user '%s' details. ", userCrn));
         Log.whenJson(LOGGER, " Get UMS user details request: ", testDto.getRequest());
-        testDto.setResponse(client.getDefaultClient().getUserDetails(userCrn));
+        testDto.setResponse(client.getDefaultClient(testContext).getUserDetails(userCrn));
         UserManagementProto.User user = testDto.getResponse();
         LOGGER.info(format(" User details %ncrn: %s %nworkload username: %s %nfirst name: %s %nlast name: %s %nstate: %s %ncreation date: %s " +
                         "%nemail: %s %nexternal user id: %s %nSFDC contact id: %s ", user.getCrn(), user.getWorkloadUsername(), user.getFirstName(),

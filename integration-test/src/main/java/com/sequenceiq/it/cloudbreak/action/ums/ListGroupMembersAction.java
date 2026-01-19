@@ -29,7 +29,7 @@ public class ListGroupMembersAction implements Action<UmsGroupTestDto, UmsClient
         testDto.withName(groupName);
         Log.when(LOGGER, format(" Listing user group '%s' members at account '%s'. ", groupName, accountId));
         Log.whenJson(LOGGER, format(" List user group members request:%n "), testDto.getRequest());
-        List<String> members = client.getDefaultClient().listMembersFromGroup(accountId, groupName);
+        List<String> members = client.getDefaultClient(testContext).listMembersFromGroup(accountId, groupName);
         LOGGER.info(format(" User group '%s' contains members: [%s] ", groupName, members));
         Log.when(LOGGER, format(" User group '%s' contains members: [%s] ", groupName, members));
         return testDto;

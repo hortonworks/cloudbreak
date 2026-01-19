@@ -17,11 +17,11 @@ public class SdxCollectDiagnosticsAction implements Action<SdxDiagnosticsTestDto
     @Override
     public SdxDiagnosticsTestDto action(TestContext testContext, SdxDiagnosticsTestDto testDto, SdxClient client) throws Exception {
         Log.whenJson(LOGGER, " SDX collect diagnostics request: ", testDto.getRequest());
-        FlowIdentifier flowIdentifier = client.getDefaultClient()
+        FlowIdentifier flowIdentifier = client.getDefaultClient(testContext)
                 .diagnosticsEndpoint()
                 .collectDiagnostics(testDto.getRequest());
         testDto.setFlow("SDX diagnostic collection", flowIdentifier);
-        Log.log(LOGGER, " SDX name: %s", client.getDefaultClient().sdxEndpoint().get(testDto.getName()).getName());
+        Log.log(LOGGER, " SDX name: %s", client.getDefaultClient(testContext).sdxEndpoint().get(testDto.getName()).getName());
         return testDto;
     }
 }

@@ -19,11 +19,11 @@ public class FreeIpaDeleteAction extends AbstractFreeIpaAction<FreeIpaTestDto> {
         String environmentCrn = testContext.given(EnvironmentTestDto.class).getCrn();
         Log.when(LOGGER, String.format(" FreeIPA crn: %s", environmentCrn));
         Log.whenJson(LOGGER, format(" FreeIPA delete:%n"), testDto.getRequest());
-        client.getDefaultClient()
+        client.getDefaultClient(testContext)
                 .getFreeIpaV1Endpoint()
                 .delete(environmentCrn, false);
         testDto.setResponse(
-                client.getDefaultClient()
+                client.getDefaultClient(testContext)
                         .getFreeIpaV1Endpoint()
                         .describe(environmentCrn)
         );

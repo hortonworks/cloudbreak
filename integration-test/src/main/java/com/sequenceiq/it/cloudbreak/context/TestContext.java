@@ -164,6 +164,11 @@ public abstract class TestContext implements ApplicationContextAware {
     @Value("${integrationtest.selinux.validate:false}")
     private boolean validateSelinux;
 
+    @Value("${integrationtest.alternative.endpoints.configured:false}")
+    private boolean alternativeEndpointsConfigured;
+
+    private boolean useAlternativeEndpoints;
+
     public int getMaxRetry() {
         return maxRetry;
     }
@@ -920,7 +925,7 @@ public abstract class TestContext implements ApplicationContextAware {
                     Objects.requireNonNull(Crn.fromString(awaitEntity.getCrn())).getAccountId(), awaitEntity));
             MicroserviceClient msClient = getAdminMicroserviceClient(awaitEntity.getClass(), Objects.requireNonNull(Crn.fromString(awaitEntity.getCrn()))
                     .getAccountId());
-            FlowPublicEndpoint flowPublicEndpoint = msClient.flowPublicEndpoint();
+            FlowPublicEndpoint flowPublicEndpoint = msClient.flowPublicEndpoint(this);
             if (flowPublicEndpoint != null) {
                 flowUtil.waitForLastKnownFlow(awaitEntity, flowPublicEndpoint, getTestContext(), runningParameter);
             }
@@ -1204,6 +1209,15 @@ public abstract class TestContext implements ApplicationContextAware {
 
     public boolean getSELinuxValidation() {
         return validateSelinux;
+    }
+
+    public void setUseAlternativeEndpoints(boolean useAlternativeEndpoints) {
+        this.useAlternativeEndpoints = useAlternativeEndpoints;
+    }
+
+    public boolean shouldUseAlternativeEndpoints() {
+        LOGGER.info("It will use alternative endpoints: {}", alternativeEndpointsConfigured && useAlternativeEndpoints);
+        return alternativeEndpointsConfigured && useAlternativeEndpoints;
     }
 
     public boolean isSecretEncryptionEnabled() {

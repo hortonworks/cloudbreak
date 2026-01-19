@@ -28,7 +28,7 @@ public class FreeIpaSynchronizeAllUsersAction implements Action<FreeIpaUserSyncT
         Log.whenJson(LOGGER, format(" FreeIPA sync request: %n"), testDto.getRequest());
         // checking if there is ongoing usersync
         EnvironmentUserSyncState environmentUserSyncState =
-                client.getDefaultClient().getUserV1Endpoint().getUserSyncState(environmentCrn);
+                client.getDefaultClient(testContext).getUserV1Endpoint().getUserSyncState(environmentCrn);
         if (UserSyncState.SYNC_IN_PROGRESS.equals(environmentUserSyncState.getState())) {
             // sync already in progress, no need to execute another one
             testDto.setOperationId(environmentUserSyncState.getLastUserSyncOperationId());
@@ -39,7 +39,7 @@ public class FreeIpaSynchronizeAllUsersAction implements Action<FreeIpaUserSyncT
         } else {
             try {
                 // need to sync
-                SyncOperationStatus syncOperationStatus = client.getDefaultClient()
+                SyncOperationStatus syncOperationStatus = client.getDefaultClient(testContext)
                         .getUserV1Endpoint()
                         .synchronizeAllUsers(testDto.getRequest());
                 testDto.setOperationId(syncOperationStatus.getOperationId());

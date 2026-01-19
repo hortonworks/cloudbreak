@@ -31,7 +31,7 @@ public class RemoveUserFromGroupAction implements Action<UmsGroupTestDto, UmsCli
         testDto.withMember(memberCrn);
         Log.when(LOGGER, format(" Removing user '%s' from group '%s' at account '%s'. ", memberCrn, groupName, accountId));
         Log.whenJson(LOGGER, format(" Remove user from group request:%n "), testDto.getRequest());
-        client.getDefaultClient().removeMemberFromGroup(accountId, groupName, memberCrn);
+        client.getDefaultClient(testContext).removeMemberFromGroup(accountId, groupName, memberCrn);
         LOGGER.info(format(" User '%s' has been removed from group '%s' at account '%s'. ", memberCrn, groupName, accountId));
         Log.when(LOGGER, format(" User '%s' has been removed from group '%s' at account '%s'. ", memberCrn, groupName, accountId));
         return testDto;

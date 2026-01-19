@@ -17,7 +17,7 @@ public class StackRequestAction implements Action<StackTestDto, CloudbreakClient
     @Override
     public StackTestDto action(TestContext testContext, StackTestDto testDto, CloudbreakClient client) throws Exception {
         Log.when(LOGGER, " Stack get cli skeleton:" + testDto.getName());
-        StackV4Request request = client.getDefaultClient().stackV4Endpoint().getRequestfromName(
+        StackV4Request request = client.getDefaultClient(testContext).stackV4Endpoint().getRequestfromName(
                 client.getWorkspaceId(),
                 testDto.getName(),
                 testContext.getActingUserCrn().getAccountId());

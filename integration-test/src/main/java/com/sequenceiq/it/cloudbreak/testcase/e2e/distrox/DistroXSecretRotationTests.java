@@ -84,7 +84,7 @@ public class DistroXSecretRotationTests extends AbstractE2ETest {
                     .when(sdxTestClient.rotateSecret(Set.of(DatalakeSecretType.USER_KEYPAIR)))
                     .awaitForFlow()
                     .then((tc, testDto, client) -> {
-                        secretRotationCheckUtil.checkSSHLoginWithNewKeys(testDto.getCrn(), client);
+                        secretRotationCheckUtil.checkSSHLoginWithNewKeys(testDto.getCrn(), client, tc);
                         return testDto;
                     })
                     .given(DistroXTestDto.class)

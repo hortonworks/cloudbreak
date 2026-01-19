@@ -13,13 +13,13 @@ import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
 @Component
 public class DistroxUtil {
     public List<String> getInstanceIds(DistroXTestDto testDto, CloudbreakClient cloudbreakClient, String hostGroupName) {
-        List<InstanceGroupV4Response> instanceGroups = cloudbreakClient.getDefaultClient().distroXV1Endpoint()
+        List<InstanceGroupV4Response> instanceGroups = cloudbreakClient.getDefaultClient(testDto.getTestContext()).distroXV1Endpoint()
                 .getByName(testDto.getName(), new HashSet<>()).getInstanceGroups();
         return InstanceUtil.getInstanceIds(instanceGroups, hostGroupName);
     }
 
     public Map<String, String> getInstancesWithAz(DistroXTestDto testDto, CloudbreakClient cloudbreakClient, String hostGroupName) {
-        List<InstanceGroupV4Response> instanceGroups = cloudbreakClient.getDefaultClient().distroXV1Endpoint()
+        List<InstanceGroupV4Response> instanceGroups = cloudbreakClient.getDefaultClient(testDto.getTestContext()).distroXV1Endpoint()
                 .getByName(testDto.getName(), new HashSet<>()).getInstanceGroups();
         return InstanceUtil.getInstancesWithAz(instanceGroups, hostGroupName);
     }

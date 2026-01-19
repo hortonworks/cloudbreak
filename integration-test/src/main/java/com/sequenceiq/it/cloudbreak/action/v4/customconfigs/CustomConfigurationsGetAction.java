@@ -18,7 +18,7 @@ public class CustomConfigurationsGetAction implements Action<CustomConfiguration
     @Override
     public CustomConfigurationsTestDto action(TestContext testContext, CustomConfigurationsTestDto testDto, CloudbreakClient client) throws Exception {
         Log.whenJson(LOGGER, format("CustomConfigurations get request: %n"), testDto.getRequest());
-        testDto.setResponse(client.getDefaultClient().customConfigurationsV4Endpoint().getByName(testDto.getName()));
+        testDto.setResponse(client.getDefaultClient(testContext).customConfigurationsV4Endpoint().getByName(testDto.getName()));
         Log.whenJson(LOGGER, format("CustomConfigurations retrieved successfully: %n"), testDto.getResponse());
         return testDto;
     }

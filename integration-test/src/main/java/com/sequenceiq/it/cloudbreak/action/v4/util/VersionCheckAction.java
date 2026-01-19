@@ -15,7 +15,7 @@ public class VersionCheckAction implements Action<VersionCheckTestDto, Cloudbrea
 
     @Override
     public VersionCheckTestDto action(TestContext testContext, VersionCheckTestDto testDto, CloudbreakClient cloudbreakClient) throws Exception {
-        testDto.setResponse(cloudbreakClient.getDefaultClient().utilV4Endpoint().checkClientVersion(testDto.getVersion()));
+        testDto.setResponse(cloudbreakClient.getDefaultClient(testContext).utilV4Endpoint().checkClientVersion(testDto.getVersion()));
         Log.whenJson(LOGGER, "Obtaining client version response:\n", testDto.getResponse());
 
         return testDto;    }

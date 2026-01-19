@@ -36,7 +36,7 @@ public class EnvironmentUtil {
 
         for (UmsVirtualGroupRight right : UmsVirtualGroupRight.values()) {
             try {
-                virtualGroup = client.getDefaultClient().getWorkloadAdministrationGroupName(accountId, right, environmentCrn);
+                virtualGroup = client.getDefaultClient(testContext).getWorkloadAdministrationGroupName(accountId, right, environmentCrn);
             } catch (StatusRuntimeException ex) {
                 if (Status.Code.NOT_FOUND != ex.getStatus().getCode()) {
                     LOGGER.info(format(" Virtual groups are missing for right: '%s' ", right.getRight()));

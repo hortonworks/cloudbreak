@@ -19,7 +19,7 @@ public class CredentialListAction implements Action<CredentialTestDto, Environme
 
     @Override
     public CredentialTestDto action(TestContext testContext, CredentialTestDto testDto, EnvironmentClient environmentClient) throws Exception {
-        Collection<CredentialResponse> responses = environmentClient.getDefaultClient()
+        Collection<CredentialResponse> responses = environmentClient.getDefaultClient(testContext)
                 .credentialV1Endpoint()
                 .list()
                 .getResponses();

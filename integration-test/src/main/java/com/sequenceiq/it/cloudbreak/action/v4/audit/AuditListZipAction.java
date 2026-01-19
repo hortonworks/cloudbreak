@@ -17,7 +17,7 @@ public class AuditListZipAction implements Action<AuditTestDto, CloudbreakClient
 
     @Override
     public AuditTestDto action(TestContext testContext, AuditTestDto testDto, CloudbreakClient client) throws Exception {
-        Response auditEventsZip = client.getDefaultClient()
+        Response auditEventsZip = client.getDefaultClient(testContext)
                 .auditV4Endpoint()
                 .getAuditEventsZip(client.getWorkspaceId(), testDto.getResourceType(), testDto.getResourceId(), null);
         testDto.setZipResponse(auditEventsZip);

@@ -32,7 +32,7 @@ public class FreeIpaAttachRecipeAction implements Action<FreeIpaTestDto, FreeIpa
         recipeAttach.setRecipes(recipes);
         recipeAttach.setEnvironmentCrn(environmentCrn);
         Log.whenJson(LOGGER, format(" FreeIPA recipe attach request: %n"), recipeAttach);
-        client.getDefaultClient()
+        client.getDefaultClient(testContext)
                 .getRecipeV1Endpoint()
                 .attachRecipes(recipeAttach);
         return testDto;

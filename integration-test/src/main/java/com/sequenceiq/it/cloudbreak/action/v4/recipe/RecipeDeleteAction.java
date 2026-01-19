@@ -19,7 +19,7 @@ public class RecipeDeleteAction implements Action<RecipeTestDto, CloudbreakClien
     public RecipeTestDto action(TestContext testContext, RecipeTestDto testDto, CloudbreakClient cloudbreakClient) throws Exception {
         Log.when(LOGGER, format(" Recipe delete request:%n", testDto.getName()));
         testDto.setResponse(
-                cloudbreakClient.getDefaultClient()
+                cloudbreakClient.getDefaultClient(testContext)
                         .recipeV4Endpoint()
                         .deleteByName(cloudbreakClient.getWorkspaceId(), testDto.getName()));
         Log.whenJson(LOGGER, format(" Recipe deleted successfully:%n"), testDto.getResponse());

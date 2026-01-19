@@ -16,7 +16,7 @@ public class LdapGetAction implements Action<LdapTestDto, FreeIpaClient> {
     public LdapTestDto action(TestContext testContext, LdapTestDto testDto, FreeIpaClient client) throws Exception {
         Log.when(LOGGER, " Ldap get: " + testDto.getName());
         testDto.setResponse(
-                client.getDefaultClient()
+                client.getDefaultClient(testContext)
                         .getLdapConfigV1Endpoint()
                         .describe(testDto.getName()));
         Log.whenJson(LOGGER, " Ldap get was successfully:\n", testDto.getResponse());

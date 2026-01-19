@@ -15,7 +15,7 @@ public class EnvironmentStopAction extends AbstractEnvironmentAction {
 
     @Override
     protected EnvironmentTestDto environmentAction(TestContext testContext, EnvironmentTestDto testDto, EnvironmentClient client) {
-        FlowIdentifier flowIdentifier = client.getDefaultClient()
+        FlowIdentifier flowIdentifier = client.getDefaultClient(testContext)
                 .environmentV1Endpoint()
                 .postStopByCrn(testDto.getResponse().getCrn());
         testDto.setLastKnownFlow(flowIdentifier);

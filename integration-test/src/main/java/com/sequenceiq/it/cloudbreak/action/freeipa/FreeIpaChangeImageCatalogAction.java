@@ -18,7 +18,7 @@ public class FreeIpaChangeImageCatalogAction implements Action<FreeipaChangeImag
 
     public FreeipaChangeImageCatalogTestDto action(TestContext testContext, FreeipaChangeImageCatalogTestDto testDto, FreeIpaClient client) throws Exception {
         Log.whenJson(LOGGER, format(" FreeIPA put request:%n"), testDto.getRequest());
-        client.getDefaultClient()
+        client.getDefaultClient(testContext)
                 .getFreeIpaV1Endpoint()
                         .changeImageCatalog(testContext.given(EnvironmentTestDto.class).getCrn(), testDto.getRequest());
         Log.when(LOGGER, format(" FreeIPA change image catalog to: %s", testDto.getRequest().getImageCatalog()));

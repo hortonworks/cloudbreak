@@ -22,7 +22,7 @@ public class LdapListStructuredEventAssertions {
 
     public LdapTestDto checkCreateEvents(TestContext testContext, LdapTestDto testDto, FreeIpaClient client) {
         List<CDPStructuredEvent> auditEvents = getAuditEvents(
-                client.getDefaultClient().structuredEventsV1Endpoint(),
+                client.getDefaultClient(testContext).structuredEventsV1Endpoint(),
                 testDto.getCrn());
         eventAssertionCommon.noRestEventsAreAllowedInDB(auditEvents);
         return testDto;
@@ -30,7 +30,7 @@ public class LdapListStructuredEventAssertions {
 
     public LdapTestDto checkDeleteEvents(TestContext testContext, LdapTestDto testDto, FreeIpaClient client) {
         List<CDPStructuredEvent> auditEvents = getAuditEvents(
-                client.getDefaultClient().structuredEventsV1Endpoint(),
+                client.getDefaultClient(testContext).structuredEventsV1Endpoint(),
                 testDto.getCrn());
         eventAssertionCommon.noRestEventsAreAllowedInDB(auditEvents);
         return testDto;

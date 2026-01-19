@@ -378,6 +378,16 @@ public class MeasuredTestContext extends MockedTestContext {
     }
 
     @Override
+    public boolean shouldUseAlternativeEndpoints() {
+        return wrappedTestContext.shouldUseAlternativeEndpoints();
+    }
+
+    @Override
+    public void setUseAlternativeEndpoints(boolean useAlternativeEndpoints) {
+        wrappedTestContext.setUseAlternativeEndpoints(useAlternativeEndpoints);
+    }
+
+    @Override
     public String toString() {
         return super.toString() + wrappedTestContext.toString();
     }

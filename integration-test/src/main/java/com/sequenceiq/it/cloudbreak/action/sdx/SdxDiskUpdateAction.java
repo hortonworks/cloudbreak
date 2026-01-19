@@ -36,7 +36,8 @@ public class SdxDiskUpdateAction implements Action<SdxInternalTestDto, SdxClient
 
     @Override
     public SdxInternalTestDto action(TestContext testContext, SdxInternalTestDto testDto, SdxClient client) throws Exception {
-        Log.when(LOGGER, " SDX endpoint: %s" + client.getDefaultClient().sdxEndpoint() + ", SDX's environment: " + testDto.getRequest().getEnvironment());
+        Log.when(LOGGER, " SDX endpoint: %s" + client.getDefaultClient(testContext).sdxEndpoint() + ", SDX's environment: "
+                + testDto.getRequest().getEnvironment());
         Log.whenJson(LOGGER, " SDX disk update request: ", testDto.getRequest());
         DiskUpdateRequest diskUpdateRequest = new DiskUpdateRequest();
         diskUpdateRequest.setVolumeType(volumeType);
@@ -45,17 +46,17 @@ public class SdxDiskUpdateAction implements Action<SdxInternalTestDto, SdxClient
         diskUpdateRequest.setDiskType(diskType);
         FlowIdentifier flowIdentifier;
         if (DiskType.ADDITIONAL_DISK.equals(diskType)) {
-            flowIdentifier = client.getDefaultClient()
+            flowIdentifier = client.getDefaultClient(testContext)
                     .sdxEndpoint()
                     .diskUpdateByName(testDto.getResponse().getStackV4Response().getName(), diskUpdateRequest);
         } else {
-            flowIdentifier = client.getDefaultClient()
+            flowIdentifier = client.getDefaultClient(testContext)
                     .sdxEndpoint()
                     .updateRootVolumeByDatalakeName(testDto.getResponse().getStackV4Response().getName(), diskUpdateRequest);
         }
         testDto.setFlow("SdxDiskUpdate", flowIdentifier);
-        Log.whenJson(LOGGER, " SDX DiskUpdate Flow: ", client.getDefaultClient().sdxEndpoint().get(testDto.getName()));
-        SdxClusterDetailResponse detailedResponse = client.getDefaultClient()
+        Log.whenJson(LOGGER, " SDX DiskUpdate Flow: ", client.getDefaultClient(testContext).sdxEndpoint().get(testDto.getName()));
+        SdxClusterDetailResponse detailedResponse = client.getDefaultClient(testContext)
                 .sdxEndpoint()
                 .getDetail(testDto.getName(), Collections.emptySet());
         testDto.setResponse(detailedResponse);

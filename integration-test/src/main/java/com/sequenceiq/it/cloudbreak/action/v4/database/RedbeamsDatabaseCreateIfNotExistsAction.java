@@ -17,14 +17,14 @@ public class RedbeamsDatabaseCreateIfNotExistsAction implements Action<RedbeamsD
         Log.when(LOGGER, "Register Database with name: " + testDto.getName());
         try {
             testDto.setResponse(
-                    client.getDefaultClient().databaseV4Endpoint().register(testDto.getRequest())
+                    client.getDefaultClient(testContext).databaseV4Endpoint().register(testDto.getRequest())
             );
             Log.whenJson(LOGGER, "Database registered successfully: ", testDto.getResponse());
         } catch (Exception e) {
             Log.when(LOGGER, "Cannot register Database, fetch existing one: " + testDto.getName());
 
             testDto.setResponse(
-                    client.getDefaultClient().databaseV4Endpoint()
+                    client.getDefaultClient(testContext).databaseV4Endpoint()
                             .getByName(testDto.getRequest().getEnvironmentCrn(), testDto.getRequest().getName()));
             Log.whenJson(LOGGER, "Database fetched successfully: ", testDto.getResponse());
         }

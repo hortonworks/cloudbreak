@@ -16,7 +16,7 @@ public class DistroXGetAction implements Action<DistroXTestDto, CloudbreakClient
     @Override
     public DistroXTestDto action(TestContext testContext, DistroXTestDto testDto, CloudbreakClient client) throws Exception {
         testDto.setResponse(
-                client.getDefaultClient()
+                client.getDefaultClient(testContext)
                         .distroXV1Endpoint()
                         .getByName(testDto.getName(), testDto.getEntries()));
         Log.whenJson(LOGGER, " Stack get was successful:\n", testDto.getResponse());

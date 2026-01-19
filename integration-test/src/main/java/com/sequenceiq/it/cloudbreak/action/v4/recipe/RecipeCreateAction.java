@@ -19,7 +19,7 @@ public class RecipeCreateAction implements Action<RecipeTestDto, CloudbreakClien
     public RecipeTestDto action(TestContext testContext, RecipeTestDto testDto, CloudbreakClient cloudbreakClient) throws Exception {
         Log.whenJson(LOGGER, format(" Recipe post request:%n"), testDto.getRequest());
         testDto.setResponse(
-                cloudbreakClient.getDefaultClient()
+                cloudbreakClient.getDefaultClient(testContext)
                         .recipeV4Endpoint()
                         .post(cloudbreakClient.getWorkspaceId(), testDto.getRequest()));
         Log.whenJson(LOGGER, format(" Recipe created  successfully:%n"), testDto.getResponse());

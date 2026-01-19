@@ -32,7 +32,7 @@ public class FreeIpaSetPasswordAction implements Action<FreeIpaUserSyncTestDto, 
         SetPasswordRequest setPasswordRequest = testDto.setPassword(environmentCrns, newPassword);
         Log.when(LOGGER, format(" List of environment Crns: [%s], freeIpa Crn: %s", environmentCrns, testDto.getRequest().getEnvironments()));
         Log.whenJson(LOGGER, format(" FreeIPA set password request: %n"), setPasswordRequest);
-        SyncOperationStatus syncOperationStatus = client.getDefaultClient()
+        SyncOperationStatus syncOperationStatus = client.getDefaultClient(testContext)
                 .getUserV1Endpoint()
                 .setPassword(setPasswordRequest);
         testDto.setOperationId(syncOperationStatus.getOperationId());

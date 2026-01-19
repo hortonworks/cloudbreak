@@ -24,7 +24,7 @@ public class StackTestAction {
 
     public static StackTestDto delete(TestContext testContext, StackTestDto entity, CloudbreakClient client) throws Exception {
         Log.whenJson(LOGGER, " Stack delete request:\n", entity.getRequest());
-        client.getDefaultClient()
+        client.getDefaultClient(testContext)
                 .stackV4Endpoint()
                 .delete(client.getWorkspaceId(), entity.getName(), false, testContext.getActingUserCrn().getAccountId());
         Log.whenJson(LOGGER, " Stack deletion was successful:\n", entity.getResponse());
@@ -35,7 +35,7 @@ public class StackTestAction {
     public static StackTestDto create(TestContext testContext, StackTestDto entity, CloudbreakClient client) throws Exception {
         Log.whenJson(LOGGER, " Stack post request:\n", entity.getRequest());
         entity.setResponse(
-                client.getDefaultClient()
+                client.getDefaultClient(testContext)
                         .stackV4Endpoint()
                         .post(client.getWorkspaceId(), entity.getRequest(), testContext.getActingUserCrn().getAccountId()));
         Log.whenJson(LOGGER, " Stack created was successful:\n", entity.getResponse());
@@ -47,7 +47,7 @@ public class StackTestAction {
     public static StackTestDto get(TestContext testContext, StackTestDto entity, CloudbreakClient client) throws Exception {
         Log.whenJson(LOGGER, " Stack get request:\n", entity.getRequest());
         entity.setResponse(
-                client.getDefaultClient()
+                client.getDefaultClient(testContext)
                         .stackV4Endpoint()
                         .get(client.getWorkspaceId(), entity.getName(), new HashSet<>(),
                                 testContext.getActingUserCrn().getAccountId()));
@@ -59,7 +59,7 @@ public class StackTestAction {
 
     public static StackTestDto refresh(TestContext testContext, StackTestDto entity, CloudbreakClient client) throws IOException {
         entity.setResponse(
-                client.getDefaultClient().stackV4Endpoint().get(client.getWorkspaceId(), entity.getName(), Collections.emptySet(),
+                client.getDefaultClient(testContext).stackV4Endpoint().get(client.getWorkspaceId(), entity.getName(), Collections.emptySet(),
                         testContext.getActingUserCrn().getAccountId())
         );
         Log.whenJson(LOGGER, " Stack refresh (get) was successful:\n", entity.getResponse());
@@ -68,7 +68,7 @@ public class StackTestAction {
 
     public static StackTestDto start(TestContext testContext, StackTestDto entity, CloudbreakClient client) throws Exception {
         Log.whenJson(LOGGER, " Stack post request:\n", entity.getRequest());
-        client.getDefaultClient().stackV4Endpoint().putStart(client.getWorkspaceId(), entity.getName(),
+        client.getDefaultClient(testContext).stackV4Endpoint().putStart(client.getWorkspaceId(), entity.getName(),
                 testContext.getActingUserCrn().getAccountId());
         Log.whenJson(LOGGER, " Stack was started successful:\n", entity.getResponse());
         Log.log(LOGGER, format(" CRN: %s", entity.getResponse().getCrn()));
@@ -77,7 +77,7 @@ public class StackTestAction {
 
     public static StackTestDto stop(TestContext testContext, StackTestDto entity, CloudbreakClient client) throws Exception {
         Log.whenJson(LOGGER, " Stack post request:\n", entity.getRequest());
-        client.getDefaultClient().stackV4Endpoint().putStop(client.getWorkspaceId(), entity.getName(),
+        client.getDefaultClient(testContext).stackV4Endpoint().putStop(client.getWorkspaceId(), entity.getName(),
                 testContext.getActingUserCrn().getAccountId());
         Log.whenJson(LOGGER, " Stack was stopped successful:\n", entity.getResponse());
         Log.when(LOGGER, format(" CRN: %s", entity.getResponse().getCrn()));

@@ -15,7 +15,7 @@ public class DeploymentPreferencesAction implements Action<DeploymentPreferences
 
     @Override
     public DeploymentPreferencesTestDto action(TestContext testContext, DeploymentPreferencesTestDto testDto, CloudbreakClient client) throws Exception {
-        testDto.setResponse(client.getDefaultClient().utilV4Endpoint().deployment());
+        testDto.setResponse(client.getDefaultClient(testContext).utilV4Endpoint().deployment());
         Log.whenJson(LOGGER, "Deployment preferences response:\n", testDto.getResponse());
         return testDto;
     }

@@ -17,7 +17,7 @@ public class DistroXUpdatePublicDnsEntriesAction implements Action<DistroXTestDt
     @Override
     public DistroXTestDto action(TestContext testContext, DistroXTestDto testDto, CloudbreakClient client) throws Exception {
         Log.when(LOGGER, "Update public dns entries by name: " + testDto.getName());
-        FlowIdentifier flowIdentifier = client.getDefaultClient().distroXV1Endpoint().updatePublicDnsEntriesByName(testDto.getName());
+        FlowIdentifier flowIdentifier = client.getDefaultClient(testContext).distroXV1Endpoint().updatePublicDnsEntriesByName(testDto.getName());
         testDto.setFlow("Update public dns entries started by name: " + testDto.getName(), flowIdentifier);
         Log.when(LOGGER, "Public dns entries update started with flow id: " + flowIdentifier);
         return testDto;

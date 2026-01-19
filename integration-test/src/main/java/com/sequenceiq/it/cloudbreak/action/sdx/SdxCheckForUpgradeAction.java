@@ -23,11 +23,11 @@ public class SdxCheckForUpgradeAction implements Action<SdxTestDto, SdxClient> {
         Log.whenJson(LOGGER, " SDX check for upgrade request: ", testDto.getRequest());
         SdxUpgradeRequest request = new SdxUpgradeRequest();
         request.setDryRun(true);
-        SdxUpgradeResponse upgradeResponse = client.getDefaultClient()
+        SdxUpgradeResponse upgradeResponse = client.getDefaultClient(testContext)
                 .sdxUpgradeEndpoint()
                 .upgradeClusterByName(testDto.getName(), request);
         Log.whenJson(LOGGER, " SDX check for upgrade response: ", upgradeResponse);
-        Log.log(LOGGER, " SDX name: %s", client.getDefaultClient().sdxEndpoint().get(testDto.getName()).getName());
+        Log.log(LOGGER, " SDX name: %s", client.getDefaultClient(testContext).sdxEndpoint().get(testDto.getName()).getName());
         return testDto;
     }
 }

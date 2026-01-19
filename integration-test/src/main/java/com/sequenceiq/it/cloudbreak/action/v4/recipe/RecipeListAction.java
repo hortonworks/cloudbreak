@@ -17,7 +17,7 @@ public class RecipeListAction implements Action<RecipeTestDto, CloudbreakClient>
     @Override
     public RecipeTestDto action(TestContext testContext, RecipeTestDto testDto, CloudbreakClient cloudbreakClient) throws Exception {
         testDto.setSimpleResponses(
-                cloudbreakClient.getDefaultClient().recipeV4Endpoint().list(cloudbreakClient.getWorkspaceId())
+                cloudbreakClient.getDefaultClient(testContext).recipeV4Endpoint().list(cloudbreakClient.getWorkspaceId())
         );
         Log.whenJson(LOGGER, format(" Recipe list successfully:%n"), testDto.getSimpleResponses());
 

@@ -20,7 +20,7 @@ public class StackDeleteAction implements Action<StackTestDto, CloudbreakClient>
     @Override
     public StackTestDto action(TestContext testContext, StackTestDto testDto, CloudbreakClient client) throws Exception {
         Log.when(LOGGER, format("Stack delete request: %s", testDto.getRequest().getName()));
-        client.getDefaultClient()
+        client.getDefaultClient(testContext)
                 .stackV4Endpoint()
                 .delete(client.getWorkspaceId(), testDto.getName(), false, testContext.getActingUserCrn().getAccountId());
         Log.whenJson(LOGGER, " Stack deletion was successful:\n", testDto.getResponse());

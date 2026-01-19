@@ -103,7 +103,7 @@ public class ProxyTestDto extends AbstractEnvironmentTestDto<ProxyRequest, Proxy
 
     @Override
     public void deleteForCleanup() {
-        ProxyEndpoint proxyEndpoint = getClientForCleanup().getDefaultClient().proxyV1Endpoint();
+        ProxyEndpoint proxyEndpoint = getClientForCleanup().getDefaultClient(getTestContext()).proxyV1Endpoint();
         proxyEndpoint.deleteByCrn(getCrn());
     }
 }

@@ -39,7 +39,7 @@ public class FreeIpaChildEnvironmentAssertion {
     }
 
     private static DescribeFreeIpaResponse describeChildFreeipa(FreeIpaChildEnvironmentTestDto entity, FreeIpaClient client) {
-        return client.getDefaultClient().getFreeIpaV1Endpoint()
+        return client.getDefaultClient(entity.getTestContext()).getFreeIpaV1Endpoint()
                 .describe(entity.getRequest().getChildEnvironmentCrn());
     }
 }

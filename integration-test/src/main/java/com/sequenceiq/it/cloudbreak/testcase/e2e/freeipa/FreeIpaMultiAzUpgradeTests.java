@@ -72,7 +72,7 @@ public class FreeIpaMultiAzUpgradeTests extends AbstractE2ETest {
     }
 
     private void validateMultiAz(String environmentCrn, FreeIpaClient client, String freeIpa, TestContext tc) {
-        DescribeFreeIpaResponse freeIpaResponse = client.getDefaultClient().getFreeIpaV1Endpoint().describe(environmentCrn);
+        DescribeFreeIpaResponse freeIpaResponse = client.getDefaultClient(tc).getFreeIpaV1Endpoint().describe(environmentCrn);
         if (!freeIpaResponse.isEnableMultiAz()) {
             throw new TestFailException(String.format("MultiAz is not enabled for %s after upgrade", freeIpaResponse.getName()));
         }

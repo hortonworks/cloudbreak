@@ -16,7 +16,7 @@ public class RedbeamsCertificateSwapAction implements Action<CertificateSwapTest
     public CertificateSwapTestDto action(TestContext testContext, CertificateSwapTestDto testDto, RedbeamsClient client) throws Exception {
         Log.whenJson(LOGGER, " Certificate swap request:\n", testDto.getRequest());
         testDto.setResponse(
-                client.getDefaultClient()
+                client.getDefaultClient(testContext)
                         .supportV4Endpoint().swapCertificate(testDto.getRequest()));
         Log.whenJson(LOGGER, " Certificate swap was successful:\n", testDto.getResponse());
 

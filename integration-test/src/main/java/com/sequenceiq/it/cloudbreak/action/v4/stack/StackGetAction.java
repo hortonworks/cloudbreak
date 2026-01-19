@@ -19,7 +19,7 @@ public class StackGetAction implements Action<StackTestDto, CloudbreakClient> {
     public StackTestDto action(TestContext testContext, StackTestDto testDto, CloudbreakClient client) throws Exception {
         Log.when(LOGGER, "Stack get request: " + testDto.getRequest().getName());
         testDto.setResponse(
-                client.getDefaultClient()
+                client.getDefaultClient(testContext)
                         .stackV4Endpoint()
                         .get(client.getWorkspaceId(), testDto.getName(), new HashSet<>(), testContext.getActingUserCrn().getAccountId()));
         Log.whenJson(LOGGER, " Stack get was successful:\n", testDto.getResponse());

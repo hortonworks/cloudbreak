@@ -17,7 +17,8 @@ public class CloudStorageMatrixAction implements Action<CloudStorageMatrixTestDt
 
     @Override
     public CloudStorageMatrixTestDto action(TestContext testContext, CloudStorageMatrixTestDto testDto, CloudbreakClient client) throws Exception {
-        testDto.setResponses(new HashSet<>(client.getDefaultClient().utilV4Endpoint().getCloudStorageMatrix(testDto.getStackVersion()).getResponses()));
+        testDto.setResponses(new HashSet<>(client.getDefaultClient(testContext).utilV4Endpoint()
+                .getCloudStorageMatrix(testDto.getStackVersion()).getResponses()));
         Log.whenJson(LOGGER, "Cloud storage matrix response:\n", testDto.getResponses());
         return testDto;
     }

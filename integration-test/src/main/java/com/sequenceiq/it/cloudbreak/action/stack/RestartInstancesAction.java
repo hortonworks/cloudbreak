@@ -26,7 +26,7 @@ public class RestartInstancesAction implements Action<RestartInstancesTestDto, C
     @Override
     public RestartInstancesTestDto action(TestContext testContext, RestartInstancesTestDto testDto, CloudbreakClient client) throws Exception {
         Log.when(LOGGER, format("Triggering restart instances on Cluster: %s ", testDto.getName()));
-        FlowIdentifier flowIdentifier = client.getDefaultClient()
+        FlowIdentifier flowIdentifier = client.getDefaultClient(testContext)
                 .restartInstancesV4Endpoint()
                 .restartInstancesForClusterName(testDto.getName(), instanceIds);
         testDto.setFlow("Cluster restart instances flow identifier", flowIdentifier);

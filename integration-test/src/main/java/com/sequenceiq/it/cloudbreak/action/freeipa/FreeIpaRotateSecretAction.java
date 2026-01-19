@@ -22,7 +22,7 @@ public class FreeIpaRotateSecretAction extends AbstractFreeIpaAction<FreeIpaRota
     public FreeIpaRotationTestDto freeIpaAction(TestContext testContext, FreeIpaRotationTestDto testDto, FreeIpaClient client) throws Exception {
         Log.whenJson(LOGGER, format(" FreeIPA secret rotation request:%n"), testDto.getRequest());
         String environmentCrn = testContext.given(EnvironmentTestDto.class).getCrn();
-        testDto.setFlow("FreeIPA secret rotation", client.getDefaultClient()
+        testDto.setFlow("FreeIPA secret rotation", client.getDefaultClient(testContext)
                 .getFreeipaRotationV1Endpoint()
                 .rotateSecretsByCrn(environmentCrn, testDto.getRequest()));
         Log.whenJson(LOGGER, format(" FreeIPA secret rotation started: %n"), testDto.getResponse());

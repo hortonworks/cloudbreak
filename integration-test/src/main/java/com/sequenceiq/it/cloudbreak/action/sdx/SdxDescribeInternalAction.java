@@ -23,7 +23,7 @@ public class SdxDescribeInternalAction implements Action<SdxInternalTestDto, Sdx
             Log.when(LOGGER, format(" SDX Crn: %s ", testDto.getCrn()));
         }
         Log.whenJson(LOGGER, " SDX describe internal request: ", testDto.getRequest());
-        testDto.setResponse(client.getDefaultClient()
+        testDto.setResponse(client.getDefaultClient(testContext)
                 .sdxEndpoint()
                 .getDetail(testDto.getName(), Collections.emptySet()));
         Log.whenJson(LOGGER, " SDX describe internal response: ", testDto.getResponse());

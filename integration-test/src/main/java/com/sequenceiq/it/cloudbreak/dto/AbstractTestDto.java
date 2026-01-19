@@ -490,4 +490,9 @@ public abstract class AbstractTestDto<R, S, T extends CloudbreakTestDto, U exten
     public boolean govCloud() {
         return getCloudProvider().getGovCloud();
     }
+
+    public T useAlternativeServiceEndpointIfConfigured() {
+        testContext.setUseAlternativeEndpoints(true);
+        return (T) this;
+    }
 }

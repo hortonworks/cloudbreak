@@ -16,7 +16,7 @@ public class RedbeamsDatabaseServerStartAction implements Action<RedbeamsDatabas
     @Override
     public RedbeamsDatabaseServerTestDto action(TestContext testContext, RedbeamsDatabaseServerTestDto testDto, RedbeamsClient client) throws Exception {
         Log.as(LOGGER, " Database server start request:\n");
-        client.getDefaultClient()
+        client.getDefaultClient(testContext)
                 .databaseServerV4Endpoint()
                 .start(testDto.getResponse().getCrn());
 

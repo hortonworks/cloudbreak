@@ -12,7 +12,7 @@ public class FreeIpaTrustCleanupCommandsAction extends AbstractFreeIpaAction<Fre
 
     @Override
     public FreeIpaTrustCommandsDto freeIpaAction(TestContext testContext, FreeIpaTrustCommandsDto testDto, FreeIpaClient client) throws Exception {
-        testDto.setResponse(client.getDefaultClient().getTrustV1Endpoint().getTrustCleanupCommands(testDto.getEnvironmentCrn()));
+        testDto.setResponse(client.getDefaultClient(testContext).getTrustV1Endpoint().getTrustCleanupCommands(testDto.getEnvironmentCrn()));
         return testDto;
     }
 }

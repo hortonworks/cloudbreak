@@ -17,7 +17,7 @@ public class DistroXCmPackageSyncAction implements Action<DistroXTestDto, Cloudb
     public DistroXTestDto action(TestContext testContext, DistroXTestDto testDto, CloudbreakClient client) throws Exception {
         Log.when(LOGGER, "Syncing package version from Cloudera Manager");
         testDto.setFlow("cm package sync",
-                client.getDefaultClient().distroXV1Endpoint().syncComponentVersionsFromCmByCrn(testDto.getCrn()).getFlowIdentifier());
+                client.getDefaultClient(testContext).distroXV1Endpoint().syncComponentVersionsFromCmByCrn(testDto.getCrn()).getFlowIdentifier());
         return testDto;
     }
 }

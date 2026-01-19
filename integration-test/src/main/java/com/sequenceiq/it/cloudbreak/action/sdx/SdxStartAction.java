@@ -23,9 +23,9 @@ public class SdxStartAction implements Action<SdxInternalTestDto, SdxClient> {
     public SdxInternalTestDto action(TestContext testContext, SdxInternalTestDto testDto, SdxClient client) throws Exception {
         Log.when(LOGGER, format(" Starting SDX: %s ", testDto.getName()));
         Log.whenJson(LOGGER, " SDX start request: ", testDto.getRequest());
-        FlowIdentifier flowIdentifier = client.getDefaultClient().sdxEndpoint().startByName(testDto.getName());
+        FlowIdentifier flowIdentifier = client.getDefaultClient(testContext).sdxEndpoint().startByName(testDto.getName());
         testDto.setFlow("SDX start", flowIdentifier);
-        SdxClusterDetailResponse detailedResponse = client.getDefaultClient()
+        SdxClusterDetailResponse detailedResponse = client.getDefaultClient(testContext)
                 .sdxEndpoint()
                 .getDetail(testDto.getName(), Collections.emptySet());
         testDto.setResponse(detailedResponse);

@@ -17,7 +17,7 @@ public class StackRefreshAction implements Action<StackTestDto, CloudbreakClient
     @Override
     public StackTestDto action(TestContext testContext, StackTestDto testDto, CloudbreakClient client) throws Exception {
         testDto.setResponse(
-                client.getDefaultClient().stackV4Endpoint().get(client.getWorkspaceId(), testDto.getName(), Collections.emptySet(),
+                client.getDefaultClient(testContext).stackV4Endpoint().get(client.getWorkspaceId(), testDto.getName(), Collections.emptySet(),
                         testContext.getActingUserCrn().getAccountId())
         );
         return testDto;

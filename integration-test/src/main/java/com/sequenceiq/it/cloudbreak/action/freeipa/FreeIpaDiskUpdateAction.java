@@ -26,7 +26,7 @@ public class FreeIpaDiskUpdateAction extends AbstractFreeIpaAction<FreeIpaTestDt
 
     @Override
     public FreeIpaTestDto freeIpaAction(TestContext testContext, FreeIpaTestDto testDto, FreeIpaClient client) throws Exception {
-        Log.when(LOGGER, " FreeIpa endpoint: %s" + client.getDefaultClient().getFreeIpaV1Endpoint() + ", FreeIpa's environment: "
+        Log.when(LOGGER, " FreeIpa endpoint: %s" + client.getDefaultClient(testContext).getFreeIpaV1Endpoint() + ", FreeIpa's environment: "
                 + testDto.getRequest().getName());
         Log.whenJson(LOGGER, " FreeIpa disk update request: ", testDto.getRequest());
         DiskUpdateRequest diskUpdateRequest = new DiskUpdateRequest();
@@ -34,7 +34,7 @@ public class FreeIpaDiskUpdateAction extends AbstractFreeIpaAction<FreeIpaTestDt
         diskUpdateRequest.setSize(size);
         Log.whenJson(LOGGER, "FreeIpa DiskUpdate Request: ", diskUpdateRequest);
         String environmentCrn = testContext.given(EnvironmentTestDto.class).getCrn();
-        UpdateRootVolumeResponse updateRootVolumeResponse = client.getDefaultClient()
+        UpdateRootVolumeResponse updateRootVolumeResponse = client.getDefaultClient(testContext)
                 .getFreeIpaV1Endpoint()
                 .updateRootVolumeByCrn(environmentCrn, diskUpdateRequest);
         testDto.setFlow("FreeIpaDiskUpdateFlow", updateRootVolumeResponse.getFlowIdentifier());

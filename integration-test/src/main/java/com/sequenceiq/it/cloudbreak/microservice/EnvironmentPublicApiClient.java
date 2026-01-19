@@ -1,5 +1,7 @@
 package com.sequenceiq.it.cloudbreak.microservice;
 
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
+
 import java.util.Set;
 
 import org.glassfish.jersey.client.ClientConfig;
@@ -16,6 +18,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.sequenceiq.cloudbreak.client.ApiKeyRequestFilter;
 import com.sequenceiq.flow.api.FlowPublicEndpoint;
 import com.sequenceiq.it.cloudbreak.actor.CloudbreakUser;
+import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.envpublicapi.EnvironmentPublicApiLastSyncStatusDto;
 import com.sequenceiq.it.cloudbreak.dto.envpublicapi.EnvironmentPublicApiTestDto;
 import com.sequenceiq.it.cloudbreak.util.wait.service.WaitObject;
@@ -27,8 +30,18 @@ public class EnvironmentPublicApiClient<E extends Enum<E>, W extends WaitObject>
 
     private final EnvironmentPublicApi client;
 
-    public EnvironmentPublicApiClient(CloudbreakUser cloudbreakUser, String address) {
+    private EnvironmentPublicApi alternativeClient;
+
+    public EnvironmentPublicApiClient(CloudbreakUser cloudbreakUser, String address, String alternativeAddress) {
         setActing(cloudbreakUser);
+        client = new EnvironmentPublicApi(createApiClient(cloudbreakUser, address));
+
+        if (isNotEmpty(alternativeAddress)) {
+            alternativeClient = new EnvironmentPublicApi(createApiClient(cloudbreakUser, alternativeAddress));
+        }
+    }
+
+    private static ApiClient createApiClient(CloudbreakUser cloudbreakUser, String address) {
         ApiClient apiClient = new ApiClient();
         apiClient.setBasePath(address);
         ObjectMapper mapper = new ObjectMapper()
@@ -40,18 +53,22 @@ public class EnvironmentPublicApiClient<E extends Enum<E>, W extends WaitObject>
                 .register(new ApiKeyRequestFilter(cloudbreakUser.getAccessKey(), cloudbreakUser.getSecretKey()))
                 .register(jacksonJsonProvider);
         apiClient.setClientConfig(clientConfig);
-        client = new EnvironmentPublicApi(apiClient);
+        return apiClient;
     }
 
     @Override
-    public FlowPublicEndpoint flowPublicEndpoint() {
+    public FlowPublicEndpoint flowPublicEndpoint(TestContext testContext) {
         LOGGER.info("Flow is not supported by public environment client");
         return null;
     }
 
     @Override
-    public EnvironmentPublicApi getDefaultClient() {
-        return client;
+    public EnvironmentPublicApi getDefaultClient(TestContext testContext) {
+        if (testContext.shouldUseAlternativeEndpoints()) {
+            return alternativeClient;
+        } else {
+            return client;
+        }
     }
 
     @Override

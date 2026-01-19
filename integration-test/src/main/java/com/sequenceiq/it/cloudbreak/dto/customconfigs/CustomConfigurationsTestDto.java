@@ -48,13 +48,13 @@ public class CustomConfigurationsTestDto extends
 
     @Override
     public Collection<CustomConfigurationsV4Response> getAll(CloudbreakClient client) {
-        return client.getDefaultClient().customConfigurationsV4Endpoint().list().getResponses();
+        return client.getDefaultClient(getTestContext()).customConfigurationsV4Endpoint().list().getResponses();
     }
 
     @Override
     public void delete(TestContext testContext, CustomConfigurationsV4Response entity, CloudbreakClient client) {
         try {
-            client.getDefaultClient().customConfigurationsV4Endpoint().deleteByName(entity.getName());
+            client.getDefaultClient(getTestContext()).customConfigurationsV4Endpoint().deleteByName(entity.getName());
         } catch (Exception e) {
             LOGGER.warn("Something went wrong during delete operation for custom configurations {}, Cause: {}", entity, ResponseUtil.getErrorMessage(e), e);
         }
@@ -62,7 +62,7 @@ public class CustomConfigurationsTestDto extends
 
     @Override
     public void deleteForCleanup() {
-        getClientForCleanup().getDefaultClient().customConfigurationsV4Endpoint().deleteByCrn(getCrn());
+        getClientForCleanup().getDefaultClient(getTestContext()).customConfigurationsV4Endpoint().deleteByCrn(getCrn());
     }
 
     @Override

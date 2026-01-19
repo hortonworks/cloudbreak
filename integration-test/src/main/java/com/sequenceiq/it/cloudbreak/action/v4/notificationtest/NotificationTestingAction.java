@@ -16,7 +16,7 @@ public class NotificationTestingAction implements Action<NotificationTestingTest
     public NotificationTestingTestDto action(TestContext testContext, NotificationTestingTestDto testDto, CloudbreakClient cloudbreakClient) throws Exception {
         String logInitMessage = "Posting notification test";
         LOGGER.info("{}", logInitMessage);
-        cloudbreakClient.getDefaultClient().utilV4Endpoint().postNotificationTest();
+        cloudbreakClient.getDefaultClient(testContext).utilV4Endpoint().postNotificationTest();
         LOGGER.info("{} was successful", logInitMessage);
         return testDto;
     }

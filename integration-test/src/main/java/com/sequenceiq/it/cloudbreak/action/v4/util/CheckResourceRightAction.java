@@ -26,7 +26,7 @@ public class CheckResourceRightAction implements Action<CheckResourceRightTestDt
             resourceRightsV4.setRights(entry.getValue());
             return resourceRightsV4;
         }).collect(Collectors.toList()));
-        testDto.setResponse(cloudbreakClient.getDefaultClient().authorizationUtilEndpoint().checkRightByCrn(checkRightByCrnV4Request));
+        testDto.setResponse(cloudbreakClient.getDefaultClient(testContext).authorizationUtilEndpoint().checkRightByCrn(checkRightByCrnV4Request));
         Log.whenJson(LOGGER, "checking right on resources response:\n", testDto.getResponse());
         return testDto;
     }

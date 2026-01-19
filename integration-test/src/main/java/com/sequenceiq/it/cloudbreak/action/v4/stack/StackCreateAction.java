@@ -17,7 +17,7 @@ public class StackCreateAction implements Action<StackTestDto, CloudbreakClient>
     @Override
     public StackTestDto action(TestContext testContext, StackTestDto testDto, CloudbreakClient client) throws Exception {
         Log.whenJson(LOGGER, " Stack create request: ", testDto.getRequest());
-        StackV4Response response = client.getDefaultClient()
+        StackV4Response response = client.getDefaultClient(testContext)
                         .stackV4Endpoint()
                         .post(client.getWorkspaceId(), testDto.getRequest(), testContext.getActingUserCrn().getAccountId());
         testDto.setResponse(response);

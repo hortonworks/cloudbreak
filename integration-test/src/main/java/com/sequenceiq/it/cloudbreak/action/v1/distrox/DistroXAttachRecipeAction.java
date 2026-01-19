@@ -25,7 +25,7 @@ public class DistroXAttachRecipeAction implements Action<DistroXTestDto, Cloudbr
             AttachRecipeV4Request request = new AttachRecipeV4Request();
             request.setRecipeName(recipeName);
             request.setHostGroupName(instanceGroupV1Request.getName());
-            AttachRecipeV4Response response = client.getDefaultClient().distroXV1Endpoint().attachRecipeByName(testDto.getName(), request);
+            AttachRecipeV4Response response = client.getDefaultClient(testContext).distroXV1Endpoint().attachRecipeByName(testDto.getName(), request);
             try {
                 Log.whenJson(LOGGER, " attach recipe to stack response:\n", response);
             } catch (IOException ignored) {

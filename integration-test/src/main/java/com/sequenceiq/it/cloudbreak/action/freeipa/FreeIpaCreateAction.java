@@ -20,12 +20,12 @@ public class FreeIpaCreateAction extends AbstractFreeIpaAction<FreeIpaTestDto> {
     public FreeIpaTestDto freeIpaAction(TestContext testContext, FreeIpaTestDto testDto, FreeIpaClient client) throws Exception {
         Log.whenJson(LOGGER, format(" FreeIPA post request:%n"), testDto.getRequest());
         if (!StringUtils.equals(testContext.getExistingResourceNames().get(FreeIpaTestDto.class), testDto.getName())) {
-            CreateFreeIpaV1Response createFreeIpaV1Response = client.getDefaultClient().getFreeIpaV1Endpoint().create(testDto.getRequest());
+            CreateFreeIpaV1Response createFreeIpaV1Response = client.getDefaultClient(testContext).getFreeIpaV1Endpoint().create(testDto.getRequest());
             testDto.setResponse(createFreeIpaV1Response);
             testDto.setFlow("freeIpaCreateFlow", createFreeIpaV1Response.getFlowIdentifier());
         } else {
             Log.when(LOGGER, format(" FreeIPA already exists: %s", testDto.getName()));
-            testDto.setResponse(client.getDefaultClient().getFreeIpaV1Endpoint().describe(testContext.given(EnvironmentTestDto.class).getCrn()));
+            testDto.setResponse(client.getDefaultClient(testContext).getFreeIpaV1Endpoint().describe(testContext.given(EnvironmentTestDto.class).getCrn()));
         }
         Log.whenJson(LOGGER, format(" FreeIPA created  successfully:%n"), testDto.getResponse());
         Log.when(LOGGER, format(" FreeIPA CRN: %s", testDto.getResponse().getCrn()));

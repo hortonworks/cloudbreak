@@ -26,7 +26,7 @@ public class ClusterRepairAction implements Action<StackTestDto, CloudbreakClien
     public StackTestDto action(TestContext testContext, StackTestDto testDto, CloudbreakClient client) throws IOException {
         Log.whenJson(LOGGER, "cluster repair request:\n", getClusterRepairRequest(testDto));
 
-        client.getDefaultClient()
+        client.getDefaultClient(testContext)
                 .stackV4Endpoint()
                 .repairCluster(client.getWorkspaceId(), testDto.getName(), getClusterRepairRequest(testDto),
                         testContext.getActingUserCrn().getAccountId());

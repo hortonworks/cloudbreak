@@ -67,7 +67,8 @@ public class FreeIpaMultiAzScalingTests extends AbstractE2ETest {
                 .when(getFreeIpaTestClient().describe())
                 .await(FREEIPA_AVAILABLE)
                 .then((tc, testDto, client) -> {
-                    Set<InstanceMetaDataResponse> instanceMetaDataResponses = getInstanceMetaDataResponses(testDto.getRequest().getEnvironmentCrn(), client);
+                    Set<InstanceMetaDataResponse> instanceMetaDataResponses = getInstanceMetaDataResponses(testDto.getRequest().getEnvironmentCrn(), client,
+                            testContext);
                     primaryGatewayInstanceId.add(getPrimaryGatewayId(instanceMetaDataResponses));
                     return testDto;
                 })
@@ -76,7 +77,8 @@ public class FreeIpaMultiAzScalingTests extends AbstractE2ETest {
                 .when(freeIpaTestClient.upscale())
                 .await(FREEIPA_AVAILABLE)
                 .then((tc, testDto, client) -> {
-                    Set<InstanceMetaDataResponse> instanceMetaDataResponses = getInstanceMetaDataResponses(testDto.getRequest().getEnvironmentCrn(), client);
+                    Set<InstanceMetaDataResponse> instanceMetaDataResponses = getInstanceMetaDataResponses(testDto.getRequest().getEnvironmentCrn(), client,
+                            testContext);
                     assertInstanceCount(testDto.getRequest().getTargetAvailabilityType(), instanceMetaDataResponses);
                     assertPrimaryGatewayHasNotChanged(primaryGatewayInstanceId, instanceMetaDataResponses);
                     validateMultiAz(testDto.getRequest().getEnvironmentCrn(), client, testDto.getName(), tc, OperationType.UPSCALE);
@@ -87,7 +89,8 @@ public class FreeIpaMultiAzScalingTests extends AbstractE2ETest {
                 .when(freeIpaTestClient.downscale())
                 .await(FREEIPA_AVAILABLE)
                 .then((tc, testDto, client) -> {
-                    Set<InstanceMetaDataResponse> instanceMetaDataResponses = getInstanceMetaDataResponses(testDto.getRequest().getEnvironmentCrn(), client);
+                    Set<InstanceMetaDataResponse> instanceMetaDataResponses = getInstanceMetaDataResponses(testDto.getRequest().getEnvironmentCrn(), client,
+                            testContext);
                     assertInstanceCount(testDto.getRequest().getTargetAvailabilityType(), instanceMetaDataResponses);
                     assertPrimaryGatewayHasNotChanged(primaryGatewayInstanceId, instanceMetaDataResponses);
                     validateMultiAz(testDto.getRequest().getEnvironmentCrn(), client, testDto.getName(), tc, OperationType.DOWNSCALE);
@@ -99,7 +102,8 @@ public class FreeIpaMultiAzScalingTests extends AbstractE2ETest {
                 .when(freeIpaTestClient.upscale())
                 .await(FREEIPA_AVAILABLE)
                 .then((tc, testDto, client) -> {
-                    Set<InstanceMetaDataResponse> instanceMetaDataResponses = getInstanceMetaDataResponses(testDto.getRequest().getEnvironmentCrn(), client);
+                    Set<InstanceMetaDataResponse> instanceMetaDataResponses = getInstanceMetaDataResponses(testDto.getRequest().getEnvironmentCrn(), client,
+                            testContext);
                     assertInstanceCount(testDto.getRequest().getTargetAvailabilityType(), instanceMetaDataResponses);
                     assertPrimaryGatewayHasNotChanged(primaryGatewayInstanceId, instanceMetaDataResponses);
                     validateMultiAz(testDto.getRequest().getEnvironmentCrn(), client, testDto.getName(), tc, OperationType.UPSCALE);
@@ -119,8 +123,8 @@ public class FreeIpaMultiAzScalingTests extends AbstractE2ETest {
         return primaryGatewayOptional.get().getInstanceId();
     }
 
-    private Set<InstanceMetaDataResponse> getInstanceMetaDataResponses(String environmentCrn, FreeIpaClient client) {
-        DescribeFreeIpaResponse describeFreeIpaResponse = client.getDefaultClient().getFreeIpaV1Endpoint().describe(environmentCrn);
+    private Set<InstanceMetaDataResponse> getInstanceMetaDataResponses(String environmentCrn, FreeIpaClient client, TestContext testContext) {
+        DescribeFreeIpaResponse describeFreeIpaResponse = client.getDefaultClient(testContext).getFreeIpaV1Endpoint().describe(environmentCrn);
         Set<InstanceMetaDataResponse> instanceMetaDataResponses = describeFreeIpaResponse.getInstanceGroups().stream()
                 .map(InstanceGroupResponse::getMetaData)
                 .flatMap(Set::stream)
@@ -148,7 +152,7 @@ public class FreeIpaMultiAzScalingTests extends AbstractE2ETest {
     }
 
     private void validateMultiAz(String environmentCrn, FreeIpaClient client, String freeIpa, TestContext tc, OperationType operationType) {
-        DescribeFreeIpaResponse freeIpaResponse = client.getDefaultClient().getFreeIpaV1Endpoint().describe(environmentCrn);
+        DescribeFreeIpaResponse freeIpaResponse = client.getDefaultClient(tc).getFreeIpaV1Endpoint().describe(environmentCrn);
         if (!freeIpaResponse.isEnableMultiAz()) {
             throw new TestFailException(String.format("MultiAz is not enabled for %s after %s", freeIpaResponse.getName(), operationType.getLowerCaseName()));
         }

@@ -149,7 +149,7 @@ public class GcpExternalDatabaseServerEncryptionTests extends PreconditionSdxE2E
         SdxClusterDetailResponse sdxClusterDetailResponse = sdxTestDto.getResponse();
         String clusterName = sdxClusterDetailResponse.getName();
         StackDatabaseServerResponse stackDatabaseServerResponse = sdxDatabaseServerAction.getSdxExternalDatabaseConfigs(sdxClusterDetailResponse.getCrn(),
-                sdxClient);
+                sdxClient, tc);
         validateDbServer(stackDatabaseServerResponse, clusterName);
 
         List<InstanceGroupV4Response> instanceGroups = sdxClusterDetailResponse.getStackV4Response().getInstanceGroups();
@@ -166,7 +166,7 @@ public class GcpExternalDatabaseServerEncryptionTests extends PreconditionSdxE2E
         StackV4Response distroxResponse = distroxTestDto.getResponse();
         String clusterName = distroxResponse.getName();
         StackDatabaseServerResponse stackDatabaseServerResponse = distroxDatabaseServerAction.getExternalDatabaseConfigs(distroxTestDto.getCrn(),
-                cloudbreakClient);
+                cloudbreakClient, distroxTestDto.getTestContext());
         validateDbServer(stackDatabaseServerResponse, clusterName);
 
         List<InstanceGroupV4Response> instanceGroups = distroxResponse.getInstanceGroups();

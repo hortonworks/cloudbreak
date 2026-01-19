@@ -17,7 +17,7 @@ public class ProxyConfigGetAction implements Action<ProxyTestDto, EnvironmentCli
     public ProxyTestDto action(TestContext testContext, ProxyTestDto testDto, EnvironmentClient client) throws Exception {
         Log.when(LOGGER, " Proxy config get request: " + testDto.getName());
         testDto.setResponse(
-                client.getDefaultClient()
+                client.getDefaultClient(testContext)
                         .proxyV1Endpoint()
                         .getByName(testDto.getName()));
         Log.whenJson(LOGGER, " Proxy config get successfully:\n", testDto.getResponse());

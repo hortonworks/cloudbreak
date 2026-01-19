@@ -24,7 +24,7 @@ public class FreeIpaCheckVariantAction extends AbstractFreeIpaAction<FreeIpaTest
     @Override
     protected FreeIpaTestDto freeIpaAction(TestContext testContext, FreeIpaTestDto testDto, FreeIpaClient client) {
         Log.when(LOGGER, " Checking FreeIpa variant, expected: " + variant);
-        DescribeFreeIpaResponse response = client.getDefaultClient()
+        DescribeFreeIpaResponse response = client.getDefaultClient(testContext)
                 .getFreeIpaV1Endpoint()
                 .describe(testContext.given(EnvironmentTestDto.class).getCrn());
         if (!response.getVariant().equals(variant)) {

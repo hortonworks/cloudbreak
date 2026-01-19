@@ -267,13 +267,13 @@ public class DistroXEncryptedVolumeTest extends AbstractE2ETest {
     }
 
     private DistroXTestDto verifyAwsEnaDriver(TestContext testContext, DistroXTestDto testDto, CloudbreakClient cloudbreakClient) {
-        testContext.getCloudProvider().getCloudFunctionality().verifyEnaDriver(testDto.getResponse(), cloudbreakClient);
+        testContext.getCloudProvider().getCloudFunctionality().verifyEnaDriver(testDto.getResponse(), cloudbreakClient, testContext);
         return testDto;
     }
 
     private EnvironmentTestDto verifyEnvironmentResponseDiskEncryptionKey(TestContext testContext, EnvironmentTestDto testDto,
             EnvironmentClient environmentClient) {
-        DetailedEnvironmentResponse environment = environmentClient.getDefaultClient().environmentV1Endpoint().getByName(testDto.getName());
+        DetailedEnvironmentResponse environment = environmentClient.getDefaultClient(testContext).environmentV1Endpoint().getByName(testDto.getName());
         testContext.getCloudProvider().verifyDiskEncryptionKey(environment, testDto.getRequest().getName());
         return testDto;
     }

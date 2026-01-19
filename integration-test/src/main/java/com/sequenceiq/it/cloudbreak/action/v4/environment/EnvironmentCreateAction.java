@@ -18,13 +18,13 @@ public class EnvironmentCreateAction extends AbstractEnvironmentAction {
     protected EnvironmentTestDto environmentAction(TestContext testContext, EnvironmentTestDto testDto, EnvironmentClient client) throws Exception {
         if (!StringUtils.equals(testContext.getExistingResourceNames().get(EnvironmentTestDto.class), testDto.getName())) {
             Log.whenJson("Environment post request: ", testDto.getRequest());
-            CreateEnvironmentResponse createEnvironmentResponse = client.getDefaultClient().environmentV1Endpoint().post(testDto.getRequest());
+            CreateEnvironmentResponse createEnvironmentResponse = client.getDefaultClient(testContext).environmentV1Endpoint().post(testDto.getRequest());
             testDto.setResponse(createEnvironmentResponse);
             testDto.setFlow("environmentCreateFlow", createEnvironmentResponse.getFlowIdentifier());
         } else {
-            DetailedEnvironmentResponse detailedEnvironmentResponse = client.getDefaultClient().environmentV1Endpoint().getByName(testDto.getName());
+            DetailedEnvironmentResponse detailedEnvironmentResponse = client.getDefaultClient(testContext).environmentV1Endpoint().getByName(testDto.getName());
             if (detailedEnvironmentResponse != null) {
-                FlowLogResponse flow = client.getDefaultClient().flowEndpoint().getLastFlowByResourceCrn(detailedEnvironmentResponse.getCrn());
+                FlowLogResponse flow = client.getDefaultClient(testContext).flowEndpoint().getLastFlowByResourceCrn(detailedEnvironmentResponse.getCrn());
                 testDto.setResponse(detailedEnvironmentResponse);
                 testDto.setFlow("environmentCreateFlow",
                         new FlowIdentifier(

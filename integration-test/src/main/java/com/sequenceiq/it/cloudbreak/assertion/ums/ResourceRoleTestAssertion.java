@@ -27,11 +27,11 @@ public class ResourceRoleTestAssertion {
         return (testContext, umsTestDto, umsClient) -> {
             String resourceCrn = umsTestDto.getRequest().getResourceCrn();
             String userCrn = assignee.getCrn();
-            String resourceRole = UmsClientUtils.getResourceRoleCrn(umsResourceRole, umsClient, resourceCrn);
+            String resourceRole = UmsClientUtils.getResourceRoleCrn(umsResourceRole, umsClient, resourceCrn, testContext);
 
             LOGGER.info(format(" Validate resource role '%s' has been successfully assigned to user '%s' at resource '%s'... ",
                     resourceRole, userCrn, resourceCrn));
-            Multimap<String, String> assignedResourceRoles = umsClient.getDefaultClient().listAssignedResourceRoles(userCrn);
+            Multimap<String, String> assignedResourceRoles = umsClient.getDefaultClient(testContext).listAssignedResourceRoles(userCrn);
             boolean resourceRoleAssigned = assignedResourceRoles.get(resourceCrn).contains(resourceRole);
             if (expectedPresence) {
                 if (resourceRoleAssigned) {

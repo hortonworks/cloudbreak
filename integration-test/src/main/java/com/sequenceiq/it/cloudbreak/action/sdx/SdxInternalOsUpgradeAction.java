@@ -30,13 +30,14 @@ public class SdxInternalOsUpgradeAction implements Action<SdxInternalTestDto, Sd
         upgradeRequest.setSkipBackup(true);
         upgradeRequest.setImageId(imageId);
 
-        Log.when(LOGGER, " SDX endpoint: %s" + client.getDefaultClient().sdxEndpoint() + ", SDX's environment: " + testDto.getRequest().getEnvironment());
+        Log.when(LOGGER, " SDX endpoint: %s" + client.getDefaultClient(testContext).sdxEndpoint() + ", SDX's environment: "
+                + testDto.getRequest().getEnvironment());
         Log.whenJson(LOGGER, " SDX OS upgrade request: ", upgradeRequest);
-        SdxUpgradeResponse upgradeResponse = client.getDefaultClient()
+        SdxUpgradeResponse upgradeResponse = client.getDefaultClient(testContext)
                 .sdxUpgradeEndpoint()
                 .upgradeClusterByName(testDto.getName(), upgradeRequest);
         testDto.setFlow("SDX OS upgrade", upgradeResponse.getFlowIdentifier());
-        SdxClusterDetailResponse detailedResponse = client.getDefaultClient()
+        SdxClusterDetailResponse detailedResponse = client.getDefaultClient(testContext)
                 .sdxEndpoint()
                 .getDetail(testDto.getName(), Collections.emptySet());
         testDto.setResponse(detailedResponse);

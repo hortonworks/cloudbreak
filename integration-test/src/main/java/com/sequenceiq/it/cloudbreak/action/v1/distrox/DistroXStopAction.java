@@ -23,11 +23,11 @@ public class DistroXStopAction implements Action<DistroXTestDto, CloudbreakClien
     public DistroXTestDto action(TestContext testContext, DistroXTestDto testDto, CloudbreakClient client) throws Exception {
         Log.when(LOGGER, format(" Stop Distrox: %s ", testDto.getName()));
         Log.whenJson(LOGGER, " Distrox stop request: ", testDto.getRequest());
-        FlowIdentifier flow = client.getDefaultClient()
+        FlowIdentifier flow = client.getDefaultClient(testContext)
                 .distroXV1Endpoint()
                 .putStopByName(testDto.getName());
         testDto.setFlow("Distrox stop", flow);
-        StackV4Response stackV4Response = client.getDefaultClient()
+        StackV4Response stackV4Response = client.getDefaultClient(testContext)
                 .distroXV1Endpoint().getByName(testDto.getName(), Collections.emptySet());
         testDto.setResponse(stackV4Response);
         Log.whenJson(LOGGER, " Distrox stop response: ", stackV4Response);

@@ -12,6 +12,6 @@ import com.sequenceiq.it.cloudbreak.microservice.FreeIpaClient;
 public class FreeIpaUtil {
 
     public List<FreeipaSecretTypeResponse> getSecretTypes(AbstractFreeIpaTestDto testDto, FreeIpaClient freeIpaClient) {
-        return freeIpaClient.getDefaultClient().getFreeipaRotationV1Endpoint().listRotatableFreeipaSecretType(testDto.getCrn());
+        return freeIpaClient.getDefaultClient(testDto.getTestContext()).getFreeipaRotationV1Endpoint().listRotatableFreeipaSecretType(testDto.getCrn());
     }
 }

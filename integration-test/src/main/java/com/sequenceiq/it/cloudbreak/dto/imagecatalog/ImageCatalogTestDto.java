@@ -70,13 +70,13 @@ public class ImageCatalogTestDto extends AbstractCloudbreakTestDto<ImageCatalogV
     @Override
     public void deleteForCleanup() {
         if (!skipCleanup) {
-            getClientForCleanup().getDefaultClient().imageCatalogV4Endpoint().deleteByCrn(0L, getCrn());
+            getClientForCleanup().getDefaultClient(getTestContext()).imageCatalogV4Endpoint().deleteByCrn(0L, getCrn());
         }
     }
 
     @Override
     public Collection<ImageCatalogV4Response> getAll(CloudbreakClient client) {
-        return client.getDefaultClient().imageCatalogV4Endpoint().list(client.getWorkspaceId(), false).getResponses();
+        return client.getDefaultClient(getTestContext()).imageCatalogV4Endpoint().list(client.getWorkspaceId(), false).getResponses();
     }
 
     @Override
@@ -87,7 +87,7 @@ public class ImageCatalogTestDto extends AbstractCloudbreakTestDto<ImageCatalogV
     @Override
     public void delete(TestContext testContext, ImageCatalogV4Response entity, CloudbreakClient client) {
         try {
-            client.getDefaultClient().imageCatalogV4Endpoint().deleteByName(client.getWorkspaceId(), entity.getName());
+            client.getDefaultClient(getTestContext()).imageCatalogV4Endpoint().deleteByName(client.getWorkspaceId(), entity.getName());
         } catch (Exception e) {
             LOGGER.warn("Something went wrong on {} purge. {}", entity.getName(), ResponseUtil.getErrorMessage(e), e);
         }

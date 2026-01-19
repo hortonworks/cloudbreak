@@ -16,7 +16,7 @@ public class RedbeamsDatabaseServerStopAction implements Action<RedbeamsDatabase
     @Override
     public RedbeamsDatabaseServerTestDto action(TestContext testContext, RedbeamsDatabaseServerTestDto testDto, RedbeamsClient client) throws Exception {
         Log.as(LOGGER, " Database server stop request:\n");
-        client.getDefaultClient()
+        client.getDefaultClient(testContext)
                 .databaseServerV4Endpoint()
                 .stop(testDto.getResponse().getCrn());
         return testDto;

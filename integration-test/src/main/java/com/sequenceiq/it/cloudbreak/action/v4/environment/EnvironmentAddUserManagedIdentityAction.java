@@ -20,7 +20,7 @@ public class EnvironmentAddUserManagedIdentityAction implements Action<Environme
             AzureEnvironmentParameters azureEnvironmentParameters = createAzureEnvironmentParameters(azureResourceEncryptionParameters.get(), testDto);
             EnvironmentEditRequest request = new EnvironmentEditRequest();
             request.setAzure(azureEnvironmentParameters);
-            DetailedEnvironmentResponse response = environmentClient.getDefaultClient()
+            DetailedEnvironmentResponse response = environmentClient.getDefaultClient(testContext)
                     .environmentV1Endpoint()
                     .editByCrn(testDto.getResponse().getCrn(), request);
             testDto.setResponse(response);

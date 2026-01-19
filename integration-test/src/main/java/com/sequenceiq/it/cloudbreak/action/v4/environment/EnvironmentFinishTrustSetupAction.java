@@ -15,7 +15,7 @@ public class EnvironmentFinishTrustSetupAction extends AbstractEnvironmentAction
 
     @Override
     protected EnvironmentTestDto environmentAction(TestContext testContext, EnvironmentTestDto testDto, EnvironmentClient client) throws Exception {
-        FinishSetupCrossRealmTrustResponse response = client.getDefaultClient().hybridEndpoint()
+        FinishSetupCrossRealmTrustResponse response = client.getDefaultClient(testContext).hybridEndpoint()
                 .finishSetupByCrn(testDto.getResourceCrn(), new FinishSetupCrossRealmTrustRequest());
         testDto.setLastKnownFlow(response.getFlowIdentifier());
         Log.when(LOGGER, "Environment finish trust setup action posted");

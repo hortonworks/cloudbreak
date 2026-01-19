@@ -18,7 +18,7 @@ import com.sequenceiq.it.cloudbreak.microservice.FreeIpaClient;
 public class FreeIpaInstanceUtil {
 
     public List<String> getInstanceIds(FreeIpaTestDto freeIpaTestDto, FreeIpaClient freeIpaClient, String hostGroupName) {
-        DescribeFreeIpaResponse describeFreeIpaResponse = freeIpaClient.getDefaultClient()
+        DescribeFreeIpaResponse describeFreeIpaResponse = freeIpaClient.getDefaultClient(freeIpaTestDto.getTestContext())
                 .getFreeIpaV1Endpoint().describe(freeIpaTestDto.getRequest().getEnvironmentCrn());
         List<InstanceGroupResponse> instanceGroupResponses = describeFreeIpaResponse.getInstanceGroups();
         InstanceGroupResponse instanceGroupResponse = instanceGroupResponses.stream().filter(instanceGroup ->

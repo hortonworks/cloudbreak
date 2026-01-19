@@ -29,19 +29,19 @@ public class SetWorkloadPasswordAction implements Action<UmsTestDto, UmsClient> 
         Crn.ResourceType resourceType = testContext.getActingUserCrn().getResourceType();
         String workloadUsername;
         if (resourceType.equals(Crn.ResourceType.MACHINE_USER)) {
-            workloadUsername = client.getDefaultClient().getMachineUserDetails(userCrn, accountId).getWorkloadUsername();
+            workloadUsername = client.getDefaultClient(testContext).getMachineUserDetails(userCrn, accountId).getWorkloadUsername();
             LOGGER.info("Setting new workload password '{}' for machine user '{}' with workload username '{}'...",
                     newPassword, userCrn, workloadUsername);
             Log.when(LOGGER, format(" Setting new workload password '%s' for machine user '%s' workload username '%s'... ",
                     newPassword, userCrn, workloadUsername));
-            client.getDefaultClient().setMachineUserWorkloadPassword(userCrn, accountId, newPassword);
+            client.getDefaultClient(testContext).setMachineUserWorkloadPassword(userCrn, accountId, newPassword);
         } else {
-            workloadUsername = client.getDefaultClient().getUserDetails(userCrn).getWorkloadUsername();
+            workloadUsername = client.getDefaultClient(testContext).getUserDetails(userCrn).getWorkloadUsername();
             LOGGER.info("Setting new workload password '{}' for user '{}' with workload username '{}'...",
                     newPassword, userCrn, workloadUsername);
             Log.when(LOGGER, format(" Setting new workload password '%s' for user '%s' workload username '%s'... ",
                     newPassword, userCrn, workloadUsername));
-            client.getDefaultClient().setActorWorkloadPassword(userCrn, newPassword);
+            client.getDefaultClient(testContext).setActorWorkloadPassword(userCrn, newPassword);
         }
         // wait for UmsRightsCache to expire
         Thread.sleep(7000);

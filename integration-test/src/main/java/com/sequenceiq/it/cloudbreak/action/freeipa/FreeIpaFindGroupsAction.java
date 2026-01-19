@@ -33,7 +33,7 @@ public class FreeIpaFindGroupsAction implements Action<FreeIpaTestDto, FreeIpaCl
         checkGroupsRequest.setGroups(groups);
         Log.when(LOGGER, format(" Checking groups [%s] are present at environment '%s'", groups, environmentCrn));
         Log.whenJson(LOGGER, format(" FreeIpa '%s' find groups request:%n ", testDto.getResponse().getCrn()), checkGroupsRequest);
-        if (!client.getDefaultClient().getClientTestV1Endpoint().checkGroups(checkGroupsRequest).getResult()) {
+        if (!client.getDefaultClient(testContext).getClientTestV1Endpoint().checkGroups(checkGroupsRequest).getResult()) {
             throw new TestFailException("Given freeipa groups cannot be found, please check FMS logs for details");
         }
         LOGGER.info(format(" Groups [%s] are present at environment '%s'", groups, environmentCrn));

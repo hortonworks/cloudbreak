@@ -349,7 +349,7 @@ public abstract class AbstractCloudProvider implements CloudProvider {
             boolean govCloud, String runtimeVersion) {
         try {
             ImageV4Response latestPrewarmedImage = cloudbreakClient
-                    .getDefaultClient()
+                    .getDefaultClient(imageCatalogTestDto.getTestContext())
                     .imageCatalogV4Endpoint()
                     .getImagesByName(cloudbreakClient.getWorkspaceId(), imageCatalogTestDto.getRequest().getName(), null,
                             platform, runtimeVersion, null, govCloud, true, null)
@@ -383,7 +383,7 @@ public abstract class AbstractCloudProvider implements CloudProvider {
 
         try {
             List<BaseImageV4Response> images = cloudbreakClient
-                    .getDefaultClient()
+                    .getDefaultClient(imageCatalogTestDto.getTestContext())
                     .imageCatalogV4Endpoint()
                     .getImagesByName(cloudbreakClient.getWorkspaceId(), imageCatalogTestDto.getRequest().getName(), null,
                             platform, null, null, govCloud, true, architecture.getName()).getBaseImages();

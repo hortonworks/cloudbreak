@@ -108,8 +108,8 @@ public class ImageAssertions {
     }
 
     private AttemptMaker<Boolean> getImageSetupAttemptMaker(SdxInternalTestDto testDto, SdxClient client) {
-        SdxEndpoint sdxEndpoint = client.getDefaultClient().sdxEndpoint();
-        SdxEventEndpoint sdxEventEndpoint = client.getDefaultClient().sdxEventEndpoint();
+        SdxEndpoint sdxEndpoint = client.getDefaultClient(testDto.getTestContext()).sdxEndpoint();
+        SdxEventEndpoint sdxEventEndpoint = client.getDefaultClient(testDto.getTestContext()).sdxEventEndpoint();
         String environmentCrn = testDto.getResponse().getEnvironmentCrn();
         List<StructuredEventType> eventTypes = List.of(StructuredEventType.NOTIFICATION);
         return () -> {
@@ -129,8 +129,8 @@ public class ImageAssertions {
     }
 
     private AttemptMaker<Boolean> getImageSetupAttemptMaker(DistroXTestDto testDto, CloudbreakClient client) {
-        DistroXV1Endpoint distroXV1Endpoint = client.getDefaultClient().distroXV1Endpoint();
-        DistroXV1EventEndpoint eventEndpoint = client.getDefaultClient().distroXV1EventEndpoint();
+        DistroXV1Endpoint distroXV1Endpoint = client.getDefaultClient(testDto.getTestContext()).distroXV1Endpoint();
+        DistroXV1EventEndpoint eventEndpoint = client.getDefaultClient(testDto.getTestContext()).distroXV1EventEndpoint();
         String environmentCrn = testDto.getResponse().getEnvironmentCrn();
         List<StructuredEventType> eventTypes = List.of(StructuredEventType.NOTIFICATION);
         return () -> {

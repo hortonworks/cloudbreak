@@ -49,7 +49,7 @@ public class CloudProviderSideTagAssertion {
         return (testContext, testDto, client) -> {
             String envCrn = testDto.getResponse().getCrn();
             DescribeFreeIpaResponse freeIpaResponse = testContext.getMicroserviceClient(FreeIpaClient.class)
-                    .getDefaultClient()
+                    .getDefaultClient(testContext)
                     .getFreeIpaV1Endpoint()
                     .describe(envCrn);
 
@@ -69,7 +69,7 @@ public class CloudProviderSideTagAssertion {
         return (testContext, testDto, client) -> {
             String sdxCrn = testDto.getResponse().getCrn();
             SdxClusterDetailResponse sdxClusterDetailResponse = testContext.getMicroserviceClient(SdxClient.class)
-                    .getDefaultClient()
+                    .getDefaultClient(testContext)
                     .sdxEndpoint()
                     .getDetailByCrn(sdxCrn, Collections.emptySet());
 
@@ -89,7 +89,7 @@ public class CloudProviderSideTagAssertion {
         return (testContext, testDto, client) -> {
             String distroxCrn = testDto.getResponse().getCrn();
             StackV4Response stackV4Response = testContext.getMicroserviceClient(CloudbreakClient.class)
-                    .getDefaultClient()
+                    .getDefaultClient(testContext)
                     .distroXV1Endpoint()
                     .getByCrn(distroxCrn, Collections.emptySet());
 

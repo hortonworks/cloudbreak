@@ -19,7 +19,7 @@ public class StackGetWithResourcesAction implements Action<DistroXTestDto, Cloud
     @Override
     public DistroXTestDto action(TestContext testContext, DistroXTestDto testDto, CloudbreakClient client) throws Exception {
         Log.whenJson(LOGGER, "Stack get request: ", testDto.getRequest());
-        StackV4Response response = client.getDefaultClient()
+        StackV4Response response = client.getDefaultClient(testContext)
                 .stackV4Endpoint()
                 .getWithResources(0L, testDto.getName(), Set.of(), testContext.getActingUserCrn().getAccountId());
         testDto.setResponse(response);

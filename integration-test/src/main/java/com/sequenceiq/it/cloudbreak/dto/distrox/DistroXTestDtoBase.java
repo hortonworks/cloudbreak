@@ -193,7 +193,7 @@ public class DistroXTestDtoBase<T extends DistroXTestDtoBase> extends AbstractCl
         }
         try {
             EnvironmentClient envClient = getTestContext().getMicroserviceClient(EnvironmentClient.class);
-            DetailedEnvironmentResponse envResponse = envClient.getDefaultClient()
+            DetailedEnvironmentResponse envResponse = envClient.getDefaultClient(getTestContext())
                     .environmentV1Endpoint()
                     .getByName(getRequest().getEnvironmentName());
             InstanceGroupNetworkV1Request instanceGroupNetworkV1Request = new InstanceGroupNetworkV1Request();

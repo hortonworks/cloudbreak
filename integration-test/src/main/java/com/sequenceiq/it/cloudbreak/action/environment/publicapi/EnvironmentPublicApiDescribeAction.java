@@ -10,7 +10,7 @@ public class EnvironmentPublicApiDescribeAction implements Action<EnvironmentPub
     @Override
     public EnvironmentPublicApiTestDto action(TestContext testContext, EnvironmentPublicApiTestDto testDto, EnvironmentPublicApiClient client) throws Exception {
         testDto.setResponse(
-                client.getDefaultClient().describeEnvironment(testDto.getRequest())
+                client.getDefaultClient(testContext).describeEnvironment(testDto.getRequest())
         );
         Log.whenJson("Environment describe response: ", testDto.getResponse());
         return testDto;

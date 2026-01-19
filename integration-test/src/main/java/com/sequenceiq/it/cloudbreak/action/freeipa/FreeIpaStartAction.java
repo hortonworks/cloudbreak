@@ -21,7 +21,7 @@ public class FreeIpaStartAction extends AbstractFreeIpaAction<FreeIpaTestDto> {
         String environmentCrn = testContext.given(EnvironmentTestDto.class).getCrn();
         Log.when(LOGGER, format(" FreeIPA CRN: %s", environmentCrn));
         Log.whenJson(LOGGER, format(" FreeIPA start request: %n"), testDto.getRequest());
-        StartFreeIpaV1Response start = client.getDefaultClient()
+        StartFreeIpaV1Response start = client.getDefaultClient(testContext)
                 .getFreeIpaV1Endpoint()
                 .start(environmentCrn);
         testDto.setFlow("FreeIpaStartFlow", start.getFlowIdentifier());

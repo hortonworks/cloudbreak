@@ -17,7 +17,7 @@ public class ClusterTemplateCreateAction implements Action<ClusterTemplateTestDt
     public ClusterTemplateTestDto action(TestContext testContext, ClusterTemplateTestDto testDto, CloudbreakClient client) throws Exception {
         Log.whenJson(LOGGER, " ClusterTemplateEntity post request:\n", testDto.getRequest());
         testDto.setResponse(
-                client.getDefaultClient()
+                client.getDefaultClient(testContext)
                         .clusterTemplateV4EndPoint()
                         .post(client.getWorkspaceId(), testDto.getRequest()));
         Log.whenJson(LOGGER, " ClusterTemplateEntity created  successfully:\n", testDto.getResponse());

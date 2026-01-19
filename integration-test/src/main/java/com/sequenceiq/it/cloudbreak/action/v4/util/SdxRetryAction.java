@@ -16,7 +16,7 @@ public class SdxRetryAction implements Action<SdxInternalTestDto, SdxClient> {
     @Override
     public SdxInternalTestDto action(TestContext testContext, SdxInternalTestDto testDto, SdxClient sdxClient)
             throws Exception {
-        FlowIdentifier flowIdentifier = sdxClient.getDefaultClient().sdxEndpoint().retryByCrn(testDto.getCrn());
+        FlowIdentifier flowIdentifier = sdxClient.getDefaultClient(testContext).sdxEndpoint().retryByCrn(testDto.getCrn());
         testDto.setFlow("Retry", flowIdentifier);
         return testDto;
     }

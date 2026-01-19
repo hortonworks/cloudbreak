@@ -22,7 +22,6 @@ import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
-import com.sequenceiq.it.cloudbreak.config.server.ServerProperties;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
@@ -30,6 +29,7 @@ import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.externalizedcompute.ExternalizedComputeClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
+import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 
 public class ExternalizedComputeClusterTest extends AbstractE2ETest {
@@ -40,7 +40,7 @@ public class ExternalizedComputeClusterTest extends AbstractE2ETest {
     private EnvironmentTestClient environmentTestClient;
 
     @Inject
-    private ServerProperties serverProperties;
+    private CloudbreakClient cloudbreakClient;
 
     @Inject
     private CredentialTestClient credentialTestClient;
@@ -138,7 +138,7 @@ public class ExternalizedComputeClusterTest extends AbstractE2ETest {
 
     private String validateListClusterResponseAndGetClusterCrn(TestContext testContext, String environmentName) {
         Client client = RestClientUtil.get();
-        WebTarget webTarget = client.target(serverProperties.getCloudbreak()).path("/api/v1/compute/listClusters");
+        WebTarget webTarget = cloudbreakClient.getRawClient(testContext).path("/api/v1/compute/listClusters");
         webTarget.register(new ApiKeyRequestFilter(testContext.getActingUserAccessKey(), testContext.getActingUser().getSecretKey()));
         String requestjson = String.format("{\"envNameOrCrn\": \"%s\"}", environmentName);
         String response = webTarget.request().post(Entity.json(requestjson)).readEntity(String.class);

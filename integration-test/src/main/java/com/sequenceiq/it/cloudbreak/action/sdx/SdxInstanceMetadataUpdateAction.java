@@ -45,7 +45,7 @@ public class SdxInstanceMetadataUpdateAction implements Action<SdxInternalTestDt
         SdxInstanceMetadataUpdateRequest request = new SdxInstanceMetadataUpdateRequest();
         request.setCrn(testDto.getCrn());
         request.setUpdateType(targetUpdateType);
-        FlowIdentifier flowIdentifier = client.getDefaultClient().sdxEndpoint().instanceMetadataUpdate(request);
+        FlowIdentifier flowIdentifier = client.getDefaultClient(testContext).sdxEndpoint().instanceMetadataUpdate(request);
         testDto.setFlow("SDX instance metadata update",  flowIdentifier);
         Log.whenJson(LOGGER, format(" SDX instance metadata update: %n"), testDto.getCrn());
         return testDto;

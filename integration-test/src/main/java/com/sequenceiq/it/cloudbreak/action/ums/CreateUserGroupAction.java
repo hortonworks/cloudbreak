@@ -32,12 +32,12 @@ public class CreateUserGroupAction implements Action<UmsGroupTestDto, UmsClient>
         String accountId = testDto.getRequest().getAccountId();
         testDto.withName(groupName);
         try {
-            Group existingGroup = client.getDefaultClient().listGroups(accountId, List.of(groupName))
+            Group existingGroup = client.getDefaultClient(testContext).listGroups(accountId, List.of(groupName))
                     .stream()
                     .filter(group -> StringUtils.equalsIgnoreCase(group.getGroupName(), groupName))
                     .findFirst()
                     .orElse(null);
-            List<String> groupMembers = client.getDefaultClient().listMembersFromGroup(accountId, groupName);
+            List<String> groupMembers = client.getDefaultClient(testContext).listMembersFromGroup(accountId, groupName);
             testDto.setResponse(existingGroup);
             LOGGER.info(format(" User group is already present at account '%s' with details: %nGroup Id: %s %nGroup Crn: %s %nGroup Name: %s " +
                             "%nGroup Members: %s. So creation is not necessary! ", accountId, testDto.getResponse().getGroupId(),
@@ -48,7 +48,7 @@ public class CreateUserGroupAction implements Action<UmsGroupTestDto, UmsClient>
         } catch (StatusRuntimeException e) {
             Log.when(LOGGER, format(" Creating new user group '%s' at account '%s'. ", groupName, accountId));
             Log.whenJson(LOGGER, format(" Create new user group request:%n "), testDto.getRequest());
-            testDto.setResponse(client.getDefaultClient().createGroup(accountId, groupName));
+            testDto.setResponse(client.getDefaultClient(testContext).createGroup(accountId, groupName));
             LOGGER.info(format(" New user group has been created at account '%s' with details: %nGroup Id: %s %nGroup Crn: %s %nGroup Name: %s. ",
                     accountId, testDto.getResponse().getGroupId(), testDto.getResponse().getCrn(), testDto.getResponse().getGroupName()));
             Log.when(LOGGER, format(" New user group has been created at account '%s' with details: %nGroup Id: %s %nGroup Crn: %s %nGroup Name: %s. ",

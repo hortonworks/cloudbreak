@@ -29,11 +29,11 @@ public class DistroXRepairInstancesAction implements Action<DistroXTestDto, Clou
         DistroXRepairV1Request distroXRepairV1Request = createRepairRequest(testDto.getRepairableInstanceIds().orElse(Collections.emptyList()));
         Log.when(LOGGER, format("Starting repair instances on DistroX: %s ", testDto.getName()));
         Log.whenJson(LOGGER, "DistroX instance id based repair request: ", distroXRepairV1Request);
-        FlowIdentifier flowIdentifier = client.getDefaultClient()
+        FlowIdentifier flowIdentifier = client.getDefaultClient(testContext)
                 .distroXV1Endpoint()
                 .repairClusterByName(testDto.getName(), distroXRepairV1Request);
         testDto.setFlow("DistroX instance id based repair flow identifier", flowIdentifier);
-        StackV4Response stackV4Response = client.getDefaultClient()
+        StackV4Response stackV4Response = client.getDefaultClient(testContext)
                 .distroXV1Endpoint()
                 .getByName(testDto.getName(), Collections.emptySet());
         testDto.setResponse(stackV4Response);

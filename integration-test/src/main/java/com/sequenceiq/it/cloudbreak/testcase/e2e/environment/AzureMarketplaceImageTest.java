@@ -82,7 +82,7 @@ public class AzureMarketplaceImageTest extends AbstractE2ETest {
             String catalogUrl = azureMarketplaceImageProperties.getCatalogUrl();
             String imageUuid = azureMarketplaceImageProperties.getImageUuid();
 
-            DetailedEnvironmentResponse environment = environmentClient.getDefaultClient().environmentV1Endpoint().getByName(testDto.getName());
+            DetailedEnvironmentResponse environment = environmentClient.getDefaultClient(testContext).environmentV1Endpoint().getByName(testDto.getName());
             FreeIpaImageResponse image = environment.getFreeIpa().getImage();
             if (!image.getCatalog().equals(catalogUrl)) {
                 throw new IllegalArgumentException("Image catalog does not match the Marketplace image catalog!");

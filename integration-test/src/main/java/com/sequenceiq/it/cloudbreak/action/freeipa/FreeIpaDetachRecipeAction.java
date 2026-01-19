@@ -32,7 +32,7 @@ public class FreeIpaDetachRecipeAction implements Action<FreeIpaTestDto, FreeIpa
         recipeDetach.setRecipes(recipes);
         recipeDetach.setEnvironmentCrn(environmentCrn);
         Log.whenJson(LOGGER, format(" FreeIPA recipe detach request: %n"), recipeDetach);
-        client.getDefaultClient()
+        client.getDefaultClient(testContext)
                 .getRecipeV1Endpoint()
                 .detachRecipes(recipeDetach);
         return testDto;

@@ -17,13 +17,13 @@ public class ProxyConfigCreateIfNotExistsAction implements Action<ProxyTestDto, 
         Log.whenJson(LOGGER, " Proxy config post request:\n", testDto.getRequest());
         try {
             testDto.setResponse(
-                    client.getDefaultClient().proxyV1Endpoint().post(testDto.getRequest())
+                    client.getDefaultClient(testContext).proxyV1Endpoint().post(testDto.getRequest())
             );
             Log.whenJson(LOGGER, "ProxyConfig created successfully, response: ", testDto.getResponse());
         } catch (Exception e) {
             Log.when(LOGGER, "Cannot create ProxyConfig, fetch existed one: " + testDto.getRequest().getName());
             testDto.setResponse(
-                    client.getDefaultClient().proxyV1Endpoint()
+                    client.getDefaultClient(testContext).proxyV1Endpoint()
                             .getByName(testDto.getRequest().getName()));
             Log.whenJson(LOGGER, "ProxyConfig fetched successfully, response: ", testDto.getResponse());
         }

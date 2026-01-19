@@ -36,9 +36,9 @@ public class TermsPutAction implements Action<TermsPolicyDto, EnvironmentClient>
     }
 
     private AzureMarketplaceTermsResponse setOrGetAzureMarketplaceTerms(TermsPolicyDto testDto, EnvironmentClient client) {
-        AzureMarketplaceTermsResponse response = client.getDefaultClient().azureMarketplaceTermsEndpoint().get();
+        AzureMarketplaceTermsResponse response = client.getDefaultClient(testDto.getTestContext()).azureMarketplaceTermsEndpoint().get();
         if (!response.getAccepted().equals(testDto.getRequest().getAccepted())) {
-            return client.getDefaultClient().azureMarketplaceTermsEndpoint().put(testDto.getRequest());
+            return client.getDefaultClient(testDto.getTestContext()).azureMarketplaceTermsEndpoint().put(testDto.getRequest());
         } else {
             return response;
         }

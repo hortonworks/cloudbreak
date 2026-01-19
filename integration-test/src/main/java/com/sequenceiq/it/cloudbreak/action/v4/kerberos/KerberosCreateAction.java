@@ -18,7 +18,7 @@ public class KerberosCreateAction implements Action<KerberosTestDto, FreeIpaClie
     public KerberosTestDto action(TestContext testContext, KerberosTestDto testDto, FreeIpaClient client) throws Exception {
         Log.whenJson(LOGGER, format(" Kerberos post request:%n"), testDto.getRequest());
         testDto.setResponse(
-                client.getDefaultClient()
+                client.getDefaultClient(testContext)
                         .getKerberosConfigV1Endpoint()
                         .create(testDto.getRequest()));
         Log.whenJson(LOGGER, format(" Kerberos created  successfully:%n"), testDto.getResponse());

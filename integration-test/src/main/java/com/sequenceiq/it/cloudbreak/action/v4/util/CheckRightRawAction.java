@@ -18,7 +18,7 @@ public class CheckRightRawAction implements Action<RawCloudbreakTestDto, Cloudbr
 
     @Override
     public RawCloudbreakTestDto action(TestContext testContext, RawCloudbreakTestDto testDto, CloudbreakClient cloudbreakClient) throws Exception {
-        Response response = cloudbreakClient.getRawClient().path("v4/utils/check_right").request()
+        Response response = cloudbreakClient.getRawClient(testContext).path("v4/utils/check_right").request()
                 .post(Entity.entity(testDto.getRequestJson(), MediaType.APPLICATION_JSON_TYPE));
         testDto.setResponse(response.readEntity(String.class));
         return testDto;

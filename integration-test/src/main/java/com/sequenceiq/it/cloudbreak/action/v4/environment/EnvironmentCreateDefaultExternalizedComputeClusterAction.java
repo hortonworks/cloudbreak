@@ -18,7 +18,7 @@ public class EnvironmentCreateDefaultExternalizedComputeClusterAction implements
         Log.when(LOGGER, "Create default externalized compute cluster for env, crn: " +  testDto.getResponse().getCrn());
         ExternalizedComputeCreateRequest request = new ExternalizedComputeCreateRequest();
         request.setCreate(true);
-        client.getDefaultClient()
+        client.getDefaultClient(testContext)
                 .defaultComputeClusterEndpoint().createDefaultExternalizedComputeCluster(testDto.getResponse().getCrn(), request, false);
         return testDto;
     }

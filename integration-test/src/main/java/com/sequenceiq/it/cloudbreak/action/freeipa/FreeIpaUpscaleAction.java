@@ -23,7 +23,7 @@ public class FreeIpaUpscaleAction extends AbstractFreeIpaAction<FreeIpaUpscaleTe
         String environmentCrn = testContext.given(EnvironmentTestDto.class).getCrn();
         upscaleRequest.setEnvironmentCrn(environmentCrn);
         upscaleRequest.setTargetAvailabilityType(testDto.getRequest().getTargetAvailabilityType());
-        testDto.setResponse(client.getDefaultClient()
+        testDto.setResponse(client.getDefaultClient(testContext)
                 .getFreeIpaV1Endpoint()
                 .upscale(upscaleRequest));
         testDto.setFlow("FreeIPA upscale",  testDto.getResponse().getFlowIdentifier());

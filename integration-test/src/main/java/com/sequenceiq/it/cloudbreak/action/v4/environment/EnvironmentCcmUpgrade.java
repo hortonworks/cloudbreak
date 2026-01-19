@@ -15,7 +15,7 @@ public class EnvironmentCcmUpgrade implements Action<EnvironmentTestDto, Environ
     @Override
     public EnvironmentTestDto action(TestContext testContext, EnvironmentTestDto testDto, EnvironmentClient client) throws Exception {
         Log.when(LOGGER, "Environment upgrading ccm request, crn: " +  testDto.getResponse().getCrn());
-        client.getDefaultClient()
+        client.getDefaultClient(testContext)
                 .environmentV1Endpoint().upgradeCcmByCrn(testDto.getResponse().getCrn());
         return testDto;
     }

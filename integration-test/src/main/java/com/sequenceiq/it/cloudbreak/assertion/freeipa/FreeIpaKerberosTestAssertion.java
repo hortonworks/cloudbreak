@@ -19,7 +19,7 @@ public class FreeIpaKerberosTestAssertion {
     public static Assertion<FreeIpaTestDto, FreeIpaClient> validate() {
         return (testContext, entity, freeIpaClient) -> {
             DescribeKerberosConfigResponse kerberosConfigResponse =
-                    freeIpaClient.getDefaultClient().getKerberosConfigV1Endpoint().describe(entity.getResponse().getEnvironmentCrn());
+                    freeIpaClient.getDefaultClient(testContext).getKerberosConfigV1Endpoint().describe(entity.getResponse().getEnvironmentCrn());
             assertNotNull(kerberosConfigResponse);
             assertEquals(entity.getRequest().getFreeIpa().getDomain().toUpperCase(Locale.ROOT),
                     kerberosConfigResponse.getDomain().toUpperCase(Locale.ROOT));

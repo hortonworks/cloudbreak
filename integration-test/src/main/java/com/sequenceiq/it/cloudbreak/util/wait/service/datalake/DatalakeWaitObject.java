@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
+import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.microservice.SdxClient;
 import com.sequenceiq.it.cloudbreak.util.wait.service.WaitObject;
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
@@ -40,15 +41,19 @@ public class DatalakeWaitObject implements WaitObject {
 
     private SdxClusterResponse sdxResponse;
 
-    public DatalakeWaitObject(SdxClient client, String name, SdxClusterStatusResponse desiredStatus, Set<SdxClusterStatusResponse> ignoredFailedStatuses) {
+    private TestContext testContext;
+
+    public DatalakeWaitObject(SdxClient client, String name, SdxClusterStatusResponse desiredStatus, Set<SdxClusterStatusResponse> ignoredFailedStatuses,
+            TestContext testContext) {
         this.client = client;
         this.name = name;
         this.desiredStatus = desiredStatus;
         this.ignoredFailedStatuses = ignoredFailedStatuses;
+        this.testContext = testContext;
     }
 
     public SdxEndpoint getEndpoint() {
-        return client.getDefaultClient().sdxEndpoint();
+        return client.getDefaultClient(testContext).sdxEndpoint();
     }
 
     @Override

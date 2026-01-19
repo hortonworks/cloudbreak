@@ -16,7 +16,7 @@ public class EnvironmentRefreshAction implements Action<EnvironmentTestDto, Envi
     @Override
     public EnvironmentTestDto action(TestContext testContext, EnvironmentTestDto testDto, EnvironmentClient client) throws Exception {
         testDto.setResponse(
-                client.getDefaultClient().environmentV1Endpoint().getByName(testDto.getName())
+                client.getDefaultClient(testContext).environmentV1Endpoint().getByName(testDto.getName())
         );
         Log.whenJson(LOGGER, " Environment get response: ", testDto.getResponse());
         return testDto;

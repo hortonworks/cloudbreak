@@ -17,7 +17,7 @@ public class DistroXShowBlueprintAction implements Action<DistroXTestDto, Cloudb
     @Override
     public DistroXTestDto action(TestContext testContext, DistroXTestDto testDto, CloudbreakClient client) throws Exception {
         Log.when(LOGGER, " Stack start request on: " + testDto.getName());
-        GeneratedBlueprintV4Response generatedBlueprintV4Response = client.getDefaultClient()
+        GeneratedBlueprintV4Response generatedBlueprintV4Response = client.getDefaultClient(testContext)
                 .distroXV1Endpoint()
                 .postStackForBlueprint(testDto.getRequest());
         testDto.withGeneratedBlueprintV4Response(generatedBlueprintV4Response);

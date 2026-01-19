@@ -498,7 +498,7 @@ public class EnvironmentTestDto
 
     @Override
     public List<SimpleEnvironmentResponse> getAll(EnvironmentClient client) {
-        EnvironmentEndpoint environmentEndpoint = client.getDefaultClient().environmentV1Endpoint();
+        EnvironmentEndpoint environmentEndpoint = client.getDefaultClient(getTestContext()).environmentV1Endpoint();
         return new ArrayList<>(environmentEndpoint.list(null).getResponses()).stream()
                 .filter(s -> s.getName() != null)
                 .map(s -> {
@@ -524,7 +524,7 @@ public class EnvironmentTestDto
         try {
             EnvironmentClient client = getClientForCleanup();
             LOGGER.info("Deleting Environment with crn: {}", getCrn());
-            client.getDefaultClient().environmentV1Endpoint().deleteByCrn(getCrn(), true, getCloudProvider().getGovCloud());
+            client.getDefaultClient(getTestContext()).environmentV1Endpoint().deleteByCrn(getCrn(), true, getCloudProvider().getGovCloud());
             getTestContext().awaitWithClient(this, Map.of("status", ARCHIVED), client);
         } catch (NotFoundException nfe) {
             LOGGER.info("resource not found, thus cleanup not needed.");
@@ -534,7 +534,7 @@ public class EnvironmentTestDto
     @Override
     public void delete(TestContext testContext, SimpleEnvironmentResponse entity, EnvironmentClient client) {
         LOGGER.info("Delete resource with name: {}", entity.getName());
-        EnvironmentEndpoint credentialEndpoint = client.getDefaultClient().environmentV1Endpoint();
+        EnvironmentEndpoint credentialEndpoint = client.getDefaultClient(getTestContext()).environmentV1Endpoint();
         credentialEndpoint.deleteByName(entity.getName(), true, false);
         setName(entity.getName());
         testContext.await(this, Map.of("status", ARCHIVED));
@@ -625,7 +625,7 @@ public class EnvironmentTestDto
         List<CDPStructuredEvent> structuredEvents = List.of();
         if (getResponse() != null && getResponse().getCrn() != null) {
             CDPStructuredEventV1Endpoint cdpStructuredEventV1Endpoint =
-                    getTestContext().getMicroserviceClient(EnvironmentClient.class).getDefaultClient().structuredEventsV1Endpoint();
+                    getTestContext().getMicroserviceClient(EnvironmentClient.class).getDefaultClient(getTestContext()).structuredEventsV1Endpoint();
             structuredEvents = StructuredEventUtil.getAuditEvents(cdpStructuredEventV1Endpoint, getResponse().getCrn());
         }
         if (getResponse().getCreateFreeIpa()) {
@@ -647,9 +647,10 @@ public class EnvironmentTestDto
         LOGGER.debug("Collecting logs for '{}' Environment's FreeIPA", getResourceCrn());
         try {
             DescribeFreeIpaResponse freeIpaResponse = getTestContext().getMicroserviceClient(FreeIpaClient.class)
-                    .getDefaultClient().getFreeIpaV1Endpoint().describe(getResourceCrn());
+                    .getDefaultClient(getTestContext()).getFreeIpaV1Endpoint().describe(getResourceCrn());
             List<String> freeipaIpAddresses = freeIpaResponse.getInstanceGroups().stream().flatMap(ig -> ig.getMetaData().stream())
-                    .map(imd -> imd.getPublicIp() != null && !Objects.equals(imd.getPublicIp(), "N/A") ? imd.getPublicIp() : imd.getPrivateIp()).toList();
+                    .map(imd -> imd.getPublicIp() != null && !Objects.equals(imd.getPublicIp(), "N/A") ?
+                            imd.getPublicIp() : imd.getPrivateIp()).toList();
             LOGGER.debug("Collected Environment's FreeIPA IP addresses for '{}': {}", getResourceCrn(), freeipaIpAddresses);
             logCollectorUtil.collectLogFiles(getResponse().getStatusReason(), freeipaIpAddresses);
         } catch (Exception e) {

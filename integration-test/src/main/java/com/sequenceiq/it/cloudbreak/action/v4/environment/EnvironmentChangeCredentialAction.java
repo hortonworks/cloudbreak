@@ -11,7 +11,7 @@ public class EnvironmentChangeCredentialAction implements Action<EnvironmentTest
     @Override
     public EnvironmentTestDto action(TestContext testContext, EnvironmentTestDto testDto, EnvironmentClient environmentClient) throws Exception {
         testDto.setResponse(
-                environmentClient.getDefaultClient()
+                environmentClient.getDefaultClient(testContext)
                         .environmentV1Endpoint()
                         .changeCredentialByEnvironmentName(testDto.getName(), testDto.getEnviornmentChangeCredentialRequest()));
 

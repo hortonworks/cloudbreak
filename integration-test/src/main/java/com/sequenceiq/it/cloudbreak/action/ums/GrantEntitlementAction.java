@@ -35,7 +35,7 @@ public class GrantEntitlementAction implements Action<UmsTestDto, UmsClient> {
     public UmsTestDto action(TestContext testContext, UmsTestDto testDto, UmsClient client) throws Exception {
         Log.when(LOGGER, format(" Grant UMS entitlement for account '%s'. ", accountId));
         try {
-            client.getDefaultClient().grantEntitlement(accountId, entitlementName);
+            client.getDefaultClient(testContext).grantEntitlement(accountId, entitlementName);
             //This is necessary because the ttl on the ums account caching
             Thread.sleep(Duration.of(WAIT_IN_SECONDS, ChronoUnit.SECONDS));
             Log.when(LOGGER, format(" UMS entitlement has been granted for account '%s'. ", accountId));

@@ -28,7 +28,7 @@ public class DistroXVerticalScaleAction implements Action<DistroXTestDto, Cloudb
     @Override
     public DistroXTestDto action(TestContext testContext, DistroXTestDto testDto, CloudbreakClient client) throws Exception {
         if (testContext.getCloudProvider().verticalScalingSupported()) {
-            FlowIdentifier flowIdentifier = client.getDefaultClient()
+            FlowIdentifier flowIdentifier = client.getDefaultClient(testContext)
                     .distroXV1Endpoint()
                     .verticalScalingByCrn(
                             testDto.getResponse().getCrn(),

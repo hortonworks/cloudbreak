@@ -17,12 +17,13 @@ public class SdxDetailedDescribeInternalAction implements Action<SdxInternalTest
 
     @Override
     public SdxInternalTestDto action(TestContext testContext, SdxInternalTestDto testDto, SdxClient client) throws Exception {
-        Log.when(LOGGER, " SDX endpoint: %s" + client.getDefaultClient().sdxEndpoint() + ", SDX's environment: " + testDto.getRequest().getEnvironment());
+        Log.when(LOGGER, " SDX endpoint: %s" + client.getDefaultClient(testContext).sdxEndpoint() + ", SDX's environment: "
+                + testDto.getRequest().getEnvironment());
         Log.whenJson(LOGGER, " SDX describe internal request: ", testDto.getRequest());
-        testDto.setResponse(client.getDefaultClient()
+        testDto.setResponse(client.getDefaultClient(testContext)
                 .sdxEndpoint()
                 .getDetail(testDto.getName(), new HashSet<>()));
-        Log.whenJson(LOGGER, " SDX describe internal response: ", client.getDefaultClient().sdxEndpoint().getDetail(testDto.getName(), null));
+        Log.whenJson(LOGGER, " SDX describe internal response: ", client.getDefaultClient(testContext).sdxEndpoint().getDetail(testDto.getName(), null));
         return testDto;
     }
 }

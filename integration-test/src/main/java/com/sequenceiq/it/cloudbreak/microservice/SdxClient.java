@@ -1,5 +1,7 @@
 package com.sequenceiq.it.cloudbreak.microservice;
 
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -34,39 +36,66 @@ public class SdxClient extends MicroserviceClient<SdxServiceApiKeyEndpoints, Sdx
 
     private SdxInternalCrnClient sdxInternalClient;
 
+    private SdxServiceApiKeyEndpoints alternativeSdxClient;
+
+    private SdxInternalCrnClient alternativeSdxInternalClient;
+
     public SdxClient(CloudbreakUser cloudbreakUser, String sdxAddress, String sdxInternalAddress,
-            RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator) {
+            RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator, String alternativeSdxAddress, String alternativeSdxInternalAddress) {
         setActing(cloudbreakUser);
-        sdxClient = new SdxServiceApiKeyClient(
+        sdxClient = createSdxClient(cloudbreakUser, sdxAddress);
+        sdxInternalClient = createInternalSdxClient(sdxInternalAddress, regionAwareInternalCrnGenerator);
+
+        if (isNotEmpty(alternativeSdxAddress) && isNotEmpty(alternativeSdxInternalAddress)) {
+            alternativeSdxClient = createSdxClient(cloudbreakUser, alternativeSdxAddress);
+            alternativeSdxInternalClient = createInternalSdxClient(alternativeSdxInternalAddress, regionAwareInternalCrnGenerator);
+        }
+    }
+
+    private SdxServiceApiKeyEndpoints createSdxClient(CloudbreakUser cloudbreakUser, String sdxAddress) {
+        return new SdxServiceApiKeyClient(
                 sdxAddress,
                 new ConfigKey(false, true, true, TIMEOUT))
                 .withKeys(cloudbreakUser.getAccessKey(), cloudbreakUser.getSecretKey());
-        sdxInternalClient = createInternalSdxClient(sdxInternalAddress, regionAwareInternalCrnGenerator);
     }
 
     @Override
-    public FlowPublicEndpoint flowPublicEndpoint() {
-        return sdxClient.flowPublicEndpoint();
+    public FlowPublicEndpoint flowPublicEndpoint(TestContext testContext) {
+        if (testContext.shouldUseAlternativeEndpoints()) {
+            return alternativeSdxClient.flowPublicEndpoint();
+        } else {
+            return sdxClient.flowPublicEndpoint();
+        }
     }
 
     @Override
     public DatalakeWaitObject waitObject(CloudbreakTestDto entity, String name, Map<String, SdxClusterStatusResponse> desiredStatuses,
             TestContext testContext, Set<SdxClusterStatusResponse> ignoredFailedStatuses) {
-        return new DatalakeWaitObject(this, entity.getName(), desiredStatuses.get("status"), ignoredFailedStatuses);
+        return new DatalakeWaitObject(this, entity.getName(), desiredStatuses.get("status"), ignoredFailedStatuses, testContext);
     }
 
     @Override
-    public SdxServiceApiKeyEndpoints getDefaultClient() {
-        return sdxClient;
+    public SdxServiceApiKeyEndpoints getDefaultClient(TestContext testContext) {
+        if (testContext.shouldUseAlternativeEndpoints()) {
+            return alternativeSdxClient;
+        } else {
+            return sdxClient;
+        }
     }
 
     @Override
     public SdxServiceCrnEndpoints getInternalClient(TestContext testContext) {
         checkIfInternalClientAllowed(testContext);
-        return sdxInternalClient.withInternalCrn();
+        SdxInternalCrnClient client;
+        if (testContext.shouldUseAlternativeEndpoints()) {
+            client = alternativeSdxInternalClient;
+        } else {
+            client = sdxInternalClient;
+        }
+        return client.withInternalCrn();
     }
 
-    public static synchronized SdxInternalCrnClient createInternalSdxClient(String serverRoot,
+    private static synchronized SdxInternalCrnClient createInternalSdxClient(String serverRoot,
             RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator) {
         SdxServiceUserCrnClient userCrnClient = new SdxServiceUserCrnClientBuilder(serverRoot)
                 .withCertificateValidation(false)

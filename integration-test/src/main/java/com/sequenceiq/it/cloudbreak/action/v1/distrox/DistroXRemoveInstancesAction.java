@@ -28,11 +28,11 @@ public class DistroXRemoveInstancesAction implements Action<DistroXTestDto, Clou
             MultipleInstanceDeleteRequest instanceDeleteRequest = new MultipleInstanceDeleteRequest();
             instanceDeleteRequest.setInstances(removableInstanceIds);
             Log.when(LOGGER, String.format(" Removing instances [%s] from distrox '%s'... ", instanceDeleteRequest.getInstances(), testDto.getName()));
-            FlowIdentifier flowIdentifier = client.getDefaultClient()
+            FlowIdentifier flowIdentifier = client.getDefaultClient(testContext)
                     .distroXV1Endpoint()
                     .deleteInstancesByCrn(testDto.getCrn(), removableInstanceIds, instanceDeleteRequest, false);
             testDto.setFlow("Instance deletion", flowIdentifier);
-            StackV4Response stackV4Response = client.getDefaultClient()
+            StackV4Response stackV4Response = client.getDefaultClient(testContext)
                     .distroXV1Endpoint()
                     .getByName(testDto.getName(), new HashSet<>(Arrays.asList("hardware_info", "events")));
             testDto.setResponse(stackV4Response);

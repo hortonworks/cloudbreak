@@ -22,7 +22,7 @@ public class KerberosConfigListStructuredEventAssertions {
 
     public KerberosTestDto checkDeleteEvents(TestContext testContext, KerberosTestDto testDto, FreeIpaClient client) {
         List<CDPStructuredEvent> auditEvents = getAuditEvents(
-                client.getDefaultClient().structuredEventsV1Endpoint(),
+                client.getDefaultClient(testContext).structuredEventsV1Endpoint(),
                 testDto.getCrn());
         eventAssertionCommon.noRestEventsAreAllowedInDB(auditEvents);
         return testDto;

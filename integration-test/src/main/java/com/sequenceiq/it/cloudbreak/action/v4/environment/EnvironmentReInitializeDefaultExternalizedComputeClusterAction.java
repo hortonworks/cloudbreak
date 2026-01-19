@@ -26,7 +26,7 @@ public class EnvironmentReInitializeDefaultExternalizedComputeClusterAction impl
         ExternalizedComputeCreateRequest request = new ExternalizedComputeCreateRequest();
         request.setCreate(true);
         request.setPrivateCluster(privateCluster);
-        FlowIdentifier flowId = client.getDefaultClient()
+        FlowIdentifier flowId = client.getDefaultClient(testContext)
                 .defaultComputeClusterEndpoint().createDefaultExternalizedComputeCluster(testDto.getResponse().getCrn(), request, true);
         testDto.setLastKnownFlow(flowId);
         return testDto;

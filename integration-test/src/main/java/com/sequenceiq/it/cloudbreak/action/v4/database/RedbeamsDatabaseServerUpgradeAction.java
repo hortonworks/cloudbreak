@@ -20,7 +20,7 @@ public class RedbeamsDatabaseServerUpgradeAction implements Action<RedbeamsDatab
         Log.as(LOGGER, " Database server stop request:\n");
         UpgradeDatabaseServerV4Request upgradeDatabaseServerV4Request = new UpgradeDatabaseServerV4Request();
         upgradeDatabaseServerV4Request.setUpgradeTargetMajorVersion(UpgradeTargetMajorVersion.VERSION_11);
-        client.getDefaultClient()
+        client.getDefaultClient(testContext)
                 .databaseServerV4Endpoint()
                 .upgrade(testDto.getCrn(), upgradeDatabaseServerV4Request);
         return testDto;

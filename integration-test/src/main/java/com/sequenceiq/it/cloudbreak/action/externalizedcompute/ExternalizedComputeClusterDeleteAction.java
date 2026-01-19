@@ -15,7 +15,8 @@ public class ExternalizedComputeClusterDeleteAction implements
             ExternalizedComputeClusterClient client) throws Exception {
         String name = testDto.getResponse().getName();
         Log.when("Delete externalized compute cluster: " + name);
-        FlowIdentifier flowIdentifier = client.getDefaultClient().externalizedComputeClusterEndpoint().delete(testDto.getEnvironmentCrn(), name, false);
+        FlowIdentifier flowIdentifier = client.getDefaultClient(testContext).externalizedComputeClusterEndpoint()
+                .delete(testDto.getEnvironmentCrn(), name, false);
         Log.whenJson("Delete externalized compute cluster: ", flowIdentifier);
         return testDto;
     }

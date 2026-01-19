@@ -19,7 +19,7 @@ public class StackRefreshEntitlementParamInternalAction implements Action<StackT
     public StackTestDto action(TestContext testContext, StackTestDto testDto, CloudbreakClient client) throws Exception {
         Log.when(LOGGER, String.format(" Stack refresh entitlement params requested: %s", testDto.getRequest().getName()));
         testDto.setResponse(
-                client.getDefaultClient().stackV4Endpoint().get(client.getWorkspaceId(), testDto.getName(), Collections.emptySet(),
+                client.getDefaultClient(testContext).stackV4Endpoint().get(client.getWorkspaceId(), testDto.getName(), Collections.emptySet(),
                         testContext.getActingUserCrn().getAccountId())
         );
         FlowIdentifier flowIdentifier = client.getInternalClientWithoutChecks(testContext).stackV4Endpoint()

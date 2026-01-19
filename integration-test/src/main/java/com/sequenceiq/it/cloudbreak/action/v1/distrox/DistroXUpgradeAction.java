@@ -25,11 +25,11 @@ public class DistroXUpgradeAction implements Action<DistroXTestDto, CloudbreakCl
         DistroXUpgradeV1Request upgradeRequest = testDto.getDistroXUpgradeRequest();
         Log.when(LOGGER, format(" Starting DistroX upgrade: %s ", testDto.getName()));
         Log.whenJson(LOGGER, " DistroX upgrade request: ", upgradeRequest);
-        DistroXUpgradeV1Response response = client.getDefaultClient()
+        DistroXUpgradeV1Response response = client.getDefaultClient(testContext)
                 .distroXUpgradeV1Endpoint()
                 .upgradeClusterByName(testDto.getName(), upgradeRequest);
         testDto.setFlow("DistroX upgrade flow identifier", response.flowIdentifier());
-        StackV4Response stackV4Response = client.getDefaultClient()
+        StackV4Response stackV4Response = client.getDefaultClient(testContext)
                 .distroXV1Endpoint()
                 .getByName(testDto.getName(), Collections.emptySet());
         testDto.setResponse(stackV4Response);

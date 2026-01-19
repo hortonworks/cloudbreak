@@ -17,7 +17,7 @@ public class RedbeamsDatabaseDeleteAction implements Action<RedbeamsDatabaseTest
     public RedbeamsDatabaseTestDto action(TestContext testContext, RedbeamsDatabaseTestDto testDto, RedbeamsClient client) throws Exception {
         Log.when(LOGGER, String.format("Database delete request Name: %s", testDto.getRequest().getName()));
         testDto.setResponse(
-                client.getDefaultClient()
+                client.getDefaultClient(testContext)
                         .databaseV4Endpoint()
                         .deleteByName(testDto.getRequest().getEnvironmentCrn(), testDto.getName()));
         Log.whenJson(LOGGER, " Database deleted successfully:\n", testDto.getResponse());

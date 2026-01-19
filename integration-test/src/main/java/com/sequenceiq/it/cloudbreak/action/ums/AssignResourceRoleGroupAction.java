@@ -27,7 +27,7 @@ public class AssignResourceRoleGroupAction extends AbstractUmsAction<UmsTestDto>
         Log.when(LOGGER, format(" Assigning resource role '%s' at resource '%s' for group '%s' ", resourceRole, resourceCrn, groupCrn));
         Log.whenJson(LOGGER, format(" Assign resource role request:%n "), testDto.getRequest());
 
-        client.getDefaultClient().assignResourceRole(groupCrn, resourceCrn, resourceRole);
+        client.getDefaultClient(testContext).assignResourceRole(groupCrn, resourceCrn, resourceRole);
         // wait for UmsRightsCache to expire
         Thread.sleep(7000);
         LOGGER.info(format(" Resource role '%s' has been assigned at resource '%s' for group '%s' ", resourceRole, resourceCrn, groupCrn));

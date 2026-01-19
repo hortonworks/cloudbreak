@@ -19,7 +19,7 @@ public class BlueprintListAction implements Action<BlueprintTestDto, CloudbreakC
     public BlueprintTestDto action(TestContext testContext, BlueprintTestDto testDto, CloudbreakClient client) throws Exception {
         Log.whenJson(LOGGER, format(" Blueprint list by workspace request, workspace:%n"), client.getWorkspaceId());
         testDto.setViewResponses(
-                client.getDefaultClient()
+                client.getDefaultClient(testContext)
                         .blueprintV4Endpoint()
                         .list(client.getWorkspaceId(), true).getResponses());
         Log.whenJson(LOGGER, format(" Blueprint list has executed successfully:%n"), testDto.getViewResponses());

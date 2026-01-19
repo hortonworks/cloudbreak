@@ -19,12 +19,12 @@ public class KerberosDeleteAction implements Action<KerberosTestDto, FreeIpaClie
 
     public KerberosTestDto action(TestContext testContext, KerberosTestDto testDto, FreeIpaClient client) throws Exception {
         Log.whenJson(LOGGER, format(" Kerberos config delete: %n"), testDto.getName());
-        client.getDefaultClient()
+        client.getDefaultClient(testContext)
                 .getKerberosConfigV1Endpoint()
                 .delete(testDto.getName());
         try {
             testDto.setResponse(
-                    client.getDefaultClient()
+                    client.getDefaultClient(testContext)
                             .getKerberosConfigV1Endpoint()
                             .describe(testDto.getName()));
         } catch (NotFoundException e) {

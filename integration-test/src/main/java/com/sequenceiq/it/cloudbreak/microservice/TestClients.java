@@ -116,39 +116,44 @@ public class TestClients {
 
     private CloudbreakClient createCloudbreakClient(CloudbreakUser cloudbreakUser) {
         return new CloudbreakClient(cloudbreakUser, regionAwareInternalCrnGeneratorFactory.iam(), serverProperties.getCloudbreakAddress(),
-                serverProperties.getCloudbreakInternalAddress());
+                serverProperties.getCloudbreakInternalAddress(), serverProperties.getAlternativeCloudbreakAddress(),
+                serverProperties.getAlternativeCloudbreakInternalAddress());
     }
 
     private EnvironmentClient createEnvironmentClient(CloudbreakUser cloudbreakUser) {
         return new EnvironmentClient(cloudbreakUser, regionAwareInternalCrnGeneratorFactory.iam(), serverProperties.getEnvironmentAddress(),
-                serverProperties.getEnvironmentInternalAddress());
+                serverProperties.getEnvironmentInternalAddress(), serverProperties.getAlternativeEnvironmentAddress(),
+                serverProperties.getAlternativeEnvironmentInternalAddress());
     }
 
     private FreeIpaClient createFreeipaClient(CloudbreakUser cloudbreakUser) {
         return new FreeIpaClient(cloudbreakUser, regionAwareInternalCrnGeneratorFactory.iam(), serverProperties.getFreeipaAddress(),
-                serverProperties.getFreeipaInternalAddress());
+                serverProperties.getFreeipaInternalAddress(), serverProperties.getAlternativeFreeipaAddress(),
+                serverProperties.getAlternativeFreeipaInternalAddress());
     }
 
     private RedbeamsClient createRedbeamsClient(CloudbreakUser cloudbreakUser) {
-        return new RedbeamsClient(cloudbreakUser, serverProperties.getRedbeamsAddress());
+        return new RedbeamsClient(cloudbreakUser, serverProperties.getRedbeamsAddress(), serverProperties.getAlternativeRedbeamsAddress());
     }
 
     private PeriscopeClient createPeriscopeClient(CloudbreakUser cloudbreakUser) {
-        return new PeriscopeClient(cloudbreakUser, serverProperties.getPeriscopeAddress());
+        return new PeriscopeClient(cloudbreakUser, serverProperties.getPeriscopeAddress(), serverProperties.getAlternativePeriscopeAddress());
     }
 
     private SdxClient createSdxClient(CloudbreakUser cloudbreakUser) {
         return new SdxClient(cloudbreakUser, serverProperties.getSdxAddress(), serverProperties.getSdxInternalAddress(),
-                regionAwareInternalCrnGeneratorFactory.iam());
+                regionAwareInternalCrnGeneratorFactory.iam(), serverProperties.getAlternativeSdxAddress(), serverProperties.getAlternativeSdxInternalAddress());
     }
 
     private RemoteEnvironmentClient createRemoteEnvironmentClient(CloudbreakUser cloudbreakUser) {
-        return new RemoteEnvironmentClient(cloudbreakUser, serverProperties.getRemoteEnvironmentAddress(), regionAwareInternalCrnGeneratorFactory.iam());
+        return new RemoteEnvironmentClient(cloudbreakUser, serverProperties.getRemoteEnvironmentAddress(), regionAwareInternalCrnGeneratorFactory.iam(),
+                serverProperties.getAlternativeRemoteEnvironmentAddress());
     }
 
     private ExternalizedComputeClusterClient createExternalizedComputeClusterClient(CloudbreakUser cloudbreakUser) {
         return new ExternalizedComputeClusterClient(cloudbreakUser, regionAwareInternalCrnGeneratorFactory.iam(),
-                serverProperties.getExternalizedComputeAddress(), serverProperties.getExternalizedComputeInternalAddress());
+                serverProperties.getExternalizedComputeAddress(), serverProperties.getExternalizedComputeInternalAddress(),
+                serverProperties.getAlternativeExternalizedComputeAddress(), serverProperties.getAlternativeExternalizedComputeInternalAddress());
     }
 
     private UmsClient createUmsClient() {
@@ -160,6 +165,7 @@ public class TestClients {
     }
 
     private EnvironmentPublicApiClient createEnvironmentPublicApiClient(CloudbreakUser cloudbreakUser) {
-        return new EnvironmentPublicApiClient(cloudbreakUser, serverProperties.getEnvironmentPublicApiAddress());
+        return new EnvironmentPublicApiClient(cloudbreakUser, serverProperties.getEnvironmentPublicApiAddress(),
+                serverProperties.getAlternativeEnvironmentPublicApiAddress());
     }
 }

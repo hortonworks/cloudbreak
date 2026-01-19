@@ -91,7 +91,6 @@ public class DistroXClusterUpscaleDownscaleTest extends AbstractClouderaManagerT
                 .withNetwork(DIX_NET_KEY)
                 .when(distroXClient.create(), key(stack))
                 .await(STACK_AVAILABLE, key(stack));
-
         for (int i = 0; i < 3; i++) {
             currentContext = currentContext
                     .when(distroXClient.scale(params.getHostgroup(), UPPER_NODE_COUNT))
@@ -207,7 +206,6 @@ public class DistroXClusterUpscaleDownscaleTest extends AbstractClouderaManagerT
         DistroXTestDto currentContext = createDistroxDto(testContext, stack, workerInitialNodeCount)
                 .when(distroXClient.create(), key(stack))
                 .await(STACK_AVAILABLE, key(stack));
-
         for (int i = 0; i < scalingCycles; i++) {
             currentContext = currentContext
                     .when(distroXClient.scale(HostGroupType.WORKER.getName(), workerNodeCountAfterDownscale))
@@ -280,7 +278,7 @@ public class DistroXClusterUpscaleDownscaleTest extends AbstractClouderaManagerT
 
     private static Assertion<DistroXTestDto, CloudbreakClient> assertInstanceCount(String hostGroup, int instanceCount) {
         return (tc, testDto, client) -> {
-            assertEquals(client.getDefaultClient().distroXV1Endpoint().getByName(testDto.getName(), new HashSet<>())
+            assertEquals(client.getDefaultClient(tc).distroXV1Endpoint().getByName(testDto.getName(), new HashSet<>())
                     .getInstanceGroups()
                     .stream()
                     .filter(instanceGroup -> hostGroup.equals(instanceGroup.getName()))

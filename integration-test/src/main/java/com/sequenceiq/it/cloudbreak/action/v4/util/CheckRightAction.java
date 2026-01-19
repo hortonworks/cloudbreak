@@ -18,7 +18,7 @@ public class CheckRightAction implements Action<CheckRightTestDto, CloudbreakCli
     public CheckRightTestDto action(TestContext testContext, CheckRightTestDto testDto, CloudbreakClient cloudbreakClient) throws Exception {
         CheckRightV4Request checkRightV4Request = new CheckRightV4Request();
         checkRightV4Request.setRights(testDto.getRightsToCheck());
-        testDto.setResponse(cloudbreakClient.getDefaultClient().authorizationUtilEndpoint().checkRightInAccount(checkRightV4Request));
+        testDto.setResponse(cloudbreakClient.getDefaultClient(testContext).authorizationUtilEndpoint().checkRightInAccount(checkRightV4Request));
         Log.whenJson(LOGGER, "check rights in account response:\n", testDto.getResponse());
         return testDto;
     }

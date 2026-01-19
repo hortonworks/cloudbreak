@@ -18,7 +18,7 @@ public class DistroXChangeImageCatalogAction implements Action<DistroXChangeImag
 
     public DistroXChangeImageCatalogTestDto action(TestContext testContext, DistroXChangeImageCatalogTestDto testDto, CloudbreakClient client) throws Exception {
         Log.whenJson(LOGGER, format(" DistroX put request:%n"), testDto.getRequest());
-        client.getDefaultClient()
+        client.getDefaultClient(testContext)
                 .distroXV1Endpoint()
                 .changeImageCatalog(testContext.given(DistroXTestDto.class).getResponse().getName(), testDto.getRequest());
         Log.when(LOGGER, format(" DistroX change image catalog to: %s", testDto.getRequest().getImageCatalog()));

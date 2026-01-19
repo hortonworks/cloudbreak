@@ -19,7 +19,7 @@ public class BlueprintCreateAction implements Action<BlueprintTestDto, Cloudbrea
     public BlueprintTestDto action(TestContext testContext, BlueprintTestDto testDto, CloudbreakClient client) throws Exception {
         Log.whenJson(LOGGER, format(" Blueprint post request:%n"), testDto.getRequest());
         testDto.setResponse(
-                client.getDefaultClient()
+                client.getDefaultClient(testContext)
                         .blueprintV4Endpoint()
                         .post(client.getWorkspaceId(), testDto.getRequest()));
         Log.whenJson(LOGGER, format(" Blueprint created  successfully:%n"), testDto.getResponse());

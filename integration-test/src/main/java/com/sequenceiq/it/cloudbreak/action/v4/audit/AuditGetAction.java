@@ -16,7 +16,7 @@ public class AuditGetAction implements Action<AuditTestDto, CloudbreakClient> {
 
     @Override
     public AuditTestDto action(TestContext testContext, AuditTestDto testDto, CloudbreakClient client) throws Exception {
-        AuditEventV4Response response = client.getDefaultClient()
+        AuditEventV4Response response = client.getDefaultClient(testContext)
                 .auditV4Endpoint()
                 .getAuditEventById(client.getWorkspaceId(), testDto.getAuditId());
         testDto.setResponse(response);

@@ -19,7 +19,7 @@ public class FreeIpaLdapTestAssertion {
     public static Assertion<FreeIpaTestDto, FreeIpaClient> validate() {
         return (testContext, entity, freeIpaClient) -> {
             DescribeLdapConfigResponse ldapConfigResponse =
-                    freeIpaClient.getDefaultClient().getLdapConfigV1Endpoint().describe(entity.getResponse().getEnvironmentCrn());
+                    freeIpaClient.getDefaultClient(testContext).getLdapConfigV1Endpoint().describe(entity.getResponse().getEnvironmentCrn());
             assertNotNull(ldapConfigResponse);
             assertEquals(entity.getRequest().getFreeIpa().getDomain().toUpperCase(Locale.ROOT),
                     ldapConfigResponse.getDomain().toUpperCase(Locale.ROOT));

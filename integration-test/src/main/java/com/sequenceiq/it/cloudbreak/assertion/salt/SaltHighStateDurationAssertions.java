@@ -46,7 +46,7 @@ public class SaltHighStateDurationAssertions {
     public FreeIpaTestDto saltHighStateDurationLimits(TestContext testContext, FreeIpaTestDto freeIpaTestDto, FreeIpaClient freeIpaClient) {
         Map<String, Double> fetchedFreeIpaSaltDurations = fetchSaltDurations("freeipa");
         List<SaltHighstateReport> freeIpaSaltHighstateReports = saltMetrics.getSaltExecutionMetrics(freeIpaTestDto.getEnvironmentCrn(),
-                freeIpaTestDto.getName(), freeIpaClient, "freeipa");
+                freeIpaTestDto.getName(), freeIpaClient, "freeipa", testContext);
         Table<String, String, Double> saltStatesTotalDurations = validateSaltStatesTotalDurations(freeIpaSaltHighstateReports, fetchedFreeIpaSaltDurations);
         saltMetrics.writeSaltStatesTotalDurationsReportsToFiles(testContext, "freeipa", saltStatesTotalDurations);
         return freeIpaTestDto;
@@ -55,7 +55,7 @@ public class SaltHighStateDurationAssertions {
     public SdxTestDto saltHighStateDurationLimits(TestContext testContext, SdxTestDto sdxTestDto, SdxClient sdxClient) {
         Map<String, Double> fetchedSdxSaltDurations = fetchSaltDurations("sdx");
         List<SaltHighstateReport> sdxSaltHighstateReports = saltMetrics.getSaltExecutionMetrics(sdxTestDto.getResponse().getEnvironmentCrn(),
-                sdxTestDto.getName(), sdxClient, "sdx");
+                sdxTestDto.getName(), sdxClient, "sdx", testContext);
         Table<String, String, Double> saltStatesTotalDurations = validateSaltStatesTotalDurations(sdxSaltHighstateReports, fetchedSdxSaltDurations);
         saltMetrics.writeSaltStatesTotalDurationsReportsToFiles(testContext, "sdx", saltStatesTotalDurations);
         return sdxTestDto;
@@ -64,7 +64,7 @@ public class SaltHighStateDurationAssertions {
     public DistroXTestDto saltHighStateDurationLimits(TestContext testContext, DistroXTestDto distroXTestDto, CloudbreakClient cloudbreakClient) {
         Map<String, Double> fetchedDistroxSaltDurations = fetchSaltDurations("distrox");
         List<SaltHighstateReport> distroxSaltHighstateReports = saltMetrics.getSaltExecutionMetrics(distroXTestDto.getResponse().getEnvironmentCrn(),
-                distroXTestDto.getName(), cloudbreakClient, "distrox");
+                distroXTestDto.getName(), cloudbreakClient, "distrox", testContext);
         Table<String, String, Double> saltStatesTotalDurations = validateSaltStatesTotalDurations(distroxSaltHighstateReports, fetchedDistroxSaltDurations);
         saltMetrics.writeSaltStatesTotalDurationsReportsToFiles(testContext, "distrox", saltStatesTotalDurations);
         return distroXTestDto;

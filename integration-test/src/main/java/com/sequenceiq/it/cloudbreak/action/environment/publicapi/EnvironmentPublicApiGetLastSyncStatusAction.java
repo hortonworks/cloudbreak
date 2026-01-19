@@ -24,7 +24,7 @@ public class EnvironmentPublicApiGetLastSyncStatusAction implements Action<Envir
     private LastSyncStatusResponse fetchLastSyncStatusResponse(EnvironmentPublicApiLastSyncStatusDto testDto, EnvironmentPublicApiClient client)
             throws ApiException {
         try {
-            return client.getDefaultClient().lastSyncStatus(testDto.getRequest());
+            return client.getDefaultClient(testDto.getTestContext()).lastSyncStatus(testDto.getRequest());
         } catch (NotFoundException e) {
             return new LastSyncStatusResponse().status(SyncStatus.NEVER_RUN);
         } catch (ApiException e) {

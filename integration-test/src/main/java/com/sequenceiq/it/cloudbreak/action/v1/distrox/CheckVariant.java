@@ -27,7 +27,7 @@ public class CheckVariant implements Action<DistroXTestDto, CloudbreakClient> {
     @Override
     public DistroXTestDto action(TestContext testContext, DistroXTestDto testDto, CloudbreakClient client) throws Exception {
         Log.when(LOGGER, " Checking the stack variant, expected: " + variant);
-        StackV4Response stackV4Response = client.getDefaultClient()
+        StackV4Response stackV4Response = client.getDefaultClient(testContext)
                 .distroXV1Endpoint()
                 .getByName(testDto.getName(), Collections.emptySet());
         if (!stackV4Response.getVariant().equals(variant)) {

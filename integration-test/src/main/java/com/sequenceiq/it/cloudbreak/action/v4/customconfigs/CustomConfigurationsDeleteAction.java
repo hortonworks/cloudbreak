@@ -18,7 +18,7 @@ public class CustomConfigurationsDeleteAction implements Action<CustomConfigurat
     @Override
     public CustomConfigurationsTestDto action(TestContext testContext, CustomConfigurationsTestDto testDto, CloudbreakClient client) throws Exception {
         Log.whenJson(LOGGER, format("CustomConfigurations delete request: %n"), testDto.getRequest());
-        testDto.setResponse(client.getDefaultClient().customConfigurationsV4Endpoint().deleteByName(testDto.getName()));
+        testDto.setResponse(client.getDefaultClient(testContext).customConfigurationsV4Endpoint().deleteByName(testDto.getName()));
         Log.whenJson(LOGGER, format("CustomConfigurations deleted successfully: %n"), testDto.getResponse());
         return testDto;
     }

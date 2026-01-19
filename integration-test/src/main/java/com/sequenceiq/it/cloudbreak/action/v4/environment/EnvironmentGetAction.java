@@ -11,7 +11,7 @@ public class EnvironmentGetAction implements Action<EnvironmentTestDto, Environm
     @Override
     public EnvironmentTestDto action(TestContext testContext, EnvironmentTestDto testDto, EnvironmentClient environmentClient) throws Exception {
         testDto.setResponse(
-                environmentClient.getDefaultClient()
+                environmentClient.getDefaultClient(testContext)
                         .environmentV1Endpoint()
                         .getByName(testDto.getName()));
         Log.whenJson("Environment get response: ", testDto.getResponse());

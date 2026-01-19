@@ -7,6 +7,7 @@ import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationStatus;
+import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.microservice.FreeIpaClient;
 
 public class FreeIpaOperationWaitObject extends FreeIpaWaitObject {
@@ -19,19 +20,22 @@ public class FreeIpaOperationWaitObject extends FreeIpaWaitObject {
 
     private OperationStatus operationStatus;
 
+    private TestContext testContext;
+
     public FreeIpaOperationWaitObject(FreeIpaClient freeIpaClient, String operationId, String freeipaName, String environmentCrn,
-            OperationState desiredOperationState, Set<OperationState> ignoredFailedStatuses) {
-        super(freeIpaClient, freeipaName, environmentCrn, Status.AVAILABLE);
+            OperationState desiredOperationState, Set<OperationState> ignoredFailedStatuses, TestContext testContext) {
+        super(freeIpaClient, freeipaName, environmentCrn, Status.AVAILABLE, testContext);
         this.operationId = operationId;
         this.desiredOperationState = desiredOperationState;
         this.ignoredFailedStatuses = ignoredFailedStatuses;
+        this.testContext = testContext;
     }
 
     @Override
     public void fetchData() {
         super.fetchData();
         if (operationId != null) {
-            operationStatus = getClient().getDefaultClient().getOperationV1Endpoint()
+            operationStatus = getClient().getDefaultClient(testContext).getOperationV1Endpoint()
                     .getOperationStatus(operationId, Crn.safeFromString(getEnvironmentCrn()).getAccountId());
         }
     }

@@ -17,8 +17,8 @@ public class SdxGetAuditsAction implements Action<SdxEventTestDto, SdxClient> {
 
     @Override
     public SdxEventTestDto action(TestContext testContext, SdxEventTestDto testDto, SdxClient client) throws Exception {
-        Log.when(LOGGER, "Getting audit events via " + client.getDefaultClient().sdxEventEndpoint() + ", for input " + testDto.argsToString());
-        List<CDPStructuredEvent> auditEvents = client.getDefaultClient().sdxEventEndpoint().getAuditEvents(
+        Log.when(LOGGER, "Getting audit events via " + client.getDefaultClient(testContext).sdxEventEndpoint() + ", for input " + testDto.argsToString());
+        List<CDPStructuredEvent> auditEvents = client.getDefaultClient(testContext).sdxEventEndpoint().getAuditEvents(
                 testDto.getEnvironmentCrn(), testDto.getTypes(), testDto.getPage(), testDto.getSize()
         );
         Log.when(LOGGER, "Audit events response: " + auditEvents);

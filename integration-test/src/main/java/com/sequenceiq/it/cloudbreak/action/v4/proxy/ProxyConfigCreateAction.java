@@ -17,7 +17,7 @@ public class ProxyConfigCreateAction implements Action<ProxyTestDto, Environment
     public ProxyTestDto action(TestContext testContext, ProxyTestDto testDto, EnvironmentClient client) throws Exception {
         Log.whenJson(LOGGER, " Proxy config post request:\n", testDto.getRequest());
         testDto.setResponse(
-                client.getDefaultClient()
+                client.getDefaultClient(testContext)
                         .proxyV1Endpoint()
                         .post(testDto.getRequest()));
         Log.whenJson(LOGGER, " Proxy config was created successfully:\n", testDto.getResponse());

@@ -75,13 +75,14 @@ public class SshSaltExecutionMetricsActions {
     @Inject
     private SshJClient sshJClient;
 
-    public List<SaltHighstateReport> getSaltExecutionMetrics(String environmentCrn, String resourceName, MicroserviceClient client, String serviceName) {
-        return getSaltExecutionMetrics(environmentCrn, resourceName, client, saltMetricsWorkingDirectory, serviceName);
+    public List<SaltHighstateReport> getSaltExecutionMetrics(String environmentCrn, String resourceName, MicroserviceClient client, String serviceName,
+            TestContext testContext) {
+        return getSaltExecutionMetrics(environmentCrn, resourceName, client, saltMetricsWorkingDirectory, serviceName, testContext);
     }
 
     public List<SaltHighstateReport> getSaltExecutionMetrics(String environmentCrn, String resourceName, MicroserviceClient client,
-            String workingDirectoryLocation, String serviceName) {
-        String saltMasterIp = getSaltMasterIp(environmentCrn, resourceName, client, serviceName);
+            String workingDirectoryLocation, String serviceName, TestContext testContext) {
+        String saltMasterIp = getSaltMasterIp(environmentCrn, resourceName, client, serviceName, testContext);
         List<SaltHighstateReport> saltHighstateReports = new ArrayList<>();
         try {
             if (!saltMasterIp.isBlank()) {
@@ -146,17 +147,17 @@ public class SshSaltExecutionMetricsActions {
         return format(commandResult, serviceName, serviceName, serviceName, serviceName, serviceName, serviceName);
     }
 
-    private String getSaltMasterIp(String environmentCrn, String resourceName, MicroserviceClient client, String serviceName) {
+    private String getSaltMasterIp(String environmentCrn, String resourceName, MicroserviceClient client, String serviceName, TestContext testContext) {
         switch (serviceName) {
             case "freeipa":
-                return getFreeIpaGatewayPrivateIp(environmentCrn, (FreeIpaClient) client);
+                return getFreeIpaGatewayPrivateIp(environmentCrn, (FreeIpaClient) client, testContext);
             case "sdx":
-                List<InstanceGroupV4Response> sdxInstanceGroups = ((SdxClient) client).getDefaultClient().sdxEndpoint()
+                List<InstanceGroupV4Response> sdxInstanceGroups = ((SdxClient) client).getDefaultClient(testContext).sdxEndpoint()
                         .getDetail(resourceName, Set.of()).getStackV4Response().getInstanceGroups();
                 LOGGER.info("Sdx host groups found: {}", sdxInstanceGroups.toString());
                 return getGatewayPrivateIp(sdxInstanceGroups);
             case "distrox":
-                List<InstanceGroupV4Response> distroxInstanceGroups = ((CloudbreakClient) client).getDefaultClient().distroXV1Endpoint()
+                List<InstanceGroupV4Response> distroxInstanceGroups = ((CloudbreakClient) client).getDefaultClient(testContext).distroXV1Endpoint()
                         .getByName(resourceName, new HashSet<>()).getInstanceGroups();
                 LOGGER.info("DistroX instance groups found: {}", distroxInstanceGroups.toString());
                 return getGatewayPrivateIp(distroxInstanceGroups);
@@ -165,8 +166,8 @@ public class SshSaltExecutionMetricsActions {
         }
     }
 
-    private String getFreeIpaGatewayPrivateIp(String environmentCrn, FreeIpaClient freeIpaClient) {
-        return freeIpaClient.getDefaultClient().getFreeIpaV1Endpoint()
+    private String getFreeIpaGatewayPrivateIp(String environmentCrn, FreeIpaClient freeIpaClient, TestContext testContext) {
+        return freeIpaClient.getDefaultClient(testContext).getFreeIpaV1Endpoint()
                 .describe(environmentCrn).getInstanceGroups().stream()
                 .filter(instanceGroup -> instanceGroup.getType().equals(InstanceGroupType.MASTER))
                 .map(InstanceGroupResponse::getMetaData)

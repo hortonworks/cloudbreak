@@ -42,13 +42,13 @@ public class FreeIpaFindUsersInGroupAction implements Action<FreeIpaTestDto, Fre
                 environmentCrn));
         Log.whenJson(LOGGER, format(" FreeIpa '%s' find users in group request:%n ", testDto.getResponse().getCrn()), checkUsersInGroupRequest);
         if (expectedPresence) {
-            if (!client.getDefaultClient().getClientTestV1Endpoint().checkUsersInGroup(checkUsersInGroupRequest).getResult()) {
+            if (!client.getDefaultClient(testContext).getClientTestV1Endpoint().checkUsersInGroup(checkUsersInGroupRequest).getResult()) {
                 throw new TestFailException("Given freeipa users cannot be found in the given group, please check FMS logs for details");
             }
             LOGGER.info(format(" Users [%s] are present in group '%s' at environment '%s'", users, group, environmentCrn));
             Log.when(LOGGER, format(" Users [%s] are present in group '%s' at environment '%s'", users, group, environmentCrn));
         } else {
-            if (client.getDefaultClient().getClientTestV1Endpoint().checkUsersInGroup(checkUsersInGroupRequest).getResult()) {
+            if (client.getDefaultClient(testContext).getClientTestV1Endpoint().checkUsersInGroup(checkUsersInGroupRequest).getResult()) {
                 throw new TestFailException("Given freeipa users have been found in the given group, please check FMS logs for details");
             }
             LOGGER.info(format(" Users [%s] have been removed successfully from group '%s' at environment '%s'", users, group,

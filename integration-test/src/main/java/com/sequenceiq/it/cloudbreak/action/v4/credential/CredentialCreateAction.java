@@ -19,7 +19,7 @@ public class CredentialCreateAction implements Action<CredentialTestDto, Environ
     public CredentialTestDto action(TestContext testContext, CredentialTestDto testDto, EnvironmentClient environmentClient) throws Exception {
         Log.when(LOGGER, "Credential create request: " + testDto.getRequest());
         testDto.setResponse(
-                environmentClient.getDefaultClient()
+                environmentClient.getDefaultClient(testContext)
                         .credentialV1Endpoint()
                         .create(testDto.getRequest()));
         Log.whenJson(LOGGER, " Credential created successfully:\n", testDto.getResponse());

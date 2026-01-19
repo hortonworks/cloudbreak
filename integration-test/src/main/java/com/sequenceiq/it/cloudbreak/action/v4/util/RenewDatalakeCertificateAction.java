@@ -15,7 +15,7 @@ public class RenewDatalakeCertificateAction implements Action<RenewDatalakeCerti
     @Override
     public RenewDatalakeCertificateTestDto action(TestContext testContext, RenewDatalakeCertificateTestDto renewCertificateTestDto, SdxClient sdxClient)
             throws Exception {
-        sdxClient.getDefaultClient().sdxEndpoint().renewCertificate(renewCertificateTestDto.getStackCrn());
+        sdxClient.getDefaultClient(testContext).sdxEndpoint().renewCertificate(renewCertificateTestDto.getStackCrn());
         return renewCertificateTestDto;
     }
 }

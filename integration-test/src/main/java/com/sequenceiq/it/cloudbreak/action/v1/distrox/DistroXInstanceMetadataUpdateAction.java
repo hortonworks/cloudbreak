@@ -45,7 +45,7 @@ public class DistroXInstanceMetadataUpdateAction implements Action<DistroXTestDt
         DistroXInstanceMetadataUpdateV1Request request = new DistroXInstanceMetadataUpdateV1Request();
         request.setCrn(testDto.getCrn());
         request.setUpdateType(targetUpdateType);
-        FlowIdentifier flowIdentifier = client.getDefaultClient().distroXV1Endpoint().instanceMetadataUpdate(request);
+        FlowIdentifier flowIdentifier = client.getDefaultClient(testContext).distroXV1Endpoint().instanceMetadataUpdate(request);
         testDto.setFlow("DistroX instance metadata update",  flowIdentifier);
         Log.whenJson(LOGGER, format(" DistroX instance metadata update: %n"), testDto.getCrn());
         return testDto;

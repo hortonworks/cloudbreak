@@ -18,7 +18,7 @@ public class FreeIpaRefreshAction implements Action<FreeIpaTestDto, FreeIpaClien
     public FreeIpaTestDto action(TestContext testContext, FreeIpaTestDto testDto, FreeIpaClient client) throws Exception {
         String environmentCrn = testContext.given(EnvironmentTestDto.class).getCrn();
         testDto.setResponse(
-                client.getDefaultClient().getFreeIpaV1Endpoint().describe(environmentCrn)
+                client.getDefaultClient(testContext).getFreeIpaV1Endpoint().describe(environmentCrn)
         );
         Log.whenJson(LOGGER, " FreeIPA get response: ", testDto.getResponse());
         return testDto;

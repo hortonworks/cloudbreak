@@ -1,5 +1,7 @@
 package com.sequenceiq.it.cloudbreak.microservice;
 
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
+
 import java.util.Map;
 import java.util.Set;
 
@@ -8,6 +10,7 @@ import com.sequenceiq.cloudbreak.client.ConfigKey;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.environment.client.EnvironmentInternalCrnClient;
 import com.sequenceiq.environment.client.EnvironmentServiceApiKeyClient;
+import com.sequenceiq.environment.client.EnvironmentServiceApiKeyEndpoints;
 import com.sequenceiq.environment.client.EnvironmentServiceCrnEndpoints;
 import com.sequenceiq.environment.client.EnvironmentServiceUserCrnClient;
 import com.sequenceiq.environment.client.EnvironmentServiceUserCrnClientBuilder;
@@ -29,27 +32,44 @@ public class EnvironmentClient extends MicroserviceClient<com.sequenceiq.environ
 
     private EnvironmentInternalCrnClient environmentInternalCrnClient;
 
+    private com.sequenceiq.environment.client.EnvironmentClient alternativeEnvironmentClient;
+
+    private EnvironmentInternalCrnClient alternativeEnvironmentInternalCrnClient;
+
     public EnvironmentClient(CloudbreakUser cloudbreakUser,
-            RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator, String environmentAddress, String environmentInternalAddress) {
+            RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator, String environmentAddress, String environmentInternalAddress,
+            String alternativeEnvironmentAddress, String alternativeEnvironmentInternalAddress) {
         setActing(cloudbreakUser);
-        environmentClient = new EnvironmentServiceApiKeyClient(
+        environmentClient = createEnvironmentClient(cloudbreakUser, environmentAddress);
+        environmentInternalCrnClient = createInternalEnvironmentClient(environmentInternalAddress, regionAwareInternalCrnGenerator);
+
+        if (isNotEmpty(alternativeEnvironmentAddress) && isNotEmpty(alternativeEnvironmentInternalAddress)) {
+            alternativeEnvironmentClient = createEnvironmentClient(cloudbreakUser, alternativeEnvironmentAddress);
+            alternativeEnvironmentInternalCrnClient = createInternalEnvironmentClient(alternativeEnvironmentInternalAddress, regionAwareInternalCrnGenerator);
+        }
+    }
+
+    private EnvironmentServiceApiKeyEndpoints createEnvironmentClient(CloudbreakUser cloudbreakUser, String environmentAddress) {
+        return new EnvironmentServiceApiKeyClient(
                 environmentAddress,
                 new ConfigKey(false, true, true, TIMEOUT))
                 .withKeys(cloudbreakUser.getAccessKey(), cloudbreakUser.getSecretKey());
-        environmentInternalCrnClient = createInternalEnvironmentClient(
-                environmentInternalAddress,
-                regionAwareInternalCrnGenerator);
     }
 
     @Override
-    public FlowPublicEndpoint flowPublicEndpoint() {
-        return environmentClient.flowPublicEndpoint();
+    public FlowPublicEndpoint flowPublicEndpoint(TestContext testContext) {
+        if (testContext.shouldUseAlternativeEndpoints()) {
+            return alternativeEnvironmentClient.flowPublicEndpoint();
+        } else {
+            return environmentClient.flowPublicEndpoint();
+        }
     }
 
     @Override
     public EnvironmentWaitObject waitObject(CloudbreakTestDto entity, String name, Map<String, EnvironmentStatus> desiredStatuses,
             TestContext testContext, Set<EnvironmentStatus> ignoredFailedStatuses) {
-        return new EnvironmentWaitObject(this, entity.getName(), entity.getCrn(), desiredStatuses.get("status"), ignoredFailedStatuses);
+        return new EnvironmentWaitObject(this, entity.getName(), entity.getCrn(), desiredStatuses.get("status"), ignoredFailedStatuses,
+                testContext);
     }
 
     public EnvironmentInternalCrnClient createInternalEnvironmentClient(String serverRoot,
@@ -73,13 +93,23 @@ public class EnvironmentClient extends MicroserviceClient<com.sequenceiq.environ
     }
 
     @Override
-    public com.sequenceiq.environment.client.EnvironmentClient getDefaultClient() {
-        return environmentClient;
+    public com.sequenceiq.environment.client.EnvironmentClient getDefaultClient(TestContext testContext) {
+        if (testContext.shouldUseAlternativeEndpoints()) {
+            return alternativeEnvironmentClient;
+        } else {
+            return environmentClient;
+        }
     }
 
     @Override
     public EnvironmentServiceCrnEndpoints getInternalClient(TestContext testContext) {
         checkIfInternalClientAllowed(testContext);
-        return environmentInternalCrnClient.withInternalCrn();
+        EnvironmentInternalCrnClient client;
+        if (testContext.shouldUseAlternativeEndpoints()) {
+            client = alternativeEnvironmentInternalCrnClient;
+        } else {
+            client = environmentInternalCrnClient;
+        }
+        return client.withInternalCrn();
     }
 }

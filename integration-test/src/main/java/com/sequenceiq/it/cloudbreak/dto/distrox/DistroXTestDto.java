@@ -132,7 +132,7 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
         try {
             CloudbreakClient clientForCleanup = getClientForCleanup();
             LOGGER.info("Deleting DataHub with crn: {}", getCrn());
-            clientForCleanup.getDefaultClient().distroXV1Endpoint().deleteByCrn(getCrn(), true);
+            clientForCleanup.getDefaultClient(getTestContext()).distroXV1Endpoint().deleteByCrn(getCrn(), true);
             awaitWithClient(STACK_DELETED, clientForCleanup);
         } catch (NotFoundException nfe) {
             LOGGER.info("resource not found, thus cleanup not needed.");
@@ -141,7 +141,7 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
 
     @Override
     public List<StackV4Response> getAll(CloudbreakClient client) {
-        DistroXV1Endpoint distroXV1Endpoint = client.getDefaultClient().distroXV1Endpoint();
+        DistroXV1Endpoint distroXV1Endpoint = client.getDefaultClient(getTestContext()).distroXV1Endpoint();
         return distroXV1Endpoint.list(null, null).getResponses().stream()
                 .filter(s -> s.getName() != null)
                 .map(s -> {
@@ -159,7 +159,7 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
     @Override
     public void delete(TestContext testContext, StackV4Response entity, CloudbreakClient client) {
         try {
-            client.getDefaultClient().distroXV1Endpoint().deleteByName(entity.getName(), true);
+            client.getDefaultClient(getTestContext()).distroXV1Endpoint().deleteByName(entity.getName(), true);
             testContext.await(this, STACK_DELETED, key("wait-purge-distrox-" + entity.getName()));
         } catch (Exception e) {
             LOGGER.warn("Something went wrong on {} purge. {}", entity.getName(), ResponseUtil.getErrorMessage(e), e);
@@ -418,7 +418,8 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
                 getTestContext().getMicroserviceClient(CloudbreakClient.class),
                 CloudbreakEventService.DATAHUB_RESOURCE_TYPE,
                 getResponse().getId(),
-                null);
+                null,
+                getTestContext());
         boolean hasSpotTermination = (getResponse().getInstanceGroups() == null) ? false : getResponse().getInstanceGroups().stream()
                 .flatMap(ig -> ig.getMetadata().stream())
                 .anyMatch(metadata -> InstanceStatus.DELETED_BY_PROVIDER == metadata.getInstanceStatus());
@@ -540,7 +541,7 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
     }
 
     private void refreshResponse(TestContext testContext, CloudbreakClient client) {
-        setResponse(client.getDefaultClient()
+        setResponse(client.getDefaultClient(testContext)
                 .distroXV1Endpoint()
                 .getByName(getName(), new HashSet<>()));
     }

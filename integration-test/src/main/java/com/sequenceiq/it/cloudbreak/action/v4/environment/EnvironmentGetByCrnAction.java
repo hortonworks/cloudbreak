@@ -11,7 +11,7 @@ public class EnvironmentGetByCrnAction implements Action<EnvironmentTestDto, Env
     @Override
     public EnvironmentTestDto action(TestContext testContext, EnvironmentTestDto testDto, EnvironmentClient environmentClient) throws Exception {
         testDto.setResponse(
-                environmentClient.getDefaultClient()
+                environmentClient.getDefaultClient(testContext)
                         .environmentV1Endpoint()
                         .getByCrn(testDto.getCrn()));
         Log.whenJson("Environment get response: ", testDto.getResponse());

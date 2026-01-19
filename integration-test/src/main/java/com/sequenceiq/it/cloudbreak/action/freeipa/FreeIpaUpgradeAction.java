@@ -45,7 +45,7 @@ public class FreeIpaUpgradeAction extends AbstractFreeIpaAction<FreeIpaTestDto> 
             request.setImage(imageSettingsRequest);
         }
         Log.whenJson(LOGGER, format(" FreeIPA upgrade request:%n"), request);
-        FreeIpaUpgradeResponse response = client.getDefaultClient()
+        FreeIpaUpgradeResponse response = client.getDefaultClient(testContext)
                 .getFreeIpaUpgradeV1Endpoint()
                 .upgradeFreeIpa(request);
         testDto.setFlow("FreeIPA upgrade", response.getFlowIdentifier());

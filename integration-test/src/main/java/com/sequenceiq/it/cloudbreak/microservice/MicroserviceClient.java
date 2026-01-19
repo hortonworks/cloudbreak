@@ -36,7 +36,7 @@ public abstract class MicroserviceClient<C, I, E extends Enum<E>, W extends Wait
         return Set.of();
     }
 
-    public abstract FlowPublicEndpoint flowPublicEndpoint();
+    public abstract FlowPublicEndpoint flowPublicEndpoint(TestContext testContext);
 
     public <T extends WaitObject> WaitService<T> waiterService() {
         return new WaitService<>();
@@ -52,7 +52,7 @@ public abstract class MicroserviceClient<C, I, E extends Enum<E>, W extends Wait
         throw new TestFailException("Can't create waitInstanceWaitObject instances object");
     }
 
-    public abstract C getDefaultClient();
+    public abstract C getDefaultClient(TestContext testContext);
 
     public I getInternalClient(TestContext testContext) {
         throw new TestFailException("There is no internal client for this microservice");

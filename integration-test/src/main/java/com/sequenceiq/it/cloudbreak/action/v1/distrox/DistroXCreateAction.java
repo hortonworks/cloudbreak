@@ -23,7 +23,7 @@ public class DistroXCreateAction implements Action<DistroXTestDto, CloudbreakCli
             throw new TestFailException("Env name cannot be null");
         }
         Log.whenJson(LOGGER, " Distrox create request: ", testDto.getRequest());
-        StackV4Response stackV4Response = client.getDefaultClient()
+        StackV4Response stackV4Response = client.getDefaultClient(testContext)
                         .distroXV1Endpoint()
                         .post(testDto.getRequest());
         testDto.setFlow("Distrox create", stackV4Response.getFlowIdentifier());

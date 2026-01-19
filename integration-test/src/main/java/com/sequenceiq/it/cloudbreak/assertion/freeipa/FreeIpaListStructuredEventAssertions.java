@@ -22,7 +22,7 @@ public class FreeIpaListStructuredEventAssertions {
 
     public FreeIpaTestDto checkCreateEvents(TestContext testContext, FreeIpaTestDto testDto, FreeIpaClient client) {
         List<CDPStructuredEvent> auditEvents = getAuditEvents(
-                client.getDefaultClient().structuredEventsV1Endpoint(),
+                client.getDefaultClient(testContext).structuredEventsV1Endpoint(),
                 testDto.getCrn());
         eventAssertionCommon.noFlowEventsAreAllowedInDB(auditEvents);
         eventAssertionCommon.noRestEventsAreAllowedInDB(auditEvents);
@@ -31,7 +31,7 @@ public class FreeIpaListStructuredEventAssertions {
 
     public FreeIpaTestDto checkDeleteEvents(TestContext testContext, FreeIpaTestDto testDto, FreeIpaClient client) {
         List<CDPStructuredEvent> auditEvents = getAuditEvents(
-                client.getDefaultClient().structuredEventsV1Endpoint(),
+                client.getDefaultClient(testContext).structuredEventsV1Endpoint(),
                 testDto.getCrn());
         eventAssertionCommon.noFlowEventsAreAllowedInDB(auditEvents);
         eventAssertionCommon.noRestEventsAreAllowedInDB(auditEvents);
@@ -40,7 +40,7 @@ public class FreeIpaListStructuredEventAssertions {
 
     public FreeIpaTestDto checkStopEvents(TestContext testContext, FreeIpaTestDto testDto, FreeIpaClient client) {
         List<CDPStructuredEvent> auditEvents = getAuditEvents(
-                client.getDefaultClient().structuredEventsV1Endpoint(),
+                client.getDefaultClient(testContext).structuredEventsV1Endpoint(),
                 testDto.getCrn());
         eventAssertionCommon.noFlowEventsAreAllowedInDB(auditEvents);
         eventAssertionCommon.noRestEventsAreAllowedInDB(auditEvents);
@@ -49,7 +49,7 @@ public class FreeIpaListStructuredEventAssertions {
 
     public FreeIpaTestDto checkStartEvents(TestContext testContext, FreeIpaTestDto testDto, FreeIpaClient client) {
         List<CDPStructuredEvent> auditEvents = getAuditEvents(
-                client.getDefaultClient().structuredEventsV1Endpoint(),
+                client.getDefaultClient(testContext).structuredEventsV1Endpoint(),
                 testDto.getCrn());
         eventAssertionCommon.noFlowEventsAreAllowedInDB(auditEvents);
         eventAssertionCommon.noRestEventsAreAllowedInDB(auditEvents);

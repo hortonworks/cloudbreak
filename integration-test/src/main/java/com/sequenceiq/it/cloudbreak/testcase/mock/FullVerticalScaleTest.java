@@ -91,7 +91,7 @@ public class FullVerticalScaleTest extends AbstractClouderaManagerTest {
                 .given(FreeIpaTestDto.class)
                 .then((tc, dto, client) -> {
                     String environmentCrn = tc.get(EnvironmentTestDto.class).getCrn();
-                    DescribeFreeIpaResponse freeIpaResponse = client.getDefaultClient().getFreeIpaV1Endpoint().describe(environmentCrn);
+                    DescribeFreeIpaResponse freeIpaResponse = client.getDefaultClient(testContext).getFreeIpaV1Endpoint().describe(environmentCrn);
                     String instanceType = freeIpaResponse.getInstanceGroups().getFirst().getInstanceTemplate().getInstanceType();
                     if (!instanceType.equals(xlargeInstanceType)) {
                         throw new TestFailException("Vertical scaled instance type should be the same, freeipa instance type " + instanceType);
@@ -102,7 +102,7 @@ public class FullVerticalScaleTest extends AbstractClouderaManagerTest {
                 .when(distroXClient.verticalScale(distroxVerticalScaleKey))
                 .awaitForFlow()
                 .then((tc, dto, client) -> {
-                    StackV4Response stackV4Response = client.getDefaultClient().distroXV1Endpoint().getByName(dto.getName(), Set.of());
+                    StackV4Response stackV4Response = client.getDefaultClient(testContext).distroXV1Endpoint().getByName(dto.getName(), Set.of());
                     String instanceType = stackV4Response.getInstanceGroups().stream().filter(ig -> ig.getName().equals("master"))
                             .findFirst().get().getTemplate().getInstanceType();
                     if (!instanceType.equals(xlargeInstanceType)) {
@@ -115,7 +115,7 @@ public class FullVerticalScaleTest extends AbstractClouderaManagerTest {
                 .awaitForFlow()
                 .then((tc, dto, client) -> {
                     CloudbreakClient cbClient = tc.getMicroserviceClient(CloudbreakClient.class);
-                    StackV4Response stackV4Response = cbClient.getDefaultClient().stackV4Endpoint().getByCrn(0L, dto.getCrn(), Set.of());
+                    StackV4Response stackV4Response = cbClient.getDefaultClient(testContext).stackV4Endpoint().getByCrn(0L, dto.getCrn(), Set.of());
                     String instanceType = stackV4Response.getInstanceGroups().stream().filter(ig -> ig.getName().equals("master"))
                             .findFirst().get().getTemplate().getInstanceType();
                     if (!instanceType.equals(xlargeInstanceType)) {

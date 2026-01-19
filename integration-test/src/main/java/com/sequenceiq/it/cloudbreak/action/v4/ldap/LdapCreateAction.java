@@ -16,7 +16,7 @@ public class LdapCreateAction implements Action<LdapTestDto, FreeIpaClient> {
     public LdapTestDto action(TestContext testContext, LdapTestDto testDto, FreeIpaClient client) throws Exception {
         Log.whenJson(LOGGER, " Ldap post request:\n", testDto.getRequest());
         testDto.setResponse(
-                client.getDefaultClient()
+                client.getDefaultClient(testContext)
                         .getLdapConfigV1Endpoint()
                         .create(testDto.getRequest()));
         Log.whenJson(LOGGER, " Ldap was created successfully:\n", testDto.getResponse());

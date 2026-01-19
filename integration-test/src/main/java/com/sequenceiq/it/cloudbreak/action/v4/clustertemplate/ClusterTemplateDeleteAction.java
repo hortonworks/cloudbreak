@@ -16,7 +16,7 @@ public class ClusterTemplateDeleteAction implements Action<ClusterTemplateTestDt
     @Override
     public ClusterTemplateTestDto action(TestContext testContext, ClusterTemplateTestDto testDto, CloudbreakClient client) throws Exception {
         Log.when(LOGGER, "ClusterTemplateEntity delete, name: " + testDto.getRequest().getName());
-        client.getDefaultClient()
+        client.getDefaultClient(testContext)
                 .clusterTemplateV4EndPoint()
                 .deleteByName(client.getWorkspaceId(), testDto.getRequest().getName());
         Log.when(LOGGER, "ClusterTemplateEntity deleted successfully: " + testDto.getResponse().getId());

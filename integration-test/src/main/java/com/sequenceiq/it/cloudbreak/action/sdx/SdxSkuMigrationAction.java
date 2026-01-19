@@ -17,7 +17,7 @@ public class SdxSkuMigrationAction implements Action<SdxTestDto, SdxClient> {
     @Override
     public SdxTestDto action(TestContext testContext, SdxTestDto testDto, SdxClient client) throws Exception {
         Log.when(LOGGER, "SKU migration for name: " + testDto.getName());
-        FlowIdentifier flowIdentifier = client.getDefaultClient().sdxEndpoint().triggerSkuMigrationByName(testDto.getName(), true);
+        FlowIdentifier flowIdentifier = client.getDefaultClient(testContext).sdxEndpoint().triggerSkuMigrationByName(testDto.getName(), true);
         testDto.setFlow("SKU migration for " + testDto.getName(), flowIdentifier);
         Log.when(LOGGER, "SKU migration started with flow id: " + flowIdentifier);
         return testDto;

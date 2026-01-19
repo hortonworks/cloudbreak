@@ -11,6 +11,7 @@ import java.util.Set;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
+import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.microservice.EnvironmentClient;
 import com.sequenceiq.it.cloudbreak.util.wait.service.WaitObject;
 
@@ -28,17 +29,20 @@ public class EnvironmentWaitObject implements WaitObject {
 
     private final String name;
 
+    private final TestContext testContext;
+
     public EnvironmentWaitObject(EnvironmentClient environmentClient, String name, String environmentCrn, EnvironmentStatus desiredStatus,
-            Set<EnvironmentStatus> ignoredFailedStatuses) {
+            Set<EnvironmentStatus> ignoredFailedStatuses, TestContext testContext) {
         this.client = environmentClient;
         this.crn = environmentCrn;
         this.name = name;
         this.desiredStatus = desiredStatus;
         this.ignoredFailedStatuses = ignoredFailedStatuses;
+        this.testContext = testContext;
     }
 
     public EnvironmentEndpoint getEndpoint() {
-        return client.getDefaultClient().environmentV1Endpoint();
+        return client.getDefaultClient(testContext).environmentV1Endpoint();
     }
 
     public String getCrn() {
