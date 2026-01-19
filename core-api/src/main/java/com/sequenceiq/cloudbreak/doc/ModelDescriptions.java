@@ -625,4 +625,8 @@ public class ModelDescriptions {
         public static final String MIGRATE_DATABASE_TO_SSL_ERROR_REASON = "Reason of the error if Migrate Database to SSL could not be started.";
     }
 
+    public static class StackVerticalScaleModelDescription {
+        public static final String ORCHESTRATOR_TYPE = "Orchestrator strategy for vertical scaling operations. Default is ALL_AT_ONCE.";
+    }
+
 }
