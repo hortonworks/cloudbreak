@@ -22,7 +22,10 @@ import com.sequenceiq.cloudbreak.cloud.task.ResourcesStatePollerResult;
 import com.sequenceiq.cloudbreak.cloud.transform.ResourceLists;
 import com.sequenceiq.cloudbreak.cloud.transform.ResourcesStatePollerResults;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.common.api.type.CommonStatus;
+import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.freeipa.flow.freeipa.loadbalancer.event.provision.LoadBalancerProvisionRequest;
+import com.sequenceiq.freeipa.service.resource.ResourceService;
 
 @Service
 public class FreeIpaLoadBalancerCreationService {
@@ -41,19 +44,33 @@ public class FreeIpaLoadBalancerCreationService {
     @Inject
     private PollTaskFactory statusCheckFactory;
 
+    @Inject
+    private ResourceService resourceService;
+
     public void createLoadBalancer(LoadBalancerProvisionRequest request) {
         try {
             LOGGER.debug("Starting FreeIPA load balancer provision.");
             CloudContext cloudContext = request.getCloudContext();
             CloudConnector connector = cloudPlatformConnectors.get(cloudContext.getPlatform(), cloudContext.getVariant());
             AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, request.getCloudCredential());
-            List<CloudResourceStatus> loadBalancerResourceStatus = connector.resources().launchLoadBalancers(ac, request.getCloudStack(), persistenceNotifier);
-            waitForResources(ac, loadBalancerResourceStatus, cloudContext);
+            if (loadBalancerProvisionRequired(request.getResourceId())) {
+                List<CloudResourceStatus> loadBalancerResourceStatus = connector
+                        .resources()
+                        .launchLoadBalancers(ac, request.getCloudStack(), persistenceNotifier);
+                waitForResources(ac, loadBalancerResourceStatus, cloudContext);
+            }
             LOGGER.debug("FreeIPA load balancer provision finished.");
         } catch (Exception e) {
             LOGGER.error("FreeIPA load balancer provision failed.", e);
             throw new CloudbreakServiceException(e);
         }
+    }
+
+    private boolean loadBalancerProvisionRequired(Long stackId) {
+        return resourceService.findAllByResourceStatusAndResourceTypeAndStackId(CommonStatus.CREATED, ResourceType.GCP_BACKEND_SERVICE, stackId)
+                .stream()
+                .findFirst()
+                .isEmpty();
     }
 
     private void waitForResources(AuthenticatedContext ac, List<CloudResourceStatus> resourceStatuses, CloudContext cloudContext) throws Exception {
