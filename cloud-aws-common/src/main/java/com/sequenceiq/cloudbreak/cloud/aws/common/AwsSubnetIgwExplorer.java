@@ -12,6 +12,8 @@ import org.springframework.stereotype.Component;
 
 import software.amazon.awssdk.services.ec2.model.Route;
 import software.amazon.awssdk.services.ec2.model.RouteTable;
+import software.amazon.awssdk.services.ec2.model.VpcEndpoint;
+import software.amazon.awssdk.services.ec2.model.VpcEndpointType;
 
 @Component
 public class AwsSubnetIgwExplorer {
@@ -30,14 +32,89 @@ public class AwsSubnetIgwExplorer {
 
     private static final String TRIAL_DESTINATION_PREFIX = "pl-";
 
-    public boolean hasInternetGatewayOrVpceOfSubnet(List<RouteTable> routeTables, String subnetId, String vpcId, boolean hasTrialEntitlement) {
+    public boolean hasInternetGatewayOrVpceOfSubnet(List<RouteTable> routeTables, String subnetId, String vpcId, List<VpcEndpoint> vpcEndpoints,
+            boolean hasTrialEntitlement) {
         Optional<RouteTable> routeTable = getRouteTableForSubnet(routeTables, subnetId, vpcId);
         LOGGER.debug("Route table for subnet '{}' (VPC is '{}'): '{}'", subnetId, vpcId, routeTable);
 
         Optional<Route> routeWithInternetGatewayOrVpce = getRouteWithInternetGatewayOrVPCE(routeTable, hasTrialEntitlement);
         LOGGER.debug("Route with IGW or trial setup for subnet '{}' (VPC is '{}'): '{}'", subnetId, vpcId, routeWithInternetGatewayOrVpce);
 
-        return routeWithInternetGatewayOrVpce.isPresent();
+        if (routeWithInternetGatewayOrVpce.isPresent()) {
+            return true;
+        }
+
+        boolean hasIgwThroughGwlb = checkIgwThroughGwlbVpcEndpoint(routeTable, routeTables, vpcId, vpcEndpoints);
+        LOGGER.debug("Subnet '{}' has IGW through GWLB: {}", subnetId, hasIgwThroughGwlb);
+
+        return hasIgwThroughGwlb;
+    }
+
+    private boolean checkIgwThroughGwlbVpcEndpoint(Optional<RouteTable> routeTable, List<RouteTable> allRouteTables,
+            String vpcId, List<VpcEndpoint> vpcEndpoints) {
+        if (routeTable.isEmpty()) {
+            return false;
+        }
+
+        Set<String> vpceIdsInRoute = routeTable.get().routes().stream()
+                .filter(route -> OPEN_CIDR_BLOCK.equals(route.destinationCidrBlock()))
+                .filter(route -> StringUtils.isNotEmpty(route.gatewayId()) && route.gatewayId().startsWith(VPCE_PREFIX))
+                .map(Route::gatewayId)
+                .collect(Collectors.toSet());
+
+        LOGGER.debug("Found VPCE IDs with 0.0.0.0/0 route: {}", vpceIdsInRoute);
+
+        if (vpceIdsInRoute.isEmpty()) {
+            return false;
+        }
+
+        List<VpcEndpoint> gwlbEndpoints = filterGatewayLoadBalancerEndpoints(vpceIdsInRoute, vpcEndpoints);
+
+        if (gwlbEndpoints.isEmpty()) {
+            LOGGER.debug("No Gateway Load Balancer type endpoints found among VPCEs: {}", vpceIdsInRoute);
+            return false;
+        }
+
+        Set<String> endpointSubnetIds = gwlbEndpoints.stream()
+                .flatMap(endpoint -> endpoint.subnetIds().stream())
+                .collect(Collectors.toSet());
+
+        if (endpointSubnetIds.isEmpty()) {
+            LOGGER.debug("No subnets found for GWLB endpoints");
+            return false;
+        }
+
+        return isGwlbSubnetsHaveIgwAccess(endpointSubnetIds, allRouteTables, vpcId);
+    }
+
+    private List<VpcEndpoint> filterGatewayLoadBalancerEndpoints(Set<String> vpceIds, List<VpcEndpoint> vpcEndpoints) {
+        if (vpceIds.isEmpty() || vpcEndpoints == null || vpcEndpoints.isEmpty()) {
+            return List.of();
+        }
+
+        return vpcEndpoints.stream()
+                .filter(endpoint -> vpceIds.contains(endpoint.vpcEndpointId()))
+                .filter(endpoint -> VpcEndpointType.GATEWAY_LOAD_BALANCER.equals(endpoint.vpcEndpointType()))
+                .collect(Collectors.toList());
+    }
+
+    private boolean isGwlbSubnetsHaveIgwAccess(Set<String> subnetIds, List<RouteTable> allRouteTables, String vpcId) {
+        for (String subnetId : subnetIds) {
+            Optional<RouteTable> subnetRouteTable = getRouteTableForSubnet(allRouteTables, subnetId, vpcId);
+
+            if (subnetRouteTable.isPresent()) {
+                boolean hasIgw = subnetRouteTable.get().routes().stream()
+                        .anyMatch(this::isInternetGatewayConfigured);
+
+                if (hasIgw) {
+                    LOGGER.debug("Firewall subnet '{}' has IGW route", subnetId);
+                    return true;
+                }
+            }
+        }
+
+        LOGGER.debug("None of the firewall subnets have IGW routes");
+        return false;
     }
 
     private Optional<RouteTable> getRouteTableForSubnet(List<RouteTable> tableList, String subnetId, String vpcId) {

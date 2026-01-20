@@ -80,6 +80,8 @@ import software.amazon.awssdk.services.ec2.model.DescribeVolumesModificationsRes
 import software.amazon.awssdk.services.ec2.model.DescribeVolumesRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeVolumesResponse;
 import software.amazon.awssdk.services.ec2.model.DescribeVpcEndpointServicesResponse;
+import software.amazon.awssdk.services.ec2.model.DescribeVpcEndpointsRequest;
+import software.amazon.awssdk.services.ec2.model.DescribeVpcEndpointsResponse;
 import software.amazon.awssdk.services.ec2.model.DescribeVpcsRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeVpcsResponse;
 import software.amazon.awssdk.services.ec2.model.DetachVolumeRequest;
@@ -208,6 +210,10 @@ public class AmazonEc2Client extends AmazonClient {
 
     public DescribeVpcsResponse describeVpcs(DescribeVpcsRequest describeVpcsRequest) {
         return client.describeVpcs(describeVpcsRequest);
+    }
+
+    public DescribeVpcEndpointsResponse describeVpcEndpoints(DescribeVpcEndpointsRequest describeVpcEndpointsRequest) {
+        return client.describeVpcEndpoints(describeVpcEndpointsRequest);
     }
 
     public DescribeKeyPairsResponse describeKeyPairs(DescribeKeyPairsRequest describeKeyPairsRequest) {

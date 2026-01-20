@@ -134,6 +134,8 @@ import software.amazon.awssdk.services.ec2.model.DescribeRouteTablesRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeSecurityGroupsRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeSubnetsRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeSubnetsResponse;
+import software.amazon.awssdk.services.ec2.model.DescribeVpcEndpointsRequest;
+import software.amazon.awssdk.services.ec2.model.DescribeVpcEndpointsResponse;
 import software.amazon.awssdk.services.ec2.model.DescribeVpcsRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeVpcsResponse;
 import software.amazon.awssdk.services.ec2.model.DiskInfo;
@@ -151,6 +153,7 @@ import software.amazon.awssdk.services.ec2.model.SecurityGroup;
 import software.amazon.awssdk.services.ec2.model.Subnet;
 import software.amazon.awssdk.services.ec2.model.Tag;
 import software.amazon.awssdk.services.ec2.model.Vpc;
+import software.amazon.awssdk.services.ec2.model.VpcEndpoint;
 import software.amazon.awssdk.services.iam.model.InstanceProfile;
 import software.amazon.awssdk.services.iam.model.ListInstanceProfilesRequest;
 import software.amazon.awssdk.services.iam.model.ListInstanceProfilesResponse;
@@ -417,7 +420,8 @@ public class AwsPlatformResources implements PlatformResources {
         LOGGER.debug("Processing VPCs");
         for (Vpc vpc : describeVpcsResponse.vpcs()) {
             List<Subnet> awsSubnets = getSubnets(ec2Client, vpc);
-            Set<CloudSubnet> subnets = convertAwsSubnetsToCloudSubnets(describeRouteTablesResponse, awsSubnets, cloudCredential);
+            List<VpcEndpoint> vpcEndpoints = getVpcEndpoints(ec2Client, vpc);
+            Set<CloudSubnet> subnets = convertAwsSubnetsToCloudSubnets(describeRouteTablesResponse, awsSubnets, vpcEndpoints, cloudCredential);
 
             Map<String, Object> properties = prepareNetworkProperties(vpc);
             Optional<String> name = getName(vpc.tags());
@@ -446,14 +450,27 @@ public class AwsPlatformResources implements PlatformResources {
         return awsSubnets;
     }
 
+    private List<VpcEndpoint> getVpcEndpoints(AmazonEc2Client ec2Client, Vpc vpc) {
+        DescribeVpcEndpointsRequest vpcEndpointsRequest = DescribeVpcEndpointsRequest.builder()
+                .filters(Filter.builder()
+                        .name("vpc-id")
+                        .values(vpc.vpcId())
+                        .build())
+                .build();
+        DescribeVpcEndpointsResponse describeVpcEndpointsResponse = ec2Client.describeVpcEndpoints(vpcEndpointsRequest);
+
+        return describeVpcEndpointsResponse.vpcEndpoints();
+    }
+
     private Set<CloudSubnet> convertAwsSubnetsToCloudSubnets(List<RouteTable> describeRouteTablesResponse,
-            List<Subnet> awsSubnets, ExtendedCloudCredential cloudCredential) {
+            List<Subnet> awsSubnets, List<VpcEndpoint> vpcEndpoints, ExtendedCloudCredential cloudCredential) {
         Set<CloudSubnet> subnets = new HashSet<>();
         for (Subnet subnet : awsSubnets) {
             boolean hasInternetGateway = awsSubnetIgwExplorer.hasInternetGatewayOrVpceOfSubnet(
                     describeRouteTablesResponse,
                     subnet.subnetId(),
                     subnet.vpcId(),
+                    vpcEndpoints,
                     entitlementService.cdpTrialEnabled(cloudCredential.getAccountId()));
             LOGGER.info("The subnet {} has internetGateway value is '{}'", subnet, hasInternetGateway);
 

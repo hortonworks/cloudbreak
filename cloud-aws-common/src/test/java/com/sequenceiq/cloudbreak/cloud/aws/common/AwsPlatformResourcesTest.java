@@ -81,6 +81,7 @@ import software.amazon.awssdk.services.ec2.model.DescribeRegionsRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeRegionsResponse;
 import software.amazon.awssdk.services.ec2.model.DescribeRouteTablesResponse;
 import software.amazon.awssdk.services.ec2.model.DescribeSubnetsResponse;
+import software.amazon.awssdk.services.ec2.model.DescribeVpcEndpointsResponse;
 import software.amazon.awssdk.services.ec2.model.DescribeVpcsResponse;
 import software.amazon.awssdk.services.ec2.model.DiskInfo;
 import software.amazon.awssdk.services.ec2.model.EbsEncryptionSupport;
@@ -456,6 +457,8 @@ public class AwsPlatformResourcesTest {
         DescribeSubnetsResponse subnets = DescribeSubnetsResponse.builder()
                 .subnets(List.of(Subnet.builder().availabilityZone("not-enabled-az").mapPublicIpOnLaunch(true).build()))
                 .build();
+        DescribeVpcEndpointsResponse vpcEndpoints = DescribeVpcEndpointsResponse.builder().vpcEndpoints(List.of()).build();
+        when(amazonEC2Client.describeVpcEndpoints(any())).thenReturn(vpcEndpoints);
         when(entitlementService.cdpTrialEnabled(anyString())).thenReturn(false);
         when(amazonEC2Client.describeSubnets(any())).thenReturn(subnets);
         CloudNetworks cloudNetworks = underTest.networks(cloudCredential, region, Map.of());
@@ -473,6 +476,8 @@ public class AwsPlatformResourcesTest {
         DescribeSubnetsResponse subnets = DescribeSubnetsResponse.builder()
                 .subnets(List.of(Subnet.builder().availabilityZone("not-enabled-az").mapPublicIpOnLaunch(true).build()))
                 .build();
+        DescribeVpcEndpointsResponse vpcEndpoints = DescribeVpcEndpointsResponse.builder().vpcEndpoints(List.of()).build();
+        when(amazonEC2Client.describeVpcEndpoints(any())).thenReturn(vpcEndpoints);
         when(entitlementService.cdpTrialEnabled(anyString())).thenReturn(true);
         when(amazonEC2Client.describeSubnets(any())).thenReturn(subnets);
         CloudNetworks cloudNetworks = underTest.networks(cloudCredential, region, Map.of());
