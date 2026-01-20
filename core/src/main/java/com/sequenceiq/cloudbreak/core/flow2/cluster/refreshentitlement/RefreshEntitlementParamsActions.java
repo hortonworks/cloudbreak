@@ -21,7 +21,6 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.ConfigureClus
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.install.ConfigureClusterManagerManagementServicesSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.RefreshEntitlementParamsTriggerEvent;
 import com.sequenceiq.cloudbreak.service.telemetry.DynamicEntitlementRefreshService;
-import com.sequenceiq.flow.core.Flow;
 
 @Configuration
 public class RefreshEntitlementParamsActions {
@@ -93,8 +92,6 @@ public class RefreshEntitlementParamsActions {
                 LOGGER.warn("Error during refreshing dynamic entitlements.", payload.getException());
                 flowMessageService.fireEventAndLog(context.getStackId(), EVENT_TYPE, ResourceEvent.STACK_DYNAMIC_ENTITLEMENT_FAILED,
                         payload.getException().getMessage());
-                Flow flow = getFlow(context.getFlowParameters().getFlowId());
-                flow.setFlowFailed(payload.getException());
                 sendEvent(context);
             }
 

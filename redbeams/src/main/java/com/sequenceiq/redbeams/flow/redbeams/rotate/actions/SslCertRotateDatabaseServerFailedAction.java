@@ -15,7 +15,6 @@ import org.springframework.statemachine.StateContext;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
-import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.flow.redbeams.rotate.RedbeamsSslCertRotateEvent;
@@ -61,9 +60,6 @@ public class SslCertRotateDatabaseServerFailedAction extends AbstractRedbeamsSsl
             FlowParameters flowParameters,
             StateContext<RedbeamsSslCertRotateState, RedbeamsSslCertRotateEvent> stateContext,
             SslCertRotateDatabaseRedbeamsFailureEvent payload) {
-        Flow flow = getFlow(flowParameters.getFlowId());
-        flow.setFlowFailed(payload.getException());
-
         return super.createFlowContext(flowParameters, stateContext, payload, false);
     }
 

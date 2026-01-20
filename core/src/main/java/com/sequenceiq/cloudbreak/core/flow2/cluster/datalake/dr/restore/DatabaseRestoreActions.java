@@ -22,7 +22,6 @@ import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.dr.restore.DatabaseRestoreFailedEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.dr.restore.DatabaseRestoreRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.dr.restore.DatabaseRestoreSuccess;
-import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowState;
@@ -79,9 +78,7 @@ public class DatabaseRestoreActions {
 
             @Override
             protected BackupRestoreContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext,
-                DatabaseRestoreFailedEvent payload) {
-                Flow flow = getFlow(flowParameters.getFlowId());
-                flow.setFlowFailed(payload.getException());
+                    DatabaseRestoreFailedEvent payload) {
                 return BackupRestoreContext.from(flowParameters, payload, null, null, true, payload.getSkipDatabaseNames(),
                         payload.getDatabaseMaxDurationInMin(), payload.isDryRun());
             }

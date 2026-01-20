@@ -23,7 +23,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
-import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.PayloadConverter;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.FailureDetails;
@@ -225,8 +224,6 @@ public class RebootActions {
                 Long stackId = payload.getResourceId();
                 Stack stack = stackService.getStackById(stackId);
                 MDCBuilder.buildMdcContext(stack);
-                Flow flow = getFlow(flowParameters.getFlowId());
-                flow.setFlowFailed(payload.getException());
 
                 List<InstanceMetaData> instanceMetaData = payload.getInstanceIds().stream()
                         .map(instanceId -> {

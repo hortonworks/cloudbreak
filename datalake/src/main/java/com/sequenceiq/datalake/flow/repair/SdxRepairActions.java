@@ -33,7 +33,6 @@ import com.sequenceiq.datalake.metric.MetricType;
 import com.sequenceiq.datalake.metric.SdxMetricService;
 import com.sequenceiq.datalake.service.AbstractSdxAction;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
-import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowState;
@@ -168,8 +167,6 @@ public class SdxRepairActions {
                 if (exception.getMessage() != null) {
                     statusReason = exception.getMessage();
                 }
-                Flow flow = getFlow(context.getFlowParameters().getFlowId());
-                flow.setFlowFailed(payload.getException());
                 SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.REPAIR_FAILED, statusReason, payload.getResourceId());
                 metricService.incrementMetricCounter(MetricType.SDX_REPAIR_FAILED, sdxCluster);
                 sendEvent(context, SDX_REPAIR_FAILED_HANDLED_EVENT.event(), payload);

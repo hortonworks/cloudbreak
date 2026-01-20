@@ -20,7 +20,6 @@ import com.sequenceiq.cloudbreak.cloud.event.resource.migration.aws.DeleteCloudF
 import com.sequenceiq.cloudbreak.cloud.event.resource.migration.aws.DeleteCloudFormationResult;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
-import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.FailureDetails;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SuccessDetails;
@@ -118,13 +117,7 @@ public class AwsVariantMigrationActions {
                 stackUpdater.updateStackStatus(stack, DetailedStackStatus.UPGRADE_FAILED, "AWS variant migration failed. " + errorReason);
                 operationService.failOperation(stack.getAccountId(), getOperationId(variables), message, List.of(successDetails), List.of(failureDetails));
                 metricService.incrementMetricCounter(MetricType.AWS_VARIANT_MIGRATION_FAILED, stack, payload.getException());
-                failFlow(context, payload);
                 sendEvent(context, AWS_VARIANT_MIGRATION_FAIL_HANDLED_EVENT.event(), payload);
-            }
-
-            private void failFlow(AwsVariantMigrationFlowContext context, StackFailureEvent payload) {
-                Flow flow = getFlow(context.getFlowParameters().getFlowId());
-                flow.setFlowFailed(payload.getException());
             }
         };
     }

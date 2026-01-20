@@ -17,7 +17,6 @@ import com.sequenceiq.flow.component.sleep.event.SleepStartEvent;
 import com.sequenceiq.flow.component.sleep.event.SleepWaitRequest;
 import com.sequenceiq.flow.core.AbstractAction;
 import com.sequenceiq.flow.core.CommonContext;
-import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowState;
@@ -82,8 +81,6 @@ public class SleepFlow {
             @Override
             protected void doExecute(CommonContext context, SleepFailedEvent payload, Map<Object, Object> variables) throws Exception {
                 LOGGER.info("Sleep fail handled!");
-                Flow flow = getFlow(context.getFlowId());
-                flow.setFlowFailed(new Exception(payload.getReason()));
                 sendEvent(context, SleepEvent.SLEEP_FAIL_HANDLED_EVENT.selector(), payload);
             }
 

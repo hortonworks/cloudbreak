@@ -6,7 +6,6 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.cert.RotateRdsCer
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.isNotNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -247,7 +246,6 @@ class RotateRdsCertificateActionsTest {
         RuntimeException expectedException = new RuntimeException(MESSAGE);
         RotateRdsCertificateFailedEvent failedPayload = new RotateRdsCertificateFailedEvent(STACK_ID, ROTATE, expectedException);
 
-        when(runningFlows.get(anyString())).thenReturn(flow);
         when(stateContext.getMessageHeader(MessageFactory.HEADERS.DATA.name())).thenReturn(failedPayload);
         Action<?, ?> action = configureAction(underTest::rotateRdsCertFailed);
         action.execute(stateContext);
@@ -255,10 +253,7 @@ class RotateRdsCertificateActionsTest {
         verify(rotateRdsCertificateService).rotateRdsCertFailed(failedPayload);
         verify(eventBus).notify(selectorArgumentCaptor.capture(), eventArgumentCaptor.capture());
         verify(metricService).incrementMetricCounter(MetricType.ROTATE_RDS_CERTIFICATE_FAILED, STACK);
-        verify(flow).setFlowFailed(exceptionCaptor.capture());
         assertThat(selectorArgumentCaptor.getValue()).isEqualTo(FAIL_HANDLED_EVENT.event());
-        Exception exception = exceptionCaptor.getValue();
-        assertThat(exception).isEqualTo(expectedException);
     }
 
     private Action<?, ?> configureAction(Supplier<Action<?, ?>> actionSupplier) {

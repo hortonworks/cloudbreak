@@ -20,7 +20,6 @@ import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.CmSyncTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.CmSyncRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.CmSyncResult;
-import com.sequenceiq.flow.core.Flow;
 
 @Configuration
 public class CmSyncActions {
@@ -69,8 +68,6 @@ public class CmSyncActions {
                 LOGGER.warn("Error during executing syncing Cloudera Manager and parcels versions from CM.", payload.getException());
                 flowMessageService.fireEventAndLog(context.getStackId(), EVENT_TYPE, ResourceEvent.STACK_SYNC_VERSIONS_FROM_CM_TO_DB_FAILED,
                         payload.getException().getMessage());
-                Flow flow = getFlow(context.getFlowParameters().getFlowId());
-                flow.setFlowFailed(payload.getException());
                 sendEvent(context);
             }
 

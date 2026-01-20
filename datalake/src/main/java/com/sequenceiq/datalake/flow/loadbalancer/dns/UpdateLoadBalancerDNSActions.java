@@ -153,7 +153,6 @@ public class UpdateLoadBalancerDNSActions {
                         sdxCluster, ResourceEvent.UPDATE_LOAD_BALANCER_DNS_FAILED,
                         Set.of(exception.getMessage())
                 );
-                getFlow(context.getFlowParameters().getFlowId()).setFlowFailed(payload.getException());
                 sendEvent(context, UPDATE_LOAD_BALANCER_DNS_FAILURE_HANDLED_EVENT.event(), payload);
             }
 

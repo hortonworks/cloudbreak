@@ -20,7 +20,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
@@ -29,8 +28,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
-import com.sequenceiq.flow.core.Flow;
-import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.VerticalScaleRequest;
 import com.sequenceiq.freeipa.converter.cloud.ResourceToCloudResourceConverter;
@@ -38,8 +35,6 @@ import com.sequenceiq.freeipa.converter.cloud.StackToCloudStackConverter;
 import com.sequenceiq.freeipa.entity.Resource;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.freeipa.verticalscale.FreeIpaVerticalScaleService;
-import com.sequenceiq.freeipa.flow.freeipa.verticalscale.FreeIpaVerticalScaleState;
-import com.sequenceiq.freeipa.flow.freeipa.verticalscale.event.FreeIpaVerticalScaleEvent;
 import com.sequenceiq.freeipa.flow.freeipa.verticalscale.event.FreeIpaVerticalScaleFailureEvent;
 import com.sequenceiq.freeipa.flow.freeipa.verticalscale.event.FreeIpaVerticalScaleRequest;
 import com.sequenceiq.freeipa.flow.freeipa.verticalscale.event.FreeIpaVerticalScaleResult;
@@ -137,15 +132,6 @@ public class FreeIpaVerticalScaleActions {
 
             @Inject
             private OperationService operationService;
-
-            @Override
-            protected StackContext createFlowContext(FlowParameters flowParameters, StateContext<FreeIpaVerticalScaleState,
-                    FreeIpaVerticalScaleEvent> stateContext,
-                    FreeIpaVerticalScaleFailureEvent payload) {
-                Flow flow = getFlow(flowParameters.getFlowId());
-                flow.setFlowFailed(payload.getException());
-                return super.createFlowContext(flowParameters, stateContext, payload);
-            }
 
             @Override
             protected void doExecute(StackContext context, FreeIpaVerticalScaleFailureEvent payload, Map<Object, Object> variables) {

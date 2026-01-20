@@ -14,7 +14,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.action.Action;
 
-import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SuccessDetails;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.freeipa.backup.full.BackupContext;
@@ -75,17 +74,11 @@ public class FullBackupActions {
             @Override
             protected void doExecute(BackupContext context, StackFailureEvent payload, Map<Object, Object> variables) {
                 LOGGER.error("Full backup failed", payload.getException());
-                failFlow(context, payload);
                 if (isOperationIdSet(variables)) {
                     LOGGER.debug("Fail operation with id: [{}]", getOperationId(variables));
                     operationService.failOperation(context.getStack().getAccountId(), getOperationId(variables), payload.getException().getMessage());
                 }
                 sendEvent(context, new StackEvent(FULL_BACKUP_FAILURE_HANDLED_EVENT.event(), payload.getResourceId()));
-            }
-
-            private void failFlow(BackupContext context, StackFailureEvent payload) {
-                Flow flow = getFlow(context.getFlowParameters().getFlowId());
-                flow.setFlowFailed(payload.getException());
             }
         };
     }

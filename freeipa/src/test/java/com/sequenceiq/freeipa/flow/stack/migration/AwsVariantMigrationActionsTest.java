@@ -1,11 +1,8 @@
 package com.sequenceiq.freeipa.flow.stack.migration;
 
 import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -27,7 +24,6 @@ import com.sequenceiq.cloudbreak.common.metrics.MetricService;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.flow.core.AbstractActionTestSupport;
-import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowRegister;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
@@ -107,7 +103,6 @@ public class AwsVariantMigrationActionsTest {
         String errorReason = "error reason";
         StackFailureEvent payload = new StackFailureEvent(STACK_ID, new Exception(errorReason), ERROR);
         Map<Object, Object> variables = new HashMap<>();
-        when(runningFlows.get(any())).thenReturn(mock(Flow.class));
         new AbstractActionTestSupport<>(getMigrationFailedAction()).doExecute(context, payload, variables);
         verify(metricService).incrementMetricCounter(MetricType.AWS_VARIANT_MIGRATION_FAILED, context.getStack(), payload.getException());
     }

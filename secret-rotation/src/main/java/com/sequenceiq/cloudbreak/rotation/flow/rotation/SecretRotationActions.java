@@ -34,7 +34,6 @@ import com.sequenceiq.cloudbreak.rotation.flow.rotation.event.SecretRotationTrig
 import com.sequenceiq.cloudbreak.rotation.service.status.SecretRotationStatusService;
 import com.sequenceiq.cloudbreak.rotation.service.usage.SecretRotationUsageService;
 import com.sequenceiq.flow.core.AbstractAction;
-import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.flow.core.FlowParameters;
 
 @Configuration
@@ -161,8 +160,6 @@ public class SecretRotationActions {
                 String message = exception.getMessage();
                 String resourceCrn = context.getResourceCrn();
                 LOGGER.warn("Secret rotation failed for secreType: {}", context.getSecretType(), exception);
-                Flow flow = getFlow(context.getFlowId());
-                flow.setFlowFailed(exception);
                 if (PREVALIDATE.equals(failedAt)) {
                     secretRotationStatusService.preVaildationFailed(resourceCrn, payload.getSecretType(), message);
                 } else {

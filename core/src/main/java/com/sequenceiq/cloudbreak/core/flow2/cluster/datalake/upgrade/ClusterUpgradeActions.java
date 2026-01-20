@@ -37,7 +37,6 @@ import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.stack.StackImageService;
 import com.sequenceiq.cloudbreak.service.upgrade.ImageComponentUpdaterService;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradeImageInfo;
-import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowState;
@@ -223,10 +222,8 @@ public class ClusterUpgradeActions {
             @Override
             protected ClusterUpgradeContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext,
                     ClusterUpgradeFailedEvent payload) {
-                Flow flow = getFlow(flowParameters.getFlowId());
                 Stack stack = getStackService().getById(payload.getResourceId());
                 MDCBuilder.buildMdcContext(stack);
-                flow.setFlowFailed(payload.getException());
                 return ClusterUpgradeContext.from(flowParameters, payload);
             }
 

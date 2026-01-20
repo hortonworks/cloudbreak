@@ -28,7 +28,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -41,8 +40,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
-import com.sequenceiq.flow.core.Flow;
-import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.PayloadConverter;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.FailureDetails;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SuccessDetails;
@@ -55,7 +52,6 @@ import com.sequenceiq.freeipa.flow.freeipa.cleanup.event.cert.RevokeCertsRespons
 import com.sequenceiq.freeipa.flow.freeipa.cleanup.event.dns.RemoveDnsRequest;
 import com.sequenceiq.freeipa.flow.freeipa.cleanup.event.dns.RemoveDnsResponse;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent;
-import com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleState;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.DownscaleEvent;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.DownscaleFailureEvent;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.collecthostnames.CollectAdditionalHostnamesRequest;
@@ -484,14 +480,6 @@ public class FreeIpaDownscaleActions {
 
             @Inject
             private OperationService operationService;
-
-            @Override
-            protected StackContext createFlowContext(FlowParameters flowParameters, StateContext<DownscaleState, DownscaleFlowEvent> stateContext,
-                    DownscaleFailureEvent payload) {
-                Flow flow = getFlow(flowParameters.getFlowId());
-                flow.setFlowFailed(payload.getException());
-                return super.createFlowContext(flowParameters, stateContext, payload);
-            }
 
             @Override
             protected void doExecute(StackContext context, DownscaleFailureEvent payload, Map<Object, Object> variables) {

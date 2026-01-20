@@ -28,7 +28,6 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.recovery.brin
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.upgrade.ImageComponentUpdaterService;
-import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowState;
@@ -113,10 +112,8 @@ public class DatalakeRecoveryBringupActions {
                     DatalakeRecoverySetupNewInstancesFailedEvent payload) {
                 Exception exception = payload.getException();
                 Long stackId = payload.getResourceId();
-                Flow flow = getFlow(flowParameters.getFlowId());
                 StackView stackView = stackService.getViewByIdWithoutAuth(stackId);
                 MDCBuilder.buildMdcContext(stackView);
-                flow.setFlowFailed(exception);
                 LOGGER.error("Datalake recovery failed for stack with id: {}", stackId, exception);
                 return DatalakeRecoveryBringupContext.from(flowParameters, payload);
             }

@@ -13,7 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
@@ -21,14 +20,11 @@ import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.verticalscale.freeipa.event.EnvironmentVerticalScaleEvent;
 import com.sequenceiq.environment.environment.flow.verticalscale.freeipa.event.EnvironmentVerticalScaleFailedEvent;
-import com.sequenceiq.environment.environment.flow.verticalscale.freeipa.event.EnvironmentVerticalScaleStateSelectors;
 import com.sequenceiq.environment.environment.service.EnvironmentStatusUpdateService;
 import com.sequenceiq.environment.environment.service.freeipa.FreeIpaService;
 import com.sequenceiq.environment.metrics.EnvironmentMetricService;
 import com.sequenceiq.environment.metrics.MetricType;
 import com.sequenceiq.flow.core.CommonContext;
-import com.sequenceiq.flow.core.Flow;
-import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 
 @Configuration
@@ -131,14 +127,6 @@ public class EnvironmentVerticalScaleActions {
     @Bean(name = "VERTICAL_SCALING_FREEIPA_FAILED_STATE")
     public Action<?, ?> failedAction() {
         return new AbstractEnvironmentVerticalScaleAction<>(EnvironmentVerticalScaleFailedEvent.class) {
-
-            @Override
-            protected CommonContext createFlowContext(FlowParameters flowParameters, StateContext<EnvironmentVerticalScaleState,
-                    EnvironmentVerticalScaleStateSelectors> stateContext, EnvironmentVerticalScaleFailedEvent payload) {
-                Flow flow = getFlow(flowParameters.getFlowId());
-                flow.setFlowFailed(payload.getException());
-                return super.createFlowContext(flowParameters, stateContext, payload);
-            }
 
             @Override
             protected void doExecute(CommonContext context, EnvironmentVerticalScaleFailedEvent payload, Map<Object, Object> variables) {

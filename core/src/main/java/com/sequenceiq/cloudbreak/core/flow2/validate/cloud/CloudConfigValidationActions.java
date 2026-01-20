@@ -28,7 +28,6 @@ import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.view.StackView;
-import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.flow.core.FlowParameters;
 
 @Configuration
@@ -65,10 +64,8 @@ public class CloudConfigValidationActions {
             @Override
             protected StackFailureContext createFlowContext(FlowParameters flowParameters,
                     StateContext<CloudConfigValidationState, CloudConfigValidationEvent> stateContext, StackFailureEvent payload) {
-                Flow flow = getFlow(flowParameters.getFlowId());
                 StackView stack = stackDtoService.getStackViewById(payload.getResourceId());
                 MDCBuilder.buildMdcContext(stack);
-                flow.setFlowFailed(payload.getException());
                 return new StackFailureContext(flowParameters, stack, stack.getId());
             }
 

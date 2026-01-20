@@ -30,7 +30,6 @@ import com.sequenceiq.environment.events.EventSenderService;
 import com.sequenceiq.environment.metrics.EnvironmentMetricService;
 import com.sequenceiq.environment.metrics.MetricType;
 import com.sequenceiq.flow.core.CommonContext;
-import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.flow.core.FlowParameters;
 
 @Configuration
@@ -163,8 +162,6 @@ public class EnvClustersDeleteActions {
             protected CommonContext createFlowContext(
                     FlowParameters flowParameters, StateContext<EnvClustersDeleteState, EnvClustersDeleteStateSelectors> stateContext,
                     EnvClusterDeleteFailedEvent payload) {
-                Flow flow = getFlow(flowParameters.getFlowId());
-                flow.setFlowFailed(payload.getException());
                 return new CommonContext(flowParameters);
             }
         };

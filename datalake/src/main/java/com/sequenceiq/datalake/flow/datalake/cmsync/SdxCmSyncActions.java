@@ -26,7 +26,6 @@ import com.sequenceiq.datalake.service.AbstractSdxAction;
 import com.sequenceiq.datalake.service.sdx.SdxCmSyncService;
 import com.sequenceiq.datalake.service.sdx.SdxUpgradeService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
-import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowState;
@@ -96,8 +95,6 @@ public class SdxCmSyncActions {
             protected void doExecute(SdxContext context, SdxCmSyncFailedEvent payload, Map<Object, Object> variables) {
                 Exception exception = payload.getException();
                 LOGGER.info("Sdx cm sync failure, error: ", exception);
-                Flow flow = getFlow(context.getFlowParameters().getFlowId());
-                flow.setFlowFailed(exception);
                 Optional.ofNullable(exception)
                         .map(Throwable::getMessage)
                         .ifPresent(message -> setStatusForDatalakeAndNotify(payload.getResourceId(), message));

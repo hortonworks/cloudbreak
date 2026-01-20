@@ -32,7 +32,6 @@ public abstract class AbstractExternalDatabaseTerminationAction<P extends Payloa
 
         StackView stack = stackDtoService.getStackViewById(payload.getResourceId());
         MDCBuilder.buildMdcContext(stack);
-        beforeReturnFlowContext(flowParameters, stateContext, payload);
         return new ExternalDatabaseContext(flowParameters, stack);
     }
 
@@ -41,7 +40,4 @@ public abstract class AbstractExternalDatabaseTerminationAction<P extends Payloa
         return payload;
     }
 
-    protected void beforeReturnFlowContext(FlowParameters flowParameters,
-            StateContext<ExternalDatabaseTerminationState, ExternalDatabaseTerminationEvent> stateContext, P payload) {
-    }
 }

@@ -9,7 +9,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 import java.util.HashMap;
@@ -37,7 +36,6 @@ import com.sequenceiq.datalake.flow.verticalscale.addvolumes.event.DatalakeAddVo
 import com.sequenceiq.datalake.service.AbstractSdxAction;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.flow.core.AbstractActionTestSupport;
-import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowRegister;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
@@ -122,8 +120,6 @@ class DatalakeAddVolumesActionsTest {
     @Test
     void testAddDisksFailedAction() throws Exception {
         doReturn("flow-id").when(flowParameters).getFlowId();
-        Flow flow = mock(Flow.class);
-        doReturn(flow).when(runningFlows).get(eq("flow-id"));
         DatalakeAddVolumesFailedEvent event = new DatalakeAddVolumesFailedEvent(SDX_ID, USER_ID, new CloudbreakServiceException("TEST"));
         Map<Object, Object> variables = new HashMap<>();
         AbstractSdxAction<DatalakeAddVolumesFailedEvent> action = (AbstractSdxAction<DatalakeAddVolumesFailedEvent>) underTest.addVolumesFailedAction();

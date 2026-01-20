@@ -48,7 +48,6 @@ import com.sequenceiq.datalake.service.AbstractSdxAction;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.sdx.dr.SdxBackupRestoreService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
-import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.flow.core.FlowParameters;
@@ -264,6 +263,10 @@ public class DatalakeRestoreActions {
             protected void doExecute(SdxContext context, DatalakeDatabaseRestoreCouldNotStartEvent payload, Map<Object, Object> variables) {
                 Exception exception = payload.getException();
                 LOGGER.error("Datalake database restore could not be started for datalake with id: {}", payload.getResourceId(), exception);
+
+                // Due to the unique approach of this flow configuration, a failed database backup state is not considered a failed flow.
+                getFlow(context.getFlowId()).clearFlowFailed();
+
                 String operationId = (String) variables.get(OPERATION_ID);
                 sdxBackupRestoreService.updateDatabaseStatusEntry(operationId, SdxOperationStatus.FAILED, exception.getLocalizedMessage());
                 sendEvent(context, DATALAKE_DATABASE_RESTORE_FAILURE_HANDLED_EVENT.event(), payload);
@@ -282,6 +285,10 @@ public class DatalakeRestoreActions {
             @Override
             protected void doExecute(SdxContext context, SdxEvent payload, Map<Object, Object> variables) {
                 LOGGER.info("Full datalake restore is in progress for {} ", payload.getResourceId());
+
+                // Due to the unique approach of this flow configuration, a failed database backup state is not considered a failed flow.
+                getFlow(context.getFlowId()).clearFlowFailed();
+
                 String operationId = (String) variables.get(OPERATION_ID);
                 String restoreId = (String) variables.get(RESTORE_ID);
                 int fullDrMaxDurationInMin = variables.get(MAX_DURATION_IN_MIN) != null ? (Integer) variables.get(MAX_DURATION_IN_MIN) : 0;
@@ -338,8 +345,6 @@ public class DatalakeRestoreActions {
                 LOGGER.error("Datalake database restore could not be started for datalake with id: {}", payload.getResourceId(), exception);
                 String operationId = (String) variables.get(OPERATION_ID);
                 sdxBackupRestoreService.updateDatabaseStatusEntry(operationId, SdxOperationStatus.FAILED, exception.getLocalizedMessage());
-                Flow flow = getFlow(context.getFlowParameters().getFlowId());
-                flow.setFlowFailed(payload.getException());
                 sendEvent(context, DATALAKE_DATABASE_RESTORE_FAILURE_HANDLED_EVENT.event(), payload);
             }
 
@@ -368,9 +373,6 @@ public class DatalakeRestoreActions {
                         getFailureReason(variables, exception), payload.getResourceId());
                     metricService.incrementMetricCounter(MetricType.SDX_RESTORE_FAILED, sdxCluster);
                 }
-                Flow flow = getFlow(context.getFlowParameters().getFlowId());
-                flow.setFlowFailed(payload.getException());
-
 
                 Optional<FlowLogWithoutPayload> lastFlowLog = flowLogService.getLastFlowLog(context.getFlowParameters().getFlowId());
                 if (flowChainLogService.isFlowTriggeredByFlowChain(

@@ -104,7 +104,6 @@ public class DetermineDatalakeDataSizesActions {
         return new AbstractDetermineDatalakeDataSizesAction<>(DetermineDatalakeDataSizesFailureEvent.class) {
             @Override
             protected void doExecute(DetermineDatalakeDataSizesContext context, DetermineDatalakeDataSizesFailureEvent payload, Map<Object, Object> variables) {
-                getFlow(context.getFlowId()).setFlowFailed(payload.getException());
                 stackUpdater.updateStackStatus(
                         context.getStackId(), DETERMINE_DATALAKE_DATA_SIZES_FAILED, "Determining the datalake data sizes failed"
                 );

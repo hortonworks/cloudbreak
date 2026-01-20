@@ -14,21 +14,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackContext;
-import com.sequenceiq.cloudbreak.core.flow2.stack.rootvolumeupdate.CoreProviderTemplateUpdateFlowEvent;
-import com.sequenceiq.cloudbreak.core.flow2.stack.rootvolumeupdate.CoreProviderTemplateUpdateState;
 import com.sequenceiq.cloudbreak.core.flow2.stack.rootvolumeupdate.ProviderTemplateUpdateHandlerRequest;
 import com.sequenceiq.cloudbreak.core.flow2.stack.rootvolumeupdate.event.CoreProviderTemplateUpdateEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.rootvolumeupdate.event.CoreProviderTemplateUpdateFailureEvent;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
-import com.sequenceiq.flow.core.Flow;
-import com.sequenceiq.flow.core.FlowParameters;
 
 @Configuration
 public class CoreProviderTemplateUpdateActions {
@@ -114,14 +109,6 @@ public class CoreProviderTemplateUpdateActions {
     @Bean(name = "CORE_PROVIDER_TEMPLATE_UPDATE_FAIL_STATE")
     public Action<?, ?> failureAction() {
         return new CoreAbstractProviderTemplateUpdateAction<>(CoreProviderTemplateUpdateFailureEvent.class) {
-            @Override
-            protected StackContext createFlowContext(FlowParameters flowParameters,
-                    StateContext<CoreProviderTemplateUpdateState, CoreProviderTemplateUpdateFlowEvent> stateContext,
-                    CoreProviderTemplateUpdateFailureEvent payload) {
-                Flow flow = getFlow(flowParameters.getFlowId());
-                flow.setFlowFailed(payload.getException());
-                return super.createFlowContext(flowParameters, stateContext, payload);
-            }
 
             @Override
             protected void doExecute(StackContext context, CoreProviderTemplateUpdateFailureEvent payload, Map<Object, Object> variables) {

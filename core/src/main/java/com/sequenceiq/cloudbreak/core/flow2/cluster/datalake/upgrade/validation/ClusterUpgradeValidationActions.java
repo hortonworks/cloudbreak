@@ -70,7 +70,6 @@ import com.sequenceiq.cloudbreak.service.upgrade.UpgradeImageInfo;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradeImageInfoFactory;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.flow.core.AbstractAction;
-import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.PayloadConverter;
 
@@ -360,8 +359,6 @@ public class ClusterUpgradeValidationActions {
                     ClusterUpgradeValidationFailureEvent payload) {
                 StackView stackView = stackService.getViewByIdWithoutAuth(payload.getResourceId());
                 MDCBuilder.buildMdcContext(stackView);
-                Flow flow = getFlow(flowParameters.getFlowId());
-                flow.setFlowFailed(payload.getException());
                 return ClusterUpgradeContext.from(flowParameters, payload);
             }
 

@@ -32,16 +32,11 @@ public abstract class AbstractExternalDatabaseStartAction<P extends Payload>
 
         StackView stack = stackDtoService.getStackViewById(payload.getResourceId());
         MDCBuilder.buildMdcContext(stack);
-        beforeReturnFlowContext(flowParameters, stateContext, payload);
         return new ExternalDatabaseContext(flowParameters, stack);
     }
 
     @Override
     protected Object getFailurePayload(P payload, Optional<ExternalDatabaseContext> flowContext, Exception ex) {
         return payload;
-    }
-
-    protected void beforeReturnFlowContext(FlowParameters flowParameters,
-            StateContext<ExternalDatabaseStartState, ExternalDatabaseStartEvent> stateContext, P payload) {
     }
 }

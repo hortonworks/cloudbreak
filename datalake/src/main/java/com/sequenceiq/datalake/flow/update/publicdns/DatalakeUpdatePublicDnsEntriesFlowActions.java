@@ -26,7 +26,6 @@ import com.sequenceiq.datalake.service.AbstractSdxAction;
 import com.sequenceiq.datalake.service.sdx.CloudbreakStackService;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
-import com.sequenceiq.flow.core.Flow;
 
 @Configuration
 public class DatalakeUpdatePublicDnsEntriesFlowActions {
@@ -99,8 +98,6 @@ public class DatalakeUpdatePublicDnsEntriesFlowActions {
                 LOGGER.warn("Failed to update public DNS entries for Datalake with error: '{}'", payload.getException().getMessage(), payload.getException());
                 sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.DATALAKE_UPDATE_PUBLIC_DNS_ENTRIES_FAILED,
                         Collections.singleton(payload.getException().getMessage()), "Failed to update public DNS entries for Datalake", context.getSdxId());
-                Flow flow = getFlow(context.getFlowId());
-                flow.setFlowFailed(payload.getException());
                 sendEvent(context);
             }
 

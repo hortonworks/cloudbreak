@@ -49,7 +49,6 @@ import com.sequenceiq.datalake.service.sdx.ProvisionerService;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.sdx.status.DatalakeStatusUpdateException;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
-import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.flow.core.FlowParameters;
@@ -305,8 +304,6 @@ public class SdxCreateActions {
                 } catch (DatalakeStatusUpdateException datalakeStatusUpdateException) {
                     LOGGER.info("Status update for data lake failed (possible reason: ongoing parallel deletion flow): {}", exception.getMessage());
                 }
-                Flow flow = getFlow(context.getFlowParameters().getFlowId());
-                flow.setFlowFailed(payload.getException());
 
                 Optional<FlowLogWithoutPayload> lastFlowLog = flowLogService.getLastFlowLog(context.getFlowParameters().getFlowId());
                 if (flowChainLogService.isFlowTriggeredByFlowChain(

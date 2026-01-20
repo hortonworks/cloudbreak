@@ -42,7 +42,6 @@ import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.StackView;
-import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.flow.core.FlowParameters;
 
 @Configuration
@@ -171,10 +170,8 @@ public class KerberosConfigValidationActions {
             @Override
             protected StackFailureContext createFlowContext(FlowParameters flowParameters,
                     StateContext<KerberosConfigValidationState, KerberosConfigValidationEvent> stateContext, StackFailureEvent payload) {
-                Flow flow = getFlow(flowParameters.getFlowId());
                 StackView stack = stackDtoService.getStackViewById(payload.getResourceId());
                 MDCBuilder.buildMdcContext(stack);
-                flow.setFlowFailed(payload.getException());
                 return new StackFailureContext(flowParameters, stack, stack.getId());
             }
 

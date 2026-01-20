@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
@@ -418,12 +419,15 @@ public class FlowComponentTest {
         long resourceId = getNextResourceId();
         SleepChainTriggerEvent sleepChainTriggerEvent = new SleepChainTriggerEvent(resourceId, Lists.newArrayList(
                 new SleepConfig(SLEEP_TIME, SleepStartEvent.NEVER_FAIL),
-                new SleepConfig(SLEEP_TIME, SleepStartEvent.ALWAYS_FAIL)
+                new SleepConfig(SLEEP_TIME, SleepStartEvent.ALWAYS_FAIL),
+                new SleepConfig(SLEEP_TIME, SleepStartEvent.NEVER_FAIL)
         ));
         FlowAcceptResult acceptResult = startSleepFlowChain(sleepChainTriggerEvent);
 
         assertRunningInFlowChain(acceptResult);
         waitFlowChainToFail(SLEEP_TIME.multipliedBy(WAIT_FACTOR), acceptResult);
+        FlowCheckResponse flow = flowService.getFlowChainState(acceptResult.getAsFlowChainId());
+        assertTrue(flow.getLatestFlowFinalizedAndFailed());
     }
 
     @Test

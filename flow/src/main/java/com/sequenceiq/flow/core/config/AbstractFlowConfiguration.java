@@ -135,7 +135,12 @@ public abstract class AbstractFlowConfiguration<S extends FlowState, E extends F
             if (action != null && transition.getFailureEvent() != null && !Objects.equals(transition.target, flowEdgeConfig.defaultFailureState)) {
                 action.setFailureEvent(transition.getFailureEvent());
                 S failureState = Optional.ofNullable(transition.getFailureState()).orElse(flowEdgeConfig.defaultFailureState);
-                stateConfigurer.state(failureState, getAction(failureState), null);
+                AbstractAction<S, E, ?, ?> failureAction = getAction(failureState);
+                if (failureAction != null) {
+                    failureAction.setFlowEdgeConfig(flowEdgeConfig);
+                    failureAction.setFailureStateId(failureState.name());
+                }
+                stateConfigurer.state(failureState, failureAction, null);
                 transitionConfigurer.and().withExternal().source(transition.source).target(failureState).event(transition.getFailureEvent());
                 if (!failHandled.contains(failureState)) {
                     failHandled.add(failureState);

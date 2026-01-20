@@ -33,7 +33,6 @@ import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackImageService;
 import com.sequenceiq.cloudbreak.view.StackView;
-import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.flow.core.FlowParameters;
 
 @Configuration
@@ -86,10 +85,8 @@ public class ImageValidationActions {
             @Override
             protected StackFailureContext createFlowContext(FlowParameters flowParameters,
                     StateContext<ImageValidationState, ImageValidationEvent> stateContext, StackFailureEvent payload) {
-                Flow flow = getFlow(flowParameters.getFlowId());
                 StackView stack = stackDtoService.getStackViewById(payload.getResourceId());
                 MDCBuilder.buildMdcContext(stack);
-                flow.setFlowFailed(payload.getException());
                 return new StackFailureContext(flowParameters, stack, stack.getId());
             }
 

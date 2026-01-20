@@ -5,7 +5,6 @@ import static com.sequenceiq.cloudbreak.core.flow2.externaldatabase.stop.config.
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.isNotNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -189,7 +188,6 @@ class ExternalDatabaseStopActionsTest {
 
         when(stackDtoService.getStackViewById(any())).thenReturn(STACK);
 
-        when(runningFlows.get(anyString())).thenReturn(flow);
         when(stateContext.getMessageHeader(MessageFactory.HEADERS.DATA.name())).thenReturn(stopExternalDatabaseFailedPayload);
         Action<?, ?> action = configureAction(underTest::externalDatabaseStopFailureAction);
         action.execute(stateContext);
@@ -199,14 +197,11 @@ class ExternalDatabaseStopActionsTest {
         verify(eventBus).notify(selectorArgumentCaptor.capture(), eventArgumentCaptor.capture());
         verify(reactorEventFactory).createEvent(headersArgumentCaptor.capture(), payloadArgumentCaptor.capture());
         verify(metricService).incrementMetricCounter(MetricType.EXTERNAL_DATABASE_STOP_FAILED, STACK);
-        verify(flow).setFlowFailed(exceptionCaptor.capture());
         assertThat(selectorArgumentCaptor.getValue()).isEqualTo("EXTERNAL_DATABASE_STOP_FAILURE_HANDLED_EVENT");
         Object capturedPayload = payloadArgumentCaptor.getValue();
         assertThat(capturedPayload).isInstanceOf(StackEvent.class);
         StackEvent stackEvent = (StackEvent) capturedPayload;
         assertThat(stackEvent.getResourceId()).isEqualTo(STACK_ID);
-        Exception exception = exceptionCaptor.getValue();
-        assertThat(exception).isEqualTo(expectedException);
     }
 
     private Action<?, ?> configureAction(Supplier<Action<?, ?>> actionSupplier) {

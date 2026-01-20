@@ -45,7 +45,6 @@ public abstract class SaltStatusCheckerJobService<T extends JobResourceAdapter<?
         try {
             Trigger trigger = buildJobTrigger(jobDetail);
             if (scheduler.getJobDetail(jobKey) != null) {
-                LOGGER.info("Unscheduling stack salt status job for stack with key: '{}' and group: '{}'", jobKey.getName(), jobKey.getGroup());
                 unschedule(jobKey);
             }
             LOGGER.info("Scheduling stack salt status job for stack with key: '{}' and group: '{}'", jobKey.getName(), jobKey.getGroup());
@@ -57,6 +56,7 @@ public abstract class SaltStatusCheckerJobService<T extends JobResourceAdapter<?
 
     public void unschedule(JobKey jobKey) {
         try {
+            LOGGER.info("Unscheduling stack salt status job for stack with key: '{}' and group: '{}'", jobKey.getName(), jobKey.getGroup());
             if (scheduler.getJobDetail(jobKey) != null) {
                 scheduler.deleteJob(jobKey);
             }

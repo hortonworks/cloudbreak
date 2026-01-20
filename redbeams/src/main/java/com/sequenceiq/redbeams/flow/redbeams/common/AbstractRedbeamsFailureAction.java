@@ -10,7 +10,6 @@ import org.springframework.statemachine.StateContext;
 
 import com.sequenceiq.flow.core.AbstractAction;
 import com.sequenceiq.flow.core.CommonContext;
-import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowState;
@@ -32,8 +31,6 @@ public abstract class AbstractRedbeamsFailureAction<S extends FlowState, E exten
 
     @Override
     protected CommonContext createFlowContext(FlowParameters flowParameters, StateContext<S, E> stateContext, RedbeamsFailureEvent payload) {
-        Flow flow = getFlow(flowParameters.getFlowId());
-        flow.setFlowFailed(payload.getException());
         return new CommonContext(flowParameters);
     }
 

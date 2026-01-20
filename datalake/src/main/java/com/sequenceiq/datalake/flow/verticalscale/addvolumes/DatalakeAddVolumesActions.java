@@ -21,7 +21,6 @@ import com.sequenceiq.datalake.flow.verticalscale.addvolumes.event.DatalakeAddVo
 import com.sequenceiq.datalake.flow.verticalscale.addvolumes.event.DatalakeAddVolumesFailedEvent;
 import com.sequenceiq.datalake.service.AbstractSdxAction;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
-import com.sequenceiq.flow.core.Flow;
 
 @Configuration
 public class DatalakeAddVolumesActions {
@@ -82,8 +81,6 @@ public class DatalakeAddVolumesActions {
                 if (exception.getMessage() != null) {
                     statusReason = exception.getMessage();
                 }
-                Flow flow = getFlow(context.getFlowParameters().getFlowId());
-                flow.setFlowFailed(exception);
                 sdxStatusService.setStatusForDatalakeAndNotify(
                         DatalakeStatusEnum.RUNNING,
                         DatalakeStatusEnum.DATALAKE_ADD_VOLUMES_FAILED.getDefaultResourceEvent(),

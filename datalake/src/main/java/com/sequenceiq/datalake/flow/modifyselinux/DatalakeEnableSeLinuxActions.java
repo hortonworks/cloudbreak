@@ -16,19 +16,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.modifyselinux.event.DatalakeModifySeLinuxEvent;
 import com.sequenceiq.datalake.flow.modifyselinux.event.DatalakeModifySeLinuxFailedEvent;
 import com.sequenceiq.datalake.flow.modifyselinux.event.DatalakeModifySeLinuxHandlerEvent;
-import com.sequenceiq.datalake.flow.modifyselinux.event.DatalakeModifySeLinuxStateSelectors;
 import com.sequenceiq.datalake.metric.SdxMetricService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.flow.core.CommonContext;
-import com.sequenceiq.flow.core.Flow;
-import com.sequenceiq.flow.core.FlowParameters;
 
 @Configuration
 public class DatalakeEnableSeLinuxActions {
@@ -73,14 +69,6 @@ public class DatalakeEnableSeLinuxActions {
     @Bean(name = "MODIFY_SELINUX_DATALAKE_FAILED_STATE")
     public Action<?, ?> failedAction() {
         return new AbstractDatalakeEnableSeLinuxAction<>(DatalakeModifySeLinuxFailedEvent.class) {
-
-            @Override
-            protected CommonContext createFlowContext(FlowParameters flowParameters, StateContext<DatalakeModifySeLinuxState,
-                    DatalakeModifySeLinuxStateSelectors> stateContext, DatalakeModifySeLinuxFailedEvent payload) {
-                Flow flow = getFlow(flowParameters.getFlowId());
-                flow.setFlowFailed(payload.getException());
-                return super.createFlowContext(flowParameters, stateContext, payload);
-            }
 
             @Override
             protected void doExecute(CommonContext context, DatalakeModifySeLinuxFailedEvent payload, Map<Object, Object> variables) {

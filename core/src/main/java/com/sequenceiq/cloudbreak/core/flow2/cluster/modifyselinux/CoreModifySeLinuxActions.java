@@ -13,7 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
@@ -27,8 +26,6 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.StackContext;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.metrics.MetricType;
-import com.sequenceiq.flow.core.Flow;
-import com.sequenceiq.flow.core.FlowParameters;
 
 @Configuration
 public class CoreModifySeLinuxActions {
@@ -103,14 +100,6 @@ public class CoreModifySeLinuxActions {
     @Bean(name = "MODIFY_SELINUX_CORE_FAILED_STATE")
     public Action<?, ?> failedAction() {
         return new AbstractCoreModifySeLinuxAction<>(CoreModifySeLinuxFailedEvent.class) {
-
-            @Override
-            protected StackContext createFlowContext(FlowParameters flowParameters, StateContext<CoreModifySeLinuxState,
-                    CoreModifySeLinuxStateSelectors> stateContext, CoreModifySeLinuxFailedEvent payload) {
-                Flow flow = getFlow(flowParameters.getFlowId());
-                flow.setFlowFailed(payload.getException());
-                return super.createFlowContext(flowParameters, stateContext, payload);
-            }
 
             @Override
             protected void doExecute(StackContext context, CoreModifySeLinuxFailedEvent payload, Map<Object, Object> variables) {

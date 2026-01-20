@@ -20,12 +20,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
-import com.sequenceiq.flow.core.Flow;
-import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.PayloadConverter;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.FailureDetails;
@@ -34,9 +31,7 @@ import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.clusterproxy.ClusterProxyUpdateRegistrationRequest;
 import com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.ChangePrimaryGatewayContext;
-import com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.ChangePrimaryGatewayFlowEvent;
 import com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.ChangePrimaryGatewayService;
-import com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.ChangePrimaryGatewayState;
 import com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.event.ChangePrimaryGatewayEvent;
 import com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.event.ChangePrimaryGatewayFailureEvent;
 import com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.event.SwitchFreeIpaMasterToPrimaryGatewayEvent;
@@ -204,16 +199,9 @@ public class ChangePrimaryGatewayActions {
     @Bean(name = "CHANGE_PRIMARY_GATEWAY_FAIL_STATE")
     public Action<?, ?> failureAction() {
         return new AbstractChangePrimaryGatewayAction<>(ChangePrimaryGatewayFailureEvent.class) {
+
             @Inject
             private OperationService operationService;
-
-            @Override
-            protected ChangePrimaryGatewayContext createFlowContext(FlowParameters flowParameters,
-                    StateContext<ChangePrimaryGatewayState, ChangePrimaryGatewayFlowEvent> stateContext, ChangePrimaryGatewayFailureEvent payload) {
-                Flow flow = getFlow(flowParameters.getFlowId());
-                flow.setFlowFailed(payload.getException());
-                return super.createFlowContext(flowParameters, stateContext, payload);
-            }
 
             @Override
             protected void doExecute(ChangePrimaryGatewayContext context, ChangePrimaryGatewayFailureEvent payload, Map<Object, Object> variables) {

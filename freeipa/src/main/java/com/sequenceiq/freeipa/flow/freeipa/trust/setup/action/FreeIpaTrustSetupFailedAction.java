@@ -10,17 +10,12 @@ import java.util.stream.IntStream;
 
 import jakarta.inject.Inject;
 
-import org.springframework.statemachine.StateContext;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.flow.core.Flow;
-import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.TrustStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.FailureDetails;
 import com.sequenceiq.freeipa.entity.Stack;
-import com.sequenceiq.freeipa.flow.freeipa.trust.setup.FreeIpaTrustSetupState;
 import com.sequenceiq.freeipa.flow.freeipa.trust.setup.event.FreeIpaTrustSetupFailureEvent;
-import com.sequenceiq.freeipa.flow.freeipa.trust.setup.event.FreeIpaTrustSetupFlowEvent;
 import com.sequenceiq.freeipa.flow.stack.StackContext;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
 import com.sequenceiq.freeipa.service.freeipa.trust.operation.TaskResult;
@@ -38,14 +33,6 @@ public class FreeIpaTrustSetupFailedAction extends FreeIpaTrustSetupBaseAction<F
 
     protected FreeIpaTrustSetupFailedAction() {
         super(FreeIpaTrustSetupFailureEvent.class);
-    }
-
-    @Override
-    protected StackContext createFlowContext(FlowParameters flowParameters, StateContext<FreeIpaTrustSetupState,
-            FreeIpaTrustSetupFlowEvent> stateContext, FreeIpaTrustSetupFailureEvent payload) {
-        Flow flow = getFlow(flowParameters.getFlowId());
-        flow.setFlowFailed(payload.getException());
-        return super.createFlowContext(flowParameters, stateContext, payload);
     }
 
     @Override

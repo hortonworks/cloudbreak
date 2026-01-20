@@ -83,6 +83,29 @@ class StackImageUpdateActionsTest {
 
     private static final String EVENT_NAME = "eventName";
 
+    @InjectMocks
+    private final AbstractStackImageUpdateAction<?> checkImageAction = spy(new StackImageUpdateActions().checkImageVersion());
+
+    @InjectMocks
+    private final AbstractStackImageUpdateAction<?> checkPackageVersionsAction = spy(new StackImageUpdateActions().checkPackageVersions());
+
+    @InjectMocks
+    private final AbstractStackImageUpdateAction<?> updateImageAction = spy(new StackImageUpdateActions().updateImage());
+
+    @InjectMocks
+    private final AbstractStackImageUpdateAction<?> prepareImageAction = spy(new StackImageUpdateActions().prepareImageAction());
+
+    @InjectMocks
+    private final AbstractStackImageUpdateAction<?> setImageAction = spy(new StackImageUpdateActions().setImageAction());
+
+    @InjectMocks
+    private final AbstractStackImageUpdateAction<?> finishAction = spy(new StackImageUpdateActions().finishAction());
+
+    @InjectMocks
+    private final AbstractStackFailureAction<?, ?> handleImageUpdateFailureAction = spy(new StackImageUpdateActions().handleImageUpdateFailure());
+
+    private final Map<Object, Object> variables = new HashMap<>();
+
     @Mock
     private CloudbreakFlowMessageService flowMessageService;
 
@@ -163,29 +186,6 @@ class StackImageUpdateActionsTest {
 
     @Mock
     private FlowLogDBService flowLogDBService;
-
-    @InjectMocks
-    private final AbstractStackImageUpdateAction<?> checkImageAction = spy(new StackImageUpdateActions().checkImageVersion());
-
-    @InjectMocks
-    private final AbstractStackImageUpdateAction<?> checkPackageVersionsAction = spy(new StackImageUpdateActions().checkPackageVersions());
-
-    @InjectMocks
-    private final AbstractStackImageUpdateAction<?> updateImageAction = spy(new StackImageUpdateActions().updateImage());
-
-    @InjectMocks
-    private final AbstractStackImageUpdateAction<?> prepareImageAction = spy(new StackImageUpdateActions().prepareImageAction());
-
-    @InjectMocks
-    private final AbstractStackImageUpdateAction<?> setImageAction = spy(new StackImageUpdateActions().setImageAction());
-
-    @InjectMocks
-    private final AbstractStackImageUpdateAction<?> finishAction = spy(new StackImageUpdateActions().finishAction());
-
-    @InjectMocks
-    private final AbstractStackFailureAction<?, ?> handleImageUpdateFailureAction = spy(new StackImageUpdateActions().handleImageUpdateFailure());
-
-    private final Map<Object, Object> variables = new HashMap<>();
 
     @BeforeEach
     void setup() throws CloudbreakImageNotFoundException {
@@ -373,7 +373,6 @@ class StackImageUpdateActionsTest {
                 new StackFailureEvent(StackImageUpdateEvent.STACK_IMAGE_UPDATE_FAILED_EVENT.event(), 1L, new CloudbreakServiceException("test"));
         when(stateContext.getMessageHeader(HEADERS.DATA.name())).thenReturn(payload);
         when(state.getId()).thenReturn(StackImageUpdateState.STACK_IMAGE_UPDATE_FAILED_STATE);
-        when(runningFlows.get(anyString())).thenReturn(flow);
 
         handleImageUpdateFailureAction.execute(stateContext);
 

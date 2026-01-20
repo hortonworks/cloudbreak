@@ -98,4 +98,10 @@ public class FlowAdapter<S extends FlowState, E extends FlowEvent> implements Fl
         flowFailed = true;
         flowEventListener.setException(exception);
     }
+
+    @Override
+    public void clearFlowFailed() {
+        flowFailed = false;
+        flowEventListener.setException(null);
+    }
 }

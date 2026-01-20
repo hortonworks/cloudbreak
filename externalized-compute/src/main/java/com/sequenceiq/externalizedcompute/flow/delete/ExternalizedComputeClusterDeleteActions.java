@@ -24,7 +24,6 @@ import com.sequenceiq.externalizedcompute.flow.AbstractExternalizedComputeCluste
 import com.sequenceiq.externalizedcompute.flow.ExternalizedComputeClusterContext;
 import com.sequenceiq.externalizedcompute.service.ExternalizedComputeClusterService;
 import com.sequenceiq.externalizedcompute.service.ExternalizedComputeClusterStatusService;
-import com.sequenceiq.flow.core.Flow;
 
 @Configuration
 public class ExternalizedComputeClusterDeleteActions {
@@ -189,8 +188,6 @@ public class ExternalizedComputeClusterDeleteActions {
                 if (payload.getException() != null && payload.getException().getMessage() != null) {
                     reason = payload.getException().getMessage();
                 }
-                Flow flow = getFlow(context.getFlowId());
-                flow.setFlowFailed(payload.getException());
                 externalizedComputeClusterStatusService.setStatus(context.getExternalizedComputeId(), DELETE_FAILED,
                         "Cluster deletion failed due to: " + reason);
                 sendEvent(context, EXTERNALIZED_COMPUTE_CLUSTER_DELETE_FAIL_HANDLED_EVENT.event(), payload);

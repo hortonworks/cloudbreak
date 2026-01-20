@@ -69,11 +69,11 @@ class ModifyProxyConfigFailedActionTest extends ActionTest {
     void createFlowContext() {
         Exception cause = new Exception("cause");
         StackFailureEvent payload = mock(StackFailureEvent.class);
-        when(payload.getException()).thenReturn(cause);
+        when(payload.getResourceId()).thenReturn(STACK_ID);
 
         underTest.createFlowContext(flowParameters, mock(StateContext.class), payload);
 
-        verify(flow).setFlowFailed(cause);
+        verify(stackService).getStackById(STACK_ID);
     }
 
     @Test

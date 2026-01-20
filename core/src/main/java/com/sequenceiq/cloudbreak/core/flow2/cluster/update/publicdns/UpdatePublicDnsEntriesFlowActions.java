@@ -27,7 +27,6 @@ import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.update.publicdns.UpdatePublicDnsEntriesInPemRequest;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
-import com.sequenceiq.flow.core.Flow;
 
 @Configuration
 public class UpdatePublicDnsEntriesFlowActions {
@@ -84,8 +83,6 @@ public class UpdatePublicDnsEntriesFlowActions {
                 stackUpdater.updateStackStatus(payload.getResourceId(), DetailedStackStatus.UPDATE_PUBLIC_DNS_ENTRIES_FAILED);
                 flowMessageService.fireEventAndLog(payload.getResourceId(), AVAILABLE.name(), CLUSTER_UPDATE_PUBLIC_DNS_ENTRIES_FAILED,
                         payload.getException().getMessage());
-                Flow flow = getFlow(context.getFlowId());
-                flow.setFlowFailed(payload.getException());
                 sendEvent(context, UpdatePublicDnsEntriesFlowEvent.UPDATE_PUBLIC_DNS_ENTRIES_FAILURE_HANDLED_EVENT.event(), payload);
             }
         };

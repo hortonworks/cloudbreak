@@ -33,7 +33,6 @@ import com.sequenceiq.datalake.flow.stop.event.SdxStopWaitRequest;
 import com.sequenceiq.datalake.service.AbstractSdxAction;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.datalake.service.sdx.stop.SdxStopService;
-import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.flow.core.FlowParameters;
@@ -206,8 +205,6 @@ public class SdxStopActions {
                 if (exception.getMessage() != null) {
                     statusReason = exception.getMessage();
                 }
-                Flow flow = getFlow(context.getFlowParameters().getFlowId());
-                flow.setFlowFailed(payload.getException());
 
                 // If this is part of DL resize, mark failure as such in order to enable proper recovery.
                 if (flowChainLogService.isFlowTriggeredByFlowChain(

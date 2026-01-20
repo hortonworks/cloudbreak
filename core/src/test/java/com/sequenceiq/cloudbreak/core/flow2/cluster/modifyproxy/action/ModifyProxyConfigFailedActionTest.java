@@ -43,13 +43,6 @@ class ModifyProxyConfigFailedActionTest extends ModifyProxyConfigActionTest<Stac
     }
 
     @Test
-    void createFlowContextShouldSetFlowFailed() {
-        underTest.createFlowContext(flowParameters, stateContext, event);
-
-        verify(flow).setFlowFailed(CAUSE);
-    }
-
-    @Test
     void doExecute() throws Exception {
         underTest.doExecute(context, event, Map.of());
 

@@ -6,7 +6,6 @@ import jakarta.inject.Inject;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
@@ -15,7 +14,6 @@ import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.ExternalDatabaseCon
 import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.StackUpdaterService;
 import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.terminate.action.AbstractExternalDatabaseTerminationAction;
 import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.terminate.config.ExternalDatabaseTerminationEvent;
-import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.terminate.config.ExternalDatabaseTerminationState;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.externaldatabase.TerminateExternalDatabaseFailed;
@@ -24,8 +22,6 @@ import com.sequenceiq.cloudbreak.reactor.api.event.externaldatabase.TerminateExt
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.TerminationEvent;
 import com.sequenceiq.cloudbreak.service.metrics.MetricType;
 import com.sequenceiq.cloudbreak.view.StackView;
-import com.sequenceiq.flow.core.Flow;
-import com.sequenceiq.flow.core.FlowParameters;
 
 @Configuration
 public class ExternalDatabaseTerminationActions {
@@ -77,15 +73,6 @@ public class ExternalDatabaseTerminationActions {
             @Override
             protected Selectable createRequest(ExternalDatabaseContext context) {
                 return new StackEvent(ExternalDatabaseTerminationEvent.EXTERNAL_DATABASE_TERMINATION_FAILURE_HANDLED_EVENT.event(), context.getStackId());
-            }
-
-            @Override
-            protected void beforeReturnFlowContext(FlowParameters flowParameters,
-                    StateContext<ExternalDatabaseTerminationState, ExternalDatabaseTerminationEvent> stateContext, TerminateExternalDatabaseFailed payload) {
-
-                Flow flow = getFlow(flowParameters.getFlowId());
-                flow.setFlowFailed(payload.getException());
-                super.beforeReturnFlowContext(flowParameters, stateContext, payload);
             }
         };
     }

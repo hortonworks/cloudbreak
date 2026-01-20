@@ -12,16 +12,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
-import com.sequenceiq.flow.core.Flow;
-import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.entity.Stack;
-import com.sequenceiq.freeipa.flow.freeipa.rootvolumeupdate.FreeIpaProviderTemplateUpdateFlowEvent;
-import com.sequenceiq.freeipa.flow.freeipa.rootvolumeupdate.FreeIpaProviderTemplateUpdateState;
 import com.sequenceiq.freeipa.flow.freeipa.rootvolumeupdate.event.FreeIpaProviderTemplateUpdateEvent;
 import com.sequenceiq.freeipa.flow.freeipa.rootvolumeupdate.event.FreeIpaProviderTemplateUpdateFailureEvent;
 import com.sequenceiq.freeipa.flow.freeipa.rootvolumeupdate.event.FreeIpaProviderTemplateUpdateHandlerRequest;
@@ -70,15 +65,6 @@ public class FreeIpaProviderTemplateUpdateActions {
         return new AbstractFreeIpaProviderTemplateUpdateAction<>(FreeIpaProviderTemplateUpdateFailureEvent.class) {
             @Inject
             private OperationService operationService;
-
-            @Override
-            protected StackContext createFlowContext(FlowParameters flowParameters,
-                    StateContext<FreeIpaProviderTemplateUpdateState, FreeIpaProviderTemplateUpdateFlowEvent> stateContext,
-                    FreeIpaProviderTemplateUpdateFailureEvent payload) {
-                Flow flow = getFlow(flowParameters.getFlowId());
-                flow.setFlowFailed(payload.getException());
-                return super.createFlowContext(flowParameters, stateContext, payload);
-            }
 
             @Override
             protected void doExecute(StackContext context, FreeIpaProviderTemplateUpdateFailureEvent payload,

@@ -12,11 +12,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
-import com.sequenceiq.flow.core.Flow;
-import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SuccessDetails;
 import com.sequenceiq.freeipa.entity.Stack;
@@ -91,13 +88,6 @@ public class FreeIpaModifySeLinuxActions {
     @Bean(name = "MODIFY_SELINUX_FREEIPA_FAILED_STATE")
     public Action<?, ?> failedAction() {
         return new AbstractFreeIpaModifySeLinuxAction<>(FreeIpaModifySeLinuxFailedEvent.class) {
-            @Override
-            protected StackContext createFlowContext(FlowParameters flowParameters, StateContext<FreeIpaModifySeLinuxState,
-                    FreeIpaModifySeLinuxStateSelectors> stateContext, FreeIpaModifySeLinuxFailedEvent payload) {
-                Flow flow = getFlow(flowParameters.getFlowId());
-                flow.setFlowFailed(payload.getException());
-                return super.createFlowContext(flowParameters, stateContext, payload);
-            }
 
             @Override
             protected void doExecute(StackContext context, FreeIpaModifySeLinuxFailedEvent payload, Map<Object, Object> variables) {

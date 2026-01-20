@@ -309,7 +309,6 @@ public class SdxDetachActions {
                         DatalakeStatusEnum.STOPPED,
                         "SDX detach failed due to: " + statusReason, payload.getResourceId()
                 );
-                getFlow(context.getFlowParameters().getFlowId()).setFlowFailed(payload.getException());
                 sendEvent(context, SDX_DETACH_FAILED_HANDLED_EVENT.event(), payload);
             }
 

@@ -44,7 +44,6 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.PrepareImageType;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.common.api.type.AdjustmentType;
-import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.PayloadConverter;
 import com.sequenceiq.freeipa.converter.cloud.ResourceToCloudResourceConverter;
@@ -394,10 +393,8 @@ public class StackProvisionActions {
             @Override
             protected StackFailureContext createFlowContext(
                     FlowParameters flowParameters, StateContext<StackProvisionState, StackProvisionEvent> stateContext, StackFailureEvent payload) {
-                Flow flow = getFlow(flowParameters.getFlowId());
                 Stack stack = stackService.getStackById(payload.getResourceId());
                 MDCBuilder.buildMdcContext(stack);
-                flow.setFlowFailed(payload.getException());
                 return new StackFailureContext(flowParameters, stack);
             }
 

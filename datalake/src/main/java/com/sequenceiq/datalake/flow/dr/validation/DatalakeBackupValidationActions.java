@@ -35,7 +35,6 @@ import com.sequenceiq.datalake.service.AbstractSdxAction;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.sdx.dr.SdxBackupRestoreService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
-import com.sequenceiq.flow.core.Flow;
 
 @Configuration
 public class DatalakeBackupValidationActions {
@@ -143,9 +142,6 @@ public class DatalakeBackupValidationActions {
                         ResourceEvent.DATALAKE_BACKUP_VALIDATION_FAILED, Collections.singleton(failureReason),
                         failureReason, payload.getResourceId());
                 metricService.incrementMetricCounter(MetricType.SDX_BACKUP_VALIDATION_FAILED, sdxCluster);
-                Flow flow = getFlow(context.getFlowParameters().getFlowId());
-                flow.setFlowFailed(exception);
-
                 sendEvent(context, DATALAKE_BACKUP_VALIDATION_FAILURE_HANDLED_EVENT.event(), payload);
             }
 

@@ -23,18 +23,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
-import com.sequenceiq.flow.core.Flow;
-import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
 import com.sequenceiq.freeipa.flow.stack.upgrade.ccm.UpgradeCcmService;
-import com.sequenceiq.freeipa.flow.stack.upgrade.ccm.UpgradeCcmState;
 import com.sequenceiq.freeipa.flow.stack.upgrade.ccm.event.UpgradeCcmEvent;
 import com.sequenceiq.freeipa.flow.stack.upgrade.ccm.event.UpgradeCcmFailureEvent;
 import com.sequenceiq.freeipa.flow.stack.upgrade.ccm.event.UpgradeCcmTriggerEvent;
-import com.sequenceiq.freeipa.flow.stack.upgrade.ccm.selector.UpgradeCcmStateSelector;
 
 @Configuration
 public class UpgradeCcmActions {
@@ -183,13 +178,6 @@ public class UpgradeCcmActions {
     @Bean(name = "UPGRADE_CCM_FAILED_STATE")
     public Action<?, ?> failedRevertTunnel() {
         return new AbstractUpgradeCcmAction<>(UpgradeCcmFailureEvent.class) {
-            @Override
-            protected UpgradeCcmContext createFlowContext(FlowParameters flowParameters, StateContext<UpgradeCcmState,
-                    UpgradeCcmStateSelector> stateContext, UpgradeCcmFailureEvent payload) {
-                Flow flow = getFlow(flowParameters.getFlowId());
-                flow.setFlowFailed(payload.getException());
-                return super.createFlowContext(flowParameters, stateContext, payload);
-            }
 
             @Override
             protected void doExecute(UpgradeCcmContext context, UpgradeCcmFailureEvent payload, Map<Object, Object> variables) {
@@ -205,13 +193,6 @@ public class UpgradeCcmActions {
     @Bean(name = "UPGRADE_CCM_FINALIZE_FAILED_STATE")
     public Action<?, ?> failedButDoNothing() {
         return new AbstractUpgradeCcmAction<>(UpgradeCcmFailureEvent.class) {
-            @Override
-            protected UpgradeCcmContext createFlowContext(FlowParameters flowParameters, StateContext<UpgradeCcmState,
-                    UpgradeCcmStateSelector> stateContext, UpgradeCcmFailureEvent payload) {
-                Flow flow = getFlow(flowParameters.getFlowId());
-                flow.setFlowFailed(payload.getException());
-                return super.createFlowContext(flowParameters, stateContext, payload);
-            }
 
             @Override
             protected void doExecute(UpgradeCcmContext context, UpgradeCcmFailureEvent payload, Map<Object, Object> variables) {
@@ -226,13 +207,6 @@ public class UpgradeCcmActions {
     @Bean(name = "UPGRADE_CCM_REVERT_FAILURE_STATE")
     public Action<?, ?> failedRevertTunnelAndSaltStates() {
         return new AbstractUpgradeCcmAction<>(UpgradeCcmFailureEvent.class) {
-            @Override
-            protected UpgradeCcmContext createFlowContext(FlowParameters flowParameters, StateContext<UpgradeCcmState,
-                    UpgradeCcmStateSelector> stateContext, UpgradeCcmFailureEvent payload) {
-                Flow flow = getFlow(flowParameters.getFlowId());
-                flow.setFlowFailed(payload.getException());
-                return super.createFlowContext(flowParameters, stateContext, payload);
-            }
 
             @Override
             protected void doExecute(UpgradeCcmContext context, UpgradeCcmFailureEvent payload, Map<Object, Object> variables) {
@@ -245,13 +219,6 @@ public class UpgradeCcmActions {
     @Bean(name = "UPGRADE_CCM_REVERT_ALL_FAILURE_STATE")
     public Action<?, ?> failedRevertAll() {
         return new AbstractUpgradeCcmAction<>(UpgradeCcmFailureEvent.class) {
-            @Override
-            protected UpgradeCcmContext createFlowContext(FlowParameters flowParameters, StateContext<UpgradeCcmState,
-                    UpgradeCcmStateSelector> stateContext, UpgradeCcmFailureEvent payload) {
-                Flow flow = getFlow(flowParameters.getFlowId());
-                flow.setFlowFailed(payload.getException());
-                return super.createFlowContext(flowParameters, stateContext, payload);
-            }
 
             @Override
             protected void doExecute(UpgradeCcmContext context, UpgradeCcmFailureEvent payload, Map<Object, Object> variables) {

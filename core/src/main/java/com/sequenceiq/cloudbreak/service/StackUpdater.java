@@ -110,13 +110,13 @@ public class StackUpdater {
 
     private Stack doUpdateStackStatus(Stack stack, Status newStatus, DetailedStackStatus newDetailedStatus, String statusReason) {
         StackStatus actualStackStatus = stack.getStackStatus();
-        LOGGER.info("Update stack status from: {}/{} to: {}/{} stack: {} reason: {}", actualStackStatus.getStatus(), actualStackStatus.getDetailedStackStatus(),
-                newStatus, newDetailedStatus, stack.getId(), statusReason);
         if (actualStackStatus.getStatus().equals(newStatus) && actualStackStatus.getDetailedStackStatus().equals(newDetailedStatus)) {
-            LOGGER.debug("New status is the same as previous status {}/{}, skip status update.",
-                    actualStackStatus.getStatus(), actualStackStatus.getDetailedStackStatus());
+            LOGGER.debug("New status is the same as previous status {}/{}, reason: {}. Skip status update.",
+                    actualStackStatus.getStatus(), actualStackStatus.getDetailedStackStatus(), statusReason);
             return stack;
         } else if (!stack.isDeleteCompleted()) {
+            LOGGER.info("Update stack status from: {}/{} to: {}/{} stack: {} reason: {}", actualStackStatus.getStatus(),
+                    actualStackStatus.getDetailedStackStatus(), newStatus, newDetailedStatus, stack.getId(), statusReason);
             stack.setStackStatus(new StackStatus(stack, newStatus, statusReason, newDetailedStatus));
             Cluster cluster = stack.getCluster();
             if (newStatus.isRemovableStatus()) {

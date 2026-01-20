@@ -43,7 +43,6 @@ import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.flow.core.AbstractAction;
-import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.flow.core.FlowParameters;
 
 @Configuration
@@ -189,8 +188,6 @@ public class ClusterUpgradePreparationActions {
                     ClusterUpgradePreparationFailureEvent payload) {
                 StackView stackView = stackService.getViewByIdWithoutAuth(payload.getResourceId());
                 MDCBuilder.buildMdcContext(stackView);
-                Flow flow = getFlow(flowParameters.getFlowId());
-                flow.setFlowFailed(payload.getException());
                 return ClusterUpgradeContext.from(flowParameters, payload);
             }
 

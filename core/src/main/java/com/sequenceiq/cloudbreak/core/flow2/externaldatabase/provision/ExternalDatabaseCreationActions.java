@@ -6,7 +6,6 @@ import jakarta.inject.Inject;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
@@ -15,7 +14,6 @@ import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.ExternalDatabaseCon
 import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.StackUpdaterService;
 import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.provision.action.AbstractExternalDatabaseCreationAction;
 import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.provision.config.ExternalDatabaseCreationEvent;
-import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.provision.config.ExternalDatabaseCreationState;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.externaldatabase.CreateExternalDatabaseFailed;
@@ -23,8 +21,6 @@ import com.sequenceiq.cloudbreak.reactor.api.event.externaldatabase.CreateExtern
 import com.sequenceiq.cloudbreak.reactor.api.event.externaldatabase.CreateExternalDatabaseResult;
 import com.sequenceiq.cloudbreak.service.metrics.MetricType;
 import com.sequenceiq.cloudbreak.view.StackView;
-import com.sequenceiq.flow.core.Flow;
-import com.sequenceiq.flow.core.FlowParameters;
 
 @Configuration
 public class ExternalDatabaseCreationActions {
@@ -79,15 +75,6 @@ public class ExternalDatabaseCreationActions {
             @Override
             protected Selectable createRequest(ExternalDatabaseContext context) {
                 return new StackEvent(ExternalDatabaseCreationEvent.EXTERNAL_DATABASE_CREATION_FAILURE_HANDLED_EVENT.event(), context.getStackId());
-            }
-
-            @Override
-            protected void beforeReturnFlowContext(FlowParameters flowParameters,
-                    StateContext<ExternalDatabaseCreationState, ExternalDatabaseCreationEvent> stateContext, CreateExternalDatabaseFailed payload) {
-
-                Flow flow = getFlow(flowParameters.getFlowId());
-                flow.setFlowFailed(payload.getException());
-                super.beforeReturnFlowContext(flowParameters, stateContext, payload);
             }
         };
     }

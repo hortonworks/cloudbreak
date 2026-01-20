@@ -15,12 +15,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
-import com.sequenceiq.flow.core.Flow;
-import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.entity.LoadBalancer;
 import com.sequenceiq.freeipa.flow.freeipa.common.FreeIpaFailedFlowAnalyzer;
@@ -143,14 +140,6 @@ public class FreeIpaLoadBalancerProvisionActions {
             @Override
             protected Selectable createRequest(StackContext context) {
                 return new StackEvent(FREEIPA_LOAD_BALANCER_CREATION_FAILURE_HANDLED_EVENT.event(), context.getStack().getId());
-            }
-
-            @Override
-            protected StackContext createFlowContext(FlowParameters flowParameters, StateContext<FreeIpaLoadBalancerProvisionState,
-                    FreeIpaLoadBalancerCreationEvent> stateContext, LoadBalancerCreationFailureEvent payload) {
-                Flow flow = getFlow(flowParameters.getFlowId());
-                flow.setFlowFailed(payload.getException());
-                return super.createFlowContext(flowParameters, stateContext, payload);
             }
         };
     }

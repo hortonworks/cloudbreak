@@ -24,4 +24,6 @@ public interface Flow {
     void setFlowFailed(Exception exception);
 
     Class<? extends FlowConfiguration<?>> getFlowConfigClass();
+
+    void clearFlowFailed();
 }

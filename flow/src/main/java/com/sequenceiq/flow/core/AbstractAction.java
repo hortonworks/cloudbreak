@@ -70,6 +70,8 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
 
     private FlowEdgeConfig<S, E> flowEdgeConfig;
 
+    private String failureStateId;
+
     protected AbstractAction(Class<P> payloadClass) {
         this.payloadClass = payloadClass;
     }
@@ -93,6 +95,10 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
                 prepareExecution(payload, variables);
                 String flowStateName = String.valueOf(variables.get(FLOW_STATE_NAME));
                 flowContext = createFlowContext(flowParameters, context, payload);
+
+                if (getTargetStateId(context).filter(targetStateId -> targetStateId.equals(failureStateId)).isPresent()) {
+                    getFlow(flowId).setFlowFailed(payload.getException());
+                }
                 executeAction(context, payload, flowContext, variables, flowStateName);
             } catch (Exception ex) {
                 LOGGER.error("Error during execution of {}", getClass().getName(), ex);
@@ -105,11 +111,9 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
                         throw new CloudbreakServiceException("Failed event propagation failed", sendEventException);
                     }
                 } else {
-                    Optional<String> tragetStateId = Optional.of(context).map(StateContext::getTransition)
-                            .map(Transition::getTarget).map(State::getId).map(Objects::toString);
+                    Optional<String> tragetStateId = getTargetStateId(context);
                     if (tragetStateId.isPresent()) {
-                        if (flowEdgeConfig != null && flowEdgeConfig.getDefaultFailureState() != null &&
-                                flowEdgeConfig.getDefaultFailureState().name().equals(tragetStateId.get())) {
+                        if (isDefaultFailureState(tragetStateId)) {
                             closeFlowOnError(flowId, String.format("Error handler failed in %s state. Message: %s", tragetStateId.get(), ex.getMessage()));
                             throw new CloudbreakServiceException(String.format("Error handler failed in %s state.", tragetStateId.get()), ex);
                         } else {
@@ -124,6 +128,16 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
                 }
             }
         });
+    }
+
+    private boolean isDefaultFailureState(Optional<String> tragetStateId) {
+        return flowEdgeConfig != null && flowEdgeConfig.getDefaultFailureState() != null &&
+                flowEdgeConfig.getDefaultFailureState().name().equals(tragetStateId.get());
+    }
+
+    private Optional<String> getTargetStateId(StateContext<S, E> context) {
+        return Optional.of(context).map(StateContext::getTransition)
+                .map(Transition::getTarget).map(State::getId).map(Objects::toString);
     }
 
     private void closeFlowOnError(String flowId, Exception ex) {
@@ -165,6 +179,10 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
 
     public void setFlowEdgeConfig(FlowEdgeConfig<S, E> flowEdgeConfig) {
         this.flowEdgeConfig = flowEdgeConfig;
+    }
+
+    public void setFailureStateId(String failureStateId) {
+        this.failureStateId = failureStateId;
     }
 
     public MetricService getMetricService() {

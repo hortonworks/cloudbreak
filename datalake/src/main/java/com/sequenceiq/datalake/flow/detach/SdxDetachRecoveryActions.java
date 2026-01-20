@@ -86,7 +86,6 @@ public class SdxDetachRecoveryActions {
                         payload.getResourceId(), payload.getSdxName(), exception.getMessage(), exception);
                 String statusReason = Optional.ofNullable(exception.getMessage()).orElse("SDX detach recovery failed");
                 sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.STOPPED, statusReason, payload.getResourceId());
-                getFlow(context.getFlowParameters().getFlowId()).setFlowFailed(payload.getException());
                 sendEvent(context, SDX_DETACH_RECOVERY_FAILURE_HANDLED_EVENT.event(), payload);
             }
 

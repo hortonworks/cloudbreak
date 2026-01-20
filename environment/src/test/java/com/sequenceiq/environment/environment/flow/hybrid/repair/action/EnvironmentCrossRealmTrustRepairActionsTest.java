@@ -38,7 +38,6 @@ import com.sequenceiq.environment.metrics.EnvironmentMetricService;
 import com.sequenceiq.environment.metrics.MetricType;
 import com.sequenceiq.flow.core.AbstractAction;
 import com.sequenceiq.flow.core.CommonContext;
-import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowRegister;
@@ -169,7 +168,6 @@ class EnvironmentCrossRealmTrustRepairActionsTest {
     void testFailedAction() throws Exception {
         EnvironmentCrossRealmTrustRepairFailedEvent payload = mock(EnvironmentCrossRealmTrustRepairFailedEvent.class);
 
-        Flow flow = mock(Flow.class);
         EnvironmentStatus failedStatus = EnvironmentStatus.TRUST_REPAIR_VALIDATION_FAILED;
         Exception ex = new RuntimeException("failure");
 
@@ -179,8 +177,6 @@ class EnvironmentCrossRealmTrustRepairActionsTest {
         when(payload.getException()).thenReturn(ex);
 
         when(stateContext.getMessageHeader(MessageFactory.HEADERS.DATA.name())).thenReturn(payload);
-        doNothing().when(flow).setFlowFailed(any());
-        when(runningFlows.get(any())).thenReturn(flow);
 
         Action<?, ?> action = configureAction(() -> actions.failedAction());
 

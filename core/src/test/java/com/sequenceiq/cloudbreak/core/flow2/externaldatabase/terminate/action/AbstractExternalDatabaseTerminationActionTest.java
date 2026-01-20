@@ -24,6 +24,9 @@ import com.sequenceiq.flow.core.FlowParameters;
 @ExtendWith(MockitoExtension.class)
 class AbstractExternalDatabaseTerminationActionTest {
 
+    @InjectMocks
+    private final AbstractExternalDatabaseTerminationAction<TestPayload> underTest = new TestAction(TestPayload.class);
+
     @Mock
     private StackDtoService stackDtoService;
 
@@ -33,11 +36,6 @@ class AbstractExternalDatabaseTerminationActionTest {
     @Mock
     private StateContext<ExternalDatabaseTerminationState, ExternalDatabaseTerminationEvent> stateContext;
 
-    @InjectMocks
-    private final AbstractExternalDatabaseTerminationAction<TestPayload> underTest = new TestAction(TestPayload.class);
-
-    private boolean semaphore;
-
     @Test
     void createFlowContext() {
         StackView stack = mock(StackView.class);
@@ -45,12 +43,10 @@ class AbstractExternalDatabaseTerminationActionTest {
         when(stack.getWorkspaceName()).thenReturn("ws");
         when(stackDtoService.getStackViewById(1L)).thenReturn(stack);
 
-        semaphore = false;
         ExternalDatabaseContext flowContext = underTest.createFlowContext(flowParameters, stateContext, new TestPayload());
 
         assertThat(flowContext.getFlowParameters()).isEqualTo(flowParameters);
         assertThat(flowContext.getStack()).isEqualTo(stack);
-        assertThat(semaphore).isTrue();
     }
 
     private class TestPayload implements Payload {
@@ -71,12 +67,5 @@ class AbstractExternalDatabaseTerminationActionTest {
         protected void doExecute(ExternalDatabaseContext context, TestPayload payload, Map<Object, Object> variables) {
         }
 
-        @Override
-        protected void beforeReturnFlowContext(FlowParameters flowParameters,
-                StateContext<ExternalDatabaseTerminationState, ExternalDatabaseTerminationEvent> stateContext, TestPayload payload) {
-
-            super.beforeReturnFlowContext(flowParameters, stateContext, payload);
-            semaphore = true;
-        }
     }
 }

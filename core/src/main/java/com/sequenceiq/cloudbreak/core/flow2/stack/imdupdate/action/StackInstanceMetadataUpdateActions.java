@@ -10,18 +10,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackContext;
-import com.sequenceiq.cloudbreak.core.flow2.stack.imdupdate.StackInstanceMetadataUpdateState;
-import com.sequenceiq.cloudbreak.core.flow2.stack.imdupdate.event.StackInstanceMetadataUpdateEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.imdupdate.event.StackInstanceMetadataUpdateFailureEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.imdupdate.event.StackInstanceMetadataUpdateRequest;
 import com.sequenceiq.cloudbreak.core.flow2.stack.imdupdate.event.StackInstanceMetadataUpdateResult;
 import com.sequenceiq.cloudbreak.core.flow2.stack.imdupdate.event.StackInstanceMetadataUpdateTriggerEvent;
-import com.sequenceiq.flow.core.Flow;
-import com.sequenceiq.flow.core.FlowParameters;
 
 @Configuration
 public class StackInstanceMetadataUpdateActions {
@@ -59,15 +54,6 @@ public class StackInstanceMetadataUpdateActions {
     @Bean(name = "STACK_IMDUPDATE_FAILED_STATE")
     public Action<?, ?> instanceMetadataUpdateFailedAction() {
         return new AbstractStackInstanceMetadataUpdateAction<>(StackInstanceMetadataUpdateFailureEvent.class) {
-
-            @Override
-            protected StackContext createFlowContext(FlowParameters flowParameters,
-                    StateContext<StackInstanceMetadataUpdateState, StackInstanceMetadataUpdateEvent> stateContext,
-                    StackInstanceMetadataUpdateFailureEvent payload) {
-                Flow flow = getFlow(flowParameters.getFlowId());
-                flow.setFlowFailed(payload.getException());
-                return super.createFlowContext(flowParameters, stateContext, payload);
-            }
 
             @Override
             protected void doExecute(StackContext context, StackInstanceMetadataUpdateFailureEvent payload, Map<Object, Object> variables) {

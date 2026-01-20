@@ -11,7 +11,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
-import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.FailureDetails;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SuccessDetails;
@@ -66,13 +65,7 @@ public class RefreshEntitlementParamsActions {
                 FailureDetails failureDetails = new FailureDetails(environmentCrn, message);
                 LOGGER.info(message, payload.getException());
                 stackUpdater.updateStackStatus(stack, DetailedStackStatus.UPGRADE_FAILED, message);
-                failFlow(context, payload);
                 sendEvent(context, RefreshEntitlementParamsEvent.REFRESH_ENTITLEMENT_FAIL_HANDLED_EVENT.event(), payload);
-            }
-
-            private void failFlow(RefreshEntitlementParamsContext context, StackFailureEvent payload) {
-                Flow flow = getFlow(context.getFlowParameters().getFlowId());
-                flow.setFlowFailed(payload.getException());
             }
         };
     }

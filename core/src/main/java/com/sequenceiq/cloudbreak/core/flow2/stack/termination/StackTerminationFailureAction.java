@@ -21,7 +21,6 @@ import com.sequenceiq.cloudbreak.reactor.api.event.stack.TerminationType;
 import com.sequenceiq.cloudbreak.service.recovery.RecoveryTeardownService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.view.StackView;
-import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.flow.core.FlowParameters;
 
 @Component("StackTerminationFailureAction")
@@ -40,11 +39,9 @@ public class StackTerminationFailureAction extends AbstractStackFailureAction<St
 
     @Override
     protected StackFailureContext createFlowContext(FlowParameters flowParameters, StateContext<StackTerminationState, StackTerminationEvent> stateContext,
-                                                    StackFailureEvent payload) {
-        Flow flow = getFlow(flowParameters.getFlowId());
+            StackFailureEvent payload) {
         StackView stack = stackDtoService.getStackViewById(payload.getResourceId());
         MDCBuilder.buildMdcContext(stack);
-        flow.setFlowFailed(payload.getException());
         return new StackFailureContext(flowParameters, stack, payload.getResourceId());
     }
 
