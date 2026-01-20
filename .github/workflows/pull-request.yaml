@@ -775,7 +775,6 @@ jobs:
           retention-days: 5
           path: |
             integration-test/integcb-logs.tar.gz
-            integration-test/test-output.tar.gz
             integration-test/cloudbreak.log
             integration-test/datalake.log
             integration-test/redbeams.log
@@ -796,6 +795,14 @@ jobs:
           retention-days: 5
           path: |
             integration-test/suites.tar.gz
+      - name: integration_test_collect_test_result_artifacts
+        uses: cloudbreak/cloudbreak-github-actions/actions/upload-artifact@master
+        if: ${{ always() }}
+        with:
+          name: integration-test-result-artifact
+          retention-days: 5
+          path: |
+            integration-test/test-output.tar.gz
   fedramp-integration-test:
     permissions: write-all
     name: FedRAMP Integration Test
@@ -877,7 +884,6 @@ jobs:
           retention-days: 5
           path: |
             integration-test/integcb-logs.tar.gz
-            integration-test/test-output.tar.gz
             integration-test/cloudbreak.log
             integration-test/datalake.log
             integration-test/redbeams.log
@@ -898,6 +904,14 @@ jobs:
           retention-days: 5
           path: |
             integration-test/suites.tar.gz
+      - name: fedramp_integration_test_collect_test_result_artifacts
+        uses: cloudbreak/cloudbreak-github-actions/actions/upload-artifact@master
+        if: ${{ always() }}
+        with:
+          name: fedramp-integration-test-result-artifact
+          retention-days: 5
+          path: |
+            integration-test/test-output.tar.gz
   real-ums-test:
     permissions: write-all
     name: Real UMS Test
