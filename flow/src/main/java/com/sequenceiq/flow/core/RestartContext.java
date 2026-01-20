@@ -1,5 +1,8 @@
 package com.sequenceiq.flow.core;
 
+import static com.sequenceiq.flow.core.FlowConstants.FLOW_RESTARTED;
+
+import java.util.HashMap;
 import java.util.Map;
 
 public class RestartContext {
@@ -32,7 +35,11 @@ public class RestartContext {
         this.flowTriggerUserCrn = flowTriggerUserCrn;
         this.flowOperationType = flowOperationType;
         this.event = event;
-        this.contextParams = contextParams;
+        this.contextParams = new HashMap<>();
+        this.contextParams.put(FLOW_RESTARTED, Boolean.TRUE);
+        if (contextParams != null) {
+            this.contextParams.putAll(contextParams);
+        }
     }
 
     public static RestartContext flowRestart(

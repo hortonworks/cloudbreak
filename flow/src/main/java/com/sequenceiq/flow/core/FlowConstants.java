@@ -33,6 +33,8 @@ public class FlowConstants {
 
     public static final String FLOW_OPERATION_TYPE = "FLOW_OPERATION_TYPE";
 
+    public static final String FLOW_RESTARTED = "FLOW_RESTARTED";
+
     private FlowConstants() {
     }
 }

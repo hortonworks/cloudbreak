@@ -1,6 +1,7 @@
 package com.sequenceiq.flow.core.restart;
 
 import static com.sequenceiq.flow.core.FlowConstants.FLOW_CHAIN_ID;
+import static com.sequenceiq.flow.core.FlowConstants.FLOW_CONTEXTPARAMS_ID;
 import static com.sequenceiq.flow.core.FlowConstants.FLOW_ID;
 import static com.sequenceiq.flow.core.FlowConstants.FLOW_TRIGGER_USERCRN;
 
@@ -49,6 +50,7 @@ public class DefaultRestartAction implements RestartAction {
             headers.put(FLOW_ID, restartContext.getFlowId());
             putIfNotNull(headers, FLOW_TRIGGER_USERCRN, restartContext.getFlowTriggerUserCrn());
             putIfNotNull(headers, FLOW_CHAIN_ID, restartContext.getFlowChainId());
+            putIfNotNull(headers, FLOW_CONTEXTPARAMS_ID, restartContext.getContextParams());
             eventBus.notify(restartContext.getEvent(), eventFactory.createEventWithErrHandler(headers, payload));
         } else if (restartContext.getFlowChainId() != null) {
             flowChains.triggerNextFlow(

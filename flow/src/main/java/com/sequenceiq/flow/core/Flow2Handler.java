@@ -8,6 +8,7 @@ import static com.sequenceiq.flow.core.FlowConstants.FLOW_CHAIN_TYPE;
 import static com.sequenceiq.flow.core.FlowConstants.FLOW_FINAL;
 import static com.sequenceiq.flow.core.FlowConstants.FLOW_ID;
 import static com.sequenceiq.flow.core.FlowConstants.FLOW_OPERATION_TYPE;
+import static com.sequenceiq.flow.core.FlowConstants.FLOW_RESTARTED;
 import static com.sequenceiq.flow.core.FlowState.FlowStateConstants.INIT_STATE;
 
 import java.util.Comparator;
@@ -121,7 +122,7 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
                     ((Acceptable) flowEventContext.getPayload()).accepted().accept(result);
                 }
             } else {
-                handleFlowControlEvent(flowEventContext);
+                handleFlowControlEvent(flowEventContext, contextParams);
             }
         } catch (FlowNotTriggerableException e) {
             LOGGER.error("Failed to handle flow event.", e);
@@ -387,7 +388,7 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
         return acceptResult;
     }
 
-    private void handleFlowControlEvent(FlowEventContext flowEventContext) throws TransactionExecutionException {
+    private void handleFlowControlEvent(FlowEventContext flowEventContext, Map<Object, Object> contextParams) throws TransactionExecutionException {
         String flowId = flowEventContext.getFlowId();
         String key =  flowEventContext.getKey();
         String flowChainId =  flowEventContext.getFlowChainId();
@@ -398,7 +399,7 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
         if (flow != null) {
             MutableBoolean flowCancelled = new MutableBoolean(false);
             try {
-                updateFlowLogStatusInTransaction(flowEventContext, flow, flowCancelled);
+                updateFlowLogStatusInTransaction(flowEventContext, flow, flowCancelled, contextParams);
             } catch (TransactionExecutionException e) {
                 LOGGER.error("Can't update flow status: {}", flowId);
                 throw e;
@@ -421,14 +422,15 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
         }
     }
 
-    private void updateFlowLogStatusInTransaction(FlowEventContext flowEventContext, Flow flow, MutableBoolean flowCancelled)
+    private void updateFlowLogStatusInTransaction(FlowEventContext flowEventContext, Flow flow, MutableBoolean flowCancelled, Map<Object, Object> contextParams)
             throws TransactionExecutionException {
         transactionService.required(() -> {
             Optional<FlowLog> lastFlowLog = flowLogService.findFirstByFlowIdOrderByCreatedDesc(flow.getFlowId());
             if (lastFlowLog.isPresent()) {
                 String nodeId = nodeConfig.getId();
                 FlowLog flowLog = lastFlowLog.get();
-                if (flowLog.getFinalized() || flowLog.getCloudbreakNodeId() == null || flowLog.getCloudbreakNodeId().equals(nodeId)) {
+                boolean flowRestarted = isFlowRestarted(contextParams);
+                if ((flowLog.getFinalized() && flowRestarted) || flowLog.getCloudbreakNodeId() == null || flowLog.getCloudbreakNodeId().equals(nodeId)) {
                     updateFlowLogStatus(flowEventContext, flow, flowLog);
                 } else {
                     LOGGER.info("Flow {} was handled by another node {}, current node ID is {}, abandoning.",
@@ -440,6 +442,10 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
                 LOGGER.debug("Cannot find LastFlowLog with flowId: {}", flow.getFlowId());
             }
         });
+    }
+
+    private boolean isFlowRestarted(Map<Object, Object> contextParams) {
+        return Boolean.TRUE.equals(contextParams.get(FLOW_RESTARTED));
     }
 
     private void updateFlowLogStatus(FlowEventContext flowEventContext, Flow flow, FlowLog lastFlowLog) {
