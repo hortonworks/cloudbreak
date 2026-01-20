@@ -35,11 +35,15 @@ public class VaultRotationExecutor extends AbstractRotationExecutor<VaultRotatio
     protected void rotate(VaultRotationContext rotationContext) throws Exception {
         rotationContext.getNewSecretMap().forEach((entity, markerMap) -> {
             performVaultRotationPhase(markerMap, entity, (marker, newValue, vaultSecretJson) -> {
-                if (!uncachedSecretServiceForRotation.getRotation(vaultSecretJson).isRotation()) {
+                RotationSecret rotation = uncachedSecretServiceForRotation.getRotation(vaultSecretJson);
+                if (!rotation.isRotation()) {
                     LOGGER.info("Adding new secret to vault path {}", vaultSecretJson);
-                    String newVaultSecretJson = uncachedSecretServiceForRotation.putRotation(vaultSecretJson, newValue);
-                    setNewSecret(entity, marker, new SecretProxy(newVaultSecretJson));
+                } else {
+                    LOGGER.info("Secret is already in rotation state for vault path {}. It can be a consequnce of a recent failure. " +
+                            "Vault is storing earlier versions, if the original value is still needed.", vaultSecretJson);
                 }
+                String newVaultSecretJson = uncachedSecretServiceForRotation.putRotation(vaultSecretJson, newValue);
+                setNewSecret(entity, marker, new SecretProxy(newVaultSecretJson));
             });
             saveEntity(entity);
         });
