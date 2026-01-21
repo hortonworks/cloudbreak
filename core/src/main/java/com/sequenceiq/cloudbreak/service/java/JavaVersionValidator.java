@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.vm.VirtualMachineConfiguration;
+import com.sequenceiq.cloudbreak.vm.CommonJavaVersionValidator;
 
 @Service
 public class JavaVersionValidator {
@@ -15,13 +15,11 @@ public class JavaVersionValidator {
     private static final int JAVA_VERSION_8 = 8;
 
     @Inject
-    private VirtualMachineConfiguration virtualMachineConfiguration;
+    private CommonJavaVersionValidator commonJavaVersionValidator;
 
-    public void validateImage(Image image, Integer javaVersion) {
+    public void validateImage(Image image, String runtime, Integer javaVersion) {
         if (javaVersion != null) {
-            if (!virtualMachineConfiguration.getSupportedJavaVersions().contains(javaVersion)) {
-                throw new BadRequestException(String.format("Java version %d is not supported.", javaVersion));
-            }
+            commonJavaVersionValidator.validateByVmConfiguration(runtime, javaVersion);
             if (javaPresentedInMetadata(image)) {
                 if (!image.getPackageVersions().containsKey(String.format("java%d", javaVersion))) {
                     throw javaVersionNotSupporter(image.getUuid(), javaVersion);
