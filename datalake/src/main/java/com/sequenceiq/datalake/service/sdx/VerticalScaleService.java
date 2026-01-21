@@ -130,7 +130,9 @@ public class VerticalScaleService {
     }
 
     public FlowIdentifier addVolumesDatalake(SdxCluster sdxCluster, StackAddVolumesRequest addVolumesRequest, String userCrn) {
-        return sdxReactorFlowManager.triggerDatalakeAddVolumes(sdxCluster, addVolumesRequest, userCrn);
+        // TODO CB-31498 - This code is temporarily disabled as it is not working properly
+        throw new BadRequestException("Add Disks feature is disabled.");
+//        return sdxReactorFlowManager.triggerDatalakeAddVolumes(sdxCluster, addVolumesRequest, userCrn);
     }
 
     public FlowIdentifier updateRootVolumeDatalake(SdxCluster sdxCluster, DiskUpdateRequest updateRequest, String userCrn) {
