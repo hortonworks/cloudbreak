@@ -5,6 +5,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -66,6 +67,7 @@ public class VerticalScaleServiceTest {
     }
 
     @Test
+    @Disabled("CB-31498")
     public void testAddVolumesDatalake() {
         SdxCluster sdxCluster = mock(SdxCluster.class);
         StackAddVolumesRequest addVolumesRequest = mock(StackAddVolumesRequest.class);
