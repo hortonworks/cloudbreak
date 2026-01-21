@@ -48,6 +48,7 @@ dependencies {
   api (group: 'software.amazon.awssdk', name: 'test-utils', version: awsSdkVersion) {
     exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
     exclude group: 'junit', module: 'junit'
+    exclude group: 'org.apache.logging.log4j', module: 'log4j-core'
   }
   api group: 'software.amazon.awssdk', name: 'apache-client', version: awsSdkVersion
   api group: 'software.amazon.awssdk', name: 'secretsmanager', version: awsSdkVersion
