@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackAddVolumesR
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.Promise;
@@ -130,7 +131,9 @@ public class VerticalScaleService {
     }
 
     public FlowIdentifier addVolumesDatalake(SdxCluster sdxCluster, StackAddVolumesRequest addVolumesRequest, String userCrn) {
-        return sdxReactorFlowManager.triggerDatalakeAddVolumes(sdxCluster, addVolumesRequest, userCrn);
+        // TODO CB-31498 - This code is temporarily disabled as it is not working properly
+        throw new BadRequestException("Add Disks feature is disabled.");
+//        return sdxReactorFlowManager.triggerDatalakeAddVolumes(sdxCluster, addVolumesRequest, userCrn);
     }
 
     public FlowIdentifier updateRootVolumeDatalake(SdxCluster sdxCluster, DiskUpdateRequest updateRequest, String userCrn) {

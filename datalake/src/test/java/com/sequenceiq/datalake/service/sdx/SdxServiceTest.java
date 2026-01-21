@@ -24,12 +24,14 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.doCallRealMethod;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
@@ -93,7 +95,7 @@ import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionEx
 import com.sequenceiq.cloudbreak.sdx.TargetPlatform;
 import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
-import com.sequenceiq.cloudbreak.vm.VirtualMachineConfiguration;
+import com.sequenceiq.cloudbreak.vm.CommonJavaVersionValidator;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.common.api.type.LoadBalancerSku;
 import com.sequenceiq.common.api.type.Tunnel;
@@ -181,7 +183,7 @@ class SdxServiceTest {
     private ImageCatalogService imageCatalogService;
 
     @Mock
-    private VirtualMachineConfiguration virtualMachineConfiguration;
+    private CommonJavaVersionValidator commonJavaVersionValidator;
 
     @Mock
     private PlatformStringTransformer platformStringTransformer;
@@ -534,7 +536,7 @@ class SdxServiceTest {
     @Test
     public void testAddRmsToSdxCluster() throws IOException, TransactionExecutionException {
         DetailedEnvironmentResponse environmentResponse = getDetailedEnvironmentResponse();
-        when(virtualMachineConfiguration.isJavaVersionSupported(11)).thenReturn(true);
+        doNothing().when(commonJavaVersionValidator).validateByVmConfiguration(any(), anyInt());
         when(environmentService.validateAndGetEnvironment(anyString())).thenReturn(environmentResponse);
         when(platformStringTransformer.getPlatformStringForImageCatalog(anyString(), anyBoolean())).thenReturn(imageCatalogPlatform);
         BaseStackDetailsV4Response baseStackDetailsV4Response = new BaseStackDetailsV4Response();
@@ -549,7 +551,7 @@ class SdxServiceTest {
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, "name", sdxClusterRequest, null));
 
-        verify(virtualMachineConfiguration, times(1)).isJavaVersionSupported(11);
+        verify(commonJavaVersionValidator, times(1)).validateByVmConfiguration(any(), eq(11));
         verify(imageCatalogService, times(1)).getImageResponseFromImageRequest(any(), any());
         verify(environmentService, times(2)).validateAndGetEnvironment(anyString());
         verify(stackRequestHandler, times(1)).getStackRequest(any(), any(), any(), any(), any(), any());
@@ -850,7 +852,7 @@ class SdxServiceTest {
         mockTransactionServiceRequired();
         String lightDutyJson = readLightDutyTestTemplate();
         when(stackRequestHandler.getStackRequest(any(), any(), any(), any(), any(), any())).thenReturn(JsonUtil.readValue(lightDutyJson, StackV4Request.class));
-        when(virtualMachineConfiguration.isJavaVersionSupported(11)).thenReturn(true);
+        doNothing().when(commonJavaVersionValidator).validateByVmConfiguration(any(), eq(11));
         SdxClusterRequest sdxClusterRequest = createSdxClusterRequest(null, LIGHT_DUTY);
         sdxClusterRequest.setJavaVersion(11);
         withCloudStorage(sdxClusterRequest);
@@ -951,14 +953,14 @@ class SdxServiceTest {
         sdxClusterRequest.setJavaVersion(11);
         when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNullAndDetachedIsFalse(
                 anyString(), anyString())).thenReturn(Collections.emptyList());
-        when(virtualMachineConfiguration.isJavaVersionSupported(11)).thenReturn(false);
+        doThrow(new BadRequestException("java error")).when(commonJavaVersionValidator).validateByVmConfiguration(any(), eq(11));
         when(accountIdService.getAccountIdFromUserCrn(any())).thenReturn(ACCOUNT_ID);
 
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
                         underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null)));
 
-        assertEquals("Java version 11 is not supported.", badRequestException.getMessage());
+        assertEquals("java error", badRequestException.getMessage());
     }
 
     @Test
