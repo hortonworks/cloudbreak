@@ -29,7 +29,6 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -889,7 +888,6 @@ class StackCommonServiceTest {
     }
 
     @Test
-    @Disabled("CB-31498")
     void testPutAddVolumesInWorkspaceSuccess() {
         StackView stackDto = mock(StackView.class);
         doReturn(STACK_ID).when(stackDto).getId();
@@ -911,7 +909,6 @@ class StackCommonServiceTest {
     }
 
     @Test
-    @Disabled("CB-31498")
     void testPutAddVolumesInWorkspaceFailure() {
         StackView stackDto = mock(StackView.class);
         doReturn(STACK_ID).when(stackDto).getId();
@@ -936,7 +933,6 @@ class StackCommonServiceTest {
     }
 
     @Test
-    @Disabled("CB-31498")
     void testPutAddVolumesInWorkspaceFailureForEntitlement() {
         StackView stackDto = mock(StackView.class);
         doReturn(STACK_ID).when(stackDto).getId();
@@ -958,16 +954,6 @@ class StackCommonServiceTest {
                 stackAddVolumesRequest));
 
         assertEquals("Adding Disk for Azure is not enabled for this account", exception.getMessage());
-    }
-
-    @Test
-    void testPutAddVolumesInWorkspaceTemporarilyDisabled() {
-        StackAddVolumesRequest stackAddVolumesRequest = new StackAddVolumesRequest();
-
-        BadRequestException exception = assertThrows(BadRequestException.class, () -> underTest.putAddVolumesInWorkspace(STACK_CRN, "accid",
-                stackAddVolumesRequest));
-
-        assertEquals("Add Disks feature is disabled.", exception.getMessage());
     }
 
     @Test

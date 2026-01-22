@@ -12,6 +12,7 @@ import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
+import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
@@ -83,19 +84,18 @@ public class SdxVolumesVerticalScaleTest extends PreconditionSdxE2ETest {
                 validateVerticalScale(testDto, tc, cloudPlatform, getVolumeType(MODIFY_DISKS, cloudPlatform, testContext), MODIFY_DISKS);
                 return testDto;
             })
-                // TODO CB-31498 - This code is temporarily disabled as it is not working properly
-//            .given(SdxInternalTestDto.class)
-//            .when(sdxTestClient.addDisks(ADD_DISKS_SIZE, DISKS_COUNT, getVolumeType(ADD_DISKS, cloudPlatform, testContext), TEST_INSTANCE_GROUP,
-//                    CloudVolumeUsageType.GENERAL))
-//            .awaitForFlow()
-//            .await(SdxClusterStatusResponse.RUNNING)
-//            .awaitForHealthyInstances()
-//            .given(SdxInternalTestDto.class)
-//            .when(sdxTestClient.describeInternal())
-//            .then((tc, testDto, client) -> {
-//                validateVerticalScale(testDto, tc, cloudPlatform, getVolumeType(ADD_DISKS, cloudPlatform, testContext), ADD_DISKS);
-//                return testDto;
-//            })
+            .given(SdxInternalTestDto.class)
+            .when(sdxTestClient.addDisks(ADD_DISKS_SIZE, DISKS_COUNT, getVolumeType(ADD_DISKS, cloudPlatform, testContext), TEST_INSTANCE_GROUP,
+                    CloudVolumeUsageType.GENERAL))
+            .awaitForFlow()
+            .await(SdxClusterStatusResponse.RUNNING)
+            .awaitForHealthyInstances()
+            .given(SdxInternalTestDto.class)
+            .when(sdxTestClient.describeInternal())
+            .then((tc, testDto, client) -> {
+                validateVerticalScale(testDto, tc, cloudPlatform, getVolumeType(ADD_DISKS, cloudPlatform, testContext), ADD_DISKS);
+                return testDto;
+            })
             .validate();
     }
 

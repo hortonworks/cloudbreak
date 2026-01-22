@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 set -x
 
-DATABASE_VOLUME_INDEX="{{ (salt['pillar.get']('mount_data')[salt['grains.get']('fqdn')])['database_volume_index'] }}"
 TEMPORARY_STORAGE="{{ (salt['pillar.get']('mount_data')[salt['grains.get']('fqdn')])['temporary_storage'] }}"
 CLOUD_PLATFORM="{{ (salt['pillar.get']('mount_data')[salt['grains.get']('fqdn')])['cloud_platform'] }}"
 PREVIOUS_FSTAB="{{ (salt['pillar.get']('mount_data')[salt['grains.get']('fqdn')])['previous_fstab'] }}"
@@ -41,16 +40,41 @@ format_disks_if_unformatted() {
     return $((return_value))
 }
 
-unmount_instance_storage() {
-  local counter=$(get_mounted_instance_storage_count)
-  log $LOG_FILE number of ephemeral disks mounted under fs path: "$counter"
-  while [[ counter -gt 0 ]]; do
-      log $LOG_FILE unmounting ephemeral volume mounted under /fs"$counter"
-      umount "/hadoopfs/fs${counter}" >> $LOG_FILE 2>&1
-      log $LOG_FILE removing from fstab /hadoopfs/fs"$counter"
-      sed -i -E "/hadoopfs\/fs${counter}/d" /etc/fstab
-      sed -i -E "/hadoopfs\/ephfs${counter}/d" /etc/fstab
-      ((counter--))
+unmount_all_storages() {
+  log $LOG_FILE "Starting Global Storage Reset (excluding root and /dbfs)..."
+
+  # Get all block devices
+  local all_volumes=$(lsblk_command | grep -v part | grep ^[a-z] | cut -f1 -d' ')
+  local root_disk=$(get_root_disk)
+
+  for vol in $all_volumes; do
+      local dev_path="/dev/$vol"
+      local uuid=$(get_disk_uuid "$dev_path")
+
+      # 1. Protection Guard: Skip root disk
+      if [[ "$dev_path" == "$root_disk" ]]; then
+          continue
+      fi
+
+      # 2. Protection Guard: Skip if mounted at /dbfs
+      local current_mount=$(awk -v u="UUID=$uuid" '$1==u {print $2}' /etc/fstab)
+      if [[ "$current_mount" == "/dbfs" ]]; then
+          log $LOG_FILE "Skipping reset for $vol (Database Volume at /dbfs)"
+          continue
+      fi
+
+      # 3. Action: Unmount and clean fstab for everything else
+      if [[ -n "$current_mount" ]]; then
+          log $LOG_FILE "Resetting $vol: Unmounting $current_mount and removing from fstab."
+          umount -l "$current_mount" >> $LOG_FILE 2>&1
+          sed -i "\|UUID=$uuid|d" /etc/fstab
+          sed -i "\|${current_mount}|d" /etc/fstab
+
+          # Clean up the directory so mkdir can recreate it fresh
+          if [[ "$current_mount" =~ ^/hadoopfs/ ]]; then
+              rmdir "$current_mount" 2>/dev/null
+          fi
+      fi
   done
 }
 
@@ -62,66 +86,108 @@ unmount_storage() {
     fi
 }
 
-unmount_and_mount_instance_store() {
+mount_instance_store() {
     local counter=$1
-    unmount_storage "/hadoopfs/ephfs${counter}" "/hadoopfs\/ephfs${counter}/d"
-    if [ ! -z "$(nvme list | grep "Instance Storage")" ]; then
+    local volume=$2
+    local uuid=$(get_disk_uuid "/dev/$volume")
+    local mount_point=$(awk -v uuid="UUID=$uuid" '$1 == uuid {print $2}' /etc/fstab)
+    if [[ -n "$(nvme list | grep "$volume" | grep "Instance Storage")" && -z "$mount_point" ]]; then
         mount_one "UUID=$uuid /hadoopfs/ephfs${counter} $FS_TYPE defaults,noatime,nofail 0 2"
-        return_value=$(($? || return_value ))
+        return_value=$?
         log $LOG_FILE "result of all mounting: $return_value"
-        ((counter++))
+        if [[ $return_value -eq 0 ]]; then
+            ((counter++))
+        fi
     fi
-    return $((counter))
+    echo "$counter"
 }
 
 unmount_and_mount_block_store() {
     local counter=$1
-    unmount_storage "/hadoopfs/fs${counter}" "/hadoopfs\/fs${counter}/d"
-    format_disks_if_unformatted "/dev/$volume" counter
-    uuid=$(get_disk_uuid "/dev/$volume")
+    local volume=$2
+    local uuid=$(get_disk_uuid "/dev/$volume")
     log $LOG_FILE "mounting volume $volume with uuid ${uuid} to path /hadoopfs/fs${counter}"
-    if [[ $uuid == $DATABASE_VOLUME_UUID ]]; then
-        mount_one "UUID=$uuid /dbfs $FS_TYPE defaults,noatime,nofail 0 2"
-    else
+    local mount_point=$(awk -v uuid="UUID=$uuid" '$1 == uuid {print $2}' /etc/fstab)
+    if [[ -z "$mount_point" ]]; then
+        unmount_storage "/hadoopfs/fs${counter}" "/hadoopfs\/fs${counter}/d"
+        format_disks_if_unformatted "/dev/$volume" "$counter"
+        if [[ -z "$uuid" ]]; then
+            uuid=$(get_disk_uuid "/dev/$volume")
+        fi
         mount_one "UUID=$uuid /hadoopfs/fs${counter} $FS_TYPE defaults,noatime,nofail 0 2"
         ((counter++))
+    else
+        log $LOG_FILE "Skipping: UUID ${uuid} is already mounted/configured at ${mount_point}"
     fi
-    return $((counter))
+    echo $((counter))
+}
+
+get_hadoopfs_dir_counter() {
+    ## This method parses /etc/fstab to figure out what is the highest number of disks mounted under fs* and gives back the number to mount the unmounted disks
+    local fs_counter=$(awk '$2 ~ /^\/hadoopfs\/fs/ {print $2}' /etc/fstab | sed 's|/hadoopfs/fs||' | sort -n | tail -1)
+    echo "${fs_counter:-0}"
 }
 
 mount_all_attached_disks_aws() {
-      local hadoop_fs_dir_counter=1
-      local hadoop_ephfs_dir_counter=1
+      local hadoop_fs_dir_counter
+      local hadoop_ephfs_dir_counter
       local return_value=0
-      unmount_instance_storage
+
+      # Check if ephfs already exists in fstab
+      local ephfs_already_exists=$(grep "/hadoopfs/ephfs" /etc/fstab)
+      log $LOG_FILE ephfs_already_exists: $ephfs_already_exists
+
+      # 1. State-Based Reset
+      if [[ -n $(nvme list | grep "Instance Storage") && -z "$ephfs_already_exists" ]]; then
+          log $LOG_FILE "Hybrid transition detected: Resetting all non-critical mounts."
+          unmount_all_storages
+          hadoop_fs_dir_counter=1
+          hadoop_ephfs_dir_counter=1
+      else
+          # Regular run: Just find the next available slot
+          hadoop_fs_dir_counter=$(( $(get_hadoopfs_dir_counter) + 1 ))
+      fi
+
+      log $LOG_FILE "Starting EBS mounting at counter: $hadoop_fs_dir_counter"
+
+      # 2. Get Disks to Process
+      # We use lsblk_command to find all disks.
+      # The functions below will check if they are already in fstab or if they need mounting.
       not_mounted_volume_names=$(lsblk_command | grep -v part | grep ^[a-z] | cut -f1 -d' ')
       log $LOG_FILE remaining not mounted volumes: $not_mounted_volume_names
       root_disk=$(get_root_disk)
+
       for volume in $not_mounted_volume_names; do
-          uuid=$(get_disk_uuid "/dev/$volume")
-          if [[ $root_disk != "/dev/$volume" && "$uuid" != ""  ]] && not_elastic_block_store "/dev/$volume" $LOG_FILE; then
-              unmount_and_mount_instance_store $hadoop_ephfs_dir_counter
-              hadoop_ephfs_dir_counter=$?
-          elif [[ "$root_disk" == "/dev/$volume" ]]; then
-              log $LOG_FILE volume $volume is the root volume, skipping it
-          elif ! not_elastic_block_store "/dev/$volume" $LOG_FILE ; then
-              unmount_and_mount_block_store $hadoop_fs_dir_counter
-              hadoop_fs_dir_counter=$?
-          else
-              log $LOG_FILE volume $volume has still no uuid, skipping it
-              return_value=1
+          local dev_path="/dev/$volume"
+          [[ "$dev_path" == "$root_disk" ]] && continue
+          local uuid=$(get_disk_uuid "$dev_path")
+          local current_mount=$(awk -v u="UUID=$uuid" '$1==u {print $2}' /etc/fstab)
+          [[ "$current_mount" == "/dbfs" ]] && continue
+          if not_elastic_block_store $dev_path $LOG_FILE; then
+              log $LOG_FILE "Routing Instance Store $volume to ephfs"
+              hadoop_ephfs_dir_counter=$(mount_instance_store "$hadoop_ephfs_dir_counter" "$volume")
+          elif ! not_elastic_block_store $dev_path $LOG_FILE ; then
+              log $LOG_FILE volume $volume is a EBS volume and starting to unmount and mount it
+              hadoop_fs_dir_counter=$(unmount_and_mount_block_store "$hadoop_fs_dir_counter" "$volume")
           fi
       done
 
     return $((return_value))
 }
 
+get_unmounted_disks() {
+    if [[ -z $(lsblk -I 8,259 -no NAME,MOUNTPOINT,PKNAME) ]]; then
+        lsblk -dn | grep -v part | grep ^[a-z] | cut -f1 -d' '
+    else
+        lsblk -I 8,259 -dno NAME | grep -v -E $(lsblk -I 8,259 -no NAME,MOUNTPOINT,PKNAME | awk '$2 != "" {print $1; if($3!="") print $3}' | grep -oE '[a-zA-Z0-9\-_]+' | sort -u | tr '\n' '|' | sed 's/|$//')
+    fi
+}
+
 mount_all_attached_disks_azure() {
-      local hadoop_fs_dir_counter=1
-      local hadoop_ephfs_dir_counter=1
+      local hadoop_fs_dir_counter=$(( $(get_hadoopfs_dir_counter) + 1 ))
       local return_value=0
       local non_ebs_device_id=""
-      not_mounted_volume_names=$(lsblk_command | grep -v part | grep ^[a-z] | cut -f1 -d' ')
+      not_mounted_volume_names=$(get_unmounted_disks)
       log $LOG_FILE remaining not mounted volumes: $not_mounted_volume_names
       if [[ "$TEMPORARY_STORAGE" == "EPHEMERAL_VOLUMES" ]]; then
            non_ebs_device_id="/dev/sdb"
@@ -130,10 +196,11 @@ mount_all_attached_disks_azure() {
       fi
       log $LOG_FILE non_ebs_device_id: $non_ebs_device_id
       for volume in $not_mounted_volume_names; do
-          uuid=$(get_disk_uuid "/dev/$volume")
+          local uuid=$(get_disk_uuid "/dev/$volume")
+          local current_mount=$(awk -v u="UUID=$uuid" '$1==u {print $2}' /etc/fstab)
+          [[ "$current_mount" =~ ^/(dbfs|boot)$ ]] && continue
           if [[ "/dev/$volume" > "$non_ebs_device_id" ]]; then
-              unmount_and_mount_block_store $hadoop_fs_dir_counter
-              hadoop_fs_dir_counter=$?
+              hadoop_fs_dir_counter=$(unmount_and_mount_block_store "$hadoop_fs_dir_counter" "$volume")
           else
               log $LOG_FILE volume $volume is not EBS, skipping it
           fi
@@ -164,9 +231,6 @@ mount_one() {
 mount_common() {
     local return_value
     mkdir /hadoopfs
-    if [[ $DATABASE_VOLUME_INDEX != -1 ]]; then
-      mkdir /dbfs
-    fi
     if [[ "$CLOUD_PLATFORM" == "AZURE" ]]; then
       mount_all_attached_disks_azure
     else
@@ -176,25 +240,9 @@ mount_common() {
     return $((return_value))
 }
 
-create_directories() {
-    if [ ! -d "/hadoopfs/fs1" ]; then
-      log $LOG_FILE directory /hadoopfs/fs1 does not exists. Skipping log directory creation
-      return 0
-    fi
-
-    cd /hadoopfs/fs1 && mkdir logs >> $LOG_FILE 2>&1
-
-    fs1_logs_dir=/hadoopfs/fs1/logs
-    [[ -d $fs1_logs_dir  ]] && return 0
-
-    log $LOG_FILE there was an error creating log directories in /hadoopfs/fs1
-    return 1
-}
-
 save_env_vars_to_log_file() {
     log $LOG_FILE environment variables:
     log $LOG_FILE TEMPORARY_STORAGE=$TEMPORARY_STORAGE
-    log $LOG_FILE DATABASE_VOLUME_UUID=$DATABASE_VOLUME_UUID
     log $LOG_FILE CLOUD_PLATFORM=$CLOUD_PLATFORM
     log $LOG_FILE PREVIOUS_FSTAB=$PREVIOUS_FSTAB
 }
@@ -208,23 +256,13 @@ main() {
     log $LOG_FILE The calculated ATTACHED_VOLUME_UUID_LIST is $ATTACHED_VOLUME_UUID_LIST
 
     local attached_volume_uuid_array=($ATTACHED_VOLUME_UUID_LIST)
-    if [[ $DATABASE_VOLUME_INDEX != -1 ]]; then
-        export DATABASE_VOLUME_UUID=${attached_volume_uuid_array[DATABASE_VOLUME_INDEX]}
-        log $LOG_FILE "database volume index is: $DATABASE_VOLUME_INDEX"
-        log $LOG_FILE "database volume uuid based on its index: $DATABASE_VOLUME_UUID"
-    else
-        log $LOG_FILE "database volume uuid is not set as its index is -1."
-    fi
+
     save_env_vars_to_log_file
-    local script_name="mount-disk"
+    local script_name="mount-disks-after-adding-volumes"
 
     mount_common
     return_code=$?
     [[ ! $return_code -eq 0 ]] && exit_with_code $LOG_FILE $return_code "Not all devices were mounted"
-
-    create_directories
-    return_code=$?
-    [[ ! $return_code -eq 0 ]] && exit_with_code $LOG_FILE $return_code "Error creating directories on /hadoopfs/fs1"
 
     exit_with_code $LOG_FILE 0 "Script $script_name ended"
 }
