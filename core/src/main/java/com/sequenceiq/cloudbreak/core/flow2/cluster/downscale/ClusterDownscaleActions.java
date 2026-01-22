@@ -114,6 +114,12 @@ public class ClusterDownscaleActions {
                 }
                 sendEvent(context, event.selector(), event);
             }
+
+            @Override
+            protected Object getFailurePayload(CollectDownscaleCandidatesResult payload, Optional<ClusterViewContext> flowContext, Exception ex) {
+                return new DecommissionResult("Unexpected error: " + ex.getMessage(), ex, new DecommissionRequest(payload.getResourceId(),
+                        payload.getHostGroupNames(), payload.getPrivateIds(), payload.getRequest().getDetails()));
+            }
         };
     }
 
@@ -124,6 +130,11 @@ public class ClusterDownscaleActions {
             protected void doExecute(ClusterViewContext context, DecommissionResult payload, Map<Object, Object> variables) {
                 RemoveHostsRequest request = new RemoveHostsRequest(context.getStackId(), payload.getHostGroupNames(), payload.getHostNames());
                 sendEvent(context, request.selector(), request);
+            }
+
+            @Override
+            protected Object getFailurePayload(DecommissionResult payload, Optional<ClusterViewContext> flowContext, Exception ex) {
+                return new RemoveHostsFailed(payload.getResourceId(), ex, payload.getHostGroupNames(), payload.getHostNames());
             }
         };
     }
