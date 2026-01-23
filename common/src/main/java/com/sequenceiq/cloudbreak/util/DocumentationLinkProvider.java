@@ -72,4 +72,8 @@ public class DocumentationLinkProvider {
         return "https://docs.cloudera.com/cdp-private-cloud-base/7.3.1/security-kerberos-authentication/topics" +
                 "/cm-security-kerberos-authentication-add-trusted-realms.html";
     }
+
+    public static String nifiMigrationLink() {
+        return "https://docs.cloudera.com/dataflow/cloud/migration-tool/topics/cdf-migration-tool.html";
+    }
 }
