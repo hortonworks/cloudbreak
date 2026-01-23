@@ -296,7 +296,7 @@ class SaltTelemetryOrchestratorTest {
     @Test
     void testPreFlightDiagnosticsCheck() throws CloudbreakOrchestratorFailedException {
         Map<String, Object> parameters = getParametersMap();
-        when(saltStateService.runCommandOnHosts(eq(retry), eq(saltConnector), any(), eq(""))).thenReturn(new HashMap<>() {{
+        when(saltStateService.runCommandOnHosts(eq(saltConnector), any(), eq(""))).thenReturn(new HashMap<>() {{
             put("", "");
         }});
 

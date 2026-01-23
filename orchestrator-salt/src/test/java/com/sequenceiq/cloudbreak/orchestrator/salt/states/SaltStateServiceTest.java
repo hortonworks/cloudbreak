@@ -7,6 +7,7 @@ import static com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStateServic
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.hamcrest.collection.IsIterableContainingInAnyOrder.containsInAnyOrder;
+import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -17,7 +18,6 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -34,6 +34,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -84,7 +85,7 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.domain.SaltMaster;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.StateType;
 import com.sequenceiq.cloudbreak.orchestrator.salt.utils.MinionUtil;
 import com.sequenceiq.cloudbreak.service.Retry;
-import com.sequenceiq.cloudbreak.service.RetryService;
+import com.sequenceiq.cloudbreak.service.RetryType;
 
 @ExtendWith(MockitoExtension.class)
 class SaltStateServiceTest {
@@ -102,6 +103,9 @@ class SaltStateServiceTest {
     @Mock
     private MinionUtil minionUtil;
 
+    @Mock
+    private Retry retry;
+
     @InjectMocks
     private SaltStateService underTest;
 
@@ -113,6 +117,7 @@ class SaltStateServiceTest {
         targets.add("10-0-0-3.example.com");
         target = new HostList(targets);
         lenient().when(minionUtil.createMinion(any(), any(), anyBoolean(), anyBoolean())).thenReturn(mock(Minion.class));
+        lenient().when(retry.testWithoutRetry(any())).thenAnswer(i -> ((Supplier<?>) i.getArgument(0)).get());
     }
 
     @Test
@@ -561,7 +566,7 @@ class SaltStateServiceTest {
         resp.setResult(commandOutputsList);
         when(saltConnector.run(Glob.ALL, "cmd.run", LOCAL, CommandExecutionResponse.class, "command")).thenReturn(resp);
         // WHEN
-        Map<String, String> actualResult = underTest.runCommand(spy(RetryService.class), saltConnector, "command");
+        Map<String, String> actualResult = underTest.runCommand(saltConnector, "command", RetryType.NO_RETRY);
         // THEN
         assertEquals(commandOutputs, actualResult);
     }
@@ -598,7 +603,7 @@ class SaltStateServiceTest {
         resp.setResult(commandOutputsList);
         when(saltConnector.run(Glob.ALL, "cmd.run", LOCAL, CommandExecutionResponse.class, "command")).thenReturn(resp);
         // WHEN
-        Map<String, String> actualResult = underTest.runCommand(spy(RetryService.class), saltConnector, "command");
+        Map<String, String> actualResult = underTest.runCommand(saltConnector, "command", RetryType.NO_RETRY);
         // THEN
         assertEquals(0, actualResult.size());
     }
@@ -609,8 +614,8 @@ class SaltStateServiceTest {
         RuntimeException exception = new RuntimeException();
         when(saltConnector.run(Glob.ALL, "cmd.run", LOCAL, CommandExecutionResponse.class, "command")).thenThrow(exception);
         // WHEN
-        Retry.ActionFailedException actionFailedException = Assertions.assertThrows(Retry.ActionFailedException.class,
-                () -> underTest.runCommand(spy(RetryService.class), saltConnector, "command"));
+        Retry.ActionFailedException actionFailedException = assertThrows(Retry.ActionFailedException.class,
+                () -> underTest.runCommand(saltConnector, "command", RetryType.NO_RETRY));
         assertEquals("Salt run command failed", actionFailedException.getMessage());
     }
 

@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.service.CloudbreakRuntimeException;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
+import com.sequenceiq.cloudbreak.service.RetryType;
 
 @Component
 public class YumLockCheckerService {
@@ -37,7 +38,7 @@ public class YumLockCheckerService {
         try {
             List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
             GatewayConfig primaryGatewayConfig = gatewayConfigs.stream().filter(GatewayConfig::isPrimary).findFirst().orElseThrow();
-            Map<String, String> yumOutput = hostOrchestrator.runCommandOnAllHostsWithFewRetry(primaryGatewayConfig, COMMAND);
+            Map<String, String> yumOutput = hostOrchestrator.runCommandOnAllHosts(primaryGatewayConfig, COMMAND, RetryType.WITH_1_SEC_DELAY_MAX_3_TIMES);
             String hostnamesYumNotWorking = yumOutput.entrySet().stream()
                     .filter(entry -> entry.getValue().contains(ERROR_RPMDB_OPEN_FAILED))
                     .map(Map.Entry::getKey)

@@ -88,6 +88,9 @@ public class SaltStateService {
     @Inject
     private MinionUtil minionUtil;
 
+    @Inject
+    private Retry retry;
+
     public Map<String, String> getUuidList(SaltConnector sc) {
         ApplyResponse applyResponse = applyStateAllSync(sc, "disks.get-uuid-list");
         List<Map<String, JsonNode>> result = (List<Map<String, JsonNode>>) applyResponse.getResult();
@@ -242,10 +245,10 @@ public class SaltStateService {
         }
     }
 
-    public Set<String> collectMinionIpAddresses(Optional<Set<Node>> saltTargetNodes, Retry retry, SaltConnector sc) {
+    public Set<String> collectMinionIpAddresses(Optional<Set<Node>> saltTargetNodes, SaltConnector sc) {
         Set<String> minionIpAddresses = new HashSet<>();
         try {
-            return collectMinionIpAddressesWithRetry(saltTargetNodes, retry, sc, minionIpAddresses);
+            return collectMinionIpAddressesWithRetry(saltTargetNodes, sc, minionIpAddresses);
         } catch (Retry.ActionFailedException e) {
             if ("Unreachable nodes found.".equals(e.getMessage())) {
                 return minionIpAddresses;
@@ -255,7 +258,7 @@ public class SaltStateService {
         }
     }
 
-    private Set<String> collectMinionIpAddressesWithRetry(Optional<Set<Node>> saltTargetNodes, Retry retry, SaltConnector sc, Set<String> minionIpAddresses) {
+    private Set<String> collectMinionIpAddressesWithRetry(Optional<Set<Node>> saltTargetNodes, SaltConnector sc, Set<String> minionIpAddresses) {
         return retry.testWith1SecDelayMax5Times(() -> {
             try {
                 return collectMinionIpAddressesAndHandleUnreachableNodes(saltTargetNodes, sc, minionIpAddresses);
@@ -463,16 +466,8 @@ public class SaltStateService {
         }
     }
 
-    public Map<String, String> runCommand(Retry retry, SaltConnector sc, String command) {
-        return retry.testWith2SecDelayMax15Times(() -> runCommand(sc, command));
-    }
-
-    public Map<String, String> runCommandWithFewRetry(Retry retry, SaltConnector sc, String command) {
-        return retry.testWith1SecDelayMax3Times(() -> runCommand(sc, command));
-    }
-
-    public Map<String, String> runCommandWithoutRetry(SaltConnector sc, String command) {
-        return runCommand(sc, command);
+    public Map<String, String> runCommand(SaltConnector sc, String command, RetryType retryType) {
+        return retryType.execute(retry, () -> runCommand(sc, command));
     }
 
     private Map<String, String> runCommand(SaltConnector sc, String command) {
@@ -487,7 +482,7 @@ public class SaltStateService {
         }
     }
 
-    public Map<String, String> replacePatternInFile(Retry retry, SaltConnector sc, String file, String pattern, String replace) {
+    public Map<String, String> replacePatternInFile(SaltConnector sc, String file, String pattern, String replace) {
         return retry.testWith2SecDelayMax15Times(() -> {
             try {
                 String[] args = new String[]{file, String.format("pattern='%s'", pattern), String.format("repl='%s'", replace)};
@@ -502,11 +497,12 @@ public class SaltStateService {
         });
     }
 
-    public Map<String, String> runCommandOnHosts(Retry retry, SaltConnector sc, Target<String> target, String command) {
-        return runCommandOnHosts(retry, sc, target, command, RetryType.WITH_2_SEC_DELAY_MAX_15_TIMES);
+    public Map<String, String> runCommandOnHosts(SaltConnector sc, Target<String> target, String command) {
+        return runCommandOnHosts(sc, target, command, RetryType.WITH_2_SEC_DELAY_MAX_15_TIMES);
     }
 
-    public Map<String, String> runCommandOnHosts(Retry retry, SaltConnector sc, Target<String> target, String command, RetryType retryType) {
+    public Map<String, String> runCommandOnHosts(
+            SaltConnector sc, Target<String> target, String command, RetryType retryType) {
         return retryType.execute(retry, () -> {
             try {
                 CommandExecutionResponse resp = measure(() -> sc.run(target, "cmd.run", LOCAL, CommandExecutionResponse.class, command), LOGGER,

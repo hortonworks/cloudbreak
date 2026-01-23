@@ -4,7 +4,6 @@ import java.util.function.Supplier;
 
 public enum RetryType {
     WITH_2_SEC_DELAY_MAX_5_TIMES(
-            Retry::testWith2SecDelayMax5Times,
             Retry::testWith2SecDelayMax5Times
     ),
     WITH_2_SEC_DELAY_MAX_15_TIMES(
@@ -12,6 +11,9 @@ public enum RetryType {
     ),
     WITH_1_SEC_DELAY_MAX_5_TIMES(
             Retry::testWith1SecDelayMax5Times
+    ),
+    WITH_1_SEC_DELAY_MAX_5_TIMES_WITH_CHECK_RETRYABLE(
+            Retry::testWith1SecDelayMax5TimesWithCheckRetriable
     ),
     WITH_1_SEC_DELAY_MAX_3_TIMES(
             Retry::testWith1SecDelayMax3Times
@@ -25,15 +27,8 @@ public enum RetryType {
 
     private final RetrySupplierExecutor supplierExecutor;
 
-    private final RetryRunnableExecutor runnableExecutor;
-
     RetryType(RetrySupplierExecutor supplierExecutor) {
-        this(supplierExecutor, null);
-    }
-
-    RetryType(RetrySupplierExecutor supplierExecutor, RetryRunnableExecutor runnableExecutor) {
         this.supplierExecutor = supplierExecutor;
-        this.runnableExecutor = runnableExecutor;
     }
 
     public <T> T execute(Retry retry, Supplier<T> action) {
@@ -41,21 +36,14 @@ public enum RetryType {
     }
 
     public void execute(Retry retry, Runnable action) {
-        if (runnableExecutor != null) {
-            runnableExecutor.execute(retry, action);
-        } else {
-            // Fallback: direct run if runnable executor not defined for this type
+        supplierExecutor.execute(retry, () -> {
             action.run();
-        }
+            return null;
+        });
     }
 
     @FunctionalInterface
     private interface RetrySupplierExecutor {
         <T> T execute(Retry retry, Supplier<T> action);
-    }
-
-    @FunctionalInterface
-    private interface RetryRunnableExecutor {
-        void execute(Retry retry, Runnable action);
     }
 }
