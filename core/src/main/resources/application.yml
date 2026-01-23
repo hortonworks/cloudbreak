@@ -902,3 +902,9 @@ vm:
           maxRuntimeVersion: 7.3.1.X
         - version: 17
           minRuntimeVersion: 7.3.1.500
+
+retry:
+  errors:
+    patterns-no-retry:
+      # Salt api authentication issue
+      - 'Status: 401 Unauthorized Response.*'

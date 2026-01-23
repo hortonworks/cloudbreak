@@ -51,7 +51,7 @@ public class CdpDoctorService {
 
     public Map<String, CdpDoctorMeteringStatusResponse> getMeteringStatusForMinions(StackDtoDelegate stack) throws CloudbreakOrchestratorFailedException {
         GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
-        return saltOrchestrator.runCommandOnAllHostsWithFewRetry(primaryGatewayConfig, DOCTOR_METERING_COMMAND).entrySet().stream()
+        return saltOrchestrator.runCommandOnAllHosts(primaryGatewayConfig, DOCTOR_METERING_COMMAND, RetryType.WITH_1_SEC_DELAY_MAX_3_TIMES).entrySet().stream()
                 .filter(entry -> JsonUtil.isValid(entry.getValue()))
                 .collect(Collectors.toMap(Map.Entry::getKey, entry -> JsonUtil.readValueUnchecked(entry.getValue(), CdpDoctorMeteringStatusResponse.class)));
     }
@@ -116,7 +116,7 @@ public class CdpDoctorService {
 
     public Map<String, CdpDoctorServicesStatusResponse> getServicesStatusForMinions(StackDtoDelegate stack) throws CloudbreakOrchestratorFailedException {
         GatewayConfig primaryGatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
-        return saltOrchestrator.runCommandOnAllHostsWithFewRetry(primaryGatewayConfig, DOCTOR_SERVICES_COMMAND).entrySet().stream()
+        return saltOrchestrator.runCommandOnAllHosts(primaryGatewayConfig, DOCTOR_SERVICES_COMMAND, RetryType.WITH_1_SEC_DELAY_MAX_3_TIMES).entrySet().stream()
                 .filter(entry -> JsonUtil.isValid(entry.getValue()))
                 .collect(Collectors.toMap(Map.Entry::getKey, entry -> JsonUtil.readValueUnchecked(entry.getValue(), CdpDoctorServicesStatusResponse.class)));
     }

@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -22,6 +23,7 @@ import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.service.CloudbreakRuntimeException;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
+import com.sequenceiq.cloudbreak.service.RetryType;
 
 @ExtendWith(MockitoExtension.class)
 class YumLockCheckerServiceTest {
@@ -50,14 +52,14 @@ class YumLockCheckerServiceTest {
     @Test
     void testYumLockedOnOneNode() throws CloudbreakOrchestratorFailedException {
         Map<String, String> saltResponse = Map.of("host1", "ok", "host2", "ok");
-        when(hostOrchestrator.runCommandOnAllHostsWithFewRetry(any(), any())).thenReturn(saltResponse);
+        when(hostOrchestrator.runCommandOnAllHosts(any(), any(), eq(RetryType.WITH_1_SEC_DELAY_MAX_3_TIMES))).thenReturn(saltResponse);
         assertDoesNotThrow(() -> underTest.validate(stackDto));
     }
 
     @Test
     void testYumLockedOnOneNodeYumDbLocked() throws CloudbreakOrchestratorFailedException {
         Map<String, String> saltResponse = Map.of("host1", "ok", "host2", "nok Error: rpmdb open failed nok");
-        when(hostOrchestrator.runCommandOnAllHostsWithFewRetry(any(), any())).thenReturn(saltResponse);
+        when(hostOrchestrator.runCommandOnAllHosts(any(), any(), eq(RetryType.WITH_1_SEC_DELAY_MAX_3_TIMES))).thenReturn(saltResponse);
         CloudbreakRuntimeException result = assertThrows(CloudbreakRuntimeException.class, () -> underTest.validate(stackDto));
 
         assertTrue(result.getMessage().contains("Operaton cannot be performed " +

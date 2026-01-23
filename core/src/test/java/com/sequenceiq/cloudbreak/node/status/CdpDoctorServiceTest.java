@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorRunParams;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.salt.SaltOrchestrator;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
+import com.sequenceiq.cloudbreak.service.RetryType;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 
@@ -151,7 +152,7 @@ class CdpDoctorServiceTest {
     @DisplayName("getMeteringStatusForMinions filters invalid JSON and preserves defaults on null values")
     void testGetMeteringStatusForMinions() throws Exception {
         when(gatewayConfigService.getPrimaryGatewayConfig(stack)).thenReturn(gatewayConfig);
-        when(saltOrchestrator.runCommandOnAllHostsWithFewRetry(gatewayConfig, METERING_CMD))
+        when(saltOrchestrator.runCommandOnAllHosts(gatewayConfig, METERING_CMD, RetryType.WITH_1_SEC_DELAY_MAX_3_TIMES))
                 .thenReturn(Map.of(
                         "host1", VALID_METERING_JSON_WITH_NULL,
                         "host2", "not-json",
@@ -162,14 +163,14 @@ class CdpDoctorServiceTest {
         assertThat(result).hasSize(2).containsKeys("host1", "host3");
         assertThat(result.get("host1").getHeartbeatAgentRunning()).isEqualTo(CdpDoctorCheckStatus.UNKNOWN);
         assertThat(result.get("host3").getHeartbeatAgentRunning()).isEqualTo(CdpDoctorCheckStatus.OK);
-        verify(saltOrchestrator).runCommandOnAllHostsWithFewRetry(gatewayConfig, METERING_CMD);
+        verify(saltOrchestrator).runCommandOnAllHosts(gatewayConfig, METERING_CMD, RetryType.WITH_1_SEC_DELAY_MAX_3_TIMES);
     }
 
     @Test
     @DisplayName("getMeteringStatusForMinions returns empty map when all invalid")
     void testGetMeteringStatusForMinionsAllInvalid() throws Exception {
         when(gatewayConfigService.getPrimaryGatewayConfig(stack)).thenReturn(gatewayConfig);
-        when(saltOrchestrator.runCommandOnAllHostsWithFewRetry(gatewayConfig, METERING_CMD))
+        when(saltOrchestrator.runCommandOnAllHosts(gatewayConfig, METERING_CMD, RetryType.WITH_1_SEC_DELAY_MAX_3_TIMES))
                 .thenReturn(Map.of(
                         "h1", "invalid",
                         "h2", "also-invalid"));
@@ -199,7 +200,7 @@ class CdpDoctorServiceTest {
     @DisplayName("getServicesStatusForMinions parses cmServices list and ignores null lists")
     void testGetServicesStatusForMinions() throws Exception {
         when(gatewayConfigService.getPrimaryGatewayConfig(stack)).thenReturn(gatewayConfig);
-        when(saltOrchestrator.runCommandOnAllHostsWithFewRetry(gatewayConfig, SERVICES_CMD))
+        when(saltOrchestrator.runCommandOnAllHosts(gatewayConfig, SERVICES_CMD, RetryType.WITH_1_SEC_DELAY_MAX_3_TIMES))
                 .thenReturn(Map.of(
                         "h1", VALID_SERVICES_JSON_WITH_NULL,
                         "h2", "randomInvalid",
@@ -210,7 +211,7 @@ class CdpDoctorServiceTest {
         assertThat(result.get("h1").getCmServices()).isEmpty();
         assertThat(result.get("h3").getCmServices()).hasSize(1);
         assertThat(result.get("h3").getCmServices().getFirst().getStatus()).isEqualTo(CdpDoctorCheckStatus.OK);
-        verify(saltOrchestrator).runCommandOnAllHostsWithFewRetry(gatewayConfig, SERVICES_CMD);
+        verify(saltOrchestrator).runCommandOnAllHosts(gatewayConfig, SERVICES_CMD, RetryType.WITH_1_SEC_DELAY_MAX_3_TIMES);
     }
 
     private void mockGatewayAndResult(Set<String> expectedTargets) throws CloudbreakOrchestratorFailedException {

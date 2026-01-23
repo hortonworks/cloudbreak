@@ -356,7 +356,7 @@ public class SaltOrchestrator implements HostOrchestrator {
                     new GrainRemoveRunner(saltStateService, allHostNames, allNodes, "mount_disks"), exitModel, exitCriteria);
 
             LOGGER.debug("Fetching '/etc/fstab' from all nodes");
-            Map<String, String> fstabResponse = saltStateService.runCommandOnHosts(retry, sc, allHosts, "cat /etc/fstab");
+            Map<String, String> fstabResponse = saltStateService.runCommandOnHosts(sc, allHosts, "cat /etc/fstab");
             return nodesWithDiskData.stream()
                     .map(node -> {
                         String fstab = fstabResponse.getOrDefault(node.getHostname(), "");
@@ -1068,18 +1068,14 @@ public class SaltOrchestrator implements HostOrchestrator {
 
     @Override
     public Map<String, String> runCommandOnAllHosts(GatewayConfig gateway, String command) throws CloudbreakOrchestratorFailedException {
-        try (SaltConnector saltConnector = saltService.createSaltConnector(gateway)) {
-            return saltStateService.runCommand(retry, saltConnector, command);
-        } catch (RuntimeException e) {
-            LOGGER.warn("Error occurred during command execution: " + command, e);
-            throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
-        }
+        return runCommandOnAllHosts(gateway, command, RetryType.WITH_2_SEC_DELAY_MAX_15_TIMES);
     }
 
     @Override
-    public Map<String, String> runCommandOnAllHostsWithFewRetry(GatewayConfig gateway, String command) throws CloudbreakOrchestratorFailedException {
+    public Map<String, String> runCommandOnAllHosts(GatewayConfig gateway, String command, RetryType retryType)
+            throws CloudbreakOrchestratorFailedException {
         try (SaltConnector saltConnector = saltService.createSaltConnector(gateway)) {
-            return saltStateService.runCommandWithFewRetry(retry, saltConnector, command);
+            return saltStateService.runCommand(saltConnector, command, retryType);
         } catch (RuntimeException e) {
             LOGGER.warn("Error occurred during command execution: {}", command, e);
             throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
@@ -1093,13 +1089,14 @@ public class SaltOrchestrator implements HostOrchestrator {
     }
 
     @Override
-    public Map<String, String> runCommandOnHosts(List<GatewayConfig> allGatewayConfigs, Set<String> targetFqdns, String command, RetryType retryType)
+    public Map<String, String> runCommandOnHosts(
+            List<GatewayConfig> allGatewayConfigs, Set<String> targetFqdns, String command, RetryType retryType)
             throws CloudbreakOrchestratorFailedException {
         GatewayConfig primaryGateway = saltService.getPrimaryGatewayConfig(allGatewayConfigs);
         Target<String> hosts = new HostList(targetFqdns);
         LOGGER.debug("Execute command: {}, on hosts: {}", command, hosts);
         try (SaltConnector saltConnector = saltService.createSaltConnector(primaryGateway)) {
-            return saltStateService.runCommandOnHosts(retry, saltConnector, hosts, command, retryType);
+            return saltStateService.runCommandOnHosts(saltConnector, hosts, command, retryType);
         } catch (RuntimeException e) {
             LOGGER.warn("Error occurred during command execution: {}", command, e);
             throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
@@ -1136,7 +1133,7 @@ public class SaltOrchestrator implements HostOrchestrator {
     public Map<String, String> replacePatternInFileOnAllHosts(GatewayConfig gatewayConfig, String file, String pattern, String replace)
             throws CloudbreakOrchestratorFailedException {
         try (SaltConnector saltConnector = saltService.createSaltConnector(gatewayConfig)) {
-            return saltStateService.replacePatternInFile(retry, saltConnector, file, pattern, replace);
+            return saltStateService.replacePatternInFile(saltConnector, file, pattern, replace);
         } catch (RuntimeException e) {
             LOGGER.warn("Error occurred during file replace execution in file '{}' while replacing pattern '{}' with '{}'", file, pattern, replace, e);
             throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
@@ -1196,7 +1193,7 @@ public class SaltOrchestrator implements HostOrchestrator {
             GatewayConfig primaryGateway = saltService.getPrimaryGatewayConfig(runParams.gatewayConfigs());
             SaltConnector sc = saltService.createSaltConnector(primaryGateway);
             Target<String> allHosts = new HostList(runParams.nodes().stream().map(Node::getHostname).collect(Collectors.toSet()));
-            result = saltStateService.runCommandOnHosts(retry, sc, allHosts, runParams.command());
+            result = saltStateService.runCommandOnHosts(sc, allHosts, runParams.command());
         } catch (Exception e) {
             String message = String.format("%s Reason: %s", runParams.errorMessage(), e.getMessage());
             LOGGER.warn(message, e);
@@ -1716,9 +1713,9 @@ public class SaltOrchestrator implements HostOrchestrator {
         Set<Node> unresponsiveNodes = new HashSet<>();
         Set<String> minionIpAddresses;
         if (targeted) {
-            minionIpAddresses = saltStateService.collectMinionIpAddresses(Optional.of(nodes), retry, sc);
+            minionIpAddresses = saltStateService.collectMinionIpAddresses(Optional.of(nodes), sc);
         } else {
-            minionIpAddresses = saltStateService.collectMinionIpAddresses(Optional.empty(), retry, sc);
+            minionIpAddresses = saltStateService.collectMinionIpAddresses(Optional.empty(), sc);
         }
         nodes.forEach(node -> {
             if (minionIpAddresses.contains(node.getPrivateIp())) {
@@ -1769,15 +1766,15 @@ public class SaltOrchestrator implements HostOrchestrator {
                 user, primaryGateway.getPrivateAddress(), gatewayTargets);
         try (SaltConnector sc = saltService.createSaltConnector(primaryGateway)) {
             String command = String.format("chage -l %s | grep \"Password expires\" | cut -d \":\" -f2", user);
-            Map<String, String> passwordExpiryDatesOnHosts = saltStateService.runCommandOnHosts(retry, sc, new HostList(gatewayTargets), command,
-                    RetryType.WITH_1_SEC_DELAY_MAX_3_TIMES);
+            Map<String, String> passwordExpiryDatesOnHosts = saltStateService.runCommandOnHosts(
+                    sc, new HostList(gatewayTargets), command, RetryType.WITH_1_SEC_DELAY_MAX_5_TIMES_WITH_CHECK_RETRYABLE);
             return passwordExpiryDatesOnHosts.values().stream()
                     .map(String::trim)
                     .map(SaltOrchestrator::parseDateString)
                     .min(LocalDate::compareTo)
                     .orElseThrow(() -> new IllegalStateException("No password expiry date found for user " + user));
         } catch (Exception e) {
-            LOGGER.warn("Error occurred during the salt state upload", e);
+            LOGGER.warn("Error occurred during password expiry date query", e);
             throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
         }
     }
@@ -1894,7 +1891,7 @@ public class SaltOrchestrator implements HostOrchestrator {
 
     private Map<String, Map<String, String>> getFstabInformation(SaltConnector sc, Target<String> allHosts, Set<Node> nodesWithDiskData) {
         Map<String, String> uuidResponse = saltStateService.getUuidList(sc);
-        Map<String, String> fstabResponse = saltStateService.runCommandOnHosts(retry, sc, allHosts, "cat /etc/fstab");
+        Map<String, String> fstabResponse = saltStateService.runCommandOnHosts(sc, allHosts, "cat /etc/fstab");
         return nodesWithDiskData.stream()
                 .map(node -> {
                     String fstab = fstabResponse.getOrDefault(node.getHostname(), "");

@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.orchestrator.host;
+package com.sequenceiq.cloudbreak.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -38,6 +38,7 @@ class RetryErrorPatternsTest {
                 Arguments.of("Failed to execute: prefix Parameter validation failed: details", true),
                 Arguments.of("Failed to execute: Some context Stdout=Failed to determine the current java version. More output", true),
                 Arguments.of("Failed to execute: prefix Stdout=Failed to determine the current java version. suffix", true),
+                Arguments.of("Status: 401 Unauthorized Response: <!DOCTYPE html PUBLIC", true),
                 Arguments.of(null, false),
                 Arguments.of("", false),
                 Arguments.of("Connection timeout occurred", false),

@@ -370,7 +370,7 @@ public class SaltTelemetryOrchestrator implements TelemetryOrchestrator {
         if (anyHostsFilter && CollectionUtils.isNotEmpty(nodes)) {
             command += " -h " + nodes.stream().map(Node::getHostname).collect(Collectors.joining(","));
         }
-        Map<String, String> preFlightResponses = saltStateService.runCommandOnHosts(retry, sc, targets, command);
+        Map<String, String> preFlightResponses = saltStateService.runCommandOnHosts(sc, targets, command);
         logMemoryWarnings(preFlightResponses);
         boolean successful = isSuccessful(preFlightResponses);
         if (successful) {

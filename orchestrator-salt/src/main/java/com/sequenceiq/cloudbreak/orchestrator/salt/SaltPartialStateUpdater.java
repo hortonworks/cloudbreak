@@ -120,7 +120,7 @@ public class SaltPartialStateUpdater implements PartialStateUpdater {
     protected void updateSaltStateComponentDefinition(SaltConnector sc, Target<String> targets, String zipFileName, String component) {
         String command = String.format("%s/%s -f %s%s -s %s",
                 REMOTE_SCRIPTS_LOCATION, SALT_STATE_UPDATER_SCRIPT, REMOTE_TMP_FOLDER, zipFileName, component);
-        Map<String, String> result = saltStateService.runCommandOnHosts(retry, sc, targets, command);
+        Map<String, String> result = saltStateService.runCommandOnHosts(sc, targets, command);
         LOGGER.debug("Result of partial salt state ({}) upgrade: {}", component, result);
     }
 

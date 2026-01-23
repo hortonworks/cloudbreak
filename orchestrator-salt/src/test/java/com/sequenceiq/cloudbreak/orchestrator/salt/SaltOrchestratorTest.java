@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.orchestrator.salt;
 
-import static com.sequenceiq.cloudbreak.service.RetryType.WITH_1_SEC_DELAY_MAX_3_TIMES;
-import static com.sequenceiq.cloudbreak.service.RetryType.WITH_2_SEC_DELAY_MAX_5_TIMES;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -104,6 +102,7 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStateService;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 import com.sequenceiq.cloudbreak.service.Retry;
+import com.sequenceiq.cloudbreak.service.RetryType;
 import com.sequenceiq.cloudbreak.service.executor.DelayedExecutorService;
 import com.sequenceiq.cloudbreak.util.CompressUtil;
 
@@ -493,7 +492,7 @@ class SaltOrchestratorTest {
         responsiveAddresses.add("10.0.0.1");
         responsiveAddresses.add("10.0.0.2");
         responsiveAddresses.add("10.0.0.3");
-        when(saltStateService.collectMinionIpAddresses(any(), any(Retry.class), any())).thenReturn(responsiveAddresses);
+        when(saltStateService.collectMinionIpAddresses(any(), any(SaltConnector.class))).thenReturn(responsiveAddresses);
 
         Set<Node> allNodes = new HashSet<>();
         allNodes.add(new Node("10.0.0.1", "1.1.1.1", "10-0-0-1.example.com", "hg", "fqdn3", null));
@@ -849,11 +848,12 @@ class SaltOrchestratorTest {
         Map<String, String> response = new HashMap<>();
         response.put("host1", "sample");
         String command = "echo sample";
-        when(saltStateService.runCommandOnHosts(eq(retry), eq(saltConnector), any(), eq(command), eq(WITH_2_SEC_DELAY_MAX_5_TIMES))).thenReturn(response);
+        when(saltStateService.runCommandOnHosts(eq(saltConnector), any(), eq(command), any())).thenReturn(response);
         Map<String, String> result = saltOrchestrator.runCommandOnHosts(allGatewayConfigs,
                 targets.stream().map(Node::getHostname).collect(Collectors.toSet()), command);
         assertEquals("sample", result.get("host1"));
-        verify(saltStateService).runCommandOnHosts(eq(retry), eq(saltConnector), targetCaptor.capture(), eq(command), eq(WITH_2_SEC_DELAY_MAX_5_TIMES));
+        verify(saltStateService).runCommandOnHosts(
+                eq(saltConnector), targetCaptor.capture(), eq(command), eq(RetryType.WITH_2_SEC_DELAY_MAX_5_TIMES));
         Target<String> target = targetCaptor.getValue();
         assertEquals("10-0-0-1.example.com,10-0-0-2.example.com,10-0-0-3.example.com", target.getTarget());
     }
@@ -865,13 +865,13 @@ class SaltOrchestratorTest {
         response.put("10-0-0-2.example.com", "uuid");
         Map<String, String> responseFstab = new HashMap<>();
         responseFstab.put("10-0-0-2.example.com", "fstab");
-        when(saltStateService.runCommandOnHosts(any(), any(), any(), any())).thenReturn(responseFstab);
+        when(saltStateService.runCommandOnHosts(any(), any(), any())).thenReturn(responseFstab);
         when(saltStateService.getUuidList(eq(saltConnector))).thenReturn(response);
         OrchestratorAware stack = mock(OrchestratorAware.class);
         Map<String, Map<String, String>> result = saltOrchestrator.formatAndMountDisksAfterModifyingVolumesOnNodes(allGatewayConfigs,
                 targets, targets, exitCriteriaModel);
         assertEquals("fstab", result.get("10-0-0-2.example.com").get("fstab"));
-        verify(saltStateService).runCommandOnHosts(any(), any(), targetCaptor.capture(), any());
+        verify(saltStateService).runCommandOnHosts(any(), targetCaptor.capture(), any());
         verify(saltStateService).getUuidList(eq(saltConnector));
         Target<String> target = targetCaptor.getValue();
         assertEquals("10-0-0-1.example.com,10-0-0-2.example.com,10-0-0-3.example.com", target.getTarget());
@@ -881,7 +881,7 @@ class SaltOrchestratorTest {
     void testGetPasswordExpiryDate() throws Exception {
         List<GatewayConfig> allGatewayConfigs = Collections.singletonList(gatewayConfig);
         String user = "saltuser";
-        when(saltStateService.runCommandOnHosts(any(), any(), any(), anyString(), any())).thenReturn(Map.of(
+        when(saltStateService.runCommandOnHosts(any(), any(), anyString(), any())).thenReturn(Map.of(
                 "host1", " Jan 01, 2022",
                 "host2", " Mar 10, 2022",
                 "host3", " never"
@@ -890,8 +890,8 @@ class SaltOrchestratorTest {
         LocalDate result = saltOrchestrator.getPasswordExpiryDate(allGatewayConfigs, user);
 
         ArgumentCaptor<HostList> hostListCaptor = ArgumentCaptor.forClass(HostList.class);
-        verify(saltStateService).runCommandOnHosts(eq(retry), eq(saltConnector), hostListCaptor.capture(), startsWith("chage -l saltuser"),
-                eq(WITH_1_SEC_DELAY_MAX_3_TIMES));
+        verify(saltStateService).runCommandOnHosts(eq(saltConnector), hostListCaptor.capture(), startsWith("chage -l saltuser"),
+                eq(RetryType.WITH_1_SEC_DELAY_MAX_5_TIMES_WITH_CHECK_RETRYABLE));
         assertEquals(gatewayConfig.getHostname(), hostListCaptor.getValue().getTarget());
         assertEquals(2022, result.getYear());
         assertEquals(Month.JANUARY, result.getMonth());

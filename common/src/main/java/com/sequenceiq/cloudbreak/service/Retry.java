@@ -16,6 +16,8 @@ public interface Retry {
 
     <T> T testWith1SecDelayMax5TimesMaxDelay5MinutesMultiplier5(Supplier<T> action) throws ActionFailedException;
 
+    <T> T testWith1SecDelayMax5TimesWithCheckRetriable(Supplier<T> action) throws ActionFailedException;
+
     <T> T testWithoutRetry(Supplier<T> action) throws ActionFailedException;
 
     class ActionFailedException extends RuntimeException {
@@ -43,4 +45,28 @@ public interface Retry {
         }
     }
 
+    class ActionFailedNonRetryableException extends RuntimeException {
+        public ActionFailedNonRetryableException() {
+        }
+
+        public ActionFailedNonRetryableException(String message) {
+            super(message);
+        }
+
+        public ActionFailedNonRetryableException(String message, Throwable cause) {
+            super(message, cause);
+        }
+
+        public ActionFailedNonRetryableException(Throwable cause) {
+            super(cause);
+        }
+
+        public ActionFailedNonRetryableException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
+            super(message, cause, enableSuppression, writableStackTrace);
+        }
+
+        public static ActionFailedNonRetryableException ofCause(Throwable cause) {
+            return new ActionFailedNonRetryableException(cause != null ? cause.getMessage() : null, cause);
+        }
+    }
 }

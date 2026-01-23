@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.orchestrator.host;
+package com.sequenceiq.cloudbreak.service;
 
 import java.util.ArrayList;
 import java.util.Collections;
