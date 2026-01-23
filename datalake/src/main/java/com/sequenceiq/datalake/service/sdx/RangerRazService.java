@@ -1,7 +1,5 @@
 package com.sequenceiq.datalake.service.sdx;
 
-import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.GCP;
-
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
@@ -11,7 +9,6 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.RangerRazEnabledV4Response;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
-import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
@@ -73,8 +70,6 @@ public class RangerRazService {
                 validationBuilder.error(String.format("Provisioning Ranger Raz on %s is only valid for Cloudera Runtime version greater than or " +
                                 "equal to %s and not %s", cloudPlatform.getDislayName(),
                         sdxVersionRuleEnforcer.getSupportedRazVersionForPlatform(cloudPlatform), runtime));
-            } else if (cloudPlatform.equals(GCP) && !entitlementService.isRazForGcpEnabled(Crn.safeFromString(environment.getCreator()).getAccountId())) {
-                validationBuilder.error("Provisioning Ranger Raz on GCP is not enabled for this account");
             }
         }
         ValidationResult validationResult = validationBuilder.build();

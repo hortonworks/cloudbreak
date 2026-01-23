@@ -103,7 +103,6 @@ class RangerRazServiceTest {
     void initMocks() {
         lenient().when(platformConfig.getRazSupportedPlatforms())
                 .thenReturn(List.of(AWS, AZURE, GCP));
-        lenient().when(entitlementService.isRazForGcpEnabled(anyString())).thenReturn(true);
     }
 
     @Test
@@ -165,21 +164,6 @@ class RangerRazServiceTest {
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.updateRangerRazEnabled(sdxCluster));
 
         verify(sdxService, times(0)).save(sdxCluster);
-    }
-
-    @Test
-    void testValidateRazEnablementForGcpEntitilementNotEnabled() {
-        DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
-        environmentResponse.setCloudPlatform("GCP");
-        environmentResponse.setCreator(ACCOUNT_CRN);
-
-        when(entitlementService.isRazForGcpEnabled(anyString())).thenReturn(false);
-        when(sdxVersionRuleEnforcer.isRazSupported(any(), any())).thenReturn(true);
-
-        BadRequestException badRequestException = assertThrows(BadRequestException.class,
-                () -> underTest.validateRazEnablement("7.2.17", true, environmentResponse));
-
-        assertEquals("Provisioning Ranger Raz on GCP is not enabled for this account", badRequestException.getMessage());
     }
 
     @ParameterizedTest(name = "{0}")

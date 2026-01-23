@@ -64,7 +64,6 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FEDRAMP
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_DATABUS_ENDPOINT_VALIDATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_LOAD_BALANCER;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_REBUILD;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_GCP_RAZ;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_HYBRID_CLOUD;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_JUMPGATE_ROOT_CA_AUTO_ROTATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_LAKEHOUSE_OPTIMIZER_ENABLED;
@@ -455,10 +454,6 @@ public class EntitlementService {
 
     public boolean isWiamUsersyncRoutingEnabled(String accountId) {
         return isEntitlementRegistered(accountId, WORKLOAD_IAM_USERSYNC_ROUTING);
-    }
-
-    public boolean isRazForGcpEnabled(String accountId) {
-        return isEntitlementRegistered(accountId, CDP_GCP_RAZ);
     }
 
     public boolean isFedRampExternalDatabaseForceDisabled(String accountId) {
