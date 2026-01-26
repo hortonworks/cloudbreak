@@ -32,7 +32,6 @@ import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.OperationAwareAction;
-import com.sequenceiq.freeipa.flow.freeipa.common.FreeIpaFailedFlowAnalyzer;
 import com.sequenceiq.freeipa.flow.freeipa.rebuild.FreeIpaRebuildFlowEvent;
 import com.sequenceiq.freeipa.flow.freeipa.rebuild.event.RebuildFailureEvent;
 import com.sequenceiq.freeipa.flow.freeipa.rebuild.event.backup.ValidateBackupFailed;
@@ -65,9 +64,6 @@ class RebuildFailedActionTest {
 
     @Mock
     private OperationService operationService;
-
-    @Mock
-    private FreeIpaFailedFlowAnalyzer freeIpaFailedFlowAnalyzer;
 
     @InjectMocks
     private RebuildFailedAction underTest;

@@ -106,8 +106,6 @@ import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.StackStatus;
 import com.sequenceiq.freeipa.flow.FlowIntegrationTestConfig;
 import com.sequenceiq.freeipa.flow.StackStatusFinalizer;
-import com.sequenceiq.freeipa.flow.freeipa.common.FreeIpaFailedFlowAnalyzer;
-import com.sequenceiq.freeipa.flow.freeipa.common.FreeIpaValidationProperties;
 import com.sequenceiq.freeipa.flow.freeipa.loadbalancer.handler.LoadBalancerUpdateHandler;
 import com.sequenceiq.freeipa.flow.freeipa.provision.handler.BootstrapMachineHandler;
 import com.sequenceiq.freeipa.flow.freeipa.provision.handler.ClusterProxyUpdateRegistrationHandler;
@@ -492,9 +490,7 @@ class FreeIpaUpscaleFlowIntegrationTest {
             ValidateInstancesHealthHandler.class,
             UpscaleCreateUserdataSecretsHandler.class,
             UpscaleUpdateUserdataSecretsHandler.class,
-            LoadBalancerUpdateHandler.class,
-            FreeIpaFailedFlowAnalyzer.class,
-            FreeIpaValidationProperties.class
+            LoadBalancerUpdateHandler.class
     })
     static class Config {
         @MockBean

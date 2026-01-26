@@ -185,26 +185,6 @@ freeipa:
   secret.rotation:
     kmskey.rotationPeriodInDays: 365
   kerberos.secret.location: "/mnt/cdp-luks/etc"
-  validation:
-    failed-messages:
-      - "Validation failed"
-      - "Modify its 'disableApiTermination' instance attribute and try again"
-      - "Testing s3 put"
-      - "Testing abfs write failed"
-      - "Please check you connection against"
-      - "Cloudera DataBus API network connectivity check failed"
-      - "Failed to upload freeipa backup to object storage"
-      - "Marketplace purchase eligibilty check returned errors"
-      - "QuotaExceeded"
-      - "Unhealthy instances found"
-      - "The maximum number of addresses has been reached"
-      - "Your AWS credential is not authorized to perform action"
-      - "Validating FreeIPA cloud storage permission for backup failed"
-      - "Quota reaches threshold"
-      - "You cannot specify tags for Spot instances requests if there are no Spot instances requests being created by the request"
-      - "Cannot execute method: terminateInstances"
-      - "Please remove the lock and try again"
-      - "difference between desired and actual capacity"
 info:
   app:
     capabilities:

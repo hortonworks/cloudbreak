@@ -3,7 +3,6 @@ package com.sequenceiq.freeipa.flow.freeipa.loadbalancer;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus.CREATING_LOAD_BALANCER;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus.CREATING_LOAD_BALANCER_FINISHED;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus.PROVISION_FAILED;
-import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus.PROVISION_VALIDATION_FAILED;
 import static com.sequenceiq.freeipa.flow.freeipa.loadbalancer.FreeIpaLoadBalancerCreationEvent.FREEIPA_LOAD_BALANCER_CREATION_FAILURE_HANDLED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.loadbalancer.FreeIpaLoadBalancerCreationEvent.FREEIPA_LOAD_BALANCER_CREATION_FINISHED_EVENT;
 
@@ -21,9 +20,7 @@ import org.springframework.statemachine.action.Action;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.flow.core.FlowParameters;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.entity.LoadBalancer;
-import com.sequenceiq.freeipa.flow.freeipa.common.FreeIpaFailedFlowAnalyzer;
 import com.sequenceiq.freeipa.flow.freeipa.loadbalancer.event.LoadBalancerCreationFailureEvent;
 import com.sequenceiq.freeipa.flow.freeipa.loadbalancer.event.configuration.LoadBalancerConfigurationSuccess;
 import com.sequenceiq.freeipa.flow.freeipa.loadbalancer.event.metadata.LoadBalancerMetadataCollectionRequest;
@@ -128,15 +125,10 @@ public class FreeIpaLoadBalancerProvisionActions {
     public Action<?, ?> handleLoadBalancerProvisionFailure() {
         return new AbstractLoadBalancerCreationAction<>(LoadBalancerCreationFailureEvent.class) {
 
-            @Inject
-            private FreeIpaFailedFlowAnalyzer freeIpaFailedFlowAnalyzer;
-
             @Override
             protected void doExecute(StackContext context, LoadBalancerCreationFailureEvent payload, Map<Object, Object> variables) {
                 String errorReason = getErrorReason(payload.getException());
-                DetailedStackStatus provisionFailed = freeIpaFailedFlowAnalyzer.isValidationFailedError(payload) ?
-                        PROVISION_VALIDATION_FAILED : PROVISION_FAILED;
-                stackUpdater().updateStackStatus(context.getStack(), provisionFailed, errorReason);
+                stackUpdater().updateStackStatus(context.getStack(), PROVISION_FAILED, errorReason);
                 sendEvent(context);
             }
 
