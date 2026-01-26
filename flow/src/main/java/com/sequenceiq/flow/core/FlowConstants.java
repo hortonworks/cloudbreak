@@ -19,8 +19,6 @@ public class FlowConstants {
 
     public static final String OPERATION_NAME = "OPERATION_NAME";
 
-    public static final String FLOW_PARAMETERS = "FLOW_PARAMETERS";
-
     public static final String FLOW_CONTEXTPARAMS_ID = "FLOW_CONTEXTPARAMS_ID";
 
     public static final String INIT_STATE = "INIT_STATE";

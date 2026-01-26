@@ -1,10 +1,12 @@
 package com.sequenceiq.flow.core;
 
+import static com.sequenceiq.flow.core.MessageFactory.HEADERS;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -100,7 +102,7 @@ class AbstractActionTest {
     @Test
     void testExecute() {
         underTest.setFailureEvent(Event.FAILURE);
-        stateMachine.sendEvent(new GenericMessage<>(Event.DOIT, Collections.singletonMap(FlowConstants.FLOW_PARAMETERS, FLOW_PARAMETERS)));
+        stateMachine.sendEvent(new GenericMessage<>(Event.DOIT, Map.of(HEADERS.FLOW_PARAMETERS.name(), FLOW_PARAMETERS)));
         verify(underTest, times(1)).createFlowContext(eq(FLOW_PARAMETERS), any(StateContext.class), nullable(Payload.class));
         verify(underTest, times(1)).doExecute(any(CommonContext.class), nullable(Payload.class), any(Map.class));
         verify(underTest, times(0)).sendEvent(any(CommonContext.class));
@@ -115,7 +117,7 @@ class AbstractActionTest {
         RuntimeException exception = new UnsupportedOperationException("");
         doThrow(exception).when(underTest).doExecute(any(CommonContext.class), nullable(Payload.class), any());
         doThrow(exception).when(underTest).doExecute(any(CommonContext.class), nullable(Payload.class), any());
-        stateMachine.sendEvent(new GenericMessage<>(Event.DOIT, Collections.singletonMap(FlowConstants.FLOW_PARAMETERS, FLOW_PARAMETERS)));
+        stateMachine.sendEvent(new GenericMessage<>(Event.DOIT, Map.of(HEADERS.FLOW_PARAMETERS.name(), FLOW_PARAMETERS)));
         verify(underTest, times(1)).createFlowContext(eq(FLOW_PARAMETERS), any(StateContext.class), nullable(Payload.class));
         verify(underTest, times(1)).doExecute(any(CommonContext.class), nullable(Payload.class), any(Map.class));
         verify(underTest, times(1)).getFailurePayload(nullable(Payload.class), any(Optional.class), eq(exception));
@@ -128,18 +130,21 @@ class AbstractActionTest {
         underTest.setFlowEdgeConfig(new FlowEdgeConfig<>(State.INIT, State.FINAL, State.FAILED_STATE, null));
         RuntimeException exception = new IllegalStateException("something went wrong");
         doThrow(exception).when(underTest).doExecute(any(CommonContext.class), nullable(Payload.class), any());
-        stateMachine.sendEvent(new GenericMessage<>(Event.DOIT, Collections.singletonMap(FlowConstants.FLOW_PARAMETERS, FLOW_PARAMETERS)));
-        verify(flowLogDBService, times(1)).closeFlowOnError(FLOW_ID, "Operation failed in DOING state without error handler. Message: something went wrong");
+        stateMachine.sendEvent(new GenericMessage<>(Event.DOIT, Map.of(HEADERS.FLOW_PARAMETERS.name(), FLOW_PARAMETERS)));
+        verify(flowLogDBService, times(1)).closeFlowOnError(FLOW_ID,
+                "Unhandled exception happened in flow execution, type: java.lang.IllegalStateException, message: something went wrong");
     }
 
     @Test
     void testFailHandlerExecutionFailure() {
-        stateMachine.sendEvent(new GenericMessage<>(Event.DOIT, Collections.singletonMap(FlowConstants.FLOW_PARAMETERS, FLOW_PARAMETERS)));
+        stateMachine.sendEvent(new GenericMessage<>(Event.DOIT, Map.of(HEADERS.FLOW_PARAMETERS.name(), FLOW_PARAMETERS)));
         underTest.setFailureEvent(null);
+        underTest.setFailureStateId(State.FAILED_STATE.name());
         underTest.setFlowEdgeConfig(new FlowEdgeConfig<>(State.INIT, State.FINAL, State.FAILED_STATE, null));
         RuntimeException exception = new IllegalStateException("something went wrong");
         doThrow(exception).when(underTest).doExecute(any(CommonContext.class), nullable(Payload.class), any());
-        stateMachine.sendEvent(new GenericMessage<>(Event.FAILURE, Collections.singletonMap(FlowConstants.FLOW_PARAMETERS, FLOW_PARAMETERS)));
+        stateMachine.sendEvent(new GenericMessage<>(Event.FAILURE, Map.of(HEADERS.FLOW_PARAMETERS.name(), FLOW_PARAMETERS,
+                HEADERS.DATA.name(), mock(Payload.class))));
         verify(flowLogDBService, times(1)).closeFlowOnError(FLOW_ID, "Error handler failed in FAILED_STATE state. Message: something went wrong");
     }
 
@@ -149,7 +154,7 @@ class AbstractActionTest {
         RuntimeException exception = new IllegalStateException("something went wrong");
         doThrow(exception).when(underTest).doExecute(any(CommonContext.class), nullable(Payload.class), any());
         doThrow(new NullPointerException("null")).when(underTest).getFailurePayload(any(), any(), any());
-        stateMachine.sendEvent(new GenericMessage<>(Event.DOIT, Collections.singletonMap(FlowConstants.FLOW_PARAMETERS, FLOW_PARAMETERS)));
+        stateMachine.sendEvent(new GenericMessage<>(Event.DOIT, Map.of(HEADERS.FLOW_PARAMETERS.name(), FLOW_PARAMETERS)));
         verify(flowLogDBService, times(1)).closeFlowOnError(FLOW_ID, "Unhandled exception happened in flow execution, type: " +
                 "java.lang.IllegalStateException, message: something went wrong");
     }

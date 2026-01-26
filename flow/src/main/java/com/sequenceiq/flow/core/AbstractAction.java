@@ -1,5 +1,8 @@
 package com.sequenceiq.flow.core;
 
+import static java.lang.String.format;
+import static java.lang.String.valueOf;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -93,7 +96,7 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
             try {
                 Map<Object, Object> variables = context.getExtendedState().getVariables();
                 prepareExecution(payload, variables);
-                String flowStateName = String.valueOf(variables.get(FLOW_STATE_NAME));
+                String flowStateName = valueOf(variables.get(FLOW_STATE_NAME));
                 flowContext = createFlowContext(flowParameters, context, payload);
 
                 if (getTargetStateId(context).filter(targetStateId -> targetStateId.equals(failureStateId)).isPresent()) {
@@ -111,16 +114,9 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
                         throw new CloudbreakServiceException("Failed event propagation failed", sendEventException);
                     }
                 } else {
-                    Optional<String> tragetStateId = getTargetStateId(context);
-                    if (tragetStateId.isPresent()) {
-                        if (isDefaultFailureState(tragetStateId)) {
-                            closeFlowOnError(flowId, String.format("Error handler failed in %s state. Message: %s", tragetStateId.get(), ex.getMessage()));
-                            throw new CloudbreakServiceException(String.format("Error handler failed in %s state.", tragetStateId.get()), ex);
-                        } else {
-                            closeFlowOnError(flowId, String.format("Operation failed in %s state without error handler. Message: %s", tragetStateId.get(),
-                                    ex.getMessage()));
-                            throw new CloudbreakServiceException(String.format("Operation failed in %s state without error handler.", tragetStateId.get()), ex);
-                        }
+                    if (getTargetStateId(context).filter(targetStateId -> targetStateId.equals(failureStateId)).isPresent()) {
+                        closeFlowOnError(flowId, format("Error handler failed in %s state. Message: %s", failureStateId, ex.getMessage()));
+                        throw new CloudbreakServiceException(format("Error handler failed in %s state.", failureStateId), ex);
                     } else {
                         closeFlowOnError(flowId, ex);
                         throw new CloudbreakServiceException("Missing error handling for " + getClass().getName(), ex);
@@ -141,7 +137,7 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
     }
 
     private void closeFlowOnError(String flowId, Exception ex) {
-        closeFlowOnError(flowId, String.format("Unhandled exception happened in flow execution, type: %s, message: %s",
+        closeFlowOnError(flowId, format("Unhandled exception happened in flow execution, type: %s, message: %s",
                 ex.getClass().getName(), ex.getMessage()));
     }
 
@@ -262,7 +258,7 @@ public abstract class AbstractAction<S extends FlowState, E extends FlowEvent, C
     }
 
     protected String getCurrentFlowStateName(Map<Object, Object> variables) {
-        return String.valueOf(variables.get(FLOW_STATE_NAME));
+        return valueOf(variables.get(FLOW_STATE_NAME));
     }
 
     private String getResourceId(P payload, String flowStateName) {

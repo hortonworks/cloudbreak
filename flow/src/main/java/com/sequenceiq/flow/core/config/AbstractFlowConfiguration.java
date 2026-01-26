@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.StreamSupport;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
@@ -128,17 +129,22 @@ public abstract class AbstractFlowConfiguration<S extends FlowState, E extends F
             transitionConfigurer = transitionConfigurer == null ? transitionConfig.withExternal() : transitionConfigurer.and().withExternal();
             AbstractAction<S, E, ?, ?> action = getAction(transition.source);
             if (action != null) {
-                stateConfigurer.state(transition.source, action, null);
                 action.setFlowEdgeConfig(flowEdgeConfig);
+                action.setFailureEvent(transition.getFailureEvent());
+                stateConfigurer.state(transition.source, action, null);
             }
             transitionConfigurer.source(transition.source).target(transition.target).event(transition.event);
             if (action != null && transition.getFailureEvent() != null && !Objects.equals(transition.target, flowEdgeConfig.defaultFailureState)) {
-                action.setFailureEvent(transition.getFailureEvent());
                 S failureState = Optional.ofNullable(transition.getFailureState()).orElse(flowEdgeConfig.defaultFailureState);
                 AbstractAction<S, E, ?, ?> failureAction = getAction(failureState);
                 if (failureAction != null) {
                     failureAction.setFlowEdgeConfig(flowEdgeConfig);
                     failureAction.setFailureStateId(failureState.name());
+                    Optional<Transition<S, E>> transitionFromFailureState = StreamSupport.stream(transitions.spliterator(), false)
+                            .filter(failureTransition -> failureState.equals(failureTransition.source)).findFirst();
+                    if (transitionFromFailureState.isPresent()) {
+                        failureAction.setFailureEvent(transitionFromFailureState.get().getFailureEvent());
+                    }
                 }
                 stateConfigurer.state(failureState, failureAction, null);
                 transitionConfigurer.and().withExternal().source(transition.source).target(failureState).event(transition.getFailureEvent());

@@ -18,6 +18,6 @@ public class MessageFactory<E> {
     }
 
     public enum HEADERS {
-        FLOW_ID, FLOW_TRIGGER_USERCRN, DATA, FLOW_PARAMETERS
+        DATA, FLOW_PARAMETERS
     }
 }
