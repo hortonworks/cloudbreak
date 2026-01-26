@@ -3,9 +3,12 @@ package com.sequenceiq.cloudbreak.cloud.gcp.compute;
 import static java.util.Collections.emptyList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -34,8 +37,10 @@ import com.google.api.services.compute.model.Operation;
 import com.google.common.collect.ImmutableMap;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.gcp.GcpPlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.service.CustomGcpDiskEncryptionService;
+import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpResourceNameService;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpLabelUtil;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
@@ -90,6 +95,9 @@ public class GcpAttachedDiskResourceBuilderTest {
     @Mock
     private GcpLabelUtil gcpLabelUtil;
 
+    @Mock
+    private GcpResourceNameService resourceNameService;
+
     private GcpContext context;
 
     private long privateId;
@@ -109,6 +117,7 @@ public class GcpAttachedDiskResourceBuilderTest {
     @BeforeEach
     void setUpBuild() throws Exception {
         String privateCrn = "crn";
+        privateId = 1L;
         CloudContext cloudContext = CloudContext.Builder.builder()
                 .withId(privateId)
                 .withName("testname")
@@ -119,6 +128,7 @@ public class GcpAttachedDiskResourceBuilderTest {
         CloudCredential cloudCredential = new CloudCredential(privateCrn, "credentialname", "account");
         cloudCredential.putParameter("projectId", "projectId");
 
+        instanceId = "SOME_ID";
         cloudInstance = new CloudInstance(instanceId,
                 new InstanceTemplate("flavor", "group", 1L, new ArrayList<>(), InstanceStatus.CREATE_REQUESTED,
                         new HashMap<>(), 1L, "img", TemporaryStorage.ATTACHED_VOLUMES, 0L),
@@ -130,17 +140,17 @@ public class GcpAttachedDiskResourceBuilderTest {
         List<CloudResource> networkResources =
                 Collections.singletonList(CloudResource.builder().withType(ResourceType.GCP_NETWORK).withName("network-test").build());
         context.addNetworkResources(networkResources);
+        context.addComputeResources(privateId, Collections.emptyList());
 
-        privateId = 1L;
         String name = "master";
         String flavor = "m1.medium";
-        instanceId = "SOME_ID";
 
         auth = new AuthenticatedContext(cloudContext, cloudCredential);
 
         Map<String, Object> params1 = Map.of();
         List<Volume> volumes1 = Arrays.asList(new Volume("/hadoop/fs1", "HDD", 1, CloudVolumeUsageType.GENERAL),
-                new Volume("/hadoop/fs2", "HDD", 1, CloudVolumeUsageType.GENERAL));
+                new Volume("/hadoop/fs2", "SSD", 2, CloudVolumeUsageType.GENERAL),
+                new Volume("/hadoop/fs3", GcpPlatformParameters.GcpDiskType.LOCAL_SSD.value(), 3, CloudVolumeUsageType.GENERAL));
 
         List<SecurityRule> rules = Collections.singletonList(new SecurityRule("0.0.0.0/0",
                 new PortDefinition[]{new PortDefinition("22", "22"), new PortDefinition("443", "443")}, "tcp"));
@@ -149,9 +159,10 @@ public class GcpAttachedDiskResourceBuilderTest {
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
         InstanceTemplate instanceTemplate = new InstanceTemplate(flavor, name, privateId, volumes1, InstanceStatus.CREATE_REQUESTED, params1,
                 0L, "cb-centos66-amb200-2015-05-25", TemporaryStorage.ATTACHED_VOLUMES, 0L);
-        CloudInstance cloudInstance = new CloudInstance(instanceId, instanceTemplate, instanceAuthentication, "subnet-1", "az1");
+        cloudInstance = new CloudInstance(instanceId, instanceTemplate, instanceAuthentication, "subnet-1", "az1");
 
         group = Group.builder()
+                .withName(name)
                 .withInstances(Collections.singletonList(cloudInstance))
                 .build();
 
@@ -175,8 +186,9 @@ public class GcpAttachedDiskResourceBuilderTest {
                 .image(image)
                 .build();
 
-        when(intermediateBuilderExecutor.submit(any(Callable.class))).thenAnswer(invocation -> {
+        lenient().when(intermediateBuilderExecutor.submit(any(Callable.class))).thenAnswer(invocation -> {
             Callable<Void> callable = invocation.getArgument(0);
+            callable.call();
             return new MockFuture(callable);
         });
 
@@ -184,9 +196,9 @@ public class GcpAttachedDiskResourceBuilderTest {
         operation.setName("operation");
         operation.setHttpErrorStatusCode(null);
 
-        when(compute.disks()).thenReturn(disks);
-        when(disks.insert(anyString(), anyString(), any(Disk.class))).thenReturn(insert);
-        when(insert.execute()).thenReturn(operation);
+        lenient().when(compute.disks()).thenReturn(disks);
+        lenient().when(disks.insert(anyString(), anyString(), any(Disk.class))).thenReturn(insert);
+        lenient().when(insert.execute()).thenReturn(operation);
     }
 
     @Test
@@ -211,5 +223,46 @@ public class GcpAttachedDiskResourceBuilderTest {
 
         assertNotNull(diskCaptor.getValue());
         assertEquals(encryptionKey, diskCaptor.getValue().getDiskEncryptionKey());
+    }
+
+    @Test
+    void testCreateVolumeSetAttributes() {
+        when(resourceNameService.attachedDisk(anyString(), anyString(), anyLong(), any(Integer.class)))
+                .thenAnswer(inv -> String.format("testname-master-1-%d", inv.getArgument(3, Integer.class)));
+
+        List<CloudResource> resources = underTest.create(context, cloudInstance, privateId, auth, group, null);
+
+        assertEquals(1, resources.size());
+        CloudResource resource = resources.get(0);
+        assertEquals(ResourceType.GCP_ATTACHED_DISKSET, resource.getType());
+        assertEquals("testname-master-1-0", resource.getName());
+
+        VolumeSetAttributes attributes = resource.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
+        assertNotNull(attributes);
+        assertEquals("az1", attributes.getAvailabilityZone());
+        assertTrue(attributes.getDeleteOnTermination());
+        assertEquals(3, attributes.getVolumes().size());
+
+        VolumeSetAttributes.Volume vol1 = attributes.getVolumes().get(0);
+        assertEquals("testname-master-1-0", vol1.getId());
+        assertEquals("/dev/disk/by-id/google-testname-master-1-0", vol1.getDevice());
+        assertEquals(1, vol1.getSize());
+        assertEquals("HDD", vol1.getType());
+        assertEquals(CloudVolumeUsageType.GENERAL, vol1.getCloudVolumeUsageType());
+
+        VolumeSetAttributes.Volume vol2 = attributes.getVolumes().get(1);
+        assertEquals("testname-master-1-1", vol2.getId());
+        assertEquals("/dev/disk/by-id/google-testname-master-1-1", vol2.getDevice());
+        assertEquals(2, vol2.getSize());
+        assertEquals("SSD", vol2.getType());
+        assertEquals(CloudVolumeUsageType.GENERAL, vol2.getCloudVolumeUsageType());
+
+        VolumeSetAttributes.Volume vol3 = attributes.getVolumes().get(2);
+        assertEquals("testname-master-1-2", vol3.getId());
+        assertEquals("/dev/disk/by-id/google-local-nvme-ssd-0", vol3.getDevice());
+        assertEquals(3, vol3.getSize());
+        assertEquals(GcpPlatformParameters.GcpDiskType.LOCAL_SSD.value(), vol3.getType());
+        assertEquals(CloudVolumeUsageType.GENERAL, vol3.getCloudVolumeUsageType());
+
     }
 }
