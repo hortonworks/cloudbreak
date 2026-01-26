@@ -3,6 +3,8 @@ package com.sequenceiq.freeipa.flow.freeipa.verticalscale.actions;
 import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
 import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
+import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus.VERTICAL_SCALE_FAILED;
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
 import static com.sequenceiq.freeipa.flow.freeipa.verticalscale.event.FreeIpaVerticalScaleEvent.FINALIZED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.verticalscale.event.FreeIpaVerticalScaleEvent.STACK_VERTICALSCALE_FAIL_HANDLED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.verticalscale.event.FreeIpaVerticalScaleEvent.STACK_VERTICALSCALE_FINISHED_FAILURE_EVENT;
@@ -107,7 +109,9 @@ public class FreeIpaVerticalScaleActions {
                 } catch (Exception e) {
                     LOGGER.error("Failed to Vertical scaling FreeIPA", e);
                     sendEvent(ctx, STACK_VERTICALSCALE_FINISHED_FAILURE_EVENT.selector(),
-                            new FreeIpaVerticalScaleFailureEvent(stack.getId(), "Vertical Scale update", Set.of(), Map.of(), e));
+                            new FreeIpaVerticalScaleFailureEvent(stack.getId(), "Vertical Scale update",
+                                    Set.of(), ERROR, Map.of(), e)
+                    );
                 }
             }
         };
@@ -149,7 +153,8 @@ public class FreeIpaVerticalScaleActions {
                 String errorReason = getErrorReason(payload.getException());
                 String message = "Vertical scale failed with [" + payload.getFailedPhase() + "]. " + errorReason;
                 LOGGER.debug(message);
-                stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.VERTICAL_SCALE_FAILED, message);
+
+                stackUpdater.updateStackStatus(stack.getId(), VERTICAL_SCALE_FAILED, message);
                 if (isOperationIdSet(variables)) {
                     operationService.failOperation(stack.getAccountId(), getOperationId(variables), message);
                 }

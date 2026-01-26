@@ -20,6 +20,7 @@ public enum DetailedStackStatus {
     STACK_PROVISIONED(Status.STACK_AVAILABLE, AvailabilityStatus.UNAVAILABLE),
     PROVISIONED(Status.AVAILABLE, AvailabilityStatus.AVAILABLE),
     PROVISION_FAILED(Status.CREATE_FAILED, AvailabilityStatus.UNAVAILABLE),
+    PROVISION_VALIDATION_FAILED(Status.CREATE_FAILED, AvailabilityStatus.UNAVAILABLE),
     // Orchestration statuses
     BOOTSTRAPPING_MACHINES(Status.UPDATE_IN_PROGRESS, AvailabilityStatus.UNAVAILABLE),
     COLLECTING_HOST_METADATA(Status.UPDATE_IN_PROGRESS, AvailabilityStatus.UNAVAILABLE),

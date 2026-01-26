@@ -3,6 +3,8 @@ package com.sequenceiq.freeipa.flow.freeipa.upscale.action;
 import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
 import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
+import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus.UPSCALE_FAILED;
+import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus.UPSCALE_VALIDATION_FAILED;
 import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
 
 import java.util.Map;
@@ -29,6 +31,7 @@ import com.sequenceiq.freeipa.converter.cloud.StackToCloudStackConverter;
 import com.sequenceiq.freeipa.entity.InstanceGroup;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.chain.AbstractCommonChainAction;
+import com.sequenceiq.freeipa.flow.freeipa.common.FreeIpaFailedFlowAnalyzer;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleState;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleFailureEvent;
@@ -57,6 +60,9 @@ public abstract class AbstractUpscaleAction<P extends Payload> extends AbstractC
 
     @Inject
     private InstanceGroupService instanceGroupService;
+
+    @Inject
+    private FreeIpaFailedFlowAnalyzer freeIpaFailedFlowAnalyzer;
 
     protected AbstractUpscaleAction(Class<P> payloadClass) {
         super(payloadClass);
@@ -111,12 +117,13 @@ public abstract class AbstractUpscaleAction<P extends Payload> extends AbstractC
         return stackStatus;
     }
 
-    protected DetailedStackStatus getFailedStatus(Map<Object, Object> variables) {
+    protected DetailedStackStatus getFailedStatus(UpscaleFailureEvent payload, Map<Object, Object> variables) {
         DetailedStackStatus stackStatus;
         if (isRepair(variables)) {
             stackStatus = DetailedStackStatus.REPAIR_FAILED;
         } else {
-            stackStatus = DetailedStackStatus.UPSCALE_FAILED;
+            stackStatus = freeIpaFailedFlowAnalyzer.isValidationFailedError(payload) ?
+                    UPSCALE_VALIDATION_FAILED : UPSCALE_FAILED;
         }
         return stackStatus;
     }

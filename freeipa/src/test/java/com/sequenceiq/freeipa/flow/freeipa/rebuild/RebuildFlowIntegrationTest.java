@@ -105,6 +105,8 @@ import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.FlowIntegrationTestConfig;
 import com.sequenceiq.freeipa.flow.StackStatusFinalizer;
+import com.sequenceiq.freeipa.flow.freeipa.common.FreeIpaFailedFlowAnalyzer;
+import com.sequenceiq.freeipa.flow.freeipa.common.FreeIpaValidationProperties;
 import com.sequenceiq.freeipa.flow.freeipa.loadbalancer.handler.LoadBalancerUpdateHandler;
 import com.sequenceiq.freeipa.flow.freeipa.provision.handler.BootstrapMachineHandler;
 import com.sequenceiq.freeipa.flow.freeipa.provision.handler.InstallFreeIpaServicesHandler;
@@ -902,7 +904,7 @@ class RebuildFlowIntegrationTest {
         stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Configuring the orchestrator");
         stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Validating cloud storage");
         stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, REBUILD_IN_PROGRESS, "Downloading and validating backup");
-        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, DetailedStackStatus.REBUILD_FAILED,
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, DetailedStackStatus.REBUILD_VALIDATION_FAILED,
                 "Failed to rebuild FreeIPA: backup dl and validate failed");
         stackStatusVerify.verifyNoMoreInteractions();
 
@@ -1026,7 +1028,9 @@ class RebuildFlowIntegrationTest {
             HealthCheckHandler.class,
             RebuildValidateHealthHandler.class,
             LoadBalancerUpdateHandler.class,
-            WebApplicationExceptionMessageExtractor.class
+            WebApplicationExceptionMessageExtractor.class,
+            FreeIpaFailedFlowAnalyzer.class,
+            FreeIpaValidationProperties.class
     })
     static class Config {
 

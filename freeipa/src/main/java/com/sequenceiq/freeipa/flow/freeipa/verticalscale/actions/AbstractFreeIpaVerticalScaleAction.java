@@ -3,6 +3,7 @@ package com.sequenceiq.freeipa.flow.freeipa.verticalscale.actions;
 import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
 import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
+import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
 
 import java.util.Map;
 import java.util.Optional;
@@ -77,6 +78,7 @@ public abstract class AbstractFreeIpaVerticalScaleAction<P extends Payload>
                 payload.getResourceId(),
                 "Unexpected error during vertical scale action",
                 Set.of(),
+                ERROR,
                 Map.of(),
                 ex);
     }
