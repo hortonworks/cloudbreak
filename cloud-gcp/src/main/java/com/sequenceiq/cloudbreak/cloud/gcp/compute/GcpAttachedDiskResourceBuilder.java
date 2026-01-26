@@ -46,7 +46,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.template.compute.PreserveResourceException;
-import com.sequenceiq.cloudbreak.util.DeviceNameGenerator;
+import com.sequenceiq.cloudbreak.util.IndexingDeviceNameGenerator;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
 
@@ -57,7 +57,9 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GcpAttachedDiskResourceBuilder.class);
 
-    private static final String DEVICE_NAME_TEMPLATE = "/dev/sd%s";
+    private static final String NVME_DEVICE_NAME_TEMPLATE = "/dev/disk/by-id/google-local-nvme-ssd-%d";
+
+    private static final String DEVICE_NAME_PREFIX = "/dev/disk/by-id/google-";
 
     @Inject
     @Qualifier("intermediateBuilderExecutor")
@@ -94,11 +96,15 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
         String stackName = cloudContext.getName();
 
         List<VolumeSetAttributes.Volume> volumes = new ArrayList<>();
-        DeviceNameGenerator generator = new DeviceNameGenerator(DEVICE_NAME_TEMPLATE, 0);
+        IndexingDeviceNameGenerator localSsdDeviceNameGenerator = new IndexingDeviceNameGenerator(NVME_DEVICE_NAME_TEMPLATE, 0);
         for (int i = 0; i < template.getVolumes().size(); i++) {
             String volumeName = resourceNameService.attachedDisk(stackName, groupName, privateId, i);
             Volume volume = template.getVolumes().get(i);
-            volumes.add(new VolumeSetAttributes.Volume(volumeName, generator.next(), volume.getSize(), volume.getType(), volume.getVolumeUsageType()));
+
+            String diskDeviceName = getDiskDeviceName(volume.getType(), localSsdDeviceNameGenerator, volumeName);
+
+            volumes.add(new VolumeSetAttributes.Volume(volumeName, diskDeviceName,
+                    volume.getSize(), volume.getType(), volume.getVolumeUsageType()));
         }
         String resourceName = resourceNameService.attachedDisk(stackName, groupName, privateId, 0);
         Map<String, Object> attributes = new HashMap<>(Map.of(CloudResource.ATTRIBUTES, new VolumeSetAttributes.Builder()
@@ -113,6 +119,14 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
                 .withAvailabilityZone(instance.getAvailabilityZone())
                 .withParameters(attributes)
                 .build();
+    }
+
+    private static String getDiskDeviceName(String volumeType, IndexingDeviceNameGenerator deviceNameGenerator, String volumeName) {
+        if (GcpDiskType.LOCAL_SSD.value().equals(volumeType)) {
+            return deviceNameGenerator.next();
+        } else {
+            return DEVICE_NAME_PREFIX + volumeName;
+        }
     }
 
     @Override
