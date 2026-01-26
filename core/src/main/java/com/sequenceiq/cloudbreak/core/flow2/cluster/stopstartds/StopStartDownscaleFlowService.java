@@ -67,7 +67,7 @@ public class StopStartDownscaleFlowService {
         // TODO CB-15153: Change the message once an adjustment based downscale is supported.
         LOGGER.debug("stopstart scaling Decommissioning from group: {}, privateIds: [{}]", hostGroupName, privateIds);
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
-        List<String> decomissionedHostNames = stackService.getHostNamesForPrivateIds(stack.getInstanceMetaDataAsList(), privateIds);
+        List<String> decomissionedHostNames = stackService.getHostNamesForPrivateIds(stack.getTerminatedAndNonTerminatedInstanceMetaDataAsList(), privateIds);
         List<String> recoveryCandidateHostNames;
         if (!recoveryCandidateHostIds.isEmpty()) {
             recoveryCandidateHostNames = stack.getAllAvailableInstances().stream().filter(i -> recoveryCandidateHostIds.contains(i.getInstanceId()))

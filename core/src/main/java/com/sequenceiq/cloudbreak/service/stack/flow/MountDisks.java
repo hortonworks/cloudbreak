@@ -127,7 +127,7 @@ public class MountDisks {
             }
 
             mountInfo.forEach((hostname, value) -> {
-                Optional<String> instanceIdOptional = stack.getInstanceMetaDataAsList().stream()
+                Optional<String> instanceIdOptional = stack.getTerminatedAndNonTerminatedInstanceMetaDataAsList().stream()
                         .filter(instanceMetaData -> hostname.equals(instanceMetaData.getDiscoveryFQDN()))
                         .filter(instanceMetaData -> InstanceStatus.CREATED.equals(instanceMetaData.getInstanceStatus()))
                         .map(InstanceMetaData::getInstanceId)

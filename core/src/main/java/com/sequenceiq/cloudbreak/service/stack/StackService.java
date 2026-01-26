@@ -657,7 +657,7 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
         measure(() -> instanceGroupService.saveAll(savedStack.getInstanceGroups()),
                 LOGGER, "Instance groups saved in {} ms for stack {}", stackName);
 
-        measure(() -> instanceMetaDataService.saveAll(savedStack.getInstanceMetaDataAsList()),
+        measure(() -> instanceMetaDataService.saveAll(savedStack.getTerminatedAndNonTerminatedInstanceMetaDataAsList()),
                 LOGGER, "Instance metadatas saved in {} ms for stack {}", stackName);
 
         measure(() -> loadBalancerPersistenceService.saveAll(savedStack.getLoadBalancers()),

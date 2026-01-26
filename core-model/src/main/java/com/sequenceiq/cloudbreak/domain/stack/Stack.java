@@ -665,7 +665,7 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
         return new ArrayList<>(getNotDeletedAndNotZombieInstanceMetaDataSet());
     }
 
-    public List<InstanceMetaData> getInstanceMetaDataAsList() {
+    public List<InstanceMetaData> getTerminatedAndNonTerminatedInstanceMetaDataAsList() {
         return instanceGroups.stream()
                 .flatMap(instanceGroup -> instanceGroup.getInstanceMetaData().stream())
                 .collect(Collectors.toList());
@@ -742,7 +742,7 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
     }
 
     public Optional<InstanceMetaData> getClusterManagerServer() {
-        return getInstanceMetaDataAsList().stream()
+        return getTerminatedAndNonTerminatedInstanceMetaDataAsList().stream()
                 .filter(InstanceMetaData::getClusterManagerServer)
                 .findFirst();
     }

@@ -98,7 +98,7 @@ class CreateUserDataHandlerTest {
         imd2.setPrivateId(2L);
         Resource resource = new Resource();
         resource.setResourceReference("resource-reference");
-        when(stack.getInstanceMetaDataAsList()).thenReturn(List.of(imd1, imd2));
+        when(stack.getTerminatedAndNonTerminatedInstanceMetaDataAsList()).thenReturn(List.of(imd1, imd2));
         when(stackService.findEnvironmentCrnByStackId(STACK_ID)).thenReturn(ENVIRONMENT_CRN);
         when(environmentClientService.getByCrn(ENVIRONMENT_CRN)).thenReturn(environment);
         when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);

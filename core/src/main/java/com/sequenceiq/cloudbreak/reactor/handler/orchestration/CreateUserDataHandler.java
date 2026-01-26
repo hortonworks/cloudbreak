@@ -75,7 +75,7 @@ public class CreateUserDataHandler implements EventHandler<CreateUserDataRequest
             DetailedEnvironmentResponse environment = environmentClientService.getByCrn(environmentCrn);
             if (environment.isEnableSecretEncryption()) {
                 Stack stack = stackService.getByIdWithListsInTransaction(stackId);
-                List<InstanceMetaData> instanceMetaDatas = stack.getInstanceMetaDataAsList().stream()
+                List<InstanceMetaData> instanceMetaDatas = stack.getTerminatedAndNonTerminatedInstanceMetaDataAsList().stream()
                         .filter(imd -> imd.getUserdataSecretResourceId() == null)
                         .toList();
                 List<Resource> secretResources = userdataSecretsService.createUserdataSecrets(stack,

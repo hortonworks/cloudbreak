@@ -220,7 +220,7 @@ public class UserdataSecretsService {
         CloudConnector cloudConnector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
         SecretConnector secretConnector = cloudConnector.secretConnector();
         CloudInformationDecorator cloudInformationDecorator = cloudInformationDecoratorProvider.getForStack(stack);
-        List<InstanceMetaData> instances = stack.getInstanceMetaDataAsList();
+        List<InstanceMetaData> instances = stack.getTerminatedAndNonTerminatedInstanceMetaDataAsList();
         LOGGER.info("Removing all associations between instances and userdata secrets for stack [{}]...", stack.getName());
         instances.forEach(imd -> imd.setUserdataSecretResourceId(null));
         instanceMetaDataService.saveAll(instances);

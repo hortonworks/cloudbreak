@@ -148,7 +148,7 @@ class ClusterNodeNameGeneratorTest {
         underTestStack.getInstanceGroups().stream().forEach(
                 instanceGroup -> hostGroupNodeCount.put(instanceGroup.getGroupName(), new AtomicLong(0L)));
 
-        Set<String> clusterNodeNames = underTestStack.getInstanceMetaDataAsList().stream()
+        Set<String> clusterNodeNames = underTestStack.getTerminatedAndNonTerminatedInstanceMetaDataAsList().stream()
                 .map(InstanceMetaData::getShortHostname).collect(Collectors.toSet());
 
         Set<String> resultSet = new HashSet();

@@ -74,7 +74,7 @@ public class DownscaleRemoveUserdataSecretsHandler extends ExceptionCatcherEvent
         List<InstanceMetaData> instancesWithUndeletedSecretResources = new ArrayList<>();
         List<Long> secretResourceIds = new ArrayList<>();
         List<String> authorizedClientsToRemove = new ArrayList<>();
-        stack.getInstanceMetaDataAsList().stream()
+        stack.getTerminatedAndNonTerminatedInstanceMetaDataAsList().stream()
                 .filter(imd -> imd.getUserdataSecretResourceId() != null && instancePrivateIds.contains(imd.getPrivateId()))
                 .forEach(imd -> {
                     instancesWithUndeletedSecretResources.add(imd);
