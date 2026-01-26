@@ -1,5 +1,8 @@
 package com.sequenceiq.freeipa.service.stack.instance;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -42,12 +45,14 @@ public class MetadataSetupService {
     @Inject
     private ImageService imageService;
 
-    public int saveInstanceMetaData(Stack stack, Iterable<CloudVmMetaDataStatus> cloudVmMetaDataStatusList, InstanceStatus status) {
+    public int saveInstanceMetaData(Stack stack, List<CloudVmMetaDataStatus> cloudVmMetaDataStatusList, InstanceStatus status) {
         int newInstances = 0;
         Set<InstanceMetaData> allInstanceMetadata = instanceMetaDataService.findNotTerminatedForStack(stack.getId());
         Json image = new Json(imageService.getCloudImageByStackId(stack.getId()));
+        ArrayList<CloudVmMetaDataStatus> sortedCloudVmMetadata = new ArrayList<>(cloudVmMetaDataStatusList);
+        sortedCloudVmMetadata.sort(Comparator.comparingLong(vm -> vm.getCloudVmInstanceStatus().getCloudInstance().getTemplate().getPrivateId()));
         boolean primaryIgSelected = allInstanceMetadata.stream().anyMatch(imd -> imd.getInstanceMetadataType() == InstanceMetadataType.GATEWAY_PRIMARY);
-        for (CloudVmMetaDataStatus cloudVmMetaDataStatus : cloudVmMetaDataStatusList) {
+        for (CloudVmMetaDataStatus cloudVmMetaDataStatus : sortedCloudVmMetadata) {
             CloudInstance cloudInstance = cloudVmMetaDataStatus.getCloudVmInstanceStatus().getCloudInstance();
             CloudInstanceMetaData md = cloudVmMetaDataStatus.getMetaData();
             Long privateId = cloudInstance.getTemplate().getPrivateId();

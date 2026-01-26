@@ -277,4 +277,17 @@ class FreeIpaTopologyServiceTest {
         verify(freeIpaClient, times(1)).deleteTopologySegment(eq("ca"), any());
     }
 
+    @Test
+    void testUnorderedPair() {
+        FreeIpaTopologyService.UnorderedPair unorderedPair = new FreeIpaTopologyService.UnorderedPair("ipaserver1.example.com", "ipaserver2.example.com");
+        assertEquals("ipaserver2.example.com", unorderedPair.getLeft());
+        assertEquals("ipaserver1.example.com", unorderedPair.getRight());
+        unorderedPair = new FreeIpaTopologyService.UnorderedPair("ipaserver3.example.com", "ipaserver20.example.com");
+        assertEquals("ipaserver20.example.com", unorderedPair.getLeft());
+        assertEquals("ipaserver3.example.com", unorderedPair.getRight());
+        unorderedPair = new FreeIpaTopologyService.UnorderedPair("ipaserver5.example.com", "ipaserver2.example.com");
+        assertEquals("ipaserver5.example.com", unorderedPair.getLeft());
+        assertEquals("ipaserver2.example.com", unorderedPair.getRight());
+    }
+
 }

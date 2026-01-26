@@ -103,6 +103,7 @@ class MetadataSetupServiceTest {
         Map<String, InstanceMetaData> instances = data.entrySet().stream().collect(Collectors.toMap(entry -> entry.getKey(), entry -> {
             InstanceMetaData instanceMetaData = mock(InstanceMetaData.class);
             when(instanceMetaData.getInstanceId()).thenReturn(entry.getValue());
+            when(instanceMetaData.getPrivateId()).thenReturn(Long.valueOf(entry.getKey()));
             if (entry.getKey().equals("3")) {
                 when(instanceMetaData.getAvailabilityZone()).thenReturn(entry.getKey());
             }
@@ -117,7 +118,7 @@ class MetadataSetupServiceTest {
             CloudInstance cloudInstance = mock(CloudInstance.class);
             when(cloudVmInstanceStatus.getCloudInstance()).thenReturn(cloudInstance);
             InstanceTemplate instanceTemplate = mock(InstanceTemplate.class);
-            when(instanceTemplate.getPrivateId()).thenReturn(null);
+            when(instanceTemplate.getPrivateId()).thenReturn(Long.valueOf(entry.getKey()));
             when(cloudInstance.getTemplate()).thenReturn(instanceTemplate);
             when(cloudInstance.getInstanceId()).thenReturn(entry.getValue());
             lenient().when(cloudInstance.getAvailabilityZone()).thenReturn(entry.getKey());

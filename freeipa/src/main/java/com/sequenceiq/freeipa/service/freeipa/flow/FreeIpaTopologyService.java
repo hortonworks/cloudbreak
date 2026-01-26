@@ -2,6 +2,7 @@ package com.sequenceiq.freeipa.service.freeipa.flow;
 
 import static com.sequenceiq.freeipa.client.FreeIpaClientExceptionUtil.ignoreNotFoundException;
 import static java.util.function.Predicate.not;
+import static java.util.regex.Pattern.compile;
 
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -11,6 +12,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
@@ -169,17 +172,31 @@ public class FreeIpaTopologyService {
 
     @VisibleForTesting
     static class UnorderedPair {
+        private static final Pattern TRAILING_DIGITS = compile("(\\d+)$");
+
         private final String left;
 
         private final String right;
 
         UnorderedPair(String item1, String item2) {
-            if (item1.compareTo(item2) < 0) {
-                this.left = item1;
-                this.right = item2;
+            Optional<Integer> item1Id = getSafeId(item1);
+            Optional<Integer> item2Id = getSafeId(item2);
+            if (item1Id.isPresent() && item2Id.isPresent()) {
+                if (item1Id.get().compareTo(item2Id.get()) >= 0) {
+                    this.left = item1;
+                    this.right = item2;
+                } else {
+                    this.left = item2;
+                    this.right = item1;
+                }
             } else {
-                this.left = item2;
-                this.right = item1;
+                if (item1.compareTo(item2) >= 0) {
+                    this.left = item1;
+                    this.right = item2;
+                } else {
+                    this.left = item2;
+                    this.right = item1;
+                }
             }
         }
 
@@ -189,6 +206,24 @@ public class FreeIpaTopologyService {
 
         String getRight() {
             return right;
+        }
+
+        private Optional<Integer> getSafeId(String fullHostname) {
+            if (StringUtils.isBlank(fullHostname)) {
+                return Optional.empty();
+            } else {
+                String shortName = StringUtils.substringBefore(fullHostname, ".");
+                Matcher matcher = TRAILING_DIGITS.matcher(shortName);
+                if (matcher.find()) {
+                    try {
+                        return Optional.of(Integer.parseInt(matcher.group(1)));
+                    } catch (NumberFormatException e) {
+                        return Optional.empty();
+                    }
+                } else {
+                    return Optional.empty();
+                }
+            }
         }
 
         @Override
