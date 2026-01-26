@@ -153,6 +153,7 @@ public class TestUpgradeCandidateProvider {
         String currentCmBuildNumber = current.getPackageVersions().get(ImagePackageVersion.CM_BUILD_NUMBER.getKey());
         String targetCmBuildNumber = target.getPackageVersions().get(ImagePackageVersion.CM_BUILD_NUMBER.getKey());
         return Objects.equals(currentCdhBuildNumber, targetCdhBuildNumber) && Objects.equals(currentCmBuildNumber, targetCmBuildNumber)
-                && !Objects.equals(current.getUuid(), target.getUuid()) && current.getCreated() < target.getCreated();
+                && !Objects.equals(current.getUuid(), target.getUuid())
+                && (!Objects.equals(current.getOsType(), target.getOsType()) || current.getCreated() < target.getCreated());
     }
 }
