@@ -19,7 +19,6 @@ import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.common.exception.ExceptionResponse;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.common.api.type.OutboundType;
-import com.sequenceiq.environment.events.EventSenderService;
 import com.sequenceiq.environment.exception.FreeIpaOperationFailedException;
 import com.sequenceiq.flow.api.model.FlowCheckResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -51,6 +50,8 @@ import com.sequenceiq.freeipa.api.v1.operation.model.OperationStatus;
 import com.sequenceiq.freeipa.api.v1.support.SupportV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.support.response.FreeIpaPlatformSupportRequirements;
 import com.sequenceiq.freeipa.api.v2.freeipa.crossrealm.TrustV2Endpoint;
+import com.sequenceiq.freeipa.api.v2.freeipa.stack.model.crossrealm.AddCrossRealmTrustV2Request;
+import com.sequenceiq.freeipa.api.v2.freeipa.stack.model.crossrealm.AddCrossRealmTrustV2Response;
 import com.sequenceiq.freeipa.api.v2.freeipa.stack.model.crossrealm.PrepareCrossRealmTrustV2Request;
 
 @Service
@@ -74,8 +75,6 @@ public class FreeIpaService {
 
     private final WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
 
-    private final EventSenderService eventService;
-
     private final FreeIpaV1FlowEndpoint flowEndpoint;
 
     public FreeIpaService(
@@ -87,8 +86,7 @@ public class FreeIpaService {
             OperationV1Endpoint operationV1Endpoint,
             FreeIpaV1FlowEndpoint flowEndpoint,
             UserV1Endpoint userV1Endpoint,
-            WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor,
-            EventSenderService eventService) {
+            WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor) {
         this.freeIpaV1Endpoint = freeIpaV1Endpoint;
         this.freeIpaInternalV1Endpoint = freeIpaInternalV1Endpoint;
         this.operationV1Endpoint = operationV1Endpoint;
@@ -97,7 +95,6 @@ public class FreeIpaService {
         this.trustV2Endpoint = trustV2Endpoint;
         this.supportV1Endpoint = supportV1Endpoint;
         this.webApplicationExceptionMessageExtractor = webApplicationExceptionMessageExtractor;
-        this.eventService = eventService;
         this.flowEndpoint = flowEndpoint;
     }
 
@@ -315,6 +312,20 @@ public class FreeIpaService {
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
             LOGGER.error("Failed to prepare cross realm trust on FreeIpa for environment {} due to: {}", environmentCrn, errorMessage, e);
+            throw new FreeIpaOperationFailedException(errorMessage);
+        }
+    }
+
+    public AddCrossRealmTrustV2Response addTrustForPublicCloud(String environmentCrn,
+            AddCrossRealmTrustV2Request prepareCrossRealmTrustRequest) {
+        try {
+            LOGGER.debug("Calling FreeIPA cross realm trust prepare for public cloud environment {}", environmentCrn);
+            String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
+            return ThreadBasedUserCrnProvider.doAsInternalActor(
+                    () -> trustV2Endpoint.addTrust(prepareCrossRealmTrustRequest, initiatorUserCrn));
+        } catch (WebApplicationException e) {
+            String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
+            LOGGER.error("Failed to prepare cross realm trust on FreeIpa for public cloud environment {} due to: {}", environmentCrn, errorMessage, e);
             throw new FreeIpaOperationFailedException(errorMessage);
         }
     }

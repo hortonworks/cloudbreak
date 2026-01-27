@@ -118,9 +118,8 @@ public class StackToDescribeFreeIpaResponseConverter {
         userSyncStatus.ifPresent(u -> describeFreeIpaResponse.setUserSyncStatus(userSyncStatusConverter.convert(u, stack.getEnvironmentCrn())));
         describeFreeIpaResponse.setSupportedImdsVersion(stack.getSupportedImdsVersion());
         describeFreeIpaResponse.setSecurity(getSecurity(stack));
-        if (environmentResponse != null && EnvironmentType.isHybridFromEnvironmentTypeString(environmentResponse.getEnvironmentType())) {
-            describeFreeIpaResponse.setTrust(convertTrust(stack));
-        }
+        boolean hybridEnvironment = environmentResponse != null && EnvironmentType.isHybridFromEnvironmentTypeString(environmentResponse.getEnvironmentType());
+        describeFreeIpaResponse.setTrust(convertTrust(stack, hybridEnvironment));
         return describeFreeIpaResponse;
     }
 
@@ -208,7 +207,7 @@ public class StackToDescribeFreeIpaResponseConverter {
         return placementResponse;
     }
 
-    private TrustResponse convertTrust(Stack stack) {
+    private TrustResponse convertTrust(Stack stack, boolean hybridEnvironment) {
         TrustResponse trustResponse = new TrustResponse();
         Optional<CrossRealmTrust> crossRealmTrust = crossRealmTrustService.getByStackIdIfExists(stack.getId());
         if (crossRealmTrust.isPresent()) {
@@ -220,8 +219,10 @@ public class StackToDescribeFreeIpaResponseConverter {
             trustResponse.setIp(trust.getKdcIp());
             trustResponse.setDnsIp(trust.getDnsIp());
             trustResponse.setKdcType(trust.getKdcType() != null ? trust.getKdcType().name() : KdcType.UNKNOWN.name());
-        } else {
+        } else if (hybridEnvironment) {
             trustResponse.setTrustStatus(TrustStatus.TRUST_SETUP_REQUIRED.name());
+        } else {
+            return null;
         }
         return trustResponse;
     }

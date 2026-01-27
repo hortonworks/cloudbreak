@@ -31,7 +31,9 @@ public class StackPollerProviderTest {
 
     private final FlowLogDBService flowLogDBService = mock(FlowLogDBService.class);
 
-    private final StackPollerProvider underTest = new StackPollerProvider(stackService, flowLogDBService);
+    private final FlowResultPollerEvaluator flowResultPollerEvaluator = mock(FlowResultPollerEvaluator.class);
+
+    private final StackPollerProvider underTest = new StackPollerProvider(stackService, flowLogDBService, flowResultPollerEvaluator);
 
     @ParameterizedTest
     @MethodSource("stackUpdateConfigStates")

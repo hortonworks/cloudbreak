@@ -3,6 +3,7 @@ package com.sequenceiq.environment.environment.service.stack;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -21,6 +22,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Resp
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
 import com.sequenceiq.environment.environment.poller.StackPollerProvider;
 import com.sequenceiq.environment.exception.DatahubOperationFailedException;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
 
 @Service
 public class StackPollerService {
@@ -66,8 +68,33 @@ public class StackPollerService {
         this.stackPollerProvider = stackPollerProvider;
     }
 
+    public List<FlowIdentifier> updateSaltOnStacks(Long envId, String envCrn) {
+        List<String> stackNames = getUpdatableStacks(envCrn, StackViewV4Response::getName);
+        LOGGER.info("Stacks names which will be updated: {}", stackNames);
+        return startStackUpdatePolling(stackNames,
+                stackPollerProvider.saltUpdateOnStacksPoller(stackNames, envId));
+    }
+
+    private List<FlowIdentifier> startStackUpdatePolling(List<String> stackNames, AttemptMaker<List<FlowIdentifier>> attemptMaker) {
+        if (CollectionUtils.isNotEmpty(stackNames)) {
+            try {
+                return Polling.stopAfterDelay(maxTime, TimeUnit.SECONDS)
+                        .stopIfException(true)
+                        .waitPeriodly(sleepTime, TimeUnit.SECONDS)
+                        .run(attemptMaker);
+            } catch (PollerStoppedException e) {
+                LOGGER.warn("Stack updating timed out");
+                throw new DatahubOperationFailedException("Stack updating timed out", e);
+            } catch (UserBreakException e) {
+                LOGGER.error("Stack updating aborted with error", e);
+                throw new DatahubOperationFailedException("Stack updating aborted with error", e);
+            }
+        }
+        return null;
+    }
+
     public void updateStackConfigurations(Long envId, String envCrn, String flowId) {
-        List<String> stackCrns = getUpdatableStacks(envCrn);
+        List<String> stackCrns = getUpdatableStacks(envCrn, StackViewV4Response::getCrn);
         LOGGER.info("Stacks CRNs which will be updated: {}", stackCrns);
         startStackConfigUpdatePolling(stackCrns,
                 stackPollerProvider.stackUpdateConfigPoller(stackCrns, envId, flowId));
@@ -90,7 +117,7 @@ public class StackPollerService {
         }
     }
 
-    private List<String> getUpdatableStacks(String envCrn) {
+    private List<String> getUpdatableStacks(String envCrn, Function<StackViewV4Response, String> requestedAttributeMapper) {
         StackViewV4Responses stackViewV4Responses = stackV4Endpoint.list(0L, envCrn, false);
         List<String> responseToLog = Optional.ofNullable(stackViewV4Responses.getResponses()).orElse(List.of()).stream()
                 .map(response -> String.format("[Name: %s; Crn: %s; Status: %s, ClusterStatus: %s]",
@@ -99,7 +126,7 @@ public class StackPollerService {
         LOGGER.info("Stacks returned for update: {}", responseToLog);
         return stackViewV4Responses.getResponses().stream().
                 filter(stack -> !SKIPPED_STATES.contains(stack.getCluster().getStatus()))
-                .map(StackViewV4Response::getCrn)
+                .map(requestedAttributeMapper)
                 .collect(Collectors.toList());
     }
 

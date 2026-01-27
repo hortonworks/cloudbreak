@@ -129,8 +129,7 @@ public class TelemetryConverter {
         return telemetry;
     }
 
-    public TelemetryRequest convert(DetailedEnvironmentResponse environment, TelemetryResponse response,
-            SdxClusterResponse sdxClusterResponse) {
+    public TelemetryRequest convert(DetailedEnvironmentResponse environment, TelemetryResponse response, SdxClusterResponse sdxClusterResponse) {
         LOGGER.debug("Creating telemetry request based on datalake and environment responses.");
         TelemetryRequest telemetryRequest = new TelemetryRequest();
         FeaturesRequest featuresRequest = new FeaturesRequest();

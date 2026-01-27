@@ -39,8 +39,10 @@ import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorEx
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorStateParams;
 import com.sequenceiq.cloudbreak.util.DocumentationLinkProvider;
+import com.sequenceiq.common.api.type.EnvironmentType;
 import com.sequenceiq.freeipa.entity.CrossRealmTrust;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.service.EnvironmentService;
 import com.sequenceiq.freeipa.service.crossrealm.CrossRealmTrustService;
 import com.sequenceiq.freeipa.service.freeipa.trust.operation.TaskResult;
 import com.sequenceiq.freeipa.service.freeipa.trust.operation.TaskResultType;
@@ -90,6 +92,9 @@ public class TrustSetupValidationService {
     @Inject
     private CloudbreakMessagesService messagesService;
 
+    @Inject
+    private EnvironmentService environmentService;
+
     public TaskResults validateTrustSetup(Long stackId) {
         Optional<CrossRealmTrust> crossRealmTrust = crossRealmTrustService.getByStackIdIfExists(stackId);
         return crossRealmTrust
@@ -100,12 +105,15 @@ public class TrustSetupValidationService {
 
     private TaskResults validateTrustSetup(Long stackId, CrossRealmTrust crossRealmTrust) {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
+        EnvironmentType environmentType = environmentService.getEnvironmentType(stack.getEnvironmentCrn());
         TaskResults taskResults = new TaskResults();
         taskResults.addTaskResult(validateLoadBalancer(stackId));
         taskResults.addTaskResult(validatePackageAvailability(stackId, crossRealmTrust));
         taskResults.addTaskResult(validateDns(stack, crossRealmTrust));
         taskResults.addTaskResult(validateReverseDns(stack, crossRealmTrust));
-        taskResults.addTaskResult(validateKerberization(crossRealmTrust));
+        if (EnvironmentType.HYBRID.equals(environmentType)) {
+            taskResults.addTaskResult(validateKerberization(crossRealmTrust));
+        }
         return taskResults;
     }
 

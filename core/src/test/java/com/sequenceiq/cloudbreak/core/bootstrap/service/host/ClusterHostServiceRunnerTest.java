@@ -115,6 +115,7 @@ import com.sequenceiq.cloudbreak.service.cluster.flow.recipe.RecipeEngine;
 import com.sequenceiq.cloudbreak.service.encryptionprofile.EncryptionProfileService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentConfigProvider;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
+import com.sequenceiq.cloudbreak.service.freeipa.FreeipaClientService;
 import com.sequenceiq.cloudbreak.service.gateway.GatewayService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.idbroker.IdBrokerService;
@@ -335,6 +336,9 @@ class ClusterHostServiceRunnerTest {
     @Mock
     private EncryptionProfileService encryptionProfileService;
 
+    @Mock
+    private FreeipaClientService freeipaClientService;
+
     @BeforeEach
     void setUp() {
         lenient().when(stack.getCluster()).thenReturn(cluster);
@@ -352,6 +356,7 @@ class ClusterHostServiceRunnerTest {
         lenient().when(stack.getStack().getResourceCrn()).thenReturn(TEST_CLUSTER_CRN);
         lenient().when(stack.getStackVersion()).thenReturn("7.3.1");
         ReflectionTestUtils.setField(kerberosPillarConfigGenerator, "kerberosDetailService", kerberosDetailService);
+        ReflectionTestUtils.setField(kerberosPillarConfigGenerator, "freeipaClient", freeipaClientService);
     }
 
     @Test
@@ -549,6 +554,7 @@ class ClusterHostServiceRunnerTest {
 
         verifyDefaultKerberosCcacheSecretStorage(DEFAULT_KERBEROS_CCACHE_SECRET_STORAGE, saltConfig.getValue());
         verifyKerberosSecretLocation(KERBEROS_SECRET_LOCATION, saltConfig.getValue());
+        verify(freeipaClientService).findByEnvironmentCrn(null);
     }
 
     @Test

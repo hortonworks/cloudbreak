@@ -31,7 +31,6 @@ import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
 import com.sequenceiq.cloudbreak.polling.PollingService;
-import com.sequenceiq.common.api.type.EnvironmentType;
 import com.sequenceiq.freeipa.api.v1.freeipa.cleanup.CleanupRequest;
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.HostRequest;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationStatus;
@@ -54,7 +53,7 @@ import com.sequenceiq.freeipa.kerberosmgmt.exception.DeleteException;
 import com.sequenceiq.freeipa.kerberosmgmt.v1.KeytabCacheService;
 import com.sequenceiq.freeipa.kerberosmgmt.v1.KeytabCleanupService;
 import com.sequenceiq.freeipa.ldap.LdapConfigService;
-import com.sequenceiq.freeipa.service.client.CachedEnvironmentClientService;
+import com.sequenceiq.freeipa.service.crossrealm.CrossRealmTrustService;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientRetryService;
 import com.sequenceiq.freeipa.service.freeipa.dns.DnsZoneBatchedService;
@@ -123,10 +122,10 @@ public class CleanupService {
     private long serverDeletionCheckInterval;
 
     @Inject
-    private CachedEnvironmentClientService environmentClientService;
+    private DnsZoneBatchedService dnsZoneBatchedService;
 
     @Inject
-    private DnsZoneBatchedService dnsZoneBatchedService;
+    private CrossRealmTrustService crossRealmTrustService;
 
     public OperationStatus cleanup(String accountId, CleanupRequest request) {
         String environmentCrn = request.getEnvironmentCrn();
@@ -182,16 +181,18 @@ public class CleanupService {
     public Pair<Set<String>, Map<String, String>> removeDnsEntries(Long stackId, Set<String> hosts, Set<String> ips, String domain, String envCrn)
             throws FreeIpaClientException {
         FreeIpaClient client = getFreeIpaClient(stackId);
-        return removeDnsEntries(client, hosts, ips, domain, envCrn);
+        boolean trustExists = crossRealmTrustService.getByStackIdIfExists(stackId).isPresent();
+        return removeDnsEntries(client, hosts, ips, domain, envCrn, trustExists);
     }
 
-    public Pair<Set<String>, Map<String, String>> removeDnsEntries(FreeIpaClient client, Set<String> hosts, Set<String> ips, String domain, String envCrn)
+    public Pair<Set<String>, Map<String, String>> removeDnsEntries(FreeIpaClient client, Set<String> hosts, Set<String> ips, String domain, String envCrn,
+            boolean trustExists)
             throws FreeIpaClientException {
         Set<String> dnsCleanupSuccess = new HashSet<>();
         Map<String, String> dnsCleanupFailed = new HashMap<>();
         if (CollectionUtils.isNotEmpty(hosts) || CollectionUtils.isNotEmpty(ips)) {
             Set<String> allDnsZoneName = client.findAllDnsZone().stream().map(DnsZone::getIdnsname).collect(Collectors.toSet());
-            Map<String, Set<DnsRecord>> dnsRecordsByZone = fetchDnsRecordsByZone(client, allDnsZoneName, envCrn);
+            Map<String, Set<DnsRecord>> dnsRecordsByZone = fetchDnsRecordsByZone(client, allDnsZoneName, envCrn, trustExists);
             for (Entry<String, Set<DnsRecord>> zoneRecords : dnsRecordsByZone.entrySet()) {
                 removeHostNameRelatedDnsRecords(hosts, domain, client, dnsCleanupSuccess, dnsCleanupFailed, zoneRecords.getValue(), zoneRecords.getKey());
                 removeIpRelatedRecords(ips, client, dnsCleanupSuccess, dnsCleanupFailed, zoneRecords.getValue(), zoneRecords.getKey());
@@ -200,10 +201,9 @@ public class CleanupService {
         return Pair.of(dnsCleanupSuccess, dnsCleanupFailed);
     }
 
-    private Map<String, Set<DnsRecord>> fetchDnsRecordsByZone(FreeIpaClient client, Set<String> allDnsZoneName, String envCrn)
+    private Map<String, Set<DnsRecord>> fetchDnsRecordsByZone(FreeIpaClient client, Set<String> allDnsZoneName, String envCrn, boolean trustExists)
             throws FreeIpaClientException {
-        String environmentType = environmentClientService.getByCrn(envCrn).getEnvironmentType();
-        if (EnvironmentType.isHybridFromEnvironmentTypeString(environmentType)) {
+        if (trustExists) {
             try {
                 Map<String, Set<DnsRecord>> dnsRecordsByZone = dnsZoneBatchedService.fetchDnsRecordsByZone(client, allDnsZoneName);
                 dnsRecordsByZone.entrySet().removeIf(entry -> entry.getValue().size() < 2);

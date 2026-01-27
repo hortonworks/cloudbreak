@@ -3,6 +3,7 @@ package com.sequenceiq.environment.environment.flow.hybrid.setupfinish.action;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_SETUP_FINISH_TRUST_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_SETUP_FINISH_TRUST_FINISHED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_SETUP_FINISH_TRUST_STARTED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_SETUP_FINISH_TRUST_UPDATE_STACKS;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_SETUP_FINISH_TRUST_VALIDATION_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_SETUP_FINISH_TRUST_VALIDATION_STARTED;
 import static com.sequenceiq.environment.environment.EnvironmentStatus.AVAILABLE;
@@ -11,8 +12,10 @@ import static com.sequenceiq.environment.environment.EnvironmentStatus.TRUST_SET
 import static com.sequenceiq.environment.environment.flow.hybrid.setupfinish.EnvironmentCrossRealmTrustSetupFinishState.TRUST_SETUP_FINISH_FAILED_STATE;
 import static com.sequenceiq.environment.environment.flow.hybrid.setupfinish.EnvironmentCrossRealmTrustSetupFinishState.TRUST_SETUP_FINISH_FINISHED_STATE;
 import static com.sequenceiq.environment.environment.flow.hybrid.setupfinish.EnvironmentCrossRealmTrustSetupFinishState.TRUST_SETUP_FINISH_STATE;
+import static com.sequenceiq.environment.environment.flow.hybrid.setupfinish.EnvironmentCrossRealmTrustSetupFinishState.TRUST_SETUP_FINISH_UPDATE_STACKS_STATE;
 import static com.sequenceiq.environment.environment.flow.hybrid.setupfinish.EnvironmentCrossRealmTrustSetupFinishState.TRUST_SETUP_FINISH_VALIDATION_STATE;
 import static com.sequenceiq.environment.environment.flow.hybrid.setupfinish.event.EnvironmentCrossRealmTrustSetupFinishHandlerSelectors.SETUP_FINISH_TRUST_HANDLER;
+import static com.sequenceiq.environment.environment.flow.hybrid.setupfinish.event.EnvironmentCrossRealmTrustSetupFinishHandlerSelectors.SETUP_FINISH_TRUST_UPDATE_STACKS_HANDLER;
 import static com.sequenceiq.environment.environment.flow.hybrid.setupfinish.event.EnvironmentCrossRealmTrustSetupFinishHandlerSelectors.SETUP_FINISH_TRUST_VALIDATION_HANDLER;
 import static com.sequenceiq.environment.environment.flow.hybrid.setupfinish.event.EnvironmentCrossRealmTrustSetupFinishStateSelectors.FINALIZE_TRUST_SETUP_FINISH_EVENT;
 import static com.sequenceiq.environment.environment.flow.hybrid.setupfinish.event.EnvironmentCrossRealmTrustSetupFinishStateSelectors.HANDLED_FAILED_TRUST_SETUP_FINISH_EVENT;
@@ -85,6 +88,25 @@ public class EnvironmentCrossRealmTrustSetupFinishActions {
                                 TRUST_SETUP_FINISH_STATE
                         );
                 sendEvent(context, SETUP_FINISH_TRUST_HANDLER.selector(), payload);
+            }
+        };
+    }
+
+    @Bean(name = "TRUST_SETUP_FINISH_UPDATE_STACKS_STATE")
+    public Action<?, ?> crossRealmFinishUpdateClusters() {
+        return new AbstractEnvironmentCrossRealmTrustSetupFinishAction<>(EnvironmentCrossRealmTrustSetupFinishEvent.class) {
+
+            @Override
+            protected void doExecute(CommonContext context, EnvironmentCrossRealmTrustSetupFinishEvent payload, Map<Object, Object> variables) {
+                environmentStatusUpdateService
+                        .updateEnvironmentStatusAndNotify(
+                                context,
+                                payload,
+                                TRUST_SETUP_FINISH_IN_PROGRESS,
+                                ENVIRONMENT_SETUP_FINISH_TRUST_UPDATE_STACKS,
+                                TRUST_SETUP_FINISH_UPDATE_STACKS_STATE
+                        );
+                sendEvent(context, SETUP_FINISH_TRUST_UPDATE_STACKS_HANDLER.selector(), payload);
             }
         };
     }

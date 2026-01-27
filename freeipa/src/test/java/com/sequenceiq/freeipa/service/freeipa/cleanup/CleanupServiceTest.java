@@ -18,6 +18,7 @@ import static org.mockito.Mockito.when;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
@@ -54,6 +55,7 @@ import com.sequenceiq.freeipa.client.model.Cert;
 import com.sequenceiq.freeipa.client.model.DnsRecord;
 import com.sequenceiq.freeipa.client.model.DnsZone;
 import com.sequenceiq.freeipa.converter.operation.OperationToOperationStatusConverter;
+import com.sequenceiq.freeipa.entity.CrossRealmTrust;
 import com.sequenceiq.freeipa.entity.Operation;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.freeipa.cleanup.CleanupEvent;
@@ -61,6 +63,7 @@ import com.sequenceiq.freeipa.flow.freeipa.cleanup.FreeIpaCleanupEvent;
 import com.sequenceiq.freeipa.kerberos.KerberosConfigService;
 import com.sequenceiq.freeipa.ldap.LdapConfigService;
 import com.sequenceiq.freeipa.service.client.CachedEnvironmentClientService;
+import com.sequenceiq.freeipa.service.crossrealm.CrossRealmTrustService;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientRetryService;
 import com.sequenceiq.freeipa.service.freeipa.dns.DnsZoneBatchedService;
@@ -124,6 +127,9 @@ public class CleanupServiceTest {
 
     @Mock
     private DnsZoneBatchedService dnsZoneBatchedService;
+
+    @Mock
+    private CrossRealmTrustService crossRealmTrustService;
 
     @BeforeEach
     void init() throws FreeIpaClientException {
@@ -650,6 +656,7 @@ public class CleanupServiceTest {
         DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
         environmentResponse.setEnvironmentType(EnvironmentType.HYBRID.name());
         when(environmentClientService.getByCrn(ENVIRONMENT_CRN)).thenReturn(environmentResponse);
+        when(crossRealmTrustService.getByStackIdIfExists(STACK_ID)).thenReturn(Optional.of(new CrossRealmTrust()));
 
         Pair<Set<String>, Map<String, String>> result = underTest.removeDnsEntries(STACK_ID,
                 Set.of(deleteMe.getIdnsname(), notFound.getIdnsname(), failed.getIdnsname(), "ptrRecord"),

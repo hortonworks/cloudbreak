@@ -51,7 +51,7 @@ import com.sequenceiq.freeipa.service.operation.OperationService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
 @ExtendWith(MockitoExtension.class)
-class TrustSetupServiceTest {
+class TrustManagementServiceTest {
 
     private static final String ACCOUNT_ID = "acc";
 
@@ -74,7 +74,7 @@ class TrustSetupServiceTest {
     private static final Long STACK_ID = 1L;
 
     @InjectMocks
-    private TrustSetupService underTest;
+    private TrustManagementService underTest;
 
     @Mock
     private StackService stackService;

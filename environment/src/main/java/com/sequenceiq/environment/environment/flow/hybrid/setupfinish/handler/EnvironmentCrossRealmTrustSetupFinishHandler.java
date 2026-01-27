@@ -3,7 +3,7 @@ package com.sequenceiq.environment.environment.flow.hybrid.setupfinish.handler;
 import static com.sequenceiq.environment.environment.EnvironmentStatus.TRUST_SETUP_FINISH_FAILED;
 import static com.sequenceiq.environment.environment.EnvironmentStatus.TRUST_SETUP_FINISH_VALIDATION_FAILED;
 import static com.sequenceiq.environment.environment.flow.hybrid.setupfinish.event.EnvironmentCrossRealmTrustSetupFinishHandlerSelectors.SETUP_FINISH_TRUST_HANDLER;
-import static com.sequenceiq.environment.environment.flow.hybrid.setupfinish.event.EnvironmentCrossRealmTrustSetupFinishStateSelectors.FINISH_TRUST_SETUP_FINISH_EVENT;
+import static com.sequenceiq.environment.environment.flow.hybrid.setupfinish.event.EnvironmentCrossRealmTrustSetupFinishStateSelectors.TRUST_SETUP_FINISH_UPDATE_STACKS_EVENT;
 
 import java.util.Optional;
 
@@ -72,9 +72,9 @@ public class EnvironmentCrossRealmTrustSetupFinishHandler extends ExceptionCatch
                             finishCrossRealmTrustRequest);
                 }
             }
-            LOGGER.debug("FINISH_TRUST_SETUP_FINISH_EVENT event sent");
+            LOGGER.debug("TRUST_SETUP_FINISH_UPDATE_STACKS_EVENT event sent");
             return EnvironmentCrossRealmTrustSetupFinishEvent.builder()
-                    .withSelector(FINISH_TRUST_SETUP_FINISH_EVENT.selector())
+                    .withSelector(TRUST_SETUP_FINISH_UPDATE_STACKS_EVENT.selector())
                     .withResourceCrn(data.getResourceCrn())
                     .withResourceId(data.getResourceId())
                     .withResourceName(data.getResourceName())

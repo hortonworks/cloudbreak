@@ -4,6 +4,7 @@ package com.sequenceiq.environment.environment.flow.hybrid.setupfinish;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_SETUP_FINISH_TRUST_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_SETUP_FINISH_TRUST_FINISHED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_SETUP_FINISH_TRUST_STARTED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_SETUP_FINISH_TRUST_UPDATE_STACKS;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_SETUP_FINISH_TRUST_VALIDATION_STARTED;
 import static com.sequenceiq.environment.environment.EnvironmentStatus.AVAILABLE;
 import static com.sequenceiq.environment.environment.EnvironmentStatus.TRUST_SETUP_FINISH_FAILED;
@@ -12,10 +13,12 @@ import static com.sequenceiq.environment.environment.EnvironmentStatus.TRUST_SET
 import static com.sequenceiq.environment.environment.flow.hybrid.setupfinish.EnvironmentCrossRealmTrustSetupFinishState.TRUST_SETUP_FINISH_FAILED_STATE;
 import static com.sequenceiq.environment.environment.flow.hybrid.setupfinish.EnvironmentCrossRealmTrustSetupFinishState.TRUST_SETUP_FINISH_FINISHED_STATE;
 import static com.sequenceiq.environment.environment.flow.hybrid.setupfinish.EnvironmentCrossRealmTrustSetupFinishState.TRUST_SETUP_FINISH_STATE;
+import static com.sequenceiq.environment.environment.flow.hybrid.setupfinish.EnvironmentCrossRealmTrustSetupFinishState.TRUST_SETUP_FINISH_UPDATE_STACKS_STATE;
 import static com.sequenceiq.environment.environment.flow.hybrid.setupfinish.EnvironmentCrossRealmTrustSetupFinishState.TRUST_SETUP_FINISH_VALIDATION_STATE;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -26,6 +29,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -45,6 +49,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import com.dyngr.core.AttemptMaker;
+import com.dyngr.core.AttemptResults;
 import com.sequenceiq.authorization.service.OwnerAssignmentService;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
@@ -65,16 +71,22 @@ import com.sequenceiq.cloudbreak.ha.NodeConfig;
 import com.sequenceiq.cloudbreak.ha.service.NodeValidator;
 import com.sequenceiq.cloudbreak.quartz.configuration.scheduler.TransactionalScheduler;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
+import com.sequenceiq.common.api.type.EnvironmentType;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.flow.EnvironmentReactorFlowManager;
+import com.sequenceiq.environment.environment.flow.MultipleFlowsResultEvaluator;
 import com.sequenceiq.environment.environment.flow.hybrid.setup.converter.SetupCrossRealmTrustRequestToEnvironmentCrossRealmTrustSetupEventConverter;
 import com.sequenceiq.environment.environment.flow.hybrid.setupfinish.action.EnvironmentCrossRealmTrustSetupFinishActions;
 import com.sequenceiq.environment.environment.flow.hybrid.setupfinish.config.EnvironmentCrossRealmTrustSetupFinishFlowConfig;
 import com.sequenceiq.environment.environment.flow.hybrid.setupfinish.handler.EnvironmentCrossRealmTrustSetupFinishHandler;
+import com.sequenceiq.environment.environment.flow.hybrid.setupfinish.handler.EnvironmentCrossRealmTrustSetupFinishUpdateStacksHandler;
 import com.sequenceiq.environment.environment.flow.hybrid.setupfinish.handler.EnvironmentValidateCrossRealmTrustSetupFinishHandler;
+import com.sequenceiq.environment.environment.poller.DatahubPollerProvider;
+import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.environment.service.EnvironmentStatusUpdateService;
 import com.sequenceiq.environment.environment.service.freeipa.FreeIpaPollerService;
 import com.sequenceiq.environment.environment.service.freeipa.FreeIpaService;
+import com.sequenceiq.environment.environment.service.stack.StackPollerService;
 import com.sequenceiq.environment.environment.service.stack.StackService;
 import com.sequenceiq.environment.metrics.EnvironmentMetricService;
 import com.sequenceiq.environment.operation.service.OperationService;
@@ -83,8 +95,6 @@ import com.sequenceiq.flow.core.ApplicationFlowInformation;
 import com.sequenceiq.flow.core.CommonContext;
 import com.sequenceiq.flow.core.FlowEventListener;
 import com.sequenceiq.flow.core.FlowRegister;
-import com.sequenceiq.flow.core.PayloadContextProvider;
-import com.sequenceiq.flow.core.ResourceIdProvider;
 import com.sequenceiq.flow.core.edh.FlowUsageSender;
 import com.sequenceiq.flow.core.listener.FlowEventCommonListener;
 import com.sequenceiq.flow.core.metrics.FlowMetricSender;
@@ -163,7 +173,19 @@ class EnvironmentCrossRealmTrustSetupFinishFlowIntegrationTest {
     private FreeIpaPollerService freeIpaPollerService;
 
     @MockBean
+    private StackPollerService stackPollerService;
+
+    @MockBean
+    private DatahubPollerProvider datahubPollerProvider;
+
+    @MockBean
+    private MultipleFlowsResultEvaluator multipleFlowsResultEvaluator;
+
+    @MockBean
     private StackService stackService;
+
+    @Inject
+    private EnvironmentService environmentService;
 
     private Environment environment;
 
@@ -174,11 +196,13 @@ class EnvironmentCrossRealmTrustSetupFinishFlowIntegrationTest {
         environment.setResourceCrn(ENVIRONMENT_CRN);
         environment.setName(ENVIRONMENT_NAME);
         environment.setAccountId(ACCOUNT_ID);
-        ///when(en.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
+        environment.setEnvironmentType(EnvironmentType.HYBRID);
     }
 
     @Test
     void testPrepareCrossRealmTrustWhenSuccessful() {
+        AttemptMaker<Void> attemptMaker = AttemptResults::justFinish;
+        when(datahubPollerProvider.multipleFlowsPoller(anyLong(), anyList())).thenReturn(attemptMaker);
         testFlow();
         InOrder environmentStatusVerify = inOrder(environmentStatusUpdateService);
 
@@ -199,9 +223,56 @@ class EnvironmentCrossRealmTrustSetupFinishFlowIntegrationTest {
         environmentStatusVerify.verify(environmentStatusUpdateService).updateEnvironmentStatusAndNotify(
                 any(CommonContext.class),
                 any(Payload.class),
+                eq(TRUST_SETUP_FINISH_IN_PROGRESS),
+                eq(ENVIRONMENT_SETUP_FINISH_TRUST_UPDATE_STACKS),
+                eq(TRUST_SETUP_FINISH_UPDATE_STACKS_STATE)
+        );
+        environmentStatusVerify.verify(environmentStatusUpdateService).updateEnvironmentStatusAndNotify(
+                any(CommonContext.class),
+                any(Payload.class),
                 eq(AVAILABLE),
                 eq(ENVIRONMENT_SETUP_FINISH_TRUST_FINISHED),
                 eq(TRUST_SETUP_FINISH_FINISHED_STATE)
+        );
+    }
+
+    @Test
+    void testFinishCrossRealmTrustWhenUpdateSaltFails() {
+        environment.setEnvironmentType(EnvironmentType.PUBLIC_CLOUD);
+        when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(Optional.of(environment));
+        InOrder environmentStatusVerify = inOrder(environmentStatusUpdateService);
+        doThrow(new CloudbreakServiceException("Salt update failed"))
+                .when(datahubPollerProvider)
+                .multipleFlowsPoller(anyLong(), anyList());
+        testFlow();
+
+        environmentStatusVerify.verify(environmentStatusUpdateService).updateEnvironmentStatusAndNotify(
+                any(CommonContext.class),
+                any(Payload.class),
+                eq(TRUST_SETUP_FINISH_VALIDATION_IN_PROGRESS),
+                eq(ENVIRONMENT_SETUP_FINISH_TRUST_VALIDATION_STARTED),
+                eq(TRUST_SETUP_FINISH_VALIDATION_STATE)
+        );
+        environmentStatusVerify.verify(environmentStatusUpdateService).updateEnvironmentStatusAndNotify(
+                any(CommonContext.class),
+                any(Payload.class),
+                eq(TRUST_SETUP_FINISH_IN_PROGRESS),
+                eq(ENVIRONMENT_SETUP_FINISH_TRUST_STARTED),
+                eq(TRUST_SETUP_FINISH_STATE)
+        );
+        environmentStatusVerify.verify(environmentStatusUpdateService).updateEnvironmentStatusAndNotify(
+                any(CommonContext.class),
+                any(Payload.class),
+                eq(TRUST_SETUP_FINISH_IN_PROGRESS),
+                eq(ENVIRONMENT_SETUP_FINISH_TRUST_UPDATE_STACKS),
+                eq(TRUST_SETUP_FINISH_UPDATE_STACKS_STATE)
+        );
+        environmentStatusVerify.verify(environmentStatusUpdateService).updateFailedEnvironmentStatusAndNotify(
+                any(CommonContext.class),
+                any(BaseFailedFlowEvent.class),
+                eq(TRUST_SETUP_FINISH_FAILED),
+                eq(ENVIRONMENT_SETUP_FINISH_TRUST_FAILED),
+                eq(TRUST_SETUP_FINISH_FAILED_STATE)
         );
     }
 
@@ -281,6 +352,7 @@ class EnvironmentCrossRealmTrustSetupFinishFlowIntegrationTest {
             EnvironmentCrossRealmTrustSetupFinishActions.class,
             EnvironmentCrossRealmTrustSetupFinishHandler.class,
             EnvironmentValidateCrossRealmTrustSetupFinishHandler.class,
+            EnvironmentCrossRealmTrustSetupFinishUpdateStacksHandler.class,
             WebApplicationExceptionMessageExtractor.class,
             EnvironmentCrossRealmTrustSetupFinishFlowConfig.class,
             EnvironmentReactorFlowManager.class,
@@ -342,10 +414,7 @@ class EnvironmentCrossRealmTrustSetupFinishFlowIntegrationTest {
         private FlowOperationStatisticsPersister flowOperationStatisticsPersister;
 
         @MockBean
-        private ResourceIdProvider resourceIdProvider;
-
-        @MockBean
-        private PayloadContextProvider payloadContextProvider;
+        private EnvironmentService environmentService;
 
         @Bean
         public EventBus reactor(ExecutorService threadPoolExecutor) {

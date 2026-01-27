@@ -80,7 +80,6 @@ import com.sequenceiq.cloudbreak.service.identitymapping.GcpMockAccountMappingSe
 import com.sequenceiq.cloudbreak.service.loadbalancer.LoadBalancerFqdnUtil;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsDbServerConfigurer;
 import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeService;
-import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.tag.AccountTagValidationFailed;
 import com.sequenceiq.cloudbreak.template.BlueprintProcessingException;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
@@ -104,7 +103,6 @@ import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.common.api.backup.response.BackupResponse;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
-import com.sequenceiq.common.api.type.EnvironmentType;
 import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
@@ -174,9 +172,6 @@ public class StackToTemplatePreparationObjectConverter {
 
     @Inject
     private EntitlementService entitlementService;
-
-    @Inject
-    private StackDtoService stackDtoService;
 
     @Inject
     private ExposedServiceCollector exposedServiceCollector;
@@ -299,13 +294,9 @@ public class StackToTemplatePreparationObjectConverter {
     }
 
     private Optional<TrustView> createTrustView(DetailedEnvironmentResponse environment) {
-        if (EnvironmentType.isHybridFromEnvironmentTypeString(environment.getEnvironmentType())) {
-            return freeipaClientService.findByEnvironmentCrn(environment.getCrn())
-                    .map(DescribeFreeIpaResponse::getTrust)
-                    .map(resp -> new TrustView(resp.getIp(), resp.getFqdn(), resp.getRealm()));
-        } else {
-            return Optional.empty();
-        }
+        return freeipaClientService.findByEnvironmentCrn(environment.getCrn())
+                .map(DescribeFreeIpaResponse::getTrust)
+                .map(resp -> new TrustView(resp.getIp(), resp.getFqdn(), resp.getRealm()));
     }
 
     private Map<String, String> getStackTags(StackView source) throws IOException {

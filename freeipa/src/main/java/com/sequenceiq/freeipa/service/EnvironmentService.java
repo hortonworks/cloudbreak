@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
-import com.sequenceiq.environment.api.v1.encryptionprofile.endpoint.EncryptionProfileEndpoint;
+import com.sequenceiq.common.api.type.EnvironmentType;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentEditRequest;
 
@@ -23,9 +23,6 @@ public class EnvironmentService {
 
     @Inject
     private EnvironmentEndpoint environmentEndpoint;
-
-    @Inject
-    private EncryptionProfileEndpoint encryptionProfileEndpoint;
 
     @Inject
     private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
@@ -51,5 +48,9 @@ public class EnvironmentService {
 
     public boolean isSecretEncryptionEnabled(String environmentCrn) {
         return environmentEndpoint.getByCrn(environmentCrn).isEnableSecretEncryption();
+    }
+
+    public EnvironmentType getEnvironmentType(String environmentCrn) {
+        return EnvironmentType.valueOf(environmentEndpoint.getByCrn(environmentCrn).getEnvironmentType());
     }
 }

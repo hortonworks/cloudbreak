@@ -24,7 +24,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.RepairCrossR
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.commands.TrustSetupCommandsResponse;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.crossrealm.TrustCommandType;
-import com.sequenceiq.freeipa.service.crossrealm.TrustSetupService;
+import com.sequenceiq.freeipa.service.crossrealm.TrustManagementService;
 import com.sequenceiq.freeipa.util.CrnService;
 
 @Controller
@@ -37,54 +37,54 @@ public class TrustV1Controller implements TrustV1Endpoint {
     private CrnService crnService;
 
     @Inject
-    private TrustSetupService trustSetupService;
+    private TrustManagementService trustManagementService;
 
     @Override
     @InternalOnly
     public PrepareCrossRealmTrustResponse setup(@RequestObject PrepareCrossRealmTrustRequest request, @InitiatorUserCrn String initiatorUserCrn) {
         String accountId = crnService.getCurrentAccountId();
-        return trustSetupService.setupTrust(accountId, request);
+        return trustManagementService.setupTrust(accountId, request);
     }
 
     @Override
     @InternalOnly
     public FinishSetupCrossRealmTrustResponse finishSetup(@RequestObject FinishSetupCrossRealmTrustRequest request, @InitiatorUserCrn String initiatorUserCrn) {
         String accountId = crnService.getCurrentAccountId();
-        return trustSetupService.finishTrustSetup(accountId, request);
+        return trustManagementService.finishTrustSetup(accountId, request);
     }
 
     @Override
     @CheckPermissionByResourceCrn(action = ADMIN_FREEIPA)
     public TrustSetupCommandsResponse getTrustSetupCommands(@ResourceCrn String environmentCrn) {
         String accountId = crnService.getCurrentAccountId();
-        return trustSetupService.getTrustCommands(accountId, environmentCrn, TrustCommandType.SETUP);
+        return trustManagementService.getTrustCommands(accountId, environmentCrn, TrustCommandType.SETUP);
     }
 
     @Override
     @CheckPermissionByResourceCrn(action = ADMIN_FREEIPA)
     public TrustSetupCommandsResponse getTrustCleanupCommands(@ResourceCrn String environmentCrn) {
         String accountId = crnService.getCurrentAccountId();
-        return trustSetupService.getTrustCommands(accountId, environmentCrn, TrustCommandType.CLEANUP);
+        return trustManagementService.getTrustCommands(accountId, environmentCrn, TrustCommandType.CLEANUP);
     }
 
     @Override
     @CheckPermissionByResourceCrn(action = ADMIN_FREEIPA)
     public TrustSetupCommandsResponse getTrustValidationCommands(@ResourceCrn String environmentCrn) {
         String accountId = crnService.getCurrentAccountId();
-        return trustSetupService.getTrustCommands(accountId, environmentCrn, TrustCommandType.VALIDATION);
+        return trustManagementService.getTrustCommands(accountId, environmentCrn, TrustCommandType.VALIDATION);
     }
 
     @Override
     @InternalOnly
     public CancelCrossRealmTrustResponse cancelByCrn(@ResourceCrn String environmentCrn) {
         String accountId = crnService.getCurrentAccountId();
-        return trustSetupService.breakDownTrust(accountId, environmentCrn);
+        return trustManagementService.breakDownTrust(accountId, environmentCrn);
     }
 
     @Override
     @InternalOnly
     public RepairCrossRealmTrustResponse repairByCrn(@ResourceCrn String environmentCrn) {
         String accountId = crnService.getCurrentAccountId();
-        return trustSetupService.repairTrust(accountId, environmentCrn);
+        return trustManagementService.repairTrust(accountId, environmentCrn);
     }
 }

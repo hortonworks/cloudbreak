@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.common.type.KdcType;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.environment.environment.flow.hybrid.setup.event.EnvironmentCrossRealmTrustSetupEvent;
 import com.sequenceiq.environment.environment.flow.hybrid.setup.event.EnvironmentCrossRealmTrustSetupFailedEvent;
@@ -23,6 +24,7 @@ import com.sequenceiq.environment.exception.FreeIpaOperationFailedException;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
+import com.sequenceiq.freeipa.api.v2.freeipa.stack.model.crossrealm.AddCrossRealmTrustV2Request;
 import com.sequenceiq.freeipa.api.v2.freeipa.stack.model.crossrealm.PrepareCrossRealmTrustV2ActiveDirectoryRequest;
 import com.sequenceiq.freeipa.api.v2.freeipa.stack.model.crossrealm.PrepareCrossRealmTrustV2KdcServerRequest;
 import com.sequenceiq.freeipa.api.v2.freeipa.stack.model.crossrealm.PrepareCrossRealmTrustV2MitRequest;
@@ -40,9 +42,9 @@ public class EnvironmentCrossRealmTrustSetupHandler extends ExceptionCatcherEven
     private final EnvironmentService environmentService;
 
     protected EnvironmentCrossRealmTrustSetupHandler(
-        FreeIpaService freeIpaService,
-        FreeIpaPollerService freePollerIpaService,
-        EnvironmentService environmentService
+            FreeIpaService freeIpaService,
+            FreeIpaPollerService freePollerIpaService,
+            EnvironmentService environmentService
     ) {
         this.freeIpaService = freeIpaService;
         freeIpaPollerService = freePollerIpaService;
@@ -64,10 +66,12 @@ public class EnvironmentCrossRealmTrustSetupHandler extends ExceptionCatcherEven
         LOGGER.debug("In EnvironmentCrossRealmTrustSetupHandler.accept");
         EnvironmentCrossRealmTrustSetupEvent data = event.getData();
         try {
-            environmentService.updateRemoteEnvironmentCrn(
-                    data.getAccountId(),
-                    data.getResourceCrn(),
-                    data.getRemoteEnvironmentCrn());
+            if (data.getRemoteEnvironmentCrn() != null) {
+                environmentService.updateRemoteEnvironmentCrn(
+                        data.getAccountId(),
+                        data.getResourceCrn(),
+                        data.getRemoteEnvironmentCrn());
+            }
 
             Optional<DescribeFreeIpaResponse> describe = freeIpaService.describe(data.getResourceCrn());
             if (describe.isPresent()) {
@@ -79,10 +83,17 @@ public class EnvironmentCrossRealmTrustSetupHandler extends ExceptionCatcherEven
                             freeIpa.getStatus().name());
                 } else {
                     LOGGER.info("FreeIPA will be cross realm trust setup.");
-                    freeIpaPollerService.waitForCrossRealmTrustSetup(
-                            data.getResourceId(),
-                            data.getResourceCrn(),
-                            getPrepareCrossRealmTrustRequest(data));
+                    if (data.getRemoteEnvironmentCrn() != null) {
+                        freeIpaPollerService.waitForCrossRealmTrustSetup(
+                                data.getResourceId(),
+                                data.getResourceCrn(),
+                                getPrepareCrossRealmTrustRequest(data));
+                    } else {
+                        freeIpaPollerService.waitForAddTrustForPublicCloud(
+                                data.getResourceId(),
+                                data.getResourceCrn(),
+                                getPrepareCrossRealmTrustForPublicCloudRequest(data));
+                    }
                 }
             }
             LOGGER.debug("FINISH_TRUST_SETUP_EVENT event sent");
@@ -95,25 +106,56 @@ public class EnvironmentCrossRealmTrustSetupHandler extends ExceptionCatcherEven
         }
     }
 
+    private AddCrossRealmTrustV2Request getPrepareCrossRealmTrustForPublicCloudRequest(EnvironmentCrossRealmTrustSetupEvent data) {
+        AddCrossRealmTrustV2Request prepareCrossRealmTrustRequest = new AddCrossRealmTrustV2Request();
+        switch (data.getKdcType()) {
+            case ACTIVE_DIRECTORY -> {
+                PrepareCrossRealmTrustV2ActiveDirectoryRequest ad = getPrepareCrossRealmTrustV2ActiveDirectoryRequest(data);
+                prepareCrossRealmTrustRequest.setAd(ad);
+            }
+            default -> throw new NotImplementedException(String.format("Unknown KDC type: %s.", data.getKdcType()));
+        }
+        prepareCrossRealmTrustRequest.setDnsServerIps(List.of(data.getDnsIp()));
+        prepareCrossRealmTrustRequest.setTrustSecret(data.getTrustSecret());
+        prepareCrossRealmTrustRequest.setEnvironmentCrn(data.getResourceCrn());
+        return prepareCrossRealmTrustRequest;
+    }
+
+    private static PrepareCrossRealmTrustV2MitRequest getPrepareCrossRealmTrustV2MitRequest(EnvironmentCrossRealmTrustSetupEvent data) {
+        if (data.getKdcType() == KdcType.ACTIVE_DIRECTORY) {
+            throw new IllegalArgumentException("KDC type must be MIT");
+        }
+        PrepareCrossRealmTrustV2MitRequest mit = new PrepareCrossRealmTrustV2MitRequest();
+        mit.setRealm(data.getKdcRealm());
+        PrepareCrossRealmTrustV2KdcServerRequest server = new PrepareCrossRealmTrustV2KdcServerRequest();
+        server.setFqdn(data.getKdcFqdn());
+        server.setIp(data.getKdcIp());
+        mit.setServers(List.of(server));
+        return mit;
+    }
+
+    private PrepareCrossRealmTrustV2ActiveDirectoryRequest getPrepareCrossRealmTrustV2ActiveDirectoryRequest(EnvironmentCrossRealmTrustSetupEvent data) {
+        if (data.getKdcType() == KdcType.MIT) {
+            throw new IllegalArgumentException("KDC type must be ACTIVE_DIRECTORY");
+        }
+        PrepareCrossRealmTrustV2ActiveDirectoryRequest ad = new PrepareCrossRealmTrustV2ActiveDirectoryRequest();
+        ad.setRealm(data.getKdcRealm());
+        PrepareCrossRealmTrustV2KdcServerRequest server = new PrepareCrossRealmTrustV2KdcServerRequest();
+        server.setFqdn(data.getKdcFqdn());
+        server.setIp(data.getKdcIp());
+        ad.setServers(List.of(server));
+        return ad;
+    }
+
     private PrepareCrossRealmTrustV2Request getPrepareCrossRealmTrustRequest(EnvironmentCrossRealmTrustSetupEvent data) {
         PrepareCrossRealmTrustV2Request prepareCrossRealmTrustRequest = new PrepareCrossRealmTrustV2Request();
         switch (data.getKdcType()) {
             case ACTIVE_DIRECTORY -> {
-                PrepareCrossRealmTrustV2ActiveDirectoryRequest ad = new PrepareCrossRealmTrustV2ActiveDirectoryRequest();
-                ad.setRealm(data.getKdcRealm());
-                PrepareCrossRealmTrustV2KdcServerRequest server = new PrepareCrossRealmTrustV2KdcServerRequest();
-                server.setFqdn(data.getKdcFqdn());
-                server.setIp(data.getKdcIp());
-                ad.setServers(List.of(server));
+                PrepareCrossRealmTrustV2ActiveDirectoryRequest ad = getPrepareCrossRealmTrustV2ActiveDirectoryRequest(data);
                 prepareCrossRealmTrustRequest.setAd(ad);
             }
             case MIT -> {
-                PrepareCrossRealmTrustV2MitRequest mit = new PrepareCrossRealmTrustV2MitRequest();
-                mit.setRealm(data.getKdcRealm());
-                PrepareCrossRealmTrustV2KdcServerRequest server = new PrepareCrossRealmTrustV2KdcServerRequest();
-                server.setFqdn(data.getKdcFqdn());
-                server.setIp(data.getKdcIp());
-                mit.setServers(List.of(server));
+                PrepareCrossRealmTrustV2MitRequest mit = getPrepareCrossRealmTrustV2MitRequest(data);
                 prepareCrossRealmTrustRequest.setMit(mit);
             }
             default -> throw new NotImplementedException(String.format("Unknown KDC type: %s.", data.getKdcType()));

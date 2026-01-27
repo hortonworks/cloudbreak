@@ -5,9 +5,11 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -53,6 +55,7 @@ import com.sequenceiq.freeipa.service.EnvironmentService;
 import com.sequenceiq.freeipa.service.GatewayConfigService;
 import com.sequenceiq.freeipa.service.client.CachedEncryptionProfileClientService;
 import com.sequenceiq.freeipa.service.client.CachedEnvironmentClientService;
+import com.sequenceiq.freeipa.service.crossrealm.CrossRealmTrustService;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
 import com.sequenceiq.freeipa.service.freeipa.backup.cloud.S3BackupConfigGenerator;
@@ -134,6 +137,9 @@ class FreeIpaConfigServiceTest {
     @Mock
     private CachedEncryptionProfileClientService cachedEncryptionProfileClientService;
 
+    @Mock
+    private CrossRealmTrustService crossRealmTrustService;
+
     @InjectMocks
     private FreeIpaConfigService underTest;
 
@@ -166,6 +172,7 @@ class FreeIpaConfigServiceTest {
         network.setNetworkCidrs(List.of(CIDR));
         stack.setNetwork(network);
         stack.setAccountId(ACCOUNT);
+        stack.setId(0L);
         DetailedEnvironmentResponse detailedEnvironmentResponse = mock(DetailedEnvironmentResponse.class);
         EncryptionProfileResponse encryptionProfileResponse = mock(EncryptionProfileResponse.class);
 
@@ -208,6 +215,8 @@ class FreeIpaConfigServiceTest {
         assertEquals(SeLinux.ENFORCING.name().toLowerCase(Locale.ROOT), freeIpaConfigView.getSeLinux());
         Map<String, Object> encryptionMap = freeIpaConfigView.getEncryptionConfig().toMap();
         assertEquals(TLS_VERSIONS, encryptionMap.get("tlsVersionsSpaceSeparated"));
+
+        verify(crossRealmTrustService).getByStackIdIfExists(anyLong());
     }
 
     @Test

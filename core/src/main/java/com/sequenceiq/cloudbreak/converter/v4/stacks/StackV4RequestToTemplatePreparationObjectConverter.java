@@ -80,7 +80,6 @@ import com.sequenceiq.cloudbreak.type.KerberosType;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.api.cloudstorage.AccountMappingBase;
-import com.sequenceiq.common.api.type.EnvironmentType;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
@@ -210,13 +209,9 @@ public class StackV4RequestToTemplatePreparationObjectConverter {
     }
 
     private Optional<TrustView> createTrustView(DetailedEnvironmentResponse environment) {
-        if (EnvironmentType.isHybridFromEnvironmentTypeString(environment.getEnvironmentType())) {
-            return freeipaClientService.findByEnvironmentCrn(environment.getCrn())
-                    .map(DescribeFreeIpaResponse::getTrust)
-                    .map(resp -> new TrustView(resp.getIp(), resp.getFqdn(), resp.getRealm()));
-        } else {
-            return Optional.empty();
-        }
+        return freeipaClientService.findByEnvironmentCrn(environment.getCrn())
+            .map(DescribeFreeIpaResponse::getTrust)
+            .map(resp -> new TrustView(resp.getIp(), resp.getFqdn(), resp.getRealm()));
     }
 
     private Credential getCredential(StackV4Request source, DetailedEnvironmentResponse environment) {

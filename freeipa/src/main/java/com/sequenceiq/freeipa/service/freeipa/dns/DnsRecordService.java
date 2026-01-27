@@ -33,6 +33,7 @@ import com.sequenceiq.freeipa.client.model.DnsZone;
 import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.config.FreeIpaDomainUtils;
+import com.sequenceiq.freeipa.service.crossrealm.CrossRealmTrustService;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
 import com.sequenceiq.freeipa.service.freeipa.cleanup.CleanupService;
@@ -47,6 +48,9 @@ public class DnsRecordService {
 
     @Inject
     private FreeIpaService freeIpaService;
+
+    @Inject
+    private CrossRealmTrustService crossRealmTrustService;
 
     @Inject
     private StackService stackService;
@@ -134,9 +138,10 @@ public class DnsRecordService {
 
     private void cleanupOldRecords(FreeIpaClient freeIpaClient, AddDnsARecordRequest request, Stack stack) throws FreeIpaClientException {
         FreeIpa freeIpa = freeIpaService.findByStack(stack);
+        boolean trustExists = crossRealmTrustService.getByStackIdIfExists(stack.getId()).isPresent();
         String domain = freeIpa.getDomain();
         cleanupService.removeDnsEntries(freeIpaClient, Set.of(FreeIpaDomainUtils.buildFqdn(request.getHostname(), domain)), Set.of(request.getIp()), domain,
-                stack.getEnvironmentCrn());
+                stack.getEnvironmentCrn(), trustExists);
     }
 
     private String calculateZone(String zoneFromRequest, FreeIpaAndClient freeIpaAndClient) throws FreeIpaClientException {

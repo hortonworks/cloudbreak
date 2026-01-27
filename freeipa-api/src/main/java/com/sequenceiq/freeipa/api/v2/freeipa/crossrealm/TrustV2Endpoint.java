@@ -12,6 +12,8 @@ import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaNotes;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaOperationDescriptions;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.PrepareCrossRealmTrustResponse;
+import com.sequenceiq.freeipa.api.v2.freeipa.stack.model.crossrealm.AddCrossRealmTrustV2Request;
+import com.sequenceiq.freeipa.api.v2.freeipa.stack.model.crossrealm.AddCrossRealmTrustV2Response;
 import com.sequenceiq.freeipa.api.v2.freeipa.stack.model.crossrealm.PrepareCrossRealmTrustV2Request;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -31,4 +33,14 @@ public interface TrustV2Endpoint {
             operationId = "prepareCrossRealmTrustV2", responses = @ApiResponse(responseCode = "200", description = "successful operation",
             useReturnTypeSchema = true))
     PrepareCrossRealmTrustResponse setup(@Valid PrepareCrossRealmTrustV2Request request, @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+
+    @POST
+    @Path("/add")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = FreeIpaOperationDescriptions.ADD_CROSS_REALM_TRUST, description = FreeIpaNotes.FREEIPA_NOTES,
+            operationId = "addCrossRealmTrustV2", responses = @ApiResponse(responseCode = "200", description = "successful operation",
+            useReturnTypeSchema = true))
+    AddCrossRealmTrustV2Response addTrust(
+            @Valid AddCrossRealmTrustV2Request request,
+            @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 }

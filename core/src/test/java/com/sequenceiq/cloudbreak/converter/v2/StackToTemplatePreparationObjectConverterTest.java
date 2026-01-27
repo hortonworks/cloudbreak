@@ -13,7 +13,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -850,14 +849,6 @@ public class StackToTemplatePreparationObjectConverterTest {
         assertEquals("fqdn", result.getTrustView().get().fqdn());
         assertEquals("realm", result.getTrustView().get().realm());
         assertEquals("ip", result.getTrustView().get().ip());
-    }
-
-    @Test
-    public void testConvertWhenNoHybridThenNoFreeipaCall() {
-        when(blueprintViewProvider.getBlueprintView(any())).thenReturn(getBlueprintView());
-        when(stackMock.getStack()).thenReturn(stackMock);
-        underTest.convert(stackMock);
-        verify(freeipaClientService, never()).findByEnvironmentCrn(anyString());
     }
 
     private BlueprintView getBlueprintView() {

@@ -22,7 +22,6 @@ import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
 import com.sequenceiq.cloudbreak.service.freeipa.FreeipaClientService;
 import com.sequenceiq.cloudbreak.template.kerberos.KerberosDetailService;
-import com.sequenceiq.common.api.type.EnvironmentType;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.TrustResponse;
@@ -80,24 +79,20 @@ public class KerberosPillarConfigGenerator {
     }
 
     private Map<String, Object> createTrustPillars(DetailedEnvironmentResponse detailedEnvironmentResponse) {
-        if (EnvironmentType.isHybridFromEnvironmentTypeString(detailedEnvironmentResponse.getEnvironmentType())) {
-            TrustResponse trustResponse = freeipaClient.findByEnvironmentCrn(detailedEnvironmentResponse.getCrn())
-                    .map(DescribeFreeIpaResponse::getTrust)
-                    .orElse(null);
-            if (trustResponse != null && StringUtils.isNotBlank(trustResponse.getRealm())) {
-                Set<String> sdxDomains = platformAwareSdxConnector.getSdxDomains(detailedEnvironmentResponse.getCrn());
-                LOGGER.debug("Creating trust kerberos pillar configuration for realm: {}", trustResponse.getRealm());
-                return Map.of(
-                        "extendRealms", KdcType.MIT.name().equals(trustResponse.getKdcType()),
-                        "realm", trustResponse.getRealm().toUpperCase(Locale.ROOT),
-                        "domain", trustResponse.getRealm().toLowerCase(Locale.ROOT),
-                        "kdcFqdn", trustResponse.getFqdn(),
-                        "sdxDomains", sdxDomains);
-            } else {
-                LOGGER.warn("Could not find trust realm for crn: {}", detailedEnvironmentResponse.getCrn());
-                return Map.of();
-            }
+        TrustResponse trustResponse = freeipaClient.findByEnvironmentCrn(detailedEnvironmentResponse.getCrn())
+                .map(DescribeFreeIpaResponse::getTrust)
+                .orElse(null);
+        if (trustResponse != null && StringUtils.isNotBlank(trustResponse.getRealm())) {
+            Set<String> sdxDomains = platformAwareSdxConnector.getSdxDomains(detailedEnvironmentResponse.getCrn());
+            LOGGER.debug("Creating trust kerberos pillar configuration for realm: {}", trustResponse.getRealm());
+            return Map.of(
+                    "extendRealms", KdcType.MIT.name().equals(trustResponse.getKdcType()),
+                    "realm", trustResponse.getRealm().toUpperCase(Locale.ROOT),
+                    "domain", trustResponse.getRealm().toLowerCase(Locale.ROOT),
+                    "kdcFqdn", trustResponse.getFqdn(),
+                    "sdxDomains", sdxDomains);
         } else {
+            LOGGER.info("Could not find trust realm for crn: {}", detailedEnvironmentResponse.getCrn());
             return Map.of();
         }
     }

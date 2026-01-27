@@ -1,0 +1,64 @@
+package com.sequenceiq.freeipa.api.v2.freeipa.stack.model.crossrealm;
+
+import static com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaModelDescriptions.CrossRealmTrustModelDescriptions;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Size;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.PrepareCrossRealmTrustBase;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+
+@Schema(name = "PrepareCrossRealmTrustForPublicCloudV2Request")
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class AddCrossRealmTrustV2Request extends PrepareCrossRealmTrustBase {
+
+    @Schema(description = CrossRealmTrustModelDescriptions.AD)
+    private PrepareCrossRealmTrustV2ActiveDirectoryRequest ad;
+
+    @NotEmpty
+    @Size(min = 1, max = 1)
+    @Schema(description = CrossRealmTrustModelDescriptions.DNS_IPS, requiredMode = Schema.RequiredMode.REQUIRED)
+    private List<String> dnsServerIps = new ArrayList<>();
+
+    @Schema(description = CrossRealmTrustModelDescriptions.TRUST_SECRET)
+    private String trustSecret;
+
+    public PrepareCrossRealmTrustV2ActiveDirectoryRequest getAd() {
+        return ad;
+    }
+
+    public void setAd(PrepareCrossRealmTrustV2ActiveDirectoryRequest ad) {
+        this.ad = ad;
+    }
+
+    public List<String> getDnsServerIps() {
+        return dnsServerIps;
+    }
+
+    public void setDnsServerIps(List<String> dnsServerIps) {
+        this.dnsServerIps = dnsServerIps;
+    }
+
+    public String getTrustSecret() {
+        return trustSecret;
+    }
+
+    public void setTrustSecret(String trustSecret) {
+        this.trustSecret = trustSecret;
+    }
+
+    @Override
+    public String toString() {
+        return "PrepareCrossRealmTrustForPublicCloudV2Request{" +
+                "ad=" + ad +
+                ", dnsServerIps=" + dnsServerIps +
+                '}';
+    }
+}

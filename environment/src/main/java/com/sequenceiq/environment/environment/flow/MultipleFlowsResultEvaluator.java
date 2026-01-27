@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.environment.flow;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +25,10 @@ public class MultipleFlowsResultEvaluator {
 
     public boolean anyFailed(List<FlowIdentifier> flowIds) {
         return flowIds.stream().anyMatch(this::isFlowNotFinishedOrFailed);
+    }
+
+    public List<FlowIdentifier> collectFailed(List<FlowIdentifier> flowIds) {
+        return flowIds.stream().filter(this::isFlowNotFinishedOrFailed).collect(Collectors.toList());
     }
 
     private Boolean isFlowNotFinishedOrFailed(FlowIdentifier flowId) {

@@ -5,6 +5,7 @@ import static com.sequenceiq.environment.environment.flow.hybrid.setupfinish.eve
 import static com.sequenceiq.environment.environment.flow.hybrid.setupfinish.event.EnvironmentCrossRealmTrustSetupFinishStateSelectors.FINALIZE_TRUST_SETUP_FINISH_EVENT;
 import static com.sequenceiq.environment.environment.flow.hybrid.setupfinish.event.EnvironmentCrossRealmTrustSetupFinishStateSelectors.FINISH_TRUST_SETUP_FINISH_EVENT;
 import static com.sequenceiq.environment.environment.flow.hybrid.setupfinish.event.EnvironmentCrossRealmTrustSetupFinishStateSelectors.TRUST_SETUP_FINISH_EVENT;
+import static com.sequenceiq.environment.environment.flow.hybrid.setupfinish.event.EnvironmentCrossRealmTrustSetupFinishStateSelectors.TRUST_SETUP_FINISH_UPDATE_STACKS_EVENT;
 import static com.sequenceiq.environment.environment.flow.hybrid.setupfinish.event.EnvironmentCrossRealmTrustSetupFinishStateSelectors.TRUST_SETUP_FINISH_VALIDATION_EVENT;
 
 import java.util.List;
@@ -39,6 +40,11 @@ public class EnvironmentCrossRealmTrustSetupFinishFlowConfig extends AbstractFlo
             .defaultFailureEvent()
 
             .from(EnvironmentCrossRealmTrustSetupFinishState.TRUST_SETUP_FINISH_STATE)
+            .to(EnvironmentCrossRealmTrustSetupFinishState.TRUST_SETUP_FINISH_UPDATE_STACKS_STATE)
+            .event(TRUST_SETUP_FINISH_UPDATE_STACKS_EVENT)
+            .defaultFailureEvent()
+
+            .from(EnvironmentCrossRealmTrustSetupFinishState.TRUST_SETUP_FINISH_UPDATE_STACKS_STATE)
             .to(EnvironmentCrossRealmTrustSetupFinishState.TRUST_SETUP_FINISH_FINISHED_STATE)
             .event(FINISH_TRUST_SETUP_FINISH_EVENT)
             .defaultFailureEvent()

@@ -2,6 +2,7 @@ package com.sequenceiq.freeipa.service.freeipa.dns;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -34,6 +35,7 @@ import com.sequenceiq.freeipa.client.model.DnsRecord;
 import com.sequenceiq.freeipa.client.model.DnsZone;
 import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.service.crossrealm.CrossRealmTrustService;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
 import com.sequenceiq.freeipa.service.freeipa.cleanup.CleanupService;
@@ -68,6 +70,9 @@ public class DnsRecordServiceTest {
 
     @Mock
     private FreeIpaClient freeIpaClient;
+
+    @Mock
+    private CrossRealmTrustService crossRealmTrustService;
 
     @InjectMocks
     private DnsRecordService underTest;
@@ -347,7 +352,8 @@ public class DnsRecordServiceTest {
 
         underTest.addDnsARecord(ACCOUNT_ID, request);
 
-        verify(cleanupService).removeDnsEntries(eq(freeIpaClient), anySet(), anySet(), eq(DOMAIN), eq(ENV_CRN));
+        verify(crossRealmTrustService).getByStackIdIfExists(anyLong());
+        verify(cleanupService).removeDnsEntries(eq(freeIpaClient), anySet(), anySet(), eq(DOMAIN), eq(ENV_CRN), eq(false));
         verify(freeIpaClient).addDnsARecord(DOMAIN, request.getHostname(), request.getIp(), request.isCreateReverse());
     }
 
@@ -419,7 +425,7 @@ public class DnsRecordServiceTest {
 
         underTest.addDnsARecord(ACCOUNT_ID, request);
 
-        verify(cleanupService).removeDnsEntries(eq(freeIpaClient), anySet(), anySet(), eq(DOMAIN), eq(ENV_CRN));
+        verify(cleanupService).removeDnsEntries(eq(freeIpaClient), anySet(), anySet(), eq(DOMAIN), eq(ENV_CRN), eq(false));
         verify(freeIpaClient).addDnsARecord(DOMAIN, request.getHostname(), request.getIp(), request.isCreateReverse());
     }
 

@@ -7,10 +7,12 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -40,8 +42,10 @@ import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorStateParams;
 import com.sequenceiq.cloudbreak.orchestrator.salt.utils.OrchestratorExceptionAnalyzer;
 import com.sequenceiq.cloudbreak.util.DocumentationLinkProvider;
+import com.sequenceiq.common.api.type.EnvironmentType;
 import com.sequenceiq.freeipa.entity.CrossRealmTrust;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.service.EnvironmentService;
 import com.sequenceiq.freeipa.service.crossrealm.CrossRealmTrustService;
 import com.sequenceiq.freeipa.service.freeipa.trust.operation.TaskResult;
 import com.sequenceiq.freeipa.service.freeipa.trust.operation.TaskResults;
@@ -82,6 +86,9 @@ class TrustSetupValidationServiceTest {
 
     @Mock
     private CloudbreakMessagesService messagesService;
+
+    @Mock
+    private EnvironmentService environmentService;
 
     @InjectMocks
     private TrustSetupValidationService underTest;
@@ -139,6 +146,7 @@ class TrustSetupValidationServiceTest {
                 validationResult.getErrors().get(0).message());
         Map<String, String> additionalParams = validationResult.getErrors().get(0).additionalParams();
         assertEquals("trust.validation.packageavailability.comment", additionalParams.get(COMMENT));
+        verify(environmentService).getEnvironmentType(null);
     }
 
     @Test
@@ -152,6 +160,7 @@ class TrustSetupValidationServiceTest {
         TaskResult taskResult = result.getErrors().get(0);
         assertEquals("trust.validation.dns failed", taskResult.message());
         assertEquals("DNS validation error", taskResult.additionalParams().get(COMMENT));
+        verify(environmentService).getEnvironmentType(null);
     }
 
     @Test
@@ -179,6 +188,7 @@ class TrustSetupValidationServiceTest {
         when(packageAvailabilityChecker.isPackageAvailable(STACK_ID)).thenReturn(false);
         doThrow(new RuntimeException("DNS validation error")).doThrow(new RuntimeException("Reverse DNS validation error"))
                 .when(hostOrchestrator).runOrchestratorState(any());
+        setUpEnvironmentType(4L, EnvironmentType.HYBRID);
 
         TaskResults result = underTest.validateTrustSetup(STACK_ID);
 
@@ -187,11 +197,13 @@ class TrustSetupValidationServiceTest {
         assertEquals("trust.validation.dns failed", result.getErrors().get(1).message());
         assertEquals("trust.validation.reversedns failed", result.getErrors().get(2).message());
         assertEquals("trust.validation.kerberos.failure", result.getErrors().get(3).message());
+        verify(environmentService).getEnvironmentType(anyString());
     }
 
     @Test
     void testValidateWhenNotKerberized() {
         setup(false);
+        setUpEnvironmentType(4L, EnvironmentType.HYBRID);
 
         TaskResults result = underTest.validateTrustSetup(STACK_ID);
 
@@ -208,6 +220,7 @@ class TrustSetupValidationServiceTest {
         RuntimeException e = new RuntimeException("exception");
         when(remoteEnvironmentEndpoint.getByCrn(any())).thenThrow(e);
         when(webApplicationExceptionMessageExtractor.getErrorMessage(e)).thenReturn("extractedMessage");
+        setUpEnvironmentType(4L, EnvironmentType.HYBRID);
 
         TaskResults result = underTest.validateTrustSetup(STACK_ID);
 
@@ -224,6 +237,7 @@ class TrustSetupValidationServiceTest {
         crossRealmTrust.setKdcIp("kdcip");
         crossRealmTrust.setDnsIp("dnsip");
         crossRealmTrust.setKdcType(KdcType.ACTIVE_DIRECTORY);
+        setUpEnvironmentType(STACK_ID, EnvironmentType.HYBRID);
         when(crossRealmTrustService.getByStackIdIfExists(STACK_ID)).thenReturn(Optional.of(crossRealmTrust));
 
         TaskResults result = underTest.validateTrustSetup(STACK_ID);
@@ -231,6 +245,15 @@ class TrustSetupValidationServiceTest {
         assertEquals(1L, result.getErrors().size());
         assertEquals("trust.validation.kerberos.failure", result.getErrors().get(0).message());
         assertEquals("trust.validation.kerberos.comment.missingcrn", result.getErrors().get(0).additionalParams().get(COMMENT));
+        verify(environmentService).getEnvironmentType(anyString());
+    }
+
+    private void setUpEnvironmentType(long stackId, EnvironmentType environmentType) {
+        Stack stack = mock(Stack.class);
+        when(stackService.getByIdWithListsInTransaction(stackId)).thenReturn(stack);
+        String envCrn = "crn";
+        when(stack.getEnvironmentCrn()).thenReturn(envCrn);
+        when(environmentService.getEnvironmentType(envCrn)).thenReturn(environmentType);
     }
 
     private void setup() {

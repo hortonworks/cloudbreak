@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.ha.service.NodeValidator;
 import com.sequenceiq.common.api.type.DataHubStartAction;
 import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
 import com.sequenceiq.environment.api.v1.environment.model.request.SetupCrossRealmTrustRequest;
+import com.sequenceiq.environment.api.v2.environment.model.request.AddCrossRealmTrustV2Request;
 import com.sequenceiq.environment.api.v2.environment.model.request.SetupCrossRealmTrustV2Request;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.domain.EnvironmentView;
@@ -114,6 +115,14 @@ public class EnvironmentReactorFlowManager {
             SetupCrossRealmTrustV2Request request) {
         LOGGER.info("Environment cross realm setup flow triggered with v2 request.");
         EnvironmentCrossRealmTrustSetupEvent event = crossRealmTrustSetupEventConverter.convertV2(envId, accountId, envName, envCrn, request);
+        return sendEvent(event, userCrn);
+    }
+
+    public FlowIdentifier triggerAddCrossRealmTrust(long envId, String accountId, String envName, String userCrn, String envCrn,
+            AddCrossRealmTrustV2Request request) {
+        LOGGER.info("Environment cross realm setup flow triggered with v2 request for public cloud.");
+        EnvironmentCrossRealmTrustSetupEvent event = crossRealmTrustSetupEventConverter
+                .convertAddCrossRealmTrustV2RequestToCrossRealmTrustSetupEvent(envId, accountId, envName, envCrn, request);
         return sendEvent(event, userCrn);
     }
 

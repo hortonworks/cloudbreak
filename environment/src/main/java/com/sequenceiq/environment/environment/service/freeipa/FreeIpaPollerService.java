@@ -29,6 +29,8 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.VerticalScaleResp
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SyncOperationStatus;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationStatus;
+import com.sequenceiq.freeipa.api.v2.freeipa.stack.model.crossrealm.AddCrossRealmTrustV2Request;
+import com.sequenceiq.freeipa.api.v2.freeipa.stack.model.crossrealm.AddCrossRealmTrustV2Response;
 import com.sequenceiq.freeipa.api.v2.freeipa.stack.model.crossrealm.PrepareCrossRealmTrustV2Request;
 
 @Service
@@ -135,25 +137,30 @@ public class FreeIpaPollerService {
 
     public void waitForCrossRealmTrustSetup(Long envId, String envCrn, PrepareCrossRealmTrustV2Request prepareCrossRealmTrustRequest) {
         PrepareCrossRealmTrustResponse response = freeIpaService.crossRealmPrepare(envCrn, prepareCrossRealmTrustRequest);
-        pollCrosssRealmTrustFlow(envId, envCrn, response.getFlowIdentifier(), "setup");
+        pollCrossRealmTrustFlow(envId, envCrn, response.getFlowIdentifier(), "setup");
+    }
+
+    public void waitForAddTrustForPublicCloud(Long envId, String envCrn, AddCrossRealmTrustV2Request prepareCrossRealmTrustRequest) {
+        AddCrossRealmTrustV2Response response = freeIpaService.addTrustForPublicCloud(envCrn, prepareCrossRealmTrustRequest);
+        pollCrossRealmTrustFlow(envId, envCrn, response.getFlowIdentifier(), "setup");
     }
 
     public void waitForCrossRealmTrustCancel(Long envId, String envCrn) {
         CancelCrossRealmTrustResponse response = freeIpaService.crossRealmCancel(envCrn);
-        pollCrosssRealmTrustFlow(envId, envCrn, response.getFlowIdentifier(), "cancel");
+        pollCrossRealmTrustFlow(envId, envCrn, response.getFlowIdentifier(), "cancel");
     }
 
     public void waitForCrossRealmFinish(Long envId, String envCrn, FinishSetupCrossRealmTrustRequest finishCrossRealmTrustRequest) {
         FinishSetupCrossRealmTrustResponse response = freeIpaService.crossRealmFinish(envCrn, finishCrossRealmTrustRequest);
-        pollCrosssRealmTrustFlow(envId, envCrn, response.getFlowIdentifier(), "finish");
+        pollCrossRealmTrustFlow(envId, envCrn, response.getFlowIdentifier(), "finish");
     }
 
     public void waitForCrossRealmTrustRepair(Long envId, String envCrn) {
         RepairCrossRealmTrustResponse response = freeIpaService.crossRealmRepair(envCrn);
-        pollCrosssRealmTrustFlow(envId, envCrn, response.getFlowIdentifier(), "repair");
+        pollCrossRealmTrustFlow(envId, envCrn, response.getFlowIdentifier(), "repair");
     }
 
-    private void pollCrosssRealmTrustFlow(Long envId, String envCrn, FlowIdentifier flowIdentifier, String operation) {
+    private void pollCrossRealmTrustFlow(Long envId, String envCrn, FlowIdentifier flowIdentifier, String operation) {
         if (flowIdentifier != null) {
             try {
                 Polling.stopAfterAttempt(crossRealmAttempt)

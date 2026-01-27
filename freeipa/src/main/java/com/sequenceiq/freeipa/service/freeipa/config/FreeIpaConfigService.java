@@ -18,7 +18,6 @@ import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.dto.ProxyConfig;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigDtoService;
 import com.sequenceiq.cloudbreak.tls.EncryptionProfileProvider;
-import com.sequenceiq.common.api.type.EnvironmentType;
 import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.freeipa.api.model.Backup;
@@ -28,6 +27,7 @@ import com.sequenceiq.freeipa.service.EnvironmentService;
 import com.sequenceiq.freeipa.service.GatewayConfigService;
 import com.sequenceiq.freeipa.service.client.CachedEncryptionProfileClientService;
 import com.sequenceiq.freeipa.service.client.CachedEnvironmentClientService;
+import com.sequenceiq.freeipa.service.crossrealm.CrossRealmTrustService;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
 import com.sequenceiq.freeipa.service.freeipa.dns.HybridReverseDnsZoneCalculator;
@@ -53,6 +53,9 @@ public class FreeIpaConfigService {
 
     @Inject
     private FreeIpaService freeIpaService;
+
+    @Inject
+    private CrossRealmTrustService crossRealmTrustService;
 
     @Inject
     private GatewayConfigService gatewayConfigService;
@@ -91,7 +94,8 @@ public class FreeIpaConfigService {
         Multimap<String, String> subnetWithCidr = networkService.getFilteredSubnetWithCidr(stack);
         LOGGER.debug("Subnets for reverse zone calculation : {}", subnetWithCidr);
         DetailedEnvironmentResponse environmentResponse = cachedEnvironmentClientService.getByCrn(stack.getEnvironmentCrn());
-        String reverseZones = EnvironmentType.isHybridFromEnvironmentTypeString(environmentResponse.getEnvironmentType()) ?
+        boolean trustExists = crossRealmTrustService.getByStackIdIfExists(stack.getId()).isPresent();
+        String reverseZones = trustExists ?
                 hybridReverseDnsZoneCalculator.reverseDnsZoneForCidrs(subnetWithCidr.values()) :
                 reverseDnsZoneCalculator.reverseDnsZoneForCidrs(subnetWithCidr.values());
         LOGGER.debug("Reverse zones : {}", reverseZones);

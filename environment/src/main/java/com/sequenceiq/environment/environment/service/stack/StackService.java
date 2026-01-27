@@ -46,13 +46,20 @@ public class StackService {
         this.messageExtractor = messageExtractor;
     }
 
+    public FlowIdentifier triggerSaltUpdateForStack(String stackName) {
+        try {
+            return stackV4Endpoint.updateSaltByName(0L, stackName, ThreadBasedUserCrnProvider.getAccountId(), false);
+        } catch (WebApplicationException wae) {
+            LOGGER.info("Unable to start stack update for stack {}.  Message is {}", stackName, messageExtractor.getErrorMessage(wae));
+            throw wae;
+        }
+    }
+
     public void triggerConfigUpdateForStack(String stackCrn) {
         try {
             stackV4Endpoint.updatePillarConfigurationByCrn(0L, stackCrn);
         } catch (WebApplicationException wae) {
-            LOGGER.info(String
-                .format("Unable to start config update for stack %s.  Message is %s", stackCrn,
-                    messageExtractor.getErrorMessage(wae)));
+            LOGGER.info("Unable to start config update for stack {}.  Message is {}", stackCrn, messageExtractor.getErrorMessage(wae));
             throw wae;
         }
     }
@@ -80,7 +87,7 @@ public class StackService {
                         });
             } catch (WebApplicationException e) {
                 String errorMessage = messageExtractor.getErrorMessage(e);
-                LOGGER.error(String.format("Failed update load balancer for stack %s due to: '%s'.", name, errorMessage), e);
+                LOGGER.error("Failed update load balancer for stack {} due to: '{}'.", name, errorMessage, e);
                 throw e;
             }
         }
