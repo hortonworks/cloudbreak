@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.cm;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -42,8 +41,6 @@ import com.cloudera.api.swagger.model.ApiRoleList;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.model.AltusCredential;
-import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
-import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
@@ -109,9 +106,6 @@ class ClouderaManagerMgmtTelemetryServiceTest {
 
     @Mock
     private MeteringServiceFieldResolver meteringServiceFieldResolver;
-
-    @Mock
-    private ClusterComponentConfigProvider clusterComponentConfigProvider;
 
     @Captor
     private ArgumentCaptor<ApiConfigList> apiConfigListCaptor;
@@ -258,10 +252,6 @@ class ClouderaManagerMgmtTelemetryServiceTest {
             stack.setPlatformVariant("govCloud");
         }
         if (!govCloud) {
-            ClouderaManagerRepo clouderaManagerRepo = new ClouderaManagerRepo();
-            clouderaManagerRepo.setBuildNumber("72192357");
-            when(clusterComponentConfigProvider.getClouderaManagerRepoDetails(stack.getCluster().getId()))
-                    .thenReturn(clouderaManagerRepo);
             when(clouderaManagerApiFactory.getMgmtRoleConfigGroupsResourceApi(apiClient)).thenReturn(mgmtRoleConfigGroupsResourceApi);
             CmTemplateProcessor cmTemplateProcessor = mock(CmTemplateProcessor.class);
             if (StackType.WORKLOAD.equals(stackType)) {
@@ -352,33 +342,5 @@ class ClouderaManagerMgmtTelemetryServiceTest {
                 .map(line -> line.split("="))
                 .filter(parts -> parts.length == 2)
                 .anyMatch(parts -> parts[0].equals(configKey) && parts[1].equals(configValue));
-    }
-
-    @Test
-    void testHasCdpMetadataKey() {
-        verifyCdpMetadataGbnTrue("72192360");
-        verifyCdpMetadataGbnTrue("72192358");
-        verifyCdpMetadataGbnFalse("invalid_gbn");
-        verifyCdpMetadataGbnFalse("72192357");
-        verifyCdpMetadataGbnFalse(null);
-        verifyCdpMetadataGbnFalse("");
-    }
-
-    private void verifyCdpMetadataGbnTrue(String buildGbn) {
-        ClouderaManagerRepo validRepo = new ClouderaManagerRepo();
-        validRepo.setBuildNumber(buildGbn);
-        when(clusterComponentConfigProvider.getClouderaManagerRepoDetails(stack.getCluster().getId()))
-                .thenReturn(validRepo);
-        boolean result = underTest.hasCdpMetadataKey(stack);
-        assertTrue(result);
-    }
-
-    private void verifyCdpMetadataGbnFalse(String buildGbn) {
-        ClouderaManagerRepo invalidRepo = new ClouderaManagerRepo();
-        invalidRepo.setBuildNumber(buildGbn);
-        when(clusterComponentConfigProvider.getClouderaManagerRepoDetails(stack.getCluster().getId()))
-                .thenReturn(invalidRepo);
-        boolean result = underTest.hasCdpMetadataKey(stack);
-        assertFalse(result);
     }
 }
