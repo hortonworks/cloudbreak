@@ -286,14 +286,11 @@ public class ClouderaManagerMgmtTelemetryService {
     boolean hasCdpMetadataKey(StackDtoDelegate stack) {
         ClouderaManagerRepo clouderaManagerRepo = clusterComponentConfigProvider.getClouderaManagerRepoDetails(stack.getCluster().getId());
         String currentBuildGbn = clouderaManagerRepo.getBuildNumber();
-        if (currentBuildGbn == null) {
-            return false;
-        }
         try {
             Long currentGbnLong = Long.parseLong(currentBuildGbn);
             return currentGbnLong.compareTo(CDP_METADATA_SAFETY_VALVE_BUILD_GBN) >= 0;
         } catch (Exception ex) {
-            LOGGER.warn("Invalid Build GBN found {} with exception", currentBuildGbn, ex);
+            LOGGER.warn("Invalid Build GBN found: {}", currentBuildGbn);
         }
         return false;
     }
