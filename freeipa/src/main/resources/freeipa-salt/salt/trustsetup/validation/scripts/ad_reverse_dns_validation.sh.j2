@@ -5,17 +5,17 @@ dns_server=$2
 ip_address=$3
 
 if [[ -z "$dns_name" ]]; then
-  echo "Missing active directory server domain parameter" >&2
+  echo "Missing KDC server FQDN parameter" >&2
   exit 1
 fi
 
 if [[ -z "$dns_server" ]]; then
-  echo "Missing active directory dns server ip address parameter" >&2
+  echo "Missing DNS server IP address parameter" >&2
   exit 1
 fi
 
 if [[ -z "$ip_address" ]]; then
-  echo "Missing active directory server ip address parameter" >&2
+  echo "Missing KDC server IP address parameter" >&2
   exit 1
 fi
 
