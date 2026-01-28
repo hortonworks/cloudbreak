@@ -6,6 +6,10 @@ public class CdhService {
 
     private String version;
 
+    private String displayName;
+
+    private String iconKey;
+
     private String componentNameInParcel;
 
     public String getName() {
@@ -22,6 +26,22 @@ public class CdhService {
 
     public void setVersion(String version) {
         this.version = version;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(String displayName) {
+        this.displayName = displayName;
+    }
+
+    public String getIconKey() {
+        return iconKey;
+    }
+
+    public void setIconKey(String iconKey) {
+        this.iconKey = iconKey;
     }
 
     public String getComponentNameInParcel() {

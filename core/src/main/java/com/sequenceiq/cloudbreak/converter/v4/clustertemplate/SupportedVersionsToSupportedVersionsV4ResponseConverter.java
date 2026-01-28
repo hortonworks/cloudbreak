@@ -29,6 +29,7 @@ public class SupportedVersionsToSupportedVersionsV4ResponseConverter {
                 supportedServiceV4Response.setName(service.getName());
                 supportedServiceV4Response.setDisplayName(service.getDisplayName());
                 supportedServiceV4Response.setVersion(service.getVersion());
+                supportedServiceV4Response.setIconKey(service.getIconKey());
                 services.add(supportedServiceV4Response);
             }
             supportedVersionV4Response.setServices(services);
