@@ -193,4 +193,28 @@ class UpgradeValidationServiceTest {
                 underTest.validateSelectedImageEntitledFor(accountId, image)
         );
     }
+
+    @Test
+    void testValidateSelectedImageForArchitectureWhenArchitecturesMatch() {
+        ImageInfoResponse currentImage = new ImageInfoResponse();
+        currentImage.setArchitecture("x86_64");
+        ImageInfoResponse selectedImage = new ImageInfoResponse();
+        selectedImage.setArchitecture("x86_64");
+
+        assertDoesNotThrow(() -> underTest.validateSelectedImageForArchitecture(currentImage, selectedImage));
+    }
+
+    @Test
+    void testValidateSelectedImageForArchitectureWhenArchitecturesDoNotMatch() {
+        ImageInfoResponse currentImage = new ImageInfoResponse();
+        currentImage.setArchitecture("x86_64");
+        ImageInfoResponse selectedImage = new ImageInfoResponse();
+        selectedImage.setArchitecture("arm64");
+
+        BadRequestException exception = assertThrows(BadRequestException.class,
+                () -> underTest.validateSelectedImageForArchitecture(currentImage, selectedImage));
+
+        assertEquals("Selected image using arm64 architecture and current image are using different x86_64 architecture.",
+                exception.getMessage());
+    }
 }

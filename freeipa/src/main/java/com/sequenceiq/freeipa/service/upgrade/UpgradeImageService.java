@@ -61,6 +61,7 @@ public class UpgradeImageService {
         imageInfoResponse.setCatalog(imageWrapperAndName.getLeft().getCatalogUrl());
         imageInfoResponse.setCatalogName(imageWrapperAndName.getLeft().getCatalogName());
         imageInfoResponse.setOs(imageWrapperAndName.getLeft().getImage().getOs());
+        imageInfoResponse.setArchitecture(imageWrapperAndName.getLeft().getImage().getArchitecture());
         imageInfoResponse.setId(imageWrapperAndName.getLeft().getImage().getUuid());
         return imageInfoResponse;
     }
@@ -73,6 +74,7 @@ public class UpgradeImageService {
         imageInfoResponse.setCatalogName(imageEntity.getImageCatalogName());
         imageInfoResponse.setOs(imageEntity.getOs());
         imageInfoResponse.setId(imageEntity.getImageId());
+        imageInfoResponse.setArchitecture(imageEntity.getArchitecture());
         imageInfoResponse.setDate(imageEntity.getDate());
         LOGGER.info("Current image: {}", imageInfoResponse);
         return imageInfoResponse;
