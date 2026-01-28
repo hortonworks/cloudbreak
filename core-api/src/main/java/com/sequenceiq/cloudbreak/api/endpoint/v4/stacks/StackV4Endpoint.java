@@ -200,6 +200,13 @@ public interface StackV4Endpoint {
             @QueryParam("accountId") String accountId);
 
     @GET
+    @Path("crn/{crn}/withResources")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = GET_BY_NAME_WITH_RESOURCES_IN_WORKSPACE, description = Notes.STACK_NOTES, operationId = "getStackByCrnInWorkspaceV4WithResources",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    StackV4Response getWithResourcesByCrn(@PathParam("workspaceId") Long workspaceId, @PathParam("crn") String crn, @QueryParam("entries") Set<String> entries);
+
+    @GET
     @Path("crn/{crn}")
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = GET_BY_CRN_IN_WORKSPACE, description = Notes.STACK_NOTES, operationId = "getStackByCrnInWorkspaceV4",

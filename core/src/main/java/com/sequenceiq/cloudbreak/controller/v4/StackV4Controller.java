@@ -181,6 +181,12 @@ public class StackV4Controller extends NotificationController implements StackV4
     }
 
     @Override
+    @InternalOnly
+    public StackV4Response getWithResourcesByCrn(Long workspaceId, @ResourceCrn String crn, Set<String> entries) {
+        return stackOperations.get(NameOrCrn.ofCrn(crn), ThreadBasedUserCrnProvider.getAccountId(), entries, null, true);
+    }
+
+    @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
     public StackV4Response getByCrn(Long workspaceId, @ResourceCrn String crn, Set<String> entries) {
         return stackOperations.get(NameOrCrn.ofCrn(crn), ThreadBasedUserCrnProvider.getAccountId(), entries, null, false);

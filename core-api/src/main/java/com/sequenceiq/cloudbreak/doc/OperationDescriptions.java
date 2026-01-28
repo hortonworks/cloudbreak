@@ -27,6 +27,7 @@ public class OperationDescriptions {
         public static final String LIST_BY_WORKSPACE = "list stacks for the given workspace and environment name";
         public static final String GET_BY_NAME_IN_WORKSPACE = "get stack by name in workspace";
         public static final String GET_BY_NAME_WITH_RESOURCES_IN_WORKSPACE = "get stack by name with resources in workspace";
+        public static final String GET_BY_CRN_WITH_RESOURCES_IN_WORKSPACE = "get stack by crn with resources in workspace";
         public static final String GET_BY_CRN_IN_WORKSPACE = "get stack by crn in workspace";
         public static final String GET_AUTOSCALE_BY_NAME = "get autoscale stack by name in workspace";
         public static final String GET_INTERNAL_AUTOSCALE_BY_NAME = "get internal autoscale stack by name in workspace";
