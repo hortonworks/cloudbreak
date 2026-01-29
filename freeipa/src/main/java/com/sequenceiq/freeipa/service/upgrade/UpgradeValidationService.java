@@ -2,18 +2,21 @@ package com.sequenceiq.freeipa.service.upgrade;
 
 import static java.util.function.Predicate.not;
 
+import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.common.model.OsType;
 import com.sequenceiq.freeipa.api.v1.freeipa.upgrade.model.FreeIpaUpgradeRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.upgrade.model.ImageInfoResponse;
@@ -87,10 +90,14 @@ public class UpgradeValidationService {
     }
 
     public void validateSelectedImageForArchitecture(ImageInfoResponse currentImage, ImageInfoResponse selectedImage) {
-        if (!currentImage.getArchitecture().equals(selectedImage.getArchitecture())) {
+        String currentArch = StringUtils.isNotBlank(currentImage.getArchitecture()) ?
+                currentImage.getArchitecture().toLowerCase(Locale.ROOT) : Architecture.X86_64.getName().toLowerCase(Locale.ROOT);
+        String selectedArch = StringUtils.isNotBlank(selectedImage.getArchitecture()) ?
+                selectedImage.getArchitecture().toLowerCase(Locale.ROOT) : Architecture.X86_64.getName().toLowerCase(Locale.ROOT);
+        if (!currentArch.equalsIgnoreCase(selectedArch)) {
             LOGGER.warn("Selected {} and current {} image are on different architecture", selectedImage, currentImage);
-            throw new BadRequestException("Selected image using " + selectedImage.getArchitecture()
-                    + " architecture and current image are using different " + currentImage.getArchitecture() + " architecture.");
+            throw new BadRequestException("Selected image using " + selectedArch
+                    + " architecture and current image are using different " + currentArch + " architecture.");
         }
     }
 }

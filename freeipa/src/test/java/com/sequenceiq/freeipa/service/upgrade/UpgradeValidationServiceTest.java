@@ -205,6 +205,24 @@ class UpgradeValidationServiceTest {
     }
 
     @Test
+    void testValidateSelectedImageNullArchForArchitectureWhenArchitecturesMatch() {
+        ImageInfoResponse currentImage = new ImageInfoResponse();
+        ImageInfoResponse selectedImage = new ImageInfoResponse();
+        selectedImage.setArchitecture("x86_64");
+
+        assertDoesNotThrow(() -> underTest.validateSelectedImageForArchitecture(currentImage, selectedImage));
+    }
+
+    @Test
+    void testValidateNewImageNullArchForArchitectureWhenArchitecturesMatch() {
+        ImageInfoResponse currentImage = new ImageInfoResponse();
+        currentImage.setArchitecture("x86_64");
+        ImageInfoResponse selectedImage = new ImageInfoResponse();
+
+        assertDoesNotThrow(() -> underTest.validateSelectedImageForArchitecture(currentImage, selectedImage));
+    }
+
+    @Test
     void testValidateSelectedImageForArchitectureWhenArchitecturesDoNotMatch() {
         ImageInfoResponse currentImage = new ImageInfoResponse();
         currentImage.setArchitecture("x86_64");
