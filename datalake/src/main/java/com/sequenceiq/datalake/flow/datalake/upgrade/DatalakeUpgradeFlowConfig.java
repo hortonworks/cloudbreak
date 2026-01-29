@@ -29,12 +29,12 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.datalake.flow.RetryableDatalakeFlowConfiguration;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
-import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
 @Component
 public class DatalakeUpgradeFlowConfig extends AbstractFlowConfiguration<DatalakeUpgradeState, DatalakeUpgradeEvent>
-        implements RetryableFlowConfiguration<DatalakeUpgradeEvent> {
+        implements RetryableDatalakeFlowConfiguration<DatalakeUpgradeEvent> {
 
     private static final List<Transition<DatalakeUpgradeState, DatalakeUpgradeEvent>> TRANSITIONS =
             new Transition.Builder<DatalakeUpgradeState, DatalakeUpgradeEvent>()
@@ -125,5 +125,10 @@ public class DatalakeUpgradeFlowConfig extends AbstractFlowConfiguration<Datalak
     @Override
     public DatalakeUpgradeEvent getRetryableEvent() {
         return DATALAKE_UPGRADE_FAILED_HANDLED_EVENT;
+    }
+
+    @Override
+    public List<DatalakeUpgradeEvent> getStackRetryEvents() {
+        return List.of(DATALAKE_UPGRADE_IN_PROGRESS_EVENT, DATALAKE_VM_REPLACE_IN_PROGRESS_EVENT);
     }
 }

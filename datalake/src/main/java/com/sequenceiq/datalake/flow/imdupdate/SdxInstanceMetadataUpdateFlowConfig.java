@@ -18,12 +18,12 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.datalake.flow.RetryableDatalakeFlowConfiguration;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
-import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
 @Component
 public class SdxInstanceMetadataUpdateFlowConfig extends AbstractFlowConfiguration<SdxInstanceMetadataUpdateState, SdxInstanceMetadataUpdateStateSelectors>
-        implements RetryableFlowConfiguration<SdxInstanceMetadataUpdateStateSelectors> {
+        implements RetryableDatalakeFlowConfiguration<SdxInstanceMetadataUpdateStateSelectors> {
 
     private static final List<Transition<SdxInstanceMetadataUpdateState, SdxInstanceMetadataUpdateStateSelectors>> TRANSITIONS =
             new Transition.Builder<SdxInstanceMetadataUpdateState, SdxInstanceMetadataUpdateStateSelectors>()

@@ -16,13 +16,13 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.datalake.flow.RetryableDatalakeFlowConfiguration;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.Transition.Builder;
-import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
 @Component
 public class UpdateLoadBalancerDNSFlowConfig extends AbstractFlowConfiguration<UpdateLoadBalancerDNSState, UpdateLoadBalancerDNSEvent>
-        implements RetryableFlowConfiguration<UpdateLoadBalancerDNSEvent> {
+        implements RetryableDatalakeFlowConfiguration<UpdateLoadBalancerDNSEvent> {
     private static final List<Transition<UpdateLoadBalancerDNSState, UpdateLoadBalancerDNSEvent>> TRANSITIONS =
         new Builder<UpdateLoadBalancerDNSState, UpdateLoadBalancerDNSEvent>()
         .defaultFailureEvent(UPDATE_LOAD_BALANCER_DNS_FAILED_EVENT)

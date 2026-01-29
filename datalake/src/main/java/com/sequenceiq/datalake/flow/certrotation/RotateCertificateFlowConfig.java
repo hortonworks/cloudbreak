@@ -15,12 +15,12 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.datalake.flow.RetryableDatalakeFlowConfiguration;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
-import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
 @Component
 public class RotateCertificateFlowConfig extends AbstractFlowConfiguration<RotateCertificateState, RotateCertificateStateSelectors>
-        implements RetryableFlowConfiguration<RotateCertificateStateSelectors> {
+        implements RetryableDatalakeFlowConfiguration<RotateCertificateStateSelectors> {
 
     private static final List<Transition<RotateCertificateState, RotateCertificateStateSelectors>> TRANSITIONS =
             new Transition.Builder<RotateCertificateState, RotateCertificateStateSelectors>()

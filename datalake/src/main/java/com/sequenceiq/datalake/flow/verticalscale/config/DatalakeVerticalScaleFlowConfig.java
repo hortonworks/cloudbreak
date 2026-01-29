@@ -17,14 +17,14 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.datalake.flow.RetryableDatalakeFlowConfiguration;
 import com.sequenceiq.datalake.flow.verticalscale.DatalakeVerticalScaleState;
 import com.sequenceiq.datalake.flow.verticalscale.event.DatalakeVerticalScaleStateSelectors;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
-import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
 @Component
 public class DatalakeVerticalScaleFlowConfig extends AbstractFlowConfiguration<DatalakeVerticalScaleState, DatalakeVerticalScaleStateSelectors>
-        implements RetryableFlowConfiguration<DatalakeVerticalScaleStateSelectors> {
+        implements RetryableDatalakeFlowConfiguration<DatalakeVerticalScaleStateSelectors> {
 
     private static final List<Transition<DatalakeVerticalScaleState, DatalakeVerticalScaleStateSelectors>> TRANSITIONS =
             new Transition.Builder<DatalakeVerticalScaleState, DatalakeVerticalScaleStateSelectors>()

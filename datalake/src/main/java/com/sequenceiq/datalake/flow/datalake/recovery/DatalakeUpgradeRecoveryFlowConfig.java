@@ -19,12 +19,12 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.datalake.flow.RetryableDatalakeFlowConfiguration;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
-import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
 @Component
 public class DatalakeUpgradeRecoveryFlowConfig extends AbstractFlowConfiguration<DatalakeUpgradeRecoveryState, DatalakeUpgradeRecoveryEvent>
-        implements RetryableFlowConfiguration<DatalakeUpgradeRecoveryEvent> {
+        implements RetryableDatalakeFlowConfiguration<DatalakeUpgradeRecoveryEvent> {
 
     private static final List<Transition<DatalakeUpgradeRecoveryState, DatalakeUpgradeRecoveryEvent>> TRANSITIONS =
             new Transition.Builder<DatalakeUpgradeRecoveryState, DatalakeUpgradeRecoveryEvent>()

@@ -18,12 +18,12 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.datalake.flow.RetryableDatalakeFlowConfiguration;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
-import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
 @Component
 public class SdxUpgradeDatabaseServerFlowConfig extends AbstractFlowConfiguration<SdxUpgradeDatabaseServerState, SdxUpgradeDatabaseServerStateSelectors>
-        implements RetryableFlowConfiguration<SdxUpgradeDatabaseServerStateSelectors> {
+        implements RetryableDatalakeFlowConfiguration<SdxUpgradeDatabaseServerStateSelectors> {
 
     private static final List<Transition<SdxUpgradeDatabaseServerState, SdxUpgradeDatabaseServerStateSelectors>> TRANSITIONS =
             new Transition.Builder<SdxUpgradeDatabaseServerState, SdxUpgradeDatabaseServerStateSelectors>()
@@ -79,5 +79,10 @@ public class SdxUpgradeDatabaseServerFlowConfig extends AbstractFlowConfiguratio
     @Override
     public SdxUpgradeDatabaseServerStateSelectors getRetryableEvent() {
         return SDX_UPGRADE_DATABASE_SERVER_FAILED_HANDLED_EVENT;
+    }
+
+    @Override
+    public List<SdxUpgradeDatabaseServerStateSelectors> getStackRetryEvents() {
+        return List.of(SDX_UPGRADE_DATABASE_SERVER_SUCCESS_EVENT);
     }
 }

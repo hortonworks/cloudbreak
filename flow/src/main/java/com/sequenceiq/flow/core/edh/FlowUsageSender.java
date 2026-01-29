@@ -16,7 +16,7 @@ import com.sequenceiq.flow.core.FlowState;
 import com.sequenceiq.flow.core.ResourceIdProvider;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 import com.sequenceiq.flow.core.listener.FlowTransitionContext;
-import com.sequenceiq.flow.core.metrics.FlowStateUtil;
+import com.sequenceiq.flow.core.metrics.FlowEnumUtil;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.service.flowlog.FlowLogDBService;
 
@@ -37,7 +37,7 @@ public class FlowUsageSender {
     public void send(FlowTransitionContext flowTransitionContext, String nextFlowState, String flowEvent) {
         try {
             String flowType = flowTransitionContext.getFlowType();
-            Enum<? extends FlowState> nextFlowStateEnum = FlowStateUtil.getFlowStateEnum(flowTransitionContext.getStateType(), nextFlowState, flowEvent);
+            Enum<? extends FlowState> nextFlowStateEnum = FlowEnumUtil.getFlowStateEnum(flowTransitionContext.getStateType(), nextFlowState, flowEvent);
             if (nextFlowStateEnum == null) {
                 LOGGER.debug("nextFlowStateEnum is null for flow type: '{}', flow chain type: '{}', next flow state: '{}', flow event: '{}'," +
                         " flow metrics is not recorded!", flowType, flowTransitionContext.getFlowChainType(), nextFlowState, flowEvent);

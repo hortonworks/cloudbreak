@@ -10,21 +10,21 @@ import org.junit.jupiter.api.Test;
 import com.sequenceiq.flow.core.FlowState;
 import com.sequenceiq.flow.core.config.TestFlowConfig;
 
-class FlowStateUtilTest {
+class FlowEnumUtilTest {
 
     @Test
     void getFlowStateEnumShouldReturnNullWhenNextFlowStateIsNull() {
-        assertNull(FlowStateUtil.getFlowStateEnum(TestFlowConfig.TestFlowState.class, null, null));
+        assertNull(FlowEnumUtil.getFlowStateEnum(TestFlowConfig.TestFlowState.class, null, null));
     }
 
     @Test
     void getFlowStateEnumShouldReturnNullWhenParsingEnumValueThrowsException() {
-        assertNull(FlowStateUtil.getFlowStateEnum(TestFlowConfig.TestFlowState.class, "UNKNOWN_ENUM_VALUE", null));
+        assertNull(FlowEnumUtil.getFlowStateEnum(TestFlowConfig.TestFlowState.class, "UNKNOWN_ENUM_VALUE", null));
     }
 
     @Test
     void getFlowStateEnumShouldReturnEnum() {
-        Enum<? extends FlowState> flowStateEnum = FlowStateUtil.getFlowStateEnum(TestFlowConfig.TestFlowState.class,
+        Enum<? extends FlowState> flowStateEnum = FlowEnumUtil.getFlowStateEnum(TestFlowConfig.TestFlowState.class,
                 TestFlowConfig.TestFlowState.TEST_FINISHED_STATE.name(), null);
         assertNotNull(flowStateEnum);
         assertEquals(TestFlowConfig.TestFlowState.TEST_FINISHED_STATE, flowStateEnum);

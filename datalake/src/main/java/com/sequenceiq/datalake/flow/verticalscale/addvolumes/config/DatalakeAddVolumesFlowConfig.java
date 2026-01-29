@@ -15,14 +15,14 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.datalake.flow.RetryableDatalakeFlowConfiguration;
 import com.sequenceiq.datalake.flow.verticalscale.addvolumes.DatalakeAddVolumesState;
 import com.sequenceiq.datalake.flow.verticalscale.addvolumes.event.DatalakeAddVolumesStateSelectors;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
-import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
 @Component
 public class DatalakeAddVolumesFlowConfig extends AbstractFlowConfiguration<DatalakeAddVolumesState, DatalakeAddVolumesStateSelectors>
-        implements RetryableFlowConfiguration<DatalakeAddVolumesStateSelectors> {
+        implements RetryableDatalakeFlowConfiguration<DatalakeAddVolumesStateSelectors> {
 
     private static final List<Transition<DatalakeAddVolumesState, DatalakeAddVolumesStateSelectors>> TRANSITIONS =
             new AbstractFlowConfiguration.Transition.Builder<DatalakeAddVolumesState, DatalakeAddVolumesStateSelectors>()

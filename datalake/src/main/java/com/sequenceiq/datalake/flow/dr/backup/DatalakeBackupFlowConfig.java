@@ -31,12 +31,12 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.datalake.flow.RetryableDatalakeFlowConfiguration;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
-import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
 @Component
 public class DatalakeBackupFlowConfig extends AbstractFlowConfiguration<DatalakeBackupState, DatalakeBackupEvent>
-        implements RetryableFlowConfiguration<DatalakeBackupEvent> {
+        implements RetryableDatalakeFlowConfiguration<DatalakeBackupEvent> {
 
     private static final List<Transition<DatalakeBackupState, DatalakeBackupEvent>> TRANSITIONS =
             new Transition.Builder<DatalakeBackupState, DatalakeBackupEvent>()

@@ -22,15 +22,15 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.datalake.flow.RetryableDatalakeFlowConfiguration;
 import com.sequenceiq.datalake.flow.datalake.scale.DatalakeHorizontalScaleEvent;
 import com.sequenceiq.datalake.flow.datalake.scale.DatalakeHorizontalScaleState;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.Transition.Builder;
-import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
 @Component
 public class DatalakeHorizontalScaleFlowConfig extends AbstractFlowConfiguration<DatalakeHorizontalScaleState, DatalakeHorizontalScaleEvent>
-        implements RetryableFlowConfiguration<DatalakeHorizontalScaleEvent> {
+        implements RetryableDatalakeFlowConfiguration<DatalakeHorizontalScaleEvent> {
 
     private static final List<Transition<DatalakeHorizontalScaleState, DatalakeHorizontalScaleEvent>> TRANSITIONS =
             new Builder<DatalakeHorizontalScaleState, DatalakeHorizontalScaleEvent>()

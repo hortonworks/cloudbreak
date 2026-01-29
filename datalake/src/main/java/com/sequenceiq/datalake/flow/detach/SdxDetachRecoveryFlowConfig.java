@@ -13,23 +13,28 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.datalake.flow.RetryableDatalakeFlowConfiguration;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.Transition.Builder;
-import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
 @Component
 public class SdxDetachRecoveryFlowConfig extends AbstractFlowConfiguration<SdxDetachRecoveryState, SdxDetachRecoveryEvent>
-        implements RetryableFlowConfiguration<SdxDetachRecoveryEvent> {
+        implements RetryableDatalakeFlowConfiguration<SdxDetachRecoveryEvent> {
+
     private static final List<Transition<SdxDetachRecoveryState, SdxDetachRecoveryEvent>> TRANSITIONS =
-        new Builder<SdxDetachRecoveryState, SdxDetachRecoveryEvent>()
-        .defaultFailureEvent(SDX_DETACH_RECOVERY_FAILED_EVENT)
-        .from(INIT_STATE).to(SDX_DETACH_RECOVERY_STATE)
-        .event(SDX_DETACH_RECOVERY_EVENT).noFailureEvent()
-        .from(SDX_DETACH_RECOVERY_STATE).to(FINAL_STATE)
-        .event(SDX_DETACH_RECOVERY_SUCCESS_EVENT).defaultFailureEvent()
-        .from(SDX_DETACH_RECOVERY_FAILED_STATE).to(FINAL_STATE)
-        .event(SDX_DETACH_RECOVERY_FAILURE_HANDLED_EVENT).noFailureEvent()
-        .build();
+            new Builder<SdxDetachRecoveryState, SdxDetachRecoveryEvent>()
+                    .defaultFailureEvent(SDX_DETACH_RECOVERY_FAILED_EVENT)
+
+                    .from(INIT_STATE).to(SDX_DETACH_RECOVERY_STATE)
+                    .event(SDX_DETACH_RECOVERY_EVENT).noFailureEvent()
+
+                    .from(SDX_DETACH_RECOVERY_STATE).to(FINAL_STATE)
+                    .event(SDX_DETACH_RECOVERY_SUCCESS_EVENT).defaultFailureEvent()
+
+                    .from(SDX_DETACH_RECOVERY_FAILED_STATE).to(FINAL_STATE)
+                    .event(SDX_DETACH_RECOVERY_FAILURE_HANDLED_EVENT).noFailureEvent()
+
+                    .build();
 
     private static final FlowEdgeConfig<SdxDetachRecoveryState, SdxDetachRecoveryEvent> EDGE_CONFIG =
             new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, SDX_DETACH_RECOVERY_FAILED_STATE, SDX_DETACH_RECOVERY_FAILURE_HANDLED_EVENT);

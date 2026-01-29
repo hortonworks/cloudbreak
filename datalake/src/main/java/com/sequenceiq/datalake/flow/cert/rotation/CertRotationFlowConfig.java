@@ -17,14 +17,14 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.datalake.flow.RetryableDatalakeFlowConfiguration;
 import com.sequenceiq.datalake.flow.cert.rotation.event.SdxCertRotationEvent;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.Transition.Builder;
-import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
 @Component
 public class CertRotationFlowConfig extends AbstractFlowConfiguration<SdxCertRotationState, SdxCertRotationEvent>
-        implements RetryableFlowConfiguration<SdxCertRotationEvent> {
+        implements RetryableDatalakeFlowConfiguration<SdxCertRotationEvent> {
 
     private static final List<Transition<SdxCertRotationState, SdxCertRotationEvent>> TRANSITIONS = new Builder<SdxCertRotationState, SdxCertRotationEvent>()
             .defaultFailureEvent(CERT_ROTATION_FAILED_EVENT)
@@ -83,5 +83,10 @@ public class CertRotationFlowConfig extends AbstractFlowConfiguration<SdxCertRot
     @Override
     public SdxCertRotationEvent getRetryableEvent() {
         return CERT_ROTATION_FAILED_EVENT;
+    }
+
+    @Override
+    public List<SdxCertRotationEvent> getStackRetryEvents() {
+        return List.of(CERT_ROTATION_STARTED_EVENT);
     }
 }

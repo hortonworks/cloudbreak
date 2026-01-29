@@ -36,7 +36,7 @@ public class FlowMetricSender {
             String actualFlowChainType = flowTransitionContext.getActualFlowChainType() != null ? flowTransitionContext.getActualFlowChainType() : NONE;
             String flowType = flowTransitionContext.getFlowType();
             AbstractFlowConfiguration.FlowEdgeConfig edgeConfig = flowTransitionContext.getEdgeConfig();
-            Enum nextFlowStateEnum = FlowStateUtil.getFlowStateEnum(flowTransitionContext.getStateType(), nextFlowState, flowEvent);
+            Enum nextFlowStateEnum = FlowEnumUtil.getFlowStateEnum(flowTransitionContext.getStateType(), nextFlowState, flowEvent);
             if (nextFlowStateEnum == null) {
                 LOGGER.debug("nextFlowStateEnum is null for flow type: '{}', flow chain type: '{}', next flow state: '{}', flow event: '{}'," +
                                 " flow metrics is not recorded!", flowType, flowTransitionContext.getFlowChainType(), nextFlowState, flowEvent);

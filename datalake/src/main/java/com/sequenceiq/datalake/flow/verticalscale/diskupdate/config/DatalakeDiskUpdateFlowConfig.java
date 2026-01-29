@@ -17,14 +17,14 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.datalake.flow.RetryableDatalakeFlowConfiguration;
 import com.sequenceiq.datalake.flow.verticalscale.diskupdate.DatalakeDiskUpdateState;
 import com.sequenceiq.datalake.flow.verticalscale.diskupdate.event.DatalakeDiskUpdateStateSelectors;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
-import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
 @Component
 public class DatalakeDiskUpdateFlowConfig extends AbstractFlowConfiguration<DatalakeDiskUpdateState, DatalakeDiskUpdateStateSelectors>
-        implements RetryableFlowConfiguration<DatalakeDiskUpdateStateSelectors> {
+        implements RetryableDatalakeFlowConfiguration<DatalakeDiskUpdateStateSelectors> {
 
     private static final List<Transition<DatalakeDiskUpdateState, DatalakeDiskUpdateStateSelectors>> TRANSITIONS =
             new Transition.Builder<DatalakeDiskUpdateState, DatalakeDiskUpdateStateSelectors>()

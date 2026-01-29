@@ -11,11 +11,11 @@ import static com.sequenceiq.datalake.flow.datahub.StartDatahubFlowState.START_D
 
 import java.util.List;
 
+import com.sequenceiq.datalake.flow.RetryableDatalakeFlowConfiguration;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
-import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
 public class StartDatahubFlowConfig extends AbstractFlowConfiguration<StartDatahubFlowState, StartDatahubFlowEvent>
-        implements RetryableFlowConfiguration<StartDatahubFlowEvent> {
+        implements RetryableDatalakeFlowConfiguration<StartDatahubFlowEvent> {
 
     private static final List<Transition<StartDatahubFlowState, StartDatahubFlowEvent>> TRANSITIONS =
             new Transition.Builder<StartDatahubFlowState, StartDatahubFlowEvent>()

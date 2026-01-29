@@ -3,6 +3,7 @@ package com.sequenceiq.datalake.flow.delete;
 import static com.sequenceiq.datalake.flow.delete.SdxDeleteEvent.RDS_WAIT_SUCCESS_EVENT;
 import static com.sequenceiq.datalake.flow.delete.SdxDeleteEvent.SDX_DELETE_EVENT;
 import static com.sequenceiq.datalake.flow.delete.SdxDeleteEvent.SDX_DELETE_FAILED_EVENT;
+import static com.sequenceiq.datalake.flow.delete.SdxDeleteEvent.SDX_DELETE_FAILED_HANDLED_EVENT;
 import static com.sequenceiq.datalake.flow.delete.SdxDeleteEvent.SDX_DELETE_FINALIZED_EVENT;
 import static com.sequenceiq.datalake.flow.delete.SdxDeleteEvent.SDX_STACK_DELETION_IN_PROGRESS_EVENT;
 import static com.sequenceiq.datalake.flow.delete.SdxDeleteEvent.SDX_STACK_DELETION_SUCCESS_EVENT;
@@ -20,11 +21,12 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.datalake.flow.RetryableDatalakeFlowConfiguration;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
-import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
 @Component
-public class SdxDeleteFlowConfig extends AbstractFlowConfiguration<SdxDeleteState, SdxDeleteEvent> implements RetryableFlowConfiguration<SdxDeleteEvent> {
+public class SdxDeleteFlowConfig extends AbstractFlowConfiguration<SdxDeleteState, SdxDeleteEvent>
+        implements RetryableDatalakeFlowConfiguration<SdxDeleteEvent> {
 
     private static final List<Transition<SdxDeleteState, SdxDeleteEvent>> TRANSITIONS =
             new Transition.Builder<SdxDeleteState, SdxDeleteEvent>()
@@ -63,7 +65,7 @@ public class SdxDeleteFlowConfig extends AbstractFlowConfiguration<SdxDeleteStat
             .build();
 
     private static final FlowEdgeConfig<SdxDeleteState, SdxDeleteEvent> EDGE_CONFIG =
-            new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, SDX_DELETION_FAILED_STATE, SdxDeleteEvent.SDX_DELETE_FAILED_HANDLED_EVENT);
+            new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, SDX_DELETION_FAILED_STATE, SDX_DELETE_FAILED_HANDLED_EVENT);
 
     public SdxDeleteFlowConfig() {
         super(SdxDeleteState.class, SdxDeleteEvent.class);
@@ -98,6 +100,6 @@ public class SdxDeleteFlowConfig extends AbstractFlowConfiguration<SdxDeleteStat
 
     @Override
     public SdxDeleteEvent getRetryableEvent() {
-        return SdxDeleteEvent.SDX_DELETE_FAILED_HANDLED_EVENT;
+        return SDX_DELETE_FAILED_HANDLED_EVENT;
     }
 }

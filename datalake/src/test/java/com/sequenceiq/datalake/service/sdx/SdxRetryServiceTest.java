@@ -16,19 +16,24 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 
 import jakarta.ws.rs.InternalServerErrorException;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.datalake.entity.SdxCluster;
+import com.sequenceiq.datalake.flow.RetryableDatalakeFlowConfiguration;
 import com.sequenceiq.datalake.flow.create.SdxCreateFlowConfig;
 import com.sequenceiq.datalake.flow.dr.restore.DatalakeRestoreFlowConfig;
 import com.sequenceiq.flow.core.Flow2Handler;
@@ -38,7 +43,7 @@ import com.sequenceiq.flow.domain.StateStatus;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("SDX retry service service tests")
-public class SdxRetryServiceTest {
+class SdxRetryServiceTest {
 
     @Mock
     private Flow2Handler flow2Handler;
@@ -46,11 +51,20 @@ public class SdxRetryServiceTest {
     @Mock
     private StackV4Endpoint stackV4Endpoint;
 
+    @Spy
+    private List<RetryableDatalakeFlowConfiguration> retryableDatalakeFlowConfigurations = new ArrayList<>();
+
     @InjectMocks
-    private SdxRetryService sdxRetryService;
+    private SdxRetryService underTest;
+
+    @BeforeEach
+    void setUp() {
+        retryableDatalakeFlowConfigurations.add(new SdxCreateFlowConfig());
+        underTest.init();
+    }
 
     @Test
-    public void noRetryAndNoRestartFlowIfStateSuccessful() {
+    void noRetryAndNoRestartFlowIfStateSuccessful() {
         SdxCluster sdxCluster = new SdxCluster();
         sdxCluster.setId(1L);
         sdxCluster.setClusterName("sdxclustername");
@@ -67,25 +81,25 @@ public class SdxRetryServiceTest {
         }).when(flow2Handler).retryLastFailedFlow(anyLong(), any());
         when(flow2Handler.getFirstRetryableStateLogfromLatestFlow(anyLong())).thenReturn(successfulFlowLog);
 
-        sdxRetryService.retrySdx(sdxCluster);
+        underTest.retrySdx(sdxCluster);
 
         verify(stackV4Endpoint, times(0)).retry(any(), any(), anyString());
     }
 
     @Test
-    public void noRetryForEmptyFlowLog() {
+    void noRetryForEmptyFlowLog() {
         SdxCluster sdxCluster = new SdxCluster();
         sdxCluster.setId(1L);
         sdxCluster.setClusterName("sdxclustername");
         when(flow2Handler.getFirstRetryableStateLogfromLatestFlow(anyLong())).thenThrow(new InternalServerErrorException());
 
-        assertThrows(InternalServerErrorException.class, () -> sdxRetryService.retrySdx(sdxCluster));
+        assertThrows(InternalServerErrorException.class, () -> underTest.retrySdx(sdxCluster));
 
         verify(stackV4Endpoint, times(0)).retry(any(), any(), anyString());
     }
 
     @Test
-    public void retryAndRestartFlowIfStackCreationInProgressWasTheLastFailedState() {
+    void retryAndRestartFlowIfStackCreationInProgressWasTheLastFailedState() {
         SdxCluster sdxCluster = new SdxCluster();
         sdxCluster.setId(1L);
         sdxCluster.setClusterName("sdxclustername");
@@ -102,13 +116,13 @@ public class SdxRetryServiceTest {
             return null;
         }).when(flow2Handler).retryLastFailedFlow(anyLong(), any());
         when(flow2Handler.getFirstRetryableStateLogfromLatestFlow(anyLong())).thenReturn(successfulFlowLog);
-        sdxRetryService.retrySdx(sdxCluster);
+        underTest.retrySdx(sdxCluster);
 
         verify(stackV4Endpoint, times(1)).retry(any(), eq("sdxclustername"), anyString());
     }
 
     @Test
-    public void retryOnBackupRestoreFailure() {
+    void retryOnBackupRestoreFailure() {
         SdxCluster sdxCluster = new SdxCluster();
         sdxCluster.setId(1L);
         sdxCluster.setClusterName("sdxclustername");
@@ -121,13 +135,13 @@ public class SdxRetryServiceTest {
         successfulFlowLog.setFlowType(ClassValue.of(DatalakeRestoreFlowConfig.class));
         when(flow2Handler.getFirstRetryableStateLogfromLatestFlow(anyLong())).thenReturn(successfulFlowLog);
 
-        sdxRetryService.retrySdx(sdxCluster);
+        underTest.retrySdx(sdxCluster);
 
         verify(flow2Handler, times(1)).retryLastFailedFlowFromStart(any());
     }
 
     @Test
-    public void retryOnBackupBackupFailure() {
+    void retryOnBackupBackupFailure() {
         SdxCluster sdxCluster = new SdxCluster();
         sdxCluster.setId(1L);
         sdxCluster.setClusterName("sdxclustername");
@@ -140,7 +154,7 @@ public class SdxRetryServiceTest {
         successfulFlowLog.setFlowType(ClassValue.of(DatalakeRestoreFlowConfig.class));
         when(flow2Handler.getFirstRetryableStateLogfromLatestFlow(anyLong())).thenReturn(successfulFlowLog);
 
-        sdxRetryService.retrySdx(sdxCluster);
+        underTest.retrySdx(sdxCluster);
         verify(flow2Handler, times(1)).retryLastFailedFlowFromStart(any());
     }
 }

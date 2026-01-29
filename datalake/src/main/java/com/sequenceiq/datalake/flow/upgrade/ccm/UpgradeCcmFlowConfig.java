@@ -15,12 +15,12 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.datalake.flow.RetryableDatalakeFlowConfiguration;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
-import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
 @Component
 public class UpgradeCcmFlowConfig extends AbstractFlowConfiguration<UpgradeCcmState, UpgradeCcmStateSelectors>
-        implements RetryableFlowConfiguration<UpgradeCcmStateSelectors> {
+        implements RetryableDatalakeFlowConfiguration<UpgradeCcmStateSelectors> {
 
     private static final List<Transition<UpgradeCcmState, UpgradeCcmStateSelectors>> TRANSITIONS =
             new Transition.Builder<UpgradeCcmState, UpgradeCcmStateSelectors>()

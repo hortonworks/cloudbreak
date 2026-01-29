@@ -6,41 +6,47 @@ import static com.sequenceiq.datalake.flow.cert.renew.SdxCertRenewalState.CERT_R
 import static com.sequenceiq.datalake.flow.cert.renew.SdxCertRenewalState.FINAL_STATE;
 import static com.sequenceiq.datalake.flow.cert.renew.SdxCertRenewalState.INIT_STATE;
 import static com.sequenceiq.datalake.flow.cert.renew.SdxCertRenewalState.START_CERT_RENEWAL_STATE;
+import static com.sequenceiq.datalake.flow.cert.renew.event.SdxCertRenewalEvent.CERT_RENEWAL_FAILED_EVENT;
+import static com.sequenceiq.datalake.flow.cert.renew.event.SdxCertRenewalEvent.CERT_RENEWAL_FAILURE_HANDLED_EVENT;
+import static com.sequenceiq.datalake.flow.cert.renew.event.SdxCertRenewalEvent.CERT_RENEWAL_FINALIZED_EVENT;
+import static com.sequenceiq.datalake.flow.cert.renew.event.SdxCertRenewalEvent.CERT_RENEWAL_FINISHED_EVENT;
+import static com.sequenceiq.datalake.flow.cert.renew.event.SdxCertRenewalEvent.CERT_RENEWAL_STARTED_EVENT;
+import static com.sequenceiq.datalake.flow.cert.renew.event.SdxCertRenewalEvent.RENEW_CERT_EVENT;
 
 import java.util.List;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.datalake.flow.RetryableDatalakeFlowConfiguration;
 import com.sequenceiq.datalake.flow.cert.renew.event.SdxCertRenewalEvent;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
-import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
 @Component
 public class CertRenewalFlowConfig extends AbstractFlowConfiguration<SdxCertRenewalState, SdxCertRenewalEvent>
-        implements RetryableFlowConfiguration<SdxCertRenewalEvent> {
+        implements RetryableDatalakeFlowConfiguration<SdxCertRenewalEvent> {
 
     private static final List<Transition<SdxCertRenewalState, SdxCertRenewalEvent>> TRANSITIONS =
             new Transition.Builder<SdxCertRenewalState, SdxCertRenewalEvent>()
-                    .defaultFailureEvent(SdxCertRenewalEvent.CERT_RENEWAL_FAILED_EVENT)
+                    .defaultFailureEvent(CERT_RENEWAL_FAILED_EVENT)
 
                     .from(INIT_STATE)
                     .to(START_CERT_RENEWAL_STATE)
-                    .event(SdxCertRenewalEvent.RENEW_CERT_EVENT)
+                    .event(RENEW_CERT_EVENT)
                     .defaultFailureEvent()
 
                     .from(START_CERT_RENEWAL_STATE)
                     .to(CERT_RENEWAL_IN_PROGRESS_STATE)
-                    .event(SdxCertRenewalEvent.CERT_RENEWAL_STARTED_EVENT)
+                    .event(CERT_RENEWAL_STARTED_EVENT)
                     .defaultFailureEvent()
 
                     .from(CERT_RENEWAL_IN_PROGRESS_STATE)
                     .to(CERT_RENEWAL_FINISHED_STATE)
-                    .event(SdxCertRenewalEvent.CERT_RENEWAL_FINISHED_EVENT)
+                    .event(CERT_RENEWAL_FINISHED_EVENT)
                     .defaultFailureEvent()
 
                     .from(CERT_RENEWAL_FINISHED_STATE)
                     .to(FINAL_STATE)
-                    .event(SdxCertRenewalEvent.CERT_RENEWAL_FINALIZED_EVENT)
+                    .event(CERT_RENEWAL_FINALIZED_EVENT)
                     .defaultFailureEvent()
 
                     .build();
@@ -56,7 +62,7 @@ public class CertRenewalFlowConfig extends AbstractFlowConfiguration<SdxCertRene
 
     @Override
     public FlowEdgeConfig<SdxCertRenewalState, SdxCertRenewalEvent> getEdgeConfig() {
-        return new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, CERT_RENEWAL_FAILED_STATE, SdxCertRenewalEvent.CERT_RENEWAL_FAILURE_HANDLED_EVENT);
+        return new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, CERT_RENEWAL_FAILED_STATE, CERT_RENEWAL_FAILURE_HANDLED_EVENT);
     }
 
     @Override
@@ -66,7 +72,7 @@ public class CertRenewalFlowConfig extends AbstractFlowConfiguration<SdxCertRene
 
     @Override
     public SdxCertRenewalEvent[] getInitEvents() {
-        return new SdxCertRenewalEvent[]{SdxCertRenewalEvent.RENEW_CERT_EVENT};
+        return new SdxCertRenewalEvent[]{RENEW_CERT_EVENT};
     }
 
     @Override
@@ -76,6 +82,11 @@ public class CertRenewalFlowConfig extends AbstractFlowConfiguration<SdxCertRene
 
     @Override
     public SdxCertRenewalEvent getRetryableEvent() {
-        return SdxCertRenewalEvent.CERT_RENEWAL_FAILED_EVENT;
+        return CERT_RENEWAL_FAILED_EVENT;
+    }
+
+    @Override
+    public List<SdxCertRenewalEvent> getStackRetryEvents() {
+        return List.of(CERT_RENEWAL_STARTED_EVENT);
     }
 }

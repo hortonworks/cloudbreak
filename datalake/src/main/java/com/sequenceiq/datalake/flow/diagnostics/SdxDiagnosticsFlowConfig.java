@@ -17,13 +17,13 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.datalake.flow.RetryableDatalakeFlowConfiguration;
 import com.sequenceiq.flow.api.model.operation.OperationType;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
-import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
 @Component
 public class SdxDiagnosticsFlowConfig extends AbstractFlowConfiguration<SdxDiagnosticsState, SdxDiagnosticsEvent>
-        implements RetryableFlowConfiguration<SdxDiagnosticsEvent> {
+        implements RetryableDatalakeFlowConfiguration<SdxDiagnosticsEvent> {
 
     private static final List<Transition<SdxDiagnosticsState, SdxDiagnosticsEvent>> TRANSITIONS =
             new Transition.Builder<SdxDiagnosticsState, SdxDiagnosticsEvent>()

@@ -15,14 +15,14 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.datalake.flow.RetryableDatalakeFlowConfiguration;
 import com.sequenceiq.datalake.flow.modifyselinux.DatalakeModifySeLinuxState;
 import com.sequenceiq.datalake.flow.modifyselinux.event.DatalakeModifySeLinuxStateSelectors;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
-import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
 @Component
 public class DatalakeModifySeLinuxFlowConfig extends AbstractFlowConfiguration<DatalakeModifySeLinuxState, DatalakeModifySeLinuxStateSelectors>
-        implements RetryableFlowConfiguration<DatalakeModifySeLinuxStateSelectors> {
+        implements RetryableDatalakeFlowConfiguration<DatalakeModifySeLinuxStateSelectors> {
 
     private static final List<Transition<DatalakeModifySeLinuxState, DatalakeModifySeLinuxStateSelectors>> TRANSITIONS =
             new Transition.Builder<DatalakeModifySeLinuxState, DatalakeModifySeLinuxStateSelectors>()
