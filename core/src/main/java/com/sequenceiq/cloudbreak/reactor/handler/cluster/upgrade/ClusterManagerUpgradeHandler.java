@@ -9,7 +9,6 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.cluster.ClusterManagerUpgradeManagementService;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.ClusterUpgradeService;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ClusterManagerUpgradeRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ClusterManagerUpgradeSuccess;
@@ -24,9 +23,6 @@ public class ClusterManagerUpgradeHandler extends ExceptionCatcherEventHandler<C
 
     @Inject
     private ClusterManagerUpgradeManagementService clusterManagerUpgradeManagementService;
-
-    @Inject
-    private ClusterUpgradeService clusterUpgradeService;
 
     @Override
     public String selector() {
@@ -43,9 +39,7 @@ public class ClusterManagerUpgradeHandler extends ExceptionCatcherEventHandler<C
         LOGGER.debug("Accepting Cluster Manager upgrade event..");
         ClusterManagerUpgradeRequest request = event.getData();
         try {
-            boolean runtimeUpgradeNecessary = clusterUpgradeService.isRuntimeUpgradeNecessary(request.getUpgradeCandidateProducts());
-            clusterManagerUpgradeManagementService.upgradeClusterManager(request.getResourceId(), request.isRollingUpgradeEnabled(), runtimeUpgradeNecessary,
-                    request.getTargetRuntimeVersion());
+            clusterManagerUpgradeManagementService.upgradeClusterManager(request);
             return new ClusterManagerUpgradeSuccess(request.getResourceId(), request.getUpgradeCandidateProducts());
         } catch (Exception e) {
             LOGGER.info("Cluster Manager upgrade event failed", e);

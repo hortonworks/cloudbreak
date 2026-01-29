@@ -18,13 +18,11 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.ClusterHostServiceRunner;
-import com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator.CsdParcelDecorator;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
-import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 
@@ -39,9 +37,6 @@ class ClusterManagerUpgradeServiceTest {
 
     @Mock
     private ClusterHostServiceRunner clusterHostServiceRunner;
-
-    @Mock
-    private CsdParcelDecorator csdParcelDecorator;
 
     @Mock
     private StackUtil stackUtil;
@@ -81,7 +76,7 @@ class ClusterManagerUpgradeServiceTest {
     }
 
     @Test
-    public void testUpgradeClusterManagerShouldNotAddCsdToPillarWhenTheClusterTypeIsDataLake() throws CloudbreakOrchestratorException, CloudbreakException {
+    public void testUpgradeClusterManagerShouldNotAddCsdToPillarWhenTheClusterTypeIsDataLake() throws CloudbreakOrchestratorException {
         stack.setType(StackType.DATALAKE);
 
         underTest.upgradeClouderaManager(stackDto, clouderaManagerRepo);
@@ -91,11 +86,10 @@ class ClusterManagerUpgradeServiceTest {
         verify(hostOrchestrator, times(1)).upgradeClusterManager(any(), any(), any(), any(), any());
         verify(clusterHostServiceRunner, times(1)).decoratePillarWithClouderaManagerRepo(any(), any(), any());
         verify(clusterHostServiceRunner, times(1)).createPillarWithClouderaManagerSettings(any(), any(), any());
-        verify(csdParcelDecorator, times(1)).decoratePillarWithCsdParcels(any(), any());
     }
 
     @Test
-    public void testUpgradeClusterManagerShouldAddCsdToPillarWhenTheClusterTypeIsWorkload() throws CloudbreakOrchestratorException, CloudbreakException {
+    public void testUpgradeClusterManagerShouldAddCsdToPillarWhenTheClusterTypeIsWorkload() throws CloudbreakOrchestratorException {
         stack.setType(StackType.WORKLOAD);
 
         underTest.upgradeClouderaManager(stackDto, clouderaManagerRepo);
@@ -105,7 +99,6 @@ class ClusterManagerUpgradeServiceTest {
         verify(hostOrchestrator, times(1)).upgradeClusterManager(any(), any(), any(), any(), any());
         verify(clusterHostServiceRunner, times(1)).decoratePillarWithClouderaManagerRepo(any(), any(), any());
         verify(clusterHostServiceRunner, times(1)).createPillarWithClouderaManagerSettings(any(), any(), any());
-        verify(csdParcelDecorator, times(1)).decoratePillarWithCsdParcels(any(), any());
     }
 
 }
