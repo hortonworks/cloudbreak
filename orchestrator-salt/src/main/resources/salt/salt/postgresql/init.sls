@@ -31,8 +31,7 @@
 
 include:
   {%- if postgres_version in [11, 14, 17] %}
-  {%- set pg_version = "pg" ~ postgres_version %}
-  {%- if not salt['file.file_exists']('/usr/' ~ pg_version ~ '/bin/psql') %}
+  {%- if not salt['file.file_exists']('/usr/pgsql-' ~ postgres_version ~ '/bin/psql') %}
   - postgresql.pg-install
   {%- endif %}
   - postgresql.pg-alternatives
