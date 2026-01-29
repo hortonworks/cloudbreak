@@ -13,11 +13,16 @@
 {%- do salt.log.debug("log_running_postgres_version " ~ running_postgres_version) %}
 
   {%- if new_postgres_version | int in [11, 14, 17] %}
-  {%- set pg_version = "pg" ~ new_postgres_version %}
-  {%- if not salt['file.file_exists']('/usr/' ~ pg_version ~ '/bin/psql') %}
-include:
-  - postgresql.pg-install
-{%- endif %}
+install_target_postgres_version:
+  module.run:
+    - name: state.sls
+    - mods: postgresql.pg-install
+    - kwargs:
+        pillar:
+          postgres:
+            postgres_version: {{ new_postgres_version }}
+    # 1. Don't run if the destination binary already exists (File check)
+    - unless: test -f /usr/pgsql-{{ new_postgres_version }}/bin/psql
 {%- endif %}
 
 {% if running_postgres_version == original_postgres_version %}
