@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.ClusterUpgradeService;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ClusterManagerUpgradeRequest;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
@@ -45,14 +46,18 @@ public class ClusterManagerUpgradeManagementService {
     @Inject
     private ClusterManagerUpgradeService clusterManagerUpgradeService;
 
-    public void upgradeClusterManager(Long stackId, boolean rollingUpgradeEnabled, boolean runtimeUpgradeNecessary, String targetRuntimeVersion)
+    @Inject
+    private ClouderaManagerCsdDownloaderService clouderaManagerCsdDownloaderService;
+
+    public void upgradeClusterManager(ClusterManagerUpgradeRequest request)
             throws CloudbreakOrchestratorException, CloudbreakException {
-        StackDto stackDto = stackDtoService.getById(stackId);
+        StackDto stackDto = stackDtoService.getById(request.getResourceId());
         ClouderaManagerRepo clouderaManagerRepo = clusterComponentConfigProvider.getClouderaManagerRepoDetails(stackDto.getCluster().getId());
         boolean clusterManagerUpgradeNecessary = isClusterManagerUpgradeNecessary(clouderaManagerRepo.getFullVersion(), stackDto);
-        stopClusterServicesIfNecessary(rollingUpgradeEnabled, runtimeUpgradeNecessary, stackDto, targetRuntimeVersion);
+        clouderaManagerCsdDownloaderService.downloadCsdFiles(stackDto, clusterManagerUpgradeNecessary, request.getUpgradeCandidateProducts());
+        stopClusterServicesIfNecessary(request, stackDto);
         if (clusterManagerUpgradeNecessary) {
-            clusterUpgradeService.upgradeClusterManager(stackId);
+            clusterUpgradeService.upgradeClusterManager(stackDto.getId());
             clusterManagerUpgradeService.upgradeClouderaManager(stackDto, clouderaManagerRepo);
             validateCmVersionAfterUpgrade(stackDto, clouderaManagerRepo);
             startClusterManagerServices(stackDto);
@@ -95,8 +100,11 @@ public class ClusterManagerUpgradeManagementService {
         return Strings.CS.removeEnd(version, "p");
     }
 
-    private void stopClusterServicesIfNecessary(boolean rollingUpgradeEnabled, boolean runtimeUpgradeNecessary, StackDto stackDto, String targetRuntimeVersion)
+    private void stopClusterServicesIfNecessary(ClusterManagerUpgradeRequest request, StackDto stackDto)
             throws CloudbreakException {
+        String targetRuntimeVersion = request.getTargetRuntimeVersion();
+        boolean runtimeUpgradeNecessary = clusterUpgradeService.isRuntimeUpgradeNecessary(request.getUpgradeCandidateProducts());
+        boolean rollingUpgradeEnabled = request.isRollingUpgradeEnabled();
         boolean skipStopForDlUpgradeTo732 = stackDto.getStack().isDatalake()
                 && StringUtils.isNotBlank(targetRuntimeVersion)
                 && CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited(targetRuntimeVersion, CMRepositoryVersionUtil.CLOUDERA_STACK_VERSION_7_3_2);

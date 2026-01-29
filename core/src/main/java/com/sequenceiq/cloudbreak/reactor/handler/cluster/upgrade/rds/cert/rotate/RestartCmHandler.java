@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.rds.cert.rotate.RotateRdsCertificateService;
+import com.sequenceiq.cloudbreak.core.cluster.ClusterManagerRestartService;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.rotaterdscert.RestartCmRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.rotaterdscert.RestartCmResult;
@@ -22,7 +22,7 @@ public class RestartCmHandler extends ExceptionCatcherEventHandler<RestartCmRequ
     private static final Logger LOGGER = LoggerFactory.getLogger(RestartCmHandler.class);
 
     @Inject
-    private RotateRdsCertificateService rotateRdsCertificateService;
+    private ClusterManagerRestartService clusterManagerRestartService;
 
     @Override
     public String selector() {
@@ -37,8 +37,9 @@ public class RestartCmHandler extends ExceptionCatcherEventHandler<RestartCmRequ
     @Override
     public Selectable doAccept(HandlerEvent<RestartCmRequest> event) {
         RestartCmRequest request = event.getData();
+        LOGGER.debug("Restarting Cloudera Manager {}", request);
         Long stackId = request.getResourceId();
-        rotateRdsCertificateService.restartCm(stackId);
+        clusterManagerRestartService.restartClouderaManager(stackId);
         return new RestartCmResult(stackId, request.getRotateRdsCertificateType());
     }
 }

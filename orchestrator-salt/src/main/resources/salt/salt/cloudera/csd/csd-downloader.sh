@@ -2,9 +2,6 @@
 
 set -e
 
-mkdir -p /opt/cloudera/csd
-cd /opt/cloudera/csd
-
 {% if salt['pillar.get']('cloudera-manager:csd-urls') %}
 csdUrls=({%- for url in salt['pillar.get']('cloudera-manager:csd-urls') -%}
 {{ url + " " }}
@@ -14,6 +11,10 @@ csdUrls=({%- for url in salt['pillar.get']('cloudera-manager:csd-urls') -%}
 CREDENTIAL="{{ salt['pillar.get']('cloudera-manager:paywall_username') }}:{{ salt['pillar.get']('cloudera-manager:paywall_password') }}"
 echo "$(date '+%d/%m/%Y %H:%M:%S') - Paywall credential found " |& tee -a /var/log/csd_downloader.log
 {%- endif %}
+
+rm -rf /opt/cloudera/csd
+mkdir -p /opt/cloudera/csd
+cd /opt/cloudera/csd
 
 for url in ${csdUrls[@]}
 do

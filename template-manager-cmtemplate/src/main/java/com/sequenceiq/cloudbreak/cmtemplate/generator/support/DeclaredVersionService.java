@@ -1,6 +1,9 @@
 package com.sequenceiq.cloudbreak.cmtemplate.generator.support;
 
+import static org.apache.commons.lang3.StringUtils.trimToNull;
+
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 import jakarta.inject.Inject;
@@ -50,16 +53,20 @@ public class DeclaredVersionService {
             SupportedService supportedService = new SupportedService();
             supportedService.setName(service.getServiceType());
 
-            for (CdhService cdhService : cdhServices) {
-                if (cdhService.getName().equals(service.getServiceType())) {
-                    supportedService.setVersion(cdhService.getVersion());
-                }
-            }
-
             for (ServiceConfig serviceConfig : cmTemplateGeneratorConfigurationResolver.serviceConfigs()) {
                 if (serviceConfig.getName().equals(service.getServiceType())) {
                     supportedService.setDisplayName(serviceConfig.getDisplayName());
                     supportedService.setComponentNameInParcel(serviceConfig.getComponentNameInParcel());
+                    // for backward compatibility UI will use name for icons in case of older runtimes
+                    supportedService.setIconKey(serviceConfig.getName());
+                }
+            }
+
+            for (CdhService cdhService : cdhServices) {
+                if (cdhService.getName().equals(service.getServiceType())) {
+                    supportedService.setVersion(cdhService.getVersion());
+                    Optional.ofNullable(trimToNull(cdhService.getDisplayName())).ifPresent(supportedService::setDisplayName);
+                    Optional.ofNullable(trimToNull(cdhService.getIconKey())).ifPresent(supportedService::setIconKey);
                 }
             }
 

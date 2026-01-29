@@ -14,7 +14,6 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -32,7 +31,6 @@ import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterModificationService;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.PostgresConfigService;
-import com.sequenceiq.cloudbreak.core.cluster.ClusterManagerDefaultConfigAdjuster;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.rds.cert.check.DatahubCertificateChecker;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.rds.cert.rotate.RotateRdsCertificateService;
 import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.ExternalDatabaseService;
@@ -88,9 +86,6 @@ class RotateRdsCertificateServiceTest {
 
     @Mock
     private PostgresConfigService postgresConfigService;
-
-    @Mock
-    private ClusterManagerDefaultConfigAdjuster clusterManagerDefaultConfigAdjuster;
 
     @Mock
     private SaltStateParamsService saltStateParamsService;
@@ -301,30 +296,9 @@ class RotateRdsCertificateServiceTest {
     }
 
     @Test
-    public void testRestartCmWhenExceptionOccurred() {
-        Long stackId = 1L;
-        StackDto stackDto = mock(StackDto.class);
-        StackView stackView = mock(StackView.class);
-        when(stackView.getType()).thenReturn(StackType.DATALAKE);
-        when(stackDto.getName()).thenReturn("stack");
-        when(stackDto.getStack()).thenReturn(stackView);
-
-        when(stackDtoService.getById(stackId)).thenReturn(stackDto);
-
-        CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class,
-                () -> underTest.restartCm(stackId));
-
-        verify(stackDtoService).getById(stackId);
-        verifyNoMoreInteractions(stackDtoService);
-        assertEquals("Failed to restart Cloudera Manager on host for stack Data Lake.", exception.getMessage());
-    }
-
-    @Test
     public void testRollingRestartServices() {
         Long stackId = 1L;
         Stack stack = mock(Stack.class);
-        StackDto stackDto = mock(StackDto.class);
-        StackView stackView = mock(StackView.class);
         ClusterApi clusterApiConnector = mock(ClusterApi.class);
         ClusterModificationService clusterModificationService = mock(ClusterModificationService.class);
         doNothing().when(clusterModificationService).rollingRestartServices(false);
