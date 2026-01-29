@@ -2,18 +2,26 @@ package com.sequenceiq.it.cloudbreak.testcase.e2e.sdx;
 
 import static java.lang.String.format;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.resource.ResourceV4Response;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
+import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
@@ -24,6 +32,7 @@ import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
 import com.sequenceiq.it.cloudbreak.util.InstanceUtil;
 import com.sequenceiq.it.cloudbreak.util.SdxUtil;
+import com.sequenceiq.it.cloudbreak.util.ssh.client.SshJClient;
 import com.sequenceiq.sdx.api.model.SdxClusterDetailResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
@@ -43,11 +52,16 @@ public class SdxVolumesVerticalScaleTest extends PreconditionSdxE2ETest {
 
     private static final String MODIFY_DISKS = "MODIFY_DISKS";
 
+    private static final String WHITESPACE_REGEX = "\\s+";
+
     @Inject
     private SdxTestClient sdxTestClient;
 
     @Inject
     private SdxUtil sdxUtil;
+
+    @Inject
+    private SshJClient sshJClient;
 
     @Test(dataProvider = TEST_CONTEXT, timeOut = 9000000)
     @Description(
@@ -70,7 +84,7 @@ public class SdxVolumesVerticalScaleTest extends PreconditionSdxE2ETest {
             .withCloudStorage(getCloudStorageRequest(testContext))
             .when(sdxTestClient.createInternal())
             .await(SdxClusterStatusResponse.RUNNING)
-            .when(sdxTestClient.describeInternal())
+            .when(sdxTestClient.describeInternalWithResources())
             .awaitForHealthyInstances()
             .given(SdxInternalTestDto.class)
             .when(sdxTestClient.updateDisks(UPDATE_SIZE, getVolumeType(MODIFY_DISKS, cloudPlatform, testContext), TEST_INSTANCE_GROUP,
@@ -79,7 +93,7 @@ public class SdxVolumesVerticalScaleTest extends PreconditionSdxE2ETest {
             .await(SdxClusterStatusResponse.RUNNING)
             .awaitForHealthyInstances()
             .given(SdxInternalTestDto.class)
-            .when(sdxTestClient.describeInternal())
+            .when(sdxTestClient.describeInternalWithResources())
             .then((tc, testDto, client) -> {
                 validateVerticalScale(testDto, tc, cloudPlatform, getVolumeType(MODIFY_DISKS, cloudPlatform, testContext), MODIFY_DISKS);
                 return testDto;
@@ -91,7 +105,7 @@ public class SdxVolumesVerticalScaleTest extends PreconditionSdxE2ETest {
             .await(SdxClusterStatusResponse.RUNNING)
             .awaitForHealthyInstances()
             .given(SdxInternalTestDto.class)
-            .when(sdxTestClient.describeInternal())
+            .when(sdxTestClient.describeInternalWithResources())
             .then((tc, testDto, client) -> {
                 validateVerticalScale(testDto, tc, cloudPlatform, getVolumeType(ADD_DISKS, cloudPlatform, testContext), ADD_DISKS);
                 return testDto;
@@ -106,7 +120,10 @@ public class SdxVolumesVerticalScaleTest extends PreconditionSdxE2ETest {
                 .filter(ig -> ig.getName().equals(TEST_INSTANCE_GROUP))
                 .findFirst().orElseThrow();
         List<String> updatedInstances = InstanceUtil.getInstanceIds(List.of(instanceGroup), TEST_INSTANCE_GROUP);
-        CloudFunctionality cloudFunctionality = getCloudFunctionality(tc);
+        Set<String> instanceIps = InstanceUtil.getInstancePrivateIps(List.of(instanceGroup), TEST_INSTANCE_GROUP);
+        Map<String, String> instanceIpIdsMap = InstanceUtil.getInstanceIpIdMap(List.of(instanceGroup), TEST_INSTANCE_GROUP);
+        validateFstab(sdxClusterDetailResponse.getStackV4Response(), instanceIps, instanceIpIdsMap);
+        CloudFunctionality cloudFunctionality = tc.getCloudProvider().getCloudFunctionality();
         List<String> attachedVolumes = cloudFunctionality.listInstancesVolumeIds(sdxTestDto.getName(), updatedInstances);
         List<Volume> attachedVolumesAttributes = cloudFunctionality.describeVolumes(attachedVolumes);
         AtomicInteger cbVolumesCount = new AtomicInteger();
@@ -131,10 +148,6 @@ public class SdxVolumesVerticalScaleTest extends PreconditionSdxE2ETest {
             validateOrThrow(cbVolumesCount.get(), "DATABASE");
             validateOrThrow(cbVolumesCount.get(), "CLOUD_PROVIDER");
         }
-    }
-
-    protected CloudFunctionality getCloudFunctionality(TestContext testContext) {
-        return testContext.getCloudProvider().getCloudFunctionality();
     }
 
     private String getExceptionMessage(CloudPlatform cloudPlatform, int size, String volumeType, String expectedVolumeType, boolean cloudProviderException) {
@@ -162,5 +175,57 @@ public class SdxVolumesVerticalScaleTest extends PreconditionSdxE2ETest {
             return testContext.getCloudProvider().verticalScaleVolumeType();
         }
         return null;
+    }
+
+    private void validateFstab(StackV4Response stackV4Response, Set<String> instanceIps, Map<String, String> instanceIpIdsMap) {
+        Map<String, String> attributesByInstanceId = stackV4Response.getResources().stream()
+                .filter(res -> instanceIpIdsMap.containsKey(res.getInstanceId()) && res.getResourceType().toString().contains("_VOLUMESET"))
+                .collect(Collectors.toMap(res -> instanceIpIdsMap.get(res.getInstanceId()),
+                        ResourceV4Response::getAttributes));
+        Map<String, Pair<Integer, String>> fstabInfo = sshJClient.executeCommands(instanceIps, "sudo cat /etc/fstab");
+        StringBuilder exceptionMessage = new StringBuilder();
+        for (String instanceIp : fstabInfo.keySet()) {
+            validateNoDuplicateMounts(fstabInfo.get(instanceIp).getRight());
+            if (attributesByInstanceId.containsKey(instanceIp)) {
+                try {
+                    String savedFstab = normalizeFstab(new Json(attributesByInstanceId.get(instanceIp)).get(VolumeSetAttributes.class).getFstab());
+                    String fstabFromSsh = normalizeFstab(fstabInfo.get(instanceIp).getRight());
+                    if (!savedFstab.equalsIgnoreCase(fstabFromSsh)) {
+                        exceptionMessage.append("Add Volumes Flow failed: Saved fstab information doesn't match what is present " +
+                                        "in the cloud provider for instance Id ")
+                                .append(instanceIp).append("!");
+                    }
+                } catch (IOException e) {
+                    exceptionMessage.append("Unable to parse fstab stored in the database.");
+                }
+            } else {
+                exceptionMessage.append("The fstab information for instance ID : ")
+                        .append(instanceIp).append(" is not stored in the database.");
+            }
+        }
+        if (!exceptionMessage.isEmpty()) {
+            throw new TestFailException(exceptionMessage.toString());
+        }
+    }
+
+    private void validateNoDuplicateMounts(String fstab) {
+        Map<String, List<String>> uuidToPaths = fstab.lines()
+                .filter(l -> l.startsWith("UUID="))
+                .map(l -> l.split(WHITESPACE_REGEX))
+                .collect(Collectors.groupingBy(
+            parts -> parts[0], Collectors.mapping(parts -> parts[1], Collectors.toList())
+                ));
+        uuidToPaths.forEach((uuid, paths) -> {
+            if (paths.size() > 1) {
+                throw new TestFailException("Add Volumes test failed: Duplicate mounts found!");
+            }
+        });
+    }
+
+    private String normalizeFstab(String fstab) {
+        return fstab.lines()
+            .map(String::trim)
+            .filter(l -> !l.isEmpty())
+            .reduce("", (acc, line) -> acc + line.replaceAll(WHITESPACE_REGEX, " "));
     }
 }
