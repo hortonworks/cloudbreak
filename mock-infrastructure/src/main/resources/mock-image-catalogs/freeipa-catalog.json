@@ -14,5 +14,18 @@
         "uuid": "DEFAULT_IMAGE_UUID"
       }
     ]
+  },
+  "versions": {
+    "freeipa": [
+      {
+        "images": [
+          "DEFAULT_IMAGE_UUID"
+        ],
+        "defaults": [],
+        "versions": [
+          "CB_VERSION"
+        ]
+      }
+    ]
   }
 }

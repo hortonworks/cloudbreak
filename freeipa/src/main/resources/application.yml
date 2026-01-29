@@ -170,6 +170,9 @@ freeipa:
   permission.polling:
     interval: 20
     delaymin: 15
+  serverrole.polling:
+    interval: 20
+    delaymin: 15
   loadbalancer:
     health-check:
       port: 5080

@@ -40,6 +40,7 @@ import com.sequenceiq.freeipa.client.model.PasswordPolicy;
 import com.sequenceiq.freeipa.client.model.Permission;
 import com.sequenceiq.freeipa.client.model.Privilege;
 import com.sequenceiq.freeipa.client.model.Role;
+import com.sequenceiq.freeipa.client.model.ServerRole;
 import com.sequenceiq.freeipa.client.model.Service;
 import com.sequenceiq.freeipa.client.model.SudoCommand;
 import com.sequenceiq.freeipa.client.model.SudoRule;
@@ -463,6 +464,16 @@ public class FreeIpaClient {
         List<Object> flags = List.of(roleName);
         Map<String, Object> params = Map.of();
         return (Role) invoke("role_show", flags, params, Role.class).getResult();
+    }
+
+    public List<ServerRole> findServerRoles(String roleName, String status, String serverFqdn) throws FreeIpaClientException {
+        Map<String, Object> params = new HashMap<>(UNLIMITED_PARAMS);
+        Optional.ofNullable(status).ifPresent(s -> params.put("status", s));
+        Optional.ofNullable(serverFqdn).ifPresent(s -> params.put("server_server", s));
+        Optional.ofNullable(roleName).ifPresent(s -> params.put("role_servrole", s));
+        ParameterizedType type = TypeUtils
+                .parameterize(List.class, ServerRole.class);
+        return (List<ServerRole>) invoke("server_role_find", List.of(), params, type).getResult();
     }
 
     public Role addRoleMember(String roleName, Set<String> users, Set<String> groups, Set<String> hosts, Set<String> hostgroups, Set<String> services)

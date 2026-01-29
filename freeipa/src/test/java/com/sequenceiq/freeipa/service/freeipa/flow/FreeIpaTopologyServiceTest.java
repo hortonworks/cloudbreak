@@ -2,10 +2,12 @@ package com.sequenceiq.freeipa.service.freeipa.flow;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -25,7 +27,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.dyngr.exception.PollerStoppedException;
 import com.googlecode.jsonrpc4j.JsonRpcClientException;
+import com.sequenceiq.cloudbreak.polling.Poller;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.client.model.TopologySegment;
@@ -51,6 +55,9 @@ class FreeIpaTopologyServiceTest {
 
     @Mock
     private FreeIpaClientFactory freeIpaClientFactory;
+
+    @Mock
+    private Poller<Void> poller;
 
     @Test
     void testGenerateTopology() {
@@ -140,7 +147,7 @@ class FreeIpaTopologyServiceTest {
 
     @MethodSource("testUpdateReplicationTopologyParameters")
     @ParameterizedTest(name = "Run {index}: numNodes={0}, expectedSegmentsToAdd={1}, expectedSegmentsToRemove={2}")
-    void testUpdateReplicationTopology(int numNodes, int expectedSegmentsToAdd, int expectedSegmentsToRemove) throws FreeIpaClientException {
+    void testUpdateReplicationTopology(int numNodes, int expectedSegmentsToAdd, int expectedSegmentsToRemove) throws Exception {
         Set<InstanceMetaData> imSet = new HashSet<>();
         for (int i = 0; i < numNodes; i++) {
             InstanceMetaData im = new InstanceMetaData();
@@ -182,7 +189,7 @@ class FreeIpaTopologyServiceTest {
 
     @MethodSource("testUpdateReplicationTopologyParameters")
     @ParameterizedTest(name = "Run {index}: numNodes={0}, expectedSegmentsToAdd={1}, expectedSegmentsToRemove={2}")
-    void testUpdateReplicationTopologyWithRetry(int numNodes, int expectedSegmentsToAdd, int expectedSegmentsToRemove) throws FreeIpaClientException {
+    void testUpdateReplicationTopologyWithRetry(int numNodes, int expectedSegmentsToAdd, int expectedSegmentsToRemove) throws Exception {
         Stack stack = new Stack();
         stack.setId(1L);
         when(freeIpaClientFactory.getFreeIpaClientForStack(stack)).thenReturn(freeIpaClient);
@@ -226,7 +233,7 @@ class FreeIpaTopologyServiceTest {
     }
 
     @Test
-    void testUpdateReplicationTopologyForDownscale() throws FreeIpaClientException {
+    void testUpdateReplicationTopologyForDownscale() throws Exception {
         InstanceMetaData im1 = new InstanceMetaData();
         InstanceMetaData im2 = new InstanceMetaData();
         im1.setDiscoveryFQDN("ipaserver1.example.com");
@@ -251,7 +258,7 @@ class FreeIpaTopologyServiceTest {
     }
 
     @Test
-    void testUpdateReplicationTopologyForDownscaleAndSegmentIsNotPresent() throws FreeIpaClientException {
+    void testUpdateReplicationTopologyForDownscaleAndSegmentIsNotPresent() throws Exception {
         InstanceMetaData im1 = new InstanceMetaData();
         InstanceMetaData im2 = new InstanceMetaData();
         im1.setDiscoveryFQDN("ipaserver1.example.com");
@@ -275,6 +282,32 @@ class FreeIpaTopologyServiceTest {
 
         verify(freeIpaClient, never()).addTopologySegment(any(), any());
         verify(freeIpaClient, times(1)).deleteTopologySegment(eq("ca"), any());
+    }
+
+    @Test
+    void testWaitForCaRoleToBeEnabled() throws Exception {
+        Set<InstanceMetaData> imSet = new HashSet<>();
+        InstanceMetaData im = new InstanceMetaData();
+        im.setDiscoveryFQDN("ipaserver1.example.com");
+        imSet.add(im);
+        when(instanceMetaDataService.findNotTerminatedForStack(anyLong())).thenReturn(imSet);
+        when(freeIpaClient.findAllTopologySuffixes()).thenReturn(List.of());
+
+        underTest.updateReplicationTopology(1L, Set.of(), freeIpaClient);
+
+        verify(poller).runPoller(anyLong(), anyLong(), any(FreeIpaServerRoleEnabledForServersPoller.class));
+    }
+
+    @Test
+    void testWaitForCaRoleToBeEnabledTimeout() throws Exception {
+        Set<InstanceMetaData> imSet = new HashSet<>();
+        InstanceMetaData im = new InstanceMetaData();
+        im.setDiscoveryFQDN("ipaserver1.example.com");
+        imSet.add(im);
+        when(instanceMetaDataService.findNotTerminatedForStack(anyLong())).thenReturn(imSet);
+        doThrow(new PollerStoppedException("timed out")).when(poller).runPoller(anyLong(), anyLong(), any(FreeIpaServerRoleEnabledForServersPoller.class));
+
+        assertThrows(PollerStoppedException.class, () -> underTest.updateReplicationTopology(1L, Set.of(), freeIpaClient));
     }
 
     @Test

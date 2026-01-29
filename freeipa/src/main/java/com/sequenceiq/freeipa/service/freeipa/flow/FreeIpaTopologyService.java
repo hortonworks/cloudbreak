@@ -21,11 +21,15 @@ import jakarta.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
+import com.dyngr.exception.PollerException;
+import com.dyngr.exception.PollerStoppedException;
 import com.google.common.annotations.VisibleForTesting;
+import com.sequenceiq.cloudbreak.polling.Poller;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.client.FreeIpaClientExceptionUtil;
@@ -45,18 +49,30 @@ public class FreeIpaTopologyService {
 
     private static final Integer MAX_REPLICATION_CONNECTIONS = 4;
 
+    private static final String CA_SERVER_ROLE = "CA server";
+
     @Inject
     private InstanceMetaDataService instanceMetaDataService;
 
     @Inject
     private FreeIpaClientFactory freeIpaClientFactory;
 
-    public void updateReplicationTopology(Long stackId, Set<String> fqdnsToExclude, FreeIpaClient freeIpaClient) throws FreeIpaClientException {
+    @Value("${freeipa.serverrole.polling.interval}")
+    private long pollingInterval;
+
+    @Value("${freeipa.serverrole.polling.delaymin}")
+    private long pollingDelay;
+
+    @Inject
+    private Poller<Void> poller;
+
+    public void updateReplicationTopology(Long stackId, Set<String> fqdnsToExclude, FreeIpaClient freeIpaClient) throws Exception {
         Set<String> allNodesFqdn = instanceMetaDataService.findNotTerminatedForStack(stackId).stream()
                 .map(InstanceMetaData::getDiscoveryFQDN)
                 .filter(StringUtils::isNotBlank)
                 .filter(not(fqdnsToExclude::contains))
                 .collect(Collectors.toSet());
+        waitForCaRoleToBeEnabled(freeIpaClient, allNodesFqdn);
         Set<TopologySegment> topology = generateTopology(allNodesFqdn).stream()
                 .map(this::convertUnorderedPairToTopologySegment)
                 .collect(Collectors.toSet());
@@ -71,7 +87,7 @@ public class FreeIpaTopologyService {
             maxAttemptsExpression = RetryableFreeIpaClientException.MAX_RETRIES_EXPRESSION,
             backoff = @Backoff(delayExpression = RetryableFreeIpaClientException.DELAY_EXPRESSION,
                     multiplierExpression = RetryableFreeIpaClientException.MULTIPLIER_EXPRESSION))
-    public void updateReplicationTopologyWithRetry(Stack stack, Set<String> fqdnsToExclude) throws FreeIpaClientException {
+    public void updateReplicationTopologyWithRetry(Stack stack, Set<String> fqdnsToExclude) throws Exception {
         FreeIpaClient freeIpaClient = freeIpaClientFactory.getFreeIpaClientForStack(stack);
         updateReplicationTopology(stack.getId(), fqdnsToExclude, freeIpaClient);
     }
@@ -167,6 +183,22 @@ public class FreeIpaTopologyService {
         for (TopologySegment segment : segmentsToRemove) {
             ignoreNotFoundException(() -> freeIpaClient.deleteTopologySegment(topologySuffixCn, segment),
                     "Deleting topology segment for [{}] but it was not found", segment);
+        }
+    }
+
+    private void waitForCaRoleToBeEnabled(FreeIpaClient freeIpaClient, Set<String> allNodesFqdn) throws Exception {
+        LOGGER.info("Start polling if [{}] role is enabled on all instances", CA_SERVER_ROLE);
+        try {
+            poller.runPoller(pollingInterval, pollingDelay,
+                    new FreeIpaServerRoleEnabledForServersPoller(freeIpaClient, CA_SERVER_ROLE, allNodesFqdn));
+        } catch (PollerStoppedException e) {
+            LOGGER.warn("Polling for [{}] role enablement timed out without success", CA_SERVER_ROLE);
+            throw e;
+        } catch (PollerException e) {
+            LOGGER.error("Polling for [{}] role enablement failed", CA_SERVER_ROLE, e);
+            if (e.getCause() != null) {
+                throw (Exception) e.getCause();
+            }
         }
     }
 

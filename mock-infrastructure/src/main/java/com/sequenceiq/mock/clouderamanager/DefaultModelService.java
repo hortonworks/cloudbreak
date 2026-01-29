@@ -63,7 +63,8 @@ public class DefaultModelService {
                         getTemplateCreated(cloudInstance, instanceShouldFail),
                         cloudInstance.getAuthentication(),
                         cloudInstance.getSubnetId(),
-                        cloudInstance.getAvailabilityZone());
+                        cloudInstance.getAvailabilityZone(),
+                        cloudInstance.getParameters());
                 CloudVmInstanceStatus cloudVmInstanceStatus =
                         new CloudVmInstanceStatus(cloudInstanceWithId, instanceShouldFail ? InstanceStatus.FAILED : InstanceStatus.STARTED);
                 String publicIp = mockInfrastructureHost + ":10090/" + name;
