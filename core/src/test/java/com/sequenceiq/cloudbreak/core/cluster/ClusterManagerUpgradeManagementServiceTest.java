@@ -8,6 +8,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -23,6 +24,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterSetupService;
@@ -33,6 +35,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ClusterManagerUpgradeRequest;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
@@ -48,6 +51,8 @@ public class ClusterManagerUpgradeManagementServiceTest {
     private static final String CM_VERSION = "7.2.6-12345";
 
     private static final String CM_VERSION_WITH_P = "7.2.6-12345p";
+
+    private static final Set<ClouderaManagerProduct> UPGRADE_CANDIDATE_PRODUCTS = Set.of();
 
     @Mock
     private StackDtoService stackDtoService;
@@ -75,6 +80,9 @@ public class ClusterManagerUpgradeManagementServiceTest {
 
     @Mock
     private ClouderaManagerRepo clouderaManagerRepo;
+
+    @Mock
+    private ClouderaManagerCsdDownloaderService clouderaManagerCsdDownloaderService;
 
     @InjectMocks
     private ClusterManagerUpgradeManagementService underTest;
@@ -110,6 +118,7 @@ public class ClusterManagerUpgradeManagementServiceTest {
         when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
         when(stackDto.getCluster()).thenReturn(cluster);
         when(stackDto.getStack()).thenReturn(stack);
+        lenient().when(stackDto.getId()).thenReturn(STACK_ID);
         when(cmServerQueryService.queryCmVersion(stackDto)).thenReturn(Optional.empty());
         lenient().when(clusterApiConnectors.getConnector(stackDto)).thenReturn(clusterApi);
         lenient().when(clusterApi.clusterSetupService()).thenReturn(clusterSetupService);
@@ -124,8 +133,9 @@ public class ClusterManagerUpgradeManagementServiceTest {
         when(clusterComponentConfigProvider.getClouderaManagerRepoDetails(cluster.getId())).thenReturn(clouderaManagerRepo);
         when(cmServerQueryService.queryCmVersion(stackDto)).thenReturn(Optional.of(oldCmVersion)).thenReturn(Optional.of(newCmVersion));
         stack.setType(datalake ? StackType.DATALAKE : StackType.WORKLOAD);
+        when(clusterUpgradeService.isRuntimeUpgradeNecessary(UPGRADE_CANDIDATE_PRODUCTS)).thenReturn(runtimeUpgradeNecessary);
 
-        underTest.upgradeClusterManager(STACK_ID, rollingUpgradeEnabled, runtimeUpgradeNecessary, targetRuntimeVersion);
+        underTest.upgradeClusterManager(new ClusterManagerUpgradeRequest(STACK_ID, UPGRADE_CANDIDATE_PRODUCTS, rollingUpgradeEnabled, targetRuntimeVersion));
 
         if (stopServices) {
             verify(clusterApi).stopCluster(true);
@@ -138,6 +148,7 @@ public class ClusterManagerUpgradeManagementServiceTest {
             verify(clusterUpgradeService).upgradeClusterManager(STACK_ID);
             verify(clusterManagerUpgradeService).upgradeClouderaManager(stackDto, clouderaManagerRepo);
         }
+        verify(clouderaManagerCsdDownloaderService).downloadCsdFiles(stackDto, cmUpgradeNecessary, UPGRADE_CANDIDATE_PRODUCTS);
     }
 
     @Test
@@ -147,8 +158,9 @@ public class ClusterManagerUpgradeManagementServiceTest {
         when(cmServerQueryService.queryCmVersion(stackDto))
                 .thenThrow(new CloudbreakServiceException("version mismatch error"))
                 .thenReturn(Optional.of(CM_VERSION));
+        when(clusterUpgradeService.isRuntimeUpgradeNecessary(UPGRADE_CANDIDATE_PRODUCTS)).thenReturn(true);
 
-        underTest.upgradeClusterManager(STACK_ID, false, true, null);
+        underTest.upgradeClusterManager(new ClusterManagerUpgradeRequest(STACK_ID, UPGRADE_CANDIDATE_PRODUCTS, false, null));
 
         verify(clusterApiConnectors, times(3)).getConnector(stackDto);
         verify(clusterApi).stopCluster(true);
@@ -163,8 +175,10 @@ public class ClusterManagerUpgradeManagementServiceTest {
         when(clouderaManagerRepo.getFullVersion()).thenReturn(CM_VERSION);
         when(clusterComponentConfigProvider.getClouderaManagerRepoDetails(cluster.getId())).thenReturn(clouderaManagerRepo);
         when(cmServerQueryService.queryCmVersion(stackDto)).thenReturn(Optional.of(OLD_CM_VERSION)).thenReturn(Optional.of("wrong"));
+        when(clusterUpgradeService.isRuntimeUpgradeNecessary(UPGRADE_CANDIDATE_PRODUCTS)).thenReturn(true);
 
-        assertThrows(CloudbreakServiceException.class, () -> underTest.upgradeClusterManager(STACK_ID, true, true, null));
+        assertThrows(CloudbreakServiceException.class,
+                () -> underTest.upgradeClusterManager(new ClusterManagerUpgradeRequest(STACK_ID, UPGRADE_CANDIDATE_PRODUCTS, true, null)));
 
         verify(cmServerQueryService, times(2)).queryCmVersion(stackDto);
         verify(clusterUpgradeService).upgradeClusterManager(STACK_ID);
@@ -178,11 +192,13 @@ public class ClusterManagerUpgradeManagementServiceTest {
         when(clouderaManagerRepo.getFullVersion()).thenReturn(CM_VERSION_WITH_P);
         when(clusterComponentConfigProvider.getClouderaManagerRepoDetails(cluster.getId())).thenReturn(clouderaManagerRepo);
         when(cmServerQueryService.queryCmVersion(stackDto)).thenReturn(Optional.of(CM_VERSION_WITH_P));
+        when(clusterUpgradeService.isRuntimeUpgradeNecessary(UPGRADE_CANDIDATE_PRODUCTS)).thenReturn(true);
 
-        underTest.upgradeClusterManager(STACK_ID, true, true, null);
+        underTest.upgradeClusterManager(new ClusterManagerUpgradeRequest(STACK_ID, UPGRADE_CANDIDATE_PRODUCTS, true, null));
 
         verify(clusterComponentConfigProvider).getClouderaManagerRepoDetails(cluster.getId());
         verify(cmServerQueryService).queryCmVersion(stackDto);
-        verifyNoInteractions(clusterUpgradeService, clusterManagerUpgradeService);
+        verify(clouderaManagerCsdDownloaderService).downloadCsdFiles(stackDto, false, UPGRADE_CANDIDATE_PRODUCTS);
+        verifyNoInteractions(clusterManagerUpgradeService);
     }
 }

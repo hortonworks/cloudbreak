@@ -18,7 +18,6 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.ClusterHostServiceRunner;
-import com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator.CsdParcelDecorator;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
@@ -46,9 +45,6 @@ public class ClusterManagerUpgradeService {
 
     @Inject
     private ClusterHostServiceRunner clusterHostServiceRunner;
-
-    @Inject
-    private CsdParcelDecorator csdParcelDecorator;
 
     @Inject
     private StackUtil stackUtil;
@@ -79,7 +75,6 @@ public class ClusterManagerUpgradeService {
         Optional<String> license = clusterHostServiceRunner.decoratePillarWithClouderaManagerLicense(stackDto.getStack(), servicePillar);
         clusterHostServiceRunner.decoratePillarWithClouderaManagerRepo(clouderaManagerRepo, servicePillar, license);
         servicePillar.putAll(clusterHostServiceRunner.createPillarWithClouderaManagerSettings(clouderaManagerRepo, stackDto, primaryGatewayConfig));
-        csdParcelDecorator.decoratePillarWithCsdParcels(stackDto, servicePillar);
         return new SaltConfig(servicePillar);
     }
 }

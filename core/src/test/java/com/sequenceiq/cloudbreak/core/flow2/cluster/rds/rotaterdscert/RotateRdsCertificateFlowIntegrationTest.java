@@ -46,6 +46,7 @@ import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.common.service.TransactionMetricsService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterServiceRunner;
+import com.sequenceiq.cloudbreak.core.cluster.ClusterManagerRestartService;
 import com.sequenceiq.cloudbreak.core.flow2.CloudbreakFlowInformation;
 import com.sequenceiq.cloudbreak.core.flow2.StackStatusFinalizer;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.provision.service.ClusterProxyService;
@@ -148,6 +149,9 @@ class RotateRdsCertificateFlowIntegrationTest {
     private RotateRdsCertificateService rotateRdsCertificateService;
 
     @SpyBean
+    private ClusterManagerRestartService clusterManagerRestartService;
+
+    @SpyBean
     private MigrateRdsCertificateService migrateRdsCertificateService;
 
     private Stack stack;
@@ -185,7 +189,7 @@ class RotateRdsCertificateFlowIntegrationTest {
         return result;
     }
 
-    private InOrder verifyServiceCalls(int calledOnceCount) throws CloudbreakOrchestratorException {
+    private InOrder verifyServiceCalls(int calledOnceCount) {
         final int[] expected = new int[ALL_CALLED_ONCE];
         Arrays.fill(expected, 0, calledOnceCount, 1);
         int i = 0;
@@ -198,7 +202,6 @@ class RotateRdsCertificateFlowIntegrationTest {
         inOrder.verify(rotateRdsCertificateService, times(expected[i])).updateLatestRdsCertificateState(STACK_ID);
         inOrder.verify(rotateRdsCertificateService, times(expected[i++])).updateLatestRdsCertificate(STACK_ID);
         inOrder.verify(rotateRdsCertificateService, times(expected[i])).restartCmState(STACK_ID);
-        inOrder.verify(rotateRdsCertificateService, times(expected[i++])).restartCm(STACK_ID);
         inOrder.verify(rotateRdsCertificateService, times(expected[i])).rollingRestartRdsCertificateState(STACK_ID);
         inOrder.verify(rotateRdsCertificateService, times(expected[i++])).rollingRestartServices(STACK_ID);
         inOrder.verify(rotateRdsCertificateService, times(expected[i])).rotateOnProviderState(STACK_ID);
@@ -274,7 +277,8 @@ class RotateRdsCertificateFlowIntegrationTest {
             TlsSecurityService.class,
             SecurityConfigService.class,
             SecurityConfigRepository.class,
-            RotateRdsCertificateService.class
+            RotateRdsCertificateService.class,
+            ClusterManagerRestartService.class
     })
     @ComponentScan(basePackages = {
             "com.sequenceiq.flow",
@@ -358,6 +362,9 @@ class RotateRdsCertificateFlowIntegrationTest {
 
         @MockBean
         private RotateRdsCertificateService rotateRdsCertificateService;
+
+        @MockBean
+        private ClusterManagerRestartService clusterManagerRestartService;
 
         @MockBean
         private MigrateRdsCertificateService migrateRdsCertificateService;

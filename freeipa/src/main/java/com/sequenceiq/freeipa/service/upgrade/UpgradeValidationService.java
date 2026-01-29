@@ -85,5 +85,13 @@ public class UpgradeValidationService {
             throw new BadRequestException(String.format("Your account is not entitled to use %s images.", selectedImage.getOs()));
         }
     }
+
+    public void validateSelectedImageForArchitecture(ImageInfoResponse currentImage, ImageInfoResponse selectedImage) {
+        if (!currentImage.getArchitecture().equals(selectedImage.getArchitecture())) {
+            LOGGER.warn("Selected {} and current {} image are on different architecture", selectedImage, currentImage);
+            throw new BadRequestException("Selected image using " + selectedImage.getArchitecture()
+                    + " architecture and current image are using different " + currentImage.getArchitecture() + " architecture.");
+        }
+    }
 }
 

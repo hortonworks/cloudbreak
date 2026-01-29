@@ -8,6 +8,8 @@ public class SupportedService {
 
     private String displayName;
 
+    private String iconKey;
+
     private String version;
 
     private String componentNameInParcel;
@@ -26,6 +28,14 @@ public class SupportedService {
 
     public void setDisplayName(String displayName) {
         this.displayName = displayName;
+    }
+
+    public String getIconKey() {
+        return iconKey;
+    }
+
+    public void setIconKey(String iconKey) {
+        this.iconKey = iconKey;
     }
 
     public String getVersion() {
@@ -48,6 +58,7 @@ public class SupportedService {
         return new StringJoiner(", ", SupportedService.class.getSimpleName() + "[", "]")
                 .add("name='" + name + "'")
                 .add("displayName='" + displayName + "'")
+                .add("iconKey='" + iconKey + "'")
                 .add("version='" + version + "'")
                 .add("componentNameInParcel='" + componentNameInParcel + "'")
                 .toString();

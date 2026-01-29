@@ -15,7 +15,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.core.flow2.cluster.rds.cert.rotate.RotateRdsCertificateService;
+import com.sequenceiq.cloudbreak.core.cluster.ClusterManagerRestartService;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.rotaterdscert.RestartCmRequest;
@@ -28,7 +28,7 @@ class RestartCmHandlerTest {
     private static final long STACK_ID = 234L;
 
     @Mock
-    private RotateRdsCertificateService rotateRdsCertificateService;
+    private ClusterManagerRestartService clusterManagerRestartService;
 
     @Mock
     private EventBus eventBus;
@@ -50,7 +50,7 @@ class RestartCmHandlerTest {
     @Test
     void restartCm() {
         underTest.accept(event);
-        verify(rotateRdsCertificateService).restartCm(STACK_ID);
+        verify(clusterManagerRestartService).restartClouderaManager(STACK_ID);
         verify(eventBus).notify(eq(CM_RESTART_FINISHED_EVENT.event()), eventCaptor.capture());
         Event<RestartCmResult> eventResult = eventCaptor.getValue();
         assertThat(eventResult.getData().selector()).isEqualTo(CM_RESTART_FINISHED_EVENT.event());

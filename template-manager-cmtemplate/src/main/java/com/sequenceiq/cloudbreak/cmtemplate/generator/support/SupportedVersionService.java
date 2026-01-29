@@ -1,6 +1,9 @@
 package com.sequenceiq.cloudbreak.cmtemplate.generator.support;
 
+import static org.apache.commons.lang3.StringUtils.trimToNull;
+
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 import jakarta.inject.Inject;
@@ -34,8 +37,10 @@ public class SupportedVersionService {
                     if (serviceInformation.getName().equals(serviceName.getName())) {
                         SupportedService supportedService = new SupportedService();
                         supportedService.setName(serviceInformation.getName());
-                        supportedService.setDisplayName(serviceInformation.getDisplayName());
+                        supportedService.setDisplayName(
+                                Optional.ofNullable(trimToNull(serviceName.getDisplayName())).orElse(serviceInformation.getDisplayName()));
                         supportedService.setVersion(serviceName.getVersion());
+                        supportedService.setIconKey(Optional.ofNullable(trimToNull(serviceName.getIconKey())).orElse(serviceInformation.getName()));
                         supportedServices.getServices().add(supportedService);
                         break;
                     }

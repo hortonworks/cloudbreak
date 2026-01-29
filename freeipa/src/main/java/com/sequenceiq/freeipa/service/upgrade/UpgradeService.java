@@ -92,6 +92,7 @@ public class UpgradeService {
         HashSet<String> instancesOnOldImage = selectInstancesWithOldImage(allInstances, selectedImage);
         validationService.validateSelectedImageDifferentFromCurrent(currentImage, selectedImage, instancesOnOldImage);
         validationService.validateSelectedImageEntitledFor(accountId, selectedImage);
+        validationService.validateSelectedImageForArchitecture(currentImage, selectedImage);
         return triggerUpgrade(request, stack, allInstances, selectedImage, currentImage, accountId);
     }
 

@@ -10,6 +10,8 @@ public class ImageInfoResponse extends ImageSettingsBase {
 
     private String catalogName;
 
+    private String architecture;
+
     public String getImageName() {
         return imageName;
     }
@@ -34,11 +36,20 @@ public class ImageInfoResponse extends ImageSettingsBase {
         this.catalogName = catalogName;
     }
 
+    public String getArchitecture() {
+        return architecture;
+    }
+
+    public void setArchitecture(String architecture) {
+        this.architecture = architecture;
+    }
+
     @Override
     public String toString() {
         return "ImageInfoResponse{" +
                 "imageName='" + imageName + '\'' +
                 ", date='" + date + '\'' +
+                ", architecture='" + architecture + '\'' +
                 ", catalogName='" + catalogName + '\'' +
                 "} " + super.toString();
     }
