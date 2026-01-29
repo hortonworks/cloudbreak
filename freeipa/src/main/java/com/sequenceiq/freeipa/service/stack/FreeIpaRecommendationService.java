@@ -103,13 +103,15 @@ public class FreeIpaRecommendationService {
         String defaultInstanceType = defaultInstanceTypeProvider.getForPlatform(stack.getCloudPlatform(), stack.getArchitecture());
         Map<String, String> customInstanceTypes = getCustomInstanceTypes(stack, defaultInstanceType);
         if (!customInstanceTypes.isEmpty()) {
-            Set<String> availableVmTypes = getAvailableVmTypes(stack.getRegion(), stack.getAvailabilityZone(), credential, defaultInstanceType,
-                    stack.getArchitecture()).stream()
+            Set<String> availableVmTypes = getAvailableVmTypes(
+                    stack.getRegion(), stack.getAvailabilityZone(), credential, defaultInstanceType, stack.getArchitecture())
+                    .stream()
                     .map(VmTypeResponse::getValue)
                     .collect(Collectors.toSet());
             customInstanceTypes.forEach((instanceGroup, instanceType) -> {
                 if (!availableVmTypes.contains(instanceType)) {
-                    String message = String.format("Invalid custom instance type for FreeIPA: %s - %s", instanceGroup, instanceType);
+                    String message = String.format("Invalid custom instance type for FreeIPA: %s - %s. " +
+                            "The instance type is not available in %s.", instanceGroup, instanceType, stack.getRegion());
                     LOGGER.warn(message);
                     throw new BadRequestException(message);
                 }
