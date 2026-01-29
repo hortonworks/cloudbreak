@@ -984,12 +984,12 @@ class SaltOrchestratorTest {
         List<Map<String, JsonNode>> responseResult = List.of(Map.of("key", mock(JsonNode.class)));
         ApplyResponse response = new ApplyResponse();
         response.setResult(responseResult);
-        when(saltStateService.applyStateSync(eq(saltConnector), eq(state), any())).thenReturn(response);
+        when(saltStateService.applyStateSync(eq(saltConnector), eq(state), any(), any())).thenReturn(response);
 
         List<Map<String, JsonNode>> result = saltOrchestrator.applyOrchestratorState(stateParams);
 
         assertEquals(responseResult, result);
-        verify(saltStateService).applyStateSync(eq(saltConnector), eq(state), targetCaptor.capture());
+        verify(saltStateService).applyStateSync(eq(saltConnector), eq(state), targetCaptor.capture(), eq(Map.of()));
         assertEquals("hostname", targetCaptor.getValue().getTarget());
     }
 

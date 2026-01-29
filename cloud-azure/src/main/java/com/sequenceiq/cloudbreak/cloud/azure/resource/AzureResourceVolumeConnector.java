@@ -38,6 +38,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.RootVolumeFetchDto;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.constant.AzureConstants;
 import com.sequenceiq.common.api.type.CommonStatus;
 
 @Service
@@ -220,5 +221,20 @@ public class AzureResourceVolumeConnector implements ResourceVolumeConnector {
         String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(authenticatedContext.getCloudContext(), cloudStack);
         Map<String, VirtualMachine> vms = azureVirtualMachineService.getVirtualMachinesByName(client, resourceGroupName, instanceIds);
         return vms.values().stream().collect(Collectors.toMap(VirtualMachine::name, vm -> vm.dataDisks().size()));
+    }
+
+    public Map<String, Map<String, String>> getVolumeDeviceMappingByInstance(AuthenticatedContext authenticatedContext, CloudStack cloudStack) {
+        AzureClient client = authenticatedContext.getParameter(AzureClient.class);
+        String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(authenticatedContext.getCloudContext(), cloudStack);
+        List<String> instanceIds = cloudStack.getGroups().stream()
+                .flatMap(g -> g.getInstances().stream())
+                .map(CloudInstance::getInstanceId)
+                .toList();
+        Map<String, VirtualMachine> vmMap = azureVirtualMachineService.getVirtualMachinesByName(client, resourceGroupName, instanceIds);
+        return vmMap.entrySet().stream()
+                .collect(Collectors.toMap(Map.Entry::getKey,
+                        vmEntry -> vmEntry.getValue().dataDisks().entrySet().stream()
+                                .collect(Collectors.toMap(diskEntry -> diskEntry.getValue().id(),
+                                        diskEntry -> AzureConstants.LUN_DEVICE_PATH_PREFIX + diskEntry.getKey()))));
     }
 }

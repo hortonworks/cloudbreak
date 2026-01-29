@@ -9,10 +9,12 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorStateParams;
 import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorStateRetryParams;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
+import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 
@@ -47,8 +49,20 @@ public class SaltStateParamsService {
         return getOrchestratorStateParams(stack, saltState, maxRetry, maxRetryOnError, -1, primaryGatewayConfig, reachableNodes);
     }
 
-    private OrchestratorStateParams getOrchestratorStateParams(StackDto stack, String saltState, int maxRetry, int maxRetryOnError, int sleepTime,
-            GatewayConfig primaryGatewayConfig, Set<Node> targetNodes) {
+    public OrchestratorStateParams createStateParams(Stack stack, String saltState, int maxRetry, int maxRetryOnError, GatewayConfig primaryGatewayConfig,
+            Set<Node> targetNodes) {
+        return getOrchestratorStateParams(saltState, maxRetry, maxRetryOnError, -1, primaryGatewayConfig, targetNodes,
+                new ClusterDeletionBasedExitCriteriaModel(stack.getId(), stack.getCluster().getId()));
+    }
+
+    private OrchestratorStateParams getOrchestratorStateParams(StackDto stack, String saltState, int maxRetry, int maxRetryOnError,
+            int sleepTime, GatewayConfig primaryGatewayConfig, Set<Node> targetNodes) {
+        return getOrchestratorStateParams(saltState, maxRetry, maxRetryOnError, sleepTime, primaryGatewayConfig, targetNodes,
+                new ClusterDeletionBasedExitCriteriaModel(stack.getId(), stack.getCluster().getId()));
+    }
+
+    private OrchestratorStateParams getOrchestratorStateParams(String saltState, int maxRetry, int maxRetryOnError,
+            int sleepTime, GatewayConfig primaryGatewayConfig, Set<Node> targetNodes, ExitCriteriaModel exitCriteriaModel) {
         OrchestratorStateParams stateParams = new OrchestratorStateParams();
         stateParams.setState(saltState);
         stateParams.setPrimaryGatewayConfig(primaryGatewayConfig);
@@ -58,7 +72,7 @@ public class SaltStateParamsService {
         retryParams.setMaxRetry(maxRetry);
         retryParams.setSleepTime(sleepTime);
         stateParams.setStateRetryParams(retryParams);
-        stateParams.setExitCriteriaModel(new ClusterDeletionBasedExitCriteriaModel(stack.getId(), stack.getCluster().getId()));
+        stateParams.setExitCriteriaModel(exitCriteriaModel);
         return stateParams;
     }
 }

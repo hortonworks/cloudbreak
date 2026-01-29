@@ -99,7 +99,7 @@ public class AzureVolumeResourceBuilderTest {
 
     private static final String DEVICE = "device";
 
-    private static final String DEVICE_DEV_SDC = "/dev/disk/azure/scsi1/lun0";
+    private static final String DEVICE_DEV_SDC = "/dev/disk/azure/scsi[1-9]/lun0";
 
     private static final String DISK_ENCRYPTION_SET_ID = "diskEncryptionSetId";
 
@@ -463,7 +463,7 @@ public class AzureVolumeResourceBuilderTest {
         assertTrue("newTagValue".equals(azureDisk.getTags().get("newTag")));
 
 
-        verifyVolumeSetResource(result.get(0), DISK_ID_ON_AZURE, "/dev/disk/azure/scsi1/lun5");
+        verifyVolumeSetResource(result.get(0), DISK_ID_ON_AZURE, "/dev/disk/azure/scsi[1-9]/lun5");
     }
 
     @Test

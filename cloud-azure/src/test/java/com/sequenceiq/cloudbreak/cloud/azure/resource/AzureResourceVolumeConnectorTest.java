@@ -144,19 +144,19 @@ class AzureResourceVolumeConnectorTest {
         verify(azureVolumeResourceBuilder).deleteVolumes(authenticatedContext, resources);
     }
 
-    static Object[] [] getDataForCreateVolumes() {
-        return new Object [] [] {
+    static Object[][] getDataForCreateVolumes() {
+        return new Object[][]{
                 // {disksToAdd, List of CloudResource = {{existingDisksCount, availableDisks, availableDisksInDb}}
                 // availableDisksInDb should be <= availableDisks and existingDisksCount
                 // existingDisksCount = -1 represents that cloud resource does not exist.
                 {2, List.of(new int[]{3, 0, 0})},
                 {3, List.of(new int[]{3, 3, 0})},
                 {3, List.of(new int[]{3, 3, 3})},
-                {2, List.of(new int[]{3, 0, 0}, new int[] {3, 0, 0}, new int[]{3, 0, 0})},
-                {3, List.of(new int[]{3, 1, 0}, new int[] {3, 0, 0}, new int[]{3, 0, 0})},
-                {3, List.of(new int[]{3, 1, 0}, new int[] {3, 1, 1}, new int[]{3, 2, 1})},
-                {2, List.of(new int[]{3, 2, 0}, new int[] {3, 2, 0}, new int[]{3, 2, 0})},
-                {3, List.of(new int[]{4, 3, 3}, new int[] {3, 3, 3}, new int[]{4, 3, 3})},
+                {2, List.of(new int[]{3, 0, 0}, new int[]{3, 0, 0}, new int[]{3, 0, 0})},
+                {3, List.of(new int[]{3, 1, 0}, new int[]{3, 0, 0}, new int[]{3, 0, 0})},
+                {3, List.of(new int[]{3, 1, 0}, new int[]{3, 1, 1}, new int[]{3, 2, 1})},
+                {2, List.of(new int[]{3, 2, 0}, new int[]{3, 2, 0}, new int[]{3, 2, 0})},
+                {3, List.of(new int[]{4, 3, 3}, new int[]{3, 3, 3}, new int[]{4, 3, 3})},
                 {2, List.of(new int[]{-1, 0, 0})},
                 {2, List.of(new int[]{-1, 0, 0}, new int[]{-1, 0, 0})},
                 {2, List.of(new int[]{-1, 2, 0}, new int[]{-1, 3, 0})}
@@ -165,7 +165,7 @@ class AzureResourceVolumeConnectorTest {
 
     @ParameterizedTest(name = "testCreateVolumes{index}")
     @MethodSource("getDataForCreateVolumes")
-    void testCreateVolumes(int numDisksToAdd, List<int []> existingDiskInfo) throws Exception {
+    void testCreateVolumes(int numDisksToAdd, List<int[]> existingDiskInfo) throws Exception {
 
         List<Disk> availableDisks = new ArrayList<>();
         List<CloudResource> resources = new ArrayList<>();
@@ -379,6 +379,43 @@ class AzureResourceVolumeConnectorTest {
         assertThat(result).containsExactlyInAnyOrderEntriesOf(expected);
     }
 
+    @Test
+    void tesGetVolumeDeviceMappingByInstance() {
+        CloudStack cloudStack = mock(CloudStack.class);
+        Group group = getGroup("group");
+        CloudInstance instance1 = getCloudInstance("instance1");
+        CloudInstance instance2 = getCloudInstance("instance2");
+        when(group.getInstances()).thenReturn(List.of(instance1, instance2));
+        when(cloudStack.getGroups()).thenReturn(List.of(group));
+        CloudContext cloudContext = mock(CloudContext.class);
+        AzureClient azureClient = mock(AzureClient.class);
+        VirtualMachine vm1 = mock(VirtualMachine.class);
+        when(vm1.name()).thenReturn("instance1");
+        Map<Integer, VirtualMachineDataDisk> instance1Disks = Map.of(0, getDataDisk("i1v0"));
+        when(vm1.dataDisks()).thenReturn(instance1Disks);
+        VirtualMachine vm2 = mock(VirtualMachine.class);
+        when(vm2.name()).thenReturn("instance2");
+        Map<Integer, VirtualMachineDataDisk> instance2Disks = Map.of(0, getDataDisk("i2v0"), 1, getDataDisk("i2v1"), 2, getDataDisk("i2v2"));
+        when(vm2.dataDisks()).thenReturn(instance2Disks);
+        when(authenticatedContext.getParameter(AzureClient.class)).thenReturn(azureClient);
+        when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
+        when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, cloudStack)).thenReturn(RESOURCE_GROUP_NAME);
+        when(azureVirtualMachineService.getVirtualMachinesByName(azureClient, RESOURCE_GROUP_NAME, List.of("instance1", "instance2")))
+                .thenReturn(Map.of("instance1", vm1, "instance2", vm2));
+
+        Map<String, Map<String, String>> result = underTest.getVolumeDeviceMappingByInstance(authenticatedContext, cloudStack);
+
+        assertEquals(Map.of("i1v0", "/dev/disk/azure/scsi[1-9]/lun0"), result.get("instance1"));
+        assertEquals(Map.of("i2v0", "/dev/disk/azure/scsi[1-9]/lun0", "i2v1", "/dev/disk/azure/scsi[1-9]/lun1", "i2v2", "/dev/disk/azure/scsi[1-9]/lun2"),
+                result.get("instance2"));
+    }
+
+    private VirtualMachineDataDisk getDataDisk(String diskId) {
+        VirtualMachineDataDisk disk = mock(VirtualMachineDataDisk.class);
+        when(disk.id()).thenReturn(diskId);
+        return disk;
+    }
+
     private CloudResource getCloudResource(String groupName, String instanceName) {
         CloudResource cloudResource = mock(CloudResource.class);
         when(cloudResource.getGroup()).thenReturn(groupName);
@@ -416,14 +453,13 @@ class AzureResourceVolumeConnectorTest {
             resources.add(cloudResource);
             cloudInstances.add(cloudInstance);
         }
-
     }
 
     private List<VolumeSetAttributes.Volume> getVolumes(CloudResource resource) {
         return resource.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class).getVolumes();
     }
 
-    private void populateExistingDiskInformation(List<int []> existingDiskInfo, List<CloudResource> resources, List<Disk> availableDisks,
+    private void populateExistingDiskInformation(List<int[]> existingDiskInfo, List<CloudResource> resources, List<Disk> availableDisks,
             List<CloudInstance> cloudInstances) {
         for (int count = 0; count < existingDiskInfo.size(); count++) {
             String instanceName = String.format("instance%s", count);
@@ -472,7 +508,7 @@ class AzureResourceVolumeConnectorTest {
         return cloudResource;
     }
 
-    private boolean cloudResourceExist(List<int []> existingDiskInfo) {
+    private boolean cloudResourceExist(List<int[]> existingDiskInfo) {
         return existingDiskInfo.stream().noneMatch(diskInfo -> diskInfo[0] == -1);
     }
 }

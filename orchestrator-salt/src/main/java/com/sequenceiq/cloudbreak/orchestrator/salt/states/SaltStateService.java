@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
 
+import org.apache.commons.collections4.MapUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.retry.annotation.Backoff;
@@ -527,6 +528,17 @@ public class SaltStateService {
                 "GrainsGet took {}ms for grain [{}]", grain);
         Iterable<Map<String, JsonNode>> result = resp.getResult();
         return result.iterator().hasNext() ? result.iterator().next() : new HashMap<>();
+    }
+
+    public ApplyResponse applyStateSync(SaltConnector sc, String service, Target<String> target, Map<String, Object> inlinePillars)
+            throws JsonProcessingException {
+        if (MapUtils.isEmpty(inlinePillars)) {
+            return applyStateSync(sc, service, target);
+        } else {
+            String inlinePillarsStr = new ObjectMapper().writeValueAsString(inlinePillars);
+            return measure(() -> sc.run(target, "state.apply", LOCAL, ApplyResponse.class, service, String.format("pillar=%s", inlinePillarsStr)), LOGGER,
+                    "ApplyState sync took {}ms for service [{}]", service);
+        }
     }
 
     public ApplyResponse applyStateSync(SaltConnector sc, String service, Target<String> target) {

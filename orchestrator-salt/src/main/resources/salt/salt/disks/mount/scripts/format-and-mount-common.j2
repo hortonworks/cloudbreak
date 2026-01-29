@@ -133,7 +133,9 @@ are_all_attached_volume_names_present() {
            log $LOG_FILE device $device was not found
         fi
     done
+    set -o noglob
     local device_name_array=($ATTACHED_VOLUME_NAME_LIST)
+    set +o noglob
     {% raw %}
     return $([[ $existing_device_count -eq ${#device_name_array[@]} ]])
     {% endraw %}

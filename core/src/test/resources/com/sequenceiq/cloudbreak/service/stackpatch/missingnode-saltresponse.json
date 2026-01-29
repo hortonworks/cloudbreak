@@ -1,0 +1,23 @@
+[
+  {
+    "node1": {
+      "cmd_|-get-uuids_|-blkid -s UUID /dev/disk/azure/scsi1/lun0 /dev/disk/azure/scsi1/lun1_|-run": {
+        "name": "blkid -s UUID /dev/disk/azure/scsi1/lun0 /dev/disk/azure/scsi1/lun1",
+        "changes": {
+          "pid": 76250,
+          "retcode": 0,
+          "stdout": "/dev/disk/azure/scsi1/lun0: UUID=\"427a9308-183c-4843-a764-c324ca0d3003\"\n/dev/disk/azure/scsi1/lun1: UUID=\"bb5d594d-ea76-4699-817b-5035bd3b3f1e\"",
+          "stderr": ""
+        },
+        "result": true,
+        "comment": "Command \"blkid -s UUID /dev/disk/azure/scsi1/lun0 /dev/disk/azure/scsi1/lun1\" run",
+        "__sls__": "disks/patch/get-uuids",
+        "__run_num__": 0,
+        "start_time": "09:22:30.823611",
+        "duration": 844.147,
+        "__id__": "get-uuids"
+      }
+    },
+    "node2": false
+  }
+]

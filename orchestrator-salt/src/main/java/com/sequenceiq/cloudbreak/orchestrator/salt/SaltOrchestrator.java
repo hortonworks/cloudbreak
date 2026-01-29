@@ -1802,7 +1802,7 @@ public class SaltOrchestrator implements HostOrchestrator {
         GatewayConfig primaryGateway = stateParams.getPrimaryGatewayConfig();
         Target<String> gatewayHost = new HostList(stateParams.getTargetHostNames());
         try (SaltConnector sc = saltService.createSaltConnector(primaryGateway)) {
-            ApplyResponse response = saltStateService.applyStateSync(sc, stateParams.getState(), gatewayHost);
+            ApplyResponse response = saltStateService.applyStateSync(sc, stateParams.getState(), gatewayHost, stateParams.getStateParams());
             return (List<Map<String, JsonNode>>) response.getResult();
         } catch (Exception e) {
             LOGGER.warn("Error occurred during the salt bootstrap", e);
