@@ -77,7 +77,7 @@ dependencies {
   }
   implementation group: 'org.bouncycastle',                 name: 'bc-fips',                        version: bouncycastleFipsVersion
   implementation     group: 'com.google.guava',          name: 'guava',                                version: guavaVersion
-  implementation     (group: 'org.apache.directory.server', name: 'apacheds-kerberos-codec',           version: '2.0.0.AM26') {
+  implementation     (group: 'org.apache.directory.server', name: 'apacheds-kerberos-codec',           version: '2.0.0.AM27') {
     exclude group: 'org.apache.mina', module: 'mina-core'
   }
   implementation     group: 'org.apache.commons',        name: 'commons-lang3',                        version: apacheCommonsLangVersion
