@@ -15,6 +15,7 @@
       "latitude": "50.09997683",
       "longitude": "8.67501542",
       "k8sSupported": true,
+      "defaultArmDbVmtype": "db.m7g.large",
       "cdpSupportedServices": [ "ALL" ]
     },
     {
@@ -244,6 +245,7 @@
       "latitude": "32.109333",
       "longitude": "34.855499",
       "k8sSupported": true,
+      "defaultArmDbVmtype": "db.m7g.large",
       "cdpSupportedServices": [ "ENVIRONMENT", "DATAHUB" ]
     }
   ]
