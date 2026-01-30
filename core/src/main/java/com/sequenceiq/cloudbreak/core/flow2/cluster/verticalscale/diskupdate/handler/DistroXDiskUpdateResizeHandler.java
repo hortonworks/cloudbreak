@@ -15,7 +15,7 @@ import com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.eve
 import com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.event.DistroXDiskUpdateFailedEvent;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.eventbus.Event;
-import com.sequenceiq.cloudbreak.service.datalake.DiskUpdateService;
+import com.sequenceiq.cloudbreak.service.diskupdate.DiskUpdateService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
@@ -52,7 +52,7 @@ public class DistroXDiskUpdateResizeHandler extends ExceptionCatcherEventHandler
             Stack stack = stackService.getByIdWithListsInTransaction(stackId);
             ResourceType diskResourceType = stack.getDiskResourceType();
             if (diskResourceType != null && diskResourceType.toString().contains("VOLUMESET")) {
-                diskUpdateService.resizeDisksAndUpdateFstab(stack, instanceGroup);
+                diskUpdateService.resizeDisks(stack, instanceGroup);
                 return new DistroXDiskResizeFinishedEvent(stackId);
             } else {
                 LOGGER.warn("Failed to resize disks - No disks to resize");

@@ -3,18 +3,13 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.handler;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
-import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.event.AddVolumesFailedEvent;
@@ -23,8 +18,8 @@ import com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.event.AddVolumesO
 import com.sequenceiq.cloudbreak.core.flow2.service.AddVolumesService;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.service.diskupdate.DiskUpdateService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.common.api.type.ResourceType;
@@ -44,7 +39,7 @@ public class AddVolumesOrchestrationHandler extends ExceptionCatcherEventHandler
     private StackService stackService;
 
     @Inject
-    private ResourceAttributeUtil resourceAttributeUtil;
+    private DiskUpdateService diskUpdateService;
 
     @Inject
     private AddVolumesService addVolumesService;
@@ -75,7 +70,7 @@ public class AddVolumesOrchestrationHandler extends ExceptionCatcherEventHandler
                 stack.setResources(new HashSet<>(resourceList));
                 Map<String, Map<String, String>> fstabInformation = addVolumesService.redeployStatesAndMountDisks(stack, requestGroup);
 
-                parseFstabAndPersistDiskInformation(fstabInformation, stack);
+                diskUpdateService.parseFstabAndPersistDiskInformation(fstabInformation, stack);
                 LOGGER.info("Successfully mounted additional volumes for group: {}", requestGroup);
                 response = new AddVolumesOrchestrationFinishedEvent(stackId, payload.getNumberOfDisks(), payload.getType(), payload.getSize(),
                         payload.getCloudVolumeUsageType(), requestGroup);
@@ -88,41 +83,6 @@ public class AddVolumesOrchestrationHandler extends ExceptionCatcherEventHandler
             response = new AddVolumesFailedEvent(stackId, e);
         }
         return response;
-    }
-
-    private void parseFstabAndPersistDiskInformation(Map<String, Map<String, String>> fstabInformation, Stack stack) {
-        LOGGER.debug("Parsing fstab information from host orchestrator mounting additional volumes - {}", fstabInformation);
-        fstabInformation.forEach((hostname, value) -> {
-            Optional<String> instanceIdOptional = stack.getNotTerminatedInstanceMetaDataSet().stream()
-                    .filter(instanceMetaData -> hostname.equals(instanceMetaData.getDiscoveryFQDN()))
-                    .map(InstanceMetaData::getInstanceId)
-                    .findFirst();
-
-            if (instanceIdOptional.isPresent()) {
-                String uuids = value.getOrDefault("uuids", "");
-                String fstab = value.getOrDefault("fstab", "");
-                if (!StringUtils.isEmpty(fstab)) {
-                    LOGGER.debug("Persisting resources for instance id - {}, hostname - {}, uuids - {}, fstab - {}.", instanceIdOptional.get(), hostname,
-                            uuids, fstab);
-                    persistUuidAndFstab(stack, instanceIdOptional.get(), hostname, uuids, fstab);
-                }
-            }
-        });
-    }
-
-    private void persistUuidAndFstab(Stack stack, String instanceId, String discoveryFQDN, String uuids, String fstab) {
-        resourceService.saveAll(stack.getDiskResources().stream()
-            .filter(volumeSet -> instanceId.equals(volumeSet.getInstanceId()))
-            .peek(volumeSet -> resourceAttributeUtil.getTypedAttributes(volumeSet, VolumeSetAttributes.class).ifPresent(volumeSetAttributes -> {
-                volumeSetAttributes.setUuids(uuids);
-                volumeSetAttributes.setFstab(fstab);
-                if (!discoveryFQDN.equals(volumeSetAttributes.getDiscoveryFQDN())) {
-                    LOGGER.info("DiscoveryFQDN is updated for {} to {}", volumeSet.getResourceName(), discoveryFQDN);
-                }
-                volumeSetAttributes.setDiscoveryFQDN(discoveryFQDN);
-                resourceAttributeUtil.setTypedAttributes(volumeSet, volumeSetAttributes);
-            }))
-            .collect(Collectors.toList()));
     }
 
     @Override

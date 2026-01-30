@@ -1,5 +1,3 @@
-{% if "mount_disks" in grains.get('roles', []) %}
-
 get_uuid_list:
   file.managed:
     - name: /opt/salt/scripts/get-uuid-list.sh
@@ -11,5 +9,3 @@ get_uuid_list:
 execute_get_uuid_list:
   cmd.run:
     - name: /opt/salt/scripts/get-uuid-list.sh
-
-{% endif %}

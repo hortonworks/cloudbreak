@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.service.datalake;
+package com.sequenceiq.cloudbreak.service.diskupdate;
 
 import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
 import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
@@ -48,7 +48,6 @@ import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
@@ -228,7 +227,7 @@ public class DiskUpdateService {
                 .toList();
     }
 
-    public void resizeDisksAndUpdateFstab(Stack stack, String instanceGroup) throws CloudbreakOrchestratorFailedException {
+    public void resizeDisks(Stack stack, String instanceGroup) throws CloudbreakOrchestratorFailedException {
         ResourceType diskResourceType = stack.getDiskResourceType();
         Long stackId = stack.getId();
         LOGGER.debug("Collecting resources based on stack id {} and resource type {} filtered by instance group {}.", stackId, diskResourceType,
@@ -239,47 +238,38 @@ public class DiskUpdateService {
         Set<Node> allNodesInTargetGroup = stackUtil.collectNodes(stack).stream().filter(node -> node.getHostGroup().equals(instanceGroup))
                 .collect(Collectors.toSet());
         Cluster cluster = stack.getCluster();
-        Set<Node> nodesWithDiskDataInTargetGroup = stackUtil.collectNodesWithDiskData(stack).stream().filter(node -> node.getHostGroup()
-                .equals(instanceGroup)).collect(Collectors.toSet());
         List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
         ExitCriteriaModel exitCriteriaModel = clusterDeletionBasedModel(stack.getId(), cluster.getId());
         LOGGER.debug("Calling host orchestrator for resizing and fetching fstab information for nodes - {}", allNodesInTargetGroup);
-        Map<String, Map<String, String>> fstabInformation = hostOrchestrator.resizeDisksOnNodes(gatewayConfigs, nodesWithDiskDataInTargetGroup,
-                allNodesInTargetGroup, exitCriteriaModel);
-
-        parseFstabAndPersistDiskInformation(fstabInformation, stack);
+        hostOrchestrator.resizeDisksOnNodes(gatewayConfigs, allNodesInTargetGroup, exitCriteriaModel);
     }
 
-    private void parseFstabAndPersistDiskInformation(Map<String, Map<String, String>> fstabInformation, Stack stack) {
+    public void parseFstabAndPersistDiskInformation(Map<String, Map<String, String>> fstabInformation, Stack stack) {
         LOGGER.debug("Parsing fstab information from host orchestrator resize disks - {}", fstabInformation);
-        fstabInformation.forEach((hostname, value) -> {
-            Optional<String> instanceIdOptional = stack.getNotTerminatedInstanceMetaDataSet().stream()
-                    .filter(instanceMetaData -> hostname.equals(instanceMetaData.getDiscoveryFQDN()))
-                    .map(InstanceMetaData::getInstanceId)
-                    .findFirst();
-
-            if (instanceIdOptional.isPresent()) {
-                String uuids = value.getOrDefault("uuids", "");
-                String fstab = value.getOrDefault("fstab", "");
-                if (!StringUtils.isEmpty(uuids) && !StringUtils.isEmpty(fstab)) {
-                    LOGGER.debug("Persisting resources for instance id - {}, hostname - {}, uuids - {}, fstab - {}.", instanceIdOptional.get(), hostname,
-                            uuids, fstab);
-                    persistUuidAndFstab(stack, instanceIdOptional.get(), hostname, uuids, fstab);
-                }
-            }
+        fstabInformation.forEach((fqdn, value) -> {
+            String uuids = value.getOrDefault("uuids", "");
+            String fstab = value.getOrDefault("fstab", "");
+            LOGGER.debug("Persisting resources for fqdn - {}, uuids - {}, fstab - {}.", fqdn, uuids, fstab);
+            persistUuidAndFstab(stack, fqdn, uuids, fstab);
         });
     }
 
-    private void persistUuidAndFstab(Stack stack, String instanceId, String discoveryFQDN, String uuids, String fstab) {
+    private void persistUuidAndFstab(Stack stack, String fqdn, String uuids, String fstab) {
         resourceService.saveAll(stack.getDiskResources().stream()
-                .filter(volumeSet -> instanceId.equals(volumeSet.getInstanceId()))
-                .peek(volumeSet -> resourceAttributeUtil.getTypedAttributes(volumeSet, VolumeSetAttributes.class).ifPresent(volumeSetAttributes -> {
-                    volumeSetAttributes.setUuids(uuids);
-                    volumeSetAttributes.setFstab(fstab);
-                    if (!discoveryFQDN.equals(volumeSetAttributes.getDiscoveryFQDN())) {
-                        LOGGER.info("DiscoveryFQDN is updated for {} to {}", volumeSet.getResourceName(), discoveryFQDN);
+                .filter(volumeSet -> {
+                    Optional<VolumeSetAttributes> volumeSetAttributes = resourceAttributeUtil.getTypedAttributes(volumeSet, VolumeSetAttributes.class);
+                    return volumeSetAttributes.isPresent() && fqdn.equals(volumeSetAttributes.get().getDiscoveryFQDN());
+                }).peek(volumeSet -> resourceAttributeUtil.getTypedAttributes(volumeSet, VolumeSetAttributes.class).ifPresent(volumeSetAttributes -> {
+                    if (!uuids.isEmpty()) {
+                        volumeSetAttributes.setUuids(uuids);
+                    } else {
+                        LOGGER.warn("No uuids found for fqdn {}.", fqdn);
                     }
-                    volumeSetAttributes.setDiscoveryFQDN(discoveryFQDN);
+                    if (!fstab.isEmpty()) {
+                        volumeSetAttributes.setFstab(fstab);
+                    } else {
+                        LOGGER.warn("No fstab found for fqdn {}.", fqdn);
+                    }
                     resourceAttributeUtil.setTypedAttributes(volumeSet, volumeSetAttributes);
                 }))
                 .collect(Collectors.toList()));

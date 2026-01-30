@@ -1051,7 +1051,7 @@ class SaltOrchestratorTest {
     void testResizeDisksOnNodes() throws Exception {
         when(saltRunner.runner(any(OrchestratorBootstrap.class), any(ExitCriteria.class), any(ExitCriteriaModel.class)))
                 .thenReturn(callable);
-        saltOrchestrator.resizeDisksOnNodes(Collections.singletonList(gatewayConfig), targets, targets, exitCriteriaModel);
+        saltOrchestrator.resizeDisksOnNodes(Collections.singletonList(gatewayConfig), targets, exitCriteriaModel);
         verify(callable, times(1)).call();
     }
 
@@ -1061,7 +1061,7 @@ class SaltOrchestratorTest {
                 .thenReturn(callable);
         when(callable.call()).thenThrow(new CloudbreakOrchestratorFailedException("TEST SALT RUNNER EXCEPTION"));
         CloudbreakOrchestratorFailedException ex = assertThrows(CloudbreakOrchestratorFailedException.class, () ->
-                saltOrchestrator.resizeDisksOnNodes(Collections.singletonList(gatewayConfig), targets, targets, exitCriteriaModel));
+                saltOrchestrator.resizeDisksOnNodes(Collections.singletonList(gatewayConfig), targets, exitCriteriaModel));
 
         assertEquals("TEST SALT RUNNER EXCEPTION", ex.getMessage());
     }

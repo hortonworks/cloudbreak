@@ -32,8 +32,21 @@ public class VolumeSetAttributes {
 
     @JsonCreator
     public VolumeSetAttributes(@JsonProperty("availabilityZone") String availabilityZone, @JsonProperty("deleteOnTermination") Boolean deleteOnTermination,
-            @JsonProperty("fstab") String fstab, @JsonProperty("volumes") List<Volume> volumes, @JsonProperty("volumeSize") Integer volumeSize,
-            @JsonProperty("volumeType") String volumeType) {
+            @JsonProperty("fstab") String fstab, @JsonProperty("uuids") String uuids, @JsonProperty("volumes") List<Volume> volumes,
+            @JsonProperty("volumeSize") Integer volumeSize, @JsonProperty("volumeType") String volumeType,
+            @JsonProperty("discoveryFQDN") String discoveryFQDN) {
+        this.availabilityZone = availabilityZone;
+        this.deleteOnTermination = deleteOnTermination;
+        this.fstab = fstab;
+        this.uuids = uuids;
+        this.volumes = volumes;
+        this.volumeSize = volumeSize;
+        this.volumeType = volumeType;
+        this.discoveryFQDN = discoveryFQDN;
+    }
+
+    public VolumeSetAttributes(String availabilityZone, Boolean deleteOnTermination, String fstab, List<Volume> volumes,
+            Integer volumeSize, String volumeType) {
         this.availabilityZone = availabilityZone;
         this.deleteOnTermination = deleteOnTermination;
         this.fstab = fstab;
@@ -218,11 +231,15 @@ public class VolumeSetAttributes {
 
         private String fstab;
 
+        private String uuids;
+
         private List<Volume> volumes;
 
         private Integer volumeSize;
 
         private String volumeType;
+
+        private String discoveryFQDN;
 
         public Builder withAvailabilityZone(String availabilityZone) {
             this.availabilityZone = availabilityZone;
@@ -236,6 +253,11 @@ public class VolumeSetAttributes {
 
         public Builder withFstab(String fstab) {
             this.fstab = fstab;
+            return this;
+        }
+
+        public Builder withUuids(String uuids) {
+            this.uuids = uuids;
             return this;
         }
 
@@ -254,8 +276,13 @@ public class VolumeSetAttributes {
             return this;
         }
 
+        public Builder withDiscoveryFQDN(String discoveryFQDN) {
+            this.discoveryFQDN = discoveryFQDN;
+            return this;
+        }
+
         public VolumeSetAttributes build() {
-            return new VolumeSetAttributes(availabilityZone, deleteOnTermination, fstab, volumes, volumeSize, volumeType);
+            return new VolumeSetAttributes(availabilityZone, deleteOnTermination, fstab, uuids, volumes, volumeSize, volumeType, discoveryFQDN);
         }
     }
 }

@@ -19,6 +19,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.ImmutableSet;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudConnectResources;
@@ -132,6 +134,9 @@ public class AddVolumesService {
     @Inject
     private VerticalScalingValidatorService verticalScalingValidatorService;
 
+    @Inject
+    private EntitlementService entitlementService;
+
     public Map<String, Map<String, String>> redeployStatesAndMountDisks(Stack stack, String requestGroup) throws Exception {
         String blueprintText = stack.getBlueprintJsonText();
         CmTemplateProcessor processor = cmTemplateProcessorFactory.get(blueprintText);
@@ -153,9 +158,11 @@ public class AddVolumesService {
         List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
         ExitCriteriaModel exitCriteriaModel = clusterDeletionBasedModel(stack.getId(), stack.getCluster().getId());
         LOGGER.debug("Formatting and mounting disks.");
-        Map<String, Map<String, String>> fstabInformation = hostOrchestrator.formatAndMountDisksAfterModifyingVolumesOnNodes(gatewayConfigs,
+        boolean xfsSupport = entitlementService.isXfsForEphemeralDisksSupported(Crn.safeFromString(stack.getResourceCrn()).getAccountId());
+        hostOrchestrator.updateMountDiskPillar(stack, gatewayConfigs, nodesWithDiskData, exitCriteriaModel,
+                stack.getPlatformVariant(), xfsSupport);
+        return hostOrchestrator.formatAndMountDisksAfterModifyingVolumesOnNodes(gatewayConfigs,
                 nodesWithDiskData, allNodes, exitCriteriaModel);
-        return fstabInformation;
     }
 
     private void stopClouderaManagerServices(Long stackId, String requestGroup, Set<ServiceComponent> hostTemplateServiceComponents) {

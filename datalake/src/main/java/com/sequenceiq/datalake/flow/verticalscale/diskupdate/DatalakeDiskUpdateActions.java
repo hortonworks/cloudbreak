@@ -6,6 +6,7 @@ import static com.sequenceiq.datalake.flow.verticalscale.diskupdate.event.Datala
 import static com.sequenceiq.datalake.flow.verticalscale.diskupdate.event.DatalakeDiskUpdateStateSelectors.FAILED_DATALAKE_DISK_UPDATE_EVENT;
 import static com.sequenceiq.datalake.flow.verticalscale.diskupdate.event.DatalakeDiskUpdateStateSelectors.HANDLED_FAILED_DATALAKE_DISK_UPDATE_EVENT;
 
+import java.util.List;
 import java.util.Map;
 
 import jakarta.inject.Inject;
@@ -89,6 +90,7 @@ public class DatalakeDiskUpdateActions {
                 sdxStatusService.setStatusForDatalakeAndNotify(
                         payload.getDatalakeStatus(),
                         payload.getDatalakeStatus().getDefaultResourceEvent(),
+                        List.of(payload.getException().getMessage()),
                         payload.getException().getMessage(),
                         payload.getResourceId());
                 sendEvent(context, HANDLED_FAILED_DATALAKE_DISK_UPDATE_EVENT.event(), payload);

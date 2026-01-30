@@ -32,6 +32,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.ResourceVolumeConnector;
@@ -85,6 +86,8 @@ import com.sequenceiq.common.api.type.ResourceType;
 
 @ExtendWith(MockitoExtension.class)
 class AddVolumesServiceTest {
+
+    private static final String DATAHUB_CRN = "crn:cdp:datahub:us-west-1:1234:user:91011";
 
     @Mock
     private StackUtil stackUtil;
@@ -179,6 +182,9 @@ class AddVolumesServiceTest {
     @Mock
     private AuthenticatedContext authenticatedContext;
 
+    @Mock
+    private EntitlementService entitlementService;
+
     private Set<Node> nodes = new HashSet<>();
 
     @BeforeEach
@@ -209,6 +215,7 @@ class AddVolumesServiceTest {
 
     @Test
     void testRedeployStatesAndMountDisks() throws Exception {
+        when(stack.getResourceCrn()).thenReturn(DATAHUB_CRN);
         Map<String, Map<String, String>> fstabInformation = Map.of("test", Map.of("fstab", "test-fstab", "uuid", "123"));
         doReturn(Map.of("test", Set.of(ServiceComponent.of("TEST", "TEST")))).when(processor).getServiceComponentsByHostGroup();
         doReturn(fstabInformation).when(hostOrchestrator).formatAndMountDisksAfterModifyingVolumesOnNodes(eq(gatewayConfigs), eq(nodes),
@@ -220,6 +227,7 @@ class AddVolumesServiceTest {
 
     @Test
     void testRedeployStatesAndMountDisksThrowsException() throws Exception {
+        when(stack.getResourceCrn()).thenReturn(DATAHUB_CRN);
         doReturn(Map.of("test", Set.of(ServiceComponent.of("TEST", "TEST")))).when(processor).getServiceComponentsByHostGroup();
         doThrow(new CloudbreakOrchestratorFailedException("test")).when(hostOrchestrator).formatAndMountDisksAfterModifyingVolumesOnNodes(any(), any(),
                 any(), any());

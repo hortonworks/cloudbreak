@@ -94,6 +94,7 @@ public class DiskResizeActions {
                 flowMessageService.fireEventAndLog(payload.getResourceId(),
                         UPDATE_FAILED.name(),
                         DISK_RESIZE_FAILED,
+                        context.getStack().getName(),
                         payload.getException().getMessage());
                 sendEvent(context, DISK_UPDATE_FAILURE_HANDLED_EVENT.selector(), payload);
             }

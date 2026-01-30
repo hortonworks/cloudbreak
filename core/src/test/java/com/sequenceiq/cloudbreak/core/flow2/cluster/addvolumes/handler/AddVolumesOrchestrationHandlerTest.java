@@ -7,6 +7,8 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import java.util.List;
 import java.util.Map;
@@ -19,7 +21,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
-import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.event.AddVolumesFailedEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.event.AddVolumesOrchestrationHandlerEvent;
@@ -28,6 +29,7 @@ import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
+import com.sequenceiq.cloudbreak.service.diskupdate.DiskUpdateService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.common.api.type.ResourceType;
@@ -44,7 +46,7 @@ class AddVolumesOrchestrationHandlerTest {
     private StackService stackService;
 
     @Mock
-    private ResourceAttributeUtil resourceAttributeUtil;
+    private DiskUpdateService diskUpdateService;
 
     @Mock
     private AddVolumesService addVolumesService;
@@ -75,6 +77,7 @@ class AddVolumesOrchestrationHandlerTest {
         doReturn(fstabInformation).when(addVolumesService).redeployStatesAndMountDisks(stack, "test");
         Selectable response = underTest.doAccept(new HandlerEvent<>(new Event<>(handlerRequest)));
         assertEquals(ADD_VOLUMES_ORCHESTRATION_FINISHED_EVENT.event(), response.getSelector());
+        verify(diskUpdateService, times(1)).parseFstabAndPersistDiskInformation(fstabInformation, stack);
     }
 
     @Test

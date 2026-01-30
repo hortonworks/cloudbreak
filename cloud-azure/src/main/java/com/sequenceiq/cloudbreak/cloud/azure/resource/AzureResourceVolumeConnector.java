@@ -100,8 +100,12 @@ public class AzureResourceVolumeConnector implements ResourceVolumeConnector {
                 CloudInstance cloudInstance = group.getInstances().stream().filter(instance ->
                                 instance.getInstanceId().equals(resource.getInstanceId())).findFirst()
                         .orElseThrow(() -> new CloudbreakServiceException(format("Instance :%s not found", resource.getInstanceId())));
-                String fqdn = getInstanceParameterAsString(cloudInstance, FQDN);
-                List<VolumeSetAttributes.Volume> volumes = getVolumes(resource);
+                String fqdn = cloudInstance.getStringParameter(FQDN);
+                VolumeSetAttributes volumeSetAttributes = getVolumeSetAttributes(resource);
+                List<VolumeSetAttributes.Volume> volumes = volumeSetAttributes.getVolumes();
+                if (volumeSetAttributes.getDiscoveryFQDN() == null) {
+                    volumeSetAttributes.setDiscoveryFQDN(fqdn);
+                }
                 int offset = volumes.size() + group.getReferenceInstanceTemplate().getTemporaryStorageCount().intValue();
                 Collection<String> availableVolumes = fqdnToAvailableVolumes.getOrDefault(fqdn, new ArrayList<>());
                 LOGGER.info("Available volumes for {} are {}", fqdn, availableVolumes);
@@ -139,7 +143,7 @@ public class AzureResourceVolumeConnector implements ResourceVolumeConnector {
     }
 
     private Map<String, Collection<String>> getAvailableVolumes(Group group, AuthenticatedContext authenticatedContext, CloudStack cloudStack) {
-        List<String> fqdns = group.getInstances().stream().map(instance -> getInstanceParameterAsString(instance, FQDN)).collect(Collectors.toList());
+        List<String> fqdns = group.getInstances().stream().map(instance -> instance.getStringParameter(FQDN)).collect(Collectors.toList());
         List<Disk> availableDisks = azureAttachmentResourceBuilder.getAvailableDisks(authenticatedContext, cloudStack, TAG_NAME, fqdns);
         return availableDisks.stream().collect(Multimaps.toMultimap(
                 disk -> disk.tags().get(TAG_NAME),
@@ -156,7 +160,7 @@ public class AzureResourceVolumeConnector implements ResourceVolumeConnector {
                             .withName(instance.getInstanceId())
                             .withType(AZURE_INSTANCE)
                             .build(), cloudStack.getParameters().get(PlatformParametersConsts.RESOURCE_CRN_PARAMETER),
-                    false));
+                    false, instance.getStringParameter(FQDN)));
         }
         return newVolumeSets;
     }
@@ -199,12 +203,8 @@ public class AzureResourceVolumeConnector implements ResourceVolumeConnector {
         }
     }
 
-    private List<VolumeSetAttributes.Volume> getVolumes(CloudResource resource) {
-        return resource.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class).getVolumes();
-    }
-
-    private String getInstanceParameterAsString(CloudInstance cloudInstance, String parameterName) {
-        return cloudInstance.getParameter(parameterName, String.class);
+    private VolumeSetAttributes getVolumeSetAttributes(CloudResource resource) {
+        return resource.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
     }
 
     @Override

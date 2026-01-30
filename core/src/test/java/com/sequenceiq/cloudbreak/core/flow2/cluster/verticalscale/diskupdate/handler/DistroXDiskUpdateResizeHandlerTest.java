@@ -25,7 +25,7 @@ import com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.diskupdate.eve
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
-import com.sequenceiq.cloudbreak.service.datalake.DiskUpdateService;
+import com.sequenceiq.cloudbreak.service.diskupdate.DiskUpdateService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
@@ -75,17 +75,17 @@ class DistroXDiskUpdateResizeHandlerTest {
     @Test
     void testResizeDisks() throws CloudbreakOrchestratorFailedException {
         Selectable selectable = underTest.doAccept(new HandlerEvent<>(new Event<>(handlerRequest)));
-        verify(diskUpdateService, times(1)).resizeDisksAndUpdateFstab(stack, "compute");
+        verify(diskUpdateService, times(1)).resizeDisks(stack, "compute");
         assertEquals(DATAHUB_DISK_RESIZE_FINISHED_EVENT.event(), selectable.getSelector());
     }
 
     @Test
     void testResizeDisksException() throws CloudbreakOrchestratorFailedException {
-        doThrow(new CloudbreakOrchestratorFailedException("TEST")).when(diskUpdateService).resizeDisksAndUpdateFstab(stack, "compute");
+        doThrow(new CloudbreakOrchestratorFailedException("TEST")).when(diskUpdateService).resizeDisks(stack, "compute");
 
         Selectable selectable = underTest.doAccept(new HandlerEvent<>(new Event<>(handlerRequest)));
         assertEquals(FAILED_DATAHUB_DISK_UPDATE_EVENT.selector(), selectable.getSelector());
-        verify(diskUpdateService, times(1)).resizeDisksAndUpdateFstab(stack, "compute");
+        verify(diskUpdateService, times(1)).resizeDisks(stack, "compute");
     }
 
 }

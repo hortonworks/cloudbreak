@@ -55,13 +55,13 @@ import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
+import com.sequenceiq.cloudbreak.service.diskupdate.DiskUpdateService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
@@ -191,10 +191,9 @@ class DiskUpdateServiceTest {
     }
 
     @Test
-    void testResizeDisks() throws Exception {
+    void testBasicResizeDisks() throws Exception {
         Stack stack = mock(Stack.class);
         doReturn(stack).when(stackService).getByIdWithListsInTransaction(STACK_ID);
-        DiskUpdateRequest diskUpdateRequest = mock(DiskUpdateRequest.class);
         List<Volume> volumeListToUpdate = List.of(mock(Volume.class));
         underTest.resizeDisks(STACK_ID, "test", "gp2", 100, volumeListToUpdate);
 
@@ -375,7 +374,7 @@ class DiskUpdateServiceTest {
     }
 
     @Test
-    void testResizeDisksAndUpdateFstab() throws CloudbreakOrchestratorFailedException {
+    void testResizeDisks() throws CloudbreakOrchestratorFailedException {
         Stack stack = mock(Stack.class);
         doReturn(ResourceType.AWS_VOLUMESET).when(stack).getDiskResourceType();
         doReturn(STACK_ID).when(stack).getId();
@@ -383,35 +382,22 @@ class DiskUpdateServiceTest {
         doReturn("test-instance-1").when(resource).getInstanceId();
         List<Resource> resourceList = List.of(resource);
         doReturn(resourceList).when(resourceService).findAllByStackIdAndInstanceGroupAndResourceTypeIn(eq(STACK_ID), eq("compute"), anyList());
-        doReturn(resourceList).when(stack).getDiskResources();
         Node node = mock(Node.class);
         doReturn("compute").when(node).getHostGroup();
         Set<Node> allNodes = Set.of(node);
         doReturn(allNodes).when(stackUtil).collectNodes(stack);
-        doReturn(allNodes).when(stackUtil).collectNodesWithDiskData(stack);
         Cluster cluster = mock(Cluster.class);
         doReturn(cluster).when(stack).getCluster();
-        InstanceMetaData instanceMetaData = mock(InstanceMetaData.class);
-        doReturn("test-instance-fqdn").when(instanceMetaData).getDiscoveryFQDN();
-        doReturn("test-instance-1").when(instanceMetaData).getInstanceId();
-        Set<InstanceMetaData> instanceMetaDataList = Set.of(instanceMetaData);
-        doReturn(instanceMetaDataList).when(stack).getNotTerminatedInstanceMetaDataSet();
-        Map<String, Map<String, String>> fstabInformation = Map.of("test-instance-fqdn", Map.of("uuids", "test-uuid", "fstab", "test-fstab"));
-        doReturn(fstabInformation).when(hostOrchestrator).resizeDisksOnNodes(anyList(), anySet(), anySet(), any());
-        VolumeSetAttributes volumeSetAttributes = mock(VolumeSetAttributes.class);
-        doReturn("test-instance-fqdn").when(volumeSetAttributes).getDiscoveryFQDN();
-        doReturn(Optional.of(volumeSetAttributes)).when(resourceAttributeUtil).getTypedAttributes(any(), eq(VolumeSetAttributes.class));
 
-        underTest.resizeDisksAndUpdateFstab(stack, "compute");
+        underTest.resizeDisks(stack, "compute");
         verify(resourceService).findAllByStackIdAndInstanceGroupAndResourceTypeIn(STACK_ID, "compute", List.of(ResourceType.AWS_VOLUMESET));
         verify(gatewayConfigService).getAllGatewayConfigs(stack);
-        verify(hostOrchestrator).resizeDisksOnNodes(anyList(), anySet(), anySet(), any());
-        verify(resourceService).saveAll(resourceList);
+        verify(hostOrchestrator).resizeDisksOnNodes(anyList(), anySet(), any());
     }
 
     @Test
-    void testResizeDisksAndUpdateFstabException() throws CloudbreakOrchestratorFailedException {
-        Stack stack = mock(Stack.class);
+        void testResizeDisksException() throws CloudbreakOrchestratorFailedException {
+            Stack stack = mock(Stack.class);
         doReturn(ResourceType.AWS_VOLUMESET).when(stack).getDiskResourceType();
         doReturn(STACK_ID).when(stack).getId();
         Resource resource = mock(Resource.class);
@@ -422,17 +408,16 @@ class DiskUpdateServiceTest {
         doReturn("compute").when(node).getHostGroup();
         Set<Node> allNodes = Set.of(node);
         doReturn(allNodes).when(stackUtil).collectNodes(stack);
-        doReturn(allNodes).when(stackUtil).collectNodesWithDiskData(stack);
         Cluster cluster = mock(Cluster.class);
         doReturn(cluster).when(stack).getCluster();
 
-        doThrow(new CloudbreakOrchestratorFailedException("Test Exception")).when(hostOrchestrator).resizeDisksOnNodes(anyList(), anySet(), anySet(), any());
+        doThrow(new CloudbreakOrchestratorFailedException("Test Exception")).when(hostOrchestrator).resizeDisksOnNodes(anyList(), anySet(), any());
 
         CloudbreakOrchestratorFailedException exception = assertThrows(CloudbreakOrchestratorFailedException.class,
-                () -> underTest.resizeDisksAndUpdateFstab(stack, "compute"));
+                () -> underTest.resizeDisks(stack, "compute"));
         verify(resourceService).findAllByStackIdAndInstanceGroupAndResourceTypeIn(STACK_ID, "compute", List.of(ResourceType.AWS_VOLUMESET));
         verify(gatewayConfigService).getAllGatewayConfigs(stack);
-        verify(hostOrchestrator).resizeDisksOnNodes(anyList(), anySet(), anySet(), any());
+        verify(hostOrchestrator).resizeDisksOnNodes(anyList(), anySet(), any());
         assertEquals("Test Exception", exception.getMessage());
     }
 }

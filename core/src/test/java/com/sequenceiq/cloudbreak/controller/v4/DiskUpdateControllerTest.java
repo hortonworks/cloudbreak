@@ -22,7 +22,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskModificationRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
-import com.sequenceiq.cloudbreak.service.datalake.DiskUpdateService;
+import com.sequenceiq.cloudbreak.service.diskupdate.DiskUpdateService;
 
 @ExtendWith(MockitoExtension.class)
 public class DiskUpdateControllerTest {

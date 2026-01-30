@@ -184,8 +184,7 @@ class AzureResourceVolumeConnectorTest {
         if (!cloudResourceExist) {
             CloudResource cloudResource = populateCloudResource(0, 0, 0, existingDiskInfo.get(0)[1], availableDisks);
             OngoingStubbing ongoingStubbing = when(azureVolumeResourceBuilder.createVolumeSet(eq(1L), eq(authenticatedContext),
-                    eq(group), any(CloudResource.class), eq(STACK_CRN),
-                    eq(false))).thenReturn(cloudResource);
+                    eq(group), any(CloudResource.class), eq(STACK_CRN), eq(false), any())).thenReturn(cloudResource);
 
             for (int index = 1; index < existingDiskInfo.size(); index++) {
                 cloudResource = populateCloudResource(index, 0, 0, existingDiskInfo.get(index)[1], availableDisks);
@@ -223,7 +222,7 @@ class AzureResourceVolumeConnectorTest {
         if (!cloudResourceExist) {
             verify(azureVolumeResourceBuilder, times(existingDiskInfo.size())).createVolumeSet(eq(1L), eq(authenticatedContext),
                     eq(group), any(CloudResource.class), eq(STACK_CRN),
-                    eq(false));
+                    eq(false), any());
         }
     }
 
@@ -234,6 +233,7 @@ class AzureResourceVolumeConnectorTest {
         List<CloudInstance> cloudInstances = new ArrayList<>();
         CloudInstance cloudInstance = mock(CloudInstance.class);
         when(cloudInstance.getInstanceId()).thenReturn("instance0");
+        when(cloudInstance.getStringParameter(FQDN)).thenReturn("fqdn0");
         cloudInstances.add(cloudInstance);
         CloudResource cloudResource = mock(CloudResource.class);
         when(cloudResource.getInstanceId()).thenReturn("instance1");
@@ -258,7 +258,7 @@ class AzureResourceVolumeConnectorTest {
         Group group = getGroup(GROUP_NAME);
         when(cloudStack.getGroups()).thenReturn(List.of(group));
         when(group.getInstances()).thenReturn(cloudInstances);
-        doThrow(new RuntimeException("TEST")).when(azureVolumeResourceBuilder).createVolumeSet(eq(1L), any(), any(), any(), any(), eq(false));
+        doThrow(new RuntimeException("TEST")).when(azureVolumeResourceBuilder).createVolumeSet(eq(1L), any(), any(), any(), any(), eq(false), any());
         CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class,
                 () -> underTest.createVolumes(authenticatedContext, group,
                         new VolumeSetAttributes.Volume(null, null, VOLUME_SIZE, VOLUME_TYPE, null),
@@ -430,6 +430,7 @@ class AzureResourceVolumeConnectorTest {
             String fqdn = String.format("fqdn%s", count);
             CloudInstance cloudInstance = getCloudInstance(instanceName);
             when(cloudInstance.getParameter(FQDN, String.class)).thenReturn(fqdn);
+            when(cloudInstance.getStringParameter(FQDN)).thenReturn(fqdn);
             cloudInstances.add(cloudInstance);
         }
         if (cloudResourceExist(existingDiskInfo)) {

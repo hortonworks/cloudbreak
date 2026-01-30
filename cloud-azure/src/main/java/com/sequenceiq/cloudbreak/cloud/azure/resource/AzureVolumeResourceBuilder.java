@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.azure.resource;
 
+import static com.sequenceiq.cloudbreak.cloud.model.CloudInstance.FQDN;
 import static com.sequenceiq.cloudbreak.cloud.model.CloudResource.PRIVATE_ID;
 import static java.util.stream.Collectors.toList;
 
@@ -98,7 +99,8 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
         Optional<CloudResource> reattachableVolumeSet = getReattachableVolumeSet(computeResources, vm);
 
         return List.of(reattachableVolumeSet.orElseGet(
-                () -> createVolumeSet(privateId, auth, group, vm, context.getStringParameter(PlatformParametersConsts.RESOURCE_CRN_PARAMETER), true)));
+                () -> createVolumeSet(privateId, auth, group, vm, context.getStringParameter(PlatformParametersConsts.RESOURCE_CRN_PARAMETER), true,
+                        instance.getStringParameter(FQDN))));
     }
 
     private Optional<CloudResource> getReattachableVolumeSet(List<CloudResource> computeResources, CloudResource vm) {
@@ -115,7 +117,7 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
     }
 
     public CloudResource createVolumeSet(long privateId, AuthenticatedContext auth, Group group, CloudResource vm, String stackCrn,
-            boolean withVolumesFromTemplate) {
+            boolean withVolumesFromTemplate, String fqdn) {
         String instanceId = vm.getInstanceId();
         Optional<CloudResource> volumeSetForInstanceId = findVolumeSetForInstanceId(instanceId, auth, group);
         if (volumeSetForInstanceId.isPresent()) {
@@ -141,6 +143,7 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
                 .withParameters(Map.of(CloudResource.ATTRIBUTES, new VolumeSetAttributes.Builder()
                                 .withAvailabilityZone(availabilityZone)
                                 .withDeleteOnTermination(Boolean.TRUE)
+                                .withDiscoveryFQDN(fqdn)
                                 .withVolumes(
                                         withVolumesFromTemplate ? template.getVolumes().stream()
                                                 .map(volume -> new Volume(

@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common.service;
 
+import static com.sequenceiq.cloudbreak.cloud.model.CloudInstance.FQDN;
 import static com.sequenceiq.cloudbreak.cloud.model.CloudResource.PRIVATE_ID;
 import static java.lang.String.format;
 
@@ -79,7 +80,16 @@ public class AwsAdditionalDiskCreator {
             cloudResources.forEach(resource -> {
                 List<VolumeSetAttributes.Volume> volumes = volumeSetMap.get(resource.getName());
                 if (!CollectionUtils.isEmpty(volumes)) {
-                    resource.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class).getVolumes().addAll(volumes);
+                    VolumeSetAttributes volumeSetAttributes = resource.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
+                    try {
+                        if (volumeSetAttributes.getDiscoveryFQDN() != null) {
+                            String fqdnForResource = getFqdnForResource(group, resource);
+                            volumeSetAttributes.setDiscoveryFQDN(fqdnForResource);
+                        }
+                    } catch (CloudbreakException e) {
+                        LOGGER.warn("Exception while getting fqdn for resource: {}", resource, e);
+                    }
+                    volumeSetAttributes.getVolumes().addAll(volumes);
                     resource.setStatus(CommonStatus.CREATED);
                 }
             });
@@ -102,6 +112,7 @@ public class AwsAdditionalDiskCreator {
                                     .withAvailabilityZone(instance.getAvailabilityZone())
                                     .withDeleteOnTermination(Boolean.TRUE)
                                     .withVolumes(new ArrayList<>())
+                                    .withDiscoveryFQDN(instance.getParameter(FQDN, String.class))
                                     .build(),
                             PRIVATE_ID, privateId))
                     .build();
@@ -119,10 +130,7 @@ public class AwsAdditionalDiskCreator {
         List<String> fqdnForAllResources = group.getInstances().stream().map(instance -> instance.getParameters().get("FQDN").toString()).toList();
         Map<String, Integer> newVolumesToCreateByFqdn = getNewVolumesToCreateCount(requestVolsToAddPerInstance, fqdnForAllResources, client);
         for (CloudResource resource: createVolumesRequest.getCloudResources()) {
-            String fqdn = (String) group.getInstances().stream().filter(instance -> instance.getInstanceId().equals(resource.getInstanceId()))
-                    .map(instance -> instance.getParameters().get("FQDN")).findFirst()
-                    .orElseThrow(() -> new CloudbreakException(format("Instance ID :%s does not have any fqdn attached.", resource.getInstanceId())));
-
+            String fqdn = getFqdnForResource(group, resource);
             int attachedVolumesCount = createVolumesRequest.getAttachedVolumesCount();
             int remainingVolumesPerInstance = newVolumesToCreateByFqdn.get(fqdn);
             DeviceNameGenerator generator = new DeviceNameGenerator(DEVICE_NAME_TEMPLATE, attachedVolumesCount + 1);
@@ -156,6 +164,12 @@ public class AwsAdditionalDiskCreator {
         }
         awsCommonDiskUpdateService.pollVolumeStates(client, volumeIdsCreated);
         return volumeSetMap;
+    }
+
+    private String getFqdnForResource(Group group, CloudResource resource) throws CloudbreakException {
+        return (String) group.getInstances().stream().filter(instance -> instance.getInstanceId().equals(resource.getInstanceId()))
+                .map(instance -> instance.getParameters().get(FQDN)).findFirst()
+                .orElseThrow(() -> new CloudbreakException(format("Instance ID :%s does not have any fqdn attached.", resource.getInstanceId())));
     }
 
     private String createAndAddVolumes(CreateVolumesRequest createVolumesRequest, AmazonEc2Client client, Map<String,
