@@ -2,14 +2,12 @@ package com.sequenceiq.freeipa.service.upgrade;
 
 import static java.util.function.Predicate.not;
 
-import java.util.Locale;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -90,14 +88,12 @@ public class UpgradeValidationService {
     }
 
     public void validateSelectedImageForArchitecture(ImageInfoResponse currentImage, ImageInfoResponse selectedImage) {
-        String currentArch = StringUtils.isNotBlank(currentImage.getArchitecture()) ?
-                currentImage.getArchitecture().toLowerCase(Locale.ROOT) : Architecture.X86_64.getName().toLowerCase(Locale.ROOT);
-        String selectedArch = StringUtils.isNotBlank(selectedImage.getArchitecture()) ?
-                selectedImage.getArchitecture().toLowerCase(Locale.ROOT) : Architecture.X86_64.getName().toLowerCase(Locale.ROOT);
-        if (!currentArch.equalsIgnoreCase(selectedArch)) {
+        Architecture currentArch = Architecture.fromStringWithFallback(currentImage.getArchitecture());
+        Architecture selectedArch = Architecture.fromStringWithFallback(selectedImage.getArchitecture());
+        if (!currentArch.equals(selectedArch)) {
             LOGGER.warn("Selected {} and current {} image are on different architecture", selectedImage, currentImage);
-            throw new BadRequestException("Selected image using " + selectedArch
-                    + " architecture and current image are using different " + currentArch + " architecture.");
+            throw new BadRequestException("Selected image using " + selectedArch.getName()
+                    + " architecture and current image are using different " + currentArch.getName() + " architecture.");
         }
     }
 }
