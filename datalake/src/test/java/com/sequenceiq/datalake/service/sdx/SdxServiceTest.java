@@ -932,6 +932,22 @@ class SdxServiceTest {
     }
 
     @Test
+    void test732Redhat8Validation() {
+        SdxClusterRequest sdxClusterRequest = createSdxClusterRequest("7.3.2", LIGHT_DUTY);
+        sdxClusterRequest.setOs("redhat8");
+        withCloudStorage(sdxClusterRequest);
+        StackV4Request stackV4Request = new StackV4Request();
+        ImageSettingsV4Request imageSettingsV4Request = new ImageSettingsV4Request();
+        imageSettingsV4Request.setOs("redhat8");
+        stackV4Request.setImage(imageSettingsV4Request);
+        mockEnvironmentCall(sdxClusterRequest, AWS, null);
+
+        assertThrows(BadRequestException.class, () ->
+                ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, stackV4Request)),
+                "Provision is not allowed for image with runtime version 7.3.2 and OS type redhat8.");
+    }
+
+    @Test
     void testSdxCreateWithDifferingOsValues() {
         SdxClusterRequest sdxClusterRequest = createSdxClusterRequest("7.2.17", LIGHT_DUTY);
         sdxClusterRequest.setOs("os1");

@@ -58,7 +58,7 @@ import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionEx
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
-import com.sequenceiq.cloudbreak.controller.validation.stack.StackRuntimeVersionValidator;
+import com.sequenceiq.cloudbreak.controller.validation.stack.StackCreationRuntimeVersionValidator;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.StackToStackV4ResponseConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.StackV4RequestToStackConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
@@ -155,7 +155,7 @@ public class StackCreatorService {
     private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
 
     @Inject
-    private StackRuntimeVersionValidator stackRuntimeVersionValidator;
+    private StackCreationRuntimeVersionValidator stackCreationRuntimeVersionValidator;
 
     @Inject
     private HueWorkaroundValidatorService hueWorkaroundValidatorService;
@@ -274,7 +274,7 @@ public class StackCreatorService {
                 int javaVersion = javaDefaultVersionCalculator.calculate(stackRequest.getJavaVersion(), blueprint.getStackVersion());
                 setJavaVersion(stackRequest, stack, javaVersion);
                 javaVersionValidator.validateImage(imgFromCatalog.getImage(), blueprint.getStackVersion(), stackRequest.getJavaVersion());
-                stackRuntimeVersionValidator.validate(stackRequest, imgFromCatalog.getImage(), stackType);
+                stackCreationRuntimeVersionValidator.validate(stackRequest, imgFromCatalog.getImage(), stackType);
                 imageService.getSupportedImdsVersion(stack.cloudPlatform(), imgFromCatalog).ifPresent(stack::setSupportedImdsVersion);
                 Stack newStack = measure(
                         () -> stackService.create(stack, imgFromCatalog, user, workspace),

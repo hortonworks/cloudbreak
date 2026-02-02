@@ -115,6 +115,8 @@ import com.sequenceiq.sdx.api.model.SdxRecipe;
 @Service
 public class SdxService implements ResourceIdProvider, PayloadContextProvider, HierarchyAuthResourcePropertyProvider {
 
+    public static final String DENIED_RUNTIME_WITH_REDHAT8 = "7.3.2";
+
     public static final long WORKSPACE_ID_DEFAULT = 0L;
 
     public static final String DATABASE_SSL_ENABLED = "databaseSslEnabled";
@@ -396,6 +398,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         String runtimeVersion = getRuntime(sdxClusterRequest, internalStackV4Request, imageV4Response);
         String os = getOs(sdxClusterRequest, internalStackV4Request, imageV4Response);
         validateOsEntitled(os, accountId);
+        validateOsAndRuntime(os, runtimeVersion);
         CloudPlatform cloudPlatform = CloudPlatform.valueOf(environment.getCloudPlatform());
         Architecture architecture = validateAndGetArchitecture(sdxClusterRequest, imageV4Response, cloudPlatform, accountId);
 
@@ -462,6 +465,12 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         }
         FlowIdentifier flowIdentifier = sdxReactorFlowManager.triggerSdxCreation(savedSdxCluster);
         return Pair.of(savedSdxCluster, flowIdentifier);
+    }
+
+    private void validateOsAndRuntime(String os, String runtime) {
+        if (StringUtils.equals(runtime, DENIED_RUNTIME_WITH_REDHAT8) && OsType.RHEL8.equals(OsType.getByOs(os))) {
+            throw new BadRequestException("Provision is not allowed for image with runtime version 7.3.2 and OS type redhat8.");
+        }
     }
 
     private void validateOsEntitled(String os, String accountId) {

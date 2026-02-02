@@ -18,18 +18,20 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.ImageStackDetails;
+import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.service.datalake.SdxClientService;
 import com.sequenceiq.cloudbreak.service.stack.RuntimeVersionService;
 import com.sequenceiq.cloudbreak.service.stack.StackViewService;
+import com.sequenceiq.common.model.OsType;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
 @Component
-public class StackRuntimeVersionValidator {
+public class StackCreationRuntimeVersionValidator {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(StackRuntimeVersionValidator.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(StackCreationRuntimeVersionValidator.class);
 
     @Inject
     private SdxClientService sdxClientService;
@@ -45,6 +47,7 @@ public class StackRuntimeVersionValidator {
     private EntitlementService entitlementService;
 
     public void validate(StackV4Request stackRequest, Image image, StackType stackType) {
+        validateOsAndRuntime(image);
         if (StackType.WORKLOAD.equals(stackType)) {
             if (isDifferentDataHubAndDataLakeVersionAllowed()) {
                 LOGGER.debug("The Data Hub version validation has been turned off with entitlement.");
@@ -53,6 +56,14 @@ public class StackRuntimeVersionValidator {
                 findRequestedStackVersion(stackRequest, image).ifPresent(requestedRuntimeVersion ->
                         checkRuntimeVersion(stackRequest.getEnvironmentCrn(), requestedRuntimeVersion));
             }
+        }
+    }
+
+    private void validateOsAndRuntime(Image image) {
+        if (image.getStackDetails() != null &&
+                CMRepositoryVersionUtil.isVersionEqualToLimited(image.getStackDetails().getVersion(), CMRepositoryVersionUtil.CLOUDERA_STACK_VERSION_7_3_2) &&
+                OsType.RHEL8.equals(OsType.getByOs(image.getOs()))) {
+            throw new BadRequestException("Provision is not allowed for image with runtime version 7.3.2 and OS type redhat8.");
         }
     }
 

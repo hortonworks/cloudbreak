@@ -44,7 +44,7 @@ import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
 @ExtendWith(MockitoExtension.class)
-class StackRuntimeVersionValidatorTest {
+class StackCreationRuntimeVersionValidatorTest {
 
     private static final String DATA_HUB_VERSION = "7.2.0";
 
@@ -57,7 +57,7 @@ class StackRuntimeVersionValidatorTest {
     private static final String SDX_VERSION = "7.2.0";
 
     @InjectMocks
-    private StackRuntimeVersionValidator underTest;
+    private StackCreationRuntimeVersionValidator underTest;
 
     @Mock
     private SdxClientService sdxClientService;
@@ -70,6 +70,15 @@ class StackRuntimeVersionValidatorTest {
 
     @Mock
     private RuntimeVersionService runtimeVersionService;
+
+    @Test
+    void test732Redhat8Validation() {
+        Image image = mock(Image.class);
+        when(image.getStackDetails()).thenReturn(new ImageStackDetails("7.3.2", null, null));
+        when(image.getOs()).thenReturn("redhat8");
+        assertThrows(BadRequestException.class, () -> underTest.validate(new StackV4Request(), image, StackType.WORKLOAD),
+                "Provision is not allowed for image with runtime version 7.3.2 and OS type redhat8.");
+    }
 
     @Test
     void testValidationWhenEntitlementOn() {
