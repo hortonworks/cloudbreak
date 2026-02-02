@@ -162,7 +162,7 @@ subprojects {
   }
 
   dependencies {
-    checkstyle('com.puppycrawl.tools:checkstyle:12.1.2')
+    checkstyle('com.puppycrawl.tools:checkstyle:13.1.0')
     deployerJars("org.springframework.build.aws:org.springframework.build.aws.maven:3.1.0.RELEASE")
     testImplementation group: 'org.mockito',               name: 'mockito-junit-jupiter',          version: mockitoVersion
     testImplementation group: 'org.junit.jupiter',         name: 'junit-jupiter',                  version: junitJupiterVersion
