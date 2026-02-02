@@ -35,7 +35,7 @@ public class CmRequestLoggerInterceptor implements Interceptor {
         if (request.body() == null) {
             return "";
         }
-        try (var buffer = new Buffer()) {
+        try (Buffer buffer = new Buffer()) {
             request.body().writeTo(buffer);
             return buffer.readUtf8();
         }

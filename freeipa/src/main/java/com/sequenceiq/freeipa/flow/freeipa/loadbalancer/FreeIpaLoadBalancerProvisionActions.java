@@ -1,11 +1,13 @@
 package com.sequenceiq.freeipa.flow.freeipa.loadbalancer;
 
-import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus.CREATING_LOAD_BALANCER;
+import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus.ADDING_LOAD_BALANCER_FINISHED;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus.CREATING_LOAD_BALANCER_FINISHED;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus.PROVISION_FAILED;
+import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus.UPDATE_FAILED;
 import static com.sequenceiq.freeipa.flow.freeipa.loadbalancer.FreeIpaLoadBalancerCreationEvent.FREEIPA_LOAD_BALANCER_CREATION_FAILURE_HANDLED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.loadbalancer.FreeIpaLoadBalancerCreationEvent.FREEIPA_LOAD_BALANCER_CREATION_FINISHED_EVENT;
 
+import java.util.List;
 import java.util.Map;
 
 import jakarta.inject.Inject;
@@ -20,13 +22,18 @@ import org.springframework.statemachine.action.Action;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.flow.core.FlowParameters;
+import com.sequenceiq.flow.core.PayloadConverter;
 import com.sequenceiq.freeipa.entity.LoadBalancer;
 import com.sequenceiq.freeipa.flow.freeipa.loadbalancer.event.LoadBalancerCreationFailureEvent;
+import com.sequenceiq.freeipa.flow.freeipa.loadbalancer.event.LoadBalancerCreationTriggerEvent;
+import com.sequenceiq.freeipa.flow.freeipa.loadbalancer.event.StackEventToLoadBalancerCreationTriggerEventConverter;
 import com.sequenceiq.freeipa.flow.freeipa.loadbalancer.event.configuration.LoadBalancerConfigurationSuccess;
 import com.sequenceiq.freeipa.flow.freeipa.loadbalancer.event.metadata.LoadBalancerMetadataCollectionRequest;
 import com.sequenceiq.freeipa.flow.freeipa.loadbalancer.event.metadata.LoadBalancerMetadataCollectionSuccess;
 import com.sequenceiq.freeipa.flow.freeipa.loadbalancer.event.provision.LoadBalancerProvisionRequest;
 import com.sequenceiq.freeipa.flow.freeipa.loadbalancer.event.provision.LoadBalancerProvisionSuccess;
+import com.sequenceiq.freeipa.flow.freeipa.loadbalancer.event.update.LoadBalancerDomainUpdateRequest;
+import com.sequenceiq.freeipa.flow.freeipa.loadbalancer.event.update.LoadBalancerDomainUpdateSuccess;
 import com.sequenceiq.freeipa.flow.stack.StackContext;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
 import com.sequenceiq.freeipa.service.loadbalancer.FreeIpaLoadBalancerConfigurationService;
@@ -39,7 +46,7 @@ public class FreeIpaLoadBalancerProvisionActions {
 
     @Bean(name = "CREATE_CONFIGURATION_STATE")
     public Action<?, ?> createConfiguration() {
-        return new AbstractLoadBalancerCreationAction<>(StackEvent.class) {
+        return new AbstractLoadBalancerCreationAction<>(LoadBalancerCreationTriggerEvent.class) {
 
             @Inject
             private FreeIpaLoadBalancerConfigurationService freeIpaLoadBalancerConfigurationService;
@@ -48,8 +55,13 @@ public class FreeIpaLoadBalancerProvisionActions {
             private FreeIpaLoadBalancerService freeIpaLoadBalancerService;
 
             @Override
-            protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
-                stackUpdater().updateStackStatus(context.getStack(), CREATING_LOAD_BALANCER, "Creating FreeIPA load balancer configuration");
+            protected void prepareExecution(LoadBalancerCreationTriggerEvent payload, Map<Object, Object> variables) {
+                variables.put(LOAD_BALANCER_PROVISIONING_MODE, payload.getLoadBalancerProvisioningMode());
+            }
+
+            @Override
+            protected void doExecute(StackContext context, LoadBalancerCreationTriggerEvent payload, Map<Object, Object> variables) {
+                stackUpdater().updateStackStatus(context.getStack(), getInProgressState(variables), "Creating FreeIPA load balancer configuration");
                 Long stackId = payload.getResourceId();
                 if (freeIpaLoadBalancerService.findByStackId(stackId).isEmpty()) {
                     LOGGER.debug("Creating load balancer configuration for FreeIPA cluster");
@@ -65,6 +77,11 @@ public class FreeIpaLoadBalancerProvisionActions {
             protected Selectable createRequest(StackContext context) {
                 return new LoadBalancerConfigurationSuccess(context.getStack().getId());
             }
+
+            @Override
+            protected void initPayloadConverterMap(List<PayloadConverter<LoadBalancerCreationTriggerEvent>> payloadConverters) {
+                payloadConverters.add(new StackEventToLoadBalancerCreationTriggerEventConverter());
+            }
         };
     }
 
@@ -74,7 +91,7 @@ public class FreeIpaLoadBalancerProvisionActions {
 
             @Override
             protected void doExecute(StackContext context, LoadBalancerConfigurationSuccess payload, Map<Object, Object> variables) {
-                stackUpdater().updateStackStatus(context.getStack(), CREATING_LOAD_BALANCER, "Provisioning FreeIPA load balancer");
+                stackUpdater().updateStackStatus(context.getStack(), getInProgressState(variables), "Provisioning FreeIPA load balancer");
                 sendEvent(context);
             }
 
@@ -92,7 +109,7 @@ public class FreeIpaLoadBalancerProvisionActions {
 
             @Override
             protected void doExecute(StackContext context, LoadBalancerProvisionSuccess payload, Map<Object, Object> variables) {
-                stackUpdater().updateStackStatus(context.getStack(), CREATING_LOAD_BALANCER, "Collecting load balancer metadata");
+                stackUpdater().updateStackStatus(context.getStack(), getInProgressState(variables), "Collecting load balancer metadata");
                 sendEvent(context);
             }
 
@@ -104,13 +121,31 @@ public class FreeIpaLoadBalancerProvisionActions {
         };
     }
 
-    @Bean(name = "LOAD_BALANCER_CREATION_FINISHED_STATE")
-    public Action<?, ?> loadBalancerCreationFinished() {
+    @Bean(name = "LOAD_BALANCER_DOMAIN_UPDATE_STATE")
+    public Action<?, ?> loadBalancerDomainUpdate() {
         return new AbstractLoadBalancerCreationAction<>(LoadBalancerMetadataCollectionSuccess.class) {
 
             @Override
             protected void doExecute(StackContext context, LoadBalancerMetadataCollectionSuccess payload, Map<Object, Object> variables) {
-                stackUpdater().updateStackStatus(context.getStack(), CREATING_LOAD_BALANCER_FINISHED, "FreeIPA load balancer creation finished");
+                if (isBootstrapMode(variables)) {
+                    sendEvent(context, new LoadBalancerDomainUpdateSuccess(payload.getResourceId()));
+                } else {
+                    stackUpdater().updateStackStatus(context.getStack(), getInProgressState(variables), "Updating FreeIPA load balancer domain");
+                    sendEvent(context, new LoadBalancerDomainUpdateRequest(payload.getResourceId()));
+                }
+            }
+        };
+    }
+
+    @Bean(name = "LOAD_BALANCER_CREATION_FINISHED_STATE")
+    public Action<?, ?> loadBalancerCreationFinished() {
+        return new AbstractLoadBalancerCreationAction<>(LoadBalancerDomainUpdateSuccess.class) {
+
+            @Override
+            protected void doExecute(StackContext context, LoadBalancerDomainUpdateSuccess payload, Map<Object, Object> variables) {
+                stackUpdater().updateStackStatus(context.getStack(),
+                        isBootstrapMode(variables) ? CREATING_LOAD_BALANCER_FINISHED : ADDING_LOAD_BALANCER_FINISHED,
+                        "FreeIPA load balancer creation finished");
                 sendEvent(context);
             }
 
@@ -128,7 +163,7 @@ public class FreeIpaLoadBalancerProvisionActions {
             @Override
             protected void doExecute(StackContext context, LoadBalancerCreationFailureEvent payload, Map<Object, Object> variables) {
                 String errorReason = getErrorReason(payload.getException());
-                stackUpdater().updateStackStatus(context.getStack(), PROVISION_FAILED, errorReason);
+                stackUpdater().updateStackStatus(context.getStack(), isBootstrapMode(variables) ? PROVISION_FAILED : UPDATE_FAILED, errorReason);
                 sendEvent(context);
             }
 

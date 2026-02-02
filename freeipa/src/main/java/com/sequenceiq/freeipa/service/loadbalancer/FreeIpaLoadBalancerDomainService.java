@@ -6,6 +6,8 @@ import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.PemDnsEntryCreateOrUpdateException;
@@ -17,9 +19,11 @@ import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.client.FreeIpaClientExceptionUtil;
 import com.sequenceiq.freeipa.client.FreeIpaClientRunnable;
+import com.sequenceiq.freeipa.client.RetryableFreeIpaClientException;
 import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.LoadBalancer;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
@@ -46,6 +50,9 @@ public class FreeIpaLoadBalancerDomainService {
     @Inject
     private FreeIpaLoadBalancerPemService freeIpaLoadBalancerPemService;
 
+    @Inject
+    private FreeIpaClientFactory freeIpaClientFactory;
+
     public void registerLbDomain(Long stackId, FreeIpaClient freeIpaClient) throws FreeIpaClientException, PemDnsEntryCreateOrUpdateException {
         Optional<LoadBalancer> loadBalancer = loadBalancerService.findByStackId(stackId);
         if (loadBalancer.isPresent()) {
@@ -61,6 +68,15 @@ public class FreeIpaLoadBalancerDomainService {
                 performLoadBalancerDNSUpdateOnPEM(lb, stack.getEnvironmentCrn(), stack.getAccountId());
             }
         }
+    }
+
+    @Retryable(retryFor = FreeIpaClientException.class,
+            maxAttemptsExpression = RetryableFreeIpaClientException.MAX_RETRIES_EXPRESSION,
+            backoff = @Backoff(delayExpression = RetryableFreeIpaClientException.DELAY_EXPRESSION,
+                    multiplierExpression = RetryableFreeIpaClientException.MULTIPLIER_EXPRESSION))
+    public void registerLbDomain(Long stackId) throws FreeIpaClientException, PemDnsEntryCreateOrUpdateException {
+        FreeIpaClient freeIpaClient = freeIpaClientFactory.getFreeIpaClientForStackId(stackId);
+        registerLbDomain(stackId, freeIpaClient);
     }
 
     public void deregisterLbDomain(Long stackId) throws PemDnsEntryCreateOrUpdateException {
