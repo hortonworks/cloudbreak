@@ -16,6 +16,7 @@ import com.cloudera.api.swagger.model.ApiParcel;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.it.cloudbreak.client.BlueprintTestClient;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
+import com.sequenceiq.it.cloudbreak.config.server.ServerProperties;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -44,6 +45,9 @@ public class CMDownscaleWithHttp500ResponsesTest extends AbstractClouderaManager
     @Inject
     private ParcelGeneratorUtil parcelGeneratorUtil;
 
+    @Inject
+    private ServerProperties serverProperties;
+
     @Override
     protected void setupTest(TestContext testContext) {
         createDefaultUser(testContext);
@@ -65,7 +69,7 @@ public class CMDownscaleWithHttp500ResponsesTest extends AbstractClouderaManager
         parcelMockActivatorUtil.mockActivateWithDefaultParcels(testContext, clusterName, parcel);
         testContext
                 .given("cmpkey", DistroXClouderaManagerProductTestDto.class)
-                .withParcel("someParcel")
+                .withParcel("https://" + serverProperties.getMockImageCatalogAddr() + "/mock-parcel/someParcel")
                 .withName(parcel.getProduct())
                 .withVersion(parcel.getVersion())
                 .given("cmanager", DistroXClouderaManagerTestDto.class)

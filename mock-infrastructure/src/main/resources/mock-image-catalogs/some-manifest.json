@@ -1,0 +1,95 @@
+{
+  "lastUpdated": 1770074471793,
+  "parcels": [
+    {
+      "components": [
+        {
+          "name": "flink",
+          "pkg_version": "1.20.1-csa2.0.0.0-75456247",
+          "version": "1.20.1-csa2.0.0.0-75456247"
+        },
+        {
+          "name": "ssb",
+          "pkg_version": "1.20.1-csa2.0.0.0-75456247",
+          "version": "1.20.1-csa2.0.0.0-75456247"
+        }
+      ],
+      "depends": "CDH (>= 7.0)",
+      "hash": "d18d3215c476516ee6c507ccfae26414c0f08277",
+      "parcelName": "FLINK-1.20.1-csa2.0.0.0-75456247-jammy.parcel",
+      "releaseNotes": "Cloudera Streaming Analytics 1.11.0.0 introduces fixes from Flink 1.16.2, adds CDP 7.1.9 support with Iceberg v2 integration and numerous SQL Stream Builder improvements.\n"
+    },
+    {
+      "components": [
+        {
+          "name": "flink",
+          "pkg_version": "1.20.1-csa2.0.0.0-75456247",
+          "version": "1.20.1-csa2.0.0.0-75456247"
+        },
+        {
+          "name": "ssb",
+          "pkg_version": "1.20.1-csa2.0.0.0-75456247",
+          "version": "1.20.1-csa2.0.0.0-75456247"
+        }
+      ],
+      "depends": "CDH (>= 7.0)",
+      "hash": "a564ba9842665b7b75da4a58eb210af318c278f8",
+      "parcelName": "FLINK-1.20.1-csa2.0.0.0-75456247-focal.parcel",
+      "releaseNotes": "Cloudera Streaming Analytics 1.11.0.0 introduces fixes from Flink 1.16.2, adds CDP 7.1.9 support with Iceberg v2 integration and numerous SQL Stream Builder improvements.\n"
+    },
+    {
+      "components": [
+        {
+          "name": "flink",
+          "pkg_version": "1.20.1-csa2.0.0.0-75456247",
+          "version": "1.20.1-csa2.0.0.0-75456247"
+        },
+        {
+          "name": "ssb",
+          "pkg_version": "1.20.1-csa2.0.0.0-75456247",
+          "version": "1.20.1-csa2.0.0.0-75456247"
+        }
+      ],
+      "depends": "CDH (>= 7.0)",
+      "hash": "939a61d9d596e9a01b89d005bd0133ab64991bd3",
+      "parcelName": "FLINK-1.20.1-csa2.0.0.0-75456247-el8.parcel",
+      "releaseNotes": "Cloudera Streaming Analytics 1.11.0.0 introduces fixes from Flink 1.16.2, adds CDP 7.1.9 support with Iceberg v2 integration and numerous SQL Stream Builder improvements.\n"
+    },
+    {
+      "components": [
+        {
+          "name": "flink",
+          "pkg_version": "1.20.1-csa2.0.0.0-75456247",
+          "version": "1.20.1-csa2.0.0.0-75456247"
+        },
+        {
+          "name": "ssb",
+          "pkg_version": "1.20.1-csa2.0.0.0-75456247",
+          "version": "1.20.1-csa2.0.0.0-75456247"
+        }
+      ],
+      "depends": "CDH (>= 7.0)",
+      "hash": "89bdb3ac5014d085867ff3c27a0ad544e13ce7cb",
+      "parcelName": "FLINK-1.20.1-csa2.0.0.0-75456247-el9.parcel",
+      "releaseNotes": "Cloudera Streaming Analytics 1.11.0.0 introduces fixes from Flink 1.16.2, adds CDP 7.1.9 support with Iceberg v2 integration and numerous SQL Stream Builder improvements.\n"
+    },
+    {
+      "components": [
+        {
+          "name": "flink",
+          "pkg_version": "1.20.1-csa2.0.0.0-75456247",
+          "version": "1.20.1-csa2.0.0.0-75456247"
+        },
+        {
+          "name": "ssb",
+          "pkg_version": "1.20.1-csa2.0.0.0-75456247",
+          "version": "1.20.1-csa2.0.0.0-75456247"
+        }
+      ],
+      "depends": "CDH (>= 7.0)",
+      "hash": "984c0b129d3265a154a48a4836d1cf76445be60f",
+      "parcelName": "FLINK-1.20.1-csa2.0.0.0-75456247-sles15.parcel",
+      "releaseNotes": "Cloudera Streaming Analytics 1.11.0.0 introduces fixes from Flink 1.16.2, adds CDP 7.1.9 support with Iceberg v2 integration and numerous SQL Stream Builder improvements.\n"
+    }
+  ]
+}

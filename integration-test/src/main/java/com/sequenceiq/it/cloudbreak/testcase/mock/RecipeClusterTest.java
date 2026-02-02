@@ -28,6 +28,7 @@ import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
 import com.sequenceiq.it.cloudbreak.client.RecipeTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.cloud.HostGroupType;
+import com.sequenceiq.it.cloudbreak.config.server.ServerProperties;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
@@ -77,6 +78,9 @@ public class RecipeClusterTest extends AbstractMockTest {
 
     @Inject
     private RecipeUtil recipeUtil;
+
+    @Inject
+    private ServerProperties serverProperties;
 
     @Test(dataProvider = "dataProviderForNonPreTerminationRecipeTypes")
     public void testRecipeNotPreTerminationHasGotHighStateOnCluster(
@@ -196,7 +200,7 @@ public class RecipeClusterTest extends AbstractMockTest {
                     .withRecipeType(POST_SERVICE_DEPLOYMENT)
                 .when(recipeTestClient.createV4())
                 .given("cmpkey", DistroXClouderaManagerProductTestDto.class)
-                    .withParcel("someParcel")
+                    .withParcel("https://" + serverProperties.getMockImageCatalogAddr() + "/mock-parcel/someParcel")
                     .withName(parcel.getProduct())
                     .withVersion(parcel.getVersion())
                 .given("cmanager", DistroXClouderaManagerTestDto.class)
@@ -237,7 +241,7 @@ public class RecipeClusterTest extends AbstractMockTest {
                     .withRecipeType(POST_CLOUDERA_MANAGER_START)
                 .when(recipeTestClient.createV4())
                 .given("cmpkey", DistroXClouderaManagerProductTestDto.class)
-                    .withParcel("someParcel")
+                    .withParcel("https://" + serverProperties.getMockImageCatalogAddr() + "/mock-parcel/someParcel")
                     .withName(parcel.getProduct())
                     .withVersion(parcel.getVersion())
                 .given("cmanager", DistroXClouderaManagerTestDto.class)

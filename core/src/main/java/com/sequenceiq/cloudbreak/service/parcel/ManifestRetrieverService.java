@@ -14,12 +14,16 @@ import org.glassfish.jersey.client.ClientProperties;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Recover;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.sequenceiq.cloudbreak.auth.PaywallCredentialPopulator;
 import com.sequenceiq.cloudbreak.client.RestClientFactory;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.cloudbreak.service.CloudbreakRuntimeException;
 
 @Component
 public class ManifestRetrieverService {
@@ -28,6 +32,8 @@ public class ManifestRetrieverService {
 
     private static final int MANIFEST_READ_TIMEOUT_IN_MS = 5000;
 
+    private static final int MAX_RETRIES = 3;
+
     @Inject
     private PaywallCredentialPopulator paywallCredentialPopulator;
 
@@ -35,7 +41,9 @@ public class ManifestRetrieverService {
     private RestClientFactory restClientFactory;
 
     @Cacheable(cacheNames = "parcelMetadataCache", key = "#baseUrl")
-    public ImmutablePair<ManifestStatus, Manifest> readRepoManifest(String baseUrl) {
+    @Retryable(value = ProcessingException.class, maxAttempts = MAX_RETRIES,
+            backoff = @Backoff(delay = MANIFEST_READ_TIMEOUT_IN_MS))
+    public ImmutablePair<ManifestStatus, Manifest> readRepoManifest(String baseUrl) throws CloudbreakRuntimeException {
         String manifestUrl = StringUtils.stripEnd(baseUrl, "/") + "/manifest.json";
         try {
             Client client = restClientFactory.getOrCreateDefault();
@@ -47,13 +55,24 @@ public class ManifestRetrieverService {
             Response response = target.request().get();
             Manifest manifest = readResponse(target, response);
             return ImmutablePair.of(ManifestStatus.SUCCESS, manifest);
-        } catch (ProcessingException | JsonParseException e) {
-            LOGGER.warn("Could not parse manifest.json: {}, message: {}", manifestUrl, e);
+        } catch (ProcessingException e) {
+            LOGGER.warn("Attempt to read manifest.json from parcel repo '{}' failed. Retrying...", manifestUrl, e);
+            throw e;
+        } catch (JsonParseException e) {
+            LOGGER.warn("Could not parse manifest.json: {}, message: {}", manifestUrl, e.getMessage());
             return ImmutablePair.of(ManifestStatus.COULD_NOT_PARSE, null);
         } catch (Exception e) {
-            LOGGER.warn("Could not read manifest.json from parcel repo: {}, message: {}", manifestUrl, e);
+            LOGGER.warn("Could not read manifest.json from parcel repo: {}, message: {}", manifestUrl, e.getMessage());
             return ImmutablePair.of(ManifestStatus.FAILED, null);
         }
+    }
+
+    @Recover
+    public ImmutablePair<ManifestStatus, Manifest> recoverRepoManifest(ProcessingException e, String baseUrl) throws CloudbreakRuntimeException {
+        String manifestUrl = StringUtils.stripEnd(baseUrl, "/") + "/manifest.json";
+        String message = String.format("Could not read manifest.json from parcel repo '%s' after %d attempts.", manifestUrl, MAX_RETRIES);
+        LOGGER.warn(message, e);
+        throw new CloudbreakRuntimeException(message, e);
     }
 
     private void addPaywallCredentialsIfNecessary(String baseUrl, WebTarget target) {

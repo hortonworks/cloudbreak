@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.parcel;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -9,6 +10,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import jakarta.ws.rs.ProcessingException;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.Invocation;
 import jakarta.ws.rs.client.WebTarget;
@@ -24,6 +26,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.auth.PaywallCredentialPopulator;
 import com.sequenceiq.cloudbreak.client.RestClientFactory;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.cloudbreak.service.CloudbreakRuntimeException;
 
 @ExtendWith(MockitoExtension.class)
 public class ManifestRetrieverServiceTest {
@@ -64,6 +67,34 @@ public class ManifestRetrieverServiceTest {
         ImmutablePair<ManifestStatus, Manifest> actual = underTest.readRepoManifest(BASE_URL);
 
         assertEquals(ManifestStatus.FAILED, actual.left);
+    }
+
+    @Test
+    void shouldThrowProcessingExceptionWhenRequestFails() {
+        Client client = mock(Client.class);
+        WebTarget target = mock(WebTarget.class);
+        Invocation.Builder request = mock(Invocation.Builder.class);
+
+        when(restClientFactory.getOrCreateDefault()).thenReturn(client);
+        when(client.target(BASE_URL + "manifest.json")).thenReturn(target);
+        when(target.request()).thenReturn(request);
+
+        when(request.get()).thenThrow(new ProcessingException("timeout"));
+
+        ProcessingException exception = assertThrows(ProcessingException.class,
+                () -> underTest.readRepoManifest(BASE_URL));
+
+        assertEquals("timeout", exception.getMessage());
+    }
+
+    @Test
+    void shouldThrowCloudbreakRuntimeExceptionWhenRecovering() {
+        ProcessingException processingException = new ProcessingException("timeout");
+
+        CloudbreakRuntimeException recovered = assertThrows(CloudbreakRuntimeException.class,
+                () -> underTest.recoverRepoManifest(processingException, BASE_URL));
+
+        assertEquals("Could not read manifest.json from parcel repo 'http://test.com/manifest.json' after 3 attempts.", recovered.getMessage());
     }
 
     private void mockManifestResponse(Response.Status status, Optional<String> manifest) {
