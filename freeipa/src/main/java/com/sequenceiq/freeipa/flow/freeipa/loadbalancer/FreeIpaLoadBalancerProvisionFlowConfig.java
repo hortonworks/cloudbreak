@@ -5,12 +5,14 @@ import static com.sequenceiq.freeipa.flow.freeipa.loadbalancer.FreeIpaLoadBalanc
 import static com.sequenceiq.freeipa.flow.freeipa.loadbalancer.FreeIpaLoadBalancerCreationEvent.FREEIPA_LOAD_BALANCER_CREATION_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.loadbalancer.FreeIpaLoadBalancerCreationEvent.FREEIPA_LOAD_BALANCER_CREATION_FAILURE_HANDLED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.loadbalancer.FreeIpaLoadBalancerCreationEvent.FREEIPA_LOAD_BALANCER_CREATION_FINISHED_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.loadbalancer.FreeIpaLoadBalancerCreationEvent.LOAD_BALANCER_DOMAIN_UPDATE_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.loadbalancer.FreeIpaLoadBalancerCreationEvent.METADATA_COLLECTION_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.loadbalancer.FreeIpaLoadBalancerCreationEvent.PROVISION_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.loadbalancer.FreeIpaLoadBalancerProvisionState.CREATE_CONFIGURATION_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.loadbalancer.FreeIpaLoadBalancerProvisionState.FINAL_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.loadbalancer.FreeIpaLoadBalancerProvisionState.INIT_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.loadbalancer.FreeIpaLoadBalancerProvisionState.LOAD_BALANCER_CREATION_FINISHED_STATE;
+import static com.sequenceiq.freeipa.flow.freeipa.loadbalancer.FreeIpaLoadBalancerProvisionState.LOAD_BALANCER_DOMAIN_UPDATE_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.loadbalancer.FreeIpaLoadBalancerProvisionState.METADATA_COLLECTION_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.loadbalancer.FreeIpaLoadBalancerProvisionState.PROVISIONING_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.loadbalancer.FreeIpaLoadBalancerProvisionState.PROVISION_FAILED_STATE;
@@ -52,8 +54,13 @@ public class FreeIpaLoadBalancerProvisionFlowConfig
             .defaultFailureEvent()
 
             .from(METADATA_COLLECTION_STATE)
-            .to(LOAD_BALANCER_CREATION_FINISHED_STATE)
+            .to(LOAD_BALANCER_DOMAIN_UPDATE_STATE)
             .event(METADATA_COLLECTION_FINISHED_EVENT)
+            .defaultFailureEvent()
+
+            .from(LOAD_BALANCER_DOMAIN_UPDATE_STATE)
+            .to(LOAD_BALANCER_CREATION_FINISHED_STATE)
+            .event(LOAD_BALANCER_DOMAIN_UPDATE_FINISHED_EVENT)
             .defaultFailureEvent()
 
             .from(LOAD_BALANCER_CREATION_FINISHED_STATE)

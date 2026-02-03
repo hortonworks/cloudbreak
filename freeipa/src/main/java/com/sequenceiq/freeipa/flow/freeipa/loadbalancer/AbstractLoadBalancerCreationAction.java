@@ -2,6 +2,7 @@ package com.sequenceiq.freeipa.flow.freeipa.loadbalancer;
 
 import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
 
+import java.util.Map;
 import java.util.Optional;
 
 import jakarta.inject.Inject;
@@ -13,12 +14,14 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.flow.core.FlowParameters;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.converter.cloud.CredentialToCloudCredentialConverter;
 import com.sequenceiq.freeipa.converter.cloud.StackToCloudStackConverter;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.OperationAwareAction;
 import com.sequenceiq.freeipa.flow.chain.FlowChainAwareAction;
 import com.sequenceiq.freeipa.flow.freeipa.loadbalancer.event.LoadBalancerCreationFailureEvent;
+import com.sequenceiq.freeipa.flow.freeipa.loadbalancer.event.LoadBalancerProvisioningMode;
 import com.sequenceiq.freeipa.flow.stack.AbstractStackAction;
 import com.sequenceiq.freeipa.flow.stack.StackContext;
 import com.sequenceiq.freeipa.service.CredentialService;
@@ -28,6 +31,8 @@ import com.sequenceiq.freeipa.service.stack.StackUpdater;
 public abstract class AbstractLoadBalancerCreationAction<P extends Payload>
         extends AbstractStackAction<FreeIpaLoadBalancerProvisionState, FreeIpaLoadBalancerCreationEvent, StackContext, P>
         implements OperationAwareAction, FlowChainAwareAction {
+
+    public static final String LOAD_BALANCER_PROVISIONING_MODE = "LOAD_BALANCER_PROVISIONING_MODE";
 
     @Inject
     private StackService stackService;
@@ -65,5 +70,17 @@ public abstract class AbstractLoadBalancerCreationAction<P extends Payload>
 
     protected StackUpdater stackUpdater() {
         return stackUpdater;
+    }
+
+    protected LoadBalancerProvisioningMode getLoadBalancerProvisioningMode(Map<Object, Object> variables) {
+        return (LoadBalancerProvisioningMode) variables.getOrDefault(LOAD_BALANCER_PROVISIONING_MODE, LoadBalancerProvisioningMode.BOOTSTRAP);
+    }
+
+    protected boolean isBootstrapMode(Map<Object, Object> variables) {
+        return getLoadBalancerProvisioningMode(variables) == LoadBalancerProvisioningMode.BOOTSTRAP;
+    }
+
+    protected DetailedStackStatus getInProgressState(Map<Object, Object> variables) {
+        return isBootstrapMode(variables) ? DetailedStackStatus.CREATING_LOAD_BALANCER : DetailedStackStatus.ADDING_LOAD_BALANCER;
     }
 }

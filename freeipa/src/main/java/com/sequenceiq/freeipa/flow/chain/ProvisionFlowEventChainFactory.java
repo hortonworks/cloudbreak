@@ -4,6 +4,7 @@ import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIP
 import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPAStatus.Value.CREATE_FINISHED;
 import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPAStatus.Value.CREATE_STARTED;
 import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPAStatus.Value.UNSET;
+import static com.sequenceiq.freeipa.flow.freeipa.loadbalancer.FreeIpaLoadBalancerCreationEvent.FREEIPA_LOAD_BALANCER_CREATION_EVENT;
 
 import java.util.Optional;
 import java.util.Queue;
@@ -20,7 +21,7 @@ import com.sequenceiq.flow.api.model.operation.OperationType;
 import com.sequenceiq.flow.core.FlowState;
 import com.sequenceiq.flow.core.chain.FlowEventChainFactory;
 import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
-import com.sequenceiq.freeipa.flow.freeipa.loadbalancer.FreeIpaLoadBalancerCreationEvent;
+import com.sequenceiq.freeipa.flow.freeipa.loadbalancer.event.LoadBalancerCreationTriggerEvent;
 import com.sequenceiq.freeipa.flow.freeipa.provision.FreeIpaProvisionEvent;
 import com.sequenceiq.freeipa.flow.freeipa.provision.FreeIpaProvisionState;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.ProvisionTriggerEvent;
@@ -69,7 +70,6 @@ public class ProvisionFlowEventChainFactory implements FlowEventChainFactory<Pro
 
     private Optional<StackEvent> createLoadBalancerCreationFlowIfNecessary(ProvisionTriggerEvent event) {
         return loadBalancerProvisionCondition.loadBalancerProvisionEnabled(event.getResourceId(), event.getLoadBalancer()) ?
-                Optional.of(new StackEvent(FreeIpaLoadBalancerCreationEvent.FREEIPA_LOAD_BALANCER_CREATION_EVENT.event(), event.getResourceId())) :
-                Optional.empty();
+                Optional.of(new LoadBalancerCreationTriggerEvent(FREEIPA_LOAD_BALANCER_CREATION_EVENT.event(), event.getResourceId())) : Optional.empty();
     }
 }

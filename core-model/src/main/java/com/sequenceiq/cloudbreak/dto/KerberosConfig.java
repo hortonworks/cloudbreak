@@ -87,6 +87,16 @@ public class KerberosConfig {
         return nameServers;
     }
 
+    @Override
+    public String toString() {
+        return "KerberosConfig{" +
+                "type=" + type +
+                ", realm='" + realm + '\'' +
+                ", domain='" + domain + '\'' +
+                ", nameServers='" + nameServers + '\'' +
+                '}';
+    }
+
     public static final class KerberosConfigBuilder {
         private KerberosType type;
 

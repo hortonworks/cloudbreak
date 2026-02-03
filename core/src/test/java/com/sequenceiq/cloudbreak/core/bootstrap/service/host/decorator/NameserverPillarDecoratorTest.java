@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator;
 
-import static com.sequenceiq.common.api.type.EnvironmentType.PUBLIC_CLOUD;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -10,6 +9,7 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,14 +22,15 @@ import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.service.freeipa.FreeipaClientService;
 import com.sequenceiq.cloudbreak.type.KerberosType;
-import com.sequenceiq.common.api.type.EnvironmentType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.TrustResponse;
 
 @ExtendWith(MockitoExtension.class)
 class NameserverPillarDecoratorTest {
 
-    private static final String SERVICE_KEY = "forwarder-zones";
+    private static final String FORWARDER_ZONES = "forwarder-zones";
+
+    private static final String DEFAULT_REVERSE_ZONE = "default-reverse-zone";
 
     private static final String SERVICE_PATH = "/unbound/forwarders.sls";
 
@@ -52,22 +53,29 @@ class NameserverPillarDecoratorTest {
     private NameserverPillarDecorator underTest;
 
     @Test
+    void testNullKerberosConfig() {
+        Map<String, SaltPillarProperties> result = underTest.createPillarForNameservers(null, ENVIRONMENT_CRN);
+        assertEquals(0, result.size());
+    }
+
+    @Test
     void testShouldPopulateThePillarWhenKerberosConfigIsAvailable() {
         KerberosConfig kerberosConfig = KerberosConfig.KerberosConfigBuilder.aKerberosConfig()
                 .withDomain(DOMAIN)
                 .withNameServers(String.join(",", "null", KERBEROS_NAMESERVER_1, KERBEROS_NAMESERVER_2))
                 .build();
 
-        Map<String, SaltPillarProperties> servicePillar = underTest.createPillarForNameservers(kerberosConfig, ENVIRONMENT_CRN, PUBLIC_CLOUD.name());
+        Map<String, SaltPillarProperties> servicePillar = underTest.createPillarForNameservers(kerberosConfig, ENVIRONMENT_CRN);
 
-        SaltPillarProperties pillarProperties = servicePillar.get(SERVICE_KEY);
-        Map<String, Map<String, List<String>>> nameservers = (Map<String, Map<String, List<String>>>) pillarProperties.getProperties().get(SERVICE_KEY);
+        SaltPillarProperties pillarProperties = servicePillar.get(FORWARDER_ZONES);
+        Map<String, Map<String, List<String>>> nameservers = getForwarderZones(pillarProperties);
+        Map<String, List<String>> defaultReverseZone = getDefaultReverseZone(pillarProperties);
         assertNotNull(pillarProperties);
         assertEquals(SERVICE_PATH, pillarProperties.getPath());
         assertTrue(nameservers.get(kerberosConfig.getDomain()).get(NAMESERVERS_KEY).contains(KERBEROS_NAMESERVER_1));
         assertTrue(nameservers.get(kerberosConfig.getDomain()).get(NAMESERVERS_KEY).contains(KERBEROS_NAMESERVER_2));
         assertEquals(2, nameservers.get(kerberosConfig.getDomain()).get(NAMESERVERS_KEY).size());
-
+        assertTrue(defaultReverseZone.isEmpty());
     }
 
     @Test
@@ -82,10 +90,11 @@ class NameserverPillarDecoratorTest {
         freeIpaResponse.setTrust(trust);
         when(freeipaClient.findByEnvironmentCrn(ENVIRONMENT_CRN)).thenReturn(Optional.of(freeIpaResponse));
 
-        Map<String, SaltPillarProperties> servicePillar = underTest.createPillarForNameservers(kerberosConfig, ENVIRONMENT_CRN, EnvironmentType.HYBRID.name());
+        Map<String, SaltPillarProperties> servicePillar = underTest.createPillarForNameservers(kerberosConfig, ENVIRONMENT_CRN);
 
-        SaltPillarProperties pillarProperties = servicePillar.get(SERVICE_KEY);
-        Map<String, Map<String, List<String>>> nameservers = (Map<String, Map<String, List<String>>>) pillarProperties.getProperties().get(SERVICE_KEY);
+        SaltPillarProperties pillarProperties = servicePillar.get(FORWARDER_ZONES);
+        Map<String, Map<String, List<String>>> nameservers = getForwarderZones(pillarProperties);
+        Map<String, List<String>> defaultReverseZone = getDefaultReverseZone(pillarProperties);
         assertNotNull(pillarProperties);
         assertEquals(SERVICE_PATH, pillarProperties.getPath());
         assertTrue(nameservers.get(kerberosConfig.getDomain()).get(NAMESERVERS_KEY).contains(KERBEROS_NAMESERVER_1));
@@ -95,6 +104,7 @@ class NameserverPillarDecoratorTest {
 
         assertEquals(2, nameservers.get("ad.domain").get(NAMESERVERS_KEY).size());
         assertEquals(2, nameservers.get(kerberosConfig.getDomain()).get(NAMESERVERS_KEY).size());
+        assertTrue(defaultReverseZone.get(NAMESERVERS_KEY).containsAll(Set.of(KERBEROS_NAMESERVER_1, KERBEROS_NAMESERVER_2)));
     }
 
     @Test
@@ -105,10 +115,10 @@ class NameserverPillarDecoratorTest {
                 .build();
         when(freeipaClient.findByEnvironmentCrn(ENVIRONMENT_CRN)).thenReturn(Optional.empty());
 
-        Map<String, SaltPillarProperties> servicePillar = underTest.createPillarForNameservers(kerberosConfig, ENVIRONMENT_CRN, EnvironmentType.HYBRID.name());
+        Map<String, SaltPillarProperties> servicePillar = underTest.createPillarForNameservers(kerberosConfig, ENVIRONMENT_CRN);
 
-        SaltPillarProperties pillarProperties = servicePillar.get(SERVICE_KEY);
-        Map<String, Map<String, List<String>>> nameservers = (Map<String, Map<String, List<String>>>) pillarProperties.getProperties().get(SERVICE_KEY);
+        SaltPillarProperties pillarProperties = servicePillar.get(FORWARDER_ZONES);
+        Map<String, Map<String, List<String>>> nameservers = getForwarderZones(pillarProperties);
         assertNotNull(pillarProperties);
         assertEquals(SERVICE_PATH, pillarProperties.getPath());
         assertTrue(nameservers.get(kerberosConfig.getDomain()).get(NAMESERVERS_KEY).contains(KERBEROS_NAMESERVER_1));
@@ -124,7 +134,7 @@ class NameserverPillarDecoratorTest {
                 .build();
 
         Exception exception = assertThrows(CloudbreakServiceException.class,
-                () -> underTest.createPillarForNameservers(kerberosConfig, ENVIRONMENT_CRN, PUBLIC_CLOUD.name()));
+                () -> underTest.createPillarForNameservers(kerberosConfig, ENVIRONMENT_CRN));
 
         assertEquals("Unable to setup nameservers because there is no IP address present.", exception.getMessage());
     }
@@ -133,9 +143,17 @@ class NameserverPillarDecoratorTest {
     void testShouldNotPopulateServicePillarWhenKerberosTypeIsFreeipaAndKerberosNameserverIsMissing() {
         KerberosConfig kerberosConfig = KerberosConfig.KerberosConfigBuilder.aKerberosConfig().withType(KerberosType.FREEIPA).build();
 
-        Map<String, SaltPillarProperties> servicePillar = underTest.createPillarForNameservers(kerberosConfig, ENVIRONMENT_CRN, PUBLIC_CLOUD.name());
+        Map<String, SaltPillarProperties> servicePillar = underTest.createPillarForNameservers(kerberosConfig, ENVIRONMENT_CRN);
 
         assertTrue(servicePillar.isEmpty());
+    }
+
+    private static Map<String, List<String>> getDefaultReverseZone(SaltPillarProperties pillarProperties) {
+        return (Map<String, List<String>>) pillarProperties.getProperties().get(DEFAULT_REVERSE_ZONE);
+    }
+
+    private static Map<String, Map<String, List<String>>> getForwarderZones(SaltPillarProperties pillarProperties) {
+        return (Map<String, Map<String, List<String>>>) pillarProperties.getProperties().get(FORWARDER_ZONES);
     }
 
 }

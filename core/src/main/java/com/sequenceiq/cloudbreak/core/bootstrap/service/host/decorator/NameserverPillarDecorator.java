@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -22,7 +23,6 @@ import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.service.freeipa.FreeipaClientService;
-import com.sequenceiq.common.api.type.EnvironmentType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.TrustResponse;
 
@@ -34,35 +34,34 @@ public class NameserverPillarDecorator {
     @Inject
     private FreeipaClientService freeipaClient;
 
-    public Map<String, SaltPillarProperties> createPillarForNameservers(KerberosConfig kerberosConfig, String environmentCrn, String environmentType) {
+    public Map<String, SaltPillarProperties> createPillarForNameservers(KerberosConfig kerberosConfig, String environmentCrn) {
         if (kerberosConfig != null && StringUtils.isNotBlank(kerberosConfig.getDomain()) && StringUtils.isNotBlank(kerberosConfig.getNameServers())) {
             LOGGER.debug("Add nameserver config to pillar based on kerberos config.");
             List<String> ipList = getKerberosNameServerIps(kerberosConfig);
             validateIpList(ipList);
-            Map<String, Map<String, List<String>>> nameservers = new HashMap<>();
-            nameservers.put(kerberosConfig.getDomain(), singletonMap("nameservers", ipList));
-            nameservers.putAll(fetchHybridNameserverConfig(environmentCrn, environmentType, ipList));
-            return Map.of("forwarder-zones", new SaltPillarProperties("/unbound/forwarders.sls",
-                    singletonMap("forwarder-zones", nameservers)));
+            Map<String, Map<String, List<String>>> forwarderZones = new HashMap<>();
+            Map<String, List<String>> defaultReverseZone = new HashMap<>();
+            forwarderZones.put(kerberosConfig.getDomain(), singletonMap("nameservers", ipList));
+            getTrustedRealm(environmentCrn).ifPresent(trustedRealm -> {
+                LOGGER.debug("Adding nameservers for trusted realm {}", trustedRealm);
+                forwarderZones.put(trustedRealm.toLowerCase(Locale.ROOT), singletonMap("nameservers", ipList));
+                defaultReverseZone.put("nameservers", ipList);
+            });
+            return Map.of("forwarder-zones",
+                    new SaltPillarProperties("/unbound/forwarders.sls", Map.of(
+                            "forwarder-zones", forwarderZones,
+                            "default-reverse-zone", defaultReverseZone)));
         } else {
-            LOGGER.debug("Skip to add nameserver config for pillar because kerberos config type is {}", kerberosConfig.getType());
+            LOGGER.debug("Skip to add nameserver config to pillar for kerberos config {}", kerberosConfig);
             return Map.of();
         }
-
     }
 
-    private Map<String, Map<String, List<String>>> fetchHybridNameserverConfig(String environmentCrn, String environmentType, List<String> ipList) {
-        if (EnvironmentType.isHybridFromEnvironmentTypeString(environmentType)) {
-            TrustResponse trustResponse = freeipaClient.findByEnvironmentCrn(environmentCrn).map(DescribeFreeIpaResponse::getTrust).orElse(null);
-            if (trustResponse != null && StringUtils.isNotBlank(trustResponse.getRealm())) {
-                return Map.of(trustResponse.getRealm().toLowerCase(Locale.ROOT), singletonMap("nameservers", ipList),
-                        "in-addr.arpa.", singletonMap("nameservers", ipList));
-            } else {
-                return Map.of();
-            }
-        } else {
-            return Map.of();
-        }
+    private Optional<String> getTrustedRealm(String environmentCrn) {
+        return freeipaClient.findByEnvironmentCrn(environmentCrn)
+                .map(DescribeFreeIpaResponse::getTrust)
+                .map(TrustResponse::getRealm)
+                .filter(StringUtils::isNotBlank);
     }
 
     private List<String> getKerberosNameServerIps(KerberosConfig kerberosConfig) {

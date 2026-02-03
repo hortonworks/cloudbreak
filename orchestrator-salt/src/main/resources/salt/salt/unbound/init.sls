@@ -30,6 +30,14 @@ remove_cluster_conf_from_unbound:
     - context:
       private_address: {{ host.private_address }}
 
+{%- if salt['pillar.get']('default-reverse-zone:nameservers', None) != None %}
+/etc/unbound/conf.d/default-reverse-zone.conf:
+  file.managed:
+    - makedirs: True
+    - source: salt://unbound/config/default-reverse-zone.conf
+    - template: jinja
+{%- endif %}
+
 set_max_ttl:
   file.replace:
     - name: /etc/unbound/unbound.conf
@@ -43,6 +51,9 @@ reload_unbound:
     - watch:
       - file: /etc/unbound/conf.d/00-cluster.conf
       - file: /etc/unbound/conf.d/60-domain-dns.conf
+{%- if salt['pillar.get']('default-reverse-zone:nameservers', None) != None %}
+      - file: /etc/unbound/conf.d/default-reverse-zone.conf
+{%- endif %}
 
 unbound:
   service.running:
