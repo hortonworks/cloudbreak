@@ -1,5 +1,6 @@
 {%- set postgres_version = salt['pillar.get']('postgres:postgres_version', '11') | int %}
 {%- do salt.log.debug("postgres_version " ~ postgres_version) %}
+{%- if not salt['file.file_exists']('/usr/pgsql-' +  postgres_version | string + '/bin/psql') %}
 
 include:
   - postgresql.repo.pg{{ postgres_version }}
@@ -13,3 +14,4 @@ install-postgres:
         - postgresql{{ postgres_version }}-contrib
         - postgresql{{ postgres_version }}-docs
     - fromrepo: pgdg{{ postgres_version }}
+{% endif %}
