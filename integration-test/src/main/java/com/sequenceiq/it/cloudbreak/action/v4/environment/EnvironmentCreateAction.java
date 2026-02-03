@@ -20,7 +20,10 @@ public class EnvironmentCreateAction extends AbstractEnvironmentAction {
             Log.whenJson("Environment post request: ", testDto.getRequest());
             CreateEnvironmentResponse createEnvironmentResponse = client.getDefaultClient(testContext).environmentV1Endpoint().post(testDto.getRequest());
             testDto.setResponse(createEnvironmentResponse);
-            testDto.setFlow("environmentCreateFlow", createEnvironmentResponse.getFlowIdentifier());
+            // TODO CB-31776 Temporarily disable flow check as mandatory - Until CB-31545 reaches prod
+            if (createEnvironmentResponse.getFlowIdentifier() != null) {
+                testDto.setFlow("environmentCreateFlow", createEnvironmentResponse.getFlowIdentifier());
+            }
         } else {
             DetailedEnvironmentResponse detailedEnvironmentResponse = client.getDefaultClient(testContext).environmentV1Endpoint().getByName(testDto.getName());
             if (detailedEnvironmentResponse != null) {
