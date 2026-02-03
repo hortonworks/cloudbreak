@@ -139,9 +139,9 @@ public class AddVolumesService {
         stopClouderaManagerServices(stack.getId(), requestGroup, hostTemplateServiceComponents);
         LOGGER.info("RE-Bootstrap machines");
         clusterBootstrapper.reBootstrapMachines(stack.getId());
-        Map<String, Map<String, String>> fstabInformation = formatAndMountAfterAddingDisks(stack, requestGroup);
         StackDto stackDto = stackDtoService.getById(stack.getId());
         clusterHostServiceRunner.updateClusterConfigs(stackDto, true);
+        Map<String, Map<String, String>> fstabInformation = formatAndMountAfterAddingDisks(stack, requestGroup);
         LOGGER.info("Successfully mounted additional block storages for stack {} and group {}", stack.getId(), requestGroup);
         return fstabInformation;
     }
