@@ -45,6 +45,8 @@ import com.sequenceiq.freeipa.entity.SaltSecurityConfig;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.DownscaleEvent;
+import com.sequenceiq.freeipa.flow.freeipa.loadbalancer.event.LoadBalancerCreationTriggerEvent;
+import com.sequenceiq.freeipa.flow.freeipa.loadbalancer.event.LoadBalancerProvisioningMode;
 import com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.ChangePrimaryGatewayFlowEvent;
 import com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.event.ChangePrimaryGatewayEvent;
 import com.sequenceiq.freeipa.flow.freeipa.salt.update.SaltUpdateTriggerEvent;
@@ -52,7 +54,6 @@ import com.sequenceiq.freeipa.flow.freeipa.upgrade.UpgradeEvent;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleEvent;
 import com.sequenceiq.freeipa.flow.freeipa.verticalscale.event.FreeIpaVerticalScalingTriggerEvent;
-import com.sequenceiq.freeipa.flow.stack.StackEvent;
 import com.sequenceiq.freeipa.flow.stack.image.change.event.ImageChangeEvent;
 import com.sequenceiq.freeipa.flow.stack.migration.AwsVariantMigrationEvent;
 import com.sequenceiq.freeipa.flow.stack.migration.event.AwsVariantMigrationTriggerEvent;
@@ -267,7 +268,8 @@ public class UpgradeFlowEventChainFactory implements FlowEventChainFactory<Upgra
     private List<Selectable> createLoadBalancerCreationFlowIfNecessary(UpgradeEvent event) {
         List<Selectable> events = new ArrayList<>();
         if (loadBalancerProvisionCondition.loadBalancerProvisionEnabled(event.getResourceId(), FreeIpaLoadBalancerType.INTERNAL_NLB)) {
-            events.add(new StackEvent(FREEIPA_LOAD_BALANCER_CREATION_EVENT.event(), event.getResourceId()));
+            events.add(new LoadBalancerCreationTriggerEvent(FREEIPA_LOAD_BALANCER_CREATION_EVENT.event(), event.getResourceId(),
+                    LoadBalancerProvisioningMode.UPGRADE));
         }
         return events;
     }

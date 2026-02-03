@@ -6,13 +6,14 @@ import com.sequenceiq.freeipa.flow.freeipa.loadbalancer.event.LoadBalancerCreati
 import com.sequenceiq.freeipa.flow.freeipa.loadbalancer.event.configuration.LoadBalancerConfigurationSuccess;
 import com.sequenceiq.freeipa.flow.freeipa.loadbalancer.event.metadata.LoadBalancerMetadataCollectionSuccess;
 import com.sequenceiq.freeipa.flow.freeipa.loadbalancer.event.provision.LoadBalancerProvisionSuccess;
+import com.sequenceiq.freeipa.flow.freeipa.loadbalancer.event.update.LoadBalancerDomainUpdateSuccess;
 
 public enum FreeIpaLoadBalancerCreationEvent implements FlowEvent {
     FREEIPA_LOAD_BALANCER_CREATION_EVENT,
     CONFIGURATION_CREATION_FINISHED_EVENT(EventSelectorUtil.selector(LoadBalancerConfigurationSuccess.class)),
     PROVISION_FINISHED_EVENT(EventSelectorUtil.selector(LoadBalancerProvisionSuccess.class)),
     METADATA_COLLECTION_FINISHED_EVENT(EventSelectorUtil.selector(LoadBalancerMetadataCollectionSuccess.class)),
-    FREEIPA_LOAD_BALANCER_CREATION_FAILED_EVENT,
+    LOAD_BALANCER_DOMAIN_UPDATE_FINISHED_EVENT(EventSelectorUtil.selector(LoadBalancerDomainUpdateSuccess.class)),
     FREEIPA_LOAD_BALANCER_CREATION_FINISHED_EVENT,
     FAILURE_EVENT(EventSelectorUtil.selector(LoadBalancerCreationFailureEvent.class)),
     FREEIPA_LOAD_BALANCER_CREATION_FAILURE_HANDLED_EVENT;

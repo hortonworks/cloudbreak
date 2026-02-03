@@ -550,8 +550,7 @@ public class ClusterHostServiceRunner {
         Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
         DetailedEnvironmentResponse detailedEnvironmentResponse = environmentConfigProvider.getEnvironmentByCrn(stackDto.getEnvironmentCrn());
         KerberosConfig kerberosConfig = kerberosConfigService.get(stack.getEnvironmentCrn(), stack.getName()).orElse(null);
-        servicePillar.putAll(nameserverPillarDecorator.createPillarForNameservers(kerberosConfig, stack.getEnvironmentCrn(),
-                detailedEnvironmentResponse.getEnvironmentType()));
+        servicePillar.putAll(nameserverPillarDecorator.createPillarForNameservers(kerberosConfig, stack.getEnvironmentCrn()));
         servicePillar.putAll(createUnboundEliminationPillar(stack.getDomainDnsResolver()));
         servicePillar.putAll(kerberosPillarConfigGenerator.createKerberosPillar(kerberosConfig, detailedEnvironmentResponse));
         servicePillar.putAll(hostAttributeDecorator.createHostAttributePillars(stackDto));
