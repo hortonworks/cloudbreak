@@ -36,10 +36,10 @@ public class ParcelMatcher {
     }
 
     private boolean isParcelVersionEqual(Map<String, String> prewarmedParcels, Entry<String, String> activatedParcelWithVersion) {
-        String activatedParcelName = activatedParcelWithVersion.getKey();
-        String prewarmedParcelVersion = prewarmedParcels.get(activatedParcelName);
-        String activatedParcelVersion = activatedParcelWithVersion.getValue();
-        return activatedParcelVersion.equals(prewarmedParcelVersion);
+        return prewarmedParcels.entrySet().stream()
+                .anyMatch(prewarmParcelEntry ->
+                        activatedParcelWithVersion.getKey().equalsIgnoreCase(prewarmParcelEntry.getKey()) &&
+                        activatedParcelWithVersion.getValue().equalsIgnoreCase(prewarmParcelEntry.getValue()));
     }
 
     private Map<String, String> getPreWarmedParcels(Image image) {

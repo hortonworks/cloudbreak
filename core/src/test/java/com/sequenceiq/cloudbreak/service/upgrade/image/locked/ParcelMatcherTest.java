@@ -47,7 +47,7 @@ class ParcelMatcherTest {
 
     @Test
     public void testPrewarmedAndActivatedMatching() {
-        Map<String, String> activatedParcels = Map.of("PARCEL1NAME", "PARCEL1VERSION", "PARCEL2NAME", "PARCEL2VERSION");
+        Map<String, String> activatedParcels = Map.of("pARCEL1NAME", "PARCEL1VERSION", "PARCEL2NAMe", "PARCEL2VERSION");
         when(preWarmParcelParser.parseProductFromParcel(PREWARMED_PARCEL1, Collections.emptyList()))
                 .thenReturn(createClouderaManagerProduct("PARCEL1NAME", "PARCEL1VERSION"));
         when(preWarmParcelParser.parseProductFromParcel(PREWARMED_PARCEL2, Collections.emptyList()))
@@ -86,7 +86,7 @@ class ParcelMatcherTest {
 
     @Test
     public void testPrewarmedHasExtraParcel() {
-        Map<String, String> activatedParcels = Map.of("PARCEL1NAME", "PARCEL1VERSION");
+        Map<String, String> activatedParcels = Map.of("pARCEL1NAME", "PARCEL1VERSION");
         when(preWarmParcelParser.parseProductFromParcel(PREWARMED_PARCEL1, Collections.emptyList()))
                 .thenReturn(createClouderaManagerProduct("PARCEL1NAME", "PARCEL1VERSION"));
         when(preWarmParcelParser.parseProductFromParcel(PREWARMED_PARCEL2, Collections.emptyList()))
