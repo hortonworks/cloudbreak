@@ -971,12 +971,34 @@ class SdxServiceTest {
                 anyString(), anyString())).thenReturn(Collections.emptyList());
         doThrow(new BadRequestException("java error")).when(commonJavaVersionValidator).validateByVmConfiguration(any(), eq(11));
         when(accountIdService.getAccountIdFromUserCrn(any())).thenReturn(ACCOUNT_ID);
+        mockEnvironmentCall(sdxClusterRequest, AWS, null);
 
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
                         underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null)));
 
         assertEquals("java error", badRequestException.getMessage());
+    }
+
+    @Test
+    void testCreateSdxClusterFailsInCaseOfForcedJavaVersionIsNotSupportedByRuntime() {
+        SdxClusterRequest sdxClusterRequest = createSdxClusterRequest(null, MEDIUM_DUTY_HA);
+        sdxClusterRequest.setJavaVersion(11);
+        when(cdpConfigService.getDefaultRuntime()).thenReturn("7.3.2");
+        when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNullAndDetachedIsFalse(
+                anyString(), anyString())).thenReturn(Collections.emptyList());
+        doThrow(new BadRequestException("java error")).when(commonJavaVersionValidator).validateByVmConfiguration(any(), eq(11));
+        when(accountIdService.getAccountIdFromUserCrn(any())).thenReturn(ACCOUNT_ID);
+        when(imageCatalogService.getImageResponseFromImageRequest(any(), any())).thenReturn(new ImageV4Response());
+        mockEnvironmentCall(sdxClusterRequest, AWS, null);
+
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
+                () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
+                        underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null)));
+
+        assertEquals("java error", badRequestException.getMessage());
+
+        verify(commonJavaVersionValidator).validateByVmConfiguration(eq("7.3.2"), eq(11));
     }
 
     @Test

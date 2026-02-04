@@ -386,7 +386,6 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         LOGGER.info("Creating SDX cluster with name {}", name);
         String accountId = accountIdService.getAccountIdFromUserCrn(userCrn);
         validateSdxRequest(name, sdxClusterRequest.getEnvironment(), accountId);
-        validateJavaVersion(sdxClusterRequest.getRuntime(), sdxClusterRequest.getJavaVersion());
         DetailedEnvironmentResponse environment = environmentService.validateAndGetEnvironment(sdxClusterRequest.getEnvironment());
         platformAwareSdxConnector.validateIfOtherPlatformsHasSdx(environment.getCrn(), TargetPlatform.PAAS);
         ImageCatalogPlatform imageCatalogPlatform = platformStringTransformer
@@ -396,6 +395,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         validateRuntimeAndImage(sdxClusterRequest, environment, imageSettingsV4Request, imageV4Response);
         encryptionProfileService.validateEncryptionProfile(sdxClusterRequest, environment);
         String runtimeVersion = getRuntime(sdxClusterRequest, internalStackV4Request, imageV4Response);
+        validateJavaVersion(runtimeVersion, sdxClusterRequest.getJavaVersion());
         String os = getOs(sdxClusterRequest, internalStackV4Request, imageV4Response);
         validateOsEntitled(os, accountId);
         validateOsAndRuntime(os, runtimeVersion);
