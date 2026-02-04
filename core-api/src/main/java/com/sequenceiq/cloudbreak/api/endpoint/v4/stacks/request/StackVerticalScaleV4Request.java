@@ -28,9 +28,8 @@ public class StackVerticalScaleV4Request implements JsonEntity {
     @Schema(description = InstanceGroupModelDescription.TEMPLATE)
     private InstanceTemplateV4Request template;
 
-    @Schema(description = StackVerticalScaleModelDescription.ORCHESTRATOR_TYPE,
-            allowableValues = {"ALL_AT_ONCE", "ONE_BY_ONE"}, defaultValue = "ALL_AT_ONCE")
-    private OrchestratorType orchestratorType = OrchestratorType.ALL_AT_ONCE;
+    @Schema(description = StackVerticalScaleModelDescription.ORCHESTRATOR_TYPE, defaultValue = "ONE_BY_ONE")
+    private OrchestratorType orchestratorType = OrchestratorType.ONE_BY_ONE;
 
     private Long stackId;
 
@@ -65,7 +64,7 @@ public class StackVerticalScaleV4Request implements JsonEntity {
     }
 
     public void setOrchestratorType(OrchestratorType orchestratorType) {
-        this.orchestratorType = orchestratorType == null ? OrchestratorType.ALL_AT_ONCE : orchestratorType;
+        this.orchestratorType = orchestratorType == null ? OrchestratorType.ONE_BY_ONE : orchestratorType;
     }
 
     @Override

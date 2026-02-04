@@ -22,6 +22,7 @@ public class DistroXVerticalScaleV1RequestToStackVerticalScaleV4RequestConverter
 
         stackVerticalScaleV4Request.setTemplate(instanceTemplateV4Request);
         stackVerticalScaleV4Request.setGroup(source.getGroup());
+        stackVerticalScaleV4Request.setOrchestratorType(source.getOrchestratorType());
         return stackVerticalScaleV4Request;
     }
 
