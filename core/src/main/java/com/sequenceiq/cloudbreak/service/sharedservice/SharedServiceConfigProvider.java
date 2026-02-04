@@ -74,7 +74,7 @@ public class SharedServiceConfigProvider {
                     case PAAS -> configureClusterByPaasDatalake(requestedCluster, stack, sdxBasicView.get());
                     default -> LOGGER.info("Data Lake platform is not recognized, skipping setup regarding shared filesystem and RDS!");
                 }
-                sdxBasicView.get().fileSystemView().ifPresent(sdxFileSystemView ->
+                platformAwareSdxConnector.getSdxFileSystemViewByEnvironmentCrn(stack.getEnvironmentCrn()).ifPresent(sdxFileSystemView ->
                         requestedCluster.setFileSystem(
                                 remoteDataContextWorkaroundService.prepareFilesystem(requestedCluster, sdxFileSystemView, sdxBasicView.get().crn())));
             }

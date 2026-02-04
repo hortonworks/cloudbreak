@@ -5,8 +5,6 @@ import java.util.Arrays;
 import org.apache.commons.lang3.tuple.Pair;
 
 public enum CrnResourceDescriptor {
-    // CDL
-    CDL(Crn.ResourceType.INSTANCE, Crn.Service.SDXSVC),
     // Classic clusters
     CLASSIC_CLUSTER(Crn.ResourceType.CLUSTER, Crn.Service.CLASSICCLUSTERS),
     // ums (iam) service

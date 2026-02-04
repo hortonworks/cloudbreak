@@ -6,6 +6,7 @@ import java.util.Set;
 import com.sequenceiq.cloudbreak.sdx.RdcView;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxAccessView;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
+import com.sequenceiq.cloudbreak.sdx.common.model.SdxFileSystemView;
 
 public interface PlatformAwareSdxDescribeService extends PlatformAwareSdxCommonService {
 
@@ -19,6 +20,8 @@ public interface PlatformAwareSdxDescribeService extends PlatformAwareSdxCommonS
     Set<String> listSdxCrns(String environmentCrn);
 
     Optional<SdxBasicView> getSdxByEnvironmentCrn(String environmentCrn);
+
+    Optional<SdxFileSystemView> getSdxFileSystemViewByEnvironmentCrn(String environmentCrn);
 
     Optional<SdxAccessView> getSdxAccessViewByEnvironmentCrn(String environmentCrn);
 

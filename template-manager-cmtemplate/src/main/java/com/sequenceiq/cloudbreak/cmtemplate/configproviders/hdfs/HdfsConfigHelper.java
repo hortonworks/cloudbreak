@@ -13,7 +13,6 @@ import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.sdx.RdcView;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
-import com.sequenceiq.cloudbreak.template.views.DatalakeView;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 
 @Component
@@ -62,16 +61,6 @@ public class HdfsConfigHelper {
         return templateProcessor.getRoleConfig(HdfsRoles.HDFS, HdfsRoles.NAMENODE, "namenode_port")
                 .map(ApiClusterTemplateConfig::getValue)
                 .orElse(DEFAULT_NAMENODE_PORT);
-    }
-
-    public Optional<String> getAttachedDatalakeHdfsUrlForHybridDatahub(CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
-        return templateProcessor.isHybridDatahub(source)
-                ? getDatalakeHdfsUrl(source.getDatalakeView().get())
-                : Optional.empty();
-    }
-
-    private Optional<String> getDatalakeHdfsUrl(DatalakeView datalake) {
-        return datalake.getRdcView().getEndpoints(HdfsRoles.HDFS, HdfsRoles.NAMENODE).stream().findFirst();
     }
 
     public String getNameService(RdcView rdcView) {

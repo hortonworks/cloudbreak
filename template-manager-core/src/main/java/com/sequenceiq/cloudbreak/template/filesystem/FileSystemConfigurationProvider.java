@@ -14,9 +14,12 @@ import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.Resource;
+import com.sequenceiq.cloudbreak.domain.cloudstorage.CloudStorage;
+import com.sequenceiq.cloudbreak.domain.cloudstorage.StorageLocation;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.common.api.cloudstorage.query.ConfigQueryEntries;
 import com.sequenceiq.common.api.type.ResourceType;
+import com.sequenceiq.common.model.CloudStorageCdpService;
 
 @Service
 public class FileSystemConfigurationProvider {
@@ -62,6 +65,18 @@ public class FileSystemConfigurationProvider {
                 if (CloudConstants.AZURE.equals(platformVariant) && credentialAttributes != null) {
                     fileSystemConfiguration = azureFileSystemConfigProvider.decorateFileSystemConfiguration(uuid, credentialAttributes,
                             resource.orElse(null), fileSystemConfiguration);
+                }
+                Optional<StorageLocation> remoteFs = Optional.ofNullable(fileSystem.getCloudStorage())
+                        .map(CloudStorage::getLocations)
+                        .stream()
+                        .flatMap(Collection::stream)
+                        .filter(location -> location.getType().equals(CloudStorageCdpService.REMOTE_FS))
+                        .findFirst();
+                if (remoteFs.isPresent()) {
+                    com.sequenceiq.cloudbreak.domain.StorageLocation storageLocation = new com.sequenceiq.cloudbreak.domain.StorageLocation();
+                    storageLocation.setProperty(CloudStorageCdpService.REMOTE_FS.name());
+                    storageLocation.setValue(remoteFs.get().getValue());
+                    fileSystemConfiguration.getLocations().add(new StorageLocationView(storageLocation));
                 }
             }
         }

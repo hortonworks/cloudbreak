@@ -131,7 +131,7 @@ public class DatalakeServiceTest {
         String envCrn = "envCrn";
         stackV4Response.setEnvironmentCrn(envCrn);
         SdxBasicView sdxBasicView = new SdxBasicView("dlaname", "dlcrn", "7.3.1", false,
-                0L, null, null, TargetPlatform.PAAS);
+                0L, null, TargetPlatform.PAAS);
         when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(envCrn)).thenReturn(Optional.of(sdxBasicView));
 
         underTest.decorateWithDataLakeResponseAnyPlatform(StackType.WORKLOAD, stackV4Response);

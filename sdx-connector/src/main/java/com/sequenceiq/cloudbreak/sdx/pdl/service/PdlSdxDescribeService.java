@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.sdx.pdl.service;
 
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -18,6 +20,7 @@ import com.cloudera.api.swagger.model.ApiRemoteDataContext;
 import com.cloudera.cdp.servicediscovery.model.DescribeDatalakeAsApiRemoteDataContextResponse;
 import com.cloudera.cdp.servicediscovery.model.DescribeDatalakeServicesRequest;
 import com.cloudera.cdp.servicediscovery.model.DescribeDatalakeServicesResponse;
+import com.cloudera.thunderhead.service.environments2api.model.Application;
 import com.cloudera.thunderhead.service.environments2api.model.Environment;
 import com.cloudera.thunderhead.service.environments2api.model.GetRootCertificateResponse;
 import com.cloudera.thunderhead.service.environments2api.model.Instance;
@@ -29,8 +32,11 @@ import com.sequenceiq.cloudbreak.sdx.RdcView;
 import com.sequenceiq.cloudbreak.sdx.TargetPlatform;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxAccessView;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
+import com.sequenceiq.cloudbreak.sdx.common.model.SdxFileSystemView;
 import com.sequenceiq.cloudbreak.sdx.common.service.PlatformAwareSdxDescribeService;
 import com.sequenceiq.cloudbreak.sdx.pdl.util.PdlRdcUtil;
+import com.sequenceiq.common.model.CloudStorageCdpService;
+import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.remoteenvironment.api.v1.environment.model.DescribeRemoteEnvironment;
 
 @Service
@@ -58,9 +64,13 @@ public class PdlSdxDescribeService extends AbstractPdlSdxService implements Plat
 
     @Override
     public RdcView extendRdcView(RdcView rdcView) {
-        DescribeDatalakeServicesRequest request = new DescribeDatalakeServicesRequest().clusterid(rdcView.getStackCrn());
-        DescribeDatalakeServicesResponse datalakeServices = getRemoteEnvironmentEndPoint().getDatalakeServicesByCrn(request);
+        DescribeDatalakeServicesResponse datalakeServices = getDatalakeServicesByCrn(rdcView.getStackCrn());
         return pdlRdcUtil.extendRdcView(rdcView, datalakeServices);
+    }
+
+    private DescribeDatalakeServicesResponse getDatalakeServicesByCrn(String crn) {
+        DescribeDatalakeServicesRequest request = new DescribeDatalakeServicesRequest().clusterid(crn);
+        return getRemoteEnvironmentEndPoint().getDatalakeServicesByCrn(request);
     }
 
     @Override
@@ -100,6 +110,47 @@ public class PdlSdxDescribeService extends AbstractPdlSdxService implements Plat
             }
         }
         return Optional.empty();
+    }
+
+    @Override
+    public Optional<SdxFileSystemView> getSdxFileSystemViewByEnvironmentCrn(String environmentCrn) {
+        Environment environment = getPrivateEnvForPublicEnv(environmentCrn);
+        DescribeDatalakeServicesResponse datalakeServices = getDatalakeServicesByCrn(environment.getCrn());
+        String defaultFs = Optional.ofNullable(datalakeServices.getApplications())
+                .map(applications -> applications.get("HDFS"))
+                .map(com.cloudera.cdp.servicediscovery.model.Application::getConfig)
+                .map(configs -> configs.get("fs.defaultFS"))
+                .orElse(null);
+        if (StringUtils.isEmpty(defaultFs)) {
+            LOGGER.warn("Can not find fs.defaultFS config for {}, skipping filesystem configuration", environment.getCrn());
+            return Optional.empty();
+        }
+
+        Map<String, String> sharedFileSystemLocationsByService = new HashMap<>();
+        sharedFileSystemLocationsByService.put(CloudStorageCdpService.DEFAULT_FS.name(), defaultFs);
+
+        Map<String, String> hiveConfig = Optional.ofNullable(environment.getPvcEnvironmentDetails())
+                .map(PvcEnvironmentDetails::getApplications)
+                .map(applications -> applications.get("HIVE"))
+                .map(Application::getConfig)
+                .orElse(Map.of());
+        String hiveWarehouseDirectory = hiveConfig.get("hive_warehouse_directory");
+        if (StringUtils.isNotEmpty(hiveWarehouseDirectory)) {
+            sharedFileSystemLocationsByService.put(
+                    CloudStorageCdpService.HIVE_METASTORE_WAREHOUSE.name(),
+                    getAbsolutePath(hiveWarehouseDirectory, defaultFs));
+        }
+        String hiveWarehouseExternalDirectory = hiveConfig.get("hive_warehouse_external_directory");
+        if (StringUtils.isNotEmpty(hiveWarehouseExternalDirectory)) {
+            sharedFileSystemLocationsByService.put(
+                    CloudStorageCdpService.HIVE_METASTORE_EXTERNAL_WAREHOUSE.name(),
+                    getAbsolutePath(hiveWarehouseExternalDirectory, defaultFs));
+        }
+        return Optional.of(new SdxFileSystemView(FileSystemType.HDFS.name(), sharedFileSystemLocationsByService));
+    }
+
+    private String getAbsolutePath(String path, String defaultHost) {
+        return path.startsWith("/") ? (defaultHost + path) : path;
     }
 
     @Override

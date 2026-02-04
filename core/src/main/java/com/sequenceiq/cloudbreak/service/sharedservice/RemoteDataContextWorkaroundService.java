@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.sharedservice;
 
 import static com.sequenceiq.cloudbreak.common.type.APIResourceType.FILESYSTEM;
 import static com.sequenceiq.common.model.CloudStorageCdpService.DEFAULT_FS;
+import static com.sequenceiq.common.model.CloudStorageCdpService.REMOTE_FS;
 import static java.util.stream.Collectors.toList;
 
 import java.util.List;
@@ -10,8 +11,6 @@ import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.auth.crn.Crn;
-import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.common.converter.ResourceNameGenerator;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.cloudstorage.CloudStorage;
@@ -39,7 +38,7 @@ public class RemoteDataContextWorkaroundService {
                             StorageLocation location = new StorageLocation();
                             location.setType(CloudStorageCdpService.valueOf(entry.getKey()));
                             location.setValue(entry.getValue());
-                            modifyLocationIfNeeded(location, requestedCluster, datalakeCRN);
+                            modifyLocationIfNeeded(location);
                             return location;
                         })
                         .toList();
@@ -70,11 +69,10 @@ public class RemoteDataContextWorkaroundService {
                 .collect(toList());
     }
 
-    private void modifyLocationIfNeeded(StorageLocation location, Cluster requestedCluster, String datalakeCRN) {
-        if (CrnResourceDescriptor.CDL.checkIfCrnMatches(Crn.safeFromString(datalakeCRN)) &&
-            location.getType().equals(DEFAULT_FS) &&
-            !location.getValue().contains(requestedCluster.getName())) {
-            location.setValue(location.getValue() + '/' + requestedCluster.getName());
+    private void modifyLocationIfNeeded(StorageLocation location) {
+        if (location.getType().equals(DEFAULT_FS)) {
+            // set the datalake's default FS as the remote FS of the datahub
+            location.setType(REMOTE_FS);
         }
     }
 

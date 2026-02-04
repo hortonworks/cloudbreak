@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.sdx.RdcView;
 import com.sequenceiq.cloudbreak.sdx.TargetPlatform;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxAccessView;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
+import com.sequenceiq.cloudbreak.sdx.common.model.SdxFileSystemView;
 import com.sequenceiq.cloudbreak.sdx.common.service.PlatformAwareSdxDescribeService;
 import com.sequenceiq.cloudbreak.sdx.paas.LocalPaasRdcViewExtender;
 import com.sequenceiq.cloudbreak.sdx.paas.LocalPaasRemoteDataContextSupplier;
@@ -81,6 +82,11 @@ public class PaasSdxDescribeService extends AbstractPaasSdxService implements Pl
                             .withPlatform(TargetPlatform.PAAS)
                             .build())
                     .findFirst());
+    }
+
+    @Override
+    public Optional<SdxFileSystemView> getSdxFileSystemViewByEnvironmentCrn(String environmentCrn) {
+        return localPaasSdxService.flatMap(localPaasService -> localPaasService.getSdxFileSystemView(environmentCrn));
     }
 
     @Override

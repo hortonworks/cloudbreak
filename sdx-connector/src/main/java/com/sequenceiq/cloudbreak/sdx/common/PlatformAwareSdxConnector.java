@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.sdx.RdcView;
 import com.sequenceiq.cloudbreak.sdx.TargetPlatform;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxAccessView;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
+import com.sequenceiq.cloudbreak.sdx.common.model.SdxFileSystemView;
 import com.sequenceiq.cloudbreak.sdx.common.polling.PollingResult;
 import com.sequenceiq.cloudbreak.sdx.common.service.PlatformAwareSdxDeleteService;
 import com.sequenceiq.cloudbreak.sdx.common.service.PlatformAwareSdxDescribeService;
@@ -120,6 +121,10 @@ public class PlatformAwareSdxConnector {
 
     public Optional<SdxBasicView> getSdxBasicViewByEnvironmentCrn(String environmentCrn) {
         return platformDependentSdxDescribeServices.get(calculatePlatform(environmentCrn)).getSdxByEnvironmentCrn(environmentCrn);
+    }
+
+    public Optional<SdxFileSystemView> getSdxFileSystemViewByEnvironmentCrn(String environmentCrn) {
+        return platformDependentSdxDescribeServices.get(calculatePlatform(environmentCrn)).getSdxFileSystemViewByEnvironmentCrn(environmentCrn);
     }
 
     public Optional<SdxAccessView> getSdxAccessViewByEnvironmentCrn(String environmentCrn) {

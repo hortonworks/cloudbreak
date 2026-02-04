@@ -12,8 +12,10 @@ import org.springframework.stereotype.Component;
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRoleConfigProvider;
+import com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.hdfs.HdfsConfigHelper;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
+import com.sequenceiq.common.model.CloudStorageCdpService;
 
 @Component
 public class Spark3OnYarnHybridConfigProvider extends AbstractRoleConfigProvider {
@@ -43,10 +45,8 @@ public class Spark3OnYarnHybridConfigProvider extends AbstractRoleConfigProvider
         List<ApiClusterTemplateConfig> roleConfigs = new ArrayList<>();
         switch (roleType) {
             case SparkRoles.GATEWAY:
-                StringBuilder confClientConfigSafetyValveValue = new StringBuilder();
-                hdfsConfigHelper.getAttachedDatalakeHdfsUrlForHybridDatahub(templateProcessor, source).ifPresent(dlHdfs -> {
-                    roleConfigs.add(config(SPARK3_KERBEROS_FILESYSTEMS_CONFIG, dlHdfs));
-                });
+                ConfigUtils.getStorageLocationForServiceProperty(source, CloudStorageCdpService.REMOTE_FS.name())
+                        .ifPresent(remoteFs -> roleConfigs.add(config(SPARK3_KERBEROS_FILESYSTEMS_CONFIG, remoteFs.getValue())));
                 break;
             default:
                 break;

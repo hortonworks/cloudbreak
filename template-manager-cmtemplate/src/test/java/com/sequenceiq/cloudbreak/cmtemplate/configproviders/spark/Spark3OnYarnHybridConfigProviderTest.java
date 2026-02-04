@@ -6,11 +6,13 @@ import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.spark.Spark3O
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.spark.Spark3OnYarnHybridConfigProvider.SPARK3_KERBEROS_FILESYSTEMS_CONFIG;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Optional;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -21,6 +23,9 @@ import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.hdfs.HdfsConfigHelper;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
+import com.sequenceiq.cloudbreak.template.filesystem.BaseFileSystemConfigurationsView;
+import com.sequenceiq.cloudbreak.template.filesystem.StorageLocationView;
+import com.sequenceiq.common.model.CloudStorageCdpService;
 
 @ExtendWith(MockitoExtension.class)
 class Spark3OnYarnHybridConfigProviderTest {
@@ -37,6 +42,18 @@ class Spark3OnYarnHybridConfigProviderTest {
     @Mock
     private TemplatePreparationObject source;
 
+    @Mock
+    private BaseFileSystemConfigurationsView fileSystemConfigurationView;
+
+    @Mock
+    private StorageLocationView storageLocationView;
+
+    @BeforeEach
+    void setUp() {
+        lenient().when(source.getFileSystemConfigurationView()).thenReturn(Optional.of(fileSystemConfigurationView));
+        lenient().when(fileSystemConfigurationView.getLocations()).thenReturn(List.of(storageLocationView));
+    }
+
     @Test
     void getServiceConfigs() {
         String dhHdfs = "hdfs://dh-hdfs";
@@ -50,7 +67,8 @@ class Spark3OnYarnHybridConfigProviderTest {
     @Test
     void getRoleConfigs() {
         String dlHdfs = "hdfs://dl-hdfs";
-        when(hdfsConfigHelper.getAttachedDatalakeHdfsUrlForHybridDatahub(templateProcessor, source)).thenReturn(Optional.of(dlHdfs));
+        when(storageLocationView.getProperty()).thenReturn(CloudStorageCdpService.REMOTE_FS.name());
+        when(storageLocationView.getValue()).thenReturn(dlHdfs);
 
         List<ApiClusterTemplateConfig> result = underTest.getRoleConfigs(SparkRoles.GATEWAY, templateProcessor, source);
 

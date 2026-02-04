@@ -63,8 +63,9 @@ public class SharedServiceConfigProviderTest {
     @Test
     void testConfigureForPaasDatalake() {
         Cluster cluster = cluster();
+        when(platformAwareSdxConnector.getSdxFileSystemViewByEnvironmentCrn(any())).thenReturn(Optional.of(new SdxFileSystemView(null, null)));
         when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(any())).thenReturn(
-                Optional.of(SdxBasicView.builder().withPlatform(PAAS).withFileSystemView(new SdxFileSystemView(null, null)).build()));
+                Optional.of(SdxBasicView.builder().withPlatform(PAAS).build()));
         Stack dlStack = new Stack();
         Cluster dlCluster = new Cluster();
         dlCluster.setId(1L);

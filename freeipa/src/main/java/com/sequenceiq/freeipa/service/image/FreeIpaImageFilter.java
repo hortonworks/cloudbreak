@@ -5,6 +5,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
@@ -57,7 +58,8 @@ public class FreeIpaImageFilter {
             if (!filteredImages.isEmpty()) {
                 List<Image> notApplicableImages = new ArrayList<>(candidateImages);
                 notApplicableImages.removeAll(filteredImages);
-                LOGGER.debug("Used filter: {} | Images filtered: {}", imageFilterSettings, notApplicableImages);
+                Set<String> notApplicableImageIds = notApplicableImages.stream().map(Image::getUuid).collect(Collectors.toSet());
+                LOGGER.debug("Used filter: {} | Images filtered: {}", imageFilterSettings, notApplicableImageIds);
                 return providerSpecificImageFilter.filterImages(platform, filteredImages);
             } else {
                 LOGGER.warn("Could not find any FreeIPA image matching {} in {}", imageFilterSettings, candidateImages);

@@ -399,11 +399,7 @@ public class StackDtoService implements LocalPaasSdxService, MonitoringEnablemen
 
     @Override
     public Optional<SdxBasicView> getSdxBasicView(String environmentCrn) {
-        return findAllByEnvironmentCrnAndStackType(environmentCrn, List.of(StackType.DATALAKE))
-                .stream()
-                .sorted(Comparator.comparing(dto -> dto.getStack().getOriginalName(),
-                        Comparator.nullsLast(Comparator.naturalOrder())))
-                .findFirst()
+        return getSdxStackDto(environmentCrn)
                 .map(stackDto -> SdxBasicView.builder()
                         .withName(stackDto.getResourceName())
                         .withCrn(stackDto.getResourceCrn())
@@ -411,9 +407,23 @@ public class StackDtoService implements LocalPaasSdxService, MonitoringEnablemen
                         .withRazEnabled(stackDto.getCluster().isRangerRazEnabled())
                         .withCreated(stackDto.getCreated())
                         .withDbServerCrn(stackDto.getCluster().getDatabaseServerCrn())
-                        .withFileSystemView(getHiveRelatedFileSystem(stackDto.getCluster().getFileSystem()))
                         .withPlatform(TargetPlatform.PAAS)
                         .build());
+    }
+
+    private Optional<StackDto> getSdxStackDto(String environmentCrn) {
+        return findAllByEnvironmentCrnAndStackType(environmentCrn, List.of(StackType.DATALAKE))
+                .stream()
+                .sorted(Comparator.comparing(dto -> dto.getStack().getOriginalName(),
+                        Comparator.nullsLast(Comparator.naturalOrder())))
+                .findFirst();
+    }
+
+    @Override
+    public Optional<SdxFileSystemView> getSdxFileSystemView(String environmentCrn) {
+        return getSdxStackDto(environmentCrn)
+                .map(stackDto -> stackDto.getCluster().getFileSystem())
+                .flatMap(this::getHiveRelatedFileSystem);
     }
 
     private Optional<SdxFileSystemView> getHiveRelatedFileSystem(FileSystem dlFileSystem) {
@@ -428,9 +438,7 @@ public class StackDtoService implements LocalPaasSdxService, MonitoringEnablemen
 
     @Override
     public Optional<SdxAccessView> getSdxAccessView(String environmentCrn) {
-        return findAllByEnvironmentCrnAndStackType(environmentCrn, List.of(StackType.DATALAKE))
-                .stream()
-                .findFirst()
+        return getSdxStackDto(environmentCrn)
                 .map(stackDto -> {
                     String clusterManagerFqdn = getClusterManagerFqdn(stackDto);
                     return SdxAccessView.builder()

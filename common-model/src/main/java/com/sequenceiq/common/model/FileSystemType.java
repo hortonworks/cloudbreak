@@ -7,6 +7,7 @@ import com.sequenceiq.common.api.filesystem.AdlsGen2FileSystem;
 import com.sequenceiq.common.api.filesystem.BaseFileSystem;
 import com.sequenceiq.common.api.filesystem.EfsFileSystem;
 import com.sequenceiq.common.api.filesystem.GcsFileSystem;
+import com.sequenceiq.common.api.filesystem.HdfsFileSystem;
 import com.sequenceiq.common.api.filesystem.S3FileSystem;
 import com.sequenceiq.common.api.filesystem.WasbFileSystem;
 import com.sequenceiq.common.api.filesystem.WasbIntegratedFileSystem;
@@ -29,7 +30,9 @@ public enum FileSystemType {
 
     S3(S3FileSystem.class, "s3a", Set.of("s3", "s3a", "s3n"), "{{{ storageName }}}", ""),
 
-    EFS(EfsFileSystem.class, "efs", Set.of("efs"), "{{{ storageName }}}", "");
+    EFS(EfsFileSystem.class, "efs", Set.of("efs"), "{{{ storageName }}}", ""),
+
+    HDFS(HdfsFileSystem.class, "hdfs", Set.of("hdfs"), "{{{ storageName }}}", "");
 
     private final Class<? extends BaseFileSystem> clazz;
 
