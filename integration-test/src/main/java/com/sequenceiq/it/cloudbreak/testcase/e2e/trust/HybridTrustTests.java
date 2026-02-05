@@ -11,7 +11,6 @@ import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +37,7 @@ import com.sequenceiq.it.cloudbreak.microservice.FreeIpaClient;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
 import com.sequenceiq.it.cloudbreak.util.ssh.client.SshJClient;
+import com.sequenceiq.it.util.SimpleRetryWrapper;
 
 import net.schmizz.sshj.SSHClient;
 
@@ -52,13 +52,16 @@ public class HybridTrustTests extends AbstractE2ETest {
 
     private static final String BATCH_FILENAME = "trustsetup-%s.bat";
 
-    private static final String AD_TRUST_VALIDATE_COMMAND = "nltest /dsgetdc:%s /force";
+    /**
+     * Make sure that the scripts validated for return code write this token in a new line in case of a failure
+     */
+    private static final String FAILURE_TOKEN = "[FAILURE]";
+
+    private static final String AD_TRUST_VALIDATE_COMMAND = "nltest /dsgetdc:%s /force || echo: && echo " + FAILURE_TOKEN;
 
     private static final String FREEIPA_TRUST_VALIDATE_COMMAND = "export PW=$(sudo grep -v \"^#\" /srv/pillar/freeipa/init.sls | jq -r '.freeipa.password'); " +
             "kinit admin <<<$PW > /dev/null 2>&1; " +
             "kvno ldap/%s@%s";
-
-    private static final String FAILURE_TOKEN = "===FAILURE===";
 
     @Value("${integrationtest.trust.activedirectory.ip}")
     private String activeDirectoryIp;
@@ -115,7 +118,7 @@ public class HybridTrustTests extends AbstractE2ETest {
                 .await(EnvironmentStatus.TRUST_SETUP_FINISH_REQUIRED)
                 .given(FreeIpaTrustCommandsDto.class)
                 .when(freeIpaTestClient.trustCleanupCommands())
-                .then(cleanUpActiveDirectory(false))
+                .then(cleanUpActiveDirectory(true))
                 .given(FreeIpaTrustCommandsDto.class)
                 .when(freeIpaTestClient.trustSetupCommands())
                 .then(setupActiveDirectory())
@@ -174,16 +177,24 @@ public class HybridTrustTests extends AbstractE2ETest {
     private void executeActiveDirectoryCommands(String name, String commands, boolean validateError) {
         try (SSHClient sshClient = sshJClient.createSshClient(activeDirectoryIp, activeDirectoryUser, null, commonCloudProperties.getDefaultPrivateKeyFile())) {
             String batchCommands = Arrays.stream(commands.split("\n"))
-                    .map(this::wrapCommand)
+                    .map(command -> '\'' + command + '\'')
                     .collect(Collectors.joining(","));
             String batchFileName = String.format(BATCH_FILENAME, name);
             String uploadBatchCommand = "powershell -EncodedCommand " + Base64.getEncoder().encodeToString(
                     String.format(SET_CONTENT_COMMAND, batchFileName, batchCommands).getBytes(StandardCharsets.UTF_16LE));
             Pair<Integer, String> createScriptResult = sshJClient.execute(sshClient, uploadBatchCommand, 120L);
             validateCommandResult(uploadBatchCommand, createScriptResult, validateError);
-            String executeBatchCommand = String.format(EXECUTE_BATCH_COMMAND, batchFileName);
-            Pair<Integer, String> executeScriptResult = sshJClient.execute(sshClient, executeBatchCommand, 120L);
-            validateCommandResult(executeBatchCommand, executeScriptResult, validateError);
+
+            SimpleRetryWrapper.create(() -> {
+                try {
+                    String executeBatchCommand = String.format(EXECUTE_BATCH_COMMAND, batchFileName);
+                    Pair<Integer, String> executeScriptResult = sshJClient.execute(sshClient, executeBatchCommand, 120L);
+                    validateCommandResult(executeBatchCommand, executeScriptResult, validateError);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }).withName(String.format("execute %s batch commands", name)).run();
+
             String deleteBatchCommand = String.format(DELETE_BATCH_COMMAND, batchFileName);
             Pair<Integer, String> deleteScriptResult = sshJClient.execute(sshClient, deleteBatchCommand, 120L);
             validateCommandResult(deleteBatchCommand, deleteScriptResult, false);
@@ -192,18 +203,6 @@ public class HybridTrustTests extends AbstractE2ETest {
             LOGGER.error(errorMessage, ex);
             throw new TestFailException(errorMessage, ex);
         }
-    }
-
-    /**
-     * Return code is not handled correctly for batch script execution on Windows Server, so as a workaround echo a special failure token when a command fails
-     * Set and rem commands are excluded to make sure we are not introducing unnecessary whitespace
-     */
-    private String wrapCommand(String command) {
-        return '\''
-                + (StringUtils.isNotEmpty(command) && !command.startsWith("set") && !command.startsWith("REM")
-                        ? String.format("%s || echo: && echo %s", command, FAILURE_TOKEN)
-                        : command)
-                + '\'';
     }
 
     private void executeFreeIpaCommand(List<String> freeIpaIps, String command, boolean validateError) {
@@ -217,8 +216,13 @@ public class HybridTrustTests extends AbstractE2ETest {
         Integer returnCode = sshResult.getLeft();
         String output = sshResult.getRight();
         LOGGER.info("Result of the {} command:\nReturn code: {}\nOutput: {}", command, returnCode, output);
-        if (validateError && (returnCode != 0 || Arrays.asList(Objects.requireNonNullElse(output, "").split("\r?\n")).contains(FAILURE_TOKEN))) {
+        if (validateError && (returnCode != 0 || containsFailureToken(output))) {
             throw new TestFailException("The command execution of '" + command + "' failed.");
         }
+    }
+
+    private boolean containsFailureToken(String output) {
+        return Arrays.stream(Objects.requireNonNullElse(output, "").split("\r?\n"))
+                .anyMatch(line -> line.startsWith(FAILURE_TOKEN));
     }
 }
