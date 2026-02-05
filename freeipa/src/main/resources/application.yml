@@ -181,7 +181,7 @@ freeipa:
       53: TCP_UDP
       88: TCP_UDP
       636: TCP
-    supported-variants: AWS_NATIVE,AWS_NATIVE_GOV,AZURE,GCP
+    supported-variants: AWS_NATIVE,AWS_NATIVE_GOV,AZURE
   secret.rotation:
     kmskey.rotationPeriodInDays: 365
   kerberos.secret.location: "/mnt/cdp-luks/etc"
