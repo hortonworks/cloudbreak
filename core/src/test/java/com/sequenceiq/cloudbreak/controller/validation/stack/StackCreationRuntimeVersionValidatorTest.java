@@ -81,6 +81,13 @@ class StackCreationRuntimeVersionValidatorTest {
     }
 
     @Test
+    void test732InvalidOsTypeValidation() {
+        Image image = mock(Image.class);
+        when(image.getOs()).thenReturn("redhat999");
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.validate(new StackV4Request(), image, StackType.WORKLOAD));
+    }
+
+    @Test
     void testValidationWhenEntitlementOn() {
         when(entitlementService.isDifferentDataHubAndDataLakeVersionAllowed(any())).thenReturn(true);
 

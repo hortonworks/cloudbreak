@@ -468,7 +468,8 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
     }
 
     private void validateOsAndRuntime(String os, String runtime) {
-        if (StringUtils.equals(runtime, DENIED_RUNTIME_WITH_REDHAT8) && OsType.RHEL8.equals(OsType.getByOs(os))) {
+        Optional<OsType> osType = OsType.getByOsOptional(os);
+        if (osType.isPresent() && StringUtils.equals(runtime, DENIED_RUNTIME_WITH_REDHAT8) && OsType.RHEL8.equals(osType.get())) {
             throw new BadRequestException("Provision is not allowed for image with runtime version 7.3.2 and OS type redhat8.");
         }
     }

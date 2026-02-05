@@ -60,9 +60,10 @@ public class StackCreationRuntimeVersionValidator {
     }
 
     private void validateOsAndRuntime(Image image) {
-        if (image.getStackDetails() != null &&
+        Optional<OsType> osType = OsType.getByOsOptional(image.getOs());
+        if (osType.isPresent() && image.getStackDetails() != null &&
                 CMRepositoryVersionUtil.isVersionEqualToLimited(image.getStackDetails().getVersion(), CMRepositoryVersionUtil.CLOUDERA_STACK_VERSION_7_3_2) &&
-                OsType.RHEL8.equals(OsType.getByOs(image.getOs()))) {
+                OsType.RHEL8.equals(osType.get())) {
             throw new BadRequestException("Provision is not allowed for image with runtime version 7.3.2 and OS type redhat8.");
         }
     }
