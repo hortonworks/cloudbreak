@@ -190,5 +190,9 @@
   {
     "path": "/var/log/yum.log",
     "label": "yum_log"
+  },
+  {
+    "path": "/var/log/ipaupgrade.log",
+    "label": "ipaupgrade"
   }
 ]
