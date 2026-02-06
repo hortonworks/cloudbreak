@@ -78,7 +78,7 @@ ext {
   jsonSmartVersion = '2.4.9'
   snakeYamlVersion = '2.5'
   xerces = '2.12.2'
-  jacksonDatabindNullable = "0.2.8"
+  jacksonDatabindNullable = "0.2.9"
 
   // Templating
   freemarkerVersion = '2.3.34'
