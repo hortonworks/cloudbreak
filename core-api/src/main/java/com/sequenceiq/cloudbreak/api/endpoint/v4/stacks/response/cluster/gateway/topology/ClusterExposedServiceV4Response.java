@@ -1,10 +1,12 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.gateway.topology;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.SSOType;
 import com.sequenceiq.common.model.JsonEntity;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ClusterExposedServiceV4Response implements JsonEntity {
 
     private String serviceName;
