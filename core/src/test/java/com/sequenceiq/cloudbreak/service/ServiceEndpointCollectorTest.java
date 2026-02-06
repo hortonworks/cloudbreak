@@ -42,8 +42,11 @@ import com.sequenceiq.cloudbreak.api.service.ExposedService;
 import com.sequenceiq.cloudbreak.api.service.ExposedServiceCollector;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cluster.service.ClouderaManagerProductsProvider;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateGeneratorService;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
+import com.sequenceiq.cloudbreak.cmtemplate.generator.support.domain.SupportedService;
+import com.sequenceiq.cloudbreak.cmtemplate.generator.support.domain.SupportedServices;
 import com.sequenceiq.cloudbreak.cmtemplate.validation.StackServiceComponentDescriptors;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.controller.validation.stack.cluster.gateway.ExposedServiceListValidator;
@@ -105,6 +108,9 @@ public class ServiceEndpointCollectorTest {
     @Mock
     private ClouderaManagerProductsProvider clouderaManagerProductsProvider;
 
+    @Mock
+    private CmTemplateGeneratorService templateGeneratorService;
+
     @BeforeEach
     public void setup() {
         ReflectionTestUtils.setField(underTest, "httpsPort", "443");
@@ -117,6 +123,7 @@ public class ServiceEndpointCollectorTest {
         lenient().when(serviceEndpointCollectorEntitlementComparator.entitlementSupported(anyList(), eq(null))).thenReturn(true);
         lenient().when(exposedServiceCollector.getNameNodeService()).thenReturn(exposedService("NAMENODE"));
         lenient().when(exposedServiceCollector.getHBaseJarsService()).thenReturn(exposedService("HBASEJARS"));
+        lenient().when(templateGeneratorService.getServicesByBlueprint(any())).thenReturn(new SupportedServices());
     }
 
     @Test
@@ -173,6 +180,36 @@ public class ServiceEndpointCollectorTest {
 
         String result = underTest.getManagerServerUrl(stack, CLOUDERA_MANAGER_IP);
         assertEquals("https://127.0.0.1:8443/gateway-path/topology1/cmf/home/", result);
+    }
+
+    @Test
+    public void testPrepareClusterExposedServicesDisplayPropertiesOverride() {
+        Stack stack = createStackWithComponents(new ExposedService[] { exposedService("HUE") },
+                new ExposedService[] { exposedService("HUE") }, GatewayType.INDIVIDUAL);
+        stack.getCluster().getGateway().setGatewayPort(443);
+
+        mockBlueprintTextProcessor();
+        mockComponentLocator(Lists.newArrayList("10.0.0.1"));
+
+        when(exposedServiceCollector.knoxServicesForComponents(any(Optional.class), anyList())).thenReturn(List.of(exposedService("HUE"),
+                exposedService("ANOTHER")));
+        SupportedServices supportedServices = new SupportedServices();
+        SupportedService supportedService = new SupportedService();
+        supportedService.setIconKey("icon");
+        supportedService.setDisplayName("display");
+        supportedService.setName("HUE");
+        supportedServices.setServices(Set.of(supportedService));
+        when(templateGeneratorService.getServicesByBlueprint(any())).thenReturn(supportedServices);
+
+        Map<String, Collection<ClusterExposedServiceV4Response>> clusterExposedServicesMap =
+                underTest.prepareClusterExposedServices(stack, "10.0.0.1");
+
+        Collection<ClusterExposedServiceV4Response> clusterExposedServiceV4Responses = clusterExposedServicesMap.get("topology1-api");
+        assertEquals(2L, clusterExposedServiceV4Responses.size());
+        ClusterExposedServiceV4Response hueSvcResponse = clusterExposedServiceV4Responses.stream()
+                .filter(svcRsp -> svcRsp.getKnoxService().equals("HUE")).findFirst().orElseThrow();
+        assertEquals("display", hueSvcResponse.getDisplayName());
+        assertEquals("icon", hueSvcResponse.getIconKey());
     }
 
     @Test
