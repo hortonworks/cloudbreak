@@ -67,7 +67,7 @@ public class CDPConfigService {
 
     private static final String RUNTIME_SUPPORTIG_CENTOS7_AND_RHEL8 = "7.2.17";
 
-    private static final String RUNTIME_SUPPORTIG_RHEL8_AND_RHEL9 = "7.3.2";
+    private static final String RUNTIME_SUPPORTING_RHEL9 = "7.3.2";
 
     private static final String ARM64_MIN_RUNTIME_VERSION = "7.3.1";
 
@@ -199,10 +199,12 @@ public class CDPConfigService {
             ret = runtimeVersions;
         } else if (RHEL9.getOs().equals(os)) {
             ret = runtimeVersions.stream()
-                    .filter(r -> VERSION_COMPARATOR.compare(() -> r, () -> RUNTIME_SUPPORTIG_RHEL8_AND_RHEL9) >= 0).collect(Collectors.toList());
+                    .filter(r -> VERSION_COMPARATOR.compare(() -> r, () -> RUNTIME_SUPPORTING_RHEL9) >= 0).collect(Collectors.toList());
         } else if (RHEL8.getOs().equals(os)) {
             ret = runtimeVersions.stream()
-                    .filter(r -> VERSION_COMPARATOR.compare(() -> r, () -> RUNTIME_SUPPORTIG_CENTOS7_AND_RHEL8) >= 0).collect(Collectors.toList());
+                    .filter(r -> VERSION_COMPARATOR.compare(() -> r, () -> RUNTIME_SUPPORTIG_CENTOS7_AND_RHEL8) >= 0)
+                    .filter(r -> VERSION_COMPARATOR.compare(() -> r, () -> RUNTIME_SUPPORTING_RHEL9) < 0)
+                    .collect(Collectors.toList());
         } else if (CENTOS7.getOs().equals(os)) {
             ret = runtimeVersions.stream()
                     .filter(r -> VERSION_COMPARATOR.compare(() -> r, () -> RUNTIME_SUPPORTIG_CENTOS7_AND_RHEL8) <= 0).collect(Collectors.toList());

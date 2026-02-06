@@ -344,17 +344,23 @@ class CDPConfigServiceTest {
 
         cdpConfigService.initCdpStackRequests();
 
-        List<AdvertisedRuntime> expected = List.of(
-                rt(RUNTIME_732, false, Architecture.ARM64),
-                rt(RUNTIME_732, false, Architecture.X86_64),
+        List<AdvertisedRuntime> expectedForRedhat8 = List.of(
                 rt(RUNTIME_731, true, Architecture.ARM64),
                 rt(RUNTIME_731, true, Architecture.X86_64),
                 rt(RUNTIME_7218, false, Architecture.X86_64),
                 rt(RUNTIME_7217, false, Architecture.X86_64)
         );
 
-        List<AdvertisedRuntime> actual = cdpConfigService.getAdvertisedRuntimes(null, "redhat8", true);
-        assertArrayEquals(expected.toArray(), actual.toArray());
+        List<AdvertisedRuntime> expectedForRedhat9 = List.of(
+                rt(RUNTIME_732, false, Architecture.ARM64),
+                rt(RUNTIME_732, false, Architecture.X86_64)
+        );
+
+        List<AdvertisedRuntime> actualForRedhat8 = cdpConfigService.getAdvertisedRuntimes(null, "redhat8", true);
+        assertArrayEquals(expectedForRedhat8.toArray(), actualForRedhat8.toArray());
+
+        List<AdvertisedRuntime> actualForRedhat9 = cdpConfigService.getAdvertisedRuntimes(null, "redhat9", true);
+        assertArrayEquals(expectedForRedhat9.toArray(), actualForRedhat9.toArray());
     }
 
     private void mockAdvertisedRuntimes(List<String> advertisedVersions) {
