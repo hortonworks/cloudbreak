@@ -44,7 +44,7 @@ function generate_cert_and_key() {
   local key_file=$1
   local cert_file=$2
   local CN_ATTR=$3
-  openssl req -x509 -newkey rsa:2048 -keyout ${key_file} -out ${cert_file} -days $VALIDITY_IN_DAYS -nodes -config <(
+  openssl req -x509 -newkey rsa:3072 -keyout ${key_file} -out ${cert_file} -days $VALIDITY_IN_DAYS -nodes -config <(
 cat <<-EOF
 [req]
 distinguished_name = req_distinguished_name

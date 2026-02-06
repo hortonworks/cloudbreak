@@ -31,8 +31,23 @@ CACERTS_DIR=/opt/cacerts
 OUT_FILE=`mktemp -t signed_ca_chain.XXXXXX.pem`
 
 OVERRIDES="--override ca_dn=CN=${HOSTNAME} "
+KEYTOOL_EXTRA_ARGS=""
+PROVIDER=""
+FIPS_ENABLED_ARGS=""
+TRUSTED_CERT=""
+
 {% if gov_cloud == True %}
+{% if java.java_version == "8" %}
+PROVIDER+="-providerclass {{ java.security_providerclass }} -providerarg ${JAVA_HOME}/jre/lib/security/nss.cfg "
 OVERRIDES+="--override keystore_type=BCFKS "
+{% else %}
+export JDK_JAVA_OPTIONS+="--add-opens java.base/sun.security.internal.spec=ALL-UNNAMED --add-opens java.base/sun.security.provider=ALL-UNNAMED --add-exports java.base/sun.security.provider=ALL-UNNAMED"
+PROVIDER+="-provider {{ java.security_providerclass }} "
+PROVIDER+="-providerpath {{ java.jre_ext_path }}/ccj.jar "
+PROVIDER+="-J--add-exports=java.base/sun.security.provider=ALL-UNNAMED -J--add-opens=java.base/sun.security.provider=ALL-UNNAMED"
+KEYTOOL_EXTRA_ARGS+="-storetype BCFKS -J--add-exports=java.base/sun.security.provider=ALL-UNNAMED -J--add-opens=java.base/sun.security.provider=ALL-UNNAMED -providerclass {{ java.security_providerclass }} -providerpath {{ java.jre_ext_path }}/ccj.jar"
+FIPS_ENABLED_ARGS="1"
+{% endif %}
 {% endif %}
 
 rm -rf $CERTMANAGER_DIR
@@ -47,6 +62,9 @@ rm -f ${CACERTS_DIR}/cacerts.p12
 rm -f ${CACERTS_DIR}/cacerts.pem
 rm -f ${CACERTS_DIR}/cacerts.bcfks
 
+{% if gov_cloud == True and java.java_version == "17" %}
+echo "Do not generate cacerts.pem and TRUSTED_CERT is empty"
+{% else %}
 keytool -importkeystore \
   -srckeystore ${JAVA_HOME}/jre/lib/security/cacerts \
   -srcstorepass changeit {% if gov_cloud == True %} -providerclass sun.security.pkcs11.SunPKCS11 -providerarg ${JAVA_HOME}/jre/lib/security/nss.cfg {% endif %} \
@@ -54,8 +72,12 @@ keytool -importkeystore \
   -deststorepass changeit \
   -deststoretype PKCS12
 openssl pkcs12 -in ${CACERTS_DIR}/cacerts.p12 -passin pass:changeit -out ${CACERTS_DIR}/cacerts.pem
+TRUSTED_CERT+=" --trusted-ca-certs ${CACERTS_DIR}/cacerts.pem"
+{% endif %}
+
 {% if gov_cloud == True %}
-# ideally we would generate the pem from bcfks on gov cloud, but it is not possible until SafeLogic openssl is installed
+# ideally we would generate the pem from bcfks on gov cloud, but it is not possible until SafeLogic openssl is installed on 17
+{% if java.java_version == "8" %}
 keytool -importkeystore \
   -srckeystore ${JAVA_HOME}/jre/lib/security/cacerts \
   -srcstorepass changeit \
@@ -65,6 +87,10 @@ keytool -importkeystore \
   -deststorepass changeit \
   -deststoretype BCFKS
 rm -f ${CACERTS_DIR}/cacerts.p12
+{% else %}
+# Cloudera Manager workaroundfor rhel9 FIPS 7.3.2
+sed -i 's|default="JKS"|default="BCFKS"|g' /opt/cloudera/cm-agent/lib/python3.11/site-packages/cmf/tools/cert.py
+{% endif %}
 {% endif %}
 
 ALTNAME=" --altname DNS:${FQDN} "
@@ -72,13 +98,37 @@ if [ -n "$LOADBALANCER_SAN" ]; then
   ALTNAME+="--altname ${LOADBALANCER_SAN} "
 fi
 {% if "ad_member" in grains.get('roles', []) %}
-/opt/cloudera/cm-agent/bin/certmanager --location $CERTMANAGER_DIR setup --skip-invalid-ca-certs --configure-services $CERTMANAGER_ARGS ${OVERRIDES} ${ALTNAME} --trusted-ca-certs ${CACERTS_DIR}/cacerts.pem
+
+KEYTOOL_EXTRA_ARGS="${KEYTOOL_EXTRA_ARGS}" /opt/cloudera/cm-agent/bin/certmanager \
+  --location $CERTMANAGER_DIR \
+  setup \
+  --skip-invalid-ca-certs \
+  --configure-services $CERTMANAGER_ARGS \
+  ${OVERRIDES} ${ALTNAME} ${TRUSTED_CERT}
+
 mv $CERTMANAGER_DIR/cm_init.txt $CERTMANAGER_DIR/auto-tls.init.txt
+
 {% else %}
-/opt/cloudera/cm-agent/bin/certmanager --location $CERTMANAGER_DIR setup --skip-invalid-ca-certs --configure-services $CERTMANAGER_ARGS ${OVERRIDES} --stop-at-csr ${ALTNAME} --trusted-ca-certs ${CACERTS_DIR}/cacerts.pem
+
+KEYTOOL_EXTRA_ARGS="${KEYTOOL_EXTRA_ARGS}" FIPS_ENABLED=${FIPS_ENABLED_ARGS} /opt/cloudera/cm-agent/bin/certmanager \
+  --location $CERTMANAGER_DIR \
+  setup --skip-invalid-ca-certs \
+  --configure-services $CERTMANAGER_ARGS \
+  ${OVERRIDES} \
+  --stop-at-csr ${ALTNAME} ${TRUSTED_CERT}
+
 /opt/cloudera/cm/bin/generate_intermediate_ca_ipa.sh $CM_PRINCIPAL ${CERTMANAGER_DIR}/CMCA/private/ca_csr.pem $OUT_FILE
-/opt/cloudera/cm-agent/bin/certmanager --location $CERTMANAGER_DIR setup --skip-invalid-ca-certs --configure-services $CERTMANAGER_ARGS ${OVERRIDES} --signed-ca-cert=$OUT_FILE --skip-cm-init ${ALTNAME} --trusted-ca-certs ${CACERTS_DIR}/cacerts.pem > $CERTMANAGER_DIR/auto-tls.init.txt
+
+KEYTOOL_EXTRA_ARGS="${KEYTOOL_EXTRA_ARGS}" FIPS_ENABLED=${FIPS_ENABLED_ARGS} /opt/cloudera/cm-agent/bin/certmanager \
+  --location $CERTMANAGER_DIR \
+  setup --skip-invalid-ca-certs \
+  --configure-services $CERTMANAGER_ARGS \
+  ${OVERRIDES} \
+  --signed-ca-cert=$OUT_FILE \
+  --skip-cm-init ${ALTNAME} ${TRUSTED_CERT} > $CERTMANAGER_DIR/auto-tls.init.txt
+
 {% endif %}
+
 chmod 600 $CERTMANAGER_DIR/auto-tls.init.txt
 
 rm -rf $OUT_FILE

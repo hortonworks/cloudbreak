@@ -1,0 +1,1 @@
+export JDK_JAVA_OPTIONS='--module-path={{ java.jre_ext_path }}/ccj.jar:{{ java.jre_ext_path }}/bctls.jar --add-exports java.base/sun.security.provider=com.safelogic.cryptocomply.fips.core --add-modules com.safelogic.cryptocomply.fips.core,bctls'

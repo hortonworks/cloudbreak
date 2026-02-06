@@ -1,3 +1,5 @@
+{%- from 'java/settings.sls' import java with context %}
+
 /opt/salt/scripts/set_default_java_version.sh:
   file.managed:
     - source:
@@ -19,28 +21,34 @@ set_default_java_version:
 
 #java-1.7.0-openjdk-devel:
 #  pkg.installed: []
-{% set java_home = salt['environ.get']('JAVA_HOME') %}
-{% if not java_home %}
-  {% set java_home = '/usr/lib/jvm/java' %}
-{% endif %}
 
 
 set_dns_ttl:
   file.replace:
-    - name: {{ java_home }}/jre/lib/security/java.security
+    - name: {{ java.java_security_file }}
     - pattern: "#?networkaddress.cache.ttl=.*"
     - repl: "networkaddress.cache.ttl=5"
-    - unless: cat {{ java_home }}/jre/lib/security/java.security | grep ^networkaddress.cache.ttl=5$
+    - unless: cat {{ java.java_security_file }} | grep ^networkaddress.cache.ttl=5$
 
 set_dns_negativ_ttl:
   file.replace:
-    - name: {{ java_home }}/jre/lib/security/java.security
+    - name: {{ java.java_security_file }}
     - pattern: "#?networkaddress.cache.negative.ttl=.*"
     - repl: "networkaddress.cache.negative.ttl=0"
-    - unless: cat {{ java_home }}/jre/lib/security/java.security | grep ^networkaddress.cache.negative.ttl=0$
-
+    - unless: cat {{ java.java_security_file }} | grep ^networkaddress.cache.negative.ttl=0$
 
 {% if salt['pillar.get']('cluster:gov_cloud', False) == True %}
+
+{% if java.java_version == "8" %}
+java_ext_dir_exists:
+{% do salt.log.debug("Directory exist" ~ java.jre_ext_path) %}
+{% else %}
+java_ext_dir_exists:
+  file.directory:
+    - name: {{ java.jre_ext_path }}
+    - mode:  755
+    - makedirs: True
+{% endif %}
 
 /opt/salt/scripts/install_safelogic_binaries.sh:
   file.managed:
@@ -52,7 +60,7 @@ install_safelogic_binaries:
   cmd.run:
     - name: /opt/salt/scripts/install_safelogic_binaries.sh 2>&1 | tee -a /var/log/install_safelogic_binaries.log && [[ 0 -eq ${PIPESTATUS[0]} ]] && echo $(date +%Y-%m-%d:%H:%M:%S) >> /var/log/safelogic_binaries_installed || exit ${PIPESTATUS[0]}
     - env:
-        JRE_EXT_PATH: "{{ java_home }}/jre/lib/ext"
+        JRE_EXT_PATH: "{{ java.jre_ext_path }}"
         PAYWALL_AUTH: "{{ salt['pillar.get']('cloudera-manager:paywall_username') }}:{{ salt['pillar.get']('cloudera-manager:paywall_password') }}"
         CCJ_PATH: "{{ salt['pillar.get']('java:safelogic:cryptoComplyPath') }}"
         CCJ_HASH_PATH: "{{ salt['pillar.get']('java:safelogic:cryptoComplyHash') }}"
@@ -63,43 +71,59 @@ install_safelogic_binaries:
     - failhard: True
     - unless: test -f /var/log/safelogic_binaries_installed
 
-{% set java_policy_file = java_home ~ '/jre/lib/security/java.policy' %}
-{% set java_security_file = java_home ~ '/jre/lib/security/java.security' %}
-
 set_java_policy:
   file.managed:
-    - name: {{ java_policy_file }}
-    - source: salt://java/templates/java.policy
+    - name: {{ java.java_policy_file }}
+    - source: {{ java.java_policy_file_template }}
     - user: root
     - group: root
     - mode: 644
 
-java_security_set_security_providers:
+java_security_set_security_providers_for_java:
   file.blockreplace:
-    - name: {{ java_security_file }}
+    - name: {{ java.java_security_file }}
     - marker_start: "# List of providers and their preference orders (see above):"
     - marker_end: "# Security providers used when FIPS mode support is active"
     - template: jinja
     - context:
         provider_type: "security"
-    - source: salt://java/templates/java_security_providers.j2
+    - source: {{ java.security_providers_template }}
 
-java_security_set_fips_providers:
+java_security_set_fips_providers_for_java:
   file.blockreplace:
-    - name: {{ java_security_file }}
+    - name: {{ java.java_security_file }}
     - marker_start: "# Security providers used when FIPS mode support is active"
     - marker_end: "# Sun Provider SecureRandom seed source."
     - template: jinja
     - context:
         provider_type: "fips"
-    - source: salt://java/templates/java_security_providers.j2
+    - source: {{ java.security_providers_template }}
 
 java_security_set_keymanagerfactory_algorithm:
   file.replace:
-    - name: {{ java_security_file }}
+    - name: {{ java.java_security_file }}
     - pattern: "^ssl.KeyManagerFactory.algorithm=.*"
     - repl: "ssl.KeyManagerFactory.algorithm=X.509"
     - append_if_not_found: True
+
+{% if java.java_version == "17" %}
+/etc/profile.d/ccj.sh:
+  file.managed:
+    - makedirs: True
+    - source: salt://java/templates/ccj.sh
+    - template: jinja
+    - mode: 644
+    - context:
+        java: {{ java }}
+
+java_security_use_system_properties:
+  file.replace:
+    - name: {{ java.java_security_file }}
+    - pattern: "security.useSystemPropertiesFile=true"
+    - repl: "security.useSystemPropertiesFile=false"
+    - append_if_not_found: True
+
+{% endif %}
 
 {% else %}
 

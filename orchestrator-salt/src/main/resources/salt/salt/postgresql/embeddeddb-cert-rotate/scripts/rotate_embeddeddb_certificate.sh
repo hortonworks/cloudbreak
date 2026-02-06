@@ -55,7 +55,7 @@ printf "%s\n" ${non_revoked_serial_numbers[@]} > ${CERTS_DIR}/old_cert_sn
 mv -f ${CERTS_DIR}/postgres.key ${CERTS_DIR}/postgres_bkp.key
 mv -f ${CERTS_DIR}/postgres.cert ${CERTS_DIR}/postgres_bkp.cert
 
-openssl req -nodes -newkey rsa:2048 -keyout ${CERTS_DIR}/postgres.key -out ${CERTS_DIR}/postgres.csr -config <(
+openssl req -nodes -newkey rsa:3072 -keyout ${CERTS_DIR}/postgres.key -out ${CERTS_DIR}/postgres.csr -config <(
 cat <<-EOF
 [req]
 distinguished_name = req_distinguished_name

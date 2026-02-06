@@ -18,7 +18,7 @@ kinit -kt ${CM_KEYTAB_FILE} ${CM_PRINCIPAL}
 
 mkdir -p ${CERTS_DIR}
 
-openssl req -nodes -newkey rsa:2048 -days 365 -keyout ${CERTS_DIR}/postgres.key -out ${CERTS_DIR}/postgres.csr -config <(
+openssl req -nodes -newkey rsa:3072 -days 365 -keyout ${CERTS_DIR}/postgres.key -out ${CERTS_DIR}/postgres.csr -config <(
 cat <<-EOF
 [req]
 distinguished_name = req_distinguished_name

@@ -1,5 +1,6 @@
 {%- from 'cloudera/manager/settings.sls' import cloudera_manager with context %}
 {%- from 'metadata/settings.sls' import metadata with context %}
+{%- from 'java/settings.sls' import java with context %}
 {% set tlsVersionsCommaSeparated = salt['pillar.get']('cluster:tlsVersionsCommaSeparated')%}
 {% set tlsCipherSuitesJavaIntermediate = salt['pillar.get']('cluster:tlsCipherSuitesJavaIntermediate')%}
 {% set tlsCipherSuitesJavaIntermediateWithComma = salt['pillar.get']('cluster:tlsCipherSuitesJavaIntermediate') | replace(":", ",")%}
@@ -36,9 +37,9 @@ setup_missed_cm_heartbeat:
 
 setup_tls_chipher:
   file.append:
-    - name: /etc/cloudera-scm-server/cm.settings
-    - text: setsettings CMF_OVERRIDE_TLS_CIPHERS {{ tlsCipherSuitesJavaIntermediate }}
-    - unless: grep "CMF_OVERRIDE_TLS_CIPHERS" /etc/cloudera-scm-server/cm.settings
+    - name: /etc/default/cloudera-scm-server
+    - text: "export CMF_OVERRIDE_TLS_CIPHERS=\"{{ tlsCipherSuitesJavaIntermediate }}\""
+    - unless: grep "export CMF_OVERRIDE_TLS_CIPHERS=\"{{ tlsCipherSuitesJavaIntermediate }}\"" /etc/default/cloudera-scm-server
 
 {% if salt['pillar.get']('cluster:cmVersionSupportsTlsSetup', False) == True and salt['pillar.get']('cluster:tlsAdvancedControl', False) == True %}
 tls_advanced_control:
@@ -68,11 +69,24 @@ setup_tls:
 
 {% if salt['pillar.get']('cluster:gov_cloud', False) == True %}
 
-setup_fips_mode:
+{% if java.java_version == "8" %}
+setup_fips_mode_for_java_8:
   file.append:
     - name: /etc/default/cloudera-scm-server
     - text: "export CMF_JAVA_OPTS=\"${CMF_JAVA_OPTS} -Dcom.cloudera.cmf.fipsMode=true -Dcom.safelogic.cryptocomply.fips.approved_only=true -Dorg.bouncycastle.jsse.client.assumeOriginalHostName=true\""
     - unless: grep "export CMF_JAVA_OPTS=\"\${CMF_JAVA_OPTS} -Dcom.cloudera.cmf.fipsMode=true -Dcom.safelogic.cryptocomply.fips.approved_only=true -Dorg.bouncycastle.jsse.client.assumeOriginalHostName=true\"" /etc/default/cloudera-scm-server
+{% else %}
+setup_fips_ccj_mode_for_java_higher_than_8:
+  file.append:
+    - name: /etc/default/cloudera-scm-server
+    - text: "export CMF_JAVA_OPTS=\"${CMF_JAVA_OPTS} -Dcom.cloudera.cmf.fipsMode=true -Dcom.safelogic.cryptocomply.fips.approved_only=true -Dcom.cloudera.cloudera.cmf.fipsMode.jdk11plus.ccj.jar.path={{ java.jre_ext_path }}/ccj.jar -Dcom.cloudera.cloudera.cmf.fipsMode.jdk11plus.ccj.moduleName=com.safelogic.cryptocomply.fips.core\""
+    - unless: grep "export CMF_JAVA_OPTS=\"\${CMF_JAVA_OPTS} -Dcom.cloudera.cmf.fipsMode=true -Dcom.safelogic.cryptocomply.fips.approved_only=true -Dcom.cloudera.cloudera.cmf.fipsMode.jdk11plus.ccj.jar.path={{ java.jre_ext_path }}/ccj.jar -Dcom.cloudera.cloudera.cmf.fipsMode.jdk11plus.ccj.moduleName=com.safelogic.cryptocomply.fips.core\"" /etc/default/cloudera-scm-server
+setup_fips_bctls_mode_for_java_higher_than_8:
+  file.append:
+    - name: /etc/default/cloudera-scm-server
+    - text: "export CMF_JAVA_OPTS=\"${CMF_JAVA_OPTS} -Dcom.cloudera.cloudera.cmf.fipsMode.jdk11plus.bctls.jar.path={{ java.jre_ext_path }}/bctls.jar -Dcom.cloudera.cloudera.cmf.fipsMode.jdk11plus.bctls.moduleName=bctls\""
+    - unless: grep "export CMF_JAVA_OPTS=\"\${CMF_JAVA_OPTS} -Dcom.cloudera.cloudera.cmf.fipsMode.jdk11plus.bctls.jar.path={{ java.jre_ext_path }}/bctls.jar -Dcom.cloudera.cloudera.cmf.fipsMode.jdk11plus.bctls.moduleName=bctls\"" /etc/default/cloudera-scm-server
+{% endif %}
 
 {% endif %}
 
@@ -163,12 +177,21 @@ replace_ocsp_in_cmca_profile:
     - context:
         cm_keytab: {{ cloudera_manager.cm_keytab }}
         server_address: {{ metadata.server_address }}
+        java: {{ java }}
 
 run_autotls_setup:
   cmd.run:
     - name: /opt/salt/scripts/cm-setup-autotls.sh 2>&1 | tee -a /var/log/cm-setup-autotls.log && exit ${PIPESTATUS[0]}
     - require:
       - file: /opt/salt/scripts/cm-setup-autotls.sh
+{% if salt['pillar.get']('cluster:gov_cloud', False) == True %}
+{% if java.java_version == "8" %}
+      - file: setup_fips_mode_for_java_8
+{% else %}
+      - file: setup_fips_ccj_mode_for_java_higher_than_8
+      - file: setup_fips_bctls_mode_for_java_higher_than_8
+{% endif %}
+{% endif %}
     - env:
         - AUTO_TLS_KEYSTORE_PASSWORD: {{salt['pillar.get']('cloudera-manager:autotls:keystore_password')}}
         - AUTO_TLS_TRUSTSTORE_PASSWORD: {{salt['pillar.get']('cloudera-manager:autotls:truststore_password')}}
