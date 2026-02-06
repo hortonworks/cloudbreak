@@ -5,8 +5,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Set;
@@ -78,7 +79,7 @@ class ClouderaManagerHostStatusCheckerTest {
         InstanceMetaData instanceMetaData = validInstanceMetadata();
         ApiHost apiHost = new ApiHost()
                 .ipAddress(instanceMetaData.getPrivateIp())
-                .lastHeartbeat(Instant.now().minus(5, ChronoUnit.MINUTES).toString());
+                .lastHeartbeat(OffsetDateTime.ofInstant(Instant.now().minus(5, ChronoUnit.MINUTES), ZoneOffset.UTC));
         when(hostsResourceApi.readHosts(null, null, VIEWTYPE)).thenReturn(newApiHostList(apiHost));
 
         boolean result = underTest.doStatusCheck(getPollerObject(instanceMetaData));
@@ -102,7 +103,7 @@ class ClouderaManagerHostStatusCheckerTest {
         InstanceMetaData instanceMetaData = validInstanceMetadata();
         ApiHost apiHost = new ApiHost()
                 .ipAddress("2.2.2.2")
-                .lastHeartbeat(Instant.now().plus(5, ChronoUnit.MINUTES).toString());
+                .lastHeartbeat(OffsetDateTime.ofInstant(Instant.now().plus(5, ChronoUnit.MINUTES), ZoneOffset.UTC));
         when(hostsResourceApi.readHosts(null, null, VIEWTYPE)).thenReturn(newApiHostList(apiHost));
 
         boolean result = underTest.doStatusCheck(getPollerObject(instanceMetaData));
@@ -253,7 +254,7 @@ class ClouderaManagerHostStatusCheckerTest {
     private ApiHost getValidApiHost(InstanceMetaData instanceMetaData) {
         return new ApiHost()
                     .ipAddress(instanceMetaData.getPrivateIp())
-                    .lastHeartbeat(Instant.now().plus(5, ChronoUnit.MINUTES).toString());
+                    .lastHeartbeat(OffsetDateTime.ofInstant(Instant.now().plus(5, ChronoUnit.MINUTES), ZoneOffset.UTC));
     }
 
     private InstanceMetaData validInstanceMetadata() {
@@ -269,7 +270,7 @@ class ClouderaManagerHostStatusCheckerTest {
         InstanceGroup instanceGroup = new InstanceGroup();
         instanceGroup.setInstanceMetaData(Set.of(instanceMetaDatas));
         stack.setInstanceGroups(Set.of(instanceGroup));
-        return new ClouderaManagerCommandPollerObject(stack, new ApiClient(), BigDecimal.ONE);
+        return new ClouderaManagerCommandPollerObject(stack, new ApiClient(), 1L);
     }
 
     private ApiHostList newApiHostList(ApiHost... apiHosts) {

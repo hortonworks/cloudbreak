@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
-import java.math.BigDecimal;
 import java.util.Optional;
 
 import org.apache.http.HttpStatus;
@@ -24,7 +23,7 @@ import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 @ExtendWith(MockitoExtension.class)
 class ClouderaManagerCommandsServiceTest {
 
-    private static final BigDecimal COMMAND_ID = BigDecimal.ONE;
+    private static final Long COMMAND_ID = 1L;
 
     @Mock
     private ClouderaManagerApiFactory clouderaManagerApiFactory;
@@ -44,7 +43,7 @@ class ClouderaManagerCommandsServiceTest {
     @Test
     public void testGetApiCommand() throws ApiException {
         when(clouderaManagerApiFactory.getCommandsResourceApi(apiClient)).thenReturn(commandsResourceApi);
-        when(commandsResourceApi.readCommand(BigDecimal.ONE)).thenReturn(apiCommand);
+        when(commandsResourceApi.readCommand(1L)).thenReturn(apiCommand);
 
         ApiCommand actualApiCommand = underTest.getApiCommand(apiClient, COMMAND_ID);
 
@@ -54,7 +53,7 @@ class ClouderaManagerCommandsServiceTest {
     @Test
     public void testRetryApiCommand() throws ApiException {
         when(clouderaManagerApiFactory.getCommandsResourceApi(apiClient)).thenReturn(commandsResourceApi);
-        when(commandsResourceApi.retry(BigDecimal.ONE)).thenReturn(apiCommand);
+        when(commandsResourceApi.retry(1L)).thenReturn(apiCommand);
 
         ApiCommand actualApiCommand = underTest.retryApiCommand(apiClient, COMMAND_ID);
 
@@ -64,7 +63,7 @@ class ClouderaManagerCommandsServiceTest {
     @Test
     public void getApiCommandIfExist() throws ApiException {
         when(clouderaManagerApiFactory.getCommandsResourceApi(apiClient)).thenReturn(commandsResourceApi);
-        when(commandsResourceApi.readCommand(BigDecimal.ONE)).thenReturn(apiCommand);
+        when(commandsResourceApi.readCommand(1L)).thenReturn(apiCommand);
 
         Optional<ApiCommand> actualApiCommand = underTest.getApiCommandIfExist(apiClient, COMMAND_ID);
 
@@ -83,7 +82,7 @@ class ClouderaManagerCommandsServiceTest {
     @Test
     public void getApiCommandIfExistWhenApiException() throws ApiException {
         when(clouderaManagerApiFactory.getCommandsResourceApi(apiClient)).thenReturn(commandsResourceApi);
-        when(commandsResourceApi.readCommand(BigDecimal.ONE)).thenThrow(new ApiException("msg"));
+        when(commandsResourceApi.readCommand(1L)).thenThrow(new ApiException("msg"));
 
         assertThrows(ApiException.class, () -> underTest.getApiCommandIfExist(apiClient, COMMAND_ID));
     }
@@ -92,7 +91,7 @@ class ClouderaManagerCommandsServiceTest {
     public void getApiCommandIfExistWhenNotFoundException() throws ApiException {
         when(clouderaManagerApiFactory.getCommandsResourceApi(apiClient)).thenReturn(commandsResourceApi);
         ApiException apiException = new ApiException(null, null, HttpStatus.SC_NOT_FOUND, null, null);
-        when(commandsResourceApi.readCommand(BigDecimal.ONE)).thenThrow(apiException);
+        when(commandsResourceApi.readCommand(1L)).thenThrow(apiException);
 
         Optional<ApiCommand> actualApiCommand = underTest.getApiCommandIfExist(apiClient, COMMAND_ID);
 

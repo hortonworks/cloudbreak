@@ -6,7 +6,6 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import java.math.BigDecimal;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -77,7 +76,7 @@ class ClouderaManagerMgmtLaunchServiceTest {
 
     private ApiCommand getApiCommand() {
         ApiCommand apiCommand = new ApiCommand();
-        apiCommand.setId(BigDecimal.TEN);
+        apiCommand.setId(10L);
         return apiCommand;
     }
 

@@ -6,7 +6,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -97,8 +96,8 @@ public class ClouderaManagerHostStatusChecker extends AbstractClouderaManagerApi
 
     private List<String> filterForHeartBeatedIps(ApiHostList hostList) {
         return hostList.getItems().stream()
-                .filter(item -> StringUtils.isNotBlank(item.getLastHeartbeat()))
-                .filter(item -> start.isBefore(Instant.parse(item.getLastHeartbeat())))
+                .filter(item -> item.getLastHeartbeat() != null)
+                .filter(item -> start.isBefore(item.getLastHeartbeat().toInstant()))
                 .map(ApiHost::getIpAddress)
                 .collect(Collectors.toList());
     }

@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cm.polling.task;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -62,7 +63,7 @@ public abstract class AbstractClouderaManagerCommandCheckerTask<T extends Cloude
     public void sendFailureEvent(T pollerObject) {
         if (pollerObject.getId() != null) {
             getClusterEventService().fireClusterManagerEvent(pollerObject.getStack(),
-                    ResourceEvent.CLUSTER_CM_COMMAND_FAILED, getCommandName(), Optional.of(pollerObject.getId()));
+                    ResourceEvent.CLUSTER_CM_COMMAND_FAILED, getCommandName(), Optional.of(new BigDecimal(pollerObject.getId())));
         }
     }
 
@@ -70,7 +71,7 @@ public abstract class AbstractClouderaManagerCommandCheckerTask<T extends Cloude
     public void sendTimeoutEvent(T pollerObject) {
         if (pollerObject.getId() != null) {
             getClusterEventService().fireClusterManagerEvent(pollerObject.getStack(),
-                    ResourceEvent.CLUSTER_CM_COMMAND_TIMEOUT, getCommandName(), Optional.of(pollerObject.getId()));
+                    ResourceEvent.CLUSTER_CM_COMMAND_TIMEOUT, getCommandName(), Optional.of(new BigDecimal(pollerObject.getId())));
         }
     }
 

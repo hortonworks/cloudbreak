@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Field;
-import java.math.BigDecimal;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Set;
 
@@ -26,8 +26,6 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 
 @ExtendWith(MockitoExtension.class)
 public class ActiveCommandsValidatorTest {
-
-    private static final String START_TIME = "start-time";
 
     private static final String INTERRUPTABLE_COMMAND_1 = "global-estimate-host-statistics";
 
@@ -105,9 +103,10 @@ public class ActiveCommandsValidatorTest {
                 () -> underTest.validate(request));
         // THEN exception is thrown
         assertEquals("There are active commands running on CM that are not interruptable, upgrade is not possible. " +
-                "Active commands: [ClusterManagerCommand{id=1, name='non-interruptable-1', startTime='start-time', endTime='null', active=null, " +
-                "success=null, resultMessage='null', retryable=null}, ClusterManagerCommand{id=1, name='non-interruptable-2', startTime='start-time', " +
-                "endTime='null', active=null, success=null, resultMessage='null', retryable=null}]", ex.getMessage());
+                "Active commands: [ClusterManagerCommand{id=1, name='non-interruptable-1', startTime='-999999999-01-01T00:00+18:00', endTime='null', " +
+                "active=null, success=null, resultMessage='null', retryable=null}, ClusterManagerCommand{id=1, name='non-interruptable-2', " +
+                "startTime='-999999999-01-01T00:00+18:00', endTime='null', active=null, success=null, resultMessage='null', retryable=null}]",
+                ex.getMessage());
     }
 
     @Test
@@ -123,8 +122,8 @@ public class ActiveCommandsValidatorTest {
                 () -> underTest.validate(request));
         // THEN exception is thrown
         assertEquals("There are active commands running on CM that are not interruptable, upgrade is not possible. " +
-                "Active commands: [ClusterManagerCommand{id=1, name='non-interruptable-1', startTime='start-time', endTime='null', active=null, " +
-                "success=null, resultMessage='null', retryable=null}]", ex.getMessage());
+                "Active commands: [ClusterManagerCommand{id=1, name='non-interruptable-1', startTime='-999999999-01-01T00:00+18:00', endTime='null', " +
+                "active=null, success=null, resultMessage='null', retryable=null}]", ex.getMessage());
     }
 
     private void initGlobalPrivateFields() {
@@ -135,8 +134,8 @@ public class ActiveCommandsValidatorTest {
 
     private ClusterManagerCommand createCommand(String name) {
         ClusterManagerCommand command = new ClusterManagerCommand();
-        command.setId(BigDecimal.ONE);
-        command.setStartTime(START_TIME);
+        command.setId(1L);
+        command.setStartTime(OffsetDateTime.MIN);
         command.setName(name);
         return command;
     }

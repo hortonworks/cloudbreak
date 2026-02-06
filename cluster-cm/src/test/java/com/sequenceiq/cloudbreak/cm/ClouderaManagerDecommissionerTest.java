@@ -19,7 +19,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -590,8 +589,8 @@ public class ClouderaManagerDecommissionerTest {
     @Test
     public void testDecommissionForLostNodesIfFirstDecommissionSucceeded() throws ApiException {
         mockListClusterHosts();
-        mockDecommission(Pair.of(BigDecimal.ONE, new ExtendedPollingResult.ExtendedPollingResultBuilder().success().build()));
-        mockAbortCommand(BigDecimal.ONE);
+        mockDecommission(Pair.of(1L, new ExtendedPollingResult.ExtendedPollingResultBuilder().success().build()));
+        mockAbortCommand(1L);
         InstanceMetaData deletedInstanceMetadata = createDeletedInstanceMetadata();
 
         underTest.decommissionNodes(getStack(), Map.of(deletedInstanceMetadata.getDiscoveryFQDN(), deletedInstanceMetadata), v51Client);
@@ -603,30 +602,30 @@ public class ClouderaManagerDecommissionerTest {
     @Test
     public void testDecommissionForLostNodesIfSecondDecommissionSucceeded() throws ApiException {
         mockListClusterHosts();
-        mockDecommission(Pair.of(BigDecimal.ONE, new ExtendedPollingResult.ExtendedPollingResultBuilder().timeout().build()),
-                Pair.of(BigDecimal.TEN, new ExtendedPollingResult.ExtendedPollingResultBuilder().success().build()));
-        mockAbortCommand(BigDecimal.ONE);
+        mockDecommission(Pair.of(1L, new ExtendedPollingResult.ExtendedPollingResultBuilder().timeout().build()),
+                Pair.of(10L, new ExtendedPollingResult.ExtendedPollingResultBuilder().success().build()));
+        mockAbortCommand(1L);
         InstanceMetaData deletedInstanceMetadata = createDeletedInstanceMetadata();
 
         underTest.decommissionNodes(getStack(), Map.of(deletedInstanceMetadata.getDiscoveryFQDN(), deletedInstanceMetadata), v51Client);
 
-        verify(commandsResourceApi, times(1)).abortCommand(eq(BigDecimal.ONE));
+        verify(commandsResourceApi, times(1)).abortCommand(eq(1L));
         verify(clouderaManagerResourceApi, times(2)).hostsDecommissionCommand(any());
     }
 
     @Test
     public void testDecommissionForLostNodesIfBothDecommissionFails() throws ApiException {
         mockListClusterHosts();
-        mockDecommission(Pair.of(BigDecimal.ONE, new ExtendedPollingResult.ExtendedPollingResultBuilder().timeout().build()),
-                Pair.of(BigDecimal.TEN, new ExtendedPollingResult.ExtendedPollingResultBuilder().timeout().build()));
-        mockAbortCommand(BigDecimal.ONE, BigDecimal.TEN);
+        mockDecommission(Pair.of(1L, new ExtendedPollingResult.ExtendedPollingResultBuilder().timeout().build()),
+                Pair.of(10L, new ExtendedPollingResult.ExtendedPollingResultBuilder().timeout().build()));
+        mockAbortCommand(1L, 10L);
         doNothing().when(flowMessageService).fireInstanceGroupEventAndLog(any(), any(), any(), any(), any());
         InstanceMetaData deletedInstanceMetadata = createDeletedInstanceMetadata();
 
         underTest.decommissionNodes(getStack(), Map.of(deletedInstanceMetadata.getDiscoveryFQDN(), deletedInstanceMetadata), v51Client);
 
-        verify(commandsResourceApi, times(1)).abortCommand(eq(BigDecimal.ONE));
-        verify(commandsResourceApi, times(1)).abortCommand(eq(BigDecimal.TEN));
+        verify(commandsResourceApi, times(1)).abortCommand(eq(1L));
+        verify(commandsResourceApi, times(1)).abortCommand(eq(10L));
         verify(clouderaManagerResourceApi, times(2)).hostsDecommissionCommand(any());
     }
 
@@ -840,10 +839,10 @@ public class ClouderaManagerDecommissionerTest {
         apiHostList.addItemsItem(createApiHostRef("host3.example.com"));
         apiHostList.addItemsItem(createApiHostRef("host4.example.com"));
         when(hostsResourceApi.readHosts(isNull(), isNull(), any())).thenReturn(apiHostList);
-        when(hostsResourceApi.stopAllRolesOnNodeGracefully(any())).thenReturn(new ApiCommand().id(BigDecimal.ONE));
+        when(hostsResourceApi.stopAllRolesOnNodeGracefully(any())).thenReturn(new ApiCommand().id(1L));
         when(clouderaManagerApiFactory.getClouderaManagerResourceApi(eq(v51Client))).thenReturn(clouderaManagerResourceApi);
         ArgumentCaptor<ApiHostNameList> apiHostNameListArgumentCaptor = ArgumentCaptor.forClass(ApiHostNameList.class);
-        BigDecimal apiCommandId = BigDecimal.ONE;
+        Long apiCommandId = 1L;
         when(clouderaManagerResourceApi.hostsStopRolesCommand(apiHostNameListArgumentCaptor.capture())).thenReturn(getApiCommand(apiCommandId));
         ExtendedPollingResult extendedPollingResult = mock(ExtendedPollingResult.class);
         when(pollingServiceProvider.startPollingStopRolesCommand(any(), eq(v51Client), eq(apiCommandId))).thenReturn(extendedPollingResult);
@@ -867,7 +866,7 @@ public class ClouderaManagerDecommissionerTest {
         when(hostsResourceApi.readHosts(isNull(), isNull(), any())).thenReturn(apiHostList);
         when(clouderaManagerApiFactory.getClouderaManagerResourceApi(eq(v51Client))).thenReturn(clouderaManagerResourceApi);
         ArgumentCaptor<ApiHostNameList> apiHostNameListArgumentCaptor = ArgumentCaptor.forClass(ApiHostNameList.class);
-        BigDecimal apiCommandId = BigDecimal.ONE;
+        Long apiCommandId = 1L;
         when(clouderaManagerResourceApi.hostsStopRolesCommand(apiHostNameListArgumentCaptor.capture())).thenReturn(getApiCommand(apiCommandId));
         ExtendedPollingResult extendedPollingResult = mock(ExtendedPollingResult.class);
         when(pollingServiceProvider.startPollingStopRolesCommand(any(), eq(v51Client), eq(apiCommandId))).thenReturn(extendedPollingResult);
@@ -890,7 +889,7 @@ public class ClouderaManagerDecommissionerTest {
         when(hostsResourceApi.readHosts(isNull(), isNull(), any())).thenReturn(apiHostList);
         when(clouderaManagerApiFactory.getClouderaManagerResourceApi(eq(v51Client))).thenReturn(clouderaManagerResourceApi);
         ArgumentCaptor<ApiHostNameList> apiHostNameListArgumentCaptor = ArgumentCaptor.forClass(ApiHostNameList.class);
-        BigDecimal apiCommandId = BigDecimal.ONE;
+        Long apiCommandId = 1L;
         when(clouderaManagerResourceApi.hostsStopRolesCommand(apiHostNameListArgumentCaptor.capture())).thenReturn(getApiCommand(apiCommandId));
         ExtendedPollingResult extendedPollingResult = mock(ExtendedPollingResult.class);
         when(pollingServiceProvider.startPollingStopRolesCommand(any(), eq(v51Client), eq(apiCommandId))).thenReturn(extendedPollingResult);
@@ -1055,7 +1054,7 @@ public class ClouderaManagerDecommissionerTest {
         return instanceGroup;
     }
 
-    private void mockDecommission(Pair<BigDecimal, ExtendedPollingResult> resultPair, Pair<BigDecimal, ExtendedPollingResult>... resultPairs)
+    private void mockDecommission(Pair<Long, ExtendedPollingResult> resultPair, Pair<Long, ExtendedPollingResult>... resultPairs)
             throws ApiException {
         when(clouderaManagerApiFactory.getClouderaManagerResourceApi(eq(v51Client))).thenReturn(clouderaManagerResourceApi);
         when(clouderaManagerResourceApi.hostsDecommissionCommand(any())).thenReturn(getApiCommand(resultPair.getLeft()),
@@ -1064,7 +1063,7 @@ public class ClouderaManagerDecommissionerTest {
                 Arrays.stream(resultPairs).map(resultPairItem -> resultPairItem.getRight()).toArray(ExtendedPollingResult[]::new));
     }
 
-    private void mockAbortCommand(BigDecimal commandId, BigDecimal... commandIds) throws ApiException {
+    private void mockAbortCommand(Long commandId, Long... commandIds) throws ApiException {
         lenient().when(clouderaManagerApiFactory.getCommandsResourceApi(eq(v51Client))).thenReturn(commandsResourceApi);
         lenient().when(commandsResourceApi.abortCommand(any())).thenReturn(getApiCommand(commandId),
                 Arrays.stream(commandIds).map(commandIdItem -> getApiCommand(commandIdItem)).toArray(ApiCommand[]::new));
@@ -1116,7 +1115,7 @@ public class ClouderaManagerDecommissionerTest {
         return instanceHostRef;
     }
 
-    private ApiCommand getApiCommand(BigDecimal commandId) {
+    private ApiCommand getApiCommand(Long commandId) {
         ApiCommand apiCommand = new ApiCommand();
         apiCommand.setId(commandId);
         return apiCommand;

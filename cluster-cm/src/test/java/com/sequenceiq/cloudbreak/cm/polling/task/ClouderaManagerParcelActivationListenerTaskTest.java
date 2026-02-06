@@ -42,7 +42,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 @ExtendWith(MockitoExtension.class)
 class ClouderaManagerParcelActivationListenerTaskTest {
 
-    private static final BigDecimal COMMAND_ID = new BigDecimal(100);
+    private static final Long COMMAND_ID = 100L;
 
     private static final String STACK_NAME = "stack_name";
 
@@ -162,6 +162,6 @@ class ClouderaManagerParcelActivationListenerTaskTest {
         verify(clusterEventService, times(1)).fireCloudbreakEvent(stack, CLUSTER_CM_COMMAND_TIMEOUT_PARCELACTIVATION,
                 List.of(String.format("(%s %s : %s)", CDH, CDH_VERSION, DOWNLOADED)));
         verify(clusterEventService, times(1)).fireClusterManagerEvent(pollerObject.getStack(), CLUSTER_CM_COMMAND_TIMEOUT,
-                "Parcel activation", Optional.of(pollerObject.getId()));
+                "Parcel activation", Optional.of(new BigDecimal(pollerObject.getId())));
     }
 }

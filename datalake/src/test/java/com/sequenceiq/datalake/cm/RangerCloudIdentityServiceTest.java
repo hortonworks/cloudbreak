@@ -10,7 +10,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -55,7 +54,7 @@ class RangerCloudIdentityServiceTest {
     @Test
     public void testSetAzureCloudIdentityMappingSuccessSync() throws ApiException {
         ApiCommand apiCommand = mock(ApiCommand.class);
-        when(apiCommand.getId()).thenReturn(BigDecimal.ONE);
+        when(apiCommand.getId()).thenReturn(1L);
         when(apiCommand.isSuccess()).thenReturn(true);
         SdxStatusEntity sdxStatus = mockSdxStatus(DatalakeStatusEnum.RUNNING);
         when(sdxStatusService.getActualStatusForSdx(any(SdxCluster.class))).thenReturn(sdxStatus);
@@ -65,7 +64,7 @@ class RangerCloudIdentityServiceTest {
     @Test
     public void testSetAzureCloudIdentityMappingActiveSync() throws ApiException {
         ApiCommand apiCommand = mock(ApiCommand.class);
-        when(apiCommand.getId()).thenReturn(BigDecimal.ONE);
+        when(apiCommand.getId()).thenReturn(1L);
         when(apiCommand.isActive()).thenReturn(true);
         SdxStatusEntity sdxStatus = mockSdxStatus(DatalakeStatusEnum.RUNNING);
         when(sdxStatusService.getActualStatusForSdx(any(SdxCluster.class))).thenReturn(sdxStatus);
@@ -75,7 +74,7 @@ class RangerCloudIdentityServiceTest {
     @Test
     public void testSetAzureCloudIdentityMappingFailSync() throws ApiException {
         ApiCommand apiCommand = mock(ApiCommand.class);
-        when(apiCommand.getId()).thenReturn(BigDecimal.ONE);
+        when(apiCommand.getId()).thenReturn(1L);
         when(apiCommand.isSuccess()).thenReturn(false);
         SdxStatusEntity sdxStatus = mockSdxStatus(DatalakeStatusEnum.RUNNING);
         when(sdxStatusService.getActualStatusForSdx(any(SdxCluster.class))).thenReturn(sdxStatus);

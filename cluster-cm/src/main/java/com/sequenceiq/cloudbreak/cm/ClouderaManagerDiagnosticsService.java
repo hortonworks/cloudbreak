@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.cm;
 
-import java.math.BigDecimal;
-
 import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
 
@@ -141,7 +139,7 @@ public class ClouderaManagerDiagnosticsService implements ClusterDiagnosticsServ
         args.setEndTime(parameters.getEndTime() == null ? new DateTime().toString() : new DateTime(parameters.getEndTime()).toString());
         args.setComments(parameters.getComments());
         args.setTicketNumber(parameters.getTicketNumber());
-        args.setBundleSizeBytes(parameters.getBundleSizeBytes() == null ? new BigDecimal(Long.MAX_VALUE) : parameters.getBundleSizeBytes());
+        args.setBundleSizeBytes(parameters.getBundleSizeBytes() == null ? Long.MAX_VALUE : parameters.getBundleSizeBytes().longValue());
         args.setEnableMonitorMetricsCollection(parameters.getEnableMonitorMetricsCollection());
         if (CollectionUtils.isNotEmpty(parameters.getRoles())) {
             args.setRoles(parameters.getRoles());

@@ -6,8 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Set;
 
@@ -285,14 +285,14 @@ class ClouderaManagerHostHealthyStatusCheckerTest {
     private ClouderaManagerCommandPollerObject getPollerObject() {
         Stack stack = new Stack();
         stack.setId(1L);
-        return new ClouderaManagerCommandPollerObject(stack, new ApiClient(), BigDecimal.ONE);
+        return new ClouderaManagerCommandPollerObject(stack, new ApiClient(), 1L);
     }
 
     private ApiHost constructApiHost(String hostname, Instant lastHeartbeat, ApiHealthSummary healthSummary,
             boolean maintenanceMode, ApiCommissionState commissionState) {
         return new ApiHost()
                 .hostname(hostname)
-                .lastHeartbeat(lastHeartbeat.toString())
+                .lastHeartbeat(lastHeartbeat.atOffset(ZoneOffset.UTC))
                 .healthSummary(healthSummary)
                 .maintenanceMode(maintenanceMode)
                 .commissionState(commissionState);
@@ -305,7 +305,7 @@ class ClouderaManagerHostHealthyStatusCheckerTest {
         apiHealthCheck.setSummary(apiHealthSummary);
         return new ApiHost()
                 .hostname(hostname)
-                .lastHeartbeat(lastHeartbeat.toString())
+                .lastHeartbeat(lastHeartbeat.atOffset(ZoneOffset.UTC))
                 .healthSummary(healthSummary)
                 .maintenanceMode(maintenanceMode)
                 .healthChecks(List.of(apiHealthCheck))

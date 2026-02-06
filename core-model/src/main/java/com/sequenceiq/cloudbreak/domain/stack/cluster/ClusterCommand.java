@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.domain.stack.cluster;
 
-import java.math.BigDecimal;
 import java.util.Date;
 import java.util.Objects;
 
@@ -25,8 +24,8 @@ public class ClusterCommand {
     @Column(name = "cluster_id", nullable = false)
     private long clusterId;
 
-    @Column(name = "command_id", nullable = false)
-    private BigDecimal commandId;
+    @Column(name = "command_id", nullable = false, columnDefinition = "NUMERIC")
+    private Long commandId;
 
     @Convert(converter = ClusterCommandTypeConverter.class)
     @Column(name = "cluster_command_type", nullable = false)
@@ -51,11 +50,11 @@ public class ClusterCommand {
         this.clusterId = clusterId;
     }
 
-    public BigDecimal getCommandId() {
+    public Long getCommandId() {
         return commandId;
     }
 
-    public void setCommandId(BigDecimal commandId) {
+    public void setCommandId(Long commandId) {
         this.commandId = commandId;
     }
 

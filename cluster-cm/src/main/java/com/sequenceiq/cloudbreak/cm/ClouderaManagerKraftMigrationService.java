@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.cm;
 import static org.apache.commons.lang3.BooleanUtils.isFalse;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
-import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
@@ -143,7 +142,7 @@ public class ClouderaManagerKraftMigrationService {
         }
     }
 
-    private void pollKraftMigrationCommand(ApiClient client, StackDtoDelegate stackDtoDelegate, BigDecimal commandId)
+    private void pollKraftMigrationCommand(ApiClient client, StackDtoDelegate stackDtoDelegate, Long commandId)
             throws CloudbreakException {
         ExtendedPollingResult pollingResult = clouderaManagerPollingServiceProvider
                 .startPollingZookeeperToKraftMigration(stackDtoDelegate, client, commandId);
@@ -157,7 +156,7 @@ public class ClouderaManagerKraftMigrationService {
         }
     }
 
-    private void pollFinalizeZookeeperToKraftMigrationCommand(ApiClient client, StackDtoDelegate stackDtoDelegate, BigDecimal commandId)
+    private void pollFinalizeZookeeperToKraftMigrationCommand(ApiClient client, StackDtoDelegate stackDtoDelegate, Long commandId)
             throws CloudbreakException {
         ExtendedPollingResult pollingResult = clouderaManagerPollingServiceProvider
                 .startPollingFinalizeZookeeperToKraftMigration(stackDtoDelegate, client, commandId);
@@ -171,7 +170,7 @@ public class ClouderaManagerKraftMigrationService {
         }
     }
 
-    private void pollRollbackZookeeperToKraftMigrationCommand(ApiClient client, StackDtoDelegate stackDtoDelegate, BigDecimal commandId)
+    private void pollRollbackZookeeperToKraftMigrationCommand(ApiClient client, StackDtoDelegate stackDtoDelegate, Long commandId)
             throws CloudbreakException {
         ExtendedPollingResult pollingResult = clouderaManagerPollingServiceProvider
                 .startPollingRollbackZookeeperToKraftMigration(stackDtoDelegate, client, commandId);
@@ -195,11 +194,11 @@ public class ClouderaManagerKraftMigrationService {
         ServicesResourceApi api = clouderaManagerApiFactory.getServicesResourceApi(client);
         String clusterName = stackDtoDelegate.getCluster().getName();
         ClustersResourceApi clustersResourceApi = clouderaManagerApiFactory.getClustersResourceApi(client);
-        Optional<BigDecimal> optionalLastKraftMigrationCommand = findLastCommandIdByCommandName(clustersResourceApi, stackDtoDelegate, commandName);
+        Optional<Long> optionalLastKraftMigrationCommand = findLastCommandIdByCommandName(clustersResourceApi, stackDtoDelegate, commandName);
         ApiCommand kraftMigrationCommand;
         if (optionalLastKraftMigrationCommand.isPresent()) {
             LOGGER.debug("Previous {} command found for cluster {}", commandName, clusterName);
-            BigDecimal lastKraftMigrationCommandId = optionalLastKraftMigrationCommand.get();
+            Long lastKraftMigrationCommandId = optionalLastKraftMigrationCommand.get();
             ApiCommand lastKraftMigrationCommand = clouderaManagerCommandsService.getApiCommand(client, lastKraftMigrationCommandId);
             Boolean commandActive = lastKraftMigrationCommand.isActive();
             Boolean commandSuccess = lastKraftMigrationCommand.isSuccess();
@@ -209,7 +208,7 @@ public class ClouderaManagerKraftMigrationService {
             } else {
                 if (isFalse(commandSuccess) && isTrue(commandCanRetry)) {
                     LOGGER.debug("Retrying last failed {} command with id {}", commandName, lastKraftMigrationCommandId);
-                    BigDecimal retriedCommandId = clouderaManagerCommandsService.retryApiCommand(client, lastKraftMigrationCommandId).getId();
+                    Long retriedCommandId = clouderaManagerCommandsService.retryApiCommand(client, lastKraftMigrationCommandId).getId();
                     pollCommandByType(client, stackDtoDelegate, retriedCommandId, commandName);
                 } else {
                     LOGGER.debug("Last {} command ({}) is not active, it was {} successful and {} retryable, submitting it now",
@@ -228,7 +227,7 @@ public class ClouderaManagerKraftMigrationService {
         }
     }
 
-    private Optional<BigDecimal> findLastCommandIdByCommandName(ClustersResourceApi clustersResourceApi, StackDtoDelegate stack, String commandName) {
+    private Optional<Long> findLastCommandIdByCommandName(ClustersResourceApi clustersResourceApi, StackDtoDelegate stack, String commandName) {
         try {
             return syncApiCommandRetriever.getCommandId(commandName, clustersResourceApi, stack.getStack());
         } catch (CloudbreakException | ApiException e) {
@@ -237,7 +236,7 @@ public class ClouderaManagerKraftMigrationService {
         }
     }
 
-    private void pollCommandByType(ApiClient client, StackDtoDelegate stackDtoDelegate, BigDecimal commandId, String commandName)
+    private void pollCommandByType(ApiClient client, StackDtoDelegate stackDtoDelegate, Long commandId, String commandName)
             throws CloudbreakException {
         switch (commandName) {
             case KRAFT_MIGRATION_COMMAND_NAME:

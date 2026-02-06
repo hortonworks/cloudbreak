@@ -5,7 +5,6 @@ import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.mapping;
 import static java.util.stream.Collectors.toList;
 
-import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -417,7 +416,7 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
             if (clouderaManagerCommand == null) {
                 return Optional.empty();
             }
-            Optional<BigDecimal> commandId = syncApiCommandRetriever.getCommandId(clouderaManagerCommand.getName(), clustersResourceApi, stack.getStack());
+            Optional<Long> commandId = syncApiCommandRetriever.getCommandId(clouderaManagerCommand.getName(), clustersResourceApi, stack.getStack());
             if (commandId.isPresent()) {
                 return Optional.ofNullable(convertApiCommand(clouderaManagerCommandsService.getApiCommand(client, commandId.get())));
             } else {

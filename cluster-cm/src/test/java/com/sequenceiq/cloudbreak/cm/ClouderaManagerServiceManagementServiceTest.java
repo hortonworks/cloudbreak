@@ -12,7 +12,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-import java.math.BigDecimal;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -43,7 +42,7 @@ class ClouderaManagerServiceManagementServiceTest {
 
     private static final String SERVICE_NAME = "yarn-1";
 
-    private static final BigDecimal COMMAND_ID = BigDecimal.valueOf(123L);
+    private static final Long COMMAND_ID = Long.valueOf(123L);
 
     @InjectMocks
     private ClouderaManagerServiceManagementService underTest;

@@ -13,7 +13,6 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.Optional;
 
@@ -46,7 +45,7 @@ class ClouderaManagerUpgradeServiceTest {
 
     private static final String CLUSTER_NAME = "test-cluster";
 
-    private static final BigDecimal COMMAND_ID = BigDecimal.TEN;
+    private static final Long COMMAND_ID = 10L;
 
     @InjectMocks
     private ClouderaManagerUpgradeService underTest;

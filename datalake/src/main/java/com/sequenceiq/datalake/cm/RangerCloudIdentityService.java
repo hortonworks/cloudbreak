@@ -1,6 +1,5 @@
 package com.sequenceiq.datalake.cm;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -122,8 +121,8 @@ public class RangerCloudIdentityService {
 
     private RangerCloudIdentitySyncStatus toRangerCloudIdentitySyncStatus(List<ApiCommand> apiCommands) {
         RangerCloudIdentitySyncStatus status = new RangerCloudIdentitySyncStatus();
-        status.setCommandId(apiCommands.getFirst().getId().longValue());
-        status.setCommandIds(apiCommands.stream().map(ApiCommand::getId).mapToLong(BigDecimal::longValue).boxed().toList());
+        status.setCommandId(apiCommands.getFirst().getId());
+        status.setCommandIds(apiCommands.stream().map(ApiCommand::getId).toList());
         status.setStatusReason(collectReasonForCommands(apiCommands));
         status.setState(toRangerCloudIdentitySyncState(apiCommands));
         return status;

@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.cm.polling.task;
 
 import static org.mockito.Mockito.when;
 
-import java.math.BigDecimal;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -22,8 +21,8 @@ class ClouderaManagerUpgradeParcelDownloadListenerTaskTest
 
     @Test
     void handleTimeoutSuccess() {
-        when(apiParcelState.getProgress()).thenReturn(new BigDecimal(10));
-        when(apiParcelState.getTotalProgress()).thenReturn(new BigDecimal(100));
+        when(apiParcelState.getProgress()).thenReturn(10L);
+        when(apiParcelState.getTotalProgress()).thenReturn(100L);
 
         Assertions.assertThatThrownBy(() -> underTest.handleTimeout(pollerObject))
                 .isInstanceOf(ClouderaManagerOperationFailedException.class)

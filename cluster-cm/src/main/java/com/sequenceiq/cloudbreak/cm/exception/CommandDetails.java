@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.cm.exception;
 
-import java.math.BigDecimal;
 import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
@@ -12,7 +11,7 @@ import com.cloudera.api.swagger.model.ApiServiceRef;
 
 public class CommandDetails {
 
-    private final BigDecimal id;
+    private final Long id;
 
     private final String name;
 
@@ -27,7 +26,7 @@ public class CommandDetails {
     private final Optional<String> hostName;
 
     public CommandDetails(
-            BigDecimal id,
+            Long id,
             String name,
             CommandStatus commandStatus, Optional<String> reason,
             Optional<String> serviceName,
@@ -63,7 +62,7 @@ public class CommandDetails {
         );
     }
 
-    public BigDecimal getId() {
+    public Long getId() {
         return id;
     }
 

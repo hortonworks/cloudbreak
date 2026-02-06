@@ -8,7 +8,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
-import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -40,15 +39,15 @@ import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 @ExtendWith(MockitoExtension.class)
 class ClouderaManagerTemplateInstallationCheckerTest {
 
-    private static final BigDecimal TEMPLATE_INSTALL_ID = new BigDecimal(1);
+    private static final Long TEMPLATE_INSTALL_ID = 1L;
 
-    private static final BigDecimal ADD_REPOSITORIES_ID = new BigDecimal(11);
+    private static final Long ADD_REPOSITORIES_ID = 11L;
 
-    private static final BigDecimal DEPLOY_PARCELS_ID = new BigDecimal(12);
+    private static final Long DEPLOY_PARCELS_ID = 12L;
 
-    private static final BigDecimal FIRST_RUN_ID = new BigDecimal(13);
+    private static final Long FIRST_RUN_ID = 13L;
 
-    private static final BigDecimal AUDIT_DIR = new BigDecimal(14);
+    private static final Long AUDIT_DIR = 14L;
 
     private static final String TEMPLATE_INSTALL_NAME = "TemplateInstall";
 
@@ -222,15 +221,15 @@ class ClouderaManagerTemplateInstallationCheckerTest {
     }
 
     private void expectReadCommandForFailedCommands(ApiCommand templateInstallCmd) throws ApiException {
-        Map<BigDecimal, ApiCommand> failedCommands = Stream.concat(
+        Map<Long, ApiCommand> failedCommands = Stream.concat(
                 Stream.of(templateInstallCmd),
                 templateInstallCmd.getChildren().getItems().stream()
         )
                 .filter(cmd -> cmd.isActive() != null && cmd.isActive() || cmd.isSuccess() != null && !cmd.isSuccess())
                 .collect(Collectors.toMap(ApiCommand::getId, Function.identity()));
 
-        when(commandsResourceApi.readCommand(any(BigDecimal.class))).thenAnswer(invocation -> {
-            BigDecimal cmdId = invocation.getArgument(0);
+        when(commandsResourceApi.readCommand(any(Long.class))).thenAnswer(invocation -> {
+            Long cmdId = invocation.getArgument(0);
             ApiCommand cmd = failedCommands.get(cmdId);
             if (cmd == null) {
                 throw new IllegalArgumentException("Unexpected argument for readCommand: " + cmdId);
@@ -272,7 +271,7 @@ class ClouderaManagerTemplateInstallationCheckerTest {
         return cmd(FIRST_RUN_ID, FIRST_RUN_NAME);
     }
 
-    private ApiCommand cmd(BigDecimal id, String name) {
+    private ApiCommand cmd(Long id, String name) {
         return new ApiCommand().id(id).name(name).active(Boolean.FALSE).success(Boolean.TRUE);
     }
 }

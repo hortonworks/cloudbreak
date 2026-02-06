@@ -16,7 +16,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.math.BigDecimal;
+import java.time.OffsetDateTime;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -295,15 +295,15 @@ public class ClouderaManagerClusterStatusServiceTest {
         //GIVEN
         when(clouderaManagerResourceApi.listActiveCommands("SUMMARY"))
                 .thenReturn(new ApiCommandList()
-                        .items(List.of(new ApiCommand().name("cmd").id(BigDecimal.ONE).startTime("starttime"))));
+                        .items(List.of(new ApiCommand().name("cmd").id(1L).startTime(OffsetDateTime.MIN))));
         // WHEN
         List<ClusterManagerCommand> actualResult = subject.getActiveCommandsList();
         // THEN
         assertEquals(1, actualResult.size());
         ClusterManagerCommand actualCmd = actualResult.get(0);
-        assertEquals(BigDecimal.ONE, actualCmd.getId());
+        assertEquals(1L, actualCmd.getId());
         assertEquals("cmd", actualCmd.getName());
-        assertEquals("starttime", actualCmd.getStartTime());
+        assertEquals(OffsetDateTime.MIN, actualCmd.getStartTime());
     }
 
     @Test

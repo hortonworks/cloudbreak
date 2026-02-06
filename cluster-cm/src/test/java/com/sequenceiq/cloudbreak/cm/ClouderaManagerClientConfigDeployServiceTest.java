@@ -10,7 +10,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -66,7 +65,7 @@ class ClouderaManagerClientConfigDeployServiceTest {
         given(stack.getResourceCrn()).willReturn(STACK_CRN);
         given(syncApiCommandPollerConfig.isSyncApiCommandPollingEnabled(STACK_CRN)).willReturn(false);
         given(clouderaManagerCommonCommandService.getApiCommand(any(), any(), any(), any()))
-                .willReturn(new ApiCommand().name(COMMAND_NAME).id(BigDecimal.ONE));
+                .willReturn(new ApiCommand().name(COMMAND_NAME).id(1L));
         given(clustersResourceApi.listActiveCommands(any(), any(), any()))
                 .willReturn(new ApiCommandList());
         RetryContext retryContext = mock(RetryContext.class);
@@ -74,7 +73,7 @@ class ClouderaManagerClientConfigDeployServiceTest {
         // WHEN
         try (MockedStatic<RetrySynchronizationManager> retrySynchronizationManagerMockedStatic = mockStatic(RetrySynchronizationManager.class)) {
             when(RetrySynchronizationManager.getContext()).thenReturn(retryContext);
-            BigDecimal result = underTest.deployClientConfig(
+            Long result = underTest.deployClientConfig(
                     ClouderaManagerClientConfigDeployRequest.builder()
                             .stack(stack)
                             .client(apiClient)
@@ -82,7 +81,7 @@ class ClouderaManagerClientConfigDeployServiceTest {
                             .build()
             );
 
-            assertEquals(BigDecimal.ONE, result);
+            assertEquals(1L, result);
         }
         // THEN
 
@@ -97,13 +96,13 @@ class ClouderaManagerClientConfigDeployServiceTest {
         given(stack.getResourceCrn()).willReturn(STACK_CRN);
         given(syncApiCommandPollerConfig.isSyncApiCommandPollingEnabled(STACK_CRN)).willReturn(true);
         given(syncApiCommandPollerConfig.getDeployClusterClientConfigCommandName()).willReturn(COMMAND_NAME);
-        given(clouderaManagerSyncApiCommandIdProvider.executeSyncApiCommandAndGetCommandId(anyString(), any(), any(), any(), any())).willReturn(BigDecimal.ONE);
+        given(clouderaManagerSyncApiCommandIdProvider.executeSyncApiCommandAndGetCommandId(anyString(), any(), any(), any(), any())).willReturn(1L);
         given(clustersResourceApi.listActiveCommands(any(), any(), any()))
                 .willReturn(new ApiCommandList());
         // WHEN
         try (MockedStatic<RetrySynchronizationManager> retrySynchronizationManagerMockedStatic = mockStatic(RetrySynchronizationManager.class)) {
             when(RetrySynchronizationManager.getContext()).thenReturn(retryContext);
-            BigDecimal result = underTest.deployClientConfig(
+            Long result = underTest.deployClientConfig(
                     ClouderaManagerClientConfigDeployRequest.builder()
                             .stack(stack)
                             .client(apiClient)
@@ -111,7 +110,7 @@ class ClouderaManagerClientConfigDeployServiceTest {
                             .build()
             );
 
-            assertEquals(BigDecimal.ONE, result);
+            assertEquals(1L, result);
         }
         // THEN
 

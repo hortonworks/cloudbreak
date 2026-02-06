@@ -18,7 +18,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -182,7 +181,7 @@ class ClouderaManagerParcelManagementServiceTest {
 
     @Test
     void testRefreshParcelReposShouldCallCmApi() throws ApiException {
-        ApiCommand apiCommand = new ApiCommand().id(BigDecimal.ONE);
+        ApiCommand apiCommand = new ApiCommand().id(1L);
         when(clouderaManagerResourceApi.refreshParcelRepos()).thenReturn(apiCommand);
 
         underTest.refreshParcelRepos(clouderaManagerResourceApi, stack, apiClient);
@@ -196,8 +195,8 @@ class ClouderaManagerParcelManagementServiceTest {
         ClouderaManagerProduct cdhProduct = new ClouderaManagerProduct().withName(CDH).withVersion("7.2.15").withParcel("http://parcel");
         ClouderaManagerProduct flinkProduct = new ClouderaManagerProduct().withName(FLINK).withVersion("1.2.3")
                 .withParcel("https://archive.cloudera.com/");
-        ApiCommand cdhDownloadCommand = new ApiCommand().id(BigDecimal.ONE);
-        ApiCommand flinkDownloadCommand = new ApiCommand().id(BigDecimal.TEN);
+        ApiCommand cdhDownloadCommand = new ApiCommand().id(1L);
+        ApiCommand flinkDownloadCommand = new ApiCommand().id(10L);
         ExtendedPollingResult pollingResult = createPollingResult();
         when(parcelResourceApi.startDownloadCommand(stack.getName(), cdhProduct.getName(), cdhProduct.getVersion())).thenReturn(cdhDownloadCommand);
         when(parcelResourceApi.startDownloadCommand(stack.getName(), flinkProduct.getName(), flinkProduct.getVersion())).thenReturn(flinkDownloadCommand);
@@ -234,8 +233,8 @@ class ClouderaManagerParcelManagementServiceTest {
     void testDistributeParcelsShouldCallCmApiToDistributeParcels() throws CloudbreakException, ApiException {
         ClouderaManagerProduct cdhProduct = new ClouderaManagerProduct().withName(CDH).withVersion("7.2.15");
         ClouderaManagerProduct flinkProduct = new ClouderaManagerProduct().withName(FLINK).withVersion("1.2.3");
-        ApiCommand cdhDistributeCommand = new ApiCommand().id(BigDecimal.ONE);
-        ApiCommand flinkDistributeCommand = new ApiCommand().id(BigDecimal.TEN);
+        ApiCommand cdhDistributeCommand = new ApiCommand().id(1L);
+        ApiCommand flinkDistributeCommand = new ApiCommand().id(10L);
         ExtendedPollingResult pollingResult = createPollingResult();
         when(parcelResourceApi.startDistributionCommand(stack.getName(), cdhProduct.getName(), cdhProduct.getVersion())).thenReturn(cdhDistributeCommand);
         when(parcelResourceApi.startDistributionCommand(stack.getName(), flinkProduct.getName(), flinkProduct.getVersion())).thenReturn(flinkDistributeCommand);
@@ -264,8 +263,8 @@ class ClouderaManagerParcelManagementServiceTest {
     void testDistributeParcelsShouldDistributeOnlyCdhParcelWhenTheFlinkIsAlreadyActivated() throws CloudbreakException, ApiException {
         ClouderaManagerProduct cdhProduct = new ClouderaManagerProduct().withName(CDH).withVersion("7.2.15");
         ClouderaManagerProduct flinkProduct = new ClouderaManagerProduct().withName(FLINK).withVersion("1.2.3");
-        ApiCommand cdhDistributeCommand = new ApiCommand().id(BigDecimal.ONE);
-        ApiCommand flinkDistributeCommand = new ApiCommand().id(BigDecimal.TEN);
+        ApiCommand cdhDistributeCommand = new ApiCommand().id(1L);
+        ApiCommand flinkDistributeCommand = new ApiCommand().id(10L);
         ExtendedPollingResult pollingResult = createPollingResult();
         when(parcelResourceApi.startDistributionCommand(stack.getName(), cdhProduct.getName(), cdhProduct.getVersion())).thenReturn(cdhDistributeCommand);
         when(clouderaManagerPollingServiceProvider.startPollingCdpRuntimeParcelDistribute(eq(stack), eq(apiClient), eq(cdhDistributeCommand.getId()),
@@ -292,8 +291,8 @@ class ClouderaManagerParcelManagementServiceTest {
     void testActivateParcelsShouldCallCmApiToActivateParcels() throws CloudbreakException, ApiException {
         ClouderaManagerProduct cdhProduct = new ClouderaManagerProduct().withName(CDH).withVersion("7.2.15");
         ClouderaManagerProduct flinkProduct = new ClouderaManagerProduct().withName(FLINK).withVersion("1.2.3");
-        ApiCommand cdhActivationCommand = new ApiCommand().id(BigDecimal.ONE);
-        ApiCommand flinkActivationCommand = new ApiCommand().id(BigDecimal.TEN);
+        ApiCommand cdhActivationCommand = new ApiCommand().id(1L);
+        ApiCommand flinkActivationCommand = new ApiCommand().id(10L);
         ExtendedPollingResult pollingResult = createPollingResult();
         when(parcelResourceApi.activateCommand(stack.getName(), cdhProduct.getName(), cdhProduct.getVersion())).thenReturn(cdhActivationCommand);
         when(parcelResourceApi.activateCommand(stack.getName(), flinkProduct.getName(), flinkProduct.getVersion())).thenReturn(flinkActivationCommand);

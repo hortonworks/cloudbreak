@@ -16,7 +16,6 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_CM_CLUSTER_S
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_CM_UPDATED_REMOTE_DATA_CONTEXT;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_CM_UPDATING_REMOTE_DATA_CONTEXT;
 
-import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -682,7 +681,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
             try {
                 List<ApiHost> hosts = getHostsFromCM();
                 ApiHostNameList items = new ApiHostNameList().items(hosts.stream().map(ApiHost::getHostname).collect(Collectors.toList()));
-                ApiGenericResponse apiGenericResponse = clouderaManagerApiFactory.getHostsResourceApi(v55Client).reallocateMemory(items);
+                ApiGenericResponse apiGenericResponse = clouderaManagerApiFactory.getHostsResourceApi(v55Client).reallocateMemory(items, false);
                 LOGGER.info("Reallocate response: {}", apiGenericResponse);
                 eventService.fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_CM_REALLOCATION_SUCCESSFUL);
             } catch (ApiException e) {
@@ -811,7 +810,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     }
 
     @VisibleForTesting
-    void pollDeployConfig(BigDecimal commandId) throws CloudbreakException {
+    void pollDeployConfig(Long commandId) throws CloudbreakException {
         ExtendedPollingResult hostTemplatePollingResult = clouderaManagerPollingServiceProvider.startPollingCmClientConfigDeployment(
                 stack, v31Client, commandId);
         handlePollingResult(hostTemplatePollingResult, "Cluster was terminated while waiting for config deploy",
@@ -852,7 +851,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
 
     private void activateParcels(ClustersResourceApi clustersResourceApi) throws ApiException, CloudbreakException {
         LOGGER.debug("Deploying client configurations on upscaled hosts.");
-        BigDecimal deployCommandId = clouderaManagerClientConfigDeployService.deployClientConfig(
+        Long deployCommandId = clouderaManagerClientConfigDeployService.deployClientConfig(
                 ClouderaManagerClientConfigDeployRequest.builder()
                         .pollerMessage("Deploy client configurations from activateParcels")
                         .clustersResourceApi(clustersResourceApi)

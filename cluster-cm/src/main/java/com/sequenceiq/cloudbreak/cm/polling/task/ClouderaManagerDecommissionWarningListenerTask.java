@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cm.polling.task;
 
+import java.math.BigDecimal;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
@@ -26,7 +27,7 @@ public class ClouderaManagerDecommissionWarningListenerTask extends ClouderaMana
     public void sendWarningTimeoutEventIfNecessary(ClouderaManagerCommandPollerObject pollerObject) {
         if (pollerObject.getId() != null && warningTimeoutChecker.checkTimeout() && !warningSent) {
             getClusterEventService().fireClusterManagerEvent(pollerObject.getStack(),
-                    ResourceEvent.CLUSTER_CM_COMMAND_TIMEOUT_WARNING, getCommandName(), Optional.of(pollerObject.getId()));
+                    ResourceEvent.CLUSTER_CM_COMMAND_TIMEOUT_WARNING, getCommandName(), Optional.of(new BigDecimal(pollerObject.getId())));
             warningSent = true;
         }
     }

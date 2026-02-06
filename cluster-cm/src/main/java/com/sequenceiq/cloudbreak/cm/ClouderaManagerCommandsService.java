@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.cm;
 
-import java.math.BigDecimal;
 import java.util.Optional;
 
 import jakarta.inject.Inject;
@@ -23,7 +22,7 @@ public class ClouderaManagerCommandsService {
     @Inject
     private ClouderaManagerApiFactory clouderaManagerApiFactory;
 
-    public Optional<ApiCommand> getApiCommandIfExist(ApiClient client, BigDecimal commandId) throws ApiException {
+    public Optional<ApiCommand> getApiCommandIfExist(ApiClient client, Long commandId) throws ApiException {
         try {
             return Optional.ofNullable(getApiCommand(client, commandId));
         } catch (ApiException apiException) {
@@ -35,14 +34,14 @@ public class ClouderaManagerCommandsService {
         }
     }
 
-    public ApiCommand getApiCommand(ApiClient client, BigDecimal commandId) throws ApiException {
+    public ApiCommand getApiCommand(ApiClient client, Long commandId) throws ApiException {
         CommandsResourceApi commandsResourceApi = clouderaManagerApiFactory.getCommandsResourceApi(client);
         ApiCommand apiCommand = commandsResourceApi.readCommand(commandId);
         LOGGER.debug("Get Api command by id {} result is {}", commandId, apiCommand);
         return apiCommand;
     }
 
-    public ApiCommand retryApiCommand(ApiClient client, BigDecimal commandId) throws ApiException {
+    public ApiCommand retryApiCommand(ApiClient client, Long commandId) throws ApiException {
         CommandsResourceApi commandsResourceApi = clouderaManagerApiFactory.getCommandsResourceApi(client);
         ApiCommand retryApiCommand = commandsResourceApi.retry(commandId);
         LOGGER.debug("Retry Api command by id {} result is {}", commandId, retryApiCommand);

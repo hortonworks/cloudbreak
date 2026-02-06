@@ -7,7 +7,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -189,7 +188,7 @@ public class ClouderaManagerCommissionerTest extends BaseClouderaManagerCommDeco
         mockAbortCommission();
 
         assertThrows(CloudbreakServiceException.class, () -> underTest.recommissionNodes(getStack(), hostsToCommission, client));
-        verify(commandsResourceApi).abortCommand(eq(BigDecimal.valueOf(1)));
+        verify(commandsResourceApi).abortCommand(eq(Long.valueOf(1)));
     }
 
     // TODO CB-15132: As error handling is improved, add tests to include
@@ -209,7 +208,7 @@ public class ClouderaManagerCommissionerTest extends BaseClouderaManagerCommDeco
     }
 
     private void mockCommissionAndExitMaintenanceMode(ExtendedPollingResult pollingResult) throws ApiException {
-        ApiCommand apiCommand = getApiCommand(BigDecimal.valueOf(1));
+        ApiCommand apiCommand = getApiCommand(Long.valueOf(1));
         when(clouderaManagerApiFactory.getClouderaManagerResourceApi(eq(client))).thenReturn(clouderaManagerResourceApi);
         when(clouderaManagerResourceApi.hostsRecommissionAndExitMaintenanceModeCommand(any(), any())).thenReturn(apiCommand);
         when(pollingServiceProvider.startPollingCmHostsRecommission(any(), eq(client), eq(apiCommand.getId()))).thenReturn(pollingResult);

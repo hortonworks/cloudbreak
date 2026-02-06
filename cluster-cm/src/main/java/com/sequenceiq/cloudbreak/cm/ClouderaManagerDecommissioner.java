@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.cm;
 
 import static com.sequenceiq.cloudbreak.cloud.model.HostName.hostName;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -642,7 +641,7 @@ public class ClouderaManagerDecommissioner {
             throws ApiException {
         LOGGER.info("Stopping services gracefully on hosts {}", hostsSelectedForStopping);
         HostsResourceApi hostsResourceApi = clouderaManagerApiFactory.getHostsResourceApi(apiClient);
-        List<BigDecimal> commands = new ArrayList<>();
+        List<Long> commands = new ArrayList<>();
         for (String hostName : hostsSelectedForStopping) {
             try {
                 commands.add(hostsResourceApi.stopAllRolesOnNodeGracefully(hostName).getId());

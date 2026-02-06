@@ -8,7 +8,6 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.math.BigDecimal;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -120,15 +119,15 @@ class ClouderaManagerKerberosServiceTest {
 
         when(clouderaManagerApiFactory.getClustersResourceApi(client)).thenReturn(clustersResourceApi);
         when(clustersResourceApi.configureForKerberos(eq(cluster.getName()), any(ApiConfigureForKerberosArguments.class)))
-                .thenReturn(new ApiCommand().id(BigDecimal.TEN));
-        when(clouderaManagerResourceApi.generateCredentialsCommand()).thenReturn(new ApiCommand().id(BigDecimal.ZERO));
+                .thenReturn(new ApiCommand().id(10L));
+        when(clouderaManagerResourceApi.generateCredentialsCommand()).thenReturn(new ApiCommand().id(0L));
         when(kerberosDetailService.isAdJoinable(kerberosConfig)).thenReturn(Boolean.TRUE);
 
         underTest.configureKerberosViaApi(client, clientConfig, stack, kerberosConfig);
 
         verify(modificationService).stopCluster(false);
-        verify(clouderaManagerPollingServiceProvider).startPollingCmKerberosJob(stack, client, BigDecimal.TEN);
-        verify(clouderaManagerPollingServiceProvider).startPollingCmKerberosJob(stack, client, BigDecimal.ZERO);
+        verify(clouderaManagerPollingServiceProvider).startPollingCmKerberosJob(stack, client, 10L);
+        verify(clouderaManagerPollingServiceProvider).startPollingCmKerberosJob(stack, client, 0L);
         verify(clouderaManagerClientConfigDeployService).deployAndPollClientConfig(any());
         verify(modificationService).startCluster();
     }
@@ -136,11 +135,11 @@ class ClouderaManagerKerberosServiceTest {
     @Test
     void deleteCredentials() throws ApiException, CloudbreakException {
         when(clouderaManagerApiFactory.getClouderaManagerResourceApi(client)).thenReturn(clouderaManagerResourceApi);
-        when(clouderaManagerResourceApi.deleteCredentialsCommand("all")).thenReturn(new ApiCommand().id(BigDecimal.ZERO));
+        when(clouderaManagerResourceApi.deleteCredentialsCommand("all")).thenReturn(new ApiCommand().id(0L));
 
         underTest.deleteCredentials(clientConfig, stack);
 
         verify(modificationService).stopCluster(false);
-        clouderaManagerPollingServiceProvider.startPollingCmKerberosJob(stack, client, BigDecimal.ZERO);
+        clouderaManagerPollingServiceProvider.startPollingCmKerberosJob(stack, client, 0L);
     }
 }

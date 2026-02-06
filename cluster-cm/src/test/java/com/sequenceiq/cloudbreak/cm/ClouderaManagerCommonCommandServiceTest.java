@@ -5,7 +5,6 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -55,7 +54,7 @@ public class ClouderaManagerCommonCommandServiceTest {
     @Test
     public void testGetApiCommand() throws ApiException {
         // GIVEN
-        given(checkedFunction.apply(CLUSTER_NAME)).willReturn(new ApiCommand().name(COMMAND_NAME).id(BigDecimal.ONE));
+        given(checkedFunction.apply(CLUSTER_NAME)).willReturn(new ApiCommand().name(COMMAND_NAME).id(1L));
         // WHEN
         underTest.getApiCommand(new ArrayList<>(), COMMAND_NAME, CLUSTER_NAME, checkedFunction);
         // THEN
@@ -65,7 +64,7 @@ public class ClouderaManagerCommonCommandServiceTest {
     @Test
     public void testGetApiCommandAlreadyRunning() throws ApiException {
         // GIVEN
-        List<ApiCommand> commands = new ApiCommandList().addItemsItem(new ApiCommand().id(BigDecimal.ONE).name(COMMAND_NAME)).getItems();
+        List<ApiCommand> commands = new ApiCommandList().addItemsItem(new ApiCommand().id(1L).name(COMMAND_NAME)).getItems();
         // WHEN
         ApiCommand result = underTest.getApiCommand(commands, COMMAND_NAME, CLUSTER_NAME, checkedFunction);
         // THEN

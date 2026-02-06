@@ -8,7 +8,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -46,7 +45,7 @@ class ClouderaManagerKraftMigrationServiceTest {
 
     private static final String KAFKA_SERVICE_TYPE = "KAFKA";
 
-    private static final BigDecimal COMMAND_ID = BigDecimal.ONE;
+    private static final Long COMMAND_ID = 1L;
 
     @Mock
     private ClouderaManagerApiFactory clouderaManagerApiFactory;

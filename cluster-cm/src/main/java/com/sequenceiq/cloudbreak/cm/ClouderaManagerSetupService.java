@@ -65,6 +65,7 @@ import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.cm.error.mapper.ClouderaManagerStorageErrorMapper;
 import com.sequenceiq.cloudbreak.cm.exception.ClouderaManagerOperationFailedException;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
+import com.sequenceiq.cloudbreak.cm.util.ClouderaManagerConstants;
 import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.cmtemplate.CentralCmTemplateUpdater;
 import com.sequenceiq.cloudbreak.cmtemplate.utils.BlueprintUtils;
@@ -663,7 +664,7 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
     private Optional<ApiCluster> getCmClusterByName(String name) throws ApiException {
         ClustersResourceApi clustersResourceApi = clouderaManagerApiFactory.getClustersResourceApi(apiClient);
         try {
-            return Optional.of(clustersResourceApi.readCluster(name));
+            return Optional.of(clustersResourceApi.readCluster(name, ClouderaManagerConstants.SUMMARY));
         } catch (ApiException apiException) {
             if (apiException.getCode() != HttpStatus.SC_NOT_FOUND) {
                 throw apiException;

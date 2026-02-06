@@ -5,7 +5,6 @@ import static com.sequenceiq.cloudbreak.cm.util.ClouderaManagerConstants.SUMMARY
 import static com.sequenceiq.cloudbreak.util.Benchmark.checkedMeasure;
 import static com.sequenceiq.cloudbreak.util.Benchmark.multiCheckedMeasure;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.concurrent.Callable;
 
@@ -84,30 +83,30 @@ public class ClouderaManagerClientConfigDeployService {
             maxAttempts = CLIENT_CONFIG_MAX_ATTEMPTS,
             backoff = @Backoff(delay = CLIENT_CONFIG_BACKOFF)
     )
-    public BigDecimal deployClientConfig(ClouderaManagerClientConfigDeployRequest request)
+    public Long deployClientConfig(ClouderaManagerClientConfigDeployRequest request)
             throws ApiException, CloudbreakException {
         LOGGER.info("deployClientConfig retry number: {}", RetrySynchronizationManager.getContext().getRetryCount());
         return deployClientConfigWithoutPollingResult(request);
     }
 
-    private BigDecimal deployClientConfigWithoutPollingResult(ClouderaManagerClientConfigDeployRequest request)
+    private Long deployClientConfigWithoutPollingResult(ClouderaManagerClientConfigDeployRequest request)
             throws ApiException, CloudbreakException {
         List<ApiCommand> commands = request.api().listActiveCommands(request.stack().getName(), SUMMARY, null).getItems();
         return deployClientConfig(request.api(), request.stack(), commands);
     }
 
-    private BigDecimal deployClientConfig(ClustersResourceApi clustersResourceApi, StackDtoDelegate stack, List<ApiCommand> commands)
+    private Long deployClientConfig(ClustersResourceApi clustersResourceApi, StackDtoDelegate stack, List<ApiCommand> commands)
             throws ApiException, CloudbreakException {
         return getDeployClientConfigCommandId(stack, clustersResourceApi, commands);
     }
 
-    private BigDecimal getDeployClientConfigCommandId(StackDtoDelegate stack, ClustersResourceApi clustersResourceApi, List<ApiCommand> commands)
+    private Long getDeployClientConfigCommandId(StackDtoDelegate stack, ClustersResourceApi clustersResourceApi, List<ApiCommand> commands)
             throws ApiException, CloudbreakException {
-        BigDecimal deployClientConfigCommandId;
+        Long deployClientConfigCommandId;
         if (syncApiCommandPollerConfig.isSyncApiCommandPollingEnabled(stack.getResourceCrn())) {
             LOGGER.debug("Execute DeployClusterClientConfig command with sync poller.");
             deployClientConfigCommandId = multiCheckedMeasure(
-                    (Benchmark.MultiCheckedSupplier<BigDecimal, ApiException, CloudbreakException>)
+                    (Benchmark.MultiCheckedSupplier<Long, ApiException, CloudbreakException>)
                             () -> getSyncDeployClientConfigCommandId(stack, clustersResourceApi, commands),
                     LOGGER, "The DeployClusterClientConfig command (with sync poller) registration to CM took {} ms");
         } else {
@@ -122,7 +121,7 @@ public class ClouderaManagerClientConfigDeployService {
         return deployClientConfigCommandId;
     }
 
-    private BigDecimal getSyncDeployClientConfigCommandId(StackDtoDelegate stack, ClustersResourceApi clustersResourceApi, List<ApiCommand> commands)
+    private Long getSyncDeployClientConfigCommandId(StackDtoDelegate stack, ClustersResourceApi clustersResourceApi, List<ApiCommand> commands)
             throws CloudbreakException, ApiException {
         return clouderaManagerSyncApiCommandIdProvider.executeSyncApiCommandAndGetCommandId(
                 syncApiCommandPollerConfig.getDeployClusterClientConfigCommandName(),

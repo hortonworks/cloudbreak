@@ -1,16 +1,16 @@
 package com.sequenceiq.cloudbreak.cluster.model;
 
-import java.math.BigDecimal;
+import java.time.OffsetDateTime;
 
 public class ClusterManagerCommand {
 
-    private BigDecimal id;
+    private Long id;
 
     private String name;
 
-    private String startTime;
+    private OffsetDateTime startTime;
 
-    private String endTime;
+    private OffsetDateTime endTime;
 
     private Boolean active;
 
@@ -23,11 +23,11 @@ public class ClusterManagerCommand {
     public ClusterManagerCommand() {
     }
 
-    public BigDecimal getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(BigDecimal id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -39,19 +39,19 @@ public class ClusterManagerCommand {
         this.name = name;
     }
 
-    public String getStartTime() {
+    public OffsetDateTime getStartTime() {
         return startTime;
     }
 
-    public void setStartTime(String startTime) {
+    public void setStartTime(OffsetDateTime startTime) {
         this.startTime = startTime;
     }
 
-    public String getEndTime() {
+    public OffsetDateTime getEndTime() {
         return endTime;
     }
 
-    public void setEndTime(String endTime) {
+    public void setEndTime(OffsetDateTime endTime) {
         this.endTime = endTime;
     }
 

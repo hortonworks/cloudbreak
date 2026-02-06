@@ -128,7 +128,7 @@ class ClassicClusterDescribeServiceTest {
                 .hostId("hostId"));
         when(clustersResourceApi.listHosts(cluster.getName(), null, null, "SUMMARY")).thenReturn(new ApiHostList().items(apiHosts));
         ApiCluster apiCluster = new ApiCluster().entityStatus(ApiEntityStatus.GOOD_HEALTH);
-        when(clustersResourceApi.readCluster(cluster.getName())).thenReturn(apiCluster);
+        when(clustersResourceApi.readCluster(cluster.getName(), "SUMMARY")).thenReturn(apiCluster);
         ApiRemoteDataContext apiRemoteDataContext = createRemoteDataContext();
         when(cdpResourceApi.getRemoteContextByCluster(cluster.getName())).thenReturn(apiRemoteDataContext);
         List<ApiCmServer> apiCmServers = List.of(new ApiCmServer()
@@ -207,7 +207,7 @@ class ClassicClusterDescribeServiceTest {
                 .hostId("hostId"));
         when(clustersResourceApi.listHosts(cluster.getName(), null, null, "SUMMARY")).thenReturn(new ApiHostList().items(apiHosts));
         ApiCluster apiCluster = new ApiCluster().entityStatus(ApiEntityStatus.GOOD_HEALTH);
-        when(clustersResourceApi.readCluster(cluster.getName())).thenReturn(apiCluster);
+        when(clustersResourceApi.readCluster(cluster.getName(), "SUMMARY")).thenReturn(apiCluster);
         ApiRemoteDataContext apiRemoteDataContext = createRemoteDataContext();
         when(cdpResourceApi.getRemoteContextByCluster(cluster.getName())).thenReturn(apiRemoteDataContext);
         List<ApiCmServer> apiCmServers = List.of(new ApiCmServer()
@@ -246,7 +246,7 @@ class ClassicClusterDescribeServiceTest {
                 .hostId("hostId"));
         when(clustersResourceApi.listHosts(cluster.getName(), null, null, "SUMMARY")).thenReturn(new ApiHostList().items(apiHosts));
         ApiCluster apiCluster = new ApiCluster().entityStatus(ApiEntityStatus.GOOD_HEALTH);
-        when(clustersResourceApi.readCluster(cluster.getName())).thenReturn(apiCluster);
+        when(clustersResourceApi.readCluster(cluster.getName(), "SUMMARY")).thenReturn(apiCluster);
         ApiRemoteDataContext apiRemoteDataContext = createRemoteDataContextWithKnox();
         when(cdpResourceApi.getRemoteContextByCluster(cluster.getName())).thenReturn(apiRemoteDataContext);
         List<ApiCmServer> apiCmServers = List.of(new ApiCmServer()

@@ -47,7 +47,7 @@ public class ClouderaManagerSyncApiCommandIdCheckerTask
         boolean result = false;
         ClouderaManagerSyncCommandPollerObject castedObj = cast(pollerObject);
         try {
-            Optional<BigDecimal> commandId = syncApiCommandRetriever.getCommandId(
+            Optional<Long> commandId = syncApiCommandRetriever.getCommandId(
                     castedObj.getCommandName(), api, castedObj.getStack().getStack());
             if (commandId.isPresent() && !commandId.get().equals(pollerObject.getId())) {
                 LOGGER.debug("Found a new latest command ID for {} command: {}", castedObj.getCommandName(), commandId);
@@ -68,7 +68,7 @@ public class ClouderaManagerSyncApiCommandIdCheckerTask
     @Override
     public void handleTimeout(ClouderaManagerCommandPollerObject pollerObject) {
         clusterEventService.fireClusterManagerEvent(pollerObject.getStack(),
-                ResourceEvent.CLUSTER_CM_COMMAND_TIMEOUT, "Sync API", Optional.of(pollerObject.getId()));
+                ResourceEvent.CLUSTER_CM_COMMAND_TIMEOUT, "Sync API", Optional.of(new BigDecimal(pollerObject.getId())));
         throw new ClouderaManagerOperationFailedException(String.format("Operation timed out. "
                 + "Failed to get newest successful %s command ID.", cast(pollerObject).getCommandName()));
     }

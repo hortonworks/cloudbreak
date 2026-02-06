@@ -17,7 +17,6 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -60,7 +59,7 @@ import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 @ExtendWith(MockitoExtension.class)
 class ClouderaManagerRestartServiceTest {
 
-    private static final BigDecimal COMMAND_ID = BigDecimal.ONE;
+    private static final Long COMMAND_ID = 1L;
 
     @InjectMocks
     private ClouderaManagerRestartService underTest;

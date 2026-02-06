@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -107,8 +106,8 @@ public class ClouderaManagerHostHealthyStatusChecker extends AbstractClouderaMan
         for (ApiHost apiHost : hostList.getItems()) {
             String hostname = apiHost.getHostname();
             Instant lastHeartBeat = null;
-            if (StringUtils.isNotBlank(apiHost.getLastHeartbeat())) {
-                lastHeartBeat = Instant.parse(apiHost.getLastHeartbeat());
+            if (apiHost.getLastHeartbeat() != null) {
+                lastHeartBeat = apiHost.getLastHeartbeat().toInstant();
             }
             ApiHealthSummary healthSummary = apiHost.getHealthSummary();
             boolean inMaintenance = Boolean.TRUE.equals(apiHost.isMaintenanceMode());

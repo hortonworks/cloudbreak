@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.cm;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -61,9 +60,9 @@ public class ClouderaManagerSyncApiCommandIdProvider {
      * 4. if the API command ties out, use 1. with polling
      * 5. if polling finished, do a last check, returns with the command id or throw an exception
      */
-    public BigDecimal executeSyncApiCommandAndGetCommandId(String commandName, ClustersResourceApi api, StackDtoDelegate stack,
+    public Long executeSyncApiCommandAndGetCommandId(String commandName, ClustersResourceApi api, StackDtoDelegate stack,
             List<ApiCommand> activeCommands, Callable<ApiCommand> commandAction) throws CloudbreakException, ApiException {
-        Optional<BigDecimal> runningCommandIdOpt = getRunningCommandIdFromActiveCommands(commandName, activeCommands);
+        Optional<Long> runningCommandIdOpt = getRunningCommandIdFromActiveCommands(commandName, activeCommands);
         if (runningCommandIdOpt.isPresent()) {
             LOGGER.debug("Found actively running {} command with id {}. Skip execution.", commandName, runningCommandIdOpt.get());
             return runningCommandIdOpt.get();
@@ -72,9 +71,9 @@ public class ClouderaManagerSyncApiCommandIdProvider {
         }
     }
 
-    private BigDecimal executeSyncApiCommand(String commandName, ClustersResourceApi api, StackDtoDelegate stack, Callable<ApiCommand> commandAction)
+    private Long executeSyncApiCommand(String commandName, ClustersResourceApi api, StackDtoDelegate stack, Callable<ApiCommand> commandAction)
             throws CloudbreakException, ApiException {
-        Optional<BigDecimal> lastSyncApiCommandId = syncApiCommandRetriever.getLastFinishedCommandId(commandName, api, stack.getStack());
+        Optional<Long> lastSyncApiCommandId = syncApiCommandRetriever.getLastFinishedCommandId(commandName, api, stack.getStack());
         Map<String, String> mdcContext = MDCBuilder.getMdcContextMap();
         Future<ApiCommand> future = executorService.submit(() -> {
             MDCBuilder.buildMdcContextFromMap(mdcContext);
@@ -100,12 +99,12 @@ public class ClouderaManagerSyncApiCommandIdProvider {
         }
     }
 
-    private Optional<BigDecimal> getRunningCommandIdFromActiveCommands(String commandName, List<ApiCommand> activeCommands) {
+    private Optional<Long> getRunningCommandIdFromActiveCommands(String commandName, List<ApiCommand> activeCommands) {
         if (CollectionUtils.isEmpty(activeCommands)) {
             LOGGER.debug("Not found any active commands. Trigger {} command.", commandName);
             return Optional.empty();
         } else {
-            BigDecimal runningCommandId = activeCommands
+            Long runningCommandId = activeCommands
                     .stream()
                     .filter(c -> commandName.equals(c.getName()))
                     .findFirst()
@@ -115,14 +114,14 @@ public class ClouderaManagerSyncApiCommandIdProvider {
         }
     }
 
-    private BigDecimal getCommandIdAfterTimeout(String commandName, ClustersResourceApi api, StackDtoDelegate stack,
-            Future<ApiCommand> future, BigDecimal lastSyncApiCommandId)
+    private Long getCommandIdAfterTimeout(String commandName, ClustersResourceApi api, StackDtoDelegate stack,
+            Future<ApiCommand> future, Long lastSyncApiCommandId)
             throws ApiException, CloudbreakException {
         future.cancel(true);
         LOGGER.debug("{} command took too much time. Start command ID query by listing active commands", commandName);
         clouderaManagerPollingServiceProvider
                 .checkSyncApiCommandId(stack, api.getApiClient(), commandName, lastSyncApiCommandId, syncApiCommandRetriever);
-        Optional<BigDecimal> finalCommandId = syncApiCommandRetriever.getCommandId(commandName, api, stack.getStack());
+        Optional<Long> finalCommandId = syncApiCommandRetriever.getCommandId(commandName, api, stack.getStack());
         if (finalCommandId.isPresent()) {
             LOGGER.debug("Get final command ID after timeout: {}", finalCommandId.get());
             return finalCommandId.get();

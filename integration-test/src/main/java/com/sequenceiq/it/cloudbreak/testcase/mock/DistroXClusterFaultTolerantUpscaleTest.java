@@ -4,8 +4,8 @@ import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
 import java.io.IOException;
 import java.time.Duration;
+import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -23,7 +23,11 @@ import org.testng.annotations.Test;
 
 import com.cloudera.api.swagger.model.ApiHost;
 import com.cloudera.api.swagger.model.ApiHostList;
+import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.JsonSerializer;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
@@ -170,23 +174,23 @@ public class DistroXClusterFaultTolerantUpscaleTest extends AbstractClouderaMana
 
     private ApiHostList getMockApiHostList() {
         ApiHostList apiHostList = new ApiHostList();
-        ApiHost master = new ApiHost();
+        ApiHost master = new IsoInstantApiHost();
         master.setIpAddress("192.0.0.0");
         master.setHostname("master0.ipatest.local");
-        master.setLastHeartbeat(ZonedDateTime.now(ZoneOffset.UTC).plusMinutes(10).format(DateTimeFormatter.ISO_INSTANT));
+        master.setLastHeartbeat(OffsetDateTime.now(ZoneOffset.UTC).plusMinutes(10));
         apiHostList.addItemsItem(master);
-        ApiHost gateway = new ApiHost();
+        ApiHost gateway = new IsoInstantApiHost();
         gateway.setIpAddress("192.2.0.0");
         gateway.setHostname("gateway0.ipatest.local");
-        gateway.setLastHeartbeat(ZonedDateTime.now(ZoneOffset.UTC).plusMinutes(10).format(DateTimeFormatter.ISO_INSTANT));
+        gateway.setLastHeartbeat(OffsetDateTime.now(ZoneOffset.UTC).plusMinutes(10));
         apiHostList.addItemsItem(gateway);
 
         for (int i = 0; i < SUCCESSFUL_UPSCALE_NODE_COUNT; i++) {
-            ApiHost temp = new ApiHost();
+            ApiHost temp = new IsoInstantApiHost();
             temp.setIpAddress("192.3.0." + i);
             temp.setHostname("worker" + i + ".ipatest.local");
             if (i < SUCCESSFUL_UPSCALE_NODE_COUNT - FAILING_NODE_COUNT) {
-                temp.setLastHeartbeat(ZonedDateTime.now(ZoneOffset.UTC).plusMinutes(10).format(DateTimeFormatter.ISO_INSTANT));
+                temp.setLastHeartbeat(OffsetDateTime.now(ZoneOffset.UTC).plusMinutes(10));
             }
             apiHostList.addItemsItem(temp);
         }
@@ -215,5 +219,21 @@ public class DistroXClusterFaultTolerantUpscaleTest extends AbstractClouderaMana
     @Override
     protected BlueprintTestClient blueprintTestClient() {
         return blueprintTestClient;
+    }
+
+    public static class IsoInstantApiHost extends ApiHost {
+
+        @Override
+        @JsonSerialize(using = IsoInstantOffsetDateTimeSerializer.class)
+        public OffsetDateTime getLastHeartbeat() {
+            return super.getLastHeartbeat();
+        }
+
+        public static class IsoInstantOffsetDateTimeSerializer extends JsonSerializer<OffsetDateTime> {
+            @Override
+            public void serialize(OffsetDateTime value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+                gen.writeString(value == null ? null : value.format(DateTimeFormatter.ISO_INSTANT));
+            }
+        }
     }
 }

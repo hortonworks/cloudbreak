@@ -1,6 +1,5 @@
 package com.sequenceiq.datalake.cm;
 
-import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -208,7 +207,7 @@ public class ClouderaManagerRangerUtil {
     public ApiCommand getApiCommand(String stackCrn, long commandId) throws ApiException {
         ApiClient client = clouderaManagerProxiedClientFactory.getProxiedClouderaManagerClient(stackCrn);
         CommandsResourceApi commandsResourceApi = clouderaManagerApiFactory.getCommandsResourceApi(client);
-        return commandsResourceApi.readCommand(BigDecimal.valueOf(commandId));
+        return commandsResourceApi.readCommand(commandId);
     }
 
 }

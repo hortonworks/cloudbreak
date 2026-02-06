@@ -103,7 +103,7 @@ public class MockClassicClusterService extends OnPremisesApiGrpc.OnPremisesApiIm
             ApiClient apiClient =
                     clouderaManagerApiClientProvider.getClouderaManagerClient(getHttpClientConfig(classicCluster), null, null, null, API_V_51);
             ClustersResourceApi clustersResourceApi = clouderaManagerApiFactory.getClustersResourceApi(apiClient);
-            ApiCluster apiCluster = clustersResourceApi.readCluster(classicCluster.getName());
+            ApiCluster apiCluster = clustersResourceApi.readCluster(classicCluster.getName(), "SUMMARY");
 
             return OnPremisesApiProto.Cluster.newBuilder()
                     .setName(classicCluster.getName())

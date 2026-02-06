@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.cm;
 
 import static org.mockito.Mockito.when;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -50,7 +49,7 @@ public abstract class BaseClouderaManagerCommDecommTest {
         return createInstanceMetadata(InstanceStatus.SERVICES_HEALTHY, fqdn, groupName);
     }
 
-    protected ApiCommand getApiCommand(BigDecimal commandId) {
+    protected ApiCommand getApiCommand(Long commandId) {
         ApiCommand apiCommand = new ApiCommand();
         apiCommand.setId(commandId);
         return apiCommand;

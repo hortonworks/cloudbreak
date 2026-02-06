@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.cm.exception;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -61,7 +60,7 @@ public class CommandDetailsFormatterTest {
     }
 
     private static CommandDetails commandDetail(int id, String name, String message) {
-        return new CommandDetails(new BigDecimal(id),
+        return new CommandDetails((long) id,
                 name,
                 CommandStatus.FAILED,
                 Optional.of(message),

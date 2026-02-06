@@ -266,7 +266,7 @@ class ClassicClusterDescribeService {
                     .findFirst()
                     .orElse(null));
             Future<ApiHostList> hostList = taskExecutor.submit(() -> clustersResourceApi.listHosts(clusterName, null, null, DataView.SUMMARY.name()));
-            Future<ApiCluster> apiCluster = taskExecutor.submit(() -> clustersResourceApi.readCluster(clusterName));
+            Future<ApiCluster> apiCluster = taskExecutor.submit(() -> clustersResourceApi.readCluster(clusterName, "SUMMARY"));
             Future<ApiRemoteDataContext> remoteDataContext = taskExecutor.submit(() -> cdpResourceApi.getRemoteContextByCluster(cluster.getName()));
             Future<ApiCmServerList> cmServerList = taskExecutor.submit(cmResourceApi::readInstances);
             Future<ApiKerberosInfo> kerberosInfo = taskExecutor.submit(() -> clustersResourceApi.getKerberosInfo(clusterName));
