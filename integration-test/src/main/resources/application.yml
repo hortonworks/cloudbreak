@@ -231,7 +231,7 @@ integrationtest:
       instanceType: m5.large
       arm64InstanceType: r7gd.large
       upgrade:
-        imageId: ee52a28a-7551-4f56-8b08-a23f155316ba
+        imageId: a1e7dad5-9ae7-4758-a469-bb557f8ebaed
         catalog: https://cloudbreak-imagecatalog.s3.amazonaws.com/v3-test-freeipa-image-catalog.json
       rebuild:
         fullbackup: s3://cloudbreak-test-persistent/freeipa_rebuild/full/
