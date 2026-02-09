@@ -75,6 +75,7 @@ class RollingVerticalScaleFlowEventChainFactoryTest {
     void testCreateFlowTriggerEventQueue() {
         StackVerticalScaleV4Request request = new StackVerticalScaleV4Request();
         request.setGroup(HOST_GROUP);
+        request.setOrchestratorType(OrchestratorType.ALL_AT_ONCE);
         RollingVerticalScaleFlowChainTriggerEvent event = new RollingVerticalScaleFlowChainTriggerEvent(
                 FlowChainTriggers.ROLLING_VERTICALSCALE_CHAIN_TRIGGER_EVENT, STACK_ID, request);
 
@@ -106,6 +107,7 @@ class RollingVerticalScaleFlowEventChainFactoryTest {
     void testCreateFlowTriggerEventQueueWithNoMatchingHostGroup() {
         StackVerticalScaleV4Request request = new StackVerticalScaleV4Request();
         request.setGroup(HOST_GROUP);
+        request.setOrchestratorType(OrchestratorType.ALL_AT_ONCE);
         RollingVerticalScaleFlowChainTriggerEvent event = new RollingVerticalScaleFlowChainTriggerEvent(
                 FlowChainTriggers.ROLLING_VERTICALSCALE_CHAIN_TRIGGER_EVENT, STACK_ID, request);
 
@@ -134,6 +136,7 @@ class RollingVerticalScaleFlowEventChainFactoryTest {
     void testCreateFlowTriggerEventQueueWithMultipleHostGroups() {
         StackVerticalScaleV4Request request = new StackVerticalScaleV4Request();
         request.setGroup(HOST_GROUP);
+        request.setOrchestratorType(OrchestratorType.ALL_AT_ONCE);
         RollingVerticalScaleFlowChainTriggerEvent event = new RollingVerticalScaleFlowChainTriggerEvent(
                 FlowChainTriggers.ROLLING_VERTICALSCALE_CHAIN_TRIGGER_EVENT, STACK_ID, request);
 

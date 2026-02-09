@@ -626,7 +626,7 @@ public class ModelDescriptions {
     }
 
     public static class StackVerticalScaleModelDescription {
-        public static final String ORCHESTRATOR_TYPE = "Orchestrator strategy for vertical scaling operations. Default is ALL_AT_ONCE.";
+        public static final String ORCHESTRATOR_TYPE = "Orchestrator strategy for vertical scaling operations (ALL_AT_ONCE | ONE_BY_ONE).";
     }
 
 }

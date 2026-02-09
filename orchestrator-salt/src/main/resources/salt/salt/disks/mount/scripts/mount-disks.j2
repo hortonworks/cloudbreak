@@ -80,7 +80,9 @@ mount_all_from_fstab() {
       local return_value=0
       local hadoop_fs_dir_counter=1
       log $LOG_FILE mounting via fstab, value: "$PREVIOUS_FSTAB"
-      for uuid in $ATTACHED_VOLUME_UUID_LIST; do
+      UUID_LIST_FROM_PREVIOUS_FSTAB=$(echo "$PREVIOUS_FSTAB" | grep -E "dbfs|hadoopfs" | awk -F'[ =]' '{print $2}')
+      log $LOG_FILE uuidlist to attach from previous fstab: $UUID_LIST_FROM_PREVIOUS_FSTAB
+      for uuid in $UUID_LIST_FROM_PREVIOUS_FSTAB; do
           local fstab_line=$(echo "$PREVIOUS_FSTAB" | grep $uuid)
           mount_one "$fstab_line"
           mount_result=$?
