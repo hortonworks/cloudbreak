@@ -69,10 +69,10 @@ class ClouderaManagerCsdDownloaderServiceTest {
         when(stackDto.getId()).thenReturn(STACK_ID);
         when(stackDto.getCluster()).thenReturn(clusterView);
         when(clusterView.getId()).thenReturn(STACK_ID);
-        when(csdParcelDecorator.addCsdParcelsToServicePillar(upgradeCandidateProducts)).thenReturn(pillarProperties);
+        when(csdParcelDecorator.addCsdParcelsToServicePillar(upgradeCandidateProducts, false)).thenReturn(pillarProperties);
         when(saltStateParamsService.createStateParamsForReachableNodes(stackDto, STATE, MAX_RETRY, MAX_RETRY_ON_ERROR)).thenReturn(orchestratorStateParams);
 
-        underTest.downloadCsdFiles(stackDto, true, upgradeCandidateProducts);
+        underTest.downloadCsdFiles(stackDto, true, upgradeCandidateProducts, false);
 
         verify(clusterHostServiceRunner).redeployStates(stackDto);
         verify(hostOrchestrator).saveCustomPillars(any(), any(), any());
@@ -91,10 +91,10 @@ class ClouderaManagerCsdDownloaderServiceTest {
         when(stackDto.getId()).thenReturn(STACK_ID);
         when(stackDto.getCluster()).thenReturn(clusterView);
         when(clusterView.getId()).thenReturn(STACK_ID);
-        when(csdParcelDecorator.addCsdParcelsToServicePillar(upgradeCandidateProducts)).thenReturn(pillarProperties);
+        when(csdParcelDecorator.addCsdParcelsToServicePillar(upgradeCandidateProducts, false)).thenReturn(pillarProperties);
         when(saltStateParamsService.createStateParamsForReachableNodes(stackDto, STATE, MAX_RETRY, MAX_RETRY_ON_ERROR)).thenReturn(orchestratorStateParams);
 
-        underTest.downloadCsdFiles(stackDto, false, upgradeCandidateProducts);
+        underTest.downloadCsdFiles(stackDto, false, upgradeCandidateProducts, false);
 
         verify(clusterHostServiceRunner).redeployStates(stackDto);
         verify(hostOrchestrator).saveCustomPillars(any(), any(), any());
@@ -103,13 +103,13 @@ class ClouderaManagerCsdDownloaderServiceTest {
     }
 
     @Test
-    void testDownloadCsdFilesShouldNotDownloadTheCsdFilesThenThereIsNoCandidateProduct() {
+    void testDownloadCsdFilesShouldNotDownloadTheCsdFilesWhenThereIsNoCandidateProduct() {
         StackDto stackDto = mock(StackDto.class);
         Set<ClouderaManagerProduct> upgradeCandidateProducts = new HashSet<>();
 
-        when(csdParcelDecorator.addCsdParcelsToServicePillar(upgradeCandidateProducts)).thenReturn(Collections.emptyMap());
+        when(csdParcelDecorator.addCsdParcelsToServicePillar(upgradeCandidateProducts, false)).thenReturn(Collections.emptyMap());
 
-        underTest.downloadCsdFiles(stackDto, false, upgradeCandidateProducts);
+        underTest.downloadCsdFiles(stackDto, false, upgradeCandidateProducts, false);
     }
 
 }

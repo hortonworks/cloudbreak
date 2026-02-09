@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparatio
 
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation.ClusterUpgradePreparationHandlerSelectors.DISTRIBUTE_PARCELS_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation.ClusterUpgradePreparationStateSelectors.FAILED_CLUSTER_UPGRADE_PREPARATION_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation.ClusterUpgradePreparationStateSelectors.FINISH_CLUSTER_UPGRADE_PREPARATION_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation.ClusterUpgradePreparationStateSelectors.START_CLUSTER_UPGRADE_CSD_PACKAGE_DOWNLOAD_EVENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
@@ -56,7 +56,7 @@ class ClusterUpgradeParcelDistributionHandlerTest {
 
         Selectable nextFlowStepSelector = underTest.doAccept(createEvent(requiredProducts));
 
-        assertEquals(FINISH_CLUSTER_UPGRADE_PREPARATION_EVENT.name(), nextFlowStepSelector.selector());
+        assertEquals(START_CLUSTER_UPGRADE_CSD_PACKAGE_DOWNLOAD_EVENT.name(), nextFlowStepSelector.selector());
         verify(stackService).getByIdWithListsInTransaction(STACK_ID);
         verify(clusterApiConnectors).getConnector(stack);
         verify(clusterApi).distributeParcels(requiredProducts);

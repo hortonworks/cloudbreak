@@ -148,7 +148,7 @@ public class ClusterManagerUpgradeManagementServiceTest {
             verify(clusterUpgradeService).upgradeClusterManager(STACK_ID);
             verify(clusterManagerUpgradeService).upgradeClouderaManager(stackDto, clouderaManagerRepo);
         }
-        verify(clouderaManagerCsdDownloaderService).downloadCsdFiles(stackDto, cmUpgradeNecessary, UPGRADE_CANDIDATE_PRODUCTS);
+        verify(clouderaManagerCsdDownloaderService).downloadCsdFiles(stackDto, cmUpgradeNecessary, UPGRADE_CANDIDATE_PRODUCTS, false);
     }
 
     @Test
@@ -198,7 +198,7 @@ public class ClusterManagerUpgradeManagementServiceTest {
 
         verify(clusterComponentConfigProvider).getClouderaManagerRepoDetails(cluster.getId());
         verify(cmServerQueryService).queryCmVersion(stackDto);
-        verify(clouderaManagerCsdDownloaderService).downloadCsdFiles(stackDto, false, UPGRADE_CANDIDATE_PRODUCTS);
+        verify(clouderaManagerCsdDownloaderService).downloadCsdFiles(stackDto, false, UPGRADE_CANDIDATE_PRODUCTS, false);
         verifyNoInteractions(clusterManagerUpgradeService);
     }
 }

@@ -42,20 +42,20 @@ public class CsdParcelDecorator {
             LOGGER.debug("Decorating service pillar with CSD parcels.");
             Set<ClusterComponentView> componentsByBlueprint = parcelService.getParcelComponentsByBlueprint(stackDto);
             servicePillar.putAll(addCsdParcelsToServicePillar(
-                    centralCDHVersionCoordinator.getClouderaManagerProductsFromComponents(componentsByBlueprint)));
+                    centralCDHVersionCoordinator.getClouderaManagerProductsFromComponents(componentsByBlueprint), false));
         } else {
             LOGGER.debug("Skipping the CSD downloading because the stack type is {}", stack.getType());
         }
     }
 
-    public Map<String, SaltPillarProperties> addCsdParcelsToServicePillar(Collection<ClouderaManagerProduct> products) {
+    public Map<String, SaltPillarProperties> addCsdParcelsToServicePillar(Collection<ClouderaManagerProduct> products, boolean upgradePreparation) {
         Map<String, SaltPillarProperties> pillarPropertiesMap = new HashMap<>();
         List<String> csdUrls = getCsdUrlList(products);
         if (!csdUrls.isEmpty()) {
             LOGGER.debug("Decorating pillar with the following CSD parcels: {}", csdUrls);
             pillarPropertiesMap.put("csd-downloader", new SaltPillarProperties("/cloudera-manager/csd.sls",
                     singletonMap("cloudera-manager",
-                            singletonMap("csd-urls", csdUrls))));
+                            Map.of("csd-urls", csdUrls, "upgrade-preparation", upgradePreparation))));
         } else {
             LOGGER.debug("There are no CSD to add to the pillar. Related products: {}", products);
         }

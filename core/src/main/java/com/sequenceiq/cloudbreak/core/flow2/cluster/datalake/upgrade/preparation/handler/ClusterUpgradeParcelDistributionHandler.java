@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation.handler;
 
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation.ClusterUpgradePreparationHandlerSelectors.DISTRIBUTE_PARCELS_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation.ClusterUpgradePreparationStateSelectors.FINISH_CLUSTER_UPGRADE_PREPARATION_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation.ClusterUpgradePreparationStateSelectors.START_CLUSTER_UPGRADE_CSD_PACKAGE_DOWNLOAD_EVENT;
 
 import java.util.Set;
 
@@ -42,7 +42,7 @@ public class ClusterUpgradeParcelDistributionHandler extends ExceptionCatcherEve
             Stack stack = stackService.getByIdWithListsInTransaction(stackId);
             Set<ClouderaManagerProduct> clouderaManagerProducts = request.getClouderaManagerProducts();
             clusterApiConnectors.getConnector(stack).distributeParcels(clouderaManagerProducts);
-            return new ClusterUpgradePreparationEvent(FINISH_CLUSTER_UPGRADE_PREPARATION_EVENT.name(), stackId, clouderaManagerProducts,
+            return new ClusterUpgradePreparationEvent(START_CLUSTER_UPGRADE_CSD_PACKAGE_DOWNLOAD_EVENT.name(), stackId, clouderaManagerProducts,
                     request.getImageId());
         } catch (Exception e) {
             LOGGER.error("Cluster upgrade parcel distribution failed.", e);

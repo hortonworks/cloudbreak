@@ -7,6 +7,7 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_FAI
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation.ClusterUpgradePreparationHandlerSelectors.DISTRIBUTE_PARCELS_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation.ClusterUpgradePreparationHandlerSelectors.DOWNLOAD_CM_PACKAGES_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation.ClusterUpgradePreparationHandlerSelectors.DOWNLOAD_CSD_PACKAGES_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation.ClusterUpgradePreparationHandlerSelectors.DOWNLOAD_PARCELS_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation.ClusterUpgradePreparationStateSelectors.FINALIZE_CLUSTER_UPGRADE_PREPARATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation.ClusterUpgradePreparationStateSelectors.HANDLED_FAILED_CLUSTER_UPGRADE_PREPARATION_EVENT;
@@ -141,6 +142,25 @@ public class ClusterUpgradePreparationActions {
             @Override
             protected Object getFailurePayload(ClusterUpgradePreparationEvent payload, Optional<StackContext> flowContext, Exception ex) {
                 LOGGER.error("Cluster upgrade preparation parcel distribution state failed.", ex);
+                return new ClusterUpgradePreparationFailureEvent(payload.getResourceId(), ex);
+            }
+        };
+    }
+
+    @Bean(name = "CLUSTER_UPGRADE_PREPARATION_DOWNLOAD_CSD_PACKAGES_STATE")
+    public Action<?, ?> clusterUpgradePreparationCsdPackageDownload() {
+        return new AbstractClusterUpgradePreparationAction<>(ClusterUpgradePreparationEvent.class) {
+
+            @Override
+            protected void doExecute(StackContext context, ClusterUpgradePreparationEvent payload, Map<Object, Object> variables) {
+                LOGGER.debug("Cluster upgrade preparation CSD package download started.");
+                String nextEvent = DOWNLOAD_CSD_PACKAGES_EVENT.event();
+                sendEvent(context, nextEvent, createClusterUpgradePreparationEvent(nextEvent, payload));
+            }
+
+            @Override
+            protected Object getFailurePayload(ClusterUpgradePreparationEvent payload, Optional<StackContext> flowContext, Exception ex) {
+                LOGGER.error("Cluster upgrade preparation CSD package download state failed.", ex);
                 return new ClusterUpgradePreparationFailureEvent(payload.getResourceId(), ex);
             }
         };

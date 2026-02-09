@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation;
 
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation.ClusterUpgradePreparationState.CLUSTER_UPGRADE_PREPARATION_DOWNLOAD_CM_PACKAGES_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation.ClusterUpgradePreparationState.CLUSTER_UPGRADE_PREPARATION_DOWNLOAD_CSD_PACKAGES_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation.ClusterUpgradePreparationState.CLUSTER_UPGRADE_PREPARATION_FAILED_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation.ClusterUpgradePreparationState.CLUSTER_UPGRADE_PREPARATION_FINISHED_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation.ClusterUpgradePreparationState.CLUSTER_UPGRADE_PREPARATION_INIT_STATE;
@@ -13,6 +14,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.prep
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation.ClusterUpgradePreparationStateSelectors.FINISH_CLUSTER_UPGRADE_PREPARATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation.ClusterUpgradePreparationStateSelectors.HANDLED_FAILED_CLUSTER_UPGRADE_PREPARATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation.ClusterUpgradePreparationStateSelectors.START_CLUSTER_UPGRADE_CM_PACKAGE_DOWNLOAD_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation.ClusterUpgradePreparationStateSelectors.START_CLUSTER_UPGRADE_CSD_PACKAGE_DOWNLOAD_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation.ClusterUpgradePreparationStateSelectors.START_CLUSTER_UPGRADE_PARCEL_DISTRIBUTION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation.ClusterUpgradePreparationStateSelectors.START_CLUSTER_UPGRADE_PARCEL_DOWNLOAD_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation.ClusterUpgradePreparationStateSelectors.START_CLUSTER_UPGRADE_PREPARATION_INIT_EVENT;
@@ -49,7 +51,11 @@ public class ClusterUpgradePreparationFlowConfig
                     .event(START_CLUSTER_UPGRADE_PARCEL_DISTRIBUTION_EVENT)
                     .defaultFailureEvent()
 
-                    .from(CLUSTER_UPGRADE_PREPARATION_PARCEL_DISTRIBUTION_STATE).to(CLUSTER_UPGRADE_PREPARATION_FINISHED_STATE)
+                    .from(CLUSTER_UPGRADE_PREPARATION_PARCEL_DISTRIBUTION_STATE).to(CLUSTER_UPGRADE_PREPARATION_DOWNLOAD_CSD_PACKAGES_STATE)
+                    .event(START_CLUSTER_UPGRADE_CSD_PACKAGE_DOWNLOAD_EVENT)
+                    .defaultFailureEvent()
+
+                    .from(CLUSTER_UPGRADE_PREPARATION_DOWNLOAD_CSD_PACKAGES_STATE).to(CLUSTER_UPGRADE_PREPARATION_FINISHED_STATE)
                     .event(FINISH_CLUSTER_UPGRADE_PREPARATION_EVENT)
                     .defaultFailureEvent()
 

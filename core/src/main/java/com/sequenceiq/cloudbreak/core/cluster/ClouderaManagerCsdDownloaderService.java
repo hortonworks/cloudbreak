@@ -46,8 +46,9 @@ public class ClouderaManagerCsdDownloaderService {
     @Inject
     private ClusterManagerRestartService clusterManagerRestartService;
 
-    public void downloadCsdFiles(StackDto stack, boolean clusterManagerUpgradeNecessary, Set<ClouderaManagerProduct> upgradeCandidateProducts) {
-        Map<String, SaltPillarProperties> pillarProperties = csdParcelDecorator.addCsdParcelsToServicePillar(upgradeCandidateProducts);
+    public void downloadCsdFiles(StackDto stack, boolean clusterManagerUpgradeNecessary, Set<ClouderaManagerProduct> upgradeCandidateProducts,
+            boolean upgradePreparation) {
+        Map<String, SaltPillarProperties> pillarProperties = csdParcelDecorator.addCsdParcelsToServicePillar(upgradeCandidateProducts, upgradePreparation);
         if (pillarProperties.isEmpty()) {
             LOGGER.debug("There are no CSD files to download.");
         } else {

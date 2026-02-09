@@ -54,7 +54,7 @@ public class ClusterManagerUpgradeManagementService {
         StackDto stackDto = stackDtoService.getById(request.getResourceId());
         ClouderaManagerRepo clouderaManagerRepo = clusterComponentConfigProvider.getClouderaManagerRepoDetails(stackDto.getCluster().getId());
         boolean clusterManagerUpgradeNecessary = isClusterManagerUpgradeNecessary(clouderaManagerRepo.getFullVersion(), stackDto);
-        clouderaManagerCsdDownloaderService.downloadCsdFiles(stackDto, clusterManagerUpgradeNecessary, request.getUpgradeCandidateProducts());
+        clouderaManagerCsdDownloaderService.downloadCsdFiles(stackDto, clusterManagerUpgradeNecessary, request.getUpgradeCandidateProducts(), false);
         stopClusterServicesIfNecessary(request, stackDto);
         if (clusterManagerUpgradeNecessary) {
             clusterUpgradeService.upgradeClusterManager(stackDto.getId());

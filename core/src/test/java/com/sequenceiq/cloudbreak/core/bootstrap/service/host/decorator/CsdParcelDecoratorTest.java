@@ -59,6 +59,8 @@ class CsdParcelDecoratorTest {
         assertEquals("/cloudera-manager/csd.sls", pillarProperties.getPath());
         Map<String, List<String>> csdUrls = (Map<String, List<String>>) pillarProperties.getProperties().get("cloudera-manager");
         assertTrue(csdUrls.get("csd-urls").containsAll(CSD_LIST));
+        assertEquals(false, csdUrls.get("upgrade-preparation"));
+
         verify(parcelService).getParcelComponentsByBlueprint(stack);
         verify(centralCDHVersionCoordinator).getClouderaManagerProductsFromComponents(componentsByBlueprint);
     }
@@ -88,6 +90,17 @@ class CsdParcelDecoratorTest {
 
         assertNull(servicePillar.get("csd-downloader"));
         verifyNoInteractions(parcelService, centralCDHVersionCoordinator);
+    }
+
+    @Test
+    void testAddCsdParcelsToServicePillarShouldSetUpgradePreparationTrue() {
+        Map<String, SaltPillarProperties> result =
+                underTest.addCsdParcelsToServicePillar(createProducts(), true);
+        SaltPillarProperties pillarProperties = result.get("csd-downloader");
+        Map<String, Object> csdUrls =
+                (Map<String, Object>) pillarProperties.getProperties().get("cloudera-manager");
+
+        assertEquals(true, csdUrls.get("upgrade-preparation"));
     }
 
     private StackDto createStack(StackType stackType) {
