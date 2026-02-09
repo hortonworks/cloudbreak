@@ -13,10 +13,10 @@ import software.amazon.awssdk.utils.StringUtils;
 
 public abstract class BasePublicEndpointManagementService {
 
-    @Value("${gateway.cert.generation.enabled:true}")
+    @Value("${gateway.cert.generation.enabled:false}")
     private boolean certGenerationEnabled;
 
-    @Value("${gateway.cert.generation.enabled-for-mock:true}")
+    @Value("${gateway.cert.generation.enabled-for-mock:false}")
     private boolean certGenerationEnabledForMock;
 
     @Inject
