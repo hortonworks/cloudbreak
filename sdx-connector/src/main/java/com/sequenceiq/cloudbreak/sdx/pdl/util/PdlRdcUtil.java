@@ -47,11 +47,18 @@ public class PdlRdcUtil {
 
     public ApiRemoteDataContext parseRemoteDataContext(String json) {
         try {
-            return OBJECT_MAPPER.readValue(json, ApiRemoteDataContext.class);
+            return OBJECT_MAPPER.readValue(workaround719(json), ApiRemoteDataContext.class);
         } catch (JsonProcessingException e) {
             LOGGER.error("Json processing failed, thus we cannot query remote data context", e);
             throw new RuntimeException("Failed to process remote data context. Please contact Cloudera support to get this resolved.");
         }
+    }
+
+    /**
+     * 7.1.9 runtime is not officially supported, but if we pretend to CM that it is a 7.3.1 cluster then basic functionality works
+     */
+    private String workaround719(String json) {
+        return json.replaceAll("CDH 7\\.1\\.9", "CDH 7.3.1");
     }
 
     public String remoteDataContextToJson(String crn, ApiRemoteDataContext apiRemoteDataContext) {
