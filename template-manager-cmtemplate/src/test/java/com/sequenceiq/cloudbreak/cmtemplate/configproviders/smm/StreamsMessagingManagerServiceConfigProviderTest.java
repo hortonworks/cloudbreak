@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.smm;
 
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.smm.StreamsMessagingManagerRoles.STREAMS_MESSAGING_MANAGER_SERVER;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.smm.StreamsMessagingManagerServiceConfigProvider.DATABASE_HOST;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.smm.StreamsMessagingManagerServiceConfigProvider.DATABASE_JDBC_URL_OVERRIDE;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.smm.StreamsMessagingManagerServiceConfigProvider.DATABASE_NAME;
@@ -8,17 +9,24 @@ import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.smm.StreamsMe
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.smm.StreamsMessagingManagerServiceConfigProvider.DATABASE_PORT;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.smm.StreamsMessagingManagerServiceConfigProvider.DATABASE_TYPE;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.smm.StreamsMessagingManagerServiceConfigProvider.DATABASE_USER;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.smm.StreamsMessagingManagerServiceConfigProvider.KERBEROS_NAME_RULES;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
@@ -26,8 +34,10 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
+import com.sequenceiq.cloudbreak.cmtemplate.utils.KerberosAuthToLocalUtils;
 import com.sequenceiq.cloudbreak.domain.RdsSslMode;
 import com.sequenceiq.cloudbreak.domain.view.RdsConfigWithoutCluster;
+import com.sequenceiq.cloudbreak.dto.TrustView;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.filesystem.TemplateCoreTestUtil;
 import com.sequenceiq.cloudbreak.template.views.BlueprintView;
@@ -38,7 +48,18 @@ import com.sequenceiq.common.api.type.InstanceGroupType;
 @ExtendWith(MockitoExtension.class)
 class StreamsMessagingManagerServiceConfigProviderTest {
 
-    private final StreamsMessagingManagerServiceConfigProvider underTest = new StreamsMessagingManagerServiceConfigProvider();
+    private static final String AUTH_TO_LOCAL = "DEFAULT";
+
+    @Mock
+    private KerberosAuthToLocalUtils kerberosAuthToLocalUtils;
+
+    @InjectMocks
+    private StreamsMessagingManagerServiceConfigProvider underTest;
+
+    @BeforeEach
+    void setUp() {
+        lenient().when(kerberosAuthToLocalUtils.generateEscapedForTrustedRealm(any())).thenReturn(AUTH_TO_LOCAL);
+    }
 
     @Test
     void testGetStreamsMessagingManagerServerConfigs() {
@@ -74,8 +95,35 @@ class StreamsMessagingManagerServiceConfigProviderTest {
         ));
     }
 
+    @Test
+    void testGetRoleConfigsWithoutTrust() {
+        String inputJson = getBlueprintText("input/cdp-streaming.bp").replace("__CDH_VERSION__", "7.2.0");
+        CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
+        TemplatePreparationObject preparationObject = getTemplatePreparationObject(null, true, cmTemplateProcessor);
+
+        List<ApiClusterTemplateConfig> roleConfigs = underTest.getRoleConfigs(STREAMS_MESSAGING_MANAGER_SERVER, cmTemplateProcessor, preparationObject);
+
+        assertThat(roleConfigs).doesNotContain(config(KERBEROS_NAME_RULES, AUTH_TO_LOCAL));
+    }
+
+    @Test
+    void testGetRoleConfigsWithTrust() {
+        String inputJson = getBlueprintText("input/cdp-streaming.bp").replace("__CDH_VERSION__", "7.2.0");
+        CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
+        TemplatePreparationObject preparationObject = getTemplatePreparationObject(null, true, cmTemplateProcessor, new TrustView("ip", "fqdn", "realm"));
+
+        List<ApiClusterTemplateConfig> roleConfigs = underTest.getRoleConfigs(STREAMS_MESSAGING_MANAGER_SERVER, cmTemplateProcessor, preparationObject);
+
+        assertThat(roleConfigs).contains(config(KERBEROS_NAME_RULES, AUTH_TO_LOCAL));
+    }
+
     private TemplatePreparationObject getTemplatePreparationObject(String internalFqdn, boolean ssl,
             CmTemplateProcessor cmTemplateProcessor) {
+        return getTemplatePreparationObject(internalFqdn, ssl, cmTemplateProcessor, null);
+    }
+
+    private TemplatePreparationObject getTemplatePreparationObject(String internalFqdn, boolean ssl,
+            CmTemplateProcessor cmTemplateProcessor, TrustView trustView) {
         HostgroupView master = new HostgroupView("master", 1, InstanceGroupType.GATEWAY, 1);
         HostgroupView worker = new HostgroupView("worker", 2, InstanceGroupType.CORE, 3);
         BlueprintView blueprintView = new BlueprintView(null, null, null, null, cmTemplateProcessor);
@@ -100,6 +148,7 @@ class StreamsMessagingManagerServiceConfigProviderTest {
                         .stream()
                         .map(e -> TemplateCoreTestUtil.rdsViewProvider().getRdsView(e, "AWS", true))
                         .collect(Collectors.toSet()))
+                .withTrust(Optional.ofNullable(trustView))
                 .build();
     }
 

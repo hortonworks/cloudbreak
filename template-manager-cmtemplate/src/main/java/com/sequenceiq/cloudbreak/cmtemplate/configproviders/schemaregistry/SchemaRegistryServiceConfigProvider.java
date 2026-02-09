@@ -9,12 +9,15 @@ import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.schemaregistr
 import java.util.ArrayList;
 import java.util.List;
 
+import jakarta.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRdsRoleConfigProvider;
+import com.sequenceiq.cloudbreak.cmtemplate.utils.KerberosAuthToLocalUtils;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.views.RdsView;
 
@@ -36,6 +39,11 @@ public class SchemaRegistryServiceConfigProvider extends AbstractRdsRoleConfigPr
     static final String DATABASE_JDBC_URL_OVERRIDE = "database_jdbc_url_override";
 
     static final String RANGER_PLUGIN_SR_SERVICE_NAME = "ranger.plugin.schema-registry.service.name";
+
+    static final String KERBEROS_NAME_RULES = "schema.registry.kerberos.name.rules";
+
+    @Inject
+    private KerberosAuthToLocalUtils kerberosAuthToLocalUtils;
 
     @Override
     public String dbUserKey() {
@@ -72,17 +80,23 @@ public class SchemaRegistryServiceConfigProvider extends AbstractRdsRoleConfigPr
     protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
         String cdhVersion = source.getBlueprintView().getProcessor().getStackVersion() == null ?
                 "" : source.getBlueprintView().getProcessor().getStackVersion();
+        List<ApiClusterTemplateConfig> roleConfigs = new ArrayList<>();
         if (isVersionNewerOrEqualThanLimited(cdhVersion, CLOUDERAMANAGER_VERSION_7_2_0)) {
-            return List.of(config(RANGER_PLUGIN_SR_SERVICE_NAME, GENERATED_RANGER_SERVICE_NAME));
+            roleConfigs.add(config(RANGER_PLUGIN_SR_SERVICE_NAME, GENERATED_RANGER_SERVICE_NAME));
         } else {
             // Legacy db configs
             RdsView schemaRegistryRdsView = getRdsView(source);
-            return List.of(
+            roleConfigs.addAll(List.of(
                     config("schema.registry.storage.connector.connectURI", schemaRegistryRdsView.getConnectionURL()),
                     config("schema.registry.storage.connector.user", schemaRegistryRdsView.getConnectionUserName()),
                     config("schema.registry.storage.connector.password", schemaRegistryRdsView.getConnectionPassword())
-            );
+            ));
         }
+        source.getTrustView().ifPresent(trustView -> {
+            // OPSAPS-76372 workaround for faulty kerberos.name.rules settings generation
+            roleConfigs.add(config(KERBEROS_NAME_RULES, kerberosAuthToLocalUtils.generateEscapedForTrustedRealm(trustView.realm())));
+        });
+        return roleConfigs;
     }
 
     @Override

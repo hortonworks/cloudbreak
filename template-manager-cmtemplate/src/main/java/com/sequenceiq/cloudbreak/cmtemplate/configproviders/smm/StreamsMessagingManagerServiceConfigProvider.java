@@ -5,10 +5,11 @@ import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUD
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.schemaregistry.StreamingAppRdsRoleConfigProviderUtil.dataBaseTypeForCM;
-import static java.util.Collections.emptyList;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
@@ -19,6 +20,7 @@ import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRdsRoleConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils;
+import com.sequenceiq.cloudbreak.cmtemplate.utils.KerberosAuthToLocalUtils;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.views.RdsView;
 
@@ -38,6 +40,11 @@ public class StreamsMessagingManagerServiceConfigProvider extends AbstractRdsRol
     public static final String DATABASE_PASSWORD = "smm_database_password";
 
     public static final String DATABASE_JDBC_URL_OVERRIDE = "database_jdbc_url_override";
+
+    public static final String KERBEROS_NAME_RULES = "streams.messaging.manager.kerberos.name.rules";
+
+    @Inject
+    private KerberosAuthToLocalUtils kerberosAuthToLocalUtils;
 
     @Override
     public String dbUserKey() {
@@ -89,20 +96,20 @@ public class StreamsMessagingManagerServiceConfigProvider extends AbstractRdsRol
     protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
         String cdhVersion = source.getBlueprintView().getProcessor().getStackVersion() == null ?
                 "" : source.getBlueprintView().getProcessor().getStackVersion();
+        List<ApiClusterTemplateConfig> roleConfigs = new ArrayList<>();
         if (!isVersionNewerOrEqualThanLimited(cdhVersion, CLOUDERAMANAGER_VERSION_7_2_0)) {
-            switch (roleType) {
-                case StreamsMessagingManagerRoles.STREAMS_MESSAGING_MANAGER_SERVER:
-                    RdsView streamsMessagingManagerRdsView = getRdsView(source);
-                    return List.of(
-                            config("streams.messaging.manager.storage.connector.connectURI", streamsMessagingManagerRdsView.getConnectionURL()),
-                            config("streams.messaging.manager.storage.connector.user", streamsMessagingManagerRdsView.getConnectionUserName()),
-                            config("streams.messaging.manager.storage.connector.password", streamsMessagingManagerRdsView.getConnectionPassword())
-                    );
-                default:
-                    return List.of();
-            }
+            RdsView streamsMessagingManagerRdsView = getRdsView(source);
+            roleConfigs.addAll(List.of(
+                    config("streams.messaging.manager.storage.connector.connectURI", streamsMessagingManagerRdsView.getConnectionURL()),
+                    config("streams.messaging.manager.storage.connector.user", streamsMessagingManagerRdsView.getConnectionUserName()),
+                    config("streams.messaging.manager.storage.connector.password", streamsMessagingManagerRdsView.getConnectionPassword())
+            ));
         }
-        return emptyList();
+        source.getTrustView().ifPresent(trustView -> {
+            // OPSAPS-76372 workaround for faulty kerberos.name.rules settings generation
+            roleConfigs.add(config(KERBEROS_NAME_RULES, kerberosAuthToLocalUtils.generateEscapedForTrustedRealm(trustView.realm())));
+        });
+        return roleConfigs;
     }
 
     @Override

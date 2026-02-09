@@ -9,23 +9,31 @@ import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.schemaregistr
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.schemaregistry.SchemaRegistryServiceConfigProvider.DATABASE_PORT;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.schemaregistry.SchemaRegistryServiceConfigProvider.DATABASE_TYPE;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.schemaregistry.SchemaRegistryServiceConfigProvider.DATABASE_USER;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.schemaregistry.SchemaRegistryServiceConfigProvider.KERBEROS_NAME_RULES;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.schemaregistry.SchemaRegistryServiceConfigProvider.RANGER_PLUGIN_SR_SERVICE_NAME;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
+import com.sequenceiq.cloudbreak.cmtemplate.utils.KerberosAuthToLocalUtils;
+import com.sequenceiq.cloudbreak.dto.TrustView;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.views.BlueprintView;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
@@ -36,7 +44,18 @@ import com.sequenceiq.common.api.type.InstanceGroupType;
 @ExtendWith(MockitoExtension.class)
 class SchemaRegistryServiceConfigProviderTest {
 
-    private final SchemaRegistryServiceConfigProvider underTest = new SchemaRegistryServiceConfigProvider();
+    private static final String AUTH_TO_LOCAL = "DEFAULT";
+
+    @Mock
+    private KerberosAuthToLocalUtils kerberosAuthToLocalUtils;
+
+    @InjectMocks
+    private SchemaRegistryServiceConfigProvider underTest;
+
+    @BeforeEach
+    void setUp() {
+        lenient().when(kerberosAuthToLocalUtils.generateEscapedForTrustedRealm(any())).thenReturn(AUTH_TO_LOCAL);
+    }
 
     @Test
     void testGetSchemaRegistryServiceConfigs710() {
@@ -108,7 +127,25 @@ class SchemaRegistryServiceConfigProviderTest {
                 config(RANGER_PLUGIN_SR_SERVICE_NAME, GENERATED_RANGER_SERVICE_NAME)));
     }
 
+    @Test
+    void testGetSchemaRegistryRoleConfigsWithTrust() {
+        String inputJson = loadBlueprint("7.3.1");
+        CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
+        TemplatePreparationObject preparationObject = getTemplatePreparationObject(cmTemplateProcessor, false, new TrustView("ip", "fqdn", "realm"));
+
+        List<ApiClusterTemplateConfig> roleConfigs = underTest.getRoleConfigs(SchemaRegistryRoles.SCHEMA_REGISTRY_SERVER,
+                cmTemplateProcessor, preparationObject);
+
+        assertThat(roleConfigs).hasSameElementsAs(List.of(
+                config(RANGER_PLUGIN_SR_SERVICE_NAME, GENERATED_RANGER_SERVICE_NAME),
+                config(KERBEROS_NAME_RULES, AUTH_TO_LOCAL)));
+    }
+
     private TemplatePreparationObject getTemplatePreparationObject(CmTemplateProcessor cmTemplateProcessor, boolean ssl) {
+        return getTemplatePreparationObject(cmTemplateProcessor, ssl, null);
+    }
+
+    private TemplatePreparationObject getTemplatePreparationObject(CmTemplateProcessor cmTemplateProcessor, boolean ssl, TrustView trustView) {
         HostgroupView master = new HostgroupView("master", 1, InstanceGroupType.GATEWAY, 1);
         HostgroupView worker = new HostgroupView("worker", 2, InstanceGroupType.CORE, 3);
         BlueprintView blueprintView = new BlueprintView(null, null, null, null, cmTemplateProcessor);
@@ -130,6 +167,7 @@ class SchemaRegistryServiceConfigProviderTest {
                 .withBlueprintView(blueprintView)
                 .withHostgroupViews(Set.of(master, worker))
                 .withRdsViews(Set.of(rdsConfig))
+                .withTrust(Optional.ofNullable(trustView))
                 .build();
     }
 
