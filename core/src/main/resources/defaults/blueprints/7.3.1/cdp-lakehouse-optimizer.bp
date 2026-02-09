@@ -33,6 +33,10 @@
           {
             "name": "core_site_safety_valve",
             "value": "<property><name>fs.s3a.buffer.dir</name><value>${env.LOCAL_DIRS:-${hadoop.tmp.dir}}/s3a</value></property><property><name>fs.s3a.committer.name</name><value>directory</value></property><property><name>fs.azure.buffer.dir</name><value>${env.LOCAL_DIRS:-${hadoop.tmp.dir}}/abfs</value></property><property><name>hadoop.mapreduce.fileoutputcommitter.algorithm.version.v1.experimental.parallel.rename.recovery</name><value>true</value></property><property><name>hadoop.mapreduce.fileoutputcommitter.algorithm.version.v1.experimental.parallel.task.commit</name><value>true</value></property><property><name>hadoop.mapreduce.fileoutputcommitter.algorithm.version.v1.experimental.mv.threads</name><value>16</value></property>"
+          },
+          {
+             "name": "dfs_replication",
+             "value": 2
           }
         ],
         "roleConfigGroups": [
@@ -444,7 +448,7 @@
       },
       {
         "refName": "worker",
-        "cardinality": 3,
+        "cardinality": 2,
         "roleConfigGroupsRefNames": [
           "hdfs-DATANODE-BASE",
           "hdfs-GATEWAY-BASE",
