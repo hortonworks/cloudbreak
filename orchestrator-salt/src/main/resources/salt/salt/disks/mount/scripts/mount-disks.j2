@@ -80,7 +80,7 @@ mount_all_from_fstab() {
       local return_value=0
       local hadoop_fs_dir_counter=1
       log $LOG_FILE mounting via fstab, value: "$PREVIOUS_FSTAB"
-      UUID_LIST_FROM_PREVIOUS_FSTAB=$(echo "$PREVIOUS_FSTAB" | grep -E "dbfs|hadoopfs" | awk -F'[ =]' '{print $2}')
+      UUID_LIST_FROM_PREVIOUS_FSTAB=$(echo "$PREVIOUS_FSTAB" | grep -E "/hadoopfs/fs|/dbfs" | awk -F'[ =]' '{print $2}')
       log $LOG_FILE uuidlist to attach from previous fstab: $UUID_LIST_FROM_PREVIOUS_FSTAB
       for uuid in $UUID_LIST_FROM_PREVIOUS_FSTAB; do
           local fstab_line=$(echo "$PREVIOUS_FSTAB" | grep $uuid)
@@ -128,7 +128,7 @@ mount_one() {
       mkdir $path >> $LOG_FILE 2>&1
       echo $fstab_line >> /etc/fstab
       log $LOG_FILE result of editing fstab: $?
-      mount $path >> $LOG_FILE 2>&1
+      mountpoint -q $path || mount $path >> $LOG_FILE 2>&1
       if [ ! $? -eq 0 ]; then
         log $LOG_FILE error mounting device on $path
         return_value=1
