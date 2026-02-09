@@ -179,6 +179,13 @@ replace_ocsp_in_cmca_profile:
         server_address: {{ metadata.server_address }}
         java: {{ java }}
 
+{% if salt['pillar.get']('cluster:gov_cloud', False) == True %}
+/etc/cloudera-scm-server/cmSubCaCert.profile:
+  file.exists:
+    - name: /etc/cloudera-scm-server/cmSubCaCert.profile
+
+{% endif %}
+
 run_autotls_setup:
   cmd.run:
     - name: /opt/salt/scripts/cm-setup-autotls.sh 2>&1 | tee -a /var/log/cm-setup-autotls.log && exit ${PIPESTATUS[0]}
@@ -190,6 +197,7 @@ run_autotls_setup:
 {% else %}
       - file: setup_fips_ccj_mode_for_java_higher_than_8
       - file: setup_fips_bctls_mode_for_java_higher_than_8
+      - file: /etc/cloudera-scm-server/cmSubCaCert.profile
 {% endif %}
 {% endif %}
     - env:

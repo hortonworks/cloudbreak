@@ -5,19 +5,20 @@
 {% set java_version = salt.cmd.shell("java -version 2>&1 | grep -oP \"version [^0-9]?(1\\.)?\\K\\d+\" || true") %}
 {% set jre_ext_path = java_home + '/jre/lib/ext' %}
 
-
 {% if java_version == "8" %}
 {% set security_providerclass = 'sun.security.pkcs11.SunPKCS11' %}
 {% set security_providers_template = 'salt://java/templates/java_security_providers_for_java_8.j2' %}
 {% set java_policy_file_template = 'salt://java/templates/java_policy_for_java_8.policy' %}
 {% set java_security_file = java_home ~ '/jre/lib/security/java.security' %}
 {% set java_policy_file = java_home ~ '/jre/lib/security/java.policy' %}
+{% set java_non_fips_policy_file = java_home ~ '/jre/lib/security/java-non-fips.policy' %}
 {% else %}
 {% set security_providerclass = 'com.safelogic.cryptocomply.jcajce.provider.CryptoComplyFipsProvider' %}
 {% set security_providers_template = 'salt://java/templates/java_security_providers_for_higher_than_java_8.j2' %}
 {% set java_policy_file_template = 'salt://java/templates/java_policy_for_higher_than_java_8.policy' %}
 {% set java_security_file = java_home ~ '/conf/security/java.security' %}
 {% set java_policy_file = java_home ~ '/conf/security/java.policy' %}
+{% set java_non_fips_policy_file = java_home ~ '/conf/security/java-non-fips.policy' %}
 {% endif %}
 
 {% set java = {} %}
@@ -29,5 +30,6 @@
     'security_providers_template' : security_providers_template,
     'java_security_file' : java_security_file,
     'java_policy_file' : java_policy_file,
-    'java_policy_file_template': java_policy_file_template
+    'java_policy_file_template': java_policy_file_template,
+    'java_non_fips_policy_file': java_non_fips_policy_file
 }) %}

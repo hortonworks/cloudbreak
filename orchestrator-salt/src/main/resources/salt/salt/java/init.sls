@@ -79,6 +79,13 @@ set_java_policy:
     - group: root
     - mode: 644
 
+create_java_non_fips_policy_file:
+  file.copy:
+    - name: {{ java.java_non_fips_policy_file }}
+    - source: {{ java.java_security_file }}
+    - force: True
+    - unless: test -f {{ java.java_non_fips_policy_file }}
+
 java_security_set_security_providers_for_java:
   file.blockreplace:
     - name: {{ java.java_security_file }}

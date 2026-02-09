@@ -1,8 +1,13 @@
 {%- from 'cloudera/manager/settings.sls' import cloudera_manager with context %}
 {%- from 'gateway/settings.sls' import gateway with context %}
 {%- from 'postgresql/settings.sls' import postgresql with context %}
+{%- from 'java/settings.sls' import java with context %}
+{%- set gov_cloud = salt['pillar.get']('cluster:gov_cloud', False) %}
 
 {% set cloudera_manager_database_connection_url = 'jdbc:' ~ cloudera_manager.cloudera_manager_database.subprotocol ~ '://' ~ cloudera_manager.cloudera_manager_database.host ~ '/' ~ cloudera_manager.cloudera_manager_database.databaseName ~ '?sslmode=' ~ postgresql.ssl_verification_mode ~ '&sslrootcert=' ~ postgresql.root_certs_file %}
+{% if gov_cloud == True and java.java_version == "17" %}
+{% set cloudera_manager_database_connection_url = cloudera_manager_database_connection_url ~ '&sslfactory=com.cloudera.enterprise.Pkcs12SSLSocketFactory' %}
+{% endif %}
 
 init-cloudera-manager-db:
   cmd.run:
