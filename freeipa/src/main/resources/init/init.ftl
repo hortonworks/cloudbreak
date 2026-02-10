@@ -84,9 +84,9 @@ export SECRET_ENCRYPTION_ENABLED=true
 export SECRET_ENCRYPTION_KEY_SOURCE="${secretEncryptionKeySource}"
 </#if>
 
-${customUserData}
-
 /usr/bin/user-data-helper.sh "$@" &> /var/log/user-data.log
+
+${customUserData}
 
 chmod o-rwx /var/log/user-data.log
 chmod o-rwx /cdp/bin/*

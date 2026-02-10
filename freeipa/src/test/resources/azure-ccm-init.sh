@@ -35,9 +35,9 @@ export CCM_GATEWAY_PORT=9443
 export IS_CCM_V2_ENABLED=false
 export IS_CCM_V2_JUMPGATE_ENABLED=false
 
-date >> /tmp/time.txt
-
 /usr/bin/user-data-helper.sh "$@" &> /var/log/user-data.log
+
+date >> /tmp/time.txt
 
 chmod o-rwx /var/log/user-data.log
 chmod o-rwx /cdp/bin/*

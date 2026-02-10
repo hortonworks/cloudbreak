@@ -34,9 +34,9 @@ export CCM_V2_AGENT_HMAC_KEY=""
 export CCM_V2_IV=""
 export CCM_V2_AGENT_HMAC_FOR_PRIVATE_KEY=""
 
-date >> /tmp/time.txt
-
 /usr/bin/user-data-helper.sh "$@" &> /var/log/user-data.log
+
+date >> /tmp/time.txt
 
 chmod o-rwx /var/log/user-data.log
 chmod o-rwx /cdp/bin/*

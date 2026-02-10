@@ -28,9 +28,9 @@ export CCM_V2_AGENT_CRN="agentCrn"
 export CCM_V2_AGENT_BACKEND_ID_PREFIX="agentCrn-"
 export IS_CCM_V2_JUMPGATE_ENABLED=false
 
-date >> /tmp/time.txt
-
 /usr/bin/user-data-helper.sh "$@" &> /var/log/user-data.log
+
+date >> /tmp/time.txt
 
 chmod o-rwx /var/log/user-data.log
 chmod o-rwx /cdp/bin/*
