@@ -19,6 +19,7 @@ public enum StackPatchType {
     GCP_SUBNET_ID_FIX(DEPRECATED),
     ATTACHED_VOLUMES_FIX,
     FSTAB_VALIDATION,
+    AWS_GP2_TO_GP3_MIGRATION,
     UNKNOWN,
     // for UT we need sample values
     TEST_PATCH_1,

@@ -166,6 +166,9 @@ public class MockUserManagementServiceTest {
 
                 {"datalakeKnoxGatewayDbDrEnabled false", "datalakeKnoxGatewayDbDrEnabled", false, "CDP_DATALAKE_KNOX_GATEWAY_DB_DR", false},
                 {"datalakeKnoxGatewayDbDrEnabled true", "datalakeKnoxGatewayDbDrEnabled", true, "CDP_DATALAKE_KNOX_GATEWAY_DB_DR", true},
+
+                {"gp2toGp3MigrationEnabled false", "gp2toGp3MigrationEnabled", false, "GP2_TO_GP3_MIGRATION", false},
+                {"gp2toGp3MigrationEnabled true", "gp2toGp3MigrationEnabled", true, "GP2_TO_GP3_MIGRATION", true},
         };
     }
 

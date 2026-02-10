@@ -106,6 +106,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.E2E_TEST_ON
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.ENABLE_COMPUTE_CLUSTER;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.ENABLE_RMS_ON_DATALAKE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.FMS_FREEIPA_BATCH_CALL;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.GP2_TO_GP3_MIGRATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.JUMPGATE_ENABLE_NEW_ROOT_CA;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.LOCAL_DEV;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.MEDIUM_DUTY_UPGRADE_ON_HIGHER_RUNTIME;
@@ -665,5 +666,9 @@ public class EntitlementService {
 
     public boolean isDataLakeShapesWithoutHBaseAndHDFSEnabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_DATALAKE_SHAPES_WITHOUT_HBASE_AND_HDFS);
+    }
+
+    public boolean isGp2toGp3MigrationEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, GP2_TO_GP3_MIGRATION);
     }
 }

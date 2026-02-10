@@ -29,6 +29,11 @@ public class StackPatchUsageReporterService {
         sendUsageReport(stackPatch.getStack(), stackPatch.getType(), eventType, stackPatch.getStatusReason());
     }
 
+    public void reportUsage(Stack stack, StackPatchType stackPatchType,
+            UsageProto.CDPStackPatchEventType.Value eventType, String optionalMessage) {
+        sendUsageReport(stack, stackPatchType, eventType, optionalMessage);
+    }
+
     private UsageProto.CDPStackPatchEventType.Value convertStatusToEventType(StackPatchStatus stackPatchStatus) {
         switch (stackPatchStatus) {
             case AFFECTED:

@@ -217,6 +217,9 @@ class EntitlementServiceTest {
 
                 {"CDP_DATALAKE_KNOX_GATEWAY_DB_DR", (EntitlementCheckFunction) EntitlementService::isDatalakeKnoxGatewayDbDrEnabled, false},
                 {"CDP_DATALAKE_KNOX_GATEWAY_DB_DR", (EntitlementCheckFunction) EntitlementService::isDatalakeKnoxGatewayDbDrEnabled, true},
+
+                {"GP2_TO_GP3_MIGRATION", (EntitlementCheckFunction) EntitlementService::isGp2toGp3MigrationEnabled, false},
+                {"GP2_TO_GP3_MIGRATION", (EntitlementCheckFunction) EntitlementService::isGp2toGp3MigrationEnabled, true},
         };
     }
 

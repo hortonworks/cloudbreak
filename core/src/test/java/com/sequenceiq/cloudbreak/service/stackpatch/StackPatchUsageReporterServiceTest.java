@@ -82,6 +82,25 @@ class StackPatchUsageReporterServiceTest {
         underTest.reportUsage(stackPatch);
     }
 
+    @Test
+    void customAffectedShouldNotFailWithNullValues() {
+        stackPatch.setStack(null);
+        underTest.reportUsage(null, null, null, null);
+    }
+
+    @Test
+    void shouldReportCustomFailure() {
+        String failureMessage = "failure message";
+        underTest.reportUsage(stack, StackPatchType.TEST_PATCH_1, UsageProto.CDPStackPatchEventType.Value.FAILURE, failureMessage);
+
+        verify(usageReporter).cdpStackPatcherEvent(eventCaptor.capture());
+        Assertions.assertThat(eventCaptor.getValue())
+                .returns(stack.getResourceCrn(), UsageProto.CDPStackPatchEvent::getResourceCrn)
+                .returns(StackPatchType.TEST_PATCH_1.name(), UsageProto.CDPStackPatchEvent::getStackPatchType)
+                .returns(UsageProto.CDPStackPatchEventType.Value.FAILURE, UsageProto.CDPStackPatchEvent::getEventType)
+                .returns(failureMessage, UsageProto.CDPStackPatchEvent::getMessage);
+    }
+
     private void verifyNonNullValues(UsageProto.CDPStackPatchEventType.Value eventType, String message) {
         verify(usageReporter).cdpStackPatcherEvent(eventCaptor.capture());
         Assertions.assertThat(eventCaptor.getValue())

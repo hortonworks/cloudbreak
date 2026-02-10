@@ -42,6 +42,7 @@ import software.amazon.awssdk.services.ec2.model.Ec2Exception;
 import software.amazon.awssdk.services.ec2.model.Filter;
 import software.amazon.awssdk.services.ec2.model.Instance;
 import software.amazon.awssdk.services.ec2.model.ModifyVolumeRequest;
+import software.amazon.awssdk.services.ec2.model.ModifyVolumeResponse;
 import software.amazon.awssdk.services.ec2.model.Tag;
 import software.amazon.awssdk.services.ec2.model.Volume;
 import software.amazon.awssdk.services.ec2.model.VolumeModification;
@@ -98,15 +99,67 @@ public class AwsCommonDiskUpdateService {
         }
     }
 
+    /**
+     * Modifies AWS EBS volumes with specific IOPS values. This method is specifically designed for gp2 to gp3 volume
+     * conversions where IOPS need to be specified explicitly. Unlike the standard modifyVolumes method, this does NOT
+     * wait for the volume modification to complete because AWS volume type conversions can take up to 24 hours to finish.
+     * The method initiates the modification requests and returns immediately, allowing the conversion to proceed
+     * asynchronously in the background.
+     *
+     * @param authenticatedContext the authenticated AWS context
+     * @param volumeIds list of volume IDs to modify
+     * @param diskType the target disk type (e.g., "gp3")
+     * @param volumeIopsMap map of volume IDs to their target IOPS values
+     * @throws CloudbreakException if the modification request fails
+     */
+    public ModifyVolumeResponse modifyVolumesWithIops(AmazonEc2Client amazonEC2Client, String volumeId, String diskType,
+        Integer iops) throws CloudbreakException {
+        try {
+            ModifyVolumeRequest.Builder modifyVolumeRequestBuilder = ModifyVolumeRequest.builder().volumeId(volumeId);
+            buildModifyVolumeRequest(modifyVolumeRequestBuilder, diskType, 0, iops);
+            // The common library has a wrapper that will trap AwsServiceException exceptions and throw an new
+            // ActionFailedException. Both RuntimeException subclasses.
+            ModifyVolumeResponse response = amazonEC2Client.modifyVolume(modifyVolumeRequestBuilder.build());
+            VolumeModification mod = response.volumeModification();
+
+            // 1. Check for immediate 'failed' state
+            if ("failed".equalsIgnoreCase(mod.modificationStateAsString())) {
+                throw new CloudbreakException(format("Modification failed immediately: %s", mod.statusMessage()));
+            }
+
+            // 2. Cross-verify the target type
+            if (diskType != null && !diskType.equals(mod.targetVolumeTypeAsString())) {
+                throw new CloudbreakException(format("Target type in response: %s", mod.targetVolumeTypeAsString()));
+            }
+
+            return response;
+        } catch (RuntimeException ex) {
+            LOGGER.error("AWS threw exception, while modifying volume: {}, exception: {}", volumeId, ex.getMessage());
+            throw new CloudbreakException(format("Exception while modifying disk volume: %s, exception: %s", volumeId, ex.getMessage()));
+        }
+    }
+
     private void buildModifyVolumeRequest(ModifyVolumeRequest.Builder modifyVolumeRequestBuilder, String diskType, int size) throws BadRequestException {
-        if (null == diskType && size == 0) {
-            throw new BadRequestException("At least one of disk type or size should be provided for disk modification.");
+        buildModifyVolumeRequest(modifyVolumeRequestBuilder, diskType, size, null);
+    }
+
+    private void buildModifyVolumeRequest(ModifyVolumeRequest.Builder modifyVolumeRequestBuilder, String diskType, int size, Integer iops)
+            throws BadRequestException {
+        if (null == diskType && size == 0 && null == iops) {
+            throw new BadRequestException("At least one of disk type, size, or IOPS should be provided for disk modification.");
         }
         if (null != diskType) {
             modifyVolumeRequestBuilder.volumeType(diskType);
         }
         if (size > 0) {
             modifyVolumeRequestBuilder.size(size);
+        }
+        if (null != iops) {
+            if (iops > 0) {
+                modifyVolumeRequestBuilder.iops(iops);
+            } else {
+                throw new BadRequestException("IOPS must be >0 for disk modification, if provided.");
+            }
         }
     }
 

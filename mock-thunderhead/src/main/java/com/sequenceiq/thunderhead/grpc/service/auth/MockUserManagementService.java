@@ -104,6 +104,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATA_LAKE_L
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.E2E_TEST_ONLY;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.ENABLE_COMPUTE_CLUSTER;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.FMS_FREEIPA_BATCH_CALL;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.GP2_TO_GP3_MIGRATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.LOCAL_DEV;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.OBSERVABILITY_DMP;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.OBSERVABILITY_REAL_TIME_JOBS;
@@ -623,6 +624,9 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.datalake.shapes.withouthbase.enabled}")
     private boolean datalakeShapesWithoutHBaseAndHDFSEnabled;
+
+    @Value("${auth.mock.gp2togp3.migration.enabled}")
+    private boolean gp2toGp3MigrationEnabled;
 
     @Inject
     private MockEnvironmentUserResourceRole mockEnvironmentUserResourceRole;
@@ -1157,6 +1161,9 @@ public class MockUserManagementService extends UserManagementImplBase {
 
         if (datalakeKnoxGatewayDbDrEnabled) {
             builder.addEntitlements(createEntitlement(CDP_DATALAKE_KNOX_GATEWAY_DB_DR));
+        }
+        if (gp2toGp3MigrationEnabled) {
+            builder.addEntitlements(createEntitlement(GP2_TO_GP3_MIGRATION));
         }
 
         if (datalakeShapesWithoutHBaseAndHDFSEnabled) {

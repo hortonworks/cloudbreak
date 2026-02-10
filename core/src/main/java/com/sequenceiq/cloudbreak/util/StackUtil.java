@@ -56,6 +56,7 @@ import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.InstanceGroupView;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.cloudbreak.view.StackView;
+import com.sequenceiq.common.model.AwsDiskType;
 
 @Service
 public class StackUtil {
@@ -369,4 +370,30 @@ public class StackUtil {
                 .filter(Objects::nonNull)
                 .anyMatch(device -> device.startsWith(DEPRECATED_DEVICE_PATH_PREFIX));
     }
+
+    /**
+     * Retrieves GP2 volumes from the stack's resource metadata stored in the database.
+     * This method examines AWS_VOLUMESET and AWS_ROOT_DISK resources to identify volumes
+     * with GP2 type.
+     *
+     * NOTE: This returns database metadata which may be stale if volumes were modified
+     * outside of Cloudbreak. Always validate against actual AWS state before making changes.
+     *
+     * @return a list of GP2 volumes found in the stack's resource metadata
+     */
+    public List<VolumeSetAttributes.Volume> getGp2VolumesFromResources(Collection<Resource> resources) {
+        LOGGER.debug("Checking {} resources for GP2 volumes", resources.size());
+
+        List<VolumeSetAttributes.Volume> gp2Volumes = resources.stream()
+                .map(resourceAttributeUtil::<VolumeSetAttributes>getTypedAttributes)
+                .flatMap(Optional::stream)
+                .map(VolumeSetAttributes::getVolumes)
+                .flatMap(List::stream)
+                .filter(volume -> AwsDiskType.Gp2.toString().equalsIgnoreCase(volume.getType()))
+                .collect(Collectors.toList());
+
+        LOGGER.debug("Found {} GP2 volumes from stack resources", gp2Volumes.size());
+        return gp2Volumes;
+    }
+
 }

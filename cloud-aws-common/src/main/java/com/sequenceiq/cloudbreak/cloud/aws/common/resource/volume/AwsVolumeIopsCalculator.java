@@ -17,6 +17,12 @@ public class AwsVolumeIopsCalculator {
 
     private static final int MAX_GP3_IOPS = 16000;
 
+    private static final int GP2_IOPS_PER_GB = 3;
+
+    private static final int GP2_MIN_IOPS = 100;
+
+    private static final int GP2_MAX_IOPS = 16000;
+
     // It is a magic constant from the AWS documentation
     private static final int IOPS_MULTIPLIER = 3;
 
@@ -28,4 +34,22 @@ public class AwsVolumeIopsCalculator {
         // IOPS must be between MIN_GP3_IOPS and MAX_GP3_IOPS
         return Math.max(MIN_GP3_IOPS, Math.min(MAX_GP3_IOPS, iops));
     }
+
+    /**
+     * Calculates the equivalent IOPS for a GP3 volume based on the GP2 volume size.
+     *
+     * @param volumeSizeGb the size of the volume in GB
+     * @return the calculated IOPS value to use for the GP3 volume
+     */
+    public int getEquivalentGp3IopsforGp2Volume(int volumeSizeGb) {
+        // Calculate GP2 IOPS: 3 IOPS per GB
+        int gp2Iops = volumeSizeGb * GP2_IOPS_PER_GB;
+
+        // Apply GP2 constraints (min 100, max 16,000)
+        int effectiveGp2Iops = Math.max(GP2_MIN_IOPS, Math.min(gp2Iops, GP2_MAX_IOPS));
+
+        // Use at least GP3 baseline (3000) or the gp2 equivalent, whichever is higher
+        return Math.max(MIN_GP3_IOPS, effectiveGp2Iops);
+    }
+
 }
