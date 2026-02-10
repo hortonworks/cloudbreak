@@ -71,7 +71,7 @@ public class CloudbreakClient extends MicroserviceClient<com.sequenceiq.cloudbre
     private Long workspaceId;
 
     public CloudbreakClient(CloudbreakUser cloudbreakUser, RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator, String serviceAddress,
-            String internalAddress, String alternativeServiceAddress, String alternativeInternalAddress) {
+            String internalAddress, String alternativeServiceAddress, String alternativeInternalAddress, String alternativeAddress) {
         setActing(cloudbreakUser);
         ConfigKey configKey = new ConfigKey(false, true, true);
 
@@ -83,7 +83,7 @@ public class CloudbreakClient extends MicroserviceClient<com.sequenceiq.cloudbre
         if (isNotEmpty(alternativeServiceAddress) && isNotEmpty(alternativeInternalAddress)) {
             alternativeCloudbreakClient = createCloudbreakClient(cloudbreakUser, alternativeServiceAddress, configKey);
             alternativeCloudbreakInternalCrnClient = createCloudbreakInternalCrnClient(alternativeInternalAddress, regionAwareInternalCrnGenerator);
-            alternativeRawClient = createRawWebTarget(configKey, serviceAddress, CoreApi.API_ROOT_CONTEXT,
+            alternativeRawClient = createRawWebTarget(configKey, alternativeAddress, CoreApi.API_ROOT_CONTEXT,
                     cloudbreakUser.getAccessKey(), cloudbreakUser.getSecretKey());
         }
     }

@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory;
 import com.sequenceiq.cloudbreak.client.ApiKeyRequestFilter;
 import com.sequenceiq.cloudbreak.client.RestClientUtil;
 import com.sequenceiq.cloudbreak.common.json.Json;
@@ -22,6 +23,7 @@ import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
+import com.sequenceiq.it.cloudbreak.config.server.ServerProperties;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
@@ -40,10 +42,15 @@ public class ExternalizedComputeClusterTest extends AbstractE2ETest {
     private EnvironmentTestClient environmentTestClient;
 
     @Inject
-    private CloudbreakClient cloudbreakClient;
+    private CredentialTestClient credentialTestClient;
 
     @Inject
-    private CredentialTestClient credentialTestClient;
+    private ServerProperties serverProperties;
+
+    @Inject
+    private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
+
+    private CloudbreakClient cloudbreakClient;
 
     @Override
     protected void setupTest(TestContext testContext) {
@@ -51,6 +58,9 @@ public class ExternalizedComputeClusterTest extends AbstractE2ETest {
         createExtendedCredential(testContext);
         createDefaultImageCatalog(testContext);
         initializeDefaultBlueprints(testContext);
+        cloudbreakClient = new CloudbreakClient(testContext.getActingUser(), regionAwareInternalCrnGeneratorFactory.iam(),
+                serverProperties.getCloudbreakAddress(), serverProperties.getCloudbreakInternalAddress(), serverProperties.getAlternativeCloudbreakAddress(),
+                serverProperties.getAlternativeCloudbreakInternalAddress(), serverProperties.getAlternativeCloudbreak());
     }
 
     @Test(dataProvider = TEST_CONTEXT)
@@ -138,7 +148,7 @@ public class ExternalizedComputeClusterTest extends AbstractE2ETest {
 
     private String validateListClusterResponseAndGetClusterCrn(TestContext testContext, String environmentName) {
         Client client = RestClientUtil.get();
-        WebTarget webTarget = cloudbreakClient.getRawClient(testContext).path("/api/v1/compute/listClusters");
+        WebTarget webTarget = cloudbreakClient.getRawClient(testContext).path("/v1/compute/listClusters");
         webTarget.register(new ApiKeyRequestFilter(testContext.getActingUserAccessKey(), testContext.getActingUser().getSecretKey()));
         String requestjson = String.format("{\"envNameOrCrn\": \"%s\"}", environmentName);
         String response = webTarget.request().post(Entity.json(requestjson)).readEntity(String.class);

@@ -117,7 +117,7 @@ public class TestClients {
     private CloudbreakClient createCloudbreakClient(CloudbreakUser cloudbreakUser) {
         return new CloudbreakClient(cloudbreakUser, regionAwareInternalCrnGeneratorFactory.iam(), serverProperties.getCloudbreakAddress(),
                 serverProperties.getCloudbreakInternalAddress(), serverProperties.getAlternativeCloudbreakAddress(),
-                serverProperties.getAlternativeCloudbreakInternalAddress());
+                serverProperties.getAlternativeCloudbreakInternalAddress(), serverProperties.getAlternativeCloudbreak());
     }
 
     private EnvironmentClient createEnvironmentClient(CloudbreakUser cloudbreakUser) {

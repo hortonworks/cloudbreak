@@ -230,6 +230,14 @@ public class ServerProperties {
         return "http://" + alternativeCloudbreakUrl + cbRootContextPath;
     }
 
+    public String getAlternativeCloudbreak() {
+        if (StringUtils.isNotEmpty(alternativeCloudbreakServer)) {
+            return alternativeCloudbreakServer;
+        } else {
+            return null;
+        }
+    }
+
     public String getEnvironmentAddress() {
         if (environmentPort != 0) {
             return environmentServer + ":" + environmentPort + environmentRootContextPath;
