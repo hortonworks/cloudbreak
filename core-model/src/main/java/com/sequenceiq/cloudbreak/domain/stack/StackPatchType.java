@@ -18,6 +18,7 @@ public enum StackPatchType {
     EMBEDDED_DB_CERTIFICATE_ROTATION,
     GCP_SUBNET_ID_FIX(DEPRECATED),
     ATTACHED_VOLUMES_FIX,
+    FSTAB_VALIDATION,
     UNKNOWN,
     // for UT we need sample values
     TEST_PATCH_1,

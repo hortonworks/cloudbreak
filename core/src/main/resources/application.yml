@@ -864,6 +864,8 @@ existing-stack-patcher:
       enabled: false
     attached-volumes-fix:
       enabled: true
+    fstab-validation:
+      enabled: true
 
 dynamic-entitlement:
   entitlements:

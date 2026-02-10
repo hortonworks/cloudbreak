@@ -1887,7 +1887,7 @@ public class SaltOrchestrator implements HostOrchestrator {
         }
     }
 
-    private Map<String, Map<String, String>> getFstabInformation(SaltConnector sc, Target<String> allHosts, Set<Node> nodesWithDiskData) {
+    public Map<String, Map<String, String>> getFstabInformation(SaltConnector sc, Target<String> allHosts, Set<Node> nodesWithDiskData) {
         Map<String, String> uuidResponse = saltStateService.getUuidList(sc);
         Map<String, String> fstabResponse = saltStateService.runCommandOnHosts(sc, allHosts, "cat /etc/fstab");
         return nodesWithDiskData.stream()
