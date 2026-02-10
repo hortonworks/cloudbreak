@@ -20,6 +20,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskType;
+import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
 import com.sequenceiq.cloudbreak.cloud.model.DiskTypes;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
@@ -167,9 +169,14 @@ public class DistroXDiskUpdateValidationHandler extends ExceptionCatcherEventHan
 
     private Predicate<VolumeSetAttributes.Volume> getVolumePredicate(int size, String volumeType, String diskType, DiskTypes cloudPlatformDiskTypes) {
         return volume ->
-                volume.getSize() < size
+                (isDataBaseDisk(diskType) && volume.getCloudVolumeUsageType().equals(CloudVolumeUsageType.DATABASE) && volume.getSize() < size)
+                || (!isDataBaseDisk(diskType) && (volume.getSize() < size
                     || isEphemeral(cloudPlatformDiskTypes, volume)
-                    || modificationNotRequired(volumeType, volume);
+                    || modificationNotRequired(volumeType, volume)));
+    }
+
+    private boolean isDataBaseDisk(String diskType) {
+        return DiskType.DATABASE_DISK.name().equalsIgnoreCase(diskType);
     }
 
     private boolean modificationNotRequired(String volumeType, VolumeSetAttributes.Volume volume) {

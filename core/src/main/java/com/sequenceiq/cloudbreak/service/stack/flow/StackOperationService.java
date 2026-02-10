@@ -45,7 +45,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.rotation.requests.StackDatabase
 import com.sequenceiq.cloudbreak.api.endpoint.v4.rotation.response.StackDatabaseServerCertificateStatusV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.rotation.response.StackDatabaseServerCertificateStatusV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StatusRequest;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.SetDefaultJavaVersionRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.SaltPasswordStatus;
@@ -557,16 +556,8 @@ public class StackOperationService {
 
     public FlowIdentifier stackUpdateDisks(NameOrCrn nameOrCrn, DiskUpdateRequest updateRequest, String accountId) {
         convertInputGroupToLowerCase(updateRequest);
-        validateDiskUpdate(updateRequest);
         StackDto stack = stackDtoService.getByNameOrCrn(nameOrCrn, accountId);
         return flowManager.triggerStackUpdateDisks(stack, updateRequest);
-    }
-
-    private void validateDiskUpdate(DiskUpdateRequest updateRequest) {
-        if (DiskType.DATABASE_DISK == updateRequest.getDiskType()) {
-            throw new BadRequestException("Database disk updates (DATABASE_DISK) are not yet supported. " +
-                    "This functionality is currently under development and will be made available in a future release.");
-        }
     }
 
     public FlowIdentifier triggerSkuMigration(NameOrCrn name, String accountId, boolean force) {
