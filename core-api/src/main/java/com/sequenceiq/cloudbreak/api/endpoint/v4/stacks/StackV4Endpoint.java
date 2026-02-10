@@ -1150,4 +1150,13 @@ public interface StackV4Endpoint {
     FlowIdentifier triggerUpdateTrustedRealm(@PathParam("workspaceId") Long workspaceId,
             @ValidCrn(resource = {DATAHUB, VM_DATALAKE}) @PathParam("crn") String crn,
             @NotNull @Valid UpdateTrustedRealmRequest request);
+
+    @PUT
+    @Path("internal/crn/{crn}/disable_encryption_profile")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Disable encryption profile in the given cluster by crn",
+            operationId = "disableEncryptionProfileByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    FlowIdentifier disableEncryptionProfileByCrn(@NotEmpty @PathParam("crn") String crn);
 }

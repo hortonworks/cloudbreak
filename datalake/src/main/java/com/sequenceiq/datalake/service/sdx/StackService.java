@@ -124,4 +124,16 @@ public class StackService {
         return ThreadBasedUserCrnProvider.doAsInternalActor(
                 initiatorUserCrn -> stackV4Endpoint.resetJvmParams(WORKSPACE_ID_DEFAULT, crn, request, initiatorUserCrn));
     }
+
+    public FlowIdentifier enableEncryptionProfile(String datalakeCrn, String encryptionProfileNameOrCrn) {
+        LOGGER.info("Enabling encryption profile for CRN {}", datalakeCrn);
+        return ThreadBasedUserCrnProvider.doAsInternalActor(
+                initiatorUserCrn -> stackV4Endpoint.updateSslConfigurationsByCrn(WORKSPACE_ID_DEFAULT, datalakeCrn, encryptionProfileNameOrCrn));
+    }
+
+    public FlowIdentifier disableEncryptionProfile(String datalakeCrn) {
+        LOGGER.info("Disabling encryption profile for CRN {}", datalakeCrn);
+        return ThreadBasedUserCrnProvider.doAsInternalActor(
+                initiatorUserCrn -> stackV4Endpoint.disableEncryptionProfileByCrn(datalakeCrn));
+    }
 }

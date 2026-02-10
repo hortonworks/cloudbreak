@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.environment.api.v1.encryptionprofile.endpoint.EncryptionProfileEndpoint;
 import com.sequenceiq.environment.api.v1.encryptionprofile.model.EncryptionProfileResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+    import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 
 @Service
@@ -40,6 +41,9 @@ public class EncryptionProfileService {
 
     @Inject
     private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
+
+    @Inject
+    private StackService stackService;
 
     public EncryptionProfileResponse getByCrn(String crn) {
         try {
@@ -115,5 +119,37 @@ public class EncryptionProfileService {
             }
         }
         return null;
+    }
+
+    public FlowIdentifier enableEncryptionProfileByCrn(String datalakeCrn, String encryptionProfileNameOrCrn) {
+        try {
+            if (!entitlementService.isChangeEncryptionProfileEnabled(Crn.safeFromString(datalakeCrn).getAccountId())) {
+                throw new BadRequestException("Enable encryption profile is not granted to the account");
+            }
+            return stackService.enableEncryptionProfile(datalakeCrn, encryptionProfileNameOrCrn);
+        } catch (Exception e) {
+            String errorMessage = (e instanceof WebApplicationException wae)
+                    ? webApplicationExceptionMessageExtractor.getErrorMessage(wae)
+                    : e.getMessage();
+            String message = String.format("Failed to enable encryption profile for CRN: %s. Error: %s", datalakeCrn, errorMessage);
+            LOGGER.error(message, e);
+            throw new CloudbreakServiceException(message, e);
+        }
+    }
+
+    public FlowIdentifier disableEncryptionProfile(String datalakeCrn) {
+        try {
+            if (!entitlementService.isChangeEncryptionProfileEnabled(Crn.safeFromString(datalakeCrn).getAccountId())) {
+                throw new BadRequestException("Disable encryption profile is not granted to the account");
+            }
+            return stackService.disableEncryptionProfile(datalakeCrn);
+        } catch (Exception e) {
+            String errorMessage = (e instanceof WebApplicationException wae)
+                    ? webApplicationExceptionMessageExtractor.getErrorMessage(wae)
+                    : e.getMessage();
+            String message = String.format("Failed to disable encryption profile for CRN: %s. Error: %s", datalakeCrn, errorMessage);
+            LOGGER.error(message, e);
+            throw new CloudbreakServiceException(message, e);
+        }
     }
 }

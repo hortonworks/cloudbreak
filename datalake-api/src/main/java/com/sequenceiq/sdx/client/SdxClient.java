@@ -9,6 +9,7 @@ import com.sequenceiq.sdx.api.endpoint.DiagnosticsEndpoint;
 import com.sequenceiq.sdx.api.endpoint.OperationEndpoint;
 import com.sequenceiq.sdx.api.endpoint.ProgressEndpoint;
 import com.sequenceiq.sdx.api.endpoint.SdxBackupEndpoint;
+import com.sequenceiq.sdx.api.endpoint.SdxEncryptionProfileEndpoint;
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
 import com.sequenceiq.sdx.api.endpoint.SdxEventEndpoint;
 import com.sequenceiq.sdx.api.endpoint.SdxInternalEndpoint;
@@ -56,4 +57,6 @@ public interface SdxClient {
     SupportV1Endpoint supportV1Endpoint();
 
     SdxKraftMigrationEndpoint sdxKraftMigrationEndpoint();
+
+    SdxEncryptionProfileEndpoint sdxEncryptionProfileEndpoint();
 }

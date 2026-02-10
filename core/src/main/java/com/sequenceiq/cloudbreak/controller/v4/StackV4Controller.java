@@ -873,4 +873,10 @@ public class StackV4Controller extends NotificationController implements StackV4
     public FlowIdentifier triggerUpdateTrustedRealm(Long workspaceId, @ResourceCrn String crn, UpdateTrustedRealmRequest request) {
         return stackOperations.triggerUpdateTrustedRealm(NameOrCrn.ofCrn(crn), ThreadBasedUserCrnProvider.getAccountId(), request);
     }
+
+    @Override
+    @InternalOnly
+    public FlowIdentifier disableEncryptionProfileByCrn(@ResourceCrn String crn) {
+        return stackOperationService.disableEncryptionProfile(NameOrCrn.ofCrn(crn), ThreadBasedUserCrnProvider.getAccountId());
+    }
 }

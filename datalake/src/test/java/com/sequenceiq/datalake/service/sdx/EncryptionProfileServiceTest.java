@@ -32,6 +32,8 @@ import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 @ExtendWith(MockitoExtension.class)
 class EncryptionProfileServiceTest {
 
+    private static final String DATALAKE_CRN = "crn:cdp:datalake:us-west-1:tenant:datalake:abc";
+
     @Mock
     private EncryptionProfileEndpoint encryptionProfileEndpoint;
 
@@ -43,6 +45,9 @@ class EncryptionProfileServiceTest {
 
     @Mock
     private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
+
+    @Mock
+    private StackService stackService;
 
     @InjectMocks
     private EncryptionProfileService underTest;
@@ -160,4 +165,23 @@ class EncryptionProfileServiceTest {
         verify(encryptionProfileEndpoint, never()).getByName(anyString());
     }
 
+    @Test
+    void testEnableEncryptionProfileByCrn() {
+        when(entitlementService.isChangeEncryptionProfileEnabled(any())).thenReturn(true);
+
+        underTest.enableEncryptionProfileByCrn(DATALAKE_CRN, "encryptionProfileCrn");
+
+        verify(stackService, times(1))
+                .enableEncryptionProfile(DATALAKE_CRN, "encryptionProfileCrn");
+    }
+
+    @Test
+    void testDisableEncryptionProfileByCrn() {
+        when(entitlementService.isChangeEncryptionProfileEnabled(any())).thenReturn(true);
+
+        underTest.disableEncryptionProfile(DATALAKE_CRN);
+
+        verify(stackService, times(1))
+                .disableEncryptionProfile(DATALAKE_CRN);
+    }
 }
