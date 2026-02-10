@@ -36,6 +36,21 @@ import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
+/**
+ * <b>Local DEV Execution requirements:</b>
+ * <p>
+ * This test suite requires a specific gateway configuration to use
+ * MOCK endpoints for certificate generation during local runs.
+ * Ensure the following properties are set for the Core service before execute:
+ * </p>
+ * <pre>
+ * gateway:
+ *   cert:
+ *     generation:
+ *       enabled: true
+ *       enabled-for-mock: true
+ * </pre>
+ */
 public class MockSdxPemTests extends AbstractMockTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(MockSdxPemTests.class);
 
@@ -69,6 +84,21 @@ public class MockSdxPemTests extends AbstractMockTest {
         createDefaultImageCatalog(testContext);
     }
 
+    /**
+     * <b>Local DEV Execution requirements:</b>
+     * <p>
+     * This test case requires a specific gateway configuration to use
+     * MOCK endpoints for certificate generation during local runs.
+     * Ensure the following properties are set for the Core service before execute:
+     * </p>
+     * <pre>
+     * gateway:
+     *   cert:
+     *     generation:
+     *       enabled: true
+     *       enabled-for-mock: true
+     * </pre>
+     */
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "there is a running Cloudbreak",
@@ -109,6 +139,21 @@ public class MockSdxPemTests extends AbstractMockTest {
                 .validate();
     }
 
+    /**
+     * <b>Local DEV Execution requirements:</b>
+     * <p>
+     * This test case requires a specific gateway configuration to use
+     * MOCK endpoints for certificate generation during local runs.
+     * Ensure the following properties are set for the Core service before execute:
+     * </p>
+     * <pre>
+     * gateway:
+     *   cert:
+     *     generation:
+     *       enabled: true
+     *       enabled-for-mock: true
+     * </pre>
+     */
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "there is a running Cloudbreak",
@@ -136,6 +181,21 @@ public class MockSdxPemTests extends AbstractMockTest {
                 .validate();
     }
 
+    /**
+     * <b>Local DEV Execution requirements:</b>
+     * <p>
+     * This test case requires a specific gateway configuration to use
+     * MOCK endpoints for certificate generation during local runs.
+     * Ensure the following properties are set for the Core service before execute:
+     * </p>
+     * <pre>
+     * gateway:
+     *   cert:
+     *     generation:
+     *       enabled: true
+     *       enabled-for-mock: true
+     * </pre>
+     */
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "there is a running Cloudbreak",
@@ -167,6 +227,21 @@ public class MockSdxPemTests extends AbstractMockTest {
                 .validate();
     }
 
+    /**
+     * <b>Local DEV Execution requirements:</b>
+     * <p>
+     * This test case requires a specific gateway configuration to use
+     * MOCK endpoints for certificate generation during local runs.
+     * Ensure the following properties are set for the Core service before execute:
+     * </p>
+     * <pre>
+     * gateway:
+     *   cert:
+     *     generation:
+     *       enabled: true
+     *       enabled-for-mock: true
+     * </pre>
+     */
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "there is a running Cloudbreak",
