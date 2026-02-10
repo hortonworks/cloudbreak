@@ -904,7 +904,11 @@ public enum ResourceEvent {
     FREEIPA_UPGRADE_FAILED("freeipa.upgrade.failed"),
     FREEIPA_IMAGE_CHANGE_STARTED("freeipa.image.change.started"),
     FREEIPA_IMAGE_CHANGE_FINISHED("freeipa.image.change.finished"),
-    FREEIPA_IMAGE_CHANGE_FAILED("freeipa.image.change.failed"),;
+    FREEIPA_IMAGE_CHANGE_FAILED("freeipa.image.change.failed"),
+
+    ENABLE_ENCRYPTION_PROFILE_STARTED("environment.enable.encryption.profile.started"),
+    ENABLE_ENCRYPTION_PROFILE_FINISHED("environment.enable.encryption.profile.finished"),
+    ENABLE_ENCRYPTION_PROFILE_FAILED("environment.enable.encryption.profile.failed");
 
     private final String message;
 

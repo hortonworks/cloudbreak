@@ -33,6 +33,8 @@ import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.domain.EnvironmentView;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteEvent;
+import com.sequenceiq.environment.environment.flow.encryptionprofile.event.EnableEncryptionProfileEvent;
+import com.sequenceiq.environment.environment.flow.encryptionprofile.event.EnableEncryptionProfileStateSelectors;
 import com.sequenceiq.environment.environment.flow.externalizedcluster.create.event.ExternalizedComputeClusterCreationEvent;
 import com.sequenceiq.environment.environment.flow.externalizedcluster.create.event.ExternalizedComputeClusterCreationStateSelectors;
 import com.sequenceiq.environment.environment.flow.externalizedcluster.reinitialization.event.ExternalizedComputeClusterReInitializationEvent;
@@ -225,6 +227,28 @@ class EnvironmentReactorFlowManagerTest {
                 .returns(ENVIRONMENT_NAME, ExternalizedComputeClusterReInitializationEvent::getResourceName)
                 .returns(ENVIRONMENT_ID, ExternalizedComputeClusterReInitializationEvent::getResourceId)
                 .returns(true, ExternalizedComputeClusterReInitializationEvent::isForce);
+        verifyHeaders();
+    }
+
+    @Test
+    void testTriggerEnableEncryptionProfile() {
+        String encryptionProfileCrn = "crn:cdp:environments:us-west-1:cloudbreak:encryptionProfile:ecb891ca-18f2-406f-9958-99da466fd0f2";
+
+        when(eventSender.sendEvent(any(EnableEncryptionProfileEvent.class), any(Event.Headers.class))).thenReturn(flowIdentifier);
+
+        FlowIdentifier result = ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> underTest.triggerEnableEncryptionProfile(ENVIRONMENT_ID, ENVIRONMENT_NAME, ENVIRONMENT_CRN, encryptionProfileCrn));
+
+        assertThat(result).isSameAs(flowIdentifier);
+        ArgumentCaptor<EnableEncryptionProfileEvent> argumentCaptor = ArgumentCaptor.forClass(EnableEncryptionProfileEvent.class);
+        verify(eventSender).sendEvent(argumentCaptor.capture(), headersCaptor.capture());
+        EnableEncryptionProfileEvent event = argumentCaptor.getValue();
+        assertThat(event)
+                .returns(EnableEncryptionProfileStateSelectors.VALIDATE_ENABLE_ENCRYPTION_PROFILE_EVENT.selector(), BaseFlowEvent::selector)
+                .returns(ENVIRONMENT_ID, EnableEncryptionProfileEvent::getResourceId)
+                .returns(ENVIRONMENT_NAME, EnableEncryptionProfileEvent::getResourceName)
+                .returns(ENVIRONMENT_CRN, EnableEncryptionProfileEvent::getResourceCrn)
+                .returns(encryptionProfileCrn, EnableEncryptionProfileEvent::getEncryptionProfileCrn);
         verifyHeaders();
     }
 

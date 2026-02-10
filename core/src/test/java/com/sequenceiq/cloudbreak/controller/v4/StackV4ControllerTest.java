@@ -273,6 +273,15 @@ class StackV4ControllerTest {
     }
 
     @Test
+    void testUpdateSslConfigurationsByCrn() {
+        String encryptionProfileCrn = "epCrn";
+        doAs(USER_CRN, () -> {
+            underTest.updateSslConfigurationsByCrn(WORKSPACE_ID, STACK_CRN, encryptionProfileCrn);
+        });
+        verify(stackOperationService).updateSslConfigsOnCluster(NameOrCrn.ofCrn(STACK_CRN), "hortonworks", encryptionProfileCrn);
+    }
+
+    @Test
     void testModifyUserDefinedTagsInternal() {
         Map<String, String> userDefinedTags = Map.of("owner", "john doe");
         doAs(USER_CRN, () -> {

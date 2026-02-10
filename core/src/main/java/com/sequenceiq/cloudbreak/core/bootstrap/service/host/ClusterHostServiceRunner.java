@@ -612,7 +612,7 @@ public class ClusterHostServiceRunner {
                 && blueprintJsonText.contains(HiveRoles.HIVESERVER2)
                 && !blueprintJsonText.contains(HiveRoles.HIVEMETASTORE);
 
-        String encryptionProfileCrn = encryptionProfileService.getEncryptionProfileCrn(detailedEnvironmentResponse, stackDto.getCluster());
+        String encryptionProfileCrn = encryptionProfileService.getEncryptionProfileByCrnOrDefault(detailedEnvironmentResponse, stackDto);
         EncryptionProfileResponse encryptionProfileResponse =  encryptionProfileService.getEncryptionProfileByCrnOrDefault(encryptionProfileCrn);
         Set<String> userTlsVersions = encryptionProfileResponse.getTlsVersions();
         Map<String, List<String>> userEncryptionProfileMap = encryptionProfileResponse.getCipherSuites();
@@ -885,7 +885,7 @@ public class ClusterHostServiceRunner {
         }
         ClusterView cluster = stackDto.getCluster();
         DetailedEnvironmentResponse detailedEnvironmentResponse = environmentService.getByCrn(stackDto.getEnvironmentCrn());
-        String encryptionProfileCrn = encryptionProfileService.getEncryptionProfileCrn(detailedEnvironmentResponse, cluster);
+        String encryptionProfileCrn = encryptionProfileService.getEncryptionProfileByCrnOrDefault(detailedEnvironmentResponse, stackDto);
         EncryptionProfileResponse encryptionProfileResponse = encryptionProfileService.getEncryptionProfileByCrnOrDefault(encryptionProfileCrn);
         Set<String> userTlsVersions = encryptionProfileResponse.getTlsVersions();
         boolean legacyEncryptionProfile = encryptionProfileResponse.isLegacy();

@@ -946,7 +946,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
-    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.REPAIR_DATAHUB)
+        @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.REPAIR_DATAHUB)
     public FlowIdentifier updatePublicDnsEntriesByCrn(@ResourceCrn String crn) {
         return stackOperationService.triggerUpdatePublicDnsEntries(NameOrCrn.ofCrn(crn), ThreadBasedUserCrnProvider.getAccountId());
     }
@@ -979,5 +979,19 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     @CheckPermissionByResourceCrn(action = UPGRADE_DATAHUB)
     public ResetJvmParamsV4Response resetJvmParamsByCrn(@ResourceCrn String crn, ResetJvmParamsRequest request) {
         return stackOperationService.resetJvmParams(NameOrCrn.ofCrn(crn), ThreadBasedUserCrnProvider.getAccountId(), request.isDryRun());
+    }
+
+    @Override
+    @CheckPermissionByResourceName(action = UPGRADE_DATAHUB)
+    public FlowIdentifier updateSslConfigurationsByName(@ResourceName String name, String encryptionProfileNameOrCrn) {
+        return stackOperationService.updateSslConfigsOnCluster(NameOrCrn.ofName(name), ThreadBasedUserCrnProvider.getAccountId(),
+                encryptionProfileNameOrCrn);
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = UPGRADE_DATAHUB)
+    public FlowIdentifier updateSslConfigurationsByCrn(@ResourceCrn String crn, String encryptionProfileNameOrCrn) {
+        return stackOperationService.updateSslConfigsOnCluster(NameOrCrn.ofCrn(crn), ThreadBasedUserCrnProvider.getAccountId(),
+                encryptionProfileNameOrCrn);
     }
 }

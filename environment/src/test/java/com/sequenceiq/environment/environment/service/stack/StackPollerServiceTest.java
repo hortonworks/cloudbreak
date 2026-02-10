@@ -2,6 +2,10 @@ package com.sequenceiq.environment.environment.service.stack;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.LinkedHashSet;
@@ -123,6 +127,21 @@ class StackPollerServiceTest {
 
         assertThat(datahubOperationFailedException).hasMessage("Stack config updating aborted with error");
         assertThat(datahubOperationFailedException).hasCauseInstanceOf(UserBreakException.class);
+    }
+
+    @Test
+    void testWaitForUpdateSslConfigs() {
+        Set<StackViewV4Response> responsesSet = new LinkedHashSet<>();
+        responsesSet.add(createAvailableStackViewV4Response(STACK_CRN_1));
+        StackViewV4Responses stackViewV4Responses = new StackViewV4Responses(responsesSet);
+
+        when(stackV4Endpoint.list(0L, ENVIRONMENT_CRN, true)).thenReturn(stackViewV4Responses);
+        when(stackV4Endpoint.updateSslConfigurationsByCrn(eq(0L), any(), any())).thenReturn(new FlowIdentifier(FlowType.FLOW, "123"));
+        when(stackPollerProvider.updateSslConfig(any(), any())).thenReturn(AttemptResults.justFinish());
+
+        underTest.waitForUpdateSslConfigs(ENVIRONMENT_CRN, ENVIRONMENT_ID);
+
+        verify(stackPollerProvider, times(1)).updateSslConfig(any(), any());
     }
 
     @Test

@@ -166,7 +166,10 @@ public enum EnvironmentStatus {
     FREEIPA_FINISH_CROSS_REALM_TRUST_FAILED("Failed to finish setting up cross-realm trust on FreeIPA"),
     FREEIPA_FINISH_CROSS_REALM_TRUST_SUCCESSFUL("Setting up cross-realm trust on FreeIPA finished successfully"),
     UPGRADE_DEFAULT_OUTBOUND_ON_FREEIPA_IN_PROGRESS("Upgrading Default Outbound on FreeIPA"),
-    UPGRADE_DEFAULT_OUTBOUND_ON_FREEIPA_FAILED("Failed to upgrade Default Outbound on FreeIPA"),;
+    UPGRADE_DEFAULT_OUTBOUND_ON_FREEIPA_FAILED("Failed to upgrade Default Outbound on FreeIPA"),
+
+    ENABLE_ENCRYPTION_PROFILE_IN_PROGRESS("Enable encryption profile in progress"),
+    ENABLE_ENCRYPTION_PROFILE_FAILED("Enable encryption profile failed");
 
     private static final Set<EnvironmentStatus> STARTABLE_STATUSES = Set.of(
             AVAILABLE,

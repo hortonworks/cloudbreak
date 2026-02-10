@@ -85,6 +85,7 @@ import com.sequenceiq.cloudbreak.service.cluster.model.HostGroupName;
 import com.sequenceiq.cloudbreak.service.cluster.model.RepairValidation;
 import com.sequenceiq.cloudbreak.service.cluster.model.Result;
 import com.sequenceiq.cloudbreak.service.datalake.DataLakeStatusCheckerService;
+import com.sequenceiq.cloudbreak.service.encryptionprofile.EncryptionProfileService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.migration.kraft.KraftMigrationService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsClientService;
@@ -95,10 +96,12 @@ import com.sequenceiq.cloudbreak.service.spot.SpotInstanceUsageCondition;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackStopRestrictionService;
 import com.sequenceiq.cloudbreak.service.stack.TargetedUpscaleSupportService;
+import com.sequenceiq.cloudbreak.service.validation.EncryptionProfileValidator;
 import com.sequenceiq.cloudbreak.service.validation.ZookeeperToKraftMigrationValidator;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.common.model.SeLinux;
+import com.sequenceiq.environment.api.v1.encryptionprofile.model.EncryptionProfileResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
@@ -183,6 +186,12 @@ class StackOperationServiceTest {
 
     @Mock
     private KraftMigrationService kraftMigrationService;
+
+    @Mock
+    private EncryptionProfileService encryptionProfileService;
+
+    @Mock
+    private EncryptionProfileValidator encryptionProfileValidator;
 
     @Captor
     private ArgumentCaptor<Map<String, Set<Long>>> capturedInstances;
@@ -828,5 +837,24 @@ class StackOperationServiceTest {
         underTest.modifyUserDefinedTags(resourceCrn, userDefinedTags);
 
         verify(stackUpdater).updateUserDefinedTags(resourceCrn, userDefinedTags);
+    }
+
+    @Test
+    public void testUpdateSslConfigsOnCluster() {
+        StackDto stack = mock(StackDto.class);
+        NameOrCrn nameOrCrn = NameOrCrn.ofName("Test");
+        String encryptionProfileName = "epName";
+        String encryptionProfileCrn = "epCrn";
+        EncryptionProfileResponse encryptionProfileResponse = new  EncryptionProfileResponse();
+        encryptionProfileResponse.setCrn(encryptionProfileCrn);
+
+        when(stackDtoService.getByNameOrCrn(nameOrCrn, "accountId")).thenReturn(stack);
+        when(stack.getId()).thenReturn(STACK_ID);
+        when(encryptionProfileService.getEncryptionProfileOrThrowException(encryptionProfileName)).thenReturn(encryptionProfileResponse);
+
+        underTest.updateSslConfigsOnCluster(nameOrCrn, "accountId", encryptionProfileName);
+
+        verify(encryptionProfileValidator, times(1)).validate(stack);
+        verify(flowManager, times(1)).triggerUpdateSslConfigsOnCluster(eq(STACK_ID), eq(encryptionProfileCrn));
     }
 }

@@ -5,6 +5,7 @@
 {% set tlsCipherSuitesJavaIntermediate = salt['pillar.get']('cluster:tlsCipherSuitesJavaIntermediate')%}
 {% set tlsCipherSuitesJavaIntermediateWithComma = salt['pillar.get']('cluster:tlsCipherSuitesJavaIntermediate') | replace(":", ",")%}
 {% set tlsAdvancedControl = salt['pillar.get']('cluster:tlsAdvancedControl')%}
+{% set enableTlsAdvancedControl = salt['pillar.get']('cluster:cmVersionSupportsTlsSetup', False) == True and salt['pillar.get']('cluster:tlsAdvancedControl', False) == True %}
 
 install-cloudera-manager-server:
   pkg.installed:
@@ -36,35 +37,40 @@ setup_missed_cm_heartbeat:
     - unless: grep "MISSED_HB_BAD" /etc/cloudera-scm-server/cm.settings
 
 setup_tls_chipher:
-  file.append:
+  file.replace:
     - name: /etc/default/cloudera-scm-server
-    - text: "export CMF_OVERRIDE_TLS_CIPHERS=\"{{ tlsCipherSuitesJavaIntermediate }}\""
-    - unless: grep "export CMF_OVERRIDE_TLS_CIPHERS=\"{{ tlsCipherSuitesJavaIntermediate }}\"" /etc/default/cloudera-scm-server
+    - pattern: '(?m)^(?!\s*#)\s*(?:export\s+)?CMF_OVERRIDE_TLS_CIPHERS.*$'
+    - repl: 'export CMF_OVERRIDE_TLS_CIPHERS="{{ tlsCipherSuitesJavaIntermediate }}"'
+    - append_if_not_found: True
 
-{% if salt['pillar.get']('cluster:cmVersionSupportsTlsSetup', False) == True and salt['pillar.get']('cluster:tlsAdvancedControl', False) == True %}
+{% if enableTlsAdvancedControl == True %}
 tls_advanced_control:
-  file.append:
+  file.replace:
     - name: /etc/default/cloudera-scm-server
-    - text: "export CMF_FF_TLS_ADVANCED_CONTROL=true"
-    - unless: grep "export CMF_FF_TLS_ADVANCED_CONTROL=true" /etc/default/cloudera-scm-server
+    - pattern: '(?m)^(?!\s*#)\s*(?:export\s+)?CMF_FF_TLS_ADVANCED_CONTROL.*$'
+    - repl: 'export CMF_FF_TLS_ADVANCED_CONTROL={{ enableTlsAdvancedControl }}'
+    - append_if_not_found: True
 
 encrypt_all_ports:
-  file.append:
+  file.replace:
     - name: /etc/default/cloudera-scm-server
-    - text: "export CMF_FF_ENCRYPT_ALL_PORTS=true"
-    - unless: grep "export CMF_FF_ENCRYPT_ALL_PORTS=true" /etc/default/cloudera-scm-server
-
-setup_ciphers:
-  file.append:
-    - name: /etc/cloudera-scm-server/cm.settings
-    - text: setsettings tls_ciphers {{ tlsCipherSuitesJavaIntermediateWithComma }}
-    - unless: grep "tls_ciphers" /etc/cloudera-scm-server/cm.settings
+    - pattern: '(?m)^(?!\s*#)\s*(?:export\s+)?CMF_FF_ENCRYPT_ALL_PORTS.*'
+    - repl: 'export CMF_FF_ENCRYPT_ALL_PORTS={{ enableTlsAdvancedControl }}'
+    - append_if_not_found: True
 
 setup_tls:
-  file.append:
+  file.replace:
     - name: /etc/cloudera-scm-server/cm.settings
-    - text: setsettings SUPPORTED_TLS_VERSIONS  {{ tlsVersionsCommaSeparated }}
-    - unless: grep "SUPPORTED_TLS_VERSIONS" /etc/cloudera-scm-server/cm.settings
+    - pattern: "setsettings SUPPORTED_TLS_VERSIONS.*"
+    - repl: 'setsettings SUPPORTED_TLS_VERSIONS {{ tlsVersionsCommaSeparated }}'
+    - append_if_not_found: True
+
+setup_ciphers:
+   file.replace:
+    - name: /etc/cloudera-scm-server/cm.settings
+    - pattern: "setsettings tls_ciphers.*"
+    - repl: 'setsettings tls_ciphers {{ tlsCipherSuitesJavaIntermediateWithComma }}'
+    - append_if_not_found: True
 {% endif %}
 
 {% if salt['pillar.get']('cluster:gov_cloud', False) == True %}

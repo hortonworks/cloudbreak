@@ -165,6 +165,10 @@ public class FreeIpaPollerProvider {
         return flowPoller(envId, envCrn, flowIdentifier, "FreeIPA cross realm trust " + operation);
     }
 
+    public AttemptResult<Void> updateSalt(Long envId, String envCrn, FlowIdentifier flowIdentifier) {
+        return flowPoller(envId, envCrn, flowIdentifier, "FreeIPA update salt");
+    }
+
     private AttemptResult<Void> flowPoller(Long envId, String envCrn, FlowIdentifier flowIdentifier, String flowName) {
         if (PollGroup.CANCELLED.equals(EnvironmentInMemoryStateStore.get(envId))) {
             LOGGER.info("FreeIpa polling cancelled in inmemory store, id: " + envId);

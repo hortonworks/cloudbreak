@@ -17,8 +17,12 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.environment.api.v1.encryptionprofile.endpoint.EncryptionProfileEndpoint;
 import com.sequenceiq.environment.api.v1.encryptionprofile.model.EncryptionProfileResponse;
@@ -37,7 +41,11 @@ public class EncryptionProfileService {
     @Inject
     private EntitlementService entitlementService;
 
-    public String getEncryptionProfileCrn(DetailedEnvironmentResponse environmentResponse, ClusterView clusterView) {
+    @Inject
+    private ClusterService clusterService;
+
+    public String getEncryptionProfileByCrnOrDefault(DetailedEnvironmentResponse environmentResponse, StackDto stackDto) {
+        ClusterView clusterView = stackDto.getCluster();
         String encryptionProfileCrn;
 
         if (StringUtils.isNotBlank(clusterView.getEncryptionProfileCrn())) {
@@ -83,6 +91,34 @@ public class EncryptionProfileService {
     private EncryptionProfileResponse getDefaultEncryptionProfile() {
         return ThreadBasedUserCrnProvider.doAsInternalActor(
                 () -> encryptionProfileEndpoint.getDefaultEncryptionProfile());
+    }
+
+    public void setEncryptionProfile(String encryptionProfileCrn, Stack stack) {
+        if (StringUtils.isNotEmpty(encryptionProfileCrn)) {
+            EncryptionProfileResponse encryptionProfile = getEncryptionProfileByCrn(encryptionProfileCrn);
+            Cluster cluster = stack.getCluster();
+            cluster.setEncryptionProfileCrn(encryptionProfile.getCrn());
+            clusterService.save(cluster);
+        } else {
+            LOGGER.info("No custom encryption profile for cluster. Cluster will use the environment's encryption profile.");
+        }
+    }
+
+    public EncryptionProfileResponse getEncryptionProfileOrThrowException(String encryptionProfileNameOrCrn) {
+        EncryptionProfileResponse encryptionProfile;
+        if (Crn.isCrn(encryptionProfileNameOrCrn)) {
+            encryptionProfile = ThreadBasedUserCrnProvider.doAsInternalActor(
+                    () -> encryptionProfileEndpoint.getByCrn(encryptionProfileNameOrCrn));
+        } else {
+            encryptionProfile = ThreadBasedUserCrnProvider.doAsInternalActor(
+                    () -> encryptionProfileEndpoint.getByName(encryptionProfileNameOrCrn));
+        }
+
+        if (encryptionProfile == null) {
+            throw new NotFoundException("Encryption profile not found: " + encryptionProfileNameOrCrn);
+        }
+
+        return encryptionProfile;
     }
 
     public EncryptionProfileResponse getEncryptionProfileByName(String encryptionProfileName) {

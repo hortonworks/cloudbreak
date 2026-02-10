@@ -43,6 +43,7 @@ import com.sequenceiq.environment.api.v1.encryptionprofile.model.EncryptionProfi
 import com.sequenceiq.environment.api.v1.encryptionprofile.model.TlsVersionResponse;
 import com.sequenceiq.environment.authorization.EncryptionProfileFiltering;
 import com.sequenceiq.environment.encryptionprofile.domain.EncryptionProfile;
+import com.sequenceiq.environment.encryptionprofile.service.EncryptionProfileFlowService;
 import com.sequenceiq.environment.encryptionprofile.service.EncryptionProfileService;
 import com.sequenceiq.environment.encryptionprofile.v1.converter.EncryptionProfileRequestToEncryptionProfileConverter;
 import com.sequenceiq.environment.encryptionprofile.v1.converter.EncryptionProfileToEncryptionProfileResponseConverter;
@@ -69,6 +70,9 @@ public class EncryptionProfileControllerTest {
     @Mock
     private EncryptionProfileToEncryptionProfileResponseConverter responseConverter;
 
+    @Mock
+    private EncryptionProfileFlowService encryptionProfileFlowService;
+
     private EncryptionProfileController controller;
 
     @BeforeEach
@@ -77,7 +81,8 @@ public class EncryptionProfileControllerTest {
                 requestConverter,
                 responseConverter,
                 encryptionProfileFiltering,
-                entitlementService);
+                entitlementService,
+                encryptionProfileFlowService);
         // Inject mock NotificationService into the superclass via reflection
         Field field = controller.getClass().getSuperclass().getDeclaredField("webSocketNotificationService");
         field.setAccessible(true);

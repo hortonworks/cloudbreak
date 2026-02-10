@@ -296,12 +296,12 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
         }
     }
 
-    void generateAlternativeCertAndSaveForStack(StackDtoDelegate stack) {
+    public void generateAlternativeCertAndSaveForStack(StackDtoDelegate stack) {
         try {
             String accountId = ThreadBasedUserCrnProvider.getAccountId();
             ClouderaManagerRepo clouderaManagerRepo = clusterComponentConfigProvider.getClouderaManagerRepoDetails(stack.getCluster().getId());
             DetailedEnvironmentResponse environment = environmentClientService.getByCrn(stack.getEnvironmentCrn());
-            String encryptionProfileCrn = encryptionProfileService.getEncryptionProfileCrn(environment, stack.getCluster());
+            String encryptionProfileCrn = encryptionProfileService.getEncryptionProfileByCrnOrDefault(environment.getEncryptionProfileCrn()).getCrn();
 
             if (entitlementService.isConfigureEncryptionProfileEnabled(accountId) &&
                     isVersionNewerOrEqualThanLimited(clouderaManagerRepo.getVersion(), CLOUDERAMANAGER_VERSION_7_13_2_0)

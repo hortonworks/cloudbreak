@@ -930,4 +930,25 @@ public interface DistroXV1Endpoint {
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     ResetJvmParamsV4Response resetJvmParamsByCrn(@NotEmpty @ValidCrn(resource = DATAHUB) @PathParam("crn") String crn,
             @NotNull @Valid ResetJvmParamsRequest request);
+
+    @PUT
+    @Path("{name}/update_ssl_configs")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Update SSL configs using encryption profile by cluster name",
+            operationId = "updateSslConfigsByName",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    FlowIdentifier updateSslConfigurationsByName(@NotEmpty @PathParam("name") String name,
+            @QueryParam("encryptionProfileNameOrCrn") String encryptionProfileNameOrCrn);
+
+    @PUT
+    @Path("crn/{crn}/update_ssl_configs")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Update SSL configs using encryption profile by cluster CRN",
+            operationId = "updateSslConfigsByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    FlowIdentifier updateSslConfigurationsByCrn(@NotEmpty @ValidCrn(resource = {DATAHUB}) @PathParam("crn") String crn,
+            @QueryParam("encryptionProfileNameOrCrn") String encryptionProfileNameOrCrn);
+
 }

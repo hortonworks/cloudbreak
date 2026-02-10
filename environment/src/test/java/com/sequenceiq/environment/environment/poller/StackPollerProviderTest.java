@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.environment.poller;
 
+import static com.sequenceiq.flow.api.model.FlowType.FLOW;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -21,6 +22,8 @@ import com.dyngr.core.AttemptResult;
 import com.dyngr.core.AttemptState;
 import com.sequenceiq.environment.environment.flow.config.update.EnvStackConfigUpdatesState;
 import com.sequenceiq.environment.environment.service.stack.StackService;
+import com.sequenceiq.flow.api.model.FlowCheckResponse;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.core.FlowConstants;
 import com.sequenceiq.flow.domain.FlowLogWithoutPayload;
 import com.sequenceiq.flow.service.flowlog.FlowLogDBService;
@@ -70,6 +73,29 @@ public class StackPollerProviderTest {
                 Arguments.of(new WebApplicationException("some 500 error"), null,
                         EnvStackConfigUpdatesState.STACK_CONFIG_UPDATES_START_STATE.name(),
                         AttemptState.BREAK)
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("updateSslConfigsSource")
+    public void testUpdateSslConfig(boolean hasActiveFlow, boolean latestFlowFinalizedAndFailed, AttemptState expectedResult) {
+        FlowIdentifier flowIdentifier = new FlowIdentifier(FLOW, "123");
+        FlowCheckResponse flowCheckResponse = mock(FlowCheckResponse.class);
+
+        when(flowCheckResponse.getHasActiveFlow()).thenReturn(hasActiveFlow);
+        when(flowCheckResponse.getLatestFlowFinalizedAndFailed()).thenReturn(latestFlowFinalizedAndFailed);
+        when(stackService.checkFlow(flowIdentifier)).thenReturn(flowCheckResponse);
+
+        AttemptResult<Void> result = underTest.updateSslConfig(1L, flowIdentifier);
+
+        assertEquals(expectedResult, result.getState());
+    }
+
+    private static Stream<Arguments> updateSslConfigsSource() {
+        return Stream.of(
+                Arguments.of(false, false, AttemptState.FINISH),
+                Arguments.of(true, false, AttemptState.CONTINUE),
+                Arguments.of(false, true, AttemptState.BREAK)
         );
     }
 

@@ -53,6 +53,9 @@ public class FreeIpaPollerService {
     @Value("${env.crossrealm.freeipa.polling.attempt:30}")
     private Integer crossRealmAttempt;
 
+    @Value("${env.update.freeipa.polling.attempt:60}")
+    private Integer updateAttempt;
+
     @Value("${env.stop.polling.sleep.time:10}")
     private Integer startStopSleeptime;
 
@@ -67,6 +70,9 @@ public class FreeIpaPollerService {
 
     @Value("${env.crossrealm.freeipa.polling.sleeptime:10}")
     private Integer crossRealmSleeptime;
+
+    @Value("${env.update.freeipa.polling.sleeptime:15}")
+    private Integer updateSleeptime;
 
     private final FreeIpaService freeIpaService;
 
@@ -212,6 +218,22 @@ public class FreeIpaPollerService {
             } catch (PollerStoppedException e) {
                 LOGGER.warn("FreeIPA syncing timed out", e);
                 throw new FreeIpaOperationFailedException("FreeIPA syncing timed out");
+            }
+        }
+    }
+
+    public void waitForSaltUpdate(Long envId, String envCrn) {
+        FlowIdentifier flowIdentifier = freeIpaService.updateSalt(envCrn);
+        if (flowIdentifier != null) {
+            try {
+                Polling.stopAfterAttempt(updateAttempt)
+                        .stopIfException(true)
+                        .waitPeriodly(updateSleeptime, TimeUnit.SECONDS)
+                        .run(() -> freeipaPollerProvider.updateSalt(envId, envCrn, flowIdentifier));
+            } catch (PollerStoppedException e) {
+                String message = String.format("FreeIPA update salt timed out or error happened: %s", e.getMessage());
+                LOGGER.warn(message, e);
+                throw new FreeIpaOperationFailedException(message);
             }
         }
     }

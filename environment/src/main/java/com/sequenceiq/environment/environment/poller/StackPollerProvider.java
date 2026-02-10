@@ -15,7 +15,11 @@ import com.dyngr.core.AttemptMaker;
 import com.dyngr.core.AttemptResult;
 import com.dyngr.core.AttemptResults;
 import com.dyngr.core.AttemptState;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.environment.environment.service.stack.StackService;
+import com.sequenceiq.environment.store.EnvironmentInMemoryStateStore;
+import com.sequenceiq.flow.api.model.FlowCheckResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.core.FlowConstants;
 import com.sequenceiq.flow.domain.FlowLogWithoutPayload;
@@ -137,5 +141,25 @@ public class StackPollerProvider {
 
     private boolean shouldContinue(List<AttemptResult<Void>> results) {
         return results.stream().anyMatch(result -> result.getState() == AttemptState.CONTINUE);
+    }
+
+    public AttemptResult<Void> updateSslConfig(Long envId, FlowIdentifier flowIdentifier) {
+        return flowPoller(envId, flowIdentifier, "Update Ssl config in Cloudbreak");
+    }
+
+    private AttemptResult<Void> flowPoller(Long envId, FlowIdentifier flowIdentifier, String flowName) {
+        if (PollGroup.CANCELLED.equals(EnvironmentInMemoryStateStore.get(envId))) {
+            LOGGER.info("Stack polling cancelled in in-memory store, id: {}", envId);
+            return AttemptResults.breakFor("Stack polling cancelled in in-memory store, id: " + envId);
+        }
+        FlowCheckResponse flowCheckResponse = ThreadBasedUserCrnProvider.doAsInternalActor(() -> stackService.checkFlow(flowIdentifier));
+        LOGGER.debug("Flow status: {}", flowCheckResponse);
+        if (flowCheckResponse.getHasActiveFlow()) {
+            return AttemptResults.justContinue();
+        } else if (flowCheckResponse.getLatestFlowFinalizedAndFailed()) {
+            return AttemptResults.breakFor(flowName + " failed.");
+        } else {
+            return AttemptResults.justFinish();
+        }
     }
 }

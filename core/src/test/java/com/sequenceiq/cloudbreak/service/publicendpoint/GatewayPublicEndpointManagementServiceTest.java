@@ -72,6 +72,7 @@ import com.sequenceiq.cloudbreak.service.securityconfig.SecurityConfigService;
 import com.sequenceiq.cloudbreak.service.stack.LoadBalancerPersistenceService;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.common.api.type.LoadBalancerType;
+import com.sequenceiq.environment.api.v1.encryptionprofile.model.EncryptionProfileResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @ExtendWith(MockitoExtension.class)
@@ -229,6 +230,10 @@ class GatewayPublicEndpointManagementServiceTest {
         when(certificateCreationService.create(eq("123"), eq(endpointName), eq(envName), any(PKCS10CertificationRequest.class),
                 eq(stack.getResourceCrn()))).thenReturn(List.of("aCertificate"));
 
+        EncryptionProfileResponse response = new EncryptionProfileResponse();
+        response.setCrn("epCrn");
+        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(any())).thenReturn(response);
+
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.renewCertificate(stack));
 
         verify(environmentClientService, times(3)).getByCrn(anyString());
@@ -272,6 +277,7 @@ class GatewayPublicEndpointManagementServiceTest {
         cluster.setFqdn(fqdn);
         doThrow(new PemDnsEntryCreateOrUpdateException("Uh-Oh"))
                 .when(dnsManagementService).createOrUpdateDnsEntryWithIp(any(), anyString(), anyString(), anyBoolean(), anyList());
+        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(any())).thenReturn(new EncryptionProfileResponse());
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
             CloudbreakServiceException actual = assertThrows(CloudbreakServiceException.class, () -> underTest.renewCertificate(stack));
@@ -330,6 +336,10 @@ class GatewayPublicEndpointManagementServiceTest {
                 eq(stack.getResourceCrn()))).thenReturn(List.of("aCertificate"));
         ClouderaManagerRepo clouderaManagerRepo = mock(ClouderaManagerRepo.class);
         when(entitlementService.isConfigureEncryptionProfileEnabled(anyString())).thenReturn(false);
+
+        EncryptionProfileResponse response = new EncryptionProfileResponse();
+        response.setCrn("epCrn");
+        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(any())).thenReturn(response);
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.generateCertAndSaveForStackAndUpdateDnsEntry(stack));
 
@@ -458,6 +468,10 @@ class GatewayPublicEndpointManagementServiceTest {
         doThrow(new PemDnsEntryCreateOrUpdateException("Uh-Oh")).when(dnsManagementService)
                 .createOrUpdateDnsEntryWithIp(eq("123"), eq(endpointName), eq(envName), eq(Boolean.FALSE), eq(List.of(primaryGw.getPublicIpWrapper())));
 
+        EncryptionProfileResponse response = new EncryptionProfileResponse();
+        response.setCrn("epCrn");
+        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(any())).thenReturn(response);
+
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
             CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class,
                     () -> underTest.generateCertAndSaveForStackAndUpdateDnsEntry(stack));
@@ -500,6 +514,8 @@ class GatewayPublicEndpointManagementServiceTest {
         when(domainNameProvider.getFullyQualifiedEndpointName(Set.of(), endpointName, environment)).thenReturn(fqdn);
         when(certificateCreationService.create(eq("123"), eq(endpointName), eq(envName), any(PKCS10CertificationRequest.class),
                 eq(stack.getResourceCrn()))).thenReturn(List.of("aCertificate"));
+
+        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(any())).thenReturn(new EncryptionProfileResponse());
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.generateCertAndSaveForStackAndUpdateDnsEntry(stack));
 
@@ -754,6 +770,10 @@ class GatewayPublicEndpointManagementServiceTest {
         when(loadBalancerPersistenceService.findByStackId(anyLong())).thenReturn(Set.of(loadBalancer));
         when(loadBalancerConfigService.selectLoadBalancerForFrontend(any(), any())).thenReturn(Optional.of(loadBalancer));
 
+        EncryptionProfileResponse response = new EncryptionProfileResponse();
+        response.setCrn("epCrn");
+        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(any())).thenReturn(response);
+
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.generateCertAndSaveForStackAndUpdateDnsEntry(stack));
 
         verify(environmentClientService, times(4)).getByCrn(anyString());
@@ -805,6 +825,10 @@ class GatewayPublicEndpointManagementServiceTest {
                 eq(stack.getResourceCrn()))).thenReturn(List.of("aCertificate"));
         when(loadBalancerPersistenceService.findByStackId(anyLong())).thenReturn(Set.of(loadBalancer));
         when(loadBalancerConfigService.selectLoadBalancerForFrontend(any(), any())).thenReturn(Optional.of(loadBalancer));
+
+        EncryptionProfileResponse response = new EncryptionProfileResponse();
+        response.setCrn("epCrn");
+        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(any())).thenReturn(response);
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.generateCertAndSaveForStackAndUpdateDnsEntry(stack));
 
@@ -1075,7 +1099,13 @@ class GatewayPublicEndpointManagementServiceTest {
         ClouderaManagerRepo clouderaManagerRepo = mock(ClouderaManagerRepo.class);
         when(clouderaManagerRepo.getVersion()).thenReturn("7.13.2.0");
         when(clusterComponentConfigProvider.getClouderaManagerRepoDetails(anyLong())).thenReturn(clouderaManagerRepo);
-        when(encryptionProfileService.getEncryptionProfileCrn(environment, stack.getCluster())).thenReturn("epCrn");
+
+        EncryptionProfileResponse response = new EncryptionProfileResponse();
+        response.setCrn("epCrn");
+        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(any())).thenReturn(response);
+
+
+
         when(entitlementService.isConfigureEncryptionProfileEnabled(anyString())).thenReturn(true);
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.generateAlternativeCertAndSaveForStack(stack));
