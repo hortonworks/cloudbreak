@@ -36,6 +36,10 @@ public class GcpDatabaseServerUpdateService extends GcpDatabaseServerBaseService
             LOGGER.info("Update root user password for database: {}", instance);
             User rootUser = sqlAdmin.users().get(projectId, instance, databaseServer.getRootUserName()).execute();
             rootUser.setPassword(newPassword);
+            // we need to set to null the new `databaseRoles` field explicitly in user object, otherwise GCP throws HTTP 400
+            // https://www.gcpapichanges.com/changes/1763035200-sqladmin:v1.html
+            // databaseRoles field is ignored during update, but it seems GCP also validates it to be empty
+            rootUser.setDatabaseRoles(null);
             Operation operation = sqlAdmin.users().update(projectId, instance, rootUser)
                     .setName(rootUser.getName())
                     .execute();
