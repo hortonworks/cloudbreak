@@ -710,7 +710,7 @@ public class MockUserManagementService extends UserManagementImplBase {
                     LOGGER.debug("Loading resources with service {} for account id {}", service.getClass(), accountId);
                     service.load(accountId);
                 } catch (Exception e) {
-                    LOGGER.error("Failed to load resources with service {} for account id {}", service.getClass(), accountId);
+                    LOGGER.error("Failed to load resources with service {} for account id {}", service.getClass(), accountId, e);
                 }
             });
             return newSetFromMap(new ConcurrentHashMap<>());
