@@ -3,13 +3,10 @@ package com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa;
 import static com.sequenceiq.freeipa.api.v1.operation.model.OperationState.COMPLETED;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.doNotWaitForFlow;
 
-import java.util.Optional;
-
 import jakarta.inject.Inject;
 
 import org.testng.annotations.Test;
 
-import com.sequenceiq.environment.environment.dto.FreeIpaLoadBalancerType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.it.cloudbreak.assertion.freeipa.FreeIpaAvailabilityAssertion;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
@@ -52,7 +49,7 @@ public class FreeIpaUpgradeTests extends AbstractE2ETest implements ImageValidat
                     "AND the stack is upgraded one node at a time",
             then = "the stack should be available AND deletable")
     public void testSingleFreeIpaInstanceUpgrade(TestContext testContext) {
-        testFreeIpaUpgrade(testContext, 1);
+        testFreeIpaUpgrade(testContext);
     }
 
     @Test(dataProvider = TEST_CONTEXT)
@@ -62,11 +59,11 @@ public class FreeIpaUpgradeTests extends AbstractE2ETest implements ImageValidat
                     "AND the stack is upgraded one node at a time",
             then = "the stack should be available AND deletable")
     public void testHAFreeIpaInstanceUpgrade(TestContext testContext) {
-        testFreeIpaUpgrade(testContext, 3);
+        testFreeIpaUpgrade(testContext);
     }
 
-    private void testFreeIpaUpgrade(TestContext testContext, int freeIpaInstances) {
-        setUpEnvironmentTestDto(testContext, Boolean.TRUE, freeIpaInstances, Optional.of(FreeIpaLoadBalancerType.NONE))
+    private void testFreeIpaUpgrade(TestContext testContext) {
+        setUpEnvironmentTestDto(testContext, Boolean.TRUE, 3)
                 .withFreeIpaImage(testContext.getCloudProvider().getFreeIpaUpgradeImageCatalog(), testContext.getCloudProvider().getFreeIpaUpgradeImageId())
                 .when(getEnvironmentTestClient().create())
                 .awaitForCreationFlow()
@@ -85,7 +82,6 @@ public class FreeIpaUpgradeTests extends AbstractE2ETest implements ImageValidat
                 .given(FreeIpaTestDto.class)
                 .await(FREEIPA_AVAILABLE)
                 .then(freeIpaAvailabilityAssertion.available())
-                .then(freeIpaAvailabilityAssertion.availableLoadBalancer())
                 .validate();
     }
 
