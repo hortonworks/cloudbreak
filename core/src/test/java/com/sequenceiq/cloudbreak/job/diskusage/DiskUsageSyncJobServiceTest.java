@@ -30,6 +30,7 @@ import org.springframework.context.ApplicationContext;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseAvailabilityType;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.domain.stack.Database;
@@ -44,6 +45,8 @@ import com.sequenceiq.cloudbreak.view.StackView;
 class DiskUsageSyncJobServiceTest {
 
     private static final String LOCAL_ID = "1";
+
+    private static final String RESOURCE_CRN = "crn:cdp:datahub:us-west-1:tenant:cluster:12345";
 
     @Mock
     private TransactionalScheduler scheduler;
@@ -63,6 +66,9 @@ class DiskUsageSyncJobServiceTest {
     @Mock
     private JobKey jobKey;
 
+    @Mock
+    private EntitlementService entitlementService;
+
     @InjectMocks
     private DiskUsageSyncJobService underTest;
 
@@ -70,11 +76,12 @@ class DiskUsageSyncJobServiceTest {
     void testSchedule() throws TransactionService.TransactionExecutionException {
         JobResource jobResource = mock(JobResource.class);
         when(jobResource.getLocalId()).thenReturn(LOCAL_ID);
-        when(jobResource.getRemoteResourceId()).thenReturn("1");
+        when(jobResource.getRemoteResourceId()).thenReturn(RESOURCE_CRN);
         when(diskUsageSyncConfig.getIntervalInMinutes()).thenReturn(10);
         when(diskUsageSyncConfig.isDiskUsageSyncEnabled()).thenReturn(Boolean.TRUE);
         when(clock.getCurrentInstant()).thenReturn(Instant.now());
         configureEmbeddedDhStack();
+        when(entitlementService.isDbDiskAutoResizeEnabled(any())).thenReturn(true);
         underTest.schedule(new DiskUsageSyncJobAdapter(jobResource));
         verify(scheduler, times(1)).scheduleJob(any(), any());
     }
@@ -103,6 +110,7 @@ class DiskUsageSyncJobServiceTest {
         when(diskUsageSyncConfig.getIntervalInMinutes()).thenReturn(10);
         when(diskUsageSyncConfig.isDiskUsageSyncEnabled()).thenReturn(Boolean.TRUE);
         when(clock.getCurrentInstant()).thenReturn(Instant.now());
+        when(entitlementService.isDbDiskAutoResizeEnabled(any())).thenReturn(true);
         underTest.schedule(stack);
         verify(scheduler, times(1)).scheduleJob(any(), any());
     }
@@ -114,6 +122,7 @@ class DiskUsageSyncJobServiceTest {
         when(stack.getId()).thenReturn(1L);
         configureStack(DATALAKE, null);
         when(diskUsageSyncConfig.isDiskUsageSyncEnabled()).thenReturn(Boolean.TRUE);
+        when(entitlementService.isDbDiskAutoResizeEnabled(any())).thenReturn(true);
         underTest.schedule(stack);
         verify(scheduler, never()).scheduleJob(any(), any());
     }
@@ -125,6 +134,7 @@ class DiskUsageSyncJobServiceTest {
         when(stack.getId()).thenReturn(1L);
         configureStack(WORKLOAD, NON_HA);
         when(diskUsageSyncConfig.isDiskUsageSyncEnabled()).thenReturn(Boolean.TRUE);
+        when(entitlementService.isDbDiskAutoResizeEnabled(any())).thenReturn(true);
         underTest.schedule(stack);
         verify(scheduler, never()).scheduleJob(any(), any());
     }
@@ -139,13 +149,27 @@ class DiskUsageSyncJobServiceTest {
     }
 
     @Test
+    void testScheduleWithIdWhenEntitlementIsDisabled() throws TransactionService.TransactionExecutionException {
+        configureJobResource();
+        StackView stackView = mock(StackView.class);
+        when(stackView.getId()).thenReturn(1L);
+        when(diskUsageSyncConfig.isDiskUsageSyncEnabled()).thenReturn(Boolean.TRUE);
+        when(entitlementService.isDbDiskAutoResizeEnabled(any())).thenReturn(false);
+
+        underTest.schedule(stackView);
+        verify(scheduler, never()).scheduleJob(any(), any());
+    }
+
+    @Test
     void testScheduleWithResource() throws TransactionService.TransactionExecutionException {
         JobResource jobResource = mock(JobResource.class);
         when(jobResource.getLocalId()).thenReturn(LOCAL_ID);
+        when(jobResource.getRemoteResourceId()).thenReturn(RESOURCE_CRN);
         when(diskUsageSyncConfig.getIntervalInMinutes()).thenReturn(10);
         when(diskUsageSyncConfig.isDiskUsageSyncEnabled()).thenReturn(Boolean.TRUE);
         when(clock.getCurrentInstant()).thenReturn(Instant.now());
         configureEmbeddedDhStack();
+        when(entitlementService.isDbDiskAutoResizeEnabled(any())).thenReturn(true);
         DiskUsageSyncJobAdapter resource = new DiskUsageSyncJobAdapter(jobResource);
         underTest.schedule(resource);
         verify(scheduler, times(1)).scheduleJob(any(), any());
@@ -192,7 +216,8 @@ class DiskUsageSyncJobServiceTest {
         StackRepository jobResourceRepository = mock(StackRepository.class);
         when(applicationContext.getBean(StackRepository.class)).thenReturn(jobResourceRepository);
         when(jobResourceRepository.getJobResource(1L)).thenReturn(Optional.of(jobResource));
-        when(jobResource.getLocalId()).thenReturn(LOCAL_ID);
+        lenient().when(jobResource.getLocalId()).thenReturn(LOCAL_ID);
+        when(jobResource.getRemoteResourceId()).thenReturn(RESOURCE_CRN);
         lenient().when(jobResource.getProvider()).thenReturn(Optional.of("AZURE"));
     }
 

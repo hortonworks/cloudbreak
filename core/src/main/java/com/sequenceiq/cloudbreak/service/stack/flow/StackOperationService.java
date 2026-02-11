@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STALE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOPPED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOP_REQUESTED;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_DB_DISK_AUTO_RESIZE;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
 import static com.sequenceiq.cloudbreak.common.notification.NotificationState.DISABLED;
 import static com.sequenceiq.cloudbreak.common.notification.NotificationState.ENABLED;
@@ -52,6 +53,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateReques
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.SetDefaultJavaVersionRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.SaltPasswordStatus;
 import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -201,6 +203,9 @@ public class StackOperationService {
 
     @Inject
     private StackNotificationService stackNotificationService;
+
+    @Inject
+    private EntitlementService entitlementService;
 
     public FlowIdentifier removeInstance(StackDto stack, String instanceId, boolean forced) {
         InstanceMetaData metaData = updateNodeCountValidator.validateInstanceForDownscale(instanceId, stack.getStack());
@@ -569,15 +574,15 @@ public class StackOperationService {
 
     public FlowIdentifier stackUpdateDisks(NameOrCrn nameOrCrn, DiskUpdateRequest updateRequest, String accountId) {
         convertInputGroupToLowerCase(updateRequest);
-        validateDiskUpdate(updateRequest);
+        validateDiskUpdate(updateRequest, accountId);
         StackDto stack = stackDtoService.getByNameOrCrn(nameOrCrn, accountId);
         return flowManager.triggerStackUpdateDisks(stack, updateRequest);
     }
 
-    private void validateDiskUpdate(DiskUpdateRequest updateRequest) {
-        if (DiskType.DATABASE_DISK == updateRequest.getDiskType()) {
-            throw new BadRequestException("Database disk updates (DATABASE_DISK) are not yet supported. " +
-                    "This functionality is currently under development and will be made available in a future release.");
+    private void validateDiskUpdate(DiskUpdateRequest updateRequest, String accountId) {
+        if (DiskType.DATABASE_DISK == updateRequest.getDiskType() && !entitlementService.isDbDiskAutoResizeEnabled(accountId)) {
+            throw new BadRequestException(String.format("Database disk update (DATABASE_DISK) is only possible " +
+                    "with the entitlement %s enabled.", CDP_CB_DB_DISK_AUTO_RESIZE));
         }
     }
 
