@@ -12,6 +12,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -51,6 +52,7 @@ import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpEnviro
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
+import com.sequenceiq.environment.environment.dto.FreeIpaLoadBalancerType;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
@@ -157,6 +159,13 @@ public class EnvironmentTestDto
 
     public EnvironmentTestDto withCreateFreeIpa(Boolean create) {
         getRequest().getFreeIpa().setCreate(create);
+        return this;
+    }
+
+    public EnvironmentTestDto withCreateFreeIpaLoadBalancer(Optional<FreeIpaLoadBalancerType> type) {
+        if (type.isPresent()) {
+            getRequest().getFreeIpa().setLoadBalancerType(type.get().name());
+        }
         return this;
     }
 

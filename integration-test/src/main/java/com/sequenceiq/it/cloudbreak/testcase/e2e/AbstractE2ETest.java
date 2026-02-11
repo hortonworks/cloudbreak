@@ -10,6 +10,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
+import java.util.Optional;
 
 import jakarta.annotation.Nonnull;
 import jakarta.inject.Inject;
@@ -25,6 +26,7 @@ import org.testng.annotations.Listeners;
 import com.azure.resourcemanager.resources.models.ResourceGroup;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.model.Architecture;
+import com.sequenceiq.environment.environment.dto.FreeIpaLoadBalancerType;
 import com.sequenceiq.it.cloudbreak.assertion.encryption.SecretEncryptionAssertions;
 import com.sequenceiq.it.cloudbreak.assertion.safelogic.SafeLogicAssertions;
 import com.sequenceiq.it.cloudbreak.assertion.selinux.SELinuxAssertions;
@@ -168,7 +170,12 @@ public abstract class AbstractE2ETest extends AbstractIntegrationTest {
     }
 
     protected void createEnvironment(TestContext testContext, Boolean createFreeIpa, int freeIpaInstanceCount) {
-        setUpEnvironmentTestDto(testContext, createFreeIpa, freeIpaInstanceCount)
+        createEnvironment(testContext, createFreeIpa, freeIpaInstanceCount, Optional.empty());
+    }
+
+    protected void createEnvironment(TestContext testContext, Boolean createFreeIpa, int freeIpaInstanceCount,
+        Optional<FreeIpaLoadBalancerType> loadBalancerType) {
+        setUpEnvironmentTestDto(testContext, createFreeIpa, freeIpaInstanceCount, loadBalancerType)
                 .when(getEnvironmentTestClient().create())
                 .awaitForCreationFlow()
                 .when(getEnvironmentTestClient().describe())
@@ -182,15 +189,21 @@ public abstract class AbstractE2ETest extends AbstractIntegrationTest {
     }
 
     protected EnvironmentTestDto setUpEnvironmentTestDto(TestContext testContext, Boolean createFreeIpa, int freeIpaInstanceCount) {
+        return setUpEnvironmentTestDto(testContext, createFreeIpa, freeIpaInstanceCount, Optional.empty());
+    }
+
+    protected EnvironmentTestDto setUpEnvironmentTestDto(TestContext testContext, Boolean createFreeIpa, int freeIpaInstanceCount,
+        Optional<FreeIpaLoadBalancerType> loadBalancerType) {
         return testContext
                 .given("telemetry", TelemetryTestDto.class)
-                    .withLogging()
-                    .withReportClusterLogs()
+                .withLogging()
+                .withReportClusterLogs()
                 .given(EnvironmentTestDto.class)
-                    .withTelemetry("telemetry")
-                    .withResourceEncryption(testContext.isResourceEncryptionEnabled())
-                    .withFreeIpaNodes(freeIpaInstanceCount)
-                    .withCreateFreeIpa(createFreeIpa);
+                .withTelemetry("telemetry")
+                .withCreateFreeIpaLoadBalancer(loadBalancerType)
+                .withResourceEncryption(testContext.isResourceEncryptionEnabled())
+                .withFreeIpaNodes(freeIpaInstanceCount)
+                .withCreateFreeIpa(createFreeIpa);
     }
 
     protected void createEnvironmentWithFreeIpa(TestContext testContext, Architecture architecture) {

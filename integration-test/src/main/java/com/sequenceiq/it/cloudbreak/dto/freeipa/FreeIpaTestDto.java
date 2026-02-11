@@ -41,7 +41,6 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupNetworkRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupRequest;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceTemplateRequest;
@@ -81,7 +80,6 @@ import com.sequenceiq.it.cloudbreak.dto.StackAuthenticationTestDto;
 import com.sequenceiq.it.cloudbreak.dto.SubnetId;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
-import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.microservice.FreeIpaClient;
 import com.sequenceiq.it.cloudbreak.search.ClusterLogsStorageUrl;
 import com.sequenceiq.it.cloudbreak.search.Searchable;
@@ -441,12 +439,6 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
         return this;
     }
 
-    public InstanceGroupResponse findInstanceGroupByType(String name) {
-        return getResponse().getInstanceGroups().stream().filter(ig -> name.equals(ig.getName())).findFirst().orElseThrow(
-                () -> new TestFailException("Unable to find FreeIPA instance group based on the following name: " + name)
-        );
-    }
-
     private boolean checkResponseHasInstanceGroups() {
         return getResponse() != null && getResponse().getInstanceGroups() != null;
     }
@@ -475,15 +467,6 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
     public FreeIpaTestDto awaitForFreeIpaInstance(Map<List<String>, com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus> statuses,
             RunningParameter runningParameter) {
         return getTestContext().awaitForInstance(this, statuses, runningParameter);
-    }
-
-    public FreeIpaTestDto withUpgradeCatalogAndImage() {
-        return withImage(getCloudProvider().getFreeIpaUpgradeImageCatalog(), getCloudProvider()
-                .getFreeIpaUpgradeImageId());
-    }
-
-    public FreeIpaTestDto withMarketplaceUpgradeCatalogAndImage() {
-        return withImage(getCloudProvider().getFreeIpaMarketplaceUpgradeImageCatalog(), getCloudProvider().getFreeIpaMarketplaceUpgradeImageId());
     }
 
     public FreeIpaTestDto withImageValidationCatalogAndImageIfPresent() {
