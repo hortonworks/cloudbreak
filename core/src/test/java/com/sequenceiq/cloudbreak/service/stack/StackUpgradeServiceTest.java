@@ -6,12 +6,15 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -23,12 +26,13 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.junit.jupiter.MockitoSettings;
-import org.mockito.quality.Strictness;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
+import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.cluster.model.HostGroupName;
@@ -51,21 +55,24 @@ public class StackUpgradeServiceTest {
             .build()
             .toString();
 
-    private static final Long STACK_ID = 3L;
-
     @InjectMocks
     private StackUpgradeService underTest;
 
     @Mock
     private EntitlementService entitlementService;
 
+    @Mock
+    private ClusterComponentConfigProvider clusterComponentConfigProvider;
+
     private Stack stack;
 
     @BeforeEach
-    @MockitoSettings(strictness = Strictness.LENIENT)
     public void setup() {
         stack = new Stack();
-        stack.setId(STACK_ID);
+        stack.setId(1L);
+        Cluster cluster = mock(Cluster.class);
+        lenient().when(cluster.getId()).thenReturn(2L);
+        stack.setCluster(cluster);
         stack.setPlatformVariant("variant");
         stack.setResourceCrn(RESOURCE_CRN);
         Workspace workspace = new Workspace();
@@ -76,6 +83,11 @@ public class StackUpgradeServiceTest {
     @Test
     public void testCalculateUpgradeVariantWhenMigrationDisabled() {
         stack.setPlatformVariant("AWS");
+        ClouderaManagerProduct cmProduct = mock(ClouderaManagerProduct.class);
+        when(cmProduct.getVersion()).thenReturn("7.3.1");
+        when(clusterComponentConfigProvider
+                .getNormalizedCdhProductWithNormalizedVersion(anyLong()))
+                .thenReturn(Optional.of(cmProduct));
         when(entitlementService.awsVariantMigrationEnabled(ACCOUNT_ID)).thenReturn(false);
         String actual = underTest.calculateUpgradeVariant(stack, USER_CRN, DO_NOT_KEEP_VARIANT);
         assertEquals("AWS", actual);
@@ -84,6 +96,13 @@ public class StackUpgradeServiceTest {
     @Test
     public void testCalculateUpgradeVariantWhenMigrationEnabledAndVariantIsAws() {
         stack.setPlatformVariant("AWS");
+
+        ClouderaManagerProduct cmProduct = mock(ClouderaManagerProduct.class);
+        when(cmProduct.getVersion()).thenReturn("7.3.1");
+        when(clusterComponentConfigProvider
+                .getNormalizedCdhProductWithNormalizedVersion(anyLong()))
+                .thenReturn(Optional.of(cmProduct));
+
         when(entitlementService.awsVariantMigrationEnabled(ACCOUNT_ID)).thenReturn(true);
         String actual = underTest.calculateUpgradeVariant(stack, USER_CRN, DO_NOT_KEEP_VARIANT);
         assertEquals("AWS_NATIVE", actual);
@@ -99,6 +118,7 @@ public class StackUpgradeServiceTest {
     @Test
     public void testCalculateUpgradeVariantWhenMigrationEnabledWhenVariantIsNotAWS() {
         stack.setPlatformVariant("GCP");
+
         String actual = underTest.calculateUpgradeVariant(stack, USER_CRN, DO_NOT_KEEP_VARIANT);
         assertEquals("GCP", actual);
     }
@@ -208,6 +228,11 @@ public class StackUpgradeServiceTest {
         );
         Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> mapRepairValidationResult = Result.success(success);
         when(stackDto.getStack().getPlatformVariant()).thenReturn("AWS");
+        ClouderaManagerProduct cmProduct = mock(ClouderaManagerProduct.class);
+        when(cmProduct.getVersion()).thenReturn("7.3.1");
+        when(clusterComponentConfigProvider
+                .getNormalizedCdhProductWithNormalizedVersion(anyLong()))
+                .thenReturn(Optional.of(cmProduct));
         when(entitlementService.awsVariantMigrationEnabled(ACCOUNT_ID)).thenReturn(false);
 
         String calculateUpgradeVariant = underTest.calculateUpgradeVariant(stackDto, USER_CRN, false, mapRepairValidationResult);
@@ -248,11 +273,30 @@ public class StackUpgradeServiceTest {
         );
         Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> mapRepairValidationResult = Result.success(success);
         when(stackDto.getStack().getPlatformVariant()).thenReturn("AWS");
+        ClouderaManagerProduct cmProduct = mock(ClouderaManagerProduct.class);
+        when(cmProduct.getVersion()).thenReturn("7.3.1");
+        when(clusterComponentConfigProvider
+                .getNormalizedCdhProductWithNormalizedVersion(anyLong()))
+                .thenReturn(Optional.of(cmProduct));
         when(entitlementService.awsVariantMigrationEnabled(ACCOUNT_ID)).thenReturn(true);
 
         String calculateUpgradeVariant = underTest.calculateUpgradeVariant(stackDto, USER_CRN, false, mapRepairValidationResult);
 
         assertEquals("AWS_NATIVE",  calculateUpgradeVariant);
+    }
+
+    @Test
+    public void testCalculateUpgradeVariantWhenRuntimeVersionIsLowerThanMinimum() {
+        stack.setPlatformVariant("AWS");
+        ClouderaManagerProduct cmProduct = mock(ClouderaManagerProduct.class);
+        when(cmProduct.getVersion()).thenReturn("7.3.0");
+        when(clusterComponentConfigProvider
+                .getNormalizedCdhProductWithNormalizedVersion(anyLong()))
+                .thenReturn(Optional.of(cmProduct));
+
+        String actual = underTest.calculateUpgradeVariant(stack, USER_CRN, DO_NOT_KEEP_VARIANT);
+
+        assertEquals("AWS", actual);
     }
 
     private InstanceMetaData getInstanceMetadatatWithFqdn(String discoveredFqdn) {
