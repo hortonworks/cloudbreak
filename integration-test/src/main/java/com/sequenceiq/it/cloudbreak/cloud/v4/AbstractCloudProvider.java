@@ -416,6 +416,12 @@ public abstract class AbstractCloudProvider implements CloudProvider {
     }
 
     @Override
+    public String getFreeIpaCentos7UpgradeImageId() {
+        LOGGER.warn("'freeIpaCentos7UpgradeImageId' is not implemented");
+        return null;
+    }
+
+    @Override
     public String getFreeIpaMarketplaceUpgradeImageId() {
         LOGGER.warn("'freeIpaMarketplaceUpgradeImageId' is not implemented");
         return null;

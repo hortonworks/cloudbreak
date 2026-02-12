@@ -55,6 +55,8 @@ public class FreeIpaProperties {
     public static class Upgrade {
         private String imageId;
 
+        private String centos7ImageId;
+
         private String catalog;
 
         public String getImageId() {
@@ -63,6 +65,14 @@ public class FreeIpaProperties {
 
         public void setImageId(String imageId) {
             this.imageId = imageId;
+        }
+
+        public String getCentos7ImageId() {
+            return centos7ImageId;
+        }
+
+        public void setCentos7ImageId(String centos7ImageId) {
+            this.centos7ImageId = centos7ImageId;
         }
 
         public String getCatalog() {

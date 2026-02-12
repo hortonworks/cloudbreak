@@ -488,6 +488,11 @@ public class AzureCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
+    public String getFreeIpaCentos7UpgradeImageId() {
+        return azureProperties.getFreeipa().getUpgrade().getCentos7ImageId();
+    }
+
+    @Override
     public String getFreeIpaMarketplaceUpgradeImageId() {
         return azureProperties.getFreeipa().getMarketplace().getUpgrade().getImageId();
     }

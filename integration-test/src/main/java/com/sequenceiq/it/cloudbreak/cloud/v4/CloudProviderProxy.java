@@ -496,6 +496,11 @@ public class CloudProviderProxy implements CloudProvider {
     }
 
     @Override
+    public String getFreeIpaCentos7UpgradeImageId() {
+        return delegate.getFreeIpaCentos7UpgradeImageId();
+    }
+
+    @Override
     public String getFreeIpaMarketplaceUpgradeImageId() {
         return delegate.getFreeIpaMarketplaceUpgradeImageId();
     }

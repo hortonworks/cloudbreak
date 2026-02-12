@@ -261,10 +261,6 @@ public class MockCloudProvider extends AbstractCloudProvider {
                 "`integrationtest.cloudProvider` property, Values: AZURE, AWS", getCloudPlatform()));
     }
 
-    public String getImageCatalogUrl() {
-        return commonCloudProperties().getImageCatalogUrl();
-    }
-
     @Override
     public String getFreeIpaImageCatalogUrl() {
         return imageCatalogMockServerSetup.getFreeIpaImageCatalogUrl();

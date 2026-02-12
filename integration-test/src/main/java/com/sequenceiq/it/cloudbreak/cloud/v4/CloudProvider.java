@@ -206,6 +206,8 @@ public interface CloudProvider {
 
     String getFreeIpaUpgradeImageId();
 
+    String getFreeIpaCentos7UpgradeImageId();
+
     String getFreeIpaMarketplaceUpgradeImageId();
 
     String getFreeIpaUpgradeImageCatalog();

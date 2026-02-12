@@ -231,6 +231,7 @@ integrationtest:
       instanceType: m5.large
       arm64InstanceType: r7gd.large
       upgrade:
+        centos7ImageId: ee52a28a-7551-4f56-8b08-a23f155316ba
         imageId: a1e7dad5-9ae7-4758-a469-bb557f8ebaed
         catalog: https://cloudbreak-imagecatalog.s3.amazonaws.com/v3-test-freeipa-image-catalog.json
       rebuild:
@@ -318,6 +319,7 @@ integrationtest:
       instanceType: Standard_D8s_v3
       arm64InstanceType:
       upgrade:
+        centos7ImageId: dc277098-ea7c-48b7-b1a2-89950b989b6a
         imageId: 863d4a99-8d8d-42d8-bb81-7076e4e8051c
         catalog: https://cloudbreak-imagecatalog.s3.amazonaws.com/v3-test-freeipa-image-catalog.json
       marketplace:
@@ -393,6 +395,7 @@ integrationtest:
       instanceType: e2-standard-2
       arm64InstanceType:
       upgrade:
+        centos7ImageId: bbc059cd-d7c7-4938-bb34-5c7fc09f1204
         imageId: dbc14494-da5f-43ef-b3b4-efed85ea3210
         catalog: https://cloudbreak-imagecatalog.s3.amazonaws.com/v3-test-freeipa-image-catalog.json
       rebuild:

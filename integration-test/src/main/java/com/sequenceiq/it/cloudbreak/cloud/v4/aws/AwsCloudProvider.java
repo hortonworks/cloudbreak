@@ -488,6 +488,11 @@ public class AwsCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
+    public String getFreeIpaCentos7UpgradeImageId() {
+        return awsProperties.getFreeipa().getUpgrade().getCentos7ImageId();
+    }
+
+    @Override
     public String getFreeIpaUpgradeImageCatalog() {
         return awsProperties.getFreeipa().getUpgrade().getCatalog();
     }

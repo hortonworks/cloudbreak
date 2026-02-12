@@ -52,7 +52,8 @@ public class FreeIpaUpgradeTests extends AbstractE2ETest implements ImageValidat
                     "AND the stack is upgraded one node at a time",
             then = "the stack should be available AND deletable")
     public void testSingleFreeIpaInstanceUpgrade(TestContext testContext) {
-        testFreeIpaUpgrade(testContext, 1);
+        testFreeIpaUpgrade(testContext, 1,
+                testContext.getCloudProvider().getFreeIpaUpgradeImageId(), true);
     }
 
     @Test(dataProvider = TEST_CONTEXT)
@@ -62,12 +63,13 @@ public class FreeIpaUpgradeTests extends AbstractE2ETest implements ImageValidat
                     "AND the stack is upgraded one node at a time",
             then = "the stack should be available AND deletable")
     public void testHAFreeIpaInstanceUpgrade(TestContext testContext) {
-        testFreeIpaUpgrade(testContext, 3);
+        testFreeIpaUpgrade(testContext, 3,
+                testContext.getCloudProvider().getFreeIpaCentos7UpgradeImageId(), false);
     }
 
-    private void testFreeIpaUpgrade(TestContext testContext, int freeIpaInstances) {
+    private void testFreeIpaUpgrade(TestContext testContext, int freeIpaInstances, String initialImageId, boolean validateLB) {
         setUpEnvironmentTestDto(testContext, Boolean.TRUE, freeIpaInstances, Optional.of(FreeIpaLoadBalancerType.NONE))
-                .withFreeIpaImage(testContext.getCloudProvider().getFreeIpaUpgradeImageCatalog(), testContext.getCloudProvider().getFreeIpaUpgradeImageId())
+                .withFreeIpaImage(testContext.getCloudProvider().getFreeIpaUpgradeImageCatalog(), initialImageId)
                 .when(getEnvironmentTestClient().create())
                 .awaitForCreationFlow()
                 .given(FreeIpaTestDto.class)
@@ -85,7 +87,7 @@ public class FreeIpaUpgradeTests extends AbstractE2ETest implements ImageValidat
                 .given(FreeIpaTestDto.class)
                 .await(FREEIPA_AVAILABLE)
                 .then(freeIpaAvailabilityAssertion.available())
-                .then(freeIpaAvailabilityAssertion.availableLoadBalancer())
+                .then(freeIpaAvailabilityAssertion.availableLoadBalancer(validateLB))
                 .validate();
     }
 

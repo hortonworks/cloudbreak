@@ -461,6 +461,11 @@ public class GcpCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
+    public String getFreeIpaCentos7UpgradeImageId() {
+        return gcpProperties.getFreeipa().getUpgrade().getCentos7ImageId();
+    }
+
+    @Override
     public String getFreeIpaUpgradeImageCatalog() {
         return gcpProperties.getFreeipa().getUpgrade().getCatalog();
     }

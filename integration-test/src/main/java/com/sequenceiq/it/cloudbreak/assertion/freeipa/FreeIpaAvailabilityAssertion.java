@@ -108,14 +108,16 @@ public class FreeIpaAvailabilityAssertion {
         };
     }
 
-    public Assertion<FreeIpaTestDto, FreeIpaClient> availableLoadBalancer() {
+    public Assertion<FreeIpaTestDto, FreeIpaClient> availableLoadBalancer(boolean validateLB) {
         return (testContext, testDto, client) -> {
             try {
-                checkLoadBalancerIfRequired(
-                        testContext,
-                        client.getDefaultClient(testContext),
-                        testDto.getResponse().getEnvironmentCrn()
-                );
+                if (validateLB) {
+                    checkLoadBalancerIfRequired(
+                            testContext,
+                            client.getDefaultClient(testContext),
+                            testDto.getResponse().getEnvironmentCrn()
+                    );
+                }
             } catch (TestFailException e) {
                 throw e;
             } catch (Exception e) {
