@@ -13,6 +13,7 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
+import com.sequenceiq.periscope.api.model.AlertType;
 import com.sequenceiq.periscope.api.model.ScalingStatus;
 import com.sequenceiq.periscope.common.MessageCode;
 import com.sequenceiq.periscope.domain.BaseAlert;
@@ -33,6 +34,10 @@ public class ScalingHandler implements ApplicationListener<ScalingEvent> {
     @Inject
     @Qualifier("periscopeListeningScheduledExecutorService")
     private ExecutorService executorService;
+
+    @Inject
+    @Qualifier("periscopeTimeMonitorScheduledExecutorService")
+    private ExecutorService executorTimeMonitorService;
 
     @Inject
     private ClusterService clusterService;
@@ -64,7 +69,11 @@ public class ScalingHandler implements ApplicationListener<ScalingEvent> {
                     event.getDecommissionNodeIds(),
                     event.getExistingServiceHealthyHostGroupNodeCount(), event.getScalingAdjustmentType(), event.getActivityId());
 
-            executorService.submit(scalingRequest);
+            if (alert.getAlertType().equals(AlertType.TIME)) {
+                executorTimeMonitorService.submit(scalingRequest);
+            } else {
+                executorService.submit(scalingRequest);
+            }
             rejectedThreadService.remove(cluster.getId());
             clusterService.setLastScalingActivity(cluster.getId(), System.currentTimeMillis());
         } else {

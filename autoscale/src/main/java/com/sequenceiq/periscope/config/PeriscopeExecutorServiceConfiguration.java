@@ -18,6 +18,9 @@ public class PeriscopeExecutorServiceConfiguration {
     @Value("${periscope.executorservice.pool.size:60}")
     private int executorServicePoolSize;
 
+    @Value("${periscope.executorservice.monitor.time.pool.size:20}")
+    private int executorServiceTimeMonitorPoolSize;
+
     @Value("${periscope.executorservice.delete.pool.size:10}")
     private int executorServiceDeletePoolSize;
 
@@ -36,5 +39,12 @@ public class PeriscopeExecutorServiceConfiguration {
         return MoreExecutors
                 .listeningDecorator(new MDCCleanerScheduledExecutor(executorServiceDeletePoolSize,
                         new ThreadFactoryBuilder().setNameFormat("autoscale-delete-monitor-%d").build()));
+    }
+
+    @Bean
+    ListeningScheduledExecutorService periscopeTimeMonitorScheduledExecutorService() {
+        return MoreExecutors
+                .listeningDecorator(new MDCCleanerScheduledExecutor(executorServiceTimeMonitorPoolSize,
+                        new ThreadFactoryBuilder().setNameFormat("autoscale-time-monitor-%d").build(), metricUtils::submitThreadPoolExecutorParameters));
     }
 }

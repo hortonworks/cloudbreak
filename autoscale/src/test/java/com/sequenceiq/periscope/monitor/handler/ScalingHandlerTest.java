@@ -30,6 +30,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationContext;
 
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
+import com.sequenceiq.periscope.api.model.AlertType;
 import com.sequenceiq.periscope.api.model.ClusterState;
 import com.sequenceiq.periscope.api.model.ScalingStatus;
 import com.sequenceiq.periscope.domain.BaseAlert;
@@ -60,6 +61,9 @@ public class ScalingHandlerTest {
 
     @Mock
     private ExecutorService executorService;
+
+    @Mock
+    private ExecutorService executorTimeMonitorService;
 
     @Mock
     private HistoryService historyService;
@@ -94,6 +98,7 @@ public class ScalingHandlerTest {
         Long activityId = 1234L;
 
         when(scalingEventMock.getAlert()).thenReturn(loadAlertMock);
+        when(scalingEventMock.getAlert().getAlertType()).thenReturn(AlertType.LOAD);
         when(loadAlertMock.getCluster()).thenReturn(cluster);
         when(loadAlertMock.getScalingPolicy()).thenReturn(scalingPolicyMock);
         when(clusterService.findById(anyLong())).thenReturn(cluster);
@@ -113,6 +118,41 @@ public class ScalingHandlerTest {
         verify(rejectedThreadService).remove(AUTOSCALE_CLUSTER_ID);
         verify(clusterService).setLastScalingActivity(eq(AUTOSCALE_CLUSTER_ID), anyLong());
         verify(executorService).submit(runnableMock);
+    }
+
+    @Test
+    public void testOnApplicationEventWhenTimeAlertDecommissionNodes() {
+        TimeAlert timeAlertMock = mock(TimeAlert.class);
+        Cluster cluster = getARunningCluster();
+
+        int clusterNodeSize = 100;
+        int hostGroupNodeCount = 10;
+        List nodeIds = List.of("nodeId1", "nodeId2", "nodeId3");
+        int expectedNodeCount = hostGroupNodeCount - nodeIds.size();
+        ScalingAdjustmentType scalingType = ScalingAdjustmentType.REGULAR;
+        Long activityId = 1234L;
+
+        when(scalingEventMock.getAlert()).thenReturn(timeAlertMock);
+        when(scalingEventMock.getAlert().getAlertType()).thenReturn(AlertType.TIME);
+        when(timeAlertMock.getCluster()).thenReturn(cluster);
+        when(timeAlertMock.getScalingPolicy()).thenReturn(scalingPolicyMock);
+        when(clusterService.findById(anyLong())).thenReturn(cluster);
+        when(scalingPolicyMock.getAdjustmentType()).thenReturn(LOAD_BASED);
+        when(scalingEventMock.getExistingClusterNodeCount()).thenReturn(clusterNodeSize);
+        when(scalingEventMock.getExistingHostGroupNodeCount()).thenReturn(hostGroupNodeCount);
+        when(scalingEventMock.getDesiredAbsoluteHostGroupNodeCount()).thenReturn(expectedNodeCount);
+        when(scalingEventMock.getDecommissionNodeIds()).thenReturn(nodeIds);
+        when(scalingEventMock.getExistingServiceHealthyHostGroupNodeCount()).thenReturn(hostGroupNodeCount);
+        when(scalingEventMock.getScalingAdjustmentType()).thenReturn(scalingType);
+        when(scalingEventMock.getActivityId()).thenReturn(activityId);
+        when(applicationContext.getBean("ScalingRequest", cluster, scalingPolicyMock,
+                clusterNodeSize, hostGroupNodeCount, expectedNodeCount, nodeIds, hostGroupNodeCount, scalingType, activityId)).thenReturn(runnableMock);
+
+        underTest.onApplicationEvent(scalingEventMock);
+
+        verify(rejectedThreadService).remove(AUTOSCALE_CLUSTER_ID);
+        verify(clusterService).setLastScalingActivity(eq(AUTOSCALE_CLUSTER_ID), anyLong());
+        verify(executorTimeMonitorService).submit(runnableMock);
     }
 
     @Test
@@ -167,6 +207,7 @@ public class ScalingHandlerTest {
         Cluster cluster = getARunningCluster();
 
         when(scalingEventMock.getAlert()).thenReturn(baseAlertMock);
+        when(scalingEventMock.getAlert().getAlertType()).thenReturn(AlertType.LOAD);
         when(scalingEventMock.getExistingClusterNodeCount()).thenReturn(currentClusterNodeCount);
         when(scalingEventMock.getExistingHostGroupNodeCount()).thenReturn(currentHostGroupCount);
         when(scalingEventMock.getDesiredAbsoluteHostGroupNodeCount()).thenReturn(currentHostGroupCount + scalingAdjument);
