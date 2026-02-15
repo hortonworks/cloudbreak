@@ -204,6 +204,11 @@
             <!-- use org.slf4j -->
             <property name="illegalPkgs" value="org.apache.logging, org.apache.commons.logging, org.apache.log4j, java.util.logging" />
         </module>
+
+        <module name="IllegalImport">
+            <property name="regexp" value="true"/>
+            <property name="illegalClasses" value="^org\.junit\.(?!jupiter\.).+"/>
+        </module>
         <module name="IllegalImport">
             <!-- use org.junit -->
             <property name="illegalPkgs" value="junit.framework" />

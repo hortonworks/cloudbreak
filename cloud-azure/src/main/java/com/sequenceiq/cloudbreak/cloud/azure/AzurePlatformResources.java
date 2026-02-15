@@ -392,6 +392,11 @@ public class AzurePlatformResources implements PlatformResources {
     }
 
     @Override
+    public Optional<String> getVirtualMachineUrl(ExtendedCloudCredential cloudCredential, Region region, String instanceId, Map<String, String> filters) {
+        return Optional.empty();
+    }
+
+    @Override
     public CloudGateWays gateways(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
         return new CloudGateWays();
     }

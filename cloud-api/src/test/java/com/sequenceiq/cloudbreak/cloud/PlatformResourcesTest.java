@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cloud;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.Map;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -74,6 +75,11 @@ class PlatformResourcesTest {
         @Override
         public CloudDatabaseVmTypes databaseVirtualMachines(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
             return null;
+        }
+
+        @Override
+        public Optional<String> getVirtualMachineUrl(ExtendedCloudCredential cloudCredential, Region region, String instanceId, Map<String, String> filters) {
+            return Optional.empty();
         }
 
         @Override

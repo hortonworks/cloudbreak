@@ -546,6 +546,18 @@ public class GcpPlatformResources implements PlatformResources {
         return new CloudVmTypes(returnVmResponses, cloudVmTypes.getDefaultCloudVmResponses());
     }
 
+    @Override
+    public Optional<String> getVirtualMachineUrl(ExtendedCloudCredential cloudCredential, Region region, String instanceId, Map<String, String> filters) {
+        return Optional.of(
+                String.format(
+                    "https://console.cloud.google.com/compute/instancesDetail/zones/%s/instances/%s?authuser=1&project=%s",
+                    filters.get(NetworkConstants.AVAILABILITY_ZONES),
+                    instanceId,
+                    gcpStackUtil.getProjectId(cloudCredential)
+                )
+        );
+    }
+
     private CloudVmTypes getCloudVmTypes(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
         Compute compute = gcpComputeFactory.buildCompute(cloudCredential);
         String projectId = gcpStackUtil.getProjectId(cloudCredential);

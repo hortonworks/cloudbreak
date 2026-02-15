@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.aws;
 
-import static org.junit.platform.commons.util.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.util.ArrayList;
 import java.util.List;

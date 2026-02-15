@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
@@ -109,6 +110,11 @@ public class YarnPlatformResources implements PlatformResources {
     @Override
     public CloudDatabaseVmTypes databaseVirtualMachines(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
         return new CloudDatabaseVmTypes();
+    }
+
+    @Override
+    public Optional<String> getVirtualMachineUrl(ExtendedCloudCredential cloudCredential, Region region, String instanceId, Map<String, String> filters) {
+        return Optional.empty();
     }
 
     @Override

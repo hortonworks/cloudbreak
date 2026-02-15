@@ -3,7 +3,7 @@ package com.sequenceiq.freeipa.converter.image;
 import java.util.Map;
 import java.util.Optional;
 
-import org.junit.platform.commons.util.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 

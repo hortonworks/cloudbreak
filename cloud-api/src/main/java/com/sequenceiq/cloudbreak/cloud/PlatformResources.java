@@ -102,6 +102,8 @@ public interface PlatformResources {
         return virtualMachines(cloudCredential, region, filters);
     }
 
+    Optional<String> getVirtualMachineUrl(ExtendedCloudCredential cloudCredential, Region region, String instanceId, Map<String, String> filters);
+
     /**
      * Return the gateways
      * @param cloudCredential credentials to connect to the cloud provider

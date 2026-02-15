@@ -650,4 +650,15 @@ public class AwsPlatformResourcesTest {
         assertNull(instanceStoreMetadata.mapInstanceTypeToInstanceStoreCount("m5.2xlarge"));
         assertEquals(0, instanceStoreMetadata.mapInstanceTypeToInstanceStoreCountNullHandled("m5.2xlarge"));
     }
+
+    @Test
+    void testGetVirtualMachineUrl() {
+        com.sequenceiq.cloudbreak.cloud.model.Region region = com.sequenceiq.cloudbreak.cloud.model.Region.region("us-west-1");
+        String instanceId = "i-1234567890abcdef0";
+
+        Optional<String> result = underTest.getVirtualMachineUrl(null, region, instanceId, null);
+
+        assertTrue(result.isPresent());
+        assertEquals("https://us-west-1.console.aws.amazon.com/ec2/v2/home?region=us-west-1#Instances:search=i-1234567890abcdef0", result.get());
+    }
 }

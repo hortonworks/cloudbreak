@@ -783,6 +783,18 @@ public class AwsPlatformResources implements PlatformResources {
         return getCloudVmTypes(cloudCredential, true, region, filters, instanceTypeFilter, true);
     }
 
+    @Override
+    public Optional<String> getVirtualMachineUrl(ExtendedCloudCredential cloudCredential, Region region, String instanceId, Map<String, String> filters) {
+        return Optional.of(
+                String.format(
+                    "https://%s.console.aws.amazon.com/ec2/v2/home?region=%s#Instances:search=%s",
+                    region.getRegionName(),
+                    region.getRegionName(),
+                    instanceId
+                )
+        );
+    }
+
     private List<Architecture> getArchitectures(Map<String, String> filters) {
         String architectureString = filters.getOrDefault(ARCHITECTURE, Architecture.X86_64.getName());
         if (Architecture.ALL_ARCHITECTURE.equals(architectureString)) {
