@@ -48,9 +48,9 @@ public class UsageReportingServiceTest {
 
         underTest.sendNotificationEvent(notificationDto);
 
-        ArgumentCaptor<UsageProto.CDPNotificationSentEvent> captor = ArgumentCaptor.forClass(UsageProto.CDPNotificationSentEvent.class);
+        ArgumentCaptor<UsageProto.CDPCBNotificationSentEvent> captor = ArgumentCaptor.forClass(UsageProto.CDPCBNotificationSentEvent.class);
         verify(usageReporter, times(1)).cdpNotificationSentEvent(captor.capture());
-        UsageProto.CDPNotificationSentEvent actual = captor.getValue();
+        UsageProto.CDPCBNotificationSentEvent actual = captor.getValue();
 
         assertEquals("testStackName", actual.getResourceName(), "Stack Name should match");
         assertEquals("testStackCrn", actual.getResourceCrn(), "Stacl crn should match");
@@ -70,10 +70,10 @@ public class UsageReportingServiceTest {
 
         underTest.sendNotificationEvent(notificationDto);
 
-        ArgumentCaptor<UsageProto.CDPNotificationSentEvent> captor =
-                ArgumentCaptor.forClass(UsageProto.CDPNotificationSentEvent.class);
+        ArgumentCaptor<UsageProto.CDPCBNotificationSentEvent> captor =
+                ArgumentCaptor.forClass(UsageProto.CDPCBNotificationSentEvent.class);
         verify(usageReporter, times(1)).cdpNotificationSentEvent(captor.capture());
-        UsageProto.CDPNotificationSentEvent actual = captor.getValue();
+        UsageProto.CDPCBNotificationSentEvent actual = captor.getValue();
 
         // Verify that only non-null fields were set
         assertEquals("accountId", actual.getAccountId());

@@ -172,6 +172,8 @@ message Event {
     CDPCDEServiceStatusChanged cdpCDEServiceStatusChanged = 69;
     // A CDP DataEngineering virtual cluster was requested to be created.
     CDPCDEVirtualClusterRequested cdpCDEVirtualClusterRequested = 72;
+    // A CDP DataEngineering virtual cluster was modified.
+    CDPCDEVirtualClusterModified cdpCDEVirtualClusterModified = 194;
     // A CDP DataEngineering virtual cluster's status changed.
     CDPCDEVirtualClusterStatusChanged cdpCDEVirtualClusterStatusChanged = 73;
     // A CDP DataEngineering service upgrade was requested.
@@ -391,8 +393,16 @@ message Event {
     CDPDFDeployedFlowKpiDeleted cdpDFDeployedFlowKpiDeleted = 191;
     // A CDP Provider sync state change.
     CDPProviderSyncStateChange cdpProviderSyncStateChange = 192;
-    // A notification event was sent out
-    CDPNotificationSentEvent cdpNotificationSentEvent = 193;
+    // A CDP DataFlow Draft Definition event
+    CDPDFFlowDraftDefinition cdpDFFlowDraftDefinition = 193;
+    // The Classic Cluster creation or deletion has been requested.
+    CDPClassicClusterStatusChanged cdpClassicClusterStatusChanged = 195;
+    // The On Premises Control Plane creation or deletion has been requested.
+    CDPOnPremisesControlPlaneStatusChanged cdpOnPremisesControlPlaneStatusChanged = 196;
+    // A CDP DataFlow Deployment event with Project tag.
+    CDPDFDeploymentProjectTag cdpDFDeploymentProjectTag = 197;
+    // A notification event was sent out by Cloudbreak
+    CDPCBNotificationSentEvent cdpCBNotificationSentEvent = 198;
   }
 }
 
@@ -2697,6 +2707,22 @@ message CDPClusterStatus {
   }
 }
 
+// The status of the On Premises Control Plane Registration
+message OnPremisesControlPlaneStatus {
+  enum Value {
+    // A value indicating the enum is unset.
+    UNSET = 0;
+    // Status when On Premises Control Plane registration has started.
+    INITIATED = 1;
+    // Status when On Premises Control Plane is reachable.
+    ACTIVE = 2;
+    // Status when On-Premises Control Plane is not reachable.
+    INACTIVE = 3;
+    // Status when On-Premises Control Plane is deleted.
+    DELETED = 4;
+  }
+}
+
 message CDPOperationDetails {
   // The CDP account id of the event
   string accountId = 1;
@@ -3756,6 +3782,25 @@ message CDPDFDeploymentStatus {
   }
 }
 
+message CDPDFDeploymentProjectTag {
+  // The id of the DataFlow Deployment.
+  string id = 1;
+  // The crn of the DataFlow Deployment.
+  string crn = 2;
+  // The CDP account ID.
+  string accountId = 3;
+  // The crn of the CDP environment.
+  string environmentCrn = 4;
+  // The id of the DataFlow Service.
+  string dataFlowServiceId = 5;
+  // The crn of the DataFlow Service.
+  string dataFlowServiceCrn = 6;
+  // The user-defined tags for the resource. These should not include automatically
+  // added tags that are product-specific. The format of this is a map serialized
+  // into a string as json. e.g.:   "tags": "{\"key1\":\"value1\",\"key2\":\"value2\"}"
+  string userTags = 7;
+}
+
 message CDPDFDeploymentRequested {
   // Operation metadata
   CDPDFOperationDetails operationDetails = 1;
@@ -3948,6 +3993,16 @@ message CDPDFDeployedFlowStatus {
     CANCEL_FLOW_VERSION_CHANGE_IN_PROGRESS = 27;
     CANCEL_FLOW_VERSION_CHANGE_COMPLETED = 28;
     CANCEL_FLOW_VERSION_CHANGE_FAILED = 29;
+    // Suspend Flow
+    SUSPEND_REQUESTED = 30;
+    SUSPEND_IN_PROGRESS = 31;
+    SUSPEND_COMPLETED = 32;
+    SUSPEND_FAILED = 33;
+    // Resume Flow
+    RESUME_REQUESTED = 34;
+    RESUME_IN_PROGRESS = 35;
+    RESUME_COMPLETED = 36;
+    RESUME_FAILED = 37;
   }
 }
 
@@ -4607,6 +4662,31 @@ message CDPDFFlowMigrationStatus {
   }
 }
 
+message CDPDFFlowDraftDefinition {
+  // The CDP account ID.
+  string accountId = 1;
+  // The crn of the CDP environment.
+  string environmentCrn = 2;
+  // The crn of the DataFlow Service.
+  string dfServiceCrn = 3;
+  // Time of the flow draft's creation.
+  uint64 createdAt = 4;
+  // Time of the flow draft's last update.
+  uint64 updatedAt = 5;
+  // The NiFi components used in the flow draft
+  string niFiComponentsUsed = 6;
+  // Flow content format
+  string contentFormat = 7;
+  // Flow draft ID
+  string id = 8;
+  // Flow name
+  string name = 9;
+  // Flow Draft revision
+  uint64 revision = 10;
+  // NiFi runtime version
+  string runtimeVersion = 11;
+}
+
 //Autoscale Policy Type
 message AutoscalePolicyType {
   enum Value {
@@ -5172,6 +5252,38 @@ message CDPCDEVirtualClusterRequested {
   string properties = 10;
   // Indicates where the CDE Spark driver and executor pods run(spot/Ondemand)
   CDPCDESpotInstanceUsage.Value spotInstanceUsage = 12;
+  // Indicates whether the job-level override is enabled for how drivers and executors run in the virtual cluster.
+  string computeOverrideEnabled = 14;
+  // Spark configurations applied at the virtual cluster. The format of this is a map serialized into a string as json.
+  string sparkConfigs = 15;
+}
+
+// Generated when a CDP CDE virtual cluster is modified.
+message CDPCDEVirtualClusterModified {
+  // The ID of the CDP CDE virtual cluster.
+  string id = 1;
+  // The CRN of the CDP CDE service for which the virtual cluster creation was requested.
+  string clusterCrn = 2;
+  // The CDP account ID.
+  string accountId = 3;
+  // The CDP user ID of the creator.
+  string creatorId = 4;
+  // The version of CDP CDE service where virtual cluster creation was requested.
+  string cdeVersion = 5;
+  // Number of CPU cores requested for the virtual cluster autoscaling.
+  uint32 cpuRequested = 6;
+  // Memory requested for the virtual cluster autoscaling.
+  string memoryRequested = 7;
+  // Set of properties used while requesting virtual clusters.
+  string properties = 8;
+  // Status of the CDP CDE virtual cluster.
+  string status = 9;
+  // Indicates where the CDE Spark driver and executor pods run(spot/Ondemand)
+  CDPCDESpotInstanceUsage.Value spotInstanceUsage = 10;
+  // Indicates whether the job-level override is enabled for how drivers and executors run in the virtual cluster.
+  string computeOverrideEnabled = 11;
+  // Spark configurations applied at the virtual cluster. The format of this is a map serialized into a string as json.
+  string sparkConfigs = 12;
 }
 
 // CDPCDESpotInstanceUsage indicates where the CDE spark driver and executor pods run(Spot/Ondemand)
@@ -5294,6 +5406,8 @@ message CDPCDEActiveVCDetails{
   string appTier = 7;
   // Operating system name for the Spark runtime (e.g., "securityhardened" or "redhat").
   string sparkOSName = 8;
+  // Spark configurations applied at the virtual cluster. The format of this is a map serialized into a string as json.
+  string sparkConfigs = 9;
 }
 
 // Generated when a CDP CDE job run is initiated or its status changes.
@@ -5320,6 +5434,10 @@ message CDPCDEJobRunStatusChanged {
   string client = 10;
   // Metadata
   CDPCDEMetadata metadata = 11;
+  // Compute configuration mode set for jon run.
+  string computeConfiguration = 12;
+  // Spark configurations applied at the virtual cluster. The format of this is a map serialized into a string as json.
+  string instanceSparkConfigs = 13;
 }
 
 // Generated when a CDP CDE job is created or is modified.
@@ -5366,6 +5484,8 @@ message CDPCDESessionRequested {
   uint64 created = 12;
   // Metadata
   CDPCDEMetadata metadata = 13;
+  // Spark configurations applied at the virtual cluster. The format of this is a map serialized into a string as json.
+  string instanceSparkConfigs = 14;
 }
 
 // operation type: suspend OR resume.
@@ -5691,6 +5811,8 @@ message CDPCDEJobDetails {
   bool pipelinesUsed = 12;
   // Airflow specific job details
   CDPCDEAirflowJobDetails airflow = 13;
+  // Compute configuration mode set for job.
+  string computeConfiguration = 14;
 }
 
 message CDPCDEAirflowJobDetails {
@@ -7278,6 +7400,33 @@ message CloudPrivatelinkAccessRevocationStatus {
   }
 }
 
+
+// Generated when the classic cluster creation or deletion is requested.
+message CDPClassicClusterStatusChanged {
+  // The CDP account identifier.
+  string accountId = 1;
+  // The crn of the classic cluster.
+  string clusterCrn = 2;
+  // The status of classic cluster creation or deletion.
+  CDPClusterStatus.Value status = 3;
+  // The description of error during creation or deletion of the classic cluster.
+  string errorDescription = 4;
+}
+
+// Generated when the On Premises Control Plane registration or deletion is requested.
+message CDPOnPremisesControlPlaneStatusChanged {
+  // The CDP account identifier.
+  string accountId = 1;
+  // The CRN of the Private Cloud control plane.
+  string pvcCrn = 2;
+  // The name of the Private Cloud control plane.
+  string name = 3;
+  // The status of the operation.
+  OnPremisesControlPlaneStatus.Value status = 4;
+  // The description of error during creation or deletion of the On Premises Control Plane Registration.
+  string errorDescription = 5;
+}
+
 // Generated when a status change has been done for a containerized datalake
 message CDPCDLStatusChanged {
   CDPCDLClusterDetails clusterDetails = 1;
@@ -7826,11 +7975,23 @@ message NotificationType {
     UNSET = 0;
     // Notification type is set to azure default outbound.
     AZURE_DEFAULT_OUTBOUND = 1;
+    // Notification type is set to stack provisioning.
+    STACK_PROVISIONING = 2;
+    // Notification type is set to stack start stop.
+    STACK_START_STOP = 3;
+    // Notification type is set to stack resize.
+    STACK_RESIZE = 4;
+    // Notification type is set to stack upgrade.
+    STACK_UPGRADE = 5;
+    // Notification type is set to stack repair.
+    STACK_REPAIR = 6;
+    // Notification type is set to stack health.
+    STACK_HEALTH = 7;
   }
 }
 
-// A CDP notification sent event
-message CDPNotificationSentEvent {
+// A CDP CB notification sent event
+message CDPCBNotificationSentEvent {
   // notification id
   int64 id = 1;
   // notification severity

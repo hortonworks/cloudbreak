@@ -282,6 +282,7 @@ public class SdxResizeService {
         newSdxCluster.setAccountId(accountIdService.getAccountIdFromUserCrn(userCrn));
         newSdxCluster.setClusterShape(shape);
         newSdxCluster.setSeLinux(sdxCluster.getSeLinux());
+        newSdxCluster.setNotificationState(sdxCluster.getNotificationState());
         newSdxCluster.setCreated(clock.getCurrentTimeMillis());
         newSdxCluster.setEnvName(environmentResponse.getName());
         newSdxCluster.setEnvCrn(environmentResponse.getCrn());

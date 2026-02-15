@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.sequenceiq.cloudbreak.common.notification.NotificationState;
 import com.sequenceiq.cloudbreak.structuredevent.event.DatabaseDetails;
 import com.sequenceiq.common.model.SeLinux;
 
@@ -26,6 +27,8 @@ public class DatalakeDetails implements Serializable {
     private String status;
 
     private String statusReason;
+
+    private NotificationState notificationState;
 
     private SeLinux seLinux;
 
@@ -83,5 +86,13 @@ public class DatalakeDetails implements Serializable {
 
     public void setSeLinux(SeLinux seLinux) {
         this.seLinux = seLinux;
+    }
+
+    public NotificationState getNotificationState() {
+        return notificationState;
+    }
+
+    public void setNotificationState(NotificationState notificationState) {
+        this.notificationState = notificationState;
     }
 }

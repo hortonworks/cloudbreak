@@ -7,6 +7,7 @@ import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.sequenceiq.cloudbreak.common.notification.NotificationState;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
 import com.sequenceiq.common.api.type.CertExpirationState;
 import com.sequenceiq.common.model.FileSystemType;
@@ -100,6 +101,9 @@ public class SdxClusterResponse {
 
     @Schema(description = ModelDescriptions.DETACHED_CLUSTER_NAME)
     private String detachedClusterName;
+
+    @Schema(description = ModelDescriptions.NOTIFICATION_STATE)
+    private NotificationState notificationState;
 
     public String getCrn() {
         return crn;
@@ -321,6 +325,14 @@ public class SdxClusterResponse {
         this.providerSyncStates = providerSyncStates;
     }
 
+    public NotificationState getNotificationState() {
+        return notificationState;
+    }
+
+    public void setNotificationState(NotificationState notificationState) {
+        this.notificationState = notificationState;
+    }
+
     @Override
     public String toString() {
         return "SdxClusterResponse{" +
@@ -337,6 +349,7 @@ public class SdxClusterResponse {
                 ", cloudStorageBaseLocation='" + cloudStorageBaseLocation + '\'' +
                 ", cloudStorageFileSystemType=" + cloudStorageFileSystemType +
                 ", runtime='" + runtime + '\'' +
+                ", notificationState='" + notificationState + '\'' +
                 ", flowIdentifier=" + flowIdentifier +
                 ", rangerRazEnabled=" + rangerRazEnabled +
                 ", rangerRmsEnabled=" + rangerRmsEnabled +

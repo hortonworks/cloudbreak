@@ -29,6 +29,8 @@ import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.cloudbreak.common.notification.NotificationState;
+import com.sequenceiq.cloudbreak.common.notification.NotificationStateConverter;
 import com.sequenceiq.cloudbreak.converter.ArchitectureConverter;
 import com.sequenceiq.cloudbreak.converter.CertExpirationStateConverter;
 import com.sequenceiq.cloudbreak.converter.FileSystemTypeConverter;
@@ -164,6 +166,10 @@ public class SdxCluster implements AccountAwareResource {
 
     @Convert(converter = ProviderSyncSetToStringConverter.class)
     private Set<ProviderSyncState> providerSyncStates = new HashSet<>();
+
+    @Convert(converter = NotificationStateConverter.class)
+    @Column(name = "notificationstate")
+    private NotificationState notificationState;
 
     public Long getId() {
         return id;
@@ -484,6 +490,14 @@ public class SdxCluster implements AccountAwareResource {
         this.providerSyncStates = providerSyncStates;
     }
 
+    public NotificationState getNotificationState() {
+        return notificationState;
+    }
+
+    public void setNotificationState(NotificationState notificationState) {
+        this.notificationState = notificationState;
+    }
+
     //CHECKSTYLE:OFF
     @Override
     public boolean equals(Object o) {
@@ -513,6 +527,7 @@ public class SdxCluster implements AccountAwareResource {
                 certExpirationState == that.certExpirationState &&
                 Objects.equals(sdxClusterServiceVersion, that.sdxClusterServiceVersion) &&
                 seLinux == that.seLinux &&
+                notificationState == that.notificationState &&
                 Objects.equals(sdxDatabase, that.sdxDatabase) &&
                 Objects.equals(providerSyncStates, that.providerSyncStates);
     }
@@ -521,7 +536,8 @@ public class SdxCluster implements AccountAwareResource {
     public int hashCode() {
         return Objects.hash(id, accountId, crn, clusterName, envName, envCrn, stackCrn, clusterShape, tags, stackId, stackRequest,
                 stackRequestToCloudbreak, deleted, created, cloudStorageBaseLocation, cloudStorageFileSystemType, seLinux,
-                rangerRazEnabled, rangerRmsEnabled, certExpirationState, sdxClusterServiceVersion, enableMultiAz, providerSyncStates);
+                rangerRazEnabled, rangerRmsEnabled, certExpirationState, sdxClusterServiceVersion, enableMultiAz,
+                providerSyncStates, notificationState);
     }
 
     @Override
@@ -554,6 +570,7 @@ public class SdxCluster implements AccountAwareResource {
                 ", rangerRmsEnabled+" + rangerRmsEnabled +
                 ", enableMultiAz=" + enableMultiAz +
                 ", certExpirationState=" + certExpirationState +
+                ", notificationState=" + notificationState +
                 ", seLinux=" + seLinux +
                 ", sdxClusterServiceVersion='" + sdxClusterServiceVersion + '\'' +
                 ", detached=" + detached +

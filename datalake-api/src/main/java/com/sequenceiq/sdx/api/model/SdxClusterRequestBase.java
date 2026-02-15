@@ -12,6 +12,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.SecurityV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
+import com.sequenceiq.cloudbreak.common.notification.NotificationState;
 import com.sequenceiq.common.api.tag.request.TaggableRequest;
 
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -78,6 +79,9 @@ public class SdxClusterRequestBase implements TaggableRequest {
 
     @Schema(description = ModelDescriptions.ENCRYPTION_PROFILE_CRN)
     private String encryptionProfileCrn;
+
+    @Schema(description = ModelDescriptions.NOTIFICATION_STATE)
+    private NotificationState notificationState;
 
     public String getEnvironment() {
         return environment;
@@ -223,6 +227,14 @@ public class SdxClusterRequestBase implements TaggableRequest {
         this.disableDbSslEnforcement = disableDbSslEnforcement;
     }
 
+    public NotificationState getNotificationState() {
+        return notificationState;
+    }
+
+    public void setNotificationState(NotificationState notificationState) {
+        this.notificationState = notificationState;
+    }
+
     public SecurityV4Request getSecurity() {
         return security;
     }
@@ -256,6 +268,7 @@ public class SdxClusterRequestBase implements TaggableRequest {
         toInstance.setDisableDbSslEnforcement(disableDbSslEnforcement);
         toInstance.setSecurity(security);
         toInstance.setEncryptionProfileCrn(encryptionProfileCrn);
+        toInstance.setNotificationState(notificationState);
     }
 
     @Override
@@ -275,6 +288,7 @@ public class SdxClusterRequestBase implements TaggableRequest {
                 ", security=" + security +
                 ", disableDbSslEnforcement=" + disableDbSslEnforcement +
                 ", encryptionProfileCrn=" + encryptionProfileCrn +
+                ", notificationState=" + notificationState +
                 '}';
     }
 }

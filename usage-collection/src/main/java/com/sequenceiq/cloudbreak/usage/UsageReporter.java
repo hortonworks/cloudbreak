@@ -230,5 +230,5 @@ public interface UsageReporter {
      * @param details the event details
      */
     void cdpNotificationSentEvent(
-            UsageProto.CDPNotificationSentEvent details);
+            UsageProto.CDPCBNotificationSentEvent details);
 }

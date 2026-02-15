@@ -369,11 +369,11 @@ public class UsageReportProcessor implements UsageReporter {
     }
 
     @Override
-    public void cdpNotificationSentEvent(UsageProto.CDPNotificationSentEvent details) {
+    public void cdpNotificationSentEvent(UsageProto.CDPCBNotificationSentEvent details) {
         try {
             checkNotNull(details);
             usageProcessingStrategy.processUsage(eventBuilder()
-                    .setCdpNotificationSentEvent(details)
+                    .setCdpCBNotificationSentEvent(details)
                     .build(), null);
         } catch (Exception e) {
             LOGGER.warn("Could not send flow usage event: {}! Cause: {}", details, e.getMessage());

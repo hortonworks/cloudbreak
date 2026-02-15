@@ -73,6 +73,7 @@ import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.notification.NotificationState;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.common.service.PlatformStringTransformer;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
@@ -428,8 +429,14 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
 
         overrideDbSslEnabledAttribute(sdxCluster, sdxClusterRequest);
         updateStackV4RequestWithEnvironmentCrnIfNotExistsOnIt(internalStackV4Request, environment.getCrn());
-        StackV4Request stackRequest = stackRequestHandler.getStackRequest(sdxClusterRequest.getClusterShape(), internalStackV4Request,
-                cloudPlatform, runtimeVersion, imageSettingsV4Request, architecture);
+        StackV4Request stackRequest = stackRequestHandler.getStackRequest(
+                sdxClusterRequest.getClusterShape(),
+                internalStackV4Request,
+                cloudPlatform,
+                runtimeVersion,
+                imageSettingsV4Request,
+                architecture
+        );
         if (sdxClusterRequest.getVariant() != null) {
             stackRequest.setVariant(sdxClusterRequest.getVariant());
         }
@@ -492,6 +499,10 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
                                 architecture, internalStackV4Request.getArchitecture()));
             }
         }
+    }
+
+    private NotificationState getNotificationState(SdxClusterRequest sdxClusterRequest) {
+        return Optional.ofNullable(sdxClusterRequest.getNotificationState()).orElse(null);
     }
 
     @VisibleForTesting

@@ -25,7 +25,7 @@ public class UsageReportingService {
     private UsageReporter usageReporter;
 
     public void sendNotificationEvent(NotificationDto notificationDto) {
-        UsageProto.CDPNotificationSentEvent.Builder builder = UsageProto.CDPNotificationSentEvent.newBuilder();
+        UsageProto.CDPCBNotificationSentEvent.Builder builder = UsageProto.CDPCBNotificationSentEvent.newBuilder();
         setIfNotNull(builder::setAccountId, notificationDto.getAccountId());
         setIfNotNull(builder::setMessage, notificationDto.getMessage());
         setIfNotNull(builder::setName, notificationDto.getName());
@@ -51,7 +51,7 @@ public class UsageReportingService {
             builder.setChannelType(getChannelType(notificationDto.getChannelType()));
         }
 
-        UsageProto.CDPNotificationSentEvent event = builder.build();
+        UsageProto.CDPCBNotificationSentEvent event = builder.build();
         LOGGER.debug("Reporting usage event: {}", notificationDto.getType());
         usageReporter.cdpNotificationSentEvent(event);
     }
