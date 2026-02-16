@@ -1,8 +1,6 @@
 package com.sequenceiq.notification.scheduled.register.dto;
 
-import java.util.Arrays;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 public abstract class BaseNotificationRegisterAdditionalDataDto {
 
@@ -46,16 +44,5 @@ public abstract class BaseNotificationRegisterAdditionalDataDto {
                 "name='" + name + '\'' +
                 ", crn='" + crn + '\'' +
                 '}';
-    }
-
-    protected String toCamelCase(String input) {
-        if (input == null || input.isEmpty()) {
-            return input;
-        }
-        String result = Arrays.stream(input.toLowerCase().split("_"))
-                .filter(word -> !word.isEmpty())
-                .map(word -> Character.toUpperCase(word.charAt(0)) + word.substring(1) + " ")
-                .collect(Collectors.joining());
-        return result.trim();
     }
 }

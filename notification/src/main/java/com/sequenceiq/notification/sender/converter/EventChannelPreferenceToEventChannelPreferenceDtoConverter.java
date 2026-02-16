@@ -63,6 +63,7 @@ public class EventChannelPreferenceToEventChannelPreferenceDtoConverter {
         } else {
             return switch (channelType) {
                 case EMAIL -> ChannelTypeDto.EMAIL;
+                case LOCAL_EMAIL -> ChannelTypeDto.LOCAL_EMAIL;
                 case IN_APP -> ChannelTypeDto.IN_APP;
                 case SLACK -> ChannelTypeDto.SLACK;
             };

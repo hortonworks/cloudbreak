@@ -3,6 +3,9 @@ package com.sequenceiq.environment.environment.flow.creation.handler;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_DISTRIBUTION_LIST_CREATION_FAILED_WITH_REASON;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationHandlerSelectors.CREATE_DISTRIBUTION_LISTS_EVENT;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.FINISH_ENV_CREATION_EVENT;
+import static com.sequenceiq.notification.domain.ChannelType.EMAIL;
+import static com.sequenceiq.notification.domain.NotificationGroupType.ENVIRONMENT;
+import static com.sequenceiq.notification.domain.NotificationSeverity.WARNING;
 
 import java.util.List;
 import java.util.Optional;
@@ -21,10 +24,8 @@ import com.sequenceiq.environment.events.EventSenderService;
 import com.sequenceiq.environment.parameters.service.ParametersService;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
-import com.sequenceiq.notification.domain.ChannelType;
 import com.sequenceiq.notification.domain.DistributionList;
 import com.sequenceiq.notification.domain.EventChannelPreference;
-import com.sequenceiq.notification.domain.NotificationSeverity;
 import com.sequenceiq.notification.domain.NotificationType;
 import com.sequenceiq.notification.sender.DistributionListManagementService;
 import com.sequenceiq.notification.sender.dto.CreateDistributionListRequest;
@@ -64,8 +65,9 @@ public class DistributionListCreationHandler extends ExceptionCatcherEventHandle
         EnvironmentDto environmentDto = event.getData();
         try {
             Long environmentId = environmentDto.getId();
-            List<EventChannelPreference> preferences = NotificationType.getEventTypeIds().stream()
-                    .map(id -> new EventChannelPreference(id, Set.of(ChannelType.EMAIL), Set.of(NotificationSeverity.WARNING)))
+            List<EventChannelPreference> preferences = NotificationType.getEventTypeIds(ENVIRONMENT)
+                    .stream()
+                    .map(id -> new EventChannelPreference(id, Set.of(EMAIL), Set.of(WARNING)))
                     .toList();
             CreateDistributionListRequest request = new CreateDistributionListRequest(
                     environmentDto.getResourceCrn(),

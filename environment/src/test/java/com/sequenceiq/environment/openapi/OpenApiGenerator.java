@@ -42,7 +42,8 @@ public class OpenApiGenerator {
 
     @Test
     public void generateSwaggerJson() throws Exception {
-        Set<String> classes = endpointConfig.getClasses().stream()
+        Set<String> classes = endpointConfig.getClasses()
+                .stream()
                 .map(Class::getName)
                 .collect(Collectors.toSet());
 

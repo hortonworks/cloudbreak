@@ -17,7 +17,7 @@ public class ChannelTypeConverter {
         }
 
         return switch (channelType) {
-            case EMAIL -> ChannelType.Value.EMAIL;
+            case EMAIL, LOCAL_EMAIL -> ChannelType.Value.EMAIL;
             case IN_APP -> ChannelType.Value.IN_APP;
             case SLACK -> ChannelType.Value.SLACK;
         };

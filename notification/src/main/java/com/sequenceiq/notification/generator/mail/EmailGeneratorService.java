@@ -2,6 +2,7 @@ package com.sequenceiq.notification.generator.mail;
 
 import java.io.IOException;
 import java.util.Optional;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,7 +49,10 @@ public class EmailGeneratorService implements NotificationGeneratorService {
     }
 
     @Override
-    public ChannelType channelType() {
-        return ChannelType.EMAIL;
+    public Set<ChannelType> channelTypes() {
+        return Set.of(
+                ChannelType.EMAIL,
+                ChannelType.LOCAL_EMAIL
+        );
     }
 }

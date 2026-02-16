@@ -16,3 +16,7 @@ altus:
   ums:
     # The name of the service making the call
     caller: cloudbreak
+
+cdp:
+  console:
+    url: https://localhost

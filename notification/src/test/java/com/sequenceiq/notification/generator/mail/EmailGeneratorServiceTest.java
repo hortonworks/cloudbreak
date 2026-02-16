@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.util.Optional;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -65,9 +66,9 @@ class EmailGeneratorServiceTest {
     }
 
     @Test
-    void channelTypeReturnsEmailChannelType() {
-        ChannelType result = emailGeneratorService.channelType();
+    void channelTypeReturnsEmailChannelTypes() {
+        Set<ChannelType> result = emailGeneratorService.channelTypes();
 
-        assertThat(result).isEqualTo(ChannelType.EMAIL);
+        assertThat(result).isEqualTo(Set.of(ChannelType.EMAIL, ChannelType.LOCAL_EMAIL));
     }
 }

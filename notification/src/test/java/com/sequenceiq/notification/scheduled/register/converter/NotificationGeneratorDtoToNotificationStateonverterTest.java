@@ -12,7 +12,7 @@ import com.sequenceiq.notification.domain.Notification;
 import com.sequenceiq.notification.domain.NotificationType;
 import com.sequenceiq.notification.generator.dto.NotificationGeneratorDto;
 
-class NotificationGeneratorDtoToNotificationConverterTest {
+class NotificationGeneratorDtoToNotificationStateonverterTest {
 
     private final NotificationGeneratorDtoToNotificationConverter converter
             = new NotificationGeneratorDtoToNotificationConverter();

@@ -8,6 +8,10 @@ server:
 
 server.port: 8088
 
+cdp:
+  console:
+    url: https://localhost
+
 management:
   endpoints:
     web:

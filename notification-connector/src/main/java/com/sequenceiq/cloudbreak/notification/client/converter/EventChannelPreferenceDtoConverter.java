@@ -47,7 +47,7 @@ public class EventChannelPreferenceDtoConverter {
             return NotificationAdminProto.ChannelType.Value.UNKNOWN;
         } else {
             return switch (channelTypeDto) {
-                case EMAIL -> NotificationAdminProto.ChannelType.Value.EMAIL;
+                case EMAIL, LOCAL_EMAIL -> NotificationAdminProto.ChannelType.Value.EMAIL;
                 case IN_APP -> NotificationAdminProto.ChannelType.Value.IN_APP;
                 case SLACK -> NotificationAdminProto.ChannelType.Value.SLACK;
             };

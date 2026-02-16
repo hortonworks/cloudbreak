@@ -10,6 +10,7 @@ import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -17,6 +18,7 @@ import org.junit.jupiter.api.Test;
 import com.sequenceiq.notification.domain.ChannelType;
 import com.sequenceiq.notification.domain.NotificationType;
 import com.sequenceiq.notification.generator.dto.NotificationGeneratorDto;
+import com.sequenceiq.notification.sender.LocalEmailProvider;
 
 public class CentralNotificationGeneratorServiceTest {
 
@@ -31,11 +33,13 @@ public class CentralNotificationGeneratorServiceTest {
                 .build();
         original.setResourceName("originalResourceName");
 
+        LocalEmailProvider emailProvider = mock(LocalEmailProvider.class);
         NotificationGeneratorService emailService = mock(NotificationGeneratorService.class);
-        when(emailService.channelType()).thenReturn(ChannelType.EMAIL);
+        when(emailService.channelTypes()).thenReturn(Set.of(ChannelType.EMAIL));
         when(emailService.generate(any(), any())).thenReturn(Optional.of("email message"));
+        when(emailProvider.getLocalChannelIfConfigured(any())).thenReturn(Set.of(ChannelType.EMAIL));
 
-        CentralNotificationGeneratorService underTest = new CentralNotificationGeneratorService(List.of(emailService));
+        CentralNotificationGeneratorService underTest = new CentralNotificationGeneratorService(List.of(emailService), emailProvider);
 
         NotificationGeneratorDto result = underTest.generateNotification(original, NotificationType.AZURE_DEFAULT_OUTBOUND);
 
@@ -55,11 +59,14 @@ public class CentralNotificationGeneratorServiceTest {
                 .resourceCrn("crn")
                 .build();
 
+        LocalEmailProvider emailProvider = mock(LocalEmailProvider.class);
         NotificationGeneratorService failingEmailService = mock(NotificationGeneratorService.class);
-        when(failingEmailService.channelType()).thenReturn(ChannelType.EMAIL);
+        when(failingEmailService.channelTypes()).thenReturn(Set.of(ChannelType.EMAIL));
+        when(emailProvider.getLocalChannelIfConfigured(any())).thenReturn(Set.of(ChannelType.EMAIL));
         when(failingEmailService.generate(any(), any())).thenThrow(new RuntimeException("boom"));
+        when(emailProvider.getLocalChannelIfConfigured(any())).thenReturn(Set.of(ChannelType.EMAIL));
 
-        CentralNotificationGeneratorService underTest = new CentralNotificationGeneratorService(List.of(failingEmailService));
+        CentralNotificationGeneratorService underTest = new CentralNotificationGeneratorService(List.of(failingEmailService), emailProvider);
 
         assertThrows(RuntimeException.class, () -> underTest.generateNotification(original, NotificationType.AZURE_DEFAULT_OUTBOUND));
     }
@@ -67,12 +74,13 @@ public class CentralNotificationGeneratorServiceTest {
     @Test
     @DisplayName("Constructor maps all provided generator services by ChannelType")
     void constructorMapsServices() throws Exception {
+        LocalEmailProvider emailProvider = mock(LocalEmailProvider.class);
         NotificationGeneratorService emailService = mock(NotificationGeneratorService.class);
-        when(emailService.channelType()).thenReturn(ChannelType.EMAIL);
+        when(emailService.channelTypes()).thenReturn(Set.of(ChannelType.EMAIL));
         NotificationGeneratorService inAppService = mock(NotificationGeneratorService.class);
-        when(inAppService.channelType()).thenReturn(ChannelType.IN_APP);
+        when(inAppService.channelTypes()).thenReturn(Set.of(ChannelType.IN_APP));
 
-        CentralNotificationGeneratorService underTest = new CentralNotificationGeneratorService(List.of(emailService, inAppService));
+        CentralNotificationGeneratorService underTest = new CentralNotificationGeneratorService(List.of(emailService, inAppService), emailProvider);
 
         Field field = CentralNotificationGeneratorService.class.getDeclaredField("generatorServiceMap");
         field.setAccessible(true);
@@ -91,8 +99,11 @@ public class CentralNotificationGeneratorServiceTest {
                 .resourceCrn("crn3")
                 .build();
 
+        LocalEmailProvider emailProvider = mock(LocalEmailProvider.class);
+        when(emailProvider.getLocalChannelIfConfigured(any())).thenReturn(Set.of(ChannelType.EMAIL));
+
         // Provide no generators though AZURE_DEFAULT_OUTBOUND requires EMAIL
-        CentralNotificationGeneratorService underTest = new CentralNotificationGeneratorService(List.of());
+        CentralNotificationGeneratorService underTest = new CentralNotificationGeneratorService(List.of(), emailProvider);
 
         assertThrows(RuntimeException.class, () -> underTest.generateNotification(original, NotificationType.AZURE_DEFAULT_OUTBOUND));
     }
@@ -107,11 +118,13 @@ public class CentralNotificationGeneratorServiceTest {
                 .channelMessages(Map.of(ChannelType.SLACK, "legacy"))
                 .build();
 
+        LocalEmailProvider emailProvider = mock(LocalEmailProvider.class);
         NotificationGeneratorService emailService = mock(NotificationGeneratorService.class);
-        when(emailService.channelType()).thenReturn(ChannelType.EMAIL);
+        when(emailService.channelTypes()).thenReturn(Set.of(ChannelType.EMAIL));
         when(emailService.generate(any(), any())).thenReturn(Optional.of("email new"));
+        when(emailProvider.getLocalChannelIfConfigured(any())).thenReturn(Set.of(ChannelType.EMAIL));
 
-        CentralNotificationGeneratorService underTest = new CentralNotificationGeneratorService(List.of(emailService));
+        CentralNotificationGeneratorService underTest = new CentralNotificationGeneratorService(List.of(emailService), emailProvider);
         NotificationGeneratorDto result = underTest.generateNotification(original, NotificationType.AZURE_DEFAULT_OUTBOUND);
 
         assertThat(result.getChannelMessages()).containsOnlyKeys(ChannelType.EMAIL)

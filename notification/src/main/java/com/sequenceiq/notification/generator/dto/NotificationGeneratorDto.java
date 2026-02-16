@@ -122,37 +122,37 @@ public class NotificationGeneratorDto<T extends BaseNotificationRegisterAddition
 
         private Map<ChannelType, String> channelMessages = new HashMap<>();
 
-        public Builder name(String name) {
+        public Builder<T> name(String name) {
             this.name = name;
             return this;
         }
 
-        public Builder accountId(String accountId) {
+        public Builder<T> accountId(String accountId) {
             this.accountId = accountId;
             return this;
         }
 
-        public Builder resourceCrn(String resourceCrn) {
+        public Builder<T> resourceCrn(String resourceCrn) {
             this.resourceCrn = resourceCrn;
             return this;
         }
 
-        public Builder resourceName(String resourceName) {
+        public Builder<T> resourceName(String resourceName) {
             this.resourceName = resourceName;
             return this;
         }
 
-        public Builder additionalData(T additionalData) {
+        public Builder<T> additionalData(T additionalData) {
             this.additionalData = additionalData;
             return this;
         }
 
-        public Builder channelMessages(Map<ChannelType, String> channelMessages) {
+        public Builder<T> channelMessages(Map<ChannelType, String> channelMessages) {
             this.channelMessages = channelMessages;
             return this;
         }
 
-        public Builder notificationGeneratorDto(NotificationGeneratorDto dto) {
+        public Builder<T> notificationGeneratorDto(NotificationGeneratorDto<T> dto) {
             this.resourceCrn = dto.getResourceCrn();
             this.name = dto.getName();
             this.accountId = dto.getAccountId();
@@ -160,7 +160,7 @@ public class NotificationGeneratorDto<T extends BaseNotificationRegisterAddition
             return this;
         }
 
-        public Builder addChannelMessage(ChannelType channelType, String channelMessages) {
+        public Builder<T> addChannelMessage(ChannelType channelType, String channelMessages) {
             if (this.channelMessages == null) {
                 this.channelMessages = new HashMap<>();
             }
@@ -168,8 +168,8 @@ public class NotificationGeneratorDto<T extends BaseNotificationRegisterAddition
             return this;
         }
 
-        public NotificationGeneratorDto build() {
-            NotificationGeneratorDto notification = new NotificationGeneratorDto();
+        public NotificationGeneratorDto<T> build() {
+            NotificationGeneratorDto<T> notification = new NotificationGeneratorDto<>();
             notification.setResourceCrn(resourceCrn);
             notification.setAccountId(accountId);
             notification.setResourceName(StringUtils.isEmpty(resourceName) ? name : resourceName);

@@ -11,15 +11,16 @@ import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.notification.domain.ChannelType;
 import com.sequenceiq.notification.domain.DistributionList;
 import com.sequenceiq.notification.domain.EventChannelPreference;
+import com.sequenceiq.notification.domain.NotificationGroupType;
 import com.sequenceiq.notification.domain.NotificationSeverity;
 import com.sequenceiq.notification.domain.NotificationType;
 import com.sequenceiq.notification.domain.test.TestOnlyInternalRegisterAzureOutboundNotificationRequest;
 import com.sequenceiq.notification.generator.dto.NotificationGeneratorDto;
 import com.sequenceiq.notification.generator.dto.NotificationGeneratorDtos;
 import com.sequenceiq.notification.repository.NotificationDataAccessService;
-import com.sequenceiq.notification.scheduled.register.dto.AzureOutboundNotificationAdditionalDataDto;
 import com.sequenceiq.notification.scheduled.register.dto.BaseNotificationRegisterAdditionalDataDto;
 import com.sequenceiq.notification.scheduled.register.dto.BaseNotificationRegisterAdditionalDataDtos;
+import com.sequenceiq.notification.scheduled.register.dto.azureoutbound.AzureOutboundNotificationAdditionalDataDto;
 import com.sequenceiq.notification.sender.DistributionListManagementService;
 import com.sequenceiq.notification.sender.dto.CreateDistributionListRequest;
 
@@ -74,7 +75,8 @@ public class TestOnlyInternalNotificationService {
         CreateDistributionListRequest request = new CreateDistributionListRequest();
         request.setResourceCrn(resourceCrn);
         request.setResourceName(Crn.fromString(resourceCrn).getResource());
-        request.setEventChannelPreferences(NotificationType.getEventTypeIds().stream()
+        request.setEventChannelPreferences(NotificationType.getEventTypeIds(NotificationGroupType.ENVIRONMENT)
+                .stream()
                 .map(id -> new EventChannelPreference(id, Set.of(ChannelType.EMAIL), Set.of(NotificationSeverity.WARNING)))
                 .toList());
         distributionListManagementService.createOrUpdateLists(Set.of(request));

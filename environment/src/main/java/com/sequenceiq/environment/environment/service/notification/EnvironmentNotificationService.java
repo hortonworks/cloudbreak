@@ -24,9 +24,9 @@ import com.sequenceiq.environment.terms.service.TermsService;
 import com.sequenceiq.notification.domain.DistributionList;
 import com.sequenceiq.notification.domain.Subscription;
 import com.sequenceiq.notification.generator.dto.NotificationGeneratorDto;
-import com.sequenceiq.notification.scheduled.register.dto.AzureOutboundNotificationAdditionalDataDto;
 import com.sequenceiq.notification.scheduled.register.dto.BaseNotificationRegisterAdditionalDataDto;
 import com.sequenceiq.notification.scheduled.register.dto.BaseNotificationRegisterAdditionalDataDtos;
+import com.sequenceiq.notification.scheduled.register.dto.azureoutbound.AzureOutboundNotificationAdditionalDataDto;
 
 @Service
 public class EnvironmentNotificationService {

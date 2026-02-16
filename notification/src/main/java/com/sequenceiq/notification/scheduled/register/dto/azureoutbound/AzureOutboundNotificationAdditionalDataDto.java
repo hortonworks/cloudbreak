@@ -1,6 +1,10 @@
-package com.sequenceiq.notification.scheduled.register.dto;
+package com.sequenceiq.notification.scheduled.register.dto.azureoutbound;
+
+import static com.sequenceiq.notification.util.NotificationUtil.toCamelCase;
 
 import java.util.Objects;
+
+import com.sequenceiq.notification.scheduled.register.dto.BaseNotificationRegisterAdditionalDataDto;
 
 public class AzureOutboundNotificationAdditionalDataDto extends BaseNotificationRegisterAdditionalDataDto {
 

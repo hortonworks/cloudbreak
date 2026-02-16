@@ -3,11 +3,7 @@ package com.sequenceiq.cloudbreak.util;
 import java.io.IOException;
 import java.io.StringWriter;
 
-import jakarta.inject.Inject;
-
 import org.springframework.stereotype.Service;
-
-import com.sequenceiq.cloudbreak.json.JsonHelper;
 
 import freemarker.template.Configuration;
 import freemarker.template.Template;
@@ -15,9 +11,6 @@ import freemarker.template.TemplateException;
 
 @Service
 public class FreeMarkerTemplateUtils {
-
-    @Inject
-    private JsonHelper jsonHelper;
 
     private FreeMarkerTemplateUtils() { }
 

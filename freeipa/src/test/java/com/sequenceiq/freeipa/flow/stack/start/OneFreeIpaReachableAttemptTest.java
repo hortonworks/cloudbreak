@@ -96,7 +96,7 @@ class OneFreeIpaReachableAttemptTest {
     }
 
     @Test
-    public void testAttemptFailedWithException() throws Exception {
+    public void testAttemptFailedWithExcBaseNotificationRegisterAdditionalDataDtoeption() throws Exception {
         response.setResult(Boolean.FALSE);
         when(freeIpaInstanceHealthDetailsService.checkFreeIpaHealth(any(), any())).thenThrow(FreeIpaClientException.class);
         assertEquals(oneFreeIpaReachableAttemptUnderTest.process().getState(), AttemptState.CONTINUE);

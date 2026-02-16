@@ -7,6 +7,7 @@ public enum CdpResourceType {
     DATALAKE,
     FREEIPA,
     DATABASE,
+    ENVIRONMENT,
     DEFAULT;
 
     public static CdpResourceType fromStackType(String type) {
@@ -17,6 +18,8 @@ public enum CdpResourceType {
             cdpResourceType = DATAHUB;
         } else if (type.toLowerCase(Locale.ROOT).contains("sdx") || type.toLowerCase(Locale.ROOT).contains("datalake")) {
             cdpResourceType = DATALAKE;
+        } else if (type.toLowerCase(Locale.ROOT).contains("environment")) {
+            cdpResourceType = ENVIRONMENT;
         }
         return cdpResourceType;
     }

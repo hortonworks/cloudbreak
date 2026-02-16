@@ -72,6 +72,12 @@ public class UsageReportingService {
 
     private UsageProto.NotificationType.Value getNotificationType(NotificationType notificationType) {
         return switch (notificationType) {
+            case STACK_PROVISIONING -> UsageProto.NotificationType.Value.STACK_PROVISIONING;
+            case STACK_START_STOP -> UsageProto.NotificationType.Value.STACK_START_STOP;
+            case STACK_RESIZE -> UsageProto.NotificationType.Value.STACK_RESIZE;
+            case STACK_UPGRADE -> UsageProto.NotificationType.Value.STACK_UPGRADE;
+            case STACK_REPAIR -> UsageProto.NotificationType.Value.STACK_REPAIR;
+            case STACK_HEALTH -> UsageProto.NotificationType.Value.STACK_HEALTH;
             case AZURE_DEFAULT_OUTBOUND -> UsageProto.NotificationType.Value.AZURE_DEFAULT_OUTBOUND;
         };
     }
@@ -88,7 +94,7 @@ public class UsageReportingService {
 
     private UsageProto.ChannelType.Value getChannelType(ChannelType channelType) {
         return switch (channelType) {
-            case EMAIL -> UsageProto.ChannelType.Value.EMAIL;
+            case EMAIL, LOCAL_EMAIL -> UsageProto.ChannelType.Value.EMAIL;
             case SLACK -> UsageProto.ChannelType.Value.SLACK;
             case IN_APP -> UsageProto.ChannelType.Value.IN_APP;
         };

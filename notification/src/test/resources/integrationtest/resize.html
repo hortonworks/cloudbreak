@@ -1,0 +1,436 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office" lang="en" xml:lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="HandheldFriendly" content="true">
+    <meta name="MobileOptimized" content="320">
+    <meta name="color-scheme" content="light only">
+    <meta name="supported-color-schemes" content="light only">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <title>Action Required: Cloudera Alert</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&amp;display=swap" rel="stylesheet" type="text/css">
+    <style type="text/css">
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #F4F4F4;
+            font-family: 'Plus Jakarta Sans', 'Roboto', Helvetica, Arial, sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        table {
+            border-spacing: 0;
+            border-collapse: collapse;
+        }
+
+        td {
+            padding: 0;
+        }
+
+        img {
+            border: 0;
+            display: block;
+        }
+
+        /* Layout Wrappers */
+        .main-wrapper {
+            background-color: #F4F4F4;
+            padding: 20px 0;
+        }
+
+        .container {
+            background-color: #FFFFFF;
+            max-width: 600px;
+            width: 100%;
+            margin: 0 auto;
+            box-shadow: 0px 4px 12px rgba(0,0,0,0.1);
+        }
+
+        /* Header Section */
+        .header-bg {
+            background-color: #120046;
+        }
+
+        .header-content {
+            padding: 30px 0 30px 40px;
+            vertical-align: top;
+        }
+
+        .logo-text {
+            color: #FF550D;
+            margin: 0;
+            font-size: 24px;
+            font-weight: 800;
+            letter-spacing: 1px;
+        }
+
+        .spacer-20 {
+            height: 20px;
+            line-height: 20px;
+        }
+
+        .headline {
+            color: #FFFFFF;
+            font-size: 26px;
+            font-weight: 600;
+            line-height: 32px;
+        }
+
+        .sub-headline {
+            color: #CEDBE4;
+            font-size: 14px;
+            font-weight: 400;
+            margin-top: 5px;
+        }
+
+        .header-image-cell {
+            width: 150px;
+            vertical-align: top;
+            text-align: right;
+        }
+
+        /* Body Section */
+        .content-padding {
+            padding: 40px;
+        }
+
+        .greeting {
+            color: #FF550D;
+            font-size: 18px;
+            font-weight: 700;
+            margin: 0 0 20px 0;
+        }
+
+        .body-text {
+            color: #120046;
+            font-size: 16px;
+            line-height: 24px;
+            margin: 0 0 24px 0;
+        }
+
+        /* Alert Note */
+        .alert-container {
+            background-color: #F0F4F8;
+            border-left: 4px solid #5555F9;
+            margin-bottom: 30px;
+            width: 100%;
+        }
+
+        .alert-content {
+            padding: 20px;
+            color: #120046;
+            font-size: 14px;
+            line-height: 22px;
+        }
+
+        .alert-label {
+            color: #5555F9;
+        }
+
+        /* Data Table */
+        .data-table {
+            width: 100%;
+            margin-bottom: 30px;
+        }
+
+        .table-title {
+            color: #120046;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        .th-style {
+            padding: 10px 0;
+            border-bottom: 1px solid #CEDBE4;
+            color: #5F6D7E;
+            font-size: 12px;
+            text-transform: uppercase;
+            text-align: left;
+        }
+
+        .td-name {
+            padding: 15px 0;
+            border-bottom: 1px solid #EEEEEE;
+            color: #120046;
+            font-size: 14px;
+        }
+
+        .td-crn {
+            padding: 15px 0;
+            border-bottom: 1px solid #EEEEEE;
+            color: #5F6D7E;
+            font-size: 14px;
+        }
+
+        .td-status {
+            padding: 15px 0;
+            border-bottom: 1px solid #EEEEEE;
+            color: #B00020;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        /* Button */
+        .btn-primary {
+            background-color: #5555F9;
+            color: #FFFFFF !important;
+            display: inline-block;
+            padding: 14px 32px;
+            font-size: 16px;
+            font-weight: 600;
+            text-decoration: none;
+            border-radius: 50px;
+            text-align: center;
+        }
+
+        /* Footer Section */
+        .footer-bg {
+            background-color: #120046;
+            padding: 30px 40px;
+            text-align: center;
+        }
+
+        .footer-text {
+            color: #CEDBE4;
+            font-size: 12px;
+            line-height: 18px;
+            margin: 0;
+        }
+
+        .footer-link {
+            color: #FFFFFF;
+            text-decoration: underline;
+        }
+
+        /* Responsive Styles */
+        @media screen and (max-width: 600px) {
+            .container {
+                width: 100% !important;
+            }
+            .content-padding {
+                padding: 20px !important;
+            }
+            .header-text {
+                padding-right: 20px !important;
+            }
+            .stack-on-mobile {
+                display: block !important;
+                width: 100% !important;
+            }
+        }
+    </style>
+</head>
+<body class="st-email-body st-center-gmail">
+<div lang="en">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%" class="main-wrapper">
+        <tbody>
+        <tr>
+            <td align="center">
+                <table border="0" cellpadding="0" cellspacing="0" class="container">
+                    <tbody>
+                    <tr>
+                        <td width="100%" valign="top" align="center" style="background-repeat: no-repeat; background-position: 0% 0%; background-size: cover;">
+                            <table role="presentation" border="0" cellpadding="0" cellspacing="0" align="center" width="650" class="st-wrapper st-wrapper-background st-module-wrapper-table" style="width: 650px;">
+                                <tbody>
+                                <tr>
+                                    <td width="100%" bgcolor="#120046" background="https://www.emailimagecdnz2jr.com/2ikpsdh4ft/en_us/images/682cba27608fa-1747761703.3955.png" valign="top" class="st-dynamic-9nzb1k5cyvpxj st-dynamic-jizlest6qhmon" style="width: 100%; background-repeat: no-repeat; background-position: 0% 0%; background-size: cover;">
+                                        <table role="presentation" border="0" cellpadding="0" cellspacing="0" align="center" width="100%" style="width: 100%;">
+                                            <tbody>
+                                            <tr>
+                                                <td width="25" class="bgi-padding-left st-dynamic-hp7br63bhgn8y" style="width: 25px;"></td>
+                                                <td align="center">
+                                                    <table role="presentation" border="0" cellpadding="0" cellspacing="0" align="center" width="100%" style="width: 100%;">
+                                                        <tbody>
+                                                        <tr class="bgi-padding-top">
+                                                            <td valign="top">
+                                                                <p height="20" style="-webkit-text-size-adjust:100%; -ms-text-size-adjust:100%; mso-line-height-rule:exactly; mso-table-lspace:0pt; mso-table-rspace:0pt; line-height:20px; font-size: 20px; height: 20px; max-height: 20px; margin: 0px auto; width: 100%">&nbsp;</p>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td width="100%" valign="top" align="left">
+                                                                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="600" class="st-mso-full-width st-mobile-full-width" style="width: 600px;">
+                                                                    <tbody>
+                                                                    <tr>
+                                                                        <td align="center" valign="top" width="600">
+                                                                            <table width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation">
+                                                                                <tbody>
+                                                                                <tr>
+                                                                                    <td width="100%" valign="top" align="left" class="center-image st-dynamic-17xaignkeg5z5" style="padding-bottom: 50px; padding-top: 10px; width: 100%;">
+                                                                                        <a href="https://www.cloudera.com/" target="_blank" style="display: block;">
+                                                                                            <img src="https://www.emailimagecdnz2jr.com/2ikpsdh4ft/en_us/images/6813babcd5f9b-1746123452.8764.png?t=1760622270435" border="0" valign="top" width="160" alt="CLOUDERA" class="st-mobile-width-constraint" style="border: 0px; display: block; width: 160px; max-width: 100%;">
+                                                                                        </a>
+                                                                                    </td>
+                                                                                </tr>
+                                                                                </tbody>
+                                                                            </table>
+                                                                        </td>
+                                                                    </tr>
+                                                                    </tbody>
+                                                                </table>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td width="100%" valign="top" align="left">
+                                                                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="600" class="st-mso-full-width st-mobile-full-width" style="width: 600px;">
+                                                                    <tbody>
+                                                                    <tr>
+                                                                        <td align="center" valign="top" width="600" class="st-dynamic-2bv18jd6s1wcm">
+                                                                            <table role="presentation" border="0" cellpadding="0" cellspacing="0" align="center" width="100%" style="width: 100%;">
+                                                                                <tbody>
+                                                                                <tr>
+                                                                                    <td align="center">
+                                                                                        <table width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation">
+                                                                                            <tbody>
+                                                                                            <tr>
+                                                                                                <td width="100%" valign="top" align="left" class="aligned-bullets st-dynamic-6r0hv9h3ozx7g" style="text-align: left; font-family: 'Plus Jakarta Sans', Arial, Helvetica, sans-serif; color: #ffffff; font-size: 16px; font-weight: 500; letter-spacing: normal; line-height: 16px; padding-bottom: 15px; width: 100%;">
+                                                                                                    <p style="margin: 0px;">
+                                                                                                        <span style="font-size: 26px; line-height: 15px;color: #ff560d;">Action Required</span>
+                                                                                                    </p>
+                                                                                                </td>
+                                                                                            </tr>
+                                                                                            <tr>
+                                                                                                <td width="100%" valign="top" align="left" class="center-element" style="text-align: left; font-family: 'Plus Jakarta Sans', Arial, Helvetica, sans-serif; color: #ffffff; font-size: 26px; font-weight: 700; letter-spacing: normal; line-height: 30px; padding-bottom: 10px; width: 100%;">
+                                                                                                    <p style="margin: 0px;">
+                                                                                                        <span style="font-size: 26px; line-height: 30px;">Data Hub Status Change</span>
+                                                                                                    </p>
+                                                                                                </td>
+                                                                                            </tr>
+                                                                                            <tr>
+                                                                                                <td width="100%" valign="top" align="left" class="center-element" style="text-align: left; font-family: 'Plus Jakarta Sans', Arial, Helvetica, sans-serif; color: #ffffff; font-size: 20px; font-weight: 500; letter-spacing: normal; line-height: 24px; padding-bottom: 10px; width: 100%;">
+                                                                                                    <p style="margin: 0px;">
+                                                                                                        <span style="font-size: 20px; line-height: 24px;">2026.03.01 13:69:11</span>
+                                                                                                    </p>
+                                                                                                </td>
+                                                                                            </tr>
+                                                                                            </tbody>
+                                                                                        </table>
+                                                                                    </td>
+                                                                                    <td width="50" class="st-dynamic-hp7br63bhgn8y" style="width: 50px;"></td>
+                                                                                </tr>
+                                                                                </tbody>
+                                                                            </table>
+                                                                        </td>
+                                                                    </tr>
+                                                                    </tbody>
+                                                                </table>
+                                                            </td>
+                                                        </tr>
+                                                        <tr class="bgi-padding-bottom">
+                                                            <td valign="top">
+                                                                <p height="20" style="-webkit-text-size-adjust:100%; -ms-text-size-adjust:100%; mso-line-height-rule:exactly; mso-table-lspace:0pt; mso-table-rspace:0pt; line-height:20px; font-size: 20px; height: 20px; max-height: 20px; margin: 0px auto; width: 100%">&nbsp;</p>
+                                                            </td>
+                                                        </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </td>
+                                                <td width="25" class="bgi-padding-right st-dynamic-hp7br63bhgn8y" style="width: 25px;"></td>
+                                            </tr>
+                                            </tbody>
+                                        </table>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="content-padding">
+                            <p class="greeting">Hello,</p>
+                            <p class="body-text">
+                                The
+                                <strong>Sclae</strong>
+                                operation on the following Data Hub failed
+                                <a href="localhost" target="_blank">
+                                    <strong>appletree</strong>
+                                </a>
+                            </p>
+                            <table border="0" cellpadding="0" cellspacing="0" class="alert-container">
+                                <tbody>
+                                <tr>
+                                    <td class="alert-content">
+                                        <strong class="alert-label">Issue Summary:</strong>
+                                        <br>
+                                        <strong>Data Hub:</strong>
+                                        <strong>
+                                            <a href="localhost" target="_blank">appletree</a>
+                                        </strong>
+                                        <br>
+                                        <strong>Operation:</strong>
+                                        Sclae
+                                        <br>
+                                        <strong>Failure Reason:</strong>
+                                        Quota issue
+                                        <br>
+                                        <strong>Date/Time:</strong>
+                                        2026.03.01 13:69:11
+                                        <br>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                            <h3 class="table-title">Impacted Resources</h3>
+                            <table border="0" cellpadding="0" cellspacing="0" class="data-table">
+                                <thead>
+                                <tr>
+                                    <th class="th-style">Instance ID</th>
+                                    <th class="th-style">Group Name</th>
+                                    <th class="th-style">Status</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr>
+                                    <td class="td-name">
+                                        <a href="localhost" target="_blank" style="display: block;">i-12345</a>
+                                    </td>
+                                    <td class="td-name">master</td>
+                                    <td class="td-name" style="color: #FF550D;font-weight: 700;">Failed</td>
+                                </tr>
+                                <tr>
+                                    <td class="td-name">
+                                        <a href="localhost" target="_blank" style="display: block;">i-12346</a>
+                                    </td>
+                                    <td class="td-name">master</td>
+                                    <td class="td-name" style="color: #FF550D;font-weight: 700;">Zombie</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                            <p class="body-text">To review the current status of the cluster and check available operations, please log in using the link below:</p>
+                            <p class="body-text">Please verify the cluster state and proceed with any required actions.</p>
+                            <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                                <tbody>
+                                <tr></tr>
+                                <tr>
+                                    <td align="center">
+                                        <a style="margin: 0 0 24px 0;" href="localhost" class="btn-primary">Data Hub Status</a>
+                                    </td>
+                                </tr>
+                                <tr></tr>
+                                </tbody>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="footer-bg">
+                            <p class="footer-text">
+                                © 2026 Cloudera, Inc. All rights reserved.
+                                <br>
+                                <a href="https://www.cloudera.com/legal/terms-and-conditions.html" style="text-decoration-line:none" target="_blank">
+                                    <span style="font-size:9.5pt;font-family:'Plus Jakarta Sans',sans-serif;color:rgb(85,85,249);background-color:transparent;font-variant-numeric:normal;font-variant-east-asian:normal;font-variant-alternates:normal;text-decoration-line:underline;vertical-align:baseline">Terms &amp; Conditions</span>
+                                </a>
+                                <span style="font-size:9.5pt;font-family:'Plus Jakarta Sans',sans-serif;color:rgb(85,85,249);background-color:transparent;font-variant-numeric:normal;font-variant-east-asian:normal;font-variant-alternates:normal;vertical-align:baseline">|</span>
+                                <a href="https://www.cloudera.com/legal/policies.html" style="text-decoration-line:none" target="_blank">
+                                    <span style="font-size:9.5pt;font-family:'Plus Jakarta Sans',sans-serif;color:rgb(85,85,249);background-color:transparent;font-variant-numeric:normal;font-variant-east-asian:normal;font-variant-alternates:normal;text-decoration-line:underline;vertical-align:baseline">Privacy Policy and Data Policy</span>
+                                </a>
+                            </p>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>

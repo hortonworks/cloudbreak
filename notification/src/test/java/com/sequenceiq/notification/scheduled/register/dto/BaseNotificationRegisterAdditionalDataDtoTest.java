@@ -1,5 +1,6 @@
 package com.sequenceiq.notification.scheduled.register.dto;
 
+import static com.sequenceiq.notification.util.NotificationUtil.toCamelCase;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 

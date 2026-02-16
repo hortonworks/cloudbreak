@@ -28,9 +28,13 @@ import com.sequenceiq.cloudbreak.notification.client.dto.EventChannelPreferenceD
 import com.sequenceiq.cloudbreak.notification.client.dto.ListDistributionListsRequestDto;
 import com.sequenceiq.cloudbreak.notification.client.dto.ListDistributionListsResponseDto;
 import com.sequenceiq.notification.config.NotificationConfig;
+import com.sequenceiq.notification.domain.ChannelType;
 import com.sequenceiq.notification.domain.DistributionList;
 import com.sequenceiq.notification.domain.DistributionListManagementType;
 import com.sequenceiq.notification.domain.EventChannelPreference;
+import com.sequenceiq.notification.domain.NotificationGroupType;
+import com.sequenceiq.notification.domain.NotificationSeverity;
+import com.sequenceiq.notification.domain.NotificationType;
 import com.sequenceiq.notification.sender.converter.EventChannelPreferenceToEventChannelPreferenceDtoConverter;
 import com.sequenceiq.notification.sender.dto.CreateDistributionListRequest;
 
@@ -68,6 +72,18 @@ public class DistributionListManagementService {
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .collect(Collectors.toList());
+    }
+
+    public Optional<DistributionList> createOrUpdateList(String resourceCrn, String resourceName, NotificationGroupType notificationGroupType) {
+        List<EventChannelPreference> preferences = NotificationType.getEventTypeIds(notificationGroupType)
+                .stream()
+                .map(id -> new EventChannelPreference(id, Set.of(ChannelType.EMAIL), Set.of(NotificationSeverity.WARNING)))
+                .toList();
+        CreateDistributionListRequest request = new CreateDistributionListRequest(
+                resourceCrn,
+                resourceName,
+                preferences);
+        return createOrUpdateList(request);
     }
 
     public Optional<DistributionList> createOrUpdateList(CreateDistributionListRequest request) {

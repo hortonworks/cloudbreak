@@ -34,7 +34,9 @@ public class NotificationDtosToCreateDistributionListRequestConverter {
             LOGGER.debug("No notifications found for notification sending dto: {}", notificationSendingDtos);
             return Collections.emptySet();
         } else {
-            Map<String, List<NotificationDto>> groupedNotifications = notificationSendingDtos.notifications().stream()
+            Map<String, List<NotificationDto>> groupedNotifications = notificationSendingDtos.notifications()
+                    .stream()
+                    .filter(e -> !e.getChannelType().equals(ChannelType.LOCAL_EMAIL))
                     .filter(Objects::nonNull)
                     .filter(notificationDto -> notificationDto.isValidNotification(NotificationFormFactor.DISTRIBUTION_LIST))
                     .collect(Collectors.groupingBy(NotificationDto::getResourceCrn));
