@@ -18,7 +18,7 @@ dependencies {
   implementation     group: 'com.squareup.okhttp3',                name: 'okhttp',                         version: okhttpVersion
   implementation     group: 'org.xerial.snappy',                   name: 'snappy-java',                    version: '1.1.10.8'
   implementation     group: 'org.springframework.boot',            name: 'spring-boot-starter-jersey',     version: springBootVersion
-  implementation     group: 'net.bytebuddy',                       name: 'byte-buddy',                     version: '1.18.4'
+  implementation     group: 'net.bytebuddy',                       name: 'byte-buddy',                     version: '1.18.5'
   implementation     group: 'com.google.protobuf',                 name: 'protobuf-java-util',             version: protobufVersion
 
   implementation ("io.grpc:grpc-all:$grpcVersion") {
