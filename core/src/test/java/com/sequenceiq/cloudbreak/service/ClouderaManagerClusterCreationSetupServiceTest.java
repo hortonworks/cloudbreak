@@ -14,9 +14,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
@@ -56,7 +54,6 @@ import com.sequenceiq.cloudbreak.domain.stack.Component;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
-import com.sequenceiq.cloudbreak.service.parcel.ParcelFilterService;
 import com.sequenceiq.cloudbreak.service.stack.CentralCDHVersionCoordinator;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.api.type.InstanceGroupType;
@@ -89,9 +86,6 @@ class ClouderaManagerClusterCreationSetupServiceTest {
 
     @Mock
     private ImageBasedDefaultCDHEntries imageBasedDefaultCDHEntries;
-
-    @Mock
-    private ParcelFilterService parcelFilterService;
 
     @Mock
     private StackMatrixService stackMatrixService;
@@ -247,13 +241,11 @@ class ClouderaManagerClusterCreationSetupServiceTest {
         when(centralCDHVersionCoordinator.convertClouderaManagerProductsToClusterComponents(any(), anySet()))
                 .thenReturn(productClusterComponentList);
         when(blueprintUtils.getCDHStackVersion(any())).thenReturn(SOME_CDH_VERSION);
-        when(parcelFilterService.filterParcelsByBlueprint(eq(WORKSPACE_ID), eq(STACK_ID), anySet(), any(Blueprint.class))).thenReturn(clouderaManagerProductSet);
 
         List<ClusterComponent> clusterComponents = underTest.prepareClouderaManagerCluster(clusterRequest, cluster, cmRepoComponent,
                 productComponentList, imageComponent);
 
         assertVersionsMatch(clusterComponents, CM_VERSION, SOME_CDH_VERSION);
-        verify(parcelFilterService, times(1)).filterParcelsByBlueprint(eq(WORKSPACE_ID), eq(STACK_ID), anySet(), any(Blueprint.class));
     }
 
     @Test
@@ -292,7 +284,6 @@ class ClouderaManagerClusterCreationSetupServiceTest {
 
         assertVersionsMatch(clusterComponents, CM_VERSION, SOME_CDH_VERSION);
         verify(clouderaManagerProductsProvider).getCdhProduct(anySet());
-        verifyNoInteractions(parcelFilterService);
     }
 
     private void assertVersionsMatch(Collection<ClusterComponent> clusterComponents, String cmVersion, String cdhVersion) {

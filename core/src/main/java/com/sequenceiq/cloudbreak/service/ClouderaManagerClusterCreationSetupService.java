@@ -44,7 +44,6 @@ import com.sequenceiq.cloudbreak.domain.stack.Component;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
-import com.sequenceiq.cloudbreak.service.parcel.ParcelFilterService;
 import com.sequenceiq.cloudbreak.service.stack.CentralCDHVersionCoordinator;
 import com.sequenceiq.common.model.ImageCatalogPlatform;
 
@@ -69,9 +68,6 @@ public class ClouderaManagerClusterCreationSetupService {
 
     @Inject
     private BlueprintUtils blueprintUtils;
-
-    @Inject
-    private ParcelFilterService parcelFilterService;
 
     @Inject
     private PlatformStringTransformer platformStringTransformer;
@@ -142,7 +138,7 @@ public class ClouderaManagerClusterCreationSetupService {
         if (products.isEmpty()) {
             components.addAll(centralCDHVersionCoordinator.convertClouderaManagerProductsToClusterComponents(
                     cluster,
-                    determineCdhRepoConfig(cluster, stackCdhRepoConfig, blueprintCdhVersion, image))
+                    determineClouderaManagerProducts(cluster, stackCdhRepoConfig, blueprintCdhVersion, image))
             );
         }
         if (isCdhParcelMissing(products, components)) {
@@ -198,8 +194,8 @@ public class ClouderaManagerClusterCreationSetupService {
         return new ClusterComponent(ComponentType.CM_REPO_DETAILS, json, cluster);
     }
 
-    private Set<ClouderaManagerProduct> determineCdhRepoConfig(Cluster cluster, List<Component> stackCdhRepoConfig, String blueprintCdhVersion, Image image)
-            throws CloudbreakImageCatalogException {
+    private Set<ClouderaManagerProduct> determineClouderaManagerProducts(Cluster cluster, List<Component> stackCdhRepoConfig, String blueprintCdhVersion,
+            Image image) throws CloudbreakImageCatalogException {
         if (Objects.isNull(stackCdhRepoConfig) || stackCdhRepoConfig.isEmpty()) {
             DefaultCDHInfo defaultCDHInfo = getDefaultCDHInfo(cluster, blueprintCdhVersion, image);
             Map<String, String> stack = defaultCDHInfo.getRepo().getStack();
@@ -214,20 +210,18 @@ public class ClouderaManagerClusterCreationSetupService {
                     .map(Component::getAttributes)
                     .map(json -> json.getUnchecked(ClouderaManagerProduct.class))
                     .collect(Collectors.toSet());
-            return filterParcelsIfNecessary(cluster, products);
+            return getSupportedClouderaManagerProducts(cluster, products);
         }
     }
 
-    private Set<ClouderaManagerProduct> filterParcelsIfNecessary(Cluster cluster, Set<ClouderaManagerProduct> products) {
+    private Set<ClouderaManagerProduct> getSupportedClouderaManagerProducts(Cluster cluster, Set<ClouderaManagerProduct> products) {
         Stack stack = cluster.getStack();
         if (stack.isDatalake()) {
-            return Set.of(clouderaManagerProductsProvider.getCdhProduct(products).orElseThrow(() -> new NotFoundException("Runtime component not found!")));
+            return Set.of(clouderaManagerProductsProvider.getCdhProduct(products)
+                    .orElseThrow(() -> new NotFoundException("Runtime component not found!")));
         } else {
-            LOGGER.info("Product list before filter out products by blueprint: {}", products);
-            Set<ClouderaManagerProduct> filteredProducts = parcelFilterService
-                    .filterParcelsByBlueprint(stack.getWorkspace().getId(), stack.getId(), products, cluster.getBlueprint());
-            LOGGER.info("Product list after filter out products by blueprint: {}", filteredProducts);
-            return filteredProducts;
+            LOGGER.debug("Parcel filtering logic has been moved to flow level. Product list by stack components: {}", products);
+            return products;
         }
     }
 

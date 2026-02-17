@@ -33,7 +33,9 @@ import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialConverter;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.validation.ParcelValidationAndFilteringService;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
+import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
@@ -74,6 +76,9 @@ public class ValidateCloudConfigHandler extends ExceptionCatcherEventHandler<Val
     @Inject
     private MultiAzValidator multiAzValidator;
 
+    @Inject
+    private ParcelValidationAndFilteringService parcelValidationAndFilteringService;
+
     @Override
     protected Selectable doAccept(HandlerEvent<ValidateCloudConfigRequest> event) {
         ValidateCloudConfigRequest data = event.getData();
@@ -84,7 +89,7 @@ public class ValidateCloudConfigHandler extends ExceptionCatcherEventHandler<Val
         Credential credential = credentialConverter.convert(environment.getCredential());
         CloudCredential cloudCredential = credentialToCloudCredentialConverter.convert(credential);
 
-        ValidationResult.ValidationResultBuilder validationBuilder = ValidationResult.builder();
+        ValidationResultBuilder validationBuilder = ValidationResult.builder();
 
         stackValidator.validate(stack, validationBuilder);
 
@@ -124,8 +129,10 @@ public class ValidateCloudConfigHandler extends ExceptionCatcherEventHandler<Val
                 stack.getType().equals(StackType.WORKLOAD),
                 validationBuilder);
 
+        parcelValidationAndFilteringService.validate(stack, validationBuilder);
+
         ValidationResult validationResult = validationBuilder.build();
-        if (validationResult.getState() == ValidationResult.State.ERROR || validationResult.hasError()) {
+        if (validationResult.hasError()) {
             LOGGER.debug("Stack request has validation error(s): {}.", validationResult.getFormattedErrors());
             throw new IllegalStateException(validationResult.getFormattedErrors());
 
