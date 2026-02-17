@@ -1,0 +1,162 @@
+{
+  "description": "7.3.2 - Hybrid Streams Messaging Light Duty with Apache Kafka, Schema Registry, Streams Messaging Manager, Streams Replication Manager, Cruise Control",
+  "blueprint": {
+    "cdhVersion": "7.3.2",
+    "displayName": "hybrid_streams_messaging",
+    "blueprintUpgradeOption": "GA",
+    "hybridOption": "BURST_TO_CLOUD",
+    "services": [
+      {
+        "refName": "streams_messaging_manager",
+        "serviceType": "STREAMS_MESSAGING_MANAGER",
+        "roleConfigGroups": [
+          {
+            "refName": "streams_messaging_manager-STREAMS_MESSAGING_MANAGER_SERVER-BASE",
+            "roleType": "STREAMS_MESSAGING_MANAGER_SERVER",
+            "base": true
+          },
+          {
+            "refName": "streams_messaging_manager-STREAMS_MESSAGING_MANAGER_UI-BASE",
+            "roleType": "STREAMS_MESSAGING_MANAGER_UI",
+            "base": true
+          }
+        ]
+      },
+      {
+        "refName": "stub_dfs",
+        "serviceType": "STUB_DFS",
+        "roleConfigGroups": [
+          {
+            "refName": "stub_dfs-STORAGEOPERATIONS-BASE",
+            "roleType": "STORAGEOPERATIONS",
+            "base": true
+          }
+        ]
+      },
+      {
+        "refName": "kafka",
+        "serviceType": "KAFKA",
+        "roleConfigGroups": [
+          {
+            "refName": "kafka-GATEWAY-BASE",
+            "roleType": "GATEWAY",
+            "base": true
+          },
+          {
+            "refName": "kafka-KAFKA_BROKER-BASE",
+            "roleType": "KAFKA_BROKER",
+            "base": true
+          },
+          {
+            "refName": "kafka-KAFKA_CONNECT-BASE",
+            "roleType": "KAFKA_CONNECT",
+            "base": true
+          },
+          {
+            "refName": "kafka-KAFKA_KRAFT-BASE",
+            "roleType": "KRAFT",
+            "base": true
+          }
+        ]
+      },
+      {
+        "refName": "zookeeper",
+        "serviceType": "ZOOKEEPER",
+        "roleConfigGroups": [
+          {
+            "refName": "zookeeper-SERVER-BASE",
+            "roleType": "SERVER",
+            "base": true
+          }
+        ]
+      },
+      {
+        "refName": "schemaregistry",
+        "serviceType": "SCHEMAREGISTRY",
+        "roleConfigGroups": [
+          {
+            "refName": "schemaregistry-SCHEMA_REGISTRY_SERVER-BASE",
+            "roleType": "SCHEMA_REGISTRY_SERVER",
+            "base": true
+          }
+        ]
+      },
+      {
+        "refName" : "streams_replication_manager",
+        "serviceType" : "STREAMS_REPLICATION_MANAGER",
+        "roleConfigGroups" : [
+          {
+            "refName" : "streams_replication_manager-STREAMS_REPLICATION_MANAGER_SERVICE-BASE",
+            "roleType" : "STREAMS_REPLICATION_MANAGER_SERVICE",
+            "base" : true
+          },
+          {
+            "refName" : "streams_replication_manager-STREAMS_REPLICATION_MANAGER_DRIVER-BASE",
+            "roleType" : "STREAMS_REPLICATION_MANAGER_DRIVER",
+            "base" : true
+          },
+          {
+            "refName" : "streams_replication_manager-GATEWAY-BASE",
+            "roleType" : "GATEWAY",
+            "base" : true
+          }
+        ]
+      },
+      {
+        "refName": "cruise_control",
+        "serviceType": "CRUISE_CONTROL",
+        "roleConfigGroups": [
+          {
+            "refName": "cruise_control-CRUISE_CONTROL_SERVER-BASE",
+            "roleType": "CRUISE_CONTROL_SERVER",
+            "base": true
+          }
+        ]
+      }
+    ],
+    "hostTemplates": [
+      {
+        "refName": "master",
+        "cardinality": 1,
+        "roleConfigGroupsRefNames": [
+          "stub_dfs-STORAGEOPERATIONS-BASE",
+          "streams_replication_manager-STREAMS_REPLICATION_MANAGER_SERVICE-BASE",
+          "schemaregistry-SCHEMA_REGISTRY_SERVER-BASE",
+          "streams_messaging_manager-STREAMS_MESSAGING_MANAGER_SERVER-BASE",
+          "streams_messaging_manager-STREAMS_MESSAGING_MANAGER_UI-BASE",
+          "cruise_control-CRUISE_CONTROL_SERVER-BASE"
+        ]
+      },
+      {
+        "refName": "core_broker",
+        "cardinality": 3,
+        "roleConfigGroupsRefNames": [
+          "zookeeper-SERVER-BASE",
+          "streams_replication_manager-STREAMS_REPLICATION_MANAGER_DRIVER-BASE",
+          "streams_replication_manager-GATEWAY-BASE",
+          "kafka-GATEWAY-BASE",
+          "kafka-KAFKA_BROKER-BASE",
+          "kafka-KAFKA_CONNECT-BASE"
+        ]
+      },
+      {
+        "refName": "broker",
+        "cardinality": 0,
+        "roleConfigGroupsRefNames": [
+          "streams_replication_manager-STREAMS_REPLICATION_MANAGER_DRIVER-BASE",
+          "kafka-GATEWAY-BASE",
+          "kafka-KAFKA_BROKER-BASE",
+          "kafka-KAFKA_CONNECT-BASE"
+        ]
+      },
+      {
+        "refName": "kraft",
+        "cardinality": 0,
+        "roleConfigGroupsRefNames": [
+          "kafka-GATEWAY-BASE",
+          "kafka-KAFKA_KRAFT-BASE"
+        ]
+      }
+    ]
+  }
+}

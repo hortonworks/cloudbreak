@@ -1,0 +1,88 @@
+{
+  "name": "7.3.1 - Hybrid Streams Messaging Light Duty for Azure",
+  "description": "",
+  "type": "HYBRID_STREAMING",
+  "featureState": "PREVIEW",
+  "cloudPlatform": "AZURE",
+  "distroXTemplate": {
+    "cluster": {
+      "blueprintName": "7.3.1 - Hybrid Streams Messaging Light Duty: Apache Kafka, Schema Registry, Streams Messaging Manager, Streams Replication Manager, Cruise Control"
+    },
+    "externalDatabase": {
+      "availabilityType": "NON_HA"
+    },
+    "instanceGroups": [
+      {
+        "name": "master",
+        "scalabilityOption": "FORBIDDEN",
+        "template": {
+          "instanceType": "Standard_E8ds_v5",
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 100,
+              "type": "StandardSSD_LRS"
+            }
+          ]
+        },
+        "nodeCount": 1,
+        "type": "GATEWAY",
+        "recoveryMode": "MANUAL"
+      },
+      {
+        "name": "core_broker",
+        "scalabilityOption": "FORBIDDEN",
+        "template": {
+          "instanceType": "Standard_D8ds_v5",
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 1000,
+              "type": "Standard_LRS"
+            }
+          ]
+        },
+        "nodeCount": 3,
+        "type": "CORE",
+        "recoveryMode": "MANUAL",
+        "recipeNames": []
+      },
+      {
+        "name": "broker",
+        "template": {
+          "instanceType": "Standard_D8ds_v5",
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 1000,
+              "type": "Standard_LRS"
+            }
+          ]
+        },
+        "nodeCount": 0,
+        "type": "CORE",
+        "recoveryMode": "MANUAL",
+        "recipeNames": []
+      },
+      {
+        "name": "kraft",
+        "template": {
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 100,
+              "type": "Standard_LRS"
+            }
+          ],
+          "azure": {
+            "manageDisk": true
+          },
+          "instanceType": "Standard_D8ds_v5"
+        },
+        "nodeCount": 0,
+        "type": "CORE",
+        "recoveryMode": "MANUAL"
+      }
+    ]
+  }
+}

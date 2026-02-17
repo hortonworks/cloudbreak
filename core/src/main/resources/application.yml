@@ -512,6 +512,7 @@ cb:
           7.3.1 - Streams Messaging High Availability: Apache Kafka, Schema Registry, Streams Messaging Manager, Streams Replication Manager, Cruise Control=cdp-streaming-ha;
           7.3.1 - Streams Messaging Heavy Duty: Apache Kafka, Schema Registry, Streams Messaging Manager, Streams Replication Manager, Cruise Control=cdp-streaming;
           7.3.1 - Streams Messaging Light Duty: Apache Kafka, Schema Registry, Streams Messaging Manager, Streams Replication Manager, Cruise Control=cdp-streaming-small;
+          7.3.1 - Hybrid Streams Messaging Light Duty: Apache Kafka, Schema Registry, Streams Messaging Manager, Streams Replication Manager, Cruise Control=cdp-hybrid-streaming-small;
           7.3.1 - Flow Management Light Duty with Apache NiFi, Apache NiFi Registry, Schema Registry=cdp-flow-management-small;
           7.3.1 - Flow Management Heavy Duty with Apache NiFi, Apache NiFi Registry, Schema Registry=cdp-flow-management;
           7.3.1 - NiFi 2 - Flow Management Light Duty with Apache NiFi, Apache NiFi Registry, Schema Registry=cdp-flow-management-small-nifi-2;
@@ -539,6 +540,7 @@ cb:
           7.3.2 - Streams Messaging High Availability: Apache Kafka, Schema Registry, Streams Messaging Manager, Streams Replication Manager, Cruise Control=cdp-streaming-ha;
           7.3.2 - Streams Messaging Heavy Duty: Apache Kafka, Schema Registry, Streams Messaging Manager, Streams Replication Manager, Cruise Control=cdp-streaming;
           7.3.2 - Streams Messaging Light Duty: Apache Kafka, Schema Registry, Streams Messaging Manager, Streams Replication Manager, Cruise Control=cdp-streaming-small;
+          7.3.2 - Hybrid Streams Messaging Light Duty: Apache Kafka, Schema Registry, Streams Messaging Manager, Streams Replication Manager, Cruise Control=cdp-hybrid-streaming-small;
           7.3.2 - Flow Management Light Duty with Apache NiFi, Apache NiFi Registry, Schema Registry=cdp-flow-management-small;
           7.3.2 - Flow Management Heavy Duty with Apache NiFi, Apache NiFi Registry, Schema Registry=cdp-flow-management;
           7.3.2 - NiFi 2 - Flow Management Light Duty with Apache NiFi, Apache NiFi Registry, Schema Registry=cdp-flow-management-small-nifi-2;

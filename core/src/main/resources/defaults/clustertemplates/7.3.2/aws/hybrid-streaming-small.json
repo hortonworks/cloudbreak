@@ -1,0 +1,90 @@
+{
+  "name": "7.3.2 - Hybrid Streams Messaging Light Duty for AWS",
+  "description": "",
+  "type": "HYBRID_STREAMING",
+  "featureState": "PREVIEW",
+  "cloudPlatform": "AWS",
+  "distroXTemplate": {
+    "cluster": {
+      "blueprintName": "7.3.2 - Hybrid Streams Messaging Light Duty: Apache Kafka, Schema Registry, Streams Messaging Manager, Streams Replication Manager, Cruise Control"
+    },
+    "externalDatabase": {
+      "availabilityType": "NON_HA"
+    },
+    "instanceGroups": [
+      {
+        "name": "master",
+        "scalabilityOption": "FORBIDDEN",
+        "template": {
+          "instanceType": "r5.2xlarge",
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 100,
+              "type": "standard"
+            }
+          ]
+        },
+        "nodeCount": 1,
+        "type": "GATEWAY",
+        "recoveryMode": "MANUAL"
+      },
+      {
+        "name": "core_broker",
+        "scalabilityOption": "FORBIDDEN",
+        "template": {
+          "instanceType": "m5.2xlarge",
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 1000,
+              "type": "st1"
+            }
+          ]
+        },
+        "nodeCount": 3,
+        "type": "CORE",
+        "recoveryMode": "MANUAL",
+        "recipeNames": []
+      },
+      {
+        "name": "broker",
+        "template": {
+          "instanceType": "m5.2xlarge",
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 1000,
+              "type": "st1"
+            }
+          ]
+        },
+        "nodeCount": 0,
+        "type": "CORE",
+        "recoveryMode": "MANUAL",
+        "recipeNames": []
+      },
+      {
+        "name": "kraft",
+        "template": {
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 100,
+              "type": "standard"
+            }
+          ],
+          "aws": {
+            "encryption": {
+              "type": "NONE"
+            }
+          },
+          "instanceType": "m5.2xlarge"
+        },
+        "nodeCount": 0,
+        "type": "CORE",
+        "recoveryMode": "MANUAL"
+      }
+    ]
+  }
+}
