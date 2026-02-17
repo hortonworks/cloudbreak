@@ -55,7 +55,7 @@ public class TestOnlyInternalNotificationService {
 
         notificationSendingService.registerAllNotification(
                 NotificationGeneratorDtos.builder()
-                        .notificationType(NotificationType.AZURE_DEFAULT_OUTBOUND)
+                        .notificationType(NotificationType.valueOf(request.getNotificationType()))
                         .notification(List.of(
                                 NotificationGeneratorDto.builder()
                                         .accountId(request.getAccountId())
