@@ -50,12 +50,12 @@ public class ExistingStackPatcherJob extends StatusCheckerJob {
 
     @Override
     protected Optional<MdcContextInfoProvider> getMdcContextConfigProvider() {
-        return Optional.ofNullable(stackDtoService.getStackViewById(getStackId()));
+        return Optional.ofNullable(stackDtoService.getStackViewById(getLocalIdAsLong()));
     }
 
     @Override
     protected void executeJob(JobExecutionContext context) throws JobExecutionException {
-        Stack stack = stackService.getByIdWithListsInTransaction(getStackId());
+        Stack stack = stackService.getByIdWithListsInTransaction(getLocalIdAsLong());
         Status stackStatus = stack.getStatus();
         String stackPatchTypeName = context.getJobDetail().getJobDataMap().getString(STACK_PATCH_TYPE_NAME);
         try {
@@ -134,9 +134,5 @@ public class ExistingStackPatcherJob extends StatusCheckerJob {
             LOGGER.debug("Stack {} was already patched for {}", stack.getResourceCrn(), stackPatchType);
             return true;
         }
-    }
-
-    private Long getStackId() {
-        return Long.valueOf(getLocalId());
     }
 }

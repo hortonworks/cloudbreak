@@ -1,10 +1,13 @@
 package com.sequenceiq.cloudbreak.job.stackpatcher;
 
+import javax.annotation.PostConstruct;
+
 import jakarta.inject.Inject;
 
 import org.quartz.JobBuilder;
 import org.quartz.JobDetail;
 import org.quartz.JobKey;
+import org.quartz.SchedulerException;
 import org.quartz.SimpleScheduleBuilder;
 import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
@@ -18,6 +21,8 @@ import com.sequenceiq.cloudbreak.quartz.JobDataMapProvider;
 import com.sequenceiq.cloudbreak.quartz.JobSchedulerService;
 import com.sequenceiq.cloudbreak.quartz.configuration.scheduler.TransactionalScheduler;
 import com.sequenceiq.cloudbreak.quartz.model.JobResource;
+import com.sequenceiq.cloudbreak.quartz.statuschecker.StatusCheckerJobConflictVetoListener;
+import com.sequenceiq.cloudbreak.quartz.statuschecker.StatusCheckerJobKey;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stackpatch.ExistingStackPatchService;
 
@@ -41,6 +46,11 @@ public class ExistingStackPatcherJobService implements JobSchedulerService {
 
     @Inject
     private JobDataMapProvider jobDataMapProvider;
+
+    @PostConstruct
+    public void init() throws SchedulerException {
+        new StatusCheckerJobConflictVetoListener(JOB_GROUP).init(scheduler.getScheduler());
+    }
 
     public void schedule(Long stackId, StackPatchType stackPatchType) {
         JobResource jobResource = stackService.getJobResource(stackId);
@@ -83,7 +93,7 @@ public class ExistingStackPatcherJobService implements JobSchedulerService {
 
     private JobDetail buildJobDetail(ExistingStackPatcherJobAdapter resource) {
         return JobBuilder.newJob(ExistingStackPatcherJob.class)
-                .withIdentity(resource.getJobResource().getLocalId() + "-" + resource.getStackPatchType().name(), JOB_GROUP)
+                .withIdentity(new StatusCheckerJobKey(resource.getJobResource().getLocalId(), JOB_GROUP, resource.getStackPatchType().name()).toQuartzJobKey())
                 .withDescription("Patching existing stack: " + resource.getJobResource().getRemoteResourceId())
                 .usingJobData(jobDataMapProvider.provide(resource))
                 .storeDurably()
