@@ -7,7 +7,6 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.sequenceiq.notification.domain.NotificationType;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -25,7 +24,7 @@ public class TestOnlyInternalRegisterAzureOutboundNotificationRequest {
     private String environmentName;
 
     @NotNull
-    private NotificationType notificationType;
+    private String notificationType;
 
     @NotNull
     private List<TestOnlyInternalAzureOutboundNotificationDatahubRequest> datahubs = new ArrayList<>();
@@ -38,11 +37,11 @@ public class TestOnlyInternalRegisterAzureOutboundNotificationRequest {
         this.datahubs = datahubs;
     }
 
-    public NotificationType getNotificationType() {
+    public String getNotificationType() {
         return notificationType;
     }
 
-    public void setNotificationType(NotificationType notificationType) {
+    public void setNotificationType(String notificationType) {
         this.notificationType = notificationType;
     }
 
