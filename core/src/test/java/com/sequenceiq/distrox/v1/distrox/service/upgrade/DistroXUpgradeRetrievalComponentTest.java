@@ -15,6 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.lenient;
@@ -29,10 +30,12 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
+import jakarta.ws.rs.core.Response;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -97,6 +100,7 @@ import com.sequenceiq.cloudbreak.service.image.PreWarmParcelParser;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.parcel.ClouderaManagerProductTransformer;
 import com.sequenceiq.cloudbreak.service.parcel.ManifestRetrieverService;
+import com.sequenceiq.cloudbreak.service.parcel.ParcelAvailabilityRetrievalService;
 import com.sequenceiq.cloudbreak.service.parcel.ParcelFilterService;
 import com.sequenceiq.cloudbreak.service.parcel.ParcelService;
 import com.sequenceiq.cloudbreak.service.runtimes.SupportedRuntimes;
@@ -128,10 +132,11 @@ import com.sequenceiq.cloudbreak.service.upgrade.image.BlueprintUpgradeOptionVal
 import com.sequenceiq.cloudbreak.service.upgrade.image.CdhPackageLocationFilter;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ClouderaManagerPackageLocationFilter;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ClusterUpgradeImageFilter;
+import com.sequenceiq.cloudbreak.service.upgrade.image.ClusterUpgradeOsVersionFilterCondition;
 import com.sequenceiq.cloudbreak.service.upgrade.image.CsdLocationFilter;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterResult;
+import com.sequenceiq.cloudbreak.service.upgrade.image.OsChangeService;
 import com.sequenceiq.cloudbreak.service.upgrade.image.OsChangeUpgradeCondition;
-import com.sequenceiq.cloudbreak.service.upgrade.image.OsChangeUtil;
 import com.sequenceiq.cloudbreak.service.upgrade.image.PreWarmParcelLocationFilter;
 import com.sequenceiq.cloudbreak.service.upgrade.image.filter.CloudPlatformBasedUpgradeImageFilter;
 import com.sequenceiq.cloudbreak.service.upgrade.image.filter.CmAndStackVersionUpgradeImageFilter;
@@ -142,7 +147,6 @@ import com.sequenceiq.cloudbreak.service.upgrade.image.filter.IgnoredCmVersionUp
 import com.sequenceiq.cloudbreak.service.upgrade.image.filter.ImageFilterUpgradeService;
 import com.sequenceiq.cloudbreak.service.upgrade.image.filter.ImageRegionUpgradeImageFilter;
 import com.sequenceiq.cloudbreak.service.upgrade.image.filter.NonCmUpgradeImageFilter;
-import com.sequenceiq.cloudbreak.service.upgrade.image.filter.OsChangeUpgradeImageFilter;
 import com.sequenceiq.cloudbreak.service.upgrade.image.filter.OsVersionBasedUpgradeImageFilter;
 import com.sequenceiq.cloudbreak.service.upgrade.image.filter.RuntimeDependencyBasedUpgradeImageFilter;
 import com.sequenceiq.cloudbreak.service.upgrade.image.filter.TargetImageIdImageFilter;
@@ -289,6 +293,12 @@ public class DistroXUpgradeRetrievalComponentTest {
     @MockBean
     private CloudbreakEventService cloudbreakEventService;
 
+    @MockBean
+    private ParcelAvailabilityRetrievalService parcelAvailabilityRetrievalService;
+
+    @Mock
+    private Response parcelAvailabilityResponse;
+
     @BeforeEach
     public void before() throws CloudbreakImageCatalogException {
         when(clusterDBValidationService.isGatewayRepairEnabled(any())).thenReturn(true);
@@ -298,7 +308,8 @@ public class DistroXUpgradeRetrievalComponentTest {
         when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(any())).thenReturn(
                 Optional.of(SdxBasicView.builder().withName(CLUSTER_NAME).build()));
         when(imageCatalogService.getAllCdhImages(any(), any(), any(), any())).thenReturn(imageCatalogMock.getAllCdhImages(CLOUD_PLATFORM));
-        when(currentImagePackageProvider.currentInstancesContainsPackage(STACK_ID, imageCatalogMock.getAllCdhImages(CLOUD_PLATFORM), PYTHON38)).thenReturn(true);
+        when(currentImagePackageProvider.currentInstancesContainsPackage(STACK_ID, imageCatalogMock.getAllCdhImages(CLOUD_PLATFORM), PYTHON38)).thenReturn(
+                true);
         when(currentImageUsageCondition.isCurrentImageUsedOnInstances(any(), any())).thenReturn(true);
     }
 
@@ -394,6 +405,8 @@ public class DistroXUpgradeRetrievalComponentTest {
         when(validationResult.isError()).thenReturn(Boolean.FALSE);
         when(clusterRepairService.repairWithDryRun(STACK_ID)).thenReturn(validationResult);
         enableOs(Set.of(CENTOS7, RHEL8, RHEL9));
+        when(parcelAvailabilityRetrievalService.getHeadResponseForParcel(any())).thenReturn(parcelAvailabilityResponse);
+        when(parcelAvailabilityResponse.getStatus()).thenReturn(200);
 
         DistroXUpgradeV1Response actual = doAs(USER_CRN, () -> distroXUpgradeV1Controller
                 .upgradeClusterByName(CLUSTER_NAME, createRequestWithLockComponent(LATEST_ONLY)));
@@ -414,13 +427,15 @@ public class DistroXUpgradeRetrievalComponentTest {
         when(validationResult.isError()).thenReturn(Boolean.FALSE);
         when(clusterRepairService.repairWithDryRun(STACK_ID)).thenReturn(validationResult);
         enableOs(Set.of(CENTOS7, RHEL8, RHEL9));
+        when(parcelAvailabilityRetrievalService.getHeadResponseForParcel(any())).thenReturn(parcelAvailabilityResponse);
+        when(parcelAvailabilityResponse.getStatus()).thenReturn(200);
 
         DistroXUpgradeV1Response actual = doAs(USER_CRN, () -> distroXUpgradeV1Controller
                 .upgradeClusterByName(CLUSTER_NAME, createRequest(LATEST_ONLY)));
 
         assertTrue(actual.reason().isEmpty(), actual.reason());
         assertUpgradeCandidateNumber(1, actual);
-        assertUpgradeCandidate(actual, "3fc06a2c-828e-458e-a0dd-39a151033fa7", "7.3.2.0 RHEL9 Base Release");
+        assertUpgradeCandidate(actual, "e2ab188c-2e4e-45ca-b1e4-cdc1e000ea48", "7.3.2.100 RHEL9 Base Release");
     }
 
     @Test
@@ -437,7 +452,7 @@ public class DistroXUpgradeRetrievalComponentTest {
         DistroXUpgradeV1Response actual = doAs(USER_CRN, () -> distroXUpgradeV1Controller
                 .upgradeClusterByName(CLUSTER_NAME, createRequestWithLockComponent(LATEST_ONLY)));
 
-        assertEquals(actual.reason(), "There are no eligible images to upgrade with the same OS version.");
+        assertEquals("There are no eligible images to upgrade with the same OS version.", actual.reason());
         assertUpgradeCandidateNumber(0, actual);
     }
 
@@ -470,7 +485,6 @@ public class DistroXUpgradeRetrievalComponentTest {
         clouderaManagerProduct.setVersion("7.2.17");
         setupImageCatalogMocks(currentCatalogImage);
         when(entitlementService.internalTenant(anyString())).thenReturn(false);
-        //when(centralCDHVersionCoordinator.getClouderaManagerProductsFromComponents(anySet())).thenReturn(Set.of(clouderaManagerProduct));
 
         DistroXUpgradeV1Response actual = doAs(USER_CRN, () -> distroXUpgradeV1Controller.upgradeClusterByName(CLUSTER_NAME, createRequest(LATEST_ONLY)));
 
@@ -488,13 +502,17 @@ public class DistroXUpgradeRetrievalComponentTest {
         setupImageCatalogMocks(currentCatalogImage);
         when(currentImageUsageCondition.isCurrentImageUsedOnInstances(any(), any())).thenReturn(false);
         when(currentImageUsageCondition.getOSUsedByInstances(STACK_ID)).thenReturn(Set.of(CENTOS7));
+        when(parcelAvailabilityRetrievalService.getHeadResponseForParcel(any())).thenReturn(parcelAvailabilityResponse);
+        when(parcelAvailabilityResponse.getStatus()).thenReturn(200);
 
         DistroXUpgradeV1Response actual = doAs(USER_CRN, () -> distroXUpgradeV1Controller.upgradeClusterByName(CLUSTER_NAME, createRequest(LATEST_ONLY)));
 
         assertTrue(actual.reason().isEmpty(), actual.reason());
-        assertUpgradeCandidateNumber(2, actual);
+        assertUpgradeCandidateNumber(4, actual);
         assertUpgradeCandidate(actual, "d45e1ab0-0de6-4c8b-8417-18e3ec30a325", "7.2.17 OS upgrade candidate for the current image");
         assertUpgradeCandidate(actual, "75f7822d-8ee6-4203-bb55-c8b7e3b059db", "7.2.17 RedHat OS upgrade");
+        assertUpgradeCandidate(actual, "75415669-5646-476d-94ed-02af05cdfaed", "7.2.18 RedHat OS upgrade");
+        assertUpgradeCandidate(actual, "a2c1c0bb-fda3-4c74-9060-4740a7aa25f7", "7.3.2 RedHat OS upgrade");
     }
 
     @Test
@@ -502,12 +520,38 @@ public class DistroXUpgradeRetrievalComponentTest {
         Image currentCatalogImage = imageCatalogMock.getLatestImageByRuntimeAndPlatformAndOs("7.2.17", CLOUD_PLATFORM, CENTOS7);
         setupImageCatalogMocks(currentCatalogImage);
         when(currentImageUsageCondition.getOSUsedByInstances(STACK_ID)).thenReturn(Set.of(CENTOS7));
+        when(parcelAvailabilityRetrievalService.getHeadResponseForParcel(any())).thenReturn(parcelAvailabilityResponse);
+        when(parcelAvailabilityResponse.getStatus()).thenReturn(200);
 
         DistroXUpgradeV1Response actual = doAs(USER_CRN, () -> distroXUpgradeV1Controller.upgradeClusterByName(CLUSTER_NAME, createRequest(LATEST_ONLY)));
 
         assertTrue(actual.reason().isEmpty(), actual.reason());
-        assertUpgradeCandidateNumber(1, actual);
+        assertUpgradeCandidateNumber(3, actual);
         assertUpgradeCandidate(actual, "75f7822d-8ee6-4203-bb55-c8b7e3b059db", "7.2.17 RedHat OS upgrade");
+        assertUpgradeCandidate(actual, "75415669-5646-476d-94ed-02af05cdfaed", "7.2.18 RedHat OS upgrade");
+        assertUpgradeCandidate(actual, "a2c1c0bb-fda3-4c74-9060-4740a7aa25f7", "7.3.2 RedHat OS upgrade");
+    }
+
+    @Test
+    void testUpgradeClusterByNameShouldSkipACandidateWhereTheParcelIsNotAvailableForTheCurrentOs()
+            throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+        Response parcelAvailabilityErrorResponse = mock(Response.class);
+        Image currentCatalogImage = imageCatalogMock.getLatestImageByRuntimeAndPlatformAndOs("7.2.17", CLOUD_PLATFORM, CENTOS7);
+        setupImageCatalogMocks(currentCatalogImage);
+        when(currentImageUsageCondition.getOSUsedByInstances(STACK_ID)).thenReturn(Set.of(CENTOS7));
+        when(parcelAvailabilityRetrievalService.getHeadResponseForParcel(any())).thenReturn(parcelAvailabilityResponse);
+        when(parcelAvailabilityRetrievalService.getHeadResponseForParcel(
+                argThat(url -> url != null && url.equals("https://archive.cloudera.com/p/cm-public/7.12.0.400-57266911/redhat7/yum/")))).thenReturn(
+                parcelAvailabilityErrorResponse);
+        when(parcelAvailabilityResponse.getStatus()).thenReturn(200);
+        when(parcelAvailabilityErrorResponse.getStatus()).thenReturn(404);
+
+        DistroXUpgradeV1Response actual = doAs(USER_CRN, () -> distroXUpgradeV1Controller.upgradeClusterByName(CLUSTER_NAME, createRequest(LATEST_ONLY)));
+
+        assertTrue(actual.reason().isEmpty(), actual.reason());
+        assertUpgradeCandidateNumber(2, actual);
+        assertUpgradeCandidate(actual, "75f7822d-8ee6-4203-bb55-c8b7e3b059db", "7.2.17 RedHat OS upgrade");
+        assertUpgradeCandidate(actual, "a2c1c0bb-fda3-4c74-9060-4740a7aa25f7", "7.3.2 RedHat OS upgrade");
     }
 
     @Test
@@ -545,7 +589,6 @@ public class DistroXUpgradeRetrievalComponentTest {
 
         DistroXUpgradeV1Response actual = doAs(USER_CRN, () -> distroXUpgradeV1Controller.upgradeClusterByName(CLUSTER_NAME, createRequest(LATEST_ONLY)));
 
-        //assertEquals("There is no proper Cloudera Manager or CDP version to upgrade.", actual.reason());
         assertUpgradeCandidateNumber(0, actual);
     }
 
@@ -679,7 +722,6 @@ public class DistroXUpgradeRetrievalComponentTest {
             CmTemplateProcessorFactory.class,
             BlueprintUpgradeOptionCondition.class,
             ImageFilterUpgradeService.class,
-            OsChangeUpgradeImageFilter.class,
             CpuArchUpgradeImageFilter.class,
             ImageUtil.class,
             CloudPlatformBasedUpgradeImageFilter.class,
@@ -702,7 +744,7 @@ public class DistroXUpgradeRetrievalComponentTest {
             CsdParcelNameMatcher.class,
             ParcelFilterService.class,
             ImageComponentVersionsComparator.class,
-            OsChangeUtil.class,
+            OsChangeService.class,
             LockedComponentChecker.class,
             StackVersionMatcher.class,
             CmVersionMatcher.class,
@@ -736,7 +778,8 @@ public class DistroXUpgradeRetrievalComponentTest {
             CdhPackageLocationFilter.class,
             CsdLocationFilter.class,
             ClouderaManagerPackageLocationFilter.class,
-            PreWarmParcelLocationFilter.class
+            PreWarmParcelLocationFilter.class,
+            ClusterUpgradeOsVersionFilterCondition.class
     })
     static class Config {
 

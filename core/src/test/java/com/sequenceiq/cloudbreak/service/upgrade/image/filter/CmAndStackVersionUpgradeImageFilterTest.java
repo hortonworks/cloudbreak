@@ -25,7 +25,6 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradePermissionProvider;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterParams;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterResult;
-import com.sequenceiq.cloudbreak.service.upgrade.image.OsChangeUtil;
 import com.sequenceiq.cloudbreak.service.upgrade.image.locked.LockedComponentChecker;
 
 @ExtendWith(MockitoExtension.class)
@@ -42,9 +41,6 @@ class CmAndStackVersionUpgradeImageFilterTest {
 
     @Mock
     private UpgradePermissionProvider upgradePermissionProvider;
-
-    @Mock
-    private OsChangeUtil osChangeUtil;
 
     @InjectMocks
     private CmAndStackVersionUpgradeImageFilter underTest;

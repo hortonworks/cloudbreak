@@ -265,7 +265,7 @@
           "build-number": "1922354"
         },
         "repo": {
-          "redhat8": "https://MOCK_SERVER_ADDRESS/mock-parcel/"
+          "redhat8": "https://MOCK_SERVER_ADDRESS/mock-parcel/redhat8/yum/"
         },
         "build-number": "5949264",
         "version": "CDH_RUNTIME_NEXT",

@@ -24,8 +24,9 @@ import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.image.ImageUtil;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradePermissionProvider;
+import com.sequenceiq.cloudbreak.service.upgrade.image.ClusterUpgradeOsVersionFilterCondition;
+import com.sequenceiq.cloudbreak.service.upgrade.image.OsChangeService;
 import com.sequenceiq.cloudbreak.service.upgrade.image.OsChangeUpgradeCondition;
-import com.sequenceiq.cloudbreak.service.upgrade.image.OsChangeUtil;
 import com.sequenceiq.cloudbreak.service.upgrade.image.locked.LockedComponentChecker;
 import com.sequenceiq.cloudbreak.service.upgrade.validation.PythonVersionBasedRuntimeVersionValidator;
 import com.sequenceiq.cloudbreak.service.validation.SeLinuxValidationService;
@@ -78,7 +79,10 @@ class UpgradeImageFilterConfigTest {
         private ImageCatalogService imageCatalogService;
 
         @MockBean
-        private OsChangeUtil osChangeUtil;
+        private OsChangeService osChangeService;
+
+        @MockBean
+        private ClusterUpgradeOsVersionFilterCondition clusterUpgradeOsVersionFilterCondition;
 
         @MockBean
         private ImageUtil imageUtil;

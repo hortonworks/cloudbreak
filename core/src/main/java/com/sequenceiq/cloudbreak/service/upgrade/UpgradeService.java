@@ -105,7 +105,7 @@ public class UpgradeService {
     public FlowIdentifier upgradeCluster(String accountId, NameOrCrn stackNameOrCrn, String imageId, Boolean rollingUpgradeEnabled) {
         StackView stack = stackDtoService.getStackViewByNameOrCrn(stackNameOrCrn, accountId);
         MDCBuilder.buildMdcContext(stack);
-        return flowManager.triggerDatalakeClusterUpgrade(stack.getId(), imageId, Boolean.TRUE.equals(rollingUpgradeEnabled));
+        return flowManager.triggerDataLakeClusterUpgrade(stack.getId(), imageId, Boolean.TRUE.equals(rollingUpgradeEnabled));
     }
 
     public FlowIdentifier prepareClusterUpgrade(String accountId, NameOrCrn stackNameOrCrn, String imageId) {

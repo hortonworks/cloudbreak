@@ -83,12 +83,12 @@ import com.sequenceiq.cloudbreak.core.flow2.event.ClusterCredentialChangeTrigger
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterDownscaleDetails;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterRecoveryTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterScaleTriggerEvent;
-import com.sequenceiq.cloudbreak.core.flow2.event.ClusterUpgradeTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.CoreVerticalScalingTriggerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.event.DataLakeUpgradeFlowChainTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.DatabaseBackupTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.DatabaseRestoreTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.DeleteVolumesTriggerEvent;
-import com.sequenceiq.cloudbreak.core.flow2.event.DistroXUpgradeTriggerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.event.DistroXUpgradeFlowChainTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.MaintenanceModeValidationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.MultiHostgroupClusterAndStackDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.RdsUpgradeChainTriggerEvent;
@@ -294,15 +294,15 @@ public class ReactorFlowManager {
         return reactorNotifier.notify(stackId, selector, new StackEvent(selector, stackId));
     }
 
-    public FlowIdentifier triggerDatalakeClusterUpgrade(Long stackId, String imageId, boolean rollingUpgradeEnabled) {
+    public FlowIdentifier triggerDataLakeClusterUpgrade(Long stackId, String imageId, boolean rollingUpgradeEnabled) {
         String selector = FlowChainTriggers.DATALAKE_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT;
-        return reactorNotifier.notify(stackId, selector, new ClusterUpgradeTriggerEvent(selector, stackId, imageId, rollingUpgradeEnabled));
+        return reactorNotifier.notify(stackId, selector, new DataLakeUpgradeFlowChainTriggerEvent(selector, stackId, imageId, rollingUpgradeEnabled));
     }
 
     public FlowIdentifier triggerDistroXUpgrade(Long stackId, ImageChangeDto imageChangeDto, boolean replaceVms, boolean lockComponents, String variant,
             boolean rollingUpgradeEnabled, String runtime) {
         String selector = FlowChainTriggers.DISTROX_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT;
-        return reactorNotifier.notify(stackId, selector, new DistroXUpgradeTriggerEvent(selector, stackId, new Promise<>(), imageChangeDto, replaceVms,
+        return reactorNotifier.notify(stackId, selector, new DistroXUpgradeFlowChainTriggerEvent(selector, stackId, new Promise<>(), imageChangeDto, replaceVms,
                 lockComponents, variant, rollingUpgradeEnabled, runtime));
     }
 

@@ -13,7 +13,6 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradePermissionProvider;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterParams;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterResult;
-import com.sequenceiq.cloudbreak.service.upgrade.image.OsChangeUtil;
 import com.sequenceiq.cloudbreak.service.upgrade.image.locked.LockedComponentChecker;
 
 @Component
@@ -28,9 +27,6 @@ public class CmAndStackVersionUpgradeImageFilter implements UpgradeImageFilter {
 
     @Inject
     private UpgradePermissionProvider upgradePermissionProvider;
-
-    @Inject
-    private OsChangeUtil osChangeUtil;
 
     @Override
     public ImageFilterResult filter(ImageFilterResult imageFilterResult, ImageFilterParams imageFilterParams) {
@@ -83,7 +79,7 @@ public class CmAndStackVersionUpgradeImageFilter implements UpgradeImageFilter {
     }
 
     private CmAndStackVersionMatchResult isUpgradePermitted(ImageFilterParams imageFilterParams, Image candidateImage) {
-        if (shouldCheckWithLockedComponents(imageFilterParams, candidateImage)) {
+        if (imageFilterParams.isLockComponents()) {
             if (lockedComponentChecker.isUpgradePermitted(candidateImage, imageFilterParams.getStackRelatedParcels(), getCmBuildNumber(imageFilterParams))) {
                 return CmAndStackVersionMatchResult.PERMITTED;
             } else {
@@ -98,15 +94,6 @@ public class CmAndStackVersionUpgradeImageFilter implements UpgradeImageFilter {
                 return CmAndStackVersionMatchResult.PERMITTED;
             }
         }
-    }
-
-    private boolean shouldCheckWithLockedComponents(ImageFilterParams imageFilterParams, Image candidateImage) {
-        return imageFilterParams.isLockComponents() || isOsChangeAllowed(imageFilterParams, candidateImage);
-    }
-
-    private boolean isOsChangeAllowed(ImageFilterParams imageFilterParams, Image candidateImage) {
-        return osChangeUtil.isOsUpgradePermitted(imageFilterParams.getStackId(), imageFilterParams.getCurrentImage(), candidateImage,
-                imageFilterParams.getStackRelatedParcels());
     }
 
     private String getCmBuildNumber(ImageFilterParams imageFilterParams) {

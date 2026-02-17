@@ -44,9 +44,9 @@ public class SdxUpgradeTestAssertion {
             SdxUpgradeResponse upgradeResponse =
                     sdxClient.getDefaultClient(testContext).sdxUpgradeEndpoint().upgradeClusterByName(entity.getName(), request);
             assertNotNull(upgradeResponse);
-            assertEquals("aaa778fc-7f17-4535-9021-515351df3691", upgradeResponse.getCurrent().getImageId());
-            assertEquals(1583391600L, upgradeResponse.getCurrent().getCreated());
-            assertEquals(2, upgradeResponse.getUpgradeCandidates().size());
+            assertEquals(upgradeResponse.getCurrent().getImageId(), "aaa778fc-7f17-4535-9021-515351df3691");
+            assertEquals(upgradeResponse.getCurrent().getCreated(), 1583391600L);
+            assertEquals(upgradeResponse.getUpgradeCandidates().size(), 2);
             assertThat(upgradeResponse.getUpgradeCandidates(),
                     hasItem(allOf(
                             hasProperty("imageId", equalTo("445ccd4a-7882-4aa4-9e0d-04163828e1ac")),

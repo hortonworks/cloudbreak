@@ -75,7 +75,7 @@ public class ClusterUpgradeCmPackageDownloaderService {
         } else {
             eventService.fireCloudbreakEvent(stackId, UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_UPGRADE_DOWNLOAD_CM_PACKAGES);
             LOGGER.debug("Downloading CM packages based on image {}", targetImageId);
-            SaltConfig saltConfig = createSaltConfig(candidateImage);
+            SaltConfig saltConfig = createSaltConfig(candidateImage, stackId);
             clusterHostServiceRunner.redeployStates(stack);
             OrchestratorStateParams stateParams = createStateParams(stack);
             hostOrchestrator.saveCustomPillars(saltConfig, new ClusterDeletionBasedExitCriteriaModel(stackId, clusterId), stateParams);
@@ -89,8 +89,8 @@ public class ClusterUpgradeCmPackageDownloaderService {
         return saltStateParamsService.createStateParamsForReachableNodes(stack, STATE, MAX_RETRY, MAX_RETRY_ON_ERROR);
     }
 
-    private SaltConfig createSaltConfig(Image candidateImage) {
-        return new SaltConfig(clusterManagerUpgradePreparationStateParamsProvider.createParamsForCmPackageDownload(candidateImage));
+    private SaltConfig createSaltConfig(Image candidateImage, Long stackId) {
+        return new SaltConfig(clusterManagerUpgradePreparationStateParamsProvider.createParamsForCmPackageDownload(candidateImage, stackId));
     }
 
     private Image getImageFromCatalog(Long stackId, Long workspaceId, String targetImageId)

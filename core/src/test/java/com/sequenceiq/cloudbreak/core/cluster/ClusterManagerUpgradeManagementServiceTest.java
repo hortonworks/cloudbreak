@@ -40,6 +40,7 @@ import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.upgrade.sync.component.CmServerQueryService;
+import com.sequenceiq.common.model.OsType;
 
 @ExtendWith(MockitoExtension.class)
 public class ClusterManagerUpgradeManagementServiceTest {
@@ -135,7 +136,8 @@ public class ClusterManagerUpgradeManagementServiceTest {
         stack.setType(datalake ? StackType.DATALAKE : StackType.WORKLOAD);
         when(clusterUpgradeService.isRuntimeUpgradeNecessary(UPGRADE_CANDIDATE_PRODUCTS)).thenReturn(runtimeUpgradeNecessary);
 
-        underTest.upgradeClusterManager(new ClusterManagerUpgradeRequest(STACK_ID, UPGRADE_CANDIDATE_PRODUCTS, rollingUpgradeEnabled, targetRuntimeVersion));
+        underTest.upgradeClusterManager(
+                new ClusterManagerUpgradeRequest(STACK_ID, UPGRADE_CANDIDATE_PRODUCTS, rollingUpgradeEnabled, targetRuntimeVersion, OsType.RHEL8));
 
         if (stopServices) {
             verify(clusterApi).stopCluster(true);
@@ -146,7 +148,7 @@ public class ClusterManagerUpgradeManagementServiceTest {
             verify(clusterApi).startClusterManagerAndAgents();
             verify(cmServerQueryService, times(2)).queryCmVersion(stackDto);
             verify(clusterUpgradeService).upgradeClusterManager(STACK_ID);
-            verify(clusterManagerUpgradeService).upgradeClouderaManager(stackDto, clouderaManagerRepo);
+            verify(clusterManagerUpgradeService).upgradeClouderaManager(stackDto, clouderaManagerRepo, OsType.RHEL8);
         }
         verify(clouderaManagerCsdDownloaderService).downloadCsdFiles(stackDto, cmUpgradeNecessary, UPGRADE_CANDIDATE_PRODUCTS, false);
     }
@@ -160,14 +162,14 @@ public class ClusterManagerUpgradeManagementServiceTest {
                 .thenReturn(Optional.of(CM_VERSION));
         when(clusterUpgradeService.isRuntimeUpgradeNecessary(UPGRADE_CANDIDATE_PRODUCTS)).thenReturn(true);
 
-        underTest.upgradeClusterManager(new ClusterManagerUpgradeRequest(STACK_ID, UPGRADE_CANDIDATE_PRODUCTS, false, null));
+        underTest.upgradeClusterManager(new ClusterManagerUpgradeRequest(STACK_ID, UPGRADE_CANDIDATE_PRODUCTS, false, null, OsType.RHEL8));
 
         verify(clusterApiConnectors, times(3)).getConnector(stackDto);
         verify(clusterApi).stopCluster(true);
         verify(clusterApi).startClusterManagerAndAgents();
         verify(cmServerQueryService, times(2)).queryCmVersion(stackDto);
         verify(clusterUpgradeService).upgradeClusterManager(STACK_ID);
-        verify(clusterManagerUpgradeService).upgradeClouderaManager(stackDto, clouderaManagerRepo);
+        verify(clusterManagerUpgradeService).upgradeClouderaManager(stackDto, clouderaManagerRepo, OsType.RHEL8);
     }
 
     @Test
@@ -178,11 +180,11 @@ public class ClusterManagerUpgradeManagementServiceTest {
         when(clusterUpgradeService.isRuntimeUpgradeNecessary(UPGRADE_CANDIDATE_PRODUCTS)).thenReturn(true);
 
         assertThrows(CloudbreakServiceException.class,
-                () -> underTest.upgradeClusterManager(new ClusterManagerUpgradeRequest(STACK_ID, UPGRADE_CANDIDATE_PRODUCTS, true, null)));
+                () -> underTest.upgradeClusterManager(new ClusterManagerUpgradeRequest(STACK_ID, UPGRADE_CANDIDATE_PRODUCTS, true, null, OsType.RHEL8)));
 
         verify(cmServerQueryService, times(2)).queryCmVersion(stackDto);
         verify(clusterUpgradeService).upgradeClusterManager(STACK_ID);
-        verify(clusterManagerUpgradeService).upgradeClouderaManager(stackDto, clouderaManagerRepo);
+        verify(clusterManagerUpgradeService).upgradeClouderaManager(stackDto, clouderaManagerRepo, OsType.RHEL8);
         verifyNoInteractions(clusterApiConnectors);
     }
 
@@ -194,7 +196,7 @@ public class ClusterManagerUpgradeManagementServiceTest {
         when(cmServerQueryService.queryCmVersion(stackDto)).thenReturn(Optional.of(CM_VERSION_WITH_P));
         when(clusterUpgradeService.isRuntimeUpgradeNecessary(UPGRADE_CANDIDATE_PRODUCTS)).thenReturn(true);
 
-        underTest.upgradeClusterManager(new ClusterManagerUpgradeRequest(STACK_ID, UPGRADE_CANDIDATE_PRODUCTS, true, null));
+        underTest.upgradeClusterManager(new ClusterManagerUpgradeRequest(STACK_ID, UPGRADE_CANDIDATE_PRODUCTS, true, null, OsType.RHEL8));
 
         verify(clusterComponentConfigProvider).getClouderaManagerRepoDetails(cluster.getId());
         verify(cmServerQueryService).queryCmVersion(stackDto);

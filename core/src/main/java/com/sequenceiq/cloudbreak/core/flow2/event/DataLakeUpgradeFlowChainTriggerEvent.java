@@ -9,28 +9,29 @@ import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.cloudbreak.common.json.JsonIgnoreDeserialization;
 import com.sequenceiq.cloudbreak.eventbus.Promise;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
-import com.sequenceiq.common.model.OsType;
 
-public class ClusterUpgradeTriggerEvent extends StackEvent {
+public class DataLakeUpgradeFlowChainTriggerEvent extends StackEvent {
 
     private final String imageId;
 
     private final boolean rollingUpgradeEnabled;
 
-    private final OsType orininalOsType;
+    public DataLakeUpgradeFlowChainTriggerEvent(String selector, Long stackId, String imageId, boolean rollingUpgradeEnabled) {
+        super(selector, stackId);
+        this.imageId = imageId;
+        this.rollingUpgradeEnabled = rollingUpgradeEnabled;
+    }
 
     @JsonCreator
-    public ClusterUpgradeTriggerEvent(
+    public DataLakeUpgradeFlowChainTriggerEvent(
             @JsonProperty("selector") String event,
             @JsonProperty("resourceId") Long resourceId,
             @JsonIgnoreDeserialization @JsonProperty("accepted") Promise<AcceptResult> accepted,
             @JsonProperty("imageId") String imageId,
-            @JsonProperty("rollingUpgradeEnabled") boolean rollingUpgradeEnabled,
-            @JsonProperty("orininalOsType") OsType orininalOsType) {
+            @JsonProperty("rollingUpgradeEnabled") boolean rollingUpgradeEnabled) {
         super(event, resourceId, accepted);
         this.imageId = imageId;
         this.rollingUpgradeEnabled = rollingUpgradeEnabled;
-        this.orininalOsType = orininalOsType;
     }
 
     public String getImageId() {
@@ -41,24 +42,17 @@ public class ClusterUpgradeTriggerEvent extends StackEvent {
         return rollingUpgradeEnabled;
     }
 
-    public OsType getOrininalOsType() {
-        return orininalOsType;
-    }
-
     @Override
     public boolean equalsEvent(StackEvent other) {
-        return isClassAndEqualsEvent(ClusterUpgradeTriggerEvent.class, other,
-                event -> Objects.equals(imageId, event.imageId)
-                        && Objects.equals(rollingUpgradeEnabled, event.rollingUpgradeEnabled)
-                        && Objects.equals(orininalOsType, event.orininalOsType));
+        return isClassAndEqualsEvent(DataLakeUpgradeFlowChainTriggerEvent.class, other,
+                event -> Objects.equals(imageId, event.imageId) && Objects.equals(rollingUpgradeEnabled, event.rollingUpgradeEnabled));
     }
 
     @Override
     public String toString() {
-        return new StringJoiner(", ", ClusterUpgradeTriggerEvent.class.getSimpleName() + "[", "]")
+        return new StringJoiner(", ", DataLakeUpgradeFlowChainTriggerEvent.class.getSimpleName() + "[", "]")
                 .add("imageId='" + imageId + "'")
                 .add("rollingUpgradeEnabled=" + rollingUpgradeEnabled)
-                .add("orininalOsType=" + orininalOsType)
                 .toString();
     }
 }

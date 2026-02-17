@@ -15,9 +15,9 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.service.image.CurrentImageUsageCondition;
+import com.sequenceiq.cloudbreak.service.upgrade.image.ClusterUpgradeOsVersionFilterCondition;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterParams;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterResult;
-import com.sequenceiq.cloudbreak.service.upgrade.image.OsChangeUpgradeCondition;
 import com.sequenceiq.common.model.OsType;
 
 @Component
@@ -28,13 +28,13 @@ public class OsVersionBasedUpgradeImageFilter implements UpgradeImageFilter {
     private static final int ORDER_NUMBER = 8;
 
     @Inject
-    private OsChangeUpgradeCondition osChangeUpgradeCondition;
-
-    @Inject
     private EntitlementService entitlementService;
 
     @Inject
     private CurrentImageUsageCondition currentImageUsageCondition;
+
+    @Inject
+    private ClusterUpgradeOsVersionFilterCondition clusterUpgradeOsVersionFilterCondition;
 
     @Override
     public ImageFilterResult filter(ImageFilterResult imageFilterResult, ImageFilterParams imageFilterParams) {
@@ -63,15 +63,8 @@ public class OsVersionBasedUpgradeImageFilter implements UpgradeImageFilter {
     }
 
     private boolean isSameOsOrAllowedOsChange(ImageFilterParams imageFilterParams, Image image, boolean rhel9Enabled, Set<OsType> osUsedByInstances) {
-        return isOsEntitled(image, rhel9Enabled) &&
-                (isOsMatches(imageFilterParams.getCurrentImage(), image) || osChangeUpgradeCondition.isNextMajorOsImage(osUsedByInstances, image));
-    }
-
-    private boolean isOsEntitled(Image image, boolean rhel9Enabled) {
-        return !RHEL9.matches(image.getOs(), image.getOsType()) || rhel9Enabled;
-    }
-
-    private boolean isOsMatches(com.sequenceiq.cloudbreak.cloud.model.Image currentImage, Image newImage) {
-        return newImage.getOs().equalsIgnoreCase(currentImage.getOs()) && newImage.getOsType().equalsIgnoreCase(currentImage.getOsType());
+        OsType currentOsType = OsType.getByOs(imageFilterParams.getCurrentImage().getOs());
+        String currentArchitecture = imageFilterParams.getCurrentImage().getArchitecture();
+        return clusterUpgradeOsVersionFilterCondition.isImageAllowed(currentOsType, currentArchitecture, image, rhel9Enabled, osUsedByInstances);
     }
 }

@@ -65,14 +65,14 @@ public class ClusterUpgradeActions {
             @Override
             protected void doExecute(ClusterUpgradeContext context, ClusterUpgradeTriggerEvent payload, Map<Object, Object> variables) {
                 try {
+                    Long stackId = context.getStackId();
                     UpgradeImageInfo images = imageComponentUpdaterService.updateComponentsForUpgrade(payload.getImageId(), payload.getResourceId());
                     StatedImage targetStatedImage = images.targetStatedImage();
-                    variables.put(CURRENT_MODEL_IMAGE, images.currentImage());
                     variables.put(TARGET_IMAGE, targetStatedImage);
                     variables.put(ROLLING_UPGRADE_ENABLED, payload.isRollingUpgradeEnabled());
-                    clusterUpgradeTargetImageService.saveImage(context.getStackId(), targetStatedImage);
-                    clusterUpgradeService.initUpgradeCluster(context.getStackId(), targetStatedImage, payload.isRollingUpgradeEnabled());
-                    Selectable event = new ClusterUpgradeInitRequest(context.getStackId(), targetStatedImage.getImage().getVersion());
+                    clusterUpgradeTargetImageService.saveImage(stackId, targetStatedImage);
+                    clusterUpgradeService.initUpgradeCluster(stackId, targetStatedImage, payload.isRollingUpgradeEnabled());
+                    Selectable event = new ClusterUpgradeInitRequest(stackId, targetStatedImage.getImage().getVersion(), payload.getOrininalOsType());
                     sendEvent(context, event.selector(), event);
                 } catch (Exception e) {
                     LOGGER.error("Error during updating cluster components with image id: [{}]", payload.getImageId(), e);
@@ -115,7 +115,7 @@ public class ClusterUpgradeActions {
                 boolean rollingUpgradeEnabled = rollingUpgradeEnabled(variables);
                 String targetRuntimeVersion = clusterUpgradeService.getStackVersionFromImage(targetStatedImage.getImage()).orElse(null);
                 Selectable event = new ClusterManagerUpgradeRequest(context.getStackId(), payload.getUpgradeCandidateProducts(),
-                        rollingUpgradeEnabled, targetRuntimeVersion);
+                        rollingUpgradeEnabled, targetRuntimeVersion, payload.getOriginalOsType());
                 sendEvent(context, event.selector(), event);
             }
 
@@ -141,7 +141,8 @@ public class ClusterUpgradeActions {
                 StatedImage targetStatedImage = getTargetImage(variables);
                 imageComponentUpdaterService.updateComponentsForUpgrade(targetStatedImage, payload.getResourceId());
                 boolean rollingUpgradeEnabled = rollingUpgradeEnabled(variables);
-                Selectable event = new ClusterUpgradeRequest(context.getStackId(), payload.getUpgradeCandidateProducts(), false, rollingUpgradeEnabled);
+                Selectable event = new ClusterUpgradeRequest(context.getStackId(), payload.getUpgradeCandidateProducts(), rollingUpgradeEnabled,
+                        payload.getOriginalOsType());
                 sendEvent(context, event.selector(), event);
             }
 

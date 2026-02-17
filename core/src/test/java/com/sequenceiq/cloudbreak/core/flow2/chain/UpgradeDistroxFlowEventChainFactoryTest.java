@@ -15,6 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -24,9 +25,9 @@ import static org.mockito.Mockito.when;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -38,10 +39,12 @@ import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.RecoveryMode;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
-import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
+import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.common.ScalingHardLimitsService;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.chain.util.SetDefaultJavaVersionFlowChainService;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation.event.ClusterUpgradePreparationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationTriggerEvent;
@@ -49,7 +52,7 @@ import com.sequenceiq.cloudbreak.core.flow2.cluster.java.SetDefaultJavaVersionFl
 import com.sequenceiq.cloudbreak.core.flow2.cluster.java.SetDefaultJavaVersionTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.sync.ClusterSyncEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterUpgradeTriggerEvent;
-import com.sequenceiq.cloudbreak.core.flow2.event.DistroXUpgradeTriggerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.event.DistroXUpgradeFlowChainTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackImageUpdateTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackSyncTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StopStartUpscaleTriggerEvent;
@@ -64,6 +67,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent.RepairType;
 import com.sequenceiq.cloudbreak.rotation.flow.chain.SecretRotationFlowChainTriggerEvent;
+import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterRepairService;
 import com.sequenceiq.cloudbreak.service.cluster.model.HostGroupName;
 import com.sequenceiq.cloudbreak.service.cluster.model.RepairValidation;
@@ -72,10 +76,10 @@ import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
 import com.sequenceiq.cloudbreak.service.salt.SaltVersionUpgradeService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
-import com.sequenceiq.cloudbreak.service.upgrade.image.OsChangeUtil;
 import com.sequenceiq.cloudbreak.service.upgrade.validation.service.ClusterSizeUpgradeValidator;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.common.api.type.InstanceGroupType;
+import com.sequenceiq.common.model.OsType;
 import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
 
 @ExtendWith(MockitoExtension.class)
@@ -84,8 +88,6 @@ class UpgradeDistroxFlowEventChainFactoryTest {
     private static final long STACK_ID = 1L;
 
     private static final String IMAGE_ID = "imageId";
-
-    private static final String RH_IMAGE = "rh-image";
 
     private final ImageChangeDto imageChangeDto = new ImageChangeDto(STACK_ID, IMAGE_ID, "imageCatalogName", "imageCatUrl");
 
@@ -100,9 +102,6 @@ class UpgradeDistroxFlowEventChainFactoryTest {
 
     @Mock
     private ScalingHardLimitsService scalingHardLimitsService;
-
-    @Mock
-    private OsChangeUtil osChangeUtil;
 
     @Mock
     private EmbeddedDbUpgradeFlowTriggersFactory embeddedDbUpgradeFlowTriggersFactory;
@@ -125,21 +124,24 @@ class UpgradeDistroxFlowEventChainFactoryTest {
     @Mock
     private SetDefaultJavaVersionFlowChainService setDefaultJavaVersionFlowChainService;
 
+    @Mock
+    private ComponentConfigProviderService componentConfigProviderService;
+
     @Test
     void testInitEvent() {
         assertEquals(FlowChainTriggers.DISTROX_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT, underTest.initEvent());
     }
 
     @Test
-    void testChainQueueForNonReplaceVms() {
+    void testChainQueueForNonReplaceVms() throws CloudbreakImageNotFoundException {
+        when(componentConfigProviderService.getImage(STACK_ID)).thenReturn(Image.builder().withOsType(OsType.RHEL9.getOsType()).build());
         when(stackDtoService.getByIdWithoutResources(STACK_ID)).thenReturn(stackDto);
-        when(osChangeUtil.findHelperImageIfNecessary(IMAGE_ID, STACK_ID)).thenReturn(Optional.empty());
         when(instanceMetaDataService.getAllNotTerminatedInstanceMetadataViewsByStackId(anyLong())).thenReturn(List.of());
         when(saltVersionUpgradeService.getSaltSecretRotationTriggerEvent(1L))
                 .thenReturn(List.of(new SecretRotationFlowChainTriggerEvent(null, 1L, null, List.of(SALT_MASTER_KEY_PAIR), null, null)));
         ReflectionTestUtils.setField(underTest, "batchRepairEnabled", true);
-        DistroXUpgradeTriggerEvent event = new DistroXUpgradeTriggerEvent(FlowChainTriggers.DISTROX_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT, STACK_ID,
-                new Promise<>(), imageChangeDto, false, false, "variant", true, "runtime");
+        DistroXUpgradeFlowChainTriggerEvent event = new DistroXUpgradeFlowChainTriggerEvent(FlowChainTriggers.DISTROX_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT,
+                STACK_ID, new Promise<>(), imageChangeDto, false, false, "variant", true, "runtime");
         SetDefaultJavaVersionTriggerEvent setDefaultJavaEvent =
                 new SetDefaultJavaVersionTriggerEvent(SetDefaultJavaVersionFlowEvent.SET_DEFAULT_JAVA_VERSION_EVENT.event(), STACK_ID,
                         "17", false, false, false);
@@ -159,9 +161,28 @@ class UpgradeDistroxFlowEventChainFactoryTest {
     }
 
     @Test
-    void testChainQueueForUpgradeWithStoppedNodes() {
-        when(osChangeUtil.findHelperImageIfNecessary(IMAGE_ID, STACK_ID)).thenReturn(Optional.empty());
+    void testCreateFlowTriggerEventQueueShouldThrowExceptionWhenImageNotFound() throws CloudbreakImageNotFoundException {
+        doThrow(new CloudbreakImageNotFoundException("error")).when(componentConfigProviderService).getImage(STACK_ID);
+        when(stackDtoService.getByIdWithoutResources(STACK_ID)).thenReturn(stackDto);
+        when(instanceMetaDataService.getAllNotTerminatedInstanceMetadataViewsByStackId(anyLong())).thenReturn(List.of());
+        when(saltVersionUpgradeService.getSaltSecretRotationTriggerEvent(1L))
+                .thenReturn(List.of(new SecretRotationFlowChainTriggerEvent(null, 1L, null, List.of(SALT_MASTER_KEY_PAIR), null, null)));
+        ReflectionTestUtils.setField(underTest, "batchRepairEnabled", true);
+        DistroXUpgradeFlowChainTriggerEvent event = new DistroXUpgradeFlowChainTriggerEvent(FlowChainTriggers.DISTROX_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT,
+                STACK_ID, new Promise<>(), imageChangeDto, false, false, "variant", true, "runtime");
+        SetDefaultJavaVersionTriggerEvent setDefaultJavaEvent =
+                new SetDefaultJavaVersionTriggerEvent(SetDefaultJavaVersionFlowEvent.SET_DEFAULT_JAVA_VERSION_EVENT.event(), STACK_ID,
+                        "17", false, false, false);
+        when(setDefaultJavaVersionFlowChainService.setDefaultJavaVersionTriggerEvent(eq(stackDto), eq(imageChangeDto)))
+                .thenReturn(List.of(setDefaultJavaEvent));
 
+        String errorMessage = Assertions.assertThrows(NotFoundException.class, () -> underTest.createFlowTriggerEventQueue(event)).getMessage();
+
+        assertEquals("Image not found for stack", errorMessage);
+    }
+
+    @Test
+    void testChainQueueForUpgradeWithStoppedNodes() throws CloudbreakImageNotFoundException {
         HostGroup hostGroup1 = new HostGroup();
         hostGroup1.setName("hostGroup1");
         hostGroup1.setRecoveryMode(RecoveryMode.MANUAL);
@@ -176,9 +197,10 @@ class UpgradeDistroxFlowEventChainFactoryTest {
         hostGroup2.setInstanceGroup(host2.getInstanceGroup());
 
         when(instanceMetaDataService.getAllNotTerminatedInstanceMetadataViewsByStackId(anyLong())).thenReturn(List.of(host1, host2));
+        when(componentConfigProviderService.getImage(STACK_ID)).thenReturn(Image.builder().withOsType(OsType.RHEL9.getOsType()).build());
         ReflectionTestUtils.setField(underTest, "batchRepairEnabled", true);
-        DistroXUpgradeTriggerEvent event = new DistroXUpgradeTriggerEvent(FlowChainTriggers.DISTROX_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT, STACK_ID,
-                new Promise<>(), imageChangeDto, false, false, "variant", true, "runtime");
+        DistroXUpgradeFlowChainTriggerEvent event = new DistroXUpgradeFlowChainTriggerEvent(FlowChainTriggers.DISTROX_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT,
+                STACK_ID, new Promise<>(), imageChangeDto, false, false, "variant", true, "runtime");
         FlowTriggerEventQueue flowChainQueue = underTest.createFlowTriggerEventQueue(event);
         assertEquals(8, flowChainQueue.getQueue().size());
         assertSyncTriggerEvent(flowChainQueue);
@@ -209,7 +231,6 @@ class UpgradeDistroxFlowEventChainFactoryTest {
     void testChainQueueForRollingUpgradeWithReplaceVms() {
         when(stackDtoService.getByIdWithoutResources(STACK_ID)).thenReturn(stackDto);
         lenient().when(stackDto.getPlatformVariant()).thenReturn("originalVariant");
-        when(osChangeUtil.findHelperImageIfNecessary(IMAGE_ID, STACK_ID)).thenReturn(Optional.empty());
         when(scalingHardLimitsService.getMaxUpscaleStepInNodeCount()).thenReturn(100);
         when(instanceMetaDataService.getAllNotTerminatedInstanceMetadataViewsByStackId(anyLong())).thenReturn(List.of());
         ReflectionTestUtils.setField(underTest, "batchRepairEnabled", true);
@@ -224,8 +245,8 @@ class UpgradeDistroxFlowEventChainFactoryTest {
                 Result.success(Map.of(HostGroupName.hostGroupName("master"), instances));
         when(clusterRepairService.validateRepair(any(), anyLong(), any(), eq(false))).thenReturn(repairStartResult);
 
-        DistroXUpgradeTriggerEvent event = new DistroXUpgradeTriggerEvent(FlowChainTriggers.DISTROX_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT, STACK_ID,
-                new Promise<>(), imageChangeDto, true, true, "variant", true, "runtime");
+        DistroXUpgradeFlowChainTriggerEvent event = new DistroXUpgradeFlowChainTriggerEvent(FlowChainTriggers.DISTROX_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT,
+                STACK_ID, new Promise<>(), imageChangeDto, true, true, "variant", true, "runtime");
         FlowTriggerEventQueue flowChainQueue = underTest.createFlowTriggerEventQueue(event);
         assertEquals(6, flowChainQueue.getQueue().size());
         assertSyncTriggerEvent(flowChainQueue);
@@ -240,7 +261,6 @@ class UpgradeDistroxFlowEventChainFactoryTest {
     void testChainQueueForReplaceVmsWithHundredNodes() {
         when(stackDtoService.getByIdWithoutResources(STACK_ID)).thenReturn(stackDto);
         lenient().when(stackDto.getPlatformVariant()).thenReturn("originalVariant");
-        when(osChangeUtil.findHelperImageIfNecessary(IMAGE_ID, STACK_ID)).thenReturn(Optional.empty());
         when(scalingHardLimitsService.getMaxUpscaleStepInNodeCount()).thenReturn(100);
         when(instanceMetaDataService.getAllNotTerminatedInstanceMetadataViewsByStackId(anyLong())).thenReturn(List.of());
         ReflectionTestUtils.setField(underTest, "batchRepairEnabled", true);
@@ -256,8 +276,8 @@ class UpgradeDistroxFlowEventChainFactoryTest {
                 Result.success(Map.of(HostGroupName.hostGroupName("compute"), instances));
         when(clusterRepairService.validateRepair(any(), anyLong(), any(), eq(false))).thenReturn(repairStartResult);
 
-        DistroXUpgradeTriggerEvent event = new DistroXUpgradeTriggerEvent(FlowChainTriggers.DISTROX_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT, STACK_ID,
-                new Promise<>(), imageChangeDto, true, true, "variant", false, "runtime");
+        DistroXUpgradeFlowChainTriggerEvent event = new DistroXUpgradeFlowChainTriggerEvent(FlowChainTriggers.DISTROX_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT,
+                STACK_ID, new Promise<>(), imageChangeDto, true, true, "variant", false, "runtime");
         FlowTriggerEventQueue flowChainQueue = underTest.createFlowTriggerEventQueue(event);
         assertEquals(6, flowChainQueue.getQueue().size());
         assertSyncTriggerEvent(flowChainQueue);
@@ -270,7 +290,8 @@ class UpgradeDistroxFlowEventChainFactoryTest {
     }
 
     @Test
-    void testChainQueueForReplaceVmsWithHundredNodesWhenForceOsUpgradeAndRollingUpgradeEnabled() {
+    void testChainQueueForReplaceVmsWithHundredNodesWhenForceOsUpgradeAndRollingUpgradeEnabled() throws CloudbreakImageNotFoundException {
+        when(componentConfigProviderService.getImage(STACK_ID)).thenReturn(Image.builder().withOsType(OsType.RHEL9.getOsType()).build());
         when(stackDtoService.getByIdWithoutResources(STACK_ID)).thenReturn(stackDto);
         lenient().when(stackDto.getPlatformVariant()).thenReturn("originalVariant");
         InstanceMetadataView master1 = mock(InstanceMetadataView.class);
@@ -279,7 +300,6 @@ class UpgradeDistroxFlowEventChainFactoryTest {
         when(master2.getInstanceId()).thenReturn("master-2");
         when(stackDto.getAllAvailableGatewayInstances()).thenReturn(List.of(master1, master2));
         when(clusterSizeUpgradeValidator.isClusterSizeLargerThanAllowedForRollingUpgrade(anyLong())).thenReturn(true);
-        when(osChangeUtil.findHelperImageIfNecessary(IMAGE_ID, STACK_ID)).thenReturn(Optional.empty());
         when(scalingHardLimitsService.getMaxUpscaleStepInNodeCount()).thenReturn(100);
         when(instanceMetaDataService.getAllNotTerminatedInstanceMetadataViewsByStackId(anyLong())).thenReturn(List.of());
         ReflectionTestUtils.setField(underTest, "batchRepairEnabled", true);
@@ -295,8 +315,8 @@ class UpgradeDistroxFlowEventChainFactoryTest {
                 Result.success(Map.of(HostGroupName.hostGroupName("master"), instances));
         when(clusterRepairService.validateRepair(any(), anyLong(), any(), eq(false))).thenReturn(repairStartResult);
 
-        DistroXUpgradeTriggerEvent event = new DistroXUpgradeTriggerEvent(FlowChainTriggers.DISTROX_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT, STACK_ID,
-                new Promise<>(), imageChangeDto, true, false, "variant", true, "runtime");
+        DistroXUpgradeFlowChainTriggerEvent event = new DistroXUpgradeFlowChainTriggerEvent(FlowChainTriggers.DISTROX_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT,
+                STACK_ID, new Promise<>(), imageChangeDto, true, false, "variant", true, "runtime");
         FlowTriggerEventQueue flowChainQueue = underTest.createFlowTriggerEventQueue(event);
         assertEquals(8, flowChainQueue.getQueue().size());
         assertSyncTriggerEvent(flowChainQueue);
@@ -311,29 +331,9 @@ class UpgradeDistroxFlowEventChainFactoryTest {
     }
 
     @Test
-    void testCreateFlowTriggerEventQueueWhenCentosToRedHadRuntimeUpgradeIsAvailable() {
-        when(osChangeUtil.findHelperImageIfNecessary(IMAGE_ID, STACK_ID))
-                .thenReturn(Optional.of(Image.builder().withUuid(RH_IMAGE).build()));
-        when(instanceMetaDataService.getAllNotTerminatedInstanceMetadataViewsByStackId(anyLong())).thenReturn(List.of());
-        ReflectionTestUtils.setField(underTest, "batchRepairEnabled", true);
-        DistroXUpgradeTriggerEvent event = new DistroXUpgradeTriggerEvent(FlowChainTriggers.DISTROX_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT, STACK_ID,
-                new Promise<>(), imageChangeDto, false, false, "variant", true, "runtime");
-        FlowTriggerEventQueue flowChainQueue = underTest.createFlowTriggerEventQueue(event);
-        assertEquals(7, flowChainQueue.getQueue().size());
-        assertSyncTriggerEvent(flowChainQueue);
-        assertClusterSyncTriggerEvent(flowChainQueue);
-        assertUpdateValidationEvent(flowChainQueue, RH_IMAGE, event.isReplaceVms(), event.isLockComponents(), event.isRollingUpgradeEnabled());
-        assertUpdatePreparationEvent(flowChainQueue, RH_IMAGE);
-        assertSaltUpdateEvent(flowChainQueue);
-        assertUpgradeEvent(flowChainQueue, RH_IMAGE);
-        assertImageUpdateEvent(flowChainQueue);
-    }
-
-    @Test
     void testChainQueueForOsUpgradeShouldFilterOutAlreadyUpgradedInstances() {
         when(stackDtoService.getByIdWithoutResources(STACK_ID)).thenReturn(stackDto);
         lenient().when(stackDto.getPlatformVariant()).thenReturn("originalVariant");
-        when(osChangeUtil.findHelperImageIfNecessary(IMAGE_ID, STACK_ID)).thenReturn(Optional.empty());
         when(scalingHardLimitsService.getMaxUpscaleStepInNodeCount()).thenReturn(100);
         when(instanceMetaDataService.getAllNotTerminatedInstanceMetadataViewsByStackId(anyLong())).thenReturn(List.of());
         ReflectionTestUtils.setField(underTest, "batchRepairEnabled", true);
@@ -352,8 +352,8 @@ class UpgradeDistroxFlowEventChainFactoryTest {
                 Result.success(Map.of(HostGroupName.hostGroupName("master"), instances));
         when(clusterRepairService.validateRepair(any(), anyLong(), any(), eq(false))).thenReturn(repairStartResult);
 
-        DistroXUpgradeTriggerEvent event = new DistroXUpgradeTriggerEvent(FlowChainTriggers.DISTROX_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT, STACK_ID,
-                new Promise<>(), imageChangeDto, true, true, "variant", false, "runtime");
+        DistroXUpgradeFlowChainTriggerEvent event = new DistroXUpgradeFlowChainTriggerEvent(FlowChainTriggers.DISTROX_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT,
+                STACK_ID, new Promise<>(), imageChangeDto, true, true, "variant", false, "runtime");
         FlowTriggerEventQueue flowChainQueue = underTest.createFlowTriggerEventQueue(event);
         assertEquals(6, flowChainQueue.getQueue().size());
         assertSyncTriggerEvent(flowChainQueue);
@@ -367,7 +367,6 @@ class UpgradeDistroxFlowEventChainFactoryTest {
     @Test
     void testChainQueueForOsUpgradeShouldSkipOsUpgradeWhenNoUpgradableInstanceFound() {
         when(stackDtoService.getByIdWithoutResources(STACK_ID)).thenReturn(stackDto);
-        when(osChangeUtil.findHelperImageIfNecessary(IMAGE_ID, STACK_ID)).thenReturn(Optional.empty());
         when(instanceMetaDataService.getAllNotTerminatedInstanceMetadataViewsByStackId(anyLong())).thenReturn(List.of());
         ReflectionTestUtils.setField(underTest, "batchRepairEnabled", true);
 
@@ -385,8 +384,8 @@ class UpgradeDistroxFlowEventChainFactoryTest {
                 Result.success(Map.of(HostGroupName.hostGroupName("master"), instances));
         when(clusterRepairService.validateRepair(any(), anyLong(), any(), eq(false))).thenReturn(repairStartResult);
 
-        DistroXUpgradeTriggerEvent event = new DistroXUpgradeTriggerEvent(FlowChainTriggers.DISTROX_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT, STACK_ID,
-                new Promise<>(), imageChangeDto, true, true, "variant", false, "runtime");
+        DistroXUpgradeFlowChainTriggerEvent event = new DistroXUpgradeFlowChainTriggerEvent(FlowChainTriggers.DISTROX_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT,
+                STACK_ID, new Promise<>(), imageChangeDto, true, true, "variant", false, "runtime");
         FlowTriggerEventQueue flowChainQueue = underTest.createFlowTriggerEventQueue(event);
         assertEquals(5, flowChainQueue.getQueue().size());
         assertSyncTriggerEvent(flowChainQueue);
@@ -398,12 +397,11 @@ class UpgradeDistroxFlowEventChainFactoryTest {
 
     @Test
     void testChainQueueForOsUpgradeWhenReplaceVmsIsFalse() {
-        when(osChangeUtil.findHelperImageIfNecessary(IMAGE_ID, STACK_ID)).thenReturn(Optional.empty());
         when(instanceMetaDataService.getAllNotTerminatedInstanceMetadataViewsByStackId(anyLong())).thenReturn(List.of());
         ReflectionTestUtils.setField(underTest, "batchRepairEnabled", true);
 
-        DistroXUpgradeTriggerEvent event = new DistroXUpgradeTriggerEvent(FlowChainTriggers.DISTROX_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT, STACK_ID,
-                new Promise<>(), imageChangeDto, false, true, "variant", false, "runtime");
+        DistroXUpgradeFlowChainTriggerEvent event = new DistroXUpgradeFlowChainTriggerEvent(FlowChainTriggers.DISTROX_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT,
+                STACK_ID, new Promise<>(), imageChangeDto, false, true, "variant", false, "runtime");
         FlowTriggerEventQueue flowChainQueue = underTest.createFlowTriggerEventQueue(event);
         assertEquals(4, flowChainQueue.getQueue().size());
         assertSyncTriggerEvent(flowChainQueue);
