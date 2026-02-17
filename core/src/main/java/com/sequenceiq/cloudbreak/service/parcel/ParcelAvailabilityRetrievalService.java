@@ -10,6 +10,7 @@ import jakarta.ws.rs.core.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.retry.support.RetrySynchronizationManager;
@@ -39,6 +40,7 @@ public class ParcelAvailabilityRetrievalService {
             maxAttemptsExpression = "${cb.parcel.retry.maxAttempts:5}",
             backoff = @Backoff(delayExpression = "${cb.parcel.retry.backOffDelay:2000}",
                     multiplierExpression = "${cb.parcel.retry.backOffMultiplier:2}"))
+    @Cacheable(cacheNames = "parcelAvailabilityCache", key = "#url")
     public Response getHeadResponseForParcel(String url) {
         Client client = restClientFactory.getOrCreateWithFollowRedirects();
         WebTarget target = client.target(url);

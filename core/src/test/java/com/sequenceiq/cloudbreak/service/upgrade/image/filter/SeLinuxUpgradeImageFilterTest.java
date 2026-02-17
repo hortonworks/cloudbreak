@@ -114,6 +114,6 @@ class SeLinuxUpgradeImageFilterTest {
 
     @Test
     void testGetFilterOrderNumber() {
-        assertEquals(12, underTest.getFilterOrderNumber());
+        assertEquals(11, underTest.getFilterOrderNumber());
     }
 }

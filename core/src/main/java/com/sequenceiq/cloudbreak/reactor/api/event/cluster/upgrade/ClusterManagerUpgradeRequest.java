@@ -5,6 +5,7 @@ import java.util.Set;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
+import com.sequenceiq.common.model.OsType;
 
 public class ClusterManagerUpgradeRequest extends AbstractClusterUpgradeEvent {
 
@@ -17,8 +18,9 @@ public class ClusterManagerUpgradeRequest extends AbstractClusterUpgradeEvent {
             @JsonProperty("resourceId") Long stackId,
             @JsonProperty("upgradeCandidateProducts") Set<ClouderaManagerProduct> upgradeCandidateProducts,
             @JsonProperty("rollingUpgradeEnabled") boolean rollingUpgradeEnabled,
-            @JsonProperty("targetRuntimeVersion") String targetRuntimeVersion) {
-        super(stackId, upgradeCandidateProducts);
+            @JsonProperty("targetRuntimeVersion") String targetRuntimeVersion,
+            @JsonProperty("originalOsType") OsType originalOsType) {
+        super(stackId, upgradeCandidateProducts, originalOsType);
         this.rollingUpgradeEnabled = rollingUpgradeEnabled;
         this.targetRuntimeVersion = targetRuntimeVersion;
     }

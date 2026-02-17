@@ -120,7 +120,7 @@ class ClusterUpgradeCmPackageDownloaderServiceTest {
                 .thenReturn(StatedImage.statedImage(candidateImage, null, null));
         when(clusterComponentConfigProvider.getClouderaManagerRepoDetails(STACK_ID)).thenReturn(currentRepo);
         when(candidateImage.getPackageVersion(ImagePackageVersion.CM_BUILD_NUMBER)).thenReturn("124");
-        when(clusterManagerUpgradePreparationStateParamsProvider.createParamsForCmPackageDownload(candidateImage)).thenReturn(Map.of());
+        when(clusterManagerUpgradePreparationStateParamsProvider.createParamsForCmPackageDownload(candidateImage, STACK_ID)).thenReturn(Map.of());
         when(saltStateParamsService.createStateParamsForReachableNodes(stackDto, "cloudera/repo/upgrade-preparation", 200, 3))
                 .thenReturn(mock(OrchestratorStateParams.class));
 

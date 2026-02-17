@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus;
-import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
+import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.
 import com.sequenceiq.cloudbreak.core.flow2.cluster.salt.update.SaltUpdateEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.salt.update.SaltUpdateState;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterUpgradeTriggerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.event.DataLakeUpgradeFlowChainTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackImageUpdateTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackSyncTriggerEvent;
 import com.sequenceiq.cloudbreak.dto.StackDto;
@@ -39,14 +40,14 @@ import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
 import com.sequenceiq.cloudbreak.service.salt.SaltVersionUpgradeService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
-import com.sequenceiq.cloudbreak.service.upgrade.image.OsChangeUtil;
 import com.sequenceiq.cloudbreak.service.upgrade.image.locked.LockedComponentService;
 import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.ClusterUseCaseAware;
+import com.sequenceiq.common.model.OsType;
 import com.sequenceiq.flow.core.chain.FlowEventChainFactory;
 import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
 
 @Component
-public class UpgradeDatalakeFlowEventChainFactory implements FlowEventChainFactory<ClusterUpgradeTriggerEvent>, ClusterUseCaseAware {
+public class UpgradeDatalakeFlowEventChainFactory implements FlowEventChainFactory<DataLakeUpgradeFlowChainTriggerEvent>, ClusterUseCaseAware {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UpgradeDatalakeFlowEventChainFactory.class);
 
@@ -60,9 +61,6 @@ public class UpgradeDatalakeFlowEventChainFactory implements FlowEventChainFacto
     private ComponentConfigProviderService componentConfigProviderService;
 
     @Inject
-    private OsChangeUtil osChangeUtil;
-
-    @Inject
     private SaltVersionUpgradeService saltVersionUpgradeService;
 
     @Inject
@@ -74,25 +72,25 @@ public class UpgradeDatalakeFlowEventChainFactory implements FlowEventChainFacto
     }
 
     @Override
-    public FlowTriggerEventQueue createFlowTriggerEventQueue(ClusterUpgradeTriggerEvent event) {
+    public FlowTriggerEventQueue createFlowTriggerEventQueue(DataLakeUpgradeFlowChainTriggerEvent event) {
         LOGGER.debug("Creating flow trigger event queue for data lake upgrade with event {}", event);
-        ClusterUpgradeTriggerEvent upgradeTriggerEvent = getEventForRuntimeUpgrade(event);
+        Image currentImage = getCurrentImage(event);
+        ImageChangeDto imageChangeDto = getImageChangeDto(event, currentImage);
         StackDto stack = stackDtoService.getByIdWithoutResources(event.getResourceId());
-        ImageChangeDto imageChangeDto = getImageChangeDto(event);
 
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
-        flowEventChain.addAll(getFullSyncEvent(upgradeTriggerEvent));
-        flowEventChain.addAll(getClusterUpgradeValidationTriggerEvent(upgradeTriggerEvent, stack));
+        flowEventChain.addAll(getFullSyncEvent(event));
+        flowEventChain.addAll(getClusterUpgradeValidationTriggerEvent(event, stack));
         flowEventChain.addAll(saltVersionUpgradeService.getSaltSecretRotationTriggerEvent(event.getResourceId()));
-        flowEventChain.addAll(getSaltUpdateTriggerEvent(upgradeTriggerEvent));
+        flowEventChain.addAll(getSaltUpdateTriggerEvent(event));
         flowEventChain.addAll(getImageUpdateTriggerEvent(imageChangeDto));
         flowEventChain.addAll(setDefaultJavaVersionFlowChainService.setDefaultJavaVersionTriggerEvent(stack, imageChangeDto));
-        flowEventChain.addAll(getClusterUpgradeTriggerEvent(upgradeTriggerEvent));
+        flowEventChain.addAll(getClusterUpgradeTriggerEvent(event, currentImage));
 
-        return new FlowTriggerEventQueue(getName(), upgradeTriggerEvent, flowEventChain);
+        return new FlowTriggerEventQueue(getName(), event, flowEventChain);
     }
 
-    private List<StackEvent> getSaltUpdateTriggerEvent(ClusterUpgradeTriggerEvent event) {
+    private List<StackEvent> getSaltUpdateTriggerEvent(DataLakeUpgradeFlowChainTriggerEvent event) {
         return List.of(new StackEvent(SaltUpdateEvent.SALT_UPDATE_EVENT.event(), event.getResourceId(), event.accepted()));
     }
 
@@ -109,14 +107,7 @@ public class UpgradeDatalakeFlowEventChainFactory implements FlowEventChainFacto
         }
     }
 
-    private ClusterUpgradeTriggerEvent getEventForRuntimeUpgrade(ClusterUpgradeTriggerEvent event) {
-        return osChangeUtil
-                .findHelperImageIfNecessary(event.getImageId(), event.getResourceId())
-                .map(image -> createEventForRuntimeUpgrade(image, event))
-                .orElse(event);
-    }
-
-    private List<Selectable> getFullSyncEvent(ClusterUpgradeTriggerEvent event) {
+    private List<Selectable> getFullSyncEvent(DataLakeUpgradeFlowChainTriggerEvent event) {
         LOGGER.info("Add sync events for full sync");
         List<Selectable> syncEvents = new ArrayList<>();
 
@@ -130,16 +121,11 @@ public class UpgradeDatalakeFlowEventChainFactory implements FlowEventChainFacto
         return List.of(new StackImageUpdateTriggerEvent(STACK_IMAGE_UPDATE_TRIGGER_EVENT, imageChangeDto));
     }
 
-    private ImageChangeDto getImageChangeDto(ClusterUpgradeTriggerEvent event) {
-        try {
-            com.sequenceiq.cloudbreak.cloud.model.Image image = componentConfigProviderService.getImage(event.getResourceId());
-            return new ImageChangeDto(event.getResourceId(), event.getImageId(), image.getImageCatalogName(), image.getImageCatalogUrl());
-        } catch (CloudbreakImageNotFoundException e) {
-            throw new NotFoundException("Image not found for stack", e);
-        }
+    private ImageChangeDto getImageChangeDto(DataLakeUpgradeFlowChainTriggerEvent event, Image currentImage) {
+        return new ImageChangeDto(event.getResourceId(), event.getImageId(), currentImage.getImageCatalogName(), currentImage.getImageCatalogUrl());
     }
 
-    private List<ClusterUpgradeValidationTriggerEvent> getClusterUpgradeValidationTriggerEvent(ClusterUpgradeTriggerEvent event, StackDto stack) {
+    private List<ClusterUpgradeValidationTriggerEvent> getClusterUpgradeValidationTriggerEvent(DataLakeUpgradeFlowChainTriggerEvent event, StackDto stack) {
         boolean lockComponents = lockedComponentService.isComponentsLocked(stack, event.getImageId());
         return List.of(
                 new ClusterUpgradeValidationTriggerEvent(
@@ -152,22 +138,22 @@ public class UpgradeDatalakeFlowEventChainFactory implements FlowEventChainFacto
         );
     }
 
-    private List<ClusterUpgradeTriggerEvent> getClusterUpgradeTriggerEvent(ClusterUpgradeTriggerEvent event) {
+    private List<ClusterUpgradeTriggerEvent> getClusterUpgradeTriggerEvent(DataLakeUpgradeFlowChainTriggerEvent event, Image currentImage) {
         return List.of(
                 new ClusterUpgradeTriggerEvent(
                         CLUSTER_UPGRADE_INIT_EVENT.event(),
                         event.getResourceId(),
                         event.accepted(),
                         event.getImageId(),
-                        event.isRollingUpgradeEnabled()
-                )
-        );
+                        event.isRollingUpgradeEnabled(),
+                        OsType.getByOsTypeString(currentImage.getOsType())));
     }
 
-    private ClusterUpgradeTriggerEvent createEventForRuntimeUpgrade(Image helperImage, ClusterUpgradeTriggerEvent event) {
-        LOGGER.debug("Creating new event where changing the image from RHEL8 {} to centos7 {} for perform the runtime upgrade", event.getImageId(),
-                helperImage.getUuid());
-        return new ClusterUpgradeTriggerEvent(event.getSelector(), event.getResourceId(), event.accepted(), helperImage.getUuid(),
-                event.isRollingUpgradeEnabled());
+    private Image getCurrentImage(DataLakeUpgradeFlowChainTriggerEvent event) {
+        try {
+            return componentConfigProviderService.getImage(event.getResourceId());
+        } catch (CloudbreakImageNotFoundException e) {
+            throw new NotFoundException("Image not found for stack", e);
+        }
     }
 }

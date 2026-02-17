@@ -8,7 +8,7 @@ import com.sequenceiq.cloudbreak.eventbus.Promise;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
 
-public class DistroXUpgradeTriggerEvent extends StackEvent {
+public class DistroXUpgradeFlowChainTriggerEvent extends StackEvent {
 
     private final ImageChangeDto imageChangeDto;
 
@@ -23,7 +23,7 @@ public class DistroXUpgradeTriggerEvent extends StackEvent {
     private final String runtimeVersion;
 
     @JsonCreator
-    public DistroXUpgradeTriggerEvent(
+    public DistroXUpgradeFlowChainTriggerEvent(
             @JsonProperty("selector") String selector,
             @JsonProperty("resourceId") Long stackId,
             @JsonIgnoreDeserialization @JsonProperty("accepted") Promise<AcceptResult> accepted,

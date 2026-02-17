@@ -193,7 +193,7 @@ class ReactorFlowManagerTest {
         underTest.triggerStackImageUpdate(new ImageChangeDto(STACK_ID, "asdf"));
         underTest.triggerMaintenanceModeValidationFlow(STACK_ID);
         underTest.triggerClusterCertificationRenewal(STACK_ID);
-        underTest.triggerDatalakeClusterUpgrade(STACK_ID, "asdf", true);
+        underTest.triggerDataLakeClusterUpgrade(STACK_ID, "asdf", true);
         underTest.triggerDistroXUpgrade(STACK_ID, imageChangeDto, false, false, "variant", false, "aRuntime");
         underTest.triggerClusterUpgradePreparation(STACK_ID, imageChangeDto, "runtimeVersion");
         underTest.triggerSaltUpdate(STACK_ID);

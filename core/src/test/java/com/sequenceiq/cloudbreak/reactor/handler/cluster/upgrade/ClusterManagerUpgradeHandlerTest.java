@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ClusterManagerUpgradeRequest;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
+import com.sequenceiq.common.model.OsType;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
 @ExtendWith(MockitoExtension.class)
@@ -35,7 +36,7 @@ class ClusterManagerUpgradeHandlerTest {
 
     @Test
     void testDoAcceptShouldReturnSuccessEvent() throws CloudbreakOrchestratorException, CloudbreakException {
-        ClusterManagerUpgradeRequest request = new ClusterManagerUpgradeRequest(STACK_ID, Collections.emptySet(), true, null);
+        ClusterManagerUpgradeRequest request = new ClusterManagerUpgradeRequest(STACK_ID, Collections.emptySet(), true, null, OsType.RHEL8);
 
         Selectable result = underTest.doAccept(new HandlerEvent<>(Event.wrap(request)));
 
@@ -45,7 +46,7 @@ class ClusterManagerUpgradeHandlerTest {
 
     @Test
     void testDoAcceptShouldReturnFailureEvent() throws CloudbreakOrchestratorException, CloudbreakException {
-        ClusterManagerUpgradeRequest request = new ClusterManagerUpgradeRequest(STACK_ID, Collections.emptySet(), true, "123");
+        ClusterManagerUpgradeRequest request = new ClusterManagerUpgradeRequest(STACK_ID, Collections.emptySet(), true, "123", OsType.RHEL8);
         doThrow(new CloudbreakException("error")).when(clusterManagerUpgradeManagementService).upgradeClusterManager(request);
 
         Selectable result = underTest.doAccept(new HandlerEvent<>(Event.wrap(request)));

@@ -21,7 +21,7 @@ public class SeLinuxUpgradeImageFilter implements UpgradeImageFilter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SeLinuxUpgradeImageFilter.class);
 
-    private static final int ORDER_NUMBER = 12;
+    private static final int ORDER_NUMBER = 11;
 
     @Inject
     private StackDtoService stackDtoService;

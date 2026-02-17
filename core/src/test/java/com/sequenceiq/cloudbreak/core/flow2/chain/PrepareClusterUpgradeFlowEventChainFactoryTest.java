@@ -10,18 +10,13 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.sync.ClusterSyncEvent
 import static com.sequenceiq.cloudbreak.core.flow2.stack.sync.StackSyncEvent.STACK_SYNC_EVENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-import static org.mockito.Mockito.when;
-
-import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.thunderhead.service.common.usage.UsageProto;
-import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation.ClusterUpgradePreparationState;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation.event.ClusterUpgradePreparationTriggerEvent;
@@ -30,7 +25,6 @@ import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.
 import com.sequenceiq.cloudbreak.core.flow2.event.UpgradePreparationChainTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
-import com.sequenceiq.cloudbreak.service.upgrade.image.OsChangeUtil;
 import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
 
 @ExtendWith(MockitoExtension.class)
@@ -39,11 +33,6 @@ class PrepareClusterUpgradeFlowEventChainFactoryTest {
     private static final long STACK_ID = 1L;
 
     private static final String IMAGE_ID = "imageId";
-
-    private static final String RHEL_UPGRADE_HELPER_IMAGE_ID = "rhelUpgradeHelperImageId";
-
-    @Mock
-    private OsChangeUtil osChangeUtil;
 
     @InjectMocks
     private PrepareClusterUpgradeFlowEventChainFactory underTest;
@@ -55,37 +44,19 @@ class PrepareClusterUpgradeFlowEventChainFactoryTest {
     }
 
     @Test
-    void createFlowTriggerEventQueueWithNoHelperImageShouldReturnCorrectQueue() {
+    void createFlowTriggerEventQueueShouldReturnCorrectQueue() {
         UpgradePreparationChainTriggerEvent event = createEvent();
-
-        when(osChangeUtil.findHelperImageIfNecessary(event.getImageChangeDto().getImageId(), event.getResourceId()))
-                .thenReturn(Optional.empty());
 
         FlowTriggerEventQueue flowChainQueue = underTest.createFlowTriggerEventQueue(event);
         assertEquals(4, flowChainQueue.getQueue().size());
 
-        assertSyncEvents(flowChainQueue, RHEL_UPGRADE_HELPER_IMAGE_ID);
+        assertSyncEvents(flowChainQueue);
         assertUpgradeValidationEvent(flowChainQueue, IMAGE_ID);
         assertUpdatePreparationEvent(flowChainQueue, IMAGE_ID);
 
     }
 
-    @Test
-    void createFlowTriggerEventQueueWithHelperImageShouldReturnCorrectQueue() {
-        UpgradePreparationChainTriggerEvent event = createEvent();
-
-        Image helperImage = Image.builder().withUuid(RHEL_UPGRADE_HELPER_IMAGE_ID).build();
-        when(osChangeUtil.findHelperImageIfNecessary(event.getImageChangeDto().getImageId(), event.getResourceId()))
-                .thenReturn(Optional.of(helperImage));
-
-        FlowTriggerEventQueue flowChainQueue = underTest.createFlowTriggerEventQueue(event);
-        assertEquals(4, flowChainQueue.getQueue().size());
-        assertSyncEvents(flowChainQueue, RHEL_UPGRADE_HELPER_IMAGE_ID);
-        assertUpgradeValidationEvent(flowChainQueue, RHEL_UPGRADE_HELPER_IMAGE_ID);
-        assertUpdatePreparationEvent(flowChainQueue, RHEL_UPGRADE_HELPER_IMAGE_ID);
-    }
-
-    private void assertSyncEvents(FlowTriggerEventQueue flowChainQueue, String imageId) {
+    private void assertSyncEvents(FlowTriggerEventQueue flowChainQueue) {
         Selectable syncStackEvent = flowChainQueue.getQueue().remove();
         assertEquals(STACK_SYNC_EVENT.event(), syncStackEvent.selector());
         assertEquals(STACK_ID, syncStackEvent.getResourceId());

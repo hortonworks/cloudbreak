@@ -13,14 +13,15 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -29,12 +30,15 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.chain.util.SetDefaultJavaVersionFlowChainService;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.java.SetDefaultJavaVersionFlowEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.java.SetDefaultJavaVersionTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.sync.ClusterSyncEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterUpgradeTriggerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.event.DataLakeUpgradeFlowChainTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackImageUpdateTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackSyncTriggerEvent;
 import com.sequenceiq.cloudbreak.dto.StackDto;
@@ -44,7 +48,6 @@ import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
 import com.sequenceiq.cloudbreak.service.salt.SaltVersionUpgradeService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
-import com.sequenceiq.cloudbreak.service.upgrade.image.OsChangeUtil;
 import com.sequenceiq.cloudbreak.service.upgrade.image.locked.LockedComponentService;
 import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
 import com.sequenceiq.flow.event.EventSelectorUtil;
@@ -71,9 +74,6 @@ class UpgradeDatalakeFlowEventChainFactoryTest {
     private StackDtoService stackDtoService;
 
     @Mock
-    private OsChangeUtil osChangeUtil;
-
-    @Mock
     private SaltVersionUpgradeService saltVersionUpgradeService;
 
     @Mock
@@ -95,7 +95,6 @@ class UpgradeDatalakeFlowEventChainFactoryTest {
                 .withImageCatalogUrl(IMAGE_CATALOG_URL)
                 .build();
         when(componentConfigProviderService.getImage(STACK_ID)).thenReturn(targetImage);
-        when(osChangeUtil.findHelperImageIfNecessary(IMAGE_ID, STACK_ID)).thenReturn(Optional.empty());
         String secretRotationSelector = EventSelectorUtil.selector(SecretRotationFlowChainTriggerEvent.class);
         when(saltVersionUpgradeService.getSaltSecretRotationTriggerEvent(1L))
                 .thenReturn(List.of(
@@ -109,7 +108,7 @@ class UpgradeDatalakeFlowEventChainFactoryTest {
                 .thenReturn(List.of(setDefaultJavaEvent));
 
         FlowTriggerEventQueue flowTriggerQueue = underTest.createFlowTriggerEventQueue(
-                new ClusterUpgradeTriggerEvent(DATALAKE_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT, STACK_ID, IMAGE_ID, true));
+                new DataLakeUpgradeFlowChainTriggerEvent(DATALAKE_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT, STACK_ID, IMAGE_ID, true));
 
         assertEquals(8, flowTriggerQueue.getQueue().size());
         Queue<Selectable> restrainedQueueData = new ConcurrentLinkedDeque<>(flowTriggerQueue.getQueue());
@@ -123,6 +122,15 @@ class UpgradeDatalakeFlowEventChainFactoryTest {
         assertClusterUpgradeTriggerEvent(flowTriggerQueue);
         flowTriggerQueue.getQueue().addAll(restrainedQueueData);
         FlowChainConfigGraphGeneratorUtil.generateFor(underTest, FLOW_CONFIGS_PACKAGE, flowTriggerQueue);
+    }
+
+    @Test
+    void testCreateFlowTriggerEventQueueShouldThrowNotFoundException() throws Exception {
+        doThrow(new CloudbreakImageNotFoundException("Image not found")).when(componentConfigProviderService).getImage(STACK_ID);
+
+        String errorMessage = Assertions.assertThrows(NotFoundException.class, () -> underTest.createFlowTriggerEventQueue(
+                new DataLakeUpgradeFlowChainTriggerEvent(DATALAKE_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT, STACK_ID, IMAGE_ID, true))).getMessage();
+        assertEquals("Image not found for stack", errorMessage);
     }
 
     private void assertImageUpdateTriggerEvent(FlowTriggerEventQueue flowTriggerEventQueue) {

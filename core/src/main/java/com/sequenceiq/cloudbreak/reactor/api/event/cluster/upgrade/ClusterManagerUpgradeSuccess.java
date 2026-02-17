@@ -7,14 +7,16 @@ import java.util.Set;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
+import com.sequenceiq.common.model.OsType;
 
 public class ClusterManagerUpgradeSuccess extends AbstractClusterUpgradeEvent {
 
     @JsonCreator
     public ClusterManagerUpgradeSuccess(
             @JsonProperty("resourceId") Long stackId,
-            @JsonProperty("upgradeCandidateProducts") Set<ClouderaManagerProduct> upgradeCandidateProducts) {
-        super(stackId, upgradeCandidateProducts);
+            @JsonProperty("upgradeCandidateProducts") Set<ClouderaManagerProduct> upgradeCandidateProducts,
+            @JsonProperty("originalOsType") OsType originalOsType) {
+        super(stackId, upgradeCandidateProducts, originalOsType);
     }
 
     @Override
@@ -22,4 +24,8 @@ public class ClusterManagerUpgradeSuccess extends AbstractClusterUpgradeEvent {
         return CLUSTER_MANAGER_UPGRADE_FINISHED_EVENT.event();
     }
 
+    @Override
+    public String toString() {
+        return "ClusterManagerUpgradeSuccess{} " + super.toString();
+    }
 }

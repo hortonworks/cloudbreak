@@ -68,7 +68,7 @@ public class ClusterUpgradeInitHandler extends ExceptionCatcherEventHandler<Clus
             ClusterApi connector = clusterApiConnectors.getConnector(stackDto);
             clusterUpgradePrerequisitesService.removeIncompatibleServices(stackDto, connector, request.getTargetRuntimeVersion());
             Set<ClouderaManagerProduct> upgradeCandidateProducts = upgradeCandidateProvider.getRequiredProductsForUpgrade(connector, stackDto, components);
-            result = new ClusterUpgradeInitSuccess(request.getResourceId(), upgradeCandidateProducts);
+            result = new ClusterUpgradeInitSuccess(request.getResourceId(), upgradeCandidateProducts, request.getOriginalOsType());
         } catch (Exception e) {
             LOGGER.error("Upgrade initialization failed", e);
             result = new ClusterUpgradeFailedEvent(request.getResourceId(), e, DetailedStackStatus.CLUSTER_UPGRADE_INIT_FAILED);

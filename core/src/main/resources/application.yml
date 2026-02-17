@@ -780,6 +780,9 @@ cb:
           - role: GATEWAY
             required: false
   parcel:
+    availability:
+      cache:
+        ttl: 15
     retry:
       maxAttempts: 5
       backOffDelay: 2000

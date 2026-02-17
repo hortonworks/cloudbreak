@@ -58,7 +58,7 @@ public class ClusterManagerUpgradeManagementService {
         stopClusterServicesIfNecessary(request, stackDto);
         if (clusterManagerUpgradeNecessary) {
             clusterUpgradeService.upgradeClusterManager(stackDto.getId());
-            clusterManagerUpgradeService.upgradeClouderaManager(stackDto, clouderaManagerRepo);
+            clusterManagerUpgradeService.upgradeClouderaManager(stackDto, clouderaManagerRepo, request.getOriginalOsType());
             validateCmVersionAfterUpgrade(stackDto, clouderaManagerRepo);
             startClusterManagerServices(stackDto);
             reconfigureClusterManager(stackDto);

@@ -31,7 +31,6 @@ import com.sequenceiq.cloudbreak.cluster.service.CdhPatchUpgradeService;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.cluster.ClusterBuilderService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.view.ClusterComponentView;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.message.FlowMessageService;
@@ -42,6 +41,7 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.parcel.ParcelService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.view.StackView;
+import com.sequenceiq.common.model.OsType;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
 @ExtendWith(MockitoExtension.class)
@@ -78,16 +78,14 @@ class ClusterUpgradeHandlerTest {
     @Mock
     private CdhPatchUpgradeService cdhPatchUpgradeService;
 
-    private Set<ClusterComponentView> components = Collections.singleton(new ClusterComponentView());
-
-    private Set<ClouderaManagerProduct> upgradeCandidateProducts = Collections.singleton(new ClouderaManagerProduct());
+    private final Set<ClouderaManagerProduct> upgradeCandidateProducts = Collections.singleton(new ClouderaManagerProduct());
 
     @InjectMocks
     private ClusterUpgradeHandler underTest;
 
     @Test
     void testDoAcceptShouldReturnSuccessResponseWhenThereAreUpgradeCandidatesAndTheStackIsDataLake() throws Exception {
-        ClusterUpgradeRequest request = new ClusterUpgradeRequest(STACK_ID, upgradeCandidateProducts, false, true);
+        ClusterUpgradeRequest request = new ClusterUpgradeRequest(STACK_ID, upgradeCandidateProducts, true, OsType.RHEL8);
 
         when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
         when(clusterApiConnectors.getConnector(stackDto)).thenReturn(connector);
@@ -107,7 +105,7 @@ class ClusterUpgradeHandlerTest {
 
     @Test
     void testDoAcceptShouldReturnSuccessResponseWhenThereAreUpgradeCandidatesAndTheStackIsDataHub() throws Exception {
-        ClusterUpgradeRequest request = new ClusterUpgradeRequest(STACK_ID, upgradeCandidateProducts, false, true);
+        ClusterUpgradeRequest request = new ClusterUpgradeRequest(STACK_ID, upgradeCandidateProducts, true, OsType.RHEL8);
 
         when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
         when(clusterApiConnectors.getConnector(stackDto)).thenReturn(connector);
@@ -129,7 +127,7 @@ class ClusterUpgradeHandlerTest {
 
     @Test
     void testDoAcceptShouldReturnSuccessResponseWhenThereAreUpgradeCandidatesAndNotAPatchUpgrade() throws Exception {
-        ClusterUpgradeRequest request = new ClusterUpgradeRequest(STACK_ID, upgradeCandidateProducts, false, true);
+        ClusterUpgradeRequest request = new ClusterUpgradeRequest(STACK_ID, upgradeCandidateProducts, true, OsType.RHEL8);
 
         when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
         when(clusterApiConnectors.getConnector(stackDto)).thenReturn(connector);
@@ -151,7 +149,7 @@ class ClusterUpgradeHandlerTest {
 
     @Test
     void testDoAcceptShouldReturnSuccessResponseWhenThereAreNoUpgradeCandidates() {
-        ClusterUpgradeRequest request = new ClusterUpgradeRequest(STACK_ID, Collections.emptySet(), false, true);
+        ClusterUpgradeRequest request = new ClusterUpgradeRequest(STACK_ID, Collections.emptySet(), true, OsType.RHEL8);
 
         Selectable result = underTest.doAccept(new HandlerEvent<>(Event.wrap(request)));
 
@@ -162,7 +160,7 @@ class ClusterUpgradeHandlerTest {
 
     @Test
     void testDoAcceptShouldReturnFailedResponseWhenThereAreUpgradeCandidatesAndTheUpgradeClusterRuntimeThrowsException() throws Exception {
-        ClusterUpgradeRequest request = new ClusterUpgradeRequest(STACK_ID, upgradeCandidateProducts, false, true);
+        ClusterUpgradeRequest request = new ClusterUpgradeRequest(STACK_ID, upgradeCandidateProducts, true, OsType.RHEL8);
 
         when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
         when(clusterApiConnectors.getConnector(stackDto)).thenReturn(connector);
@@ -181,7 +179,7 @@ class ClusterUpgradeHandlerTest {
 
     @Test
     void testDoAcceptShouldReturnFailedResponseWhenParcelRemovalFailedAfterTheUpgrade() throws Exception {
-        ClusterUpgradeRequest request = new ClusterUpgradeRequest(STACK_ID, upgradeCandidateProducts, false, true);
+        ClusterUpgradeRequest request = new ClusterUpgradeRequest(STACK_ID, upgradeCandidateProducts, true, OsType.RHEL8);
 
         when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
         when(clusterApiConnectors.getConnector(stackDto)).thenReturn(connector);

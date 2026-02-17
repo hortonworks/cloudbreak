@@ -6,11 +6,9 @@ import java.util.StringJoiner;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
+import com.sequenceiq.common.model.OsType;
 
 public class ClusterUpgradeRequest extends AbstractClusterUpgradeEvent {
-
-    @Deprecated
-    private final boolean patchUpgrade;
 
     private final boolean rollingUpgradeEnabled;
 
@@ -18,15 +16,10 @@ public class ClusterUpgradeRequest extends AbstractClusterUpgradeEvent {
     public ClusterUpgradeRequest(
             @JsonProperty("resourceId") Long stackId,
             @JsonProperty("upgradeCandidateProducts") Set<ClouderaManagerProduct> upgradeCandidateProducts,
-            @JsonProperty("patchUpgrade") boolean patchUpgrade,
-            @JsonProperty("rollingUpgradeEnabled") boolean rollingUpgradeEnabled) {
-        super(stackId, upgradeCandidateProducts);
-        this.patchUpgrade = patchUpgrade;
+            @JsonProperty("rollingUpgradeEnabled") boolean rollingUpgradeEnabled,
+            @JsonProperty("originalOsType") OsType originalOsType) {
+        super(stackId, upgradeCandidateProducts, originalOsType);
         this.rollingUpgradeEnabled = rollingUpgradeEnabled;
-    }
-
-    public boolean isPatchUpgrade() {
-        return patchUpgrade;
     }
 
     public boolean isRollingUpgradeEnabled() {
@@ -36,7 +29,6 @@ public class ClusterUpgradeRequest extends AbstractClusterUpgradeEvent {
     @Override
     public String toString() {
         return new StringJoiner(", ", ClusterUpgradeRequest.class.getSimpleName() + "[", "]")
-                .add("patchUpgrade=" + patchUpgrade)
                 .add("rollingUpgradeEnabled=" + rollingUpgradeEnabled)
                 .add(super.toString())
                 .toString();

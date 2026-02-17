@@ -5,7 +5,6 @@ import static com.sequenceiq.common.model.OsType.RHEL8;
 import static com.sequenceiq.common.model.OsType.RHEL9;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 import jakarta.inject.Inject;
@@ -28,14 +27,6 @@ public class OsChangeUpgradeCondition {
     @Inject
     private CurrentImageUsageCondition currentImageUsageCondition;
 
-    public Optional<OsType> getPreviousOs(OsType nextMajorOs) {
-        return ALLOWED_OS_CHANGES
-                .stream()
-                .filter(osChange -> osChange.getRight().equals(nextMajorOs))
-                .map(Pair::getLeft)
-                .findFirst();
-    }
-
     public boolean isNextMajorOsImage(Long stackId, Image imageCandidate) {
         if (CENTOS7.equals(OsType.getByOsTypeStringWithCentos7Fallback(imageCandidate.getOsType()))) {
             return false;
@@ -44,7 +35,7 @@ public class OsChangeUpgradeCondition {
         return isNextMajorOsImage(osUsedByInstances, imageCandidate);
     }
 
-    public boolean isNextMajorOsImage(Set<OsType> osUsedByInstances, Image imageCandidate) {
+    private boolean isNextMajorOsImage(Set<OsType> osUsedByInstances, Image imageCandidate) {
         return ALLOWED_OS_CHANGES
                 .stream()
                 .filter(osChange -> allUse(osChange.getLeft(), osUsedByInstances) && imageHasOs(osChange.getRight(), imageCandidate))
