@@ -21,7 +21,8 @@ public enum ClusterTemplateV4Type {
     DLM,
     LAKEHOUSE_OPTIMIZER,
     HYBRID_DATAENGINEERING_HA,
-    HYBRID_STREAMING;
+    HYBRID_STREAMING,
+    HYBRID_DATAMART;
 
     public boolean isHybrid() {
         return name().startsWith("HYBRID_");
