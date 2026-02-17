@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.api.service;
 
 import java.util.Objects;
 
+import org.apache.commons.lang3.StringUtils;
+
 public class ExposedService {
 
     private String name;
@@ -13,6 +15,8 @@ public class ExposedService {
     private String knoxService;
 
     private String knoxUrl;
+
+    private String iconKey;
 
     private boolean ssoSupported;
 
@@ -188,6 +192,14 @@ public class ExposedService {
         this.minHttpsVersion = minHttpsVersion;
     }
 
+    public String getIconKey() {
+        return StringUtils.isNotBlank(iconKey) ? iconKey : serviceName;
+    }
+
+    public void setIconKey(String iconKey) {
+        this.iconKey = iconKey;
+    }
+
     //CHECKSTYLE:OFF: CyclomaticComplexity
     @Override
     public boolean equals(Object o) {
@@ -205,6 +217,7 @@ public class ExposedService {
                 visibleForDatahub == that.visibleForDatahub &&
                 Objects.equals(name, that.name) &&
                 Objects.equals(displayName, that.displayName) &&
+                Objects.equals(iconKey, that.iconKey) &&
                 Objects.equals(serviceName, that.serviceName) &&
                 Objects.equals(knoxService, that.knoxService) &&
                 Objects.equals(knoxUrl, that.knoxUrl) &&
@@ -222,7 +235,7 @@ public class ExposedService {
     public int hashCode() {
         return Objects.hash(name, displayName, serviceName, knoxService, knoxUrl, ssoSupported, port, tlsPort,
                 apiOnly, apiIncluded, visibleForDatahub, visibleForDatalake, minVersion, minHttpsVersion,
-                maxVersion, entitlement, withoutProxyPath);
+                maxVersion, entitlement, withoutProxyPath, iconKey);
     }
 
     @Override
@@ -233,6 +246,7 @@ public class ExposedService {
                 ", serviceName='" + serviceName + '\'' +
                 ", knoxService='" + knoxService + '\'' +
                 ", knoxUrl='" + knoxUrl + '\'' +
+                ", iconKey='" + iconKey + '\'' +
                 ", ssoSupported=" + ssoSupported +
                 ", port=" + port +
                 ", tlsPort=" + tlsPort +

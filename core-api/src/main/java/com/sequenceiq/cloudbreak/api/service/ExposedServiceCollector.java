@@ -218,7 +218,7 @@ public class ExposedServiceCollector {
         }
     }
 
-    private Collection<ExposedService> filterSupportedKnoxServices(Optional<String> bpVersion) {
+    public Collection<ExposedService> filterSupportedKnoxServices(Optional<String> bpVersion) {
         return exposedServices.values().stream()
                 .filter(x -> StringUtils.isNotEmpty(x.getKnoxService()))
                 .filter(x -> getProperProtocol(bpVersion, x))

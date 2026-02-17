@@ -45,6 +45,7 @@ import com.sequenceiq.cloudbreak.ImageCatalogMock;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.api.service.ExposedServiceCollector;
 import com.sequenceiq.cloudbreak.auth.PaywallCredentialPopulator;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.AccountIdService;
@@ -263,6 +264,9 @@ public class DistroXUpgradeRetrievalComponentTest {
 
     @MockBean
     private StackRepository stackRepository;
+
+    @MockBean
+    private ExposedServiceCollector exposedServiceCollector;
 
     @MockBean
     private CurrentImagePackageProvider currentImagePackageProvider;

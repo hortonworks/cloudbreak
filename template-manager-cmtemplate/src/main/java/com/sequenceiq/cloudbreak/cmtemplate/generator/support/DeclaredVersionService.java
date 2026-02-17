@@ -1,23 +1,21 @@
 package com.sequenceiq.cloudbreak.cmtemplate.generator.support;
 
-import static org.apache.commons.lang3.StringUtils.trimToNull;
-
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
+import com.cloudera.api.swagger.model.ApiClusterTemplateRoleConfigGroup;
 import com.cloudera.api.swagger.model.ApiClusterTemplateService;
-import com.google.common.base.Strings;
+import com.sequenceiq.cloudbreak.api.service.ExposedService;
+import com.sequenceiq.cloudbreak.api.service.ExposedServiceCollector;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
-import com.sequenceiq.cloudbreak.cmtemplate.generator.configuration.CmTemplateGeneratorConfigurationResolver;
-import com.sequenceiq.cloudbreak.cmtemplate.generator.configuration.domain.StackVersion;
-import com.sequenceiq.cloudbreak.cmtemplate.generator.configuration.domain.dependencies.ServiceConfig;
-import com.sequenceiq.cloudbreak.cmtemplate.generator.configuration.domain.versionmatrix.CdhService;
 import com.sequenceiq.cloudbreak.cmtemplate.generator.support.domain.SupportedService;
 import com.sequenceiq.cloudbreak.cmtemplate.generator.support.domain.SupportedServices;
 
@@ -28,63 +26,37 @@ public class DeclaredVersionService {
     private CmTemplateProcessorFactory cmTemplateProcessorFactory;
 
     @Inject
-    private CmTemplateGeneratorConfigurationResolver cmTemplateGeneratorConfigurationResolver;
+    private ExposedServiceCollector exposedServiceCollector;
 
     public SupportedServices collectDeclaredVersions(String blueprintText) {
         SupportedServices supportedServices = new SupportedServices();
-
-        Set<SupportedService> services = new HashSet<>();
-
+        supportedServices.setServices(new HashSet<>());
         CmTemplateProcessor cmTemplateProcessor = cmTemplateProcessorFactory.get(blueprintText);
-
-        String cdhVersion = cmTemplateProcessor.getTemplate().getCdhVersion();
-
-        StackVersion stackVersion = new StackVersion();
-        stackVersion.setVersion(cdhVersion);
-        stackVersion.setStackType("CDH");
-
-        Set<CdhService> cdhServices = cmTemplateGeneratorConfigurationResolver.cdhConfigurations().get(stackVersion);
-
-        if (cdhServices == null) {
-            cdhServices = fallbackForDefault();
-        }
+        Collection<ExposedService> exposedServices = exposedServiceCollector
+                .filterSupportedKnoxServices(Optional.ofNullable(cmTemplateProcessor.getTemplate().getCdhVersion()));
 
         for (ApiClusterTemplateService service : cmTemplateProcessor.getTemplate().getServices()) {
-            SupportedService supportedService = new SupportedService();
-            supportedService.setName(service.getServiceType());
+            Set<String> serviceNames = Optional.ofNullable(service.getRoleConfigGroups())
+                    .stream()
+                    .flatMap(Collection::stream)
+                    .map(ApiClusterTemplateRoleConfigGroup::getRoleType)
+                    .collect(Collectors.toSet());
 
-            for (ServiceConfig serviceConfig : cmTemplateGeneratorConfigurationResolver.serviceConfigs()) {
-                if (serviceConfig.getName().equals(service.getServiceType())) {
-                    supportedService.setDisplayName(serviceConfig.getDisplayName());
-                    supportedService.setComponentNameInParcel(serviceConfig.getComponentNameInParcel());
-                    // for backward compatibility UI will use name for icons in case of older runtimes
-                    supportedService.setIconKey(serviceConfig.getName());
-                }
-            }
+            Optional<ExposedService> exposedService = exposedServices.stream()
+                    .filter(e -> serviceNames.contains(e.getServiceName()))
+                    .findFirst();
 
-            for (CdhService cdhService : cdhServices) {
-                if (cdhService.getName().equals(service.getServiceType())) {
-                    supportedService.setVersion(cdhService.getVersion());
-                    Optional.ofNullable(trimToNull(cdhService.getDisplayName())).ifPresent(supportedService::setDisplayName);
-                    Optional.ofNullable(trimToNull(cdhService.getIconKey())).ifPresent(supportedService::setIconKey);
-                }
-            }
-
-            if (!Strings.isNullOrEmpty(supportedService.getDisplayName())
-                && !Strings.isNullOrEmpty(supportedService.getVersion())) {
-                services.add(supportedService);
+            if (exposedService.isPresent()) {
+                SupportedService supportedService = new SupportedService();
+                supportedService.setName(service.getServiceType());
+                supportedService.setDisplayName(exposedService.get().getDisplayName());
+                supportedService.setComponentNameInParcel(exposedService.get().getServiceName());
+                supportedService.setIconKey(exposedService.get().getIconKey());
+                supportedService.setVersion("N/A");
+                supportedServices.getServices().add(supportedService);
             }
         }
-
-        supportedServices.setServices(services);
         return supportedServices;
-    }
-
-    public Set<CdhService> fallbackForDefault() {
-        StackVersion stackVersion = new StackVersion();
-        stackVersion.setVersion("default");
-        stackVersion.setStackType("CDH");
-        return cmTemplateGeneratorConfigurationResolver.cdhConfigurations().get(stackVersion);
     }
 
 }

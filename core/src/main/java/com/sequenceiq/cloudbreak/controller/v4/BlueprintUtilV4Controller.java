@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.converter.v4.clustertemplate.ServiceDependencyM
 import com.sequenceiq.cloudbreak.converter.v4.clustertemplate.SupportedServicesToBlueprintServicesV4ResponseConverter;
 import com.sequenceiq.cloudbreak.converter.v4.clustertemplate.SupportedVersionsToSupportedVersionsV4ResponseConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.init.blueprint.DefaultBlueprintCache;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.workspace.controller.WorkspaceEntityType;
@@ -44,6 +45,9 @@ public class BlueprintUtilV4Controller extends NotificationController implements
 
     @Inject
     private BlueprintService blueprintService;
+
+    @Inject
+    private DefaultBlueprintCache defaultBlueprintCache;
 
     @Inject
     private CloudbreakRestRequestThreadLocalService threadLocalService;
@@ -145,7 +149,10 @@ public class BlueprintUtilV4Controller extends NotificationController implements
     @Override
     @DisableCheckPermissions
     public SupportedVersionsV4Response getServiceList(Long workspaceId) {
-        return supportedVersionsToSupportedVersionsV4ResponseConverter.convert(clusterTemplateGeneratorService.getVersionsAndSupportedServiceList());
+        return supportedVersionsToSupportedVersionsV4ResponseConverter
+                .convert(clusterTemplateGeneratorService.getVersionsAndSupportedServiceList(
+                        defaultBlueprintCache.getBlueprintVersions())
+                );
     }
 
     @Override

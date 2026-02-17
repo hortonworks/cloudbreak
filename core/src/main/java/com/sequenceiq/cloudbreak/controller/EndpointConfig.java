@@ -50,7 +50,6 @@ import com.sequenceiq.cloudbreak.service.openapi.OpenApiController;
 import com.sequenceiq.cloudbreak.service.openapi.OpenApiProvider;
 import com.sequenceiq.cloudbreak.structuredevent.rest.LegacyStructuredEventFilter;
 import com.sequenceiq.cloudbreak.structuredevent.rest.filter.CDPRestAuditFilter;
-import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.distrox.v1.distrox.controller.DistroXCO2V1Controller;
 import com.sequenceiq.distrox.v1.distrox.controller.DistroXCostV1Controller;
 import com.sequenceiq.distrox.v1.distrox.controller.DistroXDatabaseServerV1Controller;
@@ -136,13 +135,13 @@ public class EndpointConfig extends ResourceConfig {
         registerFilters();
         registerEndpoints();
         registerExceptionMappers();
-        registerSwagger();
+        registerOpenApi();
     }
 
-    private void registerSwagger() throws IOException {
+    private void registerOpenApi() throws IOException {
         OpenAPI openAPI = openApiProvider.getOpenAPI(
                 "Cloudbreak API",
-                FileReaderUtils.readFileFromClasspath("swagger/cloudbreak-introduction"),
+                "API for working with Data Hubs",
                 cbVersion,
                 "https://localhost" + contextPath + CoreApi.API_ROOT_CONTEXT
         );

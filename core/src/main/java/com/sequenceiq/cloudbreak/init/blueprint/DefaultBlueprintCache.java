@@ -108,6 +108,13 @@ public class DefaultBlueprintCache {
         }
     }
 
+    public Set<String> getBlueprintVersions() {
+        return defaultBlueprints.entrySet()
+                .stream()
+                .map(e -> e.getValue().getStackVersion())
+                .collect(Collectors.toSet());
+    }
+
     public Map<String, BlueprintFile> defaultBlueprints() {
         return defaultBlueprints;
     }

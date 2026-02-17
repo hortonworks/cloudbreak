@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.cmtemplate.generator.dependencies;
 
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.Set;
@@ -12,10 +11,12 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.boot.test.context.SpringBootTestContextBootstrapper;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.BootstrapWith;
 import org.springframework.test.context.TestContextManager;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import com.sequenceiq.cloudbreak.api.service.ExposedServiceCollector;
 import com.sequenceiq.cloudbreak.cmtemplate.generator.CentralTemplateGeneratorContext;
 import com.sequenceiq.cloudbreak.cmtemplate.generator.dependencies.domain.ServiceDependencyMatrix;
 
@@ -26,6 +27,9 @@ class ServiceDependencyMatrixServiceTest extends CentralTemplateGeneratorContext
     private static final String CDH = "CDH";
 
     private static final String CDH_6_1 = "6.1";
+
+    @MockBean
+    private ExposedServiceCollector exposedServiceCollector;
 
     @BeforeEach
     public void setUp() throws Exception {

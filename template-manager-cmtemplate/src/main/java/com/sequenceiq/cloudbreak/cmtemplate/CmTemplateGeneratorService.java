@@ -67,8 +67,8 @@ public class CmTemplateGeneratorService {
         return stackTypeAndVersionArray;
     }
 
-    public SupportedVersions getVersionsAndSupportedServiceList() {
-        return supportedVersionService.collectSupportedVersions();
+    public SupportedVersions getVersionsAndSupportedServiceList(Set<String> versions) {
+        return supportedVersionService.collectSupportedVersions(versions);
     }
 
     public SupportedServices getServicesByBlueprint(String blueprintText) {

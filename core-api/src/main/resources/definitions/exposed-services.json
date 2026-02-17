@@ -54,7 +54,24 @@
       "apiOnly": false,
       "apiIncluded": false,
       "visibleForDatalake": true,
-      "visibleForDatahub": true
+      "visibleForDatahub": true,
+      "maxVersion": "7.3.1"
+    },
+    {
+      "name": "HUE",
+      "displayName": "Cloudera Data Explorer",
+      "serviceName": "HUE_LOAD_BALANCER",
+      "iconKey": "CDExp",
+      "knoxService": "HUE",
+      "knoxUrl": "/hue/",
+      "ssoSupported": true,
+      "port": 8889,
+      "tlsPort": 8889,
+      "apiOnly": false,
+      "apiIncluded": false,
+      "visibleForDatalake": true,
+      "visibleForDatahub": true,
+      "minVersion": "7.3.2"
     },
     {
       "name": "WEBHDFS",
