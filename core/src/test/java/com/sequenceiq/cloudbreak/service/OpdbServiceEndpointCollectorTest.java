@@ -49,8 +49,10 @@ import com.sequenceiq.cloudbreak.api.service.ExposedServiceCollector;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cluster.service.ClouderaManagerProductsProvider;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateGeneratorService;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
+import com.sequenceiq.cloudbreak.cmtemplate.generator.support.domain.SupportedServices;
 import com.sequenceiq.cloudbreak.cmtemplate.validation.StackServiceComponentDescriptors;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
@@ -111,6 +113,9 @@ public class OpdbServiceEndpointCollectorTest {
 
     @Mock
     private ClouderaManagerProductsProvider clouderaManagerProductsProvider;
+
+    @Mock
+    private CmTemplateGeneratorService templateGeneratorService;
 
     @InjectMocks
     private final GatewayTopologyV4RequestToExposedServicesConverter exposedServicesConverter =
@@ -173,6 +178,7 @@ public class OpdbServiceEndpointCollectorTest {
                     .collect(Collectors.toList());
         });
         when(clouderaManagerProductsProvider.findCdhProduct(anySet())).thenReturn(Optional.of(new ClouderaManagerProduct().withVersion("7.3.1-1.cdh7.3.1.p0")));
+        when(templateGeneratorService.getServicesByBlueprint(any())).thenReturn(new SupportedServices());
     }
 
     Collection<ExposedService> filterSupportedKnoxServices() {

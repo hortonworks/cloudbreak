@@ -35,8 +35,10 @@ import com.sequenceiq.cloudbreak.api.service.ExposedService;
 import com.sequenceiq.cloudbreak.api.service.ExposedServiceCollector;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cluster.service.ClouderaManagerProductsProvider;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateGeneratorService;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
+import com.sequenceiq.cloudbreak.cmtemplate.generator.support.domain.SupportedServices;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
@@ -85,6 +87,9 @@ public class ServiceEndpointCollector {
 
     @Inject
     private StackUtil stackUtil;
+
+    @Inject
+    private CmTemplateGeneratorService clusterTemplateGeneratorService;
 
     public Collection<ExposedServiceV4Response> getKnoxServices(Long workspaceId, String blueprintName) {
         Blueprint blueprint = blueprintService.getByNameForWorkspaceId(blueprintName, workspaceId);
@@ -145,8 +150,21 @@ public class ServiceEndpointCollector {
                             knownExposedServices, privateIps, gatewayTopology, version);
                 }
             }
+            overrideDisplayProperties(clusterExposedServiceMap, blueprintText);
         }
         return clusterExposedServiceMap;
+    }
+
+    private void overrideDisplayProperties(Map<String, Collection<ClusterExposedServiceV4Response>> clusterExposedServiceMap, String blueprintText) {
+        SupportedServices servicesByBlueprint = clusterTemplateGeneratorService.getServicesByBlueprint(blueprintText);
+        // override UI related informations
+        clusterExposedServiceMap.values().stream().flatMap(Collection::stream).forEach(exposedServiceResponse ->
+                servicesByBlueprint.getServices().stream()
+                        .filter(supportedService -> StringUtils.equals(supportedService.getName(), exposedServiceResponse.getKnoxService()))
+                        .forEach(supportedService -> {
+                            exposedServiceResponse.setDisplayName(supportedService.getDisplayName());
+                            exposedServiceResponse.setIconKey(supportedService.getIconKey());
+                        }));
     }
 
     private void generateGatewayTopologyFqdnsByComponent(
@@ -285,6 +303,7 @@ public class ServiceEndpointCollector {
         service.setDisplayName(exposedService.getDisplayName());
         service.setKnoxService(exposedService.getKnoxService());
         service.setServiceName(exposedService.getServiceName());
+        service.setIconKey(exposedService.getKnoxService());
         service.setOpen(true);
         if (isNotEmpty(url)) {
             service.setServiceUrl(url);
@@ -302,6 +321,7 @@ public class ServiceEndpointCollector {
         service.setMode(api ? SSOType.PAM : getSSOType(exposedService, gateway));
         service.setDisplayName(exposedService.getDisplayName());
         service.setKnoxService(exposedService.getKnoxService());
+        service.setIconKey(exposedService.getKnoxService());
         service.setServiceName(exposedService.getServiceName());
         service.setOpen(isExposed(exposedService, exposedServicesInTopology));
         if (isNotEmpty(url)) {

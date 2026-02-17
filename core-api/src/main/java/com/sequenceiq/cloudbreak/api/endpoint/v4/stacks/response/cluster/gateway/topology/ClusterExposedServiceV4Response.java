@@ -17,6 +17,8 @@ public class ClusterExposedServiceV4Response implements JsonEntity {
 
     private String serviceUrl;
 
+    private String iconKey;
+
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private boolean open;
 
@@ -70,6 +72,14 @@ public class ClusterExposedServiceV4Response implements JsonEntity {
         this.mode = mode;
     }
 
+    public String getIconKey() {
+        return iconKey;
+    }
+
+    public void setIconKey(String iconKey) {
+        this.iconKey = iconKey;
+    }
+
     @Override
     public String toString() {
         return "ClusterExposedServiceResponse{"
@@ -77,6 +87,7 @@ public class ClusterExposedServiceV4Response implements JsonEntity {
                 + ", displayName='" + displayName + '\''
                 + ", knoxService='" + knoxService + '\''
                 + ", serviceUrl='" + serviceUrl + '\''
+                + ", iconKey='" + iconKey + '\''
                 + ", open=" + open
                 + ", mode=" + mode
                 + '}';
