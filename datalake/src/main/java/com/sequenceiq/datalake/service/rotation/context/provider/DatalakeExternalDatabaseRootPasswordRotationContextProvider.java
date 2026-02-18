@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContextProvider;
+import com.sequenceiq.cloudbreak.rotation.request.RotationSource;
 import com.sequenceiq.cloudbreak.rotation.secret.poller.PollerRotationContext;
 
 @Component
@@ -23,13 +24,19 @@ public class DatalakeExternalDatabaseRootPasswordRotationContextProvider impleme
     @Override
     public Map<SecretRotationStep, RotationContext> getContexts(String resourceCrn) {
         Map<SecretRotationStep, RotationContext> context = new HashMap<>();
-        context.put(REDBEAMS_ROTATE_POLLING, new PollerRotationContext(resourceCrn, REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD));
-        context.put(CLOUDBREAK_ROTATE_POLLING, new PollerRotationContext(resourceCrn, INTERNAL_DATALAKE_EXTERNAL_DATABASE_ROOT_PASSWORD));
+        context.put(REDBEAMS_ROTATE_POLLING, new PollerRotationContext(resourceCrn, getPollingTypes().get(RotationSource.REDBEAMS)));
+        context.put(CLOUDBREAK_ROTATE_POLLING, new PollerRotationContext(resourceCrn, getPollingTypes().get(RotationSource.CLOUDBREAK)));
         return context;
     }
 
     @Override
     public SecretType getSecret() {
         return EXTERNAL_DATABASE_ROOT_PASSWORD;
+    }
+
+    @Override
+    public Map<RotationSource, SecretType> getPollingTypes() {
+        return Map.of(RotationSource.CLOUDBREAK, INTERNAL_DATALAKE_EXTERNAL_DATABASE_ROOT_PASSWORD,
+                RotationSource.REDBEAMS, REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD);
     }
 }

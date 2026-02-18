@@ -35,6 +35,8 @@ import com.sequenceiq.cloudbreak.auth.security.internal.RequestObject;
 import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.rotation.request.StepProgressCleanupDescriptor;
+import com.sequenceiq.cloudbreak.rotation.request.StepProgressCleanupResponse;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.common.api.UsedSubnetsByEnvironmentResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -48,6 +50,7 @@ import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.DatabaseS
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.DatabaseServerTestV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.DatabaseServerV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.RotateDatabaseServerSecretV4Request;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.SecretRotationCleanupProgressV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.UpgradeDatabaseServerV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.ClusterDatabaseServerCertificateStatusV4Responses;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerCertificateStatusV4Responses;
@@ -371,6 +374,13 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
     public FlowIdentifier rotateSecret(RotateDatabaseServerSecretV4Request request, @InitiatorUserCrn String initiatorUserCrn) {
         return redbeamsRotationService.rotateSecrets(request.getCrn(), List.of(request.getSecret()), request.getExecutionType(),
                 request.getAdditionalProperties());
+    }
+
+    @Override
+    @InternalOnly
+    public StepProgressCleanupResponse cleanupSecretRotationProgress(@RequestObject SecretRotationCleanupProgressV4Request request) {
+        StepProgressCleanupDescriptor stepProgressCleanupDescriptor = redbeamsRotationService.cleanupProgress(request.getCrn(), request.getSecret());
+        return StepProgressCleanupResponse.of(List.of(stepProgressCleanupDescriptor));
     }
 
     @Override

@@ -14,11 +14,15 @@ import org.springframework.stereotype.Controller;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.cloudbreak.auth.security.internal.RequestObject;
 import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
+import com.sequenceiq.cloudbreak.rotation.request.StepProgressCleanupDescriptor;
+import com.sequenceiq.cloudbreak.rotation.request.StepProgressCleanupResponse;
 import com.sequenceiq.cloudbreak.rotation.service.SecretTypeListService;
 import com.sequenceiq.cloudbreak.structuredevent.rest.annotation.AccountEntityType;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaRotationV1Endpoint;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.rotate.FreeIpaSecretRotationCleanupProgressRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.rotate.FreeIpaSecretRotationRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.rotate.FreeipaSecretTypeResponse;
 import com.sequenceiq.freeipa.entity.Stack;
@@ -53,5 +57,13 @@ public class FreeIpaRotationV1Controller implements FreeIpaRotationV1Endpoint {
     @InternalOnly
     public void syncOutdatedSecrets(@ResourceCrn String environmentCrn) {
         throw new NotImplementedException("Synchronization for vault database fields is not needed anymore!");
+    }
+
+    @Override
+    @InternalOnly
+    public StepProgressCleanupResponse cleanupProgress(@RequestObject FreeIpaSecretRotationCleanupProgressRequest request) {
+        StepProgressCleanupDescriptor stepProgressCleanupDescriptor =
+                freeIpaSecretRotationService.cleanupProgress(request.getEnvironmentCrn(), request.getSecret());
+        return StepProgressCleanupResponse.of(List.of(stepProgressCleanupDescriptor));
     }
 }

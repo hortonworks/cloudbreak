@@ -11,14 +11,17 @@ import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByRequestProperty;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
+import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.cloudbreak.auth.security.internal.RequestObject;
 import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
+import com.sequenceiq.cloudbreak.rotation.request.StepProgressCleanupResponse;
 import com.sequenceiq.cloudbreak.rotation.service.SecretTypeListService;
 import com.sequenceiq.cloudbreak.structuredevent.rest.annotation.AccountEntityType;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.service.rotation.SdxRotationService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.sdx.api.endpoint.SdxRotationEndpoint;
+import com.sequenceiq.sdx.api.model.SdxSecretRotationCleanupProgressRequest;
 import com.sequenceiq.sdx.api.model.SdxSecretRotationRequest;
 import com.sequenceiq.sdx.api.model.SdxSecretTypeResponse;
 
@@ -42,5 +45,11 @@ public class SdxRotationController implements SdxRotationEndpoint {
     @CheckPermissionByResourceCrn(action = ROTATE_DL_SECRETS)
     public List<SdxSecretTypeResponse> listRotatableSdxSecretType(@ResourceCrn String datalakeCrn) {
         return listService.listRotatableSecretType(datalakeCrn, SdxSecretTypeResponse.converter());
+    }
+
+    @Override
+    @InternalOnly
+    public StepProgressCleanupResponse cleanupProgress(@RequestObject SdxSecretRotationCleanupProgressRequest request) {
+        return StepProgressCleanupResponse.of(sdxRotationService.cleanupProgress(request.getCrn(), request.getSecret()));
     }
 }

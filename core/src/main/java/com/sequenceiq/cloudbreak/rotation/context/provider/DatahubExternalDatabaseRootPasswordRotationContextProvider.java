@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContextProvider;
 import com.sequenceiq.cloudbreak.rotation.context.SaltPillarRotationContext;
+import com.sequenceiq.cloudbreak.rotation.request.RotationSource;
 import com.sequenceiq.cloudbreak.rotation.secret.poller.PollerRotationContext;
 
 @Component
@@ -29,7 +30,7 @@ public class DatahubExternalDatabaseRootPasswordRotationContextProvider implemen
     @Override
     public Map<SecretRotationStep, RotationContext> getContexts(String resourceCrn) {
         Map<SecretRotationStep, RotationContext> contexts = new HashMap<>();
-        contexts.put(REDBEAMS_ROTATE_POLLING, new PollerRotationContext(resourceCrn, REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD));
+        contexts.put(REDBEAMS_ROTATE_POLLING, new PollerRotationContext(resourceCrn, getPollingTypes().get(RotationSource.REDBEAMS)));
         contexts.put(SALT_PILLAR, new SaltPillarRotationContext(resourceCrn, databaseRootPasswordSaltPillarGenerator));
         return contexts;
     }
@@ -37,5 +38,10 @@ public class DatahubExternalDatabaseRootPasswordRotationContextProvider implemen
     @Override
     public SecretType getSecret() {
         return EXTERNAL_DATABASE_ROOT_PASSWORD;
+    }
+
+    @Override
+    public Map<RotationSource, SecretType> getPollingTypes() {
+        return Map.of(RotationSource.REDBEAMS, REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD);
     }
 }

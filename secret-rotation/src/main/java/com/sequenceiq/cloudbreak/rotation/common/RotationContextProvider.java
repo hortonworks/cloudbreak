@@ -12,6 +12,7 @@ import org.apache.commons.lang3.NotImplementedException;
 
 import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
+import com.sequenceiq.cloudbreak.rotation.request.RotationSource;
 import com.sequenceiq.cloudbreak.rotation.secret.vault.VaultRotationContext;
 import com.sequenceiq.cloudbreak.rotation.secret.vault.VaultRotationReflectionUtil;
 
@@ -23,6 +24,10 @@ public interface RotationContextProvider {
 
     default Map<SecretRotationStep, ? extends RotationContext> getContextsWithProperties(String resourceCrn, Map<String, String> additionalProperties) {
         return getContexts(resourceCrn);
+    }
+
+    default Map<RotationSource, SecretType> getPollingTypes() {
+        return Map.of();
     }
 
     SecretType getSecret();

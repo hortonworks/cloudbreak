@@ -279,6 +279,7 @@ dependencies {
   runtimeOnly project(':audit-connector')
 
   testImplementation project(path: ':secret-rotation', configuration: 'tests')
+  testImplementation project(path: ':secret-rotation-api', configuration: 'tests')
   testImplementation project(path: ':core-model', configuration: 'tests')
   testImplementation project(path: ':cloud-common', configuration: 'tests')
   testImplementation project(path: ':common', configuration: 'tests')

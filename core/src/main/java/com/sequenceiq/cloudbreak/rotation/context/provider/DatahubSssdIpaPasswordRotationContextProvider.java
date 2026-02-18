@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContextProvider;
 import com.sequenceiq.cloudbreak.rotation.context.SaltPillarRotationContext;
+import com.sequenceiq.cloudbreak.rotation.request.RotationSource;
 import com.sequenceiq.cloudbreak.rotation.secret.poller.PollerRotationContext;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 
@@ -34,7 +35,7 @@ public class DatahubSssdIpaPasswordRotationContextProvider extends AbstractSssdI
     @Override
     public Map<SecretRotationStep, RotationContext> getContexts(String resourceCrn) {
         StackDto stackDto = stackDtoService.getByCrn(resourceCrn);
-        PollerRotationContext pollerRotationContext = new PollerRotationContext(resourceCrn, FREEIPA_KERBEROS_BIND_USER,
+        PollerRotationContext pollerRotationContext = new PollerRotationContext(resourceCrn, getPollingTypes().get(RotationSource.FREEIPA),
                 Map.of(CLUSTER_NAME.name(), stackDto.getName()));
         return Map.of(CommonSecretRotationStep.FREEIPA_ROTATE_POLLING, pollerRotationContext,
                 CloudbreakSecretRotationStep.SALT_PILLAR, new SaltPillarRotationContext(resourceCrn, this::getSssdIpaPillar));
@@ -45,4 +46,8 @@ public class DatahubSssdIpaPasswordRotationContextProvider extends AbstractSssdI
         return CloudbreakSecretType.SSSD_IPA_PASSWORD;
     }
 
+    @Override
+    public Map<RotationSource, SecretType> getPollingTypes() {
+        return Map.of(RotationSource.FREEIPA, FREEIPA_KERBEROS_BIND_USER);
+    }
 }

@@ -17,9 +17,11 @@ import jakarta.ws.rs.core.MediaType;
 
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
+import com.sequenceiq.cloudbreak.rotation.request.StepProgressCleanupResponse;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaNotes;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.rotate.FreeIpaSecretRotationCleanupProgressRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.rotate.FreeIpaSecretRotationRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.rotate.FreeipaSecretTypeResponse;
 
@@ -57,4 +59,11 @@ public interface FreeIpaRotationV1Endpoint {
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     void syncOutdatedSecrets(
             @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @QueryParam("environmentCrn") @NotEmpty String environmentCrn);
+
+    @PUT
+    @Path("cleanup_secret_rotation_progress")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Clean up rotation progress information", operationId = "cleanupProgress",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    StepProgressCleanupResponse cleanupProgress(@Valid @NotNull FreeIpaSecretRotationCleanupProgressRequest request);
 }

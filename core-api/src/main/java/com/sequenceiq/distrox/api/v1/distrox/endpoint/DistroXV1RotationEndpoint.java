@@ -15,7 +15,9 @@ import jakarta.ws.rs.core.MediaType;
 
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
+import com.sequenceiq.cloudbreak.rotation.request.StepProgressCleanupResponse;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
+import com.sequenceiq.distrox.api.v1.distrox.model.DistroXSecretRotationCleanupProgressRequest;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXSecretRotationRequest;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXSecretTypeResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -44,4 +46,11 @@ public interface DistroXV1RotationEndpoint {
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     List<DistroXSecretTypeResponse> listRotatableDistroXSecretType(
             @ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @QueryParam("datahubCrn") @NotEmpty String datahubCrn);
+
+    @PUT
+    @Path("cleanup_secret_rotation_progress")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Clean up rotation progress information", operationId = "cleanupProgress",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    StepProgressCleanupResponse cleanupProgress(@Valid @NotNull DistroXSecretRotationCleanupProgressRequest request);
 }

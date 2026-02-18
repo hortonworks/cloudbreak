@@ -2,21 +2,35 @@ package com.sequenceiq.datalake.service.rotation;
 
 import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.INTERNAL_DATALAKE_EXTERNAL_DATABASE_ROOT_PASSWORD;
 import static com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType.ROTATE;
+import static com.sequenceiq.cloudbreak.rotation.common.TestSecretType.TEST;
+import static com.sequenceiq.cloudbreak.rotation.common.TestSecretType.TEST_2;
+import static com.sequenceiq.cloudbreak.rotation.common.TestSecretType.TEST_3;
+import static com.sequenceiq.cloudbreak.rotation.request.RotationSource.CLOUDBREAK;
+import static com.sequenceiq.cloudbreak.rotation.request.RotationSource.DATALAKE;
+import static com.sequenceiq.cloudbreak.rotation.request.RotationSource.FREEIPA;
+import static com.sequenceiq.cloudbreak.rotation.request.RotationSource.REDBEAMS;
+import static com.sequenceiq.cloudbreak.rotation.request.StepProgressCleanupStatus.FINISHED;
+import static com.sequenceiq.cloudbreak.rotation.request.StepProgressCleanupStatus.PENDING;
 import static com.sequenceiq.sdx.rotation.DatalakeSecretType.EXTERNAL_DATABASE_ROOT_PASSWORD;
+import static com.sequenceiq.sdx.rotation.DatalakeSecretType.SSSD_IPA_PASSWORD;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.apache.commons.lang3.reflect.FieldUtils;
@@ -29,8 +43,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.rotation.common.RotationContextProvider;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
+import com.sequenceiq.cloudbreak.rotation.request.StepProgressCleanupDescriptor;
 import com.sequenceiq.cloudbreak.rotation.service.SecretRotationValidationService;
+import com.sequenceiq.cloudbreak.rotation.service.progress.SecretRotationStepProgressService;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxDatabase;
@@ -106,12 +123,52 @@ class SdxRotationServiceTest {
     @Mock
     private SdxStatusService sdxStatusService;
 
+    @Mock
+    private SecretRotationStepProgressService stepProgressService;
+
     @InjectMocks
     private SdxRotationService underTest;
 
     @BeforeEach
     void setup() throws IllegalAccessException {
         FieldUtils.writeField(underTest, "enabledSecretTypes", List.of(DatalakeSecretType.values()), true);
+        RotationContextProvider mockContextProvider = mock(RotationContextProvider.class);
+        Map<DatalakeSecretType, RotationContextProvider> contextProviderMap = Map.of(SSSD_IPA_PASSWORD, mockContextProvider);
+        FieldUtils.writeField(underTest, "rotationContextProviderMap", contextProviderMap, true);
+        lenient().when(mockContextProvider.getPollingTypes()).thenReturn(Map.of(CLOUDBREAK, TEST, REDBEAMS, TEST_2, FREEIPA, TEST_3));
+    }
+
+    @Test
+    void testCleanupProgressWhenNoPollingProvided() {
+        when(stepProgressService.delete(any(), any(), any())).thenReturn(StepProgressCleanupDescriptor.of(DATALAKE, FINISHED, "crn", "secrettype"));
+        when(sdxClusterRepository.findByCrnAndDeletedIsNull(any())).thenReturn(Optional.of(new SdxCluster()));
+
+        List<StepProgressCleanupDescriptor> descriptors = underTest.cleanupProgress("crn", DatalakeSecretType.DBUS_UMS_ACCESS_KEY.value());
+
+        assertEquals(1, descriptors.size());
+        assertEquals(DATALAKE, descriptors.get(0).rotationSource());
+    }
+
+    @Test
+    void testCleanupProgress() {
+        when(stepProgressService.delete(any(), any(), any())).thenReturn(StepProgressCleanupDescriptor.of(DATALAKE, FINISHED, "crn", "secrettype"));
+        SdxCluster sdxCluster = new SdxCluster();
+        sdxCluster.setEnvCrn("envCrn");
+        sdxCluster.setCrn("crn");
+        SdxDatabase sdxDatabase = new SdxDatabase();
+        sdxDatabase.setDatabaseCrn("dbCrn");
+        sdxCluster.setSdxDatabase(sdxDatabase);
+        when(sdxClusterRepository.findByCrnAndDeletedIsNull(any())).thenReturn(Optional.of(sdxCluster));
+
+        List<StepProgressCleanupDescriptor> descriptors = underTest.cleanupProgress("crn", SSSD_IPA_PASSWORD.value());
+
+        assertEquals(4, descriptors.size());
+        assertEquals("envCrn", descriptors.stream().filter(desc -> desc.rotationSource().equals(FREEIPA)).findFirst().get().crn());
+        assertEquals("dbCrn", descriptors.stream().filter(desc -> desc.rotationSource().equals(REDBEAMS)).findFirst().get().crn());
+        assertEquals("crn", descriptors.stream().filter(desc -> desc.rotationSource().equals(CLOUDBREAK)).findFirst().get().crn());
+        assertEquals("crn", descriptors.stream().filter(desc -> desc.rotationSource().equals(DATALAKE)).findFirst().get().crn());
+        assertTrue(descriptors.stream().filter(desc -> !desc.rotationSource().equals(DATALAKE))
+                .allMatch(desc -> desc.status().equals(PENDING)));
     }
 
     @Test

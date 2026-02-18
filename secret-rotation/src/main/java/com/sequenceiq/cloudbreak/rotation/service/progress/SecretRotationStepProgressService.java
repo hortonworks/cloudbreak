@@ -12,6 +12,8 @@ import java.util.Optional;
 
 import jakarta.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Iterables;
@@ -21,10 +23,16 @@ import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.entity.SecretRotationStepProgress;
 import com.sequenceiq.cloudbreak.rotation.entity.SecretRotationStepProgressStatus;
 import com.sequenceiq.cloudbreak.rotation.repository.SecretRotationStepProgressRepository;
+import com.sequenceiq.cloudbreak.rotation.request.RotationSource;
+import com.sequenceiq.cloudbreak.rotation.request.StepProgressCleanupDescriptor;
+import com.sequenceiq.cloudbreak.rotation.request.StepProgressCleanupStatus;
+import com.sequenceiq.cloudbreak.rotation.serialization.SecretRotationEnumSerializationUtil;
 import com.sequenceiq.cloudbreak.rotation.service.RotationMetadata;
 
 @Service
 public class SecretRotationStepProgressService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SecretRotationStepProgressService.class);
 
     @Inject
     private SecretRotationStepProgressRepository repository;
@@ -51,6 +59,18 @@ public class SecretRotationStepProgressService {
     public SecretRotationStepProgress update(RotationMetadata metadata, SecretRotationStep step, SecretRotationStepProgressStatus status) {
         SecretRotationStepProgress progress = updateProgress(getProgress(metadata).orElse(new SecretRotationStepProgress()), metadata, step, status);
         return repository.save(progress);
+    }
+
+    public StepProgressCleanupDescriptor delete(String resourceCrn, SecretType secretType, RotationSource rotationSource) {
+        try {
+            repository.deleteByResourceCrnAndSecretType(resourceCrn, secretType);
+            return StepProgressCleanupDescriptor.of(rotationSource, StepProgressCleanupStatus.FINISHED, resourceCrn,
+                    SecretRotationEnumSerializationUtil.serialize(secretType));
+        } catch (Exception e) {
+            LOGGER.error("Rotation step progress cleanup failed: ", e);
+            return StepProgressCleanupDescriptor.of(rotationSource, StepProgressCleanupStatus.FAILED, resourceCrn,
+                    SecretRotationEnumSerializationUtil.serialize(secretType));
+        }
     }
 
     public void deleteCurrentRotation(RotationMetadata metadata) {

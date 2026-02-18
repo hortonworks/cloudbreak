@@ -108,6 +108,7 @@ dependencies {
   implementation group: 'net.bytebuddy',                 name: 'byte-buddy',                      version: byteBuddyVersion
 
   testImplementation project(path: ':secret-rotation', configuration: 'tests')
+  testImplementation project(path: ':secret-rotation-api', configuration: 'tests')
 
   testImplementation project(path: ':authorization-common', configuration: 'tests')
   testImplementation project(path: ':common', configuration: 'tests')

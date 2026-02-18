@@ -6,6 +6,7 @@ public final class ModelDescriptions {
 
     public static final String UPGRADE_DATABASE_SERVER_REQUEST = "Request for upgrading a database server in a provider to a higher major version";
     public static final String ROTATE_DATABASE_SERVER_SECRETS_REQUEST = "Request for rotating database server secrets";
+    public static final String CLEANUP_SECRET_ROTATION_PROGRESS_REQUEST = "Request for cleaning up secret rotation progress";
     public static final String UPGRADE_DATABASE_SERVER_RESPONSE = "Response for upgrading a database server";
     public static final String VALIDATE_UPGRADE_DATABASE_SERVER_REQUEST =
             "Request for validating the upgrade of the database server in a provider to a higher major version";

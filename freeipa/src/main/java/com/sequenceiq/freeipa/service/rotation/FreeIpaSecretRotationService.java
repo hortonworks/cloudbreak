@@ -17,6 +17,8 @@ import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.SecretTypeConverter;
 import com.sequenceiq.cloudbreak.rotation.flow.chain.SecretRotationFlowChainTriggerEvent;
 import com.sequenceiq.cloudbreak.rotation.flow.chain.SecretRotationFlowEventProvider;
+import com.sequenceiq.cloudbreak.rotation.request.RotationSource;
+import com.sequenceiq.cloudbreak.rotation.request.StepProgressCleanupDescriptor;
 import com.sequenceiq.cloudbreak.rotation.service.SecretRotationValidationService;
 import com.sequenceiq.cloudbreak.rotation.service.progress.SecretRotationStepProgressService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -74,6 +76,11 @@ public class FreeIpaSecretRotationService implements SecretRotationFlowEventProv
 
     public void cleanupSecretRotationEntries(String environmentCrn) {
         stepProgressService.deleteAllForResource(environmentCrn);
+    }
+
+    public StepProgressCleanupDescriptor cleanupProgress(String crn, String secret) {
+        SecretType secretType = SecretTypeConverter.mapSecretType(secret, enabledSecretTypes.stream().map(SecretType::getClass).collect(Collectors.toSet()));
+        return stepProgressService.delete(crn, secretType, RotationSource.FREEIPA);
     }
 
     @Override

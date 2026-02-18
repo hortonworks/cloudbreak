@@ -26,6 +26,7 @@ import org.springframework.validation.annotation.Validated;
 
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
+import com.sequenceiq.cloudbreak.rotation.request.StepProgressCleanupResponse;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.common.api.UsedSubnetsByEnvironmentResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -39,6 +40,7 @@ import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.DatabaseS
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.DatabaseServerTestV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.DatabaseServerV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.RotateDatabaseServerSecretV4Request;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.SecretRotationCleanupProgressV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.UpgradeDatabaseServerV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.ClusterDatabaseServerCertificateStatusV4Responses;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerCertificateStatusV4Responses;
@@ -369,6 +371,13 @@ public interface DatabaseServerV4Endpoint {
     @Operation(summary = "Sync outdated vault secrets for DB Server", operationId = "syncOutdatedSecrets",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     void syncOutdatedSecrets(@ValidCrn(resource = DATABASE_SERVER) @NotEmpty @Parameter(description = CRN) @QueryParam("crn") String crn);
+
+    @PUT
+    @Path("cleanup_secret_rotation_progress")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Clean up secret rotation progress information", operationId = "cleanupProgress",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    StepProgressCleanupResponse cleanupSecretRotationProgress(@Valid @NotNull SecretRotationCleanupProgressV4Request request);
 
     @POST
     @Path("get_certificate_status")

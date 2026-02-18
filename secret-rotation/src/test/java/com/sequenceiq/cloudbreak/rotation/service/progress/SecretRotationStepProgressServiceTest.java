@@ -13,6 +13,8 @@ import static com.sequenceiq.cloudbreak.rotation.entity.SecretRotationStepProgre
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
@@ -33,6 +35,9 @@ import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.entity.SecretRotationStepProgress;
 import com.sequenceiq.cloudbreak.rotation.entity.SecretRotationStepProgressStatus;
 import com.sequenceiq.cloudbreak.rotation.repository.SecretRotationStepProgressRepository;
+import com.sequenceiq.cloudbreak.rotation.request.RotationSource;
+import com.sequenceiq.cloudbreak.rotation.request.StepProgressCleanupDescriptor;
+import com.sequenceiq.cloudbreak.rotation.request.StepProgressCleanupStatus;
 import com.sequenceiq.cloudbreak.rotation.service.RotationMetadata;
 
 @ExtendWith(MockitoExtension.class)
@@ -45,6 +50,26 @@ public class SecretRotationStepProgressServiceTest {
 
     @InjectMocks
     private SecretRotationStepProgressService underTest;
+
+    @Test
+    void testSuccessfulProgressCleanup() {
+        doNothing().when(repository).deleteByResourceCrnAndSecretType(any(), any());
+
+        StepProgressCleanupDescriptor result = underTest.delete("", TEST, RotationSource.CLOUDBREAK);
+
+        assertEquals(StepProgressCleanupStatus.FINISHED, result.status());
+        assertEquals(RotationSource.CLOUDBREAK, result.rotationSource());
+    }
+
+    @Test
+    void testFailedProgressCleanup() {
+        doThrow(new RuntimeException("fail")).when(repository).deleteByResourceCrnAndSecretType(any(), any());
+
+        StepProgressCleanupDescriptor result = underTest.delete("", TEST, RotationSource.CLOUDBREAK);
+
+        assertEquals(StepProgressCleanupStatus.FAILED, result.status());
+        assertEquals(RotationSource.CLOUDBREAK, result.rotationSource());
+    }
 
     @Test
     void testUpdateIfExists() {

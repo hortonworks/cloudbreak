@@ -1,6 +1,5 @@
 package com.sequenceiq.datalake.service.rotation.context.provider;
 
-import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.CLOUDBREAK_ROTATE_POLLING;
 import static com.sequenceiq.sdx.rotation.DatalakeSecretType.CM_INTERMEDIATE_CA_CERT;
 
 import java.util.Map;
@@ -8,22 +7,19 @@ import java.util.Map;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType;
-import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
-import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
-import com.sequenceiq.cloudbreak.rotation.common.RotationContextProvider;
-import com.sequenceiq.cloudbreak.rotation.secret.poller.PollerRotationContext;
+import com.sequenceiq.cloudbreak.rotation.request.RotationSource;
 
 @Component
-public class DatalakeCMIntermediateCacertRotationContextProvider implements RotationContextProvider {
-
-    @Override
-    public Map<SecretRotationStep, RotationContext> getContexts(String resourceCrn) {
-        return Map.of(CLOUDBREAK_ROTATE_POLLING, new PollerRotationContext(resourceCrn, CloudbreakSecretType.CM_INTERMEDIATE_CA_CERT));
-    }
+public class DatalakeCMIntermediateCacertRotationContextProvider extends AbstractDatalakeRotationContextProvider {
 
     @Override
     public SecretType getSecret() {
         return CM_INTERMEDIATE_CA_CERT;
+    }
+
+    @Override
+    public Map<RotationSource, SecretType> getPollingTypes() {
+        return Map.of(RotationSource.CLOUDBREAK, CloudbreakSecretType.CM_INTERMEDIATE_CA_CERT);
     }
 }

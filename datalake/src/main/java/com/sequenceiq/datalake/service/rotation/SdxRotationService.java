@@ -1,10 +1,15 @@
 package com.sequenceiq.datalake.service.rotation;
 
 import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
+import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.CLOUDBREAK_ROTATE_POLLING;
+import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.FREEIPA_ROTATE_POLLING;
+import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.REDBEAMS_ROTATE_POLLING;
 import static com.sequenceiq.cloudbreak.rotation.common.RotationPollingSvcOutageUtils.pollWithSvcOutageErrorHandling;
 import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.DATALAKE_SECRET_ROTATION_ROLLBACK_FINISHED;
 import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.RUNNING;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -14,6 +19,7 @@ import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.collections4.ListUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -25,7 +31,12 @@ import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.SecretTypeConverter;
+import com.sequenceiq.cloudbreak.rotation.common.RotationContextProvider;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
+import com.sequenceiq.cloudbreak.rotation.request.RotationSource;
+import com.sequenceiq.cloudbreak.rotation.request.StepProgressCleanupDescriptor;
+import com.sequenceiq.cloudbreak.rotation.request.StepProgressCleanupStatus;
+import com.sequenceiq.cloudbreak.rotation.serialization.SecretRotationEnumSerializationUtil;
 import com.sequenceiq.cloudbreak.rotation.service.SecretRotationValidationService;
 import com.sequenceiq.cloudbreak.rotation.service.progress.SecretRotationStepProgressService;
 import com.sequenceiq.datalake.entity.SdxCluster;
@@ -47,6 +58,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaRotationV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.rotate.FreeIpaSecretRotationRequest;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.DatabaseServerV4Endpoint;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.RotateDatabaseServerSecretV4Request;
+import com.sequenceiq.sdx.rotation.DatalakeSecretType;
 
 @Service
 public class SdxRotationService {
@@ -101,6 +113,9 @@ public class SdxRotationService {
 
     @Inject
     private List<SecretType> enabledSecretTypes;
+
+    @Inject
+    private Map<SecretType, RotationContextProvider> rotationContextProviderMap;
 
     public void rotateCloudbreakSecret(String datalakeCrn, SecretType secretType, RotationFlowExecutionType executionType,
             Map<String, String> additionalProperties) {
@@ -183,6 +198,33 @@ public class SdxRotationService {
 
     public void cleanupSecretRotationEntries(String datalakeCrn) {
         stepProgressService.deleteAllForResource(datalakeCrn);
+    }
+
+    public List<StepProgressCleanupDescriptor> cleanupProgress(String crn, String secret) {
+        SecretType secretType = SecretTypeConverter.mapSecretType(secret,
+                Arrays.stream(DatalakeSecretType.values()).map(SecretType::getClass).collect(Collectors.toSet()));
+        StepProgressCleanupDescriptor currentStepProgressCleanupDescriptor = stepProgressService.delete(crn, secretType, RotationSource.DATALAKE);
+        List<StepProgressCleanupDescriptor> furtherRequiredCleanupDescriptors = collectUnderlyingSecretsForProgressCleanup(crn, secretType);
+        return ListUtils.union(List.of(currentStepProgressCleanupDescriptor), furtherRequiredCleanupDescriptors);
+    }
+
+    public List<StepProgressCleanupDescriptor> collectUnderlyingSecretsForProgressCleanup(String crn, SecretType secretType) {
+        if (!Collections.disjoint(secretType.getSteps(), Set.of(FREEIPA_ROTATE_POLLING, REDBEAMS_ROTATE_POLLING, CLOUDBREAK_ROTATE_POLLING))) {
+            Optional<SdxCluster> sdxCluster = sdxClusterRepository.findByCrnAndDeletedIsNull(crn);
+            if (sdxCluster.isPresent() && rotationContextProviderMap.containsKey(secretType)) {
+                Map<RotationSource, SecretType> pollingTypes = rotationContextProviderMap.get(secretType).getPollingTypes();
+                return pollingTypes.entrySet().stream().map(entry -> {
+                    String targetCrn = switch (entry.getKey()) {
+                        case FREEIPA -> sdxCluster.get().getEnvCrn();
+                        case REDBEAMS -> sdxCluster.get().getDatabaseCrn();
+                        case DATALAKE, CLOUDBREAK -> crn;
+                    };
+                    return StepProgressCleanupDescriptor.of(entry.getKey(), StepProgressCleanupStatus.PENDING, targetCrn,
+                            SecretRotationEnumSerializationUtil.serialize(entry.getValue()));
+                }).filter(descriptor -> descriptor.crn() != null).toList();
+            }
+        }
+        return List.of();
     }
 
     private Set<String> getSdxCrnsByEnvironmentCrn(String parentCrn) {

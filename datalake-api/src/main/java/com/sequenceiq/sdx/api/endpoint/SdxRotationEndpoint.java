@@ -17,8 +17,10 @@ import org.springframework.validation.annotation.Validated;
 
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
+import com.sequenceiq.cloudbreak.rotation.request.StepProgressCleanupResponse;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.sdx.api.model.SdxSecretRotationCleanupProgressRequest;
 import com.sequenceiq.sdx.api.model.SdxSecretRotationRequest;
 import com.sequenceiq.sdx.api.model.SdxSecretTypeResponse;
 
@@ -47,4 +49,11 @@ public interface SdxRotationEndpoint {
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     List<SdxSecretTypeResponse> listRotatableSdxSecretType(
             @ValidCrn(resource = CrnResourceDescriptor.VM_DATALAKE) @QueryParam("datalakeCrn") @NotEmpty String datalakeCrn);
+
+    @PUT
+    @Path("cleanup_secret_rotation_progress")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Clean up rotation progress information", operationId = "cleanupProgress",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    StepProgressCleanupResponse cleanupProgress(@Valid @NotNull SdxSecretRotationCleanupProgressRequest request);
 }

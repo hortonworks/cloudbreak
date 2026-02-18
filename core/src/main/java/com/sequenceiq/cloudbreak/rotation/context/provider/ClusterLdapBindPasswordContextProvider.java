@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContextProvider;
 import com.sequenceiq.cloudbreak.rotation.context.SaltStateApplyRotationContext;
+import com.sequenceiq.cloudbreak.rotation.request.RotationSource;
 import com.sequenceiq.cloudbreak.rotation.secret.custom.CustomJobRotationContext;
 import com.sequenceiq.cloudbreak.rotation.secret.custom.CustomJobRotationContext.CustomJobRotationContextBuilder;
 import com.sequenceiq.cloudbreak.rotation.secret.poller.PollerRotationContext;
@@ -53,7 +54,7 @@ public class ClusterLdapBindPasswordContextProvider implements RotationContextPr
         Map<SecretRotationStep, RotationContext> result = new HashMap<>();
         StackDto stack = stackDtoService.getByCrnWithResources(resourceCrn);
 
-        result.put(FREEIPA_ROTATE_POLLING, new PollerRotationContext(resourceCrn, FreeIpaSecretType.FREEIPA_LDAP_BIND_PASSWORD,
+        result.put(FREEIPA_ROTATE_POLLING, new PollerRotationContext(resourceCrn, getPollingTypes().get(RotationSource.FREEIPA),
                 Map.of(CLUSTER_NAME.name(), stack.getName())));
         result.put(CUSTOM_JOB, getCustomJobRotationContext(stack.getResourceCrn(), stack));
         result.put(SALT_STATE_APPLY, getSaltStateApplyRotationContextBuilder(stack));
@@ -95,4 +96,8 @@ public class ClusterLdapBindPasswordContextProvider implements RotationContextPr
         return LDAP_BIND_PASSWORD;
     }
 
+    @Override
+    public Map<RotationSource, SecretType> getPollingTypes() {
+        return Map.of(RotationSource.FREEIPA, FreeIpaSecretType.FREEIPA_LDAP_BIND_PASSWORD);
+    }
 }

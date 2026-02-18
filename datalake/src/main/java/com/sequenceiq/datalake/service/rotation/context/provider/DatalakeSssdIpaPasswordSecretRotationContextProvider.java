@@ -16,6 +16,7 @@ import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContextProvider;
+import com.sequenceiq.cloudbreak.rotation.request.RotationSource;
 import com.sequenceiq.cloudbreak.rotation.secret.poller.PollerRotationContext;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.service.sdx.SdxService;
@@ -30,14 +31,19 @@ public class DatalakeSssdIpaPasswordSecretRotationContextProvider implements Rot
     @Override
     public Map<SecretRotationStep, RotationContext> getContexts(String resourceCrn) {
         SdxCluster sdxCluster = sdxService.getByCrn(resourceCrn);
-        PollerRotationContext freeipaPollerRotationContext = new PollerRotationContext(resourceCrn, FREEIPA_KERBEROS_BIND_USER,
+        PollerRotationContext freeipaPollerRotationContext = new PollerRotationContext(resourceCrn, getPollingTypes().get(RotationSource.FREEIPA),
                 Map.of(CLUSTER_NAME.name(), sdxCluster.getName()));
-        return Map.of(CLOUDBREAK_ROTATE_POLLING, new PollerRotationContext(resourceCrn, INTERNAL_DATALAKE_SSSD_IPA_PASSWORD),
+        return Map.of(CLOUDBREAK_ROTATE_POLLING, new PollerRotationContext(resourceCrn, getPollingTypes().get(RotationSource.CLOUDBREAK)),
                 FREEIPA_ROTATE_POLLING, freeipaPollerRotationContext);
     }
 
     @Override
     public SecretType getSecret() {
         return DatalakeSecretType.SSSD_IPA_PASSWORD;
+    }
+
+    @Override
+    public Map<RotationSource, SecretType> getPollingTypes() {
+        return Map.of(RotationSource.CLOUDBREAK, INTERNAL_DATALAKE_SSSD_IPA_PASSWORD, RotationSource.FREEIPA, FREEIPA_KERBEROS_BIND_USER);
     }
 }
