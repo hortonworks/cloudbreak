@@ -55,7 +55,7 @@ public class FreeIpaMultiAzUpgradeTests extends AbstractE2ETest {
         setUpEnvironmentTestDto(testContext, Boolean.TRUE, 3)
                 .withEnableMultiAzFreeIpa()
                 .withFreeIpaImage(testContext.getCloudProvider().getFreeIpaUpgradeImageCatalog(), testContext.getCloudProvider()
-                        .getFreeIpaUpgradeImageId())
+                        .getFreeIpaCentos7UpgradeImageId())
                 .when(getEnvironmentTestClient().create())
                 .awaitForCreationFlow()
                 .given(FreeIpaTestDto.class)

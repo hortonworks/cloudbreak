@@ -320,7 +320,7 @@ integrationtest:
       arm64InstanceType:
       upgrade:
         centos7ImageId: dc277098-ea7c-48b7-b1a2-89950b989b6a
-        imageId: 863d4a99-8d8d-42d8-bb81-7076e4e8051c
+        imageId: 6fd9a07c-61d6-441f-a429-a5e2f544b272
         catalog: https://cloudbreak-imagecatalog.s3.amazonaws.com/v3-test-freeipa-image-catalog.json
       marketplace:
         upgrade:

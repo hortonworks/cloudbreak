@@ -9,6 +9,7 @@ import jakarta.inject.Inject;
 
 import org.testng.annotations.Test;
 
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.environment.environment.dto.FreeIpaLoadBalancerType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.it.cloudbreak.assertion.freeipa.FreeIpaAvailabilityAssertion;
@@ -87,8 +88,12 @@ public class FreeIpaUpgradeTests extends AbstractE2ETest implements ImageValidat
                 .given(FreeIpaTestDto.class)
                 .await(FREEIPA_AVAILABLE)
                 .then(freeIpaAvailabilityAssertion.available())
-                .then(freeIpaAvailabilityAssertion.availableLoadBalancer(validateLB))
+                .then(freeIpaAvailabilityAssertion.availableLoadBalancer(isValidateLB(testContext, validateLB)))
                 .validate();
+    }
+
+    private boolean isValidateLB(TestContext testContext, boolean validateLB) {
+        return validateLB && !testContext.getCloudPlatform().equals(CloudPlatform.GCP);
     }
 
     @Override
