@@ -459,7 +459,7 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
         }
         LOGGER.info("Downscale groups with adjustments: {}", groupsWithAdjustment);
         LOGGER.info("Downscale groups with privateIds: {}", groupsWithPrivateIds);
-        if (!primaryGatewaySelected || (event.isUpgrade() && !event.isRollingRestartEnabled())) {
+        if (!primaryGatewaySelected || event.isUpgrade()) {
             LOGGER.info("Full downscale for the following: {}", groupsWithHostNames);
             return new ClusterAndStackDownscaleTriggerEvent(FlowChainTriggers.FULL_DOWNSCALE_TRIGGER_EVENT, event.getResourceId(), groupsWithAdjustment,
                     groupsWithPrivateIds, groupsWithHostNames, ScalingType.DOWNSCALE_TOGETHER, event.accepted(),

@@ -772,7 +772,7 @@ class ClusterRepairFlowEventChainFactoryTest {
                 "FLOWCHAIN_INIT_TRIGGER_EVENT",
                 "IMAGE_VALIDATION_EVENT",
                 "DISK_VALIDATION_EVENT",
-                "STACK_DOWNSCALE_TRIGGER_EVENT",
+                "FULL_DOWNSCALE_TRIGGER_EVENT",
                 "FULL_UPSCALE_TRIGGER_EVENT",
                 "RESCHEDULE_STATUS_CHECK_TRIGGER_EVENT",
                 "FLOWCHAIN_FINALIZE_TRIGGER_EVENT"));

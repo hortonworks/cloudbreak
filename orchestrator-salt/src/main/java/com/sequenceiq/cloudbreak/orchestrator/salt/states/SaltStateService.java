@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltClientType.
 import static com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltClientType.LOCAL_ASYNC;
 import static com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltClientType.RUNNER;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
+import static java.lang.String.format;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -186,8 +187,8 @@ public class SaltStateService {
     private Multimap<String, Map<String, String>> highStateJidInfo(SaltConnector sc, String jid) {
         JidInfoResponse jidInfo = sc.run("jobs.lookup_jid", RUNNER, JidInfoResponse.class, "jid", jid, "missing", "True");
         if (jidInfo.isEmpty()) {
-            LOGGER.error("jobs.lookup_jid returns an empty response: {}", jidInfo);
-            throw new SaltEmptyResponseException("jobs.lookup_jid returns an empty response. Please check the salt log.");
+            LOGGER.error("jobs.lookup_jid returns an empty response: {}, jid: {}", jidInfo, jid);
+            throw new SaltEmptyResponseException(format("jobs.lookup_jid returns an empty response, jid: %s. Please check the salt log.", jid));
         }
         Map<String, List<RunnerInfo>> states = JidInfoResponseTransformer.getHighStates(jidInfo);
         return collectMissingTargets(states);
@@ -485,7 +486,7 @@ public class SaltStateService {
     public Map<String, String> replacePatternInFile(SaltConnector sc, String file, String pattern, String replace) {
         return retry.testWith2SecDelayMax15Times(() -> {
             try {
-                String[] args = new String[]{file, String.format("pattern='%s'", pattern), String.format("repl='%s'", replace)};
+                String[] args = new String[]{file, format("pattern='%s'", pattern), format("repl='%s'", replace)};
                 CommandExecutionResponse resp = measure(() -> sc.run(Glob.ALL, "file.replace", LOCAL, CommandExecutionResponse.class, args), LOGGER,
                         "Command run took {}ms for file.replace with args [{}]", (Object) args);
                 List<Map<String, String>> result = resp.getResult();
@@ -541,14 +542,14 @@ public class SaltStateService {
     public ApplyResponse applyState(SaltConnector sc, String service, Target<String> target,
             Map<String, Object> inlinePillars) throws JsonProcessingException {
         String inlinePillarsStr = new ObjectMapper().writeValueAsString(inlinePillars);
-        return measure(() -> sc.run(target, "state.apply", LOCAL_ASYNC, ApplyResponse.class, service, String.format("pillar=%s", inlinePillarsStr)), LOGGER,
+        return measure(() -> sc.run(target, "state.apply", LOCAL_ASYNC, ApplyResponse.class, service, format("pillar=%s", inlinePillarsStr)), LOGGER,
                 "ApplyState with pillars took {}ms for service [{}]", service);
     }
 
     public ApplyResponse applyConcurrentState(SaltConnector sc, String service, Target<String> target,
             Map<String, Object> inlinePillars) throws JsonProcessingException {
         String inlinePillarsStr = new ObjectMapper().writeValueAsString(inlinePillars);
-        return measure(() -> sc.run(target, "state.apply", LOCAL_ASYNC, ApplyResponse.class, service, String.format("pillar=%s", inlinePillarsStr),
+        return measure(() -> sc.run(target, "state.apply", LOCAL_ASYNC, ApplyResponse.class, service, format("pillar=%s", inlinePillarsStr),
                 "concurrent=True"), LOGGER, "ApplyConcurrentState took {}ms for service [{}]", service);
     }
 
