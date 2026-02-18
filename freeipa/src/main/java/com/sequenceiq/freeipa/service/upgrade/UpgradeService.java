@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.common.model.OsType;
 import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsRequest;
@@ -136,8 +137,16 @@ public class UpgradeService {
         String pgwInstanceId = instanceMetaDataService.getPrimaryGwInstance(allInstances).getInstanceId();
         HashSet<String> nonPgwInstanceIds = selectNonPgwInstanceIds(allInstances);
         Operation operation = startUpgradeOperation(stack.getAccountId(), request);
-        String triggeredVariant = awsMigrationUtil.calculateUpgradeVariant(stack, accountId);
-        boolean needMigration = awsMigrationUtil.isAwsVariantMigrationIsFeasible(stack, triggeredVariant);
+        String candidateVariant = awsMigrationUtil.calculateUpgradeVariant(stack, accountId);
+        boolean awsVariantMigrationFeasible = awsMigrationUtil.awsVariantMigrationIsFeasible(stack, candidateVariant);
+        boolean awsVariantMigrationAllowedForOsUpgrade = awsVariantMigrationAllowedForOsUpgrade(currentImage, selectedImage);
+        if (awsVariantMigrationFeasible && !awsVariantMigrationAllowedForOsUpgrade) {
+            LOGGER.info("AWS variant migration is disabled during FreeIPA upgrade due to unsupported OS. " +
+                            "Current image OS: [{}], target image OS: [{}].",
+                    currentImage.getOs(), selectedImage.getOs());
+        }
+        boolean needMigration = awsVariantMigrationFeasible && awsVariantMigrationAllowedForOsUpgrade;
+        String triggeredVariant = needMigration ? candidateVariant : stack.getPlatformvariant();
         int defaultRootVolumeSize = rootVolumeSizeProvider.getForPlatform(stack.getCloudPlatform());
         List<VerticalScaleRequest> verticalScaleRequests = stack.getInstanceGroups().stream()
                 .filter(ig -> ig.getTemplate().getRootVolumeSize() < defaultRootVolumeSize)
@@ -169,6 +178,31 @@ public class UpgradeService {
                     "Couldn't start Freeipa upgrade flow: " + e.getMessage());
             throw e;
         }
+    }
+
+    /**
+     * CloudFormation -> AWS native migration is allowed only for FreeIPA clusters running on RHEL 8 or RHEL 9.
+     * During an OS upgrade, migration should proceed only if both the current image and target image are RHEL-based.
+     */
+    private boolean awsVariantMigrationAllowedForOsUpgrade(ImageInfoResponse currentImage, ImageInfoResponse targetImage) {
+        return isRhel8Or9(currentImage) && isRhel(targetImage);
+    }
+
+    private boolean isRhel8Or9(ImageInfoResponse imageInfoResponse) {
+        return Optional.ofNullable(imageInfoResponse)
+                .map(ImageInfoResponse::getOs)
+                .flatMap(OsType::getByOsOptional)
+                .filter(osType -> OsType.RHEL8 == osType || OsType.RHEL9 == osType)
+                .isPresent();
+    }
+
+    private boolean isRhel(ImageInfoResponse imageInfoResponse) {
+        return Optional.ofNullable(imageInfoResponse)
+                .map(ImageInfoResponse::getOs)
+                .flatMap(OsType::getByOsOptional)
+                .map(OsType::getOsType)
+                .filter(OsType::isRhel)
+                .isPresent();
     }
 
     @SuppressWarnings("IllegalType")

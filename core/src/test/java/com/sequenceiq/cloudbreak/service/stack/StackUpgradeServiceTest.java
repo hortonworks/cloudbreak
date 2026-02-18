@@ -76,7 +76,7 @@ public class StackUpgradeServiceTest {
     @Test
     public void testCalculateUpgradeVariantWhenMigrationDisabled() {
         stack.setPlatformVariant("AWS");
-        when(entitlementService.awsVariantMigrationEnable(ACCOUNT_ID)).thenReturn(false);
+        when(entitlementService.awsVariantMigrationEnabled(ACCOUNT_ID)).thenReturn(false);
         String actual = underTest.calculateUpgradeVariant(stack, USER_CRN, DO_NOT_KEEP_VARIANT);
         assertEquals("AWS", actual);
     }
@@ -84,7 +84,7 @@ public class StackUpgradeServiceTest {
     @Test
     public void testCalculateUpgradeVariantWhenMigrationEnabledAndVariantIsAws() {
         stack.setPlatformVariant("AWS");
-        when(entitlementService.awsVariantMigrationEnable(ACCOUNT_ID)).thenReturn(true);
+        when(entitlementService.awsVariantMigrationEnabled(ACCOUNT_ID)).thenReturn(true);
         String actual = underTest.calculateUpgradeVariant(stack, USER_CRN, DO_NOT_KEEP_VARIANT);
         assertEquals("AWS_NATIVE", actual);
     }
@@ -106,7 +106,7 @@ public class StackUpgradeServiceTest {
     @Test
     public void testAwsVariantMigrationIsFeasibleWhenOriginalVariantIsAwsAndTriggeredVariantIsAwsNativeAndMigrationEnabled() {
         stack.setPlatformVariant("AWS");
-        when(entitlementService.awsVariantMigrationEnable(ACCOUNT_ID)).thenReturn(true);
+        when(entitlementService.awsVariantMigrationEnabled(ACCOUNT_ID)).thenReturn(true);
         boolean actual = underTest.awsVariantMigrationIsFeasible(stack, "AWS_NATIVE");
         assertTrue(actual);
     }
@@ -114,7 +114,7 @@ public class StackUpgradeServiceTest {
     @Test
     public void testAwsVariantMigrationIsFeasibleWhenOriginalVariantIsAwsAndTriggeredVariantIsAwsNativeAndMigrationDisabled() {
         stack.setPlatformVariant("AWS");
-        when(entitlementService.awsVariantMigrationEnable(ACCOUNT_ID)).thenReturn(false);
+        when(entitlementService.awsVariantMigrationEnabled(ACCOUNT_ID)).thenReturn(false);
         boolean actual = underTest.awsVariantMigrationIsFeasible(stack, "AWS_NATIVE");
         assertFalse(actual);
     }
@@ -208,7 +208,7 @@ public class StackUpgradeServiceTest {
         );
         Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> mapRepairValidationResult = Result.success(success);
         when(stackDto.getStack().getPlatformVariant()).thenReturn("AWS");
-        when(entitlementService.awsVariantMigrationEnable(ACCOUNT_ID)).thenReturn(false);
+        when(entitlementService.awsVariantMigrationEnabled(ACCOUNT_ID)).thenReturn(false);
 
         String calculateUpgradeVariant = underTest.calculateUpgradeVariant(stackDto, USER_CRN, false, mapRepairValidationResult);
 
@@ -248,7 +248,7 @@ public class StackUpgradeServiceTest {
         );
         Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> mapRepairValidationResult = Result.success(success);
         when(stackDto.getStack().getPlatformVariant()).thenReturn("AWS");
-        when(entitlementService.awsVariantMigrationEnable(ACCOUNT_ID)).thenReturn(true);
+        when(entitlementService.awsVariantMigrationEnabled(ACCOUNT_ID)).thenReturn(true);
 
         String calculateUpgradeVariant = underTest.calculateUpgradeVariant(stackDto, USER_CRN, false, mapRepairValidationResult);
 

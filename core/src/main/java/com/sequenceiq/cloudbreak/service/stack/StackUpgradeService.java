@@ -40,7 +40,7 @@ public class StackUpgradeService {
             LOGGER.debug("Keeping the original variant is requested, therefore the following one is going to be returned: {}", variant);
         } else {
             String accountId = Crn.safeFromString(userCrn).getAccountId();
-            if (AWS_VARIANT.variant().value().equals(variant) && entitlementService.awsVariantMigrationEnable(accountId)) {
+            if (AWS_VARIANT.variant().value().equals(variant) && entitlementService.awsVariantMigrationEnabled(accountId)) {
                 LOGGER.debug("Variant migration is enabled and the {} variant is detected, therefore the following one is going to return " +
                         "to change the original one {}", AWS_VARIANT.variant().value(), AWS_NATIVE_VARIANT.variant().value());
                 variant = AWS_NATIVE_VARIANT.variant().value();
@@ -55,7 +55,7 @@ public class StackUpgradeService {
         String originalPlatformVariant = stackView.getPlatformVariant();
         return AWS_VARIANT.variant().value().equals(originalPlatformVariant)
                 && AWS_NATIVE_VARIANT.variant().value().equals(triggeredVariant)
-                && entitlementService.awsVariantMigrationEnable(crn.getAccountId());
+                && entitlementService.awsVariantMigrationEnabled(crn.getAccountId());
     }
 
     public String calculateUpgradeVariant(StackDto stack, String userCrn, boolean keepVariant,

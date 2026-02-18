@@ -17,10 +17,13 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
@@ -70,6 +73,14 @@ class UpgradeServiceTest {
 
     private static final String IMAGE_CATALOG = "cat";
 
+    private static final String CENTOS_7 = "centos7";
+
+    private static final String REDHAT_7 = "redhat7";
+
+    private static final String REDHAT_8 = "redhat8";
+
+    private static final String REDHAT_9 = "redhat9";
+
     @Mock
     private OperationService operationService;
 
@@ -118,8 +129,8 @@ class UpgradeServiceTest {
         when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(stack);
         Set<InstanceMetaData> allInstances = createValidImSet();
         when(stack.getNotDeletedInstanceMetaDataSet()).thenReturn(allInstances);
-        ImageInfoResponse selectedImage = mockSelectedImage();
-        ImageInfoResponse currentImage = mockCurrentImage(stack);
+        ImageInfoResponse selectedImage = mockSelectedImage(REDHAT_8);
+        ImageInfoResponse currentImage = mockCurrentImage(stack, REDHAT_8);
         Operation operation = mockOperation(OperationState.RUNNING);
         ArgumentCaptor<Acceptable> eventCaptor = ArgumentCaptor.forClass(Acceptable.class);
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW_CHAIN, "flowId");
@@ -127,7 +138,7 @@ class UpgradeServiceTest {
         when(instanceMetaDataService.getPrimaryGwInstance(allInstances)).thenReturn(createPgwIm());
         when(instanceMetaDataService.getNonPrimaryGwInstances(allInstances)).thenReturn(createGwImSet());
         when(awsMigrationUtil.calculateUpgradeVariant(stack, ACCOUNT_ID)).thenReturn(triggeredVariant);
-        when(awsMigrationUtil.isAwsVariantMigrationIsFeasible(stack, triggeredVariant)).thenReturn(true);
+        when(awsMigrationUtil.awsVariantMigrationIsFeasible(stack, triggeredVariant)).thenReturn(true);
         when(rootVolumeSizeProvider.getForPlatform(CloudPlatform.MOCK.name())).thenReturn(100);
 
         FreeIpaUpgradeResponse response = underTest.upgradeFreeIpa(ACCOUNT_ID, request);
@@ -175,15 +186,15 @@ class UpgradeServiceTest {
         when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(stack);
         Set<InstanceMetaData> allInstances = createValidImSet();
         when(stack.getNotDeletedInstanceMetaDataSet()).thenReturn(allInstances);
-        ImageInfoResponse selectedImage = mockSelectedImage();
-        ImageInfoResponse currentImage = mockCurrentImage(stack);
+        ImageInfoResponse selectedImage = mockSelectedImage(REDHAT_8);
+        ImageInfoResponse currentImage = mockCurrentImage(stack, REDHAT_8);
         Operation operation = mockOperation(OperationState.RUNNING);
         ArgumentCaptor<Acceptable> eventCaptor = ArgumentCaptor.forClass(Acceptable.class);
         when(flowManager.notify(eq(FlowChainTriggers.UPGRADE_TRIGGER_EVENT), eventCaptor.capture())).thenThrow(new RuntimeException("bumm"));
         when(instanceMetaDataService.getPrimaryGwInstance(allInstances)).thenReturn(createPgwIm());
         when(instanceMetaDataService.getNonPrimaryGwInstances(allInstances)).thenReturn(createGwImSet());
         when(awsMigrationUtil.calculateUpgradeVariant(stack, ACCOUNT_ID)).thenReturn(triggeredVariant);
-        when(awsMigrationUtil.isAwsVariantMigrationIsFeasible(stack, triggeredVariant)).thenReturn(true);
+        when(awsMigrationUtil.awsVariantMigrationIsFeasible(stack, triggeredVariant)).thenReturn(true);
         when(rootVolumeSizeProvider.getForPlatform(CloudPlatform.MOCK.name())).thenReturn(100);
 
         assertThrows(RuntimeException.class, () -> underTest.upgradeFreeIpa(ACCOUNT_ID, request));
@@ -222,8 +233,8 @@ class UpgradeServiceTest {
         Set<InstanceMetaData> allInstances = createValidImSet();
         Image oldImage = Image.builder()
                 .withImageName("name")
-                .withOs("alma")
-                .withOsType("rocky")
+                .withOs(REDHAT_8)
+                .withOsType(REDHAT_8)
                 .withImageCatalogName("mockcatalog")
                 .withImageId("111-222")
                 .withDate("2019-10-24")
@@ -231,8 +242,8 @@ class UpgradeServiceTest {
                 .build();
         Image newImage = Image.builder()
                 .withImageName("name")
-                .withOs("alma")
-                .withOsType("rocky")
+                .withOs(REDHAT_8)
+                .withOsType(REDHAT_8)
                 .withImageCatalogName("mockcatalog")
                 .withImageId("333-444")
                 .withDate("2019-10-24")
@@ -241,7 +252,7 @@ class UpgradeServiceTest {
         allInstances.stream().filter(im -> "pgw".equalsIgnoreCase(im.getInstanceId())).forEach(im -> im.setImage(new Json(oldImage)));
         allInstances.stream().filter(im -> !"pgw".equalsIgnoreCase(im.getInstanceId())).forEach(im -> im.setImage(new Json(newImage)));
         when(stack.getNotDeletedInstanceMetaDataSet()).thenReturn(allInstances);
-        ImageInfoResponse selectedImage = mockSelectedImage();
+        ImageInfoResponse selectedImage = mockSelectedImage(REDHAT_8);
         when(imageService.fetchCurrentImage(stack)).thenReturn(selectedImage);
         Operation operation = mockOperation(OperationState.RUNNING);
         ArgumentCaptor<Acceptable> eventCaptor = ArgumentCaptor.forClass(Acceptable.class);
@@ -250,7 +261,7 @@ class UpgradeServiceTest {
         when(instanceMetaDataService.getPrimaryGwInstance(allInstances)).thenReturn(createPgwIm());
         when(instanceMetaDataService.getNonPrimaryGwInstances(allInstances)).thenReturn(createGwImSet());
         when(awsMigrationUtil.calculateUpgradeVariant(stack, ACCOUNT_ID)).thenReturn(triggeredVariant);
-        when(awsMigrationUtil.isAwsVariantMigrationIsFeasible(stack, triggeredVariant)).thenReturn(true);
+        when(awsMigrationUtil.awsVariantMigrationIsFeasible(stack, triggeredVariant)).thenReturn(true);
         when(rootVolumeSizeProvider.getForPlatform(CloudPlatform.MOCK.name())).thenReturn(100);
 
         FreeIpaUpgradeResponse response = underTest.upgradeFreeIpa(ACCOUNT_ID, request);
@@ -268,7 +279,6 @@ class UpgradeServiceTest {
         assertEquals("pgw", upgradeEvent.getPrimareGwInstanceId());
         assertEquals(2, upgradeEvent.getInstanceIds().size());
         assertTrue(Set.of("im2", "im3").containsAll(upgradeEvent.getInstanceIds()));
-        assertFalse(upgradeEvent.isBackupSet());
         assertTrue(upgradeEvent.isNeedMigration());
         assertEquals(triggeredVariant, upgradeEvent.getTriggeredVariant());
         assertNull(upgradeEvent.getVerticalScaleRequest());
@@ -300,8 +310,8 @@ class UpgradeServiceTest {
         instanceGroup.setTemplate(template);
         instanceGroup.setGroupName("master");
         when(stack.getInstanceGroups()).thenReturn(Set.of(instanceGroup));
-        ImageInfoResponse selectedImage = mockSelectedImage();
-        ImageInfoResponse currentImage = mockCurrentImage(stack);
+        ImageInfoResponse selectedImage = mockSelectedImage(REDHAT_8);
+        ImageInfoResponse currentImage = mockCurrentImage(stack, REDHAT_8);
         currentImage.setCatalog("catalogurl");
         Operation operation = mockOperation(OperationState.RUNNING);
         ArgumentCaptor<Acceptable> eventCaptor = ArgumentCaptor.forClass(Acceptable.class);
@@ -310,7 +320,7 @@ class UpgradeServiceTest {
         when(instanceMetaDataService.getPrimaryGwInstance(allInstances)).thenReturn(createPgwIm());
         when(instanceMetaDataService.getNonPrimaryGwInstances(allInstances)).thenReturn(createGwImSet());
         when(awsMigrationUtil.calculateUpgradeVariant(stack, ACCOUNT_ID)).thenReturn(triggeredVariant);
-        when(awsMigrationUtil.isAwsVariantMigrationIsFeasible(stack, triggeredVariant)).thenReturn(true);
+        when(awsMigrationUtil.awsVariantMigrationIsFeasible(stack, triggeredVariant)).thenReturn(true);
         when(rootVolumeSizeProvider.getForPlatform(CloudPlatform.MOCK.name())).thenReturn(100);
 
         FreeIpaUpgradeResponse response = underTest.upgradeFreeIpa(ACCOUNT_ID, request);
@@ -328,7 +338,6 @@ class UpgradeServiceTest {
         assertEquals("pgw", upgradeEvent.getPrimareGwInstanceId());
         assertEquals(2, upgradeEvent.getInstanceIds().size());
         assertTrue(Set.of("im2", "im3").containsAll(upgradeEvent.getInstanceIds()));
-        assertFalse(upgradeEvent.isBackupSet());
         assertTrue(upgradeEvent.isNeedMigration());
         assertEquals(triggeredVariant, upgradeEvent.getTriggeredVariant());
         VerticalScaleRequest verticalScaleRequest = upgradeEvent.getVerticalScaleRequest();
@@ -355,8 +364,8 @@ class UpgradeServiceTest {
         when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(stack);
         Set<InstanceMetaData> allInstances = createValidImSet();
         when(stack.getNotDeletedInstanceMetaDataSet()).thenReturn(allInstances);
-        ImageInfoResponse selectedImage = mockSelectedImage();
-        ImageInfoResponse currentImage = mockCurrentImage(stack);
+        ImageInfoResponse selectedImage = mockSelectedImage(REDHAT_8);
+        ImageInfoResponse currentImage = mockCurrentImage(stack, REDHAT_8);
         currentImage.setCatalogName("catalogname");
         currentImage.setCatalog("catalogurl");
         Operation operation = mockOperation(OperationState.RUNNING);
@@ -391,6 +400,50 @@ class UpgradeServiceTest {
         assertEquals("catalogname", imageFilterSettingsArgumentCaptor.getValue().catalog());
     }
 
+    @ParameterizedTest
+    @MethodSource("osMigrationSupportSource")
+    void testAwsVariantMigrationAllowedForOsUpgrade(String currentOs, String targetOs, boolean expectedMigration) {
+        FreeIpaUpgradeRequest request = new FreeIpaUpgradeRequest();
+        request.setEnvironmentCrn(ENVIRONMENT_CRN);
+        String triggeredVariant = "triggeredVariant";
+
+        Stack stack = mock(Stack.class);
+        when(stack.getCloudPlatform()).thenReturn(CloudPlatform.MOCK.name());
+        when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(stack);
+        Set<InstanceMetaData> allInstances = createValidImSet();
+        when(stack.getNotDeletedInstanceMetaDataSet()).thenReturn(allInstances);
+
+        mockCurrentImage(stack, currentOs);
+        mockSelectedImage(targetOs);
+
+        mockOperation(OperationState.RUNNING);
+        ArgumentCaptor<Acceptable> eventCaptor = ArgumentCaptor.forClass(Acceptable.class);
+        when(instanceMetaDataService.getPrimaryGwInstance(allInstances)).thenReturn(createPgwIm());
+        when(instanceMetaDataService.getNonPrimaryGwInstances(allInstances)).thenReturn(createGwImSet());
+        when(awsMigrationUtil.calculateUpgradeVariant(stack, ACCOUNT_ID)).thenReturn(triggeredVariant);
+        when(awsMigrationUtil.awsVariantMigrationIsFeasible(stack, triggeredVariant)).thenReturn(true);
+        when(rootVolumeSizeProvider.getForPlatform(CloudPlatform.MOCK.name())).thenReturn(100);
+        when(flowManager.notify(eq(FlowChainTriggers.UPGRADE_TRIGGER_EVENT), any())).thenReturn(new FlowIdentifier(FlowType.FLOW, "id"));
+
+        underTest.upgradeFreeIpa(ACCOUNT_ID, request);
+
+        verify(flowManager).notify(eq(FlowChainTriggers.UPGRADE_TRIGGER_EVENT), eventCaptor.capture());
+        UpgradeEvent upgradeEvent = (UpgradeEvent) eventCaptor.getValue();
+        assertEquals(expectedMigration, upgradeEvent.isNeedMigration(),
+                String.format("Migration support mismatch for current: %s and target: %s", currentOs, targetOs));
+    }
+
+    private static Stream<Arguments> osMigrationSupportSource() {
+        return Stream.of(
+                Arguments.of(REDHAT_8, REDHAT_8, true),
+                Arguments.of(REDHAT_8, REDHAT_9, true),
+                Arguments.of(REDHAT_9, REDHAT_8, true),
+                Arguments.of(REDHAT_7, REDHAT_8, false),
+                Arguments.of(REDHAT_8, CENTOS_7, false),
+                Arguments.of(CENTOS_7, REDHAT_8, false)
+        );
+    }
+
     private Operation mockOperation(OperationState operationState) {
         Operation operation = new Operation();
         operation.setStatus(operationState);
@@ -399,17 +452,18 @@ class UpgradeServiceTest {
         return operation;
     }
 
-    private ImageInfoResponse mockCurrentImage(Stack stack) {
+    private ImageInfoResponse mockCurrentImage(Stack stack, String os) {
         ImageInfoResponse currentImage = new ImageInfoResponse();
         currentImage.setId("111-222");
+        currentImage.setOs(os);
         when(imageService.fetchCurrentImage(stack)).thenReturn(currentImage);
         return currentImage;
     }
 
-    private ImageInfoResponse mockSelectedImage() {
+    private ImageInfoResponse mockSelectedImage(String os) {
         ImageInfoResponse selectedImage = new ImageInfoResponse();
         selectedImage.setId("333-444");
-        selectedImage.setOs("alma");
+        selectedImage.setOs(os);
         selectedImage.setCatalog("mockcatalog");
         when(imageService.selectImage(any(FreeIpaImageFilterSettings.class))).thenReturn(selectedImage);
         return selectedImage;
@@ -425,9 +479,8 @@ class UpgradeServiceTest {
         when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(stack);
         Set<InstanceMetaData> allInstances = createValidImSet();
         when(stack.getNotDeletedInstanceMetaDataSet()).thenReturn(allInstances);
-        ImageInfoResponse selectedImage = new ImageInfoResponse();
-        when(imageService.selectImage(any(FreeIpaImageFilterSettings.class))).thenReturn(selectedImage);
-        ImageInfoResponse currentImage = mockCurrentImage(stack);
+        ImageInfoResponse selectedImage = mockSelectedImage(REDHAT_8);
+        ImageInfoResponse currentImage = mockCurrentImage(stack, REDHAT_8);
         Operation operation = mockOperation(OperationState.RUNNING);
         ArgumentCaptor<Acceptable> eventCaptor = ArgumentCaptor.forClass(Acceptable.class);
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW_CHAIN, "flowId");
@@ -462,8 +515,8 @@ class UpgradeServiceTest {
 
         Stack stack = mock(Stack.class);
         when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(stack);
-        ImageInfoResponse selectedImage = new ImageInfoResponse();
-        when(imageService.fetchCurrentImage(stack)).thenReturn(selectedImage);
+        ImageInfoResponse currentImage = new ImageInfoResponse();
+        when(imageService.fetchCurrentImage(stack)).thenReturn(currentImage);
         Set<InstanceMetaData> allInstances = Set.of();
         when(stack.getNotDeletedInstanceMetaDataSet()).thenReturn(allInstances);
         when(instanceMetaDataService.getPrimaryGwInstance(allInstances)).thenThrow(new BadRequestException("No primary Gateway found"));
@@ -483,8 +536,8 @@ class UpgradeServiceTest {
         when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(stack);
         Set<InstanceMetaData> allInstances = createValidImSet();
         when(stack.getNotDeletedInstanceMetaDataSet()).thenReturn(allInstances);
-        ImageInfoResponse selectedImage = mockSelectedImage();
-        ImageInfoResponse currentImage = mockCurrentImage(stack);
+        ImageInfoResponse selectedImage = mockSelectedImage(REDHAT_8);
+        ImageInfoResponse currentImage = mockCurrentImage(stack, REDHAT_8);
         mockOperation(OperationState.REJECTED);
         when(instanceMetaDataService.getPrimaryGwInstance(allInstances)).thenReturn(createPgwIm());
         when(instanceMetaDataService.getNonPrimaryGwInstances(allInstances)).thenReturn(createGwImSet());

@@ -48,7 +48,7 @@ public class AwsMigrationUtil {
                 .collect(Collectors.toList());
         LOGGER.debug("AutoScalingGroup fetched: {}", asGroups);
         boolean empty = asGroups.stream().map(stackResource -> fetchResult(stackResource, awsCredential, regionName)).allMatch(List::isEmpty);
-        LOGGER.debug("Is the fetched AutoScalingGroup are empty? {}", empty);
+        LOGGER.debug("Is the fetched AutoScalingGroup empty? {}", empty);
         return empty;
     }
 
@@ -61,8 +61,8 @@ public class AwsMigrationUtil {
 
     public String calculateUpgradeVariant(Stack stack, String accountId) {
         String variant = stack.getPlatformvariant();
-        boolean migrationEnable = entitlementService.awsVariantMigrationEnable(accountId);
-        if (migrationEnable) {
+        boolean migrationEnabled = entitlementService.awsVariantMigrationEnabled(accountId);
+        if (migrationEnabled) {
             if (AwsConstants.AwsVariant.AWS_VARIANT.variant().value().equals(variant)) {
                 variant = AwsConstants.AwsVariant.AWS_NATIVE_VARIANT.variant().value();
             }
@@ -70,10 +70,10 @@ public class AwsMigrationUtil {
         return variant;
     }
 
-    public boolean isAwsVariantMigrationIsFeasible(Stack stack, String triggeredVariant) {
+    public boolean awsVariantMigrationIsFeasible(Stack stack, String triggeredVariant) {
         Crn crn = Crn.safeFromString(stack.getResourceCrn());
         return AwsConstants.AwsVariant.AWS_VARIANT.variant().value().equals(stack.getCloudPlatform())
                 && AwsConstants.AwsVariant.AWS_NATIVE_VARIANT.variant().value().equals(triggeredVariant)
-                && entitlementService.awsVariantMigrationEnable(crn.getAccountId());
+                && entitlementService.awsVariantMigrationEnabled(crn.getAccountId());
     }
 }

@@ -172,7 +172,7 @@ public class EntitlementService {
         return isEntitlementRegistered(accountId, CDP_CB_ENFORCE_AWS_NATIVE_FOR_SINGLE_AZ_DATALAKE);
     }
 
-    public boolean awsVariantMigrationEnable(String accountId) {
+    public boolean awsVariantMigrationEnabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_CB_AWS_VARIANT_MIGRATION);
     }
 

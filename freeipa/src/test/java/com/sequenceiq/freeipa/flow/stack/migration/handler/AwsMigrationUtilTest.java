@@ -145,7 +145,7 @@ public class AwsMigrationUtilTest {
     public void testCalculateUpgradeVariantWhenMigrationDisabled() {
         Stack stack = new Stack();
         stack.setPlatformvariant("AWS");
-        when(entitlementService.awsVariantMigrationEnable(ACCOUNT_ID)).thenReturn(false);
+        when(entitlementService.awsVariantMigrationEnabled(ACCOUNT_ID)).thenReturn(false);
         String actual = underTest.calculateUpgradeVariant(stack, ACCOUNT_ID);
         assertEquals("AWS", actual);
     }
@@ -154,7 +154,7 @@ public class AwsMigrationUtilTest {
     public void testCalculateUpgradeVariantWhenMigrationEnabledAndVariantIsAws() {
         Stack stack = new Stack();
         stack.setPlatformvariant("AWS");
-        when(entitlementService.awsVariantMigrationEnable(ACCOUNT_ID)).thenReturn(true);
+        when(entitlementService.awsVariantMigrationEnabled(ACCOUNT_ID)).thenReturn(true);
         String actual = underTest.calculateUpgradeVariant(stack, ACCOUNT_ID);
         assertEquals("AWS_NATIVE", actual);
     }
@@ -163,7 +163,7 @@ public class AwsMigrationUtilTest {
     public void testCalculateUpgradeVariantWhenMigrationEnabledWhenVariantIsNotAWS() {
         Stack stack = new Stack();
         stack.setPlatformvariant("GCP");
-        when(entitlementService.awsVariantMigrationEnable(ACCOUNT_ID)).thenReturn(true);
+        when(entitlementService.awsVariantMigrationEnabled(ACCOUNT_ID)).thenReturn(true);
         String actual = underTest.calculateUpgradeVariant(stack, ACCOUNT_ID);
         assertEquals("GCP", actual);
     }
@@ -174,9 +174,9 @@ public class AwsMigrationUtilTest {
         stack.setCloudPlatform("AWS");
         stack.setResourceCrn(RESOURCE_CRN);
 
-        when(entitlementService.awsVariantMigrationEnable(ACCOUNT_ID)).thenReturn(true);
+        when(entitlementService.awsVariantMigrationEnabled(ACCOUNT_ID)).thenReturn(true);
 
-        boolean actual = underTest.isAwsVariantMigrationIsFeasible(stack, "AWS_NATIVE");
+        boolean actual = underTest.awsVariantMigrationIsFeasible(stack, "AWS_NATIVE");
         assertTrue(actual);
     }
 
@@ -186,9 +186,9 @@ public class AwsMigrationUtilTest {
         stack.setCloudPlatform("AWS");
         stack.setResourceCrn(RESOURCE_CRN);
 
-        boolean actual = underTest.isAwsVariantMigrationIsFeasible(stack, "AWS");
+        boolean actual = underTest.awsVariantMigrationIsFeasible(stack, "AWS");
         assertFalse(actual);
-        verify(entitlementService, never()).awsVariantMigrationEnable(any());
+        verify(entitlementService, never()).awsVariantMigrationEnabled(any());
     }
 
     @Test
@@ -197,9 +197,9 @@ public class AwsMigrationUtilTest {
         stack.setCloudPlatform("AWS");
         stack.setResourceCrn(RESOURCE_CRN);
 
-        when(entitlementService.awsVariantMigrationEnable(ACCOUNT_ID)).thenReturn(false);
+        when(entitlementService.awsVariantMigrationEnabled(ACCOUNT_ID)).thenReturn(false);
 
-        boolean actual = underTest.isAwsVariantMigrationIsFeasible(stack, "AWS_NATIVE");
+        boolean actual = underTest.awsVariantMigrationIsFeasible(stack, "AWS_NATIVE");
         assertFalse(actual);
     }
 
@@ -209,8 +209,8 @@ public class AwsMigrationUtilTest {
         stack.setCloudPlatform("AWS_NATIVE");
         stack.setResourceCrn(RESOURCE_CRN);
 
-        boolean actual = underTest.isAwsVariantMigrationIsFeasible(stack, "AWS_NATIVE");
+        boolean actual = underTest.awsVariantMigrationIsFeasible(stack, "AWS_NATIVE");
         assertFalse(actual);
-        verify(entitlementService, never()).awsVariantMigrationEnable(any());
+        verify(entitlementService, never()).awsVariantMigrationEnabled(any());
     }
 }
