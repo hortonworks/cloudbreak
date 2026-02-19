@@ -33,7 +33,11 @@ public class DeclaredVersionService {
         supportedServices.setServices(new HashSet<>());
         CmTemplateProcessor cmTemplateProcessor = cmTemplateProcessorFactory.get(blueprintText);
         Collection<ExposedService> exposedServices = exposedServiceCollector
-                .filterSupportedKnoxServices(Optional.ofNullable(cmTemplateProcessor.getTemplate().getCdhVersion()));
+                .filterSupportedKnoxServices(Optional.ofNullable(cmTemplateProcessor.getTemplate().getCdhVersion()))
+                .stream()
+                .filter(e -> e.isSsoSupported())
+                .filter(e -> !e.isApiOnly())
+                .collect(Collectors.toSet());
 
         for (ApiClusterTemplateService service : cmTemplateProcessor.getTemplate().getServices()) {
             Set<String> serviceNames = Optional.ofNullable(service.getRoleConfigGroups())
