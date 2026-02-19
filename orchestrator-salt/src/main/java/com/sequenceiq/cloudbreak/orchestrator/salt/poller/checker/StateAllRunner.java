@@ -18,7 +18,7 @@ public class StateAllRunner extends BaseSaltJobRunner {
 
     @Override
     public String submit(SaltConnector saltConnector) throws SaltJobFailedException {
-        return saltStateService().applyStateAll(saltConnector, state).getJid();
+        return getJid(saltStateService().applyStateAll(saltConnector, state));
     }
 
     @Override

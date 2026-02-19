@@ -25,7 +25,7 @@ public class ParameterizedStateRunner extends StateRunner {
     public String submit(SaltConnector saltConnector) throws SaltJobFailedException {
         HostList targets = new HostList(getTargetHostnames());
         try {
-            return saltStateService().applyState(saltConnector, state, targets, parameters).getJid();
+            return getJid(saltStateService().applyState(saltConnector, state, targets, parameters));
         } catch (JsonProcessingException e) {
             throw new SaltJobFailedException("ParameterizedStateRunner job failed.", e);
         }

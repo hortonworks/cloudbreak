@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.orchestrator.salt.poller;
 
+import static com.sequenceiq.cloudbreak.validation.MutuallyExclusiveNotNull.LOGGER;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -8,6 +10,8 @@ import java.util.Scanner;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Multimap;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
@@ -15,6 +19,7 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.domain.ApplyResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.JobId;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.JobState;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.StateType;
+import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltExecutionWentWrongException;
 import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStateService;
 
 public abstract class BaseSaltJobRunner implements SaltJobRunner {
@@ -112,6 +117,15 @@ public abstract class BaseSaltJobRunner implements SaltJobRunner {
             try (Scanner delimiter = scanner.useDelimiter("\\.")) {
                 return delimiter.next();
             }
+        }
+    }
+
+    protected String getJid(ApplyResponse applyResponse) {
+        if (StringUtils.isBlank(applyResponse.getJid())) {
+            LOGGER.warn("Salt returned null jid. Please check the salt log. Response: {}", applyResponse);
+            throw new SaltExecutionWentWrongException("Salt returned null jid. Please check the salt log.");
+        } else {
+            return applyResponse.getJid();
         }
     }
 
