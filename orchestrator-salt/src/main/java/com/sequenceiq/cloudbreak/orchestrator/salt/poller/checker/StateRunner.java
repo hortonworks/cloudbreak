@@ -21,7 +21,7 @@ public class StateRunner extends BaseSaltJobRunner {
     @Override
     public String submit(SaltConnector saltConnector) throws SaltJobFailedException {
         HostList targets = new HostList(getTargetHostnames());
-        return saltStateService().applyState(saltConnector, state, targets).getJid();
+        return getJid(saltStateService().applyState(saltConnector, state, targets));
     }
 
     @Override

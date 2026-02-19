@@ -18,7 +18,7 @@ public class HighStateRunner extends BaseSaltJobRunner {
     @Override
     public String submit(SaltConnector saltConnector) {
         HostList targets = new HostList(getTargetHostnames());
-        return saltStateService().highstate(saltConnector, targets);
+        return getJid(saltStateService().highstate(saltConnector, targets));
     }
 
     @Override

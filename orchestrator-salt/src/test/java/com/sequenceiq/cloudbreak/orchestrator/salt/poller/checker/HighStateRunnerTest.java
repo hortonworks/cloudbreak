@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -19,6 +20,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.target.Target;
+import com.sequenceiq.cloudbreak.orchestrator.salt.domain.ApplyResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.StateType;
 import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStateService;
 
@@ -50,7 +52,9 @@ class HighStateRunnerTest {
         HighStateRunner highStateRunner = new HighStateRunner(saltStateService, targets, allNode);
 
         String jobId = "1";
-        when(saltStateService.highstate(any(), any())).thenReturn(jobId);
+        ApplyResponse applyResponse = mock(ApplyResponse.class);
+        when(applyResponse.getJid()).thenReturn(jobId);
+        when(saltStateService.highstate(any(), any())).thenReturn(applyResponse);
 
         String jid = highStateRunner.submit(saltConnector);
         assertEquals(jobId, jid);
