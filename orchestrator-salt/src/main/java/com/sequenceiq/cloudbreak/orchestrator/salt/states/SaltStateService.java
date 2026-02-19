@@ -128,13 +128,13 @@ public class SaltStateService {
                 "Mine update took {}msd");
     }
 
-    public String highstate(SaltConnector sc) {
+    public ApplyResponse highstate(SaltConnector sc) {
         return highstate(sc, Glob.ALL);
     }
 
-    public String highstate(SaltConnector sc, Target<String> target) {
-        return measure(() -> sc.run(target, "state.highstate", LOCAL_ASYNC, ApplyResponse.class).getJid(), LOGGER,
-                "HisghState call took {}ms for targets: {}", target);
+    public ApplyResponse highstate(SaltConnector sc, Target<String> target) {
+        return measure(() -> sc.run(target, "state.highstate", LOCAL_ASYNC, ApplyResponse.class), LOGGER,
+                "HighState call took {}ms for targets: {}", target);
     }
 
     public ApplyFullResponse showState(SaltConnector sc, String state) {
