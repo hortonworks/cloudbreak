@@ -193,7 +193,7 @@ public class ExposedService {
     }
 
     public String getIconKey() {
-        return StringUtils.isNotBlank(iconKey) ? iconKey : serviceName;
+        return StringUtils.isNotBlank(iconKey) ? iconKey : name;
     }
 
     public void setIconKey(String iconKey) {
