@@ -28,7 +28,7 @@ public class ConcurrentParameterizedStateRunner extends ParameterizedStateRunner
             ApplyResponse applyResponse = saltStateService().applyConcurrentState(saltConnector, state, targets, parameters);
             LOGGER.debug("Executing salt state: '{}'. Parameters: '{}'. Targets: '{}'. applyResponse: '{}'",
                     state, parameters, targets, applyResponse.getResult());
-            return applyResponse.getJid();
+            return getJid(applyResponse);
         } catch (JsonProcessingException e) {
             throw new SaltJobFailedException("ConcurrentParameterizedStateRunner job failed.", e);
         }

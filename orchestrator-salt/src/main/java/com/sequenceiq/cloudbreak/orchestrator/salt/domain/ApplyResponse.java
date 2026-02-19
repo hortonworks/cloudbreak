@@ -27,7 +27,7 @@ public class ApplyResponse {
     @JsonIgnore
     public String getJid() {
         if (result != null && !result.isEmpty()) {
-            Map<String, JsonNode> resultMap = result.get(0);
+            Map<String, JsonNode> resultMap = result.getFirst();
             if (resultMap != null && resultMap.get("jid") != null) {
                 return resultMap.get("jid").asText();
             }

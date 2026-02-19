@@ -471,3 +471,5 @@ retry:
       - 'Failed to execute: .*Parameter validation failed:'
       # Java version determination failure
       - 'Failed to execute: .*Stdout=Failed to determine the current java version\.'
+      # Salt api authentication issue
+      - 'Status: 401 Unauthorized Response.*'

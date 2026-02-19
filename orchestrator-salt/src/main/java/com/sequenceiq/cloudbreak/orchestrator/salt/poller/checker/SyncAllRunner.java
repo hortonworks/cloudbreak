@@ -19,7 +19,7 @@ public class SyncAllRunner extends BaseSaltJobRunner {
         ApplyResponse grainsResult = saltStateService().syncAll(saltConnector);
         Set<String> strings = collectMissingHostnames(collectSucceededNodes(grainsResult));
         setTargetHostnames(strings);
-        return grainsResult.getJid();
+        return getJid(grainsResult);
     }
 
     @Override
