@@ -9,6 +9,7 @@ import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.g
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 import jakarta.inject.Inject;
@@ -127,7 +128,12 @@ public class HueConfigProvider extends AbstractRdsRoleConfigProvider {
                 proxyHosts.add(generalClusterConfigs.getExternalFQDN());
             }
             if (generalClusterConfigs.getLoadBalancerGatewayFqdn().isPresent()) {
-                proxyHosts.add(generalClusterConfigs.getLoadBalancerGatewayFqdn().get());
+                String loadBalancerFqdn = generalClusterConfigs.getLoadBalancerGatewayFqdn().get();
+                proxyHosts.add(loadBalancerFqdn);
+                boolean containsUpperCase = loadBalancerFqdn.chars().anyMatch(Character::isUpperCase);
+                if (containsUpperCase) {
+                    proxyHosts.add(loadBalancerFqdn.toLowerCase(Locale.ROOT));
+                }
             }
             if (!proxyHosts.isEmpty()) {
                 String proxyHostsString = String.join(",", proxyHosts);

@@ -13,6 +13,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -437,6 +438,59 @@ public class HueConfigProviderTest {
 
         when(iniFileFactory.create()).thenReturn(safetyValve);
         String proxyHostsExpected = String.join(",", expectedExternalFQDN, expectedLBFQDN);
+        String expectedSafetyValveValue = "[desktop]\n[[knox]]\nknox_proxyhosts=".concat(proxyHostsExpected);
+        when(safetyValve.print()).thenReturn(expectedSafetyValveValue);
+
+        List<ApiClusterTemplateConfig> result = underTest.getServiceConfigs(null, tpo);
+
+        verify(safetyValve).addContent(expectedSafetyValveValue);
+        verifyNoMoreInteractions(safetyValve);
+        verify(rdsConfig, never()).getSslCertificateFilePath();
+        Map<String, String> configToValue = ConfigTestUtil.getConfigNameToValueMap(result);
+        assertThat(configToValue).containsOnly(
+                entry("database_host", HOST),
+                entry("database_port", PORT),
+                entry("database_name", DB_NAME),
+                entry("database_type", DB_PROVIDER),
+                entry("database_user", USER_NAME),
+                entry("database_password", PASSWORD),
+                entry("hue_service_safety_valve", expectedSafetyValveValue));
+
+        Map<String, String> configToVariable = ConfigTestUtil.getConfigNameToVariableNameMap(result);
+        assertThat(configToVariable).isEmpty();
+    }
+
+    @Test
+    public void getServiceConfigsWhenKnoxConfiguredWithLoadBalancerWithUpperCaseCharsInFQDN() {
+        BlueprintView blueprintView = getMockBlueprintView("7.0.1");
+
+        RdsView rdsConfig = mock(RdsView.class);
+        when(rdsConfig.getType()).thenReturn(HUE);
+        when(rdsConfig.getConnectionUserName()).thenReturn(USER_NAME);
+        when(rdsConfig.getConnectionPassword()).thenReturn(PASSWORD);
+        when(rdsConfig.getHost()).thenReturn(HOST);
+        when(rdsConfig.getDatabaseName()).thenReturn(DB_NAME);
+        when(rdsConfig.getPort()).thenReturn(PORT);
+        when(rdsConfig.getSubprotocol()).thenReturn(DB_PROVIDER);
+
+        String expectedExternalFQDN = "myaddress.cloudera.site";
+        String expectedLBFQDN = "loadbalancer-GATEWAY.cloudera.site";
+        GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
+        generalClusterConfigs.setExternalFQDN(expectedExternalFQDN);
+        generalClusterConfigs.setKnoxUserFacingCertConfigured(true);
+        generalClusterConfigs.setPrimaryGatewayInstanceDiscoveryFQDN(Optional.empty());
+        generalClusterConfigs.setLoadBalancerGatewayFqdn(Optional.of(expectedLBFQDN));
+
+        TemplatePreparationObject tpo = new Builder()
+                .withGeneralClusterConfigs(generalClusterConfigs)
+                .withGateway(new Gateway(), "", new HashSet<>())
+                .withBlueprintView(blueprintView)
+                .withProductDetails(generateCmRepo(CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_0_1), null)
+                .withRdsViews(Set.of(rdsConfig))
+                .build();
+
+        when(iniFileFactory.create()).thenReturn(safetyValve);
+        String proxyHostsExpected = String.join(",", expectedExternalFQDN, expectedLBFQDN, expectedLBFQDN.toLowerCase(Locale.ROOT));
         String expectedSafetyValveValue = "[desktop]\n[[knox]]\nknox_proxyhosts=".concat(proxyHostsExpected);
         when(safetyValve.print()).thenReturn(expectedSafetyValveValue);
 
