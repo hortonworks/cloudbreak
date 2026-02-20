@@ -12,6 +12,7 @@ import org.springframework.util.StringUtils;
 
 import com.cloudera.thunderhead.service.environments2api.model.Environment;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.sdx.TargetPlatform;
 import com.sequenceiq.cloudbreak.sdx.common.service.PlatformAwareSdxCommonService;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
@@ -35,6 +36,9 @@ public abstract class AbstractPdlSdxService implements PlatformAwareSdxCommonSer
     @Inject
     private RemoteEnvironmentEndpoint remoteEnvironmentEndpoint;
 
+    @Inject
+    private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
+
     @Override
     public TargetPlatform targetPlatform() {
         return TargetPlatform.PDL;
@@ -48,8 +52,14 @@ public abstract class AbstractPdlSdxService implements PlatformAwareSdxCommonSer
     public Environment getPrivateEnvForPublicEnv(String publicEnvCrn) {
         String pvcCrn = getPrivateCloudEnvCrn(publicEnvCrn).orElse(null);
         if (!StringUtils.isEmpty(pvcCrn)) {
-            DescribeRemoteEnvironment describeRemoteEnvironment = getRemoteEnvironmentRequest(pvcCrn);
-            return remoteEnvironmentEndpoint.getByCrn(describeRemoteEnvironment).getEnvironment();
+            try {
+                DescribeRemoteEnvironment describeRemoteEnvironment = getRemoteEnvironmentRequest(pvcCrn);
+                return remoteEnvironmentEndpoint.getByCrn(describeRemoteEnvironment).getEnvironment();
+            } catch (RuntimeException e) {
+                String message = webApplicationExceptionMessageExtractor.getErrorMessage(e);
+                LOGGER.error("Failed to get PDL by crn {}: {}", pvcCrn, message, e);
+                throw new RuntimeException(String.format("Failed to get PDL by crn %s: %s", pvcCrn, message));
+            }
         }
         return null;
     }

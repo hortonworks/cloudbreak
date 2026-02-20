@@ -89,7 +89,7 @@ public class MockClassicClusterService extends OnPremisesApiGrpc.OnPremisesApiIm
                 responseObserver.onCompleted();
             } catch (Exception e) {
                 LOGGER.error("Error while converting Classic Cluster", e);
-                responseObserver.onError(Status.INTERNAL.withCause(e).asException());
+                responseObserver.onError(Status.INTERNAL.withDescription("Error while converting Classic Cluster").withCause(e).asException());
             }
         }, () -> responseObserver.onError(Status.NOT_FOUND.withDescription("Classic Cluster not found with crn " + request.getClusterCrn()).asException()));
     }

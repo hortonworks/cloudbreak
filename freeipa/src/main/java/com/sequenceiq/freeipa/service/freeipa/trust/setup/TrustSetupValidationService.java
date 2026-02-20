@@ -32,6 +32,7 @@ import com.cloudera.thunderhead.service.environments2api.model.Environment;
 import com.cloudera.thunderhead.service.environments2api.model.KerberosInfo;
 import com.cloudera.thunderhead.service.environments2api.model.PrivateDatalakeDetails;
 import com.cloudera.thunderhead.service.environments2api.model.PvcEnvironmentDetails;
+import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.common.type.KdcType;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
@@ -108,6 +109,9 @@ public class TrustSetupValidationService {
     @Inject
     private RemoteEnvironmentEndpoint remoteEnvironmentEndpoint;
 
+    @Inject
+    private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
+
     public TaskResults validateTrustSetup(Long stackId) {
         Optional<CrossRealmTrust> crossRealmTrust = crossRealmTrustService.getByStackIdIfExists(stackId);
         return crossRealmTrust
@@ -167,9 +171,10 @@ public class TrustSetupValidationService {
                         Map.of(COMMENT, "Remote environment CRN is missing.\nPlease contact Cloudera support."));
             }
         } catch (RuntimeException e) {
-            LOGGER.error("An error occurred during the kerberization verification", e);
+            String message = webApplicationExceptionMessageExtractor.getErrorMessage(e);
+            LOGGER.error("An error occurred during the kerberization verification: {}", message, e);
             return new TaskResult(TaskResultType.ERROR, "Security validation failed",
-                    Map.of(COMMENT, "An error occurred during the kerberization verification: " + e.getMessage()));
+                    Map.of(COMMENT, "An error occurred during the kerberization verification: " + message));
         }
     }
 

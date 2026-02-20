@@ -27,6 +27,7 @@ import com.cloudera.thunderhead.service.environments2api.model.Instance;
 import com.cloudera.thunderhead.service.environments2api.model.PrivateDatalakeDetails;
 import com.cloudera.thunderhead.service.environments2api.model.PvcEnvironmentDetails;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.sdx.RdcView;
 import com.sequenceiq.cloudbreak.sdx.TargetPlatform;
@@ -46,6 +47,9 @@ public class PdlSdxDescribeService extends AbstractPdlSdxService implements Plat
     @Inject
     private PdlRdcUtil pdlRdcUtil;
 
+    @Inject
+    private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
+
     @Override
     public Optional<String> getRemoteDataContext(String crn) {
         try {
@@ -56,10 +60,12 @@ public class PdlSdxDescribeService extends AbstractPdlSdxService implements Plat
             return Optional.of(pdlRdcUtil.remoteDataContextToJson(crn, apiRemoteDataContext));
         } catch (JsonProcessingException e) {
             LOGGER.error("Json processing failed, thus we cannot query remote data context. CRN: {}.", crn, e);
+            throw new RuntimeException(String.format("Not able to process the RDC for PDL %s: %s.", crn, e.getMessage()), e);
         } catch (RuntimeException exception) {
-            LOGGER.error("Not able to fetch the RDC for PDL from Service Discovery. CRN: {}.", crn, exception);
+            String message = webApplicationExceptionMessageExtractor.getErrorMessage(exception);
+            LOGGER.error("Not able to fetch the RDC for PDL {}: {}.", crn, message, exception);
+            throw new RuntimeException(String.format("Not able to fetch the RDC for PDL %s: %s", crn, message), exception);
         }
-        throw new RuntimeException("Not able to fetch the RDC for PDL from Service Discovery");
     }
 
     @Override
@@ -69,8 +75,14 @@ public class PdlSdxDescribeService extends AbstractPdlSdxService implements Plat
     }
 
     private DescribeDatalakeServicesResponse getDatalakeServicesByCrn(String crn) {
-        DescribeDatalakeServicesRequest request = new DescribeDatalakeServicesRequest().clusterid(crn);
-        return getRemoteEnvironmentEndPoint().getDatalakeServicesByCrn(request);
+        try {
+            DescribeDatalakeServicesRequest request = new DescribeDatalakeServicesRequest().clusterid(crn);
+            return getRemoteEnvironmentEndPoint().getDatalakeServicesByCrn(request);
+        } catch (RuntimeException exception) {
+            String message = webApplicationExceptionMessageExtractor.getErrorMessage(exception);
+            LOGGER.error("Not able to fetch the datalake services for PDL {}: {}.", crn, message, exception);
+            throw new RuntimeException(String.format("Not able to fetch the datalake services for PDL %s: %s", crn, message), exception);
+        }
     }
 
     @Override
@@ -174,8 +186,14 @@ public class PdlSdxDescribeService extends AbstractPdlSdxService implements Plat
     @Override
     public Optional<String> getCACertsForEnvironment(String environmentCrn) {
         String pvcCrn = getPrivateCloudEnvCrn(environmentCrn).orElse(null);
-        GetRootCertificateResponse response = getRemoteEnvironmentEndPoint().getRootCertificateByCrn(pvcCrn);
-        return Optional.ofNullable(response).map(GetRootCertificateResponse::getContents);
+        try {
+            GetRootCertificateResponse response = getRemoteEnvironmentEndPoint().getRootCertificateByCrn(pvcCrn);
+            return Optional.ofNullable(response).map(GetRootCertificateResponse::getContents);
+        } catch (RuntimeException exception) {
+            String message = webApplicationExceptionMessageExtractor.getErrorMessage(exception);
+            LOGGER.error("Not able to fetch CA certs for PDL {}: {}.", pvcCrn, message, exception);
+            throw new RuntimeException(String.format("Not able to fetch CA certs for PDL %s: %s", pvcCrn, message), exception);
+        }
     }
 
     @Override

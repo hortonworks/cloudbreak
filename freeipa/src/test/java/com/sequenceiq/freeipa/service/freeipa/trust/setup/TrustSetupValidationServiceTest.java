@@ -32,6 +32,7 @@ import com.cloudera.thunderhead.service.environments2api.model.Environment;
 import com.cloudera.thunderhead.service.environments2api.model.KerberosInfo;
 import com.cloudera.thunderhead.service.environments2api.model.PrivateDatalakeDetails;
 import com.cloudera.thunderhead.service.environments2api.model.PvcEnvironmentDetails;
+import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.common.type.KdcType;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
@@ -67,6 +68,9 @@ class TrustSetupValidationServiceTest {
 
     @Mock
     private RemoteEnvironmentEndpoint remoteEnvironmentEndpoint;
+
+    @Mock
+    private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
 
     @InjectMocks
     private TrustSetupValidationService underTest;
@@ -181,13 +185,15 @@ class TrustSetupValidationServiceTest {
     void testValidateWhenExceptionDuringKerberized() {
         setup(false);
         when(packageAvailabilityChecker.isPackageAvailable(4L)).thenReturn(true);
-        when(remoteEnvironmentEndpoint.getByCrn(any())).thenThrow(new RuntimeException("exception"));
+        RuntimeException e = new RuntimeException("exception");
+        when(remoteEnvironmentEndpoint.getByCrn(any())).thenThrow(e);
+        when(webApplicationExceptionMessageExtractor.getErrorMessage(e)).thenReturn("extractedMessage");
 
         TaskResults result = underTest.validateTrustSetup(4L);
 
         assertEquals(1L, result.getErrors().size());
         assertEquals("Security validation failed", result.getErrors().get(0).message());
-        assertEquals("An error occurred during the kerberization verification: exception",
+        assertEquals("An error occurred during the kerberization verification: extractedMessage",
                 result.getErrors().get(0).additionalParams().get(COMMENT));
     }
 

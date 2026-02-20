@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.sdx.pdl.service;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -36,6 +36,7 @@ import com.cloudera.thunderhead.service.environments2api.model.PrivateDatalakeDe
 import com.cloudera.thunderhead.service.environments2api.model.PvcEnvironmentDetails;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.sdx.RdcView;
 import com.sequenceiq.cloudbreak.sdx.TargetPlatform;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxAccessView;
@@ -81,6 +82,9 @@ public class PdlSdxDescribeServiceTest {
     private PdlRdcUtil pdlRdcUtil;
 
     @Mock
+    private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
+
+    @Mock
     private DetailedEnvironmentResponse detailedEnvironmentResponse;
 
     @Mock
@@ -110,10 +114,14 @@ public class PdlSdxDescribeServiceTest {
     }
 
     @Test
-    public void testGetRemoteDataContextRunTimeException() throws IOException {
-        when(remoteEnvironmentEndpoint.getRdcByCrn(any())).thenThrow(new RuntimeException());
-        RuntimeException e = assertThrows(RuntimeException.class, () -> underTest.getRemoteDataContext(PDL_CRN));
-        assertEquals("Not able to fetch the RDC for PDL from Service Discovery", e.getMessage());
+    void testGetRemoteDataContextRuntimeException() {
+        RuntimeException exception = new RuntimeException("exception");
+        when(remoteEnvironmentEndpoint.getRdcByCrn(any())).thenThrow(exception);
+        when(webApplicationExceptionMessageExtractor.getErrorMessage(exception)).thenReturn("extractedMessage");
+
+        assertThatThrownBy(() -> underTest.getRemoteDataContext(PDL_CRN))
+                .hasMessage("Not able to fetch the RDC for PDL %s: %s", PDL_CRN, "extractedMessage")
+                .hasCause(exception);
     }
 
     @Test
@@ -157,6 +165,20 @@ public class PdlSdxDescribeServiceTest {
         when(remoteEnvironmentEndpoint.getDatalakeServicesByCrn(any())).thenReturn(datalakeServices);
         RdcView result = underTest.extendRdcView(rdcView);
         verify(pdlRdcUtil).extendRdcView(rdcView, datalakeServices);
+    }
+
+    @Test
+    void testExtendRdcViewException() {
+        RdcView rdcView = mock();
+        when(rdcView.getStackCrn()).thenReturn(PDL_CRN);
+        DescribeDatalakeServicesResponse datalakeServices = mock();
+        RuntimeException exception = new RuntimeException("message");
+        when(remoteEnvironmentEndpoint.getDatalakeServicesByCrn(any())).thenThrow(exception);
+        when(webApplicationExceptionMessageExtractor.getErrorMessage(exception)).thenReturn("extractedMessage");
+
+        assertThatThrownBy(() -> underTest.extendRdcView(rdcView))
+                .hasMessage("Not able to fetch the datalake services for PDL %s: %s", PDL_CRN, "extractedMessage")
+                .hasCause(exception);
     }
 
     @Test
@@ -265,6 +287,18 @@ public class PdlSdxDescribeServiceTest {
         Optional<String> result = underTest.getCACertsForEnvironment(ENV_CRN);
 
         assertEquals("certecske", result.get());
+    }
+
+    @Test
+    void testGetCACertsForEnvironmentException() {
+        RuntimeException exception = new RuntimeException("exception");
+        when(remoteEnvironmentEndpoint.getRootCertificateByCrn(PDL_CRN)).thenThrow(exception);
+        when(webApplicationExceptionMessageExtractor.getErrorMessage(exception)).thenReturn("extractedMessage");
+        when(environment.getCrn()).thenReturn(PDL_CRN);
+
+        assertThatThrownBy(() -> underTest.getCACertsForEnvironment(ENV_CRN))
+                .hasMessage("Not able to fetch CA certs for PDL %s: %s", PDL_CRN, "extractedMessage")
+                .hasCause(exception);
     }
 
     @Test

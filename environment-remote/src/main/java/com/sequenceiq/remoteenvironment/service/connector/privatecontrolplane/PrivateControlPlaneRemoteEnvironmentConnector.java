@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.auth.crn.CrnParseException;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyException;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.flow.core.PayloadContextProvider;
 import com.sequenceiq.remoteenvironment.DescribeEnvironmentPropertiesV2Response;
 import com.sequenceiq.remoteenvironment.DescribeEnvironmentV2Response;
@@ -211,8 +212,11 @@ public class PrivateControlPlaneRemoteEnvironmentConnector implements PayloadCon
         LOGGER.debug("The describe of remote environment('{}') with actor('{}') is executed by thread: {}", environmentCrn, actorCrn,
                 Thread.currentThread().getName());
         try {
-            return measure(() -> privateControlPlaneClient.getEnvironment(controlPlane.getResourceCrn(), actorCrn, environmentCrn),
+            DescribeEnvironmentV2Response response = measure(
+                    () -> privateControlPlaneClient.getEnvironment(controlPlane.getResourceCrn(), actorCrn, environmentCrn),
                     LOGGER, "Cluster proxy call took us {} ms for pvc {}", controlPlane.getResourceCrn());
+            MDCBuilder.buildMdcContext(response.getEnvironment());
+            return response;
         } catch (Exception e) {
             handleUnauthorized(environmentCrn, e, "environment");
             LOGGER.warn("Failed to query environment for crn {}", environmentCrn, e);

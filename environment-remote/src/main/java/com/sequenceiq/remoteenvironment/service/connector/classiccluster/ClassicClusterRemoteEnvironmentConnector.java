@@ -18,6 +18,7 @@ import com.cloudera.thunderhead.service.environments2api.model.GetRootCertificat
 import com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto;
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.remotecluster.client.RemoteClusterServiceClient;
 import com.sequenceiq.remoteenvironment.DescribeEnvironmentV2Response;
 import com.sequenceiq.remoteenvironment.api.v1.environment.model.SimpleRemoteEnvironmentResponse;
@@ -131,6 +132,8 @@ public class ClassicClusterRemoteEnvironmentConnector implements RemoteEnvironme
 
     private OnPremisesApiProto.Cluster getCluster(String userCrn, String crn, boolean withDetails) {
         OnPremisesApiProto.Cluster cluster = remoteClusterServiceClient.describeClassicCluster(userCrn, crn, withDetails);
+        MDCBuilder.buildMdcContext(cluster);
+        MDCBuilder.addResourceCrn(cluster.getClusterCrn());
         if (!isBaseCluster(cluster)) {
             throw new BadRequestException("Only Classic Clusters with BASE_CLUSTER cluster type can be used as environment.");
         }

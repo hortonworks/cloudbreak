@@ -28,31 +28,30 @@ public class RemoteEnvironmentController implements RemoteEnvironmentEndpoint {
 
     @Override
     public SimpleRemoteEnvironmentResponses list(List<String> types) {
-        MDCBuilder.buildMdcContext();
         return remoteEnvironmentService.list(ThreadBasedUserCrnProvider.getUserCrn(), types);
     }
 
     @Override
     public DescribeEnvironmentResponse getByCrn(@RequestObject DescribeRemoteEnvironment request) {
-        MDCBuilder.buildMdcContext();
+        MDCBuilder.buildMdcContext(request);
         return remoteEnvironmentService.describeV1(ThreadBasedUserCrnProvider.getUserCrn(), request);
     }
 
     @Override
     public DescribeDatalakeAsApiRemoteDataContextResponse getRdcByCrn(@RequestObject DescribeRemoteEnvironment request) {
-        MDCBuilder.buildMdcContext();
+        MDCBuilder.buildMdcContext(request);
         return remoteEnvironmentService.getRdcByCrn(ThreadBasedUserCrnProvider.getUserCrn(), request);
     }
 
     @Override
     public DescribeDatalakeServicesResponse getDatalakeServicesByCrn(@RequestObject DescribeDatalakeServicesRequest request) {
-        MDCBuilder.buildMdcContext();
+        MDCBuilder.addResourceCrn(request.getClusterid());
         return remoteEnvironmentService.getDatalakeServicesByCrn(ThreadBasedUserCrnProvider.getUserCrn(), request);
     }
 
     @Override
     public GetRootCertificateResponse getRootCertificateByCrn(@RequestObject String environmentCrn) {
-        MDCBuilder.buildMdcContext();
+        MDCBuilder.addResourceCrn(environmentCrn);
         return remoteEnvironmentService.getRootCertificateByCrn(ThreadBasedUserCrnProvider.getUserCrn(), environmentCrn);
     }
 }

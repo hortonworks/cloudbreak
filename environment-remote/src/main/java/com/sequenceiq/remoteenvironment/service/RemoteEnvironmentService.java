@@ -30,7 +30,6 @@ import com.cloudera.thunderhead.service.environments2api.model.GetRootCertificat
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.remoteenvironment.DescribeEnvironmentV2Response;
 import com.sequenceiq.remoteenvironment.api.v1.environment.model.DescribeRemoteEnvironment;
 import com.sequenceiq.remoteenvironment.api.v1.environment.model.SimpleRemoteEnvironmentResponse;
@@ -128,7 +127,6 @@ public class RemoteEnvironmentService {
     }
 
     public DescribeEnvironmentResponse describeV1(String userCrn, DescribeRemoteEnvironment request) {
-        MDCBuilder.buildMdcContext();
         throwExceptionIfNotEntitled(userCrn);
         DescribeEnvironmentResponse describeEnvironmentResponse = remoteEnvironmentConnectorProvider.getForCrn(request.getCrn())
                 .describeV1(userCrn, request.getCrn());
@@ -137,7 +135,6 @@ public class RemoteEnvironmentService {
     }
 
     public DescribeEnvironmentV2Response describeV2(String userCrn, DescribeRemoteEnvironment request) {
-        MDCBuilder.buildMdcContext();
         throwExceptionIfNotEntitled(userCrn);
         return remoteEnvironmentConnectorProvider.getForCrn(request.getCrn())
                 .describeV2(userCrn, request.getCrn());
