@@ -189,12 +189,10 @@ public class StackUpscaleService {
             String errorReason = exception != null ? exception.getMessage() : "Error reason is unknown";
             if (!upscaleForRepair) {
                 metadataSetupService.cleanupRequestedInstancesWithoutFQDN(stackId, hostGroupWithAdjustment.keySet());
-                stackUpdater.updateStackStatus(stackId, DetailedStackStatus.UPSCALE_FAILED, "Stack update failed. " + errorReason);
                 flowMessageService.fireEventAndLog(stackId, UPDATE_FAILED.name(), STACK_INFRASTRUCTURE_UPDATE_FAILED, errorReason);
             } else {
                 metadataSetupService.handleRepairFail(stackId, hostgroupWithHostnames.values().stream()
                         .flatMap(Collection::stream).collect(Collectors.toSet()));
-                stackUpdater.updateStackStatus(stackId, DetailedStackStatus.REPAIR_FAILED, "Stack repair failed. " + errorReason);
                 flowMessageService.fireEventAndLog(stackId, UPDATE_FAILED.name(), STACK_REPAIR_FAILED, errorReason);
             }
         } catch (Exception e) {

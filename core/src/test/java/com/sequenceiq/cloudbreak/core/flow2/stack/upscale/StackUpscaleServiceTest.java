@@ -1,21 +1,27 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.upscale;
 
 import static com.sequenceiq.cloudbreak.TestUtil.instanceMetaData;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_INFRASTRUCTURE_UPDATE_FAILED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_REPAIR_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_UPSCALE_QUOTA_ISSUE;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_VERTICALSCALE_ISSUE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -103,6 +109,17 @@ class StackUpscaleServiceTest {
 
     @Mock
     private InstanceMetadataInstanceIdUpdater instanceMetadataInstanceIdUpdater;
+
+    private static CloudResource getCreatedInstanceResource(Long privateId, String instanceId, String groupName) {
+        return CloudResource.builder()
+                .withType(ResourceType.AWS_INSTANCE)
+                .withPrivateId(privateId)
+                .withInstanceId(instanceId)
+                .withGroup(groupName)
+                .withName(groupName + privateId)
+                .withParameters(Map.of())
+                .build();
+    }
 
     @Test
     public void testGetInstanceCountToCreateWhenRepair() {
@@ -651,14 +668,19 @@ class StackUpscaleServiceTest {
         verify(instanceMetadataInstanceIdUpdater, times(1)).updateWithInstanceIdAndStatus(any(), any(), any());
     }
 
-    private static CloudResource getCreatedInstanceResource(Long privateId, String instanceId, String groupName) {
-        return CloudResource.builder()
-                .withType(ResourceType.AWS_INSTANCE)
-                .withPrivateId(privateId)
-                .withInstanceId(instanceId)
-                .withGroup(groupName)
-                .withName(groupName + privateId)
-                .withParameters(Map.of())
-                .build();
+    @Test
+    void testHandleUpscaleFailureWhenRepair() {
+        underTest.handleStackUpscaleFailure(true, new HashMap<>(), new RuntimeException("error"), 1L, new HashMap<>());
+        verify(metadataSetupService, times(1)).handleRepairFail(eq(1L), any());
+        verify(metadataSetupService, never()).cleanupRequestedInstancesWithoutFQDN(anyLong(), any());
+        verify(flowMessageService, times(1)).fireEventAndLog(eq(1L), eq(UPDATE_FAILED.name()), eq(STACK_REPAIR_FAILED), eq("error"));
+    }
+
+    @Test
+    void testHandleUpscaleFailureWhenNotRepair() {
+        underTest.handleStackUpscaleFailure(false, new HashMap<>(), new RuntimeException("error"), 1L, new HashMap<>());
+        verify(metadataSetupService, times(1)).cleanupRequestedInstancesWithoutFQDN(eq(1L), any());
+        verify(metadataSetupService, never()).handleRepairFail(anyLong(), any());
+        verify(flowMessageService, times(1)).fireEventAndLog(eq(1L), eq(UPDATE_FAILED.name()), eq(STACK_INFRASTRUCTURE_UPDATE_FAILED), eq("error"));
     }
 }

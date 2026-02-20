@@ -590,12 +590,20 @@ public class StackUpscaleActions {
         return new AbstractStackFailureAction<StackUpscaleState, StackUpscaleEvent>() {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
-                LOGGER.warn("Stack upscale failed", payload.getException());
+                Exception exception = payload.getException();
+                LOGGER.warn("Stack upscale failed", exception);
                 Map<String, Set<String>> hostgroupWithHostnames = (Map<String, Set<String>>) variables.getOrDefault(HOST_GROUP_WITH_HOSTNAMES, new HashMap<>());
                 Map<String, Integer> hostGroupWithAdjustment = (Map<String, Integer>) variables.getOrDefault(HOST_GROUP_WITH_ADJUSTMENT, new HashMap<>());
-                getMetricService().incrementMetricCounter(MetricType.STACK_UPSCALE_FAILED, context.getStack(), payload.getException());
+                getMetricService().incrementMetricCounter(MetricType.STACK_UPSCALE_FAILED, context.getStack(), exception);
+                String errorReason = exception != null ? exception.getMessage() : "Error reason is unknown";
+                boolean repair = isRepair(variables);
+                if (!repair) {
+                    stackUpdater.updateStackStatus(context.getStackId(), DetailedStackStatus.UPSCALE_FAILED, "Stack update failed. " + errorReason);
+                } else {
+                    stackUpdater.updateStackStatus(context.getStackId(), DetailedStackStatus.REPAIR_FAILED, "Stack repair failed. " + errorReason);
+                }
                 StackUpscaleFailedConclusionRequest stackUpscaleFailedConclusionRequest = new StackUpscaleFailedConclusionRequest(context.getStackId(),
-                        hostgroupWithHostnames, hostGroupWithAdjustment, isRepair(variables), payload.getException());
+                        hostgroupWithHostnames, hostGroupWithAdjustment, repair, exception);
                 sendEvent(context, stackUpscaleFailedConclusionRequest);
             }
         };

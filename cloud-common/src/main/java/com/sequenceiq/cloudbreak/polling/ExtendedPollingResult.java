@@ -44,6 +44,15 @@ public class ExtendedPollingResult {
         return failedInstancePrivateIds;
     }
 
+    @Override
+    public String toString() {
+        return "ExtendedPollingResult{" +
+                "pollingResult=" + pollingResult +
+                ", exception=" + exception +
+                ", failedInstancePrivateIds=" + failedInstancePrivateIds +
+                '}';
+    }
+
     public static class ExtendedPollingResultBuilder {
         private Set<Long> failedInstancePrivateIds;
 
@@ -90,5 +99,4 @@ public class ExtendedPollingResult {
             return new ExtendedPollingResult(pollingResult, exception, failedInstancePrivateIds);
         }
     }
-
 }
