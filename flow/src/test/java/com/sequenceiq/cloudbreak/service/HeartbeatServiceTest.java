@@ -474,7 +474,7 @@ class HeartbeatServiceTest {
             }
 
             @Override
-            public <T> T testWith1SecDelayMax5TimesWithCheckRetriable(Supplier<T> action) throws ActionFailedException {
+            public <T> T testWith1SecDelayMax5TimesAndMultiplier2WithCheckRetriable(Supplier<T> action) throws ActionFailedException {
                 return null;
             }
 
@@ -538,7 +538,7 @@ class HeartbeatServiceTest {
             }
 
             @Override
-            public <T> T testWith1SecDelayMax5TimesWithCheckRetriable(Supplier<T> action) throws ActionFailedException {
+            public <T> T testWith1SecDelayMax5TimesAndMultiplier2WithCheckRetriable(Supplier<T> action) throws ActionFailedException {
                 return null;
             }
 

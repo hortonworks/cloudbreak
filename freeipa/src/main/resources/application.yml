@@ -473,3 +473,7 @@ retry:
       - 'Failed to execute: .*Stdout=Failed to determine the current java version\.'
       # Salt api authentication issue
       - 'Status: 401 Unauthorized Response.*'
+      # FreeIPA stopped or not reachable
+      - 'SocketTimeoutException: Connect timed out'
+      - 'Check if the FreeIPA security rules have not changed and the instance is in running state'
+      - 'FreeIpaHostNotAvailableException'

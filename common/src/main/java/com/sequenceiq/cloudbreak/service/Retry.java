@@ -16,7 +16,7 @@ public interface Retry {
 
     <T> T testWith1SecDelayMax5TimesMaxDelay5MinutesMultiplier5(Supplier<T> action) throws ActionFailedException;
 
-    <T> T testWith1SecDelayMax5TimesWithCheckRetriable(Supplier<T> action) throws ActionFailedException;
+    <T> T testWith1SecDelayMax5TimesAndMultiplier2WithCheckRetriable(Supplier<T> action) throws ActionFailedException;
 
     <T> T testWithoutRetry(Supplier<T> action) throws ActionFailedException;
 

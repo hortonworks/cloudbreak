@@ -5,6 +5,7 @@ import java.util.function.Supplier;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.retry.annotation.Backoff;
@@ -79,7 +80,7 @@ public class RetryService implements Retry {
             maxAttempts = 5,
             backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000)
     )
-    public <T> T testWith1SecDelayMax5TimesWithCheckRetriable(Supplier<T> action) throws ActionFailedException {
+    public <T> T testWith1SecDelayMax5TimesAndMultiplier2WithCheckRetriable(Supplier<T> action) throws ActionFailedException {
         return runWithCheckRetriable(action);
     }
 
@@ -92,15 +93,18 @@ public class RetryService implements Retry {
     }
 
     private boolean isRetriable(ActionFailedException e) {
-        Throwable cause = e.getCause();
-        if (cause == null) {
+        StringBuilder messageBuilder = new StringBuilder()
+                .append(e.getMessage());
+        if (e.getCause() != null) {
+            messageBuilder.append(". ")
+                    .append(ExceptionUtils.getRootCauseMessage(e.getCause()));
+            String message = messageBuilder.toString();
+            boolean retriable = retryErrorPatterns.isEmpty() || !retryErrorPatterns.get().containsNonRetryableError(message);
+            LOGGER.debug("Checked if message '{}' is retriable and the result is {}", message, retriable);
+            return retriable;
+        } else {
             LOGGER.debug("Empty cause, assuming it is retryable");
             return true;
         }
-        String message = cause.getMessage();
-        boolean retriable = retryErrorPatterns.isEmpty() || !retryErrorPatterns.get().containsNonRetryableError(message);
-        LOGGER.debug("Checked if message '{}' is retriable and the result is {}", message, retriable);
-        return retriable;
     }
-
 }

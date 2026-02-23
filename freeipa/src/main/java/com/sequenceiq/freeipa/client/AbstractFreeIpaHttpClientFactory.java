@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.client.RestClientUtil;
 import com.sequenceiq.cloudbreak.client.RpcListener;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyConfiguration;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.sslcontext.SSLContextProvider;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
@@ -49,6 +50,7 @@ public abstract class AbstractFreeIpaHttpClientFactory<T> {
 
     public T getClient(Stack stack, InstanceMetaData instance)
             throws FreeIpaClientException, MalformedURLException {
+        MDCBuilder.buildMdcContext(stack);
         if (clusterProxyService.isCreateConfigForClusterProxy(stack)) {
             return buildClientForClusterProxy(stack, instance, Optional.empty(), Optional.empty());
         } else {

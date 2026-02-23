@@ -161,6 +161,10 @@ public class InstanceMetaData implements OrchestrationNode {
         return instanceStatus.isAvailable();
     }
 
+    public boolean isNotAvailable() {
+        return instanceStatus.isNotAvailable();
+    }
+
     public boolean isTerminated() {
         return InstanceStatus.TERMINATED.equals(instanceStatus);
     }

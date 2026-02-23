@@ -23,6 +23,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.client.RPCMessage;
 import com.sequenceiq.cloudbreak.client.RPCResponse;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.cloudbreak.service.Retry;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.health.NodeHealthDetails;
@@ -40,7 +41,7 @@ import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 import com.sequenceiq.freeipa.util.HealthCheckAvailabilityChecker;
 
 @ExtendWith(MockitoExtension.class)
-public class FreeIpaInstanceHealthDetailsServiceTest {
+public class FreeIpaInstanceHealthDetailsClientServiceTest {
     private static final String ENVIRONMENT_ID = "crn:cdp:environments:us-west-1:f39af961-e0ce-4f79-826c-45502efb9ca3:environment:12345-6789";
 
     private static FreeIpaClientException ipaClientException;
@@ -59,10 +60,7 @@ public class FreeIpaInstanceHealthDetailsServiceTest {
     private FreeIpaHealthCheckClientFactory freeIpaHealthCheckClientFactory;
 
     @InjectMocks
-    private FreeIpaInstanceHealthDetailsService underTest;
-
-    @Mock
-    private FreeIpaInstanceHealthDetailsService mockFreeIpaInstanceHealthDetailsService;
+    private FreeIpaInstanceHealthDetailsClientService underTest;
 
     private List<RPCMessage> getLegacyBaseMessages(String host) {
         List<RPCMessage> messages = new ArrayList<>();
@@ -298,7 +296,6 @@ public class FreeIpaInstanceHealthDetailsServiceTest {
         when(mockIpaClient.getHostname()).thenReturn("test.host");
         when(freeIpaClientFactory.getFreeIpaClientForStackForLegacyHealthCheck(any(), any())).thenReturn(mockIpaClient);
         when(mockIpaClient.serverConnCheck(anyString(), anyString())).thenReturn(getLegacyGoodPayload(HOST));
-
         InstanceMetaData instanceMetaData = getInstance();
         Stack stack = getStack(Set.of(instanceMetaData));
 
@@ -332,7 +329,7 @@ public class FreeIpaInstanceHealthDetailsServiceTest {
         InstanceMetaData instanceMetaData = getInstance();
         Stack stack = getStack(Set.of(instanceMetaData));
 
-        assertThrows(FreeIpaClientException.class, () -> underTest.checkFreeIpaHealth(stack, instanceMetaData));
+        assertThrows(Retry.ActionFailedNonRetryableException.class, () -> underTest.checkFreeIpaHealth(stack, instanceMetaData));
     }
 
     @Test
@@ -396,7 +393,7 @@ public class FreeIpaInstanceHealthDetailsServiceTest {
         InstanceMetaData instanceMetaData = getInstance();
         Stack stack = getStack(Set.of(instanceMetaData));
 
-        assertThrows(FreeIpaClientException.class, () -> underTest.checkFreeIpaHealth(stack, instanceMetaData));
+        assertThrows(Retry.ActionFailedException.class, () -> underTest.checkFreeIpaHealth(stack, instanceMetaData));
     }
 
     @Test
@@ -407,7 +404,7 @@ public class FreeIpaInstanceHealthDetailsServiceTest {
         instanceMetaData.setDiscoveryFQDN(null);
         Stack stack = getStack(Set.of(instanceMetaData));
 
-        assertThrows(FreeIpaClientException.class, () -> underTest.checkFreeIpaHealth(stack, instanceMetaData));
+        assertThrows(Retry.ActionFailedNonRetryableException.class, () -> underTest.checkFreeIpaHealth(stack, instanceMetaData));
     }
 
     @Test
@@ -418,7 +415,7 @@ public class FreeIpaInstanceHealthDetailsServiceTest {
         instanceMetaData.setDiscoveryFQDN(null);
         Stack stack = getStack(Set.of(instanceMetaData));
 
-        assertThrows(FreeIpaClientException.class, () -> underTest.checkFreeIpaHealth(stack, instanceMetaData));
+        assertThrows(Retry.ActionFailedNonRetryableException.class, () -> underTest.checkFreeIpaHealth(stack, instanceMetaData));
     }
 
 }

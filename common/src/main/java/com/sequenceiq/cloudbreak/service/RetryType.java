@@ -13,7 +13,7 @@ public enum RetryType {
             Retry::testWith1SecDelayMax5Times
     ),
     WITH_1_SEC_DELAY_MAX_5_TIMES_WITH_CHECK_RETRYABLE(
-            Retry::testWith1SecDelayMax5TimesWithCheckRetriable
+            Retry::testWith1SecDelayMax5TimesAndMultiplier2WithCheckRetriable
     ),
     WITH_1_SEC_DELAY_MAX_3_TIMES(
             Retry::testWith1SecDelayMax3Times

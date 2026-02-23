@@ -30,7 +30,7 @@ class RetryErrorPatternsTest {
 
     private static Stream<Arguments> provideTestCases() {
         return Stream.of(
-                Arguments.of("Failed to execute: {Comment=Command \"/opt/salt/scripts/trust_status_validation.sh\" run}", true),
+                Arguments.of("TEST...TEST....Failed to execute: {Comment=Command \"/opt/salt/scripts/trust_status_validation.sh\" run}", true),
                 Arguments.of("Failed to execute: {Comment=Command \"/opt/salt/scripts/trust_status_validation.sh\" with extra data}", true),
                 Arguments.of("Failed to execute: Some context Stderr=Configuration file could not be loaded. More details", true),
                 Arguments.of("Failed to execute: prefix Stderr=Configuration file could not be loaded. suffix", true),
@@ -39,6 +39,9 @@ class RetryErrorPatternsTest {
                 Arguments.of("Failed to execute: Some context Stdout=Failed to determine the current java version. More output", true),
                 Arguments.of("Failed to execute: prefix Stdout=Failed to determine the current java version. suffix", true),
                 Arguments.of("Status: 401 Unauthorized Response: <!DOCTYPE html PUBLIC", true),
+                Arguments.of("java.net.SocketTimeoutException: Connect timed out", true),
+                Arguments.of("STOP,STOP Check if the FreeIPA security rules have not changed and the instance is in running state", true),
+                Arguments.of("com.sequenceiq.freeipa.client.FreeIpaHostNotAvailableException", true),
                 Arguments.of(null, false),
                 Arguments.of("", false),
                 Arguments.of("Connection timeout occurred", false),

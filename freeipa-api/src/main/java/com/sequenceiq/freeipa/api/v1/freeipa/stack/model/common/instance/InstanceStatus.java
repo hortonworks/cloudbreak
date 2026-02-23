@@ -25,4 +25,8 @@ public enum InstanceStatus {
     public boolean isAvailable() {
         return AVAILABLE_STATUSES.contains(this);
     }
+
+    public boolean isNotAvailable() {
+        return !isAvailable();
+    }
 }

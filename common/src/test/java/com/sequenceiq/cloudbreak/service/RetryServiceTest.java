@@ -32,18 +32,11 @@ class RetryServiceTest {
     }
 
     @Test
-    void noCause() {
-        assertThatThrownBy(() -> underTest.testWith1SecDelayMax5TimesWithCheckRetriable(thrownInSupplierWithoutCause()))
-                .isInstanceOf(Retry.ActionFailedException.class)
-                .hasNoCause();
-    }
-
-    @Test
     void noPatterns() {
         when(retryErrorPatternsOptional.isEmpty()).thenReturn(true);
         String message = "whatever";
 
-        assertThatThrownBy(() -> underTest.testWith1SecDelayMax5TimesWithCheckRetriable(thrownInSupplierWithCause(message)))
+        assertThatThrownBy(() -> underTest.testWith1SecDelayMax5TimesAndMultiplier2WithCheckRetriable(thrownInSupplierWithCause(message)))
                 .isInstanceOf(Retry.ActionFailedException.class)
                 .cause()
                 .hasMessage(message);
@@ -54,12 +47,20 @@ class RetryServiceTest {
         when(retryErrorPatternsOptional.isEmpty()).thenReturn(false);
         when(retryErrorPatternsOptional.get()).thenReturn(retryErrorPatterns);
         String message = "pattern";
-        when(retryErrorPatterns.containsNonRetryableError(message)).thenReturn(true);
+        when(retryErrorPatterns.containsNonRetryableError("java.lang.RuntimeException: pattern. RuntimeException: pattern"))
+                .thenReturn(true);
 
-        assertThatThrownBy(() -> underTest.testWith1SecDelayMax5TimesWithCheckRetriable(thrownInSupplierWithCause(message)))
+        assertThatThrownBy(() -> underTest.testWith1SecDelayMax5TimesAndMultiplier2WithCheckRetriable(thrownInSupplierWithCause(message)))
                 .isInstanceOf(Retry.ActionFailedNonRetryableException.class)
                 .cause()
                 .hasMessage(message);
+    }
+
+    @Test
+    void noCause() {
+        assertThatThrownBy(() -> underTest.testWith1SecDelayMax5TimesAndMultiplier2WithCheckRetriable(thrownInSupplierWithoutCause()))
+                .isInstanceOf(Retry.ActionFailedException.class)
+                .hasNoCause();
     }
 
     @Test
@@ -67,9 +68,10 @@ class RetryServiceTest {
         when(retryErrorPatternsOptional.isEmpty()).thenReturn(false);
         when(retryErrorPatternsOptional.get()).thenReturn(retryErrorPatterns);
         String message = "pattern";
-        when(retryErrorPatterns.containsNonRetryableError(message)).thenReturn(false);
+        when(retryErrorPatterns.containsNonRetryableError("java.lang.RuntimeException: pattern. RuntimeException: pattern"))
+                .thenReturn(false);
 
-        assertThatThrownBy(() -> underTest.testWith1SecDelayMax5TimesWithCheckRetriable(thrownInSupplierWithCause(message)))
+        assertThatThrownBy(() -> underTest.testWith1SecDelayMax5TimesAndMultiplier2WithCheckRetriable(thrownInSupplierWithCause(message)))
                 .isInstanceOf(Retry.ActionFailedException.class)
                 .cause()
                 .hasMessage(message);
