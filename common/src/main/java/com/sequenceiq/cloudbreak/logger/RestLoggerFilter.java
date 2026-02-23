@@ -123,7 +123,7 @@ public class RestLoggerFilter extends OncePerRequestFilter {
     }
 
     private boolean excludePathPattern(String requestPath, int statusCode) {
-        return (requestPath.contains("/metrics") || requestPath.contains("/autoscale")) && responseIsSuccessful(statusCode);
+        return requestPath.contains("/metrics") && responseIsSuccessful(statusCode);
     }
 
     private boolean responseIsSuccessful(int statusCode) {
