@@ -67,6 +67,10 @@ public abstract class AbstractMinimalTest extends AbstractTestNGSpringContextTes
 
     protected static final Map<String, Status> START_FAILED = Map.of("status", Status.START_FAILED, "clusterStatus", Status.START_FAILED);
 
+    protected static final Map<String, Status> UPDATE_IN_PROGRESS = Map.of("status", Status.UPDATE_IN_PROGRESS, "clusterStatus", Status.UPDATE_IN_PROGRESS);
+
+    protected static final Map<String, Status> NODE_FAILURE = Map.of("status", Status.NODE_FAILURE, "clusterStatus", Status.NODE_FAILURE);
+
     protected static final String TEST_CONTEXT_WITH_MOCK = "testContextWithMock";
 
     protected static final String TEST_CONTEXT = "testContextWithoutMock";
