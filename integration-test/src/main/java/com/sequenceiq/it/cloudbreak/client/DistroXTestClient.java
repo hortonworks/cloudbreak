@@ -27,6 +27,10 @@ import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXForceDeleteAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXGetAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXInstanceMetadataUpdateAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXInternalGetAction;
+import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXMigrationFromZookeeperToKraftFinalizeAction;
+import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXMigrationFromZookeeperToKraftRollbackAction;
+import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXMigrationFromZookeeperToKraftStartAction;
+import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXMigrationFromZookeeperToKraftStatusAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXOSUpgradeByUpgradeSetsAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXRefreshAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXRemoveInstancesAction;
@@ -214,5 +218,25 @@ public class DistroXTestClient {
 
     public Action<DistroXTestDto, CloudbreakClient> updatePublicDnsEntries() {
         return new DistroXUpdatePublicDnsEntriesAction();
+    }
+
+    public Action<DistroXTestDto, CloudbreakClient> startKraftMigration() {
+        return new DistroXMigrationFromZookeeperToKraftStartAction();
+    }
+
+    public Action<DistroXTestDto, CloudbreakClient> finalizeKraftMigration() {
+        return new DistroXMigrationFromZookeeperToKraftFinalizeAction();
+    }
+
+    public Action<DistroXTestDto, CloudbreakClient> rollbackKraftMigration() {
+        return new DistroXMigrationFromZookeeperToKraftRollbackAction();
+    }
+
+    public Action<DistroXTestDto, CloudbreakClient> getKraftMigrationStatus() {
+        return new DistroXMigrationFromZookeeperToKraftStatusAction();
+    }
+
+    public Action<DistroXTestDto, CloudbreakClient> validateKraftMigrationStatus(String desiredStatus) {
+        return new DistroXMigrationFromZookeeperToKraftStatusAction(desiredStatus);
     }
 }

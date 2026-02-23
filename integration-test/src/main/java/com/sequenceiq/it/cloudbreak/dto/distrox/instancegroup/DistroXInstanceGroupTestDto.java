@@ -53,6 +53,10 @@ public class DistroXInstanceGroupTestDto extends AbstractCloudbreakTestDto<Insta
         return withHostGroup(testContext, cloudPlatform, MASTER, COORDINATOR, EXECUTOR);
     }
 
+    public static List<DistroXInstanceGroupTestDto> streamsHostGroups(TestContext testContext, CloudPlatform cloudPlatform) {
+        return withHostGroup(testContext, cloudPlatform, MASTER, CORE_BROKER, BROKER, KRAFT);
+    }
+
     public static List<DistroXInstanceGroupTestDto> streamsHAHostGroups(TestContext testContext, CloudPlatform cloudPlatform) {
         return withHostGroup(testContext, cloudPlatform, MANAGER, MASTER_STREAMS, CORE_ZOOKEEPER, CORE_BROKER, BROKER, SRM, CONNECT, KRAFT);
     }

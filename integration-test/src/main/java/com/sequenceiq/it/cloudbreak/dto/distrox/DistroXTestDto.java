@@ -4,8 +4,10 @@ import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.MASTER;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.emptyRunningParameter;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 import static com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest.STACK_DELETED;
+import static com.sequenceiq.it.cloudbreak.util.CloudbreakUtil.sleep;
 import static java.lang.String.format;
 
+import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumMap;
@@ -38,6 +40,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Resp
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.polling.AttemptBasedTimeoutChecker;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.common.model.SeLinux;
@@ -244,6 +247,50 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
                 .filter(instanceGroupV4Response -> instanceGroupV4Response.getMetadata().stream()
                         .anyMatch(instanceMetaDataV4Response -> Objects.nonNull(instanceMetaDataV4Response.getInstanceId())))
                 .findAny();
+        if (instanceGroup.isPresent()) {
+            List<String> instanceIds = instanceGroup.get().getMetadata().stream()
+                    .map(InstanceMetaDataV4Response::getInstanceId)
+                    .filter(Objects::nonNull)
+                    .toList();
+            return awaitForInstance(Map.of(instanceIds, instanceStatus));
+        } else {
+            throw new IllegalStateException("Can't find valid instance group with this name: " + hostGroup);
+        }
+    }
+
+    public DistroXTestDto awaitForCurrentlyNotExistingHostGroup(String hostGroup, InstanceStatus instanceStatus) {
+        if (!getTestContext().getExceptionMap().isEmpty()) {
+            Log.await(LOGGER, format("Await for host group should be skipped because of previous error. awaitForHostGroup [%s] - [%s]",
+                    hostGroup, instanceStatus));
+            return this;
+        }
+        Log.await(LOGGER, String.format("%s for %s", hostGroup, instanceStatus));
+        Duration pollingInterval = getTestContext().getPollingDurationOrTheDefault(RunningParameter.emptyRunningParameter());
+        int maxRetry = getTestContext().getMaxRetry();
+        AttemptBasedTimeoutChecker timeoutChecker = new AttemptBasedTimeoutChecker(maxRetry);
+        boolean timeout = false;
+        int attempts = 0;
+
+        Optional<InstanceGroupV4Response> instanceGroup = getResponse().getInstanceGroups().stream()
+                .filter(instanceGroupV4Response -> hostGroup.equals(instanceGroupV4Response.getName()))
+                .filter(instanceGroupV4Response -> instanceGroupV4Response.getMetadata().stream()
+                        .anyMatch(instanceMetaDataV4Response -> Objects.nonNull(instanceMetaDataV4Response.getInstanceId())))
+                .findAny();
+        while (!instanceGroup.isPresent() && !timeout) {
+
+            refreshResponse(getTestContext(), getTestContext().getCloudbreakClient());
+            instanceGroup = getResponse().getInstanceGroups().stream()
+                    .filter(instanceGroupV4Response -> hostGroup.equals(instanceGroupV4Response.getName()))
+                    .filter(instanceGroupV4Response -> instanceGroupV4Response.getMetadata().stream()
+                            .anyMatch(instanceMetaDataV4Response -> Objects.nonNull(instanceMetaDataV4Response.getInstanceId())))
+                    .findAny();
+            sleep(pollingInterval.toMillis());
+            attempts++;
+            if (attempts > maxRetry) {
+                LOGGER.debug("Wait timeout.");
+                timeout = true;
+            }
+        }
         if (instanceGroup.isPresent()) {
             List<String> instanceIds = instanceGroup.get().getMetadata().stream()
                     .map(InstanceMetaDataV4Response::getInstanceId)
