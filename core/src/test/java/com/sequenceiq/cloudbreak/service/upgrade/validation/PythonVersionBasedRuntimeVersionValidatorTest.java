@@ -92,6 +92,8 @@ class PythonVersionBasedRuntimeVersionValidatorTest {
                 { "7.2.16", true, false, WORKLOAD,  "7.2.16", true, false, false },
                 { "7.2.16", true, false, WORKLOAD,  "7.2.16", true, true, true },
                 { "7.2.16", false, true, WORKLOAD,  "7.2.16", true, true, true },
+                { "7.2.16", false, true, WORKLOAD,  "7.3.1", false, true, false },
+                { "7.2.16", true, true, WORKLOAD,  "7.3.2", false, true, true },
 
                 { "7.2.16", true, true, WORKLOAD,  "7.2.17", true, false, true },
                 { "7.2.16", false, true, WORKLOAD,  "7.2.17", true, false, false },
@@ -106,6 +108,8 @@ class PythonVersionBasedRuntimeVersionValidatorTest {
                 { "7.2.17", true, false, DATALAKE,  "7.2.17", true, false, false },
                 { "7.2.17", true, false, DATALAKE,  "7.2.17", true, true, true },
                 { "7.2.17", false, true, DATALAKE,  "7.2.17", true, true, true },
+                { "7.2.17", true, true, DATALAKE,  "7.3.1", false, true, true },
+                { "7.2.17", true, true, DATALAKE,  "7.3.2", false, true, true },
 
                 { "7.2.17", true, true, DATALAKE,  "7.2.18", true, false, true },
                 { "7.2.17", false, true, DATALAKE,  "7.2.18", true, false, false },
