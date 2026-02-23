@@ -23,6 +23,7 @@ import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.compute.Compute;
 import com.google.api.services.compute.Compute.RegionBackendServices.Delete;
 import com.google.api.services.compute.Compute.RegionBackendServices.Insert;
+import com.google.api.services.compute.Compute.RegionBackendServices.Update;
 import com.google.api.services.compute.model.Backend;
 import com.google.api.services.compute.model.BackendService;
 import com.google.api.services.compute.model.InstanceGroupsListInstances;
@@ -68,20 +69,35 @@ public class GcpBackendServiceResourceBuilder extends AbstractGcpLoadBalancerBui
 
     @Override
     public List<CloudResource> create(GcpContext context, AuthenticatedContext auth, CloudLoadBalancer loadBalancer, Network network) {
+        List<CloudResource> resourcesWithLbType = fetchAllResourceFromDb(resourceType(), auth.getCloudContext().getId()).stream()
+                .filter(resource -> loadBalancer.getType().name()
+                        .equals(resource.getParameter(CloudResource.ATTRIBUTES, LoadBalancerTypeAttribute.class).getName()))
+                .toList();
+        LOGGER.debug("Existing resources with type [{}] and Loadbalancer type [{}]: {}", resourceType(), loadBalancer.getType(), resourcesWithLbType);
         Map<HealthProbeParameters, List<TargetGroupPortPair>> hcPortToTrafficPorts = new HashMap<>();
         loadBalancer.getPortToTargetGroupMapping().keySet().forEach(targetGroupPortPair -> {
             hcPortToTrafficPorts.computeIfAbsent(targetGroupPortPair.getHealthProbeParameters(), healthParams -> new ArrayList<>()).add(targetGroupPortPair);
         });
-        return hcPortToTrafficPorts.entrySet().stream()
-                .map(trafficByHealth -> createCloudResource(context, loadBalancer, trafficByHealth.getKey(), trafficByHealth.getValue()))
+        List<CloudResource> cloudResources = hcPortToTrafficPorts.entrySet().stream()
+                .map(trafficByHealth ->
+                        resourcesWithLbType.stream()
+                                .filter(resource -> resource.getName().contains(mapPortToPortPart(trafficByHealth.getKey().getPort())))
+                                .findFirst().map(existingCloudResource ->
+                                        CloudResource.builder()
+                                                .cloudResource(existingCloudResource)
+                                                .withParameters(Map.of(TRAFFICPORTS, trafficByHealth.getValue(), HCPORT, trafficByHealth.getKey()))
+                                                .build())
+                                .orElseGet(() -> createCloudResource(context, loadBalancer, trafficByHealth.getKey(), trafficByHealth.getValue())))
                 .toList();
+        LOGGER.debug("Created cloud resources with type [{}] and Loadbalancer type [{}]: {}", resourceType(), loadBalancer.getType(), cloudResources);
+        return cloudResources;
     }
 
     private CloudResource createCloudResource(GcpContext context, CloudLoadBalancer loadBalancer, HealthProbeParameters lbHealthCheck,
             List<TargetGroupPortPair> lbTraffics) {
         String resourceName = getResourceNameService().loadBalancerWithPort(context.getName(), loadBalancer.getType(), lbHealthCheck.getPort());
-        Map<String, Object> parameters = Map.of(TRAFFICPORTS, lbTraffics, HCPORT, lbHealthCheck,
-                CloudResource.ATTRIBUTES, Enum.valueOf(LoadBalancerTypeAttribute.class, loadBalancer.getType().name()));
+        Map<String, Object> parameters = Map.of(TRAFFICPORTS, lbTraffics, HCPORT, lbHealthCheck);
+        parameters = enrichParametersWithAttributes(parameters, loadBalancer.getType());
         return CloudResource.builder()
                 .withType(resourceType())
                 .withName(resourceName)
@@ -99,25 +115,34 @@ public class GcpBackendServiceResourceBuilder extends AbstractGcpLoadBalancerBui
 
         for (CloudResource buildableResource : buildableResources) {
             LOGGER.info("Building backend service {} for {}", buildableResource.getName(), projectId);
-            HealthProbeParameters lbHealthCheck = buildableResource.getParameter(HCPORT, HealthProbeParameters.class);
+            Optional<BackendService> backendServiceFromProvider = fetchFromProvider(() ->
+                    context.getCompute().regionBackendServices().get(projectId, regionName, buildableResource.getName()).execute(), buildableResource.getName());
             List<TargetGroupPortPair> lbTraffics = buildableResource.getParameter(TRAFFICPORTS, List.class);
             Set<Group> groups = lbTraffics.stream()
                     .map(targetGroupPortPair -> loadBalancer.getPortToTargetGroupMapping().get(targetGroupPortPair))
                     .flatMap(Collection::stream)
                     .collect(Collectors.toSet());
-            String backendProtocol = lbTraffics.stream()
-                    .map(lbTraffic -> convertProtocol(lbTraffic.getTrafficProtocol()))
-                    .reduce((np1, np2) -> Objects.equals(np1, np2) ? np1 : L3)
-                    .orElse(NetworkProtocol.TCP.name());
+            if (backendServiceFromProvider.isPresent()) {
+                BackendService backendService = backendServiceFromProvider.get();
+                backendService.setBackends(makeBackendForTargetGroup(context, auth, projectId, groups));
+                Update update = context.getCompute().regionBackendServices().update(projectId, regionName, backendService.getName(), backendService);
+                results.add(doOperationalRequest(buildableResource, update));
+            } else {
+                HealthProbeParameters lbHealthCheck = buildableResource.getParameter(HCPORT, HealthProbeParameters.class);
+                String backendProtocol = lbTraffics.stream()
+                        .map(lbTraffic -> convertProtocol(lbTraffic.getTrafficProtocol()))
+                        .reduce((np1, np2) -> Objects.equals(np1, np2) ? np1 : L3)
+                        .orElse(NetworkProtocol.TCP.name());
 
-            BackendService backendService = new BackendService();
-            backendService.setName(buildableResource.getName());
-            backendService.setBackends(makeBackendForTargetGroup(context, auth, projectId, groups));
-            backendService.setLoadBalancingScheme(gcpLoadBalancerTypeConverter.getScheme(loadBalancer).getGcpType());
-            backendService.setProtocol(backendProtocol);
-            setupBackendHealthCheck(backendService, projectId, regionName, lbHealthCheck, healthResources);
-            Insert insert = context.getCompute().regionBackendServices().insert(projectId, regionName, backendService);
-            results.add(doOperationalRequest(buildableResource, insert));
+                BackendService backendService = new BackendService();
+                backendService.setName(buildableResource.getName());
+                backendService.setBackends(makeBackendForTargetGroup(context, auth, projectId, groups));
+                backendService.setLoadBalancingScheme(gcpLoadBalancerTypeConverter.getScheme(loadBalancer).getGcpType());
+                backendService.setProtocol(backendProtocol);
+                setupBackendHealthCheck(backendService, projectId, regionName, lbHealthCheck, healthResources);
+                Insert insert = context.getCompute().regionBackendServices().insert(projectId, regionName, backendService);
+                results.add(doOperationalRequest(buildableResource, insert));
+            }
         }
         return results;
     }

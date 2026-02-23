@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.gcp.loadbalancer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,16 +42,25 @@ public class GcpHealthCheckResourceBuilder extends AbstractGcpLoadBalancerBuilde
 
     @Override
     public List<CloudResource> create(GcpContext context, AuthenticatedContext auth, CloudLoadBalancer loadBalancer, Network network) {
-        return loadBalancer.getPortToTargetGroupMapping().keySet().stream()
+        List<CloudResource> resourceFromDb = fetchAllResourceFromDb(resourceType(), auth.getCloudContext().getId());
+        LOGGER.debug("Existing resources with type [{}] and Loadbalancer type [{}]: {}", resourceType(), loadBalancer.getType(), resourceFromDb);
+        List<CloudResource> resources = loadBalancer.getPortToTargetGroupMapping().keySet().stream()
                 .map(TargetGroupPortPair::getHealthProbeParameters)
                 .distinct()
-                .map(lbHealthCheck -> createCloudResource(context, loadBalancer, lbHealthCheck))
+                .map(lbHealthCheck ->
+                        resourceFromDb.stream()
+                                .filter(resource -> resource.getName().contains(mapPortToPortPart(lbHealthCheck.getPort())))
+                                .findFirst()
+                                .orElseGet(() -> createCloudResource(context, loadBalancer, lbHealthCheck)))
                 .toList();
+        LOGGER.debug("Created cloud resources with type [{}] and Loadbalancer type [{}]: {}", resourceType(), loadBalancer.getType(), resources);
+        return resources;
     }
 
     private CloudResource createCloudResource(GcpContext context, CloudLoadBalancer loadBalancer, HealthProbeParameters lbHealthCheck) {
         String resourceName = getResourceNameService().loadBalancerWithPort(context.getName(), loadBalancer.getType(), lbHealthCheck.getPort());
         Map<String, Object> parameters = Map.of(HCPORT, lbHealthCheck);
+        parameters = enrichParametersWithAttributes(parameters, loadBalancer.getType());
         return CloudResource.builder()
                 .withType(resourceType())
                 .withName(resourceName)
@@ -64,11 +74,18 @@ public class GcpHealthCheckResourceBuilder extends AbstractGcpLoadBalancerBuilde
         List<CloudResource> results = new ArrayList<>();
         for (CloudResource buildableResource : buildableResources) {
             LOGGER.debug("Building Healthcheck {} for {}", buildableResource.getName(), context.getProjectId());
-            HealthCheck healthCheck = createHealthCheck(buildableResource);
             String regionName = context.getLocation().getRegion().getRegionName();
-            // global health checks are also supported, but only for internal load balancers
-            Insert insert = context.getCompute().regionHealthChecks().insert(context.getProjectId(), regionName, healthCheck);
-            results.add(doOperationalRequest(buildableResource, insert));
+            Optional<HealthCheck> healthCheckFromProvider = fetchFromProvider(() ->
+                    context.getCompute().regionHealthChecks().get(context.getProjectId(), regionName, buildableResource.getName()).execute(),
+                    buildableResource.getName());
+            if (healthCheckFromProvider.isPresent()) {
+                results.add(buildableResource);
+            } else {
+                HealthCheck healthCheck = createHealthCheck(buildableResource);
+                // global health checks are also supported, but only for internal load balancers
+                Insert insert = context.getCompute().regionHealthChecks().insert(context.getProjectId(), regionName, healthCheck);
+                results.add(doOperationalRequest(buildableResource, insert));
+            }
         }
         return results;
     }

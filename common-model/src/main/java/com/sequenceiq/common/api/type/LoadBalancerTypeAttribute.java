@@ -32,13 +32,17 @@ public enum LoadBalancerTypeAttribute {
      */
     OUTBOUND;
 
+    private static final String NAME_KEY = "name";
+
+    private static final String ATTRIBUTE_TYPE_KEY = "attributeType";
+
     private final Class<LoadBalancerTypeAttribute> attributeType = LoadBalancerTypeAttribute.class;
 
     /**
      * Needed for serialization
      * @return name of the enum
      */
-    @JsonProperty("name")
+    @JsonProperty(NAME_KEY)
     public String getName() {
         return name();
     }
@@ -47,7 +51,7 @@ public enum LoadBalancerTypeAttribute {
      * Needed for serialization
      * @return class of the current enum
      */
-    @JsonProperty("attributeType")
+    @JsonProperty(ATTRIBUTE_TYPE_KEY)
     public Class<LoadBalancerTypeAttribute> getAttributeType() {
         return attributeType;
     }
@@ -59,10 +63,15 @@ public enum LoadBalancerTypeAttribute {
      */
     @JsonCreator
     public static LoadBalancerTypeAttribute fromMap(Map<String, Object> value) {
-        Object nameObj = value.get("name");
+        Object nameObj = value.get(NAME_KEY);
         if (nameObj instanceof String) {
             return LoadBalancerTypeAttribute.valueOf((String) nameObj);
         }
         throw new IllegalArgumentException("Cannot deserialize LoadBalancerTypeAttribute from: " + value);
+    }
+
+    public Map<String, Object> asMap() {
+        return Map.of(NAME_KEY, name(),
+                ATTRIBUTE_TYPE_KEY, attributeType);
     }
 }

@@ -7,6 +7,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
@@ -32,6 +34,7 @@ import com.google.api.services.compute.model.ForwardingRule;
 import com.google.api.services.compute.model.Operation;
 import com.google.common.collect.ImmutableMap;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpResourceNameService;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpLabelUtil;
@@ -48,6 +51,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.NetworkProtocol;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.TargetGroupPortPair;
+import com.sequenceiq.cloudbreak.cloud.service.ResourceRetriever;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.LoadBalancerType;
@@ -56,11 +60,16 @@ import com.sequenceiq.common.api.type.ResourceType;
 @ExtendWith(MockitoExtension.class)
 class GcpForwardingRuleResourceBuilderTest {
 
+    private static final long STACK_ID = 3L;
+
     @Mock
     private GcpContext gcpContext;
 
     @Mock
     private AuthenticatedContext authenticatedContext;
+
+    @Mock
+    private CloudContext cloudContext;
 
     @Mock
     private CloudLoadBalancer cloudLoadBalancer;
@@ -84,6 +93,9 @@ class GcpForwardingRuleResourceBuilderTest {
     private Compute.ForwardingRules forwardingRules;
 
     @Mock
+    private Compute.ForwardingRules.Get forwardingRulesGet;
+
+    @Mock
     private Compute.Subnetworks subnetworks;
 
     @Mock
@@ -104,6 +116,9 @@ class GcpForwardingRuleResourceBuilderTest {
     @Mock
     private GcpLoadBalancerTypeConverter gcpLoadBalancerTypeConverter;
 
+    @Mock
+    private ResourceRetriever resourceRetriever;
+
     private CloudStack cloudStack;
 
     private CloudResource resource;
@@ -113,7 +128,7 @@ class GcpForwardingRuleResourceBuilderTest {
     private CloudResource ipResource;
 
     @BeforeEach
-    void setup() {
+    void setup() throws IOException {
         Map<InstanceGroupType, String> userData = ImmutableMap.of(InstanceGroupType.CORE, "CORE", InstanceGroupType.GATEWAY, "GATEWAY");
         Image image = new Image("cb-centos66-amb200-2015-05-25", userData, "redhat6", "redhat6", "", "", "default", "default-id", new HashMap<>(), "2019-10-24",
                 1571884856L, null);
@@ -153,6 +168,9 @@ class GcpForwardingRuleResourceBuilderTest {
                 .withName("ipsuper")
                 .withPersistent(true)
                 .build();
+        lenient().when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
+        lenient().when(cloudContext.getId()).thenReturn(STACK_ID);
+        lenient().when(forwardingRules.get(anyString(), anyString(), anyString())).thenReturn(forwardingRulesGet);
     }
 
     @Test
@@ -256,6 +274,17 @@ class GcpForwardingRuleResourceBuilderTest {
     }
 
     @Test
+    void buildExisting() throws Exception {
+        mockCalls(LoadBalancerType.PRIVATE);
+        when(forwardingRulesGet.execute()).thenReturn(new ForwardingRule());
+
+        List<CloudResource> cloudResources = underTest.build(gcpContext, authenticatedContext,
+                Collections.singletonList(resource), cloudLoadBalancer, cloudStack);
+
+        verify(forwardingRules, never()).insert(any(), any(), any());
+    }
+
+    @Test
     void buildForPublic() throws Exception {
         mockCalls(LoadBalancerType.PUBLIC);
         List<CloudResource> cloudResources = underTest.build(gcpContext, authenticatedContext,
@@ -352,10 +381,10 @@ class GcpForwardingRuleResourceBuilderTest {
         when(region.getRegionName()).thenReturn("us-west2");
         when(gcpContext.getLoadBalancerResources(any())).thenReturn(List.of(backendResource, ipResource));
         when(compute.forwardingRules()).thenReturn(forwardingRules);
-        when(forwardingRules.insert(anyString(), anyString(), forwardingRuleArg.capture())).thenReturn(forwardingRulesInsert);
-        when(forwardingRulesInsert.execute()).thenReturn(operation);
-        when(operation.getName()).thenReturn("name");
-        when(operation.getHttpErrorStatusCode()).thenReturn(null);
+        lenient().when(forwardingRules.insert(anyString(), anyString(), forwardingRuleArg.capture())).thenReturn(forwardingRulesInsert);
+        lenient().when(forwardingRulesInsert.execute()).thenReturn(operation);
+        lenient().when(operation.getName()).thenReturn("name");
+        lenient().when(operation.getHttpErrorStatusCode()).thenReturn(null);
         when(cloudLoadBalancer.getType()).thenReturn(lbType);
         lenient().when(gcpStackUtil.getCustomNetworkId(any())).thenReturn("default-network");
         lenient().when(gcpStackUtil.getSubnetId(any())).thenReturn("default-subnet");

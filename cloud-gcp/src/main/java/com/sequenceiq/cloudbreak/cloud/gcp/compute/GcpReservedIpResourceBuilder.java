@@ -7,6 +7,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import jakarta.inject.Inject;
 
@@ -65,32 +66,37 @@ public class GcpReservedIpResourceBuilder extends AbstractGcpComputeBuilder {
             String projectId = context.getProjectId();
             String region = context.getLocation().getRegion().value();
             LOGGER.info("reserving IP [project:{}, resource: {}]", projectId, resource.getName());
-
-            Address address = new Address();
-            address.setName(resource.getName());
-            address.setDescription(description());
-            address.setAddressType(type.getGcpType());
-            if (type.equals(GcpLoadBalancerScheme.GATEWAY_INTERNAL) || type.equals(GcpLoadBalancerScheme.INTERNAL)) {
-                String sharedProjectId = gcpStackUtil.getSharedProjectId(cloudStack.getNetwork());
-                String subnetId = gcpStackUtil.getSubnetId(cloudStack.getNetwork());
-                String netProjectId = isNotEmpty(sharedProjectId) ? sharedProjectId : projectId;
-                String gcpSubnetSelfLink = gcpStackUtil.getSubnetUrl(netProjectId, region, subnetId);
-                address.setSubnetwork(gcpSubnetSelfLink);
-                address.setPurpose("SHARED_LOADBALANCER_VIP");
-            }
-            Map<String, Object> customTags = new HashMap<>();
-            customTags.putAll(cloudStack.getTags());
-            address.setUnknownKeys(customTags);
-            Insert networkInsert = context.getCompute().addresses().insert(projectId, region, address);
-            try {
-                Operation operation = networkInsert.execute();
-                if (operation.getHttpErrorStatusCode() != null) {
-                    throw new GcpResourceException(operation.getHttpErrorMessage(), resourceType(), resource.getName());
+            Optional<Address> addressFromProvider = fetchFromProvider(() ->
+                    context.getCompute().addresses().get(projectId, region, resource.getName()).execute(), resource.getName());
+            if (addressFromProvider.isPresent()) {
+                result.add(resource);
+            } else {
+                Address address = new Address();
+                address.setName(resource.getName());
+                address.setDescription(description());
+                address.setAddressType(type.getGcpType());
+                if (type.equals(GcpLoadBalancerScheme.GATEWAY_INTERNAL) || type.equals(GcpLoadBalancerScheme.INTERNAL)) {
+                    String sharedProjectId = gcpStackUtil.getSharedProjectId(cloudStack.getNetwork());
+                    String subnetId = gcpStackUtil.getSubnetId(cloudStack.getNetwork());
+                    String netProjectId = isNotEmpty(sharedProjectId) ? sharedProjectId : projectId;
+                    String gcpSubnetSelfLink = gcpStackUtil.getSubnetUrl(netProjectId, region, subnetId);
+                    address.setSubnetwork(gcpSubnetSelfLink);
+                    address.setPurpose("SHARED_LOADBALANCER_VIP");
                 }
-                result.add(createOperationAwareCloudResource(resource, operation));
-            } catch (GoogleJsonResponseException e) {
-                LOGGER.error("failed to reserve IP [project: {}, resource: {}]", projectId, resource.getName(), e);
-                throw new GcpResourceException(checkException(e), resourceType(), resource.getName());
+                Map<String, Object> customTags = new HashMap<>();
+                customTags.putAll(cloudStack.getTags());
+                address.setUnknownKeys(customTags);
+                Insert networkInsert = context.getCompute().addresses().insert(projectId, region, address);
+                try {
+                    Operation operation = networkInsert.execute();
+                    if (operation.getHttpErrorStatusCode() != null) {
+                        throw new GcpResourceException(operation.getHttpErrorMessage(), resourceType(), resource.getName());
+                    }
+                    result.add(createOperationAwareCloudResource(resource, operation));
+                } catch (GoogleJsonResponseException e) {
+                    LOGGER.error("failed to reserve IP [project: {}, resource: {}]", projectId, resource.getName(), e);
+                    throw new GcpResourceException(checkException(e), resourceType(), resource.getName());
+                }
             }
         }
         return result;

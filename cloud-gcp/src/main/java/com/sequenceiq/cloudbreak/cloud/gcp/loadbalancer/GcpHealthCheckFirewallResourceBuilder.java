@@ -5,6 +5,7 @@ import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -37,6 +38,8 @@ import com.sequenceiq.common.api.type.ResourceType;
 public class GcpHealthCheckFirewallResourceBuilder extends AbstractGcpLoadBalancerBuilder {
     private static final Logger LOGGER = LoggerFactory.getLogger(GcpHealthCheckFirewallResourceBuilder.class);
 
+    private static final int ORDER = 1;
+
     @Value("${cb.gcp.loadbalancer.healthcheck.cidrs.internal}")
     private List<String> internalHealthCheckCidrs;
 
@@ -54,6 +57,11 @@ public class GcpHealthCheckFirewallResourceBuilder extends AbstractGcpLoadBalanc
         if (gcpStackUtil.noFirewallRules(network)) {
             throw new ResourceNotNeededException("Firewall rules won't be created.");
         }
+        List<CloudResource> resourcesWithLbType = fetchAllResourceFromDb(resourceType(), auth.getCloudContext().getId()).stream()
+                .filter(resource -> loadBalancer.getType().name()
+                        .equals(resource.getParameter(CloudResource.ATTRIBUTES, LoadBalancerTypeAttribute.class).getName()))
+                .toList();
+        LOGGER.debug("Existing resources with type [{}] and Loadbalancer type [{}]: {}", resourceType(), loadBalancer.getType(), resourcesWithLbType);
         Map<Integer, Set<String>> hcPortToGroups = loadBalancer.getPortToTargetGroupMapping().entrySet().stream()
                 .collect(Collectors.groupingBy(
                         entry -> entry.getKey().getHealthCheckPort(),
@@ -61,17 +69,21 @@ public class GcpHealthCheckFirewallResourceBuilder extends AbstractGcpLoadBalanc
                                 entry -> entry.getValue().stream().map(Group::getName),
                                 Collectors.toSet())));
         List<CloudResource> cloudResources = hcPortToGroups.entrySet().stream()
-                .map(entry -> createCloudResource(context, loadBalancer, entry.getKey(), entry.getValue()))
+                .map(entry ->
+                        resourcesWithLbType.stream()
+                                .filter(resource -> resource.getName().contains(mapPortToPortPart(entry.getKey())))
+                                .findFirst()
+                                .orElseGet(() -> createCloudResource(context, loadBalancer, entry.getKey(), entry.getValue())))
                 .toList();
-        LOGGER.debug("Collected health firewall resources for loadbalancer {}: {}", loadBalancer, cloudResources);
+        LOGGER.debug("Created cloud resources with type [{}] and Loadbalancer type [{}]: {}", resourceType(), loadBalancer.getType(), cloudResources);
         return cloudResources;
     }
 
     private CloudResource createCloudResource(GcpContext context, CloudLoadBalancer loadBalancer, Integer healthCheckPort,
             Set<String> groups) {
         String resourceName = getResourceNameService().loadBalancerWithPort(context.getName(), loadBalancer.getType(), healthCheckPort);
-        Map<String, Object> parameters = Map.of(TRAFFICPORTS, groups, HCPORT, healthCheckPort,
-                CloudResource.ATTRIBUTES, Enum.valueOf(LoadBalancerTypeAttribute.class, loadBalancer.getType().name()));
+        Map<String, Object> parameters = Map.of(TRAFFICPORTS, groups, HCPORT, healthCheckPort);
+        parameters = enrichParametersWithAttributes(parameters, loadBalancer.getType());
         return CloudResource.builder()
                 .withType(resourceType())
                 .withName(resourceName)
@@ -86,33 +98,39 @@ public class GcpHealthCheckFirewallResourceBuilder extends AbstractGcpLoadBalanc
         String projectId = context.getProjectId();
         String sharedProjectId = gcpStackUtil.getSharedProjectId(cloudStack.getNetwork());
         for (CloudResource buildableResource : buildableResources) {
-            Firewall firewall = new Firewall();
-            firewall.setName(buildableResource.getName());
-            firewall.setDescription(description());
-            Allowed allowed = new Allowed()
-                    .setIPProtocol("tcp")
-                    .setPorts(List.of(buildableResource.getParameter(HCPORT, Integer.class).toString()));
-            firewall.setAllowed(List.of(allowed));
-            GcpLoadBalancerScheme scheme = gcpLoadBalancerTypeConverter.getScheme(loadBalancer);
-            if (scheme.equals(GcpLoadBalancerScheme.INTERNAL) || scheme.equals(GcpLoadBalancerScheme.GATEWAY_INTERNAL)) {
-                firewall.setSourceRanges(internalHealthCheckCidrs);
+            Optional<Firewall> firewallFromProvider = fetchFromProvider(() ->
+                    context.getCompute().firewalls().get(projectId, buildableResource.getName()).execute(), buildableResource.getName());
+            if (firewallFromProvider.isPresent()) {
+                results.add(buildableResource);
             } else {
-                firewall.setSourceRanges(externalHealthCheckCidrs);
+                Firewall firewall = new Firewall();
+                firewall.setName(buildableResource.getName());
+                firewall.setDescription(description());
+                Allowed allowed = new Allowed()
+                        .setIPProtocol("tcp")
+                        .setPorts(List.of(buildableResource.getParameter(HCPORT, Integer.class).toString()));
+                firewall.setAllowed(List.of(allowed));
+                GcpLoadBalancerScheme scheme = gcpLoadBalancerTypeConverter.getScheme(loadBalancer);
+                if (scheme.equals(GcpLoadBalancerScheme.INTERNAL) || scheme.equals(GcpLoadBalancerScheme.GATEWAY_INTERNAL)) {
+                    firewall.setSourceRanges(internalHealthCheckCidrs);
+                } else {
+                    firewall.setSourceRanges(externalHealthCheckCidrs);
+                }
+                Set<String> groups = buildableResource.getParameter(TRAFFICPORTS, Set.class);
+                firewall.setTargetTags(groups.stream()
+                        .map(group -> gcpStackUtil.getGroupClusterTag(auth.getCloudContext(), group))
+                        .toList());
+                String networkUrl;
+                if (isNotEmpty(sharedProjectId)) {
+                    networkUrl = gcpStackUtil.getNetworkUrl(sharedProjectId, gcpStackUtil.getCustomNetworkId(cloudStack.getNetwork()));
+                } else {
+                    networkUrl = gcpStackUtil.getNetworkUrl(projectId, gcpStackUtil.getCustomNetworkId(cloudStack.getNetwork()));
+                }
+                firewall.setNetwork(networkUrl);
+                Insert firewallInsert = context.getCompute().firewalls().insert(projectId, firewall);
+                LOGGER.debug("Creating healthcheck firewall {} for {} healthcheck firewall resource", firewall, buildableResource.getName());
+                results.add(doOperationalRequest(buildableResource, firewallInsert));
             }
-            Set<String> groups = buildableResource.getParameter(TRAFFICPORTS, Set.class);
-            firewall.setTargetTags(groups.stream()
-                    .map(group -> gcpStackUtil.getGroupClusterTag(auth.getCloudContext(), group))
-                    .toList());
-            String networkUrl;
-            if (isNotEmpty(sharedProjectId)) {
-                networkUrl = gcpStackUtil.getNetworkUrl(sharedProjectId, gcpStackUtil.getCustomNetworkId(cloudStack.getNetwork()));
-            } else {
-                networkUrl = gcpStackUtil.getNetworkUrl(projectId, gcpStackUtil.getCustomNetworkId(cloudStack.getNetwork()));
-            }
-            firewall.setNetwork(networkUrl);
-            Insert firewallInsert = context.getCompute().firewalls().insert(projectId, firewall);
-            LOGGER.debug("Creating healthcheck firewall {} for {} healthcheck firewall resource", firewall, buildableResource.getName());
-            results.add(doOperationalRequest(buildableResource, firewallInsert));
         }
         return results;
     }
@@ -137,6 +155,6 @@ public class GcpHealthCheckFirewallResourceBuilder extends AbstractGcpLoadBalanc
 
     @Override
     public int order() {
-        return 1;
+        return ORDER;
     }
 }

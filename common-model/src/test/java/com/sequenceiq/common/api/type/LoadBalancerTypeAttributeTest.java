@@ -46,4 +46,12 @@ class LoadBalancerTypeAttributeTest {
         map.put("name", 123);
         assertThrows(IllegalArgumentException.class, () -> LoadBalancerTypeAttribute.fromMap(map));
     }
+
+    @Test
+    void testAsMap() {
+        Map<String, Object> map = LoadBalancerTypeAttribute.PUBLIC.asMap();
+        assertEquals("PUBLIC", map.get("name"));
+        assertEquals(LoadBalancerTypeAttribute.class, map.get("attributeType"));
+        assertEquals(2, map.size());
+    }
 }

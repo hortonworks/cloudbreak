@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.loadbalancer;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import jakarta.inject.Inject;
 
@@ -39,12 +41,21 @@ public class GcpLoadBalancingIpResourceBuilder extends AbstractGcpLoadBalancerBu
 
     @Override
     public List<CloudResource> create(GcpContext context, AuthenticatedContext auth, CloudLoadBalancer loadBalancer, Network network) {
+        Optional<CloudResource> resourceFromDb = fetchResourceFromDb(resourceType(), auth.getCloudContext().getId());
+        LOGGER.debug("Existing resources with type [{}] and Loadbalancer type [{}]: {}", resourceType(), loadBalancer.getType(), resourceFromDb);
         Integer hcPort = loadBalancer.getPortToTargetGroupMapping().keySet().stream().map(TargetGroupPortPair::getHealthCheckPort).findFirst().orElse(KNOX_PORT);
         String resourceName =
                 getResourceNameService().instance(auth.getCloudContext().getName(), loadBalancer.getType().name(), hcPort.toString());
-        return List.of(CloudResource.builder().withType(resourceType())
-                .withName(resourceName)
-                .build());
+        Map<String, Object> parameters = enrichParametersWithAttributes(Map.of(HCPORT, hcPort), loadBalancer.getType());
+        List<CloudResource> cloudResources = resourceFromDb.map(List::of)
+                .orElseGet(() -> List.of(
+                        CloudResource.builder()
+                                .withType(resourceType())
+                                .withName(resourceName)
+                                .withParameters(parameters)
+                                .build()));
+        LOGGER.debug("Created cloud resources with type [{}] and Loadbalancer type [{}]: {}", resourceType(), loadBalancer.getType(), cloudResources);
+        return cloudResources;
     }
 
     @Override

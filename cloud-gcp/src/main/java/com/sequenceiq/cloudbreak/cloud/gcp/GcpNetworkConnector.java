@@ -30,6 +30,7 @@ import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.compute.Compute;
 import com.google.api.services.compute.model.Subnetwork;
 import com.google.api.services.compute.model.SubnetworkList;
+import com.google.api.services.compute.model.SubnetworkSecondaryRange;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.DefaultNetworkConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -56,6 +57,7 @@ import com.sequenceiq.cloudbreak.cloud.model.network.CreatedCloudNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.network.CreatedSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkCreationRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkDeletionRequest;
+import com.sequenceiq.cloudbreak.cloud.model.network.NetworkSubnetRequest;
 import com.sequenceiq.cloudbreak.cloud.network.NetworkCidr;
 import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
@@ -196,8 +198,8 @@ public class GcpNetworkConnector extends AbstractGcpResourceBuilder implements D
             cidrs.addAll(subnet
                     .getSecondaryIpRanges()
                     .stream()
-                    .map(e -> e.getIpCidrRange())
-                    .collect(Collectors.toList())
+                    .map(SubnetworkSecondaryRange::getIpCidrRange)
+                    .toList()
             );
         }
         return cidrs;
@@ -337,32 +339,24 @@ public class GcpNetworkConnector extends AbstractGcpResourceBuilder implements D
         return GcpConstants.GCP_VARIANT;
     }
 
+    @Override
+    public ResourceType resourceType() {
+        return GCP_NETWORK;
+    }
+
     private List<CreatedSubnet> getCloudSubNets(NetworkCreationRequest networkRequest) throws IOException {
-        List<String> collect = networkRequest.getPublicSubnets().stream().map(e -> e.getCidr()).collect(Collectors.toList());
-        collect.addAll(networkRequest.getPrivateSubnets().stream().map(e -> e.getCidr()).collect(Collectors.toList()));
+        List<String> collect = networkRequest.getPublicSubnets().stream().map(NetworkSubnetRequest::getCidr).collect(Collectors.toList());
+        collect.addAll(networkRequest.getPrivateSubnets().stream().map(NetworkSubnetRequest::getCidr).toList());
         return gcpCloudSubnetProvider.provide(networkRequest, collect);
-    }
-
-    protected CloudResource createNamedResource(ResourceType type, String name, String availabilityZone) {
-        return CloudResource.builder()
-                .withType(type)
-                .withName(name)
-                .withAvailabilityZone(availabilityZone)
-                .build();
-    }
-
-    protected String checkException(GoogleJsonResponseException execute) {
-        return execute.getDetails().getMessage();
     }
 
     private Set<CreatedSubnet> getCreatedSubnets(List<CreatedSubnet> createdSubnetList) {
         Set<CreatedSubnet> subnets = new HashSet<>();
-        for (int i = 0; i < createdSubnetList.size(); i++) {
-            CreatedSubnet createdSubnetIndexed = createdSubnetList.get(i);
+        for (CreatedSubnet subnet : createdSubnetList) {
             CreatedSubnet createdSubnet = new CreatedSubnet();
-            createdSubnet.setSubnetId(createdSubnetIndexed.getSubnetId());
-            createdSubnet.setCidr(createdSubnetList.get(i).getCidr());
-            createdSubnet.setAvailabilityZone(createdSubnetList.get(i).getAvailabilityZone());
+            createdSubnet.setSubnetId(subnet.getSubnetId());
+            createdSubnet.setCidr(subnet.getCidr());
+            createdSubnet.setAvailabilityZone(subnet.getAvailabilityZone());
             createdSubnet.setMapPublicIpOnLaunch(true);
             createdSubnet.setIgwAvailable(true);
             subnets.add(createdSubnet);

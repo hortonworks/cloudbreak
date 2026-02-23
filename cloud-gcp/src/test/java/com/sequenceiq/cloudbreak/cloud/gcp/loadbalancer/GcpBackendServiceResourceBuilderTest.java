@@ -9,6 +9,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -30,6 +31,7 @@ import org.springframework.util.CollectionUtils;
 
 import com.google.api.services.compute.Compute;
 import com.google.api.services.compute.Compute.RegionBackendServices;
+import com.google.api.services.compute.model.Backend;
 import com.google.api.services.compute.model.BackendService;
 import com.google.api.services.compute.model.InstanceGroupsListInstances;
 import com.google.api.services.compute.model.InstanceGroupsListInstancesRequest;
@@ -52,15 +54,19 @@ import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.NetworkProtocol;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.TargetGroupPortPair;
+import com.sequenceiq.cloudbreak.cloud.service.ResourceRetriever;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.LoadBalancerType;
+import com.sequenceiq.common.api.type.LoadBalancerTypeAttribute;
 import com.sequenceiq.common.api.type.ResourceType;
 
 @ExtendWith(MockitoExtension.class)
 class GcpBackendServiceResourceBuilderTest {
 
     private static final String AVAILABILITY_ZONE = "us-west2-c";
+
+    private static final String AVAILABILITY_ZONE_B = "us-west2-b";
 
     private static final String REGION = "us-west2";
 
@@ -108,6 +114,9 @@ class GcpBackendServiceResourceBuilderTest {
     @Mock
     private Compute.InstanceGroups instanceGroups;
 
+    @Mock
+    private ResourceRetriever resourceRetriever;
+
     private CloudStack cloudStack;
 
     static Object[][] dataForInstanceGroups() {
@@ -128,6 +137,7 @@ class GcpBackendServiceResourceBuilderTest {
         GcpResourceNameService resourceNameService = new GcpResourceNameService();
         ReflectionTestUtils.setField(resourceNameService, "maxResourceNameLength", 50);
         ReflectionTestUtils.setField(underTest, "resourceNameService", resourceNameService);
+        ReflectionTestUtils.setField(underTest, "resourceRetriever", resourceRetriever);
         Network network = new Network(null);
         cloudStack = CloudStack.builder()
                 .network(network)
@@ -184,6 +194,49 @@ class GcpBackendServiceResourceBuilderTest {
         List<TargetGroupPortPair> traffics8081 = hc8081Resources.get(0).getParameter("trafficports", List.class);
         assertTrue(traffics8081.contains(new TargetGroupPortPair(82, NetworkProtocol.TCP, httpsHealth)));
         assertTrue(traffics8081.contains(new TargetGroupPortPair(83, NetworkProtocol.UDP, httpsHealth)));
+    }
+
+    @Test
+    void testCreateWithPrivateLoadBalancerAndExistingResources() {
+        when(gcpContext.getName()).thenReturn("name");
+        when(cloudLoadBalancer.getType()).thenReturn(LoadBalancerType.PRIVATE);
+
+        HealthProbeParameters healthProbe1 = new HealthProbeParameters("path", 8080, NetworkProtocol.TCP, 0, 0);
+        HealthProbeParameters healthProbe2 = new HealthProbeParameters("path", 8081, NetworkProtocol.HTTPS, 0, 0);
+
+        Map<TargetGroupPortPair, Set<Group>> targetGroupPortPairSetHashMap = new HashMap<>();
+        targetGroupPortPairSetHashMap.put(new TargetGroupPortPair(80, NetworkProtocol.TCP, healthProbe1), Collections.emptySet());
+        targetGroupPortPairSetHashMap.put(new TargetGroupPortPair(82, NetworkProtocol.TCP, healthProbe2), Collections.emptySet());
+        when(cloudLoadBalancer.getPortToTargetGroupMapping()).thenReturn(targetGroupPortPairSetHashMap);
+
+        CloudResource existingPublicResource = CloudResource.builder()
+                .withType(ResourceType.GCP_BACKEND_SERVICE)
+                .withStatus(CommonStatus.CREATED)
+                .withName("public-resource")
+                .withParameters(Map.of(CloudResource.ATTRIBUTES, LoadBalancerTypeAttribute.PUBLIC.asMap()))
+                .build();
+
+        CloudResource existingPrivateResource = CloudResource.builder()
+                .withType(ResourceType.GCP_BACKEND_SERVICE)
+                .withStatus(CommonStatus.CREATED)
+                .withName("private-" + healthProbe1.getPort() + "-resource")
+                .withParameters(Map.of(
+                        "hcport", healthProbe1,
+                        CloudResource.ATTRIBUTES, LoadBalancerTypeAttribute.PRIVATE.asMap())
+                )
+                .build();
+
+        when(resourceRetriever.findAllByStatusAndTypeAndStack(any(), any(), any()))
+                .thenReturn(new ArrayList<>(List.of(existingPublicResource, existingPrivateResource)));
+
+        List<CloudResource> cloudResources = underTest.create(gcpContext, authenticatedContext, cloudLoadBalancer, cloudStack.getNetwork());
+
+        assertEquals(2, cloudResources.size());
+        CloudResource newResource = cloudResources.stream().filter(resource -> resource.getName().contains("8081")).findFirst().get();
+        assertTrue(newResource.getName().startsWith("name-private-8081"));
+        assertEquals(healthProbe2, newResource.getParameter("hcport", HealthProbeParameters.class));
+        CloudResource existingResource = cloudResources.stream().filter(resource -> resource.getName().contains("8080")).findFirst().get();
+        assertEquals(existingPrivateResource.getName(), existingResource.getName());
     }
 
     @ParameterizedTest(name = "testBuildWithSeparateHCPort{index}")
@@ -251,6 +304,9 @@ class GcpBackendServiceResourceBuilderTest {
 
         when(compute.instanceGroups()).thenReturn(instanceGroups);
         ArgumentCaptor<BackendService> backendServiceArgumentCaptor = ArgumentCaptor.forClass(BackendService.class);
+        Compute.RegionBackendServices.Get getRequest = mock(Compute.RegionBackendServices.Get.class);
+        when(getRequest.execute()).thenReturn(null);
+        when(regionBackendServices.get(PROJECT_ID, REGION, resource.getName())).thenReturn(getRequest);
         when(regionBackendServices.insert(eq(PROJECT_ID), eq(REGION), backendServiceArgumentCaptor.capture())).thenReturn(insert);
         when(insert.execute()).thenReturn(operation);
         when(operation.getName()).thenReturn("name");
@@ -335,6 +391,9 @@ class GcpBackendServiceResourceBuilderTest {
                 new InstanceGroupsListInstancesRequest())).thenReturn(listInstances);
         when(compute.instanceGroups()).thenReturn(instanceGroups);
         ArgumentCaptor<BackendService> backendServiceArgumentCaptor = ArgumentCaptor.forClass(BackendService.class);
+        Compute.RegionBackendServices.Get getRequest = mock(Compute.RegionBackendServices.Get.class);
+        when(getRequest.execute()).thenReturn(null);
+        when(regionBackendServices.get(PROJECT_ID, REGION, resource.getName())).thenReturn(getRequest);
         when(regionBackendServices.insert(anyString(), anyString(), backendServiceArgumentCaptor.capture())).thenReturn(insert);
         when(insert.execute()).thenReturn(operation);
         when(operation.getName()).thenReturn("name");
@@ -410,6 +469,9 @@ class GcpBackendServiceResourceBuilderTest {
         when(instanceGroups.listInstances(PROJECT_ID, AVAILABILITY_ZONE, groupName("stackname-master-111", AVAILABILITY_ZONE),
                 new InstanceGroupsListInstancesRequest())).thenReturn(listInstances);
         when(compute.instanceGroups()).thenReturn(instanceGroups);
+        Compute.RegionBackendServices.Get getRequest = mock(Compute.RegionBackendServices.Get.class);
+        when(getRequest.execute()).thenReturn(null);
+        when(regionBackendServices.get(PROJECT_ID, REGION, resource.getName())).thenReturn(getRequest);
         when(regionBackendServices.insert(anyString(), anyString(), any())).thenReturn(insert);
         when(insert.execute()).thenReturn(operation);
         when(operation.getName()).thenReturn("name");
@@ -463,6 +525,93 @@ class GcpBackendServiceResourceBuilderTest {
     }
 
     private String groupName(String prefix, String availabilityZone) {
-        return prefix + "-" + availabilityZone.substring(availabilityZone.lastIndexOf("-") + 1);
+        return prefix.toLowerCase() + "-" + availabilityZone.substring(availabilityZone.lastIndexOf("-") + 1);
+    }
+
+    @Test
+    void testBuildWhenBackendServiceExistsShouldUpdateWithNewBackends() throws Exception {
+        // 1. Define parameters and the resource to be built/updated
+        HealthProbeParameters healthProbe = new HealthProbeParameters(null, 8080, null, 0, 0);
+        Map<String, Object> resourceParams = new HashMap<>();
+        resourceParams.put("hcport", healthProbe);
+        resourceParams.put("trafficports", List.of(new TargetGroupPortPair(80, 8080)));
+        CloudResource buildableResource = CloudResource.builder()
+                .withType(ResourceType.GCP_BACKEND_SERVICE)
+                .withStatus(CommonStatus.CREATED)
+                .withName("existing-service")
+                .withParameters(resourceParams)
+                .build();
+        // 2. Define groups: one whose backend exists, one that is new
+        Group existingGroup = mock(Group.class);
+        when(existingGroup.getName()).thenReturn("master");
+
+        // 3. Configure the load balancer to use both groups for the same port
+        Map<TargetGroupPortPair, Set<Group>> lbMapping = new HashMap<>();
+        lbMapping.put(new TargetGroupPortPair(80, 8080), Set.of(existingGroup));
+        when(cloudLoadBalancer.getPortToTargetGroupMapping()).thenReturn(lbMapping);
+        when(cloudLoadBalancer.getType()).thenReturn(LoadBalancerType.PRIVATE);
+
+        // 4. Mock the provider to return an existing BackendService with one backend
+        String masterGroupName = groupName("stackName-master-111", AVAILABILITY_ZONE);
+        String masterGroupNameB = groupName("stackName-master-111", AVAILABILITY_ZONE_B);
+        String existingBackendUrl = String.format(GCP_INSTANCEGROUP_REFERENCE_FORMAT, PROJECT_ID, AVAILABILITY_ZONE, masterGroupName);
+        Backend initialBackend = new Backend().setGroup(existingBackendUrl);
+        BackendService backendServiceFromProvider = new BackendService()
+                .setName(buildableResource.getName())
+                .setBackends(List.of(initialBackend));
+
+        Compute.RegionBackendServices.Get getRequest = mock(Compute.RegionBackendServices.Get.class);
+        when(gcpContext.getCompute()).thenReturn(compute);
+        when(compute.regionBackendServices()).thenReturn(regionBackendServices);
+        when(regionBackendServices.get(PROJECT_ID, REGION, buildableResource.getName())).thenReturn(getRequest);
+        when(getRequest.execute()).thenReturn(backendServiceFromProvider);
+
+        // 5. Mock context and name generation details
+        when(gcpContext.getProjectId()).thenReturn(PROJECT_ID);
+        when(gcpContext.getName()).thenReturn("stackName");
+        when(gcpContext.getLocation()).thenReturn(location);
+        when(location.getRegion()).thenReturn(region);
+        when(location.getAvailabilityZone()).thenReturn(availabilityZone);
+        when(region.getRegionName()).thenReturn(REGION);
+        when(authenticatedContext.getCloudContext().getId()).thenReturn(111L);
+
+        // 6. Mock instance group availability for both groups
+        when(existingGroup.getNetwork()).thenReturn(groupNetwork);
+        when(groupNetwork.getAvailabilityZones()).thenReturn(Set.of(AVAILABILITY_ZONE, AVAILABILITY_ZONE_B));
+        when(compute.instanceGroups()).thenReturn(instanceGroups);
+        mockInstanceGroupList(masterGroupName, masterGroupNameB);
+
+        // 7. Mock the update call and capture the submitted BackendService
+        Compute.RegionBackendServices.Update updateRequest = mock(Compute.RegionBackendServices.Update.class);
+        ArgumentCaptor<BackendService> backendServiceCaptor = ArgumentCaptor.forClass(BackendService.class);
+        when(regionBackendServices.update(eq(PROJECT_ID), eq(REGION), eq(buildableResource.getName()), backendServiceCaptor.capture()))
+                .thenReturn(updateRequest);
+        when(updateRequest.execute()).thenReturn(operation);
+        when(operation.getName()).thenReturn("update-operation");
+        when(operation.getHttpErrorStatusCode()).thenReturn(null);
+
+        // 8. Execute the build method
+        List<CloudResource> result = underTest.build(gcpContext, authenticatedContext, List.of(buildableResource), cloudLoadBalancer, cloudStack);
+
+        // 9. Assert the results
+        assertEquals(1, result.size());
+        assertEquals(buildableResource.getName(), result.get(0).getName());
+
+        BackendService capturedBackendService = backendServiceCaptor.getValue();
+        assertEquals(2, capturedBackendService.getBackends().size());
+
+        String newBackendUrl = String.format(GCP_INSTANCEGROUP_REFERENCE_FORMAT, PROJECT_ID, AVAILABILITY_ZONE_B, masterGroupNameB);
+
+        assertTrue(capturedBackendService.getBackends().stream().anyMatch(b -> b.getGroup().equals(existingBackendUrl)));
+        assertTrue(capturedBackendService.getBackends().stream().anyMatch(b -> b.getGroup().equals(newBackendUrl)));
+    }
+
+    private void mockInstanceGroupList(String groupName, String groupNameB) throws java.io.IOException {
+        InstanceGroupsListInstances listResult = mock(InstanceGroupsListInstances.class);
+        when(listResult.getItems()).thenReturn(List.of(new InstanceWithNamedPorts()));
+        Compute.InstanceGroups.ListInstances listInstances = mock(Compute.InstanceGroups.ListInstances.class);
+        when(listInstances.execute()).thenReturn(listResult);
+        when(instanceGroups.listInstances(eq(PROJECT_ID), eq(AVAILABILITY_ZONE), eq(groupName), any())).thenReturn(listInstances);
+        when(instanceGroups.listInstances(eq(PROJECT_ID), eq(AVAILABILITY_ZONE_B), eq(groupNameB), any())).thenReturn(listInstances);
     }
 }

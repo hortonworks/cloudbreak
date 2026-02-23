@@ -82,6 +82,12 @@ public class GcpResourceConnector extends AbstractResourceConnector {
     }
 
     @Override
+    public List<CloudResourceStatus> updateLoadBalancers(AuthenticatedContext authenticatedContext, CloudStack stack, PersistenceNotifier persistenceNotifier)
+            throws Exception {
+        return launchLoadBalancers(authenticatedContext, stack, persistenceNotifier);
+    }
+
+    @Override
     protected ResourceType getDiskResourceType() {
         return ResourceType.GCP_ATTACHED_DISKSET;
     }

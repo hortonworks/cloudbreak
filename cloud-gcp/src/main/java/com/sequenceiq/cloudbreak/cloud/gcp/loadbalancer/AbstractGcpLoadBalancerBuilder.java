@@ -1,7 +1,12 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.loadbalancer;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,7 +21,13 @@ import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.NetworkProtocol;
+import com.sequenceiq.cloudbreak.cloud.service.CloudbreakResourceNameService;
+import com.sequenceiq.cloudbreak.cloud.service.ResourceRetriever;
 import com.sequenceiq.cloudbreak.cloud.template.LoadBalancerResourceBuilder;
+import com.sequenceiq.common.api.type.CommonStatus;
+import com.sequenceiq.common.api.type.LoadBalancerType;
+import com.sequenceiq.common.api.type.LoadBalancerTypeAttribute;
+import com.sequenceiq.common.api.type.ResourceType;
 
 /**
  * Abstract class for ResourceBuilders that operate based off of the configuration of the loadbalancers in a given stack
@@ -31,6 +42,9 @@ public abstract class AbstractGcpLoadBalancerBuilder extends AbstractGcpResource
     static final String HCPORT = "hcport";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractGcpLoadBalancerBuilder.class);
+
+    @Inject
+    private ResourceRetriever resourceRetriever;
 
     @Override
     public List<CloudResourceStatus> checkResources(GcpContext context, AuthenticatedContext auth, List<CloudResource> resources) {
@@ -54,5 +68,34 @@ public abstract class AbstractGcpLoadBalancerBuilder extends AbstractGcpResource
 
     protected String convertProtocolWithTcpFallback(NetworkProtocol protocol) {
         return protocol != null ? protocol.name() : NetworkProtocol.TCP.name();
+    }
+
+    protected Map<String, Object> enrichParametersWithAttributes(Map<String, Object> parameters, LoadBalancerType loadBalancerType) {
+        Map<String, Object> result = new HashMap<>(parameters);
+        Map<String, Object> attributes = new HashMap<>(Enum.valueOf(LoadBalancerTypeAttribute.class, loadBalancerType.name()).asMap());
+        attributes.putAll(parameters);
+        result.put(CloudResource.ATTRIBUTES, attributes);
+        return result;
+    }
+
+    protected Optional<CloudResource> fetchResourceFromDb(ResourceType resourceType, Long id) {
+        return resourceRetriever.findByStatusAndTypeAndStack(CommonStatus.CREATED, resourceType, id)
+                .or(() -> resourceRetriever.findByStatusAndTypeAndStack(CommonStatus.REQUESTED, resourceType, id));
+    }
+
+    protected List<CloudResource> fetchAllResourceFromDb(ResourceType resourceType, Long id) {
+        List<CloudResource> result = resourceRetriever.findAllByStatusAndTypeAndStack(CommonStatus.CREATED, resourceType, id);
+        result.addAll(resourceRetriever.findAllByStatusAndTypeAndStack(CommonStatus.REQUESTED, resourceType, id));
+        return result;
+    }
+
+    protected String mapPortToPortPart(int port) {
+        return CloudbreakResourceNameService.DELIMITER + port + CloudbreakResourceNameService.DELIMITER;
+    }
+
+    protected String mapProtocolToPart(NetworkProtocol networkProtocol) {
+        return CloudbreakResourceNameService.DELIMITER
+                + getResourceNameService().normalize(convertProtocolWithTcpFallback(networkProtocol))
+                + CloudbreakResourceNameService.DELIMITER;
     }
 }

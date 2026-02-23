@@ -10,6 +10,7 @@ import com.google.api.client.googleapis.json.GoogleJsonError;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpResourceException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
 
 public abstract class AbstractGcpBaseResourceChecker {
@@ -29,6 +30,7 @@ public abstract class AbstractGcpBaseResourceChecker {
                 .withType(type)
                 .withName(name)
                 .withAvailabilityZone(zone)
+                .withStatus(CommonStatus.REQUESTED)
                 .build();
     }
 
@@ -38,6 +40,7 @@ public abstract class AbstractGcpBaseResourceChecker {
                 .withName(name)
                 .withAvailabilityZone(zone)
                 .withGroup(group)
+                .withStatus(CommonStatus.REQUESTED)
                 .build();
     }
 
