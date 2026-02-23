@@ -81,6 +81,7 @@ import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRu
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.sdx.TargetPlatform;
 import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
+import com.sequenceiq.cloudbreak.util.VersionComparator;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.cloudbreak.vm.CommonJavaVersionValidator;
@@ -115,7 +116,7 @@ import com.sequenceiq.sdx.api.model.SdxRecipe;
 @Service
 public class SdxService implements ResourceIdProvider, PayloadContextProvider, HierarchyAuthResourcePropertyProvider {
 
-    public static final String DENIED_RUNTIME_WITH_REDHAT8 = "7.3.2";
+    public static final String RUNTIME_7_3_2 = "7.3.2";
 
     public static final long WORKSPACE_ID_DEFAULT = 0L;
 
@@ -378,6 +379,11 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
                 throw new BadRequestException("Differing os was set in request, only the image settings os should be set.");
             }
         }
+        if (imageSettingsV4Request == null && isNotEmpty(sdxClusterRequest.getRuntime())
+                && new VersionComparator().compare(sdxClusterRequest::getRuntime, () -> RUNTIME_7_3_2) >= 0) {
+            imageSettingsV4Request = new ImageSettingsV4Request();
+            imageSettingsV4Request.setOs(OsType.RHEL9.getOs());
+        }
         return imageSettingsV4Request;
     }
 
@@ -469,7 +475,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
 
     private void validateOsAndRuntime(String os, String runtime) {
         Optional<OsType> osType = OsType.getByOsOptional(os);
-        if (osType.isPresent() && StringUtils.equals(runtime, DENIED_RUNTIME_WITH_REDHAT8) && OsType.RHEL8.equals(osType.get())) {
+        if (osType.isPresent() && StringUtils.equals(runtime, RUNTIME_7_3_2) && OsType.RHEL8.equals(osType.get())) {
             throw new BadRequestException("Provision is not allowed for image with runtime version 7.3.2 and OS type redhat8.");
         }
     }
