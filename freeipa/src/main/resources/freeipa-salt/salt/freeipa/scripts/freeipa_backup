@@ -267,15 +267,25 @@ elif [[ "${config[backup_platform]}" = "GCP" ]]; then
     if [ -d "${BACKUP_ROOT_FOLDER}" ]; then
       # The backup root folder already exists in this operating system, logger service account needs storage.objects.list permission also
       doLog "INFO Syncing backups to Google Cloud Storage"
-      /bin/gcloud storage cp -r "${config[backup_path]}/${BACKUPDIR}" "${BACKUP_LOCATION}" >> "${LOGFILE}" 2>&1 || error_exit "Sync of backups to ${BACKUP_LOCATION} failed!"
+      GS_CMD="/bin/gsutil"
+      if /bin/gcloud -h | grep -qw "storage"; then
+          doLog "DEBUG Storage command group exists."
+          GS_CMD="/bin/gcloud storage"
+      fi
+      $GS_CMD cp -r "${config[backup_path]}/${BACKUPDIR}" "${BACKUP_LOCATION}" >> "${LOGFILE}" 2>&1 || error_exit "Sync of backups to ${BACKUP_LOCATION} failed!"
       remove_local_backups
     else
+      GS_CMD="/bin/gsutil -m"
+      if /bin/gcloud -h | grep -qw "storage"; then
+          doLog "DEBUG Storage command group exists."
+          GS_CMD="/bin/gcloud storage"
+      fi
       # To avoid storage.objects.list permission for logger we must sync backups to the bucket instead of the object
       mkdir -p "${BACKUP_PATH}"
       doLog "INFO Copy backup to ${BACKUP_PATH} before moving it to cloud storage"
       cp -r "${config[backup_path]}/${BACKUPDIR}" "${BACKUP_PATH}"
       doLog "INFO Syncing backups to Google Cloud Storage"
-      /bin/gcloud storage mv "${BACKUP_ROOT_FOLDER}" "${BACKUP_BUCKET}" >> "${LOGFILE}" 2>&1 || error_exit "Sync of backups to ${BACKUP_LOCATION} failed!"
+      $GS_CMD mv "${BACKUP_ROOT_FOLDER}" "${BACKUP_BUCKET}" >> "${LOGFILE}" 2>&1 || error_exit "Sync of backups to ${BACKUP_LOCATION} failed!"
       rm -rf "${BACKUP_ROOT_FOLDER}"
       remove_local_backups
     fi
