@@ -44,11 +44,15 @@ public class NifiUpgradeValidator implements ServiceUpgradeValidator {
 
     @Override
     public void validate(ServiceUpgradeValidationRequest validationRequest) {
-        if ((validationRequest.lockComponents() || validationRequest.replaceVms()) && isNifiServicePresent(validationRequest.stack())) {
+        if (isNifiServicePresent(validationRequest.stack())) {
             validateNifiBlueprintVersion(validationRequest);
-            validateNifiWorkingDirectory(validationRequest.stack());
+            if (validationRequest.lockComponents() || validationRequest.replaceVms()) {
+                validateNifiWorkingDirectory(validationRequest.stack());
+            } else {
+                LOGGER.debug("Skipping Nifi working directory validation because it's not OS upgrade.");
+            }
         } else {
-            LOGGER.debug("Skipping Nifi service validation because it's not OS upgrade or Nifi not present in the cluster.");
+            LOGGER.debug("Skipping Nifi service validation because Nifi not present in the cluster.");
         }
     }
 

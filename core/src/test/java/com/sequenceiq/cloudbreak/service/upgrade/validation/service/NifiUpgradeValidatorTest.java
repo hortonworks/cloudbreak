@@ -75,10 +75,10 @@ public class NifiUpgradeValidatorTest {
     }
 
     @Test
-    public void testValidateShouldNotThrowExceptionWhenLockComponentsAndReplaceVmsAreFalse() {
+    public void testValidateShouldNotThrowExceptionWhenLockComponentsAndReplaceVmsAreFalseAndTheNifiServiceIsNotPresent() {
+        when(cmTemplateService.isServiceTypePresent(SERVICE_TYPE, BLUEPRINT_TEXT)).thenReturn(false);
         underTest.validate(createRequest(false, false));
 
-        verifyNoInteractions(cmTemplateService);
         verifyNoInteractions(clusterApiConnectors);
     }
 
@@ -157,6 +157,31 @@ public class NifiUpgradeValidatorTest {
         stack.getBlueprint().setName(blueprintName);
 
         Exception actual = assertThrows(UpgradeValidationFailedException.class, () -> underTest.validate(createRequest(true, false,
+                upgradeImageInfo)));
+
+        assertEquals("Action Required: Upgrade to NiFi 2.x" + System.lineSeparator()
+                        + "The selected CDP Runtime version (7.3.2) does not support NiFi 1.x. A direct, in-place upgrade is not possible. "
+                        + "To proceed, you must manually migrate your workflows to a new NiFi 2.x Data Hub cluster before upgrading this environment. "
+                        + "Refer to Cloudera Documentation at: https://docs.cloudera.com/dataflow/cloud/migration-tool/topics/cdf-migration-tool.html",
+                actual.getMessage());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "7.2.17 - Flow Management Light Duty with Apache NiFi, Apache NiFi Registry, Schema Registry",
+            "7.2.18 - Flow Management Heavy Duty with Apache NiFi, Apache NiFi Registry, Schema Registry"
+    })
+    public void testValidateShouldThrowExceptionWhenUpgradingToCdp732WithNifi1TemplateWithoutOsUpgrade(String blueprintName) {
+        when(cmTemplateService.isServiceTypePresent(SERVICE_TYPE, BLUEPRINT_TEXT)).thenReturn(true);
+        Image image = Image.builder()
+                .withVersion(CLOUDERA_STACK_VERSION_7_3_2.getVersion())
+                .build();
+        UpgradeImageInfo upgradeImageInfo = UpgradeImageInfo.builder()
+                .withTargetStatedImage(StatedImage.statedImage(image, null, null))
+                .build();
+        stack.getBlueprint().setName(blueprintName);
+
+        Exception actual = assertThrows(UpgradeValidationFailedException.class, () -> underTest.validate(createRequest(false, false,
                 upgradeImageInfo)));
 
         assertEquals("Action Required: Upgrade to NiFi 2.x" + System.lineSeparator()
