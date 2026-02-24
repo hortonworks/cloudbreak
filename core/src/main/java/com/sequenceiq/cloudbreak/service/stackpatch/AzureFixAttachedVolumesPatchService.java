@@ -235,6 +235,7 @@ public class AzureFixAttachedVolumesPatchService extends ExistingStackPatchServi
                 .map(JsonNode::textValue)
                 .orElse("");
         return stdout.lines()
+                .map(String::trim)
                 .map(UUID_RESULT_REGEX_PATTERN::matcher)
                 .filter(Matcher::matches)
                 .collect(Collectors.toMap(matcher -> convertLunPath(matcher.group(1)), matcher -> matcher.group(2)));
@@ -323,6 +324,7 @@ public class AzureFixAttachedVolumesPatchService extends ExistingStackPatchServi
 
     private Map<String, String> createMountPathByUuidMap(String fstab) {
         return fstab.lines()
+                .map(String::trim)
                 .map(FSTAB_ATTACHED_DISK_REGEX_PATTERN::matcher)
                 .filter(Matcher::matches)
                 .collect(Collectors.toMap(matcher -> matcher.group(1), matcher -> matcher.group(2), (v1, v2) -> {

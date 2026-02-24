@@ -6,7 +6,7 @@
         "changes": {
           "pid": 76250,
           "retcode": 0,
-          "stdout": "lun1: UUID=\"uuid1\"\nlun2: UUID=\"uuid2\"\nlun3: UUID=\"uuid3\"",
+          "stdout": "  lun1: UUID=\"uuid1\" \n  lun2: UUID=\"uuid2\"\nlun3: UUID=\"uuid3\"",
           "stderr": ""
         },
         "result": true,
@@ -24,7 +24,7 @@
         "changes": {
           "pid": 76250,
           "retcode": 0,
-          "stdout": "lun1: UUID=\"uuid1\"\nlun2: UUID=\"uuid2\"\nlun3: UUID=\"uuid3\"\nlun4: UUID=\"uuid4\"",
+          "stdout": "lun1: UUID=\"uuid1\"\n  lun2: UUID=\"uuid2\"\nlun3: UUID=\"uuid3\"\nlun4: UUID=\"uuid4\"",
           "stderr": ""
         },
         "result": true,

@@ -12,7 +12,7 @@ UUID=062d5873-7507-496d-9732-dfb05dd9ad1b /                       xfs     defaul
 UUID=412D-962A          /boot/efi               vfat    defaults,uid=0,gid=0,umask=077,shortname=winnt 0 2
 tmpfs /dev/shm tmpfs rw,nosuid,nodev,noexec,seclabel 0 0
 UUID=uuid1 /hadoopfs/fs1 ext4 defaults,noatime,nofail 0 2
-UUID=uuid2 /hadoopfs/fs2 ext4 defaults,noatime,nofail 0 2
+  UUID=uuid2 /hadoopfs/fs2 ext4 defaults,noatime,nofail 0 2
 UUID=uuid3 /hadoopfs/fs3 ext4 defaults,noatime,nofail 0 2
-UUID=uuid4 /hadoopfs/ephfs1 ext4 defaults,noatime,nofail 0 2
+    UUID=uuid4 /hadoopfs/ephfs1 ext4 defaults,noatime,nofail 0 2
 UUID=uuid5 /hadoopfs/ephfs2 ext4 defaults,noatime,nofail 0 2
