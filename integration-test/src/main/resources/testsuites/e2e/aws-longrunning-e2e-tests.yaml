@@ -31,4 +31,3 @@ tests:
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa.FreeIpaArmTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxNativeMigrationTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXRhel9ImageTest
-      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXKraftMigrationTest
