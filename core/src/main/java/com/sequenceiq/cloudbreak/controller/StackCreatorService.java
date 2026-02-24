@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.controller;
 
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERA_STACK_VERSION_7_3_1;
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERA_STACK_VERSION_7_3_2;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 import static com.sequenceiq.cloudbreak.service.metrics.MetricType.STACK_PREPARATION;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
@@ -23,6 +24,7 @@ import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -41,6 +43,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.BaseSecur
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.TagsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -210,8 +213,10 @@ public class StackCreatorService {
                 LOGGER,
                 "Get Environment from Environment service took {} ms");
         nodeCountLimitValidator.validateProvision(stackRequest, environment.getRegions().getNames().stream().findFirst().orElse(null));
-        validateArchitecture(stackRequest, distroxRequest, workspace.getId());
+        Optional<String> runtimeVersion = getRuntimeVersionFromBlueprint(stackRequest, workspace.getId());
+        validateArchitecture(stackRequest, distroxRequest, workspace.getId(), runtimeVersion);
         validateSeLinuxEntitlement(stackRequest);
+        updateImageOsIfRequired(stackRequest, runtimeVersion);
 
         Stack stackStub = measure(
                 () -> stackV4RequestToStackConverter.convert(environment, stackRequest),
@@ -325,6 +330,22 @@ public class StackCreatorService {
         return response;
     }
 
+    private void updateImageOsIfRequired(StackV4Request stackRequest, Optional<String> runtimeVersion) {
+        if (runtimeVersion.isPresent() && isVersionNewerOrEqualThanLimited(runtimeVersion.get(), CLOUDERA_STACK_VERSION_7_3_2)) {
+            if (stackRequest.getImage() == null) {
+                stackRequest.setImage(new ImageSettingsV4Request());
+            }
+            if (StringUtils.isAllEmpty(stackRequest.getImage().getId(), stackRequest.getImage().getOs())) {
+                stackRequest.getImage().setOs(OsType.RHEL9.getOs());
+            }
+        }
+    }
+
+    private Optional<String> getRuntimeVersionFromBlueprint(StackV4Request stackRequest, Long workspaceId) {
+        return Optional.ofNullable(stackRequest.getCluster())
+                .map(cluster -> blueprintService.getCdhVersion(NameOrCrn.ofName(cluster.getBlueprintName()), workspaceId));
+    }
+
     void validateImageAndInstanceTypeArchitectureForAws(StackV4Request stackRequest, StatedImage image) {
         if (CloudPlatform.AWS.equals(stackRequest.getCloudPlatform()) && !StackType.DATALAKE.equals(stackRequest.getType())) {
             Architecture imageArchitecture = Architecture.fromStringWithFallback(image.getImage().getArchitecture());
@@ -357,13 +378,12 @@ public class StackCreatorService {
         stack.setJavaVersion(javaVersion);
     }
 
-    private void validateArchitecture(StackV4Request stackRequest, boolean distroxRequest, Long workspaceId) {
+    private void validateArchitecture(StackV4Request stackRequest, boolean distroxRequest, Long workspaceId, Optional<String> runtimeVersion) {
         if (stackRequest.getArchitectureEnum() == Architecture.ARM64) {
-            if (!isCodRequest(stackRequest) && stackRequest.getCluster() != null) {
-                String version = blueprintService.getCdhVersion(NameOrCrn.ofName(stackRequest.getCluster().getBlueprintName()), workspaceId);
-                if (!isVersionNewerOrEqualThanLimited(version, CLOUDERA_STACK_VERSION_7_3_1)) {
+            if (!isCodRequest(stackRequest)) {
+                if (runtimeVersion.isPresent() && !isVersionNewerOrEqualThanLimited(runtimeVersion.get(), CLOUDERA_STACK_VERSION_7_3_1)) {
                     throw new BadRequestException(String.format("The selected architecture (%s) is not supported in this cdh version (%s).",
-                            Architecture.ARM64.getName(), version));
+                            Architecture.ARM64.getName(), runtimeVersion.get()));
                 }
             }
         }

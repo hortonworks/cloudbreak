@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
+import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.image.CurrentImagePackageProvider;
 import com.sequenceiq.cloudbreak.service.upgrade.image.locked.LockedComponentService;
@@ -57,7 +58,8 @@ public class PythonVersionBasedRuntimeVersionValidator {
 
     private boolean isTargetRuntimeRequiresPython38(Image targetImage, StackDto stack) {
         String targetRuntimeVersion = targetImage.getPackageVersion(STACK);
-        return new VersionComparator().compare(() -> targetRuntimeVersion, () -> getMinimumRuntimeVersion(stack)) >= 0;
+        return new VersionComparator().compare(() -> targetRuntimeVersion, () -> getMinimumRuntimeVersion(stack)) >= 0
+                && !CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited(() -> targetRuntimeVersion, CMRepositoryVersionUtil.CLOUDERA_STACK_VERSION_7_3_2);
     }
 
     private String getMinimumRuntimeVersion(StackDto stack) {
