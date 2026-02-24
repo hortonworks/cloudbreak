@@ -8,7 +8,7 @@ import com.sequenceiq.common.api.type.CdpResourceType;
 @Service
 public class CDPConsoleUrlProvider {
 
-    @Value("${cdp.console.url:}")
+    @Value("${cdp.console.url}")
     private String url;
 
     public String getClusterUrl(CdpResourceType type, String environmentName, String resourceName) {

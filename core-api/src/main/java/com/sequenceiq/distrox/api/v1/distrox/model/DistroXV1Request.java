@@ -13,6 +13,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.google.common.collect.Sets;
+import com.sequenceiq.cloudbreak.common.notification.NotificationState;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.common.api.tag.request.TaggableRequest;
 import com.sequenceiq.distrox.api.v1.distrox.model.cluster.DistroXClusterV1Request;
@@ -68,6 +69,9 @@ public class DistroXV1Request extends DistroXV1Base implements TaggableRequest {
 
     @Schema(description = ModelDescriptions.Database.DISABLE_DB_SSL_ENFORCEMENT)
     private boolean disableDbSslEnforcement;
+
+    @Schema(description = ModelDescriptions.NOTIFICATION_STATE)
+    private NotificationState notificationState;
 
     @Schema(description = ModelDescriptions.StackModelDescription.SECURITY)
     private SecurityV1Request security;
@@ -210,6 +214,14 @@ public class DistroXV1Request extends DistroXV1Base implements TaggableRequest {
 
     public void setDisableDbSslEnforcement(boolean disableDbSslEnforcement) {
         this.disableDbSslEnforcement = disableDbSslEnforcement;
+    }
+
+    public NotificationState getNotificationState() {
+        return notificationState;
+    }
+
+    public void setNotificationState(NotificationState notificationState) {
+        this.notificationState = notificationState;
     }
 
     public SecurityV1Request getSecurity() {

@@ -18,12 +18,14 @@ import com.sequenceiq.cloudbreak.common.imdupdate.InstanceMetadataUpdateProperti
 import com.sequenceiq.cloudbreak.common.imdupdate.InstanceMetadataUpdateType;
 import com.sequenceiq.cloudbreak.common.imdupdate.InstanceMetadataUpdateTypeMetadata;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.notification.NotificationState;
 import com.sequenceiq.cloudbreak.converter.scheduler.StatusToPollGroupConverter;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
+import com.sequenceiq.cloudbreak.service.notification.StackNotificationService;
 import com.sequenceiq.cloudbreak.service.securityconfig.SecurityConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.usage.service.ProviderSyncStateChangeUsageSenderService;
@@ -37,6 +39,9 @@ public class StackUpdater {
 
     @Inject
     private StackService stackService;
+
+    @Inject
+    private StackNotificationService stackNotificationAssembler;
 
     @Inject
     private StatusToPollGroupConverter statusToPollGroupConverter;
@@ -132,6 +137,7 @@ public class StackUpdater {
             }
             stack = stackService.save(stack);
             saveDeprecatedClusterStatus(statusReason, stack, newStatus);
+            stackNotificationAssembler.notify(stack);
             usageLoggingUtil.logClusterStatusChangeUsageEvent(actualStackStatus.getStatus(), newStatus, cluster);
         } else {
             LOGGER.info("Stack is in DELETE_COMPLETED status, cannot update status.");
@@ -176,5 +182,9 @@ public class StackUpdater {
             stack.setSupportedImdsVersion(supportedImdsVersion);
             stackService.save(stack);
         }
+    }
+
+    public void updateStackNotificationState(NotificationState notificationState, Long stackId) {
+        stackService.updateStackNotificationState(stackId, notificationState);
     }
 }

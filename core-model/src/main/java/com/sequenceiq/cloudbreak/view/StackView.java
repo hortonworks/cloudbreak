@@ -30,6 +30,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.OnFailureAction;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.notification.NotificationState;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.domain.FailurePolicy;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
@@ -56,6 +57,8 @@ public interface StackView extends MdcContextInfoProvider {
     Integer getGatewayPort();
 
     Tunnel getTunnel();
+
+    NotificationState getNotificationState();
 
     String getEnvironmentCrn();
 

@@ -30,6 +30,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
+import com.sequenceiq.cloudbreak.service.notification.StackNotificationService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.util.UsageLoggingUtil;
 
@@ -47,6 +48,9 @@ public class StackUpdaterTest {
 
     @Mock
     private ClusterService clusterService;
+
+    @Mock
+    private StackNotificationService stackNotificationAssembler;
 
     @Mock
     private InstanceMetadataUpdateProperties instanceMetadataUpdateProperties;

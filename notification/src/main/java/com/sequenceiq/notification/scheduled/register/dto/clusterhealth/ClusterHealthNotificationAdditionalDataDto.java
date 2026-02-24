@@ -2,10 +2,12 @@ package com.sequenceiq.notification.scheduled.register.dto.clusterhealth;
 
 import static com.sequenceiq.notification.util.NotificationUtil.toCamelCase;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.sequenceiq.notification.scheduled.register.dto.BaseNotificationRegisterAdditionalDataDto;
 
@@ -214,6 +216,17 @@ public class ClusterHealthNotificationAdditionalDataDto extends BaseNotification
         public ClusterHealthNotificationAdditionalDataDtoBuilder controlPlaneUrl(String controlPlaneUrl) {
             this.controlPlaneUrl = controlPlaneUrl;
             return this;
+        }
+
+        protected String toCamelCase(String input) {
+            if (input == null || input.isEmpty()) {
+                return input;
+            }
+            String result = Arrays.stream(input.toLowerCase().split("_"))
+                    .filter(word -> !word.isEmpty())
+                    .map(word -> Character.toUpperCase(word.charAt(0)) + word.substring(1) + " ")
+                    .collect(Collectors.joining());
+            return result.trim();
         }
 
         public ClusterHealthNotificationAdditionalDataDto build() {

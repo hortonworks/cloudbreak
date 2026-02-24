@@ -11,6 +11,7 @@ import com.sequenceiq.environment.api.v1.encryptionprofile.endpoint.EncryptionPr
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentDefaultComputeClusterEndpoint;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentHybridEndpoint;
+import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentInternalEndpoint;
 import com.sequenceiq.environment.api.v1.marketplace.endpoint.AzureMarketplaceTermsEndpoint;
 import com.sequenceiq.environment.api.v1.proxy.endpoint.ProxyEndpoint;
 import com.sequenceiq.environment.api.v1.terms.endpoint.TermsEndpoint;
@@ -41,6 +42,11 @@ public class EnvironmentServiceCrnEndpoints extends AbstractUserCrnServiceEndpoi
     @Override
     public EnvironmentEndpoint environmentV1Endpoint() {
         return getEndpoint(EnvironmentEndpoint.class);
+    }
+
+    @Override
+    public EnvironmentInternalEndpoint environmentInternalEndpoint() {
+        return getEndpoint(EnvironmentInternalEndpoint.class);
     }
 
     @Override

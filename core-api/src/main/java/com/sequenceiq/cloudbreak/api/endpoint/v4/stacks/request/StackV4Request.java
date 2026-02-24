@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSetti
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.InstanceGroupV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.TagsV4Request;
+import com.sequenceiq.cloudbreak.common.notification.NotificationState;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
@@ -115,6 +116,9 @@ public class StackV4Request extends StackV4Base implements TaggableRequest {
 
     @Schema(description = ModelDescriptions.ARCHITECTURE)
     private String architecture;
+
+    @Schema(description = ModelDescriptions.NOTIFICATION_STATE)
+    private NotificationState notificationState;
 
     @Schema(description = ModelDescriptions.Database.DISABLE_DB_SSL_ENFORCEMENT)
     private boolean disableDbSslEnforcement;
@@ -321,5 +325,13 @@ public class StackV4Request extends StackV4Base implements TaggableRequest {
 
     public void setSecurity(SecurityV4Request security) {
         this.security = security;
+    }
+
+    public NotificationState getNotificationState() {
+        return notificationState;
+    }
+
+    public void setNotificationState(NotificationState notificationState) {
+        this.notificationState = notificationState;
     }
 }

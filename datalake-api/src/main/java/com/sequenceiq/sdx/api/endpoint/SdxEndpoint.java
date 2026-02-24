@@ -598,6 +598,20 @@ public interface SdxEndpoint {
     FlowIdentifier modifySeLinuxByCrn(@ValidCrn(resource = VM_DATALAKE) @PathParam("crn") String crn, @PathParam("selinuxMode") SeLinux selinuxMode);
 
     @PUT
+    @Path("/name/{name}/modify_notification_state")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Modifies Notification Status on a specific DL", operationId = "modifyDataLakeNotificationStateByName",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    void modifyNotificationStateByName(@PathParam("name") String name);
+
+    @PUT
+    @Path("/crn/{crn}/modify_notification_state")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Modifies Notification Status on a specific DL", operationId = "modifyDataLakeNotificationStateByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    void modifyNotificationStateByCrn(@ValidCrn(resource = VM_DATALAKE) @PathParam("crn") String crn);
+
+    @PUT
     @Path("name/{name}/trigger_sku_migration")
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Triggering SKU migration on the Data Lake by its name", operationId = "triggerDataLakeSkuMigrationByName",

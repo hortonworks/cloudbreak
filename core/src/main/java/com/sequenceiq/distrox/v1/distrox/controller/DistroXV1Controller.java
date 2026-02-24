@@ -945,4 +945,21 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     public FlowIdentifier updatePublicDnsEntriesByCrn(@ResourceCrn String crn) {
         return stackOperationService.triggerUpdatePublicDnsEntries(NameOrCrn.ofCrn(crn), ThreadBasedUserCrnProvider.getAccountId());
     }
+
+    @Override
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.REPAIR_DATAHUB)
+    public void modifyDataHubNotificationStateByName(@ResourceName String name) {
+        stackOperationService.modifyNotificationStatus(
+                NameOrCrn.ofName(name),
+                ThreadBasedUserCrnProvider.getAccountId()
+        );
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.REPAIR_DATAHUB)
+    public void modifyDataHubNotificationStateByCrn(@ResourceCrn String crn) {
+        stackOperationService.modifyNotificationStatus(
+                NameOrCrn.ofCrn(crn),
+                ThreadBasedUserCrnProvider.getAccountId());
+    }
 }

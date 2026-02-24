@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.common.dal.ResourceBasicView;
 import com.sequenceiq.cloudbreak.common.event.PayloadContext;
+import com.sequenceiq.cloudbreak.common.notification.NotificationState;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.projection.AutoscaleStack;
@@ -579,5 +580,8 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
     @Modifying
     void deleteByResourceCrn(String crn);
 
+    @Modifying
+    @Query("UPDATE Stack s SET s.notificationState = :notificationState WHERE s.id = :stackId")
+    void updateStackNotificationState(@Param("notificationState") NotificationState notificationState, @Param("stackId") Long stackId);
 }
 

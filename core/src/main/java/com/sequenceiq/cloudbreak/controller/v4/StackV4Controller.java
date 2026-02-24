@@ -32,6 +32,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.MaintenanceModeV
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.RotateSaltPasswordRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.SetDefaultJavaVersionRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackImageChangeV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackNotificationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
@@ -80,6 +81,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.dto.SubnetIdWithResourceNameAndCrn;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.migraterds.StackMigrateRdsService;
+import com.sequenceiq.cloudbreak.service.notification.StackNotificationService;
 import com.sequenceiq.cloudbreak.service.rotaterdscert.StackRotateRdsCertificateService;
 import com.sequenceiq.cloudbreak.service.stack.StackInstanceMetadataUpdateService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -132,6 +134,9 @@ public class StackV4Controller extends NotificationController implements StackV4
 
     @Inject
     private StackRotateRdsCertificateService rotateRdsCertificateService;
+
+    @Inject
+    private StackNotificationService stackNotificationService;
 
     @Inject
     private StackService stackService;
@@ -292,6 +297,12 @@ public class StackV4Controller extends NotificationController implements StackV4
         SaltPasswordStatus saltPasswordStatus = stackOperations.getSaltPasswordStatus(NameOrCrn.ofCrn(crn), ThreadBasedUserCrnProvider.getAccountId());
         response.setStatus(com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.SaltPasswordStatus.valueOf(saltPasswordStatus.name()));
         return response;
+    }
+
+    @Override
+    @InternalOnly
+    public void sendNotification(Long workspaceId, @ResourceCrn String crn, StackNotificationV4Request request) {
+        stackOperations.sendNotification(NameOrCrn.ofCrn(crn), request, ThreadBasedUserCrnProvider.getAccountId());
     }
 
     @Override
@@ -794,5 +805,12 @@ public class StackV4Controller extends NotificationController implements StackV4
     @CheckPermissionByAccount(action = AuthorizationResourceAction.DESCRIBE_ENCRYPTION_PROFILE)
     public List<String> getClustersNamesByEncryptionProfile(Long workspaceId, @ResourceCrn String encryptionProfileCrn) {
         return clusterService.getAllClusterNamesUsingEncryptionProfile(encryptionProfileCrn);
+    }
+
+    @InternalOnly
+    @Override
+    public void modifyNotificationStateByCrn(Long workspaceId, @ResourceCrn String crn, @InitiatorUserCrn String initiatorUserCrn) {
+        Crn userCrn = Crn.ofUser(initiatorUserCrn);
+        stackOperationService.modifyNotificationStatus(NameOrCrn.ofCrn(crn), userCrn.getAccountId());
     }
 }

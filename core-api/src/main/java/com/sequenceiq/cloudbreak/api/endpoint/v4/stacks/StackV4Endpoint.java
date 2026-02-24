@@ -71,6 +71,7 @@ import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.DET
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.MODIFY_PROXY_CONFIG_INTERNAL;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.ROOT_VOLUME_UPDATE_BY_STACK_CRN;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.ROTATE_STACK_SECRETS;
+import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.SEND_NOTIFICATION;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.VERTICAL_SCALE_BY_NAME;
 
 import java.util.List;
@@ -103,6 +104,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.MaintenanceModeV
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.RotateSaltPasswordRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.SetDefaultJavaVersionRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackImageChangeV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackNotificationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
@@ -346,6 +348,14 @@ public interface StackV4Endpoint {
             operationId = "getSaltPasswordStatusForStackInWorkspaceV4Internal",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     SaltPasswordStatusResponse getSaltPasswordStatus(@PathParam("workspaceId") Long workspaceId, @PathParam("crn") String crn);
+
+    @PUT
+    @Path("internal/{crn}/send_notification")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = SEND_NOTIFICATION, description = Notes.STACK_NOTES,
+            operationId = "sendNotificationForStackInWorkspaceV4Internal",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    void sendNotification(@PathParam("workspaceId") Long workspaceId, @PathParam("crn") String crn, @Valid StackNotificationV4Request request);
 
     @PUT
     @Path("internal/{crn}/modify_proxy")
@@ -1031,4 +1041,15 @@ public interface StackV4Endpoint {
             operationId = "getClustersNamesByEncryptionProfile",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     List<String> getClustersNamesByEncryptionProfile(@PathParam("workspaceId") Long workspaceId, @PathParam("crn") String encryptionProfileCrn);
+
+    @PUT
+    @Path("internal/crn/{crn}/modify_notification_state")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Update the notification state of the cluster by CRN",
+            operationId = "modifyNotificationStateByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    void modifyNotificationStateByCrn(
+            @PathParam("workspaceId") Long workspaceId,
+            @NotEmpty @ValidCrn(resource = {DATAHUB, VM_DATALAKE}) @PathParam("crn") String crn,
+            @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 }

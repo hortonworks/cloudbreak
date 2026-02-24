@@ -135,6 +135,7 @@ public class DistroXV1RequestToStackV4RequestConverter {
         request.setEnableMultiAz(source.isEnableMultiAz());
         request.setArchitecture(source.getArchitecture());
         request.setDisableDbSslEnforcement(source.isDisableDbSslEnforcement());
+        request.setNotificationState(source.getNotificationState());
         request.setSecurity(securityRequestConverter.convert(source.getSecurity()));
         calculateVariant(environment, source, request, runtime);
         checkMultipleGatewayNodes(source);
@@ -313,6 +314,7 @@ public class DistroXV1RequestToStackV4RequestConverter {
         request.setEnableLoadBalancer(source.isEnableLoadBalancer());
         request.setJavaVersion(source.getJavaVersion());
         request.setDisableDbSslEnforcement(source.isDisableDbSslEnforcement());
+        request.setNotificationState(source.getNotificationState());
 
         return request;
     }

@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataTyp
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.common.domain.IdAware;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.notification.NotificationState;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.common.orchestration.OrchestratorAware;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
@@ -88,10 +89,13 @@ public class StackDto implements OrchestratorAware, StackDtoDelegate, MdcContext
 
     private Map<InstanceGroupView, List<String>> availabilityZonesByInstanceGroup;
 
+    private NotificationState notificationState;
+
     public StackDto(StackView stack, ClusterView cluster, Network network, Database database, Workspace workspace, Tenant tenant,
             Map<String, InstanceGroupDto> instanceGroups, Set<Resource> resources, Blueprint blueprint, GatewayView gateway, Orchestrator orchestrator,
             FileSystem fileSystem, FileSystem additionalFileSystem, Set<ClusterComponentView> clusterComponents, Architecture architecture,
-            List<StackParameters> stackParameters, SecurityConfig securityConfig, Map<InstanceGroupView, List<String>> availabilityZonesByInstanceGroup) {
+            List<StackParameters> stackParameters, SecurityConfig securityConfig, Map<InstanceGroupView, List<String>> availabilityZonesByInstanceGroup,
+            NotificationState notificationState) {
         this.stack = stack;
         this.cluster = cluster;
         this.network = network;
@@ -110,6 +114,7 @@ public class StackDto implements OrchestratorAware, StackDtoDelegate, MdcContext
         this.availabilityZonesByInstanceGroup = availabilityZonesByInstanceGroup;
         this.tenant = tenant;
         this.architecture = architecture;
+        this.notificationState = notificationState;
     }
 
     public StackDto() {
@@ -184,6 +189,10 @@ public class StackDto implements OrchestratorAware, StackDtoDelegate, MdcContext
 
     public Architecture getArchitecture() {
         return architecture;
+    }
+
+    public NotificationState getNotificationState() {
+        return notificationState;
     }
 
     public Set<Resource> getResources() {

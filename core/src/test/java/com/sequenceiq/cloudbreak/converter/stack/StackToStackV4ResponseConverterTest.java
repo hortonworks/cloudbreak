@@ -205,7 +205,7 @@ public class StackToStackV4ResponseConverterTest extends AbstractEntityConverter
         // THEN
         assertAllFieldsNotNull(result, Arrays.asList("gcp", "mock", "openstack", "aws", "yarn", "azure",
                 "environmentName", "environmentType", "dataLakeV4Response", "credentialName", "credentialCrn",
-                "telemetry", "flowIdentifier", "loadBalancers"));
+                "telemetry", "flowIdentifier", "loadBalancers", "notificationState"));
         assertEquals(SeLinux.PERMISSIVE.name(), result.getSecurity().getSeLinux());
         verify(restRequestThreadLocalService).setWorkspaceId(source.getWorkspaceId());
     }
@@ -230,7 +230,8 @@ public class StackToStackV4ResponseConverterTest extends AbstractEntityConverter
         StackV4Response result = underTest.convert(source);
         // THEN
         assertAllFieldsNotNull(result, Arrays.asList("cluster", "gcp", "mock", "openstack", "aws", "yarn", "azure", "telemetry", "environmentName",
-                "environmentType", "dataLakeV4Response", "credentialName", "credentialCrn", "telemetry", "flowIdentifier", "loadBalancers"));
+                "environmentType", "dataLakeV4Response", "credentialName", "credentialCrn", "telemetry", "flowIdentifier",
+                "loadBalancers", "notificationState"));
 
         assertNull(result.getCluster());
         assertEquals(SeLinux.PERMISSIVE.name(), result.getSecurity().getSeLinux());

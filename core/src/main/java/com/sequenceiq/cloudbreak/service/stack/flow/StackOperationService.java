@@ -5,6 +5,8 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STALE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOPPED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOP_REQUESTED;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
+import static com.sequenceiq.cloudbreak.common.notification.NotificationState.DISABLED;
+import static com.sequenceiq.cloudbreak.common.notification.NotificationState.ENABLED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_START_IGNORED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_STOP_IGNORED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_STOP_REQUESTED;
@@ -45,6 +47,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.rotation.requests.StackDatabase
 import com.sequenceiq.cloudbreak.api.endpoint.v4.rotation.response.StackDatabaseServerCertificateStatusV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.rotation.response.StackDatabaseServerCertificateStatusV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StatusRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.SetDefaultJavaVersionRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.SaltPasswordStatus;
@@ -52,6 +55,7 @@ import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.notification.NotificationState;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
@@ -60,6 +64,7 @@ import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.user.ExternalDataba
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.StopRestrictionReason;
 import com.sequenceiq.cloudbreak.domain.stack.ManualClusterRepairMode;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.view.StackApiView;
 import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
@@ -77,6 +82,7 @@ import com.sequenceiq.cloudbreak.service.datalake.DataLakeStatusCheckerService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
 import com.sequenceiq.cloudbreak.service.migration.kraft.KraftMigrationService;
+import com.sequenceiq.cloudbreak.service.notification.StackNotificationService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsClientService;
 import com.sequenceiq.cloudbreak.service.salt.RotateSaltPasswordTriggerService;
 import com.sequenceiq.cloudbreak.service.salt.RotateSaltPasswordValidator;
@@ -84,6 +90,7 @@ import com.sequenceiq.cloudbreak.service.salt.SaltPasswordStatusService;
 import com.sequenceiq.cloudbreak.service.spot.SpotInstanceUsageCondition;
 import com.sequenceiq.cloudbreak.service.stack.StackApiViewService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.StackStopRestrictionService;
 import com.sequenceiq.cloudbreak.service.stack.TargetedUpscaleSupportService;
 import com.sequenceiq.cloudbreak.service.validation.UpdatePublicDnsEntriesInPemValidator;
@@ -122,6 +129,9 @@ public class StackOperationService {
 
     @Inject
     private StackDtoService stackDtoService;
+
+    @Inject
+    private StackService stackService;
 
     @Inject
     private ClusterService clusterService;
@@ -188,6 +198,9 @@ public class StackOperationService {
 
     @Inject
     private KraftMigrationService kraftMigrationService;
+
+    @Inject
+    private StackNotificationService stackNotificationService;
 
     public FlowIdentifier removeInstance(StackDto stack, String instanceId, boolean forced) {
         InstanceMetaData metaData = updateNodeCountValidator.validateInstanceForDownscale(instanceId, stack.getStack());
@@ -556,8 +569,16 @@ public class StackOperationService {
 
     public FlowIdentifier stackUpdateDisks(NameOrCrn nameOrCrn, DiskUpdateRequest updateRequest, String accountId) {
         convertInputGroupToLowerCase(updateRequest);
+        validateDiskUpdate(updateRequest);
         StackDto stack = stackDtoService.getByNameOrCrn(nameOrCrn, accountId);
         return flowManager.triggerStackUpdateDisks(stack, updateRequest);
+    }
+
+    private void validateDiskUpdate(DiskUpdateRequest updateRequest) {
+        if (DiskType.DATABASE_DISK == updateRequest.getDiskType()) {
+            throw new BadRequestException("Database disk updates (DATABASE_DISK) are not yet supported. " +
+                    "This functionality is currently under development and will be made available in a future release.");
+        }
     }
 
     public FlowIdentifier triggerSkuMigration(NameOrCrn name, String accountId, boolean force) {
@@ -702,6 +723,18 @@ public class StackOperationService {
     public List<String> listAvailableJavaVersions(NameOrCrn nameOrCrn, String accountId) {
         StackDto stack = stackDtoService.getByNameOrCrn(nameOrCrn, accountId);
         return defaultJavaVersionUpdateValidator.listAvailableJavaVersions(stack);
+    }
+
+    public void sendNotification(NameOrCrn nameOrCrn, Status status, DetailedStackStatus detailedStackStatus, String statusReason, String accountId) {
+        StackDto stackDto = stackDtoService.getByNameOrCrn(nameOrCrn, accountId);
+        Stack stack = stackService.getById(stackDto.getId());
+        stackNotificationService.notify(stack, status, detailedStackStatus, statusReason);
+    }
+
+    public void modifyNotificationStatus(NameOrCrn nameOrCrn, String accountId) {
+        StackDto stack = stackDtoService.getByNameOrCrn(nameOrCrn, accountId);
+        NotificationState notificationState = stack.getNotificationState().equals(ENABLED) ? DISABLED : ENABLED;
+        stackUpdater.updateStackNotificationState(notificationState, stack.getId());
     }
 
     private void convertInputGroupToLowerCase(DiskUpdateRequest updateRequest) {

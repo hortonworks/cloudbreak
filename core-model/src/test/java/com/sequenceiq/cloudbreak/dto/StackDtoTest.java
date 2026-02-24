@@ -16,6 +16,7 @@ import java.util.Set;
 import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
+import com.sequenceiq.cloudbreak.common.notification.NotificationState;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
@@ -67,7 +68,8 @@ class StackDtoTest {
         InstanceGroupView instanceGroupView = mock(InstanceGroupView.class);
         when(instanceGroupView.getTemplate()).thenReturn(mock(Template.class));
         instanceGroups.put("worker", new InstanceGroupDto(instanceGroupView, workerInstanceMetadataViews));
-        StackDto stackDto = new StackDto(null, null, null, null, null, null, instanceGroups, null, null, null, null, null, null, null, null, null, null, null);
+        StackDto stackDto = new StackDto(null, null, null, null, null, null,
+                instanceGroups, null, null, null, null, null, null, null, null, null, null, null, NotificationState.DISABLED);
         Set<Node> allFunctioningNodes = stackDto.getAllFunctioningNodes();
         assertEquals(2, allFunctioningNodes.size());
         assertThat(allFunctioningNodes, hasItem(hasProperty("hostname", equalTo("fqdn2"))));

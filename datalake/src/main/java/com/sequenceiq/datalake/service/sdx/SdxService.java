@@ -413,6 +413,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
 
         SdxCluster sdxCluster = validateAndCreateNewSdxCluster(sdxClusterRequest, runtimeVersion, name, userCrn, environment);
         setArchitecture(internalStackV4Request, sdxCluster, architecture);
+        setNotificationState(internalStackV4Request, sdxCluster, getNotificationState(sdxClusterRequest));
         setTagsSafe(sdxClusterRequest, sdxCluster);
         setSecurity(sdxClusterRequest, sdxCluster, userCrn);
 
@@ -503,6 +504,19 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
                 throw new BadRequestException(
                         String.format("The request contains %s cpu architecture but the internal stack request contains %s architecture.",
                                 architecture, internalStackV4Request.getArchitecture()));
+            }
+        }
+    }
+
+    private void setNotificationState(StackV4Request internalStackV4Request, SdxCluster sdxCluster, NotificationState notificationState) {
+        sdxCluster.setNotificationState(notificationState);
+        if (internalStackV4Request != null) {
+            if (internalStackV4Request.getNotificationState() == null) {
+                internalStackV4Request.setNotificationState(notificationState);
+            } else if (!notificationState.equals(internalStackV4Request.getArchitecture())) {
+                throw new BadRequestException(
+                        String.format("The request contains %s notificationState but the internal stack request contains %s notificationState.",
+                                notificationState, internalStackV4Request.getNotificationState()));
             }
         }
     }

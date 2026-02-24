@@ -885,4 +885,20 @@ public interface DistroXV1Endpoint {
             operationId = "updateDataHubPublicDnsEntriesByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier updatePublicDnsEntriesByCrn(@NotEmpty @ValidCrn(resource = DATAHUB) @PathParam("crn") String crn);
+
+    @PUT
+    @Path("name/{name}/modify_notification_state")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Update the notification state of the cluster by Name",
+            operationId = "modifyDataHubNotificationStateByName",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    void modifyDataHubNotificationStateByName(@PathParam("name") String name);
+
+    @PUT
+    @Path("crn/{crn}/modify_notification_state")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Update the notification state of the cluster by CRN",
+            operationId = "modifyDataHubNotificationStateByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    void modifyDataHubNotificationStateByCrn(@NotEmpty @ValidCrn(resource = DATAHUB) @PathParam("crn") String crn);
 }

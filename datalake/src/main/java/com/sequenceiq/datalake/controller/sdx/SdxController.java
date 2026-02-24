@@ -690,6 +690,18 @@ public class SdxController implements SdxEndpoint {
         return seLinuxService.modifySeLinuxOnDatalake(sdxCluster, userCrn, selinuxMode);
     }
 
+    @Override
+    @CheckPermissionByResourceName(action =  AuthorizationResourceAction.REPAIR_DATALAKE)
+    public void modifyNotificationStateByName(@ResourceName String name) {
+        stackService.modifyNotificationState(getSdxClusterByName(name));
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action =  AuthorizationResourceAction.REPAIR_DATALAKE)
+    public void modifyNotificationStateByCrn(@ResourceCrn String crn) {
+        stackService.modifyNotificationState(getSdxClusterByCrn(crn));
+    }
+
     private SdxCluster getSdxClusterByName(String name) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         SdxCluster sdxCluster = sdxService.getByNameInAccountAllowDetached(userCrn, name);

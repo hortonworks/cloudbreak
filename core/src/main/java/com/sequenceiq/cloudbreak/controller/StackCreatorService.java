@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.controller;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERA_STACK_VERSION_7_3_1;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERA_STACK_VERSION_7_3_2;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
+import static com.sequenceiq.cloudbreak.common.notification.NotificationState.fromStateWithDisableIfNull;
 import static com.sequenceiq.cloudbreak.service.metrics.MetricType.STACK_PREPARATION;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 import static com.sequenceiq.cloudbreak.util.SqlUtil.getProperSqlErrorMessage;
@@ -226,6 +227,7 @@ public class StackCreatorService {
         stackStub.setWorkspace(workspace);
         stackStub.setCreator(user);
         StackType stackType = determineStackTypeBasedOnTheUsedApi(stackStub, distroxRequest);
+        stackStub.setNotificationState(fromStateWithDisableIfNull(stackRequest.getNotificationState()));
         stackStub.setType(stackType);
         stackStub.setMultiAz(stackRequest.isEnableMultiAz());
         String platformString = stackStub.getCloudPlatform().toLowerCase(Locale.ROOT);

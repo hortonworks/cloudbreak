@@ -222,6 +222,7 @@ dependencies {
   implementation project(':orchestrator-api')
   implementation project(':cloud-reactor-api')
   implementation project(':cloud-reactor')
+  implementation project(':notification')
   implementation project(':structuredevent-model')
   implementation project(':structuredevent-service-legacy')
   implementation project(':structuredevent-api-cdp')

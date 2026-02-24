@@ -7,6 +7,7 @@ import java.util.List;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
@@ -48,5 +49,13 @@ public interface EnvironmentInternalEndpoint {
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     SimpleEnvironmentResponse internalGetByCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @PathParam("crn") String crn,
         @QueryParam("withNetwork") @DefaultValue("false") boolean withNetwork);
+
+    @POST
+    @Path("/crn/{crn}/create_distribution_list")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = EnvironmentOpDescription.CREATE_DISTRIBUTION_LIST, description = ENVIRONMENT_NOTES,
+            operationId = "createDistributionListByEnvironmentCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    void createOrUpdateDistributionListByEnvironmentCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @PathParam("crn") String crn);
 
 }

@@ -8,6 +8,7 @@ public class ModelDescriptions {
     public static final String ATTRIBUTES = "provider specific attributes of the credential";
     public static final String CLOUD_PLATFORM = "type of cloud provider";
     public static final String ARCHITECTURE = "CPU architecture allowedValues: { X86_64, ARM64 }";
+    public static final String NOTIFICATION_STATE = "Notification enabled: { ENABLED, DISABLED }";
     public static final String CREATED = "creation time of the resource in long";
     public static final String AMBARI_SERVER = "ambari server address";
     public static final String WORKSPACE_OF_THE_RESOURCE = "workspace of the resource";

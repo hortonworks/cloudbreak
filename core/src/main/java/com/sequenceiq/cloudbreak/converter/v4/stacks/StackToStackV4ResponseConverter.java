@@ -173,6 +173,7 @@ public class StackToStackV4ResponseConverter {
         convertTelemetryComponent(response, source);
         response.setTags(getTags(source.getTags()));
         response.setTimeToLive(getStackTimeToLive(stack));
+        response.setNotificationState(source.getNotificationState());
         response.setVariant(Strings.isNullOrEmpty(source.getPlatformVariant()) ? source.getCloudPlatform() : source.getPlatformVariant());
         response.setExternalDatabase(externalDatabaseToDatabaseResponseConverter
                 .convert(stack.getExternalDatabaseCreationType(), stack.getExternalDatabaseEngineVersion()));

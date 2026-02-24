@@ -20,6 +20,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.base.ScalingStrategy;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.UpdateStackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.CertificateV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
@@ -301,6 +302,10 @@ public class StackCommonService {
 
     public FlowIdentifier modifyProxyConfig(NameOrCrn nameOrCrn, String accountId, String previousProxyConfigCrn) {
         return stackOperationService.modifyProxyConfig(nameOrCrn, accountId, previousProxyConfigCrn);
+    }
+
+    public void sendNotification(NameOrCrn nameOrCrn, Status status, DetailedStackStatus detailedStackStatus, String statusReason, String accountId) {
+        stackOperationService.sendNotification(nameOrCrn, status, detailedStackStatus, statusReason, accountId);
     }
 
     private FlowIdentifier putStartInWorkspace(StackDto stack) {

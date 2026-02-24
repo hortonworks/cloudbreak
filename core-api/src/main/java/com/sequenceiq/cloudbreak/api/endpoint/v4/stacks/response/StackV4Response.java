@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.resource.Resour
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.tags.TagsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.workspace.responses.WorkspaceResourceV4Response;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.notification.NotificationState;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.StackModelDescription;
@@ -171,6 +172,9 @@ public class StackV4Response extends StackV4Base implements TaggedResponse {
 
     @Schema(description = StackModelDescription.SECURITY)
     private SecurityV4Response security;
+
+    @Schema(description = ModelDescriptions.NOTIFICATION_STATE)
+    private NotificationState notificationState;
 
     @Schema(description = StackModelDescription.PROVIDER_SYNC_STATES)
     private Set<ProviderSyncState> providerSyncStates = new HashSet<>();
@@ -534,6 +538,14 @@ public class StackV4Response extends StackV4Base implements TaggedResponse {
         this.dataLakeV4Response = dataLakeV4Response;
     }
 
+    public NotificationState getNotificationState() {
+        return notificationState;
+    }
+
+    public void setNotificationState(NotificationState notificationState) {
+        this.notificationState = notificationState;
+    }
+
     @Override
     public String toString() {
         return "StackV4Response{ " +
@@ -580,6 +592,7 @@ public class StackV4Response extends StackV4Base implements TaggedResponse {
                 ", security=" + security +
                 ", providerSyncStates=" + providerSyncStates +
                 ", dataLakeV4Response=" + dataLakeV4Response +
+                ", notificationState=" + notificationState +
                 '}';
     }
 }

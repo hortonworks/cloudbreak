@@ -64,6 +64,7 @@ import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.notification.NotificationState;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
@@ -1296,6 +1297,10 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
             throw new BadRequestException(String.format("Fetching deleted clusters is only allowed for last %s days",
                     maxLimitForDeletedClusters));
         }
+    }
+
+    public void updateStackNotificationState(Long stackId, NotificationState notificationState) {
+        stackRepository.updateStackNotificationState(notificationState, stackId);
     }
 }
 

@@ -23,7 +23,9 @@ import org.springframework.stereotype.Service;
 import com.google.common.base.Strings;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.service.HierarchyAuthResourcePropertyProvider;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.CertificatesRotationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ClusterRepairV4Request;
@@ -31,6 +33,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.MaintenanceModeV
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackAddVolumesRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackDeleteVolumesRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackImageChangeV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackNotificationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
@@ -331,6 +334,16 @@ public class StackOperations implements HierarchyAuthResourcePropertyProvider {
 
     public FlowIdentifier putScaling(@NotNull NameOrCrn nameOrCrn, String accountId, @Valid StackScaleV4Request updateRequest) {
         return stackCommonService.putScalingInWorkspace(nameOrCrn, accountId, updateRequest);
+    }
+
+    public void sendNotification(NameOrCrn nameOrCrn, StackNotificationV4Request request, String accountId) {
+        stackCommonService.sendNotification(
+                nameOrCrn,
+                Status.valueOf(request.getStatus()),
+                DetailedStackStatus.valueOf(request.getDetailedStackStatus()),
+                request.getStatusReason(),
+                accountId
+        );
     }
 
     public FlowIdentifier putVerticalScaling(@NotNull Stack stack, @Valid StackVerticalScaleV4Request updateRequest) {

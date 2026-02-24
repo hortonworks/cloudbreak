@@ -87,17 +87,13 @@ class EmailGeneratorServiceIntegrationTest {
                 .indentAmount(0)
                 .outline(true);
 
-        String actual = Jsoup.parse(result.get(), "UTF-8")
-                .outputSettings(settings)
-                .html()
-                .trim()
-                .replaceAll("\\s+", " ");
-        String expected = Jsoup.parse(FileReaderUtils.readFileFromClasspath("integrationtest/resize.html"), "UTF-8")
-                .outputSettings(settings)
-                .html()
-                .trim()
-                .replaceAll("\\s+", " ");
 
-        assertEquals(actual, expected);
+        Document actual = Jsoup.parse(result.get(), "UTF-8");
+        Document expected = Jsoup.parse(FileReaderUtils.readFileFromClasspath("integrationtest/resize.html"), "UTF-8");
+
+        actual.outputSettings(settings);
+        expected.outputSettings(settings);
+
+        assertEquals(actual.html().trim(), expected.html().trim());
     }
 }

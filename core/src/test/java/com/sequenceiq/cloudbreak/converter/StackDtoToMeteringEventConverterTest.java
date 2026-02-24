@@ -30,6 +30,7 @@ import com.cloudera.thunderhead.service.meteringv2.events.MeteringV2EventsProto.
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.notification.NotificationState;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
@@ -190,7 +191,7 @@ class StackDtoToMeteringEventConverterTest {
         stack.setTags(tags);
 
         StackDto stackDto = new StackDto(stack, null, null, null, null, null, instanceGroups, null, null,
-                null, null, null, null, null, null, null, null, null);
+                null, null, null, null, null, null, null, null, null, NotificationState.DISABLED);
         return stackDto;
     }
 

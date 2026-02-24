@@ -23,6 +23,7 @@ public class EnvironmentOpDescription {
     public static final String CHANGE_TELEMETRY_FEATURES_BY_NAME = "Changes telemetry features(s) of the environment in the environment of a given name.";
     public static final String CHANGE_TELEMETRY_FEATURES_BY_CRN = "Changes telemetry features(s) of the environment in the environment of a given CRN.";
     public static final String POLICY_VALIDATION_BY_CRN = "Validate policy json by environment crn.";
+    public static final String CREATE_DISTRIBUTION_LIST = "Create distribution list by environment crn.";
     public static final String EDIT_BY_NAME = "Edit an environment by name. Location, regions and description can be changed.";
     public static final String EDIT_BY_CRN = "Edit an environment by CRN. Location, regions and description can be changed.";
     public static final String START_BY_NAME = "Start an environment by name. The freeipa, datalake and datahubs will be started in this order";

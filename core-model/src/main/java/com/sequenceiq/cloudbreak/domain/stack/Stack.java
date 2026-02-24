@@ -65,6 +65,8 @@ import com.sequenceiq.cloudbreak.common.domain.IdAware;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
+import com.sequenceiq.cloudbreak.common.notification.NotificationState;
+import com.sequenceiq.cloudbreak.common.notification.NotificationStateConverter;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.common.orchestration.OrchestrationNode;
 import com.sequenceiq.cloudbreak.common.orchestration.OrchestratorAware;
@@ -267,6 +269,9 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
 
     @Convert(converter = ArchitectureConverter.class)
     private Architecture architecture;
+
+    @Convert(converter = NotificationStateConverter.class)
+    private NotificationState notificationState;
 
     @Convert(converter = ProviderSyncSetToStringConverter.class)
     private Set<ProviderSyncState> providerSyncStates = new HashSet<>();
@@ -517,6 +522,15 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
 
     public void setEnvironmentCrn(String environmentCrn) {
         this.environmentCrn = environmentCrn;
+    }
+
+    @Override
+    public NotificationState getNotificationState() {
+        return notificationState;
+    }
+
+    public void setNotificationState(NotificationState notificationState) {
+        this.notificationState = notificationState;
     }
 
     /**
@@ -1293,6 +1307,7 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
                 ", supportedImdsVersion=" + supportedImdsVersion +
                 ", architecture=" + architecture +
                 ", providerSyncStates=" + providerSyncStates +
+                ", notificationState=" + notificationState +
                 '}';
     }
 

@@ -892,6 +892,8 @@ cdp:
   structuredevent:
     rest:
       contentlogging: false
+  console:
+    url: https://localhost
 
 vm:
   default:

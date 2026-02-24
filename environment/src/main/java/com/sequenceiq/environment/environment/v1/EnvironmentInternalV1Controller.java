@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.environment.v1;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,7 +17,11 @@ import com.sequenceiq.environment.credential.service.CredentialService;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.environment.v1.converter.EnvironmentResponseConverter;
+import com.sequenceiq.environment.parameters.service.ParametersService;
 import com.sequenceiq.notification.WebSocketNotificationController;
+import com.sequenceiq.notification.domain.DistributionList;
+import com.sequenceiq.notification.domain.NotificationGroupType;
+import com.sequenceiq.notification.sender.DistributionListManagementService;
 
 @Controller
 public class EnvironmentInternalV1Controller extends WebSocketNotificationController implements EnvironmentInternalEndpoint {
@@ -29,13 +34,21 @@ public class EnvironmentInternalV1Controller extends WebSocketNotificationContro
 
     private final EnvironmentResponseConverter environmentResponseConverter;
 
+    private final DistributionListManagementService distributionListManagementService;
+
+    private final ParametersService parametersService;
+
     public EnvironmentInternalV1Controller(
             CredentialService credentialService,
             EnvironmentService environmentService,
-            EnvironmentResponseConverter environmentResponseConverter) {
+            EnvironmentResponseConverter environmentResponseConverter,
+            DistributionListManagementService distributionListManagementService,
+            ParametersService parametersService) {
         this.credentialService = credentialService;
         this.environmentService = environmentService;
         this.environmentResponseConverter = environmentResponseConverter;
+        this.distributionListManagementService = distributionListManagementService;
+        this.parametersService = parametersService;
     }
 
     @Override
@@ -50,6 +63,19 @@ public class EnvironmentInternalV1Controller extends WebSocketNotificationContro
     public SimpleEnvironmentResponse internalGetByCrn(@ResourceCrn String crn, boolean withNetwork) {
         EnvironmentDto environmentDto = environmentService.internalGetByCrn(crn);
         return environmentResponseConverter.dtoToSimpleResponse(environmentDto, withNetwork, false);
+    }
+
+    @Override
+    @InternalOnly
+    public void createOrUpdateDistributionListByEnvironmentCrn(@ResourceCrn String crn) {
+        EnvironmentDto environmentDto = environmentService.internalGetByCrn(crn);
+        Optional<DistributionList> distributionList = distributionListManagementService.createOrUpdateList(
+                environmentDto.getResourceCrn(),
+                environmentDto.getResourceName(),
+                NotificationGroupType.ENVIRONMENT
+        );
+        distributionList.ifPresent(list ->
+                parametersService.updateDistributionListDetails(environmentDto.getId(), list));
     }
 
 }

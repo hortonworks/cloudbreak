@@ -25,6 +25,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.common.notification.NotificationState;
 import com.sequenceiq.cloudbreak.domain.stack.DnsResolverType;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.dto.StackDto;
@@ -139,6 +140,7 @@ public class TargetedUpscaleSupportServiceTest {
     private StackDto getStackDto() {
         Stack stack = new Stack();
         stack.setResourceCrn(DATAHUB_CRN);
-        return new StackDto(stack, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null);
+        return new StackDto(stack, null, null, null, null, null, null, null, null, null,
+                null, null, null, null, null, null, null, null, NotificationState.DISABLED);
     }
 }

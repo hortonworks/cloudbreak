@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.notification.NotificationState;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
@@ -228,6 +229,7 @@ public class StackDtoService implements LocalPaasSdxService, MonitoringEnablemen
             additionalFileSystem = cluster.getAdditionalFileSystem();
             components = clusterComponentConfigProvider.getComponentsByClusterIdAndInComponentType(cluster.getId(), COMPONENT_TYPES_TO_FETCH);
         }
+        NotificationState notificationState = stackView.getNotificationState();
         List<StackParameters> parameters = stackParametersService.findAllByStackId(stackView.getId());
         SecurityConfig securityConfig = stackDtoRepository.getSecurityByStackId(stackView.getId());
         Map<InstanceGroupView, List<String>> availabilityZonesByStackId = new HashMap<>();
@@ -239,8 +241,9 @@ public class StackDtoService implements LocalPaasSdxService, MonitoringEnablemen
                                     e -> instanceGroups.stream().filter(ig -> ig.getId().equals(e.getKey())).findFirst().get(),
                                     e -> e.getValue().stream().map(AvailabilityZoneView::getAvailabilityZone).collect(Collectors.toList())));
         }
-        return new StackDto(stackView, cluster, network, database, workspace, workspace.getTenant(), groupListMap, resources, blueprint, gateway,
-                orchestrator, fileSystem, additionalFileSystem, components, stackView.getArchitecture(), parameters, securityConfig, availabilityZonesByStackId);
+        return new StackDto(stackView, cluster, network, database, workspace, workspace.getTenant(),
+                groupListMap, resources, blueprint, gateway, orchestrator, fileSystem, additionalFileSystem, components,
+                stackView.getArchitecture(), parameters, securityConfig, availabilityZonesByStackId, notificationState);
     }
 
     public List<InstanceGroupDto> getInstanceMetadataByInstanceGroup(Long stackId) {
