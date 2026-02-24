@@ -147,7 +147,7 @@ public class TestUpgradeCandidateProvider {
         return images.getCdhImages().stream()
                 .filter(image -> image.getVersion().equals(currentUpgradeRuntimeVersion))
                 .filter(image -> image.getImageSetsByProvider().containsKey(provider))
-                .filter(image -> image.getImageSetsByProvider().get(provider).containsKey(region) || !CloudPlatform.azureOrAws(provider))
+                .filter(image -> image.getImageSetsByProvider().get(provider).containsKey(region) || !CloudPlatform.AWS.equalsIgnoreCase(provider))
                 .sorted(Comparator.comparing(ImageV4Response::getCreated))
                 .toList();
     }
