@@ -77,7 +77,7 @@ public abstract class AbstractGcpBaseResourceChecker {
         return new GcpResourceException(ex.getDetails().getMessage());
     }
 
-    private GoogleJsonError getGoogleJsonError(GoogleJsonResponseException ex) {
+    protected GoogleJsonError getGoogleJsonError(GoogleJsonResponseException ex) {
         throwIfNull(ex, () -> new IllegalArgumentException("Unable to handle exception due to: "
                 + GoogleJsonResponseException.class.getSimpleName()
                 + " should not be null!"));

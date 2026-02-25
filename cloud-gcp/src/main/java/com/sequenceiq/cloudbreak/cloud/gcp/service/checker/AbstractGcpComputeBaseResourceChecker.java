@@ -70,7 +70,9 @@ public abstract class AbstractGcpComputeBaseResourceChecker extends AbstractGcpB
                 .withParameters(resource.getParameters())
                 .withPersistent(false)
                 .build();
-        build.putParameter(OPERATION_ID, operation.getName());
+        if (operation != null) {
+            build.putParameter(OPERATION_ID, operation.getName());
+        }
         return build;
     }
 
