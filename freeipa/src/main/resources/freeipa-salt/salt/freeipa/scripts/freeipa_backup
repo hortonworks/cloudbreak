@@ -160,6 +160,15 @@ remove_local_backups() {
     find "${config[backup_path]}"/ -name "ipa-*" -type d  -print0 | xargs -0 /usr/bin/rm -vrf >> "$LOGFILE" 2>&1 || error_exit "Unable to remove local backup copies"
 }
 
+activate_gcp_account() {
+  gcloud config set account "$(curl -s --retry 3 -H "Metadata-Flavor: Google" http://metadata.google.internal/computeMetadata/v1/instance/service-accounts/default/email)"
+  gcloud config set project "$(curl -s --retry 3 -H "Metadata-Flavor: Google" http://metadata.google.internal/computeMetadata/v1/project/project-id)"
+  doLog "DEBUG gcloud auth:"
+  doLog "DEBUG $(gcloud auth list)"
+  doLog "DEBUG gcloud config:"
+  doLog "DEBUG $(gcloud config list)"
+}
+
 upload_aws_backup() {
     doLog "DEBUG try to upload with default bucket encryption"
     # shellcheck disable=SC2086
@@ -270,6 +279,7 @@ elif [[ "${config[backup_platform]}" = "GCP" ]]; then
       GS_CMD="/bin/gsutil"
       if /bin/gcloud -h | grep -qw "storage"; then
           doLog "DEBUG Storage command group exists."
+          activate_gcp_account
           GS_CMD="/bin/gcloud storage"
       fi
       $GS_CMD cp -r "${config[backup_path]}/${BACKUPDIR}" "${BACKUP_LOCATION}" >> "${LOGFILE}" 2>&1 || error_exit "Sync of backups to ${BACKUP_LOCATION} failed!"
@@ -278,6 +288,7 @@ elif [[ "${config[backup_platform]}" = "GCP" ]]; then
       GS_CMD="/bin/gsutil -m"
       if /bin/gcloud -h | grep -qw "storage"; then
           doLog "DEBUG Storage command group exists."
+          activate_gcp_account
           GS_CMD="/bin/gcloud storage"
       fi
       # To avoid storage.objects.list permission for logger we must sync backups to the bucket instead of the object
