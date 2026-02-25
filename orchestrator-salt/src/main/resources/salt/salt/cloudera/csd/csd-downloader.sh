@@ -2,6 +2,16 @@
 
 set -e
 
+{%- if salt['pillar.get']('proxy:host') %}
+proxy={{ pillar['proxy']['protocol'] }}://{{ pillar['proxy']['host'] }}:{{ pillar['proxy']['port'] }}
+{%- if salt['pillar.get']('proxy:password') %}
+proxy_auth={{ pillar['proxy']['user'] }}:{{ pillar['proxy']['password'] }}
+PROXY_FLAG="-x $proxy_auth@$proxy"
+{% else %}
+PROXY_FLAG="-x $proxy"
+{%- endif %}
+{%- endif %}
+
 {% if salt['pillar.get']('cloudera-manager:csd-urls') %}
 csdUrls=({%- for url in salt['pillar.get']('cloudera-manager:csd-urls') -%}
 {{ url + " " }}
@@ -34,7 +44,7 @@ do
       echo "$(date '+%d/%m/%Y %H:%M:%S') - Paywall credential is not necessary to access CSD ($url) " |& tee -a /var/log/csd_downloader.log
     fi
     echo "$(date '+%d/%m/%Y %H:%M:%S') - Downloading ($url) " |& tee -a /var/log/csd_downloader.log
-    curl -L -O -R --fail $AUTH_FLAG $url |& tee -a /var/log/csd_downloader.log
+    curl -L -O -R --fail $PROXY_FLAG $AUTH_FLAG $url |& tee -a /var/log/csd_downloader.log
   fi
 done
 {% else %}
