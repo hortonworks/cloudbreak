@@ -49,7 +49,7 @@ dependencies {
     implementation (group: 'com.google.http-client',        name: 'google-http-client-jackson2',               version: '2.1.0') {
         exclude group: 'com.google.http-client', module:'google-http-client'
     }
-    implementation (group: 'com.google.api-client',        name: 'google-api-client',                          version: '2.8.1') {
+    implementation (group: 'com.google.api-client',        name: 'google-api-client',                          version: '2.9.0') {
         exclude group: 'junit', module: 'junit'
     }
     implementation     group: 'com.google.guava',          name: 'guava',                                      version: guavaVersion
