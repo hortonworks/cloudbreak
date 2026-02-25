@@ -19,7 +19,7 @@ dependencies {
   implementation group: 'org.slf4j',                     name: 'slf4j-api',                      version: slf4jApiVersion
   implementation group: 'org.springframework',           name: 'spring-context',                 version: springFrameworkVersion
   implementation group: 'org.freemarker',                name: 'freemarker',                     version: freemarkerVersion
-  implementation group: 'com.sun.mail',                  name: 'jakarta.mail',                   version: '2.0.1'
+  implementation group: 'com.sun.mail',                  name: 'jakarta.mail',                   version: '2.0.2'
 
   testImplementation group: 'org.jsoup',                 name: 'jsoup',                          version: '1.22.1'
   testImplementation group: 'org.springframework',       name: 'spring-test',                    version: springFrameworkVersion
