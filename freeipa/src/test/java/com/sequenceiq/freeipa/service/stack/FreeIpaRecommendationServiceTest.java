@@ -110,7 +110,7 @@ class FreeIpaRecommendationServiceTest {
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> underTest.validateCustomInstanceType(createStack("small"), new Credential("AWS", "Cred", null, "crn", "account")));
         assertEquals("Invalid custom instance type for FreeIPA: master - small. " +
-                "The instance type is not available in eu-central-1.", badRequestException.getMessage());
+                "The instance type needs at least 800.0 MB Memory and 8 VCPU.", badRequestException.getMessage());
     }
 
     @Test

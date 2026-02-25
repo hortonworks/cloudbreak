@@ -56,12 +56,20 @@ public class FreeIpaRecommendationService {
         Credential credential = credentialService.getCredentialByCredCrn(credentialCrn);
         Architecture architectureEnum = Architecture.fromStringWithFallback(architecture);
         String defaultInstanceType = defaultInstanceTypeProvider.getForPlatform(credential.getCloudPlatform(), architectureEnum);
-        Set<VmTypeResponse> availableVmTypes = getAvailableVmTypes(region, availabilityZone, credential, defaultInstanceType, architectureEnum);
+        Set<VmType> availableAllVmTypes = getAvailableAllVmTypes(region, availabilityZone, credential, architectureEnum);
+
+        Optional<VmType> defaultVmType = availableAllVmTypes.stream()
+                .filter(vmType -> defaultInstanceType.equals(vmType.value()))
+                .findAny();
+        Set<VmTypeResponse> availableVmTypes = availableAllVmTypes.stream()
+                .filter(vmType -> filterVmTypeLargerThanDefault(vmType, defaultVmType))
+                .map(vmType -> vmTypeConverter.convert(vmType))
+                .collect(Collectors.toSet());
+
         return new FreeIpaRecommendationResponse(availableVmTypes, defaultInstanceType);
     }
 
-    private Set<VmTypeResponse> getAvailableVmTypes(String region, String availabilityZone, Credential credential, String defaultInstanceType,
-            Architecture architecture) {
+    private Set<VmType> getAvailableAllVmTypes(String region, String availabilityZone, Credential credential, Architecture architecture) {
         CloudVmTypes vmTypes = cloudParameterService.getVmTypesV2(
                 extendedCloudCredentialConverter.convert(credential),
                 region,
@@ -76,9 +84,12 @@ public class FreeIpaRecommendationService {
         } else if (vmTypes.getCloudVmResponses() != null && !vmTypes.getCloudVmResponses().isEmpty()) {
             availableVmTypes = vmTypes.getCloudVmResponses().values().iterator().next();
         }
+        return availableVmTypes;
+    }
 
+    private Set<VmTypeResponse> filterVmTypeLargerThanDefault(String defaultInstanceType, Set<VmType> availableVmTypes) {
         Optional<VmType> defaultVmType = availableVmTypes.stream()
-                .filter(vmType -> defaultInstanceType.equals(vmType.value()))
+                .filter(vmType -> defaultInstanceType.equals(vmType.getValue()))
                 .findAny();
         return availableVmTypes.stream()
                 .filter(vmType -> filterVmTypeLargerThanDefault(vmType, defaultVmType))
@@ -103,15 +114,42 @@ public class FreeIpaRecommendationService {
         String defaultInstanceType = defaultInstanceTypeProvider.getForPlatform(stack.getCloudPlatform(), stack.getArchitecture());
         Map<String, String> customInstanceTypes = getCustomInstanceTypes(stack, defaultInstanceType);
         if (!customInstanceTypes.isEmpty()) {
-            Set<String> availableVmTypes = getAvailableVmTypes(
-                    stack.getRegion(), stack.getAvailabilityZone(), credential, defaultInstanceType, stack.getArchitecture())
-                    .stream()
+            Set<VmType> availableAllVmTypes = getAvailableAllVmTypes(
+                    stack.getRegion(),
+                    stack.getAvailabilityZone(),
+                    credential,
+                    stack.getArchitecture());
+            Set<VmTypeResponse> availableMinimumRequiredVmTypes = filterVmTypeLargerThanDefault(
+                    defaultInstanceType,
+                    availableAllVmTypes);
+            Optional<VmType> defaultVmType = availableAllVmTypes.stream()
+                    .filter(vmType -> defaultInstanceType.equals(vmType.getValue()))
+                    .findAny();
+
+            Set<String> allVmTypes = availableAllVmTypes.stream()
+                    .map(VmType::getValue)
+                    .collect(Collectors.toSet());
+            Set<String> minimumRequiredVmTypes = availableMinimumRequiredVmTypes.stream()
                     .map(VmTypeResponse::getValue)
                     .collect(Collectors.toSet());
+
             customInstanceTypes.forEach((instanceGroup, instanceType) -> {
-                if (!availableVmTypes.contains(instanceType)) {
+                if (!allVmTypes.contains(instanceType)) {
                     String message = String.format("Invalid custom instance type for FreeIPA: %s - %s. " +
-                            "The instance type is not available in %s.", instanceGroup, instanceType, stack.getRegion());
+                            "The instance type is not available in %s.",
+                            instanceGroup,
+                            instanceType,
+                            stack.getRegion());
+                    LOGGER.warn(message);
+                    throw new BadRequestException(message);
+                }
+                if (!minimumRequiredVmTypes.contains(instanceType)) {
+                    String message = String.format("Invalid custom instance type for FreeIPA: %s - %s. " +
+                            "The instance type needs at least %s MB Memory and %s VCPU.",
+                            instanceGroup,
+                            instanceType,
+                            defaultVmType.get().getMetaData().getMemoryInGb(),
+                            defaultVmType.get().getMetaData().getCPU());
                     LOGGER.warn(message);
                     throw new BadRequestException(message);
                 }
