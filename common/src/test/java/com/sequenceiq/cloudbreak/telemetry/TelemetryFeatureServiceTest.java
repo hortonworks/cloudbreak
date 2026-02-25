@@ -57,12 +57,12 @@ class TelemetryFeatureServiceTest {
 
     @Test
     void testIsMinifiLoggingSupportedWhenPackagesContainsOldMinifiVersion() {
-        assertFalse(undertest.isMinifiLoggingSupported(Map.of("cdp-minifi-agent", "1.22.9")));
+        assertFalse(undertest.isMinifiLoggingSupported(Map.of("cdp-minifi-agent", "1.22.9-b40")));
     }
 
     @Test
     void testIsMinifiLoggingSupportedWhenPackagesContainsCorrectMinifi() {
-        assertTrue(undertest.isMinifiLoggingSupported(Map.of("cdp-minifi-agent", "1.25.09")));
+        assertTrue(undertest.isMinifiLoggingSupported(Map.of("cem-agents", "1.25.09-b39")));
     }
 
     private Map<String, String> generatePackageVersions() {

@@ -21,7 +21,7 @@ public class TelemetryFeatureService {
             Pair.of("cdp-request-signer", () -> "0.2.3"),
             Pair.of("cdp-telemetry", () -> "0.4.30"));
 
-    private static final Pair<String, Versioned> MINIFI_MIN_VERSION_REQUIREMENT = Pair.of("cdp-minifi-agent", () -> "1.25.09");
+    private static final Pair<String, Versioned> MINIFI_MIN_VERSION_REQUIREMENT = Pair.of("cem-agents", () -> "1.25.09-b38");
 
     public boolean isECDSAAccessKeyTypeSupported(Map<String, String> packages) {
         if (packages == null) {
