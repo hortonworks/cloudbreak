@@ -5,12 +5,14 @@ import jakarta.inject.Inject;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-
 @Component
 public class SearchUrlFactory {
 
     private static SplunkProps splunkProps;
+
+    public static boolean isSplunkConfigured() {
+        return splunkProps != null && StringUtils.hasText(splunkProps.getUrl());
+    }
 
     /**
      * Create a SearchUrl instance based on configuration.
@@ -19,7 +21,7 @@ public class SearchUrlFactory {
      * @return SearchUrl implementation based on configuration
      */
     public static SearchUrl getSearchUrl() {
-        if (splunkProps != null && StringUtils.hasText(splunkProps.getUrl())) {
+        if (isSplunkConfigured()) {
             return new SplunkSearchUrl();
         } else {
             return new KibanaSearchUrl();
@@ -27,9 +29,8 @@ public class SearchUrlFactory {
     }
 
     @Inject
-    @SuppressFBWarnings("ST")
     public void setSplunkProps(SplunkProps splunkProps) {
-        this.splunkProps = splunkProps;
+        SearchUrlFactory.splunkProps = splunkProps;
     }
 
 }

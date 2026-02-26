@@ -26,6 +26,7 @@ import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredFlowEven
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredNotificationEvent;
 import com.sequenceiq.it.cloudbreak.context.Clue;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
+import com.sequenceiq.it.cloudbreak.search.SearchUrlFactory;
 
 @Component
 public class ErrorLogMessageProvider {
@@ -53,7 +54,7 @@ public class ErrorLogMessageProvider {
                     .append(System.lineSeparator());
         });
         addCluesToMessage(messageBuilder, clues);
-        return messageBuilder.toString().replace("%", "%%");
+        return messageBuilder.toString();
     }
 
     private String getStackTrace(Exception ex) {
@@ -104,7 +105,8 @@ public class ErrorLogMessageProvider {
                 } else {
                     appendLine(builder, "<a href=\"" + clue.getStorageUrl() + "\" target=\"_blank\">" + clue.getStorageUrl() + "</a>");
                 }
-                appendLine(builder, "Kibana query: ");
+                appendLine(builder, SearchUrlFactory.isSplunkConfigured() ? "Splunk query:" : "Kibana query:");
+                appendLine(builder, clue.getSearchUrl());
                 appendLine(builder, "<a href=\"" + clue.getSearchUrl() + "\" target=\"_blank\">" + clue.getSearchUrl() + "</a>");
                 if (clue.getAuditEvents() != null && CollectionUtils.isNotEmpty(clue.getAuditEvents().getResponses())) {
                     appendLine(builder, "Audit events:");
