@@ -54,8 +54,8 @@ import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
 
 @Service
-public class AzureFixAttachedVolumesPatchService extends ExistingStackPatchService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(AzureFixAttachedVolumesPatchService.class);
+public class FixAttachedVolumesPatchService extends ExistingStackPatchService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(FixAttachedVolumesPatchService.class);
 
     private static final String DEPRECATED_DEVICE_PATH_PREFIX = "/dev/sd";
 
@@ -102,7 +102,7 @@ public class AzureFixAttachedVolumesPatchService extends ExistingStackPatchServi
 
     @Override
     public StackPatchType getStackPatchType() {
-        return StackPatchType.AZURE_ATTACHED_VOLUMES_FIX;
+        return StackPatchType.ATTACHED_VOLUMES_FIX;
     }
 
     @Override
@@ -120,9 +120,9 @@ public class AzureFixAttachedVolumesPatchService extends ExistingStackPatchServi
             affected = false;
         }
         if (affected) {
-            LOGGER.info("Azure attached volume patch is needed for {} stack", stack.getName());
+            LOGGER.info("Attached volume patch is needed for {} stack", stack.getName());
         } else {
-            LOGGER.info("Azure attached volume patch is not needed for {} stack", stack.getName());
+            LOGGER.info("Attached volume patch is not needed for {} stack", stack.getName());
         }
         return affected;
     }
@@ -130,29 +130,30 @@ public class AzureFixAttachedVolumesPatchService extends ExistingStackPatchServi
     @Override
     boolean doApply(Stack stack) throws ExistingStackPatchApplyException {
         if (!PATCH_ALLOWED_STATUSES.contains(stack.getStatus())) {
-            LOGGER.warn("Azure attached volume patch is needed for {} stack, but will be skipped, because its status is not in {}. Current status: {}",
+            LOGGER.warn("Attached volume patch is needed for {} stack, but will be skipped, because its status is not in {}. Current status: {}",
                     stack.getName(), PATCH_ALLOWED_STATUSES, stack.getStatus());
             return false;
         }
-
+        LOGGER.debug("Applying attached volumes patch on {}...", stack.getName());
         DetailedStackStatus originalStatus = stack.getDetailedStatus();
-        stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.UPDATE_ATTACHED_VOLUMES, "Updating attached volumes metadata.");
-
-        List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
-        GatewayConfig primaryGateway = gatewayConfigService.getPrimaryGatewayConfig(stack);
-
-        Set<Node> allNodes = stackUtil.collectNodes(stack);
-        Set<Node> reachableNodes = saltOrchestrator.getResponsiveNodes(allNodes, primaryGateway, true).getReachableNodes();
-        if (allNodes.size() != reachableNodes.size()) {
-            LOGGER.warn("Azure attached volume patch is needed for {} stack, but will be skipped, because not all the nodes are reachable.", stack.getName());
-            return false;
-        }
-
-        CloudConnectResources cloudConnectResources = cloudConnectorHelper.getCloudConnectorResources(stack);
         List<CloudResource> originalVolumeSetCloudResources = stack.getDiskResources().stream()
                 .map(resourceConverter::convert)
                 .toList();
         try {
+            stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.UPDATE_ATTACHED_VOLUMES, "Updating attached volumes metadata.");
+
+            List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
+            GatewayConfig primaryGateway = gatewayConfigService.getPrimaryGatewayConfig(stack);
+
+            Set<Node> allNodes = stackUtil.collectNodes(stack);
+            Set<Node> reachableNodes = saltOrchestrator.getResponsiveNodes(allNodes, primaryGateway, true).getReachableNodes();
+            if (allNodes.size() != reachableNodes.size()) {
+                LOGGER.warn("Attached volume patch is needed for {} stack, but will be skipped, because not all the nodes are reachable.",
+                        stack.getName());
+                return false;
+            }
+
+            CloudConnectResources cloudConnectResources = cloudConnectorHelper.getCloudConnectorResources(stack);
             Map<String, String> fqdnByInstanceIdMap = allNodes.stream().collect(Collectors.toMap(Node::getInstanceId, Node::getHostname));
             Map<String, Map<String, String>> volumeDeviceMappingByInstance = cloudConnectResources.getCloudConnector().volumeConnector()
                     .getVolumeDeviceMappingByInstance(cloudConnectResources.getAuthenticatedContext(), cloudConnectResources.getCloudStack());
@@ -179,11 +180,11 @@ public class AzureFixAttachedVolumesPatchService extends ExistingStackPatchServi
                             volumeDeviceMappingByInstance.get(vs.getInstanceId())))
                     .toList();
             storePatchedResourceAndUpdateMountPillar(stack, originalVolumeSetCloudResources, patchedResources, cloudConnectResources, gatewayConfigs);
-            LOGGER.info("Azure attached volume patch is successfully applied on {}", stack.getName());
+            LOGGER.info("Attached volume patch is successfully applied on {}", stack.getName());
             return true;
         } catch (Exception ex) {
-            LOGGER.error("Exception during azure attached volumes patch on {}. Volumeset resources: {}", stack.getName(), originalVolumeSetCloudResources, ex);
-            throw new ExistingStackPatchApplyException(String.format("Azure attached volumes patch on %s failed: %s", stack.getName(), ex.getMessage()), ex);
+            LOGGER.error("Exception during attached volumes patch on {}. Volumeset resources: {}", stack.getName(), originalVolumeSetCloudResources, ex);
+            throw new ExistingStackPatchApplyException(String.format("Attached volumes patch on %s failed: %s", stack.getName(), ex.getMessage()), ex);
         } finally {
             stackUpdater.updateStackStatus(stack.getId(), originalStatus);
         }

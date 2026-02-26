@@ -864,7 +864,7 @@ existing-stack-patcher:
       enabled: false
     gcp-subnet-id-fix:
       enabled: false
-    azure-attached-volumes-fix:
+    attached-volumes-fix:
       enabled: true
 
 dynamic-entitlement:

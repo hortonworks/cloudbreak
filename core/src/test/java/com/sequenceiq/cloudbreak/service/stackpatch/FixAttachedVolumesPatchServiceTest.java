@@ -72,7 +72,7 @@ import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
 
 @ExtendWith(MockitoExtension.class)
-class AzureFixAttachedVolumesPatchServiceTest {
+class FixAttachedVolumesPatchServiceTest {
     @Mock
     private ResourceService resourceService;
 
@@ -110,7 +110,7 @@ class AzureFixAttachedVolumesPatchServiceTest {
     private StackUpdater stackUpdater;
 
     @InjectMocks
-    private AzureFixAttachedVolumesPatchService underTest;
+    private FixAttachedVolumesPatchService underTest;
 
     @Test
     void testIsAffectedWhenNoAzure() {
@@ -189,6 +189,13 @@ class AzureFixAttachedVolumesPatchServiceTest {
         StackStatus stackStatus = new StackStatus();
         stackStatus.setStatus(Status.AVAILABLE);
         stack.setStackStatus(stackStatus);
+        stack.setPlatformVariant(CloudConstants.AZURE);
+        stack.setCloudPlatform(CloudPlatform.AZURE.name());
+        VolumeSetAttributes volumeSetAttributes =
+                createVolumeSetAttributes("", List.of(new VolumeSetAttributes.Volume("id", "/dev/sdc", 10, "type", CloudVolumeUsageType.GENERAL)));
+        Pair<Resource, CloudResource> volumeSetResource = createVolumeSetResource("instance1", volumeSetAttributes);
+        stack.setResources(Set.of(volumeSetResource.getKey()));
+        when(resourceConverter.convert(volumeSetResource.getKey())).thenReturn(volumeSetResource.getValue());
         GatewayConfig primaryGatewayConfig = GatewayConfig.builder().build();
         List<GatewayConfig> gatewayConfigs = List.of(primaryGatewayConfig);
         when(gatewayConfigService.getAllGatewayConfigs(stack)).thenReturn(gatewayConfigs);
@@ -354,7 +361,7 @@ class AzureFixAttachedVolumesPatchServiceTest {
 
         ExistingStackPatchApplyException exception = assertThrows(ExistingStackPatchApplyException.class, () -> underTest.doApply(parameters.stack));
 
-        assertEquals("Azure attached volumes patch on null failed: exception", exception.getMessage());
+        assertEquals("Attached volumes patch on null failed: exception", exception.getMessage());
         ArgumentCaptor<List<CloudResource>> cloudResourceArgumentCaptor = ArgumentCaptor.forClass(List.class);
         verify(resourceNotifier, times(2)).notifyUpdates(cloudResourceArgumentCaptor.capture(), eq(parameters.cloudConnectResources.getCloudContext()));
         List<CloudResource> lastPersistedResources = cloudResourceArgumentCaptor.getValue();
