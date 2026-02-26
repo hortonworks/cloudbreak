@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
@@ -63,7 +64,7 @@ public class JavaPillarDecorator {
             if (caCertificates.isPresent() && StringUtils.isNotBlank(caCertificates.get())) {
                 String[] certs = certProcessor.itemizeSingleLargeCertInput(caCertificates.get());
                 Map<String, String> certByFingerPrint = Arrays.stream(certs)
-                        .collect(Collectors.toMap(certProcessor::calculateSha256FingerprintForCert, cert -> cert));
+                        .collect(Collectors.toMap(certProcessor::calculateSha256FingerprintForCert, Function.identity(), (c1, c2) -> c1));
                 return Map.of("rootCertificates", certByFingerPrint);
             } else {
                 LOGGER.info("Root Certificate is missing or empty");
