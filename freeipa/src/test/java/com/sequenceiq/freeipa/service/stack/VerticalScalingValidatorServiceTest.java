@@ -209,7 +209,7 @@ public class VerticalScalingValidatorServiceTest {
                 badRequestException.getMessage());
         verify(credentialService, times(1)).getCredentialByEnvCrn(anyString());
         verify(credentialToExtendedCloudCredentialConverter, times(1)).convert(any());
-        verify(cloudParameterService, times(1)).getVmTypesV2(any(), anyString(), anyString(), any(), any());
+        verify(cloudParameterService, times(1)).getVmTypesV2(any(), anyString(), anyString(), any(), eq(Map.of("architecture", "ALL")));
         verify(multiAzCalculatorService, times(0)).getAvailabilityZoneConnector(stack);
         verify(verticalScaleInstanceProvider, times(1)).validateInstanceTypeForVerticalScaling(any(), any(), isNull(), any(), any());
     }
@@ -255,7 +255,7 @@ public class VerticalScalingValidatorServiceTest {
 
         verify(credentialService, times(1)).getCredentialByEnvCrn(anyString());
         verify(credentialToExtendedCloudCredentialConverter, times(1)).convert(any());
-        verify(cloudParameterService, times(1)).getVmTypesV2(any(), anyString(), anyString(), any(), any());
+        verify(cloudParameterService, times(1)).getVmTypesV2(any(), anyString(), anyString(), any(), eq(Map.of("architecture", "ALL")));
         verify(multiAzCalculatorService, times(0)).getAvailabilityZoneConnector(stack);
         verify(verticalScaleInstanceProvider, times(1)).validateInstanceTypeForVerticalScaling(any(), any(), isNull(), any(), any());
     }
@@ -307,7 +307,7 @@ public class VerticalScalingValidatorServiceTest {
 
         verify(credentialService, times(1)).getCredentialByEnvCrn(anyString());
         verify(credentialToExtendedCloudCredentialConverter, times(1)).convert(any());
-        verify(cloudParameterService, times(1)).getVmTypesV2(any(), anyString(), anyString(), any(), any());
+        verify(cloudParameterService, times(1)).getVmTypesV2(any(), anyString(), anyString(), any(), eq(Map.of("architecture", "ALL")));
         verify(verticalScaleInstanceProvider, times(1)).validateInstanceTypeForVerticalScaling(any(), any(), eq(Set.of("1", "2")), any(), any());
     }
 
@@ -369,7 +369,7 @@ public class VerticalScalingValidatorServiceTest {
 
         verify(credentialService, times(1)).getCredentialByEnvCrn(anyString());
         verify(credentialToExtendedCloudCredentialConverter, times(1)).convert(any());
-        verify(cloudParameterService, times(1)).getVmTypesV2(any(), anyString(), anyString(), any(), any());
+        verify(cloudParameterService, times(1)).getVmTypesV2(any(), anyString(), anyString(), any(), eq(Map.of("architecture", "ALL")));
         verify(verticalScaleInstanceProvider, times(1)).validateInstanceTypeForVerticalScaling(any(), any(), eq(Set.of("1", "2", "3")), any(), any());
     }
 

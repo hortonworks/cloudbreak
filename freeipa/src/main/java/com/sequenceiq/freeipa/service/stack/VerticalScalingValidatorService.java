@@ -1,7 +1,7 @@
 package com.sequenceiq.freeipa.service.stack;
 
 import static com.sequenceiq.cloudbreak.constant.AwsPlatformResourcesFilterConstants.ARCHITECTURE;
-import static com.sequenceiq.common.model.Architecture.X86_64;
+import static com.sequenceiq.common.model.Architecture.ALL_ARCHITECTURE;
 
 import java.util.Map;
 import java.util.Optional;
@@ -98,7 +98,7 @@ public class VerticalScalingValidatorService {
                     stack.getRegion(),
                     stack.getPlatformvariant(),
                     CdpResourceType.FREEIPA,
-                    Map.of(ARCHITECTURE, X86_64.getName()));
+                    Map.of(ARCHITECTURE, ALL_ARCHITECTURE));
             Optional<VmType> requestInstanceForVerticalScaling = getInstance(region, availabilityZone, requestedInstanceType, allVmTypes);
             boolean validateMultiAz = stack.isMultiAz() && multiAzCalculatorService.getAvailabilityZoneConnector(stack) != null;
             Set<String> availabilityZones = validateMultiAz ? availabilityZoneService.findAllByInstanceGroupId(instanceGroupOptional.get().getId()).stream()
