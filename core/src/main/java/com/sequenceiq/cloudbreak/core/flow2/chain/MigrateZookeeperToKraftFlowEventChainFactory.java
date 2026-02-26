@@ -42,16 +42,16 @@ public class MigrateZookeeperToKraftFlowEventChainFactory implements FlowEventCh
     @Override
     public FlowTriggerEventQueue createFlowTriggerEventQueue(MigrateZookeeperToKraftFlowChainTriggerEvent event) {
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
-        boolean kraftInstallNeeded = true;
-        if (isKraftHostGroupPresent(event.getResourceId())) {
-            kraftInstallNeeded = false;
+        boolean kraftHostGroupPresent = isKraftHostGroupPresent(event.getResourceId());
+        boolean kraftInstallNeeded = !kraftHostGroupPresent;
+        flowEventChain.add(getKraftMigrationConfigurationTriggerEvent(event, kraftInstallNeeded));
+        if (kraftHostGroupPresent) {
             int kraftNodeCount = getKraftNodeCountByStackId(event.getResourceId());
             int nodeAdjustment = getKraftNodeAdjustment(kraftNodeCount);
             if (isKraftUpscaleNeeded(kraftNodeCount)) {
                 flowEventChain.add(getStackUpscaleTriggerEvent(event, nodeAdjustment));
             }
         }
-        flowEventChain.add(getKraftMigrationConfigurationTriggerEvent(event, kraftInstallNeeded));
         flowEventChain.add(getKraftMigrationTriggerEvent(event));
         return new FlowTriggerEventQueue(getName(), event, flowEventChain);
     }

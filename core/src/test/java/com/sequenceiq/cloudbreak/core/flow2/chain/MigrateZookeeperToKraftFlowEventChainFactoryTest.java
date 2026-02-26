@@ -1,11 +1,17 @@
 package com.sequenceiq.cloudbreak.core.flow2.chain;
 
+import static com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers.FULL_UPSCALE_TRIGGER_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftConfigurationStateSelectors.START_MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_VALIDATION_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationStateSelectors.START_MIGRATE_ZOOKEEPER_TO_KRAFT_VALIDATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.generator.FlowOfflineStateGraphGenerator.FLOW_CONFIGS_PACKAGE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.mockito.Mockito.when;
 
+import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,8 +20,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
+import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.event.MigrateZookeeperToKraftConfigurationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.event.MigrateZookeeperToKraftFlowChainTriggerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.event.MigrateZookeeperToKraftTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.skumigration.SkuMigrationService;
+import com.sequenceiq.cloudbreak.core.flow2.event.StackAndClusterUpscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
@@ -49,7 +59,14 @@ class MigrateZookeeperToKraftFlowEventChainFactoryTest {
 
         FlowTriggerEventQueue flowTriggerEventQueue = underTest.createFlowTriggerEventQueue(triggerEvent);
 
-        assertEquals(3, flowTriggerEventQueue.getQueue().size());
+        Queue<Selectable> queue = flowTriggerEventQueue.getQueue();
+        Queue<Selectable> restrainedQueueData = new ConcurrentLinkedQueue<>(queue);
+        assertEquals(3, queue.size());
+        checkEventIsKraftConfiguration(queue.poll());
+        checkEventIsStackAndClusterUpscale(queue.poll());
+        checkEventIsKraftMigration(queue.poll());
+        flowTriggerEventQueue.getQueue().addAll(restrainedQueueData);
+
         FlowChainConfigGraphGeneratorUtil.generateFor(underTest, FLOW_CONFIGS_PACKAGE, flowTriggerEventQueue, "ZOOKEEPER_TO_KRAFT_MIGRATION");
     }
 
@@ -67,8 +84,33 @@ class MigrateZookeeperToKraftFlowEventChainFactoryTest {
 
         FlowTriggerEventQueue flowTriggerEventQueue = underTest.createFlowTriggerEventQueue(triggerEvent);
 
-        assertEquals(2, flowTriggerEventQueue.getQueue().size());
-        assertTrue(flowTriggerEventQueue.getQueue().stream().noneMatch(event -> FlowChainTriggers.FULL_UPSCALE_TRIGGER_EVENT.equals(event.getSelector())));
+        Queue<Selectable> queue = flowTriggerEventQueue.getQueue();
+        Queue<Selectable> restrainedQueueData = new ConcurrentLinkedQueue<>(queue);
+        assertEquals(2, queue.size());
+        checkEventIsKraftConfiguration(queue.poll());
+        checkEventIsKraftMigration(queue.poll());
+        flowTriggerEventQueue.getQueue().addAll(restrainedQueueData);
+
         FlowChainConfigGraphGeneratorUtil.generateFor(underTest, FLOW_CONFIGS_PACKAGE, flowTriggerEventQueue, "ZOOKEEPER_TO_KRAFT_MIGRATION");
+    }
+
+    private void checkEventIsKraftConfiguration(Selectable event) {
+        assertEquals(START_MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_VALIDATION_EVENT.selector(), event.selector());
+        assertInstanceOf(MigrateZookeeperToKraftConfigurationTriggerEvent.class, event);
+        assertEquals(0L, event.getResourceId());
+    }
+
+    private void checkEventIsStackAndClusterUpscale(Selectable event) {
+        assertEquals(FULL_UPSCALE_TRIGGER_EVENT, event.selector());
+        assertInstanceOf(StackAndClusterUpscaleTriggerEvent.class, event);
+        assertEquals(0L, event.getResourceId());
+        StackAndClusterUpscaleTriggerEvent upscaleEvent = (StackAndClusterUpscaleTriggerEvent) event;
+        assertEquals(Map.of("kraft", 3), (upscaleEvent.getHostGroupsWithAdjustment()));
+    }
+
+    private void checkEventIsKraftMigration(Selectable event) {
+        assertEquals(START_MIGRATE_ZOOKEEPER_TO_KRAFT_VALIDATION_EVENT.selector(), event.selector());
+        assertInstanceOf(MigrateZookeeperToKraftTriggerEvent.class, event);
+        assertEquals(0L, event.getResourceId());
     }
 }
