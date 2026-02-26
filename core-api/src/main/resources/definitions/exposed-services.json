@@ -59,7 +59,7 @@
     },
     {
       "name": "HUE",
-      "displayName": "Cloudera Data Explorer",
+      "displayName": "Data Explorer",
       "serviceName": "HUE_LOAD_BALANCER",
       "iconKey": "CDExp",
       "knoxService": "HUE",
