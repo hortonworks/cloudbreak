@@ -1,7 +1,11 @@
 package com.sequenceiq.cloudbreak.service.encryptionprofile;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.only;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -11,10 +15,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.util.TestConstants;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.environment.api.v1.encryptionprofile.endpoint.EncryptionProfileEndpoint;
-import com.sequenceiq.environment.api.v1.encryptionprofile.model.EncryptionProfileResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @ExtendWith(MockitoExtension.class)
@@ -26,32 +30,44 @@ class EncryptionProfileServiceTest {
     private EncryptionProfileService underTest;
 
     @Test
-    void testWhenClusterEncryptionProfileIsNotNull() {
+    void testGetEncryptionProfileCrnWhenClusterEncryptionProfileIsNotNull() {
         DetailedEnvironmentResponse environment = new DetailedEnvironmentResponse();
         environment.setEncryptionProfileCrn("envEncryptionProfileCrn");
-        StackDto stackDto = mock(StackDto.class);
         ClusterView cluster = mock(ClusterView.class);
 
-        when(stackDto.getCluster()).thenReturn(cluster);
         when(cluster.getEncryptionProfileCrn()).thenReturn("clusterEpCrn");
 
-        EncryptionProfileResponse response = underTest.getEncryptionProfileByCrnOrDefault(environment, stackDto);
+        String response = underTest.getEncryptionProfileCrn(environment, cluster);
 
-        verify(encryptionProfileEndpoint, times(1)).getByCrn("clusterEpCrn");
+        assertEquals("clusterEpCrn", response);
     }
 
     @Test
-    void testWhenClusterEncryptionProfileIsNullEnvironmentEncryptionProfileShouldBeUsed() {
+    void testGetEncryptionProfileCrnWhenClusterEncryptionProfileIsNullEnvironmentEncryptionProfileShouldBeUsed() {
         DetailedEnvironmentResponse environment = new DetailedEnvironmentResponse();
         environment.setEncryptionProfileCrn("environmentEp");
-        StackDto stackDto = mock(StackDto.class);
         ClusterView cluster = mock(ClusterView.class);
 
-        when(stackDto.getCluster()).thenReturn(cluster);
         when(cluster.getEncryptionProfileCrn()).thenReturn(null);
 
-        EncryptionProfileResponse response = underTest.getEncryptionProfileByCrnOrDefault(environment, stackDto);
+        String response = underTest.getEncryptionProfileCrn(environment, cluster);
 
-        verify(encryptionProfileEndpoint, times(1)).getByCrn("environmentEp");
+        assertEquals("environmentEp", response);
+    }
+
+    @Test
+    void testGetEncryptionProfileByCrnWhenEncryptionProfileIsNullDefaultEncryptionProfileShouldBeUsed() {
+        ThreadBasedUserCrnProvider.doAs(TestConstants.CRN, () -> underTest.getEncryptionProfileByCrnOrDefault(null));
+
+        verify(encryptionProfileEndpoint, never()).getByCrn(anyString());
+        verify(encryptionProfileEndpoint, only()).getDefaultEncryptionProfile();
+    }
+
+    @Test
+    void testGetEncryptionProfileByCrnWhenEncryptionProfileIsNotNull() {
+        ThreadBasedUserCrnProvider.doAs(TestConstants.CRN, () -> underTest.getEncryptionProfileByCrnOrDefault("clusterEpCrn"));
+
+        verify(encryptionProfileEndpoint, only()).getByCrn(eq("clusterEpCrn"));
+        verify(encryptionProfileEndpoint, never()).getDefaultEncryptionProfile();
     }
 }

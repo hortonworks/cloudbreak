@@ -40,6 +40,7 @@ import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancer;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.message.FlowMessageService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
+import com.sequenceiq.cloudbreak.service.encryptionprofile.EncryptionProfileService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.loadbalancer.LoadBalancerConfigService;
 import com.sequenceiq.cloudbreak.service.securityconfig.SecurityConfigService;
@@ -81,6 +82,9 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
 
     @Inject
     private ClusterComponentConfigProvider clusterComponentConfigProvider;
+
+    @Inject
+    private EncryptionProfileService encryptionProfileService;
 
     public boolean isCertRenewalTriggerable(StackView stack) {
         return manageCertificateAndDnsInPem(stack)
@@ -296,15 +300,17 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
         try {
             String accountId = ThreadBasedUserCrnProvider.getAccountId();
             ClouderaManagerRepo clouderaManagerRepo = clusterComponentConfigProvider.getClouderaManagerRepoDetails(stack.getCluster().getId());
+            DetailedEnvironmentResponse environment = environmentClientService.getByCrn(stack.getEnvironmentCrn());
+            String encryptionProfileCrn = encryptionProfileService.getEncryptionProfileCrn(environment, stack.getCluster());
 
             if (entitlementService.isConfigureEncryptionProfileEnabled(accountId) &&
-                    isVersionNewerOrEqualThanLimited(clouderaManagerRepo.getVersion(), CLOUDERAMANAGER_VERSION_7_13_2_0)) {
+                    isVersionNewerOrEqualThanLimited(clouderaManagerRepo.getVersion(), CLOUDERAMANAGER_VERSION_7_13_2_0)
+                    && StringUtils.isNotEmpty(encryptionProfileCrn)) {
                 LOGGER.info("Generating alternative certificate (ECDSA)");
 
                 SecurityConfig securityConfig = stack.getSecurityConfig();
                 KeyPair ecdsaKeyPair = getEcdsaKeyPairForStack(securityConfig);
                 String primaryGatewayEndpointName = getPrimaryGatewayEndpointName(stack);
-                DetailedEnvironmentResponse environment = environmentClientService.getByCrn(stack.getEnvironmentCrn());
                 String commonName = getDomainNameProvider().getCommonName(primaryGatewayEndpointName, environment);
                 List<String> subjectAlternativeNames = getSubjectAlternativeNames(stack, commonName, environment);
                 PKCS10CertificationRequest ecdsaCsr = PkiUtil.csr(ecdsaKeyPair, commonName, subjectAlternativeNames);

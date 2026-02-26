@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
-import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.environment.api.v1.encryptionprofile.endpoint.EncryptionProfileEndpoint;
 import com.sequenceiq.environment.api.v1.encryptionprofile.model.EncryptionProfileResponse;
@@ -29,8 +28,11 @@ public class EncryptionProfileService {
     @Inject
     private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
 
-    public EncryptionProfileResponse getEncryptionProfileByCrnOrDefault(DetailedEnvironmentResponse environmentResponse, StackDto stackDto) {
-        ClusterView clusterView = stackDto.getCluster();
+    public EncryptionProfileResponse getEncryptionProfileByCrnOrDefault(String encryptionProfileCrn) {
+        return getEncryptionProfileByCrnOrDefaultIfEmpty(encryptionProfileCrn);
+    }
+
+    public String getEncryptionProfileCrn(DetailedEnvironmentResponse environmentResponse, ClusterView clusterView) {
         String encryptionProfileCrn;
 
         if (StringUtils.isNotBlank(clusterView.getEncryptionProfileCrn())) {
@@ -40,7 +42,7 @@ public class EncryptionProfileService {
             encryptionProfileCrn = environmentResponse.getEncryptionProfileCrn();
         }
 
-        return getEncryptionProfileByCrnOrDefaultIfEmpty(encryptionProfileCrn);
+        return encryptionProfileCrn;
     }
 
     public Optional<EncryptionProfileResponse> getEncryptionProfileByCrn(String encryptionProfileCrn) {

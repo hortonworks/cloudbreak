@@ -224,6 +224,7 @@ class TelemetryDecoratorTest {
     void testMonitoringIsTurnedOnIfEntitlementIsGranted() {
         // GIVEN
         DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
+        String encryptionProfileCrn = "crn:cdp:environments:us-west-1:cloudera:encryptionProfile:custom-123";
         EncryptionProfileResponse encryptionProfileResponse = new EncryptionProfileResponse();
         encryptionProfileResponse.setCipherSuites(
             Map.of(
@@ -241,8 +242,8 @@ class TelemetryDecoratorTest {
         telemetry.setMonitoring(monitoring);
         when(monitoringUrlResolver.resolve(anyString(), anyBoolean())).thenReturn("http://nope/receive");
         when(monitoringUrlResolver.resolve(anyString(), anyBoolean())).thenReturn("http://nope/receive");
-        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(any(), any()))
-                .thenReturn(encryptionProfileResponse);
+        when(encryptionProfileService.getEncryptionProfileCrn(any(), any())).thenReturn(encryptionProfileCrn);
+        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(encryptionProfileCrn)).thenReturn(encryptionProfileResponse);
         // WHEN
         TelemetryContext result = underTest.createTelemetryContext(createStack());
         // THEN

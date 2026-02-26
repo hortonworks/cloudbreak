@@ -65,6 +65,7 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancer;
 import com.sequenceiq.cloudbreak.message.FlowMessageService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
+import com.sequenceiq.cloudbreak.service.encryptionprofile.EncryptionProfileService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.loadbalancer.LoadBalancerConfigService;
 import com.sequenceiq.cloudbreak.service.securityconfig.SecurityConfigService;
@@ -140,6 +141,9 @@ class GatewayPublicEndpointManagementServiceTest {
 
     @Mock
     private ClusterComponentConfigProvider clusterComponentConfigProvider;
+
+    @Mock
+    private EncryptionProfileService encryptionProfileService;
 
     @InjectMocks
     private GatewayPublicEndpointManagementService underTest;
@@ -227,7 +231,7 @@ class GatewayPublicEndpointManagementServiceTest {
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.renewCertificate(stack));
 
-        verify(environmentClientService, times(2)).getByCrn(anyString());
+        verify(environmentClientService, times(3)).getByCrn(anyString());
         verify(domainNameProvider, times(1)).getCommonName(endpointName, environment);
         verify(domainNameProvider, times(2)).getFullyQualifiedEndpointName(Set.of(), endpointName, environment);
         verify(certificateCreationService, times(1))
@@ -275,7 +279,7 @@ class GatewayPublicEndpointManagementServiceTest {
                     actual.getMessage());
         });
 
-        verify(environmentClientService, times(2)).getByCrn(anyString());
+        verify(environmentClientService, times(3)).getByCrn(anyString());
         verify(domainNameProvider, times(1)).getCommonName(endpointName, environment);
         verify(domainNameProvider, times(1)).getFullyQualifiedEndpointName(Set.of(), endpointName, environment);
         verify(certificateCreationService, times(1))
@@ -330,7 +334,7 @@ class GatewayPublicEndpointManagementServiceTest {
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.generateCertAndSaveForStackAndUpdateDnsEntry(stack));
 
         ArgumentCaptor<PKCS10CertificationRequest> csrCaptor = ArgumentCaptor.forClass(PKCS10CertificationRequest.class);
-        verify(environmentClientService, times(2)).getByCrn(anyString());
+        verify(environmentClientService, times(3)).getByCrn(anyString());
         verify(domainNameProvider, times(1)).getCommonName(primaryGatewayEndpointName, environment);
         verify(domainNameProvider, times(3)).getFullyQualifiedEndpointName(eq(Set.of()), anyString(), eq(environment));
         verify(certificateCreationService, times(1))
@@ -461,7 +465,7 @@ class GatewayPublicEndpointManagementServiceTest {
                     exception.getMessage());
         });
 
-        verify(environmentClientService, times(2)).getByCrn(anyString());
+        verify(environmentClientService, times(3)).getByCrn(anyString());
         verify(domainNameProvider, times(1)).getCommonName(endpointName, environment);
         verify(domainNameProvider, times(1)).getFullyQualifiedEndpointName(Set.of(), endpointName, environment);
         verify(certificateCreationService, times(1))
@@ -499,7 +503,7 @@ class GatewayPublicEndpointManagementServiceTest {
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.generateCertAndSaveForStackAndUpdateDnsEntry(stack));
 
-        verify(environmentClientService, times(2)).getByCrn(anyString());
+        verify(environmentClientService, times(3)).getByCrn(anyString());
         verify(domainNameProvider, times(1)).getCommonName(endpointName, environment);
         verify(domainNameProvider, times(2)).getFullyQualifiedEndpointName(Set.of(), endpointName, environment);
         verify(certificateCreationService, times(1))
@@ -752,7 +756,7 @@ class GatewayPublicEndpointManagementServiceTest {
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.generateCertAndSaveForStackAndUpdateDnsEntry(stack));
 
-        verify(environmentClientService, times(3)).getByCrn(anyString());
+        verify(environmentClientService, times(4)).getByCrn(anyString());
         verify(domainNameProvider, times(1)).getCommonName(endpointName, environment);
         verify(domainNameProvider, times(2)).getFullyQualifiedEndpointName(Set.of(), endpointName, environment);
         verify(certificateCreationService, times(1))
@@ -804,7 +808,7 @@ class GatewayPublicEndpointManagementServiceTest {
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.generateCertAndSaveForStackAndUpdateDnsEntry(stack));
 
-        verify(environmentClientService, times(3)).getByCrn(anyString());
+        verify(environmentClientService, times(4)).getByCrn(anyString());
         verify(domainNameProvider, times(1)).getCommonName(endpointName, environment);
         verify(domainNameProvider, times(2)).getFullyQualifiedEndpointName(Set.of(), endpointName, environment);
         verify(certificateCreationService, times(1))
@@ -1044,7 +1048,7 @@ class GatewayPublicEndpointManagementServiceTest {
     }
 
     @Test
-    void testGenerateCertAndSaveForStackAndUpdateDnsEntryWithAlternativeCertificate() throws IOException, PemDnsEntryCreateOrUpdateException {
+    void testGenerateCertAndSaveForStackAndUpdateDnsEntryWithAlternativeCertificate() throws IOException {
         Security.addProvider(new BouncyCastleFipsProvider());
         SecurityConfig securityConfig = new SecurityConfig();
         Cluster cluster = TestUtil.cluster();
@@ -1071,6 +1075,7 @@ class GatewayPublicEndpointManagementServiceTest {
         ClouderaManagerRepo clouderaManagerRepo = mock(ClouderaManagerRepo.class);
         when(clouderaManagerRepo.getVersion()).thenReturn("7.13.2.0");
         when(clusterComponentConfigProvider.getClouderaManagerRepoDetails(anyLong())).thenReturn(clouderaManagerRepo);
+        when(encryptionProfileService.getEncryptionProfileCrn(environment, stack.getCluster())).thenReturn("epCrn");
         when(entitlementService.isConfigureEncryptionProfileEnabled(anyString())).thenReturn(true);
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.generateAlternativeCertAndSaveForStack(stack));

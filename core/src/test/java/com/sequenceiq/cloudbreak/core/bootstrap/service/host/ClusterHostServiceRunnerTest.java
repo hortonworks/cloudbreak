@@ -1163,6 +1163,7 @@ class ClusterHostServiceRunnerTest {
         KerberosConfig kerberosConfig = KerberosConfig.KerberosConfigBuilder.aKerberosConfig().withVerifyKdcTrust(true).build();
         when(kerberosConfigService.get(ENV_CRN, STACK_NAME)).thenReturn(Optional.of(kerberosConfig));
         when(kerberosDetailService.areClusterManagerManagedKerberosPackages(kerberosConfig)).thenReturn(true);
+        when(encryptionProfileService.getEncryptionProfileCrn(any(), any())).thenReturn("epCrn");
         when(encryptionProfileProvider.getTlsVersions(any(), any())).thenReturn("TLSv1.2,TLSv1.3");
         when(encryptionProfileProvider.getTlsCipherSuites(any(), any(), any(), anyBoolean()))
                 .thenReturn("cipher1,cipher2,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384");
@@ -1209,6 +1210,7 @@ class ClusterHostServiceRunnerTest {
     @Test
     void testCustomEncryptionProfile() throws CloudbreakOrchestratorException {
         setupMocksForRunClusterServices("7.13.2.0");
+        String encryptionProfileCrn = "crn:cdp:environments:us-west-1:cloudera:encryptionProfile:custom-123";
         GatewayView clusterGateway = mock(GatewayView.class);
         DetailedEnvironmentResponse detailedEnvironmentResponse = mock(DetailedEnvironmentResponse.class);
         EncryptionProfileResponse encryptionProfileResponse = mock(EncryptionProfileResponse.class);
@@ -1222,7 +1224,8 @@ class ClusterHostServiceRunnerTest {
         when(cluster.getId()).thenReturn(CLUSTER_ID);
         when(gatewayService.getByClusterId(CLUSTER_ID)).thenReturn(Optional.of(clusterGateway));
         when(stackView.getPlatformVariant()).thenReturn(AwsConstants.AWS_DEFAULT_VARIANT.value());
-        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(any(), any())).thenReturn(encryptionProfileResponse);
+        when(encryptionProfileService.getEncryptionProfileCrn(any(), any())).thenReturn(encryptionProfileCrn);
+        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(encryptionProfileCrn)).thenReturn(encryptionProfileResponse);
         when(encryptionProfileResponse.getTlsVersions()).thenReturn(tlsVersions);
         when(encryptionProfileResponse.getCipherSuites()).thenReturn(cipherSuites);
         when(encryptionProfileProvider.getTlsVersions(eq(tlsVersions), any())).thenReturn("TLSv1.2,TLSv1.3");

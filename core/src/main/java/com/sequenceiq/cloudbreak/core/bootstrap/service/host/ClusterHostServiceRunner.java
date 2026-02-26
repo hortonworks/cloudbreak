@@ -40,6 +40,7 @@ import jakarta.annotation.Nonnull;
 import jakarta.inject.Inject;
 
 import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.conn.util.InetAddressUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -610,17 +611,13 @@ public class ClusterHostServiceRunner {
                 && blueprintJsonText.contains(HiveRoles.HIVESERVER2)
                 && !blueprintJsonText.contains(HiveRoles.HIVEMETASTORE);
 
-        EncryptionProfileResponse encryptionProfileResponse =  encryptionProfileService.getEncryptionProfileByCrnOrDefault(
-                detailedEnvironmentResponse, stackDto);
-        Set<String> useTlsVersions =
-                Optional.ofNullable(encryptionProfileResponse)
-                        .map(EncryptionProfileResponse::getTlsVersions)
-                        .orElse(null);
-        Map<String, List<String>> userCipherSuits =
-                Optional.ofNullable(encryptionProfileResponse)
-                        .map(EncryptionProfileResponse::getCipherSuites)
-                        .orElse(null);
-        boolean encryptionProfileEnabled = entitlementService.isConfigureEncryptionProfileEnabled(detailedEnvironmentResponse.getAccountId());
+        String encryptionProfileCrn = encryptionProfileService.getEncryptionProfileCrn(detailedEnvironmentResponse, stackDto.getCluster());
+        EncryptionProfileResponse encryptionProfileResponse =  encryptionProfileService.getEncryptionProfileByCrnOrDefault(encryptionProfileCrn);
+        Set<String> useTlsVersions = getTlsVersions(encryptionProfileResponse);
+        Map<String, List<String>> userCipherSuits = getCipherSuites(encryptionProfileResponse);
+        boolean encryptionProfileEnabled =
+                entitlementService.isConfigureEncryptionProfileEnabled(detailedEnvironmentResponse.getAccountId())
+                        && StringUtils.isNotEmpty(encryptionProfileCrn);
 
         Map<String, ? extends Serializable> clusterProperties = Map.ofEntries(
                 Map.entry("name", stackDto.getCluster().getName()),
@@ -656,6 +653,18 @@ public class ClusterHostServiceRunner {
         );
 
         return Map.of("metadata", new SaltPillarProperties("/metadata/init.sls", singletonMap("cluster", clusterProperties)));
+    }
+
+    private Set<String> getTlsVersions(EncryptionProfileResponse encryptionProfileResponse) {
+        return Optional.ofNullable(encryptionProfileResponse)
+                .map(EncryptionProfileResponse::getTlsVersions)
+                .orElse(null);
+    }
+
+    private Map<String, List<String>> getCipherSuites(EncryptionProfileResponse encryptionProfileResponse) {
+        return Optional.ofNullable(encryptionProfileResponse)
+                .map(EncryptionProfileResponse::getCipherSuites)
+                .orElse(null);
     }
 
     public void removeSecurityConfigFromCMAgentsConfig(StackDto stackDto, Set<Node> reachableNodes) {
@@ -896,18 +905,13 @@ public class ClusterHostServiceRunner {
             LOGGER.debug("Checking if {} is an ip address. Result: {}", gatewayConfig.getPublicAddress(), addressIsIp);
             gateway.put("address_is_ip", addressIsIp);
         }
-        DetailedEnvironmentResponse detailedEnvironmentResponse = environmentService.getByCrn(stackDto.getEnvironmentCrn());
-        EncryptionProfileResponse encryptionProfileResponse = encryptionProfileService.getEncryptionProfileByCrnOrDefault(
-                detailedEnvironmentResponse, stackDto);
-        Set<String> useTlsVersions =
-                Optional.ofNullable(encryptionProfileResponse)
-                        .map(EncryptionProfileResponse::getTlsVersions)
-                        .orElse(null);
-        Map<String, List<String>> userCipherSuits =
-                Optional.ofNullable(encryptionProfileResponse)
-                        .map(EncryptionProfileResponse::getCipherSuites)
-                        .orElse(null);
         ClusterView cluster = stackDto.getCluster();
+        DetailedEnvironmentResponse detailedEnvironmentResponse = environmentService.getByCrn(stackDto.getEnvironmentCrn());
+        String encryptionProfileCrn = encryptionProfileService.getEncryptionProfileCrn(detailedEnvironmentResponse, cluster);
+        EncryptionProfileResponse encryptionProfileResponse = encryptionProfileService.getEncryptionProfileByCrnOrDefault(encryptionProfileCrn);
+        Set<String> useTlsVersions = getTlsVersions(encryptionProfileResponse);
+        Map<String, List<String>> userCipherSuits = getCipherSuites(encryptionProfileResponse);
+
         gateway.put("username", cluster.getUserName());
         gateway.put("password", cluster.getPassword());
         gateway.put("enable_knox_ranger_authorizer", isRangerAuthorizerEnabled(clouderaManagerRepo));
