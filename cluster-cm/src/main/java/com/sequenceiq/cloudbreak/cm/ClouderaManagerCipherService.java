@@ -1,7 +1,8 @@
 package com.sequenceiq.cloudbreak.cm;
 
-import static com.sequenceiq.cloudbreak.tls.EncryptionProfileProvider.CipherSuitesLimitType.JAVA_INTERMEDIATE2018;
-import static com.sequenceiq.cloudbreak.tls.EncryptionProfileProvider.CipherSuitesLimitType.OPENSSL_INTERMEDIATE2018;
+import static com.sequenceiq.cloudbreak.tls.CipherSuitesLimitType.JAVA_INTERMEDIATE2018;
+import static com.sequenceiq.cloudbreak.tls.CipherSuitesLimitType.TLS_1_2_RECOMMENDED;
+import static com.sequenceiq.cloudbreak.tls.CipherSuitesLimitType.TLS_1_3_RECOMMENDED;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,41 +41,49 @@ public class ClouderaManagerCipherService {
     public List<ApiConfigEnforcement> getApiConfigEnforcements() {
         List<ApiConfigEnforcement> apiConfigEnforcements = new ArrayList<>();
 
-        ApiConfigEnforcement tlsChipherSuiteEnforcement = new ApiConfigEnforcement();
-        tlsChipherSuiteEnforcement.setLabel(TLS_CIPHER_SUITE);
-        tlsChipherSuiteEnforcement.setDefaultValue(INTERMEDIATE2018);
+        ApiConfigEnforcement tlsCipherSuiteEnforcement = new ApiConfigEnforcement();
+        tlsCipherSuiteEnforcement.setLabel(TLS_CIPHER_SUITE);
+        tlsCipherSuiteEnforcement.setDefaultValue(INTERMEDIATE2018);
 
-        ApiConfigEnforcement tlsChipherSuiteJavaEnforcement = new ApiConfigEnforcement();
-        tlsChipherSuiteJavaEnforcement.setLabel(TLS_CIPHER_SUITE_JAVA);
+        ApiConfigEnforcement tlsCipherSuiteJavaEnforcement = new ApiConfigEnforcement();
+        tlsCipherSuiteJavaEnforcement.setLabel(TLS_CIPHER_SUITE_JAVA);
+        tlsCipherSuiteJavaEnforcement.setDefaultValue(getTlsCipherSuite(true));
 
-        tlsChipherSuiteJavaEnforcement.setDefaultValue(
-                encryptionProfileProvider.getCipherSuiteString(
-                        JAVA_INTERMEDIATE2018,
-                        POLICY_SEPARATOR
-                )
-        );
-        tlsChipherSuiteJavaEnforcement.setSeparator(POLICY_SEPARATOR);
+        tlsCipherSuiteJavaEnforcement.setSeparator(POLICY_SEPARATOR);
 
-        ApiConfigEnforcement tlsChipherSuiteJavaExcludedEnforcement = new ApiConfigEnforcement();
-        tlsChipherSuiteJavaExcludedEnforcement.setLabel(TLS_CIPHER_SUITE_JAVA_EXCLUDE);
-        tlsChipherSuiteJavaExcludedEnforcement.setDefaultValue(JAVA_EXCLUDE_INTERMEDIATE2018);
-        tlsChipherSuiteJavaExcludedEnforcement.setSeparator(POLICY_SEPARATOR);
+        ApiConfigEnforcement tlsCipherSuiteJavaExcludedEnforcement = new ApiConfigEnforcement();
+        tlsCipherSuiteJavaExcludedEnforcement.setLabel(TLS_CIPHER_SUITE_JAVA_EXCLUDE);
+        tlsCipherSuiteJavaExcludedEnforcement.setDefaultValue(JAVA_EXCLUDE_INTERMEDIATE2018);
+        tlsCipherSuiteJavaExcludedEnforcement.setSeparator(POLICY_SEPARATOR);
 
-        ApiConfigEnforcement tlsChipherListOpenSslEnforcement = new ApiConfigEnforcement();
-        tlsChipherListOpenSslEnforcement.setLabel(TLS_CIPHERS_LIST_OPENSSL);
-        tlsChipherListOpenSslEnforcement.setDefaultValue(
-                encryptionProfileProvider.getCipherSuiteString(
-                        OPENSSL_INTERMEDIATE2018,
-                        POLICY_SEPARATOR
-                )
-        );
+        ApiConfigEnforcement tlsCipherListOpenSslEnforcement = new ApiConfigEnforcement();
+        tlsCipherListOpenSslEnforcement.setLabel(TLS_CIPHERS_LIST_OPENSSL);
+        tlsCipherListOpenSslEnforcement.setDefaultValue(getTlsCipherSuite(false));
+        tlsCipherListOpenSslEnforcement.setSeparator(POLICY_SEPARATOR);
 
-        tlsChipherListOpenSslEnforcement.setSeparator(POLICY_SEPARATOR);
-
-        apiConfigEnforcements.add(tlsChipherSuiteEnforcement);
-        apiConfigEnforcements.add(tlsChipherSuiteJavaEnforcement);
-        apiConfigEnforcements.add(tlsChipherSuiteJavaExcludedEnforcement);
-        apiConfigEnforcements.add(tlsChipherListOpenSslEnforcement);
+        apiConfigEnforcements.add(tlsCipherSuiteEnforcement);
+        apiConfigEnforcements.add(tlsCipherSuiteJavaEnforcement);
+        apiConfigEnforcements.add(tlsCipherSuiteJavaExcludedEnforcement);
+        apiConfigEnforcements.add(tlsCipherListOpenSslEnforcement);
         return apiConfigEnforcements;
+    }
+
+    private String getTlsCipherSuite(boolean useIanaNames) {
+        String intermediate2018 = encryptionProfileProvider.getCipherSuiteString(
+                JAVA_INTERMEDIATE2018,
+                POLICY_SEPARATOR,
+                useIanaNames
+        );
+        String tls12Recommended = encryptionProfileProvider.getCipherSuiteString(
+                TLS_1_2_RECOMMENDED,
+                POLICY_SEPARATOR,
+                useIanaNames
+        );
+        String tls13Recommended = encryptionProfileProvider.getCipherSuiteString(
+                TLS_1_3_RECOMMENDED,
+                POLICY_SEPARATOR,
+                useIanaNames
+        );
+        return String.join(POLICY_SEPARATOR, tls13Recommended, tls12Recommended, intermediate2018);
     }
 }

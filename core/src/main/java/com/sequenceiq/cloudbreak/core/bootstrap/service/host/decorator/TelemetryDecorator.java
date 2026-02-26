@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType.DATALAKE;
 import static com.sequenceiq.cloudbreak.telemetry.TelemetryClusterDetails.CLUSTER_CRN_KEY;
-import static com.sequenceiq.cloudbreak.tls.EncryptionProfileProvider.CipherSuitesLimitType.BLACKBOX_EXPORTER;
+import static com.sequenceiq.cloudbreak.tls.CipherSuitesLimitType.BLACKBOX_EXPORTER;
 
 import java.io.IOException;
 import java.util.List;

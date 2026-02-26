@@ -17,6 +17,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.service.CompositeAuthResourcePropertyProvider;
@@ -30,6 +31,7 @@ import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.tls.EncryptionProfileProvider;
+import com.sequenceiq.common.api.encryptionprofile.TlsVersion;
 import com.sequenceiq.environment.api.v1.encryptionprofile.model.TlsVersionResponse;
 import com.sequenceiq.environment.encryptionprofile.cache.DefaultEncryptionProfileProvider;
 import com.sequenceiq.environment.encryptionprofile.domain.EncryptionProfile;
@@ -90,7 +92,9 @@ public class EncryptionProfileService implements CompositeAuthResourcePropertyPr
                     throw new BadRequestException("Encryption Profile already exists with name: " + name);
                 });
 
-        if (!containsRsaCipherSuite(encryptionProfile.getCipherSuites())) {
+        if (!CollectionUtils.isEmpty(encryptionProfile.getCipherSuites())
+                && !isTls13Only(encryptionProfile.getTlsVersions())
+                && !containsRsaCipherSuite(encryptionProfile.getCipherSuites(), encryptionProfile.getTlsVersions())) {
             throw new BadRequestException("Encryption Profile must have at least one RSA cipher suite");
         }
 
@@ -106,7 +110,11 @@ public class EncryptionProfileService implements CompositeAuthResourcePropertyPr
         }
     }
 
-    private boolean containsRsaCipherSuite(List<String> cipherSuites) {
+    private boolean isTls13Only(Set<TlsVersion> tlsVersions) {
+        return  tlsVersions.contains(TlsVersion.TLS_1_3) && tlsVersions.size() == 1;
+    }
+
+    private boolean containsRsaCipherSuite(List<String> cipherSuites, Set<TlsVersion> tlsVersions) {
         return cipherSuites
                 .stream()
                 .anyMatch(EncryptionProfileService::isRsa);

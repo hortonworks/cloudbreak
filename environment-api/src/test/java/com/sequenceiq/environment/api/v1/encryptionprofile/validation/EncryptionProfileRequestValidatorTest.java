@@ -22,6 +22,7 @@ import jakarta.validation.ConstraintValidatorContext.ConstraintViolationBuilder.
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import com.sequenceiq.cloudbreak.tls.CipherSuiteProvider;
 import com.sequenceiq.cloudbreak.tls.EncryptionProfileProvider;
 import com.sequenceiq.common.api.encryptionprofile.TlsVersion;
 import com.sequenceiq.environment.api.v1.encryptionprofile.config.EncryptionProfileConfig;
@@ -36,7 +37,8 @@ public class EncryptionProfileRequestValidatorTest {
     @BeforeEach
     void setup() {
         EncryptionProfileConfig encryptionProfileConfig = buildTestEncryptionProfileConfig();
-        EncryptionProfileProvider encryptionProfileProvider = new EncryptionProfileProvider();
+        CipherSuiteProvider cipherSuiteProvider = new CipherSuiteProvider();
+        EncryptionProfileProvider encryptionProfileProvider = new EncryptionProfileProvider(cipherSuiteProvider);
         validator = new EncryptionProfileRequestValidator();
         validator.setEncryptionProfileConfig(encryptionProfileConfig);
         validator.setEncryptionProfileProvider(encryptionProfileProvider);

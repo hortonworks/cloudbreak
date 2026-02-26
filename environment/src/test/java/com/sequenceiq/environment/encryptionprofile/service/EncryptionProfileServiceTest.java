@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Supplier;
 
 import jakarta.ws.rs.BadRequestException;
@@ -48,6 +49,7 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
+import com.sequenceiq.common.api.encryptionprofile.TlsVersion;
 import com.sequenceiq.environment.encryptionprofile.EncryptionProfileTestConstants;
 import com.sequenceiq.environment.encryptionprofile.cache.DefaultEncryptionProfileProvider;
 import com.sequenceiq.environment.encryptionprofile.domain.EncryptionProfile;
@@ -490,6 +492,20 @@ public class EncryptionProfileServiceTest {
         verify(repository, never()).findByResourceCrn(any());
         verify(repository, times(1)).findByNameAndAccountId(eq("epName"), anyString());
         assertThat(ex).hasMessage("Encryption Profile not found with name: epName");
+
+    }
+
+    @Test
+    void testCreateEncryptionProfileDoesntRequireRSACipherWhenIsTls13Only() {
+        EncryptionProfile encryptionProfile = getTestEncryptionProfile();
+        encryptionProfile.setTlsVersions(Set.of(TlsVersion.TLS_1_3));
+        encryptionProfile.setCipherSuites(List.of("TLS_AES_256_GCM_SHA384"));
+
+        when(repository.findByNameAndAccountId(NAME, ACCOUNT_ID)).thenReturn(Optional.empty());
+
+        assertDoesNotThrow(() -> underTest.create(encryptionProfile, ACCOUNT_ID, CREATOR));
+
+        verify(repository, times(1)).save(any());
     }
 
     private Map<String, EncryptionProfile> getDefaultEncryptionProfileNameMap() {

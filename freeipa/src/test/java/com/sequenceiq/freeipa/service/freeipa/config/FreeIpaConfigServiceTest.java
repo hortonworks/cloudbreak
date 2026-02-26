@@ -41,6 +41,7 @@ import com.sequenceiq.cloudbreak.tls.EncryptionProfileProvider;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.common.model.SeLinux;
+import com.sequenceiq.environment.api.v1.encryptionprofile.model.EncryptionProfileResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.freeipa.api.model.Backup;
 import com.sequenceiq.freeipa.entity.FreeIpa;
@@ -84,7 +85,7 @@ class FreeIpaConfigServiceTest {
 
     private static final String TLS_VERSIONS = "TLSv1.2 TLSv1.3";
 
-    private static final String TLS_CIPHERSUITES = "CIPHERSUITES";
+    private static final String ENCRYPTION_PROFILE_CRN = "crn:cdp:environments:us-west-1:cloudera:encryptionProfile:custom-ep-123";
 
     private Multimap<String, String> subnetWithCidr;
 
@@ -166,6 +167,7 @@ class FreeIpaConfigServiceTest {
         stack.setNetwork(network);
         stack.setAccountId(ACCOUNT);
         DetailedEnvironmentResponse detailedEnvironmentResponse = mock(DetailedEnvironmentResponse.class);
+        EncryptionProfileResponse encryptionProfileResponse = mock(EncryptionProfileResponse.class);
 
         when(cachedEnvironmentClientService.getByCrn(anyString())).thenReturn(detailedEnvironmentResponse);
         when(freeIpaService.findByStack(any())).thenReturn(freeIpa);
@@ -178,9 +180,11 @@ class FreeIpaConfigServiceTest {
         when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenReturn(gatewayConfig);
         when(proxyConfigDtoService.getByEnvironmentCrn(anyString())).thenReturn(Optional.empty());
         when(environmentService.isSecretEncryptionEnabled(ENV_CRN)).thenReturn(true);
+        when(detailedEnvironmentResponse.getEncryptionProfileCrn()).thenReturn(ENCRYPTION_PROFILE_CRN);
+        when(cachedEncryptionProfileClientService.getByCrnOrDefaultIfEmpty(eq(ENCRYPTION_PROFILE_CRN))).thenReturn(encryptionProfileResponse);
         when(encryptionProfileProvider.getTlsVersions(any(), eq(" "))).thenReturn("TLSv1.2 TLSv1.3");
-        when(encryptionProfileProvider.getTlsCipherSuites(any(), any(), any(), anyBoolean()))
-                .thenReturn("cipher1,cipher2,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384");
+        when(encryptionProfileProvider.getOpenSslCipherSuites(any(), any(), anyBoolean(), any(), anyBoolean()))
+                .thenReturn("cipher1,cipher2,ECDHE-RSA-AES256-GCM-SHA384");
 
         Node node = new Node(PRIVATE_IP, null, null, null, HOSTNAME, DOMAIN, (String) null);
         Map<String, String> expectedHost = Map.of("ip", PRIVATE_IP, "fqdn", HOSTNAME);
@@ -231,6 +235,7 @@ class FreeIpaConfigServiceTest {
         loadBalancer.setFqdn("lb.fqdn");
         loadBalancer.setEndpoint("lb");
         DetailedEnvironmentResponse detailedEnvironmentResponse = mock(DetailedEnvironmentResponse.class);
+        EncryptionProfileResponse encryptionProfileResponse = mock(EncryptionProfileResponse.class);
 
         when(cachedEnvironmentClientService.getByCrn(anyString())).thenReturn(detailedEnvironmentResponse);
         when(freeIpaService.findByStack(any())).thenReturn(freeIpa);
@@ -243,9 +248,11 @@ class FreeIpaConfigServiceTest {
         when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenReturn(gatewayConfig);
         when(proxyConfigDtoService.getByEnvironmentCrn(anyString())).thenReturn(Optional.empty());
         when(environmentService.isSecretEncryptionEnabled(ENV_CRN)).thenReturn(true);
+        when(detailedEnvironmentResponse.getEncryptionProfileCrn()).thenReturn(ENCRYPTION_PROFILE_CRN);
+        when(cachedEncryptionProfileClientService.getByCrnOrDefaultIfEmpty(eq(ENCRYPTION_PROFILE_CRN))).thenReturn(encryptionProfileResponse);
         when(encryptionProfileProvider.getTlsVersions(any(), eq(" "))).thenReturn("TLSv1.2 TLSv1.3");
-        when(encryptionProfileProvider.getTlsCipherSuites(any(), any(), any(), anyBoolean()))
-                .thenReturn("cipher1,cipher2,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384");
+        when(encryptionProfileProvider.getOpenSslCipherSuites(any(), any(), anyBoolean(), any(), anyBoolean()))
+                .thenReturn("cipher1,cipher2,ECDHE-RSA-AES256-GCM-SHA384");
         when(loadBalancerService.findByStackId(any())).thenReturn(Optional.of(loadBalancer));
 
         Node node = new Node(PRIVATE_IP, null, null, null, HOSTNAME, DOMAIN, (String) null);
@@ -289,6 +296,7 @@ class FreeIpaConfigServiceTest {
         FreeIpa freeIpa = new FreeIpa();
         freeIpa.setDomain(DOMAIN);
         DetailedEnvironmentResponse detailedEnvironmentResponse = mock(DetailedEnvironmentResponse.class);
+        EncryptionProfileResponse encryptionProfileResponse = mock(EncryptionProfileResponse.class);
 
         when(cachedEnvironmentClientService.getByCrn(anyString())).thenReturn(detailedEnvironmentResponse);
         when(freeIpaService.findByStack(any())).thenReturn(freeIpa);
@@ -300,8 +308,10 @@ class FreeIpaConfigServiceTest {
         when(networkService.getFilteredSubnetWithCidr(any())).thenReturn(subnetWithCidr);
         when(environmentService.isSecretEncryptionEnabled(ENV_CRN)).thenReturn(false);
         when(encryptionProfileProvider.getTlsVersions(any(), eq(" "))).thenReturn("TLSv1.2 TLSv1.3");
-        when(encryptionProfileProvider.getTlsCipherSuites(any(), any(), any(), anyBoolean()))
-                .thenReturn("cipher1,cipher2,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384");
+        when(encryptionProfileProvider.getOpenSslCipherSuites(any(), any(), anyBoolean(), any(), anyBoolean()))
+                .thenReturn("cipher1,cipher2,ECDHE-RSA-AES256-GCM-SHA384");
+        when(detailedEnvironmentResponse.getEncryptionProfileCrn()).thenReturn(ENCRYPTION_PROFILE_CRN);
+        when(cachedEncryptionProfileClientService.getByCrnOrDefaultIfEmpty(eq(ENCRYPTION_PROFILE_CRN))).thenReturn(encryptionProfileResponse);
 
         FreeIpaConfigView freeIpaConfigView = underTest.createFreeIpaConfigs(
                 stack, Set.of());

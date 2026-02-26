@@ -7,9 +7,10 @@ import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUD
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_6_2;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 import static com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel.clusterDeletionBasedModel;
-import static com.sequenceiq.cloudbreak.tls.EncryptionProfileProvider.CipherSuitesLimitType.DEFAULT;
-import static com.sequenceiq.cloudbreak.tls.EncryptionProfileProvider.CipherSuitesLimitType.JAVA_INTERMEDIATE2018;
-import static com.sequenceiq.cloudbreak.tls.EncryptionProfileProvider.CipherSuitesLimitType.MINIMAL;
+import static com.sequenceiq.cloudbreak.tls.CipherSuitesLimitType.DEFAULT;
+import static com.sequenceiq.cloudbreak.tls.CipherSuitesLimitType.JAVA_INTERMEDIATE2018;
+import static com.sequenceiq.cloudbreak.tls.CipherSuitesLimitType.MINIMAL;
+import static com.sequenceiq.cloudbreak.tls.CipherSuitesLimitType.REDHAT_VERSION8;
 import static com.sequenceiq.cloudbreak.util.NullUtil.throwIfNull;
 import static java.util.Collections.emptySet;
 import static java.util.Collections.singletonMap;
@@ -144,7 +145,6 @@ import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.views.RdsView;
 import com.sequenceiq.cloudbreak.template.views.provider.RdsViewProvider;
 import com.sequenceiq.cloudbreak.tls.EncryptionProfileProvider;
-import com.sequenceiq.cloudbreak.tls.EncryptionProfileProvider.CipherSuitesLimitType;
 import com.sequenceiq.cloudbreak.util.EphemeralVolumeUtil;
 import com.sequenceiq.cloudbreak.util.NodesUnreachableException;
 import com.sequenceiq.cloudbreak.util.StackUtil;
@@ -613,8 +613,9 @@ public class ClusterHostServiceRunner {
 
         String encryptionProfileCrn = encryptionProfileService.getEncryptionProfileCrn(detailedEnvironmentResponse, stackDto.getCluster());
         EncryptionProfileResponse encryptionProfileResponse =  encryptionProfileService.getEncryptionProfileByCrnOrDefault(encryptionProfileCrn);
-        Set<String> useTlsVersions = getTlsVersions(encryptionProfileResponse);
-        Map<String, List<String>> userCipherSuits = getCipherSuites(encryptionProfileResponse);
+        Set<String> userTlsVersions = encryptionProfileResponse.getTlsVersions();
+        Map<String, List<String>> userEncryptionProfileMap = encryptionProfileResponse.getCipherSuites();
+        boolean defaultEncryptionProfile = encryptionProfileResponse.isDefault();
         boolean encryptionProfileEnabled =
                 entitlementService.isConfigureEncryptionProfileEnabled(detailedEnvironmentResponse.getAccountId())
                         && StringUtils.isNotEmpty(encryptionProfileCrn);
@@ -629,42 +630,18 @@ public class ClusterHostServiceRunner {
                 Map.entry("hiveWithRemoteHiveMetastore", hiveWithRemoteHiveMetastore),
                 Map.entry("tlsv13Enabled", Boolean.FALSE),
                 Map.entry("tlsAdvancedControl", encryptionProfileEnabled),
-                Map.entry("tlsVersionsSpaceSeparated", encryptionProfileProvider.getTlsVersions(useTlsVersions, " ")),
-                Map.entry("tlsVersionsCommaSeparated", encryptionProfileProvider.getTlsVersions(useTlsVersions, ",")),
+                Map.entry("tlsVersionsSpaceSeparated", encryptionProfileProvider.getTlsVersions(userTlsVersions, " ")),
+                Map.entry("tlsVersionsCommaSeparated", encryptionProfileProvider.getTlsVersions(userTlsVersions, ",")),
                 Map.entry("cmVersionSupportsTlsSetup", isVersionNewerOrEqualThanLimited(cmVersion, CLOUDERAMANAGER_VERSION_7_13_2_0)),
-                Map.entry("tlsCipherSuites", encryptionProfileProvider.getTlsCipherSuites(
-                        userCipherSuits,
-                        DEFAULT,
-                        ":",
-                        false
-                )),
-                Map.entry("tlsCipherSuitesMinimal", encryptionProfileProvider.getTlsCipherSuites(
-                        userCipherSuits,
-                        MINIMAL,
-                        ":",
-                        false
-                )),
-                Map.entry("tlsCipherSuitesJavaIntermediate", encryptionProfileProvider.getTlsCipherSuites(
-                        userCipherSuits,
-                        JAVA_INTERMEDIATE2018,
-                        ":",
-                        true
-                ))
+                Map.entry("tlsCipherSuites", encryptionProfileProvider
+                        .getOpenSslCipherSuites(userEncryptionProfileMap, DEFAULT, false, userTlsVersions, defaultEncryptionProfile)),
+                Map.entry("tlsCipherSuitesMinimal", encryptionProfileProvider
+                        .getOpenSslCipherSuites(userEncryptionProfileMap, MINIMAL, false, userTlsVersions, defaultEncryptionProfile)),
+                Map.entry("tlsCipherSuitesJavaIntermediate", encryptionProfileProvider
+                        .getIanaCipherSuites(userEncryptionProfileMap, JAVA_INTERMEDIATE2018,  true, userTlsVersions, defaultEncryptionProfile))
         );
 
         return Map.of("metadata", new SaltPillarProperties("/metadata/init.sls", singletonMap("cluster", clusterProperties)));
-    }
-
-    private Set<String> getTlsVersions(EncryptionProfileResponse encryptionProfileResponse) {
-        return Optional.ofNullable(encryptionProfileResponse)
-                .map(EncryptionProfileResponse::getTlsVersions)
-                .orElse(null);
-    }
-
-    private Map<String, List<String>> getCipherSuites(EncryptionProfileResponse encryptionProfileResponse) {
-        return Optional.ofNullable(encryptionProfileResponse)
-                .map(EncryptionProfileResponse::getCipherSuites)
-                .orElse(null);
     }
 
     public void removeSecurityConfigFromCMAgentsConfig(StackDto stackDto, Set<Node> reachableNodes) {
@@ -909,8 +886,9 @@ public class ClusterHostServiceRunner {
         DetailedEnvironmentResponse detailedEnvironmentResponse = environmentService.getByCrn(stackDto.getEnvironmentCrn());
         String encryptionProfileCrn = encryptionProfileService.getEncryptionProfileCrn(detailedEnvironmentResponse, cluster);
         EncryptionProfileResponse encryptionProfileResponse = encryptionProfileService.getEncryptionProfileByCrnOrDefault(encryptionProfileCrn);
-        Set<String> useTlsVersions = getTlsVersions(encryptionProfileResponse);
-        Map<String, List<String>> userCipherSuits = getCipherSuites(encryptionProfileResponse);
+        Set<String> userTlsVersions = encryptionProfileResponse.getTlsVersions();
+        boolean defaultEncryptionProfile = encryptionProfileResponse.isDefault();
+        Map<String, List<String>> userEncryptionProfileMap = encryptionProfileResponse.getCipherSuites();
 
         gateway.put("username", cluster.getUserName());
         gateway.put("password", cluster.getPassword());
@@ -920,13 +898,17 @@ public class ClusterHostServiceRunner {
         gateway.put("enable_ccmv2_jumpgate", stackDto.getTunnel().useCcmV2Jumpgate());
         gateway.put("activation_in_minutes", activationInMinutes);
         gateway.put("tlsv13Enabled", Boolean.FALSE);
-        gateway.put("tlsVersionsSpaceSeparated", encryptionProfileProvider.getTlsVersions(useTlsVersions, " "));
-        gateway.put("tlsCipherSuites", encryptionProfileProvider.getTlsCipherSuites(userCipherSuits,
-                DEFAULT, ":", false));
-        gateway.put("tlsCipherSuitesRedHat8", encryptionProfileProvider.getTlsCipherSuites(userCipherSuits,
-                CipherSuitesLimitType.REDHAT_VERSION8, ":", false));
-        gateway.put("tlsCipherSuitesMinimal", encryptionProfileProvider.getTlsCipherSuites(userCipherSuits,
-                MINIMAL, ":", false));
+        gateway.put("tlsVersionsSpaceSeparated", encryptionProfileProvider.getTlsVersions(userTlsVersions, " "));
+        gateway.put("tlsCipherSuites", encryptionProfileProvider
+                .getOpenSslCipherSuites(userEncryptionProfileMap, DEFAULT, false, userTlsVersions, defaultEncryptionProfile));
+        gateway.put("tlsCipherSuitesRedHat8", encryptionProfileProvider
+                .getOpenSslCipherSuites(userEncryptionProfileMap, REDHAT_VERSION8, false, userTlsVersions, defaultEncryptionProfile));
+        gateway.put("tlsCipherSuitesMinimal", encryptionProfileProvider
+                .getOpenSslCipherSuites(userEncryptionProfileMap, MINIMAL, false, userTlsVersions, defaultEncryptionProfile));
+        gateway.put("tls12CipherSuites", encryptionProfileProvider
+                .getDefaultRecommendedTls12CipherSuites(false));
+        gateway.put("tls13CipherSuites", encryptionProfileProvider
+                .getTls13CipherSuites(userEncryptionProfileMap, userTlsVersions));
         gateway.putAll(createKnoxRelatedGatewayConfiguration(stackDto, virtualGroupRequest, connector));
         gateway.putAll(createGatewayUserFacingCertAndFqdn(gatewayConfig, stackDto));
         gateway.putAll(createGatewayAlternativeUserFacingCert(gatewayConfig));

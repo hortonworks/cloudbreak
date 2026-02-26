@@ -110,6 +110,10 @@ public class EncryptionProfileResponse {
         this.status = status;
     }
 
+    public boolean isDefault() {
+        return "DEFAULT".equals(status);
+    }
+
     @Override
     public String toString() {
         return "EncryptionProfileRequest{" +

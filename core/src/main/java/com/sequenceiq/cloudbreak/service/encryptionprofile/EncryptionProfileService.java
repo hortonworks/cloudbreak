@@ -31,10 +31,6 @@ public class EncryptionProfileService {
     @Inject
     private EntitlementService entitlementService;
 
-    public EncryptionProfileResponse getEncryptionProfileByCrnOrDefault(String encryptionProfileCrn) {
-        return getEncryptionProfileByCrnOrDefaultIfEmpty(encryptionProfileCrn);
-    }
-
     public String getEncryptionProfileCrn(DetailedEnvironmentResponse environmentResponse, ClusterView clusterView) {
         String encryptionProfileCrn;
 
@@ -58,7 +54,7 @@ public class EncryptionProfileService {
         }
     }
 
-    private EncryptionProfileResponse getEncryptionProfileByCrnOrDefaultIfEmpty(String crn) {
+    public EncryptionProfileResponse getEncryptionProfileByCrnOrDefault(String crn) {
         try {
             if (StringUtils.isNotEmpty(crn)) {
                 return ThreadBasedUserCrnProvider.doAsInternalActor(
