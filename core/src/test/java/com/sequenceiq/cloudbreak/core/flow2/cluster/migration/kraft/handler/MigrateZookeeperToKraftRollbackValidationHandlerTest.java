@@ -9,8 +9,6 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
-import java.util.Collections;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -27,7 +25,6 @@ import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.service.migration.kraft.KraftMigrationService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.validation.ZookeeperToKraftMigrationValidator;
-import com.sequenceiq.distrox.api.v1.distrox.model.KraftMigrationStatusResponse;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
 @ExtendWith(MockitoExtension.class)
@@ -53,10 +50,9 @@ class MigrateZookeeperToKraftRollbackValidationHandlerTest {
                 new MigrateZookeeperToKraftRollbackEvent(ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION_VALIDATION_EVENT.selector(), STACK_ID);
         HandlerEvent<MigrateZookeeperToKraftRollbackEvent> event = new HandlerEvent<>(new Event<>(request));
         when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
-        KraftMigrationStatusResponse response = new KraftMigrationStatusResponse(KraftMigrationStatus.BROKERS_IN_MIGRATION.name(), "ROLLBACK",
-                false, null);
-        when(kraftMigrationService.getKraftMigrationStatus(stackDto, Collections.emptyList())).thenReturn(response);
-        doNothing().when(zookeeperToKraftMigrationValidator).validateZookeeperToKraftMigrationStateForRollback(response.getKraftMigrationStatus());
+        KraftMigrationStatus kraftMigrationStatus = KraftMigrationStatus.BROKERS_IN_MIGRATION;
+        when(kraftMigrationService.getKraftMigrationStatus(stackDto)).thenReturn(kraftMigrationStatus);
+        doNothing().when(zookeeperToKraftMigrationValidator).validateZookeeperToKraftMigrationStateForRollback(kraftMigrationStatus);
 
         Selectable result = underTest.doAccept(event);
 
@@ -71,11 +67,10 @@ class MigrateZookeeperToKraftRollbackValidationHandlerTest {
                 new MigrateZookeeperToKraftRollbackEvent(ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION_VALIDATION_EVENT.selector(), STACK_ID);
         HandlerEvent<MigrateZookeeperToKraftRollbackEvent> event = new HandlerEvent<>(new Event<>(request));
         when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
-        KraftMigrationStatusResponse response = new KraftMigrationStatusResponse(KraftMigrationStatus.ZOOKEEPER_INSTALLED.name(), "ROLLBACK",
-                true, null);
-        when(kraftMigrationService.getKraftMigrationStatus(stackDto, Collections.emptyList())).thenReturn(response);
+        KraftMigrationStatus kraftMigrationStatus = KraftMigrationStatus.ZOOKEEPER_INSTALLED;
+        when(kraftMigrationService.getKraftMigrationStatus(stackDto)).thenReturn(kraftMigrationStatus);
         doThrow(new BadRequestException("error")).when(zookeeperToKraftMigrationValidator)
-                .validateZookeeperToKraftMigrationStateForRollback(response.getKraftMigrationStatus());
+                .validateZookeeperToKraftMigrationStateForRollback(kraftMigrationStatus);
 
         Selectable result = underTest.doAccept(event);
 

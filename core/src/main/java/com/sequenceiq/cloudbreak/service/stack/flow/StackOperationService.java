@@ -104,7 +104,6 @@ import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.distrox.api.v1.distrox.model.KraftMigrationStatusResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
-import com.sequenceiq.flow.api.model.FlowLogResponse;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.ClusterDatabaseServerCertificateStatusV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.ClusterDatabaseServerCertificateStatusV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.ClusterDatabaseServerCertificateStatusV4Responses;
@@ -615,9 +614,9 @@ public class StackOperationService {
         return flowManager.triggerZookeeperToKraftMigrationRollback(stack.getId());
     }
 
-    public KraftMigrationStatusResponse getKraftMigrationStatus(NameOrCrn name, String accountId, List<FlowLogResponse> flowLogResponseList) {
+    public KraftMigrationStatusResponse getKraftMigrationStatus(NameOrCrn name, String accountId) {
         StackDto stack = stackDtoService.getByNameOrCrn(name, accountId);
-        return kraftMigrationService.getKraftMigrationStatus(stack, flowLogResponseList);
+        return kraftMigrationService.getKraftMigrationStatusResponse(stack);
     }
 
     public StackDatabaseServerCertificateStatusV4Responses listDatabaseServersCertificateStatus(StackDatabaseServerCertificateStatusV4Request request,

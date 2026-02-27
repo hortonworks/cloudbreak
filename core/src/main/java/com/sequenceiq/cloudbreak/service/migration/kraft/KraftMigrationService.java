@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.service.migration.kraft;
 
-import java.util.Comparator;
-import java.util.List;
 import java.util.Optional;
 
 import jakarta.inject.Inject;
@@ -16,7 +14,7 @@ import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.validation.ZookeeperToKraftMigrationValidator;
 import com.sequenceiq.distrox.api.v1.distrox.model.KraftMigrationStatusResponse;
-import com.sequenceiq.flow.api.model.FlowLogResponse;
+import com.sequenceiq.distrox.api.v1.distrox.model.cluster.kraft.KraftMigrationOperationStatus;
 
 @Service
 public class KraftMigrationService {
@@ -29,42 +27,66 @@ public class KraftMigrationService {
     @Inject
     private ZookeeperToKraftMigrationValidator zookeeperToKraftMigrationValidator;
 
-    public KraftMigrationStatusResponse getKraftMigrationStatus(StackDto stack, List<FlowLogResponse> kraftFlowLogResponseList) {
-        LOGGER.info("Getting KRaft migration status for stack with {} CRN", stack.getResourceCrn());
+    @Inject
+    private KraftMigrationOperationStatusFactory migrationOperationStatusFactory;
+
+    public KraftMigrationStatus getKraftMigrationStatus(StackDto stack) {
+        String crn = stack.getResourceCrn();
+        LOGGER.info("Getting KRaft migration status for stack with {} CRN", crn);
         boolean kraftMigrationSupported = zookeeperToKraftMigrationValidator.isMigrationFromZookeeperToKraftSupported(stack, stack.getAccountId());
-        KraftMigrationStatus kraftMigrationStatus = KraftMigrationStatus.NOT_APPLICABLE;
-        if (kraftMigrationSupported) {
-            kraftMigrationStatus = clusterApiConnectors.getConnector(stack).clusterKraftMigrationStatusService().getKraftMigrationStatus();
+        return getKraftMigrationStatus(stack, kraftMigrationSupported);
+    }
+
+    public KraftMigrationStatusResponse getKraftMigrationStatusResponse(StackDto stack) {
+        String crn = stack.getResourceCrn();
+        LOGGER.info("Getting KRaft migration status response for stack with {} CRN", crn);
+        boolean kraftMigrationSupported = zookeeperToKraftMigrationValidator.isMigrationFromZookeeperToKraftSupported(stack, stack.getAccountId());
+        KraftMigrationOperationStatus migrationOperationStatus = getKraftMigrationOperationStatus(stack, kraftMigrationSupported);
+
+        boolean kraftMigrationRequired = isKraftMigrationRequired(kraftMigrationSupported, migrationOperationStatus);
+        KraftMigrationAction recommendedAction = getKraftMigrationAction(kraftMigrationSupported, migrationOperationStatus);
+        LOGGER.debug("kraftMigrationSupported: {}, kraftMigrationOperationStatus based on cluster configs: {}, recommendedAction: {}",
+                kraftMigrationSupported, migrationOperationStatus, recommendedAction);
+        return new KraftMigrationStatusResponse(migrationOperationStatus.name(), recommendedAction.name(), kraftMigrationRequired);
+    }
+
+    private KraftMigrationOperationStatus getKraftMigrationOperationStatus(StackDto stack, boolean kraftMigrationSupported) {
+        Optional<KraftMigrationOperationStatus> migrationOperationStatusOpt = migrationOperationStatusFactory.getStatusFromFlowInformation(stack);
+        KraftMigrationOperationStatus migrationOperationStatus;
+        if (migrationOperationStatusOpt.isPresent()) {
+            migrationOperationStatus = migrationOperationStatusOpt.get();
+        } else {
+            LOGGER.debug("There is no Kraft migration flow information, getting info from the cluster.");
+            KraftMigrationStatus kraftMigrationStatus = getKraftMigrationStatus(stack, kraftMigrationSupported);
+            LOGGER.info("Calculating status based on cluster configs migration status: {}", kraftMigrationStatus);
+            migrationOperationStatus = migrationOperationStatusFactory.getStatusFromClusterKRaftMigrationStatus(kraftMigrationStatus);
         }
-        KraftMigrationAction recommendedAction = getKraftMigrationAction(kraftMigrationSupported, kraftMigrationStatus);
-        boolean kraftMigrationRequired = isKraftMigrationRequired(kraftMigrationSupported, kraftMigrationStatus);
-        String mostRecentKraftFlowId = getMostRecentKraftFlowId(kraftFlowLogResponseList).orElse(null);
-        LOGGER.debug("kraftMigrationSupported: {}, kraftMigrationStatus: {}, recommendedAction: {}, mostRecentKraftFlowId: {}", kraftMigrationSupported,
-                kraftMigrationStatus, recommendedAction, mostRecentKraftFlowId);
-        return new KraftMigrationStatusResponse(kraftMigrationStatus.name(), recommendedAction.name(), kraftMigrationRequired,
-                mostRecentKraftFlowId);
+        return migrationOperationStatus;
     }
 
-    private Optional<String> getMostRecentKraftFlowId(List<FlowLogResponse> kraftFlowLogResponseList) {
-        Optional<String> mostRecentKraftFlowId = kraftFlowLogResponseList.stream()
-                .max(Comparator.comparingLong(FlowLogResponse::getCreated))
-                .map(FlowLogResponse::getFlowId);
-        return mostRecentKraftFlowId;
+    private KraftMigrationStatus getKraftMigrationStatus(StackDto stack, boolean kraftMigrationSupported) {
+        KraftMigrationStatus kraftMigrationStatus = KraftMigrationStatus.NOT_APPLICABLE;
+        boolean clusterAvailable = stack.getStatus().isAvailable();
+        if (kraftMigrationSupported && clusterAvailable) {
+            kraftMigrationStatus = clusterApiConnectors.getConnector(stack).clusterKraftMigrationStatusService().getKraftMigrationStatus();
+            LOGGER.info("Kraft migration status based on the actual Cluster configs: {}", kraftMigrationStatus);
+        }
+        return kraftMigrationStatus;
     }
 
-    private boolean isKraftMigrationRequired(boolean kraftMigrationSupported, KraftMigrationStatus kraftMigrationStatus) {
-        return kraftMigrationSupported && KraftMigrationStatus.ZOOKEEPER_INSTALLED.equals(kraftMigrationStatus);
-    }
-
-    private KraftMigrationAction getKraftMigrationAction(boolean kraftMigrationSupported, KraftMigrationStatus kraftMigrationStatus) {
+    private KraftMigrationAction getKraftMigrationAction(boolean kraftMigrationSupported, KraftMigrationOperationStatus kraftMigrationStatus) {
         if (!kraftMigrationSupported) {
             return KraftMigrationAction.NO_ACTION;
         }
 
         return switch (kraftMigrationStatus) {
-            case ZOOKEEPER_INSTALLED -> KraftMigrationAction.MIGRATE;
-            case BROKERS_IN_KRAFT -> KraftMigrationAction.FINALIZE;
+            case ZOOKEEPER_TO_KRAFT_MIGRATION_TRIGGERABLE -> KraftMigrationAction.MIGRATE;
+            case ZOOKEEPER_TO_KRAFT_MIGRATION_COMPLETE -> KraftMigrationAction.FINALIZE;
             default -> KraftMigrationAction.NO_ACTION;
         };
+    }
+
+    private boolean isKraftMigrationRequired(boolean kraftMigrationSupported, KraftMigrationOperationStatus kraftMigrationStatus) {
+        return kraftMigrationSupported && KraftMigrationOperationStatus.ZOOKEEPER_TO_KRAFT_MIGRATION_TRIGGERABLE.equals(kraftMigrationStatus);
     }
 }

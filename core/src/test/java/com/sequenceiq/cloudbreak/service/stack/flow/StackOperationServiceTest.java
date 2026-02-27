@@ -101,7 +101,6 @@ import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
-import com.sequenceiq.flow.api.model.FlowLogResponse;
 import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.ClusterDatabaseServerCertificateStatusV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.ClusterDatabaseServerCertificateStatusV4Response;
@@ -814,11 +813,10 @@ class StackOperationServiceTest {
     public void testGetKraftMigrationStatus() {
         StackDto stack = mock(StackDto.class);
         NameOrCrn nameOrCrn = NameOrCrn.ofName("Test");
-        FlowLogResponse flowLogResponse = mock(FlowLogResponse.class);
         when(stackDtoService.getByNameOrCrn(eq(nameOrCrn), eq("accountId"))).thenReturn(stack);
 
-        underTest.getKraftMigrationStatus(nameOrCrn, "accountId", List.of(flowLogResponse));
+        underTest.getKraftMigrationStatus(nameOrCrn, "accountId");
 
-        verify(kraftMigrationService).getKraftMigrationStatus(stack, List.of(flowLogResponse));
+        verify(kraftMigrationService).getKraftMigrationStatusResponse(stack);
     }
 }

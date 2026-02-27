@@ -13,6 +13,7 @@ import java.util.Set;
 
 import org.springframework.stereotype.Component;
 
+import io.swagger.v3.core.converter.ModelConverters;
 import io.swagger.v3.jaxrs2.integration.JaxrsOpenApiContextBuilder;
 import io.swagger.v3.oas.integration.OpenApiConfigurationException;
 import io.swagger.v3.oas.integration.SwaggerConfiguration;
@@ -63,6 +64,7 @@ public class OpenApiProvider {
                 .prettyPrint(true)
                 .readAllResources(false)
                 .resourceClasses(resourceClassNames);
+        ModelConverters.getInstance().addConverter(new DynamicEnumStringSwaggerModelConverter());
 
         try {
             new JaxrsOpenApiContextBuilder<>()

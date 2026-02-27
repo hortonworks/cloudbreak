@@ -166,14 +166,14 @@ class ZookeeperToKraftMigrationValidatorTest {
 
     @Test
     void testValidateZookeeperToKraftMigrationState() {
-        assertDoesNotThrow(() -> underTest.validateZookeeperToKraftMigrationState(KraftMigrationStatus.ZOOKEEPER_INSTALLED.name()));
-        assertDoesNotThrow(() -> underTest.validateZookeeperToKraftMigrationState(KraftMigrationStatus.PRE_MIGRATION.name()));
+        assertDoesNotThrow(() -> underTest.validateZookeeperToKraftMigrationState(KraftMigrationStatus.ZOOKEEPER_INSTALLED));
+        assertDoesNotThrow(() -> underTest.validateZookeeperToKraftMigrationState(KraftMigrationStatus.PRE_MIGRATION));
     }
 
     @Test
     void testValidateZookeeperToKraftMigrationStateWhenAlreadyMigratedNotFinalized() {
         BadRequestException exception = assertThrows(BadRequestException.class,
-                () -> underTest.validateZookeeperToKraftMigrationState(KraftMigrationStatus.BROKERS_IN_KRAFT.name()));
+                () -> underTest.validateZookeeperToKraftMigrationState(KraftMigrationStatus.BROKERS_IN_KRAFT));
 
         assertEquals("Cannot start KRaft migration. The cluster has been migrated already to KRaft.",
                 exception.getMessage());
@@ -182,7 +182,7 @@ class ZookeeperToKraftMigrationValidatorTest {
     @Test
     void testValidateZookeeperToKraftMigrationStateWhenAlreadyMigrated() {
         BadRequestException exception = assertThrows(BadRequestException.class,
-                () -> underTest.validateZookeeperToKraftMigrationState(KraftMigrationStatus.KRAFT_INSTALLED.name()));
+                () -> underTest.validateZookeeperToKraftMigrationState(KraftMigrationStatus.KRAFT_INSTALLED));
 
         assertEquals("Cannot start KRaft migration. The cluster has been migrated already to KRaft.",
                 exception.getMessage());
@@ -191,7 +191,7 @@ class ZookeeperToKraftMigrationValidatorTest {
     @Test
     void testValidateZookeeperToKraftMigrationStateWhenMigrationInProgress() {
         BadRequestException exception = assertThrows(BadRequestException.class,
-                () -> underTest.validateZookeeperToKraftMigrationState(KraftMigrationStatus.BROKERS_IN_MIGRATION.name()));
+                () -> underTest.validateZookeeperToKraftMigrationState(KraftMigrationStatus.BROKERS_IN_MIGRATION));
 
         assertEquals("Cannot start KRaft migration. The cluster is being migrated to KRaft and has the status: BROKERS_IN_MIGRATION.",
                 exception.getMessage());
@@ -199,8 +199,6 @@ class ZookeeperToKraftMigrationValidatorTest {
 
     @Test
     void testIsMigrationFromZookeeperToKraftSupported() {
-        when(stack.getStatus()).thenReturn(status);
-        when(status.isAvailable()).thenReturn(true);
         when(stack.getBlueprint()).thenReturn(blueprint);
         when(stack.getStackVersion()).thenReturn(VALID_VERSION);
         when(entitlementService.isZookeeperToKRaftMigrationEnabled(ACCOUNT_ID)).thenReturn(true);
@@ -212,7 +210,6 @@ class ZookeeperToKraftMigrationValidatorTest {
     @ParameterizedTest
     @MethodSource("testIsMigrationFromZookeeperToKraftNotSupportedParameters")
     void testIsMigrationFromZookeeperToKraftNotSupported(Boolean available, String version, Boolean migrationEnabled) {
-        lenient().when(status.isAvailable()).thenReturn(available);
         lenient().when(stack.getBlueprint()).thenReturn(blueprint);
         lenient().when(stack.getStackVersion()).thenReturn(version);
         lenient().when(entitlementService.isZookeeperToKRaftMigrationEnabled(ACCOUNT_ID)).thenReturn(migrationEnabled);
@@ -232,13 +229,13 @@ class ZookeeperToKraftMigrationValidatorTest {
 
     @Test
     void testValidateZookeeperToKraftMigrationStateForFinalization() {
-        assertDoesNotThrow(() -> underTest.validateZookeeperToKraftMigrationStateForFinalization(KraftMigrationStatus.BROKERS_IN_KRAFT.name()));
+        assertDoesNotThrow(() -> underTest.validateZookeeperToKraftMigrationStateForFinalization(KraftMigrationStatus.BROKERS_IN_KRAFT));
     }
 
     @Test
     void testValidateZookeeperToKraftMigrationStateForFinalizationWhenAlreadyFinalized() {
         BadRequestException exception = assertThrows(BadRequestException.class,
-                () -> underTest.validateZookeeperToKraftMigrationStateForFinalization(KraftMigrationStatus.KRAFT_INSTALLED.name()));
+                () -> underTest.validateZookeeperToKraftMigrationStateForFinalization(KraftMigrationStatus.KRAFT_INSTALLED));
 
         assertEquals("Cannot finalize KRaft migration. KRaft migration is already finalized for this cluster.",
                 exception.getMessage());
@@ -247,7 +244,7 @@ class ZookeeperToKraftMigrationValidatorTest {
     @Test
     void testValidateZookeeperToKraftMigrationStateForFinalizationWhenNotMigratedYet() {
         BadRequestException exception = assertThrows(BadRequestException.class,
-                () -> underTest.validateZookeeperToKraftMigrationStateForFinalization(KraftMigrationStatus.ZOOKEEPER_INSTALLED.name()));
+                () -> underTest.validateZookeeperToKraftMigrationStateForFinalization(KraftMigrationStatus.ZOOKEEPER_INSTALLED));
 
         assertEquals("Cannot finalize KRaft migration. The cluster has not been migrated to KRaft yet.",
                 exception.getMessage());
@@ -255,13 +252,13 @@ class ZookeeperToKraftMigrationValidatorTest {
 
     @Test
     void testValidateZookeeperToKraftMigrationStateForRollback() {
-        assertDoesNotThrow(() -> underTest.validateZookeeperToKraftMigrationStateForRollback(KraftMigrationStatus.BROKERS_IN_KRAFT.name()));
+        assertDoesNotThrow(() -> underTest.validateZookeeperToKraftMigrationStateForRollback(KraftMigrationStatus.BROKERS_IN_KRAFT));
     }
 
     @Test
     void testValidateZookeeperToKraftMigrationStateForRollbackWhenAlreadyFinalized() {
         BadRequestException exception = assertThrows(BadRequestException.class,
-                () -> underTest.validateZookeeperToKraftMigrationStateForRollback(KraftMigrationStatus.KRAFT_INSTALLED.name()));
+                () -> underTest.validateZookeeperToKraftMigrationStateForRollback(KraftMigrationStatus.KRAFT_INSTALLED));
 
         assertEquals("Cannot rollback KRaft migration. KRaft migration is already finalized for this cluster.",
                 exception.getMessage());
@@ -270,7 +267,7 @@ class ZookeeperToKraftMigrationValidatorTest {
     @Test
     void testValidateZookeeperToKraftMigrationStateForRollbackWhenNotMigratedYet() {
         BadRequestException exception = assertThrows(BadRequestException.class,
-                () -> underTest.validateZookeeperToKraftMigrationStateForRollback(KraftMigrationStatus.ZOOKEEPER_INSTALLED.name()));
+                () -> underTest.validateZookeeperToKraftMigrationStateForRollback(KraftMigrationStatus.ZOOKEEPER_INSTALLED));
 
         assertEquals("Cannot rollback KRaft migration. The cluster has not been migrated to KRaft yet.",
                 exception.getMessage());
