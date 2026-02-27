@@ -6,8 +6,6 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOPPED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOP_REQUESTED;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_DB_DISK_AUTO_RESIZE;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
-import static com.sequenceiq.cloudbreak.common.notification.NotificationState.DISABLED;
-import static com.sequenceiq.cloudbreak.common.notification.NotificationState.ENABLED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_START_IGNORED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_STOP_IGNORED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_STOP_REQUESTED;
@@ -736,9 +734,9 @@ public class StackOperationService {
         stackNotificationService.notify(stack, status, detailedStackStatus, statusReason);
     }
 
-    public void modifyNotificationStatus(NameOrCrn nameOrCrn, String accountId) {
+    public void modifyNotificationStatus(NameOrCrn nameOrCrn, String accountId, NotificationState notificationState) {
+        LOGGER.info("NotificationState update request received for stack ('{}').", notificationState);
         StackDto stack = stackDtoService.getByNameOrCrn(nameOrCrn, accountId);
-        NotificationState notificationState = stack.getNotificationState().equals(ENABLED) ? DISABLED : ENABLED;
         stackUpdater.updateStackNotificationState(notificationState, stack.getId());
     }
 

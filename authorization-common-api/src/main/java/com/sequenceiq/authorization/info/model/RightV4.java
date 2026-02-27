@@ -48,6 +48,7 @@ public enum RightV4 {
     SDX_RECOVER(AuthorizationResourceAction.RECOVER_DATALAKE),
     SDX_REPAIR(AuthorizationResourceAction.REPAIR_DATALAKE),
     SDX_RETRY(AuthorizationResourceAction.RETRY_DATALAKE_OPERATION),
+    SDX_MODIFY(AuthorizationResourceAction.MODIFY_DATALAKE),
     SDX_DESCRIBE(AuthorizationResourceAction.DESCRIBE_DATALAKE),
     SDX_RESIZE(AuthorizationResourceAction.RESIZE_DATALAKE),
     SDX_VERTICAL_SCALING(AuthorizationResourceAction.DATALAKE_VERTICAL_SCALING),

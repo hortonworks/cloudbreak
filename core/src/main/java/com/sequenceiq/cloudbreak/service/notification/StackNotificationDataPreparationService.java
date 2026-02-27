@@ -11,6 +11,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
@@ -37,6 +39,8 @@ import com.sequenceiq.notification.scheduled.register.dto.clusterhealth.Instance
 
 @Service
 public class StackNotificationDataPreparationService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(StackNotificationDataPreparationService.class);
 
     private final InstanceMetaDataService instanceMetaDataService;
 
@@ -87,7 +91,7 @@ public class StackNotificationDataPreparationService {
         DetailedEnvironmentResponse environment = environmentService.getByCrn(stack.getEnvironmentCrn());
         Credential credential = credentialClientService.getByEnvironmentCrn(stack.getEnvironmentCrn());
         ExtendedCloudCredential extendedCloudCredential = extendedCloudCredentialConverter.convert(credential);
-        return NotificationGeneratorDto.builder()
+        NotificationGeneratorDto notificationGeneratorDto = NotificationGeneratorDto.builder()
                 .resourceCrn(stack.getResourceCrn())
                 .name(stack.getName())
                 .resourceName(stack.getName() + "_" + stack.getResourceCrn())
@@ -111,6 +115,8 @@ public class StackNotificationDataPreparationService {
                                 .build())
                 .accountId(accountId)
                 .build();
+        LOGGER.debug("Generated dto object will be: {}", notificationGeneratorDto);
+        return notificationGeneratorDto;
     }
 
     private String getClusterUrl(DetailedEnvironmentResponse environment, Stack stack) {

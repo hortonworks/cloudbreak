@@ -41,6 +41,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalSca
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.security.internal.RequestObject;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateResponse;
+import com.sequenceiq.cloudbreak.common.notification.NotificationState;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.cloudbreak.validation.ValidStackNameFormat;
@@ -598,18 +599,19 @@ public interface SdxEndpoint {
     FlowIdentifier modifySeLinuxByCrn(@ValidCrn(resource = VM_DATALAKE) @PathParam("crn") String crn, @PathParam("selinuxMode") SeLinux selinuxMode);
 
     @PUT
-    @Path("/name/{name}/modify_notification_state")
+    @Path("/name/{name}/modify_notification_state/{notificationState}")
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Modifies Notification Status on a specific DL", operationId = "modifyDataLakeNotificationStateByName",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    void modifyNotificationStateByName(@PathParam("name") String name);
+    void modifyNotificationStateByName(@PathParam("name") String name, @PathParam("notificationState") NotificationState notificationState);
 
     @PUT
-    @Path("/crn/{crn}/modify_notification_state")
+    @Path("/crn/{crn}/modify_notification_state/{notificationState}")
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Modifies Notification Status on a specific DL", operationId = "modifyDataLakeNotificationStateByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    void modifyNotificationStateByCrn(@ValidCrn(resource = VM_DATALAKE) @PathParam("crn") String crn);
+    void modifyNotificationStateByCrn(@ValidCrn(resource = VM_DATALAKE) @PathParam("crn") String crn,
+        @PathParam("notificationState") NotificationState notificationState);
 
     @PUT
     @Path("name/{name}/trigger_sku_migration")

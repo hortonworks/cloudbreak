@@ -63,7 +63,7 @@ public class StackNotificationService {
 
     public void notify(Stack stack, Status status, DetailedStackStatus detailedStackStatus, String statusReason) {
         String accountId = Crn.fromString(stack.getResourceCrn()).getAccountId();
-        if (shouldWeSendNotification(status, stack, accountId)) {
+        if (shouldSendNotification(status, stack, accountId)) {
             try {
                 Boolean success = sendNotification(
                         stack,
@@ -79,6 +79,9 @@ public class StackNotificationService {
             } catch (TransactionService.TransactionExecutionException | ExecutionException | InterruptedException e) {
                 LOGGER.error("Notification could not be sent for cluster {} because {}.", stack.getName(), e.getMessage(), e);
             }
+        } else {
+            LOGGER.info("Notification was not sent about Cluster health change for cluster: {} status: {} account id {}",
+                    stack.getName(), status, accountId);
         }
     }
 
@@ -103,10 +106,16 @@ public class StackNotificationService {
         });
     }
 
-    private boolean shouldWeSendNotification(Status newStatus, Stack stack, String accountId) {
-        return stackNotificationTypePreparationService.isNotificationRequiredByStackStatus(newStatus)
-                && entitlementService.isCdpCbNotificationSendingEnabled(accountId)
-                && NotificationState.ENABLED.equals(stack.getNotificationState());
+    private boolean shouldSendNotification(Status newStatus, Stack stack, String accountId) {
+        boolean notificationRequiredByStackStatus = stackNotificationTypePreparationService.isNotificationRequiredByStackStatus(newStatus);
+        boolean cdpCbNotificationSendingEnabled = entitlementService.isCdpCbNotificationSendingEnabled(accountId);
+        boolean enabledNotificationForStack = NotificationState.ENABLED.equals(stack.getNotificationState());
+        LOGGER.info("Notification sending calculation " +
+                "notificationRequiredByStackStatus: {} " +
+                "cdpCbNotificationSendingEnabled: {} " +
+                "enabledNotificationForStack: {}.",
+                notificationRequiredByStackStatus, cdpCbNotificationSendingEnabled, enabledNotificationForStack);
+        return notificationRequiredByStackStatus && cdpCbNotificationSendingEnabled && enabledNotificationForStack;
     }
 
 }

@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.ExceptionResponse;
+import com.sequenceiq.cloudbreak.common.notification.NotificationState;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 
@@ -104,13 +105,14 @@ public class StackService {
         return ThreadBasedUserCrnProvider.doAsInternalActor(() -> stackV4Endpoint.listAvailableJavaVersionsByCrnInternal(WORKSPACE_ID_DEFAULT, crn));
     }
 
-    public void modifyNotificationState(SdxCluster sdxCluster) {
+    public void modifyNotificationState(SdxCluster sdxCluster, NotificationState notificationState) {
         String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
         ThreadBasedUserCrnProvider.doAsInternalActor(
                 () -> stackV4Endpoint.modifyNotificationStateByCrn(
                         WORKSPACE_ID_DEFAULT,
                         sdxCluster.getCrn(),
-                        initiatorUserCrn
+                        initiatorUserCrn,
+                        notificationState
                 )
         );
     }

@@ -77,6 +77,7 @@ import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.notification.NotificationState;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.dto.SubnetIdWithResourceNameAndCrn;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
@@ -809,8 +810,9 @@ public class StackV4Controller extends NotificationController implements StackV4
 
     @InternalOnly
     @Override
-    public void modifyNotificationStateByCrn(Long workspaceId, @ResourceCrn String crn, @InitiatorUserCrn String initiatorUserCrn) {
+    public void modifyNotificationStateByCrn(Long workspaceId, @ResourceCrn String crn, @InitiatorUserCrn String initiatorUserCrn,
+        NotificationState notificationState) {
         Crn userCrn = Crn.ofUser(initiatorUserCrn);
-        stackOperationService.modifyNotificationStatus(NameOrCrn.ofCrn(crn), userCrn.getAccountId());
+        stackOperationService.modifyNotificationStatus(NameOrCrn.ofCrn(crn), userCrn.getAccountId(), notificationState);
     }
 }

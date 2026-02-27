@@ -43,6 +43,7 @@ public enum AuthorizationResourceAction {
     DESCRIBE_DETAILED_DATALAKE("datalake/describeDetailedDatalake", AuthorizationResourceType.DATALAKE),
     DELETE_DATALAKE("datalake/deleteDatalake", AuthorizationResourceType.DATALAKE),
     REPAIR_DATALAKE("datalake/repairDatalake", AuthorizationResourceType.DATALAKE),
+    MODIFY_DATALAKE("datalake/modifyDatalake", AuthorizationResourceType.DATALAKE),
     SYNC_DATALAKE("datalake/syncDatalake", AuthorizationResourceType.DATALAKE),
     RETRY_DATALAKE_OPERATION("datalake/retryDatalakeOperation", AuthorizationResourceType.DATALAKE),
     START_DATALAKE("datalake/startDatalake", AuthorizationResourceType.DATALAKE),

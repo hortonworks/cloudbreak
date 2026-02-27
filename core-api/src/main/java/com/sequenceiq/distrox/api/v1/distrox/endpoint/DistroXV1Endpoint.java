@@ -108,6 +108,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.DetachRe
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.UpdateRecipesV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recovery.RecoveryValidationV4Response;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
+import com.sequenceiq.cloudbreak.common.notification.NotificationState;
 import com.sequenceiq.cloudbreak.doc.Notes;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
@@ -887,18 +888,22 @@ public interface DistroXV1Endpoint {
     FlowIdentifier updatePublicDnsEntriesByCrn(@NotEmpty @ValidCrn(resource = DATAHUB) @PathParam("crn") String crn);
 
     @PUT
-    @Path("name/{name}/modify_notification_state")
+    @Path("name/{name}/modify_notification_state/{notificationState}")
+    @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Update the notification state of the cluster by Name",
             operationId = "modifyDataHubNotificationStateByName",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    void modifyDataHubNotificationStateByName(@PathParam("name") String name);
+    void modifyDataHubNotificationStateByName(@PathParam("name") String name,
+        @PathParam("notificationState") NotificationState notificationState);
 
     @PUT
-    @Path("crn/{crn}/modify_notification_state")
+    @Path("crn/{crn}/modify_notification_state/{notificationState}")
+    @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Update the notification state of the cluster by CRN",
             operationId = "modifyDataHubNotificationStateByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    void modifyDataHubNotificationStateByCrn(@NotEmpty @ValidCrn(resource = DATAHUB) @PathParam("crn") String crn);
+    void modifyDataHubNotificationStateByCrn(@NotEmpty @ValidCrn(resource = DATAHUB) @PathParam("crn") String crn,
+        @PathParam("notificationState") NotificationState notificationState);
 }

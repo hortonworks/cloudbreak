@@ -402,6 +402,6 @@ public interface InstanceMetaDataRepository extends JpaRepository<InstanceMetaDa
             "LEFT JOIN i.instanceGroup ig " +
             "LEFT JOIN ig.stack s " +
             "WHERE s.id= :stackId " +
-            "AND i.instanceStatus in :statusGroup ")
-    List<InstanceMetaData> findAllByStackIdAndStatusGroup(@Param("stackId") Long stackId, @Param("statusGroup") Set<InstanceStatus> statusGroup);
+            "AND i.instanceStatus in :statuses ")
+    List<InstanceMetaData> findAllByStackIdAndInstanceStatusIn(@Param("stackId") Long stackId, @Param("statuses") Set<InstanceStatus> statuses);
 }

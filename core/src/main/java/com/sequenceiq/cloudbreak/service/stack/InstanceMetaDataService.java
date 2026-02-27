@@ -564,6 +564,6 @@ public class InstanceMetaDataService {
     }
 
     public List<InstanceMetaData> findAllByStackIdAndStatusGroup(Long stackId, Set<InstanceStatus> statusGroup) {
-        return repository.findAllByStackIdAndStatusGroup(stackId, statusGroup);
+        return repository.findAllByStackIdAndInstanceStatusIn(stackId, statusGroup);
     }
 }

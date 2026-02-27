@@ -81,6 +81,7 @@ import com.sequenceiq.cloudbreak.auth.security.internal.RequestObject;
 import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.notification.NotificationState;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterDiagnosticsService;
@@ -948,18 +949,20 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
 
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.REPAIR_DATAHUB)
-    public void modifyDataHubNotificationStateByName(@ResourceName String name) {
+    public void modifyDataHubNotificationStateByName(@ResourceName String name, NotificationState notificationState) {
         stackOperationService.modifyNotificationStatus(
                 NameOrCrn.ofName(name),
-                ThreadBasedUserCrnProvider.getAccountId()
+                ThreadBasedUserCrnProvider.getAccountId(),
+                notificationState
         );
     }
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.REPAIR_DATAHUB)
-    public void modifyDataHubNotificationStateByCrn(@ResourceCrn String crn) {
+    public void modifyDataHubNotificationStateByCrn(@ResourceCrn String crn, NotificationState notificationState) {
         stackOperationService.modifyNotificationStatus(
                 NameOrCrn.ofCrn(crn),
-                ThreadBasedUserCrnProvider.getAccountId());
+                ThreadBasedUserCrnProvider.getAccountId(),
+                notificationState);
     }
 }

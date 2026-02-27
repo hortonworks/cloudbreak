@@ -45,6 +45,7 @@ import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateResponse;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.notification.NotificationState;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.structuredevent.rest.annotation.AccountEntityType;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
@@ -691,15 +692,15 @@ public class SdxController implements SdxEndpoint {
     }
 
     @Override
-    @CheckPermissionByResourceName(action =  AuthorizationResourceAction.REPAIR_DATALAKE)
-    public void modifyNotificationStateByName(@ResourceName String name) {
-        stackService.modifyNotificationState(getSdxClusterByName(name));
+    @CheckPermissionByResourceName(action =  AuthorizationResourceAction.MODIFY_DATALAKE)
+    public void modifyNotificationStateByName(@ResourceName String name, NotificationState notificationState) {
+        stackService.modifyNotificationState(getSdxClusterByName(name), notificationState);
     }
 
     @Override
-    @CheckPermissionByResourceCrn(action =  AuthorizationResourceAction.REPAIR_DATALAKE)
-    public void modifyNotificationStateByCrn(@ResourceCrn String crn) {
-        stackService.modifyNotificationState(getSdxClusterByCrn(crn));
+    @CheckPermissionByResourceCrn(action =  AuthorizationResourceAction.MODIFY_DATALAKE)
+    public void modifyNotificationStateByCrn(@ResourceCrn String crn, NotificationState notificationState) {
+        stackService.modifyNotificationState(getSdxClusterByCrn(crn), notificationState);
     }
 
     private SdxCluster getSdxClusterByName(String name) {
