@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.handler;
 
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.FAILED_CLUSTER_UPGRADE_VALIDATION_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.FINISH_CLUSTER_UPGRADE_EXISTING_UPGRADE_COMMAND_VALIDATION_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.START_CLUSTER_UPGRADE_FREEIPA_STATUS_VALIDATION_EVENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
@@ -83,7 +83,7 @@ class ClusterUpgradeExistingUpgradeCommandValidationHandlerTest {
 
         Selectable nextFlowStepSelector = underTest.doAccept(getHandlerEvent());
 
-        assertEquals(FINISH_CLUSTER_UPGRADE_EXISTING_UPGRADE_COMMAND_VALIDATION_EVENT.selector(), nextFlowStepSelector.selector());
+        assertEquals(START_CLUSTER_UPGRADE_FREEIPA_STATUS_VALIDATION_EVENT.selector(), nextFlowStepSelector.selector());
     }
 
     @Test
@@ -98,7 +98,7 @@ class ClusterUpgradeExistingUpgradeCommandValidationHandlerTest {
 
         Selectable nextFlowStepSelector = underTest.doAccept(getHandlerEvent());
 
-        assertEquals(FINISH_CLUSTER_UPGRADE_EXISTING_UPGRADE_COMMAND_VALIDATION_EVENT.selector(), nextFlowStepSelector.selector());
+        assertEquals(START_CLUSTER_UPGRADE_FREEIPA_STATUS_VALIDATION_EVENT.selector(), nextFlowStepSelector.selector());
     }
 
     @Test
@@ -113,7 +113,7 @@ class ClusterUpgradeExistingUpgradeCommandValidationHandlerTest {
 
         Selectable nextFlowStepSelector = underTest.doAccept(getHandlerEvent());
 
-        assertEquals(FINISH_CLUSTER_UPGRADE_EXISTING_UPGRADE_COMMAND_VALIDATION_EVENT.selector(), nextFlowStepSelector.selector());
+        assertEquals(START_CLUSTER_UPGRADE_FREEIPA_STATUS_VALIDATION_EVENT.selector(), nextFlowStepSelector.selector());
     }
 
     @Test
@@ -129,7 +129,7 @@ class ClusterUpgradeExistingUpgradeCommandValidationHandlerTest {
 
         Selectable nextFlowStepSelector = underTest.doAccept(getHandlerEvent());
 
-        assertEquals(FINISH_CLUSTER_UPGRADE_EXISTING_UPGRADE_COMMAND_VALIDATION_EVENT.selector(), nextFlowStepSelector.selector());
+        assertEquals(START_CLUSTER_UPGRADE_FREEIPA_STATUS_VALIDATION_EVENT.selector(), nextFlowStepSelector.selector());
     }
 
     @Test
@@ -146,7 +146,7 @@ class ClusterUpgradeExistingUpgradeCommandValidationHandlerTest {
 
         Selectable nextFlowStepSelector = underTest.doAccept(getHandlerEvent("12569826"));
 
-        assertEquals(FINISH_CLUSTER_UPGRADE_EXISTING_UPGRADE_COMMAND_VALIDATION_EVENT.selector(), nextFlowStepSelector.selector());
+        assertEquals(START_CLUSTER_UPGRADE_FREEIPA_STATUS_VALIDATION_EVENT.selector(), nextFlowStepSelector.selector());
     }
 
     @Test

@@ -9,6 +9,6 @@ public class ClusterUpgradeDiskSpaceValidationFinishedEvent extends StackEvent {
     @JsonCreator
     public ClusterUpgradeDiskSpaceValidationFinishedEvent(
             @JsonProperty("resourceId") Long resourceId) {
-        super(ClusterUpgradeValidationStateSelectors.FINISH_CLUSTER_UPGRADE_DISK_SPACE_VALIDATION_EVENT.name(), resourceId);
+        super(ClusterUpgradeValidationStateSelectors.START_CLUSTER_UPGRADE_CLOUDPROVIDER_CHECK_UPDATE_EVENT.name(), resourceId);
     }
 }

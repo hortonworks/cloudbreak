@@ -134,6 +134,10 @@ public interface ClusterApi {
         return clusterModificationService().removeUnusedParcels(usedParcelComponents, parcelNamesFromImage);
     }
 
+    default void removeUnusedParcelVersions(Set<ClouderaManagerProduct> products) {
+        clusterModificationService().removeUnusedParcelVersions(products);
+    }
+
     default void ensureComponentsAreStopped(Map<String, String> components, String hostname) throws CloudbreakException {
         clusterModificationService().ensureComponentsAreStopped(components, hostname);
     }

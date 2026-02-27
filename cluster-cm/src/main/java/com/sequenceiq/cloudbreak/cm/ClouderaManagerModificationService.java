@@ -1098,6 +1098,17 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     }
 
     @Override
+    public void removeUnusedParcelVersions(Set<ClouderaManagerProduct> products) {
+        try {
+            ParcelResourceApi parcelResourceApi = clouderaManagerApiFactory.getParcelResourceApi(v31Client);
+            removeUnusedParcelVersions(parcelResourceApi, products);
+        } catch (ApiException e) {
+            LOGGER.error("Error during removing unused parcel versions", e);
+            throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
+        }
+    }
+
+    @Override
     public ParcelOperationStatus removeUnusedParcels(Set<ClusterComponentView> usedParcelComponents, Set<String> parcelNamesFromImage) {
         ParcelsResourceApi parcelsResourceApi = clouderaManagerApiFactory.getParcelsResourceApi(v31Client);
         ParcelResourceApi parcelResourceApi = clouderaManagerApiFactory.getParcelResourceApi(v31Client);

@@ -21,7 +21,7 @@ public class ClusterUpgradeUpdateCheckFinishedEvent extends StackEvent {
             @JsonProperty("cloudStack") CloudStack cloudStack,
             @JsonProperty("cloudCredential") CloudCredential cloudCredential,
             @JsonProperty("cloudContext") CloudContext cloudContext) {
-        super(ClusterUpgradeValidationStateSelectors.FINISH_CLUSTER_UPGRADE_CLOUDPROVIDER_UPDATECHECK_EVENT.name(), stackId);
+        super(ClusterUpgradeValidationStateSelectors.START_CLUSTER_UPGRADE_EXISTING_UPGRADE_COMMAND_VALIDATION_EVENT.name(), stackId);
         this.cloudStack = cloudStack;
         this.cloudCredential = cloudCredential;
         this.cloudContext = cloudContext;

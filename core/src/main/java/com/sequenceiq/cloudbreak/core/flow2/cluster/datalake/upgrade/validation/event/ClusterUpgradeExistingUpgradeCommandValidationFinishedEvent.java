@@ -9,6 +9,6 @@ public class ClusterUpgradeExistingUpgradeCommandValidationFinishedEvent extends
     @JsonCreator
     public ClusterUpgradeExistingUpgradeCommandValidationFinishedEvent(
             @JsonProperty("resourceId") Long resourceId) {
-        super(ClusterUpgradeValidationStateSelectors.FINISH_CLUSTER_UPGRADE_EXISTING_UPGRADE_COMMAND_VALIDATION_EVENT.name(), resourceId);
+        super(ClusterUpgradeValidationStateSelectors.START_CLUSTER_UPGRADE_FREEIPA_STATUS_VALIDATION_EVENT.name(), resourceId);
     }
 }

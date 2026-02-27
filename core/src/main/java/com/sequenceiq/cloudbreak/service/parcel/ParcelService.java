@@ -99,6 +99,11 @@ public class ParcelService {
         return removeUnusedParcelComponents(stackDto, clusterComponentsByBlueprint);
     }
 
+    public void removeUnusedParcelVersions(StackDto stackDto, Set<ClouderaManagerProduct> targetProducts) {
+        LOGGER.debug("Removing unused parcel versions from the cluster for target products: {}", targetProducts);
+        clusterApiConnectors.getConnector(stackDto).removeUnusedParcelVersions(targetProducts);
+    }
+
     public ParcelOperationStatus removeUnusedParcelComponents(StackDtoDelegate stackDto, Set<ClusterComponentView> clusterComponentsByBlueprint)
             throws CloudbreakException {
         LOGGER.debug("Starting to remove unused parcels from the cluster.");

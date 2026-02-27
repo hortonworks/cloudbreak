@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.handler;
 
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationHandlerSelectors.VALIDATE_IMAGE_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.START_CLUSTER_UPGRADE_DISK_SPACE_VALIDATION_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.START_CLUSTER_UPGRADE_PARCEL_CLEANUP_EVENT;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -69,7 +69,7 @@ public class ClusterUpgradeImageValidationHandler extends ExceptionCatcherEventH
             long requiredDiskSpaceForUpgrade = parcelSizeService.getRequiredFreeSpace(parcelsResponses);
             Set<String> warningMessages = executePlatformSpecificValidations(request, cloudContext);
             LOGGER.debug("Cluster upgrade image validation succeeded.");
-            return new ClusterUpgradeImageValidationFinishedEvent(START_CLUSTER_UPGRADE_DISK_SPACE_VALIDATION_EVENT.selector(), request.getResourceId(),
+            return new ClusterUpgradeImageValidationFinishedEvent(START_CLUSTER_UPGRADE_PARCEL_CLEANUP_EVENT.selector(), request.getResourceId(),
                     requiredDiskSpaceForUpgrade, warningMessages);
         } catch (RuntimeException e) {
             LOGGER.warn("Cluster upgrade image validation failed: ", e);

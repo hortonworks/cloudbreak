@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation
 
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationHandlerSelectors.VALIDATE_DISK_SPACE_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.FAILED_CLUSTER_UPGRADE_VALIDATION_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.FINISH_CLUSTER_UPGRADE_DISK_SPACE_VALIDATION_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.START_CLUSTER_UPGRADE_CLOUDPROVIDER_CHECK_UPDATE_EVENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
@@ -48,7 +48,7 @@ class ClusterUpgradeDiskSpaceValidationHandlerTest {
 
         Selectable nextFlowStepSelector = underTest.doAccept(createEvent());
 
-        assertEquals(FINISH_CLUSTER_UPGRADE_DISK_SPACE_VALIDATION_EVENT.name(), nextFlowStepSelector.selector());
+        assertEquals(START_CLUSTER_UPGRADE_CLOUDPROVIDER_CHECK_UPDATE_EVENT.name(), nextFlowStepSelector.selector());
         verify(stackService).getByIdWithListsInTransaction(STACK_ID);
         verify(diskSpaceValidationService).validateFreeSpaceForUpgrade(stack, REQUIRED_FREE_SPACE);
     }

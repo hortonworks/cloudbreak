@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.handler;
 
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.FAILED_CLUSTER_UPGRADE_VALIDATION_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.START_CLUSTER_UPGRADE_DISK_SPACE_VALIDATION_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.START_CLUSTER_UPGRADE_PARCEL_CLEANUP_EVENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -99,7 +99,7 @@ public class ClusterUpgradeImageValidationHandlerTest {
 
         Selectable nextFlowStepSelector = underTest.doAccept(event);
 
-        assertEquals(START_CLUSTER_UPGRADE_DISK_SPACE_VALIDATION_EVENT.selector(), nextFlowStepSelector.selector());
+        assertEquals(START_CLUSTER_UPGRADE_PARCEL_CLEANUP_EVENT.selector(), nextFlowStepSelector.selector());
         assertEquals(REQUIRED_FREE_SPACE, ((ClusterUpgradeImageValidationFinishedEvent) nextFlowStepSelector).getRequiredFreeSpace());
         verify(parcelAvailabilityService).validateAvailability(request.getTargetImage(), request.getResourceId());
         verify(parcelSizeService).getRequiredFreeSpace(responses);
@@ -167,7 +167,7 @@ public class ClusterUpgradeImageValidationHandlerTest {
 
         Selectable nextFlowStepSelector = underTest.doAccept(getHandlerEvent());
 
-        assertEquals(START_CLUSTER_UPGRADE_DISK_SPACE_VALIDATION_EVENT.selector(), nextFlowStepSelector.selector());
+        assertEquals(START_CLUSTER_UPGRADE_PARCEL_CLEANUP_EVENT.selector(), nextFlowStepSelector.selector());
         verify(parcelAvailabilityService).validateAvailability(any(), any());
         verify(parcelSizeService).getRequiredFreeSpace(any());
         verify(cloudContext).getPlatformVariant();

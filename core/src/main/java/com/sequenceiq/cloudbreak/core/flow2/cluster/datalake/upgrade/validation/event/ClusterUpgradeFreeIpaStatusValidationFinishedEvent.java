@@ -9,6 +9,6 @@ public class ClusterUpgradeFreeIpaStatusValidationFinishedEvent extends StackEve
     @JsonCreator
     public ClusterUpgradeFreeIpaStatusValidationFinishedEvent(
             @JsonProperty("resourceId") Long resourceId) {
-        super(ClusterUpgradeValidationStateSelectors.FINISH_CLUSTER_UPGRADE_FREEIPA_STATUS_VALIDATION_EVENT.name(), resourceId);
+        super(ClusterUpgradeValidationStateSelectors.START_CLUSTER_UPGRADE_SERVICE_VALIDATION_EVENT.name(), resourceId);
     }
 }

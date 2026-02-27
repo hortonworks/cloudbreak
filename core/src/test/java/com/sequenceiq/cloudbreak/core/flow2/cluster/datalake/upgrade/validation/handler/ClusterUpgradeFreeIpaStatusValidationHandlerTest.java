@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.handler;
 
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.FAILED_CLUSTER_UPGRADE_VALIDATION_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.FINISH_CLUSTER_UPGRADE_FREEIPA_STATUS_VALIDATION_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors.START_CLUSTER_UPGRADE_SERVICE_VALIDATION_EVENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -68,7 +68,7 @@ class ClusterUpgradeFreeIpaStatusValidationHandlerTest {
 
         Selectable nextFlowStepSelector = underTest.doAccept(getHandlerEvent());
 
-        assertEquals(FINISH_CLUSTER_UPGRADE_FREEIPA_STATUS_VALIDATION_EVENT.selector(), nextFlowStepSelector.selector());
+        assertEquals(START_CLUSTER_UPGRADE_SERVICE_VALIDATION_EVENT.selector(), nextFlowStepSelector.selector());
         verify(freeipaService).checkFreeipaRunning(ENV_CRN, STACK_NAME);
         verify(stackService).getViewByIdWithoutAuth(STACK_ID);
     }

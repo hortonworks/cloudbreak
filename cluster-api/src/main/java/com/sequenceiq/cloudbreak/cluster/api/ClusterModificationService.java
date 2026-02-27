@@ -70,6 +70,8 @@ public interface ClusterModificationService {
     ParcelOperationStatus removeUnusedParcels(Set<ClusterComponentView> usedParcelComponents, Set<String> parcelNamesFromImage)
             throws CloudbreakException;
 
+    void removeUnusedParcelVersions(Set<ClouderaManagerProduct> products);
+
     boolean isRolePresent(String clusterName, String roleConfigGroup, String serviceType);
 
     boolean isServicePresent(String clusterName, String serviceType);
