@@ -80,7 +80,7 @@ public class EncryptionProfileService {
         }
     }
 
-    public void validateEncryptionProfile(SdxClusterRequest clusterRequest, DetailedEnvironmentResponse environment) {
+    public void validateEncryptionProfile(SdxClusterRequest clusterRequest, DetailedEnvironmentResponse environment, String runtimeVersion) {
         ValidationResult.ValidationResultBuilder validationBuilder = new ValidationResult.ValidationResultBuilder();
 
         if (checkIfEncryptionProfileCrnIsNeitherNullOrDefault(environment.getEncryptionProfileCrn()) ||
@@ -90,9 +90,8 @@ public class EncryptionProfileService {
                 validationBuilder.error("Encryption Profile entitlement is not granted to the account");
             }
 
-            if (!sdxVersionRuleEnforcer.isCustomEncryptionProfileSupported(clusterRequest.getRuntime())) {
-                validationBuilder.error(format("Encryption Profile is not supported in %s runtime. Please use 7.3.2 or above",
-                        clusterRequest.getRuntime()));
+            if (!sdxVersionRuleEnforcer.isCustomEncryptionProfileSupported(runtimeVersion)) {
+                validationBuilder.error(format("Encryption Profile is not supported in %s runtime. Please use 7.3.2 or above", runtimeVersion));
             }
 
             Optional<EncryptionProfileResponse> encryptionProfileResponseOp = getEncryptionProfileFromDatalakeOtherwiseFromEnv(
