@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.job.stackpatcher;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+
 import javax.annotation.PostConstruct;
 
 import jakarta.inject.Inject;
@@ -52,24 +55,24 @@ public class ExistingStackPatcherJobService implements JobSchedulerService {
         new StatusCheckerJobConflictVetoListener(JOB_GROUP).init(scheduler.getScheduler());
     }
 
-    public void schedule(Long stackId, StackPatchType stackPatchType) {
+    public void schedule(Long stackId, StackPatchType stackPatchType, LocalDateTime firstStart) {
         JobResource jobResource = stackService.getJobResource(stackId);
-        schedule(new ExistingStackPatcherJobAdapter(jobResource, stackPatchType));
+        schedule(new ExistingStackPatcherJobAdapter(jobResource, stackPatchType), firstStart);
     }
 
-    public void schedule(ExistingStackPatcherJobAdapter resource) {
+    public void schedule(ExistingStackPatcherJobAdapter resource, LocalDateTime firstStart) {
         JobDetail jobDetail = buildJobDetail(resource);
         JobKey jobKey = jobDetail.getKey();
         StackPatchType stackPatchType = resource.getStackPatchType();
         try {
             ExistingStackPatchService existingStackPatchService = existingStackPatcherServiceProvider.provide(stackPatchType);
-            Trigger trigger = buildJobTrigger(jobDetail, existingStackPatchService);
+            Trigger trigger = buildJobTrigger(jobDetail, existingStackPatchService, firstStart);
             if (scheduler.getJobDetail(jobKey) != null) {
                 LOGGER.info("Unscheduling stack patcher job for stack with key: '{}' and group: '{}'", jobKey.getName(), jobKey.getGroup());
                 unschedule(jobKey);
             }
-            LOGGER.info("Scheduling stack patcher {} job for stack with key: '{}' and group: '{}'",
-                    stackPatchType, jobKey.getName(), jobKey.getGroup());
+            LOGGER.info("Scheduling stack patcher {} job for stack with key: '{}' and group: '{}' with first start {}",
+                    stackPatchType, jobKey.getName(), jobKey.getGroup(), firstStart);
             scheduler.scheduleJob(jobDetail, trigger);
         } catch (UnknownStackPatchTypeException e) {
             LOGGER.error("Failed to get stack patcher for type {}", stackPatchType, e);
@@ -87,7 +90,7 @@ public class ExistingStackPatcherJobService implements JobSchedulerService {
                 LOGGER.info("All existing stacks have been patched, hooray!");
             }
         } catch (Exception e) {
-            LOGGER.error(String.format("Error during unscheduling quartz job: %s", jobKey), e);
+            LOGGER.error("Error during unscheduling quartz job: {}", jobKey, e);
         }
     }
 
@@ -100,7 +103,7 @@ public class ExistingStackPatcherJobService implements JobSchedulerService {
                 .build();
     }
 
-    private Trigger buildJobTrigger(JobDetail jobDetail, ExistingStackPatchService existingStackPatchService) {
+    private Trigger buildJobTrigger(JobDetail jobDetail, ExistingStackPatchService existingStackPatchService, LocalDateTime firstStart) {
         return TriggerBuilder.newTrigger()
                 .forJob(jobDetail)
                 .usingJobData(jobDetail.getJobDataMap())
@@ -110,7 +113,7 @@ public class ExistingStackPatcherJobService implements JobSchedulerService {
                         .withIntervalInMinutes(existingStackPatchService.getIntervalInMinutes())
                         .repeatForever()
                         .withMisfireHandlingInstructionNextWithExistingCount())
-                .startAt(existingStackPatchService.getFirstStart())
+                .startAt(firstStart.toInstant(ZoneOffset.UTC))
                 .build();
     }
 

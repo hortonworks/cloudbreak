@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.provision;
 
 import static com.cloudera.thunderhead.service.meteringv2.events.MeteringV2EventsProto.ClusterStatus.Value.STARTED;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -747,7 +748,7 @@ public class ClusterCreationActions {
                 providerSyncJobService.schedule(context.getStack());
                 diskUsageSyncJobService.schedule(context.getStack());
                 if (CloudPlatform.MOCK.equalsIgnoreCase(context.getStack().getCloudPlatform())) {
-                    existingStackPatcherJobService.schedule(context.getStackId(), StackPatchType.MOCK);
+                    existingStackPatcherJobService.schedule(context.getStackId(), StackPatchType.MOCK, LocalDateTime.now());
                 }
                 meteringService.sendMeteringStatusChangeEventForStack(context.getStackId(), STARTED);
                 meteringService.scheduleSync(context.getStackId());

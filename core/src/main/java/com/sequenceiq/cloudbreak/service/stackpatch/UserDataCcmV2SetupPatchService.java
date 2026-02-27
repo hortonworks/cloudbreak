@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.service.stackpatch;
 
 import static com.sequenceiq.cloudbreak.domain.stack.StackPatchType.USER_DATA_CCMV2_SETUP;
 
-import java.util.Date;
 import java.util.Map;
 
 import jakarta.inject.Inject;
@@ -51,11 +50,6 @@ public class UserDataCcmV2SetupPatchService extends ExistingStackPatchService {
         userData.put(InstanceGroupType.GATEWAY, updatedGatewayUserData);
         userDataService.createOrUpdateUserData(stackId, userData);
         return true;
-    }
-
-    @Override
-    public Date getFirstStart() {
-        return randomDelayWithMaxHours(MAX_START_DELAY_IN_HOURS);
     }
 
     @Override

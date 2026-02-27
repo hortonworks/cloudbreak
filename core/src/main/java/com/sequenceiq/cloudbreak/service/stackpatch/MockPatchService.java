@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.service.stackpatch;
 import static com.sequenceiq.cloudbreak.domain.stack.StackPatchType.MOCK;
 
 import java.io.IOException;
-import java.util.Date;
 import java.util.Optional;
 
 import jakarta.inject.Inject;
@@ -57,11 +56,6 @@ public class MockPatchService extends ExistingStackPatchService {
     @Override
     public int getIntervalInMinutes() {
         return 1;
-    }
-
-    @Override
-    public Date getFirstStart() {
-        return new Date();
     }
 
     @Override

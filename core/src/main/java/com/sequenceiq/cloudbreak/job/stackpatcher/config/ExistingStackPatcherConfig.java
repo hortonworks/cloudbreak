@@ -22,6 +22,10 @@ public class ExistingStackPatcherConfig {
     @Min(0)
     private Integer maxInitialStartDelayInHours;
 
+    @NotNull
+    @Min(1)
+    private Integer initializationChunkSize;
+
     private Map<StackPatchType, StackPatchTypeConfig> patchConfigs;
 
     public int getIntervalInHours() {
@@ -38,6 +42,14 @@ public class ExistingStackPatcherConfig {
 
     public void setMaxInitialStartDelayInHours(int maxInitialStartDelayInHours) {
         this.maxInitialStartDelayInHours = maxInitialStartDelayInHours;
+    }
+
+    public Integer getInitializationChunkSize() {
+        return initializationChunkSize;
+    }
+
+    public void setInitializationChunkSize(Integer initializationChunkSize) {
+        this.initializationChunkSize = initializationChunkSize;
     }
 
     public Map<StackPatchType, StackPatchTypeConfig> getPatchConfigs() {

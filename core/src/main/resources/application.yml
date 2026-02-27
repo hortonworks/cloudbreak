@@ -833,6 +833,7 @@ crn:
 existing-stack-patcher:
   intervalInHours: 24
   maxInitialStartDelayInHours: 12
+  initializationChunkSize: 100
   patch-configs:
     update-outdated-vault-secrets:
       intervalMinutes: 5

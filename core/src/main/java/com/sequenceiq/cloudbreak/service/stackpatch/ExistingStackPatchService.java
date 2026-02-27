@@ -2,9 +2,6 @@ package com.sequenceiq.cloudbreak.service.stackpatch;
 
 import static com.sequenceiq.cloudbreak.util.Benchmark.checkedMeasure;
 
-import java.time.Duration;
-import java.time.ZonedDateTime;
-import java.util.Date;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
@@ -16,7 +13,6 @@ import org.slf4j.LoggerFactory;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackPatchType;
 import com.sequenceiq.cloudbreak.job.stackpatcher.config.ExistingStackPatcherConfig;
-import com.sequenceiq.cloudbreak.util.RandomUtil;
 import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.service.FlowRetryService;
@@ -36,15 +32,6 @@ public abstract class ExistingStackPatchService {
 
     public int getIntervalInMinutes() {
         return (int) TimeUnit.HOURS.toMinutes(properties.getIntervalInHours());
-    }
-
-    public Date getFirstStart() {
-        return randomDelayWithMaxHours(properties.getMaxInitialStartDelayInHours());
-    }
-
-    protected Date randomDelayWithMaxHours(int maxStartDelayInHours) {
-        int delayInMinutes = RandomUtil.getInt((int) TimeUnit.HOURS.toMinutes(maxStartDelayInHours));
-        return Date.from(ZonedDateTime.now().toInstant().plus(Duration.ofMinutes(delayInMinutes)));
     }
 
     /**
