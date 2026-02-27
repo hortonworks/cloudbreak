@@ -9,7 +9,6 @@ base:
              - fluent
              - ntp
              - freeipa
-             - freeipa.services
              - dns
              - logrotate
              - ccm
@@ -31,6 +30,7 @@ base:
              - match: grain
              - freeipa.primary-install
              - freeipa.common-install
+             - freeipa.services
              {% if salt['pillar.get']('environmentType', 'PUBLIC_CLOUD') == 'HYBRID' %}
              - trustsetup.adtrust_install
              {% endif %}
@@ -50,6 +50,7 @@ base:
              - match: grain
              - freeipa.replica-install
              - freeipa.common-install
+             - freeipa.services
              {% if salt[ 'pillar.get' ]('environmentType', 'PUBLIC_CLOUD') == 'HYBRID' %}
              - trustsetup.adtrust_install
              {% endif %}
@@ -67,6 +68,7 @@ base:
              - match: grain
              - freeipa.replica-install
              - freeipa.common-install
+             - freeipa.services
              - freeipa.promote-replica-to-master
              {% if salt[ 'pillar.get' ]('environmentType', 'PUBLIC_CLOUD') == 'HYBRID' %}
              - trustsetup.adtrust_install
