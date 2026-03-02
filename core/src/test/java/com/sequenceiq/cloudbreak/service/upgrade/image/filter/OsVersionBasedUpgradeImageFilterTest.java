@@ -4,11 +4,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -52,7 +54,7 @@ class OsVersionBasedUpgradeImageFilterTest {
     @Test
     public void testFilterShouldReturnAllImages() {
         List<Image> images = List.of(createImage("image1", CURRENT_OS), createImage("image2", CURRENT_OS));
-        when(clusterUpgradeOsVersionFilterCondition.isImageAllowed(any(), anyString(), any(), anyBoolean(), anySet())).thenReturn(true);
+        when(clusterUpgradeOsVersionFilterCondition.isImageAllowed(any(), anyString(), any(), anyBoolean(), anySet(), anyMap())).thenReturn(true);
 
         ImageFilterResult actual = testFilterImages(createImageFilterParams(), images);
 
@@ -70,9 +72,12 @@ class OsVersionBasedUpgradeImageFilterTest {
         Image image3 = createImage("image3", OsType.RHEL9);
         List<Image> images = List.of(image1, image2, image3);
 
-        when(clusterUpgradeOsVersionFilterCondition.isImageAllowed(OsType.RHEL8, Architecture.X86_64.getName(), image1, true, usedOsTypes)).thenReturn(false);
-        when(clusterUpgradeOsVersionFilterCondition.isImageAllowed(OsType.RHEL8, Architecture.X86_64.getName(), image2, true, usedOsTypes)).thenReturn(true);
-        when(clusterUpgradeOsVersionFilterCondition.isImageAllowed(OsType.RHEL8, Architecture.X86_64.getName(), image3, true, usedOsTypes)).thenReturn(true);
+        when(clusterUpgradeOsVersionFilterCondition.isImageAllowed(OsType.RHEL8, Architecture.X86_64.getName(), image1, true, usedOsTypes,
+                Collections.emptyMap())).thenReturn(false);
+        when(clusterUpgradeOsVersionFilterCondition.isImageAllowed(OsType.RHEL8, Architecture.X86_64.getName(), image2, true, usedOsTypes,
+                Collections.emptyMap())).thenReturn(true);
+        when(clusterUpgradeOsVersionFilterCondition.isImageAllowed(OsType.RHEL8, Architecture.X86_64.getName(), image3, true, usedOsTypes,
+                Collections.emptyMap())).thenReturn(true);
 
         ImageFilterParams imageFilterParams = createImageFilterParams(OsType.RHEL8);
         ImageFilterResult actual = testFilterImages(imageFilterParams, images);
@@ -86,7 +91,8 @@ class OsVersionBasedUpgradeImageFilterTest {
     }
 
     private ImageFilterParams createImageFilterParams(OsType osType) {
-        return new ImageFilterParams(null, createCurrentImage(osType), null, false, false, null, null, null, STACK_ID, null, null, null, null, false);
+        return new ImageFilterParams(null, createCurrentImage(osType), null, false, false, Collections.emptyMap(), null, null, STACK_ID, null, null, null, null,
+                false);
     }
 
     private Image createImage(String imageId, OsType osType) {

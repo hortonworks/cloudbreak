@@ -65,6 +65,7 @@ public class OsVersionBasedUpgradeImageFilter implements UpgradeImageFilter {
     private boolean isSameOsOrAllowedOsChange(ImageFilterParams imageFilterParams, Image image, boolean rhel9Enabled, Set<OsType> osUsedByInstances) {
         OsType currentOsType = OsType.getByOs(imageFilterParams.getCurrentImage().getOs());
         String currentArchitecture = imageFilterParams.getCurrentImage().getArchitecture();
-        return clusterUpgradeOsVersionFilterCondition.isImageAllowed(currentOsType, currentArchitecture, image, rhel9Enabled, osUsedByInstances);
+        return clusterUpgradeOsVersionFilterCondition.isImageAllowed(currentOsType, currentArchitecture, image, rhel9Enabled, osUsedByInstances,
+                imageFilterParams.getStackRelatedParcels());
     }
 }

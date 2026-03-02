@@ -76,7 +76,8 @@ public class ClusterUpgradePreparationActions {
                 stackUpdater.updateStackStatus(resourceId, CLUSTER_UPGRADE_PREPARATION_STARTED,
                         messagesService.getMessage(preparationStartedResourceEvent.getMessage(), parameterList));
                 cloudbreakEventService.fireCloudbreakEvent(resourceId, UPDATE_IN_PROGRESS.name(), preparationStartedResourceEvent, parameterList);
-                ClusterUpgradeParcelSettingsPreparationEvent nextEvent = new ClusterUpgradeParcelSettingsPreparationEvent(resourceId, imageChangeDto);
+                ClusterUpgradeParcelSettingsPreparationEvent nextEvent = new ClusterUpgradeParcelSettingsPreparationEvent(resourceId, imageChangeDto,
+                        payload.getCurrentOsType());
                 sendEvent(context, nextEvent.selector(), nextEvent);
             }
 

@@ -17,7 +17,7 @@ public class ClusterUpgradeTriggerEvent extends StackEvent {
 
     private final boolean rollingUpgradeEnabled;
 
-    private final OsType orininalOsType;
+    private final OsType originalOsType;
 
     @JsonCreator
     public ClusterUpgradeTriggerEvent(
@@ -26,11 +26,11 @@ public class ClusterUpgradeTriggerEvent extends StackEvent {
             @JsonIgnoreDeserialization @JsonProperty("accepted") Promise<AcceptResult> accepted,
             @JsonProperty("imageId") String imageId,
             @JsonProperty("rollingUpgradeEnabled") boolean rollingUpgradeEnabled,
-            @JsonProperty("orininalOsType") OsType orininalOsType) {
+            @JsonProperty("originalOsType") OsType originalOsType) {
         super(event, resourceId, accepted);
         this.imageId = imageId;
         this.rollingUpgradeEnabled = rollingUpgradeEnabled;
-        this.orininalOsType = orininalOsType;
+        this.originalOsType = originalOsType;
     }
 
     public String getImageId() {
@@ -41,8 +41,8 @@ public class ClusterUpgradeTriggerEvent extends StackEvent {
         return rollingUpgradeEnabled;
     }
 
-    public OsType getOrininalOsType() {
-        return orininalOsType;
+    public OsType getOriginalOsType() {
+        return originalOsType;
     }
 
     @Override
@@ -50,7 +50,7 @@ public class ClusterUpgradeTriggerEvent extends StackEvent {
         return isClassAndEqualsEvent(ClusterUpgradeTriggerEvent.class, other,
                 event -> Objects.equals(imageId, event.imageId)
                         && Objects.equals(rollingUpgradeEnabled, event.rollingUpgradeEnabled)
-                        && Objects.equals(orininalOsType, event.orininalOsType));
+                        && Objects.equals(originalOsType, event.originalOsType));
     }
 
     @Override
@@ -58,7 +58,7 @@ public class ClusterUpgradeTriggerEvent extends StackEvent {
         return new StringJoiner(", ", ClusterUpgradeTriggerEvent.class.getSimpleName() + "[", "]")
                 .add("imageId='" + imageId + "'")
                 .add("rollingUpgradeEnabled=" + rollingUpgradeEnabled)
-                .add("orininalOsType=" + orininalOsType)
+                .add("originalOsType=" + originalOsType)
                 .toString();
     }
 }

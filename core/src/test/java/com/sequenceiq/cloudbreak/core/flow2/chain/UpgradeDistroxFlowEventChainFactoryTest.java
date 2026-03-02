@@ -164,17 +164,9 @@ class UpgradeDistroxFlowEventChainFactoryTest {
     void testCreateFlowTriggerEventQueueShouldThrowExceptionWhenImageNotFound() throws CloudbreakImageNotFoundException {
         doThrow(new CloudbreakImageNotFoundException("error")).when(componentConfigProviderService).getImage(STACK_ID);
         when(stackDtoService.getByIdWithoutResources(STACK_ID)).thenReturn(stackDto);
-        when(instanceMetaDataService.getAllNotTerminatedInstanceMetadataViewsByStackId(anyLong())).thenReturn(List.of());
-        when(saltVersionUpgradeService.getSaltSecretRotationTriggerEvent(1L))
-                .thenReturn(List.of(new SecretRotationFlowChainTriggerEvent(null, 1L, null, List.of(SALT_MASTER_KEY_PAIR), null, null)));
         ReflectionTestUtils.setField(underTest, "batchRepairEnabled", true);
         DistroXUpgradeFlowChainTriggerEvent event = new DistroXUpgradeFlowChainTriggerEvent(FlowChainTriggers.DISTROX_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT,
                 STACK_ID, new Promise<>(), imageChangeDto, false, false, "variant", true, "runtime");
-        SetDefaultJavaVersionTriggerEvent setDefaultJavaEvent =
-                new SetDefaultJavaVersionTriggerEvent(SetDefaultJavaVersionFlowEvent.SET_DEFAULT_JAVA_VERSION_EVENT.event(), STACK_ID,
-                        "17", false, false, false);
-        when(setDefaultJavaVersionFlowChainService.setDefaultJavaVersionTriggerEvent(eq(stackDto), eq(imageChangeDto)))
-                .thenReturn(List.of(setDefaultJavaEvent));
 
         String errorMessage = Assertions.assertThrows(NotFoundException.class, () -> underTest.createFlowTriggerEventQueue(event)).getMessage();
 
@@ -228,8 +220,9 @@ class UpgradeDistroxFlowEventChainFactoryTest {
     }
 
     @Test
-    void testChainQueueForRollingUpgradeWithReplaceVms() {
+    void testChainQueueForRollingUpgradeWithReplaceVms() throws CloudbreakImageNotFoundException {
         when(stackDtoService.getByIdWithoutResources(STACK_ID)).thenReturn(stackDto);
+        when(componentConfigProviderService.getImage(STACK_ID)).thenReturn(Image.builder().withOsType(OsType.RHEL9.getOsType()).build());
         lenient().when(stackDto.getPlatformVariant()).thenReturn("originalVariant");
         when(scalingHardLimitsService.getMaxUpscaleStepInNodeCount()).thenReturn(100);
         when(instanceMetaDataService.getAllNotTerminatedInstanceMetadataViewsByStackId(anyLong())).thenReturn(List.of());
@@ -258,8 +251,9 @@ class UpgradeDistroxFlowEventChainFactoryTest {
     }
 
     @Test
-    void testChainQueueForReplaceVmsWithHundredNodes() {
+    void testChainQueueForReplaceVmsWithHundredNodes() throws CloudbreakImageNotFoundException {
         when(stackDtoService.getByIdWithoutResources(STACK_ID)).thenReturn(stackDto);
+        when(componentConfigProviderService.getImage(STACK_ID)).thenReturn(Image.builder().withOsType(OsType.RHEL9.getOsType()).build());
         lenient().when(stackDto.getPlatformVariant()).thenReturn("originalVariant");
         when(scalingHardLimitsService.getMaxUpscaleStepInNodeCount()).thenReturn(100);
         when(instanceMetaDataService.getAllNotTerminatedInstanceMetadataViewsByStackId(anyLong())).thenReturn(List.of());
@@ -331,8 +325,9 @@ class UpgradeDistroxFlowEventChainFactoryTest {
     }
 
     @Test
-    void testChainQueueForOsUpgradeShouldFilterOutAlreadyUpgradedInstances() {
+    void testChainQueueForOsUpgradeShouldFilterOutAlreadyUpgradedInstances() throws CloudbreakImageNotFoundException {
         when(stackDtoService.getByIdWithoutResources(STACK_ID)).thenReturn(stackDto);
+        when(componentConfigProviderService.getImage(STACK_ID)).thenReturn(Image.builder().withOsType(OsType.RHEL9.getOsType()).build());
         lenient().when(stackDto.getPlatformVariant()).thenReturn("originalVariant");
         when(scalingHardLimitsService.getMaxUpscaleStepInNodeCount()).thenReturn(100);
         when(instanceMetaDataService.getAllNotTerminatedInstanceMetadataViewsByStackId(anyLong())).thenReturn(List.of());
@@ -365,8 +360,9 @@ class UpgradeDistroxFlowEventChainFactoryTest {
     }
 
     @Test
-    void testChainQueueForOsUpgradeShouldSkipOsUpgradeWhenNoUpgradableInstanceFound() {
+    void testChainQueueForOsUpgradeShouldSkipOsUpgradeWhenNoUpgradableInstanceFound() throws CloudbreakImageNotFoundException {
         when(stackDtoService.getByIdWithoutResources(STACK_ID)).thenReturn(stackDto);
+        when(componentConfigProviderService.getImage(STACK_ID)).thenReturn(Image.builder().withOsType(OsType.RHEL9.getOsType()).build());
         when(instanceMetaDataService.getAllNotTerminatedInstanceMetadataViewsByStackId(anyLong())).thenReturn(List.of());
         ReflectionTestUtils.setField(underTest, "batchRepairEnabled", true);
 
@@ -396,7 +392,8 @@ class UpgradeDistroxFlowEventChainFactoryTest {
     }
 
     @Test
-    void testChainQueueForOsUpgradeWhenReplaceVmsIsFalse() {
+    void testChainQueueForOsUpgradeWhenReplaceVmsIsFalse() throws CloudbreakImageNotFoundException {
+        when(componentConfigProviderService.getImage(STACK_ID)).thenReturn(Image.builder().withOsType(OsType.RHEL9.getOsType()).build());
         when(instanceMetaDataService.getAllNotTerminatedInstanceMetadataViewsByStackId(anyLong())).thenReturn(List.of());
         ReflectionTestUtils.setField(underTest, "batchRepairEnabled", true);
 

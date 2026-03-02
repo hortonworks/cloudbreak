@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.upgrade.image;
 
 import static com.sequenceiq.common.model.OsType.RHEL9;
 
+import java.util.Map;
 import java.util.Set;
 
 import jakarta.inject.Inject;
@@ -17,13 +18,15 @@ public class ClusterUpgradeOsVersionFilterCondition {
     @Inject
     private OsChangeService osChangeService;
 
-    public boolean isImageAllowed(OsType currentOsType, String currentArchitecture, Image image, boolean rhel9Enabled, Set<OsType> osUsedByInstances) {
+    public boolean isImageAllowed(OsType currentOsType, String currentArchitecture, Image image, boolean rhel9Enabled, Set<OsType> osUsedByInstances,
+            Map<String, String> stackRelatedParcels) {
         return isOsEntitled(image, rhel9Enabled) && (isOsMatches(currentOsType, image) || isOsChangePermitted(currentOsType, currentArchitecture, image,
-                osUsedByInstances));
+                osUsedByInstances, stackRelatedParcels));
     }
 
-    private boolean isOsChangePermitted(OsType currentOsType, String currentArchitecture, Image image, Set<OsType> osUsedByInstances) {
-        return osChangeService.isOsChangePermitted(image, currentOsType, osUsedByInstances, currentArchitecture);
+    private boolean isOsChangePermitted(OsType currentOsType, String currentArchitecture, Image image, Set<OsType> osUsedByInstances,
+            Map<String, String> stackRelatedParcels) {
+        return osChangeService.isOsChangePermitted(image, currentOsType, osUsedByInstances, currentArchitecture, stackRelatedParcels);
     }
 
     private boolean isOsEntitled(Image image, boolean rhel9Enabled) {

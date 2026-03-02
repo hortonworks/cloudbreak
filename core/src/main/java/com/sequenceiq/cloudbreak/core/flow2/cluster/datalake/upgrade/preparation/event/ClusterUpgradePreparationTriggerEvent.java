@@ -9,6 +9,7 @@ import com.sequenceiq.cloudbreak.common.json.JsonIgnoreDeserialization;
 import com.sequenceiq.cloudbreak.eventbus.Promise;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
+import com.sequenceiq.common.model.OsType;
 
 public class ClusterUpgradePreparationTriggerEvent extends StackEvent {
 
@@ -16,15 +17,19 @@ public class ClusterUpgradePreparationTriggerEvent extends StackEvent {
 
     private final String runtimeVersion;
 
+    private final OsType currentOsType;
+
     @JsonCreator
     public ClusterUpgradePreparationTriggerEvent(
             @JsonProperty("resourceId") Long resourceId,
             @JsonIgnoreDeserialization @JsonProperty("accepted") Promise<AcceptResult> accepted,
             @JsonProperty("imageChangeDto") ImageChangeDto imageChangeDto,
-            @JsonProperty("runtimeVersion") String runtimeVersion) {
+            @JsonProperty("runtimeVersion") String runtimeVersion,
+            @JsonProperty("currentOsType") OsType currentOsType) {
         super(START_CLUSTER_UPGRADE_PREPARATION_INIT_EVENT.event(), resourceId, accepted);
         this.imageChangeDto = imageChangeDto;
         this.runtimeVersion = runtimeVersion;
+        this.currentOsType = currentOsType;
     }
 
     public ImageChangeDto getImageChangeDto() {
@@ -35,11 +40,16 @@ public class ClusterUpgradePreparationTriggerEvent extends StackEvent {
         return runtimeVersion;
     }
 
+    public OsType getCurrentOsType() {
+        return currentOsType;
+    }
+
     @Override
     public String toString() {
         return "ClusterUpgradePreparationTriggerEvent{" +
                 "imageChangeDto=" + imageChangeDto +
                 ", runtimeVersion='" + runtimeVersion + '\'' +
+                ", currentOsType='" + currentOsType + '\'' +
                 "} " + super.toString();
     }
 }
