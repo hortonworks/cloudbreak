@@ -121,6 +121,34 @@ class FreeIpaRecommendationServiceTest {
         assertDoesNotThrow(() -> underTest.validateCustomInstanceType(createStack("large"), new Credential("AWS", "Cred", null, "crn", "account")));
     }
 
+    @Test
+    public void testValidateCustomInstanceTypeWhenArm64IsExpected() {
+        when(defaultInstanceTypeProvider.getForPlatform(eq("AWS"), any())).thenReturn("medium");
+        when(cloudParameterService.getVmTypesV2(any(), eq("eu-central-1"), eq("AWS"), eq(CdpResourceType.DEFAULT), any())).thenReturn(initCloudVmTypes());
+
+        BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> {
+            Stack stack = createStack("large");
+            stack.setArchitecture(Architecture.ARM64);
+            underTest.validateCustomInstanceType(stack, new Credential("AWS", "Cred", null, "crn", "account"));
+        });
+        assertEquals("The selected large instance type's architecture is x86_64 but the selected architecture is arm64.", badRequestException.getMessage());
+    }
+
+    @Test
+    public void testValidateCustomInstanceTypeWhenX86IsExpected() {
+        when(defaultInstanceTypeProvider.getForPlatform(eq("AWS"), any())).thenReturn("medium");
+        when(cloudParameterService.getVmTypesV2(any(), eq("eu-central-1"), eq("AWS"), eq(CdpResourceType.DEFAULT), any()))
+                .thenReturn(initCloudVmTypes(Architecture.ARM64));
+
+        BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> {
+            Stack stack = createStack("large");
+            stack.setArchitecture(Architecture.X86_64);
+            underTest.validateCustomInstanceType(stack, new Credential("AWS", "Cred", null, "crn", "account"));
+        });
+        assertEquals("The selected large instance type's architecture is arm64 but the selected architecture is x86_64. " +
+                "If you wan't to use this instance specify the architecture explicitly in the request.", badRequestException.getMessage());
+    }
+
     private Stack createStack(String instanceType) {
         Stack stack = new Stack();
         stack.setCloudPlatform("AWS");
@@ -135,18 +163,27 @@ class FreeIpaRecommendationServiceTest {
     }
 
     private CloudVmTypes initCloudVmTypes() {
+        return initCloudVmTypes(Architecture.X86_64);
+    }
+
+    private CloudVmTypes initCloudVmTypes(Architecture architecture) {
         Map<String, Set<VmType>> cloudVmResponses = Map.of("eu-central-1a",
-                Set.of(VmType.vmTypeWithMeta("large", vmTypeMeta(10, 1000.0F), false),
-                        VmType.vmTypeWithMeta("medium", vmTypeMeta(8, 800.0F), false),
-                        VmType.vmTypeWithMeta("small", vmTypeMeta(1, 1.0F), false)));
+                Set.of(VmType.vmTypeWithMeta("large", vmTypeMeta(10, 1000.0F, architecture), false),
+                        VmType.vmTypeWithMeta("medium", vmTypeMeta(8, 800.0F, architecture), false),
+                        VmType.vmTypeWithMeta("small", vmTypeMeta(1, 1.0F, architecture), false)));
         return new CloudVmTypes(cloudVmResponses, Map.of());
     }
 
     private VmTypeMeta vmTypeMeta(int cpu, float memory) {
+        return vmTypeMeta(cpu, memory, Architecture.X86_64);
+    }
+
+    private VmTypeMeta vmTypeMeta(int cpu, float memory, Architecture architecture) {
         VmTypeMeta vmTypeMeta = new VmTypeMeta();
         Map<String, Object> properties = new HashMap<>();
         properties.put(VmTypeMeta.CPU, cpu);
         properties.put(VmTypeMeta.MEMORY, memory);
+        properties.put(VmTypeMeta.ARCHITECTURE, architecture);
         vmTypeMeta.setProperties(properties);
         return vmTypeMeta;
     }

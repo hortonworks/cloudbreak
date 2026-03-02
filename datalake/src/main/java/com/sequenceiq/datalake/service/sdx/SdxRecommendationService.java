@@ -147,7 +147,7 @@ public class SdxRecommendationService {
                         sdxCluster.getArchitecture());
                 String region = environment.getRegions().getNames().stream().findFirst().orElse(null);
                 List<VmTypeResponse> availableVmTypes = getAvailableVmTypes(environment.getCredential().getCrn(), cloudPlatform, region, null,
-                        Optional.ofNullable(sdxCluster.getArchitecture()).map(Architecture::getName).orElse(Architecture.X86_64.getName()));
+                        Architecture.ALL_ARCHITECTURE);
                 Map<String, VmTypeResponse> defaultVmTypesByInstanceGroup = getDefaultVmTypesByInstanceGroup(availableVmTypes, defaultTemplate);
                 Map<String, List<String>> availableVmTypeNamesByInstanceGroup = filterAvailableVmTypeNamesBasedOnDefault(availableVmTypes,
                         defaultVmTypesByInstanceGroup);
@@ -158,9 +158,7 @@ public class SdxRecommendationService {
                         LOGGER.warn(message);
                         throw new BadRequestException(message);
                     }
-                    if (sdxCluster.getArchitecture() != null) {
-                        validateInstanceTypeArchitecture(sdxCluster, instanceGroup, availableVmTypes);
-                    }
+                    validateInstanceTypeArchitecture(sdxCluster, instanceGroup, availableVmTypes);
                     VmTypeResponse defaultTemplateVmType = defaultVmTypesByInstanceGroup.get(instanceGroup.getName());
                     if (isCustomInstanceTypeProvided(instanceGroup, defaultTemplateVmType.getValue())
                             && !isProvidedInstanceTypeIsAvailable(availableVmTypeNamesByInstanceGroup, instanceGroup)) {
@@ -184,15 +182,19 @@ public class SdxRecommendationService {
 
     private void validateInstanceTypeArchitecture(SdxCluster sdxCluster, InstanceGroupV4Request instanceGroup, List<VmTypeResponse> availableVmTypes) {
         Optional<String> instanceType = Optional.ofNullable(instanceGroup.getTemplate()).map(InstanceTemplateV4Base::getInstanceType);
+        Architecture selectedArchitecture = Optional.ofNullable(sdxCluster.getArchitecture()).orElse(Architecture.X86_64);
         instanceType.ifPresent(s -> availableVmTypes.stream()
                 .filter(vmt -> s.equals(vmt.getValue()))
                 .findFirst()
                 .ifPresent(vmt -> {
                     String architecture = (String) vmt.getVmTypeMetaJson().getProperties().get("Architecture");
-                    if (architecture != null && !sdxCluster.getArchitecture().getName().equalsIgnoreCase(architecture)) {
+                    if (architecture != null && !selectedArchitecture.getName().equalsIgnoreCase(architecture)) {
                         String message =
-                                String.format("%s instance type has %s cpu architecture which doesn't match the cluster architecture %s",
-                                        vmt.getValue(), architecture, sdxCluster.getArchitecture());
+                                String.format("%s instance type has %s cpu architecture which doesn't match the cluster architecture %s.",
+                                        vmt.getValue(), architecture, selectedArchitecture);
+                        if (Architecture.ARM64.getName().equalsIgnoreCase(architecture)) {
+                            message += " For arm64 architecture it is required to specify not just the instance type but the architecture as well.";
+                        }
                         throw new BadRequestException(message);
                     }
                 }));

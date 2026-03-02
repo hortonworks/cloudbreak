@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.constant.AwsPlatformResourcesFilterConst
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -56,7 +57,7 @@ public class FreeIpaRecommendationService {
         Credential credential = credentialService.getCredentialByCredCrn(credentialCrn);
         Architecture architectureEnum = Architecture.fromStringWithFallback(architecture);
         String defaultInstanceType = defaultInstanceTypeProvider.getForPlatform(credential.getCloudPlatform(), architectureEnum);
-        Set<VmType> availableAllVmTypes = getAvailableAllVmTypes(region, availabilityZone, credential, architectureEnum);
+        Set<VmType> availableAllVmTypes = getAvailableAllVmTypes(region, availabilityZone, credential, architectureEnum.getName());
 
         Optional<VmType> defaultVmType = availableAllVmTypes.stream()
                 .filter(vmType -> defaultInstanceType.equals(vmType.value()))
@@ -69,13 +70,13 @@ public class FreeIpaRecommendationService {
         return new FreeIpaRecommendationResponse(availableVmTypes, defaultInstanceType);
     }
 
-    private Set<VmType> getAvailableAllVmTypes(String region, String availabilityZone, Credential credential, Architecture architecture) {
+    private Set<VmType> getAvailableAllVmTypes(String region, String availabilityZone, Credential credential, String architecture) {
         CloudVmTypes vmTypes = cloudParameterService.getVmTypesV2(
                 extendedCloudCredentialConverter.convert(credential),
                 region,
                 credential.getCloudPlatform(),
                 CdpResourceType.DEFAULT,
-                Map.of(ARCHITECTURE, Optional.ofNullable(architecture).orElse(Architecture.X86_64).getName()));
+                Map.of(ARCHITECTURE, Optional.ofNullable(architecture).orElse(Architecture.X86_64.getName())));
 
         Set<VmType> availableVmTypes = Collections.emptySet();
         if (vmTypes.getCloudVmResponses() != null && StringUtils.isNotBlank(availabilityZone)
@@ -118,25 +119,22 @@ public class FreeIpaRecommendationService {
                     stack.getRegion(),
                     stack.getAvailabilityZone(),
                     credential,
-                    stack.getArchitecture());
+                    Architecture.ALL_ARCHITECTURE);
             Set<VmTypeResponse> availableMinimumRequiredVmTypes = filterVmTypeLargerThanDefault(
                     defaultInstanceType,
                     availableAllVmTypes);
             Optional<VmType> defaultVmType = availableAllVmTypes.stream()
                     .filter(vmType -> defaultInstanceType.equals(vmType.getValue()))
                     .findAny();
-
-            Set<String> allVmTypes = availableAllVmTypes.stream()
-                    .map(VmType::getValue)
-                    .collect(Collectors.toSet());
             Set<String> minimumRequiredVmTypes = availableMinimumRequiredVmTypes.stream()
                     .map(VmTypeResponse::getValue)
                     .collect(Collectors.toSet());
 
             customInstanceTypes.forEach((instanceGroup, instanceType) -> {
-                if (!allVmTypes.contains(instanceType)) {
+                Optional<VmType> selectedVmType = availableAllVmTypes.stream().filter(vm -> vm.getValue().equals(instanceType)).findFirst();
+                if (selectedVmType.isEmpty()) {
                     String message = String.format("Invalid custom instance type for FreeIPA: %s - %s. " +
-                            "The instance type is not available in %s.",
+                                    "The instance type is not available in %s.",
                             instanceGroup,
                             instanceType,
                             stack.getRegion());
@@ -145,7 +143,7 @@ public class FreeIpaRecommendationService {
                 }
                 if (!minimumRequiredVmTypes.contains(instanceType)) {
                     String message = String.format("Invalid custom instance type for FreeIPA: %s - %s. " +
-                            "The instance type needs at least %s MB Memory and %s VCPU.",
+                                    "The instance type needs at least %s MB Memory and %s VCPU.",
                             instanceGroup,
                             instanceType,
                             defaultVmType.get().getMetaData().getMemoryInGb(),
@@ -153,6 +151,19 @@ public class FreeIpaRecommendationService {
                     LOGGER.warn(message);
                     throw new BadRequestException(message);
                 }
+                Architecture selectedArchitecture = Optional.ofNullable(stack.getArchitecture()).orElse(Architecture.X86_64);
+                selectedVmType.ifPresent(vm -> {
+                    Architecture vmArchitecture = vm.getMetaData().getArchitecture();
+                    if (!Objects.equals(selectedArchitecture, vmArchitecture)) {
+                        String message = String.format(
+                                "The selected %s instance type's architecture is %s but the selected architecture is %s.",
+                                instanceType, vmArchitecture.getName(), selectedArchitecture.getName());
+                        if (Architecture.ARM64.equals(vmArchitecture)) {
+                            message += " If you wan't to use this instance specify the architecture explicitly in the request.";
+                        }
+                        throw new BadRequestException(message);
+                    }
+                });
             });
         }
     }

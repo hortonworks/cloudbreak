@@ -184,7 +184,21 @@ class SdxRecommendationServiceTest {
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> underTest.validateVmTypeOverride(createEnvironment("AWS"), sdxCluster));
 
-        assertEquals("large instance type has x86_64 cpu architecture which doesn't match the cluster architecture arm64", badRequestException.getMessage());
+        assertEquals("large instance type has x86_64 cpu architecture which doesn't match the cluster architecture arm64.", badRequestException.getMessage());
+    }
+
+    @Test
+    public void validateVmTypeOverrideWhenArchitectureIsNotSpecifiedAndArmInstancesAreSelected() {
+        when(cdpConfigService.getConfigForKey(any())).thenReturn(createStackRequest());
+        when(environmentClientService.getVmTypesByCredential(anyString(), anyString(), anyString(), eq(CdpResourceType.DATALAKE), any(), any()))
+                .thenReturn(createPlatformVmtypesResponse(Architecture.ARM64));
+        StackV4Request stackRequest = createStackRequest();
+        SdxCluster sdxCluster = createSdxCluster(stackRequest, LIGHT_DUTY);
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
+                () -> underTest.validateVmTypeOverride(createEnvironment("AWS"), sdxCluster));
+
+        assertEquals("large instance type has arm64 cpu architecture which doesn't match the cluster architecture x86_64. " +
+                "For arm64 architecture it is required to specify not just the instance type but the architecture as well.", badRequestException.getMessage());
     }
 
     @Test
@@ -216,6 +230,7 @@ class SdxRecommendationServiceTest {
         StackV4Request stackRequest = createStackRequest();
         stackRequest.getInstanceGroups().stream().forEach(ig -> ig.getTemplate().setInstanceType("small"));
         SdxCluster sdxCluster = createSdxCluster(stackRequest, LIGHT_DUTY);
+        sdxCluster.setArchitecture(Architecture.ARM64);
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> underTest.validateVmTypeOverride(createEnvironment("AWS"), sdxCluster));
 
@@ -259,34 +274,32 @@ class SdxRecommendationServiceTest {
     }
 
     private PlatformVmtypesResponse createPlatformVmtypesResponse() {
+        return createPlatformVmtypesResponse(Architecture.X86_64);
+    }
+
+    private PlatformVmtypesResponse createPlatformVmtypesResponse(Architecture architecture) {
         Map<String, VirtualMachinesResponse> vmTypes = new HashMap<>();
         VirtualMachinesResponse virtualMachinesResponse = new VirtualMachinesResponse();
         Set<VmTypeResponse> virtualMachines = new HashSet<>();
-        virtualMachines.add(new VmTypeResponse("large", createVmTypeMetaJson(10, 1000.0F)));
-        virtualMachines.add(new VmTypeResponse("medium", createVmTypeMetaJson(8, 800.0F)));
-        virtualMachines.add(new VmTypeResponse("mediumv2", createVmTypeMetaJson(8, 1000.0F)));
-        virtualMachines.add(new VmTypeResponse("small", createVmTypeMetaJsonWithArm(2, 200.0F)));
+        virtualMachines.add(new VmTypeResponse("large", createVmTypeMetaJson(10, 1000.0F, architecture)));
+        virtualMachines.add(new VmTypeResponse("medium", createVmTypeMetaJson(8, 800.0F, architecture)));
+        virtualMachines.add(new VmTypeResponse("mediumv2", createVmTypeMetaJson(8, 1000.0F, architecture)));
+        virtualMachines.add(new VmTypeResponse("small", createVmTypeMetaJson(2, 200.0F, Architecture.ARM64)));
         virtualMachinesResponse.setVirtualMachines(virtualMachines);
         vmTypes.put("eu-central-1", virtualMachinesResponse);
         return new PlatformVmtypesResponse(vmTypes);
     }
 
     private VmTypeMetaJson createVmTypeMetaJson(Integer cpu, Float memory) {
-        VmTypeMetaJson vmTypeMetaJson = new VmTypeMetaJson();
-        Map<String, Object> properties = new HashMap<>();
-        properties.put("Cpu", cpu);
-        properties.put("Memory", memory);
-        properties.put("Architecture", "x86_64");
-        vmTypeMetaJson.setProperties(properties);
-        return vmTypeMetaJson;
+        return createVmTypeMetaJson(cpu, memory, Architecture.X86_64);
     }
 
-    private VmTypeMetaJson createVmTypeMetaJsonWithArm(Integer cpu, Float memory) {
+    private VmTypeMetaJson createVmTypeMetaJson(Integer cpu, Float memory, Architecture architecture) {
         VmTypeMetaJson vmTypeMetaJson = new VmTypeMetaJson();
         Map<String, Object> properties = new HashMap<>();
         properties.put("Cpu", cpu);
         properties.put("Memory", memory);
-        properties.put("Architecture", "arm64");
+        properties.put("Architecture", architecture.getName());
         vmTypeMetaJson.setProperties(properties);
         return vmTypeMetaJson;
     }
