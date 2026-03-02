@@ -24,6 +24,7 @@ run-set-peerdns:
     - name: /opt/salt/scripts/set_peerdns.sh
     - require:
         - file: set-peerdns-script
+{% endif %}
 
 {% if salt['pkg.version']('NetworkManager') %}
 
@@ -33,17 +34,17 @@ nm-nodns-config:
     - source: salt://dns/conf/nodnsupdate.conf
     - user: root
     - group: root
-    - mode: 740
+    - mode: 640
     - makedirs: true
 
 restart-nm:
   service.running:
     - name: NetworkManager
     - watch:
-        - file: dhcp-enter-hook
         - file: nm-nodns-config
+{%- if grains['os_family'] == 'RedHat' and grains['osmajorrelease'] | int == 7 %}
+        - file: dhcp-enter-hook
         - cmd: run-set-peerdns
-
 {% endif %}
 
 {% endif %}
