@@ -134,8 +134,6 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
             List<CloudResource> resources, CloudStack cloudStack) throws Exception {
         InstanceTemplate template = group.getReferenceInstanceTemplate();
 
-        List<String> operations = new ArrayList<>();
-        List<String> syncedOperations = Collections.synchronizedList(operations);
         String projectId = context.getProjectId();
         Compute compute = context.getCompute();
         Collection<Future<Void>> futures = new ArrayList<>();
@@ -146,44 +144,57 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
 
         List<CloudResource> result = new ArrayList<>();
         for (CloudResource volumeSetResource : buildableResource) {
+            List<String> syncedOperations = Collections.synchronizedList(new ArrayList<>());
             VolumeSetAttributes volumeSetAttributes = volumeSetResource.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
+            Map<String, String> labels = gcpLabelUtil.createLabelsFromTags(cloudStack);
+            String zoneName = context.getLocation().getAvailabilityZone().getValue();
 
             for (VolumeSetAttributes.Volume volume : volumeSetAttributes.getVolumes()) {
                 if (GcpDiskType.LOCAL_SSD.value().equals(volume.getType())) {
                     LOGGER.debug("The volume request is Local ssd so skipping it.");
                     continue;
                 }
-                Map<String, String> labels = gcpLabelUtil.createLabelsFromTags(cloudStack);
                 Disk disk = createDisk(projectId, volume, labels, volumeSetAttributes);
 
-                customGcpDiskEncryptionService.addEncryptionKeyToDisk(template, disk);
-                Future<Void> submit = intermediateBuilderExecutor.submit(() -> {
-                    Insert insDisk = compute.disks().insert(projectId, volumeSetAttributes.getAvailabilityZone(), disk);
-                    try {
-                        Operation operation = insDisk.execute();
-                        syncedOperations.add(operation.getName());
-                        if (operation.getHttpErrorStatusCode() != null) {
-                            throw new GcpResourceException(operation.getHttpErrorMessage(), resourceType(), disk.getName());
+                Optional<Disk> diskFromProvider = fetchFromProvider(() ->
+                                compute.disks().get(context.getProjectId(), zoneName, disk.getName()).execute(),
+                        volumeSetResource.getName());
+
+                if (diskFromProvider.isEmpty()) {
+                    customGcpDiskEncryptionService.addEncryptionKeyToDisk(template, disk);
+                    Future<Void> submit = intermediateBuilderExecutor.submit(() -> {
+                        Insert insDisk = compute.disks().insert(projectId, volumeSetAttributes.getAvailabilityZone(), disk);
+                        try {
+                            Operation operation = insDisk.execute();
+                            syncedOperations.add(operation.getName());
+                            if (operation.getHttpErrorStatusCode() != null) {
+                                throw new GcpResourceException(operation.getHttpErrorMessage(), resourceType(), disk.getName());
+                            }
+                        } catch (TokenResponseException e) {
+                            throw gcpStackUtil.getMissingServiceAccountKeyError(e, projectId);
+                        } catch (GoogleJsonResponseException e) {
+                            throw new GcpResourceException(checkException(e), resourceType(), disk.getName());
                         }
-                    } catch (TokenResponseException e) {
-                        throw gcpStackUtil.getMissingServiceAccountKeyError(e, projectId);
-                    } catch (GoogleJsonResponseException e) {
-                        throw new GcpResourceException(checkException(e), resourceType(), disk.getName());
-                    }
-                    return null;
-                });
-                futures.add(submit);
+                        return null;
+                    });
+                    futures.add(submit);
+                } else {
+                    LOGGER.info("Disk '{}' already exists, using it.", disk.getName());
+                }
             }
-            volumeSetResource.putParameter(OPERATION_ID, operations);
-            result.add(CloudResource.builder()
-                    .cloudResource(volumeSetResource)
-                    .withStatus(CommonStatus.CREATED)
-                    .withParameters(volumeSetResource.getParameters())
-                    .build());
+            volumeSetResource.putParameter(OPERATION_ID, syncedOperations);
         }
 
         for (Future<Void> future : futures) {
             future.get();
+        }
+
+        for (CloudResource resource : buildableResource) {
+            result.add(CloudResource.builder()
+                    .cloudResource(resource)
+                    .withStatus(CommonStatus.CREATED)
+                    .withParameters(resource.getParameters())
+                    .build());
         }
 
         result.addAll(resources.stream().filter(cloudResource -> CommonStatus.CREATED.equals(cloudResource.getStatus())).collect(Collectors.toList()));
@@ -202,8 +213,7 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
             throw new PreserveResourceException("Resource will be preserved for later reattachment.");
         }
 
-        List<String> operations = new ArrayList<>();
-        List<String> syncedOperations = Collections.synchronizedList(operations);
+        List<String> syncedOperations = Collections.synchronizedList(new ArrayList<>());
         Collection<Future<Void>> futures = new ArrayList<>();
         for (VolumeSetAttributes.Volume volume : volumeSetAttributes.getVolumes()) {
             Future<Void> submit = intermediateBuilderExecutor.submit(() -> {
@@ -238,7 +248,7 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
             future.get();
         }
 
-        resource.putParameter(OPERATION_ID, operations);
+        resource.putParameter(OPERATION_ID, syncedOperations);
         return resource;
     }
 

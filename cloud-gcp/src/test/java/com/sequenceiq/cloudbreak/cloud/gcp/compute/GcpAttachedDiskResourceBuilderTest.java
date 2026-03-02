@@ -9,6 +9,8 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -19,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
+import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,8 +31,13 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.task.AsyncTaskExecutor;
 
+import com.google.api.client.googleapis.json.GoogleJsonError;
+import com.google.api.client.googleapis.json.GoogleJsonResponseException;
+import com.google.api.client.http.HttpHeaders;
+import com.google.api.client.http.HttpResponseException;
 import com.google.api.services.compute.Compute;
 import com.google.api.services.compute.Compute.Disks;
+import com.google.api.services.compute.Compute.Disks.Get;
 import com.google.api.services.compute.Compute.Disks.Insert;
 import com.google.api.services.compute.model.CustomerEncryptionKey;
 import com.google.api.services.compute.model.Disk;
@@ -88,6 +96,9 @@ public class GcpAttachedDiskResourceBuilderTest {
 
     @Mock
     private Insert insert;
+
+    @Mock
+    private Get get;
 
     @Mock
     private GcpStackUtil gcpStackUtil;
@@ -173,7 +184,7 @@ public class GcpAttachedDiskResourceBuilderTest {
         Map<String, Object> params = new HashMap<>();
         params.put(CloudResource.ATTRIBUTES, attributes);
         buildableResource = List.of(CloudResource.builder()
-                .withType(ResourceType.GCP_DISK)
+                .withType(ResourceType.GCP_ATTACHED_DISKSET)
                 .withStatus(CommonStatus.REQUESTED)
                 .withName("disk")
                 .withParameters(params)
@@ -199,10 +210,17 @@ public class GcpAttachedDiskResourceBuilderTest {
         lenient().when(compute.disks()).thenReturn(disks);
         lenient().when(disks.insert(anyString(), anyString(), any(Disk.class))).thenReturn(insert);
         lenient().when(insert.execute()).thenReturn(operation);
+        lenient().when(disks.get(anyString(), anyString(), anyString())).thenReturn(get);
     }
 
     @Test
     void testBuildWithDiskEncryption() throws Exception {
+        GoogleJsonError details = new GoogleJsonError();
+        details.set("code", HttpStatus.SC_NOT_FOUND);
+        GoogleJsonResponseException exception = new GoogleJsonResponseException(
+                new HttpResponseException.Builder(HttpStatus.SC_NOT_FOUND, "Not Found", new HttpHeaders()), details);
+        when(get.execute()).thenThrow(exception);
+
         CustomerEncryptionKey encryptionKey = new CustomerEncryptionKey();
         encryptionKey.setRawKey("rawKey==");
 
@@ -217,12 +235,29 @@ public class GcpAttachedDiskResourceBuilderTest {
         assertNotNull(build);
         assertEquals(1, build.size());
         CloudResource resource = build.iterator().next();
-        assertEquals(ResourceType.GCP_DISK, resource.getType());
+        assertEquals(ResourceType.GCP_ATTACHED_DISKSET, resource.getType());
         assertEquals(CommonStatus.CREATED, resource.getStatus());
         assertEquals("disk", resource.getName());
 
         assertNotNull(diskCaptor.getValue());
         assertEquals(encryptionKey, diskCaptor.getValue().getDiskEncryptionKey());
+    }
+
+    @Test
+    void testBuildWithDiskEncryptionWithExistingDisk() throws Exception {
+        when(get.execute()).thenReturn(new Disk());
+
+        List<CloudResource> build = underTest.build(context, cloudInstance, privateId, auth, group, buildableResource, cloudStack);
+
+        assertNotNull(build);
+        assertEquals(1, build.size());
+        CloudResource resource = build.iterator().next();
+        assertEquals(ResourceType.GCP_ATTACHED_DISKSET, resource.getType());
+        assertEquals(CommonStatus.CREATED, resource.getStatus());
+        assertEquals("disk", resource.getName());
+
+        verify(insert, never()).execute();
+
     }
 
     @Test
