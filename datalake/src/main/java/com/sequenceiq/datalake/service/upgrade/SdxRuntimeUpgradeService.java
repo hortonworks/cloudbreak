@@ -118,7 +118,7 @@ public class SdxRuntimeUpgradeService {
     private SdxUpgradeResponse initSdxUpgrade(SdxUpgradeResponse sdxUpgradeResponse, SdxUpgradeRequest request, SdxCluster cluster) {
         List<ImageInfoV4Response> upgradeCandidates = sdxUpgradeResponse.getUpgradeCandidates();
         sdxUpgradeValidator.validateRollingUpgradeByClusterShape(request, cluster.getClusterShape());
-        String targetImageId = determineImageId(request, upgradeCandidates, sdxUpgradeResponse.getCurrent().getComponentVersions().getOs());
+        String targetImageId = determineImageId(request, upgradeCandidates);
         String targetCdhVersion = getTargetCdhVersion(upgradeCandidates, targetImageId);
         FlowIdentifier flowIdentifier = triggerDatalakeUpgradeFlow(request, cluster, targetImageId);
         String message = messagesService.getMessage(ResourceEvent.DATALAKE_UPGRADE.getMessage(), List.of(targetCdhVersion, targetImageId));
@@ -149,14 +149,14 @@ public class SdxRuntimeUpgradeService {
             throw new BadRequestException("Upgrade preparation is not necessary in case of OS upgrade.");
         }
         List<ImageInfoV4Response> upgradeCandidates = upgradeResponse.getUpgradeCandidates();
-        String imageId = determineImageId(request, upgradeCandidates, upgradeResponse.getCurrent().getComponentVersions().getOs());
+        String imageId = determineImageId(request, upgradeCandidates);
         FlowIdentifier flowIdentifier = sdxReactorFlowManager.triggerDatalakeRuntimeUpgradePreparationFlow(cluster, imageId, skipBackup);
         String targetCdhVersion = getTargetCdhVersion(upgradeCandidates, imageId);
         String message = messagesService.getMessage(ResourceEvent.DATALAKE_UPGRADE_PREPARATION.getMessage(), List.of(targetCdhVersion, imageId));
         return new SdxUpgradeResponse(message, flowIdentifier);
     }
 
-    private String determineImageId(SdxUpgradeRequest upgradeRequest, List<ImageInfoV4Response> upgradeCandidates, String currentOs) {
+    private String determineImageId(SdxUpgradeRequest upgradeRequest, List<ImageInfoV4Response> upgradeCandidates) {
         if (Objects.isNull(upgradeRequest) || upgradeRequest.isEmpty() || Boolean.TRUE.equals(upgradeRequest.getLockComponents())) {
             ImageInfoV4Response imageInfoV4Response = upgradeCandidates.stream().max(ImageInfoV4Response.creationBasedComparator()).orElseThrow();
             String imageId = imageInfoV4Response.getImageId();
@@ -170,7 +170,7 @@ public class SdxRuntimeUpgradeService {
                 LOGGER.debug("Chosen image with id {} as it was specified in the request", imageId);
                 return imageId;
             } else if (StringUtils.isNotEmpty(runtime)) {
-                String imageId = validateRuntime(upgradeCandidates, runtime, currentOs);
+                String imageId = validateRuntime(upgradeCandidates, runtime);
                 LOGGER.debug("Chosen image with id {} for {} runtime specified in the request", imageId, runtime);
                 return imageId;
             } else {
@@ -189,10 +189,9 @@ public class SdxRuntimeUpgradeService {
         }
     }
 
-    private String validateRuntime(List<ImageInfoV4Response> upgradeCandidates, String runtime, String currentOs) {
+    private String validateRuntime(List<ImageInfoV4Response> upgradeCandidates, String runtime) {
         Supplier<Stream<ImageInfoV4Response>> imagesWithMatchingRuntime = () -> upgradeCandidates.stream()
-                .filter(imageInfoV4Response -> runtime.equals(imageInfoV4Response.getComponentVersions().getCdp())
-                        && currentOs.equals(imageInfoV4Response.getComponentVersions().getOs()));
+                .filter(imageInfoV4Response -> runtime.equals(imageInfoV4Response.getComponentVersions().getCdp()));
         boolean hasCompatibleImageWithRuntime = imagesWithMatchingRuntime.get().anyMatch(e -> true);
         if (!hasCompatibleImageWithRuntime) {
             String availableRuntimes = upgradeCandidates
