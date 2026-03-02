@@ -3,8 +3,6 @@ package com.sequenceiq.datalake.service.sdx;
 import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
-import java.util.Optional;
-
 import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
 
@@ -43,7 +41,7 @@ public class EncryptionProfileService {
     @Inject
     private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
 
-    public EncryptionProfileResponse getCrn(String crn) {
+    public EncryptionProfileResponse getByCrn(String crn) {
         try {
             return ThreadBasedUserCrnProvider.doAsInternalActor(
                     () -> encryptionProfileEndpoint.getByCrn(crn));
@@ -60,23 +58,20 @@ public class EncryptionProfileService {
         }
     }
 
-    public Optional<EncryptionProfileResponse> getEncryptionProfileFromDatalakeOtherwiseFromEnv(String encryptionProfileCrnFromEnv,
-            String encryptionProfileCrnFromCluster) {
-        String encryptionProfileCrn;
-
-        if (StringUtils.isNotBlank(encryptionProfileCrnFromCluster)) {
-            LOGGER.info("Getting encryption profile {} from cluster", encryptionProfileCrnFromCluster);
-            encryptionProfileCrn = encryptionProfileCrnFromCluster;
-        } else {
-            encryptionProfileCrn = encryptionProfileCrnFromEnv;
-        }
-
+    public EncryptionProfileResponse getByName(String name) {
         try {
-            return Optional.ofNullable(getCrn(encryptionProfileCrn));
+            return ThreadBasedUserCrnProvider.doAsInternalActor(
+                    () -> encryptionProfileEndpoint.getByName(name));
 
-        } catch (Exception ex) {
-            LOGGER.error("Encryption Profile CRN {} not found", encryptionProfileCrn, ex);
-            return Optional.empty();
+        } catch (WebApplicationException e) {
+            String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
+            String message = String.format("Failed to GET encryption profile by name: %s, due to: %s. %s.", name, e.getMessage(), errorMessage);
+            LOGGER.error(message, e);
+            throw new CloudbreakServiceException(message, e);
+        } catch (Exception e) {
+            String message = String.format("Failed to GET encryption profile by name: %s, due to: '%s' ", name, e.getMessage());
+            LOGGER.error(message, e);
+            throw new CloudbreakServiceException(message, e);
         }
     }
 
@@ -94,13 +89,6 @@ public class EncryptionProfileService {
                 validationBuilder.error(format("Encryption Profile is not supported in %s runtime. Please use 7.3.2 or above", runtimeVersion));
             }
 
-            Optional<EncryptionProfileResponse> encryptionProfileResponseOp = getEncryptionProfileFromDatalakeOtherwiseFromEnv(
-                    environment.getEncryptionProfileCrn(), clusterRequest.getEncryptionProfileCrn());
-
-            if (encryptionProfileResponseOp.isEmpty()) {
-                validationBuilder.error("Encryption Profile not found");
-            }
-
             ValidationResult validationResult = validationBuilder.build();
             if (validationResult.hasError()) {
                 throw new BadRequestException(validationResult.getFormattedErrors());
@@ -114,5 +102,19 @@ public class EncryptionProfileService {
             return !encryptionProfileName.startsWith(DEFAULT_ENCRYPTION_PROFILE_NAME);
         }
         return false;
+    }
+
+    public EncryptionProfileResponse getEncryptionProfile(SdxClusterRequest sdxClusterRequest) {
+        String encryptionProfileNameOrCrn = StringUtils.isNotBlank(sdxClusterRequest.getEncryptionProfileNameOrCrn()) ?
+                sdxClusterRequest.getEncryptionProfileNameOrCrn() : sdxClusterRequest.getEncryptionProfileCrn();
+
+        if (StringUtils.isNotBlank(encryptionProfileNameOrCrn)) {
+            if (Crn.isCrn(encryptionProfileNameOrCrn)) {
+                return getByCrn(encryptionProfileNameOrCrn);
+            } else  {
+                return getByName(sdxClusterRequest.getEncryptionProfileNameOrCrn());
+            }
+        }
+        return null;
     }
 }

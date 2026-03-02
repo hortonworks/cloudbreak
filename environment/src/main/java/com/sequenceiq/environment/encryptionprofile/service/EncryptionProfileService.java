@@ -24,6 +24,7 @@ import com.sequenceiq.authorization.service.OwnerAssignmentService;
 import com.sequenceiq.authorization.service.list.ResourceWithId;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
@@ -270,5 +271,19 @@ public class EncryptionProfileService implements CompositeAuthResourcePropertyPr
                 .stream()
                 .map(entry -> new TlsVersionResponse(entry.getKey(), new ArrayList<>(entry.getValue()), recommendedCipherSuites.get(entry.getKey())))
                 .collect(Collectors.toSet());
+    }
+
+    public EncryptionProfile getEncryptionProfileByNameOrCrn(String encryptionProfileNameOrCrn) {
+        EncryptionProfile encryptionProfile = null;
+        if (StringUtils.isNotBlank(encryptionProfileNameOrCrn)) {
+            if (Crn.isCrn(encryptionProfileNameOrCrn)) {
+                encryptionProfile = getByCrnOrDefault(encryptionProfileNameOrCrn);
+            } else {
+                encryptionProfile = getByNameAndAccountId(encryptionProfileNameOrCrn, ThreadBasedUserCrnProvider.getAccountId());
+            }
+        }
+
+        return encryptionProfile;
+
     }
 }

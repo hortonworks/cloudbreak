@@ -30,7 +30,6 @@ import com.sequenceiq.environment.api.v1.environment.model.request.CredentialAwa
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.service.CredentialService;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCloudCredentialConverter;
-import com.sequenceiq.environment.encryptionprofile.domain.EncryptionProfile;
 import com.sequenceiq.environment.encryptionprofile.service.EncryptionProfileService;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.network.NetworkService;
@@ -227,19 +226,5 @@ public class EnvironmentResourceService {
 
     public boolean isRawSshKeyUpdateSupported(Environment environment) {
         return supportedRawSshKeyUpdateProviders.stream().anyMatch(s -> s.equalsIgnoreCase(environment.getCloudPlatform()));
-    }
-
-    public Optional<EncryptionProfile> getEncryptionProfile(String encryptionProfileCrn) {
-        EncryptionProfile encryptionProfile = null;
-
-        if (StringUtils.isNotEmpty(encryptionProfileCrn)) {
-            try {
-                encryptionProfile = encryptionProfileService.getByCrnOrDefault(encryptionProfileCrn);
-            } catch (NotFoundException e) {
-                throw new BadRequestException(String.format("No Encryption Profile found with CRN [%s].", encryptionProfileCrn), e);
-            }
-        }
-
-        return Optional.ofNullable(encryptionProfile);
     }
 }

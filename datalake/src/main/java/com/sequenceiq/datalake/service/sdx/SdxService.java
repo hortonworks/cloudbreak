@@ -103,6 +103,7 @@ import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.repository.SdxDatabaseRepository;
 import com.sequenceiq.datalake.service.imagecatalog.ImageCatalogService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
+import com.sequenceiq.environment.api.v1.encryptionprofile.model.EncryptionProfileResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.core.PayloadContextProvider;
@@ -448,8 +449,10 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
             stackRequest.setVariant(sdxClusterRequest.getVariant());
         }
 
+        EncryptionProfileResponse encryptionProfileResponse = encryptionProfileService.getEncryptionProfile(sdxClusterRequest);
+        String encryptionProfileCrn = encryptionProfileResponse != null ? encryptionProfileResponse.getCrn() : null;
         stackRequestHandler.setStackRequestParams(stackRequest, sdxClusterRequest.getJavaVersion(), sdxClusterRequest.isEnableRangerRaz(),
-                sdxClusterRequest.isEnableRangerRms(), sdxClusterRequest.getEncryptionProfileCrn());
+                sdxClusterRequest.isEnableRangerRms(), encryptionProfileCrn);
         sdxInstanceService.overrideDefaultInstanceType(stackRequest, sdxClusterRequest.getCustomInstanceGroups(), Collections.emptyList(),
                 Collections.emptyList(), sdxClusterRequest.getClusterShape());
         recipeService.validateRecipes(sdxClusterRequest.getRecipes(), stackRequest);

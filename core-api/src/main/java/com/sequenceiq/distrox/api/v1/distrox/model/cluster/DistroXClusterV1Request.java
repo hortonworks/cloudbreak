@@ -68,8 +68,17 @@ public class DistroXClusterV1Request implements Serializable {
     @Schema(description = StackModelDescription.CUSTOM_CONFIGURATIONS_NAME)
     private String customConfigurationsName;
 
+    /**
+     * @deprecated Use encryptionProfileNameOrCrn instead
+     * To be removed after thunderhead change to encryptionProfileNameOrCrn (CB-32051)
+     * To be removed by CB-32052
+     **/
+    @Deprecated(forRemoval = true)
     @Schema(description = ClusterModelDescription.ENCRYPTION_PROFILE_CRN)
     private String encryptionProfileCrn;
+
+    @Schema(description = ClusterModelDescription.ENCRYPTION_PROFILE_NAME_OR_CRN)
+    private String encryptionProfileNameOrCrn;
 
     public String getUserName() {
         return userName;
@@ -157,5 +166,13 @@ public class DistroXClusterV1Request implements Serializable {
 
     public void setEncryptionProfileCrn(String encryptionProfileCrn) {
         this.encryptionProfileCrn = encryptionProfileCrn;
+    }
+
+    public String getEncryptionProfileNameOrCrn() {
+        return encryptionProfileNameOrCrn;
+    }
+
+    public void setEncryptionProfileNameOrCrn(String encryptionProfileNameOrCrn) {
+        this.encryptionProfileNameOrCrn = encryptionProfileNameOrCrn;
     }
 }

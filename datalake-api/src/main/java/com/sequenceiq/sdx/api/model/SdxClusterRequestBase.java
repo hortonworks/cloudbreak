@@ -77,8 +77,17 @@ public class SdxClusterRequestBase implements TaggableRequest {
     @Schema(description = ModelDescriptions.DISABLE_DB_SSL_ENFORCEMENT)
     private boolean disableDbSslEnforcement;
 
+    /**
+     * @deprecated Use encryptionProfileNameOrCrn instead
+     * To be removed after thunderhead change to encryptionProfileNameOrCrn (CB-32051)
+     * To be removed by CB-32052
+     **/
+    @Deprecated(forRemoval = true)
     @Schema(description = ModelDescriptions.ENCRYPTION_PROFILE_CRN)
     private String encryptionProfileCrn;
+
+    @Schema(description = ModelDescriptions.ENCRYPTION_PROFILE_NAME_OR_CRN)
+    private String encryptionProfileNameOrCrn;
 
     @Schema(description = ModelDescriptions.NOTIFICATION_STATE)
     private NotificationState notificationState;
@@ -251,6 +260,14 @@ public class SdxClusterRequestBase implements TaggableRequest {
         this.encryptionProfileCrn = encryptionProfileCrn;
     }
 
+    public String getEncryptionProfileNameOrCrn() {
+        return encryptionProfileNameOrCrn;
+    }
+
+    public void setEncryptionProfileNameOrCrn(String encryptionProfileNameOrCrn) {
+        this.encryptionProfileNameOrCrn = encryptionProfileNameOrCrn;
+    }
+
     public void copyTo(SdxClusterRequestBase toInstance) {
         toInstance.setEnvironment(environment);
         toInstance.setClusterShape(clusterShape);
@@ -268,6 +285,7 @@ public class SdxClusterRequestBase implements TaggableRequest {
         toInstance.setDisableDbSslEnforcement(disableDbSslEnforcement);
         toInstance.setSecurity(security);
         toInstance.setEncryptionProfileCrn(encryptionProfileCrn);
+        toInstance.setEncryptionProfileNameOrCrn(encryptionProfileNameOrCrn);
         toInstance.setNotificationState(notificationState);
     }
 
@@ -287,7 +305,7 @@ public class SdxClusterRequestBase implements TaggableRequest {
                 ", image=" + image +
                 ", security=" + security +
                 ", disableDbSslEnforcement=" + disableDbSslEnforcement +
-                ", encryptionProfileCrn=" + encryptionProfileCrn +
+                ", encryptionProfileNameOrCrn=" + encryptionProfileNameOrCrn +
                 ", notificationState=" + notificationState +
                 '}';
     }

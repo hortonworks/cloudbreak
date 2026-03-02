@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.service.encryptionprofile;
 
-import java.util.Optional;
-
 import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
 
@@ -11,6 +9,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.view.ClusterView;
@@ -27,6 +27,9 @@ public class EncryptionProfileService {
 
     @Inject
     private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
+
+    @Inject
+    private EntitlementService entitlementService;
 
     public EncryptionProfileResponse getEncryptionProfileByCrnOrDefault(String encryptionProfileCrn) {
         return getEncryptionProfileByCrnOrDefaultIfEmpty(encryptionProfileCrn);
@@ -45,13 +48,13 @@ public class EncryptionProfileService {
         return encryptionProfileCrn;
     }
 
-    public Optional<EncryptionProfileResponse> getEncryptionProfileByCrn(String encryptionProfileCrn) {
+    public EncryptionProfileResponse getEncryptionProfileByCrn(String encryptionProfileCrn) {
         try {
-            return Optional.of(ThreadBasedUserCrnProvider.doAsInternalActor(
-                    () -> encryptionProfileEndpoint.getByCrn(encryptionProfileCrn)));
+            return ThreadBasedUserCrnProvider.doAsInternalActor(
+                    () -> encryptionProfileEndpoint.getByCrn(encryptionProfileCrn));
         } catch (Exception ex) {
             LOGGER.error("Failed to GET encryption profile by CRN: {}", encryptionProfileCrn, ex);
-            return Optional.empty();
+            throw new CloudbreakServiceException(ex.getMessage(), ex);
         }
     }
 
@@ -78,5 +81,31 @@ public class EncryptionProfileService {
     private EncryptionProfileResponse getDefaultEncryptionProfile() {
         return ThreadBasedUserCrnProvider.doAsInternalActor(
                 () -> encryptionProfileEndpoint.getDefaultEncryptionProfile());
+    }
+
+    public EncryptionProfileResponse getEncryptionProfileByName(String encryptionProfileName) {
+        try {
+            return ThreadBasedUserCrnProvider.doAsInternalActor(
+                    () -> encryptionProfileEndpoint.getByName(encryptionProfileName));
+        } catch (Exception ex) {
+            LOGGER.error("Failed to GET encryption profile by name: {}", encryptionProfileName, ex);
+            throw new CloudbreakServiceException(webApplicationExceptionMessageExtractor.getErrorMessage(ex));
+        }
+    }
+
+    public EncryptionProfileResponse getEncryptionProfileByNameOrCrn(String encryptionProfileNameOrCrn, String encryptionProfileCrn) {
+        EncryptionProfileResponse encryptionProfile = null;
+        if (entitlementService.isConfigureEncryptionProfileEnabled(ThreadBasedUserCrnProvider.getAccountId())) {
+            String nameOrCrn = StringUtils.isNotBlank(encryptionProfileNameOrCrn) ?
+                    encryptionProfileNameOrCrn : encryptionProfileCrn;
+            if (StringUtils.isNotEmpty(nameOrCrn)) {
+                if (Crn.isCrn(nameOrCrn)) {
+                    encryptionProfile = getEncryptionProfileByCrn(nameOrCrn);
+                } else {
+                    encryptionProfile = getEncryptionProfileByName(nameOrCrn);
+                }
+            }
+        }
+        return encryptionProfile;
     }
 }

@@ -1044,6 +1044,7 @@ class SdxServiceTest {
         Pair<SdxCluster, FlowIdentifier> result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
                 underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null));
 
+        verify(encryptionProfileService, times(1)).getEncryptionProfile(any());
         SdxCluster createdSdxCluster = result.getLeft();
         assertEquals(id, createdSdxCluster.getId());
         ArgumentCaptor<SdxCluster> captor = ArgumentCaptor.forClass(SdxCluster.class);

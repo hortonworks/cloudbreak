@@ -217,6 +217,7 @@ class EnvironmentApiConverterTest {
         verify(networkRequestToDtoConverter).convert(request.getNetwork());
         verify(networkRequestToDtoConverter).setDefaultAvailabilityZonesIfNeeded(actual.getNetwork());
         verify(externalizedComputeService).externalizedComputeValidation(anyString());
+        verify(encryptionProfileService).getEncryptionProfileByNameOrCrn(any());
     }
 
     @ParameterizedTest

@@ -210,6 +210,9 @@ public class EnvironmentModelDescription {
     public static final String ENCRYPTION_PROFILE_CRN =
             "CRN of the encryption profile to be used. Encryption Profile manages TLS version and cipher suites";
 
+    public static final String ENCRYPTION_PROFILE_NAME_OR_CRN =
+            "Name or CRN of the encryption profile to be used. Encryption Profile manages TLS version and cipher suites";
+
     private EnvironmentModelDescription() {
     }
 }

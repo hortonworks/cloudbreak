@@ -30,9 +30,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class EnvironmentRequest extends EnvironmentBaseRequest implements CredentialAwareEnvRequest, TaggableRequest {
 
-    static final String LENGHT_INVALID_MSG = "The length of the environments's name has to be in range of 5 to 28";
+    static final String LENGTH_INVALID_MSG = "The length of the environments's name has to be in range of 5 to 28";
 
-    @Size(max = 28, min = 5, message = LENGHT_INVALID_MSG)
+    @Size(max = 28, min = 5, message = LENGTH_INVALID_MSG)
     @ValidEnvironmentName
     @Schema(description = ModelDescriptions.NAME, required = true)
     @NotNull
@@ -134,8 +134,17 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
     @Schema(description = EnvironmentModelDescription.ENVIRONMENT_TYPE)
     private String environmentType;
 
+    /**
+     * @deprecated Use encryptionProfileNameOrCrn instead
+     * To be removed after thunderhead change to encryptionProfileNameOrCrn (CB-32051)
+     * To be removed by CB-32052
+     **/
+    @Deprecated(forRemoval = true)
     @Schema(description = EnvironmentModelDescription.ENCRYPTION_PROFILE_CRN)
     private String encryptionProfileCrn;
+
+    @Schema(description = EnvironmentModelDescription.ENCRYPTION_PROFILE_NAME_OR_CRN)
+    private String encryptionProfileNameOrCrn;
 
     public AttachedFreeIpaRequest getFreeIpa() {
         return freeIpa;
@@ -368,6 +377,14 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
         this.encryptionProfileCrn = encryptionProfileCrn;
     }
 
+    public String getEncryptionProfileNameOrCrn() {
+        return encryptionProfileNameOrCrn;
+    }
+
+    public void setEncryptionProfileNameOrCrn(String encryptionProfileNameOrCrn) {
+        this.encryptionProfileNameOrCrn = encryptionProfileNameOrCrn;
+    }
+
     @Override
     public String toString() {
         return "EnvironmentRequest{" +
@@ -398,7 +415,7 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
                 ", ccmV2TlsType=" + ccmV2TlsType +
                 ", dataServices=" + dataServices +
                 ", environmentType=" + environmentType +
-                ", encryptionProfileCrn=" + encryptionProfileCrn +
+                ", encryptionProfileNameOrCrn=" + encryptionProfileNameOrCrn +
                 "} " + super.toString();
     }
 }

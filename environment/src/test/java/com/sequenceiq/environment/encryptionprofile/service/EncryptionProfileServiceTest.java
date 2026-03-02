@@ -11,10 +11,14 @@ import static com.sequenceiq.environment.encryptionprofile.EncryptionProfileTest
 import static com.sequenceiq.environment.encryptionprofile.EncryptionProfileTestConstants.getTestEncryptionProfile;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -424,6 +428,68 @@ public class EncryptionProfileServiceTest {
                 .hasMessage("Encryption Profile must have at least one RSA cipher suite");
 
         verify(repository, never()).save(any());
+    }
+
+    @Test
+    void testGetEncryptionProfileByNameOrCrnWhenProfileNameIsUsed() {
+        String encryptionProfileNameOrCrn = "epName";
+
+        when(repository.findByNameAndAccountId(eq("epName"), anyString())).thenReturn(Optional.of(ENCRYPTION_PROFILE));
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.getEncryptionProfileByNameOrCrn(encryptionProfileNameOrCrn));
+
+        verify(repository, times(1)).findByNameAndAccountId(eq("epName"), anyString());
+        verify(repository, never()).findByResourceCrn(anyString());
+    }
+
+    @Test
+    void testGetEncryptionProfileByNameOrCrnWhenProfileCrnIsUsed() {
+        String encryptionProfileNameOrCrn = "crn:cdp:environments:us-west-1:cloudera:encryptionProfile:custom-123";
+
+        when(repository.findByResourceCrn(encryptionProfileNameOrCrn)).thenReturn(Optional.of(ENCRYPTION_PROFILE));
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.getEncryptionProfileByNameOrCrn(encryptionProfileNameOrCrn));
+
+        verify(repository, times(1)).findByResourceCrn("crn:cdp:environments:us-west-1:cloudera:encryptionProfile:custom-123");
+        verify(repository, never()).findByNameAndAccountId(anyString(), anyString());
+    }
+
+    @Test
+    void testGetEncryptionProfileByNameOrCrnWhenInputIsNull() {
+        EncryptionProfile encryptionProfile = assertDoesNotThrow(() ->
+                ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.getEncryptionProfileByNameOrCrn(null)));
+
+        verify(repository, never()).findByResourceCrn(any());
+        verify(repository, never()).findByNameAndAccountId(any(), any());
+        assertThat(encryptionProfile).isNull();
+    }
+
+    @Test
+    void testGetEncryptionProfileByNameOrCrnWhenEncryptionProfileIsNotFoundByCrn() {
+        String encryptionProfileNameOrCrn = "crn:cdp:environments:us-west-1:cloudera:encryptionProfile:custom-123";
+
+        when(repository.findByResourceCrn(encryptionProfileNameOrCrn)).thenReturn(Optional.empty());
+
+        NotFoundException ex = assertThrows(NotFoundException.class, () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
+                underTest.getEncryptionProfileByNameOrCrn(encryptionProfileNameOrCrn)));
+
+        verify(repository, times(1)).findByResourceCrn("crn:cdp:environments:us-west-1:cloudera:encryptionProfile:custom-123");
+        verify(repository, never()).findByNameAndAccountId(anyString(), anyString());
+        assertThat(ex).hasMessage("Encryption Profile not found with Crn: crn:cdp:environments:us-west-1:cloudera:encryptionProfile:custom-123");
+    }
+
+    @Test
+    void testGetEncryptionProfileByNameOrCrnWhenEncryptionProfileIsNotFoundByName() {
+        String encryptionProfileNameOrCrn = "epName";
+
+        when(repository.findByNameAndAccountId(eq("epName"), anyString())).thenReturn(Optional.empty());
+
+        NotFoundException ex = assertThrows(NotFoundException.class, () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
+                underTest.getEncryptionProfileByNameOrCrn(encryptionProfileNameOrCrn)));
+
+        verify(repository, never()).findByResourceCrn(any());
+        verify(repository, times(1)).findByNameAndAccountId(eq("epName"), anyString());
+        assertThat(ex).hasMessage("Encryption Profile not found with name: epName");
     }
 
     private Map<String, EncryptionProfile> getDefaultEncryptionProfileNameMap() {

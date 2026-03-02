@@ -55,6 +55,7 @@ import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpResour
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentCrnResponse;
 import com.sequenceiq.environment.credential.service.CredentialService;
 import com.sequenceiq.environment.credential.v1.converter.TunnelConverter;
+import com.sequenceiq.environment.encryptionprofile.domain.EncryptionProfile;
 import com.sequenceiq.environment.encryptionprofile.service.EncryptionProfileService;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.domain.ExperimentalFeatures;
@@ -186,7 +187,7 @@ public class EnvironmentApiConverter {
                 .withDataServices(dataServicesConverter.convertToDto(request.getDataServices()))
                 .withCreatorClient(getHeaderOrItsFallbackValueOrDefault(USER_AGENT_HEADER, CDP_CALLER_ID_HEADER, CALLER_ID_NOT_FOUND))
                 .withEnvironmentType(environmentType == null ? EnvironmentType.PUBLIC_CLOUD : environmentType)
-                .withEncryptionProfileCrn(request.getEncryptionProfileCrn());
+                .withEncryptionProfileCrn(getEncryptionProfileCrn(request));
 
         NullUtil.doIfNotNull(request.getNetwork(), network -> {
             NetworkDto networkDto = networkRequestToDto(network);
@@ -204,6 +205,13 @@ public class EnvironmentApiConverter {
         }
 
         return builder.build();
+    }
+
+    private String getEncryptionProfileCrn(EnvironmentRequest request) {
+        String encryptionProfileNameOrCrn = request.getEncryptionProfileNameOrCrn() != null ? request.getEncryptionProfileNameOrCrn() :
+                request.getEncryptionProfileCrn();
+        EncryptionProfile encryptionProfile = encryptionProfileService.getEncryptionProfileByNameOrCrn(encryptionProfileNameOrCrn);
+        return encryptionProfile != null ? encryptionProfile.getResourceCrn() : null;
     }
 
     public ExternalizedComputeClusterDto requestToExternalizedComputeClusterDto(ExternalizedComputeCreateRequest externalizedCompute, String accountId) {

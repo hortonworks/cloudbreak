@@ -1,6 +1,6 @@
 package com.sequenceiq.environment.api.v1.environment.model.request;
 
-import static com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest.LENGHT_INVALID_MSG;
+import static com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest.LENGTH_INVALID_MSG;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Set;
@@ -31,7 +31,7 @@ class EnvironmentRequestNameLengthValidationTest {
         assertTrue(constraintViolations
                 .stream()
                 .anyMatch(cv ->
-                        LENGHT_INVALID_MSG.equals(cv.getMessage())
+                        LENGTH_INVALID_MSG.equals(cv.getMessage())
                 ));
     }
 
@@ -51,7 +51,7 @@ class EnvironmentRequestNameLengthValidationTest {
         assertTrue(constraintViolations
                 .stream()
                 .anyMatch(cv ->
-                        LENGHT_INVALID_MSG.equals(cv.getMessage())
+                        LENGTH_INVALID_MSG.equals(cv.getMessage())
                 ));
     }
 

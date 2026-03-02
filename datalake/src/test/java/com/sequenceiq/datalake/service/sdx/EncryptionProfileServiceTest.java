@@ -1,12 +1,14 @@
 package com.sequenceiq.datalake.service.sdx;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doCallRealMethod;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -15,7 +17,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -56,7 +57,6 @@ class EncryptionProfileServiceTest {
 
         when(entitlementService.isConfigureEncryptionProfileEnabled(any())).thenReturn(true);
         when(sdxVersionRuleEnforcer.isCustomEncryptionProfileSupported(runtimeVersion)).thenReturn(false);
-        when(encryptionProfileEndpoint.getByCrn(any())).thenReturn(mock(EncryptionProfileResponse.class));
 
         BadRequestException exception =
                 assertThrows(BadRequestException.class, () -> underTest.validateEncryptionProfile(clusterRequest, environment, runtimeVersion));
@@ -74,7 +74,6 @@ class EncryptionProfileServiceTest {
 
         when(entitlementService.isConfigureEncryptionProfileEnabled(any())).thenReturn(true);
         when(sdxVersionRuleEnforcer.isCustomEncryptionProfileSupported(runtimeVersion)).thenReturn(false);
-        when(encryptionProfileEndpoint.getByCrn(any())).thenReturn(mock(EncryptionProfileResponse.class));
 
         BadRequestException exception =
                 assertThrows(BadRequestException.class, () -> underTest.validateEncryptionProfile(clusterRequest, environment, runtimeVersion));
@@ -92,30 +91,11 @@ class EncryptionProfileServiceTest {
 
         when(entitlementService.isConfigureEncryptionProfileEnabled(any())).thenReturn(false);
         when(sdxVersionRuleEnforcer.isCustomEncryptionProfileSupported(runtimeVersion)).thenReturn(true);
-        when(encryptionProfileEndpoint.getByCrn(any())).thenReturn(mock(EncryptionProfileResponse.class));
 
         BadRequestException exception =
                 assertThrows(BadRequestException.class, () -> underTest.validateEncryptionProfile(clusterRequest, environment, runtimeVersion));
 
         assertEquals("Encryption Profile entitlement is not granted to the account", exception.getMessage());
-    }
-
-    @Test
-    void testValidateEncryptionProfileWhenEncryptionProfileIsNotFound() {
-        String runtimeVersion = "7.3.2";
-        SdxClusterRequest clusterRequest = new SdxClusterRequest();
-        DetailedEnvironmentResponse environment = new DetailedEnvironmentResponse();
-        environment.setCloudPlatform("AWS");
-        environment.setEncryptionProfileCrn("crn:cdp:environments:us-west-1:cloudera:encryptionProfile:custom-ep-123");
-
-        when(entitlementService.isConfigureEncryptionProfileEnabled(any())).thenReturn(true);
-        when(sdxVersionRuleEnforcer.isCustomEncryptionProfileSupported(runtimeVersion)).thenReturn(true);
-        when(encryptionProfileEndpoint.getByCrn(any())).thenReturn(null);
-
-        BadRequestException exception =
-                assertThrows(BadRequestException.class, () -> underTest.validateEncryptionProfile(clusterRequest, environment, runtimeVersion));
-
-        assertEquals("Encryption Profile not found", exception.getMessage());
     }
 
     @Test
@@ -128,7 +108,6 @@ class EncryptionProfileServiceTest {
 
         when(entitlementService.isConfigureEncryptionProfileEnabled(any())).thenReturn(true);
         when(sdxVersionRuleEnforcer.isCustomEncryptionProfileSupported(runtimeVersion)).thenReturn(true);
-        when(encryptionProfileEndpoint.getByCrn(any())).thenReturn(mock(EncryptionProfileResponse.class));
 
         assertDoesNotThrow(() -> underTest.validateEncryptionProfile(clusterRequest, environment, runtimeVersion));
     }
@@ -137,12 +116,12 @@ class EncryptionProfileServiceTest {
     @ValueSource(strings = {"7.3.1", "7.2.18", "7.2.17"})
     void runtime731AndBelowShouldThrowExceptionWhenEncryptionProfileIsUsed(String runtime) {
         SdxClusterRequest clusterRequest = new SdxClusterRequest();
+        clusterRequest.setRuntime(runtime);
         DetailedEnvironmentResponse environment = new DetailedEnvironmentResponse();
         environment.setCloudPlatform("AWS");
         environment.setEncryptionProfileCrn("crn:cdp:environments:us-west-1:cloudera:encryptionProfile:custom-ep-123");
 
         when(entitlementService.isConfigureEncryptionProfileEnabled(any())).thenReturn(true);
-        when(encryptionProfileEndpoint.getByCrn(any())).thenReturn(mock(EncryptionProfileResponse.class));
         doCallRealMethod().when(sdxVersionRuleEnforcer).isCustomEncryptionProfileSupported(runtime);
 
         assertThatThrownBy(() -> underTest.validateEncryptionProfile(clusterRequest, environment, runtime))
@@ -150,29 +129,35 @@ class EncryptionProfileServiceTest {
     }
 
     @Test
-    void testgetEncryptionProfileFromDatalakeOtherwiseFromEnvWithDatalakeEncryptionProfile() {
-        String encryptionProfileFromEnv = "crn:cdp:environments:us-west-1:cloudera:encryptionProfile:env-123";
-        String encryptionProfileCrnFromCluster = "crn:cdp:environments:us-west-1:cloudera:encryptionProfile:datalake-123";
+    void testGetEncryptionProfileWhenInputIsNullThenResponseShouldBeNullAndDoesNotThrowException() {
+        SdxClusterRequest clusterRequest = new SdxClusterRequest();
 
-        underTest.getEncryptionProfileFromDatalakeOtherwiseFromEnv(encryptionProfileFromEnv, encryptionProfileCrnFromCluster);
+        EncryptionProfileResponse response = assertDoesNotThrow(() -> underTest.getEncryptionProfile(clusterRequest));
 
-        ArgumentCaptor<String> encryptionCrnArgumentCaptor = ArgumentCaptor.forClass(String.class);
-        verify(encryptionProfileEndpoint, times(1)).getByCrn(encryptionCrnArgumentCaptor.capture());
-
-        assertEquals(encryptionProfileCrnFromCluster, encryptionCrnArgumentCaptor.getValue());
+        assertThat(response).isNull();
     }
 
     @Test
-    void testgetEncryptionProfileFromDatalakeOtherwiseFromEnvWithEnvEncryptionProfile() {
-        String encryptionProfileFromEnv = "crn:cdp:environments:us-west-1:cloudera:encryptionProfile:env-123";
-        String encryptionProfileCrnFromCluster = null;
+    void testGetEncryptionProfileWhenProfileNameIsUsed() {
+        SdxClusterRequest clusterRequest = new SdxClusterRequest();
+        clusterRequest.setEncryptionProfileNameOrCrn("epName");
 
-        underTest.getEncryptionProfileFromDatalakeOtherwiseFromEnv(encryptionProfileFromEnv, encryptionProfileCrnFromCluster);
+        underTest.getEncryptionProfile(clusterRequest);
 
-        ArgumentCaptor<String> encryptionCrnArgumentCaptor = ArgumentCaptor.forClass(String.class);
-        verify(encryptionProfileEndpoint, times(1)).getByCrn(encryptionCrnArgumentCaptor.capture());
+        verify(encryptionProfileEndpoint, times(1)).getByName("epName");
+        verify(encryptionProfileEndpoint, never()).getByCrn(anyString());
+    }
 
-        assertEquals(encryptionProfileFromEnv, encryptionCrnArgumentCaptor.getValue());
+    @Test
+    void testGetEncryptionProfileWhenProfileCrnIsUsed() {
+        SdxClusterRequest clusterRequest = new SdxClusterRequest();
+        clusterRequest.setEncryptionProfileCrn("crn:cdp:environments:us-west-1:cloudera:encryptionProfile:custom-123");
+
+        underTest.getEncryptionProfile(clusterRequest);
+
+        verify(encryptionProfileEndpoint, times(1))
+                .getByCrn("crn:cdp:environments:us-west-1:cloudera:encryptionProfile:custom-123");
+        verify(encryptionProfileEndpoint, never()).getByName(anyString());
     }
 
 }

@@ -4,10 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -15,7 +13,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -30,7 +27,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.Cloud
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.gateway.GatewayV4Request;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
-import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.service.encryptionprofile.EncryptionProfileService;
 import com.sequenceiq.common.api.cloudstorage.CloudStorageRequest;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXV1Request;
@@ -468,12 +464,14 @@ class DistroXClusterToClusterConverterTest {
         DistroXClusterV1Request distroXClusterV1Request = new DistroXClusterV1Request();
         distroXClusterV1Request.setEncryptionProfileCrn("epCrn");
         distroXV1RequestInput.setCluster(distroXClusterV1Request);
+        DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
+        EncryptionProfileResponse  encryptionProfileResponse = new EncryptionProfileResponse();
+        encryptionProfileResponse.setCrn("epCrn");
 
-        when(entitlementService.isConfigureEncryptionProfileEnabled(any())).thenReturn(true);
-        when(encryptionProfileService.getEncryptionProfileByCrn(any())).thenReturn(Optional.of(mock(EncryptionProfileResponse.class)));
+        when(encryptionProfileService.getEncryptionProfileByNameOrCrn(null, distroXClusterV1Request.getEncryptionProfileCrn()))
+                .thenReturn(encryptionProfileResponse);
 
-
-        ClusterV4Request result = ThreadBasedUserCrnProvider.doAsInternalActor(() -> underTest.convert(distroXV1RequestInput));
+        ClusterV4Request result = ThreadBasedUserCrnProvider.doAsInternalActor(() -> underTest.convert(distroXV1RequestInput, environmentResponse));
 
         assertEquals(distroXClusterV1Request.getEncryptionProfileCrn(), result.getEncryptionProfileCrn());
     }
@@ -485,38 +483,6 @@ class DistroXClusterToClusterConverterTest {
         DistroXClusterV1Request result = underTest.convert(clusterV4RequestInput);
 
         assertEquals(clusterV4RequestInput.getEncryptionProfileCrn(), result.getEncryptionProfileCrn());
-    }
-
-    @Test
-    public void testConvertToClusterV4RequestWhenEncryptionProfileIsFound() {
-        DistroXClusterV1Request distroXClusterV1Request = new DistroXClusterV1Request();
-        distroXClusterV1Request.setEncryptionProfileCrn("epCrn");
-        distroXV1RequestInput.setCluster(distroXClusterV1Request);
-        DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
-
-        when(entitlementService.isConfigureEncryptionProfileEnabled(any())).thenReturn(true);
-        when(encryptionProfileService.getEncryptionProfileByCrn(any())).thenReturn(Optional.of(mock(EncryptionProfileResponse.class)));
-
-
-        ClusterV4Request result = ThreadBasedUserCrnProvider.doAsInternalActor(() -> underTest.convert(distroXV1RequestInput, environmentResponse));
-
-        assertEquals(distroXClusterV1Request.getEncryptionProfileCrn(), result.getEncryptionProfileCrn());
-    }
-
-    @Test
-    public void testConvertToClusterV4RequestWhenEncryptionProfileIsNotFound() {
-        DistroXClusterV1Request distroXClusterV1Request = new DistroXClusterV1Request();
-        distroXClusterV1Request.setEncryptionProfileCrn("epCrn");
-        distroXV1RequestInput.setCluster(distroXClusterV1Request);
-        DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
-
-        when(entitlementService.isConfigureEncryptionProfileEnabled(any())).thenReturn(true);
-        when(encryptionProfileService.getEncryptionProfileByCrn(any())).thenReturn(Optional.empty());
-
-        BadRequestException exception = assertThrows(BadRequestException.class,
-                () -> ThreadBasedUserCrnProvider.doAsInternalActor(() -> underTest.convert(distroXV1RequestInput, environmentResponse)));
-
-        assertEquals("Encryption Profile 'epCrn' not found.", exception.getMessage());
     }
 
     private DistroXV1Request createDistroXV1Request() {
