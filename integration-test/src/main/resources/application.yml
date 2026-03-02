@@ -123,6 +123,7 @@ integrationtest:
   cloudProvider: MOCK
   ycloudTest: false
   runtimeVersion: 7.3.1
+  latestRuntimeVersion: 7.3.2
   upgrade:
     matrix:
       7.2.17: 7.2.16
@@ -145,7 +146,6 @@ integrationtest:
     originalDatabaseMajorVersion: 11
     targetDatabaseMajorVersion: 14
     latest:
-      runtimeVersion: "7.3.2"
       originalDatabaseMajorVersion: "14"
       targetDatabaseMajorVersion: "17"
   privateEndpointEnabled: false

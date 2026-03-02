@@ -22,6 +22,8 @@ public class CommonClusterManagerProperties {
 
     private String runtimeVersion;
 
+    private String latestRuntimeVersion;
+
     private SdxClusterShape clusterShape;
 
     private SdxClusterShape internalClusterShape;
@@ -44,6 +46,14 @@ public class CommonClusterManagerProperties {
 
     public void setRuntimeVersion(String runtimeVersion) {
         this.runtimeVersion = runtimeVersion;
+    }
+
+    public String getLatestRuntimeVersion() {
+        return latestRuntimeVersion;
+    }
+
+    public void setLatestRuntimeVersion(String latestRuntimeVersion) {
+        this.latestRuntimeVersion = latestRuntimeVersion;
     }
 
     public SdxClusterShape getClusterShape() {
@@ -325,8 +335,6 @@ public class CommonClusterManagerProperties {
     }
 
     public static class DatabaseVersionProperties {
-        private String runtimeVersion;
-
         private String originalDatabaseMajorVersion;
 
         private String targetDatabaseMajorVersion;
@@ -345,14 +353,6 @@ public class CommonClusterManagerProperties {
 
         public void setTargetDatabaseMajorVersion(String targetDatabaseMajorVersion) {
             this.targetDatabaseMajorVersion = targetDatabaseMajorVersion;
-        }
-
-        public String getRuntimeVersion() {
-            return runtimeVersion;
-        }
-
-        public void setRuntimeVersion(String runtimeVersion) {
-            this.runtimeVersion = runtimeVersion;
         }
     }
 }
