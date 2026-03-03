@@ -1,18 +1,22 @@
 package com.sequenceiq.cloudbreak.service.upgrade.image;
 
-import java.util.Optional;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
-import jakarta.ws.rs.core.Response;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.service.CloudbreakRuntimeException;
+import com.sequenceiq.cloudbreak.service.parcel.ClouderaManagerProductTransformer;
 import com.sequenceiq.cloudbreak.service.parcel.ParcelAvailabilityRetrievalService;
 import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.common.model.OsType;
@@ -29,22 +33,32 @@ public class OsChangeService {
     @Inject
     private ParcelAvailabilityRetrievalService parcelAvailabilityRetrievalService;
 
-    public boolean isOsChangePermitted(Image targetImage, OsType currentOsType, Set<OsType> osUsedByInstances, String currentArchitecture) {
+    @Inject
+    private ClouderaManagerProductTransformer clouderaManagerProductTransformer;
+
+    public boolean isOsChangePermitted(Image targetImage, OsType currentOsType, Set<OsType> osUsedByInstances, String currentArchitecture,
+            Map<String, String> stackRelatedParcels) {
         if (!currentOsType.getMajorOsTargets().contains(OsType.getByOs(targetImage.getOs())) || !allInstanceUseSameOs(currentOsType, osUsedByInstances)) {
             LOGGER.debug("OS change from {} to {} is not allowed. Supported target OS versions are: {}", currentOsType.getOs(), targetImage.getOs(),
                     currentOsType.getMajorOsTargets());
             return false;
         }
         try {
-            String targetCmRepoUrl = targetImage.getRepo().get(targetImage.getOsType());
-            String cmRepoUrlForCurrentOs = updateCmRepoUrl(targetImage.getOsType(), currentOsType, targetCmRepoUrl, currentArchitecture);
-            LOGGER.debug("Original CM url from target image {} replaced to the current OS {}", targetCmRepoUrl, cmRepoUrlForCurrentOs);
-            Response response = parcelAvailabilityRetrievalService.getHeadResponseForParcel(cmRepoUrlForCurrentOs);
-            boolean repoUrlReachable = response != null && response.getStatus() == HTTP_OK;
-            if (!repoUrlReachable) {
-                LOGGER.debug("Response for {} is {}", cmRepoUrlForCurrentOs, Optional.ofNullable(response).map(Response::getStatus).orElse(null));
+            Set<String> urlsForTargetOs = getUrlsForTargetOs(targetImage, stackRelatedParcels);
+            Set<String> updatedUrlsForCurrentOs = urlsForTargetOs.stream()
+                    .map(url -> updateUrl(targetImage.getOsType(), currentOsType, url, currentArchitecture))
+                    .collect(Collectors.toSet());
+
+            LOGGER.debug("Original URLs from target image {} replaced to the current OS {}", urlsForTargetOs, updatedUrlsForCurrentOs);
+            Map<String, Integer> responsesByUrl = updatedUrlsForCurrentOs.stream()
+                    .collect(Collectors.toMap(url -> url,
+                    url -> parcelAvailabilityRetrievalService.getHeadResponseForParcel(url).getStatus()));
+
+            boolean repoUrlsReachable = responsesByUrl.values().stream().allMatch(response -> response != null && response == HTTP_OK);
+            if (!repoUrlsReachable) {
+                LOGGER.debug("Response for URLs {}", responsesByUrl);
             }
-            return repoUrlReachable;
+            return repoUrlsReachable;
         } catch (Exception e) {
             LOGGER.warn("Failed to determine the possibility of the OS change for image: {}. Current OS: {}", targetImage, currentOsType, e);
             return false;
@@ -55,30 +69,70 @@ public class OsChangeService {
             String currentArchitecture) {
         if (currentOsType != null && currentOsType.getMajorOsTargets().contains(OsType.getByOs(targetOsType.getOs()))) {
             try {
-                String updatedBaseUrl = updateCmRepoUrl(targetOsType.getOsType(), currentOsType, clouderaManagerRepo.getBaseUrl(), currentArchitecture);
-                String updateGpgKeyUrl = updateCmRepoUrl(targetOsType.getOsType(), currentOsType, clouderaManagerRepo.getGpgKeyUrl(), currentArchitecture);
+                String updatedBaseUrl = updateUrl(targetOsType.getOsType(), currentOsType, clouderaManagerRepo.getBaseUrl(), currentArchitecture);
+                String updateGpgKeyUrl = updateUrl(targetOsType.getOsType(), currentOsType, clouderaManagerRepo.getGpgKeyUrl(), currentArchitecture);
                 LOGGER.debug("Updating Cloudera Manager repo with {} based URLs {}, {}", currentOsType.getOs(), updatedBaseUrl, updateGpgKeyUrl);
                 return clouderaManagerRepo
                         .withBaseUrl(updatedBaseUrl)
                         .withGpgKeyUrl(updateGpgKeyUrl);
             } catch (Exception e) {
-                LOGGER.warn("Failed to update the CM repo URL with the current OS", e);
-                return clouderaManagerRepo;
+                String errorMessage = "Failed to update the CM repo URL with the current OS";
+                LOGGER.error(errorMessage, e);
+                throw new CloudbreakRuntimeException(errorMessage, e);
             }
         } else {
             return clouderaManagerRepo;
         }
     }
 
-    private String updateCmRepoUrl(String targetOsType, OsType currentOsType, String targetCmRepoUrl, String currentArchitecture) {
+    public Set<ClouderaManagerProduct> updatePreWarmParcelUrlInCaseOfOsChange(Set<ClouderaManagerProduct> products, OsType currentOsType, OsType targetOsType,
+            String currentArchitecture) {
+        if (currentOsType != null && currentOsType.getMajorOsTargets().contains(OsType.getByOs(targetOsType.getOs()))) {
+            try {
+                return products.stream()
+                        .map(product -> product.getParcel().contains(targetOsType.getOsType()) ?
+                                product.withParcel(updateUrl(targetOsType.getOsType(), currentOsType, product.getParcel(), currentArchitecture)) : product)
+                        .collect(Collectors.toSet());
+            } catch (Exception e) {
+                String errorMessage = "Failed to update the pre-warm parcel URL with the current OS";
+                LOGGER.error(errorMessage, e);
+                throw new CloudbreakRuntimeException(errorMessage, e);
+            }
+        } else {
+            return products;
+        }
+    }
+
+    private Set<String> getUrlsForTargetOs(Image targetImage, Map<String, String> stackRelatedParcels) {
+        Set<String> targetPreWarmParcelUrls = getRequiredPreWarmParcelsToValidate(targetImage, stackRelatedParcels);
+        Set<String> urlsForTargetOs = new HashSet<>(targetPreWarmParcelUrls);
+        urlsForTargetOs.add(targetImage.getRepo().get(targetImage.getOsType()));
+        return urlsForTargetOs;
+    }
+
+    private Set<String> getRequiredPreWarmParcelsToValidate(Image targetImage, Map<String, String> stackRelatedParcels) {
+        if (!stackRelatedParcels.isEmpty()) {
+            Set<ClouderaManagerProduct> clouderaManagerProducts = clouderaManagerProductTransformer.transform(targetImage, false, true);
+            return clouderaManagerProducts.stream()
+                    .filter(parcelFromImage -> stackRelatedParcels.keySet().stream()
+                            .anyMatch(requiredParcelName -> parcelFromImage.getName().equalsIgnoreCase(requiredParcelName)))
+                    .map(ClouderaManagerProduct::getParcel)
+                    .map(url -> url.endsWith("/") ? url : url + "/")
+                    .collect(Collectors.toSet());
+        } else {
+            return Collections.emptySet();
+        }
+    }
+
+    private String updateUrl(String targetOsType, OsType currentOsType, String targetUrl, String currentArchitecture) {
         String architecturePart = Architecture.ARM64.equals(Architecture.fromStringWithValidation(currentArchitecture)) ? currentArchitecture : "";
         String targetImageRepoPart = targetOsType + architecturePart + YUM_URL;
-        if (targetCmRepoUrl != null && targetCmRepoUrl.contains(targetImageRepoPart)) {
-            return targetCmRepoUrl.replace(targetImageRepoPart, currentOsType.getOsType() + architecturePart + YUM_URL);
+        if (targetUrl != null && targetUrl.contains(targetImageRepoPart)) {
+            return targetUrl.replace(targetImageRepoPart, currentOsType.getOsType() + architecturePart + YUM_URL);
         } else {
             throw new CloudbreakRuntimeException(
-                    String.format("Failed to update CM repo URL because the %s part not found in the target repo URL %s", targetImageRepoPart,
-                            targetCmRepoUrl));
+                    String.format("Failed to update target repo URL because the %s part not found in the target repo URL %s", targetImageRepoPart,
+                            targetUrl));
         }
     }
 

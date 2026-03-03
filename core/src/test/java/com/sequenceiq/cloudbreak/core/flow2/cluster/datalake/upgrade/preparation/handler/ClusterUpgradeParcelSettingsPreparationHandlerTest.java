@@ -32,7 +32,10 @@ import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.parcel.ParcelService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
+import com.sequenceiq.cloudbreak.service.upgrade.image.OsChangeService;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.common.model.Architecture;
+import com.sequenceiq.common.model.OsType;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
 @ExtendWith(MockitoExtension.class)
@@ -64,10 +67,10 @@ class ClusterUpgradeParcelSettingsPreparationHandlerTest {
     private ImageCatalogService imageCatalogService;
 
     @Mock
-    private ClusterApi clusterApi;
+    private OsChangeService osChangeService;
 
     @Mock
-    private Image image;
+    private ClusterApi clusterApi;
 
     @Mock
     private StackDto stackDto;
@@ -76,12 +79,16 @@ class ClusterUpgradeParcelSettingsPreparationHandlerTest {
     void testDoAcceptShouldCallClusterApiToUpdateParcelSettings() throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException,
             CloudbreakException {
         ImageChangeDto imageChangeDto = new ImageChangeDto(STACK_ID, IMAGE_ID, IMAGE_CATALOG_NAME, IMAGE_CATALOG_URL);
-        Set<ClouderaManagerProduct> requiredProducts = Collections.singleton(new ClouderaManagerProduct());
+        Image targetImage = Image.builder().withOsType(OsType.RHEL9.getOsType()).withArchitecture(Architecture.X86_64.getName()).build();
+        Set<ClouderaManagerProduct> requiredProducts = Set.of(new ClouderaManagerProduct(), new ClouderaManagerProduct());
+        Set<ClouderaManagerProduct> updatedProducts = Set.of(new ClouderaManagerProduct());
         when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
         when(stackDto.getWorkspace()).thenReturn(createWorkspace());
         when(imageCatalogService.getImage(WORKSPACE_ID, IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, IMAGE_ID)).thenReturn(
-                StatedImage.statedImage(image, IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME));
-        when(parcelService.getRequiredProductsFromImage(stackDto, image)).thenReturn(requiredProducts);
+                StatedImage.statedImage(targetImage, IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME));
+        when(parcelService.getRequiredProductsFromImage(stackDto, targetImage)).thenReturn(requiredProducts);
+        when(osChangeService.updatePreWarmParcelUrlInCaseOfOsChange(requiredProducts, OsType.RHEL8, OsType.RHEL9, targetImage.getArchitecture()))
+                .thenReturn(updatedProducts);
         when(clusterApiConnectors.getConnector(stackDto)).thenReturn(clusterApi);
 
         Selectable nextFlowStepSelector = underTest.doAccept(createEvent(imageChangeDto));
@@ -89,9 +96,9 @@ class ClusterUpgradeParcelSettingsPreparationHandlerTest {
         assertEquals(START_CLUSTER_UPGRADE_CM_PACKAGE_DOWNLOAD_EVENT.name(), nextFlowStepSelector.selector());
         verify(stackDtoService).getById(STACK_ID);
         verify(imageCatalogService).getImage(WORKSPACE_ID, IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, IMAGE_ID);
-        verify(parcelService).getRequiredProductsFromImage(stackDto, image);
+        verify(parcelService).getRequiredProductsFromImage(stackDto, targetImage);
         verify(clusterApiConnectors).getConnector(stackDto);
-        verify(clusterApi).updateParcelSettings(requiredProducts);
+        verify(clusterApi).updateParcelSettings(updatedProducts);
     }
 
     @Test
@@ -99,12 +106,15 @@ class ClusterUpgradeParcelSettingsPreparationHandlerTest {
             throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException,
             CloudbreakException {
         ImageChangeDto imageChangeDto = new ImageChangeDto(STACK_ID, IMAGE_ID, IMAGE_CATALOG_NAME, IMAGE_CATALOG_URL);
+        Image targetImage = Image.builder().withOsType(OsType.RHEL9.getOsType()).withArchitecture(Architecture.X86_64.getName()).build();
         Set<ClouderaManagerProduct> requiredProducts = Collections.singleton(new ClouderaManagerProduct());
         when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
         when(stackDto.getWorkspace()).thenReturn(createWorkspace());
         when(imageCatalogService.getImage(WORKSPACE_ID, IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, IMAGE_ID)).thenReturn(
-                StatedImage.statedImage(image, IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME));
-        when(parcelService.getRequiredProductsFromImage(stackDto, image)).thenReturn(requiredProducts);
+                StatedImage.statedImage(targetImage, IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME));
+        when(parcelService.getRequiredProductsFromImage(stackDto, targetImage)).thenReturn(requiredProducts);
+        when(osChangeService.updatePreWarmParcelUrlInCaseOfOsChange(requiredProducts, OsType.RHEL8, OsType.RHEL9, targetImage.getArchitecture()))
+                .thenReturn(requiredProducts);
         when(clusterApiConnectors.getConnector(stackDto)).thenReturn(clusterApi);
         doThrow(new CloudbreakException("Failed to update parcel settings")).when(clusterApi).updateParcelSettings(requiredProducts);
 
@@ -113,13 +123,13 @@ class ClusterUpgradeParcelSettingsPreparationHandlerTest {
         assertEquals(FAILED_CLUSTER_UPGRADE_PREPARATION_EVENT.name(), nextFlowStepSelector.selector());
         verify(stackDtoService).getById(STACK_ID);
         verify(imageCatalogService).getImage(WORKSPACE_ID, IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, IMAGE_ID);
-        verify(parcelService).getRequiredProductsFromImage(stackDto, image);
+        verify(parcelService).getRequiredProductsFromImage(stackDto, targetImage);
         verify(clusterApiConnectors).getConnector(stackDto);
         verify(clusterApi).updateParcelSettings(requiredProducts);
     }
 
     private HandlerEvent<ClusterUpgradeParcelSettingsPreparationEvent> createEvent(ImageChangeDto imageChangeDto) {
-        return new HandlerEvent<>(new Event<>(new ClusterUpgradeParcelSettingsPreparationEvent(STACK_ID, imageChangeDto)));
+        return new HandlerEvent<>(new Event<>(new ClusterUpgradeParcelSettingsPreparationEvent(STACK_ID, imageChangeDto, OsType.RHEL8)));
     }
 
     private Workspace createWorkspace() {

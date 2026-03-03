@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade;
 
+import static com.sequenceiq.common.model.OsType.RHEL8;
+import static com.sequenceiq.common.model.OsType.RHEL9;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.mockito.Mockito.doThrow;
@@ -29,7 +31,8 @@ import com.sequenceiq.cloudbreak.service.parcel.ParcelService;
 import com.sequenceiq.cloudbreak.service.parcel.UpgradeCandidateProvider;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradePrerequisitesService;
-import com.sequenceiq.common.model.OsType;
+import com.sequenceiq.cloudbreak.service.upgrade.image.OsChangeService;
+import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
 @ExtendWith(MockitoExtension.class)
@@ -53,6 +56,9 @@ class ClusterUpgradeInitHandlerTest {
     private UpgradeCandidateProvider upgradeCandidateProvider;
 
     @Mock
+    private OsChangeService osChangeService;
+
+    @Mock
     private StackDto stackDto;
 
     @Mock
@@ -65,22 +71,25 @@ class ClusterUpgradeInitHandlerTest {
     void testDoAcceptSuccess() throws Exception {
         String targetRuntimeVersion = "7.3.2";
         Set<ClusterComponentView> components = new HashSet<>();
-        Set<ClouderaManagerProduct> upgradeCandidateProducts = new HashSet<>();
-        ClusterUpgradeInitRequest request = new ClusterUpgradeInitRequest(STACK_ID, targetRuntimeVersion, OsType.RHEL8);
+        Set<ClouderaManagerProduct> upgradeCandidateProducts = Set.of(new ClouderaManagerProduct(), new ClouderaManagerProduct());
+        Set<ClouderaManagerProduct> updatedProducts = Set.of(new ClouderaManagerProduct());
+        ClusterUpgradeInitRequest request = new ClusterUpgradeInitRequest(STACK_ID, targetRuntimeVersion, RHEL9, Architecture.X86_64.getName(), RHEL8);
         HandlerEvent<ClusterUpgradeInitRequest> event = new HandlerEvent<>(new Event<>(request));
 
         when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
         when(parcelService.getParcelComponentsByBlueprint(stackDto)).thenReturn(components);
         when(clusterApiConnectors.getConnector(stackDto)).thenReturn(connector);
         when(upgradeCandidateProvider.getRequiredProductsForUpgrade(connector, stackDto, components)).thenReturn(upgradeCandidateProducts);
+        when(osChangeService.updatePreWarmParcelUrlInCaseOfOsChange(upgradeCandidateProducts, request.getOriginalOsType(), request.getTargetOsType(),
+                request.getArchitecture())).thenReturn(updatedProducts);
 
         Selectable result = underTest.doAccept(event);
 
         assertInstanceOf(ClusterUpgradeInitSuccess.class, result);
         assertEquals("CLUSTERUPGRADEINITSUCCESS", result.getSelector());
         assertEquals(STACK_ID, result.getResourceId());
-        assertEquals(upgradeCandidateProducts, ((ClusterUpgradeInitSuccess) result).getUpgradeCandidateProducts());
-        assertEquals(OsType.RHEL8, ((ClusterUpgradeInitSuccess) result).getOriginalOsType());
+        assertEquals(updatedProducts, ((ClusterUpgradeInitSuccess) result).getUpgradeCandidateProducts());
+        assertEquals(RHEL8, ((ClusterUpgradeInitSuccess) result).getOriginalOsType());
 
         verify(parcelService).removeUnusedParcelComponents(stackDto, components);
         verify(clusterUpgradePrerequisitesService).removeIncompatibleServices(stackDto, connector, targetRuntimeVersion);
@@ -91,7 +100,7 @@ class ClusterUpgradeInitHandlerTest {
     void testDoAcceptFailure() throws Exception {
         String targetRuntimeVersion = "7.3.2";
         Set<ClusterComponentView> components = new HashSet<>();
-        ClusterUpgradeInitRequest request = new ClusterUpgradeInitRequest(STACK_ID, targetRuntimeVersion, OsType.RHEL8);
+        ClusterUpgradeInitRequest request = new ClusterUpgradeInitRequest(STACK_ID, targetRuntimeVersion, RHEL9, Architecture.X86_64.getName(), RHEL8);
         HandlerEvent<ClusterUpgradeInitRequest> event = new HandlerEvent<>(new Event<>(request));
 
         when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);

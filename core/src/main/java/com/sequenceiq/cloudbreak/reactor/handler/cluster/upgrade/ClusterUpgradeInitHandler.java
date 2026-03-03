@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.service.parcel.ParcelService;
 import com.sequenceiq.cloudbreak.service.parcel.UpgradeCandidateProvider;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradePrerequisitesService;
+import com.sequenceiq.cloudbreak.service.upgrade.image.OsChangeService;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
@@ -46,6 +47,9 @@ public class ClusterUpgradeInitHandler extends ExceptionCatcherEventHandler<Clus
     @Inject
     private UpgradeCandidateProvider upgradeCandidateProvider;
 
+    @Inject
+    private OsChangeService osChangeService;
+
     @Override
     public String selector() {
         return EventSelectorUtil.selector(ClusterUpgradeInitRequest.class);
@@ -68,7 +72,9 @@ public class ClusterUpgradeInitHandler extends ExceptionCatcherEventHandler<Clus
             ClusterApi connector = clusterApiConnectors.getConnector(stackDto);
             clusterUpgradePrerequisitesService.removeIncompatibleServices(stackDto, connector, request.getTargetRuntimeVersion());
             Set<ClouderaManagerProduct> upgradeCandidateProducts = upgradeCandidateProvider.getRequiredProductsForUpgrade(connector, stackDto, components);
-            result = new ClusterUpgradeInitSuccess(request.getResourceId(), upgradeCandidateProducts, request.getOriginalOsType());
+            Set<ClouderaManagerProduct> updatedUpgradeCandidateProductsForOsChange = osChangeService.updatePreWarmParcelUrlInCaseOfOsChange(
+                    upgradeCandidateProducts, request.getOriginalOsType(), request.getTargetOsType(), request.getArchitecture());
+            result = new ClusterUpgradeInitSuccess(request.getResourceId(), updatedUpgradeCandidateProductsForOsChange, request.getOriginalOsType());
         } catch (Exception e) {
             LOGGER.error("Upgrade initialization failed", e);
             result = new ClusterUpgradeFailedEvent(request.getResourceId(), e, DetailedStackStatus.CLUSTER_UPGRADE_INIT_FAILED);

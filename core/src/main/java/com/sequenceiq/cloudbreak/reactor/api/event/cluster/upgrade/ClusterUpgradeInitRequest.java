@@ -11,15 +11,23 @@ public class ClusterUpgradeInitRequest extends StackEvent {
 
     private final String targetRuntimeVersion;
 
+    private final OsType targetOsType;
+
+    private final String architecture;
+
     private final OsType originalOsType;
 
     @JsonCreator
     public ClusterUpgradeInitRequest(
             @JsonProperty("resourceId") Long stackId,
             @JsonProperty("targetRuntimeVersion") String targetRuntimeVersion,
+            @JsonProperty("targetOsType") OsType targetOsType,
+            @JsonProperty("architecture") String architecture,
             @JsonProperty("originalOsType") OsType originalOsType) {
         super(stackId);
         this.targetRuntimeVersion = targetRuntimeVersion;
+        this.targetOsType = targetOsType;
+        this.architecture = architecture;
         this.originalOsType = originalOsType;
     }
 
@@ -31,10 +39,20 @@ public class ClusterUpgradeInitRequest extends StackEvent {
         return originalOsType;
     }
 
+    public OsType getTargetOsType() {
+        return targetOsType;
+    }
+
+    public String getArchitecture() {
+        return architecture;
+    }
+
     @Override
     public String toString() {
         return new StringJoiner(", ", ClusterUpgradeInitRequest.class.getSimpleName() + "[", "]")
                 .add("targetRuntimeVersion='" + targetRuntimeVersion + "'")
+                .add("targetOsType='" + targetOsType + "'")
+                .add("architecture='" + architecture + "'")
                 .add("originalOsType='" + originalOsType + "'")
                 .add(super.toString())
                 .toString();

@@ -138,14 +138,15 @@ public class UpgradeDistroxFlowEventChainFactory implements FlowEventChainFactor
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
 
         StackDto stack = stackDtoService.getByIdWithoutResources(event.getResourceId());
+        OsType currentOsType = getCurrentOsType(event.getResourceId());
 
         flowEventChain.addAll(getFullSyncEvent(event));
         flowEventChain.addAll(getUpgradeValidationTriggerEvent(event));
-        flowEventChain.addAll(getClusterUpgradePreparationTriggerEvent(event));
+        flowEventChain.addAll(getClusterUpgradePreparationTriggerEvent(event, currentOsType));
         flowEventChain.addAll(getClusterScaleTriggerEvent(event.getResourceId()));
         flowEventChain.addAll(saltVersionUpgradeService.getSaltSecretRotationTriggerEvent(event.getResourceId()));
         flowEventChain.addAll(getSaltUpdateTriggerEvent(event));
-        flowEventChain.addAll(getClusterUpgradeTriggerEvent(event, stack));
+        flowEventChain.addAll(getClusterUpgradeTriggerEvent(event, stack, currentOsType));
         flowEventChain.addAll(getImageUpdateTriggerEvent(event));
         flowEventChain.addAll(embeddedDbUpgradeFlowTriggersFactory.createFlowTriggers(event.getResourceId(), true));
         flowEventChain.addAll(getClusterRepairTriggerEvent(event, stack));
@@ -202,13 +203,14 @@ public class UpgradeDistroxFlowEventChainFactory implements FlowEventChainFactor
         return syncEvents;
     }
 
-    private List<ClusterUpgradePreparationTriggerEvent> getClusterUpgradePreparationTriggerEvent(DistroXUpgradeFlowChainTriggerEvent event) {
+    private List<ClusterUpgradePreparationTriggerEvent> getClusterUpgradePreparationTriggerEvent(DistroXUpgradeFlowChainTriggerEvent event,
+            OsType currentOsType) {
         if (event.isLockComponents()) {
             LOGGER.debug("Skip upgrade preparation because the component versions are not changing.");
             return List.of();
         } else {
             return List.of(new ClusterUpgradePreparationTriggerEvent(event.getResourceId(), event.accepted(), event.getImageChangeDto(),
-                    event.getRuntimeVersion()));
+                    event.getRuntimeVersion(), currentOsType));
         }
     }
 
@@ -216,7 +218,7 @@ public class UpgradeDistroxFlowEventChainFactory implements FlowEventChainFactor
         return List.of(new StackEvent(SaltUpdateEvent.SALT_UPDATE_EVENT.event(), event.getResourceId(), event.accepted()));
     }
 
-    private List<Selectable> getClusterUpgradeTriggerEvent(DistroXUpgradeFlowChainTriggerEvent event, StackDto stack) {
+    private List<Selectable> getClusterUpgradeTriggerEvent(DistroXUpgradeFlowChainTriggerEvent event, StackDto stack, OsType currentOsType) {
         if (event.isLockComponents()) {
             LOGGER.debug("Skip runtime upgrade because the component versions are not changing.");
             return List.of();
@@ -224,7 +226,7 @@ public class UpgradeDistroxFlowEventChainFactory implements FlowEventChainFactor
             List<Selectable> upgradeEvents =
                     new ArrayList<>(setDefaultJavaVersionFlowChainService.setDefaultJavaVersionTriggerEvent(stack, event.getImageChangeDto()));
             upgradeEvents.add(new ClusterUpgradeTriggerEvent(CLUSTER_UPGRADE_INIT_EVENT.event(), event.getResourceId(), event.accepted(),
-                    event.getImageChangeDto().getImageId(), event.isRollingUpgradeEnabled(), getCurrentOsType(event.getResourceId())));
+                    event.getImageChangeDto().getImageId(), event.isRollingUpgradeEnabled(), currentOsType));
             return upgradeEvents;
         }
     }

@@ -15,6 +15,7 @@ import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterUpgradeTriggerEvent;
@@ -37,6 +38,7 @@ import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.stack.StackImageService;
 import com.sequenceiq.cloudbreak.service.upgrade.ImageComponentUpdaterService;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradeImageInfo;
+import com.sequenceiq.common.model.OsType;
 import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowState;
@@ -72,7 +74,9 @@ public class ClusterUpgradeActions {
                     variables.put(ROLLING_UPGRADE_ENABLED, payload.isRollingUpgradeEnabled());
                     clusterUpgradeTargetImageService.saveImage(stackId, targetStatedImage);
                     clusterUpgradeService.initUpgradeCluster(stackId, targetStatedImage, payload.isRollingUpgradeEnabled());
-                    Selectable event = new ClusterUpgradeInitRequest(stackId, targetStatedImage.getImage().getVersion(), payload.getOrininalOsType());
+                    Image targetImage = targetStatedImage.getImage();
+                    Selectable event = new ClusterUpgradeInitRequest(stackId, targetImage.getVersion(), OsType.getByOsTypeString(targetImage.getOsType()),
+                            targetImage.getArchitecture(), payload.getOriginalOsType());
                     sendEvent(context, event.selector(), event);
                 } catch (Exception e) {
                     LOGGER.error("Error during updating cluster components with image id: [{}]", payload.getImageId(), e);
@@ -100,7 +104,7 @@ public class ClusterUpgradeActions {
     public Action<?, ?> upgradeClusterManager() {
         return new AbstractClusterUpgradeAction<>(ClusterUpgradeInitSuccess.class) {
             @Inject
-            private ClusterUpgradeService  clusterUpgradeService;
+            private ClusterUpgradeService clusterUpgradeService;
 
             @Override
             protected ClusterUpgradeContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext,
