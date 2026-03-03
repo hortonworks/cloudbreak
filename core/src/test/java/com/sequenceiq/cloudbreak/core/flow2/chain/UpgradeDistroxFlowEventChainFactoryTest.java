@@ -155,9 +155,9 @@ class UpgradeDistroxFlowEventChainFactoryTest {
         assertUpdatePreparationEvent(flowChainQueue, IMAGE_ID);
         assertSaltSecretRotationTriggerEvent(flowChainQueue);
         assertSaltUpdateEvent(flowChainQueue);
+        assertImageUpdateEvent(flowChainQueue);
         assertSetDefaultJavaEvent(flowChainQueue);
         assertUpgradeEvent(flowChainQueue, IMAGE_ID);
-        assertImageUpdateEvent(flowChainQueue);
     }
 
     @Test
@@ -201,8 +201,8 @@ class UpgradeDistroxFlowEventChainFactoryTest {
         assertUpdatePreparationEvent(flowChainQueue, IMAGE_ID);
         assertClusterScaleTriggerEvent(flowChainQueue);
         assertSaltUpdateEvent(flowChainQueue);
-        assertUpgradeEvent(flowChainQueue, IMAGE_ID);
         assertImageUpdateEvent(flowChainQueue);
+        assertUpgradeEvent(flowChainQueue, IMAGE_ID);
     }
 
     private void assertClusterSyncTriggerEvent(FlowTriggerEventQueue flowTriggerEventQueue) {
@@ -318,8 +318,8 @@ class UpgradeDistroxFlowEventChainFactoryTest {
         assertUpdateValidationEvent(flowChainQueue, IMAGE_ID, event.isReplaceVms(), event.isLockComponents(), event.isRollingUpgradeEnabled());
         assertUpdatePreparationEvent(flowChainQueue, IMAGE_ID);
         assertSaltUpdateEvent(flowChainQueue);
-        assertUpgradeEvent(flowChainQueue, IMAGE_ID);
         assertImageUpdateEvent(flowChainQueue);
+        assertUpgradeEvent(flowChainQueue, IMAGE_ID);
         assertRepairEvent(flowChainQueue, RepairType.ONE_BY_ONE, 2, "originalVariant");
         verify(clusterRepairService, times(1)).validateRepair(eq(ManualClusterRepairMode.NODE_ID), eq(STACK_ID), eq(Set.of("master-1", "master-2")), eq(false));
     }

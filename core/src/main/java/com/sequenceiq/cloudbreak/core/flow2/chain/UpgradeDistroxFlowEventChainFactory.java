@@ -146,8 +146,8 @@ public class UpgradeDistroxFlowEventChainFactory implements FlowEventChainFactor
         flowEventChain.addAll(getClusterScaleTriggerEvent(event.getResourceId()));
         flowEventChain.addAll(saltVersionUpgradeService.getSaltSecretRotationTriggerEvent(event.getResourceId()));
         flowEventChain.addAll(getSaltUpdateTriggerEvent(event));
-        flowEventChain.addAll(getClusterUpgradeTriggerEvent(event, stack, currentOsType));
         flowEventChain.addAll(getImageUpdateTriggerEvent(event));
+        flowEventChain.addAll(getClusterUpgradeTriggerEvent(event, stack, currentOsType));
         flowEventChain.addAll(embeddedDbUpgradeFlowTriggersFactory.createFlowTriggers(event.getResourceId(), true));
         flowEventChain.addAll(getClusterRepairTriggerEvent(event, stack));
 
