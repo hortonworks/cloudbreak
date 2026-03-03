@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.flow.freeipa.trust.setupfinish.action;
 
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_SETUP_FINISH_TRUST_FINISHED;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus.TRUST_SETUP_FINISH_SUCCESSFUL;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.TrustStatus.TRUST_ACTIVE;
 import static com.sequenceiq.freeipa.flow.freeipa.trust.setupfinish.event.FreeIpaTrustSetupFinishFlowEvent.TRUST_SETUP_FINISH_FINISHED_EVENT;
@@ -34,18 +35,9 @@ public class FreeIpaTrustSetupFinishSuccessAction extends FreeIpaTrustSetupFinis
     @Override
     protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) throws Exception {
         Stack stack = context.getStack();
-        updateStatuses(
-                stack,
-                TRUST_SETUP_FINISH_SUCCESSFUL,
-                "Finish setting up cross-realm trust was successful",
-                TRUST_ACTIVE
-        );
-        operationService.completeOperation(
-                stack.getAccountId(),
-                getOperationId(variables),
-                List.of(new SuccessDetails(stack.getEnvironmentCrn())),
-                List.of()
-        );
+        updateStatuses(stack, TRUST_SETUP_FINISH_SUCCESSFUL, "Finish setting up cross-realm trust was successful", TRUST_ACTIVE);
+        getEventService().sendEventAndNotification(stack, context.getFlowTriggerUserCrn(), FREEIPA_SETUP_FINISH_TRUST_FINISHED);
+        operationService.completeOperation(stack.getAccountId(), getOperationId(variables), List.of(new SuccessDetails(stack.getEnvironmentCrn())), List.of());
         crossRealmTrustStatusSyncJobService.schedule(stack.getId());
         sendEvent(context, new StackEvent(TRUST_SETUP_FINISH_FINISHED_EVENT.event(), payload.getResourceId()));
     }

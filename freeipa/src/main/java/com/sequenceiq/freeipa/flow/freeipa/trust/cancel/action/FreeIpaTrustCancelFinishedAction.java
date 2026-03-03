@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.flow.freeipa.trust.cancel.action;
 
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_CANCEL_TRUST_FINISHED;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus.CANCEL_TRUST_SETUP_SUCCESSFUL;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.TrustStatus.TRUST_SETUP_REQUIRED;
 import static com.sequenceiq.freeipa.flow.freeipa.trust.cancel.event.FreeIpaTrustCancelFlowEvent.TRUST_CANCEL_FINISHED_EVENT;
@@ -30,18 +31,9 @@ public class FreeIpaTrustCancelFinishedAction extends FreeIpaTrustCancelAction<S
     @Override
     protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) throws Exception {
         Stack stack = context.getStack();
-        updateStatuses(
-                stack,
-                CANCEL_TRUST_SETUP_SUCCESSFUL,
-                "Cancel cross-realm trust was successful",
-                TRUST_SETUP_REQUIRED
-        );
-        operationService.completeOperation(
-                stack.getAccountId(),
-                getOperationId(variables),
-                List.of(new SuccessDetails(stack.getEnvironmentCrn())),
-                List.of()
-        );
+        updateStatuses(stack, CANCEL_TRUST_SETUP_SUCCESSFUL, "Cancel cross-realm trust was successful", TRUST_SETUP_REQUIRED);
+        getEventService().sendEventAndNotification(stack, context.getFlowTriggerUserCrn(), FREEIPA_CANCEL_TRUST_FINISHED);
+        operationService.completeOperation(stack.getAccountId(), getOperationId(variables), List.of(new SuccessDetails(stack.getEnvironmentCrn())), List.of());
         sendEvent(context, new StackEvent(TRUST_CANCEL_FINISHED_EVENT.event(), payload.getResourceId()));
     }
 }

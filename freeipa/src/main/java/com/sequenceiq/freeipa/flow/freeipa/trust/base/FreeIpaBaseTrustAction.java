@@ -26,7 +26,6 @@ import com.sequenceiq.freeipa.service.freeipa.trust.operation.TaskResultConverte
 import com.sequenceiq.freeipa.service.freeipa.trust.operation.TaskResults;
 import com.sequenceiq.freeipa.service.operation.OperationService;
 import com.sequenceiq.freeipa.service.stack.StackService;
-import com.sequenceiq.freeipa.service.stack.StackUpdater;
 
 public abstract class FreeIpaBaseTrustAction<S extends FlowState, E extends FlowEvent, P extends Payload>
         extends AbstractStackAction<S, E, StackContext, P>
@@ -42,9 +41,6 @@ public abstract class FreeIpaBaseTrustAction<S extends FlowState, E extends Flow
 
     @Inject
     private CredentialService credentialService;
-
-    @Inject
-    private StackUpdater stackUpdater;
 
     @Inject
     private CrossRealmTrustService crossRealmTrustService;
@@ -72,7 +68,7 @@ public abstract class FreeIpaBaseTrustAction<S extends FlowState, E extends Flow
     }
 
     protected void updateStatuses(Stack stack, DetailedStackStatus detailedStackStatus, String statusReason, TrustStatus trustStatus) {
-        stackUpdater.updateStackStatus(stack, detailedStackStatus, statusReason);
+        getStackUpdater().updateStackStatus(stack, detailedStackStatus, statusReason);
         crossRealmTrustService.updateTrustStateByStackId(stack.getId(), trustStatus);
     }
 

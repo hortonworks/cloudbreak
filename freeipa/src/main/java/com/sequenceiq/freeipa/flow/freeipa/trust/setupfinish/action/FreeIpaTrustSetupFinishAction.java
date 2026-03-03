@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.flow.freeipa.trust.setupfinish.action;
 
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_SETUP_FINISH_TRUST_STARTED;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus.TRUST_SETUP_FINISH_IN_PROGRESS;
 import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
 
@@ -24,12 +25,8 @@ public class FreeIpaTrustSetupFinishAction extends FreeIpaTrustSetupFinishBaseAc
     @Override
     protected void doExecute(StackContext context, FreeIpaTrustSetupFinishEvent payload, Map<Object, Object> variables) throws Exception {
         setOperationId(context.getStack(), variables, payload.getOperationId());
-        updateStatuses(
-                context.getStack(),
-                TRUST_SETUP_FINISH_IN_PROGRESS,
-                "Add cross-realm trust to FreeIPA",
-                TrustStatus.TRUST_SETUP_FINISH_IN_PROGRESS
-        );
+        updateStatuses(context.getStack(), TRUST_SETUP_FINISH_IN_PROGRESS, "Add cross-realm trust to FreeIPA", TrustStatus.TRUST_SETUP_FINISH_IN_PROGRESS);
+        getEventService().sendEventAndNotification(context.getStack(), context.getFlowTriggerUserCrn(), FREEIPA_SETUP_FINISH_TRUST_STARTED);
         FreeIpaTrustSetupFinishAddRequest request = new FreeIpaTrustSetupFinishAddRequest(payload.getResourceId());
         sendEvent(context, request.selector(), request);
     }

@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.flow.freeipa.trust.cancel.action;
 
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_CANCEL_TRUST_STARTED;
 import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
 
 import java.util.Map;
@@ -24,12 +25,9 @@ public class FreeIpaTrustCancelConfigurationAction extends FreeIpaTrustCancelAct
     @Override
     protected void doExecute(StackContext context, FreeIpaTrustCancelEvent payload, Map<Object, Object> variables) throws Exception {
         setOperationId(context.getStack(), variables, payload.getOperationId());
-        updateStatuses(
-                context.getStack(),
-                DetailedStackStatus.CANCEL_TRUST_SETUP_IN_PROGRESS,
-                "Cancel cross-realm trust setup",
-                TrustStatus.CANCEL_TRUST_SETUP_IN_PROGRESS
-        );
+        updateStatuses(context.getStack(), DetailedStackStatus.CANCEL_TRUST_SETUP_IN_PROGRESS, "Cancel cross-realm trust setup",
+                TrustStatus.CANCEL_TRUST_SETUP_IN_PROGRESS);
+        getEventService().sendEventAndNotification(context.getStack(), context.getFlowTriggerUserCrn(), FREEIPA_CANCEL_TRUST_STARTED);
         FreeIpaTrustCancelConfigurationRequest request = new FreeIpaTrustCancelConfigurationRequest(payload.getResourceId());
         sendEvent(context, request.selector(), request);
     }
