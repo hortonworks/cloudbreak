@@ -23,12 +23,14 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.service.AuthorizationEnvironmentCrnProvider;
 import com.sequenceiq.authorization.service.AuthorizationResourceCrnProvider;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV4Response;
 import com.sequenceiq.cloudbreak.api.model.StatusKind;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.periscope.api.model.AlertType;
 import com.sequenceiq.periscope.api.model.AutoscaleClusterState;
+import com.sequenceiq.periscope.api.model.ClusterState;
 import com.sequenceiq.periscope.api.model.ScalingStatus;
 import com.sequenceiq.periscope.api.model.StateJson;
 import com.sequenceiq.periscope.common.MessageCode;
@@ -218,26 +220,54 @@ public class AutoScaleClusterCommonService implements AuthorizationResourceCrnPr
     }
 
     protected Cluster getClusterByCrnOrName(NameOrCrn nameOrCrn) {
-        return nameOrCrn.hasName() ?
-                clusterService.findOneByStackNameAndTenant(nameOrCrn.getName(), restRequestThreadLocalService.getCloudbreakTenant())
-                        .orElseGet(() -> syncCBClusterByName(nameOrCrn.getName())) :
-                clusterService.findOneByStackCrnAndTenant(nameOrCrn.getCrn(), restRequestThreadLocalService.getCloudbreakTenant())
-                        .orElseGet(() -> syncCBClusterByCrn(nameOrCrn.getCrn()));
-    }
-
-    protected Cluster syncCBClusterByCrn(String stackCrn) {
-        return Optional.ofNullable(cloudbreakCommunicator.getAutoscaleClusterByCrn(stackCrn))
-                .filter(stack -> WORKLOAD.equals(stack.getStackType()) && stack.getClusterStatus().getStatusKind().equals(StatusKind.FINAL))
-                .map(stack -> clusterService.create(stack))
-                .orElseThrow(NotFoundException.notFound("cluster", stackCrn));
-    }
-
-    protected Cluster syncCBClusterByName(String stackName) {
         String accountId = restRequestThreadLocalService.getCloudbreakTenant();
-        return Optional.ofNullable(cloudbreakCommunicator.getAutoscaleClusterByName(stackName, accountId))
-                .filter(stack -> WORKLOAD.equals(stack.getStackType()) && stack.getClusterStatus().getStatusKind().equals(StatusKind.FINAL))
-                .map(stack -> clusterService.create(stack))
-                .orElseThrow(NotFoundException.notFound("cluster", stackName));
+        Optional<Cluster> cluster = nameOrCrn.hasName()
+                ? clusterService.findOneByStackNameAndTenant(nameOrCrn.getName(), accountId)
+                : clusterService.findOneByStackCrnAndTenant(nameOrCrn.getCrn(), accountId);
+        return cluster.isEmpty()
+                ? syncCBCluster(nameOrCrn, accountId)
+                : refreshCluster(cluster.get(), nameOrCrn, accountId);
+    }
+
+    private Cluster refreshCluster(Cluster cluster, NameOrCrn nameOrCrn, String accountId) {
+        AutoscaleStackV4Response response;
+        if (nameOrCrn.hasName()) {
+            response = Optional
+                    .ofNullable(cloudbreakCommunicator.getAutoscaleClusterByName(nameOrCrn.getName(), accountId))
+                    .filter(stack -> WORKLOAD.equals(stack.getStackType()))
+                    .orElseThrow(NotFoundException.notFound("cluster", nameOrCrn.getName()));
+        } else {
+            response = Optional
+                    .ofNullable(cloudbreakCommunicator.getAutoscaleClusterByCrn(nameOrCrn.getCrn()))
+                    .filter(stack -> WORKLOAD.equals(stack.getStackType()))
+                    .orElseThrow(NotFoundException.notFound("cluster", nameOrCrn.getCrn()));
+        }
+        updateClusterState(cluster, response);
+        return clusterService.save(cluster);
+    }
+
+    private void updateClusterState(Cluster cluster, AutoscaleStackV4Response response) {
+        ClusterState newState = StatusKind.FINAL.equals(response.getClusterStatus().getStatusKind())
+                ? ClusterState.PENDING
+                : ClusterState.SUSPENDED;
+
+        cluster.setState(newState);
+    }
+
+    protected Cluster syncCBCluster(NameOrCrn nameOrCrn, String accountId) {
+        if (nameOrCrn.hasName()) {
+            return Optional.ofNullable(cloudbreakCommunicator.getAutoscaleClusterByName(nameOrCrn.getName(), accountId))
+                    .filter(stack -> WORKLOAD.equals(stack.getStackType())
+                            && stack.getClusterStatus().getStatusKind().equals(StatusKind.FINAL))
+                    .map(stack -> clusterService.create(stack))
+                    .orElseThrow(NotFoundException.notFound("cluster", nameOrCrn.getName()));
+        } else {
+            return Optional.ofNullable(cloudbreakCommunicator.getAutoscaleClusterByCrn(nameOrCrn.getCrn()))
+                    .filter(stack -> WORKLOAD.equals(stack.getStackType())
+                            && stack.getClusterStatus().getStatusKind().equals(StatusKind.FINAL))
+                    .map(stack -> clusterService.create(stack))
+                    .orElseThrow(NotFoundException.notFound("cluster", nameOrCrn.getCrn()));
+        }
     }
 
     protected void createAutoscalingStateChangedHistoryAndNotify(Cluster cluster) {

@@ -72,19 +72,25 @@ public class AutoscaleClusterCommonServiceTest {
 
     @Test
     public void testGetClusterByCRNWhenPresentInDB() {
+        AutoscaleStackV4Response autoscaleStackV4Response = mock(AutoscaleStackV4Response.class);
         when(clusterService.findOneByStackCrnAndTenant(TEST_CLUSTER_CRN, tenant)).thenReturn(getACluster());
+        when(cloudbreakCommunicator.getAutoscaleClusterByCrn(TEST_CLUSTER_CRN)).thenReturn(autoscaleStackV4Response);
+        when(autoscaleStackV4Response.getStackType()).thenReturn(StackType.WORKLOAD);
+        when(autoscaleStackV4Response.getClusterStatus()).thenReturn(Status.UPDATE_IN_PROGRESS);
 
         underTest.getClusterByCrnOrName(NameOrCrn.ofCrn(TEST_CLUSTER_CRN));
-        verify(cloudbreakCommunicator, never()).getAutoscaleClusterByCrn(TEST_CLUSTER_CRN);
         verify(clusterService, never()).create(any(AutoscaleStackV4Response.class));
     }
 
     @Test
     public void testGetClusterByNameWhenPresentInDB() {
+        AutoscaleStackV4Response autoscaleStackV4Response = mock(AutoscaleStackV4Response.class);
         when(clusterService.findOneByStackNameAndTenant(TEST_CLUSTER_NAME, tenant)).thenReturn(getACluster());
+        when(cloudbreakCommunicator.getAutoscaleClusterByName(TEST_CLUSTER_NAME, tenant)).thenReturn(autoscaleStackV4Response);
+        when(autoscaleStackV4Response.getStackType()).thenReturn(StackType.WORKLOAD);
+        when(autoscaleStackV4Response.getClusterStatus()).thenReturn(Status.AVAILABLE);
 
         underTest.getClusterByCrnOrName(NameOrCrn.ofName(TEST_CLUSTER_NAME));
-        verify(cloudbreakCommunicator, never()).getAutoscaleClusterByName(TEST_CLUSTER_NAME, tenant);
         verify(clusterService, never()).create(any(AutoscaleStackV4Response.class));
     }
 

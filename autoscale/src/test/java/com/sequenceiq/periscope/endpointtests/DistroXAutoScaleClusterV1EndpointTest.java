@@ -1,7 +1,9 @@
 package com.sequenceiq.periscope.endpointtests;
 
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
 import static com.sequenceiq.periscope.api.model.AdjustmentType.LOAD_BASED;
 import static com.sequenceiq.periscope.api.model.AdjustmentType.NODE_COUNT;
+import static com.sequenceiq.periscope.api.model.ClusterState.PENDING;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -35,7 +37,9 @@ import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.sequenceiq.authorization.service.OwnerAssignmentService;
 import com.sequenceiq.authorization.service.ResourceAuthorizationService;
 import com.sequenceiq.authorization.service.ResourceNameFactoryService;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.AutoscaleRecommendationV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV4Response;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.altus.UmsClient;
 import com.sequenceiq.cloudbreak.quartz.configuration.QuartzJobInitializer;
@@ -54,6 +58,7 @@ import com.sequenceiq.periscope.api.model.TimeAlertResponse;
 import com.sequenceiq.periscope.client.AutoscaleUserCrnClientBuilder;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.ClusterPertain;
+import com.sequenceiq.periscope.monitor.handler.CloudbreakCommunicator;
 import com.sequenceiq.periscope.repository.ClusterPertainRepository;
 import com.sequenceiq.periscope.repository.ClusterRepository;
 import com.sequenceiq.periscope.repository.LoadAlertRepository;
@@ -114,6 +119,9 @@ class DistroXAutoScaleClusterV1EndpointTest {
     private ResourceAuthorizationService resourceAuthorizationService;
 
     @MockBean
+    private CloudbreakCommunicator cloudbreakCommunicator;
+
+    @MockBean
     private ClusterProxyConfigurationService clusterProxyConfigurationService;
 
     @MockBean
@@ -163,6 +171,22 @@ class DistroXAutoScaleClusterV1EndpointTest {
     void setup() {
         Cluster cluster1 = createTestCluster(TEST_CLUSTER_CRN, TEST_CLUSTER_NAME, TEST_ACCOUNT_ID, TEST_WORKSPACE_ID,
                 TEST_USER_ID.toString(), TEST_USER_CRN, "cluster1");
+
+        AutoscaleStackV4Response autoscaleStackV4Response1 = new AutoscaleStackV4Response();
+        autoscaleStackV4Response1.setClusterStatus(AVAILABLE);
+        autoscaleStackV4Response1.setStatus(AVAILABLE);
+        autoscaleStackV4Response1.setStackType(StackType.WORKLOAD);
+        autoscaleStackV4Response1.setStackCrn(TEST_CLUSTER_CRN);
+        when(cloudbreakCommunicator.getAutoscaleClusterByCrn(TEST_CLUSTER_CRN)).thenReturn(autoscaleStackV4Response1);
+        when(cloudbreakCommunicator.getAutoscaleClusterByName(TEST_CLUSTER_NAME, TEST_ACCOUNT_ID)).thenReturn(autoscaleStackV4Response1);
+
+        AutoscaleStackV4Response autoscaleStackV4Response2 = new AutoscaleStackV4Response();
+        autoscaleStackV4Response2.setClusterStatus(AVAILABLE);
+        autoscaleStackV4Response2.setStatus(AVAILABLE);
+        autoscaleStackV4Response2.setStackType(StackType.WORKLOAD);
+        autoscaleStackV4Response2.setStackCrn(TEST_CLUSTER_CRN_2);
+        when(cloudbreakCommunicator.getAutoscaleClusterByCrn(TEST_CLUSTER_CRN_2)).thenReturn(autoscaleStackV4Response2);
+        when(cloudbreakCommunicator.getAutoscaleClusterByName(TEST_CLUSTER_NAME_2, TEST_ACCOUNT_ID_2)).thenReturn(autoscaleStackV4Response2);
 
         UserManagementProto.User user = UserManagementProto.User.newBuilder()
                 .setCrn(TEST_USER_CRN).setEmail("dummyuser@cloudera.com").setUserId(TEST_USER_ID.toString()).build();
@@ -266,14 +290,14 @@ class DistroXAutoScaleClusterV1EndpointTest {
         DistroXAutoscaleClusterResponse xAutoscaleClusterResponse = distroXAutoScaleClusterV1Endpoint
                 .enableAutoscaleForClusterCrn(TEST_CLUSTER_CRN, AutoscaleClusterState.enable());
         assertTrue(xAutoscaleClusterResponse.isAutoscalingEnabled(), "Autoscaling should be enabled");
-        assertEquals(ClusterState.RUNNING, xAutoscaleClusterResponse.getState());
+        assertEquals(ClusterState.PENDING, xAutoscaleClusterResponse.getState());
 
         cluster.setState(ClusterState.SUSPENDED);
         clusterRepository.save(cluster);
         xAutoscaleClusterResponse = distroXAutoScaleClusterV1Endpoint
                 .enableAutoscaleForClusterCrn(TEST_CLUSTER_CRN, AutoscaleClusterState.disable());
         assertFalse(xAutoscaleClusterResponse.isAutoscalingEnabled(), "Autoscaling should be disabled");
-        assertEquals(ClusterState.PENDING, xAutoscaleClusterResponse.getState());
+        assertEquals(PENDING, xAutoscaleClusterResponse.getState());
     }
 
     @Test
