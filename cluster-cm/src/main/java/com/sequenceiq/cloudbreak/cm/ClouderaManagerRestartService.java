@@ -32,6 +32,7 @@ import com.cloudera.api.swagger.model.ApiRole;
 import com.cloudera.api.swagger.model.ApiRoleList;
 import com.cloudera.api.swagger.model.ApiRoleNameList;
 import com.cloudera.api.swagger.model.ApiRolesToInclude;
+import com.cloudera.api.swagger.model.ApiRollingRestartArgs;
 import com.cloudera.api.swagger.model.ApiRollingRestartClusterArgs;
 import com.cloudera.api.swagger.model.ApiService;
 import com.cloudera.api.swagger.model.ApiServiceList;
@@ -48,6 +49,10 @@ import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 public class ClouderaManagerRestartService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerRestartService.class);
+
+    private static final String RESTART_COMMAND_NAME = "Restart";
+
+    private static final String ROLLING_RESTART_COMMAND_NAME = "RollingRestart";
 
     @Inject
     private ClouderaManagerPollingServiceProvider clouderaManagerPollingServiceProvider;
@@ -114,6 +119,28 @@ public class ClouderaManagerRestartService {
         }
     }
 
+    public void rollingRestartServiceRoleByType(StackDtoDelegate stack, ApiClient apiClient, String serviceType, String roleType) {
+        try {
+            String serviceName = getServiceNameByType(apiClient, stack.getName(), serviceType)
+                    .orElseThrow(() -> new ClouderaManagerOperationFailedException(String.format("Cannot find CM service by role '%s' in cluster '%s'.",
+                            serviceType, stack.getName())));
+            Optional<ApiCommand> optionalActiveRollingRestartCommand = findActiveRollingRestartRoleCommand(stack, serviceName, apiClient);
+            if (optionalActiveRollingRestartCommand.isPresent()) {
+                LOGGER.debug("Rolling restart for service {} is already running with id: [{}]", serviceName,
+                        optionalActiveRollingRestartCommand.get().getId());
+                eventService.fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), CLUSTER_CM_CLUSTER_SERVICES_ROLLING_RESTART);
+                waitForRestartExecution(apiClient, stack, optionalActiveRollingRestartCommand.get());
+            } else {
+                ApiCommand apiCommand = executeRollingRestartCommandByRoleType(apiClient, stack, serviceName, roleType);
+                eventService.fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), CLUSTER_CM_CLUSTER_SERVICES_ROLLING_RESTART);
+                waitForRestartExecution(apiClient, stack, apiCommand);
+            }
+        } catch (ApiException | CloudbreakException e) {
+            LOGGER.info("Could not rolling restart {} role type for {} service type.", roleType, serviceType, e);
+            throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
+        }
+    }
+
     private Optional<String> getServiceNameByType(ApiClient apiClient, String clusterName, String serviceType) throws ApiException {
         ServicesResourceApi servicesResourceApi = clouderaManagerApiFactory.getServicesResourceApi(apiClient);
         ApiServiceList apiServiceList = servicesResourceApi.readServices(clusterName, SUMMARY.name());
@@ -146,6 +173,16 @@ public class ClouderaManagerRestartService {
         return clustersResourceApi.rollingRestart(stack.getName(), rollingRestartClusterArgs);
     }
 
+    private ApiCommand executeRollingRestartCommandByRoleType(ApiClient apiClient, StackDtoDelegate stack, String serviceName, String roleType)
+            throws ApiException {
+        ServicesResourceApi servicesResourceApi = clouderaManagerApiFactory.getServicesResourceApi(apiClient);
+        ApiRollingRestartArgs apiRollingRestartArgs = new ApiRollingRestartArgs();
+        apiRollingRestartArgs.setRestartRoleTypes(List.of(roleType));
+        apiRollingRestartArgs.setStaleConfigsOnly(false);
+
+        return servicesResourceApi.rollingRestart(stack.getName(), serviceName, apiRollingRestartArgs);
+    }
+
     private ApiCommand executeRestartCommand(StackDtoDelegate stack, ClustersResourceApi clustersResourceApi, Optional<List<String>> serviceNames)
             throws ApiException {
         ApiRestartClusterArgs restartClusterArgs = new ApiRestartClusterArgs();
@@ -163,7 +200,14 @@ public class ClouderaManagerRestartService {
     }
 
     private String determineRestartCommandName(boolean rollingRestartEnabled) {
-        return rollingRestartEnabled ? "RollingRestart" : "Restart";
+        return rollingRestartEnabled ? ROLLING_RESTART_COMMAND_NAME : RESTART_COMMAND_NAME;
+    }
+
+    private Optional<ApiCommand> findActiveRollingRestartRoleCommand(StackDtoDelegate stack, String serviceName, ApiClient apiClient)
+            throws ApiException {
+        ServicesResourceApi servicesResourceApi = clouderaManagerApiFactory.getServicesResourceApi(apiClient);
+        ApiCommandList apiCommandList = servicesResourceApi.listActiveCommands(stack.getName(), serviceName, ROLLING_RESTART_COMMAND_NAME, SUMMARY.name());
+        return apiCommandList.getItems().stream().findFirst();
     }
 
     private Collection<ApiService> readServices(StackDtoDelegate stack, ApiClient apiClient) throws ApiException {

@@ -75,7 +75,7 @@ public class MigrateZookeeperToKraftRestartKafkaConnectNodesHandlerTest {
 
         assertInstanceOf(MigrateZookeeperToKraftEvent.class, result);
         assertEquals(START_MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT.name(), result.getSelector());
-        verify(clusterModificationService).restartServiceRoleByType(KAFKA_SERVICE_TYPE, KAFKA_CONNECT_ROLE);
+        verify(clusterModificationService).rollingRestartServiceRoleByType(KAFKA_SERVICE_TYPE, KAFKA_CONNECT_ROLE);
     }
 
     @Test
@@ -95,7 +95,7 @@ public class MigrateZookeeperToKraftRestartKafkaConnectNodesHandlerTest {
         assertInstanceOf(MigrateZookeeperToKraftEvent.class, result);
         assertEquals(START_MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT.name(), result.getSelector());
 
-        verify(clusterModificationService, times(0)).restartServiceRoleByType(KAFKA_SERVICE_TYPE, KAFKA_CONNECT_ROLE);
+        verify(clusterModificationService, times(0)).rollingRestartServiceRoleByType(KAFKA_SERVICE_TYPE, KAFKA_CONNECT_ROLE);
     }
 
     @Test
@@ -110,12 +110,12 @@ public class MigrateZookeeperToKraftRestartKafkaConnectNodesHandlerTest {
         when(clusterApi.clusterModificationService()).thenReturn(clusterModificationService);
         when(clusterModificationService.isRolePresent(clusterName, KAFKA_CONNECT_ROLE, KAFKA_SERVICE_TYPE)).thenReturn(true);
 
-        doThrow(new RuntimeException("error")).when(clusterModificationService).restartServiceRoleByType(KAFKA_SERVICE_TYPE, KAFKA_CONNECT_ROLE);
+        doThrow(new RuntimeException("error")).when(clusterModificationService).rollingRestartServiceRoleByType(KAFKA_SERVICE_TYPE, KAFKA_CONNECT_ROLE);
 
         Selectable result = underTest.doAccept(event);
 
         assertInstanceOf(MigrateZookeeperToKraftFailureEvent.class, result);
         assertEquals(FAILED_MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT.name(), result.getSelector());
-        verify(clusterModificationService).restartServiceRoleByType(KAFKA_SERVICE_TYPE, KAFKA_CONNECT_ROLE);
+        verify(clusterModificationService).rollingRestartServiceRoleByType(KAFKA_SERVICE_TYPE, KAFKA_CONNECT_ROLE);
     }
 }

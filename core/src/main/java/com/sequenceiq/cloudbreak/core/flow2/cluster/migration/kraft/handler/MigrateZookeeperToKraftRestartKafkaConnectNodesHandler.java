@@ -48,7 +48,7 @@ public class MigrateZookeeperToKraftRestartKafkaConnectNodesHandler extends Exce
         ClusterModificationService clusterModificationService = getClusterModificationService(stackDto);
         try {
             if (clusterModificationService.isRolePresent(stackDto.getCluster().getName(), KAFKA_CONNECT_ROLE, KAFKA_SERVICE_TYPE)) {
-                clusterModificationService.restartServiceRoleByType(KAFKA_SERVICE_TYPE, KAFKA_CONNECT_ROLE);
+                clusterModificationService.rollingRestartServiceRoleByType(KAFKA_SERVICE_TYPE, KAFKA_CONNECT_ROLE);
             } else {
                 LOGGER.debug("{} role is not present in cluster. Skipping the restart step.", KAFKA_CONNECT_ROLE);
             }

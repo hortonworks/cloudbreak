@@ -14,6 +14,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
@@ -43,6 +44,7 @@ import com.cloudera.api.swagger.model.ApiRestartClusterArgs;
 import com.cloudera.api.swagger.model.ApiRole;
 import com.cloudera.api.swagger.model.ApiRoleList;
 import com.cloudera.api.swagger.model.ApiRoleNameList;
+import com.cloudera.api.swagger.model.ApiRollingRestartArgs;
 import com.cloudera.api.swagger.model.ApiRollingRestartClusterArgs;
 import com.cloudera.api.swagger.model.ApiService;
 import com.cloudera.api.swagger.model.ApiServiceList;
@@ -238,6 +240,100 @@ class ClouderaManagerRestartServiceTest {
         ClouderaManagerOperationFailedException e = assertThrows(ClouderaManagerOperationFailedException.class, () ->
                 underTest.restartServiceRoleByType(stack, apiClient, "KNOX", "IDBROKER"));
         assertEquals("Cannot find CM service by role 'KNOX' in cluster 'stack-name'.", e.getMessage());
+    }
+
+    @Test
+    void testRollingRestartServiceRoleByType() throws ApiException, CloudbreakException {
+        String serviceType = "KAFKA";
+        String serviceName = "kafka-abc123";
+        when(clouderaManagerApiFactory.getServicesResourceApi(any())).thenReturn(servicesResourceApi);
+        ApiServiceList apiServiceList = mock(ApiServiceList.class);
+        ApiService apiService = mock(ApiService.class);
+        when(apiServiceList.getItems()).thenReturn(List.of(apiService));
+        when(apiService.getType()).thenReturn(serviceType);
+        when(apiService.getName()).thenReturn(serviceName);
+        when(servicesResourceApi.readServices(eq(stack.getName()), any())).thenReturn(apiServiceList);
+        ApiCommandList apiCommandList = mock(ApiCommandList.class);
+        when(servicesResourceApi.listActiveCommands(eq(stack.getName()), eq(serviceName), eq("RollingRestart"), anyString())).thenReturn(apiCommandList);
+        when(apiCommandList.getItems()).thenReturn(Collections.emptyList());
+        when(servicesResourceApi.rollingRestart(eq(stack.getName()), eq(serviceName), any(ApiRollingRestartArgs.class)))
+                .thenReturn(new ApiCommand().id(COMMAND_ID));
+        when(clouderaManagerPollingServiceProvider.startPollingCmServicesRestart(stack, apiClient, COMMAND_ID)).thenReturn(pollingResult);
+
+        underTest.rollingRestartServiceRoleByType(stack, apiClient, "KAFKA", "KAFKA_BROKER");
+
+        ArgumentCaptor<ApiRollingRestartArgs> argumentCaptor = ArgumentCaptor.forClass(ApiRollingRestartArgs.class);
+        verify(servicesResourceApi).rollingRestart(eq(stack.getName()), eq(serviceName), argumentCaptor.capture());
+        assertTrue(CollectionUtils.isEqualCollection(List.of("KAFKA_BROKER"), argumentCaptor.getValue().getRestartRoleTypes()));
+        verify(pollingResultErrorHandler).handlePollingResult(eq(pollingResult), anyString(), anyString());
+        verify(eventService).fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), CLUSTER_CM_CLUSTER_SERVICES_ROLLING_RESTART);
+    }
+
+    @Test
+    void testRollingRestartServiceRoleByTypeWhenExceptionOccursDuringCommand() throws ApiException {
+        String serviceType = "KAFKA";
+        String serviceName = "kafka-abc123";
+        String errorMessage = "Error during rolling restart KAFKA_BROKER role";
+        when(clouderaManagerApiFactory.getServicesResourceApi(any())).thenReturn(servicesResourceApi);
+        ApiServiceList apiServiceList = mock(ApiServiceList.class);
+        ApiService apiService = mock(ApiService.class);
+        when(apiServiceList.getItems()).thenReturn(List.of(apiService));
+        when(apiService.getType()).thenReturn(serviceType);
+        when(apiService.getName()).thenReturn(serviceName);
+        when(servicesResourceApi.readServices(eq(stack.getName()), any())).thenReturn(apiServiceList);
+        ApiCommandList apiCommandList = mock(ApiCommandList.class);
+        when(servicesResourceApi.listActiveCommands(eq(stack.getName()), eq(serviceName), eq("RollingRestart"), anyString())).thenReturn(apiCommandList);
+        when(apiCommandList.getItems()).thenReturn(Collections.emptyList());
+        when(servicesResourceApi.rollingRestart(eq(stack.getName()), eq(serviceName), any(ApiRollingRestartArgs.class)))
+                .thenThrow(new ApiException(errorMessage));
+
+        ClouderaManagerOperationFailedException exception = assertThrows(ClouderaManagerOperationFailedException.class, () -> underTest
+                .rollingRestartServiceRoleByType(stack, apiClient, "KAFKA", "KAFKA_BROKER"));
+
+        assertEquals(errorMessage, exception.getMessage());
+    }
+
+    @Test
+    void testRollingRestartServiceRoleByTypeWhenRollingRestartAlreadyRunning() throws ApiException, CloudbreakException {
+        String serviceType = "KAFKA";
+        String serviceName = "kafka-abc123";
+        when(clouderaManagerApiFactory.getServicesResourceApi(any())).thenReturn(servicesResourceApi);
+        ApiServiceList apiServiceList = mock(ApiServiceList.class);
+        ApiService apiService = mock(ApiService.class);
+        when(apiServiceList.getItems()).thenReturn(List.of(apiService));
+        when(apiService.getType()).thenReturn(serviceType);
+        when(apiService.getName()).thenReturn(serviceName);
+        when(servicesResourceApi.readServices(eq(stack.getName()), any())).thenReturn(apiServiceList);
+        ApiCommandList apiCommandList = mock(ApiCommandList.class);
+        ApiCommand apiCommand = mock(ApiCommand.class);
+        when(apiCommand.getId()).thenReturn(COMMAND_ID);
+        when(apiCommandList.getItems()).thenReturn(List.of(apiCommand));
+        when(servicesResourceApi.listActiveCommands(eq(stack.getName()), eq(serviceName), eq("RollingRestart"), anyString())).thenReturn(apiCommandList);
+        when(clouderaManagerPollingServiceProvider.startPollingCmServicesRestart(stack, apiClient, COMMAND_ID)).thenReturn(pollingResult);
+
+        underTest.rollingRestartServiceRoleByType(stack, apiClient, "KAFKA", "KAFKA_BROKER");
+
+        verify(pollingResultErrorHandler).handlePollingResult(eq(pollingResult), anyString(), anyString());
+        verify(eventService).fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), CLUSTER_CM_CLUSTER_SERVICES_ROLLING_RESTART);
+        verify(servicesResourceApi, times(0)).rollingRestart(anyString(), anyString(), any(ApiRollingRestartArgs.class));
+    }
+
+    @Test
+    void testRollingRestartServiceRoleByTypeWhenServiceNotFound() throws ApiException {
+        when(clouderaManagerApiFactory.getServicesResourceApi(any())).thenReturn(servicesResourceApi);
+        ApiServiceList apiServiceList = mock(ApiServiceList.class);
+        when(apiServiceList.getItems()).thenReturn(Collections.emptyList());
+        when(servicesResourceApi.readServices(eq(stack.getName()), any())).thenReturn(apiServiceList);
+
+        ClouderaManagerOperationFailedException exception = assertThrows(ClouderaManagerOperationFailedException.class, () -> underTest
+                .rollingRestartServiceRoleByType(stack, apiClient, "KAFKA", "KAFKA_BROKER"));
+
+        assertEquals("Cannot find CM service by role 'KAFKA' in cluster 'stack-name'.", exception.getMessage());
+
+        verifyNoInteractions(pollingResultErrorHandler);
+        verifyNoInteractions(eventService);
+        verify(servicesResourceApi).readServices(eq(stack.getName()), any());
+        verifyNoMoreInteractions(servicesResourceApi);
     }
 
     private ApiServiceList createApiServiceList(List<String> serviceNames) {
