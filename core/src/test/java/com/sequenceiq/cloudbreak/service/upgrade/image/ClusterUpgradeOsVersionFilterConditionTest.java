@@ -34,10 +34,11 @@ class ClusterUpgradeOsVersionFilterConditionTest {
     @MethodSource("provideTestParameters")
     public void testIsImageAllowed(OsType currentOsType, Image image, boolean rhel9Enabled, boolean osChangePermitted, boolean expectedResult) {
 
-        lenient().when(osChangeService.isOsChangePermitted(image, currentOsType, OS_USED_BY_INSTANCES, Architecture.X86_64.getName()))
+        lenient().when(osChangeService.isOsChangePermitted(image, currentOsType, OS_USED_BY_INSTANCES, Architecture.X86_64.getName(), Collections.emptyMap()))
                 .thenReturn(osChangePermitted);
 
-        boolean actual = underTest.isImageAllowed(currentOsType, Architecture.X86_64.getName(), image, rhel9Enabled, OS_USED_BY_INSTANCES);
+        boolean actual = underTest.isImageAllowed(currentOsType, Architecture.X86_64.getName(), image, rhel9Enabled, OS_USED_BY_INSTANCES,
+                Collections.emptyMap());
 
         assertEquals(expectedResult, actual);
     }

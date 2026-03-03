@@ -12,12 +12,16 @@ import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import jakarta.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.thunderhead.service.common.usage.UsageProto.CDPClusterStatus.Value;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation.ClusterUpgradePreparationState;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.preparation.event.ClusterUpgradePreparationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.ClusterUpgradeValidationState;
@@ -25,7 +29,9 @@ import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.
 import com.sequenceiq.cloudbreak.core.flow2.event.StackSyncTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.UpgradePreparationChainTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
+import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.ClusterUseCaseAware;
+import com.sequenceiq.common.model.OsType;
 import com.sequenceiq.flow.core.chain.FlowEventChainFactory;
 import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
 
@@ -33,6 +39,9 @@ import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
 public class PrepareClusterUpgradeFlowEventChainFactory implements FlowEventChainFactory<UpgradePreparationChainTriggerEvent>, ClusterUseCaseAware {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PrepareClusterUpgradeFlowEventChainFactory.class);
+
+    @Inject
+    private ComponentConfigProviderService componentConfigProviderService;
 
     @Override
     public String initEvent() {
@@ -85,7 +94,8 @@ public class PrepareClusterUpgradeFlowEventChainFactory implements FlowEventChai
                         event.getResourceId(),
                         event.accepted(),
                         event.getImageChangeDto(),
-                        event.getRuntimeVersion()
+                        event.getRuntimeVersion(),
+                        getCurrentOsType(event.getResourceId())
                 )
         );
         return syncEvents;
@@ -99,5 +109,13 @@ public class PrepareClusterUpgradeFlowEventChainFactory implements FlowEventChai
         syncEvents.add(new StackEvent(CLUSTER_SYNC_EVENT.event(), event.getResourceId()));
 
         return syncEvents;
+    }
+
+    private OsType getCurrentOsType(Long stackId) {
+        try {
+            return OsType.getByOsTypeString(componentConfigProviderService.getImage(stackId).getOsType());
+        } catch (CloudbreakImageNotFoundException e) {
+            throw new NotFoundException("Image not found for stack", e);
+        }
     }
 }
