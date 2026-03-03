@@ -38,11 +38,13 @@ public class CredentialPrerequisiteService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CredentialPrerequisiteService.class);
 
-    private EventBus eventBus;
+    private static final boolean NOT_INTERNAL = false;
 
-    private UserPreferencesService userPreferencesService;
+    private final EventBus eventBus;
 
-    private ErrorHandlerAwareReactorEventFactory eventFactory;
+    private final UserPreferencesService userPreferencesService;
+
+    private final ErrorHandlerAwareReactorEventFactory eventFactory;
 
     private final EntitlementService entitlementService;
 
@@ -55,7 +57,12 @@ public class CredentialPrerequisiteService {
     }
 
     public CredentialPrerequisitesResponse getPrerequisites(String cloudPlatform, boolean govCloud, String deploymentAddress, CredentialType type) {
-        CredentialPrerequisitesResponse result = getCloudbreakPrerequisites(cloudPlatform, govCloud, deploymentAddress, type);
+        return getPrerequisites(cloudPlatform, govCloud, deploymentAddress, type, NOT_INTERNAL);
+    }
+
+    public CredentialPrerequisitesResponse getPrerequisites(String cloudPlatform, boolean govCloud, String deploymentAddress, CredentialType type,
+            boolean internal) {
+        CredentialPrerequisitesResponse result = getCloudbreakPrerequisites(cloudPlatform, govCloud, deploymentAddress, type, internal);
         if (isPolicyFetchFromExperiencesAllowed()) {
             if (AWS.name().equalsIgnoreCase(cloudPlatform)) {
                 try {
@@ -70,43 +77,12 @@ public class CredentialPrerequisiteService {
                 }
             } else {
                 LOGGER.info("Fetching is enabled but the requested prerequisites from the experiences are addressed for a currently not supported " +
-                        "cloud platform: " + cloudPlatform);
+                        "cloud platform: {}", cloudPlatform);
             }
         } else {
-            LOGGER.info("Fetching fine graded policies from the experiences has disabled by the entitlement: "
-                    + CDP_AWS_RESTRICTED_POLICY.name());
+            LOGGER.info("Fetching fine graded policies from the experiences has disabled by the entitlement: {}", CDP_AWS_RESTRICTED_POLICY.name());
         }
         return result;
-    }
-
-    public CredentialPrerequisitesResponse getCloudbreakPrerequisites(String cloudPlatform, boolean govCloud,
-        String deploymentAddress, CredentialType type) {
-        CloudContext cloudContext = CloudContext.Builder.builder()
-                .withPlatform(cloudPlatform)
-                .withGovCloud(govCloud)
-                .withWorkspaceId(TEMP_WORKSPACE_ID)
-                .build();
-        CredentialPrerequisitesRequest request = new CredentialPrerequisitesRequest(
-                cloudContext,
-                userPreferencesService.getExternalIdForCurrentUser(),
-                userPreferencesService.getAuditExternalIdForCurrentUser(),
-                deploymentAddress,
-                type);
-        LOGGER.debug("Triggering event: {}", request);
-        eventBus.notify(request.selector(), eventFactory.createEvent(request));
-        String message = String.format("Failed to get prerequisites for platform '%s': ", cloudPlatform);
-        try {
-            CredentialPrerequisitesResult res = request.await();
-            LOGGER.debug("Result: {}", res);
-            if (res.getStatus() != EventStatus.OK) {
-                LOGGER.info(message, res.getErrorDetails());
-                throw new BadRequestException(message + res.getErrorDetails(), res.getErrorDetails());
-            }
-            return res.getCredentialPrerequisitesResponse();
-        } catch (InterruptedException e) {
-            LOGGER.error(message, e);
-            throw new OperationException(e);
-        }
     }
 
     public Map<String, String> getExperiencePrerequisites(String cloudPlatform) {
@@ -143,6 +119,36 @@ public class CredentialPrerequisiteService {
         return credential;
     }
 
+    private CredentialPrerequisitesResponse getCloudbreakPrerequisites(String cloudPlatform, boolean govCloud,
+            String deploymentAddress, CredentialType type, boolean internal) {
+        CloudContext cloudContext = CloudContext.Builder.builder()
+                .withPlatform(cloudPlatform)
+                .withGovCloud(govCloud)
+                .withWorkspaceId(TEMP_WORKSPACE_ID)
+                .build();
+        CredentialPrerequisitesRequest request = new CredentialPrerequisitesRequest(
+                cloudContext,
+                internal ? null : userPreferencesService.getExternalIdForCurrentUser(),
+                internal ? null : userPreferencesService.getAuditExternalIdForCurrentUser(),
+                deploymentAddress,
+                type);
+        LOGGER.debug("Triggering event to get Cloudbreak prerequistites using payload: {}", request);
+        eventBus.notify(request.selector(), eventFactory.createEvent(request));
+        String message = String.format("Failed to get prerequisites for platform '%s': ", cloudPlatform);
+        try {
+            CredentialPrerequisitesResult res = request.await();
+            LOGGER.debug("CredentialPrerequisitesResult: {}", res);
+            if (res.getStatus() != EventStatus.OK) {
+                LOGGER.info(message, res.getErrorDetails());
+                throw new BadRequestException(message + res.getErrorDetails(), res.getErrorDetails());
+            }
+            return res.getCredentialPrerequisitesResponse();
+        } catch (InterruptedException e) {
+            LOGGER.error(message, e);
+            throw new OperationException(e);
+        }
+    }
+
     private String getExternalId(CredentialType type) {
         String externalId = null;
         if (CredentialType.AUDIT.equals(type)) {
@@ -176,7 +182,7 @@ public class CredentialPrerequisiteService {
         try {
             return new Json(credential.getAttributes()).get(CredentialAttributes.class);
         } catch (IOException ignore) {
-            LOGGER.info("exception happened {}", ignore);
+            LOGGER.info("exception happened {}", ignore.getMessage());
         }
         return null;
     }

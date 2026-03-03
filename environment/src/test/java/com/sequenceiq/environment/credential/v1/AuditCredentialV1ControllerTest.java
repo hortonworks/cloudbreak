@@ -41,7 +41,7 @@ class AuditCredentialV1ControllerTest {
     @Test
     void testGetPrerequisitesForCloudPlatform() {
         CredentialPrerequisitesResponse credentialPrerequisitesResponse = mock(CredentialPrerequisitesResponse.class);
-        when(credentialService.getPrerequisites(PLATFORM, false, DEPLOYMENT_ADDRESS, USER_CRN, CredentialType.AUDIT))
+        when(credentialService.getPrerequisites(PLATFORM, false, DEPLOYMENT_ADDRESS, CredentialType.AUDIT))
                 .thenReturn(credentialPrerequisitesResponse);
 
         CredentialPrerequisitesResponse response = ThreadBasedUserCrnProvider.doAs(USER_CRN,

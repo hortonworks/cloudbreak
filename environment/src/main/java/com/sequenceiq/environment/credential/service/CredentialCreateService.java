@@ -66,7 +66,7 @@ public class CredentialCreateService {
         LOGGER.debug("Create credential request has received: {}", createCredentialRequest);
 
         LOGGER.debug("Validating credential for cloudPlatform {} and creator {}.", createCredentialRequest.getCloudPlatform(), creatorUserCrn);
-        credentialValidator.validateCredentialCloudPlatform(createCredentialRequest.getCloudPlatform(), creatorUserCrn, type);
+        credentialValidator.validateCredentialCloudPlatform(createCredentialRequest.getCloudPlatform());
 
         LOGGER.debug("Validating credential for cloudPlatform {} and creator {}.", createCredentialRequest.getCloudPlatform(), creatorUserCrn);
         credentialValidator.validateCreate(createCredentialRequest);

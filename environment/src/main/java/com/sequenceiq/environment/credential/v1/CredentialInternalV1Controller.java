@@ -4,9 +4,11 @@ import static com.sequenceiq.common.model.CredentialType.ENVIRONMENT;
 
 import org.springframework.stereotype.Controller;
 
+import com.sequenceiq.authorization.annotation.AccountIdNotNeeded;
 import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
+import com.sequenceiq.cloudbreak.cloud.response.CredentialPrerequisitesResponse;
 import com.sequenceiq.environment.api.v1.credential.endpoint.CredentialInternalEndpoint;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 import com.sequenceiq.environment.credential.service.CredentialService;
@@ -33,4 +35,12 @@ public class CredentialInternalV1Controller extends WebSocketNotificationControl
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         return credentialConverter.convert(credentialService.getByCrnForAccountId(credentialCrn, accountId, ENVIRONMENT, true));
     }
+
+    @Override
+    @InternalOnly
+    @AccountIdNotNeeded
+    public CredentialPrerequisitesResponse getPrerequisitesForCloudPlatform(String platform, boolean govCloud) {
+        return credentialService.getInternalPrerequisitesForCloudPlatform(platform, govCloud);
+    }
+
 }

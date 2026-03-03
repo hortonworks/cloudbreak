@@ -14,8 +14,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
-import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -37,16 +35,12 @@ public class CredentialValidator {
 
     private final Map<String, ProviderCredentialValidator> providerValidators = new HashMap<>();
 
-    private final EntitlementService entitlementService;
-
     public CredentialValidator(@Value("${environment.enabledplatforms}") Set<String> enabledPlatforms,
             CredentialDefinitionService credentialDefinitionService,
-            List<ProviderCredentialValidator> providerCredentialValidators,
-            EntitlementService entitlementService) {
+            List<ProviderCredentialValidator> providerCredentialValidators) {
         this.enabledPlatforms = enabledPlatforms;
         this.credentialDefinitionService = credentialDefinitionService;
         providerCredentialValidators.forEach(validator -> providerValidators.put(validator.supportedProvider(), validator));
-        this.entitlementService = entitlementService;
     }
 
     public void validateCreate(CredentialRequest createCredentialRequest) {
@@ -64,31 +58,22 @@ public class CredentialValidator {
         credentialDefinitionService.checkPropertiesRemoveSensitives(platform, json);
     }
 
-    public void validateCredentialCloudPlatform(String cloudPlatform, String userCrn, CredentialType type) {
-        validateCredentialCloudPlatformInternal(cloudPlatform, Crn.safeFromString(userCrn).getAccountId(), type);
-    }
-
-    private void validateCredentialCloudPlatformInternal(String cloudPlatform, String accountId, CredentialType type) {
+    public void validateCredentialCloudPlatform(String cloudPlatform) {
         if (!enabledPlatforms.contains(cloudPlatform)) {
             throw new BadRequestException(String.format("There is no such cloud platform as '%s'", cloudPlatform));
         }
     }
 
     @Cacheable(cacheNames = "credentialCloudPlatformCache")
-    public Set<String> getValidPlatformsForAccountId(String accountId, CredentialType type) {
+    public Set<String> getValidPlatforms() {
         return enabledPlatforms
                 .stream()
-                .filter(cloudPlatform -> isCredentialCloudPlatformValid(cloudPlatform, accountId, type))
+                .filter(this::isCredentialCloudPlatformValid)
                 .collect(Collectors.toSet());
     }
 
-    public boolean isCredentialCloudPlatformValid(String cloudPlatform, String accountId, CredentialType type) {
-        try {
-            validateCredentialCloudPlatformInternal(cloudPlatform, accountId, type);
-            return true;
-        } catch (BadRequestException e) {
-            return false;
-        }
+    public boolean isCredentialCloudPlatformValid(String cloudPlatform) {
+        return enabledPlatforms.contains(cloudPlatform);
     }
 
     public ValidationResult validateCredentialUpdate(Credential original, Credential newCred, CredentialType type) {

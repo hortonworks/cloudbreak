@@ -55,7 +55,7 @@ public class ThreadBasedUserCrnProvider {
             String errorMessage = String.format("Trying to set crn %s when it already contains %s!", userCrn, USER_CRN.get());
             String stackTrace = Arrays.stream(Thread.currentThread().getStackTrace())
                     .map(StackTraceElement::toString).collect(Collectors.joining("\n", "\n", "\n"));
-            LOGGER.error(errorMessage + " Stack trace on thread: " + stackTrace);
+            LOGGER.error("{} Stack trace on thread: {}", errorMessage, stackTrace);
             throw new IllegalStateException(errorMessage);
         } else {
             USER_CRN.set(userCrn);

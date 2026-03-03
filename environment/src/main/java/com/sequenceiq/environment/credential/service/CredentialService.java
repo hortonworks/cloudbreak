@@ -13,11 +13,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import jakarta.annotation.Nonnull;
-import jakarta.inject.Inject;
 import jakarta.ws.rs.BadRequestException;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.google.common.base.Strings;
@@ -40,28 +37,37 @@ import com.sequenceiq.environment.environment.verification.PolicyValidationError
 @Service
 public class CredentialService implements CompositeAuthResourcePropertyProvider {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CredentialService.class);
+    private static final boolean INTERNAL = true;
 
-    @Inject
-    private CredentialValidator credentialValidator;
+    private final CredentialValidator credentialValidator;
 
-    @Inject
-    private ServiceProviderCredentialAdapter credentialAdapter;
+    private final ServiceProviderCredentialAdapter credentialAdapter;
 
-    @Inject
-    private CredentialPrerequisiteService credentialPrerequisiteService;
+    private final CredentialPrerequisiteService credentialPrerequisiteService;
 
-    @Inject
-    private PolicyValidationErrorResponseConverter policyValidationErrorResponseConverter;
+    private final PolicyValidationErrorResponseConverter policyValidationErrorResponseConverter;
 
-    @Inject
-    private CredentialCreateService credentialCreateService;
+    private final CredentialCreateService credentialCreateService;
 
-    @Inject
-    private CredentialRetrievalService credentialRetrievalService;
+    private final CredentialRetrievalService credentialRetrievalService;
 
-    @Inject
-    private CredentialUpdateService credentialUpdateService;
+    private final CredentialUpdateService credentialUpdateService;
+
+    public CredentialService(CredentialValidator credentialValidator,
+            ServiceProviderCredentialAdapter credentialAdapter,
+            CredentialPrerequisiteService credentialPrerequisiteService,
+            PolicyValidationErrorResponseConverter policyValidationErrorResponseConverter,
+            CredentialCreateService credentialCreateService,
+            CredentialRetrievalService credentialRetrievalService,
+            CredentialUpdateService credentialUpdateService) {
+        this.credentialValidator = credentialValidator;
+        this.credentialAdapter = credentialAdapter;
+        this.credentialPrerequisiteService = credentialPrerequisiteService;
+        this.policyValidationErrorResponseConverter = policyValidationErrorResponseConverter;
+        this.credentialCreateService = credentialCreateService;
+        this.credentialRetrievalService = credentialRetrievalService;
+        this.credentialUpdateService = credentialUpdateService;
+    }
 
     public Credential verify(Credential credential) {
         CredentialVerification verification = credentialAdapter.verify(credential, credential.getAccountId());
@@ -72,10 +78,15 @@ public class CredentialService implements CompositeAuthResourcePropertyProvider 
     }
 
     public CredentialPrerequisitesResponse getPrerequisites(String cloudPlatform, boolean govCloud,
-                                                            String deploymentAddress, String userCrn, CredentialType type) {
+                                                            String deploymentAddress, CredentialType type) {
         String cloudPlatformInUpperCase = cloudPlatform.toUpperCase(Locale.ROOT);
-        credentialValidator.validateCredentialCloudPlatform(cloudPlatformInUpperCase, userCrn, type);
+        credentialValidator.validateCredentialCloudPlatform(cloudPlatformInUpperCase);
         return credentialPrerequisiteService.getPrerequisites(cloudPlatformInUpperCase, govCloud, deploymentAddress, type);
+    }
+
+    public CredentialPrerequisitesResponse getInternalPrerequisitesForCloudPlatform(String cloudPlatform, boolean govCloud) {
+        credentialValidator.validateCredentialCloudPlatform(cloudPlatform.toUpperCase(Locale.ROOT));
+        return credentialPrerequisiteService.getPrerequisites(cloudPlatform, govCloud, null, ENVIRONMENT, INTERNAL);
     }
 
     public String getCloudPlatformByCredential(String credentialName, String accountId, CredentialType type) {
@@ -100,7 +111,7 @@ public class CredentialService implements CompositeAuthResourcePropertyProvider 
     }
 
     public Set<Credential> listAvailablesByAccountId(String accountId, CredentialType type) {
-        return credentialRetrievalService.listAvailablesByAccountId(accountId, type);
+        return credentialRetrievalService.listAvailableCredentials(accountId, type);
     }
 
     public List<ResourceWithId> findAsAuthorizationResourcesInAccountByType(String accountId, CredentialType type) {
@@ -131,10 +142,6 @@ public class CredentialService implements CompositeAuthResourcePropertyProvider 
         return credentialRetrievalService.getOptionalByCrnForAccountId(crn, accountId, type);
     }
 
-    public Optional<Credential> getOptionalByCrnForAccountId(String crn, String accountId, CredentialType type, boolean queryArchived) {
-        return credentialRetrievalService.getOptionalByCrnForAccountId(crn, accountId, type, queryArchived);
-    }
-
     public Credential extractCredential(Optional<Credential> credential, String resourceIdentifier) {
         return credentialRetrievalService.extractCredential(credential, resourceIdentifier);
     }
@@ -149,15 +156,6 @@ public class CredentialService implements CompositeAuthResourcePropertyProvider 
 
     public Credential updateByAccountId(Credential credential, String accountId, CredentialType type) {
         return credentialUpdateService.updateByAccountId(credential, accountId, type);
-    }
-
-    Optional<Credential> findByNameAndAccountId(String name, String accountId, Collection<String> cloudPlatforms, CredentialType type) {
-        return credentialRetrievalService.findByNameAndAccountId(name, accountId, cloudPlatforms, type);
-    }
-
-    Optional<Credential> findByCrnAndAccountId(String crn, String accountId, Collection<String> cloudPlatforms,
-            CredentialType type) {
-        return credentialRetrievalService.findByCrnAndAccountId(crn, accountId, cloudPlatforms, type);
     }
 
     @Override

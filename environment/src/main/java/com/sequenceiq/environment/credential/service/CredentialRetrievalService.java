@@ -45,13 +45,13 @@ public class CredentialRetrievalService {
 
     }
 
-    public Set<Credential> listAvailablesByAccountId(String accountId, CredentialType type) {
-        return credentialRepository.findAllByAccountId(accountId, credentialValidator.getValidPlatformsForAccountId(accountId, type), type);
+    public Set<Credential> listAvailableCredentials(String accountId, CredentialType type) {
+        return credentialRepository.findAllByAccountId(accountId, credentialValidator.getValidPlatforms(), type);
     }
 
     public List<ResourceWithId> findAsAuthorizationResourcesInAccountByType(String accountId, CredentialType type) {
         return credentialRepository.findAsAuthorizationResourcesInAccountByType(accountId,
-                credentialValidator.getValidPlatformsForAccountId(accountId, type), type);
+                credentialValidator.getValidPlatforms(), type);
     }
 
     public Set<Credential> findAllById(Iterable<Long> ids) {

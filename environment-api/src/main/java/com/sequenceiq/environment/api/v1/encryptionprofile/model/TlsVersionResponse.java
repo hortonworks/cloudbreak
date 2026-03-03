@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.api.v1.encryptionprofile.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.sequenceiq.environment.api.doc.encryptionprofile.EncryptionProfileModelDescription;
@@ -13,15 +14,18 @@ public class TlsVersionResponse {
     private String tlsVersion;
 
     @Schema(description = EncryptionProfileModelDescription.CIPHER_SUITES)
-    private List<String> cipherSuites;
+    private List<String> cipherSuites = new ArrayList<>();
 
     @Schema(description = EncryptionProfileModelDescription.RECOMMENDED_CIPHER_SUITES)
-    private List<String> recommended;
+    private List<String> recommended = new ArrayList<>();
 
     public TlsVersionResponse(String tlsVersion, List<String> cipherSuites, List<String> recommended) {
         this.tlsVersion = tlsVersion;
         this.cipherSuites = cipherSuites;
         this.recommended = recommended;
+    }
+
+    public TlsVersionResponse() {
     }
 
     public String getTlsVersion() {
@@ -56,4 +60,5 @@ public class TlsVersionResponse {
                 ", recommended=" + recommended +
                 '}';
     }
+
 }

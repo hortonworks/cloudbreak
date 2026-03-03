@@ -56,7 +56,7 @@ public class CredentialToCredentialV1ResponseConverter {
     private StringToSecretResponseConverter secretConverter;
 
     public CredentialResponse convert(Credential source) {
-        credentialValidator.validateCredentialCloudPlatform(source.getCloudPlatform(), source.getCreator(), source.getType());
+        credentialValidator.validateCredentialCloudPlatform(source.getCloudPlatform());
 
         CredentialResponse response = new CredentialResponse();
         response.setCloudPlatform(source.getCloudPlatform());

@@ -37,8 +37,6 @@ public class AuditCredentialV1Controller extends WebSocketNotificationController
 
     private final CredentialService credentialService;
 
-    private final CreateCredentialRequestToCredentialConverter credentialRequestConverter;
-
     private final EditCredentialRequestToCredentialConverter credentialEditConverter;
 
     private final CredentialToCredentialV1ResponseConverter credentialResponseConverter;
@@ -52,7 +50,6 @@ public class AuditCredentialV1Controller extends WebSocketNotificationController
             CredentialToCredentialV1ResponseConverter credentialResponseConverter,
             CredentialDeleteService credentialDeleteService) {
         this.credentialService = credentialService;
-        this.credentialRequestConverter = credentialRequestConverter;
         this.credentialEditConverter = credentialEditConverter;
         this.credentialResponseConverter = credentialResponseConverter;
         this.credentialDeleteService = credentialDeleteService;
@@ -117,8 +114,7 @@ public class AuditCredentialV1Controller extends WebSocketNotificationController
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_AUDIT_CREDENTIAL)
     public CredentialPrerequisitesResponse getPrerequisitesForCloudPlatform(String platform, boolean govCloud, String deploymentAddress) {
-        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
-        return credentialService.getPrerequisites(platform, govCloud, deploymentAddress, userCrn, AUDIT);
+        return credentialService.getPrerequisites(platform, govCloud, deploymentAddress, AUDIT);
     }
 
     @Override
