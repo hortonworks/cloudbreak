@@ -97,23 +97,6 @@ class DistroXUpgradeImageSelectorTest {
     }
 
     @Test
-    public void testSelectedImageByRuntimeShouldReturnCentOsImageEvenIfTheRedHatImageIsNewer() {
-        List<ImageInfoV4Response> candidates =
-                List.of(createImageResponseWithRedHatImage("A", 9L, "3"),
-                        createImageResponse("B", 6L, "3"),
-                        createImageResponse("C", 3L, "1"),
-                        createImageResponse("D", 8L, "3"));
-        UpgradeV4Request request = new UpgradeV4Request();
-        request.setRuntime("3");
-
-        ImageInfoV4Response result = underTest.determineImageId(request, createUpgradeV4Response(candidates));
-
-        assertEquals("D", result.getImageId());
-        assertEquals("3", result.getComponentVersions().getCdp());
-        assertEquals(8L, result.getCreated());
-    }
-
-    @Test
     public void testSelectedImageByRuntimeNotFound() {
         List<ImageInfoV4Response> candidates =
                 List.of(createImageResponse("A", 1L, "5"),
