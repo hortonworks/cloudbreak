@@ -6,7 +6,6 @@ import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,7 +20,6 @@ import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterStatusService;
 import com.sequenceiq.cloudbreak.cluster.status.ExtendedHostStatuses;
 import com.sequenceiq.cloudbreak.common.type.HealthCheck;
-import com.sequenceiq.cloudbreak.common.type.HealthCheckResult;
 import com.sequenceiq.cloudbreak.common.type.HealthCheckType;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -60,15 +58,15 @@ class HealthCheckServiceTest {
     static Object[][] scenarios() {
         return new Object[][] {
                 // Testcase name, Health Map, Expected result
-                { "No host", Map.of(HostName.hostName("host1"), Set.of(new HealthCheck(HealthCheckType.SERVICES, HealthCheckResult.UNHEALTHY, Optional.of("some insignificant error"),Optional.empty()))), Set.of() },
-                { "One host unhealthy", Map.of(HostName.hostName("host1"), Set.of(new HealthCheck(HealthCheckType.HOST, HealthCheckResult.UNHEALTHY, Optional.of("some significant error"),Optional.empty()))), Set.of("host1") },
-                { "One host healthy", Map.of(HostName.hostName("host1"), Set.of(new HealthCheck(HealthCheckType.HOST, HealthCheckResult.HEALTHY, Optional.empty(),Optional.empty()))), Set.of() },
-                { "One host healthy, one unhealthy", Map.of(HostName.hostName("host1"), Set.of(new HealthCheck(HealthCheckType.HOST, HealthCheckResult.UNHEALTHY, Optional.of("some significant error"),Optional.empty())),
-                                                            HostName.hostName("host2"), Set.of(new HealthCheck(HealthCheckType.HOST, HealthCheckResult.HEALTHY, Optional.empty(),Optional.empty()))), Set.of("host1") },
-                { "Two hosts healthy", Map.of(HostName.hostName("host1"), Set.of(new HealthCheck(HealthCheckType.HOST, HealthCheckResult.HEALTHY, Optional.empty(),Optional.empty())),
-                                              HostName.hostName("host2"), Set.of(new HealthCheck(HealthCheckType.HOST, HealthCheckResult.HEALTHY, Optional.empty(),Optional.empty()))), Set.of() },
-                { "Two hosts unhealthy", Map.of(HostName.hostName("host1"), Set.of(new HealthCheck(HealthCheckType.HOST, HealthCheckResult.UNHEALTHY, Optional.of("some significant error"),Optional.empty())),
-                                                HostName.hostName("host2"), Set.of(new HealthCheck(HealthCheckType.HOST, HealthCheckResult.UNHEALTHY, Optional.empty(),Optional.empty()))), Set.of("host1", "host2") },
+                { "No host", Map.of(HostName.hostName("host1"), Set.of(HealthCheck.unhealthy(HealthCheckType.SERVICES, "some insignificant error"))), Set.of() },
+                { "One host unhealthy", Map.of(HostName.hostName("host1"), Set.of(HealthCheck.unhealthy(HealthCheckType.HOST, "some significant error"))), Set.of("host1") },
+                { "One host healthy", Map.of(HostName.hostName("host1"), Set.of(HealthCheck.healthy(HealthCheckType.HOST))), Set.of() },
+                { "One host healthy, one unhealthy", Map.of(HostName.hostName("host1"), Set.of(HealthCheck.unhealthy(HealthCheckType.HOST, "some significant error")),
+                                                            HostName.hostName("host2"), Set.of(HealthCheck.healthy(HealthCheckType.HOST))), Set.of("host1") },
+                { "Two hosts healthy", Map.of(HostName.hostName("host1"), Set.of(HealthCheck.healthy(HealthCheckType.HOST)),
+                                              HostName.hostName("host2"), Set.of(HealthCheck.healthy(HealthCheckType.HOST))), Set.of() },
+                { "Two hosts unhealthy", Map.of(HostName.hostName("host1"), Set.of(HealthCheck.unhealthy(HealthCheckType.HOST, "some significant error")),
+                                                HostName.hostName("host2"), Set.of(HealthCheck.unhealthy(HealthCheckType.HOST))), Set.of("host1", "host2") },
         };
     }
     // CHECKSTYLE:ON

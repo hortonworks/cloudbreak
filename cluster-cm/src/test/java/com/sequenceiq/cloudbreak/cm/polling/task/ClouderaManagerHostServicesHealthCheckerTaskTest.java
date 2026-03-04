@@ -25,7 +25,6 @@ import com.sequenceiq.cloudbreak.cm.ClouderaManagerHealthService;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiPojoFactory;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollerObject;
 import com.sequenceiq.cloudbreak.common.type.HealthCheck;
-import com.sequenceiq.cloudbreak.common.type.HealthCheckResult;
 import com.sequenceiq.cloudbreak.common.type.HealthCheckType;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 
@@ -59,7 +58,7 @@ class ClouderaManagerHostServicesHealthCheckerTaskTest {
     void testDoStatusCheckWhenNoFailedHostsFouns() throws ApiException {
         when(clouderaManagerHealthService.getExtendedHostStatuses(eq(apiClient), any()))
                 .thenReturn(new ExtendedHostStatuses(Map.of(HostName.hostName("host1"),
-                        Set.of(new HealthCheck(HealthCheckType.SERVICES, HealthCheckResult.HEALTHY, Optional.empty(), Optional.empty())))));
+                        Set.of(HealthCheck.healthy(HealthCheckType.SERVICES)))));
         boolean result = underTest.doStatusCheck(new ClouderaManagerPollerObject(stack, apiClient));
         assertTrue(result);
     }
@@ -68,7 +67,7 @@ class ClouderaManagerHostServicesHealthCheckerTaskTest {
     void testDoStatusCheckWhenFailedHostsFouns() throws ApiException {
         when(clouderaManagerHealthService.getExtendedHostStatuses(eq(apiClient), any()))
                 .thenReturn(new ExtendedHostStatuses(Map.of(HostName.hostName("host1"),
-                        Set.of(new HealthCheck(HealthCheckType.SERVICES, HealthCheckResult.UNHEALTHY, Optional.of("error"), Optional.empty())))));
+                        Set.of(HealthCheck.unhealthy(HealthCheckType.SERVICES, "error")))));
         boolean result = underTest.doStatusCheck(new ClouderaManagerPollerObject(stack, apiClient));
         assertFalse(result);
     }

@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.service.secret.VaultRotationAwareRepository;
 import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
 import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.common.api.type.CertExpirationState;
+import com.sequenceiq.common.api.type.ConfigStalenessState;
 
 @Transactional(TxType.REQUIRED)
 @EntityType(entityClass = Cluster.class)
@@ -79,6 +80,10 @@ public interface ClusterRepository extends WorkspaceResourceRepository<Cluster, 
     @Modifying
     @Query("UPDATE Cluster c SET c.certExpirationState = :state, c.certExpirationDetails = :details WHERE c.id = :id")
     void updateCertExpirationState(@Param("id") Long id, @Param("state") CertExpirationState state, @Param("details") String certExpirationDetails);
+
+    @Modifying
+    @Query("UPDATE Cluster c SET c.configStalenessState = :state, c.configStalenessDetails = :details WHERE c.id = :id")
+    void updateConfigStalenessState(@Param("id") Long id, @Param("state") ConfigStalenessState state, @Param("details") String configStalenessDetails);
 
     @Query("SELECT c FROM Cluster c " +
             "JOIN c.stack s " +

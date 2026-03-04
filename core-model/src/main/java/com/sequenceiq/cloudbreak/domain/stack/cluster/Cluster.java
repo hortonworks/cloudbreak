@@ -33,6 +33,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.ConfigStrategy;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
 import com.sequenceiq.cloudbreak.converter.CertExpirationStateConverter;
+import com.sequenceiq.cloudbreak.converter.ConfigStalenessStateConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Container;
 import com.sequenceiq.cloudbreak.domain.CustomConfigurations;
@@ -55,6 +56,7 @@ import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.model.WorkspaceAwareResource;
 import com.sequenceiq.common.api.type.CertExpirationState;
+import com.sequenceiq.common.api.type.ConfigStalenessState;
 
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"workspace_id", "name"}))
@@ -220,6 +222,13 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource, Cluster
     @Convert(converter = CertExpirationStateConverter.class)
     private CertExpirationState certExpirationState = CertExpirationState.VALID;
 
+    private String certExpirationDetails;
+
+    @Convert(converter = ConfigStalenessStateConverter.class)
+    private ConfigStalenessState configStalenessState;
+
+    private String configStalenessDetails;
+
     @Column(nullable = false)
     private Boolean embeddedDatabaseOnAttachedDisk = Boolean.FALSE;
 
@@ -227,8 +236,6 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource, Cluster
     private String dbSslRootCertBundle;
 
     private Boolean dbSslEnabled;
-
-    private String certExpirationDetails;
 
     @Column(name = "encryption_profile_crn")
     private String encryptionProfileCrn;
@@ -840,6 +847,24 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource, Cluster
 
     public void setCertExpirationDetails(String certExpiryDetails) {
         this.certExpirationDetails = certExpiryDetails;
+    }
+
+    @Override
+    public ConfigStalenessState getConfigStalenessState() {
+        return configStalenessState;
+    }
+
+    public void setConfigStalenessState(ConfigStalenessState configStalenessState) {
+        this.configStalenessState = configStalenessState;
+    }
+
+    @Override
+    public String getConfigStalenessDetails() {
+        return configStalenessDetails;
+    }
+
+    public void setConfigStalenessDetails(String configStalenessDetails) {
+        this.configStalenessDetails = configStalenessDetails;
     }
 
     @Override

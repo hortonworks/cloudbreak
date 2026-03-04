@@ -10,6 +10,7 @@ import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.logger.MdcContextInfoProvider;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.common.api.type.CertExpirationState;
+import com.sequenceiq.common.api.type.ConfigStalenessState;
 
 public interface ClusterView extends MdcContextInfoProvider {
 
@@ -40,6 +41,10 @@ public interface ClusterView extends MdcContextInfoProvider {
     CertExpirationState getCertExpirationState();
 
     String getCertExpirationDetails();
+
+    ConfigStalenessState getConfigStalenessState();
+
+    String getConfigStalenessDetails();
 
     String getEnvironmentCrn();
 

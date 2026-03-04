@@ -10,30 +10,51 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.cloudera.api.swagger.HostsResourceApi;
+import com.cloudera.api.swagger.ServicesResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
+import com.cloudera.api.swagger.model.ApiClusterRef;
+import com.cloudera.api.swagger.model.ApiConfigStalenessStatus;
 import com.cloudera.api.swagger.model.ApiHealthCheck;
 import com.cloudera.api.swagger.model.ApiHealthSummary;
 import com.cloudera.api.swagger.model.ApiHost;
 import com.cloudera.api.swagger.model.ApiHostList;
 import com.cloudera.api.swagger.model.ApiRoleRef;
+import com.cloudera.api.swagger.model.ApiService;
+import com.cloudera.api.swagger.model.ApiServiceList;
 import com.sequenceiq.cloudbreak.cluster.status.ExtendedHostStatuses;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
+import com.sequenceiq.cloudbreak.cm.healthcheck.ClouderaManagerHostBasicHealthCheck;
+import com.sequenceiq.cloudbreak.cm.healthcheck.ClouderaManagerHostCertHealthCheck;
+import com.sequenceiq.cloudbreak.cm.healthcheck.ClouderaManagerHostServiceConfigStalenessHealthCheck;
+import com.sequenceiq.cloudbreak.cm.healthcheck.ClouderaManagerHostServicesHealthCheck;
+import com.sequenceiq.cloudbreak.cm.util.ClouderaManagerConstants;
+import com.sequenceiq.cloudbreak.common.type.HealthCheckType;
 
 @ExtendWith(MockitoExtension.class)
 class ClouderaManagerHealthServiceTest {
+
+    private static final String CLUSTER_NAME = "cluster";
 
     @InjectMocks
     private ClouderaManagerHealthService underTest;
@@ -47,17 +68,34 @@ class ClouderaManagerHealthServiceTest {
     @Mock
     private HostsResourceApi hostsResourceApi;
 
+    @Mock
+    private ServicesResourceApi servicesResourceApi;
+
+    @Mock
+    private ApiServiceList apiServiceList;
+
     @BeforeEach
-    void setUp() {
+    void setUp() throws ApiException {
+        ReflectionTestUtils.setField(underTest, "hostHealthChecks", Set.of(
+                new ClouderaManagerHostBasicHealthCheck(),
+                new ClouderaManagerHostCertHealthCheck(),
+                new ClouderaManagerHostServiceConfigStalenessHealthCheck(),
+                new ClouderaManagerHostServicesHealthCheck()
+        ));
         lenient().when(clouderaManagerApiFactory.getHostsResourceApi(client)).thenReturn(hostsResourceApi);
+        lenient().when(clouderaManagerApiFactory.getServicesResourceApi(client)).thenReturn(servicesResourceApi);
+        lenient().when(servicesResourceApi.readServices(CLUSTER_NAME, ClouderaManagerConstants.SUMMARY)).thenReturn(apiServiceList);
     }
 
     @Test
     public void collectsHostHealthIfDuplicated() throws ApiException {
         hostsAre(
-                new ApiHost().hostname("host1").addHealthChecksItem(new ApiHealthCheck().name(HOST_SCM_HEALTH).summary(ApiHealthSummary.GOOD)),
-                new ApiHost().hostname("host1").addHealthChecksItem(new ApiHealthCheck().name(HOST_SCM_HEALTH).summary(ApiHealthSummary.GOOD)),
-                new ApiHost().hostname("host2").addHealthChecksItem(new ApiHealthCheck().name(HOST_SCM_HEALTH).summary(ApiHealthSummary.GOOD))
+                host("host1")
+                        .addHealthChecksItem(new ApiHealthCheck().name(HOST_SCM_HEALTH).summary(ApiHealthSummary.GOOD)),
+                host("host1")
+                        .addHealthChecksItem(new ApiHealthCheck().name(HOST_SCM_HEALTH).summary(ApiHealthSummary.GOOD)),
+                host("host2")
+                        .addHealthChecksItem(new ApiHealthCheck().name(HOST_SCM_HEALTH).summary(ApiHealthSummary.GOOD))
         );
 
         ExtendedHostStatuses extendedHostStatuses = underTest.getExtendedHostStatuses(client, Optional.of("7.2.12"));
@@ -71,12 +109,18 @@ class ClouderaManagerHealthServiceTest {
     @Test
     public void collectsHostHealthIfAvailable() throws ApiException {
         hostsAre(
-                new ApiHost().hostname("host1").addHealthChecksItem(new ApiHealthCheck().name(HOST_SCM_HEALTH).summary(ApiHealthSummary.GOOD)),
-                new ApiHost().hostname("host2").addHealthChecksItem(new ApiHealthCheck().name(HOST_SCM_HEALTH).summary(ApiHealthSummary.CONCERNING)),
-                new ApiHost().hostname("host3").addHealthChecksItem(new ApiHealthCheck().name(HOST_SCM_HEALTH).summary(ApiHealthSummary.BAD)),
-                new ApiHost().hostname("host4").addHealthChecksItem(new ApiHealthCheck().name(HOST_SCM_HEALTH).summary(ApiHealthSummary.NOT_AVAILABLE)),
-                new ApiHost().hostname("host5").addHealthChecksItem(new ApiHealthCheck().name(HOST_SCM_HEALTH).summary(ApiHealthSummary.HISTORY_NOT_AVAILABLE)),
-                new ApiHost().hostname("host6").addHealthChecksItem(new ApiHealthCheck().name(HOST_SCM_HEALTH).summary(ApiHealthSummary.DISABLED))
+                host("host1")
+                        .addHealthChecksItem(new ApiHealthCheck().name(HOST_SCM_HEALTH).summary(ApiHealthSummary.GOOD)),
+                host("host2")
+                        .addHealthChecksItem(new ApiHealthCheck().name(HOST_SCM_HEALTH).summary(ApiHealthSummary.CONCERNING)),
+                host("host3")
+                        .addHealthChecksItem(new ApiHealthCheck().name(HOST_SCM_HEALTH).summary(ApiHealthSummary.BAD)),
+                host("host4")
+                        .addHealthChecksItem(new ApiHealthCheck().name(HOST_SCM_HEALTH).summary(ApiHealthSummary.NOT_AVAILABLE)),
+                host("host5")
+                        .addHealthChecksItem(new ApiHealthCheck().name(HOST_SCM_HEALTH).summary(ApiHealthSummary.HISTORY_NOT_AVAILABLE)),
+                host("host6")
+                        .addHealthChecksItem(new ApiHealthCheck().name(HOST_SCM_HEALTH).summary(ApiHealthSummary.DISABLED))
         );
 
         ExtendedHostStatuses extendedHostStatuses = underTest.getExtendedHostStatuses(client, Optional.of("7.2.12"));
@@ -88,27 +132,33 @@ class ClouderaManagerHealthServiceTest {
     @Test
     public void collectsExtendedHostHealthIfAvailable() throws ApiException {
         hostsAre(
-                new ApiHost().hostname("host1")
+                host("host1")
                         .addHealthChecksItem(new ApiHealthCheck().name(HOST_SCM_HEALTH).summary(ApiHealthSummary.GOOD))
                         .addHealthChecksItem(new ApiHealthCheck().name(HOST_AGENT_CERTIFICATE_EXPIRY).summary(ApiHealthSummary.GOOD)),
-                new ApiHost().hostname("host2")
+                host("host2")
                         .addHealthChecksItem(new ApiHealthCheck().name(HOST_SCM_HEALTH).summary(ApiHealthSummary.CONCERNING))
                         .addHealthChecksItem(new ApiHealthCheck().name(HOST_AGENT_CERTIFICATE_EXPIRY).summary(ApiHealthSummary.CONCERNING)
                                 .explanation("in 30 days")),
-                new ApiHost().hostname("host3")
-                        .addHealthChecksItem(new ApiHealthCheck().name(HOST_SCM_HEALTH).summary(ApiHealthSummary.BAD).explanation("explanation."))
-                        .addHealthChecksItem(new ApiHealthCheck().name(HOST_AGENT_CERTIFICATE_EXPIRY).summary(ApiHealthSummary.BAD).explanation("in 2 days")),
-                new ApiHost().hostname("host4").addHealthChecksItem(new ApiHealthCheck().name(HOST_SCM_HEALTH).summary(ApiHealthSummary.NOT_AVAILABLE)),
-                new ApiHost().hostname("host5").addHealthChecksItem(new ApiHealthCheck().name(HOST_SCM_HEALTH).summary(ApiHealthSummary.HISTORY_NOT_AVAILABLE)),
-                new ApiHost().hostname("host6").addHealthChecksItem(new ApiHealthCheck().name(HOST_SCM_HEALTH).summary(ApiHealthSummary.DISABLED)),
-                new ApiHost().hostname("host7").maintenanceMode(true)
+                host("host3")
+                        .addHealthChecksItem(new ApiHealthCheck().name(HOST_SCM_HEALTH).summary(ApiHealthSummary.BAD)
+                                .explanation("explanation."))
+                        .addHealthChecksItem(new ApiHealthCheck().name(HOST_AGENT_CERTIFICATE_EXPIRY).summary(ApiHealthSummary.BAD)
+                                .explanation("in 2 days")),
+                host("host4")
+                        .addHealthChecksItem(new ApiHealthCheck().name(HOST_SCM_HEALTH).summary(ApiHealthSummary.NOT_AVAILABLE)),
+                host("host5")
+                        .addHealthChecksItem(new ApiHealthCheck().name(HOST_SCM_HEALTH).summary(ApiHealthSummary.HISTORY_NOT_AVAILABLE)),
+                host("host6")
+                        .addHealthChecksItem(new ApiHealthCheck().name(HOST_SCM_HEALTH).summary(ApiHealthSummary.DISABLED)),
+                host("host7")
+                        .maintenanceMode(true)
                         .addHealthChecksItem(new ApiHealthCheck().name(HOST_SCM_HEALTH).summary(ApiHealthSummary.GOOD))
                         .addHealthChecksItem(new ApiHealthCheck().name(HOST_AGENT_CERTIFICATE_EXPIRY).summary(ApiHealthSummary.GOOD))
         );
 
         ExtendedHostStatuses extendedHostStatuses = underTest.getExtendedHostStatuses(client, Optional.of("7.2.12"));
-        assertEquals("explanation. Cert health on CM: BAD", extendedHostStatuses.statusReasonForHost(hostName("host3")));
-        assertTrue(extendedHostStatuses.isAnyCertExpiring());
+        assertEquals("explanation. Certificate health in Cloudera Manager is BAD", extendedHostStatuses.statusReasonForHost(hostName("host3")));
+        assertTrue(extendedHostStatuses.isAnyUnhealthyWithType(HealthCheckType.CERTIFICATE));
         assertTrue(extendedHostStatuses.isHostHealthy(hostName("host1")));
         assertTrue(extendedHostStatuses.isHostHealthy(hostName("host2")));
         assertFalse(extendedHostStatuses.isHostHealthy(hostName("host3")));
@@ -118,10 +168,10 @@ class ClouderaManagerHealthServiceTest {
     @Test
     public void testCertExpiringEverythingElseGood() throws ApiException {
         hostsAre(
-                new ApiHost().hostname("host1")
+                host("host1")
                         .addHealthChecksItem(new ApiHealthCheck().name(HOST_SCM_HEALTH).summary(ApiHealthSummary.GOOD))
                         .addHealthChecksItem(new ApiHealthCheck().name(HOST_AGENT_CERTIFICATE_EXPIRY).summary(ApiHealthSummary.GOOD)),
-                new ApiHost().hostname("host2")
+                host("host2")
                         .addHealthChecksItem(new ApiHealthCheck().name(HOST_SCM_HEALTH).summary(ApiHealthSummary.GOOD))
                         .addHealthChecksItem(new ApiHealthCheck().name(HOST_AGENT_CERTIFICATE_EXPIRY).summary(ApiHealthSummary.CONCERNING)
                                 .explanation("in 30 days"))
@@ -130,18 +180,42 @@ class ClouderaManagerHealthServiceTest {
         ExtendedHostStatuses extendedHostStatuses = underTest.getExtendedHostStatuses(client, Optional.of("7.2.12"));
         assertTrue(extendedHostStatuses.isHostHealthy(hostName("host1")));
         assertTrue(extendedHostStatuses.isHostHealthy(hostName("host2")));
-        assertTrue(extendedHostStatuses.isAnyCertExpiring());
+        assertTrue(extendedHostStatuses.isAnyUnhealthyWithType(HealthCheckType.CERTIFICATE));
+    }
+
+    @MethodSource("configStalenessSource")
+    @ParameterizedTest
+    public void testConfigStalenessEverythingElseGood(ApiConfigStalenessStatus configStatus, ApiConfigStalenessStatus clientConfigStatus, boolean healthy)
+            throws ApiException {
+        hostsAre(host("host1").addRoleRefsItem(new ApiRoleRef().serviceName("knox")));
+        when(apiServiceList.getItems()).thenReturn(List.of(
+                new ApiService().name("knox").configStalenessStatus(configStatus).clientConfigStalenessStatus(clientConfigStatus)
+        ));
+
+        ExtendedHostStatuses extendedHostStatuses = underTest.getExtendedHostStatuses(client, Optional.of("7.2.12"));
+        assertTrue(extendedHostStatuses.isHostHealthy(hostName("host1")));
+        assertEquals(!healthy, extendedHostStatuses.isAnyUnhealthyWithType(HealthCheckType.SERVICE_CONFIG_STALENESS));
+    }
+
+    public static Stream<Arguments> configStalenessSource() {
+        return Stream.of(
+                Arguments.of(ApiConfigStalenessStatus.FRESH, ApiConfigStalenessStatus.FRESH, true),
+                Arguments.of(ApiConfigStalenessStatus.FRESH, ApiConfigStalenessStatus.STALE, false),
+                Arguments.of(ApiConfigStalenessStatus.STALE, ApiConfigStalenessStatus.FRESH, false),
+                Arguments.of(ApiConfigStalenessStatus.STALE_REFRESHABLE, ApiConfigStalenessStatus.FRESH, false),
+                Arguments.of(ApiConfigStalenessStatus.FRESH, ApiConfigStalenessStatus.STALE_REFRESHABLE, false)
+        );
     }
 
     @Test
     public void testServiceBadHealth() throws ApiException {
         hostsAre(
-                new ApiHost().hostname("host1")
+                host("host1")
                         .addHealthChecksItem(new ApiHealthCheck().name(HOST_SCM_HEALTH).summary(ApiHealthSummary.BAD)
                                 .explanation("explanation"))
                         .addHealthChecksItem(new ApiHealthCheck().name(HOST_AGENT_CERTIFICATE_EXPIRY).summary(ApiHealthSummary.GOOD))
                         .addRoleRefsItem(roleRef("badservice", ApiHealthSummary.BAD)),
-                new ApiHost().hostname("host2")
+                host("host2")
                         .addHealthChecksItem(new ApiHealthCheck().name(HOST_SCM_HEALTH).summary(ApiHealthSummary.GOOD))
                         .addHealthChecksItem(new ApiHealthCheck().name(HOST_AGENT_CERTIFICATE_EXPIRY).summary(ApiHealthSummary.GOOD)
                                 .explanation("in 30 days"))
@@ -151,7 +225,7 @@ class ClouderaManagerHealthServiceTest {
 
         ExtendedHostStatuses extendedHostStatuses = underTest.getExtendedHostStatuses(client, Optional.of("7.2.12"));
 
-        assertFalse(extendedHostStatuses.isAnyCertExpiring());
+        assertFalse(extendedHostStatuses.isAnyUnhealthyWithType(HealthCheckType.CERTIFICATE));
         assertFalse(extendedHostStatuses.isHostHealthy(hostName("host1")));
         assertFalse(extendedHostStatuses.isHostHealthy(hostName("host2")));
         assertEquals("explanation. The following services are in bad health: badservice.",
@@ -161,7 +235,7 @@ class ClouderaManagerHealthServiceTest {
 
         extendedHostStatuses = underTest.getExtendedHostStatuses(client, Optional.of("7.2.11"));
 
-        assertFalse(extendedHostStatuses.isAnyCertExpiring());
+        assertFalse(extendedHostStatuses.isAnyUnhealthyWithType(HealthCheckType.CERTIFICATE));
         assertFalse(extendedHostStatuses.isHostHealthy(hostName("host1")));
         assertTrue(extendedHostStatuses.isHostHealthy(hostName("host2")));
         assertEquals("explanation.",
@@ -171,10 +245,10 @@ class ClouderaManagerHealthServiceTest {
     @Test
     public void testEverythingGood() throws ApiException {
         hostsAre(
-                new ApiHost().hostname("host1")
+                host("host1")
                         .addHealthChecksItem(new ApiHealthCheck().name(HOST_SCM_HEALTH).summary(ApiHealthSummary.GOOD))
                         .addHealthChecksItem(new ApiHealthCheck().name(HOST_AGENT_CERTIFICATE_EXPIRY).summary(ApiHealthSummary.GOOD)),
-                new ApiHost().hostname("host2")
+                host("host2")
                         .addHealthChecksItem(new ApiHealthCheck().name(HOST_SCM_HEALTH).summary(ApiHealthSummary.GOOD))
                         .addHealthChecksItem(new ApiHealthCheck().name(HOST_AGENT_CERTIFICATE_EXPIRY).summary(ApiHealthSummary.GOOD)
                                 .explanation("in 30 days"))
@@ -182,7 +256,7 @@ class ClouderaManagerHealthServiceTest {
 
         ExtendedHostStatuses extendedHostStatuses = underTest.getExtendedHostStatuses(client, Optional.of("7.2.12"));
 
-        assertFalse(extendedHostStatuses.isAnyCertExpiring());
+        assertFalse(extendedHostStatuses.isAnyUnhealthyWithType(HealthCheckType.CERTIFICATE));
         assertTrue(extendedHostStatuses.isHostHealthy(hostName("host1")));
         assertTrue(extendedHostStatuses.isHostHealthy(hostName("host2")));
     }
@@ -190,7 +264,7 @@ class ClouderaManagerHealthServiceTest {
     @Test
     public void filtersAppropriateHealthCheckForHost() throws ApiException {
         hostsAre(
-                new ApiHost().hostname("host")
+                host("host")
                         .addHealthChecksItem(new ApiHealthCheck().name("fake_check").summary(ApiHealthSummary.BAD))
                         .addHealthChecksItem(new ApiHealthCheck().name(HOST_SCM_HEALTH).summary(ApiHealthSummary.CONCERNING))
                         .addHealthChecksItem(new ApiHealthCheck().name("another").summary(ApiHealthSummary.BAD))
@@ -199,26 +273,20 @@ class ClouderaManagerHealthServiceTest {
         assertTrue(underTest.getExtendedHostStatuses(client, Optional.of("7.2.12")).isHostHealthy(hostName("host")));
     }
 
-    @Test
-    public void hostWithoutHealthCheckIsIgnored() throws ApiException {
-        hostsAre(new ApiHost().hostname("hostY"));
-
-        assertFalse(underTest.getExtendedHostStatuses(client, Optional.of("7.2.12")).getHostsHealth().containsKey(hostName("hostY")));
-    }
-
-    @Test
-    public void hostWithoutAppropriateHealthCheckIsIgnored() throws ApiException {
-        hostsAre(new ApiHost().hostname("hostY").addHealthChecksItem(new ApiHealthCheck().name("fake_check").summary(ApiHealthSummary.BAD)));
-
-        assertFalse(underTest.getExtendedHostStatuses(client, Optional.of("7.2.12")).getHostsHealth().containsKey(hostName("hostY")));
-    }
-
     private void hostsAre(ApiHost... hosts) throws ApiException {
         Arrays.stream(hosts).forEach(host -> host.addRoleRefsItem(roleRef(ApiHealthSummary.GOOD)));
         ApiHostList list = new ApiHostList().items(Arrays.asList(hosts));
         lenient().when(hostsResourceApi.readHosts(null, null, FULL_VIEW)).thenReturn(list);
         lenient().when(hostsResourceApi.readHosts(null, null, SUMMARY)).thenReturn(list);
         lenient().when(hostsResourceApi.readHosts(null, null, FULL_WITH_EXPLANATION_VIEW)).thenReturn(list);
+    }
+
+    private static ApiHost host(String hostName) {
+        return new ApiHost().hostname(hostName).clusterRef(clusterRef());
+    }
+
+    private static ApiClusterRef clusterRef() {
+        return new ApiClusterRef().clusterName(CLUSTER_NAME);
     }
 
     private ApiRoleRef roleRef(ApiHealthSummary apiHealthSummary) {

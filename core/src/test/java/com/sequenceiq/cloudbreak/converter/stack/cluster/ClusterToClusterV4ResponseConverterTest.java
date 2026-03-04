@@ -47,11 +47,14 @@ import com.sequenceiq.cloudbreak.service.secret.model.SecretResponse;
 import com.sequenceiq.cloudbreak.service.secret.model.StringToSecretResponseConverter;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.common.api.type.CertExpirationState;
+import com.sequenceiq.common.api.type.ConfigStalenessState;
 
 @ExtendWith(MockitoExtension.class)
 class ClusterToClusterV4ResponseConverterTest extends AbstractEntityConverterTest<Cluster> {
 
     public static final String CERT_EXPIRATION_DETAILS = "Cert will expire in 60 days";
+
+    public static final String CONFIG_STALENESS_DETAILS = "There are services with stale configuration: ranger, atlas";
 
     @InjectMocks
     private ClusterToClusterV4ResponseConverter underTest;
@@ -106,6 +109,8 @@ class ClusterToClusterV4ResponseConverterTest extends AbstractEntityConverterTes
         source.setDbSslRootCertBundle("bundle");
         source.setCertExpirationState(CertExpirationState.HOST_CERT_EXPIRING);
         source.setCertExpirationDetails(CERT_EXPIRATION_DETAILS);
+        source.setConfigStalenessState(ConfigStalenessState.STALE);
+        source.setConfigStalenessDetails(CONFIG_STALENESS_DETAILS);
         source.setEncryptionProfileCrn("epCrn");
         Blueprint blueprint = source.getBlueprint();
 
@@ -132,6 +137,8 @@ class ClusterToClusterV4ResponseConverterTest extends AbstractEntityConverterTes
         assertEquals(getSource().getExtendedBlueprintText(), result.getExtendedBlueprintText());
         assertEquals(CertExpirationState.HOST_CERT_EXPIRING, result.getCertExpirationState());
         assertEquals(CERT_EXPIRATION_DETAILS, result.getCertExpirationDetails());
+        assertEquals(ConfigStalenessState.STALE.name(), result.getConfigStaleness().getState());
+        assertEquals(CONFIG_STALENESS_DETAILS, result.getConfigStaleness().getDetails());
         assertEquals("epCrn", result.getEncryptionProfileCrn());
         List<String> skippedFields = Lists.newArrayList("customContainers", "cm", "creationFinished", "cloudStorage", "gateway", "customConfigurationsName",
                 "customConfigurationsCrn");

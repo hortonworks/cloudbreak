@@ -257,6 +257,10 @@ public class ModelDescriptions {
         public static final String CERTIFICATE_ROTATION_TYPE = "the type of the certificate rotation";
         public static final String CERT_EXPIRATION = "Indicates the certificate status on the cluster";
         public static final String CERT_EXPIRATION_DETAILS = "Provide certificate expiration details, especially days left until expiration";
+        public static final String CONFIG_STALENESS = "Configuration staleness";
+        public static final String CONFIG_STALENESS_STATE = "Indicates if there are any stale configurations on the cluster";
+        public static final String CONFIG_STALENESS_DETAILS =
+                "Provide configuration staleness details, especially the services which have stale configurations";
         public static final String ROTATE_SALT_PASSWORD_REASON = "Indicates why the salt password rotation was started";
 
         public static final String FLAG_SKIP_SALT_UPDATE = "Flag to indicate if salt update should be skipped or not.";

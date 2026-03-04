@@ -4,6 +4,8 @@ import static com.sequenceiq.cloudbreak.common.type.HealthCheckResult.HEALTHY;
 import static com.sequenceiq.cloudbreak.common.type.HealthCheckResult.UNHEALTHY;
 import static com.sequenceiq.common.api.type.CertExpirationState.HOST_CERT_EXPIRING;
 import static com.sequenceiq.common.api.type.CertExpirationState.VALID;
+import static com.sequenceiq.common.api.type.ConfigStalenessState.STALE;
+import static com.sequenceiq.common.api.type.ConfigStalenessState.UP_TO_DATE;
 import static java.util.Collections.emptySet;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -64,6 +66,7 @@ import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.common.api.type.CertExpirationState;
+import com.sequenceiq.common.api.type.ConfigStalenessState;
 
 @ExtendWith(MockitoExtension.class)
 class ClusterServiceTest {
@@ -145,6 +148,32 @@ class ClusterServiceTest {
                 {"CM returns HEALTHY", HEALTHY, InstanceStatus.SERVICES_HEALTHY, "", 1},
                 {"CM returns UNHEALTHY", UNHEALTHY, InstanceStatus.SERVICES_UNHEALTHY, STATUS_REASON_SERVER, 1},
                 {"CM returns no data for the host", null, InstanceStatus.SERVICES_RUNNING, STATUS_REASON_ORIGINAL, 0},
+        };
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("updateClusterConfigurationStalenessScenarios")
+    public void testUpdateClusterConfigurationStaleness(String name, ConfigStalenessState current, Boolean configStaleness, Boolean stateChanged,
+            ConfigStalenessState newState, String configStalenessDetails) {
+        Cluster cluster = new Cluster();
+        cluster.setId(1L);
+        cluster.setConfigStalenessState(current);
+
+        underTest.updateClusterConfigurationStaleness(cluster, configStaleness, configStalenessDetails);
+
+        if (stateChanged) {
+            verify(repository, times(1)).updateConfigStalenessState(cluster.getId(), newState, configStalenessDetails);
+        } else {
+            verifyNoInteractions(repository);
+        }
+    }
+
+    static Object[][] updateClusterConfigurationStalenessScenarios() {
+        return new Object[][]{
+                {"Change from fresh to stale", UP_TO_DATE, Boolean.TRUE, Boolean.TRUE, STALE, "There are services with stale configuration: ranger"},
+                {"Change from stale to fresh", STALE, Boolean.FALSE, Boolean.TRUE, UP_TO_DATE, ""},
+                {"No change when fresh", UP_TO_DATE, Boolean.FALSE, Boolean.FALSE, null, ""},
+                {"No change when stale", STALE, Boolean.TRUE, Boolean.FALSE, null, ""}
         };
     }
 
@@ -319,7 +348,7 @@ class ClusterServiceTest {
         Map<HostName, Set<HealthCheck>> clusterManagerStateMap = new HashMap<>();
         if (healthCheckResult != null) {
             clusterManagerStateMap.put(HostName.hostName(FQDN1),
-                    Sets.newHashSet(new HealthCheck(HealthCheckType.HOST, healthCheckResult, Optional.ofNullable(statusReason), Optional.empty())));
+                    Sets.newHashSet(new HealthCheck(HealthCheckType.HOST, healthCheckResult, Optional.ofNullable(statusReason), List.of())));
         }
         ExtendedHostStatuses extendedHostStatuses = new ExtendedHostStatuses(clusterManagerStateMap);
         when(clusterStatusService.getExtendedHostStatuses(any())).thenReturn(extendedHostStatuses);

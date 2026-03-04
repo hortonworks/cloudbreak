@@ -58,6 +58,7 @@ import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
+import com.sequenceiq.cloudbreak.common.type.HealthCheckType;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.CustomConfigurations;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
@@ -96,6 +97,7 @@ import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
+import com.sequenceiq.common.api.type.ConfigStalenessState;
 
 @Service
 public class ClusterService implements LocalPaasRdcViewExtender {
@@ -346,7 +348,12 @@ public class ClusterService implements LocalPaasRdcViewExtender {
         } else {
             ExtendedHostStatuses extendedHostStatuses = connector.clusterStatusService().getExtendedHostStatuses(
                     runtimeVersionService.getRuntimeVersion(stack.getCluster().getId()));
-            updateClusterCertExpirationState(stack.getCluster(), extendedHostStatuses.isAnyCertExpiring(), extendedHostStatuses.getCertExpirationDetails());
+            updateClusterCertExpirationState(stack.getCluster(),
+                    extendedHostStatuses.isAnyUnhealthyWithType(HealthCheckType.CERTIFICATE),
+                    extendedHostStatuses.getUnhealthyReasonWithType(HealthCheckType.CERTIFICATE));
+            updateClusterConfigurationStaleness(stack.getCluster(),
+                    extendedHostStatuses.isAnyUnhealthyWithType(HealthCheckType.SERVICE_CONFIG_STALENESS),
+                    extendedHostStatuses.getUnhealthyReasonWithType(HealthCheckType.SERVICE_CONFIG_STALENESS));
             List<InstanceMetadataView> notTerminatedInstanceMetaDatas = stack.getNotTerminatedInstanceMetaData();
             List<InstanceMetadataView> updatedInstanceMetaData = updateInstanceStatuses(notTerminatedInstanceMetaDatas, extendedHostStatuses);
             fireHostStatusUpdateNotification(stackId, updatedInstanceMetaData);
@@ -407,6 +414,16 @@ public class ClusterService implements LocalPaasRdcViewExtender {
         } else if (HOST_CERT_EXPIRING == cluster.getCertExpirationState() && !hostCertificateExpiring) {
             LOGGER.info("Update cert expiration state from {} to {}", cluster.getCertExpirationState(), VALID);
             repository.updateCertExpirationState(cluster.getId(), VALID, "");
+        }
+    }
+
+    public void updateClusterConfigurationStaleness(ClusterView cluster, boolean configStaleness, String configStalenessDetails) {
+        if (ConfigStalenessState.STALE != cluster.getConfigStalenessState() && configStaleness) {
+            LOGGER.info("Cluster configuration became STALE");
+            repository.updateConfigStalenessState(cluster.getId(), ConfigStalenessState.STALE, configStalenessDetails);
+        } else if (ConfigStalenessState.UP_TO_DATE != cluster.getConfigStalenessState() && !configStaleness) {
+            LOGGER.info("Cluster configuration became UP_TO_DATE");
+            repository.updateConfigStalenessState(cluster.getId(), ConfigStalenessState.UP_TO_DATE, "");
         }
     }
 

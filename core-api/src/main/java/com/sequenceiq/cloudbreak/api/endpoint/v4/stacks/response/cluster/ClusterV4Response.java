@@ -14,6 +14,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.BlueprintV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.responses.DatabaseV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.ConfigStalenessV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.clouderamanager.ClouderaManagerV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.customcontainer.CustomContainerV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.gateway.GatewayV4Response;
@@ -134,13 +135,16 @@ public class ClusterV4Response implements JsonEntity {
     @Schema(description = ClusterModelDescription.CERT_EXPIRATION)
     private CertExpirationState certExpirationState;
 
+    @Schema(description = ClusterModelDescription.CERT_EXPIRATION_DETAILS)
+    private String certExpirationDetails;
+
+    @Schema(description = ClusterModelDescription.CONFIG_STALENESS)
+    private ConfigStalenessV4Response configStaleness;
+
     @Schema(description = ClusterModelDescription.DATABASE_SSL_ENABLED, requiredMode = Schema.RequiredMode.REQUIRED)
     private boolean dbSSLEnabled;
 
     private String dbSslRootCertBundle;
-
-    @Schema(description = ClusterModelDescription.CERT_EXPIRATION_DETAILS)
-    private String certExpirationDetails;
 
     @Schema(description = ClusterModelDescription.ENCRYPTION_PROFILE_CRN)
     private String encryptionProfileCrn;
@@ -393,6 +397,22 @@ public class ClusterV4Response implements JsonEntity {
         this.certExpirationState = certExpirationState;
     }
 
+    public String getCertExpirationDetails() {
+        return certExpirationDetails;
+    }
+
+    public void setCertExpirationDetails(String certExpirationDetails) {
+        this.certExpirationDetails = certExpirationDetails;
+    }
+
+    public ConfigStalenessV4Response getConfigStaleness() {
+        return configStaleness;
+    }
+
+    public void setConfigStaleness(ConfigStalenessV4Response configStaleness) {
+        this.configStaleness = configStaleness;
+    }
+
     public String getCustomConfigurationsCrn() {
         return customConfigurationsCrn;
     }
@@ -423,14 +443,6 @@ public class ClusterV4Response implements JsonEntity {
 
     public void setDbSslRootCertBundle(String dbSslRootCertBundle) {
         this.dbSslRootCertBundle = dbSslRootCertBundle;
-    }
-
-    public String getCertExpirationDetails() {
-        return certExpirationDetails;
-    }
-
-    public void setCertExpirationDetails(String certExpirationDetails) {
-        this.certExpirationDetails = certExpirationDetails;
     }
 
     public String getEncryptionProfileCrn() {

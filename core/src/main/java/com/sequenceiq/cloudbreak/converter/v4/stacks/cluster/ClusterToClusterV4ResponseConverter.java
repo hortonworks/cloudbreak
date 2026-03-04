@@ -23,6 +23,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.ConfigStalenessV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.ClusterV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.customcontainer.CustomContainerV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.gateway.GatewayV4Response;
@@ -133,9 +134,10 @@ public class ClusterToClusterV4ResponseConverter {
         clusterResponse.setRangerRazEnabled(source.isRangerRazEnabled());
         clusterResponse.setRangerRmsEnabled(source.isRangerRmsEnabled());
         clusterResponse.setCertExpirationState(source.getCertExpirationState());
+        clusterResponse.setCertExpirationDetails(source.getCertExpirationDetails());
+        clusterResponse.setConfigStaleness(getConfigStalenessV4Response(source));
         clusterResponse.setDbSSLEnabled(source.getDbSslEnabled() != null && source.getDbSslEnabled());
         clusterResponse.setDbSslRootCertBundle(source.getDbSslRootCertBundle());
-        clusterResponse.setCertExpirationDetails(source.getCertExpirationDetails());
         clusterResponse.setEncryptionProfileCrn(source.getEncryptionProfileCrn());
         return clusterResponse;
     }
@@ -236,5 +238,12 @@ public class ClusterToClusterV4ResponseConverter {
             response.setCmMgmtUser(stringToSecretResponseConverter.convert(source.getDpClusterManagerUserSecretPath()));
             response.setCmMgmtPassword(stringToSecretResponseConverter.convert(source.getDpClusterManagerPasswordSecretPath()));
         }
+    }
+
+    private ConfigStalenessV4Response getConfigStalenessV4Response(ClusterView source) {
+        ConfigStalenessV4Response configStaleness = new ConfigStalenessV4Response();
+        configStaleness.setState(String.valueOf(source.getConfigStalenessState()));
+        configStaleness.setDetails(source.getConfigStalenessDetails());
+        return configStaleness;
     }
 }

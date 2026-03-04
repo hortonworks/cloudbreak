@@ -5,6 +5,7 @@ import static com.sequenceiq.mock.service.CloudInstanceUtil.isFailedVm;
 import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
@@ -18,6 +19,7 @@ import com.sequenceiq.mock.service.HostNameService;
 import com.sequenceiq.mock.spi.SpiService;
 import com.sequenceiq.mock.spi.SpiStoreService;
 import com.sequenceiq.mock.swagger.model.ApiCluster;
+import com.sequenceiq.mock.swagger.model.ApiClusterRef;
 import com.sequenceiq.mock.swagger.model.ApiClusterTemplate;
 import com.sequenceiq.mock.swagger.model.ApiClusterTemplateHostTemplate;
 import com.sequenceiq.mock.swagger.model.ApiCommand;
@@ -142,14 +144,21 @@ public class DataProviderService {
         return new ApiHost()
                 .hostId(cloudVmMetaDataStatus.getCloudVmInstanceStatus().getCloudInstance().getInstanceId())
                 .hostname(hostname)
-                .roleRefs(Collections.emptyList())
                 .ipAddress(privateIp)
                 .lastHeartbeat(Instant.now().plusSeconds(SECONDS_TO_ADD).toString())
                 .healthSummary(healthSummary)
                 .roleRefs(List.of(new ApiRoleRef().roleStatus(ApiRoleState.STARTED)))
+                .clusterRef(new ApiClusterRef().clusterName(getClusterName(mockUuid)))
                 .healthChecks(List.of(new ApiHealthCheck()
                         .name("HOST_SCM_HEALTH")
                         .summary(healthSummary)));
+    }
+
+    private String getClusterName(String mockUuid) {
+        ClouderaManagerDto clouderaManagerDto = clouderaManagerStoreService.read(mockUuid);
+        return Optional.ofNullable(clouderaManagerDto.getClusterTemplate())
+                .map(ApiClusterTemplate::getDisplayName)
+                .orElse("");
     }
 
     public ApiHostTemplateList hostTemplates(String mockUuid) {

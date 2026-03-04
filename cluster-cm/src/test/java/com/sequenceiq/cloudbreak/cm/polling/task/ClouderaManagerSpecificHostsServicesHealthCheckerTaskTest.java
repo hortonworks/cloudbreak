@@ -26,7 +26,6 @@ import com.sequenceiq.cloudbreak.cm.ClouderaManagerHealthService;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiPojoFactory;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollerObject;
 import com.sequenceiq.cloudbreak.common.type.HealthCheck;
-import com.sequenceiq.cloudbreak.common.type.HealthCheckResult;
 import com.sequenceiq.cloudbreak.common.type.HealthCheckType;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
@@ -74,7 +73,7 @@ class ClouderaManagerSpecificHostsServicesHealthCheckerTaskTest {
         when(clouderaManagerHealthService.getExtendedHostStatuses(eq(apiClient), eq(RUNTIME_VERSION)))
                 .thenReturn(new ExtendedHostStatuses(Map.of(
                         HostName.hostName(HEALTHY_HOST),
-                        Set.of(new HealthCheck(HealthCheckType.SERVICES, HealthCheckResult.HEALTHY, Optional.empty(), Optional.empty()))
+                        Set.of(HealthCheck.healthy(HealthCheckType.SERVICES))
                 )));
 
         boolean result = underTest.doStatusCheck(new ClouderaManagerPollerObject(stack, apiClient));
@@ -87,7 +86,7 @@ class ClouderaManagerSpecificHostsServicesHealthCheckerTaskTest {
         when(clouderaManagerHealthService.getExtendedHostStatuses(eq(apiClient), eq(RUNTIME_VERSION)))
                 .thenReturn(new ExtendedHostStatuses(Map.of(
                         HostName.hostName(HEALTHY_HOST),
-                        Set.of(new HealthCheck(HealthCheckType.SERVICES, HealthCheckResult.UNHEALTHY, Optional.of("bad"), Optional.empty()))
+                        Set.of(HealthCheck.unhealthy(HealthCheckType.SERVICES, "bad"))
                 )));
         when(hostWithFqdn.getPrivateId()).thenReturn(HOST_PRIVATE_ID);
 
@@ -103,7 +102,7 @@ class ClouderaManagerSpecificHostsServicesHealthCheckerTaskTest {
         when(clouderaManagerHealthService.getExtendedHostStatuses(eq(apiClient), eq(RUNTIME_VERSION)))
                 .thenReturn(new ExtendedHostStatuses(Map.of(
                         HostName.hostName("another-host.example.com"),
-                        Set.of(new HealthCheck(HealthCheckType.SERVICES, HealthCheckResult.HEALTHY, Optional.empty(), Optional.empty()))
+                        Set.of(HealthCheck.healthy(HealthCheckType.SERVICES))
                 )));
         when(hostWithFqdn.getPrivateId()).thenReturn(HOST_PRIVATE_ID);
 
@@ -117,7 +116,7 @@ class ClouderaManagerSpecificHostsServicesHealthCheckerTaskTest {
         when(clouderaManagerHealthService.getExtendedHostStatuses(eq(apiClient), eq(RUNTIME_VERSION)))
                 .thenReturn(new ExtendedHostStatuses(Map.of(
                         HostName.hostName(HEALTHY_HOST),
-                        Set.of(new HealthCheck(HealthCheckType.SERVICES, HealthCheckResult.HEALTHY, Optional.empty(), Optional.empty()))
+                        Set.of(HealthCheck.healthy(HealthCheckType.SERVICES))
                 )));
 
         boolean result = underTest.doStatusCheck(new ClouderaManagerPollerObject(stack, apiClient));

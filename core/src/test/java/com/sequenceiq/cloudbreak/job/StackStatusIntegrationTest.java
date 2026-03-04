@@ -411,7 +411,7 @@ class StackStatusIntegrationTest {
 
     private void setUpHealthForInstance(String fqdn, HealthCheckResult healthCheckResult) {
         hostStatuses.put(hostName(fqdn), Sets.newHashSet(
-                new HealthCheck(HealthCheckType.HOST, healthCheckResult, Optional.empty(), Optional.empty())));
+                new HealthCheck(HealthCheckType.HOST, healthCheckResult, Optional.empty(), List.of())));
     }
 
     @Configuration

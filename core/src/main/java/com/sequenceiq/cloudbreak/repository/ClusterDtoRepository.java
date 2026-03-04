@@ -24,6 +24,9 @@ public interface ClusterDtoRepository extends Repository<Cluster, Long> {
             "c.rangerRazEnabled as rangerRazEnabled, " +
             "c.rangerRmsEnabled as rangerRmsEnabled," +
             "c.certExpirationState as certExpirationState, " +
+            "c.certExpirationDetails as certExpirationDetails, " +
+            "c.configStalenessState as configStalenessState, " +
+            "c.configStalenessDetails as configStalenessDetails, " +
             "c.environmentCrn as environmentCrn, " +
             "c.proxyConfigCrn as proxyConfigCrn, " +
             "c.uptime as uptime, " +
