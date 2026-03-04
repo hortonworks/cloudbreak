@@ -5,13 +5,11 @@ import static java.lang.String.format;
 
 import jakarta.inject.Inject;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.StackImageV4Response;
-import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.common.model.OsType;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
@@ -56,11 +54,6 @@ public class DistroXRhel9ImageTest extends PreconditionSdxE2ETest {
             when = "data lake upgrade is started from 7.3.1 redhat8 to 7.3.2 redhat9",
             then = "the upgrade completes succesfully and the instances are running on redhat9 images")
     public void testDataLakeUpgradeFrom731Rhel8To732Rhel9(TestContext testContext) {
-        String distrox = resourcePropertyProvider().getName();
-        Pair<String, String> sourceAndCandidate = testUpgradeCandidateProvider.getDistroUpgradeSourceAndCandidate(testContext, VERSION_7_3_2,
-                Architecture.X86_64, OsType.RHEL8, OsType.RHEL9, false);
-        String rhel9Image = sourceAndCandidate.getRight();
-
         testContext.given(SdxTestDto.class)
                 .withCloudStorage()
                 .withRuntimeVersion(VERSION_7_3_1)
@@ -68,14 +61,15 @@ public class DistroXRhel9ImageTest extends PreconditionSdxE2ETest {
                 .when(sdxTestClient.create())
                 .await(SdxClusterStatusResponse.RUNNING)
                 .awaitForHealthyInstances()
+                .then(validateOSAndRuntimeForDataLake(OsType.RHEL8, VERSION_7_3_1))
                 .given(SdxUpgradeTestDto.class)
-                .withImageId(rhel9Image)
+                .withRuntime(VERSION_7_3_2)
                 .withReplaceVms(SdxUpgradeReplaceVms.ENABLED)
                 .given(SdxTestDto.class)
                 .when(sdxTestClient.upgrade())
                 .await(SdxClusterStatusResponse.RUNNING)
                 .awaitForHealthyInstances()
-                .then(validateOSAndImageForDataLake(OsType.RHEL9, rhel9Image))
+                .then(validateOSAndRuntimeForDataLake(OsType.RHEL9, VERSION_7_3_2))
                 .validate();
     }
 
@@ -95,7 +89,7 @@ public class DistroXRhel9ImageTest extends PreconditionSdxE2ETest {
                 .when(sdxTestClient.create())
                 .await(SdxClusterStatusResponse.RUNNING)
                 .awaitForHealthyInstances()
-                .then(validateOSAndImageForDataLake(OsType.RHEL9, null))
+                .then(validateOSAndRuntimeForDataLake(OsType.RHEL9, null))
                 .given(distrox, DistroXTestDto.class)
                 .withTemplate(commonClusterManagerProperties().getDataEngDistroXBlueprintName(VERSION_7_3_2))
                 .when(distroXTestClient.create(), key(distrox))
@@ -105,21 +99,21 @@ public class DistroXRhel9ImageTest extends PreconditionSdxE2ETest {
                 .validate();
     }
 
-    private static Assertion<SdxTestDto, SdxClient> validateOSAndImageForDataLake(OsType osType, String expectedImageId) {
+    private static Assertion<SdxTestDto, SdxClient> validateOSAndRuntimeForDataLake(OsType osType, String expectedRuntime) {
         return (tc, dto, client) -> {
-            validateOSAndImage(osType, expectedImageId, dto.getResponse().getStackV4Response().getImage());
+            validateOSAndImage(osType, expectedRuntime, dto.getResponse().getStackV4Response().getImage(), dto.getResponse().getRuntime());
             return dto;
         };
     }
 
     private static Assertion<DistroXTestDto, CloudbreakClient> validateOSForDataHub(OsType osType) {
         return (tc, dto, client) -> {
-            validateOSAndImage(osType, null, dto.getResponse().getImage());
+            validateOSAndImage(osType, null, dto.getResponse().getImage(), null);
             return dto;
         };
     }
 
-    private static void validateOSAndImage(OsType osType, String expectedImageId, StackImageV4Response image) {
+    private static void validateOSAndImage(OsType osType, String expectedRuntime, StackImageV4Response image, String actualRuntime) {
         Log.log(LOGGER, format(" Image Catalog Name: %s ", image.getCatalogName()));
         Log.log(LOGGER, format(" Image Catalog URL: %s ", image.getCatalogUrl()));
         Log.log(LOGGER, format(" Image ID: %s ", image.getId()));
@@ -128,8 +122,8 @@ public class DistroXRhel9ImageTest extends PreconditionSdxE2ETest {
             throw new TestFailException(String.format("The image os %s does not match, expected %s", image.getOs(), osType));
         }
 
-        if (expectedImageId != null && !expectedImageId.equals(image.getId())) {
-            throw new TestFailException(String.format("Expected %s image but current image is %s", expectedImageId, image.getId()));
+        if (expectedRuntime != null && !expectedRuntime.equals(actualRuntime)) {
+            throw new TestFailException(String.format("Expected %s runtime but the current runtime is %s", expectedRuntime, actualRuntime));
         }
     }
 }
