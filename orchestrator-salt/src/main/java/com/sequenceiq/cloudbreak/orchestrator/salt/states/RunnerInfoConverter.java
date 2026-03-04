@@ -28,16 +28,23 @@ public class RunnerInfoConverter {
         RunnerInfo runnerInfo = new RunnerInfo();
         runnerInfo.setStateId(key);
         runnerInfo.setChanges(getChanges(runnerInfoNode));
-        runnerInfo.setComment(runnerInfoNode.get("comment").asText());
+        if (runnerInfoNode.has("comment")) {
+            runnerInfo.setComment(runnerInfoNode.get("comment").asText());
+        }
         double duration = getDuration(runnerInfoNode);
         runnerInfo.setDuration(duration);
         if (runnerInfoNode.has("name")) {
             runnerInfo.setName(runnerInfoNode.get("name").asText());
         }
-        runnerInfo.setResult(runnerInfoNode.get("result").asBoolean());
-        String runNum = runnerInfoNode.get("__run_num__").asText();
-        runnerInfo.setRunNum(Integer.parseInt(runNum));
-        runnerInfo.setStartTime(runnerInfoNode.get("start_time").asText());
+        if (runnerInfoNode.has("result")) {
+            runnerInfo.setResult(runnerInfoNode.get("result").asBoolean());
+        }
+        if (runnerInfoNode.has("__run_num__")) {
+            runnerInfo.setRunNum(Integer.parseInt(runnerInfoNode.get("__run_num__").asText()));
+        }
+        if (runnerInfoNode.has("start_time")) {
+            runnerInfo.setStartTime(runnerInfoNode.get("start_time").asText());
+        }
         return Optional.of(runnerInfo);
     }
 
@@ -51,12 +58,13 @@ public class RunnerInfoConverter {
     }
 
     private static double getDuration(JsonNode runnerInfoNode) {
-        double duration;
+        double duration = 0.0;
         try {
-            String[] durationArray = String.valueOf(runnerInfoNode.get("duration").asText()).split(" ");
-            duration = Double.parseDouble(durationArray[0]);
+            if (runnerInfoNode.has("duration")) {
+                String[] durationArray = String.valueOf(runnerInfoNode.get("duration").asText()).split(" ");
+                duration = Double.parseDouble(durationArray[0]);
+            }
         } catch (NumberFormatException ignored) {
-            duration = 0.0;
         }
         return duration;
     }

@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.GCP;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.MOCK;
+import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.OPENSTACK;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.YARN;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.valueOf;
 import static com.sequenceiq.cloudbreak.util.ConditionBasedEvaluatorUtil.doIfFalse;
@@ -67,7 +68,8 @@ public class EnvironmentNetworkProviderValidator {
                     AZURE, optional(networkDto.getAzure()),
                     GCP, optional(networkDto.getGcp()),
                     MOCK, optional(networkDto.getMock()),
-                    YARN, optional(networkDto.getYarn())
+                    YARN, optional(networkDto.getYarn()),
+                    OPENSTACK, optional(networkDto.getOpenstack())
             );
             String supportedPlatforms = String.join(", ", providerNetworkParamPair.keySet().stream().map(Enum::name).collect(Collectors.toSet()));
             LOGGER.debug("About to validate network properties for cloud platform \"{}\" against the following supported platforms: {}",
@@ -110,10 +112,17 @@ public class EnvironmentNetworkProviderValidator {
                     environmentSecurityGroupValidatorsByCloudPlatform.get(valueOf(cloudPlatform));
             if (environmentSecurityGroupValidator != null) {
                 environmentSecurityGroupValidator.validate(environmentValidationDto, resultBuilder);
-            } else if (!MOCK.equalsIgnoreCase(cloudPlatform) && !YARN.equalsIgnoreCase(cloudPlatform) && !GCP.equalsIgnoreCase(cloudPlatform)) {
+            } else if (isSpecificSecurityGroupUnsupported(cloudPlatform)) {
                 resultBuilder.error(String.format("Environment specific security group is not supported for cloud platform: '%s'!", cloudPlatform));
             }
         }
+    }
+
+    private boolean isSpecificSecurityGroupUnsupported(String cloudPlatform) {
+        return !MOCK.equalsIgnoreCase(cloudPlatform)
+                && !YARN.equalsIgnoreCase(cloudPlatform)
+                && !GCP.equalsIgnoreCase(cloudPlatform)
+                && !OPENSTACK.equalsIgnoreCase(cloudPlatform);
     }
 
 }

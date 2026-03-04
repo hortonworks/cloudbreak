@@ -558,6 +558,8 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
                 return getResourcesByType(ResourceType.GCP_ATTACHED_DISKSET);
             case CloudConstants.AZURE:
                 return ResourceUtil.getLatestResourceByInstanceId(getResourcesByType(ResourceType.AZURE_VOLUMESET));
+            case CloudConstants.OPENSTACK:
+                return getResourcesByType(ResourceType.OPENSTACK_ATTACHED_DISK);
             default:
                 return List.of();
         }
@@ -576,6 +578,8 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
                 return ResourceType.AZURE_VOLUMESET;
             case CloudConstants.MOCK:
                 return ResourceType.MOCK_VOLUME;
+            case CloudConstants.OPENSTACK:
+                return ResourceType.OPENSTACK_ATTACHED_DISK;
             default:
                 return null;
         }

@@ -79,7 +79,7 @@ public abstract class EnvironmentBaseNetworkConverter implements EnvironmentNetw
 
         convertSubnets(source, builder);
 
-        return setProviderSpecificFields(builder, source);
+        return setProviderSpecificFieldsAndReturnDto(builder, source);
     }
 
     /**
@@ -200,7 +200,7 @@ public abstract class EnvironmentBaseNetworkConverter implements EnvironmentNetw
 
     abstract BaseNetwork createProviderSpecificNetwork(NetworkDto network);
 
-    abstract NetworkDto setProviderSpecificFields(NetworkDto.Builder builder, BaseNetwork source);
+    abstract NetworkDto setProviderSpecificFieldsAndReturnDto(NetworkDto.Builder builder, BaseNetwork source);
 
     abstract void setRegistrationType(BaseNetwork result, NetworkDto networkDto);
 }

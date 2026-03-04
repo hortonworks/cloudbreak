@@ -18,6 +18,7 @@ import com.sequenceiq.common.api.type.OutboundInternetTraffic;
 import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
 import com.sequenceiq.common.api.type.ServiceEndpointCreation;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAzureParams;
+import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkOpenstackParams;
 import com.sequenceiq.environment.api.v1.environment.model.base.PrivateSubnetCreation;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentNetworkRequest;
 import com.sequenceiq.environment.network.dto.AwsParams;
@@ -25,6 +26,7 @@ import com.sequenceiq.environment.network.dto.AzureParams;
 import com.sequenceiq.environment.network.dto.GcpParams;
 import com.sequenceiq.environment.network.dto.MockParams;
 import com.sequenceiq.environment.network.dto.NetworkDto;
+import com.sequenceiq.environment.network.dto.OpenStackParams;
 import com.sequenceiq.environment.network.dto.YarnParams;
 
 @Component
@@ -90,6 +92,16 @@ public class NetworkRequestToDtoConverter {
                     .build();
             builder.withGcp(gcpParams);
             builder.withNetworkId(gcpParams.getNetworkId());
+        }
+        EnvironmentNetworkOpenstackParams openstack = network.getOpenstack();
+        if (openstack != null) {
+            OpenStackParams openstackParams = OpenStackParams.builder()
+                    .withRouterId(openstack.getRouterId())
+                    .withNetworkId(openstack.getNetworkId())
+                    .withPublicNetId(openstack.getPublicNetId())
+                    .build();
+            builder.withOpenstack(openstackParams);
+            builder.withNetworkId(openstackParams.getNetworkId());
         }
         if (network.getSubnetIds() != null) {
             builder.withSubnetMetas(network.getSubnetIds().stream()

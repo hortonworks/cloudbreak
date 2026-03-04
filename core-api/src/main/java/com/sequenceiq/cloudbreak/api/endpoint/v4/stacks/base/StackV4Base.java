@@ -35,8 +35,7 @@ public abstract class StackV4Base extends ProviderParametersBase implements Json
     @Schema(description = StackModelDescription.AZURE_PARAMETERS)
     private AzureStackV4Parameters azure;
 
-    @Schema(description = StackModelDescription.OPENSTACK_PARAMETERS_DEPRECATED)
-    @Deprecated
+    @Schema(description = StackModelDescription.OPENSTACK_PARAMETERS)
     private OpenStackStackV4Parameters openstack;
 
     @Schema(description = StackModelDescription.YARN_PARAMETERS)
@@ -89,6 +88,17 @@ public abstract class StackV4Base extends ProviderParametersBase implements Json
         this.azure = azure;
     }
 
+    public OpenStackStackV4Parameters createOpenStack() {
+        if (openstack == null) {
+            openstack = new OpenStackStackV4Parameters();
+        }
+        return openstack;
+    }
+
+    public void setOpenstack(OpenStackStackV4Parameters openstack) {
+        this.openstack = openstack;
+    }
+
     @Override
     public YarnStackV4Parameters createYarn() {
         if (yarn == null) {
@@ -119,6 +129,10 @@ public abstract class StackV4Base extends ProviderParametersBase implements Json
 
     public AzureStackV4Parameters getAzure() {
         return azure;
+    }
+
+    public OpenStackStackV4Parameters getOpenstack() {
+        return openstack;
     }
 
     public YarnStackV4Parameters getYarn() {

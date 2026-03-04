@@ -281,8 +281,6 @@ public class FixAttachedVolumesPatchService extends ExistingStackPatchService {
                 .withDeleteOnTermination(originalVolumeSet.getDeleteOnTermination())
                 .withFstab(originalVolumeSet.getFstab())
                 .withVolumes(patchedVolumes)
-                .withVolumeSize(originalVolumeSet.getVolumeSize())
-                .withVolumeType(originalVolumeSet.getVolumeType())
                 .withDiscoveryFQDN(originalVolumeSet.getDiscoveryFQDN())
                 .withUuids(String.join(" ", patchedUuids))
                 .build();

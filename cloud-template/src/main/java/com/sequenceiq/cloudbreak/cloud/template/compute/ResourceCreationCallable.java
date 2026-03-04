@@ -128,16 +128,17 @@ public class ResourceCreationCallable implements Callable<List<CloudResourceStat
                     throw new CancellationException(format("Building of %s has been cancelled", cloudResources));
                 }
 
-                List<CloudResource> resources = builder.build(context, instance, privateId, auth, group, cloudResources, cloudStack);
-                updateResource(auth, resources);
-                context.addComputeResources(privateId, resources);
+                cloudResources = builder.build(context, instance, privateId, auth, group, cloudResources, cloudStack);
+                updateResource(auth, cloudResources);
+                context.addComputeResources(privateId, cloudResources);
 
                 if (ResourceType.GCP_INSTANCE.equals(builder.resourceType())) {
                     LOGGER.debug("Skip instance polling in case of GCP");
-                    resources.stream().map(resource -> new CloudResourceStatus(resource, ResourceStatus.IN_PROGRESS, privateId)).forEach(computeResults::add);
+                    cloudResources.stream().map(resource -> new CloudResourceStatus(resource, ResourceStatus.IN_PROGRESS, privateId))
+                            .forEach(computeResults::add);
                 } else {
-                    PollTask<List<CloudResourceStatus>> task = resourcePollTaskFactory.newPollResourceTask(builder, auth, resources, context, true);
-                    List<CloudResourceStatus> pollerResult = scheduleTask(task, resources);
+                    PollTask<List<CloudResourceStatus>> task = resourcePollTaskFactory.newPollResourceTask(builder, auth, cloudResources, context, true);
+                    List<CloudResourceStatus> pollerResult = scheduleTask(task, cloudResources);
                     for (CloudResourceStatus resourceStatus : pollerResult) {
                         resourceStatus.setPrivateId(privateId);
                     }

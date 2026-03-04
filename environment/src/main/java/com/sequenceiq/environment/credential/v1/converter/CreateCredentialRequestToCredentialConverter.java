@@ -19,6 +19,7 @@ import com.sequenceiq.environment.credential.v1.converter.aws.AwsCredentialV1Par
 import com.sequenceiq.environment.credential.v1.converter.azure.AzureCredentialRequestParametersToAzureCredentialAttributesConverter;
 import com.sequenceiq.environment.credential.v1.converter.gcp.GcpCredentialV1ParametersToGcpCredentialAttributesConverter;
 import com.sequenceiq.environment.credential.v1.converter.mock.MockCredentialV1ParametersToMockCredentialAttributesConverter;
+import com.sequenceiq.environment.credential.v1.converter.openstack.OpenStackCredentialV1ParametersToOpenStackCredentialAttributesConverter;
 import com.sequenceiq.environment.credential.v1.converter.yarn.YarnCredentialV1ParametersToAwsYarnAttributesConverter;
 
 @Component
@@ -38,6 +39,9 @@ public class CreateCredentialRequestToCredentialConverter {
 
     @Inject
     private YarnCredentialV1ParametersToAwsYarnAttributesConverter yarnConverter;
+
+    @Inject
+    private OpenStackCredentialV1ParametersToOpenStackCredentialAttributesConverter openstackConverter;
 
     public Credential convert(CredentialRequest source) {
         if (source == null) {
@@ -63,6 +67,7 @@ public class CreateCredentialRequestToCredentialConverter {
         doIfNotNull(source.getGcp(), param -> credentialAttributes.setGcp(gcpConverter.convert(param)));
         doIfNotNull(source.getMock(), param -> credentialAttributes.setMock(mockConverter.convert(param)));
         doIfNotNull(source.getYarn(), param -> credentialAttributes.setYarn(yarnConverter.convert(param)));
+        doIfNotNull(source.getOpenstack(), param -> credentialAttributes.setOpenstack(openstackConverter.convert(param)));
         credential.setAttributes(new Json(credentialAttributes).getValue());
     }
 

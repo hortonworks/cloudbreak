@@ -80,6 +80,7 @@ dependencies {
     implementation     project(":cloud-mock")
     implementation     project(":cloud-yarn")
     implementation     project(":cloud-gcp")
+    implementation     project(":cloud-openstack")
     implementation     project(":idbmms-connector")
     implementation     project(":redbeams-api")
     implementation     project(":freeipa-api")

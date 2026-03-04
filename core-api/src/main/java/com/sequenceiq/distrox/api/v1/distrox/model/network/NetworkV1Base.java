@@ -29,8 +29,7 @@ public class NetworkV1Base implements Serializable {
     @Schema(description = NetworkModelDescription.YARN_PARAMETERS)
     private YarnNetworkV1Parameters yarn;
 
-    @Schema(description = NetworkModelDescription.OPENSTACK_PARAMETERS_DEPRECATED)
-    @Deprecated
+    @Schema(description = NetworkModelDescription.OPENSTACK_PARAMETERS)
     private OpenstackNetworkV1Parameters openstack;
 
     public void setAws(AwsNetworkV1Parameters aws) {
@@ -71,6 +70,14 @@ public class NetworkV1Base implements Serializable {
 
     public void setYarn(YarnNetworkV1Parameters yarn) {
         this.yarn = yarn;
+    }
+
+    public OpenstackNetworkV1Parameters getOpenstack() {
+        return openstack;
+    }
+
+    public void setOpenstack(OpenstackNetworkV1Parameters openstack) {
+        this.openstack = openstack;
     }
 
 }

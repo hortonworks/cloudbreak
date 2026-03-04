@@ -81,6 +81,15 @@ public enum ResourceType {
     AZURE_NAT_GATEWAY,
     AZURE_FIREWALL,
 
+    // OPENSTACK
+    OPENSTACK_INSTANCE,
+    OPENSTACK_ATTACHED_DISK,
+    OPENSTACK_NETWORK,
+    OPENSTACK_SUBNET,
+    OPENSTACK_SECURITY_GROUP,
+    OPENSTACK_PORT,
+    OPENSTACK_FLOATING_IP,
+
     // ARM
     ARM_TEMPLATE(CommonResourceType.TEMPLATE),
 
@@ -94,7 +103,7 @@ public enum ResourceType {
     MOCK_DATABASE,
     MOCK_VOLUME;
 
-    private static final List<ResourceType> INSTANCE_TYPES = List.of(GCP_INSTANCE, MOCK_INSTANCE);
+    private static final List<ResourceType> INSTANCE_TYPES = List.of(GCP_INSTANCE, OPENSTACK_INSTANCE, MOCK_INSTANCE);
 
     private final CommonResourceType commonResourceType;
 

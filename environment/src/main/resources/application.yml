@@ -99,7 +99,7 @@ environment:
     url: http://localhost:8090
     contextPath: /freeipa
     synchronizeOnStart: true
-    supportedPlatforms: AWS,AZURE,GCP,MOCK
+    supportedPlatforms: AWS,AZURE,GCP,OPENSTACK,MOCK
     groupInstanceCount:
       default: 2
       minimum: 1
@@ -178,7 +178,7 @@ cb:
     defaultLifeTime: 604800
     networkCidrs: 10.140.0.0/16,172.27.0.0/16
   os:
-    enable.autoimport: true
+    enable.autoimport: false
     import:
       root.url.pattern: http://public-repo-1.hortonworks.com/HDP/cloudbreak/%s.img
       from.format: qcow2

@@ -156,6 +156,7 @@ dependencies {
   implementation project(':cloud-aws-gov')
   implementation project(':cloud-azure')
   implementation project(':cloud-gcp')
+  implementation project(':cloud-openstack')
   implementation project(':cloud-template')
   implementation project(':ccm-connector')
   implementation project(':service-common')

@@ -36,6 +36,7 @@ class GatewaySecurityGroupDecoratorTest {
     void testConvertExtendsGatewaySecurityGroupsWithDefaultGatewayCidrsWithoutCCM() {
         ReflectionTestUtils.setField(underTest, "defaultGatewayCidr", Set.of("0.0.0.0/0", "1.1.1.1/1"));
         ReflectionTestUtils.setField(underTest, "nginxPort", 9443);
+        ReflectionTestUtils.setField(underTest, "httpsPort", 443);
 
         // WHEN
         underTest.extendGatewaySecurityGroupWithDefaultGatewayCidrs(stack, Tunnel.DIRECT);

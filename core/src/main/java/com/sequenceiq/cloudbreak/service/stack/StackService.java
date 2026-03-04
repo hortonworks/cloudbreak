@@ -155,6 +155,7 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
             CloudConstants.AZURE,
             CloudConstants.GCP,
             CloudConstants.MOCK,
+            CloudConstants.OPENSTACK,
             CloudConstants.AWS_NATIVE,
             CloudConstants.AWS_NATIVE_GOV);
 

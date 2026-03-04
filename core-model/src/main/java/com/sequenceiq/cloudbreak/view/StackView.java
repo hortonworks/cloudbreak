@@ -170,6 +170,7 @@ public interface StackView extends MdcContextInfoProvider {
             case CloudConstants.GCP -> ResourceType.GCP_ATTACHED_DISKSET;
             case CloudConstants.AZURE -> ResourceType.AZURE_VOLUMESET;
             case CloudConstants.MOCK -> ResourceType.MOCK_VOLUME;
+            case CloudConstants.OPENSTACK -> ResourceType.OPENSTACK_ATTACHED_DISK;
             default -> null;
         };
     }

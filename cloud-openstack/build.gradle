@@ -1,0 +1,31 @@
+buildscript {
+
+  repositories {
+    maven { url = "$repoUrl" }
+    maven { url '= "$springRepoUrl"' }
+    mavenCentral()
+  }
+}
+
+plugins {
+  id 'java'
+}
+
+jar {
+  archiveBaseName = 'cloud-openstack'
+  archiveFileName= 'cloud-openstack.jar'
+}
+
+dependencies {
+
+  implementation project(':common')
+  implementation project(':cloud-api')
+  implementation project(':cloud-reactor')
+  implementation project(':cloud-common')
+  implementation project(':cloud-template')
+  implementation project(':auth-connector')
+
+  implementation     group: 'com.github.openstack4j.core', name: 'openstack4j', version: openstack4jVersion
+  implementation     group: 'com.github.openstack4j.core.connectors', name: 'openstack4j-httpclient', version: openstack4jVersion
+
+}

@@ -11,11 +11,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Schema(allOf = KeystoneV3Base.class)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
-@Deprecated
 public class DomainKeystoneV3Parameters extends KeystoneV3Base {
 
     @NotNull
-    @Schema(required = true)
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private String domainName;
 
     public String getDomainName() {

@@ -12,6 +12,7 @@ import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAws
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAzureParams;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkGcpParams;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkMockParams;
+import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkOpenstackParams;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkYarnParams;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 import com.sequenceiq.environment.network.dao.domain.RegistrationType;
@@ -75,6 +76,12 @@ public class NetworkDtoToResponseConverter {
                         .withNoFirewallRules(p.getNoFirewallRules())
                         .withNoPublicIp(p.getNoPublicIp())
                         .withAvailabilityZones(p.getAvailabilityZones())
+                        .build()))
+                .withOpenstack(getIfNotNull(network.getOpenstack(), p -> EnvironmentNetworkOpenstackParams.EnvironmentNetworkOpenstackParamsBuilder
+                        .anEnvironmentNetworkOpenstackParams()
+                        .withNetworkId(p.getNetworkId())
+                        .withPublicNetId(p.getPublicNetId())
+                        .withRouterId(p.getRouterId())
                         .build()))
                 .withYarn(getIfNotNull(network.getYarn(), p -> EnvironmentNetworkYarnParams.EnvironmentNetworkYarnParamsBuilder
                         .anEnvironmentNetworkYarnParams()

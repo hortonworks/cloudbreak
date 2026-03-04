@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.network;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
+import static com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackConstants.NETWORK_ID;
 import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNullOtherwise;
 import static java.util.stream.Collectors.toMap;
@@ -31,6 +32,7 @@ import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.network.dto.AwsParams;
 import com.sequenceiq.environment.network.dto.GcpParams;
 import com.sequenceiq.environment.network.dto.NetworkDto;
+import com.sequenceiq.environment.network.dto.OpenStackParams;
 import com.sequenceiq.environment.platformresource.PlatformParameterService;
 import com.sequenceiq.environment.platformresource.PlatformResourceRequest;
 
@@ -134,6 +136,12 @@ public class CloudNetworkService {
             buildSubnetIdFilter(subnetIds, filter);
             return fetchCloudNetwork(environmentDto.getRegions(), environmentDto.getCredential(), environmentDto.getCloudPlatform(),
                     network, filter, subnetIds);
+        } else if (isOpenstack(environmentDto.getCloudPlatform())) {
+            OpenStackParams openStackParams = network.getOpenstack();
+            Map<String, String> filter = new HashMap<>();
+            filter.put(NETWORK_ID, openStackParams.getNetworkId());
+            return fetchCloudNetwork(environmentDto.getRegions(), environmentDto.getCredential(), environmentDto.getCloudPlatform(),
+                    network, filter, subnetIds);
         } else {
             return subnetIds.stream().collect(toMap(Function.identity(), id ->
                     new CloudSubnet.Builder()
@@ -235,6 +243,10 @@ public class CloudNetworkService {
 
     private boolean isAws(String cloudPlatform) {
         return CloudPlatform.AWS.name().equalsIgnoreCase(cloudPlatform);
+    }
+
+    private boolean isOpenstack(String cloudPlatform) {
+        return CloudPlatform.OPENSTACK.name().equalsIgnoreCase(cloudPlatform);
     }
 
 }

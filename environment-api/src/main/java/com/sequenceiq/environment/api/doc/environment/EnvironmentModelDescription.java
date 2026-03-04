@@ -28,6 +28,7 @@ public class EnvironmentModelDescription {
     public static final String AWS_SPECIFIC_PARAMETERS = "AWS-specific properties of the network";
     public static final String AZURE_SPECIFIC_PARAMETERS = "Azure-specific properties of the network";
     public static final String GCP_SPECIFIC_PARAMETERS = "GCP-specific properties of the network";
+    public static final String OPENSTACK_SPECIFIC_PARAMETERS = "OpenStack-specific properties of the network";
     public static final String YARN_SPECIFIC_PARAMETERS = "Yarn-specific properties of the network";
     public static final String MOCK_PARAMETERS = "Mock-specific properties of the network";
     public static final String AWS_VPC_ID = "AWS VPC ID of the specified networks";
@@ -36,6 +37,9 @@ public class EnvironmentModelDescription {
     public static final String GCP_NO_PUBLIC_IP = "Gcp no public ip";
     public static final String GCP_NO_FIREWALL_RULES = "Gcp no firewall rules";
     public static final String GCP_AVAILABILITY_ZONES = "Gcp availability zones";
+    public static final String OPENSTACK_NETWORK_ID = "OpenStack network id";
+    public static final String OPENSTACK_ROUTER_ID = "OpenStack router id";
+    public static final String OPENSTACK_PUBLIC_NETWORK_ID = "OpenStack public network id";
 
     public static final String AZURE_AVAILABILITY_ZONES = "List of Azure Availability Zones";
     public static final String AZURE_DELEGATED_FLEXIBLE_SERVER_SUBNET_IDS = "List of Azure Delegated Subnet IDs for flexible database server";

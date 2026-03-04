@@ -5,6 +5,7 @@ import com.sequenceiq.environment.credential.attributes.aws.AwsCredentialAttribu
 import com.sequenceiq.environment.credential.attributes.azure.AzureCredentialAttributes;
 import com.sequenceiq.environment.credential.attributes.gcp.GcpCredentialAttributes;
 import com.sequenceiq.environment.credential.attributes.mock.MockCredentialAttributes;
+import com.sequenceiq.environment.credential.attributes.openstack.OpenStackCredentialAttributes;
 import com.sequenceiq.environment.credential.attributes.yarn.YarnCredentialAttributes;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -19,6 +20,8 @@ public class CredentialAttributes {
     private YarnCredentialAttributes yarn;
 
     private MockCredentialAttributes mock;
+
+    private OpenStackCredentialAttributes openstack;
 
     public AwsCredentialAttributes getAws() {
         return aws;
@@ -58,5 +61,13 @@ public class CredentialAttributes {
 
     public void setMock(MockCredentialAttributes mock) {
         this.mock = mock;
+    }
+
+    public OpenStackCredentialAttributes getOpenstack() {
+        return openstack;
+    }
+
+    public void setOpenstack(OpenStackCredentialAttributes openstack) {
+        this.openstack = openstack;
     }
 }

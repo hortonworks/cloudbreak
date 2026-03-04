@@ -91,6 +91,7 @@ freeipa:
     AZURE: Standard_D4s_v5
     GCP: e2-standard-2
     MOCK: large
+    OPENSTACK: m1.large
   platform.dnssec.validation:
     AWS: false
     AZURE: false
@@ -314,7 +315,7 @@ cb:
     database.template.batchSize: 1
 
   os:
-    enable.autoimport: true
+    enable.autoimport: false
     import:
       root.url.pattern: http://public-repo-1.hortonworks.com/HDP/cloudbreak/%s.img
       from.format: qcow2

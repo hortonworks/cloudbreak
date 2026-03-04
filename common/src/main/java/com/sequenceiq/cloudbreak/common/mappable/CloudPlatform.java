@@ -12,7 +12,6 @@ public enum CloudPlatform {
     AZURE,
     YARN,
     MOCK,
-    // DEPRECATED Platforms
     OPENSTACK;
 
     private static final Map<CloudPlatform, String> DISPLAY_NAME = new HashMap<>() {
@@ -24,10 +23,6 @@ public enum CloudPlatform {
 
     public boolean equalsIgnoreCase(String platfrom) {
         return name().equalsIgnoreCase(platfrom);
-    }
-
-    public static Set<CloudPlatform> deprecated() {
-        return Set.of(OPENSTACK);
     }
 
     public String getDislayName() {

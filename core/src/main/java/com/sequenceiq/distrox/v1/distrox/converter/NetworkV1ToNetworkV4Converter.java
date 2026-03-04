@@ -1,5 +1,10 @@
 package com.sequenceiq.distrox.v1.distrox.converter;
 
+import static com.sequenceiq.cloudbreak.common.type.CloudConstants.AWS;
+import static com.sequenceiq.cloudbreak.common.type.CloudConstants.AZURE;
+import static com.sequenceiq.cloudbreak.common.type.CloudConstants.GCP;
+import static com.sequenceiq.cloudbreak.common.type.CloudConstants.MOCK;
+import static com.sequenceiq.cloudbreak.common.type.CloudConstants.OPENSTACK;
 import static com.sequenceiq.cloudbreak.util.ConditionBasedEvaluatorUtil.evaluateIfTrueDoOtherwise;
 import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 
@@ -21,6 +26,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.A
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.AzureNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.GcpNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.MockNetworkV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.OpenStackNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.YarnNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -36,6 +42,7 @@ import com.sequenceiq.distrox.api.v1.distrox.model.network.aws.AwsNetworkV1Param
 import com.sequenceiq.distrox.api.v1.distrox.model.network.azure.AzureNetworkV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.network.gcp.GcpNetworkV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.network.mock.MockNetworkV1Parameters;
+import com.sequenceiq.distrox.api.v1.distrox.model.network.openstack.OpenstackNetworkV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.network.yarn.YarnNetworkV1Parameters;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAzureParams;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
@@ -68,17 +75,20 @@ public class NetworkV1ToNetworkV4Converter {
             throw new IllegalStateException("Unable to determine cloud platform for network since it has not been set!");
         }
         switch (source.getValue().getCloudPlatform()) {
-            case "AWS":
+            case AWS:
                 request.setAws(getAwsNetworkParameters(Optional.ofNullable(networkV1Request.getAws()), networkResponse));
                 break;
-            case "AZURE":
+            case AZURE:
                 request.setAzure(getAzureNetworkParameters(Optional.ofNullable(networkV1Request.getAzure()), networkResponse));
                 break;
-            case "MOCK":
+            case MOCK:
                 request.setMock(getMockNetworkParameters(Optional.ofNullable(networkV1Request.getMock()), networkResponse));
                 break;
-            case "GCP":
+            case GCP:
                 request.setGcp(getGcpNetworkParameters(Optional.ofNullable(networkV1Request.getGcp()), networkResponse));
+                break;
+            case OPENSTACK:
+                request.setOpenstack(getOpenstackNetworkParameters(Optional.ofNullable(networkV1Request.getOpenstack()), networkResponse));
                 break;
             default:
                 LOGGER.warn(NetworkV1ToNetworkV4Converter.class.getSimpleName() + " has no implemented action for cloud platform: " +
@@ -105,6 +115,12 @@ public class NetworkV1ToNetworkV4Converter {
     private GcpNetworkV4Parameters getGcpNetworkParameters(Optional<GcpNetworkV1Parameters> gcpKey, EnvironmentNetworkResponse networkResponse) {
         GcpNetworkV1Parameters params = gcpKey.orElse(new GcpNetworkV1Parameters());
         return convertToGcpStackRequest(new ImmutablePair<>(params, networkResponse));
+    }
+
+    private OpenStackNetworkV4Parameters getOpenstackNetworkParameters(Optional<OpenstackNetworkV1Parameters> openstackKey,
+            EnvironmentNetworkResponse networkResponse) {
+        OpenstackNetworkV1Parameters params = openstackKey.orElse(new OpenstackNetworkV1Parameters());
+        return convertToOpenstackStackRequest(new ImmutablePair<>(params, networkResponse));
     }
 
     private MockNetworkV4Parameters convertToMockNetworkParams(Pair<MockNetworkV1Parameters, EnvironmentNetworkResponse> source) {
@@ -166,6 +182,28 @@ public class NetworkV1ToNetworkV4Converter {
             response.setSharedProjectId(networkResponse.getGcp().getSharedProjectId());
 
             String subnetId = gcpNetworkV1Parameters.getSubnetId();
+            if (!Strings.isNullOrEmpty(subnetId)) {
+                response.setSubnetId(subnetId);
+            } else {
+                response.setSubnetId(getFirstSubnetIdFromEnvironment(networkResponse));
+            }
+        }
+
+        return response;
+    }
+
+    private OpenStackNetworkV4Parameters convertToOpenstackStackRequest(Pair<OpenstackNetworkV1Parameters, EnvironmentNetworkResponse> source) {
+        EnvironmentNetworkResponse networkResponse = source.getValue();
+        OpenstackNetworkV1Parameters openstackNetworkV1Parameters = source.getKey();
+
+        OpenStackNetworkV4Parameters response = new OpenStackNetworkV4Parameters();
+
+        if (openstackNetworkV1Parameters != null) {
+            response.setNetworkId(networkResponse.getOpenstack().getNetworkId());
+            response.setRouterId(networkResponse.getOpenstack().getRouterId());
+            response.setPublicNetId(networkResponse.getOpenstack().getPublicNetId());
+
+            String subnetId = openstackNetworkV1Parameters.getSubnetId();
             if (!Strings.isNullOrEmpty(subnetId)) {
                 response.setSubnetId(subnetId);
             } else {

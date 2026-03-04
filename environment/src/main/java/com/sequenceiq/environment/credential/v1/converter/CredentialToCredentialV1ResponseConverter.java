@@ -21,6 +21,7 @@ import com.sequenceiq.environment.credential.v1.converter.aws.AwsCredentialV1Par
 import com.sequenceiq.environment.credential.v1.converter.azure.AzureCredentialAttributesToAzureCredentialResponseParametersConverter;
 import com.sequenceiq.environment.credential.v1.converter.gcp.GcpCredentialV1ParametersToGcpCredentialAttributesConverter;
 import com.sequenceiq.environment.credential.v1.converter.mock.MockCredentialV1ParametersToMockCredentialAttributesConverter;
+import com.sequenceiq.environment.credential.v1.converter.openstack.OpenStackCredentialV1ParametersToOpenStackCredentialAttributesConverter;
 import com.sequenceiq.environment.credential.v1.converter.yarn.YarnCredentialV1ParametersToAwsYarnAttributesConverter;
 import com.sequenceiq.environment.credential.validation.CredentialValidator;
 import com.sequenceiq.environment.credential.validation.definition.CredentialDefinitionService;
@@ -51,6 +52,9 @@ public class CredentialToCredentialV1ResponseConverter {
 
     @Inject
     private YarnCredentialV1ParametersToAwsYarnAttributesConverter yarnConverter;
+
+    @Inject
+    private OpenStackCredentialV1ParametersToOpenStackCredentialAttributesConverter openstackConverter;
 
     @Inject
     private StringToSecretResponseConverter secretConverter;
@@ -94,6 +98,7 @@ public class CredentialToCredentialV1ResponseConverter {
             doIfNotNull(credentialAttributes.getGcp(), param -> response.setGcp(gcpConverter.convert(param, json)));
             doIfNotNull(credentialAttributes.getMock(), param -> response.setMock(mockConverter.convert(param)));
             doIfNotNull(credentialAttributes.getYarn(), param -> response.setYarn(yarnConverter.convert(param)));
+            doIfNotNull(credentialAttributes.getOpenstack(), param -> response.setOpenstack(openstackConverter.convert(param)));
         } catch (IOException e) {
             throw new BadRequestException("Cannot deserialize the credential's attributes", e);
         }

@@ -54,8 +54,7 @@ public class InstanceGroupV4Base extends ProviderParametersBase implements JsonE
     @Schema(description = InstanceGroupModelDescription.AWS_PARAMETERS)
     private AwsInstanceGroupV4Parameters aws;
 
-    @Schema(description = InstanceGroupModelDescription.OPENSTACK_PARAMETERS_DEPRECATED)
-    @Deprecated
+    @Schema(description = InstanceGroupModelDescription.OPENSTACK_PARAMETERS)
     private OpenStackInstanceGroupV4Parameters openstack;
 
     @Schema(hidden = true)
@@ -130,6 +129,17 @@ public class InstanceGroupV4Base extends ProviderParametersBase implements JsonE
 
     public void setAws(AwsInstanceGroupV4Parameters aws) {
         this.aws = aws;
+    }
+
+    public OpenStackInstanceGroupV4Parameters createOpenStack() {
+        if (openstack == null) {
+            openstack = new OpenStackInstanceGroupV4Parameters();
+        }
+        return openstack;
+    }
+
+    public OpenStackInstanceGroupV4Parameters getOpenstack() {
+        return openstack;
     }
 
     @Override

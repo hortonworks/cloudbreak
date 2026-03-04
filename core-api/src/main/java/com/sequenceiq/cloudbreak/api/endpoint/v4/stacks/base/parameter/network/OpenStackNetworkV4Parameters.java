@@ -17,7 +17,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
-@Deprecated
 public class OpenStackNetworkV4Parameters extends MappableBase implements JsonEntity {
 
     @Schema
@@ -67,14 +66,6 @@ public class OpenStackNetworkV4Parameters extends MappableBase implements JsonEn
         this.publicNetId = publicNetId;
     }
 
-    public String getNetworkingOption() {
-        return networkingOption;
-    }
-
-    public void setNetworkingOption(String networkingOption) {
-        this.networkingOption = networkingOption;
-    }
-
     @Override
     public Map<String, Object> asMap() {
         Map<String, Object> map = super.asMap();
@@ -90,7 +81,7 @@ public class OpenStackNetworkV4Parameters extends MappableBase implements JsonEn
     @JsonIgnore
     @Schema(hidden = true)
     public CloudPlatform getCloudPlatform() {
-        throw new IllegalStateException("OPENSTACK is deprecated");
+        return CloudPlatform.OPENSTACK;
     }
 
     @Override

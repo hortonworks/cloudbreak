@@ -1,6 +1,7 @@
 package com.sequenceiq.redbeams.api.endpoint.v4.stacks;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.GcpNetworkV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.OpenStackStackV4Parameters;
 import com.sequenceiq.cloudbreak.common.mappable.Mappable;
 import com.sequenceiq.cloudbreak.common.mappable.ProviderParametersBase;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.aws.AwsNetworkV4Parameters;
@@ -19,6 +20,9 @@ public class NetworkV4StackBase extends ProviderParametersBase {
 
     @Schema(description = NetworkModelDescriptions.GCP_PARAMETERS)
     private GcpNetworkV4Parameters gcp;
+
+    @Schema(description = NetworkModelDescriptions.OPENSTACK_PARAMETERS)
+    private OpenStackStackV4Parameters openstack;
 
     @Override
     public AwsNetworkV4Parameters createAws() {
@@ -53,6 +57,17 @@ public class NetworkV4StackBase extends ProviderParametersBase {
         this.azure = azure;
     }
 
+    public Mappable createOpenStack() {
+        if (openstack == null) {
+            openstack = new OpenStackStackV4Parameters();
+        }
+        return openstack;
+    }
+
+    public void setOpenstack(OpenStackStackV4Parameters openstack) {
+        this.openstack = openstack;
+    }
+
     @Override
     public Mappable createYarn() {
         return null;
@@ -69,6 +84,10 @@ public class NetworkV4StackBase extends ProviderParametersBase {
 
     public AzureNetworkV4Parameters getAzure() {
         return azure;
+    }
+
+    public OpenStackStackV4Parameters getOpenstack() {
+        return openstack;
     }
 
     public GcpNetworkV4Parameters getGcp() {

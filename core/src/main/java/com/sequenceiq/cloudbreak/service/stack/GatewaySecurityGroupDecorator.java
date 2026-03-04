@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.stack;
 
 import static com.sequenceiq.cloudbreak.service.securityrule.SecurityRuleService.TCP_PROTOCOL;
 
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -62,14 +63,28 @@ public class GatewaySecurityGroupDecorator {
     private void addSecurityRuleToSecurityGroup(Stack stack, Set<String> defaultGatewayCidrs, InstanceGroup gateway) {
         SecurityGroup securityGroup = gateway.getSecurityGroup();
         Set<SecurityRule> rules = securityGroup.getSecurityRules();
-        String ports = collectPorts(stack);
+        String ports = collectPortsWithoutDuplicateHttpsPort(stack, securityGroup);
         defaultGatewayCidrs.forEach(cloudbreakCidr -> rules.add(createSecurityRule(securityGroup, cloudbreakCidr, ports)));
         LOGGER.info("The control plane cidrs {} are added to the {} gateway group for the {} port.", defaultGatewayCidrs, gateway.getGroupName(),
                 stack.getGatewayPort());
     }
 
-    private String collectPorts(Stack stack) {
-        return (stack.getGatewayPort() == null ? nginxPort.toString() : stack.getGatewayPort().toString()) + ',' + httpsPort;
+    private String collectPortsWithoutDuplicateHttpsPort(Stack stack, SecurityGroup securityGroup) {
+        Set<String> existingPorts = securityGroup.getSecurityRules().stream()
+                .flatMap(securityRule -> Arrays.stream(securityRule.getPorts()))
+                .collect(Collectors.toSet());
+        String gatewayPortString = getEffectiveGatewayPort(stack);
+        if (!existingPorts.contains(httpsPort.toString())) {
+            return gatewayPortString + ',' + httpsPort;
+        } else {
+            return gatewayPortString;
+        }
+    }
+
+    private String getEffectiveGatewayPort(Stack stack) {
+        return Optional.ofNullable(stack.getGatewayPort())
+                .map(String::valueOf)
+                .orElse(nginxPort.toString());
     }
 
     private Set<String> filterEmptyCidrs() {

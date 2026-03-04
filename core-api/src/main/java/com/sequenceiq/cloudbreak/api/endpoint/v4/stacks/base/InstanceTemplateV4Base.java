@@ -32,8 +32,7 @@ public class InstanceTemplateV4Base extends ProviderParametersBase implements Js
     @Schema(description = TemplateModelDescription.GCP_PARAMETERS)
     private GcpInstanceTemplateV4Parameters gcp;
 
-    @Schema(description = TemplateModelDescription.OPENSTACK_PARAMETERS_DEPRECATED)
-    @Deprecated
+    @Schema(description = TemplateModelDescription.OPENSTACK_PARAMETERS)
     private OpenStackInstanceTemplateV4Parameters openstack;
 
     @Schema(description = TemplateModelDescription.YARN_PARAMETERS)
@@ -94,6 +93,18 @@ public class InstanceTemplateV4Base extends ProviderParametersBase implements Js
     }
 
     @Override
+    public OpenStackInstanceTemplateV4Parameters createOpenStack() {
+        if (openstack == null) {
+            openstack = new OpenStackInstanceTemplateV4Parameters();
+        }
+        return openstack;
+    }
+
+    public void setOpenstack(OpenStackInstanceTemplateV4Parameters openstack) {
+        this.openstack = openstack;
+    }
+
+    @Override
     public YarnInstanceTemplateV4Parameters createYarn() {
         if (yarn == null) {
             yarn = new YarnInstanceTemplateV4Parameters();
@@ -123,6 +134,10 @@ public class InstanceTemplateV4Base extends ProviderParametersBase implements Js
 
     public GcpInstanceTemplateV4Parameters getGcp() {
         return gcp;
+    }
+
+    public OpenStackInstanceTemplateV4Parameters getOpenstack() {
+        return openstack;
     }
 
     public YarnInstanceTemplateV4Parameters getYarn() {

@@ -190,7 +190,7 @@ class EnvironmentBaseNetworkConverterTest {
         }
 
         @Override
-        NetworkDto setProviderSpecificFields(NetworkDto.Builder builder, BaseNetwork source) {
+        NetworkDto setProviderSpecificFieldsAndReturnDto(NetworkDto.Builder builder, BaseNetwork source) {
             return builder.build();
         }
 

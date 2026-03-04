@@ -200,6 +200,7 @@ cb:
         AZURE: StandardSSD_LRS
         GCP: pd-ssd
         MOCK: magnetic
+        OPENSTACK: PURE-ISCSI
     upgrade:
       rds.backuprestore:
         cloudplatforms: AZURE
@@ -285,7 +286,7 @@ cb:
         georedundantbackup: false
 
   os:
-    enable.autoimport: true
+    enable.autoimport: false
     import:
       root.url.pattern: http://public-repo-1.hortonworks.com/HDP/cloudbreak/%s.img
       from.format: qcow2

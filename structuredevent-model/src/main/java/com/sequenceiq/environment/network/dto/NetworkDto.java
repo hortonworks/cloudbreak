@@ -47,6 +47,8 @@ public class NetworkDto {
 
     private final GcpParams gcp;
 
+    private final OpenStackParams openstack;
+
     private final String networkCidr;
 
     private final Set<String> networkCidrs;
@@ -97,6 +99,7 @@ public class NetworkDto {
         networkCidrs = builder.networkCidrs;
         networkId = builder.networkId;
         gcp = builder.gcp;
+        openstack = builder.openstack;
         privateSubnetCreation = builder.privateSubnetCreation;
         serviceEndpointCreation = builder.serviceEndpointCreation;
         outboundInternetTraffic = builder.outboundInternetTraffic;
@@ -135,6 +138,10 @@ public class NetworkDto {
 
     public AzureParams getAzure() {
         return azure;
+    }
+
+    public OpenStackParams getOpenstack() {
+        return openstack;
     }
 
     public YarnParams getYarn() {
@@ -314,6 +321,8 @@ public class NetworkDto {
 
         private AzureParams azure;
 
+        private OpenStackParams openstack;
+
         private YarnParams yarn;
 
         private GcpParams gcp;
@@ -360,6 +369,7 @@ public class NetworkDto {
             resourceCrn = networkDto.resourceCrn;
             aws = networkDto.aws;
             azure = networkDto.azure;
+            openstack = networkDto.openstack;
             yarn = networkDto.yarn;
             mock = networkDto.mock;
             subnetMetas = networkDto.subnetMetas;
@@ -399,6 +409,12 @@ public class NetworkDto {
         public Builder withAzure(AzureParams azure) {
             this.azure = azure;
             cloudPlatform = CloudPlatform.AZURE;
+            return this;
+        }
+
+        public Builder withOpenstack(OpenStackParams openstack) {
+            this.openstack = openstack;
+            cloudPlatform = CloudPlatform.OPENSTACK;
             return this;
         }
 

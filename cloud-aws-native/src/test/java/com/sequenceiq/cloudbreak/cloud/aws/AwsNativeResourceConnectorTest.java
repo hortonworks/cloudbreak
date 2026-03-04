@@ -130,7 +130,7 @@ public class AwsNativeResourceConnectorTest {
     public void testUpscale() throws QuotaExceededException {
         CloudResource instance1CloudResource = CloudResource.builder().withName("instance1").withType(ResourceType.AWS_INSTANCE).build();
         CloudResource instance2CloudResource = CloudResource.builder().withName("instance2").withType(ResourceType.AWS_INSTANCE).build();
-        VolumeSetAttributes volumeSetAttributes = new VolumeSetAttributes("az1", true, "fstab", null, null, null);
+        VolumeSetAttributes volumeSetAttributes = new VolumeSetAttributes("az1", true, "fstab", Collections.emptyList(), null, null);
         volumeSetAttributes.setDiscoveryFQDN("fqdn1");
         CloudResource volumeSet1 = CloudResource.builder().withName("volumeset1").withType(ResourceType.AWS_VOLUMESET)
                 .withStatus(CommonStatus.DETACHED).withGroup("master").withParameters(Map.of(CloudResource.ATTRIBUTES,

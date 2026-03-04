@@ -36,6 +36,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instanceg
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.network.azure.InstanceGroupAzureNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.network.gcp.InstanceGroupGcpNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.network.mock.InstanceGroupMockNetworkV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.network.openstack.InstanceGroupOpenstackNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.instancegroup.network.yarn.InstanceGroupYarnNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.environment.placement.PlacementSettingsV4Request;
@@ -482,10 +483,20 @@ public class StackV4RequestToStackConverter {
             case AWS -> setUpAws(instanceGroup, instanceGroupNetworkV4Request, subnetId);
             case AZURE -> setUpAzure(instanceGroup, instanceGroupNetworkV4Request, subnetId);
             case GCP -> setUpGcp(instanceGroup, instanceGroupNetworkV4Request, subnetId);
+            case OPENSTACK ->  setupOpenstack(instanceGroup, instanceGroupNetworkV4Request, subnetId);
             case YARN -> setUpYarn(instanceGroup, instanceGroupNetworkV4Request);
             case MOCK -> setUpMock(instanceGroup, instanceGroupNetworkV4Request, subnetId);
             default -> {
             }
+        }
+    }
+
+    private void setupOpenstack(InstanceGroupV4Request instanceGroup, InstanceGroupNetworkV4Request instanceGroupNetworkV4Request, String subnetId) {
+        if (instanceGroup.getNetwork() == null) {
+            InstanceGroupOpenstackNetworkV4Parameters openstack = new InstanceGroupOpenstackNetworkV4Parameters();
+            openstack.setSubnetIds(List.of(subnetId));
+            instanceGroupNetworkV4Request.setOpenstack(openstack);
+            instanceGroup.setNetwork(instanceGroupNetworkV4Request);
         }
     }
 

@@ -144,6 +144,7 @@ public final class ModelDescriptions {
         public static final String AWS_PARAMETERS = "AWS-specific parameters for the network";
         public static final String GCP_PARAMETERS = "GCP-specific parameters for the network";
         public static final String AZURE_PARAMETERS = "Azure-specific parameters for the network";
+        public static final String OPENSTACK_PARAMETERS = "OpenStack-specific parameters for the network";
     }
 
     public static class AwsNetworkModelDescriptions {

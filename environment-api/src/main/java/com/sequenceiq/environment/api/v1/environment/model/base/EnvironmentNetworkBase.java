@@ -20,6 +20,7 @@ import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAws
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAzureParams;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkGcpParams;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkMockParams;
+import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkOpenstackParams;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkYarnParams;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentNetworkRequest;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
@@ -69,6 +70,9 @@ public abstract class EnvironmentNetworkBase implements Serializable {
 
     @Schema(description = EnvironmentModelDescription.GCP_SPECIFIC_PARAMETERS)
     private EnvironmentNetworkGcpParams gcp;
+
+    @Schema(description = EnvironmentModelDescription.OPENSTACK_SPECIFIC_PARAMETERS)
+    private EnvironmentNetworkOpenstackParams openstack;
 
     @Schema(description = EnvironmentModelDescription.LOADBALANCER_CREATION)
     private LoadBalancerCreation loadBalancerCreation = LoadBalancerCreation.ENABLED;
@@ -145,6 +149,14 @@ public abstract class EnvironmentNetworkBase implements Serializable {
         this.azure = azure;
     }
 
+    public EnvironmentNetworkOpenstackParams getOpenstack() {
+        return openstack;
+    }
+
+    public void setOpenstack(EnvironmentNetworkOpenstackParams openstack) {
+        this.openstack = openstack;
+    }
+
     public EnvironmentNetworkYarnParams getYarn() {
         return yarn;
     }
@@ -182,6 +194,7 @@ public abstract class EnvironmentNetworkBase implements Serializable {
                 ", aws=" + aws +
                 ", gcp=" + gcp +
                 ", azure=" + azure +
+                ", openstack=" + openstack +
                 ", yarn=" + yarn +
                 ", mock=" + mock +
                 ", loadBalancerCreation=" + loadBalancerCreation +

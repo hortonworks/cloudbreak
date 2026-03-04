@@ -145,6 +145,11 @@ public class DatabaseServerV4StackBase extends ProviderParametersBase {
     }
 
     @Override
+    public Mappable createOpenStack() {
+        throw new UnsupportedOperationException("Openstack is not supported for database server provisioning");
+    }
+
+    @Override
     public Mappable createMock() {
         if (aws == null) {
             aws = new AwsDatabaseServerV4Parameters();

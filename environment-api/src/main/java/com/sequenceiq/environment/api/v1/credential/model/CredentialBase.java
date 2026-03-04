@@ -35,7 +35,6 @@ public abstract class CredentialBase implements Serializable {
 
     @Valid
     @Schema(description = CredentialModelDescription.OPENSTACK_PARAMETERS_DEPRECATED)
-    @Deprecated
     private OpenstackParameters openstack;
 
     @Valid
@@ -129,6 +128,14 @@ public abstract class CredentialBase implements Serializable {
 
     public void setSkipOrgPolicyDecisions(boolean skipOrgPolicyDecisions) {
         this.skipOrgPolicyDecisions = skipOrgPolicyDecisions;
+    }
+
+    public OpenstackParameters getOpenstack() {
+        return openstack;
+    }
+
+    public void setOpenstack(OpenstackParameters openstack) {
+        this.openstack = openstack;
     }
 
     @Override

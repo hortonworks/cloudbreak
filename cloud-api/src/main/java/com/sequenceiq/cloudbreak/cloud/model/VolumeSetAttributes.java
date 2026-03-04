@@ -24,8 +24,10 @@ public class VolumeSetAttributes {
 
     private String uuids;
 
+    @Deprecated
     private Integer volumeSize;
 
+    @Deprecated
     private String volumeType;
 
     private String discoveryFQDN;
@@ -42,6 +44,15 @@ public class VolumeSetAttributes {
         this.volumes = volumes;
         this.volumeSize = volumeSize;
         this.volumeType = volumeType;
+        this.discoveryFQDN = discoveryFQDN;
+    }
+
+    public VolumeSetAttributes(String availabilityZone, Boolean deleteOnTermination, String fstab, String uuids, List<Volume> volumes, String discoveryFQDN) {
+        this.availabilityZone = availabilityZone;
+        this.deleteOnTermination = deleteOnTermination;
+        this.fstab = fstab;
+        this.uuids = uuids;
+        this.volumes = volumes;
         this.discoveryFQDN = discoveryFQDN;
     }
 
@@ -95,16 +106,8 @@ public class VolumeSetAttributes {
         return uuids;
     }
 
-    public Integer getVolumeSize() {
-        return volumeSize;
-    }
-
     public void setVolumeSize(Integer volumeSize) {
         this.volumeSize = volumeSize;
-    }
-
-    public String getVolumeType() {
-        return volumeType;
     }
 
     public void setVolumeType(String volumeType) {
@@ -235,10 +238,6 @@ public class VolumeSetAttributes {
 
         private List<Volume> volumes;
 
-        private Integer volumeSize;
-
-        private String volumeType;
-
         private String discoveryFQDN;
 
         public Builder withAvailabilityZone(String availabilityZone) {
@@ -266,24 +265,13 @@ public class VolumeSetAttributes {
             return this;
         }
 
-        public Builder withVolumeSize(Integer volumeSize) {
-            this.volumeSize = volumeSize;
-            return this;
-        }
-
-        public Builder withVolumeType(String volumeType) {
-            this.volumeType = volumeType;
-            return this;
-        }
-
         public Builder withDiscoveryFQDN(String discoveryFQDN) {
             this.discoveryFQDN = discoveryFQDN;
             return this;
         }
 
         public VolumeSetAttributes build() {
-            return new VolumeSetAttributes(availabilityZone, deleteOnTermination, fstab, uuids, volumes == null ? List.of() : volumes,
-                    volumeSize, volumeType, discoveryFQDN);
+            return new VolumeSetAttributes(availabilityZone, deleteOnTermination, fstab, uuids, volumes == null ? List.of() : volumes, discoveryFQDN);
         }
     }
 }

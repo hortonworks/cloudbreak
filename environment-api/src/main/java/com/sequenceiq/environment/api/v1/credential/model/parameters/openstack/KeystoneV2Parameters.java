@@ -14,7 +14,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Deprecated
 public class KeystoneV2Parameters implements Serializable {
 
-    @Schema(required = true)
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private String tenantName;
 
     public String getTenantName() {

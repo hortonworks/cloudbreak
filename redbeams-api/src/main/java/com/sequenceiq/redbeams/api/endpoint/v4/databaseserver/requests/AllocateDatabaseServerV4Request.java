@@ -166,6 +166,11 @@ public class AllocateDatabaseServerV4Request extends ProviderParametersBase {
     }
 
     @Override
+    public Mappable createOpenStack() {
+        throw new UnsupportedOperationException("Openstack is not supported for database server allocation");
+    }
+
+    @Override
     public Mappable createMock() {
         if (aws == null) {
             aws = new AwsDBStackV4Parameters();

@@ -161,7 +161,7 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
                     createFreeIpa(environmentDto, environment.getFreeIpaPlatformVariant());
                 } else {
                     boolean supported = supportedPlatforms.supportedPlatformForFreeIpa(environment.getCloudPlatform());
-                    LOGGER.info("Freeipa won't create: parent: {}, create freeipa: {}, {} provider is supproted: {}", environment.getParentEnvironment(),
+                    LOGGER.info("Freeipa won't create: parent: {}, create freeipa: {}, {} provider is supported: {}", environment.getParentEnvironment(),
                             environment.isCreateFreeIpa(), environment.getCloudPlatform(), supported);
                 }
             }

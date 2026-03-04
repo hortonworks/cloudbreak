@@ -11,10 +11,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Schema(subTypes = {DomainKeystoneV3Parameters.class, ProjectKeystoneV3Parameters.class})
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
-@Deprecated
 public abstract class KeystoneV3Base implements Serializable {
 
-    @Schema(required = true)
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private String userDomain;
 
     public String getUserDomain() {

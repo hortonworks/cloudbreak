@@ -107,7 +107,7 @@ public class AzureEnvironmentNetworkConverter extends EnvironmentBaseNetworkConv
     }
 
     @Override
-    NetworkDto setProviderSpecificFields(NetworkDto.Builder builder, BaseNetwork network) {
+    NetworkDto setProviderSpecificFieldsAndReturnDto(NetworkDto.Builder builder, BaseNetwork network) {
         AzureNetwork azureNetwork = (AzureNetwork) network;
         return builder.withAzure(
                         AzureParams.builder()

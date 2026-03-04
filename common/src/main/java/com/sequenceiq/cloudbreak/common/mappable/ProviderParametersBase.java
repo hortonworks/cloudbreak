@@ -26,6 +26,8 @@ public abstract class ProviderParametersBase {
 
     public abstract Mappable createYarn();
 
+    public abstract Mappable createOpenStack();
+
     public abstract Mappable createMock();
 
 }

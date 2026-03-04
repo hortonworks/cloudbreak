@@ -11,21 +11,21 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Schema(name = "OpenstackV1Parameters")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
-@Deprecated
 public class OpenstackParameters implements Serializable {
 
-    @Schema(required = true)
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private String endpoint;
 
-    @Schema(required = true, allowableValues = "public, admin, internal")
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED, allowableValues = "public, admin, internal")
     private String facing;
 
-    @Schema(required = true)
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private String password;
 
-    @Schema(required = true)
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private String userName;
 
+    @Deprecated
     private KeystoneV2Parameters keystoneV2;
 
     private KeystoneV3Parameters keystoneV3;
@@ -62,10 +62,12 @@ public class OpenstackParameters implements Serializable {
         this.userName = userName;
     }
 
+    @Deprecated
     public KeystoneV2Parameters getKeystoneV2() {
         return keystoneV2;
     }
 
+    @Deprecated
     public void setKeystoneV2(KeystoneV2Parameters keystoneV2) {
         this.keystoneV2 = keystoneV2;
     }

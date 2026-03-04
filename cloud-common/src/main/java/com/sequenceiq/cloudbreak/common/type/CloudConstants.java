@@ -15,6 +15,8 @@ public class CloudConstants {
 
     public static final String MOCK = "MOCK";
 
+    public static final String OPENSTACK = "OPENSTACK";
+
     private CloudConstants() {
     }
 }

@@ -16,7 +16,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Schema(name = "OpenStackNetworkV1Parameters")
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
-@Deprecated
 public class OpenStackNetworkParameters extends MappableBase {
 
     @Schema
@@ -31,6 +30,7 @@ public class OpenStackNetworkParameters extends MappableBase {
     @Schema
     private String publicNetId;
 
+    @Deprecated
     @Schema
     private String networkingOption;
 
@@ -66,10 +66,12 @@ public class OpenStackNetworkParameters extends MappableBase {
         this.publicNetId = publicNetId;
     }
 
+    @Deprecated
     public String getNetworkingOption() {
         return networkingOption;
     }
 
+    @Deprecated
     public void setNetworkingOption(String networkingOption) {
         this.networkingOption = networkingOption;
     }
@@ -89,7 +91,7 @@ public class OpenStackNetworkParameters extends MappableBase {
     @JsonIgnore
     @Schema(hidden = true)
     public CloudPlatform getCloudPlatform() {
-        throw new IllegalStateException("OPENSTACK is deprecated");
+        return CloudPlatform.OPENSTACK;
     }
 
     @Override

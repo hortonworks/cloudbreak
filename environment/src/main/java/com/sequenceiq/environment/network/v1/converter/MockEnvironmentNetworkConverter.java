@@ -80,7 +80,7 @@ public class MockEnvironmentNetworkConverter extends EnvironmentBaseNetworkConve
     }
 
     @Override
-    NetworkDto setProviderSpecificFields(NetworkDto.Builder builder, BaseNetwork network) {
+    NetworkDto setProviderSpecificFieldsAndReturnDto(NetworkDto.Builder builder, BaseNetwork network) {
         MockNetwork mockNetwork = (MockNetwork) network;
         return builder.withMock(
                 MockParams.builder()

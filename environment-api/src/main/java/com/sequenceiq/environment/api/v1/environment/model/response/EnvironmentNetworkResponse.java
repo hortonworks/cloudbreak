@@ -17,6 +17,7 @@ import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAws
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAzureParams;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkGcpParams;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkMockParams;
+import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkOpenstackParams;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkYarnParams;
 import com.sequenceiq.environment.api.v1.environment.model.base.EnvironmentNetworkBase;
 import com.sequenceiq.environment.api.v1.environment.model.base.PrivateSubnetCreation;
@@ -224,6 +225,8 @@ public class EnvironmentNetworkResponse extends EnvironmentNetworkBase {
 
         private EnvironmentNetworkGcpParams gcp;
 
+        private EnvironmentNetworkOpenstackParams openstack;
+
         private PublicEndpointAccessGateway publicEndpointAccessGateway;
 
         private Map<String, CloudSubnet> endpointGatewaySubnetMetas = new HashMap<>();
@@ -325,6 +328,11 @@ public class EnvironmentNetworkResponse extends EnvironmentNetworkBase {
             return this;
         }
 
+        public Builder withOpenstack(EnvironmentNetworkOpenstackParams openstack) {
+            this.openstack = openstack;
+            return this;
+        }
+
         public Builder withNetworkCidr(String networkCidr) {
             this.networkCidr = networkCidr;
             return this;
@@ -371,6 +379,7 @@ public class EnvironmentNetworkResponse extends EnvironmentNetworkBase {
             environmentNetworkResponse.setAzure(azure);
             environmentNetworkResponse.setYarn(yarn);
             environmentNetworkResponse.setGcp(gcp);
+            environmentNetworkResponse.setOpenstack(openstack);
             environmentNetworkResponse.setSubnetMetas(subnetMetas);
             environmentNetworkResponse.setExistingNetwork(existingNetwork);
             environmentNetworkResponse.setMock(mock);

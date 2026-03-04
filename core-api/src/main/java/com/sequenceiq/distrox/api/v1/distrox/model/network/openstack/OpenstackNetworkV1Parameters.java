@@ -14,7 +14,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
-@Deprecated
 public class OpenstackNetworkV1Parameters implements Serializable {
 
     /**

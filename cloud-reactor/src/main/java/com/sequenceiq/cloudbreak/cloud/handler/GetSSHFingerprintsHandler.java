@@ -89,7 +89,9 @@ public class GetSSHFingerprintsHandler implements CloudPlatformEventHandler<GetS
 
         private static final Pattern[] FINGERPRINT_PATTERNS = {
                 Pattern.compile("(?<fingerprint>([a-f0-9]{2}:){15,}[a-f0-9]{2}).*ECDSA"),
-                Pattern.compile("(?<fingerprint>([a-f0-9]{2}:){15,}[a-f0-9]{2}).*RSA")
+                Pattern.compile("(?<fingerprint>([a-f0-9]{2}:){15,}[a-f0-9]{2}).*RSA"),
+                Pattern.compile("(?<fingerprint>SHA256:[A-Za-z0-9+/]+).*RSA"),
+                Pattern.compile("(?<fingerprint>SHA256:[A-Za-z0-9+/]+).*ECDSA")
         };
 
         private FingerprintParserUtil() {

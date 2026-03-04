@@ -26,7 +26,6 @@ public abstract class NetworkBase extends ProviderParametersBase {
     private GcpNetworkParameters gcp;
 
     @Schema(description = NetworkModelDescription.OPENSTACK_PARAMETERS_DEPRECATED)
-    @Deprecated
     private OpenStackNetworkParameters openstack;
 
     @Schema
@@ -91,6 +90,14 @@ public abstract class NetworkBase extends ProviderParametersBase {
         this.gcp = gcp;
     }
 
+    public OpenStackNetworkParameters getOpenstack() {
+        return openstack;
+    }
+
+    public void setOpenstack(OpenStackNetworkParameters openstack) {
+        this.openstack = openstack;
+    }
+
     @Override
     public Mappable createAws() {
         if (aws == null) {
@@ -121,6 +128,13 @@ public abstract class NetworkBase extends ProviderParametersBase {
             yarn = new YarnNetworkParameters();
         }
         return yarn;
+    }
+
+    public OpenStackNetworkParameters createOpenStack() {
+        if (openstack == null) {
+            openstack = new OpenStackNetworkParameters();
+        }
+        return openstack;
     }
 
     @Override

@@ -41,6 +41,16 @@ public class CloudResourceRetrieverService implements ResourceRetriever {
     }
 
     @Override
+    public List<CloudResource> findByTypeAndStack(ResourceType resourceType, Long stackId) {
+        List<Resource> resources = resourceService.findByStackIdAndType(stackId, resourceType);
+        LOGGER.info("Resource retrieved by type: {} and stackId: {}. Retrieved size: {}", resourceType, stackId, resources.size());
+        return resources
+                .stream()
+                .map(resource -> cloudResourceConverter.convert(resource))
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public List<CloudResource> findByResourceReferencesAndStatusAndTypeAndStack(List<String> resourceReferences, CommonStatus status, ResourceType resourceType,
             Long stackId) {
         List<Resource> resources = resourceService.findByResourceReferencesAndStatusAndTypeAndStack(resourceReferences, status, resourceType, stackId);

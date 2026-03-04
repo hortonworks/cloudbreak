@@ -25,8 +25,7 @@ public class InstanceGroupNetworkV4Base extends ProviderParametersBase implement
     @Schema(description = NetworkModelDescription.AZURE_PARAMETERS)
     private InstanceGroupAzureNetworkV4Parameters azure;
 
-    @Schema(description = NetworkModelDescription.OPENSTACK_PARAMETERS_DEPRECATED)
-    @Deprecated
+    @Schema(description = NetworkModelDescription.OPENSTACK_PARAMETERS)
     private InstanceGroupOpenstackNetworkV4Parameters openstack;
 
     @Schema(hidden = true)
@@ -80,6 +79,17 @@ public class InstanceGroupNetworkV4Base extends ProviderParametersBase implement
         this.azure = azure;
     }
 
+    public InstanceGroupOpenstackNetworkV4Parameters createOpenStack() {
+        if (openstack == null) {
+            openstack = new InstanceGroupOpenstackNetworkV4Parameters();
+        }
+        return openstack;
+    }
+
+    public void setOpenstack(InstanceGroupOpenstackNetworkV4Parameters openstack) {
+        this.openstack = openstack;
+    }
+
     @Override
     public InstanceGroupYarnNetworkV4Parameters createYarn() {
         if (yarn == null) {
@@ -102,6 +112,10 @@ public class InstanceGroupNetworkV4Base extends ProviderParametersBase implement
 
     public InstanceGroupAzureNetworkV4Parameters getAzure() {
         return azure;
+    }
+
+    public InstanceGroupOpenstackNetworkV4Parameters getOpenstack() {
+        return openstack;
     }
 
     public InstanceGroupMockNetworkV4Parameters getMock() {

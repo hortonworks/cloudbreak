@@ -13,7 +13,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
-@Deprecated
 public class OpenStackInstanceGroupV4Parameters extends InstanceGroupV4ParametersBase {
 
     @Schema
@@ -38,7 +37,7 @@ public class OpenStackInstanceGroupV4Parameters extends InstanceGroupV4Parameter
     @JsonIgnore
     @Schema(hidden = true)
     public CloudPlatform getCloudPlatform() {
-        throw new IllegalStateException("OPENSTACK is deprecated");
+        return CloudPlatform.OPENSTACK;
     }
 
     @Override

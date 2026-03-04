@@ -52,6 +52,7 @@ ext {
   azureSdkResourceManagerFlexiblePostgresqlVersion = '1.2.0-beta.1'
   azureSdkVersion = '1.41.4'
   azureStorageSdkVersion = '8.4.0'
+  openstack4jVersion='3.12'
 
   // Apache Commons, Utils
   apacheCommonsIoVersion = '2.14.0'

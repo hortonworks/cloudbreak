@@ -18,7 +18,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Schema
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
-@Deprecated
 public class InstanceGroupOpenstackNetworkV1Parameters extends MappableBase implements Serializable {
 
     @Schema
@@ -36,7 +35,7 @@ public class InstanceGroupOpenstackNetworkV1Parameters extends MappableBase impl
     @JsonIgnore
     @Schema(hidden = true)
     public CloudPlatform getCloudPlatform() {
-        throw new IllegalStateException("OPENSTACK is deprecated");
+        return CloudPlatform.OPENSTACK;
     }
 
     @Override

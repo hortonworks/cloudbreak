@@ -117,7 +117,7 @@ public class GcpEnvironmentNetworkConverter extends EnvironmentBaseNetworkConver
     }
 
     @Override
-    NetworkDto setProviderSpecificFields(NetworkDto.Builder builder, BaseNetwork network) {
+    NetworkDto setProviderSpecificFieldsAndReturnDto(NetworkDto.Builder builder, BaseNetwork network) {
         GcpNetwork gcpNetwork = (GcpNetwork) network;
         GcpParams.Builder gcpParamsBuilder = GcpParams.builder();
         Optional.ofNullable(gcpNetwork.getNetworkId()).ifPresent(gcpParamsBuilder::withNetworkId);

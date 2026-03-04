@@ -31,14 +31,10 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.RecoveryMode;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
-import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
-import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
 import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
-import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
-import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.StopRestrictionReason;
@@ -48,7 +44,6 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent.RepairType;
-import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.model.HostGroupName;
 import com.sequenceiq.cloudbreak.service.cluster.model.RepairValidation;
@@ -56,7 +51,6 @@ import com.sequenceiq.cloudbreak.service.cluster.model.Result;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.freeipa.FreeipaService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
-import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsClientService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.salt.SaltVersionUpgradeService;
@@ -86,12 +80,6 @@ public class ClusterRepairService {
 
     @Inject
     private StackUpdater stackUpdater;
-
-    @Inject
-    private ComponentConfigProviderService componentConfigProviderService;
-
-    @Inject
-    private ImageCatalogService imageCatalogService;
 
     @Inject
     private HostGroupService hostGroupService;
@@ -401,35 +389,12 @@ public class ClusterRepairService {
     private List<String> validateOnGateway(StackDto stack, InstanceMetadataView instanceMetaData) {
         List<String> validationResult = new ArrayList<>();
         if (instanceMetaData.isGatewayOrPrimaryGateway()) {
-            if (isCreatedFromBaseImage(stack.getStack())) {
-                validationResult.add("Action is only supported if the image already contains Cloudera Manager and Cloudera Data Platform artifacts.");
-            }
             if (!clusterDBValidationService.isGatewayRepairEnabled(stack.getCluster())) {
                 validationResult.add(
                         "Action is only supported if Cloudera Manager state is stored in external Database or the cluster was launched after Mar/16/21.");
             }
         }
         return validationResult;
-    }
-
-    private boolean isCreatedFromBaseImage(StackView stack) {
-        Image modelImage = getImageFromDatabase(stack);
-        try {
-            return !imageCatalogService.getImage(stack.getWorkspaceId(), modelImage.getImageCatalogUrl(), modelImage.getImageCatalogName(),
-                    modelImage.getImageId()).getImage().isPrewarmed();
-        } catch (CloudbreakImageNotFoundException | CloudbreakImageCatalogException e) {
-            LOGGER.warn("Image not found with id: {} in catalog: {}", modelImage.getImageId(), modelImage.getImageCatalogUrl());
-            return !(modelImage.getPackageVersions() != null && modelImage.getPackageVersions().containsKey(ImagePackageVersion.STACK.getKey()));
-        }
-    }
-
-    private Image getImageFromDatabase(StackView stack) {
-        try {
-            return componentConfigProviderService.getImage(stack.getId());
-        } catch (CloudbreakImageNotFoundException e) {
-            LOGGER.debug("Image not found in database.");
-            throw new BadRequestException(e.getMessage(), e);
-        }
     }
 
     private void updateVolumesDeleteFlag(StackView stack, Set<String> instanceIds, Set<String> instanceFQDNs, boolean deleteVolumes) {

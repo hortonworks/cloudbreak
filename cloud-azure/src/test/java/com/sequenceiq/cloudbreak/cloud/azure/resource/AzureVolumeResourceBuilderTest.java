@@ -525,8 +525,6 @@ public class AzureVolumeResourceBuilderTest {
         assertThat(resultVolumeSetAttributes.getAvailabilityZone()).isEqualTo(AVAILABILITY_ZONE);
         assertThat(resultVolumeSetAttributes.getDeleteOnTermination()).isEqualTo(true);
         assertThat(resultVolumeSetAttributes.getFstab()).isEqualTo(FSTAB);
-        assertThat(resultVolumeSetAttributes.getVolumeSize()).isEqualTo(VOLUME_SIZE);
-        assertThat(resultVolumeSetAttributes.getVolumeType()).isEqualTo(VOLUME_TYPE);
 
         List<VolumeSetAttributes.Volume> resultVolumes = resultVolumeSetAttributes.getVolumes();
         assertThat(resultVolumes).isNotNull();
