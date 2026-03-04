@@ -35,15 +35,14 @@ public class DistroXUpgradeImageSelector {
         } else if (StringUtils.isNotEmpty(request.getImageId())) {
             image = selectRequestedImage(request.getImageId(), upgradeCandidates);
         } else if (StringUtils.isNotEmpty(request.getRuntime())) {
-            image = selectLatestImageByRuntime(upgradeCandidates, request.getRuntime(), upgradeV4Response.getCurrent().getComponentVersions().getOs());
+            image = selectLatestImageByRuntime(upgradeCandidates, request.getRuntime());
         }
         return image.orElseThrow(() -> new BadRequestException(String.format("Invalid upgrade request, please validate the contents: %s", request)));
     }
 
-    private Optional<ImageInfoV4Response> selectLatestImageByRuntime(List<ImageInfoV4Response> upgradeCandidates, String runtime, String currentOs) {
+    private Optional<ImageInfoV4Response> selectLatestImageByRuntime(List<ImageInfoV4Response> upgradeCandidates, String runtime) {
         List<ImageInfoV4Response> imagesWithMatchingRuntime = upgradeCandidates.stream()
-                .filter(imageInfoV4Response -> runtime.equals(imageInfoV4Response.getComponentVersions().getCdp())
-                        && imageInfoV4Response.getComponentVersions().getOs().equals(currentOs))
+                .filter(imageInfoV4Response -> runtime.equals(imageInfoV4Response.getComponentVersions().getCdp()))
                 .collect(Collectors.toList());
         validateThereIsMatchingRuntime(upgradeCandidates, imagesWithMatchingRuntime, runtime);
         Optional<ImageInfoV4Response> imageInfoV4Response = imagesWithMatchingRuntime.stream().max(ImageInfoV4Response.creationBasedComparator());
