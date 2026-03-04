@@ -3,6 +3,7 @@ package com.sequenceiq.freeipa.service.freeipa.flow;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,8 +46,9 @@ public class FreeIpaServerRoleEnabledForServersPoller implements AttemptMaker<Vo
             if (roleEnabledForAllServers) {
                 return AttemptResults.justFinish();
             } else {
+                Set<String> missingRole = servers.stream().filter(server -> !isRoleEnabledForServer(server, serverRoles)).collect(Collectors.toSet());
                 LOGGER.debug("Not all servers are enabled for role: {}", serverRoles);
-                return AttemptResults.justContinue();
+                return AttemptResults.continueFor(new FreeIpaClientException(String.format("Role [%s] is not enabled for servers %s", role, missingRole)));
             }
         } catch (FreeIpaClientException e) {
             LOGGER.debug("We were unable to fetch server roles", e);
