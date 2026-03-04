@@ -537,11 +537,11 @@ public class Crn {
      * @param resource     the name of this Altus resource
      */
     Crn(Partition partition,
-        Service service,
-        Region region,
-        String accountId,
-        ResourceType resourceType,
-        String resource) {
+            Service service,
+            Region region,
+            String accountId,
+            ResourceType resourceType,
+            String resource) {
         this.partition = checkNotNull(partition, "partition should not be null.");
         this.service = checkNotNull(service, "service should not be null.");
         this.region = checkNotNull(region, "region should not be null.");
@@ -731,7 +731,7 @@ public class Crn {
                 base.getResource());
     }
 
-    static Builder builder() {
+    public static Builder builder() {
         return new Builder();
     }
 
@@ -770,22 +770,22 @@ public class Crn {
                     resource);
         }
 
-        Builder setPartition(Partition partition) {
+        public Builder setPartition(Partition partition) {
             this.partition = partition;
             return this;
         }
 
-        Builder setRegion(Region region) {
+        public Builder setRegion(Region region) {
             this.region = region;
             return this;
         }
 
-        Builder setService(Service service) {
+        public Builder setService(Service service) {
             this.service = checkNotNull(service, "service should not be null.");
             return this;
         }
 
-        Builder setResourceType(ResourceType resourceType) {
+        public Builder setResourceType(ResourceType resourceType) {
             this.resourceType = checkNotNull(resourceType, "resourceType should not be null.");
             return this;
         }

@@ -92,6 +92,7 @@ dependencies {
   implementation (project(':freeipa-client')) {
     transitive = false;
   }
+  implementation project (':ccm-connector')
   implementation project (':liftie-connector')
 }
 

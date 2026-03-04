@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.sequenceiq.mock.grpc.GrpcServer;
+import com.sequenceiq.mock.grpc.service.CcmV2Service;
 import com.sequenceiq.mock.grpc.service.LiftieService;
 
 @Configuration
@@ -18,11 +19,15 @@ public class GrpcServerConfig {
     @Inject
     private LiftieService liftieService;
 
+    @Inject
+    private CcmV2Service ccmV2Service;
+
     @Bean
     public GrpcServer grpcServer() {
         return new GrpcServer(
                 grpcServerPort,
-                liftieService.bindService());
+                liftieService.bindService(),
+                ccmV2Service.bindService());
     }
 
 }

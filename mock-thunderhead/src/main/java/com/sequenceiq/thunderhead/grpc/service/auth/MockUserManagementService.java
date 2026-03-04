@@ -1404,7 +1404,7 @@ public class MockUserManagementService extends UserManagementImplBase {
         String name = request.getMachineUserName();
         LOGGER.info("Create workload machine user for account {} with name {}", accountId, name);
         responseObserver.onNext(CreateWorkloadMachineUserResponse.newBuilder()
-                .setPrivateKey(UUID.randomUUID().toString())
+                .setPrivateKey(Base64Util.encode(UUID.randomUUID().toString()))
                 .setAccessKeyId(UUID.randomUUID().toString())
                 .setMachineUser(MachineUser.newBuilder()
                         .setMachineUserId(UUID.nameUUIDFromBytes((accountId + '#' + name).getBytes()).toString())
