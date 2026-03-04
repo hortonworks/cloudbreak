@@ -28,7 +28,7 @@ public class UpgradePathRestrictionService {
         return result;
     }
 
-    @SuppressWarnings({ "checkstyle:CyclomaticComplexity", "checkstyle:MagicNumber" })
+    @SuppressWarnings({ "checkstyle:CyclomaticComplexity", "checkstyle:NPathComplexity", "checkstyle:MagicNumber" })
     private boolean permitUpgradeByVersion(VersionComparisonContext current, VersionComparisonContext target) {
         int targetPatch = target.getPatchVersion().orElse(0);
         int currentPatch = current.getPatchVersion().orElse(0);
@@ -46,6 +46,12 @@ public class UpgradePathRestrictionService {
             boolean to731 = majorVersionEquals(targetMajor, "7.3.1");
             boolean to7218 = majorVersionEquals(targetMajor, "7.2.18");
             return fromOlderThan7218 || (from7218 && !to7218 && !(to731 && targetPatch >= 0 && targetPatch <= 400));
+        }
+
+        if (majorVersionEquals(targetMajor, "7.3.2") && targetPatch == 0) {
+            boolean from731P800 = majorVersionEquals(currentMajor, "7.3.1") && currentPatch == 800;
+            boolean from7218P1200 = majorVersionEquals(currentMajor, "7.2.18") && currentPatch == 1200;
+            return !from731P800 && !from7218P1200;
         }
 
         if (skipValidation(current, target)) {
