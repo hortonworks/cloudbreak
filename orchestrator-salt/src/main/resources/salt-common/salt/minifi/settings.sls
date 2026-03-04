@@ -38,6 +38,30 @@
 {% set partition_interval = salt['pillar.get']('fluent:partitionIntervalMin') %}
 {% set minifi_installed = salt['file.directory_exists' ]('/etc/nifi-minifi-cpp') %}
 
+{%- set base_extensions = '/usr/lib64/nifi-minifi-cpp/extensions/libminifi-archive-extensions.so,/usr/lib64/nifi-minifi-cpp/extensions/libminifi-expression-language-extensions.so,/usr/lib64/nifi-minifi-cpp/extensions/libminifi-rocksdb-repos.so,/usr/lib64/nifi-minifi-cpp/extensions/libminifi-standard-processors.so,/usr/lib64/nifi-minifi-cpp/extensions/libminifi-systemd.so,/usr/lib64/nifi-minifi-cpp/extensions/minifi_native.so' %}
+
+{%- if provider_prefix == "s3" %}
+    {% set nifi_extension_path = base_extensions ~ ',/usr/lib64/nifi-minifi-cpp/extensions/libminifi-aws.so' %}
+{%- elif provider_prefix == "abfs" %}
+    {% set nifi_extension_path = base_extensions ~ ',/usr/lib64/nifi-minifi-cpp/extensions/libminifi-azure.so' %}
+{%- elif provider_prefix == "gcs" %}
+    {% set nifi_extension_path = base_extensions ~ ',/usr/lib64/nifi-minifi-cpp/extensions/libminifi-gcp.so' %}
+{%- else %}
+    {% set nifi_extension_path = base_extensions %}
+{%- endif %}
+
+{% set minifi_properties = {
+    'nifi.flowfile.repository.rocksdb.compression': 'auto',
+    'nifi.extension.path': nifi_extension_path,
+    'nifi.flow.engine.threads': '5',
+    'nifi.content.repository.class.name': 'FileSystemRepository',
+    'nifi.flowfile.repository.rocksdb.write.buffer.size': '2 MB',
+    'nifi.flowfile.repository.rocksdb.max.write.buffer.number': '2',
+    'nifi.flowfile.repository.rocksdb.options': 'table_factory={block_cache=2M;};memtable_factory=SkipListFactory;',
+    'nifi.flowfile.repository.rocksdb.compaction.period': '2 min',
+    'nifi.database.content.repository.rocksdb.compaction.period': '2 min'
+} %}
+
 {% do minifi.update({
     "enabled": minifi_enabled,
     "is_systemd" : is_systemd,
@@ -53,4 +77,5 @@
     "region": region,
     "minifiRpm": minifi_rpm,
     "minifiInstalled": minifi_installed,
+    "minifiProperties": minifi_properties,
 }) %}

@@ -12,7 +12,7 @@ Processors:
     name: TailFile_{{ logfile["label"] | replace('.', '') }}
     class: org.apache.nifi.processors.standard.TailFile
     scheduling strategy: TIMER_DRIVEN
-    scheduling period: 10 sec
+    scheduling period: 5 min
     auto-terminated relationships list: []
     Properties:
       {%- set full_path = logfile["path"] %}
@@ -60,31 +60,13 @@ Processors:
 {% endfor %}
 
   - id: {{ salt['random.get_str'](32) | uuid }}
-    name: MergeContent
-    class: org.apache.nifi.processors.standard.MergeContent
-    scheduling strategy: TIMER_DRIVEN
-    scheduling period: 1 min
-    auto-terminated relationships list:
-        - original
-        - failure
-    Properties:
-      Attribute Strategy: Keep Only Common Attributes
-      Maximum number of Bins: 1000
-      Max Bin Age: {% minifi.partitionIntervalMin %} min
-      Minimum Number of Entries: 10000
-      Maximum Number of Entries: 10000
-      Batch Size: 1000
-      Merge Strategy: Bin-Packing Algorithm
-      Correlation Attribute Name: filenamePrefix
-
-  - id: {{ salt['random.get_str'](32) | uuid }}
     name: UpdateAttributeFilename
     class: org.apache.nifi.processors.standard.UpdateAttribute
     scheduling strategy: EVENT_DRIVEN
     auto-terminated relationships list:
       - failure
     Properties:
-      filename: ${filenamePrefix}-${hostname()}-${now():format("%M", 'UTC'):minus(${now():format("%M", 'UTC'):mod(5)}):toRadix(10, 2)}-${now():format('%M%S', 'UTC'):replaceAll('\\\\.[0-9]+', '')}.log
+      filename: ${filenamePrefix}-${hostname()}-${now():minus(300000):divide(300000):multiply(300000):format("%M", "UTC")}-${now():format("%M%S", "UTC")}.log
 
   - id: {{ salt['random.get_str'](32) | uuid }}
     name: CompressContent
@@ -181,21 +163,14 @@ Connections:
     destination name: UpdateAttributeFilenamePrefix_{{ logfile["label"] | replace('.', '') }}
 
   - id: {{ salt['random.get_str'](32) | uuid }}
-    name: UpdateAttributeLogLabel/success/MergeContent_{{ logfile["label"] | replace('.', '') }}
+    name: UpdateAttributeLogLabel/success/UpdateAttributeFilename_{{ logfile["label"] | replace('.', '') }}
     source name: UpdateAttributeFilenamePrefix_{{ logfile["label"] | replace('.', '') }}
     source relationship names:
       - success
-    destination name: MergeContent
+    destination name: UpdateAttributeFilename
 
 {% endif %}
 {% endfor %}
-
-  - id: {{ salt['random.get_str'](32) | uuid }}
-    name: MergeContent/merged/UpdateAttributeFilename
-    source name: MergeContent
-    source relationship names:
-      - merged
-    destination name: UpdateAttributeFilename
 
   - id: {{ salt['random.get_str'](32) | uuid }}
     name: UpdateAttributeFilename/success/CompressContent

@@ -39,6 +39,17 @@ minifi_stop:
     - context:
         providerPrefix: {{ minifi.providerPrefix }}
 
+{% for key, value in minifi.minifiProperties.items() %}
+update_minifi_property_{{ key }}:
+  file.replace:
+    - name: /etc/nifi-minifi-cpp/minifi.properties
+    - pattern: '^{{ key }}=.*'
+    - repl: '{{ key }}={{ value }}'
+    - append_if_not_found: True
+    - onlyif:
+      - test -f /etc/nifi-minifi-cpp/minifi.properties
+{% endfor %}
+
 {%- if minifi.is_systemd %}
 /etc/systemd/system/minifi.d:
   file.directory:
