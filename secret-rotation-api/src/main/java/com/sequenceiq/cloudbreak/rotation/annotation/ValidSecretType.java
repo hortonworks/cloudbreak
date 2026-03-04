@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.rotation.annotation;
 
 import static java.lang.annotation.ElementType.FIELD;
+import static java.lang.annotation.ElementType.PARAMETER;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
@@ -15,7 +16,7 @@ import com.sequenceiq.cloudbreak.rotation.validator.SecretTypeValidator;
 
 @Documented
 @Constraint(validatedBy = SecretTypeValidator.class)
-@Target({ FIELD })
+@Target({ FIELD, PARAMETER })
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ValidSecretType {
 

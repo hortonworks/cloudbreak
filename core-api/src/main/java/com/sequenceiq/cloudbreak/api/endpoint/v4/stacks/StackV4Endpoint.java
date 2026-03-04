@@ -146,6 +146,9 @@ import com.sequenceiq.cloudbreak.doc.Notes;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
+import com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType;
+import com.sequenceiq.cloudbreak.rotation.annotation.ValidSecretType;
+import com.sequenceiq.cloudbreak.rotation.request.StepProgressCleanupResponse;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.common.api.UsedSubnetsByEnvironmentResponse;
 import com.sequenceiq.common.model.SeLinux;
@@ -1055,4 +1058,14 @@ public interface StackV4Endpoint {
             @NotEmpty @ValidCrn(resource = {DATAHUB, VM_DATALAKE}) @PathParam("crn") String crn,
             @QueryParam("initiatorUserCrn") String initiatorUserCrn,
             @PathParam("notificationState") NotificationState notificationState);
+
+    @PUT
+    @Path("internal/crn/{crn}/cleanup_secret_rotation_progress")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Clean up rotation progress information", operationId = "cleanupSecretRotationProgress",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    StepProgressCleanupResponse cleanupSecretRotationProgress(@PathParam("workspaceId") Long workspaceId,
+            @ValidCrn(resource = {DATAHUB, VM_DATALAKE}) @PathParam("crn") String crn,
+            @NotEmpty @QueryParam("secretType") @ValidSecretType(allowedTypes = CloudbreakSecretType.class) String secretType);
 }
