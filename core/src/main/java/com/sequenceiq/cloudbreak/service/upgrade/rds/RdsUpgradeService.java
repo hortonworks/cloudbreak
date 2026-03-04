@@ -11,11 +11,9 @@ import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
@@ -36,6 +34,7 @@ import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
+import com.sequenceiq.cloudbreak.service.database.DatabaseDefaultVersionProvider;
 import com.sequenceiq.cloudbreak.service.database.DatabaseService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
@@ -71,22 +70,21 @@ public class RdsUpgradeService {
     @Inject
     private EnvironmentService environmentService;
 
-    @Value("${cb.db.env.upgrade.rds.targetversion}")
-    private TargetMajorVersion defaultTargetMajorVersion;
-
     @Inject
     private DatabaseUpgradeRuntimeValidator databaseUpgradeRuntimeValidator;
 
     @Inject
     private EntitlementService entitlementService;
 
-    public void checkUpgradeRds(NameOrCrn nameOrCrn, TargetMajorVersion targetMajorVersion) {
-        TargetMajorVersion calculatedVersion = ObjectUtils.defaultIfNull(targetMajorVersion, defaultTargetMajorVersion);
+    @Inject
+    private DatabaseDefaultVersionProvider databaseDefaultVersionProvider;
+
+    public void checkUpgradeRds(NameOrCrn nameOrCrn) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         StackView stack = stackDtoService.getStackViewByNameOrCrn(nameOrCrn, accountId);
         MDCBuilder.buildMdcContext(stack);
-        LOGGER.info("Checking if RDS upgrade is possible for stack {} to version {}, request version was {}",
-                nameOrCrn.getNameOrCrn(), calculatedVersion, targetMajorVersion);
+        LOGGER.info("Checking if RDS upgrade is possible for stack {}",
+                nameOrCrn.getNameOrCrn());
         validateAttachedDatahubsAreNotRunning(stack, accountId);
     }
 
@@ -95,7 +93,9 @@ public class RdsUpgradeService {
         StackDto stackDto = stackDtoService.getByNameOrCrn(nameOrCrn, accountId);
         StackView stackView = stackDto.getStack();
         MDCBuilder.buildMdcContext(stackView);
-        TargetMajorVersion calculatedVersion = getTargetMajorVersion(targetMajorVersion, stackDto.getCloudPlatform());
+        String targetVersion = databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntime(stackView.getStackVersion(),
+                targetMajorVersion != null ? targetMajorVersion.getMajorVersion() : null);
+        TargetMajorVersion calculatedVersion = TargetMajorVersion.fromVersion(targetVersion);
 
         boolean dataHubWithEmbeddedDatabase = !stackView.isDatalake() && stackDto.getExternalDatabaseCreationType().isEmbedded();
         if (dataHubWithEmbeddedDatabase) {
@@ -111,15 +111,6 @@ public class RdsUpgradeService {
             String backupInstanceProfile = getBackupInstanceProfile(environment);
             return triggerRdsUpgradeFlow(stackView, calculatedVersion, backupLocation, backupInstanceProfile);
         }
-    }
-
-    private TargetMajorVersion getTargetMajorVersion(TargetMajorVersion requestedTargetVersion, String cloudPlatform) {
-        TargetMajorVersion calculatedVersion = ObjectUtils.defaultIfNull(requestedTargetVersion, defaultTargetMajorVersion);
-        LOGGER.debug("Calculated upgrade target is {}, based on requested {}, general default {}",
-                calculatedVersion,
-                requestedTargetVersion,
-                defaultTargetMajorVersion);
-        return calculatedVersion;
     }
 
     private void validate(NameOrCrn nameOrCrn, StackView stack, TargetMajorVersion targetMajorVersion, String accountId, boolean forced) {

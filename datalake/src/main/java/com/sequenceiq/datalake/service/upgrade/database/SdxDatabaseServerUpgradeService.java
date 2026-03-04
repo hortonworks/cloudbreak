@@ -11,11 +11,9 @@ import java.util.Optional;
 
 import jakarta.inject.Inject;
 
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
@@ -31,6 +29,7 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
+import com.sequenceiq.cloudbreak.service.database.DatabaseDefaultVersionProvider;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxDatabase;
@@ -52,9 +51,6 @@ import com.sequenceiq.sdx.api.model.SdxUpgradeDatabaseServerResponse;
 public class SdxDatabaseServerUpgradeService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SdxDatabaseServerUpgradeService.class);
-
-    @Value("${sdx.db.env.upgrade.database.targetversion}")
-    private TargetMajorVersion defaultTargetMajorVersion;
 
     @Inject
     private SdxService sdxService;
@@ -98,11 +94,17 @@ public class SdxDatabaseServerUpgradeService {
     @Inject
     private SdxDatabaseRepository sdxDatabaseRepository;
 
+    @Inject
+    private DatabaseDefaultVersionProvider databaseDefaultVersionProvider;
+
     public SdxUpgradeDatabaseServerResponse upgrade(NameOrCrn sdxNameOrCrn, TargetMajorVersion requestedTargetMajorVersion, boolean forced) {
         LOGGER.debug("Upgrade database server called for {} with target major version {}", sdxNameOrCrn, requestedTargetMajorVersion);
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         SdxCluster cluster = sdxService.getByNameOrCrn(userCrn, sdxNameOrCrn);
-        TargetMajorVersion targetMajorVersion = getTargetMajorVersion(requestedTargetMajorVersion, cluster);
+        String targetVersion = databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntime(cluster.getRuntime(),
+                requestedTargetMajorVersion != null ? requestedTargetMajorVersion.getMajorVersion() : null);
+        TargetMajorVersion targetMajorVersion = TargetMajorVersion.fromVersion(targetVersion);
+
         MDCBuilder.buildMdcContext(cluster);
 
         DatalakeStatusEnum status = sdxStatusService.getActualStatusForSdx(cluster).getStatus();
@@ -129,16 +131,6 @@ public class SdxDatabaseServerUpgradeService {
 
         cloudbreakStackService.checkUpgradeRdsByClusterNameInternal(cluster, targetMajorVersion);
         return triggerDatabaseUpgrade(cluster, targetMajorVersion, forced);
-    }
-
-    private TargetMajorVersion getTargetMajorVersion(TargetMajorVersion requestedTargetMajorVersion, SdxCluster cluster) {
-        TargetMajorVersion targetMajorVersion = ObjectUtils.defaultIfNull(
-                requestedTargetMajorVersion, defaultTargetMajorVersion);
-        LOGGER.debug("Calculated upgrade target is {}, based on requested {}, general default {}",
-                targetMajorVersion,
-                requestedTargetMajorVersion,
-                defaultTargetMajorVersion);
-        return targetMajorVersion;
     }
 
     private boolean isUpgradeNeeded(TargetMajorVersion targetMajorVersion, StackDatabaseServerResponse databaseResponse, boolean forced) {

@@ -31,7 +31,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.database.DatabaseServerStatus;
@@ -46,6 +45,7 @@ import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
+import com.sequenceiq.cloudbreak.service.database.DatabaseDefaultVersionProvider;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
@@ -131,6 +131,9 @@ public class SdxDatabaseServerUpgradeServiceTest {
     @Mock
     private DatabaseServerParameterSetter databaseServerParameterSetter;
 
+    @Mock
+    private DatabaseDefaultVersionProvider databaseDefaultVersionProvider;
+
     @InjectMocks
     private SdxDatabaseServerUpgradeService underTest;
 
@@ -149,6 +152,7 @@ public class SdxDatabaseServerUpgradeServiceTest {
         when(reactorFlowManager.triggerDatabaseServerUpgradeFlow(sdxCluster, targetMajorVersion, forced)).thenReturn(flowIdentifier);
         when(databaseUpgradeRuntimeValidator.isRuntimeVersionAllowedForUpgrade(any(), any())).thenReturn(true);
         when(databaseResponse.getStatus()).thenReturn(DatabaseServerStatus.AVAILABLE);
+        when(databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntime(any(), any())).thenReturn(targetMajorVersion.getMajorVersion());
 
         SdxUpgradeDatabaseServerResponse response = underTest.upgrade(NAME_OR_CRN, targetMajorVersion, forced);
 
@@ -162,7 +166,6 @@ public class SdxDatabaseServerUpgradeServiceTest {
         SdxCluster sdxCluster = getSdxCluster();
         sdxCluster.setCloudStorageFileSystemType(onAzure ? FileSystemType.ADLS_GEN_2 : FileSystemType.S3);
         TargetMajorVersion desiredVersion = VERSION14;
-        ReflectionTestUtils.setField(underTest, "defaultTargetMajorVersion", VERSION14);
         when(sdxService.getByNameOrCrn(any(), eq(NAME_OR_CRN))).thenReturn(sdxCluster);
         SdxStatusEntity status = getDatalakeStatus(DatalakeStatusEnum.RUNNING);
         when(sdxStatusService.getActualStatusForSdx(sdxCluster)).thenReturn(status);
@@ -173,6 +176,7 @@ public class SdxDatabaseServerUpgradeServiceTest {
         when(reactorFlowManager.triggerDatabaseServerUpgradeFlow(sdxCluster, desiredVersion, false)).thenReturn(flowIdentifier);
         when(databaseUpgradeRuntimeValidator.isRuntimeVersionAllowedForUpgrade(any(), any())).thenReturn(true);
         when(databaseResponse.getStatus()).thenReturn(DatabaseServerStatus.AVAILABLE);
+        when(databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntime(any(), any())).thenReturn(desiredVersion.getMajorVersion());
 
         SdxUpgradeDatabaseServerResponse response =
                 ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.upgrade(NAME_OR_CRN, null, false));
@@ -196,6 +200,7 @@ public class SdxDatabaseServerUpgradeServiceTest {
         when(reactorFlowManager.triggerDatabaseServerUpgradeFlow(sdxCluster, targetMajorVersion, false)).thenReturn(flowIdentifier);
         when(databaseUpgradeRuntimeValidator.isRuntimeVersionAllowedForUpgrade(any(), any())).thenReturn(true);
         when(databaseResponse.getStatus()).thenReturn(DatabaseServerStatus.AVAILABLE);
+        when(databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntime(any(), any())).thenReturn(targetMajorVersion.getMajorVersion());
 
         SdxUpgradeDatabaseServerResponse response =
                 ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.upgrade(NAME_OR_CRN, targetMajorVersion, false));
@@ -269,6 +274,7 @@ public class SdxDatabaseServerUpgradeServiceTest {
         when(sdxStatusService.getActualStatusForSdx(sdxCluster)).thenReturn(status);
         when(databaseUpgradeRuntimeValidator.isRuntimeVersionAllowedForUpgrade(any(), any())).thenReturn(false);
         when(databaseUpgradeRuntimeValidator.getMinRuntimeVersion(targetMajorVersion.getMajorVersion())).thenReturn(Optional.of("minimumVersion"));
+        when(databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntime(any(), any())).thenReturn(targetMajorVersion.getMajorVersion());
 
         Assertions.assertThatCode(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.upgrade(NAME_OR_CRN, targetMajorVersion, false)))
                 .isInstanceOf(BadRequestException.class)
@@ -288,6 +294,7 @@ public class SdxDatabaseServerUpgradeServiceTest {
         when(sdxDatabaseServerUpgradeAvailabilityService.isUpgradeNeeded(databaseResponse, targetMajorVersion, false)).thenReturn(true);
         when(databaseUpgradeRuntimeValidator.isRuntimeVersionAllowedForUpgrade(any(), any())).thenReturn(true);
         when(databaseResponse.getStatus()).thenReturn(DatabaseServerStatus.AVAILABLE);
+        when(databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntime(any(), any())).thenReturn(targetMajorVersion.getMajorVersion());
         doThrow(new BadRequestException("badrequest")).when(cloudbreakStackService).checkUpgradeRdsByClusterNameInternal(sdxCluster, targetMajorVersion);
 
         Assertions.assertThatCode(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.upgrade(NAME_OR_CRN, targetMajorVersion, false)))
@@ -370,6 +377,7 @@ public class SdxDatabaseServerUpgradeServiceTest {
         when(reactorFlowManager.triggerDatabaseServerUpgradeFlow(sdxCluster, targetMajorVersion, false)).thenReturn(flowIdentifier);
         when(databaseUpgradeRuntimeValidator.isRuntimeVersionAllowedForUpgrade(any(), any())).thenReturn(true);
         when(databaseResponse.getStatus()).thenReturn(dbStatus);
+        when(databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntime(any(), any())).thenReturn(targetMajorVersion.getMajorVersion());
 
         SdxUpgradeDatabaseServerResponse response = underTest.upgrade(NAME_OR_CRN, targetMajorVersion, false);
 
@@ -389,6 +397,7 @@ public class SdxDatabaseServerUpgradeServiceTest {
         when(sdxDatabaseServerUpgradeAvailabilityService.isUpgradeNeeded(databaseResponse, targetMajorVersion, false)).thenReturn(true);
         when(databaseUpgradeRuntimeValidator.isRuntimeVersionAllowedForUpgrade(any(), any())).thenReturn(true);
         when(databaseResponse.getStatus()).thenReturn(null);
+        when(databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntime(any(), any())).thenReturn(targetMajorVersion.getMajorVersion());
 
         Assertions.assertThatCode(() -> underTest.upgrade(NAME_OR_CRN, targetMajorVersion, false))
                 .isInstanceOf(BadRequestException.class)
@@ -410,6 +419,7 @@ public class SdxDatabaseServerUpgradeServiceTest {
         when(sdxDatabaseServerUpgradeAvailabilityService.isUpgradeNeeded(databaseResponse, targetMajorVersion, false)).thenReturn(true);
         when(databaseUpgradeRuntimeValidator.isRuntimeVersionAllowedForUpgrade(any(), any())).thenReturn(true);
         when(databaseResponse.getStatus()).thenReturn(dbStatus);
+        when(databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntime(any(), any())).thenReturn(targetMajorVersion.getMajorVersion());
 
         Assertions.assertThatCode(() -> underTest.upgrade(NAME_OR_CRN, targetMajorVersion, false))
                 .isInstanceOf(BadRequestException.class)

@@ -188,9 +188,6 @@ cb:
         GCP: pd-ssd
         MOCK: magnetic
     upgrade:
-      embedded.targetversion: VERSION_17
-      rds:
-        targetversion: VERSION_14
       rds.backuprestore:
         cloudplatforms: AZURE
         validationratio: 0.2
