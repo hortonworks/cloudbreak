@@ -21,7 +21,6 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.util.VersionComparator;
 import com.sequenceiq.common.model.Architecture;
-import com.sequenceiq.common.model.OsType;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.client.ImageCatalogTestClient;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonClusterManagerProperties;
@@ -53,18 +52,6 @@ public class TestUpgradeCandidateProvider {
     public Pair<String, String> getOsUpgradeSourceAndCandidate(TestContext testContext) {
         String runtimeVersion = commonClusterManagerProperties.getUpgrade().getDistroXUpgradeCurrentVersion(testContext.getCloudProvider().getGovCloud());
         return getUpgradeSourceAndCandidateByCondition(testContext, this::hasSameBuildNumber, runtimeVersion, Architecture.X86_64, false);
-    }
-
-    public Pair<String, String> getOsUpgradeSourceAndCandidate(TestContext testContext, String runtimeVersion, Architecture architecture) {
-        return getUpgradeSourceAndCandidateByCondition(testContext, this::hasSameBuildNumber, runtimeVersion, architecture, false);
-    }
-
-    public Pair<String, String> getDistroUpgradeSourceAndCandidate(TestContext testContext, String runtimeVersion, Architecture architecture, OsType sourceOs,
-            OsType targetOs, boolean defaultOnly) {
-        return getUpgradeSourceAndCandidateByCondition(testContext, (current, target) ->
-                sourceOs.matches(current.getOs(), current.getOsType())
-                        && targetOs.matches(target.getOs(), target.getOsType())
-                        && hasSameBuildNumber(current, target), runtimeVersion, architecture, defaultOnly);
     }
 
     private Pair<String, String> getUpgradeSourceAndCandidateByCondition(TestContext testContext, BiPredicate<ImageV4Response, ImageV4Response> matchCondition,
