@@ -627,7 +627,8 @@ public class ClouderaManagerDecommissioner {
         } else {
             List<String> hostsWithGoodHealth = selectedHosts
                     .stream()
-                    .filter(apiHost -> ApiHealthSummary.GOOD.equals(apiHost.getHealthSummary()))
+                    .filter(apiHost -> ApiHealthSummary.GOOD.equals(apiHost.getHealthSummary())
+                            || ApiHealthSummary.CONCERNING.equals(apiHost.getHealthSummary()))
                     .map(ApiHost::getHostname)
                     .toList();
             if (CollectionUtils.isEmpty(hostsWithGoodHealth)) {

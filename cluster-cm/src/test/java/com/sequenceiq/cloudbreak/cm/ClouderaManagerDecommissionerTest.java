@@ -140,6 +140,120 @@ public class ClouderaManagerDecommissionerTest {
     @Mock
     private FlowMessageService flowMessageService;
 
+    static Object[][] testDataMultiAz() {
+        return new Object[][]{
+                {
+                        "collectDownscaleCandidatesMultiAz_NotKnownInCmOnly",
+                        List.of(List.of("host1.example.com", "BAD", "1"),
+                                List.of("host2.example.com", "NA", "1"),
+                                List.of("host3.example.com", "BAD", "2"),
+                                List.of("host4.example.com", "GOOD", "2"),
+                                List.of("host5.example.com", "NA", "3")),
+                        2,
+                        List.of("host5.example.com", "host2.example.com")
+                },
+                {
+                        "collectDownscaleCandidatesMultiAz_UnHealthyOnly",
+                        List.of(List.of("host1.example.com", "GOOD", "1"),
+                                List.of("host2.example.com", "BAD", "1"),
+                                List.of("host3.example.com", "BAD", "2"),
+                                List.of("host4.example.com", "GOOD", "2"),
+                                List.of("host5.example.com", "BAD", "3")),
+                        2,
+                        List.of("host2.example.com", "host3.example.com")
+                },
+                {
+                        "collectDownscaleCandidatesMultiAz_NotKnownInCmAndUnHealthy",
+                        List.of(List.of("host1.example.com", "GOOD", "1"),
+                                List.of("host2.example.com", "NA", "1"),
+                                List.of("host3.example.com", "BAD", "2"),
+                                List.of("host4.example.com", "GOOD", "2"),
+                                List.of("host5.example.com", "BAD", "3")),
+                        2,
+                        List.of("host2.example.com", "host3.example.com")
+                },
+                {
+                        "collectDownscaleCandidatesMultiAz_NotKnownInCmAndUnHealthyMultiZones",
+                        List.of(List.of("host1.example.com", "GOOD", "1"),
+                                List.of("host2.example.com", "NA", "1"),
+                                List.of("host3.example.com", "BAD", "2"),
+                                List.of("host4.example.com", "GOOD", "2"),
+                                List.of("host5.example.com", "BAD", "3"),
+                                List.of("host6.example.com", "GOOD", "3")),
+                        3,
+                        List.of("host2.example.com", "host3.example.com", "host5.example.com")
+                },
+                {
+                        "collectDownscaleCandidatesMultiAz_NotKnownInCmAndHealthyMultiZones",
+                        List.of(List.of("host1.example.com", "GOOD", "1"),
+                                List.of("host2.example.com", "NA", "1"),
+                                List.of("host3.example.com", "GOOD", "2"),
+                                List.of("host4.example.com", "GOOD", "2"),
+                                List.of("host5.example.com", "GOOD", "3")),
+                        2,
+                        List.of("host2.example.com", "host4.example.com")
+                },
+                {
+                        "collectDownscaleCandidatesMultiAz_HealthyNodesMultiAzs",
+                        List.of(List.of("host1.example.com", "GOOD", "1"),
+                                List.of("host2.example.com", "GOOD", "1"),
+                                List.of("host3.example.com", "GOOD", "2"),
+                                List.of("host4.example.com", "GOOD", "2"),
+                                List.of("host5.example.com", "GOOD", "3")),
+                        2,
+                        List.of("host2.example.com", "host4.example.com")
+                },
+                {
+                        "collectDownscaleCandidatesMultiAz_AllNodes",
+                        List.of(List.of("host1.example.com", "GOOD", "1"),
+                                List.of("host2.example.com", "GOOD", "1"),
+                                List.of("host3.example.com", "GOOD", "2"),
+                                List.of("host4.example.com", "GOOD", "2"),
+                                List.of("host5.example.com", "GOOD", "3")),
+                        5,
+                        List.of("host1.example.com", "host2.example.com", "host3.example.com", "host4.example.com", "host5.example.com")
+                },
+                {
+                        "collectDownscaleCandidatesMultiAz_NotKnownInCmAndHealthyAndUnHealthyInSameZone",
+                        List.of(List.of("host1.example.com", "GOOD", "1"),
+                                List.of("host2.example.com", "NA", "1"),
+                                List.of("host3.example.com", "BAD", "1"),
+                                List.of("host4.example.com", "GOOD", "1"),
+                                List.of("host5.example.com", "GOOD", "2"),
+                                List.of("host4.example.com", "GOOD", "3")),
+                        3,
+                        List.of("host2.example.com", "host3.example.com", "host4.example.com")
+                },
+                {
+                        "collectDownscaleCandidatesMultiAz_NotKnownInCmAndHealthyAndUnHealthyWithZonesNotPopulated",
+                        List.of(List.of("host1.example.com", "GOOD", "NA"),
+                                List.of("host2.example.com", "NA", "NA"),
+                                List.of("host3.example.com", "BAD", "NA"),
+                                List.of("host4.example.com", "GOOD", "NA"),
+                                List.of("host5.example.com", "GOOD", "NA")),
+                        3,
+                        List.of("host2.example.com", "host3.example.com", "host5.example.com")
+                },
+                {
+                        "collectDownscaleCandidatesMultiAz_HealthyFromAnyZone",
+                        List.of(List.of("host1.example.com", "GOOD", "1"),
+                                List.of("host2.example.com", "GOOD", "1"),
+                                List.of("host3.example.com", "GOOD", "2"),
+                                List.of("host4.example.com", "GOOD", "3")),
+                        2,
+                        List.of("host2.example.com", "host1.example.com:host3.example.com:host4.example.com")
+                }
+        };
+    }
+
+    private static VolumeSetAttributes newRemovableVolume() {
+        return new VolumeSetAttributes("az", true, "fstab", List.of(), 50, "vt");
+    }
+
+    private static VolumeSetAttributes newNoneRemovableVolume() {
+        return new VolumeSetAttributes("az", false, "fstab", List.of(), 50, "vt");
+    }
+
     @Test
     public void testVerifyNodesAreRemovable() throws ApiException {
         // GIVEN
@@ -629,112 +743,6 @@ public class ClouderaManagerDecommissionerTest {
         assertTrue(removableInstances.contains(bad1));
     }
 
-    static Object[][] testDataMultiAz() {
-        return new Object[][]{
-                {
-                        "collectDownscaleCandidatesMultiAz_NotKnownInCmOnly",
-                        List.of(List.of("host1.example.com", "BAD", "1"),
-                                List.of("host2.example.com", "NA", "1"),
-                                List.of("host3.example.com", "BAD", "2"),
-                                List.of("host4.example.com", "GOOD", "2"),
-                                List.of("host5.example.com", "NA", "3")),
-                        2,
-                        List.of("host5.example.com", "host2.example.com")
-                },
-                {
-                        "collectDownscaleCandidatesMultiAz_UnHealthyOnly",
-                        List.of(List.of("host1.example.com", "GOOD", "1"),
-                                List.of("host2.example.com", "BAD", "1"),
-                                List.of("host3.example.com", "BAD", "2"),
-                                List.of("host4.example.com", "GOOD", "2"),
-                                List.of("host5.example.com", "BAD", "3")),
-                        2,
-                        List.of("host2.example.com", "host3.example.com")
-                },
-                {
-                        "collectDownscaleCandidatesMultiAz_NotKnownInCmAndUnHealthy",
-                        List.of(List.of("host1.example.com", "GOOD", "1"),
-                                List.of("host2.example.com", "NA", "1"),
-                                List.of("host3.example.com", "BAD", "2"),
-                                List.of("host4.example.com", "GOOD", "2"),
-                                List.of("host5.example.com", "BAD", "3")),
-                        2,
-                        List.of("host2.example.com", "host3.example.com")
-                },
-                {
-                        "collectDownscaleCandidatesMultiAz_NotKnownInCmAndUnHealthyMultiZones",
-                        List.of(List.of("host1.example.com", "GOOD", "1"),
-                                List.of("host2.example.com", "NA", "1"),
-                                List.of("host3.example.com", "BAD", "2"),
-                                List.of("host4.example.com", "GOOD", "2"),
-                                List.of("host5.example.com", "BAD", "3"),
-                                List.of("host6.example.com", "GOOD", "3")),
-                        3,
-                        List.of("host2.example.com", "host3.example.com", "host5.example.com")
-                },
-                {
-                        "collectDownscaleCandidatesMultiAz_NotKnownInCmAndHealthyMultiZones",
-                        List.of(List.of("host1.example.com", "GOOD", "1"),
-                                List.of("host2.example.com", "NA", "1"),
-                                List.of("host3.example.com", "GOOD", "2"),
-                                List.of("host4.example.com", "GOOD", "2"),
-                                List.of("host5.example.com", "GOOD", "3")),
-                        2,
-                        List.of("host2.example.com", "host4.example.com")
-                },
-                {
-                        "collectDownscaleCandidatesMultiAz_HealthyNodesMultiAzs",
-                        List.of(List.of("host1.example.com", "GOOD", "1"),
-                                List.of("host2.example.com", "GOOD", "1"),
-                                List.of("host3.example.com", "GOOD", "2"),
-                                List.of("host4.example.com", "GOOD", "2"),
-                                List.of("host5.example.com", "GOOD", "3")),
-                        2,
-                        List.of("host2.example.com", "host4.example.com")
-                },
-                {
-                        "collectDownscaleCandidatesMultiAz_AllNodes",
-                        List.of(List.of("host1.example.com", "GOOD", "1"),
-                                List.of("host2.example.com", "GOOD", "1"),
-                                List.of("host3.example.com", "GOOD", "2"),
-                                List.of("host4.example.com", "GOOD", "2"),
-                                List.of("host5.example.com", "GOOD", "3")),
-                        5,
-                        List.of("host1.example.com", "host2.example.com", "host3.example.com", "host4.example.com", "host5.example.com")
-                },
-                {
-                        "collectDownscaleCandidatesMultiAz_NotKnownInCmAndHealthyAndUnHealthyInSameZone",
-                        List.of(List.of("host1.example.com", "GOOD", "1"),
-                                List.of("host2.example.com", "NA", "1"),
-                                List.of("host3.example.com", "BAD", "1"),
-                                List.of("host4.example.com", "GOOD", "1"),
-                                List.of("host5.example.com", "GOOD", "2"),
-                                List.of("host4.example.com", "GOOD", "3")),
-                        3,
-                        List.of("host2.example.com", "host3.example.com", "host4.example.com")
-                },
-                {
-                        "collectDownscaleCandidatesMultiAz_NotKnownInCmAndHealthyAndUnHealthyWithZonesNotPopulated",
-                        List.of(List.of("host1.example.com", "GOOD", "NA"),
-                                List.of("host2.example.com", "NA", "NA"),
-                                List.of("host3.example.com", "BAD", "NA"),
-                                List.of("host4.example.com", "GOOD", "NA"),
-                                List.of("host5.example.com", "GOOD", "NA")),
-                        3,
-                        List.of("host2.example.com", "host3.example.com", "host5.example.com")
-                },
-                {
-                        "collectDownscaleCandidatesMultiAz_HealthyFromAnyZone",
-                        List.of(List.of("host1.example.com", "GOOD", "1"),
-                                List.of("host2.example.com", "GOOD", "1"),
-                                List.of("host3.example.com", "GOOD", "2"),
-                                List.of("host4.example.com", "GOOD", "3")),
-                        2,
-                        List.of("host2.example.com", "host1.example.com:host3.example.com:host4.example.com")
-                }
-        };
-    }
-
     @ParameterizedTest(name = "{0}")
     @MethodSource("testDataMultiAz")
     public void collectDownscaleCandidatesMultiAz(String testName, List<List<String>> input, Integer scalingAdjustment, List<String> expectedHosts)
@@ -847,14 +855,14 @@ public class ClouderaManagerDecommissionerTest {
     }
 
     @Test
-    public void testStopRolesOnHostsBadNodeFilteredOut() throws CloudbreakException, ApiException {
+    public void testStopRolesOnHostsBadNodeFilteredOutButConcerningNot() throws CloudbreakException, ApiException {
         StackDtoDelegate stack = getStack();
         when(clouderaManagerApiFactory.getHostsResourceApi(v51Client)).thenReturn(hostsResourceApi);
         when(clouderaManagerApiFactory.getHostsResourceApi(v53Client)).thenReturn(hostsResourceApi);
         ApiHostList apiHostList = new ApiHostList();
         apiHostList.addItemsItem(createApiHostRef("host1.example.com"));
         apiHostList.addItemsItem(createApiHostRef("host2.example.com", ApiHealthSummary.BAD));
-        apiHostList.addItemsItem(createApiHostRef("host3.example.com"));
+        apiHostList.addItemsItem(createApiHostRef("host3.example.com", ApiHealthSummary.CONCERNING));
         apiHostList.addItemsItem(createApiHostRef("host4.example.com"));
         when(hostsResourceApi.readHosts(isNull(), isNull(), any())).thenReturn(apiHostList);
         when(clouderaManagerApiFactory.getClouderaManagerResourceApi(eq(v51Client))).thenReturn(clouderaManagerResourceApi);
@@ -864,9 +872,10 @@ public class ClouderaManagerDecommissionerTest {
         ExtendedPollingResult extendedPollingResult = mock(ExtendedPollingResult.class);
         when(pollingServiceProvider.startPollingStopRolesCommand(any(), eq(v51Client), eq(apiCommandId))).thenReturn(extendedPollingResult);
 
-        underTest.stopRolesOnHosts(stack, v53Client, v51Client, Set.of("host1.example.com"), true);
+        underTest.stopRolesOnHosts(stack, v53Client, v51Client,
+                Set.of("host1.example.com", "host2.example.com", "host3.example.com", "host4.example.com"), true);
         verify(clouderaManagerResourceApi, times(1)).hostsStopRolesCommand(any());
-        assertThat(apiHostNameListArgumentCaptor.getValue().getItems()).containsOnly("host1.example.com");
+        assertThat(apiHostNameListArgumentCaptor.getValue().getItems()).containsExactly("host1.example.com", "host3.example.com", "host4.example.com");
     }
 
     @Test
@@ -945,14 +954,6 @@ public class ClouderaManagerDecommissionerTest {
         underTest.enterMaintenanceMode(hostList, v51Client);
 
         verify(hostsResourceApi, times(0)).enterMaintenanceMode(any());
-    }
-
-    private static VolumeSetAttributes newRemovableVolume() {
-        return new VolumeSetAttributes("az", true, "fstab", List.of(), 50, "vt");
-    }
-
-    private static VolumeSetAttributes newNoneRemovableVolume() {
-        return new VolumeSetAttributes("az", false, "fstab", List.of(), 50, "vt");
     }
 
     private boolean matchExpectedHosts(Set<String> removableHosts, List<String> expectedHosts) {
