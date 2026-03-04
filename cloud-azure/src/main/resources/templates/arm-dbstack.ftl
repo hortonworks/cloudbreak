@@ -12,11 +12,6 @@
         "skuTier": {
             "type": "string",
             "defaultValue" : "${skuTier!"MemoryOptimized"}",
-            "allowedValues": [
-                "Basic",
-                "GeneralPurpose",
-                "MemoryOptimized"
-            ],
             "metadata": {
                 "description": "The tier of the particular SKU, e.g. Basic. - Basic, GeneralPurpose, MemoryOptimized"
             }
@@ -47,18 +42,6 @@
         "skuName": {
             "type": "string",
             "defaultValue": "${skuName!"MO_Gen5_4"}",
-            "allowedValues": [
-                "GP_Gen5_2",
-                "GP_Gen5_4",
-                "GP_Gen5_8",
-                "GP_Gen5_16",
-                "GP_Gen5_32",
-                "MO_Gen5_2",
-                "MO_Gen5_4",
-                "MO_Gen5_8",
-                "MO_Gen5_16",
-                "MO_Gen5_32"
-            ],
             "metadata": {
                 "description": "Azure database for PostgreSQL SKU name."
             }
