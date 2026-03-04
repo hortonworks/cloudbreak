@@ -19,20 +19,6 @@
     "skuName": {
       "type": "string",
       "defaultValue": "${skuName!"Standard_E4ds_v4"}",
-      "allowedValues": [
-        "Standard_D2s_v3",
-        "Standard_D4s_v3",
-        "Standard_D2ds_v4",
-        "Standard_D4ds_v4",
-        "Standard_D2ds_v5",
-        "Standard_D4ds_v5",
-        "Standard_E2s_v3",
-        "Standard_E4s_v3",
-        "Standard_E2ds_v4",
-        "Standard_E4ds_v4",
-        "Standard_E2ds_v5",
-        "Standard_E4ds_v5"
-      ],
       "metadata": {
         "description": "Azure database for PostgreSQL SKU name."
       }
@@ -40,11 +26,6 @@
     "skuTier": {
       "type": "string",
       "defaultValue" : "${skuTier!"MemoryOptimized"}",
-      "allowedValues": [
-        "Burstable",
-        "GeneralPurpose",
-        "MemoryOptimized"
-      ],
       "metadata": {
         "description": "The tier of the particular SKU, e.g. Basic. - Basic, GeneralPurpose, MemoryOptimized"
       }
