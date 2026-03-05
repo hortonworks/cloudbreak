@@ -28,7 +28,11 @@ public class LogCollectorUtil {
 
     private static final Map<String, List<String>> LOG_FILES_TO_COLLECT_ON_ISSUE =
             Map.of("There are missing nodes from salt network response", List.of("/var/log/saltboot.log", "/var/log/nginx/access.log", "/var/log/messages"),
-                    "SocketTimeoutException", List.of("/var/log/salt/master", "/var/log/salt/minion", "/var/log/saltboot.log", "/var/log/messages"));
+                    "SocketTimeoutException", List.of("/var/log/salt/master", "/var/log/salt/minion", "/var/log/saltboot.log", "/var/log/messages"),
+                    "User data script failed", List.of("/var/log/saltboot.log", "/var/log/messages", "/var/log/user-data.log"),
+                    "Failed to retrieve the server's certificate from Nginx",
+                    List.of("/var/log/nginx/access.log", "/var/log/nginx/error.log", "/var/log/saltboot.log", "/var/log/messages", "/var/log/user-data.log")
+            );
 
     @Value("${integrationtest.outputdir:.}")
     private String workingDirectory;
