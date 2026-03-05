@@ -72,11 +72,11 @@ allprojects {
     }
   }
 
-  // override Spring Depenendencies
+  // override Spring Dependencies
   ext['commons-codec.version'] = commonsCodecVersion
   ext['hibernate.version'] = hibernateCoreVersion
   ext['hibernate-validator.version'] = hibernateValidatorVersion
-  ext['jackson.version'] = jacksonVersion
+  ext['jackson-bom.version'] = jacksonVersion
   ext['snakeyaml.version'] = snakeYamlVersion
   ext['spring-framework.version'] = springFrameworkVersion
   ext['jersey.version'] = jerseyCoreVersion
