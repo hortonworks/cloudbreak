@@ -16,6 +16,7 @@ import jakarta.ws.rs.InternalServerErrorException;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -45,9 +46,10 @@ public class EncryptionProfileService implements CompositeAuthResourcePropertyPr
 
     private static final String RESERVED_NAME = "cdp_default";
 
-    private static final String DEFAULT_NAME = "cdp_default_fips_v1";
-
     private static final String RSA = "RSA";
+
+    @Value("${cb.encryptionprofile.default.name:cdp_default_fips_v1}")
+    private String defaultEncryptionProfileName;
 
     private final EncryptionProfileRepository repository;
 
@@ -154,7 +156,7 @@ public class EncryptionProfileService implements CompositeAuthResourcePropertyPr
 
     public EncryptionProfile getClouderaDefaultEncryptionProfile() {
         Map<String, EncryptionProfile> defaultEncryptionProfileMap = defaultEncryptionProfileProvider.defaultEncryptionProfilesByName();
-        return defaultEncryptionProfileMap.get(DEFAULT_NAME);
+        return defaultEncryptionProfileMap.get(defaultEncryptionProfileName);
     }
 
     public List<EncryptionProfile> getAllDefaultEncryptionProfiles() {

@@ -41,6 +41,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.authorization.service.OwnerAssignmentService;
 import com.sequenceiq.authorization.service.list.ResourceWithId;
@@ -177,6 +178,7 @@ public class EncryptionProfileServiceTest {
 
     @Test
     void testGetByNameAndAccountIdWhenEncryptionProfileNameIsEmpty() {
+        ReflectionTestUtils.setField(underTest, "defaultEncryptionProfileName", "cdp_default_fips_v1");
         when(defaultEncryptionProfileProvider.defaultEncryptionProfilesByName()).thenReturn(getDefaultEncryptionProfileNameMap());
 
         EncryptionProfile result = underTest.getByNameAndAccountId(StringUtils.EMPTY, ACCOUNT_ID);

@@ -80,6 +80,7 @@ import com.sequenceiq.cloudbreak.service.NodeCountLimitValidator;
 import com.sequenceiq.cloudbreak.service.StackUnderOperationService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.decorator.StackDecorator;
+import com.sequenceiq.cloudbreak.service.encryptionprofile.EncryptionProfileService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
@@ -189,6 +190,9 @@ public class StackCreatorService {
     private EntitlementService entitlementService;
 
     @Inject
+    private EncryptionProfileService encryptionProfileService;
+
+    @Inject
     private SecurityConfigService securityConfigService;
 
     @Inject
@@ -215,7 +219,7 @@ public class StackCreatorService {
                 "Get Environment from Environment service took {} ms");
         nodeCountLimitValidator.validateProvision(stackRequest, environment.getRegions().getNames().stream().findFirst().orElse(null));
         Optional<String> runtimeVersion = getRuntimeVersionFromBlueprint(stackRequest, workspace.getId());
-        validateArchitecture(stackRequest, distroxRequest, workspace.getId(), runtimeVersion);
+        validateArchitecture(stackRequest, runtimeVersion);
         validateSeLinuxEntitlement(stackRequest);
         updateImageOsIfRequired(stackRequest, runtimeVersion);
 
@@ -283,6 +287,8 @@ public class StackCreatorService {
                 javaVersionValidator.validateImage(imgFromCatalog.getImage(), blueprint.getStackVersion(), stackRequest.getJavaVersion());
                 stackCreationRuntimeVersionValidator.validate(stackRequest, imgFromCatalog.getImage(), stackType);
                 imageService.getSupportedImdsVersion(stack.cloudPlatform(), imgFromCatalog).ifPresent(stack::setSupportedImdsVersion);
+                encryptionProfileService.getDefaultEncryptionProfileIfRequired(environment, stack.getCluster(), runtimeVersion)
+                        .ifPresent(stack.getCluster()::setEncryptionProfileCrn);
                 Stack newStack = measure(
                         () -> stackService.create(stack, imgFromCatalog, user, workspace),
                         LOGGER,
@@ -380,7 +386,7 @@ public class StackCreatorService {
         stack.setJavaVersion(javaVersion);
     }
 
-    private void validateArchitecture(StackV4Request stackRequest, boolean distroxRequest, Long workspaceId, Optional<String> runtimeVersion) {
+    private void validateArchitecture(StackV4Request stackRequest, Optional<String> runtimeVersion) {
         if (stackRequest.getArchitectureEnum() == Architecture.ARM64) {
             if (!isCodRequest(stackRequest)) {
                 if (runtimeVersion.isPresent() && !isVersionNewerOrEqualThanLimited(runtimeVersion.get(), CLOUDERA_STACK_VERSION_7_3_1)) {

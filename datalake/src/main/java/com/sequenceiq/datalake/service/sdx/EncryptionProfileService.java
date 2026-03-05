@@ -107,7 +107,6 @@ public class EncryptionProfileService {
     public EncryptionProfileResponse getEncryptionProfile(SdxClusterRequest sdxClusterRequest) {
         String encryptionProfileNameOrCrn = StringUtils.isNotBlank(sdxClusterRequest.getEncryptionProfileNameOrCrn()) ?
                 sdxClusterRequest.getEncryptionProfileNameOrCrn() : sdxClusterRequest.getEncryptionProfileCrn();
-
         if (StringUtils.isNotBlank(encryptionProfileNameOrCrn)) {
             if (Crn.isCrn(encryptionProfileNameOrCrn)) {
                 return getByCrn(encryptionProfileNameOrCrn);

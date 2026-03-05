@@ -1,5 +1,10 @@
 package com.sequenceiq.cloudbreak.service.encryptionprofile;
 
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERA_STACK_VERSION_7_3_2;
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
+
+import java.util.Optional;
+
 import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
 
@@ -13,6 +18,7 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.environment.api.v1.encryptionprofile.endpoint.EncryptionProfileEndpoint;
 import com.sequenceiq.environment.api.v1.encryptionprofile.model.EncryptionProfileResponse;
@@ -103,5 +109,23 @@ public class EncryptionProfileService {
             }
         }
         return encryptionProfile;
+    }
+
+    public Optional<String> getDefaultEncryptionProfileIfRequired(
+            DetailedEnvironmentResponse environment,
+            Cluster cluster,
+            Optional<String> runtimeVersion
+    ) {
+        if (StringUtils.isNoneBlank(cluster.getEncryptionProfileCrn())) {
+            return Optional.ofNullable(cluster.getEncryptionProfileCrn());
+        } else if (govCloudAnd732(environment, runtimeVersion)) {
+            return Optional.ofNullable(getDefaultEncryptionProfile().getCrn());
+        }
+        return Optional.empty();
+    }
+
+    private boolean govCloudAnd732(DetailedEnvironmentResponse environment, Optional<String> runtimeVersion) {
+        return environment.getCredential().getGovCloud()
+                && isVersionNewerOrEqualThanLimited(runtimeVersion.get(), CLOUDERA_STACK_VERSION_7_3_2);
     }
 }
