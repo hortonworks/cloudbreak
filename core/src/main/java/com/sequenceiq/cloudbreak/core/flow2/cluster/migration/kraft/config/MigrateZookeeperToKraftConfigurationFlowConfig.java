@@ -39,6 +39,10 @@ public class MigrateZookeeperToKraftConfigurationFlowConfig extends StackStatusF
                     .event(START_MIGRATE_ZOOKEEPER_TO_KRAFT_INSTALLATION_EVENT)
                     .defaultFailureEvent()
 
+                    .from(MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_VALIDATION_STATE).to(MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_FINISHED_STATE)
+                    .event(FINISH_MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_EVENT)
+                    .defaultFailureEvent()
+
                     .from(MIGRATE_ZOOKEEPER_TO_KRAFT_INSTALL_STATE).to(MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_STATE)
                     .event(START_MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_EVENT)
                     .defaultFailureEvent()

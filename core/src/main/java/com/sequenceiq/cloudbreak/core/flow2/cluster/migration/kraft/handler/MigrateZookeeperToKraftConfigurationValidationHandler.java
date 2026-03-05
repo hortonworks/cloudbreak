@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.handler;
 
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftConfigurationHandlerSelectors.MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_VALIDATION_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftConfigurationStateSelectors.FINISH_MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftConfigurationStateSelectors.START_MIGRATE_ZOOKEEPER_TO_KRAFT_INSTALLATION_EVENT;
 
 import jakarta.inject.Inject;
@@ -48,6 +49,10 @@ public class MigrateZookeeperToKraftConfigurationValidationHandler extends Excep
         StackDto stack = stackDtoService.getById(stackId);
         try {
             KraftMigrationStatus kraftMigrationStatus = kraftMigrationService.getKraftMigrationStatus(stack);
+            if (KraftMigrationStatus.BROKERS_IN_KRAFT.equals(kraftMigrationStatus)
+                    || KraftMigrationStatus.KRAFT_INSTALLED.equals(kraftMigrationStatus)) {
+                return new MigrateZookeeperToKraftConfigurationEvent(FINISH_MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_EVENT.name(), stackId, false);
+            }
             zookeeperToKraftMigrationValidator.validateZookeeperToKraftMigrationState(kraftMigrationStatus);
         } catch (Exception e) {
             LOGGER.error("Migrate Zookeeper to KRaft configuration validation failed.", e);

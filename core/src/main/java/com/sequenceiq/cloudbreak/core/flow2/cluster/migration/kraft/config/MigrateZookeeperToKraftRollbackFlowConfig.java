@@ -39,6 +39,10 @@ public class MigrateZookeeperToKraftRollbackFlowConfig extends StackStatusFinali
                     .event(START_ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT)
                     .defaultFailureEvent()
 
+                    .from(ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION_VALIDATION_STATE).to(ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION_FINISHED_STATE)
+                    .event(FINISH_ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT)
+                    .defaultFailureEvent()
+
                     .from(ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION_STATE).to(ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION_FINISHED_STATE)
                     .event(FINISH_ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT)
                     .defaultFailureEvent()

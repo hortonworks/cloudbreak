@@ -19,9 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.lang.reflect.Field;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -36,27 +34,43 @@ import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.Transition;
 
 class MigrateZookeeperToKraftConfigurationFlowConfigTest {
 
-    private static final List<MigrateZookeeperToKraftConfigurationState> EXPECTED_STATE_CHAIN = List.of(
-            INIT_STATE,
-            MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_VALIDATION_STATE,
-            MIGRATE_ZOOKEEPER_TO_KRAFT_INSTALL_STATE,
-            MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_STATE,
-            MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_FINISHED_STATE,
-            FINAL_STATE
-    );
-
-    private static final List<MigrateZookeeperToKraftConfigurationStateSelectors> EXPECTED_EVENT_CHAIN = List.of(
-            START_MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_VALIDATION_EVENT,
-            START_MIGRATE_ZOOKEEPER_TO_KRAFT_INSTALLATION_EVENT,
-            START_MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_EVENT,
-            FINISH_MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_EVENT,
-            FINALIZE_MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_EVENT
-    );
-
     @Test
-    @DisplayName("Transitions should form a linear and constant chain with exactly specified from states and expected events")
-    void testTransitionsShouldFormALinearChainWithUniqueFromStatesAndExpectedEvents() throws IllegalAccessException {
-        checkChainAndFromStates(new MigrateZookeeperToKraftConfigurationFlowConfig().getTransitions());
+    @DisplayName("Transitions should form the expected state graph with correct from/to/event mappings")
+    void testTransitionsShouldFormTheExpectedStateGraphWithCorrectEventMappings() throws IllegalAccessException {
+        List<? extends Transition<?, ?>> transitions = new MigrateZookeeperToKraftConfigurationFlowConfig().getTransitions();
+
+        List<FlowTransition> expectedTransitions = List.of(
+                new FlowTransition(INIT_STATE,
+                        MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_VALIDATION_STATE,
+                        START_MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_VALIDATION_EVENT),
+                new FlowTransition(MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_VALIDATION_STATE,
+                        MIGRATE_ZOOKEEPER_TO_KRAFT_INSTALL_STATE,
+                        START_MIGRATE_ZOOKEEPER_TO_KRAFT_INSTALLATION_EVENT),
+                new FlowTransition(MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_VALIDATION_STATE,
+                        MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_FINISHED_STATE,
+                        FINISH_MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_EVENT),
+                new FlowTransition(MIGRATE_ZOOKEEPER_TO_KRAFT_INSTALL_STATE,
+                        MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_STATE,
+                        START_MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_EVENT),
+                new FlowTransition(MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_STATE,
+                        MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_FINISHED_STATE,
+                        FINISH_MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_EVENT),
+                new FlowTransition(MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_FINISHED_STATE,
+                        FINAL_STATE,
+                        FINALIZE_MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_EVENT)
+        );
+
+        assertEquals(expectedTransitions.size(), transitions.size(),
+                "The number of transitions does not match the expected number");
+
+        for (int i = 0; i < transitions.size(); i++) {
+            Transition<?, ?> transition = transitions.get(i);
+            FlowTransition expected = expectedTransitions.get(i);
+
+            assertEquals(expected.from(), transition.getSource(),   "Unexpected 'from' state at index " + i);
+            assertEquals(expected.to(),   transition.getTarget(),   "Unexpected 'to' state at index " + i);
+            assertEquals(expected.event(), extractEvent(transition), "Unexpected event at index " + i);
+        }
     }
 
     @Test
@@ -79,30 +93,6 @@ class MigrateZookeeperToKraftConfigurationFlowConfigTest {
         assertEquals(HANDLED_FAILED_MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_EVENT, configurationEdge.getFailureHandled());
     }
 
-    private static void checkChainAndFromStates(List<? extends Transition<?, ?>> transitions) throws IllegalAccessException {
-        assertEquals(MigrateZookeeperToKraftConfigurationFlowConfigTest.EXPECTED_STATE_CHAIN.size() - 1, transitions.size(),
-                "The number of transitions does not match with the expected number of steps");
-
-        Map<FlowState, Integer> fromCounts = new HashMap<>();
-        for (int i = 0; i < transitions.size(); i++) {
-            Transition<?, ?> transition = transitions.get(i);
-
-            FlowState expectedFrom = ((List<? extends FlowState>) MigrateZookeeperToKraftConfigurationFlowConfigTest.EXPECTED_STATE_CHAIN).get(i);
-            FlowState expectedTo = ((List<? extends FlowState>) MigrateZookeeperToKraftConfigurationFlowConfigTest.EXPECTED_STATE_CHAIN).get(i + 1);
-            FlowEvent expectedEvent = ((List<? extends FlowEvent>) MigrateZookeeperToKraftConfigurationFlowConfigTest.EXPECTED_EVENT_CHAIN).get(i);
-
-            assertEquals(expectedFrom, transition.getSource(), "Unexpected 'from' state at transition index " + i);
-            assertEquals(expectedTo, transition.getTarget(), "Unexpected 'to' state at transition index " + i);
-            assertEquals(expectedEvent, extractEvent(transition), "Unexpected event at transition index " + i);
-
-            fromCounts.merge(transition.getSource(), 1, Integer::sum);
-        }
-
-        for (Map.Entry<FlowState, Integer> entry : fromCounts.entrySet()) {
-            assertEquals(1, entry.getValue(), "State appears more than once as 'from': " + entry.getKey());
-        }
-    }
-
     private static void assertDefaultFailureEventForAllTransitions(List<? extends Transition<?, ?>> transitions) {
         for (int i = 0; i < transitions.size(); i++) {
             Transition<?, ?> transition = transitions.get(i);
@@ -118,4 +108,6 @@ class MigrateZookeeperToKraftConfigurationFlowConfigTest {
         return (FlowEvent) field.get(transition);
     }
 
+    private record FlowTransition(FlowState from, FlowState to, FlowEvent event) {
+    }
 }

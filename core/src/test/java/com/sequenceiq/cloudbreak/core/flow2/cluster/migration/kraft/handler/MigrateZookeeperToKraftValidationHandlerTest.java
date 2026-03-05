@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.handler;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationHandlerSelectors.MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationHandlerSelectors.MIGRATE_ZOOKEEPER_TO_KRAFT_VALIDATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationStateSelectors.FAILED_MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationStateSelectors.FINISH_MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationStateSelectors.START_RESTART_KAFKA_BROKER_NODES_EVENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
@@ -58,6 +59,36 @@ class MigrateZookeeperToKraftValidationHandlerTest {
 
         assertInstanceOf(MigrateZookeeperToKraftEvent.class, result);
         assertEquals(START_RESTART_KAFKA_BROKER_NODES_EVENT.name(), result.getSelector());
+    }
+
+    @Test
+    void testDoAcceptSuccessWhenKraftMigrationAlreadyDone() {
+        StackDto stackDto = new StackDto();
+        MigrateZookeeperToKraftEvent request = new MigrateZookeeperToKraftEvent(MIGRATE_ZOOKEEPER_TO_KRAFT_VALIDATION_EVENT.selector(), STACK_ID);
+        HandlerEvent<MigrateZookeeperToKraftEvent> event = new HandlerEvent<>(new Event<>(request));
+        when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
+        KraftMigrationStatus kraftMigrationStatus = KraftMigrationStatus.BROKERS_IN_KRAFT;
+        when(kraftMigrationService.getKraftMigrationStatus(stackDto)).thenReturn(kraftMigrationStatus);
+
+        Selectable result = underTest.doAccept(event);
+
+        assertInstanceOf(MigrateZookeeperToKraftEvent.class, result);
+        assertEquals(FINISH_MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT.name(), result.getSelector());
+    }
+
+    @Test
+    void testDoAcceptSuccessWhenKraftMigrationFinalizationAlreadyDone() {
+        StackDto stackDto = new StackDto();
+        MigrateZookeeperToKraftEvent request = new MigrateZookeeperToKraftEvent(MIGRATE_ZOOKEEPER_TO_KRAFT_VALIDATION_EVENT.selector(), STACK_ID);
+        HandlerEvent<MigrateZookeeperToKraftEvent> event = new HandlerEvent<>(new Event<>(request));
+        when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
+        KraftMigrationStatus kraftMigrationStatus = KraftMigrationStatus.KRAFT_INSTALLED;
+        when(kraftMigrationService.getKraftMigrationStatus(stackDto)).thenReturn(kraftMigrationStatus);
+
+        Selectable result = underTest.doAccept(event);
+
+        assertInstanceOf(MigrateZookeeperToKraftEvent.class, result);
+        assertEquals(FINISH_MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT.name(), result.getSelector());
     }
 
     @Test

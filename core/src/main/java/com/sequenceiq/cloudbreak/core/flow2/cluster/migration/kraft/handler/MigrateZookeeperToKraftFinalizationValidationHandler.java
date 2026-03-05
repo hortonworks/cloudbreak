@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.handler;
 
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftFinalizationHandlerSelectors.FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_VALIDATION_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftFinalizationStateSelectors.FINISH_FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftFinalizationStateSelectors.START_FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT;
 
 import jakarta.inject.Inject;
@@ -46,6 +47,9 @@ public class MigrateZookeeperToKraftFinalizationValidationHandler extends Except
         StackDto stack = stackDtoService.getById(stackId);
         try {
             KraftMigrationStatus kraftMigrationStatus = kraftMigrationService.getKraftMigrationStatus(stack);
+            if (KraftMigrationStatus.KRAFT_INSTALLED.equals(kraftMigrationStatus)) {
+                return new MigrateZookeeperToKraftFinalizationEvent(FINISH_FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT.name(), stackId);
+            }
             zookeeperToKraftMigrationValidator.validateZookeeperToKraftMigrationStateForFinalization(kraftMigrationStatus);
         } catch (Exception e) {
             LOGGER.error("Finalize Zookeeper to KRaft migration validation failed.", e);

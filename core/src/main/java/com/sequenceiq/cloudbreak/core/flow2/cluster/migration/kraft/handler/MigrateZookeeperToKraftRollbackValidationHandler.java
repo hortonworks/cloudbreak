@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.handler;
 
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftRollbackHandlerSelectors.ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION_VALIDATION_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftRollbackStateSelectors.FINISH_ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftRollbackStateSelectors.START_ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT;
 
 import jakarta.inject.Inject;
@@ -15,9 +16,11 @@ import com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.event.Migrat
 import com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.event.MigrateZookeeperToKraftRollbackFailureEvent;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.service.migration.kraft.KraftMigrationOperationStatusFactory;
 import com.sequenceiq.cloudbreak.service.migration.kraft.KraftMigrationService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.validation.ZookeeperToKraftMigrationValidator;
+import com.sequenceiq.distrox.api.v1.distrox.model.cluster.kraft.KraftMigrationOperationStatus;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
@@ -34,6 +37,9 @@ public class MigrateZookeeperToKraftRollbackValidationHandler extends ExceptionC
     @Inject
     private ZookeeperToKraftMigrationValidator zookeeperToKraftMigrationValidator;
 
+    @Inject
+    private KraftMigrationOperationStatusFactory kraftMigrationOperationStatusFactory;
+
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<MigrateZookeeperToKraftRollbackEvent> event) {
         LOGGER.error("Rollback Zookeeper to KRaft migration validation failed.", e);
@@ -45,6 +51,11 @@ public class MigrateZookeeperToKraftRollbackValidationHandler extends ExceptionC
         Long stackId = event.getData().getResourceId();
         StackDto stack = stackDtoService.getById(stackId);
         try {
+            if (kraftMigrationOperationStatusFactory.getStatusFromFlowInformation(stack)
+                    .filter(KraftMigrationOperationStatus.ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION_COMPLETE::equals)
+                    .isPresent()) {
+                return new MigrateZookeeperToKraftRollbackEvent(FINISH_ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT.name(), stackId);
+            }
             KraftMigrationStatus kraftMigrationStatus = kraftMigrationService.getKraftMigrationStatus(stack);
             zookeeperToKraftMigrationValidator.validateZookeeperToKraftMigrationStateForRollback(kraftMigrationStatus);
         } catch (Exception e) {
