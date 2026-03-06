@@ -1,0 +1,12 @@
+[
+  { "from": "*",            "to": "7.2.18.1100",  "entitlement_override": "mitigateReleaseFailure7218P1100" },
+  { "from": "7.3.1.800",   "to": "7.3.2.0" },
+  { "from": "7.2.18.1200", "to": "7.3.2.0" },
+  { "from": "7.2.18.1100", "to": "7.2.18.0-1099" },
+  { "from": "7.2.18.1100", "to": "7.2.18.1101+" },
+  { "from": "7.2.18.1100", "to": "7.3.1.0-400" },
+  { "from": "<7.2.17.*",   "to": "7.3.1.*",      "internal_account_override": true },
+  { "from": "7.2.17.0-100","to": "7.3.1.*",      "internal_account_override": true },
+  { "from": "7.2.17.600+", "to": "7.3.1.0-100",  "internal_account_override": true },
+  { "from": "7.2.18.300+", "to": "7.3.1.0-100",  "internal_account_override": true }
+]

@@ -22,6 +22,7 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -44,6 +45,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.sequenceiq.cloudbreak.ImageCatalogMock;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
@@ -66,6 +68,7 @@ import com.sequenceiq.cloudbreak.cmtemplate.generator.support.DeclaredVersionSer
 import com.sequenceiq.cloudbreak.cmtemplate.generator.support.SupportedVersionService;
 import com.sequenceiq.cloudbreak.cmtemplate.generator.template.GeneratedCmTemplateService;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.service.PlatformStringTransformer;
 import com.sequenceiq.cloudbreak.converter.ImageToClouderaManagerRepoConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
@@ -112,6 +115,7 @@ import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.StackStopRestrictionService;
 import com.sequenceiq.cloudbreak.service.stack.StackViewService;
+import com.sequenceiq.cloudbreak.service.upgrade.BlockedUpgradePath;
 import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeAvailabilityService;
 import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeCandidateFilterService;
 import com.sequenceiq.cloudbreak.service.upgrade.ComponentVersionComparator;
@@ -164,6 +168,7 @@ import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.util.CdhVersionProvider;
+import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.model.OsType;
@@ -791,6 +796,12 @@ public class DistroXUpgradeRetrievalComponentTest {
             return upgradeImageFilters.stream()
                     .sorted(Comparator.comparingInt(UpgradeImageFilter::getFilterOrderNumber))
                     .collect(Collectors.toList());
+        }
+
+        @Bean
+        public List<BlockedUpgradePath> blockedUpgradePaths() throws IOException {
+            String json = FileReaderUtils.readFileFromClasspathQuietly("definitions/upgrade-path-restrictions.json");
+            return JsonUtil.readValue(json, new TypeReference<>() { });
         }
 
     }

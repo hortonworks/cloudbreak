@@ -1,9 +1,8 @@
 package com.sequenceiq.cloudbreak.service.upgrade;
 
 import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.getAccountId;
-import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERA_STACK_VERSION_7_3_1;
-import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionEqualToLimited;
-import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
+
+import java.util.List;
 
 import jakarta.inject.Inject;
 
@@ -12,79 +11,54 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
-import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 
 @Component
 public class UpgradePathRestrictionService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UpgradePathRestrictionService.class);
 
+    private final UpgradeVersionPatternMatcher patternMatcher = new UpgradeVersionPatternMatcher();
+
     @Inject
     private EntitlementService entitlementService;
 
+    @Inject
+    private List<BlockedUpgradePath> blockedUpgradePaths;
+
+    /**
+     * Returns {@code true} if the upgrade from {@code current} to {@code target} is permitted.
+     *
+     * <p>The default is to permit. An upgrade is blocked only when at least one rule in
+     * {@code upgrade-path-restrictions.json} matches both the source and target version
+     * and is not overridden by an active entitlement or internal-account flag.
+     */
     public boolean permitUpgrade(VersionComparisonContext current, VersionComparisonContext target) {
-        boolean result = permitUpgradeByVersion(current, target);
-        LOGGER.debug("Upgrade from {} to {}, permitted: {}", current, target, result);
-        return result;
+        boolean blocked = false;
+        for (BlockedUpgradePath rule : blockedUpgradePaths) {
+            if (patternMatcher.matches(rule.from(), current) && patternMatcher.matches(rule.to(), target) && !isOverridden(rule)) {
+                LOGGER.debug("Upgrade from {} to {} blocked by rule [from={}, to={}]", current, target, rule.from(), rule.to());
+                blocked = true;
+            }
+        }
+        LOGGER.debug("Upgrade from {} to {}, permitted: {}", current, target, !blocked);
+        return !blocked;
     }
 
-    @SuppressWarnings({ "checkstyle:CyclomaticComplexity", "checkstyle:NPathComplexity", "checkstyle:MagicNumber" })
-    private boolean permitUpgradeByVersion(VersionComparisonContext current, VersionComparisonContext target) {
-        int targetPatch = target.getPatchVersion().orElse(0);
-        int currentPatch = current.getPatchVersion().orElse(0);
-        String currentMajor = current.getMajorVersion();
-        String targetMajor = target.getMajorVersion();
-
-        if (targetPatch == 1100) {
-            boolean to7218 = majorVersionEquals(targetMajor, "7.2.18");
-            return !to7218 || entitlementService.isMitigateReleaseFailure7218P1100Enabled(getAccountId());
-        }
-
-        if (currentPatch == 1100) {
-            boolean fromOlderThan7218 = CMRepositoryVersionUtil.isVersionOlderThanLimited(() -> currentMajor, () -> "7.2.18");
-            boolean from7218 = majorVersionEquals(currentMajor, "7.2.18");
-            boolean to731 = majorVersionEquals(targetMajor, "7.3.1");
-            boolean to7218 = majorVersionEquals(targetMajor, "7.2.18");
-            return fromOlderThan7218 || (from7218 && !to7218 && !(to731 && targetPatch >= 0 && targetPatch <= 400));
-        }
-
-        if (majorVersionEquals(targetMajor, "7.3.2") && targetPatch == 0) {
-            boolean from731P800 = majorVersionEquals(currentMajor, "7.3.1") && currentPatch == 800;
-            boolean from7218P1200 = majorVersionEquals(currentMajor, "7.2.18") && currentPatch == 1200;
-            return !from731P800 && !from7218P1200;
-        }
-
-        if (skipValidation(current, target)) {
-            return true;
-        }
-
-
-        if (targetPatch == 0 || targetPatch == 100) {
-            boolean from7217 = majorVersionEquals(currentMajor, "7.2.17") && currentPatch > 100 && currentPatch < 600;
-            boolean from7218 = majorVersionEquals(currentMajor, "7.2.18") && currentPatch < 300;
-            return isVersionNewerOrEqualThanLimited(currentMajor, () -> "7.2.17") && (from7217 || from7218);
-        }
-
-        if (targetPatch >= 200) {
-            boolean from7217OrNewer = majorVersionEquals(currentMajor, "7.2.17") && currentPatch >= 200;
-            boolean from7218OrNewer = isVersionNewerOrEqualThanLimited(currentMajor, () -> "7.2.18");
-            return from7217OrNewer || from7218OrNewer;
-        }
-
-        return true;
+    private boolean isOverridden(BlockedUpgradePath rule) {
+        return isEntitlementOverrideActive(rule) || isInternalAccountOverrideActive(rule);
     }
 
-    private boolean majorVersionEquals(String currentMajor, String limited) {
-        return isVersionEqualToLimited(currentMajor, () -> limited);
+    private boolean isEntitlementOverrideActive(BlockedUpgradePath rule) {
+        if (rule.entitlementOverride() == null) {
+            return false;
+        }
+        if ("mitigateReleaseFailure7218P1100".equals(rule.entitlementOverride())) {
+            return entitlementService.isMitigateReleaseFailure7218P1100Enabled(getAccountId());
+        }
+        return false;
     }
 
-    private boolean skipValidation(VersionComparisonContext current, VersionComparisonContext target) {
-        return !isVersionEqualToLimited(target.getMajorVersion(), CLOUDERA_STACK_VERSION_7_3_1) ||
-                isVersionNewerOrEqualThanLimited(current.getMajorVersion(), CLOUDERA_STACK_VERSION_7_3_1) || isInternalAccount();
+    private boolean isInternalAccountOverrideActive(BlockedUpgradePath rule) {
+        return rule.internalAccountOverride() && entitlementService.internalTenant(getAccountId());
     }
-
-    private boolean isInternalAccount() {
-        return entitlementService.internalTenant(getAccountId());
-    }
-
 }
