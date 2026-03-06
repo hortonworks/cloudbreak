@@ -463,7 +463,7 @@ public class StackV4Controller extends NotificationController implements StackV4
     @InternalOnly
     public void checkUpgradeRdsByClusterNameInternal(Long workspaceId, @ResourceName String clusterName, TargetMajorVersion targetMajorVersion,
             @InitiatorUserCrn String initiatorUserCrn) {
-        rdsUpgradeService.checkUpgradeRds(NameOrCrn.ofName(clusterName), targetMajorVersion);
+        rdsUpgradeService.checkUpgradeRds(NameOrCrn.ofName(clusterName));
     }
 
     @Override
