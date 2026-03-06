@@ -2,7 +2,7 @@
   "name": "7.3.2 - Streaming Analytics Light Duty (ARM) for AWS",
   "description": "",
   "type": "STREAMING",
-  "featureState": "INTERNAL",
+  "featureState": "RELEASED",
   "cloudPlatform": "AWS",
   "distroXTemplate": {
     "cluster": {

@@ -2,7 +2,7 @@
   "name": "7.3.2 - Edge Flow Management Light Duty (ARM) for AWS",
   "description": "",
   "type": "FLOW_MANAGEMENT",
-  "featureState": "INTERNAL",
+  "featureState": "RELEASED",
   "cloudPlatform": "AWS",
   "distroXTemplate": {
     "cluster": {
