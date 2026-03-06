@@ -61,7 +61,7 @@ public class ParcelFilterService {
         Set<ClouderaManagerProduct> notAccessibleParcels = new HashSet<>();
         Iterator<ClouderaManagerProduct> parcelIterator = parcels.iterator();
         requiredParcels.addAll(collectCustomParcelsIfPresent(availableParcelNamesFromImage, parcels));
-        requiredParcels.addAll(collectCdhParcel(availableParcelNamesFromImage, parcels));
+        requiredParcels.addAll(collectCdhParcel(parcels));
         while (!requiredServicesInBlueprint.isEmpty() && parcelIterator.hasNext()) {
             ClouderaManagerProduct parcel = parcelIterator.next();
             ImmutablePair<ManifestStatus, Manifest> manifest = manifestRetrieverService.readRepoManifest(parcel.getParcel());
@@ -93,7 +93,9 @@ public class ParcelFilterService {
     }
 
     private boolean servicesArePresentInTheBlueprint(Set<String> serviceNamesInBlueprint, Set<String> componentNamesInParcel, ClouderaManagerProduct parcel) {
-        if (componentNamesInParcel.stream().anyMatch(serviceNamesInBlueprint::contains)) {
+        if (componentNamesInParcel.stream()
+                .anyMatch(serviceInParcel -> serviceNamesInBlueprint.stream()
+                        .anyMatch(serviceInBlueprint -> serviceInBlueprint.equalsIgnoreCase(serviceInParcel)))) {
             LOGGER.debug("Add parcel '{}' as there is at least one service both in the manifest and in the blueprint.", parcel);
             return true;
         } else {
@@ -114,7 +116,7 @@ public class ParcelFilterService {
         return customParcels;
     }
 
-    private Collection<ClouderaManagerProduct> collectCdhParcel(Set<String> availableParcelNamesFromImage, Set<ClouderaManagerProduct> parcels) {
+    private Collection<ClouderaManagerProduct> collectCdhParcel(Set<ClouderaManagerProduct> parcels) {
         return parcels.stream()
                 .filter(p -> CDH.equals(p.getName()))
                 .collect(Collectors.toSet());
@@ -124,7 +126,7 @@ public class ParcelFilterService {
         String blueprintText = blueprint.getBlueprintJsonText();
         Set<SupportedService> supportedServices = clusterTemplateGeneratorService.getServicesByBlueprint(blueprintText).getServices();
         return supportedServices.stream()
-                .map(SupportedService::getComponentNameInParcel)
+                .map(SupportedService::getName)
                 .collect(Collectors.toSet());
     }
 

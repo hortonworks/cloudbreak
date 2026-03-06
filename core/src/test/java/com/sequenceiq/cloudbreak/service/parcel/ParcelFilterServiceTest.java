@@ -132,7 +132,7 @@ public class ParcelFilterServiceTest {
         String parcelName = "CUSTOM";
         ClouderaManagerProduct parcel = new ClouderaManagerProduct().withParcel(parcelUrl).withName(parcelName);
         SupportedService supportedService = new SupportedService();
-        supportedService.setComponentNameInParcel(null);
+        supportedService.setName(null);
         SupportedServices supportedServices = new SupportedServices();
         supportedServices.setServices(Set.of(supportedService));
         when(clusterTemplateGeneratorService.getServicesByBlueprint(BLUEPRINT_TEXT)).thenReturn(supportedServices);
@@ -198,7 +198,7 @@ public class ParcelFilterServiceTest {
         SupportedServices supportedServices = new SupportedServices();
         Set<SupportedService> services = componentNames.stream().map(s -> {
             SupportedService supportedService = new SupportedService();
-            supportedService.setComponentNameInParcel(s);
+            supportedService.setName(s);
             return supportedService;
         }).collect(Collectors.toSet());
         supportedServices.setServices(services);
