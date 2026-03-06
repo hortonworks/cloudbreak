@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
@@ -71,9 +72,23 @@ public class Json implements Serializable {
     }
 
     @JsonIgnore
+    public <T> T get(TypeReference<T> typeReference) throws IOException {
+        return JsonUtil.readValue(value, typeReference);
+    }
+
+    @JsonIgnore
     public <T> T getUnchecked(Class<T> valueType) {
         try {
             return JsonUtil.readValue(value, valueType);
+        } catch (IOException e) {
+            throw new IllegalStateException(e);
+        }
+    }
+
+    @JsonIgnore
+    public <T> T getUnchecked(TypeReference<T> typeReference) {
+        try {
+            return JsonUtil.readValue(value, typeReference);
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }

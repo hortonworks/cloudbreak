@@ -819,4 +819,14 @@ class StackOperationServiceTest {
 
         verify(kraftMigrationService).getKraftMigrationStatusResponse(stack);
     }
+
+    @Test
+    public void testModifyUserDefinedTags() {
+        String resourceCrn = "resourceCrn";
+        Map<String, String> userDefinedTags = Map.of("owner", "john doe");
+
+        underTest.modifyUserDefinedTags(resourceCrn, userDefinedTags);
+
+        verify(stackUpdater).updateUserDefinedTags(resourceCrn, userDefinedTags);
+    }
 }

@@ -208,6 +208,12 @@ public enum ResourceEvent {
     ENVIRONMENT_PROXY_CONFIG_MODIFICATION_FAILED("environment.proxy.modification.failed"),
     ENVIRONMENT_PROXY_CONFIG_MODIFICATION_FINISHED("environment.proxy.modification.finished"),
 
+    ENVIRONMENT_USER_DEFINED_TAGS_MODIFICATION_ON_FREEIPA_STARTED("environment.user.defined.tags.modification.freeipa.started"),
+    ENVIRONMENT_USER_DEFINED_TAGS_MODIFICATION_ON_DATALAKE_STARTED("environment.user.defined.tags.modification.datalake.started"),
+    ENVIRONMENT_USER_DEFINED_TAGS_MODIFICATION_ON_DATAHUBS_STARTED("environment.user.defined.tags.modification.datahubs.started"),
+    ENVIRONMENT_USER_DEFINED_TAGS_MODIFICATION_FAILED("environment.user.defined.tags.modification.failed"),
+    ENVIRONMENT_USER_DEFINED_TAGS_MODIFICATION_FINISHED("environment.user.defined.tags.modification.finished"),
+
     CREDENTIAL_AZURE_INTERACTIVE_CREATED("credential.azure.interactive.created"),
     CREDENTIAL_AZURE_INTERACTIVE_STATUS("credential.azure.interactive.status"),
     CREDENTIAL_AZURE_INTERACTIVE_FAILED("credential.azure.interactive.failed"),

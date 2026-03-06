@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -13,6 +14,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import jakarta.ws.rs.NotFoundException;
@@ -215,6 +217,27 @@ class FreeIpaServiceTest {
         when(freeIpaV1Endpoint.upgradeCcmInternal(ENVCRN, USERCRN)).thenThrow(new WebApplicationException("Houston..."));
         when(webApplicationExceptionMessageExtractor.getErrorMessage(any())).thenReturn("custom error");
         assertThatThrownBy(() -> ThreadBasedUserCrnProvider.doAs(USERCRN, () -> underTest.upgradeCcm(ENVCRN)))
+                .hasMessage("custom error")
+                .isExactlyInstanceOf(FreeIpaOperationFailedException.class);
+    }
+
+    @Test
+    void modifyUserDefinedTags() {
+        Map<String, String> userDefinedTags = Map.of("owner", "john doe");
+
+        ThreadBasedUserCrnProvider.doAs(USERCRN, () -> underTest.modifyUserDefinedTags(ENVCRN, userDefinedTags));
+
+        verify(freeIpaV1Endpoint).modifyUserDefinedTagsInternal(ENVCRN, userDefinedTags);
+    }
+
+    @Test
+    void modifyUserDefinedTagsFailureTest() {
+        Map<String, String> userDefinedTags = Map.of("owner", "john doe");
+
+        doThrow(new WebApplicationException("Error")).when(freeIpaV1Endpoint).modifyUserDefinedTagsInternal(ENVCRN, userDefinedTags);
+        when(webApplicationExceptionMessageExtractor.getErrorMessage(any())).thenReturn("custom error");
+
+        assertThatThrownBy(() -> ThreadBasedUserCrnProvider.doAs(USERCRN, () -> underTest.modifyUserDefinedTags(ENVCRN, userDefinedTags)))
                 .hasMessage("custom error")
                 .isExactlyInstanceOf(FreeIpaOperationFailedException.class);
     }

@@ -62,8 +62,8 @@ class RhelClientHelperTest {
         when(imageRhelJson.getValue()).thenReturn("not empty");
         when(imageUbuntuJson.getValue()).thenReturn("not empty");
 
-        when(imageRhelJson.getUnchecked(any())).thenReturn(imageRhel);
-        when(imageUbuntuJson.getUnchecked(any())).thenReturn(imageUbuntu);
+        when(imageRhelJson.getUnchecked(any(Class.class))).thenReturn(imageRhel);
+        when(imageUbuntuJson.getUnchecked(any(Class.class))).thenReturn(imageUbuntu);
 
         when(imageRhel.getOsType()).thenReturn("redhat8");
         when(imageUbuntu.getOsType()).thenReturn("ubuntu");

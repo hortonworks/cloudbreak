@@ -2,6 +2,7 @@ package com.sequenceiq.environment.environment.service.stack;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import jakarta.ws.rs.WebApplicationException;
@@ -16,6 +17,7 @@ import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.environment.environment.domain.EnvironmentView;
 import com.sequenceiq.environment.environment.flow.config.update.config.EnvStackConfigUpdatesFlowConfig;
+import com.sequenceiq.environment.exception.StackOperationFailedException;
 import com.sequenceiq.environment.store.EnvironmentInMemoryStateStore;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.domain.FlowLog;
@@ -92,5 +94,16 @@ public class StackService {
             }
         }
         return flowIdentifiers;
+    }
+
+    public void modifyUserDefinedTags(String crn, Map<String, String> userDefinedTags) {
+        try {
+            LOGGER.debug("Calling modifyUserDefinedTagsInternal endpoint for stack {} with tags {}", crn, userDefinedTags);
+            ThreadBasedUserCrnProvider.doAsInternalActor(() -> stackV4Endpoint.modifyUserDefinedTagsInternal(0L, crn, userDefinedTags));
+        } catch (WebApplicationException e) {
+            String errorMessage = messageExtractor.getErrorMessage(e);
+            LOGGER.error(String.format("Failed to modify user defined tags for stack %s due to: '%s'.", crn, errorMessage), e);
+            throw new StackOperationFailedException(errorMessage, e);
+        }
     }
 }

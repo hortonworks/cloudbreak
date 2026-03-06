@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -821,5 +822,11 @@ public class StackV4Controller extends NotificationController implements StackV4
     @InternalOnly
     public StepProgressCleanupResponse cleanupSecretRotationProgress(Long workspaceId, @ResourceCrn String crn, String secretType) {
         return StepProgressCleanupResponse.of(stackRotationService.cleanupProgress(crn, secretType));
+    }
+
+    @InternalOnly
+    @Override
+    public void modifyUserDefinedTagsInternal(Long workspaceId, @ResourceCrn String crn, Map<String, String> tags) {
+        stackOperations.modifyUserDefinedTags(crn, tags);
     }
 }

@@ -25,7 +25,7 @@ public class StackTags {
             @JsonProperty("defaultTags") Map<String, String> defaultTags) {
         this.defaultTags = defaultTags;
         this.applicationTags = applicationTags != null ? applicationTags : Maps.newHashMap();
-        this.userDefinedTags = userDefinedTags;
+        this.userDefinedTags = userDefinedTags != null ? userDefinedTags : Maps.newHashMap();
     }
 
     public Map<String, String> getUserDefinedTags() {
@@ -38,6 +38,12 @@ public class StackTags {
 
     public Map<String, String> getDefaultTags() {
         return defaultTags;
+    }
+
+    public void updateUserDefinedTags(Map<String, String> tags) {
+        if (tags != null) {
+            userDefinedTags.putAll(tags);
+        }
     }
 
     @Override

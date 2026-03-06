@@ -286,6 +286,7 @@ public class EnvironmentModificationService {
     private void editTags(EnvironmentEditDto editDto, Environment environment) {
         if (MapUtils.isNotEmpty(editDto.getUserDefinedTags())) {
             environment.setTags(environmentTagsDtoConverter.getTags(editDto));
+            environmentReactorFlowManager.triggerEnvironmentTagsModification(environment, editDto.getUserDefinedTags());
         }
     }
 

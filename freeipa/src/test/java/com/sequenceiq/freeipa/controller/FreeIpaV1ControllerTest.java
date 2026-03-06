@@ -60,6 +60,7 @@ import com.sequenceiq.freeipa.service.stack.FreeIpaCreationService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaDeletionService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaDescribeService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaListService;
+import com.sequenceiq.freeipa.service.stack.FreeIpaModifyTagsService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaUpgradeCcmService;
 import com.sequenceiq.freeipa.service.stack.FreeipaModifyProxyConfigService;
 import com.sequenceiq.freeipa.service.stack.RepairInstancesService;
@@ -133,6 +134,9 @@ class FreeIpaV1ControllerTest {
 
     @Mock
     private RootVolumeUpdateService rootVolumeUpdateService;
+
+    @Mock
+    private FreeIpaModifyTagsService freeIpaModifyTagsService;
 
     @BeforeEach
     void setUp() {
@@ -379,5 +383,15 @@ class FreeIpaV1ControllerTest {
 
         verifyNoInteractions(seLinuxModificationService);
         assertEquals("Cannot set SELinux mode value to DISABLED.", exception.getMessage());
+    }
+
+    @Test
+    void testModifyUserDefinedTagsInternal() {
+        Map<String, String> userDefinedTags = Map.of("owner", "john doe");
+        when(crnService.getCurrentAccountId()).thenReturn(ACCOUNT_ID);
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.modifyUserDefinedTagsInternal(ENVIRONMENT_CRN, userDefinedTags));
+
+        verify(freeIpaModifyTagsService).modifyUserDefinedTags(ENVIRONMENT_CRN, userDefinedTags, ACCOUNT_ID);
     }
 }

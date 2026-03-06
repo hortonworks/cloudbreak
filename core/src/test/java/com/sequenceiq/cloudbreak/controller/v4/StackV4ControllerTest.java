@@ -15,6 +15,7 @@ import static org.mockito.Mockito.when;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -250,5 +251,14 @@ class StackV4ControllerTest {
             underTest.migrateDatabaseByCrnInternal(WORKSPACE_ID, STACK_CRN, USER_CRN);
         });
         verify(migrateRdsService).migrateRds(NameOrCrn.ofCrn(STACK_CRN), "hortonworks");
+    }
+
+    @Test
+    void testModifyUserDefinedTagsInternal() {
+        Map<String, String> userDefinedTags = Map.of("owner", "john doe");
+        doAs(USER_CRN, () -> {
+            underTest.modifyUserDefinedTagsInternal(WORKSPACE_ID, STACK_CRN, userDefinedTags);
+        });
+        verify(stackOperations).modifyUserDefinedTags(STACK_CRN, userDefinedTags);
     }
 }

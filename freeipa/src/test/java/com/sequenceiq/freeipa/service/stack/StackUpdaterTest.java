@@ -14,6 +14,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -32,6 +33,7 @@ import com.sequenceiq.cloudbreak.common.imdupdate.InstanceMetadataUpdateProperti
 import com.sequenceiq.cloudbreak.common.imdupdate.InstanceMetadataUpdateType;
 import com.sequenceiq.cloudbreak.common.imdupdate.InstanceMetadataUpdateTypeMetadata;
 import com.sequenceiq.cloudbreak.common.imdupdate.InstanceMetadataUpdateTypeProperty;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.message.StackStatusMessageTransformator;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
@@ -384,4 +386,20 @@ public class StackUpdaterTest {
         }
     }
 
+    @Test
+    void testUpdateUserDefinedTags() {
+        Stack stack = new Stack();
+        String resourceCrn = "resourceCrn";
+        Map<String, String> userDefinedTags = new HashMap<>(Map.of("owner", "john doe"));
+        Map<String, String> applicationTags = new HashMap<>(Map.of("application", "app"));
+        Map<String, String> defaultTags = new HashMap<>(Map.of("owner", "john doe", "creation-timestamp", "1773042126"));
+        Map<String, String> updateTags = Map.of("owner", "jane doe", "custom", "custom");
+        stack.setTags(new Json(Map.of("userDefinedTags", userDefinedTags, "applicationTags", applicationTags, "defaultTags", defaultTags)));
+        Json expectedTags = new Json(Map.of("userDefinedTags", updateTags, "applicationTags", applicationTags, "defaultTags", defaultTags));
+
+        underTest.updateUserDefinedTags(stack, updateTags);
+
+        assertEquals(expectedTags, stack.getTags());
+        verify(stackService).save(stack);
+    }
 }

@@ -7,6 +7,7 @@ import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDele
 import static com.sequenceiq.environment.environment.flow.hybrid.cancel.event.EnvironmentCrossRealmTrustCancelStateSelectors.TRUST_CANCEL_VALIDATION_EVENT;
 import static com.sequenceiq.environment.environment.flow.hybrid.repair.event.EnvironmentCrossRealmTrustRepairStateSelectors.TRUST_REPAIR_VALIDATION_EVENT;
 import static com.sequenceiq.environment.environment.flow.hybrid.setupfinish.event.EnvironmentCrossRealmTrustSetupFinishStateSelectors.TRUST_SETUP_FINISH_VALIDATION_EVENT;
+import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationStateSelectors.START_MODIFY_USER_DEFINED_TAGS_FREEIPA_EVENT;
 
 import java.util.Map;
 import java.util.Set;
@@ -46,6 +47,7 @@ import com.sequenceiq.environment.environment.flow.loadbalancer.event.LoadBalanc
 import com.sequenceiq.environment.environment.flow.loadbalancer.event.LoadBalancerUpdateStateSelectors;
 import com.sequenceiq.environment.environment.flow.modify.proxy.event.EnvProxyModificationDefaultEvent;
 import com.sequenceiq.environment.environment.flow.modify.proxy.event.EnvProxyModificationStateSelectors;
+import com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationEvent;
 import com.sequenceiq.environment.environment.flow.start.event.EnvStartEvent;
 import com.sequenceiq.environment.environment.flow.start.event.EnvStartStateSelectors;
 import com.sequenceiq.environment.environment.flow.stop.event.EnvStopEvent;
@@ -336,6 +338,19 @@ public class EnvironmentReactorFlowManager {
         FlowIdentifier flowIdentifier = sendEvent(externalizedComputeClusterReInitializationEvent, userCrn);
         LOGGER.debug("Externalized compute cluster reinitialization flow trigger event sent for environment {}", environment.getName());
         return flowIdentifier;
+    }
+
+    public FlowIdentifier triggerEnvironmentTagsModification(Environment environment, Map<String, String> userDefinedTags) {
+        LOGGER.info("Environment tags modification flow triggered.");
+        EnvTagsModificationEvent envTagsModificationEvent =
+                EnvTagsModificationEvent.builder()
+                        .withSelector(START_MODIFY_USER_DEFINED_TAGS_FREEIPA_EVENT.selector())
+                        .withResourceId(environment.getId())
+                        .withResourceName(environment.getName())
+                        .withResourceCrn(environment.getResourceCrn())
+                        .withUserDefinedTags(userDefinedTags)
+                        .build();
+        return sendEvent(envTagsModificationEvent, ThreadBasedUserCrnProvider.getUserCrn());
     }
 
     private FlowIdentifier sendEvent(BaseNamedFlowEvent event, String userCrn) {

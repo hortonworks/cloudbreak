@@ -254,7 +254,20 @@ public enum EnvironmentStatus {
             com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.PROXY_CONFIG_MODIFICATION_ON_DATAHUBS_IN_PROGRESS),
     PROXY_CONFIG_MODIFICATION_ON_DATAHUBS_FAILED(
             com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.PROXY_CONFIG_MODIFICATION_ON_DATAHUBS_FAILED),
-    PROXY_CONFIG_MODIFICATION_FAILED(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.PROXY_CONFIG_MODIFICATION_FAILED);
+    PROXY_CONFIG_MODIFICATION_FAILED(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.PROXY_CONFIG_MODIFICATION_FAILED),
+    USER_DEFINED_TAGS_MODIFICATION_ON_FREEIPA_IN_PROGRESS(
+            com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.USER_DEFINED_TAGS_MODIFICATION_ON_FREEIPA_IN_PROGRESS),
+    USER_DEFINED_TAGS_MODIFICATION_ON_FREEIPA_FAILED(
+            com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.USER_DEFINED_TAGS_MODIFICATION_ON_FREEIPA_FAILED),
+    USER_DEFINED_TAGS_MODIFICATION_ON_DATALAKE_IN_PROGRESS(
+            com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.USER_DEFINED_TAGS_MODIFICATION_ON_DATALAKE_IN_PROGRESS),
+    USER_DEFINED_TAGS_MODIFICATION_ON_DATALAKE_FAILED(
+            com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.USER_DEFINED_TAGS_MODIFICATION_ON_DATALAKE_FAILED),
+    USER_DEFINED_TAGS_MODIFICATION_ON_DATAHUBS_IN_PROGRESS(
+            com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.USER_DEFINED_TAGS_MODIFICATION_ON_DATAHUBS_IN_PROGRESS),
+    USER_DEFINED_TAGS_MODIFICATION_ON_DATAHUBS_FAILED(
+            com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.USER_DEFINED_TAGS_MODIFICATION_ON_DATAHUBS_FAILED),
+    USER_DEFINED_TAGS_MODIFICATION_FAILED(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.USER_DEFINED_TAGS_MODIFICATION_FAILED);
 
     public static final Set<EnvironmentStatus> AVAILABLE_STATUSES = Set.of(
             CREATION_INITIATED,

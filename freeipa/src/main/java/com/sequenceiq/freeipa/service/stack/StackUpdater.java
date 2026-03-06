@@ -11,11 +11,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
 import com.sequenceiq.cloudbreak.common.imdupdate.InstanceMetadataUpdateProperties;
 import com.sequenceiq.cloudbreak.common.imdupdate.InstanceMetadataUpdateType;
 import com.sequenceiq.cloudbreak.common.imdupdate.InstanceMetadataUpdateTypeMetadata;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.message.StackStatusMessageTransformator;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
@@ -150,5 +152,13 @@ public class StackUpdater {
             stack.setSupportedImdsVersion(supportedImdsVersion);
             stackService.save(stack);
         }
+    }
+
+    public void updateUserDefinedTags(Stack stack, Map<String, String> userDefinedTags) {
+        LOGGER.info("Modifying user defined tags for {}", stack.getName());
+        StackTags stackTags = stack.getTags().getUnchecked(StackTags.class);
+        stackTags.updateUserDefinedTags(userDefinedTags);
+        stack.setTags(new Json(stackTags));
+        stackService.save(stack);
     }
 }

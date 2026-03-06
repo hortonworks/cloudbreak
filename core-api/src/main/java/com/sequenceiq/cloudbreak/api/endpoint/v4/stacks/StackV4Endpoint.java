@@ -75,6 +75,7 @@ import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.SEN
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.VERTICAL_SCALE_BY_NAME;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import jakarta.validation.Valid;
@@ -1068,4 +1069,14 @@ public interface StackV4Endpoint {
     StepProgressCleanupResponse cleanupSecretRotationProgress(@PathParam("workspaceId") Long workspaceId,
             @ValidCrn(resource = {DATAHUB, VM_DATALAKE}) @PathParam("crn") String crn,
             @NotEmpty @QueryParam("secretType") @ValidSecretType(allowedTypes = CloudbreakSecretType.class) String secretType);
+
+    @PUT
+    @Path("internal/crn/{crn}/modify_user_defined_tags")
+    @Operation(summary = "Update user defined tags of cluster by CRN",
+            operationId = "modifyUserDefinedTagsByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    void modifyUserDefinedTagsInternal(
+            @PathParam("workspaceId") Long workspaceId,
+            @ValidCrn(resource = {DATAHUB, VM_DATALAKE}) @PathParam("crn") String crn,
+            @Valid Map<String, String> tags);
 }

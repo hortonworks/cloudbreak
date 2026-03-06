@@ -63,10 +63,10 @@ public final class FreeIpaOperationDescriptions {
     public static final String IMD_UPDATE = "Stacks' instances metadata update.";
     public static final String ROTATE_SECRETS_BY_CRN = "Rotate secrets by environment CRN.";
     public static final String GET_USED_SUBNETS_BY_ENVIRONMENT_CRN = "List the used subnets by the given Environment resource CRN";
-
     public static final String GET_ENCRYPTION_KEYS = "Get encryption keys of the FreeIPA";
-
     public static final String MODIFY_SELINUX_BY_CRN = "Modifies SELinux of the FreeIPA instances";
+    public static final String INTERNAL_MODIFY_TAGS_BY_ENV_ID =
+            "Initiates the modification of the user defined tags for FreeIPA stack by environment CRN using the internal actor";
 
     private FreeIpaOperationDescriptions() {
     }

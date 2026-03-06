@@ -41,6 +41,8 @@ import com.sequenceiq.environment.environment.flow.loadbalancer.event.LoadBalanc
 import com.sequenceiq.environment.environment.flow.loadbalancer.event.LoadBalancerUpdateStateSelectors;
 import com.sequenceiq.environment.environment.flow.modify.proxy.event.EnvProxyModificationDefaultEvent;
 import com.sequenceiq.environment.environment.flow.modify.proxy.event.EnvProxyModificationStateSelectors;
+import com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationEvent;
+import com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationStateSelectors;
 import com.sequenceiq.environment.environment.service.stack.StackService;
 import com.sequenceiq.environment.proxy.domain.ProxyConfig;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -223,6 +225,32 @@ class EnvironmentReactorFlowManagerTest {
                 .returns(ENVIRONMENT_NAME, ExternalizedComputeClusterReInitializationEvent::getResourceName)
                 .returns(ENVIRONMENT_ID, ExternalizedComputeClusterReInitializationEvent::getResourceId)
                 .returns(true, ExternalizedComputeClusterReInitializationEvent::isForce);
+        verifyHeaders();
+    }
+
+    @Test
+    void triggerEnvironmentTagsModification() {
+        Map<String, String> userDefinedTags = Map.of("owner", "john doe");
+        Environment environment = mock(Environment.class);
+        when(environment.getResourceCrn()).thenReturn(ENVIRONMENT_CRN);
+        when(environment.getName()).thenReturn(ENVIRONMENT_NAME);
+        when(environment.getId()).thenReturn(ENVIRONMENT_ID);
+        when(eventSender.sendEvent(any(EnvTagsModificationEvent.class), any(Event.Headers.class))).thenReturn(flowIdentifier);
+
+        FlowIdentifier result = ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> underTest.triggerEnvironmentTagsModification(environment, userDefinedTags));
+
+        assertThat(result).isSameAs(flowIdentifier);
+        ArgumentCaptor<EnvTagsModificationEvent> argumentCaptor = ArgumentCaptor.forClass(
+                EnvTagsModificationEvent.class);
+        verify(eventSender).sendEvent(argumentCaptor.capture(), headersCaptor.capture());
+        EnvTagsModificationEvent event = argumentCaptor.getValue();
+        assertThat(event)
+                .returns(EnvTagsModificationStateSelectors.START_MODIFY_USER_DEFINED_TAGS_FREEIPA_EVENT.selector(), BaseFlowEvent::selector)
+                .returns(ENVIRONMENT_CRN, EnvTagsModificationEvent::getResourceCrn)
+                .returns(ENVIRONMENT_NAME, EnvTagsModificationEvent::getResourceName)
+                .returns(ENVIRONMENT_ID, EnvTagsModificationEvent::getResourceId)
+                .returns(userDefinedTags, EnvTagsModificationEvent::getUserDefinedTags);
         verifyHeaders();
     }
 

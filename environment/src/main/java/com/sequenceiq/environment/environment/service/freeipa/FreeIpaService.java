@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.environment.service.freeipa;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -418,5 +419,16 @@ public class FreeIpaService {
                     return defaultOutbound;
                 }, Crn.safeFromString(crn).getAccountId());
         return outboundType != null ? outboundType : OutboundType.NOT_DEFINED;
+    }
+
+    public void modifyUserDefinedTags(String environmentCrn, Map<String, String> tags) {
+        try {
+            LOGGER.debug("Calling FreeIPA modify user defined tags for environment {} with tags {}", environmentCrn, tags);
+            ThreadBasedUserCrnProvider.doAsInternalActor(() -> freeIpaV1Endpoint.modifyUserDefinedTagsInternal(environmentCrn, tags));
+        } catch (WebApplicationException e) {
+            String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
+            LOGGER.error("Failed to modify user defined tags on FreeIpa for environment {} due to: {}", environmentCrn, errorMessage, e);
+            throw new FreeIpaOperationFailedException(errorMessage, e);
+        }
     }
 }

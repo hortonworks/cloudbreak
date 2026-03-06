@@ -739,6 +739,10 @@ public class StackOperationService {
         stackUpdater.updateStackNotificationState(notificationState, stack.getId());
     }
 
+    public void modifyUserDefinedTags(String resourceCrn, Map<String, String> userDefinedTags) {
+        stackUpdater.updateUserDefinedTags(resourceCrn, userDefinedTags);
+    }
+
     private void convertInputGroupToLowerCase(DiskUpdateRequest updateRequest) {
         updateRequest.getGroup().toLowerCase(Locale.ROOT);
     }

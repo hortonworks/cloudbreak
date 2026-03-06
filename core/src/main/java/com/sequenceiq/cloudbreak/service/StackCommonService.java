@@ -6,6 +6,7 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_UPSCALE_ADJUST
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -611,6 +612,10 @@ public class StackCommonService {
     public FlowIdentifier triggerMigrateRdsToTls(StackView stack) {
         MDCBuilder.buildMdcContext(stack);
         return clusterOperationService.triggerMigrateRdsToTls(stack);
+    }
+
+    public void modifyUserDefinedTags(String resourceCrn, Map<String, String> userDefinedTags) {
+        stackOperationService.modifyUserDefinedTags(resourceCrn, userDefinedTags);
     }
 
     private void validateDeleteVolumesRequest(Stack stack, StackDeleteVolumesRequest deleteRequest) {

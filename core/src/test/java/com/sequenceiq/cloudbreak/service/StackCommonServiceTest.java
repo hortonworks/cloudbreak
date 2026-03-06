@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -963,6 +964,16 @@ class StackCommonServiceTest {
         FlowIdentifier result = underTest.rotateRdsCertificate(stack);
         verify(clusterOperationService).rotateRdsCertificate(stack);
         assertThat(result).isEqualTo(FLOW_IDENTIFIER);
+    }
+
+    @Test
+    void testModifyUserDefinedTags() {
+        String resourceCrn = "crn";
+        Map<String, String> userDefinedTags = Map.of("owner", "john doe");
+
+        underTest.modifyUserDefinedTags(resourceCrn, userDefinedTags);
+
+        verify(stackOperationService).modifyUserDefinedTags(resourceCrn, userDefinedTags);
     }
 
     private List<InstanceMetadataView> generateInstances(int count,

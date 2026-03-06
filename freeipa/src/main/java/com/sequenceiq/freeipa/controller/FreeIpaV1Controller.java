@@ -10,6 +10,7 @@ import static com.sequenceiq.authorization.resource.AuthorizationVariableType.CR
 import static com.sequenceiq.authorization.resource.AuthorizationVariableType.NAME_LIST;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -95,6 +96,7 @@ import com.sequenceiq.freeipa.service.stack.FreeIpaCreationService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaDeletionService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaDescribeService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaListService;
+import com.sequenceiq.freeipa.service.stack.FreeIpaModifyTagsService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaRecommendationService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaScalingService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaStackHealthDetailsService;
@@ -210,6 +212,9 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
 
     @Inject
     private SeLinuxModificationService seLinuxModificationService;
+
+    @Inject
+    private FreeIpaModifyTagsService freeIpaModifyTagsService;
 
     @Override
     @CheckPermissionByRequestProperty(path = "environmentCrn", type = CRN, action = EDIT_ENVIRONMENT)
@@ -539,5 +544,12 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
             throw new BadRequestException("Cannot set SELinux mode value to DISABLED.");
         }
         return seLinuxModificationService.modifySeLinuxByCrn(environmentCrn, ThreadBasedUserCrnProvider.getAccountId(), selinuxMode);
+    }
+
+    @Override
+    @InternalOnly
+    public void modifyUserDefinedTagsInternal(@ResourceCrn String environmentCrn, Map<String, String> tags) {
+        String accountId = crnService.getCurrentAccountId();
+        freeIpaModifyTagsService.modifyUserDefinedTags(environmentCrn, tags, accountId);
     }
 }

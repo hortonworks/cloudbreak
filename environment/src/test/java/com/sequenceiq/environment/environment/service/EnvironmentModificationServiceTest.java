@@ -15,6 +15,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -35,6 +36,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.encryption.CreatedDiskEncryptionSet;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.environment.credential.domain.Credential;
@@ -940,6 +942,30 @@ class EnvironmentModificationServiceTest {
                 () -> environmentModificationServiceUnderTest.edit(environment, environmentDto));
 
         assertEquals("The custom docker registry CRN is not valid for example", badRequestException.getMessage());
+    }
+
+    @Test
+    void editTags() {
+        Map<String, String> userDefinedTags = new HashMap<>(Map.of("owner", "john doe"));
+        Map<String, String> applicationTags = new HashMap<>(Map.of("application", "app"));
+        Map<String, String> defaultTags = new HashMap<>(Map.of("owner", "john doe", "creation-timestamp", "1773042126"));
+        Json tags = new Json(Map.of("userDefinedTags", userDefinedTags, "applicationTags", applicationTags, "defaultTags", defaultTags));
+        EnvironmentEditDto environmentEditDto = EnvironmentEditDto.builder()
+                .withAccountId(ACCOUNT_ID)
+                .withUserDefinedTags(userDefinedTags)
+                .build();
+        Environment environment = new Environment();
+        environment.setAccountId(ACCOUNT_ID);
+
+        when(environmentTagsDtoConverter.getTags(environmentEditDto)).thenReturn(tags);
+
+        environmentModificationServiceUnderTest.edit(environment, environmentEditDto);
+
+        verify(environmentReactorFlowManager).triggerEnvironmentTagsModification(environment, userDefinedTags);
+        ArgumentCaptor<Environment> savedCaptor = ArgumentCaptor.forClass(Environment.class);
+        verify(environmentService).save(savedCaptor.capture());
+        Environment saved = savedCaptor.getValue();
+        assertThat(saved.getTags()).isEqualTo(tags);
     }
 
     private Environment environmentMock() {

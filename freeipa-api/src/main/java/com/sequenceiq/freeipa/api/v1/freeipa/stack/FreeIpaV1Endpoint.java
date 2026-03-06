@@ -11,6 +11,7 @@ import static com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaOperationDe
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaOperationDescriptions.VERTICAL_SCALE_BY_CRN;
 
 import java.util.List;
+import java.util.Map;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
@@ -440,4 +441,14 @@ public interface FreeIpaV1Endpoint {
     ModifySeLinuxResponse modifySelinuxByCrn(
             @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @QueryParam("environment") @NotEmpty String environmentCrn,
             @NotNull @QueryParam("selinux_mode") SeLinux selinuxMode);
+
+    @PUT
+    @Path("/internal/modify_user_defined_tags")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = FreeIpaOperationDescriptions.INTERNAL_MODIFY_TAGS_BY_ENV_ID,
+            description = FreeIpaNotes.FREEIPA_NOTES, operationId = "internalModifyUserDefinedTagsByEnvironmentV1",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    void modifyUserDefinedTagsInternal(
+            @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @QueryParam("environment") @NotEmpty String environmentCrn,
+            @Valid @NotNull Map<String, String> tags);
 }
