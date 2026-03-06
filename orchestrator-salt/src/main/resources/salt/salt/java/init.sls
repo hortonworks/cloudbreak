@@ -39,10 +39,7 @@ set_dns_negativ_ttl:
 
 {% if salt['pillar.get']('cluster:gov_cloud', False) == True %}
 
-{% if java.java_version == "8" %}
-java_ext_dir_exists:
-{% do salt.log.debug("Directory exist" ~ java.jre_ext_path) %}
-{% else %}
+{% if java.java_version == "17" %}
 java_ext_dir_exists:
   file.directory:
     - name: {{ java.jre_ext_path }}

@@ -66,7 +66,13 @@ rm -f ${CACERTS_DIR}/cacerts.bcfks
 keytool -importkeystore \
   -srckeystore ${JAVA_HOME}/jre/lib/security/cacerts \
   -srcstorepass changeit \
-  {% if gov_cloud == True %}-J-Djava.security.properties=={{ java.java_non_fips_policy_file }} {% endif %} \
+  {%- if gov_cloud == True %}
+  {%- if java.java_version == "8" %}
+  ${PROVIDER} \
+  {%- elif java.java_version == "17" %}
+  -J-Djava.security.properties=={{ java.java_non_fips_policy_file }} \
+  {%- endif %}
+  {%- endif %}
   -destkeystore ${CACERTS_DIR}/cacerts.p12 \
   -deststorepass changeit \
   -deststoretype PKCS12
