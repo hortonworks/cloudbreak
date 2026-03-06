@@ -3,6 +3,7 @@ package com.sequenceiq.freeipa.service.upgrade;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -97,7 +98,28 @@ public class UpgradeImageService {
                 .map(this::convertImageWrapperAndNameToImageInfoResponse)
                 .collect(Collectors.toList());
         fetchDefaultOsImageIfNotPresentInTargets(stack, catalog, currentImage, targetImages).ifPresent(targetImages::add);
-        return targetImages;
+        return getLatestImagesGroupedByOs(targetImages);
+    }
+
+    private List<ImageInfoResponse> getLatestImagesGroupedByOs(List<ImageInfoResponse> targetImages) {
+        return new java.util.ArrayList<>(targetImages.stream()
+                .collect(Collectors.toMap(
+                        image -> StringUtils.defaultString(image.getOs()),
+                        image -> image,
+                        this::selectLatestImageByDate,
+                        LinkedHashMap::new))
+                .values());
+    }
+
+    private ImageInfoResponse selectLatestImageByDate(ImageInfoResponse first, ImageInfoResponse second) {
+        String firstDate = first.getDate();
+        String secondDate = second.getDate();
+        try {
+            return compareImageDates(firstDate, secondDate) ? first : second;
+        } catch (ParseException e) {
+            LOGGER.debug("Unable to compare image dates [{}] and [{}]", secondDate, firstDate, e);
+            return first;
+        }
     }
 
     private Optional<ImageInfoResponse> fetchDefaultOsImageIfNotPresentInTargets(Stack stack, String catalog, ImageInfoResponse currentImage,
@@ -124,14 +146,24 @@ public class UpgradeImageService {
 
     private boolean isCandidateImageNewerThanCurrent(ImageWrapper candidate, String currentImageDate) {
         try {
-            SimpleDateFormat imageDateFormat = new SimpleDateFormat(DATE_FORMAT);
-            Date candidateDate = imageDateFormat.parse(candidate.getImage().getDate());
-            Date currentDate = imageDateFormat.parse(currentImageDate);
-            return candidateDate.after(currentDate);
+            return compareImageDates(candidate.getImage().getDate(), currentImageDate);
         } catch (ParseException e) {
             LOGGER.warn("Couldn't parse dates, return false. Current date: [{}], candidate date: [{}]", currentImageDate, candidate.getImage().getDate(), e);
             return false;
         }
+    }
+
+    private boolean compareImageDates(String firstDate, String secondDate) throws ParseException {
+        if (StringUtils.isBlank(firstDate)) {
+            return false;
+        }
+        if (StringUtils.isBlank(secondDate)) {
+            return true;
+        }
+        SimpleDateFormat imageDateFormat = new SimpleDateFormat(DATE_FORMAT);
+        Date firstDateParsed = imageDateFormat.parse(firstDate);
+        Date secondDateParsed = imageDateFormat.parse(secondDate);
+        return firstDateParsed.after(secondDateParsed);
     }
 
     private boolean filterBasedOnTags(Map<String, String> tagFilters, Pair<ImageWrapper, String> imageWrapperAndName) {
