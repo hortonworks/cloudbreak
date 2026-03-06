@@ -32,6 +32,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackSta
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.VerticalScaleRequest;
 import com.sequenceiq.freeipa.converter.cloud.ResourceToCloudResourceConverter;
 import com.sequenceiq.freeipa.converter.cloud.StackToCloudStackConverter;
+import com.sequenceiq.freeipa.entity.Operation;
 import com.sequenceiq.freeipa.entity.Resource;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.freeipa.verticalscale.FreeIpaVerticalScaleService;
@@ -142,7 +143,8 @@ public class FreeIpaVerticalScaleActions {
 
                 stackUpdater.updateStackStatus(stack.getId(), VERTICAL_SCALE_FAILED, message);
                 if (isOperationIdSet(variables)) {
-                    operationService.failOperation(stack.getAccountId(), getOperationId(variables), message);
+                    Operation operation = operationService.failOperation(stack.getAccountId(), getOperationId(variables), message);
+                    sendFailedOperationNotificationIfApplicable(stack, context.getFlowTriggerUserCrn(), operation, errorReason);
                 }
                 enableStatusChecker(stack, "Failed vertical scaling FreeIPA");
                 sendEvent(context, STACK_VERTICALSCALE_FAIL_HANDLED_EVENT.event(), payload);

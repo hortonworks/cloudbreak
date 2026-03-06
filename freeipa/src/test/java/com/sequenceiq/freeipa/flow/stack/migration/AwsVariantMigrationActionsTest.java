@@ -28,6 +28,7 @@ import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowRegister;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.events.EventSenderService;
 import com.sequenceiq.freeipa.flow.stack.StackFailureEvent;
 import com.sequenceiq.freeipa.metrics.FreeIpaMetricService;
 import com.sequenceiq.freeipa.metrics.MetricType;
@@ -75,6 +76,9 @@ public class AwsVariantMigrationActionsTest {
     @Mock
     private OperationService operationService;
 
+    @Mock
+    private EventSenderService eventSenderService;
+
     private AwsVariantMigrationFlowContext context;
 
     @BeforeEach
@@ -118,6 +122,7 @@ public class AwsVariantMigrationActionsTest {
         AbstractAwsVariantMigrationAction<StackFailureEvent> action = (AbstractAwsVariantMigrationAction<StackFailureEvent>) underTest.migrationFailed();
         initActionPrivateFields(action);
         ReflectionTestUtils.setField(action, null, operationService, OperationService.class);
+        ReflectionTestUtils.setField(action, null, eventSenderService, EventSenderService.class);
         return action;
     }
 

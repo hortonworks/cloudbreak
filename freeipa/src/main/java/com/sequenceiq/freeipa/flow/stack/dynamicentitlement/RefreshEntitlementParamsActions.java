@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.flow.stack.dynamicentitlement;
 
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_UPGRADE_FAILED;
+
 import java.util.Map;
 
 import jakarta.inject.Inject;
@@ -12,8 +14,6 @@ import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
-import com.sequenceiq.freeipa.api.v1.freeipa.user.model.FailureDetails;
-import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SuccessDetails;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
 import com.sequenceiq.freeipa.flow.stack.StackFailureEvent;
@@ -57,17 +57,14 @@ public class RefreshEntitlementParamsActions {
 
             @Override
             protected void doExecute(RefreshEntitlementParamsContext context, StackFailureEvent payload, Map<Object, Object> variables) throws Exception {
-                String errorReason = payload.getException().getMessage();
+                String errorReason = getErrorReason(payload.getException());
                 Stack stack = context.getStack();
-                String environmentCrn = stack.getEnvironmentCrn();
                 String message = String.format("Refresh entitlement based configurations failed: %s", errorReason);
-                SuccessDetails successDetails = new SuccessDetails(environmentCrn);
-                FailureDetails failureDetails = new FailureDetails(environmentCrn, message);
                 LOGGER.info(message, payload.getException());
                 stackUpdater.updateStackStatus(stack, DetailedStackStatus.UPGRADE_FAILED, message);
+                getEventService().sendEventAndNotification(stack, context.getFlowTriggerUserCrn(), FREEIPA_UPGRADE_FAILED, java.util.List.of(message));
                 sendEvent(context, RefreshEntitlementParamsEvent.REFRESH_ENTITLEMENT_FAIL_HANDLED_EVENT.event(), payload);
             }
         };
     }
-
 }
