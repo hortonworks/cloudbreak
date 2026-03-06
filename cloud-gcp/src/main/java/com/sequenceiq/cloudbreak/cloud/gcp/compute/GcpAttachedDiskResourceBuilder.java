@@ -27,6 +27,7 @@ import com.google.api.services.compute.model.Disk;
 import com.google.api.services.compute.model.Operation;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.gcp.GcpConstants;
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpPlatformParameters.GcpDiskType;
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpResourceException;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
@@ -56,10 +57,6 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
     private static final String VOLUME_DELETION_FAILED_BASE_MSG = "Volume deletion operation has failed due to:";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GcpAttachedDiskResourceBuilder.class);
-
-    private static final String NVME_DEVICE_NAME_TEMPLATE = "/dev/disk/by-id/google-local-nvme-ssd-%d";
-
-    private static final String DEVICE_NAME_PREFIX = "/dev/disk/by-id/google-";
 
     @Inject
     @Qualifier("intermediateBuilderExecutor")
@@ -96,7 +93,7 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
         String stackName = cloudContext.getName();
 
         List<VolumeSetAttributes.Volume> volumes = new ArrayList<>();
-        IndexingDeviceNameGenerator localSsdDeviceNameGenerator = new IndexingDeviceNameGenerator(NVME_DEVICE_NAME_TEMPLATE, 0);
+        IndexingDeviceNameGenerator localSsdDeviceNameGenerator = new IndexingDeviceNameGenerator(GcpConstants.NVME_DEVICE_NAME_TEMPLATE, 0);
         for (int i = 0; i < template.getVolumes().size(); i++) {
             String volumeName = resourceNameService.attachedDisk(stackName, groupName, privateId, i);
             Volume volume = template.getVolumes().get(i);
@@ -125,7 +122,7 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
         if (GcpDiskType.LOCAL_SSD.value().equals(volumeType)) {
             return deviceNameGenerator.next();
         } else {
-            return DEVICE_NAME_PREFIX + volumeName;
+            return GcpConstants.DEVICE_NAME_PREFIX + volumeName;
         }
     }
 

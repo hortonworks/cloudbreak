@@ -11,7 +11,6 @@ import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 
 @Service
 public class GcpConstants implements CloudConstant {
-
     public static final String[] VARIANTS = new String[] {
             CloudConstants.GCP,
     };
@@ -19,6 +18,10 @@ public class GcpConstants implements CloudConstant {
     public static final Platform GCP_PLATFORM = Platform.platform(GCP);
 
     public static final Variant GCP_VARIANT = Variant.variant(GCP);
+
+    public static final String NVME_DEVICE_NAME_TEMPLATE = "/dev/disk/by-id/google-local-nvme-ssd-%d";
+
+    public static final String DEVICE_NAME_PREFIX = "/dev/disk/by-id/google-";
 
     public GcpConstants() {
     }

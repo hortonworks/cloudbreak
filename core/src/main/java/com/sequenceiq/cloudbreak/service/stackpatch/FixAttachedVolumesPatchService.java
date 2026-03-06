@@ -5,6 +5,7 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
@@ -18,6 +19,7 @@ import jakarta.inject.Inject;
 
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -26,6 +28,7 @@ import org.springframework.util.CollectionUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.cloud.gcp.GcpPlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.model.CloudConnectResources;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
@@ -66,6 +69,11 @@ public class FixAttachedVolumesPatchService extends ExistingStackPatchService {
     private static final int SALT_RETRY = 3;
 
     private static final EnumSet<Status> PATCH_ALLOWED_STATUSES = EnumSet.of(Status.AVAILABLE, Status.NODE_FAILURE);
+
+    private static final Set<String> EPHEMERAL_TYPES = Set.of(GcpPlatformParameters.GcpDiskType.LOCAL_SSD.value());
+
+    private static final Set<String> AFFECTED_PROVIDERS =
+            Set.of(CloudPlatform.AZURE.name().toLowerCase(Locale.ROOT), CloudPlatform.GCP.name().toLowerCase(Locale.ROOT));
 
     @Inject
     private ResourceService resourceService;
@@ -108,10 +116,9 @@ public class FixAttachedVolumesPatchService extends ExistingStackPatchService {
     @Override
     public boolean isAffected(Stack stack) {
         boolean affected;
-        if (CloudPlatform.AZURE.name().equalsIgnoreCase(stack.cloudPlatform())) {
+        if (AFFECTED_PROVIDERS.contains(stack.cloudPlatform().toLowerCase(Locale.ROOT))) {
             setVolumeSetResourcesForStack(stack);
-            affected = stack.getResources().stream()
-                    .filter(resource -> resource.getResourceType() == ResourceType.AZURE_VOLUMESET)
+            affected = stack.getDiskResources().stream()
                     .map(resource -> resourceAttributeUtil.getTypedAttributes(resource, VolumeSetAttributes.class))
                     .flatMap(Optional::stream)
                     .flatMap(volumeSet -> volumeSet.getVolumes().stream())
@@ -156,7 +163,8 @@ public class FixAttachedVolumesPatchService extends ExistingStackPatchService {
             CloudConnectResources cloudConnectResources = cloudConnectorHelper.getCloudConnectorResources(stack);
             Map<String, String> fqdnByInstanceIdMap = allNodes.stream().collect(Collectors.toMap(Node::getInstanceId, Node::getHostname));
             Map<String, Map<String, String>> volumeDeviceMappingByInstance = cloudConnectResources.getCloudConnector().volumeConnector()
-                    .getVolumeDeviceMappingByInstance(cloudConnectResources.getAuthenticatedContext(), cloudConnectResources.getCloudStack());
+                    .getVolumeDeviceMappingByInstance(cloudConnectResources.getAuthenticatedContext(), cloudConnectResources.getCloudStack(),
+                            originalVolumeSetCloudResources);
             LOGGER.debug("VolumeId-device mapping by instanceid from provider: {}", volumeDeviceMappingByInstance);
             if (!volumeDeviceMappingByInstance.keySet().equals(fqdnByInstanceIdMap.keySet())) {
                 LOGGER.warn("Different instances from providers and from salt. Instances from provider: {}, and from salt: {}",
@@ -239,7 +247,7 @@ public class FixAttachedVolumesPatchService extends ExistingStackPatchService {
                 .map(String::trim)
                 .map(UUID_RESULT_REGEX_PATTERN::matcher)
                 .filter(Matcher::matches)
-                .collect(Collectors.toMap(matcher -> convertLunPath(matcher.group(1)), matcher -> matcher.group(2)));
+                .collect(Collectors.toMap(matcher -> convertPath(matcher.group(1)), matcher -> matcher.group(2)));
     }
 
     private CloudResource patchVolumeSetResource(CloudResource originalResource, Map<String, String> uuidByDeviceNameMap,
@@ -249,39 +257,24 @@ public class FixAttachedVolumesPatchService extends ExistingStackPatchService {
             LOGGER.debug("No volumes are attached on {} instance, no patch is needed on {} volumeset", originalResource.getName(), originalResource.getName());
             return originalResource;
         }
-        if (StringUtils.isBlank(originalVolumeSet.getFstab())) {
-            LOGGER.warn("There are attached volumes, but fstab parameter is empty in volumeset {}", originalVolumeSet);
-            throw new IllegalArgumentException(String.format("There are attached volumes, but fstab parameter is empty in %s resource",
+        boolean onlyEphemeralVolumes = originalVolumeSet.getVolumes().stream().allMatch(volume -> EPHEMERAL_TYPES.contains(volume.getType()));
+        if (!onlyEphemeralVolumes && StringUtils.isBlank(originalVolumeSet.getFstab())) {
+            LOGGER.warn("There are attached persistent volumes, but fstab parameter is empty in volumeset {}", originalVolumeSet);
+            throw new IllegalArgumentException(String.format("There are attached persistent volumes, but fstab parameter is empty in %s resource",
                     originalResource.getName()));
         }
-        Map<String, String> mountPathByUuidMap = createMountPathByUuidMap(originalVolumeSet.getFstab());
+        Map<String, String> mountPathByUuidMap = onlyEphemeralVolumes ? Map.of() : createMountPathByUuidMap(originalVolumeSet.getFstab());
         List<VolumeSetAttributes.Volume> patchedVolumes = new ArrayList<>();
         List<String> patchedUuids = new ArrayList<>();
         LOGGER.debug("Patching volumeset resource {}, uuidByDeviceNameMap: {}, deviceNameByVolumeIdMap: {}, mountPathByUuidMap: {}",
                 originalResource, uuidByDeviceNameMap, deviceNameByVolumeIdMap, mountPathByUuidMap);
         for (VolumeSetAttributes.Volume volume : originalVolumeSet.getVolumes()) {
-            String deviceName = deviceNameByVolumeIdMap.get(volume.getId());
-            if (StringUtils.isBlank(deviceName)) {
-                LOGGER.warn("No device name found for {} volumeid. deviceNameByVolumeIdMap: {}", volume.getId(), deviceNameByVolumeIdMap);
-                throw new NoSuchElementException("Missing device name for " + volume.getId() + " volume");
-            }
-            String uuid = uuidByDeviceNameMap.get(deviceName);
-            if (StringUtils.isBlank(uuid)) {
-                LOGGER.warn("No uuid found for {} device. uuidByDeviceNameMap: {}", deviceName, uuidByDeviceNameMap);
-                throw new NoSuchElementException("Missing uuid for " + deviceName + " device");
-            }
-            String mountPath = mountPathByUuidMap.get(uuid);
-            if (StringUtils.isBlank(mountPath)) {
-                LOGGER.warn("No mountPath found for {} uuid. mountPathByUuidMap: {}", deviceName, mountPathByUuidMap);
-                throw new NoSuchElementException("Missing mountPath for " + uuid + " uuid");
-            }
-            CloudVolumeUsageType usageType = VolumeUtils.DATABASE_VOLUME.equals(mountPath) ? CloudVolumeUsageType.DATABASE : CloudVolumeUsageType.GENERAL;
-            VolumeSetAttributes.Volume patchedVolume =
-                    new VolumeSetAttributes.Volume(volume.getId(), deviceName, volume.getSize(), volume.getType(), usageType);
-            patchedVolume.setCloudVolumeStatus(volume.getCloudVolumeStatus());
-            patchedVolumes.add(patchedVolume);
-            patchedUuids.add(uuid);
-            LOGGER.debug("Volume is patched:{}Original volume: {}{}Patched volume: {}", System.lineSeparator(), volume, System.lineSeparator(), patchedVolume);
+            Pair<VolumeSetAttributes.Volume, Optional<String>> patchedVolumeWithUuid =
+                    patchVolume(volume, uuidByDeviceNameMap, deviceNameByVolumeIdMap, mountPathByUuidMap);
+            patchedVolumes.add(patchedVolumeWithUuid.getKey());
+            patchedVolumeWithUuid.getValue().ifPresent(patchedUuids::add);
+            LOGGER.debug("Volume is patched:{}Original volume: {}{}Patched volume: {}", System.lineSeparator(), volume, System.lineSeparator(),
+                    patchedVolumeWithUuid.getKey());
         }
         VolumeSetAttributes patchedVolumeSet = new VolumeSetAttributes.Builder()
                 .withAvailabilityZone(originalVolumeSet.getAvailabilityZone())
@@ -317,7 +310,7 @@ public class FixAttachedVolumesPatchService extends ExistingStackPatchService {
         ResourceType diskResourceType = stack.getDiskResourceType();
         if (diskResourceType != null) {
             stack.setResources(new HashSet<>(resourceService.findAllByResourceStatusAndResourceTypeAndStackId(
-                    CommonStatus.CREATED, ResourceType.AZURE_VOLUMESET, stack.getId())));
+                    CommonStatus.CREATED, diskResourceType, stack.getId())));
         } else {
             stack.setResources(Set.of());
         }
@@ -336,7 +329,32 @@ public class FixAttachedVolumesPatchService extends ExistingStackPatchService {
                 }));
     }
 
-    private String convertLunPath(String lunPathFromSalt) {
-        return lunPathFromSalt.replaceFirst("scsi[1-9]", "scsi[1-9]");
+    private Pair<VolumeSetAttributes.Volume, Optional<String>> patchVolume(VolumeSetAttributes.Volume volume, Map<String, String> uuidByDeviceNameMap,
+            Map<String, String> deviceNameByVolumeIdMap, Map<String, String> mountPathByUuidMap) {
+        boolean ephemeralVolume = EPHEMERAL_TYPES.contains(volume.getType());
+        String deviceName = deviceNameByVolumeIdMap.get(volume.getId());
+        if (StringUtils.isBlank(deviceName)) {
+            LOGGER.warn("No device name found for {} volumeid. deviceNameByVolumeIdMap: {}", volume.getId(), deviceNameByVolumeIdMap);
+            throw new NoSuchElementException("Missing device name for " + volume.getId() + " volume");
+        }
+        String uuid = uuidByDeviceNameMap.get(deviceName);
+        if (StringUtils.isBlank(uuid)) {
+            LOGGER.warn("No uuid found for {} device. uuidByDeviceNameMap: {}", deviceName, uuidByDeviceNameMap);
+            throw new NoSuchElementException("Missing uuid for " + deviceName + " device");
+        }
+        String mountPath = mountPathByUuidMap.get(uuid);
+        if (!ephemeralVolume && StringUtils.isBlank(mountPath)) {
+            LOGGER.warn("No mountPath found for {} uuid. mountPathByUuidMap: {}", deviceName, mountPathByUuidMap);
+            throw new NoSuchElementException("Missing mountPath for " + uuid + " uuid");
+        }
+        CloudVolumeUsageType usageType = VolumeUtils.DATABASE_VOLUME.equals(mountPath) ? CloudVolumeUsageType.DATABASE : CloudVolumeUsageType.GENERAL;
+        VolumeSetAttributes.Volume patchedVolume =
+                new VolumeSetAttributes.Volume(volume.getId(), deviceName, volume.getSize(), volume.getType(), usageType);
+        patchedVolume.setCloudVolumeStatus(volume.getCloudVolumeStatus());
+        return Pair.of(patchedVolume, ephemeralVolume ? Optional.empty() : Optional.of(uuid));
+    }
+
+    private String convertPath(String pathFromSalt) {
+        return pathFromSalt.replaceFirst("scsi[1-9]", "scsi[1-9]");
     }
 }

@@ -78,6 +78,9 @@ public class GcpConnector implements CloudConnector {
     @Inject
     private GcpScriptResources gcpScriptResources;
 
+    @Inject
+    private GcpResourceVolumeConnector gcpResourceVolumeConnector;
+
     @Override
     public Authenticator authentication() {
         return authenticator;
@@ -158,7 +161,7 @@ public class GcpConnector implements CloudConnector {
 
     @Override
     public ResourceVolumeConnector volumeConnector() {
-        throw new UnsupportedOperationException("This connector is not implemented for GCP!");
+        return gcpResourceVolumeConnector;
     }
 
     @Override

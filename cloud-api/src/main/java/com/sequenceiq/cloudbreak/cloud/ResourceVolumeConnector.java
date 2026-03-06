@@ -100,7 +100,8 @@ public interface ResourceVolumeConnector {
         throw new UnsupportedOperationException("Interface not implemented.");
     }
 
-    default Map<String, Map<String, String>> getVolumeDeviceMappingByInstance(AuthenticatedContext authenticatedContext, CloudStack cloudStack) {
+    default Map<String, Map<String, String>> getVolumeDeviceMappingByInstance(AuthenticatedContext authenticatedContext, CloudStack cloudStack,
+            List<CloudResource> cloudResources) {
         throw new UnsupportedOperationException("Interface not implemented.");
     }
 }

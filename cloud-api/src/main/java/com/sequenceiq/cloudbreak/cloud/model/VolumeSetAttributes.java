@@ -282,7 +282,8 @@ public class VolumeSetAttributes {
         }
 
         public VolumeSetAttributes build() {
-            return new VolumeSetAttributes(availabilityZone, deleteOnTermination, fstab, uuids, volumes, volumeSize, volumeType, discoveryFQDN);
+            return new VolumeSetAttributes(availabilityZone, deleteOnTermination, fstab, uuids, volumes == null ? List.of() : volumes,
+                    volumeSize, volumeType, discoveryFQDN);
         }
     }
 }

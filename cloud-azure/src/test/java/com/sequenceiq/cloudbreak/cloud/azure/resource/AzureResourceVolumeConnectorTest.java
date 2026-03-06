@@ -403,7 +403,7 @@ class AzureResourceVolumeConnectorTest {
         when(azureVirtualMachineService.getVirtualMachinesByName(azureClient, RESOURCE_GROUP_NAME, List.of("instance1", "instance2")))
                 .thenReturn(Map.of("instance1", vm1, "instance2", vm2));
 
-        Map<String, Map<String, String>> result = underTest.getVolumeDeviceMappingByInstance(authenticatedContext, cloudStack);
+        Map<String, Map<String, String>> result = underTest.getVolumeDeviceMappingByInstance(authenticatedContext, cloudStack, List.of());
 
         assertEquals(Map.of("i1v0", "/dev/disk/azure/scsi[1-9]/lun0"), result.get("instance1"));
         assertEquals(Map.of("i2v0", "/dev/disk/azure/scsi[1-9]/lun0", "i2v1", "/dev/disk/azure/scsi[1-9]/lun1", "i2v2", "/dev/disk/azure/scsi[1-9]/lun2"),

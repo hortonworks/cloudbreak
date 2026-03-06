@@ -223,7 +223,9 @@ public class AzureResourceVolumeConnector implements ResourceVolumeConnector {
         return vms.values().stream().collect(Collectors.toMap(VirtualMachine::name, vm -> vm.dataDisks().size()));
     }
 
-    public Map<String, Map<String, String>> getVolumeDeviceMappingByInstance(AuthenticatedContext authenticatedContext, CloudStack cloudStack) {
+    @Override
+    public Map<String, Map<String, String>> getVolumeDeviceMappingByInstance(AuthenticatedContext authenticatedContext, CloudStack cloudStack,
+            List<CloudResource> cloudResources) {
         AzureClient client = authenticatedContext.getParameter(AzureClient.class);
         String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(authenticatedContext.getCloudContext(), cloudStack);
         List<String> instanceIds = cloudStack.getGroups().stream()

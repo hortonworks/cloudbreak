@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.stackpatch;
 
+import static com.sequenceiq.cloudbreak.cloud.gcp.GcpPlatformParameters.GcpDiskType.LOCAL_SSD;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -23,6 +24,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -113,9 +115,9 @@ class FixAttachedVolumesPatchServiceTest {
     private FixAttachedVolumesPatchService underTest;
 
     @Test
-    void testIsAffectedWhenNoAzure() {
+    void testIsAffectedWhenNotAffectedProvider() {
         Stack stack = new Stack();
-        stack.setCloudPlatform(CloudPlatform.GCP.name());
+        stack.setCloudPlatform(CloudPlatform.AWS.name());
 
         boolean affected = underTest.isAffected(stack);
 
@@ -143,7 +145,7 @@ class FixAttachedVolumesPatchServiceTest {
         stack.setCloudPlatform(CloudPlatform.AZURE.name());
         VolumeSetAttributes volumeSetAttributes = createVolumeSetAttributes(null,
                 List.of(new VolumeSetAttributes.Volume("id", "/dev/disk/azure/scsi1/lun1", 10, "type", CloudVolumeUsageType.GENERAL)));
-        Resource volumeSetResource = createVolumeSetResource("instance1", volumeSetAttributes).getKey();
+        Resource volumeSetResource = createAzureVolumeSetResource("instance1", volumeSetAttributes).getKey();
         when(resourceService.findAllByResourceStatusAndResourceTypeAndStackId(any(), any(), any())).thenReturn(List.of(volumeSetResource));
         when(resourceAttributeUtil.getTypedAttributes(volumeSetResource, VolumeSetAttributes.class)).thenReturn(Optional.of(volumeSetAttributes));
 
@@ -160,7 +162,7 @@ class FixAttachedVolumesPatchServiceTest {
         stack.setCloudPlatform(CloudPlatform.AZURE.name());
         VolumeSetAttributes volumeSetAttributes =
                 createVolumeSetAttributes(null, List.of(new VolumeSetAttributes.Volume("id", "/dev/sdc", 10, "type", CloudVolumeUsageType.GENERAL)));
-        Resource volumeSetResource = createVolumeSetResource("instance1", volumeSetAttributes).getKey();
+        Resource volumeSetResource = createAzureVolumeSetResource("instance1", volumeSetAttributes).getKey();
         when(resourceService.findAllByResourceStatusAndResourceTypeAndStackId(any(), any(), any())).thenReturn(List.of(volumeSetResource));
         when(resourceAttributeUtil.getTypedAttributes(volumeSetResource, VolumeSetAttributes.class)).thenReturn(Optional.of(volumeSetAttributes));
 
@@ -193,7 +195,7 @@ class FixAttachedVolumesPatchServiceTest {
         stack.setCloudPlatform(CloudPlatform.AZURE.name());
         VolumeSetAttributes volumeSetAttributes =
                 createVolumeSetAttributes("", List.of(new VolumeSetAttributes.Volume("id", "/dev/sdc", 10, "type", CloudVolumeUsageType.GENERAL)));
-        Pair<Resource, CloudResource> volumeSetResource = createVolumeSetResource("instance1", volumeSetAttributes);
+        Pair<Resource, CloudResource> volumeSetResource = createAzureVolumeSetResource("instance1", volumeSetAttributes);
         stack.setResources(Set.of(volumeSetResource.getKey()));
         when(resourceConverter.convert(volumeSetResource.getKey())).thenReturn(volumeSetResource.getValue());
         GatewayConfig primaryGatewayConfig = GatewayConfig.builder().build();
@@ -215,8 +217,9 @@ class FixAttachedVolumesPatchServiceTest {
     @Test
     void testDoApplyMissingInstanceFromVolumeDeviceMapping() throws Exception {
         TestParameters parameters = setupDefaultsForFailures("fstab");
-        when(volumeConnector.getVolumeDeviceMappingByInstance(parameters.cloudConnectResources.getAuthenticatedContext(),
-                parameters.cloudConnectResources.getCloudStack())).thenReturn(Map.of("instance2", Map.of()));
+        when(volumeConnector.getVolumeDeviceMappingByInstance(eq(parameters.cloudConnectResources.getAuthenticatedContext()),
+                eq(parameters.cloudConnectResources.getCloudStack()), anyList()))
+                .thenReturn(Map.of("instance2", Map.of()));
 
         boolean patchApplied = underTest.doApply(parameters.stack);
 
@@ -228,8 +231,9 @@ class FixAttachedVolumesPatchServiceTest {
     @Test
     void testDoApplyMissingNodesFromSaltResponse() throws Exception {
         TestParameters parameters = setupDefaultsForFailures("fstab");
-        when(volumeConnector.getVolumeDeviceMappingByInstance(parameters.cloudConnectResources.getAuthenticatedContext(),
-                parameters.cloudConnectResources.getCloudStack())).thenReturn(Map.of("instance1", Map.of(), "instance2", Map.of(), "instance3", Map.of()));
+        when(volumeConnector.getVolumeDeviceMappingByInstance(eq(parameters.cloudConnectResources.getAuthenticatedContext()),
+                eq(parameters.cloudConnectResources.getCloudStack()), anyList()))
+                .thenReturn(Map.of("instance1", Map.of(), "instance2", Map.of(), "instance3", Map.of()));
         OrchestratorStateParams orchestratorStateParams = new OrchestratorStateParams();
         when(saltStateParamsService.createStateParams(parameters.stack, "disks/patch/get-uuids", 3, 3, parameters.primaryGatewayConfig, parameters.nodes))
                 .thenReturn(orchestratorStateParams);
@@ -245,8 +249,9 @@ class FixAttachedVolumesPatchServiceTest {
     @Test
     void testDoApplyValidSaltResponseMissingVolumeIdDeviceNameMapping() throws Exception {
         TestParameters parameters = setupDefaultsForFailures("fstab");
-        when(volumeConnector.getVolumeDeviceMappingByInstance(parameters.cloudConnectResources.getAuthenticatedContext(),
-                parameters.cloudConnectResources.getCloudStack())).thenReturn(Map.of("instance1", Map.of(), "instance2", Map.of(), "instance3", Map.of()));
+        when(volumeConnector.getVolumeDeviceMappingByInstance(eq(parameters.cloudConnectResources.getAuthenticatedContext()),
+                eq(parameters.cloudConnectResources.getCloudStack()), anyList()))
+                .thenReturn(Map.of("instance1", Map.of(), "instance2", Map.of(), "instance3", Map.of()));
         OrchestratorStateParams orchestratorStateParams = new OrchestratorStateParams();
         when(saltStateParamsService.createStateParams(parameters.stack, "disks/patch/get-uuids", 3, 3, parameters.primaryGatewayConfig, parameters.nodes))
                 .thenReturn(orchestratorStateParams);
@@ -262,8 +267,8 @@ class FixAttachedVolumesPatchServiceTest {
     @Test
     void testDoApplyValidSaltResponseMissingMountLineInFstab() throws Exception {
         TestParameters parameters = setupDefaultsForFailures("fstab");
-        when(volumeConnector.getVolumeDeviceMappingByInstance(parameters.cloudConnectResources.getAuthenticatedContext(),
-                parameters.cloudConnectResources.getCloudStack())).thenReturn(Map.of("instance1",
+        when(volumeConnector.getVolumeDeviceMappingByInstance(eq(parameters.cloudConnectResources.getAuthenticatedContext()),
+                eq(parameters.cloudConnectResources.getCloudStack()), anyList())).thenReturn(Map.of("instance1",
                 Map.of("id", "lun1"), "instance2", Map.of(), "instance3", Map.of()));
         OrchestratorStateParams orchestratorStateParams = new OrchestratorStateParams();
         when(saltStateParamsService.createStateParams(parameters.stack, "disks/patch/get-uuids", 3, 3, parameters.primaryGatewayConfig, parameters.nodes))
@@ -280,8 +285,9 @@ class FixAttachedVolumesPatchServiceTest {
     @Test
     void testDoApplyDuplicatesInFstabOnDifferentPathes() throws Exception {
         TestParameters parameters = setupDefaultsForFailures(createFstab("fstab-duplicate-uuids-different-path.txt"));
-        when(volumeConnector.getVolumeDeviceMappingByInstance(parameters.cloudConnectResources.getAuthenticatedContext(),
-                parameters.cloudConnectResources.getCloudStack())).thenReturn(Map.of("instance1", Map.of(), "instance2", Map.of(), "instance3", Map.of()));
+        when(volumeConnector.getVolumeDeviceMappingByInstance(eq(parameters.cloudConnectResources.getAuthenticatedContext()),
+                eq(parameters.cloudConnectResources.getCloudStack()), anyList()))
+                .thenReturn(Map.of("instance1", Map.of(), "instance2", Map.of(), "instance3", Map.of()));
         OrchestratorStateParams orchestratorStateParams = new OrchestratorStateParams();
         when(saltStateParamsService.createStateParams(parameters.stack, "disks/patch/get-uuids", 3, 3, parameters.primaryGatewayConfig, parameters.nodes))
                 .thenReturn(orchestratorStateParams);
@@ -296,9 +302,9 @@ class FixAttachedVolumesPatchServiceTest {
 
     @Test
     void testSuccessfulDoApply() throws Exception {
-        TestParameters parameters = setupDefaults(createDiskResources());
-        when(volumeConnector.getVolumeDeviceMappingByInstance(parameters.cloudConnectResources.getAuthenticatedContext(),
-                parameters.cloudConnectResources.getCloudStack())).thenReturn(
+        TestParameters parameters = setupDefaults(createDiskResources(), CloudPlatform.AZURE, CloudConstants.AZURE);
+        when(volumeConnector.getVolumeDeviceMappingByInstance(eq(parameters.cloudConnectResources.getAuthenticatedContext()),
+                eq(parameters.cloudConnectResources.getCloudStack()), anyList())).thenReturn(
                 Map.ofEntries(Map.entry("instance1",
                                 Map.ofEntries(Map.entry("i1v1", "lun1"), Map.entry("i1v2", "lun2"), Map.entry("i1v3", "lun3"))),
                         Map.entry("instance2",
@@ -330,7 +336,7 @@ class FixAttachedVolumesPatchServiceTest {
             VolumeSetAttributes.Volume volume = vsa2.getVolumes().get(i);
             assertEquals(volume.getId(), "i2v" + (i + 1));
             assertEquals(volume.getDevice(), "lun" + (i + 1));
-            assertEquals(i == 3 ? CloudVolumeUsageType.DATABASE : CloudVolumeUsageType.GENERAL,  volume.getCloudVolumeUsageType());
+            assertEquals(i == 3 ? CloudVolumeUsageType.DATABASE : CloudVolumeUsageType.GENERAL, volume.getCloudVolumeUsageType());
         }
         assertEquals("uuid1 uuid2 uuid3 uuid4", vsa2.getUuids());
         CloudResource instance3Resource = patchedResources.stream().filter(res -> res.getInstanceId().equals("instance3")).findFirst().get();
@@ -343,10 +349,58 @@ class FixAttachedVolumesPatchServiceTest {
     }
 
     @Test
+    void testSuccessfulDoApplyGcp() throws Exception {
+        TestParameters parameters = setupDefaults(createDiskResourcesForGcp(), CloudPlatform.GCP, CloudConstants.GCP);
+        when(volumeConnector.getVolumeDeviceMappingByInstance(eq(parameters.cloudConnectResources.getAuthenticatedContext()),
+                eq(parameters.cloudConnectResources.getCloudStack()), anyList())).thenReturn(
+                Map.ofEntries(Map.entry("instance1",
+                                Map.ofEntries(Map.entry("i1v1", "disk1"), Map.entry("i1v2", "disk2"), Map.entry("i1v3", "disk3"))),
+                        Map.entry("instance2",
+                                Map.ofEntries(Map.entry("i2v1", "disk1"), Map.entry("i2v2", "disk2"), Map.entry("i2v3", "disk3"), Map.entry("i2v4", "disk4"))),
+                        Map.entry("instance3", Map.of())));
+        OrchestratorStateParams orchestratorStateParams = new OrchestratorStateParams();
+        when(saltStateParamsService.createStateParams(parameters.stack, "disks/patch/get-uuids", 3, 3, parameters.primaryGatewayConfig, parameters.nodes))
+                .thenReturn(orchestratorStateParams);
+        when(saltOrchestrator.applyOrchestratorState(orchestratorStateParams)).thenReturn(createSaltResponse("valid-saltresponse-gcp.json"));
+
+        boolean accepted = underTest.doApply(parameters.stack);
+
+        assertTrue(accepted);
+        ArgumentCaptor<List<CloudResource>> cloudResourceArgumentCaptor = ArgumentCaptor.forClass(List.class);
+        verify(resourceNotifier).notifyUpdates(cloudResourceArgumentCaptor.capture(), eq(parameters.cloudConnectResources.getCloudContext()));
+        // Checking the patched resources
+        List<CloudResource> patchedResources = cloudResourceArgumentCaptor.getValue();
+        CloudResource instance1Resource = patchedResources.stream().filter(res -> res.getInstanceId().equals("instance1")).findFirst().get();
+        VolumeSetAttributes vsa1 = instance1Resource.getTypedAttributes(VolumeSetAttributes.class, () -> new VolumeSetAttributes.Builder().build());
+        for (int i = 0; i < vsa1.getVolumes().size(); i++) {
+            VolumeSetAttributes.Volume volume = vsa1.getVolumes().get(i);
+            assertEquals(volume.getId(), "i1v" + (i + 1));
+            assertEquals(volume.getDevice(), "disk" + (i + 1));
+        }
+        assertTrue(StringUtils.isEmpty(vsa1.getUuids()));
+        CloudResource instance2Resource = patchedResources.stream().filter(res -> res.getInstanceId().equals("instance2")).findFirst().get();
+        VolumeSetAttributes vsa2 = instance2Resource.getTypedAttributes(VolumeSetAttributes.class, () -> new VolumeSetAttributes.Builder().build());
+        for (int i = 0; i < vsa2.getVolumes().size(); i++) {
+            VolumeSetAttributes.Volume volume = vsa2.getVolumes().get(i);
+            assertEquals(volume.getId(), "i2v" + (i + 1));
+            assertEquals(volume.getDevice(), "disk" + (i + 1));
+            assertEquals(i == 3 ? CloudVolumeUsageType.DATABASE : CloudVolumeUsageType.GENERAL, volume.getCloudVolumeUsageType());
+        }
+        assertEquals("uuid1 uuid2 uuid3", vsa2.getUuids());
+        CloudResource instance3Resource = patchedResources.stream().filter(res -> res.getInstanceId().equals("instance3")).findFirst().get();
+        VolumeSetAttributes vsa3 = instance3Resource.getTypedAttributes(VolumeSetAttributes.class, () -> new VolumeSetAttributes.Builder().build());
+        assertTrue(vsa3.getVolumes().isEmpty());
+        assertNull(vsa3.getUuids());
+
+        verify(saltOrchestrator).updateMountDiskPillar(eq(parameters.stack()), eq(parameters.gatewayConfigs), eq(parameters.nodes),
+                any(), eq(CloudConstants.GCP), eq(false));
+    }
+
+    @Test
     void testDoApplyWhenUpdateMountPillarThrowsException() throws Exception {
-        TestParameters parameters = setupDefaults(createDiskResources());
-        when(volumeConnector.getVolumeDeviceMappingByInstance(parameters.cloudConnectResources.getAuthenticatedContext(),
-                parameters.cloudConnectResources.getCloudStack())).thenReturn(
+        TestParameters parameters = setupDefaults(createDiskResources(), CloudPlatform.AZURE, CloudConstants.AZURE);
+        when(volumeConnector.getVolumeDeviceMappingByInstance(eq(parameters.cloudConnectResources.getAuthenticatedContext()),
+                eq(parameters.cloudConnectResources.getCloudStack()), anyList())).thenReturn(
                 Map.ofEntries(Map.entry("instance1",
                                 Map.ofEntries(Map.entry("i1v1", "lun1"), Map.entry("i1v2", "lun2"), Map.entry("i1v3", "lun3"))),
                         Map.entry("instance2",
@@ -372,11 +426,11 @@ class FixAttachedVolumesPatchServiceTest {
     private TestParameters setupDefaultsForFailures(String fstab) {
         VolumeSetAttributes volumeSetAttributes =
                 createVolumeSetAttributes(fstab, List.of(new VolumeSetAttributes.Volume("id", "/dev/sdc", 10, "type", CloudVolumeUsageType.GENERAL)));
-        Pair<Resource, CloudResource> volumeSetResource = createVolumeSetResource("instance1", volumeSetAttributes);
-        return setupDefaults(Map.of(volumeSetResource.getKey(), volumeSetResource.getValue()));
+        Pair<Resource, CloudResource> volumeSetResource = createAzureVolumeSetResource("instance1", volumeSetAttributes);
+        return setupDefaults(Map.of(volumeSetResource.getKey(), volumeSetResource.getValue()), CloudPlatform.AZURE, CloudConstants.AZURE);
     }
 
-    private TestParameters setupDefaults(Map<Resource, CloudResource> diskResources) {
+    private TestParameters setupDefaults(Map<Resource, CloudResource> diskResources, CloudPlatform platform, String variant) {
         Stack stack = new Stack();
         stack.setId(1L);
         Cluster cluster = new Cluster();
@@ -385,8 +439,8 @@ class FixAttachedVolumesPatchServiceTest {
         StackStatus stackStatus = new StackStatus();
         stackStatus.setStatus(Status.AVAILABLE);
         stack.setStackStatus(stackStatus);
-        stack.setPlatformVariant(CloudConstants.AZURE);
-        stack.setCloudPlatform(CloudPlatform.AZURE.name());
+        stack.setPlatformVariant(variant);
+        stack.setCloudPlatform(platform.name());
         stack.setResources(diskResources.keySet());
         GatewayConfig primaryGatewayConfig = GatewayConfig.builder().build();
         List<GatewayConfig> gatewayConfigs = List.of(primaryGatewayConfig);
@@ -415,17 +469,40 @@ class FixAttachedVolumesPatchServiceTest {
         VolumeSetAttributes.Volume i1v1 = new VolumeSetAttributes.Volume("i1v1", "/dev/sdc", 10, "HDD", CloudVolumeUsageType.GENERAL);
         VolumeSetAttributes.Volume i1v2 = new VolumeSetAttributes.Volume("i1v2", "/dev/sdd", 10, "HDD", CloudVolumeUsageType.GENERAL);
         VolumeSetAttributes.Volume i1v3 = new VolumeSetAttributes.Volume("i1v3", "/dev/sde", 10, "HDD", CloudVolumeUsageType.GENERAL);
-        Pair<Resource, CloudResource> volumeSetResource1 = createVolumeSetResource("instance1",
+        Pair<Resource, CloudResource> volumeSetResource1 = createAzureVolumeSetResource("instance1",
                 createVolumeSetAttributes(createFstab("valid-fstab-instance1.txt"), List.of(i1v1, i1v2, i1v3)));
 
         VolumeSetAttributes.Volume i2v1 = new VolumeSetAttributes.Volume("i2v1", "/dev/sdc", 10, "HDD", CloudVolumeUsageType.GENERAL);
         VolumeSetAttributes.Volume i2v2 = new VolumeSetAttributes.Volume("i2v2", "/dev/sdd", 10, "HDD", CloudVolumeUsageType.GENERAL);
         VolumeSetAttributes.Volume i2v3 = new VolumeSetAttributes.Volume("i2v3", "/dev/sde", 10, "HDD", CloudVolumeUsageType.DATABASE);
         VolumeSetAttributes.Volume i2v4 = new VolumeSetAttributes.Volume("i2v4", "/dev/sdf", 10, "HDD", CloudVolumeUsageType.GENERAL);
-        Pair<Resource, CloudResource> volumeSetResource2 = createVolumeSetResource("instance2",
+        Pair<Resource, CloudResource> volumeSetResource2 = createAzureVolumeSetResource("instance2",
                 createVolumeSetAttributes(createFstab("valid-fstab-instance2.txt"), List.of(i2v1, i2v2, i2v3, i2v4)));
 
-        Pair<Resource, CloudResource> volumeSetResource3 = createVolumeSetResource("instance3", createVolumeSetAttributes("", List.of()));
+        Pair<Resource, CloudResource> volumeSetResource3 = createAzureVolumeSetResource("instance3", createVolumeSetAttributes("", List.of()));
+
+        resourceMap.put(volumeSetResource1.getKey(), volumeSetResource1.getValue());
+        resourceMap.put(volumeSetResource2.getKey(), volumeSetResource2.getValue());
+        resourceMap.put(volumeSetResource3.getKey(), volumeSetResource3.getValue());
+        return resourceMap;
+    }
+
+    private Map<Resource, CloudResource> createDiskResourcesForGcp() throws Exception {
+        Map<Resource, CloudResource> resourceMap = new HashMap<>();
+        VolumeSetAttributes.Volume i1v1 = new VolumeSetAttributes.Volume("i1v1", "/dev/sdc", 10, LOCAL_SSD.value(), CloudVolumeUsageType.GENERAL);
+        VolumeSetAttributes.Volume i1v2 = new VolumeSetAttributes.Volume("i1v2", "/dev/sdd", 10, LOCAL_SSD.value(), CloudVolumeUsageType.GENERAL);
+        VolumeSetAttributes.Volume i1v3 = new VolumeSetAttributes.Volume("i1v3", "/dev/sde", 10, LOCAL_SSD.value(), CloudVolumeUsageType.GENERAL);
+        Pair<Resource, CloudResource> volumeSetResource1 = createGcpVolumeSetResource("instance1",
+                createVolumeSetAttributes(null, List.of(i1v1, i1v2, i1v3)));
+
+        VolumeSetAttributes.Volume i2v1 = new VolumeSetAttributes.Volume("i2v1", "/dev/sdc", 10, "HDD", CloudVolumeUsageType.GENERAL);
+        VolumeSetAttributes.Volume i2v2 = new VolumeSetAttributes.Volume("i2v2", "/dev/sdd", 10, "HDD", CloudVolumeUsageType.GENERAL);
+        VolumeSetAttributes.Volume i2v3 = new VolumeSetAttributes.Volume("i2v3", "/dev/sde", 10, "HDD", CloudVolumeUsageType.DATABASE);
+        VolumeSetAttributes.Volume i2v4 = new VolumeSetAttributes.Volume("i2v4", "/dev/sdf", 10, LOCAL_SSD.value(), CloudVolumeUsageType.GENERAL);
+        Pair<Resource, CloudResource> volumeSetResource2 = createGcpVolumeSetResource("instance2",
+                createVolumeSetAttributes(createFstab("valid-fstab-instance2.txt"), List.of(i2v1, i2v2, i2v3, i2v4)));
+
+        Pair<Resource, CloudResource> volumeSetResource3 = createGcpVolumeSetResource("instance3", createVolumeSetAttributes("", List.of()));
 
         resourceMap.put(volumeSetResource1.getKey(), volumeSetResource1.getValue());
         resourceMap.put(volumeSetResource2.getKey(), volumeSetResource2.getValue());
@@ -446,16 +523,24 @@ class FixAttachedVolumesPatchServiceTest {
         return new Node("", "", instanceId, "", fqdn, "");
     }
 
-    private Pair<Resource, CloudResource> createVolumeSetResource(String instanceId, VolumeSetAttributes volumeSetAttributes) {
+    private Pair<Resource, CloudResource> createAzureVolumeSetResource(String instanceId, VolumeSetAttributes volumeSetAttributes) {
+        return createVolumeSetResource(instanceId, volumeSetAttributes, ResourceType.AZURE_VOLUMESET);
+    }
+
+    private Pair<Resource, CloudResource> createGcpVolumeSetResource(String instanceId, VolumeSetAttributes volumeSetAttributes) {
+        return createVolumeSetResource(instanceId, volumeSetAttributes, ResourceType.GCP_ATTACHED_DISKSET);
+    }
+
+    private Pair<Resource, CloudResource> createVolumeSetResource(String instanceId, VolumeSetAttributes volumeSetAttributes, ResourceType resourceType) {
         Resource resource = new Resource();
         resource.setId(1L);
         resource.setInstanceId(instanceId);
         resource.setAttributes(new Json(volumeSetAttributes));
-        resource.setResourceType(ResourceType.AZURE_VOLUMESET);
+        resource.setResourceType(resourceType);
 
         CloudResource cloudResource = CloudResource.builder()
                 .withInstanceId(instanceId)
-                .withType(ResourceType.AZURE_VOLUMESET)
+                .withType(resourceType)
                 .withStatus(CommonStatus.CREATED)
                 .withName("name")
                 .withParameters(new HashMap<>())
