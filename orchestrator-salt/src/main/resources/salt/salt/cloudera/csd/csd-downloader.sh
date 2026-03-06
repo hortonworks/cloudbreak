@@ -26,14 +26,15 @@ CREDENTIAL="{{ salt['pillar.get']('cloudera-manager:paywall_username') }}:{{ sal
 echo "$(date '+%d/%m/%Y %H:%M:%S') - Paywall credential found " |& tee -a /var/log/csd_downloader.log
 {%- endif %}
 
-rm -rf /opt/cloudera/csd
 mkdir -p /opt/cloudera/csd
 cd /opt/cloudera/csd
+declare -a desiredFiles=()
 
 for url in ${csdUrls[@]}
 do
   fileName=$(basename $url)
   echo "$(date '+%d/%m/%Y %H:%M:%S') - Trying to download CSD file name ($fileName) from URL: ($url) " |& tee -a /var/log/csd_downloader.log
+  desiredFiles+=("$fileName")
   if test -f $fileName
   then
     echo "$(date '+%d/%m/%Y %H:%M:%S') - ($fileName) already exists " |& tee -a /var/log/csd_downloader.log
@@ -49,6 +50,21 @@ do
     curl -L -O -R --fail "${PROXY_ARGS[@]}" "${PROXY_AUTH_ARGS[@]}" $AUTH_FLAG $url |& tee -a /var/log/csd_downloader.log
   fi
 done
+
+declare -A desiredMap
+for f in "${desiredFiles[@]}"; do
+  desiredMap["$f"]=1
+done
+
+for file in *; do
+  [[ -f "$file" ]] || continue
+
+  if [[ -z "${desiredMap[$file]}" ]]; then
+    echo "$(date '+%d/%m/%Y %H:%M:%S') - Removing obsolete CSD: $file" |& tee -a /var/log/csd_downloader.log
+    rm -f "$file"
+  fi
+done
+
 {% else %}
 echo "$(date '+%d/%m/%Y %H:%M:%S') - No CSDs to download. " |& tee -a /var/log/csd_downloader.log
 
