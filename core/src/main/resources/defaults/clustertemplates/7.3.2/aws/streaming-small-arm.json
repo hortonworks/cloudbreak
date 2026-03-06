@@ -3,7 +3,7 @@
   "description": "",
   "type": "STREAMING",
   "cloudPlatform": "AWS",
-  "featureState": "RELEASED",
+  "featureState": "INTERNAL",
   "distroXTemplate": {
     "cluster": {
       "blueprintName": "7.3.2 - Streams Messaging Light Duty: Apache Kafka, Schema Registry, Streams Messaging Manager, Streams Replication Manager, Cruise Control"
