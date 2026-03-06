@@ -67,6 +67,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @RetryAndMetrics
 @Path("/v4/databaseservers")
 @Produces(MediaType.APPLICATION_JSON)
+@Consumes(MediaType.APPLICATION_JSON)
 @Tag(name = "database servers")
 @SecurityScheme(type = SecuritySchemeType.APIKEY, name = RedbeamsApi.CRN_HEADER_API_KEY, in = SecuritySchemeIn.HEADER, paramName = "x-cdp-actor-crn")
 public interface DatabaseServerV4Endpoint {
@@ -130,7 +131,6 @@ public interface DatabaseServerV4Endpoint {
 
     @POST
     @Path("managed")
-    @Consumes(MediaType.APPLICATION_JSON)
     @Operation(summary = DatabaseServerOpDescription.CREATE, description = DatabaseServerNotes.CREATE,
             operationId = "createDatabaseServer",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
@@ -140,7 +140,6 @@ public interface DatabaseServerV4Endpoint {
 
     @POST
     @Path("updateclustercrn")
-    @Consumes(MediaType.APPLICATION_JSON)
     @Operation(summary = DatabaseServerOpDescription.UPDATE_CLUSTER_CRN,  description = DatabaseServerNotes.UPDATE_CLUSTER_CRN,
             operationId = "updateClusterCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
@@ -149,7 +148,6 @@ public interface DatabaseServerV4Endpoint {
 
     @POST
     @Path("internal/managed")
-    @Consumes(MediaType.APPLICATION_JSON)
     @Operation(summary = DatabaseServerOpDescription.CREATE_INTERNAL, description = DatabaseServerNotes.CREATE,
             operationId = "createDatabaseServerInternal",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
@@ -160,7 +158,6 @@ public interface DatabaseServerV4Endpoint {
 
     @POST
     @Path("internal/managed/nonunique")
-    @Consumes(MediaType.APPLICATION_JSON)
     @Operation(summary = DatabaseServerOpDescription.CREATE_INTERNAL_NON_UNIQUE, description = DatabaseServerNotes.CREATE,
             operationId = "createNonUniqueDatabaseServerInternal",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
@@ -181,7 +178,6 @@ public interface DatabaseServerV4Endpoint {
 
     @POST
     @Path("register")
-    @Consumes(MediaType.APPLICATION_JSON)
     @Operation(summary = DatabaseServerOpDescription.REGISTER, description = DatabaseServerNotes.REGISTER,
             operationId = "registerDatabaseServer",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
@@ -214,7 +210,6 @@ public interface DatabaseServerV4Endpoint {
 
     @DELETE
     @Path("")
-    @Consumes(MediaType.APPLICATION_JSON)
     @Operation(summary = DatabaseServerOpDescription.DELETE_MULTIPLE_BY_CRN, description = DatabaseServerNotes.DELETE_MULTIPLE_BY_CRN,
             operationId = "deleteMultipleDatabaseServersByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
@@ -225,7 +220,6 @@ public interface DatabaseServerV4Endpoint {
 
     @POST
     @Path("test")
-    @Consumes(MediaType.APPLICATION_JSON)
     @Operation(summary = DatabaseServerOpDescription.TEST_CONNECTION, description = DatabaseServerNotes.TEST_CONNECTION,
             operationId = "testDatabaseServerConnection",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
@@ -235,7 +229,6 @@ public interface DatabaseServerV4Endpoint {
 
     @POST
     @Path("createDatabase")
-    @Consumes(MediaType.APPLICATION_JSON)
     @Operation(summary = DatabaseServerOpDescription.CREATE_DATABASE, description = DatabaseServerNotes.CREATE_DATABASE,
             operationId = "createDatabaseOnServer",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
@@ -255,8 +248,6 @@ public interface DatabaseServerV4Endpoint {
 
     @PUT
     @Path("internal/crn/{crn}/migrate_database_to_ssl")
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = DatabaseServerOpDescription.MIGRATE_DATABASE_TO_SSL, description = DatabaseServerNotes.MIGRATE_DATABASE_TO_SSL,
             operationId = "migrateDatabaseToSslByCrnInternal",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
@@ -316,7 +307,6 @@ public interface DatabaseServerV4Endpoint {
 
     @PUT
     @Path("{crn}/upgrade")
-    @Consumes(MediaType.APPLICATION_JSON)
     @Operation(summary = DatabaseServerOpDescription.UPGRADE, description = DatabaseServerNotes.UPGRADE,
             operationId = "upgradeDatabaseServer",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
@@ -327,7 +317,6 @@ public interface DatabaseServerV4Endpoint {
 
     @GET
     @Path("internal/used_subnets")
-    @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = OperationDescriptions.DatabaseOpDescription.GET_USED_SUBNETS_BY_ENVIRONMENT_CRN,
             description = Notes.DatabaseNotes.GET_USED_SUBNETS_BY_ENVIRONMENT_CRN, operationId = "getUsedSubnetsByEnvironment",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
@@ -336,7 +325,6 @@ public interface DatabaseServerV4Endpoint {
 
     @PUT
     @Path("{crn}/validate_upgrade")
-    @Consumes(MediaType.APPLICATION_JSON)
     @Operation(summary = DatabaseServerOpDescription.VALIDATE_UPGRADE, description = DatabaseServerNotes.VALIDATE_UPGRADE,
             operationId = "validateUpgradeDatabaseServer",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
@@ -348,7 +336,6 @@ public interface DatabaseServerV4Endpoint {
 
     @PUT
     @Path("{crn}/validate_upgrade_cleanup")
-    @Consumes(MediaType.APPLICATION_JSON)
     @Operation(summary = DatabaseServerOpDescription.VALIDATE_UPGRADE_CLEANUP, description = DatabaseServerNotes.VALIDATE_UPGRADE_CLEANUP,
             operationId = "validateUpgradeDatabaseServerCleanup",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
@@ -358,7 +345,6 @@ public interface DatabaseServerV4Endpoint {
 
     @PUT
     @Path("internal/rotate_secret")
-    @Consumes(MediaType.APPLICATION_JSON)
     @Operation(summary = DatabaseServerOpDescription.ROTATE, description = DatabaseServerNotes.ROTATE,
             operationId = "rotateSecrets",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
@@ -367,21 +353,18 @@ public interface DatabaseServerV4Endpoint {
 
     @PUT
     @Path("internal/sync_outdated_secrets")
-    @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Sync outdated vault secrets for DB Server", operationId = "syncOutdatedSecrets",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     void syncOutdatedSecrets(@ValidCrn(resource = DATABASE_SERVER) @NotEmpty @Parameter(description = CRN) @QueryParam("crn") String crn);
 
     @PUT
     @Path("cleanup_secret_rotation_progress")
-    @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Clean up secret rotation progress information", operationId = "cleanupProgress",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     StepProgressCleanupResponse cleanupSecretRotationProgress(@Valid @NotNull SecretRotationCleanupProgressV4Request request);
 
     @POST
     @Path("get_certificate_status")
-    @Consumes(MediaType.APPLICATION_JSON)
     @Operation(summary = DatabaseServerOpDescription.LIST_CERTIFICATE_STATUS, description = DatabaseServerNotes.LIST_CERTIFICATE_STATUS,
             operationId = "listDatabaseServersCertificateStatus",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
@@ -393,7 +376,6 @@ public interface DatabaseServerV4Endpoint {
 
     @POST
     @Path("internal/get_database_certificate_status_by_stack_crns")
-    @Consumes(MediaType.APPLICATION_JSON)
     @Operation(summary = DatabaseServerOpDescription.LIST_CERTIFICATE_STATUS, description = DatabaseServerNotes.LIST_CERTIFICATE_STATUS,
             operationId = "listDatabaseServersCertificateStatusByStackCrns",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
@@ -413,7 +395,6 @@ public interface DatabaseServerV4Endpoint {
 
     @GET
     @Path("retry")
-    @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = DatabaseServerNotes.LIST_RETRYABLE_FLOWS, description = DatabaseServerNotes.LIST_RETRYABLE_FLOWS, operationId = "listRetryableFlowsV1",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     List<RetryableFlowResponse> listRetryableFlows(
