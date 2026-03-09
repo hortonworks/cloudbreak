@@ -378,4 +378,32 @@ class UpgradeImageServiceTest {
     private void setDefaultOsToRhel8() {
         ReflectionTestUtils.setField(underTest, UpgradeImageService.class, "defaultOs", DEFAULT_OS, String.class);
     }
+
+    @Test
+    void testFindTargetImagesReturnsLatestPerOs() {
+        ReflectionTestUtils.setField(underTest, UpgradeImageService.class, "defaultOs", "centos7", String.class);
+        Stack stack = new Stack();
+        Image centosOld = createImage("2021-09-01", "centos7");
+        Image centosNew = createImage("2021-10-01", "centos7");
+        Image rhelOld = createImage("2021-07-01", "redhat8");
+        Image rhelNew = createImage("2021-09-15", "redhat8");
+
+        when(imageService.fetchImagesWrapperAndName(eq(stack), any(), any(), eq(true))).thenReturn(List.of(
+                Pair.of(ImageWrapper.ofFreeipaImage(centosOld, CATALOG_URL), "centosOld"),
+                Pair.of(ImageWrapper.ofFreeipaImage(centosNew, CATALOG_URL), "centosNew"),
+                Pair.of(ImageWrapper.ofFreeipaImage(rhelOld, CATALOG_URL), "rhelOld"),
+                Pair.of(ImageWrapper.ofFreeipaImage(rhelNew, CATALOG_URL), "rhelNew")
+        ));
+
+        ImageInfoResponse currentImage = new ImageInfoResponse();
+        currentImage.setDate("2021-08-01");
+        currentImage.setId("111-222");
+        currentImage.setOs("centos7");
+
+        List<ImageInfoResponse> result = underTest.findTargetImages(stack, CATALOG_URL, currentImage, true);
+
+        assertEquals(2, result.size());
+        assertThat(result).extracting(ImageInfoResponse::getDate).containsExactlyInAnyOrder("2021-10-01", "2021-09-15");
+        assertThat(result).extracting(ImageInfoResponse::getOs).containsExactlyInAnyOrder("centos7", "redhat8");
+    }
 }
