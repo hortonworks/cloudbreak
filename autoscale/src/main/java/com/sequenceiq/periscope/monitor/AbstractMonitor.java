@@ -13,11 +13,14 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.periscope.monitor.context.EvaluatorContext;
 import com.sequenceiq.periscope.monitor.evaluator.EvaluatorExecutor;
 import com.sequenceiq.periscope.monitor.executor.ExecutorServiceWithRegistry;
+import com.sequenceiq.periscope.service.ClusterService;
 import com.sequenceiq.periscope.service.RejectedThreadService;
 
 public abstract class AbstractMonitor<M extends Monitored> implements Monitor<M> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractMonitor.class);
+
+    private ClusterService clusterService;
 
     private ApplicationContext applicationContext;
 
@@ -35,7 +38,9 @@ public abstract class AbstractMonitor<M extends Monitored> implements Monitor<M>
             try {
                 EvaluatorExecutor evaluatorExecutor = getEvaluatorExecutorBean(monitored);
                 EvaluatorContext evaluatorContext = getContext(monitored);
+                clusterService = applicationContext.getBean(ClusterService.class);
                 evaluatorExecutor.setContext(evaluatorContext);
+                MDCBuilder.buildMdcContext(clusterService.findById((long) evaluatorContext.getData()));
                 executorServiceWithRegistry.submitIfAbsent(evaluatorExecutor, evaluatorContext.getItemId());
                 // TODO CB-14972: The size of the queue needs to be logged occasionally.
                 LOGGER.debug("Successfully submitted {} for cluster {}.", evaluatorExecutor.getName(), evaluatorContext.getData());
