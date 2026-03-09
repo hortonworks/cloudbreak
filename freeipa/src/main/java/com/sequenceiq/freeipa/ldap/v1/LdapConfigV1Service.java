@@ -10,6 +10,7 @@ import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.util.FreeIpaPasswordUtil;
 import com.sequenceiq.freeipa.api.v1.ldap.model.create.CreateLdapConfigRequest;
@@ -95,8 +96,7 @@ public class LdapConfigV1Service {
         }
     }
 
-    private DescribeLdapConfigResponse getLdapConfigIfFreeIPAExists(String environmentCrn, String accountId, String clusterName, Stack stack)
-            throws FreeIpaClientException {
+    private DescribeLdapConfigResponse getLdapConfigIfFreeIPAExists(String environmentCrn, String accountId, String clusterName, Stack stack) {
         MDCBuilder.buildMdcContext(stack);
         LOGGER.debug("FreeIPA exists for environment");
         Optional<LdapConfig> existingLdapConfig = ldapConfigService.find(environmentCrn, accountId, clusterName);
@@ -104,10 +104,10 @@ public class LdapConfigV1Service {
         if (existingLdapConfig.isPresent()) {
             LOGGER.debug("LdapConfig already exists");
             ldapConfig = existingLdapConfig.get();
+            return ldapConfigConverter.convertLdapConfigToDescribeLdapConfigResponse(ldapConfig);
         } else {
-            ldapConfig = createNewLdapConfig(environmentCrn, clusterName, stack, false);
+            throw NotFoundException.notFoundException("Kerberos config for cluster", clusterName);
         }
-        return ldapConfigConverter.convertLdapConfigToDescribeLdapConfigResponse(ldapConfig);
     }
 
     @Retryable(value = RetryableFreeIpaClientException.class,
