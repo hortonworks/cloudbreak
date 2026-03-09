@@ -197,6 +197,37 @@ class KraftMigrationOperationStatusFactoryTest {
         assertFalse(result.isPresent());
     }
 
+    @Test
+    void testGetStatusFromFlowChainInformationAndFlowLogsWhenMigrationTriggeredAfterRollback() {
+        when(stackDto.getId()).thenReturn(STACK_ID);
+        when(stackDto.getResourceCrn()).thenReturn(TestUtil.STACK_CRN);
+        FlowLog rollbackFlowLog = new FlowLog();
+        rollbackFlowLog.setFlowType(ClassValue.of(MigrateZookeeperToKraftRollbackFlowConfig.class));
+        rollbackFlowLog.setFinalized(true);
+        rollbackFlowLog.setCurrentState("FINISHED_STATE");
+        rollbackFlowLog.setStateStatus(StateStatus.SUCCESSFUL);
+        rollbackFlowLog.setCreated(90L);
+        when(flowLogDBService.findAllByResourceIdAndFlowTypeInOrderByCreatedDesc(eq(STACK_ID), anyList())).thenReturn(List.of(rollbackFlowLog));
+
+        FlowLog migrationFlowChainFlowLog = new FlowLog();
+        migrationFlowChainFlowLog.setFlowType(ClassValue.of(MigrateZookeeperToKraftMigrationFlowConfig.class));
+        migrationFlowChainFlowLog.setFinalized(true);
+        migrationFlowChainFlowLog.setCurrentState("FINISHED_STATE");
+        migrationFlowChainFlowLog.setStateStatus(StateStatus.SUCCESSFUL);
+        migrationFlowChainFlowLog.setCreated(100L);
+        migrationFlowChainFlowLog.setFlowChainId("flowChainId");
+        Optional<FlowChainLog> flowChainLog = Optional.of(
+                new FlowChainLog("MigrateZookeeperToKraftFlowEventChainFactory/Upscale", "", "", "", "", ""));
+        when(flowLogDBService.getLatestFlowLogsByCrnInFlowChain(anyString())).thenReturn(List.of(migrationFlowChainFlowLog));
+        when(flowLogDBService.findFirstByFlowChainIdOrderByCreatedDesc(anyString())).thenReturn(flowChainLog);
+
+        Optional<KraftMigrationOperationStatus> result = underTest.getStatusFromFlowInformation(stackDto);
+
+        verify(flowLogDBService).findAllByResourceIdAndFlowTypeInOrderByCreatedDesc(eq(STACK_ID), anyList());
+        verify(flowLogDBService).getLatestFlowLogsByCrnInFlowChain(eq(stackDto.getResourceCrn()));
+        assertEquals(ZOOKEEPER_TO_KRAFT_MIGRATION_COMPLETE, result.orElse(NOT_APPLICABLE));
+    }
+
     private static Stream<Arguments> previousLogFailedParameters() {
         return Stream.of(
                 Arguments.of(MigrateZookeeperToKraftConfigurationFlowConfig.class, ZOOKEEPER_TO_KRAFT_MIGRATION_FAILED),

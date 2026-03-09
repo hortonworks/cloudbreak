@@ -78,20 +78,18 @@ public class KraftMigrationOperationStatusFactory {
     private List<FlowLog> getMostRecentKraftFlowLastLogs(StackDto stackDto) {
         Long stackId = stackDto.getId();
         List<FlowLog> kraftFlowLogs = new ArrayList<>(flowLogDBService.findAllByResourceIdAndFlowTypeInOrderByCreatedDesc(stackId, RELATED_FLOW_CONFIGS));
-        if (CollectionUtils.isEmpty(kraftFlowLogs)) {
-            List<FlowLog> latestFlowLogsByCrnInFlowChain = flowLogDBService.getLatestFlowLogsByCrnInFlowChain(stackDto.getResourceCrn());
-            boolean kraftMigrationFlowChain = latestFlowLogsByCrnInFlowChain.stream()
-                    .findFirst()
-                    .map(FlowLog::getFlowChainId)
-                    .flatMap(flowChainId -> flowLogDBService.findFirstByFlowChainIdOrderByCreatedDesc(flowChainId))
-                    .map(FlowChainLog::getFlowChainType)
-                    .filter(flowChainType -> flowChainType.contains(MigrateZookeeperToKraftFlowEventChainFactory.class.getSimpleName()))
-                    .isPresent();
+        List<FlowLog> latestFlowLogsByCrnInFlowChain = flowLogDBService.getLatestFlowLogsByCrnInFlowChain(stackDto.getResourceCrn());
+        boolean kraftMigrationFlowChain = latestFlowLogsByCrnInFlowChain.stream()
+                .findFirst()
+                .map(FlowLog::getFlowChainId)
+                .flatMap(flowChainId -> flowLogDBService.findFirstByFlowChainIdOrderByCreatedDesc(flowChainId))
+                .map(FlowChainLog::getFlowChainType)
+                .filter(flowChainType -> flowChainType.contains(MigrateZookeeperToKraftFlowEventChainFactory.class.getSimpleName()))
+                .isPresent();
 
-            if (kraftMigrationFlowChain) {
-                LOGGER.debug("The Kraft migration flow chain has been found, adding the relevant '{}' flow logs", latestFlowLogsByCrnInFlowChain.size());
-                kraftFlowLogs.addAll(latestFlowLogsByCrnInFlowChain);
-            }
+        if (kraftMigrationFlowChain) {
+            LOGGER.debug("The Kraft migration flow chain has been found, adding the relevant '{}' flow logs", latestFlowLogsByCrnInFlowChain.size());
+            kraftFlowLogs.addAll(latestFlowLogsByCrnInFlowChain);
         }
 
         return kraftFlowLogs.stream()
