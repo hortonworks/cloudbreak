@@ -211,7 +211,7 @@ class EventSenderServiceTest {
 
         assert notificationDetails.getPayload().contains("\"id\":123");
         assert notificationDetails.getPayload().contains("\"name\":\"test-stack\"");
-        assert notificationDetails.getPayload().contains("\"resourceCrn\"");
+        assert notificationDetails.getPayload().contains("\"crn\"");
     }
 
     @Test
@@ -322,7 +322,7 @@ class EventSenderServiceTest {
         StackEvent stackEvent = new StackEvent();
         stackEvent.setId(STACK_ID);
         stackEvent.setName(STACK_NAME);
-        stackEvent.setResourceCrn(RESOURCE_CRN);
+        stackEvent.setCrn(RESOURCE_CRN);
         stackEvent.setEnvironmentCrn(ENVIRONMENT_CRN);
         stackEvent.setAccountId(ACCOUNT_ID);
         stackEvent.setCloudPlatform("AWS");

@@ -48,7 +48,7 @@ class StackToStackEventConverterTest {
         assertNotNull(result);
         assertEquals(STACK_ID, result.getId());
         assertEquals(STACK_NAME, result.getName());
-        assertEquals(RESOURCE_CRN, result.getResourceCrn());
+        assertEquals(RESOURCE_CRN, result.getCrn());
         assertEquals(ENVIRONMENT_CRN, result.getEnvironmentCrn());
         assertEquals(CLOUD_PLATFORM, result.getCloudPlatform());
         assertEquals(REGION, result.getRegion());
@@ -67,7 +67,7 @@ class StackToStackEventConverterTest {
         assertNotNull(result);
         assertEquals(STACK_ID, result.getId());
         assertEquals(STACK_NAME, result.getName());
-        assertEquals(RESOURCE_CRN, result.getResourceCrn());
+        assertEquals(RESOURCE_CRN, result.getCrn());
         assertEquals(ENVIRONMENT_CRN, result.getEnvironmentCrn());
         assertEquals(CLOUD_PLATFORM, result.getCloudPlatform());
         assertEquals(REGION, result.getRegion());
@@ -86,7 +86,7 @@ class StackToStackEventConverterTest {
         assertNotNull(result);
         assertEquals(STACK_ID, result.getId());
         assertNull(result.getName());
-        assertNull(result.getResourceCrn());
+        assertNull(result.getCrn());
         assertNull(result.getEnvironmentCrn());
         assertNull(result.getCloudPlatform());
         assertNull(result.getRegion());
@@ -123,7 +123,7 @@ class StackToStackEventConverterTest {
 
         assertNotNull(result);
         assertEquals("", result.getName());
-        assertEquals("", result.getResourceCrn());
+        assertEquals("", result.getCrn());
         assertEquals("", result.getEnvironmentCrn());
         assertEquals("", result.getAccountId());
         assertEquals("", result.getCloudPlatform());

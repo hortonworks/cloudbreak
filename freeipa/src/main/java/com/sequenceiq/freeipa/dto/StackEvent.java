@@ -12,7 +12,7 @@ public class StackEvent {
 
     private String name;
 
-    private String resourceCrn;
+    private String crn;
 
     private String environmentCrn;
 
@@ -45,12 +45,12 @@ public class StackEvent {
         this.name = name;
     }
 
-    public String getResourceCrn() {
-        return resourceCrn;
+    public String getCrn() {
+        return crn;
     }
 
-    public void setResourceCrn(String resourceCrn) {
-        this.resourceCrn = resourceCrn;
+    public void setCrn(String crn) {
+        this.crn = crn;
     }
 
     public String getEnvironmentCrn() {
@@ -106,7 +106,7 @@ public class StackEvent {
         return "StackEvent{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
-                ", resourceCrn='" + resourceCrn + '\'' +
+                ", crn='" + crn + '\'' +
                 ", environmentCrn='" + environmentCrn + '\'' +
                 ", cloudPlatform='" + cloudPlatform + '\'' +
                 ", region='" + region + '\'' +

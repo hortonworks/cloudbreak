@@ -12,7 +12,7 @@ public class StackToStackEventConverter {
         StackEvent stackEvent = new StackEvent();
         stackEvent.setId(source.getId());
         stackEvent.setName(source.getName());
-        stackEvent.setResourceCrn(source.getResourceCrn());
+        stackEvent.setCrn(source.getResourceCrn());
         stackEvent.setEnvironmentCrn(source.getEnvironmentCrn());
         stackEvent.setCloudPlatform(source.getCloudPlatform());
         stackEvent.setRegion(source.getRegion());
