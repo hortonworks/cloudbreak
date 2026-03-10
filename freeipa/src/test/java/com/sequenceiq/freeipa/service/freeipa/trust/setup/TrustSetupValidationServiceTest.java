@@ -34,6 +34,7 @@ import com.cloudera.thunderhead.service.environments2api.model.PrivateDatalakeDe
 import com.cloudera.thunderhead.service.environments2api.model.PvcEnvironmentDetails;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.common.type.KdcType;
+import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorStateParams;
@@ -44,6 +45,7 @@ import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.crossrealm.CrossRealmTrustService;
 import com.sequenceiq.freeipa.service.freeipa.trust.operation.TaskResult;
 import com.sequenceiq.freeipa.service.freeipa.trust.operation.TaskResults;
+import com.sequenceiq.freeipa.service.loadbalancer.FreeIpaLoadBalancerService;
 import com.sequenceiq.freeipa.service.rotation.SaltStateParamsService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.util.IpaTrustAdPackageAvailabilityChecker;
@@ -51,6 +53,9 @@ import com.sequenceiq.remoteenvironment.api.v1.environment.endpoint.RemoteEnviro
 
 @ExtendWith(MockitoExtension.class)
 class TrustSetupValidationServiceTest {
+
+    private static final long STACK_ID = 4L;
+
     @Mock
     StackService stackService;
 
@@ -59,6 +64,9 @@ class TrustSetupValidationServiceTest {
 
     @Mock
     private CrossRealmTrustService crossRealmTrustService;
+
+    @Mock
+    private FreeIpaLoadBalancerService freeIpaLoadBalancerService;
 
     @Mock
     private SaltStateParamsService saltStateParamsService;
@@ -72,6 +80,9 @@ class TrustSetupValidationServiceTest {
     @Mock
     private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
 
+    @Mock
+    private CloudbreakMessagesService messagesService;
+
     @InjectMocks
     private TrustSetupValidationService underTest;
 
@@ -80,6 +91,8 @@ class TrustSetupValidationServiceTest {
     @BeforeEach
     void setupTest() {
         orchestratorExceptionAnalyzer = mockStatic(OrchestratorExceptionAnalyzer.class);
+        lenient().when(messagesService.getMessage(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        lenient().when(messagesService.getMessageWithArgs(any(), any())).thenAnswer(invocation -> invocation.getArgument(0));
     }
 
     @AfterEach
@@ -95,106 +108,112 @@ class TrustSetupValidationServiceTest {
         TaskResults results = underTest.validateTrustSetup(stackId);
 
         assertTrue(results.hasErrors());
-        assertEquals("No cross realm information is provided", results.getErrors().get(0).message());
+        assertEquals("trust.validation.notfound", results.getErrors().get(0).message());
     }
 
     @Test
     void testValidateWhenNoValidationError() {
         setup();
-        when(packageAvailabilityChecker.isPackageAvailable(4L)).thenReturn(true);
-        TaskResults validationResult = underTest.validateTrustSetup(4L);
+        TaskResults validationResult = underTest.validateTrustSetup(STACK_ID);
         assertEquals(0L, validationResult.getErrors().size());
+    }
+
+    @Test
+    void testValidateWhenMissingLoadBalancer() throws Exception {
+        setup();
+        when(freeIpaLoadBalancerService.findByStackId(STACK_ID)).thenReturn(Optional.empty());
+        TaskResults validationResult = underTest.validateTrustSetup(STACK_ID);
+        assertEquals(1L, validationResult.getErrors().size());
+        assertEquals("trust.validation.loadbalancer.failure", validationResult.getErrors().get(0).message());
+        Map<String, String> additionalParams = validationResult.getErrors().get(0).additionalParams();
+        assertEquals("trust.validation.loadbalancer.comment", additionalParams.get(COMMENT));
     }
 
     @Test
     void testValidateWhenMissingPackage() throws Exception {
         setup();
-        TaskResults validationResult = underTest.validateTrustSetup(4L);
+        when(packageAvailabilityChecker.isPackageAvailable(STACK_ID)).thenReturn(false);
+        TaskResults validationResult = underTest.validateTrustSetup(STACK_ID);
         assertEquals(1L, validationResult.getErrors().size());
-        assertEquals("Package validation failed",
+        assertEquals("trust.validation.packageavailability.failure",
                 validationResult.getErrors().get(0).message());
         Map<String, String> additionalParams = validationResult.getErrors().get(0).additionalParams();
-        assertTrue(additionalParams.get(COMMENT).startsWith("Trust setup requires certain packages to be present on the image"));
+        assertEquals("trust.validation.packageavailability.comment", additionalParams.get(COMMENT));
     }
 
     @Test
     void testValidateWhenDnsValidationFailure() throws Exception {
         setup();
-        when(packageAvailabilityChecker.isPackageAvailable(4L)).thenReturn(true);
         doThrow(new RuntimeException("DNS validation error")).doNothing().when(hostOrchestrator).runOrchestratorState(any());
 
-        TaskResults result = underTest.validateTrustSetup(4L);
+        TaskResults result = underTest.validateTrustSetup(STACK_ID);
 
         assertEquals(1, result.getErrors().size());
         TaskResult taskResult = result.getErrors().get(0);
-        assertEquals("DNS validation failed", taskResult.message());
+        assertEquals("trust.validation.dns failed", taskResult.message());
         assertEquals("DNS validation error", taskResult.additionalParams().get(COMMENT));
     }
 
     @Test
     void testValidateWhenDnsValidationFailureWithParams() throws Exception {
         setup();
-        when(packageAvailabilityChecker.isPackageAvailable(4L)).thenReturn(true);
         CloudbreakOrchestratorFailedException orchestratorException = new CloudbreakOrchestratorFailedException("Dns validation error");
         doThrow(orchestratorException).doNothing().when(hostOrchestrator).runOrchestratorState(any());
         Map<String, String> params = Map.of("stdout", "out", "stderr", "err");
         when(OrchestratorExceptionAnalyzer.getHostSaltCommands(orchestratorException)).thenReturn(Set.of(
                 new OrchestratorExceptionAnalyzer.HostSaltCommands("host", List.of(new OrchestratorExceptionAnalyzer.SaltCommand("command", params)))));
 
-        TaskResults result = underTest.validateTrustSetup(4L);
+        TaskResults result = underTest.validateTrustSetup(STACK_ID);
 
         assertEquals(1, result.getErrors().size());
         TaskResult taskResult = result.getErrors().get(0);
-        assertEquals(taskResult.message(), "DNS validation failed");
+        assertEquals("trust.validation.dns failed", taskResult.message());
         assertTrue(taskResult.additionalParams().entrySet().containsAll(params.entrySet()));
-        assertTrue(taskResult.additionalParams().get(COMMENT).startsWith("The fully qualified domain name"));
+        assertEquals("trust.validation.dns.comment", taskResult.additionalParams().get(COMMENT));
         assertEquals(DocumentationLinkProvider.hybridDnsArchitectureLink(), taskResult.additionalParams().get(DOCS));
     }
 
     @Test
     void testValidateWhenMultipleFailure() throws Exception {
         setup(false);
+        when(packageAvailabilityChecker.isPackageAvailable(STACK_ID)).thenReturn(false);
         doThrow(new RuntimeException("DNS validation error")).doThrow(new RuntimeException("Reverse DNS validation error"))
                 .when(hostOrchestrator).runOrchestratorState(any());
 
-        TaskResults result = underTest.validateTrustSetup(4L);
+        TaskResults result = underTest.validateTrustSetup(STACK_ID);
 
-        assertEquals(4L, result.getErrors().size());
-        assertEquals("Package validation failed", result.getErrors().get(0).message());
-        assertEquals("DNS validation failed", result.getErrors().get(1).message());
-        assertEquals("Reverse DNS validation failed", result.getErrors().get(2).message());
-        assertEquals("Security validation failed", result.getErrors().get(3).message());
+        assertEquals(STACK_ID, result.getErrors().size());
+        assertEquals("trust.validation.packageavailability.failure", result.getErrors().get(0).message());
+        assertEquals("trust.validation.dns failed", result.getErrors().get(1).message());
+        assertEquals("trust.validation.reversedns failed", result.getErrors().get(2).message());
+        assertEquals("trust.validation.kerberos.failure", result.getErrors().get(3).message());
     }
 
     @Test
     void testValidateWhenNotKerberized() {
         setup(false);
-        when(packageAvailabilityChecker.isPackageAvailable(4L)).thenReturn(true);
 
-        TaskResults result = underTest.validateTrustSetup(4L);
+        TaskResults result = underTest.validateTrustSetup(STACK_ID);
 
         assertEquals(1L, result.getErrors().size());
         TaskResult taskResult = result.getErrors().get(0);
-        assertEquals("Security validation failed", taskResult.message());
-        assertTrue(taskResult.additionalParams().get(COMMENT)
-                .startsWith("The base cluster selected as a Hybrid Environment Data Lake must be secured by Kerberos"));
+        assertEquals("trust.validation.kerberos.failure", taskResult.message());
+        assertEquals("trust.validation.kerberos.comment.failed", taskResult.additionalParams().get(COMMENT));
         assertEquals(DocumentationLinkProvider.hybridSecurityRequirements(), taskResult.additionalParams().get(DOCS));
     }
 
     @Test
     void testValidateWhenExceptionDuringKerberized() {
         setup(false);
-        when(packageAvailabilityChecker.isPackageAvailable(4L)).thenReturn(true);
         RuntimeException e = new RuntimeException("exception");
         when(remoteEnvironmentEndpoint.getByCrn(any())).thenThrow(e);
         when(webApplicationExceptionMessageExtractor.getErrorMessage(e)).thenReturn("extractedMessage");
 
-        TaskResults result = underTest.validateTrustSetup(4L);
+        TaskResults result = underTest.validateTrustSetup(STACK_ID);
 
         assertEquals(1L, result.getErrors().size());
-        assertEquals("Security validation failed", result.getErrors().get(0).message());
-        assertEquals("An error occurred during the kerberization verification: extractedMessage",
-                result.getErrors().get(0).additionalParams().get(COMMENT));
+        assertEquals("trust.validation.kerberos.failure", result.getErrors().get(0).message());
+        assertEquals("trust.validation.kerberos.comment.missingcrn", result.getErrors().get(0).additionalParams().get(COMMENT));
     }
 
     @Test
@@ -205,14 +224,13 @@ class TrustSetupValidationServiceTest {
         crossRealmTrust.setKdcIp("kdcip");
         crossRealmTrust.setDnsIp("dnsip");
         crossRealmTrust.setKdcType(KdcType.ACTIVE_DIRECTORY);
-        when(crossRealmTrustService.getByStackIdIfExists(4L)).thenReturn(Optional.of(crossRealmTrust));
-        when(packageAvailabilityChecker.isPackageAvailable(4L)).thenReturn(true);
+        when(crossRealmTrustService.getByStackIdIfExists(STACK_ID)).thenReturn(Optional.of(crossRealmTrust));
 
-        TaskResults result = underTest.validateTrustSetup(4L);
+        TaskResults result = underTest.validateTrustSetup(STACK_ID);
 
         assertEquals(1L, result.getErrors().size());
-        assertEquals("Security validation failed", result.getErrors().get(0).message());
-        assertEquals("Remote environment CRN is missing.\nPlease contact Cloudera support.", result.getErrors().get(0).additionalParams().get(COMMENT));
+        assertEquals("trust.validation.kerberos.failure", result.getErrors().get(0).message());
+        assertEquals("trust.validation.kerberos.comment.missingcrn", result.getErrors().get(0).additionalParams().get(COMMENT));
     }
 
     private void setup() {
@@ -226,8 +244,10 @@ class TrustSetupValidationServiceTest {
         crossRealmTrust.setDnsIp("dnsip");
         crossRealmTrust.setRemoteEnvironmentCrn("remoteenvcrn");
         crossRealmTrust.setKdcType(KdcType.ACTIVE_DIRECTORY);
-        when(crossRealmTrustService.getByStackIdIfExists(4L)).thenReturn(Optional.of(crossRealmTrust));
-        when(stackService.getByIdWithListsInTransaction(4L)).thenReturn(mock(Stack.class));
+        when(packageAvailabilityChecker.isPackageAvailable(STACK_ID)).thenReturn(true);
+        when(crossRealmTrustService.getByStackIdIfExists(STACK_ID)).thenReturn(Optional.of(crossRealmTrust));
+        when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(mock(Stack.class));
+        when(freeIpaLoadBalancerService.findByStackId(STACK_ID)).thenReturn(Optional.of(mock()));
         when(saltStateParamsService.createStateParams(any(), any(), anyBoolean(), anyInt(), anyInt())).thenReturn(new OrchestratorStateParams());
         lenient().when(remoteEnvironmentEndpoint.getByCrn(any())).thenReturn(createEnvironmentResponse(kerberized));
     }

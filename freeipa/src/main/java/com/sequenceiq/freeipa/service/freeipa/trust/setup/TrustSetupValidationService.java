@@ -34,6 +34,7 @@ import com.cloudera.thunderhead.service.environments2api.model.PrivateDatalakeDe
 import com.cloudera.thunderhead.service.environments2api.model.PvcEnvironmentDetails;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.common.type.KdcType;
+import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorStateParams;
@@ -44,6 +45,7 @@ import com.sequenceiq.freeipa.service.crossrealm.CrossRealmTrustService;
 import com.sequenceiq.freeipa.service.freeipa.trust.operation.TaskResult;
 import com.sequenceiq.freeipa.service.freeipa.trust.operation.TaskResultType;
 import com.sequenceiq.freeipa.service.freeipa.trust.operation.TaskResults;
+import com.sequenceiq.freeipa.service.loadbalancer.FreeIpaLoadBalancerService;
 import com.sequenceiq.freeipa.service.rotation.SaltStateParamsService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.util.IpaTrustAdPackageAvailabilityChecker;
@@ -61,38 +63,11 @@ public class TrustSetupValidationService {
 
     private static final String AD_REVERSE_DNS_VALIDATION_STATE = "trustsetup/validation/ad_reverse_dns_validation";
 
-    private static final String PACKAGE_VALIDATION_COMMENT = """
-            Trust setup requires certain packages to be present on the image. You can check the package versions of an image in the image catalog. \
-            Please upgrade to an appropriate image before proceeding with Hybrid Environment configuration.
-
-            Required packages: %s""";
-
-    private static final String DNS_VALIDATION_COMMENT = """
-            The fully qualified domain name (FQDN) of the Key Distribution Center (KDC) must be resolvable to the corresponding KDC IP address by the provided \
-            DNS server.
-
-            Ensure that the DNS zone contains a valid A record mapping the KDC FQDN to the correct KDCP IP address. If this record is missing or incorrect, \
-            Kerberos authentication requests will fail.
-
-            This enables resources in either environment to communicate with each other.""";
-
-    private static final String REVERSE_DNS_VALIDATION_COMMENT = """
-            The IP address of the Key Distribution Center (KDC) must be resolvable to the fully qualified domain name (FQDN) of the corresponding KDC by the \
-            provided DNS server.
-
-            Ensure that the DNS zone contains a valid PTR (reverse lookup) record so that the KDC IP address resolves back to the same FQDN.
-
-            This enables resources in either environment to communicate with each other.""";
-
-    private static final String SECURITY_VALIDATION_COMMENT = """
-            The base cluster selected as a Hybrid Environment Data Lake must be secured by Kerberos.
-            Ensure that Kerberos authentication is enabled and fully configured on the on-premises Data Lake before proceeding with Hybrid Environment \
-            configuration.
-
-            This enables secure communication with the services, regardless of whether they reside in a public cloud or on-premises.""";
-
     @Inject
     private CrossRealmTrustService crossRealmTrustService;
+
+    @Inject
+    private FreeIpaLoadBalancerService freeIpaLoadBalancerService;
 
     @Inject
     private IpaTrustAdPackageAvailabilityChecker packageAvailabilityChecker;
@@ -112,16 +87,21 @@ public class TrustSetupValidationService {
     @Inject
     private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
 
+    @Inject
+    private CloudbreakMessagesService messagesService;
+
     public TaskResults validateTrustSetup(Long stackId) {
         Optional<CrossRealmTrust> crossRealmTrust = crossRealmTrustService.getByStackIdIfExists(stackId);
         return crossRealmTrust
                 .map(cr -> validateTrustSetup(stackId, cr))
-                .orElse(new TaskResults().addTaskResult(new TaskResult(TaskResultType.ERROR, "No cross realm information is provided", Map.of())));
+                .orElse(new TaskResults().addTaskResult(new TaskResult(
+                        TaskResultType.ERROR, messagesService.getMessage("trust.validation.notfound"), Map.of())));
     }
 
     private TaskResults validateTrustSetup(Long stackId, CrossRealmTrust crossRealmTrust) {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         TaskResults taskResults = new TaskResults();
+        taskResults.addTaskResult(validateLoadBalancer(stackId));
         taskResults.addTaskResult(validatePackageAvailability(stackId, crossRealmTrust));
         taskResults.addTaskResult(validateDns(stack, crossRealmTrust));
         taskResults.addTaskResult(validateReverseDns(stack, crossRealmTrust));
@@ -129,25 +109,34 @@ public class TrustSetupValidationService {
         return taskResults;
     }
 
+    private TaskResult validateLoadBalancer(Long stackId) {
+        LOGGER.info("Validate for IPA load balancer");
+        return freeIpaLoadBalancerService.findByStackId(stackId)
+                .map(lb -> new TaskResult(TaskResultType.INFO, messagesService.getMessage("trust.validation.loadbalancer.success"), Map.of()))
+                .orElse(new TaskResult(TaskResultType.ERROR, messagesService.getMessage("trust.validation.loadbalancer.failure"), Map.of(
+                        COMMENT, messagesService.getMessage("trust.validation.loadbalancer.comment")
+                )));
+    }
+
     private TaskResult validatePackageAvailability(Long stackId, CrossRealmTrust crossRealmTrust) {
         LOGGER.info("Validate for IPA Server image trust packages");
         if (KdcType.ACTIVE_DIRECTORY.equals(crossRealmTrust.getKdcType()) && !packageAvailabilityChecker.isPackageAvailable(stackId)) {
             LOGGER.warn("Missing package [{}] required for AD trust setup", IPA_SERVER_TRUST_AD_PACKAGE);
-            return new TaskResult(TaskResultType.ERROR, "Package validation failed",
-                    Map.of(COMMENT, String.format(PACKAGE_VALIDATION_COMMENT, (IPA_SERVER_TRUST_AD_PACKAGE))));
+            return new TaskResult(TaskResultType.ERROR, messagesService.getMessage("trust.validation.packageavailability.failure"),
+                    Map.of(COMMENT, messagesService.getMessageWithArgs("trust.validation.packageavailability.comment", IPA_SERVER_TRUST_AD_PACKAGE)));
         } else {
-            return new TaskResult(TaskResultType.INFO, "Valid image trust packages", Map.of());
+            return new TaskResult(TaskResultType.INFO, messagesService.getMessage("trust.validation.packageavailability.success"), Map.of());
         }
     }
 
     private TaskResult validateDns(Stack stack, CrossRealmTrust crossRealmTrust) {
-        return executeSaltState(stack, crossRealmTrust, AD_DNS_VALIDATION_STATE, "DNS validation",
-                DNS_VALIDATION_COMMENT, DocumentationLinkProvider.hybridDnsArchitectureLink());
+        return executeSaltState(stack, crossRealmTrust, AD_DNS_VALIDATION_STATE, messagesService.getMessage("trust.validation.dns"),
+                messagesService.getMessage("trust.validation.dns.comment"), DocumentationLinkProvider.hybridDnsArchitectureLink());
     }
 
     private TaskResult validateReverseDns(Stack stack, CrossRealmTrust crossRealmTrust) {
-        return executeSaltState(stack, crossRealmTrust, AD_REVERSE_DNS_VALIDATION_STATE, "Reverse DNS validation",
-                REVERSE_DNS_VALIDATION_COMMENT, DocumentationLinkProvider.hybridDnsArchitectureLink());
+        return executeSaltState(stack, crossRealmTrust, AD_REVERSE_DNS_VALIDATION_STATE, messagesService.getMessage("trust.validation.reversedns"),
+                messagesService.getMessage("trust.validation.reversedns.comment"), DocumentationLinkProvider.hybridDnsArchitectureLink());
     }
 
     private TaskResult validateKerberization(CrossRealmTrust crossRealmTrust) {
@@ -162,19 +151,19 @@ public class TrustSetupValidationService {
                         .map(PrivateDatalakeDetails::getKerberosInfo)
                         .map(KerberosInfo::getKerberized)
                         .orElse(false);
-                return kerberized ? new TaskResult(TaskResultType.INFO, "The on-premises cluster is kerberized", Map.of()) :
-                        new TaskResult(TaskResultType.ERROR, "Security validation failed",
-                                Map.of(COMMENT, SECURITY_VALIDATION_COMMENT,
+                return kerberized ? new TaskResult(TaskResultType.INFO, messagesService.getMessage("trust.validation.kerberos.success"), Map.of()) :
+                        new TaskResult(TaskResultType.ERROR, messagesService.getMessage("trust.validation.kerberos.failure"),
+                                Map.of(COMMENT, messagesService.getMessage("trust.validation.kerberos.comment.failed"),
                                         DOCS, DocumentationLinkProvider.hybridSecurityRequirements()));
             } else {
-                return new TaskResult(TaskResultType.ERROR, "Security validation failed",
-                        Map.of(COMMENT, "Remote environment CRN is missing.\nPlease contact Cloudera support."));
+                return new TaskResult(TaskResultType.ERROR, messagesService.getMessage("trust.validation.kerberos.failure"),
+                        Map.of(COMMENT, messagesService.getMessage("trust.validation.kerberos.comment.missingcrn")));
             }
         } catch (RuntimeException e) {
             String message = webApplicationExceptionMessageExtractor.getErrorMessage(e);
             LOGGER.error("An error occurred during the kerberization verification: {}", message, e);
-            return new TaskResult(TaskResultType.ERROR, "Security validation failed",
-                    Map.of(COMMENT, "An error occurred during the kerberization verification: " + message));
+            return new TaskResult(TaskResultType.ERROR, messagesService.getMessage("trust.validation.kerberos.failure"),
+                    Map.of(COMMENT, messagesService.getMessageWithArgs("trust.validation.kerberos.comment.missingcrn", message)));
         }
     }
 
