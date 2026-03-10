@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
@@ -91,8 +92,8 @@ class ConfigureClusterManagerManagementServicesHandlerTest {
 
     @Test
     void testAccept() throws IOException, CloudbreakException {
-        com.sequenceiq.cloudbreak.cloud.model.Image currentImage = mock();
-        when(currentImage.getPackageVersions()).thenReturn(Map.of(CM.getKey(), "7.12.0.400"));
+        com.sequenceiq.cloudbreak.cloud.model.Image originalImage = mock();
+        when(originalImage.getPackageVersions()).thenReturn(Map.of(CM.getKey(), "7.12.0.400"));
         StatedImage targetStatedImage = mock();
         Image targetImage = mock();
         when(targetStatedImage.getImage()).thenReturn(targetImage);
@@ -108,13 +109,32 @@ class ConfigureClusterManagerManagementServicesHandlerTest {
         when(cmTemplateComponentConfigProviderProcessor.getServiceConfigsToBeUpdatedDuringUpgrade(cmTemplateProcessor, templatePreparationObject,
                 "7.12.0.400", "7.12.0.500")).thenReturn(Map.of("service1", Map.of("key1", "value1"), "service2", Map.of("key2", "value2")));
 
-        underTest.accept(new Event<>(new ConfigureClusterManagerManagementServicesRequest(STACK_ID, currentImage, targetStatedImage)));
+        underTest.accept(new Event<>(new ConfigureClusterManagerManagementServicesRequest(STACK_ID, originalImage, null, targetStatedImage)));
 
         verify(clusterBuilderService).configureManagementServices(STACK_ID);
         verify(clusterApi).updateServiceConfig("service1", Map.of("key1", "value1"));
         verify(clusterApi).updateServiceConfig("service2", Map.of("key2", "value2"));
         verify(eventBus).notify(eq("CONFIGURECLUSTERMANAGERMANAGEMENTSERVICESSUCCESS"), successEventCaptor.capture());
         assertEquals(STACK_ID, successEventCaptor.getValue().getData().getResourceId());
+    }
+
+    @Test
+    void testAcceptWhenCmVersionsMissing() throws IOException, CloudbreakException {
+        com.sequenceiq.cloudbreak.cloud.model.Image originalImage = mock();
+        when(originalImage.getPackageVersions()).thenReturn(Map.of());
+        StatedImage targetStatedImage = mock();
+        Image targetImage = mock();
+        when(targetStatedImage.getImage()).thenReturn(targetImage);
+        when(targetImage.getPackageVersions()).thenReturn(Map.of());
+
+        underTest.accept(new Event<>(new ConfigureClusterManagerManagementServicesRequest(STACK_ID, originalImage, null, targetStatedImage)));
+
+        verify(clusterBuilderService).configureManagementServices(STACK_ID);
+        verifyNoInteractions(stackDtoService);
+        verifyNoInteractions(stackToTemplatePreparationObjectConverter);
+        verifyNoInteractions(centralCmTemplateUpdater);
+        verifyNoInteractions(clusterApiConnectors);
+        verifyNoInteractions(cmTemplateComponentConfigProviderProcessor);
     }
 
     @Test

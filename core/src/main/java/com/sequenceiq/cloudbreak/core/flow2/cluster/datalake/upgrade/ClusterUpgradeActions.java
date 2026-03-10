@@ -70,13 +70,14 @@ public class ClusterUpgradeActions {
                     Long stackId = context.getStackId();
                     UpgradeImageInfo images = imageComponentUpdaterService.updateComponentsForUpgrade(payload.getImageId(), payload.getResourceId());
                     StatedImage targetStatedImage = images.targetStatedImage();
+                    variables.put(ORIGINAL_IMAGE, payload.getOriginalImage());
                     variables.put(TARGET_IMAGE, targetStatedImage);
                     variables.put(ROLLING_UPGRADE_ENABLED, payload.isRollingUpgradeEnabled());
                     clusterUpgradeTargetImageService.saveImage(stackId, targetStatedImage);
                     clusterUpgradeService.initUpgradeCluster(stackId, targetStatedImage, payload.isRollingUpgradeEnabled());
                     Image targetImage = targetStatedImage.getImage();
                     Selectable event = new ClusterUpgradeInitRequest(stackId, targetImage.getVersion(), OsType.getByOsTypeString(targetImage.getOsType()),
-                            targetImage.getArchitecture(), payload.getOriginalOsType());
+                            targetImage.getArchitecture(), OsType.getByOsTypeString(payload.getOriginalImage().getOsType()));
                     sendEvent(context, event.selector(), event);
                 } catch (Exception e) {
                     LOGGER.error("Error during updating cluster components with image id: [{}]", payload.getImageId(), e);
@@ -174,9 +175,10 @@ public class ClusterUpgradeActions {
 
             @Override
             protected void doExecute(ClusterUpgradeContext context, ClusterUpgradeSuccess payload, Map<Object, Object> variables) {
+                com.sequenceiq.cloudbreak.cloud.model.Image originalImage = getOriginalImage(variables);
                 com.sequenceiq.cloudbreak.cloud.model.Image currentImage = retrieveCurrentImageFromVariables(variables, payload.getResourceId());
                 StatedImage targetStatedImage = getTargetImage(variables);
-                Selectable event = new ConfigureClusterManagerManagementServicesRequest(context.getStackId(), currentImage, targetStatedImage);
+                Selectable event = new ConfigureClusterManagerManagementServicesRequest(context.getStackId(), originalImage, currentImage, targetStatedImage);
                 sendEvent(context, event);
             }
         };

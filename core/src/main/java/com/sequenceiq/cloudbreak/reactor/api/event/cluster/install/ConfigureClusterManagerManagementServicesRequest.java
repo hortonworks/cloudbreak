@@ -10,6 +10,8 @@ import com.sequenceiq.cloudbreak.service.image.StatedImage;
 
 public class ConfigureClusterManagerManagementServicesRequest extends StackEvent {
 
+    private final Image originalImage;
+
     private final Image currentImage;
 
     private final StatedImage targetStatedImage;
@@ -17,17 +19,24 @@ public class ConfigureClusterManagerManagementServicesRequest extends StackEvent
     @JsonCreator
     public ConfigureClusterManagerManagementServicesRequest(
             @JsonProperty("resourceId") Long stackId,
+            @JsonProperty("originalImage") Image originalImage,
             @JsonProperty("currentImage") Image currentImage,
             @JsonProperty("targetStatedImage") StatedImage targetStatedImage) {
         super(stackId);
+        this.originalImage = originalImage;
         this.currentImage = currentImage;
         this.targetStatedImage = targetStatedImage;
     }
 
     public ConfigureClusterManagerManagementServicesRequest(Long stackId) {
         super(stackId);
+        this.originalImage = null;
         this.currentImage = null;
         this.targetStatedImage = null;
+    }
+
+    public Image getOriginalImage() {
+        return originalImage;
     }
 
     public Image getCurrentImage() {
@@ -36,6 +45,10 @@ public class ConfigureClusterManagerManagementServicesRequest extends StackEvent
 
     public StatedImage getTargetStatedImage() {
         return targetStatedImage;
+    }
+
+    public Optional<Image> getOriginalImageOpt() {
+        return Optional.ofNullable(originalImage);
     }
 
     public Optional<Image> getCurrentImageOpt() {
@@ -49,7 +62,8 @@ public class ConfigureClusterManagerManagementServicesRequest extends StackEvent
     @Override
     public String toString() {
         return "ConfigureClusterManagerManagementServicesRequest{" +
-                "currentImage=" + currentImage +
+                "originalImage=" + originalImage +
+                ", currentImage=" + currentImage +
                 ", targetStatedImage=" + targetStatedImage +
                 "} " + super.toString();
     }

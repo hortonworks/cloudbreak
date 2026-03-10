@@ -42,7 +42,6 @@ import com.sequenceiq.cloudbreak.service.salt.SaltVersionUpgradeService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.upgrade.image.locked.LockedComponentService;
 import com.sequenceiq.cloudbreak.structuredevent.service.telemetry.mapper.ClusterUseCaseAware;
-import com.sequenceiq.common.model.OsType;
 import com.sequenceiq.flow.core.chain.FlowEventChainFactory;
 import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
 
@@ -146,7 +145,7 @@ public class UpgradeDatalakeFlowEventChainFactory implements FlowEventChainFacto
                         event.accepted(),
                         event.getImageId(),
                         event.isRollingUpgradeEnabled(),
-                        OsType.getByOsTypeString(currentImage.getOsType())));
+                        currentImage));
     }
 
     private Image getCurrentImage(DataLakeUpgradeFlowChainTriggerEvent event) {

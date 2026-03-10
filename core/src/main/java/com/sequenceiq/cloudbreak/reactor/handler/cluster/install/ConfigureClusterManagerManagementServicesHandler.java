@@ -83,29 +83,37 @@ public class ConfigureClusterManagerManagementServicesHandler extends ExceptionC
         return response;
     }
 
-    private void updateServiceConfigsForUpgrade(Long stackId, ConfigureClusterManagerManagementServicesRequest data) throws IOException, CloudbreakException {
-        Optional<com.sequenceiq.cloudbreak.cloud.model.Image> currentImageOpt = data.getCurrentImageOpt();
-        Optional<StatedImage> targetStatedImageOpt = data.getTargetStatedImageOpt();
-        StackDto stack = stackDtoService.getById(stackId);
-        TemplatePreparationObject templatePreparationObject = stackToTemplatePreparationObjectConverter.convert(stack);
-        CmTemplateProcessor cmTemplateProcessor = centralCmTemplateUpdater.getCmTemplateProcessor(templatePreparationObject);
-        ClusterApi clusterApi = clusterApiConnectors.getConnector(stack);
-        String fromCmVersion = currentImageOpt
+    private void updateServiceConfigsForUpgrade(Long stackId, ConfigureClusterManagerManagementServicesRequest request)
+            throws IOException, CloudbreakException {
+        Optional<com.sequenceiq.cloudbreak.cloud.model.Image> originalImageOpt = request.getOriginalImageOpt();
+        Optional<StatedImage> targetStatedImageOpt = request.getTargetStatedImageOpt();
+        Optional<String> fromCmVersionOpt = originalImageOpt
                 .map(com.sequenceiq.cloudbreak.cloud.model.Image::getPackageVersions)
-                .filter(packageVersions -> packageVersions.containsKey(CM.getKey()))
-                .map(packageVersions -> packageVersions.get(CM.getKey()))
-                .orElse("");
-        String toCmVersion = targetStatedImageOpt
+                .map(packageVersions -> packageVersions.get(CM.getKey()));
+        Optional<String> toCmVersionOpt = targetStatedImageOpt
                 .map(StatedImage::getImage)
                 .map(Image::getPackageVersions)
-                .filter(packageVersions -> packageVersions.containsKey(CM.getKey()))
-                .map(packageVersions -> packageVersions.get(CM.getKey()))
-                .orElse("");
+                .map(packageVersions -> packageVersions.get(CM.getKey()));
 
-        for (Map.Entry<String, Map<String, String>> entry : cmTemplateComponentConfigProviderProcessor.getServiceConfigsToBeUpdatedDuringUpgrade(
-                cmTemplateProcessor, templatePreparationObject, fromCmVersion, toCmVersion).entrySet()) {
-            LOGGER.info("Updating service configs for service: {}", entry.getKey());
-            clusterApi.updateServiceConfig(entry.getKey(), entry.getValue());
+        if (fromCmVersionOpt.isPresent() && toCmVersionOpt.isPresent()) {
+            StackDto stack = stackDtoService.getById(stackId);
+            TemplatePreparationObject templatePreparationObject = stackToTemplatePreparationObjectConverter.convert(stack);
+            CmTemplateProcessor cmTemplateProcessor = centralCmTemplateUpdater.getCmTemplateProcessor(templatePreparationObject);
+            ClusterApi clusterApi = clusterApiConnectors.getConnector(stack);
+
+            Map<String, Map<String, String>> serviceConfigsToBeupdated =
+                    cmTemplateComponentConfigProviderProcessor.getServiceConfigsToBeUpdatedDuringUpgrade(
+                            cmTemplateProcessor,
+                            templatePreparationObject,
+                            fromCmVersionOpt.get(),
+                            toCmVersionOpt.get());
+            for (Map.Entry<String, Map<String, String>> entry : serviceConfigsToBeupdated.entrySet()) {
+                LOGGER.info("Updating service configs for service: {}", entry.getKey());
+                clusterApi.updateServiceConfig(entry.getKey(), entry.getValue());
+            }
+        } else {
+            LOGGER.warn("CM version is not present for the original or target image, skipping service config update during upgrade. " +
+                    "Original CM version: {}, Target CM version: {}", fromCmVersionOpt.orElse("N/A"), toCmVersionOpt.orElse("N/A"));
         }
     }
 }

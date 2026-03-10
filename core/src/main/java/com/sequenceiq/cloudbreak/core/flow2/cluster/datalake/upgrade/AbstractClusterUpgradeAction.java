@@ -19,6 +19,8 @@ import com.sequenceiq.flow.core.FlowState;
 public abstract class AbstractClusterUpgradeAction<P extends Payload>
         extends AbstractAction<FlowState, FlowEvent, ClusterUpgradeContext, P> {
 
+    protected static final String ORIGINAL_IMAGE = "ORIGINAL_IMAGE";
+
     protected static final String CURRENT_IMAGE = "CURRENT_IMAGE";
 
     protected static final String CURRENT_MODEL_IMAGE = "CURRENT_MODEL_IMAGE";
@@ -35,6 +37,10 @@ public abstract class AbstractClusterUpgradeAction<P extends Payload>
 
     protected AbstractClusterUpgradeAction(Class<P> payloadClass) {
         super(payloadClass);
+    }
+
+    protected Image getOriginalImage(Map<Object, Object> variables) {
+        return (Image) variables.get(ORIGINAL_IMAGE);
     }
 
     protected StatedImage getCurrentImage(Map<Object, Object> variables) {
