@@ -1,23 +1,26 @@
 package com.sequenceiq.environment.api.v1.encryptionprofile.validation;
 
+import java.util.Collection;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import jakarta.inject.Inject;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 
+import com.sequenceiq.cloudbreak.tls.EncryptionProfileConverter;
+import com.sequenceiq.cloudbreak.tls.EncryptionProfileProvider;
 import com.sequenceiq.common.api.encryptionprofile.TlsVersion;
 import com.sequenceiq.common.api.util.ValidatorUtil;
-import com.sequenceiq.environment.api.v1.encryptionprofile.config.EncryptionProfileConfig;
 import com.sequenceiq.environment.api.v1.encryptionprofile.model.EncryptionProfileRequest;
 
 public class EncryptionProfileRequestValidator implements ConstraintValidator<ValidEncryptionProfileRequest, EncryptionProfileRequest> {
 
-    @Autowired
-    private EncryptionProfileConfig encryptionProfileConfig;
+    @Inject
+    private EncryptionProfileProvider encryptionProfileProvider;
 
     @Override
     public boolean isValid(EncryptionProfileRequest request, ConstraintValidatorContext context) {
@@ -36,8 +39,24 @@ public class EncryptionProfileRequestValidator implements ConstraintValidator<Va
             return false;
         }
 
+        try {
+            EncryptionProfileConverter.toCipherSuites(request.getCipherSuites());
+        } catch (Exception ex) {
+            ValidatorUtil.addConstraintViolation(context,
+                    "cipherSuites is invalid. Please use IANA names for the cipher suites.");
+            return false;
+        }
+
         // Validate them against available ciphers for the specified TLS versions
-            Set<String> availableCipherSuites = encryptionProfileConfig.getAvailableCipherSet(tlsVersions);
+            Set<String> availableCipherSuites = encryptionProfileProvider
+                    .getAllCipherSuitesAvailableByTlsVersion()
+                    .entrySet()
+                    .stream()
+                    .filter(k -> tlsVersions.contains(TlsVersion.fromString(k.getKey())))
+                    .map(Map.Entry::getValue)
+                    .flatMap(Collection::stream)
+                    .collect(Collectors.toSet());
+
             Set<String> unsupportedCiphers = request.getCipherSuites()
                     .stream()
                     .filter(cipher -> !availableCipherSuites.contains(cipher))
@@ -51,9 +70,5 @@ public class EncryptionProfileRequestValidator implements ConstraintValidator<Va
             }
 
         return true;
-    }
-
-    public void setEncryptionProfileConfig(EncryptionProfileConfig encryptionProfileConfig) {
-        this.encryptionProfileConfig = encryptionProfileConfig;
     }
 }
