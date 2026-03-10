@@ -62,7 +62,7 @@ public class ClusterServicesRestartHandler extends ExceptionCatcherEventHandler<
             Optional<SdxBasicView> sdxBasicView = platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(stack.getEnvironmentCrn());
             CmTemplateProcessor blueprintProcessor = getCmTemplateProcessor(stack);
             if (request.isReallocateMemory()) {
-                apiConnectors.getConnector(stack).reallocateMemory();
+                apiConnectors.getConnector(stack).reallocateMemory(false);
             }
             if ((sdxBasicView.isPresent() && clusterServicesRestartService.isRemoteDataContextRefreshNeeded(stack, sdxBasicView.get()))
                     || request.isDatahubRefreshNeeded()) {

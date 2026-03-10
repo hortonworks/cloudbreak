@@ -11,9 +11,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ResetJvmParamsRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.SetDefaultJavaVersionRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.RangerRazEnabledV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.resetjvmparams.ResetJvmParamsV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.ExceptionResponse;
@@ -115,5 +117,11 @@ public class StackService {
                         notificationState
                 )
         );
+    }
+
+    public ResetJvmParamsV4Response resetJvmParams(String crn, ResetJvmParamsRequest request) {
+        LOGGER.info("Calling cloudbreak to reset JVM params for SDX cluster with CRN {}", crn);
+        return ThreadBasedUserCrnProvider.doAsInternalActor(
+                initiatorUserCrn -> stackV4Endpoint.resetJvmParams(WORKSPACE_ID_DEFAULT, crn, request, initiatorUserCrn));
     }
 }

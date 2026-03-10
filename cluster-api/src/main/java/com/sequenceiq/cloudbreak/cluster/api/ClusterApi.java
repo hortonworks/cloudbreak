@@ -9,6 +9,7 @@ import java.util.Set;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cluster.model.ParcelInfo;
 import com.sequenceiq.cloudbreak.cluster.model.ParcelOperationStatus;
+import com.sequenceiq.cloudbreak.cluster.model.resetjvmparams.ResetJvmParamsDiff;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterClientInitException;
 import com.sequenceiq.cloudbreak.cluster.status.ClusterStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
@@ -105,8 +106,12 @@ public interface ClusterApi {
         clusterModificationService().deployConfigAndRestartClusterServices(rollingRestart);
     }
 
-    default void reallocateMemory() throws Exception {
-        clusterModificationService().reallocateMemory();
+    default void reallocateMemory(boolean resetUserConfigs) throws Exception {
+        clusterModificationService().reallocateMemory(resetUserConfigs);
+    }
+
+    default ResetJvmParamsDiff reallocateMemoryDiff() {
+        return clusterModificationService().reallocateMemoryDiff();
     }
 
     default Set<ParcelInfo> gatherInstalledParcels(String stackName) {

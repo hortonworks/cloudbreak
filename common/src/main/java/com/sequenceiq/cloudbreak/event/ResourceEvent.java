@@ -658,6 +658,9 @@ public enum ResourceEvent {
     CLUSTER_SET_DEFAULT_JAVA_VERSION("cluster.set.default.java.version"),
     CLUSTER_SET_DEFAULT_JAVA_VERSION_FINISHED("cluster.set.default.java.version.finished"),
     CLUSTER_SET_DEFAULT_JAVA_VERSION_FAILED("cluster.set.default.java.version.failed"),
+    CLUSTER_RESET_JVM_PARAMS("cluster.reset.jvm.params"),
+    CLUSTER_RESET_JVM_PARAMS_FINISHED("cluster.reset.jvm.params.finished"),
+    CLUSTER_RESET_JVM_PARAMS_FAILED("cluster.reset.jvm.params.failed"),
 
     CLUSTER_UPDATE_PUBLIC_DNS_ENTRIES("cluster.update.public.dns.entries"),
     CLUSTER_UPDATE_PUBLIC_DNS_ENTRIES_FINISHED("cluster.update.public.dns.entries.finished"),

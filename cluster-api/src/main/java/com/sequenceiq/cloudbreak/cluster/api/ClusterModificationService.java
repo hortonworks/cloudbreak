@@ -11,6 +11,7 @@ import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cluster.model.CMConfigUpdateStrategy;
 import com.sequenceiq.cloudbreak.cluster.model.ParcelInfo;
 import com.sequenceiq.cloudbreak.cluster.model.ParcelOperationStatus;
+import com.sequenceiq.cloudbreak.cluster.model.resetjvmparams.ResetJvmParamsDiff;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.view.ClusterComponentView;
@@ -130,7 +131,9 @@ public interface ClusterModificationService {
 
     void restartMgmtServices() throws Exception;
 
-    void reallocateMemory() throws Exception;
+    void reallocateMemory(boolean resetUserConfigs) throws Exception;
+
+    ResetJvmParamsDiff reallocateMemoryDiff();
 
     String getStackCdhVersion(String stackName) throws Exception;
 }

@@ -231,6 +231,7 @@ class ReactorFlowManagerTest {
         underTest.triggerZookeeperToKraftMigrationFinalization(STACK_ID);
         underTest.triggerZookeeperToKraftMigrationRollback(STACK_ID);
         underTest.triggerUpdatePublicDnsEntriesInPem(STACK_ID);
+        underTest.triggerResetJvmParams(STACK_ID);
 
         int count = 0;
         for (Method method : underTest.getClass().getDeclaredMethods()) {

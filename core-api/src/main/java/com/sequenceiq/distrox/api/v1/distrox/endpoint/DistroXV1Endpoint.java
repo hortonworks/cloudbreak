@@ -89,6 +89,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.rotation.response.StackDatabase
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.CertificatesRotationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ChangeImageCatalogV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ResetJvmParamsRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.SetDefaultJavaVersionRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackAddVolumesRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackDeleteVolumesRequest;
@@ -107,6 +108,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.AttachRe
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.DetachRecipeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.UpdateRecipesV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recovery.RecoveryValidationV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.resetjvmparams.ResetJvmParamsV4Response;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.common.notification.NotificationState;
 import com.sequenceiq.cloudbreak.doc.Notes;
@@ -908,4 +910,24 @@ public interface DistroXV1Endpoint {
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     void modifyDataHubNotificationStateByCrn(@NotEmpty @ValidCrn(resource = DATAHUB) @PathParam("crn") String crn,
         @PathParam("notificationState") NotificationState notificationState);
+
+    @POST
+    @Path("name/{name}/reset_jvm_params")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Reset JVM params on the DataHub by its name",
+            operationId = "resetDataHubJvmParamsByName",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    ResetJvmParamsV4Response resetJvmParamsByName(@PathParam("name") String name,
+            @NotNull @Valid ResetJvmParamsRequest request);
+
+    @POST
+    @Path("crn/{crn}/reset_jvm_params")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Reset JVM params on the DataHub by its CRN",
+            operationId = "resetDataHubJvmParamsByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    ResetJvmParamsV4Response resetJvmParamsByCrn(@NotEmpty @ValidCrn(resource = DATAHUB) @PathParam("crn") String crn,
+            @NotNull @Valid ResetJvmParamsRequest request);
 }

@@ -70,6 +70,8 @@ import com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.event.Migrat
 import com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.event.MigrateZookeeperToKraftFlowChainTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.event.MigrateZookeeperToKraftRollbackTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.modifyselinux.event.CoreModifySeLinuxEvent;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.resetjvmparams.ResetJvmParamsFlowEvent;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.resetjvmparams.ResetJvmParamsTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.restart.RestartInstancesWithRdsStartEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.services.restart.event.ClusterServicesRestartTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.skumigration.SkuMigrationTriggerEvent;
@@ -612,6 +614,11 @@ public class ReactorFlowManager {
         String selector = FlowChainTriggers.SET_DEFAULT_JAVA_VERSION_CHAIN_TRIGGER_EVENT;
         return reactorNotifier.notify(stackId, selector,
                 new SetDefaultJavaVersionTriggerEvent(selector, stackId, javaVersion, restartServices, restartCM, rollingRestart));
+    }
+
+    public FlowIdentifier triggerResetJvmParams(Long stackId) {
+        String selector = ResetJvmParamsFlowEvent.RESET_JVM_PARAMS_EVENT.event();
+        return reactorNotifier.notify(stackId, selector, new ResetJvmParamsTriggerEvent(selector, stackId));
     }
 
     public FlowIdentifier triggerModifySelinux(Long stackId, SeLinux selinuxMode) {

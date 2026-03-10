@@ -63,6 +63,7 @@ import com.cloudera.api.swagger.model.ApiEntityTag;
 import com.cloudera.api.swagger.model.ApiGenericResponse;
 import com.cloudera.api.swagger.model.ApiHost;
 import com.cloudera.api.swagger.model.ApiHostNameList;
+import com.cloudera.api.swagger.model.ApiHostReallocateMemoryResponse;
 import com.cloudera.api.swagger.model.ApiHostRef;
 import com.cloudera.api.swagger.model.ApiHostRefList;
 import com.cloudera.api.swagger.model.ApiParcel;
@@ -87,6 +88,7 @@ import com.sequenceiq.cloudbreak.cluster.api.ClusterModificationService;
 import com.sequenceiq.cloudbreak.cluster.model.CMConfigUpdateStrategy;
 import com.sequenceiq.cloudbreak.cluster.model.ParcelInfo;
 import com.sequenceiq.cloudbreak.cluster.model.ParcelOperationStatus;
+import com.sequenceiq.cloudbreak.cluster.model.resetjvmparams.ResetJvmParamsDiff;
 import com.sequenceiq.cloudbreak.cluster.service.ClouderaManagerProductsProvider;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterClientInitException;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
@@ -97,6 +99,7 @@ import com.sequenceiq.cloudbreak.cm.config.ClouderaManagerFlinkConfigurationServ
 import com.sequenceiq.cloudbreak.cm.config.modification.ClouderaManagerConfigModificationService;
 import com.sequenceiq.cloudbreak.cm.config.modification.CmConfig;
 import com.sequenceiq.cloudbreak.cm.config.modification.CmServiceType;
+import com.sequenceiq.cloudbreak.cm.converter.ApiHostReallocateMemoryResponseConverter;
 import com.sequenceiq.cloudbreak.cm.exception.ClouderaManagerOperationFailedException;
 import com.sequenceiq.cloudbreak.cm.exception.ClouderaManagerParcelActivationTimeoutException;
 import com.sequenceiq.cloudbreak.cm.model.ClouderaManagerClientConfigDeployRequest;
@@ -400,7 +403,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
             refreshRemoteDataContextFromDatalakeInCaseOfDatahub(remoteDataContext);
             updateParcelSettings(products);
             if (JAVA_17.equals(stack.getStack().getJavaVersion())) {
-                reallocateMemory();
+                reallocateMemory(false);
             }
             restartMgmtServices();
             addFlinkServiceConfigurationIfNecessary(products);
@@ -675,13 +678,13 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     }
 
     @Override
-    public void reallocateMemory() {
+    public void reallocateMemory(boolean resetUserConfigs) {
         ClouderaManagerRepo clouderaManagerRepoDetails = clusterComponentProvider.getClouderaManagerRepoDetails(stack.getCluster().getId());
         if (CMRepositoryVersionUtil.isMemoryRelocationSupported(clouderaManagerRepoDetails.getVersion())) {
             try {
                 List<ApiHost> hosts = getHostsFromCM();
                 ApiHostNameList items = new ApiHostNameList().items(hosts.stream().map(ApiHost::getHostname).collect(Collectors.toList()));
-                ApiGenericResponse apiGenericResponse = clouderaManagerApiFactory.getHostsResourceApi(v55Client).reallocateMemory(items, false);
+                ApiGenericResponse apiGenericResponse = clouderaManagerApiFactory.getHostsResourceApi(v55Client).reallocateMemory(items, resetUserConfigs);
                 LOGGER.info("Reallocate response: {}", apiGenericResponse);
                 eventService.fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_CM_REALLOCATION_SUCCESSFUL);
             } catch (ApiException e) {
@@ -690,6 +693,30 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
             }
         } else {
             LOGGER.info("Memory relocation is not supported for Cloudera Manager version: {}", clouderaManagerRepoDetails.getVersion());
+        }
+    }
+
+    @Override
+    public ResetJvmParamsDiff reallocateMemoryDiff() {
+        ClouderaManagerRepo clouderaManagerRepoDetails = clusterComponentProvider.getClouderaManagerRepoDetails(stack.getCluster().getId());
+        if (CMRepositoryVersionUtil.isMemoryRelocationDiffSupported(clouderaManagerRepoDetails.getVersion())) {
+            try {
+                List<ApiHost> hosts = getHostsFromCM();
+                ApiHostNameList items = new ApiHostNameList().items(hosts.stream().map(ApiHost::getHostname).collect(Collectors.toList()));
+                ApiHostReallocateMemoryResponse apiHostReallocateMemoryResponse =
+                        clouderaManagerApiFactory.getHostsResourceApi(v55Client).reallocateMemoryDiff(items);
+                ResetJvmParamsDiff resetJvmParamsDiff = ApiHostReallocateMemoryResponseConverter.convert(apiHostReallocateMemoryResponse);
+                LOGGER.info("Reallocate response: {}", resetJvmParamsDiff);
+                eventService.fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_CM_REALLOCATION_SUCCESSFUL);
+                return resetJvmParamsDiff;
+            } catch (ApiException e) {
+                LOGGER.error("Error during memory reallocation! ", e);
+                eventService.fireCloudbreakEvent(stack.getId(), UPDATE_FAILED.name(), ResourceEvent.CLUSTER_CM_REALLOCATION_FAILED);
+                throw new ClouderaManagerOperationFailedException("Failed to get CM reallocate memory diff for stack: " + stack.getName());
+            }
+        } else {
+            LOGGER.info("Memory relocation is not supported for Cloudera Manager version: {}", clouderaManagerRepoDetails.getVersion());
+            return new ResetJvmParamsDiff();
         }
     }
 

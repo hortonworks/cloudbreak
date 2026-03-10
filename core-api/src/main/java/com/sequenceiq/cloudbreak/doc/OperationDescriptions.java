@@ -107,6 +107,7 @@ public class OperationDescriptions {
         public static final String AUTHORIZE_FOR_AUTOSCALE = "Authorize for Autoscale";
         public static final String IMD_UPDATE = "update instance metadata for stack's instances";
         public static final String REFRESH_ENTITLEMENTS_PARAMS = "Refresh configurations based on entitlements";
+        public static final String RESET_JVM_PARAMS = "Reset JVM params on the cluster";
     }
 
     public static class ClusterOpDescription {

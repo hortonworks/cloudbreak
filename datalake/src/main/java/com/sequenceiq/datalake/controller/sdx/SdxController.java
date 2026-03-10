@@ -32,10 +32,12 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.rotation.response.StackDatabaseServerCertificateStatusV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.CertificatesRotationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ResetJvmParamsRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.SetDefaultJavaVersionRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackAddVolumesRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.resetjvmparams.ResetJvmParamsV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
@@ -701,6 +703,19 @@ public class SdxController implements SdxEndpoint {
     @CheckPermissionByResourceCrn(action =  AuthorizationResourceAction.MODIFY_DATALAKE)
     public void modifyNotificationStateByCrn(@ResourceCrn String crn, NotificationState notificationState) {
         stackService.modifyNotificationState(getSdxClusterByCrn(crn), notificationState);
+    }
+
+    @Override
+    @CheckPermissionByResourceName(action = UPGRADE_DATALAKE)
+    public ResetJvmParamsV4Response resetJvmParamsByName(@ResourceName String name, ResetJvmParamsRequest request) {
+        SdxCluster sdxCluster = getSdxClusterByName(name);
+        return stackService.resetJvmParams(sdxCluster.getCrn(), request);
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = UPGRADE_DATALAKE)
+    public ResetJvmParamsV4Response resetJvmParamsByCrn(@ResourceCrn String crn, ResetJvmParamsRequest request) {
+        return stackService.resetJvmParams(crn, request);
     }
 
     private SdxCluster getSdxClusterByName(String name) {

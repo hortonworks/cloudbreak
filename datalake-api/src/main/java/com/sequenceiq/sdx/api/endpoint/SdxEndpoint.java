@@ -35,9 +35,11 @@ import org.springframework.validation.annotation.Validated;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.rotation.response.StackDatabaseServerCertificateStatusV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.CertificatesRotationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ResetJvmParamsRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.SetDefaultJavaVersionRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackAddVolumesRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.resetjvmparams.ResetJvmParamsV4Response;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.security.internal.RequestObject;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateResponse;
@@ -644,5 +646,26 @@ public interface SdxEndpoint {
             operationId = "updateDataLakePublicDnsEntriesByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier updatePublicDnsEntriesByCrn(@NotEmpty @ValidCrn(resource = VM_DATALAKE) @PathParam("crn") String crn);
+
+    @POST
+    @Path("name/{name}/reset_jvm_params")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Reset JVM params on the Data Lake by its name",
+            operationId = "resetDataLakeJvmParamsByName",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    ResetJvmParamsV4Response resetJvmParamsByName(@PathParam("name") String name,
+            @NotNull @Valid ResetJvmParamsRequest request);
+
+    @POST
+    @Path("crn/{crn}/reset_jvm_params")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Reset JVM params on the Data Lake by its CRN",
+            operationId = "resetDataLakeJvmParamsByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    ResetJvmParamsV4Response resetJvmParamsByCrn(@NotEmpty @ValidCrn(resource = VM_DATALAKE) @PathParam("crn") String crn,
+            @NotNull @Valid ResetJvmParamsRequest request);
+
 }
 

@@ -30,6 +30,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ClusterRepairV4R
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ExternalDatabaseManageDatabaseUserV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.MaintenanceModeV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ResetJvmParamsRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.RotateSaltPasswordRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.SetDefaultJavaVersionRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackImageChangeV4Request;
@@ -63,6 +64,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.DetachRe
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.UpdateRecipesV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recovery.RecoveryV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recovery.RecoveryValidationV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.resetjvmparams.ResetJvmParamsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.rotaterdscert.StackRotateRdsCertificateV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.RdsUpgradeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.StackCcmUpgradeV4Response;
@@ -835,5 +837,12 @@ public class StackV4Controller extends NotificationController implements StackV4
     @Override
     public void modifyUserDefinedTagsInternal(Long workspaceId, @ResourceCrn String crn, Map<String, String> tags) {
         stackOperations.modifyUserDefinedTags(crn, tags);
+    }
+
+    @Override
+    @InternalOnly
+    public ResetJvmParamsV4Response resetJvmParams(Long workspaceId, @ResourceCrn String crn, ResetJvmParamsRequest request,
+            @InitiatorUserCrn String initiatorUserCrn) {
+        return stackOperationService.resetJvmParams(NameOrCrn.ofCrn(crn), ThreadBasedUserCrnProvider.getAccountId(), request.isDryRun());
     }
 }

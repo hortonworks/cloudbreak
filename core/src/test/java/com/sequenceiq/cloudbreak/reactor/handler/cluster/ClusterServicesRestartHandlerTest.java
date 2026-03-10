@@ -104,7 +104,7 @@ public class ClusterServicesRestartHandlerTest {
         when(connector.clusterModificationService()).thenReturn(clusterModificationService);
         underTest.accept(new Event(new ClusterServicesRestartRequest(stack.getId(), true, false, true)));
 
-        verify(connector, times(1)).reallocateMemory();
+        verify(connector, times(1)).reallocateMemory(false);
         verify(clusterModificationService, times(1)).rollingRestartServices(false);
         verify(clusterModificationService, times(0)).restartClusterServices();
 

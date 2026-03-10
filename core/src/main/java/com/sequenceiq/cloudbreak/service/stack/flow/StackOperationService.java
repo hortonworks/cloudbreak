@@ -50,6 +50,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.SetDefaultJavaVersionRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.SaltPasswordStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.resetjvmparams.ResetJvmParamsV4Response;
 import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
@@ -72,6 +73,7 @@ import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.quartz.model.StaleAwareJobRescheduler;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterReallocateMemoryService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterRepairService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterOperationService;
@@ -116,6 +118,9 @@ public class StackOperationService {
 
     @Inject
     private ReactorFlowManager flowManager;
+
+    @Inject
+    private ClusterReallocateMemoryService clusterReallocateMemoryService;
 
     @Inject
     private StackUpdater stackUpdater;
@@ -683,6 +688,11 @@ public class StackOperationService {
         defaultJavaVersionUpdateValidator.validate(stack, request);
         return flowManager.triggerSetDefaultJavaVersion(stack.getId(), request.getDefaultJavaVersion(), request.isRestartServices(),
                 request.isRestartCM(), request.isRollingRestart());
+    }
+
+    public ResetJvmParamsV4Response resetJvmParams(NameOrCrn nameOrCrn, String accountId, boolean dryRun) {
+        StackDto stack = stackDtoService.getByNameOrCrn(nameOrCrn, accountId);
+        return clusterReallocateMemoryService.resetJvmParams(stack, dryRun);
     }
 
     public FlowIdentifier triggerModifySELinux(NameOrCrn nameOrCrn, String accountId, SeLinux selinuxMode) {

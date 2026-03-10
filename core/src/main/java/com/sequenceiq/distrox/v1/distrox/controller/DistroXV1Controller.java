@@ -52,6 +52,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.rotation.response.StackDatabase
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.CertificatesRotationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ChangeImageCatalogV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ResetJvmParamsRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.SetDefaultJavaVersionRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackAddVolumesRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackDeleteVolumesRequest;
@@ -73,6 +74,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.AttachRe
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.DetachRecipeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.UpdateRecipesV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recovery.RecoveryValidationV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.resetjvmparams.ResetJvmParamsV4Response;
 import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
@@ -966,5 +968,16 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
                 NameOrCrn.ofCrn(crn),
                 ThreadBasedUserCrnProvider.getAccountId(),
                 notificationState);
+    }
+
+    @CheckPermissionByResourceName(action = UPGRADE_DATAHUB)
+    public ResetJvmParamsV4Response resetJvmParamsByName(@ResourceName String name, ResetJvmParamsRequest request) {
+        return stackOperationService.resetJvmParams(NameOrCrn.ofName(name), ThreadBasedUserCrnProvider.getAccountId(), request.isDryRun());
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = UPGRADE_DATAHUB)
+    public ResetJvmParamsV4Response resetJvmParamsByCrn(@ResourceCrn String crn, ResetJvmParamsRequest request) {
+        return stackOperationService.resetJvmParams(NameOrCrn.ofCrn(crn), ThreadBasedUserCrnProvider.getAccountId(), request.isDryRun());
     }
 }

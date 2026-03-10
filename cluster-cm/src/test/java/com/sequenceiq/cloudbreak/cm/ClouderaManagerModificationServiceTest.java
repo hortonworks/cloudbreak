@@ -6,6 +6,7 @@ import static com.sequenceiq.cloudbreak.cm.util.ClouderaManagerConstants.SUMMARY
 import static com.sequenceiq.cloudbreak.cm.util.TestUtil.CDH;
 import static com.sequenceiq.cloudbreak.cm.util.TestUtil.FLINK;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_13_1_500;
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_13_2_0;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_1_0;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_4_3;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_5_1;
@@ -75,11 +76,13 @@ import com.cloudera.api.swagger.model.ApiBatchResponse;
 import com.cloudera.api.swagger.model.ApiBatchResponseElement;
 import com.cloudera.api.swagger.model.ApiCommand;
 import com.cloudera.api.swagger.model.ApiCommandList;
+import com.cloudera.api.swagger.model.ApiConfigRecord;
 import com.cloudera.api.swagger.model.ApiConfigStalenessStatus;
 import com.cloudera.api.swagger.model.ApiEntityTag;
 import com.cloudera.api.swagger.model.ApiHost;
 import com.cloudera.api.swagger.model.ApiHostList;
 import com.cloudera.api.swagger.model.ApiHostNameList;
+import com.cloudera.api.swagger.model.ApiHostReallocateMemoryResponse;
 import com.cloudera.api.swagger.model.ApiHostRef;
 import com.cloudera.api.swagger.model.ApiHostRefList;
 import com.cloudera.api.swagger.model.ApiParcel;
@@ -91,6 +94,7 @@ import com.cloudera.api.swagger.model.ApiRoleState;
 import com.cloudera.api.swagger.model.ApiService;
 import com.cloudera.api.swagger.model.ApiServiceList;
 import com.cloudera.api.swagger.model.ApiServiceState;
+import com.cloudera.api.swagger.model.AutoConfigApplicability;
 import com.cloudera.api.swagger.model.HTTPMethod;
 import com.google.common.collect.HashBasedTable;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
@@ -99,6 +103,8 @@ import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.cluster.model.CMConfigUpdateStrategy;
 import com.sequenceiq.cloudbreak.cluster.model.ParcelOperationStatus;
+import com.sequenceiq.cloudbreak.cluster.model.resetjvmparams.JvmConfigApplicability;
+import com.sequenceiq.cloudbreak.cluster.model.resetjvmparams.ResetJvmParamsDiff;
 import com.sequenceiq.cloudbreak.cluster.service.ClouderaManagerProductsProvider;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiClientProvider;
@@ -1946,5 +1952,48 @@ class ClouderaManagerModificationServiceTest {
         underTest.startClouderaManagerService("YARN", true);
 
         verify(clouderaManagerServiceManagementService, times(0)).startClouderaManagerService(v31Client, stack, "YARN", true);
+    }
+
+    @Test
+    void testReallocateMemoryDiffWhenVersionNotSupported() {
+        when(clusterComponentProvider.getClouderaManagerRepoDetails(CLUSTER_ID)).thenReturn(clouderaManagerRepo);
+        when(clouderaManagerRepo.getVersion()).thenReturn(CLOUDERAMANAGER_VERSION_7_6_0.getVersion());
+        ResetJvmParamsDiff result = underTest.reallocateMemoryDiff();
+        assertTrue(result.getConfigsBefore().isEmpty());
+        assertTrue(result.getConfigsAfter().isEmpty());
+        verifyNoInteractions(hostsResourceApi);
+    }
+
+    @Test
+    void testReallocateMemoryDiffSuccess() throws ApiException {
+        when(clusterComponentProvider.getClouderaManagerRepoDetails(CLUSTER_ID)).thenReturn(clouderaManagerRepo);
+        when(clouderaManagerRepo.getVersion()).thenReturn(CLOUDERAMANAGER_VERSION_7_13_2_0.getVersion());
+        when(clouderaManagerApiFactory.getHostsResourceApi(any())).thenReturn(hostsResourceApi);
+        setUpReadHosts(false);
+
+        ApiConfigRecord configRecordBefore = new ApiConfigRecord()
+                .name("heap_size").value("1024")
+                .applicability(AutoConfigApplicability.RECONFIGURABLE);
+        ApiConfigRecord configRecordAfter = new ApiConfigRecord()
+                .name("heap_size").value("2048")
+                .applicability(AutoConfigApplicability.RECONFIGURABLE);
+        ApiHostReallocateMemoryResponse apiResponse = new ApiHostReallocateMemoryResponse()
+                .configsBefore(List.of(configRecordBefore))
+                .configsAfter(List.of(configRecordAfter));
+        when(hostsResourceApi.reallocateMemoryDiff(any(ApiHostNameList.class))).thenReturn(apiResponse);
+
+        ResetJvmParamsDiff result = underTest.reallocateMemoryDiff();
+        ArgumentCaptor<ApiHostNameList> hostNameListCaptor = ArgumentCaptor.forClass(ApiHostNameList.class);
+        verify(hostsResourceApi).reallocateMemoryDiff(hostNameListCaptor.capture());
+        assertEquals(List.of("original"), hostNameListCaptor.getValue().getItems());
+        assertFalse(result.getConfigsBefore().isEmpty());
+        assertEquals("heap_size", result.getConfigsBefore().getFirst().getName());
+        assertEquals("1024", result.getConfigsBefore().getFirst().getValue());
+        assertEquals(JvmConfigApplicability.RECONFIGURABLE, result.getConfigsBefore().getFirst().getApplicability());
+        assertFalse(result.getConfigsAfter().isEmpty());
+        assertEquals("heap_size", result.getConfigsAfter().getFirst().getName());
+        assertEquals("2048", result.getConfigsAfter().getFirst().getValue());
+        assertEquals(JvmConfigApplicability.RECONFIGURABLE, result.getConfigsAfter().getFirst().getApplicability());
+        verify(eventService).fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_CM_REALLOCATION_SUCCESSFUL);
     }
 }
