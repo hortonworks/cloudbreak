@@ -60,8 +60,8 @@ public class ZookeeperToKraftMigrationValidator {
             throw new BadRequestException("Cannot rollback KRaft migration. KRaft migration is already finalized for this cluster.");
         }
 
-        if (!KraftMigrationStatus.BROKERS_IN_KRAFT.equals(kraftMigrationState)) {
-            throw new BadRequestException("Cannot rollback KRaft migration. The cluster has not been migrated to KRaft yet.");
+        if (KraftMigrationStatus.ZOOKEEPER_INSTALLED.equals(kraftMigrationState)) {
+            throw new BadRequestException("Cannot rollback KRaft migration. The cluster still uses Zookeeper.");
         }
     }
 

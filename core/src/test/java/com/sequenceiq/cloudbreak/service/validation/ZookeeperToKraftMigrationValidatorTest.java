@@ -269,7 +269,7 @@ class ZookeeperToKraftMigrationValidatorTest {
         BadRequestException exception = assertThrows(BadRequestException.class,
                 () -> underTest.validateZookeeperToKraftMigrationStateForRollback(KraftMigrationStatus.ZOOKEEPER_INSTALLED));
 
-        assertEquals("Cannot rollback KRaft migration. The cluster has not been migrated to KRaft yet.",
+        assertEquals("Cannot rollback KRaft migration. The cluster still uses Zookeeper.",
                 exception.getMessage());
     }
 
