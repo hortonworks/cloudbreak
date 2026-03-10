@@ -14,6 +14,7 @@ import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiConfig;
 import com.cloudera.api.swagger.model.ApiConfigList;
+import com.cloudera.api.swagger.model.ApiRoleConfigGroupList;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterKraftMigrationStatusService;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterClientInitException;
@@ -22,6 +23,7 @@ import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiClientProvider;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientInitException;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.cm.exception.ClouderaManagerOperationFailedException;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 
@@ -30,8 +32,6 @@ import com.sequenceiq.cloudbreak.view.ClusterView;
 public class ClouderaManagerClusterKraftMigrationStatusService implements ClusterKraftMigrationStatusService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerClusterKraftMigrationStatusService.class);
-
-    private static final String FULL_VIEW = "FULL";
 
     private static final String KAFKA_SERVICE_TYPE = "KAFKA";
 
@@ -85,7 +85,9 @@ public class ClouderaManagerClusterKraftMigrationStatusService implements Cluste
     @Override
     public KraftMigrationStatus getKraftMigrationStatus() {
         String clusterName = stack.getCluster().getName();
+        long currentTimeMillis = System.currentTimeMillis();
         String serviceName = getKafkaServiceName(clusterName);
+        LOGGER.debug("Service name retrieval on cluster {} took {} ms", clusterName, System.currentTimeMillis() - currentTimeMillis);
 
         try {
             return determineStatusFromConfigs(clusterName, serviceName);
@@ -108,13 +110,11 @@ public class ClouderaManagerClusterKraftMigrationStatusService implements Cluste
     private KraftMigrationStatus determineStatusFromConfigs(String clusterName, String serviceName) throws ApiException {
         RoleConfigGroupsResourceApi roleConfigGroupsResourceApi = clouderaManagerApiFactory.getRoleConfigGroupsResourceApi(client);
 
-        String kraftRoleConfigGroupName = configService.getRoleConfigGroupNameByTypeAndServiceName(
-                KRAFT_ROLE_TYPE, clusterName, serviceName, roleConfigGroupsResourceApi);
-        String kafkaBrokerConfigGroupName = configService.getRoleConfigGroupNameByTypeAndServiceName(
-                KAFKA_BROKER_ROLE_TYPE, clusterName, serviceName, roleConfigGroupsResourceApi);
-
-        ApiConfigList kafkaBrokerConfigList = roleConfigGroupsResourceApi.readConfig(clusterName, kafkaBrokerConfigGroupName, serviceName, FULL_VIEW);
-        ApiConfigList kraftConfigList = roleConfigGroupsResourceApi.readConfig(clusterName, kraftRoleConfigGroupName, serviceName, FULL_VIEW);
+        long start = System.currentTimeMillis();
+        ApiRoleConfigGroupList roleConfigGroupList = configService.getRoleConfigGroupList(clusterName, serviceName, roleConfigGroupsResourceApi);
+        ApiConfigList kraftConfigList = getApiConfigListForType(roleConfigGroupList, KRAFT_ROLE_TYPE);
+        ApiConfigList kafkaBrokerConfigList = getApiConfigListForType(roleConfigGroupList, KAFKA_BROKER_ROLE_TYPE);
+        LOGGER.debug("Determining KRaft migration status for cluster {}. RoleConfigGroups read took {} ms", clusterName, System.currentTimeMillis() - start);
 
         ApiConfig metadataStoreConfig = retrieveConfig(kafkaBrokerConfigList, METADATA_STORE_CONFIG);
         ApiConfig kafkaBrokerConfig = retrieveConfig(kafkaBrokerConfigList, KAFKA_PROPERTIES_ROLE_SAFETY_VALVE_CONFIG);
@@ -157,6 +157,15 @@ public class ClouderaManagerClusterKraftMigrationStatusService implements Cluste
             return KraftMigrationStatus.BROKERS_IN_MIGRATION;
         }
         return KraftMigrationStatus.NOT_APPLICABLE;
+    }
+
+    private ApiConfigList getApiConfigListForType(ApiRoleConfigGroupList roleConfigGroupList, String kraftRoleType) {
+        return roleConfigGroupList.getItems()
+                .stream()
+                .filter(roleConfigGroup -> kraftRoleType.equals(roleConfigGroup.getRoleType()))
+                .findFirst()
+                .orElseThrow(() -> new NotFoundException(String.format("No role found with %s role type", kraftRoleType)))
+                .getConfig();
     }
 
     private ApiConfig retrieveConfig(ApiConfigList configList, String configName) {

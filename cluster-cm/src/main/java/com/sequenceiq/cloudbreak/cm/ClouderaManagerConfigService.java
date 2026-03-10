@@ -174,9 +174,14 @@ public class ClouderaManagerConfigService {
         }
     }
 
+    public ApiRoleConfigGroupList getRoleConfigGroupList(String clusterName, String serviceName, RoleConfigGroupsResourceApi roleConfigGroupsResourceApi)
+            throws ApiException {
+        return roleConfigGroupsResourceApi.readRoleConfigGroups(clusterName, serviceName);
+    }
+
     String getRoleConfigGroupNameByTypeAndServiceName(String roleType, String clusterName, String serviceName,
             RoleConfigGroupsResourceApi roleConfigGroupsResourceApi) throws ApiException {
-        ApiRoleConfigGroupList roleConfigGroupList = roleConfigGroupsResourceApi.readRoleConfigGroups(clusterName, serviceName);
+        ApiRoleConfigGroupList roleConfigGroupList = getRoleConfigGroupList(clusterName, serviceName, roleConfigGroupsResourceApi);
         return roleConfigGroupList.getItems()
                 .stream()
                 .filter(roleConfigGroup -> roleType.equals(roleConfigGroup.getRoleType()))

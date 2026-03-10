@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.cm;
 
-import static com.sequenceiq.cloudbreak.cm.ClouderaManagerClusterStatusService.FULL_VIEW;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.lenient;
@@ -26,6 +25,8 @@ import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiConfig;
 import com.cloudera.api.swagger.model.ApiConfigList;
+import com.cloudera.api.swagger.model.ApiRoleConfigGroup;
+import com.cloudera.api.swagger.model.ApiRoleConfigGroupList;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterClientInitException;
 import com.sequenceiq.cloudbreak.cluster.status.KraftMigrationStatus;
@@ -97,10 +98,6 @@ public class ClouderaManagerClusterKraftMigrationStatusServiceTest {
         String kafkaRoleConfigGroupName = "kafkaRoleConfigGroupName";
 
         when(configService.getServiceName(CLUSTER_NAME, "KAFKA", servicesResourceApi)).thenReturn(Optional.of(serviceName));
-        when(configService.getRoleConfigGroupNameByTypeAndServiceName("KRAFT", CLUSTER_NAME, serviceName, roleConfigGroupsResourceApi))
-                .thenReturn(kraftRoleConfigGroupName);
-        when(configService.getRoleConfigGroupNameByTypeAndServiceName("KAFKA_BROKER", CLUSTER_NAME, serviceName, roleConfigGroupsResourceApi))
-                .thenReturn(kafkaRoleConfigGroupName);
 
         ApiConfigList kraftConfigList = new ApiConfigList();
         kraftConfigList.addItemsItem(apiConfig("kraft.properties_role_safety_valve", kraftSafetyValve));
@@ -109,8 +106,11 @@ public class ClouderaManagerClusterKraftMigrationStatusServiceTest {
         kafkaConfigList.addItemsItem(apiConfig("metadata.store", metadataStore));
         kafkaConfigList.addItemsItem(apiConfig("kafka.properties_role_safety_valve", kafkaBrokerSafetyValve));
 
-        when(roleConfigGroupsResourceApi.readConfig(CLUSTER_NAME, kraftRoleConfigGroupName, serviceName, FULL_VIEW)).thenReturn(kraftConfigList);
-        when(roleConfigGroupsResourceApi.readConfig(CLUSTER_NAME, kafkaRoleConfigGroupName, serviceName, FULL_VIEW)).thenReturn(kafkaConfigList);
+        ApiRoleConfigGroupList apiRoleConfigGroupList = new ApiRoleConfigGroupList()
+                .addItemsItem(new ApiRoleConfigGroup().roleType("KRAFT").name(kraftRoleConfigGroupName).config(kraftConfigList))
+                .addItemsItem(new ApiRoleConfigGroup().roleType("KAFKA_BROKER").name(kafkaRoleConfigGroupName).config(kafkaConfigList));
+        when(configService.getRoleConfigGroupList(CLUSTER_NAME, serviceName, roleConfigGroupsResourceApi))
+                .thenReturn(apiRoleConfigGroupList);
 
         assertEquals(expectedStatus, subject.getKraftMigrationStatus());
     }
@@ -130,7 +130,7 @@ public class ClouderaManagerClusterKraftMigrationStatusServiceTest {
         String kafkaRoleConfigGroupName = "kafkaRoleConfigGroupName";
 
         when(configService.getServiceName(CLUSTER_NAME, "KAFKA", servicesResourceApi)).thenReturn(Optional.of(serviceName));
-        when(configService.getRoleConfigGroupNameByTypeAndServiceName("KRAFT", CLUSTER_NAME, serviceName, roleConfigGroupsResourceApi))
+        when(configService.getRoleConfigGroupList(CLUSTER_NAME, serviceName, roleConfigGroupsResourceApi))
                 .thenThrow(ApiException.class);
 
         Exception expectedException = assertThrows(ClouderaManagerOperationFailedException.class, () -> subject.getKraftMigrationStatus());
