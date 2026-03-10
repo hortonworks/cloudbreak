@@ -1,6 +1,5 @@
 package com.sequenceiq.freeipa.service.telemetry;
 
-import static com.sequenceiq.cloudbreak.tls.CipherSuitesLimitType.BLACKBOX_EXPORTER;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import java.io.IOException;
@@ -48,7 +47,6 @@ import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringServiceType;
 import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringUrlResolver;
 import com.sequenceiq.cloudbreak.telemetry.orchestrator.TelemetryConfigProvider;
 import com.sequenceiq.cloudbreak.telemetry.orchestrator.TelemetrySaltPillarDecorator;
-import com.sequenceiq.cloudbreak.tls.EncryptionProfileProvider;
 import com.sequenceiq.common.api.telemetry.model.DataBusCredential;
 import com.sequenceiq.common.api.telemetry.model.Logging;
 import com.sequenceiq.common.api.telemetry.model.Monitoring;
@@ -56,13 +54,9 @@ import com.sequenceiq.common.api.telemetry.model.MonitoringCredential;
 import com.sequenceiq.common.api.telemetry.model.SensitiveLoggingComponent;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.common.api.telemetry.model.VmLog;
-import com.sequenceiq.environment.api.v1.encryptionprofile.model.EncryptionProfileResponse;
-import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.AltusMachineUserService;
-import com.sequenceiq.freeipa.service.client.CachedEncryptionProfileClientService;
-import com.sequenceiq.freeipa.service.client.CachedEnvironmentClientService;
 import com.sequenceiq.freeipa.service.image.ImageService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
@@ -110,15 +104,6 @@ public class TelemetryConfigService implements TelemetryConfigProvider, Telemetr
     @Inject
     private TransactionService transactionService;
 
-    @Inject
-    private CachedEnvironmentClientService environmentService;
-
-    @Inject
-    private EncryptionProfileProvider encryptionProfileProvider;
-
-    @Inject
-    private CachedEncryptionProfileClientService cachedEncryptionProfileClientService;
-
     @Override
     public Map<String, SaltPillarProperties> createTelemetryConfigs(Long stackId, Set<TelemetryComponentType> components) {
         Stack stack = stackService.getStackById(stackId);
@@ -142,17 +127,7 @@ public class TelemetryConfigService implements TelemetryConfigProvider, Telemetr
         telemetryContext.setClusterDetails(createClusterDetails(stack, databusContext));
         NodeStatusContext nodeStatusContext = createNodeStatusContext(stack);
         telemetryContext.setNodeStatusContext(nodeStatusContext);
-        DetailedEnvironmentResponse environmentResponse = environmentService.getByCrn(stack.getEnvironmentCrn());
 
-        EncryptionProfileResponse encryptionProfileResponse = cachedEncryptionProfileClientService.getByCrnOrDefaultIfEmpty(
-                environmentResponse.getEncryptionProfileCrn());
-        Map<String, List<String>> userCipherSuits =
-                Optional.ofNullable(encryptionProfileResponse)
-                        .map(EncryptionProfileResponse::getCipherSuites)
-                        .orElse(null);
-        List<String> tlsCipherSuitesBlackBoxExporter = encryptionProfileProvider
-                .getTlsCipherSuitesIanaList(userCipherSuits, BLACKBOX_EXPORTER);
-        telemetryContext.setTlsCipherSuites(tlsCipherSuitesBlackBoxExporter);
         if (telemetry != null) {
             telemetryContext.setLogShipperContext(createLogShipperContext(stack, telemetry));
             telemetryContext.setMonitoringContext(createMonitoringContext(stack, telemetry, nodeStatusContext, cdpAccessKeyType));

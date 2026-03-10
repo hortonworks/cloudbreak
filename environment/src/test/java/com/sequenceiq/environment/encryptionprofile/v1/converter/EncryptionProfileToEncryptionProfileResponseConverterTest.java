@@ -101,24 +101,6 @@ class EncryptionProfileToEncryptionProfileResponseConverterTest {
     }
 
     @Test
-    void testConvertEmptyCipherSuitesReturnEmptyMap() {
-        encryptionProfile.setCipherSuites(Collections.emptyList());
-
-        EncryptionProfileResponse response = converter.convert(encryptionProfile);
-
-        assertThat(response.getCipherSuites()).isEmpty();
-    }
-
-    @Test
-    void testConvertNullCipherSuitesReturnEmptyMap() {
-        encryptionProfile.setCipherSuites(null);
-
-        EncryptionProfileResponse response = converter.convert(encryptionProfile);
-
-        assertThat(response.getCipherSuites()).isEmpty();
-    }
-
-    @Test
     void testConvertUnsupportedTlsVersionsReturnEmptyCipherSets() {
         when(encryptionProfileConfig.getAvailableCiphers(TlsVersion.TLS_1_2)).thenReturn(Collections.emptySet());
         when(encryptionProfileConfig.getAvailableCiphers(TlsVersion.TLS_1_3)).thenReturn(Collections.emptySet());

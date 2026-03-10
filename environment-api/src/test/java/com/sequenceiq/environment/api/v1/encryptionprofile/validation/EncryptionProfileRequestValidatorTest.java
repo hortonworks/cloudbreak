@@ -22,8 +22,6 @@ import jakarta.validation.ConstraintValidatorContext.ConstraintViolationBuilder.
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import com.sequenceiq.cloudbreak.tls.CipherSuiteProvider;
-import com.sequenceiq.cloudbreak.tls.EncryptionProfileProvider;
 import com.sequenceiq.common.api.encryptionprofile.TlsVersion;
 import com.sequenceiq.environment.api.v1.encryptionprofile.config.EncryptionProfileConfig;
 import com.sequenceiq.environment.api.v1.encryptionprofile.model.EncryptionProfileRequest;
@@ -37,11 +35,8 @@ public class EncryptionProfileRequestValidatorTest {
     @BeforeEach
     void setup() {
         EncryptionProfileConfig encryptionProfileConfig = buildTestEncryptionProfileConfig();
-        CipherSuiteProvider cipherSuiteProvider = new CipherSuiteProvider();
-        EncryptionProfileProvider encryptionProfileProvider = new EncryptionProfileProvider(cipherSuiteProvider);
         validator = new EncryptionProfileRequestValidator();
         validator.setEncryptionProfileConfig(encryptionProfileConfig);
-        validator.setEncryptionProfileProvider(encryptionProfileProvider);
 
         context = mock(ConstraintValidatorContext.class);
         ConstraintViolationBuilder violationBuilder = mock(ConstraintViolationBuilder.class);
@@ -104,7 +99,9 @@ public class EncryptionProfileRequestValidatorTest {
         request.setTlsVersions(tls);
 
         boolean result = validator.isValid(request, context);
-        assertTrue(result);
+
+        assertFalse(result);
+        verify(context).buildConstraintViolationWithTemplate("cipherSuites is a mandatory field and must not be empty.");
     }
 
     @Test
@@ -133,7 +130,7 @@ public class EncryptionProfileRequestValidatorTest {
 
         boolean result = validator.isValid(request, context);
         assertFalse(result);
-        verify(context).buildConstraintViolationWithTemplate(contains("The following cipher(s) are not allowed: [INVALID_CIPHER]"));
+        verify(context).buildConstraintViolationWithTemplate("Unsupported cipher suite(s) for the given TLS versions: INVALID_CIPHER");
     }
 
     @Test

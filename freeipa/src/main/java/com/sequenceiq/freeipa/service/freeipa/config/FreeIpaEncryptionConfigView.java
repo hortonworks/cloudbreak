@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.sequenceiq.cloudbreak.tls.EncryptionProfileConverter;
 import com.sequenceiq.cloudbreak.tls.EncryptionProfileProvider;
 import com.sequenceiq.environment.api.v1.encryptionprofile.model.EncryptionProfileResponse;
 
@@ -26,15 +27,11 @@ public class FreeIpaEncryptionConfigView {
         Set<String> userTlsVersions = encryptionProfileResponse.getTlsVersions();
         Map<String, List<String>> userEncryptionProfileMap = encryptionProfileResponse.getCipherSuites();
         boolean legacyEncryptionProfile = encryptionProfileResponse.isLegacy();
-        tlsVersionsSpaceSeparated = encryptionProfileProvider.getTlsVersions(userTlsVersions, " ");
-        tlsCipherSuites = encryptionProfileProvider
-                .getOpenSslCipherSuites(userEncryptionProfileMap, DEFAULT, false, userTlsVersions, legacyEncryptionProfile);
-        tlsCipherSuitesRedHat8 = encryptionProfileProvider
-                .getOpenSslCipherSuites(userEncryptionProfileMap, REDHAT_VERSION8, false, userTlsVersions, legacyEncryptionProfile);
-        tls12CipherSuites = encryptionProfileProvider
-                .getDefaultRecommendedTls12CipherSuites(false);
-        tls13CipherSuites = encryptionProfileProvider
-                .getTls13CipherSuites(userEncryptionProfileMap, userTlsVersions);
+        tlsVersionsSpaceSeparated = EncryptionProfileConverter.getTlsVersionsSeparatedBySpace(userTlsVersions);
+        tlsCipherSuites = encryptionProfileProvider.getOpenSslCipherSuites(userEncryptionProfileMap, DEFAULT, legacyEncryptionProfile);
+        tlsCipherSuitesRedHat8 = encryptionProfileProvider.getOpenSslCipherSuites(userEncryptionProfileMap, REDHAT_VERSION8, legacyEncryptionProfile);
+        tls12CipherSuites = encryptionProfileProvider.getDefaultTls12CipherSuites(false);
+        tls13CipherSuites = encryptionProfileProvider.getTls13CipherSuites(userEncryptionProfileMap);
     }
 
     public Map<String, Object> toMap() {

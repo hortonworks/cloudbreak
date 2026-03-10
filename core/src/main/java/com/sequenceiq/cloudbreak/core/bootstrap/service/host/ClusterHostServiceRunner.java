@@ -144,6 +144,7 @@ import com.sequenceiq.cloudbreak.telemetry.orchestrator.TelemetrySaltPillarDecor
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.views.RdsView;
 import com.sequenceiq.cloudbreak.template.views.provider.RdsViewProvider;
+import com.sequenceiq.cloudbreak.tls.EncryptionProfileConverter;
 import com.sequenceiq.cloudbreak.tls.EncryptionProfileProvider;
 import com.sequenceiq.cloudbreak.util.EphemeralVolumeUtil;
 import com.sequenceiq.cloudbreak.util.NodesUnreachableException;
@@ -630,15 +631,15 @@ public class ClusterHostServiceRunner {
                 Map.entry("hiveWithRemoteHiveMetastore", hiveWithRemoteHiveMetastore),
                 Map.entry("tlsv13Enabled", Boolean.FALSE),
                 Map.entry("tlsAdvancedControl", encryptionProfileEnabled),
-                Map.entry("tlsVersionsSpaceSeparated", encryptionProfileProvider.getTlsVersions(userTlsVersions, " ")),
-                Map.entry("tlsVersionsCommaSeparated", encryptionProfileProvider.getTlsVersions(userTlsVersions, ",")),
+                Map.entry("tlsVersionsSpaceSeparated", EncryptionProfileConverter.getTlsVersionsSeparatedBySpace(userTlsVersions)),
+                Map.entry("tlsVersionsCommaSeparated", EncryptionProfileConverter.getTlsVersionsSeparatedByComma(userTlsVersions)),
                 Map.entry("cmVersionSupportsTlsSetup", isVersionNewerOrEqualThanLimited(cmVersion, CLOUDERAMANAGER_VERSION_7_13_2_0)),
                 Map.entry("tlsCipherSuites", encryptionProfileProvider
-                        .getOpenSslCipherSuites(userEncryptionProfileMap, DEFAULT, false, userTlsVersions, legacyEncryptionProfile)),
+                        .getOpenSslCipherSuites(userEncryptionProfileMap, DEFAULT, legacyEncryptionProfile)),
                 Map.entry("tlsCipherSuitesMinimal", encryptionProfileProvider
-                        .getOpenSslCipherSuites(userEncryptionProfileMap, MINIMAL, false, userTlsVersions, legacyEncryptionProfile)),
+                        .getOpenSslCipherSuites(userEncryptionProfileMap, MINIMAL, legacyEncryptionProfile)),
                 Map.entry("tlsCipherSuitesJavaIntermediate", encryptionProfileProvider
-                        .getIanaCipherSuites(userEncryptionProfileMap, JAVA_INTERMEDIATE2018,  true, userTlsVersions, legacyEncryptionProfile))
+                        .getIanaCipherSuites(userEncryptionProfileMap, JAVA_INTERMEDIATE2018,  legacyEncryptionProfile))
         );
 
         return Map.of("metadata", new SaltPillarProperties("/metadata/init.sls", singletonMap("cluster", clusterProperties)));
@@ -898,17 +899,15 @@ public class ClusterHostServiceRunner {
         gateway.put("enable_ccmv2_jumpgate", stackDto.getTunnel().useCcmV2Jumpgate());
         gateway.put("activation_in_minutes", activationInMinutes);
         gateway.put("tlsv13Enabled", Boolean.FALSE);
-        gateway.put("tlsVersionsSpaceSeparated", encryptionProfileProvider.getTlsVersions(userTlsVersions, " "));
+        gateway.put("tlsVersionsSpaceSeparated", EncryptionProfileConverter.getTlsVersionsSeparatedBySpace(userTlsVersions));
         gateway.put("tlsCipherSuites", encryptionProfileProvider
-                .getOpenSslCipherSuites(userEncryptionProfileMap, DEFAULT, false, userTlsVersions, legacyEncryptionProfile));
+                .getOpenSslCipherSuites(userEncryptionProfileMap, DEFAULT, legacyEncryptionProfile));
         gateway.put("tlsCipherSuitesRedHat8", encryptionProfileProvider
-                .getOpenSslCipherSuites(userEncryptionProfileMap, REDHAT_VERSION8, false, userTlsVersions, legacyEncryptionProfile));
+                .getOpenSslCipherSuites(userEncryptionProfileMap, REDHAT_VERSION8, legacyEncryptionProfile));
         gateway.put("tlsCipherSuitesMinimal", encryptionProfileProvider
-                .getOpenSslCipherSuites(userEncryptionProfileMap, MINIMAL, false, userTlsVersions, legacyEncryptionProfile));
-        gateway.put("tls12CipherSuites", encryptionProfileProvider
-                .getDefaultRecommendedTls12CipherSuites(false));
-        gateway.put("tls13CipherSuites", encryptionProfileProvider
-                .getTls13CipherSuites(userEncryptionProfileMap, userTlsVersions));
+                .getOpenSslCipherSuites(userEncryptionProfileMap, MINIMAL, legacyEncryptionProfile));
+        gateway.put("tls12CipherSuites", encryptionProfileProvider.getDefaultTls12CipherSuites(false));
+        gateway.put("tls13CipherSuites", encryptionProfileProvider.getTls13CipherSuites(userEncryptionProfileMap));
         gateway.putAll(createKnoxRelatedGatewayConfiguration(stackDto, virtualGroupRequest, connector));
         gateway.putAll(createGatewayUserFacingCertAndFqdn(gatewayConfig, stackDto));
         gateway.putAll(createGatewayAlternativeUserFacingCert(gatewayConfig));

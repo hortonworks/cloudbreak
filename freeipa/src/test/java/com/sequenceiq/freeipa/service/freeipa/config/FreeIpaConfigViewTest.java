@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -19,6 +18,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.tls.EncryptionProfileProvider;
+import com.sequenceiq.common.api.encryptionprofile.TlsVersion;
 import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.environment.api.v1.encryptionprofile.model.EncryptionProfileResponse;
 import com.sequenceiq.freeipa.service.freeipa.config.FreeIpaConfigView.Builder;
@@ -54,15 +54,14 @@ class FreeIpaConfigViewTest {
     }
 
     @Test
-    void testToMapForTlsv13() {
+    void testToMapForTls13() {
         FreeIpaBackupConfigView backupConfigView = mock(FreeIpaBackupConfigView.class);
         EncryptionProfileResponse encryptionProfileResponse = mock(EncryptionProfileResponse.class);
 
-        when(encryptionProfileResponse.getTlsVersions()).thenReturn(Set.of("TLSv1.2", "TLSv1.3"));
-        when(encryptionProfileProvider.getTlsVersions(eq(Set.of("TLSv1.2", "TLSv1.3")), eq(" "))).thenReturn(TLS_VERSION);
-        when(encryptionProfileProvider.getOpenSslCipherSuites(any(), any(), anyBoolean(), any(), anyBoolean())).thenReturn("ECDHE-ECDSA-AES256-GCM-SHA384");
-        when(encryptionProfileProvider.getTls13CipherSuites(any(), any())).thenReturn("TLS_AES_256_GCM_SHA384");
-        when(encryptionProfileProvider.getDefaultRecommendedTls12CipherSuites(anyBoolean())).thenReturn("ECDHE-ECDSA-AES256-GCM-SHA384");
+        when(encryptionProfileResponse.getTlsVersions()).thenReturn(Set.of(TlsVersion.TLS_1_2.getVersion(), TlsVersion.TLS_1_3.getVersion()));
+        when(encryptionProfileProvider.getOpenSslCipherSuites(any(), any(), anyBoolean())).thenReturn("ECDHE-ECDSA-AES256-GCM-SHA384");
+        when(encryptionProfileProvider.getTls13CipherSuites(any())).thenReturn("TLS_AES_256_GCM_SHA384");
+        when(encryptionProfileProvider.getDefaultTls12CipherSuites(anyBoolean())).thenReturn("ECDHE-ECDSA-AES256-GCM-SHA384");
 
         FreeIpaConfigView freeIpaConfigView = new Builder()
                 .withBackupConfig(backupConfigView)

@@ -1,7 +1,6 @@
 package com.sequenceiq.environment.encryptionprofile.v1.converter;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -43,18 +42,13 @@ public class EncryptionProfileToEncryptionProfileResponseConverter {
     private Map<String, List<String>> getCipherSuiteMap(
             List<String> cipherSuites,
             Set<TlsVersion> tlsVersions) {
-        if (shouldReturnEmptyMap(cipherSuites)) {
-            return Collections.emptyMap();
-        }
-
         return tlsVersions.stream().collect(Collectors.toMap(
                 TlsVersion::getVersion,
                 tlsVersion -> {
                     Set<String> availableCiphers = encryptionProfileConfig.getAvailableCiphers(tlsVersion);
-                    List<String> filteredCiphers = cipherSuites.stream()
+                    return cipherSuites.stream()
                             .filter(availableCiphers::contains)
                             .collect(Collectors.toList());
-                    return filteredCiphers;
                 }
         ));
     }
@@ -65,10 +59,6 @@ public class EncryptionProfileToEncryptionProfileResponseConverter {
                 TlsVersion::getVersion,
                 tlsVersion -> new ArrayList<>(encryptionProfileConfig.getRequiredCiphers(tlsVersion))
         ));
-    }
-
-    private boolean shouldReturnEmptyMap(List<String> cipherSuites) {
-        return (cipherSuites == null || cipherSuites.isEmpty());
     }
 
     public EncryptionProfileResponse dtoToResponse(EncryptionProfileDto encryptionProfile) {

@@ -1,9 +1,5 @@
 package com.sequenceiq.cloudbreak.cm;
 
-import static com.sequenceiq.cloudbreak.tls.CipherSuitesLimitType.JAVA_INTERMEDIATE2018;
-import static com.sequenceiq.cloudbreak.tls.CipherSuitesLimitType.TLS_1_2_RECOMMENDED;
-import static com.sequenceiq.cloudbreak.tls.CipherSuitesLimitType.TLS_1_3_RECOMMENDED;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,6 +8,7 @@ import jakarta.inject.Inject;
 import org.springframework.stereotype.Service;
 
 import com.cloudera.api.swagger.model.ApiConfigEnforcement;
+import com.sequenceiq.cloudbreak.tls.EncryptionProfileConverter;
 import com.sequenceiq.cloudbreak.tls.EncryptionProfileProvider;
 
 @Service
@@ -68,22 +65,8 @@ public class ClouderaManagerCipherService {
         return apiConfigEnforcements;
     }
 
-    private String getTlsCipherSuite(boolean useIanaNames) {
-        String intermediate2018 = encryptionProfileProvider.getCipherSuiteString(
-                JAVA_INTERMEDIATE2018,
-                POLICY_SEPARATOR,
-                useIanaNames
-        );
-        String tls12Recommended = encryptionProfileProvider.getCipherSuiteString(
-                TLS_1_2_RECOMMENDED,
-                POLICY_SEPARATOR,
-                useIanaNames
-        );
-        String tls13Recommended = encryptionProfileProvider.getCipherSuiteString(
-                TLS_1_3_RECOMMENDED,
-                POLICY_SEPARATOR,
-                useIanaNames
-        );
-        return String.join(POLICY_SEPARATOR, tls13Recommended, tls12Recommended, intermediate2018);
+    private String getTlsCipherSuite(boolean useIanaName) {
+        return EncryptionProfileConverter
+                .toString(encryptionProfileProvider.getAllowedCipherSuites(), useIanaName, POLICY_SEPARATOR);
     }
 }

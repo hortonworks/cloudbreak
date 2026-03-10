@@ -53,9 +53,6 @@ import static com.sequenceiq.cloudbreak.tls.CipherSuite.TLS_ECDHE_RSA_WITH_CAMEL
 import static com.sequenceiq.cloudbreak.tls.CipherSuite.TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256;
 import static com.sequenceiq.cloudbreak.tls.CipherSuite.TLS_RSA_WITH_AES_128_CBC_SHA;
 import static com.sequenceiq.cloudbreak.tls.CipherSuite.TLS_RSA_WITH_AES_256_CBC_SHA;
-import static com.sequenceiq.cloudbreak.tls.CipherSuitesLimitType.JAVA_INTERMEDIATE2018;
-import static com.sequenceiq.cloudbreak.tls.CipherSuitesLimitType.TLS_1_2_RECOMMENDED;
-import static com.sequenceiq.cloudbreak.tls.CipherSuitesLimitType.TLS_1_3_RECOMMENDED;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
@@ -88,18 +85,8 @@ class ClouderaManagerCipherServiceTest {
 
     @Test
     void testGetApiConfigEnforcements() {
-        when(encryptionProfileProvider.getCipherSuiteString(JAVA_INTERMEDIATE2018, POLICY_SEPARATOR, true))
-                .thenReturn(testData.getCipherSuiteString(JAVA_INTERMEDIATE2018, POLICY_SEPARATOR, true));
-        when(encryptionProfileProvider.getCipherSuiteString(JAVA_INTERMEDIATE2018, POLICY_SEPARATOR, false))
-                .thenReturn(testData.getCipherSuiteString(JAVA_INTERMEDIATE2018, POLICY_SEPARATOR, false));
-        when(encryptionProfileProvider.getCipherSuiteString(TLS_1_3_RECOMMENDED, POLICY_SEPARATOR, true))
-                .thenReturn(testData.getCipherSuiteString(TLS_1_3_RECOMMENDED, POLICY_SEPARATOR, true));
-        when(encryptionProfileProvider.getCipherSuiteString(TLS_1_3_RECOMMENDED, POLICY_SEPARATOR, false))
-                .thenReturn(testData.getCipherSuiteString(TLS_1_3_RECOMMENDED, POLICY_SEPARATOR, false));
-        when(encryptionProfileProvider.getCipherSuiteString(TLS_1_2_RECOMMENDED, POLICY_SEPARATOR, true))
-                .thenReturn(testData.getCipherSuiteString(TLS_1_2_RECOMMENDED, POLICY_SEPARATOR, true));
-        when(encryptionProfileProvider.getCipherSuiteString(TLS_1_2_RECOMMENDED, POLICY_SEPARATOR, false))
-                .thenReturn(testData.getCipherSuiteString(TLS_1_2_RECOMMENDED, POLICY_SEPARATOR, false));
+        when(encryptionProfileProvider.getAllowedCipherSuites())
+                .thenReturn(testData.getAllowedCipherSuites());
 
         List<ApiConfigEnforcement> result = underTest.getApiConfigEnforcements();
 
@@ -159,10 +146,6 @@ class ClouderaManagerCipherServiceTest {
                         TLS_ECCPWD_WITH_AES_128_CCM_SHA256,
                         TLS_ECDHE_PSK_WITH_AES_128_CCM_SHA256,
                         TLS_ECDHE_PSK_WITH_AES_128_CCM_8_SHA256,
-                        TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
-                        TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
-                        TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
-                        TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,
                         TLS_DHE_RSA_WITH_AES_128_GCM_SHA256,
                         TLS_DHE_RSA_WITH_AES_256_GCM_SHA384,
                         TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA256,

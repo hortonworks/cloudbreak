@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType.DATALAKE;
 import static com.sequenceiq.cloudbreak.telemetry.TelemetryClusterDetails.CLUSTER_CRN_KEY;
-import static com.sequenceiq.cloudbreak.tls.CipherSuitesLimitType.BLACKBOX_EXPORTER;
 
 import java.io.IOException;
 import java.util.List;
@@ -62,8 +61,6 @@ import com.sequenceiq.common.api.telemetry.model.MonitoringCredential;
 import com.sequenceiq.common.api.telemetry.model.SensitiveLoggingComponent;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.common.api.telemetry.model.VmLog;
-import com.sequenceiq.environment.api.v1.encryptionprofile.model.EncryptionProfileResponse;
-import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @Component
 public class TelemetryDecorator implements TelemetryContextProvider<StackDto> {
@@ -88,12 +85,6 @@ public class TelemetryDecorator implements TelemetryContextProvider<StackDto> {
 
     private final ClusterComponentConfigProvider clusterComponentConfigProvider;
 
-    private final EnvironmentService environmentService;
-
-    private final EncryptionProfileProvider encryptionProfileProvider;
-
-    private final EncryptionProfileService encryptionProfileService;
-
     private final TelemetryFeatureService telemetryFeatureService;
 
     public TelemetryDecorator(AltusMachineUserService altusMachineUserService,
@@ -116,9 +107,6 @@ public class TelemetryDecorator implements TelemetryContextProvider<StackDto> {
         this.componentConfigProviderService = componentConfigProviderService;
         this.clusterComponentConfigProvider = clusterComponentConfigProvider;
         this.version = version;
-        this.environmentService = environmentService;
-        this.encryptionProfileProvider = encryptionProfileProvider;
-        this.encryptionProfileService = encryptionProfileService;
         this.telemetryFeatureService = telemetryFeatureService;
     }
 
@@ -136,17 +124,7 @@ public class TelemetryDecorator implements TelemetryContextProvider<StackDto> {
         telemetryContext.setCloudPlatform(stack.getCloudPlatform());
         telemetryContext.setClusterType(mapToFluentClusterType(stack.getType()));
         telemetryContext.setTelemetry(telemetry);
-        DetailedEnvironmentResponse environmentResponse = environmentService.getByCrn(stack.getEnvironmentCrn());
 
-        String encryptionProfileCrn = encryptionProfileService.getEncryptionProfileCrn(environmentResponse, stackDto.getCluster());
-        EncryptionProfileResponse encryptionProfileResponse = encryptionProfileService.getEncryptionProfileByCrnOrDefault(encryptionProfileCrn);
-        Map<String, List<String>> userCipherSuits =
-                Optional.ofNullable(encryptionProfileResponse)
-                        .map(EncryptionProfileResponse::getCipherSuites)
-                        .orElse(null);
-        List<String> tlsCipherSuitesBlackBoxExporter = encryptionProfileProvider
-                .getTlsCipherSuitesIanaList(userCipherSuits, BLACKBOX_EXPORTER);
-        telemetryContext.setTlsCipherSuites(tlsCipherSuitesBlackBoxExporter);
         Image image = getImage(stack);
         if (image != null) {
             telemetryContext.setOsType(image.getOsType());
