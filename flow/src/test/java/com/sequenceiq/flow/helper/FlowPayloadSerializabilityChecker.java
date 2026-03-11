@@ -7,6 +7,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
+import java.lang.reflect.RecordComponent;
 import java.lang.reflect.Type;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -30,6 +31,8 @@ import org.apache.commons.collections4.SetUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.reflections.Reflections;
 import org.reflections.scanners.SubTypesScanner;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -43,6 +46,8 @@ import com.sequenceiq.cloudbreak.common.event.FlowPayload;
 import com.sequenceiq.cloudbreak.common.json.JsonIgnoreDeserialization;
 
 public class FlowPayloadSerializabilityChecker {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(FlowPayloadSerializabilityChecker.class);
 
     private static final String BASE_PACKAGE = "com.sequenceiq.";
 
@@ -63,6 +68,10 @@ public class FlowPayloadSerializabilityChecker {
         if (!validationErrors.isEmpty()) {
             fail("There are " + validationErrors.size() + " violations:\n" + String.join("\n", validationErrors));
         }
+        LOGGER.info("Checked the following classes for serializability: {}", checked.stream()
+                .map(Class::getName)
+                .sorted()
+                .collect(Collectors.joining(System.lineSeparator())));
     }
 
     private <T> Set<Class<?>> getClassesToCheck(Set<Class<? extends T>> eventClasses) {
@@ -90,7 +99,7 @@ public class FlowPayloadSerializabilityChecker {
         }
         if (!hasDeserializeAttributeWithBuilder) {
             checkSoloBuilder(clazz, constructors);
-            if (!hasDefaultConstructor) {
+            if (!hasDefaultConstructor || clazz.isRecord()) {
                 checkJacksonCreatorAnnotation(clazz, constructors);
             }
         }
@@ -180,7 +189,26 @@ public class FlowPayloadSerializabilityChecker {
     }
 
     private void checkJacksonCreatorAnnotation(Class<?> clazz, Constructor<?>[] constructors) {
-        Set<Constructor<?>> creators = Arrays.stream(constructors).filter(c -> c.getAnnotation(JsonCreator.class) != null).collect(Collectors.toSet());
+        Set<Constructor<?>> creators = Arrays.stream(constructors)
+                .filter(c -> c.getAnnotation(JsonCreator.class) != null || isCanonicalConstructorOfRecord(clazz, c))
+                .collect(Collectors.toSet());
+        if (!clazz.isRecord()) {
+            checkJacksonCreatorAnnotationForRegularClass(clazz, creators);
+        } else {
+            checkJacksonCreatorAnnotationForRecordClass(clazz, creators);
+        }
+    }
+
+    private boolean isCanonicalConstructorOfRecord(Class<?> clazz, Constructor<?> creator) {
+        if (!clazz.isRecord()) {
+            return false;
+        } else {
+            List<? extends Class<?>> paramTypes = Arrays.stream(clazz.getRecordComponents()).map(RecordComponent::getType).toList();
+            return paramTypes.equals(Arrays.asList(creator.getParameterTypes()));
+        }
+    }
+
+    private void checkJacksonCreatorAnnotationForRegularClass(Class<?> clazz, Set<Constructor<?>> creators) {
         if (creators.isEmpty()) {
             validationErrors.add(decorateWitParentClasses(String.format("Class %s has no constructor with @JsonCreator attribute.", clazz.getName())));
         } else if (creators.size() > 1) {
@@ -189,6 +217,28 @@ public class FlowPayloadSerializabilityChecker {
         } else {
             Constructor<?> creator = creators.iterator().next();
             checkCreator(clazz, creator);
+        }
+    }
+
+    private void checkJacksonCreatorAnnotationForRecordClass(Class<?> clazz, Set<Constructor<?>> creators) {
+        Constructor<?> canonicalConstructor = creators.stream()
+                .filter(c -> isCanonicalConstructorOfRecord(clazz, c))
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("Record class must have a canonical constructor"));
+        Set<Constructor<?>> nonCanonicalConstructorCreators = SetUtils.difference(creators, Set.of(canonicalConstructor));
+        if (nonCanonicalConstructorCreators.isEmpty()) {
+            checkCreator(clazz, canonicalConstructor);
+        } else if (nonCanonicalConstructorCreators.size() == 1) {
+            if (canonicalConstructor.getAnnotation(JsonCreator.class) != null) {
+                validationErrors.add(decorateWitParentClasses(String.format("Class %s has a canonical constructor with @JsonCreator attribute, " +
+                        "but also has a non-canonical constructor with @JsonCreator attribute.", clazz.getName())));
+            } else {
+                Constructor<?> creator = nonCanonicalConstructorCreators.iterator().next();
+                checkCreator(clazz, creator);
+            }
+        } else {
+            validationErrors.add(decorateWitParentClasses(String.format(
+                    "Class %s has more than 1 constructors with @JsonCreator attribute, ambiguity.", clazz.getName())));
         }
     }
 
