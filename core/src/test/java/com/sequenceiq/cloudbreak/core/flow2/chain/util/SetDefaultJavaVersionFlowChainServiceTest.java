@@ -8,6 +8,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -81,6 +82,47 @@ class SetDefaultJavaVersionFlowChainServiceTest {
         events = underTest.setDefaultJavaVersionTriggerEvent(stackDto,
                 new ImageChangeDto(STACK_ID, IMAGE_ID, IMAGE_CATALOG_NAME, IMAGE_CATALOG_URL));
         assertTrue(events.isEmpty());
+    }
+
+    @Test
+    void testCreateFlowTriggerEventQueueWithSetDefaultJavaWhenRuntimeIs731AndJavaVersionIs11()
+            throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
+        StackDto stackDto = mock(StackDto.class);
+        when(stackDto.getId()).thenReturn(1L);
+        when(stackDto.getWorkspaceId()).thenReturn(1L);
+        Stack stack = mock(Stack.class);
+        when(stack.getJavaVersion()).thenReturn(11);
+        when(stackDto.getStack()).thenReturn(stack);
+        StatedImage statedImage = mock(StatedImage.class);
+        com.sequenceiq.cloudbreak.cloud.model.catalog.Image image = mock(com.sequenceiq.cloudbreak.cloud.model.catalog.Image.class);
+        when(image.getPackageVersion(ImagePackageVersion.STACK)).thenReturn("7.3.1");
+        when(statedImage.getImage()).thenReturn(image);
+        when(imageCatalogService.getImage(STACK_ID, IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, IMAGE_ID))
+                .thenReturn(statedImage);
+        when(entitlementService.isAutoJavaUpgaradeEnabled(any())).thenReturn(true);
+        when(allowableJavaUpdateConfigurations.getMinJavaVersionForRuntime("7.3.1.499")).thenReturn(8);
+        when(image.getTags()).thenReturn(Map.of("release-version", "7.3.1.499"));
+
+        List<SetDefaultJavaVersionTriggerEvent> events = underTest.setDefaultJavaVersionTriggerEvent(stackDto,
+                new ImageChangeDto(STACK_ID, IMAGE_ID, IMAGE_CATALOG_NAME, IMAGE_CATALOG_URL));
+
+        SetDefaultJavaVersionTriggerEvent javaEvent = events.get(0);
+        assertEquals(SET_DEFAULT_JAVA_VERSION_CHAIN_TRIGGER_EVENT, javaEvent.selector());
+        assertEquals(STACK_ID, javaEvent.getResourceId());
+        assertEquals("8", javaEvent.getDefaultJavaVersion());
+        assertEquals(1, javaEvent.getResourceId());
+
+        when(allowableJavaUpdateConfigurations.getMinJavaVersionForRuntime("7.3.1.500")).thenReturn(17);
+        when(image.getTags()).thenReturn(Map.of("release-version", "7.3.1.500"));
+
+        events = underTest.setDefaultJavaVersionTriggerEvent(stackDto,
+                new ImageChangeDto(STACK_ID, IMAGE_ID, IMAGE_CATALOG_NAME, IMAGE_CATALOG_URL));
+
+        javaEvent = events.get(0);
+        assertEquals(SET_DEFAULT_JAVA_VERSION_CHAIN_TRIGGER_EVENT, javaEvent.selector());
+        assertEquals(STACK_ID, javaEvent.getResourceId());
+        assertEquals("17", javaEvent.getDefaultJavaVersion());
+        assertEquals(1, javaEvent.getResourceId());
     }
 
     @Test

@@ -16,11 +16,13 @@ import com.sequenceiq.cloudbreak.common.exception.UpgradeValidationFailedExcepti
 @Component
 public class JavaVersionUpgradeValidator implements ServiceUpgradeValidator {
 
+    public static final Integer JAVA_8 = 8;
+
+    public static final Integer JAVA_11 = 11;
+
+    public static final Integer JAVA_17 = 17;
+
     private static final Logger LOGGER = LoggerFactory.getLogger(JavaVersionUpgradeValidator.class);
-
-    private static final Integer NOT_SUPPORTED_JAVA_VERSION = 11;
-
-    private static final Integer POST_732_MIN_JAVA_VERSION = 17;
 
     @Inject
     private EntitlementService entitlementService;
@@ -30,19 +32,22 @@ public class JavaVersionUpgradeValidator implements ServiceUpgradeValidator {
         String targetRuntime = request.upgradeImageInfo().getTargetStatedImage().getImage().getVersion();
         Integer currentJavaVersion = request.stack().getStack().getJavaVersion();
         if (isVersionNewerOrEqualThan732(targetRuntime)) {
-            if (!entitlementService.isAutoJavaUpgaradeEnabled(request.stack().getAccountId()) && currentJavaVersion < POST_732_MIN_JAVA_VERSION) {
+            if (!entitlementService.isAutoJavaUpgaradeEnabled(request.stack().getAccountId()) && currentJavaVersion < JAVA_17) {
                 String message = String.format("You cannot upgrade to %s because your current cluster uses JDK %d, and upgrading to %s with " +
                                 "JDK %d is not supported. Please upgrade to JDK 17 or higher before upgrading the cluster.",
                         targetRuntime, currentJavaVersion, targetRuntime, currentJavaVersion);
                 LOGGER.error("Cluster upgrade validation failed for 7.3.2+ cluster. {}", message);
                 throw new UpgradeValidationFailedException(message);
             }
-        } else if (isVersionNewerOrEqualThan731(targetRuntime) && NOT_SUPPORTED_JAVA_VERSION.equals(currentJavaVersion)) {
-            String message = String.format("You cannot upgrade to %s because your current cluster uses JDK %d, and upgrading to %s with "
-                    + "JDK %d is not supported. Please downgrade to JDK 8 before upgrading the cluster.",
-                    targetRuntime, NOT_SUPPORTED_JAVA_VERSION, targetRuntime, NOT_SUPPORTED_JAVA_VERSION);
-            LOGGER.error("Cluster upgrade validation failed because of JDK 11. {}", message);
-            throw new UpgradeValidationFailedException(message);
+        } else if (isVersionNewerOrEqualThan731(targetRuntime)) {
+            if (!entitlementService.isAutoJavaUpgaradeEnabled(request.stack().getAccountId())
+                    && JAVA_11.equals(currentJavaVersion)) {
+                String message = String.format("You cannot upgrade to %s because your current cluster uses JDK %d, and upgrading to %s with "
+                                + "JDK %d is not supported. Please downgrade to JDK 8 before upgrading the cluster.",
+                        targetRuntime, JAVA_11, targetRuntime, JAVA_11);
+                LOGGER.error("Cluster upgrade validation failed because of JDK 11. {}", message);
+                throw new UpgradeValidationFailedException(message);
+            }
         }
 
     }

@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
+import static com.sequenceiq.cloudbreak.service.ComponentConfigProviderService.RELEASE_VERSION;
 import static java.lang.Integer.parseInt;
 
 import java.util.List;
@@ -26,8 +27,6 @@ import com.sequenceiq.cloudbreak.service.java.vm.AllowableJavaUpdateConfiguratio
 public class DefaultJavaVersionUpdateValidator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultJavaVersionUpdateValidator.class);
-
-    private static final String RELEASE_VERSION = "release-version";
 
     @Inject
     private AllowableJavaUpdateConfigurations allowableJavaUpdateConfigurations;

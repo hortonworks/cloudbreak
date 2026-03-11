@@ -38,9 +38,9 @@ import com.sequenceiq.common.api.telemetry.model.Telemetry;
 @Service
 public class ComponentConfigProviderService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ComponentConfigProviderService.class);
+    public static final String RELEASE_VERSION = "release-version";
 
-    private static final String RELEASE_VERSION = "release-version";
+    private static final Logger LOGGER = LoggerFactory.getLogger(ComponentConfigProviderService.class);
 
     @Inject
     private ComponentRepository componentRepository;

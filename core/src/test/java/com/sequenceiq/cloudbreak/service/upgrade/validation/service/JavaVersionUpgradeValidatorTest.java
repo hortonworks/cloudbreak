@@ -66,6 +66,7 @@ class JavaVersionUpgradeValidatorTest {
                 Arguments.of("7.3.1", 8, false, true, null),
                 Arguments.of("7.3.1", 8, true, true, null),
                 Arguments.of("7.3.1", 11, false, false, "You cannot upgrade to 7.3.1 because your current cluster uses JDK 11"),
+                Arguments.of("7.3.1", 11, true, true, null),
                 Arguments.of("7.3.1", 17, false, true, null),
                 Arguments.of("7.3.1", 17, true, true, null),
                 Arguments.of("7.3.2", 8, false, false, "You cannot upgrade to 7.3.2 because your current cluster uses JDK 8"),
