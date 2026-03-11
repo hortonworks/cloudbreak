@@ -35,7 +35,7 @@ public class SdxRefreshService {
         SdxCluster sdxCluster = sdxService.getById(sdxId);
 
         try {
-            distroxService.restartAttachedDistroxClustersServices(sdxCluster.getEnvCrn());
+            distroxService.restartAttachedDistroxClustersServices(sdxCluster.getEnvCrn(), false, false);
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
             LOGGER.info("Can not restart datahubs {} from cloudbreak: {}", sdxCluster.getStackId(), errorMessage, e);

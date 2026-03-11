@@ -65,7 +65,7 @@ public class DistroxService {
         }
     }
 
-    public void restartAttachedDistroxClustersServices(String envCrn) {
+    public void restartAttachedDistroxClustersServices(String envCrn, Boolean rollingRestart, Boolean onlyRestartStaleServices) {
         Collection<StackViewV4Response> attachedDistroXClusters = getAttachedDistroXClusters(envCrn);
 
         // We allow the refresh of DHs in NODE_FAILURE states to "fix" clusters that end up in this state due to their
@@ -82,7 +82,7 @@ public class DistroxService {
                 .toList();
         ArrayList<String> pollingCrnList = availableClusters.stream().map(StackViewV4Response::getCrn).collect(Collectors.toCollection(ArrayList::new));
         if (!pollingCrnList.isEmpty()) {
-            distroXV1Endpoint.restartClusterServicesByCrns(pollingCrnList, true);
+            distroXV1Endpoint.restartClusterServicesByCrns(pollingCrnList, true, rollingRestart, onlyRestartStaleServices);
             Polling.stopAfterAttempt(attempt)
                     .stopIfException(true)
                     .waitPeriodly(sleeptime, TimeUnit.SECONDS)
@@ -90,8 +90,8 @@ public class DistroxService {
         }
     }
 
-    public void restartDistroxServicesByCrns(List<String> crns) {
-        distroXV1Endpoint.restartClusterServicesByCrns(crns, true);
+    public void restartDistroxServicesByCrns(List<String> crns, Boolean rollingRestart, Boolean onlyRestartStaleServices) {
+        distroXV1Endpoint.restartClusterServicesByCrns(crns, true, rollingRestart, onlyRestartStaleServices);
     }
 
     public void stopAttachedDistrox(String envCrn) {
@@ -127,13 +127,13 @@ public class DistroxService {
         SdxRefreshDatahubResponse response = new SdxRefreshDatahubResponse();
         SdxCluster sdxCluster = sdxService.getByNameInAccountAllowDetached(ThreadBasedUserCrnProvider.getUserCrn(), clusterName);
         if (Strings.isNullOrEmpty(datahubName)) {
-            restartAttachedDistroxClustersServices(sdxCluster.getEnvCrn());
+            restartAttachedDistroxClustersServices(sdxCluster.getEnvCrn(), false, false);
             getAttachedDistroXClusters(sdxCluster.getEnvCrn())
                     .forEach(response::addStack);
             return response;
         }
         StackV4Response stackV4Response = distroXV1Endpoint.getByName(datahubName, null);
-        restartDistroxServicesByCrns(List.of(stackV4Response.getCrn()));
+        restartDistroxServicesByCrns(List.of(stackV4Response.getCrn()), false, false);
         response.addStack(stackV4Response);
         return response;
     }

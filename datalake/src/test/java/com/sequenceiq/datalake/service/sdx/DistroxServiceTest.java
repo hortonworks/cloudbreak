@@ -88,7 +88,7 @@ class DistroxServiceTest {
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.refreshDataHub(CLUSTER_NAME, null));
 
         verify(distroXV1Endpoint, times(2)).list(null, sdxCluster.getEnvCrn());
-        verify(distroXV1Endpoint, times(1)).restartClusterServicesByCrns(any(), any());
+        verify(distroXV1Endpoint, times(1)).restartClusterServicesByCrns(any(), any(), any(), any());
         assertEquals("crn:cdp:iam:us-west-1:hortonworks:user:perdos@hortonworks.com", crnArgCaptor.getValue());
     }
 
@@ -110,7 +110,7 @@ class DistroxServiceTest {
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.refreshDataHub(CLUSTER_NAME, "datahubName"));
 
         verify(distroXV1Endpoint, times(1)).getByName(anyString(), eq(null));
-        verify(distroXV1Endpoint, times(1)).restartClusterServicesByCrns(any(), any());
+        verify(distroXV1Endpoint, times(1)).restartClusterServicesByCrns(any(), any(), any(), any());
         assertEquals("crn:cdp:iam:us-west-1:hortonworks:user:perdos@hortonworks.com", crnArgCaptor.getValue());
     }
 }

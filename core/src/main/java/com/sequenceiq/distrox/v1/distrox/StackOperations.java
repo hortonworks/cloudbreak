@@ -560,12 +560,13 @@ public class StackOperations implements HierarchyAuthResourcePropertyProvider {
         return generateImageCatalogService.generateImageCatalogForStack(stack);
     }
 
-    public FlowIdentifier restartClusterServices(NameOrCrn nameOrCrn, Long workspaceId, boolean refreshRemoteDataContext) {
+    public FlowIdentifier restartClusterServices(
+            NameOrCrn nameOrCrn, Long workspaceId, boolean refreshRemoteDataContext, Boolean rollingRestart, Boolean onlyRestartStaleServices) {
         if (nameOrCrn == null) {
             throw new IllegalArgumentException("Crn must be provided.");
         }
         Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
-        return clusterOperationService.restartClusterServices(stack, refreshRemoteDataContext);
+        return clusterOperationService.restartClusterServices(stack, refreshRemoteDataContext, rollingRestart, onlyRestartStaleServices);
     }
 
     public void updateLoadBalancerPEMDNS(Long workspaceId, NameOrCrn nameOrCrn) {

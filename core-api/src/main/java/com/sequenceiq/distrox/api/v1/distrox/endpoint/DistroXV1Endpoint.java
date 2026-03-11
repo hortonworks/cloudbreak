@@ -310,7 +310,9 @@ public interface DistroXV1Endpoint {
             operationId = "restartDistroXClusterByCrns",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     List<FlowIdentifier> restartClusterServicesByCrns(@QueryParam("crns") List<String> crns,
-            @QueryParam("refreshRemoteDataContext") @DefaultValue("false") Boolean refreshRemoteDataContext);
+            @QueryParam("refreshRemoteDataContext") @DefaultValue("false") Boolean refreshRemoteDataContext,
+            @QueryParam("rollingRestart") @DefaultValue("false") Boolean rollingRestart,
+            @QueryParam("onlyRestartStaleServices") @DefaultValue("false") Boolean onlyRestartStaleServices);
 
     /**
      * @deprecated use rotate_secret endpoint with secret type SALT_PASSWORD instead

@@ -391,10 +391,11 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
 
     @Override
     @CheckPermissionByResourceCrnList(action = AuthorizationResourceAction.START_DATAHUB)
-    public List<FlowIdentifier> restartClusterServicesByCrns(@ResourceCrnList List<String> crns, Boolean refreshRemoteDataContext) {
+    public List<FlowIdentifier> restartClusterServicesByCrns(
+            @ResourceCrnList List<String> crns, Boolean refreshRemoteDataContext, Boolean rollingRestart, Boolean onlyRestartStaleServices) {
         List<FlowIdentifier> flowIds = new ArrayList<>();
         for (String crn : crns) {
-            flowIds.add(restartClusterServicesByCrn(crn, refreshRemoteDataContext));
+            flowIds.add(restartClusterServicesByCrn(crn, refreshRemoteDataContext, rollingRestart, onlyRestartStaleServices));
         }
         return flowIds;
     }
@@ -807,8 +808,9 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
         return workspaceService.getForCurrentUser().getId();
     }
 
-    private FlowIdentifier restartClusterServicesByCrn(String crn, Boolean refreshRemoteDataContext) {
-        return stackOperations.restartClusterServices(NameOrCrn.ofCrn(crn), getWorkspaceIdForCurrentUser(), refreshRemoteDataContext);
+    private FlowIdentifier restartClusterServicesByCrn(String crn, Boolean refreshRemoteDataContext, Boolean rollingRestart, Boolean onlyRestartStaleServices) {
+        return stackOperations.restartClusterServices(NameOrCrn.ofCrn(crn), getWorkspaceIdForCurrentUser(),
+                refreshRemoteDataContext, rollingRestart, onlyRestartStaleServices);
     }
 
     @Override

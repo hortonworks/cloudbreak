@@ -549,7 +549,7 @@ public class ClusterOperationService {
         return flowIdentifier;
     }
 
-    public FlowIdentifier restartClusterServices(Stack stack, boolean refreshRemoteDataContext) {
+    public FlowIdentifier restartClusterServices(Stack stack, boolean refreshRemoteDataContext, Boolean rollingRestart, Boolean onlyRestartStaleServices) {
         if (stack.getCluster() == null) {
             throw new BadRequestException(String.format("There is no cluster installed on stack '%s'.", stack.getName()));
         }
@@ -559,7 +559,7 @@ public class ClusterOperationService {
                     "Stack '%s' has state '%s' which is not supported for restarting the cluster services.", stack.getName(), stack.getStatus()
             ));
         }
-        return flowManager.triggerClusterServicesRestart(stack.getId(), refreshRemoteDataContext, false, false);
+        return flowManager.triggerClusterServicesRestart(stack.getId(), refreshRemoteDataContext, rollingRestart, onlyRestartStaleServices);
     }
 
     private FlowIdentifier triggerClusterInstall(Long stackId) {
