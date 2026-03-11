@@ -13,9 +13,9 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -125,7 +125,7 @@ class GcpLoadBalancingIpResourceBuilderTest {
     void testCreateWhenPublicLB() {
         when(cloudLoadBalancer.getType()).thenReturn(LoadBalancerType.PUBLIC);
         when(cloudLoadBalancer.getPortToTargetGroupMapping()).thenReturn(Map.of(new TargetGroupPortPair(80, 8080), Set.of(mockGroup("master"))));
-        when(resourceRetriever.findByStatusAndTypeAndStack(any(), any(), any())).thenReturn(Optional.empty());
+        when(resourceRetriever.findAllByStatusAndTypeAndStack(any(), any(), any())).thenReturn(new ArrayList<>());
 
         List<CloudResource> resources = underTest.create(gcpContext, authenticatedContext, cloudLoadBalancer, network);
 
@@ -139,7 +139,7 @@ class GcpLoadBalancingIpResourceBuilderTest {
     void testCreateWhenPrivateLB() {
         when(cloudLoadBalancer.getType()).thenReturn(LoadBalancerType.PRIVATE);
         when(cloudLoadBalancer.getPortToTargetGroupMapping()).thenReturn(Map.of(new TargetGroupPortPair(80, 8080), Set.of(mockGroup("master"))));
-        when(resourceRetriever.findByStatusAndTypeAndStack(any(), any(), any())).thenReturn(Optional.empty());
+        when(resourceRetriever.findAllByStatusAndTypeAndStack(any(), any(), any())).thenReturn(new ArrayList<>());
 
         List<CloudResource> resources = underTest.create(gcpContext, authenticatedContext, cloudLoadBalancer, network);
 
@@ -153,12 +153,27 @@ class GcpLoadBalancingIpResourceBuilderTest {
     void testCreateWhenResourceAlreadyExists() {
         when(cloudLoadBalancer.getType()).thenReturn(LoadBalancerType.PUBLIC);
         when(cloudLoadBalancer.getPortToTargetGroupMapping()).thenReturn(Map.of(new TargetGroupPortPair(80, 8080), Set.of(mockGroup("master"))));
-        CloudResource existingIp = CloudResource.builder().withType(ResourceType.GCP_RESERVED_IP).withStatus(CREATED).withName("existing-ip").build();
-        when(resourceRetriever.findByStatusAndTypeAndStack(any(), eq(ResourceType.GCP_RESERVED_IP), any())).thenReturn(Optional.of(existingIp));
+        CloudResource existingIp = CloudResource.builder().withType(ResourceType.GCP_RESERVED_IP).withStatus(CREATED).withName("existing-p-8080-ip").build();
+        when(resourceRetriever.findAllByStatusAndTypeAndStack(any(), eq(ResourceType.GCP_RESERVED_IP), any())).thenReturn(new ArrayList<>(List.of(existingIp)));
 
         List<CloudResource> resources = underTest.create(gcpContext, authenticatedContext, cloudLoadBalancer, network);
 
         assertEquals(existingIp, resources.getFirst());
+    }
+
+    @Test
+    void testCreateWhenResourceAlreadyExistsForInstance() {
+        when(cloudLoadBalancer.getType()).thenReturn(LoadBalancerType.PUBLIC);
+        when(cloudLoadBalancer.getPortToTargetGroupMapping()).thenReturn(Map.of(new TargetGroupPortPair(80, 8080), Set.of(mockGroup("master"))));
+        CloudResource existingIp = CloudResource.builder().withType(ResourceType.GCP_RESERVED_IP).withStatus(CREATED).withName("existing-m-8080-ip").build();
+        when(resourceRetriever.findAllByStatusAndTypeAndStack(any(), eq(ResourceType.GCP_RESERVED_IP), any())).thenReturn(new ArrayList<>(List.of(existingIp)));
+
+        List<CloudResource> resources = underTest.create(gcpContext, authenticatedContext, cloudLoadBalancer, network);
+
+        assertEquals(1, resources.size());
+        assertEquals(ResourceType.GCP_RESERVED_IP, resources.get(0).getType());
+        assertTrue(resources.get(0).getName().contains("p-8080"));
+        assertEquals(CREATED, resources.get(0).getStatus());
     }
 
     @Test

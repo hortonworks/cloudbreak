@@ -66,7 +66,7 @@ public class GcpResourceNameService extends CloudbreakResourceNameService {
 
     public String instance(String stackName, String groupName, String privateId) {
         String name;
-        String instanceGroupName = WordUtils.initials(String.valueOf(groupName).replaceAll("_", " "));
+        String instanceGroupName = getInitials(groupName);
         name = normalize(stackName);
         name = adjustPartLength(name);
         name = appendPart(name, normalize(instanceGroupName));
@@ -74,6 +74,10 @@ public class GcpResourceNameService extends CloudbreakResourceNameService {
         name = appendDateAsHash(name, new Date());
         name = adjustBaseLength(name, maxResourceNameLength);
         return name;
+    }
+
+    public String getInitials(String input) {
+        return WordUtils.initials(String.valueOf(input).replaceAll("_", " "));
     }
 
     public String firewallIn(String stackName) {
