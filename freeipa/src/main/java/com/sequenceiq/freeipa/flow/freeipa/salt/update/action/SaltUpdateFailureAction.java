@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
+import com.sequenceiq.freeipa.entity.Operation;
 import com.sequenceiq.freeipa.flow.OperationAwareAction;
 import com.sequenceiq.freeipa.flow.freeipa.salt.update.SaltUpdateEvent;
 import com.sequenceiq.freeipa.flow.freeipa.salt.update.SaltUpdateState;
@@ -32,10 +33,12 @@ public class SaltUpdateFailureAction extends AbstractStackFailureAction<SaltUpda
     @Override
     protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
         LOGGER.error("Salt state update failed", payload.getException());
+        String errorMessage = getErrorReason(payload.getException());
         stackUpdater.updateStackStatus(context.getStack(), DetailedStackStatus.SALT_STATE_UPDATE_FAILED,
-                "Salt update failed with: " + payload.getException().getMessage());
+                "Salt update failed with: " + errorMessage);
         if (isOperationIdSet(variables)) {
-            operationService.failOperation(context.getStack().getAccountId(), getOperationId(variables), payload.getException().getMessage());
+            Operation operation = operationService.failOperation(context.getStack().getAccountId(), getOperationId(variables), errorMessage);
+            sendFailedOperationNotificationIfApplicable(context.getStack(), context.getFlowTriggerUserCrn(), operation, errorMessage);
         }
         sendEvent(context);
     }

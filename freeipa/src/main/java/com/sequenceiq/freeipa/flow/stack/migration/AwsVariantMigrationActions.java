@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.flow.stack.migration;
 
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_UPGRADE_FAILED;
 import static com.sequenceiq.freeipa.flow.stack.migration.AwsVariantMigrationEvent.AWS_VARIANT_MIGRATION_FAIL_HANDLED_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.migration.AwsVariantMigrationEvent.AWS_VARIANT_MIGRATION_FINALIZED_EVENT;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -107,14 +108,16 @@ public class AwsVariantMigrationActions {
 
             @Override
             protected void doExecute(AwsVariantMigrationFlowContext context, StackFailureEvent payload, Map<Object, Object> variables) throws Exception {
-                String errorReason = payload.getException().getMessage();
+                String errorReason = getErrorReason(payload.getException());
                 Stack stack = context.getStack();
                 String environmentCrn = stack.getEnvironmentCrn();
                 String message = String.format("Aws variant migration failed: %s", errorReason);
                 SuccessDetails successDetails = new SuccessDetails(environmentCrn);
                 FailureDetails failureDetails = new FailureDetails(environmentCrn, message);
                 LOGGER.info(message, payload.getException());
-                stackUpdater.updateStackStatus(stack, DetailedStackStatus.UPGRADE_FAILED, "AWS variant migration failed. " + errorReason);
+                String statusReason = "AWS variant migration failed. " + errorReason;
+                stackUpdater.updateStackStatus(stack, DetailedStackStatus.UPGRADE_FAILED, statusReason);
+                getEventService().sendEventAndNotification(stack, context.getFlowTriggerUserCrn(), FREEIPA_UPGRADE_FAILED, List.of(statusReason));
                 operationService.failOperation(stack.getAccountId(), getOperationId(variables), message, List.of(successDetails), List.of(failureDetails));
                 metricService.incrementMetricCounter(MetricType.AWS_VARIANT_MIGRATION_FAILED, stack, payload.getException());
                 sendEvent(context, AWS_VARIANT_MIGRATION_FAIL_HANDLED_EVENT.event(), payload);

@@ -3,6 +3,10 @@ package com.sequenceiq.freeipa.flow.stack;
 import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
 import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_UPGRADE_FAILED;
+
+import java.util.List;
+import java.util.Map;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
@@ -10,17 +14,24 @@ import jakarta.inject.Inject;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.common.event.Payload;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.flow.core.AbstractAction;
 import com.sequenceiq.flow.core.CommonContext;
 import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.core.FlowState;
+import com.sequenceiq.freeipa.api.v1.operation.model.OperationType;
+import com.sequenceiq.freeipa.entity.Operation;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.events.EventSenderService;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
 
 public abstract class AbstractStackAction<S extends FlowState, E extends FlowEvent, C extends CommonContext, P extends Payload>
         extends AbstractAction<S, E, C, P> {
+
+    private static final Map<OperationType, ResourceEvent> FAILED_OPERATION_RESOURCE_EVENT_MAP = Map.of(
+            OperationType.UPGRADE, FREEIPA_UPGRADE_FAILED
+    );
 
     @Inject
     private EventSenderService eventService;
@@ -54,6 +65,16 @@ public abstract class AbstractStackAction<S extends FlowState, E extends FlowEve
                 .withUserName(stack.getOwner())
                 .withAccountId(stack.getAccountId())
                 .build();
+    }
+
+    protected void sendFailedOperationNotificationIfApplicable(Stack stack, String flowTriggerUserCrn, Operation operation, String errorReason) {
+        if (operation != null) {
+            OperationType operationType = operation.getOperationType();
+            ResourceEvent event = FAILED_OPERATION_RESOURCE_EVENT_MAP.get(operationType);
+            if (event != null) {
+                getEventService().sendEventAndNotification(stack, flowTriggerUserCrn, event, List.of(errorReason));
+            }
+        }
     }
 
     public EventSenderService getEventService() {
