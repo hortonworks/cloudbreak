@@ -1,5 +1,10 @@
 package com.sequenceiq.it.cloudbreak.testcase.e2e.distrox;
 
+import static com.sequenceiq.distrox.api.v1.distrox.model.cluster.kraft.KraftMigrationOperationStatus.FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_COMPLETE;
+import static com.sequenceiq.distrox.api.v1.distrox.model.cluster.kraft.KraftMigrationOperationStatus.ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION_COMPLETE;
+import static com.sequenceiq.distrox.api.v1.distrox.model.cluster.kraft.KraftMigrationOperationStatus.ZOOKEEPER_TO_KRAFT_MIGRATION_COMPLETE;
+import static com.sequenceiq.distrox.api.v1.distrox.model.cluster.kraft.KraftMigrationOperationStatus.ZOOKEEPER_TO_KRAFT_MIGRATION_FAILED;
+import static com.sequenceiq.distrox.api.v1.distrox.model.cluster.kraft.KraftMigrationOperationStatus.ZOOKEEPER_TO_KRAFT_MIGRATION_TRIGGERABLE;
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.KRAFT;
 
 import java.util.List;
@@ -58,7 +63,6 @@ public class DistroXKraftMigrationTest extends AbstractE2EWithReusableResourcesT
                 .await(SdxClusterStatusResponse.RUNNING)
                 .awaitForHealthyInstances()
                 .validate();
-
     }
 
     @Test(dataProvider = TEST_CONTEXT)
@@ -74,15 +78,15 @@ public class DistroXKraftMigrationTest extends AbstractE2EWithReusableResourcesT
                 .when(distroXTestClient.create())
                 .await(STACK_AVAILABLE)
                 .awaitForHealthyInstances()
-                .when(distroXTestClient.validateKraftMigrationStatus(KraftMigrationStatus.ZOOKEEPER_INSTALLED.name()))
+                .when(distroXTestClient.validateKraftMigrationStatus(ZOOKEEPER_TO_KRAFT_MIGRATION_TRIGGERABLE.name()))
                 .when(distroXTestClient.startKraftMigration())
                 .await(STACK_AVAILABLE)
                 .awaitForHealthyInstances()
-                .when(distroXTestClient.validateKraftMigrationStatus(KraftMigrationStatus.BROKERS_IN_KRAFT.name()))
+                .when(distroXTestClient.validateKraftMigrationStatus(ZOOKEEPER_TO_KRAFT_MIGRATION_COMPLETE.name()))
                 .when(distroXTestClient.finalizeKraftMigration())
                 .await(STACK_AVAILABLE)
                 .awaitForHealthyInstances()
-                .when(distroXTestClient.validateKraftMigrationStatus(KraftMigrationStatus.KRAFT_INSTALLED.name()))
+                .when(distroXTestClient.validateKraftMigrationStatus(FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_COMPLETE.name()))
                 .validate();
     }
 
@@ -99,23 +103,23 @@ public class DistroXKraftMigrationTest extends AbstractE2EWithReusableResourcesT
                 .when(distroXTestClient.create())
                 .await(STACK_AVAILABLE)
                 .awaitForHealthyInstances()
-                .when(distroXTestClient.validateKraftMigrationStatus(KraftMigrationStatus.ZOOKEEPER_INSTALLED.name()))
+                .when(distroXTestClient.validateKraftMigrationStatus(ZOOKEEPER_TO_KRAFT_MIGRATION_TRIGGERABLE.name()))
                 .when(distroXTestClient.startKraftMigration())
                 .await(STACK_AVAILABLE)
                 .awaitForHealthyInstances()
-                .when(distroXTestClient.validateKraftMigrationStatus(KraftMigrationStatus.BROKERS_IN_KRAFT.name()))
+                .when(distroXTestClient.validateKraftMigrationStatus(ZOOKEEPER_TO_KRAFT_MIGRATION_COMPLETE.name()))
                 .when(distroXTestClient.rollbackKraftMigration())
                 .await(STACK_AVAILABLE)
                 .awaitForHealthyInstances()
-                .when(distroXTestClient.validateKraftMigrationStatus(KraftMigrationStatus.PRE_MIGRATION.name()))
+                .when(distroXTestClient.validateKraftMigrationStatus(ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION_COMPLETE.name()))
                 .when(distroXTestClient.startKraftMigration())
                 .await(STACK_AVAILABLE)
                 .awaitForHealthyInstances()
-                .when(distroXTestClient.validateKraftMigrationStatus(KraftMigrationStatus.BROKERS_IN_KRAFT.name()))
+                .when(distroXTestClient.validateKraftMigrationStatus(ZOOKEEPER_TO_KRAFT_MIGRATION_COMPLETE.name()))
                 .when(distroXTestClient.finalizeKraftMigration())
                 .await(STACK_AVAILABLE)
                 .awaitForHealthyInstances()
-                .when(distroXTestClient.validateKraftMigrationStatus(KraftMigrationStatus.KRAFT_INSTALLED.name()))
+                .when(distroXTestClient.validateKraftMigrationStatus(FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_COMPLETE.name()))
                 .validate();
     }
 
@@ -143,6 +147,7 @@ public class DistroXKraftMigrationTest extends AbstractE2EWithReusableResourcesT
                     return testDto;
                 })
                 .await(NODE_FAILURE, RunningParameter.emptyRunningParameter().withoutWaitForFlow())
+                .when(distroXTestClient.validateKraftMigrationStatus(ZOOKEEPER_TO_KRAFT_MIGRATION_FAILED.name()))
                 .when(distroXTestClient.repair(KRAFT))
                 .await(STACK_AVAILABLE)
                 .when(distroXTestClient.startKraftMigration())
@@ -150,16 +155,7 @@ public class DistroXKraftMigrationTest extends AbstractE2EWithReusableResourcesT
                 .when(distroXTestClient.finalizeKraftMigration())
                 .await(STACK_AVAILABLE)
                 .awaitForHealthyInstances()
-                .when(distroXTestClient.validateKraftMigrationStatus(KraftMigrationStatus.KRAFT_INSTALLED.name()))
+                .when(distroXTestClient.validateKraftMigrationStatus(FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_COMPLETE.name()))
                 .validate();
-    }
-
-    private enum KraftMigrationStatus {
-        ZOOKEEPER_INSTALLED,
-        PRE_MIGRATION,
-        BROKERS_IN_MIGRATION,
-        BROKERS_IN_KRAFT,
-        KRAFT_INSTALLED,
-        NOT_APPLICABLE
     }
 }
