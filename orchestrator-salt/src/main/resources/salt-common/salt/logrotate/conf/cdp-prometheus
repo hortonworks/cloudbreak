@@ -6,6 +6,5 @@
     size 5M
     rotate 20
     dateext
-    dateformat -%Y%m%d-%s.log
     nocompress
 }

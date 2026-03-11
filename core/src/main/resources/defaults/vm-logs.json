@@ -1,21 +1,25 @@
 [
   {
-    "path": "/var/log/salt/master*",
+    "path": "/var/log/salt/master",
+    "collectorPath": "/var/log/salt/master*",
     "label": "salt_master",
     "type": "salt"
   },
   {
-    "path": "/var/log/salt/minion*",
+    "path": "/var/log/salt/minion",
+    "collectorPath": "/var/log/salt/minion*",
     "label": "salt_minion",
     "type": "salt"
   },
   {
-    "path": "/var/log/salt/api*",
+    "path": "/var/log/salt/api",
+    "collectorPath": "/var/log/salt/api*",
     "label": "salt_api",
     "type": "salt"
   },
   {
-    "path": "/var/log/salt/key*",
+    "path": "/var/log/salt/key",
+    "collectorPath": "/var/log/salt/key*",
     "label": "salt_key",
     "type": "salt"
   },
@@ -60,7 +64,8 @@
     "label": "mount_disks_allout"
   },
   {
-    "path": "/var/log/cdp_resources_check/cdp-resources-check.log*",
+    "path": "/var/log/cdp_resources_check/cdp-resources-check.log",
+    "collectorPath": "/var/log/cdp_resources_check/cdp-resources-check.log*",
     "label": "cdp_resources_check"
   },
   {
@@ -84,7 +89,8 @@
     "label": "rds_upgrade_canary_checkconnection"
   },
   {
-    "path": "/var/log/cloudera-scm-server/cloudera-scm-server.log*",
+    "path": "/var/log/cloudera-scm-server/cloudera-scm-server.log",
+    "collectorPath": "/var/log/cloudera-scm-server/cloudera-scm-server.log*",
     "label": "cloudera_server_log"
   },
   {
@@ -164,19 +170,23 @@
     "label": "HDFS_SECONDARYNAMENODE"
   },
   {
-    "path": "/var/log/knox/gateway/gateway.log*",
+    "path": "/var/log/knox/gateway/gateway.log",
+    "collectorPath": "/var/log/knox/gateway/gateway.log*",
     "label": "KNOX_GATEWAY"
   },
   {
-    "path": "/var/log/knox/gateway/gateway-audit.log*",
+    "path": "/var/log/knox/gateway/gateway-audit.log",
+    "collectorPath": "/var/log/knox/gateway/gateway-audit.log*",
     "label": "KNOX_GATEWAY_AUDIT"
   },
   {
-    "path": "/var/log/knox/idbroker/gateway.log*",
+    "path": "/var/log/knox/idbroker/gateway.log",
+    "collectorPath": "/var/log/knox/idbroker/gateway.log*",
     "label": "KNOX_IDBROKER_GATEWAY"
   },
   {
-    "path": "/var/log/knox/idbroker/gateway-audit.log*",
+    "path": "/var/log/knox/idbroker/gateway-audit.log",
+    "collectorPath": "/var/log/knox/idbroker/gateway-audit.log*",
     "label": "KNOX_IDBROKER_GATEWAY_AUDIT"
   },
   {

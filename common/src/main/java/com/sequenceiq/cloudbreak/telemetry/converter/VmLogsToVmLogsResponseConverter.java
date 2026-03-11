@@ -19,6 +19,7 @@ public class VmLogsToVmLogsResponseConverter {
                     VmLog log = new VmLog();
                     log.setName(logs.getName());
                     log.setPath(logs.getPath());
+                    log.setCollectorPath(logs.getCollectorPath());
                     log.setType(logs.getType());
                     log.setLabel(logs.getLabel());
                     log.setExcludes(logs.getExcludes());

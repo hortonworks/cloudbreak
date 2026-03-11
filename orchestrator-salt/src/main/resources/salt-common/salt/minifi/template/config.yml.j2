@@ -41,6 +41,7 @@ Processors:
       File to Tail: "{{ full_path }}"
       tail-mode: Single file
       {%- endif %}
+      Rolling Filename Pattern: ${filename}*
       Result Mode: Flow file per batch
 
   - id: {{ salt['random.get_str'](32) | uuid }}
@@ -58,6 +59,23 @@ Processors:
 
 {% endif %}
 {% endfor %}
+
+  - id: {{ salt['random.get_str'](32) | uuid }}
+    name: MergeContent
+    class: org.apache.nifi.processors.standard.MergeContent
+    scheduling strategy: EVENT_DRIVEN
+    auto-terminated relationships list:
+        - original
+        - failure
+    Properties:
+      Attribute Strategy: Keep Only Common Attributes
+      Maximum number of Bins: 200
+      Max Bin Age: 5 min
+      Minimum Number of Entries: 1
+      Maximum Number of Entries: 10000
+      Batch Size: 1000
+      Merge Strategy: Bin-Packing Algorithm
+      Correlation Attribute Name: filenamePrefix
 
   - id: {{ salt['random.get_str'](32) | uuid }}
     name: UpdateAttributeFilename
@@ -163,14 +181,21 @@ Connections:
     destination name: UpdateAttributeFilenamePrefix_{{ logfile["label"] | replace('.', '') }}
 
   - id: {{ salt['random.get_str'](32) | uuid }}
-    name: UpdateAttributeLogLabel/success/UpdateAttributeFilename_{{ logfile["label"] | replace('.', '') }}
+    name: UpdateAttributeLogLabel/success/MergeContent_{{ logfile["label"] | replace('.', '') }}
     source name: UpdateAttributeFilenamePrefix_{{ logfile["label"] | replace('.', '') }}
     source relationship names:
       - success
-    destination name: UpdateAttributeFilename
+    destination name: MergeContent
 
 {% endif %}
 {% endfor %}
+
+  - id: {{ salt['random.get_str'](32) | uuid }}
+    name: MergeContent/merged/UpdateAttributeFilename
+    source name: MergeContent
+    source relationship names:
+      - merged
+    destination name: UpdateAttributeFilename
 
   - id: {{ salt['random.get_str'](32) | uuid }}
     name: UpdateAttributeFilename/success/CompressContent

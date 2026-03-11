@@ -62,6 +62,7 @@ public class TelemetryFeatureService {
                 return false;
             }
         }
+        LOGGER.info("Minifi logging is supported.");
         return true;
     }
 }

@@ -5,7 +5,7 @@ collector:
     useFullPath: true
     outputLocation: "/var/lib/filecollector"
     files:{% for logfile in telemetry.logs %}{% if not ("type" in logfile and logfile["type"] == "salt" and not filecollector.includeSaltLogs) %}
-    - path: {{ logfile["path"] }}{% if destination in ["CLOUD_STORAGE", "LOCAL", "SUPPORT"] %}
+    - path: {{ logfile["collectorPath"] | default(logfile["path"]) }}{% if destination in ["CLOUD_STORAGE", "LOCAL", "SUPPORT"] %}
       compress: true{% endif %}
       folderPrefix: logs
       label: "{{ logfile["label"] }}"{% endif %}{% endfor %}

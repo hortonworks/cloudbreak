@@ -144,6 +144,7 @@
   {% set uninstall_td_agent = False %}
 {% endif %}
 {% set cdp_logging_agent_package_version = salt['pkg.version']('cdp-logging-agent') %}
+{% set prefer_minifi_logging = salt['pillar.get']('fluent:preferMinifiLogging', False) == True %}
 {% do fluent.update({
     "enabled": fluent_enabled,
     "is_systemd" : is_systemd,
@@ -196,5 +197,6 @@
     "cdpLoggingAgentRpm": cdp_logging_agent_rpm,
     "cdpLoggingAgentPackageVersion": cdp_logging_agent_package_version,
     "cdpLoggingAgentDevVersion": cdp_logging_agent_dev_version,
-    "uninstallTdAgent": uninstall_td_agent
+    "uninstallTdAgent": uninstall_td_agent,
+    "preferMinifiLogging": prefer_minifi_logging
 }) %}

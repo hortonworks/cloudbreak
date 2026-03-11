@@ -20,6 +20,8 @@ public class VmLog implements Serializable {
     @NotBlank
     private String path;
 
+    private String collectorPath;
+
     @NotNull
     @NotBlank
     private String label;
@@ -34,6 +36,14 @@ public class VmLog implements Serializable {
 
     public void setPath(String path) {
         this.path = path;
+    }
+
+    public String getCollectorPath() {
+        return collectorPath;
+    }
+
+    public void setCollectorPath(String collectorPath) {
+        this.collectorPath = collectorPath;
     }
 
     public String getLabel() {

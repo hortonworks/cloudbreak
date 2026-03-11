@@ -1,21 +1,25 @@
 [
   {
-    "path": "/var/log/salt/master*",
+    "path": "/var/log/salt/master",
+    "collectorPath": "/var/log/salt/master*",
     "label": "salt_master",
     "type": "salt"
   },
   {
-    "path": "/var/log/salt/minion*",
+    "path": "/var/log/salt/minion",
+    "collectorPath": "/var/log/salt/minion*",
     "label": "salt_minion",
     "type": "salt"
   },
   {
-    "path": "/var/log/salt/api*",
+    "path": "/var/log/salt/api",
+    "collectorPath": "/var/log/salt/api*",
     "label": "salt_api",
     "type": "salt"
   },
   {
-    "path": "/var/log/salt/key*",
+    "path": "/var/log/salt/key",
+    "collectorPath": "/var/log/salt/key*",
     "label": "salt_key",
     "type": "salt"
   },
