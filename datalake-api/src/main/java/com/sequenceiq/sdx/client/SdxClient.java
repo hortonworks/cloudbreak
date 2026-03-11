@@ -12,6 +12,7 @@ import com.sequenceiq.sdx.api.endpoint.SdxBackupEndpoint;
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
 import com.sequenceiq.sdx.api.endpoint.SdxEventEndpoint;
 import com.sequenceiq.sdx.api.endpoint.SdxInternalEndpoint;
+import com.sequenceiq.sdx.api.endpoint.SdxKraftMigrationEndpoint;
 import com.sequenceiq.sdx.api.endpoint.SdxRecoveryEndpoint;
 import com.sequenceiq.sdx.api.endpoint.SdxRestoreEndpoint;
 import com.sequenceiq.sdx.api.endpoint.SdxRotationEndpoint;
@@ -53,4 +54,6 @@ public interface SdxClient {
     SdxEventEndpoint sdxEventEndpoint();
 
     SupportV1Endpoint supportV1Endpoint();
+
+    SdxKraftMigrationEndpoint sdxKraftMigrationEndpoint();
 }

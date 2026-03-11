@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.RecipeV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.restartinstances.RestartInstancesV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.DatalakeV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.DiskUpdateEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackKraftMigrationV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.support.SupportV1Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.userprofile.UserProfileV4Endpoint;
@@ -73,6 +74,8 @@ public interface CloudbreakClient {
     DistroXV1EventEndpoint distroXV1EventEndpoint();
 
     DistroXKraftMigrationV1Endpoint distroXKraftMigrationV1Endpoint();
+
+    StackKraftMigrationV4Endpoint stackKraftMigrationV4Endpoint();
 
     DatalakeV4Endpoint datalakeV4Endpoint();
 

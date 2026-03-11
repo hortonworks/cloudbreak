@@ -66,6 +66,9 @@ import com.sequenceiq.datalake.flow.cert.renew.event.SdxStartCertRenewalEvent;
 import com.sequenceiq.datalake.flow.cert.rotation.event.SdxStartCertRotationEvent;
 import com.sequenceiq.datalake.flow.certrotation.event.RotateCertificateStackEvent;
 import com.sequenceiq.datalake.flow.datalake.cmsync.event.SdxCmSyncStartEvent;
+import com.sequenceiq.datalake.flow.datalake.kraftmigration.DatalakeKraftMigrationEvent;
+import com.sequenceiq.datalake.flow.datalake.kraftmigration.KraftMigrationOperationType;
+import com.sequenceiq.datalake.flow.datalake.kraftmigration.event.DatalakeKraftMigrationStartEvent;
 import com.sequenceiq.datalake.flow.datalake.recovery.event.DatalakeRecoveryStartEvent;
 import com.sequenceiq.datalake.flow.datalake.scale.event.DatalakeHorizontalScaleSdxEvent;
 import com.sequenceiq.datalake.flow.datalake.upgrade.event.DatalakeUpgradeFlowChainStartEvent;
@@ -328,8 +331,8 @@ public class SdxReactorFlowManager {
         return notify(event.selector(), event, cluster.getClusterName());
     }
 
-    public FlowIdentifier triggerSetDefaultJavaVersion(SdxCluster cluster, String defaultJavaVersion, boolean restartServices, boolean restartCM,
-            boolean rollingRestart) {
+    public FlowIdentifier triggerSetDefaultJavaVersion(SdxCluster cluster, String defaultJavaVersion,
+            boolean restartServices, boolean restartCM, boolean rollingRestart) {
         LOGGER.info("Trigger Set Default Java Version to {} on Datalake for: {}, restart services: {}, restart CM: {}, rolling restart: {}",
                 defaultJavaVersion, cluster, restartServices, restartCM, rollingRestart);
         String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
@@ -483,5 +486,27 @@ public class SdxReactorFlowManager {
         DatalakeUpdatePublicDnsEntriesTriggerEvent datalakeUpdatePublicDnsEntriesTriggerEvent =
                 new DatalakeUpdatePublicDnsEntriesTriggerEvent(DATALAKE_UPDATE_PUBLIC_DNS_ENTRIES_EVENT.event(), cluster.getId(), initiatorUserCrn);
         return notify(datalakeUpdatePublicDnsEntriesTriggerEvent.selector(), datalakeUpdatePublicDnsEntriesTriggerEvent, cluster.getClusterName());
+    }
+
+    public FlowIdentifier triggerZookeeperToKraftMigrationFlow(SdxCluster cluster) {
+        LOGGER.info("Trigger ZooKeeper to KRaft migration for DataLake: {}", cluster.getClusterName());
+        return triggerKraftMigrationFlow(cluster, KraftMigrationOperationType.MIGRATE);
+    }
+
+    public FlowIdentifier triggerZookeeperToKraftFinalizationFlow(SdxCluster cluster) {
+        LOGGER.info("Trigger ZooKeeper to KRaft migration finalization for DataLake: {}", cluster.getClusterName());
+        return triggerKraftMigrationFlow(cluster, KraftMigrationOperationType.FINALIZE);
+    }
+
+    public FlowIdentifier triggerZookeeperToKraftRollbackFlow(SdxCluster cluster) {
+        LOGGER.info("Trigger ZooKeeper to KRaft migration rollback for DataLake: {}", cluster.getClusterName());
+        return triggerKraftMigrationFlow(cluster, KraftMigrationOperationType.ROLLBACK);
+    }
+
+    private FlowIdentifier triggerKraftMigrationFlow(SdxCluster cluster, KraftMigrationOperationType operationType) {
+        String selector = DatalakeKraftMigrationEvent.DATALAKE_KRAFT_MIGRATION_TRIGGER_EVENT.event();
+        DatalakeKraftMigrationStartEvent event =
+                new DatalakeKraftMigrationStartEvent(selector, cluster.getId(), ThreadBasedUserCrnProvider.getUserCrn(), operationType);
+        return notify(selector, event, cluster.getClusterName());
     }
 }

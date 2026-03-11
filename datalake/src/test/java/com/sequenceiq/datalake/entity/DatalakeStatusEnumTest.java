@@ -20,6 +20,12 @@ import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.DATALAKE_UPGRADE
 import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.DATALAKE_UPGRADE_CCM_IN_PROGRESS;
 import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.DATALAKE_UPGRADE_FAILED;
 import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.DATALAKE_UPGRADE_IN_PROGRESS;
+import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.DATALAKE_ZOOKEEPER_TO_KRAFT_FINALIZE_FAILED;
+import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.DATALAKE_ZOOKEEPER_TO_KRAFT_FINALIZE_IN_PROGRESS;
+import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.DATALAKE_ZOOKEEPER_TO_KRAFT_MIGRATION_FAILED;
+import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.DATALAKE_ZOOKEEPER_TO_KRAFT_MIGRATION_IN_PROGRESS;
+import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.DATALAKE_ZOOKEEPER_TO_KRAFT_ROLLBACK_FAILED;
+import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.DATALAKE_ZOOKEEPER_TO_KRAFT_ROLLBACK_IN_PROGRESS;
 import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.DELETED;
 import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.DELETE_FAILED;
 import static com.sequenceiq.datalake.entity.DatalakeStatusEnum.DELETE_REQUESTED;
@@ -74,7 +80,10 @@ class DatalakeStatusEnumTest {
                     entry(DATALAKE_SECRET_ROTATION_FINALIZE_IN_PROGRESS, DATALAKE_SECRET_ROTATION_FINALIZE_FAILED),
                     entry(DATALAKE_DISK_UPDATE_IN_PROGRESS, DATALAKE_DISK_UPDATE_FAILED),
                     entry(DATALAKE_ADD_VOLUMES_IN_PROGRESS, DATALAKE_ADD_VOLUMES_FAILED),
-                    entry(DATALAKE_UPDATE_PUBLIC_DNS_ENTRIES_IN_PROGRESS, DATALAKE_UPDATE_PUBLIC_DNS_ENTRIES_FAILED))
+                    entry(DATALAKE_UPDATE_PUBLIC_DNS_ENTRIES_IN_PROGRESS, DATALAKE_UPDATE_PUBLIC_DNS_ENTRIES_FAILED),
+                    entry(DATALAKE_ZOOKEEPER_TO_KRAFT_MIGRATION_IN_PROGRESS, DATALAKE_ZOOKEEPER_TO_KRAFT_MIGRATION_FAILED),
+                    entry(DATALAKE_ZOOKEEPER_TO_KRAFT_FINALIZE_IN_PROGRESS, DATALAKE_ZOOKEEPER_TO_KRAFT_FINALIZE_FAILED),
+                    entry(DATALAKE_ZOOKEEPER_TO_KRAFT_ROLLBACK_IN_PROGRESS, DATALAKE_ZOOKEEPER_TO_KRAFT_ROLLBACK_FAILED))
     );
 
     private static final Set<DatalakeStatusEnum> STOP_STATE_SET = EnumSet.of(STOPPED, STOP_IN_PROGRESS);

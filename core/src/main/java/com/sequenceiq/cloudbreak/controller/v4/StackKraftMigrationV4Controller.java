@@ -1,49 +1,46 @@
-package com.sequenceiq.distrox.v1.distrox.controller;
-
-import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.DESCRIBE_DATAHUB;
-import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.MIGRATE_ZOOKEEPER_TO_KRAFT_DATAHUB;
+package com.sequenceiq.cloudbreak.controller.v4;
 
 import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Controller;
 
-import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
+import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackKraftMigrationV4Endpoint;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.security.internal.InitiatorUserCrn;
 import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackOperationService;
-import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXKraftMigrationV1Endpoint;
 import com.sequenceiq.distrox.api.v1.distrox.model.KraftMigrationStatusResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 
 @Controller
-public class DistroXKraftMigrationV1Controller implements DistroXKraftMigrationV1Endpoint {
+public class StackKraftMigrationV4Controller implements StackKraftMigrationV4Endpoint {
 
     @Inject
     private StackOperationService stackOperationService;
 
     @Override
-    @CheckPermissionByResourceCrn(action = MIGRATE_ZOOKEEPER_TO_KRAFT_DATAHUB)
-    public FlowIdentifier migrateFromZookeeperToKraftByCrn(@ResourceCrn String crn) {
+    @InternalOnly
+    public FlowIdentifier migrateFromZookeeperToKraftByCrnInternal(@ResourceCrn String crn, @InitiatorUserCrn String initiatorUserCrn) {
         return stackOperationService.triggerZookeeperToKraftMigration(NameOrCrn.ofCrn(crn), ThreadBasedUserCrnProvider.getAccountId());
     }
 
     @Override
-    @CheckPermissionByResourceCrn(action = MIGRATE_ZOOKEEPER_TO_KRAFT_DATAHUB)
-    public FlowIdentifier finalizeMigrationFromZookeeperToKraftByCrn(@ResourceCrn String crn) {
+    @InternalOnly
+    public FlowIdentifier finalizeMigrationFromZookeeperToKraftByCrnInternal(@ResourceCrn String crn, @InitiatorUserCrn String initiatorUserCrn) {
         return stackOperationService.triggerZookeeperToKraftMigrationFinalization(NameOrCrn.ofCrn(crn), ThreadBasedUserCrnProvider.getAccountId());
     }
 
     @Override
-    @CheckPermissionByResourceCrn(action = MIGRATE_ZOOKEEPER_TO_KRAFT_DATAHUB)
-    public FlowIdentifier rollbackMigrationFromZookeeperToKraftByCrn(@ResourceCrn String crn) {
+    @InternalOnly
+    public FlowIdentifier rollbackMigrationFromZookeeperToKraftByCrnInternal(@ResourceCrn String crn, @InitiatorUserCrn String initiatorUserCrn) {
         return stackOperationService.triggerZookeeperToKraftMigrationRollback(NameOrCrn.ofCrn(crn), ThreadBasedUserCrnProvider.getAccountId());
     }
 
     @Override
-    @CheckPermissionByResourceCrn(action = DESCRIBE_DATAHUB)
-    public KraftMigrationStatusResponse zookeeperToKraftMigrationStatusByCrn(@ResourceCrn String crn) {
+    @InternalOnly
+    public KraftMigrationStatusResponse zookeeperToKraftMigrationStatusByCrnInternal(@ResourceCrn String crn, @InitiatorUserCrn String initiatorUserCrn) {
         return stackOperationService.getKraftMigrationStatus(NameOrCrn.ofCrn(crn), ThreadBasedUserCrnProvider.getAccountId());
     }
-
 }
