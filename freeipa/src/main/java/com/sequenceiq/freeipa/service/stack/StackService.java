@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.service.stack;
 
+import java.time.Instant;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -210,6 +211,12 @@ public class StackService implements EnvironmentPropertyProvider, PayloadContext
 
     public List<Stack> findAllWithDetailedStackStatuses(Collection<DetailedStackStatus> detailedStackStatuses) {
         return stackRepository.findAllWithDetailedStackStatuses(detailedStackStatuses);
+    }
+
+    public Instant getCreatedByResourceCrn(String resourceCrn) {
+        Optional<Long> created = stackRepository.getCreatedByResourceCrn(resourceCrn);
+        return Instant.ofEpochMilli(created.orElseThrow(() -> new NotFoundException(
+            String.format("FreeIPA stack with resource crn [%s] not found or terminated", resourceCrn))));
     }
 
     @Override

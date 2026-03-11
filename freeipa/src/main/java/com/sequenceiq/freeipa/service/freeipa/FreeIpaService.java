@@ -1,6 +1,7 @@
 package com.sequenceiq.freeipa.service.freeipa;
 
 import java.util.List;
+import java.util.Optional;
 
 import jakarta.inject.Inject;
 
@@ -83,5 +84,9 @@ public class FreeIpaService implements ResourceIdProvider {
 
     public List<ResourceWithId> getAllAsAuthorizationResources(String accountId) {
         return repository.findAllAsAuthorizationResources(accountId);
+    }
+
+    public Optional<FreeIpaListView> getViewByResourceCrn(String resourceCrn) {
+        return repository.findViewByResourceCrn(resourceCrn);
     }
 }

@@ -39,7 +39,8 @@ public class SecretRotationFlowEventChainFactoryTest {
     void setup() throws IllegalAccessException {
         FieldUtils.writeDeclaredField(underTest, "secretRotationFlowEventProviderOptional", Optional.of(secretRotationFlowEventProvider), true);
         lenient().when(secretRotationFlowEventProvider.getSaltUpdateTriggerEvent(any())).thenReturn(sampleEvent("salt"));
-        when(secretRotationFlowEventProvider.saltUpdateNeeded(any())).thenCallRealMethod();
+        // keep default provider behavior in other tests; explicitly override in jitter-specific tests
+        lenient().when(secretRotationFlowEventProvider.saltUpdateNeeded(any())).thenCallRealMethod();
     }
 
     @Test
@@ -76,6 +77,7 @@ public class SecretRotationFlowEventChainFactoryTest {
         assertThat(flowTriggerEventQueue.poll()).isInstanceOf(SecretSubRotationTriggerEvent.class);
     }
 
+    // Jitter/delay behavior is removed; no additional tests needed for DelayEvent wrapping.
     private static Selectable sampleEvent(String selector) {
         return new Selectable() {
             @Override

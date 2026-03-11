@@ -47,6 +47,17 @@ cdp:
 
 secretrotation:
     secretTypeEnumClass: FreeIpaSecretType
+    periodic:
+      enabled: false
+      perSecret:
+        # FreeIpaSecretType entries only
+        SALT_BOOT_SECRETS: 90d
+        SALT_SIGN_KEY_PAIR: 90d
+        SALT_MASTER_KEY_PAIR: 90d
+        USER_KEYPAIR: 90d
+        FREEIPA_ADMIN_PASSWORD: 90d
+        CCMV2_JUMPGATE_AGENT_ACCESS_KEY: 90d
+        DBUS_UMS_ACCESS_KEY: 90d
 
 freeipa:
   verticalScalingSupported: AWS,GCP,MOCK,AZURE

@@ -31,6 +31,10 @@ public interface FreeIpaRepository extends CrudRepository<FreeIpa, Long>, VaultR
             + "FROM FreeIpa f LEFT JOIN f.stack s WHERE f.id IN :ids AND s.terminated = -1")
     List<FreeIpaListView> findAllViewByIds(@Param("ids") List<Long> ids);
 
+    @Query("SELECT new com.sequenceiq.freeipa.entity.projection.FreeIpaListView(f.domain, s.name, s.resourceCrn, s.environmentCrn, s.stackStatus) "
+            + "FROM FreeIpa f LEFT JOIN f.stack s WHERE s.resourceCrn = :resourceCrn AND s.terminated = -1")
+    Optional<FreeIpaListView> findViewByResourceCrn(@Param("resourceCrn") String resourceCrn);
+
     @Query("SELECT new com.sequenceiq.authorization.service.list.ResourceWithId(f.id, f.stack.environmentCrn) " +
             "FROM FreeIpa f WHERE f.stack.accountId = :accountId AND f.stack.terminated = -1")
     List<ResourceWithId> findAllAsAuthorizationResources(@Param("accountId") String accountId);

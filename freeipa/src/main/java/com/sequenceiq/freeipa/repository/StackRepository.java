@@ -211,6 +211,9 @@ public interface StackRepository extends AccountAwareResourceRepository<Stack, L
     @Query("SELECT s.environmentCrn FROM Stack s WHERE s.id = :id")
     Optional<String> findEnvironmentCrnByStackId(@Param("id") Long id);
 
+    @Query("SELECT s.created FROM Stack s where s.resourceCrn = :resourcecrn AND s.terminated = -1")
+    Optional<Long> getCreatedByResourceCrn(@Param("resourcecrn") String resourcecrn);
+
     @Override
     default Class<Stack> getEntityClass() {
         return Stack.class;

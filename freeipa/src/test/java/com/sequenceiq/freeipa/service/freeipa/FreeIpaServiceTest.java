@@ -7,6 +7,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.internal.verification.VerificationModeFactory.times;
 
+import java.util.Optional;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -14,8 +16,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.common.dal.ResourceBasicView;
-import com.sequenceiq.flow.api.FlowEndpoint;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.entity.StackStatus;
+import com.sequenceiq.freeipa.entity.projection.FreeIpaListView;
+import com.sequenceiq.freeipa.repository.FreeIpaRepository;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.util.CrnService;
 
@@ -35,7 +39,7 @@ public class FreeIpaServiceTest {
     private CrnService crnService;
 
     @Mock
-    private FlowEndpoint flowEndpoint;
+    private FreeIpaRepository repository;
 
     @InjectMocks
     private FreeIpaService underTest;
@@ -61,5 +65,17 @@ public class FreeIpaServiceTest {
         Long resourceId = underTest.getResourceIdByResourceCrn(FREEIPA_CRN);
         assertEquals(expectedResourceId, resourceId);
         verify(stackService, times(0)).getByEnvironmentCrnAndAccountId(any(), any());
+    }
+
+    @Test
+    void testGetViewByResourceCrn() {
+        FreeIpaListView view = new FreeIpaListView("domain", "name", FREEIPA_CRN, ENV_CRN, new StackStatus());
+        when(repository.findViewByResourceCrn(FREEIPA_CRN)).thenReturn(Optional.of(view));
+
+        Optional<FreeIpaListView> result = underTest.getViewByResourceCrn(FREEIPA_CRN);
+
+        assertEquals(true, result.isPresent());
+        assertEquals(view, result.get());
+        verify(repository).findViewByResourceCrn(FREEIPA_CRN);
     }
 }
