@@ -1037,8 +1037,8 @@
             <value>-1</value>
         </param>
         <param>
-            <name>knox.token.renewer.group.whitelist</name>
-            <value>*;{{ salt['pillar.get']('gateway:knoxAdminGroup') }};*</value>
+            <name>clientid.knox.token.renewer.group.whitelist</name>
+            <value>{{ salt['pillar.get']('gateway:knoxAdminGroup') }}</value>
         </param>
     </service>
 </topology>
