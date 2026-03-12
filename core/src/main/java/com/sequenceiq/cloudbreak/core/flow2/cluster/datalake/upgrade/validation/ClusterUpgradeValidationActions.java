@@ -138,7 +138,7 @@ public class ClusterUpgradeValidationActions {
 
             @Override
             protected Object getFailurePayload(ClusterUpgradeValidationTriggerEvent payload, Optional<StackContext> flowContext, Exception ex) {
-                return new ClusterUpgradeValidationFinishedEvent(payload.getResourceId(), ex);
+                return new ClusterUpgradeValidationFailureEvent(payload.getResourceId(), ex);
             }
         };
     }
@@ -172,7 +172,7 @@ public class ClusterUpgradeValidationActions {
 
             @Override
             protected Object getFailurePayload(ClusterUpgradeValidationEvent payload, Optional<StackContext> flowContext, Exception ex) {
-                return new ClusterUpgradeValidationFinishedEvent(payload.getResourceId(), ex);
+                return new ClusterUpgradeValidationFailureEvent(payload.getResourceId(), ex);
             }
         };
     }
@@ -235,7 +235,7 @@ public class ClusterUpgradeValidationActions {
 
             @Override
             protected Object getFailurePayload(ClusterUpgradeImageValidationFinishedEvent payload, Optional<StackContext> flowContext, Exception ex) {
-                return new ClusterUpgradeDiskSpaceValidationFinishedEvent(payload.getResourceId());
+                return new ClusterUpgradeValidationFailureEvent(payload.getResourceId(), ex);
             }
 
             @Override
@@ -333,7 +333,7 @@ public class ClusterUpgradeValidationActions {
 
             @Override
             protected Object getFailurePayload(ClusterUpgradeFreeIpaStatusValidationFinishedEvent payload, Optional<StackContext> flowContext, Exception ex) {
-                return new ClusterUpgradeValidationFinishedEvent(payload.getResourceId(), ex);
+                return new ClusterUpgradeValidationFailureEvent(payload.getResourceId(), ex);
             }
         };
     }
@@ -365,7 +365,7 @@ public class ClusterUpgradeValidationActions {
 
             @Override
             protected Object getFailurePayload(ClusterUpgradeValidationFinishedEvent payload, Optional<StackContext> flowContext, Exception ex) {
-                return new ClusterUpgradeValidationFinishedEvent(payload.getResourceId(), ex);
+                return new ClusterUpgradeValidationFailureEvent(payload.getResourceId(), ex);
             }
         };
     }
