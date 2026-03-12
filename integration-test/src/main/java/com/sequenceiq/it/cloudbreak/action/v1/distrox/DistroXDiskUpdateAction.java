@@ -42,7 +42,7 @@ public class DistroXDiskUpdateAction implements Action<DistroXTestDto, Cloudbrea
         diskUpdateRequest.setDiskType(diskType);
         Log.whenJson(LOGGER, "DistroX Disk Update request: ", diskUpdateRequest);
         FlowIdentifier flowIdentifier;
-        if (DiskType.ADDITIONAL_DISK.equals(diskType)) {
+        if (DiskType.ADDITIONAL_DISK.equals(diskType) || DiskType.DATABASE_DISK.equals(diskType)) {
             flowIdentifier = client.getDefaultClient(testContext)
                     .distroXV1Endpoint()
                     .diskUpdateByName(testDto.getName(), diskUpdateRequest);

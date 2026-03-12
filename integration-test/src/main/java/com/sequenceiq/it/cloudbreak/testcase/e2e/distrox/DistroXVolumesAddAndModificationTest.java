@@ -1,5 +1,6 @@
 package com.sequenceiq.it.cloudbreak.testcase.e2e.distrox;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -14,6 +15,7 @@ import com.google.common.collect.ImmutableMap;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.template.volume.DatabaseVolumeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.template.volume.VolumeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.resource.ResourceV4Response;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
@@ -49,6 +51,8 @@ public class DistroXVolumesAddAndModificationTest extends AbstractE2EWithReusabl
 
     private static final String TEST_INSTANCE_GROUP = "coordinator";
 
+    private static final String DB_INSTANCE_GROUP = "master";
+
     private static final int UPDATE_SIZE = 500;
 
     private static final int ADD_DISK_SIZE = 200;
@@ -60,6 +64,14 @@ public class DistroXVolumesAddAndModificationTest extends AbstractE2EWithReusabl
     private static final String AWS_DISK_TYPE = "gp2";
 
     private static final String AZURE_DISK_TYPE = "StandardSSD_LRS";
+
+    private static final int DB_UPDATE_SIZE = 300;
+
+    private static final String ROOT_VOLUMES = "rootVolumes";
+
+    private static final String ADDITIONAL_VOLUMES = "additionalVolumes";
+
+    private static final String DB_VOLUMES = "dbVolumes";
 
     @Inject
     private SdxTestClient sdxTestClient;
@@ -156,6 +168,18 @@ public class DistroXVolumesAddAndModificationTest extends AbstractE2EWithReusabl
                     validateUpdatedDisks(testDto, tc, client, cloudPlatform);
                     return testDto;
                 })
+                .awaitForHealthyInstances()
+                .given("dx", DistroXTestDto.class)
+                .when(distroXTestClient.updateDisks(DB_UPDATE_SIZE, getVolumeTypeForUpdatingDisks(cloudPlatform),
+                        DB_INSTANCE_GROUP, DiskType.DATABASE_DISK), RunningParameter.key("dx"))
+                .await(STACK_AVAILABLE, RunningParameter.key("dx"))
+                .awaitForHealthyInstances()
+                .given("dx", DistroXTestDto.class)
+                .when(distroXTestClient.get(), RunningParameter.key("dx"))
+                .then((tc, testDto, client) -> {
+                    validateUpdatedDbDisk(testDto, tc, client, cloudPlatform);
+                    return testDto;
+                })
                 .then((tc, testDto, client) -> selinuxAssertions.validateAll(tc, testDto, false))
                 .validate();
     }
@@ -201,7 +225,7 @@ public class DistroXVolumesAddAndModificationTest extends AbstractE2EWithReusabl
     private void validateUpdatedDisks(DistroXTestDto distroXTestDto, TestContext tc, CloudbreakClient client, CloudPlatform cloudPlatform) {
         String expectedVolumeType = getVolumeTypeForUpdatingDisks(cloudPlatform);
 
-        List<String> attachedVolumes = getVolumesOnCloudProvider(distroXTestDto, tc, client, false);
+        List<String> attachedVolumes = getVolumesOnCloudProvider(distroXTestDto, tc, client, ADDITIONAL_VOLUMES);
         if (CollectionUtils.isEmpty(attachedVolumes)) {
             throw new TestFailException(String.format("Update Disk did not complete successfully on cloud provider for instances in group %s. " +
                     "Attached Volumes %s on cloud provider does not match with expected number of Volumes", TEST_INSTANCE_GROUP, attachedVolumes));
@@ -215,23 +239,30 @@ public class DistroXVolumesAddAndModificationTest extends AbstractE2EWithReusabl
         }
         attachedVolumesWithGroup.forEach(vol -> {
             if (vol.getSize() != UPDATE_SIZE || (expectedVolumeType != null && !expectedVolumeType.equalsIgnoreCase(vol.getType()))) {
-                throw new TestFailException(String.format("Update Disk did not complete successfully for instances in group %s in CB",
-                        TEST_INSTANCE_GROUP));
+                throw new TestFailException(String.format("Update Disk did not complete successfully for instances in group %s in CB. " +
+                                "Expected: [size: %s, type: %s], Actual: [size: %s, type: %s]",
+                        TEST_INSTANCE_GROUP, UPDATE_SIZE, expectedVolumeType, vol.getSize(), vol.getType()));
             }
         });
 
         List<Volume> attachedVolumesAttributes = getCloudFunctionality(tc).describeVolumes(attachedVolumes);
+        List<Volume> misalignedVolumes = new ArrayList<>();
         attachedVolumesAttributes.forEach(vol -> {
             if (vol.getSize() != UPDATE_SIZE || (expectedVolumeType != null && !expectedVolumeType.equalsIgnoreCase(vol.getType()))) {
-                throw new TestFailException(String.format("Update Disk did not complete successfully for instances on cloud provider in group %s",
-                        TEST_INSTANCE_GROUP));
+                misalignedVolumes.add(vol);
             }
         });
+
+        if (!misalignedVolumes.isEmpty()) {
+            throw new TestFailException(String.format("Update Disk did not complete successfully for instances on cloud provider in group %s. " +
+                            "Misaligned volumes: %s. Expected size: %s, Expected type: %s",
+                    TEST_INSTANCE_GROUP, misalignedVolumes, UPDATE_SIZE, expectedVolumeType));
+        }
 
     }
 
     private void validateDeletedDisk(DistroXTestDto distroXTestDto, TestContext tc, CloudbreakClient client) {
-        List<String> attachedVolumes = getVolumesOnCloudProvider(distroXTestDto, tc, client, false);
+        List<String> attachedVolumes = getVolumesOnCloudProvider(distroXTestDto, tc, client, ADDITIONAL_VOLUMES);
         if (!CollectionUtils.isEmpty(attachedVolumes)) {
             throw new TestFailException(String.format("Disk Delete did not complete successfully for instances in group %s. " +
                             "volumes %s are still attached on cloud provider",
@@ -250,7 +281,7 @@ public class DistroXVolumesAddAndModificationTest extends AbstractE2EWithReusabl
     private void validateAddedDisks(DistroXTestDto distroXTestDto, TestContext tc, CloudbreakClient client, CloudPlatform cloudPlatform) {
         String expectedVolumeType = getVolumeTypeForAddingDisks(cloudPlatform);
 
-        List<String> attachedVolumes = getVolumesOnCloudProvider(distroXTestDto, tc, client, false);
+        List<String> attachedVolumes = getVolumesOnCloudProvider(distroXTestDto, tc, client, ADDITIONAL_VOLUMES);
         if (attachedVolumes.size() != NUM_DISK_TO_ADD) {
             throw new TestFailException(String.format("Add Disk did not complete successfully on cloud provider for instances in group %s. " +
                     "Attached Volumes %s on cloud provider does not match with expected number of Volumes", TEST_INSTANCE_GROUP, attachedVolumes));
@@ -264,18 +295,25 @@ public class DistroXVolumesAddAndModificationTest extends AbstractE2EWithReusabl
         }
         attachedVolumesWithGroup.forEach(vol -> {
             if (vol.getSize() != ADD_DISK_SIZE || (expectedVolumeType != null && !expectedVolumeType.equalsIgnoreCase(vol.getType()))) {
-                throw new TestFailException(String.format("Add Disk did not complete successfully for instances in group %s in CB",
-                        TEST_INSTANCE_GROUP));
+                throw new TestFailException(String.format("Add Disk did not complete successfully for instances in group %s in CB. " +
+                                "Expected: [size: %s, type: %s], Actual: [size: %s, type: %s]",
+                        TEST_INSTANCE_GROUP, ADD_DISK_SIZE, expectedVolumeType, vol.getSize(), vol.getType()));
             }
         });
 
         List<Volume> attachedVolumesAttributes = getCloudFunctionality(tc).describeVolumes(attachedVolumes);
+        List<Volume> misalignedVolumes = new ArrayList<>();
         attachedVolumesAttributes.forEach(vol -> {
             if (vol.getSize() != ADD_DISK_SIZE || (expectedVolumeType != null && !expectedVolumeType.equalsIgnoreCase(vol.getType()))) {
-                throw new TestFailException(String.format("Add Disk did not complete successfully for instances on cloud provider in group %s",
-                        TEST_INSTANCE_GROUP));
+                misalignedVolumes.add(vol);
             }
         });
+
+        if (!misalignedVolumes.isEmpty()) {
+            throw new TestFailException(String.format("Add Disk did not complete successfully for instances on cloud provider in group %s. " +
+                            "Misaligned volumes: %s. Expected size: %s, Expected type: %s",
+                    TEST_INSTANCE_GROUP, misalignedVolumes, ADD_DISK_SIZE, expectedVolumeType));
+        }
 
     }
 
@@ -295,13 +333,22 @@ public class DistroXVolumesAddAndModificationTest extends AbstractE2EWithReusabl
         return null;
     }
 
-    private List<String> getVolumesOnCloudProvider(DistroXTestDto distroXTestDto, TestContext tc, CloudbreakClient client, boolean rootVolumes) {
-        List<String> updatedInstances = distroxUtil.getInstanceIds(distroXTestDto, client, TEST_INSTANCE_GROUP);
+    private List<String> getVolumesOnCloudProvider(DistroXTestDto distroXTestDto, TestContext tc, CloudbreakClient client, String volumeType) {
         CloudFunctionality cloudFunctionality = getCloudFunctionality(tc);
-        if (rootVolumes) {
-            return cloudFunctionality.listInstancesRootVolumeIds(distroXTestDto.getName(), updatedInstances);
-        } else {
-            return cloudFunctionality.listInstancesVolumeIds(distroXTestDto.getName(), updatedInstances);
+        switch (volumeType) {
+            case ROOT_VOLUMES -> {
+                List<String> updatedInstances = distroxUtil.getInstanceIds(distroXTestDto, client, TEST_INSTANCE_GROUP);
+                return cloudFunctionality.listInstancesRootVolumeIds(distroXTestDto.getName(), updatedInstances);
+            }
+            case ADDITIONAL_VOLUMES -> {
+                List<String> updatedInstances = distroxUtil.getInstanceIds(distroXTestDto, client, TEST_INSTANCE_GROUP);
+                return cloudFunctionality.listInstancesVolumeIds(distroXTestDto.getName(), updatedInstances);
+            }
+            case DB_VOLUMES -> {
+                List<String> updatedInstances = distroxUtil.getInstanceIds(distroXTestDto, client, DB_INSTANCE_GROUP);
+                return cloudFunctionality.listInstancesVolumeIds(distroXTestDto.getName(), updatedInstances);
+            }
+            default -> throw new TestFailException("Invalid configuration, unexpected value: " + volumeType);
         }
     }
 
@@ -312,6 +359,13 @@ public class DistroXVolumesAddAndModificationTest extends AbstractE2EWithReusabl
         Set<VolumeV4Response> attachedVolumesWithGroup = instanceGroup.getTemplate().getAttachedVolumes().stream()
                 .filter(volumeV4Response -> volumeV4Response.getCount() > 0).collect(Collectors.toSet());
         return attachedVolumesWithGroup;
+    }
+
+    private DatabaseVolumeV4Response getDatabaseVolume(DistroXTestDto distroXTestDto) {
+        StackV4Response stackV4Response = distroXTestDto.getResponse();
+        InstanceGroupV4Response instanceGroup = stackV4Response.getInstanceGroups().stream().filter(ig -> ig.getName().equals(DB_INSTANCE_GROUP))
+                .findFirst().orElseThrow();
+        return instanceGroup.getTemplate().getDatabaseVolume();
     }
 
     private List<ResourceV4Response> getRootVolumes(DistroXTestDto distroXTestDto, CloudPlatform cloudPlatform) {
@@ -329,19 +383,25 @@ public class DistroXVolumesAddAndModificationTest extends AbstractE2EWithReusabl
     private void validateRootDisks(DistroXTestDto distroXTestDto, TestContext tc, CloudbreakClient client, CloudPlatform cloudPlatform) {
         String expectedVolumeType = getVolumeTypeForUpdatingDisks(cloudPlatform);
 
-        List<String> rootVolumes = getVolumesOnCloudProvider(distroXTestDto, tc, client, true);
+        List<String> rootVolumes = getVolumesOnCloudProvider(distroXTestDto, tc, client, ROOT_VOLUMES);
         if (CollectionUtils.isEmpty(rootVolumes)) {
             throw new TestFailException(String.format("Root volume is not present on instances on Cloud Provider for group %s",
                     TEST_INSTANCE_GROUP));
         }
 
         List<Volume> rootVolumesAttributes = getCloudFunctionality(tc).describeVolumes(rootVolumes);
+        List<Volume> misalignedVolumes = new ArrayList<>();
         rootVolumesAttributes.forEach(vol -> {
             if (vol.getSize() != ROOT_UPDATE_SIZE || (expectedVolumeType != null && !expectedVolumeType.equalsIgnoreCase(vol.getType()))) {
-                throw new TestFailException(String.format("Root Volume Modification did not complete successfully for instances on cloud provider in group %s",
-                        TEST_INSTANCE_GROUP));
+                misalignedVolumes.add(vol);
             }
         });
+
+        if (!misalignedVolumes.isEmpty()) {
+            throw new TestFailException(String.format("Root Volume Modification did not complete successfully for instances on cloud provider in group %s. " +
+                            "Misaligned volumes: %s. Expected size: %s, Expected type: %s",
+                    TEST_INSTANCE_GROUP, misalignedVolumes, ROOT_UPDATE_SIZE, expectedVolumeType));
+        }
 
         List<ResourceV4Response> rootVolumesInGroup = getRootVolumes(distroXTestDto, cloudPlatform);
         if (CollectionUtils.isEmpty(rootVolumesInGroup)) {
@@ -349,5 +409,42 @@ public class DistroXVolumesAddAndModificationTest extends AbstractE2EWithReusabl
                     TEST_INSTANCE_GROUP));
 
         }
+    }
+
+    private void validateUpdatedDbDisk(DistroXTestDto distroXTestDto, TestContext tc, CloudbreakClient client, CloudPlatform cloudPlatform) {
+        String expectedVolumeType = getVolumeTypeForUpdatingDisks(cloudPlatform);
+
+        List<String> attachedVolumes = getVolumesOnCloudProvider(distroXTestDto, tc, client, DB_VOLUMES);
+        if (CollectionUtils.isEmpty(attachedVolumes)) {
+            throw new TestFailException(String.format("Update DB Disk did not complete successfully on cloud provider for instances in group %s. " +
+                    "Attached Volumes %s on cloud provider does not match with expected number of Volumes", DB_INSTANCE_GROUP, attachedVolumes));
+        }
+
+        DatabaseVolumeV4Response databaseVolume = getDatabaseVolume(distroXTestDto);
+        if (databaseVolume == null) {
+            throw new TestFailException(String.format("Update DB Disk did not complete successfully for instances in group %s. " +
+                    "DatabaseVolume %s does not match with expected number of Volumes in CB", DB_INSTANCE_GROUP, databaseVolume));
+
+        }
+        if (databaseVolume.getSize() != DB_UPDATE_SIZE || (expectedVolumeType != null && !expectedVolumeType.equalsIgnoreCase(databaseVolume.getType()))) {
+            throw new TestFailException(String.format("Update DB Disk did not complete successfully for instances in group %s in CB. " +
+                            "Expected: [size: %s, type: %s], Actual: [size: %s, type: %s]",
+                    DB_INSTANCE_GROUP, DB_UPDATE_SIZE, expectedVolumeType, databaseVolume.getSize(), databaseVolume.getType()));
+        }
+
+        List<Volume> attachedVolumesAttributes = getCloudFunctionality(tc).describeVolumes(attachedVolumes);
+        List<Volume> misalignedVolumes = new ArrayList<>();
+        for (Volume vol : attachedVolumesAttributes) {
+            if (vol.getSize() != DB_UPDATE_SIZE || (expectedVolumeType != null && !expectedVolumeType.equalsIgnoreCase(vol.getType()))) {
+                misalignedVolumes.add(vol);
+            }
+        }
+
+        if (!misalignedVolumes.isEmpty()) {
+            throw new TestFailException(String.format("Update Disk did not complete successfully for instances on cloud provider in group %s. " +
+                            "Misaligned volumes: %s. Expected size: %s, Expected type: %s",
+                    DB_INSTANCE_GROUP, misalignedVolumes, DB_UPDATE_SIZE, expectedVolumeType));
+        }
+
     }
 }
