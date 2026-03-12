@@ -68,6 +68,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTr
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent.RepairType;
 import com.sequenceiq.cloudbreak.rotation.flow.chain.SecretRotationFlowChainTriggerEvent;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
+import com.sequenceiq.cloudbreak.service.cluster.CLOWorkaroundService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterRepairService;
 import com.sequenceiq.cloudbreak.service.cluster.model.HostGroupName;
 import com.sequenceiq.cloudbreak.service.cluster.model.RepairValidation;
@@ -117,6 +118,9 @@ class UpgradeDistroxFlowEventChainFactoryTest {
 
     @Mock
     private EntitlementService entitlementService;
+
+    @Mock
+    private CLOWorkaroundService cloWorkaroundService;
 
     @Mock
     private ClusterSizeUpgradeValidator clusterSizeUpgradeValidator;
