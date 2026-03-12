@@ -63,6 +63,7 @@ import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
+import com.sequenceiq.cloudbreak.service.cluster.CLOWorkaroundService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterRepairService;
 import com.sequenceiq.cloudbreak.service.cluster.model.HostGroupName;
 import com.sequenceiq.cloudbreak.service.cluster.model.RepairValidation;
@@ -113,6 +114,9 @@ public class UpgradeDistroxFlowEventChainFactory implements FlowEventChainFactor
     @Inject
     private ComponentConfigProviderService componentConfigProviderService;
 
+    @Inject
+    private CLOWorkaroundService cloWorkaroundService;
+
     @Override
     public String initEvent() {
         return DISTROX_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT;
@@ -150,6 +154,7 @@ public class UpgradeDistroxFlowEventChainFactory implements FlowEventChainFactor
         flowEventChain.addAll(getSaltUpdateTriggerEvent(event));
         flowEventChain.addAll(getImageUpdateTriggerEvent(event));
         flowEventChain.addAll(getClusterUpgradeTriggerEvent(event, stack, currentImage));
+        flowEventChain.addAll(cloWorkaroundService.getClusterUpgradeTriggerEvent(event));
         flowEventChain.addAll(embeddedDbUpgradeFlowTriggersFactory.createFlowTriggers(event.getResourceId(), true));
         flowEventChain.addAll(getClusterRepairTriggerEvent(event, stack));
 

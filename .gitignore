@@ -54,3 +54,4 @@ ImageId*
 resource_names_*.json
 
 *.log
+.sdkmanrc
