@@ -4,7 +4,6 @@ import static com.sequenceiq.freeipa.flow.stack.image.change.event.ImageChangeEv
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import jakarta.inject.Inject;
 
@@ -14,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.entity.ImageEntity;
+import com.sequenceiq.freeipa.entity.Operation;
 import com.sequenceiq.freeipa.flow.OperationAwareAction;
 import com.sequenceiq.freeipa.flow.stack.AbstractStackFailureAction;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
@@ -48,13 +48,16 @@ class ImageChangeFailureHandlerAction extends AbstractStackFailureAction<ImageCh
             ImageEntity originalImage = (ImageEntity) variables.get(ImageChangeActions.ORIGINAL_IMAGE);
             imageService.save(originalImage);
         }
+        String errorMessage = getErrorReason(payload.getException());
         if (isOperationIdSet(variables)) {
-            operationService.failOperation(context.getStack().getAccountId(), getOperationId(variables), payload.getException().getMessage());
+            Operation operation = operationService.failOperation(
+                    context.getStack().getAccountId(), getOperationId(variables), payload.getException().getMessage());
+            sendFailedOperationNotificationIfApplicable(context.getStack(), context.getFlowTriggerUserCrn(), operation, errorMessage);
         }
         getStackUpdater().updateStackStatus(context.getStack(), DetailedStackStatus.IMAGE_CHANGE_FAILED,
                 "Image change failed with: " + payload.getException().getMessage());
         getEventService().sendEventAndNotification(context.getStack(), context.getFlowTriggerUserCrn(), ResourceEvent.FREEIPA_IMAGE_CHANGE_FAILED,
-                List.of(Optional.ofNullable(payload.getException()).map(Throwable::getMessage).orElse("Unknown")));
+                List.of(errorMessage));
         sendEvent(context, new StackEvent(IMAGE_CHANGE_FAILURE_HANDLED_EVENT.event(), context.getStack().getId()));
     }
 }

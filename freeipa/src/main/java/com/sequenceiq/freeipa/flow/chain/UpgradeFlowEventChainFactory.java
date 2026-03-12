@@ -256,7 +256,7 @@ public class UpgradeFlowEventChainFactory implements FlowEventChainFactory<Upgra
 
     private List<AwsVariantMigrationTriggerEvent> createMigrationFlowIfNeeded(UpgradeEvent event, Set<String> groupNames, String flow) {
         if (event.isNeedMigration()) {
-            LOGGER.debug(flow + " flow added to FreeIPA upgrade");
+            LOGGER.debug("{} flow added to FreeIPA upgrade", flow);
             return groupNames.stream()
                     .map(g -> new AwsVariantMigrationTriggerEvent(AwsVariantMigrationEvent.CREATE_RESOURCES_EVENT.event(), event.getResourceId(), g))
                     .collect(Collectors.toList());
@@ -268,8 +268,12 @@ public class UpgradeFlowEventChainFactory implements FlowEventChainFactory<Upgra
     private List<Selectable> createLoadBalancerCreationFlowIfNecessary(UpgradeEvent event) {
         List<Selectable> events = new ArrayList<>();
         if (loadBalancerProvisionCondition.loadBalancerProvisionEnabled(event.getResourceId(), FreeIpaLoadBalancerType.INTERNAL_NLB)) {
-            events.add(new LoadBalancerCreationTriggerEvent(FREEIPA_LOAD_BALANCER_CREATION_EVENT.event(), event.getResourceId(),
-                    LoadBalancerProvisioningMode.UPGRADE));
+            events.add(new LoadBalancerCreationTriggerEvent(
+                    FREEIPA_LOAD_BALANCER_CREATION_EVENT.event(),
+                    event.getResourceId(),
+                    LoadBalancerProvisioningMode.UPGRADE,
+                    event.getOperationId()
+            ));
         }
         return events;
     }

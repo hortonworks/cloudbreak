@@ -45,6 +45,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.user.model.FailureDetails;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SuccessDetails;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.LoadBalancer;
+import com.sequenceiq.freeipa.entity.Operation;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.freeipa.cleanup.CleanupEvent;
 import com.sequenceiq.freeipa.flow.freeipa.cleanup.event.cert.RevokeCertsRequest;
@@ -496,7 +497,9 @@ public class FreeIpaDownscaleActions {
                 if (payload.getFailureDetails() != null) {
                     failureDetails.getAdditionalDetails().putAll(payload.getFailureDetails());
                 }
-                operationService.failOperation(stack.getAccountId(), getOperationId(variables), message, List.of(successDetails), List.of(failureDetails));
+                Operation operation = operationService.failOperation(
+                        stack.getAccountId(), getOperationId(variables), message, List.of(successDetails), List.of(failureDetails));
+                sendFailedOperationNotificationIfApplicable(stack, context.getFlowTriggerUserCrn(), operation, errorReason);
                 enableStatusChecker(stack, "Failed downscaling FreeIPA");
                 sendEvent(context, FAIL_HANDLED_EVENT.event(), payload);
             }

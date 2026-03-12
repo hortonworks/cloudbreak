@@ -14,6 +14,7 @@ import java.util.Map;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
@@ -23,7 +24,9 @@ import org.springframework.statemachine.action.Action;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.flow.core.PayloadConverter;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
+import com.sequenceiq.freeipa.api.v1.freeipa.user.model.FailureDetails;
 import com.sequenceiq.freeipa.entity.LoadBalancer;
+import com.sequenceiq.freeipa.entity.Operation;
 import com.sequenceiq.freeipa.flow.freeipa.common.FreeIpaFailedFlowAnalyzer;
 import com.sequenceiq.freeipa.flow.freeipa.loadbalancer.event.LoadBalancerCreationFailureEvent;
 import com.sequenceiq.freeipa.flow.freeipa.loadbalancer.event.LoadBalancerCreationTriggerEvent;
@@ -39,6 +42,7 @@ import com.sequenceiq.freeipa.flow.stack.StackContext;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
 import com.sequenceiq.freeipa.service.loadbalancer.FreeIpaLoadBalancerConfigurationService;
 import com.sequenceiq.freeipa.service.loadbalancer.FreeIpaLoadBalancerService;
+import com.sequenceiq.freeipa.service.operation.OperationService;
 
 @Configuration
 public class FreeIpaLoadBalancerProvisionActions {
@@ -58,6 +62,7 @@ public class FreeIpaLoadBalancerProvisionActions {
             @Override
             protected void prepareExecution(LoadBalancerCreationTriggerEvent payload, Map<Object, Object> variables) {
                 variables.put(LOAD_BALANCER_PROVISIONING_MODE, payload.getLoadBalancerProvisioningMode());
+                setOperationId(variables, payload.getOperationId());
             }
 
             @Override
@@ -164,11 +169,18 @@ public class FreeIpaLoadBalancerProvisionActions {
             @Inject
             private FreeIpaFailedFlowAnalyzer freeIpaFailedFlowAnalyzer;
 
+            @Inject
+            private OperationService operationService;
+
             @Override
             protected void doExecute(StackContext context, LoadBalancerCreationFailureEvent payload, Map<Object, Object> variables) {
                 String errorReason = getErrorReason(payload.getException());
                 DetailedStackStatus detailedStackStatus = calculateFailureStatus(payload, variables);
+                Operation operation = failOperationIfPresent(context, variables, errorReason);
                 stackUpdater().updateStackStatus(context.getStack(), detailedStackStatus, errorReason);
+                if (!isBootstrapMode(variables)) {
+                    sendFailedOperationNotificationIfApplicable(context.getStack(), context.getFlowTriggerUserCrn(), operation, errorReason);
+                }
                 sendEvent(context);
             }
 
@@ -177,6 +189,22 @@ public class FreeIpaLoadBalancerProvisionActions {
                     return isBootstrapMode(variables) ? PROVISION_VALIDATION_FAILED : UPGRADE_VALIDATION_FAILED;
                 } else {
                     return isBootstrapMode(variables) ? PROVISION_FAILED : UPGRADE_FAILED;
+                }
+            }
+
+            private Operation failOperationIfPresent(StackContext context, Map<Object, Object> variables, String errorMessage) {
+                String operationId = getOperationId(variables);
+                if (StringUtils.isNotEmpty(operationId)) {
+                    FailureDetails failureDetails = new FailureDetails(context.getStack().getEnvironmentCrn(), errorMessage);
+                    return operationService.failOperation(
+                            context.getStack().getAccountId(),
+                            operationId,
+                            errorMessage,
+                            List.of(),
+                            List.of(failureDetails));
+                } else {
+                    LOGGER.warn("No operation id found in variables, skipping operation failure, this should not happen..");
+                    return null;
                 }
             }
 

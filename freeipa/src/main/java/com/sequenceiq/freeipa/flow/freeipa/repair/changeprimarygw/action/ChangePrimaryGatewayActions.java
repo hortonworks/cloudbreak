@@ -28,6 +28,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackSta
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.FailureDetails;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SuccessDetails;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
+import com.sequenceiq.freeipa.entity.Operation;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.clusterproxy.ClusterProxyUpdateRegistrationRequest;
 import com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.ChangePrimaryGatewayContext;
@@ -218,7 +219,9 @@ public class ChangePrimaryGatewayActions {
                 }
                 String errorReason = getErrorReason(payload.getException());
                 stackUpdater.updateStackStatus(context.getStack(), DetailedStackStatus.REPAIR_FAILED, errorReason);
-                operationService.failOperation(stack.getAccountId(), getOperationId(variables), message, List.of(successDetails), List.of(failureDetails));
+                Operation operation = operationService.failOperation(
+                        stack.getAccountId(), getOperationId(variables), message, List.of(successDetails), List.of(failureDetails));
+                sendFailedOperationNotificationIfApplicable(stack, context.getFlowTriggerUserCrn(), operation, errorReason);
                 LOGGER.info("Enabling the status checker for stack ID {} after failing repairing", stack.getId());
                 enableStatusChecker(stack, "Failed to repair FreeIPA");
                 sendEvent(context, FAIL_HANDLED_EVENT.event(), payload);
