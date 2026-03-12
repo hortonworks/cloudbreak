@@ -101,6 +101,7 @@ init-services-db-remote:
 create_embeddeddb_certificate:
   cmd.run:
     - name: /opt/salt/scripts/create_embeddeddb_certificate.sh
+    - failhard: True
     - require:
       - file: /opt/salt/scripts/create_embeddeddb_certificate.sh
     - unless: test -f {{ postgres_directory }}/certs/postgres.cert
