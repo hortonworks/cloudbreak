@@ -21,13 +21,10 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.util.Strings;
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Multimap;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.audits.responses.AuditEventV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
@@ -500,7 +497,6 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
     }
 
     private void collectLogFiles(StackV4Response stackResponse) {
-        Multimap<String, Pair<String, String>> collectedLogFiles = ArrayListMultimap.create();
         try {
             List<String> ipAddresses = stackResponse.getInstanceGroups().stream().flatMap(ig -> ig.getMetadata().stream())
                     .map(imd -> imd.getPublicIp() != null && !Objects.equals(imd.getPublicIp(), "N/A") ? imd.getPublicIp() : imd.getPrivateIp()).toList();

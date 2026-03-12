@@ -77,6 +77,7 @@ import com.sequenceiq.it.cloudbreak.microservice.SdxClient;
 import com.sequenceiq.it.cloudbreak.search.Searchable;
 import com.sequenceiq.it.cloudbreak.util.AuditUtil;
 import com.sequenceiq.it.cloudbreak.util.InstanceUtil;
+import com.sequenceiq.it.cloudbreak.util.LogCollectorUtil;
 import com.sequenceiq.it.cloudbreak.util.ResponseUtil;
 import com.sequenceiq.it.cloudbreak.util.StructuredEventUtil;
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
@@ -114,6 +115,9 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
 
     @Inject
     private CommonCloudProperties commonCloudProperties;
+
+    @Inject
+    private LogCollectorUtil logCollectorUtil;
 
     private final Map<HostGroupType, String> privateIps = new EnumMap<>(HostGroupType.class);
 
@@ -634,6 +638,7 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
         String resourceCrn = getResponse().getCrn();
         StackV4Response stackResponse = getResponse().getStackV4Response();
         setCloudPlatformFromStack(stackResponse);
+        collectLogFiles(stackResponse);
         AuditEventV4Responses auditEvents = AuditUtil.getAuditEvents(
                 getTestContext().getMicroserviceClient(CloudbreakClient.class),
                 CloudbreakEventService.DATALAKE_RESOURCE_TYPE,
@@ -656,6 +661,16 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
                 structuredEvents,
                 getResponse(),
                 hasSpotTermination(stackResponse));
+    }
+
+    private void collectLogFiles(StackV4Response stackResponse) {
+        try {
+            List<String> ipAddresses = stackResponse.getInstanceGroups().stream().flatMap(ig -> ig.getMetadata().stream())
+                    .map(imd -> imd.getPublicIp() != null && !Objects.equals(imd.getPublicIp(), "N/A") ? imd.getPublicIp() : imd.getPrivateIp()).toList();
+            logCollectorUtil.collectLogFiles(stackResponse.getStatusReason(), ipAddresses);
+        } catch (Exception e) {
+            LOGGER.warn("Failed to collect datalake log files for investigation.", e);
+        }
     }
 
     protected CommonClusterManagerProperties commonClusterManagerProperties() {

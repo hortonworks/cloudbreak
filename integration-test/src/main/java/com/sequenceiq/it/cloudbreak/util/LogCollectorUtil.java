@@ -1,5 +1,7 @@
 package com.sequenceiq.it.cloudbreak.util;
 
+import static com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto.SOS_LOG;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -31,7 +33,8 @@ public class LogCollectorUtil {
                     "SocketTimeoutException", List.of("/var/log/salt/master", "/var/log/salt/minion", "/var/log/saltboot.log", "/var/log/messages"),
                     "User data script failed", List.of("/var/log/saltboot.log", "/var/log/messages", "/var/log/user-data.log"),
                     "Failed to retrieve the server's certificate from Nginx",
-                    List.of("/var/log/nginx/access.log", "/var/log/nginx/error.log", "/var/log/saltboot.log", "/var/log/messages", "/var/log/user-data.log")
+                    List.of("/var/log/nginx/access.log", "/var/log/nginx/error.log", "/var/log/saltboot.log", "/var/log/messages", "/var/log/user-data.log"),
+                    "CA server", List.of(SOS_LOG + "/*")
             );
 
     @Value("${integrationtest.outputdir:.}")

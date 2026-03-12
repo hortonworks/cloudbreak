@@ -87,6 +87,7 @@ import com.sequenceiq.it.cloudbreak.search.StorageUrl;
 import com.sequenceiq.it.cloudbreak.util.FreeIpaInstanceUtil;
 import com.sequenceiq.it.cloudbreak.util.LogCollectorUtil;
 import com.sequenceiq.it.cloudbreak.util.StructuredEventUtil;
+import com.sequenceiq.it.cloudbreak.util.ssh.action.SshJClientActions;
 import com.sequenceiq.it.cloudbreak.util.yarn.YarnCloudFunctionality;
 
 @Prototype
@@ -94,6 +95,8 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
         implements Purgable<ListFreeIpaResponse, FreeIpaClient>, Searchable, Investigable, EnvironmentAware {
 
     public static final String FREEIPA_RESOURCE_NAME = "freeipaName";
+
+    public static final String SOS_LOG = "/var/log/sos";
 
     @Inject
     private FreeIpaTestClient freeIpaTestClient;
@@ -110,6 +113,9 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
     @Inject
     private LogCollectorUtil logCollectorUtil;
 
+    @Inject
+    private SshJClientActions sshJClientActions;
+
     private CloudPlatform cloudPlatformFromStack;
 
     public FreeIpaTestDto(TestContext testContext) {
@@ -120,10 +126,10 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
     public FreeIpaTestDto valid() {
         return withName(getResourcePropertyProvider().getName(getCloudPlatform()))
                 .withEnvironment(getTestContext()
-                .given(EnvironmentTestDto.class)
-                .withTunnel(getTestContext().getTunnel()))
+                        .given(EnvironmentTestDto.class)
+                        .withTunnel(getTestContext().getTunnel()))
                 .withPlacement(getTestContext()
-                .given(PlacementSettingsTestDto.class))
+                        .given(PlacementSettingsTestDto.class))
                 .withInstanceGroupsEntity()
                 .withNetwork(getTestContext().given(NetworkV4TestDto.class))
                 .withGatewayPort(getCloudProvider().gatewayPort(this))
@@ -602,9 +608,22 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
             List<String> ipAddresses = getResponse().getInstanceGroups().stream().flatMap(ig -> ig.getMetaData().stream())
                     .map(imd -> imd.getPublicIp() != null && !Objects.equals(imd.getPublicIp(), "N/A") ? imd.getPublicIp() : imd.getPrivateIp()).toList();
             LOGGER.debug("Collected FreeIPA IP addresses: {}", ipAddresses);
-            logCollectorUtil.collectLogFiles(getResponse().getStatusReason(), ipAddresses);
+            String statusReason = getResponse().getStatusReason();
+            createSosReport(statusReason, ipAddresses);
+            logCollectorUtil.collectLogFiles(statusReason, ipAddresses);
         } catch (Exception e) {
             LOGGER.warn("Failed to collect FreeIPA log files for investigation.", e);
+        }
+    }
+
+    private void createSosReport(String statusReason, List<String> ipAddresses) {
+        if (StringUtils.isNotBlank(statusReason) && statusReason.contains("CA server")) {
+            try {
+                sshJClientActions.executeSshCommandOnHosts(ipAddresses, "sudo mkdir -p " + SOS_LOG
+                        + " && sudo sos report --batch --tmp-dir " + SOS_LOG);
+            } catch (Exception e) {
+                LOGGER.warn("Failed to create sos report from all hosts. Reason: {}", e.getMessage(), e);
+            }
         }
     }
 
