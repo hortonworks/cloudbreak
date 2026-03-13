@@ -32,7 +32,7 @@ public interface SdxClusterRepository extends AccountAwareResourceRepository<Sdx
     @Override
     List<SdxCluster> findAll();
 
-    @Query("SELECT s.id as localId, s.stackCrn as remoteResourceId, s.name as name " +
+    @Query("SELECT s.id as localId, s.resourceCrn as remoteResourceId, s.name as name " +
             "FROM SdxCluster s " +
             "WHERE s.deleted is null " +
             "AND s.stackCrn is not null")
@@ -141,4 +141,7 @@ public interface SdxClusterRepository extends AccountAwareResourceRepository<Sdx
     @Query("SELECT s.id FROM SdxCluster s " +
             "WHERE s.id in (:ids) AND NOT s.detached")
     List<Long> findAllIdsNotDetachedByIds(@Param("ids") Collection<Long> ids);
+
+    @Query("SELECT s.created FROM SdxCluster s where s.resourceCrn = :resourceCrn AND s.deleted is null AND s.stackCrn is not null")
+    Optional<Long> getCreatedByResourceCrn(@Param("resourceCrn") String resourceCrn);
 }

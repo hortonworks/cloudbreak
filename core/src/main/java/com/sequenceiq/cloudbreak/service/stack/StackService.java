@@ -10,6 +10,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Collections;
@@ -1225,6 +1226,12 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
                 .findAllTerminatedBefore(dateFrom, PageRequest.of(0, limit));
         return allArchived.stream()
                 .collect(Collectors.toSet());
+    }
+
+    public Instant getCreatedByResourceCrn(String resourceCrn) {
+        Optional<Long> created = stackRepository.getCreatedByResourceCrn(resourceCrn);
+        return Instant.ofEpochMilli(created.orElseThrow(() -> new NotFoundException(
+            String.format("Datahub stack with resource crn [%s] not found or terminated", resourceCrn))));
     }
 
     public void deleteArchivedByResourceCrn(String crn) {

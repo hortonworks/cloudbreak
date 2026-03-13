@@ -577,6 +577,9 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
             + "WHERE s.resourceCrn = :resourceCrn")
     Optional<Stack> findByResourceCrnArchivedIsTrue(@Param("resourceCrn") String resourceCrn);
 
+    @Query("SELECT s.created FROM Stack s where s.resourceCrn = :resourceCrn AND s.terminated IS null")
+    Optional<Long> getCreatedByResourceCrn(@Param("resourceCrn") String resourceCrn);
+
     @Modifying
     void deleteByResourceCrn(String crn);
 

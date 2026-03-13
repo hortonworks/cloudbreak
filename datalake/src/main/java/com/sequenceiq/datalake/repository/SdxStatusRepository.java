@@ -24,5 +24,4 @@ public interface SdxStatusRepository extends CrudRepository<SdxStatusEntity, Lon
             "GROUP BY (isse.datalake.id))")
     List<SdxStatusEntity> findLatestSdxStatusesFilteredByStatusesAndDatalakeIds(@Param("statuses") Collection<DatalakeStatusEnum> statuses,
             @Param("datalakeIds") Collection<Long> datalakeIds);
-
 }

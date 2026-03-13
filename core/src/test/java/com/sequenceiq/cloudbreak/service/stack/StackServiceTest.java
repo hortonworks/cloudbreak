@@ -27,6 +27,8 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.sql.Timestamp;
+import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.HashSet;
@@ -798,6 +800,30 @@ class StackServiceTest {
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> underTest.getDeletedStacks(since));
         assertEquals("Fetching deleted clusters is only allowed for last 2 days", badRequestException.getMessage());
+    }
+
+    @Test
+    void testGetCreatedByResourceCrnReturnsInstantWhenStackExists() {
+        String resourceCrn = "crn:cdp:datahub:us-west-1:acc:cluster:stack-1";
+        long createdMillis = Instant.now().minus(Duration.ofDays(30)).toEpochMilli();
+        when(stackRepository.getCreatedByResourceCrn(resourceCrn)).thenReturn(Optional.of(createdMillis));
+
+        Instant result = underTest.getCreatedByResourceCrn(resourceCrn);
+
+        assertThat(result).isEqualTo(Instant.ofEpochMilli(createdMillis));
+        verify(stackRepository).getCreatedByResourceCrn(resourceCrn);
+    }
+
+    @Test
+    void testGetCreatedByResourceCrnThrowsNotFoundExceptionWhenStackNotFoundOrTerminated() {
+        String resourceCrn = "crn:cdp:datahub:us-west-1:acc:cluster:non-existent";
+        when(stackRepository.getCreatedByResourceCrn(resourceCrn)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> underTest.getCreatedByResourceCrn(resourceCrn))
+                .isInstanceOf(NotFoundException.class)
+                .hasMessage("Datahub stack with resource crn [%s] not found or terminated".formatted(resourceCrn));
+
+        verify(stackRepository).getCreatedByResourceCrn(resourceCrn);
     }
 
     @Test

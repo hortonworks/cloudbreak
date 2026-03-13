@@ -80,7 +80,5 @@ class DBStackServiceTest {
         when(dbStackRepository.findAllDbStackByStatusIn(Status.getAutoSyncStatuses())).thenReturn(expected);
 
         assertEquals(expected, underTest.findAllForAutoSync());
-
-
     }
 }

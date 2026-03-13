@@ -55,7 +55,20 @@ management:
       enabled: true
 
 secretrotation:
-    secretTypeEnumClass: DatalakeSecretType
+  secretTypeEnumClass: DatalakeSecretType
+  periodic:
+    enabled: false
+    perSecret:
+      # Datalake entries only
+      CM_ADMIN_PASSWORD: 90d
+      EXTERNAL_DATABASE_ROOT_PASSWORD: 90d
+      USER_KEYPAIR: 90d
+      LDAP_BIND_PASSWORD: 90d
+      SSSD_IPA_PASSWORD: 90d
+      DBUS_UMS_ACCESS_KEY: 90d
+      SALT_BOOT_SECRETS: 90d
+      SALT_SIGN_KEY_PAIR: 90d
+      SALT_MASTER_KEY_PAIR: 90d
 
 sdx:
   db:

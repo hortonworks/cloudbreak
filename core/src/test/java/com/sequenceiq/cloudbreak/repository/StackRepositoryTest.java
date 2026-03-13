@@ -7,6 +7,7 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 
@@ -54,6 +55,12 @@ class StackRepositoryTest {
 
     private static final long LONG_TERMINATED_STACK_TIME = Timestamp.valueOf(LocalDateTime.now().minusYears(1)).getTime();
 
+    private static final String ALIVE_STACK_FOR_GET_CREATED_CRN = "crn:cdp:datahub:us-west-1:acc:cluster:alive-for-get-created";
+
+    private static final String TERMINATED_STACK_FOR_GET_CREATED_CRN = "crn:cdp:datahub:us-west-1:acc:cluster:terminated-for-get-created";
+
+    private static final long CREATED_TIMESTAMP = 1234567890000L;
+
     @Inject
     private StackRepository stackRepository;
 
@@ -82,6 +89,17 @@ class StackRepositoryTest {
 
         Stack inCreationStack = createStack(null);
         save(inCreationStack);
+
+        Stack aliveStackForGetCreated = createStack(null);
+        aliveStackForGetCreated.setResourceCrn(ALIVE_STACK_FOR_GET_CREATED_CRN);
+        aliveStackForGetCreated.setCreated(CREATED_TIMESTAMP);
+        save(aliveStackForGetCreated);
+
+        Stack terminatedStackForGetCreated = createStack(null);
+        terminatedStackForGetCreated.setResourceCrn(TERMINATED_STACK_FOR_GET_CREATED_CRN);
+        terminatedStackForGetCreated.setCreated(CREATED_TIMESTAMP + 1000L);
+        terminatedStackForGetCreated.setTerminated(TERMINATED_STACK_TIME);
+        save(terminatedStackForGetCreated);
     }
 
     @Test
@@ -121,7 +139,28 @@ class StackRepositoryTest {
     @Test
     void testGetDeletedStacks() {
         List<StackClusterStatusView> deletedStacks = stackRepository.getDeletedStacks(TERMINATED_STACK_TIME - 1);
-        assertEquals(1, deletedStacks.size());
+        assertEquals(2, deletedStacks.size());
+    }
+
+    @Test
+    void testGetCreatedByResourceCrnReturnsCreatedWhenStackExistsAndNotTerminated() {
+        Optional<Long> result = stackRepository.getCreatedByResourceCrn(ALIVE_STACK_FOR_GET_CREATED_CRN);
+
+        assertThat(result).isPresent().hasValue(CREATED_TIMESTAMP);
+    }
+
+    @Test
+    void testGetCreatedByResourceCrnReturnsEmptyWhenStackIsTerminated() {
+        Optional<Long> result = stackRepository.getCreatedByResourceCrn(TERMINATED_STACK_FOR_GET_CREATED_CRN);
+
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    void testGetCreatedByResourceCrnReturnsEmptyWhenResourceCrnDoesNotExist() {
+        Optional<Long> result = stackRepository.getCreatedByResourceCrn("crn:cdp:datahub:us-west-1:acc:cluster:non-existent");
+
+        assertThat(result).isEmpty();
     }
 
     private Stack createStack(String imageId) {
