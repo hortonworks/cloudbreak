@@ -163,6 +163,9 @@ message MethodExtension {
     // The alternate name for this method, which is usually the previous name after
     // a refactoring to keep the backward compatibility and should be deprecated.
     string altName = 60014;
+    // This method returns a binary resource (file download) instead of JSON.
+    // Generates x-api-resource-response: true in YAML and produces: application/octet-stream.
+    bool resourceResponse = 60015;
   }
 }
 

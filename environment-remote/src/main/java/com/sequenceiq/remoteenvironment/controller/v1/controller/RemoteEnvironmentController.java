@@ -18,6 +18,8 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.remoteenvironment.api.v1.environment.endpoint.RemoteEnvironmentEndpoint;
 import com.sequenceiq.remoteenvironment.api.v1.environment.model.DescribeRemoteEnvironment;
 import com.sequenceiq.remoteenvironment.api.v1.environment.model.SimpleRemoteEnvironmentResponses;
+import com.sequenceiq.remoteenvironment.api.v1.environment.model.ValidateForDatalakeRequest;
+import com.sequenceiq.remoteenvironment.api.v1.environment.model.ValidateForDatalakeResponse;
 import com.sequenceiq.remoteenvironment.service.RemoteEnvironmentService;
 
 @DisableCheckPermissions
@@ -35,6 +37,12 @@ public class RemoteEnvironmentController implements RemoteEnvironmentEndpoint {
     public DescribeEnvironmentResponse getByCrn(@RequestObject DescribeRemoteEnvironment request) {
         MDCBuilder.buildMdcContext(request);
         return remoteEnvironmentService.describeV1(ThreadBasedUserCrnProvider.getUserCrn(), request);
+    }
+
+    @Override
+    public ValidateForDatalakeResponse validateForDatalake(@RequestObject ValidateForDatalakeRequest request) {
+        MDCBuilder.buildMdcContext(request);
+        return remoteEnvironmentService.validateForDatalake(ThreadBasedUserCrnProvider.getUserCrn(), request);
     }
 
     @Override

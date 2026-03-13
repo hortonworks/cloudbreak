@@ -53,6 +53,7 @@ public final class Options {
     registry.add(com.cloudera.thunderhead.service.common.options.Options.MethodExtension.extension);
     registry.add(com.cloudera.thunderhead.service.common.options.Options.MethodExtension.tag);
     registry.add(com.cloudera.thunderhead.service.common.options.Options.MethodExtension.altName);
+    registry.add(com.cloudera.thunderhead.service.common.options.Options.MethodExtension.resourceResponse);
     registry.add(com.cloudera.thunderhead.service.common.options.Options.MessageExtension.hidden);
     registry.add(com.cloudera.thunderhead.service.common.options.Options.MessageExtension.hiddenReason);
     registry.add(com.cloudera.thunderhead.service.common.options.Options.MessageExtension.hiddenRetention);
@@ -5070,6 +5071,24 @@ public final class Options {
           14,
           java.lang.String.class,
           null);
+    public static final int RESOURCERESPONSE_FIELD_NUMBER = 60015;
+    /**
+     * <pre>
+     * This method returns a binary resource (file download) instead of JSON.
+     * Generates x-api-resource-response: true in YAML and produces: application/octet-stream.
+     * </pre>
+     *
+     * <code>extend .google.protobuf.MethodOptions { ... }</code>
+     */
+    public static final
+      com.google.protobuf.GeneratedMessage.GeneratedExtension<
+        com.google.protobuf.DescriptorProtos.MethodOptions,
+        java.lang.Boolean> resourceResponse = com.google.protobuf.GeneratedMessage
+            .newMessageScopedGeneratedExtension(
+          com.cloudera.thunderhead.service.common.options.Options.MethodExtension.getDefaultInstance(),
+          15,
+          java.lang.Boolean.class,
+          null);
   }
 
   public interface MessageExtensionOrBuilder extends
@@ -6124,7 +6143,7 @@ public final class Options {
       "default\022\035.google.protobuf.FieldOptions\030\341" +
       "\206\003 \001(\t23\n\nformFactor\022\035.google.protobuf.F" +
       "ieldOptions\030\342\206\003 \003(\t23\n\npluralName\022\035.goog" +
-      "le.protobuf.FieldOptions\030\343\206\003 \001(\t\"\275\006\n\017Met" +
+      "le.protobuf.FieldOptions\030\343\206\003 \001(\t\"\371\006\n\017Met" +
       "hodExtension2/\n\005right\022\036.google.protobuf." +
       "MethodOptions\030\340\324\003 \001(\t25\n\013entitlement\022\036.g" +
       "oogle.protobuf.MethodOptions\030\341\324\003 \001(\t23\n\t" +
@@ -6145,23 +6164,25 @@ public final class Options {
       "ension\022\036.google.protobuf.MethodOptions\030\354" +
       "\324\003 \003(\t2-\n\003tag\022\036.google.protobuf.MethodOp" +
       "tions\030\355\324\003 \001(\t21\n\007altName\022\036.google.protob" +
-      "uf.MethodOptions\030\356\324\003 \001(\t\"\250\002\n\020MessageExte" +
-      "nsion21\n\006hidden\022\037.google.protobuf.Messag" +
-      "eOptions\030\360\242\004 \001(\01027\n\014hiddenReason\022\037.googl" +
-      "e.protobuf.MessageOptions\030\361\242\004 \001(\t2:\n\017hid" +
-      "denRetention\022\037.google.protobuf.MessageOp" +
-      "tions\030\362\242\004 \001(\t25\n\ndeprecated\022\037.google.pro" +
-      "tobuf.MessageOptions\030\363\242\004 \001(\01025\n\nformFact" +
-      "or\022\037.google.protobuf.MessageOptions\030\364\242\004 " +
-      "\003(\t\"\373\001\n\022EnumValueExtension23\n\006hidden\022!.g" +
-      "oogle.protobuf.EnumValueOptions\030\220\277\005 \001(\0102" +
-      "9\n\014hiddenReason\022!.google.protobuf.EnumVa" +
-      "lueOptions\030\221\277\005 \001(\t2<\n\017hiddenRetention\022!." +
-      "google.protobuf.EnumValueOptions\030\222\277\005 \001(\t" +
-      "27\n\ndeprecated\022!.google.protobuf.EnumVal" +
-      "ueOptions\030\223\277\005 \001(\010BU\n/com.cloudera.thunde" +
-      "rhead.service.common.optionsB\007OptionsZ\031c" +
-      "om/cloudera/cdp/protobufb\006proto3"
+      "uf.MethodOptions\030\356\324\003 \001(\t2:\n\020resourceResp" +
+      "onse\022\036.google.protobuf.MethodOptions\030\357\324\003" +
+      " \001(\010\"\250\002\n\020MessageExtension21\n\006hidden\022\037.go" +
+      "ogle.protobuf.MessageOptions\030\360\242\004 \001(\01027\n\014" +
+      "hiddenReason\022\037.google.protobuf.MessageOp" +
+      "tions\030\361\242\004 \001(\t2:\n\017hiddenRetention\022\037.googl" +
+      "e.protobuf.MessageOptions\030\362\242\004 \001(\t25\n\ndep" +
+      "recated\022\037.google.protobuf.MessageOptions" +
+      "\030\363\242\004 \001(\01025\n\nformFactor\022\037.google.protobuf" +
+      ".MessageOptions\030\364\242\004 \003(\t\"\373\001\n\022EnumValueExt" +
+      "ension23\n\006hidden\022!.google.protobuf.EnumV" +
+      "alueOptions\030\220\277\005 \001(\01029\n\014hiddenReason\022!.go" +
+      "ogle.protobuf.EnumValueOptions\030\221\277\005 \001(\t2<" +
+      "\n\017hiddenRetention\022!.google.protobuf.Enum" +
+      "ValueOptions\030\222\277\005 \001(\t27\n\ndeprecated\022!.goo" +
+      "gle.protobuf.EnumValueOptions\030\223\277\005 \001(\010BU\n" +
+      "/com.cloudera.thunderhead.service.common" +
+      ".optionsB\007OptionsZ\031com/cloudera/cdp/prot" +
+      "obufb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,

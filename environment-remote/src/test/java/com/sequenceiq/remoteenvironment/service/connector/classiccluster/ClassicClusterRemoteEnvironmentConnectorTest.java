@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.remotecluster.client.RemoteClusterServiceClient;
 import com.sequenceiq.remoteenvironment.DescribeEnvironmentV2Response;
 import com.sequenceiq.remoteenvironment.api.v1.environment.model.SimpleRemoteEnvironmentResponse;
+import com.sequenceiq.remoteenvironment.api.v1.environment.model.ValidateForDatalakeResponse;
 import com.sequenceiq.remoteenvironment.service.connector.privatecontrolplane.PrivateControlPlaneRemoteEnvironmentConnector;
 
 @ExtendWith(MockitoExtension.class)
@@ -53,6 +54,9 @@ class ClassicClusterRemoteEnvironmentConnectorTest {
 
     @Mock
     private ClassicClusterDescribeService describeService;
+
+    @Mock
+    private ClassicClusterValidateForDatalakeService validateForDatalakeService;
 
     @Mock
     private ClassicClusterRemoteDataContextProvider remoteDataContextProvider;
@@ -162,6 +166,16 @@ class ClassicClusterRemoteEnvironmentConnectorTest {
 
         assertThatThrownBy(() -> underTest.describeV2(USER_CRN, CLUSTER_CRN))
                 .isEqualTo(ex);
+    }
+
+    @Test
+    void validateForDatalake() {
+        ValidateForDatalakeResponse validateForDatalakeResponse = mock();
+        when(validateForDatalakeService.validateForDatalake(USER_CRN, CLUSTER_CRN)).thenReturn(validateForDatalakeResponse);
+
+        ValidateForDatalakeResponse result = underTest.validateForDatalake(USER_CRN, CLUSTER_CRN);
+
+        assertThat(result).isEqualTo(validateForDatalakeResponse);
     }
 
     @Test

@@ -15,7 +15,10 @@ import static com.sequenceiq.freeipa.service.freeipa.trust.TrustSaltStateParamsC
 import static com.sequenceiq.freeipa.service.freeipa.trust.TrustSaltStateParamsConstants.TRUST_SETUP_PILLAR;
 import static com.sequenceiq.freeipa.util.IpaTrustAdPackageAvailabilityChecker.IPA_SERVER_TRUST_AD_PACKAGE;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -27,11 +30,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.cloudera.thunderhead.service.environments2api.model.DescribeEnvironmentResponse;
-import com.cloudera.thunderhead.service.environments2api.model.Environment;
-import com.cloudera.thunderhead.service.environments2api.model.KerberosInfo;
-import com.cloudera.thunderhead.service.environments2api.model.PrivateDatalakeDetails;
-import com.cloudera.thunderhead.service.environments2api.model.PvcEnvironmentDetails;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.common.type.KdcType;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
@@ -52,7 +50,9 @@ import com.sequenceiq.freeipa.service.rotation.SaltStateParamsService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.util.IpaTrustAdPackageAvailabilityChecker;
 import com.sequenceiq.remoteenvironment.api.v1.environment.endpoint.RemoteEnvironmentEndpoint;
-import com.sequenceiq.remoteenvironment.api.v1.environment.model.DescribeRemoteEnvironment;
+import com.sequenceiq.remoteenvironment.api.v1.environment.model.ValidateForDatalakeRequest;
+import com.sequenceiq.remoteenvironment.api.v1.environment.model.ValidateForDatalakeResponse;
+import com.sequenceiq.remoteenvironment.api.v1.environment.model.ValidateForDatalakeValidationResponse;
 
 @Service
 public class TrustSetupValidationService {
@@ -112,7 +112,8 @@ public class TrustSetupValidationService {
         taskResults.addTaskResult(validateDns(stack, crossRealmTrust));
         taskResults.addTaskResult(validateReverseDns(stack, crossRealmTrust));
         if (EnvironmentType.HYBRID.equals(environmentType)) {
-            taskResults.addTaskResult(validateKerberization(crossRealmTrust));
+            validateForDatalake(crossRealmTrust.getRemoteEnvironmentCrn())
+                    .forEach(taskResults::addTaskResult);
         }
         return taskResults;
     }
@@ -147,32 +148,39 @@ public class TrustSetupValidationService {
                 messagesService.getMessage("trust.validation.reversedns.comment"), DocumentationLinkProvider.hybridDnsArchitectureLink());
     }
 
-    private TaskResult validateKerberization(CrossRealmTrust crossRealmTrust) {
+    private Collection<TaskResult> validateForDatalake(String remoteEnvironmentCrn) {
+        List<TaskResult> taskResults = new ArrayList<>();
         try {
-            if (StringUtils.isNotBlank(crossRealmTrust.getRemoteEnvironmentCrn())) {
-                DescribeRemoteEnvironment describeRemoteEnvironment = new DescribeRemoteEnvironment();
-                describeRemoteEnvironment.setCrn(crossRealmTrust.getRemoteEnvironmentCrn());
-                DescribeEnvironmentResponse describeRemoteEnvironmentResponse = remoteEnvironmentEndpoint.getByCrn(describeRemoteEnvironment);
-                boolean kerberized = Optional.of(describeRemoteEnvironmentResponse.getEnvironment())
-                        .map(Environment::getPvcEnvironmentDetails)
-                        .map(PvcEnvironmentDetails::getPrivateDatalakeDetails)
-                        .map(PrivateDatalakeDetails::getKerberosInfo)
-                        .map(KerberosInfo::getKerberized)
-                        .orElse(false);
-                return kerberized ? new TaskResult(TaskResultType.INFO, messagesService.getMessage("trust.validation.kerberos.success"), Map.of()) :
-                        new TaskResult(TaskResultType.ERROR, messagesService.getMessage("trust.validation.kerberos.failure"),
-                                Map.of(COMMENT, messagesService.getMessage("trust.validation.kerberos.comment.failed"),
-                                        DOCS, DocumentationLinkProvider.hybridSecurityRequirements()));
+            if (StringUtils.isNotBlank(remoteEnvironmentCrn)) {
+                ValidateForDatalakeRequest request = new ValidateForDatalakeRequest();
+                request.setCrn(remoteEnvironmentCrn);
+                ValidateForDatalakeResponse validateForDatalakeResponse = remoteEnvironmentEndpoint.validateForDatalake(request);
+                validateForDatalakeResponse.getValidations().stream()
+                        .map(this::toTaskResult)
+                        .forEach(taskResults::add);
             } else {
-                return new TaskResult(TaskResultType.ERROR, messagesService.getMessage("trust.validation.kerberos.failure"),
-                        Map.of(COMMENT, messagesService.getMessage("trust.validation.kerberos.comment.missingcrn")));
+                taskResults.add(new TaskResult(TaskResultType.ERROR, messagesService.getMessage("trust.validation.datalake.failure"),
+                        Map.of(COMMENT, messagesService.getMessage("trust.validation.datalake.comment.missingcrn"))));
             }
         } catch (RuntimeException e) {
             String message = webApplicationExceptionMessageExtractor.getErrorMessage(e);
-            LOGGER.error("An error occurred during the kerberization verification: {}", message, e);
-            return new TaskResult(TaskResultType.ERROR, messagesService.getMessage("trust.validation.kerberos.failure"),
-                    Map.of(COMMENT, messagesService.getMessageWithArgs("trust.validation.kerberos.comment.missingcrn", message)));
+            LOGGER.error("An error occurred during the datalake validation: {}", message, e);
+            taskResults.add(new TaskResult(TaskResultType.ERROR, messagesService.getMessage("trust.validation.datalake.failure"), Map.of()));
         }
+        return taskResults;
+    }
+
+    private TaskResult toTaskResult(ValidateForDatalakeValidationResponse validation) {
+        TaskResultType taskResultType = validation.isPassed() ? TaskResultType.INFO : TaskResultType.ERROR;
+        String message = validation.getMessage();
+        Map<String, String> additionalParams = new HashMap<>();
+        messagesService.getMessageIfExists(String.format("trust.validation.%s.comment", validation.getValidationType()))
+                        .ifPresent(comment -> additionalParams.put(COMMENT, comment));
+        Optional.ofNullable(switch (validation.getValidationType()) {
+            case "KERBERIZED" -> DocumentationLinkProvider.hybridSecurityRequirements();
+            default -> null;
+        }).ifPresent(docs -> additionalParams.put(DOCS, docs));
+        return new TaskResult(taskResultType, message, additionalParams);
     }
 
     private TaskResult executeSaltState(Stack stack, CrossRealmTrust crossRealmTrust, String stateName, String messagePrefix, String comment, String docs) {

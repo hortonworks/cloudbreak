@@ -418,6 +418,37 @@ public final class OnPremisesApiGrpc {
     return getRegisterAgentMethod;
   }
 
+  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageRequest,
+      com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageResponse> getGenerateClusterConnectivitySetupPackageMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "GenerateClusterConnectivitySetupPackage",
+      requestType = com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageRequest.class,
+      responseType = com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageRequest,
+      com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageResponse> getGenerateClusterConnectivitySetupPackageMethod() {
+    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageRequest, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageResponse> getGenerateClusterConnectivitySetupPackageMethod;
+    if ((getGenerateClusterConnectivitySetupPackageMethod = OnPremisesApiGrpc.getGenerateClusterConnectivitySetupPackageMethod) == null) {
+      synchronized (OnPremisesApiGrpc.class) {
+        if ((getGenerateClusterConnectivitySetupPackageMethod = OnPremisesApiGrpc.getGenerateClusterConnectivitySetupPackageMethod) == null) {
+          OnPremisesApiGrpc.getGenerateClusterConnectivitySetupPackageMethod = getGenerateClusterConnectivitySetupPackageMethod =
+              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageRequest, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "GenerateClusterConnectivitySetupPackage"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new OnPremisesApiMethodDescriptorSupplier("GenerateClusterConnectivitySetupPackage"))
+              .build();
+        }
+      }
+    }
+    return getGenerateClusterConnectivitySetupPackageMethod;
+  }
+
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractSetupScriptRequest,
       com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractSetupScriptResponse> getExtractSetupScriptMethod;
 
@@ -571,6 +602,37 @@ public final class OnPremisesApiGrpc {
       }
     }
     return getDeletePartiallyRegisteredClusterMethod;
+  }
+
+  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeRequest,
+      com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeResponse> getValidateClusterForDatalakeMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "ValidateClusterForDatalake",
+      requestType = com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeRequest.class,
+      responseType = com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeRequest,
+      com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeResponse> getValidateClusterForDatalakeMethod() {
+    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeRequest, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeResponse> getValidateClusterForDatalakeMethod;
+    if ((getValidateClusterForDatalakeMethod = OnPremisesApiGrpc.getValidateClusterForDatalakeMethod) == null) {
+      synchronized (OnPremisesApiGrpc.class) {
+        if ((getValidateClusterForDatalakeMethod = OnPremisesApiGrpc.getValidateClusterForDatalakeMethod) == null) {
+          OnPremisesApiGrpc.getValidateClusterForDatalakeMethod = getValidateClusterForDatalakeMethod =
+              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeRequest, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "ValidateClusterForDatalake"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new OnPremisesApiMethodDescriptorSupplier("ValidateClusterForDatalake"))
+              .build();
+        }
+      }
+    }
+    return getValidateClusterForDatalakeMethod;
   }
 
   /**
@@ -771,6 +833,16 @@ public final class OnPremisesApiGrpc {
 
     /**
      * <pre>
+     * Generate cluster connectivity setup package:: Generates and returns a ZIP file containing all necessary files to set up cluster connectivity.
+     * </pre>
+     */
+    default void generateClusterConnectivitySetupPackage(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageResponse> responseObserver) {
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGenerateClusterConnectivitySetupPackageMethod(), responseObserver);
+    }
+
+    /**
+     * <pre>
      * Extract the setup script. :: Extract the setup script for CCM_V2 installation.
      * </pre>
      */
@@ -817,6 +889,16 @@ public final class OnPremisesApiGrpc {
     default void deletePartiallyRegisteredCluster(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DeletePartiallyRegisteredClusterRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DeletePartiallyRegisteredClusterResponse> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getDeletePartiallyRegisteredClusterMethod(), responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Validate cluster for datalake. :: Validate if a classic-cluster can be used as datalake.
+     * </pre>
+     */
+    default void validateClusterForDatalake(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeResponse> responseObserver) {
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getValidateClusterForDatalakeMethod(), responseObserver);
     }
   }
 
@@ -998,6 +1080,17 @@ public final class OnPremisesApiGrpc {
 
     /**
      * <pre>
+     * Generate cluster connectivity setup package:: Generates and returns a ZIP file containing all necessary files to set up cluster connectivity.
+     * </pre>
+     */
+    public void generateClusterConnectivitySetupPackage(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageResponse> responseObserver) {
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getGenerateClusterConnectivitySetupPackageMethod(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     * <pre>
      * Extract the setup script. :: Extract the setup script for CCM_V2 installation.
      * </pre>
      */
@@ -1049,6 +1142,17 @@ public final class OnPremisesApiGrpc {
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DeletePartiallyRegisteredClusterResponse> responseObserver) {
       io.grpc.stub.ClientCalls.asyncUnaryCall(
           getChannel().newCall(getDeletePartiallyRegisteredClusterMethod(), getCallOptions()), request, responseObserver);
+    }
+
+    /**
+     * <pre>
+     * Validate cluster for datalake. :: Validate if a classic-cluster can be used as datalake.
+     * </pre>
+     */
+    public void validateClusterForDatalake(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeResponse> responseObserver) {
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getValidateClusterForDatalakeMethod(), getCallOptions()), request, responseObserver);
     }
   }
 
@@ -1203,6 +1307,16 @@ public final class OnPremisesApiGrpc {
 
     /**
      * <pre>
+     * Generate cluster connectivity setup package:: Generates and returns a ZIP file containing all necessary files to set up cluster connectivity.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageResponse generateClusterConnectivitySetupPackage(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getGenerateClusterConnectivitySetupPackageMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
      * Extract the setup script. :: Extract the setup script for CCM_V2 installation.
      * </pre>
      */
@@ -1249,6 +1363,16 @@ public final class OnPremisesApiGrpc {
     public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DeletePartiallyRegisteredClusterResponse deletePartiallyRegisteredCluster(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DeletePartiallyRegisteredClusterRequest request) throws io.grpc.StatusException {
       return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
           getChannel(), getDeletePartiallyRegisteredClusterMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Validate cluster for datalake. :: Validate if a classic-cluster can be used as datalake.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeResponse validateClusterForDatalake(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeRequest request) throws io.grpc.StatusException {
+      return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
+          getChannel(), getValidateClusterForDatalakeMethod(), getCallOptions(), request);
     }
   }
 
@@ -1403,6 +1527,16 @@ public final class OnPremisesApiGrpc {
 
     /**
      * <pre>
+     * Generate cluster connectivity setup package:: Generates and returns a ZIP file containing all necessary files to set up cluster connectivity.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageResponse generateClusterConnectivitySetupPackage(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageRequest request) {
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getGenerateClusterConnectivitySetupPackageMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
      * Extract the setup script. :: Extract the setup script for CCM_V2 installation.
      * </pre>
      */
@@ -1449,6 +1583,16 @@ public final class OnPremisesApiGrpc {
     public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DeletePartiallyRegisteredClusterResponse deletePartiallyRegisteredCluster(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DeletePartiallyRegisteredClusterRequest request) {
       return io.grpc.stub.ClientCalls.blockingUnaryCall(
           getChannel(), getDeletePartiallyRegisteredClusterMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     * Validate cluster for datalake. :: Validate if a classic-cluster can be used as datalake.
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeResponse validateClusterForDatalake(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeRequest request) {
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getValidateClusterForDatalakeMethod(), getCallOptions(), request);
     }
   }
 
@@ -1616,6 +1760,17 @@ public final class OnPremisesApiGrpc {
 
     /**
      * <pre>
+     * Generate cluster connectivity setup package:: Generates and returns a ZIP file containing all necessary files to set up cluster connectivity.
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageResponse> generateClusterConnectivitySetupPackage(
+        com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageRequest request) {
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getGenerateClusterConnectivitySetupPackageMethod(), getCallOptions()), request);
+    }
+
+    /**
+     * <pre>
      * Extract the setup script. :: Extract the setup script for CCM_V2 installation.
      * </pre>
      */
@@ -1668,6 +1823,17 @@ public final class OnPremisesApiGrpc {
       return io.grpc.stub.ClientCalls.futureUnaryCall(
           getChannel().newCall(getDeletePartiallyRegisteredClusterMethod(), getCallOptions()), request);
     }
+
+    /**
+     * <pre>
+     * Validate cluster for datalake. :: Validate if a classic-cluster can be used as datalake.
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeResponse> validateClusterForDatalake(
+        com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeRequest request) {
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getValidateClusterForDatalakeMethod(), getCallOptions()), request);
+    }
   }
 
   private static final int METHODID_LIST_CLUSTERS = 0;
@@ -1683,11 +1849,13 @@ public final class OnPremisesApiGrpc {
   private static final int METHODID_SETUP_CLUSTER_CONNECTIVITY = 10;
   private static final int METHODID_DESCRIBE_PARTIALLY_REGISTERED_CLUSTER = 11;
   private static final int METHODID_REGISTER_AGENT = 12;
-  private static final int METHODID_EXTRACT_SETUP_SCRIPT = 13;
-  private static final int METHODID_EXTRACT_CERTIFICATE_REFRESH_SCRIPT = 14;
-  private static final int METHODID_UPDATE_CLUSTER_STATE = 15;
-  private static final int METHODID_CHECK_CLUSTER_CONNECTIVITY = 16;
-  private static final int METHODID_DELETE_PARTIALLY_REGISTERED_CLUSTER = 17;
+  private static final int METHODID_GENERATE_CLUSTER_CONNECTIVITY_SETUP_PACKAGE = 13;
+  private static final int METHODID_EXTRACT_SETUP_SCRIPT = 14;
+  private static final int METHODID_EXTRACT_CERTIFICATE_REFRESH_SCRIPT = 15;
+  private static final int METHODID_UPDATE_CLUSTER_STATE = 16;
+  private static final int METHODID_CHECK_CLUSTER_CONNECTIVITY = 17;
+  private static final int METHODID_DELETE_PARTIALLY_REGISTERED_CLUSTER = 18;
+  private static final int METHODID_VALIDATE_CLUSTER_FOR_DATALAKE = 19;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -1758,6 +1926,10 @@ public final class OnPremisesApiGrpc {
           serviceImpl.registerAgent((com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.RegisterAgentRequest) request,
               (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.RegisterAgentResponse>) responseObserver);
           break;
+        case METHODID_GENERATE_CLUSTER_CONNECTIVITY_SETUP_PACKAGE:
+          serviceImpl.generateClusterConnectivitySetupPackage((com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageRequest) request,
+              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageResponse>) responseObserver);
+          break;
         case METHODID_EXTRACT_SETUP_SCRIPT:
           serviceImpl.extractSetupScript((com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractSetupScriptRequest) request,
               (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ExtractSetupScriptResponse>) responseObserver);
@@ -1777,6 +1949,10 @@ public final class OnPremisesApiGrpc {
         case METHODID_DELETE_PARTIALLY_REGISTERED_CLUSTER:
           serviceImpl.deletePartiallyRegisteredCluster((com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DeletePartiallyRegisteredClusterRequest) request,
               (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DeletePartiallyRegisteredClusterResponse>) responseObserver);
+          break;
+        case METHODID_VALIDATE_CLUSTER_FOR_DATALAKE:
+          serviceImpl.validateClusterForDatalake((com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeRequest) request,
+              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeResponse>) responseObserver);
           break;
         default:
           throw new AssertionError();
@@ -1888,6 +2064,13 @@ public final class OnPremisesApiGrpc {
               com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.RegisterAgentResponse>(
                 service, METHODID_REGISTER_AGENT)))
         .addMethod(
+          getGenerateClusterConnectivitySetupPackageMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageRequest,
+              com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageResponse>(
+                service, METHODID_GENERATE_CLUSTER_CONNECTIVITY_SETUP_PACKAGE)))
+        .addMethod(
           getExtractSetupScriptMethod(),
           io.grpc.stub.ServerCalls.asyncUnaryCall(
             new MethodHandlers<
@@ -1922,6 +2105,13 @@ public final class OnPremisesApiGrpc {
               com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DeletePartiallyRegisteredClusterRequest,
               com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DeletePartiallyRegisteredClusterResponse>(
                 service, METHODID_DELETE_PARTIALLY_REGISTERED_CLUSTER)))
+        .addMethod(
+          getValidateClusterForDatalakeMethod(),
+          io.grpc.stub.ServerCalls.asyncUnaryCall(
+            new MethodHandlers<
+              com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeRequest,
+              com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeResponse>(
+                service, METHODID_VALIDATE_CLUSTER_FOR_DATALAKE)))
         .build();
   }
 
@@ -1983,11 +2173,13 @@ public final class OnPremisesApiGrpc {
               .addMethod(getSetupClusterConnectivityMethod())
               .addMethod(getDescribePartiallyRegisteredClusterMethod())
               .addMethod(getRegisterAgentMethod())
+              .addMethod(getGenerateClusterConnectivitySetupPackageMethod())
               .addMethod(getExtractSetupScriptMethod())
               .addMethod(getExtractCertificateRefreshScriptMethod())
               .addMethod(getUpdateClusterStateMethod())
               .addMethod(getCheckClusterConnectivityMethod())
               .addMethod(getDeletePartiallyRegisteredClusterMethod())
+              .addMethod(getValidateClusterForDatalakeMethod())
               .build();
         }
       }

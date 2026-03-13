@@ -5,8 +5,9 @@ import static com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor.ENVIRONME
 import static com.sequenceiq.remoteenvironment.api.v1.environment.endpoint.RemoteEnvironmentOpDescription.DATALAKE_SERVICES_NOTES;
 import static com.sequenceiq.remoteenvironment.api.v1.environment.endpoint.RemoteEnvironmentOpDescription.DESCRIBE_BY_CRN;
 import static com.sequenceiq.remoteenvironment.api.v1.environment.endpoint.RemoteEnvironmentOpDescription.ENVIRONMENT_NOTES;
+import static com.sequenceiq.remoteenvironment.api.v1.environment.endpoint.RemoteEnvironmentOpDescription.GET_RDC_BY_CRN;
 import static com.sequenceiq.remoteenvironment.api.v1.environment.endpoint.RemoteEnvironmentOpDescription.LIST;
-import static com.sequenceiq.remoteenvironment.api.v1.environment.endpoint.RemoteEnvironmentOpDescription.POST_BY_CRN;
+import static com.sequenceiq.remoteenvironment.api.v1.environment.endpoint.RemoteEnvironmentOpDescription.VALIDATE_FOR_DATALAKE_BY_CRN;
 
 import java.util.List;
 
@@ -30,6 +31,8 @@ import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.remoteenvironment.api.v1.environment.model.DescribeRemoteEnvironment;
 import com.sequenceiq.remoteenvironment.api.v1.environment.model.SimpleRemoteEnvironmentResponses;
+import com.sequenceiq.remoteenvironment.api.v1.environment.model.ValidateForDatalakeRequest;
+import com.sequenceiq.remoteenvironment.api.v1.environment.model.ValidateForDatalakeResponse;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -57,16 +60,23 @@ public interface RemoteEnvironmentEndpoint {
     DescribeEnvironmentResponse getByCrn(@Valid DescribeRemoteEnvironment request);
 
     @POST
+    @Path("/validateForDatalake")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = VALIDATE_FOR_DATALAKE_BY_CRN, description = DATALAKE_SERVICES_NOTES, operationId = "validateForDatalakeV1ByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    ValidateForDatalakeResponse validateForDatalake(@Valid ValidateForDatalakeRequest request);
+
+    @POST
     @Path("/rdc")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = POST_BY_CRN, description = ENVIRONMENT_NOTES, operationId = "getRdcV1ByCrn",
+    @Operation(summary = GET_RDC_BY_CRN, description = ENVIRONMENT_NOTES, operationId = "getRdcV1ByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     DescribeDatalakeAsApiRemoteDataContextResponse getRdcByCrn(@Valid DescribeRemoteEnvironment request);
 
     @POST
     @Path("/datalakeServices")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = POST_BY_CRN, description = DATALAKE_SERVICES_NOTES, operationId = "getDatalakeByCrn",
+    @Operation(summary = GET_RDC_BY_CRN, description = DATALAKE_SERVICES_NOTES, operationId = "getDatalakeByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     DescribeDatalakeServicesResponse getDatalakeServicesByCrn(@Valid DescribeDatalakeServicesRequest request);
 

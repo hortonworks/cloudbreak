@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.message;
 
 import java.util.Collection;
 import java.util.Locale;
+import java.util.Optional;
 
 import jakarta.inject.Inject;
 
@@ -31,6 +32,14 @@ public class CloudbreakMessagesService {
             return messageSource.getMessage(code, args, Locale.getDefault());
         } catch (Exception e) {
             return e.getMessage();
+        }
+    }
+
+    public Optional<String> getMessageIfExists(String code) {
+        try {
+            return Optional.of(messageSource.getMessage(code, null, Locale.getDefault()));
+        } catch (Exception e) {
+            return Optional.empty();
         }
     }
 }

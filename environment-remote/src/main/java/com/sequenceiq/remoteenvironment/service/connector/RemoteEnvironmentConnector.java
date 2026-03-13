@@ -8,6 +8,7 @@ import com.cloudera.thunderhead.service.environments2api.model.DescribeEnvironme
 import com.cloudera.thunderhead.service.environments2api.model.GetRootCertificateResponse;
 import com.sequenceiq.remoteenvironment.DescribeEnvironmentV2Response;
 import com.sequenceiq.remoteenvironment.api.v1.environment.model.SimpleRemoteEnvironmentResponse;
+import com.sequenceiq.remoteenvironment.api.v1.environment.model.ValidateForDatalakeResponse;
 
 public interface RemoteEnvironmentConnector {
 
@@ -22,6 +23,10 @@ public interface RemoteEnvironmentConnector {
     }
 
     default DescribeEnvironmentV2Response describeV2(String userCrn, String environmentCrn) {
+        throw new UnsupportedOperationException("Not implemented for " + type());
+    }
+
+    default ValidateForDatalakeResponse validateForDatalake(String userCrn, String environmentCrn) {
         throw new UnsupportedOperationException("Not implemented for " + type());
     }
 

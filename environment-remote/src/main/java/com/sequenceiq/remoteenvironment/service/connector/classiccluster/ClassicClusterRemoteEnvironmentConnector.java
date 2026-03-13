@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.remotecluster.client.RemoteClusterServiceClient;
 import com.sequenceiq.remoteenvironment.DescribeEnvironmentV2Response;
 import com.sequenceiq.remoteenvironment.api.v1.environment.model.SimpleRemoteEnvironmentResponse;
+import com.sequenceiq.remoteenvironment.api.v1.environment.model.ValidateForDatalakeResponse;
 import com.sequenceiq.remoteenvironment.service.connector.RemoteEnvironmentConnector;
 import com.sequenceiq.remoteenvironment.service.connector.RemoteEnvironmentConnectorType;
 import com.sequenceiq.remoteenvironment.service.connector.privatecontrolplane.PrivateControlPlaneRemoteEnvironmentConnector;
@@ -46,6 +47,9 @@ public class ClassicClusterRemoteEnvironmentConnector implements RemoteEnvironme
 
     @Inject
     private ClassicClusterDescribeService describeService;
+
+    @Inject
+    private ClassicClusterValidateForDatalakeService validateForDatalakeService;
 
     @Inject
     private ClassicClusterRemoteDataContextProvider remoteDataContextProvider;
@@ -97,6 +101,11 @@ public class ClassicClusterRemoteEnvironmentConnector implements RemoteEnvironme
             }
         }
         return describeService.describe(getCluster(userCrn, environmentCrn, true));
+    }
+
+    @Override
+    public ValidateForDatalakeResponse validateForDatalake(String userCrn, String environmentCrn) {
+        return validateForDatalakeService.validateForDatalake(userCrn, environmentCrn);
     }
 
     @Override

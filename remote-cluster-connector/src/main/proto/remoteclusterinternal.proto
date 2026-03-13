@@ -77,7 +77,7 @@ message ListAllPvcControlPlanesResponse {
 // Request object for the GeneratePvcControlPlaneAuthToken method.
 message GeneratePvcControlPlaneAuthTokenRequest {
   // The account ID of the Private Cloud control plane.
-  string pvcId = 1 [(options.FieldExtension.required) = true];;
+  string pvcId = 1 [(options.FieldExtension.required) = true];
 }
 
 // Response object for the GeneratePvcControlPlaneAuthToken method.

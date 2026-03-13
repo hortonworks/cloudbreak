@@ -133,6 +133,15 @@ service OnPremisesApi {
     option (options.MethodExtension.mutating) = true;
   }
 
+  // Generate cluster connectivity setup package:: Generates and returns a ZIP file containing all necessary files to set up cluster connectivity.
+  rpc GenerateClusterConnectivitySetupPackage (GenerateClusterConnectivitySetupPackageRequest)
+      returns (GenerateClusterConnectivitySetupPackageResponse) {
+    option (options.MethodExtension.hidden) = true;
+    option (options.MethodExtension.hiddenReason) = "IN_DEVELOPMENT";
+    option (options.MethodExtension.mutating) = true;
+    option (options.MethodExtension.resourceResponse) = true;
+  }
+
   // Extract the setup script. :: Extract the setup script for CCM_V2 installation.
   rpc ExtractSetupScript (ExtractSetupScriptRequest)
       returns (ExtractSetupScriptResponse) {
@@ -175,6 +184,14 @@ service OnPremisesApi {
     option (options.MethodExtension.hiddenReason) = "IN_DEVELOPMENT";
     option (options.MethodExtension.mutating) = true;
   }
+
+  // Validate cluster for datalake. :: Validate if a classic-cluster can be used as datalake.
+  rpc ValidateClusterForDatalake (ValidateClusterForDatalakeRequest)
+      returns (ValidateClusterForDatalakeResponse) {
+    option (options.MethodExtension.hidden) = true;
+    option (options.MethodExtension.hiddenReason) = "IN_DEVELOPMENT";
+    option (options.MethodExtension.mutating) = false;
+  }
 }
 
 // Request object for the ListClusters method.
@@ -196,6 +213,12 @@ message ListClustersRequest {
   repeated string services = 4;
   // Operator on which the filters should be applied.
   ClusterQueryOperator.Value operator = 5;
+  // Type of the cluster.
+  ClusterType.Value clusterType = 6;
+  // State of the cluster.
+  ClusterState.Value clusterState = 7;
+  // Checks if the cluster is behind any gateway.
+  bool behindGateway = 8;
 }
 
 // Response object for the ListClusters method.
@@ -309,6 +332,59 @@ message DescribeClusterResponse {
 
   // Object containing cluster details.
   Cluster cluster = 1;
+}
+
+// Request object for the ValidateClusterForDatalake method.
+message ValidateClusterForDatalakeRequest {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+
+  // The CRN of the cluster.
+  string clusterCrn = 1 [(options.FieldExtension.required) = true];
+}
+
+// Response object for the ValidateClusterForDatalake method.
+message ValidateClusterForDatalakeResponse {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+
+  // Indicates whether the cluster can be used as a Data Lake.
+  bool isValidForDatalake = 1 [(options.FieldExtension.required) = true];
+
+  // Validation results (passed/failed) with optional messages.
+  repeated DatalakeValidation validations = 2;
+}
+
+// Datalake validation result.
+message DatalakeValidation {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+
+  // Validation type.
+  DatalakeValidationType.Value type = 1;
+
+  // Whether this validation passed.
+  bool passed = 2;
+
+  // Human-readable message (typically empty for passed validations; includes reason for failures).
+  string message = 3;
+}
+
+// The type of datalake validation.
+message DatalakeValidationType {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+  enum Value {
+    UNSET = 0;
+    // Cluster type is CDPDC.
+    CLUSTER_TYPE_CDPDC = 1;
+    // Cloudera Runtime is 7.1.9 or newer.
+    CLOUDERA_RUNTIME_VERSION_AT_LEAST_7_1_9 = 2;
+    // Whether kerberized or not.
+    KERBERIZED = 3;
+    // The clusterType should not be "COMPUTE" for virtual private cluster.
+    NOT_COMPUTE_CLUSTER = 4;
+  }
 }
 
 // Request object for the ListClusterServices method.
@@ -571,8 +647,6 @@ message PartiallyRegisteredClusterData {
   int64 updatedAt = 13 [(options.FieldExtension.datetime) = true];
   // Boolean value to determine if this is the primary registration.
   bool primary = 14;
-  // Version of the cluster connectivity management service. It will be either of CCM_V1 or CCM_V2.
-  string ccmVersion = 15;
   // Registration Status of the partially registered on-premises cluster.
   string registrationStatus = 16;
   // CRN of the jumpgate agent.
@@ -614,9 +688,6 @@ message SetupClusterConnectivityRequest {
 
   // URL of the knox service. This field is deprecated.
   string knoxUrl = 9 [(options.FieldExtension.deprecated) = true];
-
-  // Is the request made for the upgrade of CCMv1 to CCMv2? This field is deprecated.
-  bool isUpgrade = 10 [(options.FieldExtension.deprecated) = true];
 
   // TLS type of the cluster. This field is deprecated.
   string tlsType = 11 [(options.FieldExtension.deprecated) = true];
@@ -743,8 +814,8 @@ message Cluster {
   ClusterState.Value state = 8;
   // The description of the registered cluster.
   string description = 11;
-  // The location of the registered cluster.
-  int64 locationId = 12;
+  // The location of the registered cluster. (Deprecated: Use id from location instead.)
+  int64 locationId = 12 [(options.FieldExtension.deprecated) = true];
   // The time at which the cluster was registered.
   int64 lastCreateTime = 13 [(options.FieldExtension.datetime) = true];
   // The time at which the cluster was updated.
@@ -790,6 +861,8 @@ message Cluster {
   // Cloudera on-premises environment details.
   // Only returned when showOnPremiseEnvironmentDetails in DescribeClusterRequest is true.
   OnPremEnvironmentDetails onPremEnvironmentDetails = 34;
+  // Indicates whether this classic cluster is eligible to be used as a Data Lake.
+  bool isValidForDatalake = 35;
 }
 
 // Object containing the on-premises Environment details.
@@ -1004,6 +1077,28 @@ message ClusterDiscovered {
   // Name of cluster as returned from the cluster-manager.
   string name = 1;
 }
+
+
+// Generate cluster connectivity setup package request.
+message GenerateClusterConnectivitySetupPackageRequest {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+
+  // The cluster CRN of the partially registered cluster.
+  string clusterCrn = 1 [(options.FieldExtension.required) = true];
+}
+
+
+// Generate cluster connectivity setup package response.
+message GenerateClusterConnectivitySetupPackageResponse {
+  option (options.MessageExtension.hidden) = true;
+  option (options.MessageExtension.hiddenReason) = "IN_DEVELOPMENT";
+  // Empty - binary content is streamed
+
+  // Raw zip file bytes containing the script and keys.
+  bytes setupPackage = 1 [(options.FieldExtension.skipLogging) = true];
+}
+
 
 // State of the on-premise cluster.
 message ClusterState {

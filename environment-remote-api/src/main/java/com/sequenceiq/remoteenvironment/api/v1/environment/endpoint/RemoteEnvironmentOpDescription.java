@@ -9,9 +9,11 @@ public class RemoteEnvironmentOpDescription {
 
     public static final String DATALAKE_SERVICES_NOTES = "Datalake consists of information for all the services.";
 
-    public static final String POST_BY_CRN = "POST an environment by CRN.";
-
     public static final String DESCRIBE_BY_CRN = "Describe an environment by CRN.";
+
+    public static final String VALIDATE_FOR_DATALAKE_BY_CRN = "Validate for datalake by CRN.";
+
+    public static final String GET_RDC_BY_CRN = "Get the remote data context of an environment by CRN.";
 
     private RemoteEnvironmentOpDescription() {
 

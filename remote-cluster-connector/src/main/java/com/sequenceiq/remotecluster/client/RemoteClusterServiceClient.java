@@ -108,6 +108,14 @@ public class RemoteClusterServiceClient {
         return createOnPremisesApiBlockingStub(userCrn).describeCluster(request).getCluster();
     }
 
+    public OnPremisesApiProto.ValidateClusterForDatalakeResponse validateClusterForDatalake(String userCrn, String clusterCrn) {
+        OnPremisesApiProto.ValidateClusterForDatalakeRequest request = OnPremisesApiProto.ValidateClusterForDatalakeRequest.newBuilder()
+                .setClusterCrn(clusterCrn)
+                .build();
+        LOGGER.info("Created request to validate cluster {} for datalake: {}", clusterCrn, request);
+        return createOnPremisesApiBlockingStub(userCrn).validateClusterForDatalake(request);
+    }
+
     private RemoteClusterInternalGrpc.RemoteClusterInternalBlockingStub createRemoteClusterInternalBlockingStub() {
         String requestId = MDCBuilder.getOrGenerateRequestId();
         return stubProvider.newRemoteClusterInternalStub(channelWrapper.getChannel(), requestId,

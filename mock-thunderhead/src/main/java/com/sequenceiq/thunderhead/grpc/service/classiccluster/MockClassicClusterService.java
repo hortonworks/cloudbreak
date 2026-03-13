@@ -1,19 +1,24 @@
 package com.sequenceiq.thunderhead.grpc.service.classiccluster;
 
+import static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidationType.Value.UNRECOGNIZED;
+import static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidationType.Value.UNSET;
 import static com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiClientProvider.API_V_51;
 import static com.sequenceiq.thunderhead.service.ClassicClusterService.CLUSTER_PROXY_CONFIG_SERVICE_NAME;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 import jakarta.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.ClustersResourceApi;
@@ -41,6 +46,9 @@ public class MockClassicClusterService extends OnPremisesApiGrpc.OnPremisesApiIm
     private static final Logger LOGGER = LoggerFactory.getLogger(MockClassicClusterService.class);
 
     private static final Map<String, OnPremisesApiProto.Cluster> CLUSTER_CACHE = new HashMap<>();
+
+    @Value("${mock.classicCluster.passValidationForDatalake:true}")
+    private boolean passValidationForDatalake;
 
     @Inject
     private ClassicClusterService classicClusterService;
@@ -137,5 +145,39 @@ public class MockClassicClusterService extends OnPremisesApiGrpc.OnPremisesApiIm
         String resourceId = Crn.safeFromString(classicCluster.getPvcCpEnvironmentCrn()).getAccountId();
         String accountId = classicCluster.getAccountId();
         return regionAwareCrnGenerator.generateCrnString(CrnResourceDescriptor.HYBRID, resourceId, accountId);
+    }
+
+    @Override
+    public void validateClusterForDatalake(
+            OnPremisesApiProto.ValidateClusterForDatalakeRequest request,
+            StreamObserver<OnPremisesApiProto.ValidateClusterForDatalakeResponse> responseObserver) {
+        LOGGER.info("Validating Classic Cluster {} for datalake result is {}", request.getClusterCrn(), passValidationForDatalake);
+        List<OnPremisesApiProto.DatalakeValidation> validations = Arrays.stream(OnPremisesApiProto.DatalakeValidationType.Value.values())
+                .filter(validationType -> !Set.of(UNSET, UNRECOGNIZED).contains(validationType))
+                .map(validationType -> OnPremisesApiProto.DatalakeValidation.newBuilder()
+                        .setType(validationType)
+                        .setPassed(passValidationForDatalake)
+                        .setMessage(getValidationMessage(validationType))
+                        .build())
+                .toList();
+        OnPremisesApiProto.ValidateClusterForDatalakeResponse response = OnPremisesApiProto.ValidateClusterForDatalakeResponse.newBuilder()
+                .setIsValidForDatalake(passValidationForDatalake)
+                .addAllValidations(validations)
+                .build();
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
+
+    private String getValidationMessage(OnPremisesApiProto.DatalakeValidationType.Value validationType) {
+        if (passValidationForDatalake) {
+            return "";
+        }
+        return switch (validationType) {
+            case CLUSTER_TYPE_CDPDC -> "Cluster type is not CDPDC.";
+            case CLOUDERA_RUNTIME_VERSION_AT_LEAST_7_1_9 -> "Cloudera runtime version 7.1.0 cannot be considered as datalake.";
+            case KERBERIZED -> "Cluster not kerberized.";
+            case NOT_COMPUTE_CLUSTER -> "Cloudera Manager is a 'COMPUTE' type cluster.";
+            default -> "Default MOCK validation reason";
+        };
     }
 }

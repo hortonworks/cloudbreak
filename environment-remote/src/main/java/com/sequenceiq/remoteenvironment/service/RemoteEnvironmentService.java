@@ -34,6 +34,8 @@ import com.sequenceiq.remoteenvironment.DescribeEnvironmentV2Response;
 import com.sequenceiq.remoteenvironment.api.v1.environment.model.DescribeRemoteEnvironment;
 import com.sequenceiq.remoteenvironment.api.v1.environment.model.SimpleRemoteEnvironmentResponse;
 import com.sequenceiq.remoteenvironment.api.v1.environment.model.SimpleRemoteEnvironmentResponses;
+import com.sequenceiq.remoteenvironment.api.v1.environment.model.ValidateForDatalakeRequest;
+import com.sequenceiq.remoteenvironment.api.v1.environment.model.ValidateForDatalakeResponse;
 import com.sequenceiq.remoteenvironment.service.connector.RemoteEnvironmentConnectorType;
 
 @Service
@@ -138,6 +140,12 @@ public class RemoteEnvironmentService {
         throwExceptionIfNotEntitled(userCrn);
         return remoteEnvironmentConnectorProvider.getForCrn(request.getCrn())
                 .describeV2(userCrn, request.getCrn());
+    }
+
+    public ValidateForDatalakeResponse validateForDatalake(String userCrn, ValidateForDatalakeRequest request) {
+        throwExceptionIfNotEntitled(userCrn);
+        return remoteEnvironmentConnectorProvider.getForCrn(request.getCrn())
+                .validateForDatalake(userCrn, request.getCrn());
     }
 
     public DescribeDatalakeAsApiRemoteDataContextResponse getRdcByCrn(String userCrn, DescribeRemoteEnvironment request) {

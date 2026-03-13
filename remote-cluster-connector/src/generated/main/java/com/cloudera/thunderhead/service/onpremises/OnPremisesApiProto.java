@@ -127,6 +127,54 @@ public final class OnPremisesApiProto {
      * @return The operator.
      */
     com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClusterQueryOperator.Value getOperator();
+
+    /**
+     * <pre>
+     * Type of the cluster.
+     * </pre>
+     *
+     * <code>.onpremises.ClusterType.Value clusterType = 6;</code>
+     * @return The enum numeric value on the wire for clusterType.
+     */
+    int getClusterTypeValue();
+    /**
+     * <pre>
+     * Type of the cluster.
+     * </pre>
+     *
+     * <code>.onpremises.ClusterType.Value clusterType = 6;</code>
+     * @return The clusterType.
+     */
+    com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClusterType.Value getClusterType();
+
+    /**
+     * <pre>
+     * State of the cluster.
+     * </pre>
+     *
+     * <code>.onpremises.ClusterState.Value clusterState = 7;</code>
+     * @return The enum numeric value on the wire for clusterState.
+     */
+    int getClusterStateValue();
+    /**
+     * <pre>
+     * State of the cluster.
+     * </pre>
+     *
+     * <code>.onpremises.ClusterState.Value clusterState = 7;</code>
+     * @return The clusterState.
+     */
+    com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClusterState.Value getClusterState();
+
+    /**
+     * <pre>
+     * Checks if the cluster is behind any gateway.
+     * </pre>
+     *
+     * <code>bool behindGateway = 8;</code>
+     * @return The behindGateway.
+     */
+    boolean getBehindGateway();
   }
   /**
    * <pre>
@@ -150,6 +198,8 @@ public final class OnPremisesApiProto {
       services_ =
           com.google.protobuf.LazyStringArrayList.emptyList();
       operator_ = 0;
+      clusterType_ = 0;
+      clusterState_ = 0;
     }
 
     @java.lang.Override
@@ -339,6 +389,73 @@ public final class OnPremisesApiProto {
       return result == null ? com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClusterQueryOperator.Value.UNRECOGNIZED : result;
     }
 
+    public static final int CLUSTERTYPE_FIELD_NUMBER = 6;
+    private int clusterType_ = 0;
+    /**
+     * <pre>
+     * Type of the cluster.
+     * </pre>
+     *
+     * <code>.onpremises.ClusterType.Value clusterType = 6;</code>
+     * @return The enum numeric value on the wire for clusterType.
+     */
+    @java.lang.Override public int getClusterTypeValue() {
+      return clusterType_;
+    }
+    /**
+     * <pre>
+     * Type of the cluster.
+     * </pre>
+     *
+     * <code>.onpremises.ClusterType.Value clusterType = 6;</code>
+     * @return The clusterType.
+     */
+    @java.lang.Override public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClusterType.Value getClusterType() {
+      com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClusterType.Value result = com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClusterType.Value.forNumber(clusterType_);
+      return result == null ? com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClusterType.Value.UNRECOGNIZED : result;
+    }
+
+    public static final int CLUSTERSTATE_FIELD_NUMBER = 7;
+    private int clusterState_ = 0;
+    /**
+     * <pre>
+     * State of the cluster.
+     * </pre>
+     *
+     * <code>.onpremises.ClusterState.Value clusterState = 7;</code>
+     * @return The enum numeric value on the wire for clusterState.
+     */
+    @java.lang.Override public int getClusterStateValue() {
+      return clusterState_;
+    }
+    /**
+     * <pre>
+     * State of the cluster.
+     * </pre>
+     *
+     * <code>.onpremises.ClusterState.Value clusterState = 7;</code>
+     * @return The clusterState.
+     */
+    @java.lang.Override public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClusterState.Value getClusterState() {
+      com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClusterState.Value result = com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClusterState.Value.forNumber(clusterState_);
+      return result == null ? com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClusterState.Value.UNRECOGNIZED : result;
+    }
+
+    public static final int BEHINDGATEWAY_FIELD_NUMBER = 8;
+    private boolean behindGateway_ = false;
+    /**
+     * <pre>
+     * Checks if the cluster is behind any gateway.
+     * </pre>
+     *
+     * <code>bool behindGateway = 8;</code>
+     * @return The behindGateway.
+     */
+    @java.lang.Override
+    public boolean getBehindGateway() {
+      return behindGateway_;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -367,6 +484,15 @@ public final class OnPremisesApiProto {
       }
       if (operator_ != com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClusterQueryOperator.Value.UNSET.getNumber()) {
         output.writeEnum(5, operator_);
+      }
+      if (clusterType_ != com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClusterType.Value.UNSET.getNumber()) {
+        output.writeEnum(6, clusterType_);
+      }
+      if (clusterState_ != com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClusterState.Value.UNSET.getNumber()) {
+        output.writeEnum(7, clusterState_);
+      }
+      if (behindGateway_ != false) {
+        output.writeBool(8, behindGateway_);
       }
       getUnknownFields().writeTo(output);
     }
@@ -400,6 +526,18 @@ public final class OnPremisesApiProto {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(5, operator_);
       }
+      if (clusterType_ != com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClusterType.Value.UNSET.getNumber()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(6, clusterType_);
+      }
+      if (clusterState_ != com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClusterState.Value.UNSET.getNumber()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(7, clusterState_);
+      }
+      if (behindGateway_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(8, behindGateway_);
+      }
       size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
@@ -423,6 +561,10 @@ public final class OnPremisesApiProto {
       if (!getServicesList()
           .equals(other.getServicesList())) return false;
       if (operator_ != other.operator_) return false;
+      if (clusterType_ != other.clusterType_) return false;
+      if (clusterState_ != other.clusterState_) return false;
+      if (getBehindGateway()
+          != other.getBehindGateway()) return false;
       if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
@@ -446,6 +588,13 @@ public final class OnPremisesApiProto {
       }
       hash = (37 * hash) + OPERATOR_FIELD_NUMBER;
       hash = (53 * hash) + operator_;
+      hash = (37 * hash) + CLUSTERTYPE_FIELD_NUMBER;
+      hash = (53 * hash) + clusterType_;
+      hash = (37 * hash) + CLUSTERSTATE_FIELD_NUMBER;
+      hash = (53 * hash) + clusterState_;
+      hash = (37 * hash) + BEHINDGATEWAY_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getBehindGateway());
       hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -587,6 +736,9 @@ public final class OnPremisesApiProto {
         services_ =
             com.google.protobuf.LazyStringArrayList.emptyList();
         operator_ = 0;
+        clusterType_ = 0;
+        clusterState_ = 0;
+        behindGateway_ = false;
         return this;
       }
 
@@ -635,6 +787,15 @@ public final class OnPremisesApiProto {
         }
         if (((from_bitField0_ & 0x00000010) != 0)) {
           result.operator_ = operator_;
+        }
+        if (((from_bitField0_ & 0x00000020) != 0)) {
+          result.clusterType_ = clusterType_;
+        }
+        if (((from_bitField0_ & 0x00000040) != 0)) {
+          result.clusterState_ = clusterState_;
+        }
+        if (((from_bitField0_ & 0x00000080) != 0)) {
+          result.behindGateway_ = behindGateway_;
         }
       }
 
@@ -706,6 +867,15 @@ public final class OnPremisesApiProto {
         if (other.operator_ != 0) {
           setOperatorValue(other.getOperatorValue());
         }
+        if (other.clusterType_ != 0) {
+          setClusterTypeValue(other.getClusterTypeValue());
+        }
+        if (other.clusterState_ != 0) {
+          setClusterStateValue(other.getClusterStateValue());
+        }
+        if (other.getBehindGateway() != false) {
+          setBehindGateway(other.getBehindGateway());
+        }
         this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
         return this;
@@ -758,6 +928,21 @@ public final class OnPremisesApiProto {
                 bitField0_ |= 0x00000010;
                 break;
               } // case 40
+              case 48: {
+                clusterType_ = input.readEnum();
+                bitField0_ |= 0x00000020;
+                break;
+              } // case 48
+              case 56: {
+                clusterState_ = input.readEnum();
+                bitField0_ |= 0x00000040;
+                break;
+              } // case 56
+              case 64: {
+                behindGateway_ = input.readBool();
+                bitField0_ |= 0x00000080;
+                break;
+              } // case 64
               default: {
                 if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                   done = true; // was an endgroup tag
@@ -1200,6 +1385,196 @@ public final class OnPremisesApiProto {
       public Builder clearOperator() {
         bitField0_ = (bitField0_ & ~0x00000010);
         operator_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int clusterType_ = 0;
+      /**
+       * <pre>
+       * Type of the cluster.
+       * </pre>
+       *
+       * <code>.onpremises.ClusterType.Value clusterType = 6;</code>
+       * @return The enum numeric value on the wire for clusterType.
+       */
+      @java.lang.Override public int getClusterTypeValue() {
+        return clusterType_;
+      }
+      /**
+       * <pre>
+       * Type of the cluster.
+       * </pre>
+       *
+       * <code>.onpremises.ClusterType.Value clusterType = 6;</code>
+       * @param value The enum numeric value on the wire for clusterType to set.
+       * @return This builder for chaining.
+       */
+      public Builder setClusterTypeValue(int value) {
+        clusterType_ = value;
+        bitField0_ |= 0x00000020;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Type of the cluster.
+       * </pre>
+       *
+       * <code>.onpremises.ClusterType.Value clusterType = 6;</code>
+       * @return The clusterType.
+       */
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClusterType.Value getClusterType() {
+        com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClusterType.Value result = com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClusterType.Value.forNumber(clusterType_);
+        return result == null ? com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClusterType.Value.UNRECOGNIZED : result;
+      }
+      /**
+       * <pre>
+       * Type of the cluster.
+       * </pre>
+       *
+       * <code>.onpremises.ClusterType.Value clusterType = 6;</code>
+       * @param value The clusterType to set.
+       * @return This builder for chaining.
+       */
+      public Builder setClusterType(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClusterType.Value value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        bitField0_ |= 0x00000020;
+        clusterType_ = value.getNumber();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Type of the cluster.
+       * </pre>
+       *
+       * <code>.onpremises.ClusterType.Value clusterType = 6;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearClusterType() {
+        bitField0_ = (bitField0_ & ~0x00000020);
+        clusterType_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private int clusterState_ = 0;
+      /**
+       * <pre>
+       * State of the cluster.
+       * </pre>
+       *
+       * <code>.onpremises.ClusterState.Value clusterState = 7;</code>
+       * @return The enum numeric value on the wire for clusterState.
+       */
+      @java.lang.Override public int getClusterStateValue() {
+        return clusterState_;
+      }
+      /**
+       * <pre>
+       * State of the cluster.
+       * </pre>
+       *
+       * <code>.onpremises.ClusterState.Value clusterState = 7;</code>
+       * @param value The enum numeric value on the wire for clusterState to set.
+       * @return This builder for chaining.
+       */
+      public Builder setClusterStateValue(int value) {
+        clusterState_ = value;
+        bitField0_ |= 0x00000040;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * State of the cluster.
+       * </pre>
+       *
+       * <code>.onpremises.ClusterState.Value clusterState = 7;</code>
+       * @return The clusterState.
+       */
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClusterState.Value getClusterState() {
+        com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClusterState.Value result = com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClusterState.Value.forNumber(clusterState_);
+        return result == null ? com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClusterState.Value.UNRECOGNIZED : result;
+      }
+      /**
+       * <pre>
+       * State of the cluster.
+       * </pre>
+       *
+       * <code>.onpremises.ClusterState.Value clusterState = 7;</code>
+       * @param value The clusterState to set.
+       * @return This builder for chaining.
+       */
+      public Builder setClusterState(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ClusterState.Value value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        bitField0_ |= 0x00000040;
+        clusterState_ = value.getNumber();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * State of the cluster.
+       * </pre>
+       *
+       * <code>.onpremises.ClusterState.Value clusterState = 7;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearClusterState() {
+        bitField0_ = (bitField0_ & ~0x00000040);
+        clusterState_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private boolean behindGateway_ ;
+      /**
+       * <pre>
+       * Checks if the cluster is behind any gateway.
+       * </pre>
+       *
+       * <code>bool behindGateway = 8;</code>
+       * @return The behindGateway.
+       */
+      @java.lang.Override
+      public boolean getBehindGateway() {
+        return behindGateway_;
+      }
+      /**
+       * <pre>
+       * Checks if the cluster is behind any gateway.
+       * </pre>
+       *
+       * <code>bool behindGateway = 8;</code>
+       * @param value The behindGateway to set.
+       * @return This builder for chaining.
+       */
+      public Builder setBehindGateway(boolean value) {
+
+        behindGateway_ = value;
+        bitField0_ |= 0x00000080;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Checks if the cluster is behind any gateway.
+       * </pre>
+       *
+       * <code>bool behindGateway = 8;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearBehindGateway() {
+        bitField0_ = (bitField0_ & ~0x00000080);
+        behindGateway_ = false;
         onChanged();
         return this;
       }
@@ -8416,6 +8791,2999 @@ public final class OnPremisesApiProto {
 
     @java.lang.Override
     public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DescribeClusterResponse getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface ValidateClusterForDatalakeRequestOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:onpremises.ValidateClusterForDatalakeRequest)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * The CRN of the cluster.
+     * </pre>
+     *
+     * <code>string clusterCrn = 1 [(.options.FieldExtension.required) = true];</code>
+     * @return The clusterCrn.
+     */
+    java.lang.String getClusterCrn();
+    /**
+     * <pre>
+     * The CRN of the cluster.
+     * </pre>
+     *
+     * <code>string clusterCrn = 1 [(.options.FieldExtension.required) = true];</code>
+     * @return The bytes for clusterCrn.
+     */
+    com.google.protobuf.ByteString
+        getClusterCrnBytes();
+  }
+  /**
+   * <pre>
+   * Request object for the ValidateClusterForDatalake method.
+   * </pre>
+   *
+   * Protobuf type {@code onpremises.ValidateClusterForDatalakeRequest}
+   */
+  public static final class ValidateClusterForDatalakeRequest extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:onpremises.ValidateClusterForDatalakeRequest)
+      ValidateClusterForDatalakeRequestOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use ValidateClusterForDatalakeRequest.newBuilder() to construct.
+    private ValidateClusterForDatalakeRequest(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private ValidateClusterForDatalakeRequest() {
+      clusterCrn_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new ValidateClusterForDatalakeRequest();
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_ValidateClusterForDatalakeRequest_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_ValidateClusterForDatalakeRequest_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeRequest.class, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeRequest.Builder.class);
+    }
+
+    public static final int CLUSTERCRN_FIELD_NUMBER = 1;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object clusterCrn_ = "";
+    /**
+     * <pre>
+     * The CRN of the cluster.
+     * </pre>
+     *
+     * <code>string clusterCrn = 1 [(.options.FieldExtension.required) = true];</code>
+     * @return The clusterCrn.
+     */
+    @java.lang.Override
+    public java.lang.String getClusterCrn() {
+      java.lang.Object ref = clusterCrn_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        clusterCrn_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The CRN of the cluster.
+     * </pre>
+     *
+     * <code>string clusterCrn = 1 [(.options.FieldExtension.required) = true];</code>
+     * @return The bytes for clusterCrn.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getClusterCrnBytes() {
+      java.lang.Object ref = clusterCrn_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        clusterCrn_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(clusterCrn_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, clusterCrn_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(clusterCrn_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, clusterCrn_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeRequest)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeRequest other = (com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeRequest) obj;
+
+      if (!getClusterCrn()
+          .equals(other.getClusterCrn())) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + CLUSTERCRN_FIELD_NUMBER;
+      hash = (53 * hash) + getClusterCrn().hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeRequest parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeRequest parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeRequest parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeRequest parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeRequest parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeRequest parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeRequest parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeRequest parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeRequest parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeRequest parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeRequest parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeRequest parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeRequest prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Request object for the ValidateClusterForDatalake method.
+     * </pre>
+     *
+     * Protobuf type {@code onpremises.ValidateClusterForDatalakeRequest}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:onpremises.ValidateClusterForDatalakeRequest)
+        com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeRequestOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_ValidateClusterForDatalakeRequest_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_ValidateClusterForDatalakeRequest_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeRequest.class, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeRequest.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeRequest.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        bitField0_ = 0;
+        clusterCrn_ = "";
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_ValidateClusterForDatalakeRequest_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeRequest getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeRequest.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeRequest build() {
+        com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeRequest result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeRequest buildPartial() {
+        com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeRequest result = new com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeRequest(this);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartial0(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeRequest result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.clusterCrn_ = clusterCrn_;
+        }
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeRequest) {
+          return mergeFrom((com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeRequest)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeRequest other) {
+        if (other == com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeRequest.getDefaultInstance()) return this;
+        if (!other.getClusterCrn().isEmpty()) {
+          clusterCrn_ = other.clusterCrn_;
+          bitField0_ |= 0x00000001;
+          onChanged();
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                clusterCrn_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      private int bitField0_;
+
+      private java.lang.Object clusterCrn_ = "";
+      /**
+       * <pre>
+       * The CRN of the cluster.
+       * </pre>
+       *
+       * <code>string clusterCrn = 1 [(.options.FieldExtension.required) = true];</code>
+       * @return The clusterCrn.
+       */
+      public java.lang.String getClusterCrn() {
+        java.lang.Object ref = clusterCrn_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          clusterCrn_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The CRN of the cluster.
+       * </pre>
+       *
+       * <code>string clusterCrn = 1 [(.options.FieldExtension.required) = true];</code>
+       * @return The bytes for clusterCrn.
+       */
+      public com.google.protobuf.ByteString
+          getClusterCrnBytes() {
+        java.lang.Object ref = clusterCrn_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          clusterCrn_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The CRN of the cluster.
+       * </pre>
+       *
+       * <code>string clusterCrn = 1 [(.options.FieldExtension.required) = true];</code>
+       * @param value The clusterCrn to set.
+       * @return This builder for chaining.
+       */
+      public Builder setClusterCrn(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        clusterCrn_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The CRN of the cluster.
+       * </pre>
+       *
+       * <code>string clusterCrn = 1 [(.options.FieldExtension.required) = true];</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearClusterCrn() {
+        clusterCrn_ = getDefaultInstance().getClusterCrn();
+        bitField0_ = (bitField0_ & ~0x00000001);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The CRN of the cluster.
+       * </pre>
+       *
+       * <code>string clusterCrn = 1 [(.options.FieldExtension.required) = true];</code>
+       * @param value The bytes for clusterCrn to set.
+       * @return This builder for chaining.
+       */
+      public Builder setClusterCrnBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        clusterCrn_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:onpremises.ValidateClusterForDatalakeRequest)
+    }
+
+    // @@protoc_insertion_point(class_scope:onpremises.ValidateClusterForDatalakeRequest)
+    private static final com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeRequest DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeRequest();
+    }
+
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeRequest getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<ValidateClusterForDatalakeRequest>
+        PARSER = new com.google.protobuf.AbstractParser<ValidateClusterForDatalakeRequest>() {
+      @java.lang.Override
+      public ValidateClusterForDatalakeRequest parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<ValidateClusterForDatalakeRequest> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<ValidateClusterForDatalakeRequest> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeRequest getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface ValidateClusterForDatalakeResponseOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:onpremises.ValidateClusterForDatalakeResponse)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * Indicates whether the cluster can be used as a Data Lake.
+     * </pre>
+     *
+     * <code>bool isValidForDatalake = 1 [(.options.FieldExtension.required) = true];</code>
+     * @return The isValidForDatalake.
+     */
+    boolean getIsValidForDatalake();
+
+    /**
+     * <pre>
+     * Validation results (passed/failed) with optional messages.
+     * </pre>
+     *
+     * <code>repeated .onpremises.DatalakeValidation validations = 2;</code>
+     */
+    java.util.List<com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidation> 
+        getValidationsList();
+    /**
+     * <pre>
+     * Validation results (passed/failed) with optional messages.
+     * </pre>
+     *
+     * <code>repeated .onpremises.DatalakeValidation validations = 2;</code>
+     */
+    com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidation getValidations(int index);
+    /**
+     * <pre>
+     * Validation results (passed/failed) with optional messages.
+     * </pre>
+     *
+     * <code>repeated .onpremises.DatalakeValidation validations = 2;</code>
+     */
+    int getValidationsCount();
+    /**
+     * <pre>
+     * Validation results (passed/failed) with optional messages.
+     * </pre>
+     *
+     * <code>repeated .onpremises.DatalakeValidation validations = 2;</code>
+     */
+    java.util.List<? extends com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidationOrBuilder> 
+        getValidationsOrBuilderList();
+    /**
+     * <pre>
+     * Validation results (passed/failed) with optional messages.
+     * </pre>
+     *
+     * <code>repeated .onpremises.DatalakeValidation validations = 2;</code>
+     */
+    com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidationOrBuilder getValidationsOrBuilder(
+        int index);
+  }
+  /**
+   * <pre>
+   * Response object for the ValidateClusterForDatalake method.
+   * </pre>
+   *
+   * Protobuf type {@code onpremises.ValidateClusterForDatalakeResponse}
+   */
+  public static final class ValidateClusterForDatalakeResponse extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:onpremises.ValidateClusterForDatalakeResponse)
+      ValidateClusterForDatalakeResponseOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use ValidateClusterForDatalakeResponse.newBuilder() to construct.
+    private ValidateClusterForDatalakeResponse(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private ValidateClusterForDatalakeResponse() {
+      validations_ = java.util.Collections.emptyList();
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new ValidateClusterForDatalakeResponse();
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_ValidateClusterForDatalakeResponse_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_ValidateClusterForDatalakeResponse_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeResponse.class, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeResponse.Builder.class);
+    }
+
+    public static final int ISVALIDFORDATALAKE_FIELD_NUMBER = 1;
+    private boolean isValidForDatalake_ = false;
+    /**
+     * <pre>
+     * Indicates whether the cluster can be used as a Data Lake.
+     * </pre>
+     *
+     * <code>bool isValidForDatalake = 1 [(.options.FieldExtension.required) = true];</code>
+     * @return The isValidForDatalake.
+     */
+    @java.lang.Override
+    public boolean getIsValidForDatalake() {
+      return isValidForDatalake_;
+    }
+
+    public static final int VALIDATIONS_FIELD_NUMBER = 2;
+    @SuppressWarnings("serial")
+    private java.util.List<com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidation> validations_;
+    /**
+     * <pre>
+     * Validation results (passed/failed) with optional messages.
+     * </pre>
+     *
+     * <code>repeated .onpremises.DatalakeValidation validations = 2;</code>
+     */
+    @java.lang.Override
+    public java.util.List<com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidation> getValidationsList() {
+      return validations_;
+    }
+    /**
+     * <pre>
+     * Validation results (passed/failed) with optional messages.
+     * </pre>
+     *
+     * <code>repeated .onpremises.DatalakeValidation validations = 2;</code>
+     */
+    @java.lang.Override
+    public java.util.List<? extends com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidationOrBuilder> 
+        getValidationsOrBuilderList() {
+      return validations_;
+    }
+    /**
+     * <pre>
+     * Validation results (passed/failed) with optional messages.
+     * </pre>
+     *
+     * <code>repeated .onpremises.DatalakeValidation validations = 2;</code>
+     */
+    @java.lang.Override
+    public int getValidationsCount() {
+      return validations_.size();
+    }
+    /**
+     * <pre>
+     * Validation results (passed/failed) with optional messages.
+     * </pre>
+     *
+     * <code>repeated .onpremises.DatalakeValidation validations = 2;</code>
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidation getValidations(int index) {
+      return validations_.get(index);
+    }
+    /**
+     * <pre>
+     * Validation results (passed/failed) with optional messages.
+     * </pre>
+     *
+     * <code>repeated .onpremises.DatalakeValidation validations = 2;</code>
+     */
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidationOrBuilder getValidationsOrBuilder(
+        int index) {
+      return validations_.get(index);
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (isValidForDatalake_ != false) {
+        output.writeBool(1, isValidForDatalake_);
+      }
+      for (int i = 0; i < validations_.size(); i++) {
+        output.writeMessage(2, validations_.get(i));
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (isValidForDatalake_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(1, isValidForDatalake_);
+      }
+      for (int i = 0; i < validations_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(2, validations_.get(i));
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeResponse)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeResponse other = (com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeResponse) obj;
+
+      if (getIsValidForDatalake()
+          != other.getIsValidForDatalake()) return false;
+      if (!getValidationsList()
+          .equals(other.getValidationsList())) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + ISVALIDFORDATALAKE_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getIsValidForDatalake());
+      if (getValidationsCount() > 0) {
+        hash = (37 * hash) + VALIDATIONS_FIELD_NUMBER;
+        hash = (53 * hash) + getValidationsList().hashCode();
+      }
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeResponse parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeResponse parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeResponse parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeResponse parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeResponse parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeResponse parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeResponse parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeResponse parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeResponse parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeResponse parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeResponse parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeResponse parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeResponse prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Response object for the ValidateClusterForDatalake method.
+     * </pre>
+     *
+     * Protobuf type {@code onpremises.ValidateClusterForDatalakeResponse}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:onpremises.ValidateClusterForDatalakeResponse)
+        com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeResponseOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_ValidateClusterForDatalakeResponse_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_ValidateClusterForDatalakeResponse_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeResponse.class, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeResponse.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeResponse.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        bitField0_ = 0;
+        isValidForDatalake_ = false;
+        if (validationsBuilder_ == null) {
+          validations_ = java.util.Collections.emptyList();
+        } else {
+          validations_ = null;
+          validationsBuilder_.clear();
+        }
+        bitField0_ = (bitField0_ & ~0x00000002);
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_ValidateClusterForDatalakeResponse_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeResponse getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeResponse.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeResponse build() {
+        com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeResponse result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeResponse buildPartial() {
+        com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeResponse result = new com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeResponse(this);
+        buildPartialRepeatedFields(result);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartialRepeatedFields(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeResponse result) {
+        if (validationsBuilder_ == null) {
+          if (((bitField0_ & 0x00000002) != 0)) {
+            validations_ = java.util.Collections.unmodifiableList(validations_);
+            bitField0_ = (bitField0_ & ~0x00000002);
+          }
+          result.validations_ = validations_;
+        } else {
+          result.validations_ = validationsBuilder_.build();
+        }
+      }
+
+      private void buildPartial0(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeResponse result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.isValidForDatalake_ = isValidForDatalake_;
+        }
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeResponse) {
+          return mergeFrom((com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeResponse)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeResponse other) {
+        if (other == com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeResponse.getDefaultInstance()) return this;
+        if (other.getIsValidForDatalake() != false) {
+          setIsValidForDatalake(other.getIsValidForDatalake());
+        }
+        if (validationsBuilder_ == null) {
+          if (!other.validations_.isEmpty()) {
+            if (validations_.isEmpty()) {
+              validations_ = other.validations_;
+              bitField0_ = (bitField0_ & ~0x00000002);
+            } else {
+              ensureValidationsIsMutable();
+              validations_.addAll(other.validations_);
+            }
+            onChanged();
+          }
+        } else {
+          if (!other.validations_.isEmpty()) {
+            if (validationsBuilder_.isEmpty()) {
+              validationsBuilder_.dispose();
+              validationsBuilder_ = null;
+              validations_ = other.validations_;
+              bitField0_ = (bitField0_ & ~0x00000002);
+              validationsBuilder_ = 
+                com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
+                   getValidationsFieldBuilder() : null;
+            } else {
+              validationsBuilder_.addAllMessages(other.validations_);
+            }
+          }
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 8: {
+                isValidForDatalake_ = input.readBool();
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 8
+              case 18: {
+                com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidation m =
+                    input.readMessage(
+                        com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidation.parser(),
+                        extensionRegistry);
+                if (validationsBuilder_ == null) {
+                  ensureValidationsIsMutable();
+                  validations_.add(m);
+                } else {
+                  validationsBuilder_.addMessage(m);
+                }
+                break;
+              } // case 18
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      private int bitField0_;
+
+      private boolean isValidForDatalake_ ;
+      /**
+       * <pre>
+       * Indicates whether the cluster can be used as a Data Lake.
+       * </pre>
+       *
+       * <code>bool isValidForDatalake = 1 [(.options.FieldExtension.required) = true];</code>
+       * @return The isValidForDatalake.
+       */
+      @java.lang.Override
+      public boolean getIsValidForDatalake() {
+        return isValidForDatalake_;
+      }
+      /**
+       * <pre>
+       * Indicates whether the cluster can be used as a Data Lake.
+       * </pre>
+       *
+       * <code>bool isValidForDatalake = 1 [(.options.FieldExtension.required) = true];</code>
+       * @param value The isValidForDatalake to set.
+       * @return This builder for chaining.
+       */
+      public Builder setIsValidForDatalake(boolean value) {
+
+        isValidForDatalake_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Indicates whether the cluster can be used as a Data Lake.
+       * </pre>
+       *
+       * <code>bool isValidForDatalake = 1 [(.options.FieldExtension.required) = true];</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearIsValidForDatalake() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        isValidForDatalake_ = false;
+        onChanged();
+        return this;
+      }
+
+      private java.util.List<com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidation> validations_ =
+        java.util.Collections.emptyList();
+      private void ensureValidationsIsMutable() {
+        if (!((bitField0_ & 0x00000002) != 0)) {
+          validations_ = new java.util.ArrayList<com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidation>(validations_);
+          bitField0_ |= 0x00000002;
+         }
+      }
+
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidation, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidation.Builder, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidationOrBuilder> validationsBuilder_;
+
+      /**
+       * <pre>
+       * Validation results (passed/failed) with optional messages.
+       * </pre>
+       *
+       * <code>repeated .onpremises.DatalakeValidation validations = 2;</code>
+       */
+      public java.util.List<com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidation> getValidationsList() {
+        if (validationsBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(validations_);
+        } else {
+          return validationsBuilder_.getMessageList();
+        }
+      }
+      /**
+       * <pre>
+       * Validation results (passed/failed) with optional messages.
+       * </pre>
+       *
+       * <code>repeated .onpremises.DatalakeValidation validations = 2;</code>
+       */
+      public int getValidationsCount() {
+        if (validationsBuilder_ == null) {
+          return validations_.size();
+        } else {
+          return validationsBuilder_.getCount();
+        }
+      }
+      /**
+       * <pre>
+       * Validation results (passed/failed) with optional messages.
+       * </pre>
+       *
+       * <code>repeated .onpremises.DatalakeValidation validations = 2;</code>
+       */
+      public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidation getValidations(int index) {
+        if (validationsBuilder_ == null) {
+          return validations_.get(index);
+        } else {
+          return validationsBuilder_.getMessage(index);
+        }
+      }
+      /**
+       * <pre>
+       * Validation results (passed/failed) with optional messages.
+       * </pre>
+       *
+       * <code>repeated .onpremises.DatalakeValidation validations = 2;</code>
+       */
+      public Builder setValidations(
+          int index, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidation value) {
+        if (validationsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureValidationsIsMutable();
+          validations_.set(index, value);
+          onChanged();
+        } else {
+          validationsBuilder_.setMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * Validation results (passed/failed) with optional messages.
+       * </pre>
+       *
+       * <code>repeated .onpremises.DatalakeValidation validations = 2;</code>
+       */
+      public Builder setValidations(
+          int index, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidation.Builder builderForValue) {
+        if (validationsBuilder_ == null) {
+          ensureValidationsIsMutable();
+          validations_.set(index, builderForValue.build());
+          onChanged();
+        } else {
+          validationsBuilder_.setMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * Validation results (passed/failed) with optional messages.
+       * </pre>
+       *
+       * <code>repeated .onpremises.DatalakeValidation validations = 2;</code>
+       */
+      public Builder addValidations(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidation value) {
+        if (validationsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureValidationsIsMutable();
+          validations_.add(value);
+          onChanged();
+        } else {
+          validationsBuilder_.addMessage(value);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * Validation results (passed/failed) with optional messages.
+       * </pre>
+       *
+       * <code>repeated .onpremises.DatalakeValidation validations = 2;</code>
+       */
+      public Builder addValidations(
+          int index, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidation value) {
+        if (validationsBuilder_ == null) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          ensureValidationsIsMutable();
+          validations_.add(index, value);
+          onChanged();
+        } else {
+          validationsBuilder_.addMessage(index, value);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * Validation results (passed/failed) with optional messages.
+       * </pre>
+       *
+       * <code>repeated .onpremises.DatalakeValidation validations = 2;</code>
+       */
+      public Builder addValidations(
+          com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidation.Builder builderForValue) {
+        if (validationsBuilder_ == null) {
+          ensureValidationsIsMutable();
+          validations_.add(builderForValue.build());
+          onChanged();
+        } else {
+          validationsBuilder_.addMessage(builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * Validation results (passed/failed) with optional messages.
+       * </pre>
+       *
+       * <code>repeated .onpremises.DatalakeValidation validations = 2;</code>
+       */
+      public Builder addValidations(
+          int index, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidation.Builder builderForValue) {
+        if (validationsBuilder_ == null) {
+          ensureValidationsIsMutable();
+          validations_.add(index, builderForValue.build());
+          onChanged();
+        } else {
+          validationsBuilder_.addMessage(index, builderForValue.build());
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * Validation results (passed/failed) with optional messages.
+       * </pre>
+       *
+       * <code>repeated .onpremises.DatalakeValidation validations = 2;</code>
+       */
+      public Builder addAllValidations(
+          java.lang.Iterable<? extends com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidation> values) {
+        if (validationsBuilder_ == null) {
+          ensureValidationsIsMutable();
+          com.google.protobuf.AbstractMessageLite.Builder.addAll(
+              values, validations_);
+          onChanged();
+        } else {
+          validationsBuilder_.addAllMessages(values);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * Validation results (passed/failed) with optional messages.
+       * </pre>
+       *
+       * <code>repeated .onpremises.DatalakeValidation validations = 2;</code>
+       */
+      public Builder clearValidations() {
+        if (validationsBuilder_ == null) {
+          validations_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000002);
+          onChanged();
+        } else {
+          validationsBuilder_.clear();
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * Validation results (passed/failed) with optional messages.
+       * </pre>
+       *
+       * <code>repeated .onpremises.DatalakeValidation validations = 2;</code>
+       */
+      public Builder removeValidations(int index) {
+        if (validationsBuilder_ == null) {
+          ensureValidationsIsMutable();
+          validations_.remove(index);
+          onChanged();
+        } else {
+          validationsBuilder_.remove(index);
+        }
+        return this;
+      }
+      /**
+       * <pre>
+       * Validation results (passed/failed) with optional messages.
+       * </pre>
+       *
+       * <code>repeated .onpremises.DatalakeValidation validations = 2;</code>
+       */
+      public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidation.Builder getValidationsBuilder(
+          int index) {
+        return getValidationsFieldBuilder().getBuilder(index);
+      }
+      /**
+       * <pre>
+       * Validation results (passed/failed) with optional messages.
+       * </pre>
+       *
+       * <code>repeated .onpremises.DatalakeValidation validations = 2;</code>
+       */
+      public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidationOrBuilder getValidationsOrBuilder(
+          int index) {
+        if (validationsBuilder_ == null) {
+          return validations_.get(index);  } else {
+          return validationsBuilder_.getMessageOrBuilder(index);
+        }
+      }
+      /**
+       * <pre>
+       * Validation results (passed/failed) with optional messages.
+       * </pre>
+       *
+       * <code>repeated .onpremises.DatalakeValidation validations = 2;</code>
+       */
+      public java.util.List<? extends com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidationOrBuilder> 
+           getValidationsOrBuilderList() {
+        if (validationsBuilder_ != null) {
+          return validationsBuilder_.getMessageOrBuilderList();
+        } else {
+          return java.util.Collections.unmodifiableList(validations_);
+        }
+      }
+      /**
+       * <pre>
+       * Validation results (passed/failed) with optional messages.
+       * </pre>
+       *
+       * <code>repeated .onpremises.DatalakeValidation validations = 2;</code>
+       */
+      public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidation.Builder addValidationsBuilder() {
+        return getValidationsFieldBuilder().addBuilder(
+            com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidation.getDefaultInstance());
+      }
+      /**
+       * <pre>
+       * Validation results (passed/failed) with optional messages.
+       * </pre>
+       *
+       * <code>repeated .onpremises.DatalakeValidation validations = 2;</code>
+       */
+      public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidation.Builder addValidationsBuilder(
+          int index) {
+        return getValidationsFieldBuilder().addBuilder(
+            index, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidation.getDefaultInstance());
+      }
+      /**
+       * <pre>
+       * Validation results (passed/failed) with optional messages.
+       * </pre>
+       *
+       * <code>repeated .onpremises.DatalakeValidation validations = 2;</code>
+       */
+      public java.util.List<com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidation.Builder> 
+           getValidationsBuilderList() {
+        return getValidationsFieldBuilder().getBuilderList();
+      }
+      private com.google.protobuf.RepeatedFieldBuilderV3<
+          com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidation, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidation.Builder, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidationOrBuilder> 
+          getValidationsFieldBuilder() {
+        if (validationsBuilder_ == null) {
+          validationsBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
+              com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidation, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidation.Builder, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidationOrBuilder>(
+                  validations_,
+                  ((bitField0_ & 0x00000002) != 0),
+                  getParentForChildren(),
+                  isClean());
+          validations_ = null;
+        }
+        return validationsBuilder_;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:onpremises.ValidateClusterForDatalakeResponse)
+    }
+
+    // @@protoc_insertion_point(class_scope:onpremises.ValidateClusterForDatalakeResponse)
+    private static final com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeResponse DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeResponse();
+    }
+
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeResponse getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<ValidateClusterForDatalakeResponse>
+        PARSER = new com.google.protobuf.AbstractParser<ValidateClusterForDatalakeResponse>() {
+      @java.lang.Override
+      public ValidateClusterForDatalakeResponse parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<ValidateClusterForDatalakeResponse> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<ValidateClusterForDatalakeResponse> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.ValidateClusterForDatalakeResponse getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface DatalakeValidationOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:onpremises.DatalakeValidation)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * Validation type.
+     * </pre>
+     *
+     * <code>.onpremises.DatalakeValidationType.Value type = 1;</code>
+     * @return The enum numeric value on the wire for type.
+     */
+    int getTypeValue();
+    /**
+     * <pre>
+     * Validation type.
+     * </pre>
+     *
+     * <code>.onpremises.DatalakeValidationType.Value type = 1;</code>
+     * @return The type.
+     */
+    com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidationType.Value getType();
+
+    /**
+     * <pre>
+     * Whether this validation passed.
+     * </pre>
+     *
+     * <code>bool passed = 2;</code>
+     * @return The passed.
+     */
+    boolean getPassed();
+
+    /**
+     * <pre>
+     * Human-readable message (typically empty for passed validations; includes reason for failures).
+     * </pre>
+     *
+     * <code>string message = 3;</code>
+     * @return The message.
+     */
+    java.lang.String getMessage();
+    /**
+     * <pre>
+     * Human-readable message (typically empty for passed validations; includes reason for failures).
+     * </pre>
+     *
+     * <code>string message = 3;</code>
+     * @return The bytes for message.
+     */
+    com.google.protobuf.ByteString
+        getMessageBytes();
+  }
+  /**
+   * <pre>
+   * Datalake validation result.
+   * </pre>
+   *
+   * Protobuf type {@code onpremises.DatalakeValidation}
+   */
+  public static final class DatalakeValidation extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:onpremises.DatalakeValidation)
+      DatalakeValidationOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use DatalakeValidation.newBuilder() to construct.
+    private DatalakeValidation(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private DatalakeValidation() {
+      type_ = 0;
+      message_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new DatalakeValidation();
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_DatalakeValidation_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_DatalakeValidation_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidation.class, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidation.Builder.class);
+    }
+
+    public static final int TYPE_FIELD_NUMBER = 1;
+    private int type_ = 0;
+    /**
+     * <pre>
+     * Validation type.
+     * </pre>
+     *
+     * <code>.onpremises.DatalakeValidationType.Value type = 1;</code>
+     * @return The enum numeric value on the wire for type.
+     */
+    @java.lang.Override public int getTypeValue() {
+      return type_;
+    }
+    /**
+     * <pre>
+     * Validation type.
+     * </pre>
+     *
+     * <code>.onpremises.DatalakeValidationType.Value type = 1;</code>
+     * @return The type.
+     */
+    @java.lang.Override public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidationType.Value getType() {
+      com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidationType.Value result = com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidationType.Value.forNumber(type_);
+      return result == null ? com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidationType.Value.UNRECOGNIZED : result;
+    }
+
+    public static final int PASSED_FIELD_NUMBER = 2;
+    private boolean passed_ = false;
+    /**
+     * <pre>
+     * Whether this validation passed.
+     * </pre>
+     *
+     * <code>bool passed = 2;</code>
+     * @return The passed.
+     */
+    @java.lang.Override
+    public boolean getPassed() {
+      return passed_;
+    }
+
+    public static final int MESSAGE_FIELD_NUMBER = 3;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object message_ = "";
+    /**
+     * <pre>
+     * Human-readable message (typically empty for passed validations; includes reason for failures).
+     * </pre>
+     *
+     * <code>string message = 3;</code>
+     * @return The message.
+     */
+    @java.lang.Override
+    public java.lang.String getMessage() {
+      java.lang.Object ref = message_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        message_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * Human-readable message (typically empty for passed validations; includes reason for failures).
+     * </pre>
+     *
+     * <code>string message = 3;</code>
+     * @return The bytes for message.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getMessageBytes() {
+      java.lang.Object ref = message_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        message_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (type_ != com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidationType.Value.UNSET.getNumber()) {
+        output.writeEnum(1, type_);
+      }
+      if (passed_ != false) {
+        output.writeBool(2, passed_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(message_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, message_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (type_ != com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidationType.Value.UNSET.getNumber()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(1, type_);
+      }
+      if (passed_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(2, passed_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(message_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, message_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidation)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidation other = (com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidation) obj;
+
+      if (type_ != other.type_) return false;
+      if (getPassed()
+          != other.getPassed()) return false;
+      if (!getMessage()
+          .equals(other.getMessage())) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + TYPE_FIELD_NUMBER;
+      hash = (53 * hash) + type_;
+      hash = (37 * hash) + PASSED_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getPassed());
+      hash = (37 * hash) + MESSAGE_FIELD_NUMBER;
+      hash = (53 * hash) + getMessage().hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidation parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidation parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidation parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidation parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidation parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidation parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidation parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidation parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidation parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidation parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidation parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidation parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidation prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Datalake validation result.
+     * </pre>
+     *
+     * Protobuf type {@code onpremises.DatalakeValidation}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:onpremises.DatalakeValidation)
+        com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidationOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_DatalakeValidation_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_DatalakeValidation_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidation.class, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidation.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidation.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        bitField0_ = 0;
+        type_ = 0;
+        passed_ = false;
+        message_ = "";
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_DatalakeValidation_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidation getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidation.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidation build() {
+        com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidation result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidation buildPartial() {
+        com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidation result = new com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidation(this);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartial0(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidation result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.type_ = type_;
+        }
+        if (((from_bitField0_ & 0x00000002) != 0)) {
+          result.passed_ = passed_;
+        }
+        if (((from_bitField0_ & 0x00000004) != 0)) {
+          result.message_ = message_;
+        }
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidation) {
+          return mergeFrom((com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidation)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidation other) {
+        if (other == com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidation.getDefaultInstance()) return this;
+        if (other.type_ != 0) {
+          setTypeValue(other.getTypeValue());
+        }
+        if (other.getPassed() != false) {
+          setPassed(other.getPassed());
+        }
+        if (!other.getMessage().isEmpty()) {
+          message_ = other.message_;
+          bitField0_ |= 0x00000004;
+          onChanged();
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 8: {
+                type_ = input.readEnum();
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 8
+              case 16: {
+                passed_ = input.readBool();
+                bitField0_ |= 0x00000002;
+                break;
+              } // case 16
+              case 26: {
+                message_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000004;
+                break;
+              } // case 26
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      private int bitField0_;
+
+      private int type_ = 0;
+      /**
+       * <pre>
+       * Validation type.
+       * </pre>
+       *
+       * <code>.onpremises.DatalakeValidationType.Value type = 1;</code>
+       * @return The enum numeric value on the wire for type.
+       */
+      @java.lang.Override public int getTypeValue() {
+        return type_;
+      }
+      /**
+       * <pre>
+       * Validation type.
+       * </pre>
+       *
+       * <code>.onpremises.DatalakeValidationType.Value type = 1;</code>
+       * @param value The enum numeric value on the wire for type to set.
+       * @return This builder for chaining.
+       */
+      public Builder setTypeValue(int value) {
+        type_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Validation type.
+       * </pre>
+       *
+       * <code>.onpremises.DatalakeValidationType.Value type = 1;</code>
+       * @return The type.
+       */
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidationType.Value getType() {
+        com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidationType.Value result = com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidationType.Value.forNumber(type_);
+        return result == null ? com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidationType.Value.UNRECOGNIZED : result;
+      }
+      /**
+       * <pre>
+       * Validation type.
+       * </pre>
+       *
+       * <code>.onpremises.DatalakeValidationType.Value type = 1;</code>
+       * @param value The type to set.
+       * @return This builder for chaining.
+       */
+      public Builder setType(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidationType.Value value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        bitField0_ |= 0x00000001;
+        type_ = value.getNumber();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Validation type.
+       * </pre>
+       *
+       * <code>.onpremises.DatalakeValidationType.Value type = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearType() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        type_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private boolean passed_ ;
+      /**
+       * <pre>
+       * Whether this validation passed.
+       * </pre>
+       *
+       * <code>bool passed = 2;</code>
+       * @return The passed.
+       */
+      @java.lang.Override
+      public boolean getPassed() {
+        return passed_;
+      }
+      /**
+       * <pre>
+       * Whether this validation passed.
+       * </pre>
+       *
+       * <code>bool passed = 2;</code>
+       * @param value The passed to set.
+       * @return This builder for chaining.
+       */
+      public Builder setPassed(boolean value) {
+
+        passed_ = value;
+        bitField0_ |= 0x00000002;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Whether this validation passed.
+       * </pre>
+       *
+       * <code>bool passed = 2;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearPassed() {
+        bitField0_ = (bitField0_ & ~0x00000002);
+        passed_ = false;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object message_ = "";
+      /**
+       * <pre>
+       * Human-readable message (typically empty for passed validations; includes reason for failures).
+       * </pre>
+       *
+       * <code>string message = 3;</code>
+       * @return The message.
+       */
+      public java.lang.String getMessage() {
+        java.lang.Object ref = message_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          message_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Human-readable message (typically empty for passed validations; includes reason for failures).
+       * </pre>
+       *
+       * <code>string message = 3;</code>
+       * @return The bytes for message.
+       */
+      public com.google.protobuf.ByteString
+          getMessageBytes() {
+        java.lang.Object ref = message_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          message_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * Human-readable message (typically empty for passed validations; includes reason for failures).
+       * </pre>
+       *
+       * <code>string message = 3;</code>
+       * @param value The message to set.
+       * @return This builder for chaining.
+       */
+      public Builder setMessage(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        message_ = value;
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Human-readable message (typically empty for passed validations; includes reason for failures).
+       * </pre>
+       *
+       * <code>string message = 3;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearMessage() {
+        message_ = getDefaultInstance().getMessage();
+        bitField0_ = (bitField0_ & ~0x00000004);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Human-readable message (typically empty for passed validations; includes reason for failures).
+       * </pre>
+       *
+       * <code>string message = 3;</code>
+       * @param value The bytes for message to set.
+       * @return This builder for chaining.
+       */
+      public Builder setMessageBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        message_ = value;
+        bitField0_ |= 0x00000004;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:onpremises.DatalakeValidation)
+    }
+
+    // @@protoc_insertion_point(class_scope:onpremises.DatalakeValidation)
+    private static final com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidation DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidation();
+    }
+
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidation getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<DatalakeValidation>
+        PARSER = new com.google.protobuf.AbstractParser<DatalakeValidation>() {
+      @java.lang.Override
+      public DatalakeValidation parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<DatalakeValidation> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<DatalakeValidation> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidation getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface DatalakeValidationTypeOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:onpremises.DatalakeValidationType)
+      com.google.protobuf.MessageOrBuilder {
+  }
+  /**
+   * <pre>
+   * The type of datalake validation.
+   * </pre>
+   *
+   * Protobuf type {@code onpremises.DatalakeValidationType}
+   */
+  public static final class DatalakeValidationType extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:onpremises.DatalakeValidationType)
+      DatalakeValidationTypeOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use DatalakeValidationType.newBuilder() to construct.
+    private DatalakeValidationType(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private DatalakeValidationType() {
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new DatalakeValidationType();
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_DatalakeValidationType_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_DatalakeValidationType_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidationType.class, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidationType.Builder.class);
+    }
+
+    /**
+     * Protobuf enum {@code onpremises.DatalakeValidationType.Value}
+     */
+    public enum Value
+        implements com.google.protobuf.ProtocolMessageEnum {
+      /**
+       * <code>UNSET = 0;</code>
+       */
+      UNSET(0),
+      /**
+       * <pre>
+       * Cluster type is CDPDC.
+       * </pre>
+       *
+       * <code>CLUSTER_TYPE_CDPDC = 1;</code>
+       */
+      CLUSTER_TYPE_CDPDC(1),
+      /**
+       * <pre>
+       * Cloudera Runtime is 7.1.9 or newer.
+       * </pre>
+       *
+       * <code>CLOUDERA_RUNTIME_VERSION_AT_LEAST_7_1_9 = 2;</code>
+       */
+      CLOUDERA_RUNTIME_VERSION_AT_LEAST_7_1_9(2),
+      /**
+       * <pre>
+       * Whether kerberized or not.
+       * </pre>
+       *
+       * <code>KERBERIZED = 3;</code>
+       */
+      KERBERIZED(3),
+      /**
+       * <pre>
+       * The clusterType should not be "COMPUTE" for virtual private cluster.
+       * </pre>
+       *
+       * <code>NOT_COMPUTE_CLUSTER = 4;</code>
+       */
+      NOT_COMPUTE_CLUSTER(4),
+      UNRECOGNIZED(-1),
+      ;
+
+      /**
+       * <code>UNSET = 0;</code>
+       */
+      public static final int UNSET_VALUE = 0;
+      /**
+       * <pre>
+       * Cluster type is CDPDC.
+       * </pre>
+       *
+       * <code>CLUSTER_TYPE_CDPDC = 1;</code>
+       */
+      public static final int CLUSTER_TYPE_CDPDC_VALUE = 1;
+      /**
+       * <pre>
+       * Cloudera Runtime is 7.1.9 or newer.
+       * </pre>
+       *
+       * <code>CLOUDERA_RUNTIME_VERSION_AT_LEAST_7_1_9 = 2;</code>
+       */
+      public static final int CLOUDERA_RUNTIME_VERSION_AT_LEAST_7_1_9_VALUE = 2;
+      /**
+       * <pre>
+       * Whether kerberized or not.
+       * </pre>
+       *
+       * <code>KERBERIZED = 3;</code>
+       */
+      public static final int KERBERIZED_VALUE = 3;
+      /**
+       * <pre>
+       * The clusterType should not be "COMPUTE" for virtual private cluster.
+       * </pre>
+       *
+       * <code>NOT_COMPUTE_CLUSTER = 4;</code>
+       */
+      public static final int NOT_COMPUTE_CLUSTER_VALUE = 4;
+
+
+      public final int getNumber() {
+        if (this == UNRECOGNIZED) {
+          throw new java.lang.IllegalArgumentException(
+              "Can't get the number of an unknown enum value.");
+        }
+        return value;
+      }
+
+      /**
+       * @param value The numeric wire value of the corresponding enum entry.
+       * @return The enum associated with the given numeric wire value.
+       * @deprecated Use {@link #forNumber(int)} instead.
+       */
+      @java.lang.Deprecated
+      public static Value valueOf(int value) {
+        return forNumber(value);
+      }
+
+      /**
+       * @param value The numeric wire value of the corresponding enum entry.
+       * @return The enum associated with the given numeric wire value.
+       */
+      public static Value forNumber(int value) {
+        switch (value) {
+          case 0: return UNSET;
+          case 1: return CLUSTER_TYPE_CDPDC;
+          case 2: return CLOUDERA_RUNTIME_VERSION_AT_LEAST_7_1_9;
+          case 3: return KERBERIZED;
+          case 4: return NOT_COMPUTE_CLUSTER;
+          default: return null;
+        }
+      }
+
+      public static com.google.protobuf.Internal.EnumLiteMap<Value>
+          internalGetValueMap() {
+        return internalValueMap;
+      }
+      private static final com.google.protobuf.Internal.EnumLiteMap<
+          Value> internalValueMap =
+            new com.google.protobuf.Internal.EnumLiteMap<Value>() {
+              public Value findValueByNumber(int number) {
+                return Value.forNumber(number);
+              }
+            };
+
+      public final com.google.protobuf.Descriptors.EnumValueDescriptor
+          getValueDescriptor() {
+        if (this == UNRECOGNIZED) {
+          throw new java.lang.IllegalStateException(
+              "Can't get the descriptor of an unrecognized enum value.");
+        }
+        return getDescriptor().getValues().get(ordinal());
+      }
+      public final com.google.protobuf.Descriptors.EnumDescriptor
+          getDescriptorForType() {
+        return getDescriptor();
+      }
+      public static final com.google.protobuf.Descriptors.EnumDescriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidationType.getDescriptor().getEnumTypes().get(0);
+      }
+
+      private static final Value[] VALUES = values();
+
+      public static Value valueOf(
+          com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
+        if (desc.getType() != getDescriptor()) {
+          throw new java.lang.IllegalArgumentException(
+            "EnumValueDescriptor is not for this type.");
+        }
+        if (desc.getIndex() == -1) {
+          return UNRECOGNIZED;
+        }
+        return VALUES[desc.getIndex()];
+      }
+
+      private final int value;
+
+      private Value(int value) {
+        this.value = value;
+      }
+
+      // @@protoc_insertion_point(enum_scope:onpremises.DatalakeValidationType.Value)
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidationType)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidationType other = (com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidationType) obj;
+
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidationType parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidationType parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidationType parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidationType parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidationType parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidationType parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidationType parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidationType parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidationType parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidationType parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidationType parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidationType parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidationType prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * The type of datalake validation.
+     * </pre>
+     *
+     * Protobuf type {@code onpremises.DatalakeValidationType}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:onpremises.DatalakeValidationType)
+        com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidationTypeOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_DatalakeValidationType_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_DatalakeValidationType_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidationType.class, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidationType.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidationType.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_DatalakeValidationType_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidationType getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidationType.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidationType build() {
+        com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidationType result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidationType buildPartial() {
+        com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidationType result = new com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidationType(this);
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidationType) {
+          return mergeFrom((com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidationType)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidationType other) {
+        if (other == com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidationType.getDefaultInstance()) return this;
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:onpremises.DatalakeValidationType)
+    }
+
+    // @@protoc_insertion_point(class_scope:onpremises.DatalakeValidationType)
+    private static final com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidationType DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidationType();
+    }
+
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidationType getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<DatalakeValidationType>
+        PARSER = new com.google.protobuf.AbstractParser<DatalakeValidationType>() {
+      @java.lang.Override
+      public DatalakeValidationType parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<DatalakeValidationType> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<DatalakeValidationType> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.DatalakeValidationType getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -24863,26 +28231,6 @@ public final class OnPremisesApiProto {
 
     /**
      * <pre>
-     * Version of the cluster connectivity management service. It will be either of CCM_V1 or CCM_V2.
-     * </pre>
-     *
-     * <code>string ccmVersion = 15;</code>
-     * @return The ccmVersion.
-     */
-    java.lang.String getCcmVersion();
-    /**
-     * <pre>
-     * Version of the cluster connectivity management service. It will be either of CCM_V1 or CCM_V2.
-     * </pre>
-     *
-     * <code>string ccmVersion = 15;</code>
-     * @return The bytes for ccmVersion.
-     */
-    com.google.protobuf.ByteString
-        getCcmVersionBytes();
-
-    /**
-     * <pre>
      * Registration Status of the partially registered on-premises cluster.
      * </pre>
      *
@@ -24985,7 +28333,6 @@ public final class OnPremisesApiProto {
       clusterType_ = "";
       clusterConnectivityState_ = "";
       createdBy_ = "";
-      ccmVersion_ = "";
       registrationStatus_ = "";
       agentCrn_ = "";
       pvcCrn_ = "";
@@ -25431,53 +28778,6 @@ public final class OnPremisesApiProto {
       return primary_;
     }
 
-    public static final int CCMVERSION_FIELD_NUMBER = 15;
-    @SuppressWarnings("serial")
-    private volatile java.lang.Object ccmVersion_ = "";
-    /**
-     * <pre>
-     * Version of the cluster connectivity management service. It will be either of CCM_V1 or CCM_V2.
-     * </pre>
-     *
-     * <code>string ccmVersion = 15;</code>
-     * @return The ccmVersion.
-     */
-    @java.lang.Override
-    public java.lang.String getCcmVersion() {
-      java.lang.Object ref = ccmVersion_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        ccmVersion_ = s;
-        return s;
-      }
-    }
-    /**
-     * <pre>
-     * Version of the cluster connectivity management service. It will be either of CCM_V1 or CCM_V2.
-     * </pre>
-     *
-     * <code>string ccmVersion = 15;</code>
-     * @return The bytes for ccmVersion.
-     */
-    @java.lang.Override
-    public com.google.protobuf.ByteString
-        getCcmVersionBytes() {
-      java.lang.Object ref = ccmVersion_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        ccmVersion_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-
     public static final int REGISTRATIONSTATUS_FIELD_NUMBER = 16;
     @SuppressWarnings("serial")
     private volatile java.lang.Object registrationStatus_ = "";
@@ -25719,9 +29019,6 @@ public final class OnPremisesApiProto {
       if (primary_ != false) {
         output.writeBool(14, primary_);
       }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(ccmVersion_)) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 15, ccmVersion_);
-      }
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(registrationStatus_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 16, registrationStatus_);
       }
@@ -25788,9 +29085,6 @@ public final class OnPremisesApiProto {
         size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(14, primary_);
       }
-      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(ccmVersion_)) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(15, ccmVersion_);
-      }
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(registrationStatus_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(16, registrationStatus_);
       }
@@ -25844,8 +29138,6 @@ public final class OnPremisesApiProto {
           != other.getUpdatedAt()) return false;
       if (getPrimary()
           != other.getPrimary()) return false;
-      if (!getCcmVersion()
-          .equals(other.getCcmVersion())) return false;
       if (!getRegistrationStatus()
           .equals(other.getRegistrationStatus())) return false;
       if (!getAgentCrn()
@@ -25896,8 +29188,6 @@ public final class OnPremisesApiProto {
       hash = (37 * hash) + PRIMARY_FIELD_NUMBER;
       hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
           getPrimary());
-      hash = (37 * hash) + CCMVERSION_FIELD_NUMBER;
-      hash = (53 * hash) + getCcmVersion().hashCode();
       hash = (37 * hash) + REGISTRATIONSTATUS_FIELD_NUMBER;
       hash = (53 * hash) + getRegistrationStatus().hashCode();
       hash = (37 * hash) + AGENTCRN_FIELD_NUMBER;
@@ -26054,7 +29344,6 @@ public final class OnPremisesApiProto {
         createdAt_ = 0L;
         updatedAt_ = 0L;
         primary_ = false;
-        ccmVersion_ = "";
         registrationStatus_ = "";
         agentCrn_ = "";
         pvcCrn_ = "";
@@ -26132,18 +29421,15 @@ public final class OnPremisesApiProto {
           result.primary_ = primary_;
         }
         if (((from_bitField0_ & 0x00002000) != 0)) {
-          result.ccmVersion_ = ccmVersion_;
-        }
-        if (((from_bitField0_ & 0x00004000) != 0)) {
           result.registrationStatus_ = registrationStatus_;
         }
-        if (((from_bitField0_ & 0x00008000) != 0)) {
+        if (((from_bitField0_ & 0x00004000) != 0)) {
           result.agentCrn_ = agentCrn_;
         }
-        if (((from_bitField0_ & 0x00010000) != 0)) {
+        if (((from_bitField0_ & 0x00008000) != 0)) {
           result.pvcCrn_ = pvcCrn_;
         }
-        if (((from_bitField0_ & 0x00020000) != 0)) {
+        if (((from_bitField0_ & 0x00010000) != 0)) {
           result.knoxUrl_ = knoxUrl_;
         }
       }
@@ -26245,29 +29531,24 @@ public final class OnPremisesApiProto {
         if (other.getPrimary() != false) {
           setPrimary(other.getPrimary());
         }
-        if (!other.getCcmVersion().isEmpty()) {
-          ccmVersion_ = other.ccmVersion_;
-          bitField0_ |= 0x00002000;
-          onChanged();
-        }
         if (!other.getRegistrationStatus().isEmpty()) {
           registrationStatus_ = other.registrationStatus_;
-          bitField0_ |= 0x00004000;
+          bitField0_ |= 0x00002000;
           onChanged();
         }
         if (!other.getAgentCrn().isEmpty()) {
           agentCrn_ = other.agentCrn_;
-          bitField0_ |= 0x00008000;
+          bitField0_ |= 0x00004000;
           onChanged();
         }
         if (!other.getPvcCrn().isEmpty()) {
           pvcCrn_ = other.pvcCrn_;
-          bitField0_ |= 0x00010000;
+          bitField0_ |= 0x00008000;
           onChanged();
         }
         if (!other.getKnoxUrl().isEmpty()) {
           knoxUrl_ = other.knoxUrl_;
-          bitField0_ |= 0x00020000;
+          bitField0_ |= 0x00010000;
           onChanged();
         }
         this.mergeUnknownFields(other.getUnknownFields());
@@ -26361,29 +29642,24 @@ public final class OnPremisesApiProto {
                 bitField0_ |= 0x00001000;
                 break;
               } // case 112
-              case 122: {
-                ccmVersion_ = input.readStringRequireUtf8();
-                bitField0_ |= 0x00002000;
-                break;
-              } // case 122
               case 130: {
                 registrationStatus_ = input.readStringRequireUtf8();
-                bitField0_ |= 0x00004000;
+                bitField0_ |= 0x00002000;
                 break;
               } // case 130
               case 138: {
                 agentCrn_ = input.readStringRequireUtf8();
-                bitField0_ |= 0x00008000;
+                bitField0_ |= 0x00004000;
                 break;
               } // case 138
               case 146: {
                 pvcCrn_ = input.readStringRequireUtf8();
-                bitField0_ |= 0x00010000;
+                bitField0_ |= 0x00008000;
                 break;
               } // case 146
               case 154: {
                 knoxUrl_ = input.readStringRequireUtf8();
-                bitField0_ |= 0x00020000;
+                bitField0_ |= 0x00010000;
                 break;
               } // case 154
               default: {
@@ -27311,98 +30587,6 @@ public final class OnPremisesApiProto {
         return this;
       }
 
-      private java.lang.Object ccmVersion_ = "";
-      /**
-       * <pre>
-       * Version of the cluster connectivity management service. It will be either of CCM_V1 or CCM_V2.
-       * </pre>
-       *
-       * <code>string ccmVersion = 15;</code>
-       * @return The ccmVersion.
-       */
-      public java.lang.String getCcmVersion() {
-        java.lang.Object ref = ccmVersion_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          ccmVersion_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
-      }
-      /**
-       * <pre>
-       * Version of the cluster connectivity management service. It will be either of CCM_V1 or CCM_V2.
-       * </pre>
-       *
-       * <code>string ccmVersion = 15;</code>
-       * @return The bytes for ccmVersion.
-       */
-      public com.google.protobuf.ByteString
-          getCcmVersionBytes() {
-        java.lang.Object ref = ccmVersion_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          ccmVersion_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <pre>
-       * Version of the cluster connectivity management service. It will be either of CCM_V1 or CCM_V2.
-       * </pre>
-       *
-       * <code>string ccmVersion = 15;</code>
-       * @param value The ccmVersion to set.
-       * @return This builder for chaining.
-       */
-      public Builder setCcmVersion(
-          java.lang.String value) {
-        if (value == null) { throw new NullPointerException(); }
-        ccmVersion_ = value;
-        bitField0_ |= 0x00002000;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * Version of the cluster connectivity management service. It will be either of CCM_V1 or CCM_V2.
-       * </pre>
-       *
-       * <code>string ccmVersion = 15;</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearCcmVersion() {
-        ccmVersion_ = getDefaultInstance().getCcmVersion();
-        bitField0_ = (bitField0_ & ~0x00002000);
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * Version of the cluster connectivity management service. It will be either of CCM_V1 or CCM_V2.
-       * </pre>
-       *
-       * <code>string ccmVersion = 15;</code>
-       * @param value The bytes for ccmVersion to set.
-       * @return This builder for chaining.
-       */
-      public Builder setCcmVersionBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) { throw new NullPointerException(); }
-        checkByteStringIsUtf8(value);
-        ccmVersion_ = value;
-        bitField0_ |= 0x00002000;
-        onChanged();
-        return this;
-      }
-
       private java.lang.Object registrationStatus_ = "";
       /**
        * <pre>
@@ -27458,7 +30642,7 @@ public final class OnPremisesApiProto {
           java.lang.String value) {
         if (value == null) { throw new NullPointerException(); }
         registrationStatus_ = value;
-        bitField0_ |= 0x00004000;
+        bitField0_ |= 0x00002000;
         onChanged();
         return this;
       }
@@ -27472,7 +30656,7 @@ public final class OnPremisesApiProto {
        */
       public Builder clearRegistrationStatus() {
         registrationStatus_ = getDefaultInstance().getRegistrationStatus();
-        bitField0_ = (bitField0_ & ~0x00004000);
+        bitField0_ = (bitField0_ & ~0x00002000);
         onChanged();
         return this;
       }
@@ -27490,7 +30674,7 @@ public final class OnPremisesApiProto {
         if (value == null) { throw new NullPointerException(); }
         checkByteStringIsUtf8(value);
         registrationStatus_ = value;
-        bitField0_ |= 0x00004000;
+        bitField0_ |= 0x00002000;
         onChanged();
         return this;
       }
@@ -27550,7 +30734,7 @@ public final class OnPremisesApiProto {
           java.lang.String value) {
         if (value == null) { throw new NullPointerException(); }
         agentCrn_ = value;
-        bitField0_ |= 0x00008000;
+        bitField0_ |= 0x00004000;
         onChanged();
         return this;
       }
@@ -27564,7 +30748,7 @@ public final class OnPremisesApiProto {
        */
       public Builder clearAgentCrn() {
         agentCrn_ = getDefaultInstance().getAgentCrn();
-        bitField0_ = (bitField0_ & ~0x00008000);
+        bitField0_ = (bitField0_ & ~0x00004000);
         onChanged();
         return this;
       }
@@ -27582,7 +30766,7 @@ public final class OnPremisesApiProto {
         if (value == null) { throw new NullPointerException(); }
         checkByteStringIsUtf8(value);
         agentCrn_ = value;
-        bitField0_ |= 0x00008000;
+        bitField0_ |= 0x00004000;
         onChanged();
         return this;
       }
@@ -27642,7 +30826,7 @@ public final class OnPremisesApiProto {
           java.lang.String value) {
         if (value == null) { throw new NullPointerException(); }
         pvcCrn_ = value;
-        bitField0_ |= 0x00010000;
+        bitField0_ |= 0x00008000;
         onChanged();
         return this;
       }
@@ -27656,7 +30840,7 @@ public final class OnPremisesApiProto {
        */
       public Builder clearPvcCrn() {
         pvcCrn_ = getDefaultInstance().getPvcCrn();
-        bitField0_ = (bitField0_ & ~0x00010000);
+        bitField0_ = (bitField0_ & ~0x00008000);
         onChanged();
         return this;
       }
@@ -27674,7 +30858,7 @@ public final class OnPremisesApiProto {
         if (value == null) { throw new NullPointerException(); }
         checkByteStringIsUtf8(value);
         pvcCrn_ = value;
-        bitField0_ |= 0x00010000;
+        bitField0_ |= 0x00008000;
         onChanged();
         return this;
       }
@@ -27734,7 +30918,7 @@ public final class OnPremisesApiProto {
           java.lang.String value) {
         if (value == null) { throw new NullPointerException(); }
         knoxUrl_ = value;
-        bitField0_ |= 0x00020000;
+        bitField0_ |= 0x00010000;
         onChanged();
         return this;
       }
@@ -27748,7 +30932,7 @@ public final class OnPremisesApiProto {
        */
       public Builder clearKnoxUrl() {
         knoxUrl_ = getDefaultInstance().getKnoxUrl();
-        bitField0_ = (bitField0_ & ~0x00020000);
+        bitField0_ = (bitField0_ & ~0x00010000);
         onChanged();
         return this;
       }
@@ -27766,7 +30950,7 @@ public final class OnPremisesApiProto {
         if (value == null) { throw new NullPointerException(); }
         checkByteStringIsUtf8(value);
         knoxUrl_ = value;
-        bitField0_ |= 0x00020000;
+        bitField0_ |= 0x00010000;
         onChanged();
         return this;
       }
@@ -27996,16 +31180,6 @@ public final class OnPremisesApiProto {
      */
     com.google.protobuf.ByteString
         getKnoxUrlBytes();
-
-    /**
-     * <pre>
-     * Is the request made for the upgrade of CCMv1 to CCMv2? This field is deprecated.
-     * </pre>
-     *
-     * <code>bool isUpgrade = 10 [(.options.FieldExtension.deprecated) = true];</code>
-     * @return The isUpgrade.
-     */
-    boolean getIsUpgrade();
 
     /**
      * <pre>
@@ -28433,21 +31607,6 @@ public final class OnPremisesApiProto {
       }
     }
 
-    public static final int ISUPGRADE_FIELD_NUMBER = 10;
-    private boolean isUpgrade_ = false;
-    /**
-     * <pre>
-     * Is the request made for the upgrade of CCMv1 to CCMv2? This field is deprecated.
-     * </pre>
-     *
-     * <code>bool isUpgrade = 10 [(.options.FieldExtension.deprecated) = true];</code>
-     * @return The isUpgrade.
-     */
-    @java.lang.Override
-    public boolean getIsUpgrade() {
-      return isUpgrade_;
-    }
-
     public static final int TLSTYPE_FIELD_NUMBER = 11;
     @SuppressWarnings("serial")
     private volatile java.lang.Object tlsType_ = "";
@@ -28583,9 +31742,6 @@ public final class OnPremisesApiProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(knoxUrl_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 9, knoxUrl_);
       }
-      if (isUpgrade_ != false) {
-        output.writeBool(10, isUpgrade_);
-      }
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(tlsType_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 11, tlsType_);
       }
@@ -28631,10 +31787,6 @@ public final class OnPremisesApiProto {
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(knoxUrl_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(9, knoxUrl_);
       }
-      if (isUpgrade_ != false) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeBoolSize(10, isUpgrade_);
-      }
       if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(tlsType_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(11, tlsType_);
       }
@@ -28673,8 +31825,6 @@ public final class OnPremisesApiProto {
           .equals(other.getKnoxPort())) return false;
       if (!getKnoxUrl()
           .equals(other.getKnoxUrl())) return false;
-      if (getIsUpgrade()
-          != other.getIsUpgrade()) return false;
       if (!getTlsType()
           .equals(other.getTlsType())) return false;
       if (!getCmUrl()
@@ -28709,9 +31859,6 @@ public final class OnPremisesApiProto {
       hash = (53 * hash) + getKnoxPort().hashCode();
       hash = (37 * hash) + KNOXURL_FIELD_NUMBER;
       hash = (53 * hash) + getKnoxUrl().hashCode();
-      hash = (37 * hash) + ISUPGRADE_FIELD_NUMBER;
-      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
-          getIsUpgrade());
       hash = (37 * hash) + TLSTYPE_FIELD_NUMBER;
       hash = (53 * hash) + getTlsType().hashCode();
       hash = (37 * hash) + CMURL_FIELD_NUMBER;
@@ -28860,7 +32007,6 @@ public final class OnPremisesApiProto {
         knoxIpAddress_ = "";
         knoxPort_ = "";
         knoxUrl_ = "";
-        isUpgrade_ = false;
         tlsType_ = "";
         cmUrl_ = "";
         return this;
@@ -28924,12 +32070,9 @@ public final class OnPremisesApiProto {
           result.knoxUrl_ = knoxUrl_;
         }
         if (((from_bitField0_ & 0x00000200) != 0)) {
-          result.isUpgrade_ = isUpgrade_;
-        }
-        if (((from_bitField0_ & 0x00000400) != 0)) {
           result.tlsType_ = tlsType_;
         }
-        if (((from_bitField0_ & 0x00000800) != 0)) {
+        if (((from_bitField0_ & 0x00000400) != 0)) {
           result.cmUrl_ = cmUrl_;
         }
       }
@@ -29017,17 +32160,14 @@ public final class OnPremisesApiProto {
           bitField0_ |= 0x00000100;
           onChanged();
         }
-        if (other.getIsUpgrade() != false) {
-          setIsUpgrade(other.getIsUpgrade());
-        }
         if (!other.getTlsType().isEmpty()) {
           tlsType_ = other.tlsType_;
-          bitField0_ |= 0x00000400;
+          bitField0_ |= 0x00000200;
           onChanged();
         }
         if (!other.getCmUrl().isEmpty()) {
           cmUrl_ = other.cmUrl_;
-          bitField0_ |= 0x00000800;
+          bitField0_ |= 0x00000400;
           onChanged();
         }
         this.mergeUnknownFields(other.getUnknownFields());
@@ -29101,19 +32241,14 @@ public final class OnPremisesApiProto {
                 bitField0_ |= 0x00000100;
                 break;
               } // case 74
-              case 80: {
-                isUpgrade_ = input.readBool();
-                bitField0_ |= 0x00000200;
-                break;
-              } // case 80
               case 90: {
                 tlsType_ = input.readStringRequireUtf8();
-                bitField0_ |= 0x00000400;
+                bitField0_ |= 0x00000200;
                 break;
               } // case 90
               case 98: {
                 cmUrl_ = input.readStringRequireUtf8();
-                bitField0_ |= 0x00000800;
+                bitField0_ |= 0x00000400;
                 break;
               } // case 98
               default: {
@@ -29846,50 +32981,6 @@ public final class OnPremisesApiProto {
         return this;
       }
 
-      private boolean isUpgrade_ ;
-      /**
-       * <pre>
-       * Is the request made for the upgrade of CCMv1 to CCMv2? This field is deprecated.
-       * </pre>
-       *
-       * <code>bool isUpgrade = 10 [(.options.FieldExtension.deprecated) = true];</code>
-       * @return The isUpgrade.
-       */
-      @java.lang.Override
-      public boolean getIsUpgrade() {
-        return isUpgrade_;
-      }
-      /**
-       * <pre>
-       * Is the request made for the upgrade of CCMv1 to CCMv2? This field is deprecated.
-       * </pre>
-       *
-       * <code>bool isUpgrade = 10 [(.options.FieldExtension.deprecated) = true];</code>
-       * @param value The isUpgrade to set.
-       * @return This builder for chaining.
-       */
-      public Builder setIsUpgrade(boolean value) {
-
-        isUpgrade_ = value;
-        bitField0_ |= 0x00000200;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * Is the request made for the upgrade of CCMv1 to CCMv2? This field is deprecated.
-       * </pre>
-       *
-       * <code>bool isUpgrade = 10 [(.options.FieldExtension.deprecated) = true];</code>
-       * @return This builder for chaining.
-       */
-      public Builder clearIsUpgrade() {
-        bitField0_ = (bitField0_ & ~0x00000200);
-        isUpgrade_ = false;
-        onChanged();
-        return this;
-      }
-
       private java.lang.Object tlsType_ = "";
       /**
        * <pre>
@@ -29945,7 +33036,7 @@ public final class OnPremisesApiProto {
           java.lang.String value) {
         if (value == null) { throw new NullPointerException(); }
         tlsType_ = value;
-        bitField0_ |= 0x00000400;
+        bitField0_ |= 0x00000200;
         onChanged();
         return this;
       }
@@ -29959,7 +33050,7 @@ public final class OnPremisesApiProto {
        */
       public Builder clearTlsType() {
         tlsType_ = getDefaultInstance().getTlsType();
-        bitField0_ = (bitField0_ & ~0x00000400);
+        bitField0_ = (bitField0_ & ~0x00000200);
         onChanged();
         return this;
       }
@@ -29977,7 +33068,7 @@ public final class OnPremisesApiProto {
         if (value == null) { throw new NullPointerException(); }
         checkByteStringIsUtf8(value);
         tlsType_ = value;
-        bitField0_ |= 0x00000400;
+        bitField0_ |= 0x00000200;
         onChanged();
         return this;
       }
@@ -30037,7 +33128,7 @@ public final class OnPremisesApiProto {
           java.lang.String value) {
         if (value == null) { throw new NullPointerException(); }
         cmUrl_ = value;
-        bitField0_ |= 0x00000800;
+        bitField0_ |= 0x00000400;
         onChanged();
         return this;
       }
@@ -30051,7 +33142,7 @@ public final class OnPremisesApiProto {
        */
       public Builder clearCmUrl() {
         cmUrl_ = getDefaultInstance().getCmUrl();
-        bitField0_ = (bitField0_ & ~0x00000800);
+        bitField0_ = (bitField0_ & ~0x00000400);
         onChanged();
         return this;
       }
@@ -30069,7 +33160,7 @@ public final class OnPremisesApiProto {
         if (value == null) { throw new NullPointerException(); }
         checkByteStringIsUtf8(value);
         cmUrl_ = value;
-        bitField0_ |= 0x00000800;
+        bitField0_ |= 0x00000400;
         onChanged();
         return this;
       }
@@ -36611,10 +39702,10 @@ public final class OnPremisesApiProto {
 
     /**
      * <pre>
-     * The location of the registered cluster.
+     * The location of the registered cluster. (Deprecated: Use id from location instead.)
      * </pre>
      *
-     * <code>int64 locationId = 12;</code>
+     * <code>int64 locationId = 12 [(.options.FieldExtension.deprecated) = true];</code>
      * @return The locationId.
      */
     long getLocationId();
@@ -37011,6 +40102,16 @@ public final class OnPremisesApiProto {
      * <code>.onpremises.OnPremEnvironmentDetails onPremEnvironmentDetails = 34;</code>
      */
     com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremEnvironmentDetailsOrBuilder getOnPremEnvironmentDetailsOrBuilder();
+
+    /**
+     * <pre>
+     * Indicates whether this classic cluster is eligible to be used as a Data Lake.
+     * </pre>
+     *
+     * <code>bool isValidForDatalake = 35;</code>
+     * @return The isValidForDatalake.
+     */
+    boolean getIsValidForDatalake();
   }
   /**
    * <pre>
@@ -37377,10 +40478,10 @@ public final class OnPremisesApiProto {
     private long locationId_ = 0L;
     /**
      * <pre>
-     * The location of the registered cluster.
+     * The location of the registered cluster. (Deprecated: Use id from location instead.)
      * </pre>
      *
-     * <code>int64 locationId = 12;</code>
+     * <code>int64 locationId = 12 [(.options.FieldExtension.deprecated) = true];</code>
      * @return The locationId.
      */
     @java.lang.Override
@@ -38153,6 +41254,21 @@ public final class OnPremisesApiProto {
       return onPremEnvironmentDetails_ == null ? com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.OnPremEnvironmentDetails.getDefaultInstance() : onPremEnvironmentDetails_;
     }
 
+    public static final int ISVALIDFORDATALAKE_FIELD_NUMBER = 35;
+    private boolean isValidForDatalake_ = false;
+    /**
+     * <pre>
+     * Indicates whether this classic cluster is eligible to be used as a Data Lake.
+     * </pre>
+     *
+     * <code>bool isValidForDatalake = 35;</code>
+     * @return The isValidForDatalake.
+     */
+    @java.lang.Override
+    public boolean getIsValidForDatalake() {
+      return isValidForDatalake_;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -38259,6 +41375,9 @@ public final class OnPremisesApiProto {
       }
       if (((bitField0_ & 0x00000004) != 0)) {
         output.writeMessage(34, getOnPremEnvironmentDetails());
+      }
+      if (isValidForDatalake_ != false) {
+        output.writeBool(35, isValidForDatalake_);
       }
       getUnknownFields().writeTo(output);
     }
@@ -38377,6 +41496,10 @@ public final class OnPremisesApiProto {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(34, getOnPremEnvironmentDetails());
       }
+      if (isValidForDatalake_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(35, isValidForDatalake_);
+      }
       size += getUnknownFields().getSerializedSize();
       memoizedSize = size;
       return size;
@@ -38460,6 +41583,8 @@ public final class OnPremisesApiProto {
         if (!getOnPremEnvironmentDetails()
             .equals(other.getOnPremEnvironmentDetails())) return false;
       }
+      if (getIsValidForDatalake()
+          != other.getIsValidForDatalake()) return false;
       if (!getUnknownFields().equals(other.getUnknownFields())) return false;
       return true;
     }
@@ -38548,6 +41673,9 @@ public final class OnPremisesApiProto {
         hash = (37 * hash) + ONPREMENVIRONMENTDETAILS_FIELD_NUMBER;
         hash = (53 * hash) + getOnPremEnvironmentDetails().hashCode();
       }
+      hash = (37 * hash) + ISVALIDFORDATALAKE_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getIsValidForDatalake());
       hash = (29 * hash) + getUnknownFields().hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -38734,6 +41862,7 @@ public final class OnPremisesApiProto {
           onPremEnvironmentDetailsBuilder_.dispose();
           onPremEnvironmentDetailsBuilder_ = null;
         }
+        isValidForDatalake_ = false;
         return this;
       }
 
@@ -38869,6 +41998,9 @@ public final class OnPremisesApiProto {
               ? onPremEnvironmentDetails_
               : onPremEnvironmentDetailsBuilder_.build();
           to_bitField0_ |= 0x00000004;
+        }
+        if (((from_bitField0_ & 0x80000000) != 0)) {
+          result.isValidForDatalake_ = isValidForDatalake_;
         }
         result.bitField0_ |= to_bitField0_;
       }
@@ -39041,6 +42173,9 @@ public final class OnPremisesApiProto {
         }
         if (other.hasOnPremEnvironmentDetails()) {
           mergeOnPremEnvironmentDetails(other.getOnPremEnvironmentDetails());
+        }
+        if (other.getIsValidForDatalake() != false) {
+          setIsValidForDatalake(other.getIsValidForDatalake());
         }
         this.mergeUnknownFields(other.getUnknownFields());
         onChanged();
@@ -39229,6 +42364,11 @@ public final class OnPremisesApiProto {
                 bitField0_ |= 0x40000000;
                 break;
               } // case 274
+              case 280: {
+                isValidForDatalake_ = input.readBool();
+                bitField0_ |= 0x80000000;
+                break;
+              } // case 280
               default: {
                 if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                   done = true; // was an endgroup tag
@@ -39899,10 +43039,10 @@ public final class OnPremisesApiProto {
       private long locationId_ ;
       /**
        * <pre>
-       * The location of the registered cluster.
+       * The location of the registered cluster. (Deprecated: Use id from location instead.)
        * </pre>
        *
-       * <code>int64 locationId = 12;</code>
+       * <code>int64 locationId = 12 [(.options.FieldExtension.deprecated) = true];</code>
        * @return The locationId.
        */
       @java.lang.Override
@@ -39911,10 +43051,10 @@ public final class OnPremisesApiProto {
       }
       /**
        * <pre>
-       * The location of the registered cluster.
+       * The location of the registered cluster. (Deprecated: Use id from location instead.)
        * </pre>
        *
-       * <code>int64 locationId = 12;</code>
+       * <code>int64 locationId = 12 [(.options.FieldExtension.deprecated) = true];</code>
        * @param value The locationId to set.
        * @return This builder for chaining.
        */
@@ -39927,10 +43067,10 @@ public final class OnPremisesApiProto {
       }
       /**
        * <pre>
-       * The location of the registered cluster.
+       * The location of the registered cluster. (Deprecated: Use id from location instead.)
        * </pre>
        *
-       * <code>int64 locationId = 12;</code>
+       * <code>int64 locationId = 12 [(.options.FieldExtension.deprecated) = true];</code>
        * @return This builder for chaining.
        */
       public Builder clearLocationId() {
@@ -41811,6 +44951,50 @@ public final class OnPremisesApiProto {
           onPremEnvironmentDetails_ = null;
         }
         return onPremEnvironmentDetailsBuilder_;
+      }
+
+      private boolean isValidForDatalake_ ;
+      /**
+       * <pre>
+       * Indicates whether this classic cluster is eligible to be used as a Data Lake.
+       * </pre>
+       *
+       * <code>bool isValidForDatalake = 35;</code>
+       * @return The isValidForDatalake.
+       */
+      @java.lang.Override
+      public boolean getIsValidForDatalake() {
+        return isValidForDatalake_;
+      }
+      /**
+       * <pre>
+       * Indicates whether this classic cluster is eligible to be used as a Data Lake.
+       * </pre>
+       *
+       * <code>bool isValidForDatalake = 35;</code>
+       * @param value The isValidForDatalake to set.
+       * @return This builder for chaining.
+       */
+      public Builder setIsValidForDatalake(boolean value) {
+
+        isValidForDatalake_ = value;
+        bitField0_ |= 0x80000000;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Indicates whether this classic cluster is eligible to be used as a Data Lake.
+       * </pre>
+       *
+       * <code>bool isValidForDatalake = 35;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearIsValidForDatalake() {
+        bitField0_ = (bitField0_ & ~0x80000000);
+        isValidForDatalake_ = false;
+        onChanged();
+        return this;
       }
       @java.lang.Override
       public final Builder setUnknownFields(
@@ -59952,6 +63136,1107 @@ java.lang.String defaultValue) {
 
   }
 
+  public interface GenerateClusterConnectivitySetupPackageRequestOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:onpremises.GenerateClusterConnectivitySetupPackageRequest)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * The cluster CRN of the partially registered cluster.
+     * </pre>
+     *
+     * <code>string clusterCrn = 1 [(.options.FieldExtension.required) = true];</code>
+     * @return The clusterCrn.
+     */
+    java.lang.String getClusterCrn();
+    /**
+     * <pre>
+     * The cluster CRN of the partially registered cluster.
+     * </pre>
+     *
+     * <code>string clusterCrn = 1 [(.options.FieldExtension.required) = true];</code>
+     * @return The bytes for clusterCrn.
+     */
+    com.google.protobuf.ByteString
+        getClusterCrnBytes();
+  }
+  /**
+   * <pre>
+   * Generate cluster connectivity setup package request.
+   * </pre>
+   *
+   * Protobuf type {@code onpremises.GenerateClusterConnectivitySetupPackageRequest}
+   */
+  public static final class GenerateClusterConnectivitySetupPackageRequest extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:onpremises.GenerateClusterConnectivitySetupPackageRequest)
+      GenerateClusterConnectivitySetupPackageRequestOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use GenerateClusterConnectivitySetupPackageRequest.newBuilder() to construct.
+    private GenerateClusterConnectivitySetupPackageRequest(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private GenerateClusterConnectivitySetupPackageRequest() {
+      clusterCrn_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new GenerateClusterConnectivitySetupPackageRequest();
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_GenerateClusterConnectivitySetupPackageRequest_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_GenerateClusterConnectivitySetupPackageRequest_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageRequest.class, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageRequest.Builder.class);
+    }
+
+    public static final int CLUSTERCRN_FIELD_NUMBER = 1;
+    @SuppressWarnings("serial")
+    private volatile java.lang.Object clusterCrn_ = "";
+    /**
+     * <pre>
+     * The cluster CRN of the partially registered cluster.
+     * </pre>
+     *
+     * <code>string clusterCrn = 1 [(.options.FieldExtension.required) = true];</code>
+     * @return The clusterCrn.
+     */
+    @java.lang.Override
+    public java.lang.String getClusterCrn() {
+      java.lang.Object ref = clusterCrn_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        clusterCrn_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The cluster CRN of the partially registered cluster.
+     * </pre>
+     *
+     * <code>string clusterCrn = 1 [(.options.FieldExtension.required) = true];</code>
+     * @return The bytes for clusterCrn.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getClusterCrnBytes() {
+      java.lang.Object ref = clusterCrn_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        clusterCrn_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(clusterCrn_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, clusterCrn_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(clusterCrn_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, clusterCrn_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageRequest)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageRequest other = (com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageRequest) obj;
+
+      if (!getClusterCrn()
+          .equals(other.getClusterCrn())) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + CLUSTERCRN_FIELD_NUMBER;
+      hash = (53 * hash) + getClusterCrn().hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageRequest parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageRequest parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageRequest parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageRequest parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageRequest parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageRequest parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageRequest parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageRequest parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageRequest parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageRequest parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageRequest parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageRequest parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageRequest prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Generate cluster connectivity setup package request.
+     * </pre>
+     *
+     * Protobuf type {@code onpremises.GenerateClusterConnectivitySetupPackageRequest}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:onpremises.GenerateClusterConnectivitySetupPackageRequest)
+        com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageRequestOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_GenerateClusterConnectivitySetupPackageRequest_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_GenerateClusterConnectivitySetupPackageRequest_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageRequest.class, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageRequest.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageRequest.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        bitField0_ = 0;
+        clusterCrn_ = "";
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_GenerateClusterConnectivitySetupPackageRequest_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageRequest getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageRequest.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageRequest build() {
+        com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageRequest result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageRequest buildPartial() {
+        com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageRequest result = new com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageRequest(this);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartial0(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageRequest result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.clusterCrn_ = clusterCrn_;
+        }
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageRequest) {
+          return mergeFrom((com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageRequest)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageRequest other) {
+        if (other == com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageRequest.getDefaultInstance()) return this;
+        if (!other.getClusterCrn().isEmpty()) {
+          clusterCrn_ = other.clusterCrn_;
+          bitField0_ |= 0x00000001;
+          onChanged();
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                clusterCrn_ = input.readStringRequireUtf8();
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      private int bitField0_;
+
+      private java.lang.Object clusterCrn_ = "";
+      /**
+       * <pre>
+       * The cluster CRN of the partially registered cluster.
+       * </pre>
+       *
+       * <code>string clusterCrn = 1 [(.options.FieldExtension.required) = true];</code>
+       * @return The clusterCrn.
+       */
+      public java.lang.String getClusterCrn() {
+        java.lang.Object ref = clusterCrn_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          clusterCrn_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The cluster CRN of the partially registered cluster.
+       * </pre>
+       *
+       * <code>string clusterCrn = 1 [(.options.FieldExtension.required) = true];</code>
+       * @return The bytes for clusterCrn.
+       */
+      public com.google.protobuf.ByteString
+          getClusterCrnBytes() {
+        java.lang.Object ref = clusterCrn_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          clusterCrn_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The cluster CRN of the partially registered cluster.
+       * </pre>
+       *
+       * <code>string clusterCrn = 1 [(.options.FieldExtension.required) = true];</code>
+       * @param value The clusterCrn to set.
+       * @return This builder for chaining.
+       */
+      public Builder setClusterCrn(
+          java.lang.String value) {
+        if (value == null) { throw new NullPointerException(); }
+        clusterCrn_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The cluster CRN of the partially registered cluster.
+       * </pre>
+       *
+       * <code>string clusterCrn = 1 [(.options.FieldExtension.required) = true];</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearClusterCrn() {
+        clusterCrn_ = getDefaultInstance().getClusterCrn();
+        bitField0_ = (bitField0_ & ~0x00000001);
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The cluster CRN of the partially registered cluster.
+       * </pre>
+       *
+       * <code>string clusterCrn = 1 [(.options.FieldExtension.required) = true];</code>
+       * @param value The bytes for clusterCrn to set.
+       * @return This builder for chaining.
+       */
+      public Builder setClusterCrnBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        checkByteStringIsUtf8(value);
+        clusterCrn_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:onpremises.GenerateClusterConnectivitySetupPackageRequest)
+    }
+
+    // @@protoc_insertion_point(class_scope:onpremises.GenerateClusterConnectivitySetupPackageRequest)
+    private static final com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageRequest DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageRequest();
+    }
+
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageRequest getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<GenerateClusterConnectivitySetupPackageRequest>
+        PARSER = new com.google.protobuf.AbstractParser<GenerateClusterConnectivitySetupPackageRequest>() {
+      @java.lang.Override
+      public GenerateClusterConnectivitySetupPackageRequest parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<GenerateClusterConnectivitySetupPackageRequest> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<GenerateClusterConnectivitySetupPackageRequest> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageRequest getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface GenerateClusterConnectivitySetupPackageResponseOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:onpremises.GenerateClusterConnectivitySetupPackageResponse)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     * Raw zip file bytes containing the script and keys.
+     * </pre>
+     *
+     * <code>bytes setupPackage = 1 [(.options.FieldExtension.skipLogging) = true];</code>
+     * @return The setupPackage.
+     */
+    com.google.protobuf.ByteString getSetupPackage();
+  }
+  /**
+   * <pre>
+   * Generate cluster connectivity setup package response.
+   * </pre>
+   *
+   * Protobuf type {@code onpremises.GenerateClusterConnectivitySetupPackageResponse}
+   */
+  public static final class GenerateClusterConnectivitySetupPackageResponse extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:onpremises.GenerateClusterConnectivitySetupPackageResponse)
+      GenerateClusterConnectivitySetupPackageResponseOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use GenerateClusterConnectivitySetupPackageResponse.newBuilder() to construct.
+    private GenerateClusterConnectivitySetupPackageResponse(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private GenerateClusterConnectivitySetupPackageResponse() {
+      setupPackage_ = com.google.protobuf.ByteString.EMPTY;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new GenerateClusterConnectivitySetupPackageResponse();
+    }
+
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_GenerateClusterConnectivitySetupPackageResponse_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_GenerateClusterConnectivitySetupPackageResponse_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageResponse.class, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageResponse.Builder.class);
+    }
+
+    public static final int SETUPPACKAGE_FIELD_NUMBER = 1;
+    private com.google.protobuf.ByteString setupPackage_ = com.google.protobuf.ByteString.EMPTY;
+    /**
+     * <pre>
+     * Raw zip file bytes containing the script and keys.
+     * </pre>
+     *
+     * <code>bytes setupPackage = 1 [(.options.FieldExtension.skipLogging) = true];</code>
+     * @return The setupPackage.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString getSetupPackage() {
+      return setupPackage_;
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!setupPackage_.isEmpty()) {
+        output.writeBytes(1, setupPackage_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!setupPackage_.isEmpty()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBytesSize(1, setupPackage_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageResponse)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageResponse other = (com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageResponse) obj;
+
+      if (!getSetupPackage()
+          .equals(other.getSetupPackage())) return false;
+      if (!getUnknownFields().equals(other.getUnknownFields())) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + SETUPPACKAGE_FIELD_NUMBER;
+      hash = (53 * hash) + getSetupPackage().hashCode();
+      hash = (29 * hash) + getUnknownFields().hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageResponse parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageResponse parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageResponse parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageResponse parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageResponse parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageResponse parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageResponse parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageResponse parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageResponse parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageResponse parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageResponse parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageResponse parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageResponse prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     * Generate cluster connectivity setup package response.
+     * </pre>
+     *
+     * Protobuf type {@code onpremises.GenerateClusterConnectivitySetupPackageResponse}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:onpremises.GenerateClusterConnectivitySetupPackageResponse)
+        com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageResponseOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_GenerateClusterConnectivitySetupPackageResponse_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_GenerateClusterConnectivitySetupPackageResponse_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageResponse.class, com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageResponse.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageResponse.newBuilder()
+      private Builder() {
+
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        bitField0_ = 0;
+        setupPackage_ = com.google.protobuf.ByteString.EMPTY;
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.internal_static_onpremises_GenerateClusterConnectivitySetupPackageResponse_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageResponse getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageResponse.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageResponse build() {
+        com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageResponse result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageResponse buildPartial() {
+        com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageResponse result = new com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageResponse(this);
+        if (bitField0_ != 0) { buildPartial0(result); }
+        onBuilt();
+        return result;
+      }
+
+      private void buildPartial0(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageResponse result) {
+        int from_bitField0_ = bitField0_;
+        if (((from_bitField0_ & 0x00000001) != 0)) {
+          result.setupPackage_ = setupPackage_;
+        }
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageResponse) {
+          return mergeFrom((com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageResponse)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageResponse other) {
+        if (other == com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageResponse.getDefaultInstance()) return this;
+        if (other.getSetupPackage() != com.google.protobuf.ByteString.EMPTY) {
+          setSetupPackage(other.getSetupPackage());
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        if (extensionRegistry == null) {
+          throw new java.lang.NullPointerException();
+        }
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              case 10: {
+                setupPackage_ = input.readBytes();
+                bitField0_ |= 0x00000001;
+                break;
+              } // case 10
+              default: {
+                if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                  done = true; // was an endgroup tag
+                }
+                break;
+              } // default:
+            } // switch (tag)
+          } // while (!done)
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.unwrapIOException();
+        } finally {
+          onChanged();
+        } // finally
+        return this;
+      }
+      private int bitField0_;
+
+      private com.google.protobuf.ByteString setupPackage_ = com.google.protobuf.ByteString.EMPTY;
+      /**
+       * <pre>
+       * Raw zip file bytes containing the script and keys.
+       * </pre>
+       *
+       * <code>bytes setupPackage = 1 [(.options.FieldExtension.skipLogging) = true];</code>
+       * @return The setupPackage.
+       */
+      @java.lang.Override
+      public com.google.protobuf.ByteString getSetupPackage() {
+        return setupPackage_;
+      }
+      /**
+       * <pre>
+       * Raw zip file bytes containing the script and keys.
+       * </pre>
+       *
+       * <code>bytes setupPackage = 1 [(.options.FieldExtension.skipLogging) = true];</code>
+       * @param value The setupPackage to set.
+       * @return This builder for chaining.
+       */
+      public Builder setSetupPackage(com.google.protobuf.ByteString value) {
+        if (value == null) { throw new NullPointerException(); }
+        setupPackage_ = value;
+        bitField0_ |= 0x00000001;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Raw zip file bytes containing the script and keys.
+       * </pre>
+       *
+       * <code>bytes setupPackage = 1 [(.options.FieldExtension.skipLogging) = true];</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearSetupPackage() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        setupPackage_ = getDefaultInstance().getSetupPackage();
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:onpremises.GenerateClusterConnectivitySetupPackageResponse)
+    }
+
+    // @@protoc_insertion_point(class_scope:onpremises.GenerateClusterConnectivitySetupPackageResponse)
+    private static final com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageResponse DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageResponse();
+    }
+
+    public static com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageResponse getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<GenerateClusterConnectivitySetupPackageResponse>
+        PARSER = new com.google.protobuf.AbstractParser<GenerateClusterConnectivitySetupPackageResponse>() {
+      @java.lang.Override
+      public GenerateClusterConnectivitySetupPackageResponse parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        Builder builder = newBuilder();
+        try {
+          builder.mergeFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(builder.buildPartial());
+        } catch (com.google.protobuf.UninitializedMessageException e) {
+          throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(e)
+              .setUnfinishedMessage(builder.buildPartial());
+        }
+        return builder.buildPartial();
+      }
+    };
+
+    public static com.google.protobuf.Parser<GenerateClusterConnectivitySetupPackageResponse> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<GenerateClusterConnectivitySetupPackageResponse> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.onpremises.OnPremisesApiProto.GenerateClusterConnectivitySetupPackageResponse getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
   public interface ClusterStateOrBuilder extends
       // @@protoc_insertion_point(interface_extends:onpremises.ClusterState)
       com.google.protobuf.MessageOrBuilder {
@@ -63467,6 +67752,26 @@ java.lang.String defaultValue) {
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_onpremises_DescribeClusterResponse_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_onpremises_ValidateClusterForDatalakeRequest_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_onpremises_ValidateClusterForDatalakeRequest_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_onpremises_ValidateClusterForDatalakeResponse_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_onpremises_ValidateClusterForDatalakeResponse_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_onpremises_DatalakeValidation_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_onpremises_DatalakeValidation_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_onpremises_DatalakeValidationType_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_onpremises_DatalakeValidationType_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_onpremises_ListClusterServicesRequest_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
@@ -63707,6 +68012,16 @@ java.lang.String defaultValue) {
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_onpremises_ClusterDiscovered_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_onpremises_GenerateClusterConnectivitySetupPackageRequest_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_onpremises_GenerateClusterConnectivitySetupPackageRequest_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_onpremises_GenerateClusterConnectivitySetupPackageResponse_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_onpremises_GenerateClusterConnectivitySetupPackageResponse_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
     internal_static_onpremises_ClusterState_descriptor;
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
@@ -63746,303 +68061,334 @@ java.lang.String defaultValue) {
   static {
     java.lang.String[] descriptorData = {
       "\n\023onpremisesapi.proto\022\nonpremises\032\roptio" +
-      "ns.proto\"\355\001\n\023ListClustersRequest\022\036\n\010page" +
+      "ns.proto\"\356\002\n\023ListClustersRequest\022\036\n\010page" +
       "Size\030\001 \001(\005B\014\220\265\030\001\330\265\030\001\340\265\030d\022\027\n\tpageToken\030\002 " +
       "\001(\tB\004\230\265\030\001\0229\n\013managerType\030\003 \001(\0162$.onpremi" +
       "ses.ClusterManagerType.Value\022\020\n\010services" +
       "\030\004 \003(\t\0228\n\010operator\030\005 \001(\0162&.onpremises.Cl" +
-      "usterQueryOperator.Value:\026\200\227\"\001\212\227\"\016IN_DEV" +
-      "ELOPMENT\"x\n\024ListClustersResponse\022\033\n\rnext" +
-      "PageToken\030\001 \001(\tB\004\250\265\030\001\022+\n\010clusters\030\002 \003(\0132" +
-      "\023.onpremises.ClusterB\004\240\265\030\001:\026\200\227\"\001\212\227\"\016IN_D" +
-      "EVELOPMENT\"\357\001\n\026RegisterClusterRequest\022\034\n" +
-      "\016datacenterName\030\002 \001(\tB\004\320\265\030\001\022\030\n\nmanagerUr" +
-      "i\030e \001(\tB\004\320\265\030\001\022\020\n\010username\030f \001(\t\022\026\n\010passw" +
-      "ord\030g \001(\tB\004\200\265\030\001\022\014\n\004name\030\001 \001(\t\022\022\n\nlocatio" +
-      "nId\030h \001(\003\022\014\n\004tags\030i \003(\t\022\023\n\013description\030j" +
-      " \001(\t\022\026\n\016environmentCrn\030k \001(\t:\026\200\227\"\001\212\227\"\016IN" +
-      "_DEVELOPMENT\"K\n\027RegisterClusterResponse\022" +
-      "\030\n\nclusterCrn\030\001 \001(\tB\004\320\265\030\001:\026\200\227\"\001\212\227\"\016IN_DE" +
-      "VELOPMENT\"\224\001\n\024UpdateClusterRequest\022\030\n\ncl" +
-      "usterCrn\030\001 \001(\tB\004\320\265\030\001\022\020\n\010username\030f \001(\t\022\026" +
-      "\n\010password\030g \001(\tB\004\200\265\030\001\022\022\n\nlocationId\030h \001" +
-      "(\003\022\014\n\004tags\030i \003(\t:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT" +
-      "\"I\n\025UpdateClusterResponse\022\030\n\nclusterCrn\030" +
-      "\001 \001(\tB\004\320\265\030\001:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"\234\001\n\026" +
-      "DescribeClusterRequest\022\022\n\nclusterCrn\030\001 \001" +
-      "(\t\022-\n\002id\030d \001(\003B!\270\265\030\001\302\265\030\025FOR_CLOUDERA_USE" +
-      "_ONLY\370\265\030\001\022\'\n\037showOnPremiseEnvironmentDet" +
-      "ails\030\002 \001(\010:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"W\n\027De" +
-      "scribeClusterResponse\022$\n\007cluster\030\001 \001(\0132\023" +
-      ".onpremises.Cluster:\026\200\227\"\001\212\227\"\016IN_DEVELOPM" +
-      "ENT\"\241\001\n\032ListClusterServicesRequest\022\030\n\ncl" +
-      "usterCrn\030\001 \001(\tB\004\320\265\030\001\022\023\n\013clusterName\030\002 \001(" +
-      "\t\022\022\n\nmanagerUri\030\003 \001(\t\022\020\n\010username\030\004 \001(\t\022" +
-      "\026\n\010password\030\005 \001(\tB\004\200\265\030\001:\026\200\227\"\001\212\227\"\016IN_DEVE" +
-      "LOPMENT\"c\n\033ListClusterServicesResponse\022," +
-      "\n\010services\030\001 \003(\0132\032.onpremises.ClusterSer" +
-      "vice:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"\222\001\n\026Extract" +
-      "ClustersRequest\022\030\n\nmanagerUri\030e \001(\tB\004\320\265\030" +
-      "\001\022\026\n\010username\030f \001(\tB\004\320\265\030\001\022\032\n\010password\030g " +
-      "\001(\tB\010\200\265\030\001\320\265\030\001\022\022\n\nclusterCrn\030h \001(\t:\026\200\227\"\001\212" +
-      "\227\"\016IN_DEVELOPMENT\"b\n\027ExtractClustersResp" +
-      "onse\022/\n\010clusters\030\001 \003(\0132\035.onpremises.Clus" +
-      "terDiscovered:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"v\n" +
-      "\024ListLocationsRequest\022\036\n\010pageSize\030\001 \001(\005B" +
-      "\014\220\265\030\001\330\265\030\001\340\265\030d\022\027\n\tpageToken\030\002 \001(\tB\004\230\265\030\001\022\r" +
-      "\n\005query\030\003 \001(\t:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"w\n" +
-      "\025ListLocationsResponse\022\027\n\tpageToken\030\001 \001(" +
-      "\tB\004\250\265\030\001\022-\n\tlocations\030\002 \003(\0132\024.onpremises." +
-      "LocationB\004\240\265\030\001:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"I" +
-      "\n\027SyncClusterDataResponse\022\026\n\016syncSuccess" +
-      "ful\030\001 \001(\010:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"D\n\026Syn" +
-      "cClusterDataRequest\022\022\n\nclusterCrn\030\001 \001(\t:" +
-      "\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"L\n\024DeleteCluster" +
-      "Request\022\014\n\004name\030\001 \001(\t\022\016\n\006dcName\030\002 \001(\t:\026\200" +
-      "\227\"\001\212\227\"\016IN_DEVELOPMENT\"/\n\025DeleteClusterRe" +
-      "sponse:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"y\n&ListPa" +
-      "rtiallyRegisteredClustersRequest\022\036\n\010page" +
-      "Size\030\001 \001(\005B\014\220\265\030\001\330\265\030\001\340\265\030d\022\027\n\tpageToken\030\002 " +
-      "\001(\tB\004\230\265\030\001:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"\270\001\n\'Li" +
-      "stPartiallyRegisteredClustersResponse\022X\n" +
-      "\036partiallyRegisteredClusterData\030\001 \003(\0132*." +
-      "onpremises.PartiallyRegisteredClusterDat" +
-      "aB\004\240\265\030\001\022\033\n\rnextPageToken\030\002 \001(\tB\004\250\265\030\001:\026\200\227" +
-      "\"\001\212\227\"\016IN_DEVELOPMENT\"3\n\031ExtractSetupScri" +
-      "ptRequest:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"\251\001\n\032Ex" +
-      "tractSetupScriptResponse\022\027\n\017installerScr" +
-      "ipt\030\001 \001(\t\022\035\n\025olderAgentRpmLocation\030\002 \001(\t" +
-      "\022\036\n\026latestAgentRpmLocation\030\003 \001(\t\022\033\n\023agen" +
-      "tDebianLocation\030\004 \001(\t:\026\200\227\"\001\212\227\"\016IN_DEVELO" +
-      "PMENT\"@\n&ExtractCertificateRefreshScript" +
-      "Request:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"q\n\'Extra" +
-      "ctCertificateRefreshScriptResponse\022\034\n\016re" +
-      "freshPackage\030\001 \001(\014B\004\210\265\030\001\022\020\n\010filename\030\002 \001" +
-      "(\t:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"M\n\031UpdateClus" +
-      "terStateRequest\022\030\n\nclusterCrn\030\001 \001(\tB\004\320\265\030" +
-      "\001:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"D\n\032UpdateClust" +
-      "erStateResponse\022\016\n\006status\030\001 \001(\010:\026\200\227\"\001\212\227\"" +
-      "\016IN_DEVELOPMENT\"b\n\037CheckClusterConnectiv" +
-      "ityRequest\022\022\n\nclusterCrn\030\001 \001(\t\022\023\n\013servic" +
-      "eName\030\002 \001(\t:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\":\n C" +
-      "heckClusterConnectivityResponse:\026\200\227\"\001\212\227\"" +
-      "\016IN_DEVELOPMENT\"U\n\'DeletePartiallyRegist" +
-      "eredClusterRequest\022\022\n\nclusterCrn\030\001 \001(\t:\026" +
-      "\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"B\n(DeletePartiall" +
-      "yRegisteredClusterResponse:\026\200\227\"\001\212\227\"\016IN_D" +
-      "EVELOPMENT\"\250\003\n\036PartiallyRegisteredCluste" +
-      "rData\022\n\n\002id\030\001 \001(\003\022\022\n\nclusterCrn\030\002 \001(\t\022\026\n" +
-      "\016datacenterName\030\003 \001(\t\022\021\n\tipAddress\030\004 \001(\t" +
-      "\022\014\n\004port\030\005 \001(\005\022\023\n\013serviceName\030\006 \001(\t\022\023\n\013c" +
-      "lusterType\030\007 \001(\t\022\020\n\010isSecure\030\010 \001(\010\022 \n\030cl" +
-      "usterConnectivityState\030\t \001(\t\022\021\n\tcreatedB" +
-      "y\030\013 \001(\t\022\027\n\tcreatedAt\030\014 \001(\003B\004\260\265\030\001\022\027\n\tupda" +
-      "tedAt\030\r \001(\003B\004\260\265\030\001\022\017\n\007primary\030\016 \001(\010\022\022\n\ncc" +
-      "mVersion\030\017 \001(\t\022\032\n\022registrationStatus\030\020 \001" +
-      "(\t\022\020\n\010agentCrn\030\021 \001(\t\022\016\n\006pvcCrn\030\022 \001(\t\022\017\n\007" +
-      "knoxUrl\030\023 \001(\t:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"\352\002" +
-      "\n\037SetupClusterConnectivityRequest\022\027\n\tipA" +
-      "ddress\030\001 \001(\tB\004\370\265\030\001\022\022\n\004port\030\002 \001(\005B\004\370\265\030\001\022\026" +
-      "\n\016datacenterName\030\003 \001(\t\022\026\n\010isSecure\030\004 \001(\010" +
-      "B\004\370\265\030\001\0222\n\013clusterType\030\005 \001(\0162\035.onpremises" +
-      ".ClusterType.Value\022\023\n\013serviceName\030\006 \001(\t\022" +
-      "\033\n\rknoxIpAddress\030\007 \001(\tB\004\370\265\030\001\022\026\n\010knoxPort" +
-      "\030\010 \001(\tB\004\370\265\030\001\022\025\n\007knoxUrl\030\t \001(\tB\004\370\265\030\001\022\027\n\ti" +
-      "sUpgrade\030\n \001(\010B\004\370\265\030\001\022\025\n\007tlsType\030\013 \001(\tB\004\370" +
-      "\265\030\001\022\r\n\005cmUrl\030\014 \001(\t:\026\200\227\"\001\212\227\"\016IN_DEVELOPME" +
-      "NT\"\270\001\n SetupClusterConnectivityResponse\022" +
-      "\r\n\005keyId\030\001 \001(\t\022\016\n\006status\030\002 \001(\t\022\036\n\026invert" +
-      "ingProxyHostName\030\003 \001(\t\022\026\n\016causeOfFailure" +
-      "\030\004 \001(\t\022\023\n\013certificate\030\005 \001(\t\022\020\n\010agentCrn\030" +
-      "\006 \001(\t:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"W\n)Describ" +
-      "ePartiallyRegisteredClusterRequest\022\022\n\ncl" +
-      "usterCrn\030\001 \001(\t:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"\230" +
-      "\001\n*DescribePartiallyRegisteredClusterRes" +
-      "ponse\022R\n\036partiallyRegisteredClusterData\030" +
-      "\001 \001(\0132*.onpremises.PartiallyRegisteredCl" +
-      "usterData:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"B\n\024Reg" +
-      "isterAgentRequest\022\022\n\nclusterCrn\030\001 \001(\t:\026\200" +
-      "\227\"\001\212\227\"\016IN_DEVELOPMENT\"\255\001\n\025RegisterAgentR" +
-      "esponse\022\022\n\nclusterCrn\030\001 \001(\t\022\016\n\006status\030\002 " +
-      "\001(\t\022\023\n\013certificate\030\003 \001(\t\022\023\n\013cdpEndpoint\030" +
-      "\004 \001(\t\022.\n\014agentDetails\030\005 \001(\0132\030.onpremises" +
-      ".AgentDetails:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"\261\001" +
-      "\n\014AgentDetails\022\020\n\010agentCrn\030\001 \001(\t\022\023\n\013cert" +
-      "ificate\030\002 \001(\t\022\022\n\nclusterCrn\030\003 \001(\t\022\023\n\013acc" +
-      "essKeyId\030\004 \001(\t\022\033\n\023encipheredAccessKey\030\005 " +
-      "\001(\t\022\034\n\024encipheredPrivateKey\030\006 \001(\t:\026\200\227\"\001\212" +
-      "\227\"\016IN_DEVELOPMENT\"\364\006\n\007Cluster\022\022\n\ncluster" +
-      "Crn\030\001 \001(\t\022\014\n\004name\030\002 \001(\t\022\026\n\016datacenterNam" +
-      "e\030\003 \001(\t\022\n\n\002id\030\004 \001(\003\022\021\n\tipAddress\030\006 \001(\t\0222" +
-      "\n\013clusterType\030\007 \001(\0162\035.onpremises.Cluster" +
-      "Type.Value\022-\n\005state\030\010 \001(\0162\036.onpremises.C" +
-      "lusterState.Value\022\023\n\013description\030\013 \001(\t\022\022" +
-      "\n\nlocationId\030\014 \001(\003\022\034\n\016lastCreateTime\030\r \001" +
-      "(\003B\004\260\265\030\001\022\035\n\017lastUpdatedTime\030\016 \001(\003B\004\260\265\030\001\022" +
-      "\030\n\nupdatedUtc\030\017 \001(\003B\004\260\265\030\001\022%\n\004data\030\020 \001(\0132" +
-      "\027.onpremises.ClusterData\022\023\n\013knoxEnabled\030" +
-      "\021 \001(\010\022\017\n\007knoxUrl\030\022 \001(\t\022\020\n\010username\030\023 \001(\t" +
-      "\022\026\n\010password\030\024 \001(\tB\004\200\265\030\001\022\026\n\016allowUntrust" +
-      "ed\030\025 \001(\010\022\025\n\rbehindGateway\030\026 \001(\010\0229\n\013manag" +
-      "erType\030\027 \001(\0162$.onpremises.ClusterManager" +
-      "Type.Value\022\022\n\nmanagerUri\030\030 \001(\t\022\021\n\tcreate" +
-      "dBy\030\031 \001(\t\022\033\n\023connectivityVersion\030\032 \001(\t\022\033" +
-      "\n\023isUpgradeInProgress\030\033 \001(\010\022\020\n\010newKeyId\030" +
-      "\034 \001(\t\022&\n\010location\030\035 \001(\0132\024.onpremises.Loc" +
-      "ation\022\022\n\nproperties\030\036 \001(\t\022\025\n\rcmClusterUu" +
-      "id\030\037 \001(\t\022\026\n\016environmentCrn\030  \001(\t\022\016\n\006pvcC" +
-      "rn\030! \001(\t\022F\n\030onPremEnvironmentDetails\030\" \001" +
-      "(\0132$.onpremises.OnPremEnvironmentDetails" +
-      ":\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"\353\002\n\030OnPremEnvir" +
-      "onmentDetails\022\016\n\006cmHost\030\001 \001(\t\022\026\n\016knoxGat" +
-      "ewayUrl\030\002 \001(\t\022L\n\014applications\030\003 \003(\01326.on" +
-      "premises.OnPremEnvironmentDetails.Applic" +
-      "ationsEntry\022\021\n\tcmVersion\030\004 \001(\t\022\036\n\026cloude" +
-      "raRuntimeVersion\030\005 \001(\t\022@\n\025onPremDatalake" +
-      "Details\030\007 \001(\0132!.onpremises.OnPremDatalak" +
-      "eDetails\032L\n\021ApplicationsEntry\022\013\n\003key\030\001 \001" +
-      "(\t\022&\n\005value\030\002 \001(\0132\027.onpremises.Applicati" +
-      "on:\0028\001:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"\226\002\n\013Appli" +
-      "cation\022\014\n\004name\030\001 \001(\t\0227\n\010services\030\002 \003(\0132%" +
-      ".onpremises.Application.ServicesEntry\0223\n" +
-      "\006config\030\003 \003(\0132#.onpremises.Application.C" +
-      "onfigEntry\032D\n\rServicesEntry\022\013\n\003key\030\001 \001(\t" +
-      "\022\"\n\005value\030\002 \001(\0132\023.onpremises.Service:\0028\001" +
-      "\032-\n\013ConfigEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 " +
-      "\001(\t:\0028\001:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"\277\001\n\007Serv" +
-      "ice\022\014\n\004type\030\001 \001(\t\022.\n\tendpoints\030\002 \003(\0132\033.o" +
-      "npremises.ServiceEndpoint\022/\n\006config\030\003 \003(" +
-      "\0132\037.onpremises.Service.ConfigEntry\032-\n\013Co" +
-      "nfigEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028" +
-      "\001:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"R\n\017ServiceEndp" +
-      "oint\022\014\n\004host\030\001 \001(\t\022\014\n\004port\030\002 \001(\005\022\013\n\003uri\030" +
-      "\003 \001(\t:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"\274\002\n\025OnPrem" +
-      "DatalakeDetails\022\024\n\014datalakeName\030\001 \001(\t\022\027\n" +
-      "\017enableRangerRaz\030\002 \001(\010\022\037\n\027creationTimeEp" +
-      "ochMillis\030\003 \001(\003\022\016\n\006cmFqdn\030\004 \001(\t\022\014\n\004cmIp\030" +
-      "\005 \001(\t\022\022\n\ncmServerId\030\006 \001(\t\0220\n\006status\030\007 \001(" +
-      "\0162 .onpremises.DatalakeStatus.Value\022\'\n\ti" +
-      "nstances\030\010 \003(\0132\024.onpremises.Instance\022.\n\014" +
-      "kerberosInfo\030\t \001(\0132\030.onpremises.Kerberos" +
-      "Info:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"O\n\010Instance" +
-      "\022\n\n\002id\030\001 \001(\t\022\014\n\004fqdn\030\002 \001(\t\022\021\n\tprivateIp\030" +
-      "\003 \001(\t:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"\206\001\n\014Kerber" +
-      "osInfo\022\017\n\007kdcType\030\001 \001(\t\022\025\n\rkerberosRealm" +
-      "\030\002 \001(\t\022\017\n\007kdcHost\030\003 \001(\t\022\021\n\tkdcHostIp\030\004 \001" +
-      "(\t\022\022\n\nkerberized\030\005 \001(\010:\026\200\227\"\001\212\227\"\016IN_DEVEL" +
-      "OPMENT\"^\n\016DatalakeStatus\"4\n\005Value\022\t\n\005UNS" +
-      "ET\020\000\022\r\n\tAVAILABLE\020\001\022\021\n\rNOT_AVAILABLE\020\002:\026" +
-      "\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"V\n\016ClusterService" +
-      "\022\014\n\004name\030\001 \001(\t\022\017\n\007version\030\002 \001(\t\022\r\n\005state" +
-      "\030\003 \001(\t:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"\360\001\n\013Clust" +
-      "erData\022\014\n\004name\030\001 \001(\t\022\017\n\007version\030\002 \001(\t\022\023\n" +
-      "\013displayName\030\003 \001(\t\022\013\n\003url\030\004 \001(\t\022\017\n\007secur" +
-      "ed\030\005 \001(\010\022\024\n\014kerberosUser\030\006 \001(\t\022\036\n\026kerber" +
-      "osTicketLocation\030\007 \001(\t\0222\n\016clusterDetails" +
-      "\030\n \001(\0132\032.onpremises.ClusterDetails\022\r\n\005st" +
-      "ats\030\t \001(\t:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"\222\001\n\010Lo" +
-      "cation\022\n\n\002id\030\001 \001(\003\022\014\n\004city\030\002 \001(\t\022\020\n\010prov" +
-      "ince\030\003 \001(\t\022\017\n\007country\030\004 \001(\t\022\014\n\004iso2\030\005 \001(" +
-      "\t\022\020\n\010latitude\030\006 \001(\t\022\021\n\tlongitude\030\007 \001(\t:\026" +
-      "\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"\341\002\n\016ClusterDetail" +
-      "s\022\014\n\004name\030\001 \001(\t\022\023\n\013displayName\030\002 \001(\t\022\017\n\007" +
-      "version\030\003 \001(\t\022\023\n\013fullVersion\030\004 \001(\t\022\027\n\017ma" +
-      "intenanceMode\030\005 \001(\010\022\031\n\021maintenanceOwners" +
-      "\030\006 \003(\t\022\022\n\nclusterUrl\030\007 \001(\t\022\020\n\010hostsUrl\030\010" +
-      " \001(\t\0224\n\014entityStatus\030\t \001(\0162\036.onpremises." +
-      "EntityStatus.Value\022\014\n\004uuid\030\n \001(\t\022P\n\032clou" +
-      "deraManagerClusterType\030\013 \001(\0162,.onpremise" +
-      "s.ClouderaManagerClusterType.Value:\026\200\227\"\001" +
-      "\212\227\"\016IN_DEVELOPMENT\"9\n\021ClusterDiscovered\022" +
-      "\014\n\004name\030\001 \001(\t:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"\271\001" +
-      "\n\014ClusterState\"\220\001\n\005Value\022\t\n\005UNSET\020\000\022\013\n\007T" +
-      "O_SYNC\020\001\022\024\n\020SYNC_IN_PROGRESS\020\002\022\n\n\006SYNCED" +
-      "\020\003\022\016\n\nSYNC_ERROR\020\004\022\036\n\032KNOX_TOPOLOGY_DEP_" +
-      "VERIFIED\020\005\022\035\n\031KNOX_TOPOLOGY_DEP_PENDING\020" +
-      "\006:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"b\n\022ClusterMana" +
-      "gerType\"4\n\005Value\022\t\n\005UNSET\020\000\022\n\n\006AMBARI\020\001\022" +
-      "\024\n\020CLOUDERA_MANAGER\020\002:\026\200\227\"\001\212\227\"\016IN_DEVELO" +
-      "PMENT\"V\n\013ClusterType\"/\n\005Value\022\t\n\005UNSET\020\000" +
-      "\022\007\n\003HDP\020\001\022\007\n\003CDH\020\002\022\t\n\005CDPDC\020\003:\026\200\227\"\001\212\227\"\016I" +
-      "N_DEVELOPMENT\"o\n\032ClouderaManagerClusterT" +
-      "ype\"9\n\005Value\022\t\n\005UNSET\020\000\022\020\n\014BASE_CLUSTER\020" +
-      "\001\022\023\n\017COMPUTE_CLUSTER\020\002:\026\200\227\"\001\212\227\"\016IN_DEVEL" +
-      "OPMENT\"S\n\024ClusterQueryOperator\"#\n\005Value\022" +
-      "\t\n\005UNSET\020\000\022\007\n\003AND\020\001\022\006\n\002OR\020\002:\026\200\227\"\001\212\227\"\016IN_" +
-      "DEVELOPMENT\"\366\001\n\014EntityStatus\"\315\001\n\005Value\022\013" +
-      "\n\007UNKNOWN\020\000\022\010\n\004NONE\020\001\022\013\n\007STOPPED\020\002\022\010\n\004DO" +
-      "WN\020\003\022\022\n\016UNKNOWN_HEALTH\020\004\022\023\n\017DISABLED_HEA" +
-      "LTH\020\005\022\025\n\021CONCERNING_HEALTH\020\006\022\016\n\nBAD_HEAL" +
-      "TH\020\007\022\017\n\013GOOD_HEALTH\020\010\022\014\n\010STARTING\020\t\022\014\n\010S" +
-      "TOPPING\020\n\022\031\n\025HISTORY_NOT_AVAILABLE\020\013:\026\200\227" +
-      "\"\001\212\227\"\016IN_DEVELOPMENT2\225\024\n\rOnPremisesApi\022u" +
-      "\n\014ListClusters\022\037.onpremises.ListClusters" +
-      "Request\032 .onpremises.ListClustersRespons" +
-      "e\"\"\220\246\035\001\230\246\035\024\240\246\035\001\252\246\035\016IN_DEVELOPMENT\310\246\035\000\022v\n" +
-      "\017RegisterCluster\022\".onpremises.RegisterCl" +
-      "usterRequest\032#.onpremises.RegisterCluste" +
-      "rResponse\"\032\240\246\035\001\252\246\035\016IN_DEVELOPMENT\310\246\035\001\022v\n" +
-      "\017DescribeCluster\022\".onpremises.DescribeCl" +
-      "usterRequest\032#.onpremises.DescribeCluste" +
-      "rResponse\"\032\240\246\035\001\252\246\035\016IN_DEVELOPMENT\310\246\035\000\022p\n" +
-      "\rUpdateCluster\022 .onpremises.UpdateCluste" +
-      "rRequest\032!.onpremises.UpdateClusterRespo" +
-      "nse\"\032\240\246\035\001\252\246\035\016IN_DEVELOPMENT\310\246\035\001\022v\n\017Extra" +
-      "ctClusters\022\".onpremises.ExtractClustersR" +
-      "equest\032#.onpremises.ExtractClustersRespo" +
-      "nse\"\032\240\246\035\001\252\246\035\016IN_DEVELOPMENT\310\246\035\000\022\202\001\n\023List" +
-      "ClusterServices\022&.onpremises.ListCluster" +
-      "ServicesRequest\032\'.onpremises.ListCluster" +
-      "ServicesResponse\"\032\240\246\035\001\252\246\035\016IN_DEVELOPMENT" +
-      "\310\246\035\000\022x\n\rListLocations\022 .onpremises.ListL" +
-      "ocationsRequest\032!.onpremises.ListLocatio" +
-      "nsResponse\"\"\220\246\035\001\230\246\035\024\240\246\035\001\252\246\035\016IN_DEVELOPME" +
-      "NT\310\246\035\000\022v\n\017SyncClusterData\022\".onpremises.S" +
-      "yncClusterDataRequest\032#.onpremises.SyncC" +
-      "lusterDataResponse\"\032\240\246\035\001\252\246\035\016IN_DEVELOPME" +
-      "NT\310\246\035\001\022p\n\rDeleteCluster\022 .onpremises.Del" +
-      "eteClusterRequest\032!.onpremises.DeleteClu" +
-      "sterResponse\"\032\240\246\035\001\252\246\035\016IN_DEVELOPMENT\310\246\035\001" +
-      "\022\270\001\n\037ListPartiallyRegisteredClusters\0222.o" +
-      "npremises.ListPartiallyRegisteredCluster" +
-      "sRequest\0323.onpremises.ListPartiallyRegis" +
-      "teredClustersResponse\",\220\246\035\001\230\246\035\024\240\246\035\001\252\246\035\016I" +
-      "N_DEVELOPMENT\310\246\035\000\332\246\035\006public\022\233\001\n\030SetupClu" +
-      "sterConnectivity\022+.onpremises.SetupClust" +
-      "erConnectivityRequest\032,.onpremises.Setup" +
-      "ClusterConnectivityResponse\"$\240\246\035\001\252\246\035\016IN_" +
-      "DEVELOPMENT\310\246\035\001\332\246\035\006public\022\271\001\n\"DescribePa" +
-      "rtiallyRegisteredCluster\0225.onpremises.De" +
-      "scribePartiallyRegisteredClusterRequest\032" +
-      "6.onpremises.DescribePartiallyRegistered" +
-      "ClusterResponse\"$\240\246\035\001\252\246\035\016IN_DEVELOPMENT\310" +
-      "\246\035\000\332\246\035\006public\022z\n\rRegisterAgent\022 .onpremi" +
-      "ses.RegisterAgentRequest\032!.onpremises.Re" +
-      "gisterAgentResponse\"$\240\246\035\001\252\246\035\016IN_DEVELOPM" +
-      "ENT\310\246\035\001\332\246\035\006public\022\211\001\n\022ExtractSetupScript" +
-      "\022%.onpremises.ExtractSetupScriptRequest\032" +
-      "&.onpremises.ExtractSetupScriptResponse\"" +
-      "$\240\246\035\001\252\246\035\016IN_DEVELOPMENT\310\246\035\000\332\246\035\006public\022\260\001" +
-      "\n\037ExtractCertificateRefreshScript\0222.onpr" +
-      "emises.ExtractCertificateRefreshScriptRe" +
-      "quest\0323.onpremises.ExtractCertificateRef" +
-      "reshScriptResponse\"$\240\246\035\001\252\246\035\016IN_DEVELOPME" +
-      "NT\310\246\035\000\332\246\035\006public\022\211\001\n\022UpdateClusterState\022" +
-      "%.onpremises.UpdateClusterStateRequest\032&" +
-      ".onpremises.UpdateClusterStateResponse\"$" +
-      "\240\246\035\001\252\246\035\016IN_DEVELOPMENT\310\246\035\001\332\246\035\006public\022\221\001\n" +
-      "\030CheckClusterConnectivity\022+.onpremises.C" +
-      "heckClusterConnectivityRequest\032,.onpremi" +
-      "ses.CheckClusterConnectivityResponse\"\032\240\246" +
-      "\035\001\252\246\035\016IN_DEVELOPMENT\310\246\035\000\022\251\001\n DeleteParti" +
-      "allyRegisteredCluster\0223.onpremises.Delet" +
-      "ePartiallyRegisteredClusterRequest\0324.onp" +
-      "remises.DeletePartiallyRegisteredCluster" +
-      "Response\"\032\240\246\035\001\252\246\035\016IN_DEVELOPMENT\310\246\035\001\032.\212\304" +
-      "\023\030\n\nonpremises\022\nOnPremises\242\304\023\016private,pu" +
-      "blicB`\n+com.cloudera.thunderhead.service" +
-      ".onpremisesB\022OnPremisesApiProtoZ\031com/clo" +
-      "udera/cdp/protobuf\200\210\'\001b\006proto3"
+      "usterQueryOperator.Value\0222\n\013clusterType\030" +
+      "\006 \001(\0162\035.onpremises.ClusterType.Value\0224\n\014" +
+      "clusterState\030\007 \001(\0162\036.onpremises.ClusterS" +
+      "tate.Value\022\025\n\rbehindGateway\030\010 \001(\010:\026\200\227\"\001\212" +
+      "\227\"\016IN_DEVELOPMENT\"x\n\024ListClustersRespons" +
+      "e\022\033\n\rnextPageToken\030\001 \001(\tB\004\250\265\030\001\022+\n\010cluste" +
+      "rs\030\002 \003(\0132\023.onpremises.ClusterB\004\240\265\030\001:\026\200\227\"" +
+      "\001\212\227\"\016IN_DEVELOPMENT\"\357\001\n\026RegisterClusterR" +
+      "equest\022\034\n\016datacenterName\030\002 \001(\tB\004\320\265\030\001\022\030\n\n" +
+      "managerUri\030e \001(\tB\004\320\265\030\001\022\020\n\010username\030f \001(\t" +
+      "\022\026\n\010password\030g \001(\tB\004\200\265\030\001\022\014\n\004name\030\001 \001(\t\022\022" +
+      "\n\nlocationId\030h \001(\003\022\014\n\004tags\030i \003(\t\022\023\n\013desc" +
+      "ription\030j \001(\t\022\026\n\016environmentCrn\030k \001(\t:\026\200" +
+      "\227\"\001\212\227\"\016IN_DEVELOPMENT\"K\n\027RegisterCluster" +
+      "Response\022\030\n\nclusterCrn\030\001 \001(\tB\004\320\265\030\001:\026\200\227\"\001" +
+      "\212\227\"\016IN_DEVELOPMENT\"\224\001\n\024UpdateClusterRequ" +
+      "est\022\030\n\nclusterCrn\030\001 \001(\tB\004\320\265\030\001\022\020\n\010usernam" +
+      "e\030f \001(\t\022\026\n\010password\030g \001(\tB\004\200\265\030\001\022\022\n\nlocat" +
+      "ionId\030h \001(\003\022\014\n\004tags\030i \003(\t:\026\200\227\"\001\212\227\"\016IN_DE" +
+      "VELOPMENT\"I\n\025UpdateClusterResponse\022\030\n\ncl" +
+      "usterCrn\030\001 \001(\tB\004\320\265\030\001:\026\200\227\"\001\212\227\"\016IN_DEVELOP" +
+      "MENT\"\234\001\n\026DescribeClusterRequest\022\022\n\nclust" +
+      "erCrn\030\001 \001(\t\022-\n\002id\030d \001(\003B!\270\265\030\001\302\265\030\025FOR_CLO" +
+      "UDERA_USE_ONLY\370\265\030\001\022\'\n\037showOnPremiseEnvir" +
+      "onmentDetails\030\002 \001(\010:\026\200\227\"\001\212\227\"\016IN_DEVELOPM" +
+      "ENT\"W\n\027DescribeClusterResponse\022$\n\007cluste" +
+      "r\030\001 \001(\0132\023.onpremises.Cluster:\026\200\227\"\001\212\227\"\016IN" +
+      "_DEVELOPMENT\"U\n!ValidateClusterForDatala" +
+      "keRequest\022\030\n\nclusterCrn\030\001 \001(\tB\004\320\265\030\001:\026\200\227\"" +
+      "\001\212\227\"\016IN_DEVELOPMENT\"\223\001\n\"ValidateClusterF" +
+      "orDatalakeResponse\022 \n\022isValidForDatalake" +
+      "\030\001 \001(\010B\004\320\265\030\001\0223\n\013validations\030\002 \003(\0132\036.onpr" +
+      "emises.DatalakeValidation:\026\200\227\"\001\212\227\"\016IN_DE" +
+      "VELOPMENT\"\205\001\n\022DatalakeValidation\0226\n\004type" +
+      "\030\001 \001(\0162(.onpremises.DatalakeValidationTy" +
+      "pe.Value\022\016\n\006passed\030\002 \001(\010\022\017\n\007message\030\003 \001(" +
+      "\t:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"\263\001\n\026DatalakeVa" +
+      "lidationType\"\200\001\n\005Value\022\t\n\005UNSET\020\000\022\026\n\022CLU" +
+      "STER_TYPE_CDPDC\020\001\022+\n\'CLOUDERA_RUNTIME_VE" +
+      "RSION_AT_LEAST_7_1_9\020\002\022\016\n\nKERBERIZED\020\003\022\027" +
+      "\n\023NOT_COMPUTE_CLUSTER\020\004:\026\200\227\"\001\212\227\"\016IN_DEVE" +
+      "LOPMENT\"\241\001\n\032ListClusterServicesRequest\022\030" +
+      "\n\nclusterCrn\030\001 \001(\tB\004\320\265\030\001\022\023\n\013clusterName\030" +
+      "\002 \001(\t\022\022\n\nmanagerUri\030\003 \001(\t\022\020\n\010username\030\004 " +
+      "\001(\t\022\026\n\010password\030\005 \001(\tB\004\200\265\030\001:\026\200\227\"\001\212\227\"\016IN_" +
+      "DEVELOPMENT\"c\n\033ListClusterServicesRespon" +
+      "se\022,\n\010services\030\001 \003(\0132\032.onpremises.Cluste" +
+      "rService:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"\222\001\n\026Ext" +
+      "ractClustersRequest\022\030\n\nmanagerUri\030e \001(\tB" +
+      "\004\320\265\030\001\022\026\n\010username\030f \001(\tB\004\320\265\030\001\022\032\n\010passwor" +
+      "d\030g \001(\tB\010\200\265\030\001\320\265\030\001\022\022\n\nclusterCrn\030h \001(\t:\026\200" +
+      "\227\"\001\212\227\"\016IN_DEVELOPMENT\"b\n\027ExtractClusters" +
+      "Response\022/\n\010clusters\030\001 \003(\0132\035.onpremises." +
+      "ClusterDiscovered:\026\200\227\"\001\212\227\"\016IN_DEVELOPMEN" +
+      "T\"v\n\024ListLocationsRequest\022\036\n\010pageSize\030\001 " +
+      "\001(\005B\014\220\265\030\001\330\265\030\001\340\265\030d\022\027\n\tpageToken\030\002 \001(\tB\004\230\265" +
+      "\030\001\022\r\n\005query\030\003 \001(\t:\026\200\227\"\001\212\227\"\016IN_DEVELOPMEN" +
+      "T\"w\n\025ListLocationsResponse\022\027\n\tpageToken\030" +
+      "\001 \001(\tB\004\250\265\030\001\022-\n\tlocations\030\002 \003(\0132\024.onpremi" +
+      "ses.LocationB\004\240\265\030\001:\026\200\227\"\001\212\227\"\016IN_DEVELOPME" +
+      "NT\"I\n\027SyncClusterDataResponse\022\026\n\016syncSuc" +
+      "cessful\030\001 \001(\010:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"D\n" +
+      "\026SyncClusterDataRequest\022\022\n\nclusterCrn\030\001 " +
+      "\001(\t:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"L\n\024DeleteClu" +
+      "sterRequest\022\014\n\004name\030\001 \001(\t\022\016\n\006dcName\030\002 \001(" +
+      "\t:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"/\n\025DeleteClust" +
+      "erResponse:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"y\n&Li" +
+      "stPartiallyRegisteredClustersRequest\022\036\n\010" +
+      "pageSize\030\001 \001(\005B\014\220\265\030\001\330\265\030\001\340\265\030d\022\027\n\tpageToke" +
+      "n\030\002 \001(\tB\004\230\265\030\001:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"\270\001" +
+      "\n\'ListPartiallyRegisteredClustersRespons" +
+      "e\022X\n\036partiallyRegisteredClusterData\030\001 \003(" +
+      "\0132*.onpremises.PartiallyRegisteredCluste" +
+      "rDataB\004\240\265\030\001\022\033\n\rnextPageToken\030\002 \001(\tB\004\250\265\030\001" +
+      ":\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"3\n\031ExtractSetup" +
+      "ScriptRequest:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"\251\001" +
+      "\n\032ExtractSetupScriptResponse\022\027\n\017installe" +
+      "rScript\030\001 \001(\t\022\035\n\025olderAgentRpmLocation\030\002" +
+      " \001(\t\022\036\n\026latestAgentRpmLocation\030\003 \001(\t\022\033\n\023" +
+      "agentDebianLocation\030\004 \001(\t:\026\200\227\"\001\212\227\"\016IN_DE" +
+      "VELOPMENT\"@\n&ExtractCertificateRefreshSc" +
+      "riptRequest:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"q\n\'E" +
+      "xtractCertificateRefreshScriptResponse\022\034" +
+      "\n\016refreshPackage\030\001 \001(\014B\004\210\265\030\001\022\020\n\010filename" +
+      "\030\002 \001(\t:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"M\n\031Update" +
+      "ClusterStateRequest\022\030\n\nclusterCrn\030\001 \001(\tB" +
+      "\004\320\265\030\001:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"D\n\032UpdateC" +
+      "lusterStateResponse\022\016\n\006status\030\001 \001(\010:\026\200\227\"" +
+      "\001\212\227\"\016IN_DEVELOPMENT\"b\n\037CheckClusterConne" +
+      "ctivityRequest\022\022\n\nclusterCrn\030\001 \001(\t\022\023\n\013se" +
+      "rviceName\030\002 \001(\t:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"" +
+      ":\n CheckClusterConnectivityResponse:\026\200\227\"" +
+      "\001\212\227\"\016IN_DEVELOPMENT\"U\n\'DeletePartiallyRe" +
+      "gisteredClusterRequest\022\022\n\nclusterCrn\030\001 \001" +
+      "(\t:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"B\n(DeletePart" +
+      "iallyRegisteredClusterResponse:\026\200\227\"\001\212\227\"\016" +
+      "IN_DEVELOPMENT\"\224\003\n\036PartiallyRegisteredCl" +
+      "usterData\022\n\n\002id\030\001 \001(\003\022\022\n\nclusterCrn\030\002 \001(" +
+      "\t\022\026\n\016datacenterName\030\003 \001(\t\022\021\n\tipAddress\030\004" +
+      " \001(\t\022\014\n\004port\030\005 \001(\005\022\023\n\013serviceName\030\006 \001(\t\022" +
+      "\023\n\013clusterType\030\007 \001(\t\022\020\n\010isSecure\030\010 \001(\010\022 " +
+      "\n\030clusterConnectivityState\030\t \001(\t\022\021\n\tcrea" +
+      "tedBy\030\013 \001(\t\022\027\n\tcreatedAt\030\014 \001(\003B\004\260\265\030\001\022\027\n\t" +
+      "updatedAt\030\r \001(\003B\004\260\265\030\001\022\017\n\007primary\030\016 \001(\010\022\032" +
+      "\n\022registrationStatus\030\020 \001(\t\022\020\n\010agentCrn\030\021" +
+      " \001(\t\022\016\n\006pvcCrn\030\022 \001(\t\022\017\n\007knoxUrl\030\023 \001(\t:\026\200" +
+      "\227\"\001\212\227\"\016IN_DEVELOPMENT\"\321\002\n\037SetupClusterCo" +
+      "nnectivityRequest\022\027\n\tipAddress\030\001 \001(\tB\004\370\265" +
+      "\030\001\022\022\n\004port\030\002 \001(\005B\004\370\265\030\001\022\026\n\016datacenterName" +
+      "\030\003 \001(\t\022\026\n\010isSecure\030\004 \001(\010B\004\370\265\030\001\0222\n\013cluste" +
+      "rType\030\005 \001(\0162\035.onpremises.ClusterType.Val" +
+      "ue\022\023\n\013serviceName\030\006 \001(\t\022\033\n\rknoxIpAddress" +
+      "\030\007 \001(\tB\004\370\265\030\001\022\026\n\010knoxPort\030\010 \001(\tB\004\370\265\030\001\022\025\n\007" +
+      "knoxUrl\030\t \001(\tB\004\370\265\030\001\022\025\n\007tlsType\030\013 \001(\tB\004\370\265" +
+      "\030\001\022\r\n\005cmUrl\030\014 \001(\t:\026\200\227\"\001\212\227\"\016IN_DEVELOPMEN" +
+      "T\"\270\001\n SetupClusterConnectivityResponse\022\r" +
+      "\n\005keyId\030\001 \001(\t\022\016\n\006status\030\002 \001(\t\022\036\n\026inverti" +
+      "ngProxyHostName\030\003 \001(\t\022\026\n\016causeOfFailure\030" +
+      "\004 \001(\t\022\023\n\013certificate\030\005 \001(\t\022\020\n\010agentCrn\030\006" +
+      " \001(\t:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"W\n)Describe" +
+      "PartiallyRegisteredClusterRequest\022\022\n\nclu" +
+      "sterCrn\030\001 \001(\t:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"\230\001" +
+      "\n*DescribePartiallyRegisteredClusterResp" +
+      "onse\022R\n\036partiallyRegisteredClusterData\030\001" +
+      " \001(\0132*.onpremises.PartiallyRegisteredClu" +
+      "sterData:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"B\n\024Regi" +
+      "sterAgentRequest\022\022\n\nclusterCrn\030\001 \001(\t:\026\200\227" +
+      "\"\001\212\227\"\016IN_DEVELOPMENT\"\255\001\n\025RegisterAgentRe" +
+      "sponse\022\022\n\nclusterCrn\030\001 \001(\t\022\016\n\006status\030\002 \001" +
+      "(\t\022\023\n\013certificate\030\003 \001(\t\022\023\n\013cdpEndpoint\030\004" +
+      " \001(\t\022.\n\014agentDetails\030\005 \001(\0132\030.onpremises." +
+      "AgentDetails:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"\261\001\n" +
+      "\014AgentDetails\022\020\n\010agentCrn\030\001 \001(\t\022\023\n\013certi" +
+      "ficate\030\002 \001(\t\022\022\n\nclusterCrn\030\003 \001(\t\022\023\n\013acce" +
+      "ssKeyId\030\004 \001(\t\022\033\n\023encipheredAccessKey\030\005 \001" +
+      "(\t\022\034\n\024encipheredPrivateKey\030\006 \001(\t:\026\200\227\"\001\212\227" +
+      "\"\016IN_DEVELOPMENT\"\226\007\n\007Cluster\022\022\n\nclusterC" +
+      "rn\030\001 \001(\t\022\014\n\004name\030\002 \001(\t\022\026\n\016datacenterName" +
+      "\030\003 \001(\t\022\n\n\002id\030\004 \001(\003\022\021\n\tipAddress\030\006 \001(\t\0222\n" +
+      "\013clusterType\030\007 \001(\0162\035.onpremises.ClusterT" +
+      "ype.Value\022-\n\005state\030\010 \001(\0162\036.onpremises.Cl" +
+      "usterState.Value\022\023\n\013description\030\013 \001(\t\022\030\n" +
+      "\nlocationId\030\014 \001(\003B\004\370\265\030\001\022\034\n\016lastCreateTim" +
+      "e\030\r \001(\003B\004\260\265\030\001\022\035\n\017lastUpdatedTime\030\016 \001(\003B\004" +
+      "\260\265\030\001\022\030\n\nupdatedUtc\030\017 \001(\003B\004\260\265\030\001\022%\n\004data\030\020" +
+      " \001(\0132\027.onpremises.ClusterData\022\023\n\013knoxEna" +
+      "bled\030\021 \001(\010\022\017\n\007knoxUrl\030\022 \001(\t\022\020\n\010username\030" +
+      "\023 \001(\t\022\026\n\010password\030\024 \001(\tB\004\200\265\030\001\022\026\n\016allowUn" +
+      "trusted\030\025 \001(\010\022\025\n\rbehindGateway\030\026 \001(\010\0229\n\013" +
+      "managerType\030\027 \001(\0162$.onpremises.ClusterMa" +
+      "nagerType.Value\022\022\n\nmanagerUri\030\030 \001(\t\022\021\n\tc" +
+      "reatedBy\030\031 \001(\t\022\033\n\023connectivityVersion\030\032 " +
+      "\001(\t\022\033\n\023isUpgradeInProgress\030\033 \001(\010\022\020\n\010newK" +
+      "eyId\030\034 \001(\t\022&\n\010location\030\035 \001(\0132\024.onpremise" +
+      "s.Location\022\022\n\nproperties\030\036 \001(\t\022\025\n\rcmClus" +
+      "terUuid\030\037 \001(\t\022\026\n\016environmentCrn\030  \001(\t\022\016\n" +
+      "\006pvcCrn\030! \001(\t\022F\n\030onPremEnvironmentDetail" +
+      "s\030\" \001(\0132$.onpremises.OnPremEnvironmentDe" +
+      "tails\022\032\n\022isValidForDatalake\030# \001(\010:\026\200\227\"\001\212" +
+      "\227\"\016IN_DEVELOPMENT\"\353\002\n\030OnPremEnvironmentD" +
+      "etails\022\016\n\006cmHost\030\001 \001(\t\022\026\n\016knoxGatewayUrl" +
+      "\030\002 \001(\t\022L\n\014applications\030\003 \003(\01326.onpremise" +
+      "s.OnPremEnvironmentDetails.ApplicationsE" +
+      "ntry\022\021\n\tcmVersion\030\004 \001(\t\022\036\n\026clouderaRunti" +
+      "meVersion\030\005 \001(\t\022@\n\025onPremDatalakeDetails" +
+      "\030\007 \001(\0132!.onpremises.OnPremDatalakeDetail" +
+      "s\032L\n\021ApplicationsEntry\022\013\n\003key\030\001 \001(\t\022&\n\005v" +
+      "alue\030\002 \001(\0132\027.onpremises.Application:\0028\001:" +
+      "\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"\226\002\n\013Application\022" +
+      "\014\n\004name\030\001 \001(\t\0227\n\010services\030\002 \003(\0132%.onprem" +
+      "ises.Application.ServicesEntry\0223\n\006config" +
+      "\030\003 \003(\0132#.onpremises.Application.ConfigEn" +
+      "try\032D\n\rServicesEntry\022\013\n\003key\030\001 \001(\t\022\"\n\005val" +
+      "ue\030\002 \001(\0132\023.onpremises.Service:\0028\001\032-\n\013Con" +
+      "figEntry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001" +
+      ":\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"\277\001\n\007Service\022\014\n\004" +
+      "type\030\001 \001(\t\022.\n\tendpoints\030\002 \003(\0132\033.onpremis" +
+      "es.ServiceEndpoint\022/\n\006config\030\003 \003(\0132\037.onp" +
+      "remises.Service.ConfigEntry\032-\n\013ConfigEnt" +
+      "ry\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001:\026\200\227\"\001" +
+      "\212\227\"\016IN_DEVELOPMENT\"R\n\017ServiceEndpoint\022\014\n" +
+      "\004host\030\001 \001(\t\022\014\n\004port\030\002 \001(\005\022\013\n\003uri\030\003 \001(\t:\026" +
+      "\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"\274\002\n\025OnPremDatalak" +
+      "eDetails\022\024\n\014datalakeName\030\001 \001(\t\022\027\n\017enable" +
+      "RangerRaz\030\002 \001(\010\022\037\n\027creationTimeEpochMill" +
+      "is\030\003 \001(\003\022\016\n\006cmFqdn\030\004 \001(\t\022\014\n\004cmIp\030\005 \001(\t\022\022" +
+      "\n\ncmServerId\030\006 \001(\t\0220\n\006status\030\007 \001(\0162 .onp" +
+      "remises.DatalakeStatus.Value\022\'\n\tinstance" +
+      "s\030\010 \003(\0132\024.onpremises.Instance\022.\n\014kerbero" +
+      "sInfo\030\t \001(\0132\030.onpremises.KerberosInfo:\026\200" +
+      "\227\"\001\212\227\"\016IN_DEVELOPMENT\"O\n\010Instance\022\n\n\002id\030" +
+      "\001 \001(\t\022\014\n\004fqdn\030\002 \001(\t\022\021\n\tprivateIp\030\003 \001(\t:\026" +
+      "\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"\206\001\n\014KerberosInfo\022" +
+      "\017\n\007kdcType\030\001 \001(\t\022\025\n\rkerberosRealm\030\002 \001(\t\022" +
+      "\017\n\007kdcHost\030\003 \001(\t\022\021\n\tkdcHostIp\030\004 \001(\t\022\022\n\nk" +
+      "erberized\030\005 \001(\010:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"" +
+      "^\n\016DatalakeStatus\"4\n\005Value\022\t\n\005UNSET\020\000\022\r\n" +
+      "\tAVAILABLE\020\001\022\021\n\rNOT_AVAILABLE\020\002:\026\200\227\"\001\212\227\"" +
+      "\016IN_DEVELOPMENT\"V\n\016ClusterService\022\014\n\004nam" +
+      "e\030\001 \001(\t\022\017\n\007version\030\002 \001(\t\022\r\n\005state\030\003 \001(\t:" +
+      "\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"\360\001\n\013ClusterData\022" +
+      "\014\n\004name\030\001 \001(\t\022\017\n\007version\030\002 \001(\t\022\023\n\013displa" +
+      "yName\030\003 \001(\t\022\013\n\003url\030\004 \001(\t\022\017\n\007secured\030\005 \001(" +
+      "\010\022\024\n\014kerberosUser\030\006 \001(\t\022\036\n\026kerberosTicke" +
+      "tLocation\030\007 \001(\t\0222\n\016clusterDetails\030\n \001(\0132" +
+      "\032.onpremises.ClusterDetails\022\r\n\005stats\030\t \001" +
+      "(\t:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"\222\001\n\010Location\022" +
+      "\n\n\002id\030\001 \001(\003\022\014\n\004city\030\002 \001(\t\022\020\n\010province\030\003 " +
+      "\001(\t\022\017\n\007country\030\004 \001(\t\022\014\n\004iso2\030\005 \001(\t\022\020\n\010la" +
+      "titude\030\006 \001(\t\022\021\n\tlongitude\030\007 \001(\t:\026\200\227\"\001\212\227\"" +
+      "\016IN_DEVELOPMENT\"\341\002\n\016ClusterDetails\022\014\n\004na" +
+      "me\030\001 \001(\t\022\023\n\013displayName\030\002 \001(\t\022\017\n\007version" +
+      "\030\003 \001(\t\022\023\n\013fullVersion\030\004 \001(\t\022\027\n\017maintenan" +
+      "ceMode\030\005 \001(\010\022\031\n\021maintenanceOwners\030\006 \003(\t\022" +
+      "\022\n\nclusterUrl\030\007 \001(\t\022\020\n\010hostsUrl\030\010 \001(\t\0224\n" +
+      "\014entityStatus\030\t \001(\0162\036.onpremises.EntityS" +
+      "tatus.Value\022\014\n\004uuid\030\n \001(\t\022P\n\032clouderaMan" +
+      "agerClusterType\030\013 \001(\0162,.onpremises.Cloud" +
+      "eraManagerClusterType.Value:\026\200\227\"\001\212\227\"\016IN_" +
+      "DEVELOPMENT\"9\n\021ClusterDiscovered\022\014\n\004name" +
+      "\030\001 \001(\t:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"b\n.Genera" +
+      "teClusterConnectivitySetupPackageRequest" +
+      "\022\030\n\nclusterCrn\030\001 \001(\tB\004\320\265\030\001:\026\200\227\"\001\212\227\"\016IN_D" +
+      "EVELOPMENT\"e\n/GenerateClusterConnectivit" +
+      "ySetupPackageResponse\022\032\n\014setupPackage\030\001 " +
+      "\001(\014B\004\210\265\030\001:\026\200\227\"\001\212\227\"\016IN_DEVELOPMENT\"\271\001\n\014Cl" +
+      "usterState\"\220\001\n\005Value\022\t\n\005UNSET\020\000\022\013\n\007TO_SY" +
+      "NC\020\001\022\024\n\020SYNC_IN_PROGRESS\020\002\022\n\n\006SYNCED\020\003\022\016" +
+      "\n\nSYNC_ERROR\020\004\022\036\n\032KNOX_TOPOLOGY_DEP_VERI" +
+      "FIED\020\005\022\035\n\031KNOX_TOPOLOGY_DEP_PENDING\020\006:\026\200" +
+      "\227\"\001\212\227\"\016IN_DEVELOPMENT\"b\n\022ClusterManagerT" +
+      "ype\"4\n\005Value\022\t\n\005UNSET\020\000\022\n\n\006AMBARI\020\001\022\024\n\020C" +
+      "LOUDERA_MANAGER\020\002:\026\200\227\"\001\212\227\"\016IN_DEVELOPMEN" +
+      "T\"V\n\013ClusterType\"/\n\005Value\022\t\n\005UNSET\020\000\022\007\n\003" +
+      "HDP\020\001\022\007\n\003CDH\020\002\022\t\n\005CDPDC\020\003:\026\200\227\"\001\212\227\"\016IN_DE" +
+      "VELOPMENT\"o\n\032ClouderaManagerClusterType\"" +
+      "9\n\005Value\022\t\n\005UNSET\020\000\022\020\n\014BASE_CLUSTER\020\001\022\023\n" +
+      "\017COMPUTE_CLUSTER\020\002:\026\200\227\"\001\212\227\"\016IN_DEVELOPME" +
+      "NT\"S\n\024ClusterQueryOperator\"#\n\005Value\022\t\n\005U" +
+      "NSET\020\000\022\007\n\003AND\020\001\022\006\n\002OR\020\002:\026\200\227\"\001\212\227\"\016IN_DEVE" +
+      "LOPMENT\"\366\001\n\014EntityStatus\"\315\001\n\005Value\022\013\n\007UN" +
+      "KNOWN\020\000\022\010\n\004NONE\020\001\022\013\n\007STOPPED\020\002\022\010\n\004DOWN\020\003" +
+      "\022\022\n\016UNKNOWN_HEALTH\020\004\022\023\n\017DISABLED_HEALTH\020" +
+      "\005\022\025\n\021CONCERNING_HEALTH\020\006\022\016\n\nBAD_HEALTH\020\007" +
+      "\022\017\n\013GOOD_HEALTH\020\010\022\014\n\010STARTING\020\t\022\014\n\010STOPP" +
+      "ING\020\n\022\031\n\025HISTORY_NOT_AVAILABLE\020\013:\026\200\227\"\001\212\227" +
+      "\"\016IN_DEVELOPMENT2\364\026\n\rOnPremisesApi\022u\n\014Li" +
+      "stClusters\022\037.onpremises.ListClustersRequ" +
+      "est\032 .onpremises.ListClustersResponse\"\"\220" +
+      "\246\035\001\230\246\035\024\240\246\035\001\252\246\035\016IN_DEVELOPMENT\310\246\035\000\022v\n\017Reg" +
+      "isterCluster\022\".onpremises.RegisterCluste" +
+      "rRequest\032#.onpremises.RegisterClusterRes" +
+      "ponse\"\032\240\246\035\001\252\246\035\016IN_DEVELOPMENT\310\246\035\001\022v\n\017Des" +
+      "cribeCluster\022\".onpremises.DescribeCluste" +
+      "rRequest\032#.onpremises.DescribeClusterRes" +
+      "ponse\"\032\240\246\035\001\252\246\035\016IN_DEVELOPMENT\310\246\035\000\022p\n\rUpd" +
+      "ateCluster\022 .onpremises.UpdateClusterReq" +
+      "uest\032!.onpremises.UpdateClusterResponse\"" +
+      "\032\240\246\035\001\252\246\035\016IN_DEVELOPMENT\310\246\035\001\022v\n\017ExtractCl" +
+      "usters\022\".onpremises.ExtractClustersReque" +
+      "st\032#.onpremises.ExtractClustersResponse\"" +
+      "\032\240\246\035\001\252\246\035\016IN_DEVELOPMENT\310\246\035\000\022\202\001\n\023ListClus" +
+      "terServices\022&.onpremises.ListClusterServ" +
+      "icesRequest\032\'.onpremises.ListClusterServ" +
+      "icesResponse\"\032\240\246\035\001\252\246\035\016IN_DEVELOPMENT\310\246\035\000" +
+      "\022x\n\rListLocations\022 .onpremises.ListLocat" +
+      "ionsRequest\032!.onpremises.ListLocationsRe" +
+      "sponse\"\"\220\246\035\001\230\246\035\024\240\246\035\001\252\246\035\016IN_DEVELOPMENT\310\246" +
+      "\035\000\022v\n\017SyncClusterData\022\".onpremises.SyncC" +
+      "lusterDataRequest\032#.onpremises.SyncClust" +
+      "erDataResponse\"\032\240\246\035\001\252\246\035\016IN_DEVELOPMENT\310\246" +
+      "\035\001\022p\n\rDeleteCluster\022 .onpremises.DeleteC" +
+      "lusterRequest\032!.onpremises.DeleteCluster" +
+      "Response\"\032\240\246\035\001\252\246\035\016IN_DEVELOPMENT\310\246\035\001\022\270\001\n" +
+      "\037ListPartiallyRegisteredClusters\0222.onpre" +
+      "mises.ListPartiallyRegisteredClustersReq" +
+      "uest\0323.onpremises.ListPartiallyRegistere" +
+      "dClustersResponse\",\220\246\035\001\230\246\035\024\240\246\035\001\252\246\035\016IN_DE" +
+      "VELOPMENT\310\246\035\000\332\246\035\006public\022\233\001\n\030SetupCluster" +
+      "Connectivity\022+.onpremises.SetupClusterCo" +
+      "nnectivityRequest\032,.onpremises.SetupClus" +
+      "terConnectivityResponse\"$\240\246\035\001\252\246\035\016IN_DEVE" +
+      "LOPMENT\310\246\035\001\332\246\035\006public\022\271\001\n\"DescribePartia" +
+      "llyRegisteredCluster\0225.onpremises.Descri" +
+      "bePartiallyRegisteredClusterRequest\0326.on" +
+      "premises.DescribePartiallyRegisteredClus" +
+      "terResponse\"$\240\246\035\001\252\246\035\016IN_DEVELOPMENT\310\246\035\000\332" +
+      "\246\035\006public\022z\n\rRegisterAgent\022 .onpremises." +
+      "RegisterAgentRequest\032!.onpremises.Regist" +
+      "erAgentResponse\"$\240\246\035\001\252\246\035\016IN_DEVELOPMENT\310" +
+      "\246\035\001\332\246\035\006public\022\302\001\n\'GenerateClusterConnect" +
+      "ivitySetupPackage\022:.onpremises.GenerateC" +
+      "lusterConnectivitySetupPackageRequest\032;." +
+      "onpremises.GenerateClusterConnectivitySe" +
+      "tupPackageResponse\"\036\240\246\035\001\252\246\035\016IN_DEVELOPME" +
+      "NT\310\246\035\001\370\246\035\001\022\211\001\n\022ExtractSetupScript\022%.onpr" +
+      "emises.ExtractSetupScriptRequest\032&.onpre" +
+      "mises.ExtractSetupScriptResponse\"$\240\246\035\001\252\246" +
+      "\035\016IN_DEVELOPMENT\310\246\035\000\332\246\035\006public\022\260\001\n\037Extra" +
+      "ctCertificateRefreshScript\0222.onpremises." +
+      "ExtractCertificateRefreshScriptRequest\0323" +
+      ".onpremises.ExtractCertificateRefreshScr" +
+      "iptResponse\"$\240\246\035\001\252\246\035\016IN_DEVELOPMENT\310\246\035\000\332" +
+      "\246\035\006public\022\211\001\n\022UpdateClusterState\022%.onpre" +
+      "mises.UpdateClusterStateRequest\032&.onprem" +
+      "ises.UpdateClusterStateResponse\"$\240\246\035\001\252\246\035" +
+      "\016IN_DEVELOPMENT\310\246\035\001\332\246\035\006public\022\221\001\n\030CheckC" +
+      "lusterConnectivity\022+.onpremises.CheckClu" +
+      "sterConnectivityRequest\032,.onpremises.Che" +
+      "ckClusterConnectivityResponse\"\032\240\246\035\001\252\246\035\016I" +
+      "N_DEVELOPMENT\310\246\035\000\022\251\001\n DeletePartiallyReg" +
+      "isteredCluster\0223.onpremises.DeletePartia" +
+      "llyRegisteredClusterRequest\0324.onpremises" +
+      ".DeletePartiallyRegisteredClusterRespons" +
+      "e\"\032\240\246\035\001\252\246\035\016IN_DEVELOPMENT\310\246\035\001\022\227\001\n\032Valida" +
+      "teClusterForDatalake\022-.onpremises.Valida" +
+      "teClusterForDatalakeRequest\032..onpremises" +
+      ".ValidateClusterForDatalakeResponse\"\032\240\246\035" +
+      "\001\252\246\035\016IN_DEVELOPMENT\310\246\035\000\032.\212\304\023\030\n\nonpremise" +
+      "s\022\nOnPremises\242\304\023\016private,publicB`\n+com.c" +
+      "loudera.thunderhead.service.onpremisesB\022" +
+      "OnPremisesApiProtoZ\031com/cloudera/cdp/pro" +
+      "tobuf\200\210\'\001b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -64054,7 +68400,7 @@ java.lang.String defaultValue) {
     internal_static_onpremises_ListClustersRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_onpremises_ListClustersRequest_descriptor,
-        new java.lang.String[] { "PageSize", "PageToken", "ManagerType", "Services", "Operator", });
+        new java.lang.String[] { "PageSize", "PageToken", "ManagerType", "Services", "Operator", "ClusterType", "ClusterState", "BehindGateway", });
     internal_static_onpremises_ListClustersResponse_descriptor =
       getDescriptor().getMessageTypes().get(1);
     internal_static_onpremises_ListClustersResponse_fieldAccessorTable = new
@@ -64097,194 +68443,218 @@ java.lang.String defaultValue) {
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_onpremises_DescribeClusterResponse_descriptor,
         new java.lang.String[] { "Cluster", });
-    internal_static_onpremises_ListClusterServicesRequest_descriptor =
+    internal_static_onpremises_ValidateClusterForDatalakeRequest_descriptor =
       getDescriptor().getMessageTypes().get(8);
+    internal_static_onpremises_ValidateClusterForDatalakeRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_onpremises_ValidateClusterForDatalakeRequest_descriptor,
+        new java.lang.String[] { "ClusterCrn", });
+    internal_static_onpremises_ValidateClusterForDatalakeResponse_descriptor =
+      getDescriptor().getMessageTypes().get(9);
+    internal_static_onpremises_ValidateClusterForDatalakeResponse_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_onpremises_ValidateClusterForDatalakeResponse_descriptor,
+        new java.lang.String[] { "IsValidForDatalake", "Validations", });
+    internal_static_onpremises_DatalakeValidation_descriptor =
+      getDescriptor().getMessageTypes().get(10);
+    internal_static_onpremises_DatalakeValidation_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_onpremises_DatalakeValidation_descriptor,
+        new java.lang.String[] { "Type", "Passed", "Message", });
+    internal_static_onpremises_DatalakeValidationType_descriptor =
+      getDescriptor().getMessageTypes().get(11);
+    internal_static_onpremises_DatalakeValidationType_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_onpremises_DatalakeValidationType_descriptor,
+        new java.lang.String[] { });
+    internal_static_onpremises_ListClusterServicesRequest_descriptor =
+      getDescriptor().getMessageTypes().get(12);
     internal_static_onpremises_ListClusterServicesRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_onpremises_ListClusterServicesRequest_descriptor,
         new java.lang.String[] { "ClusterCrn", "ClusterName", "ManagerUri", "Username", "Password", });
     internal_static_onpremises_ListClusterServicesResponse_descriptor =
-      getDescriptor().getMessageTypes().get(9);
+      getDescriptor().getMessageTypes().get(13);
     internal_static_onpremises_ListClusterServicesResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_onpremises_ListClusterServicesResponse_descriptor,
         new java.lang.String[] { "Services", });
     internal_static_onpremises_ExtractClustersRequest_descriptor =
-      getDescriptor().getMessageTypes().get(10);
+      getDescriptor().getMessageTypes().get(14);
     internal_static_onpremises_ExtractClustersRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_onpremises_ExtractClustersRequest_descriptor,
         new java.lang.String[] { "ManagerUri", "Username", "Password", "ClusterCrn", });
     internal_static_onpremises_ExtractClustersResponse_descriptor =
-      getDescriptor().getMessageTypes().get(11);
+      getDescriptor().getMessageTypes().get(15);
     internal_static_onpremises_ExtractClustersResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_onpremises_ExtractClustersResponse_descriptor,
         new java.lang.String[] { "Clusters", });
     internal_static_onpremises_ListLocationsRequest_descriptor =
-      getDescriptor().getMessageTypes().get(12);
+      getDescriptor().getMessageTypes().get(16);
     internal_static_onpremises_ListLocationsRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_onpremises_ListLocationsRequest_descriptor,
         new java.lang.String[] { "PageSize", "PageToken", "Query", });
     internal_static_onpremises_ListLocationsResponse_descriptor =
-      getDescriptor().getMessageTypes().get(13);
+      getDescriptor().getMessageTypes().get(17);
     internal_static_onpremises_ListLocationsResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_onpremises_ListLocationsResponse_descriptor,
         new java.lang.String[] { "PageToken", "Locations", });
     internal_static_onpremises_SyncClusterDataResponse_descriptor =
-      getDescriptor().getMessageTypes().get(14);
+      getDescriptor().getMessageTypes().get(18);
     internal_static_onpremises_SyncClusterDataResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_onpremises_SyncClusterDataResponse_descriptor,
         new java.lang.String[] { "SyncSuccessful", });
     internal_static_onpremises_SyncClusterDataRequest_descriptor =
-      getDescriptor().getMessageTypes().get(15);
+      getDescriptor().getMessageTypes().get(19);
     internal_static_onpremises_SyncClusterDataRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_onpremises_SyncClusterDataRequest_descriptor,
         new java.lang.String[] { "ClusterCrn", });
     internal_static_onpremises_DeleteClusterRequest_descriptor =
-      getDescriptor().getMessageTypes().get(16);
+      getDescriptor().getMessageTypes().get(20);
     internal_static_onpremises_DeleteClusterRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_onpremises_DeleteClusterRequest_descriptor,
         new java.lang.String[] { "Name", "DcName", });
     internal_static_onpremises_DeleteClusterResponse_descriptor =
-      getDescriptor().getMessageTypes().get(17);
+      getDescriptor().getMessageTypes().get(21);
     internal_static_onpremises_DeleteClusterResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_onpremises_DeleteClusterResponse_descriptor,
         new java.lang.String[] { });
     internal_static_onpremises_ListPartiallyRegisteredClustersRequest_descriptor =
-      getDescriptor().getMessageTypes().get(18);
+      getDescriptor().getMessageTypes().get(22);
     internal_static_onpremises_ListPartiallyRegisteredClustersRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_onpremises_ListPartiallyRegisteredClustersRequest_descriptor,
         new java.lang.String[] { "PageSize", "PageToken", });
     internal_static_onpremises_ListPartiallyRegisteredClustersResponse_descriptor =
-      getDescriptor().getMessageTypes().get(19);
+      getDescriptor().getMessageTypes().get(23);
     internal_static_onpremises_ListPartiallyRegisteredClustersResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_onpremises_ListPartiallyRegisteredClustersResponse_descriptor,
         new java.lang.String[] { "PartiallyRegisteredClusterData", "NextPageToken", });
     internal_static_onpremises_ExtractSetupScriptRequest_descriptor =
-      getDescriptor().getMessageTypes().get(20);
+      getDescriptor().getMessageTypes().get(24);
     internal_static_onpremises_ExtractSetupScriptRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_onpremises_ExtractSetupScriptRequest_descriptor,
         new java.lang.String[] { });
     internal_static_onpremises_ExtractSetupScriptResponse_descriptor =
-      getDescriptor().getMessageTypes().get(21);
+      getDescriptor().getMessageTypes().get(25);
     internal_static_onpremises_ExtractSetupScriptResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_onpremises_ExtractSetupScriptResponse_descriptor,
         new java.lang.String[] { "InstallerScript", "OlderAgentRpmLocation", "LatestAgentRpmLocation", "AgentDebianLocation", });
     internal_static_onpremises_ExtractCertificateRefreshScriptRequest_descriptor =
-      getDescriptor().getMessageTypes().get(22);
+      getDescriptor().getMessageTypes().get(26);
     internal_static_onpremises_ExtractCertificateRefreshScriptRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_onpremises_ExtractCertificateRefreshScriptRequest_descriptor,
         new java.lang.String[] { });
     internal_static_onpremises_ExtractCertificateRefreshScriptResponse_descriptor =
-      getDescriptor().getMessageTypes().get(23);
+      getDescriptor().getMessageTypes().get(27);
     internal_static_onpremises_ExtractCertificateRefreshScriptResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_onpremises_ExtractCertificateRefreshScriptResponse_descriptor,
         new java.lang.String[] { "RefreshPackage", "Filename", });
     internal_static_onpremises_UpdateClusterStateRequest_descriptor =
-      getDescriptor().getMessageTypes().get(24);
+      getDescriptor().getMessageTypes().get(28);
     internal_static_onpremises_UpdateClusterStateRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_onpremises_UpdateClusterStateRequest_descriptor,
         new java.lang.String[] { "ClusterCrn", });
     internal_static_onpremises_UpdateClusterStateResponse_descriptor =
-      getDescriptor().getMessageTypes().get(25);
+      getDescriptor().getMessageTypes().get(29);
     internal_static_onpremises_UpdateClusterStateResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_onpremises_UpdateClusterStateResponse_descriptor,
         new java.lang.String[] { "Status", });
     internal_static_onpremises_CheckClusterConnectivityRequest_descriptor =
-      getDescriptor().getMessageTypes().get(26);
+      getDescriptor().getMessageTypes().get(30);
     internal_static_onpremises_CheckClusterConnectivityRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_onpremises_CheckClusterConnectivityRequest_descriptor,
         new java.lang.String[] { "ClusterCrn", "ServiceName", });
     internal_static_onpremises_CheckClusterConnectivityResponse_descriptor =
-      getDescriptor().getMessageTypes().get(27);
+      getDescriptor().getMessageTypes().get(31);
     internal_static_onpremises_CheckClusterConnectivityResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_onpremises_CheckClusterConnectivityResponse_descriptor,
         new java.lang.String[] { });
     internal_static_onpremises_DeletePartiallyRegisteredClusterRequest_descriptor =
-      getDescriptor().getMessageTypes().get(28);
+      getDescriptor().getMessageTypes().get(32);
     internal_static_onpremises_DeletePartiallyRegisteredClusterRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_onpremises_DeletePartiallyRegisteredClusterRequest_descriptor,
         new java.lang.String[] { "ClusterCrn", });
     internal_static_onpremises_DeletePartiallyRegisteredClusterResponse_descriptor =
-      getDescriptor().getMessageTypes().get(29);
+      getDescriptor().getMessageTypes().get(33);
     internal_static_onpremises_DeletePartiallyRegisteredClusterResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_onpremises_DeletePartiallyRegisteredClusterResponse_descriptor,
         new java.lang.String[] { });
     internal_static_onpremises_PartiallyRegisteredClusterData_descriptor =
-      getDescriptor().getMessageTypes().get(30);
+      getDescriptor().getMessageTypes().get(34);
     internal_static_onpremises_PartiallyRegisteredClusterData_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_onpremises_PartiallyRegisteredClusterData_descriptor,
-        new java.lang.String[] { "Id", "ClusterCrn", "DatacenterName", "IpAddress", "Port", "ServiceName", "ClusterType", "IsSecure", "ClusterConnectivityState", "CreatedBy", "CreatedAt", "UpdatedAt", "Primary", "CcmVersion", "RegistrationStatus", "AgentCrn", "PvcCrn", "KnoxUrl", });
+        new java.lang.String[] { "Id", "ClusterCrn", "DatacenterName", "IpAddress", "Port", "ServiceName", "ClusterType", "IsSecure", "ClusterConnectivityState", "CreatedBy", "CreatedAt", "UpdatedAt", "Primary", "RegistrationStatus", "AgentCrn", "PvcCrn", "KnoxUrl", });
     internal_static_onpremises_SetupClusterConnectivityRequest_descriptor =
-      getDescriptor().getMessageTypes().get(31);
+      getDescriptor().getMessageTypes().get(35);
     internal_static_onpremises_SetupClusterConnectivityRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_onpremises_SetupClusterConnectivityRequest_descriptor,
-        new java.lang.String[] { "IpAddress", "Port", "DatacenterName", "IsSecure", "ClusterType", "ServiceName", "KnoxIpAddress", "KnoxPort", "KnoxUrl", "IsUpgrade", "TlsType", "CmUrl", });
+        new java.lang.String[] { "IpAddress", "Port", "DatacenterName", "IsSecure", "ClusterType", "ServiceName", "KnoxIpAddress", "KnoxPort", "KnoxUrl", "TlsType", "CmUrl", });
     internal_static_onpremises_SetupClusterConnectivityResponse_descriptor =
-      getDescriptor().getMessageTypes().get(32);
+      getDescriptor().getMessageTypes().get(36);
     internal_static_onpremises_SetupClusterConnectivityResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_onpremises_SetupClusterConnectivityResponse_descriptor,
         new java.lang.String[] { "KeyId", "Status", "InvertingProxyHostName", "CauseOfFailure", "Certificate", "AgentCrn", });
     internal_static_onpremises_DescribePartiallyRegisteredClusterRequest_descriptor =
-      getDescriptor().getMessageTypes().get(33);
+      getDescriptor().getMessageTypes().get(37);
     internal_static_onpremises_DescribePartiallyRegisteredClusterRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_onpremises_DescribePartiallyRegisteredClusterRequest_descriptor,
         new java.lang.String[] { "ClusterCrn", });
     internal_static_onpremises_DescribePartiallyRegisteredClusterResponse_descriptor =
-      getDescriptor().getMessageTypes().get(34);
+      getDescriptor().getMessageTypes().get(38);
     internal_static_onpremises_DescribePartiallyRegisteredClusterResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_onpremises_DescribePartiallyRegisteredClusterResponse_descriptor,
         new java.lang.String[] { "PartiallyRegisteredClusterData", });
     internal_static_onpremises_RegisterAgentRequest_descriptor =
-      getDescriptor().getMessageTypes().get(35);
+      getDescriptor().getMessageTypes().get(39);
     internal_static_onpremises_RegisterAgentRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_onpremises_RegisterAgentRequest_descriptor,
         new java.lang.String[] { "ClusterCrn", });
     internal_static_onpremises_RegisterAgentResponse_descriptor =
-      getDescriptor().getMessageTypes().get(36);
+      getDescriptor().getMessageTypes().get(40);
     internal_static_onpremises_RegisterAgentResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_onpremises_RegisterAgentResponse_descriptor,
         new java.lang.String[] { "ClusterCrn", "Status", "Certificate", "CdpEndpoint", "AgentDetails", });
     internal_static_onpremises_AgentDetails_descriptor =
-      getDescriptor().getMessageTypes().get(37);
+      getDescriptor().getMessageTypes().get(41);
     internal_static_onpremises_AgentDetails_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_onpremises_AgentDetails_descriptor,
         new java.lang.String[] { "AgentCrn", "Certificate", "ClusterCrn", "AccessKeyId", "EncipheredAccessKey", "EncipheredPrivateKey", });
     internal_static_onpremises_Cluster_descriptor =
-      getDescriptor().getMessageTypes().get(38);
+      getDescriptor().getMessageTypes().get(42);
     internal_static_onpremises_Cluster_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_onpremises_Cluster_descriptor,
-        new java.lang.String[] { "ClusterCrn", "Name", "DatacenterName", "Id", "IpAddress", "ClusterType", "State", "Description", "LocationId", "LastCreateTime", "LastUpdatedTime", "UpdatedUtc", "Data", "KnoxEnabled", "KnoxUrl", "Username", "Password", "AllowUntrusted", "BehindGateway", "ManagerType", "ManagerUri", "CreatedBy", "ConnectivityVersion", "IsUpgradeInProgress", "NewKeyId", "Location", "Properties", "CmClusterUuid", "EnvironmentCrn", "PvcCrn", "OnPremEnvironmentDetails", });
+        new java.lang.String[] { "ClusterCrn", "Name", "DatacenterName", "Id", "IpAddress", "ClusterType", "State", "Description", "LocationId", "LastCreateTime", "LastUpdatedTime", "UpdatedUtc", "Data", "KnoxEnabled", "KnoxUrl", "Username", "Password", "AllowUntrusted", "BehindGateway", "ManagerType", "ManagerUri", "CreatedBy", "ConnectivityVersion", "IsUpgradeInProgress", "NewKeyId", "Location", "Properties", "CmClusterUuid", "EnvironmentCrn", "PvcCrn", "OnPremEnvironmentDetails", "IsValidForDatalake", });
     internal_static_onpremises_OnPremEnvironmentDetails_descriptor =
-      getDescriptor().getMessageTypes().get(39);
+      getDescriptor().getMessageTypes().get(43);
     internal_static_onpremises_OnPremEnvironmentDetails_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_onpremises_OnPremEnvironmentDetails_descriptor,
@@ -64296,7 +68666,7 @@ java.lang.String defaultValue) {
         internal_static_onpremises_OnPremEnvironmentDetails_ApplicationsEntry_descriptor,
         new java.lang.String[] { "Key", "Value", });
     internal_static_onpremises_Application_descriptor =
-      getDescriptor().getMessageTypes().get(40);
+      getDescriptor().getMessageTypes().get(44);
     internal_static_onpremises_Application_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_onpremises_Application_descriptor,
@@ -64314,7 +68684,7 @@ java.lang.String defaultValue) {
         internal_static_onpremises_Application_ConfigEntry_descriptor,
         new java.lang.String[] { "Key", "Value", });
     internal_static_onpremises_Service_descriptor =
-      getDescriptor().getMessageTypes().get(41);
+      getDescriptor().getMessageTypes().get(45);
     internal_static_onpremises_Service_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_onpremises_Service_descriptor,
@@ -64326,97 +68696,109 @@ java.lang.String defaultValue) {
         internal_static_onpremises_Service_ConfigEntry_descriptor,
         new java.lang.String[] { "Key", "Value", });
     internal_static_onpremises_ServiceEndpoint_descriptor =
-      getDescriptor().getMessageTypes().get(42);
+      getDescriptor().getMessageTypes().get(46);
     internal_static_onpremises_ServiceEndpoint_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_onpremises_ServiceEndpoint_descriptor,
         new java.lang.String[] { "Host", "Port", "Uri", });
     internal_static_onpremises_OnPremDatalakeDetails_descriptor =
-      getDescriptor().getMessageTypes().get(43);
+      getDescriptor().getMessageTypes().get(47);
     internal_static_onpremises_OnPremDatalakeDetails_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_onpremises_OnPremDatalakeDetails_descriptor,
         new java.lang.String[] { "DatalakeName", "EnableRangerRaz", "CreationTimeEpochMillis", "CmFqdn", "CmIp", "CmServerId", "Status", "Instances", "KerberosInfo", });
     internal_static_onpremises_Instance_descriptor =
-      getDescriptor().getMessageTypes().get(44);
+      getDescriptor().getMessageTypes().get(48);
     internal_static_onpremises_Instance_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_onpremises_Instance_descriptor,
         new java.lang.String[] { "Id", "Fqdn", "PrivateIp", });
     internal_static_onpremises_KerberosInfo_descriptor =
-      getDescriptor().getMessageTypes().get(45);
+      getDescriptor().getMessageTypes().get(49);
     internal_static_onpremises_KerberosInfo_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_onpremises_KerberosInfo_descriptor,
         new java.lang.String[] { "KdcType", "KerberosRealm", "KdcHost", "KdcHostIp", "Kerberized", });
     internal_static_onpremises_DatalakeStatus_descriptor =
-      getDescriptor().getMessageTypes().get(46);
+      getDescriptor().getMessageTypes().get(50);
     internal_static_onpremises_DatalakeStatus_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_onpremises_DatalakeStatus_descriptor,
         new java.lang.String[] { });
     internal_static_onpremises_ClusterService_descriptor =
-      getDescriptor().getMessageTypes().get(47);
+      getDescriptor().getMessageTypes().get(51);
     internal_static_onpremises_ClusterService_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_onpremises_ClusterService_descriptor,
         new java.lang.String[] { "Name", "Version", "State", });
     internal_static_onpremises_ClusterData_descriptor =
-      getDescriptor().getMessageTypes().get(48);
+      getDescriptor().getMessageTypes().get(52);
     internal_static_onpremises_ClusterData_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_onpremises_ClusterData_descriptor,
         new java.lang.String[] { "Name", "Version", "DisplayName", "Url", "Secured", "KerberosUser", "KerberosTicketLocation", "ClusterDetails", "Stats", });
     internal_static_onpremises_Location_descriptor =
-      getDescriptor().getMessageTypes().get(49);
+      getDescriptor().getMessageTypes().get(53);
     internal_static_onpremises_Location_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_onpremises_Location_descriptor,
         new java.lang.String[] { "Id", "City", "Province", "Country", "Iso2", "Latitude", "Longitude", });
     internal_static_onpremises_ClusterDetails_descriptor =
-      getDescriptor().getMessageTypes().get(50);
+      getDescriptor().getMessageTypes().get(54);
     internal_static_onpremises_ClusterDetails_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_onpremises_ClusterDetails_descriptor,
         new java.lang.String[] { "Name", "DisplayName", "Version", "FullVersion", "MaintenanceMode", "MaintenanceOwners", "ClusterUrl", "HostsUrl", "EntityStatus", "Uuid", "ClouderaManagerClusterType", });
     internal_static_onpremises_ClusterDiscovered_descriptor =
-      getDescriptor().getMessageTypes().get(51);
+      getDescriptor().getMessageTypes().get(55);
     internal_static_onpremises_ClusterDiscovered_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_onpremises_ClusterDiscovered_descriptor,
         new java.lang.String[] { "Name", });
+    internal_static_onpremises_GenerateClusterConnectivitySetupPackageRequest_descriptor =
+      getDescriptor().getMessageTypes().get(56);
+    internal_static_onpremises_GenerateClusterConnectivitySetupPackageRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_onpremises_GenerateClusterConnectivitySetupPackageRequest_descriptor,
+        new java.lang.String[] { "ClusterCrn", });
+    internal_static_onpremises_GenerateClusterConnectivitySetupPackageResponse_descriptor =
+      getDescriptor().getMessageTypes().get(57);
+    internal_static_onpremises_GenerateClusterConnectivitySetupPackageResponse_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_onpremises_GenerateClusterConnectivitySetupPackageResponse_descriptor,
+        new java.lang.String[] { "SetupPackage", });
     internal_static_onpremises_ClusterState_descriptor =
-      getDescriptor().getMessageTypes().get(52);
+      getDescriptor().getMessageTypes().get(58);
     internal_static_onpremises_ClusterState_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_onpremises_ClusterState_descriptor,
         new java.lang.String[] { });
     internal_static_onpremises_ClusterManagerType_descriptor =
-      getDescriptor().getMessageTypes().get(53);
+      getDescriptor().getMessageTypes().get(59);
     internal_static_onpremises_ClusterManagerType_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_onpremises_ClusterManagerType_descriptor,
         new java.lang.String[] { });
     internal_static_onpremises_ClusterType_descriptor =
-      getDescriptor().getMessageTypes().get(54);
+      getDescriptor().getMessageTypes().get(60);
     internal_static_onpremises_ClusterType_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_onpremises_ClusterType_descriptor,
         new java.lang.String[] { });
     internal_static_onpremises_ClouderaManagerClusterType_descriptor =
-      getDescriptor().getMessageTypes().get(55);
+      getDescriptor().getMessageTypes().get(61);
     internal_static_onpremises_ClouderaManagerClusterType_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_onpremises_ClouderaManagerClusterType_descriptor,
         new java.lang.String[] { });
     internal_static_onpremises_ClusterQueryOperator_descriptor =
-      getDescriptor().getMessageTypes().get(56);
+      getDescriptor().getMessageTypes().get(62);
     internal_static_onpremises_ClusterQueryOperator_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_onpremises_ClusterQueryOperator_descriptor,
         new java.lang.String[] { });
     internal_static_onpremises_EntityStatus_descriptor =
-      getDescriptor().getMessageTypes().get(57);
+      getDescriptor().getMessageTypes().get(63);
     internal_static_onpremises_EntityStatus_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_onpremises_EntityStatus_descriptor,
@@ -64445,6 +68827,7 @@ java.lang.String defaultValue) {
     registry.add(com.cloudera.thunderhead.service.common.options.Options.MethodExtension.mutating);
     registry.add(com.cloudera.thunderhead.service.common.options.Options.MethodExtension.paginates);
     registry.add(com.cloudera.thunderhead.service.common.options.Options.MethodExtension.pagingDefaultMaxItems);
+    registry.add(com.cloudera.thunderhead.service.common.options.Options.MethodExtension.resourceResponse);
     registry.add(com.cloudera.thunderhead.service.common.options.Options.ServiceExtension.apiServiceName);
     registry.add(com.cloudera.thunderhead.service.common.options.Options.ServiceExtension.formFactor);
     com.google.protobuf.Descriptors.FileDescriptor

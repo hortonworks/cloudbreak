@@ -3,6 +3,7 @@ package com.sequenceiq.freeipa.service.freeipa.trust.setup;
 import static com.sequenceiq.cloudbreak.orchestrator.salt.utils.OrchestratorExceptionAnalyzer.COMMENT;
 import static com.sequenceiq.freeipa.service.freeipa.trust.setup.TrustSetupValidationService.DOCS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -54,11 +55,15 @@ import com.sequenceiq.freeipa.service.rotation.SaltStateParamsService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.util.IpaTrustAdPackageAvailabilityChecker;
 import com.sequenceiq.remoteenvironment.api.v1.environment.endpoint.RemoteEnvironmentEndpoint;
+import com.sequenceiq.remoteenvironment.api.v1.environment.model.ValidateForDatalakeResponse;
+import com.sequenceiq.remoteenvironment.api.v1.environment.model.ValidateForDatalakeValidationResponse;
 
 @ExtendWith(MockitoExtension.class)
 class TrustSetupValidationServiceTest {
 
     private static final long STACK_ID = 4L;
+
+    private static final String KERBERIZED_FAILED = "failed";
 
     @Mock
     StackService stackService;
@@ -100,6 +105,7 @@ class TrustSetupValidationServiceTest {
         orchestratorExceptionAnalyzer = mockStatic(OrchestratorExceptionAnalyzer.class);
         lenient().when(messagesService.getMessage(any())).thenAnswer(invocation -> invocation.getArgument(0));
         lenient().when(messagesService.getMessageWithArgs(any(), any())).thenAnswer(invocation -> invocation.getArgument(0));
+        lenient().when(messagesService.getMessageIfExists(any())).thenAnswer(invocation -> Optional.of(invocation.getArgument(0)));
     }
 
     @AfterEach
@@ -196,12 +202,12 @@ class TrustSetupValidationServiceTest {
         assertEquals("trust.validation.packageavailability.failure", result.getErrors().get(0).message());
         assertEquals("trust.validation.dns failed", result.getErrors().get(1).message());
         assertEquals("trust.validation.reversedns failed", result.getErrors().get(2).message());
-        assertEquals("trust.validation.kerberos.failure", result.getErrors().get(3).message());
+        assertEquals(KERBERIZED_FAILED, result.getErrors().get(3).message());
         verify(environmentService).getEnvironmentType(anyString());
     }
 
     @Test
-    void testValidateWhenNotKerberized() {
+    void testValidateWhenInvalidCluster() {
         setup(false);
         setUpEnvironmentType(4L, EnvironmentType.HYBRID);
 
@@ -209,24 +215,24 @@ class TrustSetupValidationServiceTest {
 
         assertEquals(1L, result.getErrors().size());
         TaskResult taskResult = result.getErrors().get(0);
-        assertEquals("trust.validation.kerberos.failure", taskResult.message());
-        assertEquals("trust.validation.kerberos.comment.failed", taskResult.additionalParams().get(COMMENT));
+        assertEquals(KERBERIZED_FAILED, taskResult.message());
+        assertEquals("trust.validation.KERBERIZED.comment", taskResult.additionalParams().get(COMMENT));
         assertEquals(DocumentationLinkProvider.hybridSecurityRequirements(), taskResult.additionalParams().get(DOCS));
     }
 
     @Test
-    void testValidateWhenExceptionDuringKerberized() {
+    void testValidateWhenExceptionDuringDatalakeValidation() {
         setup(false);
         RuntimeException e = new RuntimeException("exception");
-        when(remoteEnvironmentEndpoint.getByCrn(any())).thenThrow(e);
+        when(remoteEnvironmentEndpoint.validateForDatalake(any())).thenThrow(e);
         when(webApplicationExceptionMessageExtractor.getErrorMessage(e)).thenReturn("extractedMessage");
         setUpEnvironmentType(4L, EnvironmentType.HYBRID);
 
         TaskResults result = underTest.validateTrustSetup(STACK_ID);
 
         assertEquals(1L, result.getErrors().size());
-        assertEquals("trust.validation.kerberos.failure", result.getErrors().get(0).message());
-        assertEquals("trust.validation.kerberos.comment.missingcrn", result.getErrors().get(0).additionalParams().get(COMMENT));
+        assertEquals("trust.validation.datalake.failure", result.getErrors().get(0).message());
+        assertFalse(result.getErrors().get(0).additionalParams().containsKey(COMMENT));
     }
 
     @Test
@@ -243,8 +249,8 @@ class TrustSetupValidationServiceTest {
         TaskResults result = underTest.validateTrustSetup(STACK_ID);
 
         assertEquals(1L, result.getErrors().size());
-        assertEquals("trust.validation.kerberos.failure", result.getErrors().get(0).message());
-        assertEquals("trust.validation.kerberos.comment.missingcrn", result.getErrors().get(0).additionalParams().get(COMMENT));
+        assertEquals("trust.validation.datalake.failure", result.getErrors().get(0).message());
+        assertEquals("trust.validation.datalake.comment.missingcrn", result.getErrors().get(0).additionalParams().get(COMMENT));
         verify(environmentService).getEnvironmentType(anyString());
     }
 
@@ -260,7 +266,7 @@ class TrustSetupValidationServiceTest {
         setup(true);
     }
 
-    private void setup(boolean kerberized) {
+    private void setup(boolean validForDatalake) {
         CrossRealmTrust crossRealmTrust = new CrossRealmTrust();
         crossRealmTrust.setKdcFqdn("fqdn");
         crossRealmTrust.setKdcIp("ip");
@@ -272,7 +278,14 @@ class TrustSetupValidationServiceTest {
         when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(mock(Stack.class));
         when(freeIpaLoadBalancerService.findByStackId(STACK_ID)).thenReturn(Optional.of(mock()));
         when(saltStateParamsService.createStateParams(any(), any(), anyBoolean(), anyInt(), anyInt())).thenReturn(new OrchestratorStateParams());
-        lenient().when(remoteEnvironmentEndpoint.getByCrn(any())).thenReturn(createEnvironmentResponse(kerberized));
+        ValidateForDatalakeResponse validateForDatalakeResponse = new ValidateForDatalakeResponse();
+        validateForDatalakeResponse.setValid(validForDatalake);
+        ValidateForDatalakeValidationResponse validation = new ValidateForDatalakeValidationResponse();
+        validation.setPassed(validForDatalake);
+        validation.setValidationType("KERBERIZED");
+        validation.setMessage(validForDatalake ? "" : KERBERIZED_FAILED);
+        validateForDatalakeResponse.setValidations(List.of(validation));
+        lenient().when(remoteEnvironmentEndpoint.validateForDatalake(any())).thenReturn(validateForDatalakeResponse);
     }
 
     private DescribeEnvironmentResponse createEnvironmentResponse(boolean kerberized) {
