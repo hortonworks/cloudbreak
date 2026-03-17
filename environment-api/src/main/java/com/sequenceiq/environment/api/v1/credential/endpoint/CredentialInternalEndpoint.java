@@ -1,7 +1,7 @@
 package com.sequenceiq.environment.api.v1.credential.endpoint;
 
 import static com.sequenceiq.environment.api.doc.credential.CredentialDescriptor.CREDENTIAL_DESCRIPTION;
-import static com.sequenceiq.environment.api.doc.credential.CredentialOpDescription.GET_INTERNAL_PREREQUISTIES_BY_CLOUD_PROVIDER;
+import static com.sequenceiq.environment.api.doc.credential.CredentialOpDescription.GET_PREREQUISITES_INTERNAL_BY_CLOUD_PROVIDER;
 
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
@@ -37,8 +37,8 @@ public interface CredentialInternalEndpoint {
     @GET
     @Path("prerequisites/{cloudPlatform}")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = GET_INTERNAL_PREREQUISTIES_BY_CLOUD_PROVIDER,
-            description = CredentialDescriptor.CREDENTIAL_NOTES, operationId = "getPrerequisitesForCloudPlatform",
+    @Operation(summary = GET_PREREQUISITES_INTERNAL_BY_CLOUD_PROVIDER,
+            description = CredentialDescriptor.CREDENTIAL_NOTES, operationId = "getPrerequisitesInternalForCloudPlatform",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     CredentialPrerequisitesResponse getPrerequisitesForCloudPlatform(@PathParam("cloudPlatform") String platform,
             @QueryParam("govCloud") boolean govCloud);
