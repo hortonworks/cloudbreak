@@ -8,13 +8,19 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXUpgradeReplaceVms;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
 import com.sequenceiq.it.cloudbreak.client.ImageCatalogTestClient;
+import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonClusterManagerProperties;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.cluster.DistroXUpgradeTestDto;
+import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
+import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
+import com.sequenceiq.it.cloudbreak.dto.sdx.SdxUpgradeTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
+import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
+import com.sequenceiq.sdx.api.model.SdxUpgradeReplaceVms;
 
 public class DistroXAwsMigrationTest extends AbstractE2ETest {
 
@@ -26,6 +32,9 @@ public class DistroXAwsMigrationTest extends AbstractE2ETest {
 
     @Inject
     private CommonClusterManagerProperties commonClusterManagerProperties;
+
+    @Inject
+    private SdxTestClient sdxTestClient;
 
     @Override
     protected void setupTest(TestContext testContext) {
@@ -46,6 +55,9 @@ public class DistroXAwsMigrationTest extends AbstractE2ETest {
         String targetVersion = commonClusterManagerProperties.getLatestRuntimeVersion();
         createDatalakeWithVersion(testContext, currentVersion);
 
+        SdxInternalTestDto sdxInternalTestDto = testContext.get(SdxInternalTestDto.class);
+        useExistingDatalake(testContext, sdxInternalTestDto.getName());
+
         testContext
                 .given(DistroXTestDto.class)
                 .withTemplate(commonClusterManagerProperties.getDataEngDistroXBlueprintName(currentVersion))
@@ -55,6 +67,18 @@ public class DistroXAwsMigrationTest extends AbstractE2ETest {
                 .await(STACK_AVAILABLE)
                 .awaitForHealthyInstances()
                 .when(distroXTestClient.checkVariant("AWS"))
+                .when(distroXTestClient.stop())
+                .await(STACK_STOPPED)
+                .given(SdxUpgradeTestDto.class)
+                .withReplaceVms(SdxUpgradeReplaceVms.ENABLED)
+                .withRuntime(targetVersion)
+                .given(SdxTestDto.class)
+                .when(sdxTestClient.upgrade())
+                .await(SdxClusterStatusResponse.RUNNING)
+                .given(DistroXTestDto.class)
+                .when(distroXTestClient.start())
+                .await(STACK_AVAILABLE)
+                .awaitForHealthyInstances()
                 .given(DistroXUpgradeTestDto.class)
                 .withReplaceVms(DistroXUpgradeReplaceVms.ENABLED)
                 .withRuntime(targetVersion)
