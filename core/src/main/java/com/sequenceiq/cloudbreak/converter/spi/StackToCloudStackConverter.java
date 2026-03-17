@@ -297,8 +297,9 @@ public class StackToCloudStackConverter {
         }
 
         LOGGER.debug("The volumes are {}.", volumes);
-        return new InstanceTemplate(template.getInstanceType(), name, privateId, volumes, status, fields, template.getId(), instanceImageId,
-                template.getTemporaryStorage(), Optional.ofNullable(template.getInstanceStorageCount()).orElse(0).longValue());
+        return new InstanceTemplate(template.getInstanceType(), template.getFallbackInstanceTypesAsList(), name, privateId, volumes, status, fields,
+                template.getId(), instanceImageId, template.getTemporaryStorage(),
+                Optional.ofNullable(template.getInstanceStorageCount()).orElse(0).longValue());
     }
 
     private List<VolumeTemplate> sortVolumeTemplates(Template template) {

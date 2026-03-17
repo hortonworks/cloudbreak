@@ -49,6 +49,7 @@ public class InstanceTemplateV4RequestToTemplateConverter {
         template.setVolumeTemplates(Sets.newHashSet());
         setVolumesProperty(source.getAttachedVolumes(), Optional.ofNullable(source.getRootVolume()), template, gatewayType);
         template.setInstanceType(source.getInstanceType() == null ? "" : source.getInstanceType());
+        Optional.ofNullable(source.getFallbackInstanceTypes()).map(Json::silent).ifPresent(template::setFallbackInstanceTypes);
         Map<String, Object> parameters = providerParameterCalculator.get(source).asMap();
         Optional.ofNullable(parameters).map(toJson()).ifPresent(template::setAttributes);
         Map<String, Object> secretParameters = providerParameterCalculator.get(source).asSecretMap();

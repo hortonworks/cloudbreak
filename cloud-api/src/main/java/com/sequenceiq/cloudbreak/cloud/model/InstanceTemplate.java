@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.model;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -21,7 +22,7 @@ public class InstanceTemplate extends DynamicModel {
      * is up to the target cloud provider.
      *
      * <p>
-     *     Permitted values are the names of enum constants in {@link EncryptionType}:
+     * Permitted values are the names of enum constants in {@link EncryptionType}:
      *     <ul>
      *         <li>{@code "NONE"}, {@code null}: No encryption key. This setting essentially disables volume encryption.</li>
      *         <li>{@code "DEFAULT"}: Use the default key. This is typically a cloud provider managed encryption key, but can also mean some customer-managed
@@ -41,7 +42,7 @@ public class InstanceTemplate extends DynamicModel {
      * when {@link #VOLUME_ENCRYPTION_KEY_TYPE} equals {@code "CUSTOM"}. Its value will be ignored otherwise.
      *
      * <p>
-     *     When set, the value shall be a nonempty {@link String} containing the ID of the customer-managed encryption key in a cloud provider specific syntax.
+     * When set, the value shall be a nonempty {@link String} containing the ID of the customer-managed encryption key in a cloud provider specific syntax.
      * </p>
      *
      * @see #VOLUME_ENCRYPTION_KEY_TYPE
@@ -50,6 +51,8 @@ public class InstanceTemplate extends DynamicModel {
     public static final String VOLUME_ENCRYPTION_KEY_ID = "key";
 
     private String flavor;
+
+    private List<String> fallbackInstanceTypes;
 
     private String groupName;
 
@@ -67,8 +70,14 @@ public class InstanceTemplate extends DynamicModel {
 
     private Long temporaryStorageCount;
 
+    public InstanceTemplate(String flavor, String groupName, Long privateId, Collection<Volume> volumes, InstanceStatus status, Map<String, Object> parameters,
+            Long templateId, String imageId, TemporaryStorage temporaryStorage, Long temporaryStorageCount) {
+        this(flavor, Collections.emptyList(), groupName, privateId, volumes, status, parameters, templateId, imageId, temporaryStorage, temporaryStorageCount);
+    }
+
     @JsonCreator
     public InstanceTemplate(@JsonProperty("flavor") String flavor,
+            @JsonProperty("fallbackInstanceTypes") List<String> fallbackInstanceTypes,
             @JsonProperty("groupName") String groupName,
             @JsonProperty("privateId") Long privateId,
             @JsonProperty("volumes") Collection<Volume> volumes,
@@ -80,6 +89,7 @@ public class InstanceTemplate extends DynamicModel {
             @JsonProperty("temporaryStorageCount") Long temporaryStorageCount) {
         super(parameters);
         this.flavor = flavor;
+        this.fallbackInstanceTypes = fallbackInstanceTypes;
         this.templateId = templateId;
         this.groupName = groupName;
         this.privateId = privateId;
@@ -92,6 +102,14 @@ public class InstanceTemplate extends DynamicModel {
 
     public String getFlavor() {
         return flavor;
+    }
+
+    public List<String> getFallbackInstanceTypes() {
+        return fallbackInstanceTypes;
+    }
+
+    public void setFallbackInstanceTypes(List<String> fallbackInstanceTypes) {
+        this.fallbackInstanceTypes = fallbackInstanceTypes;
     }
 
     public List<Volume> getVolumes() {

@@ -1,5 +1,9 @@
 package com.sequenceiq.cloudbreak.domain;
 
+import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import jakarta.persistence.CascadeType;
@@ -59,6 +63,10 @@ public class Template implements ProvisionEntity, WorkspaceAwareResource {
     @Convert(converter = JsonToString.class)
     @Column(columnDefinition = "TEXT")
     private Json attributes;
+
+    @Convert(converter = JsonToString.class)
+    @Column(columnDefinition = "TEXT")
+    private Json fallbackInstanceTypes;
 
     @Convert(converter = SecretToString.class)
     @SecretValue
@@ -169,6 +177,27 @@ public class Template implements ProvisionEntity, WorkspaceAwareResource {
 
     public void setAttributes(Json attributes) {
         this.attributes = attributes;
+    }
+
+    public Json getFallbackInstanceTypes() {
+        return fallbackInstanceTypes;
+    }
+
+    public List<String> getFallbackInstanceTypesAsList() {
+        return Optional.ofNullable(fallbackInstanceTypes)
+                .filter(instanceTypesJson -> instanceTypesJson.getValue() != null)
+                .map(instanceTypesJson -> {
+                    try {
+                        return (List<String>) instanceTypesJson.get(List.class);
+                    } catch (IOException e) {
+                        return null;
+                    }
+                })
+                .orElse(Collections.emptyList());
+    }
+
+    public void setFallbackInstanceTypes(Json fallbackInstanceTypes) {
+        this.fallbackInstanceTypes = fallbackInstanceTypes;
     }
 
     public String getSecretAttributes() {

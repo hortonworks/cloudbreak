@@ -101,6 +101,8 @@ class MetadataSetupServiceTest {
 
     private static final String INSTANCE_NAME = "INSTANCE_NAME";
 
+    private static final String INSTANCE_TYPE = "INSTANCE_NAME";
+
     private static final String AVAILABILITY_ZONE = "AVAILABILITY_ZONE";
 
     private static final String RACK_ID = "/RACK_ID";
@@ -245,7 +247,7 @@ class MetadataSetupServiceTest {
         instanceGroup.setId(INSTANCE_GROUP_ID);
         instanceGroup.setGroupName(GROUP_NAME);
         Template template = new Template();
-        template.setInstanceType("large");
+        template.setInstanceType(INSTANCE_TYPE);
         instanceGroup.setTemplate(template);
         Set<InstanceGroup> instanceGroupSet = new TreeSet<>();
         instanceGroupSet.add(instanceGroup);
@@ -270,7 +272,7 @@ class MetadataSetupServiceTest {
         assertEquals(CREATED, instanceMetaData.getInstanceStatus());
         assertNotNull(instanceMetaData.getImage());
         assertEquals(imageJson, instanceMetaData.getImage());
-        assertEquals("large", instanceMetaData.getProviderInstanceType());
+        assertEquals(INSTANCE_TYPE, instanceMetaData.getProviderInstanceType());
     }
 
     @Test
@@ -645,7 +647,7 @@ class MetadataSetupServiceTest {
         CloudInstance cloudInstance = new CloudInstance(null, instanceTemplate, null, null, null, params);
         CloudVmInstanceStatus cloudVmInstanceStatus = new CloudVmInstanceStatus(cloudInstance, instanceStatus);
         CloudInstanceMetaData cloudInstanceMetaData =
-                new CloudInstanceMetaData(PRIVATE_IP, PUBLIC_IP, SSH_PORT, LOCALITY_INDICATOR, CloudInstanceLifeCycle.SPOT);
+                new CloudInstanceMetaData(PRIVATE_IP, PUBLIC_IP, INSTANCE_TYPE, SSH_PORT, LOCALITY_INDICATOR, CloudInstanceLifeCycle.SPOT);
         CloudVmMetaDataStatus cloudVmMetaDataStatus = new CloudVmMetaDataStatus(cloudVmInstanceStatus, cloudInstanceMetaData);
         return List.of(cloudVmMetaDataStatus);
     }

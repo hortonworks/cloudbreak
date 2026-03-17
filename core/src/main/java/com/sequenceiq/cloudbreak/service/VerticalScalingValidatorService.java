@@ -48,6 +48,7 @@ import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
 import com.sequenceiq.cloudbreak.domain.VolumeUsageType;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
 import com.sequenceiq.cloudbreak.service.multiaz.ProviderBasedMultiAzSetupValidator;
@@ -166,7 +167,8 @@ public class VerticalScalingValidatorService {
             boolean validateMultiAz = stack.isMultiAz() && providerBasedMultiAzSetupValidator.getAvailabilityZoneConnector(stack) != null;
             String availabilityZone = stack.getAvailabilityZone();
             String region = stack.getRegion();
-            String currentInstanceType = instanceGroup.getTemplate().getInstanceType();
+            String currentInstanceType = getCurrentInstanceType(instanceGroup);
+            Optional<String> providerInstanceType = instanceGroup.getInstanceMetaData().stream().findFirst().map(InstanceMetaData::getProviderInstanceType);
             Credential credential = credentialService.getByEnvironmentCrn(stack.getEnvironmentCrn());
             ExtendedCloudCredential cloudCredential = credentialToExtendedCloudCredentialConverter.convert(credential);
             Json attributes = instanceGroup.getTemplate().getAttributes();
@@ -191,6 +193,17 @@ public class VerticalScalingValidatorService {
                             .collect(Collectors.joining(", ")))
             );
         }
+    }
+
+    private String getCurrentInstanceType(InstanceGroup instanceGroup) {
+        String templateInstanceType = instanceGroup.getTemplate().getInstanceType();
+        List<String> alternativeInstanceTypes = instanceGroup.getTemplate().getFallbackInstanceTypesAsList();
+        Optional<String> providerInstanceType = instanceGroup.getInstanceMetaData().stream().findFirst().map(InstanceMetaData::getProviderInstanceType);
+        if (providerInstanceType.isPresent()
+                && alternativeInstanceTypes.stream().anyMatch(instanceType -> instanceType.equalsIgnoreCase(providerInstanceType.get()))) {
+            return providerInstanceType.get();
+        }
+        return templateInstanceType;
     }
 
     private boolean anyAttachedVolumePropertyDefinedInVerticalScalingRequest(StackVerticalScaleV4Request verticalScaleV4Request) {
@@ -279,7 +292,7 @@ public class VerticalScalingValidatorService {
                 .findFirst();
 
         CloudConnector cloudConnector = cloudPlatformConnectors.get(platform(
-                stack.getCloudPlatform()),
+                        stack.getCloudPlatform()),
                 Variant.variant(stack.getPlatformVariant()));
         PlatformParameters parameters = cloudConnector.parameters();
         DiskTypes diskTypes = parameters.diskTypes();

@@ -42,6 +42,7 @@ public class InstanceTemplateV1ToInstanceTemplateV4Converter {
         response.setYarn(getIfNotNull(source.getYarn(), instanceTemplateParameterConverter::convert));
         response.setCloudPlatform(source.getCloudPlatform());
         response.setInstanceType(source.getInstanceType());
+        response.setFallbackInstanceTypes(source.getFallbackInstanceTypes());
         response.setTemporaryStorage(source.getTemporaryStorage());
         return response;
     }

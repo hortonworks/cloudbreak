@@ -13,6 +13,8 @@ public class CloudInstanceMetaData {
 
     private final String publicIp;
 
+    private final String instanceType;
+
     private final int sshPort;
 
     private final String localityIndicator;
@@ -23,8 +25,8 @@ public class CloudInstanceMetaData {
         this(privateIp, publicIp, (String) null);
     }
 
-    public CloudInstanceMetaData(String privateIp, String publicIp, CloudInstanceLifeCycle lifeCycle) {
-        this(privateIp, publicIp, DEFAULT_SSH_PORT, null, lifeCycle);
+    public CloudInstanceMetaData(String privateIp, String publicIp, String actualInstanceType, CloudInstanceLifeCycle lifeCycle) {
+        this(privateIp, publicIp, actualInstanceType, DEFAULT_SSH_PORT, null, lifeCycle);
     }
 
     public CloudInstanceMetaData(String privateIp, String publicIp, String localityIndicator) {
@@ -32,17 +34,19 @@ public class CloudInstanceMetaData {
     }
 
     public CloudInstanceMetaData(String privateIp, String publicIp, int sshPort, String localityIndicator) {
-        this(privateIp, publicIp, sshPort, localityIndicator, CloudInstanceLifeCycle.getDefault());
+        this(privateIp, publicIp, null, sshPort, localityIndicator, CloudInstanceLifeCycle.getDefault());
     }
 
     @JsonCreator
     public CloudInstanceMetaData(@JsonProperty("privateIp") String privateIp,
             @JsonProperty("publicIp") String publicIp,
+            @JsonProperty("instanceType") String instanceType,
             @JsonProperty("sshPort") int sshPort,
             @JsonProperty("localityIndicator") String localityIndicator,
             @JsonProperty("lifeCycle") CloudInstanceLifeCycle lifeCycle) {
         this.privateIp = privateIp;
         this.publicIp = publicIp;
+        this.instanceType = instanceType;
         this.localityIndicator = localityIndicator;
         this.sshPort = sshPort;
         this.lifeCycle = lifeCycle;
@@ -54,6 +58,10 @@ public class CloudInstanceMetaData {
 
     public String getPublicIp() {
         return publicIp;
+    }
+
+    public String getInstanceType() {
+        return instanceType;
     }
 
     public int getSshPort() {
@@ -74,6 +82,7 @@ public class CloudInstanceMetaData {
         return "InstanceMetaData{"
                 + ", privateIp='" + privateIp + '\''
                 + ", publicIp='" + publicIp + '\''
+                + ", instanceType='" + instanceType + '\''
                 + ", localityIndicator='" + localityIndicator + '\''
                 + ", lifeCycle='" + lifeCycle + '\''
                 + '}';

@@ -40,6 +40,7 @@ public class TemplateToInstanceTemplateV4ResponseConverter {
                 .collect(Collectors.toSet()));
         response.setDatabaseVolume(databaseVolume(source));
         response.setInstanceType(source.getInstanceType());
+        response.setFallbackInstanceTypes(source.getFallbackInstanceTypesAsList());
         Json attributes = source.getAttributes();
         if (attributes != null) {
             Map<String, Object> parameters = attributes.getMap();

@@ -191,6 +191,7 @@ public class AwsMetadataCollector implements MetadataCollector {
             CloudInstanceMetaData cloudInstanceMetaData = new CloudInstanceMetaData(
                     selectedInstance.privateIpAddress(),
                     selectedInstance.publicIpAddress(),
+                    selectedInstance.instanceTypeAsString(),
                     awsLifeCycleMapper.getLifeCycle(selectedInstance));
             LOGGER.info("New CloudInstance: {}", newCloudInstance);
             LOGGER.info("Cloud instance metadata: {}", cloudInstanceMetaData);
@@ -310,6 +311,7 @@ public class AwsMetadataCollector implements MetadataCollector {
                     CloudInstanceMetaData cloudInstanceMetaData = new CloudInstanceMetaData(
                             instance.privateIpAddress(),
                             instance.publicIpAddress(),
+                            instance.instanceTypeAsString(),
                             awsLifeCycleMapper.getLifeCycle(instance));
                     CloudVmInstanceStatus cloudVmInstanceStatus = new CloudVmInstanceStatus(cloudInstance, cloudInstance.getTemplate().getStatus());
                     CloudVmMetaDataStatus newMetadataStatus = new CloudVmMetaDataStatus(cloudVmInstanceStatus, cloudInstanceMetaData);

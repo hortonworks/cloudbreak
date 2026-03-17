@@ -12,6 +12,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -21,6 +22,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
@@ -78,6 +80,9 @@ class TemplateValidatorAndUpdaterTest {
     @Mock
     private HostEncryptionProvider hostEncryptionProvider;
 
+    @Mock
+    private EntitlementService entitlementService;
+
     @InjectMocks
     private TemplateValidatorAndUpdater templateValidatorAndUpdater;
 
@@ -112,8 +117,8 @@ class TemplateValidatorAndUpdaterTest {
                 .thenReturn(cloudVmTypes);
         when(locationService.location(any(), any())).thenReturn("eu-west-1");
         when(emptyVolumeSetFilter.filterOutVolumeSetsWhichAreEmpty(template)).thenReturn(template);
-        when(resourceDiskPropertyCalculator.updateWithResourceDiskAttached(credential, template, m5xlarge)).thenReturn(template);
-        when(hostEncryptionProvider.updateWithHostEncryption(environmentResponse, credential, template, m5xlarge)).thenReturn(template);
+        when(resourceDiskPropertyCalculator.updateWithResourceDiskAttached(any(), any(), any())).thenReturn(instanceGroup.getTemplate());
+        when(hostEncryptionProvider.updateWithHostEncryption(any(), any(), any(), any())).thenReturn(instanceGroup.getTemplate());
 
         // Create a ValidationResult.ValidationResultBuilder
         ValidationResult.ValidationResultBuilder validationBuilder = ValidationResult.builder();
@@ -126,6 +131,106 @@ class TemplateValidatorAndUpdaterTest {
         assertTrue(validationResult.hasError());
         assertEquals(validationResult.getErrors().getFirst(),
                 "The 'm5xlarge' instance type's architecture 'x86_64' is not matching requested architecture 'arm64'");
+    }
+
+    @Test
+    void testValidateArchitectureAndFallbackInstanceType() {
+        Credential credential = Credential.builder()
+                .build();
+        DetailedEnvironmentResponse environmentResponse = mock(DetailedEnvironmentResponse.class);
+        InstanceGroup instanceGroup = new InstanceGroup();
+        Template template = new Template();
+        template.setAttributes(new Json(Map.of()));
+        template.setCloudPlatform(CloudPlatform.AWS.name());
+        template.setInstanceType("m5xlarge");
+        template.setFallbackInstanceTypes(new Json(List.of("m5large")));
+        template.setVolumeTemplates(Set.of());
+        instanceGroup.setTemplate(template);
+        CloudVmTypes cloudVmTypes = new CloudVmTypes();
+        VmTypeMeta vmTypeMeta = VmTypeMeta.VmTypeMetaBuilder.builder().withArchitecture(Architecture.X86_64).create();
+        VmType m5large = vmTypeWithMeta("m5large", vmTypeMeta, true);
+        cloudVmTypes.setCloudVmResponses(Map.of("eu-west-1", Set.of(m5large)));
+        PlatformParameters platformParameters = mock(PlatformParameters.class);
+        Stack stack = new Stack();
+        stack.setArchitecture(Architecture.ARM64);
+
+        when(extendedCloudCredentialConverter.convert(any()))
+                .thenReturn(new ExtendedCloudCredential(
+                        new CloudCredential(),
+                        "MOCK",
+                        "",
+                        "account",
+                        new ArrayList<>()));
+        when(cloudParameterService.getVmTypesV2(any(), any(), any(), any(), any()))
+                .thenReturn(cloudVmTypes);
+        when(locationService.location(any(), any())).thenReturn("eu-west-1");
+        when(emptyVolumeSetFilter.filterOutVolumeSetsWhichAreEmpty(template)).thenReturn(template);
+        when(resourceDiskPropertyCalculator.updateWithResourceDiskAttached(any(), any(), any())).thenReturn(instanceGroup.getTemplate());
+        when(hostEncryptionProvider.updateWithHostEncryption(any(), any(), any(), any())).thenReturn(instanceGroup.getTemplate());
+        when(entitlementService.isFallbackInstanceTypeEnabled(any())).thenReturn(true);
+
+        // Create a ValidationResult.ValidationResultBuilder
+        ValidationResult.ValidationResultBuilder validationBuilder = ValidationResult.builder();
+
+        // Call the validate method
+        templateValidatorAndUpdater.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATAHUB, validationBuilder);
+
+        // Assert that there are no errors in the ValidationResult
+        ValidationResult validationResult = validationBuilder.build();
+        assertTrue(validationResult.hasError());
+        assertEquals(validationResult.getErrors().getFirst(),
+                "The 'm5large' instance type's architecture 'x86_64' is not matching requested architecture 'arm64'");
+    }
+
+    @Test
+    void testValidateNoInstanceTypeFallbackInstanceType() {
+        Credential credential = Credential.builder()
+                .cloudPlatform(CloudPlatform.AWS.name())
+                .build();
+        DetailedEnvironmentResponse environmentResponse = mock(DetailedEnvironmentResponse.class);
+        InstanceGroup instanceGroup = new InstanceGroup();
+        Template template = new Template();
+        template.setAttributes(new Json(Map.of()));
+        template.setCloudPlatform(CloudPlatform.AWS.name());
+        template.setInstanceType("m5xlarge");
+        template.setFallbackInstanceTypes(new Json(List.of("m5large")));
+        template.setVolumeTemplates(Set.of());
+        instanceGroup.setTemplate(template);
+        CloudVmTypes cloudVmTypes = new CloudVmTypes();
+        VmTypeMeta vmTypeMeta = VmTypeMeta.VmTypeMetaBuilder.builder().withArchitecture(Architecture.X86_64).create();
+        VmType m5xlarge = vmTypeWithMeta("r5xlarge", vmTypeMeta, true);
+        cloudVmTypes.setCloudVmResponses(Map.of("eu-west-1", Set.of(m5xlarge)));
+        PlatformParameters platformParameters = mock(PlatformParameters.class);
+        Stack stack = new Stack();
+        stack.setRegion("eu-west-1");
+        stack.setArchitecture(Architecture.ARM64);
+
+        when(extendedCloudCredentialConverter.convert(any()))
+                .thenReturn(new ExtendedCloudCredential(
+                        new CloudCredential(),
+                        "MOCK",
+                        "",
+                        "account",
+                        new ArrayList<>()));
+        when(cloudParameterService.getVmTypesV2(any(), any(), any(), any(), any()))
+                .thenReturn(cloudVmTypes);
+        when(locationService.location(any(), any())).thenReturn("eu-west-1");
+        when(emptyVolumeSetFilter.filterOutVolumeSetsWhichAreEmpty(template)).thenReturn(template);
+        when(resourceDiskPropertyCalculator.updateWithResourceDiskAttached(credential, template, null)).thenReturn(template);
+        when(hostEncryptionProvider.updateWithHostEncryption(environmentResponse, credential, template, null)).thenReturn(template);
+        when(entitlementService.isFallbackInstanceTypeEnabled(any())).thenReturn(true);
+
+        // Create a ValidationResult.ValidationResultBuilder
+        ValidationResult.ValidationResultBuilder validationBuilder = ValidationResult.builder();
+
+        // Call the validate method
+        templateValidatorAndUpdater.validate(environmentResponse, credential, instanceGroup, stack, CdpResourceType.DATAHUB, validationBuilder);
+
+        // Assert that there are no errors in the ValidationResult
+        ValidationResult validationResult = validationBuilder.build();
+        assertTrue(validationResult.hasError());
+        assertEquals(validationResult.getErrors().getFirst(),
+                "Our platform currently not supporting the '[m5xlarge, m5large]' instance types for 'AWS' in eu-west-1.");
     }
 
     @Test
@@ -144,11 +249,11 @@ class TemplateValidatorAndUpdaterTest {
 
         when(extendedCloudCredentialConverter.convert(any()))
                 .thenReturn(new ExtendedCloudCredential(
-                    new CloudCredential(),
-                    "MOCK",
-                    "",
-                    "account",
-                    new ArrayList<>()));
+                        new CloudCredential(),
+                        "MOCK",
+                        "",
+                        "account",
+                        new ArrayList<>()));
         when(cloudParameterService.getVmTypesV2(any(), any(), any(), any(), any()))
                 .thenReturn(cloudVmTypes);
         when(cloudParameterService.getPlatformParameters())
@@ -322,12 +427,12 @@ class TemplateValidatorAndUpdaterTest {
         CloudVmTypes cloudVmTypes = new CloudVmTypes();
         cloudVmTypes.setCloudVmResponses(Map.of(region, Set.of(
                 vmTypeWithMeta(
-                    instanceType,
-                    VmTypeMeta.VmTypeMetaBuilder.builder()
-                            .withEphemeralConfig(1, 100, 1, 2)
-                            .withMaximumPersistentDisksSizeGb(100L)
-                            .create(),
-                    false
+                        instanceType,
+                        VmTypeMeta.VmTypeMetaBuilder.builder()
+                                .withEphemeralConfig(1, 100, 1, 2)
+                                .withMaximumPersistentDisksSizeGb(100L)
+                                .create(),
+                        false
                 )
         )));
         PlatformParameters platformParameters = mock(PlatformParameters.class);
@@ -357,8 +462,8 @@ class TemplateValidatorAndUpdaterTest {
                 )
         );
         when(locationService.location(any(), any())).thenReturn(region);
-        when(resourceDiskPropertyCalculator.updateWithResourceDiskAttached(any(), any(), any())).thenReturn(instanceGroup.getTemplate());
         when(emptyVolumeSetFilter.filterOutVolumeSetsWhichAreEmpty(any())).thenReturn(instanceGroup.getTemplate());
+        when(resourceDiskPropertyCalculator.updateWithResourceDiskAttached(any(), any(), any())).thenReturn(instanceGroup.getTemplate());
         when(hostEncryptionProvider.updateWithHostEncryption(any(), any(), any(), any())).thenReturn(instanceGroup.getTemplate());
 
         ValidationResult.ValidationResultBuilder validationBuilder = ValidationResult.builder();
@@ -427,8 +532,8 @@ class TemplateValidatorAndUpdaterTest {
                 )
         );
         when(locationService.location(any(), any())).thenReturn(region);
-        when(resourceDiskPropertyCalculator.updateWithResourceDiskAttached(any(), any(), any())).thenReturn(instanceGroup.getTemplate());
         when(emptyVolumeSetFilter.filterOutVolumeSetsWhichAreEmpty(any())).thenReturn(instanceGroup.getTemplate());
+        when(resourceDiskPropertyCalculator.updateWithResourceDiskAttached(any(), any(), any())).thenReturn(instanceGroup.getTemplate());
         when(hostEncryptionProvider.updateWithHostEncryption(any(), any(), any(), any())).thenReturn(instanceGroup.getTemplate());
 
         ValidationResult.ValidationResultBuilder validationBuilder = ValidationResult.builder();

@@ -234,6 +234,9 @@ public class MetadataSetupService {
         if (!StringUtils.hasText(instanceMetaDataEntry.getProviderInstanceType())) {
             instanceMetaDataEntry.setProviderInstanceType(instanceGroup.getTemplate() != null ? instanceGroup.getTemplate().getInstanceType() : null);
         }
+        if (md.getInstanceType() != null) {
+            instanceMetaDataEntry.setProviderInstanceType(md.getInstanceType());
+        }
         instanceMetaDataEntry.setInstanceId(instanceId);
         instanceMetaDataEntry.setPrivateId(privateId);
         instanceMetaDataEntry.setStartDate(clock.getCurrentTimeMillis());

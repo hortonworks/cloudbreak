@@ -1,6 +1,7 @@
 package com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template;
 
 import java.io.Serializable;
+import java.util.List;
 
 import jakarta.validation.Valid;
 
@@ -33,12 +34,23 @@ public class InstanceTemplateV1Base implements Serializable, CloudPlatformProvid
     @Schema(description = TemplateModelDescription.INSTANCE_TYPE)
     private String instanceType;
 
+    @Schema(description = TemplateModelDescription.FALLBACK_INSTANCE_TYPES)
+    private List<String> fallbackInstanceTypes;
+
     public String getInstanceType() {
         return instanceType;
     }
 
     public void setInstanceType(String instanceType) {
         this.instanceType = instanceType;
+    }
+
+    public List<String> getFallbackInstanceTypes() {
+        return fallbackInstanceTypes;
+    }
+
+    public void setFallbackInstanceTypes(List<String> fallbackInstanceTypes) {
+        this.fallbackInstanceTypes = fallbackInstanceTypes;
     }
 
     @Override

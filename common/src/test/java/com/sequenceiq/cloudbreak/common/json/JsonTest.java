@@ -133,6 +133,7 @@ class JsonTest {
                 Arguments.of(Map.of("key1", "value1", "key2", 2), "{\"key1\":\"value1\",\"key2\":2}"),
                 Arguments.of(Map.of("nested", Map.of("innerKey", "innerValue")), "{\"nested\":{\"innerKey\":\"innerValue\"}}"),
                 Arguments.of(Map.of("list", java.util.List.of(1, 2, 3)), "{\"list\":[1,2,3]}"),
+                Arguments.of(java.util.List.of(1, 2, 3), "[1,2,3]"),
                 Arguments.of(featureSetting, "{\"enabled\":true}")
         );
     }

@@ -45,6 +45,7 @@ public class ModelDescriptions {
         public static final String DATABASE_VOLUME_SIZE = "size of the database volume";
         public static final String DATABASE_VOLUME_TYPE = "type of the database volume";
         public static final String INSTANCE_TYPE = "type of the instance";
+        public static final String FALLBACK_INSTANCE_TYPES = "fallback instance types in case instance type is not available";
         public static final String AWS_PARAMETERS = "aws specific parameters for template";
         public static final String GCP_PARAMETERS = "gcp specific parameters for template";
         public static final String OPENSTACK_PARAMETERS = "openstack specific parameters for template";

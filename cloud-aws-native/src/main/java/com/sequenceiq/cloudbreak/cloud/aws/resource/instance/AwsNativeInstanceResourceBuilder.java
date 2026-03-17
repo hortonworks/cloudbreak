@@ -27,6 +27,7 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.UpdateType;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTaggingService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
@@ -36,6 +37,8 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsImdsUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsMethodExecutor;
 import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsStackNameCommonUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsInstanceView;
+import com.sequenceiq.cloudbreak.cloud.aws.resource.instance.util.InstanceCreationContext;
+import com.sequenceiq.cloudbreak.cloud.aws.resource.instance.util.InstanceTypeRetryExceptionMatcher;
 import com.sequenceiq.cloudbreak.cloud.aws.resource.instance.util.SecurityGroupBuilderUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.view.AwsCloudStackView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -58,6 +61,7 @@ import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.common.model.AwsDiskType;
 
+import software.amazon.awssdk.awscore.exception.AwsServiceException;
 import software.amazon.awssdk.services.ec2.model.AttributeValue;
 import software.amazon.awssdk.services.ec2.model.BlockDeviceMapping;
 import software.amazon.awssdk.services.ec2.model.DescribeInstancesRequest;
@@ -111,6 +115,9 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
     @Inject
     private SshKeyNameGenerator sshKeyNameGenerator;
 
+    @Inject
+    private EntitlementService entitlementService;
+
     @Override
     public List<CloudResource> create(AwsContext context, CloudInstance instance, long privateId, AuthenticatedContext auth, Group group, Image image) {
         CloudContext cloudContext = auth.getCloudContext();
@@ -134,12 +141,11 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
             throw new CloudConnectorException("Buildable resources cannot be empty!");
         }
         AmazonEc2Client amazonEc2Client = context.getAmazonEc2Client();
-        InstanceTemplate instanceTemplate = group.getReferenceInstanceTemplate();
-        AwsCloudStackView awsCloudStackView = new AwsCloudStackView(cloudStack);
         CloudResource cloudResource = buildableResource.get(0);
+        InstanceTemplate instanceTemplate = group.getReferenceInstanceTemplate();
         String instanceName = awsStackNameCommonUtil.getInstanceName(ac, group.getName(), privateId);
         Optional<Instance> existedOpt = resourceByNameAndStackId(amazonEc2Client, instanceName, cloudStack);
-        Instance instance;
+        Instance instance = null;
         if (existedOpt.isPresent()) {
             instance = existedOpt.get();
             LOGGER.info("Instance exists with name: {} ({}), check the state: {}", cloudResource.getName(), instance.instanceId(),
@@ -149,41 +155,87 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
                 amazonEc2Client.startInstances(StartInstancesRequest.builder().instanceIds(instance.instanceId()).build());
             }
         } else {
-            LOGGER.info("Create new instance with name: {}", cloudResource.getName());
-            Map<String, String> tags = new HashMap<>(awsCloudStackView.getTags());
-            tags.putIfAbsent("Name", instanceName);
-            tags.putIfAbsent("instanceGroup", group.getName());
-            TagSpecification tagSpecificationOfInstance = awsTaggingService.prepareEc2TagSpecification(tags,
-                    software.amazon.awssdk.services.ec2.model.ResourceType.INSTANCE);
-            TagSpecification tagSpecificationOfVolume = awsTaggingService.prepareEc2TagSpecification(tags,
-                    software.amazon.awssdk.services.ec2.model.ResourceType.VOLUME);
-            RunInstancesRequest.Builder builder = RunInstancesRequest.builder()
-                    .instanceType(instanceTemplate.getFlavor())
-                    .imageId(cloudStack.getImage().getImageName())
-                    .subnetId(cloudInstance.getSubnetId())
-                    .securityGroupIds(securityGroupBuilderUtil.getSecurityGroupIds(context, group))
-                    .ebsOptimized(isEbsOptimized(instanceTemplate))
-                    .tagSpecifications(tagSpecificationOfInstance, tagSpecificationOfVolume)
-                    .iamInstanceProfile(getIamInstanceProfile(group))
-                    .userData(getUserData(cloudStack, group, cloudInstance))
-                    .minCount(1)
-                    .maxCount(1)
-                    .blockDeviceMappings(blocks(group, cloudStack, ac))
-                    .keyName(sshKeyNameGenerator.getKeyPairName(ac, cloudStack));
-            if (StringUtils.equals(cloudStack.getSupportedImdsVersion(), AWS_IMDS_VERSION_V2)) {
-                builder.metadataOptions(InstanceMetadataOptionsRequest.builder()
-                        .httpTokens(HttpTokensState.REQUIRED)
-                        .build());
+            if (entitlementService.isFallbackInstanceTypeEnabled(ac.getCloudContext().getAccountId())) {
+                instance = createNewInstanceWithInstanceTypeRetry(new InstanceCreationContext(context, ac, amazonEc2Client), cloudInstance, group, cloudStack,
+                        cloudResource, instanceName, instanceTemplate);
+            } else {
+                instance = createNewInstance(new InstanceCreationContext(context, ac, amazonEc2Client), cloudInstance, group, cloudStack,
+                        cloudResource, instanceName, instanceTemplate.getFlavor());
             }
-            RunInstancesRequest request = builder.build();
-            RunInstancesResponse instanceResponse = amazonEc2Client.createInstance(request);
-            instance = instanceResponse.instances().get(0);
-
-            LOGGER.info("Instance creation initiated for resource: {} and instance id: {}", cloudResource, instance.instanceId());
         }
         cloudResource.setInstanceId(instance.instanceId());
         cloudInstance.getTemplate().putParameter(CloudResource.ARCHITECTURE, instance.architecture().name());
         return buildableResource;
+    }
+
+    private void shouldRetryWithDifferentInstanceType(AwsServiceException e, String instanceType) {
+        if (InstanceTypeRetryExceptionMatcher.isInstanceTypeNotSupported(e)) {
+            LOGGER.info("Instance creation with instance type {} was not successful. " +
+                    "Retrying instance creation with different instance type.", instanceType, e);
+        } else {
+            throw e;
+        }
+    }
+
+    private Instance createNewInstanceWithInstanceTypeRetry(InstanceCreationContext ic, CloudInstance cloudInstance, Group group,
+            CloudStack cloudStack, CloudResource cloudResource, String instanceName, InstanceTemplate instanceTemplate) {
+        Instance instance = null;
+        List<String> possibleInstanceTypes = new ArrayList<>();
+        possibleInstanceTypes.add(instanceTemplate.getFlavor());
+        possibleInstanceTypes.addAll(Optional.ofNullable(instanceTemplate.getFallbackInstanceTypes()).orElse(List.of()));
+        AwsServiceException exceptionDuringCreation = null;
+        for (String instanceType : possibleInstanceTypes) {
+            try {
+                instance = createNewInstance(ic, cloudInstance, group, cloudStack, cloudResource, instanceName, instanceType);
+                LOGGER.info("Successfully created instance using instance type: {}", instanceType);
+                break;
+            } catch (AwsServiceException e) {
+                exceptionDuringCreation = e;
+                shouldRetryWithDifferentInstanceType(e, instanceType);
+            }
+        }
+        if (instance == null) {
+            throw exceptionDuringCreation;
+        }
+        return instance;
+    }
+
+    private Instance createNewInstance(InstanceCreationContext ic, CloudInstance cloudInstance,
+            Group group, CloudStack cloudStack, CloudResource cloudResource, String instanceName, String instanceType) {
+        Instance instance;
+        AwsCloudStackView awsCloudStackView = new AwsCloudStackView(cloudStack);
+        LOGGER.info("Create new instance with name: {}", cloudResource.getName());
+        Map<String, String> tags = new HashMap<>(awsCloudStackView.getTags());
+        tags.putIfAbsent("Name", instanceName);
+        tags.putIfAbsent("instanceGroup", group.getName());
+        TagSpecification tagSpecificationOfInstance = awsTaggingService.prepareEc2TagSpecification(tags,
+                software.amazon.awssdk.services.ec2.model.ResourceType.INSTANCE);
+        TagSpecification tagSpecificationOfVolume = awsTaggingService.prepareEc2TagSpecification(tags,
+                software.amazon.awssdk.services.ec2.model.ResourceType.VOLUME);
+        RunInstancesRequest.Builder builder = RunInstancesRequest.builder()
+                .instanceType(instanceType)
+                .imageId(cloudStack.getImage().getImageName())
+                .subnetId(cloudInstance.getSubnetId())
+                .securityGroupIds(securityGroupBuilderUtil.getSecurityGroupIds(ic.context(), group))
+                .ebsOptimized(isEbsOptimized(group.getReferenceInstanceTemplate()))
+                .tagSpecifications(tagSpecificationOfInstance, tagSpecificationOfVolume)
+                .iamInstanceProfile(getIamInstanceProfile(group))
+                .userData(getUserData(cloudStack, group, cloudInstance))
+                .minCount(1)
+                .maxCount(1)
+                .blockDeviceMappings(blocks(group, cloudStack, ic.auth()))
+                .keyName(sshKeyNameGenerator.getKeyPairName(ic.auth(), cloudStack));
+        if (StringUtils.equals(cloudStack.getSupportedImdsVersion(), AWS_IMDS_VERSION_V2)) {
+            builder.metadataOptions(InstanceMetadataOptionsRequest.builder()
+                    .httpTokens(HttpTokensState.REQUIRED)
+                    .build());
+        }
+        RunInstancesRequest request = builder.build();
+        RunInstancesResponse instanceResponse = ic.amazonEc2Client().createInstance(request);
+        instance = instanceResponse.instances().get(0);
+
+        LOGGER.info("Instance creation initiated for resource: {} and instance id: {}", cloudResource, instance.instanceId());
+        return instance;
     }
 
     @Override
@@ -308,10 +360,10 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
                 }
             } catch (Ec2Exception e) {
                 if (e.awsErrorDetails().errorCode().contains(NOT_FOUND) && !creation) {
-                    LOGGER.info("Aws resource does not found: {}", e.getMessage());
-                    return new CloudResourceStatus(resource, ResourceStatus.DELETED, "AWS resource does not found");
+                    LOGGER.info("Aws resource not found: {}", e.getMessage());
+                    return new CloudResourceStatus(resource, ResourceStatus.DELETED, "AWS resource not found");
                 } else {
-                    LOGGER.error("Cannot finished instance {}: {}", operation, e.getMessage(), e);
+                    LOGGER.error("Cannot finish instance {}: {}", operation, e.getMessage(), e);
                     throw e;
                 }
             }

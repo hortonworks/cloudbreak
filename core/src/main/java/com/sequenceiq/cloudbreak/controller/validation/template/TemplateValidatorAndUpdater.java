@@ -3,9 +3,11 @@ package com.sequenceiq.cloudbreak.controller.validation.template;
 import static com.sequenceiq.cloudbreak.constant.AwsPlatformResourcesFilterConstants.ARCHITECTURE;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
@@ -24,6 +26,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.base.Suppliers;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
@@ -87,6 +90,9 @@ public class TemplateValidatorAndUpdater {
     @Inject
     private HostEncryptionProvider hostEncryptionProvider;
 
+    @Inject
+    private EntitlementService entitlementService;
+
     @Value("${cb.doc.urls.supportedInstanceTypes:https://www.cloudera.com/products/pricing/cdp-public-cloud-service-rates.html}")
     private String supportedVmTypesDocPageLink;
 
@@ -121,17 +127,17 @@ public class TemplateValidatorAndUpdater {
             Platform platform = Platform.platform(template.getCloudPlatform());
             Map<String, Set<VmType>> machines = cloudVmTypes.getCloudVmResponses();
             String locationString = locationService.location(stack.getRegion(), stack.getAvailabilityZone());
+            List<String> possibleInstanceTypes = new ArrayList<>();
+            possibleInstanceTypes.add(template.getInstanceType());
+            if (entitlementService.isFallbackInstanceTypeEnabled(credential.getAccount())) {
+                possibleInstanceTypes.addAll(template.getFallbackInstanceTypesAsList());
+            }
             if (machines.containsKey(locationString) && !machines.get(locationString).isEmpty()) {
-                for (VmType type : machines.get(locationString)) {
-                    if (type.value().equals(template.getInstanceType())) {
-                        vmType = type;
-                        break;
-                    }
-                }
+                vmType = selectVmTypeOrNull(possibleInstanceTypes, machines, locationString, vmType);
                 if (vmType == null) {
-                    LOGGER.info("Instance type not found {} at location {}. Available instances: {}", template.getInstanceType(), locationString,
+                    LOGGER.info("Instance type not found {} at location {}. Available instances: {}", possibleInstanceTypes, locationString,
                             machines.get(locationString).stream().map(StringType::value).toList());
-                    validationBuilder.error(getInvalidVmTypeErrorMessage(template.getInstanceType(), platform.value(), stack.getRegion()));
+                    validationBuilder.error(getInvalidVmTypeErrorMessage(possibleInstanceTypes, platform.value(), stack.getRegion()));
                 } else {
                     validateArchitecture(vmType, stack, validationBuilder);
                 }
@@ -144,8 +150,19 @@ public class TemplateValidatorAndUpdater {
         }
     }
 
+    private VmType selectVmTypeOrNull(List<String> possibleInstanceTypes, Map<String, Set<VmType>> machines, String locationString, VmType vmType) {
+        for (String instanceType : possibleInstanceTypes) {
+            for (VmType type : machines.get(locationString)) {
+                if (type.value().equals(instanceType)) {
+                    return type;
+                }
+            }
+        }
+        return null;
+    }
+
     public void validateGroupForVerticalScale(Credential credential, InstanceGroup instanceGroup, Stack stack,
-        CdpResourceType stackType, ValidationResult.ValidationResultBuilder validationBuilder) {
+            CdpResourceType stackType, ValidationResult.ValidationResultBuilder validationBuilder) {
         Template template = instanceGroup.getTemplate();
         CloudVmTypes cloudVmTypes = cloudParameterService.getVmTypesV2(
                 extendedCloudCredentialConverter.convert(credential),
@@ -347,13 +364,13 @@ public class TemplateValidatorAndUpdater {
         return volumeParameterType != null && volumeParameterType != VolumeParameterType.EPHEMERAL || value != null;
     }
 
-    private String getInvalidVmTypeErrorMessage(String instanceType, String platform, String region) {
-        String baseMsg = "Our platform currently not supporting the '%s' instance type for '%s' in %s.";
+    private String getInvalidVmTypeErrorMessage(List<String> instanceTypes, String platform, String region) {
+        String baseMsg = "Our platform currently not supporting the '%s' instance types for '%s' in %s.";
         if (isEmpty(supportedVmTypesDocPageLink)) {
-            return String.format(baseMsg, instanceType, platform, region);
+            return String.format(baseMsg, instanceTypes, platform, region);
         }
-        return String.format("Our platform currently not supporting the '%s' instance type for '%s' in %s." +
-                " You can find the supported types here: %s", instanceType, platform, region, supportedVmTypesDocPageLink);
+        return String.format("Our platform currently not supporting the '%s' instance types for '%s' in %s." +
+                " You can find the supported types here: %s", instanceTypes, platform, region, supportedVmTypesDocPageLink);
     }
 
 }

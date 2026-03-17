@@ -235,6 +235,7 @@ public class AwsNativeMetadataCollector implements MetadataCollector {
             CloudInstanceMetaData cloudInstanceMetaData = new CloudInstanceMetaData(
                     instance.privateIpAddress(),
                     instance.publicIpAddress(),
+                    instance.instanceTypeAsString(),
                     awsLifeCycleMapper.getLifeCycle(instance));
             CloudVmInstanceStatus cloudVmInstanceStatus = new CloudVmInstanceStatus(updatedInstance, updatedInstance.getTemplate().getStatus());
             CloudVmMetaDataStatus newMetadataStatus = new CloudVmMetaDataStatus(cloudVmInstanceStatus, cloudInstanceMetaData);

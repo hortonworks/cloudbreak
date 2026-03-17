@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base;
 
+import java.util.List;
+
 import jakarta.validation.Valid;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -44,12 +46,23 @@ public class InstanceTemplateV4Base extends ProviderParametersBase implements Js
     @Schema(description = TemplateModelDescription.INSTANCE_TYPE)
     private String instanceType;
 
+    @Schema(description = TemplateModelDescription.FALLBACK_INSTANCE_TYPES)
+    private List<String> fallbackInstanceTypes;
+
     public String getInstanceType() {
         return instanceType;
     }
 
     public void setInstanceType(String instanceType) {
         this.instanceType = instanceType;
+    }
+
+    public List<String> getFallbackInstanceTypes() {
+        return fallbackInstanceTypes;
+    }
+
+    public void setFallbackInstanceTypes(List<String> fallbackInstanceTypes) {
+        this.fallbackInstanceTypes = fallbackInstanceTypes;
     }
 
     @Override
