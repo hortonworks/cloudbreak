@@ -15,6 +15,8 @@ import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsPtrRecordRequest;
+import com.sequenceiq.freeipa.api.v1.dns.model.DeleteDnsPtrRecordRequest;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.client.FreeIpaClientExceptionUtil;
@@ -25,6 +27,8 @@ import com.sequenceiq.freeipa.entity.LoadBalancer;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
+import com.sequenceiq.freeipa.service.freeipa.dns.DnsPtrRecordService;
+import com.sequenceiq.freeipa.service.freeipa.dns.DnsRecordConflictException;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
 @Service
@@ -53,6 +57,9 @@ public class FreeIpaLoadBalancerDomainService {
     @Inject
     private FreeIpaClientFactory freeIpaClientFactory;
 
+    @Inject
+    private DnsPtrRecordService dnsPtrRecordService;
+
     public void registerLbDomain(Long stackId, FreeIpaClient freeIpaClient) throws FreeIpaClientException, PemDnsEntryCreateOrUpdateException {
         Optional<LoadBalancer> loadBalancer = loadBalancerService.findByStackId(stackId);
         if (loadBalancer.isPresent()) {
@@ -60,13 +67,36 @@ public class FreeIpaLoadBalancerDomainService {
             FreeIpa freeIpa = freeIpaService.findByStackId(stackId);
             for (String ip : lb.getIp()) {
                 String msg = "LB A record with endpoint [{}], IP [{}], domain [{}] already exists, nothing to do";
-                FreeIpaClientRunnable ipaClientRunnable = () -> freeIpaClient.addDnsARecord(freeIpa.getDomain(), lb.getEndpoint(), ip, true);
+                FreeIpaClientRunnable ipaClientRunnable = () -> freeIpaClient.addDnsARecord(freeIpa.getDomain(), lb.getEndpoint(), ip, false);
                 FreeIpaClientExceptionUtil.ignoreEmptyModOrDuplicateException(ipaClientRunnable, msg, lb.getEndpoint(), lb.getIp(), freeIpa.getDomain());
+                createPtrRecord(ip, freeIpa, lb);
             }
             Stack stack = freeIpa.getStack();
             if (manageLbDomainInPem(stack.getCloudPlatform())) {
                 performLoadBalancerDNSUpdateOnPEM(lb, stack.getEnvironmentCrn(), stack.getAccountId());
             }
+        }
+    }
+
+    private void createPtrRecord(String ip, FreeIpa freeIpa, LoadBalancer lb) throws FreeIpaClientException {
+        String accountId = freeIpa.getStack().getAccountId();
+        String environmentCrn = freeIpa.getStack().getEnvironmentCrn();
+
+        AddDnsPtrRecordRequest request = new AddDnsPtrRecordRequest();
+        request.setFqdn(lb.getEndpoint() + "." + freeIpa.getDomain());
+        request.setIp(ip);
+        request.setEnvironmentCrn(environmentCrn);
+
+        try {
+            dnsPtrRecordService.addDnsPtrRecord(request, accountId);
+        } catch (DnsRecordConflictException e) {
+            LOGGER.info("Deleting conflicting PTR record");
+            DeleteDnsPtrRecordRequest delRequest = new DeleteDnsPtrRecordRequest();
+            delRequest.setEnvironmentCrn(environmentCrn);
+            delRequest.setIp(ip);
+            dnsPtrRecordService.deleteDnsPtrRecord(delRequest, accountId);
+            LOGGER.info("Conflicting PTR record deleted. Proceeding to create PTR record for the load balancer");
+            dnsPtrRecordService.addDnsPtrRecord(request, accountId);
         }
     }
 
