@@ -168,32 +168,6 @@ class ClouderaManagerKraftMigrationServiceTest {
     }
 
     @Test
-    void testMigrateZookeeperToKraftWhenCommandIsRetryable() throws ApiException, CloudbreakException {
-        ApiService kafkaService = new ApiService().name(KAFKA_SERVICE_NAME).type(KAFKA_SERVICE_TYPE);
-        ApiServiceList serviceList = new ApiServiceList().items(List.of(kafkaService));
-        ApiCommand previousMigrationCommand = new ApiCommand().id(COMMAND_ID).active(false).success(false).canRetry(true);
-        ExtendedPollingResult pollingResult = new ExtendedPollingResult.ExtendedPollingResultBuilder()
-                .success()
-                .build();
-
-        when(stackDtoDelegate.getStack()).thenReturn(stackView);
-        when(clouderaManagerApiFactory.getServicesResourceApi(apiClient)).thenReturn(servicesResourceApi);
-        when(clouderaManagerApiFactory.getClustersResourceApi(apiClient)).thenReturn(clustersResourceApi);
-        when(servicesResourceApi.readServices(eq(CLUSTER_NAME), any())).thenReturn(serviceList);
-        when(syncApiCommandRetriever.getCommandId("KRaftMigrationCommand", clustersResourceApi, stackView)).thenReturn(Optional.of(COMMAND_ID));
-        when(clouderaManagerCommandsService.getApiCommand(apiClient, COMMAND_ID)).thenReturn(previousMigrationCommand);
-        when(clouderaManagerCommandsService.retryApiCommand(apiClient, COMMAND_ID)).thenReturn(previousMigrationCommand);
-        when(clouderaManagerPollingServiceProvider.startPollingZookeeperToKraftMigration(
-                eq(stackDtoDelegate), eq(apiClient), eq(COMMAND_ID))).thenReturn(pollingResult);
-
-        underTest.migrateZookeeperToKraft(apiClient, stackDtoDelegate);
-
-        verify(clouderaManagerCommandsService).retryApiCommand(eq(apiClient), eq(COMMAND_ID));
-        verify(clouderaManagerPollingServiceProvider).startPollingZookeeperToKraftMigration(
-                eq(stackDtoDelegate), eq(apiClient), eq(COMMAND_ID));
-    }
-
-    @Test
     void testKraftMigrationWhenPreviousCommandIsNotRetryable() throws ApiException, CloudbreakException {
         ApiService kafkaService = new ApiService().name(KAFKA_SERVICE_NAME).type(KAFKA_SERVICE_TYPE);
         ApiServiceList serviceList = new ApiServiceList().items(List.of(kafkaService));
@@ -302,32 +276,6 @@ class ClouderaManagerKraftMigrationServiceTest {
     }
 
     @Test
-    void testFinalizeKraftMigrationWhenPreviousCommandIsRetryable() throws ApiException, CloudbreakException {
-        ApiService kafkaService = new ApiService().name(KAFKA_SERVICE_NAME).type(KAFKA_SERVICE_TYPE);
-        ApiServiceList serviceList = new ApiServiceList().items(List.of(kafkaService));
-        ApiCommand previousMigrationCommand = new ApiCommand().id(COMMAND_ID).active(false).success(false).canRetry(true);
-        ExtendedPollingResult pollingResult = new ExtendedPollingResult.ExtendedPollingResultBuilder()
-                .success()
-                .build();
-
-        when(stackDtoDelegate.getStack()).thenReturn(stackView);
-        when(clouderaManagerApiFactory.getServicesResourceApi(apiClient)).thenReturn(servicesResourceApi);
-        when(clouderaManagerApiFactory.getClustersResourceApi(apiClient)).thenReturn(clustersResourceApi);
-        when(servicesResourceApi.readServices(eq(CLUSTER_NAME), any())).thenReturn(serviceList);
-        when(syncApiCommandRetriever.getCommandId("KRaftFinalizeMigrationCommand", clustersResourceApi, stackView)).thenReturn(Optional.of(COMMAND_ID));
-        when(clouderaManagerCommandsService.getApiCommand(apiClient, COMMAND_ID)).thenReturn(previousMigrationCommand);
-        when(clouderaManagerCommandsService.retryApiCommand(apiClient, COMMAND_ID)).thenReturn(previousMigrationCommand);
-        when(clouderaManagerPollingServiceProvider.startPollingFinalizeZookeeperToKraftMigration(
-                eq(stackDtoDelegate), eq(apiClient), eq(COMMAND_ID))).thenReturn(pollingResult);
-
-        underTest.finalizeZookeeperToKraftMigration(apiClient, stackDtoDelegate);
-
-        verify(clouderaManagerCommandsService).retryApiCommand(eq(apiClient), eq(COMMAND_ID));
-        verify(clouderaManagerPollingServiceProvider).startPollingFinalizeZookeeperToKraftMigration(
-                eq(stackDtoDelegate), eq(apiClient), eq(COMMAND_ID));
-    }
-
-    @Test
     void testFinalizeKraftMigrationWhenPreviousCommandIsNotRetryable() throws ApiException, CloudbreakException {
         ApiService kafkaService = new ApiService().name(KAFKA_SERVICE_NAME).type(KAFKA_SERVICE_TYPE);
         ApiServiceList serviceList = new ApiServiceList().items(List.of(kafkaService));
@@ -399,32 +347,6 @@ class ClouderaManagerKraftMigrationServiceTest {
                 () -> underTest.rollbackZookeeperToKraftMigration(apiClient, stackDtoDelegate));
         assertEquals("Timeout during waiting for command API to be available (Zookeeper to KRaft migration rollback)",
                 expectedException.getMessage());
-    }
-
-    @Test
-    void testRollbackKraftMigrationWhenCommandIsRetryable() throws ApiException, CloudbreakException {
-        ApiService kafkaService = new ApiService().name(KAFKA_SERVICE_NAME).type(KAFKA_SERVICE_TYPE);
-        ApiServiceList serviceList = new ApiServiceList().items(List.of(kafkaService));
-        ApiCommand previousMigrationCommand = new ApiCommand().id(COMMAND_ID).active(false).success(false).canRetry(true);
-        ExtendedPollingResult pollingResult = new ExtendedPollingResult.ExtendedPollingResultBuilder()
-                .success()
-                .build();
-
-        when(stackDtoDelegate.getStack()).thenReturn(stackView);
-        when(clouderaManagerApiFactory.getServicesResourceApi(apiClient)).thenReturn(servicesResourceApi);
-        when(clouderaManagerApiFactory.getClustersResourceApi(apiClient)).thenReturn(clustersResourceApi);
-        when(servicesResourceApi.readServices(eq(CLUSTER_NAME), any())).thenReturn(serviceList);
-        when(syncApiCommandRetriever.getCommandId("KRaftRollbackMigrationCommand", clustersResourceApi, stackView)).thenReturn(Optional.of(COMMAND_ID));
-        when(clouderaManagerCommandsService.getApiCommand(apiClient, COMMAND_ID)).thenReturn(previousMigrationCommand);
-        when(clouderaManagerCommandsService.retryApiCommand(apiClient, COMMAND_ID)).thenReturn(previousMigrationCommand);
-        when(clouderaManagerPollingServiceProvider.startPollingRollbackZookeeperToKraftMigration(
-                eq(stackDtoDelegate), eq(apiClient), eq(COMMAND_ID))).thenReturn(pollingResult);
-
-        underTest.rollbackZookeeperToKraftMigration(apiClient, stackDtoDelegate);
-
-        verify(clouderaManagerCommandsService).retryApiCommand(eq(apiClient), eq(COMMAND_ID));
-        verify(clouderaManagerPollingServiceProvider).startPollingRollbackZookeeperToKraftMigration(
-                eq(stackDtoDelegate), eq(apiClient), eq(COMMAND_ID));
     }
 
     @Test
