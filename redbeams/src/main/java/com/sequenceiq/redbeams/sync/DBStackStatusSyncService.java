@@ -148,7 +148,7 @@ public class DBStackStatusSyncService {
             AuthenticatedContext ac = connector.authentication().authenticate(cloudContext, cloudCredential);
             DatabaseStack databaseStack = databaseStackConverter.convert(dbStack);
 
-            Optional<ExternalDatabaseStatus> databaseStatusOptional = ofNullable(connector.resources().getDatabaseServerStatus(ac, databaseStack));
+            Optional<ExternalDatabaseStatus> databaseStatusOptional = ofNullable(connector.resources().getDatabaseServerStatusFailFast(ac, databaseStack));
             Boolean externalDatabaseDeleted = databaseStatusOptional.map(ExternalDatabaseStatus.DELETED::equals).orElse(false);
             if (AZURE.equalsIgnoreCase(dbStack.getCloudPlatform())) {
                 AzureDatabaseType databaseType =
@@ -184,7 +184,7 @@ public class DBStackStatusSyncService {
             LOGGER.debug(":::Auto sync::: Looking for migrated/rolled back {} by reference: {}", flippedDatabaseType.name(), flippedRef);
 
             DatabaseStack flippedStack = convertDatabaseStackToFlipped(databaseStack, flippedDatabaseType.name());
-            ExternalDatabaseStatus status = connector.resources().getDatabaseServerStatus(ac, flippedStack);
+            ExternalDatabaseStatus status = connector.resources().getDatabaseServerStatusFailFast(ac, flippedStack);
             if (!UNACCEPTABLE_STATES.contains(status)) {
                 LOGGER.debug(":::Auto sync::: {} server exists in status: {}, updating resource", flippedDatabaseType.name(), status);
                 updateResourceReference(dbResource, flippedRef);

@@ -345,6 +345,11 @@ public class MockResourceConnector implements ResourceConnector {
 
     @Override
     public ExternalDatabaseStatus getDatabaseServerStatus(AuthenticatedContext authenticatedContext, DatabaseStack stack) {
+        return getDatabaseServerStatusFailFast(authenticatedContext, stack);
+    }
+
+    @Override
+    public ExternalDatabaseStatus getDatabaseServerStatusFailFast(AuthenticatedContext authenticatedContext, DatabaseStack stack) {
         return mockUrlFactory.get(authenticatedContext, "/db")
                 .get(ExternalDatabaseStatus.class);
     }

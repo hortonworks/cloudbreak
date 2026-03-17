@@ -208,6 +208,11 @@ public class AwsResourceConnector implements ResourceConnector {
     }
 
     @Override
+    public ExternalDatabaseStatus getDatabaseServerStatusFailFast(AuthenticatedContext authenticatedContext, DatabaseStack stack) throws Exception {
+        return awsRdsStatusLookupService.getStatus(authenticatedContext, stack);
+    }
+
+    @Override
     public ExternalDatabaseParameters getDatabaseServerParameters(AuthenticatedContext authenticatedContext, DatabaseStack stack) {
         ExternalDatabaseStatus databaseStatus = awsRdsStatusLookupService.getStatus(authenticatedContext, stack);
         return new ExternalDatabaseParameters(databaseStatus, null, null);
