@@ -134,7 +134,7 @@ public class ExternalizedComputeClusterTest extends AbstractE2ETest {
 
     private String validateListClusterResponseAndGetClusterCrn(TestContext testContext, String environmentName) {
         Client client = RestClientUtil.get();
-        WebTarget webTarget = client.target(serverProperties.getCloudbreak()).path("/v1/compute/listClusters");
+        WebTarget webTarget = client.target(serverProperties.getCloudbreak()).path("/api/v1/compute/listClusters");
         webTarget.register(new ApiKeyRequestFilter(testContext.getActingUserAccessKey(), testContext.getActingUser().getSecretKey()));
         String requestjson = String.format("{\"envNameOrCrn\": \"%s\"}", environmentName);
         String response = webTarget.request().post(Entity.json(requestjson)).readEntity(String.class);
