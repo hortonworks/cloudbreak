@@ -57,6 +57,12 @@ public class GcpPlatformParameters implements PlatformParameters {
     @Value("${cb.gcp.zone.parameter.default:europe-west1}")
     private String gcpZoneParameterDefault;
 
+    @Value("${cb.gcp.disk.type.default:pd-standard}")
+    private String defaultDiskType;
+
+    @Value("${cb.gcp.root.disk.type.default:pd-standard}")
+    private String defaultRootDiskType;
+
     @Inject
     private CloudbreakResourceReaderService cloudbreakResourceReaderService;
 
@@ -185,13 +191,14 @@ public class GcpPlatformParameters implements PlatformParameters {
         return disks;
     }
 
-    private DiskType defaultDiskType() {
-        return diskType(GcpDiskType.HDD.value());
+    @Override
+    public DiskType defaultDiskType() {
+        return diskType(defaultDiskType);
     }
 
     @Override
     public DiskType defaultRootDiskType() {
-        return diskType(GcpDiskType.HDD.value());
+        return diskType(defaultRootDiskType);
     }
 
     public String getPrerequisitesCreationCommand(CredentialType type) {

@@ -74,6 +74,12 @@ public class AzurePlatformParameters implements PlatformParameters {
     @Value("${cb.arm.zone.parameter.default:North Europe}")
     private String armZoneParameterDefault;
 
+    @Value("${cb.azure.default.disk.type:StandardSSD_LRS}")
+    private String defaultDiskType;
+
+    @Value("${cb.azure.default.root.disk.type:StandardSSD_LRS}")
+    private String defaultRootDiskType;
+
     @Inject
     private AzureTagValidator azureTagValidator;
 
@@ -141,13 +147,14 @@ public class AzurePlatformParameters implements PlatformParameters {
         return map;
     }
 
-    public static DiskType defaultDiskType() {
-        return diskType(STANDARD_SSD_LRS.value());
+    @Override
+    public DiskType defaultDiskType() {
+        return diskType(defaultDiskType);
     }
 
     @Override
     public DiskType defaultRootDiskType() {
-        return diskType(STANDARD_SSD_LRS.value());
+        return diskType(defaultRootDiskType);
     }
 
     @Override

@@ -1,11 +1,11 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
 import static com.sequenceiq.cloudbreak.cloud.azure.DistroxEnabledInstanceTypes.AZURE_ENABLED_TYPES_LIST;
+import static com.sequenceiq.cloudbreak.cloud.model.DiskType.diskType;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.security.SecureRandom;
 import java.util.HashSet;
@@ -17,7 +17,10 @@ import org.assertj.core.api.Assertions;
 import org.hamcrest.core.IsInstanceOf;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -26,7 +29,8 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceGroupParameterRequest;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceGroupParameterResponse;
 import com.sequenceiq.common.model.Architecture;
 
-public class AzurePlatformParametersTest {
+@ExtendWith(MockitoExtension.class)
+class AzurePlatformParametersTest {
 
     private static final String WORKER_GROUP_NAME = "worker";
 
@@ -50,12 +54,13 @@ public class AzurePlatformParametersTest {
     private AzurePlatformParameters underTest;
 
     @BeforeEach
-    public void setUp() {
-        initMocks(this);
+    void setUp() {
+        ReflectionTestUtils.setField(underTest, "defaultDiskType", AzureDiskType.STANDARD_SSD_LRS.value());
+        ReflectionTestUtils.setField(underTest, "defaultRootDiskType", AzureDiskType.STANDARD_SSD_LRS.value());
     }
 
     @Test
-    public void testAvailabilitySetParameterCollection() {
+    void testAvailabilitySetParameterCollection() {
         Map<String, InstanceGroupParameterResponse> instanceGroupParameterResponseMap =
                 underTest.collectInstanceGroupParameters(Sets.newHashSet(getRequestWithAs(WORKER_GROUP_NAME), getRequestWithoutAs(COMPUTE_GROUP_NAME)));
 
@@ -78,18 +83,24 @@ public class AzurePlatformParametersTest {
     }
 
     @Test
-    public void testDiskTypeChangeSupported() {
+    void testDiskTypeChangeSupported() {
         assertTrue(underTest.specialParameters().getSpecialParameters().get(PlatformParametersConsts.DISK_TYPE_CHANGE_SUPPORTED));
     }
 
     @Test
-    public void testDeleteDiskSupported() {
+    void testDeleteDiskSupported() {
         assertTrue(underTest.specialParameters().getSpecialParameters().get(PlatformParametersConsts.DELETE_VOLUMES_SUPPORTED));
     }
 
     @Test
-    public void testAddDiskSupported() {
+    void testAddDiskSupported() {
         assertTrue(underTest.specialParameters().getSpecialParameters().get(PlatformParametersConsts.ADD_VOLUMES_SUPPORTED));
+    }
+
+    @Test
+    void testDefaultDisks() {
+        assertEquals(diskType(AzureDiskType.STANDARD_SSD_LRS.value()), underTest.defaultDiskType());
+        assertEquals(diskType(AzureDiskType.STANDARD_SSD_LRS.value()), underTest.defaultRootDiskType());
     }
 
     private InstanceGroupParameterRequest getRequestWithoutAs(String groupName) {

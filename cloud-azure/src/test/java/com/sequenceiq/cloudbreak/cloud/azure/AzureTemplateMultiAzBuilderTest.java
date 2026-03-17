@@ -291,7 +291,7 @@ public class AzureTemplateMultiAzBuilderTest {
                 .gatewayUserData(GATEWAY_CUSTOM_DATA)
                 .coreUserData(CORE_CUSTOM_DATA)
                 .build();
-        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
+        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap(), null);
 
         //WHEN
 
@@ -351,7 +351,7 @@ public class AzureTemplateMultiAzBuilderTest {
                 .coreUserData(CORE_CUSTOM_DATA)
                 .multiAz(true)
                 .build();
-        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
+        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap(), null);
 
         //WHEN
 
@@ -420,7 +420,7 @@ public class AzureTemplateMultiAzBuilderTest {
                 .gatewayUserData(GATEWAY_CUSTOM_DATA)
                 .coreUserData(CORE_CUSTOM_DATA)
                 .build();
-        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
+        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap(), null);
 
         //WHEN
 
@@ -591,7 +591,7 @@ public class AzureTemplateMultiAzBuilderTest {
                 .gatewayUserData(GATEWAY_CUSTOM_DATA)
                 .coreUserData(CORE_CUSTOM_DATA)
                 .build();
-        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
+        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap(), null);
 
         //WHEN
         when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
@@ -624,7 +624,7 @@ public class AzureTemplateMultiAzBuilderTest {
                 .gatewayUserData(GATEWAY_CUSTOM_DATA)
                 .coreUserData(CORE_CUSTOM_DATA)
                 .build();
-        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
+        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap(), null);
 
         //WHEN
         when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
@@ -670,7 +670,7 @@ public class AzureTemplateMultiAzBuilderTest {
                 .gatewayUserData(GATEWAY_CUSTOM_DATA)
                 .coreUserData(CORE_CUSTOM_DATA)
                 .build();
-        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
+        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap(), null);
 
         //WHEN
         when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");

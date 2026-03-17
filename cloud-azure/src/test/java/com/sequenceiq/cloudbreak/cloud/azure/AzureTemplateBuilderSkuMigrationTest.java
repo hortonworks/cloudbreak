@@ -188,7 +188,7 @@ public class AzureTemplateBuilderSkuMigrationTest {
                 .build();
 
         AzureStackView azureStackView = new AzureStackView("mystack", 3, groups, mock(AzureStorageView.class),
-                mock(AzureSubnetStrategy.class), Collections.emptyMap());
+                mock(AzureSubnetStrategy.class), Collections.emptyMap(), null);
         return new TestData(cloudContext, cloudStack, azureStackView);
     }
 

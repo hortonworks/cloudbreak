@@ -13,6 +13,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.sequenceiq.cloudbreak.cloud.azure.AzurePlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.azure.subnetstrategy.AzureSubnetStrategy;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
@@ -67,9 +68,13 @@ class AzureStackViewTest {
     @Mock
     private CloudAdlsGen2View cloudAdlsGen2View;
 
+    @Mock
+    private AzurePlatformParameters azurePlatformParameters;
+
     @Test
     void constructorTestWhenNoGroup() {
-        AzureStackView underTest = new AzureStackView(STACK_NAME, STACK_NAME_PREFIX_LENGTH, List.of(), armStorageView, subnetStrategy, Map.of());
+        AzureStackView underTest = new AzureStackView(STACK_NAME, STACK_NAME_PREFIX_LENGTH, List.of(), armStorageView, subnetStrategy, Map.of(),
+                azurePlatformParameters);
 
         Map<String, List<AzureInstanceView>> groups = underTest.getInstancesByGroupType();
         assertThat(groups).isNotNull();
@@ -88,7 +93,8 @@ class AzureStackViewTest {
     void constructorTestWhenGroupGivenWithoutInstance() {
         initGroupBasics();
 
-        AzureStackView underTest = new AzureStackView(STACK_NAME, STACK_NAME_PREFIX_LENGTH, List.of(group), armStorageView, subnetStrategy, Map.of());
+        AzureStackView underTest = new AzureStackView(STACK_NAME, STACK_NAME_PREFIX_LENGTH, List.of(group), armStorageView, subnetStrategy, Map.of(),
+                azurePlatformParameters);
 
         Map<String, List<AzureInstanceView>> groups = underTest.getInstancesByGroupType();
         assertThat(groups).isNotNull();
@@ -104,7 +110,7 @@ class AzureStackViewTest {
         initInstances();
 
         AzureStackView underTest = new AzureStackView(STACK_NAME, STACK_NAME_PREFIX_LENGTH, List.of(group), armStorageView, subnetStrategy,
-                Map.of(INSTANCE_ID, CUSTOM_IMAGE_NAME));
+                Map.of(INSTANCE_ID, CUSTOM_IMAGE_NAME), azurePlatformParameters);
 
         Map<String, List<AzureInstanceView>> groups = underTest.getInstancesByGroupType();
         assertThat(groups).isNotNull();

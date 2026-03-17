@@ -27,7 +27,7 @@ public class AzureStackView {
     private final List<String> instanceGroupNames = new ArrayList<>();
 
     public AzureStackView(String stackName, int stackNamePrefixLength, Iterable<Group> groupList, AzureStorageView armStorageView,
-            AzureSubnetStrategy subnetStrategy, Map<String, String> customImageNamePerInstance) {
+            AzureSubnetStrategy subnetStrategy, Map<String, String> customImageNamePerInstance, AzurePlatformParameters azurePlatformParameters) {
         for (Group group : groupList) {
             String groupType = group.getType().name();
             AzureInstanceGroupView instanceGroupView;
@@ -50,7 +50,7 @@ public class AzureStackView {
                     InstanceTemplate template = instance.getTemplate();
                     String attachedDiskStorageName = armStorageView.getAttachedDiskStorageName(template);
                     String attachedDiskStorageType = group.getRootVolumeType() != null ? group.getRootVolumeType() :
-                            template.getVolumes().isEmpty() ? AzurePlatformParameters.defaultDiskType().value()
+                            template.getVolumes().isEmpty() ? azurePlatformParameters.defaultDiskType().value()
                             : template.getVolumes().getFirst().getType();
                     AzureInstanceView azureInstance = AzureInstanceView.builder(instance)
                             .withStackName(stackName)

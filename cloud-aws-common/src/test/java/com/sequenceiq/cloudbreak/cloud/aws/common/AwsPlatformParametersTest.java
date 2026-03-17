@@ -27,6 +27,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
@@ -85,6 +86,8 @@ class AwsPlatformParametersTest {
 
     @BeforeEach
     void setUp() throws JsonProcessingException {
+        ReflectionTestUtils.setField(underTest, "defaultDiskType", AwsDiskType.Standard.value());
+        ReflectionTestUtils.setField(underTest, "defaultRootDiskType", AwsDiskType.Gp3.value());
         lenient().when(cloudbreakResourceReaderService.resourceDefinition("aws", "vm-recommendation"))
                 .thenReturn(JsonUtil.writeValueAsString(vmRecommendations));
         RESOURCES.forEach(r -> lenient().when(cloudbreakResourceReaderService.resourceDefinition("aws", r))

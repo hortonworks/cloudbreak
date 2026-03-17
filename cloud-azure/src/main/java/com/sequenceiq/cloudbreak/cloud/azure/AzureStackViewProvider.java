@@ -60,6 +60,9 @@ public class AzureStackViewProvider {
     @Inject
     private AzureAddressPrefixProvider azureAddressPrefixProvider;
 
+    @Inject
+    private AzurePlatformParameters azurePlatformParameters;
+
     public AzureStackView getAzureStack(AzureCredentialView azureCredentialView, CloudStack cloudStack, AzureClient client, AuthenticatedContext ac) {
         Map<String, String> customImageNamePerInstance = getCustomImageNamePerInstance(ac, cloudStack);
         Network network = cloudStack.getNetwork();
@@ -68,7 +71,7 @@ public class AzureStackViewProvider {
                 ac.getCloudContext(),
                 azureStorage, azureStorage.getArmAttachedStorageOption(cloudStack.getParameters())),
                 AzureSubnetStrategy.getAzureSubnetStrategy(FILL, azureUtils.getCustomSubnetIds(network), availableIPs),
-                customImageNamePerInstance);
+                customImageNamePerInstance, azurePlatformParameters);
     }
 
     private Map<String, String> getCustomImageNamePerInstance(AuthenticatedContext ac, CloudStack cloudStack) {

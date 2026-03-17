@@ -24,6 +24,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Lists;
@@ -64,6 +65,12 @@ public class AwsPlatformParameters implements PlatformParameters {
     private static final String CDP_SUB_RESOURCE_DIR = "/cdp";
 
     private static final String GOV_CDP_SUB_RESOURCE_DIR = CDP_SUB_RESOURCE_DIR + "/gov";
+
+    @Value("${cb.aws.default.disk.type:standard}")
+    private String defaultDiskType;
+
+    @Value("${cb.aws.default.root.disk.type:gp3}")
+    private String defaultRootDiskType;
 
     @Inject
     private CloudbreakResourceReaderService cloudbreakResourceReaderService;
@@ -165,13 +172,14 @@ public class AwsPlatformParameters implements PlatformParameters {
         return disks;
     }
 
-    private DiskType defaultDiskType() {
-        return diskType(AwsDiskType.Standard.value());
+    @Override
+    public DiskType defaultDiskType() {
+        return diskType(defaultDiskType);
     }
 
     @Override
     public DiskType defaultRootDiskType() {
-        return diskType(AwsDiskType.Gp3.value());
+        return diskType(defaultRootDiskType);
     }
 
     @Override

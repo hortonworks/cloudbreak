@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
+import static com.sequenceiq.cloudbreak.cloud.model.DiskType.diskType;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -48,7 +49,7 @@ import com.sequenceiq.cloudbreak.service.Retry;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 
 @ExtendWith(MockitoExtension.class)
-public class AzureStackViewProviderTest {
+class AzureStackViewProviderTest {
 
     private static final String STACK_NAME = "Test Cluster";
 
@@ -88,12 +89,15 @@ public class AzureStackViewProviderTest {
     @Mock
     private AzureAddressPrefixProvider addressPrefixProvider;
 
+    @Mock
+    private AzurePlatformParameters azurePlatformParameters;
+
     @BeforeEach
-    public void before() {
+    void before() {
         ReflectionTestUtils.setField(underTest, "stackNamePrefixLength", 255);
     }
 
-    public static Collection<Object[]> data() {
+    static Collection<Object[]> data() {
         return Arrays.asList(new Object[][]{
                 {true, null},
                 {false, "id"}
@@ -118,6 +122,7 @@ public class AzureStackViewProviderTest {
         when(network.getStringParameter("networkId")).thenReturn(NETWORK_ID);
         when(azureUtils.getCustomSubnetIds(network)).thenReturn(Collections.emptyList());
         when(azureImageFormatValidator.isMarketplaceImageFormat(IMAGE_ID)).thenReturn(marketplaceImage);
+        when(azurePlatformParameters.defaultDiskType()).thenReturn(diskType(AzureDiskType.STANDARD_SSD_LRS.value()));
 
         AzureStackView actual = underTest.getAzureStack(azureCredentialView, cloudStack, client, ac);
 

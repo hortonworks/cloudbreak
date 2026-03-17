@@ -240,7 +240,7 @@ public class AzureTemplateBuilderMissingMarketplaceTest {
                 .gatewayUserData(GATEWAY_CUSTOM_DATA)
                 .coreUserData(CORE_CUSTOM_DATA)
                 .build();
-        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
+        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap(), null);
         when(azureAcceleratedNetworkValidator.validate(azureStackView, Set.of())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
 
         //WHEN
@@ -309,7 +309,7 @@ public class AzureTemplateBuilderMissingMarketplaceTest {
                 .gatewayUserData(GATEWAY_CUSTOM_DATA)
                 .coreUserData(CORE_CUSTOM_DATA)
                 .build();
-        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
+        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap(), null);
 
         //WHEN
         when(azureAcceleratedNetworkValidator.validate(azureStackView, Set.of())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
@@ -379,7 +379,7 @@ public class AzureTemplateBuilderMissingMarketplaceTest {
                 .gatewayUserData(GATEWAY_CUSTOM_DATA)
                 .coreUserData(CORE_CUSTOM_DATA)
                 .build();
-        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
+        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap(), null);
 
         //WHEN
         when(azureAcceleratedNetworkValidator.validate(azureStackView, Set.of())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
@@ -447,7 +447,7 @@ public class AzureTemplateBuilderMissingMarketplaceTest {
                 .gatewayUserData(GATEWAY_CUSTOM_DATA)
                 .coreUserData(CORE_CUSTOM_DATA)
                 .build();
-        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
+        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap(), null);
 
         //WHEN
         when(azureAcceleratedNetworkValidator.validate(azureStackView, Set.of())).thenReturn(ACCELERATED_NETWORK_SUPPORT);

@@ -277,7 +277,7 @@ public class AzureTemplateBuilderPart2Test {
                 .gatewayUserData(GATEWAY_CUSTOM_DATA)
                 .coreUserData(CORE_CUSTOM_DATA)
                 .build();
-        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
+        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap(), null);
         when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
         String templateString = azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack,
@@ -315,7 +315,7 @@ public class AzureTemplateBuilderPart2Test {
                 .gatewayUserData(GATEWAY_CUSTOM_DATA)
                 .coreUserData(CORE_CUSTOM_DATA)
                 .build();
-        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
+        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap(), null);
         when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
         String templateString = azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack,
@@ -347,7 +347,7 @@ public class AzureTemplateBuilderPart2Test {
                 .gatewayUserData(GATEWAY_CUSTOM_DATA)
                 .coreUserData(CORE_CUSTOM_DATA)
                 .build();
-        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
+        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap(), null);
         when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
         String templateString =
@@ -380,7 +380,7 @@ public class AzureTemplateBuilderPart2Test {
                 .gatewayUserData(GATEWAY_CUSTOM_DATA)
                 .coreUserData(CORE_CUSTOM_DATA)
                 .build();
-        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
+        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap(), null);
         when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
         String templateString =
@@ -416,7 +416,7 @@ public class AzureTemplateBuilderPart2Test {
                 .gatewayUserData(GATEWAY_CUSTOM_DATA)
                 .coreUserData(CORE_CUSTOM_DATA)
                 .build();
-        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
+        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap(), null);
         when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
         String templateString =
@@ -447,7 +447,7 @@ public class AzureTemplateBuilderPart2Test {
                 .gatewayUserData(GATEWAY_CUSTOM_DATA)
                 .coreUserData(CORE_CUSTOM_DATA)
                 .build();
-        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
+        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap(), null);
         when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
         String templateString =
@@ -478,7 +478,7 @@ public class AzureTemplateBuilderPart2Test {
                 .gatewayUserData(GATEWAY_CUSTOM_DATA)
                 .coreUserData(CORE_CUSTOM_DATA)
                 .build();
-        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
+        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap(), null);
         when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
         String templateString =
@@ -515,7 +515,7 @@ public class AzureTemplateBuilderPart2Test {
                 .gatewayUserData(GATEWAY_CUSTOM_DATA)
                 .coreUserData(CORE_CUSTOM_DATA)
                 .build();
-        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
+        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap(), null);
         when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
         String templateString =
@@ -561,7 +561,7 @@ public class AzureTemplateBuilderPart2Test {
                 .gatewayUserData(GATEWAY_CUSTOM_DATA)
                 .coreUserData(CORE_CUSTOM_DATA)
                 .build();
-        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
+        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap(), null);
         when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
         when(azureUtils.isExistingNetwork(any())).thenReturn(true);
@@ -615,7 +615,7 @@ public class AzureTemplateBuilderPart2Test {
                 .gatewayUserData(GATEWAY_CUSTOM_DATA)
                 .coreUserData(CORE_CUSTOM_DATA)
                 .build();
-        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
+        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap(), null);
         when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
         when(azureUtils.isExistingNetwork(any())).thenReturn(false);
@@ -660,7 +660,7 @@ public class AzureTemplateBuilderPart2Test {
                 .gatewayUserData(GATEWAY_CUSTOM_DATA)
                 .coreUserData(CORE_CUSTOM_DATA)
                 .build();
-        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
+        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap(), null);
         when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
         when(azureUtils.isExistingNetwork(any())).thenReturn(false);
@@ -699,7 +699,7 @@ public class AzureTemplateBuilderPart2Test {
                 .gatewayUserData(GATEWAY_CUSTOM_DATA)
                 .coreUserData(CORE_CUSTOM_DATA)
                 .build();
-        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
+        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap(), null);
         when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
         String templateString =
@@ -763,7 +763,7 @@ public class AzureTemplateBuilderPart2Test {
                 .gatewayUserData(GATEWAY_CUSTOM_DATA)
                 .coreUserData(CORE_CUSTOM_DATA)
                 .build();
-        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
+        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap(), null);
         when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
         String templateString =
@@ -804,7 +804,7 @@ public class AzureTemplateBuilderPart2Test {
                 .gatewayUserData(GATEWAY_CUSTOM_DATA)
                 .coreUserData(CORE_CUSTOM_DATA)
                 .build();
-        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
+        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap(), null);
         when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
         String templateString =
@@ -860,7 +860,7 @@ public class AzureTemplateBuilderPart2Test {
                 .gatewayUserData(GATEWAY_CUSTOM_DATA)
                 .coreUserData(CORE_CUSTOM_DATA)
                 .build();
-        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
+        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap(), null);
         when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
         when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
         when(azureUtils.getCustomResourceGroupName(any())).thenReturn("custom-resource-group-name");

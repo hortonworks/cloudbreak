@@ -280,7 +280,7 @@ public class AzureTemplateBuilderFreeIpaTest {
         cloudStack = new CloudStack(groups, network, image, parameters, tags, "",
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(),
                 null, loadBalancers, null, GATEWAY_CUSTOM_DATA, CORE_CUSTOM_DATA, false, null);
-        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, emptyMap());
+        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, emptyMap(), null);
 
         //WHEN
         when(azureAcceleratedNetworkValidator.validate(azureStackView, Set.of())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
@@ -335,7 +335,7 @@ public class AzureTemplateBuilderFreeIpaTest {
                 .gatewayUserData(GATEWAY_CUSTOM_DATA)
                 .coreUserData(CORE_CUSTOM_DATA)
                 .build();
-        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, emptyMap());
+        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, emptyMap(), null);
 
         //WHEN
         when(azureAcceleratedNetworkValidator.validate(azureStackView, Set.of())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
@@ -395,7 +395,7 @@ public class AzureTemplateBuilderFreeIpaTest {
                 .coreUserData(CORE_CUSTOM_DATA)
                 .multiAz(true)
                 .build();
-        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, emptyMap());
+        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, emptyMap(), null);
 
         //WHEN
         when(azureAcceleratedNetworkValidator.validate(azureStackView, Set.of())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
@@ -457,7 +457,7 @@ public class AzureTemplateBuilderFreeIpaTest {
                 .coreUserData(CORE_CUSTOM_DATA)
                 .multiAz(true)
                 .build();
-        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, emptyMap());
+        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, emptyMap(), null);
 
         //WHEN
         when(azureAcceleratedNetworkValidator.validate(azureStackView, Set.of())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
@@ -511,7 +511,7 @@ public class AzureTemplateBuilderFreeIpaTest {
                 .gatewayUserData(GATEWAY_CUSTOM_DATA)
                 .coreUserData(CORE_CUSTOM_DATA)
                 .build();
-        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, emptyMap());
+        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, emptyMap(), null);
 
         //WHEN
         when(azureAcceleratedNetworkValidator.validate(azureStackView, Set.of())).thenReturn(ACCELERATED_NETWORK_SUPPORT);

@@ -115,9 +115,18 @@ public interface PlatformParameters {
     }
 
     /**
-     * Default DiskType of a platform
+     * Default disk type of a platform
      *
-     * @return the {@link DiskType} of a platform
+     * @return the default {@link DiskType} of a platform
+     */
+    default DiskType defaultDiskType() {
+        return null;
+    }
+
+    /**
+     * Default root disk type of a platform
+     *
+     * @return the default root {@link DiskType} of a platform
      */
     default DiskType defaultRootDiskType() {
         return null;
