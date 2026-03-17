@@ -68,13 +68,21 @@ public class DiskUsageSyncJobService implements JobSchedulerService {
 
     public void schedule(StackView stack) {
         if (properties.isDiskUsageSyncEnabled()) {
-            scheduleJob(new DiskUsageSyncJobAdapter(stack.getId(), applicationContext));
+            try {
+                scheduleJob(new DiskUsageSyncJobAdapter(stack.getId(), applicationContext));
+            } catch (Exception e) {
+                LOGGER.error("Error during scheduling disk usage sync job: {}", stack.getResourceCrn(), e);
+            }
         }
     }
 
     public void schedule(DiskUsageSyncJobAdapter resource) {
         if (properties.isDiskUsageSyncEnabled()) {
-            scheduleJob(resource);
+            try {
+                scheduleJob(resource);
+            } catch (Exception e) {
+                LOGGER.error("Error during scheduling disk usage sync job: {}", resource.getJobResource().getRemoteResourceId(), e);
+            }
         }
     }
 
@@ -87,6 +95,8 @@ public class DiskUsageSyncJobService implements JobSchedulerService {
         if (entitlementService.isDbDiskAutoResizeEnabled(accountId)) {
             if (stack.getType() == StackType.DATALAKE) {
                 LOGGER.debug("Skip scheduling database disk usage sync job, stack is a Datalake: {}", stack.getResourceCrn());
+            } else if (stack.getDatabase() == null || stack.getDatabase().getExternalDatabaseAvailabilityType() == null) {
+                LOGGER.warn("Skip scheduling database disk usage sync job, database type can't be determined for stack: {}", stack.getResourceCrn());
             } else if (!stack.getDatabase().getExternalDatabaseAvailabilityType().isEmbedded()) {
                 LOGGER.debug("Skip scheduling database disk usage sync job, external database is used for stack: {}", stack.getResourceCrn());
             } else {
