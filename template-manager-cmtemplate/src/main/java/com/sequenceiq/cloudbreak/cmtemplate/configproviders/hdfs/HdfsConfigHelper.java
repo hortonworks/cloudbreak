@@ -26,7 +26,7 @@ public class HdfsConfigHelper {
 
     protected static final String HYBRID_DH_NAME_SERVICE = "nshybrid";
 
-    private static final String DEFAULT_NAME_SERVICE = "ns1";
+    protected static final String DEFAULT_NAME_SERVICE = "ns1";
 
     public boolean isNamenodeHA(TemplatePreparationObject source) {
         return source.getHostGroupsWithComponent(HdfsRoles.NAMENODE)
@@ -52,9 +52,9 @@ public class HdfsConfigHelper {
 
     public Optional<String> getHdfsUrl(CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
         List<String> nameNodeHostNames = templateProcessor.getHostsWithComponent(HdfsRoles.NAMENODE);
-        return nameNodeHostNames.size() > 1
-                ? Optional.of("hdfs://" + getNameService(templateProcessor, source))
-                : nameNodeHostNames.stream().map(nameNode -> String.format("hdfs://%s:%s", nameNode, getNameNodePort(templateProcessor))).findFirst();
+        return nameNodeHostNames.size() == 1
+                ? nameNodeHostNames.stream().map(nameNode -> String.format("hdfs://%s:%s", nameNode, getNameNodePort(templateProcessor))).findFirst()
+                : Optional.of("hdfs://" + getNameService(templateProcessor, source));
     }
 
     private String getNameNodePort(CmTemplateProcessor templateProcessor) {

@@ -48,6 +48,7 @@ import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.dto.LdapView;
 import com.sequenceiq.cloudbreak.dto.TrustView;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
+import com.sequenceiq.cloudbreak.sdx.RdcView;
 import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
@@ -398,7 +399,8 @@ public class StackV4RequestToTemplatePreparationObjectConverter {
             if (datalakeOpt.isPresent()) {
                 SdxBasicView datalake = datalakeOpt.get();
                 boolean externalDatabaseForDL = RedbeamsDbServerConfigurer.isRemoteDatabaseRequested(datalake.dbServerCrn());
-                datalakeView = new DatalakeView(datalake.razEnabled(), datalake.crn(), externalDatabaseForDL);
+                RdcView rdcView = platformAwareSdxConnector.getRdcView(datalake.crn());
+                datalakeView = new DatalakeView(datalake.razEnabled(), datalake.crn(), externalDatabaseForDL, rdcView);
             }
         }
         builder.withDataLakeView(datalakeView);
