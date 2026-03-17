@@ -15,6 +15,7 @@ import static com.sequenceiq.distrox.api.v1.distrox.model.cluster.kraft.KraftMig
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
@@ -37,7 +38,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.cluster.status.KraftMigrationStatus;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.downscale.ClusterDownscaleFlowConfig;
@@ -153,7 +153,6 @@ class KraftMigrationOperationStatusFactoryTest {
     void testGetStatusFromFlowChainInformationAndFlowLogs(Class<?> flowConfigClass, boolean finalized, boolean failed,
             KraftMigrationOperationStatus expectedStatus) {
         when(stackDto.getId()).thenReturn(STACK_ID);
-        when(stackDto.getResourceCrn()).thenReturn(TestUtil.STACK_CRN);
         FlowLog flowLog = new FlowLog();
         flowLog.setFlowType(ClassValue.of(flowConfigClass));
         flowLog.setFinalized(finalized);
@@ -164,20 +163,19 @@ class KraftMigrationOperationStatusFactoryTest {
         Optional<FlowChainLog> flowChainLog = Optional.of(
                 new FlowChainLog("MigrateZookeeperToKraftFlowEventChainFactory/Upscale", "", "", "", "", ""));
         when(flowLogDBService.findAllByResourceIdAndFlowTypeInOrderByCreatedDesc(eq(STACK_ID), anyList())).thenReturn(List.of());
-        when(flowLogDBService.getLatestFlowLogsByCrnInFlowChain(anyString())).thenReturn(List.of(flowLog));
+        when(flowLogDBService.getLatestFlowLogsByResourceIdInFlowChain(anyLong())).thenReturn(List.of(flowLog));
         when(flowLogDBService.findFirstByFlowChainIdOrderByCreatedDesc(anyString())).thenReturn(flowChainLog);
 
         Optional<KraftMigrationOperationStatus> result = underTest.getStatusFromFlowInformation(stackDto);
 
         verify(flowLogDBService).findAllByResourceIdAndFlowTypeInOrderByCreatedDesc(eq(STACK_ID), anyList());
-        verify(flowLogDBService).getLatestFlowLogsByCrnInFlowChain(eq(stackDto.getResourceCrn()));
+        verify(flowLogDBService).getLatestFlowLogsByResourceIdInFlowChain(eq(stackDto.getId()));
         assertEquals(expectedStatus, result.orElse(NOT_APPLICABLE));
     }
 
     @Test
     void testGetStatusFromFlowChainInformationAndFlowLogsWhenNoFlowRelatedFlowChain() {
         when(stackDto.getId()).thenReturn(STACK_ID);
-        when(stackDto.getResourceCrn()).thenReturn(TestUtil.STACK_CRN);
         FlowLog flowLog = new FlowLog();
         flowLog.setFlowType(ClassValue.of(SetDefaultJavaVersionFlowConfig.class));
         flowLog.setFinalized(false);
@@ -187,20 +185,19 @@ class KraftMigrationOperationStatusFactoryTest {
         Optional<FlowChainLog> flowChainLog = Optional.of(
                 new FlowChainLog("AFLOWCHAINCONFIG/CHILDCHAIN", "", "", "", "", ""));
         when(flowLogDBService.findAllByResourceIdAndFlowTypeInOrderByCreatedDesc(eq(STACK_ID), anyList())).thenReturn(List.of());
-        when(flowLogDBService.getLatestFlowLogsByCrnInFlowChain(anyString())).thenReturn(List.of(flowLog));
+        when(flowLogDBService.getLatestFlowLogsByResourceIdInFlowChain(anyLong())).thenReturn(List.of(flowLog));
         when(flowLogDBService.findFirstByFlowChainIdOrderByCreatedDesc(anyString())).thenReturn(flowChainLog);
 
         Optional<KraftMigrationOperationStatus> result = underTest.getStatusFromFlowInformation(stackDto);
 
         verify(flowLogDBService).findAllByResourceIdAndFlowTypeInOrderByCreatedDesc(eq(STACK_ID), anyList());
-        verify(flowLogDBService).getLatestFlowLogsByCrnInFlowChain(eq(stackDto.getResourceCrn()));
+        verify(flowLogDBService).getLatestFlowLogsByResourceIdInFlowChain(eq(stackDto.getId()));
         assertFalse(result.isPresent());
     }
 
     @Test
     void testGetStatusFromFlowChainInformationAndFlowLogsWhenMigrationTriggeredAfterRollback() {
         when(stackDto.getId()).thenReturn(STACK_ID);
-        when(stackDto.getResourceCrn()).thenReturn(TestUtil.STACK_CRN);
         FlowLog rollbackFlowLog = new FlowLog();
         rollbackFlowLog.setFlowType(ClassValue.of(MigrateZookeeperToKraftRollbackFlowConfig.class));
         rollbackFlowLog.setFinalized(true);
@@ -218,13 +215,13 @@ class KraftMigrationOperationStatusFactoryTest {
         migrationFlowChainFlowLog.setFlowChainId("flowChainId");
         Optional<FlowChainLog> flowChainLog = Optional.of(
                 new FlowChainLog("MigrateZookeeperToKraftFlowEventChainFactory/Upscale", "", "", "", "", ""));
-        when(flowLogDBService.getLatestFlowLogsByCrnInFlowChain(anyString())).thenReturn(List.of(migrationFlowChainFlowLog));
+        when(flowLogDBService.getLatestFlowLogsByResourceIdInFlowChain(anyLong())).thenReturn(List.of(migrationFlowChainFlowLog));
         when(flowLogDBService.findFirstByFlowChainIdOrderByCreatedDesc(anyString())).thenReturn(flowChainLog);
 
         Optional<KraftMigrationOperationStatus> result = underTest.getStatusFromFlowInformation(stackDto);
 
         verify(flowLogDBService).findAllByResourceIdAndFlowTypeInOrderByCreatedDesc(eq(STACK_ID), anyList());
-        verify(flowLogDBService).getLatestFlowLogsByCrnInFlowChain(eq(stackDto.getResourceCrn()));
+        verify(flowLogDBService).getLatestFlowLogsByResourceIdInFlowChain(eq(stackDto.getId()));
         assertEquals(ZOOKEEPER_TO_KRAFT_MIGRATION_COMPLETE, result.orElse(NOT_APPLICABLE));
     }
 

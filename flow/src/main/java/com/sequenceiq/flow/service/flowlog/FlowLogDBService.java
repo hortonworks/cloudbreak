@@ -415,6 +415,10 @@ public class FlowLogDBService implements FlowLogService {
 
     public List<FlowLog> getLatestFlowLogsByCrnInFlowChain(String resourceCrn) {
         Long resourceId = getResourceIdByCrnOrName(resourceCrn);
+        return getLatestFlowLogsByResourceIdInFlowChain(resourceId);
+    }
+
+    public List<FlowLog> getLatestFlowLogsByResourceIdInFlowChain(Long resourceId) {
         Optional<FlowLog> flowLogOpt = flowLogRepository.findFirstByResourceIdOrderByCreatedDesc(resourceId);
         if (flowLogOpt.isPresent()) {
             FlowLog flowLog = flowLogOpt.get();
