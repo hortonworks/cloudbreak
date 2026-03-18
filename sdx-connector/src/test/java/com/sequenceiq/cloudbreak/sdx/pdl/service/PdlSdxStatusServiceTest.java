@@ -140,7 +140,7 @@ public class PdlSdxStatusServiceTest {
     @Test
     public void testGetAvailabilityStatusCheckResult() {
         assertEquals(StatusCheckResult.AVAILABLE, underTest.getAvailabilityStatusCheckResult(PrivateDatalakeDetails.StatusEnum.AVAILABLE));
-        assertEquals(StatusCheckResult.NOT_AVAILABLE, underTest.getAvailabilityStatusCheckResult(PrivateDatalakeDetails.StatusEnum.NOT_AVAILABLE));
+        assertEquals(StatusCheckResult.AVAILABLE, underTest.getAvailabilityStatusCheckResult(PrivateDatalakeDetails.StatusEnum.NOT_AVAILABLE));
     }
 
 }

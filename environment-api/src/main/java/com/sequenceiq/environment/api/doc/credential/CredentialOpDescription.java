@@ -16,7 +16,7 @@ public class CredentialOpDescription {
     public static final String DELETE_BY_CRN = "delete credential by crn";
     public static final String DELETE_MULTIPLE_BY_NAME = "delete multiple credentials by name";
     public static final String GET_PREREQUISTIES_BY_CLOUD_PROVIDER = "get credential prerequisites for cloud platform";
-    public static final String GET_INTERNAL_PREREQUISTIES_BY_CLOUD_PROVIDER = "get credential prerequisites for cloud platform using internal actor";
+    public static final String GET_PREREQUISITES_INTERNAL_BY_CLOUD_PROVIDER = "get credential prerequisites for cloud platform using internal actor";
     public static final String VERIFY_BR_NAME = "verify permissions by name";
     public static final String VERIFY_BR_CRN = "verify permissions by crn";
     public static final String CLI_COMMAND = "produce cli command input for credential creation";
