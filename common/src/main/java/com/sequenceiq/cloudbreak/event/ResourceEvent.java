@@ -457,6 +457,8 @@ public enum ResourceEvent {
     CLUSTER_MODIFY_PROXY_CONFIG_ON_CM("cluster.proxy.modification.cm"),
     CLUSTER_MODIFY_PROXY_CONFIG_SUCCESS("cluster.proxy.modification.success"),
     CLUSTER_MODIFY_PROXY_CONFIG_FAILED("cluster.proxy.modification.failed"),
+    CLUSTER_UPDATE_TRUSTED_REALM("cluster.update.trusted.realm"),
+    CLUSTER_UPDATE_TRUSTED_REALM_FAILED("cluster.update.trusted.realm.failed"),
     CLUSTER_MANAGER_UPGRADE("cluster.manager.upgrade"),
     CLUSTER_MANAGER_UPGRADE_NOT_NEEDED("cluster.manager.upgrade.not.needed"),
     CLUSTER_MANAGER_UPGRADE_FINISHED("cluster.manager.upgrade.finished"),

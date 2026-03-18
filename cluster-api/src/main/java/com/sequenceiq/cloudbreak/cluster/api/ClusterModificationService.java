@@ -6,6 +6,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import com.google.common.collect.Table;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ServiceConfiguration;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cluster.model.CMConfigUpdateStrategy;
@@ -17,6 +18,7 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.view.ClusterComponentView;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
+import com.sequenceiq.cloudbreak.dto.TrustView;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 
 public interface ClusterModificationService {
@@ -67,6 +69,8 @@ public interface ClusterModificationService {
     void distributeParcels(Set<ClouderaManagerProduct> products) throws CloudbreakException;
 
     Optional<String> getRoleConfigValueByServiceType(String clusterName, String roleConfigGroup, String serviceType, String configName);
+
+    Optional<String> getServiceConfigValue(String clusterName, String serviceType, String configName);
 
     ParcelOperationStatus removeUnusedParcels(Set<ClusterComponentView> usedParcelComponents, Set<String> parcelNamesFromImage)
             throws CloudbreakException;
@@ -136,4 +140,8 @@ public interface ClusterModificationService {
     ResetJvmParamsDiff reallocateMemoryDiff();
 
     String getStackCdhVersion(String stackName) throws Exception;
+
+    void updateTrustedRealms(TrustView trustView);
+
+    void updateClusterServiceConfiguration(List<ServiceConfiguration> serviceConfigurations);
 }

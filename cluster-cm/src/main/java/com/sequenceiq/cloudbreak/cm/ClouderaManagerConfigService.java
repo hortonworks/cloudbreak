@@ -119,7 +119,7 @@ public class ClouderaManagerConfigService {
             LOGGER.debug("Looking for service of name {} in cluster {}", serviceType, clusterName);
             ApiServiceList serviceList = servicesResourceApi.readServices(clusterName, DataView.SUMMARY.name());
             return serviceList.getItems().stream()
-                    .filter(service -> serviceType.equals(service.getType()))
+                    .filter(service -> serviceType.equalsIgnoreCase(service.getType()))
                     .map(ApiService::getName)
                     .findFirst();
         } catch (ApiException e) {
@@ -199,6 +199,25 @@ public class ClouderaManagerConfigService {
         } catch (ApiException e) {
             LOGGER.error("Failed to get service config for service {} from Cloudera Manager.", serviceName, e);
             throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
+        }
+    }
+
+    public Optional<String> getServiceConfigValue(ApiClient client, String clusterName, String serviceType, String configName) {
+        LOGGER.debug("Looking for service configuration: {} for serviceType {} in cluster {}.", configName, serviceType, clusterName);
+        ServicesResourceApi servicesResourceApi = clouderaManagerApiFactory.getServicesResourceApi(client);
+        try {
+            String serviceName = getServiceNameValue(clusterName, serviceType, servicesResourceApi);
+            ApiServiceConfig serviceConfig = servicesResourceApi.readServiceConfig(clusterName, serviceName, DataView.FULL.name());
+            return serviceConfig.getItems().stream()
+                    .filter(apiConfig -> configName.equals(apiConfig.getName()))
+                    .map(apiConfig -> Optional.ofNullable(apiConfig.getValue()).orElse(apiConfig.getDefault()))
+                    .findFirst();
+        } catch (NotFoundException e) {
+            LOGGER.debug("Service of type {} not found in cluster {}.", serviceType, clusterName, e);
+            return Optional.empty();
+        } catch (ApiException e) {
+            LOGGER.debug("Failed to get service configuration: {} for serviceType {} in cluster {}.", configName, serviceType, clusterName, e);
+            return Optional.empty();
         }
     }
 

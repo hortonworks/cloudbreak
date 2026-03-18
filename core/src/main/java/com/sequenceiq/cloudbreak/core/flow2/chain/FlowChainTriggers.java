@@ -78,6 +78,8 @@ public class FlowChainTriggers {
 
     public static final String DISTROX_DISK_UPDATE_CHAIN_TRIGGER_EVENT = "DISTROX_DISK_UPDATE_CHAIN_TRIGGER_EVENT";
 
+    public static final String UPDATE_TRUSTED_REALM_CHAIN_TRIGGER_EVENT = "UPDATE_TRUSTED_REALM_CHAIN_TRIGGER_EVENT";
+
     private FlowChainTriggers() {
     }
 }

@@ -47,6 +47,7 @@ public class StackApiViewToStackViewV4ResponseConverter {
         stackViewResponse.setExternalDatabase(
                 externalDatabaseToDatabaseResponseConverter.convert(source.getExternalDatabaseCreationType(), source.getExternalDatabaseEngineVersion()));
         stackViewResponse.setProviderSyncStates(source.getProviderSyncStates());
+        stackViewResponse.setStackType(source.getType().name());
         return stackViewResponse;
     }
 

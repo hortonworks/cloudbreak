@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.service;
 
 import static com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers.MIGRATE_ZOOKEEPER_TO_KRAFT_CHAIN_TRIGGER_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers.UPDATE_TRUSTED_REALM_CHAIN_TRIGGER_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.AddVolumesEvent.ADD_VOLUMES_TRIGGER_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes.DeleteVolumesEvent.DELETE_VOLUMES_VALIDATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftFinalizationStateSelectors.START_FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_VALIDATION_EVENT;
@@ -79,6 +80,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.eventbus.Promise;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.rotaterdscert.RotateRdsCertificateTriggerRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.trustedrealm.UpdateTrustedRealmChainTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent.RepairType;
 import com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType;
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
@@ -232,6 +234,7 @@ class ReactorFlowManagerTest {
         underTest.triggerZookeeperToKraftMigrationRollback(STACK_ID);
         underTest.triggerUpdatePublicDnsEntriesInPem(STACK_ID);
         underTest.triggerResetJvmParams(STACK_ID);
+        underTest.triggerUpdateTrustedRealm(STACK_ID, "crn", "crn", "realm", true);
 
         int count = 0;
         for (Method method : underTest.getClass().getDeclaredMethods()) {
@@ -518,6 +521,41 @@ class ReactorFlowManagerTest {
         assertEquals(STACK_ID, event.getResourceId());
         assertEquals(STACK_VERTICALSCALE_EVENT.event(), event.selector());
         assertEquals(request, event.getRequest());
+    }
+
+    @Test
+    void testTriggerUpdateTrustedRealmWithSaltUpdateRequired() {
+        String resourceCrn = "crn:cdp:datahub:us-west-1:tenant:cluster:cluster-id";
+        String environmentCrn = "crn:cdp:environments:us-west-1:tenant:environment:env-id";
+        String realm = "EXAMPLE.COM";
+
+        underTest.triggerUpdateTrustedRealm(STACK_ID, resourceCrn, environmentCrn, realm, true);
+
+        ArgumentCaptor<UpdateTrustedRealmChainTriggerEvent> captor = ArgumentCaptor.forClass(UpdateTrustedRealmChainTriggerEvent.class);
+        verify(reactorNotifier, times(1)).notify(eq(STACK_ID), eq(UPDATE_TRUSTED_REALM_CHAIN_TRIGGER_EVENT), captor.capture());
+        UpdateTrustedRealmChainTriggerEvent event = captor.getValue();
+        assertEquals(UPDATE_TRUSTED_REALM_CHAIN_TRIGGER_EVENT, event.selector());
+        assertEquals(STACK_ID, event.getResourceId());
+        assertEquals(resourceCrn, event.getResourceCrn());
+        assertEquals(environmentCrn, event.getEnvironmentCrn());
+        assertEquals(realm, event.getRealm());
+        assertEquals(true, event.isSaltUpdateRequired());
+    }
+
+    @Test
+    void testTriggerUpdateTrustedRealmWithoutSaltUpdate() {
+        String resourceCrn = "crn:cdp:datahub:us-west-1:tenant:cluster:cluster-id";
+        String environmentCrn = "crn:cdp:environments:us-west-1:tenant:environment:env-id";
+        String realm = "HYBRID.REALM.COM";
+
+        underTest.triggerUpdateTrustedRealm(STACK_ID, resourceCrn, environmentCrn, realm, false);
+
+        ArgumentCaptor<UpdateTrustedRealmChainTriggerEvent> captor = ArgumentCaptor.forClass(UpdateTrustedRealmChainTriggerEvent.class);
+        verify(reactorNotifier, times(1)).notify(eq(STACK_ID), eq(UPDATE_TRUSTED_REALM_CHAIN_TRIGGER_EVENT), captor.capture());
+        UpdateTrustedRealmChainTriggerEvent event = captor.getValue();
+        assertEquals(false, event.isSaltUpdateRequired());
+        assertEquals(realm, event.getRealm());
+        assertEquals(environmentCrn, event.getEnvironmentCrn());
     }
 
     private static class TestAcceptable implements Acceptable {

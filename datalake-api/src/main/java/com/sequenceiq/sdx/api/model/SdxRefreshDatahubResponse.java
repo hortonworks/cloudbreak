@@ -7,6 +7,7 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 
@@ -46,6 +47,7 @@ public class SdxRefreshDatahubResponse {
         response.setName(stack.getName());
         response.setEnvironmentName(stack.getEnvironmentName());
         response.setEnvironmentCrn(stack.getEnvironmentCrn());
+        response.setStackType(StackType.WORKLOAD.name());
         addStack(response);
     }
 

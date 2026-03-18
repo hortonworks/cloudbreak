@@ -40,6 +40,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.dto.TrustView;
 import com.sequenceiq.cloudbreak.message.FlowMessageService;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.UpscaleClusterRequest;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
@@ -47,15 +48,20 @@ import com.sequenceiq.cloudbreak.service.ScalingException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.recipe.RecipeEngine;
+import com.sequenceiq.cloudbreak.service.freeipa.FreeipaClientService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.parcel.ParcelService;
 import com.sequenceiq.cloudbreak.service.stack.RuntimeVersionService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.TrustResponse;
 
 @ExtendWith(MockitoExtension.class)
 class ClusterUpscaleServiceTest {
 
     private static final long STACK_ID = 1L;
+
+    private static final String ENVIRONMENT_CRN = "crn:cdp:environments:us-west-1:accountId:environment:envId";
 
     @Mock
     private StackDtoService stackDtoService;
@@ -104,6 +110,9 @@ class ClusterUpscaleServiceTest {
     @Mock
     private RuntimeVersionService runtimeVersionService;
 
+    @Mock
+    private FreeipaClientService freeipaClientService;
+
     @BeforeEach
     public void setUp() {
         Cluster cluster = new Cluster();
@@ -113,6 +122,8 @@ class ClusterUpscaleServiceTest {
                 clusterService);
         lenient().when(stackDto.getCluster()).thenReturn(cluster);
         lenient().when(stackDto.getId()).thenReturn(STACK_ID);
+        lenient().when(stackDto.getEnvironmentCrn()).thenReturn(ENVIRONMENT_CRN);
+        lenient().when(freeipaClientService.findByEnvironmentCrn(ENVIRONMENT_CRN)).thenReturn(Optional.empty());
     }
 
     @Test
@@ -323,6 +334,70 @@ class ClusterUpscaleServiceTest {
         inOrder.verify(clusterStatusService, times(0)).getDecommissionedHostsFromCM();
         inOrder.verify(clusterCommissionService, times(0)).recommissionHosts(any());
         inOrder.verify(clusterService, times(1)).updateInstancesToOrchestrationFailedByInstanceIds(eq(STACK_ID), eq(Set.of("instanceId1")));
+    }
+
+    @Test
+    public void testInstallServicesShouldCallUpdateTrustedRealmsWhenFreeipaHasTrust() throws CloudbreakException {
+        HostGroup hostGroup = newHostGroup(
+                "master",
+                newInstance(InstanceStatus.SERVICES_HEALTHY));
+        when(hostGroupService.getByClusterWithRecipes(any())).thenReturn(Set.of(hostGroup));
+        when(hostGroupService.getByCluster(any())).thenReturn(Set.of(hostGroup));
+        when(parcelService.removeUnusedParcelComponents(stackDto)).thenReturn(new ParcelOperationStatus(Map.of(), Map.of()));
+        when(clusterApiConnectors.getConnector(any(StackDto.class))).thenReturn(clusterApi);
+        Map<String, String> candidates = Map.of("master-1", "privateIp");
+        when(clusterHostServiceRunner.collectUpscaleCandidates(any(), isNull(), anyBoolean())).thenReturn(candidates);
+
+        TrustResponse trustResponse = new TrustResponse();
+        trustResponse.setIp("10.0.0.1");
+        trustResponse.setFqdn("kdc.example.com");
+        trustResponse.setRealm("EXAMPLE.COM");
+        DescribeFreeIpaResponse freeIpaResponse = new DescribeFreeIpaResponse();
+        freeIpaResponse.setTrust(trustResponse);
+        when(freeipaClientService.findByEnvironmentCrn(ENVIRONMENT_CRN)).thenReturn(Optional.of(freeIpaResponse));
+
+        underTest.installServicesOnNewHosts(createRequest(false, false, Map.of("master", Set.of("master-1")), null, true, false));
+
+        TrustView expectedTrustView = new TrustView("10.0.0.1", "kdc.example.com", "EXAMPLE.COM");
+        verify(clusterApi, times(1)).updateTrustedRealms(expectedTrustView);
+    }
+
+    @Test
+    public void testInstallServicesShouldNotCallUpdateTrustedRealmsWhenFreeipaHasNoTrust() throws CloudbreakException {
+        HostGroup hostGroup = newHostGroup(
+                "master",
+                newInstance(InstanceStatus.SERVICES_HEALTHY));
+        when(hostGroupService.getByClusterWithRecipes(any())).thenReturn(Set.of(hostGroup));
+        when(hostGroupService.getByCluster(any())).thenReturn(Set.of(hostGroup));
+        when(parcelService.removeUnusedParcelComponents(stackDto)).thenReturn(new ParcelOperationStatus(Map.of(), Map.of()));
+        when(clusterApiConnectors.getConnector(any(StackDto.class))).thenReturn(clusterApi);
+        Map<String, String> candidates = Map.of("master-1", "privateIp");
+        when(clusterHostServiceRunner.collectUpscaleCandidates(any(), isNull(), anyBoolean())).thenReturn(candidates);
+
+        DescribeFreeIpaResponse freeIpaResponse = new DescribeFreeIpaResponse();
+        freeIpaResponse.setTrust(null);
+        when(freeipaClientService.findByEnvironmentCrn(ENVIRONMENT_CRN)).thenReturn(Optional.of(freeIpaResponse));
+
+        underTest.installServicesOnNewHosts(createRequest(false, false, Map.of("master", Set.of("master-1")), null, true, false));
+
+        verify(clusterApi, times(0)).updateTrustedRealms(any());
+    }
+
+    @Test
+    public void testInstallServicesShouldNotCallUpdateTrustedRealmsWhenFreeipaIsNotFound() throws CloudbreakException {
+        HostGroup hostGroup = newHostGroup(
+                "master",
+                newInstance(InstanceStatus.SERVICES_HEALTHY));
+        when(hostGroupService.getByClusterWithRecipes(any())).thenReturn(Set.of(hostGroup));
+        when(hostGroupService.getByCluster(any())).thenReturn(Set.of(hostGroup));
+        when(parcelService.removeUnusedParcelComponents(stackDto)).thenReturn(new ParcelOperationStatus(Map.of(), Map.of()));
+        when(clusterApiConnectors.getConnector(any(StackDto.class))).thenReturn(clusterApi);
+        Map<String, String> candidates = Map.of("master-1", "privateIp");
+        when(clusterHostServiceRunner.collectUpscaleCandidates(any(), isNull(), anyBoolean())).thenReturn(candidates);
+
+        underTest.installServicesOnNewHosts(createRequest(false, false, Map.of("master", Set.of("master-1")), null, false, false));
+
+        verify(clusterApi, times(0)).updateTrustedRealms(any());
     }
 
     @Test

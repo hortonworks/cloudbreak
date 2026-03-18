@@ -601,6 +601,10 @@ public class ClusterOperationService {
         return flowManager.triggerSaltUpdate(stackId, skipHighstate);
     }
 
+    public FlowIdentifier triggerUpdateTrustedRealm(Long stackId, String resourceCrn, String environmentCrn, String realm, boolean saltUpdateRequired) {
+        return flowManager.triggerUpdateTrustedRealm(stackId, resourceCrn, environmentCrn, realm, saltUpdateRequired);
+    }
+
     public FlowIdentifier updatePillarConfiguration(Long stackId) {
         return flowManager.triggerPillarConfigurationUpdate(stackId);
     }

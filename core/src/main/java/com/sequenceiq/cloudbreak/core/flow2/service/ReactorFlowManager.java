@@ -119,6 +119,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.clusterproxy.ClusterP
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.datalakemetrics.datasizes.DetermineDatalakeDataSizesBaseEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.modifyproxy.ModifyProxyConfigFlowChainTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.rotaterdscert.RotateRdsCertificateTriggerRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.trustedrealm.UpdateTrustedRealmChainTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent.RepairType;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.CmSyncTriggerEvent;
@@ -467,6 +468,12 @@ public class ReactorFlowManager {
 
     public FlowIdentifier triggerSaltUpdate(Long stackId, boolean skipHighstate) {
         SaltUpdateTriggerEvent event = new SaltUpdateTriggerEvent(stackId, skipHighstate);
+        return reactorNotifier.notify(stackId, event.getSelector(), event);
+    }
+
+    public FlowIdentifier triggerUpdateTrustedRealm(Long stackId, String resourceCrn, String environmentCrn, String realm, boolean saltUpdateRequired) {
+        UpdateTrustedRealmChainTriggerEvent event = new UpdateTrustedRealmChainTriggerEvent(
+                FlowChainTriggers.UPDATE_TRUSTED_REALM_CHAIN_TRIGGER_EVENT, stackId, resourceCrn, environmentCrn, realm, saltUpdateRequired);
         return reactorNotifier.notify(stackId, event.getSelector(), event);
     }
 

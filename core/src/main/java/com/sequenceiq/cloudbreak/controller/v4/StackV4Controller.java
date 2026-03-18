@@ -39,6 +39,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackScaleV4Requ
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateClusterV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateTrustedRealmRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UserNamePasswordV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerSyncV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.imdupdate.StackInstanceMetadataUpdateV4Request;
@@ -844,5 +845,11 @@ public class StackV4Controller extends NotificationController implements StackV4
     public ResetJvmParamsV4Response resetJvmParams(Long workspaceId, @ResourceCrn String crn, ResetJvmParamsRequest request,
             @InitiatorUserCrn String initiatorUserCrn) {
         return stackOperationService.resetJvmParams(NameOrCrn.ofCrn(crn), ThreadBasedUserCrnProvider.getAccountId(), request.isDryRun());
+    }
+
+    @Override
+    @InternalOnly
+    public FlowIdentifier triggerUpdateTrustedRealm(Long workspaceId, @ResourceCrn String crn, UpdateTrustedRealmRequest request) {
+        return stackOperations.triggerUpdateTrustedRealm(NameOrCrn.ofCrn(crn), ThreadBasedUserCrnProvider.getAccountId(), request);
     }
 }

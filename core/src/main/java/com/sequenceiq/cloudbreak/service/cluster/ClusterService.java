@@ -43,7 +43,9 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cloud.model.HostName;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
@@ -603,5 +605,23 @@ public class ClusterService implements LocalPaasRdcViewExtender {
 
     public List<String> getAllClusterNamesUsingEncryptionProfile(String encryptionProfileCrn) {
         return repository.findAllClusterNamesByEncryptionProfileCrn(encryptionProfileCrn);
+    }
+
+    public void updateClusterServiceConfiguration(NameOrCrn nameOrCrn, ClusterServiceConfigurationUpdate request) {
+        StackDto stackDto = stackDtoService.getByNameOrCrn(nameOrCrn, ThreadBasedUserCrnProvider.getAccountId());
+        ClusterApi clusterApi = clusterApiConnectors.getConnector(stackDto);
+        if (!clusterApi.clusterStatusService().isClusterManagerRunning()) {
+            throw new CloudbreakServiceException(String.format("Cloudera Manager is not running for cluster: %s", stackDto.getCluster().getName()));
+        }
+        clusterApi.clusterModificationService().updateClusterServiceConfiguration(request.getServiceConfigurations());
+    }
+
+    public Optional<String> getClusterServiceConfigValue(NameOrCrn nameOrCrn, ClusterServiceConfigurationLookup request) {
+        StackDto stackDto = stackDtoService.getByNameOrCrn(nameOrCrn, ThreadBasedUserCrnProvider.getAccountId());
+        ClusterApi clusterApi = clusterApiConnectors.getConnector(stackDto);
+        if (!clusterApi.clusterStatusService().isClusterManagerRunning()) {
+            throw new CloudbreakServiceException(String.format("Cloudera Manager is not running for cluster: %s", stackDto.getCluster().getName()));
+        }
+        return clusterApi.clusterModificationService().getServiceConfigValue(stackDto.getName(), request.getServiceName(), request.getConfigName());
     }
 }

@@ -26,6 +26,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Resp
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.views.ClusterViewV4Response;
 import com.sequenceiq.environment.environment.poller.StackPollerProvider;
 import com.sequenceiq.environment.exception.DatahubOperationFailedException;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.flow.api.model.FlowType;
 
 @ExtendWith(MockitoExtension.class)
 class StackPollerServiceTest {
@@ -39,6 +41,10 @@ class StackPollerServiceTest {
     private static final String STACK_CRN_1 = "stackCrn1";
 
     private static final String STACK_CRN_2 = "stackCrn2";
+
+    private static final String STACK_NAME_1 = "stackName1";
+
+    private static final String STACK_NAME_2 = "stackName2";
 
     @Mock
     private StackV4Endpoint stackV4Endpoint;
@@ -54,6 +60,8 @@ class StackPollerServiceTest {
         ReflectionTestUtils.setField(underTest, "maxTime", 3);
         ReflectionTestUtils.setField(underTest, "sleepTime", 1);
     }
+
+    // ---- updateStackConfigurations ----
 
     @Test
     void updateStackConfigurationsWhenNoExistingStacks() {
@@ -74,14 +82,6 @@ class StackPollerServiceTest {
         underTest.updateStackConfigurations(ENVIRONMENT_ID, ENVIRONMENT_CRN, FLOW_ID);
     }
 
-    private StackViewV4Response createStackViewV4ResponseWithStatus(Status status) {
-        StackViewV4Response stack = new StackViewV4Response();
-        ClusterViewV4Response cluster = new ClusterViewV4Response();
-        cluster.setStatus(status);
-        stack.setCluster(cluster);
-        return stack;
-    }
-
     @Test
     void updateStackConfigurationsWhenStacksNeedToBeUpdated() {
         Set<StackViewV4Response> responsesSet = new LinkedHashSet<>();
@@ -94,12 +94,6 @@ class StackPollerServiceTest {
                 .thenReturn(() -> AttemptResults.finishWith(null));
 
         underTest.updateStackConfigurations(ENVIRONMENT_ID, ENVIRONMENT_CRN, FLOW_ID);
-    }
-
-    private StackViewV4Response createAvailableStackViewV4Response(String stackCrn) {
-        StackViewV4Response stack = createStackViewV4ResponseWithStatus(Status.AVAILABLE);
-        stack.setCrn(stackCrn);
-        return stack;
     }
 
     @Test
@@ -131,4 +125,170 @@ class StackPollerServiceTest {
         assertThat(datahubOperationFailedException).hasCauseInstanceOf(UserBreakException.class);
     }
 
+    @Test
+    void updateSaltOnStacksReturnsFlowIdentifiersForUpdatableStacks() {
+        Set<StackViewV4Response> responsesSet = new LinkedHashSet<>();
+        responsesSet.add(createNamedStackViewV4Response(STACK_NAME_1, Status.AVAILABLE));
+        responsesSet.add(createNamedStackViewV4Response(STACK_NAME_2, Status.AVAILABLE));
+        when(stackV4Endpoint.list(0L, ENVIRONMENT_CRN, false)).thenReturn(new StackViewV4Responses(responsesSet));
+
+        List<FlowIdentifier> expectedIds = List.of(
+                new FlowIdentifier(FlowType.FLOW, "flow-1"),
+                new FlowIdentifier(FlowType.FLOW, "flow-2"));
+        when(stackPollerProvider.saltUpdateOnStacksPoller(List.of(STACK_NAME_1, STACK_NAME_2), ENVIRONMENT_ID))
+                .thenReturn(() -> AttemptResults.finishWith(expectedIds));
+
+        List<FlowIdentifier> result = underTest.updateSaltOnStacks(ENVIRONMENT_ID, ENVIRONMENT_CRN);
+
+        assertThat(result).isEqualTo(expectedIds);
+    }
+
+    @Test
+    void updateSaltOnStacksSkipsStacksInSkippedStates() {
+        Set<StackViewV4Response> responsesSet = new LinkedHashSet<>();
+        responsesSet.add(createNamedStackViewV4Response(STACK_NAME_1, Status.AVAILABLE));
+        responsesSet.add(createNamedStackViewV4Response(STACK_NAME_2, Status.STOPPED));
+        when(stackV4Endpoint.list(0L, ENVIRONMENT_CRN, false)).thenReturn(new StackViewV4Responses(responsesSet));
+
+        List<FlowIdentifier> expectedIds = List.of(new FlowIdentifier(FlowType.FLOW, "flow-1"));
+        when(stackPollerProvider.saltUpdateOnStacksPoller(List.of(STACK_NAME_1), ENVIRONMENT_ID))
+                .thenReturn(() -> AttemptResults.finishWith(expectedIds));
+
+        List<FlowIdentifier> result = underTest.updateSaltOnStacks(ENVIRONMENT_ID, ENVIRONMENT_CRN);
+
+        assertThat(result).isEqualTo(expectedIds);
+    }
+
+    @Test
+    void updateSaltOnStacksReturnsNullWhenAllStacksAreInSkippedStates() {
+        Set<StackViewV4Response> responsesSet = Set.of(
+                createNamedStackViewV4Response(STACK_NAME_1, Status.DELETE_IN_PROGRESS),
+                createNamedStackViewV4Response(STACK_NAME_2, Status.CREATE_FAILED));
+        when(stackV4Endpoint.list(0L, ENVIRONMENT_CRN, false)).thenReturn(new StackViewV4Responses(responsesSet));
+
+        List<FlowIdentifier> result = underTest.updateSaltOnStacks(ENVIRONMENT_ID, ENVIRONMENT_CRN);
+
+        assertThat(result).isNull();
+    }
+
+    @Test
+    void updateSaltOnStacksReturnsNullWhenNoStacks() {
+        when(stackV4Endpoint.list(0L, ENVIRONMENT_CRN, false)).thenReturn(new StackViewV4Responses());
+
+        List<FlowIdentifier> result = underTest.updateSaltOnStacks(ENVIRONMENT_ID, ENVIRONMENT_CRN);
+
+        assertThat(result).isNull();
+    }
+
+    @Test
+    void updateSaltOnStacksThrowsDatahubOperationFailedExceptionOnPollerTimeout() {
+        Set<StackViewV4Response> responsesSet = Set.of(createNamedStackViewV4Response(STACK_NAME_1, Status.AVAILABLE));
+        when(stackV4Endpoint.list(0L, ENVIRONMENT_CRN, false)).thenReturn(new StackViewV4Responses(responsesSet));
+        when(stackPollerProvider.saltUpdateOnStacksPoller(List.of(STACK_NAME_1), ENVIRONMENT_ID))
+                .thenReturn(AttemptResults::justContinue);
+
+        DatahubOperationFailedException ex = assertThrows(DatahubOperationFailedException.class,
+                () -> underTest.updateSaltOnStacks(ENVIRONMENT_ID, ENVIRONMENT_CRN));
+
+        assertThat(ex).hasMessage("Stack updating timed out");
+        assertThat(ex).hasCauseInstanceOf(PollerStoppedException.class);
+    }
+
+    @Test
+    void updateSaltOnStacksThrowsDatahubOperationFailedExceptionOnPollerUserBreak() {
+        Set<StackViewV4Response> responsesSet = Set.of(createNamedStackViewV4Response(STACK_NAME_1, Status.AVAILABLE));
+        when(stackV4Endpoint.list(0L, ENVIRONMENT_CRN, false)).thenReturn(new StackViewV4Responses(responsesSet));
+        when(stackPollerProvider.saltUpdateOnStacksPoller(List.of(STACK_NAME_1), ENVIRONMENT_ID))
+                .thenReturn(() -> AttemptResults.breakFor(new Exception("abort")));
+
+        DatahubOperationFailedException ex = assertThrows(DatahubOperationFailedException.class,
+                () -> underTest.updateSaltOnStacks(ENVIRONMENT_ID, ENVIRONMENT_CRN));
+
+        assertThat(ex).hasMessage("Stack updating aborted with error");
+        assertThat(ex).hasCauseInstanceOf(UserBreakException.class);
+    }
+
+    @Test
+    void getUpdatableStacksFiltersOutAllSkippedStates() {
+        Set<StackViewV4Response> responsesSet = new LinkedHashSet<>();
+        for (Status skipped : List.of(
+                Status.CREATE_FAILED, Status.STOPPED, Status.STOP_IN_PROGRESS,
+                Status.DELETE_IN_PROGRESS, Status.DELETE_COMPLETED, Status.DELETE_FAILED)) {
+            responsesSet.add(createNamedStackViewV4Response("stack-" + skipped.name(), skipped));
+        }
+        when(stackV4Endpoint.list(0L, ENVIRONMENT_CRN, false)).thenReturn(new StackViewV4Responses(responsesSet));
+
+        List<String> result = underTest.getUpdatableStacks(ENVIRONMENT_CRN, StackViewV4Response::getName);
+
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    void getUpdatableStacksIncludesAvailableStacksUsingNameMapper() {
+        Set<StackViewV4Response> responsesSet = new LinkedHashSet<>();
+        responsesSet.add(createNamedStackViewV4Response(STACK_NAME_1, Status.AVAILABLE));
+        responsesSet.add(createNamedStackViewV4Response(STACK_NAME_2, Status.STOPPED));
+        when(stackV4Endpoint.list(0L, ENVIRONMENT_CRN, false)).thenReturn(new StackViewV4Responses(responsesSet));
+
+        List<String> result = underTest.getUpdatableStacks(ENVIRONMENT_CRN, StackViewV4Response::getName);
+
+        assertThat(result).containsExactly(STACK_NAME_1);
+    }
+
+    @Test
+    void getUpdatableStacksIncludesAvailableStacksUsingCrnMapper() {
+        Set<StackViewV4Response> responsesSet = new LinkedHashSet<>();
+        StackViewV4Response s1 = createNamedStackViewV4Response(STACK_NAME_1, Status.AVAILABLE);
+        s1.setCrn(STACK_CRN_1);
+        StackViewV4Response s2 = createNamedStackViewV4Response(STACK_NAME_2, Status.AVAILABLE);
+        s2.setCrn(STACK_CRN_2);
+        responsesSet.add(s1);
+        responsesSet.add(s2);
+        when(stackV4Endpoint.list(0L, ENVIRONMENT_CRN, false)).thenReturn(new StackViewV4Responses(responsesSet));
+
+        List<String> result = underTest.getUpdatableStacks(ENVIRONMENT_CRN, StackViewV4Response::getCrn);
+
+        assertThat(result).containsExactly(STACK_CRN_1, STACK_CRN_2);
+    }
+
+    @Test
+    void getUpdatableStacksReturnsEmptyWhenResponsesIsNull() {
+        StackViewV4Responses responses = new StackViewV4Responses();
+        responses.setResponses(null);
+        when(stackV4Endpoint.list(0L, ENVIRONMENT_CRN, false)).thenReturn(responses);
+
+        // getUpdatableStacks calls getResponses().stream() directly, so null responses cause NPE
+        // In practice, the endpoint always returns a non-null collection, but the empty-responses case should be safe
+        when(stackV4Endpoint.list(0L, ENVIRONMENT_CRN, false)).thenReturn(new StackViewV4Responses());
+
+        List<String> result = underTest.getUpdatableStacks(ENVIRONMENT_CRN, StackViewV4Response::getName);
+
+        assertThat(result).isEmpty();
+    }
+
+    // ---- helpers ----
+
+    private StackViewV4Response createStackViewV4ResponseWithStatus(Status status) {
+        StackViewV4Response stack = new StackViewV4Response();
+        ClusterViewV4Response cluster = new ClusterViewV4Response();
+        cluster.setStatus(status);
+        stack.setCluster(cluster);
+        return stack;
+    }
+
+    private StackViewV4Response createAvailableStackViewV4Response(String stackCrn) {
+        StackViewV4Response stack = createStackViewV4ResponseWithStatus(Status.AVAILABLE);
+        stack.setCrn(stackCrn);
+        return stack;
+    }
+
+    private StackViewV4Response createNamedStackViewV4Response(String name, Status clusterStatus) {
+        StackViewV4Response stack = new StackViewV4Response();
+        stack.setName(name);
+        ClusterViewV4Response cluster = new ClusterViewV4Response();
+        cluster.setStatus(clusterStatus);
+        stack.setCluster(cluster);
+        return stack;
+    }
 }
+

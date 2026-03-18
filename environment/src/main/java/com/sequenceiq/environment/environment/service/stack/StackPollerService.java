@@ -117,15 +117,15 @@ public class StackPollerService {
         }
     }
 
-    private List<String> getUpdatableStacks(String envCrn, Function<StackViewV4Response, String> requestedAttributeMapper) {
+    public List<String> getUpdatableStacks(String envCrn, Function<StackViewV4Response, String> requestedAttributeMapper) {
         StackViewV4Responses stackViewV4Responses = stackV4Endpoint.list(0L, envCrn, false);
         List<String> responseToLog = Optional.ofNullable(stackViewV4Responses.getResponses()).orElse(List.of()).stream()
                 .map(response -> String.format("[Name: %s; Crn: %s; Status: %s, ClusterStatus: %s]",
                         response.getName(), response.getCrn(), response.getStatus(), response.getCluster().getStatus()))
                 .collect(Collectors.toList());
         LOGGER.info("Stacks returned for update: {}", responseToLog);
-        return stackViewV4Responses.getResponses().stream().
-                filter(stack -> !SKIPPED_STATES.contains(stack.getCluster().getStatus()))
+        return stackViewV4Responses.getResponses().stream()
+                .filter(stack -> !SKIPPED_STATES.contains(stack.getCluster().getStatus()))
                 .map(requestedAttributeMapper)
                 .collect(Collectors.toList());
     }

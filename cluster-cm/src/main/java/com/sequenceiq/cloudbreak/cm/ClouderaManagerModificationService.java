@@ -72,6 +72,7 @@ import com.cloudera.api.swagger.model.ApiRole;
 import com.cloudera.api.swagger.model.ApiRoleList;
 import com.cloudera.api.swagger.model.ApiRoleState;
 import com.cloudera.api.swagger.model.ApiService;
+import com.cloudera.api.swagger.model.ApiServiceConfig;
 import com.cloudera.api.swagger.model.ApiServiceList;
 import com.cloudera.api.swagger.model.ApiServiceRef;
 import com.cloudera.api.swagger.model.ApiServiceState;
@@ -79,6 +80,7 @@ import com.cloudera.api.swagger.model.HTTPMethod;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Table;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ServiceConfiguration;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
@@ -114,6 +116,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.view.ClusterComponentView;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
+import com.sequenceiq.cloudbreak.dto.TrustView;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
 import com.sequenceiq.cloudbreak.polling.PollingResult;
@@ -1284,6 +1287,11 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     }
 
     @Override
+    public Optional<String> getServiceConfigValue(String clusterName, String serviceType, String configName) {
+        return configService.getServiceConfigValue(v31Client, clusterName, serviceType, configName);
+    }
+
+    @Override
     public boolean isRolePresent(String clusterName, String roleConfigGroup, String serviceType) {
         return configService.isRolePresent(v31Client, clusterName, roleConfigGroup, serviceType);
     }
@@ -1435,4 +1443,56 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
         configService.modifyRoleBasedConfig(v31Client, stack.getName(), serviceType, config, roleGroupNames);
     }
 
+    @Override
+    public void updateTrustedRealms(TrustView trustView) {
+        String realm = trustView.realm().toUpperCase(Locale.ROOT);
+        LOGGER.info("Updating trusted_realms configuration in Cloudera Manager with realm: {}", realm);
+
+        ServiceConfiguration trustedRealmConfig = new ServiceConfiguration();
+        trustedRealmConfig.setServiceName("core_settings");
+        trustedRealmConfig.setConfigName("trusted_realms");
+        trustedRealmConfig.setValue(realm);
+        updateClusterServiceConfiguration(List.of(trustedRealmConfig));
+    }
+
+    @Override
+    public void updateClusterServiceConfiguration(List<ServiceConfiguration> serviceConfigurations) {
+        LOGGER.info("Updating cluster service configurations in Cloudera Manager for {} entries.", serviceConfigurations.size());
+        try {
+            BatchResourceApi batchResourceApi = clouderaManagerApiFactory.getBatchResourceApi(v31Client);
+            ServicesResourceApi servicesResourceApi = clouderaManagerApiFactory.getServicesResourceApi(v31Client);
+
+            Map<String, List<ServiceConfiguration>> configsByServiceType = serviceConfigurations.stream()
+                    .collect(Collectors.groupingBy(ServiceConfiguration::getServiceName));
+
+            ApiBatchRequest batchRequest = new ApiBatchRequest();
+            List<ApiBatchRequestElement> elementList = configsByServiceType.entrySet()
+                    .stream()
+                    .map(entry -> {
+                        String serviceType = entry.getKey();
+                        String serviceName = configService.getServiceName(stack.getName(), serviceType, servicesResourceApi)
+                                .orElseThrow(() -> new ClouderaManagerOperationFailedException(
+                                        String.format("Service of type %s not found in cluster %s", serviceType, stack.getName())));
+                        ApiServiceConfig apiServiceConfig = new ApiServiceConfig();
+                        entry.getValue().forEach(config ->
+                                apiServiceConfig.addItemsItem(new ApiConfig().name(config.getConfigName()).value(config.getValue())));
+                        return new ApiBatchRequestElement()
+                                .method(HTTPMethod.PUT)
+                                .url(ClouderaManagerApiClientProvider.API_V_31 + "/clusters/" + URLUtils.encodeString(stack.getName()) +
+                                        "/services/" + URLUtils.encodeString(serviceName) + "/config")
+                                .body(apiServiceConfig)
+                                .acceptType("application/json")
+                                .contentType("application/json");
+                    })
+                    .toList();
+            batchRequest.items(elementList);
+            LOGGER.info("Calling batch resource API with the following request: {}", batchRequest);
+            batchResourceApi.execute(batchRequest);
+
+            LOGGER.info("Successfully updated cluster service configurations in Cloudera Manager.");
+        } catch (ApiException e) {
+            LOGGER.warn("Failed to update cluster service configurations in Cloudera Manager", e);
+            throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
+        }
+    }
 }

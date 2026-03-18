@@ -10,6 +10,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -30,6 +31,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.dto.TrustView;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.message.FlowMessageService;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.UpscaleClusterRequest;
@@ -38,12 +40,14 @@ import com.sequenceiq.cloudbreak.service.ScalingException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.recipe.RecipeEngine;
+import com.sequenceiq.cloudbreak.service.freeipa.FreeipaClientService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.parcel.ParcelService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.RuntimeVersionService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.view.StackView;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 
 @Service
 public class ClusterUpscaleService {
@@ -85,6 +89,9 @@ public class ClusterUpscaleService {
     @Inject
     private RuntimeVersionService runtimeVersionService;
 
+    @Inject
+    private FreeipaClientService freeipaClientService;
+
     public void installServicesOnNewHosts(UpscaleClusterRequest request) throws CloudbreakException {
         StackDto stackDto = stackDtoService.getById(request.getResourceId());
             LOGGER.debug("Start installing CM services");
@@ -103,6 +110,9 @@ public class ClusterUpscaleService {
         ClusterApi connector = getClusterConnector(stackDto);
         try {
             List<String> upscaledHosts = connector.upscaleCluster(instanceMetaDatasByHostGroup);
+            if (request.isPrimaryGatewayChanged()) {
+                createTrustView(stackDto.getEnvironmentCrn()).ifPresent(connector::updateTrustedRealms);
+            }
             if (request.isRepair()) {
                 recommissionHostsIfNeeded(connector, request.getHostGroupsWithHostNames());
                 restartServicesIfNecessary(request.isRestartServices(), stackDto, connector, request.isRollingRestartEnabled());
@@ -132,6 +142,12 @@ public class ClusterUpscaleService {
                 throw se;
             }
         }
+    }
+
+    private Optional<TrustView> createTrustView(String environmentCrn) {
+        return freeipaClientService.findByEnvironmentCrn(environmentCrn)
+                .map(DescribeFreeIpaResponse::getTrust)
+                .map(resp -> new TrustView(resp.getIp(), resp.getFqdn(), resp.getRealm()));
     }
 
     private void removeUnusedParcelComponents(StackDto stackDto) throws CloudbreakException {

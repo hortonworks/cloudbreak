@@ -82,6 +82,9 @@ public class StackViewV4Response implements JsonEntity {
     @Schema(description = StackModelDescription.PROVIDER_SYNC_STATES)
     private Set<ProviderSyncState> providerSyncStates = new HashSet<>();
 
+    @Schema(description = StackModelDescription.STACK_TYPE)
+    private String stackType;
+
     public String getCrn() {
         return crn;
     }
@@ -250,6 +253,14 @@ public class StackViewV4Response implements JsonEntity {
         this.providerSyncStates = providerSyncStates;
     }
 
+    public String getStackType() {
+        return stackType;
+    }
+
+    public void setStackType(String stackType) {
+        this.stackType = stackType;
+    }
+
     @Override
     public String toString() {
         return "StackViewV4Response{" +
@@ -274,6 +285,7 @@ public class StackViewV4Response implements JsonEntity {
                 ", externalDatabase=" + externalDatabase +
                 ", security=" + security +
                 ", providerSyncStates=" + providerSyncStates +
+                ", stackType='" + stackType + '\'' +
                 '}';
     }
 }

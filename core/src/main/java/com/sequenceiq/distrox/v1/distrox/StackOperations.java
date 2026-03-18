@@ -38,6 +38,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackScaleV4Requ
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateClusterV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateTrustedRealmRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UserNamePasswordV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.recipe.AttachRecipeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.recipe.DetachRecipeV4Request;
@@ -367,6 +368,13 @@ public class StackOperations implements HierarchyAuthResourcePropertyProvider {
     public FlowIdentifier updateSalt(@NotNull NameOrCrn nameOrCrn, String accountId, boolean skipHighstate) {
         LOGGER.debug("Starting salt update: " + nameOrCrn);
         return clusterCommonService.updateSalt(nameOrCrn, accountId, skipHighstate);
+    }
+
+    public FlowIdentifier triggerUpdateTrustedRealm(@NotNull NameOrCrn nameOrCrn, String accountId, UpdateTrustedRealmRequest request) {
+        LOGGER.debug("Triggering update trusted realm for stack: {}", nameOrCrn);
+        StackDto stackDto = stackDtoService.getByNameOrCrn(nameOrCrn, accountId);
+        return clusterOperationService.triggerUpdateTrustedRealm(stackDto.getId(), stackDto.getResourceCrn(),
+                stackDto.getEnvironmentCrn(), request.getRealm(), request.isSaltUpdateRequired());
     }
 
     public FlowIdentifier updatePillarConfiguration(@NotNull NameOrCrn nameOrCrn, String accountId) {

@@ -52,6 +52,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import com.dyngr.core.AttemptMaker;
 import com.dyngr.core.AttemptResults;
 import com.sequenceiq.authorization.service.OwnerAssignmentService;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
@@ -84,6 +85,7 @@ import com.sequenceiq.environment.environment.flow.hybrid.setupfinish.handler.En
 import com.sequenceiq.environment.environment.poller.DatahubPollerProvider;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.environment.service.EnvironmentStatusUpdateService;
+import com.sequenceiq.environment.environment.service.cluster.ClusterService;
 import com.sequenceiq.environment.environment.service.freeipa.FreeIpaPollerService;
 import com.sequenceiq.environment.environment.service.freeipa.FreeIpaService;
 import com.sequenceiq.environment.environment.service.stack.StackPollerService;
@@ -108,7 +110,12 @@ import com.sequenceiq.flow.repository.FlowLogRepository;
 import com.sequenceiq.flow.repository.FlowOperationStatsRepository;
 import com.sequenceiq.flow.service.FlowCancelService;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaV1Endpoint;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.AvailabilityStatus;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.FinishSetupCrossRealmTrustRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.TrustResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.TrustStatus;
 import com.sequenceiq.notification.WebSocketNotificationService;
 
 import io.micrometer.core.instrument.MeterRegistry;
@@ -122,8 +129,6 @@ class EnvironmentCrossRealmTrustSetupFinishFlowIntegrationTest {
     private static final String ENVIRONMENT_NAME = "ENVIRONMENT_NAME";
 
     private static final String ENVIRONMENT_CRN = "ENVIRONMENT_CRN";
-
-    private static final String OPERATION_ID = UUID.randomUUID().toString();
 
     private static final String ACCOUNT_ID = "accId";
 
@@ -173,6 +178,9 @@ class EnvironmentCrossRealmTrustSetupFinishFlowIntegrationTest {
     private FreeIpaPollerService freeIpaPollerService;
 
     @MockBean
+    private StackV4Endpoint stackV4Endpoint;
+
+    @MockBean
     private StackPollerService stackPollerService;
 
     @MockBean
@@ -183,6 +191,9 @@ class EnvironmentCrossRealmTrustSetupFinishFlowIntegrationTest {
 
     @MockBean
     private StackService stackService;
+
+    @MockBean
+    private ClusterService clusterService;
 
     @Inject
     private EnvironmentService environmentService;
@@ -202,6 +213,14 @@ class EnvironmentCrossRealmTrustSetupFinishFlowIntegrationTest {
     @Test
     void testPrepareCrossRealmTrustWhenSuccessful() {
         AttemptMaker<Void> attemptMaker = AttemptResults::justFinish;
+        DescribeFreeIpaResponse describeFreeIpaResponse = new DescribeFreeIpaResponse();
+        TrustResponse trust = new TrustResponse();
+        trust.setTrustStatus(TrustStatus.TRUST_SETUP_FINISH_REQUIRED.name());
+        trust.setRealm("REALM");
+        describeFreeIpaResponse.setTrust(trust);
+        describeFreeIpaResponse.setStatus(Status.AVAILABLE);
+        describeFreeIpaResponse.setAvailabilityStatus(AvailabilityStatus.AVAILABLE);
+        when(freeIpaService.describe(ENVIRONMENT_CRN)).thenReturn(Optional.of(describeFreeIpaResponse));
         when(datahubPollerProvider.multipleFlowsPoller(anyLong(), anyList())).thenReturn(attemptMaker);
         testFlow();
         InOrder environmentStatusVerify = inOrder(environmentStatusUpdateService);

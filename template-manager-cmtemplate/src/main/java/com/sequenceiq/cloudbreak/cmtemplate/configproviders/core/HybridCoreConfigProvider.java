@@ -2,12 +2,10 @@ package com.sequenceiq.cloudbreak.cmtemplate.configproviders.core;
 
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.getSafetyValveProperty;
-import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.core.CoreRoles.AUTH_TO_LOCAL_LOWERCASE;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.core.CoreRoles.CORE_DEFAULTFS;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.core.CoreRoles.CORE_SITE_SAFETY_VALVE;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.core.CoreRoles.DFS_NAMENODE_KERBEROS_PRINCIPAL;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.core.CoreRoles.HADOOP_RPC_PROTECTION;
-import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.core.CoreRoles.TRUSTED_REALMS;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.hdfs.HdfsRoles.HDFS;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.hdfs.HdfsRoles.NAMENODE;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.hive.HiveRoles.HIVE;
@@ -27,7 +25,6 @@ import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.hdfs.HdfsConfigHelper;
-import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.dto.TrustView;
 import com.sequenceiq.cloudbreak.sdx.RdcView;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
@@ -51,24 +48,11 @@ public class HybridCoreConfigProvider extends CommonCoreConfigProvider {
                 .ifPresentOrElse(rpcProtection -> serviceConfigs.add(config(HADOOP_RPC_PROTECTION, rpcProtection)),
                         () -> LOGGER.warn("Missing {} config parameter from remote context", HADOOP_RPC_PROTECTION));
 
-        List<String> trustedRealms = new ArrayList<>();
-        source.getTrustView()
-                .map(TrustView::realm)
-                .map(String::toUpperCase)
-                .ifPresentOrElse(trustedRealms::add, () -> LOGGER.warn("Missing realm for trust"));
-        source.getKerberosConfig()
-                .map(KerberosConfig::getRealm)
-                .ifPresentOrElse(trustedRealms::add, () -> LOGGER.warn("Missing kerberos realm"));
-        if (!trustedRealms.isEmpty()) {
-            serviceConfigs.add(config(TRUSTED_REALMS, String.join(",", trustedRealms)));
-            serviceConfigs.add(config(AUTH_TO_LOCAL_LOWERCASE, Boolean.TRUE.toString()));
-        }
-
         if (!templateProcessor.isRoleTypePresentInService(HDFS, Lists.newArrayList(NAMENODE))) {
             serviceConfigs.addAll(getRemoteHdfsPropertiesForStubDfs(source));
         }
 
-        LOGGER.debug("Core-settings config params for cross realm trust: {}", serviceConfigs);
+        LOGGER.debug("Core-settings config params for hybrid cross realm trust: {}", serviceConfigs);
         return serviceConfigs;
     }
 

@@ -87,7 +87,6 @@ import com.cloudera.api.swagger.model.ApiHostRef;
 import com.cloudera.api.swagger.model.ApiHostRefList;
 import com.cloudera.api.swagger.model.ApiParcel;
 import com.cloudera.api.swagger.model.ApiParcelList;
-import com.cloudera.api.swagger.model.ApiRestartClusterArgs;
 import com.cloudera.api.swagger.model.ApiRole;
 import com.cloudera.api.swagger.model.ApiRoleList;
 import com.cloudera.api.swagger.model.ApiRoleState;
@@ -948,9 +947,11 @@ class ClouderaManagerModificationServiceTest {
         assertEquals("upscaled", applyTemplateBodyCatcher.getValue().getItems().get(0).getHostname());
 
         ArgumentCaptor<ApiBatchRequest> batchRequestCaptor = ArgumentCaptor.forClass(ApiBatchRequest.class);
-        verify(batchResourceApi).execute(batchRequestCaptor.capture());
+        verify(batchResourceApi, times(1)).execute(batchRequestCaptor.capture());
 
-        verifyRackIdBatch(batchRequestCaptor.getValue(), "upscaledId", "/upscaledRack");
+        List<ApiBatchRequest> batchRequests = batchRequestCaptor.getAllValues();
+        assertThat(batchRequests).hasSize(1);
+        verifyRackIdBatch(batchRequests.get(0), "upscaledId", "/upscaledRack");
     }
 
     @Test
@@ -979,8 +980,6 @@ class ClouderaManagerModificationServiceTest {
         ApiCommand startCommand = mock(ApiCommand.class);
         when(startCommand.getId()).thenReturn(apiCommandId);
         when(servicesResourceApi.readServices(any(), any())).thenReturn(serviceList);
-        ApiCommandList activeCommandList = new ApiCommandList();
-        activeCommandList.setItems(new ArrayList<>());
         when(clustersResourceApi.startCommand(STACK_NAME)).thenReturn(startCommand);
         when(clusterCommandService.save(any(ClusterCommand.class))).thenAnswer(i -> i.getArgument(0));
 
@@ -1182,8 +1181,8 @@ class ClouderaManagerModificationServiceTest {
         verify(clouderaManagerParcelManagementService, times(1)).distributeParcels(products, parcelResourceApi, parcelsResourceApi, stack, v31Client);
         verify(clouderaManagerParcelManagementService, times(1)).activateParcels(products, parcelResourceApi, parcelsResourceApi, stack, v31Client);
         verify(eventService, times(1)).fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_UPGRADE_START_POST_UPGRADE);
+        verify(clustersResourceApi, times(1)).startCommand(STACK_NAME);
         verify(clouderaManagerUpgradeService, times(1)).callPostRuntimeUpgradeCommand(clustersResourceApi, stack, v31Client);
-        verify(clustersResourceApi, times(0)).restartCommand(eq(stack.getName()), any(ApiRestartClusterArgs.class));
         verify(clouderaManagerApiClientProvider, times(1)).getV45Client(any(), any(), any(), any());
 
         ArgumentCaptor<ApiHostNameList> apiHostNameListArgumentCaptor = ArgumentCaptor.forClass(ApiHostNameList.class);
@@ -1200,6 +1199,7 @@ class ClouderaManagerModificationServiceTest {
         inOrder.verify(clouderaManagerParcelManagementService).downloadParcels(products, parcelResourceApi, parcelsResourceApi, stack, v31Client);
         inOrder.verify(clouderaManagerParcelManagementService).distributeParcels(products, parcelResourceApi, parcelsResourceApi, stack, v31Client);
         inOrder.verify(clouderaManagerParcelManagementService).activateParcels(products, parcelResourceApi, parcelsResourceApi, stack, v31Client);
+        inOrder.verify(clustersResourceApi).startCommand(STACK_NAME);
         inOrder.verify(clouderaManagerApiClientProvider).getV45Client(any(), any(), any(), any());
         inOrder.verify(clouderaManagerUpgradeService).callPostRuntimeUpgradeCommand(eq(clustersResourceApi), eq(stack), eq(v31Client));
     }
@@ -1261,8 +1261,7 @@ class ClouderaManagerModificationServiceTest {
         verify(clouderaManagerParcelManagementService, times(1)).refreshParcelRepos(clouderaManagerResourceApi, stack, v31Client);
         verify(clouderaManagerParcelManagementService, times(1)).downloadParcels(products, parcelResourceApi, parcelsResourceApi, stack, v31Client);
         verify(clouderaManagerParcelManagementService, times(1)).distributeParcels(products, parcelResourceApi, parcelsResourceApi, stack, v31Client);
-        verify(clouderaManagerUpgradeService, times(1)).callUpgradeCdhCommand(TestUtil.CDH_VERSION, clustersResourceApi, stack, v31Client, true);
-        verify(clouderaManagerParcelManagementService).activateParcels(any(), eq(parcelResourceApi), eq(parcelsResourceApi), eq(stack), eq(v31Client));
+        verify(clouderaManagerParcelManagementService, times(1)).activateParcels(nonCdhProduct, parcelResourceApi, parcelsResourceApi, stack, v31Client);
         verify(clouderaManagerCommonCommandService, times(1)).getApiCommand(any(), any(), any(), any());
 
         InOrder inOrder = inOrder(clouderaManagerPollingServiceProvider, clouderaManagerParcelManagementService, clouderaManagerUpgradeService,
@@ -1275,7 +1274,6 @@ class ClouderaManagerModificationServiceTest {
         inOrder.verify(clouderaManagerParcelManagementService).downloadParcels(products, parcelResourceApi, parcelsResourceApi, stack, v31Client);
         inOrder.verify(clouderaManagerParcelManagementService).distributeParcels(products, parcelResourceApi, parcelsResourceApi, stack, v31Client);
         inOrder.verify(clouderaManagerParcelManagementService).activateParcels(nonCdhProduct, parcelResourceApi, parcelsResourceApi, stack, v31Client);
-        inOrder.verify(clouderaManagerUpgradeService).callUpgradeCdhCommand(TestUtil.CDH_VERSION, clustersResourceApi, stack, v31Client, true);
         inOrder.verify(servicesResourceApi).readServices(stack.getName(), "SUMMARY");
         inOrder.verify(clouderaManagerCommonCommandService).getApiCommand(any(), any(), any(), any());
     }
@@ -1996,4 +1994,5 @@ class ClouderaManagerModificationServiceTest {
         assertEquals(JvmConfigApplicability.RECONFIGURABLE, result.getConfigsAfter().getFirst().getApplicability());
         verify(eventService).fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_CM_REALLOCATION_SUCCESSFUL);
     }
+
 }

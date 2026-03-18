@@ -75,13 +75,9 @@ class HybridCoreConfigProviderTest {
 
         List<ApiClusterTemplateConfig> configs = underTest.getServiceConfigs(cmTemplateProcessor, source);
 
-        assertEquals(3, configs.size());
+        assertEquals(1, configs.size());
         assertEquals("hadoop_rpc_protection", configs.get(0).getName());
         assertEquals("privacy", configs.get(0).getValue());
-        assertEquals("trusted_realms", configs.get(1).getName());
-        assertEquals("REALM1,realm2", configs.get(1).getValue());
-        assertEquals("set_auth_to_local_to_lowercase", configs.get(2).getName());
-        assertEquals("true", configs.get(2).getValue());
     }
 
     @Test
@@ -111,23 +107,6 @@ class HybridCoreConfigProviderTest {
         assertEquals(1, configs.size());
         assertEquals("hadoop_rpc_protection", configs.get(0).getName());
         assertEquals("integrity", configs.get(0).getValue());
-    }
-
-    @Test
-    void getServiceConfigsOnlyTrustedRealms() {
-        when(source.getDatalakeView()).thenReturn(Optional.empty());
-        TrustView trustView = mock(TrustView.class);
-        when(source.getTrustView()).thenReturn(Optional.of(trustView));
-        when(trustView.realm()).thenReturn("realmX");
-        when(source.getKerberosConfig()).thenReturn(Optional.empty());
-
-        List<ApiClusterTemplateConfig> configs = underTest.getServiceConfigs(cmTemplateProcessor, source);
-
-        assertEquals(2, configs.size());
-        assertEquals("trusted_realms", configs.get(0).getName());
-        assertEquals("REALMX", configs.get(0).getValue());
-        assertEquals("set_auth_to_local_to_lowercase", configs.get(1).getName());
-        assertEquals("true", configs.get(1).getValue());
     }
 
     @Test
