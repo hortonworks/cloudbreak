@@ -36,6 +36,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.RootVolumeFetchDto;
+import com.sequenceiq.cloudbreak.cloud.model.VolumeRecord;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.constant.AzureConstants;
@@ -238,5 +239,30 @@ public class AzureResourceVolumeConnector implements ResourceVolumeConnector {
                         vmEntry -> vmEntry.getValue().dataDisks().entrySet().stream()
                                 .collect(Collectors.toMap(diskEntry -> diskEntry.getValue().id(),
                                         diskEntry -> AzureConstants.LUN_DEVICE_PATH_PREFIX + diskEntry.getKey()))));
+    }
+
+    @Override
+    public Map<String, List<VolumeRecord>> describeAttachedVolumes(AuthenticatedContext authenticatedContext, CloudStack cloudStack,
+        Collection<String> instanceIds) {
+        AzureClient client = authenticatedContext.getParameter(AzureClient.class);
+        String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(authenticatedContext.getCloudContext(), cloudStack);
+        Map<String, VirtualMachine> vms = azureVirtualMachineService.getVirtualMachinesByName(client, resourceGroupName, instanceIds);
+        return instanceIds.stream().collect(Collectors.toMap(
+            id -> id,
+            id -> {
+                List<VolumeRecord> attachedVolumes = new ArrayList<>();
+                VirtualMachine vm = vms.get(id);
+                if (vm != null && vm.dataDisks() != null) {
+                    vm.dataDisks().forEach((key, disk) ->
+                        attachedVolumes.add(new VolumeRecord(
+                            disk.id(),
+                            AzureConstants.LUN_DEVICE_PATH_PREFIX + disk.lun(),
+                            disk.size(),
+                            disk.storageAccountType().toString()))
+                    );
+                }
+                return attachedVolumes;
+            }
+        ));
     }
 }

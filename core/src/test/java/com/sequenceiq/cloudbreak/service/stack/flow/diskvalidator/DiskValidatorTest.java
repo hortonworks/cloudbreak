@@ -61,28 +61,28 @@ class DiskValidatorTest {
     public static final String FETCHER_SCRIPT = "fetcher_script";
 
     private final String awsLsblkOutput = """
-            nvme0n1 200\s
-            nvme1n1 1000 /hadoopfs/fs4
-            nvme3n1 1000 /hadoopfs/fs3
-            nvme2n1 1000 /hadoopfs/fs2
-            nvme4n1 1000 /hadoopfs/fs1
+            NAME="nvme0n1" SIZE="214748364800"\s
+            NAME="nvme1n1" SIZE="1073741824000" MOUNTPOINT="/hadoopfs/fs4"
+            NAME="nvme3n1" SIZE="1073741824000" MOUNTPOINT="/hadoopfs/fs3"
+            NAME="nvme2n1" SIZE="1073741824000" MOUNTPOINT="/hadoopfs/fs2"
+            NAME="nvme4n1" SIZE="1073741824000" MOUNTPOINT="/hadoopfs/fs1"
             """;
 
     private final String gcpLsblkOutput = """
-            sda 200\s
-            sdb 1000 /hadoopfs/fs1
-            sdc 1000 /hadoopfs/fs2
-            sdd 1000 /hadoopfs/fs3
-            sde 1000 /hadoopfs/fs4
+            NAME="sda" SIZE="214748364800"\s
+            NAME="sdb" SIZE="1073741824000" MOUNTPOINT="/hadoopfs/fs1"
+            NAME="sdc" SIZE="1073741824000" MOUNTPOINT="/hadoopfs/fs2"
+            NAME="sdd" SIZE="1073741824000" MOUNTPOINT="/hadoopfs/fs3"
+            NAME="sde" SIZE="1073741824000" MOUNTPOINT="/hadoopfs/fs4"
             """;
 
     private final String azureLsblkOuptut = """
-            sda 200\s
-            sdb 64\s
-            sdc 1000 /hadoopfs/fs2
-            sdd 1000 /hadoopfs/fs3
-            sde 1000 /hadoopfs/fs1
-            sdf 1000 /hadoopfs/fs4
+            NAME="sda" SIZE="214748364800"\s
+            NAME="sdb" SIZE="68719476736"\s
+            NAME="sdc" SIZE="1073741824000" MOUNTPOINT="/hadoopfs/fs2"
+            NAME="sdd" SIZE="1073741824000" MOUNTPOINT="/hadoopfs/fs3"
+            NAME="sde" SIZE="1073741824000" MOUNTPOINT="/hadoopfs/fs1"
+            NAME="sdf" SIZE="1073741824000" MOUNTPOINT="/hadoopfs/fs4"
             """;
 
     @Spy
@@ -188,11 +188,11 @@ class DiskValidatorTest {
         when(gatewayConfigService.getAllGatewayConfigs(stack)).thenReturn(allGatewayConfigs);
 
         String missingLsblkOutput = """
-            nvme0n1 200\s
-            nvme1n1 1000 /hadoopfs/fs4
-            nvme3n1 1000 /hadoopfs/fs3
-            nvme2n1 1000 /hadoopfs/fs2
-            nvme4n1 1000
+            NAME="nvme0n1" SIZE="214748364800"\s
+            NAME="nvme1n1" SIZE="1073741824000" MOUNTPOINT="/hadoopfs/fs4"
+            NAME="nvme3n1" SIZE="1073741824000" MOUNTPOINT="/hadoopfs/fs3"
+            NAME="nvme2n1" SIZE="1073741824000" MOUNTPOINT="/hadoopfs/fs2"
+            NAME="nvme4n1" SIZE="1073741824000"
             """;
 
         when(hostOrchestrator.runCommandOnHosts(allGatewayConfigs, Set.of("fqdn1", "fqdn2"), LSBLK_COMMAND))
@@ -226,11 +226,11 @@ class DiskValidatorTest {
         when(gatewayConfigService.getAllGatewayConfigs(stack)).thenReturn(allGatewayConfigs);
 
         String missingLsblkOutput = """
-            sda 200\s
-            sdb 1000 /hadoopfs/fs1
-            sdc 1000 /hadoopfs/fs2
-            sdd 1000 /hadoopfs/fs3
-            sde 1000
+            NAME="sda" SIZE="214748364800"\s
+            NAME="sdb" SIZE="1073741824000" MOUNTPOINT="/hadoopfs/fs1"
+            NAME="sdc" SIZE="1073741824000" MOUNTPOINT="/hadoopfs/fs2"
+            NAME="sdd" SIZE="1073741824000" MOUNTPOINT="/hadoopfs/fs3"
+            NAME="sde" SIZE="1073741824000"
             """;
 
         when(hostOrchestrator.runCommandOnHosts(allGatewayConfigs, Set.of("fqdn1", "fqdn2"), LSBLK_COMMAND))
@@ -328,11 +328,11 @@ class DiskValidatorTest {
         when(gatewayConfigService.getAllGatewayConfigs(stack)).thenReturn(allGatewayConfigs);
 
         String awsLsblkDifferentSizeOutput = """
-            nvme0n1 200\s
-            nvme1n1 1000 /hadoopfs/fs4
-            nvme3n1 1000 /hadoopfs/fs3
-            nvme2n1 500 /hadoopfs/fs2
-            nvme4n1 500 /hadoopfs/fs1
+            NAME="nvme0n1" SIZE="214748364800"\s
+            NAME="nvme1n1" SIZE="1073741824000" MOUNTPOINT="/hadoopfs/fs4"
+            NAME="nvme3n1" SIZE="1073741824000" MOUNTPOINT="/hadoopfs/fs3"
+            NAME="nvme2n1" SIZE="536870912000" MOUNTPOINT="/hadoopfs/fs2"
+            NAME="nvme4n1" SIZE="536870912000" MOUNTPOINT="/hadoopfs/fs1"
             """;
 
         when(hostOrchestrator.runCommandOnHosts(allGatewayConfigs, Set.of("fqdn1", "fqdn2"), LSBLK_COMMAND))
@@ -367,12 +367,12 @@ class DiskValidatorTest {
         when(gatewayConfigService.getAllGatewayConfigs(stack)).thenReturn(allGatewayConfigs);
 
         String gcpLsblkDifferentSizeOutput = """
-            sda 200\s
-            sdb 1000 /hadoopfs/fs1
-            sdc 1000 /hadoopfs/fs2
-            sdd 500 /hadoopfs/fs3
-            sde 500 /hadoopfs/fs4
-            sdf
+            NAME="sda" SIZE="214748364800"\s
+            NAME="sdb" SIZE="1073741824000" MOUNTPOINT="/hadoopfs/fs1"
+            NAME="sdc" SIZE="1073741824000" MOUNTPOINT="/hadoopfs/fs2"
+            NAME="sdd" SIZE="536870912000" MOUNTPOINT="/hadoopfs/fs3"
+            NAME="sde" SIZE="536870912000" MOUNTPOINT="/hadoopfs/fs4"
+            NAME="sdf"
             """;
 
         when(hostOrchestrator.runCommandOnHosts(allGatewayConfigs, Set.of("fqdn1", "fqdn2"), LSBLK_COMMAND))
@@ -501,11 +501,11 @@ class DiskValidatorTest {
         when(gatewayConfigService.getAllGatewayConfigs(stack)).thenReturn(allGatewayConfigs);
 
         String missingLsblkOutput = """
-            sda 200\s
-            sdb 64\s
-            sdc 1000 /hadoopfs/fs2
-            sdd 1000 /hadoopfs/fs3
-            sde 1000\s
+            NAME="sda" SIZE="214748364800"\s
+            NAME="sdb" SIZE="68719476736"\s
+            NAME="sdc" SIZE="1073741824000" MOUNTPOINT="/hadoopfs/fs2"
+            NAME="sdd" SIZE="1073741824000" MOUNTPOINT="/hadoopfs/fs3"
+            NAME="sde" SIZE="1073741824000"\s
             """;
 
         when(hostOrchestrator.runCommandOnHosts(allGatewayConfigs, Set.of("fqdn1", "fqdn2"), LSBLK_COMMAND))

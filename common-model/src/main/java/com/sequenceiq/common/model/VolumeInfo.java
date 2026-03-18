@@ -9,11 +9,11 @@ public class VolumeInfo {
 
     private final String device;
 
-    private final String size;
+    private final int size;
 
     private final boolean databaseType;
 
-    public VolumeInfo(String id, String device, String size, boolean databaseType) {
+    public VolumeInfo(String id, String device, int size, boolean databaseType) {
         this.id = id;
         this.device = device;
         this.size = size;
@@ -28,7 +28,7 @@ public class VolumeInfo {
         return device;
     }
 
-    public String getSize() {
+    public int getSize() {
         return size;
     }
 

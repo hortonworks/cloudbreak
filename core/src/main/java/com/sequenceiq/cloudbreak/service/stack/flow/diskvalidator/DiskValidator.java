@@ -32,6 +32,7 @@ import com.sequenceiq.cloudbreak.common.metrics.MetricService;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.job.disk.model.InstanceResourceDto;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
@@ -72,7 +73,7 @@ public class DiskValidator {
 
         Set<String> hostNames = nodes.stream().map(Node::getHostname).collect(Collectors.toSet());
         List<GatewayConfig> allGatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
-        MultiValuedMap<String, LsblkLine> lsblkResults = lsblkFetcher.getLsblkResults(allGatewayConfigs, hostNames);
+        MultiValuedMap<String, InstanceResourceDto.VolumeDto> lsblkResults = lsblkFetcher.getLsblkResults(allGatewayConfigs, hostNames);
 
         MultiValuedMap<String, VolumeIdWithDevice> volumeMappings =
                 volumeIdWithDeviceFetcher.getVolumeMappings(allGatewayConfigs, hostNames,
@@ -97,12 +98,12 @@ public class DiskValidator {
         return volumeInfos;
     }
 
-    private void validateNodeVolumes(Node node, MultiValuedMap<String, VolumeInfo> volumeInfos, Stack stack, MultiValuedMap<String, LsblkLine> lsblkResults,
-            MultiValuedMap<String, VolumeIdWithDevice> volumeMappings) {
+    private void validateNodeVolumes(Node node, MultiValuedMap<String, VolumeInfo> volumeInfos, Stack stack,
+        MultiValuedMap<String, InstanceResourceDto.VolumeDto> lsblkResults, MultiValuedMap<String, VolumeIdWithDevice> volumeMappings) {
 
         String instanceId = node.getInstanceId();
         String fqdn = node.getHostname();
-        Collection<LsblkLine> lsblkLine = lsblkResults.get(fqdn);
+        Collection<InstanceResourceDto.VolumeDto> lsblkLine = lsblkResults.get(fqdn);
         Collection<VolumeInfo> requiredVolumes = volumeInfos.get(instanceId);
 
         if (!volumeMappings.isEmpty()) {
@@ -114,7 +115,7 @@ public class DiskValidator {
         }
     }
 
-    private void validateVolume(Stack stack, VolumeInfo volumeInfo, String fqdn, Collection<LsblkLine> lsblkLines,
+    private void validateVolume(Stack stack, VolumeInfo volumeInfo, String fqdn, Collection<InstanceResourceDto.VolumeDto> lsblkLines,
             Collection<VolumeIdWithDevice> volumeMappingsForFQDN) {
         if (volumeMappingsForFQDN != null) {
             volumeMappingsForFQDN.stream().filter(volumeMapping -> volumeInfo.getId().equals(volumeMapping.getVolumeId())).findFirst()
@@ -125,19 +126,21 @@ public class DiskValidator {
         }
     }
 
-    private void validateVolumeSize(Stack stack, VolumeIdWithDevice volumeIdWithDevice, Collection<LsblkLine> lsblkLines, VolumeInfo volumeInfo, String fqdn) {
-        lsblkLines.stream().filter(line -> volumeIdWithDevice.getDevice().equals(line.getDevice())).findFirst()
+    private void validateVolumeSize(Stack stack, VolumeIdWithDevice volumeIdWithDevice, Collection<InstanceResourceDto.VolumeDto> lsblkLines,
+        VolumeInfo volumeInfo, String fqdn) {
+        lsblkLines.stream().filter(line -> volumeIdWithDevice.getDevice().equals(line.deviceName())).findFirst()
                 .ifPresentOrElse(line -> checkVolumeSizeAndMount(stack, line, volumeInfo, fqdn), () -> logVolumeNotFound(stack, volumeInfo, fqdn));
     }
 
-    private void validateVolumeCount(Stack stack, Collection<VolumeInfo> requiredVolumes, String fqdn, Collection<LsblkLine> lsblkLines) {
+    private void validateVolumeCount(Stack stack, Collection<VolumeInfo> requiredVolumes, String fqdn,
+        Collection<InstanceResourceDto.VolumeDto> lsblkLines) {
         List<VolumeInfo> notFoundVolumesBySize = new LinkedList<>(requiredVolumes);
         lsblkLines.forEach(lsblkLine -> {
             if (isMounted(lsblkLine)) {
-                notFoundVolumesBySize.stream().filter(volumeInfo -> Objects.equals(lsblkLine.getSize(), volumeInfo.getSize())).findFirst()
+                notFoundVolumesBySize.stream().filter(volumeInfo -> Objects.equals(lsblkLine.size(), volumeInfo.getSize())).findFirst()
                         .ifPresent(notFoundVolumesBySize::remove);
             } else {
-                LOGGER.debug("Volume {} is not mounted on the instance {}", lsblkLine.getDevice(), fqdn);
+                LOGGER.debug("Volume {} is not mounted on the instance {}", lsblkLine.deviceName(), fqdn);
             }
         });
         if (!notFoundVolumesBySize.isEmpty()) {
@@ -151,14 +154,14 @@ public class DiskValidator {
         }
     }
 
-    private void checkVolumeSizeAndMount(Stack stack, LsblkLine lsblkLine, VolumeInfo volumeInfo, String fqdn) {
-        if (!volumeInfo.getSize().equals(lsblkLine.getSize())) {
+    private void checkVolumeSizeAndMount(Stack stack, InstanceResourceDto.VolumeDto lsblkLine, VolumeInfo volumeInfo, String fqdn) {
+        if (volumeInfo.getSize() != lsblkLine.size()) {
             LOGGER.warn("Volume {} size mismatch for instance {}. Expected: {}, Actual: {}",
-                    volumeInfo.getId(), fqdn, volumeInfo.getSize(), lsblkLine.getSize());
+                    volumeInfo.getId(), fqdn, volumeInfo.getSize(), lsblkLine.size());
             metricService.incrementMetricCounter(VOLUME_MOUNT_SIZE_MISMATCH,
                     PLATFORM_VARIANT.name(), stack.getPlatformVariant());
             cloudbreakEventService.fireCloudbreakEvent(stack.getId(), VOLUMES_INADEQUATE_EVENT_TYPE, CLUSTER_VOLUME_SIZE_MISMATCH,
-                    List.of(volumeInfo.getId(), fqdn, volumeInfo.getSize() + GIGABYTE, lsblkLine.getSize() + GIGABYTE));
+                    List.of(volumeInfo.getId(), fqdn, volumeInfo.getSize() + GIGABYTE, lsblkLine.size() + GIGABYTE));
         }
         if (!isMounted(lsblkLine)) {
             LOGGER.warn("Volume {} is not mounted, but it should have been on {}", volumeInfo.getId(), fqdn);
@@ -170,8 +173,8 @@ public class DiskValidator {
         }
     }
 
-    private boolean isMounted(LsblkLine lsblkLine) {
-        return !Strings.isNullOrEmpty(lsblkLine.getMountPoint());
+    private boolean isMounted(InstanceResourceDto.VolumeDto lsblkLine) {
+        return !Strings.isNullOrEmpty(lsblkLine.mountPoint());
     }
 
     private void logVolumeNotFound(Stack stack, VolumeInfo volumeInfo, String fqdn) {

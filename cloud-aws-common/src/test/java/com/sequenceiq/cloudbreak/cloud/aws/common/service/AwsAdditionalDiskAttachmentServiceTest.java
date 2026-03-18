@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.aws.common.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -30,6 +31,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.CommonAwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.cloudbreak.cloud.model.VolumeRecord;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 
@@ -215,5 +217,30 @@ class AwsAdditionalDiskAttachmentServiceTest {
         verify(client).attachVolume(attachRequestCaptor.capture());
         assertEquals("test-instance-id", attachRequestCaptor.getValue().instanceId());
         assertEquals("vol-id", attachRequestCaptor.getValue().volumeId());
+    }
+
+    @Test
+    void testDescribeAttachedVolumes() {
+        DescribeInstancesResponse describeInstancesResponse = mock(DescribeInstancesResponse.class);
+        doReturn(describeInstancesResponse).when(client).describeInstances(any(DescribeInstancesRequest.class));
+        software.amazon.awssdk.services.ec2.model.Reservation reservation = mock(software.amazon.awssdk.services.ec2.model.Reservation.class);
+        software.amazon.awssdk.services.ec2.model.Instance awsInstance = mock(software.amazon.awssdk.services.ec2.model.Instance.class);
+        when(awsInstance.instanceId()).thenReturn("test-instance-id");
+        when(awsInstance.rootDeviceName()).thenReturn("test-instance-root");
+        when(describeInstancesResponse.reservations()).thenReturn(List.of(reservation));
+        when(reservation.instances()).thenReturn(List.of(awsInstance));
+
+        software.amazon.awssdk.services.ec2.model.VolumeAttachment attachments = mock(software.amazon.awssdk.services.ec2.model.VolumeAttachment.class);
+        Volume volumeResponse = Volume.builder().volumeId("vol-id").attachments(attachments).build();
+        DescribeVolumesResponse describeVolumesResponse = mock(DescribeVolumesResponse.class);
+        doReturn(List.of(volumeResponse)).when(describeVolumesResponse).volumes();
+        doReturn(describeVolumesResponse).when(client).describeVolumes(any(DescribeVolumesRequest.class));
+        when(attachments.device()).thenReturn("test-instance-id");
+        when(attachments.instanceId()).thenReturn("test-instance-id");
+
+        Map<String, List<VolumeRecord>> response = underTest.describeAttachedVolumes(authenticatedContext, List.of("test-instance-id"));
+        assertEquals(1, response.size());
+        assertTrue(response.containsKey("test-instance-id"));
+        assertEquals("vol-id", response.get("test-instance-id").get(0).id());
     }
 }

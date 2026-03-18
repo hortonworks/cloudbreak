@@ -88,7 +88,7 @@ class GcpResourceVolumeConnectorTest {
         VolumeInfo volumeInfo = underTest.getVolumeInfoFromResourceVolume(vol);
         assertEquals("abc", volumeInfo.getId());
         assertEquals("/dev/disk/by-id/google-abc", volumeInfo.getDevice());
-        assertEquals("10", volumeInfo.getSize());
+        assertEquals(10, volumeInfo.getSize());
         assertFalse(volumeInfo.isDatabaseType());
     }
 
@@ -98,7 +98,7 @@ class GcpResourceVolumeConnectorTest {
         VolumeInfo volumeInfo = underTest.getVolumeInfoFromResourceVolume(vol);
         assertEquals("i2v1", volumeInfo.getId());
         assertEquals("/dev/disk/by-id/google-abc", volumeInfo.getDevice());
-        assertEquals("10", volumeInfo.getSize());
+        assertEquals(10, volumeInfo.getSize());
         assertTrue(volumeInfo.isDatabaseType());
     }
 }

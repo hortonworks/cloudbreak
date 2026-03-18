@@ -44,10 +44,10 @@ public class GcpResourceVolumeConnector implements ResourceVolumeConnector {
     @Override
     public VolumeInfo getVolumeInfoFromResourceVolume(VolumeSetAttributes.Volume volume) {
         if (volume.getType().equals(GcpDiskType.LOCAL_SSD.value())) {
-            return new VolumeInfo(volume.getDevice().replace(DEVICE_NAME_PREFIX, ""), volume.getDevice(), volume.getSize().toString(),
+            return new VolumeInfo(volume.getDevice().replace(DEVICE_NAME_PREFIX, ""), volume.getDevice(), volume.getSize(),
                 volume.getCloudVolumeUsageType() == CloudVolumeUsageType.DATABASE);
         } else {
-            return new VolumeInfo(volume.getId(), volume.getDevice(), volume.getSize().toString(),
+            return new VolumeInfo(volume.getId(), volume.getDevice(), volume.getSize(),
                 volume.getCloudVolumeUsageType() == CloudVolumeUsageType.DATABASE);
         }
     }

@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common.service;
 
+import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
 import java.util.ArrayList;
@@ -24,6 +25,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.CommonAwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.cloudbreak.cloud.model.VolumeRecord;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 
@@ -146,5 +148,34 @@ public class AwsAdditionalDiskAttachmentService {
             LOGGER.error(errorMessage);
             throw new CloudbreakServiceException(errorMessage + throwable.getMessage(), throwable);
         }
+    }
+
+    public Map<String, List<VolumeRecord>> describeAttachedVolumes(AuthenticatedContext authenticatedContext, Collection<String> instanceIds) {
+        AmazonEc2Client client = commonAwsClient.createEc2Client(authenticatedContext);
+        DescribeInstancesResponse describeInstancesResponse = client.describeInstances(DescribeInstancesRequest.builder()
+                .instanceIds(instanceIds)
+                .build());
+        Map<String, String> instanceRootDeviceNames = describeInstancesResponse.reservations().stream()
+                .map(Reservation::instances)
+                .flatMap(Collection::stream)
+                .collect(Collectors.toMap(Instance::instanceId, Instance::rootDeviceName));
+        DescribeVolumesResponse describeVolumesResponse = client.describeVolumes(DescribeVolumesRequest.builder()
+                .filters(Filter.builder()
+                        .name("attachment.instance-id")
+                        .values(instanceIds)
+                        .build())
+                .build());
+        Map<String, List<VolumeRecord>> result = describeVolumesResponse.volumes().stream()
+                .filter(v -> {
+                    // Filter root volumes
+                    VolumeAttachment volumeAttachment = v.attachments().getFirst();
+                    String rootDeviceNameOfInstance = instanceRootDeviceNames.get(volumeAttachment.instanceId());
+                    return !Objects.equals(rootDeviceNameOfInstance, volumeAttachment.device());
+                })
+                .collect(Collectors.groupingBy(v -> v.attachments().getFirst().instanceId(),
+                        Collectors.mapping(v -> new VolumeRecord(v.volumeId(),
+                                v.attachments().getFirst().device(), v.size(), v.volumeTypeAsString()), toList())));
+        instanceIds.forEach(i -> result.computeIfAbsent(i, k -> new ArrayList<>()));
+        return result;
     }
 }

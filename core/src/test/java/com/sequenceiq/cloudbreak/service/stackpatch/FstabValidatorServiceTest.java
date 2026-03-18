@@ -5,11 +5,11 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anySet;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -43,12 +43,9 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
 import com.sequenceiq.cloudbreak.dto.StackDto;
-import com.sequenceiq.cloudbreak.orchestrator.model.NodeReachabilityResult;
-import com.sequenceiq.cloudbreak.orchestrator.salt.SaltOrchestrator;
-import com.sequenceiq.cloudbreak.orchestrator.salt.SaltService;
-import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
-import com.sequenceiq.cloudbreak.util.StackUtil;
+import com.sequenceiq.cloudbreak.util.ResourceSyncUtil;
+import com.sequenceiq.cloudbreak.util.StackStatusAndReachabilityValidatorUtil;
 import com.sequenceiq.common.api.type.ResourceType;
 
 @ExtendWith(MockitoExtension.class)
@@ -71,19 +68,13 @@ class FstabValidatorServiceTest {
     private ResourceService resourceService;
 
     @Mock
-    private GatewayConfigService gatewayConfigService;
-
-    @Mock
-    private StackUtil stackUtil;
-
-    @Mock
-    private SaltOrchestrator saltOrchestrator;
-
-    @Mock
     private ResourceAttributeUtil resourceAttributeUtil;
 
     @Mock
-    private SaltService saltService;
+    private ResourceSyncUtil resourceSyncUtil;
+
+    @Mock
+    private StackStatusAndReachabilityValidatorUtil stackStatusAndReachabilityValidatorUtil;
 
     @InjectMocks
     private FstabValidatorService underTest;
@@ -114,8 +105,6 @@ class FstabValidatorServiceTest {
                 null, null, null);
 
         Node node = new Node("privateIp", "publicIp", "instanceId", "instanceType", FQDN, "hostGroup");
-        lenient().when(stackUtil.collectNodes(stack)).thenReturn(Set.of(node));
-        lenient().when(saltOrchestrator.getResponsiveNodes(any(), any(), anyBoolean())).thenReturn(new NodeReachabilityResult(Set.of(node), null));
         lenient().doCallRealMethod().when(resourceAttributeUtil).getTypedAttributes(any(), eq(VolumeSetAttributes.class));
     }
 
@@ -127,21 +116,24 @@ class FstabValidatorServiceTest {
     @Test
     void testIsAffectedWhenNoVolumeSets() {
         when(resourceService.findAllByStackIdAndResourceTypeIn(anyLong(), anyList())).thenReturn(Collections.emptyList());
+        when(stackStatusAndReachabilityValidatorUtil.validateStackStatusAndReachability(stack)).thenReturn(true);
         assertFalse(underTest.isAffected(stack));
     }
 
     @Test
     void testIsAffectedWhenUnsupportedCloudProvider() {
         stack.setCloudPlatform("YARN");
+        when(stackStatusAndReachabilityValidatorUtil.validateStackStatusAndReachability(stack)).thenReturn(true);
         assertFalse(underTest.isAffected(stack));
     }
 
     @Test
     void testIsAffectedWhenFstabAndResourceVolumeSizeAreSame() {
         Resource resource = createVolumeSetResource(FSTAB_FROM_DB);
+        doCallRealMethod().when(resourceSyncUtil).normalizeFstab(anyString());
+        doCallRealMethod().when(resourceSyncUtil).getMountedVolumesCount(anyString());
         when(resourceService.findAllByStackIdAndResourceTypeIn(anyLong(), anyList())).thenReturn(List.of(resource));
-//        when(saltOrchestrator.getFstabInformation(any(), any(), anySet())).thenReturn(Map.of(FQDN, Map.of("uuid", "", "fstab", FSTAB_FROM_DB)));
-
+        when(stackStatusAndReachabilityValidatorUtil.validateStackStatusAndReachability(stack)).thenReturn(true);
         assertFalse(underTest.isAffected(stack));
     }
 
@@ -149,8 +141,7 @@ class FstabValidatorServiceTest {
     void testIsAffectedWhenFstabAndResourceVolumeSizeAreDifferent() {
         Resource resource = createVolumeSetResource(FSTAB_FROM_DB_2);
         when(resourceService.findAllByStackIdAndResourceTypeIn(anyLong(), anyList())).thenReturn(List.of(resource));
-//        when(saltOrchestrator.getFstabInformation(any(), any(), anySet())).thenReturn(Map.of(FQDN, Map.of("uuid", "", "fstab", FSTAB_FROM_HOST)));
-
+        when(stackStatusAndReachabilityValidatorUtil.validateStackStatusAndReachability(stack)).thenReturn(true);
         assertTrue(underTest.isAffected(stack));
     }
 
@@ -158,7 +149,8 @@ class FstabValidatorServiceTest {
     void testDoApplyWhenFstabsAreDifferent() throws ExistingStackPatchApplyException {
         Resource resource = createVolumeSetResource(FSTAB_FROM_DB);
         when(resourceService.findAllByStackIdAndResourceTypeIn(anyLong(), anyList())).thenReturn(List.of(resource));
-        when(saltOrchestrator.getFstabInformation(any(), any(), anySet())).thenReturn(Map.of(FQDN, Map.of("uuid", "", "fstab", FSTAB_FROM_HOST)));
+        doCallRealMethod().when(resourceSyncUtil).normalizeFstab(anyString());
+        when(resourceSyncUtil.getFstabInformation(stack.getId())).thenReturn(Map.of(FQDN, FSTAB_FROM_HOST));
 
         assertTrue(underTest.doApply(stack));
         verify(resourceService, times(1)).save(any(Resource.class));
@@ -168,7 +160,8 @@ class FstabValidatorServiceTest {
     void testDoApplyWhenFstabsAreSame() throws ExistingStackPatchApplyException {
         Resource resource = createVolumeSetResource(FSTAB_FROM_DB);
         when(resourceService.findAllByStackIdAndResourceTypeIn(anyLong(), anyList())).thenReturn(List.of(resource));
-        when(saltOrchestrator.getFstabInformation(any(), any(), anySet())).thenReturn(Map.of(FQDN, Map.of("uuid", "", "fstab", FSTAB_FROM_DB)));
+        doCallRealMethod().when(resourceSyncUtil).normalizeFstab(anyString());
+        when(resourceSyncUtil.getFstabInformation(stack.getId())).thenReturn(Map.of(FQDN, FSTAB_FROM_DB));
 
         assertTrue(underTest.doApply(stack));
         verify(resourceService, never()).save(any(Resource.class));
@@ -178,7 +171,7 @@ class FstabValidatorServiceTest {
     void testDoApplyWhenOrchestratorFails() {
         Resource resource = createVolumeSetResource(FSTAB_FROM_DB);
         when(resourceService.findAllByStackIdAndResourceTypeIn(anyLong(), anyList())).thenReturn(List.of(resource));
-        when(saltOrchestrator.getFstabInformation(any(), any(), anySet())).thenThrow(new RuntimeException("error"));
+        when(resourceSyncUtil.getFstabInformation(stack.getId())).thenThrow(new RuntimeException("error"));
 
         assertThrows(ExistingStackPatchApplyException.class, () -> underTest.doApply(stack));
     }
@@ -192,11 +185,5 @@ class FstabValidatorServiceTest {
         attributes.setFstab(fstab);
         resource.setAttributes(new Json(attributes));
         return resource;
-    }
-
-    @Test
-    void testFstabNormalization() {
-        String duplicatedFstab = FSTAB_FROM_HOST + "\n" + FSTAB_FROM_HOST;
-        assertEquals(FSTAB_FROM_HOST, underTest.normalizeFstab(duplicatedFstab));
     }
 }

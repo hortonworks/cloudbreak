@@ -32,6 +32,7 @@ import org.mockito.quality.Strictness;
 import org.mockito.stubbing.OngoingStubbing;
 
 import com.azure.resourcemanager.compute.models.Disk;
+import com.azure.resourcemanager.compute.models.StorageAccountTypes;
 import com.azure.resourcemanager.compute.models.VirtualMachine;
 import com.azure.resourcemanager.compute.models.VirtualMachineDataDisk;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
@@ -48,6 +49,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.RootVolumeFetchDto;
+import com.sequenceiq.cloudbreak.cloud.model.VolumeRecord;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 
@@ -410,10 +412,56 @@ class AzureResourceVolumeConnectorTest {
                 result.get("instance2"));
     }
 
-    private VirtualMachineDataDisk getDataDisk(String diskId) {
+    @Test
+    void testDescribeAttachedVolumes() {
+        CloudStack cloudStack = mock(CloudStack.class);
+        CloudContext cloudContext = mock(CloudContext.class);
+        AzureClient azureClient = mock(AzureClient.class);
+        VirtualMachine vm1 = mock(VirtualMachine.class);
+        when(vm1.name()).thenReturn("instance1");
+        Map<Integer, VirtualMachineDataDisk> instance1Disks = Map.of(
+                0, getDataDisk("i1v0", 100, "StandardSSD_LRS", 0)
+        );
+        when(vm1.dataDisks()).thenReturn(instance1Disks);
+        VirtualMachine vm2 = mock(VirtualMachine.class);
+        when(vm2.name()).thenReturn("instance2");
+        Map<Integer, VirtualMachineDataDisk> instance2Disks = Map.of(
+                0, getDataDisk("i2v0", 300, "StandardSSD_LRS", 0)
+        );
+        when(vm2.dataDisks()).thenReturn(instance2Disks);
+        when(authenticatedContext.getParameter(AzureClient.class)).thenReturn(azureClient);
+        when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
+        when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, cloudStack)).thenReturn(RESOURCE_GROUP_NAME);
+        when(azureVirtualMachineService.getVirtualMachinesByName(azureClient, RESOURCE_GROUP_NAME, List.of("instance1", "instance2")))
+                .thenReturn(Map.of("instance1", vm1, "instance2", vm2));
+
+        Map<String, List<VolumeRecord>> result = underTest.describeAttachedVolumes(authenticatedContext, cloudStack,
+                List.of("instance1", "instance2"));
+
+        assertEquals(2, result.size());
+        assertEquals(1, result.get("instance1").size());
+        assertEquals("i1v0", result.get("instance1").get(0).id());
+        assertEquals("/dev/disk/azure/scsi[1-9]/lun0", result.get("instance1").get(0).device());
+        assertEquals(100, result.get("instance1").get(0).size());
+        assertEquals("StandardSSD_LRS", result.get("instance1").get(0).type());
+        assertEquals(1, result.get("instance2").size());
+        assertEquals("i2v0", result.get("instance2").get(0).id());
+        assertEquals("/dev/disk/azure/scsi[1-9]/lun0", result.get("instance2").get(0).device());
+        assertEquals(300, result.get("instance2").get(0).size());
+        assertEquals("StandardSSD_LRS", result.get("instance2").get(0).type());
+    }
+
+    private VirtualMachineDataDisk getDataDisk(String diskId, int size, String type, int lun) {
         VirtualMachineDataDisk disk = mock(VirtualMachineDataDisk.class);
         when(disk.id()).thenReturn(diskId);
+        when(disk.size()).thenReturn(size);
+        when(disk.storageAccountType()).thenReturn(StorageAccountTypes.fromString(type));
+        when(disk.lun()).thenReturn(lun);
         return disk;
+    }
+
+    private VirtualMachineDataDisk getDataDisk(String diskId) {
+        return getDataDisk(diskId, 0, "StandardSSD_LRS", 0);
     }
 
     private CloudResource getCloudResource(String groupName, String instanceName) {

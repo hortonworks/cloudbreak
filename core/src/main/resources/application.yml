@@ -903,6 +903,11 @@ diskusage-sync:
   maxsize: 1000
   dryrun: true
 
+disk-sync:
+  intervalminutes: 360
+  enabled-providers: AWS,AZURE
+  enabled: true
+
 clusterdns:
   host: localhost
   port: 8982
