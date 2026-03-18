@@ -113,17 +113,20 @@ public class VaultConfig extends AbstractVaultConfiguration {
     public ClientAuthentication clientAuthentication() {
         if (AUTH_TYPE_K8S.equalsIgnoreCase(authType)) {
             LOGGER.info("Kubernetes based Vault auth is configured");
-            try {
-                String token = FileReaderUtils.readFileFromPath(Paths.get(kubernetesSATokenPath));
-                KubernetesAuthenticationOptions k8sOptions = KubernetesAuthenticationOptions.builder()
-                        .jwtSupplier(() -> token)
-                        .role(kubernetesLoginRole)
-                        .path(kubernetesMountPath)
-                        .build();
-                return new KubernetesAuthentication(k8sOptions, restOperations());
-            } catch (IOException e) {
-                throw new RuntimeException("Failed to read the Kubernetes service account token", e);
-            }
+            KubernetesAuthenticationOptions k8sOptions = KubernetesAuthenticationOptions.builder()
+                    .jwtSupplier(() -> {
+                        try {
+                            LOGGER.info("Reading Kubernetes service account token from {}", kubernetesSATokenPath);
+                            return FileReaderUtils.readFileFromPath(Paths.get(kubernetesSATokenPath));
+                        } catch (IOException e) {
+                            LOGGER.error("Failed to read the Kubernetes service account token", e);
+                            throw new RuntimeException("Failed to read the Kubernetes service account token", e);
+                        }
+                    })
+                    .role(kubernetesLoginRole)
+                    .path(kubernetesMountPath)
+                    .build();
+            return new KubernetesAuthentication(k8sOptions, restOperations());
         } else {
             LOGGER.info("Token based Vault auth is configured");
             return new TokenAuthentication(rootToken);
