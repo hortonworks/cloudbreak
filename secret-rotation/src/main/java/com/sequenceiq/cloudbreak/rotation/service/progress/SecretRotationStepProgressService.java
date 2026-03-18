@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.rotation.service.progress;
 
+import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
 import static com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType.FINALIZE;
 import static com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType.PREVALIDATE;
 import static com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType.ROLLBACK;
@@ -26,6 +27,7 @@ import com.sequenceiq.cloudbreak.rotation.repository.SecretRotationStepProgressR
 import com.sequenceiq.cloudbreak.rotation.request.RotationSource;
 import com.sequenceiq.cloudbreak.rotation.request.StepProgressCleanupDescriptor;
 import com.sequenceiq.cloudbreak.rotation.request.StepProgressCleanupStatus;
+import com.sequenceiq.cloudbreak.rotation.request.StepProgressResponse;
 import com.sequenceiq.cloudbreak.rotation.serialization.SecretRotationEnumSerializationUtil;
 import com.sequenceiq.cloudbreak.rotation.service.RotationMetadata;
 
@@ -36,6 +38,16 @@ public class SecretRotationStepProgressService {
 
     @Inject
     private SecretRotationStepProgressRepository repository;
+
+    public StepProgressResponse getProgressResponse(String resourceCrn, SecretType secretType) {
+        SecretRotationStepProgress progress = getProgress(resourceCrn, secretType)
+                .orElseThrow(notFound(String.format("Secret rotation progress for resource '%s' and secret type '%s' not found!", resourceCrn, secretType)));
+        StepProgressResponse stepProgressResponse = new StepProgressResponse();
+        stepProgressResponse.setStep(SecretRotationEnumSerializationUtil.serialize(progress.getSecretRotationStep()));
+        stepProgressResponse.setPhase(SecretRotationEnumSerializationUtil.serialize(progress.getCurrentExecutionType()));
+        stepProgressResponse.setStatus(SecretRotationEnumSerializationUtil.serialize(progress.getStatus()));
+        return stepProgressResponse;
+    }
 
     public Optional<SecretRotationStepProgress> getProgress(String resourceCrn, SecretType secretType) {
         return repository.findByResourceCrnAndSecretType(resourceCrn, secretType);

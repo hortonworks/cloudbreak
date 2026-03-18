@@ -37,6 +37,7 @@ import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.rotation.request.StepProgressCleanupDescriptor;
 import com.sequenceiq.cloudbreak.rotation.request.StepProgressCleanupResponse;
+import com.sequenceiq.cloudbreak.rotation.request.StepProgressResponse;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.common.api.UsedSubnetsByEnvironmentResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -381,6 +382,12 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
     public StepProgressCleanupResponse cleanupSecretRotationProgress(@RequestObject SecretRotationCleanupProgressV4Request request) {
         StepProgressCleanupDescriptor stepProgressCleanupDescriptor = redbeamsRotationService.cleanupProgress(request.getCrn(), request.getSecret());
         return StepProgressCleanupResponse.of(List.of(stepProgressCleanupDescriptor));
+    }
+
+    @Override
+    @InternalOnly
+    public StepProgressResponse getSecretRotationProgress(String secretType, @ResourceCrn String dbServerCrn) {
+        return redbeamsRotationService.getProgressResponse(dbServerCrn, secretType);
     }
 
     @Override

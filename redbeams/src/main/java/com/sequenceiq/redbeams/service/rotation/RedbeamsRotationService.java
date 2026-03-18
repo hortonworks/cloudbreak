@@ -14,6 +14,7 @@ import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.SecretTypeConverter;
 import com.sequenceiq.cloudbreak.rotation.request.RotationSource;
 import com.sequenceiq.cloudbreak.rotation.request.StepProgressCleanupDescriptor;
+import com.sequenceiq.cloudbreak.rotation.request.StepProgressResponse;
 import com.sequenceiq.cloudbreak.rotation.service.progress.SecretRotationStepProgressService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
@@ -50,5 +51,10 @@ public class RedbeamsRotationService {
     public StepProgressCleanupDescriptor cleanupProgress(String crn, String secret) {
         SecretType secretType = SecretTypeConverter.mapSecretType(secret, enabledSecretTypes.stream().map(SecretType::getClass).collect(Collectors.toSet()));
         return stepProgressService.delete(crn, secretType, RotationSource.REDBEAMS);
+    }
+
+    public StepProgressResponse getProgressResponse(String crn, String secret) {
+        SecretType secretType = SecretTypeConverter.mapSecretType(secret, enabledSecretTypes.stream().map(SecretType::getClass).collect(Collectors.toSet()));
+        return stepProgressService.getProgressResponse(crn, secretType);
     }
 }

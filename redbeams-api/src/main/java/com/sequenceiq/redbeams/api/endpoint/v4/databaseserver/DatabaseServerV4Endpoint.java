@@ -26,7 +26,9 @@ import org.springframework.validation.annotation.Validated;
 
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
+import com.sequenceiq.cloudbreak.rotation.annotation.ValidSecretType;
 import com.sequenceiq.cloudbreak.rotation.request.StepProgressCleanupResponse;
+import com.sequenceiq.cloudbreak.rotation.request.StepProgressResponse;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.common.api.UsedSubnetsByEnvironmentResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -54,6 +56,7 @@ import com.sequenceiq.redbeams.doc.Notes.DatabaseServerNotes;
 import com.sequenceiq.redbeams.doc.OperationDescriptions;
 import com.sequenceiq.redbeams.doc.OperationDescriptions.DatabaseServerOpDescription;
 import com.sequenceiq.redbeams.doc.ParamDescriptions.DatabaseServerParamDescriptions;
+import com.sequenceiq.redbeams.rotation.RedbeamsSecretType;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -362,6 +365,14 @@ public interface DatabaseServerV4Endpoint {
     @Operation(summary = "Clean up secret rotation progress information", operationId = "cleanupProgress",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     StepProgressCleanupResponse cleanupSecretRotationProgress(@Valid @NotNull SecretRotationCleanupProgressV4Request request);
+
+    @GET
+    @Path("get_secret_rotation_progress")
+    @Operation(summary = "Get secret rotation progress information", operationId = "getProgress",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    StepProgressResponse getSecretRotationProgress(
+            @QueryParam("secretType") @ValidSecretType(allowedTypes = RedbeamsSecretType.class) @NotEmpty String secretType,
+            @ValidCrn(resource = DATABASE_SERVER) @QueryParam("dbServerCrn") String dbServerCrn);
 
     @POST
     @Path("get_certificate_status")

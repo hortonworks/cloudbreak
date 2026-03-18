@@ -15,7 +15,10 @@ import jakarta.ws.rs.core.MediaType;
 
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
+import com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType;
+import com.sequenceiq.cloudbreak.rotation.annotation.ValidSecretType;
 import com.sequenceiq.cloudbreak.rotation.request.StepProgressCleanupResponse;
+import com.sequenceiq.cloudbreak.rotation.request.StepProgressResponse;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXSecretRotationCleanupProgressRequest;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXSecretRotationRequest;
@@ -53,4 +56,12 @@ public interface DistroXV1RotationEndpoint {
     @Operation(summary = "Clean up rotation progress information", operationId = "cleanupProgress",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     StepProgressCleanupResponse cleanupProgress(@Valid @NotNull DistroXSecretRotationCleanupProgressRequest request);
+
+    @GET
+    @Path("get_secret_rotation_progress")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Get rotation progress information", operationId = "getProgress",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    StepProgressResponse getProgress(@QueryParam("secretType") @ValidSecretType(allowedTypes = CloudbreakSecretType.class) @NotEmpty String secretType,
+            @ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @QueryParam("datahubCrn") String datahubCrn);
 }

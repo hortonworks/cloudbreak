@@ -17,13 +17,16 @@ import jakarta.ws.rs.core.MediaType;
 
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
+import com.sequenceiq.cloudbreak.rotation.annotation.ValidSecretType;
 import com.sequenceiq.cloudbreak.rotation.request.StepProgressCleanupResponse;
+import com.sequenceiq.cloudbreak.rotation.request.StepProgressResponse;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaNotes;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.rotate.FreeIpaSecretRotationCleanupProgressRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.rotate.FreeIpaSecretRotationRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.rotate.FreeipaSecretTypeResponse;
+import com.sequenceiq.freeipa.rotation.FreeIpaSecretType;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -66,4 +69,12 @@ public interface FreeIpaRotationV1Endpoint {
     @Operation(summary = "Clean up rotation progress information", operationId = "cleanupProgress",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     StepProgressCleanupResponse cleanupProgress(@Valid @NotNull FreeIpaSecretRotationCleanupProgressRequest request);
+
+    @GET
+    @Path("get_secret_rotation_progress")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Get rotation progress information", operationId = "getProgress",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    StepProgressResponse getProgress(@QueryParam("secretType") @ValidSecretType(allowedTypes = FreeIpaSecretType.class) @NotEmpty String secretType,
+            @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @QueryParam("environmentCrn") String environmentCrn);
 }

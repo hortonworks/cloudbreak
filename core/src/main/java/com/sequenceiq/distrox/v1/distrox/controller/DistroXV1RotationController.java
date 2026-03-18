@@ -15,6 +15,7 @@ import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.cloudbreak.auth.security.internal.RequestObject;
 import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 import com.sequenceiq.cloudbreak.rotation.request.StepProgressCleanupResponse;
+import com.sequenceiq.cloudbreak.rotation.request.StepProgressResponse;
 import com.sequenceiq.cloudbreak.rotation.service.SecretTypeListService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackRotationService;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1RotationEndpoint;
@@ -48,5 +49,11 @@ public class DistroXV1RotationController implements DistroXV1RotationEndpoint {
     @InternalOnly
     public StepProgressCleanupResponse cleanupProgress(@RequestObject DistroXSecretRotationCleanupProgressRequest request) {
         return StepProgressCleanupResponse.of(stackRotationService.cleanupProgress(request.getCrn(), request.getSecret()));
+    }
+
+    @Override
+    @InternalOnly
+    public StepProgressResponse getProgress(String secret, @ResourceCrn String datahubCrn) {
+        return stackRotationService.getProgressResponse(datahubCrn, secret);
     }
 }

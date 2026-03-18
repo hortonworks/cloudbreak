@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.rotation.common.RotationContextProvider;
 import com.sequenceiq.cloudbreak.rotation.request.RotationSource;
 import com.sequenceiq.cloudbreak.rotation.request.StepProgressCleanupDescriptor;
 import com.sequenceiq.cloudbreak.rotation.request.StepProgressCleanupStatus;
+import com.sequenceiq.cloudbreak.rotation.request.StepProgressResponse;
 import com.sequenceiq.cloudbreak.rotation.serialization.SecretRotationEnumSerializationUtil;
 import com.sequenceiq.cloudbreak.rotation.service.SecretRotationValidationService;
 import com.sequenceiq.cloudbreak.rotation.service.progress.SecretRotationStepProgressService;
@@ -72,6 +73,12 @@ public class StackRotationService {
 
     public void cleanupSecretRotationEntries(String crn) {
         stepProgressService.deleteAllForResource(crn);
+    }
+
+    public StepProgressResponse getProgressResponse(String crn, String secret) {
+        SecretType secretType = SecretTypeConverter.mapSecretType(secret,
+                Arrays.stream(CloudbreakSecretType.values()).map(SecretType::getClass).collect(Collectors.toSet()));
+        return stepProgressService.getProgressResponse(crn, secretType);
     }
 
     public List<StepProgressCleanupDescriptor> cleanupProgress(String crn, String secret) {

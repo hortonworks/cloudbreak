@@ -82,6 +82,7 @@ import com.sequenceiq.cloudbreak.common.notification.NotificationState;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.dto.SubnetIdWithResourceNameAndCrn;
 import com.sequenceiq.cloudbreak.rotation.request.StepProgressCleanupResponse;
+import com.sequenceiq.cloudbreak.rotation.request.StepProgressResponse;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.migraterds.StackMigrateRdsService;
 import com.sequenceiq.cloudbreak.service.notification.StackNotificationService;
@@ -822,6 +823,12 @@ public class StackV4Controller extends NotificationController implements StackV4
     @InternalOnly
     public StepProgressCleanupResponse cleanupSecretRotationProgress(Long workspaceId, @ResourceCrn String crn, String secretType) {
         return StepProgressCleanupResponse.of(stackRotationService.cleanupProgress(crn, secretType));
+    }
+
+    @Override
+    @InternalOnly
+    public StepProgressResponse getSecretRotationProgress(Long workspaceId, @ResourceCrn String crn, String secretType) {
+        return stackRotationService.getProgressResponse(crn, secretType);
     }
 
     @InternalOnly

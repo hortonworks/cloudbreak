@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.auth.security.internal.RequestObject;
 import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 import com.sequenceiq.cloudbreak.rotation.request.StepProgressCleanupDescriptor;
 import com.sequenceiq.cloudbreak.rotation.request.StepProgressCleanupResponse;
+import com.sequenceiq.cloudbreak.rotation.request.StepProgressResponse;
 import com.sequenceiq.cloudbreak.rotation.service.SecretTypeListService;
 import com.sequenceiq.cloudbreak.structuredevent.rest.annotation.AccountEntityType;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -65,5 +66,11 @@ public class FreeIpaRotationV1Controller implements FreeIpaRotationV1Endpoint {
         StepProgressCleanupDescriptor stepProgressCleanupDescriptor =
                 freeIpaSecretRotationService.cleanupProgress(request.getEnvironmentCrn(), request.getSecret());
         return StepProgressCleanupResponse.of(List.of(stepProgressCleanupDescriptor));
+    }
+
+    @Override
+    @InternalOnly
+    public StepProgressResponse getProgress(String secretType, @ResourceCrn String environmentCrn) {
+        return freeIpaSecretRotationService.getProgress(environmentCrn, secretType);
     }
 }
