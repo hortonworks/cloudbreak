@@ -27,6 +27,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.azure.conf.AzureConfig;
+import com.sequenceiq.cloudbreak.cloud.azure.conf.MdcReactorSchedulerDecorator;
 import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureTagValidator;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
@@ -63,7 +64,7 @@ public class RedBeamsTagValidatorTest {
     }
 
     public static Object[][] negativeScenarios() {
-        return new Object[][] {
+        return new Object[][]{
 
                 {"", "azure@cloudera.com prx:pfx:^!=-", "too short"},
                 {"azureprefix", "azure@cloudera.com prx:pfx:^!=-", "regular expression"},
@@ -72,7 +73,7 @@ public class RedBeamsTagValidatorTest {
     }
 
     public static Object[][] positiveScenarios() {
-        return new Object[][] {
+        return new Object[][]{
 
                 {"azaccount", "azure@cloudera.com prx:pfx:^!=-"},
                 {"cod_database_name", "hura"},
@@ -93,6 +94,9 @@ public class RedBeamsTagValidatorTest {
 
         @MockBean
         private MeterRegistry meterRegistry;
+
+        @MockBean
+        private MdcReactorSchedulerDecorator mdcReactorSchedulerDecorator;
 
         @Bean
         CloudConnector cloud() {

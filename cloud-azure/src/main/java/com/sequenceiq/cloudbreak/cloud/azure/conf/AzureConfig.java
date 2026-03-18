@@ -7,6 +7,7 @@ import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
@@ -20,6 +21,8 @@ import com.sequenceiq.cloudbreak.cloud.model.TagSpecification;
 import com.sequenceiq.cloudbreak.concurrent.CommonExecutorServiceFactory;
 import com.sequenceiq.cloudbreak.concurrent.MDCCopyDecorator;
 import com.sequenceiq.common.model.AzureDatabaseType;
+
+import reactor.core.scheduler.Schedulers;
 
 @Configuration
 public class AzureConfig {
@@ -57,6 +60,14 @@ public class AzureConfig {
 
     @Value("${spring.threads.virtual.enabled:false}")
     private boolean virtualThreadsAvailable;
+
+    @Inject
+    private MdcReactorSchedulerDecorator mdcReactorSchedulerDecorator;
+
+    @PostConstruct
+    public void initScheduler() {
+        Schedulers.onScheduleHook("mdc-propagation", mdcReactorSchedulerDecorator);
+    }
 
     @Bean(name = "AzureTagSpecification")
     public TagSpecification getTagSpecification() {

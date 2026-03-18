@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.ImageFilter;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.azure.conf.AzureConfig;
+import com.sequenceiq.cloudbreak.cloud.azure.conf.MdcReactorSchedulerDecorator;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
@@ -154,6 +155,9 @@ class AzureTagValidatorTest {
 
         @MockBean
         private MeterRegistry meterRegistry;
+
+        @MockBean
+        private MdcReactorSchedulerDecorator mdcReactorSchedulerDecorator;
 
         @Bean
         CloudConnector cloud() {

@@ -29,6 +29,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.azure.conf.AzureConfig;
+import com.sequenceiq.cloudbreak.cloud.azure.conf.MdcReactorSchedulerDecorator;
 import com.sequenceiq.cloudbreak.cloud.azure.validator.AzureTagValidator;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
@@ -89,6 +90,9 @@ class TagValidatorTest {
 
         @MockBean
         private MeterRegistry meterRegistry;
+
+        @MockBean
+        private MdcReactorSchedulerDecorator mdcReactorSchedulerDecorator;
 
         @Bean
         CloudConnector cloud() {
