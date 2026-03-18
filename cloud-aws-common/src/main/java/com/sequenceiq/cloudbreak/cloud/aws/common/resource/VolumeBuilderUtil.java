@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.cloud.aws.common.AwsPlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.aws.common.CommonAwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.resource.volume.AwsVolumeIopsCalculator;
@@ -32,7 +33,6 @@ import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
-import com.sequenceiq.common.model.AwsDiskType;
 
 import software.amazon.awssdk.services.ec2.model.BlockDeviceMapping;
 import software.amazon.awssdk.services.ec2.model.DescribeImagesRequest;
@@ -59,6 +59,9 @@ public class VolumeBuilderUtil {
 
     @Inject
     private CommonAwsClient awsClient;
+
+    @Inject
+    private AwsPlatformParameters awsPlatformParameters;
 
     public List<BlockDeviceMapping> getEphemeral(AwsInstanceView awsInstanceView) {
         Long ephemeralCount = getEphemeralCount(awsInstanceView);
@@ -97,7 +100,9 @@ public class VolumeBuilderUtil {
     }
 
     public EbsBlockDevice getRootEbs(AwsInstanceView awsInstanceView, Group group) {
-        String volumeType = group.getRootVolumeType() != null ? group.getRootVolumeType().toLowerCase(Locale.ROOT) : AwsDiskType.Gp3.value();
+        String volumeType = group.getRootVolumeType() != null
+                ? group.getRootVolumeType().toLowerCase(Locale.ROOT)
+                : awsPlatformParameters.defaultRootDiskType().value();
         int rootVolumeSize = group.getRootVolumeSize();
 
         LOGGER.debug("AwsInstanceView: {},  root volume type: {}, size: {}", awsInstanceView, volumeType, rootVolumeSize);

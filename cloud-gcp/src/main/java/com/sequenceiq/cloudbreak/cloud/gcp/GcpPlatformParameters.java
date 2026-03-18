@@ -7,6 +7,7 @@ import static com.sequenceiq.cloudbreak.cloud.model.DisplayName.displayName;
 import static com.sequenceiq.cloudbreak.cloud.model.Orchestrator.orchestrator;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -60,7 +61,7 @@ public class GcpPlatformParameters implements PlatformParameters {
     @Value("${cb.gcp.disk.type.default:pd-standard}")
     private String defaultDiskType;
 
-    @Value("${cb.gcp.root.disk.type.default:pd-standard}")
+    @Value("${cb.gcp.root.disk.type.default:pd-ssd}")
     private String defaultRootDiskType;
 
     @Inject
@@ -233,6 +234,13 @@ public class GcpPlatformParameters implements PlatformParameters {
             this.displayName = displayName;
         }
 
+        public static GcpDiskType findByValue(String value) {
+            return Arrays.stream(GcpDiskType.values())
+                    .filter(diskType -> diskType.value.equals(value))
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalArgumentException("No GCP disk type found for value: " + value));
+        }
+
         public static String getUrl(String projectId, String zone, String volumeId) {
             return String.format("https://www.googleapis.com/compute/v1/projects/%s/zones/%s/diskTypes/%s", projectId, zone, volumeId);
         }
@@ -248,7 +256,6 @@ public class GcpPlatformParameters implements PlatformParameters {
         public String getUrl(String projectId, String zone) {
             return getUrl(projectId, zone, value);
         }
-
     }
 
     private VmRecommendations initVmRecommendations() {

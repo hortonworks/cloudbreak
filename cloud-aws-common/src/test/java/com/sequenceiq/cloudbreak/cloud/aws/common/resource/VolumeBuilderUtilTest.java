@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common.resource;
 
+import static com.sequenceiq.cloudbreak.cloud.model.DiskType.diskType;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -19,7 +20,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.cloud.aws.common.AwsPlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.aws.common.CommonAwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.resource.volume.AwsVolumeIopsCalculator;
@@ -34,6 +35,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
+import com.sequenceiq.common.model.AwsDiskType;
 
 import software.amazon.awssdk.services.ec2.model.BlockDeviceMapping;
 import software.amazon.awssdk.services.ec2.model.DescribeImagesResponse;
@@ -47,7 +49,7 @@ import software.amazon.awssdk.services.ec2.model.Reservation;
 import software.amazon.awssdk.services.ec2.model.VolumeAttachment;
 
 @ExtendWith(MockitoExtension.class)
-public class VolumeBuilderUtilTest {
+class VolumeBuilderUtilTest {
 
     @InjectMocks
     private VolumeBuilderUtil underTest;
@@ -77,23 +79,24 @@ public class VolumeBuilderUtilTest {
     private AwsVolumeThroughputCalculator awsVolumeThroughputCalculator;
 
     @Mock
-    private EntitlementService entitlementService;
-
-    @Mock
     private CommonAwsClient commonAwsClient;
 
+    @Mock
+    private AwsPlatformParameters awsPlatformParameters;
+
     @Test
-    public void testGetRootVolume() {
+    void testGetRootVolume() {
         when(ac.getParameter(AmazonEc2Client.class)).thenReturn(amazonEc2Client);
         software.amazon.awssdk.services.ec2.model.Image ecImage = software.amazon.awssdk.services.ec2.model.Image.builder().build();
         when(amazonEc2Client.describeImages(any())).thenReturn(DescribeImagesResponse.builder().images(ecImage).build());
         when(cloudStack.getImage()).thenReturn(image);
+        when(awsPlatformParameters.defaultRootDiskType()).thenReturn(diskType(AwsDiskType.Gp3.value()));
         BlockDeviceMapping actual = underTest.getRootVolume(awsInstanceView, group, cloudStack, ac);
         assertNotNull(actual);
     }
 
     @Test
-    public void testGetEphemeralWhenVolumesEmpty() {
+    void testGetEphemeralWhenVolumesEmpty() {
         when(awsInstanceView.getTemporaryStorageCount()).thenReturn(0L);
 
         List<BlockDeviceMapping> actual = underTest.getEphemeral(awsInstanceView);
@@ -103,7 +106,7 @@ public class VolumeBuilderUtilTest {
     }
 
     @Test
-    public void testGetEphemeralWhenVolumesNotEmpty() {
+    void testGetEphemeralWhenVolumesNotEmpty() {
         when(awsInstanceView.getTemporaryStorageCount()).thenReturn(1L);
 
         List<BlockDeviceMapping> actual = underTest.getEphemeral(awsInstanceView);
@@ -116,7 +119,7 @@ public class VolumeBuilderUtilTest {
     }
 
     @Test
-    public void testGetEphemeralWhenHas25Volumes() {
+    void testGetEphemeralWhenHas25Volumes() {
         long storageCount = 25L;
         when(awsInstanceView.getTemporaryStorageCount()).thenReturn(storageCount);
 
@@ -134,7 +137,7 @@ public class VolumeBuilderUtilTest {
     }
 
     @Test
-    public void testGetRootDeviceNotFoundOnAws() {
+    void testGetRootDeviceNotFoundOnAws() {
         when(cloudStack.getImage()).thenReturn(image);
         when(ac.getParameter(AmazonEc2Client.class)).thenReturn(amazonEc2Client);
         when(amazonEc2Client.describeImages(any())).thenReturn(DescribeImagesResponse.builder().build());
@@ -143,7 +146,7 @@ public class VolumeBuilderUtilTest {
     }
 
     @Test
-    public void testGetRootDeviceWhenImageNull() {
+    void testGetRootDeviceWhenImageNull() {
         when(cloudStack.getImage()).thenReturn(image);
         when(ac.getParameter(AmazonEc2Client.class)).thenReturn(amazonEc2Client);
         when(amazonEc2Client.describeImages(any()))
@@ -153,11 +156,12 @@ public class VolumeBuilderUtilTest {
     }
 
     @Test
-    public void testGetEbsWhenEncryptedAndKmsKeyCustom() {
+    void testGetEbsWhenEncryptedAndKmsKeyCustom() {
         when(group.getRootVolumeSize()).thenReturn(1);
         when(awsInstanceView.isEncryptedVolumes()).thenReturn(true);
         when(awsInstanceView.isKmsCustom()).thenReturn(true);
         when(awsInstanceView.getKmsKey()).thenReturn("kmsKey");
+        when(awsPlatformParameters.defaultRootDiskType()).thenReturn(diskType(AwsDiskType.Gp3.value()));
 
         EbsBlockDevice actual = underTest.getRootEbs(awsInstanceView, group);
         assertTrue(actual.deleteOnTermination());
@@ -168,7 +172,7 @@ public class VolumeBuilderUtilTest {
     }
 
     @Test
-    public void testGetEbsWhenEncryptedAndKmsKeyCustomAndVolumeType() {
+    void testGetEbsWhenEncryptedAndKmsKeyCustomAndVolumeType() {
         when(group.getRootVolumeSize()).thenReturn(1);
         when(group.getRootVolumeType()).thenReturn("gp2");
         when(awsInstanceView.isEncryptedVolumes()).thenReturn(true);
@@ -184,10 +188,11 @@ public class VolumeBuilderUtilTest {
     }
 
     @Test
-    public void testGetEbsWhenNotEncryptedAndNotKmsKeyCustom() {
+    void testGetEbsWhenNotEncryptedAndNotKmsKeyCustom() {
         when(group.getRootVolumeSize()).thenReturn(1);
         when(awsInstanceView.isEncryptedVolumes()).thenReturn(false);
         when(awsInstanceView.isKmsCustom()).thenReturn(false);
+        when(awsPlatformParameters.defaultRootDiskType()).thenReturn(diskType(AwsDiskType.Gp3.value()));
 
         EbsBlockDevice actual = underTest.getRootEbs(awsInstanceView, group);
         assertTrue(actual.deleteOnTermination());
@@ -198,7 +203,7 @@ public class VolumeBuilderUtilTest {
     }
 
     @Test
-    public void testGetEbsWhenNotEncryptedAndRootVolumeTypeIsUpperCase() {
+    void testGetEbsWhenNotEncryptedAndRootVolumeTypeIsUpperCase() {
         when(group.getRootVolumeSize()).thenReturn(1);
         when(group.getRootVolumeType()).thenReturn("GP3");
         when(awsInstanceView.isKmsCustom()).thenReturn(false);
@@ -212,7 +217,7 @@ public class VolumeBuilderUtilTest {
     }
 
     @Test
-    public void testGetEbsWhenNotEncryptedAndRootVolumeTypeIsLowerCase() {
+    void testGetEbsWhenNotEncryptedAndRootVolumeTypeIsLowerCase() {
         when(group.getRootVolumeSize()).thenReturn(1);
         when(group.getRootVolumeType()).thenReturn("gp3");
         when(awsInstanceView.isKmsCustom()).thenReturn(false);

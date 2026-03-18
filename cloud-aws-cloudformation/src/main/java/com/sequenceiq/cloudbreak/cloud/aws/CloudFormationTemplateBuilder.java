@@ -16,6 +16,7 @@ import jakarta.inject.Inject;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Lists;
+import com.sequenceiq.cloudbreak.cloud.aws.common.AwsPlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.aws.common.resource.ModelContext;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsGroupView;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsInstanceView;
@@ -40,6 +41,9 @@ public class CloudFormationTemplateBuilder {
 
     @Inject
     private FreeMarkerTemplateUtils freeMarkerTemplateUtils;
+
+    @Inject
+    private AwsPlatformParameters awsPlatformParameters;
 
     public String build(ModelContext context) {
         Map<String, Object> model = new HashMap<>();
@@ -71,7 +75,9 @@ public class CloudFormationTemplateBuilder {
                     awsInstanceView.getOnDemandPercentage(),
                     awsInstanceView.getSpotMaxPrice(),
                     awsInstanceView.getPlacementGroupStrategy().name(),
-                    group.getRootVolumeType() != null ? group.getRootVolumeType().toLowerCase(Locale.ROOT)  : AwsDiskType.Gp3.value());
+                    group.getRootVolumeType() != null
+                            ? group.getRootVolumeType().toLowerCase(Locale.ROOT)
+                            : awsPlatformParameters.defaultRootDiskType().value());
             awsGroupViews.add(groupView);
             if (group.getType() == InstanceGroupType.GATEWAY) {
                 awsGatewayGroupViews.add(groupView);

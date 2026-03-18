@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.aws.connector.resource;
 
+import static com.sequenceiq.cloudbreak.cloud.model.DiskType.diskType;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -38,6 +39,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationStackUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.LaunchTemplateField;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationClient;
+import com.sequenceiq.cloudbreak.cloud.aws.common.AwsPlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -98,6 +100,9 @@ class AwsUpdateServiceTest {
 
     @Mock
     private CloudFormationStackUtil cfStackUtil;
+
+    @Mock
+    private AwsPlatformParameters awsPlatformParameters;
 
     @InjectMocks
     private AwsUpdateService underTest;
@@ -364,6 +369,7 @@ class AwsUpdateServiceTest {
 
         Map<String, AutoScalingGroup> autoScalingGroupMap = Map.of("masterASG", asg1, "workerASG", asg2);
 
+        when(awsPlatformParameters.defaultRootDiskType()).thenReturn(diskType(AwsDiskType.Gp3.value()));
         when(awsClient.createAutoScalingClient(any(AwsCredentialView.class), anyString())).thenReturn(amazonAutoScalingClient);
         when(awsClient.createCloudFormationClient(any(AwsCredentialView.class), anyString())).thenReturn(amazonCloudFormationClient);
         when(awsClient.createEc2Client(any(), any())).thenReturn(ec2Client);

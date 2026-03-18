@@ -267,6 +267,7 @@ class GcpDiskResourceBuilderTest {
     private Group createGroup(int rootVolumeSize) {
         return Group.builder()
                 .withInstances(Collections.singletonList(createDefaultCloudInstance()))
+                .withRootVolumeType("pd-ssd")
                 .withRootVolumeSize(rootVolumeSize)
                 .build();
     }

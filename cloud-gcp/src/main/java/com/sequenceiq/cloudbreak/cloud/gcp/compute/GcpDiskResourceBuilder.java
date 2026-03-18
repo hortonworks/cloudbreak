@@ -62,8 +62,8 @@ public class GcpDiskResourceBuilder extends AbstractGcpComputeBuilder {
         Disk disk = new Disk();
         disk.setDescription(description());
         disk.setSizeGb((long) group.getRootVolumeSize());
-        disk.setName(buildableResources.get(0).getName());
-        disk.setType(GcpDiskType.SSD.getUrl(projectId, location));
+        disk.setName(buildableResources.getFirst().getName());
+        disk.setType(GcpDiskType.findByValue(group.getRootVolumeType()).getUrl(projectId, location));
 
         InstanceTemplate template = group.getReferenceInstanceTemplate();
         customGcpDiskEncryptionService.addEncryptionKeyToDisk(template, disk);
@@ -76,11 +76,11 @@ public class GcpDiskResourceBuilder extends AbstractGcpComputeBuilder {
         try {
             Operation operation = insDisk.execute();
             if (operation.getHttpErrorStatusCode() != null) {
-                throw new GcpResourceException(operation.getHttpErrorMessage(), resourceType(), buildableResources.get(0).getName());
+                throw new GcpResourceException(operation.getHttpErrorMessage(), resourceType(), buildableResources.getFirst().getName());
             }
-            return Collections.singletonList(createOperationAwareCloudResource(buildableResources.get(0), operation));
+            return Collections.singletonList(createOperationAwareCloudResource(buildableResources.getFirst(), operation));
         } catch (GoogleJsonResponseException e) {
-            throw new GcpResourceException(checkException(e), resourceType(), buildableResources.get(0).getName());
+            throw new GcpResourceException(checkException(e), resourceType(), buildableResources.getFirst().getName());
         }
     }
 

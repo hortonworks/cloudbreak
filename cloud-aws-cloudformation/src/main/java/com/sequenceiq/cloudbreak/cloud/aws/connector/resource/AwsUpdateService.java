@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationStackUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.LaunchTemplateField;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationClient;
+import com.sequenceiq.cloudbreak.cloud.aws.common.AwsPlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsImdsUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
@@ -41,7 +42,6 @@ import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.common.api.type.CommonResourceType;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.ResourceType;
-import com.sequenceiq.common.model.AwsDiskType;
 
 import software.amazon.awssdk.services.autoscaling.model.AutoScalingGroup;
 import software.amazon.awssdk.services.ec2.model.HttpTokensState;
@@ -73,6 +73,9 @@ public class AwsUpdateService {
 
     @Inject
     private CloudFormationStackUtil cfStackUtil;
+
+    @Inject
+    private AwsPlatformParameters awsPlatformParameters;
 
     public List<CloudResourceStatus> update(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources,
             UpdateType type, Optional<String> targetGroupName) {
@@ -195,9 +198,12 @@ public class AwsUpdateService {
                 .autoScalingGroupByName(cloudFormationClient, autoScalingClient, cfStackUtil.getCfStackName(ac));
         for (String groupName : groupByName.keySet()) {
             Group group = groupByName.get(groupName);
-            Map<LaunchTemplateField, String> updatableFields = Map.of(LaunchTemplateField.ROOT_DISK_SIZE, String.valueOf(group.getRootVolumeSize()),
-                    LaunchTemplateField.ROOT_VOLUME_TYPE, group.getRootVolumeType() != null ? group.getRootVolumeType().toLowerCase(Locale.ROOT)
-                            : AwsDiskType.Gp3.value());
+            Map<LaunchTemplateField, String> updatableFields = Map.of(
+                    LaunchTemplateField.ROOT_DISK_SIZE, String.valueOf(group.getRootVolumeSize()),
+                    LaunchTemplateField.ROOT_VOLUME_TYPE, group.getRootVolumeType() != null
+                            ? group.getRootVolumeType().toLowerCase(Locale.ROOT)
+                            : awsPlatformParameters.defaultRootDiskType().value()
+            );
             Optional<AutoScalingGroup> autoScalingGroupOptional = autoScalingGroupMap.keySet().stream().filter(key -> key.contains(groupName))
                     .map(autoScalingGroupMap::get).findFirst();
             if (autoScalingGroupOptional.isPresent()) {

@@ -69,7 +69,6 @@ import com.sequenceiq.cloudbreak.cloud.model.filesystem.efs.CloudEfsConfiguratio
 import com.sequenceiq.cloudbreak.cloud.model.instance.AwsInstanceTemplate;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
-import com.sequenceiq.cloudbreak.tag.CostTagging;
 import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
 import com.sequenceiq.common.api.placement.AwsPlacementGroupStrategy;
 import com.sequenceiq.common.api.type.EncryptionType;
@@ -82,7 +81,7 @@ import freemarker.template.Configuration;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.ProtocolEnum;
 
 @ExtendWith(MockitoExtension.class)
-public class CloudFormationTemplateBuilderTest {
+class CloudFormationTemplateBuilderTest {
 
     private static final Long WORKSPACE_ID = 1L;
 
@@ -96,9 +95,6 @@ public class CloudFormationTemplateBuilderTest {
     private final CloudFormationTemplateBuilder cloudFormationTemplateBuilder = new CloudFormationTemplateBuilder();
 
     private final Map<String, String> defaultTags = new HashMap<>();
-
-    @Mock
-    private CostTagging costTagging;
 
     @Mock
     private FreeMarkerTemplateUtils freeMarkerTemplateUtils;
@@ -120,7 +116,7 @@ public class CloudFormationTemplateBuilderTest {
     private CloudInstance instance;
 
     @BeforeEach
-    public void setUp() throws Exception {
+    void setUp() throws Exception {
         FreeMarkerConfigurationFactoryBean factoryBean = new FreeMarkerConfigurationFactoryBean();
         factoryBean.setPreferFileSystemAccess(false);
         factoryBean.setTemplateLoaderPath("classpath:/");
@@ -149,7 +145,7 @@ public class CloudFormationTemplateBuilderTest {
     }
 
     @Test
-    public void buildTestInstanceGroupsAndRootVolumeSize() {
+    void buildTestInstanceGroupsAndRootVolumeSize() {
         //WHEN
         modelContext = new ModelContext()
                 .withAuthenticatedContext(authenticatedContext)
@@ -180,7 +176,7 @@ public class CloudFormationTemplateBuilderTest {
     }
 
     @Test
-    public void buildTestInstanceGroupsWhenRootVolumeSizeIsSuperLarge() throws IOException {
+    void buildTestInstanceGroupsWhenRootVolumeSizeIsSuperLarge() throws IOException {
         //GIVEN
         int rootVolumeSize = Integer.MAX_VALUE;
         Security security = getDefaultCloudStackSecurity();
@@ -211,7 +207,7 @@ public class CloudFormationTemplateBuilderTest {
     }
 
     @Test
-    public void buildTestInstanceGroupsWhenRootVolumeSizeIsSuperSmall() throws IOException {
+    void buildTestInstanceGroupsWhenRootVolumeSizeIsSuperSmall() throws IOException {
         //GIVEN
         int rootVolumeSize = Integer.MIN_VALUE;
         Security security = getDefaultCloudStackSecurity();
@@ -242,7 +238,7 @@ public class CloudFormationTemplateBuilderTest {
     }
 
     @Test
-    public void buildTestWithVPCAndIGWAndPublicIpOnLaunchAndInstanceProfileAndRole() {
+    void buildTestWithVPCAndIGWAndPublicIpOnLaunchAndInstanceProfileAndRole() {
         CloudStack cloudStack = initCloudStackWithInstanceProfile();
         //WHEN
         modelContext = new ModelContext()
@@ -273,7 +269,7 @@ public class CloudFormationTemplateBuilderTest {
     }
 
     @Test
-    public void buildTestWithVPCAndIGWAndPublicIpOnLaunchAndRoleWithoutInstanceProfile() {
+    void buildTestWithVPCAndIGWAndPublicIpOnLaunchAndRoleWithoutInstanceProfile() {
         CloudStack cloudStack = initCloudStackWithInstanceProfile();
         //WHEN
         modelContext = new ModelContext()
@@ -304,7 +300,7 @@ public class CloudFormationTemplateBuilderTest {
     }
 
     @Test
-    public void buildTestWithVPCAndIGWAndPublicIpOnLaunchAndInstanceProfileWithoutRole() {
+    void buildTestWithVPCAndIGWAndPublicIpOnLaunchAndInstanceProfileWithoutRole() {
         CloudStack cloudStack = initCloudStackWithInstanceProfile();
         //WHEN
         modelContext = new ModelContext()
@@ -335,7 +331,7 @@ public class CloudFormationTemplateBuilderTest {
     }
 
     @Test
-    public void buildTestWithVPCAndIGWAndPublicIpOnLaunchWithoutInstanceProfileAndRole() {
+    void buildTestWithVPCAndIGWAndPublicIpOnLaunchWithoutInstanceProfileAndRole() {
         //WHEN
         modelContext = new ModelContext()
                 .withAuthenticatedContext(authenticatedContext)
@@ -365,7 +361,7 @@ public class CloudFormationTemplateBuilderTest {
     }
 
     @Test
-    public void buildTestWithVPCAndIGWAndInstanceProfileAndRoleWithoutPublicIpOnLaunch() {
+    void buildTestWithVPCAndIGWAndInstanceProfileAndRoleWithoutPublicIpOnLaunch() {
         CloudStack cloudStack = initCloudStackWithInstanceProfile();
         //WHEN
         modelContext = new ModelContext()
@@ -396,7 +392,7 @@ public class CloudFormationTemplateBuilderTest {
     }
 
     @Test
-    public void buildTestWithVPCAndIGWAndVpcSubnets() {
+    void buildTestWithVPCAndIGWAndVpcSubnets() {
         String vpcSubnet = "10.0.0.0/24";
         List<String> vpcSubnets = List.of(vpcSubnet);
         Security security = new Security(getDefaultSecurityRules(), List.of(), true);
@@ -436,7 +432,7 @@ public class CloudFormationTemplateBuilderTest {
     }
 
     @Test
-    public void buildTestWithVPCAndIGWAndRoleWithoutPublicIpOnLaunchAndInstanceProfile() {
+    void buildTestWithVPCAndIGWAndRoleWithoutPublicIpOnLaunchAndInstanceProfile() {
         CloudStack cloudStack = initCloudStackWithInstanceProfile();
         //WHEN
         modelContext = new ModelContext()
@@ -467,7 +463,7 @@ public class CloudFormationTemplateBuilderTest {
     }
 
     @Test
-    public void buildTestWithVPCAndIGWAndInstanceProfileWithoutPublicIpOnLaunchAndRole() {
+    void buildTestWithVPCAndIGWAndInstanceProfileWithoutPublicIpOnLaunchAndRole() {
         CloudStack cloudStack = initCloudStackWithInstanceProfile();
         //WHEN
         modelContext = new ModelContext()
@@ -498,7 +494,7 @@ public class CloudFormationTemplateBuilderTest {
     }
 
     @Test
-    public void buildTestWithVPCAndIGWWithoutPublicIpOnLaunchAndInstanceProfileAndRole() {
+    void buildTestWithVPCAndIGWWithoutPublicIpOnLaunchAndInstanceProfileAndRole() {
         //WHEN
         modelContext = new ModelContext()
                 .withAuthenticatedContext(authenticatedContext)
@@ -528,7 +524,7 @@ public class CloudFormationTemplateBuilderTest {
     }
 
     @Test
-    public void buildTestWithVPCAndInstanceProfileAndRoleWithoutIGWAndPublicIpOnLaunch() {
+    void buildTestWithVPCAndInstanceProfileAndRoleWithoutIGWAndPublicIpOnLaunch() {
         CloudStack cloudStack = initCloudStackWithInstanceProfile();
         //WHEN
         modelContext = new ModelContext()
@@ -559,7 +555,7 @@ public class CloudFormationTemplateBuilderTest {
     }
 
     @Test
-    public void buildTestWithVPCAndRoleWithoutIGWAndPublicIpOnLaunchAndInstanceProfile() {
+    void buildTestWithVPCAndRoleWithoutIGWAndPublicIpOnLaunchAndInstanceProfile() {
         CloudStack cloudStack = initCloudStackWithInstanceProfile();
         //WHEN
         modelContext = new ModelContext()
@@ -590,7 +586,7 @@ public class CloudFormationTemplateBuilderTest {
     }
 
     @Test
-    public void buildTestWithVPCAndInstanceProfileWithoutIGWAndPublicIpOnLaunchAndRole() {
+    void buildTestWithVPCAndInstanceProfileWithoutIGWAndPublicIpOnLaunchAndRole() {
         CloudStack cloudStack = initCloudStackWithInstanceProfile();
         //WHEN
         modelContext = new ModelContext()
@@ -621,7 +617,7 @@ public class CloudFormationTemplateBuilderTest {
     }
 
     @Test
-    public void buildTestWithVPCWithoutIGWAndPublicIpOnLaunchAndInstanceProfileAndRole() {
+    void buildTestWithVPCWithoutIGWAndPublicIpOnLaunchAndInstanceProfileAndRole() {
         //WHEN
         modelContext = new ModelContext()
                 .withAuthenticatedContext(authenticatedContext)
@@ -651,7 +647,7 @@ public class CloudFormationTemplateBuilderTest {
     }
 
     @Test
-    public void buildTestWithInstanceProfileAndRoleWithoutVPCAndIGWAndPublicIpOnLaunch() {
+    void buildTestWithInstanceProfileAndRoleWithoutVPCAndIGWAndPublicIpOnLaunch() {
         CloudStack cloudStack = initCloudStackWithInstanceProfile();
         //WHEN
         modelContext = new ModelContext()
@@ -682,7 +678,7 @@ public class CloudFormationTemplateBuilderTest {
     }
 
     @Test
-    public void buildTestWithInstanceProfileWithoutVPCAndIGWAndPublicIpOnLaunchAndRole() {
+    void buildTestWithInstanceProfileWithoutVPCAndIGWAndPublicIpOnLaunchAndRole() {
         CloudStack cloudStack = initCloudStackWithInstanceProfile();
         //WHEN
         modelContext = new ModelContext()
@@ -713,7 +709,7 @@ public class CloudFormationTemplateBuilderTest {
     }
 
     @Test
-    public void buildTestWithRoleWithoutVPCAndIGWAndPublicIpOnLaunchAndInstanceProfile() {
+    void buildTestWithRoleWithoutVPCAndIGWAndPublicIpOnLaunchAndInstanceProfile() {
         CloudStack cloudStack = initCloudStackWithInstanceProfile();
         //WHEN
         modelContext = new ModelContext()
@@ -744,7 +740,7 @@ public class CloudFormationTemplateBuilderTest {
     }
 
     @Test
-    public void buildTestWithoutVPCAndIGWAndPublicIpOnLaunchAndInstanceProfileAndRole() {
+    void buildTestWithoutVPCAndIGWAndPublicIpOnLaunchAndInstanceProfileAndRole() {
         //GIVEN
         //WHEN
         modelContext = new ModelContext()
@@ -775,7 +771,7 @@ public class CloudFormationTemplateBuilderTest {
     }
 
     @Test
-    public void buildTestWithVPCAndIGWAndSingleSG() {
+    void buildTestWithVPCAndIGWAndSingleSG() {
         //GIVEN
         List<Group> groups = new ArrayList<>();
         Security security = new Security(emptyList(), singletonList("single-sg-id"));
@@ -816,7 +812,7 @@ public class CloudFormationTemplateBuilderTest {
     }
 
     @Test
-    public void buildTestWithVPCAndIGWAndSingleSGAndMultiGroup() {
+    void buildTestWithVPCAndIGWAndSingleSGAndMultiGroup() {
         //GIVEN
         List<Group> groups = new ArrayList<>();
         Security security = new Security(emptyList(), singletonList("single-sg-id"));
@@ -863,7 +859,7 @@ public class CloudFormationTemplateBuilderTest {
     }
 
     @Test
-    public void buildTestWithVPCAndIGWAndMultiSG() {
+    void buildTestWithVPCAndIGWAndMultiSG() {
         //GIVEN
         List<Group> groups = new ArrayList<>();
         Security security = new Security(emptyList(), List.of("multi-sg-id1", "multi-sg-id2"));
@@ -902,7 +898,7 @@ public class CloudFormationTemplateBuilderTest {
     }
 
     @Test
-    public void buildTestInstanceGroupsWithSpotInstances() {
+    void buildTestInstanceGroupsWithSpotInstances() {
         //GIVEN
         List<Group> groups = new ArrayList<>();
         Security security = getDefaultCloudStackSecurity();
@@ -944,7 +940,7 @@ public class CloudFormationTemplateBuilderTest {
     }
 
     @Test
-    public void buildTestInstanceGroupsWithSpotInstancesWithMaxPrice() {
+    void buildTestInstanceGroupsWithSpotInstancesWithMaxPrice() {
         //GIVEN
         List<Group> groups = new ArrayList<>();
         Security security = getDefaultCloudStackSecurity();
@@ -987,7 +983,7 @@ public class CloudFormationTemplateBuilderTest {
     }
 
     @Test
-    public void buildTestOutboundInternetTrafficButVpcCidrs() {
+    void buildTestOutboundInternetTrafficButVpcCidrs() {
         //GIVEN
         //WHEN
         modelContext = new ModelContext()
@@ -1013,7 +1009,7 @@ public class CloudFormationTemplateBuilderTest {
     }
 
     @Test
-    public void buildTestOutboundInternetTrafficButPrefixlists() {
+    void buildTestOutboundInternetTrafficButPrefixlists() {
         //GIVEN
         //WHEN
         modelContext = new ModelContext()
@@ -1039,7 +1035,7 @@ public class CloudFormationTemplateBuilderTest {
     }
 
     @Test
-    public void buildTestNoOutboundInternetTrafficJustVpcCidrs() {
+    void buildTestNoOutboundInternetTrafficJustVpcCidrs() {
         //GIVEN
         //WHEN
         modelContext = new ModelContext()
@@ -1065,7 +1061,7 @@ public class CloudFormationTemplateBuilderTest {
     }
 
     @Test
-    public void buildTestNoOutboundInternetTrafficJustPrefixLists() {
+    void buildTestNoOutboundInternetTrafficJustPrefixLists() {
         //GIVEN
         //WHEN
         modelContext = new ModelContext()
@@ -1091,7 +1087,7 @@ public class CloudFormationTemplateBuilderTest {
     }
 
     @Test
-    public void buildTestNoOutboundInternetTrafficBothVpcCidrsAndPrefixListsAreGiven() {
+    void buildTestNoOutboundInternetTrafficBothVpcCidrsAndPrefixListsAreGiven() {
         //GIVEN
         //WHEN
         modelContext = new ModelContext()
@@ -1117,7 +1113,7 @@ public class CloudFormationTemplateBuilderTest {
     }
 
     @Test
-    public void buildTestNoOutboundInternetTrafficButVpcCidrsAndPrefixListsAreEmpty() {
+    void buildTestNoOutboundInternetTrafficButVpcCidrsAndPrefixListsAreEmpty() {
         //GIVEN
         //WHEN
         modelContext = new ModelContext()
@@ -1143,7 +1139,7 @@ public class CloudFormationTemplateBuilderTest {
     }
 
     @Test
-    public void buildTestNoEbsEncryption() {
+    void buildTestNoEbsEncryption() {
         //GIVEN
         //WHEN
         modelContext = new ModelContext()
@@ -1168,7 +1164,7 @@ public class CloudFormationTemplateBuilderTest {
     }
 
     @Test
-    public void buildTestEbsEncryptionWithDefaultKey() {
+    void buildTestEbsEncryptionWithDefaultKey() {
         //GIVEN
         instance.getTemplate().putParameter(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED, true);
         instance.getTemplate().putParameter(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, EncryptionType.DEFAULT.name());
@@ -1197,7 +1193,7 @@ public class CloudFormationTemplateBuilderTest {
     }
 
     @Test
-    public void buildTestEbsEncryptionWithCustomKey() {
+    void buildTestEbsEncryptionWithCustomKey() {
         //GIVEN
         instance.getTemplate().putParameter(AwsInstanceTemplate.EBS_ENCRYPTION_ENABLED, true);
         instance.getTemplate().putParameter(InstanceTemplate.VOLUME_ENCRYPTION_KEY_TYPE, EncryptionType.CUSTOM.name());
@@ -1227,7 +1223,7 @@ public class CloudFormationTemplateBuilderTest {
     }
 
     @Test
-    public void buildTestPlacementGroupWithMixedPlacementGroup() {
+    void buildTestPlacementGroupWithMixedPlacementGroup() {
         //GIVEN
         InstanceTemplate instanceTemplateMaster = createDefaultInstanceTemplate();
         InstanceTemplate instanceTemplateWorker = createDefaultInstanceTemplate();
@@ -1276,7 +1272,7 @@ public class CloudFormationTemplateBuilderTest {
     }
 
     @Test
-    public void buildTestPlacementGroupWithNonePlacementGroup() {
+    void buildTestPlacementGroupWithNonePlacementGroup() {
         //GIVEN
         instance.getTemplate().putParameter(PLACEMENT_GROUP_STRATEGY, AwsPlacementGroupStrategy.NONE.name());
 
@@ -1305,7 +1301,7 @@ public class CloudFormationTemplateBuilderTest {
     }
 
     @Test
-    public void buildTestPlacementGroupWithPlacementGroupNotSpecified() {
+    void buildTestPlacementGroupWithPlacementGroupNotSpecified() {
         //GIVEN
 
         //WHEN
@@ -1333,7 +1329,7 @@ public class CloudFormationTemplateBuilderTest {
     }
 
     @Test
-    public void buildTestPlacementGroupWithPartitionPlacementGroup() {
+    void buildTestPlacementGroupWithPartitionPlacementGroup() {
         //GIVEN
         instance.getTemplate().putParameter(PLACEMENT_GROUP_STRATEGY, AwsPlacementGroupStrategy.PARTITION.name());
 
@@ -1364,7 +1360,7 @@ public class CloudFormationTemplateBuilderTest {
     }
 
     @Test
-    public void buildTestWithSingleLoadBalancerBeforeUpdate() {
+    void buildTestWithSingleLoadBalancerBeforeUpdate() {
         //GIVEN
         AwsLoadBalancer awsLoadBalancer = setupLoadBalancer(AwsLoadBalancerScheme.INTERNAL, 443, false);
 
@@ -1396,7 +1392,7 @@ public class CloudFormationTemplateBuilderTest {
     }
 
     @Test
-    public void buildTestWithSingleLoadBalancerAfterUpdate() {
+    void buildTestWithSingleLoadBalancerAfterUpdate() {
         //GIVEN
         AwsLoadBalancer awsLoadBalancer = setupLoadBalancer(AwsLoadBalancerScheme.INTERNAL, 443, true);
 
@@ -1428,7 +1424,7 @@ public class CloudFormationTemplateBuilderTest {
     }
 
     @Test
-    public void buildTestWithMultipleLoadBalancers() {
+    void buildTestWithMultipleLoadBalancers() {
         //GIVEN
         List<AwsLoadBalancer> awsLoadBalancers = List.of(
             setupLoadBalancer(AwsLoadBalancerScheme.INTERNAL, 443, true),
@@ -1468,7 +1464,7 @@ public class CloudFormationTemplateBuilderTest {
             templateString.contains("\"Targets\" : [{ \"Id\" : \"instance2-888\" },{ \"Id\" : \"instance1-888\" }]}}");
     }
 
-    public void buildTestHealthCheckPortDifferentFromTrafficPort() {
+    void buildTestHealthCheckPortDifferentFromTrafficPort() {
         //GIVEN
         AwsLoadBalancer awsLoadBalancer = setupLoadBalancer(AwsLoadBalancerScheme.INTERNAL, 443, true);
 
@@ -1497,7 +1493,7 @@ public class CloudFormationTemplateBuilderTest {
     }
 
     @Test
-    public void buildTestEfsNullFields() {
+    void buildTestEfsNullFields() {
         //GIVEN
         AwsEfsFileSystem awsEfsFileSystem = setupEfsFileSystemNullFields();
 
@@ -1529,7 +1525,7 @@ public class CloudFormationTemplateBuilderTest {
     }
 
     @Test
-    public void buildTestEfsSetFields() {
+    void buildTestEfsSetFields() {
         //GIVEN
         AwsEfsFileSystem awsEfsFileSystem = setupEfsFileSystemValidSet();
 
@@ -1561,7 +1557,7 @@ public class CloudFormationTemplateBuilderTest {
     }
 
     @Test
-    public void testBuildWhenImdsV2Supported() {
+    void testBuildWhenImdsV2Supported() {
         //WHEN
         modelContext = new ModelContext()
                 .withAuthenticatedContext(authenticatedContext)
