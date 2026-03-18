@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -35,6 +36,7 @@ import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.domain.stack.Database;
 import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.quartz.configuration.SchedulerRuntimeException;
 import com.sequenceiq.cloudbreak.quartz.configuration.scheduler.TransactionalScheduler;
 import com.sequenceiq.cloudbreak.quartz.model.JobResource;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
@@ -209,6 +211,48 @@ class DiskUsageSyncJobServiceTest {
     void testGetScheduler() {
         TransactionalScheduler transactionalScheduler = underTest.getScheduler();
         assertNotNull(transactionalScheduler);
+    }
+
+    @Test
+    void testScheduleWhenSchedulerThrowsException() throws Exception {
+        JobResource jobResource = mock(JobResource.class);
+        when(jobResource.getLocalId()).thenReturn(LOCAL_ID);
+        when(jobResource.getRemoteResourceId()).thenReturn(RESOURCE_CRN);
+        when(diskUsageSyncConfig.getIntervalInMinutes()).thenReturn(10);
+        when(diskUsageSyncConfig.isDiskUsageSyncEnabled()).thenReturn(Boolean.TRUE);
+        when(clock.getCurrentInstant()).thenReturn(Instant.now());
+        configureEmbeddedDhStack();
+        when(entitlementService.isDbDiskAutoResizeEnabled(any())).thenReturn(true);
+        doThrow(new SchedulerRuntimeException("Test exception", new Exception())).when(scheduler).scheduleJob(any(), any());
+
+        underTest.schedule(new DiskUsageSyncJobAdapter(jobResource));
+
+        verify(scheduler, times(1)).scheduleJob(any(), any());
+    }
+
+    @Test
+    void testScheduleWhenEntitlementServiceThrowsException() throws TransactionService.TransactionExecutionException {
+        JobResource jobResource = mock(JobResource.class);
+        when(jobResource.getLocalId()).thenReturn(LOCAL_ID);
+        when(jobResource.getRemoteResourceId()).thenReturn(RESOURCE_CRN);
+        when(diskUsageSyncConfig.isDiskUsageSyncEnabled()).thenReturn(Boolean.TRUE);
+        doThrow(new RuntimeException("Entitlement exception")).when(entitlementService).isDbDiskAutoResizeEnabled(any());
+
+        underTest.schedule(new DiskUsageSyncJobAdapter(jobResource));
+
+        verify(scheduler, never()).scheduleJob(any(), any());
+    }
+
+    @Test
+    void testScheduleWithIdExternalDbDhNullExternalDatabaseAvailabilityType() throws TransactionService.TransactionExecutionException {
+        configureJobResource();
+        StackView stack = mock(StackView.class);
+        when(stack.getId()).thenReturn(1L);
+        configureStack(WORKLOAD, null);
+        when(diskUsageSyncConfig.isDiskUsageSyncEnabled()).thenReturn(Boolean.TRUE);
+        when(entitlementService.isDbDiskAutoResizeEnabled(any())).thenReturn(true);
+        underTest.schedule(stack);
+        verify(scheduler, never()).scheduleJob(any(), any());
     }
 
     private void configureJobResource() {

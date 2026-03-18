@@ -127,9 +127,9 @@ public class FixAttachedVolumesPatchService extends ExistingStackPatchService {
             affected = false;
         }
         if (affected) {
-            LOGGER.info("Attached volume patch is needed for {} stack", stack.getName());
+            LOGGER.info("Attached volume patch is needed for {} stack on {} provider", stack.getName(), stack.cloudPlatform());
         } else {
-            LOGGER.info("Attached volume patch is not needed for {} stack", stack.getName());
+            LOGGER.info("Attached volume patch is not needed for {} stack on {} provider", stack.getName(), stack.cloudPlatform());
         }
         return affected;
     }
@@ -141,7 +141,7 @@ public class FixAttachedVolumesPatchService extends ExistingStackPatchService {
                     stack.getName(), PATCH_ALLOWED_STATUSES, stack.getStatus());
             return false;
         }
-        LOGGER.debug("Applying attached volumes patch on {}...", stack.getName());
+        LOGGER.debug("Applying attached volumes patch on {} on {} provider...", stack.getName(), stack.cloudPlatform());
         DetailedStackStatus originalStatus = stack.getDetailedStatus();
         List<CloudResource> originalVolumeSetCloudResources = stack.getDiskResources().stream()
                 .map(resourceConverter::convert)
