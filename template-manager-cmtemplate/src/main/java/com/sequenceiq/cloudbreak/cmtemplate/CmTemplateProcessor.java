@@ -1122,6 +1122,7 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
         return Optional.ofNullable(cmTemplate.getInstantiator())
                 .stream()
                 .map(ApiClusterTemplateInstantiator::getHosts)
+                .filter(Objects::nonNull)
                 .flatMap(Collection::stream)
                 .filter(host -> Objects.equals(host.getHostTemplateRefName(), group))
                 .map(ApiClusterTemplateHostInfo::getHostName)

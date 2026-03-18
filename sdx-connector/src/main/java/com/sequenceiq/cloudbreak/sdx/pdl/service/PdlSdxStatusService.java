@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.sdx.pdl.service;
 
-import static com.cloudera.thunderhead.service.environments2api.model.PrivateDatalakeDetails.StatusEnum.AVAILABLE;
-
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
@@ -40,6 +38,7 @@ public class PdlSdxStatusService extends AbstractPdlSdxService implements Platfo
 
     @Override
     public StatusCheckResult getAvailabilityStatusCheckResult(StatusEnum status) {
-        return (AVAILABLE == status) ? StatusCheckResult.AVAILABLE : StatusCheckResult.NOT_AVAILABLE;
+        // TODO CB-32262 implement a more selective availability status check
+        return StatusCheckResult.AVAILABLE;
     }
 }
