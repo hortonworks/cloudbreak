@@ -236,6 +236,12 @@ class EnvironmentCrossRealmTrustSetupFinishUpdateStacksHandlerTest {
         when(environmentDto.getResourceCrn()).thenReturn(RESOURCE_CRN);
         when(freeIpaService.describe(RESOURCE_CRN)).thenReturn(Optional.empty());
 
+        FlowIdentifier failedFlow = new FlowIdentifier(FlowType.FLOW, "flow-3");
+        List<FlowIdentifier> flowIdentifiers = List.of(failedFlow);
+        when(stackPollerService.updateSaltOnStacks(RESOURCE_ID, RESOURCE_CRN)).thenReturn(flowIdentifiers);
+        when(datahubPollerProvider.multipleFlowsPoller(eq(RESOURCE_ID), eq(flowIdentifiers))).thenReturn(AttemptResults::justFinish);
+        when(multipleFlowsResultEvaluator.collectFailed(flowIdentifiers)).thenReturn(List.of(failedFlow));
+
         Selectable result = handler.doAccept(handlerEvent);
 
         assertInstanceOf(EnvironmentCrossRealmTrustSetupFinishFailedEvent.class, result);
