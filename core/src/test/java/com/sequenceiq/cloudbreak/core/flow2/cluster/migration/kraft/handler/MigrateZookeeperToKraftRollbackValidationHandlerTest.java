@@ -1,13 +1,15 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.handler;
 
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.AVAILABLE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftRollbackHandlerSelectors.ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION_VALIDATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftRollbackStateSelectors.FAILED_ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftRollbackStateSelectors.FINISH_ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftRollbackStateSelectors.START_ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_KRAFT_MIGRATION_ROLLBACK_SKIPPED_EVENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
@@ -25,10 +27,10 @@ import com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.event.Migrat
 import com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.event.MigrateZookeeperToKraftRollbackFailureEvent;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.message.FlowMessageService;
 import com.sequenceiq.cloudbreak.service.migration.kraft.KraftMigrationOperationStatusFactory;
 import com.sequenceiq.cloudbreak.service.migration.kraft.KraftMigrationService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
-import com.sequenceiq.cloudbreak.service.validation.ZookeeperToKraftMigrationValidator;
 import com.sequenceiq.distrox.api.v1.distrox.model.cluster.kraft.KraftMigrationOperationStatus;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
@@ -43,10 +45,10 @@ class MigrateZookeeperToKraftRollbackValidationHandlerTest {
     private KraftMigrationService kraftMigrationService;
 
     @Mock
-    private ZookeeperToKraftMigrationValidator zookeeperToKraftMigrationValidator;
+    private KraftMigrationOperationStatusFactory kraftMigrationOperationStatusFactory;
 
     @Mock
-    private KraftMigrationOperationStatusFactory kraftMigrationOperationStatusFactory;
+    private FlowMessageService flowMessageService;
 
     @InjectMocks
     private MigrateZookeeperToKraftRollbackValidationHandler underTest;
@@ -60,7 +62,6 @@ class MigrateZookeeperToKraftRollbackValidationHandlerTest {
         when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
         KraftMigrationStatus kraftMigrationStatus = KraftMigrationStatus.BROKERS_IN_MIGRATION;
         when(kraftMigrationService.getKraftMigrationStatus(stackDto)).thenReturn(kraftMigrationStatus);
-        doNothing().when(zookeeperToKraftMigrationValidator).validateZookeeperToKraftMigrationStateForRollback(kraftMigrationStatus);
 
         Selectable result = underTest.doAccept(event);
 
@@ -81,6 +82,28 @@ class MigrateZookeeperToKraftRollbackValidationHandlerTest {
 
         Selectable result = underTest.doAccept(event);
 
+        String expectedMessage = "Skipping rollback Zookeeper to KRaft migration because rollback is executed recently or it is not in a rollbackable state: " +
+                "[rollbackCompleted=true], [statusIsNotRollbackable=false]";
+        verify(flowMessageService).fireEventAndLog(STACK_ID, AVAILABLE.name(), CLUSTER_KRAFT_MIGRATION_ROLLBACK_SKIPPED_EVENT, expectedMessage);
+        assertInstanceOf(MigrateZookeeperToKraftRollbackEvent.class, result);
+        assertEquals(FINISH_ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT.name(), result.getSelector());
+    }
+
+    @Test
+    void testDoAcceptSuccessWhenKraftMigrationAlreadyFinalized() {
+        StackDto stackDto = new StackDto();
+        MigrateZookeeperToKraftRollbackEvent request =
+                new MigrateZookeeperToKraftRollbackEvent(ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION_VALIDATION_EVENT.selector(), STACK_ID);
+        HandlerEvent<MigrateZookeeperToKraftRollbackEvent> event = new HandlerEvent<>(new Event<>(request));
+        when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
+        KraftMigrationStatus kraftMigrationStatus = KraftMigrationStatus.KRAFT_INSTALLED;
+        when(kraftMigrationService.getKraftMigrationStatus(stackDto)).thenReturn(kraftMigrationStatus);
+
+        Selectable result = underTest.doAccept(event);
+
+        String expectedMessage = "Skipping rollback Zookeeper to KRaft migration because rollback is executed recently or it is not in a rollbackable state: " +
+                "[rollbackCompleted=false], [statusIsNotRollbackable=true]";
+        verify(flowMessageService).fireEventAndLog(STACK_ID, AVAILABLE.name(), CLUSTER_KRAFT_MIGRATION_ROLLBACK_SKIPPED_EVENT, expectedMessage);
         assertInstanceOf(MigrateZookeeperToKraftRollbackEvent.class, result);
         assertEquals(FINISH_ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT.name(), result.getSelector());
     }
@@ -92,10 +115,8 @@ class MigrateZookeeperToKraftRollbackValidationHandlerTest {
                 new MigrateZookeeperToKraftRollbackEvent(ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION_VALIDATION_EVENT.selector(), STACK_ID);
         HandlerEvent<MigrateZookeeperToKraftRollbackEvent> event = new HandlerEvent<>(new Event<>(request));
         when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
-        KraftMigrationStatus kraftMigrationStatus = KraftMigrationStatus.ZOOKEEPER_INSTALLED;
-        when(kraftMigrationService.getKraftMigrationStatus(stackDto)).thenReturn(kraftMigrationStatus);
-        doThrow(new BadRequestException("error")).when(zookeeperToKraftMigrationValidator)
-                .validateZookeeperToKraftMigrationStateForRollback(kraftMigrationStatus);
+        doThrow(new BadRequestException("error")).when(kraftMigrationService)
+                .getKraftMigrationStatus(stackDto);
 
         Selectable result = underTest.doAccept(event);
 
