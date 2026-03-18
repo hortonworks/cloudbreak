@@ -11,7 +11,6 @@ import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.secret.model.StringToSecretResponseConverter;
 import com.sequenceiq.cloudbreak.util.FreeIpaPasswordUtil;
@@ -125,12 +124,14 @@ public class KerberosConfigV1Service {
         }
     }
 
-    private DescribeKerberosConfigResponse getKerberosConfigIfFreeIPAExistsResponse(String environmentCrn, String accountId, String clusterName, Stack stack) {
+    private DescribeKerberosConfigResponse getKerberosConfigIfFreeIPAExistsResponse(String environmentCrn, String accountId, String clusterName, Stack stack)
+            throws FreeIpaClientException {
         KerberosConfig kerberosConfig = getKerberosConfigIfFreeIPAExists(environmentCrn, accountId, clusterName, stack);
         return convertKerberosConfigToDescribeKerberosConfigResponse(kerberosConfig);
     }
 
-    private KerberosConfig getKerberosConfigIfFreeIPAExists(String environmentCrn, String accountId, String clusterName, Stack stack) {
+    private KerberosConfig getKerberosConfigIfFreeIPAExists(String environmentCrn, String accountId, String clusterName, Stack stack)
+            throws FreeIpaClientException {
         MDCBuilder.buildMdcContext(stack);
         LOGGER.debug("Get kerberos config when FreeIPA exists for env");
         Optional<KerberosConfig> existingKerberosConfig = kerberosConfigService.find(environmentCrn, accountId, clusterName);
@@ -138,7 +139,7 @@ public class KerberosConfigV1Service {
             LOGGER.debug("Kerberos config already exists");
             return existingKerberosConfig.get();
         } else {
-            throw NotFoundException.notFoundException("Kerberos config for cluster", clusterName);
+            return createNewKerberosConfig(environmentCrn, clusterName, stack, false);
         }
     }
 
