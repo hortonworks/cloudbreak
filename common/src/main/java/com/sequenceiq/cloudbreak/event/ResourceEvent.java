@@ -919,6 +919,7 @@ public enum ResourceEvent {
     ENABLE_ENCRYPTION_PROFILE_FAILED("environment.enable.encryption.profile.failed"),
     DISK_SYNC_FAILED("disk.sync.status.failed"),
     DISK_SYNC_VOLUME_MISMATCH_FOUND("disk.sync.status.volume.mismatch.found"),
+    DISK_SYNC_FSTAB_MISMATCH_FOUND("disk.sync.status.fstab.mismatch.found"),
     DISK_SYNC_VOLUME_MOUNT_MISMATCH_FOUND("disk.sync.status.volume.mount.mismatch.found"),;
 
     private final String message;

@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.util;
 
 import static com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType.DATABASE;
 import static com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType.GENERAL;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.DISK_SYNC_FSTAB_MISMATCH_FOUND;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.DISK_SYNC_VOLUME_MISMATCH_FOUND;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.DISK_SYNC_VOLUME_MOUNT_MISMATCH_FOUND;
 import static com.sequenceiq.cloudbreak.job.disk.DiskSyncService.CLOUD_RESOURCE_TYPE_CONSTANTS;
@@ -91,9 +92,35 @@ public class ResourceSyncUtil {
                 instanceInfo.getVolumes(), instanceId, res.getId());
             LOGGER.info("Synced volumes for resource id {}, instance id {}, volumes - {}", res.getId(), instanceId, syncedVolumes);
             volumeSetAttribute.setVolumes(syncedVolumes);
+
+            // SYNC Fstab
+            String fstabFromLsblk = createFstabFromLsblk(instanceInfo);
+            LOGGER.info("DiskSyncJob: Created fstab from lsblk on instance: {}, fstab: {}", instanceId, fstabFromLsblk);
+            instanceInfo.setFstab(fstabFromLsblk);
+            syncFstab(instanceInfo, volumeSetAttribute, stack.getId(), res.getId(), instanceId, stack.getStatus().name());
         }
         // Add resourceService.save here if needed
         return true;
+    }
+
+    public String createFstabFromLsblk(InstanceResourceDto lsblkInfo) {
+        return lsblkInfo.getVolumes().stream()
+            .filter(dto -> dto.uuid() != null && !dto.uuid().isEmpty())
+            .filter(dto -> dto.mountPoint() != null && !dto.mountPoint().isEmpty())
+            .filter(dto -> !"/".equals(dto.mountPoint()) && !"/boot".equals(dto.mountPoint()) && !"/boot/efi".equals(dto.mountPoint()))
+            .map(dto -> String.format("UUID=%s %s %s defaults,noatime,nofail 0 2", dto.uuid(), dto.mountPoint(), dto.fsType()))
+            .collect(Collectors.joining("\n"));
+    }
+
+    public void syncFstab(InstanceResourceDto instanceInfo, VolumeSetAttributes volumeSetAttributeFromDB,
+        Long stackId, Long resourceId, String instanceId, String stackStatus) {
+        String normalizedFstabFromDB = normalizeFstab(volumeSetAttributeFromDB.getFstab());
+        if (getMountedVolumesCount(instanceInfo.getFstab()) != getMountedVolumesCount(normalizedFstabFromDB)) {
+            LOGGER.info("Found fstab mismatch in Resource table: saved fstab: {} and actual fstab created from lsblk: {}",
+                normalizedFstabFromDB, instanceInfo.getFstab());
+            eventService.fireCloudbreakEvent(stackId, stackStatus, DISK_SYNC_FSTAB_MISMATCH_FOUND,
+                    Arrays.asList(instanceId, normalizedFstabFromDB, instanceInfo.getFstab(), String.valueOf(resourceId)));
+        }
     }
 
     public String normalizeFstab(String fstab) {
@@ -158,7 +185,7 @@ public class ResourceSyncUtil {
             // 2. Ensure line has at least Device and MountPoint columns
             .filter(columns -> columns.length >= 2)
             // 3. Match the mount point column (index 1)
-            .filter(columns -> columns[1].startsWith("/hadoopfs/fs") || columns[1].startsWith("/dbfs"))
+            .filter(columns -> columns[1].startsWith("/hadoopfs/fs") || columns[1].startsWith("/dbfs") || columns[1].startsWith("/hadoopfs/ephfs"))
             .count();
     }
 

@@ -108,7 +108,7 @@ public class DiskInstanceInfoCollector {
                 InstanceResourceDto.VolumeDto existing = diskMap.get(key);
                 InstanceResourceDto.VolumeDto updatedVolume = new InstanceResourceDto.VolumeDto(vol.id(),
                         vol.device(), existing.mountPoint(), existing.size(), vol.type(), existing.uuid(),
-                        existing.serial(), existing.hctl());
+                        existing.serial(), existing.hctl(), existing.fsType());
                 updatedVolumes.add(updatedVolume);
             }
         }

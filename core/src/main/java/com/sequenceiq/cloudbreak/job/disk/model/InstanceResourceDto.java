@@ -45,7 +45,8 @@ public class InstanceResourceDto {
             String volumeType,
             String uuid,
             String serial,
-            String hctl
+            String hctl,
+            String fsType
     ) {
         @Override
         public String toString() {
@@ -54,6 +55,7 @@ public class InstanceResourceDto {
                     ", device='" + deviceName + '\'' +
                     ", size=" + size +
                     ", mountPoint='" + mountPoint + '\'' +
+                    ", fsType='" + fsType + '\'' +
                     '}';
         }
     }

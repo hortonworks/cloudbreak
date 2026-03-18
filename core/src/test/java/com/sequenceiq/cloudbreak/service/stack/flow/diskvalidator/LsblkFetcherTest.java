@@ -66,7 +66,8 @@ class LsblkFetcherTest {
     void testGetLsblkResultsSync() throws CloudbreakOrchestratorFailedException {
         List<GatewayConfig> gatewayConfigs = List.of();
         Set<String> targetFqdns = Set.of("host1");
-        String output = "NAME=\"nvme0n1\" SIZE=\"108000000000\" SERIAL=\"serial1\" UUID=\"uuid1\" MOUNTPOINT=\"/mnt\" TYPE=\"disk\" HCTL=\"hctl1\"\n" +
+        String output = "NAME=\"nvme0n1\" SIZE=\"108000000000\" SERIAL=\"serial1\" UUID=\"uuid1\" MOUNTPOINT=\"/mnt\" TYPE=\"disk\" HCTL=\"hctl1\" " +
+                "FSTYPE=\"xfs\"\n" +
                 "NAME=\"nvme1n1\" SIZE=\"215000000000\" UUID=\"uuid2\"\n" +
                 "NAME=\"nvme2n1\" SIZE=\"324000000000\" SERIAL=\"serial3\" UUID=\"\"";
 
@@ -85,6 +86,7 @@ class LsblkFetcherTest {
         assertThat(lines.get(0).uuid()).isEqualTo("uuid1");
         assertThat(lines.get(0).serial()).isEqualTo("serial1");
         assertThat(lines.get(0).hctl()).isEqualTo("hctl1");
+        assertThat(lines.get(0).fsType()).isEqualTo("xfs");
 
         assertThat(lines.get(1).deviceName()).isEqualTo("nvme1n1");
         assertThat(lines.get(1).size()).isEqualTo(200);

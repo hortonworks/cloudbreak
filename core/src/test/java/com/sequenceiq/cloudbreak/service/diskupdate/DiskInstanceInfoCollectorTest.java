@@ -58,7 +58,7 @@ class DiskInstanceInfoCollectorTest {
         Map<String, List<VolumeRecord>> cloudMetadata = Map.of("inst1", List.of(vol));
 
         MultiValuedMap<String, InstanceResourceDto.VolumeDto> lsblkLines = new ArrayListValuedHashMap<>();
-        lsblkLines.put("fqdn1", new InstanceResourceDto.VolumeDto(null, "nvme0n1", "/hadoopfs/", 100, "disk", "uuid", "vol1", null));
+        lsblkLines.put("fqdn1", new InstanceResourceDto.VolumeDto(null, "nvme0n1", "/hadoopfs/", 100, "disk", "uuid", "vol1", null, null));
 
         InstanceResourceDto result = underTest.getInstanceResourceDto(lsblkLines.get("fqdn1"), cloudMetadata, "inst1", "AWS");
 
@@ -73,7 +73,7 @@ class DiskInstanceInfoCollectorTest {
         Map<String, List<VolumeRecord>> cloudMetadata = Map.of("inst1", List.of(vol));
 
         MultiValuedMap<String, InstanceResourceDto.VolumeDto> lsblkLines = new ArrayListValuedHashMap<>();
-        lsblkLines.put("host", new InstanceResourceDto.VolumeDto(null, "sdc", "/hadoopfs/", 100, "disk", "uuid", "sdc", null));
+        lsblkLines.put("host", new InstanceResourceDto.VolumeDto(null, "sdc", "/hadoopfs/", 100, "disk", "uuid", "sdc", null, null));
 
         InstanceResourceDto result = underTest.getInstanceResourceDto(lsblkLines.get("host"), cloudMetadata, "inst1", "AZURE");
 
@@ -95,7 +95,7 @@ class DiskInstanceInfoCollectorTest {
         when(node.getHostname()).thenReturn("fqdn1");
         when(stackUtil.collectNodes(stackDto)).thenReturn(Set.of(node));
         MultiValuedMap<String, InstanceResourceDto.VolumeDto> lsblkLines = new ArrayListValuedHashMap<>();
-        lsblkLines.put("fqdn1", new InstanceResourceDto.VolumeDto(null, "nvme0n1", "/hadoopfs/", 100, "disk", "uuid", "vol1", null));
+        lsblkLines.put("fqdn1", new InstanceResourceDto.VolumeDto(null, "nvme0n1", "/hadoopfs/", 100, "disk", "uuid", "vol1", null, null));
 
         when(lsblkFetcher.getLsblkResults(anyList(), anySet())).thenReturn(lsblkLines);
 

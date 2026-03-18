@@ -25,7 +25,7 @@ import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 @Service
 public class LsblkFetcher {
 
-    static final String LSBLK_COMMAND = "lsblk -b -P -o NAME,SIZE,SERIAL,UUID,MOUNTPOINT,TYPE,HCTL; ";
+    static final String LSBLK_COMMAND = "lsblk -b -P -o NAME,SIZE,SERIAL,UUID,MOUNTPOINT,TYPE,HCTL,FSTYPE; ";
 
     private static final Pattern PAIR_PATTERN = Pattern.compile("(\\w+)=\"([^\"]*)\"");
 
@@ -64,8 +64,9 @@ public class LsblkFetcher {
         String uuid = lsblkLineParts.get("UUID");
         String serial = lsblkLineParts.get("SERIAL");
         String hctl = lsblkLineParts.get("HCTL");
+        String fstype = lsblkLineParts.get("FSTYPE");
         return new InstanceResourceDto.VolumeDto(null, device, mountPoint, convertBytesToGb(size), type,
-            uuid, serial, hctl);
+            uuid, serial, hctl, fstype);
     }
 
     private int convertBytesToGb(String rawByteString) {
