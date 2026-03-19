@@ -45,7 +45,7 @@ class GcpPlatformParametersTest {
 
     @BeforeEach
     void setUp() {
-        ReflectionTestUtils.setField(underTest, "defaultDiskType", GcpPlatformParameters.GcpDiskType.HDD.value());
+        ReflectionTestUtils.setField(underTest, "defaultDiskType", GcpPlatformParameters.GcpDiskType.BALANCED.value());
         ReflectionTestUtils.setField(underTest, "defaultRootDiskType", GcpPlatformParameters.GcpDiskType.SSD.value());
     }
 
@@ -112,7 +112,7 @@ class GcpPlatformParametersTest {
 
     @Test
     void testDefaultDiskTypes() {
-        assertEquals(diskType(GcpPlatformParameters.GcpDiskType.HDD.value()), underTest.defaultDiskType());
+        assertEquals(diskType(GcpPlatformParameters.GcpDiskType.BALANCED.value()), underTest.defaultDiskType());
         assertEquals(diskType(GcpPlatformParameters.GcpDiskType.SSD.value()), underTest.defaultRootDiskType());
     }
 

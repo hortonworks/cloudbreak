@@ -58,7 +58,7 @@ public class GcpPlatformParameters implements PlatformParameters {
     @Value("${cb.gcp.zone.parameter.default:europe-west1}")
     private String gcpZoneParameterDefault;
 
-    @Value("${cb.gcp.disk.type.default:pd-standard}")
+    @Value("${cb.gcp.disk.type.default:pd-balanced}")
     private String defaultDiskType;
 
     @Value("${cb.gcp.root.disk.type.default:pd-ssd}")

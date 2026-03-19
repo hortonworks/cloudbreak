@@ -23,7 +23,7 @@
             {
               "size": 100,
               "count": 1,
-              "type": "pd-standard"
+              "type": "pd-balanced"
             }
           ]
         }
