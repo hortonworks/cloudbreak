@@ -85,6 +85,24 @@ class OsChangeServiceTest {
     }
 
     @Test
+    void testIsOsChangePermittedShouldReturnTrueWhenTheCurrentOsIsRhel8AndTheTargetIsRhel9AndTheArchIsX86AndThereAreOsIndependentPreWarmParcels() {
+        Image targetImage = createTargetImage(RHEL9);
+        Response response = mock(Response.class);
+        ClouderaManagerProduct parcel = new ClouderaManagerProduct()
+                .withName(PRE_WARM_PARCEL_NAME)
+                .withParcel("https://archive.cloudera.com/p/csa/1.16.1.0/parcels");
+        when(clouderaManagerProductTransformer.transform(targetImage, false, true)).thenReturn(Set.of(parcel));
+        when(parcelAvailabilityRetrievalService.getHeadResponseForParcel("https://archive.cloudera.com/p/cm-public/7.12.0.400-57266911/redhat8/yum/"))
+                .thenReturn(response);
+        when(response.getStatus()).thenReturn(HTTP_OK);
+
+        boolean actual = underTest.isOsChangePermitted(targetImage, RHEL8, Set.of(RHEL8), Architecture.X86_64.getName(), Map.of(PRE_WARM_PARCEL_NAME, "123"));
+
+        assertTrue(actual);
+        verify(parcelAvailabilityRetrievalService, times(1)).getHeadResponseForParcel(anyString());
+    }
+
+    @Test
     void testIsOsChangePermittedShouldReturnTrueWhenTheCurrentOsIsRhel8AndTheTargetIsRhel9AndTheArchIsArm64() {
         Image targetImage = Image.builder()
                 .withOs(RHEL9.getOs())
