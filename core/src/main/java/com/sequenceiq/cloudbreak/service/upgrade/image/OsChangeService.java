@@ -117,6 +117,7 @@ public class OsChangeService {
                     .filter(parcelFromImage -> stackRelatedParcels.keySet().stream()
                             .anyMatch(requiredParcelName -> parcelFromImage.getName().equalsIgnoreCase(requiredParcelName)))
                     .map(ClouderaManagerProduct::getParcel)
+                    .filter(parcelUrl -> parcelUrl.contains(targetImage.getOsType()))
                     .map(url -> url.endsWith("/") ? url : url + "/")
                     .collect(Collectors.toSet());
         } else {

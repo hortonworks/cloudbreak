@@ -36,6 +36,12 @@ init-db-with-utf8:
     - unless: grep -q UTF-8 {{ new_postgres_directory }}/initdb.log && test -f {{ new_postgres_directory }}/data/PG_VERSION
     - failhard: True
 
+fix_selinux_labels_for_postgres_upgrade:
+  cmd.run:
+    - name: chcon -R -t usr_t /dbfs/tmp/ && chcon -t postgresql_exec_t {{ original_postgres_binaries }}/bin/*
+    - onlyif: getenforce | grep -q "Enforcing"
+    - failhard: True
+
 upgrade_postgresql_db:
   cmd.run:
     - name: runuser -l postgres -s /bin/bash sh -c '{{ new_postgres_binaries }}/bin/pg_upgrade -b {{ original_postgres_binaries }}/bin -B {{ new_postgres_binaries }}/bin -d {{ original_postgres_directory }}/data -D {{ new_postgres_directory }}/data > {{ new_postgres_directory }}/upgradedb.log'
