@@ -260,6 +260,11 @@ public class YarnResourceConnector implements ResourceConnector {
     }
 
     @Override
+    public ExternalDatabaseStatus getDatabaseServerStatusFailFast(AuthenticatedContext authenticatedContext, DatabaseStack stack) throws Exception {
+        throw new UnsupportedOperationException("Database server status lookup is not supported for " + getClass().getName());
+    }
+
+    @Override
     public List<CloudResourceStatus> update(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources,
         UpdateType type, Optional<String> group) {
         return null;

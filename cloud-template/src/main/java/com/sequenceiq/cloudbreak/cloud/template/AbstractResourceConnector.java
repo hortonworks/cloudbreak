@@ -218,6 +218,11 @@ public abstract class AbstractResourceConnector implements ResourceConnector {
     }
 
     @Override
+    public ExternalDatabaseStatus getDatabaseServerStatusFailFast(AuthenticatedContext authenticatedContext, DatabaseStack stack) {
+        return databaseServerCheckerService.check(authenticatedContext, stack);
+    }
+
+    @Override
     public ExternalDatabaseParameters getDatabaseServerParameters(AuthenticatedContext authenticatedContext, DatabaseStack stack) throws Exception {
         ExternalDatabaseStatus databaseStatus = databaseServerCheckerService.check(authenticatedContext, stack);
         return new ExternalDatabaseParameters(databaseStatus, null, null);

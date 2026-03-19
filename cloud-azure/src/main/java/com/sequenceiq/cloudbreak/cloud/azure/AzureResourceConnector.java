@@ -400,6 +400,11 @@ public class AzureResourceConnector extends AbstractResourceConnector {
     }
 
     @Override
+    public ExternalDatabaseStatus getDatabaseServerStatusFailFast(AuthenticatedContext authenticatedContext, DatabaseStack stack) {
+        return azureDatabaseResourceService.getDatabaseServerStatus(authenticatedContext, stack);
+    }
+
+    @Override
     public ExternalDatabaseParameters getDatabaseServerParameters(AuthenticatedContext authenticatedContext, DatabaseStack stack) {
         return azureDatabaseResourceService.getExternalDatabaseParameters(authenticatedContext, stack);
     }
