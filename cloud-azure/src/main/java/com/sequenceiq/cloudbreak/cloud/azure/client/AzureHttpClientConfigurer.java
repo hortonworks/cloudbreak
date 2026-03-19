@@ -67,21 +67,24 @@ public class AzureHttpClientConfigurer {
     }
 
     public PostgreSqlManager.Configurable configureDefault(PostgreSqlManager.Configurable configurable) {
-        PostgreSqlManager.Configurable client = configurable.withLogOptions(getHttpLogOptions()).withHttpClient(newHttpClient());
-        AzureQuartzRetryUtils.reconfigureHttpClientRetryPolicyIfNeeded(client::withRetryPolicy);
+        PostgreSqlManager.Configurable client = configurable.withLogOptions(getHttpLogOptions());
+        AzureQuartzRetryUtils.reconfigureHttpClientIfNeeded(client::withRetryPolicy, client::withHttpClient, newHttpClientBuilder());
         return client;
     }
 
     public com.azure.resourcemanager.postgresqlflexibleserver.PostgreSqlManager.Configurable configureDefault(
             com.azure.resourcemanager.postgresqlflexibleserver.PostgreSqlManager.Configurable configurable) {
-        com.azure.resourcemanager.postgresqlflexibleserver.PostgreSqlManager.Configurable client =
-                configurable.withLogOptions(getHttpLogOptions()).withHttpClient(newHttpClient());
-        AzureQuartzRetryUtils.reconfigureHttpClientRetryPolicyIfNeeded(client::withRetryPolicy);
+        com.azure.resourcemanager.postgresqlflexibleserver.PostgreSqlManager.Configurable client = configurable.withLogOptions(getHttpLogOptions());
+        AzureQuartzRetryUtils.reconfigureHttpClientIfNeeded(client::withRetryPolicy, client::withHttpClient, newHttpClientBuilder());
         return client;
     }
 
     public HttpClient newHttpClient() {
-        return new OkHttpAsyncHttpClientBuilder(okHttpClient).build();
+        return newHttpClientBuilder().build();
+    }
+
+    private OkHttpAsyncHttpClientBuilder newHttpClientBuilder() {
+        return new OkHttpAsyncHttpClientBuilder(okHttpClient);
     }
 
     private HttpLogOptions getHttpLogOptions() {

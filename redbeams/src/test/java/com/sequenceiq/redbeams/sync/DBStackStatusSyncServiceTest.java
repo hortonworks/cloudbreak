@@ -172,7 +172,7 @@ public class DBStackStatusSyncServiceTest {
     @MethodSource("provideTestData")
     public void testStatusUpdate(Status savedStatus, ExternalDatabaseStatus externalDatabaseStatus, DetailedDBStackStatus newDetailedDBStackStatus)
             throws Exception {
-        when(resourceConnector.getDatabaseServerStatus(authenticatedContext, databaseStack)).thenReturn(externalDatabaseStatus);
+        when(resourceConnector.getDatabaseServerStatusFailFast(authenticatedContext, databaseStack)).thenReturn(externalDatabaseStatus);
         when(dbStack.getId()).thenReturn(DB_STACK_ID);
         when(dbStack.getStatus()).thenReturn(savedStatus);
         when(dbStack.getOwnerCrn()).thenReturn(crn);
@@ -191,7 +191,7 @@ public class DBStackStatusSyncServiceTest {
     public void shouldCheckSingleToFlexibleMigration()
             throws Exception {
         ArgumentCaptor<DatabaseStack> databaseStackCaptor = ArgumentCaptor.forClass(DatabaseStack.class);
-        when(resourceConnector.getDatabaseServerStatus(eq(authenticatedContext), databaseStackCaptor.capture()))
+        when(resourceConnector.getDatabaseServerStatusFailFast(eq(authenticatedContext), databaseStackCaptor.capture()))
                 .thenReturn(ExternalDatabaseStatus.DELETED)
                 .thenReturn(ExternalDatabaseStatus.STARTED);
         when(dbStack.getCloudPlatform()).thenReturn(AZURE.name());
@@ -220,7 +220,7 @@ public class DBStackStatusSyncServiceTest {
     public void shouldCheckSingleToFlexibleMigrationSingleStillRunning()
             throws Exception {
         ArgumentCaptor<DatabaseStack> databaseStackCaptor = ArgumentCaptor.forClass(DatabaseStack.class);
-        when(resourceConnector.getDatabaseServerStatus(eq(authenticatedContext), databaseStackCaptor.capture()))
+        when(resourceConnector.getDatabaseServerStatusFailFast(eq(authenticatedContext), databaseStackCaptor.capture()))
                 .thenReturn(ExternalDatabaseStatus.STARTED)
                 .thenReturn(ExternalDatabaseStatus.STARTED);
         when(dbStack.getCloudPlatform()).thenReturn(AZURE.name());
@@ -249,7 +249,7 @@ public class DBStackStatusSyncServiceTest {
     public void shouldCheckFlexibleToSingleRollback()
             throws Exception {
         ArgumentCaptor<DatabaseStack> databaseStackCaptor = ArgumentCaptor.forClass(DatabaseStack.class);
-        when(resourceConnector.getDatabaseServerStatus(eq(authenticatedContext), databaseStackCaptor.capture()))
+        when(resourceConnector.getDatabaseServerStatusFailFast(eq(authenticatedContext), databaseStackCaptor.capture()))
                 .thenReturn(ExternalDatabaseStatus.DELETED)
                 .thenReturn(ExternalDatabaseStatus.STARTED);
         when(dbStack.getCloudPlatform()).thenReturn(AZURE.name());
@@ -278,7 +278,7 @@ public class DBStackStatusSyncServiceTest {
     public void shouldBeDeletedIfNeitherSingleNorFlexible()
             throws Exception {
         ArgumentCaptor<DatabaseStack> databaseStackCaptor = ArgumentCaptor.forClass(DatabaseStack.class);
-        when(resourceConnector.getDatabaseServerStatus(eq(authenticatedContext), databaseStackCaptor.capture()))
+        when(resourceConnector.getDatabaseServerStatusFailFast(eq(authenticatedContext), databaseStackCaptor.capture()))
                 .thenReturn(ExternalDatabaseStatus.DELETED)
                 .thenReturn(ExternalDatabaseStatus.DELETED);
         when(dbStack.getCloudPlatform()).thenReturn(AZURE.name());
@@ -304,7 +304,7 @@ public class DBStackStatusSyncServiceTest {
     @Test
     public void shouldSetStatusAndUnscheduleInCaseOfStopCompleted()
             throws Exception {
-        when(resourceConnector.getDatabaseServerStatus(authenticatedContext, databaseStack)).thenReturn(ExternalDatabaseStatus.DELETED);
+        when(resourceConnector.getDatabaseServerStatusFailFast(authenticatedContext, databaseStack)).thenReturn(ExternalDatabaseStatus.DELETED);
         when(dbStack.getId()).thenReturn(DB_STACK_ID);
         when(dbStack.getStatus()).thenReturn(Status.DELETE_IN_PROGRESS);
         when(dbStack.getOwnerCrn()).thenReturn(crn);

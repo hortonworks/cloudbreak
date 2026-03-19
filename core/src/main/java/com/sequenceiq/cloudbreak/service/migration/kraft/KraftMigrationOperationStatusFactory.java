@@ -78,8 +78,8 @@ public class KraftMigrationOperationStatusFactory {
     private List<FlowLog> getMostRecentKraftFlowLastLogs(StackDto stackDto) {
         Long stackId = stackDto.getId();
         List<FlowLog> kraftFlowLogs = new ArrayList<>(flowLogDBService.findAllByResourceIdAndFlowTypeInOrderByCreatedDesc(stackId, RELATED_FLOW_CONFIGS));
-        List<FlowLog> latestFlowLogsByCrnInFlowChain = flowLogDBService.getLatestFlowLogsByCrnInFlowChain(stackDto.getResourceCrn());
-        boolean kraftMigrationFlowChain = latestFlowLogsByCrnInFlowChain.stream()
+        List<FlowLog> latestFlowLogsInFlowChain = flowLogDBService.getLatestFlowLogsByResourceIdInFlowChain(stackId);
+        boolean kraftMigrationFlowChain = latestFlowLogsInFlowChain.stream()
                 .findFirst()
                 .map(FlowLog::getFlowChainId)
                 .flatMap(flowChainId -> flowLogDBService.findFirstByFlowChainIdOrderByCreatedDesc(flowChainId))
@@ -88,8 +88,8 @@ public class KraftMigrationOperationStatusFactory {
                 .isPresent();
 
         if (kraftMigrationFlowChain) {
-            LOGGER.debug("The Kraft migration flow chain has been found, adding the relevant '{}' flow logs", latestFlowLogsByCrnInFlowChain.size());
-            kraftFlowLogs.addAll(latestFlowLogsByCrnInFlowChain);
+            LOGGER.debug("The Kraft migration flow chain has been found, adding the relevant '{}' flow logs", latestFlowLogsInFlowChain.size());
+            kraftFlowLogs.addAll(latestFlowLogsInFlowChain);
         }
 
         return kraftFlowLogs.stream()

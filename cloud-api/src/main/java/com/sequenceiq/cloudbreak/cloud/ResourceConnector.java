@@ -303,6 +303,16 @@ public interface ResourceConnector {
     ExternalDatabaseStatus getDatabaseServerStatus(AuthenticatedContext authenticatedContext, DatabaseStack stack) throws Exception;
 
     /**
+     * Determines the status of a database server without retrying in case of timeout or any provider side exception
+     * @param authenticatedContext the authenticated context which holds the client object; must not be {@code null}
+     * @param stack contains the full description of infrastructure; must not be {@code null}
+     * @return The status of the given database server instance; never {@code null}
+     * @throws NullPointerException if either argument is {@code null}
+     * @throws Exception in case of any error
+     */
+    ExternalDatabaseStatus getDatabaseServerStatusFailFast(AuthenticatedContext authenticatedContext, DatabaseStack stack) throws Exception;
+
+    /**
      * Collect database related parameters of a database server.
      * @param authenticatedContext the authenticated context which holds the client object; must not be {@code null}
      * @param stack contains the full description of infrastructure; must not be {@code null}

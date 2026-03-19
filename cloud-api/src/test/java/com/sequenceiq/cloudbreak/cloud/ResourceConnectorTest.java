@@ -92,6 +92,11 @@ class ResourceConnectorTest {
         }
 
         @Override
+        public ExternalDatabaseStatus getDatabaseServerStatusFailFast(AuthenticatedContext authenticatedContext, DatabaseStack stack) {
+            return null;
+        }
+
+        @Override
         public TlsInfo getTlsInfo(AuthenticatedContext authenticatedContext, CloudStack cloudStack) {
             return null;
         }
