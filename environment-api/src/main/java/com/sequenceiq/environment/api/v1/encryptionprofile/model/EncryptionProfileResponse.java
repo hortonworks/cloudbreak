@@ -8,6 +8,7 @@ import java.util.Set;
 
 import jakarta.validation.constraints.Size;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.environment.api.doc.ModelDescriptions;
@@ -110,8 +111,9 @@ public class EncryptionProfileResponse {
         this.status = status;
     }
 
-    public boolean isDefault() {
-        return "DEFAULT".equals(status);
+    @JsonIgnore
+    public boolean isLegacy() {
+        return "cdp_default_fips_v1".equals(name);
     }
 
     @Override

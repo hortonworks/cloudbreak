@@ -25,12 +25,12 @@ public class FreeIpaEncryptionConfigView {
     public FreeIpaEncryptionConfigView(EncryptionProfileProvider encryptionProfileProvider, EncryptionProfileResponse encryptionProfileResponse) {
         Set<String> userTlsVersions = encryptionProfileResponse.getTlsVersions();
         Map<String, List<String>> userEncryptionProfileMap = encryptionProfileResponse.getCipherSuites();
-        boolean defaultEncryptionProfile = encryptionProfileResponse.isDefault();
+        boolean legacyEncryptionProfile = encryptionProfileResponse.isLegacy();
         tlsVersionsSpaceSeparated = encryptionProfileProvider.getTlsVersions(userTlsVersions, " ");
         tlsCipherSuites = encryptionProfileProvider
-                .getOpenSslCipherSuites(userEncryptionProfileMap, DEFAULT, false, userTlsVersions, defaultEncryptionProfile);
+                .getOpenSslCipherSuites(userEncryptionProfileMap, DEFAULT, false, userTlsVersions, legacyEncryptionProfile);
         tlsCipherSuitesRedHat8 = encryptionProfileProvider
-                .getOpenSslCipherSuites(userEncryptionProfileMap, REDHAT_VERSION8, false, userTlsVersions, defaultEncryptionProfile);
+                .getOpenSslCipherSuites(userEncryptionProfileMap, REDHAT_VERSION8, false, userTlsVersions, legacyEncryptionProfile);
         tls12CipherSuites = encryptionProfileProvider
                 .getDefaultRecommendedTls12CipherSuites(false);
         tls13CipherSuites = encryptionProfileProvider

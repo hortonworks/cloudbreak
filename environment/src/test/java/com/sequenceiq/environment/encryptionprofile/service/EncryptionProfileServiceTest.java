@@ -508,6 +508,20 @@ public class EncryptionProfileServiceTest {
         verify(repository, times(1)).save(any());
     }
 
+    @Test
+    void testCreateEncryptionProfileShouldNotAllowCipherSuitesEmptyList() {
+        EncryptionProfile encryptionProfile = getTestEncryptionProfile();
+        encryptionProfile.setCipherSuites(List.of());
+
+        when(repository.findByNameAndAccountId(NAME, ACCOUNT_ID)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> underTest.create(encryptionProfile, ACCOUNT_ID, CREATOR))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessage("Cipher suites list cannot be empty");
+
+        verify(repository, never()).save(any());
+    }
+
     private Map<String, EncryptionProfile> getDefaultEncryptionProfileNameMap() {
         Map<String, EncryptionProfile> defaultEncryptionProfileMap = new HashMap<>();
         EncryptionProfile defaultEncryptionProfile = new EncryptionProfile();

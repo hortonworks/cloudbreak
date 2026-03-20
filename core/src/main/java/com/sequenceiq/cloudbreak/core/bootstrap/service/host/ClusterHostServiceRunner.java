@@ -615,7 +615,7 @@ public class ClusterHostServiceRunner {
         EncryptionProfileResponse encryptionProfileResponse =  encryptionProfileService.getEncryptionProfileByCrnOrDefault(encryptionProfileCrn);
         Set<String> userTlsVersions = encryptionProfileResponse.getTlsVersions();
         Map<String, List<String>> userEncryptionProfileMap = encryptionProfileResponse.getCipherSuites();
-        boolean defaultEncryptionProfile = encryptionProfileResponse.isDefault();
+        boolean legacyEncryptionProfile = encryptionProfileResponse.isLegacy();
         boolean encryptionProfileEnabled =
                 entitlementService.isConfigureEncryptionProfileEnabled(detailedEnvironmentResponse.getAccountId())
                         && StringUtils.isNotEmpty(encryptionProfileCrn);
@@ -634,11 +634,11 @@ public class ClusterHostServiceRunner {
                 Map.entry("tlsVersionsCommaSeparated", encryptionProfileProvider.getTlsVersions(userTlsVersions, ",")),
                 Map.entry("cmVersionSupportsTlsSetup", isVersionNewerOrEqualThanLimited(cmVersion, CLOUDERAMANAGER_VERSION_7_13_2_0)),
                 Map.entry("tlsCipherSuites", encryptionProfileProvider
-                        .getOpenSslCipherSuites(userEncryptionProfileMap, DEFAULT, false, userTlsVersions, defaultEncryptionProfile)),
+                        .getOpenSslCipherSuites(userEncryptionProfileMap, DEFAULT, false, userTlsVersions, legacyEncryptionProfile)),
                 Map.entry("tlsCipherSuitesMinimal", encryptionProfileProvider
-                        .getOpenSslCipherSuites(userEncryptionProfileMap, MINIMAL, false, userTlsVersions, defaultEncryptionProfile)),
+                        .getOpenSslCipherSuites(userEncryptionProfileMap, MINIMAL, false, userTlsVersions, legacyEncryptionProfile)),
                 Map.entry("tlsCipherSuitesJavaIntermediate", encryptionProfileProvider
-                        .getIanaCipherSuites(userEncryptionProfileMap, JAVA_INTERMEDIATE2018,  true, userTlsVersions, defaultEncryptionProfile))
+                        .getIanaCipherSuites(userEncryptionProfileMap, JAVA_INTERMEDIATE2018,  true, userTlsVersions, legacyEncryptionProfile))
         );
 
         return Map.of("metadata", new SaltPillarProperties("/metadata/init.sls", singletonMap("cluster", clusterProperties)));
@@ -887,7 +887,7 @@ public class ClusterHostServiceRunner {
         String encryptionProfileCrn = encryptionProfileService.getEncryptionProfileCrn(detailedEnvironmentResponse, cluster);
         EncryptionProfileResponse encryptionProfileResponse = encryptionProfileService.getEncryptionProfileByCrnOrDefault(encryptionProfileCrn);
         Set<String> userTlsVersions = encryptionProfileResponse.getTlsVersions();
-        boolean defaultEncryptionProfile = encryptionProfileResponse.isDefault();
+        boolean legacyEncryptionProfile = encryptionProfileResponse.isLegacy();
         Map<String, List<String>> userEncryptionProfileMap = encryptionProfileResponse.getCipherSuites();
 
         gateway.put("username", cluster.getUserName());
@@ -900,11 +900,11 @@ public class ClusterHostServiceRunner {
         gateway.put("tlsv13Enabled", Boolean.FALSE);
         gateway.put("tlsVersionsSpaceSeparated", encryptionProfileProvider.getTlsVersions(userTlsVersions, " "));
         gateway.put("tlsCipherSuites", encryptionProfileProvider
-                .getOpenSslCipherSuites(userEncryptionProfileMap, DEFAULT, false, userTlsVersions, defaultEncryptionProfile));
+                .getOpenSslCipherSuites(userEncryptionProfileMap, DEFAULT, false, userTlsVersions, legacyEncryptionProfile));
         gateway.put("tlsCipherSuitesRedHat8", encryptionProfileProvider
-                .getOpenSslCipherSuites(userEncryptionProfileMap, REDHAT_VERSION8, false, userTlsVersions, defaultEncryptionProfile));
+                .getOpenSslCipherSuites(userEncryptionProfileMap, REDHAT_VERSION8, false, userTlsVersions, legacyEncryptionProfile));
         gateway.put("tlsCipherSuitesMinimal", encryptionProfileProvider
-                .getOpenSslCipherSuites(userEncryptionProfileMap, MINIMAL, false, userTlsVersions, defaultEncryptionProfile));
+                .getOpenSslCipherSuites(userEncryptionProfileMap, MINIMAL, false, userTlsVersions, legacyEncryptionProfile));
         gateway.put("tls12CipherSuites", encryptionProfileProvider
                 .getDefaultRecommendedTls12CipherSuites(false));
         gateway.put("tls13CipherSuites", encryptionProfileProvider

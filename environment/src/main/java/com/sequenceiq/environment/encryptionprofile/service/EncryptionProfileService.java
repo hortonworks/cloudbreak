@@ -92,8 +92,11 @@ public class EncryptionProfileService implements CompositeAuthResourcePropertyPr
                     throw new BadRequestException("Encryption Profile already exists with name: " + name);
                 });
 
-        if (!CollectionUtils.isEmpty(encryptionProfile.getCipherSuites())
-                && !isTls13Only(encryptionProfile.getTlsVersions())
+        if (CollectionUtils.isEmpty(encryptionProfile.getCipherSuites())) {
+            throw new BadRequestException("Cipher suites list cannot be empty");
+        }
+
+        if (!isTls13Only(encryptionProfile.getTlsVersions())
                 && !containsRsaCipherSuite(encryptionProfile.getCipherSuites(), encryptionProfile.getTlsVersions())) {
             throw new BadRequestException("Encryption Profile must have at least one RSA cipher suite");
         }

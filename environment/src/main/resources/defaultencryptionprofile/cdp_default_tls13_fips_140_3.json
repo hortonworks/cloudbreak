@@ -1,0 +1,13 @@
+{
+  "name": "cdp_default_tls13_fips_140_3",
+  "description": "This encryption profile uses FIPS 140-3 compatible ciphers (TLSv1.3 only)",
+  "created": 1755792561568,
+  "tlsVersions": [
+    "TLSv1.3"
+  ],
+  "cipherSuites": [
+    "TLS_AES_128_GCM_SHA256",
+    "TLS_AES_256_GCM_SHA384"
+  ],
+  "resourceStatus": "DEFAULT"
+}
