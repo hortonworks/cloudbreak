@@ -32,6 +32,7 @@ public class EnvironmentTrustSetupDto extends AbstractEnvironmentTestDto<SetupCr
 
     @Override
     public EnvironmentTrustSetupDto valid() {
+        String remoteEnvironmentCrn = this.remoteEnvironmentCrn.replaceAll("ACCOUNT_ID", getTestContext().getActingUserCrn().getAccountId());
         getRequest().setRemoteEnvironmentCrn(remoteEnvironmentCrn);
         getRequest().setFqdn(activeDirectoryFqdn);
         getRequest().setIp(activeDirectoryIp);
