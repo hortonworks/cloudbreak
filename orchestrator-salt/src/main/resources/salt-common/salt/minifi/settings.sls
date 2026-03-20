@@ -5,7 +5,9 @@
     {% set minifi_enabled = False %}
 {% endif %}
 
-{% set minifi_rpm = 'https://cloudera-build-us-west-1.vpc.cloudera.com/s3/build/71542311/cem-agents/1.x/ubuntu22/apt/tars/nifi-minifi-cpp/nifi-minifi-cpp-1.25.09-b38-x86_64.rpm' %}
+{% set prefer_minifi_logging = salt['pillar.get']('fluent:preferMinifiLogging', False) == True %}
+
+{% set minifi_rpm = 'https://cloudera-build-2-us-west-2.vpc.cloudera.com/s3/build/76334049/cem-agents/1.x/ubuntu24/apt/tars/nifi-minifi-cpp/nifi-minifi-cpp-1.26.02-b30-x86_64.rpm' %}
 {% if salt['pillar.get']('fluent:cloudStorageLoggingEnabled') %}
     {% set cloud_storage_logging_enabled = True %}
 {% else %}
@@ -37,30 +39,7 @@
 
 {% set partition_interval = salt['pillar.get']('fluent:partitionIntervalMin') %}
 {% set minifi_installed = salt['file.directory_exists' ]('/etc/nifi-minifi-cpp') %}
-
-{%- set base_extensions = '/usr/lib64/nifi-minifi-cpp/extensions/libminifi-archive-extensions.so,/usr/lib64/nifi-minifi-cpp/extensions/libminifi-expression-language-extensions.so,/usr/lib64/nifi-minifi-cpp/extensions/libminifi-rocksdb-repos.so,/usr/lib64/nifi-minifi-cpp/extensions/libminifi-standard-processors.so,/usr/lib64/nifi-minifi-cpp/extensions/libminifi-systemd.so,/usr/lib64/nifi-minifi-cpp/extensions/minifi_native.so' %}
-
-{%- if provider_prefix == "s3" %}
-    {% set nifi_extension_path = base_extensions ~ ',/usr/lib64/nifi-minifi-cpp/extensions/libminifi-aws.so' %}
-{%- elif provider_prefix == "abfs" %}
-    {% set nifi_extension_path = base_extensions ~ ',/usr/lib64/nifi-minifi-cpp/extensions/libminifi-azure.so' %}
-{%- elif provider_prefix == "gcs" %}
-    {% set nifi_extension_path = base_extensions ~ ',/usr/lib64/nifi-minifi-cpp/extensions/libminifi-gcp.so' %}
-{%- else %}
-    {% set nifi_extension_path = base_extensions %}
-{%- endif %}
-
-{% set minifi_properties = {
-    'nifi.flowfile.repository.rocksdb.compression': 'auto',
-    'nifi.extension.path': nifi_extension_path,
-    'nifi.flow.engine.threads': '5',
-    'nifi.content.repository.class.name': 'FileSystemRepository',
-    'nifi.flowfile.repository.rocksdb.write.buffer.size': '2 MB',
-    'nifi.flowfile.repository.rocksdb.max.write.buffer.number': '2',
-    'nifi.flowfile.repository.rocksdb.options': 'table_factory={block_cache=2M;};memtable_factory=SkipListFactory;',
-    'nifi.flowfile.repository.rocksdb.compaction.period': '2 min',
-    'nifi.database.content.repository.rocksdb.compaction.period': '2 min'
-} %}
+{% set minifi_package_version = salt['pkg.version']('nifi-minifi-cpp') %}
 
 {% do minifi.update({
     "enabled": minifi_enabled,
@@ -78,4 +57,6 @@
     "minifiRpm": minifi_rpm,
     "minifiInstalled": minifi_installed,
     "minifiProperties": minifi_properties,
+    "preferMinifiLogging": prefer_minifi_logging,
+    "minifiPackageVersion": minifi_package_version
 }) %}

@@ -1,0 +1,28 @@
+{%- from 'minifi/settings.sls' import minifi with context %}
+
+{%- set extensionPaths = [
+    '/usr/lib64/nifi-minifi-cpp/extensions/libminifi-archive-extensions.so',
+    '/usr/lib64/nifi-minifi-cpp/extensions/libminifi-expression-language-extensions.so',
+    '/usr/lib64/nifi-minifi-cpp/extensions/libminifi-rocksdb-repos.so',
+    '/usr/lib64/nifi-minifi-cpp/extensions/libminifi-standard-processors.so',
+    '/usr/lib64/nifi-minifi-cpp/extensions/libminifi-systemd.so',
+    '/usr/lib64/nifi-minifi-cpp/extensions/minifi_native.so'
+] -%}
+
+{%- if minifi.providerPrefix == "s3" -%}
+    {%- do extensionPaths.append('/usr/lib64/nifi-minifi-cpp/extensions/libminifi-aws.so') -%}
+{%- elif minifi.providerPrefix == "abfs" -%}
+    {%- do extensionPaths.append('/usr/lib64/nifi-minifi-cpp/extensions/libminifi-azure.so') -%}
+{%- elif minifi.providerPrefix == "gcs" -%}
+    {%- do extensionPaths.append('/usr/lib64/nifi-minifi-cpp/extensions/libminifi-gcp.so') -%}
+{%- endif -%}
+
+nifi.flowfile.repository.rocksdb.compression=auto
+nifi.extension.path={{ extensionPaths | join(',') }}
+nifi.flow.engine.threads=5
+nifi.content.repository.class.name=FileSystemRepository
+nifi.flowfile.repository.rocksdb.write.buffer.size=2 MB
+nifi.flowfile.repository.rocksdb.max.write.buffer.number=2
+nifi.flowfile.repository.rocksdb.options=table_factory={block_cache=2M;};memtable_factory=SkipListFactory;
+nifi.flowfile.repository.rocksdb.compaction.period=2 min
+nifi.database.content.repository.rocksdb.compaction.period=2 min

@@ -33,22 +33,47 @@ minifi_stop:
   file.managed:
     - source: salt://minifi/template/config.yml.j2
     - template: jinja
-    - user: root
-    - group: root
+    - user: minificpp
+    - group: minificpp
     - mode: 640
     - context:
         providerPrefix: {{ minifi.providerPrefix }}
 
-{% for key, value in minifi.minifiProperties.items() %}
+{%- if minifi.minifiPackageVersion is defined and minifi.minifiPackageVersion is not none and minifi.minifiPackageVersion and salt['pkg.version_cmp'](minifi.minifiPackageVersion,'1.26.02-1') >= 0 %}
+/etc/nifi-minifi-cpp/minifi.properties.d/minifi-custom.properties:
+  file.managed:
+    - makedirs: True
+    - source: salt://minifi/template/minifi-custom.properties.j2
+    - template: jinja
+    - user: minificpp
+    - group: minificpp
+    - mode: 640
+    - makedirs: True
+{%- else %}
+
+{%- set rendered_content = salt['cp.get_template']('salt://minifi/template/minifi-custom.properties.j2', '/tmp/rendered_temp') -%}
+
+{%- set final_config = salt['cp.get_file_str']('/tmp/rendered_temp') -%}
+
+{%- for line in final_config.splitlines() %}
+  {%- if '=' in line and not line.startswith('#') %}
+    {%- set key = line.split('=', 1)[0].strip() %}
+    {%- set value = line.split('=', 1)[1].strip() %}
+
 update_minifi_property_{{ key }}:
-  file.replace:
+  file.keyvalue:
     - name: /etc/nifi-minifi-cpp/minifi.properties
-    - pattern: '^{{ key }}=.*'
-    - repl: '{{ key }}={{ value }}'
+    - key: "{{ key }}"
+    - value: "{{ value }}"
+    - separator: '='
     - append_if_not_found: True
-    - onlyif:
-      - test -f /etc/nifi-minifi-cpp/minifi.properties
-{% endfor %}
+  {%- endif %}
+{%- endfor %}
+
+cleanup_temp_render:
+  file.absent:
+    - name: /tmp/rendered_temp
+{%- endif %}
 
 {%- if minifi.is_systemd %}
 /etc/systemd/system/minifi.d:
