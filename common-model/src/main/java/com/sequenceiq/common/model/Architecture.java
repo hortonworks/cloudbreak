@@ -40,6 +40,19 @@ public enum Architecture {
         return name().toLowerCase();
     }
 
+    /**
+     * Returns the architecture name as used in Linux RPM package paths (e.g. in Cloudera Manager repo URLs).
+     * ARM64 is known as "aarch64" in the Linux kernel and RPM ecosystem, while getName() returns "arm64".
+     * X86_64 is the same in both conventions.
+     */
+    public String getRpmName() {
+        return switch (this) {
+            case ARM64 -> "aarch64";
+            case X86_64 -> "x86_64";
+            default -> getName();
+        };
+    }
+
     @Override
     public String toString() {
         return getName();

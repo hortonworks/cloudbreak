@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.auth.PaywallCredentialPopulator;
 import com.sequenceiq.cloudbreak.client.RestClientFactory;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.service.image.CustomImageProvider;
+import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.common.model.OsType;
 
 @Component
@@ -42,18 +43,6 @@ public class CmUrlProvider {
     public String getCmRpmUrl(Image image) {
         LOGGER.debug("Retrieving CM RPM package URL from image {}", image.getUuid());
         return fetchUrlFromManifest(image).orElseGet(() -> concatRpmUrlLegacyWay(image));
-    }
-
-    private String concatRpmUrlLegacyWay(Image image) {
-        LOGGER.info("Creating the CM rpm URL the legacy way for {}", image);
-        return image.getRepo().get(image.getOsType())
-                .concat("RPMS/x86_64/cloudera-manager-server-")
-                .concat(image.getPackageVersions().get(CM.getKey()))
-                .concat("-")
-                .concat(image.getPackageVersions().get(CM_BUILD_NUMBER.getKey()))
-                .concat(".")
-                .concat(OsType.getByOsTypeString(image.getOsType()).getParcelPostfix())
-                .concat(".x86_64.rpm");
     }
 
     private Optional<String> fetchUrlFromManifest(Image image) {
@@ -78,10 +67,11 @@ public class CmUrlProvider {
     }
 
     private Optional<String> selectCmServerRpmUrl(Image image, CmManifestFile response) {
+        String architecture = Architecture.fromStringWithFallback(image.getArchitecture()).getRpmName();
         Set<String> cmPackages = response.getFiles().stream()
                 .filter(file -> file.contains("cloudera-manager-server-" + image.getPackageVersions().get(CM.getKey())))
                 .filter(file -> file.contains(image.getPackageVersions().get(CM_BUILD_NUMBER.getKey())))
-                .filter(file -> file.contains("x86_64.rpm"))
+                .filter(file -> file.contains(architecture + ".rpm"))
                 .filter(file -> file.contains(image.getOsType()))
                 .collect(Collectors.toSet());
         LOGGER.info("Package candidate: {}, selecting first", cmPackages);
@@ -106,5 +96,22 @@ public class CmUrlProvider {
         String manifestUrl = StringUtils.appendIfMissing(cmRepoUrlWithVersion, "/") + RELEASE_MANIFEST_JSON;
         LOGGER.debug("Manifest URL: {} from {}", manifestUrl, cmRepoUrlForOs);
         return manifestUrl;
+    }
+
+    private String concatRpmUrlLegacyWay(Image image) {
+        LOGGER.info("Creating the CM rpm URL the legacy way for {}", image);
+        String architecture = Architecture.fromStringWithFallback(image.getArchitecture()).getRpmName();
+        return image.getRepo().get(image.getOsType())
+                .concat("RPMS/")
+                .concat(architecture)
+                .concat("/cloudera-manager-server-")
+                .concat(image.getPackageVersions().get(CM.getKey()))
+                .concat("-")
+                .concat(image.getPackageVersions().get(CM_BUILD_NUMBER.getKey()))
+                .concat(".")
+                .concat(OsType.getByOsTypeString(image.getOsType()).getParcelPostfix())
+                .concat(".")
+                .concat(architecture)
+                .concat(".rpm");
     }
 }
