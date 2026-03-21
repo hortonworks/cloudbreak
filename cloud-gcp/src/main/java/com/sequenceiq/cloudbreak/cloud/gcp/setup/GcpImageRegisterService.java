@@ -20,6 +20,7 @@ import com.google.api.services.compute.model.GuestOsFeature;
 import com.google.api.services.compute.model.Image;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.client.GcpComputeFactory;
+import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpImageUtil;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
@@ -34,21 +35,21 @@ public class GcpImageRegisterService {
     @Inject
     private GcpComputeFactory gcpComputeFactory;
 
-    public void register(AuthenticatedContext authenticatedContext, String bucketName, String imageName, CloudStack cloudStack) throws IOException {
+    public void register(AuthenticatedContext authenticatedContext, String bucketName, String tarName, String gcpImageName, CloudStack cloudStack)
+            throws IOException {
         CloudCredential credential = authenticatedContext.getCloudCredential();
         String projectId = gcpStackUtil.getProjectId(credential);
         Compute compute = gcpComputeFactory.buildCompute(credential);
-        String tarName = gcpStackUtil.getTarName(imageName);
 
         Image gcpApiImage = new Image();
-        String finalImageName = gcpStackUtil.getImageName(imageName);
-        gcpApiImage.setName(finalImageName);
+        gcpApiImage.setName(gcpImageName);
         Image.RawDisk rawDisk = new Image.RawDisk();
         rawDisk.setSource(String.format("http://storage.googleapis.com/%s/%s", bucketName, tarName));
         gcpApiImage.setRawDisk(rawDisk);
         GuestOsFeature uefiCompatible = new GuestOsFeature().setType("UEFI_COMPATIBLE");
         GuestOsFeature multiIpSubnet = new GuestOsFeature().setType("MULTI_IP_SUBNET");
-        gcpApiImage.setGuestOsFeatures(List.of(uefiCompatible, multiIpSubnet));
+        GuestOsFeature gvnicSubnet = new GuestOsFeature().setType(GcpImageUtil.GVNIC);
+        gcpApiImage.setGuestOsFeatures(List.of(uefiCompatible, multiIpSubnet, gvnicSubnet));
         Optional.ofNullable(cloudStack.getParameters().get(ENVIRONMENT_RESOURCE_ENCRYPTION_KEY))
                 .ifPresent(key -> gcpApiImage.setImageEncryptionKey(new CustomerEncryptionKey().setKmsKeyName(key)));
         try {
@@ -57,11 +58,11 @@ public class GcpImageRegisterService {
         } catch (GoogleJsonResponseException ex) {
             if (ex.getStatusCode() != HttpStatus.SC_CONFLICT) {
                 String detailedMessage = ex.getDetails().getMessage();
-                String msg = String.format("Failed to create image with name '%s' in project '%s': %s", finalImageName, projectId, detailedMessage);
+                String msg = String.format("Failed to create image with name '%s' in project '%s': %s", gcpImageName, projectId, detailedMessage);
                 LOGGER.warn(msg, ex);
                 throw ex;
             } else {
-                LOGGER.info("No need to create image as it exists already with name '{}' in project '{}':", finalImageName, projectId);
+                LOGGER.info("No need to create image as it exists already with name '{}' in project '{}':", gcpImageName, projectId);
             }
         }
     }

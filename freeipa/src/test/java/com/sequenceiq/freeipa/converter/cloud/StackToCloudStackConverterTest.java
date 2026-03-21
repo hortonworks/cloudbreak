@@ -65,6 +65,7 @@ import com.sequenceiq.freeipa.entity.Template;
 import com.sequenceiq.freeipa.service.client.CachedEnvironmentClientService;
 import com.sequenceiq.freeipa.service.image.ImageService;
 import com.sequenceiq.freeipa.service.resource.ResourceService;
+import com.sequenceiq.freeipa.service.stack.StackParameterService;
 
 @ExtendWith(MockitoExtension.class)
 public class StackToCloudStackConverterTest {
@@ -121,6 +122,9 @@ public class StackToCloudStackConverterTest {
 
     @Mock
     private ImageConverter imageConverter;
+
+    @Mock
+    private StackParameterService stackParameterService;
 
     @Test
     void testBuildInstance() {

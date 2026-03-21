@@ -20,6 +20,8 @@ public enum StackImageUpdateEvent implements FlowEvent {
     VALIDATE_IMAGE_FAILED_EVENT(CloudPlatformResult.failureSelector(ValidateImageResult.class)),
     IMAGE_PREPARATION_FINISHED_EVENT(CloudPlatformResult.selector(PrepareImageResult.class)),
     IMAGE_PREPARATION_FAILED_EVENT(CloudPlatformResult.failureSelector(PrepareImageResult.class)),
+    UPDATE_IMAGE_PARAMETER_FINISHED_EVENT("UPDATE_IMAGE_PARAMETER_FINISHED_EVENT"),
+    UPDATE_IMAGE_PARAMETER_FAILED_EVENT("UPDATE_IMAGE_PARAMETER_FAILED_EVENT"),
     IMAGE_FALLBACK_EVENT(CloudPlatformResult.selector(PrepareImageFallbackRequiredResult.class)),
     IMAGE_FALLBACK_FINISHED_EVENT(EventSelectorUtil.selector(ImageFallbackSuccess.class)),
     IMAGE_FALLBACK_FAILED_EVENT(EventSelectorUtil.selector(ImageFallbackFailed.class)),

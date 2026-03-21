@@ -22,6 +22,8 @@ import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreation
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent.IMAGE_FALLBACK_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent.IMAGE_PREPARATION_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent.IMAGE_PREPARATION_FINISHED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent.IMAGE_SETUP_FAILED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent.IMAGE_SETUP_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent.LAUNCH_LOAD_BALANCER_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent.LAUNCH_LOAD_BALANCER_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent.LAUNCH_STACK_FAILED_EVENT;
@@ -50,6 +52,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreation
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationState.IMAGESETUP_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationState.IMAGE_CHECK_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationState.IMAGE_FALLBACK_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationState.IMAGE_SETUP_FINISHED_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationState.INIT_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationState.PROVISIONING_FINISHED_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationState.PROVISION_LOAD_BALANCER_STATE;
@@ -80,7 +83,8 @@ public class StackCreationFlowConfig extends StackStatusFinalizerAbstractFlowCon
             .failureEvent(GENERATE_ENCRYPTION_KEYS_FAILED_EVENT)
             .from(CREATE_USER_DATA_STATE).to(SETUP_STATE).event(CREATE_USER_DATA_FINISHED_EVENT).failureEvent(CREATE_USER_DATA_FAILED_EVENT)
             .from(SETUP_STATE).to(IMAGESETUP_STATE).event(SETUP_FINISHED_EVENT).failureEvent(SETUP_FAILED_EVENT)
-            .from(IMAGESETUP_STATE).to(IMAGE_CHECK_STATE).event(IMAGE_PREPARATION_FINISHED_EVENT).failureEvent(IMAGE_PREPARATION_FAILED_EVENT)
+            .from(IMAGESETUP_STATE).to(IMAGE_SETUP_FINISHED_STATE).event(IMAGE_PREPARATION_FINISHED_EVENT).failureEvent(IMAGE_PREPARATION_FAILED_EVENT)
+            .from(IMAGE_SETUP_FINISHED_STATE).to(IMAGE_CHECK_STATE).event(IMAGE_SETUP_FINISHED_EVENT).failureEvent(IMAGE_SETUP_FAILED_EVENT)
             .from(IMAGE_CHECK_STATE).to(IMAGE_CHECK_STATE).event(IMAGE_COPY_CHECK_EVENT).failureEvent(IMAGE_COPY_FAILED_EVENT)
             .from(IMAGE_CHECK_STATE).to(CREATE_CREDENTIAL_STATE).event(IMAGE_COPY_FINISHED_EVENT).failureEvent(IMAGE_COPY_FAILED_EVENT)
             .from(CREATE_CREDENTIAL_STATE).to(START_PROVISIONING_STATE).event(CREATE_CREDENTIAL_FINISHED_EVENT).failureEvent(CREATE_CREDENTIAL_FAILED_EVENT)

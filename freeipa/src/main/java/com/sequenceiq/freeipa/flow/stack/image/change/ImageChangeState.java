@@ -10,6 +10,7 @@ public enum ImageChangeState implements FlowState {
     INIT_STATE,
     CHANGE_IMAGE_STATE,
     PREPARE_IMAGE_STATE,
+    UPDATE_IMAGE_PARAMETER_STATE,
     SET_FALLBACK_IMAGE_STATE,
     CHECK_IMAGE_STATE(CheckImageForChangeAction.class),
     SET_IMAGE_ON_PROVIDER_STATE,

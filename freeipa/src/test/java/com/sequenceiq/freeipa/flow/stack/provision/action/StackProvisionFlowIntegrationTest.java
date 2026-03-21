@@ -114,6 +114,7 @@ import com.sequenceiq.freeipa.service.image.userdata.UserDataService;
 import com.sequenceiq.freeipa.service.resource.ResourceService;
 import com.sequenceiq.freeipa.service.secret.UserdataSecretsService;
 import com.sequenceiq.freeipa.service.stack.ClusterProxyService;
+import com.sequenceiq.freeipa.service.stack.StackParameterService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
 import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
@@ -140,6 +141,9 @@ class StackProvisionFlowIntegrationTest {
 
     @MockBean(reset = MockReset.NONE)
     private StackService stackService;
+
+    @MockBean
+    private StackParameterService stackParameterService;
 
     @MockBean
     private FlowOperationStatisticsPersister flowOperationStatisticsPersister;

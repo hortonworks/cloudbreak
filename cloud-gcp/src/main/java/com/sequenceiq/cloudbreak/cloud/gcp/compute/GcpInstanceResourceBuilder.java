@@ -59,6 +59,7 @@ import com.sequenceiq.cloudbreak.cloud.gcp.GcpResourceException;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.service.CustomGcpDiskEncryptionCreatorService;
 import com.sequenceiq.cloudbreak.cloud.gcp.service.CustomGcpDiskEncryptionService;
+import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpImageUtil;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpLabelUtil;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
@@ -120,6 +121,9 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
 
     @Inject
     private GcpLabelUtil gcpLabelUtil;
+
+    @Inject
+    private GcpImageUtil gcpImageUtil;
 
     @Inject
     private GcpInstanceStateChecker instanceStateChecker;
@@ -513,15 +517,18 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
 
     private List<NetworkInterface> getNetworkInterface(GcpContext context, List<CloudResource> computeResources, Group group,
         CloudStack stack, CloudInstance instance) throws IOException {
-
         boolean noPublicIp = context.getNoPublicIp();
         String projectId = context.getProjectId();
         Location location = context.getLocation();
         Compute compute = context.getCompute();
 
         NetworkInterface networkInterface = new NetworkInterface();
-        String networkName = Strings.isNullOrEmpty(instance.getSubnetId()) ? filterResourcesByTypes(context.getNetworkResources(),
-                List.of(ResourceType.GCP_NETWORK)).get(0).getName() : instance.getSubnetId();
+        if (gcpImageUtil.isGvnicCompatibleImage(stack)) {
+            networkInterface.setNicType(GcpImageUtil.GVNIC);
+        }
+        String networkName = Strings.isNullOrEmpty(instance.getSubnetId())
+                ? filterResourcesByTypes(context.getNetworkResources(), List.of(ResourceType.GCP_NETWORK)).getFirst().getName()
+                : instance.getSubnetId();
         networkInterface.setName(networkName);
 
         if (!noPublicIp) {

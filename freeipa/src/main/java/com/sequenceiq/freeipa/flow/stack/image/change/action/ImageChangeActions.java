@@ -5,6 +5,8 @@ import static com.sequenceiq.freeipa.flow.stack.image.change.event.ImageChangeEv
 import static com.sequenceiq.freeipa.flow.stack.image.change.event.ImageChangeEvents.IMAGE_CHANGE_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.image.change.event.ImageChangeEvents.IMAGE_FALLBACK_FAILED_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.image.change.event.ImageChangeEvents.IMAGE_FALLBACK_FINISHED_EVENT;
+import static com.sequenceiq.freeipa.flow.stack.image.change.event.ImageChangeEvents.UPDATE_IMAGE_PARAMETER_FAILED_EVENT;
+import static com.sequenceiq.freeipa.flow.stack.image.change.event.ImageChangeEvents.UPDATE_IMAGE_PARAMETER_FINISHED_EVENT;
 
 import java.util.Collection;
 import java.util.List;
@@ -14,16 +16,19 @@ import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.action.Action;
 
+import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
 import com.sequenceiq.cloudbreak.cloud.event.resource.UpdateImageRequest;
 import com.sequenceiq.cloudbreak.cloud.event.setup.PrepareImageRequest;
+import com.sequenceiq.cloudbreak.cloud.event.setup.PrepareImageResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
@@ -47,6 +52,7 @@ import com.sequenceiq.freeipa.service.image.ImageFallbackService;
 import com.sequenceiq.freeipa.service.image.ImageNotFoundException;
 import com.sequenceiq.freeipa.service.image.ImageService;
 import com.sequenceiq.freeipa.service.resource.ResourceService;
+import com.sequenceiq.freeipa.service.stack.StackParameterService;
 
 @Configuration
 public class ImageChangeActions {
@@ -109,6 +115,34 @@ public class ImageChangeActions {
             protected Object getFailurePayload(ImageChangeEvent payload, Optional<StackContext> flowContext, Exception ex) {
                 LOGGER.error("[PREPARE_IMAGE_STATE] failed", ex);
                 return new StackFailureEvent(IMAGE_CHANGE_FAILED_EVENT.event(), payload.getResourceId(), ex, ERROR);
+            }
+        };
+    }
+
+    @Bean(name = "UPDATE_IMAGE_PARAMETER_STATE")
+    public Action<?, ?> updateImageParameterAction() {
+        return new AbstractImageChangeAction<>(PrepareImageResult.class) {
+            @Inject
+            private StackParameterService stackParameterService;
+
+            @Override
+            protected void doExecute(StackContext context, PrepareImageResult payload, Map<Object, Object> variables) {
+                if (StringUtils.isNotBlank(payload.getImageIdentifier())) {
+                    stackParameterService.setStackParameter(context.getStack().getId(), PlatformParametersConsts.IMAGE_IDENTIFIER,
+                            payload.getImageIdentifier());
+                }
+                sendEvent(context);
+            }
+
+            @Override
+            protected Selectable createRequest(StackContext context) {
+                return new StackEvent(UPDATE_IMAGE_PARAMETER_FINISHED_EVENT.event(), context.getStack().getId());
+            }
+
+            @Override
+            protected Object getFailurePayload(PrepareImageResult payload, Optional<StackContext> flowContext, Exception ex) {
+                LOGGER.error("[UPDATE_IMAGE_PARAMETER_STATE] failed", ex);
+                return new StackFailureEvent(UPDATE_IMAGE_PARAMETER_FAILED_EVENT.event(), payload.getResourceId(), ex, ERROR);
             }
         };
     }

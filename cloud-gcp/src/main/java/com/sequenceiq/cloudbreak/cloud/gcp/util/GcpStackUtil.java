@@ -66,8 +66,6 @@ public class GcpStackUtil {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GcpStackUtil.class);
 
-    private static final String GCP_IMAGE_TYPE_PREFIX = "https://www.googleapis.com/compute/v1/projects/%s/global/images/%s";
-
     private static final String EMPTY_BUCKET = "";
 
     private static final String EMPTY_PATH = "";
@@ -202,25 +200,6 @@ public class GcpStackUtil {
         };
     }
 
-    public String getBucket(String image) {
-        if (!StringUtils.isEmpty(image) && createParts(image).length > 1) {
-            String[] parts = createParts(image.replaceAll("https://storage.googleapis.com/", ""));
-            return StringUtils.join(ArrayUtils.remove(parts, parts.length - 1), "/");
-        } else {
-            LOGGER.debug("No bucket found in source image path.");
-            return EMPTY_BUCKET;
-        }
-    }
-
-    public String getTarName(String image) {
-        if (!StringUtils.isEmpty(image)) {
-            String[] parts = createParts(image);
-            return parts[parts.length - 1];
-        } else {
-            throw new GcpResourceException("Source image path environment variable is not well formed");
-        }
-    }
-
     public String getBucketName(String objectStorageLocation) {
         String[] parts = createParts(objectStorageLocation.replaceAll(FileSystemType.GCS.getProtocol() + "://", ""));
         if (!StringUtils.isEmpty(objectStorageLocation) && parts.length >= 1) {
@@ -239,17 +218,6 @@ public class GcpStackUtil {
             LOGGER.debug("No path found in object storage location.");
             return EMPTY_PATH;
         }
-    }
-
-    public String getImageName(String image) {
-        if (image.contains("/")) {
-            return getTarName(image).replaceAll("(\\.tar|\\.zip|\\.gz|\\.gzip)", "").replaceAll("\\.", "-");
-        }
-        return image.trim();
-    }
-
-    public String getCDPImage(String projectId, String image) {
-        return String.format(GCP_IMAGE_TYPE_PREFIX, projectId, getImageName(image));
     }
 
     public Long getPrivateId(String resourceName) {

@@ -9,6 +9,7 @@ import static com.sequenceiq.freeipa.flow.stack.image.change.ImageChangeState.IN
 import static com.sequenceiq.freeipa.flow.stack.image.change.ImageChangeState.PREPARE_IMAGE_STATE;
 import static com.sequenceiq.freeipa.flow.stack.image.change.ImageChangeState.SET_FALLBACK_IMAGE_STATE;
 import static com.sequenceiq.freeipa.flow.stack.image.change.ImageChangeState.SET_IMAGE_ON_PROVIDER_STATE;
+import static com.sequenceiq.freeipa.flow.stack.image.change.ImageChangeState.UPDATE_IMAGE_PARAMETER_STATE;
 import static com.sequenceiq.freeipa.flow.stack.image.change.event.ImageChangeEvents.IMAGE_CHANGED_IN_DB_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.image.change.event.ImageChangeEvents.IMAGE_CHANGE_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.image.change.event.ImageChangeEvents.IMAGE_CHANGE_NOT_REQUIRED_EVENT;
@@ -21,6 +22,8 @@ import static com.sequenceiq.freeipa.flow.stack.image.change.event.ImageChangeEv
 import static com.sequenceiq.freeipa.flow.stack.image.change.event.ImageChangeEvents.IMAGE_PREPARATION_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.image.change.event.ImageChangeEvents.SET_IMAGE_ON_PROVIDER_FAILED_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.image.change.event.ImageChangeEvents.SET_IMAGE_ON_PROVIDER_FINISHED_EVENT;
+import static com.sequenceiq.freeipa.flow.stack.image.change.event.ImageChangeEvents.UPDATE_IMAGE_PARAMETER_FAILED_EVENT;
+import static com.sequenceiq.freeipa.flow.stack.image.change.event.ImageChangeEvents.UPDATE_IMAGE_PARAMETER_FINISHED_EVENT;
 
 import java.util.List;
 
@@ -51,7 +54,7 @@ public class ImageChangeFlowConfig extends StackStatusFinalizerAbstractFlowConfi
             .defaultFailureEvent()
 
             .from(PREPARE_IMAGE_STATE)
-            .to(CHECK_IMAGE_STATE)
+            .to(UPDATE_IMAGE_PARAMETER_STATE)
             .event(IMAGE_PREPARATION_FINISHED_EVENT)
             .failureEvent(IMAGE_PREPARATION_FAILED_EVENT)
 
@@ -59,6 +62,11 @@ public class ImageChangeFlowConfig extends StackStatusFinalizerAbstractFlowConfi
             .to(SET_FALLBACK_IMAGE_STATE)
             .event(IMAGE_FALLBACK_EVENT)
             .failureEvent(IMAGE_PREPARATION_FAILED_EVENT)
+
+            .from(UPDATE_IMAGE_PARAMETER_STATE)
+            .to(CHECK_IMAGE_STATE)
+            .event(UPDATE_IMAGE_PARAMETER_FINISHED_EVENT)
+            .failureEvent(UPDATE_IMAGE_PARAMETER_FAILED_EVENT)
 
             .from(SET_FALLBACK_IMAGE_STATE)
             .to(CHECK_IMAGE_STATE)

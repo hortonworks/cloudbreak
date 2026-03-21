@@ -7,6 +7,6 @@ public class PrepareImageFallbackRequiredResult extends PrepareImageResult {
 
     @JsonCreator
     public PrepareImageFallbackRequiredResult(@JsonProperty("resourceId") Long resourceId) {
-        super(resourceId);
+        super(resourceId, null);
     }
 }

@@ -69,6 +69,7 @@ import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.service.CustomGcpDiskEncryptionCreatorService;
 import com.sequenceiq.cloudbreak.cloud.gcp.service.CustomGcpDiskEncryptionService;
 import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpResourceNameService;
+import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpImageUtil;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpLabelUtil;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
@@ -151,6 +152,9 @@ class GcpInstanceResourceBuilderTest {
 
     @Mock
     private GcpStackUtil gcpStackUtil;
+
+    @Mock
+    private GcpImageUtil gcpImageUtil;
 
     @Mock
     private GcpLabelUtil gcpLabelUtil;

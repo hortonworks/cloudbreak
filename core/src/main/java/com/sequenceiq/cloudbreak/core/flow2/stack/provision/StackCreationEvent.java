@@ -36,6 +36,8 @@ public enum StackCreationEvent implements FlowEvent {
     SETUP_FAILED_EVENT(CloudPlatformResult.failureSelector(SetupResult.class)),
     IMAGE_PREPARATION_FINISHED_EVENT(CloudPlatformResult.selector(PrepareImageResult.class)),
     IMAGE_PREPARATION_FAILED_EVENT(CloudPlatformResult.failureSelector(PrepareImageResult.class)),
+    IMAGE_SETUP_FINISHED_EVENT("IMAGESETUPFINISHED"),
+    IMAGE_SETUP_FAILED_EVENT("IMAGESETUPFAILED"),
     IMAGE_COPY_CHECK_EVENT("IMAGECOPYCHECK"),
     IMAGE_COPY_FINISHED_EVENT("IMAGECOPYFINISHED"),
     IMAGE_COPY_FAILED_EVENT("IMAGECOPYFAILED"),

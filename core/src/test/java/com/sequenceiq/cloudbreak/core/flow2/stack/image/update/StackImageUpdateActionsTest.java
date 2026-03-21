@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.image.update;
 
+import static com.sequenceiq.cloudbreak.core.flow2.stack.image.update.StackImageUpdateEvent.UPDATE_IMAGE_PARAMETER_FINISHED_EVENT;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -30,10 +31,12 @@ import org.springframework.statemachine.state.State;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformRequest;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
 import com.sequenceiq.cloudbreak.cloud.event.resource.UpdateImageRequest;
 import com.sequenceiq.cloudbreak.cloud.event.setup.PrepareImageRequest;
+import com.sequenceiq.cloudbreak.cloud.event.setup.PrepareImageResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
@@ -65,6 +68,7 @@ import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackImageService;
+import com.sequenceiq.cloudbreak.service.stack.StackParametersService;
 import com.sequenceiq.cloudbreak.service.upgrade.ImageComponentUpdaterService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.cloudbreak.workspace.model.Tenant;
@@ -94,6 +98,9 @@ class StackImageUpdateActionsTest {
 
     @InjectMocks
     private final AbstractStackImageUpdateAction<?> prepareImageAction = spy(new StackImageUpdateActions().prepareImageAction());
+
+    @InjectMocks
+    private final AbstractStackImageUpdateAction<?> updateImageParameterAction = spy(new StackImageUpdateActions().updateImageParameterAction());
 
     @InjectMocks
     private final AbstractStackImageUpdateAction<?> setImageAction = spy(new StackImageUpdateActions().setImageAction());
@@ -186,6 +193,9 @@ class StackImageUpdateActionsTest {
 
     @Mock
     private FlowLogDBService flowLogDBService;
+
+    @Mock
+    private StackParametersService stackParametersService;
 
     @BeforeEach
     void setup() throws CloudbreakImageNotFoundException {
@@ -310,6 +320,18 @@ class StackImageUpdateActionsTest {
 
         verify(stackCreationService, times(1)).prepareImage(anyLong(), eq(variables));
         verify(eventBus, times(1)).notify(eq(CloudPlatformRequest.selector(PrepareImageRequest.class)), any(Event.class));
+    }
+
+    @Test
+    void updateImageParameterAction() {
+        PrepareImageResult payload = new PrepareImageResult(1L, "imageId");
+        when(stateContext.getMessageHeader(HEADERS.DATA.name())).thenReturn(payload);
+        when(state.getId()).thenReturn(StackImageUpdateState.UPDATE_IMAGE_PARAMETER_STATE);
+
+        updateImageParameterAction.execute(stateContext);
+
+        verify(stackParametersService, times(1)).setStackParameter(1L, PlatformParametersConsts.IMAGE_IDENTIFIER, "imageId");
+        verify(eventBus, times(1)).notify(eq(UPDATE_IMAGE_PARAMETER_FINISHED_EVENT.event()), any(Event.class));
     }
 
     @Test

@@ -63,20 +63,19 @@ public class GcpImageRegisterServiceTest {
         when(authenticatedContext.getCloudCredential()).thenReturn(cloudCredential);
         when(gcpStackUtil.getProjectId(cloudCredential)).thenReturn("project-id");
         when(gcpComputeFactory.buildCompute(cloudCredential)).thenReturn(compute);
-        when(gcpStackUtil.getTarName("image-name")).thenReturn("image.tar.gz");
-        when(gcpStackUtil.getImageName("image-name")).thenReturn("super-image");
         when(stack.getParameters()).thenReturn(Map.of(ENVIRONMENT_RESOURCE_ENCRYPTION_KEY, "encryptionKey"));
         when(compute.images()).thenReturn(images);
         when(images.insert(eq("project-id"), any(Image.class))).thenReturn(insert);
 
-        underTest.register(authenticatedContext, "bucket-name", "image-name", stack);
+        underTest.register(authenticatedContext, "bucket-name", "image.tar.gz", "super-image", stack);
 
         verify(images, times(1)).insert(eq("project-id"), imageArgumentCaptor.capture());
         Image captureImage = imageArgumentCaptor.getValue();
         assertEquals("super-image", captureImage.getName());
         assertEquals("http://storage.googleapis.com/bucket-name/image.tar.gz", captureImage.getRawDisk().getSource());
-        assertEquals(2, captureImage.getGuestOsFeatures().size());
-        assertThat(captureImage.getGuestOsFeatures()).extracting(GuestOsFeature::getType).containsExactlyInAnyOrder("UEFI_COMPATIBLE", "MULTI_IP_SUBNET");
+        assertEquals(3, captureImage.getGuestOsFeatures().size());
+        assertThat(captureImage.getGuestOsFeatures()).extracting(GuestOsFeature::getType)
+                .containsExactlyInAnyOrder("UEFI_COMPATIBLE", "MULTI_IP_SUBNET", "GVNIC");
         assertEquals("encryptionKey", captureImage.getImageEncryptionKey().getKmsKeyName());
         verify(insert, times(1)).execute();
     }
@@ -94,22 +93,21 @@ public class GcpImageRegisterServiceTest {
         when(authenticatedContext.getCloudCredential()).thenReturn(cloudCredential);
         when(gcpStackUtil.getProjectId(cloudCredential)).thenReturn("project-id");
         when(gcpComputeFactory.buildCompute(cloudCredential)).thenReturn(compute);
-        when(gcpStackUtil.getTarName("image-name")).thenReturn("image.tar.gz");
-        when(gcpStackUtil.getImageName("image-name")).thenReturn("super-image");
         when(stack.getParameters()).thenReturn(Map.of(ENVIRONMENT_RESOURCE_ENCRYPTION_KEY, "encryptionKey"));
         when(compute.images()).thenReturn(images);
         when(images.insert(eq("project-id"), any(Image.class))).thenReturn(insert);
         when(insert.execute()).thenThrow(googleJsonResponseException);
         when(googleJsonResponseException.getStatusCode()).thenReturn(HttpStatus.SC_CONFLICT);
 
-        underTest.register(authenticatedContext, "bucket-name", "image-name", stack);
+        underTest.register(authenticatedContext, "bucket-name", "image.tar.gz", "super-image", stack);
 
         verify(images, times(1)).insert(eq("project-id"), imageArgumentCaptor.capture());
         Image captureImage = imageArgumentCaptor.getValue();
         assertEquals("super-image", captureImage.getName());
         assertEquals("http://storage.googleapis.com/bucket-name/image.tar.gz", captureImage.getRawDisk().getSource());
-        assertEquals(2, captureImage.getGuestOsFeatures().size());
-        assertThat(captureImage.getGuestOsFeatures()).extracting(GuestOsFeature::getType).containsExactlyInAnyOrder("UEFI_COMPATIBLE", "MULTI_IP_SUBNET");
+        assertEquals(3, captureImage.getGuestOsFeatures().size());
+        assertThat(captureImage.getGuestOsFeatures()).extracting(GuestOsFeature::getType)
+                .containsExactlyInAnyOrder("UEFI_COMPATIBLE", "MULTI_IP_SUBNET", "GVNIC");
         assertEquals("encryptionKey", captureImage.getImageEncryptionKey().getKmsKeyName());
         verify(insert, times(1)).execute();
     }
@@ -130,22 +128,21 @@ public class GcpImageRegisterServiceTest {
         when(authenticatedContext.getCloudCredential()).thenReturn(cloudCredential);
         when(gcpStackUtil.getProjectId(cloudCredential)).thenReturn("project-id");
         when(gcpComputeFactory.buildCompute(cloudCredential)).thenReturn(compute);
-        when(gcpStackUtil.getTarName("image-name")).thenReturn("image.tar.gz");
-        when(gcpStackUtil.getImageName("image-name")).thenReturn("super-image");
         when(stack.getParameters()).thenReturn(Map.of(ENVIRONMENT_RESOURCE_ENCRYPTION_KEY, "encryptionKey"));
         when(compute.images()).thenReturn(images);
         when(images.insert(eq("project-id"), any(Image.class))).thenReturn(insert);
         when(insert.execute()).thenThrow(googleJsonResponseException);
 
         GoogleJsonResponseException exception = assertThrows(GoogleJsonResponseException.class,
-                () -> underTest.register(authenticatedContext, "bucket-name", "image-name", stack));
+                () -> underTest.register(authenticatedContext, "bucket-name", "image.tar.gz", "super-image", stack));
 
         verify(images, times(1)).insert(eq("project-id"), imageArgumentCaptor.capture());
         Image captureImage = imageArgumentCaptor.getValue();
         assertEquals("super-image", captureImage.getName());
         assertEquals("http://storage.googleapis.com/bucket-name/image.tar.gz", captureImage.getRawDisk().getSource());
-        assertEquals(2, captureImage.getGuestOsFeatures().size());
-        assertThat(captureImage.getGuestOsFeatures()).extracting(GuestOsFeature::getType).containsExactlyInAnyOrder("UEFI_COMPATIBLE", "MULTI_IP_SUBNET");
+        assertEquals(3, captureImage.getGuestOsFeatures().size());
+        assertThat(captureImage.getGuestOsFeatures()).extracting(GuestOsFeature::getType)
+                .containsExactlyInAnyOrder("UEFI_COMPATIBLE", "MULTI_IP_SUBNET", "GVNIC");
         assertEquals("encryptionKey", captureImage.getImageEncryptionKey().getKmsKeyName());
         verify(insert, times(1)).execute();
         assertEquals("error", exception.getDetails().getMessage());

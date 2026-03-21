@@ -4,6 +4,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import jakarta.inject.Inject;
@@ -21,7 +22,6 @@ import com.dyngr.exception.PollerStoppedException;
 import com.google.api.client.auth.oauth2.TokenResponseException;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.compute.Compute;
-import com.google.api.services.compute.Compute.Images.Get;
 import com.google.api.services.compute.model.Image;
 import com.google.api.services.storage.Storage;
 import com.google.api.services.storage.model.RewriteResponse;
@@ -32,6 +32,7 @@ import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.gcp.client.GcpComputeFactory;
 import com.sequenceiq.cloudbreak.cloud.gcp.client.GcpStorageFactory;
+import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpImageUtil;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
@@ -60,6 +61,9 @@ public class GcpProvisionSetup implements Setup {
     private GcpStackUtil gcpStackUtil;
 
     @Inject
+    private GcpImageUtil gcpImageUtil;
+
+    @Inject
     private GcpImageRegisterService gcpImageRegisterService;
 
     @Inject
@@ -72,31 +76,41 @@ public class GcpProvisionSetup implements Setup {
     private GcpImageAttemptMakerFactory gcpImageAttemptMakerFactory;
 
     @Override
-    public void prepareImage(AuthenticatedContext authenticatedContext, CloudStack stack, com.sequenceiq.cloudbreak.cloud.model.Image image,
+    public Optional<String> prepareImage(AuthenticatedContext authenticatedContext, CloudStack stack, com.sequenceiq.cloudbreak.cloud.model.Image image,
             PrepareImageType prepareImageType, String fallbackTargetImage) {
         CloudCredential credential = authenticatedContext.getCloudCredential();
         CloudContext cloudContext = authenticatedContext.getCloudContext();
-        String finalImageName = null;
+        String gcpImageName = null;
         try {
             String projectId = gcpStackUtil.getProjectId(credential);
             String imageName = image.getImageName();
-            finalImageName = gcpStackUtil.getImageName(imageName);
+            gcpImageName = gcpImageUtil.getLatestImageName(imageName);
             Compute compute = gcpComputeFactory.buildCompute(credential);
-            Image gcpImage = getGcpImage(projectId, finalImageName, compute);
-            if (gcpImage == null) {
-                Storage storage = gcpStorageFactory.buildStorage(credential, cloudContext.getName());
-                String bucketName = gcpBucketRegisterService.register(authenticatedContext);
-                String tarName = gcpStackUtil.getTarName(imageName);
-                copyImage(gcpStackUtil.getBucket(imageName), tarName, bucketName, tarName, storage);
-                gcpImageRegisterService.register(authenticatedContext, bucketName, imageName, stack);
+            Image gcpImage = getGcpImage(projectId, gcpImageName, compute);
+            if (imageMissing(gcpImage)) {
+                createImage(authenticatedContext, stack, credential, cloudContext, imageName, gcpImageName);
             }
+            return Optional.of(gcpImageName);
         } catch (Exception e) {
             String msg = String.format("Error occurred on %s stack during the image creation process%s: %s", cloudContext.getName(),
-                    isBlank(finalImageName) ? "" : ", image name: " + finalImageName,
+                    isBlank(gcpImageName) ? "" : ", image name: " + gcpImageName,
                     e.getMessage());
             LOGGER.warn(msg, e);
             throw new CloudConnectorException(msg, e);
         }
+    }
+
+    private boolean imageMissing(Image gcpImage) {
+        return gcpImage == null;
+    }
+
+    private void createImage(AuthenticatedContext authenticatedContext, CloudStack stack, CloudCredential credential,
+            CloudContext cloudContext, String imageName, String gcpImageName) throws IOException {
+        Storage storage = gcpStorageFactory.buildStorage(credential, cloudContext.getName());
+        String bucketName = gcpBucketRegisterService.register(authenticatedContext);
+        String tarName = gcpImageUtil.getTarName(imageName);
+        copyImage(gcpImageUtil.getBucket(imageName), tarName, bucketName, tarName, storage);
+        gcpImageRegisterService.register(authenticatedContext, bucketName, tarName, gcpImageName, stack);
     }
 
     @Override
@@ -117,7 +131,7 @@ public class GcpProvisionSetup implements Setup {
         return null;
     }
 
-    public void copyImage(
+    private void copyImage(
             final String sourceBucket,
             final String sourceKey,
             final String destBucket,
@@ -169,14 +183,11 @@ public class GcpProvisionSetup implements Setup {
     public ImageStatusResult checkImageStatus(AuthenticatedContext authenticatedContext, CloudStack stack, com.sequenceiq.cloudbreak.cloud.model.Image image) {
         CloudCredential credential = authenticatedContext.getCloudCredential();
         String projectId = gcpStackUtil.getProjectId(credential);
-        String imageName = image.getImageName();
         try {
-            Image gcpApiImage = new Image();
-            gcpApiImage.setName(gcpStackUtil.getImageName(imageName));
+            String gcpImageName = gcpImageUtil.getGcpImageResourceName(stack);
             Compute compute = gcpComputeFactory.buildCompute(credential);
-            Get getImages = compute.images().get(projectId, gcpApiImage.getName());
-            String status = getImages.execute().getStatus();
-            LOGGER.debug("Status of image {} copy: {}", gcpApiImage.getName(), status);
+            String status = compute.images().get(projectId, gcpImageName).execute().getStatus();
+            LOGGER.debug("Status of image {} copy: {}", gcpImageName, status);
             if (READY.equals(status)) {
                 return new ImageStatusResult(ImageStatus.CREATE_FINISHED, ImageStatusResult.COMPLETED);
             }

@@ -22,6 +22,8 @@ import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreation
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent.IMAGE_FALLBACK_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent.IMAGE_PREPARATION_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent.IMAGE_PREPARATION_FINISHED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent.IMAGE_SETUP_FAILED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent.IMAGE_SETUP_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent.LAUNCH_LOAD_BALANCER_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent.LAUNCH_LOAD_BALANCER_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationEvent.LAUNCH_STACK_FAILED_EVENT;
@@ -57,6 +59,7 @@ class StackCreationEventTest {
             entry(GENERATE_ENCRYPTION_KEYS_FAILED_EVENT, "GENERATEENCRYPTIONKEYSFAILED"),
             entry(CREATE_USER_DATA_FAILED_EVENT, "CREATEUSERDATAFAILED"), entry(SETUP_FINISHED_EVENT, "SETUPRESULT"),
             entry(SETUP_FAILED_EVENT, "SETUPRESULT_ERROR"), entry(IMAGE_PREPARATION_FINISHED_EVENT, "PREPAREIMAGERESULT"),
+            entry(IMAGE_SETUP_FINISHED_EVENT, "IMAGESETUPFINISHED"), entry(IMAGE_SETUP_FAILED_EVENT, "IMAGESETUPFAILED"),
             entry(IMAGE_PREPARATION_FAILED_EVENT, "PREPAREIMAGERESULT_ERROR"), entry(IMAGE_COPY_CHECK_EVENT, "IMAGECOPYCHECK"),
             entry(IMAGE_COPY_FINISHED_EVENT, "IMAGECOPYFINISHED"), entry(IMAGE_COPY_FAILED_EVENT, "IMAGECOPYFAILED"),
             entry(CREATE_CREDENTIAL_FINISHED_EVENT, "CREATECREDENTIALRESULT"), entry(CREATE_CREDENTIAL_FAILED_EVENT, "CREATECREDENTIALRESULT_ERROR"),

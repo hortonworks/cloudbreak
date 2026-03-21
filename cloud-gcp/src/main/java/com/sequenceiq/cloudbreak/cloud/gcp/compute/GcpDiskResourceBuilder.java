@@ -22,8 +22,8 @@ import com.sequenceiq.cloudbreak.cloud.gcp.GcpPlatformParameters.GcpDiskType;
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpResourceException;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.service.CustomGcpDiskEncryptionService;
+import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpImageUtil;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpLabelUtil;
-import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
@@ -44,7 +44,7 @@ public class GcpDiskResourceBuilder extends AbstractGcpComputeBuilder {
     private GcpLabelUtil gcpLabelUtil;
 
     @Inject
-    private GcpStackUtil gcpStackUtil;
+    private GcpImageUtil gcpImageUtil;
 
     @Override
     public List<CloudResource> create(GcpContext context, CloudInstance instance, long privateId, AuthenticatedContext auth, Group group, Image image) {
@@ -72,7 +72,7 @@ public class GcpDiskResourceBuilder extends AbstractGcpComputeBuilder {
         disk.setLabels(labels);
 
         Insert insDisk = context.getCompute().disks().insert(projectId, location, disk);
-        insDisk.setSourceImage(gcpStackUtil.getCDPImage(projectId, cloudStack.getImage().getImageName()));
+        insDisk.setSourceImage(gcpImageUtil.getCDPImage(projectId, cloudStack));
         try {
             Operation operation = insDisk.execute();
             if (operation.getHttpErrorStatusCode() != null) {

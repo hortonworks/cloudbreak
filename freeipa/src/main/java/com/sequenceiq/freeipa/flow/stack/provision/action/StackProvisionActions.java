@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.flow.stack.provision.action;
 
+import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.IMAGE_IDENTIFIER;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_CREATION_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_CREATION_FINISHED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_CREATION_STARTED;
@@ -16,6 +17,7 @@ import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
@@ -33,6 +35,7 @@ import com.sequenceiq.cloudbreak.cloud.event.resource.CreateCredentialResult;
 import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchStackRequest;
 import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchStackResult;
 import com.sequenceiq.cloudbreak.cloud.event.setup.PrepareImageRequest;
+import com.sequenceiq.cloudbreak.cloud.event.setup.PrepareImageResult;
 import com.sequenceiq.cloudbreak.cloud.event.setup.SetupRequest;
 import com.sequenceiq.cloudbreak.cloud.event.setup.SetupResult;
 import com.sequenceiq.cloudbreak.cloud.event.setup.ValidationRequest;
@@ -75,6 +78,7 @@ import com.sequenceiq.freeipa.service.client.CachedEnvironmentClientService;
 import com.sequenceiq.freeipa.service.image.ImageFallbackService;
 import com.sequenceiq.freeipa.service.image.ImageService;
 import com.sequenceiq.freeipa.service.resource.ResourceService;
+import com.sequenceiq.freeipa.service.stack.StackParameterService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
 @Configuration
@@ -98,6 +102,9 @@ public class StackProvisionActions {
 
     @Inject
     private StackService stackService;
+
+    @Inject
+    private StackParameterService stackParameterService;
 
     @Inject
     private ResourceToCloudResourceConverter resourceConverter;
@@ -202,6 +209,24 @@ public class StackProvisionActions {
             @Override
             protected void initPayloadConverterMap(List<PayloadConverter<StackEvent>> payloadConverters) {
                 payloadConverters.add(new SetupResultToStackEventConverter());
+            }
+        };
+    }
+
+    @Bean(name = "IMAGE_SETUP_FINISHED_STATE")
+    public Action<?, ?> imageSetupFinishedAction() {
+        return new AbstractStackProvisionAction<>(PrepareImageResult.class) {
+            @Override
+            protected void doExecute(StackContext context, PrepareImageResult payload, Map<Object, Object> variables) {
+                if (StringUtils.isNotBlank(payload.getImageIdentifier())) {
+                    stackParameterService.setStackParameter(context.getStack().getId(), IMAGE_IDENTIFIER, payload.getImageIdentifier());
+                }
+                sendEvent(context);
+            }
+
+            @Override
+            protected Selectable createRequest(StackContext context) {
+                return new StackEvent(StackProvisionEvent.IMAGE_SETUP_FINISHED_EVENT.event(), context.getStack().getId());
             }
         };
     }

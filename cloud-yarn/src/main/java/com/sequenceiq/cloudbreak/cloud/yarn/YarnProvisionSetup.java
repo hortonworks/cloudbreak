@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.yarn;
 
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
@@ -19,9 +20,10 @@ import com.sequenceiq.common.api.type.ImageStatusResult;
 public class YarnProvisionSetup implements Setup {
 
     @Override
-    public void prepareImage(AuthenticatedContext authenticatedContext, CloudStack stack, Image image, PrepareImageType prepareImageType,
+    public Optional<String> prepareImage(AuthenticatedContext authenticatedContext, CloudStack stack, Image image, PrepareImageType prepareImageType,
             String fallbackTargetImage) {
         // There is no image create step in Yarn Cloud
+        return Optional.empty();
     }
 
     @Override

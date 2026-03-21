@@ -13,6 +13,7 @@ public enum StackImageUpdateState implements FlowState {
     VALIDATE_IMAGE_STATE,
     UPDATE_IMAGE_STATE,
     IMAGE_PREPARE_STATE,
+    UPDATE_IMAGE_PARAMETER_STATE,
     SET_IMAGE_FALLBACK_STATE,
     IMAGE_CHECK_STATE(CheckImageAfterUpdateAction.class),
     SET_IMAGE_STATE,

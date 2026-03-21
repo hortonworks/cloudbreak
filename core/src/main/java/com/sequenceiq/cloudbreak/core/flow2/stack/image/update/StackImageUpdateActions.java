@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.core.flow2.stack.image.update;
 
 import static com.sequenceiq.cloudbreak.core.flow2.stack.image.update.StackImageUpdateEvent.IMAGE_FALLBACK_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.image.update.StackImageUpdateEvent.STACK_IMAGE_UPDATE_FINISHED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.image.update.StackImageUpdateEvent.UPDATE_IMAGE_PARAMETER_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_IMAGE_UPDATE_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_IMAGE_UPDATE_FINISHED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_IMAGE_UPDATE_STARTED;
@@ -13,6 +14,7 @@ import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
@@ -21,10 +23,12 @@ import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
 import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
 import com.sequenceiq.cloudbreak.cloud.event.resource.UpdateImageRequest;
 import com.sequenceiq.cloudbreak.cloud.event.setup.PrepareImageRequest;
+import com.sequenceiq.cloudbreak.cloud.event.setup.PrepareImageResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
@@ -52,12 +56,12 @@ import com.sequenceiq.cloudbreak.reactor.handler.ImageFallbackService;
 import com.sequenceiq.cloudbreak.service.OperationException;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
+import com.sequenceiq.cloudbreak.service.stack.StackParametersService;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.flow.core.PayloadConverter;
 
 @Configuration
 public class StackImageUpdateActions {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(StackImageUpdateActions.class);
 
     @Bean(name = "CHECK_IMAGE_VERSIONS_STATE")
@@ -167,6 +171,28 @@ public class StackImageUpdateActions {
                                 PrepareImageType.EXECUTED_DURING_IMAGE_CHANGE, fallbackImageName);
                 sendEvent(context, request);
 
+            }
+        };
+    }
+
+    @Bean(name = "UPDATE_IMAGE_PARAMETER_STATE")
+    public AbstractStackImageUpdateAction<?> updateImageParameterAction() {
+        return new AbstractStackImageUpdateAction<>(PrepareImageResult.class) {
+            @Inject
+            private StackParametersService stackParametersService;
+
+            @Override
+            protected void doExecute(StackContext context, PrepareImageResult payload, Map<Object, Object> variables) {
+                if (StringUtils.isNotBlank(payload.getImageIdentifier())) {
+                    stackParametersService.setStackParameter(context.getStack().getId(), PlatformParametersConsts.IMAGE_IDENTIFIER,
+                            payload.getImageIdentifier());
+                }
+                sendEvent(context);
+            }
+
+            @Override
+            protected Selectable createRequest(StackContext context) {
+                return new StackEvent(UPDATE_IMAGE_PARAMETER_FINISHED_EVENT.event(), context.getStack().getId());
             }
         };
     }

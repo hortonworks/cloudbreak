@@ -14,6 +14,7 @@ public enum StackCreationState implements FlowState {
     CREATE_USER_DATA_STATE,
     SETUP_STATE,
     IMAGESETUP_STATE,
+    IMAGE_SETUP_FINISHED_STATE,
     IMAGE_CHECK_STATE(CheckImageAction.class),
     CREATE_CREDENTIAL_STATE,
     START_PROVISIONING_STATE(null),

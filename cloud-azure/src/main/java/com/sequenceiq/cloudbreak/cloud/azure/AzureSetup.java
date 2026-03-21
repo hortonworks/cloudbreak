@@ -61,7 +61,7 @@ public class AzureSetup implements Setup {
     private AzureHttpClientConfigurer azureHttpClientConfigurer;
 
     @Override
-    public void prepareImage(AuthenticatedContext ac, CloudStack stack, Image image, PrepareImageType prepareType, String fallbackTargetImage) {
+    public Optional<String> prepareImage(AuthenticatedContext ac, CloudStack stack, Image image, PrepareImageType prepareType, String fallbackTargetImage) {
         LOGGER.debug("Prepare image: {}", image);
 
         String region = ac.getCloudContext().getLocation().getRegion().value();
@@ -76,6 +76,7 @@ public class AzureSetup implements Setup {
             throwExceptionWithDetails(ac, stack, image, ex);
         }
         LOGGER.debug("Prepare image has been executed");
+        return Optional.empty();
     }
 
     private void throwExceptionWithDetails(AuthenticatedContext ac, CloudStack stack, Image image, Exception ex) {

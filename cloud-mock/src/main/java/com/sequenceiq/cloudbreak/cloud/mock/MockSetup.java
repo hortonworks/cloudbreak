@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.mock;
 
 import java.util.Map;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,9 +26,10 @@ public class MockSetup implements Setup {
     private static final int FINISHED_PROGRESS_VALUE = 100;
 
     @Override
-    public void prepareImage(AuthenticatedContext authenticatedContext, CloudStack stack, Image image, PrepareImageType prepareImageType,
+    public Optional<String> prepareImage(AuthenticatedContext authenticatedContext, CloudStack stack, Image image, PrepareImageType prepareImageType,
             String fallbackTargetImage) {
         LOGGER.debug("prepare image has been executed");
+        return Optional.empty();
     }
 
     @Override

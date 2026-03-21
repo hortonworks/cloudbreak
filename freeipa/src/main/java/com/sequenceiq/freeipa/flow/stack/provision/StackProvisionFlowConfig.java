@@ -21,6 +21,8 @@ import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionEvent.IM
 import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionEvent.IMAGE_FALLBACK_START_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionEvent.IMAGE_PREPARATION_FAILED_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionEvent.IMAGE_PREPARATION_FINISHED_EVENT;
+import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionEvent.IMAGE_SETUP_FAILED_EVENT;
+import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionEvent.IMAGE_SETUP_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionEvent.LAUNCH_STACK_FAILED_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionEvent.LAUNCH_STACK_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionEvent.SETUP_FAILED_EVENT;
@@ -46,6 +48,7 @@ import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionState.IM
 import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionState.IMAGE_CHECK_STATE;
 import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionState.IMAGE_FALLBACK_START_STATE;
 import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionState.IMAGE_FALLBACK_STATE;
+import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionState.IMAGE_SETUP_FINISHED_STATE;
 import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionState.INIT_STATE;
 import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionState.PROVISIONING_FINISHED_STATE;
 import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionState.SETUP_STATE;
@@ -75,7 +78,8 @@ public class StackProvisionFlowConfig extends StackStatusFinalizerAbstractFlowCo
             .failureEvent(GENERATE_ENCRYPTION_KEYS_FAILED_EVENT)
             .from(CREATE_USER_DATA_STATE).to(SETUP_STATE).event(CREATE_USER_DATA_FINISHED_EVENT).failureEvent(CREATE_USER_DATA_FAILED_EVENT)
             .from(SETUP_STATE).to(IMAGESETUP_STATE).event(SETUP_FINISHED_EVENT).failureEvent(SETUP_FAILED_EVENT)
-            .from(IMAGESETUP_STATE).to(IMAGE_CHECK_STATE).event(IMAGE_PREPARATION_FINISHED_EVENT).failureEvent(IMAGE_PREPARATION_FAILED_EVENT)
+            .from(IMAGESETUP_STATE).to(IMAGE_SETUP_FINISHED_STATE).event(IMAGE_PREPARATION_FINISHED_EVENT).failureEvent(IMAGE_PREPARATION_FAILED_EVENT)
+            .from(IMAGE_SETUP_FINISHED_STATE).to(IMAGE_CHECK_STATE).event(IMAGE_SETUP_FINISHED_EVENT).failureEvent(IMAGE_SETUP_FAILED_EVENT)
             .from(IMAGE_CHECK_STATE).to(IMAGE_CHECK_STATE).event(IMAGE_COPY_CHECK_EVENT).failureEvent(IMAGE_COPY_FAILED_EVENT)
             .from(IMAGE_CHECK_STATE).to(CREATE_CREDENTIAL_STATE).event(IMAGE_COPY_FINISHED_EVENT).failureEvent(IMAGE_COPY_FAILED_EVENT)
             .from(CREATE_CREDENTIAL_STATE).to(START_PROVISIONING_STATE).event(CREATE_CREDENTIAL_FINISHED_EVENT).failureEvent(CREATE_CREDENTIAL_FAILED_EVENT)

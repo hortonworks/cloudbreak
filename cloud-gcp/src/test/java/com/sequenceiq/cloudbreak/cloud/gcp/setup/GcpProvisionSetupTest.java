@@ -38,6 +38,7 @@ import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpResourceException;
 import com.sequenceiq.cloudbreak.cloud.gcp.client.GcpComputeFactory;
 import com.sequenceiq.cloudbreak.cloud.gcp.client.GcpStorageFactory;
+import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpImageUtil;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpLabelUtil;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
@@ -61,6 +62,9 @@ public class GcpProvisionSetupTest {
 
     @Mock
     private GcpStackUtil gcpStackUtil;
+
+    @Mock
+    private GcpImageUtil gcpImageUtil;
 
     @Mock
     private GcpLabelUtil gcpLabelUtil;
@@ -121,7 +125,7 @@ public class GcpProvisionSetupTest {
 
         when(authenticatedContext.getCloudCredential()).thenReturn(cloudCredential);
         when(gcpStackUtil.getProjectId(cloudCredential)).thenReturn("project-id");
-        when(gcpStackUtil.getImageName(anyString())).thenReturn("super-image");
+        when(gcpImageUtil.getGcpImageResourceName(cloudStack)).thenReturn("super-image");
         when(gcpComputeFactory.buildCompute(cloudCredential)).thenReturn(compute);
         when(compute.images()).thenReturn(images);
         when(images.get(anyString(), anyString())).thenReturn(imagesGet);
@@ -149,7 +153,7 @@ public class GcpProvisionSetupTest {
 
         when(authenticatedContext.getCloudCredential()).thenReturn(cloudCredential);
         when(gcpStackUtil.getProjectId(cloudCredential)).thenReturn("project-id");
-        when(gcpStackUtil.getImageName(anyString())).thenReturn("super-image");
+        when(gcpImageUtil.getGcpImageResourceName(cloudStack)).thenReturn("super-image");
         when(gcpComputeFactory.buildCompute(cloudCredential)).thenReturn(compute);
         when(compute.images()).thenReturn(images);
         when(images.get(anyString(), anyString())).thenReturn(imagesGet);
@@ -176,7 +180,7 @@ public class GcpProvisionSetupTest {
 
         when(authenticatedContext.getCloudCredential()).thenReturn(cloudCredential);
         when(gcpStackUtil.getProjectId(cloudCredential)).thenReturn("project-id");
-        when(gcpStackUtil.getImageName(anyString())).thenReturn("super-image");
+        when(gcpImageUtil.getGcpImageResourceName(cloudStack)).thenReturn("super-image");
         when(gcpComputeFactory.buildCompute(cloudCredential)).thenReturn(compute);
         when(compute.images()).thenReturn(images);
         when(images.get(anyString(), anyString())).thenReturn(imagesGet);
@@ -203,7 +207,7 @@ public class GcpProvisionSetupTest {
 
         when(authenticatedContext.getCloudCredential()).thenReturn(cloudCredential);
         when(gcpStackUtil.getProjectId(cloudCredential)).thenReturn("project-id");
-        when(gcpStackUtil.getImageName(anyString())).thenReturn("super-image");
+        when(gcpImageUtil.getGcpImageResourceName(cloudStack)).thenReturn("super-image");
         when(gcpComputeFactory.buildCompute(cloudCredential)).thenReturn(compute);
         when(compute.images()).thenReturn(images);
         when(images.get(anyString(), anyString())).thenReturn(imagesGet);
@@ -235,7 +239,7 @@ public class GcpProvisionSetupTest {
         when(gcpComputeFactory.buildCompute(any(CloudCredential.class))).thenReturn(compute);
         when(compute.images()).thenReturn(images);
         when(images.get(anyString(), anyString())).thenReturn(imagesGet);
-        when(gcpStackUtil.getImageName(anyString())).thenReturn("super-image");
+        when(gcpImageUtil.getLatestImageName(anyString())).thenReturn("super-image");
         GoogleJsonResponseException googleError = mock(GoogleJsonResponseException.class);
         when(googleError.getMessage()).thenReturn("Google error");
         when(googleError.getSuppressed()).thenReturn(new Throwable[0]);
@@ -266,7 +270,7 @@ public class GcpProvisionSetupTest {
         when(compute.images()).thenReturn(images);
         when(images.get(anyString(), anyString())).thenReturn(imagesGet);
         when(imagesGet.execute()).thenReturn(imageGoogle);
-        when(gcpStackUtil.getImageName(anyString())).thenReturn("super-image");
+        when(gcpImageUtil.getLatestImageName(anyString())).thenReturn("super-image");
 
         underTest.prepareImage(authenticatedContext, cloudStack, image, EXECUTED_DURING_PROVISIONING, null);
     }
@@ -297,12 +301,12 @@ public class GcpProvisionSetupTest {
         when(images.get(anyString(), anyString())).thenReturn(imagesGet);
         when(imagesGet.execute()).thenThrow(notFoundImageException);
         when(notFoundImageException.getStatusCode()).thenReturn(HttpStatus.NOT_FOUND.value());
-        when(gcpStackUtil.getImageName(anyString())).thenReturn("super-image");
-        when(gcpStackUtil.getTarName(anyString())).thenReturn("tarname");
+        when(gcpImageUtil.getLatestImageName(anyString())).thenReturn("super-image");
+        when(gcpImageUtil.getTarName(anyString())).thenReturn("tarname");
         when(gcpStorageFactory.buildStorage(any(CloudCredential.class), anyString())).thenReturn(storage);
-        when(gcpStackUtil.getBucket(anyString())).thenReturn("bucketName");
+        when(gcpImageUtil.getBucket(anyString())).thenReturn("bucketName");
         when(gcpBucketRegisterService.register(any(AuthenticatedContext.class))).thenReturn("bucket");
-        doNothing().when(gcpImageRegisterService).register(any(AuthenticatedContext.class), anyString(), anyString(), any(CloudStack.class));
+        doNothing().when(gcpImageRegisterService).register(any(AuthenticatedContext.class), anyString(), anyString(), anyString(), any(CloudStack.class));
         when(storage.objects()).thenReturn(storageObjects);
         when(rewriteResponse.getRewriteToken()).thenReturn("token");
         when(storageObjects.rewrite(anyString(), anyString(), anyString(), anyString(), any(StorageObject.class))).thenReturn(storageObjectsRewrite);
@@ -317,11 +321,11 @@ public class GcpProvisionSetupTest {
                 .create(anyString(), anyString(), anyString(), anyString(), anyString(), any(Storage.class));
         verify(gcpBucketRegisterService, times(1)).register(any(AuthenticatedContext.class));
         verify(gcpImageRegisterService, times(1))
-                .register(any(AuthenticatedContext.class), anyString(), anyString(), any(CloudStack.class));
+                .register(any(AuthenticatedContext.class), anyString(), anyString(), anyString(), any(CloudStack.class));
     }
 
     @Test
-    public void testPrepareImageDoesNotExistAndAndPollerStoppedExceptionHappensAndCloudbreakServiceExceptionThrows() throws Exception {
+    public void testPrepareImageDoesNotExistAndPollerStoppedExceptionHappensAndCloudbreakServiceExceptionThrows() throws Exception {
         AuthenticatedContext authenticatedContext = mock(AuthenticatedContext.class);
         CloudStack cloudStack = mock(CloudStack.class);
         CloudContext context = mock(CloudContext.class);
@@ -344,10 +348,10 @@ public class GcpProvisionSetupTest {
         when(compute.images()).thenReturn(images);
         when(images.get(anyString(), anyString())).thenReturn(imagesGet);
         when(imagesGet.execute()).thenReturn(null);
-        when(gcpStackUtil.getImageName(anyString())).thenReturn("super-image");
-        when(gcpStackUtil.getTarName(anyString())).thenReturn("tarname");
+        when(gcpImageUtil.getLatestImageName(anyString())).thenReturn("super-image");
+        when(gcpImageUtil.getTarName(anyString())).thenReturn("tarname");
         when(gcpStorageFactory.buildStorage(any(CloudCredential.class), anyString())).thenReturn(storage);
-        when(gcpStackUtil.getBucket(anyString())).thenReturn("bucketName");
+        when(gcpImageUtil.getBucket(anyString())).thenReturn("bucketName");
         when(gcpBucketRegisterService.register(any(AuthenticatedContext.class))).thenReturn("bucket");
         when(storage.objects()).thenReturn(storageObjects);
         when(rewriteResponse.getRewriteToken()).thenReturn("token");
@@ -364,12 +368,12 @@ public class GcpProvisionSetupTest {
                 .create(anyString(), anyString(), anyString(), anyString(), anyString(), any(Storage.class));
         verify(gcpBucketRegisterService, times(1)).register(any(AuthenticatedContext.class));
         verify(gcpImageRegisterService, times(0))
-                .register(any(AuthenticatedContext.class), anyString(), anyString(), any(CloudStack.class));
+                .register(any(AuthenticatedContext.class), anyString(), anyString(), anyString(), any(CloudStack.class));
         assertTrue(cloudConnectorException.getMessage().contains("Image copy failed because the copy take too long time"));
     }
 
     @Test
-    public void testPrepareImageDoesNotExistAndAndPollerExceptionHappensAndCloudbreakServiceExceptionThrows() throws Exception {
+    public void testPrepareImageDoesNotExistAndPollerExceptionHappensAndCloudbreakServiceExceptionThrows() throws Exception {
         AuthenticatedContext authenticatedContext = mock(AuthenticatedContext.class);
         CloudStack cloudStack = mock(CloudStack.class);
         CloudContext context = mock(CloudContext.class);
@@ -392,10 +396,10 @@ public class GcpProvisionSetupTest {
         when(compute.images()).thenReturn(images);
         when(images.get(anyString(), anyString())).thenReturn(imagesGet);
         when(imagesGet.execute()).thenReturn(null);
-        when(gcpStackUtil.getImageName(anyString())).thenReturn("super-image");
-        when(gcpStackUtil.getTarName(anyString())).thenReturn("tarname");
+        when(gcpImageUtil.getLatestImageName(anyString())).thenReturn("super-image");
+        when(gcpImageUtil.getTarName(anyString())).thenReturn("tarname");
         when(gcpStorageFactory.buildStorage(any(CloudCredential.class), anyString())).thenReturn(storage);
-        when(gcpStackUtil.getBucket(anyString())).thenReturn("bucketName");
+        when(gcpImageUtil.getBucket(anyString())).thenReturn("bucketName");
         when(gcpBucketRegisterService.register(any(AuthenticatedContext.class))).thenReturn("bucket");
         when(storage.objects()).thenReturn(storageObjects);
         when(rewriteResponse.getRewriteToken()).thenReturn("token");
@@ -412,12 +416,12 @@ public class GcpProvisionSetupTest {
                 .create(anyString(), anyString(), anyString(), anyString(), anyString(), any(Storage.class));
         verify(gcpBucketRegisterService, times(1)).register(any(AuthenticatedContext.class));
         verify(gcpImageRegisterService, times(0))
-                .register(any(AuthenticatedContext.class), anyString(), anyString(), any(CloudStack.class));
+                .register(any(AuthenticatedContext.class), anyString(), anyString(), anyString(), any(CloudStack.class));
         assertTrue(cloudConnectorException.getMessage().contains("Image copy failed because"));
     }
 
     @Test
-    public void testPrepareImageDoesNotExistAndAndCloudBreakExceptionHappensAndCloudbreakServiceExceptionThrows() throws Exception {
+    public void testPrepareImageDoesNotExistAndCloudBreakExceptionHappensAndCloudbreakServiceExceptionThrows() throws Exception {
         AuthenticatedContext authenticatedContext = mock(AuthenticatedContext.class);
         CloudStack cloudStack = mock(CloudStack.class);
         CloudContext context = mock(CloudContext.class);
@@ -438,10 +442,10 @@ public class GcpProvisionSetupTest {
         when(compute.images()).thenReturn(images);
         when(images.get(anyString(), anyString())).thenReturn(imagesGet);
         when(imagesGet.execute()).thenReturn(null);
-        when(gcpStackUtil.getImageName(anyString())).thenReturn("super-image");
-        when(gcpStackUtil.getTarName(anyString())).thenReturn("tarname");
+        when(gcpImageUtil.getLatestImageName(anyString())).thenReturn("super-image");
+        when(gcpImageUtil.getTarName(anyString())).thenReturn("tarname");
         when(gcpStorageFactory.buildStorage(any(CloudCredential.class), anyString())).thenReturn(storage);
-        when(gcpStackUtil.getBucket(anyString())).thenReturn("bucketName");
+        when(gcpImageUtil.getBucket(anyString())).thenReturn("bucketName");
         when(gcpBucketRegisterService.register(any(AuthenticatedContext.class))).thenReturn("bucket");
         when(storage.objects()).thenReturn(storageObjects);
         when(storageObjects.rewrite(anyString(), anyString(), anyString(), anyString(), any(StorageObject.class))).thenReturn(storageObjectsRewrite);
@@ -456,7 +460,7 @@ public class GcpProvisionSetupTest {
                 .create(anyString(), anyString(), anyString(), anyString(), anyString(), any(Storage.class));
         verify(gcpBucketRegisterService, times(1)).register(any(AuthenticatedContext.class));
         verify(gcpImageRegisterService, times(0))
-                .register(any(AuthenticatedContext.class), anyString(), anyString(), any(CloudStack.class));
+                .register(any(AuthenticatedContext.class), anyString(), anyString(), anyString(), any(CloudStack.class));
     }
 
     private com.sequenceiq.cloudbreak.cloud.model.Image createImage() {

@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,8 +25,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.statemachine.action.Action;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.event.resource.CreateCredentialResult;
 import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchStackRequest;
+import com.sequenceiq.cloudbreak.cloud.event.setup.PrepareImageResult;
 import com.sequenceiq.cloudbreak.cloud.event.setup.ValidationResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
@@ -53,6 +56,7 @@ import com.sequenceiq.cloudbreak.service.multiaz.DataLakeAwareInstanceMetadataAv
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.LoadBalancerPersistenceService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
+import com.sequenceiq.cloudbreak.service.stack.StackParametersService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.flow.core.AbstractActionTestSupport;
@@ -101,6 +105,9 @@ class StackCreationActionsTest {
 
     @Mock
     private StackDtoService stackDtoService;
+
+    @Mock
+    private StackParametersService stackParametersService;
 
     @Mock
     private CloudbreakEventService eventService;
@@ -171,6 +178,25 @@ class StackCreationActionsTest {
         assertThat(headers).containsOnly(entry(FlowConstants.FLOW_ID, FLOW_ID), entry(FlowConstants.FLOW_TRIGGER_USERCRN, FLOW_TRIGGER_USER_CRN),
                 entry(FlowConstants.FLOW_OPERATION_TYPE, "UNKNOWN"),
                 entry(FlowConstants.FLOW_CHAIN_ID, FLOW_CHAIN_ID));
+    }
+
+    @Test
+    void imageSetupFinishedActionTestDoExecute() throws Exception {
+        StackCreationContext context = stackCreationContext();
+        ArgumentCaptor<StackEvent> stackEventCaptor = ArgumentCaptor.forClass(StackEvent.class);
+        AbstractActionTestSupport<StackCreationState, StackCreationEvent, StackCreationContext,
+                PrepareImageResult> testSupport =
+                new AbstractActionTestSupport<>(initAction(underTest::imageSetupFinishedAction));
+
+        testSupport.doExecute(context, new PrepareImageResult(STACK_ID, "imageId"), Map.of());
+
+        verify(stackParametersService).setStackParameter(STACK_ID, PlatformParametersConsts.IMAGE_IDENTIFIER, "imageId");
+
+        verifyEvent(stackEventCaptor, StackCreationEvent.IMAGE_SETUP_FINISHED_EVENT.event());
+
+        StackEvent stackEvent = stackEventCaptor.getValue();
+        assertThat(stackEvent).isNotNull();
+        Assertions.assertEquals(StackCreationEvent.IMAGE_SETUP_FINISHED_EVENT.event(), stackEvent.getSelector());
     }
 
     @Test

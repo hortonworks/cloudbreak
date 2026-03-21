@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud;
 
 import java.util.Map;
+import java.util.Optional;
 
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
@@ -27,8 +28,10 @@ public interface Setup {
      * @param image                the image to be copied
      * @param prepareImageType     the caller flow, can be either during creation or image change
      * @param fallbackTargetImage  the name of the image to be used in case of Marketplace -> VHD fallback
+     * @return the provider side image identifier, it is optional as not all the providers creates image related resources during setup
      */
-    void prepareImage(AuthenticatedContext authenticatedContext, CloudStack stack, Image image, PrepareImageType prepareImageType, String fallbackTargetImage);
+    Optional<String> prepareImage(AuthenticatedContext authenticatedContext, CloudStack stack, Image image, PrepareImageType prepareImageType,
+            String fallbackTargetImage);
 
     /**
      * Invoked by Cloudbreak to check whether the image copy is finished

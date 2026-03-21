@@ -48,7 +48,7 @@ public class OpenStackSetup implements Setup {
     private OpenStackFlavorVerifier openStackFlavorVerifier;
 
     @Override
-    public void prepareImage(AuthenticatedContext authenticatedContext, CloudStack stack, Image image, PrepareImageType prepareImageType,
+    public Optional<String> prepareImage(AuthenticatedContext authenticatedContext, CloudStack stack, Image image, PrepareImageType prepareImageType,
             String fallbackTargetImage) {
         String imageName = image.getImageName();
         OSClient<?> osClient = openStackClient.createOSClient(authenticatedContext);
@@ -59,6 +59,7 @@ public class OpenStackSetup implements Setup {
                 throw new CloudConnectorException(String.format("OpenStack image: %s not found", imageName));
             }
         }
+        return Optional.empty();
     }
 
     @Override

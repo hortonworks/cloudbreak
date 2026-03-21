@@ -60,6 +60,8 @@ public class PlatformParametersConsts {
 
     public static final String SECRET_ENCRYPTION_ENABLED = "secretEncryptionEnabled";
 
+    public static final String IMAGE_IDENTIFIER = "imageIdentifier";
+
     private PlatformParametersConsts() {
 
     }

@@ -16,6 +16,8 @@ import static com.sequenceiq.cloudbreak.core.flow2.stack.image.update.StackImage
 import static com.sequenceiq.cloudbreak.core.flow2.stack.image.update.StackImageUpdateEvent.STACK_IMAGE_UPDATE_FAILE_HANDLED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.image.update.StackImageUpdateEvent.STACK_IMAGE_UPDATE_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.image.update.StackImageUpdateEvent.UPDATE_IMAGE_FINESHED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.image.update.StackImageUpdateEvent.UPDATE_IMAGE_PARAMETER_FAILED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.image.update.StackImageUpdateEvent.UPDATE_IMAGE_PARAMETER_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.image.update.StackImageUpdateEvent.VALIDATE_IMAGE_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.image.update.StackImageUpdateEvent.VALIDATE_IMAGE_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.image.update.StackImageUpdateState.CHECK_IMAGE_VERSIONS_STATE;
@@ -28,6 +30,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.stack.image.update.StackImage
 import static com.sequenceiq.cloudbreak.core.flow2.stack.image.update.StackImageUpdateState.SET_IMAGE_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.image.update.StackImageUpdateState.STACK_IMAGE_UPDATE_FAILED_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.image.update.StackImageUpdateState.STACK_IMAGE_UPDATE_FINISHED;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.image.update.StackImageUpdateState.UPDATE_IMAGE_PARAMETER_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.image.update.StackImageUpdateState.UPDATE_IMAGE_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.image.update.StackImageUpdateState.VALIDATE_IMAGE_STATE;
 
@@ -49,7 +52,10 @@ public class StackImageUpdateFlowConfig extends StackStatusFinalizerAbstractFlow
                     .from(CHECK_PACKAGE_VERSIONS_STATE).to(VALIDATE_IMAGE_STATE).event(CHECK_PACKAGE_VERSIONS_FINISHED_EVENT).defaultFailureEvent()
                     .from(VALIDATE_IMAGE_STATE).to(UPDATE_IMAGE_STATE).event(VALIDATE_IMAGE_FINISHED_EVENT).failureEvent(VALIDATE_IMAGE_FAILED_EVENT)
                     .from(UPDATE_IMAGE_STATE).to(IMAGE_PREPARE_STATE).event(UPDATE_IMAGE_FINESHED_EVENT).defaultFailureEvent()
-                    .from(IMAGE_PREPARE_STATE).to(IMAGE_CHECK_STATE).event(IMAGE_PREPARATION_FINISHED_EVENT).failureEvent(IMAGE_PREPARATION_FAILED_EVENT)
+                    .from(IMAGE_PREPARE_STATE).to(UPDATE_IMAGE_PARAMETER_STATE).event(IMAGE_PREPARATION_FINISHED_EVENT)
+                    .failureEvent(IMAGE_PREPARATION_FAILED_EVENT)
+                    .from(UPDATE_IMAGE_PARAMETER_STATE).to(IMAGE_CHECK_STATE).event(UPDATE_IMAGE_PARAMETER_FINISHED_EVENT)
+                    .failureEvent(UPDATE_IMAGE_PARAMETER_FAILED_EVENT)
 
                     .from(IMAGE_PREPARE_STATE).to(SET_IMAGE_FALLBACK_STATE).event(IMAGE_FALLBACK_EVENT).failureEvent(IMAGE_PREPARATION_FAILED_EVENT)
                     .from(SET_IMAGE_FALLBACK_STATE).to(IMAGE_CHECK_STATE).event(IMAGE_FALLBACK_FINISHED_EVENT).failureEvent(IMAGE_FALLBACK_FAILED_EVENT)

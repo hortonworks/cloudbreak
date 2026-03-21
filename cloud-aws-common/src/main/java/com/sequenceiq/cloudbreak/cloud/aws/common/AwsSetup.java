@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.aws.common;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import jakarta.inject.Inject;
 
@@ -81,9 +82,10 @@ public abstract class AwsSetup implements Setup {
     }
 
     @Override
-    public void prepareImage(AuthenticatedContext authenticatedContext, CloudStack stack, Image image, PrepareImageType prepareImageType,
+    public Optional<String> prepareImage(AuthenticatedContext authenticatedContext, CloudStack stack, Image image, PrepareImageType prepareImageType,
             String fallbackTargetImage) {
         LOGGER.debug("prepare image has been executed");
+        return Optional.empty();
     }
 
     @Override

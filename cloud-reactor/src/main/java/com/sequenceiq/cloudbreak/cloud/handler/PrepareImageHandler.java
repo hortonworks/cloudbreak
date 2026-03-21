@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.handler;
 
+import java.util.Optional;
+
 import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
@@ -46,8 +48,9 @@ public class PrepareImageHandler implements CloudPlatformEventHandler<PrepareIma
             AuthenticatedContext auth = connector.authentication().authenticate(cloudContext, request.getCloudCredential());
             Image image = request.getImage();
             CloudStack stack = request.getStack();
-            connector.setup().prepareImage(auth, stack, image, request.getPrepareImageType(), request.getImageFallbackTarget());
-            PrepareImageResult result = new PrepareImageResult(request.getResourceId());
+            Optional<String> imageIdentifier =
+                    connector.setup().prepareImage(auth, stack, image, request.getPrepareImageType(), request.getImageFallbackTarget());
+            PrepareImageResult result = new PrepareImageResult(request.getResourceId(), imageIdentifier.orElse(null));
             request.getResult().onNext(result);
             eventBus.notify(result.selector(), new Event<>(event.getHeaders(), result));
             LOGGER.debug("Prepare image finished for {}", cloudContext);

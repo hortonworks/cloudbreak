@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 import jakarta.ws.rs.BadRequestException;
@@ -86,12 +87,14 @@ import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Resource;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.StackAuthentication;
+import com.sequenceiq.freeipa.entity.StackParameter;
 import com.sequenceiq.freeipa.entity.Template;
 import com.sequenceiq.freeipa.service.DefaultRootVolumeSizeProvider;
 import com.sequenceiq.freeipa.service.client.AzureMarketplaceTermsClientService;
 import com.sequenceiq.freeipa.service.client.CachedEnvironmentClientService;
 import com.sequenceiq.freeipa.service.image.ImageService;
 import com.sequenceiq.freeipa.service.resource.ResourceService;
+import com.sequenceiq.freeipa.service.stack.StackParameterService;
 
 @Component
 public class StackToCloudStackConverter implements Converter<Stack, CloudStack> {
@@ -119,6 +122,9 @@ public class StackToCloudStackConverter implements Converter<Stack, CloudStack> 
     @Inject
     private LoadBalancerToCloudLoadBalancerConverter loadBalancerToCloudLoadBalancerConverter;
 
+    @Inject
+    private StackParameterService stackParameterService;
+
     @Override
     public CloudStack convert(Stack stack) {
         ImageEntity imageEntity = imageService.getByStack(stack);
@@ -133,6 +139,8 @@ public class StackToCloudStackConverter implements Converter<Stack, CloudStack> 
         Network network = buildNetwork(stack);
         InstanceAuthentication instanceAuthentication = buildInstanceAuthentication(stack.getStackAuthentication());
         Map<String, String> parameters = buildCloudStackParameters(stack.getCloudPlatform(), stack.getEnvironmentCrn());
+        parameters.putAll(stackParameterService.findAllByStackId(stack.getId()).stream()
+                .collect(Collectors.toMap(StackParameter::getParamKey, StackParameter::getParamValue)));
         List<CloudLoadBalancer> loadBalancer = loadBalancerToCloudLoadBalancerConverter.convertLoadBalancer(stack.getId(), new HashSet<>(instanceGroups));
 
         return CloudStack.builder()
