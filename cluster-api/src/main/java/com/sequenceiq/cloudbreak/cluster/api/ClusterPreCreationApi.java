@@ -26,9 +26,9 @@ public interface ClusterPreCreationApi {
 
     String getMasterKey(Cluster cluster);
 
-    Map<String, Integer> getServicePorts(Blueprint blueprint, boolean tls);
+    Map<String, Integer> getServicePorts(Blueprint blueprint, boolean tls, String runtimeVersion);
 
-    Map<String, String> getServiceProtocols(Blueprint blueprint, boolean tls);
+    Map<String, String> getServiceProtocols(Blueprint blueprint, boolean tls, String runtimeVersion);
 
     ServiceLocationMap getServiceLocations();
 }

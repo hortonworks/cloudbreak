@@ -20,17 +20,17 @@ public class ClouderaManagerBlueprintPortConfigCollector {
     @Inject
     private ExposedServiceCollector exposedServiceCollector;
 
-    public Map<String, Integer> getServicePorts(Blueprint blueprint, boolean tls) {
+    public Map<String, Integer> getServicePorts(Blueprint blueprint, boolean tls, String runtimeVersion) {
         String blueprintText = blueprint.getBlueprintJsonText();
         CmTemplateProcessor processor = cmTemplateProcessorFactory.get(blueprintText);
 
-        return exposedServiceCollector.getAllServicePorts(processor.getVersion(), tls);
+        return exposedServiceCollector.getAllServicePorts(processor.getVersion(), tls, runtimeVersion);
     }
 
-    public Map<String, String> getServiceProtocols(Blueprint blueprint, boolean tls) {
+    public Map<String, String> getServiceProtocols(Blueprint blueprint, boolean tls, String runtimeVersion) {
         String blueprintText = blueprint.getBlueprintJsonText();
         CmTemplateProcessor processor = cmTemplateProcessorFactory.get(blueprintText);
 
-        return exposedServiceCollector.getAllServiceProtocols(processor.getVersion(), tls);
+        return exposedServiceCollector.getAllServiceProtocols(processor.getVersion(), tls, runtimeVersion);
     }
 }

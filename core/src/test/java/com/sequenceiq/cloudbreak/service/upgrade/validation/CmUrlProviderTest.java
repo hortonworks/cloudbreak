@@ -27,6 +27,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.auth.PaywallCredentialPopulator;
 import com.sequenceiq.cloudbreak.client.RestClientFactory;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
+import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.common.model.OsType;
 
 @ExtendWith(MockitoExtension.class)
@@ -74,6 +75,39 @@ class CmUrlProviderTest {
     public void testUrlLegacyNonArchive() {
         Image image = mock(Image.class);
         when(image.getOsType()).thenReturn("redhat7");
+        when(image.getArchitecture()).thenReturn(Architecture.X86_64.getName());
+        when(image.getRepo()).thenReturn(Map.of("redhat7", "https://random.cloudera.com/p/cm-public/7.6.0-23760327/redhat7/yum/"));
+        when(image.getPackageVersions()).thenReturn(Map.of(CM.getKey(), "7.6.0", CM_BUILD_NUMBER.getKey(), "23760327"));
+
+        String result = underTest.getCmRpmUrl(image);
+
+        verifyNoInteractions(restClientFactory);
+        verifyNoInteractions(paywallCredentialPopulator);
+        assertEquals("https://random.cloudera.com/p/cm-public/7.6.0-23760327/redhat7/yum/RPMS/x86_64/cloudera-manager-server-7.6.0-23760327.el7.x86_64.rpm",
+                result);
+    }
+
+    @Test
+    public void testUrlLegacyNonArchiveArm64() {
+        Image image = mock(Image.class);
+        when(image.getOsType()).thenReturn("redhat8");
+        when(image.getArchitecture()).thenReturn(Architecture.ARM64.getName());
+        when(image.getRepo()).thenReturn(Map.of("redhat8", "https://random.cloudera.com/p/cm-public/7.6.0-23760327/redhat8/yum/"));
+        when(image.getPackageVersions()).thenReturn(Map.of(CM.getKey(), "7.6.0", CM_BUILD_NUMBER.getKey(), "23760327"));
+
+        String result = underTest.getCmRpmUrl(image);
+
+        verifyNoInteractions(restClientFactory);
+        verifyNoInteractions(paywallCredentialPopulator);
+        assertEquals("https://random.cloudera.com/p/cm-public/7.6.0-23760327/redhat8/yum/RPMS/aarch64/cloudera-manager-server-7.6.0-23760327.el8.aarch64.rpm",
+                result);
+    }
+
+    @Test
+    public void testUrlLegacyNullArchitectureFallsBackToX86() {
+        Image image = mock(Image.class);
+        when(image.getOsType()).thenReturn("redhat7");
+        when(image.getArchitecture()).thenReturn(null);
         when(image.getRepo()).thenReturn(Map.of("redhat7", "https://random.cloudera.com/p/cm-public/7.6.0-23760327/redhat7/yum/"));
         when(image.getPackageVersions()).thenReturn(Map.of(CM.getKey(), "7.6.0", CM_BUILD_NUMBER.getKey(), "23760327"));
 
@@ -89,6 +123,7 @@ class CmUrlProviderTest {
     public void testUrlLegacyArchiveButMissingCmPublic() {
         Image image = mock(Image.class);
         when(image.getOsType()).thenReturn("redhat7");
+        when(image.getArchitecture()).thenReturn(Architecture.X86_64.getName());
         when(image.getRepo()).thenReturn(Map.of("redhat7", "https://archive.cloudera.com/p/asdf/7.6.0-23760327/redhat7/yum/"));
         when(image.getPackageVersions()).thenReturn(Map.of(CM.getKey(), "7.6.0", CM_BUILD_NUMBER.getKey(), "23760327"));
 
@@ -104,6 +139,7 @@ class CmUrlProviderTest {
     public void testLegacyReturnedIfCallFails() {
         Image image = mock(Image.class);
         when(image.getOsType()).thenReturn("redhat7");
+        when(image.getArchitecture()).thenReturn(Architecture.X86_64.getName());
         when(image.getRepo()).thenReturn(Map.of("redhat7", "https://archive.cloudera.com/p/cm-public/7.6.0-23760327/redhat7/yum/"));
         when(image.getPackageVersions()).thenReturn(Map.of(CM.getKey(), "7.6.0", CM_BUILD_NUMBER.getKey(), "23760327"));
         Client client = mock(Client.class);
@@ -125,6 +161,7 @@ class CmUrlProviderTest {
     public void testLegacyReturnedIfManifestMissingSuitable() throws IOException {
         Image image = mock(Image.class);
         when(image.getOsType()).thenReturn("redhat7");
+        when(image.getArchitecture()).thenReturn(Architecture.X86_64.getName());
         when(image.getRepo()).thenReturn(Map.of("redhat7", "https://archive.cloudera.com/p/cm-public/7.6.0-23760327/redhat7/yum/"));
         when(image.getPackageVersions()).thenReturn(Map.of(CM.getKey(), "7.6.0", CM_BUILD_NUMBER.getKey(), "23760327"));
         Client client = mock(Client.class);
