@@ -43,6 +43,7 @@ dependencies {
   testImplementation group: 'org.assertj',              name: 'assertj-core',                   version: assertjVersion
   testImplementation group: 'org.hamcrest',             name: 'hamcrest',                       version: hamcrestVersion
   testImplementation group: 'net.bytebuddy',            name: 'byte-buddy',                     version: byteBuddyVersion
+  testImplementation group: 'org.springframework',               name: 'spring-test',                    version: springFrameworkVersion
   testImplementation project(path: ':common', configuration: 'tests')
 
 }

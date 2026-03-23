@@ -24,6 +24,7 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.cloudera.cdp.servicediscovery.model.ApiRemoteDataContext;
 import com.cloudera.cdp.servicediscovery.model.DescribeDatalakeAsApiRemoteDataContextResponse;
@@ -37,6 +38,7 @@ import com.cloudera.thunderhead.service.environments2api.model.PvcEnvironmentDet
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
+import com.sequenceiq.cloudbreak.sdx.OnPrem719WorkaroundService;
 import com.sequenceiq.cloudbreak.sdx.RdcView;
 import com.sequenceiq.cloudbreak.sdx.TargetPlatform;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxAccessView;
@@ -111,6 +113,7 @@ public class PdlSdxDescribeServiceTest {
         when(environment.getPvcEnvironmentDetails()).thenReturn(pvcEnvironmentDetails);
         when(describeEnvironmentResponse.getEnvironment()).thenReturn(environment);
         when(remoteEnvironmentEndpoint.getByCrn(any())).thenReturn(describeEnvironmentResponse);
+        ReflectionTestUtils.setField(pdlRdcUtil, "onPrem719WorkaroundService", new OnPrem719WorkaroundService());
     }
 
     @Test
