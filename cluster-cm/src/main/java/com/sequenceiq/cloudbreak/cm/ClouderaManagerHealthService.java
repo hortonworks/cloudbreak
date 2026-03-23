@@ -33,6 +33,7 @@ import com.google.api.client.util.Maps;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.cloud.model.HostName;
 import com.sequenceiq.cloudbreak.cluster.status.ExtendedHostStatuses;
+import com.sequenceiq.cloudbreak.cluster.status.ExtendedHostStatusesFactory;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.cm.healthcheck.ClouderaManagerHostHealthCheck;
 import com.sequenceiq.cloudbreak.cm.util.ClouderaManagerConstants;
@@ -66,6 +67,9 @@ public class ClouderaManagerHealthService {
     @Inject
     private Set<ClouderaManagerHostHealthCheck> hostHealthChecks;
 
+    @Inject
+    private ExtendedHostStatusesFactory extendedHostStatusesFactory;
+
     private static <T> Map<HostName, T> convertHealthSummary(Map<HostName, ApiHealthSummary> hostHealth, Function<ApiHealthSummary, T> converter) {
         Map<HostName, T> result = new HashMap<>();
         hostHealth.forEach((hostname, healthSummary) -> result.put(hostname, converter.apply(healthSummary)));
@@ -83,7 +87,7 @@ public class ClouderaManagerHealthService {
                     (k, v) -> Set.of(HealthCheck.unhealthy(HealthCheckType.HOST, DUPLICATED_HOST))));
         hostStates.entrySet().removeIf(entry -> entry.getValue().isEmpty());
         LOGGER.debug("Creating 'ExtendedHostStatuses' with {}", hostStates);
-        return new ExtendedHostStatuses(hostStates);
+        return extendedHostStatusesFactory.create(hostStates);
     }
 
     public Map<HostName, String> getHostStatusesRaw(ApiClient client) {

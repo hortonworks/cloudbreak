@@ -55,16 +55,17 @@ public class HostnameTransformer {
         if (numbers.isEmpty() || numbers.contains(FALLBACK_INDEX)) {
             return "";
         }
-        if (numbers.size() == 1) {
-            return String.valueOf(numbers.getFirst());
+        List<Integer> sortedNumbers = numbers.stream().sorted().toList();
+        if (sortedNumbers.size() == 1) {
+            return String.valueOf(sortedNumbers.getFirst());
         }
 
         List<String> ranges = new ArrayList<>();
-        int rangeStart = numbers.getFirst();
-        int prev = numbers.getFirst();
+        int rangeStart = sortedNumbers.getFirst();
+        int prev = sortedNumbers.getFirst();
 
-        for (int j = 1; j < numbers.size(); j++) {
-            int current = numbers.get(j);
+        for (int j = 1; j < sortedNumbers.size(); j++) {
+            int current = sortedNumbers.get(j);
 
             if (current != prev + 1) {
                 ranges.add(formatRange(rangeStart, prev));
@@ -73,7 +74,7 @@ public class HostnameTransformer {
 
             prev = current;
         }
-        ranges.add(formatRange(rangeStart, numbers.getLast()));
+        ranges.add(formatRange(rangeStart, sortedNumbers.getLast()));
 
         return '[' + String.join(",", ranges) + ']';
     }

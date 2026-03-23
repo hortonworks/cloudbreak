@@ -9,6 +9,7 @@ import static com.sequenceiq.cloudbreak.cm.ClouderaManagerHealthService.HOST_SCM
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
@@ -43,6 +44,7 @@ import com.cloudera.api.swagger.model.ApiRoleRef;
 import com.cloudera.api.swagger.model.ApiService;
 import com.cloudera.api.swagger.model.ApiServiceList;
 import com.sequenceiq.cloudbreak.cluster.status.ExtendedHostStatuses;
+import com.sequenceiq.cloudbreak.cluster.status.ExtendedHostStatusesFactory;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.cm.healthcheck.ClouderaManagerHostBasicHealthCheck;
 import com.sequenceiq.cloudbreak.cm.healthcheck.ClouderaManagerHostCertHealthCheck;
@@ -74,6 +76,9 @@ class ClouderaManagerHealthServiceTest {
     @Mock
     private ApiServiceList apiServiceList;
 
+    @Mock
+    private ExtendedHostStatusesFactory extendedHostStatusesFactory;
+
     @BeforeEach
     void setUp() throws ApiException {
         ReflectionTestUtils.setField(underTest, "hostHealthChecks", Set.of(
@@ -85,6 +90,7 @@ class ClouderaManagerHealthServiceTest {
         lenient().when(clouderaManagerApiFactory.getHostsResourceApi(client)).thenReturn(hostsResourceApi);
         lenient().when(clouderaManagerApiFactory.getServicesResourceApi(client)).thenReturn(servicesResourceApi);
         lenient().when(servicesResourceApi.readServices(CLUSTER_NAME, ClouderaManagerConstants.SUMMARY)).thenReturn(apiServiceList);
+        lenient().when(extendedHostStatusesFactory.create(any())).thenAnswer(invocation -> new ExtendedHostStatuses(invocation.getArgument(0)));
     }
 
     @Test

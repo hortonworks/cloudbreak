@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.jupiter.api.Test;
 
@@ -84,6 +85,21 @@ public class ExtendedHostStatusesTest {
                 TEST_HOST_2, Set.of(createHealthCheck(HOST, UNHEALTHY, "whatever"))));
         assertEquals("reason1 reason2 reason3", extendedHostStatuses2.statusReasonForHost(TEST_HOST));
         assertEquals("whatever", extendedHostStatuses2.statusReasonForHost(TEST_HOST_2));
+    }
+
+    @Test
+    public void testGetUnhealthyReasonWithTypeUsesCustomProvider() {
+        AtomicBoolean providerCalled = new AtomicBoolean(false);
+        ExtendedHostStatuses underTest = new ExtendedHostStatuses(
+                Map.of(TEST_HOST, Set.of(createHealthCheck(HOST, UNHEALTHY, "host is down"))),
+                Map.of(HOST, hostsHealth -> {
+                    providerCalled.set(true);
+                    return "custom reason";
+                })
+        );
+
+        assertEquals("custom reason", underTest.getUnhealthyReasonWithType(HOST));
+        assertTrue(providerCalled.get());
     }
 
     private HealthCheck createHealthCheck(HealthCheckType type, HealthCheckResult result) {

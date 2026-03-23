@@ -27,4 +27,13 @@ class HostnameTransformerTest {
         assertEquals(List.of("compute0", "fake1", "master[0-1]", "mock", "worker[0-1,3-4]"), result);
     }
 
+    @Test
+    void getHostnamePatternsNormalizesUnorderedIndexes() {
+        List<String> fqdns = List.of("master2", "master1", "master0", "idbroker0");
+
+        List<String> result = HostnameTransformer.getHostnamePatterns(fqdns);
+
+        assertEquals(List.of("idbroker0", "master[0-2]"), result);
+    }
+
 }
