@@ -70,6 +70,8 @@ public interface ClusterModificationService {
 
     Optional<String> getRoleConfigValueByServiceType(String clusterName, String roleConfigGroup, String serviceType, String configName);
 
+    void updateRoleConfigByServiceType(String clusterName, String roleType, String serviceType, Map<String, String> config) throws CloudbreakException;
+
     Optional<String> getServiceConfigValue(String clusterName, String serviceType, String configName);
 
     ParcelOperationStatus removeUnusedParcels(Set<ClusterComponentView> usedParcelComponents, Set<String> parcelNamesFromImage)

@@ -239,7 +239,8 @@ public class MigrateZookeeperToKraftConfigurationActionsTest {
                 "MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_FINISHED_STATE",
                 "MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_FAILED_STATE",
                 "MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_STATE",
-                "MIGRATE_ZOOKEEPER_TO_KRAFT_INSTALL_STATE"
+                "MIGRATE_ZOOKEEPER_TO_KRAFT_INSTALL_STATE",
+                "MIGRATE_ZOOKEEPER_TO_KRAFT_REMOVE_BROKER_VERSION_STATE"
         ));
 
         Set<String> actualBeanNames = Arrays.stream(MigrateZookeeperToKraftConfigurationActions.class.getDeclaredMethods())

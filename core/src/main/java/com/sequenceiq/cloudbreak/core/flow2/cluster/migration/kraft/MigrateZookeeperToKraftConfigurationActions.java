@@ -9,6 +9,7 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftConfigurationHandlerSelectors.MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftConfigurationHandlerSelectors.MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_VALIDATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftConfigurationHandlerSelectors.MIGRATE_ZOOKEEPER_TO_KRAFT_INSTALL_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftConfigurationHandlerSelectors.MIGRATE_ZOOKEEPER_TO_KRAFT_REMOVE_BROKER_VERSION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftConfigurationStateSelectors.FINALIZE_MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftConfigurationStateSelectors.HANDLED_FAILED_MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_EVENT;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_KRAFT_MIGRATION_FAILED_EVENT;
@@ -119,6 +120,32 @@ public class MigrateZookeeperToKraftConfigurationActions {
                 stackUpdater.updateStackStatus(stackId, ZOOKEEPER_TO_KRAFT_MIGRATION_CONFIGURATION_IN_PROGRESS);
                 flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), CLUSTER_KRAFT_MIGRATION_STARTED_EVENT);
                 String nextEvent = MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_EVENT.event();
+                sendEvent(context, nextEvent, new MigrateZookeeperToKraftConfigurationEvent(nextEvent, payload.getResourceId(), context.isKraftInstallNeeded()));
+            }
+
+            @Override
+            protected Object getFailurePayload(MigrateZookeeperToKraftConfigurationEvent payload, Optional<MigrateZookeeperToKraftContext> flowContext,
+                    Exception ex) {
+                return new MigrateZookeeperToKraftConfigurationFailureEvent(payload.getResourceId(), ex);
+            }
+        };
+    }
+
+    @Bean(name = "MIGRATE_ZOOKEEPER_TO_KRAFT_REMOVE_BROKER_VERSION_STATE")
+    public Action<?, ?> migrateZookeeperToKraftRemoveBrokerVersionAction() {
+        return new AbstractMigrateZookeeperToKraftAction<>(MigrateZookeeperToKraftConfigurationEvent.class) {
+
+            @Override
+            protected MigrateZookeeperToKraftContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext,
+                    MigrateZookeeperToKraftConfigurationEvent payload) {
+                return MigrateZookeeperToKraftContext.from(flowParameters, payload, payload.isKraftInstallNeeded());
+            }
+
+            @Override
+            protected void doExecute(MigrateZookeeperToKraftContext context, MigrateZookeeperToKraftConfigurationEvent payload,
+                    Map<Object, Object> variables) {
+                LOGGER.debug("Removing broker version config during Zookeeper to KRaft migration {}", payload);
+                String nextEvent = MIGRATE_ZOOKEEPER_TO_KRAFT_REMOVE_BROKER_VERSION_EVENT.event();
                 sendEvent(context, nextEvent, new MigrateZookeeperToKraftConfigurationEvent(nextEvent, payload.getResourceId(), context.isKraftInstallNeeded()));
             }
 
