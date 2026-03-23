@@ -355,7 +355,7 @@ public abstract class TestContext implements ApplicationContextAware {
 
         CloudbreakUser who = setActingUser(runningParameter);
 
-        LOGGER.info("when {} action on {} bwho =y {}, name: {}", key, entity, who, entity.getName());
+        LOGGER.info("when {} action on {} by {}, name: {}", key, entity, who, entity.getName());
         Log.when(LOGGER, action.getClass().getSimpleName() + " action on " + entity + " by " + who);
 
         try {

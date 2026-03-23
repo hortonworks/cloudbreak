@@ -54,6 +54,10 @@ public abstract class MicroserviceClient<C, I, E extends Enum<E>, W extends Wait
 
     public abstract C getDefaultClient(TestContext testContext);
 
+    public C getDefaultSilentClient(TestContext testContext) {
+        return getDefaultClient(testContext);
+    }
+
     public I getInternalClient(TestContext testContext) {
         throw new TestFailException("There is no internal client for this microservice");
     }

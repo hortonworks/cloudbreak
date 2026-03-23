@@ -30,9 +30,13 @@ public class EnvironmentClient extends MicroserviceClient<com.sequenceiq.environ
 
     private com.sequenceiq.environment.client.EnvironmentClient environmentClient;
 
+    private com.sequenceiq.environment.client.EnvironmentClient environmentSilentClient;
+
     private EnvironmentInternalCrnClient environmentInternalCrnClient;
 
     private com.sequenceiq.environment.client.EnvironmentClient alternativeEnvironmentClient;
+
+    private com.sequenceiq.environment.client.EnvironmentClient alternativeEnvironmentSilentClient;
 
     private EnvironmentInternalCrnClient alternativeEnvironmentInternalCrnClient;
 
@@ -40,19 +44,21 @@ public class EnvironmentClient extends MicroserviceClient<com.sequenceiq.environ
             RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator, String environmentAddress, String environmentInternalAddress,
             String alternativeEnvironmentAddress, String alternativeEnvironmentInternalAddress) {
         setActing(cloudbreakUser);
-        environmentClient = createEnvironmentClient(cloudbreakUser, environmentAddress);
+        environmentClient = createEnvironmentClient(cloudbreakUser, environmentAddress, true);
+        environmentSilentClient = createEnvironmentClient(cloudbreakUser, environmentAddress, false);
         environmentInternalCrnClient = createInternalEnvironmentClient(environmentInternalAddress, regionAwareInternalCrnGenerator);
 
         if (isNotEmpty(alternativeEnvironmentAddress) && isNotEmpty(alternativeEnvironmentInternalAddress)) {
-            alternativeEnvironmentClient = createEnvironmentClient(cloudbreakUser, alternativeEnvironmentAddress);
+            alternativeEnvironmentClient = createEnvironmentClient(cloudbreakUser, alternativeEnvironmentAddress, true);
+            alternativeEnvironmentSilentClient = createEnvironmentClient(cloudbreakUser, alternativeEnvironmentAddress, false);
             alternativeEnvironmentInternalCrnClient = createInternalEnvironmentClient(alternativeEnvironmentInternalAddress, regionAwareInternalCrnGenerator);
         }
     }
 
-    private EnvironmentServiceApiKeyEndpoints createEnvironmentClient(CloudbreakUser cloudbreakUser, String environmentAddress) {
+    private EnvironmentServiceApiKeyEndpoints createEnvironmentClient(CloudbreakUser cloudbreakUser, String environmentAddress, boolean clientDebugEnabled) {
         return new EnvironmentServiceApiKeyClient(
                 environmentAddress,
-                new ConfigKey(false, true, true, TIMEOUT))
+                new ConfigKey(false, clientDebugEnabled, true, TIMEOUT))
                 .withKeys(cloudbreakUser.getAccessKey(), cloudbreakUser.getSecretKey());
     }
 
@@ -98,6 +104,15 @@ public class EnvironmentClient extends MicroserviceClient<com.sequenceiq.environ
             return alternativeEnvironmentClient;
         } else {
             return environmentClient;
+        }
+    }
+
+    @Override
+    public com.sequenceiq.environment.client.EnvironmentClient getDefaultSilentClient(TestContext testContext) {
+        if (testContext.shouldUseAlternativeEndpoints()) {
+            return alternativeEnvironmentSilentClient;
+        } else {
+            return environmentSilentClient;
         }
     }
 
