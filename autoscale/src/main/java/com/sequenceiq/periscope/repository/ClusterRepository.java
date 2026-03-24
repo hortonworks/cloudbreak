@@ -91,6 +91,10 @@ public interface ClusterRepository extends CrudRepository<Cluster, Long> {
 
     List<Cluster> findAllByPeriscopeNodeIdNotInOrPeriscopeNodeIdIsNull(List<String> nodes);
 
+    List<Cluster> findAll();
+
+    long countByPeriscopeNodeId(String nodeId);
+
     @Modifying
     @Query("UPDATE Cluster c SET c.periscopeNodeId = NULL WHERE c.periscopeNodeId = :periscopeNodeId")
     void deallocateClustersOfNode(@Param("periscopeNodeId") String periscopeNodeId);

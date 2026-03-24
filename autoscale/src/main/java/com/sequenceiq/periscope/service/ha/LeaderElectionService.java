@@ -48,6 +48,8 @@ public class LeaderElectionService {
 
     private static final long STACK_COLLECTOR_PERIOD = 10000L;
 
+    private static final double OPTIMAL_FACTOR_FOR_REBALANCING = 0.7;
+
     @Value("${periscope.ha.heartbeat.threshold:60000}")
     private Integer heartbeatThresholdRate;
 
@@ -114,11 +116,11 @@ public class LeaderElectionService {
                             long limit = clock.getCurrentTimeMillis() - heartbeatThresholdRate;
                             List<PeriscopeNode> activeNodes = periscopeNodeRepository.findAllByLastUpdatedIsGreaterThan(limit);
                             if (!activeNodes.isEmpty()) {
-                                reallocateOrphanClusters(activeNodes);
+                                rebalanceClusters(activeNodes);
                                 cleanupInactiveNodesByActiveNodes(activeNodes);
                             }
                         } catch (RuntimeException e) {
-                            LOGGER.error("Error happend during fetching cluster allocating them to nodes", e);
+                            LOGGER.error("Error happened during fetching cluster allocating them to nodes", e);
                         }
                     }
                 }, LEADER_TASK_DELAY, STACK_COLLECTOR_PERIOD);
@@ -126,15 +128,14 @@ public class LeaderElectionService {
         }
     }
 
-    private void reallocateOrphanClusters(List<PeriscopeNode> activeNodes) {
+    private void rebalanceClusters(List<PeriscopeNode> activeNodes) {
         if (activeNodes.stream().noneMatch(n -> n.isLeader() && n.getUuid().equals(periscopeNodeConfig.getId()))) {
             Optional<PeriscopeNode> leader = activeNodes.stream().filter(PeriscopeNode::isLeader).findFirst();
             LOGGER.info("Leader is {}, let's drop leader scope", leader.isPresent() ? leader.get().getUuid() : "-");
             resetTimer();
             return;
         }
-        List<String> nodeIds = activeNodes.stream().map(PeriscopeNode::getUuid).collect(Collectors.toList());
-        List<Cluster> orphanClusters = clusterRepository.findAllByPeriscopeNodeIdNotInOrPeriscopeNodeIdIsNull(nodeIds);
+        List<Cluster> orphanClusters = fetchClustersToRebalance(activeNodes);
         if (!orphanClusters.isEmpty()) {
             Iterator<PeriscopeNode> iterator = activeNodes.iterator();
             for (Cluster cluster : orphanClusters) {
@@ -146,10 +147,33 @@ public class LeaderElectionService {
                     executeMissedTimeBasedAlerts(cluster);
                 }
                 cluster.setPeriscopeNodeId(iterator.next().getUuid());
-                LOGGER.info("Allocationg cluster {} to node {}", cluster.getId(), cluster.getPeriscopeNodeId());
+                LOGGER.info("Allocating cluster {} to node {}", cluster.getId(), cluster.getPeriscopeNodeId());
             }
             clusterRepository.saveAll(orphanClusters);
         }
+    }
+
+    private List<Cluster> fetchClustersToRebalance(List<PeriscopeNode> activeNodes) {
+        boolean rebalaceRequired = false;
+        long totalClusters = clusterRepository.count();
+        for (PeriscopeNode activeNode : activeNodes) {
+            long clustersOnNode = clusterRepository.countByPeriscopeNodeId(activeNode.getUuid());
+            long idealClustersOnNode = (long) (((double) totalClusters / activeNodes.size()) * OPTIMAL_FACTOR_FOR_REBALANCING);
+            if (clustersOnNode < idealClustersOnNode) {
+                rebalaceRequired = true;
+                break;
+            }
+        }
+        List<Cluster> orphanClusters;
+        if (rebalaceRequired) {
+            LOGGER.info("Re-balancing all cluster for managing them properly");
+            orphanClusters = clusterRepository.findAll();
+        } else {
+            LOGGER.info("Re-balancing only orphan clusters across active nodes");
+            List<String> nodeIds = activeNodes.stream().map(PeriscopeNode::getUuid).collect(Collectors.toList());
+            orphanClusters = clusterRepository.findAllByPeriscopeNodeIdNotInOrPeriscopeNodeIdIsNull(nodeIds);
+        }
+        return orphanClusters;
     }
 
     private boolean isExecutionOfMissedTimeBasedAlertsNeeded(Cluster cluster) {
