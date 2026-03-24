@@ -116,6 +116,7 @@ public class ModelDescriptions {
         public static final String PASSWORD = "ambari password";
         public static final String INPUTS = "dynamic properties";
         public static final String STACK_STATUS = "status of the stack";
+        public static final String DETAILED_STACK_STATUS = "detailed status of the stack";
         public static final String STATUS_REASON = "status message of the stack";
         public static final String STATUS_REQUEST = "status of the scale request";
         public static final String SERVER_IP = "public ambari ip of the stack";
