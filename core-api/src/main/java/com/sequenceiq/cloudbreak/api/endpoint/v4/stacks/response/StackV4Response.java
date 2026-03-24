@@ -14,6 +14,7 @@ import jakarta.validation.constraints.NotNull;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.CloudbreakEventV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StackV4Base;
@@ -69,6 +70,9 @@ public class StackV4Response extends StackV4Base implements TaggedResponse {
 
     @Schema(description = StackModelDescription.STACK_STATUS)
     private Status status;
+
+    @Schema(description = StackModelDescription.DETAILED_STACK_STATUS)
+    private DetailedStackStatus detailedStackStatus;
 
     @Schema(description = StackModelDescription.CLUSTER)
     private ClusterV4Response cluster;
@@ -544,6 +548,14 @@ public class StackV4Response extends StackV4Base implements TaggedResponse {
 
     public void setNotificationState(NotificationState notificationState) {
         this.notificationState = notificationState;
+    }
+
+    public DetailedStackStatus getDetailedStackStatus() {
+        return detailedStackStatus;
+    }
+
+    public void setDetailedStackStatus(DetailedStackStatus detailedStackStatus) {
+        this.detailedStackStatus = detailedStackStatus;
     }
 
     @Override

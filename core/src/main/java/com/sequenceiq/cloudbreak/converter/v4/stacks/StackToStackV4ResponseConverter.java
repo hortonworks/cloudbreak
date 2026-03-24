@@ -157,6 +157,7 @@ public class StackToStackV4ResponseConverter {
         response.setCloudPlatform(CloudPlatform.valueOf(source.getCloudPlatform()));
         response.setPlacement(stackToPlacementSettingsV4ResponseConverter.convert(source));
         response.setStatus(source.getStatus());
+        response.setDetailedStackStatus(source.getDetailedStatus());
         response.setTerminated(source.getTerminated());
         response.setStatusReason(source.getStatusReason());
         response.setInstanceGroups(getInstanceGroups(stack));
