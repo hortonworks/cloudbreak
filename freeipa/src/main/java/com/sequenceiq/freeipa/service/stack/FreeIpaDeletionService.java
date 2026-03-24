@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.rotation.job.PeriodicRotationJobService;
 import com.sequenceiq.flow.core.ApplicationFlowInformation;
 import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.flow.domain.ClassValue;
@@ -63,6 +64,9 @@ public class FreeIpaDeletionService {
     @Inject
     private FreeIpaSecretRotationService freeIpaSecretRotationService;
 
+    @Inject
+    private PeriodicRotationJobService periodicRotationJobService;
+
     public void delete(String environmentCrn, String accountId, boolean forced) {
         List<Stack> stacks = stackService.findAllByEnvironmentCrnAndAccountId(environmentCrn, accountId);
         if (stacks.isEmpty()) {
@@ -77,6 +81,7 @@ public class FreeIpaDeletionService {
         MDCBuilder.buildMdcContext(stack);
         flowCancelService.cancelTooOldTerminationFlowForResource(stack.getId(), stack.getName());
         freeipaJobService.unschedule(stack);
+        periodicRotationJobService.unschedule(String.valueOf(stack.getId()));
         if (!stack.isDeleteCompleted()) {
             handleIfStackIsNotTerminated(stack, forced);
         } else {

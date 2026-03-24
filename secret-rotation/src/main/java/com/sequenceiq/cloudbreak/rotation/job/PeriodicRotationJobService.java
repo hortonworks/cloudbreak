@@ -43,6 +43,10 @@ public class PeriodicRotationJobService implements JobSchedulerService {
     private Clock clock;
 
     public void schedule(PeriodicRotationJobAdapter adapter) {
+        if (!periodicRotationProperties.isEnabled()) {
+            LOGGER.debug("Periodic secret rotation disabled by service, skipping schedule.");
+            return;
+        }
         try {
             JobDetail jobDetail = buildJobDetail(adapter);
             JobKey jobKey = jobDetail.getKey();
@@ -87,6 +91,17 @@ public class PeriodicRotationJobService implements JobSchedulerService {
         int spreadMinutes = Math.min(interval, MAX_INITIAL_SPREAD_MINUTES);
         long delayMinutes = spreadMinutes > 0 ? RandomUtil.getInt(spreadMinutes) : 0;
         return Date.from(clock.getCurrentInstant().plus(Duration.ofMinutes(delayMinutes)));
+    }
+
+    public void unschedule(String id) {
+        JobKey jobKey = JobKey.jobKey(id, JOB_GROUP);
+        try {
+            if (scheduler.getJobDetail(jobKey) != null) {
+                scheduler.deleteJob(jobKey);
+            }
+        } catch (Exception e) {
+            LOGGER.error(String.format("Error during unscheduling quartz job: %s", jobKey), e);
+        }
     }
 
     @Override

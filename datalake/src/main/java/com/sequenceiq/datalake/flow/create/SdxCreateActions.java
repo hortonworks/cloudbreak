@@ -23,6 +23,8 @@ import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.service.StatusCheckerJobService;
+import com.sequenceiq.cloudbreak.rotation.job.PeriodicRotationJobAdapter;
+import com.sequenceiq.cloudbreak.rotation.job.PeriodicRotationJobService;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.events.EventSenderService;
@@ -42,6 +44,7 @@ import com.sequenceiq.datalake.flow.create.event.StorageConsumptionCollectionSch
 import com.sequenceiq.datalake.flow.create.event.StorageValidationRequest;
 import com.sequenceiq.datalake.flow.create.event.StorageValidationSuccessEvent;
 import com.sequenceiq.datalake.job.SdxClusterJobAdapter;
+import com.sequenceiq.datalake.job.SdxClusterJobResources;
 import com.sequenceiq.datalake.metric.MetricType;
 import com.sequenceiq.datalake.metric.SdxMetricService;
 import com.sequenceiq.datalake.service.AbstractSdxAction;
@@ -87,6 +90,9 @@ public class SdxCreateActions {
 
     @Inject
     private FlowChainLogService flowChainLogService;
+
+    @Inject
+    private PeriodicRotationJobService periodicRotationJobService;
 
     @Bean(name = "SDX_CREATION_VALIDATION_STATE")
     public Action<?, ?> sdxValidation() {
@@ -265,6 +271,7 @@ public class SdxCreateActions {
                 );
                 metricService.incrementMetricCounter(MetricType.SDX_CREATION_FINISHED, sdxCluster);
                 jobService.schedule(context.getSdxId(), SdxClusterJobAdapter.class);
+                periodicRotationJobService.schedule(new PeriodicRotationJobAdapter(SdxClusterJobResources.fromSdxCluster(sdxCluster)));
                 sendEvent(context, SDX_CREATE_FINALIZED_EVENT.event(), payload);
             }
 

@@ -16,6 +16,8 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.rotation.job.PeriodicRotationJobAdapter;
+import com.sequenceiq.cloudbreak.rotation.job.PeriodicRotationJobService;
 import com.sequenceiq.cloudbreak.wiam.client.GrpcWiamClient;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.entity.Stack;
@@ -42,6 +44,7 @@ import com.sequenceiq.freeipa.flow.stack.StackEvent;
 import com.sequenceiq.freeipa.flow.stack.StackFailureContext;
 import com.sequenceiq.freeipa.flow.stack.StackFailureEvent;
 import com.sequenceiq.freeipa.flow.stack.provision.action.AbstractStackProvisionAction;
+import com.sequenceiq.freeipa.job.FreeIpaStackJobResources;
 import com.sequenceiq.freeipa.metrics.FreeIpaMetricService;
 import com.sequenceiq.freeipa.metrics.MetricType;
 import com.sequenceiq.freeipa.service.config.AbstractConfigRegister;
@@ -66,6 +69,9 @@ public class FreeIpaProvisionActions {
 
     @Inject
     private ProviderSyncJobService providerSyncJobService;
+
+    @Inject
+    private PeriodicRotationJobService periodicRotationJobService;
 
     @Bean(name = "BOOTSTRAPPING_MACHINES_STATE")
     public Action<?, ?> bootstrappingMachinesAction() {
@@ -214,6 +220,7 @@ public class FreeIpaProvisionActions {
                 freeipaJobService.schedule(stackId);
                 dynamicEntitlementRefreshJobService.schedule(stackId);
                 providerSyncJobService.schedule(stack);
+                periodicRotationJobService.schedule(new PeriodicRotationJobAdapter(FreeIpaStackJobResources.fromStack(stack)));
                 stackUpdater.updateStackStatus(stack, DetailedStackStatus.PROVISIONED, "FreeIPA installation finished");
                 synchronizeUsersViaWiam(stack);
                 sendEvent(context);

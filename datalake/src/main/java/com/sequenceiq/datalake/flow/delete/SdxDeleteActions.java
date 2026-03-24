@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.service.StatusCheckerJobService;
+import com.sequenceiq.cloudbreak.rotation.job.PeriodicRotationJobService;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.events.EventSenderService;
@@ -84,6 +85,9 @@ public class SdxDeleteActions {
     @Inject
     private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
 
+    @Inject
+    private PeriodicRotationJobService periodicRotationJobService;
+
     @Bean(name = "SDX_DELETION_START_STATE")
     public Action<?, ?> sdxDeletion() {
         return new AbstractSdxAction<>(SdxDeleteStartEvent.class) {
@@ -97,6 +101,7 @@ public class SdxDeleteActions {
             protected void doExecute(SdxContext context, SdxDeleteStartEvent payload, Map<Object, Object> variables) throws Exception {
                 LOGGER.info("Start stack deletion for SDX: {}", payload.getResourceId());
                 jobService.unschedule(String.valueOf(context.getSdxId()));
+                periodicRotationJobService.unschedule(String.valueOf(context.getSdxId()));
                 provisionerService.startStackDeletion(payload.getResourceId(), payload.isForced());
                 eventSenderService.notifyEvent(context, ResourceEvent.SDX_CLUSTER_DELETION_STARTED);
                 sendEvent(context, SDX_STACK_DELETION_IN_PROGRESS_EVENT.event(), payload);

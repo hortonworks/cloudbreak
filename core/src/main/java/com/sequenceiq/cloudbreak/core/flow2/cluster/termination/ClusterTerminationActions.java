@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.PrepareClusterTermina
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterTerminationRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterTerminationResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.TerminationEvent;
+import com.sequenceiq.cloudbreak.rotation.job.PeriodicRotationJobService;
 import com.sequenceiq.cloudbreak.structuredevent.job.StructuredSynchronizerJobService;
 import com.sequenceiq.flow.core.PayloadConverter;
 
@@ -38,6 +39,9 @@ public class ClusterTerminationActions {
 
     @Inject
     private StructuredSynchronizerJobService syncJobService;
+
+    @Inject
+    private PeriodicRotationJobService periodicRotationJobService;
 
     @Bean(name = "PREPARE_CLUSTER_STATE")
     public Action<?, ?> prepareCluster() {
@@ -128,6 +132,7 @@ public class ClusterTerminationActions {
                 clusterTerminationFlowService.finishClusterTerminationAllowed(context, payload);
                 jobService.unschedule(String.valueOf(context.getStackId()));
                 syncJobService.unschedule(String.valueOf(context.getStackId()));
+                periodicRotationJobService.unschedule(String.valueOf(context.getStackId()));
                 sendEvent(context);
             }
 

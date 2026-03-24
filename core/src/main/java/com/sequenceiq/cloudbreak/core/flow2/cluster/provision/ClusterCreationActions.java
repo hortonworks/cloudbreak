@@ -18,6 +18,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.action.Action;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyEnablementService;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -32,6 +33,7 @@ import com.sequenceiq.cloudbreak.domain.stack.StackPatchType;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.job.StackJobAdapter;
+import com.sequenceiq.cloudbreak.job.StackViewJobResources;
 import com.sequenceiq.cloudbreak.job.archiver.instancemetadata.ArchiveInstanceMetaDataJobService;
 import com.sequenceiq.cloudbreak.job.diskusage.DiskUsageSyncJobService;
 import com.sequenceiq.cloudbreak.job.dynamicentitlement.DynamicEntitlementRefreshJobService;
@@ -107,6 +109,8 @@ import com.sequenceiq.cloudbreak.reactor.api.event.recipe.UploadRecipesSuccess;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.CleanupAdEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.CleanupFreeIpaEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.ProvisionEvent;
+import com.sequenceiq.cloudbreak.rotation.job.PeriodicRotationJobAdapter;
+import com.sequenceiq.cloudbreak.rotation.job.PeriodicRotationJobService;
 import com.sequenceiq.cloudbreak.service.freeipa.InstanceMetadataProcessor;
 import com.sequenceiq.cloudbreak.service.metering.MeteringService;
 import com.sequenceiq.cloudbreak.service.metrics.MetricType;
@@ -160,6 +164,9 @@ public class ClusterCreationActions {
 
     @Inject
     private StackUtil stackUtil;
+
+    @Inject
+    private PeriodicRotationJobService periodicRotationJobService;
 
     @Bean(name = "CLUSTER_PROXY_REGISTRATION_STATE")
     public Action<?, ?> clusterProxyRegistrationAction() {
@@ -752,6 +759,9 @@ public class ClusterCreationActions {
                 }
                 meteringService.sendMeteringStatusChangeEventForStack(context.getStackId(), STARTED);
                 meteringService.scheduleSync(context.getStackId());
+                if (StackType.WORKLOAD.equals(context.getStack().getType())) {
+                    periodicRotationJobService.schedule(new PeriodicRotationJobAdapter(StackViewJobResources.fromStackView(context.getStack())));
+                }
                 getMetricService().incrementMetricCounter(MetricType.CLUSTER_CREATION_SUCCESSFUL, context.getStack());
                 sendEvent(context);
             }

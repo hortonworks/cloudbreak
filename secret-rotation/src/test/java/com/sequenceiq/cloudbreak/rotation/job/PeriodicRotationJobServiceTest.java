@@ -2,8 +2,10 @@ package com.sequenceiq.cloudbreak.rotation.job;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -44,8 +46,20 @@ class PeriodicRotationJobServiceTest {
 
     @BeforeEach
     void setup() {
+        lenient().when(periodicRotationProperties.isEnabled()).thenReturn(true);
         lenient().when(periodicRotationProperties.getScheduleIntervalMinutes()).thenReturn(60);
         lenient().when(clock.getCurrentInstant()).thenReturn(Instant.now());
+    }
+
+    @Test
+    void scheduleSkippedWhenPeriodicRotationDisabled() throws Exception {
+        when(periodicRotationProperties.isEnabled()).thenReturn(false);
+        PeriodicRotationJobAdapter adapter = new PeriodicRotationJobAdapter(mock(JobResource.class));
+
+        underTest.schedule(adapter);
+
+        verify(scheduler, never()).scheduleJob(any(JobDetail.class), any(Trigger.class));
+        verify(scheduler, never()).deleteJob(any(JobKey.class));
     }
 
     @Test
@@ -85,6 +99,42 @@ class PeriodicRotationJobServiceTest {
 
         verify(scheduler, times(1)).deleteJob(any(JobKey.class));
         verify(scheduler, times(1)).scheduleJob(any(JobDetail.class), any(Trigger.class));
+    }
+
+    @Test
+    void unscheduleDeletesJobWhenPresent() throws Exception {
+        String id = "123";
+        JobKey expectedKey = JobKey.jobKey(id, "periodic-secret-rotation-job-group");
+        when(scheduler.getJobDetail(eq(expectedKey))).thenReturn(mock(JobDetail.class));
+
+        underTest.unschedule(id);
+
+        verify(scheduler).getJobDetail(expectedKey);
+        verify(scheduler).deleteJob(expectedKey);
+    }
+
+    @Test
+    void unscheduleDoesNotDeleteWhenJobMissing() throws Exception {
+        String id = "456";
+        JobKey expectedKey = JobKey.jobKey(id, "periodic-secret-rotation-job-group");
+        when(scheduler.getJobDetail(eq(expectedKey))).thenReturn(null);
+
+        underTest.unschedule(id);
+
+        verify(scheduler).getJobDetail(expectedKey);
+        verify(scheduler, never()).deleteJob(any(JobKey.class));
+    }
+
+    @Test
+    void unscheduleSwallowsSchedulerException() throws Exception {
+        String id = "789";
+        JobKey expectedKey = JobKey.jobKey(id, "periodic-secret-rotation-job-group");
+        when(scheduler.getJobDetail(eq(expectedKey))).thenThrow(new RuntimeException("scheduler down"));
+
+        underTest.unschedule(id);
+
+        verify(scheduler).getJobDetail(expectedKey);
+        verify(scheduler, never()).deleteJob(any(JobKey.class));
     }
 }
 

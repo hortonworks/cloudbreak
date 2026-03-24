@@ -30,6 +30,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
 import com.sequenceiq.cloudbreak.common.service.Clock;
+import com.sequenceiq.cloudbreak.rotation.job.PeriodicRotationJobService;
 import com.sequenceiq.flow.core.ApplicationFlowInformation;
 import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.flow.domain.ClassValue;
@@ -87,6 +88,9 @@ class FreeIpaDeletionServiceTest {
     @Mock
     private Clock clock;
 
+    @Mock
+    private PeriodicRotationJobService periodicRotationJobService;
+
     private Stack stack;
 
     @BeforeEach
@@ -98,6 +102,7 @@ class FreeIpaDeletionServiceTest {
         stackStatus.setStatus(Status.AVAILABLE);
         stack.setStackStatus(stackStatus);
         lenient().doNothing().when(freeIpaSecretRotationService).cleanupSecretRotationEntries(anyString());
+        lenient().doNothing().when(periodicRotationJobService).unschedule(anyString());
     }
 
     @Test
@@ -112,6 +117,7 @@ class FreeIpaDeletionServiceTest {
         verify(flowManager, times(1)).notify(eq(TERMINATION_EVENT.event()), terminationEventArgumentCaptor.capture());
         verify(flowCancelService).cancelTooOldTerminationFlowForResource(stack.getId(), stack.getName());
         verify(freeipaJobService).unschedule(stack);
+        verify(periodicRotationJobService).unschedule(String.valueOf(STACK_ID));
 
         assertAll(
                 () -> assertEquals(TERMINATION_EVENT.event(), terminationEventArgumentCaptor.getValue().selector()),
@@ -189,5 +195,6 @@ class FreeIpaDeletionServiceTest {
         assertThrows(BadRequestException.class, () -> underTest.delete(ENVIRONMENT_CRN, ACCOUNT_ID, false));
         verify(stackService, times(1)).findAllByEnvironmentCrnAndAccountId(eq(ENVIRONMENT_CRN), eq(ACCOUNT_ID));
         verify(childEnvironmentService, times(1)).findChildEnvironments(stack, ACCOUNT_ID);
+        verify(periodicRotationJobService, never()).unschedule(anyString());
     }
 }
