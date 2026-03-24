@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.service.parcel;
 
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -17,8 +16,23 @@ import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateGeneratorService;
 import com.sequenceiq.cloudbreak.cmtemplate.generator.support.domain.SupportedService;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.service.CloudbreakRuntimeException;
 import com.sequenceiq.cloudbreak.service.upgrade.sync.component.ImageReaderService;
 
+/**
+ * Filters the set of candidate parcels down to only those required by a given cluster blueprint,
+ * using each parcel's remote manifest to determine which services it provides.
+ * <p>
+ * Filtering only applies to pre-warmed images. For base images (no parcels baked in), all
+ * candidate parcels are returned as-is because there is no image-based baseline to compare against.
+ * Similarly, if any service in the blueprint cannot be identified, all parcels are returned to
+ * avoid accidentally excluding a required one.
+ * <p>
+ * Parcels that are not present on the pre-warmed image are treated as custom parcels and are
+ * always included regardless of blueprint content. CDH is always included because it is a
+ * mandatory runtime dependency (e.g. Knox is always added to clusters and is shipped in CDH),
+ * even when no CDH-resident service appears explicitly in the blueprint.
+ */
 @Service
 public class ParcelFilterService {
 
@@ -40,71 +54,32 @@ public class ParcelFilterService {
         Set<String> serviceNamesInBlueprint = getServiceNamesInBlueprint(blueprint);
         LOGGER.debug("The following services are found in the blueprint: {}", serviceNamesInBlueprint);
         if (serviceNamesInBlueprint.contains(null)) {
-            LOGGER.debug("We can not identify one of the service from the blueprint so to stay on the safe side we will add every parcel");
+            LOGGER.debug("We cannot identify all services from the blueprint so to stay on the safe side we will add every parcel");
             return parcels;
         }
         Set<String> availableParcelNamesFromImage = imageReaderService.getParcelNames(workspaceId, stackId);
         if (availableParcelNamesFromImage.isEmpty()) {
-            LOGGER.debug("There is no pre warmed parcel on the image therefore we assume that every parcel is required. Parcels: {}", parcels);
+            LOGGER.debug("There is no pre-warmed parcel on the image therefore we assume that every parcel is required. Parcels: {}", parcels);
             return parcels;
         } else {
-            LOGGER.debug("The following parcels are available on the pre-warm image: {}", availableParcelNamesFromImage);
+            LOGGER.debug("The following parcels are available on the pre-warmed image: {}", availableParcelNamesFromImage);
         }
-        Set<ClouderaManagerProduct> requiredParcels = filterParcels(parcels, serviceNamesInBlueprint, availableParcelNamesFromImage);
+        Set<ClouderaManagerProduct> customParcels = collectCustomParcels(availableParcelNamesFromImage, parcels);
+        Set<ClouderaManagerProduct> cdhParcels = collectCdhParcels(parcels);
+        Set<ClouderaManagerProduct> requiredParcels = filterParcelsByManifest(parcels, serviceNamesInBlueprint, customParcels, cdhParcels);
         LOGGER.debug("The following parcels are used in CM based on blueprint: {}", requiredParcels);
         return requiredParcels;
     }
 
-    private Set<ClouderaManagerProduct> filterParcels(Set<ClouderaManagerProduct> parcels, Set<String> requiredServicesInBlueprint,
-            Set<String> availableParcelNamesFromImage) {
-        Set<ClouderaManagerProduct> requiredParcels = new HashSet<>();
-        Set<ClouderaManagerProduct> notAccessibleParcels = new HashSet<>();
-        Iterator<ClouderaManagerProduct> parcelIterator = parcels.iterator();
-        requiredParcels.addAll(collectCustomParcelsIfPresent(availableParcelNamesFromImage, parcels));
-        requiredParcels.addAll(collectCdhParcel(parcels));
-        while (!requiredServicesInBlueprint.isEmpty() && parcelIterator.hasNext()) {
-            ClouderaManagerProduct parcel = parcelIterator.next();
-            ImmutablePair<ManifestStatus, Manifest> manifest = manifestRetrieverService.readRepoManifest(parcel.getParcel());
-            if (manifestAvailable(manifest)) {
-                Set<String> servicesInParcel = getAllServiceNameInParcel(manifest.right);
-                LOGGER.debug("The {} parcel contains the following services: {}", parcel.getName(), servicesInParcel);
-                if (servicesArePresentInTheBlueprint(requiredServicesInBlueprint, servicesInParcel, parcel) || CDH.equals(parcel.getName())) {
-                    requiredParcels.add(parcel);
-                    LOGGER.debug("Removing {} from the remaining required services because these services are found in {} parcel.", servicesInParcel, parcel);
-                    requiredServicesInBlueprint.removeAll(servicesInParcel);
-                } else {
-                    LOGGER.info("Skip parcel '{}' as there isn't any service both in the manifest and in the blueprint.", parcel);
-                }
-            } else {
-                LOGGER.info("Add parcel '{}' as we were unable to check parcel's manifest.", parcel);
-                notAccessibleParcels.add(parcel);
-            }
-        }
-        if (!requiredServicesInBlueprint.isEmpty()) {
-            LOGGER.debug("Add {} not accessible parcels to the required parcel list because the {} required services are not found in the accessible parcels.",
-                    notAccessibleParcels, requiredServicesInBlueprint);
-            requiredParcels.addAll(notAccessibleParcels);
-        }
-        return requiredParcels;
+    private Set<String> getServiceNamesInBlueprint(Blueprint blueprint) {
+        String blueprintText = blueprint.getBlueprintJsonText();
+        Set<SupportedService> supportedServices = clusterTemplateGeneratorService.getServicesByBlueprint(blueprintText).getServices();
+        return supportedServices.stream()
+                .map(SupportedService::getName)
+                .collect(Collectors.toSet());
     }
 
-    private boolean manifestAvailable(ImmutablePair<ManifestStatus, Manifest> manifest) {
-        return manifest.right != null && ManifestStatus.SUCCESS.equals(manifest.left);
-    }
-
-    private boolean servicesArePresentInTheBlueprint(Set<String> serviceNamesInBlueprint, Set<String> componentNamesInParcel, ClouderaManagerProduct parcel) {
-        if (componentNamesInParcel.stream()
-                .anyMatch(serviceInParcel -> serviceNamesInBlueprint.stream()
-                        .anyMatch(serviceInBlueprint -> serviceInBlueprint.equalsIgnoreCase(serviceInParcel)))) {
-            LOGGER.debug("Add parcel '{}' as there is at least one service both in the manifest and in the blueprint.", parcel);
-            return true;
-        } else {
-            LOGGER.debug("The following services in the parcel {} are not present in the blueprint {}", componentNamesInParcel, serviceNamesInBlueprint);
-            return false;
-        }
-    }
-
-    private Set<ClouderaManagerProduct> collectCustomParcelsIfPresent(Set<String> availableParcelNamesFromImage, Set<ClouderaManagerProduct> parcels) {
+    private Set<ClouderaManagerProduct> collectCustomParcels(Set<String> availableParcelNamesFromImage, Set<ClouderaManagerProduct> parcels) {
         Set<ClouderaManagerProduct> customParcels = parcels.stream()
                 .filter(parcel -> !availableParcelNamesFromImage.contains(parcel.getName()))
                 .collect(Collectors.toSet());
@@ -116,25 +91,86 @@ public class ParcelFilterService {
         return customParcels;
     }
 
-    private Collection<ClouderaManagerProduct> collectCdhParcel(Set<ClouderaManagerProduct> parcels) {
+    private Set<ClouderaManagerProduct> collectCdhParcels(Set<ClouderaManagerProduct> parcels) {
         return parcels.stream()
-                .filter(p -> CDH.equals(p.getName()))
+                .filter(parcel -> CDH.equals(parcel.getName()))
                 .collect(Collectors.toSet());
     }
 
-    private Set<String> getServiceNamesInBlueprint(Blueprint blueprint) {
-        String blueprintText = blueprint.getBlueprintJsonText();
-        Set<SupportedService> supportedServices = clusterTemplateGeneratorService.getServicesByBlueprint(blueprintText).getServices();
-        return supportedServices.stream()
-                .map(SupportedService::getName)
-                .collect(Collectors.toSet());
+    /**
+     * Iterates over parcels, fetching each one's remote manifest to determine which services it
+     * provides, and includes it in the result if any of those services are required by the blueprint.
+     * The loop exits early once all required services have been matched.
+     * <p>
+     * Parcels whose manifest cannot be retrieved or parsed are collected separately as
+     * {@code notAccessibleParcels}. These are only added to the result at the end if there are
+     * still unmatched required services — on the assumption that one of the inaccessible parcels
+     * may provide them. If all required services were already matched by accessible parcels,
+     * the inaccessible ones are silently dropped.
+     */
+    private Set<ClouderaManagerProduct> filterParcelsByManifest(Set<ClouderaManagerProduct> parcels, Set<String> requiredServicesInBlueprint,
+            Set<ClouderaManagerProduct> customParcels, Set<ClouderaManagerProduct> cdhParcels) {
+        Set<ClouderaManagerProduct> requiredParcels = new HashSet<>();
+        Set<ClouderaManagerProduct> notAccessibleParcels = new HashSet<>();
+        Iterator<ClouderaManagerProduct> parcelIterator = parcels.iterator();
+        requiredParcels.addAll(customParcels);
+        requiredParcels.addAll(cdhParcels);
+        while (!requiredServicesInBlueprint.isEmpty() && parcelIterator.hasNext()) {
+            ClouderaManagerProduct parcel = parcelIterator.next();
+            ImmutablePair<ManifestStatus, Manifest> manifest;
+            try {
+                manifest = manifestRetrieverService.readRepoManifest(parcel.getParcel());
+            } catch (CloudbreakRuntimeException e) {
+                LOGGER.info("Adding parcel '{}' as retrieving its manifest has failed.", parcel);
+                notAccessibleParcels.add(parcel);
+                continue;
+            }
+            if (manifestAvailable(manifest)) {
+                Set<String> servicesInParcel = getAllServiceNamesInParcel(manifest.right);
+                LOGGER.debug("Parcel '{}' contains the following services: {}", parcel.getName(), servicesInParcel);
+                if (CDH.equals(parcel.getName()) || parcelContainsServicesRequiredByBlueprint(requiredServicesInBlueprint, servicesInParcel, parcel)) {
+                    requiredParcels.add(parcel);
+                    LOGGER.debug("Removing '{}' from the remaining required services because these services are found in '{}' parcel.",
+                        servicesInParcel, parcel);
+                    requiredServicesInBlueprint.removeAll(servicesInParcel);
+                } else {
+                    LOGGER.info("Skipping parcel '{}' as none of its manifest services are required by the blueprint.", parcel);
+                }
+            } else {
+                LOGGER.info("Adding parcel '{}' as its manifest was not available (status: {}).", parcel, manifest.left);
+                notAccessibleParcels.add(parcel);
+            }
+        }
+        if (!requiredServicesInBlueprint.isEmpty()) {
+            LOGGER.debug("Adding {} not accessible parcels to required parcels as {} required services are not found in the accessible parcels.",
+                    notAccessibleParcels, requiredServicesInBlueprint);
+            requiredParcels.addAll(notAccessibleParcels);
+        }
+        return requiredParcels;
     }
 
-    private Set<String> getAllServiceNameInParcel(Manifest manifest) {
+    private boolean manifestAvailable(ImmutablePair<ManifestStatus, Manifest> manifest) {
+        return manifest.right != null && ManifestStatus.SUCCESS.equals(manifest.left);
+    }
+
+    private Set<String> getAllServiceNamesInParcel(Manifest manifest) {
         return manifest.getParcels().stream()
-                .flatMap(it -> it.getComponents().stream())
+                .flatMap(parcel -> parcel.getComponents().stream())
                 .map(Component::getName)
                 .map(String::trim)
                 .collect(Collectors.toSet());
+    }
+
+    private boolean parcelContainsServicesRequiredByBlueprint(Set<String> serviceNamesInBlueprint, Set<String> serviceNamesInParcel,
+        ClouderaManagerProduct parcel) {
+        if (serviceNamesInParcel.stream()
+                .anyMatch(serviceInParcel -> serviceNamesInBlueprint.stream()
+                        .anyMatch(serviceInBlueprint -> serviceInBlueprint.equalsIgnoreCase(serviceInParcel)))) {
+            LOGGER.debug("Adding parcel '{}' as there is at least one service both in the manifest and in the blueprint.", parcel);
+            return true;
+        } else {
+            LOGGER.debug("The following services in the parcel '{}' are not present in the blueprint {}", serviceNamesInParcel, serviceNamesInBlueprint);
+            return false;
+        }
     }
 }

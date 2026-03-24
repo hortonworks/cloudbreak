@@ -26,6 +26,7 @@ import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateGeneratorService;
 import com.sequenceiq.cloudbreak.cmtemplate.generator.support.domain.SupportedService;
 import com.sequenceiq.cloudbreak.cmtemplate.generator.support.domain.SupportedServices;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.service.CloudbreakRuntimeException;
 import com.sequenceiq.cloudbreak.service.upgrade.sync.component.ImageReaderService;
 
 @ExtendWith(MockitoExtension.class)
@@ -176,6 +177,23 @@ public class ParcelFilterServiceTest {
         when(manifestRetrieverService.readRepoManifest(cdhParcel.getParcel())).thenReturn(
                 ImmutablePair.of(ManifestStatus.SUCCESS, getManifest("HDFS", "HIVE")));
         when(manifestRetrieverService.readRepoManifest(nifiParcel.getParcel())).thenReturn(ImmutablePair.of(ManifestStatus.FAILED, null));
+
+        Set<ClouderaManagerProduct> actual = underTest.filterParcelsByBlueprint(WORKSPACE_ID, STACK_ID, createParcelSet(cdhParcel, nifiParcel), getBlueprint());
+        assertEquals(2, actual.size());
+        assertTrue(actual.contains(cdhParcel));
+        assertTrue(actual.contains(nifiParcel));
+    }
+
+    @Test
+    void testShouldAddNotAccessibleParcelsToRequiredParcelsWhenReadRepoManifestRetriesAreExhausted() {
+        when(clusterTemplateGeneratorService.getServicesByBlueprint(BLUEPRINT_TEXT)).thenReturn(getSupportedServices(Set.of("HDFS", "HIVE", "SPARK")));
+        when(imageReaderService.getParcelNames(WORKSPACE_ID, STACK_ID)).thenReturn(Set.of("HDFS", "HIVE", "SPARK", "CDH", "NIFI"));
+        ClouderaManagerProduct cdhParcel = new ClouderaManagerProduct().withParcel("cdh-parcel-url").withName("CDH");
+        ClouderaManagerProduct nifiParcel = new ClouderaManagerProduct().withParcel("nifi-parcel-url").withName("NIFI");
+        when(manifestRetrieverService.readRepoManifest(cdhParcel.getParcel())).thenReturn(
+                ImmutablePair.of(ManifestStatus.SUCCESS, getManifest("HDFS", "HIVE")));
+        when(manifestRetrieverService.readRepoManifest(nifiParcel.getParcel()))
+                .thenThrow(new CloudbreakRuntimeException("Retries exhausted"));
 
         Set<ClouderaManagerProduct> actual = underTest.filterParcelsByBlueprint(WORKSPACE_ID, STACK_ID, createParcelSet(cdhParcel, nifiParcel), getBlueprint());
         assertEquals(2, actual.size());
