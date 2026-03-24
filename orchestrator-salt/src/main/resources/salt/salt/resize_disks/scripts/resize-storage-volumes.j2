@@ -8,25 +8,42 @@ LOG_FILE="/var/log/resize-storage-volumes.log"
 CLOUD_PLATFORM="{{salt['pillar.get']('platform')}}"
 
 extend_partition() {
-  device=$1
-  LOG_FILE=$2
-  STR=$(cat /etc/os-release)
-  SUB="VERSION_ID=\"2\""
-  # Expand the size of the file system.
-  # Check if we're on AL2
-  if [[ "$STR" == *"$SUB"* ]]
-  then
-    log $LOG_FILE "resizing disk for filesystem: xfs_growfs"
-    log $LOG_FILE "growing: ${device}"
-    extend_azure_partition $device $LOG_FILE
-    xfs_growfs -d / || log $LOG_FILE xfs_growfs indicates that there is no need for growing disk on $device
-  else
-    log $LOG_FILE "resizing disk for filesystem: resize2fs"
-    log $LOG_FILE "cloud platform: ${CLOUD_PLATFORM}"
-    extend_azure_partition $device $LOG_FILE
-    log $LOG_FILE "growing: ${device}"
-    resize2fs $device || log $LOG_FILE resize2fs indicates that there is no need for growing disk on $device
-  fi
+    device=$1
+    LOG_FILE=$2
+
+    # Rescan on Azure data disks
+    extend_azure_partition "$device" "$LOG_FILE"
+
+    # Decide grow tool by filesystem
+    # Try xfs first; fallback to ext (resize2fs)
+    # Note: lsblk -no FSTYPE might print 'xfs' or 'ext4'
+    fstype=$(lsblk -no FSTYPE "$device" 2>/dev/null | head -n1)
+
+    case "$fstype" in
+        xfs)
+            log "$LOG_FILE" "resizing disk for filesystem: xfs_growfs"
+            # If the mountpoint is root ('/'), grow that; else use -d on the mountpoint
+            mount_point=$(lsblk -no MOUNTPOINT "$device")
+            if [[ -z "$mount_point" ]]; then
+                log "$LOG_FILE" "Cannot resize volume because the disk is not mounted"
+            else
+                log "$LOG_FILE" "growing XFS on: $mount_point"
+                xfs_growfs -d "$mount_point" || log "$LOG_FILE" "xfs_growfs indicates no need to grow on $device ($mount_point)"
+            fi
+            ;;
+        ext2|ext3|ext4|""|*)
+            # resize2fs for ext*, empty fstype, or unknown (fails gracefully if unsupported)
+            if [[ -z "$fstype" || "$fstype" == "ext2" || "$fstype" == "ext3" || "$fstype" == "ext4" ]]; then
+                log "$LOG_FILE" "resizing disk for filesystem: resize2fs"
+                log "$LOG_FILE" "growing: ${device}"
+                resize2fs_log_suffix=""
+            else
+                log "$LOG_FILE" "unknown filesystem '$fstype', attempting resize2fs"
+                resize2fs_log_suffix=" (fstype=$fstype)"
+            fi
+            resize2fs "$device" || log "$LOG_FILE" "resize2fs indicates no need to grow on $device${resize2fs_log_suffix}"
+            ;;
+    esac
 }
 
 extend_azure_partition() {
@@ -34,10 +51,10 @@ extend_azure_partition() {
   LOG_FILE=$2
   local devicename="${device#/dev/*}"
   local mountpoint_for_device=$(lsblk -n -oMOUNTPOINT,NAME | grep ${devicename} | awk '{print $1}')
-  if [[ "$CLOUD_PLATFORM" == "AZURE" && "$mountpoint_for_device" == *"/hadoopfs/"* ]]; then
+  if [[ "$CLOUD_PLATFORM" == "AZURE" ]]; then
     log $LOG_FILE "cloud platform: ${CLOUD_PLATFORM}"
     log $LOG_FILE "device being scanned for growing: ${devicename}"
-    log $LOG_FILE "mount point for device: $mountpoint_for_device"
+    log $LOG_FILE "mount point for device (if any): $mountpoint_for_device"
     echo 1 | sudo tee /sys/class/block/"${devicename}"/device/rescan >> $LOG_FILE 2>&1
   fi
 }
@@ -65,6 +82,10 @@ main() {
     # Check if growpart is required
     if [[ $device =~ $root_disk ]]; then
       device=$root_disk
+      # Always rescan Azure target device before growpart/resize to ensure kernel sees new size
+      if [[ "$CLOUD_PLATFORM" == "AZURE" ]]; then
+        extend_azure_partition "$device" "$LOG_FILE"
+      fi
       if growpart -N $device 1 ; then
         # Check if we're on an NVMe filesystem
         grow_disk $device $LOG_FILE
