@@ -158,6 +158,34 @@ class GcpHealthCheckResourceBuilderTest {
     }
 
     @Test
+    void testCreateWithExistingDifferentType() {
+        when(gcpContext.getName()).thenReturn("name");
+        when(cloudLoadBalancer.getType()).thenReturn(LoadBalancerType.PUBLIC);
+        Map<TargetGroupPortPair, Set<Group>> targetGroupPortPairSetHashMap = new HashMap<>();
+        targetGroupPortPairSetHashMap.put(new TargetGroupPortPair(80, 8080), Collections.emptySet());
+        targetGroupPortPairSetHashMap.put(new TargetGroupPortPair(80, 8081), Collections.emptySet());
+        when(cloudLoadBalancer.getPortToTargetGroupMapping()).thenReturn(targetGroupPortPairSetHashMap);
+        CloudResource existingResource = CloudResource.builder()
+                .withType(ResourceType.GCP_HEALTH_CHECK)
+                .withStatus(CommonStatus.CREATED)
+                .withParameters(Map.of())
+                .withName("test-private-8081-asdf")
+                .build();
+        when(resourceRetriever.findAllByStatusAndTypeAndStack(CommonStatus.CREATED, ResourceType.GCP_HEALTH_CHECK, STACK_ID))
+                .thenReturn(new ArrayList<>(List.of(existingResource)));
+
+        List<CloudResource> cloudResources = new ArrayList<>(underTest.create(gcpContext, authenticatedContext, cloudLoadBalancer, cloudStack.getNetwork()));
+
+        cloudResources.sort(Comparator.comparing(CloudResource::getName));
+        assertTrue(cloudResources.getFirst().getName().startsWith("name-public-8080"));
+        assertEquals(2, cloudResources.size());
+        assertEquals(8080, cloudResources.getFirst().getParameter("hcport", HealthProbeParameters.class).getPort());
+        assertEquals(CommonStatus.CREATED, cloudResources.getFirst().getStatus());
+        assertTrue(cloudResources.getLast().getName().startsWith("name-public-8081"));
+        assertEquals(8081, cloudResources.getLast().getParameter("hcport", HealthProbeParameters.class).getPort());
+    }
+
+    @Test
     void testBuild() throws Exception {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("hcport", new HealthProbeParameters(null, 8080, null, 0, 0));
