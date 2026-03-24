@@ -32,6 +32,7 @@ import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.hybrid.setup.event.EnvironmentCrossRealmTrustSetupEvent;
 import com.sequenceiq.environment.environment.flow.hybrid.setup.event.EnvironmentCrossRealmTrustSetupFailedEvent;
+import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.environment.service.EnvironmentStatusUpdateService;
 import com.sequenceiq.environment.metrics.EnvironmentMetricService;
 import com.sequenceiq.flow.core.CommonContext;
@@ -45,11 +46,15 @@ public class EnvironmentCrossRealmTrustSetupActions {
 
     private final EnvironmentMetricService metricService;
 
+    private final EnvironmentService environmentService;
+
     public EnvironmentCrossRealmTrustSetupActions(
             EnvironmentStatusUpdateService environmentStatusUpdateService,
-            EnvironmentMetricService metricService) {
+            EnvironmentMetricService metricService,
+            EnvironmentService environmentService) {
         this.environmentStatusUpdateService = environmentStatusUpdateService;
         this.metricService = metricService;
+        this.environmentService = environmentService;
     }
 
     @Bean(name = "TRUST_SETUP_VALIDATION_STATE")
@@ -57,6 +62,15 @@ public class EnvironmentCrossRealmTrustSetupActions {
         return new AbstractEnvironmentCrossRealmTrustSetupAction<>(EnvironmentCrossRealmTrustSetupEvent.class) {
             @Override
             protected void doExecute(CommonContext context, EnvironmentCrossRealmTrustSetupEvent payload, Map<Object, Object> variables) {
+                if (payload != null && payload.getRemoteEnvironmentCrn() != null) {
+                    LOGGER.info("Remote environment CRN is set in request: {}, updating it in the environment: {}",
+                            payload.getRemoteEnvironmentCrn(), payload.getResourceCrn());
+                    environmentService.updateRemoteEnvironmentCrn(
+                            payload.getAccountId(),
+                            payload.getResourceCrn(),
+                            payload.getRemoteEnvironmentCrn());
+                }
+
                 environmentStatusUpdateService
                         .updateEnvironmentStatusAndNotify(
                                 context,

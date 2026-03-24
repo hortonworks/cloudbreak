@@ -39,8 +39,6 @@ public class EnvironmentCrossRealmTrustSetupHandler extends ExceptionCatcherEven
 
     private final FreeIpaPollerService freeIpaPollerService;
 
-    private final EnvironmentService environmentService;
-
     protected EnvironmentCrossRealmTrustSetupHandler(
             FreeIpaService freeIpaService,
             FreeIpaPollerService freePollerIpaService,
@@ -48,7 +46,6 @@ public class EnvironmentCrossRealmTrustSetupHandler extends ExceptionCatcherEven
     ) {
         this.freeIpaService = freeIpaService;
         freeIpaPollerService = freePollerIpaService;
-        this.environmentService = environmentService;
     }
 
     @Override
@@ -66,13 +63,6 @@ public class EnvironmentCrossRealmTrustSetupHandler extends ExceptionCatcherEven
         LOGGER.debug("In EnvironmentCrossRealmTrustSetupHandler.accept");
         EnvironmentCrossRealmTrustSetupEvent data = event.getData();
         try {
-            if (data.getRemoteEnvironmentCrn() != null) {
-                environmentService.updateRemoteEnvironmentCrn(
-                        data.getAccountId(),
-                        data.getResourceCrn(),
-                        data.getRemoteEnvironmentCrn());
-            }
-
             Optional<DescribeFreeIpaResponse> describe = freeIpaService.describe(data.getResourceCrn());
             if (describe.isPresent()) {
                 DescribeFreeIpaResponse freeIpa = describe.get();

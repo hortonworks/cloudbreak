@@ -2,9 +2,7 @@ package com.sequenceiq.environment.environment.flow.hybrid.setup.handler;
 
 import static com.sequenceiq.environment.environment.flow.hybrid.setup.event.EnvironmentCrossRealmTrustSetupStateSelectors.FINISH_TRUST_SETUP_EVENT;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -116,12 +114,6 @@ class EnvironmentCrossRealmTrustSetupHandlerTest {
     }
 
     private void validateSuccess(Selectable result) {
-        verify(environmentService).updateRemoteEnvironmentCrn(
-                eq(eventData.getAccountId()),
-                eq(eventData.getResourceCrn()),
-                eq(eventData.getRemoteEnvironmentCrn())
-        );
-
         verify(freeIpaPollerService).waitForCrossRealmTrustSetup(
                 eq(eventData.getResourceId()),
                 eq(eventData.getResourceCrn()),
@@ -141,7 +133,6 @@ class EnvironmentCrossRealmTrustSetupHandlerTest {
         when(freeIpaService.describe(eventData.getResourceCrn()))
                 .thenReturn(Optional.of(freeIpa));
         when(freeIpa.getStatus()).thenReturn(null);
-        doNothing().when(environmentService).updateRemoteEnvironmentCrn(any(), any(), any());
         Selectable result = handler.doAccept(event);
 
         assertThat(result).isInstanceOf(EnvironmentCrossRealmTrustSetupFailedEvent.class);

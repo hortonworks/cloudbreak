@@ -33,6 +33,7 @@ import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.hybrid.setup.event.EnvironmentCrossRealmTrustSetupEvent;
 import com.sequenceiq.environment.environment.flow.hybrid.setup.event.EnvironmentCrossRealmTrustSetupFailedEvent;
+import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.environment.service.EnvironmentStatusUpdateService;
 import com.sequenceiq.environment.metrics.EnvironmentMetricService;
 import com.sequenceiq.environment.metrics.MetricType;
@@ -93,6 +94,9 @@ class EnvironmentCrossRealmTrustSetupActionsTest {
     @Mock
     private EnvironmentCrossRealmTrustSetupEvent actionPayload;
 
+    @Mock
+    private EnvironmentService environmentService;
+
     @InjectMocks
     private EnvironmentCrossRealmTrustSetupActions actions;
 
@@ -105,7 +109,7 @@ class EnvironmentCrossRealmTrustSetupActionsTest {
         when(stateContext.getMessageHeader(MessageFactory.HEADERS.FLOW_PARAMETERS.name())).thenReturn(flowParameters);
         when(runningFlows.getFlowChainId(anyString())).thenReturn(null);
 
-        actions = new EnvironmentCrossRealmTrustSetupActions(environmentStatusUpdateService, metricService);
+        actions = new EnvironmentCrossRealmTrustSetupActions(environmentStatusUpdateService, metricService, environmentService);
 
         when(stateContext.getMessageHeader(MessageFactory.HEADERS.DATA.name())).thenReturn(actions);
         when(stateContext.getExtendedState()).thenReturn(extendedState);
@@ -118,6 +122,13 @@ class EnvironmentCrossRealmTrustSetupActionsTest {
 
     @Test
     void testCrossRealmTrustSetupValidationAction() {
+        EnvironmentCrossRealmTrustSetupEvent payload = mock(EnvironmentCrossRealmTrustSetupEvent.class);
+        when(payload.getRemoteEnvironmentCrn()).thenReturn("remotecrn");
+        when(payload.getAccountId()).thenReturn("account");
+        when(payload.getResourceCrn()).thenReturn("envcrn");
+
+        when(stateContext.getMessageHeader(MessageFactory.HEADERS.DATA.name())).thenReturn(payload);
+
         Action<?, ?> action = configureAction(() -> actions.crossRealmTrustSetupValidationAction());
         action.execute(stateContext);
 
@@ -127,6 +138,12 @@ class EnvironmentCrossRealmTrustSetupActionsTest {
                 any(),
                 any(),
                 any()
+        );
+
+        verify(environmentService).updateRemoteEnvironmentCrn(
+                "account",
+                "envcrn",
+                "remotecrn"
         );
     }
 
