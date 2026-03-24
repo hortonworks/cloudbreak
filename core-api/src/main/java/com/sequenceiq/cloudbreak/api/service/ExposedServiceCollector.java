@@ -245,12 +245,8 @@ public class ExposedServiceCollector {
 
     private String getProperProtocol(Optional<String> bpVersion, ExposedService exposedService, boolean tls, String runtimeVersion) {
         if (StringUtils.isNotBlank(exposedService.getMinHttpsVersion())) {
-            if (StringUtils.isNotBlank(runtimeVersion) && exposedService.getName().equals("LAKEHOUSE_OPTIMIZER")) {
-                return exposedServiceVersionSupportService.minVersionSupported(Optional.of(runtimeVersion), exposedService.getMinHttpsVersion())
-                        && tls ? HTTPS : HTTP;
-            } else {
-                return exposedServiceVersionSupportService.minVersionSupported(bpVersion, exposedService.getMinHttpsVersion()) && tls ? HTTPS : HTTP;
-            }
+            Optional<String> version = StringUtils.isNotBlank(runtimeVersion) ? Optional.of(runtimeVersion) : bpVersion;
+                return exposedServiceVersionSupportService.minVersionSupported(version, exposedService.getMinHttpsVersion()) && tls ? HTTPS : HTTP;
         } else {
             return tls ? HTTPS : HTTP;
         }
@@ -258,13 +254,9 @@ public class ExposedServiceCollector {
 
     private Integer getProperPort(Optional<String> bpVersion, ExposedService exposedService, boolean tls, String runtimeVersion) {
         if (StringUtils.isNotBlank(exposedService.getMinHttpsVersion())) {
-            if (StringUtils.isNotBlank(runtimeVersion) && exposedService.getName().equals("LAKEHOUSE_OPTIMIZER")) {
-                return exposedServiceVersionSupportService.minVersionSupported(Optional.of(runtimeVersion), exposedService.getMinHttpsVersion())
+            Optional<String> version = StringUtils.isNotBlank(runtimeVersion) ? Optional.of(runtimeVersion) : bpVersion;
+                return exposedServiceVersionSupportService.minVersionSupported(version, exposedService.getMinHttpsVersion())
                         && tls ? exposedService.getTlsPort() : exposedService.getPort();
-            } else {
-                return exposedServiceVersionSupportService.minVersionSupported(bpVersion, exposedService.getMinHttpsVersion()) && tls
-                        ? exposedService.getTlsPort() : exposedService.getPort();
-            }
         } else {
             return tls ? exposedService.getTlsPort() : exposedService.getPort();
         }
