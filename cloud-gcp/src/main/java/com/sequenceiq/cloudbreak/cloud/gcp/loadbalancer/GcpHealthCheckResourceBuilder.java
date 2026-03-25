@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.loadbalancer;
 
+import static com.sequenceiq.cloudbreak.cloud.service.CloudbreakResourceNameService.DELIMITER;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -44,12 +46,14 @@ public class GcpHealthCheckResourceBuilder extends AbstractGcpLoadBalancerBuilde
     public List<CloudResource> create(GcpContext context, AuthenticatedContext auth, CloudLoadBalancer loadBalancer, Network network) {
         List<CloudResource> resourceFromDb = fetchAllResourceFromDb(resourceType(), auth.getCloudContext().getId());
         LOGGER.debug("Existing resources with type [{}] and Loadbalancer type [{}]: {}", resourceType(), loadBalancer.getType(), resourceFromDb);
+        String lbTypePart = DELIMITER + getResourceNameService().normalize(loadBalancer.getType().name()) + DELIMITER;
         List<CloudResource> resources = loadBalancer.getPortToTargetGroupMapping().keySet().stream()
                 .map(TargetGroupPortPair::getHealthProbeParameters)
                 .distinct()
                 .map(lbHealthCheck ->
                         resourceFromDb.stream()
                                 .filter(resource -> resource.getName().contains(mapPortToPortPart(lbHealthCheck.getPort())))
+                                .filter(resource -> resource.getName().contains(lbTypePart))
                                 .findFirst()
                                 .orElseGet(() -> createCloudResource(context, loadBalancer, lbHealthCheck)))
                 .toList();

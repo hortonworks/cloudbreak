@@ -7,6 +7,8 @@ import static com.sequenceiq.cloudbreak.sdx.RdcConstants.HdfsNameNode.HDFS_NAMEN
 import static com.sequenceiq.cloudbreak.sdx.RdcConstants.Hive.HIVE_WAREHOUSE_DIRECTORY;
 import static com.sequenceiq.cloudbreak.sdx.RdcConstants.Hive.HIVE_WAREHOUSE_EXTERNAL_DIRECTORY;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verifyNoInteractions;
 
@@ -18,6 +20,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.cdp.servicediscovery.model.ApiMapEntry;
@@ -25,6 +28,7 @@ import com.cloudera.cdp.servicediscovery.model.ApiRemoteDataContext;
 import com.cloudera.cdp.servicediscovery.model.Application;
 import com.cloudera.cdp.servicediscovery.model.DescribeDatalakeServicesResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sequenceiq.cloudbreak.sdx.OnPrem719WorkaroundService;
 import com.sequenceiq.cloudbreak.sdx.RdcView;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
@@ -44,6 +48,9 @@ class PdlRdcUtilTest {
     @InjectMocks
     private PdlRdcUtil underTest;
 
+    @Mock
+    private OnPrem719WorkaroundService onPrem719WorkaroundService;
+
     private DescribeDatalakeServicesResponse describeDatalakeServicesResponse;
 
     private RdcView rdcView;
@@ -52,6 +59,7 @@ class PdlRdcUtilTest {
     void setUp() {
         rdcView = new RdcView("crn", RDC, null, null, null);
         describeDatalakeServicesResponse = new DescribeDatalakeServicesResponse();
+        lenient().when(onPrem719WorkaroundService.replaceRdcRuntimeVersion(any())).thenAnswer(invocation -> invocation.getArgument(0));
     }
 
     @Test
