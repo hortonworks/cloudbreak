@@ -44,6 +44,7 @@ import com.sequenceiq.cloudbreak.converter.v4.clustertemplate.ClusterTemplateV4R
 import com.sequenceiq.cloudbreak.converter.v4.clustertemplate.ClusterTemplateViewToClusterTemplateViewV4ResponseConverter;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterTemplate;
 import com.sequenceiq.cloudbreak.domain.view.ClusterTemplateView;
+import com.sequenceiq.cloudbreak.sdx.OnPrem719WorkaroundService;
 import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
@@ -100,6 +101,9 @@ public class ClusterTemplateV4Controller extends NotificationController implemen
     @Inject
     private ClusterTemplateViewToClusterTemplateViewV4ResponseConverter clusterTemplateViewToClusterTemplateViewV4ResponseConverter;
 
+    @Inject
+    private OnPrem719WorkaroundService onPrem719WorkaroundService;
+
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_CLUSTER_DEFINITION)
     public ClusterTemplateV4Response post(Long workspaceId, ClusterTemplateV4Request request) {
@@ -139,6 +143,7 @@ public class ClusterTemplateV4Controller extends NotificationController implemen
         Optional<String> runtimeVersion = sdxBasicView.stream()
                 .map(SdxBasicView::runtime)
                 .filter(e -> !Strings.isNullOrEmpty(e))
+                .map(onPrem719WorkaroundService::replaceRuntimeVersion)
                 .findFirst();
         Set<ClusterTemplateView> clusterTemplateViews = clusterTemplateViewService.findAllUserManagedAndDefaultByEnvironmentCrn(
                 threadLocalService.getRequestedWorkspaceId(),

@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.controller.validation.stack;
 
-import java.util.List;
 import java.util.Optional;
 
 import jakarta.inject.Inject;
@@ -21,12 +20,12 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.ImageStackDetails;
 import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
-import com.sequenceiq.cloudbreak.service.datalake.SdxClientService;
+import com.sequenceiq.cloudbreak.sdx.OnPrem719WorkaroundService;
+import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
+import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
 import com.sequenceiq.cloudbreak.service.stack.RuntimeVersionService;
 import com.sequenceiq.cloudbreak.service.stack.StackViewService;
 import com.sequenceiq.common.model.OsType;
-import com.sequenceiq.sdx.api.model.SdxClusterResponse;
-import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
 @Component
 public class StackCreationRuntimeVersionValidator {
@@ -34,7 +33,10 @@ public class StackCreationRuntimeVersionValidator {
     private static final Logger LOGGER = LoggerFactory.getLogger(StackCreationRuntimeVersionValidator.class);
 
     @Inject
-    private SdxClientService sdxClientService;
+    private PlatformAwareSdxConnector platformAwareSdxConnector;
+
+    @Inject
+    private OnPrem719WorkaroundService onPrem719WorkaroundService;
 
     @Inject
     @Qualifier("stackViewServiceDeprecated")
@@ -71,8 +73,8 @@ public class StackCreationRuntimeVersionValidator {
     private void checkRuntimeVersion(String environmentCrn, String requestedStackVersion) {
         Optional<String> optionalErrorMessage = validateStackVersionLocally(environmentCrn, requestedStackVersion);
         if (optionalErrorMessage.isPresent()) {
-            LOGGER.error("Falling back to SDX service, because: {}", optionalErrorMessage.get());
-            validateStackVersionWithSdxService(environmentCrn, requestedStackVersion);
+            LOGGER.error("Falling back to SDX connector, because: {}", optionalErrorMessage.get());
+            validateStackVersionWithSdxConnector(environmentCrn, requestedStackVersion);
         }
     }
 
@@ -98,15 +100,14 @@ public class StackCreationRuntimeVersionValidator {
         return Optional.empty();
     }
 
-    private void validateStackVersionWithSdxService(String environmentCrn, String requestedStackVersion) {
-        List<SdxClusterResponse> sdxClusters = sdxClientService.getByEnvironmentCrn(environmentCrn);
-        sdxClusters.forEach(sdx -> {
-            if (SdxClusterStatusResponse.RUNNING.equals(sdx.getStatus())) {
-                compareRuntimeVersions(requestedStackVersion, sdx.getRuntime());
-            } else {
-                throw new BadRequestException(String.format("Datalake %s is not available yet, thus we cannot check runtime version!", sdx.getName()));
-            }
-        });
+    private void validateStackVersionWithSdxConnector(String environmentCrn, String requestedStackVersion) {
+        Optional<SdxBasicView> sdxBasicView = platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(environmentCrn);
+        if (sdxBasicView.isPresent()) {
+            String sdxRuntimeVersion = onPrem719WorkaroundService.replaceRuntimeVersion(sdxBasicView.get().runtime());
+            compareRuntimeVersions(requestedStackVersion, sdxRuntimeVersion);
+        } else {
+            throw new BadRequestException("Data Lake not found for environment");
+        }
     }
 
     private Optional<String> findRequestedStackVersion(StackV4Request stackRequest, Image image) {

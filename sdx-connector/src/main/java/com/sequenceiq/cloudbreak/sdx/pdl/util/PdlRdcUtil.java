@@ -15,6 +15,8 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import jakarta.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -29,6 +31,7 @@ import com.fasterxml.jackson.annotation.Nulls;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.sequenceiq.cloudbreak.sdx.OnPrem719WorkaroundService;
 import com.sequenceiq.cloudbreak.sdx.RdcView;
 import com.sequenceiq.cloudbreak.template.TemplateEndpoint;
 import com.sequenceiq.cloudbreak.template.TemplateRoleConfig;
@@ -45,20 +48,17 @@ public class PdlRdcUtil {
             HIVE_SERVICE.toUpperCase(), List.of(HIVE_WAREHOUSE_DIRECTORY, HIVE_WAREHOUSE_EXTERNAL_DIRECTORY)
     );
 
+    @Inject
+    private OnPrem719WorkaroundService onPrem719WorkaroundService;
+
     public ApiRemoteDataContext parseRemoteDataContext(String json) {
         try {
-            return OBJECT_MAPPER.readValue(workaround719(json), ApiRemoteDataContext.class);
+            String replacedJson = onPrem719WorkaroundService.replaceRdcRuntimeVersion(json);
+            return OBJECT_MAPPER.readValue(replacedJson, ApiRemoteDataContext.class);
         } catch (JsonProcessingException e) {
             LOGGER.error("Json processing failed, thus we cannot query remote data context", e);
             throw new RuntimeException("Failed to process remote data context. Please contact Cloudera support to get this resolved.");
         }
-    }
-
-    /**
-     * 7.1.9 runtime is not officially supported, but if we pretend to CM that it is a 7.3.1 cluster then basic functionality works
-     */
-    private String workaround719(String json) {
-        return json.replaceAll("CDH 7\\.1\\.9", "CDH 7.3.1");
     }
 
     public String remoteDataContextToJson(String crn, ApiRemoteDataContext apiRemoteDataContext) {
