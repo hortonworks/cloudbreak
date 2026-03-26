@@ -179,7 +179,9 @@ date
 echo -e "\n\033[1;96m--- Tests to run:\033[0m\n"
 echo $INTEGRATIONTEST_SUITEFILES
 
-set -o pipefail ; docker compose up --remove-orphans --exit-code-from test test | tee test.out
+set -o pipefail ; docker compose up --remove-orphans --exit-code-from test test > test.out 2>&1
+echo -e "\n\033[1;96m--- Test output would be too long, stored in the \033[1;93mtest.out\033[1;96m file \033[0m\n"
+
 echo -e "\n\033[1;96m--- Test finished\033[0m\n"
 
 echo -e "\n\033[1;96m--- Collect docker stats:\033[0m\n"

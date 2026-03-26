@@ -771,7 +771,7 @@ jobs:
         uses: cloudbreak/cloudbreak-github-actions/actions/upload-artifact@master
         if: ${{ always() }}
         with:
-          name: integration-test-service-artifact
+          name: integration-test-cb-service-logs-artifact
           retention-days: 5
           path: |
             integration-test/integcb-logs.tar.gz
@@ -791,7 +791,7 @@ jobs:
         uses: cloudbreak/cloudbreak-github-actions/actions/upload-artifact@master
         if: ${{ always() }}
         with:
-          name: integration-test-test-artifact
+          name: integration-test-suites_log-artifact
           retention-days: 5
           path: |
             integration-test/suites.tar.gz
@@ -799,10 +799,18 @@ jobs:
         uses: cloudbreak/cloudbreak-github-actions/actions/upload-artifact@master
         if: ${{ always() }}
         with:
-          name: integration-test-result-artifact
+          name: integration-test-test-output-artifact
           retention-days: 5
           path: |
             integration-test/test-output.tar.gz
+      - name: integration_test_collect_test_console_output_artifacts
+        uses: cloudbreak/cloudbreak-github-actions/actions/upload-artifact@master
+        if: ${{ always() }}
+        with:
+          name: integration-test-test_console_output-artifact
+          retention-days: 5
+          path: |
+            integration-test/test.out
   fedramp-integration-test:
     permissions: write-all
     name: FedRAMP Integration Test
@@ -880,7 +888,7 @@ jobs:
         uses: cloudbreak/cloudbreak-github-actions/actions/upload-artifact@master
         if: ${{ always() }}
         with:
-          name: fedramp-integration-service-artifact
+          name: fedramp-integration-test-cb-service-logs-artifact
           retention-days: 5
           path: |
             integration-test/integcb-logs.tar.gz
@@ -900,7 +908,7 @@ jobs:
         uses: cloudbreak/cloudbreak-github-actions/actions/upload-artifact@master
         if: ${{ always() }}
         with:
-          name: fedramp-integration-test-artifact
+          name: fedramp-integration-test-suites_log-artifact
           retention-days: 5
           path: |
             integration-test/suites.tar.gz
@@ -908,10 +916,18 @@ jobs:
         uses: cloudbreak/cloudbreak-github-actions/actions/upload-artifact@master
         if: ${{ always() }}
         with:
-          name: fedramp-integration-test-result-artifact
+          name: fedramp-integration-test-test-output-artifact
           retention-days: 5
           path: |
             integration-test/test-output.tar.gz
+      - name: fedramp_integration_test_collect_test_console_output_artifacts
+        uses: cloudbreak/cloudbreak-github-actions/actions/upload-artifact@master
+        if: ${{ always() }}
+        with:
+          name: fedramp-integration-test-test_console_output-artifact
+          retention-days: 5
+          path: |
+            integration-test/test.out
   real-ums-test:
     permissions: write-all
     name: Real UMS Test
