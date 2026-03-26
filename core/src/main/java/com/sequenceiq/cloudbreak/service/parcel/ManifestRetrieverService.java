@@ -56,8 +56,12 @@ public class ManifestRetrieverService {
             Manifest manifest = readResponse(target, response);
             return ImmutablePair.of(ManifestStatus.SUCCESS, manifest);
         } catch (ProcessingException e) {
-            LOGGER.warn("Attempt to read manifest.json from parcel repo '{}' failed. Retrying...", manifestUrl, e);
-            throw e;
+            if (PaywallCredentialPopulator.ARCHIVE_URL_PATTERN.matcher(baseUrl).find()) {
+                LOGGER.warn("Attempt to read manifest.json from parcel repo '{}' failed. Retrying...", manifestUrl, e);
+                throw e;
+            }
+            LOGGER.warn("Could not read manifest.json from non-archive parcel repo '{}', message: {}", manifestUrl, e.getMessage());
+            return ImmutablePair.of(ManifestStatus.FAILED, null);
         } catch (JsonParseException e) {
             LOGGER.warn("Could not parse manifest.json: {}, message: {}", manifestUrl, e.getMessage());
             return ImmutablePair.of(ManifestStatus.COULD_NOT_PARSE, null);
