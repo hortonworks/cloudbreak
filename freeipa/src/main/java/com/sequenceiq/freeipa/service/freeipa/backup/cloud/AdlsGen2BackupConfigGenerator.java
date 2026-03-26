@@ -23,18 +23,26 @@ public class AdlsGen2BackupConfigGenerator extends CloudBackupConfigGenerator<Ad
     @Override
     public String generateBackupLocation(String location, String clusterType,
             String clusterName, String clusterId) {
-        AdlsGen2BackupConfig adlsGen2BackupConfig = generateBackupConfig(location);
+        String sanitizedLocation = sanitizeLocation(location);
+        AdlsGen2BackupConfig adlsGen2BackupConfig = generateBackupConfig(sanitizedLocation);
         String logFolder = resolveBackupFolder(adlsGen2BackupConfig, clusterType, clusterName, clusterId);
         String hostPart = String.format("%s.%s", adlsGen2BackupConfig.getAccount(), AZURE_DFS_DOMAIN_SUFFIX);
         String generatedLocation = String.format("%s%s", AZURE_BLOB_STORAGE_SCHEMA,
                 Paths.get(hostPart, adlsGen2BackupConfig.getFileSystem(), logFolder));
         LOGGER.info("The following ADLS Gen2 base folder location is generated: {} (from {})",
-                generatedLocation, location);
+                generatedLocation, sanitizedLocation);
         return generatedLocation;
     }
 
     public String convertToRestoreLocation(String location) {
-        return StringUtils.substringBeforeLast(generateBackupLocation(location, "", "", ""), CLUSTER_BACKUP_PREFIX);
+        return StringUtils.stripEnd(StringUtils.substringBeforeLast(generateBackupLocation(location, "", "", ""), CLUSTER_BACKUP_PREFIX), "/");
+    }
+
+    private String sanitizeLocation(String location) {
+        if (location == null) {
+            return null;
+        }
+        return StringUtils.stripEnd(location.trim(), "/");
     }
 
     private AdlsGen2BackupConfig generateBackupConfig(String location) {
