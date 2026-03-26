@@ -33,6 +33,8 @@ public class ManifestRetrieverServiceTest {
 
     private static final String BASE_URL = "http://test.com/";
 
+    private static final String ARCHIVE_BASE_URL = "https://archive.cloudera.com/parcel/";
+
     @Mock
     private RestClientFactory restClientFactory;
 
@@ -70,7 +72,24 @@ public class ManifestRetrieverServiceTest {
     }
 
     @Test
-    void shouldThrowProcessingExceptionWhenRequestFails() {
+    void shouldThrowProcessingExceptionWhenRequestFailsForArchiveUrl() {
+        Client client = mock(Client.class);
+        WebTarget target = mock(WebTarget.class);
+        Invocation.Builder request = mock(Invocation.Builder.class);
+
+        when(restClientFactory.getOrCreateDefault()).thenReturn(client);
+        when(client.target(ARCHIVE_BASE_URL + "manifest.json")).thenReturn(target);
+        when(target.request()).thenReturn(request);
+        when(request.get()).thenThrow(new ProcessingException("timeout"));
+
+        ProcessingException exception = assertThrows(ProcessingException.class,
+                () -> underTest.readRepoManifest(ARCHIVE_BASE_URL));
+
+        assertEquals("timeout", exception.getMessage());
+    }
+
+    @Test
+    void shouldReturnFailedWithoutRetryingWhenRequestFailsForNonArchiveUrl() {
         Client client = mock(Client.class);
         WebTarget target = mock(WebTarget.class);
         Invocation.Builder request = mock(Invocation.Builder.class);
@@ -78,13 +97,11 @@ public class ManifestRetrieverServiceTest {
         when(restClientFactory.getOrCreateDefault()).thenReturn(client);
         when(client.target(BASE_URL + "manifest.json")).thenReturn(target);
         when(target.request()).thenReturn(request);
-
         when(request.get()).thenThrow(new ProcessingException("timeout"));
 
-        ProcessingException exception = assertThrows(ProcessingException.class,
-                () -> underTest.readRepoManifest(BASE_URL));
+        ImmutablePair<ManifestStatus, Manifest> actual = underTest.readRepoManifest(BASE_URL);
 
-        assertEquals("timeout", exception.getMessage());
+        assertEquals(ManifestStatus.FAILED, actual.left);
     }
 
     @Test
