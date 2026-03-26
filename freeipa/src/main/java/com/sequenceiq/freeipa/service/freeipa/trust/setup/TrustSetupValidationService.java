@@ -156,6 +156,7 @@ public class TrustSetupValidationService {
                 request.setCrn(remoteEnvironmentCrn);
                 ValidateForDatalakeResponse validateForDatalakeResponse = remoteEnvironmentEndpoint.validateForDatalake(request);
                 validateForDatalakeResponse.getValidations().stream()
+                        .filter(this::isFailedOrHasMessage)
                         .map(this::toTaskResult)
                         .forEach(taskResults::add);
             } else {
@@ -168,6 +169,10 @@ public class TrustSetupValidationService {
             taskResults.add(new TaskResult(TaskResultType.ERROR, messagesService.getMessage("trust.validation.datalake.failure"), Map.of()));
         }
         return taskResults;
+    }
+
+    private boolean isFailedOrHasMessage(ValidateForDatalakeValidationResponse validation) {
+        return !validation.isPassed() || StringUtils.isNotBlank(validation.getMessage());
     }
 
     private TaskResult toTaskResult(ValidateForDatalakeValidationResponse validation) {

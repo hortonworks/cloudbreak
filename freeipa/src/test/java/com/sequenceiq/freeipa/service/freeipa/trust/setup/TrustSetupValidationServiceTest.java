@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -254,6 +255,24 @@ class TrustSetupValidationServiceTest {
         verify(environmentService).getEnvironmentType(anyString());
     }
 
+    @Test
+    void testValidateWhenClusterValidationPassedWithEmptyMessage() {
+        setup();
+        setUpEnvironmentType(4L, EnvironmentType.HYBRID);
+        ValidateForDatalakeResponse validateForDatalakeResponse = new ValidateForDatalakeResponse();
+        validateForDatalakeResponse.setValid(true);
+        ValidateForDatalakeValidationResponse validation = new ValidateForDatalakeValidationResponse();
+        validation.setPassed(true);
+        validation.setValidationType("KERBERIZED");
+        validation.setMessage("");
+        validateForDatalakeResponse.setValidations(List.of(validation));
+        when(remoteEnvironmentEndpoint.validateForDatalake(any())).thenReturn(validateForDatalakeResponse);
+
+        TaskResults result = underTest.validateTrustSetup(STACK_ID);
+
+        assertTrue(result.taskResults().stream().allMatch(taskResult -> StringUtils.isNotEmpty(taskResult.message())));
+    }
+
     private void setUpEnvironmentType(long stackId, EnvironmentType environmentType) {
         Stack stack = mock(Stack.class);
         when(stackService.getByIdWithListsInTransaction(stackId)).thenReturn(stack);
@@ -283,7 +302,7 @@ class TrustSetupValidationServiceTest {
         ValidateForDatalakeValidationResponse validation = new ValidateForDatalakeValidationResponse();
         validation.setPassed(validForDatalake);
         validation.setValidationType("KERBERIZED");
-        validation.setMessage(validForDatalake ? "" : KERBERIZED_FAILED);
+        validation.setMessage(validForDatalake ? "success" : KERBERIZED_FAILED);
         validateForDatalakeResponse.setValidations(List.of(validation));
         lenient().when(remoteEnvironmentEndpoint.validateForDatalake(any())).thenReturn(validateForDatalakeResponse);
     }
