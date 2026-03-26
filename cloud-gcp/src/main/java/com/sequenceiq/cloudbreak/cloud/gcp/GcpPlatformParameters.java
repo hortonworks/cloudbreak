@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.gcp;
 
 import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.TTL_MILLIS;
-import static com.sequenceiq.cloudbreak.cloud.gcp.DistroxEnabledInstanceTypes.GCP_ENABLED_TYPES_LIST;
+import static com.sequenceiq.cloudbreak.cloud.gcp.GcpEnabledInstanceTypes.GCP_ENABLED_TYPES_LIST;
 import static com.sequenceiq.cloudbreak.cloud.model.DiskType.diskType;
 import static com.sequenceiq.cloudbreak.cloud.model.DisplayName.displayName;
 import static com.sequenceiq.cloudbreak.cloud.model.Orchestrator.orchestrator;
