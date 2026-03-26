@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.yarn;
 import static com.sequenceiq.common.api.type.ResourceType.YARN_APPLICATION;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
@@ -309,5 +310,10 @@ class YarnResourceConnectorTest {
         String expectedAppName = "n-1-hort";
         assertEquals(expectedAppName, capturedRequest.getName());
         assertCloudResourceStatusList(cloudResourceStatusList, "n-1-hort");
+    }
+
+    @Test
+    void testUpdateTags() {
+        assertThrows(UnsupportedOperationException.class, () -> underTest.updateTags(authenticatedContextMock, List.of(), Map.of()));
     }
 }

@@ -242,6 +242,12 @@ public class GcpResourceConnectorTest {
         );
     }
 
+    @Test
+    void testUpdateTags() {
+        AuthenticatedContext ac = mock(AuthenticatedContext.class);
+        assertThrows(UnsupportedOperationException.class, () -> underTest.updateTags(ac, List.of(), Map.of()));
+    }
+
     private CloudResource cloudResource(String name, ResourceType resourceType) {
         VolumeSetAttributes volumeSetAttributes = new VolumeSetAttributes("az", false, "fstab", List.of(), 1, "type");
         volumeSetAttributes.setDiscoveryFQDN("fqdn");

@@ -175,6 +175,10 @@ class ResourceConnectorTest {
         public void updateDatabaseRootPassword(AuthenticatedContext authenticatedContext, DatabaseStack databaseStack, String newPassword) {
 
         }
+
+        @Override
+        public void updateTags(AuthenticatedContext authenticatedContext, List<CloudResource> cloudResources, Map<String, String> userDefinedTags) {
+        }
     }
 
 }

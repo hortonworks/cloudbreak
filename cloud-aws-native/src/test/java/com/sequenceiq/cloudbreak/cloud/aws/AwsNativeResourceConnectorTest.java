@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.aws;
 
 import static com.sequenceiq.cloudbreak.cloud.model.CloudInstance.FQDN;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
@@ -189,5 +190,10 @@ public class AwsNativeResourceConnectorTest {
         underTest.downscale(ac, cloudStack, Collections.emptyList(), Collections.emptyList(), Collections.emptyList());
 
         verify(loadBalancerService).removeLoadBalancerTargets(ac, Collections.emptyList(), Collections.emptyList());
+    }
+
+    @Test
+    void testUpdateTags() {
+        assertThrows(UnsupportedOperationException.class, () -> underTest.updateTags(ac, List.of(), Map.of()));
     }
 }

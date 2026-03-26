@@ -474,6 +474,20 @@ public interface ResourceConnector {
     }
 
     /**
+     * Updates the tags of the given cloud resources in the following way:
+     * - Tags present in {@code tags} but absent from the cloud resource will be added.
+     * - Tags present in both {@code tags} and the cloud resource will be overwritten with the new value.
+     *
+     * @param authenticatedContext the authenticated context which holds the client object
+     * @param cloudResources the list of cloud resources whose tags are being updated
+     * @param tags the desired tags to apply; new entries will be added, existing entries will be overwritten
+     * @throws Exception in case of any error
+     */
+    default void updateTags(AuthenticatedContext authenticatedContext, List<CloudResource> cloudResources, Map<String, String> tags) throws Exception {
+        throw new UnsupportedOperationException("Interface not implemented.");
+    }
+
+    /**
      * Migrate database from non ssl to ssl
      *
      * @param authenticatedContext the authenticated context which holds the client object

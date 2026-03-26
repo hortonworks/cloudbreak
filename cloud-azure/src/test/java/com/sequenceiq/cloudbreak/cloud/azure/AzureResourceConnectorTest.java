@@ -357,4 +357,9 @@ public class AzureResourceConnectorTest {
                 .upgradeDatabaseServer(eq(ac), eq(databaseStack), eq(databaseStack), eq(persistenceNotifier),
                         eq(TargetMajorVersion.VERSION_11), eq(List.of(resource1, resource2)));
     }
+
+    @Test
+    void testUpdateTags() {
+        assertThrows(UnsupportedOperationException.class, () -> underTest.updateTags(ac, List.of(), Map.of()));
+    }
 }
