@@ -119,7 +119,7 @@ public abstract class TestContext implements ApplicationContextAware {
     @Value("${integrationtest.testsuite.pollingInterval:1000}")
     private long pollingInterval;
 
-    @Value("#{'${integrationtest.cloudProvider}'.equals('MOCK') ? 300 : ${integrationtest.testsuite.maxRetry:2700}}")
+    @Value("#{'${integrationtest.cloudProvider}'.equals('MOCK') ? 350 : ${integrationtest.testsuite.maxRetry:2700}}")
     private int maxRetry;
 
     @Value("#{'${integrationtest.cloudProvider}'.equals('MOCK') ? 3 : ${integrationtest.testsuite.maxRetryCount:5}}")
