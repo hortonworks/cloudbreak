@@ -34,7 +34,7 @@ public class LogCollectorUtil {
                     "User data script failed", List.of("/var/log/saltboot.log", "/var/log/messages", "/var/log/user-data.log"),
                     "Failed to retrieve the server's certificate from Nginx",
                     List.of("/var/log/nginx/access.log", "/var/log/nginx/error.log", "/var/log/saltboot.log", "/var/log/messages", "/var/log/user-data.log"),
-                    "CA server", List.of(SOS_LOG + "/*")
+                    "CA server", List.of(SOS_LOG)
             );
 
     @Value("${integrationtest.outputdir:.}")
@@ -54,7 +54,7 @@ public class LogCollectorUtil {
                 for (String logFilePath : LOG_FILES_TO_COLLECT_ON_ISSUE.get(issue)) {
                     try {
                         sshJClientActions.executeSshCommandOnHosts(ipAddresses, "sudo mkdir -p " + TMP_LOGS
-                                + "; sudo rsync -R " + logFilePath + " " + TMP_LOGS + "/" + "; sudo chown -R cloudbreak:cloudbreak " + TMP_LOGS);
+                                + "; sudo rsync -aR " + logFilePath + " " + TMP_LOGS + "/" + "; sudo chown -R cloudbreak:cloudbreak " + TMP_LOGS);
                         for (String ipAddress : ipAddresses) {
                             try (SSHClient sshClient = sshJClient.createSshClient(ipAddress, null, null, null)) {
                                 String downloadPath = workingDirectory + "/debug-logs/" + ipAddress + logFilePath;
