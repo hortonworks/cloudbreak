@@ -188,10 +188,12 @@ public class MockResourceConnector implements ResourceConnector {
     public List<CloudResourceStatus> update(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources,
             UpdateType type, Optional<String> groupName) {
         List<CloudResourceStatus> cloudResourceStatuses = resources.stream().map(r -> {
-                    Group group = stack.getGroups().stream().filter(g -> g.getName().equals(r.getGroup())).findFirst()
-                            .orElseThrow(NotFoundException.notFound("Group", r.getGroup()));
-                    String path = "/spi/update/" + r.getGroup() + "/instance_type/" + getFlavorFromGroup(group);
-                    mockUrlFactory.get(authenticatedContext, path).get(CloudVmInstanceStatus[].class);
+                    if (type != UpdateType.IMAGE_UPDATE) {
+                        Group group = stack.getGroups().stream().filter(g -> g.getName().equals(r.getGroup())).findFirst()
+                                .orElseThrow(NotFoundException.notFound("Group", r.getGroup()));
+                        String path = "/spi/update/" + r.getGroup() + "/instance_type/" + getFlavorFromGroup(group);
+                        mockUrlFactory.get(authenticatedContext, path).get(CloudVmInstanceStatus[].class);
+                    }
                     return new CloudResourceStatus(r, UPDATED);
                 })
                 .collect(Collectors.toList());
