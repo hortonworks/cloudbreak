@@ -353,8 +353,8 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
         }
 
         LOGGER.debug(knoxGatewayGroupNames.size() > 1 ? ("Found Knox Gateway explicitly defined in host group '{}' that has " +
-                "the smallest positive cardinality, returning it as the recommendation.") :
-                "Found Knox Gateway explicitly defined in exactly 1 host group '{}' with a positive cardinality, returning it as the recommendation.",
+                        "the smallest positive cardinality, returning it as the recommendation.") :
+                        "Found Knox Gateway explicitly defined in exactly 1 host group '{}' with a positive cardinality, returning it as the recommendation.",
                 knoxGatewayGroupName);
         return new GatewayRecommendation(Set.of(knoxGatewayGroupName));
     }
@@ -492,7 +492,7 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
     }
 
     private <T extends Enum<T>> Set<String> getRecommendationByBlacklist(Class<T> enumClass, boolean emptyServiceListBlacklisted,
-        Versioned version, List<String> entitlements, Map<String, Set<String>> componentsByHostGroup) {
+            Versioned version, List<String> entitlements, Map<String, Set<String>> componentsByHostGroup) {
         return getRecommendationByBlacklist(enumClass, emptyServiceListBlacklisted, componentsByHostGroup, version, entitlements);
     }
 
@@ -531,7 +531,7 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
     }
 
     private boolean isEntitledForTheOptionalEntitlement(List<String> entitlements, BlackListedScaleRole blackListedScaleRole,
-        Optional<Entitlement> entitledFor) {
+            Optional<Entitlement> entitledFor) {
         return (entitledFor.isEmpty() && blackListedScaleRole.getBlockedUntilCDPVersion().isEmpty())
                 || (entitledFor.isPresent() && !entitlements.contains(entitledFor.get().name()));
     }
@@ -601,7 +601,7 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
 
     private boolean isYarnNodemanager(Set<ServiceComponent> serviceComponents) {
         return serviceComponents.stream().anyMatch(sc -> YarnRoles.YARN.equalsIgnoreCase(sc.getService())
-            && YarnRoles.NODEMANAGER.equalsIgnoreCase(sc.getComponent()));
+                && YarnRoles.NODEMANAGER.equalsIgnoreCase(sc.getComponent()));
     }
 
     private Set<String> collectComponents(Set<ServiceComponent> serviceComponentSet) {
@@ -1142,16 +1142,20 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
     }
 
     public Set<TemplateEndpoint> calculateEndpoints() {
+        Set<TemplateEndpoint> templateEndpoints = Set.of();
         List<String> nameNodes = getHostsWithComponent(HdfsRoles.NAMENODE);
-        String endpoint;
-        if (nameNodes.size() > 1) {
-            TemplateRoleConfig nameServiceConfig = getTemplateRoleConfig(HdfsRoles.HDFS, HdfsRoles.NAMENODE, "dfs_federation_namenode_nameservice")
-                    .orElseThrow(() -> new CloudbreakServiceException("Failed to determine HDFS namenode nameservice"));
-            endpoint = nameServiceConfig.value();
-        } else {
-            endpoint = String.format("hdfs://%s:%s", nameNodes.getFirst(), HdfsConfigHelper.DEFAULT_NAMENODE_PORT);
+        if (!CollectionUtils.isEmpty(nameNodes)) {
+            String endpoint;
+            if (nameNodes.size() > 1) {
+                TemplateRoleConfig nameServiceConfig = getTemplateRoleConfig(HdfsRoles.HDFS, HdfsRoles.NAMENODE, "dfs_federation_namenode_nameservice")
+                        .orElseThrow(() -> new CloudbreakServiceException("Failed to determine HDFS namenode nameservice"));
+                endpoint = nameServiceConfig.value();
+            } else {
+                endpoint = String.format("hdfs://%s:%s", nameNodes.getFirst(), HdfsConfigHelper.DEFAULT_NAMENODE_PORT);
+            }
+            templateEndpoints = Set.of(new TemplateEndpoint(HdfsRoles.HDFS, HdfsRoles.NAMENODE, endpoint));
         }
-        return Set.of(new TemplateEndpoint(HdfsRoles.HDFS, HdfsRoles.NAMENODE, endpoint));
+        return templateEndpoints;
     }
 
     public Set<TemplateServiceConfig> calculateServiceConfigs() {
@@ -1189,6 +1193,6 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
 
     private Optional<TemplateRoleConfig> getTemplateRoleConfig(String service, String role, String configKey) {
         return getRoleConfig(service, role, configKey).map(ApiClusterTemplateConfig::getValue)
-            .map(configValue -> new TemplateRoleConfig(service, role, configKey, configValue));
+                .map(configValue -> new TemplateRoleConfig(service, role, configKey, configValue));
     }
 }
