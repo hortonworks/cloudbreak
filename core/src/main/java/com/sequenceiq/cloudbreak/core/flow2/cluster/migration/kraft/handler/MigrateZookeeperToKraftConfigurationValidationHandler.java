@@ -1,8 +1,10 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.handler;
 
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.AVAILABLE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftConfigurationHandlerSelectors.MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_VALIDATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftConfigurationStateSelectors.FINISH_MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftConfigurationStateSelectors.START_MIGRATE_ZOOKEEPER_TO_KRAFT_INSTALLATION_EVENT;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_KRAFT_MIGRATION_SKIPPED_EVENT;
 
 import jakarta.inject.Inject;
 
@@ -17,6 +19,7 @@ import com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.event.Migrat
 import com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.event.MigrateZookeeperToKraftFailureEvent;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.message.FlowMessageService;
 import com.sequenceiq.cloudbreak.service.migration.kraft.KraftMigrationService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.validation.ZookeeperToKraftMigrationValidator;
@@ -37,6 +40,9 @@ public class MigrateZookeeperToKraftConfigurationValidationHandler extends Excep
     @Inject
     private ZookeeperToKraftMigrationValidator zookeeperToKraftMigrationValidator;
 
+    @Inject
+    private FlowMessageService flowMessageService;
+
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<MigrateZookeeperToKraftConfigurationEvent> event) {
         LOGGER.error("Migrate Zookeeper to KRaft configuration validation failed.", e);
@@ -51,6 +57,9 @@ public class MigrateZookeeperToKraftConfigurationValidationHandler extends Excep
             KraftMigrationStatus kraftMigrationStatus = kraftMigrationService.getKraftMigrationStatus(stack);
             if (KraftMigrationStatus.BROKERS_IN_KRAFT.equals(kraftMigrationStatus)
                     || KraftMigrationStatus.KRAFT_INSTALLED.equals(kraftMigrationStatus)) {
+                String skipReason = "Skipping Zookeeper to KRaft migration because cluster is already migrated to KRaft";
+                LOGGER.debug(skipReason);
+                flowMessageService.fireEventAndLog(stackId, AVAILABLE.name(), CLUSTER_KRAFT_MIGRATION_SKIPPED_EVENT, skipReason);
                 return new MigrateZookeeperToKraftConfigurationEvent(FINISH_MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_EVENT.name(), stackId, false);
             }
             zookeeperToKraftMigrationValidator.validateZookeeperToKraftMigrationState(kraftMigrationStatus);

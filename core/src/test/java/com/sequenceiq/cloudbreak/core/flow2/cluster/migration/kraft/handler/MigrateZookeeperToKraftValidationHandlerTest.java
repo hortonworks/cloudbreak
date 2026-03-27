@@ -1,14 +1,17 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.handler;
 
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.AVAILABLE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationHandlerSelectors.MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationHandlerSelectors.MIGRATE_ZOOKEEPER_TO_KRAFT_VALIDATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationStateSelectors.FAILED_MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationStateSelectors.FINISH_MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftMigrationStateSelectors.START_RESTART_KAFKA_BROKER_NODES_EVENT;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_KRAFT_MIGRATION_SKIPPED_EVENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.Test;
@@ -24,6 +27,7 @@ import com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.event.Migrat
 import com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.event.MigrateZookeeperToKraftFailureEvent;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.eventbus.Event;
+import com.sequenceiq.cloudbreak.message.FlowMessageService;
 import com.sequenceiq.cloudbreak.service.migration.kraft.KraftMigrationService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.validation.ZookeeperToKraftMigrationValidator;
@@ -41,6 +45,9 @@ class MigrateZookeeperToKraftValidationHandlerTest {
 
     @Mock
     private ZookeeperToKraftMigrationValidator zookeeperToKraftMigrationValidator;
+
+    @Mock
+    private FlowMessageService flowMessageService;
 
     @InjectMocks
     private MigrateZookeeperToKraftValidationHandler underTest;
@@ -72,6 +79,8 @@ class MigrateZookeeperToKraftValidationHandlerTest {
 
         Selectable result = underTest.doAccept(event);
 
+        String expectedMessage = "Skipping Zookeeper to KRaft migration because cluster is already migrated to KRaft";
+        verify(flowMessageService).fireEventAndLog(STACK_ID, AVAILABLE.name(), CLUSTER_KRAFT_MIGRATION_SKIPPED_EVENT, expectedMessage);
         assertInstanceOf(MigrateZookeeperToKraftEvent.class, result);
         assertEquals(FINISH_MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT.name(), result.getSelector());
     }
@@ -87,6 +96,8 @@ class MigrateZookeeperToKraftValidationHandlerTest {
 
         Selectable result = underTest.doAccept(event);
 
+        String expectedMessage = "Skipping Zookeeper to KRaft migration because cluster is already migrated to KRaft";
+        verify(flowMessageService).fireEventAndLog(STACK_ID, AVAILABLE.name(), CLUSTER_KRAFT_MIGRATION_SKIPPED_EVENT, expectedMessage);
         assertInstanceOf(MigrateZookeeperToKraftEvent.class, result);
         assertEquals(FINISH_MIGRATE_ZOOKEEPER_TO_KRAFT_EVENT.name(), result.getSelector());
     }

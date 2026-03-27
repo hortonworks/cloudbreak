@@ -69,6 +69,17 @@ public class AdlsGen2BackupConfigGeneratorTest {
 
         String result = generator.convertToRestoreLocation("abfs://rebuild@cloudbreaktestpersistent.dfs.core.windows.net/full/");
 
-        assertEquals("https://cloudbreaktestpersistent.dfs.core.windows.net/rebuild/full/", result);
+        assertEquals("https://cloudbreaktestpersistent.dfs.core.windows.net/rebuild/full", result);
+    }
+
+    @Test
+    public void testSimpleCaseLocationWithTrailingSlash() {
+        AdlsGen2BackupConfigGenerator generator = new AdlsGen2BackupConfigGenerator();
+        String location = generator.generateBackupLocation(
+                "abfs://mycontainer@someaccount.dfs.core.windows.net/",
+                FluentClusterType.FREEIPA.value(),
+                "mycluster",
+                "12345");
+        assertEquals("https://someaccount.dfs.core.windows.net/mycontainer/cluster-backups/freeipa/mycluster_12345", location);
     }
 }
