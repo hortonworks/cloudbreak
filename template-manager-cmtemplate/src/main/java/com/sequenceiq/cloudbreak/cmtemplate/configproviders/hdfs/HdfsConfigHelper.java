@@ -1,12 +1,15 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.hdfs;
 
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.getSafetyValveProperty;
 import static com.sequenceiq.cloudbreak.sdx.RdcConstants.HdfsNameNode.HDFS_NAMENODE_NAMESERVICE;
 import static java.util.stream.Collectors.toSet;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
@@ -65,6 +68,25 @@ public class HdfsConfigHelper {
 
     public String getNameService(RdcView rdcView) {
         return rdcView.getRoleConfigs(HdfsRoles.HDFS, HdfsRoles.NAMENODE).get(HDFS_NAMENODE_NAMESERVICE);
+    }
+
+    public String getNameServiceConfigSafetyValveValue(RdcView rdcView) {
+        String nameService = getNameService(rdcView);
+        StringBuilder configValueBuilder = new StringBuilder();
+        if (StringUtils.isNotBlank(nameService)) {
+            configValueBuilder.append(getSafetyValveProperty(
+                    "dfs.client.failover.proxy.provider." + nameService,
+                    "org.apache.hadoop.hdfs.server.namenode.ha.ConfiguredFailoverProxyProvider"));
+            rdcView.getRoleConfigs(HdfsRoles.HDFS, HdfsRoles.NAMENODE).entrySet().stream()
+                    .filter(this::isHAConfig)
+                    .map(entry -> getSafetyValveProperty(entry.getKey(), entry.getValue()))
+                    .forEach(configValueBuilder::append);
+        }
+        return configValueBuilder.toString();
+    }
+
+    private boolean isHAConfig(Map.Entry<String, String> entry) {
+        return entry.getKey().startsWith("dfs.ha.namenodes.") || entry.getKey().startsWith("dfs.namenode.");
     }
 
 }

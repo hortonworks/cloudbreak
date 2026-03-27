@@ -14,7 +14,13 @@ public class CoreRoles {
 
     public static final String CORE_SITE_SAFETY_VALVE = "core_site_safety_valve";
 
+    public static final String TRUSTED_REALMS = "trusted_realms";
+
+    public static final String AUTH_TO_LOCAL_LOWERCASE = "set_auth_to_local_to_lowercase";
+
     public static final String HADOOP_SECURITY_GROUPS_CACHE_BACKGROUND_RELOAD = "hadoop.security.groups.cache.background.reload";
+
+    public static final String DFS_NAMENODE_KERBEROS_PRINCIPAL = "dfs.namenode.kerberos.principal";
 
     public static final String STUB_DFS = "STUB_DFS";
 

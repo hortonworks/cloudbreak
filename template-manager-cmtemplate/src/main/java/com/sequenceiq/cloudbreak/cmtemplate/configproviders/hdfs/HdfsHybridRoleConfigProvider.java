@@ -8,12 +8,11 @@ import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.hdfs.HdfsConf
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import jakarta.inject.Inject;
 
-import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
@@ -63,25 +62,15 @@ public class HdfsHybridRoleConfigProvider extends AbstractRoleConfigProvider {
     private Optional<String> getRemoteHdfsHaSafetyValveValue(TemplatePreparationObject source) {
         RdcView rdcView = source.getDatalakeView().get().getRdcView();
         String datalakeNameService = hdfsConfigHelper.getNameService(rdcView);
-        if (ObjectUtils.isNotEmpty(datalakeNameService)) {
+        if (StringUtils.isNotBlank(datalakeNameService)) {
             String nameServices = Joiner.on(',').join(List.of(datalakeNameService, HYBRID_DH_NAME_SERVICE));
             StringBuilder configValueBuilder = new StringBuilder();
             configValueBuilder
                     .append(getSafetyValveProperty("dfs.nameservices", nameServices))
                     .append(getSafetyValveProperty("dfs.internal.nameservices", HYBRID_DH_NAME_SERVICE))
-                    .append(getSafetyValveProperty("dfs.client.failover.proxy.provider." + datalakeNameService,
-                            "org.apache.hadoop.hdfs.server.namenode.ha.ConfiguredFailoverProxyProvider"));
-
-            rdcView.getRoleConfigs(HdfsRoles.HDFS, HdfsRoles.NAMENODE).entrySet().stream()
-                    .filter(HdfsHybridRoleConfigProvider::isHAConfig)
-                    .map(entry -> getSafetyValveProperty(entry.getKey(), entry.getValue()))
-                    .forEach(configValueBuilder::append);
+                    .append(hdfsConfigHelper.getNameServiceConfigSafetyValveValue(rdcView));
             return Optional.of(configValueBuilder.toString());
         }
         return Optional.empty();
-    }
-
-    private static boolean isHAConfig(Map.Entry<String, String> entry) {
-        return entry.getKey().startsWith("dfs.ha.namenodes.") || entry.getKey().startsWith("dfs.namenode.");
     }
 }
