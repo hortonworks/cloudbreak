@@ -105,40 +105,14 @@ public class CloudStack {
     }
 
     public static CloudStack replaceImage(CloudStack cloudStack, Image newImage) {
-        return builder()
-                .groups(cloudStack.getGroups())
-                .network(cloudStack.getNetwork())
+        return cloudStack.toBuilder()
                 .image(newImage)
-                .template(cloudStack.getTemplate())
-                .parameters(cloudStack.getParameters())
-                .tags(cloudStack.getTags())
-                .instanceAuthentication(cloudStack.getInstanceAuthentication())
-                .fileSystem(cloudStack.getFileSystem().orElse(null))
-                .additionalFileSystem(cloudStack.getAdditionalFileSystem().orElse(null))
-                .loadBalancers(cloudStack.getLoadBalancers())
-                .gatewayUserData(cloudStack.getGatewayUserData())
-                .coreUserData(cloudStack.getCoreUserData())
-                .multiAz(cloudStack.multiAz)
-                .supportedImdsVersion(cloudStack.getSupportedImdsVersion())
                 .build();
     }
 
     public static CloudStack replaceParameters(CloudStack cloudStack, Map<String, String> parameters) {
-        return builder()
-                .groups(cloudStack.getGroups())
-                .network(cloudStack.getNetwork())
-                .image(cloudStack.getImage())
-                .template(cloudStack.getTemplate())
+        return cloudStack.toBuilder()
                 .parameters(parameters)
-                .tags(cloudStack.getTags())
-                .instanceAuthentication(cloudStack.getInstanceAuthentication())
-                .fileSystem(cloudStack.getFileSystem().orElse(null))
-                .additionalFileSystem(cloudStack.getAdditionalFileSystem().orElse(null))
-                .loadBalancers(cloudStack.getLoadBalancers())
-                .gatewayUserData(cloudStack.getGatewayUserData())
-                .coreUserData(cloudStack.getCoreUserData())
-                .multiAz(cloudStack.multiAz)
-                .supportedImdsVersion(cloudStack.getSupportedImdsVersion())
                 .build();
     }
 
@@ -235,6 +209,24 @@ public class CloudStack {
                 ", multiAz=" + multiAz +
                 ", supportedImdsVersion=" + supportedImdsVersion +
                 '}';
+    }
+
+    public Builder toBuilder() {
+        return new Builder()
+                .groups(groups)
+                .network(network)
+                .image(image)
+                .template(template)
+                .parameters(parameters)
+                .tags(tags)
+                .instanceAuthentication(instanceAuthentication)
+                .fileSystem(fileSystem.orElse(null))
+                .additionalFileSystem(additionalFileSystem.orElse(null))
+                .loadBalancers(loadBalancers)
+                .gatewayUserData(gatewayUserData)
+                .coreUserData(coreUserData)
+                .multiAz(multiAz)
+                .supportedImdsVersion(supportedImdsVersion);
     }
 
     public static Builder builder() {

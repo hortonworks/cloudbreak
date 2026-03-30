@@ -28,6 +28,7 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.cloud.CommonSecretEncryptionValidator;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationClient;
@@ -202,6 +203,9 @@ public class AwsLaunchTest {
 
     @MockBean
     private S3ExpressBucketNameValidator s3ExpressBucketNameValidator;
+
+    @MockBean
+    private CommonSecretEncryptionValidator  commonSecretEncryptionValidator;
 
     @Inject
     private ResourceBuilders resourceBuilders;

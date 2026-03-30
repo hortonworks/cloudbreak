@@ -146,6 +146,9 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
     @Schema(description = EnvironmentModelDescription.ENCRYPTION_PROFILE_NAME_OR_CRN)
     private String encryptionProfileNameOrCrn;
 
+    @Schema(description = EnvironmentModelDescription.SECRET_ENCRYPTION_ENABLED)
+    private boolean secretEncryptionEnabled;
+
     public AttachedFreeIpaRequest getFreeIpa() {
         return freeIpa;
     }
@@ -385,6 +388,14 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
         this.encryptionProfileNameOrCrn = encryptionProfileNameOrCrn;
     }
 
+    public boolean isSecretEncryptionEnabled() {
+        return secretEncryptionEnabled;
+    }
+
+    public void setSecretEncryptionEnabled(boolean secretEncryptionEnabled) {
+        this.secretEncryptionEnabled = secretEncryptionEnabled;
+    }
+
     @Override
     public String toString() {
         return "EnvironmentRequest{" +
@@ -416,6 +427,7 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
                 ", dataServices=" + dataServices +
                 ", environmentType=" + environmentType +
                 ", encryptionProfileNameOrCrn=" + encryptionProfileNameOrCrn +
+                ", secretEncryptionEnabled=" + secretEncryptionEnabled +
                 "} " + super.toString();
     }
 }

@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -18,6 +19,7 @@ import java.util.Set;
 
 import jakarta.ws.rs.core.Response;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -85,6 +87,11 @@ public class ClusterUpgradeImageValidationHandlerTest {
 
     @Mock
     private StackDtoService stackDtoService;
+
+    @BeforeEach
+    void setUp() {
+        lenient().when(cloudStack.toBuilder()).thenReturn(CloudStack.builder());
+    }
 
     @Test
     void testDoAcceptWhenImageTermsAreSignedThenSuccess() {

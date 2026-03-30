@@ -58,6 +58,8 @@ public class PlatformParametersConsts {
 
     public static final String DELAY_DATABASE_START = "delayDatabaseStart";
 
+    public static final String SECRET_ENCRYPTION_ENABLED = "secretEncryptionEnabled";
+
     private PlatformParametersConsts() {
 
     }

@@ -26,6 +26,8 @@ public class EnvironmentCreationDto {
 
     private final String cloudPlatform;
 
+    private final boolean govCloud;
+
     private final String accountId;
 
     /**
@@ -79,10 +81,13 @@ public class EnvironmentCreationDto {
 
     private final String encryptionProfileCrn;
 
+    private final boolean secretEncryptionEnabled;
+
     private EnvironmentCreationDto(Builder builder) {
         name = builder.name;
         description = builder.description;
         cloudPlatform = builder.cloudPlatform;
+        govCloud = builder.govCloud;
         accountId = builder.accountId;
         creator = builder.creator;
         location = builder.location;
@@ -111,6 +116,7 @@ public class EnvironmentCreationDto {
         creatorClient = builder.creatorClient;
         environmentType = builder.environmentType;
         encryptionProfileCrn = builder.encryptionProfileCrn;
+        secretEncryptionEnabled = builder.secretEncryptionEnabled;
     }
 
     public static Builder builder() {
@@ -127,6 +133,10 @@ public class EnvironmentCreationDto {
 
     public String getCloudPlatform() {
         return cloudPlatform;
+    }
+
+    public boolean isGovCloud() {
+        return govCloud;
     }
 
     public Set<String> getRegions() {
@@ -230,6 +240,10 @@ public class EnvironmentCreationDto {
         return encryptionProfileCrn;
     }
 
+    public boolean isSecretEncryptionEnabled() {
+        return secretEncryptionEnabled;
+    }
+
     @Override
     public String toString() {
         return "EnvironmentCreationDto{" +
@@ -249,6 +263,8 @@ public class EnvironmentCreationDto {
         private String description;
 
         private String cloudPlatform;
+
+        private boolean govCloud;
 
         private String accountId;
 
@@ -303,6 +319,8 @@ public class EnvironmentCreationDto {
 
         private String encryptionProfileCrn;
 
+        private boolean secretEncryptionEnabled;
+
         private Builder() {
         }
 
@@ -318,6 +336,11 @@ public class EnvironmentCreationDto {
 
         public Builder withCloudPlatform(String cloudPlatform) {
             this.cloudPlatform = cloudPlatform;
+            return this;
+        }
+
+        public Builder withGovCloud(boolean govCloud) {
+            this.govCloud = govCloud;
             return this;
         }
 
@@ -443,6 +466,11 @@ public class EnvironmentCreationDto {
 
         public Builder withEncryptionProfileCrn(String encryptionProfileCrn) {
             this.encryptionProfileCrn = encryptionProfileCrn;
+            return this;
+        }
+
+        public Builder withSecretEncryptionEnabled(boolean secretEncryptionEnabled) {
+            this.secretEncryptionEnabled = secretEncryptionEnabled;
             return this;
         }
 

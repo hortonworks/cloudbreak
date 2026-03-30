@@ -10,7 +10,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.cloud.CommonSecretEncryptionValidator;
 import com.sequenceiq.cloudbreak.cloud.ConsumptionCalculator;
+import com.sequenceiq.cloudbreak.cloud.ValidatorType;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsAuthenticator;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsCredentialConnector;
@@ -83,6 +85,9 @@ class AwsConnectorTest {
     private AwsStorageValidator awsStorageValidator;
 
     @Mock
+    private CommonSecretEncryptionValidator commonSecretEncryptionValidator;
+
+    @Mock
     private AwsResourceVolumeConnector resourceVolumeConnector;
 
     @Mock
@@ -107,4 +112,14 @@ class AwsConnectorTest {
         assertThat(underTest.secretConnector()).isSameAs(awsSecretsManagerConnector);
     }
 
+    @Test
+    void testValidatorsImage() {
+        assertThat(underTest.validators(ValidatorType.IMAGE)).containsExactly();
+    }
+
+    @Test
+    void testValidatorsAll() {
+        assertThat(underTest.validators(ValidatorType.ALL))
+                .containsExactly(awsTagValidator, awsStackValidator, awsStorageValidator, commonSecretEncryptionValidator);
+    }
 }

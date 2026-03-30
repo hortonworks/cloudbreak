@@ -102,6 +102,7 @@ class AzureMarketplaceValidatorServiceTest {
         lenient().when(client.getCurrentSubscription()).thenReturn(mock(Subscription.class));
         lenient().when(client.getCurrentSubscription().subscriptionId()).thenReturn(SUBSCRIPTION_ID);
         lenient().when(azureImageTermsSignerService.getImageTermStatus(anyString(), any(), any())).thenReturn(AzureImageTermStatus.ACCEPTED);
+        lenient().when(stack.toBuilder()).thenReturn(CloudStack.builder());
     }
 
     @Test

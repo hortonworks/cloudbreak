@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
+import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.service.CredentialService;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
@@ -169,8 +170,8 @@ public class EnvironmentValidatorService {
     public ValidationResult validateAwsEnvironmentRequest(EnvironmentRequest environmentRequest) {
         ValidationResultBuilder resultBuilder = new ValidationResultBuilder();
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
-        String cloudPlatform = credentialService.getCloudPlatformByCredential(environmentRequest.getCredentialName(), accountId, ENVIRONMENT);
-        resultBuilder.ifError(() -> !AWS.name().equalsIgnoreCase(cloudPlatform),
+        Credential credential = credentialService.getCredentialForEnvCreation(environmentRequest.getCredentialName(), accountId, ENVIRONMENT);
+        resultBuilder.ifError(() -> !AWS.name().equalsIgnoreCase(credential.getCloudPlatform()),
                 "Environment request is not for cloud platform AWS.");
 
         return resultBuilder.build();
@@ -329,9 +330,9 @@ public class EnvironmentValidatorService {
         return resultBuilder.build();
     }
 
-    public ValidationResult validateEncryptionKeyArn(String encryptionKeyArn, boolean secretEncryptionEnabled) {
+    public ValidationResult validateEncryptionKeyArn(String encryptionKeyArn, boolean govCloud, boolean secretEncryptionEnabled) {
         ValidationResultBuilder resultBuilder = ValidationResult.builder();
-        ValidationResult validationResult = encryptionKeyArnValidator.validateEncryptionKeyArn(encryptionKeyArn, secretEncryptionEnabled);
+        ValidationResult validationResult = encryptionKeyArnValidator.validateEncryptionKeyArn(encryptionKeyArn, govCloud, secretEncryptionEnabled);
         resultBuilder.merge(validationResult);
         return resultBuilder.build();
     }

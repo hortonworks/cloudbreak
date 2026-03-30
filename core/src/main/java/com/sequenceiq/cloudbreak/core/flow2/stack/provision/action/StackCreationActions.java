@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackProvisionConstants.START_DATE;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -18,6 +19,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.action.Action;
 import org.springframework.util.CollectionUtils;
 
+import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataRequest;
 import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataResult;
 import com.sequenceiq.cloudbreak.cloud.event.instance.GetSSHFingerprintsRequest;
@@ -76,6 +78,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.stack.userdata.CreateUserData
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.userdata.UpdateUserdataSecretsRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.userdata.UpdateUserdataSecretsSuccess;
 import com.sequenceiq.cloudbreak.reactor.handler.ImageFallbackService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.metrics.MetricType;
 import com.sequenceiq.cloudbreak.service.multiaz.DataLakeAwareInstanceMetadataAvailabilityZoneCalculator;
@@ -88,6 +91,7 @@ import com.sequenceiq.cloudbreak.view.InstanceGroupView;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.common.api.type.LoadBalancerType;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.flow.core.PayloadConverter;
 
 @Configuration
@@ -131,6 +135,9 @@ public class StackCreationActions {
     @Inject
     private InstanceMetadataInstanceIdUpdater instanceMetadataInstanceIdUpdater;
 
+    @Inject
+    private EnvironmentService environmentService;
+
     @Bean(name = "VALIDATION_STATE")
     public Action<?, ?> provisioningValidationAction() {
         return new AbstractStackCreationAction<>(ProvisionEvent.class) {
@@ -150,7 +157,17 @@ public class StackCreationActions {
             protected Selectable createRequest(StackCreationContext context) {
                 StackDto stack = stackDtoService.getById(context.getStackId());
                 CloudStack cloudStack = cloudStackConverter.convert(stack);
-                return new ValidationRequest(context.getCloudContext(), context.getCloudCredential(), cloudStack);
+                CloudStack updatedCloudStack = addSecretEncryptionFlagToCloudStack(context, cloudStack);
+                return new ValidationRequest(context.getCloudContext(), context.getCloudCredential(), updatedCloudStack);
+            }
+
+            private CloudStack addSecretEncryptionFlagToCloudStack(StackCreationContext context, CloudStack cloudStack) {
+                DetailedEnvironmentResponse environment = environmentService.getByCrn(context.getStack().getEnvironmentCrn());
+                Map<String, String> parameters = new HashMap<>(Optional.ofNullable(cloudStack.getParameters()).orElse(Map.of()));
+                parameters.put(PlatformParametersConsts.SECRET_ENCRYPTION_ENABLED, Boolean.valueOf(environment.isEnableSecretEncryption()).toString());
+                return cloudStack.toBuilder()
+                        .parameters(parameters)
+                        .build();
             }
         };
     }

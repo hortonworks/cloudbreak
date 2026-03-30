@@ -22,6 +22,7 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import jakarta.ws.rs.BadRequestException;
 
@@ -29,6 +30,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -347,6 +349,8 @@ class EnvironmentCreationServiceTest {
                 .withAuthentication(AuthenticationDto.builder().build())
                 .withParameters(parametersDto)
                 .withCloudPlatform(CloudPlatform.AWS.name())
+                .withGovCloud(true)
+                .withSecretEncryptionEnabled(secretEncryptionEnabled)
                 .withLocation(LocationDto.builder()
                         .withName("test")
                         .withDisplayName("test")
@@ -370,12 +374,14 @@ class EnvironmentCreationServiceTest {
         when(validatorService.validateFreeIpaCreation(any(), any())).thenReturn(ValidationResult.builder().build());
         when(authenticationDtoConverter.dtoToAuthentication(any())).thenReturn(new EnvironmentAuthentication());
         when(environmentService.save(environmentCaptor.capture())).thenReturn(environment);
-        when(entitlementService.isSecretEncryptionEnabled(ACCOUNT_ID)).thenReturn(secretEncryptionEnabled);
+        if (secretEncryptionEnabled) {
+            when(entitlementService.isSecretEncryptionEnabled(ACCOUNT_ID)).thenReturn(true);
+        }
 
         environmentCreationServiceUnderTest.create(environmentCreationDto);
 
-        verify(validatorService, times(1)).validatePublicKey(any());
-        verify(validatorService, times(1)).validateEncryptionKeyArn(eq("dummy-key-arn"), eq(secretEncryptionEnabled));
+        verify(validatorService).validatePublicKey(any());
+        verify(validatorService).validateEncryptionKeyArn(eq("dummy-key-arn"), eq(true), eq(secretEncryptionEnabled));
         verify(environmentService, times(2)).save(any());
         verify(parametersService).saveParameters(eq(environment), eq(parametersDto));
         verify(environmentResourceService).createAndSetNetwork(any(), any(), any(), any(), any());
@@ -577,6 +583,144 @@ class EnvironmentCreationServiceTest {
         verify(reactorFlowManager, never()).triggerCreationFlow(anyLong(), eq(ENVIRONMENT_NAME), eq(USER), anyString());
     }
 
+    @EnumSource(value = CloudPlatform.class, mode = EnumSource.Mode.EXCLUDE, names = {"AWS"})
+    @ParameterizedTest
+    void testSecretEncyptionValidationWithUnsupportedProviders(CloudPlatform cloudPlatform) {
+        EnvironmentCreationDto environmentCreationDto = EnvironmentCreationDto.builder()
+                .withName(ENVIRONMENT_NAME)
+                .withCloudPlatform(cloudPlatform.name())
+                .withSecretEncryptionEnabled(true)
+                .withCreator(CRN)
+                .withAccountId(ACCOUNT_ID)
+                .withAuthentication(AuthenticationDto.builder().build())
+                .build();
+
+        Environment environment = new Environment();
+        environment.setName(ENVIRONMENT_NAME);
+        environment.setId(1L);
+        environment.setAccountId(ACCOUNT_ID);
+        Credential credential = new Credential();
+        credential.setCloudPlatform(cloudPlatform.name());
+
+        when(environmentService.isNameOccupied(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(false);
+        when(environmentDtoConverter.creationDtoToEnvironment(eq(environmentCreationDto))).thenReturn(environment);
+        when(environmentResourceService.getCredentialFromRequest(any(), any())).thenReturn(credential);
+        when(validatorService.validateParentChildRelation(any(), any())).thenReturn(ValidationResult.empty());
+        when(validatorService.validateNetworkCreation(any(), any())).thenReturn(ValidationResult.builder());
+        when(validatorService.validateFreeIpaCreation(any(), any())).thenReturn(ValidationResult.empty());
+        when(authenticationDtoConverter.dtoToAuthentication(any())).thenReturn(new EnvironmentAuthentication());
+        verify(validatorService, never()).validateFreeIpaCreation(any(), any());
+
+        assertThrows(BadRequestException.class, () -> environmentCreationServiceUnderTest.create(environmentCreationDto));
+    }
+
+    static Stream<Arguments> testSecretEncyptionValidationFailureWithAwsArguments() {
+        return Stream.of(
+                Arguments.of(false, false, false),
+                Arguments.of(false, false, true),
+                Arguments.of(false, true, false),
+                Arguments.of(true, false, false),
+                Arguments.of(true, false, true)
+        );
+    }
+
+    @MethodSource("testSecretEncyptionValidationFailureWithAwsArguments")
+    @ParameterizedTest
+    void testSecretEncyptionValidationFailureWithAws(boolean govCloud, boolean secretEncryptionEntitlement, boolean commercialSecretEncryptionEntitlement) {
+        EnvironmentCreationDto environmentCreationDto = EnvironmentCreationDto.builder()
+                .withName(ENVIRONMENT_NAME)
+                .withCloudPlatform("AWS")
+                .withGovCloud(govCloud)
+                .withSecretEncryptionEnabled(true)
+                .withCreator(CRN)
+                .withAccountId(ACCOUNT_ID)
+                .withAuthentication(AuthenticationDto.builder().build())
+                .build();
+
+        Environment environment = new Environment();
+        environment.setName(ENVIRONMENT_NAME);
+        environment.setId(1L);
+        environment.setAccountId(ACCOUNT_ID);
+        Credential credential = new Credential();
+        credential.setCloudPlatform("AWS");
+
+        when(entitlementService.isSecretEncryptionEnabled(ACCOUNT_ID)).thenReturn(secretEncryptionEntitlement);
+        lenient().when(entitlementService.isSecretEncryptionForCommercialAwsEnabled(ACCOUNT_ID)).thenReturn(commercialSecretEncryptionEntitlement);
+        when(environmentService.isNameOccupied(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(false);
+        when(environmentDtoConverter.creationDtoToEnvironment(eq(environmentCreationDto))).thenReturn(environment);
+        when(environmentResourceService.getCredentialFromRequest(any(), any())).thenReturn(credential);
+        when(validatorService.validateParentChildRelation(any(), any())).thenReturn(ValidationResult.empty());
+        when(validatorService.validateNetworkCreation(any(), any())).thenReturn(ValidationResult.builder());
+        when(validatorService.validateFreeIpaCreation(any(), any())).thenReturn(ValidationResult.empty());
+        when(authenticationDtoConverter.dtoToAuthentication(any())).thenReturn(new EnvironmentAuthentication());
+        verify(validatorService, never()).validateFreeIpaCreation(any(), any());
+
+        assertThrows(BadRequestException.class, () -> environmentCreationServiceUnderTest.create(environmentCreationDto));
+    }
+
+    static Stream<Arguments> testSecretEncyptionValidationSuccessArguments() {
+        return Stream.of(
+                Arguments.of(false, true, true),
+                Arguments.of(true, true, false),
+                Arguments.of(true, true, true)
+        );
+    }
+
+    @MethodSource("testSecretEncyptionValidationSuccessArguments")
+    @ParameterizedTest
+    void testSecretEncyptionValidationSuccess(boolean govCloud, boolean secretEncryptionEntitlement, boolean commercialSecretEncryptionEntitlement) {
+        ParametersDto parametersDto = ParametersDto.builder().withAwsParametersDto(AwsParametersDto.builder().build()).build();
+        String environmentCrn = "crn";
+        EnvironmentCreationDto environmentCreationDto = EnvironmentCreationDto.builder()
+                .withName(ENVIRONMENT_NAME)
+                .withCreator(CRN)
+                .withAccountId(ACCOUNT_ID)
+                .withCrn(environmentCrn)
+                .withCloudPlatform("AWS")
+                .withGovCloud(govCloud)
+                .withSecretEncryptionEnabled(true)
+                .withAuthentication(AuthenticationDto.builder().build())
+                .withParameters(parametersDto)
+                .withExternalizedComputeCluster(ExternalizedComputeClusterDto.builder().withCreate(true).withWorkerNodeSubnetIds(Set.of("subnet1")).build())
+                .withLocation(LocationDto.builder()
+                        .withName("test")
+                        .withDisplayName("test")
+                        .withLatitude(0.1)
+                        .withLongitude(0.1)
+                        .build())
+                .build();
+        Environment environment = new Environment();
+        environment.setName(ENVIRONMENT_NAME);
+        environment.setId(1L);
+        environment.setAccountId(ACCOUNT_ID);
+        Credential credential = new Credential();
+        credential.setCloudPlatform("AWS");
+        when(entitlementService.isSecretEncryptionEnabled(ACCOUNT_ID)).thenReturn(secretEncryptionEntitlement);
+        lenient().when(entitlementService.isSecretEncryptionForCommercialAwsEnabled(ACCOUNT_ID)).thenReturn(commercialSecretEncryptionEntitlement);
+        when(environmentService.isNameOccupied(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(false);
+        when(environmentDtoConverter.creationDtoToEnvironment(eq(environmentCreationDto))).thenReturn(environment);
+        when(environmentResourceService.getCredentialFromRequest(any(), eq(ACCOUNT_ID)))
+                .thenReturn(credential);
+        when(validatorService.validateParentChildRelation(any(), any())).thenReturn(ValidationResult.builder().build());
+        when(validatorService.validateNetworkCreation(any(), any())).thenReturn(ValidationResult.builder());
+        when(validatorService.validateFreeIpaCreation(any(), any())).thenReturn(ValidationResult.builder().build());
+        when(authenticationDtoConverter.dtoToAuthentication(any())).thenReturn(new EnvironmentAuthentication());
+        when(environmentService.save(environmentCaptor.capture())).thenReturn(environment);
+
+        environmentCreationServiceUnderTest.create(environmentCreationDto);
+
+        verify(validatorService, times(1)).validatePublicKey(any());
+        verify(environmentService, times(2)).save(any());
+        verify(parametersService).saveParameters(eq(environment), eq(parametersDto));
+        verify(environmentResourceService).createAndSetNetwork(any(), any(), any(), any(), any());
+        verify(reactorFlowManager).triggerCreationFlow(eq(1L), eq(ENVIRONMENT_NAME), eq(CRN), anyString());
+        verify(validatorService, times(1)).validateFreeIpaCreation(any(), any());
+
+        List<Environment> allValues = environmentCaptor.getAllValues();
+        assertThat(allValues).hasSize(2);
+        Environment environmentCaptured = allValues.get(0);
+    }
+
     @Test
     void testEncryptionKeyValidationError() {
         ParametersDto parametersDto = ParametersDto.builder().
@@ -640,7 +784,7 @@ class EnvironmentCreationServiceTest {
 
         ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
         validationResultBuilder.error("error");
-        when(validatorService.validateEncryptionKeyArn(eq("dummy-key-arn"), anyBoolean())).thenReturn(validationResultBuilder.build());
+        when(validatorService.validateEncryptionKeyArn(eq("dummy-key-arn"), anyBoolean(), anyBoolean())).thenReturn(validationResultBuilder.build());
 
         when(environmentService.isNameOccupied(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(false);
         when(environmentDtoConverter.creationDtoToEnvironment(eq(environmentCreationDto))).thenReturn(environment);
