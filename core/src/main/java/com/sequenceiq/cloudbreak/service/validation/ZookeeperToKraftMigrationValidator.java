@@ -1,10 +1,15 @@
 package com.sequenceiq.cloudbreak.service.validation;
 
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENABLE_ZOOKEEPER_TO_KRAFT_MIGRATION;
+import static com.sequenceiq.cloudbreak.cluster.status.KraftMigrationStatus.BROKERS_IN_MIGRATION;
+import static com.sequenceiq.cloudbreak.cluster.status.KraftMigrationStatus.NOT_APPLICABLE;
+import static com.sequenceiq.cloudbreak.cluster.status.KraftMigrationStatus.PRE_MIGRATION;
+import static com.sequenceiq.cloudbreak.cluster.status.KraftMigrationStatus.ZOOKEEPER_INSTALLED;
 
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Predicate;
 
 import org.springframework.stereotype.Component;
@@ -23,6 +28,11 @@ public class ZookeeperToKraftMigrationValidator {
 
     private static final String ZOOKEEPER_TO_KRAFT_MIGRATION_MIN_VERSION = "7.3.2";
 
+    private static final Set<KraftMigrationStatus> INVALID_KRAFT_MIGRATION_STATUSES = Set.of(BROKERS_IN_MIGRATION, NOT_APPLICABLE);
+
+    private static final Set<KraftMigrationStatus> INVALID_KRAFT_MIGRATION_FINALIZATION_STATUSES = Set.of(ZOOKEEPER_INSTALLED, PRE_MIGRATION,
+            BROKERS_IN_MIGRATION, NOT_APPLICABLE);
+
     private final EntitlementService entitlementService;
 
     private final BlueprintService blueprintService;
@@ -33,35 +43,14 @@ public class ZookeeperToKraftMigrationValidator {
     }
 
     public void validateZookeeperToKraftMigrationState(KraftMigrationStatus kraftMigrationState) {
-        if (KraftMigrationStatus.BROKERS_IN_KRAFT.equals(kraftMigrationState)
-                || KraftMigrationStatus.KRAFT_INSTALLED.equals(kraftMigrationState)) {
-            throw new BadRequestException("Cannot start KRaft migration. The cluster has been migrated already to KRaft.");
-        }
-
-        if (!KraftMigrationStatus.ZOOKEEPER_INSTALLED.equals(kraftMigrationState)
-        && !KraftMigrationStatus.PRE_MIGRATION.equals(kraftMigrationState)) {
-            throw new BadRequestException(String.format("Cannot start KRaft migration. The cluster is being migrated to KRaft and has the status: %s.",
-                    kraftMigrationState));
+        if (INVALID_KRAFT_MIGRATION_STATUSES.contains(kraftMigrationState)) {
+            throw new BadRequestException(String.format("Cannot start KRaft migration. The cluster has [%s] KRaft migration status.", kraftMigrationState));
         }
     }
 
     public void validateZookeeperToKraftMigrationStateForFinalization(KraftMigrationStatus kraftMigrationState) {
-        if (KraftMigrationStatus.KRAFT_INSTALLED.equals(kraftMigrationState)) {
-            throw new BadRequestException("Cannot finalize KRaft migration. KRaft migration is already finalized for this cluster.");
-        }
-
-        if (!KraftMigrationStatus.BROKERS_IN_KRAFT.equals(kraftMigrationState)) {
-            throw new BadRequestException("Cannot finalize KRaft migration. The cluster has not been migrated to KRaft yet.");
-        }
-    }
-
-    public void validateZookeeperToKraftMigrationStateForRollback(KraftMigrationStatus kraftMigrationState) {
-        if (KraftMigrationStatus.KRAFT_INSTALLED.equals(kraftMigrationState)) {
-            throw new BadRequestException("Cannot rollback KRaft migration. KRaft migration is already finalized for this cluster.");
-        }
-
-        if (KraftMigrationStatus.ZOOKEEPER_INSTALLED.equals(kraftMigrationState)) {
-            throw new BadRequestException("Cannot rollback KRaft migration. The cluster still uses Zookeeper.");
+        if (INVALID_KRAFT_MIGRATION_FINALIZATION_STATUSES.contains(kraftMigrationState)) {
+            throw new BadRequestException(String.format("Cannot finalize KRaft migration. The cluster has [%s] KRaft migration status.", kraftMigrationState));
         }
     }
 
