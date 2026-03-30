@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.gcp;
 
-import static com.sequenceiq.cloudbreak.cloud.gcp.DistroxEnabledInstanceTypes.GCP_ENABLED_TYPES_LIST;
+import static com.sequenceiq.cloudbreak.cloud.gcp.GcpEnabledInstanceTypes.GCP_ENABLED_TYPES_LIST;
 import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.SHARED_PROJECT_ID;
 import static com.sequenceiq.cloudbreak.cloud.model.Coordinate.coordinate;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
@@ -156,7 +156,7 @@ public class GcpPlatformResources implements PlatformResources {
 
     private Map<Region, Coordinate> regionCoordinates = new HashMap<>();
 
-    private final Predicate<VmType> enabledDistroxInstanceTypeFilter = vmt -> GCP_ENABLED_TYPES_LIST.stream()
+    private final Predicate<VmType> enabledGcpInstanceTypeFilter = vmt -> GCP_ENABLED_TYPES_LIST.stream()
             .filter(it -> !it.isEmpty())
             .anyMatch(di -> vmt.value().equals(di));
 
@@ -496,7 +496,17 @@ public class GcpPlatformResources implements PlatformResources {
     @Cacheable(cacheNames = "cloudResourceVmTypeCache", key = "#cloudCredential?.id + #region.getRegionName()")
     public CloudVmTypes virtualMachines(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
         CloudVmTypes cloudVmTypes = getCloudVmTypes(cloudCredential, region, filters);
-        return new CloudVmTypes(cloudVmTypes.getCloudVmResponses(), cloudVmTypes.getDefaultCloudVmResponses());
+        if (restrictInstanceTypes) {
+            Map<String, Set<VmType>> returnVmResponses = new HashMap<>();
+            for (Map.Entry<String, Set<VmType>> stringSetEntry : cloudVmTypes.getCloudVmResponses().entrySet()) {
+                returnVmResponses.put(stringSetEntry.getKey(), stringSetEntry.getValue().stream()
+                        .filter(enabledGcpInstanceTypeFilter)
+                        .collect(Collectors.toSet()));
+            }
+            return new CloudVmTypes(returnVmResponses, cloudVmTypes.getDefaultCloudVmResponses());
+        } else {
+            return cloudVmTypes;
+        }
     }
 
     @Override
@@ -524,13 +534,13 @@ public class GcpPlatformResources implements PlatformResources {
     @Override
     @Cacheable(cacheNames = "cloudResourceVmTypeCache", key = "#cloudCredential?.id + #region.getRegionName() + 'distrox'")
     public CloudVmTypes virtualMachinesForDistroX(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
-        CloudVmTypes cloudVmTypes = virtualMachines(cloudCredential, region, filters);
+        CloudVmTypes cloudVmTypes = getCloudVmTypes(cloudCredential, region, filters);
         Map<String, Set<VmType>> returnVmResponses = new HashMap<>();
         Map<String, Set<VmType>> cloudVmResponses = cloudVmTypes.getCloudVmResponses();
         if (restrictInstanceTypes) {
             for (Map.Entry<String, Set<VmType>> stringSetEntry : cloudVmResponses.entrySet()) {
                 returnVmResponses.put(stringSetEntry.getKey(), stringSetEntry.getValue().stream()
-                        .filter(enabledDistroxInstanceTypeFilter)
+                        .filter(enabledGcpInstanceTypeFilter)
                         .filter(e -> minimalHardwareFilter
                                 .suitableAsMinimumHardware(e.getMetaData().getCPU(), e.getMetaData().getMemoryInGb()))
                         .collect(Collectors.toSet()));
