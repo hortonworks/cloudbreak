@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.gcp;
 
 import java.util.List;
 
-public class DistroxEnabledInstanceTypes {
+public class GcpEnabledInstanceTypes {
 
     public static final List<String> GCP_ENABLED_TYPES_LIST = List.of(
             "e2-standard-2",
@@ -96,93 +96,9 @@ public class DistroxEnabledInstanceTypes {
             "c2d-highcpu-16",
             "c2d-highcpu-32",
             "c2d-highcpu-56",
-            "c2d-highcpu-112",
-
-            "c3-standard-8",
-            "c3-standard-22",
-            "c3-standard-44",
-            "c3-standard-88",
-            "c3-standard-176",
-            "c3-standard-192-metal",
-
-            "c3-highmem-8",
-            "c3-highmem-22",
-            "c3-highmem-44",
-            "c3-highmem-88",
-            "c3-highmem-176",
-            "c3-highmem-192-metal",
-
-            "c3-highcpu-8",
-            "c3-highcpu-22",
-            "c3-highcpu-44",
-            "c3-highcpu-88",
-            "c3-highcpu-176",
-            "c3-highcpu-192-metal",
-
-            "c3d-standard-8",
-            "c3d-standard-16",
-            "c3d-standard-30",
-            "c3d-standard-60",
-            "c3d-standard-90",
-            "c3d-standard-180",
-            "c3d-standard-360",
-
-            "c3d-highmem-8",
-            "c3d-highmem-16",
-            "c3d-highmem-30",
-            "c3d-highmem-60",
-            "c3d-highmem-90",
-            "c3d-highmem-180",
-            "c3d-highmem-360",
-
-            "c3d-highcpu-8",
-            "c3d-highcpu-16",
-            "c3d-highcpu-30",
-            "c3d-highcpu-60",
-            "c3d-highcpu-90",
-            "c3d-highcpu-180",
-            "c3d-highcpu-360",
-
-            "c4-highcpu-8",
-            "c4-highcpu-16",
-            "c4-highcpu-32",
-            "c4-highcpu-48",
-            "c4-highcpu-96",
-            "c4-highcpu-192",
-
-            "c4-standard-8",
-            "c4-standard-16",
-            "c4-standard-32",
-            "c4-standard-48",
-            "c4-standard-96",
-            "c4-standard-192",
-
-            "c4-highmem-8",
-            "c4-highmem-16",
-            "c4-highmem-32",
-            "c4-highmem-48",
-            "c4-highmem-96",
-            "c4-highmem-192",
-
-            "n4-standard-2",
-            "n4-standard-4",
-            "n4-standard-8",
-            "n4-standard-16",
-            "n4-standard-32",
-            "n4-standard-48",
-            "n4-standard-64",
-            "n4-standard-80",
-
-            "n4-highmem-2",
-            "n4-highmem-4",
-            "n4-highmem-8",
-            "n4-highmem-16",
-            "n4-highmem-32",
-            "n4-highmem-48",
-            "n4-highmem-64",
-            "n4-highmem-80"
+            "c2d-highcpu-112"
     );
 
-    private DistroxEnabledInstanceTypes() {
+    private GcpEnabledInstanceTypes() {
     }
 }
