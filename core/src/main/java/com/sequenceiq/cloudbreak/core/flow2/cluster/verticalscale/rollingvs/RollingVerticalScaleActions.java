@@ -231,6 +231,7 @@ public class RollingVerticalScaleActions {
                     Map<Object, Object> variables) throws Exception {
                 LOGGER.info("ROLLING_VERTICALSCALE_FINISHED_STATE - finishing rolling vertical scale.");
                 RollingVerticalScaleResult result = payload.getRollingVerticalScaleResult();
+                Long stackId = payload.getResourceId();
                 List<String> successfulInstanceIds = result.getInstanceIds().stream()
                         .filter(i -> result.getStatus(i).getStatus().equals(RollingVerticalScaleStatus.SUCCESS)).toList();
                 Map<String, String> failedInstancesWithErrorMessage = getFailedInstances(result);
@@ -238,6 +239,8 @@ public class RollingVerticalScaleActions {
                         successfulInstanceIds, failedInstancesWithErrorMessage);
 
                 if (!failedInstancesWithErrorMessage.isEmpty()) {
+                    rollingVerticalScaleService.failedVerticalScale(stackId, failedInstancesWithErrorMessage.keySet().stream().toList(),
+                            failedInstancesWithErrorMessage.values().stream().toString());
                     String errorMessage = String.format("Vertical scale instances failed for instances [%s] with errors [%s]",
                             failedInstancesWithErrorMessage.keySet(), failedInstancesWithErrorMessage.values());
                     LOGGER.error(errorMessage);
