@@ -33,7 +33,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.datalake.entity.SdxCluster;
-import com.sequenceiq.datalake.flow.RetryableDatalakeFlowConfiguration;
 import com.sequenceiq.datalake.flow.create.SdxCreateFlowConfig;
 import com.sequenceiq.datalake.flow.dr.restore.DatalakeRestoreFlowConfig;
 import com.sequenceiq.flow.core.Flow2Handler;
@@ -52,7 +51,7 @@ class SdxRetryServiceTest {
     private StackV4Endpoint stackV4Endpoint;
 
     @Spy
-    private List<RetryableDatalakeFlowConfiguration> retryableDatalakeFlowConfigurations = new ArrayList<>();
+    private List<SdxCreateFlowConfig> retryableDatalakeFlowConfigurations = new ArrayList<>();
 
     @InjectMocks
     private SdxRetryService underTest;

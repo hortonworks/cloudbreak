@@ -41,6 +41,5 @@ dependencies {
   testImplementation(group: 'org.mockito', name: 'mockito-core', version: mockitoVersion) {
     exclude group: 'org.hamcrest'
   }
-  testImplementation group: 'org.mockito',               name: 'mockito-inline',                   version: mockitoInlineVersion
   testImplementation group: 'org.assertj', name: 'assertj-core', version: assertjVersion
 }

@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.database;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.sql.Connection;
@@ -28,25 +29,13 @@ class RoutingDataSourceTest {
     @InjectMocks
     private RoutingDataSource underTest;
 
-    @Mock(name = "defaultDataSource")
-    private DataSource defaultDataSource;
-
-    @Mock(name = "quartzDataSource")
-    private DataSource quartzDataSource;
-
-    @Mock(name = "quartzMeteringDataSource")
-    private DataSource quartzMeteringDataSource;
-
     @Mock
     private Map<String, DataSource> dataSources;
 
-    @Mock
     private Connection defaultConnection;
 
-    @Mock
     private Connection quartzConnection;
 
-    @Mock
     private Connection quartzMeteringConnection;
 
     /**
@@ -70,8 +59,14 @@ class RoutingDataSourceTest {
 
     @BeforeEach
     void setUp() throws SQLException {
+        defaultConnection = mock(Connection.class);
+        quartzConnection = mock(Connection.class);
+        quartzMeteringConnection = mock(Connection.class);
+        DataSource defaultDataSource = mock(DataSource.class);
         lenient().when(defaultDataSource.getConnection()).thenReturn(defaultConnection);
+        DataSource quartzDataSource = mock(DataSource.class);
         lenient().when(quartzDataSource.getConnection()).thenReturn(quartzConnection);
+        DataSource quartzMeteringDataSource = mock(DataSource.class);
         lenient().when(quartzMeteringDataSource.getConnection()).thenReturn(quartzMeteringConnection);
         when(dataSources.entrySet()).thenReturn(Map.of("quartzDataSource", quartzDataSource,
                 "defaultDataSource", defaultDataSource,

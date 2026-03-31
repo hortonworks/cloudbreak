@@ -60,8 +60,4 @@ dependencies {
 
     // mockito juniper depends on ByteBuddy 1.9.7, but hibernate use older version
     implementation group: 'net.bytebuddy',          name: 'byte-buddy',                   version: byteBuddyVersion
-
-    //to be able to mock final class(es)
-    testImplementation group: 'org.mockito',        name: 'mockito-inline',               version: mockitoInlineVersion
-
 }

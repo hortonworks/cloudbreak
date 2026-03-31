@@ -27,8 +27,5 @@ dependencies {
 
   implementation     group: 'org.hibernate',           name: 'hibernate-envers',         version: hibernateCoreVersion
 
-  testImplementation(group: 'org.mockito',             name: 'mockito-inline',           version: mockitoInlineVersion) {
-    exclude group: 'org.hamcrest'
-  }
   testImplementation group: 'org.hamcrest',            name: 'hamcrest',                 version: hamcrestVersion
 }

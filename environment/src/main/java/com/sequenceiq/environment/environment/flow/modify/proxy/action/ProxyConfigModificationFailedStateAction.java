@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import jakarta.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -22,14 +24,14 @@ public class ProxyConfigModificationFailedStateAction extends AbstractEnvProxyMo
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ProxyConfigModificationFailedStateAction.class);
 
-    private final EnvironmentStatusUpdateService environmentStatusUpdateService;
+    @Inject
+    private EnvironmentStatusUpdateService environmentStatusUpdateService;
 
-    private final UsageReporter usageReporter;
+    @Inject
+    private UsageReporter usageReporter;
 
-    public ProxyConfigModificationFailedStateAction(EnvironmentStatusUpdateService environmentStatusUpdateService, UsageReporter usageReporter) {
+    public ProxyConfigModificationFailedStateAction() {
         super(EnvProxyModificationFailedEvent.class);
-        this.environmentStatusUpdateService = environmentStatusUpdateService;
-        this.usageReporter = usageReporter;
     }
 
     @Override

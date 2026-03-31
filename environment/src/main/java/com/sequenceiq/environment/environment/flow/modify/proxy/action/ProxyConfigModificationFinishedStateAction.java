@@ -3,6 +3,8 @@ package com.sequenceiq.environment.environment.flow.modify.proxy.action;
 import java.util.Map;
 import java.util.Objects;
 
+import jakarta.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -22,14 +24,14 @@ public class ProxyConfigModificationFinishedStateAction extends AbstractEnvProxy
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ProxyConfigModificationFinishedStateAction.class);
 
-    private final EnvironmentStatusUpdateService environmentStatusUpdateService;
+    @Inject
+    private EnvironmentStatusUpdateService environmentStatusUpdateService;
 
-    private final UsageReporter usageReporter;
+    @Inject
+    private UsageReporter usageReporter;
 
-    public ProxyConfigModificationFinishedStateAction(EnvironmentStatusUpdateService environmentStatusUpdateService, UsageReporter usageReporter) {
+    public ProxyConfigModificationFinishedStateAction() {
         super(EnvProxyModificationDefaultEvent.class);
-        this.environmentStatusUpdateService = environmentStatusUpdateService;
-        this.usageReporter = usageReporter;
     }
 
     @Override

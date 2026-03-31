@@ -24,5 +24,4 @@ dependencies {
   }
   testImplementation group: 'org.assertj',                         name: 'assertj-core',                   version: assertjVersion
   testImplementation group: 'org.mockito',                         name: 'mockito-core',                   version: mockitoVersion
-  testImplementation group: 'org.mockito',                         name: 'mockito-inline',                 version: mockitoInlineVersion
 }
