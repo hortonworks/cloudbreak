@@ -25,6 +25,7 @@ import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterConfig;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.filter.MinimalHardwareFilter;
 import com.sequenceiq.common.api.type.CdpResourceType;
 import com.sequenceiq.common.model.Architecture;
@@ -37,17 +38,17 @@ public class VerticalScaleInstanceProvider {
     @Inject
     private MinimalHardwareFilter minimalHardwareFilter;
 
-    public CloudVmTypes listInstanceTypes(String availabilityZone, String currentInstanceType, CloudVmTypes allVmTypes) {
-        return listInstanceTypes(availabilityZone, currentInstanceType, allVmTypes, null, CdpResourceType.DEFAULT);
+    public CloudVmTypes listInstanceTypes(String cloudPlatform, String availabilityZone, String currentInstanceType, CloudVmTypes allVmTypes) {
+        return listInstanceTypes(cloudPlatform, availabilityZone, currentInstanceType, allVmTypes, null, CdpResourceType.DEFAULT);
     }
 
-    public CloudVmTypes listInstanceTypes(String availabilityZone, String currentInstanceType, CloudVmTypes allVmTypes,
-            Set<String> instanceGroupAvailabilityZones) {
-        return listInstanceTypes(availabilityZone, currentInstanceType, allVmTypes, instanceGroupAvailabilityZones, CdpResourceType.DEFAULT);
+    public CloudVmTypes listInstanceTypes(String cloudPlatform, String availabilityZone, String currentInstanceType,
+            CloudVmTypes allVmTypes, Set<String> instanceGroupAvailabilityZones) {
+        return listInstanceTypes(cloudPlatform, availabilityZone, currentInstanceType, allVmTypes, instanceGroupAvailabilityZones, CdpResourceType.DEFAULT);
     }
 
-    public CloudVmTypes listInstanceTypes(String availabilityZone, String currentInstanceType, CloudVmTypes allVmTypes,
-            Set<String> instanceGroupAvailabilityZones, CdpResourceType cdpResourceType) {
+    public CloudVmTypes listInstanceTypes(String cloudPlatform, String availabilityZone, String currentInstanceType,
+            CloudVmTypes allVmTypes, Set<String> instanceGroupAvailabilityZones, CdpResourceType cdpResourceType) {
         Map<String, Set<VmType>> cloudVmResponses = allVmTypes.getCloudVmResponses();
         LOGGER.debug("cloudVmResponses: {}", cloudVmResponses);
         if (cloudVmResponses.isEmpty()) {
@@ -68,7 +69,14 @@ public class VerticalScaleInstanceProvider {
                 .stream()
                 .filter(availableVmType -> {
                     try {
-                        validateInstanceType(currentInstance, Optional.of(availableVmType), instanceGroupAvailabilityZones, Map.of(), cdpResourceType);
+                        validateInstanceType(
+                                cloudPlatform,
+                                currentInstance,
+                                Optional.of(availableVmType),
+                                instanceGroupAvailabilityZones,
+                                Map.of(),
+                                cdpResourceType
+                        );
                         return true;
                     } catch (BadRequestException ex) {
                         return false;
@@ -87,16 +95,19 @@ public class VerticalScaleInstanceProvider {
         );
     }
 
-    public void validateInstanceTypeForVerticalScaling(Optional<VmType> currentInstanceTypeOptional, Optional<VmType> requestedInstanceTypeOptional,
-            Set<String> instanceGroupAvailabilityZones, Map<String, Object> additionalProperties) {
-        validateInstanceTypeForVerticalScaling(currentInstanceTypeOptional, requestedInstanceTypeOptional, instanceGroupAvailabilityZones, additionalProperties,
-                CdpResourceType.DEFAULT);
+    public void validateInstanceTypeForVerticalScaling(String cloudPlatform,
+        Optional<VmType> currentInstanceTypeOptional, Optional<VmType> requestedInstanceTypeOptional,
+        Set<String> instanceGroupAvailabilityZones, Map<String, Object> additionalProperties) {
+        validateInstanceTypeForVerticalScaling(cloudPlatform, currentInstanceTypeOptional, requestedInstanceTypeOptional,
+                instanceGroupAvailabilityZones, additionalProperties, CdpResourceType.DEFAULT);
     }
 
-    public void validateInstanceTypeForVerticalScaling(Optional<VmType> currentInstanceTypeOptional, Optional<VmType> requestedInstanceTypeOptional,
+    public void validateInstanceTypeForVerticalScaling(String cloudPlatform,
+            Optional<VmType> currentInstanceTypeOptional, Optional<VmType> requestedInstanceTypeOptional,
             Set<String> instanceGroupAvailabilityZones, Map<String, Object> additionalProperties, CdpResourceType cdpResourceType) {
         try {
             validateInstanceType(
+                    cloudPlatform,
                     currentInstanceTypeOptional,
                     requestedInstanceTypeOptional,
                     instanceGroupAvailabilityZones,
@@ -108,8 +119,9 @@ public class VerticalScaleInstanceProvider {
         }
     }
 
-    private void validateInstanceType(Optional<VmType> currentInstanceTypeOptional, Optional<VmType> requestedInstanceTypeOptional,
-            Set<String> instanceGroupAvailabilityZones, Map<String, Object> additionalProperties, CdpResourceType cdpResourceType) {
+    private void validateInstanceType(String cloudPlatform, Optional<VmType> currentInstanceTypeOptional,
+            Optional<VmType> requestedInstanceTypeOptional, Set<String> instanceGroupAvailabilityZones,
+            Map<String, Object> additionalProperties, CdpResourceType cdpResourceType) {
         if (currentInstanceTypeOptional.isEmpty()) {
             throw new BadRequestException("The current instancetype does not exist on provider side.");
         }
@@ -129,6 +141,7 @@ public class VerticalScaleInstanceProvider {
                     currentInstanceTypeMetaData, requestedInstanceTypeMetaData);
             validateAutoAttached(currentInstanceTypeName, requestedInstanceTypeName,
                     currentInstanceTypeMetaData, requestedInstanceTypeMetaData);
+            validateHyperDisk(cloudPlatform, currentInstanceType, requestedInstanceType);
             validateResourceDisk(currentInstanceTypeMetaData, requestedInstanceTypeMetaData);
             validateHostEncryption(currentInstanceType, requestedInstanceType, additionalProperties);
             validateEnhancedNetwork(currentInstanceType, requestedInstanceType);
@@ -138,6 +151,24 @@ public class VerticalScaleInstanceProvider {
             }
         } else {
             throw new BadRequestException("The requested instancetype does not exist on provider side.");
+        }
+    }
+
+    private void validateHyperDisk(String cloudPlatform, VmType currentInstanceTypeMetaData, VmType requestedInstanceTypeMetaData) {
+        if (CloudPlatform.GCP.name().equalsIgnoreCase(cloudPlatform)) {
+            if (currentInstanceTypeMetaData.getMetaData().getHyperdiskBalancedConfig() != null
+                    && requestedInstanceTypeMetaData.getMetaData().getHyperdiskBalancedConfig() == null) {
+                throw new BadRequestException("The requested instancetype does not support Hyperdisk as attached disk " +
+                        "but the current instancetype is using Hyperdisk. " +
+                        "In Google Cloud, you cannot \"switch\" a disk type from Hyperdisk (like Hyperdisk Balanced or Extreme) " +
+                        "to a non-Hyperdisk type (like pd-standard or pd-balanced) by simply changing a setting.");
+            } else if (currentInstanceTypeMetaData.getMetaData().getHyperdiskBalancedConfig() == null
+                    && requestedInstanceTypeMetaData.getMetaData().getHyperdiskBalancedConfig() != null) {
+                throw new BadRequestException("The requested instancetype does not support non-Hyperdisk as attached disk " +
+                        "but the current instancetype is using non-Hyperdisk. " +
+                        "In Google Cloud, you cannot \"switch\" a disk type from non-Hyperdisk type (like pd-standard or pd-balanced) " +
+                        "to a Hyperdisk (like Hyperdisk Balanced or Extreme) by simply changing a setting.");
+            }
         }
     }
 

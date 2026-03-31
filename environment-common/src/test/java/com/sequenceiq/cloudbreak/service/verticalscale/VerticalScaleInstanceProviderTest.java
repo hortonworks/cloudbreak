@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.service.verticalscale;
 
-
 import static com.sequenceiq.cloudbreak.cloud.model.VmType.vmTypeWithMeta;
 import static com.sequenceiq.cloudbreak.cloud.model.instance.AzureInstanceTemplate.ENCRYPTION_AT_HOST_ENABLED;
 import static java.util.Map.entry;
@@ -31,6 +30,7 @@ import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterConfig;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.filter.MinimalHardwareFilter;
 import com.sequenceiq.common.model.Architecture;
 
@@ -75,7 +75,7 @@ public class VerticalScaleInstanceProviderTest {
         when(minimalHardwareFilter.minMemory()).thenReturn(16);
 
         BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> {
-            underTest.validateInstanceTypeForVerticalScaling(current, requested, null, Map.of());
+            underTest.validateInstanceTypeForVerticalScaling("AWS", current, requested, null, Map.of());
         });
 
         assertEquals("The requested instancetype m2.xlarge has less Memory than the minimum 16 GB.",
@@ -111,7 +111,7 @@ public class VerticalScaleInstanceProviderTest {
         when(minimalHardwareFilter.suitableAsMinimumHardwareForMemory(any(), any())).thenReturn(true);
 
         BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> {
-            underTest.validateInstanceTypeForVerticalScaling(current, requested, Set.of(), Map.of(ENCRYPTION_AT_HOST_ENABLED, true));
+            underTest.validateInstanceTypeForVerticalScaling("AWS", current, requested, Set.of(), Map.of(ENCRYPTION_AT_HOST_ENABLED, true));
         });
 
         assertEquals("Unable to resize since changing from host encrypted m3.xlarge instance type " +
@@ -140,7 +140,7 @@ public class VerticalScaleInstanceProviderTest {
         requested.get().getMetaData().getProperties().put(VmTypeMeta.ARCHITECTURE, Architecture.ARM64);
 
         BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> {
-            underTest.validateInstanceTypeForVerticalScaling(current, requested, null, Map.of());
+            underTest.validateInstanceTypeForVerticalScaling("AWS", current, requested, null, Map.of());
         });
 
         assertEquals("Unable to resize since changing CPU architecture is not supported.",
@@ -170,7 +170,7 @@ public class VerticalScaleInstanceProviderTest {
         when(minimalHardwareFilter.minCpu()).thenReturn(4);
 
         BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> {
-            underTest.validateInstanceTypeForVerticalScaling(current, requested, null, Map.of());
+            underTest.validateInstanceTypeForVerticalScaling("AWS", current, requested, null, Map.of());
         });
 
         assertEquals("The requested instancetype m2.xlarge has less Cpu than the minimum 4 core.",
@@ -200,7 +200,7 @@ public class VerticalScaleInstanceProviderTest {
         when(minimalHardwareFilter.suitableAsMinimumHardwareForMemory(any(), any())).thenReturn(true);
 
         BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> {
-            underTest.validateInstanceTypeForVerticalScaling(current, requested, null, Map.of());
+            underTest.validateInstanceTypeForVerticalScaling("AWS", current, requested, null, Map.of());
         });
 
         assertEquals("The current instancetype m3.xlarge has more Ephemeral Disk than the requested m2.xlarge.",
@@ -230,7 +230,7 @@ public class VerticalScaleInstanceProviderTest {
         when(minimalHardwareFilter.suitableAsMinimumHardwareForMemory(any(), any())).thenReturn(true);
 
         BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> {
-            underTest.validateInstanceTypeForVerticalScaling(current, requested, null, Map.of());
+            underTest.validateInstanceTypeForVerticalScaling("AWS", current, requested, null, Map.of());
         });
 
         assertEquals("The current instancetype m3.xlarge has more Auto Attached Disk than the requested m2.xlarge.",
@@ -266,7 +266,7 @@ public class VerticalScaleInstanceProviderTest {
         when(minimalHardwareFilter.suitableAsMinimumHardwareForMemory(any(), any())).thenReturn(true);
 
         BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> {
-            underTest.validateInstanceTypeForVerticalScaling(current, requested, null, Map.of());
+            underTest.validateInstanceTypeForVerticalScaling("AWS", current, requested, null, Map.of());
         });
 
         assertEquals("Unable to resize since changing from resource disk to non-resource disk VM size and " +
@@ -303,7 +303,7 @@ public class VerticalScaleInstanceProviderTest {
         when(minimalHardwareFilter.suitableAsMinimumHardwareForMemory(any(), any())).thenReturn(true);
 
         BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> {
-            underTest.validateInstanceTypeForVerticalScaling(current, requested, Set.of("2", "3"), Map.of());
+            underTest.validateInstanceTypeForVerticalScaling("AWS", current, requested, Set.of("2", "3"), Map.of());
         });
 
         assertEquals("Stack is MultiAz enabled but requested instance type is not supported in existing " +
@@ -339,14 +339,53 @@ public class VerticalScaleInstanceProviderTest {
         when(minimalHardwareFilter.suitableAsMinimumHardwareForCpu(any(), any())).thenReturn(true);
         when(minimalHardwareFilter.suitableAsMinimumHardwareForMemory(any(), any())).thenReturn(true);
 
-        assertDoesNotThrow(() -> underTest.validateInstanceTypeForVerticalScaling(current, requested, Set.of("1", "2"), Map.of()));
+        assertDoesNotThrow(() -> underTest.validateInstanceTypeForVerticalScaling("AWS", current, requested, Set.of("1", "2"), Map.of()));
+    }
+
+    @Test
+    public void testRequestWhenRequestedInstanceIsValidButTheInstanceUsingHyperdiskAndTheRequestDoesNotSupportHyperdisk() {
+        String instanceTypeNameInStack = "Standard_D6S_v5";
+        String instanceTypeNameInRequest = "Standard_D64_v5";
+        Optional<VmType> current = vmTypeOptional(
+                instanceTypeNameInStack,
+                1,
+                1,
+                new VolumeParameterConfig(VolumeParameterType.AUTO_ATTACHED, 1, 1, 1, 1),
+                new VolumeParameterConfig(VolumeParameterType.EPHEMERAL, 1, 1, 1, 1),
+                true,
+                false,
+                List.of("1", "2")
+        );
+        current.get().getMetaData().setHyperdiskBalancedConfig(
+                new VolumeParameterConfig(VolumeParameterType.HYPERDISK_BALANCED, 1, 1, 1, 1));
+        Optional<VmType> requested = vmTypeOptional(
+                instanceTypeNameInRequest,
+                1,
+                1,
+                new VolumeParameterConfig(VolumeParameterType.AUTO_ATTACHED, 1, 1, 1, 1),
+                new VolumeParameterConfig(VolumeParameterType.EPHEMERAL, 1, 1, 1, 1),
+                true,
+                false,
+                List.of("1", "2")
+        );
+
+        when(minimalHardwareFilter.suitableAsMinimumHardwareForCpu(any(), any())).thenReturn(true);
+        when(minimalHardwareFilter.suitableAsMinimumHardwareForMemory(any(), any())).thenReturn(true);
+
+        BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> {
+            underTest.validateInstanceTypeForVerticalScaling("GCP", current, requested, Set.of("1", "2"), Map.of());
+        });
+        assertEquals("The requested instancetype does not support Hyperdisk as attached disk " +
+                "but the current instancetype is using Hyperdisk. " +
+                "In Google Cloud, you cannot \"switch\" a disk type from Hyperdisk (like Hyperdisk Balanced or Extreme) " +
+                "to a non-Hyperdisk type (like pd-standard or pd-balanced) by simply changing a setting.", badRequestException.getMessage());
     }
 
     @Test
     void listInstanceTypesTestWhenNoCloudVmResponses() {
         CloudVmTypes allVmTypes = new CloudVmTypes(Map.of(), Map.of());
 
-        CloudVmTypes result = underTest.listInstanceTypes(AVAILABILITY_ZONE_1, INSTANCE_TYPE_1, allVmTypes);
+        CloudVmTypes result = underTest.listInstanceTypes(CloudPlatform.GCP.name(), AVAILABILITY_ZONE_1, INSTANCE_TYPE_1, allVmTypes);
 
         assertThat(result).isNotNull();
         assertThat(result.getCloudVmResponses()).isEqualTo(Map.of());
@@ -374,7 +413,7 @@ public class VerticalScaleInstanceProviderTest {
         when(minimalHardwareFilter.suitableAsMinimumHardwareForCpu(any(), any())).thenReturn(true);
         when(minimalHardwareFilter.suitableAsMinimumHardwareForMemory(any(), any())).thenReturn(true);
 
-        CloudVmTypes result = underTest.listInstanceTypes(availabilityZone, INSTANCE_TYPE_1, allVmTypes);
+        CloudVmTypes result = underTest.listInstanceTypes("AWS", availabilityZone, INSTANCE_TYPE_1, allVmTypes);
 
         verifySuitableInstances(result);
     }
@@ -414,7 +453,7 @@ public class VerticalScaleInstanceProviderTest {
         CloudVmTypes allVmTypes = new CloudVmTypes(Map.ofEntries(entry(AVAILABILITY_ZONE_1, Set.of(current))),
                 Map.ofEntries(entry(AVAILABILITY_ZONE_1, current)));
 
-        CloudVmTypes result = underTest.listInstanceTypes(AVAILABILITY_ZONE_2, INSTANCE_TYPE_1, allVmTypes);
+        CloudVmTypes result = underTest.listInstanceTypes("AWS", AVAILABILITY_ZONE_2, INSTANCE_TYPE_1, allVmTypes);
 
         assertThat(result).isNotNull();
         assertThat(result.getCloudVmResponses()).isEqualTo(Map.of(AVAILABILITY_ZONE_2, Set.of()));
@@ -437,7 +476,7 @@ public class VerticalScaleInstanceProviderTest {
         CloudVmTypes allVmTypes = new CloudVmTypes(Map.ofEntries(entry(AVAILABILITY_ZONE_1, Set.of(current))),
                 Map.ofEntries(entry(AVAILABILITY_ZONE_1, current)));
 
-        CloudVmTypes result = underTest.listInstanceTypes(AVAILABILITY_ZONE_1, INSTANCE_TYPE_2, allVmTypes);
+        CloudVmTypes result = underTest.listInstanceTypes("AWS", AVAILABILITY_ZONE_1, INSTANCE_TYPE_2, allVmTypes);
 
         assertThat(result).isNotNull();
         assertThat(result.getCloudVmResponses()).isEqualTo(Map.of(AVAILABILITY_ZONE_1, Set.of()));
@@ -463,7 +502,7 @@ public class VerticalScaleInstanceProviderTest {
         when(minimalHardwareFilter.suitableAsMinimumHardwareForCpu(any(), any())).thenReturn(false);
         when(minimalHardwareFilter.minCpu()).thenReturn(4);
 
-        CloudVmTypes result = underTest.listInstanceTypes(AVAILABILITY_ZONE_1, INSTANCE_TYPE_1, allVmTypes);
+        CloudVmTypes result = underTest.listInstanceTypes("AWS", AVAILABILITY_ZONE_1, INSTANCE_TYPE_1, allVmTypes);
 
         assertThat(result).isNotNull();
         assertThat(result.getCloudVmResponses()).isEqualTo(Map.of(AVAILABILITY_ZONE_1, Set.of()));
@@ -489,7 +528,7 @@ public class VerticalScaleInstanceProviderTest {
         when(minimalHardwareFilter.suitableAsMinimumHardwareForCpu(any(), any())).thenReturn(true);
         when(minimalHardwareFilter.suitableAsMinimumHardwareForMemory(any(), any())).thenReturn(true);
 
-        CloudVmTypes result = underTest.listInstanceTypes(AVAILABILITY_ZONE_1, INSTANCE_TYPE_1, allVmTypes);
+        CloudVmTypes result = underTest.listInstanceTypes("AWS", AVAILABILITY_ZONE_1, INSTANCE_TYPE_1, allVmTypes);
 
         verifySuitableInstances(result);
     }

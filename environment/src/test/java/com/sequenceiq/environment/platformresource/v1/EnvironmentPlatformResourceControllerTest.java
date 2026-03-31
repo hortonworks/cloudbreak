@@ -93,7 +93,7 @@ public class EnvironmentPlatformResourceControllerTest {
                         null)).thenReturn(request);
         CloudVmTypes cloudVmTypes = mock(CloudVmTypes.class);
         when(platformParameterService.getVmTypesByCredential(request)).thenReturn(cloudVmTypes);
-        when(verticalScaleInstanceProvider.listInstanceTypes(null, null, cloudVmTypes, null,
+        when(verticalScaleInstanceProvider.listInstanceTypes(null, null, null, cloudVmTypes, null,
                 null)).thenReturn(cloudVmTypes);
         PlatformVmtypesResponse response = mock(PlatformVmtypesResponse.class);
         when(cloudVmTypesToPlatformVmTypesV1ResponseConverter.convert(cloudVmTypes)).thenReturn(response);

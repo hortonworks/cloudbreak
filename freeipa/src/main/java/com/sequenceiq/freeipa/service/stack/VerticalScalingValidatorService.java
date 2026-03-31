@@ -105,6 +105,7 @@ public class VerticalScalingValidatorService {
                     .map(InstanceGroupAvailabilityZone::getAvailabilityZone).collect(Collectors.toSet()) : null;
             Json attributes = instanceGroupOptional.get().getTemplate().getAttributes();
             verticalScaleInstanceProvider.validateInstanceTypeForVerticalScaling(
+                    stack.getCloudPlatform(),
                     getInstance(region, availabilityZone, currentInstanceType, allVmTypes),
                     requestInstanceForVerticalScaling,
                     availabilityZones,

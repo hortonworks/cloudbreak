@@ -177,6 +177,7 @@ public class VerticalScalingValidatorService {
                     CdpResourceType.DEFAULT,
                     Map.of(ARCHITECTURE, Architecture.ALL_ARCHITECTURE));
             verticalScaleInstanceProvider.validateInstanceTypeForVerticalScaling(
+                    stack.getCloudPlatform(),
                     getInstance(region, availabilityZone, currentInstanceType, allVmTypes),
                     getInstance(region, availabilityZone, requestedInstanceType, allVmTypes),
                     validateMultiAz ? instanceGroupService.findAvailabilityZonesByStackIdAndGroupId(instanceGroup.getId()) : null,
