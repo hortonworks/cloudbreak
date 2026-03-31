@@ -14,6 +14,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -36,6 +37,7 @@ import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.adls.AdlsGen2ConfigProvider;
+import com.sequenceiq.cloudbreak.cmtemplate.configproviders.remotehdfs.RemoteHdfsConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.s3.S3ConfigProvider;
 import com.sequenceiq.cloudbreak.domain.StorageLocation;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
@@ -60,6 +62,9 @@ class CoreConfigProviderTest {
 
     @Mock
     private AdlsGen2ConfigProvider adlsGen2ConfigProvider;
+
+    @Mock
+    private RemoteHdfsConfigProvider remoteHdfsConfigProvider;
 
     @Test
     void isConfigurationNeededWhenKafkaPresentedHdfsNotAndStorageConfiguredMustReturnTrue() {
@@ -303,5 +308,6 @@ class CoreConfigProviderTest {
             assertEquals("hadoop_rpc_protection", serviceConfigs.get(1).getName());
             assertEquals("privacy", serviceConfigs.get(1).getValue());
         });
+        verifyNoInteractions(remoteHdfsConfigProvider);
     }
 }

@@ -4,9 +4,11 @@ import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVer
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.core.CoreRoles.CORE_DEFAULTFS;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.core.CoreRoles.CORE_SETTINGS;
-import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.core.CoreRoles.CORE_SETTINGS_REF_NAME;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.core.CoreRoles.CORE_SETTINGS_GATEWAY_REF_NAME;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.core.CoreRoles.CORE_SETTINGS_SERVICE_REF_NAME;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.core.CoreRoles.CORE_SETTINGS_STORAGEOPERATIONS_REF_NAME;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.core.CoreRoles.CORE_SITE_SAFETY_VALVE;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.core.CoreRoles.GATEWAY;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.core.CoreRoles.HADOOP_RPC_PROTECTION;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.core.CoreRoles.HADOOP_SECURITY_GROUPS_CACHE_BACKGROUND_RELOAD;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.core.CoreRoles.STORAGEOPERATIONS;
@@ -14,7 +16,6 @@ import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.hdfs.HdfsRole
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.hdfs.HdfsRoles.NAMENODE;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -37,10 +38,13 @@ import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRoleConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.adls.AdlsGen2ConfigProvider;
+import com.sequenceiq.cloudbreak.cmtemplate.configproviders.remotehdfs.RemoteHdfsConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.s3.S3ConfigProvider;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
+import com.sequenceiq.cloudbreak.template.filesystem.StorageLocationView;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 import com.sequenceiq.common.api.type.InstanceGroupType;
+import com.sequenceiq.common.model.CloudStorageCdpService;
 
 @Component
 public class CoreConfigProvider extends AbstractRoleConfigProvider {
@@ -52,6 +56,9 @@ public class CoreConfigProvider extends AbstractRoleConfigProvider {
     @Inject
     private AdlsGen2ConfigProvider adlsConfigProvider;
 
+    @Inject
+    private RemoteHdfsConfigProvider remoteHdfsConfigProvider;
+
     @Override
     protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
         return List.of();
@@ -62,13 +69,16 @@ public class CoreConfigProvider extends AbstractRoleConfigProvider {
         List<ApiClusterTemplateConfig> apiClusterTemplateConfigs = new ArrayList<>();
         Optional<ApiClusterTemplateConfig> roleConfig = templateProcessor.getRoleConfig(CORE_SETTINGS, STORAGEOPERATIONS, CORE_DEFAULTFS);
         if (roleConfig.isEmpty()) {
-            ConfigUtils.getStorageLocationForServiceProperty(source, CORE_DEFAULTFS)
+            getConfiguredFileSystem(source)
                     .ifPresent(location -> apiClusterTemplateConfigs.add(config(CORE_DEFAULTFS, location.getValue())));
         }
 
         StringBuilder hdfsCoreSiteSafetyValveValue = new StringBuilder();
         s3ConfigProvider.getServiceConfigs(source, hdfsCoreSiteSafetyValveValue);
         adlsConfigProvider.populateServiceConfigs(source, hdfsCoreSiteSafetyValveValue, templateProcessor.getStackVersion());
+        if (templateProcessor.isHybridDatahub(source)) {
+            remoteHdfsConfigProvider.populateRemoteHdfsPropertiesForStubDfs(source, hdfsCoreSiteSafetyValveValue);
+        }
 
         hdfsCoreSiteSafetyValveValue.append(ConfigUtils.getSafetyValveProperty(HADOOP_SECURITY_GROUPS_CACHE_BACKGROUND_RELOAD, "true"));
 
@@ -91,31 +101,33 @@ public class CoreConfigProvider extends AbstractRoleConfigProvider {
             ApiClusterTemplateService coreSettings = createBaseCoreSettingsService(cmTemplateProcessor);
             Set<HostgroupView> hostgroupViews = source.getHostgroupViews();
             return hostgroupViews.stream()
-                    .filter(filterByHostGroupViewType())
+                    .filter(filterByHostGroupViewType(cmTemplateProcessor.isHybridDatahub(source)))
                     .collect(Collectors.toMap(HostgroupView::getName, v -> coreSettings));
         }
         return Map.of();
     }
 
-    public Predicate<HostgroupView> filterByHostGroupViewType() {
-        return hg -> InstanceGroupType.GATEWAY.equals(hg.getInstanceGroupType());
+    public Predicate<HostgroupView> filterByHostGroupViewType(boolean hybridDatahub) {
+        return hg -> hybridDatahub || InstanceGroupType.GATEWAY.equals(hg.getInstanceGroupType());
     }
 
     private ApiClusterTemplateService createBaseCoreSettingsService(CmTemplateProcessor cmTemplateProcessor) {
-        ApiClusterTemplateService coreSettings = new ApiClusterTemplateService()
-                .serviceType(CORE_SETTINGS)
-                .refName(CORE_SETTINGS_SERVICE_REF_NAME);
+        List<ApiClusterTemplateRoleConfigGroup> roleConfigGroups = new ArrayList<>();
+        roleConfigGroups.add(new ApiClusterTemplateRoleConfigGroup()
+                .roleType(GATEWAY)
+                .base(true)
+                .refName(CORE_SETTINGS_GATEWAY_REF_NAME));
         if (needToAddStorageOperationsRole(cmTemplateProcessor)) {
             LOGGER.info("CM version is older then 7.7.1, adding '{}' role to '{}' service.", STORAGEOPERATIONS, CORE_SETTINGS);
-            ApiClusterTemplateRoleConfigGroup coreSettingsRole = new ApiClusterTemplateRoleConfigGroup()
+            roleConfigGroups.add(new ApiClusterTemplateRoleConfigGroup()
                     .roleType(STORAGEOPERATIONS)
                     .base(true)
-                    .refName(CORE_SETTINGS_REF_NAME);
-            coreSettings.roleConfigGroups(List.of(coreSettingsRole));
-        } else {
-            coreSettings.roleConfigGroups(new LinkedList<>());
+                    .refName(CORE_SETTINGS_STORAGEOPERATIONS_REF_NAME));
         }
-        return coreSettings;
+        return new ApiClusterTemplateService()
+                .serviceType(CORE_SETTINGS)
+                .refName(CORE_SETTINGS_SERVICE_REF_NAME)
+                .roleConfigGroups(roleConfigGroups);
     }
 
     private boolean needToAddStorageOperationsRole(CmTemplateProcessor cmTemplateProcessor) {
@@ -137,6 +149,11 @@ public class CoreConfigProvider extends AbstractRoleConfigProvider {
     public boolean isConfigurationNeeded(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject source) {
         return !cmTemplateProcessor.isRoleTypePresentInService(HDFS, Lists.newArrayList(NAMENODE))
                 && source.getFileSystemConfigurationView().isPresent()
-                && ConfigUtils.getStorageLocationForServiceProperty(source, CORE_DEFAULTFS).isPresent();
+                && getConfiguredFileSystem(source).isPresent();
+    }
+
+    private Optional<StorageLocationView> getConfiguredFileSystem(TemplatePreparationObject source) {
+        return ConfigUtils.getStorageLocationForServiceProperty(source, CORE_DEFAULTFS)
+                .or(() -> ConfigUtils.getStorageLocationForServiceProperty(source, CloudStorageCdpService.REMOTE_FS.name()));
     }
 }

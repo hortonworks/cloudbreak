@@ -1,16 +1,10 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.core;
 
-import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
-import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.getSafetyValveProperty;
-import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.core.CoreRoles.CORE_DEFAULTFS;
-import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.core.CoreRoles.CORE_SITE_SAFETY_VALVE;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.hdfs.HdfsRoles.HDFS;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.hdfs.HdfsRoles.NAMENODE;
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -31,10 +25,7 @@ import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.dto.TrustView;
 import com.sequenceiq.cloudbreak.sdx.RdcView;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
-import com.sequenceiq.cloudbreak.template.filesystem.BaseFileSystemConfigurationsView;
-import com.sequenceiq.cloudbreak.template.filesystem.StorageLocationView;
 import com.sequenceiq.cloudbreak.template.views.DatalakeView;
-import com.sequenceiq.common.model.CloudStorageCdpService;
 
 class HybridCoreConfigProviderTest {
 
@@ -115,36 +106,5 @@ class HybridCoreConfigProviderTest {
         assertTrue(underTest.isConfigurationNeeded(cmTemplateProcessor, source));
         when(cmTemplateProcessor.isHybridDatahub(source)).thenReturn(false);
         assertFalse(underTest.isConfigurationNeeded(cmTemplateProcessor, source));
-    }
-
-    @Test
-    void stubDfsProperties() {
-        when(cmTemplateProcessor.isRoleTypePresentInService(HDFS, Lists.newArrayList(NAMENODE))).thenReturn(false);
-        BaseFileSystemConfigurationsView fileSystemConfigurationsView = mock();
-        StorageLocationView storageLocationView = mock();
-        when(storageLocationView.getProperty()).thenReturn(CloudStorageCdpService.REMOTE_FS.name());
-        when(storageLocationView.getValue()).thenReturn("hdfs://ns1");
-        when(fileSystemConfigurationsView.getLocations()).thenReturn(List.of(storageLocationView));
-        when(source.getFileSystemConfigurationView()).thenReturn(Optional.of(fileSystemConfigurationsView));
-
-        TrustView trustView = mock(TrustView.class);
-        when(source.getTrustView()).thenReturn(Optional.of(trustView));
-        when(trustView.realm()).thenReturn("realmX");
-
-        when(source.getDatalakeView()).thenReturn(Optional.of(mock()));
-
-        when(hdfsConfigHelper.getNameService(any())).thenReturn("ns1");
-        when(hdfsConfigHelper.getNameServiceConfigSafetyValveValue(any())).thenReturn("<NameServiceConfigSafetyValveValue>");
-
-        List<ApiClusterTemplateConfig> result = underTest.getServiceConfigs(cmTemplateProcessor, source);
-
-        assertThat(result)
-                .contains(config(CORE_DEFAULTFS, "hdfs://ns1"))
-                .anyMatch(config ->
-                        config.getName().equals(CORE_SITE_SAFETY_VALVE)
-                                && config.getValue().contains("<NameServiceConfigSafetyValveValue>")
-                                && config.getValue().contains(getSafetyValveProperty("dfs.namenode.kerberos.principal", "hdfs/_HOST@REALMX"))
-                                && config.getValue().contains(getSafetyValveProperty("dfs.nameservices", "ns1"))
-                );
     }
 }

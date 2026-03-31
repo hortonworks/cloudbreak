@@ -77,17 +77,6 @@
             "base": true
           }
         ]
-      },
-      {
-        "refName": "stub_dfs",
-        "serviceType": "STUB_DFS",
-        "roleConfigGroups": [
-          {
-            "refName": "stub_dfs-STORAGEOPERATIONS-BASE",
-            "roleType": "STORAGEOPERATIONS",
-            "base": true
-          }
-        ]
       }
     ],
     "hostTemplates": [
@@ -98,8 +87,7 @@
           "hue-HUE_LOAD_BALANCER-BASE",
           "hue-HUE_SERVER-BASE",
           "impala-CATALOGSERVER-BASE",
-          "impala-STATESTORE-BASE",
-          "stub_dfs-STORAGEOPERATIONS-BASE"
+          "impala-STATESTORE-BASE"
         ]
       },
       {

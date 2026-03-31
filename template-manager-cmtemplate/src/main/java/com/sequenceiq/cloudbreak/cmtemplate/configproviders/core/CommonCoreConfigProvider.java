@@ -62,7 +62,7 @@ public class CommonCoreConfigProvider extends CoreConfigProvider {
     }
 
     @Override
-    public Predicate<HostgroupView> filterByHostGroupViewType() {
+    public Predicate<HostgroupView> filterByHostGroupViewType(boolean hybridDatahub) {
         return hgv -> true;
     }
 

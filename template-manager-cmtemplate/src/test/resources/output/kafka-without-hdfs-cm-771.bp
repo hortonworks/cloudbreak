@@ -88,7 +88,13 @@
           "value": "<property><name>hadoop.security.groups.cache.background.reload</name><value>true</value></property>"
         }
       ],
-      "roleConfigGroups": []
+      "roleConfigGroups": [
+        {
+          "refName": "core_settings-GATEWAY-BASE",
+          "roleType": "GATEWAY",
+          "base": true
+        }
+      ]
     },
     {
       "refName": "stub_dfs",
@@ -110,6 +116,7 @@
         "schemaregistry-SCHEMA_REGISTRY_SERVER-BASE",
         "streams_messaging_manager-STREAMS_MESSAGING_MANAGER_SERVER-BASE",
         "streams_messaging_manager-STREAMS_MESSAGING_MANAGER_UI-BASE",
+        "core_settings-GATEWAY-BASE",
         "stub_dfs-STORAGEOPERATIONS-BASE"
       ]
     },

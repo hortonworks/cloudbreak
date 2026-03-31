@@ -8,7 +8,11 @@ public class CoreRoles {
 
     public static final String STORAGEOPERATIONS = "STORAGEOPERATIONS";
 
-    public static final String CORE_SETTINGS_REF_NAME = "core_settings-STORAGEOPERATIONS-BASE";
+    public static final String CORE_SETTINGS_STORAGEOPERATIONS_REF_NAME = "core_settings-STORAGEOPERATIONS-BASE";
+
+    public static final String GATEWAY = "GATEWAY";
+
+    public static final String CORE_SETTINGS_GATEWAY_REF_NAME = "core_settings-GATEWAY-BASE";
 
     public static final String CORE_DEFAULTFS = "core_defaultfs";
 

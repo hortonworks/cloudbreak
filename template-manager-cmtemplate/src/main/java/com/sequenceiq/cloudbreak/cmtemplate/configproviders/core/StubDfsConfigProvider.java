@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 import com.sequenceiq.common.api.type.InstanceGroupType;
+import com.sequenceiq.common.model.CloudStorageCdpService;
 
 @Component
 public class StubDfsConfigProvider extends AbstractRoleConfigProvider {
@@ -81,6 +82,8 @@ public class StubDfsConfigProvider extends AbstractRoleConfigProvider {
                 && isVersionNewerOrEqualThanLimited(cmTemplateProcessor.getCmVersion().get(), CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_7_1)
                 && !cmTemplateProcessor.isRoleTypePresentInService(HDFS, Lists.newArrayList(NAMENODE))
                 && source.getFileSystemConfigurationView().isPresent()
-                && ConfigUtils.getStorageLocationForServiceProperty(source, CORE_DEFAULTFS).isPresent();
+                && ConfigUtils.getStorageLocationForServiceProperty(source, CORE_DEFAULTFS)
+                        .or(() -> ConfigUtils.getStorageLocationForServiceProperty(source, CloudStorageCdpService.REMOTE_FS.name()))
+                        .isPresent();
     }
 }

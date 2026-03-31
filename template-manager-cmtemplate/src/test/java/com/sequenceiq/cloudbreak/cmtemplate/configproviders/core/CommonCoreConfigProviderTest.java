@@ -97,8 +97,8 @@ class CommonCoreConfigProviderTest {
 
     @Test
     void testFilterByHostGroupViewTypeReturnsCorrectPredicate() {
-        assertTrue(underTest.filterByHostGroupViewType().test(mock(HostgroupView.class)));
-        assertTrue(underTest.filterByHostGroupViewType().test(null));
+        assertTrue(underTest.filterByHostGroupViewType(false).test(mock(HostgroupView.class)));
+        assertTrue(underTest.filterByHostGroupViewType(false).test(null));
     }
 
     @ValueSource(strings = {"7.12.0", "7.11.0", "7.12.0.400", ""})
