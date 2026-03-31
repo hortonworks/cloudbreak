@@ -19,7 +19,6 @@ import com.sequenceiq.authorization.service.OwnerAssignmentService;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
-import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 import com.sequenceiq.common.api.type.EnvironmentType;
@@ -132,7 +131,6 @@ public class EnvironmentCreationService {
         }
 
         environmentService.setSecurityAccess(environment, creationDto.getSecurityAccess());
-        initializeSecretEncryption(environment);
         validateCreation(creationDto, environment);
         validateRecipes(creationDto);
         validateSecurity(creationDto);
@@ -192,14 +190,9 @@ public class EnvironmentCreationService {
         environment.setAuthentication(authenticationDtoConverter.dtoToAuthentication(creationDto.getAuthentication()));
         environment.setEnvironmentServiceVersion(environmentServiceVersion);
         environment.setEncryptionProfileCrn(creationDto.getEncryptionProfileCrn());
+        environment.setEnableSecretEncryption(creationDto.isSecretEncryptionEnabled());
         LOGGER.info("Environment is initialized for creation.");
         return environment;
-    }
-
-    private void initializeSecretEncryption(Environment environment) {
-        environment.setEnableSecretEncryption(CloudPlatform.AWS.name().equals(environment.getCloudPlatform()) &&
-                Boolean.TRUE.equals(environment.getCredential().getGovCloud()) && entitlementService.isSecretEncryptionEnabled(environment.getAccountId()));
-        LOGGER.info("Environment is initialized with enableSecretEncryption={}.", environment.isEnableSecretEncryption());
     }
 
     private void initializeEnvironmentTunnel(Environment environment) {
@@ -226,7 +219,8 @@ public class EnvironmentCreationService {
         validationBuilder.merge(validatorService.validatePublicKey(creationDto.getAuthentication().getPublicKey()));
         validationBuilder.merge(validatorService.validateTags(creationDto));
         if (creationDto.getCloudPlatform() != null) {
-            validationBuilder.merge(validateEncryptionKey(creationDto, environment.isEnableSecretEncryption()));
+            validationBuilder.merge(validateSecretEncryption(creationDto));
+            validationBuilder.merge(validateEncryptionKey(creationDto));
             validationBuilder.merge(validateEncryptionRole(creationDto));
         }
         ValidationResult parentChildValidation = validatorService.validateParentChildRelation(environment, creationDto.getParentEnvironmentName());
@@ -252,16 +246,36 @@ public class EnvironmentCreationService {
         }
     }
 
-    private ValidationResult validateEncryptionKey(EnvironmentCreationDto creationDto, boolean secretEncryptionEnabled) {
+    private ValidationResult validateSecretEncryption(EnvironmentCreationDto creationDto) {
+        ValidationResultBuilder validationResultBuilder = ValidationResult.builder();
+        if (creationDto.isSecretEncryptionEnabled()) {
+            String cloudPlatform = creationDto.getCloudPlatform().toLowerCase(Locale.ROOT);
+            switch (cloudPlatform) {
+                case "aws" -> {
+                    String accountId = creationDto.getAccountId();
+                    if (!entitlementService.isSecretEncryptionEnabled(accountId)) {
+                        validationResultBuilder.error(String.format("Account '%s' is not entitled to use secret encryption.", accountId));
+                    }
+                    if (!creationDto.isGovCloud() && !entitlementService.isSecretEncryptionForCommercialAwsEnabled(accountId)) {
+                        validationResultBuilder.error(String.format("Account '%s' is not entitled to use secret encryption on commercial AWS.", accountId));
+                    }
+                }
+                default -> validationResultBuilder.error("Secret encryption is not supported for cloud platform: " + creationDto.getCloudPlatform());
+            }
+        }
+        return validationResultBuilder.build();
+    }
+
+    private ValidationResult validateEncryptionKey(EnvironmentCreationDto creationDto) {
         String cloudPlatform = creationDto.getCloudPlatform().toLowerCase(Locale.ROOT);
-        switch (cloudPlatform) {
+        return switch (cloudPlatform) {
             case "azure" -> {
                 String encryptionKeyUrl = Optional.ofNullable(creationDto.getParameters())
                         .map(ParametersDto::getAzureParametersDto)
                         .map(AzureParametersDto::getAzureResourceEncryptionParametersDto)
                         .map(AzureResourceEncryptionParametersDto::getEncryptionKeyUrl)
                         .orElse(null);
-                return encryptionKeyUrl != null ? validatorService.validateEncryptionKeyUrl(encryptionKeyUrl) : ValidationResult.empty();
+                yield encryptionKeyUrl != null ? validatorService.validateEncryptionKeyUrl(encryptionKeyUrl) : ValidationResult.empty();
             }
             case "gcp" -> {
                 String encryptionKey = Optional.ofNullable(creationDto.getParameters())
@@ -269,7 +283,7 @@ public class EnvironmentCreationService {
                         .map(GcpParametersDto::getGcpResourceEncryptionParametersDto)
                         .map(GcpResourceEncryptionParametersDto::getEncryptionKey)
                         .orElse(null);
-                return encryptionKey != null ? validatorService.validateEncryptionKey(encryptionKey) : ValidationResult.empty();
+                yield encryptionKey != null ? validatorService.validateEncryptionKey(encryptionKey) : ValidationResult.empty();
             }
             case "aws" -> {
                 String encryptionKeyArn = Optional.ofNullable(creationDto.getParameters())
@@ -277,12 +291,10 @@ public class EnvironmentCreationService {
                         .map(AwsParametersDto::getAwsDiskEncryptionParametersDto)
                         .map(AwsDiskEncryptionParametersDto::getEncryptionKeyArn)
                         .orElse(null);
-                return validatorService.validateEncryptionKeyArn(encryptionKeyArn, secretEncryptionEnabled);
+                yield validatorService.validateEncryptionKeyArn(encryptionKeyArn, creationDto.isGovCloud(), creationDto.isSecretEncryptionEnabled());
             }
-            default -> {
-                return ValidationResult.empty();
-            }
-        }
+            default -> ValidationResult.empty();
+        };
     }
 
     private ValidationResult validateEncryptionRole(EnvironmentCreationDto creationDto) {
@@ -304,7 +316,7 @@ public class EnvironmentCreationService {
 
     private ValidationResult validateEnvironmentType(EnvironmentCreationDto creationDto) {
         ValidationResultBuilder resultBuilder = ValidationResult.builder();
-        if ((EnvironmentType.HYBRID.equals(creationDto.getEnvironmentType()) ||  EnvironmentType.HYBRID_BASE.equals(creationDto.getEnvironmentType()))
+        if ((EnvironmentType.HYBRID.equals(creationDto.getEnvironmentType()) || EnvironmentType.HYBRID_BASE.equals(creationDto.getEnvironmentType()))
                 && !entitlementService.hybridCloudEnabled(creationDto.getAccountId())) {
             resultBuilder.error("Creating Hybrid Environment requires CDP_HYBRID_CLOUD entitlement for your account");
         }

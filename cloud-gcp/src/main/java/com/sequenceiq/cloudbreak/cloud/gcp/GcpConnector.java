@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.gcp;
 
-import java.util.Collections;
 import java.util.List;
 
 import jakarta.inject.Inject;
@@ -11,6 +10,7 @@ import com.sequenceiq.cloudbreak.cloud.Authenticator;
 import com.sequenceiq.cloudbreak.cloud.AvailabilityZoneConnector;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.CloudConstant;
+import com.sequenceiq.cloudbreak.cloud.CommonSecretEncryptionValidator;
 import com.sequenceiq.cloudbreak.cloud.CredentialConnector;
 import com.sequenceiq.cloudbreak.cloud.EncryptionResources;
 import com.sequenceiq.cloudbreak.cloud.IdentityService;
@@ -41,6 +41,9 @@ public class GcpConnector implements CloudConnector {
 
     @Inject
     private GcpTagValidator gcpTagValidator;
+
+    @Inject
+    private CommonSecretEncryptionValidator commonSecretEncryptionValidator;
 
     @Inject
     private GcpInstanceConnector instanceConnector;
@@ -96,7 +99,7 @@ public class GcpConnector implements CloudConnector {
         if (ValidatorType.IMAGE.equals(validatorType)) {
             return List.of();
         }
-        return Collections.singletonList(gcpTagValidator);
+        return List.of(gcpTagValidator, commonSecretEncryptionValidator);
     }
 
     @Override

@@ -53,6 +53,7 @@ import com.sequenceiq.environment.api.v1.environment.model.request.azure.UpdateA
 import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpResourceEncryptionParameters;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentCrnResponse;
+import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.service.CredentialService;
 import com.sequenceiq.environment.credential.v1.converter.TunnelConverter;
 import com.sequenceiq.environment.encryptionprofile.domain.EncryptionProfile;
@@ -145,7 +146,8 @@ public class EnvironmentApiConverter {
     public EnvironmentCreationDto initCreationDto(EnvironmentRequest request) {
         LOGGER.debug("Creating EnvironmentCreationDto from EnvironmentRequest: {}", request);
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
-        String cloudPlatform = credentialService.getCloudPlatformByCredential(request.getCredentialName(), accountId, ENVIRONMENT);
+        Credential credential = credentialService.getCredentialForEnvCreation(request.getCredentialName(), accountId, ENVIRONMENT);
+        String cloudPlatform = credential.getCloudPlatform();
         EnvironmentType environmentType = null;
         if (request.getEnvironmentType() != null) {
             try {
@@ -160,6 +162,7 @@ public class EnvironmentApiConverter {
                 .withName(request.getName())
                 .withDescription(request.getDescription())
                 .withCloudPlatform(cloudPlatform)
+                .withGovCloud(credential.getGovCloud())
                 .withCredential(request)
                 .withCreated(System.currentTimeMillis())
                 .withFreeIpaCreation(freeIpaConverter.convert(request.getFreeIpa(), accountId, cloudPlatform))
@@ -187,7 +190,8 @@ public class EnvironmentApiConverter {
                 .withDataServices(dataServicesConverter.convertToDto(request.getDataServices()))
                 .withCreatorClient(getHeaderOrItsFallbackValueOrDefault(USER_AGENT_HEADER, CDP_CALLER_ID_HEADER, CALLER_ID_NOT_FOUND))
                 .withEnvironmentType(environmentType == null ? EnvironmentType.PUBLIC_CLOUD : environmentType)
-                .withEncryptionProfileCrn(getEncryptionProfileCrn(request));
+                .withEncryptionProfileCrn(getEncryptionProfileCrn(request))
+                .withSecretEncryptionEnabled(request.isSecretEncryptionEnabled());
 
         NullUtil.doIfNotNull(request.getNetwork(), network -> {
             NetworkDto networkDto = networkRequestToDto(network);

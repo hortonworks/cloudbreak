@@ -84,16 +84,15 @@ class EncryptionKeyArnValidatorTest {
     void testEncryptionKeyArnValidationWithValidKeyAndCommentIsValid() {
         String validKey = "arn:aws:kms:us-east-1:012345678910:key/1234abcd-12ab-34cd-56ef-1234567890ab";
 
-        ValidationResult validationResult = underTest.validateEncryptionKeyArn(validKey, false);
+        ValidationResult validationResult = underTest.validateEncryptionKeyArn(validKey, false, false);
         assertFalse(validationResult.hasError());
-
     }
 
     @Test
     void testEncryptionKeyUrlValidationWithInValidKeyAndCommentIsValid() {
         String invalidKey = "aws:kms:us-east-1:012345678910:key/1234abcd-12ab-34cd-56ef-1234567890ab";
 
-        ValidationResult validationResult = underTest.validateEncryptionKeyArn(invalidKey, false);
+        ValidationResult validationResult = underTest.validateEncryptionKeyArn(invalidKey, false, false);
         assertTrue(validationResult.hasError());
         assertEquals(String.format("The identifier of the AWS Key Management Service (AWS KMS)" +
                         "customer master key (CMK) to use for Amazon EBS encryption.%n" +
@@ -179,9 +178,15 @@ class EncryptionKeyArnValidatorTest {
     }
 
     @Test
-    public void testWithEmptyEncryptionKeyAndSecretEncryptionEnabled() {
-        ValidationResult validationResult = underTest.validateEncryptionKeyArn(null, true);
+    public void testWithEmptyEncryptionKeyAndSecretEncryptionEnabledAndGovCloud() {
+        ValidationResult validationResult = underTest.validateEncryptionKeyArn(null, true, true);
         assertEquals(NULL_ARN_WITH_SECRET_ENCRYPTION_ENABLED_ERROR_MESSAGE, validationResult.getFormattedErrors());
+    }
+
+    @Test
+    public void testWithEmptyEncryptionKeyAndSecretEncryptionEnabledAndNotGovCloud() {
+        ValidationResult validationResult = underTest.validateEncryptionKeyArn(null, false, true);
+        assertFalse(validationResult.hasError());
     }
 
     @Test

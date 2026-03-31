@@ -64,6 +64,7 @@ import com.sequenceiq.environment.api.v1.environment.model.request.azure.UpdateA
 import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpResourceEncryptionParameters;
 import com.sequenceiq.environment.api.v1.proxy.model.request.ProxyRequest;
+import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.service.CredentialService;
 import com.sequenceiq.environment.credential.v1.converter.TunnelConverter;
 import com.sequenceiq.environment.encryptionprofile.service.EncryptionProfileService;
@@ -171,8 +172,10 @@ class EnvironmentApiConverterTest {
         Features features = mock(Features.class);
         NetworkDto networkDto = mock(NetworkDto.class);
         EnvironmentDataServices dataServices = mock(EnvironmentDataServices.class);
+        Credential credential = mock(Credential.class);
 
-        when(credentialService.getCloudPlatformByCredential(anyString(), anyString(), any())).thenReturn(cloudPlatform.name());
+        when(credential.getCloudPlatform()).thenReturn(cloudPlatform.name());
+        when(credentialService.getCredentialForEnvCreation(anyString(), anyString(), any())).thenReturn(credential);
         when(freeIpaConverter.convert(request.getFreeIpa(), "test-aws", cloudPlatform.name())).thenReturn(freeIpaCreationDto);
         when(accountTelemetry.getFeatures()).thenReturn(features);
         when(accountTelemetryService.getOrDefault(any())).thenReturn(accountTelemetry);
@@ -209,7 +212,7 @@ class EnvironmentApiConverterTest {
         assertEquals(Set.of(KUBE_API_AUTHORIZED_IP_RANGES), externalizedComputeCluster.getKubeApiAuthorizedIpRanges());
         assertEquals(EnvironmentType.HYBRID, actual.getEnvironmentType());
 
-        verify(credentialService).getCloudPlatformByCredential(anyString(), anyString(), any());
+        verify(credentialService).getCredentialForEnvCreation(anyString(), anyString(), any());
         verify(freeIpaConverter).convert(request.getFreeIpa(), "test-aws", cloudPlatform.name());
         verify(accountTelemetryService).getOrDefault(any());
         verify(telemetryApiConverter).convert(eq(request.getTelemetry()), any(), anyString());
@@ -225,6 +228,9 @@ class EnvironmentApiConverterTest {
     void testInitCreationDtoInvalidEnvironmentType(CloudPlatform cloudPlatform) {
         EnvironmentRequest request = createEnvironmentRequest(cloudPlatform);
         request.setEnvironmentType("HYBRID11");
+        Credential credential = mock(Credential.class);
+        when(credential.getCloudPlatform()).thenReturn(cloudPlatform.name());
+        when(credentialService.getCredentialForEnvCreation(anyString(), anyString(), any())).thenReturn(credential);
 
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> testInitCreationDto(request));
@@ -305,7 +311,10 @@ class EnvironmentApiConverterTest {
         AccountTelemetry accountTelemetry = mock(AccountTelemetry.class);
         Features features = mock(Features.class);
         NetworkDto networkDto = mock(NetworkDto.class);
-        when(credentialService.getCloudPlatformByCredential(anyString(), anyString(), any())).thenReturn(AZURE.name());
+        Credential credential = mock(Credential.class);
+
+        when(credential.getCloudPlatform()).thenReturn(AZURE.name());
+        when(credentialService.getCredentialForEnvCreation(anyString(), anyString(), any())).thenReturn(credential);
         when(freeIpaConverter.convert(request.getFreeIpa(), "id", CloudConstants.AWS)).thenReturn(freeIpaCreationDto);
         when(accountTelemetry.getFeatures()).thenReturn(features);
         when(accountTelemetryService.getOrDefault(any())).thenReturn(accountTelemetry);
@@ -335,7 +344,10 @@ class EnvironmentApiConverterTest {
         AccountTelemetry accountTelemetry = mock(AccountTelemetry.class);
         Features features = mock(Features.class);
         NetworkDto networkDto = mock(NetworkDto.class);
-        when(credentialService.getCloudPlatformByCredential(anyString(), anyString(), any())).thenReturn(AZURE.name());
+        Credential credential = mock(Credential.class);
+
+        when(credential.getCloudPlatform()).thenReturn(AZURE.name());
+        when(credentialService.getCredentialForEnvCreation(anyString(), anyString(), any())).thenReturn(credential);
         when(freeIpaConverter.convert(request.getFreeIpa(), "id", CloudConstants.AWS)).thenReturn(freeIpaCreationDto);
         when(accountTelemetry.getFeatures()).thenReturn(features);
         when(accountTelemetryService.getOrDefault(any())).thenReturn(accountTelemetry);
@@ -367,7 +379,10 @@ class EnvironmentApiConverterTest {
         AccountTelemetry accountTelemetry = mock(AccountTelemetry.class);
         Features features = mock(Features.class);
         NetworkDto networkDto = mock(NetworkDto.class);
-        when(credentialService.getCloudPlatformByCredential(anyString(), anyString(), any())).thenReturn(AZURE.name());
+        Credential credential = mock(Credential.class);
+
+        when(credential.getCloudPlatform()).thenReturn(AZURE.name());
+        when(credentialService.getCredentialForEnvCreation(anyString(), anyString(), any())).thenReturn(credential);
         when(freeIpaConverter.convert(request.getFreeIpa(), "id", CloudConstants.AWS)).thenReturn(freeIpaCreationDto);
         when(accountTelemetry.getFeatures()).thenReturn(features);
         when(accountTelemetryService.getOrDefault(any())).thenReturn(accountTelemetry);
@@ -406,7 +421,10 @@ class EnvironmentApiConverterTest {
         AccountTelemetry accountTelemetry = mock(AccountTelemetry.class);
         Features features = mock(Features.class);
         NetworkDto networkDto = mock(NetworkDto.class);
-        when(credentialService.getCloudPlatformByCredential(anyString(), anyString(), any())).thenReturn(AWS.name());
+        Credential credential = mock(Credential.class);
+
+        when(credential.getCloudPlatform()).thenReturn(AWS.name());
+        when(credentialService.getCredentialForEnvCreation(anyString(), anyString(), any())).thenReturn(credential);
         when(freeIpaConverter.convert(request.getFreeIpa(), "id", CloudConstants.AWS)).thenReturn(freeIpaCreationDto);
         when(accountTelemetry.getFeatures()).thenReturn(features);
         when(accountTelemetryService.getOrDefault(any())).thenReturn(accountTelemetry);
@@ -437,7 +455,10 @@ class EnvironmentApiConverterTest {
         AccountTelemetry accountTelemetry = mock(AccountTelemetry.class);
         Features features = mock(Features.class);
         NetworkDto networkDto = mock(NetworkDto.class);
-        when(credentialService.getCloudPlatformByCredential(anyString(), anyString(), any())).thenReturn(AZURE.name());
+        Credential credential = mock(Credential.class);
+
+        when(credential.getCloudPlatform()).thenReturn(AZURE.name());
+        when(credentialService.getCredentialForEnvCreation(anyString(), anyString(), any())).thenReturn(credential);
         when(freeIpaConverter.convert(request.getFreeIpa(), "id", CloudConstants.AWS)).thenReturn(freeIpaCreationDto);
         when(accountTelemetry.getFeatures()).thenReturn(features);
         when(accountTelemetryService.getOrDefault(any())).thenReturn(accountTelemetry);
@@ -470,7 +491,10 @@ class EnvironmentApiConverterTest {
         AccountTelemetry accountTelemetry = mock(AccountTelemetry.class);
         Features features = mock(Features.class);
         NetworkDto networkDto = mock(NetworkDto.class);
-        when(credentialService.getCloudPlatformByCredential(anyString(), anyString(), any())).thenReturn(GCP.name());
+        Credential credential = mock(Credential.class);
+
+        when(credential.getCloudPlatform()).thenReturn(GCP.name());
+        when(credentialService.getCredentialForEnvCreation(anyString(), anyString(), any())).thenReturn(credential);
         when(freeIpaConverter.convert(request.getFreeIpa(), "id", CloudConstants.AWS)).thenReturn(freeIpaCreationDto);
         when(accountTelemetry.getFeatures()).thenReturn(features);
         when(accountTelemetryService.getOrDefault(any())).thenReturn(accountTelemetry);

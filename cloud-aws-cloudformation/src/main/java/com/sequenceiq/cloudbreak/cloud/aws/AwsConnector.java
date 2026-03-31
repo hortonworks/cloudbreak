@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.cloud.Authenticator;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.CloudConstant;
+import com.sequenceiq.cloudbreak.cloud.CommonSecretEncryptionValidator;
 import com.sequenceiq.cloudbreak.cloud.ConsumptionCalculator;
 import com.sequenceiq.cloudbreak.cloud.CredentialConnector;
 import com.sequenceiq.cloudbreak.cloud.EncryptionResources;
@@ -108,6 +109,9 @@ public class AwsConnector implements CloudConnector {
     private AwsStorageValidator awsStorageValidator;
 
     @Inject
+    private CommonSecretEncryptionValidator commonSecretEncryptionValidator;
+
+    @Inject
     private AwsResourceVolumeConnector resourceVolumeConnector;
 
     @Inject
@@ -180,7 +184,7 @@ public class AwsConnector implements CloudConnector {
         if (ValidatorType.IMAGE.equals(validatorType)) {
             return List.of();
         }
-        return Arrays.asList(awsTagValidator, awsStackValidator, awsStorageValidator);
+        return Arrays.asList(awsTagValidator, awsStackValidator, awsStorageValidator, commonSecretEncryptionValidator);
     }
 
     @Override

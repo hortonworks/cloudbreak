@@ -163,8 +163,10 @@ class EntitlementServiceTest {
                 {"CDP_CB_SECRET_ENCRYPTION", (EntitlementCheckFunction) EntitlementService::isSecretEncryptionEnabled, false},
                 {"CDP_CB_SECRET_ENCRYPTION", (EntitlementCheckFunction) EntitlementService::isSecretEncryptionEnabled, true},
 
-                {"CDP_CB_SECRET_ENCRYPTION", (EntitlementCheckFunction) EntitlementService::isSecretEncryptionEnabled, false},
-                {"CDP_CB_SECRET_ENCRYPTION", (EntitlementCheckFunction) EntitlementService::isSecretEncryptionEnabled, true},
+                {"CDP_CB_SECRET_ENCRYPTION_FOR_COMMERCIAL_AWS",
+                        (EntitlementCheckFunction) EntitlementService::isSecretEncryptionForCommercialAwsEnabled, false},
+                {"CDP_CB_SECRET_ENCRYPTION_FOR_COMMERCIAL_AWS",
+                        (EntitlementCheckFunction) EntitlementService::isSecretEncryptionForCommercialAwsEnabled, true},
 
                 {"CDP_EXPRESS_ONBOARDING", (EntitlementCheckFunction) EntitlementService::isExpressOnboardingEnabled, false},
                 {"CDP_EXPRESS_ONBOARDING", (EntitlementCheckFunction) EntitlementService::isExpressOnboardingEnabled, true},
