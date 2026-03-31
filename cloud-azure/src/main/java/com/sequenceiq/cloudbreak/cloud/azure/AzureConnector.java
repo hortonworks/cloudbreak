@@ -11,6 +11,7 @@ import com.sequenceiq.cloudbreak.cloud.Authenticator;
 import com.sequenceiq.cloudbreak.cloud.AvailabilityZoneConnector;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.CloudConstant;
+import com.sequenceiq.cloudbreak.cloud.CommonSecretEncryptionValidator;
 import com.sequenceiq.cloudbreak.cloud.CredentialConnector;
 import com.sequenceiq.cloudbreak.cloud.EncryptionResources;
 import com.sequenceiq.cloudbreak.cloud.IdentityService;
@@ -59,6 +60,9 @@ public class AzureConnector implements CloudConnector {
 
     @Inject
     private AzureFileSystemValidator azureFileSystemValidator;
+
+    @Inject
+    private CommonSecretEncryptionValidator commonSecretEncryptionValidator;
 
     @Inject
     private AzureCredentialConnector azureCredentialConnector;
@@ -117,7 +121,8 @@ public class AzureConnector implements CloudConnector {
         if (ValidatorType.IMAGE.equals(validatorType)) {
             return List.of(azureImageFormatValidator);
         }
-        return Arrays.asList(azureTagValidator, azureSubnetValidator, azureStorageValidator, azureImageFormatValidator, azureFileSystemValidator);
+        return Arrays.asList(azureTagValidator, azureSubnetValidator, azureStorageValidator, azureImageFormatValidator, azureFileSystemValidator,
+                commonSecretEncryptionValidator);
     }
 
     @Override

@@ -243,7 +243,9 @@ class StackProvisionFlowIntegrationTest {
         when(credentialConnector.create(any())).thenReturn(mock(CloudCredentialStatus.class));
         when(cloudConnector.resources()).thenReturn(resourceConnector);
         when(imageService.getByStack(stack)).thenReturn(new ImageEntity());
-        when(stackToCloudStackConverter.convert(stack)).thenReturn(mock(CloudStack.class));
+        CloudStack cloudStack = mock(CloudStack.class);
+        when(cloudStack.toBuilder()).thenReturn(CloudStack.builder());
+        when(stackToCloudStackConverter.convert(stack)).thenReturn(cloudStack);
         PollTask pollTask = mock(PollTask.class);
         when(pollTask.completed(any())).thenReturn(Boolean.TRUE);
         when(pollTaskFactory.newPollResourcesStateTask(any(), any(), anyBoolean())).thenReturn(pollTask);

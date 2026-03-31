@@ -11,6 +11,7 @@ import com.sequenceiq.cloudbreak.cloud.Authenticator;
 import com.sequenceiq.cloudbreak.cloud.AvailabilityZoneConnector;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.CloudConstant;
+import com.sequenceiq.cloudbreak.cloud.CommonSecretEncryptionValidator;
 import com.sequenceiq.cloudbreak.cloud.CredentialConnector;
 import com.sequenceiq.cloudbreak.cloud.EncryptionResources;
 import com.sequenceiq.cloudbreak.cloud.IdentityService;
@@ -48,6 +49,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTagValidator;
 import com.sequenceiq.cloudbreak.cloud.aws.common.validator.AwsStorageValidator;
 import com.sequenceiq.cloudbreak.cloud.aws.metadata.AwsNativeMetadataCollector;
 import com.sequenceiq.cloudbreak.cloud.aws.validator.AwsGatewaySubnetMultiAzValidator;
+import com.sequenceiq.cloudbreak.cloud.aws.validator.AwsNativeSecretEncryptionValidator;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
 
@@ -106,6 +108,9 @@ public class AwsNativeConnector implements CloudConnector {
     private AwsStorageValidator awsStorageValidator;
 
     @Inject
+    private AwsNativeSecretEncryptionValidator awsNativeSecretEncryptionValidator;
+
+    @Inject
     private AwsSecretsManagerConnector awsSecretsManagerConnector;
 
     @Inject
@@ -135,7 +140,11 @@ public class AwsNativeConnector implements CloudConnector {
         if (ValidatorType.IMAGE.equals(validatorType)) {
             return List.of();
         }
-        return List.of(awsTagValidator, awsGatewaySubnetMultiAzValidator, awsStorageValidator);
+        return List.of(awsTagValidator, awsGatewaySubnetMultiAzValidator, awsStorageValidator, secretEncryptionValidator());
+    }
+
+    protected CommonSecretEncryptionValidator secretEncryptionValidator() {
+        return awsNativeSecretEncryptionValidator;
     }
 
     @Override

@@ -28,6 +28,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_GCP_
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_NOTIFICATION_SENDING_ENABLED;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_PREFER_MINIFI_LOGGING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_SECRET_ENCRYPTION;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_SECRET_ENCRYPTION_FOR_COMMERCIAL_AWS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_SUPPORTS_TLS_1_3_ONLY;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_TLS_1_3;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_UPGRADE_RECOVERY;
@@ -483,6 +484,10 @@ public class EntitlementService {
 
     public boolean isSecretEncryptionEnabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_CB_SECRET_ENCRYPTION);
+    }
+
+    public boolean isSecretEncryptionForCommercialAwsEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_CB_SECRET_ENCRYPTION_FOR_COMMERCIAL_AWS);
     }
 
     public boolean isTlsv13Enabled(String accountId) {

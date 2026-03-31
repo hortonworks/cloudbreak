@@ -33,6 +33,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_GCP_
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_NOTIFICATION_SENDING_ENABLED;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_PREFER_MINIFI_LOGGING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_SECRET_ENCRYPTION;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_SECRET_ENCRYPTION_FOR_COMMERCIAL_AWS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_SUPPORTS_TLS_1_3_ONLY;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_TLS_1_3;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_UPGRADE_RECOVERY;
@@ -540,6 +541,9 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.secret.encryption.enabled}")
     private boolean secretEncryptionEnabled;
+
+    @Value("${auth.mock.secret.encryption.for.commercial.aws.enabled}")
+    private boolean secretEncryptionForCommercialAwsEnabled;
 
     @Value("${auth.mock.cm.observability.saas.premium}")
     private boolean cmObservabilitySaasPremium;
@@ -1077,6 +1081,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (secretEncryptionEnabled) {
             builder.addEntitlements(createEntitlement(CDP_CB_SECRET_ENCRYPTION));
+        }
+        if (secretEncryptionForCommercialAwsEnabled) {
+            builder.addEntitlements(createEntitlement(CDP_CB_SECRET_ENCRYPTION_FOR_COMMERCIAL_AWS));
         }
         if (cmObservabilitySaasPremium) {
             builder.addEntitlements(createEntitlement(OBSERVABILITY_SAAS_PREMIUM));

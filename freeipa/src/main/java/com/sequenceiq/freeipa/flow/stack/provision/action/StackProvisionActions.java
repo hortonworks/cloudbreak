@@ -8,6 +8,7 @@ import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionConstant
 import static com.sequenceiq.freeipa.flow.stack.provision.StackProvisionEvent.IMAGE_FALLBACK_START_EVENT;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -22,6 +23,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
+import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataRequest;
 import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataResult;
 import com.sequenceiq.cloudbreak.cloud.event.instance.GetTlsInfoRequest;
@@ -44,6 +46,7 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.PrepareImageType;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.common.api.type.AdjustmentType;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.PayloadConverter;
 import com.sequenceiq.freeipa.converter.cloud.ResourceToCloudResourceConverter;
@@ -68,6 +71,7 @@ import com.sequenceiq.freeipa.flow.stack.provision.event.userdata.CreateUserData
 import com.sequenceiq.freeipa.flow.stack.provision.event.userdata.CreateUserDataSuccess;
 import com.sequenceiq.freeipa.flow.stack.provision.event.userdata.UpdateUserdataSecretsRequest;
 import com.sequenceiq.freeipa.flow.stack.provision.event.userdata.UpdateUserdataSecretsSuccess;
+import com.sequenceiq.freeipa.service.client.CachedEnvironmentClientService;
 import com.sequenceiq.freeipa.service.image.ImageFallbackService;
 import com.sequenceiq.freeipa.service.image.ImageService;
 import com.sequenceiq.freeipa.service.resource.ResourceService;
@@ -101,6 +105,9 @@ public class StackProvisionActions {
     @Inject
     private ResourceService resourceService;
 
+    @Inject
+    private CachedEnvironmentClientService cachedEnvironmentClientService;
+
     @Bean(name = "VALIDATION_STATE")
     public Action<?, ?> provisioningValidationAction() {
         return new AbstractStackProvisionAction<>(StackEvent.class) {
@@ -112,7 +119,17 @@ public class StackProvisionActions {
             @Override
             protected Selectable createRequest(StackContext context) {
                 getEventService().sendEventAndNotification(context.getStack(), context.getFlowTriggerUserCrn(), FREEIPA_CREATION_STARTED);
-                return new ValidationRequest(context.getCloudContext(), context.getCloudCredential(), context.getCloudStack());
+                CloudStack updatedCloudStack = addSecretEncryptionFlagToCloudStack(context);
+                return new ValidationRequest(context.getCloudContext(), context.getCloudCredential(), updatedCloudStack);
+            }
+
+            private CloudStack addSecretEncryptionFlagToCloudStack(StackContext context) {
+                DetailedEnvironmentResponse environment = cachedEnvironmentClientService.getByCrn(context.getStack().getEnvironmentCrn());
+                Map<String, String> parameters = new HashMap<>(Optional.ofNullable(context.getCloudStack().getParameters()).orElse(Map.of()));
+                parameters.put(PlatformParametersConsts.SECRET_ENCRYPTION_ENABLED, Boolean.valueOf(environment.isEnableSecretEncryption()).toString());
+                return context.getCloudStack().toBuilder()
+                        .parameters(parameters)
+                        .build();
             }
         };
     }

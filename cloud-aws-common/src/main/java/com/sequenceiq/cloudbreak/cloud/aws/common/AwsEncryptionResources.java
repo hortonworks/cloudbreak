@@ -194,7 +194,7 @@ public class AwsEncryptionResources implements EncryptionResources {
             try {
                 tags = amazonKmsUtil.listResourceTagsWithAllPages(kmsClient, listResourceTagsRequest);
             } catch (Exception e) {
-                LOGGER.error("Unable to fetch tags for {}", keyArn, e);
+                LOGGER.error("Unable to fetch tags for {}", keyArn);
             }
             return tags.stream()
                     .anyMatch(tag -> TAG_KEY_CLOUDERA_KMS_KEY_TARGET.equals(tag.tagKey()) && tagValueClouderaKMSKeyTarget.equals(tag.tagValue()));

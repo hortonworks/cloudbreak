@@ -89,14 +89,12 @@ public class CredentialService implements CompositeAuthResourcePropertyProvider 
         return credentialPrerequisiteService.getPrerequisites(cloudPlatform, govCloud, null, ENVIRONMENT, INTERNAL);
     }
 
-    public String getCloudPlatformByCredential(String credentialName, String accountId, CredentialType type) {
+    public Credential getCredentialForEnvCreation(String credentialName, String accountId, CredentialType type) {
         if (!Strings.isNullOrEmpty(credentialName)) {
             try {
-                Credential credential = getByNameForAccountId(credentialName, accountId, type);
-                return credential.getCloudPlatform();
+                return getByNameForAccountId(credentialName, accountId, type);
             } catch (NotFoundException e) {
-                throw new BadRequestException(String.format("No credential found with name [%s] in the workspace.",
-                        credentialName), e);
+                throw new BadRequestException(String.format("No credential found with name [%s] in the workspace.", credentialName), e);
             }
         } else {
             throw new BadRequestException("No credential has been specified as part of environment creation.");

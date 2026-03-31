@@ -67,9 +67,9 @@ public class EncryptionKeyArnValidator {
         this.entitlementService = entitlementService;
     }
 
-    public ValidationResult validateEncryptionKeyArn(String encryptionKeyArn, boolean secretEncryptionEnabled) {
+    public ValidationResult validateEncryptionKeyArn(String encryptionKeyArn, boolean govCloud, boolean secretEncryptionEnabled) {
         ValidationResult.ValidationResultBuilder validationResultBuilder = ValidationResult.builder();
-        if (secretEncryptionEnabled && encryptionKeyArn == null) {
+        if (govCloud && secretEncryptionEnabled && encryptionKeyArn == null) {
             validationResultBuilder.error(NULL_ARN_WITH_SECRET_ENCRYPTION_ENABLED_ERROR_MESSAGE);
         }
         if (encryptionKeyArn != null) {

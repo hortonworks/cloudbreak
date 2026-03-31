@@ -22,7 +22,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -35,6 +34,7 @@ import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
+import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.service.CredentialService;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
@@ -163,7 +163,9 @@ class EnvironmentValidatorServiceTest {
 
     @Test
     void testValidateAwsEnvironmentRequestNotAWS() {
-        when(credentialService.getCloudPlatformByCredential(anyString(), anyString(), any())).thenReturn("AZURE");
+        Credential credential = mock(Credential.class);
+        when(credential.getCloudPlatform()).thenReturn("AZURE");
+        when(credentialService.getCredentialForEnvCreation(anyString(), anyString(), any())).thenReturn(credential);
 
         EnvironmentRequest request = new EnvironmentRequest();
         request.setCredentialName("azure-credential");
@@ -174,7 +176,9 @@ class EnvironmentValidatorServiceTest {
 
     @Test
     void testValidateAwsEnvironmentRequestNoAwsParams() {
-        when(credentialService.getCloudPlatformByCredential(anyString(), anyString(), any())).thenReturn("AWS");
+        Credential credential = mock(Credential.class);
+        when(credential.getCloudPlatform()).thenReturn("AWS");
+        when(credentialService.getCredentialForEnvCreation(anyString(), anyString(), any())).thenReturn(credential);
 
         EnvironmentRequest request = new EnvironmentRequest();
         request.setCredentialName("aws-credential");
@@ -184,7 +188,9 @@ class EnvironmentValidatorServiceTest {
 
     @Test
     void testValidateAwsEnvironmentNoS3GuardParams() {
-        when(credentialService.getCloudPlatformByCredential(anyString(), anyString(), any())).thenReturn("AWS");
+        Credential credential = mock(Credential.class);
+        when(credential.getCloudPlatform()).thenReturn("AWS");
+        when(credentialService.getCredentialForEnvCreation(anyString(), anyString(), any())).thenReturn(credential);
 
         EnvironmentRequest request = new EnvironmentRequest();
         request.setCredentialName("aws-credential");
@@ -195,7 +201,9 @@ class EnvironmentValidatorServiceTest {
 
     @Test
     void testValidateAwsEnvironmentRequestNoDynamoTable() {
-        when(credentialService.getCloudPlatformByCredential(anyString(), anyString(), any())).thenReturn("AWS");
+        Credential credential = mock(Credential.class);
+        when(credential.getCloudPlatform()).thenReturn("AWS");
+        when(credentialService.getCredentialForEnvCreation(anyString(), anyString(), any())).thenReturn(credential);
 
         EnvironmentRequest request = new EnvironmentRequest();
         request.setCredentialName("aws-credential");
@@ -207,7 +215,9 @@ class EnvironmentValidatorServiceTest {
 
     @Test
     void testValidateAwsEnvironmentRequestValid() {
-        when(credentialService.getCloudPlatformByCredential(anyString(), anyString(), any())).thenReturn("AWS");
+        Credential credential = mock(Credential.class);
+        when(credential.getCloudPlatform()).thenReturn("AWS");
+        when(credentialService.getCredentialForEnvCreation(anyString(), anyString(), any())).thenReturn(credential);
 
         EnvironmentRequest request = new EnvironmentRequest();
         request.setCredentialName("aws-credential");
@@ -439,14 +449,13 @@ class EnvironmentValidatorServiceTest {
         assertTrue(validationResult.hasError());
     }
 
-    @ParameterizedTest(name = "{0}")
-    @ValueSource(booleans = {true, false})
-    void testValidateEncryptionKeyArnSpecified(boolean secretEncryptionEnabled) {
+    @Test
+    void testValidateEncryptionKeyArnSpecified() {
         String encryptionKeyArn = "dummy-key-arn";
         ValidationResult.ValidationResultBuilder validationResultBuilder = new ValidationResult.ValidationResultBuilder();
-        when(encryptionKeyArnValidator.validateEncryptionKeyArn(eq("dummy-key-arn"), eq(secretEncryptionEnabled)))
+        when(encryptionKeyArnValidator.validateEncryptionKeyArn(eq("dummy-key-arn"), eq(true), eq(true)))
                 .thenReturn(validationResultBuilder.build());
-        ValidationResult validationResult = underTest.validateEncryptionKeyArn(encryptionKeyArn, secretEncryptionEnabled);
+        ValidationResult validationResult = underTest.validateEncryptionKeyArn(encryptionKeyArn, true, true);
         assertFalse(validationResult.hasError());
     }
 

@@ -8,6 +8,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.cloud.ValidatorType;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsAuthenticator;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsCredentialConnector;
@@ -24,6 +25,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTagValidator;
 import com.sequenceiq.cloudbreak.cloud.aws.common.validator.AwsStorageValidator;
 import com.sequenceiq.cloudbreak.cloud.aws.metadata.AwsNativeMetadataCollector;
 import com.sequenceiq.cloudbreak.cloud.aws.validator.AwsGatewaySubnetMultiAzValidator;
+import com.sequenceiq.cloudbreak.cloud.aws.validator.AwsNativeSecretEncryptionValidator;
 
 @ExtendWith(MockitoExtension.class)
 class AwsNativeConnectorTest {
@@ -80,6 +82,9 @@ class AwsNativeConnectorTest {
     private AwsStorageValidator awsStorageValidator;
 
     @Mock
+    private AwsNativeSecretEncryptionValidator awsNativeSecretEncryptionValidator;
+
+    @Mock
     private AwsSecretsManagerConnector awsSecretsManagerConnector;
 
     @Mock
@@ -98,4 +103,14 @@ class AwsNativeConnectorTest {
         assertThat(underTest.secretConnector()).isSameAs(awsSecretsManagerConnector);
     }
 
+    @Test
+    void testValidatorsImage() {
+        assertThat(underTest.validators(ValidatorType.IMAGE)).containsExactly();
+    }
+
+    @Test
+    void testValidatorsAll() {
+        assertThat(underTest.validators(ValidatorType.ALL))
+                .containsExactly(awsTagValidator, awsGatewaySubnetMultiAzValidator, awsStorageValidator, awsNativeSecretEncryptionValidator);
+    }
 }
