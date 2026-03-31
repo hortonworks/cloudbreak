@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.service.cluster;
 
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.salt.update.SaltUpdateEvent.SALT_UPDATE_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.sync.ClusterSyncEvent.CLUSTER_SYNC_EVENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
@@ -53,11 +52,9 @@ class CLOWorkaroundServiceTest {
 
         List<Selectable> result = underTest.getClusterUpgradeTriggerEvent(event);
 
-        assertEquals(2, result.size());
-        assertEquals(CLUSTER_SYNC_EVENT.event(), result.get(0).getSelector());
+        assertEquals(1, result.size());
+        assertEquals(SALT_UPDATE_EVENT.event(), result.get(0).getSelector());
         assertEquals(STACK_ID, ((StackEvent) result.get(0)).getResourceId());
-        assertEquals(SALT_UPDATE_EVENT.event(), result.get(1).getSelector());
-        assertEquals(STACK_ID, ((StackEvent) result.get(1)).getResourceId());
     }
 
     @Test

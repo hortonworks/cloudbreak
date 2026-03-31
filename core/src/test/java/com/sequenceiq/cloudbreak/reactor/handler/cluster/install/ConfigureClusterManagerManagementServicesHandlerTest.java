@@ -2,7 +2,9 @@ package com.sequenceiq.cloudbreak.reactor.handler.cluster.install;
 
 import static com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion.CM;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -37,6 +39,7 @@ import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
+import com.sequenceiq.cloudbreak.service.upgrade.sync.template.ClusterManagerTemplateSyncService;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 
 @ExtendWith(MockitoExtension.class)
@@ -52,6 +55,9 @@ class ConfigureClusterManagerManagementServicesHandlerTest {
 
     @Mock
     private StackDtoService stackDtoService;
+
+    @Mock
+    private ClusterManagerTemplateSyncService clusterManagerTemplateSyncService;
 
     @Mock
     private StackToTemplatePreparationObjectConverter stackToTemplatePreparationObjectConverter;
@@ -108,6 +114,7 @@ class ConfigureClusterManagerManagementServicesHandlerTest {
         when(clusterApiConnectors.getConnector(stack)).thenReturn(clusterApi);
         when(cmTemplateComponentConfigProviderProcessor.getServiceConfigsToBeUpdatedDuringUpgrade(cmTemplateProcessor, templatePreparationObject,
                 "7.12.0.400", "7.12.0.500")).thenReturn(Map.of("service1", Map.of("key1", "value1"), "service2", Map.of("key2", "value2")));
+        doNothing().when(clusterManagerTemplateSyncService).sync(anyLong());
 
         underTest.accept(new Event<>(new ConfigureClusterManagerManagementServicesRequest(STACK_ID, originalImage, null, targetStatedImage)));
 

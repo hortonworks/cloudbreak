@@ -189,20 +189,20 @@ public class ExposedServiceCollector {
                 .collect(Collectors.toSet());
     }
 
-    public Map<String, Integer> getAllServicePorts(Optional<String> bpVersion, boolean tls, String runtimeVersion) {
+    public Map<String, Integer> getAllServicePorts(Optional<String> bpVersion, boolean tls) {
         return exposedServices.values()
                 .stream()
                 .filter(x -> hasServicePort(tls, x))
                 .filter(x -> getProperProtocol(bpVersion, x))
-                .collect(Collectors.toMap(ExposedService::getKnoxService, v -> getProperPort(bpVersion, v, tls, runtimeVersion)));
+                .collect(Collectors.toMap(ExposedService::getKnoxService, v -> getProperPort(bpVersion, v, tls)));
     }
 
-    public Map<String, String> getAllServiceProtocols(Optional<String> bpVersion, boolean tls, String runtimeVersion) {
+    public Map<String, String> getAllServiceProtocols(Optional<String> bpVersion, boolean tls) {
         return exposedServices.values()
                 .stream()
                 .filter(x -> hasServicePort(tls, x))
                 .filter(x -> getProperProtocol(bpVersion, x))
-                .collect(Collectors.toMap(ExposedService::getKnoxService, v -> getProperProtocol(bpVersion, v, tls, runtimeVersion)));
+                .collect(Collectors.toMap(ExposedService::getKnoxService, v -> getProperProtocol(bpVersion, v, tls)));
     }
 
     private void readExposedServices() {
@@ -243,20 +243,19 @@ public class ExposedServiceCollector {
                 .orElseThrow(() -> new IllegalStateException("Given service \"" + serviceName + "\" not found"));
     }
 
-    private String getProperProtocol(Optional<String> bpVersion, ExposedService exposedService, boolean tls, String runtimeVersion) {
+    private String getProperProtocol(Optional<String> bpVersion, ExposedService exposedService, boolean tls) {
         if (StringUtils.isNotBlank(exposedService.getMinHttpsVersion())) {
-            Optional<String> version = StringUtils.isNotBlank(runtimeVersion) ? Optional.of(runtimeVersion) : bpVersion;
-                return exposedServiceVersionSupportService.minVersionSupported(version, exposedService.getMinHttpsVersion()) && tls ? HTTPS : HTTP;
+            return exposedServiceVersionSupportService.minVersionSupported(bpVersion, exposedService.getMinHttpsVersion())
+                    && tls ? HTTPS : HTTP;
         } else {
             return tls ? HTTPS : HTTP;
         }
     }
 
-    private Integer getProperPort(Optional<String> bpVersion, ExposedService exposedService, boolean tls, String runtimeVersion) {
+    private Integer getProperPort(Optional<String> bpVersion, ExposedService exposedService, boolean tls) {
         if (StringUtils.isNotBlank(exposedService.getMinHttpsVersion())) {
-            Optional<String> version = StringUtils.isNotBlank(runtimeVersion) ? Optional.of(runtimeVersion) : bpVersion;
-                return exposedServiceVersionSupportService.minVersionSupported(version, exposedService.getMinHttpsVersion())
-                        && tls ? exposedService.getTlsPort() : exposedService.getPort();
+            return exposedServiceVersionSupportService.minVersionSupported(bpVersion, exposedService.getMinHttpsVersion())
+                    && tls ? exposedService.getTlsPort() : exposedService.getPort();
         } else {
             return tls ? exposedService.getTlsPort() : exposedService.getPort();
         }

@@ -471,7 +471,7 @@ class ExposedServiceCollectorTest {
     @Test
     void getNonTLSServiceProtocolsPre7211() {
         underTest.init();
-        assertThat(underTest.getAllServicePorts(CDH_7_2_10, false, null)).containsOnly(
+        assertThat(underTest.getAllServicePorts(CDH_7_2_10, false)).containsOnly(
                 Map.entry("ATLAS", 21000),
                 Map.entry("ATLAS_API", 21000),
                 Map.entry("AVATICA", 8765),
@@ -525,7 +525,7 @@ class ExposedServiceCollectorTest {
     @Test
     void getHTTPSServicePortsPre732() {
         underTest.init();
-        assertThat(underTest.getAllServiceProtocols(CDH_7_3_2, true, null)).containsOnly(
+        assertThat(underTest.getAllServiceProtocols(CDH_7_3_2, true)).containsOnly(
                 Map.entry("ATLAS", "https"),
                 Map.entry("ATLAS_API", "https"),
                 Map.entry("AVATICA", "https"),
@@ -589,7 +589,7 @@ class ExposedServiceCollectorTest {
     @Test
     void getHTTPSServicePortsPre731() {
         underTest.init();
-        assertThat(underTest.getAllServiceProtocols(CDH_7_3_1, true, null)).containsOnly(
+        assertThat(underTest.getAllServiceProtocols(CDH_7_3_1, true)).containsOnly(
                 Map.entry("ATLAS", "https"),
                 Map.entry("ATLAS_API", "https"),
                 Map.entry("AVATICA", "https"),
@@ -652,7 +652,7 @@ class ExposedServiceCollectorTest {
     @Test
     void getHTTPSServicePortsPre7218() {
         underTest.init();
-        assertThat(underTest.getAllServiceProtocols(CDH_7_2_18, true, null)).containsOnly(
+        assertThat(underTest.getAllServiceProtocols(CDH_7_2_18, true)).containsOnly(
                 Map.entry("ATLAS", "https"),
                 Map.entry("ATLAS_API", "https"),
                 Map.entry("AVATICA", "https"),
@@ -716,7 +716,7 @@ class ExposedServiceCollectorTest {
     @Test
     void getHTTPServicePortsPre732() {
         underTest.init();
-        assertThat(underTest.getAllServiceProtocols(CDH_7_3_2, false, null)).containsOnly(
+        assertThat(underTest.getAllServiceProtocols(CDH_7_3_2, false)).containsOnly(
                 Map.entry("ATLAS", "http"),
                 Map.entry("ATLAS_API", "http"),
                 Map.entry("AVATICA", "http"),
@@ -780,7 +780,7 @@ class ExposedServiceCollectorTest {
     @Test
     void getHTTPServicePortsPre731() {
         underTest.init();
-        assertThat(underTest.getAllServiceProtocols(CDH_7_3_1, false, null)).containsOnly(
+        assertThat(underTest.getAllServiceProtocols(CDH_7_3_1, false)).containsOnly(
                 Map.entry("ATLAS", "http"),
                 Map.entry("ATLAS_API", "http"),
                 Map.entry("AVATICA", "http"),
@@ -843,7 +843,7 @@ class ExposedServiceCollectorTest {
     @Test
     void getHTTPServicePortsPre7218() {
         underTest.init();
-        assertThat(underTest.getAllServiceProtocols(CDH_7_2_18, false, null)).containsOnly(
+        assertThat(underTest.getAllServiceProtocols(CDH_7_2_18, false)).containsOnly(
                 Map.entry("ATLAS", "http"),
                 Map.entry("ATLAS_API", "http"),
                 Map.entry("AVATICA", "http"),
@@ -907,7 +907,7 @@ class ExposedServiceCollectorTest {
     @Test
     void getNonTLSServicePortsPre7214() {
         underTest.init();
-        assertThat(underTest.getAllServicePorts(CDH_7_2_12, false, null)).containsOnly(
+        assertThat(underTest.getAllServicePorts(CDH_7_2_12, false)).containsOnly(
                 Map.entry("ATLAS", 21000),
                 Map.entry("ATLAS_API", 21000),
                 Map.entry("AVATICA", 8765),
@@ -965,7 +965,7 @@ class ExposedServiceCollectorTest {
     @Test
     void getNonTLSServicePortsPre7216() {
         underTest.init();
-        assertThat(underTest.getAllServicePorts(CDH_7_2_15, false, null)).containsOnly(
+        assertThat(underTest.getAllServicePorts(CDH_7_2_15, false)).containsOnly(
                 Map.entry("ATLAS", 21000),
                 Map.entry("ATLAS_API", 21000),
                 Map.entry("AVATICA", 8765),
@@ -1026,7 +1026,7 @@ class ExposedServiceCollectorTest {
     @Test
     void getNonTLSServicePorts() {
         underTest.init();
-        assertThat(underTest.getAllServicePorts(CDH_7_2_16, false, null)).containsOnly(
+        assertThat(underTest.getAllServicePorts(CDH_7_2_16, false)).containsOnly(
                 Map.entry("ATLAS", 21000),
                 Map.entry("ATLAS_API", 21000),
                 Map.entry("AVATICA", 8765),
@@ -1087,7 +1087,7 @@ class ExposedServiceCollectorTest {
     @Test
     void getTLSServicePortsPre7211() {
         underTest.init();
-        assertThat(underTest.getAllServicePorts(CDH_7_2_10, true, null)).containsOnly(
+        assertThat(underTest.getAllServicePorts(CDH_7_2_10, true)).containsOnly(
                 Map.entry("ATLAS", 31443),
                 Map.entry("ATLAS_API", 31443),
                 Map.entry("AVATICA", 8765),
@@ -1141,7 +1141,7 @@ class ExposedServiceCollectorTest {
     @Test
     void getTLSServicePortsPre7214() {
         underTest.init();
-        assertThat(underTest.getAllServicePorts(CDH_7_2_12, true, null)).containsOnly(
+        assertThat(underTest.getAllServicePorts(CDH_7_2_12, true)).containsOnly(
                 Map.entry("ATLAS", 31443),
                 Map.entry("ATLAS_API", 31443),
                 Map.entry("AVATICA", 8765),
@@ -1199,7 +1199,7 @@ class ExposedServiceCollectorTest {
     @Test
     void getTLSServicePortsPre7216() {
         underTest.init();
-        assertThat(underTest.getAllServicePorts(CDH_7_2_15, true, null)).containsOnly(
+        assertThat(underTest.getAllServicePorts(CDH_7_2_15, true)).containsOnly(
                 Map.entry("ATLAS", 31443),
                 Map.entry("ATLAS_API", 31443),
                 Map.entry("AVATICA", 8765),
@@ -1260,7 +1260,7 @@ class ExposedServiceCollectorTest {
     @Test
     void getTLSServicePorts7218() {
         underTest.init();
-        assertThat(underTest.getAllServicePorts(CDH_7_2_18, true, null)).containsOnly(
+        assertThat(underTest.getAllServicePorts(CDH_7_2_18, true)).containsOnly(
                 Map.entry("ATLAS", 31443),
                 Map.entry("ATLAS_API", 31443),
                 Map.entry("AVATICA", 8765),
@@ -1324,7 +1324,7 @@ class ExposedServiceCollectorTest {
     @Test
     void getTLSServicePorts7218Runtime() {
         underTest.init();
-        assertThat(underTest.getAllServicePorts(CDH_7_2_12, true, CDH_7_2_18.get())).containsOnly(
+        assertThat(underTest.getAllServicePorts(CDH_7_2_12, true)).containsOnly(
                 Map.entry("ATLAS", 31443),
                 Map.entry("ATLAS_API", 31443),
                 Map.entry("AVATICA", 8765),
@@ -1382,7 +1382,7 @@ class ExposedServiceCollectorTest {
     @Test
     void getTLSServicePorts731() {
         underTest.init();
-        assertThat(underTest.getAllServicePorts(CDH_7_3_1, true, null)).containsOnly(
+        assertThat(underTest.getAllServicePorts(CDH_7_3_1, true)).containsOnly(
                 Map.entry("ATLAS", 31443),
                 Map.entry("ATLAS_API", 31443),
                 Map.entry("AVATICA", 8765),
@@ -1445,7 +1445,7 @@ class ExposedServiceCollectorTest {
     @Test
     void getTLSServicePorts731Runtime() {
         underTest.init();
-        assertThat(underTest.getAllServicePorts(CDH_7_2_12, true, CDH_7_3_1.get())).containsOnly(
+        assertThat(underTest.getAllServicePorts(CDH_7_2_12, true)).containsOnly(
                 Map.entry("ATLAS", 31443),
                 Map.entry("ATLAS_API", 31443),
                 Map.entry("AVATICA", 8765),
@@ -1503,7 +1503,7 @@ class ExposedServiceCollectorTest {
     @Test
     void getTLSServicePorts732() {
         underTest.init();
-        assertThat(underTest.getAllServicePorts(CDH_7_3_2, true, null)).containsOnly(
+        assertThat(underTest.getAllServicePorts(CDH_7_3_2, true)).containsOnly(
                 Map.entry("ATLAS", 31443),
                 Map.entry("ATLAS_API", 31443),
                 Map.entry("AVATICA", 8765),
@@ -1567,7 +1567,7 @@ class ExposedServiceCollectorTest {
     @Test
     void getTLSServicePorts732Runtime() {
         underTest.init();
-        assertThat(underTest.getAllServicePorts(CDH_7_2_12, true, CDH_7_3_2.get())).containsOnly(
+        assertThat(underTest.getAllServicePorts(CDH_7_2_12, true)).containsOnly(
                 Map.entry("ATLAS", 31443),
                 Map.entry("ATLAS_API", 31443),
                 Map.entry("AVATICA", 8765),
@@ -1625,7 +1625,7 @@ class ExposedServiceCollectorTest {
     @Test
     void getTLSServicePorts() {
         underTest.init();
-        assertThat(underTest.getAllServicePorts(CDH_7_2_16, true, null)).containsOnly(
+        assertThat(underTest.getAllServicePorts(CDH_7_2_16, true)).containsOnly(
                 Map.entry("ATLAS", 31443),
                 Map.entry("ATLAS_API", 31443),
                 Map.entry("AVATICA", 8765),

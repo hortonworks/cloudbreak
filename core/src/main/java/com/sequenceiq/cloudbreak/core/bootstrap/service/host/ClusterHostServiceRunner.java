@@ -975,8 +975,8 @@ public class ClusterHostServiceRunner {
             if (stackDto.getBlueprint() != null) {
                 ClusterView cluster = stackDto.getCluster();
                 Boolean autoTlsEnabled = cluster.getAutoTlsEnabled();
-                gateway.put("ports", connector.getServicePorts(stackDto.getBlueprint(), autoTlsEnabled, stackDto.getStackVersion()));
-                gateway.put("protocols", connector.getServiceProtocols(stackDto.getBlueprint(), autoTlsEnabled, stackDto.getStackVersion()));
+                gateway.put("ports", connector.getServicePorts(stackDto.getBlueprintJsonText(), autoTlsEnabled));
+                gateway.put("protocols", connector.getServiceProtocols(stackDto.getBlueprintJsonText(), autoTlsEnabled));
                 gateway.put("protocol", autoTlsEnabled ? "https" : "http");
             }
             if (SSOType.SSO_PROVIDER_FROM_UMS.equals(clusterGateway.getSsoType())) {

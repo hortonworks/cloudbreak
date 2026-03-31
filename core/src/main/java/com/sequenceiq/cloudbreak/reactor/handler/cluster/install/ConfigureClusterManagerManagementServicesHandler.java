@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
+import com.sequenceiq.cloudbreak.service.upgrade.sync.template.ClusterManagerTemplateSyncService;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
@@ -56,6 +57,9 @@ public class ConfigureClusterManagerManagementServicesHandler extends ExceptionC
 
     @Inject
     private ClusterApiConnectors clusterApiConnectors;
+
+    @Inject
+    private ClusterManagerTemplateSyncService clusterManagerTemplateSyncService;
 
     @Override
     public String selector() {
@@ -111,6 +115,7 @@ public class ConfigureClusterManagerManagementServicesHandler extends ExceptionC
                 LOGGER.info("Updating service configs for service: {}", entry.getKey());
                 clusterApi.updateServiceConfig(entry.getKey(), entry.getValue());
             }
+            clusterManagerTemplateSyncService.sync(stackId);
         } else {
             LOGGER.warn("CM version is not present for the original or target image, skipping service config update during upgrade. " +
                     "Original CM version: {}, Target CM version: {}", fromCmVersionOpt.orElse("N/A"), toCmVersionOpt.orElse("N/A"));

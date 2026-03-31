@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.cluster.api;
 import java.util.Map;
 
 import com.sequenceiq.cloudbreak.cluster.model.ServiceLocationMap;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 
 public interface ClusterPreCreationApi {
@@ -26,9 +25,9 @@ public interface ClusterPreCreationApi {
 
     String getMasterKey(Cluster cluster);
 
-    Map<String, Integer> getServicePorts(Blueprint blueprint, boolean tls, String runtimeVersion);
+    Map<String, Integer> getServicePorts(String blueprintText, boolean tls);
 
-    Map<String, String> getServiceProtocols(Blueprint blueprint, boolean tls, String runtimeVersion);
+    Map<String, String> getServiceProtocols(String blueprintText, boolean tls);
 
     ServiceLocationMap getServiceLocations();
 }

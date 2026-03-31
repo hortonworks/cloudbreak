@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.service.cluster;
 
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.sync.ClusterSyncEvent.CLUSTER_SYNC_EVENT;
-
 import java.util.List;
 
 import jakarta.inject.Inject;
@@ -15,7 +13,6 @@ import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateService;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.event.DistroXUpgradeFlowChainTriggerEvent;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.SaltUpdateTriggerEvent;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
@@ -35,10 +32,7 @@ public class CLOWorkaroundService {
         Stack stack = stackService.get(event.getResourceId());
         if (cloPresentedOnTheCluster(stack) && targetVersionIs732(event)) {
             LOGGER.info("CLO workaround for modifing the knox topology will be applied");
-            return List.of(
-                    new StackEvent(CLUSTER_SYNC_EVENT.event(), event.getResourceId()),
-                    new SaltUpdateTriggerEvent(event.getResourceId(), false)
-            );
+            return List.of(new SaltUpdateTriggerEvent(event.getResourceId(), false));
         }
         return List.of();
     }

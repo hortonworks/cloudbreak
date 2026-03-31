@@ -9,7 +9,6 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.service.ExposedServiceCollector;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
 
 @Component
 public class ClouderaManagerBlueprintPortConfigCollector {
@@ -20,17 +19,15 @@ public class ClouderaManagerBlueprintPortConfigCollector {
     @Inject
     private ExposedServiceCollector exposedServiceCollector;
 
-    public Map<String, Integer> getServicePorts(Blueprint blueprint, boolean tls, String runtimeVersion) {
-        String blueprintText = blueprint.getBlueprintJsonText();
+    public Map<String, Integer> getServicePorts(String blueprintText, boolean tls) {
         CmTemplateProcessor processor = cmTemplateProcessorFactory.get(blueprintText);
 
-        return exposedServiceCollector.getAllServicePorts(processor.getVersion(), tls, runtimeVersion);
+        return exposedServiceCollector.getAllServicePorts(processor.getVersion(), tls);
     }
 
-    public Map<String, String> getServiceProtocols(Blueprint blueprint, boolean tls, String runtimeVersion) {
-        String blueprintText = blueprint.getBlueprintJsonText();
+    public Map<String, String> getServiceProtocols(String blueprintText, boolean tls) {
         CmTemplateProcessor processor = cmTemplateProcessorFactory.get(blueprintText);
 
-        return exposedServiceCollector.getAllServiceProtocols(processor.getVersion(), tls, runtimeVersion);
+        return exposedServiceCollector.getAllServiceProtocols(processor.getVersion(), tls);
     }
 }

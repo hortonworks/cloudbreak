@@ -202,12 +202,10 @@ public class UpgradeDistroxFlowEventChainFactory implements FlowEventChainFactor
 
     private List<Selectable> getFullSyncEvent(DistroXUpgradeFlowChainTriggerEvent event) {
         LOGGER.info("Add sync events for full sync");
-        List<Selectable> syncEvents = new ArrayList<>();
-
-        syncEvents.add(new StackSyncTriggerEvent(STACK_SYNC_EVENT.event(), event.getResourceId(), true, event.accepted()));
-        syncEvents.add(new StackEvent(CLUSTER_SYNC_EVENT.event(), event.getResourceId()));
-
-        return syncEvents;
+        return List.of(
+                new StackSyncTriggerEvent(STACK_SYNC_EVENT.event(), event.getResourceId(), true, event.accepted()),
+                new StackEvent(CLUSTER_SYNC_EVENT.event(), event.getResourceId())
+        );
     }
 
     private List<ClusterUpgradePreparationTriggerEvent> getClusterUpgradePreparationTriggerEvent(DistroXUpgradeFlowChainTriggerEvent event,
