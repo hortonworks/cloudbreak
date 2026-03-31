@@ -460,6 +460,8 @@ public enum ResourceEvent {
     CLUSTER_MODIFY_PROXY_CONFIG_FAILED("cluster.proxy.modification.failed"),
     CLUSTER_UPDATE_TRUSTED_REALM("cluster.update.trusted.realm"),
     CLUSTER_UPDATE_TRUSTED_REALM_FAILED("cluster.update.trusted.realm.failed"),
+    CLUSTER_REMOVE_TRUSTED_REALM("cluster.remove.trusted.realm"),
+    CLUSTER_REMOVE_TRUSTED_REALM_FAILED("cluster.remove.trusted.realm.failed"),
     CLUSTER_MANAGER_UPGRADE("cluster.manager.upgrade"),
     CLUSTER_MANAGER_UPGRADE_NOT_NEEDED("cluster.manager.upgrade.not.needed"),
     CLUSTER_MANAGER_UPGRADE_FINISHED("cluster.manager.upgrade.finished"),
@@ -869,8 +871,14 @@ public enum ResourceEvent {
 
     ENVIRONMENT_CANCEL_TRUST_VALIDATION_STARTED("environment.cancel.cross.realm.trust.validation.started"),
     ENVIRONMENT_CANCEL_TRUST_STARTED("environment.cancel.cross.realm.trust.started"),
+    ENVIRONMENT_CANCEL_TRUST_CONFIG_REMOVAL_STARTED("environment.cancel.cross.realm.trust.cm.removal.started"),
+    ENVIRONMENT_CANCEL_TRUST_ENTITY_DELETE_STARTED("environment.cancel.cross.realm.trust.entity.delete.started"),
+    ENVIRONMENT_CANCEL_TRUST_ENTITY_DELETE_FAILED("environment.cancel.cross.realm.trust.entity.delete.failed"),
+    ENVIRONMENT_CANCEL_TRUST_SALT_UPDATE_STARTED("environment.cancel.cross.realm.trust.salt.update.started"),
+    ENVIRONMENT_CANCEL_TRUST_SALT_UPDATE_FAILED("environment.cancel.cross.realm.trust.salt.update.failed"),
     ENVIRONMENT_CANCEL_TRUST_FINISHED("environment.cancel.cross.realm.trust.finished"),
     ENVIRONMENT_CANCEL_TRUST_VALIDATION_FAILED("environment.cancel.cross.realm.trust.validation.failed"),
+    ENVIRONMENT_CANCEL_TRUST_CONFIG_REMOVAL_FAILED("environment.cancel.cross.realm.trust.cm.removal.failed"),
     ENVIRONMENT_CANCEL_TRUST_FAILED("environment.cancel.cross.realm.trust.failed"),
 
     ENVIRONMENT_SETUP_FINISH_TRUST_VALIDATION_STARTED("environment.setup.finish.cross.realm.trust.validation.started"),

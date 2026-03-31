@@ -13,6 +13,8 @@ public class UpdateTrustedRealmRequest implements JsonEntity {
 
     private boolean saltUpdateRequired;
 
+    private boolean remove;
+
     public String getRealm() {
         return realm;
     }
@@ -29,13 +31,20 @@ public class UpdateTrustedRealmRequest implements JsonEntity {
         this.saltUpdateRequired = saltUpdateRequired;
     }
 
+    public boolean isRemove() {
+        return remove;
+    }
+
+    public void setRemove(boolean remove) {
+        this.remove = remove;
+    }
+
     @Override
     public String toString() {
         return "UpdateTrustedRealmRequest{" +
                 "realm='" + realm + '\'' +
                 ", saltUpdateRequired=" + saltUpdateRequired +
+                ", remove=" + remove +
                 '}';
     }
 }
-
-

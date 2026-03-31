@@ -3,7 +3,6 @@ package com.sequenceiq.environment.environment.service.cluster;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
 
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -14,17 +13,13 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ClusterServiceConfigurationRequest;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ServiceConfiguration;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateClusterServiceConfigurationRequest;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.ClusterServiceConfigurationResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateTrustedRealmRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
-import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.common.api.type.EnvironmentType;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
-import com.sequenceiq.environment.environment.dto.EnvironmentDtoBase;
-import com.sequenceiq.environment.environment.service.freeipa.FreeIpaService;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
 
 @Service
 public class ClusterService {
@@ -33,47 +28,12 @@ public class ClusterService {
 
     private final StackV4Endpoint stackV4Endpoint;
 
-    private final FreeIpaService freeIpaService;
-
-    public ClusterService(StackV4Endpoint stackV4Endpoint, FreeIpaService freeIpaService) {
+    public ClusterService(StackV4Endpoint stackV4Endpoint) {
         this.stackV4Endpoint = stackV4Endpoint;
-        this.freeIpaService = freeIpaService;
     }
 
     public List<String> getClustersNamesByEncryptionProfile(String encryptionProfileCrn) {
         return stackV4Endpoint.getClustersNamesByEncryptionProfile(0L, encryptionProfileCrn);
-    }
-
-    public void updateTrustedRealmsOnClusters(Optional<EnvironmentDto> environmentDto) {
-        EnvironmentType environmentType = environmentDto.map(EnvironmentDtoBase::getEnvironmentType).orElse(EnvironmentType.PUBLIC_CLOUD);
-
-        String envCrn = environmentDto.map(EnvironmentDtoBase::getResourceCrn).orElse(null);
-
-        ClusterServiceConfigurationRequest configRequest = new ClusterServiceConfigurationRequest();
-        configRequest.setServiceName("core_settings");
-        configRequest.setConfigName("trusted_realms");
-
-        UpdateClusterServiceConfigurationRequest updateClusterServiceConfigurationRequest = new UpdateClusterServiceConfigurationRequest();
-        ServiceConfiguration trustedRealmsConfiguration = new ServiceConfiguration();
-        trustedRealmsConfiguration.setServiceName("core_settings");
-        trustedRealmsConfiguration.setConfigName("trusted_realms");
-        String realm = freeIpaService.describe(envCrn).map(describeFreeIpaResponse ->
-                        describeFreeIpaResponse.getTrust().getRealm().toUpperCase(Locale.ROOT))
-                .orElseThrow(() -> new CloudbreakServiceException("Failed to get realm from FreeIPA for environment " + envCrn));
-        trustedRealmsConfiguration.setValue(realm);
-        updateClusterServiceConfigurationRequest.setServiceConfigurations(List.of(trustedRealmsConfiguration));
-
-        List<String> stackCrns = getStackCrnsForConfigUpdate(envCrn, environmentType);
-        stackCrns.forEach(crn -> {
-            ClusterServiceConfigurationResponse configResponse = stackV4Endpoint.getClusterServiceConfiguration(0L, crn, configRequest);
-            Optional<String> valueOpt = Optional.ofNullable(configResponse).map(ClusterServiceConfigurationResponse::getValue);
-            boolean realmAlreadyConfigured = valueOpt.map(val -> val.contains(realm)).orElse(false);
-            if (!realmAlreadyConfigured) {
-                String realmList = valueOpt.map(val -> val + "," + realm).orElse(realm);
-                trustedRealmsConfiguration.setValue(realmList);
-            }
-            stackV4Endpoint.updateClusterServiceConfiguration(0L, crn, updateClusterServiceConfigurationRequest);
-        });
     }
 
     public List<String> getStackCrnsForConfigUpdate(String envCrn, EnvironmentType environmentType) {
@@ -93,5 +53,25 @@ public class ClusterService {
                 .filter(workloadsBasedOnEnvironmentType)
                 .map(StackViewV4Response::getCrn)
                 .collect(Collectors.toList());
+    }
+
+    public List<FlowIdentifier> removeTrustedRealmConfigFromClusters(Optional<EnvironmentDto> environmentDto, String realm) {
+        if (environmentDto.isEmpty()) {
+            LOGGER.warn("Environment DTO is not present, skipping trusted realm removal from clusters.");
+            return List.of();
+        }
+        EnvironmentDto env = environmentDto.get();
+        String envCrn = env.getResourceCrn();
+        EnvironmentType environmentType = env.getEnvironmentType();
+
+        List<String> stackCrns = getStackCrnsForConfigUpdate(envCrn, environmentType);
+        return stackCrns.stream().map(crn -> {
+            LOGGER.info("Triggering async removal of trusted realm '{}' from cluster: {}", realm, crn);
+            UpdateTrustedRealmRequest request = new UpdateTrustedRealmRequest();
+            request.setRealm(realm);
+            request.setRemove(true);
+            return ThreadBasedUserCrnProvider.doAsInternalActor(
+                    () -> stackV4Endpoint.triggerUpdateTrustedRealm(0L, crn, request));
+        }).collect(Collectors.toList());
     }
 }

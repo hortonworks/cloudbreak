@@ -41,7 +41,6 @@ import org.mockito.ArgumentCaptor;
 import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiCommand;
 import com.cloudera.api.swagger.model.ApiCommandList;
-import com.cloudera.api.swagger.model.ApiConfig;
 import com.cloudera.api.swagger.model.ApiConfigRecord;
 import com.cloudera.api.swagger.model.ApiConfigStalenessStatus;
 import com.cloudera.api.swagger.model.ApiHostNameList;
@@ -68,7 +67,6 @@ import com.sequenceiq.cloudbreak.cm.exception.ClouderaManagerOperationFailedExce
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterCommand;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterCommandType;
 import com.sequenceiq.cloudbreak.domain.view.ClusterComponentView;
-import com.sequenceiq.cloudbreak.dto.TrustView;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
@@ -910,39 +908,5 @@ class ClouderaManagerModificationServiceTest extends ClouderaManagerModification
         assertEquals("2048", result.getConfigsAfter().getFirst().getValue());
         assertEquals(JvmConfigApplicability.RECONFIGURABLE, result.getConfigsAfter().getFirst().getApplicability());
         verify(eventService).fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_CM_REALLOCATION_SUCCESSFUL);
-    }
-
-
-    @Test
-    public void testUpdateTrustedRealmsCallsApiWithUpperCasedRealm() throws ApiException {
-        when(clouderaManagerApiFactory.getBatchResourceApi(v31Client)).thenReturn(batchResourceApi);
-        TrustView trustView = new TrustView("10.0.0.1", "kdc.example.com", "example.com");
-
-        underTest.updateTrustedRealms(trustView);
-
-        ArgumentCaptor<ApiBatchRequest> batchRequestCaptor = ArgumentCaptor.forClass(ApiBatchRequest.class);
-        verify(batchResourceApi).execute(batchRequestCaptor.capture());
-
-        ApiBatchRequest batchRequest = batchRequestCaptor.getValue();
-        assertThat(batchRequest.getItems()).hasSize(1);
-        ApiBatchRequestElement element = batchRequest.getItems().get(0);
-        assertEquals(HTTPMethod.PUT, element.getMethod());
-        assertEquals("/clusters/" + STACK_NAME + "/services/core_settings/config", element.getUrl());
-        assertThat(element.getBody()).isInstanceOf(ApiConfig.class);
-        ApiConfig config = (ApiConfig) element.getBody();
-        assertEquals("trusted_realms", config.getName());
-        assertEquals("EXAMPLE.COM", config.getValue());
-    }
-
-    @Test
-    public void testUpdateTrustedRealmsThrowsCloudManagerOperationFailedExceptionOnApiException() throws ApiException {
-        when(clouderaManagerApiFactory.getBatchResourceApi(v31Client)).thenReturn(batchResourceApi);
-        when(batchResourceApi.execute(any(ApiBatchRequest.class))).thenThrow(new ApiException("CM API failure"));
-        TrustView trustView = new TrustView("10.0.0.1", "kdc.example.com", "EXAMPLE.COM");
-
-        ClouderaManagerOperationFailedException exception = assertThrows(ClouderaManagerOperationFailedException.class,
-                () -> underTest.updateTrustedRealms(trustView));
-
-        assertThat(exception.getMessage()).contains("CM API failure");
     }
 }

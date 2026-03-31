@@ -5,7 +5,10 @@ import com.sequenceiq.flow.core.FlowEvent;
 public enum EnvironmentCrossRealmTrustCancelHandlerSelectors implements FlowEvent {
 
     TRUST_CANCEL_VALIDATION_HANDLER,
-    TRUST_CANCEL_HANDLER;
+    TRUST_CANCEL_HANDLER,
+    TRUST_CANCEL_CONFIG_REMOVAL_HANDLER,
+    TRUST_CANCEL_TRUST_ENTITY_DELETE_HANDLER,
+    TRUST_CANCEL_SALT_UPDATE_HANDLER;
 
     @Override
     public String event() {

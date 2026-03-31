@@ -237,7 +237,7 @@ class ReactorFlowManagerTest {
         underTest.triggerUpdatePublicDnsEntriesInPem(STACK_ID);
         underTest.triggerUpdateSslConfigsOnCluster(STACK_ID, "encryptionProfileCrn");
         underTest.triggerResetJvmParams(STACK_ID);
-        underTest.triggerUpdateTrustedRealm(STACK_ID, "crn", "crn", "realm", true);
+        underTest.triggerUpdateTrustedRealm(STACK_ID, "crn", "crn", "realm", true, false);
 
         int count = 0;
         for (Method method : underTest.getClass().getDeclaredMethods()) {
@@ -543,7 +543,7 @@ class ReactorFlowManagerTest {
         String environmentCrn = "crn:cdp:environments:us-west-1:tenant:environment:env-id";
         String realm = "EXAMPLE.COM";
 
-        underTest.triggerUpdateTrustedRealm(STACK_ID, resourceCrn, environmentCrn, realm, true);
+        underTest.triggerUpdateTrustedRealm(STACK_ID, resourceCrn, environmentCrn, realm, true, false);
 
         ArgumentCaptor<UpdateTrustedRealmChainTriggerEvent> captor = ArgumentCaptor.forClass(UpdateTrustedRealmChainTriggerEvent.class);
         verify(reactorNotifier, times(1)).notify(eq(STACK_ID), eq(UPDATE_TRUSTED_REALM_CHAIN_TRIGGER_EVENT), captor.capture());
@@ -554,6 +554,7 @@ class ReactorFlowManagerTest {
         assertEquals(environmentCrn, event.getEnvironmentCrn());
         assertEquals(realm, event.getRealm());
         assertEquals(true, event.isSaltUpdateRequired());
+        assertEquals(false, event.isRemove());
     }
 
     @Test
@@ -562,12 +563,13 @@ class ReactorFlowManagerTest {
         String environmentCrn = "crn:cdp:environments:us-west-1:tenant:environment:env-id";
         String realm = "HYBRID.REALM.COM";
 
-        underTest.triggerUpdateTrustedRealm(STACK_ID, resourceCrn, environmentCrn, realm, false);
+        underTest.triggerUpdateTrustedRealm(STACK_ID, resourceCrn, environmentCrn, realm, false, false);
 
         ArgumentCaptor<UpdateTrustedRealmChainTriggerEvent> captor = ArgumentCaptor.forClass(UpdateTrustedRealmChainTriggerEvent.class);
         verify(reactorNotifier, times(1)).notify(eq(STACK_ID), eq(UPDATE_TRUSTED_REALM_CHAIN_TRIGGER_EVENT), captor.capture());
         UpdateTrustedRealmChainTriggerEvent event = captor.getValue();
         assertEquals(false, event.isSaltUpdateRequired());
+        assertEquals(false, event.isRemove());
         assertEquals(realm, event.getRealm());
         assertEquals(environmentCrn, event.getEnvironmentCrn());
     }

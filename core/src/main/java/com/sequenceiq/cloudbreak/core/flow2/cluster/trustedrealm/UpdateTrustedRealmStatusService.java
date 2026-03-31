@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.trustedrealm;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_REMOVE_TRUSTED_REALM;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_REMOVE_TRUSTED_REALM_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_UPDATE_TRUSTED_REALM;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_UPDATE_TRUSTED_REALM_FAILED;
 
@@ -26,10 +28,16 @@ public class UpdateTrustedRealmStatusService {
     @Inject
     private CloudbreakFlowMessageService flowMessageService;
 
-    public void updatingTrustedRealm(Long stackId) {
-        LOGGER.info("Updating trusted realm configuration on CM for stack {}", stackId);
-        stackUpdater.updateStackStatus(stackId, DetailedStackStatus.UPDATE_TRUSTED_REALM_IN_PROGRESS);
-        flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), CLUSTER_UPDATE_TRUSTED_REALM);
+    public void updatingTrustedRealm(Long stackId, boolean remove) {
+        if (remove) {
+            LOGGER.info("Removing trusted realm configuration on CM for stack {}", stackId);
+            stackUpdater.updateStackStatus(stackId, DetailedStackStatus.UPDATE_TRUSTED_REALM_IN_PROGRESS);
+            flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), CLUSTER_REMOVE_TRUSTED_REALM);
+        } else {
+            LOGGER.info("Updating trusted realm configuration on CM for stack {}", stackId);
+            stackUpdater.updateStackStatus(stackId, DetailedStackStatus.UPDATE_TRUSTED_REALM_IN_PROGRESS);
+            flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), CLUSTER_UPDATE_TRUSTED_REALM);
+        }
     }
 
     public void success(Long stackId) {
@@ -37,11 +45,16 @@ public class UpdateTrustedRealmStatusService {
         stackUpdater.updateStackStatus(stackId, DetailedStackStatus.AVAILABLE);
     }
 
-    public void failed(Long stackId, Exception exception) {
-        LOGGER.error("Trusted realm configuration update failed for stack {}", stackId, exception);
-        stackUpdater.updateStackStatus(stackId, DetailedStackStatus.UPDATE_TRUSTED_REALM_FAILED, exception.getMessage());
-        flowMessageService.fireEventAndLog(stackId, UPDATE_FAILED.name(), CLUSTER_UPDATE_TRUSTED_REALM_FAILED, exception.getMessage());
+    public void failed(Long stackId, Exception exception, boolean remove) {
+        if (remove) {
+            LOGGER.info("Trusted realm configuration remove failed for stack {}", stackId);
+            stackUpdater.updateStackStatus(stackId, DetailedStackStatus.UPDATE_TRUSTED_REALM_FAILED, exception.getMessage());
+            flowMessageService.fireEventAndLog(stackId, UPDATE_FAILED.name(), CLUSTER_REMOVE_TRUSTED_REALM_FAILED, exception.getMessage());
+        } else {
+            LOGGER.error("Trusted realm configuration update failed for stack {}", stackId, exception);
+            stackUpdater.updateStackStatus(stackId, DetailedStackStatus.UPDATE_TRUSTED_REALM_FAILED, exception.getMessage());
+            flowMessageService.fireEventAndLog(stackId, UPDATE_FAILED.name(), CLUSTER_UPDATE_TRUSTED_REALM_FAILED, exception.getMessage());
+        }
     }
 }
-
 

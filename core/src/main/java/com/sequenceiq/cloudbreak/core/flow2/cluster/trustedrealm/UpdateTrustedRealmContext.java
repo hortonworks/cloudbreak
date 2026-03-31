@@ -12,11 +12,14 @@ public class UpdateTrustedRealmContext extends CommonContext {
 
     private final String realm;
 
-    public UpdateTrustedRealmContext(FlowParameters flowParameters, StackView stack, String environmentCrn, String realm) {
+    private final boolean remove;
+
+    public UpdateTrustedRealmContext(FlowParameters flowParameters, StackView stack, String environmentCrn, String realm, boolean remove) {
         super(flowParameters);
         this.stack = stack;
         this.environmentCrn = environmentCrn;
         this.realm = realm;
+        this.remove = remove;
     }
 
     public StackView getStack() {
@@ -30,5 +33,8 @@ public class UpdateTrustedRealmContext extends CommonContext {
     public String getRealm() {
         return realm;
     }
-}
 
+    public boolean isRemove() {
+        return remove;
+    }
+}

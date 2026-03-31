@@ -1,17 +1,28 @@
 package com.sequenceiq.environment.environment.flow.hybrid.cancel;
 
 
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_CANCEL_TRUST_CONFIG_REMOVAL_FAILED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_CANCEL_TRUST_CONFIG_REMOVAL_STARTED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_CANCEL_TRUST_ENTITY_DELETE_STARTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_CANCEL_TRUST_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_CANCEL_TRUST_FINISHED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_CANCEL_TRUST_SALT_UPDATE_STARTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_CANCEL_TRUST_STARTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_CANCEL_TRUST_VALIDATION_STARTED;
+import static com.sequenceiq.environment.environment.EnvironmentStatus.TRUST_CANCEL_CONFIG_REMOVAL_FAILED;
+import static com.sequenceiq.environment.environment.EnvironmentStatus.TRUST_CANCEL_CONFIG_REMOVAL_IN_PROGRESS;
 import static com.sequenceiq.environment.environment.EnvironmentStatus.TRUST_CANCEL_FAILED;
 import static com.sequenceiq.environment.environment.EnvironmentStatus.TRUST_CANCEL_IN_PROGRESS;
+import static com.sequenceiq.environment.environment.EnvironmentStatus.TRUST_CANCEL_SALT_UPDATE_IN_PROGRESS;
+import static com.sequenceiq.environment.environment.EnvironmentStatus.TRUST_CANCEL_TRUST_ENTITY_DELETE_IN_PROGRESS;
 import static com.sequenceiq.environment.environment.EnvironmentStatus.TRUST_CANCEL_VALIDATION_IN_PROGRESS;
 import static com.sequenceiq.environment.environment.EnvironmentStatus.TRUST_SETUP_REQUIRED;
+import static com.sequenceiq.environment.environment.flow.hybrid.cancel.EnvironmentCrossRealmTrustCancelState.TRUST_CANCEL_CONFIG_REMOVAL_STATE;
 import static com.sequenceiq.environment.environment.flow.hybrid.cancel.EnvironmentCrossRealmTrustCancelState.TRUST_CANCEL_FAILED_STATE;
 import static com.sequenceiq.environment.environment.flow.hybrid.cancel.EnvironmentCrossRealmTrustCancelState.TRUST_CANCEL_FINISHED_STATE;
+import static com.sequenceiq.environment.environment.flow.hybrid.cancel.EnvironmentCrossRealmTrustCancelState.TRUST_CANCEL_SALT_UPDATE_STATE;
 import static com.sequenceiq.environment.environment.flow.hybrid.cancel.EnvironmentCrossRealmTrustCancelState.TRUST_CANCEL_STATE;
+import static com.sequenceiq.environment.environment.flow.hybrid.cancel.EnvironmentCrossRealmTrustCancelState.TRUST_CANCEL_TRUST_ENTITY_DELETE_STATE;
 import static com.sequenceiq.environment.environment.flow.hybrid.cancel.EnvironmentCrossRealmTrustCancelState.TRUST_CANCEL_VALIDATION_STATE;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -26,6 +37,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -70,17 +82,25 @@ import com.sequenceiq.cloudbreak.ha.service.NodeValidator;
 import com.sequenceiq.cloudbreak.quartz.configuration.scheduler.TransactionalScheduler;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.environment.environment.domain.Environment;
+import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDtoConverter;
 import com.sequenceiq.environment.environment.flow.EnvironmentReactorFlowManager;
+import com.sequenceiq.environment.environment.flow.MultipleFlowsResultEvaluator;
 import com.sequenceiq.environment.environment.flow.hybrid.cancel.action.EnvironmentCrossRealmTrustCancelActions;
 import com.sequenceiq.environment.environment.flow.hybrid.cancel.config.EnvironmentCrossRealmTrustCancelFlowConfig;
+import com.sequenceiq.environment.environment.flow.hybrid.cancel.handler.EnvironmentCrossRealmTrustCancelConfigRemovalHandler;
 import com.sequenceiq.environment.environment.flow.hybrid.cancel.handler.EnvironmentCrossRealmTrustCancelHandler;
+import com.sequenceiq.environment.environment.flow.hybrid.cancel.handler.EnvironmentCrossRealmTrustCancelSaltUpdateHandler;
+import com.sequenceiq.environment.environment.flow.hybrid.cancel.handler.EnvironmentCrossRealmTrustEntityDeleteHandler;
 import com.sequenceiq.environment.environment.flow.hybrid.cancel.handler.EnvironmentValidateCrossRealmTrustCancelHandler;
 import com.sequenceiq.environment.environment.flow.hybrid.setup.converter.SetupCrossRealmTrustRequestToEnvironmentCrossRealmTrustSetupEventConverter;
+import com.sequenceiq.environment.environment.poller.DatahubPollerProvider;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.environment.service.EnvironmentStatusUpdateService;
+import com.sequenceiq.environment.environment.service.cluster.ClusterService;
 import com.sequenceiq.environment.environment.service.freeipa.FreeIpaPollerService;
 import com.sequenceiq.environment.environment.service.freeipa.FreeIpaService;
+import com.sequenceiq.environment.environment.service.stack.StackPollerService;
 import com.sequenceiq.environment.environment.service.stack.StackService;
 import com.sequenceiq.environment.experience.ExperienceConnectorService;
 import com.sequenceiq.environment.metrics.EnvironmentMetricService;
@@ -104,6 +124,10 @@ import com.sequenceiq.flow.repository.FlowLogRepository;
 import com.sequenceiq.flow.repository.FlowOperationStatsRepository;
 import com.sequenceiq.flow.service.FlowCancelService;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaV1Endpoint;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.AvailabilityStatus;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.TrustResponse;
 import com.sequenceiq.notification.WebSocketNotificationService;
 
 import io.micrometer.core.instrument.MeterRegistry;
@@ -119,6 +143,8 @@ class EnvironmentCrossRealmTrustCancelFlowIntegrationTest {
     private static final String ENVIRONMENT_CRN = "ENVIRONMENT_CRN";
 
     private static final String ACCOUNT_ID = "accId";
+
+    private static final String REALM = "EXAMPLE.COM";
 
     @Inject
     private FlowRegister flowRegister;
@@ -166,6 +192,18 @@ class EnvironmentCrossRealmTrustCancelFlowIntegrationTest {
     private FreeIpaPollerService freeIpaPollerService;
 
     @MockBean
+    private ClusterService clusterService;
+
+    @MockBean
+    private StackPollerService stackPollerService;
+
+    @MockBean
+    private DatahubPollerProvider datahubPollerProvider;
+
+    @MockBean
+    private MultipleFlowsResultEvaluator multipleFlowsResultEvaluator;
+
+    @MockBean
     private StackService stackService;
 
     @MockBean
@@ -184,10 +222,85 @@ class EnvironmentCrossRealmTrustCancelFlowIntegrationTest {
         environment.setResourceCrn(ENVIRONMENT_CRN);
         environment.setName(ENVIRONMENT_NAME);
         environment.setAccountId(ACCOUNT_ID);
+
+        // Default stub: FreeIPA is available and has a trust configured.
+        // Tests that simulate FreeIPA failure override this with doThrow.
+        TrustResponse trustResponse = new TrustResponse();
+        trustResponse.setRealm(REALM);
+        DescribeFreeIpaResponse describeFreeIpaResponse = new DescribeFreeIpaResponse();
+        describeFreeIpaResponse.setStatus(Status.AVAILABLE);
+        describeFreeIpaResponse.setAvailabilityStatus(AvailabilityStatus.AVAILABLE);
+        describeFreeIpaResponse.setTrust(trustResponse);
+        when(freeIpaService.describe(anyString())).thenReturn(Optional.of(describeFreeIpaResponse));
+
+        // Default stub: environment exists so config-removal handler can proceed.
+        EnvironmentDto environmentDto = new EnvironmentDto();
+        environmentDto.setId(ENVIRONMENT_ID);
+        environmentDto.setResourceCrn(ENVIRONMENT_CRN);
+        environmentDto.setName(ENVIRONMENT_NAME);
+        when(environmentService.findById(ENVIRONMENT_ID)).thenReturn(Optional.of(environmentDto));
     }
 
     @Test
     void testCancelCrossRealmTrustWhenSuccessful() {
+        testFlow();
+        InOrder environmentStatusVerify = inOrder(environmentStatusUpdateService);
+
+        // 1. Validation
+        environmentStatusVerify.verify(environmentStatusUpdateService).updateEnvironmentStatusAndNotify(
+                any(CommonContext.class),
+                any(Payload.class),
+                eq(TRUST_CANCEL_VALIDATION_IN_PROGRESS),
+                eq(ENVIRONMENT_CANCEL_TRUST_VALIDATION_STARTED),
+                eq(TRUST_CANCEL_VALIDATION_STATE)
+        );
+        // 2. FreeIPA trust cancel (runs before CM config removal so realm is still available)
+        environmentStatusVerify.verify(environmentStatusUpdateService).updateEnvironmentStatusAndNotify(
+                any(CommonContext.class),
+                any(Payload.class),
+                eq(TRUST_CANCEL_IN_PROGRESS),
+                eq(ENVIRONMENT_CANCEL_TRUST_STARTED),
+                eq(TRUST_CANCEL_STATE)
+        );
+        // 3. CM config removal
+        environmentStatusVerify.verify(environmentStatusUpdateService).updateEnvironmentStatusAndNotify(
+                any(CommonContext.class),
+                any(Payload.class),
+                eq(TRUST_CANCEL_CONFIG_REMOVAL_IN_PROGRESS),
+                eq(ENVIRONMENT_CANCEL_TRUST_CONFIG_REMOVAL_STARTED),
+                eq(TRUST_CANCEL_CONFIG_REMOVAL_STATE)
+        );
+        // 4. FreeIPA trust entity deletion
+        environmentStatusVerify.verify(environmentStatusUpdateService).updateEnvironmentStatusAndNotify(
+                any(CommonContext.class),
+                any(Payload.class),
+                eq(TRUST_CANCEL_TRUST_ENTITY_DELETE_IN_PROGRESS),
+                eq(ENVIRONMENT_CANCEL_TRUST_ENTITY_DELETE_STARTED),
+                eq(TRUST_CANCEL_TRUST_ENTITY_DELETE_STATE)
+        );
+        // 5. Salt update to remove trust.conf after the trust entity is gone
+        environmentStatusVerify.verify(environmentStatusUpdateService).updateEnvironmentStatusAndNotify(
+                any(CommonContext.class),
+                any(Payload.class),
+                eq(TRUST_CANCEL_SALT_UPDATE_IN_PROGRESS),
+                eq(ENVIRONMENT_CANCEL_TRUST_SALT_UPDATE_STARTED),
+                eq(TRUST_CANCEL_SALT_UPDATE_STATE)
+        );
+        // 6. Finished
+        environmentStatusVerify.verify(environmentStatusUpdateService).updateEnvironmentStatusAndNotify(
+                any(CommonContext.class),
+                any(Payload.class),
+                eq(TRUST_SETUP_REQUIRED),
+                eq(ENVIRONMENT_CANCEL_TRUST_FINISHED),
+                eq(TRUST_CANCEL_FINISHED_STATE)
+        );
+    }
+
+    @Test
+    public void testCancelCrossRealmTrustWhenCmRemovalFailure() {
+        doThrow(new CloudbreakServiceException("Failed to remove CM configuration"))
+                .when(clusterService)
+                .removeTrustedRealmConfigFromClusters(any(), any());
         testFlow();
         InOrder environmentStatusVerify = inOrder(environmentStatusUpdateService);
 
@@ -208,14 +321,23 @@ class EnvironmentCrossRealmTrustCancelFlowIntegrationTest {
         environmentStatusVerify.verify(environmentStatusUpdateService).updateEnvironmentStatusAndNotify(
                 any(CommonContext.class),
                 any(Payload.class),
-                eq(TRUST_SETUP_REQUIRED),
-                eq(ENVIRONMENT_CANCEL_TRUST_FINISHED),
-                eq(TRUST_CANCEL_FINISHED_STATE)
+                eq(TRUST_CANCEL_CONFIG_REMOVAL_IN_PROGRESS),
+                eq(ENVIRONMENT_CANCEL_TRUST_CONFIG_REMOVAL_STARTED),
+                eq(TRUST_CANCEL_CONFIG_REMOVAL_STATE)
+        );
+        environmentStatusVerify.verify(environmentStatusUpdateService).updateFailedEnvironmentStatusAndNotify(
+                any(CommonContext.class),
+                any(BaseFailedFlowEvent.class),
+                eq(TRUST_CANCEL_CONFIG_REMOVAL_FAILED),
+                eq(ENVIRONMENT_CANCEL_TRUST_CONFIG_REMOVAL_FAILED),
+                eq(TRUST_CANCEL_FAILED_STATE)
         );
     }
 
     @Test
     public void testCancelCrossRealmTrustWhenFailure() {
+        // FreeIPA describe throws during TRUST_CANCEL_STATE (FreeIPA cancel handler),
+        // which is now the step immediately after validation.
         doThrow(new CloudbreakServiceException("Freeipa not exist on provider side"))
                 .when(freeIpaService)
                 .describe(anyString());
@@ -312,6 +434,9 @@ class EnvironmentCrossRealmTrustCancelFlowIntegrationTest {
             EnvironmentCrossRealmTrustCancelActions.class,
             EnvironmentCrossRealmTrustCancelHandler.class,
             EnvironmentValidateCrossRealmTrustCancelHandler.class,
+            EnvironmentCrossRealmTrustCancelConfigRemovalHandler.class,
+            EnvironmentCrossRealmTrustEntityDeleteHandler.class,
+            EnvironmentCrossRealmTrustCancelSaltUpdateHandler.class,
             WebApplicationExceptionMessageExtractor.class,
             EnvironmentCrossRealmTrustCancelFlowConfig.class,
             EnvironmentReactorFlowManager.class,
@@ -414,3 +539,4 @@ class EnvironmentCrossRealmTrustCancelFlowIntegrationTest {
         }
     }
 }
+

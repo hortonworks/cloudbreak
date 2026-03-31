@@ -22,13 +22,16 @@ public class UpdateTrustedRealmFailedAction extends AbstractStackFailureAction<U
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UpdateTrustedRealmFailedAction.class);
 
+    private static final String REMOVE = "REMOVE";
+
     @Inject
     private UpdateTrustedRealmStatusService statusService;
 
     @Override
     protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
         LOGGER.error("Error during update trusted realm for stack {}", context.getStackId(), payload.getException());
-        statusService.failed(context.getStackId(), payload.getException());
+        boolean remove = Boolean.TRUE.equals(variables.get(REMOVE));
+        statusService.failed(context.getStackId(), payload.getException(), remove);
         sendEvent(context);
     }
 

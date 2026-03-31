@@ -1,6 +1,6 @@
 package com.sequenceiq.environment.environment.flow.hybrid.cancel.handler;
 
-import static com.sequenceiq.environment.environment.flow.hybrid.cancel.event.EnvironmentCrossRealmTrustCancelStateSelectors.FINISH_TRUST_CANCEL_EVENT;
+import static com.sequenceiq.environment.environment.flow.hybrid.cancel.event.EnvironmentCrossRealmTrustCancelStateSelectors.TRUST_CANCEL_CONFIG_REMOVAL_EVENT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -24,7 +24,6 @@ import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.environment.service.freeipa.FreeIpaPollerService;
 import com.sequenceiq.environment.environment.service.freeipa.FreeIpaService;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.AvailabilityStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 
@@ -67,7 +66,6 @@ class EnvironmentCrossRealmTrustCancelHandlerTest {
         when(freeIpaService.describe(eventData.getResourceCrn()))
                 .thenReturn(Optional.of(freeIpa));
         when(freeIpa.getStatus()).thenReturn(Status.AVAILABLE);
-        when(freeIpa.getAvailabilityStatus()).thenReturn(AvailabilityStatus.AVAILABLE);
 
         Selectable result = handler.doAccept(event);
 
@@ -77,7 +75,7 @@ class EnvironmentCrossRealmTrustCancelHandlerTest {
 
         verify(freeIpaPollerService).waitForCrossRealmTrustCancel(eventData.getResourceId(), eventData.getResourceCrn());
 
-        assertThat(result.selector()).isEqualTo(FINISH_TRUST_CANCEL_EVENT.selector());
+        assertThat(result.selector()).isEqualTo(TRUST_CANCEL_CONFIG_REMOVAL_EVENT.selector());
     }
 
     @Test

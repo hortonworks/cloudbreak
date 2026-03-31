@@ -472,9 +472,10 @@ public class ReactorFlowManager {
         return reactorNotifier.notify(stackId, event.getSelector(), event);
     }
 
-    public FlowIdentifier triggerUpdateTrustedRealm(Long stackId, String resourceCrn, String environmentCrn, String realm, boolean saltUpdateRequired) {
+    public FlowIdentifier triggerUpdateTrustedRealm(Long stackId, String resourceCrn, String environmentCrn, String realm, boolean saltUpdateRequired,
+            boolean remove) {
         UpdateTrustedRealmChainTriggerEvent event = new UpdateTrustedRealmChainTriggerEvent(
-                FlowChainTriggers.UPDATE_TRUSTED_REALM_CHAIN_TRIGGER_EVENT, stackId, resourceCrn, environmentCrn, realm, saltUpdateRequired);
+                FlowChainTriggers.UPDATE_TRUSTED_REALM_CHAIN_TRIGGER_EVENT, stackId, resourceCrn, environmentCrn, realm, saltUpdateRequired, remove);
         return reactorNotifier.notify(stackId, event.getSelector(), event);
     }
 

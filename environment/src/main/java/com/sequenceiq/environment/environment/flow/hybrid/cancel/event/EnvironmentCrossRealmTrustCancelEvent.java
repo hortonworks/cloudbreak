@@ -9,13 +9,21 @@ import com.sequenceiq.flow.reactor.api.event.BaseNamedFlowEvent;
 @JsonDeserialize(builder = EnvironmentCrossRealmTrustCancelEvent.Builder.class)
 public class EnvironmentCrossRealmTrustCancelEvent extends BaseNamedFlowEvent {
 
+    private final String realm;
+
     public EnvironmentCrossRealmTrustCancelEvent(
             String selector,
             Long resourceId,
             Promise<AcceptResult> accepted,
             String resourceName,
-            String resourceCrn) {
+            String resourceCrn,
+            String realm) {
         super(selector, resourceId, accepted, resourceName, resourceCrn);
+        this.realm = realm;
+    }
+
+    public String getRealm() {
+        return realm;
     }
 
     public static Builder builder() {
@@ -33,6 +41,8 @@ public class EnvironmentCrossRealmTrustCancelEvent extends BaseNamedFlowEvent {
         private Long resourceId;
 
         private Promise<AcceptResult> accepted;
+
+        private String realm;
 
         private Builder() {
         }
@@ -62,13 +72,19 @@ public class EnvironmentCrossRealmTrustCancelEvent extends BaseNamedFlowEvent {
             return this;
         }
 
+        public Builder withRealm(String realm) {
+            this.realm = realm;
+            return this;
+        }
+
         public EnvironmentCrossRealmTrustCancelEvent build() {
             return new EnvironmentCrossRealmTrustCancelEvent(
                     selector,
                     resourceId,
                     accepted,
                     resourceName,
-                    resourceCrn);
+                    resourceCrn,
+                    realm);
         }
     }
 }

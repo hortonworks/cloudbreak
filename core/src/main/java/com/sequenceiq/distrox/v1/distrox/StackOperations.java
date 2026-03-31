@@ -374,7 +374,7 @@ public class StackOperations implements HierarchyAuthResourcePropertyProvider {
         LOGGER.debug("Triggering update trusted realm for stack: {}", nameOrCrn);
         StackDto stackDto = stackDtoService.getByNameOrCrn(nameOrCrn, accountId);
         return clusterOperationService.triggerUpdateTrustedRealm(stackDto.getId(), stackDto.getResourceCrn(),
-                stackDto.getEnvironmentCrn(), request.getRealm(), request.isSaltUpdateRequired());
+                stackDto.getEnvironmentCrn(), request.getRealm(), request.isSaltUpdateRequired(), request.isRemove());
     }
 
     public FlowIdentifier updatePillarConfiguration(@NotNull NameOrCrn nameOrCrn, String accountId) {

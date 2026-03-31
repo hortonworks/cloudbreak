@@ -1,15 +1,12 @@
 package com.sequenceiq.environment.environment.service.cluster;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,17 +20,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateClusterServiceConfigurationRequest;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.ClusterServiceConfigurationResponse;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateTrustedRealmRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.views.ClusterViewV4Response;
-import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.common.api.type.EnvironmentType;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
-import com.sequenceiq.environment.environment.service.freeipa.FreeIpaService;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.TrustResponse;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.flow.api.model.FlowType;
 
 @ExtendWith(MockitoExtension.class)
 class ClusterServiceTest {
@@ -48,13 +42,10 @@ class ClusterServiceTest {
 
     private static final String ENCRYPTION_PROFILE_CRN = "crn:cdp:encryption:us-west-1:1234:profile:ep1";
 
-    private static final String TRUSTED_REALM = "TRUSTED.REALM.EXAMPLE.COM";
+    private static final String REALM = "EXAMPLE.COM";
 
     @Mock
     private StackV4Endpoint stackV4Endpoint;
-
-    @Mock
-    private FreeIpaService freeIpaService;
 
     @InjectMocks
     private ClusterService underTest;
@@ -134,105 +125,55 @@ class ClusterServiceTest {
     }
 
     @Test
-    void updateTrustedRealmsOnClustersWithEnvironmentDtoSendsTrustedRealm() {
-        EnvironmentDto environmentDto = buildEnvironmentDto(ENV_CRN, EnvironmentType.PUBLIC_CLOUD);
-        StackViewV4Responses responses = buildStackViewV4Responses(
-                stackView(STACK_CRN_1, Status.AVAILABLE, StackType.WORKLOAD)
-        );
-        when(stackV4Endpoint.list(0L, ENV_CRN, false)).thenReturn(responses);
-        when(freeIpaService.describe(ENV_CRN)).thenReturn(Optional.of(describeFreeIpaResponse(TRUSTED_REALM)));
-        when(stackV4Endpoint.getClusterServiceConfiguration(anyLong(), any(), any())).thenReturn(new ClusterServiceConfigurationResponse());
-
-        underTest.updateTrustedRealmsOnClusters(Optional.of(environmentDto));
-
-        ArgumentCaptor<UpdateClusterServiceConfigurationRequest> captor =
-                ArgumentCaptor.forClass(UpdateClusterServiceConfigurationRequest.class);
-        verify(stackV4Endpoint).updateClusterServiceConfiguration(eq(0L), eq(STACK_CRN_1), captor.capture());
-        UpdateClusterServiceConfigurationRequest request = captor.getValue();
-        assertThat(request.getServiceConfigurations()).hasSize(1);
-        assertThat(request.getServiceConfigurations().get(0).getServiceName()).isEqualTo("core_settings");
-        assertThat(request.getServiceConfigurations().get(0).getConfigName()).isEqualTo("trusted_realms");
-        assertThat(request.getServiceConfigurations().get(0).getValue()).isEqualTo(TRUSTED_REALM);
-    }
-
-    @Test
-    void updateTrustedRealmsOnClustersWithEmptyOptionalUsesPublicCloudType() {
-        StackViewV4Responses responses = buildStackViewV4Responses(
-                stackView(STACK_CRN_1, Status.AVAILABLE, StackType.WORKLOAD)
-        );
-        when(freeIpaService.describe(null)).thenReturn(Optional.empty());
-
-        assertThrows(CloudbreakServiceException.class, () -> underTest.updateTrustedRealmsOnClusters(Optional.empty()));
-
-        verify(stackV4Endpoint, never()).updateClusterServiceConfiguration(eq(0L), eq(STACK_CRN_1), any());
-    }
-
-    @Test
-    void updateTrustedRealmsOnClustersWithNoFreeIpaSendsNullRealm() {
-        EnvironmentDto environmentDto = buildEnvironmentDto(ENV_CRN, EnvironmentType.PUBLIC_CLOUD);
-        StackViewV4Responses responses = buildStackViewV4Responses(
-                stackView(STACK_CRN_1, Status.AVAILABLE, StackType.WORKLOAD)
-        );
-        when(freeIpaService.describe(ENV_CRN)).thenReturn(Optional.empty());
-
-        assertThrows(CloudbreakServiceException.class, () -> underTest.updateTrustedRealmsOnClusters(Optional.of(environmentDto)));
-
-        ArgumentCaptor<UpdateClusterServiceConfigurationRequest> captor =
-                ArgumentCaptor.forClass(UpdateClusterServiceConfigurationRequest.class);
-        verify(stackV4Endpoint, never()).updateClusterServiceConfiguration(eq(0L), eq(STACK_CRN_1), captor.capture());
-    }
-
-    @Test
-    void updateTrustedRealmsOnClustersSkipsInoperableStacks() {
-        EnvironmentDto environmentDto = buildEnvironmentDto(ENV_CRN, EnvironmentType.PUBLIC_CLOUD);
-        StackViewV4Responses responses = buildStackViewV4Responses(
-                stackView(STACK_CRN_1, Status.STOPPED, StackType.WORKLOAD),
-                stackView(STACK_CRN_2, Status.DELETE_IN_PROGRESS, StackType.WORKLOAD)
-        );
-        when(stackV4Endpoint.list(0L, ENV_CRN, false)).thenReturn(responses);
-        when(freeIpaService.describe(ENV_CRN)).thenReturn(Optional.of(describeFreeIpaResponse(TRUSTED_REALM)));
-
-        underTest.updateTrustedRealmsOnClusters(Optional.of(environmentDto));
-
-        verify(stackV4Endpoint, never()).updateClusterServiceConfiguration(anyLong(), any(), any());
-    }
-
-    @Test
-    void updateTrustedRealmsOnClustersUpdatesMultipleStacks() {
-        EnvironmentDto environmentDto = buildEnvironmentDto(ENV_CRN, EnvironmentType.PUBLIC_CLOUD);
+    void removeTrustedRealmConfigFromClustersCallsTriggerUpdateWithRemoveTrue() {
+        EnvironmentDto environmentDto = environmentDto(ENV_CRN, EnvironmentType.PUBLIC_CLOUD);
         StackViewV4Responses responses = buildStackViewV4Responses(
                 stackView(STACK_CRN_1, Status.AVAILABLE, StackType.WORKLOAD),
                 stackView(STACK_CRN_2, Status.AVAILABLE, StackType.WORKLOAD)
         );
         when(stackV4Endpoint.list(0L, ENV_CRN, false)).thenReturn(responses);
-        when(freeIpaService.describe(ENV_CRN)).thenReturn(Optional.of(describeFreeIpaResponse(TRUSTED_REALM)));
-        when(stackV4Endpoint.getClusterServiceConfiguration(anyLong(), any(), any())).thenReturn(new ClusterServiceConfigurationResponse());
-        underTest.updateTrustedRealmsOnClusters(Optional.of(environmentDto));
+        FlowIdentifier flow1 = new FlowIdentifier(FlowType.FLOW, "f1");
+        FlowIdentifier flow2 = new FlowIdentifier(FlowType.FLOW, "f2");
+        when(stackV4Endpoint.triggerUpdateTrustedRealm(eq(0L), eq(STACK_CRN_1), any())).thenReturn(flow1);
+        when(stackV4Endpoint.triggerUpdateTrustedRealm(eq(0L), eq(STACK_CRN_2), any())).thenReturn(flow2);
 
-        verify(stackV4Endpoint, times(1)).updateClusterServiceConfiguration(eq(0L), eq(STACK_CRN_1), any());
-        verify(stackV4Endpoint, times(1)).updateClusterServiceConfiguration(eq(0L), eq(STACK_CRN_2), any());
+        List<FlowIdentifier> result = underTest.removeTrustedRealmConfigFromClusters(Optional.of(environmentDto), REALM);
+
+        assertThat(result).containsExactlyInAnyOrder(flow1, flow2);
+        ArgumentCaptor<UpdateTrustedRealmRequest> captor = ArgumentCaptor.forClass(UpdateTrustedRealmRequest.class);
+        verify(stackV4Endpoint).triggerUpdateTrustedRealm(eq(0L), eq(STACK_CRN_1), captor.capture());
+        UpdateTrustedRealmRequest captured = captor.getValue();
+        assertThat(captured.getRealm()).isEqualTo(REALM);
+        assertThat(captured.isRemove()).isTrue();
     }
 
     @Test
-    void updateTrustedRealmsOnClustersForHybridSkipsDatalakeStacks() {
-        EnvironmentDto environmentDto = buildEnvironmentDto(ENV_CRN, EnvironmentType.HYBRID);
-        StackViewV4Responses responses = buildStackViewV4Responses(
-                stackView(STACK_CRN_1, Status.AVAILABLE, StackType.WORKLOAD),
-                stackView(STACK_CRN_2, Status.AVAILABLE, StackType.DATALAKE)
-        );
-        when(stackV4Endpoint.list(0L, ENV_CRN, false)).thenReturn(responses);
-        when(freeIpaService.describe(ENV_CRN)).thenReturn(Optional.of(describeFreeIpaResponse(TRUSTED_REALM)));
-        when(stackV4Endpoint.getClusterServiceConfiguration(anyLong(), any(), any())).thenReturn(new ClusterServiceConfigurationResponse());
+    void removeTrustedRealmConfigFromClustersReturnsEmptyWhenNoAvailableStacks() {
+        EnvironmentDto environmentDto = environmentDto(ENV_CRN, EnvironmentType.PUBLIC_CLOUD);
+        when(stackV4Endpoint.list(0L, ENV_CRN, false)).thenReturn(buildStackViewV4Responses());
 
-        underTest.updateTrustedRealmsOnClusters(Optional.of(environmentDto));
+        List<FlowIdentifier> result = underTest.removeTrustedRealmConfigFromClusters(Optional.of(environmentDto), REALM);
 
-        verify(stackV4Endpoint, times(1)).updateClusterServiceConfiguration(eq(0L), eq(STACK_CRN_1), any());
-        verify(stackV4Endpoint, never()).updateClusterServiceConfiguration(eq(0L), eq(STACK_CRN_2), any());
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    void removeTrustedRealmConfigFromClustersReturnsEmptyWhenEnvironmentDtoIsAbsent() {
+        List<FlowIdentifier> result = underTest.removeTrustedRealmConfigFromClusters(Optional.empty(), REALM);
+
+        assertThat(result).isEmpty();
+    }
+
+    private EnvironmentDto environmentDto(String crn, EnvironmentType type) {
+        EnvironmentDto dto = new EnvironmentDto();
+        dto.setResourceCrn(crn);
+        dto.setEnvironmentType(type);
+        return dto;
     }
 
     private StackViewV4Responses buildStackViewV4Responses(StackViewV4Response... stacks) {
         StackViewV4Responses responses = new StackViewV4Responses();
-        responses.setResponses(java.util.Arrays.asList(stacks));
+        responses.setResponses(Arrays.asList(stacks));
         return responses;
     }
 
@@ -247,21 +188,4 @@ class ClusterServiceTest {
         stack.setStatus(clusterStatus);
         return stack;
     }
-
-    private EnvironmentDto buildEnvironmentDto(String resourceCrn, EnvironmentType environmentType) {
-        EnvironmentDto dto = new EnvironmentDto();
-        dto.setResourceCrn(resourceCrn);
-        dto.setEnvironmentType(environmentType);
-        return dto;
-    }
-
-    private DescribeFreeIpaResponse describeFreeIpaResponse(String realm) {
-        TrustResponse trustResponse = new TrustResponse();
-        trustResponse.setRealm(realm);
-
-        DescribeFreeIpaResponse response = new DescribeFreeIpaResponse();
-        response.setTrust(trustResponse);
-        return response;
-    }
 }
-
