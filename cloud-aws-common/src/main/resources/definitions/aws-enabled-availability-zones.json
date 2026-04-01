@@ -182,14 +182,6 @@
       ]
     },
     {
-      "name": "me-south-1",
-      "zones": [
-        "me-south-1a",
-        "me-south-1b",
-        "me-south-1c"
-      ]
-    },
-    {
       "name": "me-central-1",
       "zones": [
         "me-central-1a",
