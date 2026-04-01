@@ -169,6 +169,37 @@ class MinionAcceptorTest {
         assertThrows(CloudbreakOrchestratorFailedException.class, underTest::acceptMinions);
     }
 
+    @Test
+    void testNonMatchingFringerprint() throws CloudbreakOrchestratorFailedException {
+        MinionKeysOnMasterResponse keysOnMasterResponse = mock(MinionKeysOnMasterResponse.class);
+        MinionFingersOnMasterResponse fingersOnMasterResponse = mock(MinionFingersOnMasterResponse.class);
+        FingerprintFromSbCollector fingerprintCollector = mock(FingerprintFromSbCollector.class);
+        FingerprintsResponse fingerprintsResponse = mock(FingerprintsResponse.class);
+
+        Minion m1 = new Minion();
+        m1.setHostName("m1");
+        m1.setDomain("d");
+        m1.setAddress("1.2.3.4");
+        Minion m2 = new Minion();
+        m2.setHostName("m2");
+        m2.setDomain("d");
+
+        when(keysOnMasterResponse.getAllMinions()).thenReturn(List.of("m2.d", "m1.d"));
+        when(keysOnMasterResponse.getUnacceptedMinions()).thenReturn(List.of("m1.d"));
+        when(fingersOnMasterResponse.getUnacceptedMinions()).thenReturn(Map.of("m1.d", "finger1"));
+        when(sc.wheel(eq("key.list_all"), isNull(), eq(MinionKeysOnMasterResponse.class))).thenReturn(keysOnMasterResponse);
+        when(sc.wheel(eq("key.finger"), anyCollection(), eq(MinionFingersOnMasterResponse.class))).thenReturn(fingersOnMasterResponse);
+        Fingerprint fingerprint = new Fingerprint();
+        fingerprint.setAddress("1.2.3.4");
+        fingerprint.setFingerprint("different");
+        when(fingerprintsResponse.getFingerprints()).thenReturn(List.of(fingerprint));
+        when(fingerprintCollector.collectFingerprintFromMinions(eq(sc), argThat(arg -> arg.containsAll(List.of(m1))))).thenReturn(fingerprintsResponse);
+
+        MinionAcceptor underTest = new MinionAcceptor(List.of(sc), List.of(m1, m2), new EqualMinionFpMatcher(), fingerprintCollector);
+
+        assertThrows(CloudbreakOrchestratorFailedException.class, underTest::acceptMinions);
+    }
+
     private static List<List<String>> testAllMinionsAcceptedWithMatchingFingerprintParams() {
         return List.of(
                 // Same saltboot https setting on all nodes
@@ -205,13 +236,13 @@ class MinionAcceptorTest {
 
         Fingerprint fp1 = new Fingerprint();
         fp1.setFingerprint("finger1");
-        fp1.setAddress("1.1.1.1" + ports.get(0));
+        fp1.setAddress("1.1.1.1:" + ports.get(0));
         Fingerprint fp2 = new Fingerprint();
         fp2.setFingerprint("finger2");
-        fp2.setAddress("1.1.1.2" + ports.get(1));
+        fp2.setAddress("1.1.1.2:" + ports.get(1));
         Fingerprint fp3 = new Fingerprint();
         fp3.setFingerprint("badFinger");
-        fp3.setAddress("1.1.1.3" + ports.get(2));
+        fp3.setAddress("1.1.1.3:" + ports.get(2));
 
         when(keysOnMasterResponse.getAllMinions()).thenReturn(List.of("m2.d", "m1.d", "m3.d", "m4.d"));
         when(keysOnMasterResponse.getUnacceptedMinions()).thenReturn(List.of("m2.d", "m1.d", "m3.d"));
@@ -223,9 +254,7 @@ class MinionAcceptorTest {
 
         MinionAcceptor underTest = spy(new MinionAcceptor(List.of(sc), List.of(m1, m2, m3, m4),  new EqualMinionFpMatcher(), fingerprintCollector));
 
-        underTest.acceptMinions();
-
-        verify(sc).wheel(eq("key.accept"), argThat(arg -> arg.containsAll(List.of("m2.d", "m1.d"))), eq(Object.class));
+        assertThrows(CloudbreakOrchestratorFailedException.class, underTest::acceptMinions);
     }
 
     @Test

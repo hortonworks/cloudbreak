@@ -118,12 +118,17 @@ public class MinionAcceptor {
     }
 
     private void acceptMatchingFingerprints(SaltConnector sc, Map<String, String> fingerprintsFromMaster, FingerprintsResponse fingerprintsResponse,
-            List<Minion> minions) {
+            List<Minion> minions) throws CloudbreakOrchestratorFailedException {
         Map<String, String> fingerprintByMinion = mapFingerprintByMinion(fingerprintsResponse, minions);
         List<String> minionsToAccept = fingerprintMatcher.collectMinionsWithMatchingFp(fingerprintsFromMaster, fingerprintByMinion);
         LOGGER.info("Following minions will be accepted: {}", minionsToAccept);
         if (!minionsToAccept.isEmpty()) {
             sc.wheel("key.accept", minionsToAccept, Object.class);
+        }
+        List<Minion> minionsNotAccepted = minions.stream().filter(minion -> !minionsToAccept.contains(minion.getId())).toList();
+        if (!minionsNotAccepted.isEmpty()) {
+            LOGGER.warn("Not all minions can be accepted, as their fingerprint is different: {}", minionsNotAccepted);
+            throw new CloudbreakOrchestratorFailedException("Not all minions can be accepted, as their fingerprint is different: " + minionsNotAccepted);
         }
     }
 
