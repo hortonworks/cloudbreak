@@ -2,6 +2,7 @@ package com.sequenceiq.freeipa.service.freeipa.trust.setup;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -26,6 +27,7 @@ import com.sequenceiq.cloudbreak.common.type.KdcType;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorStateParams;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
+import com.sequenceiq.common.api.type.EnvironmentType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.commands.ActiveDirectoryTrustSetupCommands;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.commands.BaseClusterTrustSetupCommands;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.commands.TrustSetupCommandsResponse;
@@ -37,6 +39,7 @@ import com.sequenceiq.freeipa.entity.CrossRealmTrust;
 import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.LoadBalancer;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.service.EnvironmentService;
 import com.sequenceiq.freeipa.service.crossrealm.CrossRealmTrustService;
 import com.sequenceiq.freeipa.service.crossrealm.TrustCommandType;
 import com.sequenceiq.freeipa.service.crossrealm.commands.activedirectory.ActiveDirectoryBaseClusterTrustCommandsBuilder;
@@ -97,8 +100,12 @@ class ActiveDirectoryTrustServiceTest {
     @Mock
     private ActiveDirectoryBaseClusterTrustCommandsBuilder activeDirectoryBaseClusterTrustCommandsBuilder;
 
+    @Mock
+    private EnvironmentService environmentService;
+
     @Test
     void returnsCommandsResponseWithADExpectedFields() {
+        String environmentCrn = "env-crn";
         Stack stack = mock(Stack.class);
         FreeIpa freeIpa = mock(FreeIpa.class);
         LoadBalancer loadBalancer = mock(LoadBalancer.class);
@@ -109,14 +116,37 @@ class ActiveDirectoryTrustServiceTest {
                 .thenReturn(activeDirectoryTrustSetupCommands);
         when(activeDirectoryBaseClusterTrustCommandsBuilder.buildBaseClusterCommands(stack, TrustCommandType.SETUP, freeIpa, crossRealmTrust, loadBalancer))
                 .thenReturn(baseClusterTrustSetupCommands);
+        when(environmentService.getEnvironmentType(environmentCrn)).thenReturn(EnvironmentType.HYBRID);
 
-        TrustSetupCommandsResponse response = underTest.buildTrustSetupCommandsResponse(TrustCommandType.SETUP, "env-crn", stack, freeIpa,
+        TrustSetupCommandsResponse response = underTest.buildTrustSetupCommandsResponse(TrustCommandType.SETUP, environmentCrn, stack, freeIpa,
                 crossRealmTrust, loadBalancer);
 
-        assertEquals("env-crn", response.getEnvironmentCrn());
+        assertEquals(environmentCrn, response.getEnvironmentCrn());
         assertEquals(KdcType.ACTIVE_DIRECTORY.name(), response.getKdcType());
         assertEquals(activeDirectoryTrustSetupCommands, response.getActiveDirectoryCommands());
         assertEquals(baseClusterTrustSetupCommands, response.getBaseClusterCommands());
+    }
+
+    @Test
+    void returnsCommandsResponseWithADExpectedFieldsForPublicCloudEnv() {
+        String environmentCrn = "env-crn";
+        Stack stack = mock(Stack.class);
+        FreeIpa freeIpa = mock(FreeIpa.class);
+        LoadBalancer loadBalancer = mock(LoadBalancer.class);
+        CrossRealmTrust crossRealmTrust = mock(CrossRealmTrust.class);
+        ActiveDirectoryTrustSetupCommands activeDirectoryTrustSetupCommands = new ActiveDirectoryTrustSetupCommands();
+        BaseClusterTrustSetupCommands baseClusterTrustSetupCommands = new BaseClusterTrustSetupCommands();
+        when(activeDirectoryTrustInstructionsBuilder.buildInstructions(TrustCommandType.SETUP, stack, freeIpa, crossRealmTrust))
+                .thenReturn(activeDirectoryTrustSetupCommands);
+        when(environmentService.getEnvironmentType(environmentCrn)).thenReturn(EnvironmentType.PUBLIC_CLOUD);
+
+        TrustSetupCommandsResponse response = underTest.buildTrustSetupCommandsResponse(TrustCommandType.SETUP, environmentCrn, stack, freeIpa,
+                crossRealmTrust, loadBalancer);
+
+        assertEquals(environmentCrn, response.getEnvironmentCrn());
+        assertEquals(KdcType.ACTIVE_DIRECTORY.name(), response.getKdcType());
+        assertEquals(activeDirectoryTrustSetupCommands, response.getActiveDirectoryCommands());
+        assertNull(response.getBaseClusterCommands());
     }
 
     @Test

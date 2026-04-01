@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.type.KdcType;
 import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorStateParams;
+import com.sequenceiq.common.api.type.EnvironmentType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.commands.ActiveDirectoryTrustSetupCommands;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.commands.TrustSetupCommandsResponse;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
@@ -25,6 +26,7 @@ import com.sequenceiq.freeipa.entity.CrossRealmTrust;
 import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.LoadBalancer;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.service.EnvironmentService;
 import com.sequenceiq.freeipa.service.crossrealm.TrustCommandType;
 import com.sequenceiq.freeipa.service.crossrealm.commands.activedirectory.ActiveDirectoryBaseClusterTrustCommandsBuilder;
 import com.sequenceiq.freeipa.service.crossrealm.commands.activedirectory.ActiveDirectoryTrustInstructionsBuilder;
@@ -39,6 +41,9 @@ public class ActiveDirectoryTrustService extends TrustProvider {
 
     @Inject
     private ActiveDirectoryBaseClusterTrustCommandsBuilder activeDirectoryBaseClusterTrustCommandsBuilder;
+
+    @Inject
+    private EnvironmentService environmentService;
 
     @Override
     public KdcType kdcType() {
@@ -99,12 +104,15 @@ public class ActiveDirectoryTrustService extends TrustProvider {
     @Override
     public TrustSetupCommandsResponse buildTrustSetupCommandsResponse(TrustCommandType trustCommandType, String environmentCrn, Stack stack, FreeIpa freeIpa,
             CrossRealmTrust crossRealmTrust, LoadBalancer loadBalancer) {
+        EnvironmentType environmentType = environmentService.getEnvironmentType(environmentCrn);
         TrustSetupCommandsResponse response = new TrustSetupCommandsResponse();
         response.setEnvironmentCrn(environmentCrn);
         response.setKdcType(kdcType().name());
         response.setActiveDirectoryCommands(activeDirectoryTrustInstructionsBuilder.buildInstructions(trustCommandType, stack, freeIpa, crossRealmTrust));
-        response.setBaseClusterCommands(activeDirectoryBaseClusterTrustCommandsBuilder.buildBaseClusterCommands(stack, trustCommandType, freeIpa,
-                crossRealmTrust, loadBalancer));
+        if (environmentType != EnvironmentType.PUBLIC_CLOUD) {
+            response.setBaseClusterCommands(activeDirectoryBaseClusterTrustCommandsBuilder.buildBaseClusterCommands(stack, trustCommandType, freeIpa,
+                    crossRealmTrust, loadBalancer));
+        }
         return response;
     }
 }
