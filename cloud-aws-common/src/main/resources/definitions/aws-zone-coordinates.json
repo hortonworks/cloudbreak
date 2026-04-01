@@ -222,15 +222,6 @@
       "cdpSupportedServices": [ "ALL" ]
     },
     {
-      "name": "me-south-1",
-      "displayName": "Middle East (Bahrain)",
-      "latitude": "25.563633",
-      "longitude": "50.36539",
-      "k8sSupported": true,
-      "defaultArmDbVmtype": "db.m7g.large",
-      "cdpSupportedServices": [ "ENVIRONMENT", "DATAHUB" ]
-    },
-    {
       "name": "me-central-1",
       "displayName": "Middle East (UAE)",
       "latitude": "23.4241",
