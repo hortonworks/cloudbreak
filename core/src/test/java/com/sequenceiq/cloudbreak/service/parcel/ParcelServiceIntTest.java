@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 
+import jakarta.ws.rs.ProcessingException;
 import jakarta.ws.rs.client.Client;
 import jakarta.ws.rs.client.Invocation;
 import jakarta.ws.rs.client.WebTarget;
@@ -37,11 +38,12 @@ import com.sequenceiq.cloudbreak.service.upgrade.sync.component.ImageReaderServi
 @SpringBootTest
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {ParcelService.class})
-@TestPropertySource(properties = {"cb.parcel.retry.maxAttempts=5", "cb.parcel.retry.backOffDelay=5",
-        "cb.parcel.retry.backOffMultiplier=2"})
+@TestPropertySource(properties = {"cb.parcel.retry.backOffDelay=5"})
 public class ParcelServiceIntTest {
 
     private static final String ARCHIVE_PARCEL = "https://archive.cloudera.com/parcel";
+
+    private static final String NON_ARCHIVE_PARCEL = "https://example.com/parcel";
 
     private static final String ERROR_MESSAGE = "Failed to fetch the head";
 
@@ -87,71 +89,45 @@ public class ParcelServiceIntTest {
     }
 
     @Test
-    void testGetHeadResponseForParcelShouldReturnResponseForNonRetryableStatus() {
-        setUpMocks(0, null, List.of(200));
+    void testGetHeadResponseForParcelShouldReturnResponseWithoutRetry() {
+        setUpMocks(ARCHIVE_PARCEL, 0, null, List.of(200));
         Response actual = underTest.getHeadResponseForParcel(ARCHIVE_PARCEL);
-        assertEquals(actual.getStatus(), 200);
+        assertEquals(200, actual.getStatus());
         verify(restClientFactory, times(1)).getOrCreateWithFollowRedirects();
     }
 
     @Test
-    void testGetHeadResponseForParcelShouldReturnResponseAfterRetryWithRetryableStatus() {
-        setUpMocks(0, null, List.of(403, 403, 200));
+    void testGetHeadResponseForParcelShouldRetryOnProcessingException() {
+        setUpMocks(ARCHIVE_PARCEL, 2, new ProcessingException(ERROR_MESSAGE), List.of(200));
         Response actual = underTest.getHeadResponseForParcel(ARCHIVE_PARCEL);
-        assertEquals(actual.getStatus(), 200);
+        assertEquals(200, actual.getStatus());
         verify(restClientFactory, times(3)).getOrCreateWithFollowRedirects();
     }
 
     @Test
-    void testGetHeadResponseForParcelShouldReturnResponseAfterRetryWithRetryableAndNonTryableStatus() {
-        setUpMocks(0, null, List.of(403, 403, 404, 200));
-        Response actual = underTest.getHeadResponseForParcel(ARCHIVE_PARCEL);
-        assertEquals(actual.getStatus(), 404);
+    void testGetHeadResponseForParcelShouldThrowExceptionAfterRetriesExhausted() {
+        setUpMocks(ARCHIVE_PARCEL, 3, new ProcessingException(ERROR_MESSAGE), List.of());
+        assertThrows(ProcessingException.class, () -> underTest.getHeadResponseForParcel(ARCHIVE_PARCEL));
         verify(restClientFactory, times(3)).getOrCreateWithFollowRedirects();
     }
 
     @Test
-    void testGetHeadResponseForParcelShouldReturnResponseAfterMaxRetryWithRetryableStatus() {
-        setUpMocks(0, null, List.of(403, 403, 403, 403, 200));
-        Response actual = underTest.getHeadResponseForParcel(ARCHIVE_PARCEL);
-        assertEquals(actual.getStatus(), 200);
-        verify(restClientFactory, times(5)).getOrCreateWithFollowRedirects();
+    void testGetHeadResponseForParcelShouldNotRetryForNonArchiveUrl() {
+        setUpMocks(NON_ARCHIVE_PARCEL, 1, new ProcessingException(ERROR_MESSAGE), List.of());
+        assertThrows(ProcessingException.class, () -> underTest.getHeadResponseForParcel(NON_ARCHIVE_PARCEL));
+        verify(restClientFactory, times(1)).getOrCreateWithFollowRedirects();
     }
 
-    @Test
-    void testGetHeadResponseForParcelShouldThrowExceptionAfterRetryExhaustedWithRetryableStatus() {
-        setUpMocks(0, null, List.of(403, 403, 403, 403, 403, 200));
-        Response actual = underTest.getHeadResponseForParcel(ARCHIVE_PARCEL);
-        assertEquals(actual.getStatus(), 403);
-        verify(restClientFactory, times(5)).getOrCreateWithFollowRedirects();
-    }
-
-    @Test
-    void testGetHeadResponseForParcelShouldReturnResponseAfterRetryWithException() {
-        setUpMocks(4, new RuntimeException(ERROR_MESSAGE), List.of(200));
-        Response actual = underTest.getHeadResponseForParcel(ARCHIVE_PARCEL);
-        assertEquals(actual.getStatus(), 200);
-        verify(restClientFactory, times(5)).getOrCreateWithFollowRedirects();
-    }
-
-    @Test
-    void testGetHeadResponseForParcelThrowsExceptionAfterRetryExhaustedWithException() {
-        setUpMocks(5, new RuntimeException(ERROR_MESSAGE), List.of(200));
-        RuntimeException runtimeException = assertThrows(RuntimeException.class, () -> underTest.getHeadResponseForParcel(ARCHIVE_PARCEL));
-        assertEquals(runtimeException.getMessage(), ERROR_MESSAGE);
-        verify(restClientFactory, times(5)).getOrCreateWithFollowRedirects();
-    }
-
-    private void setUpMocks(int exceptionCount, Exception e, List<Integer> statuses) {
+    private void setUpMocks(String url, int exceptionCount, Exception e, List<Integer> statuses) {
         WebTarget webTarget = mock(WebTarget.class);
         Invocation.Builder request = mock(Invocation.Builder.class);
-        when(client.target(ARCHIVE_PARCEL)).thenReturn(webTarget);
+        when(client.target(url)).thenReturn(webTarget);
         when(webTarget.request()).thenReturn(request);
         OngoingStubbing<Response> ongoingStubbing = null;
         while (exceptionCount-- > 0) {
             ongoingStubbing = (ongoingStubbing == null) ? when(request.head()).thenThrow(e) : ongoingStubbing.thenThrow(e);
         }
-        for (int status :statuses) {
+        for (int status : statuses) {
             Response response = Response.status(status).build();
             ongoingStubbing = (ongoingStubbing == null) ? when(request.head()).thenReturn(response) : ongoingStubbing.thenReturn(response);
         }
