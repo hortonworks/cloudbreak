@@ -1,0 +1,50 @@
+{
+  "name": "7.3.2 - Data Visualization for AZURE",
+  "description": "",
+  "type": "DATAVIZ",
+  "featureState": "PREVIEW",
+  "cloudPlatform": "AZURE",
+  "distroXTemplate": {
+    "cluster": {
+      "blueprintName": "7.3.2 - Data Visualization"
+    },
+    "instanceGroups": [
+      {
+        "name": "master",
+        "template": {
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 100,
+              "type": "StandardSSD_LRS"
+            }
+          ],
+          "instanceType": "Standard_E8ds_v5"
+        },
+        "nodeCount": 1,
+        "type": "GATEWAY",
+        "recoveryMode": "MANUAL"
+      },
+      {
+        "name": "coordinator",
+        "template": {
+          "attachedVolumes": [],
+          "instanceType": "Standard_E16ds_v5"
+        },
+        "nodeCount": 1,
+        "type": "CORE",
+        "recoveryMode": "MANUAL"
+      },
+      {
+        "name": "executor",
+        "template": {
+          "attachedVolumes": [],
+          "instanceType": "Standard_E16ds_v5"
+        },
+        "nodeCount": 2,
+        "type": "CORE",
+        "recoveryMode": "MANUAL"
+      }
+    ]
+  }
+}

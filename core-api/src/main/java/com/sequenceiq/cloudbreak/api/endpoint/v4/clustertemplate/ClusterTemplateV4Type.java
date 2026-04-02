@@ -20,6 +20,7 @@ public enum ClusterTemplateV4Type {
     OTHER,
     DLM,
     LAKEHOUSE_OPTIMIZER,
+    DATAVIZ,
     HYBRID_DATAENGINEERING_HA,
     HYBRID_STREAMING,
     HYBRID_DATAMART;

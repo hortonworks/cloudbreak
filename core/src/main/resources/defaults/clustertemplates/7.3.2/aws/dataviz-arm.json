@@ -1,0 +1,59 @@
+{
+  "name": "7.3.2 - Data Visualization (ARM) for AWS",
+  "description": "",
+  "type": "DATAVIZ",
+  "featureState": "PREVIEW",
+  "cloudPlatform": "AWS",
+  "distroXTemplate": {
+    "cluster": {
+      "blueprintName": "7.3.2 - Data Visualization"
+    },
+    "instanceGroups": [
+      {
+        "name": "master",
+        "template": {
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 100,
+              "type": "standard"
+            }
+          ],
+          "instanceType": "r7gd.2xlarge"
+        },
+        "nodeCount": 1,
+        "type": "GATEWAY"
+      },
+      {
+        "name": "coordinator",
+        "template": {
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 950,
+              "type": "ephemeral"
+            }
+          ],
+          "instanceType": "r7gd.4xlarge"
+        },
+        "nodeCount": 1,
+        "type": "CORE"
+      },
+      {
+        "name": "executor",
+        "template": {
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 950,
+              "type": "ephemeral"
+            }
+          ],
+          "instanceType": "r7gd.4xlarge"
+        },
+        "nodeCount": 2,
+        "type": "CORE"
+      }
+    ]
+  }
+}

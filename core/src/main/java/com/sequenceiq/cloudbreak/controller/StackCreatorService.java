@@ -62,6 +62,7 @@ import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionEx
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
+import com.sequenceiq.cloudbreak.controller.validation.stack.StackBlueprintValidator;
 import com.sequenceiq.cloudbreak.controller.validation.stack.StackCreationRuntimeVersionValidator;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.StackToStackV4ResponseConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.StackV4RequestToStackConverter;
@@ -198,6 +199,9 @@ public class StackCreatorService {
     @Inject
     private SeLinuxValidationService seLinuxValidationService;
 
+    @Inject
+    private StackBlueprintValidator stackBlueprintValidator;
+
     public StackV4Response createStack(User user, Workspace workspace, StackV4Request stackRequest, boolean distroxRequest) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         long start = System.currentTimeMillis();
@@ -297,7 +301,7 @@ public class StackCreatorService {
                 securityConfigService.validateRequest(stackRequest.getSecurity(), accountId);
                 securityConfigService.create(stack, stackRequest.getSecurity());
                 seLinuxValidationService.validateSeLinuxSupportedOnTargetImage(stack, imgFromCatalog.getImage());
-
+                stackBlueprintValidator.validateComponentsByRuntime(stackRequest, stack, imgFromCatalog.getImage());
                 try {
                     LOGGER.info("Create cluster entity in the database with name {}.", stackName);
                     long clusterSaveStart = System.currentTimeMillis();
