@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cm.polling.task;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -13,6 +14,7 @@ import static org.mockito.Mockito.when;
 import java.net.ConnectException;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,6 +25,7 @@ import org.springframework.http.HttpStatus;
 import com.cloudera.api.swagger.CommandsResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
+import com.cloudera.api.swagger.model.ApiCommand;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterEventService;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiPojoFactory;
@@ -155,5 +158,63 @@ class AbstractClouderaManagerCommandCheckerTaskTest {
         underTest.checkStatus(pollerObject);
 
         verify(clusterEventService, times(1)).fireCloudbreakEvent(any(), any(), anyList());
+    }
+
+    @Test
+    void testHandleTimeoutWithoutKnownTimeoutAndNoCommandDetails() throws ApiException {
+        Stack stack = new Stack();
+        Long id = ID;
+        ClouderaManagerCommandPollerObject pollerObject = new ClouderaManagerCommandPollerObject(stack, apiClient, id);
+        ApiCommand apiCommand = new ApiCommand().active(false).success(false).id(id);
+        when(commandsResourceApi.readCommand(id)).thenReturn(apiCommand);
+
+        ClouderaManagerOperationFailedException ex = assertThrows(ClouderaManagerOperationFailedException.class,
+                () -> underTest.handleTimeout(pollerObject));
+
+        assertThat(ex.getMessage())
+                .contains("decommission host")
+                .contains("command id: " + ID)
+                .doesNotContain("Timeout limit");
+    }
+
+    @Test
+    void testHandleTimeoutIncludesTimeoutLimitAndCommandDetails() throws ApiException {
+        Stack stack = new Stack();
+        Long id = ID;
+        long timeoutSeconds = TimeUnit.MINUTES.toSeconds(30);
+        ClouderaManagerCommandPollerObject pollerObject = new ClouderaManagerCommandPollerObject(stack, apiClient, id, timeoutSeconds);
+        ApiCommand apiCommand = new ApiCommand()
+                .active(false)
+                .success(false)
+                .id(id)
+                .resultMessage("Service restart failed due to missing configuration");
+        when(commandsResourceApi.readCommand(id)).thenReturn(apiCommand);
+
+        ClouderaManagerOperationFailedException ex = assertThrows(ClouderaManagerOperationFailedException.class,
+                () -> underTest.handleTimeout(pollerObject));
+
+        assertThat(ex.getMessage())
+                .contains("decommission host")
+                .contains("command id: " + ID)
+                .contains("Timeout limit: 30 minutes")
+                .contains("Service restart failed due to missing configuration");
+    }
+
+    @Test
+    void testHandleTimeoutWhenCommandDetailsFetchFails() throws ApiException {
+        Stack stack = new Stack();
+        Long id = ID;
+        long timeoutSeconds = TimeUnit.MINUTES.toSeconds(60);
+        ClouderaManagerCommandPollerObject pollerObject = new ClouderaManagerCommandPollerObject(stack, apiClient, id, timeoutSeconds);
+        when(commandsResourceApi.readCommand(id)).thenThrow(new ApiException("CM unreachable"));
+
+        ClouderaManagerOperationFailedException ex = assertThrows(ClouderaManagerOperationFailedException.class,
+                () -> underTest.handleTimeout(pollerObject));
+
+        assertThat(ex.getMessage())
+                .contains("decommission host")
+                .contains("command id: " + ID)
+                .contains("Timeout limit: 60 minutes")
+                .doesNotContain("Please find more details");
     }
 }

@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,8 +52,23 @@ public abstract class AbstractClouderaManagerCommandCheckerTask<T extends Cloude
 
     @Override
     public void handleTimeout(ClouderaManagerCommandPollerObject pollerObject) {
-        throw new ClouderaManagerOperationFailedException(String.format("Operation timed out. Failed to execute command %s.",
-                getCommandName().toLowerCase(Locale.ROOT)));
+        String timeoutInfo = pollerObject.getTimeoutInSeconds() != ClouderaManagerCommandPollerObject.TIMEOUT_UNKNOWN
+                ? String.format(" Timeout limit: %d minutes.", TimeUnit.SECONDS.toMinutes(pollerObject.getTimeoutInSeconds()))
+                : "";
+        String msg = String.format("Operation timed out. Failed to execute command %s (command id: %d).%s",
+                getCommandName().toLowerCase(Locale.ROOT), pollerObject.getId(), timeoutInfo);
+        try {
+            CommandsResourceApi commandsResourceApi = clouderaManagerApiPojoFactory.getCommandsResourceApi(pollerObject.getApiClient());
+            ApiCommand apiCommand = commandsResourceApi.readCommand(pollerObject.getId());
+            List<CommandDetails> commandDetails = ClouderaManagerCommandUtil.getFailedOrActiveCommands(apiCommand, commandsResourceApi);
+            LOGGER.debug("Timed out command {}. Failed or active commands: {}", CommandDetails.fromApiCommand(apiCommand), commandDetails);
+            if (!commandDetails.isEmpty()) {
+                msg += " " + CommandDetailsFormatter.formatFailedCommands(commandDetails);
+            }
+        } catch (ApiException e) {
+            LOGGER.info("Unable to fetch command details for timed out command [{}] with id [{}]", getCommandName(), pollerObject.getId(), e);
+        }
+        throw new ClouderaManagerOperationFailedException(msg);
     }
 
     protected String getOperationIdentifier(T pollerObject) {

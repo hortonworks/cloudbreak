@@ -397,7 +397,8 @@ public class ClouderaManagerPollingServiceProvider {
 
     private ExtendedPollingResult pollCommandWithTimeListener(StackDtoDelegate stack, ApiClient apiClient, Long commandId, long maximumWaitTimeInSeconds,
             AbstractClouderaManagerCommandCheckerTask<ClouderaManagerCommandPollerObject> listenerTask) {
-        ClouderaManagerCommandPollerObject clouderaManagerCommandPollerObject = new ClouderaManagerCommandPollerObject(stack, apiClient, commandId);
+        ClouderaManagerCommandPollerObject clouderaManagerCommandPollerObject =
+                new ClouderaManagerCommandPollerObject(stack, apiClient, commandId, maximumWaitTimeInSeconds);
         return clouderaManagerCommandPollerObjectPollingService.pollWithAbsoluteTimeout(
                 listenerTask,
                 clouderaManagerCommandPollerObject,
