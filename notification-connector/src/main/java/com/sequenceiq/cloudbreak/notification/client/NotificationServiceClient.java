@@ -207,8 +207,7 @@ public class NotificationServiceClient {
         }, "delete distribution list", "name: " + name);
     }
 
-    public ListDistributionListsResponse
-    listDistributionLists(String resourceCrn) {
+    public ListDistributionListsResponse listDistributionLists(String resourceCrn) {
         return executeWithErrorHandling(() -> {
             ListDistributionListsRequest request =
                     ListDistributionListsRequest.newBuilder()

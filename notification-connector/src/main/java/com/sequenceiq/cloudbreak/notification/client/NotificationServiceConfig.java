@@ -20,7 +20,7 @@ public class NotificationServiceConfig {
     @Value("${thunderheadnotification.service.host:localhost}")
     private String host;
 
-    @Value("${thunderheadnotification.service.port:80}")
+    @Value("${thunderheadnotification.service.port:8982}")
     private int port;
 
     @Value("${thunderheadnotification.service.grpc.timeout.sec:120}")

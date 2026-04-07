@@ -97,6 +97,7 @@ dependencies {
     implementation project(':cluster-dns-connector')
     implementation project(':sdx-connector')
     implementation project(':auth-distributor-connector')
+    implementation project(':notification-connector')
     implementation project(':metering-connector')
     implementation project(':environment-public-api-client')
     implementation project(':servicediscovery-api-client')
