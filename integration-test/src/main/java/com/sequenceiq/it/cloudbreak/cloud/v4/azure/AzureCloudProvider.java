@@ -26,6 +26,7 @@ import com.sequenceiq.common.api.cloudstorage.old.AdlsCloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.AdlsGen2CloudStorageV1Parameters;
 import com.sequenceiq.common.api.cloudstorage.old.WasbCloudStorageV1Parameters;
 import com.sequenceiq.common.api.telemetry.request.LoggingRequest;
+import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.common.api.type.ServiceEndpointCreation;
 import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.common.model.FileSystemType;
@@ -631,5 +632,25 @@ public class AzureCloudProvider extends AbstractCloudProvider {
     @Override
     public String getFreeIpaInstanceType() {
         return azureProperties.getFreeipa().getInstanceType();
+    }
+
+    @Override
+    public ResourceType getRootDiskResourceType() {
+        return ResourceType.AZURE_DISK;
+    }
+
+    @Override
+    public String getDatahubCustomInstanceType() {
+        return azureProperties.getDatahubCustomInstanceType();
+    }
+
+    @Override
+    public String getAddDiskVolumeType() {
+        return verticalScaleVolumeType();
+    }
+
+    @Override
+    public String getModifyDiskVolumeType() {
+        return null;
     }
 }

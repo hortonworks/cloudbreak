@@ -19,6 +19,7 @@ import org.testng.annotations.Test;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
+import com.sequenceiq.it.cloudbreak.cloud.v4.CommonClusterManagerProperties;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -35,8 +36,8 @@ public class DistroXKraftMigrationTest extends AbstractE2EWithReusableResourcesT
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DistroXKraftMigrationTest.class);
 
-    private static final String STREAMS_MESSAGING_LIGHT_DUTY_TEMPLATE = "7.3.2 - Streams Messaging Light Duty: Apache Kafka, Schema Registry," +
-            " Streams Messaging Manager, Streams Replication Manager, Cruise Control";
+    @Inject
+    private CommonClusterManagerProperties commonClusterManagerProperties;
 
     @Inject
     private SdxTestClient sdxTestClient;
@@ -73,7 +74,7 @@ public class DistroXKraftMigrationTest extends AbstractE2EWithReusableResourcesT
     public void testKraftMigrationWithNodesInTemplate(TestContext testContext, ITestContext iTestContext) {
         testContext
                 .given(DistroXTestDto.class)
-                .withTemplate(STREAMS_MESSAGING_LIGHT_DUTY_TEMPLATE)
+                .withTemplate(commonClusterManagerProperties.getStreamsLDDistroXBlueprintName("7.3.2"))
                 .withInstanceGroupsEntity(DistroXInstanceGroupTestDto.streamsHostGroups(testContext, testContext.getCloudPlatform()))
                 .when(distroXTestClient.create())
                 .await(STACK_AVAILABLE)
@@ -98,7 +99,7 @@ public class DistroXKraftMigrationTest extends AbstractE2EWithReusableResourcesT
     public void testKraftMigrationRollback(TestContext testContext, ITestContext iTestContext) {
         testContext
                 .given(DistroXTestDto.class)
-                .withTemplate(STREAMS_MESSAGING_LIGHT_DUTY_TEMPLATE)
+                .withTemplate(commonClusterManagerProperties.getStreamsLDDistroXBlueprintName("7.3.2"))
                 .withInstanceGroupsEntity(DistroXInstanceGroupTestDto.streamsHostGroups(testContext, testContext.getCloudPlatform()))
                 .when(distroXTestClient.create())
                 .await(STACK_AVAILABLE)
@@ -131,7 +132,7 @@ public class DistroXKraftMigrationTest extends AbstractE2EWithReusableResourcesT
     public void testKraftMigrationFailAtUpscale(TestContext testContext, ITestContext iTestContext) {
         testContext
                 .given(DistroXTestDto.class)
-                .withTemplate(STREAMS_MESSAGING_LIGHT_DUTY_TEMPLATE)
+                .withTemplate(commonClusterManagerProperties.getStreamsLDDistroXBlueprintName("7.3.2"))
                 .withInstanceGroupsEntity(DistroXInstanceGroupTestDto.streamsHostGroups(testContext, testContext.getCloudPlatform()))
                 .when(distroXTestClient.create())
                 .await(STACK_AVAILABLE)

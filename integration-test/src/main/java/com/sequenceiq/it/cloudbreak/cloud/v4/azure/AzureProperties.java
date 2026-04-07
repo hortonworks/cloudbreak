@@ -45,6 +45,8 @@ public class AzureProperties {
 
     private String embeddedDbUpgradeSourceVersion;
 
+    private String datahubCustomInstanceType;
+
     public VerticalScaleProperties getVerticalScale() {
         return verticalScale;
     }
@@ -139,6 +141,14 @@ public class AzureProperties {
 
     public void setEmbeddedDbUpgradeSourceVersion(String embeddedDbUpgradeSourceVersion) {
         this.embeddedDbUpgradeSourceVersion = embeddedDbUpgradeSourceVersion;
+    }
+
+    public String getDatahubCustomInstanceType() {
+        return datahubCustomInstanceType;
+    }
+
+    public void setDatahubCustomInstanceType(String datahubCustomInstanceType) {
+        this.datahubCustomInstanceType = datahubCustomInstanceType;
     }
 
     public static class Credential {

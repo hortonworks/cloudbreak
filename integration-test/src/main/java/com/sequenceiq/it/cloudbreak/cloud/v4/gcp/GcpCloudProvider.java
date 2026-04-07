@@ -22,6 +22,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.ne
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.cloudstorage.old.GcsCloudStorageV1Parameters;
 import com.sequenceiq.common.api.telemetry.request.LoggingRequest;
+import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.InstanceTemplateV1Request;
@@ -552,5 +553,30 @@ public class GcpCloudProvider extends AbstractCloudProvider {
     @Override
     public String getFreeIpaInstanceType() {
         return gcpProperties.getFreeipa().getInstanceType();
+    }
+
+    @Override
+    public String verticalScaleVolumeType() {
+        return gcpProperties.getVerticalScale().getVolumeType();
+    }
+
+    @Override
+    public ResourceType getRootDiskResourceType() {
+        return ResourceType.GCP_DISK;
+    }
+
+    @Override
+    public String getDatahubCustomInstanceType() {
+        return gcpProperties.getDatahubCustomInstanceType();
+    }
+
+    @Override
+    public String getAddDiskVolumeType() {
+        return verticalScaleVolumeType();
+    }
+
+    @Override
+    public String getModifyDiskVolumeType() {
+        return verticalScaleVolumeType();
     }
 }

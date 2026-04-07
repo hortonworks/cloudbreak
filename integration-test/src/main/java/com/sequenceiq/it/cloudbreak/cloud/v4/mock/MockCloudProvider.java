@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.Moc
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.authentication.StackAuthenticationV4Request;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
+import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.InstanceTemplateV1Request;
@@ -151,6 +152,30 @@ public class MockCloudProvider extends AbstractCloudProvider {
     @Override
     public String getFreeIpaInstanceType() {
         return "large";
+    }
+
+    @Override
+    public String getDatahubCustomInstanceType() {
+        throw new NotImplementedException(format("Not implemented on %s. Do you want to use against a real provider? You should set the " +
+                "`integrationtest.cloudProvider` property, Values: AZURE, AWS", getCloudPlatform()));
+    }
+
+    @Override
+    public ResourceType getRootDiskResourceType() {
+        throw new NotImplementedException(format("Not implemented on %s. Do you want to use against a real provider? You should set the " +
+                "`integrationtest.cloudProvider` property, Values: AZURE, AWS", getCloudPlatform()));
+    }
+
+    @Override
+    public String getAddDiskVolumeType() {
+        throw new NotImplementedException(format("Not implemented on %s. Do you want to use against a real provider? You should set the " +
+                "`integrationtest.cloudProvider` property, Values: AZURE, AWS", getCloudPlatform()));
+    }
+
+    @Override
+    public String getModifyDiskVolumeType() {
+        throw new NotImplementedException(format("Not implemented on %s. Do you want to use against a real provider? You should set the " +
+                "`integrationtest.cloudProvider` property, Values: AZURE, AWS", getCloudPlatform()));
     }
 
     @Override
