@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.client;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
@@ -10,6 +11,9 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 import java.security.spec.PKCS8EncodedKeySpec;
@@ -83,6 +87,12 @@ public class KeyStoreUtil {
                 return new KeyPair(publicKey, privateKey);
             }
         }
+    }
+
+    public static long getCertificateExpiryDate(String publicCert, String certificateEncoding) throws CertificateException {
+        CertificateFactory factory = CertificateFactory.getInstance(certificateEncoding);
+        X509Certificate certificate = (X509Certificate) factory.generateCertificate(new ByteArrayInputStream(publicCert.getBytes()));
+        return certificate.getNotAfter().getTime();
     }
 
 }
