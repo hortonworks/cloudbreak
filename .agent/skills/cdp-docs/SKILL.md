@@ -14,11 +14,11 @@ This skill provides a structured map to the official Cloudera CDP Public Cloud d
 - **Data Hub**: [Data Hub Home](https://docs.cloudera.com/data-hub/cloud/index.html) (Cluster Templates, Workloads)
 - **Release Notes**: [CDP Release Notes](https://docs.cloudera.com/cdp-public-cloud/cloud/release-notes/topics/cdp-release-notes.html)
 
-## 🛠 Search Strategy
+## Search strategy
 When asked to verify a requirement (e.g., "What are the Azure VNet requirements for CDP?"):
-1.  **Identify the Hub**: Determine if the topic belongs to Management Console, SDX, or a specific Data Service.
-2.  **Web Fetch**: Use the `web_fetch` tool with a descriptive prompt targeting the relevant hub URL.
-3.  **Synthesis**: Ground your implementation plan in the fetched documentation.
+1. **Identify the hub**: Determine if the topic belongs to Management Console, SDX, or a specific Data Service.
+2. **Retrieve the page**: Open or fetch the relevant hub URL (browser, `curl`, or whatever HTTP/fetch capability your environment provides).
+3. **Synthesis**: Ground your implementation plan in the retrieved documentation.
 
 ## 📂 Logical Path Mapping
 - **Environments**: `management-console/cloud/environments/`

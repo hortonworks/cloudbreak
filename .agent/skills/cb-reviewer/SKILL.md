@@ -34,7 +34,7 @@ Verify that the PR follows API mandates:
 Suggest `agent-fix` labels for PRs that were primarily implemented or fixed by an agent.
 
 ## Review Criteria
-Review should follow the strict guidelines in `cb-architect`. If any standard is violated, provide a polite but firm request to correct the violation.
+Review should follow the strict guidelines in **cb-architect** (see `.agent/skills/cb-architect/SKILL.md`). If any standard is violated, provide a polite but firm request to correct the violation.
 - **Fail PR** if:
     - Wrong commit message format.
     - `Enum` used in public API.

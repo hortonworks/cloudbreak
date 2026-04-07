@@ -4,14 +4,8 @@ This workflow defines the standard operating procedure for resolving Jira ticket
 
 ## Phase 1: Jira Ingestion
 1.  **Ticket ID**: User specifies a ticket (e.g., `CB-12345`).
-2.  **Fetch Issue**: `mcp-atlassian_jira_get_issue` to retrieve description, **Team field (`customfield_10001`)**, and attachments.
-3.  **Domain Mapping (by Mascot Clan)**:
-    -   `Raven Clan` -> `core/`, `freeipa/`
-    -   `Wolf Clan` -> `datalake/`, `environment/`
-    -   `Duck Clan` -> `redbeams/`
-    -   `Bear Clan` -> `autoscale/`
-    -   `Hawk Clan` -> `cloud-aws-*`, `cloud-azure/`, `cloud-gcp/`
-4.  **Module Deep-Dive**: Read the specific `GEMINI.md` in the target module.
+2.  **Fetch issue**: Retrieve description, **Team field (`customfield_10001`)**, and attachments via your Jira integration (e.g. Atlassian MCP, API, or user-provided excerpt). For JQL, team ids, and clan conventions, use **`.agent/skills/cb-jira/SKILL.md`**.
+3.  **Module Deep-Dive**: Read the specific `AGENTS.md` in the target module.
 
 ## Phase 2: Reproduction (Critical)
 1.  **Isolate Failure**: Search the module's `src/test/java` for similar test cases.
@@ -42,7 +36,7 @@ This workflow defines the standard operating procedure for resolving Jira ticket
 3.  **PR Body**:
     -   **Summary**: Technical rationale of the fix.
     -   **Verification**: List of tests executed.
-4.  **PR Creation**: `mcp_github_pull_request_create`.
+4.  **PR creation**: Open the PR using your Git hosting workflow (e.g. GitHub MCP, `gh` CLI, or the web UI).
 
 ## Phase 6: Closure
 1.  **Jira Update**: Add a comment to the Jira ticket with a link to the PR.

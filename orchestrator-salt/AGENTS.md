@@ -1,6 +1,6 @@
 # SaltStack Orchestrator Mandates
 
-This file contains foundational mandates for Gemini agents in the `orchestrator-salt` module. These instructions take precedence over general defaults.
+This file contains foundational mandates for automated assistants working in the `orchestrator-salt` module. These instructions take precedence over general defaults.
 
 ## 🧂 SaltStack Core Concepts
 SaltStack is used in Cloudbreak for configuration management and remote execution on cluster nodes.

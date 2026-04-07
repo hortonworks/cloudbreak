@@ -73,4 +73,4 @@ PRs should briefly address the impact on:
 -   **Flow State**: If the change involves a `Flow`, confirm that the state machine transitions were audited for leaks or deadlocks.
 
 ### 3. Reviewer Selection
-Assign reviewers based on the `CODEOWNERS` file in the project root. Identify the target domain using the **Team field (`customfield_10001`)** (e.g., `Raven Clan`). If the change spans multiple domains (e.g., Core and Datalake), ensure at least one reviewer from each domain is requested.
+Assign reviewers based on the `CODEOWNERS` file in the project root. Identify the target domain using the **Team field (`customfield_10001`)** (e.g., `Raven Clan`). For JQL against Team or resolving Atlassian team ids, see **cb-jira** (`.agent/skills/cb-jira/SKILL.md`). If the change spans multiple domains (e.g., Core and Datalake), ensure at least one reviewer from each domain is requested.
