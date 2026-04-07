@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.environment.service.freeipa;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -50,6 +51,9 @@ public class FreeIpaPollerService {
     @Value("${env.verticalscale.freeipa.polling.attempt:60}")
     private Integer verticalscaleAttempt;
 
+    @Value("${env.modifyuserdefinedtags.freeipa.polling.attempt:60}")
+    private Integer modifyUserDefinedTagsAttempt;
+
     @Value("${env.crossrealm.freeipa.polling.attempt:30}")
     private Integer crossRealmAttempt;
 
@@ -67,6 +71,9 @@ public class FreeIpaPollerService {
 
     @Value("${env.verticalscale.freeipa.polling.sleeptime:30}")
     private Integer verticalscaleSleeptime;
+
+    @Value("${env.modifyuserdefinedtags.freeipa.polling.sleeptime:30}")
+    private Integer modifyUserDefinedTagsSleeptime;
 
     @Value("${env.crossrealm.freeipa.polling.sleeptime:10}")
     private Integer crossRealmSleeptime;
@@ -122,6 +129,21 @@ public class FreeIpaPollerService {
             } catch (PollerStoppedException e) {
                 LOGGER.warn("FreeIPA modify proxy config timed out or error happened.", e);
                 throw new FreeIpaOperationFailedException("FreeIPA proxy config modification timed out or error happened: " + e.getMessage());
+            }
+        }
+    }
+
+    public void waitForModifyUserDefinedTags(Long envId, String envCrn, Map<String, String> tags) {
+        OperationStatus status = freeIpaService.triggerUserDefinedTagsUpdate(envCrn, tags);
+        if (status.getStatus() != OperationState.COMPLETED) {
+            try {
+                Polling.stopAfterAttempt(modifyUserDefinedTagsAttempt)
+                        .stopIfException(true)
+                        .waitPeriodly(modifyUserDefinedTagsSleeptime, TimeUnit.SECONDS)
+                        .run(() -> freeipaPollerProvider.modifyUserDefinedTagsPoller(envId, envCrn, status.getOperationId()));
+            } catch (PollerStoppedException e) {
+                LOGGER.warn("FreeIPA user defined tags update timed out or error happened.", e);
+                throw new FreeIpaOperationFailedException("FreeIPA user defined tags update timed out or error happened: " + e.getMessage());
             }
         }
     }

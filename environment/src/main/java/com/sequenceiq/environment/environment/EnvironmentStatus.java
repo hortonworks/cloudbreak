@@ -273,6 +273,8 @@ public enum EnvironmentStatus {
     ENABLE_ENCRYPTION_PROFILE_FAILED(
             com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.ENABLE_ENCRYPTION_PROFILE_FAILED),
 
+    USER_DEFINED_TAGS_MODIFICATION_IN_PROGRESS(
+            com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.USER_DEFINED_TAGS_MODIFICATION_IN_PROGRESS),
     USER_DEFINED_TAGS_MODIFICATION_ON_FREEIPA_IN_PROGRESS(
             com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.USER_DEFINED_TAGS_MODIFICATION_ON_FREEIPA_IN_PROGRESS),
     USER_DEFINED_TAGS_MODIFICATION_ON_FREEIPA_FAILED(

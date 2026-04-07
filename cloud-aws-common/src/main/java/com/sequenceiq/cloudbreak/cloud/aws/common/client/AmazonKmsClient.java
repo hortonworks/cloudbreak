@@ -21,6 +21,8 @@ import software.amazon.awssdk.services.kms.model.RotateKeyOnDemandRequest;
 import software.amazon.awssdk.services.kms.model.RotateKeyOnDemandResponse;
 import software.amazon.awssdk.services.kms.model.ScheduleKeyDeletionRequest;
 import software.amazon.awssdk.services.kms.model.ScheduleKeyDeletionResponse;
+import software.amazon.awssdk.services.kms.model.TagResourceRequest;
+import software.amazon.awssdk.services.kms.model.TagResourceResponse;
 
 public class AmazonKmsClient extends AmazonClient {
 
@@ -70,4 +72,7 @@ public class AmazonKmsClient extends AmazonClient {
         return client.rotateKeyOnDemand(rotateKeyOnDemandRequest);
     }
 
+    public TagResourceResponse tagResource(TagResourceRequest tagResourceRequest) {
+        return client.tagResource(tagResourceRequest);
+    }
 }

@@ -7,7 +7,7 @@ import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDele
 import static com.sequenceiq.environment.environment.flow.hybrid.cancel.event.EnvironmentCrossRealmTrustCancelStateSelectors.TRUST_CANCEL_VALIDATION_EVENT;
 import static com.sequenceiq.environment.environment.flow.hybrid.repair.event.EnvironmentCrossRealmTrustRepairStateSelectors.TRUST_REPAIR_VALIDATION_EVENT;
 import static com.sequenceiq.environment.environment.flow.hybrid.setupfinish.event.EnvironmentCrossRealmTrustSetupFinishStateSelectors.TRUST_SETUP_FINISH_VALIDATION_EVENT;
-import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationStateSelectors.START_MODIFY_USER_DEFINED_TAGS_FREEIPA_EVENT;
+import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationStateSelectors.START_MODIFY_ENVIRONMENT_TAGS_EVENT;
 
 import java.util.Map;
 import java.util.Set;
@@ -360,7 +360,7 @@ public class EnvironmentReactorFlowManager {
         LOGGER.info("Environment tags modification flow triggered.");
         EnvTagsModificationEvent envTagsModificationEvent =
                 EnvTagsModificationEvent.builder()
-                        .withSelector(START_MODIFY_USER_DEFINED_TAGS_FREEIPA_EVENT.selector())
+                        .withSelector(START_MODIFY_ENVIRONMENT_TAGS_EVENT.selector())
                         .withResourceId(environment.getId())
                         .withResourceName(environment.getName())
                         .withResourceCrn(environment.getResourceCrn())

@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -23,6 +24,8 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsPageCollector;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 
 import software.amazon.awssdk.services.rds.RdsClient;
+import software.amazon.awssdk.services.rds.model.AddTagsToResourceRequest;
+import software.amazon.awssdk.services.rds.model.AddTagsToResourceResponse;
 import software.amazon.awssdk.services.rds.model.Certificate;
 import software.amazon.awssdk.services.rds.model.CreateDbParameterGroupRequest;
 import software.amazon.awssdk.services.rds.model.DbParameterGroupNotFoundException;
@@ -151,5 +154,16 @@ class AmazonRdsClientTest {
         when(client.deleteDBParameterGroup(any(DeleteDbParameterGroupRequest.class))).thenThrow(invalidGroupStateException);
         CloudConnectorException actualException = assertThrows(CloudConnectorException.class, () -> underTest.deleteParameterGroup("paramGroup"));
         assertEquals(invalidGroupStateException, actualException.getCause());
+    }
+
+    @Test
+    void testAddTagsToResource() {
+        AddTagsToResourceRequest request = mock(AddTagsToResourceRequest.class);
+        AddTagsToResourceResponse expectedResponse = mock(AddTagsToResourceResponse.class);
+        when(client.addTagsToResource(request)).thenReturn(expectedResponse);
+
+        AddTagsToResourceResponse response = underTest.addTagsToResource(request);
+
+        assertEquals(expectedResponse, response);
     }
 }

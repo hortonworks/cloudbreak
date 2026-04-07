@@ -135,13 +135,15 @@ public class StackService {
                 .collect(Collectors.toList());
     }
 
-    public void modifyUserDefinedTags(String crn, Map<String, String> userDefinedTags) {
+    public FlowIdentifier triggerUserDefinedTagsUpdate(String crn, Map<String, String> userDefinedTags) {
         try {
-            LOGGER.debug("Calling modifyUserDefinedTagsInternal endpoint for stack {} with tags {}", crn, userDefinedTags);
-            ThreadBasedUserCrnProvider.doAsInternalActor(() -> stackV4Endpoint.modifyUserDefinedTagsInternal(0L, crn, userDefinedTags));
+            LOGGER.debug("Calling triggerUserDefinedTagsUpdateInternal endpoint for stack {} with tags {}", crn, userDefinedTags);
+            return ThreadBasedUserCrnProvider.doAsInternalActor(
+                    () -> stackV4Endpoint.triggerUserDefinedTagsUpdateInternal(0L, crn, userDefinedTags)
+            );
         } catch (WebApplicationException e) {
             String errorMessage = messageExtractor.getErrorMessage(e);
-            LOGGER.error(String.format("Failed to modify user defined tags for stack %s due to: '%s'.", crn, errorMessage), e);
+            LOGGER.error("Failed to update user defined tags for stack: {} due to: {}", crn, errorMessage);
             throw new StackOperationFailedException(errorMessage, e);
         }
     }

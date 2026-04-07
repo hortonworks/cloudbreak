@@ -21,7 +21,7 @@ import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationEvent;
 import com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationFailureEvent;
-import com.sequenceiq.environment.environment.service.freeipa.FreeIpaService;
+import com.sequenceiq.environment.environment.service.freeipa.FreeIpaPollerService;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
 @ExtendWith(MockitoExtension.class)
@@ -33,10 +33,10 @@ class ModifyUserDefinedTagsOnFreeIpaHandlerTest {
 
     private static final String ENV_CRN = "crn";
 
-    private static final Map<String, String> USER_DEFINED_TAGS = Map.of("owner", "john doe");
+    private static final Map<String, String> USER_DEFINED_TAGS = Map.of("custom", "value");
 
     @Mock
-    private FreeIpaService freeIpaService;
+    private FreeIpaPollerService freeIpaPollerService;
 
     @InjectMocks
     private ModifyUserDefinedTagsOnFreeIpaHandler underTest;
@@ -61,17 +61,16 @@ class ModifyUserDefinedTagsOnFreeIpaHandlerTest {
 
         assertInstanceOf(EnvTagsModificationEvent.class, result);
         assertEquals(START_MODIFY_USER_DEFINED_TAGS_DATALAKE_EVENT.name(), result.getSelector());
-        verify(freeIpaService).modifyUserDefinedTags(ENV_CRN, USER_DEFINED_TAGS);
+        verify(freeIpaPollerService).waitForModifyUserDefinedTags(ENV_ID, ENV_CRN, USER_DEFINED_TAGS);
     }
 
     @Test
     void testDoAcceptFailure() {
-        doThrow(new RuntimeException("error")).when(freeIpaService).modifyUserDefinedTags(ENV_CRN, USER_DEFINED_TAGS);
+        doThrow(new RuntimeException("error")).when(freeIpaPollerService).waitForModifyUserDefinedTags(ENV_ID, ENV_CRN, USER_DEFINED_TAGS);
 
         Selectable result = underTest.doAccept(event);
 
         assertInstanceOf(EnvTagsModificationFailureEvent.class, result);
         assertEquals(FAILED_MODIFY_USER_DEFINED_TAGS_EVENT.name(), result.getSelector());
-        verify(freeIpaService).modifyUserDefinedTags(ENV_CRN, USER_DEFINED_TAGS);
     }
 }

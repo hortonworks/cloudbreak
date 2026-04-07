@@ -1,11 +1,13 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common.client;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -22,6 +24,8 @@ import software.amazon.awssdk.services.secretsmanager.model.DescribeSecretReques
 import software.amazon.awssdk.services.secretsmanager.model.GetResourcePolicyRequest;
 import software.amazon.awssdk.services.secretsmanager.model.GetSecretValueRequest;
 import software.amazon.awssdk.services.secretsmanager.model.PutResourcePolicyRequest;
+import software.amazon.awssdk.services.secretsmanager.model.TagResourceRequest;
+import software.amazon.awssdk.services.secretsmanager.model.TagResourceResponse;
 import software.amazon.awssdk.services.secretsmanager.model.UpdateSecretRequest;
 
 class AmazonSecretsManagerClientTest {
@@ -147,5 +151,16 @@ class AmazonSecretsManagerClientTest {
 
         ActionFailedException result = assertThrows(ActionFailedException.class, () -> underTest.getResourcePolicy(getResourcePolicyRequest));
         assertInstanceOf(AwsServiceException.class, result.getCause());
+    }
+
+    @Test
+    void testTagResource() {
+        TagResourceRequest request = mock(TagResourceRequest.class);
+        TagResourceResponse expectedResponse = mock(TagResourceResponse.class);
+        when(secretsManagerClient.tagResource(request)).thenReturn(expectedResponse);
+
+        TagResourceResponse response = underTest.tagResource(request);
+
+        assertEquals(expectedResponse, response);
     }
 }

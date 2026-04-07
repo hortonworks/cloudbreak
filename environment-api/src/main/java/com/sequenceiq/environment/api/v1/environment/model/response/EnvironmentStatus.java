@@ -158,6 +158,7 @@ public enum EnvironmentStatus {
     PROXY_CONFIG_MODIFICATION_ON_DATAHUBS_IN_PROGRESS("Modifying proxy configuration on DataHubs"),
     PROXY_CONFIG_MODIFICATION_ON_DATAHUBS_FAILED("Failed to modify proxy configuration on DataHubs"),
     PROXY_CONFIG_MODIFICATION_FAILED("Proxy configuration modification failed"),
+    USER_DEFINED_TAGS_MODIFICATION_IN_PROGRESS("Starting user defined tags modification"),
     USER_DEFINED_TAGS_MODIFICATION_ON_FREEIPA_IN_PROGRESS("Modifying user defined tags on FreeIPA"),
     USER_DEFINED_TAGS_MODIFICATION_ON_FREEIPA_FAILED("Failed to modify user defined tags on FreeIPA"),
     USER_DEFINED_TAGS_MODIFICATION_ON_DATALAKE_IN_PROGRESS("Modifying user defined tags on Data Lake"),

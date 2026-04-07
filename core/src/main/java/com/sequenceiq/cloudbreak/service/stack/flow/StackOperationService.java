@@ -758,8 +758,10 @@ public class StackOperationService {
         stackUpdater.updateStackNotificationState(notificationState, stack.getId());
     }
 
-    public void modifyUserDefinedTags(String resourceCrn, Map<String, String> userDefinedTags) {
-        stackUpdater.updateUserDefinedTags(resourceCrn, userDefinedTags);
+    public FlowIdentifier triggerUserDefinedTagsUpdate(String crn, String accountId, Map<String, String> userDefinedTags) {
+        LOGGER.info("Triggering user defined tags update on stack ('{}')", crn);
+        StackDto stack = stackDtoService.getByCrnWithMdcContext(crn);
+        return flowManager.triggerUserDefinedTagsUpdate(stack.getId(), userDefinedTags);
     }
 
     private void convertInputGroupToLowerCase(DiskUpdateRequest updateRequest) {

@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.apache.commons.lang3.StringUtils;
@@ -56,8 +57,10 @@ public class FreeIpaPollerServiceTest {
     void setup() {
         ReflectionTestUtils.setField(underTest, "startStopAttempt", 1);
         ReflectionTestUtils.setField(underTest, "upgradeccmAttempt", 1);
+        ReflectionTestUtils.setField(underTest, "modifyUserDefinedTagsAttempt", 1);
         ReflectionTestUtils.setField(underTest, "startStopSleeptime", 1);
         ReflectionTestUtils.setField(underTest, "upgradeccmSleeptime", 1);
+        ReflectionTestUtils.setField(underTest, "modifyUserDefinedTagsSleeptime", 1);
     }
 
     @Test
@@ -171,6 +174,44 @@ public class FreeIpaPollerServiceTest {
                 .isExactlyInstanceOf(FreeIpaOperationFailedException.class);
 
         verify(freeIpaService).upgradeCcm(ENV_CRN);
+    }
+
+    @Test
+    void testWaitForModifyUserDefinedTags() {
+        Map<String, String> userDefinedTags = Map.of("custom", "value");
+        OperationStatus status = new OperationStatus("123", OperationType.MODIFY_USER_DEFINED_TAGS, OperationState.REQUESTED, null, null, null, 0, null);
+        when(freeIpaService.triggerUserDefinedTagsUpdate(ENV_CRN, userDefinedTags)).thenReturn(status);
+        when(freeipaPollerProvider.modifyUserDefinedTagsPoller(ENV_ID, ENV_CRN, "123")).thenReturn(AttemptResults.justFinish());
+
+        underTest.waitForModifyUserDefinedTags(ENV_ID, ENV_CRN, userDefinedTags);
+
+        verify(freeIpaService).triggerUserDefinedTagsUpdate(ENV_CRN, userDefinedTags);
+    }
+
+    @Test
+    void testWaitForModifyUserDefinedTagsAlreadyCompleted() {
+        Map<String, String> userDefinedTags = Map.of("custom", "value");
+        OperationStatus status = new OperationStatus("123", OperationType.MODIFY_USER_DEFINED_TAGS, OperationState.COMPLETED, null, null, null, 0, null);
+        when(freeIpaService.triggerUserDefinedTagsUpdate(ENV_CRN, userDefinedTags)).thenReturn(status);
+
+        underTest.waitForModifyUserDefinedTags(ENV_ID, ENV_CRN, userDefinedTags);
+
+        verify(freeIpaService).triggerUserDefinedTagsUpdate(ENV_CRN, userDefinedTags);
+        verify(freeipaPollerProvider, never()).modifyUserDefinedTagsPoller(any(), any(), any());
+    }
+
+    @Test
+    void testWaitForModifyUserDefinedTagsFailed() {
+        Map<String, String> userDefinedTags = Map.of("custom", "value");
+        OperationStatus status = new OperationStatus("123", OperationType.MODIFY_USER_DEFINED_TAGS, OperationState.REQUESTED, null, null, null, 0, null);
+        when(freeIpaService.triggerUserDefinedTagsUpdate(ENV_CRN, userDefinedTags)).thenReturn(status);
+        when(freeipaPollerProvider.modifyUserDefinedTagsPoller(ENV_ID, ENV_CRN, "123")).thenThrow(new RuntimeException("error"));
+
+        assertThatThrownBy(() -> underTest.waitForModifyUserDefinedTags(ENV_ID, ENV_CRN, userDefinedTags))
+                .hasMessageContaining("FreeIPA user defined tags update timed out or error happened")
+                .isExactlyInstanceOf(FreeIpaOperationFailedException.class);
+
+        verify(freeIpaService).triggerUserDefinedTagsUpdate(ENV_CRN, userDefinedTags);
     }
 
     private static SyncOperationStatus createStatus(SynchronizationStatus syncStatus, String error) {

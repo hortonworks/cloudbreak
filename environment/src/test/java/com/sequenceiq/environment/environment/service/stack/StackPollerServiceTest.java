@@ -10,6 +10,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -23,6 +24,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import com.dyngr.core.AttemptResults;
 import com.dyngr.exception.PollerStoppedException;
 import com.dyngr.exception.UserBreakException;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
@@ -283,6 +285,41 @@ class StackPollerServiceTest {
         List<String> result = underTest.getUpdatableStacks(ENVIRONMENT_CRN, StackViewV4Response::getName);
 
         assertThat(result).isEmpty();
+    }
+
+    @Test
+    void updateUserDefinedTagsWhenDataLakeNeedsToBeUpdated() {
+        Map<String, String> userDefinedTags = Map.of("custom", "value");
+        Set<StackViewV4Response> responsesSet = new LinkedHashSet<>();
+        StackViewV4Response stackView1 = createAvailableStackViewV4Response(STACK_CRN_1);
+        stackView1.setStackType("DATALAKE");
+        responsesSet.add(stackView1);
+        StackViewV4Responses stackViewV4Responses = new StackViewV4Responses(responsesSet);
+        when(stackV4Endpoint.list(0L, ENVIRONMENT_CRN, false)).thenReturn(stackViewV4Responses);
+
+        when(stackPollerProvider.userDefinedTagsUpdatePoller(List.of(STACK_CRN_1), ENVIRONMENT_ID, userDefinedTags))
+                .thenReturn(() -> AttemptResults.finishWith(null));
+
+        underTest.updateUserDefinedTagsOnStacks(ENVIRONMENT_ID, ENVIRONMENT_CRN, userDefinedTags, StackType.DATALAKE);
+    }
+
+    @Test
+    void updateUserDefinedTagsWhenDataHubsNeedToBeUpdated() {
+        Map<String, String> userDefinedTags = Map.of("custom", "value");
+        Set<StackViewV4Response> responsesSet = new LinkedHashSet<>();
+        StackViewV4Response stackView1 = createAvailableStackViewV4Response(STACK_CRN_1);
+        stackView1.setStackType("WORKLOAD");
+        StackViewV4Response stackView2 = createAvailableStackViewV4Response(STACK_CRN_2);
+        stackView2.setStackType("WORKLOAD");
+        responsesSet.add(stackView1);
+        responsesSet.add(stackView2);
+        StackViewV4Responses stackViewV4Responses = new StackViewV4Responses(responsesSet);
+        when(stackV4Endpoint.list(0L, ENVIRONMENT_CRN, false)).thenReturn(stackViewV4Responses);
+
+        when(stackPollerProvider.userDefinedTagsUpdatePoller(List.of(STACK_CRN_1, STACK_CRN_2), ENVIRONMENT_ID, userDefinedTags))
+                .thenReturn(() -> AttemptResults.finishWith(null));
+
+        underTest.updateUserDefinedTagsOnStacks(ENVIRONMENT_ID, ENVIRONMENT_CRN, userDefinedTags, StackType.WORKLOAD);
     }
 
     // ---- helpers ----

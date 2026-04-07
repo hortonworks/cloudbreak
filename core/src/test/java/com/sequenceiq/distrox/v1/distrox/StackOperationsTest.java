@@ -458,16 +458,6 @@ class StackOperationsTest {
         verify(clusterCommonService).updateSalt(nameOrCrn, ACCOUNT_ID, true);
     }
 
-    @Test
-    void testModifyUserDefinedTags() {
-        String resourceCrn = "resourceCrn";
-        Map<String, String> userDefinedTags = Map.of("owner", "john doe");
-
-        underTest.modifyUserDefinedTags(resourceCrn, userDefinedTags);
-
-        verify(stackCommonService).modifyUserDefinedTags(resourceCrn, userDefinedTags);
-    }
-
     private static StackViewV4Response getStackViewV4Response(String resourceCrn) {
         StackViewV4Response stackViewV4Response = mock(StackViewV4Response.class);
         when(stackViewV4Response.getCrn()).thenReturn(resourceCrn);

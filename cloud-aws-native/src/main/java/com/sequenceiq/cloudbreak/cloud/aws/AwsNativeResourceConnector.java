@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.service.AwsCommonDiskUpdateSer
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsNetworkView;
 import com.sequenceiq.cloudbreak.cloud.aws.resource.loadbalancer.AwsNativeLoadBalancerLaunchService;
+import com.sequenceiq.cloudbreak.cloud.aws.resource.tag.AwsNativeResourceTagUpdaterService;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.TemplatingNotSupportedException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
@@ -34,6 +35,7 @@ import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.service.ResourceRetriever;
 import com.sequenceiq.cloudbreak.cloud.template.AbstractResourceConnector;
 import com.sequenceiq.cloudbreak.common.provider.ProviderResourceSyncer;
+import com.sequenceiq.cloudbreak.service.CloudbreakRuntimeException;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.ResourceType;
@@ -66,6 +68,9 @@ public class AwsNativeResourceConnector extends AbstractResourceConnector {
 
     @Inject
     private List<ProviderResourceSyncer> providerResourceSyncers;
+
+    @Inject
+    private AwsNativeResourceTagUpdaterService awsNativeResourceTagUpdaterService;
 
     @Override
     public List<CloudResourceStatus> launchLoadBalancers(AuthenticatedContext authenticatedContext, CloudStack stack, PersistenceNotifier persistenceNotifier) {
@@ -148,6 +153,25 @@ public class AwsNativeResourceConnector extends AbstractResourceConnector {
     @Override
     public ResourceType getInstanceResourceType() {
         return ResourceType.AWS_INSTANCE;
+    }
+
+    @Override
+    public void updateTags(AuthenticatedContext authenticatedContext, List<CloudResource> cloudResources, Map<String, String> userDefinedTags) {
+        if (userDefinedTags == null || userDefinedTags.isEmpty()) {
+            LOGGER.debug("Skip updating user defined tags on cloud resources because user defined tags are empty.");
+            return;
+        }
+        for (CloudResource cloudResource : cloudResources) {
+            LOGGER.debug("Updating tags for cloud resource: {} with type: {} with tags: {}", cloudResource.getName(), cloudResource.getType(),
+                    userDefinedTags);
+            try {
+                awsNativeResourceTagUpdaterService.updateTags(authenticatedContext, cloudResource, userDefinedTags);
+                LOGGER.debug("Successfully updated tags for cloud resource: {} with type: {}", cloudResource.getName(), cloudResource.getType());
+            } catch (Exception e) {
+                throw new CloudbreakRuntimeException(String.format("Failed to update tags for resource: %s with type: %s", cloudResource.getName(),
+                        cloudResource.getType()), e);
+            }
+        }
     }
 
     @Override

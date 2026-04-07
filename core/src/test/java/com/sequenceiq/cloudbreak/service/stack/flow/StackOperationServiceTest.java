@@ -831,12 +831,16 @@ class StackOperationServiceTest {
 
     @Test
     public void testModifyUserDefinedTags() {
+        StackDto stack = mock(StackDto.class);
         String resourceCrn = "resourceCrn";
         Map<String, String> userDefinedTags = Map.of("owner", "john doe");
 
-        underTest.modifyUserDefinedTags(resourceCrn, userDefinedTags);
+        when(stack.getId()).thenReturn(STACK_ID);
+        when(stackDtoService.getByCrnWithMdcContext(resourceCrn)).thenReturn(stack);
 
-        verify(stackUpdater).updateUserDefinedTags(resourceCrn, userDefinedTags);
+        underTest.triggerUserDefinedTagsUpdate(resourceCrn, "accountId", userDefinedTags);
+
+        verify(flowManager).triggerUserDefinedTagsUpdate(STACK_ID, userDefinedTags);
     }
 
     @Test

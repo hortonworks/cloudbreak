@@ -6,6 +6,7 @@ import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvT
 import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationStateSelectors.FINALIZE_MODIFY_USER_DEFINED_TAGS_EVENT;
 import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationStateSelectors.FINISH_MODIFY_USER_DEFINED_TAGS_EVENT;
 import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationStateSelectors.HANDLED_FAILED_MODIFY_USER_DEFINED_TAGS_EVENT;
+import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationStateSelectors.START_MODIFY_ENVIRONMENT_TAGS_EVENT;
 import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationStateSelectors.START_MODIFY_USER_DEFINED_TAGS_DATAHUBS_EVENT;
 import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationStateSelectors.START_MODIFY_USER_DEFINED_TAGS_DATALAKE_EVENT;
 import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationStateSelectors.START_MODIFY_USER_DEFINED_TAGS_FREEIPA_EVENT;
@@ -60,7 +61,7 @@ class EnvTagsModificationActionsTest {
 
     private static final String FLOW_ID = "flowId";
 
-    private static final Map<String, String> USER_DEFINED_TAGS = Map.of("owner", "john doe");
+    private static final Map<String, String> USER_DEFINED_TAGS = Map.of("custom", "value");
 
     @Mock
     private EventBus eventBus;
@@ -100,7 +101,16 @@ class EnvTagsModificationActionsTest {
     private static Stream<Arguments> modifyUserDefinedTagsActionParams() {
         return Stream.of(
             Arguments.of(
-                "FreeIpa",
+                "Init",
+                START_MODIFY_ENVIRONMENT_TAGS_EVENT.selector(),
+                (Function<EnvTagsModificationActions, Action<?, ?>>) EnvTagsModificationActions::initUserDefinedTagsModificationOnEnvironment,
+                START_MODIFY_USER_DEFINED_TAGS_FREEIPA_EVENT.event(),
+                EnvironmentStatus.USER_DEFINED_TAGS_MODIFICATION_IN_PROGRESS,
+                ResourceEvent.ENVIRONMENT_USER_DEFINED_TAGS_MODIFICATION_STARTED,
+                EnvTagsModificationState.ENVIRONMENT_TAGS_MODIFICATION_START_STATE
+            ),
+            Arguments.of(
+                "FreeIPA stack",
                 START_MODIFY_USER_DEFINED_TAGS_FREEIPA_EVENT.selector(),
                 (Function<EnvTagsModificationActions, Action<?, ?>>) EnvTagsModificationActions::modifyUserDefinedTagsOnFreeIpa,
                 MODIFY_USER_DEFINED_TAGS_ON_FREEIPA_EVENT.event(),
@@ -109,7 +119,7 @@ class EnvTagsModificationActionsTest {
                 EnvTagsModificationState.USER_DEFINED_TAGS_MODIFICATION_FREEIPA_STATE
             ),
             Arguments.of(
-                "Datalake",
+                "Datalake stack",
                 START_MODIFY_USER_DEFINED_TAGS_DATALAKE_EVENT.selector(),
                 (Function<EnvTagsModificationActions, Action<?, ?>>) EnvTagsModificationActions::modifyUserDefinedTagsOnDatalake,
                 MODIFY_USER_DEFINED_TAGS_ON_DATALAKE_EVENT.event(),
@@ -118,7 +128,7 @@ class EnvTagsModificationActionsTest {
                 EnvTagsModificationState.USER_DEFINED_TAGS_MODIFICATION_DATALAKE_STATE
             ),
             Arguments.of(
-                "Datahubs",
+                "Datahub stacks",
                 START_MODIFY_USER_DEFINED_TAGS_DATAHUBS_EVENT.selector(),
                 (Function<EnvTagsModificationActions, Action<?, ?>>) EnvTagsModificationActions::modifyUserDefinedTagsOnDatahubs,
                 MODIFY_USER_DEFINED_TAGS_ON_DATAHUBS_EVENT.event(),

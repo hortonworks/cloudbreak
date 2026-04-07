@@ -8,6 +8,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes.DeleteV
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftFinalizationStateSelectors.START_FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_VALIDATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftRollbackStateSelectors.START_ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION_VALIDATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.modifyselinux.event.CoreModifySeLinuxStateSelectors.CORE_MODIFY_SELINUX_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.modifytags.event.ModifyUserDefinedTagsStateSelectors.MODIFY_USER_DEFINED_TAGS_START_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.cert.RotateRdsCertificateEvent.ROTATE_RDS_CERTIFICATE_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.CoreVerticalScaleEvent.STACK_VERTICALSCALE_EVENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -65,6 +66,7 @@ import com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.event.Migrat
 import com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.event.MigrateZookeeperToKraftFlowChainTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.event.MigrateZookeeperToKraftRollbackTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.modifyselinux.event.CoreModifySeLinuxEvent;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.modifytags.event.ModifyUserDefinedTagsEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.CoreVerticalScalingTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.DatabaseBackupTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.DatabaseRestoreTriggerEvent;
@@ -238,6 +240,7 @@ class ReactorFlowManagerTest {
         underTest.triggerUpdateSslConfigsOnCluster(STACK_ID, "encryptionProfileCrn");
         underTest.triggerResetJvmParams(STACK_ID);
         underTest.triggerUpdateTrustedRealm(STACK_ID, "crn", "crn", "realm", true, false);
+        underTest.triggerUserDefinedTagsUpdate(STACK_ID, Map.of("custom", "value"));
 
         int count = 0;
         for (Method method : underTest.getClass().getDeclaredMethods()) {
@@ -486,6 +489,18 @@ class ReactorFlowManagerTest {
         MigrateZookeeperToKraftRollbackTriggerEvent event = captor.getValue();
         assertEquals(1L, captor.getValue().getResourceId());
         assertEquals(START_ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION_VALIDATION_EVENT.event(), event.selector());
+    }
+
+    @Test
+    void testTriggerUserDefinedTagsUpdate() {
+        Map<String, String> userDefinedTags = Map.of("custom", "value");
+        underTest.triggerUserDefinedTagsUpdate(STACK_ID, userDefinedTags);
+        ArgumentCaptor<ModifyUserDefinedTagsEvent> captor = ArgumentCaptor.forClass(ModifyUserDefinedTagsEvent.class);
+        verify(reactorNotifier, times(1)).notify(eq(stack.getId()),
+                eq(MODIFY_USER_DEFINED_TAGS_START_EVENT.event()), captor.capture());
+        ModifyUserDefinedTagsEvent event = captor.getValue();
+        assertEquals(1L, captor.getValue().getResourceId());
+        assertEquals(MODIFY_USER_DEFINED_TAGS_START_EVENT.event(), event.selector());
     }
 
     @Test

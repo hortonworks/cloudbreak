@@ -548,8 +548,7 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
 
     @Override
     @InternalOnly
-    public void modifyUserDefinedTagsInternal(@ResourceCrn String environmentCrn, Map<String, String> tags) {
-        String accountId = crnService.getCurrentAccountId();
-        freeIpaModifyTagsService.modifyUserDefinedTags(environmentCrn, tags, accountId);
+    public OperationStatus triggerUserDefinedTagsUpdateInternal(@ResourceCrn String environmentCrn, Map<String, String> tags) {
+        return freeIpaModifyTagsService.startUserDefinedTagsModificationOperation(environmentCrn, ThreadBasedUserCrnProvider.getAccountId(), tags);
     }
 }

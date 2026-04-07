@@ -12,12 +12,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationEvent;
 import com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationFailureEvent;
-import com.sequenceiq.environment.environment.service.datahub.DatahubService;
-import com.sequenceiq.environment.environment.service.stack.StackService;
+import com.sequenceiq.environment.environment.service.stack.StackPollerService;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
@@ -27,10 +27,7 @@ public class ModifyUserDefinedTagsOnDatahubsHandler extends ExceptionCatcherEven
     private static final Logger LOGGER = LoggerFactory.getLogger(ModifyUserDefinedTagsOnDatahubsHandler.class);
 
     @Inject
-    private DatahubService datahubService;
-
-    @Inject
-    private StackService stackService;
+    private StackPollerService stackPollerService;
 
     @Override
     public String selector() {
@@ -44,9 +41,7 @@ public class ModifyUserDefinedTagsOnDatahubsHandler extends ExceptionCatcherEven
         String resourceCrn = event.getData().getResourceCrn();
         Map<String, String> userDefinedTags = event.getData().getUserDefinedTags();
         try {
-            datahubService.list(resourceCrn)
-                    .getResponses()
-                    .forEach(stackView -> stackService.modifyUserDefinedTags(stackView.getCrn(), userDefinedTags));
+            stackPollerService.updateUserDefinedTagsOnStacks(resourceId, resourceCrn, userDefinedTags, StackType.WORKLOAD);
         } catch (Exception e) {
             LOGGER.error("Modify user defined tags on Data Hubs failed.", e);
             return new EnvTagsModificationFailureEvent(resourceId, resourceName, resourceCrn, USER_DEFINED_TAGS_MODIFICATION_ON_DATAHUBS_FAILED, e);

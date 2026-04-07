@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -59,7 +58,7 @@ class StackServiceTest {
     private FlowLogDBService flowLogDBService;
 
     @Mock
-    private WebApplicationExceptionMessageExtractor messageExtractor;
+    private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
 
     @Mock
     private FlowEndpoint flowEndpoint;
@@ -103,20 +102,18 @@ class StackServiceTest {
         String resourceCrn = "resourceCrn";
         Map<String, String> userDefinedTags = Map.of("owner", "john doe");
 
-        ThreadBasedUserCrnProvider.doAs(USERCRN, () -> underTest.modifyUserDefinedTags(resourceCrn, userDefinedTags));
+        ThreadBasedUserCrnProvider.doAs(USERCRN, () -> underTest.triggerUserDefinedTagsUpdate(resourceCrn, userDefinedTags));
 
-        verify(stackV4Endpoint).modifyUserDefinedTagsInternal(0L, resourceCrn, userDefinedTags);
+        verify(stackV4Endpoint).triggerUserDefinedTagsUpdateInternal(0L, resourceCrn, userDefinedTags);
     }
 
     @Test
     void modifyUserDefinedTagsFailureTest() {
         String resourceCrn = "resourceCrn";
         Map<String, String> userDefinedTags = Map.of("owner", "john doe");
-
-        doThrow(new WebApplicationException("Error")).when(stackV4Endpoint).modifyUserDefinedTagsInternal(0L, resourceCrn, userDefinedTags);
-        when(messageExtractor.getErrorMessage(any())).thenReturn("custom error");
-
-        assertThatThrownBy(() -> ThreadBasedUserCrnProvider.doAs(USERCRN, () -> underTest.modifyUserDefinedTags(resourceCrn, userDefinedTags)))
+        when(stackV4Endpoint.triggerUserDefinedTagsUpdateInternal(0L, resourceCrn, userDefinedTags)).thenThrow(new WebApplicationException("Error"));
+        when(webApplicationExceptionMessageExtractor.getErrorMessage(any())).thenReturn("custom error");
+        assertThatThrownBy(() -> ThreadBasedUserCrnProvider.doAs(USERCRN, () -> underTest.triggerUserDefinedTagsUpdate(resourceCrn, userDefinedTags)))
                 .hasMessage("custom error")
                 .isExactlyInstanceOf(StackOperationFailedException.class);
     }

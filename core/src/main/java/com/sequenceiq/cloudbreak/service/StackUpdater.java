@@ -190,9 +190,8 @@ public class StackUpdater {
         stackService.updateStackNotificationState(stackId, notificationState);
     }
 
-    public void updateUserDefinedTags(String resourceCrn, Map<String, String> userDefinedTags) {
-        Stack stack = stackService.getByCrn(resourceCrn);
-        LOGGER.info("Modifying user defined tags of stack: {}", resourceCrn);
+    public void updateUserDefinedTags(Stack stack, Map<String, String> userDefinedTags) {
+        LOGGER.info("Modifying user defined tags for {}", stack.getResourceCrn());
         StackTags stackTags = stack.getTags().getUnchecked(StackTags.class);
         stackTags.updateUserDefinedTags(userDefinedTags);
         stack.setTags(new Json(stackTags));

@@ -7,9 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
-import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -19,14 +17,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationEvent;
 import com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationFailureEvent;
-import com.sequenceiq.environment.environment.service.sdx.SdxService;
-import com.sequenceiq.environment.environment.service.stack.StackService;
+import com.sequenceiq.environment.environment.service.stack.StackPollerService;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
-import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 
 @ExtendWith(MockitoExtension.class)
 class ModifyUserDefinedTagsOnDatalakeHandlerTest {
@@ -36,22 +33,15 @@ class ModifyUserDefinedTagsOnDatalakeHandlerTest {
 
     private static final String ENV_CRN = "crn";
 
-    private static final String SDX_CRN = "sdxCrn";
-
-    private static final Map<String, String> USER_DEFINED_TAGS = Map.of("owner", "john doe");
+    private static final Map<String, String> USER_DEFINED_TAGS = Map.of("custom", "value");
 
     @Mock
-    private SdxService sdxService;
-
-    @Mock
-    private StackService stackService;
+    private StackPollerService stackPollerService;
 
     @InjectMocks
     private ModifyUserDefinedTagsOnDatalakeHandler underTest;
 
     private HandlerEvent<EnvTagsModificationEvent> event;
-
-    private SdxClusterResponse sdxClusterResponse;
 
     @BeforeEach
     void setUp() {
@@ -63,10 +53,6 @@ class ModifyUserDefinedTagsOnDatalakeHandlerTest {
                 .withUserDefinedTags(USER_DEFINED_TAGS)
                 .build();
         event = new HandlerEvent<>(new Event<>(request));
-        SdxClusterResponse sdxClusterResponse = new SdxClusterResponse();
-        sdxClusterResponse.setCrn(SDX_CRN);
-
-        when(sdxService.list(ENV_NAME)).thenReturn(List.of(sdxClusterResponse));
     }
 
     @Test
@@ -75,16 +61,15 @@ class ModifyUserDefinedTagsOnDatalakeHandlerTest {
 
         assertInstanceOf(EnvTagsModificationEvent.class, result);
         assertEquals(START_MODIFY_USER_DEFINED_TAGS_DATAHUBS_EVENT.name(), result.getSelector());
-        verify(stackService).modifyUserDefinedTags(SDX_CRN, USER_DEFINED_TAGS);
+        verify(stackPollerService).updateUserDefinedTagsOnStacks(ENV_ID, ENV_CRN, USER_DEFINED_TAGS, StackType.DATALAKE);
     }
 
     @Test
     void testDoAcceptFailure() {
-        doThrow(new RuntimeException("error")).when(stackService).modifyUserDefinedTags(SDX_CRN, USER_DEFINED_TAGS);
+        doThrow(new RuntimeException("error")).when(stackPollerService).updateUserDefinedTagsOnStacks(ENV_ID, ENV_CRN, USER_DEFINED_TAGS, StackType.DATALAKE);
         Selectable result = underTest.doAccept(event);
 
         assertInstanceOf(EnvTagsModificationFailureEvent.class, result);
         assertEquals(FAILED_MODIFY_USER_DEFINED_TAGS_EVENT.name(), result.getSelector());
-        verify(stackService).modifyUserDefinedTags(SDX_CRN, USER_DEFINED_TAGS);
     }
 }

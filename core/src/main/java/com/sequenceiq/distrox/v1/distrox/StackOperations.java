@@ -623,8 +623,4 @@ public class StackOperations implements HierarchyAuthResourcePropertyProvider {
         StackDto stack = stackDtoService.getByCrn(crn);
         return clusterOperationService.refreshEntitlementParams(stack);
     }
-
-    public void modifyUserDefinedTags(String resourceCrn, Map<String, String> userDefinedTags) {
-        stackCommonService.modifyUserDefinedTags(resourceCrn, userDefinedTags);
-    }
 }

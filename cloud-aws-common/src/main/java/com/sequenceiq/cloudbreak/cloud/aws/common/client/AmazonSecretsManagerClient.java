@@ -24,6 +24,8 @@ import software.amazon.awssdk.services.secretsmanager.model.GetSecretValueReques
 import software.amazon.awssdk.services.secretsmanager.model.GetSecretValueResponse;
 import software.amazon.awssdk.services.secretsmanager.model.PutResourcePolicyRequest;
 import software.amazon.awssdk.services.secretsmanager.model.PutResourcePolicyResponse;
+import software.amazon.awssdk.services.secretsmanager.model.TagResourceRequest;
+import software.amazon.awssdk.services.secretsmanager.model.TagResourceResponse;
 import software.amazon.awssdk.services.secretsmanager.model.UpdateSecretRequest;
 import software.amazon.awssdk.services.secretsmanager.model.UpdateSecretResponse;
 
@@ -103,6 +105,16 @@ public class AmazonSecretsManagerClient extends AmazonClient {
         return retry.testWith2SecDelayMax15Times(() -> {
             try {
                 return secretsManagerClient.getResourcePolicy(getResourcePolicyRequest);
+            } catch (AwsServiceException ex) {
+                throw createActionFailedExceptionIfRetriableError(ex);
+            }
+        });
+    }
+
+    public TagResourceResponse tagResource(TagResourceRequest tagResourceRequest) {
+        return retry.testWith2SecDelayMax15Times(() -> {
+            try {
+                return secretsManagerClient.tagResource(tagResourceRequest);
             } catch (AwsServiceException ex) {
                 throw createActionFailedExceptionIfRetriableError(ex);
             }

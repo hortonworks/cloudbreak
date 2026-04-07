@@ -13,6 +13,8 @@ import software.amazon.awssdk.services.efs.model.DescribeFileSystemsRequest;
 import software.amazon.awssdk.services.efs.model.DescribeFileSystemsResponse;
 import software.amazon.awssdk.services.efs.model.DescribeMountTargetsRequest;
 import software.amazon.awssdk.services.efs.model.DescribeMountTargetsResponse;
+import software.amazon.awssdk.services.efs.model.TagResourceRequest;
+import software.amazon.awssdk.services.efs.model.TagResourceResponse;
 
 public class AmazonEfsClient extends AmazonClient {
     private final EfsClient client;
@@ -44,4 +46,7 @@ public class AmazonEfsClient extends AmazonClient {
         return retry.testWith2SecDelayMax15Times(() -> client.describeMountTargets(request));
     }
 
+    public TagResourceResponse tagResource(TagResourceRequest request) {
+        return retry.testWith2SecDelayMax15Times(() -> client.tagResource(request));
+    }
 }

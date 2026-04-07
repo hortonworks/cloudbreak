@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common.client;
 
 import software.amazon.awssdk.services.elasticloadbalancingv2.ElasticLoadBalancingV2Client;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.AddTagsRequest;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.AddTagsResponse;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.CreateListenerRequest;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.CreateListenerResponse;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.CreateLoadBalancerRequest;
@@ -92,5 +94,9 @@ public class AmazonElasticLoadBalancingClient extends AmazonClient {
 
     public DescribeTargetGroupsResponse describeTargetGroup(DescribeTargetGroupsRequest describeTargetGroupsRequest) {
         return client.describeTargetGroups(describeTargetGroupsRequest);
+    }
+
+    public AddTagsResponse addTags(AddTagsRequest addTagsRequest) {
+        return client.addTags(addTagsRequest);
     }
 }

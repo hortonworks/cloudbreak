@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.cloud.aws;
 
 import static com.sequenceiq.cloudbreak.cloud.model.CloudInstance.FQDN;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
@@ -17,9 +16,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InOrder;
 import org.mockito.InjectMocks;
@@ -31,6 +34,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonElasticLoadBalanc
 import com.sequenceiq.cloudbreak.cloud.aws.common.context.AwsContext;
 import com.sequenceiq.cloudbreak.cloud.aws.common.loadbalancer.LoadBalancerService;
 import com.sequenceiq.cloudbreak.cloud.aws.resource.loadbalancer.AwsNativeLoadBalancerLaunchService;
+import com.sequenceiq.cloudbreak.cloud.aws.resource.tag.AwsNativeResourceTagUpdaterService;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.QuotaExceededException;
@@ -126,6 +130,9 @@ public class AwsNativeResourceConnectorTest {
     @Mock
     private ResourceRetriever resourceRetriever;
 
+    @Mock
+    private AwsNativeResourceTagUpdaterService awsNativeResourceTagUpdaterService;
+
     @Test
     public void testUpscale() throws QuotaExceededException {
         CloudResource instance1CloudResource = CloudResource.builder().withName("instance1").withType(ResourceType.AWS_INSTANCE).build();
@@ -194,6 +201,57 @@ public class AwsNativeResourceConnectorTest {
 
     @Test
     void testUpdateTags() {
-        assertThrows(UnsupportedOperationException.class, () -> underTest.updateTags(ac, List.of(), Map.of()));
+        CloudResource awsInstance = CloudResource.builder()
+                .withType(ResourceType.AWS_INSTANCE)
+                .withName("awsInstance")
+                .build();
+
+        CloudResource awsVolumeSet = CloudResource.builder()
+                .withType(ResourceType.AWS_VOLUMESET)
+                .withName("awsVolumeSet")
+                .build();
+
+        CloudResource loadBalancer = CloudResource.builder()
+                .withType(ResourceType.ELASTIC_LOAD_BALANCER)
+                .withName("awsLoadBalancer")
+                .build();
+
+        Map<String, String> userDefinedTags = Map.of("custom", "value");
+
+        underTest.updateTags(ac, List.of(awsInstance, awsVolumeSet, loadBalancer), userDefinedTags);
+
+        verify(awsNativeResourceTagUpdaterService).updateTags(ac, awsInstance, userDefinedTags);
+        verify(awsNativeResourceTagUpdaterService).updateTags(ac, awsVolumeSet, userDefinedTags);
+        verify(awsNativeResourceTagUpdaterService).updateTags(ac, loadBalancer, userDefinedTags);
+    }
+
+    @ParameterizedTest
+    @MethodSource("emptyAndNullUserDefinedTags")
+    void testUpdateTagsWhenUserDefinedTagsIsEmpty(Map<String, String> userDefinedTags) {
+        CloudResource awsInstance = CloudResource.builder()
+                .withType(ResourceType.AWS_INSTANCE)
+                .withName("awsInstance")
+                .build();
+
+        CloudResource awsVolumeSet = CloudResource.builder()
+                .withType(ResourceType.AWS_VOLUMESET)
+                .withName("awsVolumeSet")
+                .build();
+
+        CloudResource loadBalancer = CloudResource.builder()
+                .withType(ResourceType.ELASTIC_LOAD_BALANCER)
+                .withName("awsLoadBalancer")
+                .build();
+
+        underTest.updateTags(ac, List.of(awsInstance, awsVolumeSet, loadBalancer), userDefinedTags);
+
+        verifyNoInteractions(awsNativeResourceTagUpdaterService);
+    }
+
+    private static Stream<Arguments> emptyAndNullUserDefinedTags() {
+        return Stream.of(
+                Arguments.of((Object) null),
+                Arguments.of(Collections.emptyMap())
+        );
     }
 }

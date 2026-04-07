@@ -282,11 +282,11 @@ class StackV4ControllerTest {
     }
 
     @Test
-    void testModifyUserDefinedTagsInternal() {
+    void testTriggerUserDefinedTagsUpdateInternal() {
         Map<String, String> userDefinedTags = Map.of("owner", "john doe");
         doAs(USER_CRN, () -> {
-            underTest.modifyUserDefinedTagsInternal(WORKSPACE_ID, STACK_CRN, userDefinedTags);
+            underTest.triggerUserDefinedTagsUpdateInternal(WORKSPACE_ID, STACK_CRN, userDefinedTags);
         });
-        verify(stackOperations).modifyUserDefinedTags(STACK_CRN, userDefinedTags);
+        verify(stackOperationService).triggerUserDefinedTagsUpdate(STACK_CRN, ACCOUNT_ID, userDefinedTags);
     }
 }

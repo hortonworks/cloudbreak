@@ -141,6 +141,10 @@ public class FreeIpaPollerProvider {
         return operationStatusPoller(envId, envCrn, operationId, "FreeIpa modify proxy config");
     }
 
+    public AttemptResult<Void> modifyUserDefinedTagsPoller(Long envId, String envCrn, String operationId) {
+        return operationStatusPoller(envId, envCrn, operationId, "FreeIPA modify user defined tags");
+    }
+
     private AttemptResult<Void> operationStatusPoller(Long envId, String envCrn, String operationId, String operationName) {
         if (PollGroup.CANCELLED.equals(EnvironmentInMemoryStateStore.get(envId))) {
             LOGGER.info("FreeIpa polling cancelled in inmemory store, id: " + envId);

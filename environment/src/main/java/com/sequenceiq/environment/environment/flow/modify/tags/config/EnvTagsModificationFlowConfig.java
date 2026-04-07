@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.environment.flow.modify.tags.config;
 
+import static com.sequenceiq.environment.environment.flow.modify.tags.EnvTagsModificationState.ENVIRONMENT_TAGS_MODIFICATION_START_STATE;
 import static com.sequenceiq.environment.environment.flow.modify.tags.EnvTagsModificationState.FINAL_STATE;
 import static com.sequenceiq.environment.environment.flow.modify.tags.EnvTagsModificationState.INIT_STATE;
 import static com.sequenceiq.environment.environment.flow.modify.tags.EnvTagsModificationState.USER_DEFINED_TAGS_MODIFICATION_DATAHUBS_STATE;
@@ -11,6 +12,7 @@ import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvT
 import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationStateSelectors.FINALIZE_MODIFY_USER_DEFINED_TAGS_EVENT;
 import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationStateSelectors.FINISH_MODIFY_USER_DEFINED_TAGS_EVENT;
 import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationStateSelectors.HANDLED_FAILED_MODIFY_USER_DEFINED_TAGS_EVENT;
+import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationStateSelectors.START_MODIFY_ENVIRONMENT_TAGS_EVENT;
 import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationStateSelectors.START_MODIFY_USER_DEFINED_TAGS_DATAHUBS_EVENT;
 import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationStateSelectors.START_MODIFY_USER_DEFINED_TAGS_DATALAKE_EVENT;
 import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationStateSelectors.START_MODIFY_USER_DEFINED_TAGS_FREEIPA_EVENT;
@@ -36,7 +38,10 @@ public class EnvTagsModificationFlowConfig extends
             new Transition.Builder<EnvTagsModificationState, EnvTagsModificationStateSelectors>()
                     .defaultFailureEvent(FAILED_MODIFY_USER_DEFINED_TAGS_EVENT)
 
-                    .from(INIT_STATE).to(USER_DEFINED_TAGS_MODIFICATION_FREEIPA_STATE)
+                    .from(INIT_STATE).to(ENVIRONMENT_TAGS_MODIFICATION_START_STATE)
+                    .event(START_MODIFY_ENVIRONMENT_TAGS_EVENT).defaultFailureEvent()
+
+                    .from(ENVIRONMENT_TAGS_MODIFICATION_START_STATE).to(USER_DEFINED_TAGS_MODIFICATION_FREEIPA_STATE)
                     .event(START_MODIFY_USER_DEFINED_TAGS_FREEIPA_EVENT).defaultFailureEvent()
 
                     .from(USER_DEFINED_TAGS_MODIFICATION_FREEIPA_STATE).to(USER_DEFINED_TAGS_MODIFICATION_DATALAKE_STATE)
@@ -77,7 +82,7 @@ public class EnvTagsModificationFlowConfig extends
 
     @Override
     public EnvTagsModificationStateSelectors[] getInitEvents() {
-        return new EnvTagsModificationStateSelectors[]{START_MODIFY_USER_DEFINED_TAGS_FREEIPA_EVENT};
+        return new EnvTagsModificationStateSelectors[]{START_MODIFY_ENVIRONMENT_TAGS_EVENT};
     }
 
     @Override

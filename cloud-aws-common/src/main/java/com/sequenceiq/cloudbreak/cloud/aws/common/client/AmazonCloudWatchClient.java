@@ -9,6 +9,8 @@ import software.amazon.awssdk.services.cloudwatch.model.GetMetricStatisticsReque
 import software.amazon.awssdk.services.cloudwatch.model.GetMetricStatisticsResponse;
 import software.amazon.awssdk.services.cloudwatch.model.PutMetricAlarmRequest;
 import software.amazon.awssdk.services.cloudwatch.model.PutMetricAlarmResponse;
+import software.amazon.awssdk.services.cloudwatch.model.TagResourceRequest;
+import software.amazon.awssdk.services.cloudwatch.model.TagResourceResponse;
 
 public class AmazonCloudWatchClient extends AmazonClient {
 
@@ -32,5 +34,9 @@ public class AmazonCloudWatchClient extends AmazonClient {
 
     public GetMetricStatisticsResponse getMetricStatisticsResponse(GetMetricStatisticsRequest getMetricStatisticsRequest) {
         return client.getMetricStatistics(getMetricStatisticsRequest);
+    }
+
+    public TagResourceResponse tagResource(TagResourceRequest tagResourceRequest) {
+        return client.tagResource(tagResourceRequest);
     }
 }

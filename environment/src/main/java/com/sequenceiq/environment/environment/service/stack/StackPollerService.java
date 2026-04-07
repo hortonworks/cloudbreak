@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.environment.service.stack;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
@@ -16,6 +17,7 @@ import com.dyngr.Polling;
 import com.dyngr.core.AttemptMaker;
 import com.dyngr.exception.PollerStoppedException;
 import com.dyngr.exception.UserBreakException;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
@@ -24,6 +26,7 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.environment.environment.poller.StackPollerProvider;
 import com.sequenceiq.environment.exception.DatahubOperationFailedException;
+import com.sequenceiq.environment.exception.StackOperationFailedException;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 
 @Service
@@ -57,17 +60,26 @@ public class StackPollerService {
 
     private final StackPollerProvider stackPollerProvider;
 
+    private final StackService stackService;
+
     @Value("${env.stack.config.update.polling.maximum.seconds:7200}")
     private Integer maxTime;
 
     @Value("${env.stack.config.update.sleep.time.seconds:60}")
     private Integer sleepTime;
 
+    @Value("${env.modifyuserdefinedtags.freeipa.polling.attempt:60}")
+    private Integer modifyUserDefinedTagsAttempt;
+
+    @Value("${env.modifyuserdefinedtags.freeipa.polling.sleeptime:30}")
+    private Integer modifyUserDefinedTagsSleeptime;
+
     public StackPollerService(
             StackV4Endpoint stackV4Endpoint,
-            StackPollerProvider stackPollerProvider) {
+            StackPollerProvider stackPollerProvider, StackService stackService) {
         this.stackV4Endpoint = stackV4Endpoint;
         this.stackPollerProvider = stackPollerProvider;
+        this.stackService = stackService;
     }
 
     public List<FlowIdentifier> updateSaltOnStacks(Long envId, String envCrn) {
@@ -156,5 +168,34 @@ public class StackPollerService {
             throw new CloudbreakServiceException(message);
         }
 
+    }
+
+    public List<FlowIdentifier> updateUserDefinedTagsOnStacks(Long envId, String envCrn, Map<String, String> tags, StackType stackType) {
+        StackViewV4Responses stackViews = stackV4Endpoint.list(0L, envCrn, false);
+        List<String> stackCrns = stackViews.getResponses().stream()
+                .filter(v -> stackType.name().equals(v.getStackType()))
+                .map(StackViewV4Response::getCrn)
+                .toList();
+        LOGGER.info("User defined tags will be updated on stacks: {}", stackCrns);
+        return startStackUserDefinedTagsUpdatePolling(stackCrns,
+                stackPollerProvider.userDefinedTagsUpdatePoller(stackCrns, envId, tags));
+    }
+
+    private List<FlowIdentifier> startStackUserDefinedTagsUpdatePolling(List<String> stackNames, AttemptMaker<List<FlowIdentifier>> attemptMaker) {
+        if (CollectionUtils.isNotEmpty(stackNames)) {
+            try {
+                return Polling.stopAfterDelay(maxTime, TimeUnit.SECONDS)
+                        .stopIfException(true)
+                        .waitPeriodly(sleepTime, TimeUnit.SECONDS)
+                        .run(attemptMaker);
+            } catch (PollerStoppedException e) {
+                LOGGER.warn("Stack updating timed out");
+                throw new StackOperationFailedException("Stack updating timed out", e);
+            } catch (UserBreakException e) {
+                LOGGER.error("Stack updating aborted with error", e);
+                throw new StackOperationFailedException("Stack updating aborted with error", e);
+            }
+        }
+        return null;
     }
 }

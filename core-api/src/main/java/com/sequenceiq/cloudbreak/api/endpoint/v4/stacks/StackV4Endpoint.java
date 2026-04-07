@@ -1120,10 +1120,11 @@ public interface StackV4Endpoint {
 
     @PUT
     @Path("internal/crn/{crn}/modify_user_defined_tags")
+    @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Update user defined tags of cluster by CRN",
             operationId = "modifyUserDefinedTagsByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    void modifyUserDefinedTagsInternal(
+    FlowIdentifier triggerUserDefinedTagsUpdateInternal(
             @PathParam("workspaceId") Long workspaceId,
             @ValidCrn(resource = {DATAHUB, VM_DATALAKE}) @PathParam("crn") String crn,
             @Valid Map<String, String> tags);

@@ -2,6 +2,7 @@ package com.sequenceiq.environment.environment.poller;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -83,6 +84,43 @@ public class StackPollerProvider {
 
     private AttemptResult<List<FlowIdentifier>> evaluateResultWithFlowIdentifier(List<AttemptResult<FlowIdentifier>> results) {
         return results.stream().collect(Collectors.collectingAndThen(Collectors.toList(), flowResultPollerEvaluator::attemptResultFinisher));
+    }
+
+    public AttemptMaker<List<FlowIdentifier>> userDefinedTagsUpdatePoller(List<String> stackCrns, Long envId, Map<String, String> tags) {
+        List<String> mutableCrnsList = new ArrayList<>(stackCrns);
+        return () -> {
+            LOGGER.info("Attempting to update user defined tags on {} clusters for environment with ID {}",
+                    mutableCrnsList.size(), envId);
+            List<String> remaining = new ArrayList<>();
+            List<AttemptResult<FlowIdentifier>> results = collectUserDefinedTagsUpdateResults(mutableCrnsList,
+                    remaining, tags);
+            mutableCrnsList.retainAll(remaining);
+            return evaluateResultWithFlowIdentifier(results);
+        };
+    }
+
+    private List<AttemptResult<FlowIdentifier>> collectUserDefinedTagsUpdateResults(List<String> stackCrns,
+            List<String> remaining, Map<String, String> tags) {
+        return stackCrns.stream()
+                .map(stackCrn -> fetchUserDefinedTagsUpdateResults(remaining, stackCrn, tags))
+                .collect(Collectors.toList());
+    }
+
+    private AttemptResult<FlowIdentifier> fetchUserDefinedTagsUpdateResults(List<String> remainingStacks, String stackCrn, Map<String, String> tags) {
+        try {
+            LOGGER.info("Calling cloudbreak to update user defined tags for cluster {}", stackCrn);
+            FlowIdentifier flowIdentifier = stackService.triggerUserDefinedTagsUpdate(stackCrn, tags);
+            return AttemptResults.finishWith(flowIdentifier);
+        } catch (BadRequestException e) {
+            LOGGER.info("Unable to start user defined tags update for {}. Cluster has flow running already. Retrying.",
+                    stackCrn);
+            remainingStacks.add(stackCrn);
+            return AttemptResults.justContinue();
+        } catch (Exception e) {
+            LOGGER.warn("Failure asking Cloudbreak for user defined tags update, error message is: {}",
+                    e.getMessage());
+            return AttemptResults.breakFor(e);
+        }
     }
 
     public AttemptMaker<Void> stackUpdateConfigPoller(List<String> stackCrns, Long envId, String flowId) {

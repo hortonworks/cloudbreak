@@ -448,7 +448,7 @@ public interface FreeIpaV1Endpoint {
     @Operation(summary = FreeIpaOperationDescriptions.INTERNAL_MODIFY_TAGS_BY_ENV_ID,
             description = FreeIpaNotes.FREEIPA_NOTES, operationId = "internalModifyUserDefinedTagsByEnvironmentV1",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    void modifyUserDefinedTagsInternal(
+    OperationStatus triggerUserDefinedTagsUpdateInternal(
             @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @QueryParam("environment") @NotEmpty String environmentCrn,
             @Valid @NotNull Map<String, String> tags);
 }

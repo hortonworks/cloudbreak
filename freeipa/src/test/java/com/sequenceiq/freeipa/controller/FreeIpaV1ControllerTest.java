@@ -388,10 +388,9 @@ class FreeIpaV1ControllerTest {
     @Test
     void testModifyUserDefinedTagsInternal() {
         Map<String, String> userDefinedTags = Map.of("owner", "john doe");
-        when(crnService.getCurrentAccountId()).thenReturn(ACCOUNT_ID);
 
-        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.modifyUserDefinedTagsInternal(ENVIRONMENT_CRN, userDefinedTags));
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.triggerUserDefinedTagsUpdateInternal(ENVIRONMENT_CRN, userDefinedTags));
 
-        verify(freeIpaModifyTagsService).modifyUserDefinedTags(ENVIRONMENT_CRN, userDefinedTags, ACCOUNT_ID);
+        verify(freeIpaModifyTagsService).startUserDefinedTagsModificationOperation(eq(ENVIRONMENT_CRN), eq("hortonworks"), eq(userDefinedTags));
     }
 }

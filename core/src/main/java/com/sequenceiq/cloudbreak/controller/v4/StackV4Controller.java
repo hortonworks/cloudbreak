@@ -857,8 +857,8 @@ public class StackV4Controller extends NotificationController implements StackV4
 
     @InternalOnly
     @Override
-    public void modifyUserDefinedTagsInternal(Long workspaceId, @ResourceCrn String crn, Map<String, String> tags) {
-        stackOperations.modifyUserDefinedTags(crn, tags);
+    public FlowIdentifier triggerUserDefinedTagsUpdateInternal(Long workspaceId, @ResourceCrn String crn, Map<String, String> tags) {
+        return stackOperationService.triggerUserDefinedTagsUpdate(crn, ThreadBasedUserCrnProvider.getAccountId(), tags);
     }
 
     @Override

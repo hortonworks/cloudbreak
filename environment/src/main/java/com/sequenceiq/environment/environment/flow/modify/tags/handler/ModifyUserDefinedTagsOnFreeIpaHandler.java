@@ -16,7 +16,7 @@ import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationEvent;
 import com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationFailureEvent;
-import com.sequenceiq.environment.environment.service.freeipa.FreeIpaService;
+import com.sequenceiq.environment.environment.service.freeipa.FreeIpaPollerService;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
@@ -26,7 +26,7 @@ public class ModifyUserDefinedTagsOnFreeIpaHandler extends ExceptionCatcherEvent
     private static final Logger LOGGER = LoggerFactory.getLogger(ModifyUserDefinedTagsOnFreeIpaHandler.class);
 
     @Inject
-    private FreeIpaService freeIpaService;
+    private FreeIpaPollerService freeIpaPollerService;
 
     @Override
     public String selector() {
@@ -40,7 +40,7 @@ public class ModifyUserDefinedTagsOnFreeIpaHandler extends ExceptionCatcherEvent
         String resourceCrn = event.getData().getResourceCrn();
         Map<String, String> userDefinedTags = event.getData().getUserDefinedTags();
         try {
-            freeIpaService.modifyUserDefinedTags(resourceCrn, userDefinedTags);
+            freeIpaPollerService.waitForModifyUserDefinedTags(resourceId, resourceCrn, userDefinedTags);
         } catch (Exception e) {
             LOGGER.error("Modify user defined tags on FreeIPA failed.", e);
             return new EnvTagsModificationFailureEvent(resourceId, resourceName, resourceCrn, USER_DEFINED_TAGS_MODIFICATION_ON_FREEIPA_FAILED, e);

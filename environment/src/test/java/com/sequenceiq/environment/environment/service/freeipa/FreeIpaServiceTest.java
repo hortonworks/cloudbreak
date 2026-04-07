@@ -5,7 +5,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -222,22 +221,20 @@ class FreeIpaServiceTest {
     }
 
     @Test
-    void modifyUserDefinedTags() {
+    void triggerUserDefinedTagsUpdate() {
         Map<String, String> userDefinedTags = Map.of("owner", "john doe");
 
-        ThreadBasedUserCrnProvider.doAs(USERCRN, () -> underTest.modifyUserDefinedTags(ENVCRN, userDefinedTags));
+        ThreadBasedUserCrnProvider.doAs(USERCRN, () -> underTest.triggerUserDefinedTagsUpdate(ENVCRN, userDefinedTags));
 
-        verify(freeIpaV1Endpoint).modifyUserDefinedTagsInternal(ENVCRN, userDefinedTags);
+        verify(freeIpaV1Endpoint).triggerUserDefinedTagsUpdateInternal(ENVCRN, userDefinedTags);
     }
 
     @Test
-    void modifyUserDefinedTagsFailureTest() {
+    void triggerUserDefinedTagsUpdateFailureTest() {
         Map<String, String> userDefinedTags = Map.of("owner", "john doe");
-
-        doThrow(new WebApplicationException("Error")).when(freeIpaV1Endpoint).modifyUserDefinedTagsInternal(ENVCRN, userDefinedTags);
+        when(freeIpaV1Endpoint.triggerUserDefinedTagsUpdateInternal(ENVCRN, userDefinedTags)).thenThrow(new WebApplicationException("Error"));
         when(webApplicationExceptionMessageExtractor.getErrorMessage(any())).thenReturn("custom error");
-
-        assertThatThrownBy(() -> ThreadBasedUserCrnProvider.doAs(USERCRN, () -> underTest.modifyUserDefinedTags(ENVCRN, userDefinedTags)))
+        assertThatThrownBy(() -> ThreadBasedUserCrnProvider.doAs(USERCRN, () -> underTest.triggerUserDefinedTagsUpdate(ENVCRN, userDefinedTags)))
                 .hasMessage("custom error")
                 .isExactlyInstanceOf(FreeIpaOperationFailedException.class);
     }

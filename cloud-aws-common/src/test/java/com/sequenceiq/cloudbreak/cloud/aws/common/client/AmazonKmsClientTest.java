@@ -33,6 +33,8 @@ import software.amazon.awssdk.services.kms.model.RotateKeyOnDemandRequest;
 import software.amazon.awssdk.services.kms.model.RotateKeyOnDemandResponse;
 import software.amazon.awssdk.services.kms.model.ScheduleKeyDeletionRequest;
 import software.amazon.awssdk.services.kms.model.ScheduleKeyDeletionResponse;
+import software.amazon.awssdk.services.kms.model.TagResourceRequest;
+import software.amazon.awssdk.services.kms.model.TagResourceResponse;
 
 @ExtendWith(MockitoExtension.class)
 class AmazonKmsClientTest {
@@ -152,4 +154,14 @@ class AmazonKmsClientTest {
         assertEquals(expectedResponse, response);
     }
 
+    @Test
+    void testTagResource() {
+        TagResourceRequest request = mock(TagResourceRequest.class);
+        TagResourceResponse expectedResponse = mock(TagResourceResponse.class);
+        when(client.tagResource(request)).thenReturn(expectedResponse);
+
+        TagResourceResponse response = underTest.tagResource(request);
+
+        assertEquals(expectedResponse, response);
+    }
 }

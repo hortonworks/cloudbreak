@@ -13,6 +13,7 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes.DeleteV
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftFinalizationStateSelectors.START_FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_VALIDATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftRollbackStateSelectors.START_ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION_VALIDATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.modifyselinux.event.CoreModifySeLinuxStateSelectors.CORE_MODIFY_SELINUX_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.modifytags.event.ModifyUserDefinedTagsStateSelectors.MODIFY_USER_DEFINED_TAGS_START_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.provision.ClusterCreationEvent.CLUSTER_CREATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.rds.cert.RotateRdsCertificateEvent.ROTATE_RDS_CERTIFICATE_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.salt.update.SaltUpdateEvent.SALT_UPDATE_EVENT;
@@ -70,6 +71,7 @@ import com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.event.Migrat
 import com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.event.MigrateZookeeperToKraftFlowChainTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.event.MigrateZookeeperToKraftRollbackTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.modifyselinux.event.CoreModifySeLinuxEvent;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.modifytags.event.ModifyUserDefinedTagsEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.resetjvmparams.ResetJvmParamsFlowEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.resetjvmparams.ResetJvmParamsTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.restart.RestartInstancesWithRdsStartEvent;
@@ -654,6 +656,11 @@ public class ReactorFlowManager {
     public FlowIdentifier triggerZookeeperToKraftMigrationRollback(Long stackId) {
         String selector = START_ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION_VALIDATION_EVENT.event();
         return reactorNotifier.notify(stackId, selector, new MigrateZookeeperToKraftRollbackTriggerEvent(stackId, new Promise<>()));
+    }
+
+    public FlowIdentifier triggerUserDefinedTagsUpdate(Long stackId, Map<String, String> userDefinedTags) {
+        String selector = MODIFY_USER_DEFINED_TAGS_START_EVENT.event();
+        return reactorNotifier.notify(stackId, selector, new ModifyUserDefinedTagsEvent(selector, stackId, userDefinedTags));
     }
 
     public FlowIdentifier triggerUpdatePublicDnsEntriesInPem(Long stackId) {

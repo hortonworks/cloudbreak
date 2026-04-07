@@ -3,6 +3,7 @@ package com.sequenceiq.environment.environment.flow.modify.tags.event;
 import com.sequenceiq.flow.core.FlowEvent;
 
 public enum EnvTagsModificationStateSelectors implements FlowEvent {
+    START_MODIFY_ENVIRONMENT_TAGS_EVENT,
     START_MODIFY_USER_DEFINED_TAGS_FREEIPA_EVENT,
     START_MODIFY_USER_DEFINED_TAGS_DATALAKE_EVENT,
     START_MODIFY_USER_DEFINED_TAGS_DATAHUBS_EVENT,

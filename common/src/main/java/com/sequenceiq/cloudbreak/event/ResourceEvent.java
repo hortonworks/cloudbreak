@@ -217,6 +217,7 @@ public enum ResourceEvent {
     ENVIRONMENT_PROXY_CONFIG_MODIFICATION_FAILED("environment.proxy.modification.failed"),
     ENVIRONMENT_PROXY_CONFIG_MODIFICATION_FINISHED("environment.proxy.modification.finished"),
 
+    ENVIRONMENT_USER_DEFINED_TAGS_MODIFICATION_STARTED("environment.user.defined.tags.modification.started"),
     ENVIRONMENT_USER_DEFINED_TAGS_MODIFICATION_ON_FREEIPA_STARTED("environment.user.defined.tags.modification.freeipa.started"),
     ENVIRONMENT_USER_DEFINED_TAGS_MODIFICATION_ON_DATALAKE_STARTED("environment.user.defined.tags.modification.datalake.started"),
     ENVIRONMENT_USER_DEFINED_TAGS_MODIFICATION_ON_DATAHUBS_STARTED("environment.user.defined.tags.modification.datahubs.started"),
@@ -855,6 +856,10 @@ public enum ResourceEvent {
     STACK_CHANGING_SELINUX("stack.changing.selinux.mode"),
     STACK_CHANGED_SELINUX("stack.changed.selinux.mode"),
     STACK_FAILED_SELINUX("stack.failed.selinux.mode"),
+    STACK_UPDATE_USER_DEFINED_TAGS_ON_CLOUD_RESOURCES("stack.update.userdefinedtags.cloudresources"),
+    STACK_UPDATE_USER_DEFINED_TAGS("stack.update.userdefinedtags.stack"),
+    STACK_UPDATE_USER_DEFINED_TAGS_COMPLETE("stack.update.userdefinedtags.complete"),
+    STACK_UPDATE_USER_DEFINED_TAGS_FAILED("stack.update.userdefinedtags.failed"),
     SHARED_SERVICE_DB_SECRET_ROTATION_PILLAR_CONFIG_UPDATE_DH("shared.service.db.rotation.dh.pillar.update.notification"),
     SHARED_SERVICE_DB_SECRET_ROTATION_PILLAR_CONFIG_UPDATE_DL("shared.service.db.rotation.dl.pillar.update.notification"),
     SHARED_SERVICE_DB_SECRET_ROTATION_CM_CONFIG_UPDATE_DH("shared.service.db.rotation.dh.cm.update.notification"),

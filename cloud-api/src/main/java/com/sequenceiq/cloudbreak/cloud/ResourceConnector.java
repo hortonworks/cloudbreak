@@ -481,9 +481,8 @@ public interface ResourceConnector {
      * @param authenticatedContext the authenticated context which holds the client object
      * @param cloudResources the list of cloud resources whose tags are being updated
      * @param tags the desired tags to apply; new entries will be added, existing entries will be overwritten
-     * @throws Exception in case of any error
      */
-    default void updateTags(AuthenticatedContext authenticatedContext, List<CloudResource> cloudResources, Map<String, String> tags) throws Exception {
+    default void updateTags(AuthenticatedContext authenticatedContext, List<CloudResource> cloudResources, Map<String, String> tags) {
         throw new UnsupportedOperationException("Interface not implemented.");
     }
 

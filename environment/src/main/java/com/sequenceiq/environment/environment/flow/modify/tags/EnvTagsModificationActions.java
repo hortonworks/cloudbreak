@@ -5,6 +5,7 @@ import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvT
 import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationHandlerSelectors.MODIFY_USER_DEFINED_TAGS_ON_FREEIPA_EVENT;
 import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationStateSelectors.FINALIZE_MODIFY_USER_DEFINED_TAGS_EVENT;
 import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationStateSelectors.HANDLED_FAILED_MODIFY_USER_DEFINED_TAGS_EVENT;
+import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationStateSelectors.START_MODIFY_USER_DEFINED_TAGS_FREEIPA_EVENT;
 import static org.slf4j.LoggerFactory.getLogger;
 
 import java.util.List;
@@ -31,6 +32,41 @@ public class EnvTagsModificationActions {
 
     @Inject
     private EnvironmentStatusUpdateService environmentStatusUpdateService;
+
+    @Bean(name = "ENVIRONMENT_TAGS_MODIFICATION_START_STATE")
+    public Action<?, ?> initUserDefinedTagsModificationOnEnvironment() {
+        return new AbstractEnvTagsModificationAction<>(EnvTagsModificationEvent.class) {
+
+            @Override
+            protected void doExecute(CommonContext context, EnvTagsModificationEvent payload, Map<Object, Object> variables) {
+                LOGGER.debug("Modify user defined tags on environment state started {}", payload);
+                environmentStatusUpdateService.updateEnvironmentStatusAndNotify(context, payload,
+                        EnvironmentStatus.USER_DEFINED_TAGS_MODIFICATION_IN_PROGRESS,
+                        ResourceEvent.ENVIRONMENT_USER_DEFINED_TAGS_MODIFICATION_STARTED,
+                        EnvTagsModificationState.ENVIRONMENT_TAGS_MODIFICATION_START_STATE);
+                String nextEvent = START_MODIFY_USER_DEFINED_TAGS_FREEIPA_EVENT.event();
+                Long resourceId = payload.getResourceId();
+                String resourceName = payload.getResourceName();
+                String resourceCrn = payload.getResourceCrn();
+                Map<String, String> tags = payload.getUserDefinedTags();
+                EnvTagsModificationEvent event = EnvTagsModificationEvent.builder()
+                        .withSelector(nextEvent)
+                        .withResourceId(resourceId)
+                        .withResourceName(resourceName)
+                        .withResourceCrn(resourceCrn)
+                        .withUserDefinedTags(tags)
+                        .build();
+                sendEvent(context, nextEvent, event);
+            }
+
+            @Override
+            protected Object getFailurePayload(EnvTagsModificationEvent payload, Optional<CommonContext> context,
+                    Exception ex) {
+                return new EnvTagsModificationFailureEvent(payload.getResourceId(), payload.getResourceName(), payload.getResourceCrn(),
+                        getFailureEnvironmentStatus(), ex);
+            }
+        };
+    }
 
     @Bean(name = "USER_DEFINED_TAGS_MODIFICATION_FREEIPA_STATE")
     public Action<?, ?> modifyUserDefinedTagsOnFreeIpa() {

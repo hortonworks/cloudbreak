@@ -270,7 +270,7 @@ class EnvironmentReactorFlowManagerTest {
         verify(eventSender).sendEvent(argumentCaptor.capture(), headersCaptor.capture());
         EnvTagsModificationEvent event = argumentCaptor.getValue();
         assertThat(event)
-                .returns(EnvTagsModificationStateSelectors.START_MODIFY_USER_DEFINED_TAGS_FREEIPA_EVENT.selector(), BaseFlowEvent::selector)
+                .returns(EnvTagsModificationStateSelectors.START_MODIFY_ENVIRONMENT_TAGS_EVENT.selector(), BaseFlowEvent::selector)
                 .returns(ENVIRONMENT_CRN, EnvTagsModificationEvent::getResourceCrn)
                 .returns(ENVIRONMENT_NAME, EnvTagsModificationEvent::getResourceName)
                 .returns(ENVIRONMENT_ID, EnvTagsModificationEvent::getResourceId)

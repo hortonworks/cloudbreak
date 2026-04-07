@@ -10,13 +10,13 @@ import org.junit.jupiter.api.Test;
 
 class StackTagsTest {
 
-    private static final Map<String, String> USER_DEFINED_TAGS = new HashMap<>(Map.of("owner", "john doe"));
+    private static final Map<String, String> USER_DEFINED_TAGS = new HashMap<>(Map.of("custom", "value"));
 
     private static final Map<String, String> APPLICATION_TAGS = new HashMap<>(Map.of("application", "app"));
 
     private static final Map<String, String> DEFAULT_TAGS = new HashMap<>(Map.of("owner", "john doe", "creation-timestamp", "1773042126"));
 
-    private static final Map<String, String> UPDATED_USER_DEFINED_TAGS = Map.of("owner", "jane doe", "application", "app");
+    private static final Map<String, String> UPDATED_USER_DEFINED_TAGS = Map.of("custom", "value2", "application", "app");
 
     private StackTags stackTags;
 
