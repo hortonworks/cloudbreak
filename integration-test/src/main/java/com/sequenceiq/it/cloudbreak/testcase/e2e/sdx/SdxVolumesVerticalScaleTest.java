@@ -72,7 +72,7 @@ public class SdxVolumesVerticalScaleTest extends PreconditionSdxE2ETest {
     )
     public void testSdxVolumesVerticalScale(TestContext testContext) {
         CloudPlatform cloudPlatform = testContext.getCloudPlatform();
-        String instanceType = CloudPlatform.AWS.equals(cloudPlatform) ? "m5.4xlarge" : "Standard_D8s_v3";
+        String instanceType = testContext.getCloudProvider().getDatahubCustomInstanceType();
         testContext
             .given("telemetry", TelemetryTestDto.class)
             .withLogging()
@@ -87,7 +87,7 @@ public class SdxVolumesVerticalScaleTest extends PreconditionSdxE2ETest {
             .when(sdxTestClient.describeInternalWithResources())
             .awaitForHealthyInstances()
             .given(SdxInternalTestDto.class)
-            .when(sdxTestClient.updateDisks(UPDATE_SIZE, getVolumeType(MODIFY_DISKS, cloudPlatform, testContext), TEST_INSTANCE_GROUP,
+            .when(sdxTestClient.updateDisks(UPDATE_SIZE, testContext.getCloudProvider().getModifyDiskVolumeType(), TEST_INSTANCE_GROUP,
                     DiskType.ADDITIONAL_DISK))
             .awaitForFlow()
             .await(SdxClusterStatusResponse.RUNNING)
@@ -95,11 +95,11 @@ public class SdxVolumesVerticalScaleTest extends PreconditionSdxE2ETest {
             .given(SdxInternalTestDto.class)
             .when(sdxTestClient.describeInternalWithResources())
             .then((tc, testDto, client) -> {
-                validateVerticalScale(testDto, tc, cloudPlatform, getVolumeType(MODIFY_DISKS, cloudPlatform, testContext), MODIFY_DISKS);
+                validateVerticalScale(testDto, tc, cloudPlatform, testContext.getCloudProvider().getModifyDiskVolumeType(), MODIFY_DISKS);
                 return testDto;
             })
             .given(SdxInternalTestDto.class)
-            .when(sdxTestClient.addDisks(ADD_DISKS_SIZE, DISKS_COUNT, getVolumeType(ADD_DISKS, cloudPlatform, testContext), TEST_INSTANCE_GROUP,
+            .when(sdxTestClient.addDisks(ADD_DISKS_SIZE, DISKS_COUNT, testContext.getCloudProvider().getAddDiskVolumeType(), TEST_INSTANCE_GROUP,
                     CloudVolumeUsageType.GENERAL))
             .awaitForFlow()
             .await(SdxClusterStatusResponse.RUNNING)
@@ -107,7 +107,7 @@ public class SdxVolumesVerticalScaleTest extends PreconditionSdxE2ETest {
             .given(SdxInternalTestDto.class)
             .when(sdxTestClient.describeInternalWithResources())
             .then((tc, testDto, client) -> {
-                validateVerticalScale(testDto, tc, cloudPlatform, getVolumeType(ADD_DISKS, cloudPlatform, testContext), ADD_DISKS);
+                validateVerticalScale(testDto, tc, cloudPlatform, testContext.getCloudProvider().getAddDiskVolumeType(), ADD_DISKS);
                 return testDto;
             })
             .validate();
@@ -168,13 +168,6 @@ public class SdxVolumesVerticalScaleTest extends PreconditionSdxE2ETest {
                     : "Failed to add disks on cloud provider");
             throw new TestFailException(exceptionMessage);
         }
-    }
-
-    private String getVolumeType(String operationType, CloudPlatform cloudPlatform, TestContext testContext) {
-        if ((cloudPlatform == CloudPlatform.AWS) || (cloudPlatform == CloudPlatform.AZURE && ADD_DISKS.equals(operationType))) {
-            return testContext.getCloudProvider().verticalScaleVolumeType();
-        }
-        return null;
     }
 
     private void validateFstab(StackV4Response stackV4Response, Set<String> instanceIps, Map<String, String> instanceIpIdsMap) {

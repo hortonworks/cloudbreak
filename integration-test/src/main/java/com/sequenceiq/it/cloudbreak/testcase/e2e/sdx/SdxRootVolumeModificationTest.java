@@ -8,12 +8,9 @@ import jakarta.inject.Inject;
 import org.springframework.util.CollectionUtils;
 import org.testng.annotations.Test;
 
-import com.google.common.collect.ImmutableMap;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.resource.ResourceV4Response;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
-import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -29,9 +26,6 @@ import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 public class SdxRootVolumeModificationTest extends PreconditionSdxE2ETest {
 
     private static final Map<String, String> SDX_TAGS = Map.of("sdxTagKey", "sdxTagValue");
-
-    private static final Map<CloudPlatform, ResourceType> PLATFORM_ROOT_DISK_RESOURCE_TYPE_MAP = ImmutableMap.of(CloudPlatform.AWS, ResourceType.AWS_ROOT_DISK,
-            CloudPlatform.AZURE, ResourceType.AZURE_DISK);
 
     private static final String TEST_INSTANCE_GROUP = "master";
 
@@ -50,8 +44,7 @@ public class SdxRootVolumeModificationTest extends PreconditionSdxE2ETest {
             then = "root volume should be modified and the datalake should be up and running"
     )
     public void testSdxRootVolumeModification(TestContext testContext) {
-        CloudPlatform cloudPlatform = testContext.getCloudPlatform();
-        String instanceType = CloudPlatform.AWS.equals(cloudPlatform) ? "m5.2xlarge" : "Standard_D8s_v3";
+        String instanceType = testContext.getCloudProvider().getDatahubCustomInstanceType();
         testContext
                 .given("telemetry", TelemetryTestDto.class)
                 .withLogging()
@@ -66,7 +59,7 @@ public class SdxRootVolumeModificationTest extends PreconditionSdxE2ETest {
                 .when(sdxTestClient.describeInternal())
                 .awaitForHealthyInstances()
                 .given(SdxInternalTestDto.class)
-                .when(sdxTestClient.updateDisks(ROOT_UPDATE_SIZE, getVolumeType(cloudPlatform, testContext), TEST_INSTANCE_GROUP,
+                .when(sdxTestClient.updateDisks(ROOT_UPDATE_SIZE, testContext.getCloudProvider().verticalScaleVolumeType(), TEST_INSTANCE_GROUP,
                         DiskType.ROOT_DISK))
                 .awaitForFlow()
                 .await(SdxClusterStatusResponse.RUNNING)
@@ -74,17 +67,10 @@ public class SdxRootVolumeModificationTest extends PreconditionSdxE2ETest {
                 .given(SdxInternalTestDto.class)
                 .when(sdxTestClient.describeInternalWithResources())
                 .then((tc, testDto, client) -> {
-                    validateRootDisks(testDto, tc, client, cloudPlatform);
+                    validateRootDisks(testDto, tc, client);
                     return testDto;
                 })
                 .validate();
-    }
-
-    private String getVolumeType(CloudPlatform cloudPlatform, TestContext testContext) {
-        if (cloudPlatform == CloudPlatform.AWS || cloudPlatform == CloudPlatform.AZURE) {
-            return testContext.getCloudProvider().verticalScaleVolumeType();
-        }
-        return null;
     }
 
     private List<String> getVolumesOnCloudProvider(SdxInternalTestDto sdxTestDto, TestContext tc, SdxClient client) {
@@ -93,18 +79,18 @@ public class SdxRootVolumeModificationTest extends PreconditionSdxE2ETest {
         return cloudFunctionality.listInstancesRootVolumeIds(sdxTestDto.getName(), updatedInstances);
     }
 
-    private List<ResourceV4Response> getRootVolumes(SdxInternalTestDto sdxTestDto, CloudPlatform cloudPlatform) {
+    private List<ResourceV4Response> getRootVolumes(SdxInternalTestDto sdxTestDto, TestContext tc) {
         SdxClusterDetailResponse sdxClusterDetailResponse = sdxTestDto.getResponse();
         return sdxClusterDetailResponse.getStackV4Response().getResources().stream()
-                .filter(res -> res.getResourceType().equals(PLATFORM_ROOT_DISK_RESOURCE_TYPE_MAP.get(cloudPlatform))
+                .filter(res -> res.getResourceType().equals(tc.getCloudProvider().getRootDiskResourceType())
                         && res.getInstanceGroup().equals(TEST_INSTANCE_GROUP))
                 .toList();
     }
 
-    private void validateRootDisks(SdxInternalTestDto sdxTestDto, TestContext tc, SdxClient client, CloudPlatform cloudPlatform) {
+    private void validateRootDisks(SdxInternalTestDto sdxTestDto, TestContext tc, SdxClient client) {
         String operation = "Update";
         int expectedDiskSize = ROOT_UPDATE_SIZE;
-        String expectedVolumeType = getVolumeType(cloudPlatform, tc);
+        String expectedVolumeType = tc.getCloudProvider().verticalScaleVolumeType();
 
         List<String> rootVolumes = getVolumesOnCloudProvider(sdxTestDto, tc, client);
         if (CollectionUtils.isEmpty(rootVolumes)) {
@@ -120,7 +106,7 @@ public class SdxRootVolumeModificationTest extends PreconditionSdxE2ETest {
             }
         });
 
-        List<ResourceV4Response> rootVolumesInGroup = getRootVolumes(sdxTestDto, cloudPlatform);
+        List<ResourceV4Response> rootVolumesInGroup = getRootVolumes(sdxTestDto, tc);
         if (CollectionUtils.isEmpty(rootVolumesInGroup)) {
             throw new TestFailException(String.format("Root volume is not present on instances in CB for group %s",
                     TEST_INSTANCE_GROUP));

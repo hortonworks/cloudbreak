@@ -12,6 +12,7 @@ import org.testng.annotations.Test;
 
 import com.sequenceiq.it.cloudbreak.assertion.distrox.DistroxStopStartScaleDurationAssertions;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
+import com.sequenceiq.it.cloudbreak.config.DistroXStopStartScaleTestProperties;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
@@ -26,6 +27,9 @@ public class DistroXStopStartScaleTest extends AbstractE2ETest {
 
     @Inject
     private DistroxUtil distroxUtil;
+
+    @Inject
+    private DistroXStopStartScaleTestProperties distroXStopStartScaleTestProperties;
 
     @Override
     protected void setupTest(TestContext testContext) {
@@ -50,45 +54,39 @@ public class DistroXStopStartScaleTest extends AbstractE2ETest {
             then = "cluster compute nodes can be scaled down then up via stop then start instances at provider")
     public void testStopStartScaleDistroX(TestContext testContext, ITestContext iTestContext) {
         AtomicReference<List<String>> instancesToStop = new AtomicReference<>();
-        DistroXScaleTestParameters params = new DistroXScaleTestParameters(iTestContext.getCurrentXmlTest().getAllParameters());
 
-        long expectedNumber;
-        if (testContext.commonCloudProperties().getCloudProvider().equalsIgnoreCase("AZURE")) {
-            expectedNumber = params.getAzureScalingTime();
-        } else if (testContext.commonCloudProperties().getCloudProvider().equalsIgnoreCase("GCP")) {
-            expectedNumber = params.getGcpScalingTime();
-        } else {
-            expectedNumber = params.getAwsScalingTime();
-        }
+        int expectedNumber = distroXStopStartScaleTestProperties.getScalingTimeByProvider(testContext.commonCloudProperties().getCloudProvider());
 
-        if (params.getTimes() < 1) {
+        if (distroXStopStartScaleTestProperties.getTestingTimes() < 1) {
             throw new TestFailException("Test should execute at least 1 round of scaling");
         }
 
         testContext.given(DistroXTestDto.class)
-                .when(distroXTestClient.scale(params.getHostGroup(), params.getScaleUpTarget()))
+                .when(distroXTestClient.scale(distroXStopStartScaleTestProperties.getHostGroup(), distroXStopStartScaleTestProperties.getScaleUpTarget()))
                 .awaitForFlow()
                 .then((tc, testDto, client) -> {
-                    instancesToStop.set(distroxUtil.getInstanceIds(testDto, client, params.getHostGroup()).stream()
-                            .limit(params.getScaleDownTarget()).collect(Collectors.toList()));
+                    instancesToStop.set(distroxUtil.getInstanceIds(testDto, client, distroXStopStartScaleTestProperties.getHostGroup()).stream()
+                            .limit(distroXStopStartScaleTestProperties.getScaleDownTarget()).collect(Collectors.toList()));
                     testDto.setInstanceIdsForActions(instancesToStop.get());
                     return testDto;
                 })
                 .when(distroXTestClient.scaleStopInstances())
                 .awaitForFlow()
                 .then(new DistroxStopStartScaleDurationAssertions(expectedNumber, false))
-                .when(distroXTestClient.scaleStartInstances(params.getHostGroup(), params.getScaleUpTarget()))
+                .when(distroXTestClient.scaleStartInstances(distroXStopStartScaleTestProperties.getHostGroup(),
+                        distroXStopStartScaleTestProperties.getScaleUpTarget()))
                 .awaitForFlow()
                 .when(distroXTestClient.get())
                 .then(new DistroxStopStartScaleDurationAssertions(expectedNumber, true));
-        IntStream.range(1, params.getTimes())
+        IntStream.range(1, distroXStopStartScaleTestProperties.getTestingTimes())
                 .forEach(i -> {
                             testContext
                                     .given(DistroXTestDto.class)
                                     .when(distroXTestClient.scaleStopInstances())
                                     .awaitForFlow()
                                     .then(new DistroxStopStartScaleDurationAssertions(expectedNumber, false))
-                                    .when(distroXTestClient.scaleStartInstances(params.getHostGroup(), params.getScaleUpTarget()))
+                                    .when(distroXTestClient.scaleStartInstances(distroXStopStartScaleTestProperties.getHostGroup(),
+                                            distroXStopStartScaleTestProperties.getScaleUpTarget()))
                                     .awaitForFlow()
                                     .when(distroXTestClient.get())
                                     .then(new DistroxStopStartScaleDurationAssertions(expectedNumber, true));

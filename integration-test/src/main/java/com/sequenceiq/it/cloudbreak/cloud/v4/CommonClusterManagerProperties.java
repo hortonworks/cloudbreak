@@ -36,6 +36,8 @@ public class CommonClusterManagerProperties {
 
     private String streamsHADistroXBlueprintName;
 
+    private String streamsLDDistroXBlueprintName;
+
     private UpgradeProperties upgrade = new UpgradeProperties();
 
     private UpgradeDatabaseServerProperties upgradeDatabaseServer = new UpgradeDatabaseServerProperties();
@@ -126,6 +128,14 @@ public class CommonClusterManagerProperties {
 
     public void setStreamsHADistroXBlueprintName(String streamsHADistroXBlueprintName) {
         this.streamsHADistroXBlueprintName = streamsHADistroXBlueprintName;
+    }
+
+    public String getStreamsLDDistroXBlueprintName(String runtimeVersion) {
+        return String.format(streamsLDDistroXBlueprintName, runtimeVersion);
+    }
+
+    public void setStreamsLDDistroXBlueprintName(String streamsLDDistroXBlueprintName) {
+        this.streamsLDDistroXBlueprintName = streamsLDDistroXBlueprintName;
     }
 
     public UpgradeProperties getUpgrade() {

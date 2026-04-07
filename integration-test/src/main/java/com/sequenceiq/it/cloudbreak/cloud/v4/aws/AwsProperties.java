@@ -34,6 +34,8 @@ public class AwsProperties {
 
     private String embeddedDbUpgradeSourceVersion;
 
+    private String datahubCustomInstanceType;
+
     private final Instance instance = new Instance();
 
     private final Instance storageOptimizedInstance = new Instance();
@@ -106,6 +108,14 @@ public class AwsProperties {
 
     public void setEmbeddedDbUpgradeSourceVersion(String embeddedDbUpgradeSourceVersion) {
         this.embeddedDbUpgradeSourceVersion = embeddedDbUpgradeSourceVersion;
+    }
+
+    public String getDatahubCustomInstanceType() {
+        return datahubCustomInstanceType;
+    }
+
+    public void setDatahubCustomInstanceType(String datahubCustomInstanceType) {
+        this.datahubCustomInstanceType = datahubCustomInstanceType;
     }
 
     public String getLocation() {

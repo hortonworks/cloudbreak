@@ -116,6 +116,7 @@ integrationtest:
   dataEngDistroXBlueprintName: "%s - Data Engineering: Apache Spark%s, Apache Hive, Apache Oozie"
   dataMartDistroXBlueprintName: "%s - Data Mart: Apache Impala, Hue"
   streamsHADistroXBlueprintName: "%s - Streams Messaging High Availability: Apache Kafka, Schema Registry, Streams Messaging Manager, Streams Replication Manager, Cruise Control"
+  streamsLDDistroXBlueprintName: "%s - Streams Messaging Light Duty: Apache Kafka, Schema Registry, Streams Messaging Manager, Streams Replication Manager, Cruise Control"
   clouderamanager:
     defaultUser: admin
     defaultPassword: cb1STPneh2b6KyJn
@@ -245,6 +246,7 @@ integrationtest:
       subnetIds:
         - subnet-0476e538519ac9570
         - subnet-0cb6292385565e5da
+    datahubCustomInstanceType: m5.4xlarge
 
   # azure parameters
   azure:
@@ -336,6 +338,7 @@ integrationtest:
       resourceGroupName:
       managedIdentity:
     embeddedDbUpgradeSourceVersion: 11
+    datahubCustomInstanceType: Standard_D8s_v3
 
   # gcp parameters
   gcp:
@@ -405,6 +408,7 @@ integrationtest:
       environmentKey:
       datahubKey:
     embeddedDbUpgradeSourceVersion: 14
+    datahubCustomInstanceType: n2-standard-8
 
   # yarn parameters
   yarn:
@@ -509,3 +513,13 @@ loadtest:
     minNodes: 1
     maxNodes: 5
     imageCatalogId: f6e778fc-7f17-4535-9021-515351df3691
+
+distroXStopStartScaleTest:
+  config:
+    hostGroup: compute
+    scaleUpTarget: 5
+    scaleDownTarget: 3
+    testingTimes: 3
+    awsScalingTime: 6
+    azureScalingTime: 8
+    gcpScalingTime: 8
