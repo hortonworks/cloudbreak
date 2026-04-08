@@ -11,8 +11,7 @@ echo "Creating service account for CDP"
 gcloud iam service-accounts create $SERVICE_ACCOUNT_NAME --display-name "A CDP Service Account" --quiet
 
 echo "Creating Role with minimal permissions for CDP"
-gcloud iam roles create $ROLE_ID --project  $PROJECT_ID --title $ROLE_NAME \
---file path/to/gcp-environment-minimal-policy.json
+gcloud iam roles create $ROLE_ID --project  $PROJECT_ID --file path/to/gcp-environment-minimal-policy.json
 
 echo "Binding Role with minimal permissions to the service account"
 gcloud projects add-iam-policy-binding $PROJECT_ID --member serviceAccount:$SERVICE_ACCOUNT_NAME@$PROJECT_ID.iam.gserviceaccount.com --role projects/$PROJECT_ID/roles/$ROLE_ID --quiet --no-user-output-enabled --condition=None
