@@ -68,8 +68,8 @@
     "label": "slapd_errors"
   },
   {
-    "path": "/var/log/pki/pki-tomcat/ca/transactions",
-    "label": "pki_transactions"
+    "path": "/var/log/pki/pki-tomcat/**/**",
+    "label": "pki_tomcat"
   },
   {
     "path": "/var/log/ipabackup.log",
