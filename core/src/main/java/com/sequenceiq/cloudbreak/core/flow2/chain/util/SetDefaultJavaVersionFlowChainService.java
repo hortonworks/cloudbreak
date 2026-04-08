@@ -25,11 +25,16 @@ import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.java.vm.AllowableJavaUpdateConfigurations;
-import com.sequenceiq.cloudbreak.service.upgrade.validation.service.JavaVersionUpgradeValidator;
 import com.sequenceiq.cloudbreak.util.NullUtil;
 
 @Service
 public class SetDefaultJavaVersionFlowChainService {
+
+    private static final Integer JAVA_8 = 8;
+
+    private static final Integer JAVA_11 = 11;
+
+    private static final Integer JAVA_17 = 17;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SetDefaultJavaVersionFlowChainService.class);
 
@@ -52,12 +57,12 @@ public class SetDefaultJavaVersionFlowChainService {
                     return List.of(new SetDefaultJavaVersionTriggerEvent(selector, stack.getId(), String.valueOf(minJavaVersionForRuntime),
                             false, false, false));
                 } else if (CLOUDERA_STACK_VERSION_7_3_1.getVersion().equalsIgnoreCase(image.getImage().getPackageVersion(ImagePackageVersion.STACK))
-                        && currentJavaVersion.equals(JavaVersionUpgradeValidator.JAVA_11)) {
+                        && currentJavaVersion.equals(JAVA_11)) {
                     if (CMRepositoryVersionUtil.isVersionOlderThanLimited(runtimeVersion, () -> "7.3.1.500")) {
-                        return List.of(new SetDefaultJavaVersionTriggerEvent(selector, stack.getId(), String.valueOf(JavaVersionUpgradeValidator.JAVA_8),
+                        return List.of(new SetDefaultJavaVersionTriggerEvent(selector, stack.getId(), String.valueOf(JAVA_8),
                                 false, false, false));
                     } else {
-                        return List.of(new SetDefaultJavaVersionTriggerEvent(selector, stack.getId(), String.valueOf(JavaVersionUpgradeValidator.JAVA_17),
+                        return List.of(new SetDefaultJavaVersionTriggerEvent(selector, stack.getId(), String.valueOf(JAVA_17),
                                 false, false, false));
                     }
                 }
