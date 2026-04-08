@@ -25,6 +25,11 @@ public class SecretRotationFlowConfig extends AbstractFlowConfiguration<SecretRo
                     .event(SecretRotationStateSelectors.PRE_VALIDATE_ROTATION_FINISHED_EVENT)
                     .defaultFailureEvent()
 
+                    .from(SecretRotationState.PRE_VALIDATE_ROTATION_STATE)
+                    .to(SecretRotationState.FINAL_STATE)
+                    .event(SecretRotationStateSelectors.PRE_VALIDATE_ROTATION_SUPPRESSED_SUCCESS_EVENT)
+                    .defaultFailureEvent()
+
                     .from(SecretRotationState.EXECUTE_ROTATION_STATE)
                     .to(SecretRotationState.FINALIZE_ROTATION_STATE)
                     .event(SecretRotationStateSelectors.EXECUTE_ROTATION_FINISHED_EVENT)

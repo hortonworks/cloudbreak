@@ -1,7 +1,10 @@
 package com.sequenceiq.datalake.service.rotation;
 
+import static com.sequenceiq.cloudbreak.rotation.config.PeriodicRotationProperties.IGNORE_PREVALIDATE_ERRORS;
+
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import jakarta.inject.Inject;
@@ -76,7 +79,8 @@ public class DatalakePeriodicSecretRotationService implements PeriodicSecretRota
 
     @Override
     public void triggerRotation(String resourceCrn, List<String> dueSecretNames) {
-        sdxRotationService.triggerSecretRotation(resourceCrn, dueSecretNames, null, null);
+        sdxRotationService.triggerSecretRotation(resourceCrn, dueSecretNames, null,
+            Map.of(IGNORE_PREVALIDATE_ERRORS, "true"));
     }
 
     public SdxCluster getResourceByCrn(String resourceCrn) {

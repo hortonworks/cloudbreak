@@ -1,7 +1,10 @@
 package com.sequenceiq.cloudbreak.service.rotation;
 
+import static com.sequenceiq.cloudbreak.rotation.config.PeriodicRotationProperties.IGNORE_PREVALIDATE_ERRORS;
+
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import jakarta.inject.Inject;
@@ -76,7 +79,8 @@ public class DatahubPeriodicSecretRotationService implements PeriodicSecretRotat
 
     @Override
     public void triggerRotation(String resourceCrn, List<String> dueSecretNames) {
-        stackRotationService.rotateSecrets(resourceCrn, dueSecretNames, null, null);
+        stackRotationService.rotateSecrets(resourceCrn, dueSecretNames, null,
+            Map.of(IGNORE_PREVALIDATE_ERRORS, "true"));
     }
 
     public StackDto getResourceByCrn(String resourceCrn) {

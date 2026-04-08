@@ -5,6 +5,7 @@ import com.sequenceiq.cloudbreak.rotation.flow.rotation.event.ExecuteRotationFai
 import com.sequenceiq.cloudbreak.rotation.flow.rotation.event.ExecuteRotationFinishedEvent;
 import com.sequenceiq.cloudbreak.rotation.flow.rotation.event.FinalizeRotationSuccessEvent;
 import com.sequenceiq.cloudbreak.rotation.flow.rotation.event.PreValidateRotationFinishedEvent;
+import com.sequenceiq.cloudbreak.rotation.flow.rotation.event.PreValidateRotationSuppressedSuccessEvent;
 import com.sequenceiq.cloudbreak.rotation.flow.rotation.event.RotationFailedEvent;
 import com.sequenceiq.cloudbreak.rotation.flow.rotation.event.SecretRotationTriggerEvent;
 import com.sequenceiq.flow.core.FlowEvent;
@@ -14,6 +15,7 @@ public enum SecretRotationStateSelectors implements FlowEvent {
 
     SECRET_ROTATION_TRIGGER_EVENT(EventSelectorUtil.selector(SecretRotationTriggerEvent.class)),
     PRE_VALIDATE_ROTATION_FINISHED_EVENT(EventSelectorUtil.selector(PreValidateRotationFinishedEvent.class)),
+    PRE_VALIDATE_ROTATION_SUPPRESSED_SUCCESS_EVENT(EventSelectorUtil.selector(PreValidateRotationSuppressedSuccessEvent.class)),
     EXECUTE_ROTATION_FINISHED_EVENT(EventSelectorUtil.selector(ExecuteRotationFinishedEvent.class)),
     EXECUTE_ROTATION_FAILED_EVENT(EventSelectorUtil.selector(ExecuteRotationFailedEvent.class)),
     EXECUTE_ROLLBACK_FINISHED_EVENT(EventSelectorUtil.selector(ExecuteRollbackFinishedEvent.class)),

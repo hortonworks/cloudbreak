@@ -43,7 +43,13 @@ public class ExecuteSubRotationHandler extends ExceptionCatcherEventHandler<Exec
         RotationFlowExecutionType executionType = subRotationEvent.getExecutionType();
         Map<String, String> additionalProperties = subRotationEvent.getAdditionalProperties();
         switch (executionType) {
-            case PREVALIDATE -> secretRotationOrchestrationService.preValidateIfNeeded(secretType, resourceCrn, executionType, additionalProperties);
+            case PREVALIDATE -> {
+                boolean proceedWithRotation = secretRotationOrchestrationService.preValidateIfNeeded(secretType, resourceCrn,
+                    executionType, additionalProperties);
+                if (!proceedWithRotation) {
+                    return ExecuteSubRotationFinishedEvent.fromPayload(subRotationEvent);
+                }
+            }
             case ROTATE -> secretRotationOrchestrationService.rotateIfNeeded(secretType, resourceCrn, executionType, additionalProperties);
             case ROLLBACK -> secretRotationOrchestrationService.rollbackIfNeeded(secretType, resourceCrn, executionType, additionalProperties,
                     new SecretRotationException("Explicit rollback"));

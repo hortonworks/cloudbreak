@@ -23,6 +23,8 @@ import com.sequenceiq.cloudbreak.rotation.SecretType;
 @ConfigurationProperties(prefix = "secretrotation.periodic")
 public class PeriodicRotationProperties {
 
+    public static final String IGNORE_PREVALIDATE_ERRORS = "ignore-prevalidate-errors";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(PeriodicRotationProperties.class);
 
     // 24 * 60 = daily

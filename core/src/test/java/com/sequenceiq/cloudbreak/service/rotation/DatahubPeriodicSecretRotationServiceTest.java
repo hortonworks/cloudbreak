@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.rotation;
 
+import static com.sequenceiq.cloudbreak.rotation.config.PeriodicRotationProperties.IGNORE_PREVALIDATE_ERRORS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anySet;
@@ -12,6 +13,7 @@ import static org.mockito.Mockito.when;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -138,7 +140,8 @@ class DatahubPeriodicSecretRotationServiceTest {
     void triggerRotationDelegatesToStackRotationService() {
         List<String> due = List.of("SALT_PASSWORD", "COMPUTE_MONITORING_CREDENTIALS");
         underTest.triggerRotation(RESOURCE_CRN, due);
-        verify(stackRotationService).rotateSecrets(eq(RESOURCE_CRN), eq(due), eq(null), eq(null));
+        verify(stackRotationService).rotateSecrets(eq(RESOURCE_CRN), eq(due), eq(null),
+            eq(Map.of(IGNORE_PREVALIDATE_ERRORS, "true")));
     }
 
     @Test

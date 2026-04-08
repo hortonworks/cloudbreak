@@ -77,7 +77,7 @@ public class PeriodicRotationJobService implements JobSchedulerService {
                 .forJob(jobDetail)
                 .withIdentity(TriggerKey.triggerKey(jobDetail.getKey().getName(), TRIGGER_GROUP))
                 .withDescription("Trigger for periodic secret rotation for resource "
-                    + jobDetail.getJobDataMap().getString(adapter.getJobResource().getRemoteResourceId()))
+                    + adapter.getJobResource().getRemoteResourceId())
                 .startAt(delayedFirstStart())
                 .withSchedule(SimpleScheduleBuilder.simpleSchedule()
                         .withIntervalInMinutes(periodicRotationProperties.getScheduleIntervalMinutes())

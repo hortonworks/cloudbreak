@@ -1,7 +1,10 @@
 package com.sequenceiq.freeipa.service.rotation;
 
+import static com.sequenceiq.cloudbreak.rotation.config.PeriodicRotationProperties.IGNORE_PREVALIDATE_ERRORS;
+
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import jakarta.inject.Inject;
@@ -84,6 +87,7 @@ public class FreeIpaPeriodicSecretRotationService implements PeriodicSecretRotat
             String accountId = Crn.fromString(resource.resourceCrn()).getAccountId();
             FreeIpaSecretRotationRequest request = new FreeIpaSecretRotationRequest();
             request.setSecrets(dueSecretNames);
+            request.setAdditionalProperties(Map.of(IGNORE_PREVALIDATE_ERRORS, "true"));
             freeIpaSecretRotationService.rotateSecretsByCrn(accountId, resource.environmentCrn(), request);
         });
     }

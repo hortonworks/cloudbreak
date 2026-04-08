@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType.FINAL
 import static com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType.PREVALIDATE;
 import static com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType.ROLLBACK;
 import static com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType.ROTATE;
+import static com.sequenceiq.cloudbreak.rotation.config.PeriodicRotationProperties.IGNORE_PREVALIDATE_ERRORS;
 
 import java.util.Map;
 
@@ -56,7 +57,13 @@ public class SecretRotationOrchestrationService {
     @Inject
     private SecretRotationHistoryService historyService;
 
-    public void preValidateIfNeeded(SecretType secretType, String resourceCrn, RotationFlowExecutionType executionType,
+    /**
+     * Runs pre-validation if needed. Any failure is logged and cleared from secretrotationprogressstep.
+     *
+     * @return true if pre-validation succeeded or was not required
+     *         false if pre-validation failed (the flow is marked successful without rotating).
+     */
+    public boolean preValidateIfNeeded(SecretType secretType, String resourceCrn, RotationFlowExecutionType executionType,
             Map<String, String> additionalProperties) {
         RotationMetadata rotationMetadata = getRotationMetadata(secretType, resourceCrn, executionType, PREVALIDATE, additionalProperties);
         if (executionDecisionProvider.executionRequired(rotationMetadata)) {
@@ -65,9 +72,18 @@ public class SecretRotationOrchestrationService {
             } catch (Exception e) {
                 // for prevalidation we do not need to store failed progress in DB
                 progressService.deleteCurrentRotation(rotationMetadata);
+                if (ignorePrevalidateErrors(additionalProperties)) {
+                    LOGGER.warn("Secret rotation pre-validation failed; suppressing and closing flow without rotation "
+                            + "(IGNORE_PREVALIDATE_ERRORS=true). resourceCrn={}, secretType={}",
+                        resourceCrn, secretType, e);
+                    return false;
+                }
+                LOGGER.warn("Secret rotation pre-validation failed; failing the flow. resourceCrn={}, secretType={}",
+                    resourceCrn, secretType, e);
                 throw e;
             }
         }
+        return true;
     }
 
     public void rotateIfNeeded(SecretType secretType, String resourceCrn, RotationFlowExecutionType executionType, Map<String, String> additionalProperties) {
@@ -126,5 +142,15 @@ public class SecretRotationOrchestrationService {
                 .resourceCrn(resourceCrn)
                 .additionalProperties(additionalProperties);
         return builder.build();
+    }
+
+    /**
+     * When true, a failed pre-validation clears progress and completes the flow as suppressed success.
+     */
+    static boolean ignorePrevalidateErrors(Map<String, String> additionalProperties) {
+        if (additionalProperties == null) {
+            return false;
+        }
+        return Boolean.parseBoolean(additionalProperties.get(IGNORE_PREVALIDATE_ERRORS));
     }
 }

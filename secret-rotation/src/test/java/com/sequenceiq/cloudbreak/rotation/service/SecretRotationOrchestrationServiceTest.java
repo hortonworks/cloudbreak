@@ -1,14 +1,21 @@
 package com.sequenceiq.cloudbreak.rotation.service;
 
 import static com.sequenceiq.cloudbreak.rotation.common.TestSecretType.TEST;
+import static com.sequenceiq.cloudbreak.rotation.config.PeriodicRotationProperties.IGNORE_PREVALIDATE_ERRORS;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
+
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -78,7 +85,7 @@ public class SecretRotationOrchestrationServiceTest {
     @Test
     public void testPreValidateWhenNotNeeded() {
         when(decisionProvider.executionRequired(any())).thenReturn(Boolean.FALSE);
-        underTest.preValidateIfNeeded(TEST, RESOURCE, null, null);
+        assertTrue(underTest.preValidateIfNeeded(TEST, RESOURCE, null, null));
 
         verifyNoInteractions(contextProvider, preValidateService, statusService, usageService);
     }
@@ -115,9 +122,35 @@ public class SecretRotationOrchestrationServiceTest {
     public void testPreValidate() {
         when(decisionProvider.executionRequired(any())).thenReturn(Boolean.TRUE);
         doNothing().when(preValidateService).preValidate(any());
-        underTest.preValidateIfNeeded(TEST, RESOURCE, null, null);
+        assertTrue(underTest.preValidateIfNeeded(TEST, RESOURCE, null, null));
 
         verify(preValidateService).preValidate(any());
+        verifyNoInteractions(usageService, statusService);
+    }
+
+    @Test
+    public void testPreValidateFailureReturnsFalseWhenIgnorePrevalidateErrorsTrueAndDeletesProgress() {
+        when(decisionProvider.executionRequired(any())).thenReturn(Boolean.TRUE);
+        doThrow(new SecretRotationException("prevalidate failed")).when(preValidateService).preValidate(any());
+        doNothing().when(stepProgressService).deleteCurrentRotation(any());
+
+        assertFalse(underTest.preValidateIfNeeded(TEST, RESOURCE, null, Map.of(IGNORE_PREVALIDATE_ERRORS, "true")));
+
+        verify(preValidateService).preValidate(any());
+        verify(stepProgressService, times(1)).deleteCurrentRotation(any());
+        verifyNoInteractions(usageService, statusService);
+    }
+
+    @Test
+    public void testPreValidateFailureThrowsWhenIgnorePrevalidateErrorsNotSet() {
+        when(decisionProvider.executionRequired(any())).thenReturn(Boolean.TRUE);
+        doThrow(new SecretRotationException("prevalidate failed")).when(preValidateService).preValidate(any());
+        doNothing().when(stepProgressService).deleteCurrentRotation(any());
+
+        assertThrows(SecretRotationException.class, () -> underTest.preValidateIfNeeded(TEST, RESOURCE, null, null));
+
+        verify(preValidateService).preValidate(any());
+        verify(stepProgressService, times(1)).deleteCurrentRotation(any());
         verifyNoInteractions(usageService, statusService);
     }
 

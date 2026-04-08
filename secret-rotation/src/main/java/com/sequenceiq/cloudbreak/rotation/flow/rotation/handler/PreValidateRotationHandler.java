@@ -8,6 +8,7 @@ import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType;
 import com.sequenceiq.cloudbreak.rotation.flow.rotation.event.PreValidateRotationFinishedEvent;
+import com.sequenceiq.cloudbreak.rotation.flow.rotation.event.PreValidateRotationSuppressedSuccessEvent;
 import com.sequenceiq.cloudbreak.rotation.flow.rotation.event.PreValidateRotationTriggerEvent;
 import com.sequenceiq.cloudbreak.rotation.flow.rotation.event.RotationFailedEvent;
 import com.sequenceiq.cloudbreak.rotation.service.SecretRotationOrchestrationService;
@@ -33,8 +34,11 @@ public class PreValidateRotationHandler extends ExceptionCatcherEventHandler<Pre
 
     @Override
     protected Selectable doAccept(HandlerEvent<PreValidateRotationTriggerEvent> event) {
-        secretRotationOrchestrationService.preValidateIfNeeded(event.getData().getSecretType(), event.getData().getResourceCrn(),
-                event.getData().getExecutionType(), event.getData().getAdditionalProperties());
-        return PreValidateRotationFinishedEvent.fromPayload(event.getData());
+        boolean proceedWithRotation = secretRotationOrchestrationService.preValidateIfNeeded(event.getData().getSecretType(),
+                event.getData().getResourceCrn(), event.getData().getExecutionType(), event.getData().getAdditionalProperties());
+        if (proceedWithRotation) {
+            return PreValidateRotationFinishedEvent.fromPayload(event.getData());
+        }
+        return PreValidateRotationSuppressedSuccessEvent.fromPayload(event.getData());
     }
 }

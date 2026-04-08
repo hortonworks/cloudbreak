@@ -14,6 +14,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -59,6 +60,8 @@ public class ExecuteSubRotationHandlerTest {
 
     @Test
     public void testHandlerWhenExecutionTypeIsPreValidate() {
+        when(secretRotationOrchestrationService.preValidateIfNeeded(any(), any(), any(), any())).thenReturn(true);
+
         underTest.accept(Event.wrap(getTriggerEvent(PREVALIDATE)));
 
         verify(secretRotationOrchestrationService, times(1)).preValidateIfNeeded(eq(SECRET_TYPE), eq(RESOURCE_CRN),
@@ -98,6 +101,15 @@ public class ExecuteSubRotationHandlerTest {
         underTest.accept(Event.wrap(getTriggerEvent(RotationFlowExecutionType.ROTATE)));
 
         assertEquals(SubRotationFailedEvent.class, argumentCaptor.getValue().getData().getClass());
+    }
+
+    @Test
+    public void testHandlerPreValidateFailureClosesSubFlowSuccessfully() {
+        when(secretRotationOrchestrationService.preValidateIfNeeded(any(), any(), eq(PREVALIDATE), any())).thenReturn(false);
+
+        underTest.accept(Event.wrap(getTriggerEvent(PREVALIDATE)));
+
+        assertEquals(ExecuteSubRotationFinishedEvent.class, argumentCaptor.getValue().getData().getClass());
     }
 
     private static ExecuteSubRotationTriggerEvent getTriggerEvent(RotationFlowExecutionType executionType) {
