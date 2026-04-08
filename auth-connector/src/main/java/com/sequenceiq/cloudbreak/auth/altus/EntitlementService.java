@@ -650,10 +650,6 @@ public class EntitlementService {
         return isEntitlementRegistered(accountId, CDP_CB_PREFER_MINIFI_LOGGING);
     }
 
-    public boolean isAutoJavaUpgaradeEnabled(String accountId) {
-        return isEntitlementRegistered(accountId, Entitlement.CDP_ALLOW_AUTO_JAVA_UPGRADE);
-    }
-
     public boolean isDatalakeKnoxGatewayDbDrEnabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_DATALAKE_KNOX_GATEWAY_DB_DR);
     }

@@ -3,7 +3,6 @@ package com.sequenceiq.thunderhead.grpc.service.auth;
 import static com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Group;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_AUTO_JAVA_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_DIFFERENT_DATAHUB_VERSION_THAN_DATALAKE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_HA_REPAIR;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ALLOW_INTERNAL_REPOSITORY_FOR_UPGRADE;
@@ -620,9 +619,6 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Value("${auth.mock.prefer.minifi.logging.enabled}")
     private boolean preferMinifiLoggingEnabled;
 
-    @Value("${auth.mock.allow.auto.java.upgrade}")
-    private boolean allowAutoJavaUpgrade;
-
     @Value("${auth.mock.personal.view.cb.by.right.enabled}")
     private boolean personalViewCbByRightEnabled;
 
@@ -1158,9 +1154,6 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (preferMinifiLoggingEnabled) {
             builder.addEntitlements(createEntitlement(CDP_CB_PREFER_MINIFI_LOGGING));
-        }
-        if (allowAutoJavaUpgrade) {
-            builder.addEntitlements(createEntitlement(CDP_ALLOW_AUTO_JAVA_UPGRADE));
         }
         if (personalViewCbByRightEnabled) {
             builder.addEntitlements(createEntitlement(PERSONAL_VIEW_CB_BY_RIGHT));

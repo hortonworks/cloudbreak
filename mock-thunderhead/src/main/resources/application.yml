@@ -122,7 +122,6 @@ auth:
     verticalscale.ha.enabled: false
     cloudprivatelinks.enabled: true
     prefer.minifi.logging.enabled: true
-    allow.auto.java.upgrade: true
     personal.view.cb.by.right.enabled: true
 crn:
   partition: cdp

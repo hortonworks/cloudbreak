@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.core.flow2.chain.util;
 import static com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers.SET_DEFAULT_JAVA_VERSION_CHAIN_TRIGGER_EVENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -16,7 +15,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
@@ -38,9 +36,6 @@ class SetDefaultJavaVersionFlowChainServiceTest {
     private static final String IMAGE_CATALOG_NAME = "dev";
 
     private static final String IMAGE_CATALOG_URL = "http://dev.catalog.url";
-
-    @Mock
-    private EntitlementService entitlementService;
 
     @Mock
     private ImageCatalogService imageCatalogService;
@@ -66,7 +61,6 @@ class SetDefaultJavaVersionFlowChainServiceTest {
         when(statedImage.getImage()).thenReturn(image);
         when(imageCatalogService.getImage(STACK_ID, IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, IMAGE_ID))
                 .thenReturn(statedImage);
-        when(entitlementService.isAutoJavaUpgaradeEnabled(any())).thenReturn(true);
         when(allowableJavaUpdateConfigurations.getMinJavaVersionForRuntime("7.3.2")).thenReturn(17);
 
         List<SetDefaultJavaVersionTriggerEvent> events = underTest.setDefaultJavaVersionTriggerEvent(stackDto,
@@ -77,11 +71,6 @@ class SetDefaultJavaVersionFlowChainServiceTest {
         assertEquals(STACK_ID, javaEvent.getResourceId());
         assertEquals("17", javaEvent.getDefaultJavaVersion());
         assertEquals(1, javaEvent.getResourceId());
-
-        when(entitlementService.isAutoJavaUpgaradeEnabled(any())).thenReturn(false);
-        events = underTest.setDefaultJavaVersionTriggerEvent(stackDto,
-                new ImageChangeDto(STACK_ID, IMAGE_ID, IMAGE_CATALOG_NAME, IMAGE_CATALOG_URL));
-        assertTrue(events.isEmpty());
     }
 
     @Test
@@ -99,7 +88,6 @@ class SetDefaultJavaVersionFlowChainServiceTest {
         when(statedImage.getImage()).thenReturn(image);
         when(imageCatalogService.getImage(STACK_ID, IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, IMAGE_ID))
                 .thenReturn(statedImage);
-        when(entitlementService.isAutoJavaUpgaradeEnabled(any())).thenReturn(true);
         when(allowableJavaUpdateConfigurations.getMinJavaVersionForRuntime("7.3.1.499")).thenReturn(8);
         when(image.getTags()).thenReturn(Map.of("release-version", "7.3.1.499"));
 
@@ -139,7 +127,6 @@ class SetDefaultJavaVersionFlowChainServiceTest {
         when(statedImage.getImage()).thenReturn(image);
         when(imageCatalogService.getImage(STACK_ID, IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME, IMAGE_ID))
                 .thenReturn(statedImage);
-        when(entitlementService.isAutoJavaUpgaradeEnabled(any())).thenReturn(true);
         when(allowableJavaUpdateConfigurations.getMinJavaVersionForRuntime("7.3.1")).thenReturn(8);
 
         List<SetDefaultJavaVersionTriggerEvent> events = underTest.setDefaultJavaVersionTriggerEvent(stackDto,
