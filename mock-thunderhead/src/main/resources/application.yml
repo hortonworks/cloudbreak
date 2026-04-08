@@ -1,3 +1,8 @@
+mockthunderhead:
+  intermediate.threadpool:
+    core.size: 10
+    capacity.size: 100
+
 auth:
   license:
     file: license.txt

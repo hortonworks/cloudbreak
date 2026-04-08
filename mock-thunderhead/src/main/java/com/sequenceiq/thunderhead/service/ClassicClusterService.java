@@ -6,7 +6,9 @@ import java.util.Optional;
 
 import jakarta.inject.Inject;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -45,6 +47,10 @@ public class ClassicClusterService implements LoadResourcesForAccountIdService {
 
     @Inject
     private StringToSecretResponseConverter stringToSecretResponseConverter;
+
+    @Inject
+    @Qualifier("intermediateBuilderExecutor")
+    private AsyncTaskExecutor intermediateBuilderExecutor;
 
     @Override
     public void load(String accountId) throws Exception {
@@ -90,7 +96,7 @@ public class ClassicClusterService implements LoadResourcesForAccountIdService {
                 null,
                 false
         );
-        clusterProxyRegistrationClient.registerConfig(configRegistrationRequest);
+        intermediateBuilderExecutor.submit(() -> clusterProxyRegistrationClient.registerConfig(configRegistrationRequest));
     }
 
     private List<ClusterServiceConfig> getClusterServiceConfigs(ClassicCluster classicCluster) {

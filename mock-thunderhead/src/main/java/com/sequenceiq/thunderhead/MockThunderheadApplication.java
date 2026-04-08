@@ -16,6 +16,7 @@ import org.springframework.retry.annotation.EnableRetry;
         "com.sequenceiq.cloudbreak.dns",
         "com.sequenceiq.cloudbreak.clusterproxy",
         "com.sequenceiq.cloudbreak.cm.client",
+        "com.sequenceiq.cloudbreak.concurrent"
 })
 public class MockThunderheadApplication {
     public static void main(String[] args) {

@@ -4,7 +4,9 @@ import java.util.List;
 
 import jakarta.inject.Inject;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -53,6 +55,10 @@ public class PrivateControlPlaneService implements LoadResourcesForAccountIdServ
     @Inject
     private StringToSecretResponseConverter stringToSecretResponseConverter;
 
+    @Inject
+    @Qualifier("intermediateBuilderExecutor")
+    private AsyncTaskExecutor intermediateBuilderExecutor;
+
     public List<PrivateControlPlane> findAll() {
         return privateControlPlaneRepository.findAll();
     }
@@ -95,7 +101,7 @@ public class PrivateControlPlaneService implements LoadResourcesForAccountIdServ
                 null,
                 false
         );
-        clusterProxyRegistrationClient.registerConfig(configRegistrationRequest);
+        intermediateBuilderExecutor.submit(() -> clusterProxyRegistrationClient.registerConfig(configRegistrationRequest));
     }
 
     private List<ClusterServiceConfig> getClusterServiceConfigs(PrivateControlPlane privateControlPlane) {
