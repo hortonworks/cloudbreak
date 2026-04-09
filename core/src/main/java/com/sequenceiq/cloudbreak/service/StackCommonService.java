@@ -375,7 +375,8 @@ public class StackCommonService {
         verticalScalingValidatorService.validateRequest(stack, verticalScaleV4Request);
         verticalScalingValidatorService.validateInstanceType(stack, verticalScaleV4Request);
         if (stack.getType().equals(StackType.WORKLOAD)) {
-            verticalScalingValidatorService.validateIfInstanceAvailable(verticalScaleV4Request.getTemplate().getInstanceType(), stack.getArchitecture(),
+            verticalScalingValidatorService.validateIfInstanceAvailable(Crn.safeFromString(stack.getResourceCrn()).getAccountId(),
+                    verticalScaleV4Request.getTemplate().getInstanceType(), stack.getArchitecture(),
                     stack.getPlatformVariant(), stack.getCloudPlatform());
         }
     }

@@ -195,6 +195,7 @@ public class VerticalScalingValidatorServiceTest {
 
     @Test
     public void testValidateIfInstanceAvailableForDhVerticalScaling() {
+        String accountId = "accountId";
         String requestedInstanceType = "m7.4xlarge";
         String cloudPlatform = "AWS";
         String cloudPlatformVariant = "AWS";
@@ -202,7 +203,7 @@ public class VerticalScalingValidatorServiceTest {
         lenient().when(cloudConnector.parameters()).thenReturn(platformParameters);
         when(platformParameters.getDistroxEnabledInstanceTypes(Architecture.ARM64)).thenReturn(Set.of("m7.xlarge"));
         BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> {
-            underTest.validateIfInstanceAvailable(requestedInstanceType, Architecture.ARM64, cloudPlatformVariant, cloudPlatform);
+            underTest.validateIfInstanceAvailable(accountId, requestedInstanceType, Architecture.ARM64, cloudPlatformVariant, cloudPlatform);
         });
         assertEquals("The requested instancetype: m7.4xlarge is not enabled for vertical scaling.", badRequestException.getMessage());
     }

@@ -133,10 +133,11 @@ public class VerticalScalingValidatorService {
         }
     }
 
-    public void validateIfInstanceAvailable(String requestedInstanceType, Architecture architecture, String cloudPlatformVariant, String cloudPlatform) {
+    public void validateIfInstanceAvailable(String accountId, String requestedInstanceType,
+                                            Architecture architecture, String cloudPlatformVariant, String cloudPlatform) {
         CloudConnector cloudConnector = cloudPlatformConnectors.get(platform(cloudPlatform), Variant.variant(cloudPlatformVariant));
         Set<String> distroxEnabledInstanceTypes = cloudConnector.parameters().getDistroxEnabledInstanceTypes(architecture);
-        if (!distroxEnabledInstanceTypes.contains(requestedInstanceType)) {
+        if (!distroxEnabledInstanceTypes.contains(requestedInstanceType) && !entitlementService.enableDistroxInstanceTypesEnabled(accountId)) {
             throw new BadRequestException("The requested instancetype: " + requestedInstanceType + " is not enabled for vertical scaling.");
         }
     }
