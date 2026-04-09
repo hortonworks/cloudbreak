@@ -1,12 +1,19 @@
 package com.sequenceiq.cloudbreak.cloud.gcp;
 
 import static com.sequenceiq.cloudbreak.cloud.gcp.GcpEnabledInstanceTypes.GCP_ENABLED_TYPES_LIST;
+import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpDiskUtil.HYPERDISK_BALANCED_MAX_SIZE_GB;
+import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpDiskUtil.HYPERDISK_BALANCED_MIN_SIZE_GB;
+import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpDiskUtil.HYPERDISK_EXTREME_MAX_SIZE_GB;
+import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpDiskUtil.HYPERDISK_EXTREME_MIN_SIZE_GB;
+import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpDiskUtil.HYPERDISK_THROUGHPUT_MAX_SIZE_GB;
+import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpDiskUtil.HYPERDISK_THROUGHPUT_MIN_SIZE_GB;
 import static com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil.SHARED_PROJECT_ID;
 import static com.sequenceiq.cloudbreak.cloud.model.Coordinate.coordinate;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 import static com.sequenceiq.cloudbreak.cloud.model.network.SubnetType.PRIVATE;
 import static com.sequenceiq.cloudbreak.cloud.model.network.SubnetType.PUBLIC;
 import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.SUBNET_ID;
+import static com.sequenceiq.cloudbreak.validation.VolumeParameterConstants.MAXIMUM_NUMBER_OF_VOLUMES;
 import static org.apache.commons.collections4.CollectionUtils.emptyIfNull;
 
 import java.io.IOException;
@@ -16,7 +23,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -63,6 +69,7 @@ import com.sequenceiq.cloudbreak.cloud.gcp.client.GcpCloudKMSFactory;
 import com.sequenceiq.cloudbreak.cloud.gcp.client.GcpComputeFactory;
 import com.sequenceiq.cloudbreak.cloud.gcp.client.GcpIamFactory;
 import com.sequenceiq.cloudbreak.cloud.gcp.client.GcpSQLAdminFactory;
+import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpDiskUtil;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfig;
@@ -147,6 +154,9 @@ public class GcpPlatformResources implements PlatformResources {
 
     @Inject
     private GcpStackUtil gcpStackUtil;
+
+    @Inject
+    private GcpDiskUtil gcpDiskUtil;
 
     @Inject
     private GcpSQLAdminFactory gcpSQLAdminFactory;
@@ -591,18 +601,15 @@ public class GcpPlatformResources implements PlatformResources {
                         VmTypeMetaBuilder vmTypeMetaBuilder = VmTypeMetaBuilder.builder()
                                 .withCpuAndMemory(machineType.getGuestCpus(),
                                         machineType.getMemoryMb().floatValue() / THOUSAND)
-
-                                .withMagneticConfig(TEN, machineType.getMaximumPersistentDisksSizeGb().intValue(),
-                                        1, machineType.getMaximumPersistentDisks())
-
                                 .withSsdConfig(TEN, machineType.getMaximumPersistentDisksSizeGb().intValue(),
                                         1, machineType.getMaximumPersistentDisks())
-
                                 .withBalancedHddConfig(TEN, machineType.getMaximumPersistentDisksSizeGb().intValue(),
                                         1, machineType.getMaximumPersistentDisks())
-
+                                .withMagneticConfig(TEN, machineType.getMaximumPersistentDisksSizeGb().intValue(),
+                                        1, machineType.getMaximumPersistentDisks())
                                 .withMaximumPersistentDisksSizeGb(machineType.getMaximumPersistentDisksSizeGb())
                                 .withVolumeEncryptionSupport(true);
+
                         if (isLocalSsdSupportedForInstanceType(machineType)) {
                             LOGGER.trace("Adding the local disk configurations to the instance {}.", machineType);
                             vmTypeMetaBuilder.withLocalSsdConfig(
@@ -610,6 +617,7 @@ public class GcpPlatformResources implements PlatformResources {
                                     GCP_LOCAL_SSD_POSSIBLE_NUMBER_VALUES
                             );
                         }
+                        extendWithHyperDiskConfigs(machineType, vmTypeMetaBuilder);
                         if (isExtremeSsdSupportedForInstanceType(machineType)) {
                             LOGGER.trace("Adding the extreme disk configurations to the instance {}.", machineType);
                             vmTypeMetaBuilder.withExtremeSsdConfig(
@@ -638,16 +646,27 @@ public class GcpPlatformResources implements PlatformResources {
         }
     }
 
+    private void extendWithHyperDiskConfigs(MachineType machineType, VmTypeMetaBuilder vmTypeMetaBuilder) {
+        // Followup task to create a machinetype: maxnumber mapping as it can be different on different machinetypes
+        // https://cloudera.atlassian.net/browse/CB-32446
+        if (gcpDiskUtil.isHyperdiskBalancedSupportedForInstanceType(machineType)) {
+            vmTypeMetaBuilder.withHyperdiskBalancedConfig(HYPERDISK_BALANCED_MIN_SIZE_GB, HYPERDISK_BALANCED_MAX_SIZE_GB, 1, MAXIMUM_NUMBER_OF_VOLUMES)
+                    .withMagneticConfig(null);
+        }
+        if (gcpDiskUtil.isHyperdiskExtremeSupportedForInstanceType(machineType)) {
+            vmTypeMetaBuilder.withHyperdiskExtremeConfig(HYPERDISK_EXTREME_MIN_SIZE_GB, HYPERDISK_EXTREME_MAX_SIZE_GB, 1, MAXIMUM_NUMBER_OF_VOLUMES);
+        }
+        if (gcpDiskUtil.isHyperdiskThroughtputSupportedForInstanceType(machineType)) {
+            vmTypeMetaBuilder.withHyperdiskThroughputConfig(HYPERDISK_THROUGHPUT_MIN_SIZE_GB, HYPERDISK_THROUGHPUT_MAX_SIZE_GB, 1, MAXIMUM_NUMBER_OF_VOLUMES);
+        }
+    }
+
     private boolean isLocalSsdSupportedForInstanceType(MachineType machineType) {
-        return MACHINE_TYPES_WITH_LOCAL_SSD.contains(getMachineTypeFamily(machineType));
+        return MACHINE_TYPES_WITH_LOCAL_SSD.contains(gcpStackUtil.getMachineTypeFamily(machineType));
     }
 
     private boolean isExtremeSsdSupportedForInstanceType(MachineType machineType) {
         return extremeDiskCalculator.extremeDiskSupported(machineType);
-    }
-
-    private String getMachineTypeFamily(MachineType machineType) {
-        return machineType.getName().toLowerCase(Locale.ROOT).split("-")[0];
     }
 
     @Override

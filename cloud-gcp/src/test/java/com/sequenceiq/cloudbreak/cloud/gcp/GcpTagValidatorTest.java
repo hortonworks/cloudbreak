@@ -22,7 +22,9 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.gcp.conf.GcpConfig;
+import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpDiskUtil;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpLabelUtil;
+import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
@@ -154,12 +156,16 @@ class GcpTagValidatorTest {
     }
 
     @Configuration
-    @Import({CloudPlatformConnectors.class,
+    @Import({
+            CloudPlatformConnectors.class,
             GcpConfig.class,
             GcpTagValidator.class,
             GcpPlatformParameters.class,
             CloudbreakResourceReaderService.class,
-            GcpLabelUtil.class
+            GcpPlatformParameters.class,
+            GcpLabelUtil.class,
+            GcpDiskUtil.class,
+            GcpStackUtil.class
     })
     static class Config {
 

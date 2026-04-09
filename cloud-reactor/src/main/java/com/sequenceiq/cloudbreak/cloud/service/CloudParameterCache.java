@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import com.google.common.base.Suppliers;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
+import com.sequenceiq.cloudbreak.cloud.model.DiskType;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 
 @Component
@@ -41,13 +42,14 @@ public class CloudParameterCache {
         return result == null || result;
     }
 
-    public String getDefaultVolumeType(String cloudPlatform) {
-        Platform platform = Platform.platform(cloudPlatform);
-        PlatformParameters platformParameters = getPlatformParameters().get(platform);
-        if (platformParameters == null) {
+    public String getDefaultRootVolumeType(String cloudPlatform, String instanceType) {
+        PlatformParameters platformParameters = getPlatformParameters().get(Platform.platform(cloudPlatform));
+        if (platformParameters != null) {
+            DiskType rootDiskType = platformParameters.defaultRootDiskType(instanceType);
+            return rootDiskType != null ? rootDiskType.getValue() : null;
+        } else {
             return null;
         }
-        return null != platformParameters.defaultRootDiskType() ? platformParameters.defaultRootDiskType().value() : null;
     }
 
     public boolean isDownScalingSupported(String platform) {

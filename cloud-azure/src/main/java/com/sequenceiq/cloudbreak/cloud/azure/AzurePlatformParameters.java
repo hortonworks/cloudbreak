@@ -80,6 +80,9 @@ public class AzurePlatformParameters implements PlatformParameters {
     @Value("${cb.azure.default.root.disk.type:StandardSSD_LRS}")
     private String defaultRootDiskType;
 
+    @Value("${cb.arm.database.disk.type:StandardSSD_LRS}")
+    private String databaseDiskType;
+
     @Inject
     private AzureTagValidator azureTagValidator;
 
@@ -123,6 +126,11 @@ public class AzurePlatformParameters implements PlatformParameters {
         return new DiskTypes(getDiskTypes(), defaultDiskType(), diskMappings(), diskDisplayNames());
     }
 
+    @Override
+    public String embeddedDatabaseDiskType(String flavor) {
+        return databaseDiskType;
+    }
+
     private Map<DiskType, DisplayName> diskDisplayNames() {
         Map<DiskType, DisplayName> map = new HashMap<>();
         map.put(diskType(STANDARD_SSD_LRS.value()), displayName(STANDARD_SSD_LRS.displayName()));
@@ -153,7 +161,7 @@ public class AzurePlatformParameters implements PlatformParameters {
     }
 
     @Override
-    public DiskType defaultRootDiskType() {
+    public DiskType defaultRootDiskType(String flavor) {
         return diskType(defaultRootDiskType);
     }
 

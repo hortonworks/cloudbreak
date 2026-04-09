@@ -11,6 +11,22 @@ public class GcpEnabledInstanceTypes {
             "e2-standard-16",
             "e2-standard-32",
 
+            "e2-highcpu-8",
+            "e2-highcpu-16",
+            "e2-highcpu-32",
+
+            "e2-highmem-8",
+            "e2-highmem-16",
+
+            "n1-standard-2",
+            "n1-standard-4",
+            "n1-standard-8",
+            "n1-standard-16",
+            "n1-standard-32",
+            "n1-standard-48",
+            "n1-standard-64",
+            "n1-standard-96",
+
             "n2-standard-2",
             "n2-standard-4",
             "n2-standard-8",
@@ -33,15 +49,6 @@ public class GcpEnabledInstanceTypes {
             "n2-highmem-96",
             "n2-highmem-128",
 
-            "n1-standard-2",
-            "n1-standard-4",
-            "n1-standard-8",
-            "n1-standard-16",
-            "n1-standard-32",
-            "n1-standard-48",
-            "n1-standard-64",
-            "n1-standard-96",
-
             "n2d-standard-2",
             "n2d-standard-4",
             "n2d-standard-8",
@@ -54,17 +61,6 @@ public class GcpEnabledInstanceTypes {
             "n2d-standard-128",
             "n2d-standard-224",
 
-            "e2-highmem-8",
-            "e2-highmem-16",
-
-            "n2d-highmem-8",
-            "n2d-highmem-16",
-            "n2d-highmem-32",
-            "n2d-highmem-48",
-            "n2d-highmem-64",
-            "n2d-highmem-80",
-            "n2d-highmem-96",
-
             "n2d-highcpu-8",
             "n2d-highcpu-16",
             "n2d-highcpu-32",
@@ -75,10 +71,13 @@ public class GcpEnabledInstanceTypes {
             "n2d-highcpu-128",
             "n2d-highcpu-224",
 
-
-            "e2-highcpu-8",
-            "e2-highcpu-16",
-            "e2-highcpu-32",
+            "n2d-highmem-8",
+            "n2d-highmem-16",
+            "n2d-highmem-32",
+            "n2d-highmem-48",
+            "n2d-highmem-64",
+            "n2d-highmem-80",
+            "n2d-highmem-96",
 
             "c2d-standard-8",
             "c2d-standard-16",
@@ -86,17 +85,98 @@ public class GcpEnabledInstanceTypes {
             "c2d-standard-56",
             "c2d-standard-112",
 
+            "c2d-highcpu-8",
+            "c2d-highcpu-16",
+            "c2d-highcpu-32",
+            "c2d-highcpu-56",
+            "c2d-highcpu-112",
+
             "c2d-highmem-8",
             "c2d-highmem-16",
             "c2d-highmem-32",
             "c2d-highmem-56",
             "c2d-highmem-112",
 
-            "c2d-highcpu-8",
-            "c2d-highcpu-16",
-            "c2d-highcpu-32",
-            "c2d-highcpu-56",
-            "c2d-highcpu-112"
+            "c3-standard-8",
+            "c3-standard-22",
+            "c3-standard-44",
+            "c3-standard-88",
+            "c3-standard-176",
+
+            "c3-highcpu-8",
+            "c3-highcpu-22",
+            "c3-highcpu-44",
+            "c3-highcpu-88",
+            "c3-highcpu-176",
+
+            "c3-highmem-8",
+            "c3-highmem-22",
+            "c3-highmem-44",
+            "c3-highmem-88",
+            "c3-highmem-176",
+
+            "c3d-standard-8",
+            "c3d-standard-16",
+            "c3d-standard-30",
+            "c3d-standard-60",
+            "c3d-standard-90",
+            "c3d-standard-180",
+            "c3d-standard-360",
+
+            "c3d-highcpu-8",
+            "c3d-highcpu-16",
+            "c3d-highcpu-30",
+            "c3d-highcpu-60",
+            "c3d-highcpu-90",
+            "c3d-highcpu-180",
+            "c3d-highcpu-360",
+
+            "c3d-highmem-8",
+            "c3d-highmem-16",
+            "c3d-highmem-30",
+            "c3d-highmem-60",
+            "c3d-highmem-90",
+            "c3d-highmem-180",
+            "c3d-highmem-360",
+
+            "c4-standard-8",
+            "c4-standard-16",
+            "c4-standard-32",
+            "c4-standard-48",
+            "c4-standard-96",
+            "c4-standard-192",
+
+            "c4-highcpu-8",
+            "c4-highcpu-16",
+            "c4-highcpu-32",
+            "c4-highcpu-48",
+            "c4-highcpu-96",
+            "c4-highcpu-192",
+
+            "c4-highmem-8",
+            "c4-highmem-16",
+            "c4-highmem-32",
+            "c4-highmem-48",
+            "c4-highmem-96",
+            "c4-highmem-192",
+
+            "n4-standard-2",
+            "n4-standard-4",
+            "n4-standard-8",
+            "n4-standard-16",
+            "n4-standard-32",
+            "n4-standard-48",
+            "n4-standard-64",
+            "n4-standard-80",
+
+            "n4-highmem-2",
+            "n4-highmem-4",
+            "n4-highmem-8",
+            "n4-highmem-16",
+            "n4-highmem-32",
+            "n4-highmem-48",
+            "n4-highmem-64",
+            "n4-highmem-80"
     );
 
     private GcpEnabledInstanceTypes() {

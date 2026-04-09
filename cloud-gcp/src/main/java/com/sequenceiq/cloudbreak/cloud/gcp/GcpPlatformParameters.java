@@ -10,12 +10,12 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
@@ -30,6 +30,7 @@ import com.google.api.client.util.Lists;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.TagValidator;
+import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpDiskUtil;
 import com.sequenceiq.cloudbreak.cloud.model.DiskType;
 import com.sequenceiq.cloudbreak.cloud.model.DiskTypes;
 import com.sequenceiq.cloudbreak.cloud.model.DisplayName;
@@ -64,8 +65,20 @@ public class GcpPlatformParameters implements PlatformParameters {
     @Value("${cb.gcp.root.disk.type.default:pd-ssd}")
     private String defaultRootDiskType;
 
+    @Value("${cb.gcp.root.disk.type.default:hyperdisk-balanced}")
+    private String defaultRootHyperDiskType;
+
+    @Value("${cb.gcp.database.disk.type:pd-ssd}")
+    private String databaseDiskType;
+
+    @Value("${cb.gcp.database.hyperdisk.type:hyperdisk-balanced}")
+    private String databaseHyperDiskType;
+
     @Inject
     private CloudbreakResourceReaderService cloudbreakResourceReaderService;
+
+    @Inject
+    private GcpDiskUtil gcpDiskUtil;
 
     @Inject
     private GcpTagValidator gcpTagValidator;
@@ -113,7 +126,14 @@ public class GcpPlatformParameters implements PlatformParameters {
 
     @Override
     public DiskTypes diskTypes() {
+        // Followup tasks to handle machinetype based disktypes
+        // https://cloudera.atlassian.net/browse/CB-32446, https://cloudera.atlassian.net/browse/CB-32447
         return new DiskTypes(getDiskTypes(), defaultDiskType(), diskMappings(), diskDisplayNames());
+    }
+
+    @Override
+    public String embeddedDatabaseDiskType(String flavor) {
+        return gcpDiskUtil.isHyperdiskBalancedSupportedForInstanceType(flavor) ? databaseHyperDiskType : databaseDiskType;
     }
 
     @Override
@@ -164,24 +184,13 @@ public class GcpPlatformParameters implements PlatformParameters {
     }
 
     private Map<DiskType, DisplayName> diskDisplayNames() {
-        Map<DiskType, DisplayName> map = new HashMap<>();
-        map.put(diskType(GcpDiskType.HDD.value()), displayName(GcpDiskType.HDD.displayName()));
-        map.put(diskType(GcpDiskType.BALANCED.value()), displayName(GcpDiskType.BALANCED.displayName()));
-        map.put(diskType(GcpDiskType.EXTREME.value()), displayName(GcpDiskType.EXTREME.displayName()));
-        map.put(diskType(GcpDiskType.SSD.value()), displayName(GcpDiskType.SSD.displayName()));
-        map.put(diskType(GcpDiskType.LOCAL_SSD.value()), displayName(GcpDiskType.LOCAL_SSD.displayName()));
-        return map;
+        return Arrays.stream(GcpDiskType.values())
+                .collect(Collectors.toMap(diskType -> diskType(diskType.value()), diskType -> displayName(diskType.displayName())));
     }
 
     private Map<String, VolumeParameterType> diskMappings() {
-        Map<String, VolumeParameterType> map = new HashMap<>();
-        map.put(GcpDiskType.HDD.value(), VolumeParameterType.MAGNETIC);
-        map.put(GcpDiskType.BALANCED.value(), VolumeParameterType.MAGNETIC);
-        map.put(GcpDiskType.EXTREME.value(), VolumeParameterType.SSD);
-        map.put(GcpDiskType.SSD.value(), VolumeParameterType.SSD);
-        map.put(GcpDiskType.LOCAL_SSD.value(), VolumeParameterType.LOCAL_SSD);
-
-        return map;
+        return Arrays.stream(GcpDiskType.values())
+                .collect(Collectors.toMap(diskType -> diskType(diskType.value()).getValue(), GcpDiskType::getVolumeParameterType));
     }
 
     private Collection<DiskType> getDiskTypes() {
@@ -198,8 +207,8 @@ public class GcpPlatformParameters implements PlatformParameters {
     }
 
     @Override
-    public DiskType defaultRootDiskType() {
-        return diskType(defaultRootDiskType);
+    public DiskType defaultRootDiskType(String flavor) {
+        return diskType(gcpDiskUtil.isHyperdiskBalancedSupportedForInstanceType(flavor) ? defaultRootHyperDiskType : defaultRootDiskType);
     }
 
     public String getPrerequisitesCreationCommand(CredentialType type) {
@@ -219,19 +228,25 @@ public class GcpPlatformParameters implements PlatformParameters {
     }
 
     public enum GcpDiskType {
-        SSD("pd-ssd", "Solid-state persistent disks (SSD)"),
-        BALANCED("pd-balanced", "Balanced persistent disks (BALANCED)"),
-        EXTREME("pd-extreme", "Extreme persistent disks (EXTREME)"),
-        HDD("pd-standard", "Standard persistent disks (HDD)"),
-        LOCAL_SSD("local-ssd", "Local scratch disk (SSD)");
+        SSD("pd-ssd", "Solid-state persistent disks (SSD)", VolumeParameterType.SSD),
+        BALANCED("pd-balanced", "Balanced persistent disks (BALANCED)", VolumeParameterType.MAGNETIC),
+        EXTREME("pd-extreme", "Extreme persistent disks (EXTREME)", VolumeParameterType.SSD),
+        HDD("pd-standard", "Standard persistent disks (HDD)", VolumeParameterType.MAGNETIC),
+        LOCAL_SSD("local-ssd", "Local scratch disk (SSD)", VolumeParameterType.LOCAL_SSD),
+        HYPERDISK_EXTREME("hyperdisk-extreme", "Hyperdisk extreme disks (HYPERDISK_EXTREME)", VolumeParameterType.HYPERDISK_EXTREME),
+        HYPERDISK_BALANCED("hyperdisk-balanced", "Hyperdisk balanced disk (HYPERDISK_BALANCED)", VolumeParameterType.HYPERDISK_BALANCED),
+        HYPERDISK_THROUGHPUT("hyperdisk-throughput", "Hyperdisk throughput disk (HYPERDISK_THROUGHPUT)", VolumeParameterType.HYPERDISK_THROUGHPUT);
 
         private final String value;
 
         private final String displayName;
 
-        GcpDiskType(String value, String displayName) {
+        private final VolumeParameterType volumeParameterType;
+
+        GcpDiskType(String value, String displayName, VolumeParameterType volumeParameterType) {
             this.value = value;
             this.displayName = displayName;
+            this.volumeParameterType = volumeParameterType;
         }
 
         public static GcpDiskType findByValue(String value) {
@@ -251,6 +266,10 @@ public class GcpPlatformParameters implements PlatformParameters {
 
         public String displayName() {
             return displayName;
+        }
+
+        public VolumeParameterType getVolumeParameterType() {
+            return volumeParameterType;
         }
 
         public String getUrl(String projectId, String zone) {

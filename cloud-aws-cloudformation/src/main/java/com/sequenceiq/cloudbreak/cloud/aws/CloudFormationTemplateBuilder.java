@@ -77,7 +77,7 @@ public class CloudFormationTemplateBuilder {
                     awsInstanceView.getPlacementGroupStrategy().name(),
                     group.getRootVolumeType() != null
                             ? group.getRootVolumeType().toLowerCase(Locale.ROOT)
-                            : awsPlatformParameters.defaultRootDiskType().value());
+                            : awsPlatformParameters.defaultRootDiskType(awsInstanceView.getFlavor()).value());
             awsGroupViews.add(groupView);
             if (group.getType() == InstanceGroupType.GATEWAY) {
                 awsGatewayGroupViews.add(groupView);

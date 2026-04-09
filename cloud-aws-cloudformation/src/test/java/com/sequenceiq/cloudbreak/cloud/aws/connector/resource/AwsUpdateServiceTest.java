@@ -369,7 +369,7 @@ class AwsUpdateServiceTest {
 
         Map<String, AutoScalingGroup> autoScalingGroupMap = Map.of("masterASG", asg1, "workerASG", asg2);
 
-        when(awsPlatformParameters.defaultRootDiskType()).thenReturn(diskType(AwsDiskType.Gp3.value()));
+        when(awsPlatformParameters.defaultRootDiskType(any())).thenReturn(diskType(AwsDiskType.Gp3.value()));
         when(awsClient.createAutoScalingClient(any(AwsCredentialView.class), anyString())).thenReturn(amazonAutoScalingClient);
         when(awsClient.createCloudFormationClient(any(AwsCredentialView.class), anyString())).thenReturn(amazonCloudFormationClient);
         when(awsClient.createEc2Client(any(), any())).thenReturn(ec2Client);

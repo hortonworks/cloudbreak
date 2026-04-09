@@ -13,6 +13,7 @@ import java.util.Set;
 
 import jakarta.inject.Inject;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Lists;
@@ -39,6 +40,9 @@ public class MockPlatformParameters implements PlatformParameters {
 
     private static final ScriptParams SCRIPT_PARAMS = new ScriptParams("mockdisk", START_LABEL);
 
+    @Value("${cb.mock.database.disk.type:magnetic}")
+    private String databaseDiskType;
+
     @Inject
     private CloudbreakResourceReaderService cloudbreakResourceReaderService;
 
@@ -54,6 +58,11 @@ public class MockPlatformParameters implements PlatformParameters {
         diskMappings.put(MockDiskType.SSD.value(), VolumeParameterType.SSD);
         diskMappings.put(MockDiskType.EPHEMERAL.value(), VolumeParameterType.EPHEMERAL);
         return new DiskTypes(getDiskTypes(), defaultDiskType(), diskMappings, new HashMap<>());
+    }
+
+    @Override
+    public String embeddedDatabaseDiskType(String flavor) {
+        return databaseDiskType;
     }
 
     private Collection<DiskType> getDiskTypes() {

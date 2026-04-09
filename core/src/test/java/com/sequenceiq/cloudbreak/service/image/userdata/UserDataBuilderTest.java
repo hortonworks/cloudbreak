@@ -234,6 +234,11 @@ class UserDataBuilderTest {
         }
 
         @Override
+        public String embeddedDatabaseDiskType(String flavor) {
+            return "magnetic";
+        }
+
+        @Override
         public String resourceDefinition(String resource) {
             return "";
         }

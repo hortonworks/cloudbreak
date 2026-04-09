@@ -26,6 +26,9 @@ public class VmTypeToVmTypeV1ResponseConverter {
         convertVolumeConfig(configs, source.getMetaData().getMagneticConfig());
         convertVolumeConfig(configs, source.getMetaData().getSsdConfig());
         convertVolumeConfig(configs, source.getMetaData().getSt1Config());
+        convertVolumeConfig(configs, source.getMetaData().getHyperdiskBalancedConfig());
+        convertVolumeConfig(configs, source.getMetaData().getHyperdiskThroughputConfig());
+        convertVolumeConfig(configs, source.getMetaData().getHyperdiskExtremeConfig());
 
         Map<String, Object> properties = new HashMap<>(source.getMetaData().getProperties());
         properties.put("AvailabilityZones", Objects.requireNonNullElse(source.getMetaData().getAvailabilityZones(), new ArrayList<>()));

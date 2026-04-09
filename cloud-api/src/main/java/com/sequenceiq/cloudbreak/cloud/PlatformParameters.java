@@ -51,6 +51,14 @@ public interface PlatformParameters {
     DiskTypes diskTypes();
 
     /**
+     * Disk type of the embedded database
+     *
+     * @param flavor the flavor of the instance where the embedded db is on
+     * @return the {@link DiskTypes} of a platform
+     */
+    String embeddedDatabaseDiskType(String flavor);
+
+    /**
      * Return the definition of a resource in JSON format.
      *
      * @param resource type of the resource (available ones: "credential")
@@ -124,11 +132,11 @@ public interface PlatformParameters {
     }
 
     /**
-     * Default root disk type of a platform
+     * Default root disk type of a platform for a given flavor
      *
      * @return the default root {@link DiskType} of a platform
      */
-    default DiskType defaultRootDiskType() {
+    default DiskType defaultRootDiskType(String flavor) {
         return null;
     }
 

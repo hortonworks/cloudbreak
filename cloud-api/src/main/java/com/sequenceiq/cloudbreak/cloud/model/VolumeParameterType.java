@@ -122,6 +122,72 @@ public enum VolumeParameterType {
         }
     },
 
+    HYPERDISK_BALANCED() {
+        @Override
+        public VolumeParameterConfig getVolumeParameterByType(VmTypeMeta metaData) {
+            return metaData.getHyperdiskBalancedConfig();
+        }
+
+        @Override
+        public void buildForVmTypeMetaBuilder(VmTypeMetaBuilder builder, int maxDataDiskCount, int maxdiskSize) {
+            builder.withHyperdiskBalancedConfig(VolumeParameterType.volumeParameterConfig(this, maxDataDiskCount, maxdiskSize));
+        }
+
+        @Override
+        public void buildForVmTypeMetaBuilder(VmTypeMetaBuilder builder, int maxDataDiskCount) {
+            builder.withHyperdiskBalancedConfig(VolumeParameterType.volumeParameterConfig(this, maxDataDiskCount));
+        }
+
+        @Override
+        public boolean in(VolumeParameterType... types) {
+            return VolumeParameterType.in(this, types);
+        }
+    },
+
+    HYPERDISK_THROUGHPUT() {
+        @Override
+        public VolumeParameterConfig getVolumeParameterByType(VmTypeMeta metaData) {
+            return metaData.getHyperdiskThroughputConfig();
+        }
+
+        @Override
+        public void buildForVmTypeMetaBuilder(VmTypeMetaBuilder builder, int maxDataDiskCount, int maxdiskSize) {
+            builder.withHyperdiskThroughputConfig(VolumeParameterType.volumeParameterConfig(this, maxDataDiskCount, maxdiskSize));
+        }
+
+        @Override
+        public void buildForVmTypeMetaBuilder(VmTypeMetaBuilder builder, int maxDataDiskCount) {
+            builder.withHyperdiskThroughputConfig(VolumeParameterType.volumeParameterConfig(this, maxDataDiskCount));
+        }
+
+        @Override
+        public boolean in(VolumeParameterType... types) {
+            return VolumeParameterType.in(this, types);
+        }
+    },
+
+    HYPERDISK_EXTREME() {
+        @Override
+        public VolumeParameterConfig getVolumeParameterByType(VmTypeMeta metaData) {
+            return metaData.getHyperdiskExtremeConfig();
+        }
+
+        @Override
+        public void buildForVmTypeMetaBuilder(VmTypeMetaBuilder builder, int maxDataDiskCount, int maxdiskSize) {
+            builder.withHyperdiskExtremeConfig(VolumeParameterType.volumeParameterConfig(this, maxDataDiskCount, maxdiskSize));
+        }
+
+        @Override
+        public void buildForVmTypeMetaBuilder(VmTypeMetaBuilder builder, int maxDataDiskCount) {
+            builder.withHyperdiskExtremeConfig(VolumeParameterType.volumeParameterConfig(this, maxDataDiskCount));
+        }
+
+        @Override
+        public boolean in(VolumeParameterType... types) {
+            return VolumeParameterType.in(this, types);
+        }
+    },
+
     EPHEMERAL() {
         @Override
         public VolumeParameterConfig getVolumeParameterByType(VmTypeMeta metaData) {

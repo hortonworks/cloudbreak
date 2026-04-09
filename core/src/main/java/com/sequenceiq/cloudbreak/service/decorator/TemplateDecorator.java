@@ -114,7 +114,7 @@ public class TemplateDecorator {
     private void setRootVolumeType(Template template, String cloudPlatform) {
         if (isEmpty(template.getRootVolumeType())) {
             LOGGER.debug("Setting root volume type with default value for platform '{}'", template.getCloudPlatform());
-            template.setRootVolumeType(cloudParameterCache.getDefaultVolumeType(cloudPlatform));
+            template.setRootVolumeType(cloudParameterCache.getDefaultRootVolumeType(cloudPlatform, template.getInstanceType()));
         }
     }
 }

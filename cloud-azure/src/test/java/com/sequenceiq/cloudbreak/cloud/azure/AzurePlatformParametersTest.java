@@ -100,7 +100,7 @@ class AzurePlatformParametersTest {
     @Test
     void testDefaultDisks() {
         assertEquals(diskType(AzureDiskType.STANDARD_SSD_LRS.value()), underTest.defaultDiskType());
-        assertEquals(diskType(AzureDiskType.STANDARD_SSD_LRS.value()), underTest.defaultRootDiskType());
+        assertEquals(diskType(AzureDiskType.STANDARD_SSD_LRS.value()), underTest.defaultRootDiskType(null));
     }
 
     private InstanceGroupParameterRequest getRequestWithoutAs(String groupName) {

@@ -202,7 +202,7 @@ public class AwsUpdateService {
                     LaunchTemplateField.ROOT_DISK_SIZE, String.valueOf(group.getRootVolumeSize()),
                     LaunchTemplateField.ROOT_VOLUME_TYPE, group.getRootVolumeType() != null
                             ? group.getRootVolumeType().toLowerCase(Locale.ROOT)
-                            : awsPlatformParameters.defaultRootDiskType().value()
+                            : awsPlatformParameters.defaultRootDiskType(group.getReferenceInstanceTemplate().getFlavor()).value()
             );
             Optional<AutoScalingGroup> autoScalingGroupOptional = autoScalingGroupMap.keySet().stream().filter(key -> key.contains(groupName))
                     .map(autoScalingGroupMap::get).findFirst();

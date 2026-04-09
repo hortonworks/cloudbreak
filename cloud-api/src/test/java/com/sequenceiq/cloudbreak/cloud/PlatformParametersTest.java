@@ -62,6 +62,11 @@ public class PlatformParametersTest {
         }
 
         @Override
+        public String embeddedDatabaseDiskType(String flavor) {
+            return "magnetic";
+        }
+
+        @Override
         public String resourceDefinition(String resource) {
             return "testResourceDefinition";
         }

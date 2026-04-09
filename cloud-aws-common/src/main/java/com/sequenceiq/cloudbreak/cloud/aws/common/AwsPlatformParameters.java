@@ -82,6 +82,9 @@ public class AwsPlatformParameters implements PlatformParameters {
     @Inject
     private AwsTagValidator awsTagValidator;
 
+    @Value("${cb.aws.database.disk.type:gp3}")
+    private String databaseDiskType;
+
     private final Map<AvailabilityZone, VmType> defaultVmTypes = new HashMap<>();
 
     private Region defaultRegion;
@@ -146,6 +149,11 @@ public class AwsPlatformParameters implements PlatformParameters {
         return new DiskTypes(getDiskTypes(), defaultDiskType(), diskMappings(), diskDisplayName());
     }
 
+    @Override
+    public String embeddedDatabaseDiskType(String flavor) {
+        return databaseDiskType;
+    }
+
     private Map<DiskType, DisplayName> diskDisplayName() {
         Map<DiskType, DisplayName> map = new HashMap<>();
         for (AwsDiskType awsDiskType : AwsDiskType.values()) {
@@ -178,7 +186,7 @@ public class AwsPlatformParameters implements PlatformParameters {
     }
 
     @Override
-    public DiskType defaultRootDiskType() {
+    public DiskType defaultRootDiskType(String flavor) {
         return diskType(defaultRootDiskType);
     }
 

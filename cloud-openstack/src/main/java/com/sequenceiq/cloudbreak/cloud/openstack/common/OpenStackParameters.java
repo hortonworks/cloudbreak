@@ -72,6 +72,11 @@ public class OpenStackParameters implements PlatformParameters {
     }
 
     @Override
+    public String embeddedDatabaseDiskType(String flavor) {
+        return "PURE-ISCSI";
+    }
+
+    @Override
     public TagValidator tagValidator() {
         return openStackTagValidator;
     }

@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.converter.v4.stacks.instancegroup.template;
 
+import static com.sequenceiq.cloudbreak.domain.VolumeUsageType.DATABASE;
 import static java.util.Optional.ofNullable;
 
 import java.util.Map;
@@ -57,7 +58,8 @@ public class TemplateToInstanceTemplateV4ResponseConverter {
 
     private DatabaseVolumeV4Response databaseVolume(Template source) {
         Optional<VolumeTemplate> databaseVolume = source.getVolumeTemplates().stream()
-                .filter(volumeTemplate -> volumeTemplate.getUsageType() == VolumeUsageType.DATABASE).findFirst();
+                .filter(volumeTemplate -> volumeTemplate.getUsageType() == DATABASE)
+                .findFirst();
         return databaseVolume.map(volume -> {
             DatabaseVolumeV4Response volumeResponse = new DatabaseVolumeV4Response();
             volumeResponse.setType(volume.getVolumeType());

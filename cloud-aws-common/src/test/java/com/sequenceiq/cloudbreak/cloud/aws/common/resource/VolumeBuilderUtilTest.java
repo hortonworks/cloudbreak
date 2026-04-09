@@ -90,7 +90,7 @@ class VolumeBuilderUtilTest {
         software.amazon.awssdk.services.ec2.model.Image ecImage = software.amazon.awssdk.services.ec2.model.Image.builder().build();
         when(amazonEc2Client.describeImages(any())).thenReturn(DescribeImagesResponse.builder().images(ecImage).build());
         when(cloudStack.getImage()).thenReturn(image);
-        when(awsPlatformParameters.defaultRootDiskType()).thenReturn(diskType(AwsDiskType.Gp3.value()));
+        when(awsPlatformParameters.defaultRootDiskType(any())).thenReturn(diskType(AwsDiskType.Gp3.value()));
         BlockDeviceMapping actual = underTest.getRootVolume(awsInstanceView, group, cloudStack, ac);
         assertNotNull(actual);
     }
@@ -161,7 +161,7 @@ class VolumeBuilderUtilTest {
         when(awsInstanceView.isEncryptedVolumes()).thenReturn(true);
         when(awsInstanceView.isKmsCustom()).thenReturn(true);
         when(awsInstanceView.getKmsKey()).thenReturn("kmsKey");
-        when(awsPlatformParameters.defaultRootDiskType()).thenReturn(diskType(AwsDiskType.Gp3.value()));
+        when(awsPlatformParameters.defaultRootDiskType(any())).thenReturn(diskType(AwsDiskType.Gp3.value()));
 
         EbsBlockDevice actual = underTest.getRootEbs(awsInstanceView, group);
         assertTrue(actual.deleteOnTermination());
@@ -192,7 +192,7 @@ class VolumeBuilderUtilTest {
         when(group.getRootVolumeSize()).thenReturn(1);
         when(awsInstanceView.isEncryptedVolumes()).thenReturn(false);
         when(awsInstanceView.isKmsCustom()).thenReturn(false);
-        when(awsPlatformParameters.defaultRootDiskType()).thenReturn(diskType(AwsDiskType.Gp3.value()));
+        when(awsPlatformParameters.defaultRootDiskType(any())).thenReturn(diskType(AwsDiskType.Gp3.value()));
 
         EbsBlockDevice actual = underTest.getRootEbs(awsInstanceView, group);
         assertTrue(actual.deleteOnTermination());

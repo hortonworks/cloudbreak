@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.common.request.CreatorClientConstants.CA
 import static com.sequenceiq.cloudbreak.common.request.CreatorClientConstants.CDP_CALLER_ID_HEADER;
 import static com.sequenceiq.cloudbreak.common.request.CreatorClientConstants.USER_AGENT_HEADER;
 import static com.sequenceiq.cloudbreak.common.request.HeaderValueProvider.getHeaderOrItsFallbackValueOrDefault;
+import static com.sequenceiq.cloudbreak.domain.VolumeUsageType.DATABASE;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 
 import java.util.HashSet;
@@ -50,7 +51,6 @@ import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
-import com.sequenceiq.cloudbreak.domain.VolumeUsageType;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.AvailabilityZone;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
@@ -354,11 +354,11 @@ public class StackDecorator {
         InstanceGroupType instanceGroupType = instanceGroup.getInstanceGroupType();
         if (instanceGroupType == InstanceGroupType.GATEWAY
                 && embeddedDatabaseService.isEmbeddedDatabaseOnAttachedDiskEnabled(subject, subject.getCluster())) {
-            String databaseVolumeType = embeddedDatabaseConfig.getPlatformVolumeType(subject.cloudPlatform())
+            String databaseVolumeType = embeddedDatabaseConfig.getPlatformVolumeType(subject.cloudPlatform(), template)
                     .orElseThrow(() -> new BadRequestException(String.format("If embedded db is enabled on attached disk, database volumetype" +
                             " have to be defined for cloudprovider in app config! Missing database volumetype on %s provider", subject.cloudPlatform())));
             VolumeTemplate databaseVolumeTemplate = new VolumeTemplate();
-            databaseVolumeTemplate.setUsageType(VolumeUsageType.DATABASE);
+            databaseVolumeTemplate.setUsageType(DATABASE);
             databaseVolumeTemplate.setVolumeSize(embeddedDatabaseConfig.getSize());
             databaseVolumeTemplate.setVolumeCount(1);
             databaseVolumeTemplate.setVolumeType(databaseVolumeType);

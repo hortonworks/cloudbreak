@@ -50,6 +50,11 @@ public class YarnPlatformParameters implements PlatformParameters {
     }
 
     @Override
+    public String embeddedDatabaseDiskType(String flavor) {
+        return null;
+    }
+
+    @Override
     public String resourceDefinition(String resource) {
         return cloudbreakResourceReaderService.resourceDefinition("yarn", resource);
     }

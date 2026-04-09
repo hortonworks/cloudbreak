@@ -38,6 +38,7 @@ import com.google.api.services.compute.model.Subnetwork;
 import com.google.api.services.compute.model.SubnetworkList;
 import com.google.api.services.compute.model.SubnetworkSecondaryRange;
 import com.sequenceiq.cloudbreak.cloud.gcp.client.GcpComputeFactory;
+import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpDiskUtil;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.CloudNetworks;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
@@ -59,13 +60,16 @@ class GcpPlatformResourcesTest {
     private ExtendedCloudCredential extendedCloudCredential;
 
     @Mock
+    private GcpStackUtil gcpStackUtil;
+
+    @Mock
     private ExtremeDiskCalculator extremeDiskCalculator;
 
     @Mock
     private GcpComputeFactory gcpComputeFactory;
 
     @Mock
-    private GcpStackUtil gcpStackUtil;
+    private GcpDiskUtil gcpDiskUtil;
 
     @InjectMocks
     private GcpPlatformResources underTest;
@@ -142,7 +146,7 @@ class GcpPlatformResourcesTest {
         when(regionsList.execute()).thenReturn(regionList);
         Compute.Regions regions = mock(Compute.Regions.class);
         when(regions.list(PROJECT_ID)).thenReturn(regionsList);
-
+        lenient().when(gcpStackUtil.getMachineTypeFamily(any(MachineType.class))).thenReturn("a9");
         Compute.MachineTypes machineTypes = mock(Compute.MachineTypes.class);
 
         for (Map.Entry<String, List<String>> entry : availabilityZoneToVmTypes.entrySet()) {

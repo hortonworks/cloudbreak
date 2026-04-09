@@ -44,6 +44,12 @@ public class VmTypeMeta {
 
     private VolumeParameterConfig extremeSsdConfig;
 
+    private VolumeParameterConfig hyperdiskBalancedConfig;
+
+    private VolumeParameterConfig hyperdiskThroughputConfig;
+
+    private VolumeParameterConfig hyperdiskExtremeConfig;
+
     private List<String> availabilityZones = new ArrayList<>();
 
     private Map<String, Object> properties = new HashMap<>();
@@ -112,6 +118,30 @@ public class VmTypeMeta {
         this.extremeSsdConfig = extremeSsdConfig;
     }
 
+    public VolumeParameterConfig getHyperdiskThroughputConfig() {
+        return hyperdiskThroughputConfig;
+    }
+
+    public void setHyperdiskThroughputConfig(VolumeParameterConfig hyperdiskThroughputConfig) {
+        this.hyperdiskThroughputConfig = hyperdiskThroughputConfig;
+    }
+
+    public VolumeParameterConfig getHyperdiskBalancedConfig() {
+        return hyperdiskBalancedConfig;
+    }
+
+    public void setHyperdiskBalancedConfig(VolumeParameterConfig hyperdiskBalancedConfig) {
+        this.hyperdiskBalancedConfig = hyperdiskBalancedConfig;
+    }
+
+    public VolumeParameterConfig getHyperdiskExtremeConfig() {
+        return hyperdiskExtremeConfig;
+    }
+
+    public void setHyperdiskExtremeConfig(VolumeParameterConfig hyperdiskExtremeConfig) {
+        this.hyperdiskExtremeConfig = hyperdiskExtremeConfig;
+    }
+
     public List<String> getAvailabilityZones() {
         return availabilityZones;
     }
@@ -160,6 +190,9 @@ public class VmTypeMeta {
                 + ", ssdConfig=" + ssdConfig
                 + ", ephemeralConfig=" + ephemeralConfig
                 + ", st1Config=" + st1Config
+                + ", hyperdiskBalancedConfig" + hyperdiskBalancedConfig
+                + ", hyperdiskExtremeConfig" + hyperdiskExtremeConfig
+                + ", hyperdiskThroughputConfig" + hyperdiskThroughputConfig
                 + ", extremeSsdConfig=" + extremeSsdConfig
                 + ", balancedHddConfig=" + balancedHddConfig
                 + ", availabilityZones=" + availabilityZones
@@ -176,6 +209,12 @@ public class VmTypeMeta {
         private VolumeParameterConfig ssdConfig;
 
         private VolumeParameterConfig ephemeralConfig;
+
+        private VolumeParameterConfig hyperDiskBalancedConfig;
+
+        private VolumeParameterConfig hyperDiskThroughputConfig;
+
+        private VolumeParameterConfig hyperDiskExtremeConfig;
 
         private VolumeParameterConfig st1Config;
 
@@ -243,6 +282,37 @@ public class VmTypeMeta {
 
         public VmTypeMetaBuilder withExtremeSsdConfig(Integer minimumSize, Integer maximumSize, Integer minimumNumber, Integer maximumNumber) {
             ephemeralConfig = new VolumeParameterConfig(VolumeParameterType.EXTREME_SSD, minimumSize, maximumSize, minimumNumber, maximumNumber);
+            return this;
+        }
+
+        public VmTypeMetaBuilder withHyperdiskBalancedConfig(VolumeParameterConfig volumeParameterConfig) {
+            hyperDiskBalancedConfig = volumeParameterConfig;
+            return this;
+        }
+
+        public VmTypeMetaBuilder withHyperdiskBalancedConfig(Integer minimumSize, Integer maximumSize, Integer minimumNumber, Integer maximumNumber) {
+            hyperDiskBalancedConfig = new VolumeParameterConfig(VolumeParameterType.HYPERDISK_BALANCED, minimumSize, maximumSize, minimumNumber, maximumNumber);
+            return this;
+        }
+
+        public VmTypeMetaBuilder withHyperdiskThroughputConfig(VolumeParameterConfig volumeParameterConfig) {
+            hyperDiskThroughputConfig = volumeParameterConfig;
+            return this;
+        }
+
+        public VmTypeMetaBuilder withHyperdiskThroughputConfig(Integer minimumSize, Integer maximumSize, Integer minimumNumber, Integer maximumNumber) {
+            hyperDiskThroughputConfig = new VolumeParameterConfig(VolumeParameterType.HYPERDISK_THROUGHPUT, minimumSize, maximumSize,
+                    minimumNumber, maximumNumber);
+            return this;
+        }
+
+        public VmTypeMetaBuilder withHyperdiskExtremeConfig(VolumeParameterConfig volumeParameterConfig) {
+            hyperDiskExtremeConfig = volumeParameterConfig;
+            return this;
+        }
+
+        public VmTypeMetaBuilder withHyperdiskExtremeConfig(Integer minimumSize, Integer maximumSize, Integer minimumNumber, Integer maximumNumber) {
+            hyperDiskExtremeConfig = new VolumeParameterConfig(VolumeParameterType.HYPERDISK_EXTREME, minimumSize, maximumSize, minimumNumber, maximumNumber);
             return this;
         }
 
@@ -348,6 +418,9 @@ public class VmTypeMeta {
             vmTypeMeta.setLocalSsdConfig(localSsdConfig);
             vmTypeMeta.setBalancedHddConfig(balancedHddConfig);
             vmTypeMeta.setExtremeSsdConfig(extremeSsdConfig);
+            vmTypeMeta.setHyperdiskBalancedConfig(hyperDiskBalancedConfig);
+            vmTypeMeta.setHyperdiskExtremeConfig(hyperDiskExtremeConfig);
+            vmTypeMeta.setHyperdiskThroughputConfig(hyperDiskThroughputConfig);
             vmTypeMeta.setAvailabilityZones(availabilityZones);
             vmTypeMeta.setProperties(properties);
             return vmTypeMeta;

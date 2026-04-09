@@ -56,8 +56,8 @@ public class GetPlatformVmTypesHandler implements CloudPlatformEventHandler<GetP
                 platformVirtualMachinesJson = platformResources
                         .virtualMachines(request.getExtendedCloudCredential(), Region.region(request.getRegion()), request.getFilters());
             }
-            GetPlatformVmTypesResult getPlatformSecurityGroupsResult = new GetPlatformVmTypesResult(request.getResourceId(), platformVirtualMachinesJson);
-            request.getResult().onNext(getPlatformSecurityGroupsResult);
+            GetPlatformVmTypesResult getPlatformVmTypesResult = new GetPlatformVmTypesResult(request.getResourceId(), platformVirtualMachinesJson);
+            request.getResult().onNext(getPlatformVmTypesResult);
             LOGGER.debug("Query platform vmtypes types finished.");
         } catch (Exception e) {
             request.getResult().onNext(new GetPlatformVmTypesResult(e.getMessage(), e, request.getResourceId()));

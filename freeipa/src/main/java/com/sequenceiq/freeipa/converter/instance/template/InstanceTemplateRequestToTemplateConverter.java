@@ -63,9 +63,9 @@ public class InstanceTemplateRequestToTemplateConverter {
         template.setAccountId(accountId);
         template.setName(resourceNameGenerator.generateName(APIResourceType.TEMPLATE));
         template.setStatus(ResourceStatus.USER_MANAGED);
-        setVolumesProperty(source.getAttachedVolumes(), template, cloudPlatform);
         template.setInstanceType(Objects.requireNonNullElse(source.getInstanceType(),
                 defaultInstanceTypeProvider.getForPlatform(cloudPlatform.name(), architecture)));
+        setVolumesProperty(source.getAttachedVolumes(), template, cloudPlatform);
         Map<String, Object> attributes = new HashMap<>();
         if (cloudPlatform == CloudPlatform.AWS) {
             if (awsKmsEncryptionKey != null) {
@@ -122,7 +122,6 @@ public class InstanceTemplateRequestToTemplateConverter {
             template.setVolumeSize(0);
         }
         template.setRootVolumeSize(defaultRootVolumeSizeProvider.getForPlatform(cloudPlatform.name()));
-        template.setRootVolumeType(cloudParameterCache.getDefaultVolumeType(cloudPlatform.name()));
+        template.setRootVolumeType(cloudParameterCache.getDefaultRootVolumeType(cloudPlatform.name(), template.getInstanceType()));
     }
-
 }

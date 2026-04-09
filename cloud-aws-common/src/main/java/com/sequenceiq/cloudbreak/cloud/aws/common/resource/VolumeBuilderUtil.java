@@ -102,7 +102,7 @@ public class VolumeBuilderUtil {
     public EbsBlockDevice getRootEbs(AwsInstanceView awsInstanceView, Group group) {
         String volumeType = group.getRootVolumeType() != null
                 ? group.getRootVolumeType().toLowerCase(Locale.ROOT)
-                : awsPlatformParameters.defaultRootDiskType().value();
+                : awsPlatformParameters.defaultRootDiskType(awsInstanceView.getFlavor()).value();
         int rootVolumeSize = group.getRootVolumeSize();
 
         LOGGER.debug("AwsInstanceView: {},  root volume type: {}, size: {}", awsInstanceView, volumeType, rootVolumeSize);

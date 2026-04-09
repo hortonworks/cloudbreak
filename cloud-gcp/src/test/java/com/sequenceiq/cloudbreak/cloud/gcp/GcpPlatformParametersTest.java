@@ -20,6 +20,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.TagValidator;
+import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpDiskUtil;
 import com.sequenceiq.cloudbreak.cloud.model.DiskTypes;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformOrchestrator;
 import com.sequenceiq.cloudbreak.cloud.model.ScriptParams;
@@ -30,7 +31,6 @@ import com.sequenceiq.common.model.Architecture;
 
 @ExtendWith(MockitoExtension.class)
 class GcpPlatformParametersTest {
-
     @Mock
     private CloudbreakResourceReaderService cloudbreakResourceReaderService;
 
@@ -39,6 +39,9 @@ class GcpPlatformParametersTest {
 
     @Mock
     private TagSpecification tagSpecification;
+
+    @Mock
+    private GcpDiskUtil gcpDiskUtil;
 
     @InjectMocks
     private GcpPlatformParameters underTest;
@@ -52,7 +55,7 @@ class GcpPlatformParametersTest {
     @Test
     void testDiskTypes() {
         DiskTypes diskTypes = underTest.diskTypes();
-        assertEquals(5, diskTypes.diskMapping().keySet().size());
+        assertEquals(8, diskTypes.diskMapping().keySet().size());
     }
 
     @Test
@@ -113,7 +116,6 @@ class GcpPlatformParametersTest {
     @Test
     void testDefaultDiskTypes() {
         assertEquals(diskType(GcpPlatformParameters.GcpDiskType.BALANCED.value()), underTest.defaultDiskType());
-        assertEquals(diskType(GcpPlatformParameters.GcpDiskType.SSD.value()), underTest.defaultRootDiskType());
+        assertEquals(diskType(GcpPlatformParameters.GcpDiskType.SSD.value()), underTest.defaultRootDiskType(null));
     }
-
 }
