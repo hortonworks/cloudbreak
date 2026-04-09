@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
 import com.sequenceiq.cloudbreak.polling.PollingService;
+import com.sequenceiq.common.api.type.EnvironmentType;
 import com.sequenceiq.freeipa.api.v1.freeipa.cleanup.CleanupRequest;
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.HostRequest;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationStatus;
@@ -53,6 +54,7 @@ import com.sequenceiq.freeipa.kerberosmgmt.exception.DeleteException;
 import com.sequenceiq.freeipa.kerberosmgmt.v1.KeytabCacheService;
 import com.sequenceiq.freeipa.kerberosmgmt.v1.KeytabCleanupService;
 import com.sequenceiq.freeipa.ldap.LdapConfigService;
+import com.sequenceiq.freeipa.service.client.CachedEnvironmentClientService;
 import com.sequenceiq.freeipa.service.crossrealm.CrossRealmTrustService;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientRetryService;
@@ -126,6 +128,9 @@ public class CleanupService {
 
     @Inject
     private CrossRealmTrustService crossRealmTrustService;
+
+    @Inject
+    private CachedEnvironmentClientService environmentClientService;
 
     public OperationStatus cleanup(String accountId, CleanupRequest request) {
         String environmentCrn = request.getEnvironmentCrn();
@@ -203,7 +208,8 @@ public class CleanupService {
 
     private Map<String, Set<DnsRecord>> fetchDnsRecordsByZone(FreeIpaClient client, Set<String> allDnsZoneName, String envCrn, boolean trustExists)
             throws FreeIpaClientException {
-        if (trustExists) {
+        String environmentType = environmentClientService.getByCrn(envCrn).getEnvironmentType();
+        if (trustExists || EnvironmentType.isHybridFromEnvironmentTypeString(environmentType)) {
             try {
                 Map<String, Set<DnsRecord>> dnsRecordsByZone = dnsZoneBatchedService.fetchDnsRecordsByZone(client, allDnsZoneName);
                 dnsRecordsByZone.entrySet().removeIf(entry -> entry.getValue().size() < 2);
