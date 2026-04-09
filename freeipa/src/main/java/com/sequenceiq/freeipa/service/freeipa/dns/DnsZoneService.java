@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Multimap;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.common.api.type.EnvironmentType;
 import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsZoneForSubnetIdsRequest;
 import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsZoneForSubnetsRequest;
 import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsZoneForSubnetsResponse;
@@ -32,7 +33,7 @@ import com.sequenceiq.freeipa.client.RetryableFreeIpaClientException;
 import com.sequenceiq.freeipa.client.model.DnsZone;
 import com.sequenceiq.freeipa.entity.CrossRealmTrust;
 import com.sequenceiq.freeipa.entity.Stack;
-import com.sequenceiq.freeipa.service.crossrealm.CrossRealmTrustService;
+import com.sequenceiq.freeipa.service.client.CachedEnvironmentClientService;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 import com.sequenceiq.freeipa.service.stack.NetworkService;
 import com.sequenceiq.freeipa.service.stack.StackService;
@@ -53,9 +54,6 @@ public class DnsZoneService {
     private StackService stackService;
 
     @Inject
-    private CrossRealmTrustService crossRealmTrustService;
-
-    @Inject
     private ReverseDnsZoneCalculator reverseDnsZoneCalculator;
 
     @Inject
@@ -63,6 +61,9 @@ public class DnsZoneService {
 
     @Inject
     private NetworkService networkService;
+
+    @Inject
+    private CachedEnvironmentClientService environmentClient;
 
     @Retryable(value = RetryableFreeIpaClientException.class,
             maxAttemptsExpression = RetryableFreeIpaClientException.MAX_RETRIES_EXPRESSION,
@@ -72,9 +73,8 @@ public class DnsZoneService {
         Stack stack = stackService.getByEnvironmentCrnAndAccountId(request.getEnvironmentCrn(), accountId);
         MDCBuilder.buildMdcContext(stack);
         FreeIpaClient client = freeIpaClientFactory.getFreeIpaClientForStack(stack);
-        boolean trustExists = crossRealmTrustService.getByStackIdIfExists(stack.getId()).isPresent();
         AddDnsZoneForSubnetsResponse response = new AddDnsZoneForSubnetsResponse();
-        if (trustExists) {
+        if (EnvironmentType.isHybridFromEnvironmentTypeString(environmentClient.getByCrn(request.getEnvironmentCrn()).getEnvironmentType())) {
             addHybridDnsZonesForSubnets(client, request.getSubnets());
         } else {
             addDnsZonesForSubnets(request, client, response);
@@ -134,12 +134,11 @@ public class DnsZoneService {
     public AddDnsZoneForSubnetsResponse addDnsZonesForSubnetIds(AddDnsZoneForSubnetIdsRequest request, String accountId) throws FreeIpaClientException {
         Stack stack = stackService.getByEnvironmentCrnAndAccountId(request.getEnvironmentCrn(), accountId);
         MDCBuilder.buildMdcContext(stack);
-        boolean trustExists = crossRealmTrustService.getByStackIdIfExists(stack.getId()).isPresent();
         Multimap<String, String> subnetWithCidr = networkService.getFilteredSubnetWithCidr(request.getEnvironmentCrn(), stack,
                 request.getAddDnsZoneNetwork().getNetworkId(), request.getAddDnsZoneNetwork().getSubnetIds());
         FreeIpaClient client = freeIpaClientFactory.getFreeIpaClientForStack(stack);
         AddDnsZoneForSubnetsResponse response = new AddDnsZoneForSubnetsResponse();
-        if (trustExists) {
+        if (EnvironmentType.isHybridFromEnvironmentTypeString(environmentClient.getByCrn(request.getEnvironmentCrn()).getEnvironmentType())) {
             addHybridDnsZonesForSubnets(client, subnetWithCidr.values());
         } else {
             for (Entry<String, String> subnet : subnetWithCidr.entries()) {

@@ -5,11 +5,9 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -25,7 +23,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.env.Environment;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -33,12 +30,10 @@ import org.springframework.test.util.ReflectionTestUtils;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigDtoService;
-import com.sequenceiq.cloudbreak.telemetry.fluent.cloud.AdlsGen2ConfigGenerator;
 import com.sequenceiq.cloudbreak.tls.EncryptionProfileProvider;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.common.api.encryptionprofile.TlsVersion;
@@ -56,10 +51,8 @@ import com.sequenceiq.freeipa.service.EnvironmentService;
 import com.sequenceiq.freeipa.service.GatewayConfigService;
 import com.sequenceiq.freeipa.service.client.CachedEncryptionProfileClientService;
 import com.sequenceiq.freeipa.service.client.CachedEnvironmentClientService;
-import com.sequenceiq.freeipa.service.crossrealm.CrossRealmTrustService;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
-import com.sequenceiq.freeipa.service.freeipa.backup.cloud.S3BackupConfigGenerator;
 import com.sequenceiq.freeipa.service.freeipa.dns.ReverseDnsZoneCalculator;
 import com.sequenceiq.freeipa.service.loadbalancer.FreeIpaLoadBalancerService;
 import com.sequenceiq.freeipa.service.stack.NetworkService;
@@ -93,12 +86,6 @@ class FreeIpaConfigServiceTest {
 
     private Multimap<String, String> subnetWithCidr;
 
-    @Spy
-    private S3BackupConfigGenerator s3ConfigGenerator;
-
-    @Spy
-    private AdlsGen2ConfigGenerator adlsGen2ConfigGenerator;
-
     @Mock
     private NetworkService networkService;
 
@@ -124,9 +111,6 @@ class FreeIpaConfigServiceTest {
     private EnvironmentService environmentService;
 
     @Mock
-    private EntitlementService entitlementService;
-
-    @Mock
     private FreeIpaLoadBalancerService loadBalancerService;
 
     @Mock
@@ -137,9 +121,6 @@ class FreeIpaConfigServiceTest {
 
     @Mock
     private CachedEncryptionProfileClientService cachedEncryptionProfileClientService;
-
-    @Mock
-    private CrossRealmTrustService crossRealmTrustService;
 
     @InjectMocks
     private FreeIpaConfigService underTest;
@@ -216,8 +197,6 @@ class FreeIpaConfigServiceTest {
         assertEquals(SeLinux.ENFORCING.name().toLowerCase(Locale.ROOT), freeIpaConfigView.getSeLinux());
         Map<String, Object> encryptionMap = freeIpaConfigView.getEncryptionConfig().toMap();
         assertEquals(TLS_VERSIONS, encryptionMap.get("tlsVersionsSpaceSeparated"));
-
-        verify(crossRealmTrustService).getByStackIdIfExists(anyLong());
     }
 
     @Test
