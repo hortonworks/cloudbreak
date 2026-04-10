@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
@@ -24,7 +25,6 @@ import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
-import com.sequenceiq.cloudbreak.rotation.common.RotationContextProvider;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.secret.custom.CustomJobRotationContext;
 import com.sequenceiq.cloudbreak.telemetry.DataBusEndpointProvider;
@@ -33,11 +33,12 @@ import com.sequenceiq.cloudbreak.telemetry.databus.DatabusConfigView;
 import com.sequenceiq.common.api.telemetry.model.DataBusCredential;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.service.rotation.FreeipaConditionalRotationContextProvider;
 import com.sequenceiq.freeipa.service.rotation.SecretRotationSaltService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
 @Component
-public class FreeIpaDbusUmsAccessKeyRotationContextProvider implements RotationContextProvider {
+public class FreeIpaDbusUmsAccessKeyRotationContextProvider extends FreeipaConditionalRotationContextProvider {
     private static final String DATABUS_KEY = "databus";
 
     private static final String DEFAULT_ACCESS_KEY_TYPE = "Ed25519";
@@ -68,6 +69,11 @@ public class FreeIpaDbusUmsAccessKeyRotationContextProvider implements RotationC
                 .build();
         return Map.of(FREEIPA_UMS_DATABUS_CREDENTIAL, new RotationContext(environmentCrnAsString),
                 CUSTOM_JOB, customJobRotationContext);
+    }
+
+    @Override
+    protected Function<Stack, Boolean> getConditionalRotationFunction() {
+        return stack -> stack.getDatabusCredential() != null;
     }
 
     private void updateClusterWithDatabusCredentials(Stack stack, String accountId) {

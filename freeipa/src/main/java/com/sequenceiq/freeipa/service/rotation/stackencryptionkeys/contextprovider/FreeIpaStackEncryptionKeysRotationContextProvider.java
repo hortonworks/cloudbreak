@@ -8,6 +8,7 @@ import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.CUSTOM
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 import jakarta.inject.Inject;
 
@@ -25,7 +26,6 @@ import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
-import com.sequenceiq.cloudbreak.rotation.common.RotationContextProvider;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.secret.custom.CustomJobRotationContext;
 import com.sequenceiq.common.api.type.CommonStatus;
@@ -40,10 +40,11 @@ import com.sequenceiq.freeipa.service.client.CachedEnvironmentClientService;
 import com.sequenceiq.freeipa.service.encryption.CloudInformationDecorator;
 import com.sequenceiq.freeipa.service.encryption.CloudInformationDecoratorProvider;
 import com.sequenceiq.freeipa.service.encryption.EncryptionKeyService;
+import com.sequenceiq.freeipa.service.rotation.FreeipaConditionalRotationContextProvider;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
 @Component
-public class FreeIpaStackEncryptionKeysRotationContextProvider implements RotationContextProvider {
+public class FreeIpaStackEncryptionKeysRotationContextProvider extends FreeipaConditionalRotationContextProvider {
 
     @Inject
     private StackService stackService;
@@ -92,6 +93,11 @@ public class FreeIpaStackEncryptionKeysRotationContextProvider implements Rotati
                 })
                 .build();
         return Map.of(CUSTOM_JOB, customJobRotationContext);
+    }
+
+    @Override
+    protected Function<Stack, Boolean> getConditionalRotationFunction() {
+        return stack -> AWS_NATIVE_GOV_VARIANT.variant().getValue().equals(stack.getPlatformvariant());
     }
 
     @Override

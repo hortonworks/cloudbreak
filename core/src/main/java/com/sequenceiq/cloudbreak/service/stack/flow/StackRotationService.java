@@ -18,6 +18,7 @@ import org.apache.commons.collections4.ListUtils;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.dto.StackDto;
@@ -25,6 +26,7 @@ import com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType;
 import com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.SecretTypeConverter;
+import com.sequenceiq.cloudbreak.rotation.common.ConditionalRotationContextProvider;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContextProvider;
 import com.sequenceiq.cloudbreak.rotation.request.RotationSource;
 import com.sequenceiq.cloudbreak.rotation.request.StepProgressCleanupDescriptor;
@@ -34,7 +36,6 @@ import com.sequenceiq.cloudbreak.rotation.serialization.SecretRotationEnumSerial
 import com.sequenceiq.cloudbreak.rotation.service.SecretRotationValidationService;
 import com.sequenceiq.cloudbreak.rotation.service.progress.SecretRotationStepProgressService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
-import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 
 @Service
@@ -60,15 +61,25 @@ public class StackRotationService {
     @Inject
     private Map<SecretType, RotationContextProvider> rotationContextProviderMap;
 
+    @Inject
+    private Map<SecretType, ConditionalRotationContextProvider> conditionalRotationContextProviderMap;
+
     public FlowIdentifier rotateSecrets(String crn, List<String> secrets, RotationFlowExecutionType requestedExecutionType,
             Map<String, String> additionalProperties) {
         List<SecretType> secretTypes = SecretTypeConverter.mapSecretTypes(secrets,
                 enabledSecretTypes.stream().map(SecretType::getClass).collect(Collectors.toSet()));
         secretRotationValidationService.validateEnabledSecretTypes(secretTypes, requestedExecutionType);
-        StackView stack = stackDtoService.getStackViewByCrn(crn);
+        StackDto stackDto = stackDtoService.getByCrn(crn);
+        List<SecretType> filteredSecretTypes = secretTypes.stream()
+                .filter(type -> !conditionalRotationContextProviderMap.containsKey(type) ||
+                        conditionalRotationContextProviderMap.get(type).isApplicable(stackDto))
+                .toList();
+        if (filteredSecretTypes.isEmpty()) {
+            throw new BadRequestException("None of the requested secret types are applicable for the cluster!");
+        }
         Optional<RotationFlowExecutionType> usedExecutionType =
-                secretRotationValidationService.validate(crn, secretTypes, requestedExecutionType, stack::isAvailable);
-        return flowManager.triggerSecretRotation(stack.getId(), crn, secretTypes, usedExecutionType.orElse(null), additionalProperties);
+                secretRotationValidationService.validate(crn, filteredSecretTypes, requestedExecutionType, stackDto::isAvailable);
+        return flowManager.triggerSecretRotation(stackDto.getId(), crn, filteredSecretTypes, usedExecutionType.orElse(null), additionalProperties);
     }
 
     public void cleanupSecretRotationEntries(String crn) {

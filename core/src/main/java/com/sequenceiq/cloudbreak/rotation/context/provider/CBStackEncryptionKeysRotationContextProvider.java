@@ -8,6 +8,7 @@ import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.CUSTOM
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 import jakarta.inject.Inject;
 
@@ -24,11 +25,11 @@ import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackEncryption;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType;
 import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
-import com.sequenceiq.cloudbreak.rotation.common.RotationContextProvider;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.secret.custom.CustomJobRotationContext;
 import com.sequenceiq.cloudbreak.service.encryption.CloudInformationDecorator;
@@ -42,7 +43,7 @@ import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @Component
-public class CBStackEncryptionKeysRotationContextProvider implements RotationContextProvider {
+public class CBStackEncryptionKeysRotationContextProvider extends CloudbreakConditionalRotationContextProvider {
 
     @Inject
     private StackService stackService;
@@ -91,6 +92,11 @@ public class CBStackEncryptionKeysRotationContextProvider implements RotationCon
                 })
                 .build();
         return Map.of(CUSTOM_JOB, customJobRotationContext);
+    }
+
+    @Override
+    protected Function<StackDto, Boolean> getConditionalRotationFunction() {
+        return stackDto -> AWS_NATIVE_GOV_VARIANT.variant().getValue().equals(stackDto.getPlatformVariant());
     }
 
     @Override

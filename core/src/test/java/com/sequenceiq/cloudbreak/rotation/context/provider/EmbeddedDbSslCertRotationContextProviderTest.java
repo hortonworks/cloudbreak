@@ -20,6 +20,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseAvailabilityType;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel;
 import com.sequenceiq.cloudbreak.domain.stack.Database;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType;
@@ -46,6 +47,18 @@ public class EmbeddedDbSslCertRotationContextProviderTest {
 
     @InjectMocks
     private EmbeddedDbSslCertRotationContextProvider underTest;
+
+    @Test
+    void testIsApplicable() {
+        StackDto stack = mock(StackDto.class);
+        Database database = mock(Database.class);
+        Cluster cluster = mock(Cluster.class);
+        when(database.getExternalDatabaseAvailabilityType()).thenReturn(DatabaseAvailabilityType.ON_ROOT_VOLUME);
+        when(cluster.getDbSslEnabled()).thenReturn(Boolean.TRUE);
+        when(stack.getDatabase()).thenReturn(database);
+        when(stack.getCluster()).thenReturn(cluster);
+        assertTrue(underTest.isApplicable(stack));
+    }
 
     @Test
     void testPrevalidateIfNotEmbedded() {

@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.VAULT;
 import static com.sequenceiq.freeipa.rotation.FreeIpaSecretType.COMPUTE_MONITORING_CREDENTIALS;
 
 import java.util.Map;
+import java.util.function.Function;
 
 import jakarta.inject.Inject;
 
@@ -14,17 +15,17 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
-import com.sequenceiq.cloudbreak.rotation.common.RotationContextProvider;
 import com.sequenceiq.cloudbreak.rotation.secret.custom.CustomJobRotationContext;
 import com.sequenceiq.cloudbreak.rotation.secret.vault.VaultRotationContext;
 import com.sequenceiq.cloudbreak.service.secret.SecretMarker;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.service.rotation.FreeipaConditionalRotationContextProvider;
 import com.sequenceiq.freeipa.service.rotation.computemonitoring.service.FreeipaMonitoringCredentialsRotationService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
 @Component
-public class FreeipaMonitoringCredentialRotationContextProvider implements RotationContextProvider {
+public class FreeipaMonitoringCredentialRotationContextProvider extends FreeipaConditionalRotationContextProvider {
 
     @Inject
     private StackService stackService;
@@ -47,6 +48,11 @@ public class FreeipaMonitoringCredentialRotationContextProvider implements Rotat
                 .build();
         return Map.of(CUSTOM_JOB, customJobRotationContext,
                 VAULT, vaultRotationContext);
+    }
+
+    @Override
+    protected Function<Stack, Boolean> getConditionalRotationFunction() {
+        return stack -> rotationService.isRotationApplicable(stack);
     }
 
     @Override

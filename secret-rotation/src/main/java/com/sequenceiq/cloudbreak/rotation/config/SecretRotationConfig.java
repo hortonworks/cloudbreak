@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.SecretTypeConverter;
+import com.sequenceiq.cloudbreak.rotation.common.ConditionalRotationContextProvider;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContextProvider;
 import com.sequenceiq.cloudbreak.rotation.executor.AbstractRotationExecutor;
@@ -52,6 +53,9 @@ public class SecretRotationConfig {
     private Optional<List<RotationContextProvider>> rotationContextProviders;
 
     @Inject
+    private Optional<List<ConditionalRotationContextProvider>> conditionalRotationContextProviders;
+
+    @Inject
     private Optional<List<AbstractRotationExecutor<? extends RotationContext>>> rotationExecutors;
 
     @Bean
@@ -62,6 +66,22 @@ public class SecretRotationConfig {
                 if (enabledSecretTypes().stream()
                         .anyMatch(secretType -> rotationContextProvider.getSecret().getClass().isAssignableFrom(secretType.getClass()))) {
                     beans.put(rotationContextProvider.getSecret(), rotationContextProvider);
+                }
+            }
+            return beans;
+        } else {
+            return Map.of();
+        }
+    }
+
+    @Bean
+    public Map<SecretType, ConditionalRotationContextProvider<?>> conditionalRotationContextProviderMap() {
+        if (conditionalRotationContextProviders.isPresent()) {
+            Map<SecretType, ConditionalRotationContextProvider<?>> beans = Maps.newHashMap();
+            for (ConditionalRotationContextProvider<?> conditionalRotationContextProvider : conditionalRotationContextProviders.get()) {
+                if (enabledSecretTypes().stream()
+                        .anyMatch(secretType -> conditionalRotationContextProvider.getSecret().getClass().isAssignableFrom(secretType.getClass()))) {
+                    beans.put(conditionalRotationContextProvider.getSecret(), conditionalRotationContextProvider);
                 }
             }
             return beans;

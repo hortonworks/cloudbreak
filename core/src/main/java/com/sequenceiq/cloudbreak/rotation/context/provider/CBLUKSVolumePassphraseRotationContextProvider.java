@@ -7,6 +7,7 @@ import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.CUSTOM
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -22,7 +23,6 @@ import com.sequenceiq.cloudbreak.rotation.ExitCriteriaProvider;
 import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
-import com.sequenceiq.cloudbreak.rotation.common.RotationContextProvider;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.context.SaltStateApplyRotationContext;
 import com.sequenceiq.cloudbreak.rotation.secret.custom.CustomJobRotationContext;
@@ -33,7 +33,7 @@ import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @Component
-public class CBLUKSVolumePassphraseRotationContextProvider implements RotationContextProvider {
+public class CBLUKSVolumePassphraseRotationContextProvider extends CloudbreakConditionalRotationContextProvider {
 
     private static final String TRIGGGER_LUKS_ROTATION_STATE = "rotateluks";
 
@@ -64,6 +64,11 @@ public class CBLUKSVolumePassphraseRotationContextProvider implements RotationCo
         context.put(CUSTOM_JOB, getCustomJobRotationContext(stack));
         context.put(SALT_STATE_APPLY, getSaltStateApplyRotationContext(stack));
         return context;
+    }
+
+    @Override
+    protected Function<StackDto, Boolean> getConditionalRotationFunction() {
+        return stackDto -> AWS_NATIVE_GOV_VARIANT.variant().getValue().equals(stackDto.getPlatformVariant());
     }
 
     @Override

@@ -6,6 +6,7 @@ import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.CUSTOM
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 
 import jakarta.inject.Inject;
 
@@ -18,7 +19,6 @@ import com.sequenceiq.cloudbreak.rotation.ExitCriteriaProvider;
 import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
-import com.sequenceiq.cloudbreak.rotation.common.RotationContextProvider;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.context.SaltStateApplyRotationContext;
 import com.sequenceiq.cloudbreak.rotation.secret.custom.CustomJobRotationContext;
@@ -26,7 +26,7 @@ import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 
 @Component
-public class EmbeddedDbSslCertRotationContextProvider implements RotationContextProvider {
+public class EmbeddedDbSslCertRotationContextProvider extends CloudbreakConditionalRotationContextProvider {
 
     @Inject
     private StackDtoService stackDtoService;
@@ -64,6 +64,11 @@ public class EmbeddedDbSslCertRotationContextProvider implements RotationContext
                 .build();
         return Map.of(CUSTOM_JOB, customJobRotationContext,
                 SALT_STATE_APPLY, saltStateApplyRotationContext);
+    }
+
+    @Override
+    protected Function<StackDto, Boolean> getConditionalRotationFunction() {
+        return stackDto -> stackDto.getDatabase().getExternalDatabaseAvailabilityType().isEmbedded() && stackDto.getCluster().getDbSslEnabled();
     }
 
     @Override

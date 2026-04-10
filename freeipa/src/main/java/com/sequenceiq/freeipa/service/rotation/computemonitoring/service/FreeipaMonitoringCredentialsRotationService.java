@@ -39,9 +39,13 @@ public class FreeipaMonitoringCredentialsRotationService {
     private EntitlementService entitlementService;
 
     public void validateEnablement(Stack stack) {
-        if (!stack.getTelemetry().isComputeMonitoringEnabled() || !entitlementService.isComputeMonitoringEnabled(stack.getAccountId())) {
+        if (!isRotationApplicable(stack)) {
             throw new SecretRotationException("Compute monitoring is not enabled for the cluster!");
         }
+    }
+
+    public boolean isRotationApplicable(Stack stack) {
+        return stack.getTelemetry().isComputeMonitoringEnabled() && entitlementService.isComputeMonitoringEnabled(stack.getAccountId());
     }
 
     public void updateMonitoringCredentials(Stack stack) {

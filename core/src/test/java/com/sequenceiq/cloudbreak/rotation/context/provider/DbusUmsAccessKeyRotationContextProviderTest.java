@@ -38,6 +38,7 @@ import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterModificationService;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.core.cluster.ClusterBuilderService;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
@@ -94,6 +95,15 @@ public class DbusUmsAccessKeyRotationContextProviderTest {
         lenient().when(componentConfigProviderService.getTelemetry(any())).thenReturn(new Telemetry());
         lenient().when(entitlementService.useDataBusCNameEndpointEnabled(any())).thenReturn(Boolean.TRUE);
         lenient().when(dataBusEndpointProvider.getDataBusEndpoint(any(), anyBoolean())).thenReturn("");
+    }
+
+    @Test
+    void testIsApplicable() {
+        StackDto stack = mock(StackDto.class);
+        Cluster cluster = mock(Cluster.class);
+        when(cluster.getDatabusCredential()).thenReturn("");
+        when(stack.getCluster()).thenReturn(cluster);
+        assertTrue(underTest.isApplicable(stack));
     }
 
     @Test

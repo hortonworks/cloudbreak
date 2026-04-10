@@ -11,8 +11,8 @@ import static com.sequenceiq.cloudbreak.rotation.request.RotationSource.FREEIPA;
 import static com.sequenceiq.cloudbreak.rotation.request.RotationSource.REDBEAMS;
 import static com.sequenceiq.cloudbreak.rotation.request.StepProgressCleanupStatus.FINISHED;
 import static com.sequenceiq.cloudbreak.rotation.request.StepProgressCleanupStatus.PENDING;
+import static com.sequenceiq.sdx.rotation.DatalakeSecretType.EMBEDDED_DB_SSL_CERT;
 import static com.sequenceiq.sdx.rotation.DatalakeSecretType.EXTERNAL_DATABASE_ROOT_PASSWORD;
-import static com.sequenceiq.sdx.rotation.DatalakeSecretType.SSSD_IPA_PASSWORD;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -42,7 +42,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.rotation.common.ConditionalRotationContextProvider;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContextProvider;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.request.StepProgressCleanupDescriptor;
@@ -69,6 +71,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaRotationV1Endpoint;
 import com.sequenceiq.freeipa.rotation.FreeIpaSecretType;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.DatabaseServerV4Endpoint;
 import com.sequenceiq.redbeams.rotation.RedbeamsSecretType;
+import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
 import com.sequenceiq.sdx.rotation.DatalakeSecretType;
 
 @ExtendWith(MockitoExtension.class)
@@ -132,10 +135,24 @@ class SdxRotationServiceTest {
     @BeforeEach
     void setup() throws IllegalAccessException {
         FieldUtils.writeField(underTest, "enabledSecretTypes", List.of(DatalakeSecretType.values()), true);
+
         RotationContextProvider mockContextProvider = mock(RotationContextProvider.class);
-        Map<DatalakeSecretType, RotationContextProvider> contextProviderMap = Map.of(SSSD_IPA_PASSWORD, mockContextProvider);
+        Map<DatalakeSecretType, RotationContextProvider> contextProviderMap = Map.of(EXTERNAL_DATABASE_ROOT_PASSWORD, mockContextProvider);
         FieldUtils.writeField(underTest, "rotationContextProviderMap", contextProviderMap, true);
         lenient().when(mockContextProvider.getPollingTypes()).thenReturn(Map.of(CLOUDBREAK, TEST, REDBEAMS, TEST_2, FREEIPA, TEST_3));
+
+        ConditionalRotationContextProvider conditionalRotationContextProvider = mock(ConditionalRotationContextProvider.class);
+        Map<DatalakeSecretType, ConditionalRotationContextProvider> conditionalRotationContextProviderMap =
+                Map.of(EMBEDDED_DB_SSL_CERT, conditionalRotationContextProvider);
+        FieldUtils.writeField(underTest, "conditionalRotationContextProviderMap", conditionalRotationContextProviderMap, true);
+        lenient().when(conditionalRotationContextProvider.isApplicable(any())).thenReturn(Boolean.FALSE);
+    }
+
+    @Test
+    void testFiltering() {
+        when(sdxClusterRepository.findByCrnAndDeletedIsNull(RESOURCE_CRN)).thenReturn(Optional.of(new SdxCluster()));
+        assertThrows(BadRequestException.class, () ->
+                underTest.triggerSecretRotation(RESOURCE_CRN, List.of(EMBEDDED_DB_SSL_CERT.name()), null, null));
     }
 
     @Test
@@ -160,7 +177,7 @@ class SdxRotationServiceTest {
         sdxCluster.setSdxDatabase(sdxDatabase);
         when(sdxClusterRepository.findByCrnAndDeletedIsNull(any())).thenReturn(Optional.of(sdxCluster));
 
-        List<StepProgressCleanupDescriptor> descriptors = underTest.cleanupProgress("crn", SSSD_IPA_PASSWORD.value());
+        List<StepProgressCleanupDescriptor> descriptors = underTest.cleanupProgress("crn", EXTERNAL_DATABASE_ROOT_PASSWORD.value());
 
         assertEquals(4, descriptors.size());
         assertEquals("envCrn", descriptors.stream().filter(desc -> desc.rotationSource().equals(FREEIPA)).findFirst().get().crn());
@@ -251,6 +268,9 @@ class SdxRotationServiceTest {
         when(secretRotationValidationService.validate(any(), any(), any(), any())).thenReturn(Optional.empty());
         SdxCluster sdxCluster = new SdxCluster();
         sdxCluster.setId(1L);
+        SdxDatabase sdxDatabase = new SdxDatabase();
+        sdxDatabase.setDatabaseAvailabilityType(SdxDatabaseAvailabilityType.NON_HA);
+        sdxCluster.setSdxDatabase(sdxDatabase);
         when(sdxClusterRepository.findByCrnAndDeletedIsNull(RESOURCE_CRN)).thenReturn(Optional.of(sdxCluster));
         SdxStatusEntity status = new SdxStatusEntity();
         status.setStatus(DatalakeStatusEnum.RUNNING);
@@ -265,6 +285,9 @@ class SdxRotationServiceTest {
         when(secretRotationValidationService.validate(any(), any(), any(), any())).thenReturn(Optional.empty());
         SdxCluster sdxCluster = new SdxCluster();
         sdxCluster.setId(1L);
+        SdxDatabase sdxDatabase = new SdxDatabase();
+        sdxDatabase.setDatabaseAvailabilityType(SdxDatabaseAvailabilityType.NON_HA);
+        sdxCluster.setSdxDatabase(sdxDatabase);
         when(sdxClusterRepository.findByCrnAndDeletedIsNull(RESOURCE_CRN)).thenReturn(Optional.of(sdxCluster));
         SdxStatusEntity status = new SdxStatusEntity();
         status.setStatus(DatalakeStatusEnum.DATALAKE_SECRET_ROTATION_ROLLBACK_FINISHED);

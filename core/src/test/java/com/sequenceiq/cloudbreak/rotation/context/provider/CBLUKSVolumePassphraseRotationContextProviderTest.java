@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -60,6 +61,14 @@ class CBLUKSVolumePassphraseRotationContextProviderTest {
 
     @InjectMocks
     private CBLUKSVolumePassphraseRotationContextProvider underTest;
+
+    @Test
+    void testIsApplicable() {
+        StackDto stack = mock(StackDto.class);
+        when(stack.getPlatformVariant()).thenReturn("AWS_NATIVE_GOV");
+
+        assertTrue(underTest.isApplicable(stack));
+    }
 
     @Test
     void testGetContexts() {

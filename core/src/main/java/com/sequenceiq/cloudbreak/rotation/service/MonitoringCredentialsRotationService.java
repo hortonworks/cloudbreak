@@ -59,10 +59,14 @@ public class MonitoringCredentialsRotationService {
     private EntitlementService entitlementService;
 
     public void validateEnablement(StackDto stackDto) {
-        Telemetry telemetry = componentConfigProviderService.getTelemetry(stackDto.getId());
-        if (!telemetry.isComputeMonitoringEnabled() || !entitlementService.isComputeMonitoringEnabled(stackDto.getAccountId())) {
+        if (!isRotationApplicable(stackDto)) {
             throw new SecretRotationException("Compute monitoring is not enabled for the cluster!");
         }
+    }
+
+    public boolean isRotationApplicable(StackDto stackDto) {
+        Telemetry telemetry = componentConfigProviderService.getTelemetry(stackDto.getId());
+        return telemetry.isComputeMonitoringEnabled() && entitlementService.isComputeMonitoringEnabled(stackDto.getAccountId());
     }
 
     public String getCmMonitoringUser() {

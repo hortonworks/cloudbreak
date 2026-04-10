@@ -74,6 +74,11 @@ public class FreeIpaDbusUmsAccessKeyRotationContextProviderTest {
     }
 
     @Test
+    void testIsApplicable() {
+        assertTrue(underTest.isApplicable(stack));
+    }
+
+    @Test
     void testGetContexts() {
         assertEquals(2, underTest.getContexts(ENV_CRN).size());
     }

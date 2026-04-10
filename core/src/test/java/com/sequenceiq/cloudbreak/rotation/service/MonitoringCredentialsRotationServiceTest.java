@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.rotation.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.lenient;
@@ -69,6 +70,18 @@ public class MonitoringCredentialsRotationServiceTest {
 
     @InjectMocks
     private MonitoringCredentialsRotationService underTest;
+
+    @Test
+    void testIsApplicable() {
+        Telemetry telemetry = new Telemetry();
+        Monitoring monitoring = new Monitoring();
+        monitoring.setRemoteWriteUrl("url");
+        telemetry.setMonitoring(monitoring);
+        when(componentConfigProviderService.getTelemetry(any())).thenReturn(telemetry);
+        when(entitlementService.isComputeMonitoringEnabled(any())).thenReturn(true);
+
+        assertTrue(underTest.isRotationApplicable(getStack()));
+    }
 
     @Test
     void testEnablementCheckIfMonitoringDisabledForStack() {

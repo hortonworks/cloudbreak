@@ -7,6 +7,7 @@ import static com.sequenceiq.freeipa.rotation.FreeIpaSecretRotationStep.SALT_STA
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -20,7 +21,6 @@ import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
-import com.sequenceiq.cloudbreak.rotation.common.RotationContextProvider;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.secret.custom.CustomJobRotationContext;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
@@ -30,11 +30,12 @@ import com.sequenceiq.freeipa.rotation.FreeIpaSecretType;
 import com.sequenceiq.freeipa.service.GatewayConfigService;
 import com.sequenceiq.freeipa.service.client.CachedEnvironmentClientService;
 import com.sequenceiq.freeipa.service.rotation.ExitCriteriaProvider;
+import com.sequenceiq.freeipa.service.rotation.FreeipaConditionalRotationContextProvider;
 import com.sequenceiq.freeipa.service.rotation.context.SaltStateApplyRotationContext;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
 @Component
-public class FreeipaLUKSVolumePassphraseRotationContextProvider implements RotationContextProvider {
+public class FreeipaLUKSVolumePassphraseRotationContextProvider extends FreeipaConditionalRotationContextProvider {
 
     private static final String TRIGGGER_LUKS_ROTATION_STATE = "rotateluks";
 
@@ -66,6 +67,11 @@ public class FreeipaLUKSVolumePassphraseRotationContextProvider implements Rotat
         contexts.put(CUSTOM_JOB, getCustomJobRotationContext(stack));
         contexts.put(SALT_STATE_APPLY, getSaltStateApplyRotationContext(stack));
         return contexts;
+    }
+
+    @Override
+    protected Function<Stack, Boolean> getConditionalRotationFunction() {
+        return stack -> AWS_NATIVE_GOV_VARIANT.variant().getValue().equals(stack.getPlatformvariant());
     }
 
     @Override

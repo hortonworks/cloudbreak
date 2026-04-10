@@ -28,9 +28,11 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.rotation.requests.StackV4Secret
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.SecretTypeConverter;
+import com.sequenceiq.cloudbreak.rotation.common.ConditionalRotationContextProvider;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContextProvider;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.request.RotationSource;
@@ -118,6 +120,9 @@ public class SdxRotationService {
     @Inject
     private Map<SecretType, RotationContextProvider> rotationContextProviderMap;
 
+    @Inject
+    private Map<SecretType, ConditionalRotationContextProvider> conditionalRotationContextProviderMap;
+
     public void rotateCloudbreakSecret(String datalakeCrn, SecretType secretType, RotationFlowExecutionType executionType,
             Map<String, String> additionalProperties) {
         SdxCluster sdxCluster = sdxClusterRepository.findByCrnAndDeletedIsNull(datalakeCrn)
@@ -169,10 +174,17 @@ public class SdxRotationService {
                 enabledSecretTypes.stream().map(SecretType::getClass).collect(Collectors.toSet()));
         secretRotationValidationService.validateEnabledSecretTypes(secretTypes, requestedExecutionType);
         SdxCluster sdxCluster = sdxClusterRepository.findByCrnAndDeletedIsNull(datalakeCrn).orElseThrow(notFound("SDX cluster", datalakeCrn));
+        List<SecretType> filteredSecretTypes = secretTypes.stream()
+                .filter(type -> !conditionalRotationContextProviderMap.containsKey(type) ||
+                        conditionalRotationContextProviderMap.get(type).isApplicable(sdxCluster))
+                .toList();
+        if (filteredSecretTypes.isEmpty()) {
+            throw new BadRequestException("None of the requested secret types are applicable for the cluster!");
+        }
         SdxStatusEntity status = sdxStatusService.getActualStatusForSdx(sdxCluster.getId());
-        Optional<RotationFlowExecutionType> usedExecutionType = secretRotationValidationService.validate(datalakeCrn, secretTypes, requestedExecutionType,
-                () -> Set.of(RUNNING, DATALAKE_SECRET_ROTATION_ROLLBACK_FINISHED).contains(status.getStatus()));
-        return sdxReactorFlowManager.triggerSecretRotation(sdxCluster, secretTypes, usedExecutionType.orElse(null), additionalProperties);
+        Optional<RotationFlowExecutionType> usedExecutionType = secretRotationValidationService.validate(datalakeCrn, filteredSecretTypes,
+                requestedExecutionType, () -> Set.of(RUNNING, DATALAKE_SECRET_ROTATION_ROLLBACK_FINISHED).contains(status.getStatus()));
+        return sdxReactorFlowManager.triggerSecretRotation(sdxCluster, filteredSecretTypes, usedExecutionType.orElse(null), additionalProperties);
     }
 
     public void preValidateRedbeamsRotation(String datalakeCrn) {

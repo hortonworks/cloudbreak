@@ -7,22 +7,23 @@ import static com.sequenceiq.redbeams.rotation.RedbeamsSecretType.REDBEAMS_EXTER
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
 
 import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.rotation.DatabaseRootPasswordSaltPillarGenerator;
 import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
-import com.sequenceiq.cloudbreak.rotation.common.RotationContextProvider;
 import com.sequenceiq.cloudbreak.rotation.context.SaltPillarRotationContext;
 import com.sequenceiq.cloudbreak.rotation.request.RotationSource;
 import com.sequenceiq.cloudbreak.rotation.secret.poller.PollerRotationContext;
 
 @Component
-public class DatahubExternalDatabaseRootPasswordRotationContextProvider implements RotationContextProvider {
+public class DatahubExternalDatabaseRootPasswordRotationContextProvider extends CloudbreakConditionalRotationContextProvider {
 
     @Inject
     private DatabaseRootPasswordSaltPillarGenerator databaseRootPasswordSaltPillarGenerator;
@@ -43,5 +44,10 @@ public class DatahubExternalDatabaseRootPasswordRotationContextProvider implemen
     @Override
     public Map<RotationSource, SecretType> getPollingTypes() {
         return Map.of(RotationSource.REDBEAMS, REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD);
+    }
+
+    @Override
+    protected Function<StackDto, Boolean> getConditionalRotationFunction() {
+        return stackDto -> !stackDto.getDatabase().getExternalDatabaseAvailabilityType().isEmbedded();
     }
 }

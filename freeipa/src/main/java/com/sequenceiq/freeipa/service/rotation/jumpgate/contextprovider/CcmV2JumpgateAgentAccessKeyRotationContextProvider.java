@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
@@ -16,7 +17,6 @@ import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
-import com.sequenceiq.cloudbreak.rotation.common.RotationContextProvider;
 import com.sequenceiq.freeipa.entity.ImageEntity;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.rotation.FreeIpaSecretRotationStep;
@@ -26,12 +26,13 @@ import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaNodeUtilService;
 import com.sequenceiq.freeipa.service.freeipa.flow.SaltConfigProvider;
 import com.sequenceiq.freeipa.service.image.ImageService;
 import com.sequenceiq.freeipa.service.rotation.ExitCriteriaProvider;
+import com.sequenceiq.freeipa.service.rotation.FreeipaConditionalRotationContextProvider;
 import com.sequenceiq.freeipa.service.rotation.context.SaltPillarUpdateRotationContext;
 import com.sequenceiq.freeipa.service.rotation.context.SaltStateApplyRotationContext;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
 @Component
-public class CcmV2JumpgateAgentAccessKeyRotationContextProvider implements RotationContextProvider {
+public class CcmV2JumpgateAgentAccessKeyRotationContextProvider extends FreeipaConditionalRotationContextProvider {
 
     private static final String TRIGGER_CCM_ROTATION_STATE = "rotateccm";
 
@@ -64,6 +65,11 @@ public class CcmV2JumpgateAgentAccessKeyRotationContextProvider implements Rotat
         contexts.put(FreeIpaSecretRotationStep.SALT_PILLAR_UPDATE, getSaltPillarUpdateRotationContext(resourceCrn));
         contexts.put(FreeIpaSecretRotationStep.SALT_STATE_APPLY, getSaltStateApplyRotationContext(resourceCrn));
         return contexts;
+    }
+
+    @Override
+    protected Function<Stack, Boolean> getConditionalRotationFunction() {
+        return stack -> stack.getTunnel().useCcmV2Jumpgate();
     }
 
     private SaltPillarUpdateRotationContext getSaltPillarUpdateRotationContext(String resourceCrn) {

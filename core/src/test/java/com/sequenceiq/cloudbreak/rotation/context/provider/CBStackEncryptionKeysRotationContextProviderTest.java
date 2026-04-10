@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -30,6 +31,7 @@ import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackEncryption;
+import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType;
 import com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep;
@@ -97,6 +99,14 @@ class CBStackEncryptionKeysRotationContextProviderTest {
 
     @Captor
     private ArgumentCaptor<EncryptionKeyRotationRequest> encryptionKeyRotationRequestCaptor;
+
+    @Test
+    void testIsApplicable() {
+        StackDto stack = mock(StackDto.class);
+        when(stack.getPlatformVariant()).thenReturn("AWS_NATIVE_GOV");
+
+        assertTrue(underTest.isApplicable(stack));
+    }
 
     @Test
     void testGetContexts() {

@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
@@ -37,7 +38,6 @@ import com.sequenceiq.cloudbreak.rotation.SecretRotationSaltService;
 import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
-import com.sequenceiq.cloudbreak.rotation.common.RotationContextProvider;
 import com.sequenceiq.cloudbreak.rotation.common.SecretRotationException;
 import com.sequenceiq.cloudbreak.rotation.context.CMServiceConfigRotationContext;
 import com.sequenceiq.cloudbreak.rotation.secret.custom.CustomJobRotationContext;
@@ -52,7 +52,7 @@ import com.sequenceiq.common.api.telemetry.model.DataBusCredential;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 
 @Component
-public class DbusUmsAccessKeyRotationContextProvider implements RotationContextProvider {
+public class DbusUmsAccessKeyRotationContextProvider extends CloudbreakConditionalRotationContextProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DbusUmsAccessKeyRotationContextProvider.class);
 
@@ -99,6 +99,11 @@ public class DbusUmsAccessKeyRotationContextProvider implements RotationContextP
         return Map.of(UMS_DATABUS_CREDENTIAL, new RotationContext(resourceCrn),
                 CUSTOM_JOB, customJobRotationContext,
                 CM_SERVICE, cmServiceConfigRotationContext);
+    }
+
+    @Override
+    protected Function<StackDto, Boolean> getConditionalRotationFunction() {
+        return stackDto -> stackDto.getCluster().getDatabusCredential() != null;
     }
 
     private CMServiceConfigRotationContext getCMServiceConfigRotationContext(StackDto stackDto) {

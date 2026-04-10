@@ -1,17 +1,22 @@
 package com.sequenceiq.freeipa.service.rotation;
 
+import static com.sequenceiq.freeipa.rotation.FreeIpaSecretType.CCMV2_JUMPGATE_AGENT_ACCESS_KEY;
 import static com.sequenceiq.freeipa.rotation.FreeIpaSecretType.SALT_BOOT_SECRETS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.apache.commons.lang3.reflect.FieldUtils;
@@ -25,7 +30,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType;
+import com.sequenceiq.cloudbreak.rotation.common.ConditionalRotationContextProvider;
 import com.sequenceiq.cloudbreak.rotation.flow.chain.SecretRotationFlowChainTriggerEvent;
 import com.sequenceiq.cloudbreak.rotation.service.SecretRotationValidationService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -65,10 +72,27 @@ class FreeIpaSecretRotationServiceTest {
     @BeforeEach
     void setup() throws IllegalAccessException {
         FieldUtils.writeField(underTest, "enabledSecretTypes", List.of(FreeIpaSecretType.values()), true);
+        ConditionalRotationContextProvider conditionalRotationContextProvider = mock(ConditionalRotationContextProvider.class);
+        Map<FreeIpaSecretType, ConditionalRotationContextProvider> conditionalRotationContextProviderMap =
+                Map.of(CCMV2_JUMPGATE_AGENT_ACCESS_KEY, conditionalRotationContextProvider);
+        FieldUtils.writeField(underTest, "conditionalRotationContextProviderMap", conditionalRotationContextProviderMap, true);
+        lenient().when(conditionalRotationContextProvider.isApplicable(any())).thenReturn(Boolean.FALSE);
     }
 
     @Test
-    public void testSecretRotationIsTriggered() {
+    void testRotationFiltering() {
+        Stack stack = newStack(DetailedStackStatus.AVAILABLE);
+        when(stackService.getByEnvironmentCrnAndAccountId(anyString(), anyString())).thenReturn(stack);
+
+        FreeIpaSecretRotationRequest request = new FreeIpaSecretRotationRequest();
+        request.setExecutionType(RotationFlowExecutionType.ROTATE);
+        request.setSecrets(List.of(CCMV2_JUMPGATE_AGENT_ACCESS_KEY.name()));
+
+        assertThrows(BadRequestException.class, () -> underTest.rotateSecretsByCrn(ACCOUNT_ID, ENV_CRN, request));
+    }
+
+    @Test
+    void testSecretRotationIsTriggered() {
         when(secretRotationValidationService.validate(any(), any(), any(), any())).thenReturn(Optional.of(RotationFlowExecutionType.ROTATE));
         Stack stack = newStack(DetailedStackStatus.AVAILABLE);
         when(stackService.getByEnvironmentCrnAndAccountId(anyString(), anyString())).thenReturn(stack);

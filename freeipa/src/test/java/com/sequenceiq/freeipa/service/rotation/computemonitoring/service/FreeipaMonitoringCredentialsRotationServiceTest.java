@@ -2,6 +2,7 @@ package com.sequenceiq.freeipa.service.rotation.computemonitoring.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.verify;
@@ -55,6 +56,19 @@ public class FreeipaMonitoringCredentialsRotationServiceTest {
 
     @Mock
     private EnvironmentService environmentService;
+
+    @Test
+    void testIsApplicable() {
+        Stack stack = new Stack();
+        Telemetry telemetry = new Telemetry();
+        Monitoring monitoring = new Monitoring();
+        monitoring.setRemoteWriteUrl("url");
+        telemetry.setMonitoring(monitoring);
+        stack.setTelemetry(telemetry);
+        when(entitlementService.isComputeMonitoringEnabled(any())).thenReturn(true);
+
+        assertTrue(underTest.isRotationApplicable(stack));
+    }
 
     @Test
     void testEnablementCheckIfMonitoringDisabledForStack() {

@@ -8,18 +8,20 @@ import static com.sequenceiq.sdx.rotation.DatalakeSecretType.EXTERNAL_DATABASE_R
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
 
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
-import com.sequenceiq.cloudbreak.rotation.common.RotationContextProvider;
 import com.sequenceiq.cloudbreak.rotation.request.RotationSource;
 import com.sequenceiq.cloudbreak.rotation.secret.poller.PollerRotationContext;
+import com.sequenceiq.datalake.entity.SdxCluster;
+import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
 
 @Component
-public class DatalakeExternalDatabaseRootPasswordRotationContextProvider implements RotationContextProvider {
+public class DatalakeExternalDatabaseRootPasswordRotationContextProvider extends DatalakeConditionalRotationContextProvider {
 
     @Override
     public Map<SecretRotationStep, RotationContext> getContexts(String resourceCrn) {
@@ -38,5 +40,10 @@ public class DatalakeExternalDatabaseRootPasswordRotationContextProvider impleme
     public Map<RotationSource, SecretType> getPollingTypes() {
         return Map.of(RotationSource.CLOUDBREAK, INTERNAL_DATALAKE_EXTERNAL_DATABASE_ROOT_PASSWORD,
                 RotationSource.REDBEAMS, REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD);
+    }
+
+    @Override
+    protected Function<SdxCluster, Boolean> getConditionalRotationFunction() {
+        return sdxCluster -> SdxDatabaseAvailabilityType.hasExternalDatabase(sdxCluster.getDatabaseAvailabilityType());
     }
 }

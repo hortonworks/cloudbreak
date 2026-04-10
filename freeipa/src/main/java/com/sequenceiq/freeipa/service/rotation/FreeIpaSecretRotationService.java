@@ -12,9 +12,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.rotation.RotationFlowExecutionType;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.SecretTypeConverter;
+import com.sequenceiq.cloudbreak.rotation.common.ConditionalRotationContextProvider;
 import com.sequenceiq.cloudbreak.rotation.flow.chain.SecretRotationFlowChainTriggerEvent;
 import com.sequenceiq.cloudbreak.rotation.flow.chain.SecretRotationFlowEventProvider;
 import com.sequenceiq.cloudbreak.rotation.request.RotationSource;
@@ -50,16 +52,25 @@ public class FreeIpaSecretRotationService implements SecretRotationFlowEventProv
     @Inject
     private List<SecretType> enabledSecretTypes;
 
+    @Inject
+    private Map<SecretType, ConditionalRotationContextProvider> conditionalRotationContextProviderMap;
+
     public FlowIdentifier rotateSecretsByCrn(String accountId, String environmentCrn, FreeIpaSecretRotationRequest request) {
         LOGGER.info("Requested secret rotation. Account id: {}, environment crn: {}, request: {}", accountId, environmentCrn, request);
         List<SecretType> secretTypes = SecretTypeConverter.mapSecretTypes(request.getSecrets(),
                 enabledSecretTypes.stream().map(SecretType::getClass).collect(Collectors.toSet()));
         secretRotationValidationService.validateEnabledSecretTypes(secretTypes, null);
         Stack stack = stackService.getByEnvironmentCrnAndAccountId(environmentCrn, accountId);
-
+        List<SecretType> filteredSecretTypes = secretTypes.stream()
+                .filter(type -> !conditionalRotationContextProviderMap.containsKey(type) ||
+                        conditionalRotationContextProviderMap.get(type).isApplicable(stack))
+                .toList();
+        if (filteredSecretTypes.isEmpty()) {
+            throw new BadRequestException("None of the requested secret types are applicable for the cluster!");
+        }
         Optional<RotationFlowExecutionType> usedExecutionType =
-                secretRotationValidationService.validate(environmentCrn, secretTypes, request.getExecutionType(), stack::isAvailable);
-        SecretRotationFlowChainTriggerEvent triggerEvent = createSecretRotationTriggerEvent(stack, secretTypes, usedExecutionType.orElse(null),
+                secretRotationValidationService.validate(environmentCrn, filteredSecretTypes, request.getExecutionType(), stack::isAvailable);
+        SecretRotationFlowChainTriggerEvent triggerEvent = createSecretRotationTriggerEvent(stack, filteredSecretTypes, usedExecutionType.orElse(null),
                 request.getAdditionalProperties());
         return flowManager.notify(triggerEvent.selector(), triggerEvent);
     }

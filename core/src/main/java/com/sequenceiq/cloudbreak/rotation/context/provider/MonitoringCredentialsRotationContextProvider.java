@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.CUSTOM
 import static com.sequenceiq.cloudbreak.rotation.CommonSecretRotationStep.VAULT;
 
 import java.util.Map;
+import java.util.function.Function;
 
 import jakarta.inject.Inject;
 
@@ -15,7 +16,6 @@ import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
-import com.sequenceiq.cloudbreak.rotation.common.RotationContextProvider;
 import com.sequenceiq.cloudbreak.rotation.secret.custom.CustomJobRotationContext;
 import com.sequenceiq.cloudbreak.rotation.secret.vault.VaultRotationContext;
 import com.sequenceiq.cloudbreak.rotation.service.MonitoringCredentialsRotationService;
@@ -25,7 +25,7 @@ import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.util.PasswordUtil;
 
 @Component
-public class MonitoringCredentialsRotationContextProvider implements RotationContextProvider {
+public class MonitoringCredentialsRotationContextProvider extends CloudbreakConditionalRotationContextProvider {
 
     @Inject
     private StackDtoService stackService;
@@ -56,6 +56,11 @@ public class MonitoringCredentialsRotationContextProvider implements RotationCon
                 .build();
         return Map.of(CUSTOM_JOB, customJobRotationContext,
                 VAULT, vaultRotationContext);
+    }
+
+    @Override
+    protected Function<StackDto, Boolean> getConditionalRotationFunction() {
+        return stackDto -> rotationService.isRotationApplicable(stackDto);
     }
 
     @Override
