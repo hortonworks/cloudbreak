@@ -15,11 +15,15 @@ public class RollingVerticalScaleTriggerEvent extends StackEvent {
 
     private final List<String> instanceIds;
 
+    private final List<String> stoppedInstanceIds;
+
     private final StackVerticalScaleV4Request stackVerticalScaleV4Request;
 
-    public RollingVerticalScaleTriggerEvent(String selector, Long stackId, List<String> instanceIds, StackVerticalScaleV4Request stackVerticalScaleV4Request) {
+    public RollingVerticalScaleTriggerEvent(String selector, Long stackId, List<String> instanceIds,
+            List<String> stoppedInstanceIds, StackVerticalScaleV4Request stackVerticalScaleV4Request) {
         super(selector, stackId);
         this.instanceIds = instanceIds;
+        this.stoppedInstanceIds = stoppedInstanceIds;
         this.stackVerticalScaleV4Request = stackVerticalScaleV4Request;
     }
 
@@ -28,15 +32,21 @@ public class RollingVerticalScaleTriggerEvent extends StackEvent {
             @JsonProperty("selector") String selector,
             @JsonProperty("resourceId") Long resourceId,
             @JsonProperty("instanceIds") List<String> instanceIds,
+            @JsonProperty("stoppedInstanceIds") List<String> stoppedInstanceIds,
             @JsonProperty("stackVerticalScaleV4Request") StackVerticalScaleV4Request stackVerticalScaleV4Request,
             @JsonIgnoreDeserialization @JsonProperty("accepted") Promise<AcceptResult> accepted) {
         super(selector, resourceId, accepted);
         this.instanceIds = instanceIds;
+        this.stoppedInstanceIds = stoppedInstanceIds;
         this.stackVerticalScaleV4Request = stackVerticalScaleV4Request;
     }
 
     public List<String> getInstanceIds() {
         return instanceIds;
+    }
+
+    public List<String> getStoppedInstanceIds() {
+        return stoppedInstanceIds;
     }
 
     public StackVerticalScaleV4Request getStackVerticalScaleV4Request() {

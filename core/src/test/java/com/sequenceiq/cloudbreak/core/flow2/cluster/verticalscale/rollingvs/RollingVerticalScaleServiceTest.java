@@ -59,6 +59,8 @@ class RollingVerticalScaleServiceTest {
 
     private static final List<String> INSTANCE_IDS = List.of(INSTANCE_ID_1, INSTANCE_ID_2);
 
+    private static final Set<String> INSTANCE_IDS_SET = Set.of(INSTANCE_ID_1, INSTANCE_ID_2);
+
     private static final String ERROR_MESSAGE = "Test error message";
 
     private static final String TARGET_INSTANCE_TYPE = "m5.2xlarge";
@@ -187,13 +189,13 @@ class RollingVerticalScaleServiceTest {
         StackVerticalScaleV4Request request = createStackVerticalScaleV4Request();
         request.getTemplate().setInstanceType(TARGET_INSTANCE_TYPE);
 
-        underTest.finishVerticalScaleInstances(STACK_ID, INSTANCE_IDS, request);
+        underTest.finishVerticalScaleInstances(STACK_ID, INSTANCE_IDS_SET, request);
 
         verify(flowMessageService, times(1)).fireEventAndLog(eq(STACK_ID),
                 eq(STOPPED.name()),
                 eq(CLUSTER_VERTICALSCALED_INSTANCES),
                 eq(GROUP),
-                eq(String.join(", ", INSTANCE_IDS)));
+                eq(String.join(", ", INSTANCE_IDS_SET)));
         verify(flowMessageService, never()).fireEventAndLog(eq(STACK_ID), eq(UPDATE_IN_PROGRESS.name()),
                 eq(CLUSTER_ROOT_VOLUME_INCREASED), any(), any());
     }
@@ -205,7 +207,7 @@ class RollingVerticalScaleServiceTest {
         rootVolume.setSize(100);
         request.getTemplate().setRootVolume(rootVolume);
 
-        underTest.finishVerticalScaleInstances(STACK_ID, INSTANCE_IDS, request);
+        underTest.finishVerticalScaleInstances(STACK_ID, INSTANCE_IDS_SET, request);
 
         verify(flowMessageService, times(1)).fireEventAndLog(eq(STACK_ID),
                 eq(UPDATE_IN_PROGRESS.name()),
@@ -224,13 +226,13 @@ class RollingVerticalScaleServiceTest {
         rootVolume.setSize(100);
         request.getTemplate().setRootVolume(rootVolume);
 
-        underTest.finishVerticalScaleInstances(STACK_ID, INSTANCE_IDS, request);
+        underTest.finishVerticalScaleInstances(STACK_ID, INSTANCE_IDS_SET, request);
 
         verify(flowMessageService, times(1)).fireEventAndLog(eq(STACK_ID),
                 eq(STOPPED.name()),
                 eq(CLUSTER_VERTICALSCALED_INSTANCES),
                 eq(GROUP),
-                eq(String.join(", ", INSTANCE_IDS)));
+                eq(String.join(", ", INSTANCE_IDS_SET)));
         verify(flowMessageService, times(1)).fireEventAndLog(eq(STACK_ID),
                 eq(UPDATE_IN_PROGRESS.name()),
                 eq(CLUSTER_ROOT_VOLUME_INCREASED),
@@ -243,7 +245,7 @@ class RollingVerticalScaleServiceTest {
         StackVerticalScaleV4Request request = createStackVerticalScaleV4Request();
         request.getTemplate().setInstanceType(TARGET_INSTANCE_TYPE);
 
-        underTest.finishVerticalScaleInstances(STACK_ID, Collections.emptyList(), request);
+        underTest.finishVerticalScaleInstances(STACK_ID, Collections.emptySet(), request);
 
         verify(flowMessageService, never()).fireEventAndLog(any(), any(), any(), any(), any());
     }
@@ -284,11 +286,20 @@ class RollingVerticalScaleServiceTest {
 
     @Test
     void testStartInstances() {
-        underTest.startInstances(STACK_ID, INSTANCE_IDS, GROUP);
+        underTest.startInstances(STACK_ID, INSTANCE_IDS, GROUP, Collections.emptyList());
 
         verify(instanceMetaDataService, times(1)).updateStatus(eq(STACK_ID), eq(INSTANCE_IDS), eq(InstanceStatus.RESTARTING));
         verify(flowMessageService, times(1)).fireEventAndLog(eq(STACK_ID), eq(UPDATE_IN_PROGRESS.name()),
-                eq(CLUSTER_VERTICALSCALE_RESTARTING_INSTANCES), eq(GROUP), eq(String.join(", ", INSTANCE_IDS)));
+                eq(CLUSTER_VERTICALSCALE_RESTARTING_INSTANCES), eq(GROUP), eq(String.join(", ", INSTANCE_IDS)), eq(String.join(", ", Collections.emptyList())));
+    }
+
+    @Test
+    void testStartInstancesWithStoppedInstances() {
+        underTest.startInstances(STACK_ID, INSTANCE_IDS, GROUP, INSTANCE_IDS);
+
+        verify(instanceMetaDataService, times(1)).updateStatus(eq(STACK_ID), eq(INSTANCE_IDS), eq(InstanceStatus.RESTARTING));
+        verify(flowMessageService, times(1)).fireEventAndLog(eq(STACK_ID), eq(UPDATE_IN_PROGRESS.name()),
+                eq(CLUSTER_VERTICALSCALE_RESTARTING_INSTANCES), eq(GROUP), eq(String.join(", ", INSTANCE_IDS)), eq(String.join(", ", INSTANCE_IDS)));
     }
 
     @Test

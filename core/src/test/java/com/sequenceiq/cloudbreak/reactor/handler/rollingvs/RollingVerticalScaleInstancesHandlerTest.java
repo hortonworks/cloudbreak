@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
@@ -149,7 +150,7 @@ class RollingVerticalScaleInstancesHandlerTest {
         // THEN
         verify(stackUpscaleService).verticalScale(any(), eq(request), eq(cloudConnector), eq(GROUP_NAME));
         verify(metadataCollector).collectInstanceTypes(any(), anyList());
-        verify(rollingVerticalScaleService).finishVerticalScaleInstances(eq(STACK_ID), anyList(), any(StackVerticalScaleV4Request.class));
+        verify(rollingVerticalScaleService).finishVerticalScaleInstances(eq(STACK_ID), anySet(), any(StackVerticalScaleV4Request.class));
         // failedVerticalScaleInstances is always called, even with empty list when all instances succeed
         verify(rollingVerticalScaleService).failedVerticalScaleInstances(eq(STACK_ID), anyList(), any(StackVerticalScaleV4Request.class), eq(""));
 
@@ -181,7 +182,7 @@ class RollingVerticalScaleInstancesHandlerTest {
         // THEN
         verify(stackUpscaleService).verticalScale(any(), eq(request), eq(cloudConnector), eq(GROUP_NAME));
         verify(metadataCollector).collectInstanceTypes(any(), anyList());
-        verify(rollingVerticalScaleService).finishVerticalScaleInstances(eq(STACK_ID), anyList(), any(StackVerticalScaleV4Request.class));
+        verify(rollingVerticalScaleService).finishVerticalScaleInstances(eq(STACK_ID), anySet(), any(StackVerticalScaleV4Request.class));
         verify(rollingVerticalScaleService).failedVerticalScaleInstances(eq(STACK_ID), anyList(), any(StackVerticalScaleV4Request.class), anyString());
 
         ArgumentCaptor<Event<RollingVerticalScaleInstancesResult>> eventCaptor = ArgumentCaptor.forClass(Event.class);
@@ -203,7 +204,7 @@ class RollingVerticalScaleInstancesHandlerTest {
         // THEN
         verify(stackUpscaleService).verticalScale(any(), eq(request), eq(cloudConnector), eq(GROUP_NAME));
         verify(rollingVerticalScaleService).failedVerticalScaleInstances(eq(STACK_ID), anyList(), any(StackVerticalScaleV4Request.class), eq("Scale failed"));
-        verify(rollingVerticalScaleService, never()).finishVerticalScaleInstances(eq(STACK_ID), anyList(), any(StackVerticalScaleV4Request.class));
+        verify(rollingVerticalScaleService, never()).finishVerticalScaleInstances(eq(STACK_ID), anySet(), any(StackVerticalScaleV4Request.class));
 
         ArgumentCaptor<Event<RollingVerticalScaleInstancesResult>> eventCaptor = ArgumentCaptor.forClass(Event.class);
         verify(eventBus).notify(eq(EventSelectorUtil.selector(RollingVerticalScaleInstancesResult.class)), eventCaptor.capture());

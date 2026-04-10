@@ -57,15 +57,20 @@ public class RollingVerticalScaleFlowEventChainFactory implements FlowEventChain
                 .flatMap(r -> r.getInstanceMetadataViews().stream())
                 .map(InstanceMetadataView::getInstanceId).distinct().toList();
 
+        List<String> stoppedInstanceIds = instanceGroupDtos.stream()
+                .filter(r -> r.getInstanceGroup().getGroupName().equals(hostGroup))
+                .flatMap(r -> r.getInstanceMetadataViews().stream().filter(InstanceMetadataView::isStopped))
+                .map(InstanceMetadataView::getInstanceId).distinct().toList();
+
         switch (orchestratorType) {
             case ALL_AT_ONCE -> {
                 return Collections.singletonList(new RollingVerticalScaleTriggerEvent(ROLLING_VERTICALSCALE_TRIGGER_EVENT.event(),
-                        event.getResourceId(), instanceIds, event.getRequest(), event.accepted()));
+                        event.getResourceId(), instanceIds, stoppedInstanceIds, event.getRequest(), event.accepted()));
             }
             case ONE_BY_ONE -> {
                 List<Selectable> flowChain = new ArrayList<>();
                 instanceIds.forEach(instanceId -> flowChain.add(new RollingVerticalScaleTriggerEvent(ROLLING_VERTICALSCALE_TRIGGER_EVENT.event(),
-                        event.getResourceId(), Collections.singletonList(instanceId), event.getRequest(), event.accepted())));
+                        event.getResourceId(), Collections.singletonList(instanceId), stoppedInstanceIds, event.getRequest(), event.accepted())));
                 return flowChain;
             }
             default -> throw new IllegalStateException("Unexpected value: " + orchestratorType);

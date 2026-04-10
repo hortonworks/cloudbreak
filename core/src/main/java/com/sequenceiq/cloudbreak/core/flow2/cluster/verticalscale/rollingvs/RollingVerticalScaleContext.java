@@ -15,6 +15,8 @@ public class RollingVerticalScaleContext extends CommonContext {
 
     private final List<String> instanceIds;
 
+    private final List<String> stoppedInstanceIds;
+
     private final StackVerticalScaleV4Request stackVerticalScaleV4Request;
 
     private final CloudContext cloudContext;
@@ -23,11 +25,12 @@ public class RollingVerticalScaleContext extends CommonContext {
 
     private final String targetInstanceType;
 
-    public RollingVerticalScaleContext(FlowParameters flowParameters, Stack stack, List<String> instanceIds,
+    public RollingVerticalScaleContext(FlowParameters flowParameters, Stack stack, List<String> instanceIds, List<String> stoppedInstanceIds,
             StackVerticalScaleV4Request request, CloudContext cloudContext, CloudCredential cloudCredential, String targetInstanceType) {
         super(flowParameters);
         this.stack = stack;
         this.instanceIds = instanceIds;
+        this.stoppedInstanceIds = stoppedInstanceIds;
         this.stackVerticalScaleV4Request = request;
         this.cloudContext = cloudContext;
         this.cloudCredential = cloudCredential;
@@ -40,6 +43,10 @@ public class RollingVerticalScaleContext extends CommonContext {
 
     public List<String> getInstanceIds() {
         return instanceIds;
+    }
+
+    public List<String> getStoppedInstanceIds() {
+        return stoppedInstanceIds;
     }
 
     public StackVerticalScaleV4Request getStackVerticalScaleV4Request() {

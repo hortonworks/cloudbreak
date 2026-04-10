@@ -86,6 +86,7 @@ class RollingVerticalScaleFlowEventChainFactoryTest {
         when(instanceGroupDto.getInstanceMetadataViews()).thenReturn(List.of(instanceMetadataView1, instanceMetadataView2));
         when(instanceMetadataView1.getInstanceId()).thenReturn(INSTANCE_ID_1);
         when(instanceMetadataView2.getInstanceId()).thenReturn(INSTANCE_ID_2);
+        when(instanceMetadataView2.isStopped()).thenReturn(true);
 
         FlowTriggerEventQueue flowTriggerEventQueue = underTest.createFlowTriggerEventQueue(event);
 
@@ -98,6 +99,7 @@ class RollingVerticalScaleFlowEventChainFactoryTest {
         assertEquals(ROLLING_VERTICALSCALE_TRIGGER_EVENT.event(), triggerEvent.selector());
         assertEquals(STACK_ID, triggerEvent.getResourceId());
         assertEquals(List.of(INSTANCE_ID_1, INSTANCE_ID_2), triggerEvent.getInstanceIds());
+        assertEquals(List.of(INSTANCE_ID_2), triggerEvent.getStoppedInstanceIds());
         assertEquals(request, triggerEvent.getStackVerticalScaleV4Request());
         flowTriggerEventQueue.getQueue().addAll(restrainedQueueData);
         FlowChainConfigGraphGeneratorUtil.generateFor(underTest, FLOW_CONFIGS_PACKAGE, flowTriggerEventQueue);
@@ -151,6 +153,7 @@ class RollingVerticalScaleFlowEventChainFactoryTest {
         when(instanceGroupDto.getInstanceMetadataViews()).thenReturn(List.of(instanceMetadataView1, instanceMetadataView2));
         when(instanceMetadataView1.getInstanceId()).thenReturn(INSTANCE_ID_1);
         when(instanceMetadataView2.getInstanceId()).thenReturn(INSTANCE_ID_2);
+        when(instanceMetadataView2.isStopped()).thenReturn(true);
 
         when(otherInstanceGroupDto.getInstanceGroup()).thenReturn(otherInstanceGroupView);
         when(otherInstanceGroupView.getGroupName()).thenReturn("worker");
@@ -168,6 +171,7 @@ class RollingVerticalScaleFlowEventChainFactoryTest {
         assertEquals(ROLLING_VERTICALSCALE_TRIGGER_EVENT.event(), triggerEvent.selector());
         assertEquals(STACK_ID, triggerEvent.getResourceId());
         assertEquals(List.of(INSTANCE_ID_1, INSTANCE_ID_2), triggerEvent.getInstanceIds());
+        assertEquals(List.of(INSTANCE_ID_2), triggerEvent.getStoppedInstanceIds());
         assertEquals(request, triggerEvent.getStackVerticalScaleV4Request());
         flowTriggerEventQueue.getQueue().addAll(restrainedQueueData);
         FlowChainConfigGraphGeneratorUtil.generateFor(underTest, FLOW_CONFIGS_PACKAGE, flowTriggerEventQueue);
@@ -189,6 +193,7 @@ class RollingVerticalScaleFlowEventChainFactoryTest {
         assertEquals(1, queue.size());
         RollingVerticalScaleTriggerEvent triggerEvent = (RollingVerticalScaleTriggerEvent) queue.poll();
         assertEquals(List.of(INSTANCE_ID_1, INSTANCE_ID_2, INSTANCE_ID_3), triggerEvent.getInstanceIds());
+        assertEquals(List.of(INSTANCE_ID_1, INSTANCE_ID_2, INSTANCE_ID_3), triggerEvent.getStoppedInstanceIds());
     }
 
     @Test
@@ -210,6 +215,9 @@ class RollingVerticalScaleFlowEventChainFactoryTest {
                 .toList();
         assertEquals(List.of(List.of(INSTANCE_ID_1), List.of(INSTANCE_ID_2), List.of(INSTANCE_ID_3)),
                 triggerEvents.stream().map(RollingVerticalScaleTriggerEvent::getInstanceIds).toList());
+        assertEquals(List.of(List.of(INSTANCE_ID_1, INSTANCE_ID_2, INSTANCE_ID_3), List.of(INSTANCE_ID_1, INSTANCE_ID_2, INSTANCE_ID_3),
+                        List.of(INSTANCE_ID_1, INSTANCE_ID_2, INSTANCE_ID_3)),
+                triggerEvents.stream().map(RollingVerticalScaleTriggerEvent::getStoppedInstanceIds).toList());
     }
 
     private void mockStackWithInstances(List<String> instanceIds) {
@@ -226,6 +234,7 @@ class RollingVerticalScaleFlowEventChainFactoryTest {
     private InstanceMetadataView mockInstanceMetadataView(String instanceId) {
         InstanceMetadataView metadataView = mock(InstanceMetadataView.class);
         when(metadataView.getInstanceId()).thenReturn(instanceId);
+        when(metadataView.isStopped()).thenReturn(true);
         return metadataView;
     }
 }

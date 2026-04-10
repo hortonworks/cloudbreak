@@ -113,6 +113,7 @@ public class RollingVerticalScaleActions {
                 }
                 variables.put(GROUP_BEING_SCALED, request.getGroup());
                 variables.put(TARGET_INSTANCES, payload.getInstanceIds());
+                variables.put(STOPPED_INSTANCES, payload.getStoppedInstanceIds());
                 variables.put(STACK_VERTICALSCALE_V4_REQUEST, payload.getStackVerticalScaleV4Request());
             }
 
@@ -196,12 +197,17 @@ public class RollingVerticalScaleActions {
             @Override
             protected void doExecute(RollingVerticalScaleContext context, RollingVerticalScaleInstancesResult payload, Map<Object, Object> variables) {
                 StackDtoDelegate stack = context.getStack();
-                List<String> instancesToRestart = getInstancesToRestart(payload.getRollingVerticalScaleResult());
+                List<String> instancesToRestart = getInstancesToRestart(payload.getRollingVerticalScaleResult(), context.getStoppedInstanceIds());
 
-                LOGGER.info("Restarting instances after vertical scale: count={}, instanceIds=[{}]", instancesToRestart.size(), instancesToRestart);
-                rollingVerticalScaleService.startInstances(payload.getResourceId(), instancesToRestart, context.getStackVerticalScaleV4Request().getGroup());
+                LOGGER.info("Restarting instances after vertical scale: count={}, instanceIds=[{}]. " +
+                        "Not Starting the instances which were stopped before vertical scale: count={}, instanceIds=[{}]",
+                        instancesToRestart.size(), instancesToRestart,
+                        context.getStoppedInstanceIds().size(), context.getStoppedInstanceIds());
+                rollingVerticalScaleService.startInstances(payload.getResourceId(), instancesToRestart, context.getStackVerticalScaleV4Request().getGroup(),
+                        context.getStoppedInstanceIds());
                 List<InstanceMetadataView> instances = instanceMetaDataService.getAllAvailableInstanceMetadataViewsByStackId(context.getStack().getId()).stream()
-                        .filter(instanceMetaData -> context.getInstanceIds().contains(instanceMetaData.getInstanceId())).collect(Collectors.toList());
+                        .filter(instanceMetaData -> context.getInstanceIds().contains(instanceMetaData.getInstanceId()) &&
+                                !context.getStoppedInstanceIds().contains(instanceMetaData.getInstanceId())).collect(Collectors.toList());
 
                 List<CloudInstance> cloudInstances = instanceMetaDataToCloudInstanceConverter.convert(instances, stack.getStack());
                 List<CloudResource> cloudResources = getCloudResources(context.getStack().getId());
@@ -210,8 +216,8 @@ public class RollingVerticalScaleActions {
                 sendEvent(context, request);
             }
 
-            private List<String> getInstancesToRestart(RollingVerticalScaleResult rollingVerticalScaleResult) {
-                return rollingVerticalScaleResult.getInstanceIds();
+            private List<String> getInstancesToRestart(RollingVerticalScaleResult rollingVerticalScaleResult, List<String> stoppedInstanceIds) {
+                return rollingVerticalScaleResult.getInstanceIds().stream().filter(i -> !stoppedInstanceIds.contains(i)).toList();
             }
 
             private List<CloudResource> getCloudResources(Long stackId) {
@@ -234,7 +240,7 @@ public class RollingVerticalScaleActions {
                 Long stackId = payload.getResourceId();
                 List<String> successfulInstanceIds = result.getInstanceIds().stream()
                         .filter(i -> result.getStatus(i).getStatus().equals(RollingVerticalScaleStatus.SUCCESS)).toList();
-                Map<String, String> failedInstancesWithErrorMessage = getFailedInstances(result);
+                Map<String, String> failedInstancesWithErrorMessage = getFailedInstances(result, context.getStoppedInstanceIds());
                 LOGGER.info("Rolling Vertical scale instances. Results: Successfully vertical scaled:[{}]. Failed to vertical scale:[{}]",
                         successfulInstanceIds, failedInstancesWithErrorMessage);
 
@@ -247,14 +253,18 @@ public class RollingVerticalScaleActions {
                     sendEvent(context, new StackFailureEvent(RollingVerticalScaleEvent.ROLLING_VERTICALSCALE_FAILURE_EVENT.event(),
                             payload.getResourceId(), new CloudbreakException(errorMessage)));
                 } else {
+                    String message = String.format("Successfully vertically scaled instances: [%s]", result.getInstanceIds());
+                    rollingVerticalScaleService.verticalScalingCompletedSuccessfully(stackId, message);
                     sendEvent(context, RollingVerticalScaleEvent.ROLLING_VERTICALSCALE_FINALIZED_EVENT.event(), payload);
                 }
             }
 
-            private Map<String, String> getFailedInstances(RollingVerticalScaleResult result) {
+            private Map<String, String> getFailedInstances(RollingVerticalScaleResult result, List<String> stoppedInstanceIds) {
                 Map<String, String> failedInstances = new HashMap<>();
                 for (String instanceId : result.getInstanceIds()) {
-                    if (!result.getStatus(instanceId).getStatus().equals(RollingVerticalScaleStatus.SUCCESS)) {
+                    if ((!result.getStatus(instanceId).getStatus().equals(RollingVerticalScaleStatus.SUCCESS))
+                            && !((result.getStatus(instanceId).getStatus().equals(RollingVerticalScaleStatus.SCALED))
+                            && stoppedInstanceIds.contains(instanceId))) {
                         String errorMessage = String.format("Failed to vertical scale instance %s during (%s) stages with errors: %s",
                                 instanceId,
                                 result.getStatus(instanceId).getStatus().getMessage(),
@@ -290,6 +300,8 @@ public class RollingVerticalScaleActions {
 
         static final String TARGET_INSTANCES = "TARGET_INSTANCES";
 
+        static final String STOPPED_INSTANCES = "STOPPED_INSTANCES";
+
         static final String STACK_VERTICALSCALE_V4_REQUEST = "STACK_VERTICALSCALE_V4_REQUEST";
 
         static final String TARGET_INSTANCE_TYPE = "TARGET_INSTANCE_TYPE";
@@ -318,6 +330,7 @@ public class RollingVerticalScaleActions {
             Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
             StackVerticalScaleV4Request stackVerticalScaleV4Request = (StackVerticalScaleV4Request) variables.get(STACK_VERTICALSCALE_V4_REQUEST);
             List<String> instanceIds = (List<String>) variables.get(TARGET_INSTANCES);
+            List<String> stoppedInstanceIds = (List<String>) variables.get(STOPPED_INSTANCES);
             String targetInstanceType = (String) variables.get(TARGET_INSTANCE_TYPE);
 
             CloudContext cloudContext = CloudContext.Builder.builder()
@@ -333,7 +346,7 @@ public class RollingVerticalScaleActions {
                     .build();
             CloudCredential cloudCredential = stackUtil.getCloudCredential(stack.getEnvironmentCrn());
 
-            return new RollingVerticalScaleContext(flowParameters, stack, instanceIds,
+            return new RollingVerticalScaleContext(flowParameters, stack, instanceIds, stoppedInstanceIds,
                     stackVerticalScaleV4Request, cloudContext, cloudCredential, targetInstanceType);
         }
 

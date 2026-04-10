@@ -1,8 +1,10 @@
 package com.sequenceiq.cloudbreak.reactor.handler.rollingvs;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import jakarta.inject.Inject;
 
@@ -109,7 +111,7 @@ public class RollingVerticalScaleInstancesHandler extends ExceptionCatcherEventH
 
     private void updateRollingVerticalScaleResult(Long stackId, RollingVerticalScaleResult result, Map<String, String> updatedInstanceType,
             List<CloudResourceStatus> cloudResourceStatuses, String requestedInstanceType, StackVerticalScaleV4Request stackVerticalScaleV4Request) {
-        List<String> successfullyScaledInstances = new ArrayList<>();
+        Set<String> successfullyScaledInstances = new HashSet<>();
         List<String> failedInstances = new ArrayList<>();
         for (CloudResourceStatus status : cloudResourceStatuses) {
             String instanceId = status.getCloudResource().getInstanceId();

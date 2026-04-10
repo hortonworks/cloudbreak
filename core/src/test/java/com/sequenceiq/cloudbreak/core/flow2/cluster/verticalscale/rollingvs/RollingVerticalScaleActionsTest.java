@@ -246,7 +246,7 @@ public class RollingVerticalScaleActionsTest {
 
         new AbstractActionTestSupport<>(action).doExecute(context, payload, createVariables(instanceIds));
 
-        verify(rollingVerticalScaleService).startInstances(eq(STACK_ID), eq(instanceIds), eq(INSTANCE_GROUP_NAME));
+        verify(rollingVerticalScaleService).startInstances(eq(STACK_ID), eq(instanceIds), eq(INSTANCE_GROUP_NAME), eq(Collections.emptyList()));
         ArgumentCaptor<Object> captor = ArgumentCaptor.forClass(Object.class);
         verify(reactorEventFactory).createEvent(anyMap(), captor.capture());
         verify(eventBus).notify("ROLLINGVERTICALSCALESTARTINSTANCESREQUEST", event);
@@ -324,7 +324,7 @@ public class RollingVerticalScaleActionsTest {
     }
 
     private RollingVerticalScaleContext createContext() {
-        return new RollingVerticalScaleContext(flowParameters, stack, createInstanceIds(3),
+        return new RollingVerticalScaleContext(flowParameters, stack, createInstanceIds(3), createInstanceIds(0),
                 createStackVerticalScaleV4Request(), cloudContext, cloudCredential, TARGET_INSTANCE_TYPE);
     }
 
@@ -393,7 +393,7 @@ public class RollingVerticalScaleActionsTest {
     }
 
     private RollingVerticalScaleTriggerEvent createTriggerEvent(List<String> instanceIds) {
-        return new RollingVerticalScaleTriggerEvent(SELECTOR, STACK_ID, instanceIds, createStackVerticalScaleV4Request());
+        return new RollingVerticalScaleTriggerEvent(SELECTOR, STACK_ID, instanceIds, Collections.emptyList(), createStackVerticalScaleV4Request());
     }
 
     private StackVerticalScaleV4Request createStackVerticalScaleV4Request() {

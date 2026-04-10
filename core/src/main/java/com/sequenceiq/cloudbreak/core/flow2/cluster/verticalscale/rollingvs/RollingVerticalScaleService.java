@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.verticalscale.rollingvs;
 
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_ROOT_VOLUME_INCREASED;
@@ -9,6 +10,7 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_VERTICALSCAL
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_VERTICALSCALE_RESTARTED_INSTANCES;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_VERTICALSCALE_RESTARTING_INSTANCES;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_VERTICALSCALE_RESTART_INSTANCES_FAILED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_VERTICALSCALE_SERVICES_HEALTHY;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_VERTICALSCALE_STOPPED_INSTANCES;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_VERTICALSCALE_STOPPING_INSTANCES;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_VERTICALSCALE_STOP_INSTANCES_FAILED;
@@ -89,7 +91,7 @@ public class RollingVerticalScaleService {
         }
     }
 
-    public void finishVerticalScaleInstances(Long stackId, List<String> instanceIds, StackVerticalScaleV4Request payload) {
+    public void finishVerticalScaleInstances(Long stackId, Set<String> instanceIds, StackVerticalScaleV4Request payload) {
         if (!instanceIds.isEmpty()) {
             if (payload.getTemplate().getInstanceType() != null) {
                 flowMessageService.fireEventAndLog(stackId,
@@ -121,10 +123,10 @@ public class RollingVerticalScaleService {
         }
     }
 
-    public void startInstances(Long stackId, List<String> instanceIds, String group) {
+    public void startInstances(Long stackId, List<String> instanceIds, String group, List<String> stoppedInstanceIds) {
         instanceMetaDataService.updateStatus(stackId, instanceIds, InstanceStatus.RESTARTING);
         flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(),
-                CLUSTER_VERTICALSCALE_RESTARTING_INSTANCES, group, String.join(", ", instanceIds));
+                CLUSTER_VERTICALSCALE_RESTARTING_INSTANCES, group, String.join(", ", instanceIds), String.join(", ", stoppedInstanceIds));
     }
 
     public void finishStartInstances(Long stackId, List<String> instanceIds, String group) {
@@ -144,10 +146,16 @@ public class RollingVerticalScaleService {
                 CLUSTER_VERTICALSCALED_FAILED, message, String.join(", ", instanceIds));
     }
 
+    public void verticalScalingCompletedSuccessfully(Long stackId, String message) {
+        clusterService.updateClusterStatusByStackId(stackId, DetailedStackStatus.CLUSTER_VERTICALSCALE_COMPLETE, message);
+    }
+
     public void updateInstancesToServicesHealthy(Long stackId, Set<InstanceMetadataView> instances) {
         if (!instances.isEmpty()) {
             List<String> instanceIds = instances.stream().map(InstanceMetadataView::getInstanceId).toList();
             instanceMetaDataService.updateStatus(stackId, instanceIds, InstanceStatus.SERVICES_HEALTHY);
+            flowMessageService.fireEventAndLog(stackId, AVAILABLE.name(),
+                    CLUSTER_VERTICALSCALE_SERVICES_HEALTHY, String.join(", ", instanceIds));
         }
     }
 
