@@ -7,9 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,21 +15,16 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.flow.encryptionprofile.event.EnableEncryptionProfileEvent;
 import com.sequenceiq.environment.environment.flow.encryptionprofile.validator.EncryptionProfileValidator;
-import com.sequenceiq.environment.environment.service.stack.StackService;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
 @ExtendWith(MockitoExtension.class)
 class ValidateEnableEncryptionProfileHandlerTest {
-
-    @Mock
-    private StackService stackService;
 
     @Mock
     private EncryptionProfileValidator encryptionProfileValidator;
@@ -64,25 +56,17 @@ class ValidateEnableEncryptionProfileHandlerTest {
 
     @Test
     void testValidateEnableEncryptionProfileHandlerSuccess() {
-        List<StackViewV4Response> stacks = List.of(new StackViewV4Response(), new StackViewV4Response());
-
-        when(stackService.getAllNotDeletedClustersByEnvironmentCrn(event.getResourceCrn())).thenReturn(stacks);
-
         Selectable response = underTest.doAccept(new HandlerEvent<>(new Event<>(event)));
 
-        verify(encryptionProfileValidator, times(1)).validate(stacks);
+        verify(encryptionProfileValidator, times(1)).validate(event.getResourceCrn());
         assertEquals(event.getResourceId(), response.getResourceId());
         assertEquals(SET_ENCRYPTION_PROFILE_EVENT.selector(), response.getSelector());
     }
 
     @Test
     void testValidateEnableEncryptionProfileHandlerFailure() {
-        List<StackViewV4Response> stacks = List.of(new StackViewV4Response(), new StackViewV4Response());
-
-        when(stackService.getAllNotDeletedClustersByEnvironmentCrn(event.getResourceCrn())).thenReturn(stacks);
-
         doThrow(new CloudbreakServiceException("failed"))
-                .when(encryptionProfileValidator).validate(stacks);
+                .when(encryptionProfileValidator).validate(event.getResourceCrn());
 
         Selectable selectable = underTest.doAccept(new HandlerEvent<>(new Event<>(event)));
 

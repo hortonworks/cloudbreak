@@ -1,29 +1,22 @@
 package com.sequenceiq.environment.environment.flow.encryptionprofile.handler;
 
-import java.util.List;
-
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.environment.environment.flow.encryptionprofile.event.EnableEncryptionProfileEvent;
 import com.sequenceiq.environment.environment.flow.encryptionprofile.event.EnableEncryptionProfileFailedEvent;
 import com.sequenceiq.environment.environment.flow.encryptionprofile.event.EnableEncryptionProfileStateSelectors;
 import com.sequenceiq.environment.environment.flow.encryptionprofile.validator.EncryptionProfileValidator;
-import com.sequenceiq.environment.environment.service.stack.StackService;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
 @Component
 public class ValidateEnableEncryptionProfileHandler extends ExceptionCatcherEventHandler<EnableEncryptionProfileEvent> {
 
-    private final StackService stackService;
-
     private final EncryptionProfileValidator encryptionProfileValidator;
 
-    protected ValidateEnableEncryptionProfileHandler(StackService stackService, EncryptionProfileValidator encryptionProfileValidator) {
-        this.stackService = stackService;
+    protected ValidateEnableEncryptionProfileHandler(EncryptionProfileValidator encryptionProfileValidator) {
         this.encryptionProfileValidator = encryptionProfileValidator;
     }
 
@@ -42,9 +35,7 @@ public class ValidateEnableEncryptionProfileHandler extends ExceptionCatcherEven
     protected Selectable doAccept(HandlerEvent<EnableEncryptionProfileEvent> event) {
         EnableEncryptionProfileEvent payload = event.getData();
         try {
-            List<StackViewV4Response> stackViewV4Responses = stackService.getAllNotDeletedClustersByEnvironmentCrn(payload.getResourceCrn());
-
-            encryptionProfileValidator.validate(stackViewV4Responses);
+            encryptionProfileValidator.validate(payload.getResourceCrn());
 
             return EnableEncryptionProfileEvent
                     .builder()
