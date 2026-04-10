@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -37,6 +38,7 @@ import com.sequenceiq.sdx.api.model.CcmUpgradeResponseType;
 import com.sequenceiq.sdx.api.model.SdxCcmUpgradeResponse;
 import com.sequenceiq.sdx.api.model.SdxUpgradeDatabaseServerRequest;
 import com.sequenceiq.sdx.api.model.SdxUpgradeDatabaseServerResponse;
+import com.sequenceiq.sdx.api.model.SdxUpgradeReinitiableResponse;
 import com.sequenceiq.sdx.api.model.SdxUpgradeRequest;
 import com.sequenceiq.sdx.api.model.SdxUpgradeResponse;
 import com.sequenceiq.sdx.api.model.SdxUpgradeShowAvailableImages;
@@ -254,6 +256,26 @@ class SdxUpgradeControllerTest {
         SdxUpgradeRequest capturedRequest = upgradeRequestArgumentCaptor.getValue();
         assertNull(capturedRequest.getLockComponents());
         assertEquals("No image available to upgrade", response.getReason());
+    }
+
+    @Test
+    void testGetClusterUpgradeReinitiableByName() {
+        SdxUpgradeReinitiableResponse sdxUpgradeReinitiableResponse = mock();
+        when(sdxRuntimeUpgradeService.checkClusterUpgradeReinitiable(NameOrCrn.ofName(CLUSTER_NAME))).thenReturn(sdxUpgradeReinitiableResponse);
+
+        SdxUpgradeReinitiableResponse result = underTest.getClusterUpgradeReinitiableByName(CLUSTER_NAME);
+
+        assertEquals(sdxUpgradeReinitiableResponse, result);
+    }
+
+    @Test
+    void testGetClusterUpgradeReinitiableByCrn() {
+        SdxUpgradeReinitiableResponse sdxUpgradeReinitiableResponse = mock();
+        when(sdxRuntimeUpgradeService.checkClusterUpgradeReinitiable(NameOrCrn.ofCrn(CLUSTER_CRN))).thenReturn(sdxUpgradeReinitiableResponse);
+
+        SdxUpgradeReinitiableResponse result = underTest.getClusterUpgradeReinitiableByCrn(CLUSTER_CRN);
+
+        assertEquals(sdxUpgradeReinitiableResponse, result);
     }
 
     @Test

@@ -102,6 +102,12 @@ class ClusterRecoveryServiceTest {
                         "Last cluster upgrade has failed, recovery can be launched to restore the cluster to its pre-upgrade state."},
                 {List.of(
                         getStackStatus(DetailedStackStatus.AVAILABLE),
+                        getStackStatus(DetailedStackStatus.CLUSTER_ROLLING_UPGRADE_FAILED)),
+                        true,
+                        RecoveryStatus.RECOVERABLE,
+                        "Last cluster upgrade has failed, recovery can be launched to restore the cluster to its pre-upgrade state."},
+                {List.of(
+                        getStackStatus(DetailedStackStatus.AVAILABLE),
                         getStackStatus(DetailedStackStatus.CLUSTER_UPGRADE_FAILED),
                         getStackStatus(DetailedStackStatus.CLUSTER_RECOVERY_FAILED)),
                         true,

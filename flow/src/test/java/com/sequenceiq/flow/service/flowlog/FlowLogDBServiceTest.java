@@ -3,7 +3,6 @@ package com.sequenceiq.flow.service.flowlog;
 import static com.sequenceiq.flow.core.FlowConstants.CANCELLED_STATE;
 import static com.sequenceiq.flow.core.FlowConstants.FINISHED_STATE;
 import static com.sequenceiq.flow.core.FlowConstants.TERMINATED_STATE;
-import static com.sequenceiq.flow.domain.ClassValue.of;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -66,6 +65,7 @@ import com.sequenceiq.flow.core.ResourceIdProvider;
 import com.sequenceiq.flow.core.RestartAction;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 import com.sequenceiq.flow.core.restart.DefaultRestartAction;
+import com.sequenceiq.flow.domain.ClassValue;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.domain.FlowLogIdWithTypeAndTimestamp;
 import com.sequenceiq.flow.domain.FlowLogWithoutPayload;
@@ -239,10 +239,10 @@ class FlowLogDBServiceTest {
         Long currentTime = 123456789L;
         doReturn(currentTime).when(clock).getCurrentTimeMillis();
         FlowLogIdWithTypeAndTimestamp flowLog2 = mock(FlowLogIdWithTypeAndTimestamp.class);
-        when(flowLog2.getFlowType()).thenReturn(of(Class.class));
+        when(flowLog2.getFlowType()).thenReturn(ClassValue.of(Class.class));
         flowLogs.add(flowLog2);
         FlowLogIdWithTypeAndTimestamp flowLog1 = mock(FlowLogIdWithTypeAndTimestamp.class);
-        when(flowLog1.getFlowType()).thenReturn(of(TerminationFlowConfig.class));
+        when(flowLog1.getFlowType()).thenReturn(ClassValue.of(TerminationFlowConfig.class));
         when(flowLog1.getCreated()).thenReturn(9000L);
         when(flowLog1.getFlowId()).thenReturn("flow1");
         flowLogs.add(flowLog1);
@@ -263,11 +263,11 @@ class FlowLogDBServiceTest {
     void doNotCancelTooYoungTerminationFlowForResourceTest() {
         Set<FlowLogIdWithTypeAndTimestamp> flowLogs = new HashSet<>();
         FlowLogIdWithTypeAndTimestamp flowLog1 = mock(FlowLogIdWithTypeAndTimestamp.class);
-        when(flowLog1.getFlowType()).thenReturn(of(TerminationFlowConfig.class));
+        when(flowLog1.getFlowType()).thenReturn(ClassValue.of(TerminationFlowConfig.class));
         when(flowLog1.getCreated()).thenReturn(11000L);
         flowLogs.add(flowLog1);
         FlowLogIdWithTypeAndTimestamp flowLog2 = mock(FlowLogIdWithTypeAndTimestamp.class);
-        when(flowLog2.getFlowType()).thenReturn(of(Class.class));
+        when(flowLog2.getFlowType()).thenReturn(ClassValue.of(Class.class));
         flowLogs.add(flowLog2);
         when(flowLogRepository.findAllRunningFlowLogByResourceId(eq(1L))).thenReturn(flowLogs);
         when(applicationFlowInformation.getTerminationFlow()).thenReturn(Collections.singletonList(TerminationFlowConfig.class));
@@ -397,7 +397,7 @@ class FlowLogDBServiceTest {
     @Test
     void testIsTerminatedFlowAlreadyRunningWhenHasActiveTerminationFlow() throws ClassNotFoundException {
         FlowLog flowLog = mock(FlowLog.class);
-        com.sequenceiq.flow.domain.ClassValue terminationFlowConfig = of(TerminationFlowConfig.class.getName());
+        com.sequenceiq.flow.domain.ClassValue terminationFlowConfig = ClassValue.of(TerminationFlowConfig.class.getName());
         when(flowLogRepository.findFirstByResourceIdOrderByCreatedDesc(1L)).thenReturn(Optional.of(flowLog));
         when(flowLog.getFlowType()).thenReturn(terminationFlowConfig);
         when(flowLog.getStateStatus()).thenReturn(StateStatus.PENDING);
@@ -408,7 +408,7 @@ class FlowLogDBServiceTest {
     @Test
     void testIsTerminatedFlowAlreadyRunningWhenLastFlowTermButNotPending() throws ClassNotFoundException {
         FlowLog flowLog = mock(FlowLog.class);
-        com.sequenceiq.flow.domain.ClassValue terminationFlowConfig = of(TerminationFlowConfig.class.getName());
+        com.sequenceiq.flow.domain.ClassValue terminationFlowConfig = ClassValue.of(TerminationFlowConfig.class.getName());
         when(flowLogRepository.findFirstByResourceIdOrderByCreatedDesc(1L)).thenReturn(Optional.of(flowLog));
         when(flowLog.getFlowType()).thenReturn(terminationFlowConfig);
         when(flowLog.getStateStatus()).thenReturn(StateStatus.SUCCESSFUL);
@@ -419,7 +419,7 @@ class FlowLogDBServiceTest {
     @Test
     void testIsTerminatedFlowAlreadyRunningWhenLastFlowIsNotTermination() throws ClassNotFoundException {
         FlowLog flowLog = mock(FlowLog.class);
-        com.sequenceiq.flow.domain.ClassValue terminationFlowConfig = of(TerminationFlowConfig.class.getName());
+        com.sequenceiq.flow.domain.ClassValue terminationFlowConfig = ClassValue.of(TerminationFlowConfig.class.getName());
         when(flowLogRepository.findFirstByResourceIdOrderByCreatedDesc(1L)).thenReturn(Optional.of(flowLog));
         when(flowLog.getFlowType()).thenReturn(terminationFlowConfig);
         boolean actual = underTest.isFlowConfigAlreadyRunning(1L, TerminationFlowConfig.class);

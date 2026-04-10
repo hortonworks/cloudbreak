@@ -12,10 +12,14 @@ import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -25,6 +29,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.InternalUpgradeSettings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.upgrade.UpgradeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageInfoV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeReinitiableV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
 import com.sequenceiq.cloudbreak.cloud.model.component.PreparedImages;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
@@ -35,18 +40,23 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeAvailabilityService;
 import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeCandidateFilterService;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradePreconditionService;
+import com.sequenceiq.cloudbreak.service.upgrade.UpgradeReinitiateService;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradeService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.reinit.UpgradeReinitiateStatus;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
 
 @ExtendWith(MockitoExtension.class)
 class StackUpgradeOperationsTest {
+
+    private static final Long WORKSPACE_ID = 1L;
 
     private static final long STACK_ID = 1L;
 
@@ -55,6 +65,8 @@ class StackUpgradeOperationsTest {
     private static final String ACCOUNT_ID = "account-id";
 
     private static final String STACK_NAME = "stack-name";
+
+    private static final String CLUSTER_CRN = "cluster-crn";
 
     private static final String IMAGE_ID = "image-id";
 
@@ -66,10 +78,16 @@ class StackUpgradeOperationsTest {
     private StackUpgradeOperations underTest;
 
     @Mock
+    private StackService stackService;
+
+    @Mock
     private UserService userService;
 
     @Mock
     private UpgradeService upgradeService;
+
+    @Mock
+    private UpgradeReinitiateService upgradeReinitiateService;
 
     @Mock
     private InstanceGroupService instanceGroupService;
@@ -106,6 +124,32 @@ class StackUpgradeOperationsTest {
     void testUpgradeClusterShouldCallUpgradeService() {
         underTest.upgradeCluster(nameOrCrn, ACCOUNT_ID, IMAGE_ID, ROLLING_UPGRADE_ENABLED);
         verify(upgradeService).upgradeCluster(ACCOUNT_ID, nameOrCrn, IMAGE_ID, ROLLING_UPGRADE_ENABLED);
+    }
+
+    static Stream<Arguments> testUpgradeReinitiableArguments() {
+        return Stream.of(
+                Arguments.of(NameOrCrn.ofName(STACK_NAME)),
+                Arguments.of(NameOrCrn.ofCrn(CLUSTER_CRN))
+        );
+    }
+
+    @MethodSource("testUpgradeReinitiableArguments")
+    @ParameterizedTest
+    void testUpgradeReinitiable(NameOrCrn nameOrCrn) {
+        UpgradeReinitiableV4Response upgradeReinitiableV4Response = getUpgradeReinitiableV4Response();
+        when(stackService.getIdByNameOrCrnInWorkspace(nameOrCrn, WORKSPACE_ID)).thenReturn(STACK_ID);
+        when(upgradeReinitiateService.checkClusterUpgradeReinitiable(STACK_ID)).thenReturn(upgradeReinitiableV4Response);
+
+        UpgradeReinitiableV4Response result = underTest.upgradeReinitiable(nameOrCrn, WORKSPACE_ID);
+
+        assertEquals(upgradeReinitiableV4Response, result);
+    }
+
+    private UpgradeReinitiableV4Response getUpgradeReinitiableV4Response() {
+        return new UpgradeReinitiableV4Response(
+                UpgradeReinitiateStatus.NON_REINITIABLE,
+                "There were no upgrades for this cluster, therefore upgrade reinitiation is not needed."
+        );
     }
 
     @Test

@@ -1,10 +1,11 @@
 package com.sequenceiq.cloudbreak.service.upgrade;
 
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.findLastStatusIndexFromListByMultipleStatuses;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.findLastStatusIndexFromListByStatus;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recovery.RecoveryStatus.NON_RECOVERABLE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recovery.RecoveryStatus.RECOVERABLE;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -99,10 +100,10 @@ public class ClusterRecoveryService {
         List<DetailedStackStatus> detailedStackStatusList = statusList.stream()
                 .map(StackStatus::getDetailedStackStatus)
                 .collect(Collectors.toList());
-        int lastRecoverySuccess = getLastRecoverySuccess(detailedStackStatusList);
-        int lastRecoveryFailure = getLastRecoveryFailure(detailedStackStatusList);
-        int lastUpgradeSuccess = getLastUpgradeSuccess(detailedStackStatusList);
-        int lastUpgradeFailure = getLastUpgradeFailure(detailedStackStatusList);
+        int lastRecoverySuccess = findLastStatusIndexFromListByStatus(detailedStackStatusList, DetailedStackStatus.CLUSTER_RECOVERY_FINISHED);
+        int lastRecoveryFailure = findLastStatusIndexFromListByStatus(detailedStackStatusList, DetailedStackStatus.CLUSTER_RECOVERY_FAILED);
+        int lastUpgradeSuccess = findLastStatusIndexFromListByMultipleStatuses(detailedStackStatusList, DetailedStackStatus.getUpgradeSuccessStatuses());
+        int lastUpgradeFailure = findLastStatusIndexFromListByMultipleStatuses(detailedStackStatusList, DetailedStackStatus.getUpgradeFailureStatuses());
         String logMessage =
                 Stream.of(createLogEntry(lastUpgradeSuccess, UPGRADE_SUCCESS_STATUS),
                                 createLogEntry(lastUpgradeFailure, UPGRADE_FAILURE_STATUS),
@@ -149,31 +150,7 @@ public class ClusterRecoveryService {
         return new RecoveryValidationV4Response(reason, status);
     }
 
-    private int getLastUpgradeSuccess(List<DetailedStackStatus> detailedStackStatusList) {
-        return getLastStatusFromListByMultipleStatus(detailedStackStatusList,
-                List.of(DetailedStackStatus.CLUSTER_UPGRADE_FINISHED, DetailedStackStatus.CLUSTER_ROLLING_UPGRADE_FINISHED));
-    }
-
-    private int getLastRecoverySuccess(List<DetailedStackStatus> detailedStackStatusList) {
-        return detailedStackStatusList.lastIndexOf(DetailedStackStatus.CLUSTER_RECOVERY_FINISHED);
-    }
-
-    private int getLastRecoveryFailure(List<DetailedStackStatus> detailedStackStatusList) {
-        return detailedStackStatusList.lastIndexOf(DetailedStackStatus.CLUSTER_RECOVERY_FAILED);
-    }
-
-    private int getLastUpgradeFailure(List<DetailedStackStatus> detailedStackStatusList) {
-        return getLastStatusFromListByMultipleStatus(detailedStackStatusList, DetailedStackStatus.getUpgradeFailureStatuses());
-    }
-
-    private int getLastStatusFromListByMultipleStatus(List<DetailedStackStatus> detailedStackStatusList, List<DetailedStackStatus> expectedStatusList) {
-        return Collections.max(expectedStatusList
-                .stream()
-                .map(detailedStackStatusList::lastIndexOf)
-                .toList());
-    }
-
-    private Optional<String> createLogEntry(int index, DetailedStackStatus status) {
+    private static Optional<String> createLogEntry(int index, DetailedStackStatus status) {
         if (index == -1) {
             return Optional.empty();
         }

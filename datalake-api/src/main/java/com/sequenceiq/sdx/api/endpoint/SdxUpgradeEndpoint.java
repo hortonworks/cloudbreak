@@ -3,6 +3,7 @@ package com.sequenceiq.sdx.api.endpoint;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
@@ -19,6 +20,7 @@ import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.sdx.api.model.SdxCcmUpgradeResponse;
 import com.sequenceiq.sdx.api.model.SdxUpgradeDatabaseServerRequest;
 import com.sequenceiq.sdx.api.model.SdxUpgradeDatabaseServerResponse;
+import com.sequenceiq.sdx.api.model.SdxUpgradeReinitiableResponse;
 import com.sequenceiq.sdx.api.model.SdxUpgradeRequest;
 import com.sequenceiq.sdx.api.model.SdxUpgradeResponse;
 
@@ -60,6 +62,20 @@ public interface SdxUpgradeEndpoint {
     @Operation(summary = "prepares the data lake cluster for upgrade", operationId = "prepareDatalakeClusterUpgradeByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     SdxUpgradeResponse prepareClusterUpgradeByCrn(@PathParam("crn") String crn, @Valid SdxUpgradeRequest distroxUpgradeRequest);
+
+    @GET
+    @Path("{name}/upgrade/reinitiable")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Check whether the cluster has a failed upgrade that can be reinitiated", operationId = "getClusterUpgradeReinitiableByName",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    SdxUpgradeReinitiableResponse getClusterUpgradeReinitiableByName(@PathParam("name") String name);
+
+    @GET
+    @Path("/crn/{crn}/upgrade/reinitiable")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Check whether the cluster has a failed upgrade that can be reinitiated", operationId = "getClusterUpgradeReinitiableByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    SdxUpgradeReinitiableResponse getClusterUpgradeReinitiableByCrn(@PathParam("crn") String crn);
 
     @PUT
     @Path("/internal/upgrade_ccm")

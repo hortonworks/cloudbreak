@@ -71,6 +71,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.RdsUpgr
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.StackCcmUpgradeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.StackOutboundTypeValidationV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeOptionV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeReinitiableV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
 import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -456,6 +457,12 @@ public class StackV4Controller extends NotificationController implements StackV4
     public FlowIdentifier upgradeClusterByNameInternal(Long workspaceId, String name, String imageId, @InitiatorUserCrn String initiatorUserCrn,
             Boolean rollingUpgradeEnabled) {
         return stackUpgradeOperations.upgradeCluster(NameOrCrn.ofName(name), ThreadBasedUserCrnProvider.getAccountId(), imageId, rollingUpgradeEnabled);
+    }
+
+    @Override
+    @InternalOnly
+    public UpgradeReinitiableV4Response getClusterUpgradeReinitiableByNameInternal(Long workspaceId, String name, @InitiatorUserCrn String initiatorUserCrn) {
+        return stackUpgradeOperations.upgradeReinitiable(NameOrCrn.ofName(name), restRequestThreadLocalService.getRequestedWorkspaceId());
     }
 
     @Override

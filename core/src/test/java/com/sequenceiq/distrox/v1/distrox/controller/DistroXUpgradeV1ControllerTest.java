@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.upgrade.UpgradeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.StackCcmUpgradeV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeReinitiableV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
 import com.sequenceiq.cloudbreak.api.model.CcmUpgradeResponseType;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -35,6 +36,7 @@ import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.upgrade.UpgradeReinitiateService;
 import com.sequenceiq.cloudbreak.service.upgrade.ccm.StackCcmUpgradeService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.tag.ClusterTemplateApplicationTag;
@@ -43,6 +45,8 @@ import com.sequenceiq.common.model.UpgradeShowAvailableImages;
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXCcmUpgradeV1Response;
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXUpgradeV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXUpgradeV1Response;
+import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.reinit.DistroXUpgradeReinitiableV1Response;
+import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.reinit.UpgradeReinitiateStatus;
 import com.sequenceiq.distrox.v1.distrox.converter.UpgradeConverter;
 import com.sequenceiq.distrox.v1.distrox.service.upgrade.DistroXUpgradeAvailabilityService;
 import com.sequenceiq.distrox.v1.distrox.service.upgrade.DistroXUpgradeService;
@@ -51,6 +55,8 @@ import com.sequenceiq.flow.api.model.FlowType;
 
 @ExtendWith(MockitoExtension.class)
 class DistroXUpgradeV1ControllerTest {
+
+    private static final Long STACK_ID = 1L;
 
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:1234:user:1";
 
@@ -77,6 +83,9 @@ class DistroXUpgradeV1ControllerTest {
     private DistroXUpgradeService upgradeService;
 
     @Mock
+    private UpgradeReinitiateService upgradeReinitiateService;
+
+    @Mock
     private StackCcmUpgradeService stackCcmUpgradeService;
 
     @Mock
@@ -89,12 +98,12 @@ class DistroXUpgradeV1ControllerTest {
     private DistroXUpgradeV1Controller underTest;
 
     @BeforeEach
-    public void init() {
+    void init() {
         lenient().when(restRequestThreadLocalService.getRequestedWorkspaceId()).thenReturn(WORKSPACE_ID);
     }
 
     @Test
-    public void testDryRun() {
+    void testDryRun() {
         DistroXUpgradeV1Request distroxUpgradeRequest = new DistroXUpgradeV1Request();
         UpgradeV4Request upgradeV4Request = new UpgradeV4Request();
         upgradeV4Request.setDryRun(Boolean.TRUE);
@@ -113,7 +122,7 @@ class DistroXUpgradeV1ControllerTest {
     }
 
     @Test
-    public void testShowAvailableImages() {
+    void testShowAvailableImages() {
         DistroXUpgradeV1Request distroxUpgradeRequest = new DistroXUpgradeV1Request();
         UpgradeV4Request upgradeV4Request = new UpgradeV4Request();
         upgradeV4Request.setShowAvailableImages(UpgradeShowAvailableImages.SHOW);
@@ -132,7 +141,7 @@ class DistroXUpgradeV1ControllerTest {
     }
 
     @Test
-    public void testUpgradeCalled() {
+    void testUpgradeCalled() {
         DistroXUpgradeV1Request distroxUpgradeRequest = new DistroXUpgradeV1Request();
         UpgradeV4Request upgradeV4Request = new UpgradeV4Request();
         upgradeV4Request.setDryRun(Boolean.FALSE);
@@ -149,7 +158,7 @@ class DistroXUpgradeV1ControllerTest {
     }
 
     @Test
-    public void testUpgradeCalledWithCrn() {
+    void testUpgradeCalledWithCrn() {
         DistroXUpgradeV1Request distroxUpgradeRequest = new DistroXUpgradeV1Request();
         UpgradeV4Request upgradeV4Request = new UpgradeV4Request();
         upgradeV4Request.setDryRun(Boolean.FALSE);
@@ -166,7 +175,7 @@ class DistroXUpgradeV1ControllerTest {
     }
 
     @Test
-    public void testUpgradeOnNonInternalEndpointWhenCodCluster() {
+    void testUpgradeOnNonInternalEndpointWhenCodCluster() {
         DistroXUpgradeV1Request distroxUpgradeRequest = new DistroXUpgradeV1Request();
         UpgradeV4Request upgradeV4Request = new UpgradeV4Request();
         upgradeV4Request.setDryRun(Boolean.FALSE);
@@ -183,7 +192,7 @@ class DistroXUpgradeV1ControllerTest {
     }
 
     @Test
-    public void testUpgradePreparationCalled() {
+    void testUpgradePreparationCalled() {
         DistroXUpgradeV1Request distroxUpgradeRequest = new DistroXUpgradeV1Request();
         UpgradeV4Request upgradeV4Request = new UpgradeV4Request();
         upgradeV4Request.setDryRun(Boolean.FALSE);
@@ -200,7 +209,7 @@ class DistroXUpgradeV1ControllerTest {
     }
 
     @Test
-    public void testUpgradePreparationCalledWithCrn() {
+    void testUpgradePreparationCalledWithCrn() {
         DistroXUpgradeV1Request distroxUpgradeRequest = new DistroXUpgradeV1Request();
         UpgradeV4Request upgradeV4Request = new UpgradeV4Request();
         upgradeV4Request.setDryRun(Boolean.FALSE);
@@ -216,7 +225,40 @@ class DistroXUpgradeV1ControllerTest {
     }
 
     @Test
-    public void testRollingUpgradeCalledWithCrn() {
+    void testGetClusterUpgradeReinitiableByName() {
+        UpgradeReinitiableV4Response upgradeReinitiableV4Response = getUpgradeReinitiableV4Response();
+        when(stackService.getIdByNameInWorkspace(CLUSTER_NAME, WORKSPACE_ID)).thenReturn(STACK_ID);
+        when(upgradeReinitiateService.checkClusterUpgradeReinitiable(STACK_ID)).thenReturn(upgradeReinitiableV4Response);
+
+        DistroXUpgradeReinitiableV1Response result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
+                underTest.getClusterUpgradeReinitiableByName(CLUSTER_NAME)
+        );
+
+        assertEquals(UpgradeReinitiateStatus.NON_REINITIABLE, result.status());
+        assertEquals("There were no upgrades for this cluster, therefore upgrade reinitiation is not needed.", result.reason());
+    }
+
+    @Test
+    void testGetClusterUpgradeReinitiableByCrn() {
+        UpgradeReinitiableV4Response upgradeReinitiableV4Response = getUpgradeReinitiableV4Response();
+        when(stackService.getIdByCrnInWorkspace(DATAHUB_CRN, WORKSPACE_ID)).thenReturn(STACK_ID);
+        when(upgradeReinitiateService.checkClusterUpgradeReinitiable(STACK_ID)).thenReturn(upgradeReinitiableV4Response);
+
+        DistroXUpgradeReinitiableV1Response result = underTest.getClusterUpgradeReinitiableByCrn(DATAHUB_CRN);
+
+        assertEquals(UpgradeReinitiateStatus.NON_REINITIABLE, result.status());
+        assertEquals("There were no upgrades for this cluster, therefore upgrade reinitiation is not needed.", result.reason());
+    }
+
+    private static UpgradeReinitiableV4Response getUpgradeReinitiableV4Response() {
+        return new UpgradeReinitiableV4Response(
+                UpgradeReinitiateStatus.NON_REINITIABLE,
+                "There were no upgrades for this cluster, therefore upgrade reinitiation is not needed."
+        );
+    }
+
+    @Test
+    void testRollingUpgradeCalledWithCrn() {
         DistroXUpgradeV1Request distroxUpgradeRequest = new DistroXUpgradeV1Request();
         distroxUpgradeRequest.setRollingUpgradeEnabled(true);
         UpgradeV4Request upgradeV4Request = new UpgradeV4Request();
@@ -235,7 +277,7 @@ class DistroXUpgradeV1ControllerTest {
     }
 
     @Test
-    public void testInternalRollingUpgradeCalledWithCrn() {
+    void testInternalRollingUpgradeCalledWithCrn() {
         DistroXUpgradeV1Request distroxUpgradeRequest = new DistroXUpgradeV1Request();
         UpgradeV4Request upgradeV4Request = new UpgradeV4Request();
         upgradeV4Request.setDryRun(Boolean.FALSE);
@@ -252,7 +294,7 @@ class DistroXUpgradeV1ControllerTest {
     }
 
     @Test
-    public void testCcmUpgrade() {
+    void testCcmUpgrade() {
         FlowIdentifier flowId = new FlowIdentifier(FlowType.FLOW, "1");
         StackCcmUpgradeV4Response stackCcmUpgradeV4Response = new StackCcmUpgradeV4Response(CcmUpgradeResponseType.TRIGGERED, flowId, null, "resourceCrn");
         DistroXCcmUpgradeV1Response expected = new DistroXCcmUpgradeV1Response(CcmUpgradeResponseType.TRIGGERED, flowId, null, "resourceCrn");

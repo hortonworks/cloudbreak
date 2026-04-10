@@ -3,6 +3,7 @@ package com.sequenceiq.distrox.api.v1.distrox.endpoint;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
@@ -22,6 +23,7 @@ import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXUpgradeV1Reque
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXUpgradeV1Response;
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.rds.DistroXRdsUpgradeV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.rds.DistroXRdsUpgradeV1Response;
+import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.reinit.DistroXUpgradeReinitiableV1Response;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -80,6 +82,20 @@ public interface DistroXUpgradeV1Endpoint {
     DistroXUpgradeV1Response prepareClusterUpgradeByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn,
             @Valid DistroXUpgradeV1Request distroxUpgradeRequest);
 
+    @GET
+    @Path("{name}/upgrade/reinitiable")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Check whether the cluster has a failed upgrade that can be reinitiated", operationId = "getClusterUpgradeReinitiableByName",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    DistroXUpgradeReinitiableV1Response getClusterUpgradeReinitiableByName(@PathParam("name") String name);
+
+    @GET
+    @Path("/crn/{crn}/upgrade/reinitiable")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Check whether the cluster has a failed upgrade that can be reinitiated", operationId = "getClusterUpgradeReinitiableByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    DistroXUpgradeReinitiableV1Response getClusterUpgradeReinitiableByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn);
+
     @POST
     @Path("internal/{name}/upgrade")
     @Produces(MediaType.APPLICATION_JSON)
@@ -103,7 +119,7 @@ public interface DistroXUpgradeV1Endpoint {
     @Operation(summary = "Initiates the CCM tunnel type upgrade to the latest available version", operationId = "upgradeCcmByDatahubCrnInternal",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     DistroXCcmUpgradeV1Response upgradeCcmByCrnInternal(@NotEmpty @ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn,
-            @ValidCrn(resource = { CrnResourceDescriptor.USER, CrnResourceDescriptor.MACHINE_USER })
+            @ValidCrn(resource = {CrnResourceDescriptor.USER, CrnResourceDescriptor.MACHINE_USER})
             @NotEmpty @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 
     @POST

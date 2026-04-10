@@ -128,6 +128,7 @@ import com.sequenceiq.cloudbreak.service.upgrade.UpgradeOptionsResponseFactory;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradePathRestrictionService;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradePermissionProvider;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradePreconditionService;
+import com.sequenceiq.cloudbreak.service.upgrade.UpgradeReinitiateService;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradeService;
 import com.sequenceiq.cloudbreak.service.upgrade.VersionComparisonContextFactory;
 import com.sequenceiq.cloudbreak.service.upgrade.ccm.StackCcmUpgradeService;
@@ -300,6 +301,9 @@ public class DistroXUpgradeRetrievalComponentTest {
 
     @MockBean
     private ParcelAvailabilityRetrievalService parcelAvailabilityRetrievalService;
+
+    @MockBean
+    private UpgradeReinitiateService upgradeReinitiateService;
 
     @Mock
     private Response parcelAvailabilityResponse;

@@ -207,4 +207,47 @@ public class SdxUpgradeRequest {
                 + ", replaceVms=" + replaceVms
                 + ", skipDataHubValidation=" + skipDataHubValidation + '}';
     }
+
+    @Override
+    @SuppressWarnings("checkstyle:CyclomaticComplexity")
+    public final boolean equals(Object o) {
+        if (!(o instanceof SdxUpgradeRequest)) {
+            return false;
+        }
+
+        SdxUpgradeRequest that = (SdxUpgradeRequest) o;
+        return Objects.equals(imageId, that.imageId)
+                && Objects.equals(runtime, that.runtime)
+                && Objects.equals(lockComponents, that.lockComponents)
+                && Objects.equals(dryRun, that.dryRun)
+                && Objects.equals(skipBackup, that.skipBackup)
+                && Objects.equals(skipDataHubValidation, that.skipDataHubValidation)
+                && Objects.equals(rollingUpgradeEnabled, that.rollingUpgradeEnabled)
+                && skipValidation == that.skipValidation
+                && skipAtlasMetadata == that.skipAtlasMetadata
+                && skipRangerAudits == that.skipRangerAudits
+                && skipRangerMetadata == that.skipRangerMetadata
+                && showAvailableImages == that.showAvailableImages
+                && replaceVms == that.replaceVms
+                && keepVariant == that.keepVariant;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hashCode(imageId);
+        result = 31 * result + Objects.hashCode(runtime);
+        result = 31 * result + Objects.hashCode(lockComponents);
+        result = 31 * result + Objects.hashCode(dryRun);
+        result = 31 * result + Objects.hashCode(skipBackup);
+        result = 31 * result + Objects.hashCode(skipDataHubValidation);
+        result = 31 * result + Objects.hashCode(rollingUpgradeEnabled);
+        result = 31 * result + Boolean.hashCode(skipValidation);
+        result = 31 * result + Boolean.hashCode(skipAtlasMetadata);
+        result = 31 * result + Boolean.hashCode(skipRangerAudits);
+        result = 31 * result + Boolean.hashCode(skipRangerMetadata);
+        result = 31 * result + Objects.hashCode(showAvailableImages);
+        result = 31 * result + Objects.hashCode(replaceVms);
+        result = 31 * result + Boolean.hashCode(keepVariant);
+        return result;
+    }
 }

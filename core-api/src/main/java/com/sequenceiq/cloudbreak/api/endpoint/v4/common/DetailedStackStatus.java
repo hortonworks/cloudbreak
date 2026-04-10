@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.common;
 
+import java.util.EnumSet;
 import java.util.List;
 
 public enum DetailedStackStatus {
@@ -244,11 +245,35 @@ public enum DetailedStackStatus {
         this.status = status;
     }
 
-    public static List<DetailedStackStatus> getUpgradeFailureStatuses() {
-        return List.of(
-                DetailedStackStatus.CLUSTER_UPGRADE_FAILED,
+    public static EnumSet<DetailedStackStatus> getUpgradeSuccessStatuses() {
+        return EnumSet.of(
+                DetailedStackStatus.CLUSTER_UPGRADE_FINISHED,
+                DetailedStackStatus.CLUSTER_ROLLING_UPGRADE_FINISHED
+        );
+    }
+
+    public static EnumSet<DetailedStackStatus> getUpgradeFailureStatuses() {
+        return EnumSet.of(
+                DetailedStackStatus.CLUSTER_UPGRADE_INIT_FAILED,
                 DetailedStackStatus.CLUSTER_MANAGER_UPGRADE_FAILED,
-                DetailedStackStatus.CLUSTER_UPGRADE_INIT_FAILED);
+                DetailedStackStatus.CLUSTER_UPGRADE_FAILED,
+                DetailedStackStatus.CLUSTER_ROLLING_UPGRADE_FAILED
+        );
+    }
+
+    /**
+     * @return the index of the last occurrence of the `expectedStatus` in the `detailedStackStatusList`, or -1 if the `expectedStatus` is not found in the list
+     */
+    public static int findLastStatusIndexFromListByStatus(List<DetailedStackStatus> detailedStackStatusList, DetailedStackStatus expectedStatus) {
+        return detailedStackStatusList.lastIndexOf(expectedStatus);
+    }
+
+    public static int findLastStatusIndexFromListByMultipleStatuses(List<DetailedStackStatus> detailedStackStatusList,
+            EnumSet<DetailedStackStatus> expectedStatusList) {
+        return expectedStatusList.stream()
+                .map(status -> findLastStatusIndexFromListByStatus(detailedStackStatusList, status))
+                .max(Integer::compareTo)
+                .get();
     }
 
     public Status getStatus() {

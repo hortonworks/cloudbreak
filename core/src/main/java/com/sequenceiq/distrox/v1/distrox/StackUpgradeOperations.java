@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.InternalUpgradeSettings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.osupgrade.OrderedOSUpgradeSetRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.upgrade.UpgradeV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeReinitiableV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
 import com.sequenceiq.cloudbreak.cloud.model.component.PreparedImages;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
@@ -32,6 +33,7 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeAvailabilityService;
 import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeCandidateFilterService;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradePreconditionService;
+import com.sequenceiq.cloudbreak.service.upgrade.UpgradeReinitiateService;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradeService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 
@@ -45,6 +47,9 @@ public class StackUpgradeOperations {
 
     @Inject
     private UpgradeService upgradeService;
+
+    @Inject
+    private UpgradeReinitiateService upgradeReinitiateService;
 
     @Inject
     private InstanceGroupService instanceGroupService;
@@ -75,6 +80,12 @@ public class StackUpgradeOperations {
     public FlowIdentifier upgradeCluster(@NotNull NameOrCrn nameOrCrn, String accountId, String imageId, Boolean rollingUpgradeEnabled) {
         LOGGER.debug("Starting to upgrade cluster: " + nameOrCrn);
         return upgradeService.upgradeCluster(accountId, nameOrCrn, imageId, rollingUpgradeEnabled);
+    }
+
+    public UpgradeReinitiableV4Response upgradeReinitiable(@NotNull NameOrCrn nameOrCrn, Long workspaceId) {
+        LOGGER.debug("Checking if there is a reinitiable upgrade for cluster: {}", nameOrCrn);
+        Long stackId = stackService.getIdByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
+        return upgradeReinitiateService.checkClusterUpgradeReinitiable(stackId);
     }
 
     public FlowIdentifier prepareClusterUpgrade(@NotNull NameOrCrn nameOrCrn, String accountId, String imageId) {

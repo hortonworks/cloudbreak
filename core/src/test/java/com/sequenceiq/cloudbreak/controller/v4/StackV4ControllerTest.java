@@ -36,6 +36,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.SaltPasswordSta
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.SaltPasswordStatusResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.rotaterdscert.StackRotateRdsCertificateV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.StackCcmUpgradeV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeReinitiableV4Response;
 import com.sequenceiq.cloudbreak.api.model.CcmUpgradeResponseType;
 import com.sequenceiq.cloudbreak.api.model.RotateRdsCertResponseType;
 import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
@@ -44,6 +45,7 @@ import com.sequenceiq.cloudbreak.service.rotaterdscert.StackRotateRdsCertificate
 import com.sequenceiq.cloudbreak.service.stack.flow.StackOperationService;
 import com.sequenceiq.cloudbreak.service.upgrade.ccm.StackCcmUpgradeService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
+import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.reinit.UpgradeReinitiateStatus;
 import com.sequenceiq.distrox.v1.distrox.StackOperations;
 import com.sequenceiq.distrox.v1.distrox.StackUpgradeOperations;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -155,6 +157,23 @@ class StackV4ControllerTest {
         doAs(USER_CRN, () -> underTest.modifyProxyConfigInternal(WORKSPACE_ID, stackCrn, previousProxyConfigCrn, USER_CRN));
 
         verify(stackOperations).modifyProxyConfig(NameOrCrn.ofCrn(stackCrn), ACCOUNT_ID, previousProxyConfigCrn);
+    }
+
+    @Test
+    void testGetClusterUpgradeReinitiableByNameInternal() {
+        UpgradeReinitiableV4Response upgradeReinitiableV4Response = getUpgradeReinitiableV4Response();
+        when(stackUpgradeOperations.upgradeReinitiable(NameOrCrn.ofName(STACK_NAME), WORKSPACE_ID)).thenReturn(upgradeReinitiableV4Response);
+
+        UpgradeReinitiableV4Response result = underTest.getClusterUpgradeReinitiableByNameInternal(WORKSPACE_ID, STACK_NAME, USER_CRN);
+
+        assertEquals(upgradeReinitiableV4Response, result);
+    }
+
+    private UpgradeReinitiableV4Response getUpgradeReinitiableV4Response() {
+        return new UpgradeReinitiableV4Response(
+                UpgradeReinitiateStatus.NON_REINITIABLE,
+                "There were no upgrades for this cluster, therefore upgrade reinitiation is not needed."
+        );
     }
 
     @Test

@@ -88,6 +88,22 @@ public interface FlowLogRepository extends CrudRepository<FlowLog, Long> {
     @Query("DELETE FROM FlowLog fl WHERE fl.finalized = TRUE AND fl.endTime <= :endTime AND fl.flowId IN (" + SELECT_FAILED_FLOW_IDS + ")")
     int purgeFinalizedFailedFlowLogs(@Param("endTime") Long endTime);
 
+    @Query("SELECT fl FROM FlowLog fl " +
+            "WHERE fl.resourceId = :resourceId " +
+            "AND fl.flowType = :flowType " +
+            "AND fl.flowId IN (" +
+            "  SELECT fls.flowId FROM FlowLog fls " +
+            "  WHERE fls.resourceId = :resourceId " +
+            "  AND fls.flowType = :flowType " +
+            "  AND fls.created = (" +
+            "    SELECT max(fli.created) FROM FlowLog fli " +
+            "    WHERE fli.resourceId = :resourceId " +
+            "    AND fli.flowType = :flowType" +
+            "  )" +
+            ") " +
+            "ORDER BY fl.created DESC")
+    List<FlowLog> findAllForLastFlowByResourceIdAndFlowTypeOrderByCreatedDesc(Long resourceId, ClassValue flowType);
+
     List<FlowLog> findAllByResourceIdOrderByCreatedDesc(Long resourceId);
 
     List<FlowLog> findAllByResourceIdAndFlowTypeInOrderByCreatedDesc(Long resourceId, List<ClassValue> flowTypes);

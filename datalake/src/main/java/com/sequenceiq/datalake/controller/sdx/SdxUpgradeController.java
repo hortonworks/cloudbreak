@@ -22,6 +22,7 @@ import com.sequenceiq.sdx.api.endpoint.SdxUpgradeEndpoint;
 import com.sequenceiq.sdx.api.model.SdxCcmUpgradeResponse;
 import com.sequenceiq.sdx.api.model.SdxUpgradeDatabaseServerRequest;
 import com.sequenceiq.sdx.api.model.SdxUpgradeDatabaseServerResponse;
+import com.sequenceiq.sdx.api.model.SdxUpgradeReinitiableResponse;
 import com.sequenceiq.sdx.api.model.SdxUpgradeRequest;
 import com.sequenceiq.sdx.api.model.SdxUpgradeResponse;
 
@@ -80,6 +81,18 @@ public class SdxUpgradeController implements SdxUpgradeEndpoint {
         } else {
             return sdxRuntimeUpgradeService.triggerUpgradeByCrn(userCrn, crn, request, true);
         }
+    }
+
+    @Override
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.UPGRADE_DATALAKE)
+    public SdxUpgradeReinitiableResponse getClusterUpgradeReinitiableByName(@ResourceName String name) {
+        return sdxRuntimeUpgradeService.checkClusterUpgradeReinitiable(NameOrCrn.ofName(name));
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.UPGRADE_DATALAKE)
+    public SdxUpgradeReinitiableResponse getClusterUpgradeReinitiableByCrn(@ResourceCrn String crn) {
+        return sdxRuntimeUpgradeService.checkClusterUpgradeReinitiable(NameOrCrn.ofCrn(crn));
     }
 
     @Override

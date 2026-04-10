@@ -15,11 +15,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.InternalUpgradeSettings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.upgrade.UpgradeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageComponentVersions;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageInfoV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeReinitiableV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
@@ -34,6 +36,7 @@ import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.validation.upgrade.SdxUpgradeValidator;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.sdx.api.model.SdxUpgradeReinitiableResponse;
 import com.sequenceiq.sdx.api.model.SdxUpgradeReplaceVms;
 import com.sequenceiq.sdx.api.model.SdxUpgradeRequest;
 import com.sequenceiq.sdx.api.model.SdxUpgradeResponse;
@@ -84,6 +87,15 @@ public class SdxRuntimeUpgradeService {
     public SdxUpgradeResponse triggerUpgradeByCrn(String userCrn, String clusterCrn, SdxUpgradeRequest upgradeRequest, boolean upgradePreparation) {
         SdxCluster cluster = sdxService.getByCrn(userCrn, clusterCrn);
         return triggerUpgrade(userCrn, cluster, upgradeRequest, upgradePreparation);
+    }
+
+    public SdxUpgradeReinitiableResponse checkClusterUpgradeReinitiable(NameOrCrn nameOrCrn) {
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
+        String name = nameOrCrn.hasName() ? nameOrCrn.getName() : sdxService.getByNameOrCrn(userCrn, nameOrCrn).getName();
+        UpgradeReinitiableV4Response upgradeReinitiableV4Response = ThreadBasedUserCrnProvider.doAsInternalActor(() ->
+                stackV4Endpoint.getClusterUpgradeReinitiableByNameInternal(WORKSPACE_ID, name, userCrn)
+        );
+        return SdxUpgradeReinitiableResponse.from(upgradeReinitiableV4Response);
     }
 
     private SdxUpgradeResponse triggerUpgrade(String userCrn, SdxCluster cluster, SdxUpgradeRequest upgradeRequest, boolean upgradePreparation) {

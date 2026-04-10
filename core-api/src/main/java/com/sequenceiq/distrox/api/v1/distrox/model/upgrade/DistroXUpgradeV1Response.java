@@ -21,14 +21,4 @@ public record DistroXUpgradeV1Response(
         this.reason = reason;
         this.flowIdentifier = flowIdentifier;
     }
-
-    @Override
-    public String toString() {
-        return "DistroXUpgradeV1Response{" +
-                "current=" + current +
-                ", upgradeCandidates=" + upgradeCandidates +
-                ", reason='" + reason + '\'' +
-                ", flowIdentifier=" + flowIdentifier +
-                '}';
-    }
 }

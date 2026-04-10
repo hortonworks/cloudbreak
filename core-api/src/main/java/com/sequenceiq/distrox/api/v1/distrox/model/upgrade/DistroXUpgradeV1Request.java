@@ -133,4 +133,33 @@ public class DistroXUpgradeV1Request {
                 '}';
     }
 
+    @Override
+    public final boolean equals(Object o) {
+        if (!(o instanceof DistroXUpgradeV1Request)) {
+            return false;
+        }
+
+        DistroXUpgradeV1Request that = (DistroXUpgradeV1Request) o;
+        return Objects.equals(imageId, that.imageId)
+                && Objects.equals(runtime, that.runtime)
+                && Objects.equals(lockComponents, that.lockComponents)
+                && Objects.equals(dryRun, that.dryRun)
+                && Objects.equals(rollingUpgradeEnabled, that.rollingUpgradeEnabled)
+                && showAvailableImages == that.showAvailableImages
+                && replaceVms == that.replaceVms
+                && disableVariantChange == that.disableVariantChange;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = imageId.hashCode();
+        result = 31 * result + Objects.hashCode(runtime);
+        result = 31 * result + Objects.hashCode(lockComponents);
+        result = 31 * result + Objects.hashCode(dryRun);
+        result = 31 * result + rollingUpgradeEnabled.hashCode();
+        result = 31 * result + Objects.hashCode(showAvailableImages);
+        result = 31 * result + Objects.hashCode(replaceVms);
+        result = 31 * result + Boolean.hashCode(disableVariantChange);
+        return result;
+    }
 }

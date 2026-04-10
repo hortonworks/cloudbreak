@@ -19,12 +19,16 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -33,11 +37,14 @@ import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.upgrade.UpgradeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageComponentVersions;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageInfoV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeReinitiableV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.client.RestClientFactory;
@@ -51,13 +58,15 @@ import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.validation.upgrade.SdxUpgradeValidator;
+import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.reinit.UpgradeReinitiateStatus;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
+import com.sequenceiq.sdx.api.model.SdxUpgradeReinitiableResponse;
 import com.sequenceiq.sdx.api.model.SdxUpgradeReplaceVms;
 import com.sequenceiq.sdx.api.model.SdxUpgradeRequest;
 import com.sequenceiq.sdx.api.model.SdxUpgradeResponse;
 
 @ExtendWith(MockitoExtension.class)
-public class SdxRuntimeUpgradeServiceTest {
+class SdxRuntimeUpgradeServiceTest {
 
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:1234:user:1";
 
@@ -128,7 +137,7 @@ public class SdxRuntimeUpgradeServiceTest {
     private SdxUpgradeResponse sdxUpgradeResponse;
 
     @BeforeEach
-    public void setUp() {
+    void setUp() {
         response = new UpgradeV4Response();
         sdxUpgradeResponse = new SdxUpgradeResponse();
         sdxUpgradeResponse.setCurrent(createCurrentImage());
@@ -140,7 +149,7 @@ public class SdxRuntimeUpgradeServiceTest {
     }
 
     @Test
-    public void testNoImageFound() {
+    void testNoImageFound() {
         when(sdxService.getByCrn(USER_CRN, CLUSTER_CRN)).thenReturn(sdxCluster);
         ArgumentCaptor<UpgradeV4Request> upgradeV4RequestCaptor = ArgumentCaptor.forClass(UpgradeV4Request.class);
         when(stackV4Endpoint.checkForClusterUpgradeByName(eq(0L), eq(STACK_NAME), upgradeV4RequestCaptor.capture(), eq(ACCOUNT_ID))).thenReturn(response);
@@ -158,7 +167,7 @@ public class SdxRuntimeUpgradeServiceTest {
     }
 
     @Test
-    public void testInvalidImageIdShouldReturnNoCompatibleImageFound() {
+    void testInvalidImageIdShouldReturnNoCompatibleImageFound() {
         when(sdxService.getByCrn(anyString(), anyString())).thenReturn(sdxCluster);
         ArgumentCaptor<UpgradeV4Request> upgradeV4RequestCaptor = ArgumentCaptor.forClass(UpgradeV4Request.class);
         when(stackV4Endpoint.checkForClusterUpgradeByName(eq(0L), eq(STACK_NAME), upgradeV4RequestCaptor.capture(), eq(ACCOUNT_ID))).thenReturn(response);
@@ -180,7 +189,7 @@ public class SdxRuntimeUpgradeServiceTest {
     }
 
     @Test
-    public void testOtherError() {
+    void testOtherError() {
         when(sdxService.getByCrn(anyString(), anyString())).thenReturn(sdxCluster);
         ArgumentCaptor<UpgradeV4Request> upgradeV4RequestCaptor = ArgumentCaptor.forClass(UpgradeV4Request.class);
         when(stackV4Endpoint.checkForClusterUpgradeByName(eq(0L), eq(STACK_NAME), upgradeV4RequestCaptor.capture(), eq(ACCOUNT_ID))).thenReturn(response);
@@ -205,7 +214,7 @@ public class SdxRuntimeUpgradeServiceTest {
     }
 
     @Test
-    public void testNoCompatibleRuntimeFound() {
+    void testNoCompatibleRuntimeFound() {
         sdxCluster.setClusterShape(SdxClusterShape.ENTERPRISE);
         when(sdxService.getByCrn(anyString(), anyString())).thenReturn(sdxCluster);
         ArgumentCaptor<UpgradeV4Request> upgradeV4RequestCaptor = ArgumentCaptor.forClass(UpgradeV4Request.class);
@@ -233,7 +242,7 @@ public class SdxRuntimeUpgradeServiceTest {
     }
 
     @Test
-    public void testCompatibleRuntimeFoundShouldReturnLatestImage() {
+    void testCompatibleRuntimeFoundShouldReturnLatestImage() {
         when(sdxService.getByCrn(anyString(), anyString())).thenReturn(sdxCluster);
         ArgumentCaptor<UpgradeV4Request> upgradeV4RequestCaptor = ArgumentCaptor.forClass(UpgradeV4Request.class);
         when(stackV4Endpoint.checkForClusterUpgradeByName(eq(0L), eq(STACK_NAME), upgradeV4RequestCaptor.capture(), eq(ACCOUNT_ID))).thenReturn(response);
@@ -266,7 +275,7 @@ public class SdxRuntimeUpgradeServiceTest {
     }
 
     @Test
-    public void testRollingUpgradeForMediumDutyDataLakeShouldBeEnabledWhenSkipRollingValidationEntitlementIsEnabled() {
+    void testRollingUpgradeForMediumDutyDataLakeShouldBeEnabledWhenSkipRollingValidationEntitlementIsEnabled() {
         sdxCluster.setClusterShape(SdxClusterShape.MEDIUM_DUTY_HA);
         when(sdxService.getByCrn(anyString(), anyString())).thenReturn(sdxCluster);
         ArgumentCaptor<UpgradeV4Request> upgradeV4RequestCaptor = ArgumentCaptor.forClass(UpgradeV4Request.class);
@@ -300,7 +309,7 @@ public class SdxRuntimeUpgradeServiceTest {
     }
 
     @Test
-    public void testSkipOptionsShouldBePassedToDrService() {
+    void testSkipOptionsShouldBePassedToDrService() {
         DatalakeDrSkipOptions skipOptions = new DatalakeDrSkipOptions(true, true, true, true);
         sdxUpgradeRequest.setSkipValidation(true);
         sdxUpgradeRequest.setSkipAtlasMetadata(true);
@@ -327,7 +336,7 @@ public class SdxRuntimeUpgradeServiceTest {
     }
 
     @Test
-    public void testNoError() {
+    void testNoError() {
         when(sdxService.getByCrn(anyString(), anyString())).thenReturn(sdxCluster);
         ArgumentCaptor<UpgradeV4Request> upgradeV4RequestCaptor = ArgumentCaptor.forClass(UpgradeV4Request.class);
         when(stackV4Endpoint.checkForClusterUpgradeByName(eq(0L), eq(STACK_NAME), upgradeV4RequestCaptor.capture(), eq(ACCOUNT_ID))).thenReturn(response);
@@ -345,7 +354,7 @@ public class SdxRuntimeUpgradeServiceTest {
     }
 
     @Test
-    public void testNoErrorWithEnterpriseShape() {
+    void testNoErrorWithEnterpriseShape() {
         sdxCluster.setClusterShape(SdxClusterShape.ENTERPRISE);
         when(sdxService.getByCrn(anyString(), anyString())).thenReturn(sdxCluster);
         ArgumentCaptor<UpgradeV4Request> upgradeV4RequestCaptor = ArgumentCaptor.forClass(UpgradeV4Request.class);
@@ -364,7 +373,7 @@ public class SdxRuntimeUpgradeServiceTest {
     }
 
     @Test
-    public void testPrepare() {
+    void testPrepare() {
         when(sdxService.getByCrn(anyString(), anyString())).thenReturn(sdxCluster);
         ArgumentCaptor<UpgradeV4Request> upgradeV4RequestCaptor = ArgumentCaptor.forClass(UpgradeV4Request.class);
         when(stackV4Endpoint.checkForClusterUpgradeByName(eq(0L), eq(STACK_NAME), upgradeV4RequestCaptor.capture(), eq(ACCOUNT_ID))).thenReturn(response);
@@ -383,7 +392,7 @@ public class SdxRuntimeUpgradeServiceTest {
     }
 
     @Test
-    public void testTriggerUpgradeWithValidPaywallLicense() {
+    void testTriggerUpgradeWithValidPaywallLicense() {
         when(sdxService.getByCrn(anyString(), anyString())).thenReturn(sdxCluster);
         ArgumentCaptor<UpgradeV4Request> upgradeV4RequestCaptor = ArgumentCaptor.forClass(UpgradeV4Request.class);
         when(stackV4Endpoint.checkForClusterUpgradeByName(eq(0L), eq(STACK_NAME), upgradeV4RequestCaptor.capture(), eq(ACCOUNT_ID))).thenReturn(response);
@@ -415,7 +424,7 @@ public class SdxRuntimeUpgradeServiceTest {
     }
 
     @Test
-    public void testTriggerRuntimeUpgradeByCrnWhenNotEnabledAndNoPatchUpgrades() {
+    void testTriggerRuntimeUpgradeByCrnWhenNotEnabledAndNoPatchUpgrades() {
         when(sdxService.getByCrn(anyString(), anyString())).thenReturn(sdxCluster);
         ImageInfoV4Response currentImageInfo = new ImageInfoV4Response();
         currentImageInfo.setImageId(IMAGE_ID);
@@ -447,7 +456,7 @@ public class SdxRuntimeUpgradeServiceTest {
     }
 
     @Test
-    public void testTriggerRuntimeUpgradeByNameWhenNotEnabledAndNoPatchUpgrades() {
+    void testTriggerRuntimeUpgradeByNameWhenNotEnabledAndNoPatchUpgrades() {
         when(sdxService.getByNameInAccount(USER_CRN, STACK_NAME)).thenReturn(sdxCluster);
         ImageInfoV4Response currentImageInfo = new ImageInfoV4Response();
         currentImageInfo.setImageId(IMAGE_ID);
@@ -480,7 +489,7 @@ public class SdxRuntimeUpgradeServiceTest {
 
     @Test
     @DisplayName("Test checkForUpgradeByCrn() when Runtime Upgrade is enabled and no current image information is provided in upgrade response")
-    public void testCheckForUpgradeByCrnWhenDisabledAndNoCurrentImage() {
+    void testCheckForUpgradeByCrnWhenDisabledAndNoCurrentImage() {
         ImageInfoV4Response imageInfo = new ImageInfoV4Response();
         imageInfo.setImageId(IMAGE_ID);
         imageInfo.setCreated(1L);
@@ -510,7 +519,7 @@ public class SdxRuntimeUpgradeServiceTest {
 
     @Test
     @DisplayName("Test checkForUpgradeByCrn() when Runtime Upgrade is enabled and patch updates are available")
-    public void testCheckForUpgradeByCrnWhenDisabledAndPatchUpdatesAvailable() {
+    void testCheckForUpgradeByCrnWhenDisabledAndPatchUpdatesAvailable() {
         ImageInfoV4Response currentImageInfo = new ImageInfoV4Response();
         currentImageInfo.setImageId(IMAGE_ID);
         currentImageInfo.setCreated(1L);
@@ -549,7 +558,7 @@ public class SdxRuntimeUpgradeServiceTest {
 
     @Test
     @DisplayName("Test checkForUpgradeByCrn() when Runtime Upgrade is enabled and request imageid param is wrong")
-    public void testCheckForUpgradeByCrnWhenDisabledAndRequestImageIdParamIsWrong() {
+    void testCheckForUpgradeByCrnWhenDisabledAndRequestImageIdParamIsWrong() {
         SdxUpgradeRequest sdxUpgradeRequest = new SdxUpgradeRequest();
         sdxUpgradeRequest.setImageId(IMAGE_ID_LAST);
         sdxUpgradeRequest.setRuntime("7.2.17");
@@ -599,8 +608,8 @@ public class SdxRuntimeUpgradeServiceTest {
         List<ImageInfoV4Response> upgradeCandidates = response.getUpgradeCandidates();
         assertEquals(2, upgradeCandidates.size());
         List<String> componentVersions = upgradeCandidates.stream()
-            .map(candidates -> candidates.getComponentVersions().getCdp())
-            .toList();
+                .map(candidates -> candidates.getComponentVersions().getCdp())
+                .toList();
         assertTrue(componentVersions.contains("7.2.16"));
         assertTrue(componentVersions.contains("7.2.17"));
         assertFalse(componentVersions.contains("7.2.18"));
@@ -761,15 +770,44 @@ public class SdxRuntimeUpgradeServiceTest {
         assertTrue(candidates.contains("7.2.17"));
     }
 
+    static Stream<Arguments> testCheckClusterUpgradeReinitiableArguments() {
+        return Stream.of(
+                Arguments.of(NameOrCrn.ofName(STACK_NAME)),
+                Arguments.of(NameOrCrn.ofCrn(CLUSTER_CRN))
+        );
+    }
+
+    @MethodSource("testCheckClusterUpgradeReinitiableArguments")
+    @ParameterizedTest
+    void testCheckClusterUpgradeReinitiable(NameOrCrn nameOrCrn) {
+        SdxCluster sdxCluster = getValidSdxCluster();
+        if (nameOrCrn.hasCrn()) {
+            when(sdxService.getByNameOrCrn(USER_CRN, nameOrCrn)).thenReturn(sdxCluster);
+        }
+        when(stackV4Endpoint.getClusterUpgradeReinitiableByNameInternal(0L, STACK_NAME, USER_CRN)).thenReturn(getUpgradeReinitiableV4Response());
+
+        SdxUpgradeReinitiableResponse result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.checkClusterUpgradeReinitiable(nameOrCrn));
+
+        assertEquals(UpgradeReinitiateStatus.NON_REINITIABLE, result.status());
+        assertEquals("There were no upgrades for this cluster, therefore upgrade reinitiation is not needed.", result.reason());
+    }
+
+    private static UpgradeReinitiableV4Response getUpgradeReinitiableV4Response() {
+        return new UpgradeReinitiableV4Response(
+                UpgradeReinitiateStatus.NON_REINITIABLE,
+                "There were no upgrades for this cluster, therefore upgrade reinitiation is not needed."
+        );
+    }
+
     private void constructUpgradeV4ResponseAndSetupStackV4EndpointMock(String... runtimes) {
         UpgradeV4Response upgradeV4Response = new UpgradeV4Response();
         List<ImageInfoV4Response> imageInfoV4Responses = Arrays.stream(runtimes)
-            .map(runtime -> {
-                ImageInfoV4Response imageInfoV4Response1 = new ImageInfoV4Response();
-                imageInfoV4Response1.setComponentVersions(new ImageComponentVersions("7.10", "1234", runtime, "", "", "", List.of()));
-                return imageInfoV4Response1;
-            })
-            .toList();
+                .map(runtime -> {
+                    ImageInfoV4Response imageInfoV4Response1 = new ImageInfoV4Response();
+                    imageInfoV4Response1.setComponentVersions(new ImageComponentVersions("7.10", "1234", runtime, "", "", "", List.of()));
+                    return imageInfoV4Response1;
+                })
+                .toList();
         upgradeV4Response.setUpgradeCandidates(imageInfoV4Responses);
         when(stackV4Endpoint.checkForClusterUpgradeByName(anyLong(), anyString(), any(), eq(ACCOUNT_ID))).thenReturn(upgradeV4Response);
     }

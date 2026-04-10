@@ -15,6 +15,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.osupgrade.OrderedOSUpgradeSetRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.upgrade.UpgradeV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeReinitiableV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.security.internal.InitiatorUserCrn;
@@ -22,6 +23,7 @@ import com.sequenceiq.cloudbreak.auth.security.internal.ResourceCrn;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.upgrade.UpgradeReinitiateService;
 import com.sequenceiq.cloudbreak.service.upgrade.ccm.StackCcmUpgradeService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.util.CodUtil;
@@ -32,6 +34,7 @@ import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXUpgradeV1Reque
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXUpgradeV1Response;
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.rds.DistroXRdsUpgradeV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.rds.DistroXRdsUpgradeV1Response;
+import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.reinit.DistroXUpgradeReinitiableV1Response;
 import com.sequenceiq.distrox.v1.distrox.converter.UpgradeConverter;
 import com.sequenceiq.distrox.v1.distrox.service.upgrade.DistroXUpgradeAvailabilityService;
 import com.sequenceiq.distrox.v1.distrox.service.upgrade.DistroXUpgradeService;
@@ -54,6 +57,9 @@ public class DistroXUpgradeV1Controller implements DistroXUpgradeV1Endpoint {
 
     @Inject
     private DistroXUpgradeService upgradeService;
+
+    @Inject
+    private UpgradeReinitiateService upgradeReinitiateService;
 
     @Inject
     private DistroXRdsUpgradeService rdsUpgradeService;
@@ -112,6 +118,23 @@ public class DistroXUpgradeV1Controller implements DistroXUpgradeV1Endpoint {
     }
 
     @Override
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.UPGRADE_DATAHUB)
+    public DistroXUpgradeReinitiableV1Response getClusterUpgradeReinitiableByName(@ResourceName String name) {
+        validateClusterName(name);
+        Long workspaceId = restRequestThreadLocalService.getRequestedWorkspaceId();
+        Long stackId = stackService.getIdByNameInWorkspace(name, workspaceId);
+        return checkClusterUpgradeReinitiable(stackId);
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.UPGRADE_DATAHUB)
+    public DistroXUpgradeReinitiableV1Response getClusterUpgradeReinitiableByCrn(@ResourceCrn String crn) {
+        Long workspaceId = restRequestThreadLocalService.getRequestedWorkspaceId();
+        Long stackId = stackService.getIdByCrnInWorkspace(crn, workspaceId);
+        return checkClusterUpgradeReinitiable(stackId);
+    }
+
+    @Override
     @InternalOnly
     public DistroXUpgradeV1Response upgradeClusterByNameInternal(@ResourceName String clusterName, DistroXUpgradeV1Request distroxUpgradeRequest,
             @InitiatorUserCrn String initiatorUserCrn, Boolean rollingUpgradeEnabled) {
@@ -166,6 +189,11 @@ public class DistroXUpgradeV1Controller implements DistroXUpgradeV1Endpoint {
             UpgradeV4Response upgradeV4Response = upgradeService.triggerUpgrade(nameOrCrn, workspaceId, userCrn, request, upgradePreparation);
             return upgradeConverter.convert(upgradeV4Response);
         }
+    }
+
+    private DistroXUpgradeReinitiableV1Response checkClusterUpgradeReinitiable(Long stackId) {
+        UpgradeReinitiableV4Response upgradeReinitiableV4Response = upgradeReinitiateService.checkClusterUpgradeReinitiable(stackId);
+        return DistroXUpgradeReinitiableV1Response.from(upgradeReinitiableV4Response);
     }
 
     private DistroXRdsUpgradeV1Response upgradeRds(DistroXRdsUpgradeV1Request distroxRdsUpgradeRequest, NameOrCrn nameOrCrn) {
