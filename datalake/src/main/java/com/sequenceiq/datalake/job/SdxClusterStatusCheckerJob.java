@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.client.CloudbreakInternalCrnClient;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.job.StatusCheckerJob;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.service.StatusCheckerJobService;
+import com.sequenceiq.common.api.type.ConfigStalenessState;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxStatusEntity;
@@ -77,6 +78,7 @@ public class SdxClusterStatusCheckerJob extends StatusCheckerJob {
             } else {
                 StackStatusV4Response stack = cloudbreakInternalCrnClient.withInternalCrn().autoscaleEndpoint().getStatusByCrn(getRemoteResourceCrn());
                 updateCertExpirationStateIfDifferent(sdx, stack);
+                updateConfigStalenessStateIfDifferent(sdx, stack);
                 updateProviderSyncStateIfDifferent(sdx, stack);
                 DatalakeStatusEnum originalStatus = sdxStatus.getStatus();
                 DatalakeStatusEnum updatedStatus = updateStatusIfNecessary(stack, sdx, sdxStatus);
@@ -120,6 +122,18 @@ public class SdxClusterStatusCheckerJob extends StatusCheckerJob {
             LOGGER.info("Updating CertExpirationState from [{}] to [{}] with details [{}]",
                     sdx.getCertExpirationState(), stack.getCertExpirationState(), stack.getCertExpirationDetails());
             sdxClusterRepository.updateCertExpirationState(sdx.getId(), stack.getCertExpirationState(), stack.getCertExpirationDetails());
+        }
+    }
+
+    private void updateConfigStalenessStateIfDifferent(SdxCluster sdx, StackStatusV4Response stack) {
+        if (stack.getConfigStaleness() != null) {
+            ConfigStalenessState configStalenessState = ConfigStalenessState.fromString(stack.getConfigStaleness().getState());
+            if (sdx.getConfigStalenessState() != configStalenessState) {
+                String configStalenessDetails = stack.getConfigStaleness().getDetails();
+                LOGGER.info("Updating ConfigStalenessState from [{}] to [{}] with details [{}]",
+                        sdx.getConfigStalenessState(), configStalenessState, configStalenessDetails);
+                sdxClusterRepository.updateConfigStalenessState(sdx.getId(), configStalenessState, configStalenessDetails);
+            }
         }
     }
 

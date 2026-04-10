@@ -17,6 +17,7 @@ import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
+import com.sequenceiq.sdx.api.model.SdxConfigStalenessResponse;
 import com.sequenceiq.sdx.api.model.SdxDatabaseResponse;
 
 @Service
@@ -61,6 +62,7 @@ public class SdxClusterConverter {
         sdxClusterResponse.setTags(getTags(sdxCluster.getTags()));
         sdxClusterResponse.setCertExpirationState(sdxCluster.getCertExpirationState());
         sdxClusterResponse.setCertExpirationDetails(sdxCluster.getCertExpirationDetails());
+        sdxClusterResponse.setConfigStaleness(convertConfigStaleness(sdxCluster));
         sdxClusterResponse.setSdxClusterServiceVersion(sdxCluster.getSdxClusterServiceVersion());
         sdxClusterResponse.setDetached(sdxCluster.isDetached());
         sdxClusterResponse.setEnableMultiAz(sdxCluster.isEnableMultiAz());
@@ -72,5 +74,12 @@ public class SdxClusterConverter {
         sdxClusterResponse.setSdxDatabaseResponse(sdxDatabaseResponse);
         sdxClusterResponse.setProviderSyncStates(sdxCluster.getProviderSyncStates());
         return sdxClusterResponse;
+    }
+
+    private SdxConfigStalenessResponse convertConfigStaleness(SdxCluster sdxCluster) {
+        SdxConfigStalenessResponse configStaleness = new SdxConfigStalenessResponse();
+        configStaleness.setState(sdxCluster.getConfigStalenessState().name());
+        configStaleness.setDetails(sdxCluster.getConfigStalenessDetails());
+        return configStaleness;
     }
 }
