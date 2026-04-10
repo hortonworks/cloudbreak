@@ -104,15 +104,20 @@ public class AvailabilityChecker {
     }
 
     protected boolean doesAllImageSupport(Stack stack, String packageName, Versioned supportedAfter) {
-        Set<String> imageIdsInUse = stack.getNotTerminatedInstanceMetaDataSet().stream()
-                .map(InstanceMetaData::getImage)
-                .map(imageJson -> imageJson.getUnchecked(com.sequenceiq.cloudbreak.cloud.model.Image.class))
-                .map(com.sequenceiq.cloudbreak.cloud.model.Image::getImageId)
-                .collect(Collectors.toSet());
-        String currentImageId = getImageService().getImageForStack(stack).getUuid();
-        imageIdsInUse.add(currentImageId);
-        return imageIdsInUse.size() == 1
-                || doesAllNonCurrentImageSupport(stack, currentImageId, imageIdsInUse, packageName, supportedAfter);
+        try {
+            Set<String> imageIdsInUse = stack.getNotTerminatedInstanceMetaDataSet().stream()
+                    .map(InstanceMetaData::getImage)
+                    .map(imageJson -> imageJson.getUnchecked(com.sequenceiq.cloudbreak.cloud.model.Image.class))
+                    .map(com.sequenceiq.cloudbreak.cloud.model.Image::getImageId)
+                    .collect(Collectors.toSet());
+            String currentImageId = getImageService().getImageForStack(stack).getUuid();
+            imageIdsInUse.add(currentImageId);
+            return imageIdsInUse.size() == 1
+                    || doesAllNonCurrentImageSupport(stack, currentImageId, imageIdsInUse, packageName, supportedAfter);
+        } catch (Exception e) {
+            LOGGER.warn("Image feature support check failed, returning false", e);
+            return false;
+        }
     }
 
     private boolean doesAllNonCurrentImageSupport(Stack stack, String currentImageId, Set<String> imageIdsInUse, String packageName,
