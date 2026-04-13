@@ -198,7 +198,7 @@ public class FreeIpaCreationService {
                 freeIpaRecipeService.saveRecipes(request.getRecipes(), savedStack.getId());
                 freeIpaRecipeService.sendCreationUsageReport(stack.getResourceCrn(), CollectionUtils.emptyIfNull(request.getRecipes()).size());
                 ImageEntity image = imageService.create(savedStack, imageWrapperStringPair);
-                Image imageForIm = imageConverter.convert(image);
+                Image imageForIm = imageConverter.convertWithoutUserdata(image);
                 if (!Objects.equals(savedStack.getArchitecture(), Architecture.fromStringWithFallback(image.getArchitecture()))) {
                     throw new BadRequestException(String.format("Image architecture doesn't match the selected FreeIPA architecture. Image architecture: %s, " +
                             "FreeIPA architecture: %s.", imageForIm.getArchitecture(), savedStack.getArchitecture()));

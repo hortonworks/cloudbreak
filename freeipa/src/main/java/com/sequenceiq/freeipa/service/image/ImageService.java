@@ -317,6 +317,6 @@ public class ImageService {
 
     public com.sequenceiq.cloudbreak.cloud.model.Image getCloudImageByStackId(Long stackId) {
         ImageEntity imageEntity = getByStackId(stackId);
-        return imageEntityToImageConverter.convert(imageEntity);
+        return imageEntityToImageConverter.convertWithoutUserdata(imageEntity);
     }
 }

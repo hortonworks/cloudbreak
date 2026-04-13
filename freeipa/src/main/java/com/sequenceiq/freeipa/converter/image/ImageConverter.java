@@ -40,4 +40,10 @@ public class ImageConverter implements Converter<ImageEntity, Image> {
                 null,
                 null);
     }
+
+    public Image convertWithoutUserdata(ImageEntity source) {
+        Image image = convert(source);
+        image.setUserdata(Map.of());
+        return image;
+    }
 }
