@@ -26,7 +26,7 @@ import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.MetadataCollector;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureDiskType;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
-import com.sequenceiq.cloudbreak.cloud.gcp.GcpPlatformParameters;
+import com.sequenceiq.cloudbreak.cloud.gcp.GcpDiskType;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStoreMetadata;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterConfig;
@@ -97,7 +97,7 @@ class StackCreationServiceTest {
 
     @Test
     void setInstanceStoreCountOnGCP() {
-        StackView stack = stack(GcpPlatformParameters.GcpDiskType.HDD.value(), CloudPlatform.GCP.name(), TemporaryStorage.EPHEMERAL_VOLUMES);
+        StackView stack = stack(GcpDiskType.HDD.value(), CloudPlatform.GCP.name(), TemporaryStorage.EPHEMERAL_VOLUMES);
         StackCreationContext context = getStackContext(CloudPlatform.GCP.name(), stack);
         underTest.setInstanceStoreCount(context);
 
@@ -110,7 +110,7 @@ class StackCreationServiceTest {
         assertEquals(TemporaryStorage.EPHEMERAL_VOLUMES, savedTemplate.getValue().getTemporaryStorage());
         assertEquals(2, savedTemplate.getValue().getInstanceStorageCount());
 
-        Set<String> expectedTypes = new HashSet<>(Set.of(GcpPlatformParameters.GcpDiskType.HDD.value()));
+        Set<String> expectedTypes = new HashSet<>(Set.of(GcpDiskType.HDD.value()));
         savedVolumeTemplates.stream().map(VolumeTemplate::getVolumeType).forEach(expectedTypes::remove);
         assertTrue(expectedTypes.isEmpty());
     }
@@ -137,7 +137,7 @@ class StackCreationServiceTest {
 
     @Test
     void setInstanceStoreCountOnClusterWithLocalDisksOnlyOnGCP() {
-        StackView stack = stack(GcpPlatformParameters.GcpDiskType.LOCAL_SSD.value(), CloudPlatform.GCP.name(), TemporaryStorage.EPHEMERAL_VOLUMES);
+        StackView stack = stack(GcpDiskType.LOCAL_SSD.value(), CloudPlatform.GCP.name(), TemporaryStorage.EPHEMERAL_VOLUMES);
         StackCreationContext context = getStackContext(CloudPlatform.GCP.name(), stack);
         underTest.setInstanceStoreCount(context);
 
@@ -150,7 +150,7 @@ class StackCreationServiceTest {
         assertEquals(TemporaryStorage.EPHEMERAL_VOLUMES_ONLY, savedTemplate.getValue().getTemporaryStorage());
         assertEquals(2, savedTemplate.getValue().getInstanceStorageCount());
 
-        Set<String> expectedTypes = new HashSet<>(Set.of(GcpPlatformParameters.GcpDiskType.LOCAL_SSD.value()));
+        Set<String> expectedTypes = new HashSet<>(Set.of(GcpDiskType.LOCAL_SSD.value()));
         savedVolumeTemplates.stream().map(VolumeTemplate::getVolumeType).forEach(expectedTypes::remove);
         assertTrue(expectedTypes.isEmpty());
     }
@@ -177,7 +177,7 @@ class StackCreationServiceTest {
 
     @Test
     void setTemporaryStorageToLocalDisksIfInstanceStorageIsAvailable() {
-        StackView stack = stack(GcpPlatformParameters.GcpDiskType.HDD.value(), CloudPlatform.GCP.name(), TemporaryStorage.ATTACHED_VOLUMES);
+        StackView stack = stack(GcpDiskType.HDD.value(), CloudPlatform.GCP.name(), TemporaryStorage.ATTACHED_VOLUMES);
         StackCreationContext context = getStackContext(CloudPlatform.GCP.name(), stack);
         underTest.setInstanceStoreCount(context);
 
@@ -190,7 +190,7 @@ class StackCreationServiceTest {
         assertEquals(TemporaryStorage.EPHEMERAL_VOLUMES, savedTemplate.getValue().getTemporaryStorage());
         assertEquals(2, savedTemplate.getValue().getInstanceStorageCount());
 
-        Set<String> expectedTypes = new HashSet<>(Set.of(GcpPlatformParameters.GcpDiskType.HDD.value()));
+        Set<String> expectedTypes = new HashSet<>(Set.of(GcpDiskType.HDD.value()));
         savedVolumeTemplates.stream().map(VolumeTemplate::getVolumeType).forEach(expectedTypes::remove);
         assertTrue(expectedTypes.isEmpty());
     }

@@ -45,7 +45,7 @@ import com.google.api.services.compute.model.Operation;
 import com.google.common.collect.ImmutableMap;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
-import com.sequenceiq.cloudbreak.cloud.gcp.GcpPlatformParameters;
+import com.sequenceiq.cloudbreak.cloud.gcp.GcpDiskType;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.service.CustomGcpDiskEncryptionService;
 import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpResourceNameService;
@@ -161,7 +161,7 @@ public class GcpAttachedDiskResourceBuilderTest {
         Map<String, Object> params1 = Map.of();
         List<Volume> volumes1 = Arrays.asList(new Volume("/hadoop/fs1", "HDD", 1, CloudVolumeUsageType.GENERAL),
                 new Volume("/hadoop/fs2", "SSD", 2, CloudVolumeUsageType.GENERAL),
-                new Volume("/hadoop/fs3", GcpPlatformParameters.GcpDiskType.LOCAL_SSD.value(), 3, CloudVolumeUsageType.GENERAL));
+                new Volume("/hadoop/fs3", GcpDiskType.LOCAL_SSD.value(), 3, CloudVolumeUsageType.GENERAL));
 
         List<SecurityRule> rules = Collections.singletonList(new SecurityRule("0.0.0.0/0",
                 new PortDefinition[]{new PortDefinition("22", "22"), new PortDefinition("443", "443")}, "tcp"));
@@ -296,7 +296,7 @@ public class GcpAttachedDiskResourceBuilderTest {
         assertEquals("testname-master-1-2", vol3.getId());
         assertEquals("/dev/disk/by-id/google-local-nvme-ssd-0", vol3.getDevice());
         assertEquals(3, vol3.getSize());
-        assertEquals(GcpPlatformParameters.GcpDiskType.LOCAL_SSD.value(), vol3.getType());
+        assertEquals(GcpDiskType.LOCAL_SSD.value(), vol3.getType());
         assertEquals(CloudVolumeUsageType.GENERAL, vol3.getCloudVolumeUsageType());
 
     }

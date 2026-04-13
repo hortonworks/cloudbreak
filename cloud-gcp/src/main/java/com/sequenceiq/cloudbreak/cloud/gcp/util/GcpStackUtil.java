@@ -24,7 +24,6 @@ import com.google.api.services.compute.Compute.GlobalOperations;
 import com.google.api.services.compute.Compute.RegionOperations.Get;
 import com.google.api.services.compute.Compute.ZoneOperations;
 import com.google.api.services.compute.model.Instance;
-import com.google.api.services.compute.model.MachineType;
 import com.google.api.services.compute.model.Operation;
 import com.google.api.services.compute.model.Operation.Error.Errors;
 import com.google.api.services.sqladmin.SQLAdmin;
@@ -87,14 +86,6 @@ public class GcpStackUtil {
 
     public String getServiceAccountId(CloudCredential credential) {
         return credential.getParameter(SERVICE_ACCOUNT, String.class);
-    }
-
-    public String getMachineTypeFamily(MachineType machineType) {
-        return getMachineTypeFamily(machineType.getName());
-    }
-
-    public String getMachineTypeFamily(String machineType) {
-        return machineType.toLowerCase(Locale.ROOT).split("-")[0];
     }
 
     public boolean isLegacyNetwork(Network network) {

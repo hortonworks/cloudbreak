@@ -30,7 +30,7 @@ import com.google.api.client.util.Lists;
 import com.sequenceiq.cloudbreak.cloud.PlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.TagValidator;
-import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpDiskUtil;
+import com.sequenceiq.cloudbreak.cloud.gcp.conf.GcpInstanceTypeHyperDiskConfig;
 import com.sequenceiq.cloudbreak.cloud.model.DiskType;
 import com.sequenceiq.cloudbreak.cloud.model.DiskTypes;
 import com.sequenceiq.cloudbreak.cloud.model.DisplayName;
@@ -49,7 +49,6 @@ import com.sequenceiq.common.model.CredentialType;
 
 @Service
 public class GcpPlatformParameters implements PlatformParameters {
-
     private static final Integer START_LABEL = 97;
 
     private static final ScriptParams SCRIPT_PARAMS = new ScriptParams("sd", START_LABEL);
@@ -62,10 +61,13 @@ public class GcpPlatformParameters implements PlatformParameters {
     @Value("${cb.gcp.disk.type.default:pd-balanced}")
     private String defaultDiskType;
 
+    @Value("${cb.gcp.hyperdisk.type.default:hyperdisk-balanced}")
+    private String defaultHyperDiskType;
+
     @Value("${cb.gcp.root.disk.type.default:pd-ssd}")
     private String defaultRootDiskType;
 
-    @Value("${cb.gcp.root.disk.type.default:hyperdisk-balanced}")
+    @Value("${cb.gcp.root.hyperdisk.type.default:hyperdisk-balanced}")
     private String defaultRootHyperDiskType;
 
     @Value("${cb.gcp.database.disk.type:pd-ssd}")
@@ -78,14 +80,14 @@ public class GcpPlatformParameters implements PlatformParameters {
     private CloudbreakResourceReaderService cloudbreakResourceReaderService;
 
     @Inject
-    private GcpDiskUtil gcpDiskUtil;
-
-    @Inject
     private GcpTagValidator gcpTagValidator;
 
     @Inject
     @Qualifier("GcpTagSpecification")
     private TagSpecification tagSpecification;
+
+    @Inject
+    private GcpInstanceTypeHyperDiskConfig hyperDiskConfig;
 
     private VmRecommendations vmRecommendations;
 
@@ -126,14 +128,12 @@ public class GcpPlatformParameters implements PlatformParameters {
 
     @Override
     public DiskTypes diskTypes() {
-        // Followup tasks to handle machinetype based disktypes
-        // https://cloudera.atlassian.net/browse/CB-32446, https://cloudera.atlassian.net/browse/CB-32447
         return new DiskTypes(getDiskTypes(), defaultDiskType(), diskMappings(), diskDisplayNames());
     }
 
     @Override
     public String embeddedDatabaseDiskType(String flavor) {
-        return gcpDiskUtil.isHyperdiskBalancedSupportedForInstanceType(flavor) ? databaseHyperDiskType : databaseDiskType;
+        return hyperDiskConfig.isHyperdiskBalancedSupportedForInstanceType(flavor) ? databaseHyperDiskType : databaseDiskType;
     }
 
     @Override
@@ -207,8 +207,13 @@ public class GcpPlatformParameters implements PlatformParameters {
     }
 
     @Override
+    public DiskType defaultDiskType(String flavor) {
+        return diskType(hyperDiskConfig.isHyperdiskBalancedSupportedForInstanceType(flavor) ? defaultHyperDiskType : defaultDiskType);
+    }
+
+    @Override
     public DiskType defaultRootDiskType(String flavor) {
-        return diskType(gcpDiskUtil.isHyperdiskBalancedSupportedForInstanceType(flavor) ? defaultRootHyperDiskType : defaultRootDiskType);
+        return diskType(hyperDiskConfig.isHyperdiskBalancedSupportedForInstanceType(flavor) ? defaultRootHyperDiskType : defaultRootDiskType);
     }
 
     public String getPrerequisitesCreationCommand(CredentialType type) {
@@ -225,56 +230,6 @@ public class GcpPlatformParameters implements PlatformParameters {
 
     public String getMinimalPrerequisitesCreationPermissions() {
         return minimalPrerequisitesCreationPermissions;
-    }
-
-    public enum GcpDiskType {
-        SSD("pd-ssd", "Solid-state persistent disks (SSD)", VolumeParameterType.SSD),
-        BALANCED("pd-balanced", "Balanced persistent disks (BALANCED)", VolumeParameterType.MAGNETIC),
-        EXTREME("pd-extreme", "Extreme persistent disks (EXTREME)", VolumeParameterType.SSD),
-        HDD("pd-standard", "Standard persistent disks (HDD)", VolumeParameterType.MAGNETIC),
-        LOCAL_SSD("local-ssd", "Local scratch disk (SSD)", VolumeParameterType.LOCAL_SSD),
-        HYPERDISK_EXTREME("hyperdisk-extreme", "Hyperdisk extreme disks (HYPERDISK_EXTREME)", VolumeParameterType.HYPERDISK_EXTREME),
-        HYPERDISK_BALANCED("hyperdisk-balanced", "Hyperdisk balanced disk (HYPERDISK_BALANCED)", VolumeParameterType.HYPERDISK_BALANCED),
-        HYPERDISK_THROUGHPUT("hyperdisk-throughput", "Hyperdisk throughput disk (HYPERDISK_THROUGHPUT)", VolumeParameterType.HYPERDISK_THROUGHPUT);
-
-        private final String value;
-
-        private final String displayName;
-
-        private final VolumeParameterType volumeParameterType;
-
-        GcpDiskType(String value, String displayName, VolumeParameterType volumeParameterType) {
-            this.value = value;
-            this.displayName = displayName;
-            this.volumeParameterType = volumeParameterType;
-        }
-
-        public static GcpDiskType findByValue(String value) {
-            return Arrays.stream(GcpDiskType.values())
-                    .filter(diskType -> diskType.value.equals(value))
-                    .findFirst()
-                    .orElseThrow(() -> new IllegalArgumentException("No GCP disk type found for value: " + value));
-        }
-
-        public static String getUrl(String projectId, String zone, String volumeId) {
-            return String.format("https://www.googleapis.com/compute/v1/projects/%s/zones/%s/diskTypes/%s", projectId, zone, volumeId);
-        }
-
-        public String value() {
-            return value;
-        }
-
-        public String displayName() {
-            return displayName;
-        }
-
-        public VolumeParameterType getVolumeParameterType() {
-            return volumeParameterType;
-        }
-
-        public String getUrl(String projectId, String zone) {
-            return getUrl(projectId, zone, value);
-        }
     }
 
     private VmRecommendations initVmRecommendations() {

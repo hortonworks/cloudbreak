@@ -1,16 +1,21 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.conf;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.retry.annotation.EnableRetry;
 
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.sequenceiq.cloudbreak.cloud.model.TagSpecification;
+import com.sequenceiq.cloudbreak.spring.YamlPropertySourceFactory;
 
 @Configuration
 @EnableRetry
+@EnableConfigurationProperties(GcpInstanceTypeHyperDiskConfig.class)
+@PropertySource(value = "classpath:definitions/gcp-instancetype-hyperdisk-config.yaml", factory = YamlPropertySourceFactory.class)
 public class GcpConfig {
 
     @Value("${cb.gcp.tag.amount:64}")

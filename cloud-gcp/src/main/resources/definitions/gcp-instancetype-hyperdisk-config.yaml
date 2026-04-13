@@ -1,0 +1,283 @@
+gcp.hyperdisk:
+  # Hyperdisk-compatible machine type families
+  familyTypes:
+    c3:
+      defaultDiskType: hyperdisk-balanced
+      hyperDiskBalancedSupported: true
+      hyperDiskThroughputSupported: true
+      hyperDiskExtremeSupported: true
+      hyperDiskExtremeMinCpuCount: 88
+      pdBalancedSupported: true
+      pdSsdSupported: true
+    c3d:
+      defaultDiskType: hyperdisk-balanced
+      hyperDiskBalancedSupported: true
+      hyperDiskThroughputSupported: true
+      hyperDiskExtremeSupported: true
+      hyperDiskExtremeMinCpuCount: 60
+      pdBalancedSupported: true
+      pdSsdSupported: true
+    c4:
+      defaultDiskType: hyperdisk-balanced
+      hyperDiskBalancedSupported: true
+      hyperDiskThroughputSupported: true
+      hyperDiskExtremeSupported: true
+      hyperDiskExtremeMinCpuCount: 96
+    c4a:
+      defaultDiskType: hyperdisk-balanced
+      hyperDiskBalancedSupported: true
+      hyperDiskThroughputSupported: true
+      hyperDiskExtremeSupported: true
+      hyperDiskExtremeMinCpuCount: 64
+    c4d:
+      defaultDiskType: hyperdisk-balanced
+      hyperDiskBalancedSupported: true
+      hyperDiskExtremeSupported: true
+      hyperDiskExtremeMinCpuCount: 64
+    n2:
+      defaultDiskType: pd-balanced
+      hyperDiskExtremeSupported: true
+      hyperDiskThroughputSupported: true
+      pdStandardSupported: true
+      pdBalancedSupported: true
+      pdSsdSupported: true
+    n2d:
+      defaultDiskType: pd-balanced
+      hyperDiskThroughputSupported: true
+      pdStandardSupported: true
+      pdBalancedSupported: true
+      pdSsdSupported: true
+    n4:
+      defaultDiskType: hyperdisk-balanced
+      hyperDiskBalancedSupported: true
+      hyperDiskThroughputSupported: true
+    n4a:
+      defaultDiskType: hyperdisk-balanced
+      hyperDiskBalancedSupported: true
+      hyperDiskThroughputSupported: true
+    n4d:
+      defaultDiskType: hyperdisk-balanced
+      hyperDiskBalancedSupported: true
+      hyperDiskThroughputSupported: true
+    t2d:
+      defaultDiskType: pd-balanced
+      hyperDiskThroughputSupported: true
+      pdStandardSupported: true
+      pdBalancedSupported: true
+      pdSsdSupported: true
+
+  # Machine type level hyperdisk configuration
+  instanceTypes:
+    # c3 family
+    "[^c3-(standard|highcpu|highmem)-4$]":
+      hyperDiskMaxCount: 24
+      hyperDiskBalancedMaxCount: 16
+      hyperDiskThroughputMaxCount: 24
+    "[^c3-(standard|highcpu|highmem)-8$]":
+      hyperDiskMaxCount: 32
+      hyperDiskBalancedMaxCount: 16
+      hyperDiskThroughputMaxCount: 32
+    "[^c3-(standard|highcpu|highmem)-22$]":
+      hyperDiskMaxCount: 48
+      hyperDiskBalancedMaxCount: 32
+      hyperDiskThroughputMaxCount: 48
+    "[^c3-(standard|highcpu|highmem)-44$]":
+      hyperDiskMaxCount: 64
+      hyperDiskBalancedMaxCount: 32
+      hyperDiskThroughputMaxCount: 64
+    "[^c3-(standard|highcpu|highmem)-(88|176)$]":
+      hyperDiskMaxCount: 64
+      hyperDiskBalancedMaxCount: 32
+      hyperDiskThroughputMaxCount: 64
+      hyperDiskExtremeMaxCount: 8
+
+    # c3d family
+    "[^c3d-(standard|highcpu|highmem)-4$]":
+      hyperDiskMaxCount: 24
+      hyperDiskBalancedMaxCount: 16
+      hyperDiskThroughputMaxCount: 24
+    "[^c3d-(standard|highcpu|highmem)-8$]":
+      hyperDiskMaxCount: 32
+      hyperDiskBalancedMaxCount: 16
+      hyperDiskThroughputMaxCount: 32
+    "[^c3d-(standard|highcpu|highmem)-16$]":
+      hyperDiskMaxCount: 48
+      hyperDiskBalancedMaxCount: 16
+      hyperDiskThroughputMaxCount: 48
+    "[^c3d-(standard|highcpu|highmem)-30$]":
+      hyperDiskMaxCount: 64
+      hyperDiskBalancedMaxCount: 16
+      hyperDiskThroughputMaxCount: 64
+    "[^c3d-(standard|highcpu|highmem)-(60|90|180|360)$]":
+      hyperDiskMaxCount: 64
+      hyperDiskBalancedMaxCount: 32
+      hyperDiskThroughputMaxCount: 64
+      hyperDiskExtremeMaxCount: 8
+
+    # c4 family
+    "[^c4-(standard|highcpu|highmem)-2$]":
+      hyperDiskMaxCount: 8
+      hyperDiskBalancedMaxCount: 8
+      hyperDiskThroughputMaxCount: 8
+    "[^c4-(standard|highcpu|highmem)-4$]":
+      hyperDiskMaxCount: 16
+      hyperDiskBalancedMaxCount: 16
+      hyperDiskThroughputMaxCount: 16
+    "[^c4-(standard|highcpu|highmem)-(8|16|24)$]":
+      hyperDiskMaxCount: 32
+      hyperDiskBalancedMaxCount: 32
+      hyperDiskThroughputMaxCount: 32
+    "[^c4-(standard|highcpu|highmem)-(32|48)$]":
+      hyperDiskMaxCount: 64
+      hyperDiskBalancedMaxCount: 64
+      hyperDiskThroughputMaxCount: 64
+    "[^c4-(standard|highcpu|highmem)-(96|144|192|288)$]":
+      hyperDiskMaxCount: 128
+      hyperDiskBalancedMaxCount: 128
+      hyperDiskThroughputMaxCount: 128
+      hyperDiskExtremeMaxCount: 8
+
+    # c4a family
+    "[^c4a-(standard|highcpu|highmem)-1$]":
+      hyperDiskMaxCount: 16
+      hyperDiskBalancedMaxCount: 16
+      hyperDiskThroughputMaxCount: 16
+    "[^c4a-(standard|highcpu|highmem)-2$]":
+      hyperDiskMaxCount: 16
+      hyperDiskBalancedMaxCount: 16
+      hyperDiskThroughputMaxCount: 16
+    "[^c4a-(standard|highcpu|highmem)-4$]":
+      hyperDiskMaxCount: 16
+      hyperDiskBalancedMaxCount: 16
+      hyperDiskThroughputMaxCount: 16
+    "[^c4a-(standard|highcpu|highmem)-8$]":
+      hyperDiskMaxCount: 16
+      hyperDiskBalancedMaxCount: 16
+      hyperDiskThroughputMaxCount: 16
+    "[^c4a-(standard|highcpu|highmem)-(16|32|48)$]":
+      hyperDiskMaxCount: 32
+      hyperDiskBalancedMaxCount: 32
+      hyperDiskThroughputMaxCount: 32
+    "[^c4a-(standard|highcpu|highmem)-(64|72)$]":
+      hyperDiskMaxCount: 64
+      hyperDiskBalancedMaxCount: 64
+      hyperDiskThroughputMaxCount: 64
+      hyperDiskExtremeMaxCount: 8
+
+    # c4d family
+    "[^c4d-(standard|highcpu|highmem)-2$]":
+      hyperDiskMaxCount: 4
+      hyperDiskBalancedMaxCount: 4
+    "[^c4d-(standard|highcpu|highmem)-4$]":
+      hyperDiskMaxCount: 8
+      hyperDiskBalancedMaxCount: 8
+    "[^c4d-(standard|highcpu|highmem)-8$]":
+      hyperDiskMaxCount: 16
+      hyperDiskBalancedMaxCount: 16
+    "[^c4d-(standard|highcpu|highmem)-(16|32|48)$]":
+      hyperDiskMaxCount: 32
+      hyperDiskBalancedMaxCount: 32
+    "[^c4d-(standard|highcpu|highmem)-(64|96)$]":
+      hyperDiskMaxCount: 32
+      hyperDiskBalancedMaxCount: 32
+      hyperDiskExtremeMaxCount: 8
+    "[^c4d-(standard|highcpu|highmem)-192$]":
+      hyperDiskMaxCount: 64
+      hyperDiskBalancedMaxCount: 64
+      hyperDiskExtremeMaxCount: 8
+    "[^c4d-(standard|highcpu|highmem)-384$]":
+      hyperDiskMaxCount: 128
+      hyperDiskBalancedMaxCount: 128
+      hyperDiskExtremeMaxCount: 8
+
+    # n2 family
+    "[^n2-(standard|highcpu|highmem)-2$]":
+      hyperDiskMaxCount: 20
+      hyperDiskThroughputMaxCount: 20
+    "[^n2-(standard|highcpu|highmem)-4$]":
+      hyperDiskMaxCount: 24
+      hyperDiskThroughputMaxCount: 24
+    "[^n2-(standard|highcpu|highmem)-8$]":
+      hyperDiskMaxCount: 32
+      hyperDiskThroughputMaxCount: 32
+    "[^n2-(standard|highcpu|highmem)-16$]":
+      hyperDiskMaxCount: 48
+      hyperDiskThroughputMaxCount: 48
+    "[^n2-(standard|highcpu|highmem)-(32|48|64)$]":
+      hyperDiskMaxCount: 64
+      hyperDiskThroughputMaxCount: 64
+    "[^n2-(standard|highcpu|highmem)-(80|96|128)$]":
+      hyperDiskMaxCount: 64
+      hyperDiskThroughputMaxCount: 64
+      hyperDiskExtremeMaxCount: 8
+
+    # n2d family
+    "[^n2d-(standard|highcpu|highmem)-2$]":
+      hyperDiskMaxCount: 20
+      hyperDiskThroughputMaxCount: 20
+    "[^n2d-(standard|highcpu|highmem)-4$]":
+      hyperDiskMaxCount: 24
+      hyperDiskThroughputMaxCount: 24
+    "[^n2d-(standard|highcpu|highmem)-8$]":
+      hyperDiskMaxCount: 32
+      hyperDiskThroughputMaxCount: 32
+    "[^n2d-(standard|highcpu|highmem)-16$]":
+      hyperDiskMaxCount: 48
+      hyperDiskThroughputMaxCount: 48
+    "[^n2d-(standard|highcpu|highmem)-(32|48|64|80|96|128|224)$]":
+      hyperDiskMaxCount: 64
+      hyperDiskThroughputMaxCount: 64
+
+    # n4 family
+    "[^n4-(standard|highcpu|highmem)-(2|4|8)$]":
+      hyperDiskMaxCount: 16
+      hyperDiskBalancedMaxCount: 16
+      hyperDiskThroughputMaxCount: 16
+    "[^n4-(standard|highcpu|highmem)-(16|32|48|64|80)$]":
+      hyperDiskMaxCount: 32
+      hyperDiskBalancedMaxCount: 32
+      hyperDiskThroughputMaxCount: 32
+
+    # n4a family
+    "[^n4a-(standard|highcpu|highmem)-(1|2)$]":
+      hyperDiskMaxCount: 4
+      hyperDiskBalancedMaxCount: 16
+      hyperDiskThroughputMaxCount: 16
+    "[^n4a-(standard|highcpu|highmem)-4$]":
+      hyperDiskMaxCount: 8
+      hyperDiskBalancedMaxCount: 16
+      hyperDiskThroughputMaxCount: 16
+    "[^n4a-(standard|highcpu|highmem)-8$]":
+      hyperDiskMaxCount: 16
+      hyperDiskBalancedMaxCount: 16
+      hyperDiskThroughputMaxCount: 16
+    "[^n4a-(standard|highcpu|highmem)-16$]":
+      hyperDiskMaxCount: 32
+      hyperDiskBalancedMaxCount: 32
+      hyperDiskThroughputMaxCount: 32
+    "[^n4a-(standard|highcpu|highmem)-(32|48|64)$]":
+      hyperDiskMaxCount: 64
+      hyperDiskBalancedMaxCount: 32
+      hyperDiskThroughputMaxCount: 32
+
+    # n4d family
+    "[^n4d-(standard|highcpu|highmem)-2$]":
+      hyperDiskMaxCount: 4
+      hyperDiskBalancedMaxCount: 16
+      hyperDiskThroughputMaxCount: 16
+    "[^n4d-(standard|highcpu|highmem)-4$]":
+      hyperDiskMaxCount: 8
+      hyperDiskBalancedMaxCount: 16
+      hyperDiskThroughputMaxCount: 16
+    "[^n4d-(standard|highcpu|highmem)-8$]":
+      hyperDiskMaxCount: 16
+      hyperDiskBalancedMaxCount: 16
+      hyperDiskThroughputMaxCount: 16
+    "[^n4d-(standard|highcpu|highmem)-16$]":
+      hyperDiskMaxCount: 32
+      hyperDiskBalancedMaxCount: 32
+      hyperDiskThroughputMaxCount: 32
+    "[^n4d-(standard|highcpu|highmem)-(32|48|64|80|96)$]":
+      hyperDiskMaxCount: 64
+      hyperDiskBalancedMaxCount: 32
+      hyperDiskThroughputMaxCount: 32

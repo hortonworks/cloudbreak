@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -38,12 +39,13 @@ import com.google.api.services.compute.model.Subnetwork;
 import com.google.api.services.compute.model.SubnetworkList;
 import com.google.api.services.compute.model.SubnetworkSecondaryRange;
 import com.sequenceiq.cloudbreak.cloud.gcp.client.GcpComputeFactory;
-import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpDiskUtil;
+import com.sequenceiq.cloudbreak.cloud.gcp.conf.GcpInstanceTypeHyperDiskConfig;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.CloudNetworks;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.Coordinate;
+import com.sequenceiq.cloudbreak.cloud.model.DiskType;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
@@ -69,7 +71,10 @@ class GcpPlatformResourcesTest {
     private GcpComputeFactory gcpComputeFactory;
 
     @Mock
-    private GcpDiskUtil gcpDiskUtil;
+    private GcpInstanceTypeHyperDiskConfig hyperDiskConfig;
+
+    @Mock
+    private GcpPlatformParameters platformParameters;
 
     @InjectMocks
     private GcpPlatformResources underTest;
@@ -146,7 +151,7 @@ class GcpPlatformResourcesTest {
         when(regionsList.execute()).thenReturn(regionList);
         Compute.Regions regions = mock(Compute.Regions.class);
         when(regions.list(PROJECT_ID)).thenReturn(regionsList);
-        lenient().when(gcpStackUtil.getMachineTypeFamily(any(MachineType.class))).thenReturn("a9");
+        lenient().when(hyperDiskConfig.getMachineTypeFamily(any(MachineType.class))).thenReturn("a9");
         Compute.MachineTypes machineTypes = mock(Compute.MachineTypes.class);
 
         for (Map.Entry<String, List<String>> entry : availabilityZoneToVmTypes.entrySet()) {
@@ -184,6 +189,7 @@ class GcpPlatformResourcesTest {
     void testVirtualMachines(Map<String, List<String>> availabilityZoneToVmTypes, List<String> availabilityZones, Map<String, Set<String>> expectedVms)
             throws IOException {
         setUp(availabilityZoneToVmTypes);
+        lenient().when(platformParameters.defaultDiskType(any())).thenReturn(DiskType.diskType("pd-balanced"));
 
         CloudVmTypes cloudVmTypes = underTest.virtualMachines(extendedCloudCredential, REGION,
                 availabilityZones != null ? Map.of(NetworkConstants.AVAILABILITY_ZONES, String.join(",", availabilityZones)) : null);
@@ -194,6 +200,38 @@ class GcpPlatformResourcesTest {
             expectedVms.entrySet().stream().forEach(entry -> {
                 assertTrue(vmTypes.stream().anyMatch(vmType -> vmType.getValue().equals(entry.getKey())));
                 assertTrue(vmTypes.stream().anyMatch(vmType -> vmType.getMetaData().getBalancedHddConfig() != null));
+                assertEquals(entry.getValue(), new HashSet<>(vmTypes.stream().filter(vmType ->
+                        vmType.getValue().equals(entry.getKey())).findFirst().orElse(null).getMetaData().getAvailabilityZones()));
+            });
+        }
+    }
+
+    @ParameterizedTest(name = "testVirtualMachines{index}")
+    @MethodSource("populateDataForCloudVmTypes")
+    void testVirtualMachinesHyperDisks(Map<String, List<String>> availabilityZoneToVmTypes, List<String> availabilityZones, Map<String, Set<String>> expectedVms)
+            throws IOException {
+        setUp(availabilityZoneToVmTypes);
+        lenient().when(platformParameters.defaultDiskType(any())).thenReturn(DiskType.diskType("pd-balanced"));
+        lenient().when(hyperDiskConfig.getFamilyConfig(any(MachineType.class))).thenReturn(Optional.of(
+                new GcpInstanceTypeHyperDiskConfig.InstanceFamilyConfig("hyperdisk-balanced", false, false, false, false, true, true, true, 0)));
+        lenient().when(hyperDiskConfig.getInstanceTypeConfig(any(MachineType.class))).thenReturn(
+                Optional.of(new GcpInstanceTypeHyperDiskConfig.InstanceTypeConfig(5, 10, 10, 10)));
+
+        CloudVmTypes cloudVmTypes = underTest.virtualMachines(extendedCloudCredential, REGION,
+                availabilityZones != null ? Map.of(NetworkConstants.AVAILABILITY_ZONES, String.join(",", availabilityZones)) : null);
+
+        assertEquals(availabilityZoneToVmTypes.size(), cloudVmTypes.getCloudVmResponses().size());
+        for (Set<VmType> vmTypes : cloudVmTypes.getCloudVmResponses().values()) {
+            assertEquals(expectedVms.size(), vmTypes.size());
+            expectedVms.entrySet().stream().forEach(entry -> {
+                assertTrue(vmTypes.stream().anyMatch(vmType -> vmType.getValue().equals(entry.getKey())));
+                assertTrue(vmTypes.stream().allMatch(vmType -> vmType.getMetaData().getHyperdiskBalancedConfig() != null));
+                assertTrue(vmTypes.stream().allMatch(vmType -> vmType.getMetaData().getHyperdiskExtremeConfig() != null));
+                assertTrue(vmTypes.stream().allMatch(vmType -> vmType.getMetaData().getHyperdiskThroughputConfig() != null));
+                assertTrue(vmTypes.stream().noneMatch(vmType -> vmType.getMetaData().getMagneticConfig() != null));
+                assertTrue(vmTypes.stream().noneMatch(vmType -> vmType.getMetaData().getBalancedHddConfig() != null));
+                assertTrue(vmTypes.stream().noneMatch(vmType -> vmType.getMetaData().getSsdConfig() != null));
+                assertTrue(vmTypes.stream().noneMatch(vmType -> vmType.getMetaData().getExtremeSsdConfig() != null));
                 assertEquals(entry.getValue(), new HashSet<>(vmTypes.stream().filter(vmType ->
                         vmType.getValue().equals(entry.getKey())).findFirst().orElse(null).getMetaData().getAvailabilityZones()));
             });

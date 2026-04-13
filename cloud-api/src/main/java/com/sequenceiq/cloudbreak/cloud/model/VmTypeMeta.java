@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import com.sequenceiq.common.model.Architecture;
@@ -27,6 +28,8 @@ public class VmTypeMeta {
     public static final String ENHANCED_NETWORK = "EnhancedNetwork";
 
     public static final String ARCHITECTURE = "Architecture";
+
+    public static final String DEFAULT_DISK_TYPE = "DefaultDiskType";
 
     private VolumeParameterConfig magneticConfig;
 
@@ -178,6 +181,10 @@ public class VmTypeMeta {
         return (Architecture) properties.getOrDefault(ARCHITECTURE, Architecture.X86_64);
     }
 
+    public Optional<VolumeParameterType> getDefaultVolumeType() {
+        return Optional.ofNullable((VolumeParameterType) properties.get(DEFAULT_DISK_TYPE));
+    }
+
     public void setProperties(Map<String, Object> properties) {
         this.properties = properties;
     }
@@ -281,7 +288,7 @@ public class VmTypeMeta {
         }
 
         public VmTypeMetaBuilder withExtremeSsdConfig(Integer minimumSize, Integer maximumSize, Integer minimumNumber, Integer maximumNumber) {
-            ephemeralConfig = new VolumeParameterConfig(VolumeParameterType.EXTREME_SSD, minimumSize, maximumSize, minimumNumber, maximumNumber);
+            extremeSsdConfig = new VolumeParameterConfig(VolumeParameterType.EXTREME_SSD, minimumSize, maximumSize, minimumNumber, maximumNumber);
             return this;
         }
 
@@ -322,7 +329,7 @@ public class VmTypeMeta {
         }
 
         public VmTypeMetaBuilder withLocalSsdConfig(VolumeParameterConfig volumeParameterConfig) {
-            ssdConfig = volumeParameterConfig;
+            localSsdConfig = volumeParameterConfig;
             return this;
         }
 
@@ -343,6 +350,11 @@ public class VmTypeMeta {
 
         public VmTypeMetaBuilder withSt1Config(VolumeParameterConfig volumeParameterConfig) {
             st1Config = volumeParameterConfig;
+            return this;
+        }
+
+        public VmTypeMetaBuilder withDefaultDiskType(String defaultVolumeType) {
+            properties.put(DEFAULT_DISK_TYPE, defaultVolumeType);
             return this;
         }
 

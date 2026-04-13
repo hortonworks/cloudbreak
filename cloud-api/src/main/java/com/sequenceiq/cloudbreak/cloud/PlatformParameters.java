@@ -132,6 +132,15 @@ public interface PlatformParameters {
     }
 
     /**
+     * Default disk type of a platform for the given instancetype
+     *
+     * @return the default {@link DiskType} of a platform
+     */
+    default DiskType defaultDiskType(String flavor) {
+        return defaultDiskType();
+    }
+
+    /**
      * Default root disk type of a platform for a given flavor
      *
      * @return the default root {@link DiskType} of a platform

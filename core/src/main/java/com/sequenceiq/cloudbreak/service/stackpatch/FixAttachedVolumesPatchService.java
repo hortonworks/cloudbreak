@@ -28,7 +28,7 @@ import org.springframework.util.CollectionUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
-import com.sequenceiq.cloudbreak.cloud.gcp.GcpPlatformParameters;
+import com.sequenceiq.cloudbreak.cloud.gcp.GcpDiskType;
 import com.sequenceiq.cloudbreak.cloud.model.CloudConnectResources;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
@@ -70,7 +70,7 @@ public class FixAttachedVolumesPatchService extends ExistingStackPatchService {
 
     private static final EnumSet<Status> PATCH_ALLOWED_STATUSES = EnumSet.of(Status.AVAILABLE, Status.NODE_FAILURE);
 
-    private static final Set<String> EPHEMERAL_TYPES = Set.of(GcpPlatformParameters.GcpDiskType.LOCAL_SSD.value());
+    private static final Set<String> EPHEMERAL_TYPES = Set.of(GcpDiskType.LOCAL_SSD.value());
 
     private static final Set<String> AFFECTED_PROVIDERS =
             Set.of(CloudPlatform.AZURE.name().toLowerCase(Locale.ROOT), CloudPlatform.GCP.name().toLowerCase(Locale.ROOT));

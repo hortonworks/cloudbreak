@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.cloud.gcp;
 
-import static com.sequenceiq.cloudbreak.cloud.gcp.GcpPlatformParameters.GcpDiskType;
-
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;

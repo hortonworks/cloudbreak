@@ -6,7 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
-import com.sequenceiq.cloudbreak.cloud.gcp.GcpPlatformParameters;
+import com.sequenceiq.cloudbreak.cloud.gcp.GcpDiskType;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
@@ -35,7 +35,7 @@ public class EphemeralVolumeUtilTest {
     @Test
     public void testVolumeIsEphemeralWhenLocalSsdMustTrue() {
         VolumeTemplate volumeTemplate = new VolumeTemplate();
-        volumeTemplate.setVolumeType(GcpPlatformParameters.GcpDiskType.LOCAL_SSD.value());
+        volumeTemplate.setVolumeType(GcpDiskType.LOCAL_SSD.value());
 
         assertTrue(EphemeralVolumeUtil.volumeIsEphemeral(volumeTemplate));
     }
@@ -51,7 +51,7 @@ public class EphemeralVolumeUtilTest {
     @Test
     public void testVolumeIsEphemeralWhichMustBeProvisionedWithVolumeTemplateWhenLocalSsdMustTrue() {
         VolumeTemplate volumeTemplate = new VolumeTemplate();
-        volumeTemplate.setVolumeType(GcpPlatformParameters.GcpDiskType.LOCAL_SSD.value());
+        volumeTemplate.setVolumeType(GcpDiskType.LOCAL_SSD.value());
 
         assertTrue(EphemeralVolumeUtil.volumeIsEphemeralWhichMustBeProvisioned(volumeTemplate));
     }
@@ -75,7 +75,7 @@ public class EphemeralVolumeUtilTest {
                 "1.0",
                 "1.0",
                 1,
-                GcpPlatformParameters.GcpDiskType.LOCAL_SSD.value(),
+                GcpDiskType.LOCAL_SSD.value(),
                 CloudVolumeUsageType.GENERAL
         );
 
@@ -89,7 +89,7 @@ public class EphemeralVolumeUtilTest {
 
     @Test
     public void testVolumeIsEphemeralWhichMustBeProvisionedWhenLocalSsdMustTrue() {
-        assertTrue(EphemeralVolumeUtil.volumeIsEphemeralWhichMustBeProvisioned(GcpPlatformParameters.GcpDiskType.LOCAL_SSD.value()));
+        assertTrue(EphemeralVolumeUtil.volumeIsEphemeralWhichMustBeProvisioned(GcpDiskType.LOCAL_SSD.value()));
     }
 
 }

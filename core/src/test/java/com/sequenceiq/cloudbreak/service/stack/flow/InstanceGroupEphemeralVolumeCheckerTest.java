@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
-import static com.sequenceiq.cloudbreak.cloud.gcp.GcpPlatformParameters.GcpDiskType.HDD;
-import static com.sequenceiq.cloudbreak.cloud.gcp.GcpPlatformParameters.GcpDiskType.LOCAL_SSD;
+import static com.sequenceiq.cloudbreak.cloud.gcp.GcpDiskType.HDD;
+import static com.sequenceiq.cloudbreak.cloud.gcp.GcpDiskType.LOCAL_SSD;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
