@@ -14,8 +14,10 @@ import jakarta.persistence.Table;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.converter.CertExpirationStateConverter;
+import com.sequenceiq.cloudbreak.converter.ConfigStalenessStateConverter;
 import com.sequenceiq.cloudbreak.domain.converter.StatusConverter;
 import com.sequenceiq.common.api.type.CertExpirationState;
+import com.sequenceiq.common.api.type.ConfigStalenessState;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
@@ -43,6 +45,11 @@ public class ClusterApiView extends CompactView {
 
     @Convert(converter = CertExpirationStateConverter.class)
     private CertExpirationState certExpirationState;
+
+    @Convert(converter = ConfigStalenessStateConverter.class)
+    private ConfigStalenessState configStalenessState;
+
+    private String configStalenessDetails;
 
     public String getEnvironmentCrn() {
         return environmentCrn;
@@ -100,6 +107,22 @@ public class ClusterApiView extends CompactView {
         this.certExpirationState = certExpirationState;
     }
 
+    public ConfigStalenessState getConfigStalenessState() {
+        return configStalenessState;
+    }
+
+    public void setConfigStalenessState(ConfigStalenessState configStalenessState) {
+        this.configStalenessState = configStalenessState;
+    }
+
+    public String getConfigStalenessDetails() {
+        return configStalenessDetails;
+    }
+
+    public void setConfigStalenessDetails(String configStalenessDetails) {
+        this.configStalenessDetails = configStalenessDetails;
+    }
+
     @Override
     public String toString() {
         return "ClusterApiView{" +
@@ -109,6 +132,7 @@ public class ClusterApiView extends CompactView {
                 ", status=" + status +
                 ", environmentCrn='" + environmentCrn + '\'' +
                 ", certExpirationState=" + certExpirationState +
+                ", configStalenessState=" + configStalenessState +
                 "} " + super.toString();
     }
 }

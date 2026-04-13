@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.converter.v4.stacks.view;
 
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -10,6 +11,7 @@ import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.ConfigStalenessV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.views.ClusterViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.views.HostGroupViewV4Response;
 import com.sequenceiq.cloudbreak.converter.v4.blueprint.BlueprintViewToBlueprintV4ViewResponseConverter;
@@ -17,6 +19,7 @@ import com.sequenceiq.cloudbreak.domain.view.ClusterApiView;
 import com.sequenceiq.cloudbreak.domain.view.HostGroupView;
 import com.sequenceiq.cloudbreak.domain.view.InstanceGroupView;
 import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeService;
+import com.sequenceiq.common.api.type.ConfigStalenessState;
 
 @Component
 public class ClusterApiViewToClusterViewV4ResponseConverter {
@@ -43,6 +46,7 @@ public class ClusterApiViewToClusterViewV4ResponseConverter {
         clusterViewResponse.setStatus(source.getStatus());
         clusterViewResponse.setHostGroups(convertHostGroupsToJson(source.getHostGroups(), instanceGroup));
         clusterViewResponse.setCertExpirationState(source.getCertExpirationState());
+        clusterViewResponse.setConfigStaleness(convertConfigStaleness(source));
         datalakeService.addSharedServiceResponse(source, clusterViewResponse);
         return clusterViewResponse;
     }
@@ -59,5 +63,12 @@ public class ClusterApiViewToClusterViewV4ResponseConverter {
         });
 
         return jsons;
+    }
+
+    private ConfigStalenessV4Response convertConfigStaleness(ClusterApiView source) {
+        ConfigStalenessV4Response configStalenessV4Response = new ConfigStalenessV4Response();
+        configStalenessV4Response.setState(Objects.requireNonNullElse(source.getConfigStalenessState(), ConfigStalenessState.UP_TO_DATE).name());
+        configStalenessV4Response.setDetails(source.getConfigStalenessDetails());
+        return configStalenessV4Response;
     }
 }

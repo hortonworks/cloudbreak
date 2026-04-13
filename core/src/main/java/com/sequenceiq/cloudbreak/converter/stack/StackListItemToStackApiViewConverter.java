@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 
 import org.springframework.stereotype.Component;
 
@@ -15,6 +16,7 @@ import com.sequenceiq.cloudbreak.domain.view.InstanceGroupView;
 import com.sequenceiq.cloudbreak.domain.view.StackApiView;
 import com.sequenceiq.cloudbreak.domain.view.StackStatusView;
 import com.sequenceiq.cloudbreak.domain.view.UserView;
+import com.sequenceiq.common.api.type.ConfigStalenessState;
 
 @Component
 public class StackListItemToStackApiViewConverter {
@@ -67,6 +69,8 @@ public class StackListItemToStackApiViewConverter {
         clusterResponse.setStatus(item.getClusterStatus());
         clusterResponse.setHostGroups(hostGroupViews == null ? Collections.emptySet() : new HashSet<>(hostGroupViews));
         clusterResponse.setCertExpirationState(item.getCertExpirationState());
+        clusterResponse.setConfigStalenessState(Objects.requireNonNullElse(item.getConfigStalenessState(), ConfigStalenessState.UP_TO_DATE));
+        clusterResponse.setConfigStalenessDetails(item.getConfigStalenessDetails());
         return clusterResponse;
     }
 

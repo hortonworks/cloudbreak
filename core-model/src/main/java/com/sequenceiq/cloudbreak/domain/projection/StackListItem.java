@@ -9,6 +9,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.Databas
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.domain.BlueprintUpgradeOption;
 import com.sequenceiq.common.api.type.CertExpirationState;
+import com.sequenceiq.common.api.type.ConfigStalenessState;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.common.model.ProviderSyncState;
 
@@ -72,6 +73,10 @@ public interface StackListItem {
     Tunnel getTunnel();
 
     CertExpirationState getCertExpirationState();
+
+    ConfigStalenessState getConfigStalenessState();
+
+    String getConfigStalenessDetails();
 
     DatabaseAvailabilityType getExternalDatabaseCreationType();
 

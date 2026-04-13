@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.BlueprintV4ViewResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.CompactViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.ConfigStalenessV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.sharedservice.SharedServiceV4Response;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.ClusterModelDescription;
@@ -35,6 +36,9 @@ public class ClusterViewV4Response extends CompactViewV4Response {
 
     @Schema(description = ClusterModelDescription.CERT_EXPIRATION)
     private CertExpirationState certExpirationState;
+
+    @Schema(description = ClusterModelDescription.CONFIG_STALENESS)
+    private ConfigStalenessV4Response configStaleness;
 
     public Status getStatus() {
         return status;
@@ -82,6 +86,14 @@ public class ClusterViewV4Response extends CompactViewV4Response {
 
     public void setCertExpirationState(CertExpirationState certExpirationState) {
         this.certExpirationState = certExpirationState;
+    }
+
+    public ConfigStalenessV4Response getConfigStaleness() {
+        return configStaleness;
+    }
+
+    public void setConfigStaleness(ConfigStalenessV4Response configStaleness) {
+        this.configStaleness = configStaleness;
     }
 
     @Override
