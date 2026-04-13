@@ -15,8 +15,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.type.Versioned;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image;
+import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.image.ImageNotFoundException;
 import com.sequenceiq.freeipa.service.image.ImageService;
@@ -186,6 +188,16 @@ class AvailabilityCheckerTest {
         packageVersions.put(PACKAGE_NAME, "2.19.0");
 
         assertFalse(underTest.isRequiredPackagesInstalled(stack, Set.of("unknown-package")));
+    }
+
+    @Test
+    void testDoesAllImageSupportWhenImageIsMissingForOldClusters() {
+        Stack stack = mock(Stack.class);
+        InstanceMetaData instanceMetaData = new InstanceMetaData();
+        instanceMetaData.setImage(new Json(null));
+        when(stack.getNotTerminatedInstanceMetaDataSet()).thenReturn(Set.of(instanceMetaData));
+        boolean result = underTest.doesAllImageSupport(stack, "packageName", AFTER_VERSION);
+        assertFalse(result);
     }
 
     private Map<String, String> createPackageVersions(Stack stack) {
