@@ -63,17 +63,17 @@ do
 done
 
 REVERSE_RECORD_CREATED=0
-for zone in $(ipa dnszone-find --raw | grep "idnsname:.*\.in-addr\.arpa\." | cut -d':' -f2 | awk '{ print length, $0 }' | sort -n -r | awk '{ print $2 }' | xargs)
+for zone in $(ipa dnszone-find --raw --sizelimit=0 --timelimit=0 | grep "idnsname:.*\.in-addr\.arpa\." | cut -d':' -f2 | awk '{ print length, $0 }' | sort -n -r | awk '{ print $2 }' | xargs)
 do
     ZONE_NET=${zone//.in-addr.arpa./}
     if echo "$REVERSE_IP" | grep -qE "\.$ZONE_NET$"; then
         REVERSE_RECORD_NAME=$(echo "$REVERSE_IP" | sed "s/\.$ZONE_NET$//g")
         # dnsrecord-add must either add the record or modify it
-        if ! ipa dnsrecord-find "$zone" "--name=$REVERSE_RECORD_NAME" "--ptr-rec=${FQDN}." --ttl {{ pillar['sssd-ipa']['dns_ttl'] }}; then
+        if ! ipa dnsrecord-find "$zone" "--name=$REVERSE_RECORD_NAME" "--ptr-rec=${FQDN}." --sizelimit=0 --timelimit=0 --ttl {{ pillar['sssd-ipa']['dns_ttl'] }}; then
           echo "Adding reverse record ${REVERSE_RECORD_NAME} to ${zone} with PTR ${FQDN}."
           ipa dnsrecord-add "$zone" "$REVERSE_RECORD_NAME" "--ptr-rec=${FQDN}." --ttl {{ pillar['sssd-ipa']['dns_ttl'] }}
         fi
-        if ipa dnsrecord-find "$zone" "--name=$REVERSE_RECORD_NAME" "--ptr-rec=${FQDN}." --ttl {{ pillar['sssd-ipa']['dns_ttl'] }}; then
+        if ipa dnsrecord-find "$zone" "--name=$REVERSE_RECORD_NAME" "--ptr-rec=${FQDN}." --sizelimit=0 --timelimit=0 --ttl {{ pillar['sssd-ipa']['dns_ttl'] }}; then
           REVERSE_RECORD_CREATED=1
           break
         else
