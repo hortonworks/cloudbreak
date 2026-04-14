@@ -24,7 +24,6 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.common.api.telemetry.request.LoggingRequest;
 import com.sequenceiq.common.api.type.EncryptionType;
-import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.common.api.type.ServiceEndpointCreation;
 import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.common.model.FileSystemType;
@@ -580,25 +579,5 @@ public class AwsCloudProvider extends AbstractCloudProvider {
     @Override
     public String getFreeIpaInstanceType() {
         return awsProperties.getFreeipa().getInstanceType();
-    }
-
-    @Override
-    public ResourceType getRootDiskResourceType() {
-        return ResourceType.AWS_ROOT_DISK;
-    }
-
-    @Override
-    public String getDatahubCustomInstanceType() {
-        return awsProperties.getDatahubCustomInstanceType();
-    }
-
-    @Override
-    public String getAddDiskVolumeType() {
-        return verticalScaleVolumeType();
-    }
-
-    @Override
-    public String getModifyDiskVolumeType() {
-        return verticalScaleVolumeType();
     }
 }

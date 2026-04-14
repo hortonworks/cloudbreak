@@ -18,7 +18,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.Yar
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.template.YarnInstanceTemplateV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.authentication.StackAuthenticationV4Request;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.common.model.OsType;
@@ -105,30 +104,6 @@ public class YarnCloudProvider extends AbstractCloudProvider {
 
     @Override
     public String getFreeIpaInstanceType() {
-        throw new NotImplementedException(format("Not implemented on %s. Do you want to use against a real provider? You should set the " +
-                "`integrationtest.cloudProvider` property, Values: AZURE, AWS", getCloudPlatform()));
-    }
-
-    @Override
-    public String getDatahubCustomInstanceType() {
-        throw new NotImplementedException(format("Not implemented on %s. Do you want to use against a real provider? You should set the " +
-                "`integrationtest.cloudProvider` property, Values: AZURE, AWS", getCloudPlatform()));
-    }
-
-    @Override
-    public ResourceType getRootDiskResourceType() {
-        throw new NotImplementedException(format("Not implemented on %s. Do you want to use against a real provider? You should set the " +
-                "`integrationtest.cloudProvider` property, Values: AZURE, AWS", getCloudPlatform()));
-    }
-
-    @Override
-    public String getAddDiskVolumeType() {
-        throw new NotImplementedException(format("Not implemented on %s. Do you want to use against a real provider? You should set the " +
-                "`integrationtest.cloudProvider` property, Values: AZURE, AWS", getCloudPlatform()));
-    }
-
-    @Override
-    public String getModifyDiskVolumeType() {
         throw new NotImplementedException(format("Not implemented on %s. Do you want to use against a real provider? You should set the " +
                 "`integrationtest.cloudProvider` property, Values: AZURE, AWS", getCloudPlatform()));
     }

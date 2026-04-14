@@ -24,8 +24,6 @@ public class GcpProperties {
 
     private String embeddedDbUpgradeSourceVersion;
 
-    private String datahubCustomInstanceType;
-
     private final Credential credential = new Credential();
 
     private final Instance instance = new Instance();
@@ -85,14 +83,6 @@ public class GcpProperties {
 
     public void setEmbeddedDbUpgradeSourceVersion(String embeddedDbUpgradeSourceVersion) {
         this.embeddedDbUpgradeSourceVersion = embeddedDbUpgradeSourceVersion;
-    }
-
-    public String getDatahubCustomInstanceType() {
-        return datahubCustomInstanceType;
-    }
-
-    public void setDatahubCustomInstanceType(String datahubCustomInstanceType) {
-        this.datahubCustomInstanceType = datahubCustomInstanceType;
     }
 
     public String getAvailabilityZone() {

@@ -15,7 +15,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.stack.Sta
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.network.InstanceGroupNetworkV4Request;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.telemetry.request.LoggingRequest;
-import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.common.api.type.ServiceEndpointCreation;
 import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.common.model.FileSystemType;
@@ -573,25 +572,5 @@ public class CloudProviderProxy implements CloudProvider {
     @Override
     public String getFreeIpaInstanceType() {
         return delegate.getFreeIpaInstanceType();
-    }
-
-    @Override
-    public String getDatahubCustomInstanceType() {
-        return delegate.getDatahubCustomInstanceType();
-    }
-
-    @Override
-    public ResourceType getRootDiskResourceType() {
-        return delegate.getRootDiskResourceType();
-    }
-
-    @Override
-    public String getAddDiskVolumeType() {
-        return delegate.getAddDiskVolumeType();
-    }
-
-    @Override
-    public String getModifyDiskVolumeType() {
-        return delegate.getModifyDiskVolumeType();
     }
 }

@@ -42,7 +42,7 @@ public class FreeIpaRootVolumeModificationTest extends PreconditionSdxE2ETest {
         CloudPlatform cloudPlatform = testContext.getCloudPlatform();
         testContext
             .given(FreeIpaTestDto.class)
-            .when(freeIpaTestClient.updateDisks(ROOT_UPDATE_SIZE, testContext.getCloudProvider().verticalScaleVolumeType()))
+            .when(freeIpaTestClient.updateDisks(ROOT_UPDATE_SIZE, getVolumeType(cloudPlatform, testContext)))
             .awaitForFlow()
             .await(Status.AVAILABLE)
             .awaitForHealthyInstances()
@@ -59,6 +59,13 @@ public class FreeIpaRootVolumeModificationTest extends PreconditionSdxE2ETest {
         return testContext.getCloudProvider().getCloudFunctionality();
     }
 
+    private String getVolumeType(CloudPlatform cloudPlatform, TestContext testContext) {
+        if (cloudPlatform == CloudPlatform.AWS || cloudPlatform == CloudPlatform.AZURE) {
+            return testContext.getCloudProvider().verticalScaleVolumeType();
+        }
+        return null;
+    }
+
     private List<String> getVolumesOnCloudProvider(FreeIpaTestDto freeIpaTestDto, TestContext tc, FreeIpaClient client) {
         List<String> updatedInstances = freeIpaInstanceUtil.getInstanceIds(freeIpaTestDto, client, TEST_INSTANCE_GROUP);
         CloudFunctionality cloudFunctionality = getCloudFunctionality(tc);
@@ -67,7 +74,7 @@ public class FreeIpaRootVolumeModificationTest extends PreconditionSdxE2ETest {
 
     private void validateRootDisks(FreeIpaTestDto freeIpaTestDto, TestContext tc, FreeIpaClient client, CloudPlatform cloudPlatform) {
         int expectedDiskSize = ROOT_UPDATE_SIZE;
-        String expectedVolumeType = tc.getCloudProvider().verticalScaleVolumeType();
+        String expectedVolumeType = getVolumeType(cloudPlatform, tc);
 
         List<String> rootVolumes = getVolumesOnCloudProvider(freeIpaTestDto, tc, client);
         if (CollectionUtils.isEmpty(rootVolumes)) {

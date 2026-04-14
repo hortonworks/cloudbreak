@@ -12,6 +12,7 @@ import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonClusterManagerProperties;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
+import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.util.resize.SdxResizeTestUtil;
 import com.sequenceiq.it.cloudbreak.util.resize.SdxResizeTestValidator;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
@@ -42,6 +43,12 @@ public class SdxCustomInstanceResizeTests extends PreconditionSdxE2ETest {
         String sdxKey = resourcePropertyProvider().getName();
         SdxResizeTestValidator validator = new SdxResizeTestValidator(SdxClusterShape.ENTERPRISE);
         String runtimeVersion = commonClusterManagerProperties.getRuntimeVersion();
+        String instanceType = switch (testContext.getCloudPlatform().name().toLowerCase()) {
+            case "aws" -> "m5.4xlarge";
+            case "azure" -> "Standard_D8s_v3";
+            case "gcp" -> "n2-standard-8";
+            default -> throw new TestFailException("Custom instanceType has no value for cloud platform:" + testContext.getCloudPlatform().name());
+        };
 
         sdxResizeTestUtil
             .givenProvisionEnvironmentAndDatalake(testContext, sdxKey, runtimeVersion, SdxClusterShape.CUSTOM, validator)
@@ -52,7 +59,7 @@ public class SdxCustomInstanceResizeTests extends PreconditionSdxE2ETest {
 
                 SdxInstanceGroupRequest sdxInstanceGroupRequest = new SdxInstanceGroupRequest();
                 sdxInstanceGroupRequest.setName("master");
-                sdxInstanceGroupRequest.setInstanceType(tc.getCloudProvider().getDatahubCustomInstanceType());
+                sdxInstanceGroupRequest.setInstanceType(instanceType);
                 SdxInstanceGroupDiskRequest sdxInstanceGroupDiskRequest = new SdxInstanceGroupDiskRequest();
                 sdxInstanceGroupDiskRequest.setName("master");
                 sdxInstanceGroupDiskRequest.setInstanceDiskSize(300);
