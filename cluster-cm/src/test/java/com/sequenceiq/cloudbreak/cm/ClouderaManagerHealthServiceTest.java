@@ -267,7 +267,9 @@ class ClouderaManagerHealthServiceTest {
                 host("host")
                         .addHealthChecksItem(new ApiHealthCheck().name("fake_check").summary(ApiHealthSummary.BAD))
                         .addHealthChecksItem(new ApiHealthCheck().name(HOST_SCM_HEALTH).summary(ApiHealthSummary.CONCERNING))
-                        .addHealthChecksItem(new ApiHealthCheck().name("another").summary(ApiHealthSummary.BAD))
+                        .addHealthChecksItem(new ApiHealthCheck().name("another").summary(ApiHealthSummary.BAD)),
+                host("host_non_cluster")
+                        .clusterRef(null)
         );
 
         assertTrue(underTest.getExtendedHostStatuses(client, Optional.of("7.2.12")).isHostHealthy(hostName("host")));

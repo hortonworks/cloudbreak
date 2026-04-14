@@ -104,6 +104,7 @@ public class ClouderaManagerHealthService {
 
     private List<ApiService> readServicesOfAllClustersFromClouderaManager(ApiClient client, List<ApiHost> apiHostList) {
         Set<String> clusterNames = apiHostList.stream()
+                .filter(apiHost -> apiHost.getClusterRef() != null)
                 .map(apiHost -> apiHost.getClusterRef().getClusterName())
                 .collect(Collectors.toSet());
         return clusterNames.stream()
