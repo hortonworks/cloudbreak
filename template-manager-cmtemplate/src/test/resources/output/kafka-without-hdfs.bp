@@ -90,11 +90,6 @@
       ],
       "roleConfigGroups": [
         {
-          "refName": "core_settings-GATEWAY-BASE",
-          "roleType": "GATEWAY",
-          "base": true
-        },
-        {
           "refName": "core_settings-STORAGEOPERATIONS-BASE",
           "roleType": "STORAGEOPERATIONS",
           "base": true
@@ -110,7 +105,6 @@
         "schemaregistry-SCHEMA_REGISTRY_SERVER-BASE",
         "streams_messaging_manager-STREAMS_MESSAGING_MANAGER_SERVER-BASE",
         "streams_messaging_manager-STREAMS_MESSAGING_MANAGER_UI-BASE",
-        "core_settings-GATEWAY-BASE",
         "core_settings-STORAGEOPERATIONS-BASE"
       ]
     },

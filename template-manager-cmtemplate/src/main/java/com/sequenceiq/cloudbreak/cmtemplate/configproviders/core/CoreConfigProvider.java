@@ -98,7 +98,7 @@ public class CoreConfigProvider extends AbstractRoleConfigProvider {
     public Map<String, ApiClusterTemplateService> getAdditionalServices(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject source) {
         if (isConfigurationNeeded(cmTemplateProcessor, source) && cmTemplateProcessor.getServiceByType(CORE_SETTINGS).isEmpty()) {
             LOGGER.info("Adding '{}' as additional service.", CORE_SETTINGS);
-            ApiClusterTemplateService coreSettings = createBaseCoreSettingsService(cmTemplateProcessor);
+            ApiClusterTemplateService coreSettings = createBaseCoreSettingsService(cmTemplateProcessor, source);
             Set<HostgroupView> hostgroupViews = source.getHostgroupViews();
             return hostgroupViews.stream()
                     .filter(filterByHostGroupViewType(cmTemplateProcessor.isHybridDatahub(source)))
@@ -111,12 +111,15 @@ public class CoreConfigProvider extends AbstractRoleConfigProvider {
         return hg -> hybridDatahub || InstanceGroupType.GATEWAY.equals(hg.getInstanceGroupType());
     }
 
-    private ApiClusterTemplateService createBaseCoreSettingsService(CmTemplateProcessor cmTemplateProcessor) {
+    private ApiClusterTemplateService createBaseCoreSettingsService(CmTemplateProcessor cmTemplateProcessor, TemplatePreparationObject source) {
         List<ApiClusterTemplateRoleConfigGroup> roleConfigGroups = new ArrayList<>();
-        roleConfigGroups.add(new ApiClusterTemplateRoleConfigGroup()
-                .roleType(GATEWAY)
-                .base(true)
-                .refName(CORE_SETTINGS_GATEWAY_REF_NAME));
+        if (cmTemplateProcessor.isHybridDatahub(source)) {
+            LOGGER.info("Cluster is hybrid datahub, adding '{}' role to '{}' service.", GATEWAY, CORE_SETTINGS);
+            roleConfigGroups.add(new ApiClusterTemplateRoleConfigGroup()
+                    .roleType(GATEWAY)
+                    .base(true)
+                    .refName(CORE_SETTINGS_GATEWAY_REF_NAME));
+        }
         if (needToAddStorageOperationsRole(cmTemplateProcessor)) {
             LOGGER.info("CM version is older then 7.7.1, adding '{}' role to '{}' service.", STORAGEOPERATIONS, CORE_SETTINGS);
             roleConfigGroups.add(new ApiClusterTemplateRoleConfigGroup()
