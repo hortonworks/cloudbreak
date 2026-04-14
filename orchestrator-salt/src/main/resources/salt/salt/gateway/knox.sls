@@ -1,5 +1,7 @@
 {%- from 'gateway/settings.sls' import gateway with context %}
 {%- set knoxUser = 'knox' %}
+{%- from 'java/settings.sls' import java with context %}
+{%- set gov_cloud = salt['pillar.get']('cluster:gov_cloud', False) %}
 {%- set knoxGroup = 'knox' %}
 {%- set useKnoxUser = True if salt['pillar.get']('cloudera-manager:settings:deterministic_uid_gid') == True
 or salt['pillar.get']('cluster:secretEncryptionEnabled', False) == True else False %}
@@ -128,7 +130,11 @@ knox-create-sign-pkcs12:
 
 knox-create-sign-{{ gateway.keystore_type }}:
   cmd.run:
+{%- if gov_cloud == True and java.java_version == "17" %}
+    - name: cd {{ secretRoot }}/keystores/ && keytool -importkeystore -deststorepass {{ salt['pillar.get']('gateway:mastersecret') }} -destkeypass {{ salt['pillar.get']('gateway:mastersecret') }} -destkeystore signing.{{ gateway.keystore_type }} -deststoretype {{ gateway.keystore_type | upper }} -srckeystore signing.p12 -srcstoretype PKCS12 -srcstorepass {{ salt['pillar.get']('gateway:mastersecret') }} -alias signing-identity -J--add-exports=java.base/sun.security.provider=ALL-UNNAMED -providerclass {{ java.security_providerclass }} -providerpath {{ java.jre_ext_path }}/ccj.jar
+{%- else %}
     - name: cd {{ secretRoot }}/keystores/ && keytool -importkeystore -deststorepass {{ salt['pillar.get']('gateway:mastersecret') }} -destkeypass {{ salt['pillar.get']('gateway:mastersecret') }} -destkeystore signing.{{ gateway.keystore_type }} -deststoretype {{ gateway.keystore_type | upper }} -srckeystore signing.p12 -srcstoretype PKCS12 -srcstorepass {{ salt['pillar.get']('gateway:mastersecret') }} -alias signing-identity
+{%- endif %}
     - creates: {{ secretRoot }}/keystores/signing.{{ gateway.keystore_type }}
     - output_loglevel: quiet
 

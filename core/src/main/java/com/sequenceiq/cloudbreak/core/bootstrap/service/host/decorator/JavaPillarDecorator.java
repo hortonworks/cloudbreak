@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
 import com.sequenceiq.cloudbreak.util.CertProcessor;
+import com.sequenceiq.cloudbreak.util.JavaUtil;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @Component
@@ -30,17 +31,32 @@ public class JavaPillarDecorator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JavaPillarDecorator.class);
 
-    @Value("${cb.safelogic.cryptocomply.path:}")
-    private String cryptoComplyPath;
+    private static final String CRYPTO_COMPLY_PATH = "cryptoComplyPath";
 
-    @Value("${cb.safelogic.cryptocomply.hash:}")
-    private String cryptoComplyHash;
+    private static final String BOUNCY_CASTLE_TLS_PATH = "bouncyCastleTlsPath";
 
-    @Value("${cb.safelogic.bouncycastletls.path:}")
-    private String bouncyCastleTlsPath;
+    private static final String BOUNCY_CASTLE_UTIL_TLS_PATH = "bouncyCastleUtilTlsPath";
 
-    @Value("${cb.safelogic.bouncycastletls.hash:}")
-    private String bouncyCastleTlsHash;
+    private static final String SASL_PROVIDER_PATH = "saslProviderPath";
+
+    @Value("${cb.safelogic.8.cryptocomply.path:https://archive.releng.gov-dev.cloudera.com/p/safelogic/ccj-3.0.2.1/ccj-3.0.2.1.jar}")
+    private String cryptoComplyPathForJava8;
+
+    @Value("${cb.safelogic.17.cryptocomply.path:https://archive.releng.gov-dev.cloudera.com/p/safelogic/ccj-4.0.0/ccj-4.0.0-fips.jar}")
+    private String cryptoComplyPathForJava17;
+
+    @Value("${cb.safelogic.8.bouncycastletls.path:https://archive.releng.gov-dev.cloudera.com/p/safelogic/bctls-ccj-3.0.2.1/bctls.jar}")
+    private String bouncyCastleTlsPathForJava8;
+
+    @Value("${cb.safelogic.17.bouncycastletls.path:https://archive.releng.gov-dev.cloudera.com/p/safelogic/ccj-4.0.0/bctls-2.0.17.1.jar}")
+    private String bouncyCastleTlsPathForJava17;
+
+    @Value("${cb.safelogic.17.bouncycastleutiltls.path:https://archive.releng.gov-dev.cloudera.com/p/safelogic/ccj-4.0.0/bcutil-2.0.1.jar}")
+    private String bouncyCastleUtilTlsPathForJava17;
+
+    @Value("${cb.safelogic.17.saslprovider.path:https://archive.releng.gov-dev.cloudera.com/p/safelogic/" +
+            "sasl-sha256aes-0.1.0.7.1.9.1021-6/sasl-sha256aes-0.1.0.7.1.9.1021-6.jar}")
+    private String saslProviderPathForJava17;
 
     @Inject
     private PlatformAwareSdxConnector sdxConnector;
@@ -89,12 +105,44 @@ public class JavaPillarDecorator {
         if (stackDto.isOnGovPlatformVariant()) {
             LOGGER.debug("Adding SafeLogic properties");
             Map<String, Object> safeLogicProperties = new HashMap<>();
-            addSafeLogicProperty(safeLogicProperties, "cryptoComplyPath", cryptoComplyPath);
-            addSafeLogicProperty(safeLogicProperties, "cryptoComplyHash", cryptoComplyHash);
-            addSafeLogicProperty(safeLogicProperties, "bouncyCastleTlsPath", bouncyCastleTlsPath);
-            addSafeLogicProperty(safeLogicProperties, "bouncyCastleTlsHash", bouncyCastleTlsHash);
+            addCryptoComplyPath(stackDto, safeLogicProperties);
+            addBouncyCastleTlsPath(stackDto, safeLogicProperties);
+            addBouncyCastleUtilTlsPath(stackDto, safeLogicProperties);
+            addSaslProviderPath(stackDto, safeLogicProperties);
             config.put("safelogic", safeLogicProperties);
         }
+    }
+
+    private void addSaslProviderPath(StackDto stackDto, Map<String, Object> config) {
+        if (java17OrHigher(stackDto)) {
+            addSafeLogicProperty(config, SASL_PROVIDER_PATH, saslProviderPathForJava17);
+        }
+    }
+
+    private void addBouncyCastleUtilTlsPath(StackDto stackDto, Map<String, Object> config) {
+        if (java17OrHigher(stackDto)) {
+            addSafeLogicProperty(config, BOUNCY_CASTLE_UTIL_TLS_PATH, bouncyCastleUtilTlsPathForJava17);
+        }
+    }
+
+    private void addBouncyCastleTlsPath(StackDto stackDto, Map<String, Object> config) {
+        if (java17OrHigher(stackDto)) {
+            addSafeLogicProperty(config, BOUNCY_CASTLE_TLS_PATH, bouncyCastleTlsPathForJava17);
+        } else {
+            addSafeLogicProperty(config, BOUNCY_CASTLE_TLS_PATH, bouncyCastleTlsPathForJava8);
+        }
+    }
+
+    private void addCryptoComplyPath(StackDto stackDto, Map<String, Object> config) {
+        if (java17OrHigher(stackDto)) {
+            addSafeLogicProperty(config, CRYPTO_COMPLY_PATH, cryptoComplyPathForJava17);
+        } else {
+            addSafeLogicProperty(config, CRYPTO_COMPLY_PATH, cryptoComplyPathForJava8);
+        }
+    }
+
+    private boolean java17OrHigher(StackDto stackDto) {
+        return stackDto.getStack().getJavaVersion() != null && stackDto.getStack().getJavaVersion() >= JavaUtil.JAVA_17;
     }
 
     private void addSafeLogicProperty(Map<String, Object> config, String name, String value) {

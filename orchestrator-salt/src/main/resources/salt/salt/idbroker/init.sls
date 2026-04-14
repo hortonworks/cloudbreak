@@ -1,6 +1,8 @@
 {% if salt['pillar.get']('idbroker:mastersecret', None) != None %}
 {%- from 'idbroker/settings.sls' import idbroker with context %}
 {%- set knoxUser = 'knox' %}
+{%- from 'java/settings.sls' import java with context %}
+{%- set gov_cloud = salt[ 'pillar.get' ]('cluster:gov_cloud', False) %}
 {%- set knoxGroup = 'knox' %}
 {%- set mode = 640 if salt['pillar.get']('cluster:secretEncryptionEnabled', False) == True else 644 %}
 {%- set useKnoxUser = True if salt['pillar.get']('cluster:secretEncryptionEnabled', False) == True else False %}
@@ -49,7 +51,11 @@ idbroker-create-sign-pkcs12:
 
 idbroker-create-sign-{{ idbroker.keystore_type }}:
   cmd.run:
+{%- if gov_cloud == True and java.java_version == "17" %}
+    - name: cd {{ secretRoot }}/keystores/ && keytool -importkeystore -deststorepass {{ salt['pillar.get']('idbroker:mastersecret') }} -destkeypass {{ salt['pillar.get']('idbroker:mastersecret') }} -destkeystore signing.{{ idbroker.keystore_type }} -deststoretype {{ idbroker.keystore_type | upper }} -srckeystore signing.p12 -srcstoretype PKCS12 -srcstorepass {{ salt['pillar.get']('idbroker:mastersecret') }} -alias signing-identity -J--add-exports=java.base/sun.security.provider=ALL-UNNAMED -providerclass {{ java.security_providerclass }} -providerpath {{ java.jre_ext_path }}/ccj.jar
+{%- else %}
     - name: cd {{ secretRoot }}/keystores/ && keytool -importkeystore -deststorepass {{ salt['pillar.get']('idbroker:mastersecret') }} -destkeypass {{ salt['pillar.get']('idbroker:mastersecret') }} -destkeystore signing.{{ idbroker.keystore_type }} -deststoretype {{ idbroker.keystore_type | upper }} -srckeystore signing.p12 -srcstoretype PKCS12 -srcstorepass {{ salt['pillar.get']('idbroker:mastersecret') }} -alias signing-identity
+{%- endif %}
     - creates: {{ secretRoot }}/keystores/signing.{{ idbroker.keystore_type }}
     - output_loglevel: debug
 

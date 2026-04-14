@@ -124,14 +124,13 @@ import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.ClusterCommandService;
 import com.sequenceiq.cloudbreak.service.ScalingException;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.util.JavaUtil;
 import com.sequenceiq.cloudbreak.util.URLUtils;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 
 @Service
 @Scope("prototype")
 public class ClouderaManagerModificationService implements ClusterModificationService {
-
-    public static final Integer JAVA_17 = 17;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerModificationService.class);
 
@@ -405,7 +404,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
             disableKnoxAutorestart(rollingUpgradeEnabled);
             refreshRemoteDataContextFromDatalakeInCaseOfDatahub(remoteDataContext);
             updateParcelSettings(products);
-            if (JAVA_17.equals(stack.getStack().getJavaVersion())) {
+            if (JavaUtil.JAVA_17.equals(stack.getStack().getJavaVersion())) {
                 reallocateMemory(false);
             }
             restartMgmtServices();

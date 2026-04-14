@@ -49,9 +49,12 @@ java_ext_dir_exists:
 
 /opt/salt/scripts/install_safelogic_binaries.sh:
   file.managed:
-    - source: salt://java/scripts/install_safelogic_binaries.sh
+    - source: salt://java/scripts/install_safelogic_binaries.sh.j2
     - makedirs: True
+    - template: jinja
     - mode: 700
+    - context:
+        java: {{ java }}
 
 install_safelogic_binaries:
   cmd.run:
@@ -60,9 +63,11 @@ install_safelogic_binaries:
         JRE_EXT_PATH: "{{ java.jre_ext_path }}"
         PAYWALL_AUTH: "{{ salt['pillar.get']('cloudera-manager:paywall_username') }}:{{ salt['pillar.get']('cloudera-manager:paywall_password') }}"
         CCJ_PATH: "{{ salt['pillar.get']('java:safelogic:cryptoComplyPath') }}"
-        CCJ_HASH_PATH: "{{ salt['pillar.get']('java:safelogic:cryptoComplyHash') }}"
         BCTLS_PATH: "{{ salt['pillar.get']('java:safelogic:bouncyCastleTlsPath') }}"
-        BCTLS_HASH_PATH: "{{ salt['pillar.get']('java:safelogic:bouncyCastleTlsHash') }}"
+{%- if java.java_version == "17" %}
+        BCUTIL_PATH: "{{ salt['pillar.get']('java:safelogic:bouncyCastleUtilTlsPath') }}"
+        SALSPROVIDER_PATH: "{{ salt['pillar.get']('java:safelogic:saslProviderPath') }}"
+{%- endif %}
     - require:
         - file: /opt/salt/scripts/install_safelogic_binaries.sh
     - failhard: True

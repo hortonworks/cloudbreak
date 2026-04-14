@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
@@ -51,10 +50,12 @@ class JavaPillarDecoratorTest {
 
     @BeforeEach
     void setUp() {
-        ReflectionTestUtils.setField(underTest, "cryptoComplyPath", "ccj-path");
-        ReflectionTestUtils.setField(underTest, "cryptoComplyHash", "ccj-hash");
-        ReflectionTestUtils.setField(underTest, "bouncyCastleTlsPath", "bctls-path");
-        ReflectionTestUtils.setField(underTest, "bouncyCastleTlsHash", "bctls-hash");
+        ReflectionTestUtils.setField(underTest, "cryptoComplyPathForJava8", "ccj8");
+        ReflectionTestUtils.setField(underTest, "cryptoComplyPathForJava17", "ccj17");
+        ReflectionTestUtils.setField(underTest, "bouncyCastleTlsPathForJava8", "bctls8");
+        ReflectionTestUtils.setField(underTest, "bouncyCastleTlsPathForJava17", "bctls17");
+        ReflectionTestUtils.setField(underTest, "bouncyCastleUtilTlsPathForJava17", "bctls-util");
+        ReflectionTestUtils.setField(underTest, "saslProviderPathForJava17", "sasl");
 
         when(stackDto.isOnGovPlatformVariant()).thenReturn(true);
         when(stackDto.getStack()).thenReturn(stack);
@@ -78,7 +79,13 @@ class JavaPillarDecoratorTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"cryptoComplyPath", "cryptoComplyHash", "bouncyCastleTlsPath", "bouncyCastleTlsHash"})
+    @ValueSource(strings = {
+            "cryptoComplyPathForJava8",
+            "cryptoComplyPathForJava17",
+            "bouncyCastleTlsPathForJava8",
+            "bouncyCastleTlsPathForJava17",
+            "bouncyCastleUtilTlsPathForJava17"
+    })
     void missingSafeLogicPropertyForNonGovStack(String property) {
         when(stackDto.isOnGovPlatformVariant()).thenReturn(false);
         ReflectionTestUtils.setField(underTest, property, null);
@@ -86,14 +93,38 @@ class JavaPillarDecoratorTest {
         assertThatCode(() -> underTest.createJavaPillars(stackDto, new DetailedEnvironmentResponse())).doesNotThrowAnyException();
     }
 
-    @ParameterizedTest
-    @ValueSource(strings = {"cryptoComplyPath", "cryptoComplyHash", "bouncyCastleTlsPath", "bouncyCastleTlsHash"})
-    void missingSafeLogicPropertyForGovStack(String property) {
-        ReflectionTestUtils.setField(underTest, property, null);
+    @Test
+    void safeLogicPropertyForGovStackWithJava8() {
+        when(stack.getJavaVersion()).thenReturn(8);
 
-        assertThatThrownBy(() -> underTest.createJavaPillars(stackDto, new DetailedEnvironmentResponse()))
-                .isInstanceOf(IllegalStateException.class)
-                .hasMessage("Required SafeLogic property is blank for application: " + property);
+        Map<String, SaltPillarProperties> result = underTest.createJavaPillars(stackDto, new DetailedEnvironmentResponse());
+
+        assertThatSafeLogicProperties(result)
+                .containsEntry("cryptoComplyPath", "ccj8")
+                .containsEntry("bouncyCastleTlsPath", "bctls8");
+    }
+
+    @Test
+    void safeLogicPropertyForGovStackWithJava17() {
+        when(stack.getJavaVersion()).thenReturn(17);
+
+        Map<String, SaltPillarProperties> result = underTest.createJavaPillars(stackDto, new DetailedEnvironmentResponse());
+
+        assertThatSafeLogicProperties(result)
+                .containsEntry("cryptoComplyPath", "ccj17")
+                .containsEntry("bouncyCastleTlsPath", "bctls17")
+                .containsEntry("saslProviderPath", "sasl");
+    }
+
+    @Test
+    void safeLogicPropertyForGovStackWithJavaNull() {
+        when(stack.getJavaVersion()).thenReturn(null);
+
+        Map<String, SaltPillarProperties> result = underTest.createJavaPillars(stackDto, new DetailedEnvironmentResponse());
+
+        assertThatSafeLogicProperties(result)
+                .containsEntry("cryptoComplyPath", "ccj8")
+                .containsEntry("bouncyCastleTlsPath", "bctls8");
     }
 
     @Test
@@ -110,10 +141,8 @@ class JavaPillarDecoratorTest {
         Map<String, SaltPillarProperties> result = underTest.createJavaPillars(stackDto, new DetailedEnvironmentResponse());
 
         assertThatSafeLogicProperties(result)
-                .containsEntry("cryptoComplyPath", "ccj-path")
-                .containsEntry("cryptoComplyHash", "ccj-hash")
-                .containsEntry("bouncyCastleTlsPath", "bctls-path")
-                .containsEntry("bouncyCastleTlsHash", "bctls-hash");
+                .containsEntry("cryptoComplyPath", "ccj8")
+                .containsEntry("bouncyCastleTlsPath", "bctls8");
     }
 
     @Test

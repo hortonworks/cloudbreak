@@ -86,6 +86,21 @@ setup_fips_bctls_mode_for_java_higher_than_8:
     - name: /etc/default/cloudera-scm-server
     - text: "export CMF_JAVA_OPTS=\"${CMF_JAVA_OPTS} -Dcom.cloudera.cloudera.cmf.fipsMode.jdk11plus.bctls.jar.path={{ java.jre_ext_path }}/bctls.jar -Dcom.cloudera.cloudera.cmf.fipsMode.jdk11plus.bctls.moduleName=bctls\""
     - unless: grep "export CMF_JAVA_OPTS=\"\${CMF_JAVA_OPTS} -Dcom.cloudera.cloudera.cmf.fipsMode.jdk11plus.bctls.jar.path={{ java.jre_ext_path }}/bctls.jar -Dcom.cloudera.cloudera.cmf.fipsMode.jdk11plus.bctls.moduleName=bctls\"" /etc/default/cloudera-scm-server
+setup_fips_modul_path_for_java_higher_than_8:
+  file.append:
+    - name: /etc/default/cloudera-scm-server
+    - text: "export CMF_JAVA_OPTS=\"${CMF_JAVA_OPTS} -Dcom.cloudera.cloudera.cmf.fipsMode.jdk11plus.module.path={{ java.jre_ext_path }}\""
+    - unless: grep "export CMF_JAVA_OPTS=\"${CMF_JAVA_OPTS} -Dcom.cloudera.cloudera.cmf.fipsMode.jdk11plus.module.path={{ java.jre_ext_path }}\"" /etc/default/cloudera-scm-server
+setup_fips_bcutil_mode_for_java_higher_than_8:
+  file.append:
+    - name: /etc/default/cloudera-scm-server
+    - text: "export CMF_ADD_TO_CLASSPATH=\"${CMF_ADD_TO_CLASSPATH}:{{ java.jre_ext_path }}/bcutil.jar\""
+    - unless: grep "export CMF_ADD_TO_CLASSPATH=\"${CMF_ADD_TO_CLASSPATH}:{{ java.jre_ext_path }}/bcutil.jar\"" /etc/default/cloudera-scm-server
+setup_fips_sasl_for_java_higher_than_8:
+  file.append:
+    - name: /etc/default/cloudera-scm-server
+    - text: "export CMF_JAVA_OPTS=\"${CMF_JAVA_OPTS} -Dcom.cloudera.cmf.fipsSaslMode=true\""
+    - unless: grep "export CMF_JAVA_OPTS=\"\${CMF_JAVA_OPTS} -Dcom.cloudera.cmf.fipsSaslMode=true\"" /etc/default/cloudera-scm-server
 {% endif %}
 
 {% endif %}
@@ -197,6 +212,7 @@ run_autotls_setup:
 {% else %}
       - file: setup_fips_ccj_mode_for_java_higher_than_8
       - file: setup_fips_bctls_mode_for_java_higher_than_8
+      - file: setup_fips_bcutil_mode_for_java_higher_than_8
       - file: /etc/cloudera-scm-server/cmSubCaCert.profile
 {% endif %}
 {% endif %}
