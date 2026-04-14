@@ -1,6 +1,7 @@
 {%- set secretEncryptionEnabled = True if salt['pillar.get']('cluster:secretEncryptionEnabled', False) == True else False %}
 {%- set cCacheStoragePath = salt['pillar.get']('kerberos:cCacheSecretLocation') if secretEncryptionEnabled == True else '/tmp' %}
 {%- set kerberosConfigPath = salt['pillar.get']('kerberos:kerberosSecretLocation') if secretEncryptionEnabled == True else '/etc' %}
+{%- set gov_cloud = salt['pillar.get']('cluster:gov_cloud', False) %}
 {%- if "ipa_member" in grains.get('roles', []) or "ad_member" in grains.get('roles', []) -%}
 includedir /etc/krb5.conf.d/
 includedir /var/lib/sss/pubconf/krb5.include.d/
@@ -28,6 +29,10 @@ includedir /var/lib/sss/pubconf/krb5.include.d/
   default_keytab_name = {{ kerberosConfigPath }}/krb5.keytab
   renew_lifetime = 7d
   max_retries = 1
+{%- if gov_cloud %}
+  allow_weak_crypto = false
+  pkinit_dh_min_bits = 4096
+{%- endif %}
 
 [realms]
   {{ salt['pillar.get']('kerberos:realm')|upper }} = {

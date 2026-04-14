@@ -17,6 +17,7 @@ base:
              - hostname
              - java
              - loadbalancer.loadbalancer_ip
+             - kerberos
 
            'recipes:pre-cloudera-manager-start':
              - match: grain

@@ -72,10 +72,7 @@ public class SaltConfigProvider {
     }
 
     private Map<String, Object> getPlatformMetadata(Stack stack) {
-        boolean govCloud = Boolean.FALSE;
-        if (AwsConstants.AwsVariant.AWS_NATIVE_GOV_VARIANT.variant().value().equals(stack.getPlatformvariant())) {
-            govCloud = Boolean.TRUE;
-        }
+        boolean govCloud = AwsConstants.AwsVariant.AWS_NATIVE_GOV_VARIANT.variant().value().equals(stack.getPlatformvariant());
         String environmentType = environmentClientService.getByCrn(stack.getEnvironmentCrn()).getEnvironmentType();
         return Map.of(
                 "platform", stack.getCloudPlatform(),
