@@ -18,6 +18,13 @@
 {%- else %}
   {%- set systemd_units_include = common_services + salt_services + cm_services %}
 {%- endif %}
+{%- set node_exporter_version = salt['cmd.shell']('/opt/node_exporter/node_exporter --version 2>&1 | head -n1 | awk \'{print $3}\'') -%}
+{%- if salt['pkg.version_cmp'](node_exporter_version, '1.7.0') >= 0 -%}
+  {%- set config_flag = "--web.config.file" -%}
+{%- else -%}
+  {%- set config_flag = "--web.config" -%}
+{%- endif -%}
+
 [Unit]
 Description=CDP Node Exporter
 Wants=network-online.target
@@ -27,7 +34,7 @@ After=network-online.target
 Type=simple
 User=root
 Group=root
-ExecStart=/opt/node_exporter/node_exporter --web.config=/opt/node_exporter/node_exporter-web-config.yml \
+ExecStart=/opt/node_exporter/node_exporter {{ config_flag }}=/opt/node_exporter/node_exporter-web-config.yml \
 {%- if monitoring.nodeExporterCollectors %}
      --collector.disable-defaults \
      {%- for collectorName in monitoring.nodeExporterCollectors %}
