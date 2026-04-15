@@ -1,5 +1,11 @@
 {%- from 'telemetry/settings.sls' import telemetry with context %}
 {%- from 'monitoring/settings.sls' import monitoring with context %}
+{%- set cdp_prometheus_version = salt['cmd.shell']('/opt/cdp-prometheus/prometheus --version 2>&1 | head -n1 | awk \'{print $3}\'') -%}
+{%- if salt['pkg.version_cmp'](cdp_prometheus_version, '3.5.0') >= 0 -%}
+    {%- set agent_flag = "--agent" -%}
+{%- else -%}
+    {%- set agent_flag = "--enable-feature=agent" -%}
+{%- endif -%}
 [Unit]
 Description=CDP Prometheus agent for collecting metrics
 Wants=network-online.target
@@ -10,7 +16,7 @@ Type=simple
 User=root
 Group=root
 ExecStart=/bin/sh -c "/opt/cdp-prometheus/prometheus \
-     --enable-feature=agent \
+     {{ agent_flag }} \
      --storage.agent.path=/opt/cdp-prometheus/data-agent \
      --storage.agent.wal-compression \
      {%- if monitoring.retentionMinTime %}
