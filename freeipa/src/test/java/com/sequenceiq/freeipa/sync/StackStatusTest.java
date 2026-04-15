@@ -160,9 +160,10 @@ class StackStatusTest {
         return instanceMetaData;
     }
 
-    private void setStackSatus(DetailedStackStatus available) {
+    private void setStackSatus(DetailedStackStatus detailedStackStatus) {
         StackStatus stackStatus = new StackStatus();
-        stackStatus.setDetailedStackStatus(available);
+        stackStatus.setDetailedStackStatus(detailedStackStatus);
+        stackStatus.setStatus(detailedStackStatus.getStatus());
         stack.setStackStatus(stackStatus);
     }
 

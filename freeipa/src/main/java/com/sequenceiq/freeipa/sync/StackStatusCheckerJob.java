@@ -1,6 +1,8 @@
 package com.sequenceiq.freeipa.sync;
 
 import static com.sequenceiq.cloudbreak.util.Benchmark.checkedMeasure;
+import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.DELETED_ON_PROVIDER_SIDE;
+import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.STOPPED;
 
 import java.util.EnumSet;
 import java.util.List;
@@ -107,7 +109,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
     }
 
     private Set<String> getHostsWithSaltFailure(Stack stack) {
-        if (autoSyncConfig.isSaltCheckEnabled()) {
+        if (autoSyncConfig.isSaltCheckEnabled() && !Set.of(STOPPED, DELETED_ON_PROVIDER_SIDE).contains(stack.getStackStatus().getStatus())) {
             GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
             Optional<Set<String>> failedMinions = saltSyncService.checkSaltMinions(gatewayConfig);
             if (failedMinions.isPresent()) {
