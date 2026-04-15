@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.loadbalancer;
 
+import static com.sequenceiq.cloudbreak.cloud.service.CloudbreakResourceNameService.DELIMITER;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -14,6 +16,7 @@ import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -31,6 +34,7 @@ import com.google.api.services.compute.model.InstanceGroupsListInstancesRequest;
 import com.google.api.services.compute.model.Operation;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
+import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpExceptionUtil;
 import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancer;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
@@ -195,10 +199,12 @@ public class GcpBackendServiceResourceBuilder extends AbstractGcpLoadBalancerBui
             for (String availabilityZone : getAvailabilityZones(group, context)) {
                 String instanceGroupName = getResourceNameService()
                         .group(context.getName(), group.getName(), auth.getCloudContext().getId(), availabilityZone);
-                if (!isInstanceGroupEmpty(context.getCompute(), projectId, availabilityZone, instanceGroupName)) {
+                Optional<String> realInstanceGroupNameIfNotEmpty =
+                        fetchInstanceGroupNameIfNotEmpty(context.getCompute(), projectId, availabilityZone, instanceGroupName);
+                if (realInstanceGroupNameIfNotEmpty.isPresent()) {
                     Backend backend = new Backend();
                     backend.setGroup(String.format(GCP_INSTANCEGROUP_REFERENCE_FORMAT,
-                            projectId, availabilityZone, instanceGroupName));
+                            projectId, availabilityZone, realInstanceGroupNameIfNotEmpty.get()));
                     backend.setBalancingMode(CONNECTION);
                     backends.add(backend);
                 } else {
@@ -209,10 +215,24 @@ public class GcpBackendServiceResourceBuilder extends AbstractGcpLoadBalancerBui
         return backends;
     }
 
-    private boolean isInstanceGroupEmpty(Compute compute, String projectId, String zone, String instanceGroupName) throws IOException {
-        InstanceGroupsListInstances instances = compute.instanceGroups().listInstances(projectId, zone, instanceGroupName,
-                new InstanceGroupsListInstancesRequest()).execute();
-        return CollectionUtils.isEmpty(instances.getItems());
+    private Optional<String> fetchInstanceGroupNameIfNotEmpty(Compute compute, String projectId, String zone, String instanceGroupName) throws IOException {
+        try {
+            InstanceGroupsListInstances instances = compute.instanceGroups().listInstances(projectId, zone, instanceGroupName,
+                    new InstanceGroupsListInstancesRequest()).execute();
+            return CollectionUtils.isEmpty(instances.getItems()) ? Optional.empty() : Optional.ofNullable(instanceGroupName);
+        } catch (GoogleJsonResponseException e) {
+            if (GcpExceptionUtil.resourceNotFoundException(e) && StringUtils.isNotBlank(zone)) {
+                LOGGER.warn("Instances check in project [{}] zone [{}] instance group [{}] returned empty. Retry without zone",
+                        projectId, zone, instanceGroupName, e);
+                String instanceGroupNameWithoutAz = StringUtils.substringBeforeLast(instanceGroupName, DELIMITER);
+                LOGGER.debug("Instance group name without AZ: [{}]", instanceGroupNameWithoutAz);
+                InstanceGroupsListInstances instances = compute.instanceGroups().listInstances(projectId, zone, instanceGroupNameWithoutAz,
+                        new InstanceGroupsListInstancesRequest()).execute();
+                return CollectionUtils.isEmpty(instances.getItems()) ? Optional.empty() : Optional.ofNullable(instanceGroupNameWithoutAz);
+            } else {
+                throw e;
+            }
+        }
     }
 
     @Override
