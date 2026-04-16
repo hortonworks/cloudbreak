@@ -257,7 +257,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
     }
 
     private Set<String> getHostsWithSaltFailure(StackDto stackDto) {
-        if (config.isSaltCheckEnabled()) {
+        if (config.isSaltCheckEnabled() && !Set.of(Status.STOPPED, Status.DELETED_ON_PROVIDER_SIDE).contains(stackDto.getStatus())) {
             GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stackDto);
             Optional<Set<String>> failedMinions = saltSyncService.checkSaltMinions(gatewayConfig);
             if (failedMinions.isPresent()) {
