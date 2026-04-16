@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.api.service;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -209,7 +210,8 @@ public class ExposedServiceCollector {
         LOGGER.debug("Loading exposed-services.json");
         String exposedServiceDefinition = cloudbreakResourceReaderService.resourceDefinition("exposed-services");
         try {
-            JsonUtil.readValue(exposedServiceDefinition, ExposedServices.class).getServices()
+            JsonUtil.readValue(exposedServiceDefinition, ExposedServices.class)
+                    .getServices()
                     .forEach(exposedService -> exposedServices.put(exposedService.getName(), exposedService));
             String exposedServiceNames = String.join(",", exposedServices.keySet());
             LOGGER.info("The following exposed service(s) has loaded (in total: {}): {}", exposedServices.size(), exposedServiceNames);
@@ -259,5 +261,9 @@ public class ExposedServiceCollector {
         } else {
             return tls ? exposedService.getTlsPort() : exposedService.getPort();
         }
+    }
+
+    public List<ExposedService> getExposedServices() {
+        return exposedServices.values().stream().collect(Collectors.toList());
     }
 }

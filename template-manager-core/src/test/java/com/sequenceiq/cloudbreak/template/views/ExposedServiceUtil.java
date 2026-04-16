@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.template.views;
 
+import java.util.Set;
+
 import com.sequenceiq.cloudbreak.api.service.ExposedService;
 
 public class ExposedServiceUtil {
@@ -8,19 +10,28 @@ public class ExposedServiceUtil {
     }
 
     public static ExposedService exposedService(String name) {
-        ExposedService exposedService = new ExposedService();
-        exposedService.setApiIncluded(true);
-        exposedService.setApiOnly(true);
-        exposedService.setDisplayName(name);
-        exposedService.setKnoxService(name);
-        exposedService.setKnoxUrl(name);
-        exposedService.setName(name);
-        exposedService.setPort(1);
-        exposedService.setServiceName(name);
-        exposedService.setSsoSupported(true);
-        exposedService.setTlsPort(1);
-        exposedService.setVisibleForDatahub(true);
-        exposedService.setVisibleForDatalake(true);
+        ExposedService exposedService = new ExposedService(
+                name,
+                name,
+                name,
+                name,
+                "/impala",
+                name,
+                true,
+                1,
+                80,
+                true,
+                true,
+                true,
+                true,
+                true,
+                "",
+                "",
+                "",
+                true,
+                "",
+                Set.of()
+        );
         return exposedService;
     }
 }

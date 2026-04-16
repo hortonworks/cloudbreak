@@ -32,8 +32,7 @@ public class DeclaredVersionService {
         SupportedServices supportedServices = new SupportedServices();
         supportedServices.setServices(new HashSet<>());
         CmTemplateProcessor cmTemplateProcessor = cmTemplateProcessorFactory.get(blueprintText);
-        Collection<ExposedService> exposedServices = exposedServiceCollector
-                .filterSupportedKnoxServices(Optional.ofNullable(cmTemplateProcessor.getTemplate().getCdhVersion()))
+        Collection<ExposedService> exposedServices = exposedServiceCollector.getExposedServices()
                 .stream()
                 .filter(e -> e.isSsoSupported())
                 .filter(e -> !e.isApiOnly())
@@ -45,9 +44,10 @@ public class DeclaredVersionService {
                     .flatMap(Collection::stream)
                     .map(ApiClusterTemplateRoleConfigGroup::getRoleType)
                     .collect(Collectors.toSet());
+            serviceNames.add(service.getServiceType());
 
             Optional<ExposedService> exposedService = exposedServices.stream()
-                    .filter(e -> serviceNames.contains(e.getServiceName()))
+                    .filter(e -> isExposed(e, serviceNames))
                     .findFirst();
 
             if (exposedService.isPresent()) {
@@ -61,6 +61,11 @@ public class DeclaredVersionService {
             }
         }
         return supportedServices;
+    }
+
+    private boolean isExposed(ExposedService exposedService, Collection<String> exposedRoleTypes) {
+        return exposedRoleTypes.contains(exposedService.getServiceName())
+                || (exposedService.getRoleTypes() != null && exposedService.getRoleTypes().stream().anyMatch(exposedRoleTypes::contains));
     }
 
 }

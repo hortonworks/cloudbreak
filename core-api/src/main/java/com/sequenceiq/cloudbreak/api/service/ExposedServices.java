@@ -1,20 +1,22 @@
 package com.sequenceiq.cloudbreak.api.service;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ExposedServices {
 
-    private Set<ExposedService> services = new HashSet<>();
+    private List<ExposedService> services;
 
-    public Set<ExposedService> getServices() {
-        return services;
+    @JsonCreator
+    public ExposedServices(@JsonProperty("services") List<ExposedService> services) {
+        this.services = services;
     }
 
-    public void setServices(Set<ExposedService> services) {
-        this.services = services;
+    public List<ExposedService> getServices() {
+        return services;
     }
 }

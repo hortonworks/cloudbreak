@@ -74,9 +74,10 @@ class GrainPropertiesServiceTest {
 
     @BeforeEach
     public void init() {
-        ExposedService namenode = new ExposedService();
-        namenode.setName("NAMENODE");
-        namenode.setServiceName("NAMENODE");
+        ExposedService namenode = ExposedService.builder()
+                .withName("NAMENODE")
+                .withServiceName("NAMENODE")
+                .build();
         when(exposedServiceCollector.getNameNodeService()).thenReturn(namenode);
         Stack stack = new Stack();
         stack.setId(1L);

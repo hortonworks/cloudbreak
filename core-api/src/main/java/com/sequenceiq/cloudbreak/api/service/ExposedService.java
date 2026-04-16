@@ -1,8 +1,13 @@
 package com.sequenceiq.cloudbreak.api.service;
 
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class ExposedService {
 
@@ -43,6 +48,80 @@ public class ExposedService {
     private boolean withoutProxyPath;
 
     private String minHttpsVersion;
+
+    private Set<String> roleTypes = new HashSet<>();
+
+    private ExposedService(Builder builder) {
+        this.name = builder.name;
+        this.displayName = builder.displayName;
+        this.serviceName = builder.serviceName;
+        this.knoxService = builder.knoxService;
+        this.knoxUrl = builder.knoxUrl;
+        this.iconKey = builder.iconKey;
+        this.ssoSupported = builder.ssoSupported;
+        this.port = builder.port;
+        this.tlsPort = builder.tlsPort;
+        this.apiOnly = builder.apiOnly;
+        this.cmProxied = builder.cmProxied;
+        this.apiIncluded = builder.apiIncluded;
+        this.visibleForDatalake = builder.visibleForDatalake;
+        this.visibleForDatahub = builder.visibleForDatahub;
+        this.entitlement = builder.entitlement;
+        this.minVersion = builder.minVersion;
+        this.maxVersion = builder.maxVersion;
+        this.withoutProxyPath = builder.withoutProxyPath;
+        this.minHttpsVersion = builder.minHttpsVersion;
+        this.roleTypes = builder.roleTypes;
+    }
+
+    @JsonCreator
+    public ExposedService(
+            @JsonProperty("name") String name,
+            @JsonProperty("displayName") String displayName,
+            @JsonProperty("serviceName") String serviceName,
+            @JsonProperty("knoxService") String knoxService,
+            @JsonProperty("knoxUrl") String knoxUrl,
+            @JsonProperty("iconKey") String iconKey,
+            @JsonProperty("ssoSupported") boolean ssoSupported,
+            @JsonProperty("port") Integer port,
+            @JsonProperty("tlsPort") Integer tlsPort,
+            @JsonProperty("apiOnly") boolean apiOnly,
+            @JsonProperty("cmProxied") boolean cmProxied,
+            @JsonProperty("apiIncluded") boolean apiIncluded,
+            @JsonProperty("visibleForDatalake") boolean visibleForDatalake,
+            @JsonProperty("visibleForDatahub") boolean visibleForDatahub,
+            @JsonProperty("entitlement") String entitlement,
+            @JsonProperty("minVersion") String minVersion,
+            @JsonProperty("maxVersion") String maxVersion,
+            @JsonProperty("withoutProxyPath") boolean withoutProxyPath,
+            @JsonProperty("minHttpsVersion") String minHttpsVersion,
+            @JsonProperty("roleTypes") Set<String> roleTypes
+    ) {
+        this.name = name;
+        this.displayName = displayName;
+        this.serviceName = serviceName;
+        this.knoxService = knoxService;
+        this.knoxUrl = knoxUrl;
+        this.iconKey = iconKey;
+        this.ssoSupported = ssoSupported;
+        this.port = port;
+        this.tlsPort = tlsPort;
+        this.apiOnly = apiOnly;
+        this.cmProxied = cmProxied;
+        this.apiIncluded = apiIncluded;
+        this.visibleForDatalake = visibleForDatalake;
+        this.visibleForDatahub = visibleForDatahub;
+        this.entitlement = entitlement;
+        this.minVersion = minVersion;
+        this.maxVersion = maxVersion;
+        this.withoutProxyPath = withoutProxyPath;
+        this.minHttpsVersion = minHttpsVersion;
+        this.roleTypes = roleTypes;
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
 
     public String getName() {
         return name;
@@ -200,6 +279,14 @@ public class ExposedService {
         this.iconKey = iconKey;
     }
 
+    public Set<String> getRoleTypes() {
+        return roleTypes;
+    }
+
+    public void setRoleTypes(Set<String> roleTypes) {
+        this.roleTypes = roleTypes;
+    }
+
     //CHECKSTYLE:OFF: CyclomaticComplexity
     @Override
     public boolean equals(Object o) {
@@ -227,6 +314,7 @@ public class ExposedService {
                 Objects.equals(entitlement, that.entitlement) &&
                 Objects.equals(withoutProxyPath, that.withoutProxyPath) &&
                 Objects.equals(minHttpsVersion, that.minHttpsVersion) &&
+                Objects.equals(roleTypes, that.roleTypes) &&
                 Objects.equals(tlsPort, that.tlsPort);
     }
     //CHECKSTYLE:ON
@@ -235,7 +323,7 @@ public class ExposedService {
     public int hashCode() {
         return Objects.hash(name, displayName, serviceName, knoxService, knoxUrl, ssoSupported, port, tlsPort,
                 apiOnly, apiIncluded, visibleForDatahub, visibleForDatalake, minVersion, minHttpsVersion,
-                maxVersion, entitlement, withoutProxyPath, iconKey);
+                maxVersion, entitlement, withoutProxyPath, iconKey, roleTypes);
     }
 
     @Override
@@ -257,8 +345,158 @@ public class ExposedService {
                 ", minVersion=" + minVersion +
                 ", maxVersion=" + maxVersion +
                 ", entitlement=" + entitlement +
+                ", roleTypes=" + roleTypes +
                 ", minHttpsVersion=" + minHttpsVersion +
                 ", withoutProxyPath=" + withoutProxyPath +
                 '}';
+    }
+
+    public static final class Builder {
+        private String name;
+
+        private String displayName;
+
+        private String serviceName;
+
+        private String knoxService;
+
+        private String knoxUrl;
+
+        private String iconKey;
+
+        private boolean ssoSupported;
+
+        private Integer port;
+
+        private Integer tlsPort;
+
+        private boolean apiOnly;
+
+        private boolean cmProxied;
+
+        private boolean apiIncluded;
+
+        private boolean visibleForDatalake;
+
+        private boolean visibleForDatahub;
+
+        private String entitlement;
+
+        private String minVersion;
+
+        private String maxVersion;
+
+        private boolean withoutProxyPath;
+
+        private String minHttpsVersion;
+
+        private Set<String> roleTypes = new HashSet<>();
+
+        private Builder() {
+        }
+
+        public Builder withName(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public Builder withDisplayName(String displayName) {
+            this.displayName = displayName;
+            return this;
+        }
+
+        public Builder withServiceName(String serviceName) {
+            this.serviceName = serviceName;
+            return this;
+        }
+
+        public Builder withKnoxService(String knoxService) {
+            this.knoxService = knoxService;
+            return this;
+        }
+
+        public Builder withKnoxUrl(String knoxUrl) {
+            this.knoxUrl = knoxUrl;
+            return this;
+        }
+
+        public Builder withIconKey(String iconKey) {
+            this.iconKey = iconKey;
+            return this;
+        }
+
+        public Builder withSsoSupported(boolean ssoSupported) {
+            this.ssoSupported = ssoSupported;
+            return this;
+        }
+
+        public Builder withPort(Integer port) {
+            this.port = port;
+            return this;
+        }
+
+        public Builder withTlsPort(Integer tlsPort) {
+            this.tlsPort = tlsPort;
+            return this;
+        }
+
+        public Builder withApiOnly(boolean apiOnly) {
+            this.apiOnly = apiOnly;
+            return this;
+        }
+
+        public Builder withCmProxied(boolean cmProxied) {
+            this.cmProxied = cmProxied;
+            return this;
+        }
+
+        public Builder withApiIncluded(boolean apiIncluded) {
+            this.apiIncluded = apiIncluded;
+            return this;
+        }
+
+        public Builder withVisibleForDatalake(boolean visibleForDatalake) {
+            this.visibleForDatalake = visibleForDatalake;
+            return this;
+        }
+
+        public Builder withVisibleForDatahub(boolean visibleForDatahub) {
+            this.visibleForDatahub = visibleForDatahub;
+            return this;
+        }
+
+        public Builder withEntitlement(String entitlement) {
+            this.entitlement = entitlement;
+            return this;
+        }
+
+        public Builder withMinVersion(String minVersion) {
+            this.minVersion = minVersion;
+            return this;
+        }
+
+        public Builder withMaxVersion(String maxVersion) {
+            this.maxVersion = maxVersion;
+            return this;
+        }
+
+        public Builder withWithoutProxyPath(boolean withoutProxyPath) {
+            this.withoutProxyPath = withoutProxyPath;
+            return this;
+        }
+
+        public Builder withMinHttpsVersion(String minHttpsVersion) {
+            this.minHttpsVersion = minHttpsVersion;
+            return this;
+        }
+
+        public Builder withRoleTypes(Set<String> roleTypes) {
+            this.roleTypes = roleTypes;
+            return this;
+        }
+
+        public ExposedService build() {
+            return new ExposedService(this);
+        }
     }
 }

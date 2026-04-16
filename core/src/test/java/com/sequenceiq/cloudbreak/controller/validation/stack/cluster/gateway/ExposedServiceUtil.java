@@ -8,19 +8,20 @@ public class ExposedServiceUtil {
     }
 
     public static ExposedService exposedService(String name) {
-        ExposedService exposedService = new ExposedService();
-        exposedService.setApiIncluded(true);
-        exposedService.setApiOnly(true);
-        exposedService.setDisplayName(name);
-        exposedService.setKnoxService(name);
-        exposedService.setKnoxUrl(name);
-        exposedService.setName(name);
-        exposedService.setPort(1);
-        exposedService.setServiceName(name);
-        exposedService.setSsoSupported(true);
-        exposedService.setTlsPort(1);
-        exposedService.setVisibleForDatalake(true);
-        exposedService.setVisibleForDatahub(true);
+        ExposedService exposedService = ExposedService.builder()
+                .withApiIncluded(true)
+                .withApiOnly(true)
+                .withDisplayName(name)
+                .withKnoxService(name)
+                .withKnoxUrl(name)
+                .withName(name)
+                .withTlsPort(1)
+                .withPort(1)
+                .withServiceName(name)
+                .withSsoSupported(true)
+                .withVisibleForDatalake(true)
+                .withVisibleForDatahub(true)
+                .build();
         return exposedService;
     }
 }

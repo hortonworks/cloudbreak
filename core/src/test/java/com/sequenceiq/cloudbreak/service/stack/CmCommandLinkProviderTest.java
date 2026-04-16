@@ -102,8 +102,9 @@ public class CmCommandLinkProviderTest {
     }
 
     private ExposedService exposedService() {
-        ExposedService service = new ExposedService();
-        service.setServiceName(CM_UI_SVC_NAME);
+        ExposedService service = ExposedService.builder()
+                .withServiceName(CM_UI_SVC_NAME)
+                .build();
         return service;
     }
 

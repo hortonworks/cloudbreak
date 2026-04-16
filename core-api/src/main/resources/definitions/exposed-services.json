@@ -538,7 +538,10 @@
       "apiOnly": true,
       "apiIncluded": true,
       "visibleForDatalake": true,
-      "visibleForDatahub": true
+      "visibleForDatahub": true,
+      "roleTypes": [
+        "IMPALAD"
+      ]
     },
     {
       "name": "IMPALA_DEBUG_UI",
@@ -552,7 +555,10 @@
       "apiOnly": false,
       "apiIncluded": false,
       "visibleForDatalake": true,
-      "visibleForDatahub": true
+      "visibleForDatahub": true,
+      "roleTypes": [
+        "IMPALAD"
+      ]
     },
     {
       "name": "NAMENODE_HDFS",
