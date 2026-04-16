@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.cm;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -9,7 +8,6 @@ import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -43,8 +41,6 @@ import com.cloudera.api.swagger.model.ApiRoleList;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.model.AltusCredential;
-import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
-import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
@@ -110,9 +106,6 @@ class ClouderaManagerMgmtTelemetryServiceTest {
 
     @Mock
     private MeteringServiceFieldResolver meteringServiceFieldResolver;
-
-    @Mock
-    private ClusterComponentConfigProvider clusterComponentConfigProvider;
 
     @Captor
     private ArgumentCaptor<ApiConfigList> apiConfigListCaptor;
@@ -259,11 +252,6 @@ class ClouderaManagerMgmtTelemetryServiceTest {
             stack.setPlatformVariant("govCloud");
         }
         if (!govCloud) {
-            ClouderaManagerRepo clouderaManagerRepo = new ClouderaManagerRepo();
-            clouderaManagerRepo.setVersion("7.12.0");
-            clouderaManagerRepo.setBuildNumber("72192357");
-            when(clusterComponentConfigProvider.getClouderaManagerRepoDetails(stack.getCluster().getId()))
-                    .thenReturn(clouderaManagerRepo);
             when(clouderaManagerApiFactory.getMgmtRoleConfigGroupsResourceApi(apiClient)).thenReturn(mgmtRoleConfigGroupsResourceApi);
             CmTemplateProcessor cmTemplateProcessor = mock(CmTemplateProcessor.class);
             if (StackType.WORKLOAD.equals(stackType)) {
@@ -354,48 +342,5 @@ class ClouderaManagerMgmtTelemetryServiceTest {
                 .map(line -> line.split("="))
                 .filter(parts -> parts.length == 2)
                 .anyMatch(parts -> parts[0].equals(configKey) && parts[1].equals(configValue));
-    }
-
-    @Test
-    void testHasCdpMetadataKey() throws ApiException {
-        // Setup common mocks
-        when(clouderaManagerApiFactory.getMgmtRoleConfigGroupsResourceApi(apiClient)).thenReturn(mgmtRoleConfigGroupsResourceApi);
-        stack.setResourceCrn("crn:cdp:datalake:us-west-1:accountId:datalake:name");
-        stack.setType(StackType.DATALAKE);
-        // Version > 7.13.2.0 should include CDP metadata safety valve
-        assertTrue(verifyCdpMetadataKeyPresence("7.14.0", "50000000"));
-        // Version == 7.13.2.0 and build GBN >= threshold should include CDP metadata safety valve
-        assertTrue(verifyCdpMetadataKeyPresence("7.13.2.0", "72192360"));
-        assertTrue(verifyCdpMetadataKeyPresence("7.13.2.0", "72192358"));
-        // Version == 7.13.2.0 and build GBN < threshold should NOT include CDP metadata safety valve
-        assertFalse(verifyCdpMetadataKeyPresence("7.13.2.0", "72192357"));
-        // Version < 7.13.2.0 should NOT include CDP metadata safety valve
-        assertFalse(verifyCdpMetadataKeyPresence("7.13.1", "72192360"));
-        assertFalse(verifyCdpMetadataKeyPresence("7.12.0", "72192360"));
-        // Invalid build number should NOT include CDP metadata safety valve
-        assertFalse(verifyCdpMetadataKeyPresence("7.13.2.0", "invalid_gbn"));
-        // Null or empty version should NOT include CDP metadata safety valve
-        assertFalse(verifyCdpMetadataKeyPresence(null, "72192360"));
-        assertFalse(verifyCdpMetadataKeyPresence("", "72192360"));
-        // Null or empty build number should NOT include CDP metadata safety valve
-        assertFalse(verifyCdpMetadataKeyPresence("7.13.2.0", null));
-        assertFalse(verifyCdpMetadataKeyPresence("7.13.2.0", ""));
-    }
-
-    private boolean verifyCdpMetadataKeyPresence(String cmVersion, String buildGbn) throws ApiException {
-        ClouderaManagerRepo repo = new ClouderaManagerRepo();
-        repo.setVersion(cmVersion);
-        repo.setBuildNumber(buildGbn);
-        when(clusterComponentConfigProvider.getClouderaManagerRepoDetails(stack.getCluster().getId()))
-                .thenReturn(repo);
-        underTest.updateTelemetryConfigs(stack, apiClient, telemetry, SDX_CONTEXT_NAME, SDX_STACK_CRN, proxyConfig);
-        verify(mgmtRoleConfigGroupsResourceApi).updateConfig(eq("MGMT-TELEMETRYPUBLISHER-BASE"), apiConfigListCaptor.capture(),
-                eq("Set configs for Telemetry publisher by CB"));
-        ApiConfigList apiConfigList = apiConfigListCaptor.getValue();
-        // Reset invocations for the next call
-        clearInvocations(mgmtRoleConfigGroupsResourceApi);
-        // Check if telemetrypublisher_cdp_metadata_safety_valve config is present
-        return apiConfigList.getItems().stream()
-                .anyMatch(config -> "telemetrypublisher_cdp_metadata_safety_valve".equals(config.getName()));
     }
 }
