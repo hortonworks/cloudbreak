@@ -169,7 +169,8 @@ public class NifiUpgradeValidatorTest {
     @ParameterizedTest
     @ValueSource(strings = {
             "7.2.17 - Flow Management Light Duty with Apache NiFi, Apache NiFi Registry, Schema Registry",
-            "7.2.18 - Flow Management Heavy Duty with Apache NiFi, Apache NiFi Registry, Schema Registry"
+            "7.2.18 - Flow Management Heavy Duty with Apache NiFi, Apache NiFi Registry, Schema Registry",
+            "GOES 7.2.16 - Flow Management Light Duty with Apache NiFi, Apache Nifi Registry"
     })
     public void testValidateShouldThrowExceptionWhenUpgradingToCdp732WithNifi1TemplateWithoutOsUpgrade(String blueprintName) {
         when(cmTemplateService.isServiceTypePresent(SERVICE_TYPE, BLUEPRINT_TEXT)).thenReturn(true);
