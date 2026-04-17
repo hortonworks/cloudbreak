@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -106,14 +107,13 @@ public class SaltBootstrap implements OrchestratorBootstrap {
             }
         }
 
-        MinionIpAddressesResponse minionIpAddressesResponse = saltStateService.collectMinionIpAddresses(sc);
-        if (minionIpAddressesResponse != null) {
-            originalTargets.forEach(node -> {
-                if (!minionIpAddressesResponse.getAllIpAddresses().contains(node.getPrivateIp())) {
-                    LOGGER.info("Salt-minion is not responding on host: {}, yet", node);
-                    targets.add(node);
-                }
-            });
+        List<MinionIpAddressesResponse> minionIpAddressesResponses = saltStateService.collectMinionIpAddresses(saltConnectors);
+        if (minionIpAddressesResponses != null) {
+            if (minionIpAddressesResponses.stream().anyMatch(Objects::isNull)) {
+                throw new CloudbreakOrchestratorFailedException("Minions ip address collection returned null value from " + sc.getHostname());
+            } else {
+                addMissingMinionsToTarget(minionIpAddressesResponses);
+            }
         } else {
             throw new CloudbreakOrchestratorFailedException("Minions ip address collection returned null value from " + sc.getHostname());
         }
@@ -123,6 +123,19 @@ public class SaltBootstrap implements OrchestratorBootstrap {
         }
         LOGGER.debug("Bootstrapping of nodes completed: {}", originalTargets.size());
         return true;
+    }
+
+    private void addMissingMinionsToTarget(List<MinionIpAddressesResponse> minionIpAddressesResponses) {
+        minionIpAddressesResponses.stream()
+                .filter(Objects::nonNull)
+                .forEach(minionIpAddressesResponse -> {
+                    originalTargets.forEach(node -> {
+                        if (!minionIpAddressesResponse.getAllIpAddresses().contains(node.getPrivateIp())) {
+                            LOGGER.info("Salt-minion is not responding on host: {}, yet", node);
+                            targets.add(node);
+                        }
+                    });
+                });
     }
 
     private void handleMinionAcceptingError(CloudbreakOrchestratorFailedException e) throws CloudbreakOrchestratorFailedException {

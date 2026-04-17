@@ -7,6 +7,7 @@ import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 import static java.lang.String.format;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -299,6 +300,12 @@ public class SaltStateService {
 
     public MinionIpAddressesResponse collectMinionIpAddresses(SaltConnector sc) {
         return collectMinionIpAddresses(sc, Optional.empty());
+    }
+
+    public List<MinionIpAddressesResponse> collectMinionIpAddresses(Collection<SaltConnector> saltConnectors) {
+        return saltConnectors.stream()
+                .map(sc -> collectMinionIpAddresses(sc, Optional.empty()))
+                .toList();
     }
 
     public MinionIpAddressesResponse collectMinionIpAddresses(SaltConnector sc, Optional<Set<String>> targets) {

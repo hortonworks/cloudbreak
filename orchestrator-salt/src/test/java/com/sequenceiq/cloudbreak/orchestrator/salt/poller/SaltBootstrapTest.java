@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -12,6 +13,7 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -88,7 +90,7 @@ class SaltBootstrapTest {
         when(saltStateService.bootstrap(eq(saltConnector), any(), any(), any())).thenReturn(genericResponses);
 
         minionIpAddressesResponse = new MinionIpAddressesResponse();
-        when(saltStateService.collectMinionIpAddresses(eq(saltConnector))).thenReturn(minionIpAddressesResponse);
+        lenient().when(saltStateService.collectMinionIpAddresses(eq(List.of(saltConnector)))).thenReturn(List.of(minionIpAddressesResponse));
     }
 
     @Test
@@ -142,4 +144,89 @@ class SaltBootstrapTest {
                 .isInstanceOf(CloudbreakOrchestratorFailedException.class);
     }
 
+    @Test
+    void callWithMultipleConnectorsTest() throws Exception {
+        SaltConnector saltConnector1 = mock(SaltConnector.class);
+        SaltConnector saltConnector2 = mock(SaltConnector.class);
+        Collection<SaltConnector> saltConnectors = List.of(saltConnector1, saltConnector2);
+
+        // All connectors must return all minions for success
+        MinionIpAddressesResponse response1 = new MinionIpAddressesResponse();
+        List<Map<String, JsonNode>> result1 = new ArrayList<>();
+        Map<String, JsonNode> ipAddressesForMinions1 = new HashMap<>();
+        ipAddressesForMinions1.put("10-0-0-1.example.com", JsonUtil.readTree("[\"10.0.0.1\"]"));
+        ipAddressesForMinions1.put("10-0-0-2.example.com", JsonUtil.readTree("[\"10.0.0.2\"]"));
+        ipAddressesForMinions1.put("10-0-0-3.example.com", JsonUtil.readTree("[\"10.0.0.3\"]"));
+        result1.add(ipAddressesForMinions1);
+        response1.setResult(result1);
+
+        MinionIpAddressesResponse response2 = new MinionIpAddressesResponse();
+        List<Map<String, JsonNode>> result2 = new ArrayList<>();
+        Map<String, JsonNode> ipAddressesForMinions2 = new HashMap<>();
+        ipAddressesForMinions2.put("10-0-0-1.example.com", JsonUtil.readTree("[\"10.0.0.1\"]"));
+        ipAddressesForMinions2.put("10-0-0-2.example.com", JsonUtil.readTree("[\"10.0.0.2\"]"));
+        ipAddressesForMinions2.put("10-0-0-3.example.com", JsonUtil.readTree("[\"10.0.0.3\"]"));
+        result2.add(ipAddressesForMinions2);
+        response2.setResult(result2);
+
+        when(saltStateService.collectMinionIpAddresses(saltConnectors)).thenReturn(List.of(response1, response2));
+
+        Set<Node> targets = new HashSet<>();
+        targets.add(new Node("10.0.0.1", null, null, "hg"));
+        targets.add(new Node("10.0.0.2", null, null, "hg"));
+        targets.add(new Node("10.0.0.3", null, null, "hg"));
+
+        BootstrapParams params = new BootstrapParams();
+        SaltBootstrap saltBootstrap = spy(new SaltBootstrap(saltStateService, minionUtil, saltConnector, saltConnectors, gatewayConfigs, targets, params));
+        doReturn(mock(MinionAcceptor.class)).when(saltBootstrap).createMinionAcceptor();
+
+        saltBootstrap.call();
+
+        verify(saltStateService, times(1)).bootstrap(saltConnector, params, gatewayConfigs, targets);
+        verify(saltStateService, times(1)).collectMinionIpAddresses(saltConnectors);
+    }
+
+    @Test
+    void callWithMultipleConnectorsFailTest() throws IOException {
+        SaltConnector saltConnector1 = mock(SaltConnector.class);
+        SaltConnector saltConnector2 = mock(SaltConnector.class);
+        Collection<SaltConnector> saltConnectors = List.of(saltConnector1, saltConnector2);
+
+        // response1 is missing 10.0.0.2 and 10.0.0.3
+        MinionIpAddressesResponse response1 = new MinionIpAddressesResponse();
+        List<Map<String, JsonNode>> result1 = new ArrayList<>();
+        Map<String, JsonNode> ipAddressesForMinions1 = new HashMap<>();
+        ipAddressesForMinions1.put("10-0-0-1.example.com", JsonUtil.readTree("[\"10.0.0.1\"]"));
+        result1.add(ipAddressesForMinions1);
+        response1.setResult(result1);
+
+        // response2 is missing 10.0.0.1 and 10.0.0.3
+        MinionIpAddressesResponse response2 = new MinionIpAddressesResponse();
+        List<Map<String, JsonNode>> result2 = new ArrayList<>();
+        Map<String, JsonNode> ipAddressesForMinions2 = new HashMap<>();
+        ipAddressesForMinions2.put("10-0-0-2.example.com", JsonUtil.readTree("[\"10.0.0.2\"]"));
+        result2.add(ipAddressesForMinions2);
+        response2.setResult(result2);
+
+        when(saltStateService.collectMinionIpAddresses(saltConnectors)).thenReturn(List.of(response1, response2));
+
+        Set<Node> targets = new HashSet<>();
+        targets.add(new Node("10.0.0.1", null, null, "hg"));
+        targets.add(new Node("10.0.0.2", null, null, "hg"));
+        String missingNodeIp = "10.0.0.3";
+        targets.add(new Node(missingNodeIp, null, null, "hg"));
+
+        SaltBootstrap saltBootstrap = spy(new SaltBootstrap(saltStateService, minionUtil, saltConnector, saltConnectors, gatewayConfigs, targets,
+                new BootstrapParams()));
+        doReturn(mock(MinionAcceptor.class)).when(saltBootstrap).createMinionAcceptor();
+
+        // All three IPs will be considered missing because each was absent from at least one response
+        assertThatThrownBy(saltBootstrap::call)
+                .hasMessageContaining("10.0.0.1")
+                .hasMessageContaining("10.0.0.2")
+                .hasMessageContaining("10.0.0.3")
+                .isInstanceOf(CloudbreakOrchestratorFailedException.class);
+
+        verify(saltStateService, times(1)).collectMinionIpAddresses(saltConnectors);
+    }
 }
