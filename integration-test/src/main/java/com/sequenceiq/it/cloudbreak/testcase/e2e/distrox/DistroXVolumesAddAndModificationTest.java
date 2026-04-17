@@ -1,6 +1,7 @@
 package com.sequenceiq.it.cloudbreak.testcase.e2e.distrox;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -37,6 +38,7 @@ import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2EWithReusableResourcesTest;
 import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
 import com.sequenceiq.it.cloudbreak.util.DistroxUtil;
+import com.sequenceiq.it.cloudbreak.util.InstanceHostDiskAssertions;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
 public class DistroXVolumesAddAndModificationTest extends AbstractE2EWithReusableResourcesTest {
@@ -79,6 +81,9 @@ public class DistroXVolumesAddAndModificationTest extends AbstractE2EWithReusabl
 
     @Inject
     private SELinuxAssertions selinuxAssertions;
+
+    @Inject
+    private InstanceHostDiskAssertions instanceHostDiskAssertions;
 
     @Override
     protected void setupClass(TestContext testContext) {
@@ -249,6 +254,9 @@ public class DistroXVolumesAddAndModificationTest extends AbstractE2EWithReusabl
                     TEST_INSTANCE_GROUP, misalignedVolumes, UPDATE_SIZE, expectedVolumeType));
         }
 
+        instanceHostDiskAssertions.assertMountPointsAtLeastProvisionedSize(distroXTestDto.getResponse().getInstanceGroups(), TEST_INSTANCE_GROUP,
+            hadoopFsMountsExpectedGiB(attachedVolumesWithGroup, UPDATE_SIZE),
+            "additional volume resize (df/lsblk)");
     }
 
     private void validateDeletedDisk(DistroXTestDto distroXTestDto, TestContext tc, CloudbreakClient client) {
@@ -305,6 +313,9 @@ public class DistroXVolumesAddAndModificationTest extends AbstractE2EWithReusabl
                     TEST_INSTANCE_GROUP, misalignedVolumes, ADD_DISK_SIZE, expectedVolumeType));
         }
 
+        instanceHostDiskAssertions.assertMountPointsAtLeastProvisionedSize(distroXTestDto.getResponse().getInstanceGroups(), TEST_INSTANCE_GROUP,
+            hadoopFsMountsExpectedGiB(attachedVolumesWithGroup, ADD_DISK_SIZE),
+            "added volume sizing (df/lsblk)");
     }
 
     private List<String> getVolumesOnCloudProvider(DistroXTestDto distroXTestDto, TestContext tc, CloudbreakClient client, String volumeType) {
@@ -421,5 +432,16 @@ public class DistroXVolumesAddAndModificationTest extends AbstractE2EWithReusabl
                     DB_INSTANCE_GROUP, misalignedVolumes, DB_UPDATE_SIZE, expectedVolumeType));
         }
 
+        instanceHostDiskAssertions.assertMountPointsAtLeastProvisionedSize(distroXTestDto.getResponse().getInstanceGroups(), DB_INSTANCE_GROUP,
+            Map.of("/dbfs", DB_UPDATE_SIZE), "database volume resize (df/lsblk)");
+    }
+
+    private Map<String, Integer> hadoopFsMountsExpectedGiB(Set<VolumeV4Response> attachedVolumesWithGroup, int sizeGiB) {
+        int volumeCount = attachedVolumesWithGroup.stream().mapToInt(VolumeV4Response::getCount).sum();
+        Map<String, Integer> mounts = new LinkedHashMap<>();
+        for (int i = 1; i <= volumeCount; i++) {
+            mounts.put("/hadoopfs/fs" + i, sizeGiB);
+        }
+        return mounts;
     }
 }
