@@ -12,6 +12,7 @@ import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.environment.environment.flow.hybrid.setup.event.EnvironmentCrossRealmTrustSetupEvent;
 import com.sequenceiq.environment.environment.flow.hybrid.setup.event.EnvironmentCrossRealmTrustSetupFailedEvent;
+import com.sequenceiq.environment.environment.service.ClusterAvailabilityValidator;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
@@ -19,6 +20,12 @@ import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 public class EnvironmentValidateCrossRealmTrustSetupHandler extends ExceptionCatcherEventHandler<EnvironmentCrossRealmTrustSetupEvent> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentValidateCrossRealmTrustSetupHandler.class);
+
+    private final ClusterAvailabilityValidator clusterAvailabilityValidator;
+
+    public EnvironmentValidateCrossRealmTrustSetupHandler(ClusterAvailabilityValidator clusterAvailabilityValidator) {
+        this.clusterAvailabilityValidator = clusterAvailabilityValidator;
+    }
 
     @Override
     public String selector() {
@@ -34,8 +41,11 @@ public class EnvironmentValidateCrossRealmTrustSetupHandler extends ExceptionCat
     protected Selectable doAccept(HandlerEvent<EnvironmentCrossRealmTrustSetupEvent> environmentCrossRealmTrustSetupEvent) {
         LOGGER.debug("In EnvironmentValidateCrossRealmTrustSetupHandler.accept");
         try {
+            EnvironmentCrossRealmTrustSetupEvent data = environmentCrossRealmTrustSetupEvent.getData();
+            LOGGER.debug("Validating cluster availability for environment CRN: {}", data.getResourceCrn());
+            clusterAvailabilityValidator.validateAllClustersAvailable(data.getResourceCrn());
             LOGGER.debug("TRUST_SETUP_EVENT event sent");
-            return environmentCrossRealmTrustSetupEvent.getData().toBuilder()
+            return data.toBuilder()
                     .withSelector(TRUST_SETUP_EVENT.selector())
                     .build();
         } catch (Exception e) {

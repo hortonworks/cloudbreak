@@ -4,7 +4,9 @@ import static com.sequenceiq.environment.environment.EnvironmentStatus.TRUST_SET
 import static com.sequenceiq.environment.environment.flow.hybrid.setup.event.EnvironmentCrossRealmTrustSetupHandlerSelectors.TRUST_SETUP_VALIDATION_HANDLER;
 import static com.sequenceiq.environment.environment.flow.hybrid.setup.event.EnvironmentCrossRealmTrustSetupStateSelectors.TRUST_SETUP_EVENT;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -18,10 +20,16 @@ import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.environment.environment.flow.hybrid.setup.event.EnvironmentCrossRealmTrustSetupEvent;
 import com.sequenceiq.environment.environment.flow.hybrid.setup.event.EnvironmentCrossRealmTrustSetupFailedEvent;
+import com.sequenceiq.environment.environment.service.ClusterAvailabilityValidator;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
 @ExtendWith(MockitoExtension.class)
 class EnvironmentValidateCrossRealmTrustSetupHandlerTest {
+
+    private static final String ENV_CRN = "crn:env:100";
+
+    @Mock
+    private ClusterAvailabilityValidator clusterAvailabilityValidator;
 
     @Mock
     private HandlerEvent<EnvironmentCrossRealmTrustSetupEvent> handlerEvent;
@@ -33,12 +41,12 @@ class EnvironmentValidateCrossRealmTrustSetupHandlerTest {
 
     @BeforeEach
     void setUp() {
-        handler = new EnvironmentValidateCrossRealmTrustSetupHandler();
+        handler = new EnvironmentValidateCrossRealmTrustSetupHandler(clusterAvailabilityValidator);
 
         eventData = EnvironmentCrossRealmTrustSetupEvent.builder()
                 .withAccountId("1")
                 .withResourceId(100L)
-                .withResourceCrn("crn:env:100")
+                .withResourceCrn(ENV_CRN)
                 .withRemoteEnvironmentCrn("crn:remote:200")
                 .withResourceName("env-name")
                 .withKdcRealm("REALM")
@@ -46,7 +54,6 @@ class EnvironmentValidateCrossRealmTrustSetupHandlerTest {
                 .withKdcIp("1.2.3.4")
                 .withTrustSecret("secret")
                 .build();
-
     }
 
     @Test
@@ -55,6 +62,7 @@ class EnvironmentValidateCrossRealmTrustSetupHandlerTest {
 
         Selectable result = handler.doAccept(handlerEvent);
 
+        verify(clusterAvailabilityValidator).validateAllClustersAvailable(ENV_CRN);
         assertThat(result).isInstanceOf(EnvironmentCrossRealmTrustSetupEvent.class);
         EnvironmentCrossRealmTrustSetupEvent newEvent = (EnvironmentCrossRealmTrustSetupEvent) result;
 
@@ -62,6 +70,21 @@ class EnvironmentValidateCrossRealmTrustSetupHandlerTest {
         assertThat(newEvent.getResourceCrn()).isEqualTo(eventData.getResourceCrn());
         assertThat(newEvent.getResourceId()).isEqualTo(eventData.getResourceId());
         assertThat(newEvent.getKdcRealm()).isEqualTo(eventData.getKdcRealm());
+    }
+
+    @Test
+    void testDoAcceptValidationFailureReturnsFailedEvent() {
+        when(handlerEvent.getData()).thenReturn(eventData);
+        doThrow(new jakarta.ws.rs.BadRequestException("clusters not available"))
+                .when(clusterAvailabilityValidator).validateAllClustersAvailable(ENV_CRN);
+
+        Selectable result = handler.doAccept(handlerEvent);
+
+        assertThat(result).isInstanceOf(EnvironmentCrossRealmTrustSetupFailedEvent.class);
+        EnvironmentCrossRealmTrustSetupFailedEvent failedEvent = (EnvironmentCrossRealmTrustSetupFailedEvent) result;
+
+        assertThat(failedEvent.getEnvironmentStatus()).isEqualTo(TRUST_SETUP_VALIDATION_FAILED);
+        assertThat(failedEvent.getException().getMessage()).contains("clusters not available");
     }
 
     @Test

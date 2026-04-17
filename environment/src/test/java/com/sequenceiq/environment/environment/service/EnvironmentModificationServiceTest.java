@@ -149,6 +149,9 @@ class EnvironmentModificationServiceTest {
     private FreeIpaService freeIpaService;
 
     @MockBean
+    private ClusterAvailabilityValidator clusterAvailabilityValidator;
+
+    @MockBean
     private EventSenderService eventSenderService;
 
     @MockBean

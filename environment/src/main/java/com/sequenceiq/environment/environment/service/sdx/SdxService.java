@@ -75,6 +75,16 @@ public class SdxService {
         }
     }
 
+    public List<SdxClusterResponse> listByEnvironmentCrn(String environmentCrn) {
+        try {
+            return sdxEndpoint.getByEnvCrn(environmentCrn, false);
+        } catch (WebApplicationException e) {
+            String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
+            LOGGER.error(String.format("Failed to list SDX clusters by environment CRN '%s' due to '%s'.", environmentCrn, errorMessage), e);
+            throw new SdxOperationFailedException(errorMessage, e);
+        }
+    }
+
     public SdxStopValidationResponse isStoppable(String crn) {
         try {
             String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();

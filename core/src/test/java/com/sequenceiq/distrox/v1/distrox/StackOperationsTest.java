@@ -35,12 +35,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackAddVolumesRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackDeleteVolumesRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.SaltPasswordStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackEndpointV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
@@ -351,6 +353,37 @@ class StackOperationsTest {
         assertEquals(2, deletedStacks.size());
         assertEquals(stackStatusV4Response1, deletedStacks.get(0));
         assertEquals(stackStatusV4Response2, deletedStacks.get(1));
+    }
+
+    @Test
+    void testGetStatusForInternalCrns() {
+        List<String> crns = List.of("crn1", "crn2");
+        StackClusterStatusView view1 = mock(StackClusterStatusView.class);
+        StackClusterStatusView view2 = mock(StackClusterStatusView.class);
+        StackStatusV4Responses expected = new StackStatusV4Responses();
+        when(stackService.getStatusesByCrnsInternal(crns, StackType.WORKLOAD)).thenReturn(List.of(view1, view2));
+        when(stackClusterStatusViewToStatusConverter.convert(List.of(view1, view2))).thenReturn(expected);
+
+        StackStatusV4Responses result = underTest.getStatusForInternalCrns(crns, StackType.WORKLOAD);
+
+        assertThat(result).isSameAs(expected);
+        verify(stackService).getStatusesByCrnsInternal(crns, StackType.WORKLOAD);
+    }
+
+    @Test
+    void testGetStatusForInternalEnvironmentCrn() {
+        String environmentCrn = "crn:cdp:environments:us-west-1:1234:environment:e1";
+        StackClusterStatusView view1 = mock(StackClusterStatusView.class);
+        StackStatusV4Response statusResponse = new StackStatusV4Response();
+        statusResponse.setStatus(Status.AVAILABLE);
+        StackStatusV4Responses expected = new StackStatusV4Responses();
+        when(stackService.getStatusesByEnvironmentCrn(environmentCrn)).thenReturn(List.of(view1));
+        when(stackClusterStatusViewToStatusConverter.convert(List.of(view1))).thenReturn(expected);
+
+        StackStatusV4Responses result = underTest.getStatusForInternalEnvironmentCrn(environmentCrn);
+
+        assertThat(result).isSameAs(expected);
+        verify(stackService).getStatusesByEnvironmentCrn(environmentCrn);
     }
 
     @Test
