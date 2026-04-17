@@ -258,7 +258,7 @@ public class VerticalScalingValidatorService {
             volumeTemplate.setVolumeCount(addVolumesRequest.getNumberOfDisks().intValue());
             volumeTemplate.setVolumeSize(addVolumesRequest.getSize().intValue());
             volumeTemplate.setVolumeType(addVolumesRequest.getType());
-            instanceGroup.getTemplate().getVolumeTemplates().add(volumeTemplate);
+            instanceGroup.getTemplate().setVolumeTemplates(Set.of(volumeTemplate));
             templateValidatorAndUpdater.validateGroupForVerticalScale(
                     credentialService.getByEnvironmentCrn(stack.getEnvironmentCrn()),
                     instanceGroup,

@@ -1287,6 +1287,12 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     }
 
     @Override
+    public void updateRoleConfigByServiceType(String clusterName, String roleType, String serviceType, Map<String, String> config)
+            throws CloudbreakException {
+        configService.updateRoleConfigByServiceType(v31Client, clusterName, roleType, serviceType, config);
+    }
+
+    @Override
     public Optional<String> getServiceConfigValue(String clusterName, String serviceType, String configName) {
         return configService.getServiceConfigValue(v31Client, clusterName, serviceType, configName);
     }
