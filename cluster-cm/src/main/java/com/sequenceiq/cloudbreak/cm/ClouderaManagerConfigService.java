@@ -116,7 +116,7 @@ public class ClouderaManagerConfigService {
     Optional<String> getServiceName(String clusterName, String serviceType, ServicesResourceApi servicesResourceApi) {
         Objects.requireNonNull(serviceType);
         try {
-            LOGGER.debug("Looking for service of name {} in cluster {}", serviceType, clusterName);
+            LOGGER.debug("Looking for service of type {} in cluster {}", serviceType, clusterName);
             ApiServiceList serviceList = servicesResourceApi.readServices(clusterName, DataView.SUMMARY.name());
             return serviceList.getItems().stream()
                     .filter(service -> serviceType.equalsIgnoreCase(service.getType()))
@@ -143,6 +143,23 @@ public class ClouderaManagerConfigService {
         } catch (ApiException | NotFoundException e) {
             LOGGER.debug("Failed to get configuration: {} for cluster {}, roleType {}, and serviceType {}", configName, clusterName, roleType, serviceType, e);
             return Optional.empty();
+        }
+    }
+
+    public void updateRoleConfigByServiceType(ApiClient apiClient, String clusterName, String roleType, String serviceType, Map<String, String> config)
+            throws CloudbreakException {
+        LOGGER.debug("Updating role config for cluster {}, roleType {}, serviceType {}, config keys: {}",
+                clusterName, roleType, serviceType, config.keySet());
+        RoleConfigGroupsResourceApi roleConfigGroupsResourceApi = clouderaManagerApiFactory.getRoleConfigGroupsResourceApi(apiClient);
+        ServicesResourceApi servicesResourceApi = clouderaManagerApiFactory.getServicesResourceApi(apiClient);
+        try {
+            String serviceName = getServiceNameValue(clusterName, serviceType, servicesResourceApi);
+            String roleConfigGroupName = getRoleConfigGroupNameByTypeAndServiceName(roleType, clusterName, serviceName, roleConfigGroupsResourceApi);
+            modifyRoleConfigGroup(apiClient, clusterName, serviceName, roleConfigGroupName, config);
+        } catch (ApiException | NotFoundException e) {
+            LOGGER.error("Failed to update role config for cluster {}, roleType {}, serviceType {}", clusterName, roleType, serviceType, e);
+            throw new CloudbreakException(
+                    String.format("Failed to update role config for roleType %s in service %s: %s", roleType, serviceType, e.getMessage()), e);
         }
     }
 
