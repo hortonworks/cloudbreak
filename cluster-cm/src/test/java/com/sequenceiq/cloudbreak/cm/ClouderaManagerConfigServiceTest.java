@@ -44,6 +44,7 @@ import com.cloudera.api.swagger.model.ApiServiceList;
 import com.cloudera.api.swagger.model.ApiVersionInfo;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.cm.exception.ClouderaManagerOperationFailedException;
+import com.sequenceiq.cloudbreak.service.CloudbreakException;
 
 @ExtendWith(MockitoExtension.class)
 public class ClouderaManagerConfigServiceTest {
@@ -407,6 +408,78 @@ public class ClouderaManagerConfigServiceTest {
 
         assertThrows(ClouderaManagerOperationFailedException.class, () -> underTest.modifyRoleConfigGroup(API_CLIENT, "cluster",
                 "service", "roleConfigGroup", Map.of("config", "newvalue")));
+
+        verify(roleConfigGroupsResourceApi).updateRoleConfigGroup(any(), any(), any(), any(), any());
+    }
+
+    @Test
+    public void testUpdateRoleConfigByServiceTypeSuccess() throws Exception {
+        RoleConfigGroupsResourceApi roleConfigGroupsResourceApi = mock(RoleConfigGroupsResourceApi.class);
+        when(clouderaManagerApiFactory.getRoleConfigGroupsResourceApi(API_CLIENT)).thenReturn(roleConfigGroupsResourceApi);
+        when(clouderaManagerApiFactory.getServicesResourceApi(API_CLIENT)).thenReturn(servicesResourceApi);
+        List<ApiService> services = List.of(createApiService(NIFI_SERVICE, NIFI_SERVICE_TYPE));
+        when(servicesResourceApi.readServices(eq(TEST_CLUSTER_NAME), any())).thenReturn(createApiServiceList(services));
+        ApiRoleConfigGroupList configGroupList = createApiRoleConfigGroups(List.of(createConfigGroup(NIFI_CONFIG_GROUP, NIFI_ROLE)));
+        when(roleConfigGroupsResourceApi.readRoleConfigGroups(TEST_CLUSTER_NAME, NIFI_SERVICE)).thenReturn(configGroupList);
+        when(roleConfigGroupsResourceApi.updateRoleConfigGroup(any(), any(), any(), any(), any())).thenReturn(new ApiRoleConfigGroup());
+
+        String configKey = "inter.broker.protocol.version";
+        String configValue = "3.5";
+        underTest.updateRoleConfigByServiceType(API_CLIENT, TEST_CLUSTER_NAME, NIFI_ROLE, NIFI_SERVICE_TYPE, Map.of(configKey, configValue));
+
+        ArgumentCaptor<ApiRoleConfigGroup> bodyCaptor = ArgumentCaptor.forClass(ApiRoleConfigGroup.class);
+        verify(roleConfigGroupsResourceApi).updateRoleConfigGroup(
+                eq(TEST_CLUSTER_NAME), eq(NIFI_CONFIG_GROUP), eq(NIFI_SERVICE), bodyCaptor.capture(), eq(""));
+        assertTrue(bodyCaptor.getValue().getConfig().getItems().stream()
+                .anyMatch(c -> configKey.equals(c.getName()) && configValue.equals(c.getValue())));
+    }
+
+    @Test
+    public void testUpdateRoleConfigByServiceTypeWhenServiceTypeNotFound() throws Exception {
+        RoleConfigGroupsResourceApi roleConfigGroupsResourceApi = mock(RoleConfigGroupsResourceApi.class);
+        when(clouderaManagerApiFactory.getRoleConfigGroupsResourceApi(API_CLIENT)).thenReturn(roleConfigGroupsResourceApi);
+        when(clouderaManagerApiFactory.getServicesResourceApi(API_CLIENT)).thenReturn(servicesResourceApi);
+        when(servicesResourceApi.readServices(eq(TEST_CLUSTER_NAME), any())).thenReturn(createApiServiceList(List.of(createApiService("SPARK", "SPARK-ROLE"))));
+
+        CloudbreakException exception = assertThrows(CloudbreakException.class,
+                () -> underTest.updateRoleConfigByServiceType(API_CLIENT, TEST_CLUSTER_NAME, NIFI_ROLE, NIFI_SERVICE_TYPE, Map.of("k", "v")));
+
+        assertTrue(exception.getMessage().contains("Failed to update role config"));
+        assertTrue(exception.getMessage().contains(NIFI_ROLE));
+        assertTrue(exception.getMessage().contains(NIFI_SERVICE_TYPE));
+        verify(roleConfigGroupsResourceApi, never()).updateRoleConfigGroup(any(), any(), any(), any(), any());
+    }
+
+    @Test
+    public void testUpdateRoleConfigByServiceTypeWhenRoleTypeNotFound() throws Exception {
+        RoleConfigGroupsResourceApi roleConfigGroupsResourceApi = mock(RoleConfigGroupsResourceApi.class);
+        when(clouderaManagerApiFactory.getRoleConfigGroupsResourceApi(API_CLIENT)).thenReturn(roleConfigGroupsResourceApi);
+        when(clouderaManagerApiFactory.getServicesResourceApi(API_CLIENT)).thenReturn(servicesResourceApi);
+        List<ApiService> services = List.of(createApiService(NIFI_SERVICE, NIFI_SERVICE_TYPE));
+        when(servicesResourceApi.readServices(eq(TEST_CLUSTER_NAME), any())).thenReturn(createApiServiceList(services));
+        ApiRoleConfigGroupList configGroupList = createApiRoleConfigGroups(List.of(createConfigGroup("OTHER-GROUP", "OTHER-ROLE")));
+        when(roleConfigGroupsResourceApi.readRoleConfigGroups(TEST_CLUSTER_NAME, NIFI_SERVICE)).thenReturn(configGroupList);
+
+        CloudbreakException exception = assertThrows(CloudbreakException.class,
+                () -> underTest.updateRoleConfigByServiceType(API_CLIENT, TEST_CLUSTER_NAME, NIFI_ROLE, NIFI_SERVICE_TYPE, Map.of("k", "v")));
+
+        assertTrue(exception.getMessage().contains("Failed to update role config"));
+        verify(roleConfigGroupsResourceApi, never()).updateRoleConfigGroup(any(), any(), any(), any(), any());
+    }
+
+    @Test
+    public void testUpdateRoleConfigByServiceTypeWhenCmUpdateFails() throws Exception {
+        RoleConfigGroupsResourceApi roleConfigGroupsResourceApi = mock(RoleConfigGroupsResourceApi.class);
+        when(clouderaManagerApiFactory.getRoleConfigGroupsResourceApi(API_CLIENT)).thenReturn(roleConfigGroupsResourceApi);
+        when(clouderaManagerApiFactory.getServicesResourceApi(API_CLIENT)).thenReturn(servicesResourceApi);
+        List<ApiService> services = List.of(createApiService(NIFI_SERVICE, NIFI_SERVICE_TYPE));
+        when(servicesResourceApi.readServices(eq(TEST_CLUSTER_NAME), any())).thenReturn(createApiServiceList(services));
+        ApiRoleConfigGroupList configGroupList = createApiRoleConfigGroups(List.of(createConfigGroup(NIFI_CONFIG_GROUP, NIFI_ROLE)));
+        when(roleConfigGroupsResourceApi.readRoleConfigGroups(TEST_CLUSTER_NAME, NIFI_SERVICE)).thenReturn(configGroupList);
+        when(roleConfigGroupsResourceApi.updateRoleConfigGroup(any(), any(), any(), any(), any())).thenThrow(new ApiException("cm error"));
+
+        assertThrows(ClouderaManagerOperationFailedException.class,
+                () -> underTest.updateRoleConfigByServiceType(API_CLIENT, TEST_CLUSTER_NAME, NIFI_ROLE, NIFI_SERVICE_TYPE, Map.of("k", "v")));
 
         verify(roleConfigGroupsResourceApi).updateRoleConfigGroup(any(), any(), any(), any(), any());
     }

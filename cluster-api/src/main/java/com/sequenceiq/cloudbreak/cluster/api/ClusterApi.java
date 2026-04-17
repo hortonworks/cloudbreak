@@ -180,6 +180,11 @@ public interface ClusterApi {
         return clusterModificationService().getRoleConfigValueByServiceType(clusterName, roleConfigGroup, serviceType, configName);
     }
 
+    default void updateRoleConfigByServiceType(String clusterName, String roleType, String serviceType, Map<String, String> config)
+            throws CloudbreakException {
+        clusterModificationService().updateRoleConfigByServiceType(clusterName, roleType, serviceType, config);
+    }
+
     default boolean isRolePresent(String clusterName, String roleConfigGroup, String serviceType) {
         return clusterModificationService().isRolePresent(clusterName, roleConfigGroup, serviceType);
     }
