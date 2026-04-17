@@ -4,9 +4,11 @@ import static com.sequenceiq.cloudbreak.constant.AwsPlatformResourcesFilterConst
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -151,18 +153,15 @@ public class TemplateValidatorAndUpdater {
                 stack.getPlatformVariant(),
                 stackType,
                 Map.of(ARCHITECTURE, stack.getArchitectureName()));
-        VmType vmType = null;
         Platform platform = Platform.platform(template.getCloudPlatform());
         Map<String, Set<VmType>> machines = cloudVmTypes.getCloudVmResponses();
         String locationString = locationService.location(stack.getRegion(), stack.getAvailabilityZone());
-        if (machines.containsKey(locationString) && !machines.get(locationString).isEmpty()) {
-            for (VmType type : machines.get(locationString)) {
-                if (type.value().equals(template.getInstanceType())) {
-                    vmType = type;
-                    break;
-                }
-            }
-        }
+        VmType vmType = Optional.ofNullable(machines.get(locationString))
+                .orElse(Collections.emptySet())
+                .stream()
+                .filter(type -> type.value().equals(template.getInstanceType()))
+                .findFirst()
+                .orElse(null);
         validateVolumeTemplates(template, vmType, platform, validationBuilder, instanceGroup, stack);
         validateMaximumVolumeSize(template, vmType, validationBuilder);
     }
@@ -180,18 +179,16 @@ public class TemplateValidatorAndUpdater {
     private void validateVolumeTemplates(Template value, VmType vmType, Platform platform,
             ValidationResult.ValidationResultBuilder validationBuilder, InstanceGroup instanceGroup, Stack stack) {
         for (VolumeTemplate volumeTemplate : value.getVolumeTemplates()) {
-            VolumeParameterType volumeParameterType = null;
             Map<Platform, Map<String, VolumeParameterType>> disks = diskMappings.get();
-            if (disks.containsKey(platform) && !disks.get(platform).isEmpty()) {
-                Map<String, VolumeParameterType> map = disks.get(platform);
-                volumeParameterType = map.get(volumeTemplate.getVolumeType());
-                if (volumeParameterType == null) {
-                    validationBuilder.error(
-                            String.format("The '%s' volume type isn't supported by '%s' platform", volumeTemplate.getVolumeType(), platform.value()));
-                }
+            Optional<VolumeParameterType> volumeParameterType = Optional.ofNullable(disks.get(platform))
+                    .flatMap(platformDisks -> Optional.ofNullable(platformDisks.get(volumeTemplate.getVolumeType())));
+
+            if (volumeParameterType.isEmpty()) {
+                validationBuilder.error(String.format("The '%s' volume type isn't supported by '%s' platform",
+                        volumeTemplate.getVolumeType(), platform.value()));
             }
 
-            validateVolume(volumeTemplate, vmType, platform, volumeParameterType, validationBuilder, instanceGroup, stack);
+            validateVolume(volumeTemplate, vmType, platform, volumeParameterType.orElse(null), validationBuilder, instanceGroup, stack);
         }
     }
 
