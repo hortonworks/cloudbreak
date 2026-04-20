@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.handler;
 
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftFinalizationHandlerSelectors.FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftFinalizationStateSelectors.FINISH_FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftFinalizationStateSelectors.START_REMOVE_UNUSED_ZOOKEEPER_AFTER_KRAFT_FINALIZATION_EVENT;
 
 import jakarta.inject.Inject;
 
@@ -47,7 +47,7 @@ public class MigrateZookeeperToKraftFinalizationHandler extends ExceptionCatcher
             LOGGER.error("Finalize Zookeeper to KRaft migration failed.", e);
             return new MigrateZookeeperToKraftFinalizationFailureEvent(stackId, e);
         }
-        return new MigrateZookeeperToKraftFinalizationEvent(FINISH_FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT.name(), stackId);
+        return new MigrateZookeeperToKraftFinalizationEvent(START_REMOVE_UNUSED_ZOOKEEPER_AFTER_KRAFT_FINALIZATION_EVENT.name(), stackId);
     }
 
     @Override

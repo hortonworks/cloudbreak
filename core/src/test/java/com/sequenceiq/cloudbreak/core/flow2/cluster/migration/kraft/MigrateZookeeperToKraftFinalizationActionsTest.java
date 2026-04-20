@@ -8,10 +8,12 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_FAI
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftFinalizationHandlerSelectors.FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftFinalizationHandlerSelectors.FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_VALIDATION_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftFinalizationHandlerSelectors.REMOVE_UNUSED_ZOOKEEPER_AFTER_KRAFT_FINALIZATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftFinalizationStateSelectors.FINALIZE_FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftFinalizationStateSelectors.FINISH_FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftFinalizationStateSelectors.HANDLED_FAILED_FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftFinalizationStateSelectors.START_FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftFinalizationStateSelectors.START_REMOVE_UNUSED_ZOOKEEPER_AFTER_KRAFT_FINALIZATION_EVENT;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_KRAFT_MIGRATION_FINALIZATION_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_KRAFT_MIGRATION_FINALIZATION_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_KRAFT_MIGRATION_FINALIZATION_STARTED_EVENT;
@@ -113,6 +115,24 @@ class MigrateZookeeperToKraftFinalizationActionsTest {
         verify(flowMessageService).fireEventAndLog(event.getResourceId(), UPDATE_IN_PROGRESS.name(), CLUSTER_KRAFT_MIGRATION_FINALIZATION_STARTED_EVENT);
         verify(eventBus).notify(captor.capture(), eventCaptor.capture());
         assertEquals(FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT.event(), captor.getValue());
+        assertEquals(STACK_ID, ReflectionTestUtils.getField(eventCaptor.getValue().getData(), "stackId"));
+    }
+
+    @Test
+    void testRemoveUnusedZookeeperAfterKraftFinalizationAction() throws Exception {
+        MigrateZookeeperToKraftFinalizationEvent event =
+                new MigrateZookeeperToKraftFinalizationEvent(START_REMOVE_UNUSED_ZOOKEEPER_AFTER_KRAFT_FINALIZATION_EVENT.name(), STACK_ID);
+        doReturn(new Event<>(new Event.Headers(new HashMap<>()), event)).when(reactorEventFactory).createEvent(any(), any());
+
+        AbstractMigrateZookeeperToKraftAction<MigrateZookeeperToKraftFinalizationEvent> action =
+                (AbstractMigrateZookeeperToKraftAction<MigrateZookeeperToKraftFinalizationEvent>) underTest.removeUnusedZookeeperAfterKraftFinalizationAction();
+        initActionPrivateFields(action);
+        context = new MigrateZookeeperToKraftContext(flowParameters, event);
+        new AbstractActionTestSupport<>(action).doExecute(context, event, variables);
+
+        ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
+        verify(eventBus).notify(captor.capture(), eventCaptor.capture());
+        assertEquals(REMOVE_UNUSED_ZOOKEEPER_AFTER_KRAFT_FINALIZATION_EVENT.event(), captor.getValue());
         assertEquals(STACK_ID, ReflectionTestUtils.getField(eventCaptor.getValue().getData(), "stackId"));
     }
 

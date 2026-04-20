@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.handler;
 
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftFinalizationHandlerSelectors.FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftFinalizationStateSelectors.FAILED_FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftFinalizationStateSelectors.FINISH_FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftFinalizationStateSelectors.START_REMOVE_UNUSED_ZOOKEEPER_AFTER_KRAFT_FINALIZATION_EVENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.mockito.Mockito.doThrow;
@@ -54,7 +54,7 @@ class MigrateZookeeperToKraftFinalizationHandlerTest {
         Selectable result = underTest.doAccept(event);
 
         assertInstanceOf(MigrateZookeeperToKraftFinalizationEvent.class, result);
-        assertEquals(FINISH_FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT.name(), result.getSelector());
+        assertEquals(START_REMOVE_UNUSED_ZOOKEEPER_AFTER_KRAFT_FINALIZATION_EVENT.name(), result.getSelector());
         verify(clusterApi).finalizeZookeeperToKraftMigration(stackDto);
     }
 

@@ -8,6 +8,7 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_FAI
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftFinalizationHandlerSelectors.FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftFinalizationHandlerSelectors.FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_VALIDATION_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftFinalizationHandlerSelectors.REMOVE_UNUSED_ZOOKEEPER_AFTER_KRAFT_FINALIZATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftFinalizationStateSelectors.FINALIZE_FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftFinalizationStateSelectors.HANDLED_FAILED_FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_KRAFT_MIGRATION_FINALIZATION_FAILED_EVENT;
@@ -90,6 +91,32 @@ public class MigrateZookeeperToKraftFinalizationActions {
                 stackUpdater.updateStackStatus(stackId, FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_IN_PROGRESS);
                 flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), CLUSTER_KRAFT_MIGRATION_FINALIZATION_STARTED_EVENT);
                 String nextEvent = FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT.event();
+                sendEvent(context, nextEvent, new MigrateZookeeperToKraftFinalizationEvent(nextEvent, payload.getResourceId()));
+            }
+
+            @Override
+            protected Object getFailurePayload(MigrateZookeeperToKraftFinalizationEvent payload, Optional<MigrateZookeeperToKraftContext> flowContext,
+                    Exception ex) {
+                return new MigrateZookeeperToKraftFinalizationFailureEvent(payload.getResourceId(), ex);
+            }
+        };
+    }
+
+    @Bean(name = "REMOVE_UNUSED_ZOOKEEPER_AFTER_KRAFT_FINALIZATION_STATE")
+    public Action<?, ?> removeUnusedZookeeperAfterKraftFinalizationAction() {
+        return new AbstractMigrateZookeeperToKraftAction<>(MigrateZookeeperToKraftFinalizationEvent.class) {
+
+            @Override
+            protected MigrateZookeeperToKraftContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext,
+                    MigrateZookeeperToKraftFinalizationEvent payload) {
+                return MigrateZookeeperToKraftContext.from(flowParameters, payload);
+            }
+
+            @Override
+            protected void doExecute(MigrateZookeeperToKraftContext context, MigrateZookeeperToKraftFinalizationEvent payload,
+                    Map<Object, Object> variables) {
+                LOGGER.debug("Remove unused ZooKeeper after KRaft finalization started {}", payload);
+                String nextEvent = REMOVE_UNUSED_ZOOKEEPER_AFTER_KRAFT_FINALIZATION_EVENT.event();
                 sendEvent(context, nextEvent, new MigrateZookeeperToKraftFinalizationEvent(nextEvent, payload.getResourceId()));
             }
 

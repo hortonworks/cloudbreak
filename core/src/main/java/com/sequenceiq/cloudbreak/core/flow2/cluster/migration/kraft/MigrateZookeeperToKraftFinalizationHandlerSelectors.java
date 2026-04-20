@@ -5,7 +5,8 @@ import com.sequenceiq.flow.core.FlowEvent;
 public enum MigrateZookeeperToKraftFinalizationHandlerSelectors implements FlowEvent {
 
     FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_VALIDATION_EVENT,
-    FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT;
+    FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT,
+    REMOVE_UNUSED_ZOOKEEPER_AFTER_KRAFT_FINALIZATION_EVENT;
 
     @Override
     public String event() {

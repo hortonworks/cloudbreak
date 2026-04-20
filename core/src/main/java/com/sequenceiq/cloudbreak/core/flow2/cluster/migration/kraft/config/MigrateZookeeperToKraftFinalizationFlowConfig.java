@@ -6,12 +6,15 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.Migra
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftFinalizationState.FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_VALIDATION_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftFinalizationState.FINAL_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftFinalizationState.INIT_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftFinalizationState.REMOVE_UNUSED_ZOOKEEPER_AFTER_KRAFT_FINALIZATION_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftFinalizationStateSelectors.FAILED_FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftFinalizationStateSelectors.FINALIZE_FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftFinalizationStateSelectors.FINISH_FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftFinalizationStateSelectors.FINISH_REMOVE_UNUSED_ZOOKEEPER_AFTER_KRAFT_FINALIZATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftFinalizationStateSelectors.HANDLED_FAILED_FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftFinalizationStateSelectors.START_FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftFinalizationStateSelectors.START_FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_VALIDATION_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftFinalizationStateSelectors.START_REMOVE_UNUSED_ZOOKEEPER_AFTER_KRAFT_FINALIZATION_EVENT;
 
 import java.util.List;
 
@@ -42,8 +45,12 @@ public class MigrateZookeeperToKraftFinalizationFlowConfig extends StackStatusFi
                     .event(FINISH_FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT)
                     .defaultFailureEvent()
 
-                    .from(FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_STATE).to(FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_FINISHED_STATE)
-                    .event(FINISH_FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_EVENT)
+                    .from(FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_STATE).to(REMOVE_UNUSED_ZOOKEEPER_AFTER_KRAFT_FINALIZATION_STATE)
+                    .event(START_REMOVE_UNUSED_ZOOKEEPER_AFTER_KRAFT_FINALIZATION_EVENT)
+                    .defaultFailureEvent()
+
+                    .from(REMOVE_UNUSED_ZOOKEEPER_AFTER_KRAFT_FINALIZATION_STATE).to(FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_FINISHED_STATE)
+                    .event(FINISH_REMOVE_UNUSED_ZOOKEEPER_AFTER_KRAFT_FINALIZATION_EVENT)
                     .defaultFailureEvent()
 
                     .from(FINALIZE_ZOOKEEPER_TO_KRAFT_MIGRATION_FINISHED_STATE).to(FINAL_STATE)
