@@ -38,7 +38,7 @@ public class FreeIpaPollerService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaPollerService.class);
 
-    @Value("${env.stop.polling.attempt:180}")
+    @Value("${env.stop.polling.attempt:360}")
     private Integer startStopAttempt;
 
     @Value("${env.upgradeccm.freeipa.polling.attempt:60}")
