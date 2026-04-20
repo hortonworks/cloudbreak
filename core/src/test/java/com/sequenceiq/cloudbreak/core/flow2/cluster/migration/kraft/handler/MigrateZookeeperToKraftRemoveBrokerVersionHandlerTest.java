@@ -5,7 +5,6 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.Migra
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.migration.kraft.MigrateZookeeperToKraftConfigurationStateSelectors.FINISH_MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_EVENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
@@ -103,7 +102,28 @@ class MigrateZookeeperToKraftRemoveBrokerVersionHandlerTest {
         verify(clusterApi).updateRoleConfigByServiceType(eq(CLUSTER_NAME), eq(KAFKA_BROKER_ROLE), eq(KAFKA_SERVICE), brokerConfigCaptor.capture());
         Map<String, String> config = brokerConfigCaptor.getValue();
         assertEquals(1, config.size());
-        assertNull(config.get(INTER_BROKER_PROTOCOL_VERSION));
+        assertEquals("", config.get(INTER_BROKER_PROTOCOL_VERSION));
+    }
+
+    @Test
+    void testDoAcceptSkipsUpdateWhenInterBrokerProtocolVersionBlank() throws Exception {
+        MigrateZookeeperToKraftConfigurationEvent request = new MigrateZookeeperToKraftConfigurationEvent(
+                MIGRATE_ZOOKEEPER_TO_KRAFT_REMOVE_BROKER_VERSION_EVENT.selector(), STACK_ID, NO_KRAFT_INSTALL_NEEDED);
+        HandlerEvent<MigrateZookeeperToKraftConfigurationEvent> event = new HandlerEvent<>(new Event<>(request));
+
+        when(stackDto.getCluster()).thenReturn(clusterView);
+        when(clusterView.getName()).thenReturn(CLUSTER_NAME);
+        when(stackDtoService.getById(STACK_ID)).thenReturn(stackDto);
+        when(clusterApiConnectors.getConnector(stackDto)).thenReturn(clusterApi);
+        when(clusterApi.getRoleConfigValueByServiceType(CLUSTER_NAME, KAFKA_BROKER_ROLE, KAFKA_SERVICE, INTER_BROKER_PROTOCOL_VERSION))
+                .thenReturn(Optional.of(""));
+
+        Selectable result = underTest.doAccept(event);
+
+        assertInstanceOf(MigrateZookeeperToKraftConfigurationEvent.class, result);
+        assertEquals(FINISH_MIGRATE_ZOOKEEPER_TO_KRAFT_CONFIGURATION_EVENT.name(), result.getSelector());
+        verify(clusterApi, never()).updateRoleConfigByServiceType(
+                eq(CLUSTER_NAME), eq(KAFKA_BROKER_ROLE), eq(KAFKA_SERVICE), anyMap());
     }
 
     @Test

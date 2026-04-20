@@ -56,12 +56,13 @@ public class MigrateZookeeperToKraftRemoveBrokerVersionHandler extends Exception
         String clusterName = stackDto.getCluster().getName();
         Optional<String> currentValue = connector.getRoleConfigValueByServiceType(
                 clusterName, KAFKA_BROKER_ROLE_TYPE, KAFKA_SERVICE_TYPE, INTER_BROKER_PROTOCOL_VERSION);
-        if (currentValue.isPresent()) {
+        Optional<String> valueToClear = currentValue.filter(value -> !value.isBlank());
+        if (valueToClear.isPresent()) {
             LOGGER.debug("Clearing {} (current value: [{}]) from {} role in {} service in cluster {}.",
-                    INTER_BROKER_PROTOCOL_VERSION, currentValue.get(), KAFKA_BROKER_ROLE_TYPE, KAFKA_SERVICE_TYPE, clusterName);
+                    INTER_BROKER_PROTOCOL_VERSION, valueToClear.get(), KAFKA_BROKER_ROLE_TYPE, KAFKA_SERVICE_TYPE, clusterName);
             try {
                 connector.updateRoleConfigByServiceType(clusterName, KAFKA_BROKER_ROLE_TYPE, KAFKA_SERVICE_TYPE,
-                        Collections.singletonMap(INTER_BROKER_PROTOCOL_VERSION, null));
+                        Collections.singletonMap(INTER_BROKER_PROTOCOL_VERSION, ""));
             } catch (Exception e) {
                 LOGGER.error("Removing broker version config during Zookeeper to KRaft migration failed.", e);
                 return new MigrateZookeeperToKraftConfigurationFailureEvent(stackId, e);
