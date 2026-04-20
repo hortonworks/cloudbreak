@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common.client;
 
-import com.sequenceiq.cloudbreak.service.Retry;
+import com.sequenceiq.cloudbreak.service.retry.Retry;
 
 import software.amazon.awssdk.services.efs.EfsClient;
 import software.amazon.awssdk.services.efs.model.CreateFileSystemRequest;

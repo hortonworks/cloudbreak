@@ -6,8 +6,8 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.client.RPCResponse;
-import com.sequenceiq.cloudbreak.service.Retry;
-import com.sequenceiq.cloudbreak.service.RetryService;
+import com.sequenceiq.cloudbreak.service.retry.Retry;
+import com.sequenceiq.cloudbreak.service.retry.RetryService;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.health.NodeHealthDetails;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.client.RetryableFreeIpaClientException;

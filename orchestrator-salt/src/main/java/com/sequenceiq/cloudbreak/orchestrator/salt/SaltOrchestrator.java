@@ -106,9 +106,9 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStateService;
 import com.sequenceiq.cloudbreak.orchestrator.salt.utils.GrainsJsonPropertyUtil;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
-import com.sequenceiq.cloudbreak.service.Retry;
-import com.sequenceiq.cloudbreak.service.RetryType;
 import com.sequenceiq.cloudbreak.service.executor.DelayedExecutorService;
+import com.sequenceiq.cloudbreak.service.retry.Retry;
+import com.sequenceiq.cloudbreak.service.retry.RetryType;
 import com.sequenceiq.cloudbreak.util.CompressUtil;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;

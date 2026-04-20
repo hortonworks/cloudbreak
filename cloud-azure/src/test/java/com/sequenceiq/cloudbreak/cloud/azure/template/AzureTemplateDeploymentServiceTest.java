@@ -46,8 +46,8 @@ import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
-import com.sequenceiq.cloudbreak.service.Retry;
-import com.sequenceiq.cloudbreak.service.RetryService;
+import com.sequenceiq.cloudbreak.service.retry.Retry;
+import com.sequenceiq.cloudbreak.service.retry.RetryService;
 
 @ExtendWith(MockitoExtension.class)
 class AzureTemplateDeploymentServiceTest {

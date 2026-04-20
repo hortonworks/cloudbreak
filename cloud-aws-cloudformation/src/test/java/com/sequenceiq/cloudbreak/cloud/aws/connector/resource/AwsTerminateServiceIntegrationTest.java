@@ -37,7 +37,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.template.compute.ComputeResourceService;
-import com.sequenceiq.cloudbreak.service.Retry;
+import com.sequenceiq.cloudbreak.service.retry.Retry;
 import com.sequenceiq.common.api.type.ResourceType;
 
 import software.amazon.awssdk.services.autoscaling.model.DescribeAutoScalingGroupsResponse;

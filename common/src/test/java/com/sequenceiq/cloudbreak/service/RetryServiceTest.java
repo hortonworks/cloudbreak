@@ -14,6 +14,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.service.retry.Retry;
+import com.sequenceiq.cloudbreak.service.retry.RetryErrorPatterns;
+import com.sequenceiq.cloudbreak.service.retry.RetryService;
+
 @ExtendWith(MockitoExtension.class)
 class RetryServiceTest {
 

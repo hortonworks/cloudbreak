@@ -22,7 +22,7 @@ import org.testng.TestNG;
 
 @Configuration
 @ComponentScan(basePackages = { "com.sequenceiq.it", "com.sequenceiq.cloudbreak.cloud.gcp.util",
-        "com.sequenceiq.cloudbreak.auth.crn", "com.sequenceiq.liftie" })
+        "com.sequenceiq.cloudbreak.auth.crn", "com.sequenceiq.liftie", "com.sequenceiq.cloudbreak.service.retry" })
 @EnableConfigurationProperties
 @EnableRetry
 @EnableAspectJAutoProxy(proxyTargetClass = true)

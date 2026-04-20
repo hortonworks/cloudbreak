@@ -15,6 +15,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import jakarta.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,6 +36,8 @@ import com.google.cloud.storage.Storage;
 import com.google.cloud.storage.Storage.BlobListOption;
 import com.google.cloud.storage.Storage.BlobSourceOption;
 import com.google.cloud.storage.StorageException;
+import com.sequenceiq.cloudbreak.service.retry.Retry;
+import com.sequenceiq.cloudbreak.service.retry.RetryService;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.util.gcp.client.GcpClient;
@@ -45,6 +49,9 @@ public class GcpClientActions extends GcpClient {
     protected static final int POLLING_INTERVAL = 10000;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GcpClientActions.class);
+
+    @Inject
+    private RetryService retryService;
 
     public Map<String, Map<String, String>> listTagsByInstanceId(List<String> instanceIds) {
         LOGGER.info("Collect tags/labels for instance ids: '{}'", String.join(", ", instanceIds));
@@ -436,14 +443,18 @@ public class GcpClientActions extends GcpClient {
         Map<String, String> availabilityZoneMap = new HashMap<>();
         Compute compute = buildCompute();
         for (Map.Entry<String, String> instanceInfo : instanceZoneMap.entrySet()) {
-            Instance instance = null;
             try {
-                instance = compute.instances().get(getProjectId(), instanceInfo.getValue(), instanceInfo.getKey()).execute();
-            } catch (IOException e) {
-
-            }
-            if (instance != null) {
-                availabilityZoneMap.put(instance.getName(), instance.getZone());
+                retryService.testWith2SecDelayMax5Times(() -> {
+                    try {
+                        Instance instance = compute.instances().get(getProjectId(), instanceInfo.getValue(), instanceInfo.getKey()).execute();
+                        availabilityZoneMap.put(instance.getName(), instance.getZone());
+                    } catch (Exception e) {
+                        LOGGER.warn("Failed to query instance {}", instanceInfo.getKey(), e);
+                        throw new Retry.ActionFailedException(e);
+                    }
+                });
+            } catch (Retry.ActionFailedException e) {
+                LOGGER.error("Failed to query instance {} even with retries", instanceInfo.getKey(), e);
             }
         }
         return availabilityZoneMap;

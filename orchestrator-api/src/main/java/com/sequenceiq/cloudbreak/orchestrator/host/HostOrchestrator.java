@@ -23,7 +23,7 @@ import com.sequenceiq.cloudbreak.orchestrator.model.MemoryInfo;
 import com.sequenceiq.cloudbreak.orchestrator.model.NodeReachabilityResult;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltConfig;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
-import com.sequenceiq.cloudbreak.service.RetryType;
+import com.sequenceiq.cloudbreak.service.retry.RetryType;
 
 public interface HostOrchestrator extends HostRecipeExecutor {
 

@@ -13,6 +13,9 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import com.sequenceiq.cloudbreak.service.retry.RetryErrorPatterns;
+import com.sequenceiq.cloudbreak.service.retry.RetryPredicates;
+
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = {RetryErrorPatterns.class, RetryPredicates.class})
 @EnableConfigurationProperties

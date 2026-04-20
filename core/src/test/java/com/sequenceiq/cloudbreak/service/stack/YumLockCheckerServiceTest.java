@@ -23,7 +23,7 @@ import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.service.CloudbreakRuntimeException;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
-import com.sequenceiq.cloudbreak.service.RetryType;
+import com.sequenceiq.cloudbreak.service.retry.RetryType;
 
 @ExtendWith(MockitoExtension.class)
 class YumLockCheckerServiceTest {

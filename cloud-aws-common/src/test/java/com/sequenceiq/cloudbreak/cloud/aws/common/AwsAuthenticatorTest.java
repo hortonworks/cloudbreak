@@ -41,7 +41,7 @@ import com.sequenceiq.cloudbreak.cloud.event.credential.CredentialVerificationEx
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
-import com.sequenceiq.cloudbreak.service.RetryService;
+import com.sequenceiq.cloudbreak.service.retry.RetryService;
 
 @ExtendWith(SpringExtension.class)
 class AwsAuthenticatorTest {

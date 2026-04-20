@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;
 
+import com.sequenceiq.cloudbreak.service.retry.Retry;
+
 class RetryTest {
 
     private static final String MESSAGE = "message";

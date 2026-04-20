@@ -7,8 +7,8 @@ import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsSdkErrorCodes.SERVIC
 
 import java.util.Set;
 
-import com.sequenceiq.cloudbreak.service.Retry;
-import com.sequenceiq.cloudbreak.service.Retry.ActionFailedException;
+import com.sequenceiq.cloudbreak.service.retry.Retry;
+import com.sequenceiq.cloudbreak.service.retry.Retry.ActionFailedException;
 
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
 import software.amazon.awssdk.services.pricing.PricingClient;
