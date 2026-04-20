@@ -278,7 +278,7 @@ public class ClouderaManagerConfigService {
             roleConfigGroupsResourceApi.updateRoleConfigGroup(clusterName, roleConfigGroupName, serviceName, apiRoleConfigGroup, "");
         } catch (ApiException e) {
             LOGGER.error("Failed to update role group config [{}] for role group {} of service {}",
-                    Joiner.on(",").withKeyValueSeparator("=").join(config), roleConfigGroupName, serviceName, e);
+                    Joiner.on(",").useForNull("null").withKeyValueSeparator("=").join(config), roleConfigGroupName, serviceName, e);
             throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
         }
     }
