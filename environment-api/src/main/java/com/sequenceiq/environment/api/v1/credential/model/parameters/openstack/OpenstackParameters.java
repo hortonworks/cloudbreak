@@ -16,7 +16,7 @@ public class OpenstackParameters implements Serializable {
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private String endpoint;
 
-    @Schema(requiredMode = Schema.RequiredMode.REQUIRED, allowableValues = "public, admin, internal")
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private String facing;
 
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
