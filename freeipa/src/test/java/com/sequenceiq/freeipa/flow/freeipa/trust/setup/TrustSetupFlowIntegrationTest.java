@@ -4,6 +4,7 @@ import static com.sequenceiq.common.api.type.Tunnel.CLUSTER_PROXY;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus.TRUST_SETUP_FAILED;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus.TRUST_SETUP_IN_PROGRESS;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.times;
@@ -37,6 +38,8 @@ import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessage
 import com.sequenceiq.cloudbreak.ha.NodeConfig;
 import com.sequenceiq.cloudbreak.ha.service.NodeValidator;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
+import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
+import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.core.FlowEventListener;
 import com.sequenceiq.flow.core.FlowRegister;
@@ -63,15 +66,20 @@ import com.sequenceiq.freeipa.flow.freeipa.trust.setup.action.FreeIpaTrustSetupC
 import com.sequenceiq.freeipa.flow.freeipa.trust.setup.action.FreeIpaTrustSetupFailedAction;
 import com.sequenceiq.freeipa.flow.freeipa.trust.setup.action.FreeIpaTrustSetupFinishedAction;
 import com.sequenceiq.freeipa.flow.freeipa.trust.setup.action.FreeIpaTrustSetupPrepareServerAction;
+import com.sequenceiq.freeipa.flow.freeipa.trust.setup.action.FreeIpaTrustSetupUpdatePillarDataAction;
 import com.sequenceiq.freeipa.flow.freeipa.trust.setup.action.FreeIpaTrustSetupValidationAction;
 import com.sequenceiq.freeipa.flow.freeipa.trust.setup.config.FreeIpaTrustSetupFlowConfig;
 import com.sequenceiq.freeipa.flow.freeipa.trust.setup.event.FreeIpaTrustSetupEvent;
 import com.sequenceiq.freeipa.flow.freeipa.trust.setup.handler.FreeIpaTrustSetupConfigureDnsHandler;
 import com.sequenceiq.freeipa.flow.freeipa.trust.setup.handler.FreeIpaTrustSetupPrepareServerHandler;
+import com.sequenceiq.freeipa.flow.freeipa.trust.setup.handler.FreeIpaTrustSetupUpdatePillarDataHandler;
 import com.sequenceiq.freeipa.flow.freeipa.trust.setup.handler.FreeIpaTrustSetupValidationHandler;
 import com.sequenceiq.freeipa.service.CredentialService;
+import com.sequenceiq.freeipa.service.GatewayConfigService;
 import com.sequenceiq.freeipa.service.crossrealm.CrossRealmTrustService;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
+import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaNodeUtilService;
+import com.sequenceiq.freeipa.service.freeipa.flow.SaltConfigProvider;
 import com.sequenceiq.freeipa.service.freeipa.trust.operation.TaskResult;
 import com.sequenceiq.freeipa.service.freeipa.trust.operation.TaskResultConverter;
 import com.sequenceiq.freeipa.service.freeipa.trust.operation.TaskResultType;
@@ -162,7 +170,19 @@ class TrustSetupFlowIntegrationTest {
     @MockBean
     private EventSenderService eventSenderService;
 
-    @Inject
+    @MockBean
+    private HostOrchestrator hostOrchestrator;
+
+    @MockBean
+    private GatewayConfigService gatewayConfigService;
+
+    @MockBean
+    private SaltConfigProvider saltConfigProvider;
+
+    @MockBean
+    private FreeIpaNodeUtilService freeIpaNodeUtilService;
+
+    @MockBean
     private StackService stackService;
 
     private Stack stack;
@@ -196,11 +216,12 @@ class TrustSetupFlowIntegrationTest {
         stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, TRUST_SETUP_IN_PROGRESS, "Cross-realm trust validation");
         stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, TRUST_SETUP_IN_PROGRESS, "Prepare IPA server");
         stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, TRUST_SETUP_IN_PROGRESS, "Configuring DNS");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, TRUST_SETUP_IN_PROGRESS, "Updating pillar data");
         stackStatusVerify.verify(stackUpdater)
                 .updateStackStatus(stack, DetailedStackStatus.TRUST_SETUP_FINISH_REQUIRED, "Prepare cross-realm trust finished");
 
         InOrder crossRealmStatusVerify = inOrder(crossRealmTrustService);
-        crossRealmStatusVerify.verify(crossRealmTrustService, times(3)).updateTrustStateByStackId(stack.getId(), TrustStatus.TRUST_SETUP_IN_PROGRESS);
+        crossRealmStatusVerify.verify(crossRealmTrustService, times(4)).updateTrustStateByStackId(stack.getId(), TrustStatus.TRUST_SETUP_IN_PROGRESS);
         crossRealmStatusVerify.verify(crossRealmTrustService).updateTrustStateByStackId(stack.getId(), TrustStatus.TRUST_SETUP_FINISH_REQUIRED);
 
         InOrder operationUpdateVerify = inOrder(operationService);
@@ -213,7 +234,44 @@ class TrustSetupFlowIntegrationTest {
         operationUpdateVerify.verify(operationService).updateOperation(stack.getAccountId(), OPERATION_ID, List.of(successDetails), List.of());
         successDetails.getAdditionalDetails().put("MESSAGE", List.of("Dns configuration finished successfully"));
         successDetails.getAdditionalDetails().put("TYPE", List.of(TaskResultType.INFO.name()));
+        operationUpdateVerify.verify(operationService).updateOperation(stack.getAccountId(), OPERATION_ID, List.of(successDetails), List.of());
+        successDetails.getAdditionalDetails().put("MESSAGE", List.of("Pillar data update finished successfully"));
+        successDetails.getAdditionalDetails().put("TYPE", List.of(TaskResultType.INFO.name()));
         operationUpdateVerify.verify(operationService).completeOperation(stack.getAccountId(), OPERATION_ID, List.of(successDetails), List.of());
+    }
+
+    @Test
+    public void testUpdatePillarDataFails() throws Exception {
+        when(validationService.validateTrustSetup(STACK_ID)).thenReturn(new TaskResults());
+        when(crossRealmTrustService.getTrustProvider(STACK_ID)).thenReturn(activeDirectoryTrustService);
+        doThrow(new CloudbreakOrchestratorFailedException("Update pillar data failed")).when(hostOrchestrator).saveCustomPillars(any(), any(), any());
+        testFlow();
+        InOrder stackStatusVerify = inOrder(stackUpdater);
+
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, TRUST_SETUP_IN_PROGRESS, "Cross-realm trust validation");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, TRUST_SETUP_IN_PROGRESS, "Prepare IPA server");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, TRUST_SETUP_IN_PROGRESS, "Configuring DNS");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, TRUST_SETUP_IN_PROGRESS, "Updating pillar data");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, TRUST_SETUP_FAILED,
+                "Failed to prepare cross-realm trust FreeIPA: Update pillar data failed");
+
+        InOrder crossRealmStatusVerify = inOrder(crossRealmTrustService);
+        crossRealmStatusVerify.verify(crossRealmTrustService, times(4)).updateTrustStateByStackId(stack.getId(), TrustStatus.TRUST_SETUP_IN_PROGRESS);
+        crossRealmStatusVerify.verify(crossRealmTrustService).updateTrustStateByStackId(stack.getId(), TrustStatus.TRUST_SETUP_FAILED);
+
+        InOrder operationUpdateVerify = inOrder(operationService);
+        operationUpdateVerify.verify(operationService).updateOperation(stack.getAccountId(), OPERATION_ID, List.of(), List.of());
+        SuccessDetails successDetails = new SuccessDetails(ENVIRONMENT_CRN);
+        successDetails.getAdditionalDetails().put("MESSAGE", List.of("Ipa server preparation finished successfully"));
+        successDetails.getAdditionalDetails().put("TYPE", List.of(TaskResultType.INFO.name()));
+        operationUpdateVerify.verify(operationService).updateOperation(stack.getAccountId(), OPERATION_ID, List.of(successDetails), List.of());
+        successDetails.getAdditionalDetails().put("MESSAGE", List.of("Dns configuration finished successfully"));
+        successDetails.getAdditionalDetails().put("TYPE", List.of(TaskResultType.INFO.name()));
+        operationUpdateVerify.verify(operationService).updateOperation(stack.getAccountId(), OPERATION_ID, List.of(successDetails), List.of());
+        FailureDetails failureDetails = new FailureDetails(ENVIRONMENT_CRN, "Update pillar data failed");
+        operationUpdateVerify.verify(operationService).failOperation(stack.getAccountId(), OPERATION_ID,
+                "Failed to prepare cross-realm trust FreeIPA: Update pillar data failed", List.of(),
+                List.of(failureDetails));
     }
 
     @Test
@@ -352,16 +410,16 @@ class TrustSetupFlowIntegrationTest {
             FreeIpaTrustSetupFailedAction.class,
             FreeIpaTrustSetupPrepareServerAction.class,
             FreeIpaTrustSetupConfigureDnsAction.class,
+            FreeIpaTrustSetupUpdatePillarDataAction.class,
             FreeIpaTrustSetupFinishedAction.class,
             FreeIpaTrustSetupFailedAction.class,
             FreeIpaTrustSetupValidationHandler.class,
             FreeIpaTrustSetupPrepareServerHandler.class,
             FreeIpaTrustSetupConfigureDnsHandler.class,
+            FreeIpaTrustSetupUpdatePillarDataHandler.class,
             CrossRealmTrustService.class,
             TaskResultConverter.class
     })
     static class Config {
-        @MockBean
-        private StackService stackService;
     }
 }

@@ -53,6 +53,8 @@ public class FreeIpaConfigView {
 
     private final FreeIpaEncryptionConfigView encryptionConfig;
 
+    private final boolean adTrustEnabled;
+
     @SuppressWarnings("ExecutableStatementCount")
     private FreeIpaConfigView(Builder builder) {
         this.realm = builder.realm;
@@ -73,6 +75,7 @@ public class FreeIpaConfigView {
         this.seLinux = builder.seLinux;
         this.lbConfig = builder.lbConfig;
         this.encryptionConfig = builder.encryptionConfig;
+        this.adTrustEnabled = builder.adTrustEnabled;
     }
 
     public String getRealm() {
@@ -143,6 +146,10 @@ public class FreeIpaConfigView {
         return encryptionConfig;
     }
 
+    public boolean isAdTrustEnabled() {
+        return adTrustEnabled;
+    }
+
     @SuppressWarnings("ExecutableStatementCount")
     public Map<String, Object> toMap() {
         Map<String, Object> map = new HashMap<>();
@@ -169,6 +176,7 @@ public class FreeIpaConfigView {
         map.put("tlsv13Enabled", false);
         map.put("loadBalancer", lbConfig.toMap());
         map.put("encryptionConfig", encryptionConfig.toMap());
+        map.put("adTrustEnabled", adTrustEnabled);
 
         return map;
     }
@@ -210,6 +218,8 @@ public class FreeIpaConfigView {
         private FreeIpaLbConfigView lbConfig = new FreeIpaLbConfigView();
 
         private FreeIpaEncryptionConfigView encryptionConfig;
+
+        private boolean adTrustEnabled;
 
         public FreeIpaConfigView build() {
             return new FreeIpaConfigView(this);
@@ -302,6 +312,11 @@ public class FreeIpaConfigView {
 
         public Builder withEncryptionConfig(FreeIpaEncryptionConfigView encryptionConfig) {
             this.encryptionConfig = encryptionConfig;
+            return this;
+        }
+
+        public Builder withAdTrustEnabled(boolean adTrustEnabled) {
+            this.adTrustEnabled = adTrustEnabled;
             return this;
         }
     }

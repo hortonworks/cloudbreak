@@ -10,6 +10,7 @@ import static com.sequenceiq.freeipa.flow.freeipa.trust.setup.FreeIpaTrustSetupS
 import static com.sequenceiq.freeipa.flow.freeipa.trust.setup.FreeIpaTrustSetupState.TRUST_SETUP_FAILED_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.trust.setup.FreeIpaTrustSetupState.TRUST_SETUP_FINISHED_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.trust.setup.FreeIpaTrustSetupState.TRUST_SETUP_PREPARE_IPA_SERVER_STATE;
+import static com.sequenceiq.freeipa.flow.freeipa.trust.setup.FreeIpaTrustSetupState.TRUST_SETUP_UPDATE_PILLAR_DATA_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.trust.setup.FreeIpaTrustSetupState.TRUST_SETUP_VALIDATION_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.trust.setup.event.FreeIpaTrustSetupFlowEvent.TRUST_SETUP_CONFIGURE_DNS_FAILED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.trust.setup.event.FreeIpaTrustSetupFlowEvent.TRUST_SETUP_CONFIGURE_DNS_FINISHED_EVENT;
@@ -19,6 +20,8 @@ import static com.sequenceiq.freeipa.flow.freeipa.trust.setup.event.FreeIpaTrust
 import static com.sequenceiq.freeipa.flow.freeipa.trust.setup.event.FreeIpaTrustSetupFlowEvent.TRUST_SETUP_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.trust.setup.event.FreeIpaTrustSetupFlowEvent.TRUST_SETUP_PREPARE_IPA_SERVER_FAILED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.trust.setup.event.FreeIpaTrustSetupFlowEvent.TRUST_SETUP_PREPARE_IPA_SERVER_FINISHED_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.trust.setup.event.FreeIpaTrustSetupFlowEvent.TRUST_SETUP_UPDATE_PILLAR_DATA_FAILED_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.trust.setup.event.FreeIpaTrustSetupFlowEvent.TRUST_SETUP_UPDATE_PILLAR_DATA_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.trust.setup.event.FreeIpaTrustSetupFlowEvent.TRUST_SETUP_VALIDATION_FAILED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.trust.setup.event.FreeIpaTrustSetupFlowEvent.TRUST_SETUP_VALIDATION_FINISHED_EVENT;
 
@@ -59,9 +62,14 @@ public class FreeIpaTrustSetupFlowConfig
                     .failureEvent(TRUST_SETUP_PREPARE_IPA_SERVER_FAILED_EVENT)
 
                     .from(TRUST_SETUP_CONFIGURE_DNS_STATE)
-                    .to(TRUST_SETUP_FINISHED_STATE)
+                    .to(TRUST_SETUP_UPDATE_PILLAR_DATA_STATE)
                     .event(TRUST_SETUP_CONFIGURE_DNS_FINISHED_EVENT)
                     .failureEvent(TRUST_SETUP_CONFIGURE_DNS_FAILED_EVENT)
+
+                    .from(TRUST_SETUP_UPDATE_PILLAR_DATA_STATE)
+                    .to(TRUST_SETUP_FINISHED_STATE)
+                    .event(TRUST_SETUP_UPDATE_PILLAR_DATA_FINISHED_EVENT)
+                    .failureEvent(TRUST_SETUP_UPDATE_PILLAR_DATA_FAILED_EVENT)
 
                     .from(TRUST_SETUP_FINISHED_STATE)
                     .to(FINAL_STATE)

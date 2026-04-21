@@ -32,7 +32,7 @@ base:
              - freeipa.primary-install
              - freeipa.common-install
              - freeipa.services
-             {% if salt['pillar.get']('environmentType', 'PUBLIC_CLOUD') == 'HYBRID' %}
+             {% if salt['pillar.get']('environmentType') == 'HYBRID' or (salt['pillar.get']('environmentType') == 'PUBLIC_CLOUD' and salt['pillar.get']('freeipa:adTrustEnabled', False) == True) %}
              - trustsetup.adtrust_install
              {% endif %}
              - freeipa.backups
@@ -52,7 +52,7 @@ base:
              - freeipa.replica-install
              - freeipa.common-install
              - freeipa.services
-             {% if salt[ 'pillar.get' ]('environmentType', 'PUBLIC_CLOUD') == 'HYBRID' %}
+             {% if salt['pillar.get']('environmentType') == 'HYBRID' or (salt['pillar.get']('environmentType') == 'PUBLIC_CLOUD' and salt['pillar.get']('freeipa:adTrustEnabled', False) == True) %}
              - trustsetup.adtrust_install
              {% endif %}
              - freeipa.backups
@@ -71,7 +71,7 @@ base:
              - freeipa.common-install
              - freeipa.services
              - freeipa.promote-replica-to-master
-             {% if salt[ 'pillar.get' ]('environmentType', 'PUBLIC_CLOUD') == 'HYBRID' %}
+             {% if salt['pillar.get']('environmentType') == 'HYBRID' or (salt['pillar.get']('environmentType') == 'PUBLIC_CLOUD' and salt['pillar.get']('freeipa:adTrustEnabled', False) == True) %}
              - trustsetup.adtrust_install
              {% endif %}
              - freeipa.backups

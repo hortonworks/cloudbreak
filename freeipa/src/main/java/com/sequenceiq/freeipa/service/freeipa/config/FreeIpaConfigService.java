@@ -13,8 +13,10 @@ import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Multimap;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
+import com.sequenceiq.cloudbreak.common.type.KdcType;
 import com.sequenceiq.cloudbreak.dto.ProxyConfig;
 import com.sequenceiq.cloudbreak.service.proxy.ProxyConfigDtoService;
 import com.sequenceiq.cloudbreak.tls.EncryptionProfileProvider;
@@ -22,12 +24,14 @@ import com.sequenceiq.common.api.type.EnvironmentType;
 import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.freeipa.api.model.Backup;
+import com.sequenceiq.freeipa.entity.CrossRealmTrust;
 import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.EnvironmentService;
 import com.sequenceiq.freeipa.service.GatewayConfigService;
 import com.sequenceiq.freeipa.service.client.CachedEncryptionProfileClientService;
 import com.sequenceiq.freeipa.service.client.CachedEnvironmentClientService;
+import com.sequenceiq.freeipa.service.crossrealm.CrossRealmTrustService;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
 import com.sequenceiq.freeipa.service.freeipa.dns.HybridReverseDnsZoneCalculator;
@@ -84,6 +88,9 @@ public class FreeIpaConfigService {
     @Inject
     private CachedEncryptionProfileClientService cachedEncryptionProfileClientService;
 
+    @Inject
+    private CrossRealmTrustService crossRealmTrustService;
+
     public FreeIpaConfigView createFreeIpaConfigs(Stack stack, Set<Node> hosts) {
         final FreeIpaConfigView.Builder builder = new FreeIpaConfigView.Builder();
 
@@ -97,6 +104,14 @@ public class FreeIpaConfigService {
         LOGGER.debug("Reverse zones : {}", reverseZones);
         String seLinux = null != stack.getSecurityConfig() && null != stack.getSecurityConfig().getSeLinux() ?
                 stack.getSecurityConfig().getSeLinux().toString().toLowerCase(Locale.ROOT) : SeLinux.PERMISSIVE.toString().toLowerCase(Locale.ROOT);
+        boolean adTrustEnabled;
+        try {
+            CrossRealmTrust crossRealmTrust = crossRealmTrustService.getByStackId(stack.getId());
+            adTrustEnabled = crossRealmTrust != null && crossRealmTrust.getKdcType() == KdcType.ACTIVE_DIRECTORY;
+        } catch (NotFoundException e) {
+            adTrustEnabled = false;
+        }
+        LOGGER.debug("AD trust is {}", adTrustEnabled ? "enabled" : "disabled");
         return builder
                 .withRealm(freeIpa.getDomain().toUpperCase(Locale.ROOT))
                 .withDomain(freeIpa.getDomain())
@@ -118,6 +133,7 @@ public class FreeIpaConfigService {
                 .withLbConfig(loadBalancerService.findByStackId(stack.getId())
                         .map(lb -> new FreeIpaLbConfigView(lb.getEndpoint(), lb.getFqdn(), lb.getIp()))
                         .orElse(new FreeIpaLbConfigView()))
+                .withAdTrustEnabled(adTrustEnabled)
                 .build();
     }
 

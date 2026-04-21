@@ -11,6 +11,8 @@ public enum FreeIpaTrustSetupFlowEvent implements FlowEvent {
     TRUST_SETUP_PREPARE_IPA_SERVER_FAILED_EVENT(EventSelectorUtil.selector(FreeIpaTrustSetupPrepareServerFailed.class)),
     TRUST_SETUP_CONFIGURE_DNS_FINISHED_EVENT(EventSelectorUtil.selector(FreeIpaTrustSetupConfigureDnsSuccess.class)),
     TRUST_SETUP_CONFIGURE_DNS_FAILED_EVENT(EventSelectorUtil.selector(FreeIpaTrustSetupConfigureDnsFailed.class)),
+    TRUST_SETUP_UPDATE_PILLAR_DATA_FINISHED_EVENT(EventSelectorUtil.selector(FreeIpaTrustSetupUpdatePillarDataSuccess.class)),
+    TRUST_SETUP_UPDATE_PILLAR_DATA_FAILED_EVENT(EventSelectorUtil.selector(FreeIpaTrustSetupUpdatePillarDataFailed.class)),
     TRUST_SETUP_FINISHED_EVENT(EventSelectorUtil.selector(FreeIpaTrustSetupSuccess.class)),
     TRUST_SETUP_FAILURE_EVENT(EventSelectorUtil.selector(FreeIpaTrustSetupFailureEvent.class)),
     TRUST_SETUP_FAILURE_HANDLED_EVENT;

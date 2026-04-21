@@ -30,6 +30,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
@@ -51,6 +52,7 @@ import com.sequenceiq.freeipa.service.EnvironmentService;
 import com.sequenceiq.freeipa.service.GatewayConfigService;
 import com.sequenceiq.freeipa.service.client.CachedEncryptionProfileClientService;
 import com.sequenceiq.freeipa.service.client.CachedEnvironmentClientService;
+import com.sequenceiq.freeipa.service.crossrealm.CrossRealmTrustService;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaService;
 import com.sequenceiq.freeipa.service.freeipa.dns.ReverseDnsZoneCalculator;
@@ -121,6 +123,9 @@ class FreeIpaConfigServiceTest {
 
     @Mock
     private CachedEncryptionProfileClientService cachedEncryptionProfileClientService;
+
+    @Mock
+    private CrossRealmTrustService crossRealmTrustService;
 
     @InjectMocks
     private FreeIpaConfigService underTest;
@@ -270,6 +275,48 @@ class FreeIpaConfigServiceTest {
         assertEquals(loadBalancer.getEndpoint(), lbConf.get("endpoint"));
         assertEquals(loadBalancer.getFqdn(), lbConf.get("fqdn"));
         assertTrue((Boolean) lbConf.get("enabled"));
+    }
+
+    @Test
+    void testAdTrustIsDisabledWhenTrustIsMissing() {
+        FreeIpa freeIpa = new FreeIpa();
+        freeIpa.setDomain(DOMAIN);
+        freeIpa.setAdminPassword(PASSWORD);
+        Stack stack = new Stack();
+        stack.setCloudPlatform(CloudPlatform.AWS.name());
+        stack.setRegion("region");
+        stack.setEnvironmentCrn(ENV_CRN);
+        Network network = new Network();
+        network.setNetworkCidrs(List.of(CIDR));
+        stack.setNetwork(network);
+        stack.setAccountId(ACCOUNT);
+        stack.setId(0L);
+        DetailedEnvironmentResponse detailedEnvironmentResponse = mock(DetailedEnvironmentResponse.class);
+        EncryptionProfileResponse encryptionProfileResponse = mock(EncryptionProfileResponse.class);
+
+        when(encryptionProfileResponse.getTlsVersions()).thenReturn(Set.of(TlsVersion.TLS_1_2.getVersion(), TlsVersion.TLS_1_3.getVersion()));
+        when(cachedEnvironmentClientService.getByCrn(anyString())).thenReturn(detailedEnvironmentResponse);
+        when(freeIpaService.findByStack(any())).thenReturn(freeIpa);
+        when(freeIpaClientFactory.getAdminUser()).thenReturn(ADMIN);
+        when(networkService.getFilteredSubnetWithCidr(any())).thenReturn(subnetWithCidr);
+        when(reverseDnsZoneCalculator.reverseDnsZoneForCidrs(any())).thenReturn(REVERSE_ZONE);
+        when(environment.getProperty("freeipa.platform.dnssec.validation.AWS", "true")).thenReturn("true");
+        GatewayConfig gatewayConfig = mock(GatewayConfig.class);
+        when(gatewayConfig.getHostname()).thenReturn(HOSTNAME);
+        when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenReturn(gatewayConfig);
+        when(environmentService.isSecretEncryptionEnabled(ENV_CRN)).thenReturn(true);
+        when(detailedEnvironmentResponse.getEncryptionProfileCrn()).thenReturn(ENCRYPTION_PROFILE_CRN);
+        when(cachedEncryptionProfileClientService.getByCrnOrDefaultIfEmpty(eq(ENCRYPTION_PROFILE_CRN))).thenReturn(encryptionProfileResponse);
+        when(encryptionProfileProvider.getOpenSslCipherSuites(any(), any(), anyBoolean()))
+                .thenReturn("cipher1,cipher2,ECDHE-RSA-AES256-GCM-SHA384");
+        when(crossRealmTrustService.getByStackId(any())).thenThrow(new NotFoundException("not found"));
+
+        Node node = new Node(PRIVATE_IP, null, null, null, HOSTNAME, DOMAIN, (String) null);
+
+        FreeIpaConfigView freeIpaConfigView = underTest.createFreeIpaConfigs(
+                stack, ImmutableSet.of(node));
+
+        assertFalse(freeIpaConfigView.isAdTrustEnabled());
     }
 
     @ParameterizedTest(name = "{0}")
