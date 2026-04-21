@@ -6,6 +6,7 @@ import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.GCP;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.MOCK;
+import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.OPENSTACK;
 import static com.sequenceiq.cloudbreak.common.request.CreatorClientConstants.CALLER_ID_NOT_FOUND;
 import static com.sequenceiq.cloudbreak.common.request.CreatorClientConstants.CDP_CALLER_ID_HEADER;
 import static com.sequenceiq.cloudbreak.common.request.CreatorClientConstants.USER_AGENT_HEADER;
@@ -425,6 +426,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
             sdxCluster.setCloudStorageFileSystemType(sdxClusterRequest.getCloudStorage().getFileSystemType());
             sdxClusterRequest.getCloudStorage().setBaseLocation(trimmedBaseLocation);
         } else if (!CloudPlatform.YARN.equalsIgnoreCase(cloudPlatform.name()) &&
+                !OPENSTACK.equalsIgnoreCase(cloudPlatform.name()) &&
                 !GCP.equalsIgnoreCase(cloudPlatform.name()) &&
                 !MOCK.equalsIgnoreCase(cloudPlatform.name()) &&
                 internalStackV4Request == null) {
