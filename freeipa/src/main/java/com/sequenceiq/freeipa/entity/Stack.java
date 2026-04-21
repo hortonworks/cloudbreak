@@ -667,4 +667,10 @@ public class Stack implements AccountAwareResource, OrchestratorAware, IdAware {
     public Set<Node> getAllNotDeletedNodes() {
         return new HashSet<>(getNotDeletedInstanceMetaDataSet()).stream().map(OrchestrationNode::getNode).collect(Collectors.toSet());
     }
+
+    public Set<InstanceMetaData> getReachableInstances() {
+        return instanceGroups.stream()
+                .flatMap(ig -> ig.getReachableInstanceMetaData().stream())
+                .collect(Collectors.toSet());
+    }
 }
