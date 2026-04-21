@@ -130,6 +130,12 @@ public class InstanceGroup implements Comparable<InstanceGroup> {
                 .collect(Collectors.toSet());
     }
 
+    public Set<InstanceMetaData> getReachableInstanceMetaData() {
+        return instanceMetaData.stream()
+                .filter(InstanceMetaData::isAvailable)
+                .collect(Collectors.toSet());
+    }
+
     public Set<InstanceMetaData> getInstanceMetaDataSet() {
         return instanceMetaData;
     }

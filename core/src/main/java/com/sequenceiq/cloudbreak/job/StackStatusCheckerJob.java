@@ -257,15 +257,23 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
     }
 
     private Set<String> getHostsWithSaltFailure(StackDto stackDto) {
-        if (config.isSaltCheckEnabled() && !Set.of(Status.STOPPED, Status.DELETED_ON_PROVIDER_SIDE).contains(stackDto.getStatus())) {
-            GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stackDto);
-            Optional<Set<String>> failedMinions = saltSyncService.checkSaltMinions(gatewayConfig);
-            if (failedMinions.isPresent()) {
-                LOGGER.debug("Salt minions check failed for: {}", failedMinions.get());
-                if (config.isSaltCheckStatusChangeEnabled()) {
-                    return failedMinions.get();
+        try {
+            if (config.isSaltCheckEnabled() && !Set.of(Status.STOPPED, Status.DELETED_ON_PROVIDER_SIDE).contains(stackDto.getStatus())) {
+                GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stackDto);
+                Optional<Set<String>> failedMinions = saltSyncService.checkSaltMinions(gatewayConfig);
+                if (failedMinions.isPresent()) {
+                    Set<String> reachableImdFqdns = stackDto.getReachableInstances().stream().map(InstanceMetadataView::getDiscoveryFQDN).collect(toSet());
+                    Set<String> failedMinionsPresentInDatabase = failedMinions.get().stream().filter(reachableImdFqdns::contains).collect(toSet());
+                    if (!failedMinionsPresentInDatabase.isEmpty()) {
+                        LOGGER.debug("Salt minions check failed for: {}", failedMinionsPresentInDatabase);
+                        if (config.isSaltCheckStatusChangeEnabled()) {
+                            return failedMinionsPresentInDatabase;
+                        }
+                    }
                 }
             }
+        } catch (Exception e) {
+            LOGGER.warn("Failed to check salt status for instances, skipping. Reason: ", e);
         }
         return Set.of();
     }

@@ -3,6 +3,7 @@ package com.sequenceiq.freeipa.sync;
 import static com.sequenceiq.cloudbreak.util.Benchmark.checkedMeasure;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.DELETED_ON_PROVIDER_SIDE;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.STOPPED;
+import static java.util.stream.Collectors.toSet;
 
 import java.util.EnumSet;
 import java.util.List;
@@ -109,15 +110,23 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
     }
 
     private Set<String> getHostsWithSaltFailure(Stack stack) {
-        if (autoSyncConfig.isSaltCheckEnabled() && !Set.of(STOPPED, DELETED_ON_PROVIDER_SIDE).contains(stack.getStackStatus().getStatus())) {
-            GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
-            Optional<Set<String>> failedMinions = saltSyncService.checkSaltMinions(gatewayConfig);
-            if (failedMinions.isPresent()) {
-                LOGGER.debug("Salt minions check failed for: {}", failedMinions.get());
-                if (autoSyncConfig.isSaltCheckStatusChangeEnabled()) {
-                    return failedMinions.get();
+        try {
+            if (autoSyncConfig.isSaltCheckEnabled() && !Set.of(STOPPED, DELETED_ON_PROVIDER_SIDE).contains(stack.getStackStatus().getStatus())) {
+                GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
+                Optional<Set<String>> failedMinions = saltSyncService.checkSaltMinions(gatewayConfig);
+                if (failedMinions.isPresent()) {
+                    Set<String> reachableImdFqdns = stack.getReachableInstances().stream().map(InstanceMetaData::getDiscoveryFQDN).collect(toSet());
+                    Set<String> failedMinionsPresentInDatabase = failedMinions.get().stream().filter(reachableImdFqdns::contains).collect(toSet());
+                    if (!failedMinionsPresentInDatabase.isEmpty()) {
+                        LOGGER.debug("Salt minions check failed for: {}", failedMinionsPresentInDatabase);
+                        if (autoSyncConfig.isSaltCheckStatusChangeEnabled()) {
+                            return failedMinionsPresentInDatabase;
+                        }
+                    }
                 }
             }
+        } catch (Exception e) {
+            LOGGER.warn("Failed to check salt status on instances, skipping. Reason: ", e);
         }
         return Set.of();
     }

@@ -10,6 +10,7 @@ import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.validateMockitoUsage;
 import static org.mockito.Mockito.verify;
@@ -211,6 +212,10 @@ public class StackStatusCheckerJobTest {
         stack.setCreator(user);
         stack.setCloudPlatform("AWS");
 
+        InstanceMetadataView imd = mock(InstanceMetadataView.class);
+        lenient().when(imd.getDiscoveryFQDN()).thenReturn("host1");
+        lenient().when(stackDto.getReachableInstances()).thenReturn(Set.of(imd));
+
         lenient().when(stackDtoService.getById(anyLong())).thenReturn(stackDto);
         lenient().when(stackDto.getStack()).thenReturn(stack);
         lenient().when(stackDto.getCluster()).thenReturn(cluster);
@@ -227,6 +232,19 @@ public class StackStatusCheckerJobTest {
     @AfterEach
     public void tearDown() {
         validateMockitoUsage();
+    }
+
+    @Test
+    public void testSaltCheckFailureIfInstanceUnknown() {
+        setupForCM();
+        when(config.isSaltCheckEnabled()).thenReturn(Boolean.TRUE);
+        when(saltSyncService.checkSaltMinions(any())).thenReturn(Optional.of(Set.of("hostunknown")));
+        underTest.executeJob(jobExecutionContext);
+
+        ArgumentCaptor<Map<String, Optional<String>>> failedNodesCaptor = ArgumentCaptor.forClass(Map.class);
+        verify(clusterOperationService).reportHealthChange(anyString(), failedNodesCaptor.capture(), anySet());
+        assertEquals(0, failedNodesCaptor.getValue().size());
+        verify(saltSyncService).checkSaltMinions(any());
     }
 
     @Test
