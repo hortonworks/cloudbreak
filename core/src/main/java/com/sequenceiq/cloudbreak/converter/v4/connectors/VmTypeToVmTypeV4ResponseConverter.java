@@ -24,6 +24,8 @@ public class VmTypeToVmTypeV4ResponseConverter {
         convertVolumeConfig(configs, source.getMetaData().getSsdConfig());
         convertVolumeConfig(configs, source.getMetaData().getSt1Config());
         convertVolumeConfig(configs, source.getMetaData().getLocalSsdConfig());
+        convertVolumeConfig(configs, source.getMetaData().getBalancedHddConfig());
+        convertVolumeConfig(configs, source.getMetaData().getExtremeSsdConfig());
         convertVolumeConfig(configs, source.getMetaData().getHyperdiskBalancedConfig());
         convertVolumeConfig(configs, source.getMetaData().getHyperdiskThroughputConfig());
         convertVolumeConfig(configs, source.getMetaData().getHyperdiskExtremeConfig());
