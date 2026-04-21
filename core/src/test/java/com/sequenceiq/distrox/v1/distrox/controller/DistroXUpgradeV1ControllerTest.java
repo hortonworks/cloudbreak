@@ -6,50 +6,51 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-import java.util.Map;
+import java.util.List;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.osupgrade.OrderedOSUpgradeSet;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.osupgrade.OrderedOSUpgradeSetRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.upgrade.UpgradeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.StackCcmUpgradeV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeReinitiableV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
 import com.sequenceiq.cloudbreak.api.model.CcmUpgradeResponseType;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.common.json.Json;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.service.upgrade.UpgradeReinitiateService;
 import com.sequenceiq.cloudbreak.service.upgrade.ccm.StackCcmUpgradeService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
-import com.sequenceiq.cloudbreak.tag.ClusterTemplateApplicationTag;
-import com.sequenceiq.cloudbreak.util.CodUtil;
-import com.sequenceiq.common.model.UpgradeShowAvailableImages;
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXCcmUpgradeV1Response;
+import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXUpgradeShowAvailableImages;
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXUpgradeV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXUpgradeV1Response;
+import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.rds.DistroXRdsUpgradeV1Request;
+import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.rds.DistroXRdsUpgradeV1Response;
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.reinit.DistroXUpgradeReinitiableV1Response;
-import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.reinit.UpgradeReinitiateStatus;
 import com.sequenceiq.distrox.v1.distrox.converter.UpgradeConverter;
-import com.sequenceiq.distrox.v1.distrox.service.upgrade.DistroXUpgradeAvailabilityService;
 import com.sequenceiq.distrox.v1.distrox.service.upgrade.DistroXUpgradeService;
+import com.sequenceiq.distrox.v1.distrox.service.upgrade.rds.DistroXRdsUpgradeService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
 
@@ -77,19 +78,16 @@ class DistroXUpgradeV1ControllerTest {
     private UpgradeConverter upgradeConverter;
 
     @Mock
-    private DistroXUpgradeAvailabilityService upgradeAvailabilityService;
-
-    @Mock
-    private DistroXUpgradeService upgradeService;
-
-    @Mock
-    private UpgradeReinitiateService upgradeReinitiateService;
+    private DistroXRdsUpgradeService rdsUpgradeService;
 
     @Mock
     private StackCcmUpgradeService stackCcmUpgradeService;
 
     @Mock
     private StackService stackService;
+
+    @Mock
+    private DistroXUpgradeService distroXUpgradeService;
 
     @Mock
     private DistroXUpgradeV1Response distroXUpgradeV1Response;
@@ -103,194 +101,190 @@ class DistroXUpgradeV1ControllerTest {
     }
 
     @Test
-    void testDryRun() {
-        DistroXUpgradeV1Request distroxUpgradeRequest = new DistroXUpgradeV1Request();
-        UpgradeV4Request upgradeV4Request = new UpgradeV4Request();
-        upgradeV4Request.setDryRun(Boolean.TRUE);
-        when(upgradeConverter.convert(distroxUpgradeRequest, USER_CRN, false)).thenReturn(upgradeV4Request);
-        UpgradeV4Response upgradeV4Response = new UpgradeV4Response();
-        when(upgradeAvailabilityService.checkForUpgrade(NameOrCrn.ofName(CLUSTER_NAME), WORKSPACE_ID, upgradeV4Request, USER_CRN))
-                .thenReturn(upgradeV4Response);
-        when(upgradeConverter.convert(upgradeV4Response)).thenReturn(distroXUpgradeV1Response);
-        when(stackService.getByNameOrCrnInWorkspace(any(), anyLong())).thenReturn(mock(Stack.class));
+    void testUpgradeRdsByName() {
+        DistroXRdsUpgradeV1Request distroxRdsUpgradeRequest = new DistroXRdsUpgradeV1Request();
+        DistroXRdsUpgradeV1Response expected = new DistroXRdsUpgradeV1Response();
+        when(rdsUpgradeService.triggerUpgrade(NameOrCrn.ofName(CLUSTER_NAME), distroxRdsUpgradeRequest)).thenReturn(expected);
 
-        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.upgradeClusterByName(CLUSTER_NAME, distroxUpgradeRequest));
+        DistroXRdsUpgradeV1Response result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
+                underTest.upgradeRdsByName(CLUSTER_NAME, distroxRdsUpgradeRequest));
 
         verify(stackService).checkLiveStackExistenceByName(CLUSTER_NAME, ACCOUNT_ID, StackType.WORKLOAD);
-        verify(upgradeAvailabilityService).checkForUpgrade(NameOrCrn.ofName(CLUSTER_NAME), WORKSPACE_ID, upgradeV4Request, USER_CRN);
-        verifyNoInteractions(upgradeService);
+        assertEquals(expected, result);
     }
 
     @Test
-    void testShowAvailableImages() {
-        DistroXUpgradeV1Request distroxUpgradeRequest = new DistroXUpgradeV1Request();
-        UpgradeV4Request upgradeV4Request = new UpgradeV4Request();
-        upgradeV4Request.setShowAvailableImages(UpgradeShowAvailableImages.SHOW);
-        when(upgradeConverter.convert(distroxUpgradeRequest, USER_CRN, false)).thenReturn(upgradeV4Request);
-        UpgradeV4Response upgradeV4Response = new UpgradeV4Response();
-        when(upgradeAvailabilityService.checkForUpgrade(NameOrCrn.ofName(CLUSTER_NAME), WORKSPACE_ID, upgradeV4Request, USER_CRN))
-                .thenReturn(upgradeV4Response);
-        when(upgradeConverter.convert(upgradeV4Response)).thenReturn(distroXUpgradeV1Response);
-        when(stackService.getByNameOrCrnInWorkspace(any(), anyLong())).thenReturn(mock(Stack.class));
+    void testUpgradeRdsByCrn() {
+        DistroXRdsUpgradeV1Request distroxRdsUpgradeRequest = new DistroXRdsUpgradeV1Request();
+        DistroXRdsUpgradeV1Response expected = new DistroXRdsUpgradeV1Response();
+        when(rdsUpgradeService.triggerUpgrade(NameOrCrn.ofCrn(DATAHUB_CRN), distroxRdsUpgradeRequest)).thenReturn(expected);
 
-        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.upgradeClusterByName(CLUSTER_NAME, distroxUpgradeRequest));
+        DistroXRdsUpgradeV1Response result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
+                underTest.upgradeRdsByCrn(DATAHUB_CRN, distroxRdsUpgradeRequest));
 
-        verify(stackService).checkLiveStackExistenceByName(CLUSTER_NAME, ACCOUNT_ID, StackType.WORKLOAD);
-        verify(upgradeAvailabilityService).checkForUpgrade(NameOrCrn.ofName(CLUSTER_NAME), WORKSPACE_ID, upgradeV4Request, USER_CRN);
-        verifyNoInteractions(upgradeService);
+        assertEquals(expected, result);
     }
 
-    @Test
-    void testUpgradeCalled() {
+    @EnumSource(DistroXUpgradeShowAvailableImages.class)
+    @ParameterizedTest
+    void testUpgradeClusterByName(DistroXUpgradeShowAvailableImages upgradeShowAvailableImages) {
         DistroXUpgradeV1Request distroxUpgradeRequest = new DistroXUpgradeV1Request();
-        UpgradeV4Request upgradeV4Request = new UpgradeV4Request();
-        upgradeV4Request.setDryRun(Boolean.FALSE);
-        when(upgradeConverter.convert(distroxUpgradeRequest, USER_CRN, false)).thenReturn(upgradeV4Request);
-        UpgradeV4Response upgradeV4Response = new UpgradeV4Response();
-        when(upgradeService.triggerUpgrade(NameOrCrn.ofName(CLUSTER_NAME), WORKSPACE_ID, USER_CRN, upgradeV4Request, false)).thenReturn(upgradeV4Response);
-        when(upgradeConverter.convert(upgradeV4Response)).thenReturn(distroXUpgradeV1Response);
-        when(stackService.getByNameOrCrnInWorkspace(any(), anyLong())).thenReturn(mock(Stack.class));
+        distroxUpgradeRequest.setShowAvailableImages(upgradeShowAvailableImages);
+        DistroXUpgradeV1Response expected = mock();
+        when(distroXUpgradeService.upgradeCluster(distroxUpgradeRequest, NameOrCrn.ofName(CLUSTER_NAME), false, WORKSPACE_ID)).thenReturn(expected);
 
-        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.upgradeClusterByName(CLUSTER_NAME, distroxUpgradeRequest));
+        DistroXUpgradeV1Response result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.upgradeClusterByName(CLUSTER_NAME, distroxUpgradeRequest));
 
         verify(stackService).checkLiveStackExistenceByName(CLUSTER_NAME, ACCOUNT_ID, StackType.WORKLOAD);
-        verify(upgradeService).triggerUpgrade(NameOrCrn.ofName(CLUSTER_NAME), WORKSPACE_ID, USER_CRN, upgradeV4Request, false);
+        verify(distroXUpgradeService)
+                .validateCodCluster(NameOrCrn.ofName(CLUSTER_NAME), upgradeShowAvailableImages, WORKSPACE_ID);
+        assertEquals(expected, result);
     }
 
-    @Test
-    void testUpgradeCalledWithCrn() {
+    @EnumSource(DistroXUpgradeShowAvailableImages.class)
+    @ParameterizedTest
+    void testUpgradeClusterByCrn(DistroXUpgradeShowAvailableImages upgradeShowAvailableImages) {
         DistroXUpgradeV1Request distroxUpgradeRequest = new DistroXUpgradeV1Request();
-        UpgradeV4Request upgradeV4Request = new UpgradeV4Request();
-        upgradeV4Request.setDryRun(Boolean.FALSE);
-        when(upgradeConverter.convert(distroxUpgradeRequest, USER_CRN, false)).thenReturn(upgradeV4Request);
-        UpgradeV4Response upgradeV4Response = new UpgradeV4Response();
-        when(upgradeService.triggerUpgrade(NameOrCrn.ofCrn(CLUSTER_NAME), WORKSPACE_ID, USER_CRN, upgradeV4Request, false))
-                .thenReturn(upgradeV4Response);
-        when(upgradeConverter.convert(upgradeV4Response)).thenReturn(distroXUpgradeV1Response);
-        when(stackService.getByNameOrCrnInWorkspace(any(), anyLong())).thenReturn(mock(Stack.class));
+        distroxUpgradeRequest.setShowAvailableImages(upgradeShowAvailableImages);
+        DistroXUpgradeV1Response expected = mock();
+        when(distroXUpgradeService.upgradeCluster(distroxUpgradeRequest, NameOrCrn.ofCrn(DATAHUB_CRN), false, WORKSPACE_ID)).thenReturn(expected);
 
-        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.upgradeClusterByCrn(CLUSTER_NAME, distroxUpgradeRequest));
+        DistroXUpgradeV1Response result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.upgradeClusterByCrn(DATAHUB_CRN, distroxUpgradeRequest));
 
-        verify(upgradeService).triggerUpgrade(NameOrCrn.ofCrn(CLUSTER_NAME), WORKSPACE_ID, USER_CRN, upgradeV4Request, false);
+        verify(distroXUpgradeService)
+                .validateCodCluster(NameOrCrn.ofCrn(DATAHUB_CRN), upgradeShowAvailableImages, WORKSPACE_ID);
+        assertEquals(expected, result);
     }
 
     @Test
     void testUpgradeOnNonInternalEndpointWhenCodCluster() {
         DistroXUpgradeV1Request distroxUpgradeRequest = new DistroXUpgradeV1Request();
+        distroxUpgradeRequest.setShowAvailableImages(DistroXUpgradeShowAvailableImages.DO_NOT_SHOW);
         UpgradeV4Request upgradeV4Request = new UpgradeV4Request();
         upgradeV4Request.setDryRun(Boolean.FALSE);
-        Stack stack = new Stack();
-        StackTags stackTags = new StackTags(Map.of(), Map.of(ClusterTemplateApplicationTag.SERVICE_TYPE.key(), CodUtil.OPERATIONAL_DB), Map.of());
-        stack.setTags(new Json(stackTags));
-        when(stackService.getByNameOrCrnInWorkspace(any(), anyLong())).thenReturn(stack);
+        BadRequestException expected =
+                new BadRequestException("Please note that COD cluster upgrades are supported only through the Operational Database UI or CLI!");
+        doThrow(expected)
+                .when(distroXUpgradeService).validateCodCluster(NameOrCrn.ofName(CLUSTER_NAME), DistroXUpgradeShowAvailableImages.DO_NOT_SHOW, WORKSPACE_ID);
 
-        BadRequestException exception = assertThrows(BadRequestException.class,
-                () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.upgradeClusterByCrn(CLUSTER_NAME, distroxUpgradeRequest)));
-        assertEquals("Please note that COD cluster upgrades are supported only through the Operational Database UI or CLI!", exception.getMessage());
+        BadRequestException result = assertThrows(BadRequestException.class,
+                () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.upgradeClusterByName(CLUSTER_NAME, distroxUpgradeRequest)));
+        assertEquals(expected, result);
 
-        verify(upgradeService, never()).triggerUpgrade(any(), anyLong(), anyString(), any(), anyBoolean());
+        verify(distroXUpgradeService, never()).upgradeCluster(any(DistroXUpgradeV1Request.class), any(NameOrCrn.class), anyBoolean(), anyLong());
     }
 
     @Test
-    void testUpgradePreparationCalled() {
+    void testPrepareClusterUpgradeByName() {
         DistroXUpgradeV1Request distroxUpgradeRequest = new DistroXUpgradeV1Request();
-        UpgradeV4Request upgradeV4Request = new UpgradeV4Request();
-        upgradeV4Request.setDryRun(Boolean.FALSE);
-        when(upgradeConverter.convert(distroxUpgradeRequest, USER_CRN, false)).thenReturn(upgradeV4Request);
-        UpgradeV4Response upgradeV4Response = new UpgradeV4Response();
-        when(upgradeService.triggerUpgrade(NameOrCrn.ofName(CLUSTER_NAME), WORKSPACE_ID, USER_CRN, upgradeV4Request, true))
-                .thenReturn(upgradeV4Response);
-        when(upgradeConverter.convert(upgradeV4Response)).thenReturn(distroXUpgradeV1Response);
+        DistroXUpgradeV1Response expected = mock();
+        when(distroXUpgradeService.upgradeCluster(distroxUpgradeRequest, NameOrCrn.ofName(CLUSTER_NAME), true, WORKSPACE_ID)).thenReturn(expected);
 
-        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.prepareClusterUpgradeByName(CLUSTER_NAME, distroxUpgradeRequest));
+        DistroXUpgradeV1Response result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
+                underTest.prepareClusterUpgradeByName(CLUSTER_NAME, distroxUpgradeRequest));
 
         verify(stackService).checkLiveStackExistenceByName(CLUSTER_NAME, ACCOUNT_ID, StackType.WORKLOAD);
-        verify(upgradeService).triggerUpgrade(NameOrCrn.ofName(CLUSTER_NAME), WORKSPACE_ID, USER_CRN, upgradeV4Request, true);
+        assertEquals(expected, result);
     }
 
     @Test
-    void testUpgradePreparationCalledWithCrn() {
+    void testPrepareClusterUpgradeByCrn() {
         DistroXUpgradeV1Request distroxUpgradeRequest = new DistroXUpgradeV1Request();
-        UpgradeV4Request upgradeV4Request = new UpgradeV4Request();
-        upgradeV4Request.setDryRun(Boolean.FALSE);
-        when(upgradeConverter.convert(distroxUpgradeRequest, USER_CRN, false)).thenReturn(upgradeV4Request);
-        UpgradeV4Response upgradeV4Response = new UpgradeV4Response();
-        when(upgradeService.triggerUpgrade(NameOrCrn.ofCrn(CLUSTER_NAME), WORKSPACE_ID, USER_CRN, upgradeV4Request, true))
-                .thenReturn(upgradeV4Response);
-        when(upgradeConverter.convert(upgradeV4Response)).thenReturn(distroXUpgradeV1Response);
+        DistroXUpgradeV1Response expected = mock();
+        when(distroXUpgradeService.upgradeCluster(distroxUpgradeRequest, NameOrCrn.ofCrn(DATAHUB_CRN), true, WORKSPACE_ID)).thenReturn(expected);
 
-        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.prepareClusterUpgradeByCrn(CLUSTER_NAME, distroxUpgradeRequest));
+        DistroXUpgradeV1Response result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
+                underTest.prepareClusterUpgradeByCrn(DATAHUB_CRN, distroxUpgradeRequest));
 
-        verify(upgradeService).triggerUpgrade(NameOrCrn.ofCrn(CLUSTER_NAME), WORKSPACE_ID, USER_CRN, upgradeV4Request, true);
+        assertEquals(expected, result);
     }
 
     @Test
     void testGetClusterUpgradeReinitiableByName() {
-        UpgradeReinitiableV4Response upgradeReinitiableV4Response = getUpgradeReinitiableV4Response();
-        when(stackService.getIdByNameInWorkspace(CLUSTER_NAME, WORKSPACE_ID)).thenReturn(STACK_ID);
-        when(upgradeReinitiateService.checkClusterUpgradeReinitiable(STACK_ID)).thenReturn(upgradeReinitiableV4Response);
+        DistroXUpgradeReinitiableV1Response expected = mock();
+        when(distroXUpgradeService.checkClusterUpgradeReinitiable(NameOrCrn.ofName(CLUSTER_NAME), WORKSPACE_ID)).thenReturn(expected);
 
         DistroXUpgradeReinitiableV1Response result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
-                underTest.getClusterUpgradeReinitiableByName(CLUSTER_NAME)
-        );
+                underTest.getClusterUpgradeReinitiableByName(CLUSTER_NAME));
 
-        assertEquals(UpgradeReinitiateStatus.NON_REINITIABLE, result.status());
-        assertEquals("There were no upgrades for this cluster, therefore upgrade reinitiation is not needed.", result.reason());
+        verify(stackService).checkLiveStackExistenceByName(CLUSTER_NAME, ACCOUNT_ID, StackType.WORKLOAD);
+        assertEquals(expected, result);
     }
 
     @Test
     void testGetClusterUpgradeReinitiableByCrn() {
-        UpgradeReinitiableV4Response upgradeReinitiableV4Response = getUpgradeReinitiableV4Response();
-        when(stackService.getIdByCrnInWorkspace(DATAHUB_CRN, WORKSPACE_ID)).thenReturn(STACK_ID);
-        when(upgradeReinitiateService.checkClusterUpgradeReinitiable(STACK_ID)).thenReturn(upgradeReinitiableV4Response);
+        DistroXUpgradeReinitiableV1Response expected = mock();
+        when(distroXUpgradeService.checkClusterUpgradeReinitiable(NameOrCrn.ofCrn(DATAHUB_CRN), WORKSPACE_ID)).thenReturn(expected);
 
-        DistroXUpgradeReinitiableV1Response result = underTest.getClusterUpgradeReinitiableByCrn(DATAHUB_CRN);
+        DistroXUpgradeReinitiableV1Response result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
+                underTest.getClusterUpgradeReinitiableByCrn(DATAHUB_CRN));
 
-        assertEquals(UpgradeReinitiateStatus.NON_REINITIABLE, result.status());
-        assertEquals("There were no upgrades for this cluster, therefore upgrade reinitiation is not needed.", result.reason());
+        assertEquals(expected, result);
     }
 
-    private static UpgradeReinitiableV4Response getUpgradeReinitiableV4Response() {
-        return new UpgradeReinitiableV4Response(
-                UpgradeReinitiateStatus.NON_REINITIABLE,
-                "There were no upgrades for this cluster, therefore upgrade reinitiation is not needed."
+    @Test
+    void testReinitiateClusterUpgradeByName() {
+        when(distroXUpgradeService.reinitiateClusterUpgrade(NameOrCrn.ofName(CLUSTER_NAME), WORKSPACE_ID)).thenReturn(distroXUpgradeV1Response);
+
+        DistroXUpgradeV1Response result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.reinitiateClusterUpgradeByName(CLUSTER_NAME));
+
+        verify(stackService).checkLiveStackExistenceByName(CLUSTER_NAME, ACCOUNT_ID, StackType.WORKLOAD);
+        assertEquals(distroXUpgradeV1Response, result);
+    }
+
+    @Test
+    void testReinitiateClusterUpgradeByCrn() {
+        when(distroXUpgradeService.reinitiateClusterUpgrade(NameOrCrn.ofCrn(DATAHUB_CRN), WORKSPACE_ID)).thenReturn(distroXUpgradeV1Response);
+
+        DistroXUpgradeV1Response result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.reinitiateClusterUpgradeByCrn(DATAHUB_CRN));
+
+        assertEquals(distroXUpgradeV1Response, result);
+    }
+
+    static Stream<Arguments> testUpgradeClusterByXInternalArguments() {
+        return Stream.of(
+                Arguments.of(false, false),
+                Arguments.of(false, true),
+                Arguments.of(true, false),
+                Arguments.of(true, true)
         );
     }
 
-    @Test
-    void testRollingUpgradeCalledWithCrn() {
+    @MethodSource("testUpgradeClusterByXInternalArguments")
+    @ParameterizedTest
+    void testUpgradeClusterByNameInternal(boolean rollingUpgradeParam, boolean rollingUpgradeFromRequest) {
+        boolean expectedRollingUpgradeParam = rollingUpgradeParam || rollingUpgradeFromRequest;
+        ArgumentCaptor<DistroXUpgradeV1Request> captor = ArgumentCaptor.forClass(DistroXUpgradeV1Request.class);
         DistroXUpgradeV1Request distroxUpgradeRequest = new DistroXUpgradeV1Request();
-        distroxUpgradeRequest.setRollingUpgradeEnabled(true);
+        distroxUpgradeRequest.setRollingUpgradeEnabled(rollingUpgradeFromRequest);
         UpgradeV4Request upgradeV4Request = new UpgradeV4Request();
-        upgradeV4Request.setDryRun(Boolean.FALSE);
-        when(upgradeConverter.convert(distroxUpgradeRequest, USER_CRN, false)).thenReturn(upgradeV4Request);
-        UpgradeV4Response upgradeV4Response = new UpgradeV4Response();
-        when(upgradeService.triggerUpgrade(NameOrCrn.ofCrn(CLUSTER_NAME), WORKSPACE_ID, USER_CRN, upgradeV4Request, false))
-                .thenReturn(upgradeV4Response);
-        when(upgradeConverter.convert(upgradeV4Response)).thenReturn(distroXUpgradeV1Response);
-        when(stackService.getByNameOrCrnInWorkspace(any(), anyLong())).thenReturn(mock(Stack.class));
+        when(upgradeConverter.convert(captor.capture(), eq(true))).thenReturn(upgradeV4Request);
+        when(distroXUpgradeService.upgradeCluster(upgradeV4Request, NameOrCrn.ofName(CLUSTER_NAME), false, WORKSPACE_ID)).thenReturn(distroXUpgradeV1Response);
 
-        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.upgradeClusterByCrn(CLUSTER_NAME, distroxUpgradeRequest));
+        DistroXUpgradeV1Response result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
+                underTest.upgradeClusterByNameInternal(CLUSTER_NAME, distroxUpgradeRequest, USER_CRN, rollingUpgradeParam));
 
-        verify(upgradeConverter).convert(distroxUpgradeRequest, USER_CRN, false);
-        verify(upgradeService).triggerUpgrade(NameOrCrn.ofCrn(CLUSTER_NAME), WORKSPACE_ID, USER_CRN, upgradeV4Request, false);
+        verify(stackService).checkLiveStackExistenceByName(CLUSTER_NAME, ACCOUNT_ID, StackType.WORKLOAD);
+        assertEquals(expectedRollingUpgradeParam, captor.getValue().getRollingUpgradeEnabled());
+        assertEquals(distroXUpgradeV1Response, result);
     }
 
-    @Test
-    void testInternalRollingUpgradeCalledWithCrn() {
+    @MethodSource("testUpgradeClusterByXInternalArguments")
+    @ParameterizedTest
+    void testUpgradeClusterByCrnInternal(boolean rollingUpgradeParam, boolean rollingUpgradeFromRequest) {
+        boolean expectedRollingUpgradeParam = rollingUpgradeParam || rollingUpgradeFromRequest;
+        ArgumentCaptor<DistroXUpgradeV1Request> captor = ArgumentCaptor.forClass(DistroXUpgradeV1Request.class);
         DistroXUpgradeV1Request distroxUpgradeRequest = new DistroXUpgradeV1Request();
+        distroxUpgradeRequest.setRollingUpgradeEnabled(rollingUpgradeFromRequest);
         UpgradeV4Request upgradeV4Request = new UpgradeV4Request();
-        upgradeV4Request.setDryRun(Boolean.FALSE);
-        when(upgradeConverter.convert(distroxUpgradeRequest, USER_CRN, true)).thenReturn(upgradeV4Request);
-        UpgradeV4Response upgradeV4Response = new UpgradeV4Response();
-        when(upgradeService.triggerUpgrade(NameOrCrn.ofCrn(CLUSTER_NAME), WORKSPACE_ID, INTERNAL_CRN, upgradeV4Request, false))
-                .thenReturn(upgradeV4Response);
-        when(upgradeConverter.convert(upgradeV4Response)).thenReturn(distroXUpgradeV1Response);
+        when(upgradeConverter.convert(captor.capture(), eq(true))).thenReturn(upgradeV4Request);
+        when(distroXUpgradeService.upgradeCluster(upgradeV4Request, NameOrCrn.ofCrn(DATAHUB_CRN), false, WORKSPACE_ID)).thenReturn(distroXUpgradeV1Response);
 
-        ThreadBasedUserCrnProvider.doAs(INTERNAL_CRN, () -> underTest.upgradeClusterByCrnInternal(CLUSTER_NAME, distroxUpgradeRequest, USER_CRN, true));
+        DistroXUpgradeV1Response result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
+                underTest.upgradeClusterByCrnInternal(DATAHUB_CRN, distroxUpgradeRequest, USER_CRN, rollingUpgradeParam));
 
-        verify(upgradeConverter).convert(distroxUpgradeRequest, USER_CRN, true);
-        verify(upgradeService).triggerUpgrade(NameOrCrn.ofCrn(CLUSTER_NAME), WORKSPACE_ID, INTERNAL_CRN, upgradeV4Request, false);
+        assertEquals(expectedRollingUpgradeParam, captor.getValue().getRollingUpgradeEnabled());
+        assertEquals(distroXUpgradeV1Response, result);
     }
 
     @Test
@@ -307,4 +301,18 @@ class DistroXUpgradeV1ControllerTest {
         assertThat(result.getResponseType()).isEqualTo(expected.getResponseType());
     }
 
+    @Test
+    void testOsUpgradeByUpgradeSetsInternal() {
+        OrderedOSUpgradeSetRequest orderedOSUpgradeSetRequest = new OrderedOSUpgradeSetRequest();
+        orderedOSUpgradeSetRequest.setImageId("imageId");
+        List<OrderedOSUpgradeSet> upgradeSets = mock();
+        orderedOSUpgradeSetRequest.setOrderedOsUpgradeSets(upgradeSets);
+        FlowIdentifier expected = new FlowIdentifier(FlowType.FLOW, "1");
+        when(distroXUpgradeService.triggerOsUpgradeByUpgradeSets(NameOrCrn.ofCrn(DATAHUB_CRN), WORKSPACE_ID, "imageId", upgradeSets)).thenReturn(expected);
+
+        FlowIdentifier result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
+                underTest.osUpgradeByUpgradeSetsInternal(DATAHUB_CRN, orderedOSUpgradeSetRequest));
+
+        assertEquals(expected, result);
+    }
 }

@@ -25,7 +25,9 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.Upgrade
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.datalakedr.DatalakeDrSkipOptions;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -33,9 +35,13 @@ import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.datalake.controller.sdx.SdxUpgradeClusterConverter;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
+import com.sequenceiq.datalake.flow.chain.DatalakeUpgradeFlowEventChainFactory;
+import com.sequenceiq.datalake.flow.datalake.upgrade.event.DatalakeUpgradeFlowChainStartEvent;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.validation.upgrade.SdxUpgradeValidator;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.flow.domain.FlowChainLog;
+import com.sequenceiq.flow.service.flowlog.FlowChainLogService;
 import com.sequenceiq.sdx.api.model.SdxUpgradeReinitiableResponse;
 import com.sequenceiq.sdx.api.model.SdxUpgradeReplaceVms;
 import com.sequenceiq.sdx.api.model.SdxUpgradeRequest;
@@ -69,6 +75,12 @@ public class SdxRuntimeUpgradeService {
     @Inject
     private SdxUpgradeValidator sdxUpgradeValidator;
 
+    @Inject
+    private FlowChainLogService flowChainLogService;
+
+    @Inject
+    private DatalakeUpgradeFlowEventChainFactory datalakeUpgradeFlowEventChainFactory;
+
     public SdxUpgradeResponse checkForUpgradeByName(String userCrn, String clusterName, SdxUpgradeRequest upgradeRequest, boolean upgradePreparation) {
         SdxCluster cluster = sdxService.getByNameInAccount(userCrn, clusterName);
         return checkForSdxUpgradeResponse(upgradeRequest, cluster, userCrn, upgradePreparation);
@@ -96,6 +108,49 @@ public class SdxRuntimeUpgradeService {
                 stackV4Endpoint.getClusterUpgradeReinitiableByNameInternal(WORKSPACE_ID, name, userCrn)
         );
         return SdxUpgradeReinitiableResponse.from(upgradeReinitiableV4Response);
+    }
+
+    public SdxUpgradeResponse reinitiateClusterUpgrade(NameOrCrn nameOrCrn) {
+        SdxUpgradeReinitiableResponse sdxUpgradeReinitiableResponse = checkClusterUpgradeReinitiable(nameOrCrn);
+        if (!sdxUpgradeReinitiableResponse.status().reinitiable()) {
+            throw new BadRequestException("Cluster upgrade cannot be reinitiated: " + sdxUpgradeReinitiableResponse.reason());
+        }
+
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
+        SdxCluster sdxCluster = sdxService.getByNameOrCrn(userCrn, nameOrCrn);
+        return tryRetrieveLastSdxUpgradeRequest(sdxCluster.getId())
+                .map(sdxUpgradeRequest -> {
+                    LOGGER.info("Reinitiating cluster upgrade for cluster [{}] with the following parameters: {}", sdxCluster.getCrn(), sdxUpgradeRequest);
+                    return triggerUpgrade(userCrn, sdxCluster, sdxUpgradeRequest, false);
+                }).orElseThrow(() -> new BadRequestException("Reinitiate the upgrade by manually providing the same parameters as the last failed upgrade."));
+    }
+
+    private Optional<SdxUpgradeRequest> tryRetrieveLastSdxUpgradeRequest(Long sdxClusterId) {
+        return flowChainLogService.findLastByResourceIdAndFlowChainTypeOrderByCreatedDesc(sdxClusterId, datalakeUpgradeFlowEventChainFactory.getName())
+                .map(SdxRuntimeUpgradeService::tryDeserializeFlowChainLogTriggerEvent)
+                .map(Optional::get)
+                .filter(DatalakeUpgradeFlowChainStartEvent.class::isInstance)
+                .map(DatalakeUpgradeFlowChainStartEvent.class::cast)
+                .map(triggerEvent -> {
+                    LOGGER.info("Last Sdx upgrade flow chain trigger event: {}", triggerEvent);
+                    SdxUpgradeRequest sdxUpgradeRequest = new SdxUpgradeRequest();
+                    sdxUpgradeRequest.setImageId(triggerEvent.getImageId());
+                    sdxUpgradeRequest.setRollingUpgradeEnabled(triggerEvent.isRollingUpgradeEnabled());
+                    return Optional.of(sdxUpgradeRequest);
+                })
+                .orElseGet(() -> {
+                    LOGGER.info("Could not retrieve the parameters of the last failed upgrade for cluster with id '{}'. ", sdxClusterId);
+                    return Optional.empty();
+                });
+    }
+
+    private static Optional<Payload> tryDeserializeFlowChainLogTriggerEvent(FlowChainLog flowChainLog) {
+        try {
+            return Optional.of(JsonUtil.readValueUnchecked(flowChainLog.getTriggerEventJackson(), Payload.class));
+        } catch (IllegalStateException e) {
+            LOGGER.debug("Failed to deserialize the init event of flow chain log with id '{}'", flowChainLog.getId(), e);
+            return Optional.empty();
+        }
     }
 
     private SdxUpgradeResponse triggerUpgrade(String userCrn, SdxCluster cluster, SdxUpgradeRequest upgradeRequest, boolean upgradePreparation) {

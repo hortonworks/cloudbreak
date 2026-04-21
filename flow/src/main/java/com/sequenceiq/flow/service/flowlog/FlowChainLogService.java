@@ -84,6 +84,10 @@ public class FlowChainLogService {
         return initFlowChainLog;
     }
 
+    public Optional<FlowChainLog> findLastByResourceIdAndFlowChainTypeOrderByCreatedDesc(Long resourceId, String flowChainType) {
+        return repository.findLastByResourceIdAndFlowChainTypeOrderByCreatedDesc(resourceId, flowChainType);
+    }
+
     private FlowChainLog collectRootFlowChain(FlowChainLog flowChain) {
         Optional<FlowChainLog> lastParentFlowChain = repository.findFirstByFlowChainIdOrderByCreatedDesc(flowChain.getParentFlowChainId());
         if (lastParentFlowChain.isPresent()) {

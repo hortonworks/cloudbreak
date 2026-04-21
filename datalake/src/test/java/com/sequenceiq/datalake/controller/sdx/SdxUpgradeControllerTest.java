@@ -279,6 +279,26 @@ class SdxUpgradeControllerTest {
     }
 
     @Test
+    void testReinitiateClusterUpgradeByName() {
+        SdxUpgradeResponse expected = new SdxUpgradeResponse();
+        when(sdxRuntimeUpgradeService.reinitiateClusterUpgrade(NameOrCrn.ofName(CLUSTER_NAME))).thenReturn(expected);
+
+        SdxUpgradeResponse result = underTest.reinitiateClusterUpgradeByName(CLUSTER_NAME);
+
+        assertEquals(expected, result);
+    }
+
+    @Test
+    void testReinitiateClusterUpgradeByCrn() {
+        SdxUpgradeResponse expected = new SdxUpgradeResponse();
+        when(sdxRuntimeUpgradeService.reinitiateClusterUpgrade(NameOrCrn.ofCrn(CLUSTER_CRN))).thenReturn(expected);
+
+        SdxUpgradeResponse result = underTest.reinitiateClusterUpgradeByCrn(CLUSTER_CRN);
+
+        assertEquals(expected, result);
+    }
+
+    @Test
     void testUpgradeCcm() {
         SdxCcmUpgradeResponse response = new SdxCcmUpgradeResponse(CcmUpgradeResponseType.TRIGGERED, new FlowIdentifier(FlowType.FLOW, "FlowId"),
                 "OK", "crn");

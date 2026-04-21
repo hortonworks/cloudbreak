@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackImageChange
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.osupgrade.OrderedOSUpgradeSet;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.upgrade.UpgradeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageInfoV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeReinitiableV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
 import com.sequenceiq.cloudbreak.auth.ClouderaManagerLicenseProvider;
 import com.sequenceiq.cloudbreak.auth.JsonCMLicense;
@@ -39,9 +40,15 @@ import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.StackUpgradeService;
 import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeAvailabilityService;
+import com.sequenceiq.cloudbreak.service.upgrade.UpgradeReinitiateService;
 import com.sequenceiq.cloudbreak.service.upgrade.UpgradeService;
-import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.util.CdhVersionProvider;
+import com.sequenceiq.cloudbreak.util.CodUtil;
+import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXUpgradeShowAvailableImages;
+import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXUpgradeV1Request;
+import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXUpgradeV1Response;
+import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.reinit.DistroXUpgradeReinitiableV1Response;
+import com.sequenceiq.distrox.v1.distrox.converter.UpgradeConverter;
 import com.sequenceiq.distrox.v1.distrox.service.upgrade.dto.DistroXUpgradeDto;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 
@@ -93,7 +100,10 @@ public class DistroXUpgradeService {
     private ClusterComponentConfigProvider clusterComponentConfigProvider;
 
     @Inject
-    private CloudbreakEventService cloudbreakEventService;
+    private UpgradeConverter upgradeConverter;
+
+    @Inject
+    private UpgradeReinitiateService upgradeReinitiateService;
 
     public FlowIdentifier triggerOsUpgradeByUpgradeSets(NameOrCrn nameOrCrn, Long workspaceId, String imageId, List<OrderedOSUpgradeSet> upgradeSets) {
         Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
@@ -114,7 +124,7 @@ public class DistroXUpgradeService {
         return createImageChangeDto(nameOrCrn, stack.getWorkspaceId(), targetImage);
     }
 
-    public UpgradeV4Response triggerUpgrade(NameOrCrn cluster, Long workspaceId, String userCrn, UpgradeV4Request request, boolean upgradePreparation) {
+    private UpgradeV4Response triggerUpgrade(NameOrCrn cluster, Long workspaceId, String userCrn, UpgradeV4Request request, boolean upgradePreparation) {
         UpgradeV4Response upgradeV4Response = upgradeAvailabilityService.checkForUpgrade(cluster, workspaceId, request, userCrn);
         validateUpgradeCandidates(cluster, upgradeV4Response);
         verifyPaywallAccess(userCrn, request);
@@ -211,6 +221,58 @@ public class DistroXUpgradeService {
         LOGGER.info("Verify if the CM license is valid to authenticate to {}", paywallUrl);
         JsonCMLicense license = clouderaManagerLicenseProvider.getLicense(userCrn);
         paywallAccessChecker.checkPaywallAccess(license, paywallUrl);
+    }
+
+    public DistroXUpgradeV1Response upgradeCluster(DistroXUpgradeV1Request distroxUpgradeRequest, NameOrCrn nameOrCrn, boolean upgradePreparation,
+            Long workspaceId) {
+        UpgradeV4Request request = upgradeConverter.convert(distroxUpgradeRequest, false);
+        return upgradeCluster(request, nameOrCrn, upgradePreparation, workspaceId);
+    }
+
+    public DistroXUpgradeV1Response upgradeCluster(UpgradeV4Request request, NameOrCrn nameOrCrn, boolean upgradePreparation, Long workspaceId) {
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
+        if (request.isDryRun() || request.isShowAvailableImagesSet()) {
+            LOGGER.info("Checking for upgrade for cluster [{}] with request: {}", nameOrCrn, request);
+            UpgradeV4Response upgradeV4Response = upgradeAvailabilityService.checkForUpgrade(nameOrCrn, workspaceId, request, userCrn);
+            return upgradeConverter.convert(upgradeV4Response);
+        } else {
+            LOGGER.info("Triggering upgrade for cluster [{}] with request: {}", nameOrCrn, request);
+            UpgradeV4Response upgradeV4Response = triggerUpgrade(nameOrCrn, workspaceId, userCrn, request, upgradePreparation);
+            return upgradeConverter.convert(upgradeV4Response);
+        }
+    }
+
+    public void validateCodCluster(NameOrCrn nameOrCrn, DistroXUpgradeShowAvailableImages showAvailableImages, Long workspaceId) {
+        if (DistroXUpgradeShowAvailableImages.SHOW != showAvailableImages && DistroXUpgradeShowAvailableImages.LATEST_ONLY != showAvailableImages) {
+            Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
+            if (CodUtil.isCodCluster(stack)) {
+                throw new BadRequestException("Please note that COD cluster upgrades are supported only through the Operational Database UI or CLI!");
+            }
+        }
+    }
+
+    public DistroXUpgradeReinitiableV1Response checkClusterUpgradeReinitiable(NameOrCrn nameOrCrn, Long workspaceId) {
+        Long stackId = stackService.getIdByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
+        return checkClusterUpgradeReinitiable(stackId);
+    }
+
+    public DistroXUpgradeReinitiableV1Response checkClusterUpgradeReinitiable(Long stackId) {
+        UpgradeReinitiableV4Response upgradeReinitiableV4Response = upgradeReinitiateService.checkClusterUpgradeReinitiable(stackId);
+        return DistroXUpgradeReinitiableV1Response.from(upgradeReinitiableV4Response);
+    }
+
+    public DistroXUpgradeV1Response reinitiateClusterUpgrade(NameOrCrn nameOrCrn, Long workspaceId) {
+        Long stackId = stackService.getIdByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
+        DistroXUpgradeReinitiableV1Response distroXUpgradeReinitiableV1Response = checkClusterUpgradeReinitiable(stackId);
+        if (!distroXUpgradeReinitiableV1Response.status().reinitiable()) {
+            throw new BadRequestException("Cluster upgrade cannot be reinitiated: " + distroXUpgradeReinitiableV1Response.reason());
+        }
+
+        return upgradeReinitiateService.tryRetrieveLastDistroxUpgradeV1Request(stackId)
+                .map(distroXUpgradeV1Request -> {
+                    LOGGER.info("Reinitiating cluster upgrade for cluster [{}] with the following parameters: {}", nameOrCrn, distroXUpgradeV1Request);
+                    return upgradeCluster(distroXUpgradeV1Request, nameOrCrn, false, workspaceId);
+                }).orElseThrow(() -> new BadRequestException("Reinitiate the upgrade by manually providing the same parameters as the last failed upgrade."));
     }
 
 }

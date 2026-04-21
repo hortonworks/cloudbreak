@@ -80,6 +80,16 @@ class FlowChainLogServiceTest {
     }
 
     @Test
+    void testFindLastByResourceIdAndFlowChainTypeOrderByCreatedDesc() {
+        Optional<FlowChainLog> expected = mock();
+        when(flowLogRepository.findLastByResourceIdAndFlowChainTypeOrderByCreatedDesc(1L, "SomeFlowChainFactory")).thenReturn(expected);
+
+        Optional<FlowChainLog> result = underTest.findLastByResourceIdAndFlowChainTypeOrderByCreatedDesc(1L, "SomeFlowChainFactory");
+
+        assertEquals(expected, result);
+    }
+
+    @Test
     void testCheckIfThereIsEventInQueues() {
         List<FlowChainLog> flowChains = List.of(
                 flowChainLog("1", true, 1L),

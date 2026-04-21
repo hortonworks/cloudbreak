@@ -77,13 +77,27 @@ public interface SdxUpgradeEndpoint {
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     SdxUpgradeReinitiableResponse getClusterUpgradeReinitiableByCrn(@PathParam("crn") String crn);
 
+    @POST
+    @Path("{name}/upgrade/reinitiate")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Reinitiate the last failed upgrade of the cluster", operationId = "reinitiateClusterUpgradeByName",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    SdxUpgradeResponse reinitiateClusterUpgradeByName(@PathParam("name") String name);
+
+    @POST
+    @Path("/crn/{crn}/upgrade/reinitiate")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Reinitiate the last failed upgrade of the cluster", operationId = "reinitiateClusterUpgradeByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    SdxUpgradeResponse reinitiateClusterUpgradeByCrn(@PathParam("crn") String crn);
+
     @PUT
     @Path("/internal/upgrade_ccm")
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Upgrade Cluster Connectivity Manager", operationId = "upgradeCcm",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     SdxCcmUpgradeResponse upgradeCcm(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @QueryParam("environment") @NotEmpty String environmentCrn,
-            @ValidCrn(resource = { CrnResourceDescriptor.USER, CrnResourceDescriptor.MACHINE_USER })
+            @ValidCrn(resource = {CrnResourceDescriptor.USER, CrnResourceDescriptor.MACHINE_USER})
             @NotEmpty @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 
     @PUT

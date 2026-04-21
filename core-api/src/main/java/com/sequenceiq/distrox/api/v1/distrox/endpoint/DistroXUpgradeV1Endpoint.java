@@ -97,6 +97,20 @@ public interface DistroXUpgradeV1Endpoint {
     DistroXUpgradeReinitiableV1Response getClusterUpgradeReinitiableByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn);
 
     @POST
+    @Path("{name}/upgrade/reinitiate")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Reinitiate the last failed upgrade of the cluster", operationId = "reinitiateClusterUpgradeByName",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    DistroXUpgradeV1Response reinitiateClusterUpgradeByName(@PathParam("name") String name);
+
+    @POST
+    @Path("/crn/{crn}/upgrade/reinitiate")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Reinitiate the last failed upgrade of the cluster", operationId = "reinitiateClusterUpgradeByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    DistroXUpgradeV1Response reinitiateClusterUpgradeByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn);
+
+    @POST
     @Path("internal/{name}/upgrade")
     @Produces(MediaType.APPLICATION_JSON)
     @Operation(summary = "Upgrades the distrox cluster internal", operationId = "upgradeDistroxClusterInternal",

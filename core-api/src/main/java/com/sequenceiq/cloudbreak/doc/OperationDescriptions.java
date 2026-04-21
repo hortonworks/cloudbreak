@@ -84,6 +84,7 @@ public class OperationDescriptions {
         public static final String STACK_UPGRADE = "Upgrades a cluster to the latest CM or CDH version";
         public static final String STACK_UPGRADE_INTERNAL = "Upgrades a cluster to the latest CM or CDH version, internal only";
         public static final String STACK_UPGRADE_REINITIABLE = "Check whether the cluster has a failed upgrade that can be reinitiated";
+        public static final String STACK_REINITIATE_UPGRADE = "Reinitiate the last failed upgrade of the cluster";
         public static final String CHECK_RDS_UPGRADE_INTERNAL =
                 "Checks that upgrade of the external database of a cluster to a given version is possible, internal only";
         public static final String RDS_UPGRADE_INTERNAL = "Upgrades the external database of a cluster to a given version, internal only";

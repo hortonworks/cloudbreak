@@ -8,10 +8,14 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doCallRealMethod;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -19,6 +23,7 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
@@ -49,16 +54,23 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.client.RestClientFactory;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.datalakedr.DatalakeDrSkipOptions;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.util.TestConstants;
 import com.sequenceiq.common.model.OsType;
 import com.sequenceiq.datalake.controller.sdx.SdxUpgradeClusterConverter;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
+import com.sequenceiq.datalake.flow.chain.DatalakeUpgradeFlowEventChainFactory;
+import com.sequenceiq.datalake.flow.datalake.upgrade.event.DatalakeUpgradeFlowChainStartEvent;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.validation.upgrade.SdxUpgradeValidator;
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.reinit.UpgradeReinitiateStatus;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.flow.domain.FlowChainLog;
+import com.sequenceiq.flow.service.flowlog.FlowChainLogService;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxUpgradeReinitiableResponse;
 import com.sequenceiq.sdx.api.model.SdxUpgradeReplaceVms;
@@ -122,6 +134,12 @@ class SdxRuntimeUpgradeServiceTest {
 
     @Mock
     private SdxUpgradeValidator sdxUpgradeValidator;
+
+    @Mock
+    private FlowChainLogService flowChainLogService;
+
+    @Mock
+    private DatalakeUpgradeFlowEventChainFactory datalakeUpgradeFlowEventChainFactory;
 
     private SdxUpgradeFilter sdxUpgradeFilter;
 
@@ -792,11 +810,81 @@ class SdxRuntimeUpgradeServiceTest {
         assertEquals("There were no upgrades for this cluster, therefore upgrade reinitiation is not needed.", result.reason());
     }
 
+    @Test
+    void testReinitiateClusterUpgrade() {
+        when(stackV4Endpoint.getClusterUpgradeReinitiableByNameInternal(0L, STACK_NAME, USER_CRN)).thenReturn(
+                getUpgradeReinitiableV4Response(
+                        UpgradeReinitiateStatus.REINITIABLE,
+                        "The last upgrade for this cluster finished with a failure, therefore the cluster is eligible for upgrade reinitiation.")
+        );
+        when(sdxService.getByNameOrCrn(USER_CRN, NameOrCrn.ofName(STACK_NAME))).thenReturn(getValidSdxCluster());
+        when(datalakeUpgradeFlowEventChainFactory.getName()).thenCallRealMethod();
+        DatalakeUpgradeFlowChainStartEvent expectedTriggerEvent = new DatalakeUpgradeFlowChainStartEvent(
+                DatalakeUpgradeFlowChainStartEvent.DATALAKE_UPGRADE_FLOW_CHAIN_EVENT, 1L, "1", IMAGE_ID, false, null, null, true, false);
+        FlowChainLog flowChainLog = mock();
+        when(flowChainLog.getTriggerEventJackson()).thenReturn(new Json(expectedTriggerEvent).getValue());
+        when(flowChainLogService.findLastByResourceIdAndFlowChainTypeOrderByCreatedDesc(1L, "DatalakeUpgradeFlowEventChainFactory"))
+                .thenReturn(Optional.of(flowChainLog));
+        ImageInfoV4Response imageInfo = new ImageInfoV4Response();
+        imageInfo.setImageId(IMAGE_ID);
+        imageInfo.setComponentVersions(createExpectedPackageVersions());
+        UpgradeV4Response upgradeV4Response = new UpgradeV4Response();
+        upgradeV4Response.setUpgradeCandidates(List.of(imageInfo));
+        when(stackV4Endpoint.checkForClusterUpgradeByName(eq(0L), eq(STACK_NAME), any(UpgradeV4Request.class), eq(ACCOUNT_ID))).thenReturn(upgradeV4Response);
+        SdxUpgradeResponse upgradeResponse = new SdxUpgradeResponse();
+        upgradeResponse.setUpgradeCandidates(List.of(imageInfo));
+        when(sdxUpgradeClusterConverter.upgradeResponseToSdxUpgradeResponse(any())).thenReturn(upgradeResponse);
+        when(sdxUpgradeClusterConverter.sdxUpgradeRequestToUpgradeV4Request(any())).thenCallRealMethod();
+        when(messagesService.getMessage(eq(ResourceEvent.DATALAKE_UPGRADE.getMessage()), anyList())).thenReturn("message");
+        FlowIdentifier flowIdentifier = mock();
+        when(sdxReactorFlowManager.triggerDatalakeRuntimeUpgradeFlow(eq(sdxCluster), eq(IMAGE_ID), eq(SdxUpgradeReplaceVms.ENABLED), eq(false), any(),
+                eq(true), eq(false))).thenReturn(flowIdentifier);
+
+        SdxUpgradeResponse result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.reinitiateClusterUpgrade(NameOrCrn.ofName(STACK_NAME)));
+
+        assertEquals(flowIdentifier, result.getFlowIdentifier());
+        assertEquals("message", result.getReason());
+    }
+
+    @Test
+    void testReinitiateClusterUpgradeWhenNotReinitiable() {
+        when(stackV4Endpoint.getClusterUpgradeReinitiableByNameInternal(0L, STACK_NAME, USER_CRN)).thenReturn(getUpgradeReinitiableV4Response());
+
+        BadRequestException exception = assertThrows(BadRequestException.class, () ->
+                ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.reinitiateClusterUpgrade(NameOrCrn.ofName(STACK_NAME))));
+
+        assertEquals("Cluster upgrade cannot be reinitiated:" +
+                " There were no upgrades for this cluster, therefore upgrade reinitiation is not needed.", exception.getMessage());
+    }
+
+    @Test
+    void testReinitiateClusterUpgradeWhenCantRetrieveRequest() {
+        when(stackV4Endpoint.getClusterUpgradeReinitiableByNameInternal(0L, STACK_NAME, USER_CRN)).thenReturn(
+                getUpgradeReinitiableV4Response(
+                        UpgradeReinitiateStatus.REINITIABLE,
+                        "The last upgrade for this cluster finished with a failure, therefore the cluster is eligible for upgrade reinitiation.")
+        );
+        when(sdxService.getByNameOrCrn(USER_CRN, NameOrCrn.ofName(STACK_NAME))).thenReturn(getValidSdxCluster());
+        when(datalakeUpgradeFlowEventChainFactory.getName()).thenCallRealMethod();
+        when(flowChainLogService.findLastByResourceIdAndFlowChainTypeOrderByCreatedDesc(1L, "DatalakeUpgradeFlowEventChainFactory"))
+                .thenReturn(Optional.empty());
+
+        assertThrows(BadRequestException.class, () ->
+                ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.reinitiateClusterUpgrade(NameOrCrn.ofName(STACK_NAME))));
+
+        verify(stackV4Endpoint, never()).checkForClusterUpgradeByName(anyLong(), anyString(), any(), anyString());
+        verify(sdxReactorFlowManager, never()).triggerDatalakeRuntimeUpgradeFlow(any(), anyString(), any(), anyBoolean(), any(), anyBoolean(), anyBoolean());
+    }
+
     private static UpgradeReinitiableV4Response getUpgradeReinitiableV4Response() {
-        return new UpgradeReinitiableV4Response(
+        return getUpgradeReinitiableV4Response(
                 UpgradeReinitiateStatus.NON_REINITIABLE,
                 "There were no upgrades for this cluster, therefore upgrade reinitiation is not needed."
         );
+    }
+
+    private static UpgradeReinitiableV4Response getUpgradeReinitiableV4Response(UpgradeReinitiateStatus status, String reason) {
+        return new UpgradeReinitiableV4Response(status, reason);
     }
 
     private void constructUpgradeV4ResponseAndSetupStackV4EndpointMock(String... runtimes) {

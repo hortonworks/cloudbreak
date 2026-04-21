@@ -51,6 +51,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.service.ExposedServiceCollector;
+import com.sequenceiq.cloudbreak.auth.ClouderaManagerLicenseProvider;
+import com.sequenceiq.cloudbreak.auth.PaywallAccessChecker;
 import com.sequenceiq.cloudbreak.auth.PaywallCredentialPopulator;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.AccountIdService;
@@ -73,6 +75,7 @@ import com.sequenceiq.cloudbreak.common.service.PlatformStringTransformer;
 import com.sequenceiq.cloudbreak.converter.ImageToClouderaManagerRepoConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
+import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.BlueprintUpgradeOption;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -86,6 +89,7 @@ import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.DefaultClouderaManagerRepoService;
+import com.sequenceiq.cloudbreak.service.StackCommonService;
 import com.sequenceiq.cloudbreak.service.StackMatrixService;
 import com.sequenceiq.cloudbreak.service.StackTypeResolver;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterDBValidationService;
@@ -114,6 +118,7 @@ import com.sequenceiq.cloudbreak.service.stack.RuntimeVersionService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.StackStopRestrictionService;
+import com.sequenceiq.cloudbreak.service.stack.StackUpgradeService;
 import com.sequenceiq.cloudbreak.service.stack.StackViewService;
 import com.sequenceiq.cloudbreak.service.upgrade.BlockedUpgradePath;
 import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeAvailabilityService;
@@ -288,9 +293,6 @@ public class DistroXUpgradeRetrievalComponentTest {
     private PaywallCredentialPopulator paywallCredentialPopulator;
 
     @MockBean
-    private DistroXUpgradeService distroXUpgradeService;
-
-    @MockBean
     private DistroXRdsUpgradeService rdsUpgradeService;
 
     @MockBean
@@ -304,6 +306,18 @@ public class DistroXUpgradeRetrievalComponentTest {
 
     @MockBean
     private UpgradeReinitiateService upgradeReinitiateService;
+
+    @MockBean
+    private StackCommonService stackCommonService;
+
+    @MockBean
+    private ReactorFlowManager reactorFlowManager;
+
+    @MockBean
+    private ClouderaManagerLicenseProvider clouderaManagerLicenseProvider;
+
+    @MockBean
+    private StackUpgradeService stackUpgradeService;
 
     @Mock
     private Response parcelAvailabilityResponse;
@@ -788,7 +802,10 @@ public class DistroXUpgradeRetrievalComponentTest {
             CsdLocationFilter.class,
             ClouderaManagerPackageLocationFilter.class,
             PreWarmParcelLocationFilter.class,
-            ClusterUpgradeOsVersionFilterCondition.class
+            ClusterUpgradeOsVersionFilterCondition.class,
+            DistroXUpgradeService.class,
+            PaywallAccessChecker.class,
+            DistroXUpgradeImageSelector.class
     })
     static class Config {
 
@@ -805,7 +822,8 @@ public class DistroXUpgradeRetrievalComponentTest {
         @Bean
         public List<BlockedUpgradePath> blockedUpgradePaths() throws IOException {
             String json = FileReaderUtils.readFileFromClasspathQuietly("definitions/upgrade-path-restrictions.json");
-            return JsonUtil.readValue(json, new TypeReference<>() { });
+            return JsonUtil.readValue(json, new TypeReference<>() {
+            });
         }
 
     }

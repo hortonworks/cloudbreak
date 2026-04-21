@@ -12,7 +12,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.upgrade.UpgradeV4Request;
@@ -20,8 +19,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageInfo
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.StackCcmUpgradeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
 import com.sequenceiq.cloudbreak.api.model.CcmUpgradeResponseType;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
-import com.sequenceiq.cloudbreak.auth.crn.AccountIdService;
 import com.sequenceiq.common.model.UpgradeShowAvailableImages;
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXCcmUpgradeV1Response;
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXUpgradeReplaceVms;
@@ -34,31 +31,23 @@ import com.sequenceiq.flow.api.model.FlowType;
 @ExtendWith(MockitoExtension.class)
 class UpgradeConverterTest {
 
-    private static final String USER_CRN = "crn:cdp:iam:us-west-1:1234:user:1";
-
     @InjectMocks
     private UpgradeConverter underTest;
 
-    @Mock
-    private AccountIdService accountIdService;
-
-    @Mock
-    private EntitlementService entitlementService;
-
     @ParameterizedTest
     @EnumSource(UpgradeShowAvailableImages.class)
-    public void testFromUpgradeShowAvailableImagesToDistroxUpgradeShowAvailableImages(UpgradeShowAvailableImages upgradeShowAvailableImagesEnum) {
+    void testFromUpgradeShowAvailableImagesToDistroxUpgradeShowAvailableImages(UpgradeShowAvailableImages upgradeShowAvailableImagesEnum) {
         DistroXUpgradeShowAvailableImages.valueOf(upgradeShowAvailableImagesEnum.name());
     }
 
     @ParameterizedTest
     @EnumSource(DistroXUpgradeShowAvailableImages.class)
-    public void testFromDistroxUpgradeShowAvailableImagesToUpgradeShowAvailableImages(DistroXUpgradeShowAvailableImages distroxUpgradeShowAvailableImages) {
+    void testFromDistroxUpgradeShowAvailableImagesToUpgradeShowAvailableImages(DistroXUpgradeShowAvailableImages distroxUpgradeShowAvailableImages) {
         UpgradeShowAvailableImages.valueOf(distroxUpgradeShowAvailableImages.name());
     }
 
     @Test
-    public void testConvertRequest() {
+    void testConvertRequest() {
         DistroXUpgradeV1Request source = new DistroXUpgradeV1Request();
         source.setDryRun(Boolean.TRUE);
         source.setImageId("asdf");
@@ -67,7 +56,7 @@ class UpgradeConverterTest {
         source.setReplaceVms(DistroXUpgradeReplaceVms.DISABLED);
         source.setRuntime("runtime");
 
-        UpgradeV4Request result = underTest.convert(source, USER_CRN, false);
+        UpgradeV4Request result = underTest.convert(source, false);
 
         assertEquals(source.getDryRun(), result.getDryRun());
         assertEquals(source.getImageId(), result.getImageId());
@@ -79,27 +68,27 @@ class UpgradeConverterTest {
     }
 
     @Test
-    public void testConvertRequestWhenInternal() {
+    void testConvertRequestWhenInternal() {
         // GIVEN
         DistroXUpgradeV1Request source = new DistroXUpgradeV1Request();
         // WHEN
-        UpgradeV4Request result = underTest.convert(source, USER_CRN, true);
+        UpgradeV4Request result = underTest.convert(source, true);
         // THEN
         assertTrue(result.getInternalUpgradeSettings().isSkipValidations());
     }
 
     @Test
-    public void testConvertRequestWhenReplaceVmsParamIsNotGiven() {
+    void testConvertRequestWhenReplaceVmsParamIsNotGiven() {
         // GIVEN
         DistroXUpgradeV1Request source = new DistroXUpgradeV1Request();
         // WHEN
-        UpgradeV4Request result = underTest.convert(source, USER_CRN, false);
+        UpgradeV4Request result = underTest.convert(source, false);
         // THEN
         assertNull(result.getReplaceVms());
     }
 
     @Test
-    public void testConvertResult() {
+    void testConvertResult() {
         UpgradeV4Response source = new UpgradeV4Response();
         source.setUpgradeCandidates(List.of());
         source.setCurrent(new ImageInfoV4Response());
@@ -115,7 +104,7 @@ class UpgradeConverterTest {
     }
 
     @Test
-    public void testConvertUpgradeCcmResult() {
+    void testConvertUpgradeCcmResult() {
         StackCcmUpgradeV4Response source = new StackCcmUpgradeV4Response();
         source.setResponseType(CcmUpgradeResponseType.TRIGGERED);
         source.setResourceCrn("crn");

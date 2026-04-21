@@ -35,6 +35,15 @@ public interface FlowChainLogRepository extends CrudRepository<FlowChainLog, Lon
 
     Optional<FlowChainLog> findFirstByFlowChainIdOrderByCreatedAsc(String flowChainId);
 
+    @Query("""
+            SELECT flc FROM FlowChainLog flc
+            WHERE flc.flowChainId IN (SELECT fl.flowChainId FROM FlowLog fl WHERE fl.resourceId = :resourceId)
+            AND flc.flowChainType = :flowChainType
+            ORDER BY flc.created DESC
+            LIMIT 1
+            """)
+    Optional<FlowChainLog> findLastByResourceIdAndFlowChainTypeOrderByCreatedDesc(Long resourceId, String flowChainType);
+
     @Modifying
     @Query("DELETE FROM FlowChainLog fch "
             + "WHERE fch.flowChainId NOT IN ( SELECT DISTINCT fl.flowChainId FROM FlowLog fl WHERE fl.flowChainId IS NOT NULL)"

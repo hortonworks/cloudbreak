@@ -96,6 +96,18 @@ public class SdxUpgradeController implements SdxUpgradeEndpoint {
     }
 
     @Override
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.UPGRADE_DATALAKE)
+    public SdxUpgradeResponse reinitiateClusterUpgradeByName(@ResourceName String name) {
+        return sdxRuntimeUpgradeService.reinitiateClusterUpgrade(NameOrCrn.ofName(name));
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.UPGRADE_DATALAKE)
+    public SdxUpgradeResponse reinitiateClusterUpgradeByCrn(@ResourceCrn String crn) {
+        return sdxRuntimeUpgradeService.reinitiateClusterUpgrade(NameOrCrn.ofCrn(crn));
+    }
+
+    @Override
     @InternalOnly
     public SdxCcmUpgradeResponse upgradeCcm(@ResourceCrn String environmentCrn, @InitiatorUserCrn String initiatorUserCrn) {
         return sdxCcmUpgradeService.upgradeCcm(environmentCrn);
