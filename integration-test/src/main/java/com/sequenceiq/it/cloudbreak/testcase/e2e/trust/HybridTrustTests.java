@@ -193,7 +193,7 @@ public class HybridTrustTests extends AbstractE2ETest {
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
-            }).withName(String.format("execute %s batch commands", name)).run();
+            }).withName(String.format("execute %s batch commands", name)).withRetryWaitSeconds(30).run();
 
             String deleteBatchCommand = String.format(DELETE_BATCH_COMMAND, batchFileName);
             Pair<Integer, String> deleteScriptResult = sshJClient.execute(sshClient, deleteBatchCommand, 120L);

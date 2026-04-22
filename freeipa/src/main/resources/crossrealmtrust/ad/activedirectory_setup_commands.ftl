@@ -20,7 +20,7 @@ netdom query /Domain:%AD_DOMAIN% /Direct TRUST | findstr %IPA_DOMAIN% > NUL 2>&1
   echo IPA trust already exists
 ) || (
   echo IPA trust not found, adding it...
-  netdom trust %IPA_DOMAIN% /Domain:%AD_DOMAIN% /Add /Twoway /ForestTRANsitive:yes /PasswordT:%TRUST_SECRET% /oneside:trusted || (
+  netdom trust %IPA_DOMAIN% /Domain:%AD_DOMAIN% /Add /Twoway /ForestTRANsitive:yes /PasswordT:%TRUST_SECRET% /oneside:trusted /verbose || (
     echo [FAILURE] Failed to add IPA trust for %IPA_DOMAIN% domain!
   )
 )
