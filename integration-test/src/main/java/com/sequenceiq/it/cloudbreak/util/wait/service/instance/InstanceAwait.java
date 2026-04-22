@@ -71,6 +71,7 @@ public class InstanceAwait {
             Log.await(LOGGER, String.format("%s for instance existence", entity.getName()));
             Duration pollingInterval = testContext.getPollingDurationOrTheDefault(runningParameter);
             int maxRetry = testContext.getMaxRetry();
+            int maxRetryCount = testContext.getMaxRetryCount();
             MicroserviceClient client = testContext.getMicroserviceClient(entity.getClass(), testContext.setActingUser(runningParameter).getAccessKey());
 
             InstanceWaitObject instanceWaitObject = client.waitInstancesObject(entity, testContext, List.of(), null);
@@ -80,7 +81,7 @@ public class InstanceAwait {
                         pollingInterval, runningParameter.getTimeoutChecker(), maxRetry);
             } else {
                 client.<CloudbreakInstanceWaitObject>waiterService().waitObject(new InstanceExistenceChecker<>(), instanceWaitObject, testContext,
-                        pollingInterval, maxRetry, 1);
+                        pollingInterval, maxRetry, maxRetryCount);
             }
         } catch (Exception e) {
             if (runningParameter.isLogError()) {
