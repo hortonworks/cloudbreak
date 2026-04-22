@@ -15,6 +15,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AZUR
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AZURE_DELETE_DISK;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AZURE_MULTIAZ;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AZURE_RESIZE_DISK;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_BLUEPRINT_JVM_PARAMETER_REMOVAL;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_CM_TEMPLATE_SYNC;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_CO2_CALCULATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_CONFIGURE_ENCRYPTION_PROFILE;
@@ -656,5 +657,9 @@ public class EntitlementService {
 
     public boolean isDbDiskAutoResizeEnabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_CB_DB_DISK_AUTO_RESIZE);
+    }
+
+    public boolean isBlueprintJvmParameterRemovalEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_CB_BLUEPRINT_JVM_PARAMETER_REMOVAL);
     }
 }

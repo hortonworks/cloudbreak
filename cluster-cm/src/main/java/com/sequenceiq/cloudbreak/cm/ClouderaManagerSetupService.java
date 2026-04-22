@@ -165,6 +165,9 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
     @Inject
     private ClouderaManagerCommandsService clouderaManagerCommandsService;
 
+    @Inject
+    private DefaultBlueprintJvmParameterRemovalService defaultBlueprintJvmParameterRemovalService;
+
     private final StackDtoDelegate stack;
 
     private final HttpClientConfig clientConfig;
@@ -224,7 +227,7 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
             ClouderaManagerRepo clouderaManagerRepoDetails = clusterComponentProvider.getClouderaManagerRepoDetails(clusterId);
             ApiClusterTemplate apiClusterTemplate = getCmTemplate(templatePreparationObject, sdxContextName, instanceMetaDataByHostGroup,
                     clouderaManagerRepoDetails, clusterId);
-
+            defaultBlueprintJvmParameterRemovalService.removeJvmPropertiesIfNeeded(stack, apiClusterTemplate);
             return getExtendedBlueprintText(apiClusterTemplate);
         } catch (CancellationException cancellationException) {
             throw cancellationException;
