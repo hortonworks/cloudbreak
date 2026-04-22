@@ -122,7 +122,7 @@ public class GcpPlatformResources implements PlatformResources {
 
     private static final Set<String> MACHINE_TYPES_WITH_LOCAL_SSD = Set.of("n1", "n2", "n2d");
 
-    @Value("${cb.gcp.default.vmtype:n2-highcpu-8}")
+    @Value("${cb.gcp.default.vmtype:n2-standard-8}")
     private String gcpVmDefault;
 
     @Value("${cb.gcp.default.database.vmtype:db-custom-2-13312}")
