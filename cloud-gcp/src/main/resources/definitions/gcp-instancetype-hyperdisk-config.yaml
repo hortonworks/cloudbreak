@@ -37,6 +37,7 @@ gcp.hyperdisk:
     n2:
       defaultDiskType: pd-balanced
       hyperDiskExtremeSupported: true
+      hyperDiskExtremeMinCpuCount: 80
       hyperDiskThroughputSupported: true
       pdStandardSupported: true
       pdBalancedSupported: true

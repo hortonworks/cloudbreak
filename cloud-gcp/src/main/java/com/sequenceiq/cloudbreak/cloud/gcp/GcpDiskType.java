@@ -16,8 +16,8 @@ import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
 
 public enum GcpDiskType {
     SSD("pd-ssd", "Solid-State Persistent Disk (SSD)", VolumeParameterType.SSD, DEFAULT_DISK_MIN_SIZE, UNDEFINED_DISK_SIZE),
-    BALANCED("pd-balanced", "Balanced Persistent Disk (BALANCED)", VolumeParameterType.MAGNETIC, DEFAULT_DISK_MIN_SIZE, UNDEFINED_DISK_SIZE),
-    EXTREME("pd-extreme", "Extreme Persistent Disk (EXTREME)", VolumeParameterType.SSD, DEFAULT_DISK_MIN_SIZE, EXTREME_DISK_MAX_SIZE),
+    BALANCED("pd-balanced", "Balanced Persistent Disk (BALANCED)", VolumeParameterType.BALANCED_HDD, DEFAULT_DISK_MIN_SIZE, UNDEFINED_DISK_SIZE),
+    EXTREME("pd-extreme", "Extreme Persistent Disk (EXTREME)", VolumeParameterType.EXTREME_SSD, DEFAULT_DISK_MIN_SIZE, EXTREME_DISK_MAX_SIZE),
     HDD("pd-standard", "Standard Persistent Disk (HDD)", VolumeParameterType.MAGNETIC, DEFAULT_DISK_MIN_SIZE, UNDEFINED_DISK_SIZE),
     LOCAL_SSD("local-ssd", "Scratch Disk (SSD)", VolumeParameterType.LOCAL_SSD, UNDEFINED_DISK_SIZE, UNDEFINED_DISK_SIZE),
     HYPERDISK_EXTREME("hyperdisk-extreme", "Hyperdisk Extreme (HYPERDISK_EXTREME)", VolumeParameterType.HYPERDISK_EXTREME,
