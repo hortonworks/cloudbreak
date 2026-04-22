@@ -255,6 +255,10 @@ public interface CloudProvider {
 
     String getDatahubCustomInstanceType();
 
+    default String getDatahubCustomInstanceTypeWithStorage() {
+        return getDatahubCustomInstanceType();
+    }
+
     String getAddDiskVolumeType();
 
     String getModifyDiskVolumeType();

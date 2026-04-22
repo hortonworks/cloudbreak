@@ -247,6 +247,7 @@ integrationtest:
         - subnet-0476e538519ac9570
         - subnet-0cb6292385565e5da
     datahubCustomInstanceType: m5.4xlarge
+    datahubCustomInstanceTypeWithStorage: m5d.2xlarge
 
   # azure parameters
   azure:

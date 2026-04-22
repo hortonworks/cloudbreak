@@ -581,6 +581,11 @@ public class CloudProviderProxy implements CloudProvider {
     }
 
     @Override
+    public String getDatahubCustomInstanceTypeWithStorage() {
+        return delegate.getDatahubCustomInstanceTypeWithStorage();
+    }
+
+    @Override
     public ResourceType getRootDiskResourceType() {
         return delegate.getRootDiskResourceType();
     }

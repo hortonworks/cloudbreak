@@ -593,6 +593,11 @@ public class AwsCloudProvider extends AbstractCloudProvider {
     }
 
     @Override
+    public String getDatahubCustomInstanceTypeWithStorage() {
+        return awsProperties.getDatahubCustomInstanceTypeWithStorage();
+    }
+
+    @Override
     public String getAddDiskVolumeType() {
         return verticalScaleVolumeType();
     }

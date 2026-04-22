@@ -36,6 +36,8 @@ public class AwsProperties {
 
     private String datahubCustomInstanceType;
 
+    private String datahubCustomInstanceTypeWithStorage;
+
     private final Instance instance = new Instance();
 
     private final Instance storageOptimizedInstance = new Instance();
@@ -116,6 +118,14 @@ public class AwsProperties {
 
     public void setDatahubCustomInstanceType(String datahubCustomInstanceType) {
         this.datahubCustomInstanceType = datahubCustomInstanceType;
+    }
+
+    public String getDatahubCustomInstanceTypeWithStorage() {
+        return datahubCustomInstanceTypeWithStorage;
+    }
+
+    public void setDatahubCustomInstanceTypeWithStorage(String datahubCustomInstanceTypeWithStorage) {
+        this.datahubCustomInstanceTypeWithStorage = datahubCustomInstanceTypeWithStorage;
     }
 
     public String getLocation() {
