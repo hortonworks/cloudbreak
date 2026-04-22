@@ -2,9 +2,6 @@ package com.sequenceiq.cloudbreak.rotation.context.provider;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 import java.util.Map;
 
@@ -14,9 +11,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.DatabaseAvailabilityType;
-import com.sequenceiq.cloudbreak.domain.stack.Database;
-import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.rotation.CloudbreakSecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.DatabaseRootPasswordSaltPillarGenerator;
 import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
@@ -33,15 +27,6 @@ class DatalakeExternalDatabaseRootPasswordRotationContextProviderTest {
 
     @InjectMocks
     private DatalakeExternalDatabaseRootPasswordRotationContextProvider underTest;
-
-    @Test
-    void testIsApplicable() {
-        StackDto stack = mock(StackDto.class);
-        Database database = mock(Database.class);
-        when(database.getExternalDatabaseAvailabilityType()).thenReturn(DatabaseAvailabilityType.NON_HA);
-        when(stack.getDatabase()).thenReturn(database);
-        assertTrue(underTest.isApplicable(stack));
-    }
 
     @Test
     void testGetContexts() {

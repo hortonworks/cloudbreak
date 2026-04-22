@@ -4,22 +4,21 @@ import static com.sequenceiq.cloudbreak.rotation.CloudbreakSecretType.INTERNAL_D
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Function;
 
 import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.rotation.CloudbreakSecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.DatabaseRootPasswordSaltPillarGenerator;
 import com.sequenceiq.cloudbreak.rotation.SecretRotationStep;
 import com.sequenceiq.cloudbreak.rotation.SecretType;
 import com.sequenceiq.cloudbreak.rotation.common.RotationContext;
+import com.sequenceiq.cloudbreak.rotation.common.RotationContextProvider;
 import com.sequenceiq.cloudbreak.rotation.context.SaltPillarRotationContext;
 
 @Component
-public class DatalakeExternalDatabaseRootPasswordRotationContextProvider extends CloudbreakConditionalRotationContextProvider {
+public class DatalakeExternalDatabaseRootPasswordRotationContextProvider implements RotationContextProvider {
 
     @Inject
     private DatabaseRootPasswordSaltPillarGenerator databaseRootPasswordSaltPillarGenerator;
@@ -34,10 +33,5 @@ public class DatalakeExternalDatabaseRootPasswordRotationContextProvider extends
     @Override
     public SecretType getSecret() {
         return INTERNAL_DATALAKE_EXTERNAL_DATABASE_ROOT_PASSWORD;
-    }
-
-    @Override
-    protected Function<StackDto, Boolean> getConditionalRotationFunction() {
-        return stackDto -> !stackDto.getDatabase().getExternalDatabaseAvailabilityType().isEmbedded();
     }
 }
