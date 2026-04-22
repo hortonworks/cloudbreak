@@ -52,21 +52,19 @@ public class LogCollectorUtil {
         for (String issue : LOG_FILES_TO_COLLECT_ON_ISSUE.keySet()) {
             if (!StringUtils.isEmpty(statusReason) && statusReason.contains(issue)) {
                 for (String logFilePath : LOG_FILES_TO_COLLECT_ON_ISSUE.get(issue)) {
-                    try {
-                        sshJClientActions.executeSshCommandOnHosts(ipAddresses, "sudo mkdir -p " + TMP_LOGS
+                    for (String ipAddress : ipAddresses) {
+                        sshJClientActions.executeSshCommand(ipAddress, "sudo mkdir -p " + TMP_LOGS
                                 + "; sudo rsync -aR " + logFilePath + " " + TMP_LOGS + "/" + "; sudo chown -R cloudbreak:cloudbreak " + TMP_LOGS);
-                        for (String ipAddress : ipAddresses) {
-                            try (SSHClient sshClient = sshJClient.createSshClient(ipAddress, null, null, null)) {
-                                String downloadPath = workingDirectory + "/debug-logs/" + ipAddress + logFilePath;
-                                FileUtils.createParentDirectories(new File(downloadPath));
-                                sshJClient.download(sshClient, TMP_LOGS + logFilePath,
-                                        workingDirectory + "/debug-logs/" + ipAddress + logFilePath);
-                            } catch (IOException e) {
-                                LOGGER.warn("Failed to create ssh client for {}. Reason: {}", ipAddress, e.getMessage(), e);
-                            }
+                        try (SSHClient sshClient = sshJClient.createSshClient(ipAddress, null, null, null)) {
+                            String downloadPath = workingDirectory + "/debug-logs/" + ipAddress + logFilePath;
+                            FileUtils.createParentDirectories(new File(downloadPath));
+                            sshJClient.download(sshClient, TMP_LOGS + logFilePath,
+                                    workingDirectory + "/debug-logs/" + ipAddress + logFilePath);
+                        } catch (IOException e) {
+                            LOGGER.warn("Failed to create ssh client for {}. Reason: {}", ipAddress, e.getMessage(), e);
+                        } catch (Exception e) {
+                            LOGGER.warn("Failed to collect {} from host {}. Reason: {}", logFilePath, ipAddress, e.getMessage(), e);
                         }
-                    } catch (Exception e) {
-                        LOGGER.warn("Failed to collect {} from all hosts. Reason: {}", logFilePath, e.getMessage(), e);
                     }
                 }
             }

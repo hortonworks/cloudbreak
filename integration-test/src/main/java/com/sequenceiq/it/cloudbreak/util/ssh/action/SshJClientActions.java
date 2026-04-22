@@ -334,7 +334,7 @@ public class SshJClientActions {
         }
     }
 
-    protected Pair<Integer, String> executeSshCommand(String instanceIp, String command) {
+    public Pair<Integer, String> executeSshCommand(String instanceIp, String command) {
         return executeSshCommand(instanceIp, null, null, null, command);
     }
 
