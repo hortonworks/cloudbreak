@@ -1,7 +1,8 @@
-package com.sequenceiq.cloudbreak.cloud.aws.resource.tag;
+package com.sequenceiq.cloudbreak.cloud.aws.common.connector.resource.tag;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -16,6 +17,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTaggingService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.CommonAwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEfsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
@@ -27,6 +29,8 @@ import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.common.api.type.ResourceType;
 
+import software.amazon.awssdk.services.efs.model.ListTagsForResourceRequest;
+import software.amazon.awssdk.services.efs.model.ListTagsForResourceResponse;
 import software.amazon.awssdk.services.efs.model.Tag;
 import software.amazon.awssdk.services.efs.model.TagResourceRequest;
 
@@ -39,7 +43,13 @@ class EfsTagUpdateStrategyTest {
 
     private static final String RESOURCE_REFERENCE = "resourceReference";
 
+    private static final String EXISTING_TAG_KEY = "existingTagKey";
+
+    private static final String EXISTING_TAG_VALUE = "existingTagValue";
+
     private static final Map<String, String> USER_DEFINED_TAGS = Map.of("custom", "value");
+
+    private static final Map<String, String> EXISTING_TAGS = Map.of(EXISTING_TAG_KEY, EXISTING_TAG_VALUE);
 
     @Mock
     private AuthenticatedContext authenticatedContext;
@@ -62,6 +72,9 @@ class EfsTagUpdateStrategyTest {
     @Mock
     private AmazonEfsClient efsClient;
 
+    @Mock
+    private AwsTaggingService awsTaggingService;
+
     @InjectMocks
     private EfsTagUpdateStrategy underTest;
 
@@ -77,14 +90,38 @@ class EfsTagUpdateStrategyTest {
     @Test
     void testUpdateTagsForAwsEfs() {
         CloudResource cloudResource = buildResource(ResourceType.AWS_EFS, null, RESOURCE_REFERENCE);
+        List<Tag> expectedTags = toEfsTags(USER_DEFINED_TAGS);
         when(commonAwsClient.createElasticFileSystemClient(any(AwsCredentialView.class), eq(REGION_NAME))).thenReturn(efsClient);
+        when(efsClient.listTagsForResource(any(ListTagsForResourceRequest.class))).thenReturn(ListTagsForResourceResponse.builder()
+                        .tags(Tag.builder()
+                                .key(EXISTING_TAG_KEY)
+                                .value(EXISTING_TAG_VALUE)
+                                .build())
+                .build());
+        when(awsTaggingService.prepareEfsTags(USER_DEFINED_TAGS)).thenReturn(expectedTags);
 
         underTest.updateTags(authenticatedContext, cloudResource, USER_DEFINED_TAGS);
 
         verify(efsClient).tagResource(TagResourceRequest.builder()
                 .resourceId(RESOURCE_REFERENCE)
-                .tags(toEfsTags(USER_DEFINED_TAGS))
+                .tags(expectedTags)
                 .build());
+    }
+
+    @Test
+    void testUpdateTagsSkipUpdateWhenTagsAlreadyUpToDate() {
+        CloudResource cloudResource = buildResource(ResourceType.AWS_EFS, null, RESOURCE_REFERENCE);
+        when(commonAwsClient.createElasticFileSystemClient(any(AwsCredentialView.class), eq(REGION_NAME))).thenReturn(efsClient);
+        when(efsClient.listTagsForResource(any(ListTagsForResourceRequest.class))).thenReturn(ListTagsForResourceResponse.builder()
+                .tags(Tag.builder()
+                        .key(EXISTING_TAG_KEY)
+                        .value(EXISTING_TAG_VALUE)
+                        .build())
+                .build());
+
+        underTest.updateTags(authenticatedContext, cloudResource, EXISTING_TAGS);
+
+        verify(efsClient, times(0)).tagResource(any(TagResourceRequest.class));
     }
 
     private List<Tag> toEfsTags(Map<String, String> tags) {

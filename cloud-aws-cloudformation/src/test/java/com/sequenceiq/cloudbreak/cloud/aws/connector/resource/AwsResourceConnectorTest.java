@@ -1,30 +1,39 @@
 package com.sequenceiq.cloudbreak.cloud.aws.connector.resource;
 
+import static com.sequenceiq.common.api.type.ResourceType.AWS_ROOT_DISK;
+import static com.sequenceiq.common.api.type.ResourceType.AWS_VOLUMESET;
 import static com.sequenceiq.common.api.type.ResourceType.CLOUDFORMATION_STACK;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.cloud.aws.connector.resource.tag.AwsResourceTagUpdaterService;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseServer;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.model.database.CloudDatabaseServerSslCertificate;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
+import com.sequenceiq.common.api.type.ResourceType;
 
 import software.amazon.awssdk.services.rds.model.DescribeDbInstancesResponse;
 
@@ -47,6 +56,9 @@ class AwsResourceConnectorTest {
 
     @Mock
     private AwsRdsTerminateService awsRdsTerminateService;
+
+    @Mock
+    private AwsResourceTagUpdaterService awsResourceTagUpdaterService;
 
     @InjectMocks
     private AwsResourceConnector underTest;
@@ -105,14 +117,60 @@ class AwsResourceConnectorTest {
     }
 
     @Test
-    void testUpdateTags() {
+    void testUpdateTags() throws IOException {
         AuthenticatedContext ac = mock(AuthenticatedContext.class);
         CloudResource cloudFormationStack = CloudResource.builder()
                 .withType(CLOUDFORMATION_STACK)
-                .withName("cloudFormationStack")
+                .withName("awsCloudFormationStack")
+                .build();
+
+        CloudResource awsVolumeSet = CloudResource.builder()
+                .withType(AWS_VOLUMESET)
+                .withName("awsVolumeSet")
+                .build();
+
+        CloudResource awsRootDisk = CloudResource.builder()
+                .withType(AWS_ROOT_DISK)
+                .withName("awsRootDisk")
                 .build();
 
         Map<String, String> userDefinedTags = Map.of("custom", "value");
-        assertThrows(UnsupportedOperationException.class, () -> underTest.updateTags(ac, List.of(cloudFormationStack), userDefinedTags));
+
+        underTest.updateTags(ac, List.of(cloudFormationStack, awsVolumeSet, awsRootDisk), userDefinedTags);
+
+        verify(awsResourceTagUpdaterService).updateTags(ac, cloudFormationStack, userDefinedTags);
+        verify(awsResourceTagUpdaterService).updateTags(ac, awsVolumeSet, userDefinedTags);
+        verify(awsResourceTagUpdaterService).updateTags(ac, awsRootDisk, userDefinedTags);
+    }
+
+    @ParameterizedTest
+    @MethodSource("emptyAndNullUserDefinedTags")
+    void testUpdateTagsWhenUserDefinedTagsIsEmpty(Map<String, String> userDefinedTags) {
+        AuthenticatedContext ac = mock(AuthenticatedContext.class);
+        CloudResource cloudFormationStack = CloudResource.builder()
+                .withType(ResourceType.CLOUDFORMATION_STACK)
+                .withName("awsCloudFormationStack")
+                .build();
+
+        CloudResource awsVolumeSet = CloudResource.builder()
+                .withType(AWS_VOLUMESET)
+                .withName("awsVolumeSet")
+                .build();
+
+        CloudResource awsRootDisk = CloudResource.builder()
+                .withType(AWS_ROOT_DISK)
+                .withName("awsRootDisk")
+                .build();
+
+        underTest.updateTags(ac, List.of(cloudFormationStack, awsVolumeSet, awsRootDisk), userDefinedTags);
+
+        verifyNoInteractions(awsResourceTagUpdaterService);
+    }
+
+    private static Stream<Arguments> emptyAndNullUserDefinedTags() {
+        return Stream.of(
+                Arguments.of((Object) null),
+                Arguments.of(Collections.emptyMap())
+        );
     }
 }

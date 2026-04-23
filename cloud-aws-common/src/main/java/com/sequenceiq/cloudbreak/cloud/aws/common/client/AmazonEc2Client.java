@@ -75,6 +75,8 @@ import software.amazon.awssdk.services.ec2.model.DescribeSecurityGroupsRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeSecurityGroupsResponse;
 import software.amazon.awssdk.services.ec2.model.DescribeSubnetsRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeSubnetsResponse;
+import software.amazon.awssdk.services.ec2.model.DescribeTagsRequest;
+import software.amazon.awssdk.services.ec2.model.DescribeTagsResponse;
 import software.amazon.awssdk.services.ec2.model.DescribeVolumesModificationsRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeVolumesModificationsResponse;
 import software.amazon.awssdk.services.ec2.model.DescribeVolumesRequest;
@@ -285,6 +287,10 @@ public class AmazonEc2Client extends AmazonClient {
 
     public CreateTagsResponse createTags(CreateTagsRequest createTagsRequest) {
         return client.createTags(createTagsRequest);
+    }
+
+    public DescribeTagsResponse describeTags(DescribeTagsRequest describeTagsRequest) {
+        return client.describeTags(describeTagsRequest);
     }
 
     public DescribeVpcEndpointServicesResponse describeVpcEndpointServices() {

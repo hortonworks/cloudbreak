@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.gcp.tag;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -121,6 +122,25 @@ class GcpAttachedDiskSetTagUpdateStrategyTest {
                         && MERGED_LABELS.equals(req.getLabels())));
         verify(disksSetLabels1).execute();
         verify(disksSetLabels2).execute();
+    }
+
+    @Test
+    void testUpdateTagsWithoutNewTags() throws Exception {
+        CloudResource cloudResource = buildCloudResourceWithVolumes(
+                List.of(
+                        buildVolume(DISK_ID_1)
+                )
+        );
+
+        Disk disk1 = new Disk().setLabelFingerprint(FINGERPRINT_1).setLabels(EXISTING_LABELS);
+
+        when(compute.disks()).thenReturn(disks);
+        when(disks.get(PROJECT_ID, ZONE, DISK_ID_1)).thenReturn(disksGet1);
+        when(disksGet1.execute()).thenReturn(disk1);
+
+        underTest.updateTags(authenticatedContext, cloudResource, EXISTING_LABELS);
+
+        verify(disksSetLabels1, times(0)).execute();
     }
 
     private CloudResource buildCloudResourceWithVolumes(List<VolumeSetAttributes.Volume> volumes) {

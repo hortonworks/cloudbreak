@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cloud.aws.resource.tag;
+package com.sequenceiq.cloudbreak.cloud.aws.connector.resource.tag;
 
 import static java.util.stream.Collectors.toMap;
 
@@ -18,7 +18,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.common.api.type.ResourceType;
 
 /**
- * Service responsible for updating tags on AWS native cloud resources.
+ * Service responsible for updating tags on AWS CloudFormation cloud resources.
  *
  * <p>This service uses strategy pattern to delegate tag update operations
  * to specific implementations of {@link TagUpdateStrategy}.
@@ -29,14 +29,13 @@ import com.sequenceiq.common.api.type.ResourceType;
  */
 
 @Service
-public class AwsNativeResourceTagUpdaterService {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(AwsNativeResourceTagUpdaterService.class);
+public class AwsResourceTagUpdaterService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(AwsResourceTagUpdaterService.class);
 
     private final Map<ResourceType, TagUpdateStrategy> tagUpdateStrategyMap;
 
     @Inject
-    public AwsNativeResourceTagUpdaterService(List<TagUpdateStrategy> tagUpdateStrategies) {
+    public AwsResourceTagUpdaterService(List<TagUpdateStrategy> tagUpdateStrategies) {
         this.tagUpdateStrategyMap = tagUpdateStrategies.stream()
                 .flatMap(strategy -> strategy.supportedTypes().stream().map(type -> Map.entry(type, strategy)))
                 .collect(toMap(Map.Entry::getKey, Map.Entry::getValue));

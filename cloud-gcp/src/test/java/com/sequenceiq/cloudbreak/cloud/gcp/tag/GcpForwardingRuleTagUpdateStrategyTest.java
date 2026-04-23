@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.gcp.tag;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -108,6 +109,22 @@ class GcpForwardingRuleTagUpdateStrategyTest {
                 argThat(req -> FINGERPRINT.equals(req.getLabelFingerprint())
                         && MERGED_LABELS.equals(req.getLabels())));
         verify(forwardingRulesSetLabels).execute();
+    }
+
+    @Test
+    void testUpdateTagsWithoutNewTags() throws Exception {
+        CloudResource cloudResource = buildCloudResource(ResourceType.GCP_FORWARDING_RULE);
+        ForwardingRule forwardingRule = new ForwardingRule()
+                .setLabelFingerprint(FINGERPRINT)
+                .setLabels(EXISTING_LABELS);
+
+        when(compute.forwardingRules()).thenReturn(forwardingRules);
+        when(forwardingRules.get(PROJECT_ID, REGION, RESOURCE_NAME)).thenReturn(forwardingRulesGet);
+        when(forwardingRulesGet.execute()).thenReturn(forwardingRule);
+
+        underTest.updateTags(authenticatedContext, cloudResource, EXISTING_LABELS);
+
+        verify(forwardingRulesSetLabels, times(0)).execute();
     }
 
     private CloudResource buildCloudResource(ResourceType type) {

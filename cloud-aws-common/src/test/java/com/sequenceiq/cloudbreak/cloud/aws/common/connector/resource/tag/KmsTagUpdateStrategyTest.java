@@ -1,7 +1,8 @@
-package com.sequenceiq.cloudbreak.cloud.aws.resource.tag;
+package com.sequenceiq.cloudbreak.cloud.aws.common.connector.resource.tag;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -16,6 +17,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTaggingService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.CommonAwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonKmsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
@@ -27,7 +29,10 @@ import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.common.api.type.ResourceType;
 
+import software.amazon.awssdk.services.kms.model.ListResourceTagsRequest;
+import software.amazon.awssdk.services.kms.model.ListResourceTagsResponse;
 import software.amazon.awssdk.services.kms.model.Tag;
+import software.amazon.awssdk.services.kms.model.TagResourceRequest;
 
 @ExtendWith(MockitoExtension.class)
 class KmsTagUpdateStrategyTest {
@@ -38,7 +43,13 @@ class KmsTagUpdateStrategyTest {
 
     private static final String RESOURCE_REFERENCE = "resourceReference";
 
+    private static final String EXISTING_TAG_KEY = "existingTagKey";
+
+    private static final String EXISTING_TAG_VALUE = "existingTagValue";
+
     private static final Map<String, String> USER_DEFINED_TAGS = Map.of("custom", "value");
+
+    private static final Map<String, String> EXISTING_TAGS = Map.of(EXISTING_TAG_KEY, EXISTING_TAG_VALUE);
 
     @Mock
     private AuthenticatedContext authenticatedContext;
@@ -61,6 +72,9 @@ class KmsTagUpdateStrategyTest {
     @Mock
     private AmazonKmsClient kmsClient;
 
+    @Mock
+    private AwsTaggingService awsTaggingService;
+
     @InjectMocks
     private KmsTagUpdateStrategy underTest;
 
@@ -76,14 +90,38 @@ class KmsTagUpdateStrategyTest {
     @Test
     void testUpdateTagsForAwsKmsKey() {
         CloudResource cloudResource = buildResource(ResourceType.AWS_KMS_KEY, null, RESOURCE_REFERENCE);
+        List<Tag> expectedTags = toKmsTags(USER_DEFINED_TAGS);
         when(commonAwsClient.createAWSKMS(any(AwsCredentialView.class), eq(REGION_NAME))).thenReturn(kmsClient);
+        when(kmsClient.listResourceTags(any(ListResourceTagsRequest.class))).thenReturn(ListResourceTagsResponse.builder()
+                        .tags(Tag.builder()
+                                .tagKey(EXISTING_TAG_KEY)
+                                .tagValue(EXISTING_TAG_VALUE)
+                                .build())
+                .build());
+        when(awsTaggingService.prepareKmsTags(USER_DEFINED_TAGS)).thenReturn(expectedTags);
 
         underTest.updateTags(authenticatedContext, cloudResource, USER_DEFINED_TAGS);
 
         verify(kmsClient).tagResource(software.amazon.awssdk.services.kms.model.TagResourceRequest.builder()
                 .keyId(RESOURCE_REFERENCE)
-                .tags(toKmsTags(USER_DEFINED_TAGS))
+                .tags(expectedTags)
                 .build());
+    }
+
+    @Test
+    void testUpdateTagsSkipUpdateWhenTagsAlreadyUpToDate() {
+        CloudResource cloudResource = buildResource(ResourceType.AWS_KMS_KEY, null, RESOURCE_REFERENCE);
+        when(commonAwsClient.createAWSKMS(any(AwsCredentialView.class), eq(REGION_NAME))).thenReturn(kmsClient);
+        when(kmsClient.listResourceTags(any(ListResourceTagsRequest.class))).thenReturn(ListResourceTagsResponse.builder()
+                .tags(Tag.builder()
+                        .tagKey(EXISTING_TAG_KEY)
+                        .tagValue(EXISTING_TAG_VALUE)
+                        .build())
+                .build());
+
+        underTest.updateTags(authenticatedContext, cloudResource, EXISTING_TAGS);
+
+        verify(kmsClient, times(0)).tagResource(any(TagResourceRequest.class));
     }
 
     private List<Tag> toKmsTags(Map<String, String> tags) {

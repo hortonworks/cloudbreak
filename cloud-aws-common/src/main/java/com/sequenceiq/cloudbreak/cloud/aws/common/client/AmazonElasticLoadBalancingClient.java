@@ -21,6 +21,8 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeList
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeListenersResponse;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeLoadBalancersRequest;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeLoadBalancersResponse;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeTagsRequest;
+import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeTagsResponse;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeTargetGroupsRequest;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeTargetGroupsResponse;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeTargetHealthRequest;
@@ -94,6 +96,10 @@ public class AmazonElasticLoadBalancingClient extends AmazonClient {
 
     public DescribeTargetGroupsResponse describeTargetGroup(DescribeTargetGroupsRequest describeTargetGroupsRequest) {
         return client.describeTargetGroups(describeTargetGroupsRequest);
+    }
+
+    public DescribeTagsResponse describeTags(DescribeTagsRequest describeTagsRequest) {
+        return client.describeTags(describeTagsRequest);
     }
 
     public AddTagsResponse addTags(AddTagsRequest addTagsRequest) {

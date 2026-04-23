@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import com.google.api.services.compute.Compute;
 import com.google.api.services.compute.model.Disk;
 import com.google.api.services.compute.model.ZoneSetLabelsRequest;
+import com.sequenceiq.cloudbreak.cloud.TagUpdateStrategy;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContextBuilder;
@@ -23,7 +24,7 @@ import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.common.api.type.ResourceType;
 
 @Service
-public class GcpAttachedDiskSetTagUpdateStrategy implements GcpResourceTagUpdateStrategy {
+public class GcpAttachedDiskSetTagUpdateStrategy implements TagUpdateStrategy {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GcpAttachedDiskSetTagUpdateStrategy.class);
 
@@ -62,9 +63,15 @@ public class GcpAttachedDiskSetTagUpdateStrategy implements GcpResourceTagUpdate
 
         Disk disk = compute.disks().get(project, zone, diskName).execute();
 
+        Map<String, String> existingLabels = disk.getLabels();
+        if (tagsAlreadyUpToDate(existingLabels, newLabels)) {
+            LOGGER.debug("Tags for disk {} are already up to date, skipping update.", diskName);
+            return;
+        }
+
         ZoneSetLabelsRequest labelsRequest = new ZoneSetLabelsRequest()
                 .setLabelFingerprint(disk.getLabelFingerprint())
-                .setLabels(mergeLabels(disk.getLabels(), newLabels));
+                .setLabels(mergeTags(existingLabels, newLabels));
 
         compute.disks().setLabels(project, zone, diskName, labelsRequest).execute();
 

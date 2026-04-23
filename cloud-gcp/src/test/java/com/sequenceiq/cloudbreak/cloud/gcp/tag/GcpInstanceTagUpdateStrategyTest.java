@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.gcp.tag;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -104,6 +105,43 @@ class GcpInstanceTagUpdateStrategyTest {
         verify(instances).setLabels(eq(PROJECT_ID), eq(ZONE), eq(RESOURCE_NAME),
                 argThat(req -> FINGERPRINT.equals(req.getLabelFingerprint())
                         && MERGED_LABELS.equals(req.getLabels())));
+        verify(instancesSetLabels).execute();
+    }
+
+    @Test
+    void testUpdateTagsWithoutNewTags() throws Exception {
+        CloudResource cloudResource = buildCloudResource(ResourceType.GCP_INSTANCE);
+        Instance instance = new Instance()
+                .setLabelFingerprint(FINGERPRINT)
+                .setLabels(EXISTING_LABELS);
+
+        when(compute.instances()).thenReturn(instances);
+        when(instances.get(PROJECT_ID, ZONE, RESOURCE_NAME)).thenReturn(instancesGet);
+        when(instancesGet.execute()).thenReturn(instance);
+
+        underTest.updateTags(authenticatedContext, cloudResource, EXISTING_LABELS);
+
+        verify(instancesSetLabels, times(0)).execute();
+    }
+
+    @Test
+    void testUpdateTagsWithNullExistingTags() throws Exception {
+        CloudResource cloudResource = buildCloudResource(ResourceType.GCP_INSTANCE);
+        Instance instance = new Instance()
+                .setLabelFingerprint(FINGERPRINT)
+                .setLabels(null);
+
+        when(compute.instances()).thenReturn(instances);
+        when(instances.get(PROJECT_ID, ZONE, RESOURCE_NAME)).thenReturn(instancesGet);
+        when(instancesGet.execute()).thenReturn(instance);
+        when(instances.setLabels(eq(PROJECT_ID), eq(ZONE), eq(RESOURCE_NAME), any(InstancesSetLabelsRequest.class)))
+                .thenReturn(instancesSetLabels);
+
+        underTest.updateTags(authenticatedContext, cloudResource, NEW_LABELS);
+
+        verify(instances).setLabels(eq(PROJECT_ID), eq(ZONE), eq(RESOURCE_NAME),
+                argThat(req -> FINGERPRINT.equals(req.getLabelFingerprint())
+                        && NEW_LABELS.equals(req.getLabels())));
         verify(instancesSetLabels).execute();
     }
 

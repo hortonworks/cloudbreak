@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.gcp.tag;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -10,6 +11,7 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -90,6 +92,13 @@ class GcpDiskTagUpdateStrategyTest {
         when(gcpContextBuilder.contextInit(cloudContext, authenticatedContext, null, true)).thenReturn(gcpContext);
     }
 
+    private static Stream<Arguments> diskResourceTypes() {
+        return Stream.of(
+                Arguments.of(ResourceType.GCP_DISK),
+                Arguments.of(ResourceType.GCP_ATTACHED_DISK)
+        );
+    }
+
     @ParameterizedTest
     @MethodSource("diskResourceTypes")
     void testUpdateTags(ResourceType resourceType) throws Exception {
@@ -112,11 +121,20 @@ class GcpDiskTagUpdateStrategyTest {
         verify(disksSetLabels).execute();
     }
 
-    private static Stream<Arguments> diskResourceTypes() {
-        return Stream.of(
-                Arguments.of(ResourceType.GCP_DISK),
-                Arguments.of(ResourceType.GCP_ATTACHED_DISK)
-        );
+    @Test
+    void testUpdateTagsWithoutNewTags() throws Exception {
+        CloudResource cloudResource = buildCloudResource(ResourceType.GCP_DISK);
+        Disk disk = new Disk()
+                .setLabelFingerprint(FINGERPRINT)
+                .setLabels(EXISTING_LABELS);
+
+        when(compute.disks()).thenReturn(disks);
+        when(disks.get(PROJECT_ID, ZONE, RESOURCE_NAME)).thenReturn(disksGet);
+        when(disksGet.execute()).thenReturn(disk);
+
+        underTest.updateTags(authenticatedContext, cloudResource, EXISTING_LABELS);
+
+        verify(disksSetLabels, times(0)).execute();
     }
 
     private CloudResource buildCloudResource(ResourceType type) {

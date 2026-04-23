@@ -28,8 +28,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.Authenticator;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
+import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
+import com.sequenceiq.cloudbreak.cloud.aws.AwsConnector;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsNativeConnector;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsNativeResourceConnector;
+import com.sequenceiq.cloudbreak.cloud.aws.connector.resource.AwsResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureConnector;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -40,7 +43,6 @@ import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
-import com.sequenceiq.cloudbreak.cloud.template.AbstractResourceConnector;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.eventbus.Event;
@@ -99,6 +101,12 @@ class ModifyUserDefinedTagsCloudResourcesHandlerTest {
     private GcpResourceConnector gcpResourceConnector;
 
     @Mock
+    private AwsConnector awsConnector;
+
+    @Mock
+    private AwsResourceConnector awsResourceConnector;
+
+    @Mock
     private CredentialService credentialService;
 
     private HandlerEvent<ModifyUserDefinedTagsCloudResourcesHandlerEvent> event;
@@ -117,7 +125,8 @@ class ModifyUserDefinedTagsCloudResourcesHandlerTest {
         return Stream.of(
                 Arguments.of("AWS_NATIVE"),
                 Arguments.of("AZURE"),
-                Arguments.of("GCP")
+                Arguments.of("GCP"),
+                Arguments.of("AWS")
         );
     }
 
@@ -128,12 +137,14 @@ class ModifyUserDefinedTagsCloudResourcesHandlerTest {
             case "AWS_NATIVE" -> awsNativeConnector;
             case "AZURE" -> azureConnector;
             case "GCP" -> gcpConnector;
+            case "AWS" -> awsConnector;
             default -> throw new IllegalStateException("Unexpected value: " + cloudPlatformVariant);
         };
-        AbstractResourceConnector resourceConnector = switch (cloudPlatformVariant) {
+        ResourceConnector resourceConnector = switch (cloudPlatformVariant) {
             case "AWS_NATIVE" -> awsNativeResourceConnector;
             case "AZURE" -> azureResourceConnector;
             case "GCP" -> gcpResourceConnector;
+            case "AWS" -> awsResourceConnector;
             default -> throw new IllegalStateException("Unexpected value: " + cloudPlatformVariant);
         };
         Stack stack = new Stack();

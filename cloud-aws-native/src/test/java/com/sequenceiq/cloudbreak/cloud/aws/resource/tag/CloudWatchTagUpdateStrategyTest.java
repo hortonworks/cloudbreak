@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.aws.resource.tag;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
@@ -17,6 +18,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTaggingService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.CommonAwsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonCloudWatchClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
@@ -29,6 +31,8 @@ import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.common.api.type.ResourceType;
 
+import software.amazon.awssdk.services.cloudwatch.model.ListTagsForResourceRequest;
+import software.amazon.awssdk.services.cloudwatch.model.ListTagsForResourceResponse;
 import software.amazon.awssdk.services.cloudwatch.model.MetricAlarm;
 import software.amazon.awssdk.services.cloudwatch.model.Tag;
 import software.amazon.awssdk.services.cloudwatch.model.TagResourceRequest;
@@ -42,7 +46,13 @@ class CloudWatchTagUpdateStrategyTest {
 
     private static final String RESOURCE_REFERENCE = "resourceReference";
 
+    private static final String EXISTING_TAG_KEY = "existingTagKey";
+
+    private static final String EXISTING_TAG_VALUE = "existingTagValue";
+
     private static final Map<String, String> USER_DEFINED_TAGS = Map.of("custom", "value");
+
+    private static final Map<String, String> EXISTING_TAGS = Map.of(EXISTING_TAG_KEY, EXISTING_TAG_VALUE);
 
     private static final List<Tag> CLOUD_WATCH_TAGS = List.of(Tag.builder()
             .key("custom")
@@ -72,6 +82,9 @@ class CloudWatchTagUpdateStrategyTest {
 
     @Mock
     private Region region;
+
+    @Mock
+    private AwsTaggingService awsTaggingService;
 
     @InjectMocks
     private CloudWatchTagUpdateStrategy underTest;
@@ -104,6 +117,13 @@ class CloudWatchTagUpdateStrategyTest {
         when(commonAwsClient.createCloudWatchClient(any(AwsCredentialView.class), eq(REGION_NAME))).thenReturn(cloudWatchClient);
         when(awsNativeCloudWatchService.getMetricAlarmsForInstances(eq(REGION_NAME), any(AwsCredentialView.class), eq(List.of(INSTANCE_ID))))
                 .thenReturn(List.of(alarm));
+        when(cloudWatchClient.listTagsForResource(any(ListTagsForResourceRequest.class))).thenReturn(ListTagsForResourceResponse.builder()
+                .tags(Tag.builder()
+                        .key(EXISTING_TAG_KEY)
+                        .value(EXISTING_TAG_VALUE)
+                        .build())
+                .build());
+        when(awsTaggingService.prepareCloudWatchTags(USER_DEFINED_TAGS)).thenReturn(CLOUD_WATCH_TAGS);
 
         underTest.updateTags(authenticatedContext, cloudResource, USER_DEFINED_TAGS);
 
@@ -125,6 +145,13 @@ class CloudWatchTagUpdateStrategyTest {
         when(commonAwsClient.createCloudWatchClient(any(AwsCredentialView.class), eq(REGION_NAME))).thenReturn(cloudWatchClient);
         when(awsNativeCloudWatchService.getMetricAlarmsForInstances(any(), any(), any()))
                 .thenReturn(List.of(alarm1, alarm2));
+        when(cloudWatchClient.listTagsForResource(any(ListTagsForResourceRequest.class))).thenReturn(ListTagsForResourceResponse.builder()
+                .tags(Tag.builder()
+                        .key(EXISTING_TAG_KEY)
+                        .value(EXISTING_TAG_VALUE)
+                        .build())
+                .build());
+        when(awsTaggingService.prepareCloudWatchTags(USER_DEFINED_TAGS)).thenReturn(CLOUD_WATCH_TAGS);
 
         underTest.updateTags(authenticatedContext, cloudResource, USER_DEFINED_TAGS);
 
@@ -140,6 +167,28 @@ class CloudWatchTagUpdateStrategyTest {
                         .tags(CLOUD_WATCH_TAGS)
                         .build()
         );
+    }
+
+    @Test
+    void testUpdateTagsSkipUpdateWhenTagsAlreadyUpToDate() {
+        String alarmArn1 = "alarmArn1";
+        String alarmArn2 = "alarmArn2";
+        MetricAlarm alarm1 = MetricAlarm.builder().alarmArn(alarmArn1).build();
+        MetricAlarm alarm2 = MetricAlarm.builder().alarmArn(alarmArn2).build();
+
+        when(commonAwsClient.createCloudWatchClient(any(AwsCredentialView.class), eq(REGION_NAME))).thenReturn(cloudWatchClient);
+        when(awsNativeCloudWatchService.getMetricAlarmsForInstances(any(), any(), any()))
+                .thenReturn(List.of(alarm1, alarm2));
+        when(cloudWatchClient.listTagsForResource(any(ListTagsForResourceRequest.class))).thenReturn(ListTagsForResourceResponse.builder()
+                .tags(Tag.builder()
+                        .key(EXISTING_TAG_KEY)
+                        .value(EXISTING_TAG_VALUE)
+                        .build())
+                .build());
+
+        underTest.updateTags(authenticatedContext, cloudResource, EXISTING_TAGS);
+
+        verify(cloudWatchClient, times(0)).tagResource(any(TagResourceRequest.class));
     }
 
     @Test

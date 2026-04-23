@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.gcp.tag;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -108,6 +109,22 @@ class GcpAddressTagUpdateStrategyTest {
                 argThat(req -> FINGERPRINT.equals(req.getLabelFingerprint())
                         && MERGED_LABELS.equals(req.getLabels())));
         verify(addressesSetLabels).execute();
+    }
+
+    @Test
+    void testUpdateTagsWithoutNewTags() throws Exception {
+        CloudResource cloudResource = buildCloudResource(ResourceType.GCP_RESERVED_IP);
+        Address address = new Address()
+                .setLabelFingerprint(FINGERPRINT)
+                .setLabels(EXISTING_LABELS);
+
+        when(compute.addresses()).thenReturn(addresses);
+        when(addresses.get(PROJECT_ID, REGION, RESOURCE_NAME)).thenReturn(addressesGet);
+        when(addressesGet.execute()).thenReturn(address);
+
+        underTest.updateTags(authenticatedContext, cloudResource, EXISTING_LABELS);
+
+        verify(addressesSetLabels, times(0)).execute();
     }
 
     private CloudResource buildCloudResource(ResourceType type) {

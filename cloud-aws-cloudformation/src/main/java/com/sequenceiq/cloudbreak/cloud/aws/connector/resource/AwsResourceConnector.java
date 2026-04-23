@@ -21,6 +21,7 @@ import com.sequenceiq.cloudbreak.cloud.UpdateType;
 import com.sequenceiq.cloudbreak.cloud.aws.common.service.AwsCommonDiskUpdateService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsNetworkView;
 import com.sequenceiq.cloudbreak.cloud.aws.connector.resource.loadbalancer.AwsLoadBalancerLaunchService;
+import com.sequenceiq.cloudbreak.cloud.aws.connector.resource.tag.AwsResourceTagUpdaterService;
 import com.sequenceiq.cloudbreak.cloud.aws.connector.resource.upgrade.AwsRdsUpgradeService;
 import com.sequenceiq.cloudbreak.cloud.aws.connector.resource.upgrade.AwsRdsUpgradeValidatorService;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -38,6 +39,7 @@ import com.sequenceiq.cloudbreak.cloud.model.database.ExternalDatabaseParameters
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.common.database.TargetMajorVersion;
 import com.sequenceiq.cloudbreak.common.provider.ProviderResourceSyncer;
+import com.sequenceiq.cloudbreak.service.CloudbreakRuntimeException;
 import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.ResourceType;
@@ -112,6 +114,9 @@ public class AwsResourceConnector implements ResourceConnector {
 
     @Inject
     private List<ProviderResourceSyncer> providerResourceSyncers;
+
+    @Inject
+    private AwsResourceTagUpdaterService awsResourceTagUpdaterService;
 
     @Override
     public List<CloudResourceStatus> launch(AuthenticatedContext ac, CloudStack stack, PersistenceNotifier resourceNotifier,
@@ -302,6 +307,17 @@ public class AwsResourceConnector implements ResourceConnector {
     @Override
     public void updateDiskVolumes(AuthenticatedContext authenticatedContext, List<String> volumeIds, String diskType, int size) throws Exception {
         awsCommonDiskUpdateService.modifyVolumes(authenticatedContext, volumeIds, diskType, size);
+    }
+
+    @Override
+    public void updateTag(AuthenticatedContext authenticatedContext, CloudResource cloudResource, Map<String, String> userDefinedTags) {
+        try {
+            awsResourceTagUpdaterService.updateTags(authenticatedContext, cloudResource, userDefinedTags);
+            LOGGER.info("Successfully updated tags for cloud resource: {} with type: {}", cloudResource.getName(), cloudResource.getType());
+        } catch (Exception e) {
+            throw new CloudbreakRuntimeException(String.format("Failed to update tags for resource: %s with type: %s", cloudResource.getName(),
+                    cloudResource.getType()), e);
+        }
     }
 
     @Override
