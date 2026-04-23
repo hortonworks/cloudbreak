@@ -24,7 +24,6 @@ auth:
         migration.enable: true
       rebuild.enable: true
       batch.call.enable: true
-      loadbalancer.enable: true
     cloudstoragevalidation.enable:
       global: true
       aws: true

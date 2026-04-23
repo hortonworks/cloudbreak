@@ -67,7 +67,6 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_EXPERIE
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_EXPRESS_ONBOARDING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FALLBACK_INSTANCETYPE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FEDRAMP_EXTERNAL_DATABASE_FORCE_DISABLED;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_LOAD_BALANCER;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_REBUILD;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_GLOBAL_DEFAULT_TEMPLATE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_LAKEHOUSE_OPTIMIZER_ENABLED;
@@ -362,9 +361,6 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.freeipa.rebuild.enable}")
     private boolean enableFreeIpaRebuild;
-
-    @Value("${auth.mock.freeipa.loadbalancer.enable}")
-    private boolean enableFreeIpaLoadBalancer;
 
     @Value("${auth.mock.cloudstoragevalidation.enable.global}")
     private boolean enableCloudStorageValidation;
@@ -925,7 +921,6 @@ public class MockUserManagementService extends UserManagementImplBase {
         Account.Builder builder = Account.newBuilder();
         addEntitlement(builder, accountId, enableBaseImages, CDP_BASE_IMAGE);
         addEntitlement(builder, accountId, enableFreeIpaRebuild, CDP_FREEIPA_REBUILD);
-        addEntitlement(builder, accountId, enableFreeIpaLoadBalancer, CDP_FREEIPA_LOAD_BALANCER);
         addEntitlement(builder, accountId, enableCloudStorageValidation, CDP_CLOUD_STORAGE_VALIDATION);
         addEntitlement(builder, accountId, enableAwsCloudStorageValidation, CDP_CLOUD_STORAGE_VALIDATION_AWS);
         addEntitlement(builder, accountId, enableAzureCloudStorageValidation, CDP_CLOUD_STORAGE_VALIDATION_AZURE);

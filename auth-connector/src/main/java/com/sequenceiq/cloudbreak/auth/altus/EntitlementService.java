@@ -69,7 +69,6 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_EXPRESS
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FALLBACK_INSTANCETYPE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FEDRAMP_EXTERNAL_DATABASE_FORCE_DISABLED;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_DATABUS_ENDPOINT_VALIDATION;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_LOAD_BALANCER;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_REBUILD;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_GLOBAL_DEFAULT_TEMPLATE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_JUMPGATE_ROOT_CA_AUTO_ROTATION;
@@ -217,10 +216,6 @@ public class EntitlementService {
 
     public boolean isFreeIpaRebuildEnabled(String accountID) {
         return isEntitlementRegistered(accountID, CDP_FREEIPA_REBUILD);
-    }
-
-    public boolean isFreeIpaLoadBalancerEnabled(String accountID) {
-        return isEntitlementRegistered(accountID, CDP_FREEIPA_LOAD_BALANCER);
     }
 
     public boolean internalTenant(String accountId) {
