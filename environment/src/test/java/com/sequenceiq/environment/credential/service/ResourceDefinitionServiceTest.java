@@ -38,7 +38,7 @@ public class ResourceDefinitionServiceTest {
     private ErrorHandlerAwareReactorEventFactory eventFactory;
 
     @MockBean
-    private RequestProvider requestProvider;
+    private CloudPlatformRequestProvider cloudPlatformRequestProvider;
 
     @Mock
     private ResourceDefinitionRequest resourceDefinitionRequest;
@@ -51,7 +51,7 @@ public class ResourceDefinitionServiceTest {
 
     @Test
     public void testResourceDefinitionServiceAnswered() throws InterruptedException {
-        when(requestProvider.getResourceDefinitionRequest(any(), anyString())).thenReturn(resourceDefinitionRequest);
+        when(cloudPlatformRequestProvider.getResourceDefinitionRequest(any(), anyString())).thenReturn(resourceDefinitionRequest);
         when(resourceDefinitionRequest.await()).thenReturn(resourceDefinitionResult);
         when(resourceDefinitionResult.getDefinition()).thenReturn(SAMPLE_RESULT);
         assertEquals(
@@ -62,7 +62,7 @@ public class ResourceDefinitionServiceTest {
 
     @Test
     public void testResourceDefinitionServiceUnanswered() throws InterruptedException {
-        when(requestProvider.getResourceDefinitionRequest(any(), anyString())).thenReturn(resourceDefinitionRequest);
+        when(cloudPlatformRequestProvider.getResourceDefinitionRequest(any(), anyString())).thenReturn(resourceDefinitionRequest);
         when(resourceDefinitionRequest.await()).thenThrow(InterruptedException.class);
         assertThrows(OperationException.class, () ->
                 resourceDefinitionServiceUnderTest.getResourceDefinition(CLOUD_PLATFORM, RESOURCE));

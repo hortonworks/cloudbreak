@@ -60,7 +60,7 @@ public class ServiceProviderCredentialAdapter {
     private CredentialPrerequisiteService credentialPrerequisiteService;
 
     @Inject
-    private RequestProvider requestProvider;
+    private CloudPlatformRequestProvider cloudPlatformRequestProvider;
 
     public CredentialVerification verify(Credential credential, String accountId) {
         return verify(credential, accountId, Boolean.FALSE);
@@ -78,7 +78,8 @@ public class ServiceProviderCredentialAdapter {
                 .build();
         CloudCredential cloudCredential = credentialConverter.convert(credential);
 
-        CredentialVerificationRequest request = requestProvider.getCredentialVerificationRequest(cloudContext, cloudCredential, creationVerification);
+        CredentialVerificationRequest request = cloudPlatformRequestProvider.getCredentialVerificationRequest(cloudContext, cloudCredential,
+                creationVerification);
         LOGGER.debug("Triggering event: {}", request);
         eventBus.notify(request.selector(), eventFactory.createEvent(request));
         try {
@@ -118,7 +119,7 @@ public class ServiceProviderCredentialAdapter {
                 .build();
         CloudCredential cloudCredential = credentialConverter.convert(credential);
 
-        CDPServicePolicyVerificationRequest request = requestProvider.getCDPServicePolicyVerificationRequest(
+        CDPServicePolicyVerificationRequest request = cloudPlatformRequestProvider.getCDPServicePolicyVerificationRequest(
                 cloudContext,
                 cloudCredential,
                 services,

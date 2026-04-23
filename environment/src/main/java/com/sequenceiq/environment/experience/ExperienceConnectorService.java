@@ -81,13 +81,13 @@ public class ExperienceConnectorService {
         if (experienceScanEnabled) {
             if (isNotEmpty(experiences)) {
                 for (Experience experience : experiences) {
-                    experience.collectPolicy(environmentExperienceDto).forEach((k, v) -> policies.put(k, v));
+                    policies.putAll(experience.collectPolicy(environmentExperienceDto));
                 }
             } else {
                 LOGGER.info("No configured experiences has been provided for policy collecting!");
             }
         } else {
-            LOGGER.info(XP_SCAN_DISABLED_BASE_MSG, "the experience deletion is disabled in the Spring config");
+            LOGGER.info(XP_SCAN_DISABLED_BASE_MSG, "the scan is disabled in the Spring config");
         }
         return policies;
     }

@@ -54,7 +54,7 @@ import com.sequenceiq.environment.client.EnvironmentServiceClientBuilder;
 import com.sequenceiq.environment.client.EnvironmentServiceCrnEndpoints;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.repository.CredentialRepository;
-import com.sequenceiq.environment.credential.service.RequestProvider;
+import com.sequenceiq.environment.credential.service.CloudPlatformRequestProvider;
 import com.sequenceiq.environment.network.NetworkService;
 import com.sequenceiq.environment.proxy.repository.ProxyConfigRepository;
 import com.sequenceiq.environment.service.integration.testconfiguration.TestConfigurationForServiceIntegration;
@@ -86,7 +86,7 @@ public class AzureCredentialIntegrationTest {
     private ResourceDefinitionRequest resourceDefinitionRequest;
 
     @MockBean
-    private RequestProvider requestProvider;
+    private CloudPlatformRequestProvider cloudPlatformRequestProvider;
 
     @MockBean
     private UmsResourceAuthorizationService umsResourceAuthorizationService;
@@ -173,8 +173,8 @@ public class AzureCredentialIntegrationTest {
         azureCredentialRequestParameters.setAppBased(appBasedRequest);
         credentialRequest.setAzure(azureCredentialRequestParameters);
 
-        when(requestProvider.getResourceDefinitionRequest(any(), any())).thenReturn(resourceDefinitionRequest);
-        when(requestProvider.getCredentialVerificationRequest(any(), any(), anyBoolean())).thenAnswer(
+        when(cloudPlatformRequestProvider.getResourceDefinitionRequest(any(), any())).thenReturn(resourceDefinitionRequest);
+        when(cloudPlatformRequestProvider.getCredentialVerificationRequest(any(), any(), anyBoolean())).thenAnswer(
                 invocation -> new CredentialVerificationMockRequest(invocation.getArgument(0), invocation.getArgument(1))
         );
         when(resourceDefinitionRequest.await()).thenReturn(new ResourceDefinitionResult(1L, DEFINITION_AZURE));
@@ -204,8 +204,8 @@ public class AzureCredentialIntegrationTest {
         azureCredentialRequestParameters.setAppBased(appBasedRequest);
         credentialRequest.setAzure(azureCredentialRequestParameters);
 
-        when(requestProvider.getResourceDefinitionRequest(any(), any())).thenReturn(resourceDefinitionRequest);
-        when(requestProvider.getCredentialVerificationRequest(any(), any(), anyBoolean())).thenAnswer(
+        when(cloudPlatformRequestProvider.getResourceDefinitionRequest(any(), any())).thenReturn(resourceDefinitionRequest);
+        when(cloudPlatformRequestProvider.getCredentialVerificationRequest(any(), any(), anyBoolean())).thenAnswer(
                 invocation -> new CredentialVerificationMockRequest(invocation.getArgument(0), invocation.getArgument(1))
         );
         when(resourceDefinitionRequest.await()).thenReturn(new ResourceDefinitionResult(1L, DEFINITION_AZURE));

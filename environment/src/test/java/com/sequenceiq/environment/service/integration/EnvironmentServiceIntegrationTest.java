@@ -63,7 +63,7 @@ import com.sequenceiq.environment.client.EnvironmentServiceClientBuilder;
 import com.sequenceiq.environment.client.EnvironmentServiceCrnEndpoints;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.repository.CredentialRepository;
-import com.sequenceiq.environment.credential.service.RequestProvider;
+import com.sequenceiq.environment.credential.service.CloudPlatformRequestProvider;
 import com.sequenceiq.environment.network.NetworkService;
 import com.sequenceiq.environment.proxy.domain.ProxyConfig;
 import com.sequenceiq.environment.proxy.repository.ProxyConfigRepository;
@@ -102,7 +102,7 @@ public class EnvironmentServiceIntegrationTest {
     private ResourceDefinitionRequest resourceDefinitionRequest;
 
     @MockBean
-    private RequestProvider requestProvider;
+    private CloudPlatformRequestProvider cloudPlatformRequestProvider;
 
     @MockBean
     private UmsResourceAuthorizationService umsResourceAuthorizationService;
@@ -179,8 +179,8 @@ public class EnvironmentServiceIntegrationTest {
         credentialRequest.setCloudPlatform("AWS");
         credentialRequest.setName("testcredential");
 
-        when(requestProvider.getResourceDefinitionRequest(any(), any())).thenReturn(resourceDefinitionRequest);
-        when(requestProvider.getCredentialVerificationRequest(any(), any(), anyBoolean())).thenAnswer(
+        when(cloudPlatformRequestProvider.getResourceDefinitionRequest(any(), any())).thenReturn(resourceDefinitionRequest);
+        when(cloudPlatformRequestProvider.getCredentialVerificationRequest(any(), any(), anyBoolean())).thenAnswer(
                 invocation -> new CredentialVerificationMockRequest(invocation.getArgument(0), invocation.getArgument(1))
         );
         when(resourceDefinitionRequest.await()).thenReturn(new ResourceDefinitionResult(1L, DEFINITION_AWS));
@@ -196,8 +196,8 @@ public class EnvironmentServiceIntegrationTest {
         credentialRequest.setCloudPlatform("AWS");
         credentialRequest.setName("testcredential");
 
-        when(requestProvider.getResourceDefinitionRequest(any(), any())).thenReturn(resourceDefinitionRequest);
-        when(requestProvider.getCredentialVerificationRequest(any(), any(), anyBoolean())).thenAnswer(
+        when(cloudPlatformRequestProvider.getResourceDefinitionRequest(any(), any())).thenReturn(resourceDefinitionRequest);
+        when(cloudPlatformRequestProvider.getCredentialVerificationRequest(any(), any(), anyBoolean())).thenAnswer(
                 invocation -> new CredentialVerificationRequest(invocation.getArgument(0), invocation.getArgument(1)) {
                     @Override
                     public CredentialVerificationResult await() {

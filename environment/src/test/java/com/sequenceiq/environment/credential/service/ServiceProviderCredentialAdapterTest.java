@@ -68,7 +68,7 @@ class ServiceProviderCredentialAdapterTest {
     private CredentialPrerequisiteService credentialPrerequisiteService;
 
     @Mock
-    private RequestProvider requestProvider;
+    private CloudPlatformRequestProvider cloudPlatformRequestProvider;
 
     @InjectMocks
     private ServiceProviderCredentialAdapter underTest;
@@ -107,7 +107,7 @@ class ServiceProviderCredentialAdapterTest {
         when(credentialVerificationRequest.await()).thenReturn(credentialVerificationResult);
         when(credentialPrerequisiteService.decorateCredential(any())).thenAnswer(i -> i.getArgument(0));
         when(credentialConverter.convert(credential)).thenReturn(convertedCredential);
-        when(requestProvider.getCredentialVerificationRequest(any(CloudContext.class), eq(convertedCredential), anyBoolean()))
+        when(cloudPlatformRequestProvider.getCredentialVerificationRequest(any(CloudContext.class), eq(convertedCredential), anyBoolean()))
                 .thenReturn(credentialVerificationRequest);
     }
 
@@ -145,7 +145,7 @@ class ServiceProviderCredentialAdapterTest {
     @Test
     void testVerifyByServices() throws InterruptedException {
         when(cloudCredentialStatus.getCloudCredential()).thenReturn(convertedCredential);
-        when(requestProvider.getCDPServicePolicyVerificationRequest(any(CloudContext.class), eq(convertedCredential),
+        when(cloudPlatformRequestProvider.getCDPServicePolicyVerificationRequest(any(CloudContext.class), eq(convertedCredential),
                 anyList(), anyMap())).thenReturn(cdpServicePolicyVerificationRequest);
         when(cdpServicePolicyVerificationRequest.await()).thenReturn(cdpServicePolicyVerificationResult);
         when(cdpServicePolicyVerificationResult.getStatus()).thenReturn(EventStatus.OK);
@@ -170,7 +170,7 @@ class ServiceProviderCredentialAdapterTest {
     @Test
     void testFailedVerifyByServices() throws InterruptedException {
         when(cloudCredentialStatus.getCloudCredential()).thenReturn(convertedCredential);
-        when(requestProvider.getCDPServicePolicyVerificationRequest(any(CloudContext.class), eq(convertedCredential),
+        when(cloudPlatformRequestProvider.getCDPServicePolicyVerificationRequest(any(CloudContext.class), eq(convertedCredential),
                 anyList(), anyMap())).thenReturn(cdpServicePolicyVerificationRequest);
         when(cdpServicePolicyVerificationRequest.await()).thenReturn(cdpServicePolicyVerificationResult);
         when(cdpServicePolicyVerificationResult.getStatus()).thenReturn(EventStatus.FAILED);

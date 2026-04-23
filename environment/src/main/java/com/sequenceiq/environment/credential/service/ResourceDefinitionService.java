@@ -28,14 +28,14 @@ public class ResourceDefinitionService {
     private ErrorHandlerAwareReactorEventFactory eventFactory;
 
     @Inject
-    private RequestProvider requestProvider;
+    private CloudPlatformRequestProvider cloudPlatformRequestProvider;
 
     @Cacheable("resourceDefinitionCache")
     public String getResourceDefinition(String cloudPlatform, String resource) {
         LOGGER.debug("Sending request for {} {} resource property definition", cloudPlatform, resource);
         CloudPlatformVariant platformVariant = new CloudPlatformVariant(Platform.platform(cloudPlatform), Variant.EMPTY);
 
-        ResourceDefinitionRequest request = requestProvider.getResourceDefinitionRequest(platformVariant, resource);
+        ResourceDefinitionRequest request = cloudPlatformRequestProvider.getResourceDefinitionRequest(platformVariant, resource);
         eventBus.notify(request.selector(), eventFactory.createEvent(request));
         try {
             ResourceDefinitionResult result = request.await();

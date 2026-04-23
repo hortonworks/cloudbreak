@@ -51,7 +51,7 @@ import com.sequenceiq.environment.client.EnvironmentServiceClientBuilder;
 import com.sequenceiq.environment.client.EnvironmentServiceCrnEndpoints;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.repository.CredentialRepository;
-import com.sequenceiq.environment.credential.service.RequestProvider;
+import com.sequenceiq.environment.credential.service.CloudPlatformRequestProvider;
 import com.sequenceiq.environment.service.integration.testconfiguration.TestConfigurationForServiceIntegration;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = TestConfigurationForServiceIntegration.class,
@@ -82,7 +82,7 @@ public class CredentialAuthorizationIntegrationTest {
     private GrpcUmsClient grpcUmsClient;
 
     @MockBean
-    private RequestProvider requestProvider;
+    private CloudPlatformRequestProvider cloudPlatformRequestProvider;
 
     @MockBean
     private EntitlementService entitlementService;
@@ -123,8 +123,8 @@ public class CredentialAuthorizationIntegrationTest {
 
     @Test
     public void testCredentialCreateAws() throws InterruptedException {
-        when(requestProvider.getResourceDefinitionRequest(any(), any())).thenReturn(resourceDefinitionRequest);
-        when(requestProvider.getCredentialVerificationRequest(any(), any(), anyBoolean())).thenAnswer(
+        when(cloudPlatformRequestProvider.getResourceDefinitionRequest(any(), any())).thenReturn(resourceDefinitionRequest);
+        when(cloudPlatformRequestProvider.getCredentialVerificationRequest(any(), any(), anyBoolean())).thenAnswer(
                 invocation -> new EnvironmentServiceIntegrationTest.CredentialVerificationMockRequest(invocation.getArgument(0), invocation.getArgument(1))
         );
         when(resourceDefinitionRequest.await()).thenReturn(new ResourceDefinitionResult(1L, DEFINITION_AWS));

@@ -7,13 +7,16 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.credential.CDPServicePolicyVerificationRequest;
+import com.sequenceiq.cloudbreak.cloud.event.credential.CredentialExperiencePolicyRequest;
+import com.sequenceiq.cloudbreak.cloud.event.credential.CredentialPrerequisitesRequest;
 import com.sequenceiq.cloudbreak.cloud.event.credential.CredentialVerificationRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.ResourceDefinitionRequest;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
+import com.sequenceiq.common.model.CredentialType;
 
 @Component
-public class RequestProvider {
+public class CloudPlatformRequestProvider {
 
     public ResourceDefinitionRequest getResourceDefinitionRequest(CloudPlatformVariant platform, String resource) {
         return new ResourceDefinitionRequest(platform, resource);
@@ -31,6 +34,15 @@ public class RequestProvider {
     public CDPServicePolicyVerificationRequest getCDPServicePolicyVerificationRequest(CloudContext cloudContext, CloudCredential cloudCredential,
             List<String> services, Map<String, String> experiencePrerequisites) {
         return new CDPServicePolicyVerificationRequest(cloudContext, cloudCredential, services, experiencePrerequisites);
+    }
+
+    public CredentialExperiencePolicyRequest getCredentialExperiencePolicyRequest(CloudContext cloudContext) {
+        return new CredentialExperiencePolicyRequest(cloudContext);
+    }
+
+    public CredentialPrerequisitesRequest getCredentialPrerequisitesRequest(CloudContext cloudContext, String externalId, String auditExternalId,
+            String deploymentAddress, CredentialType type) {
+        return new CredentialPrerequisitesRequest(cloudContext, externalId, auditExternalId, deploymentAddress, type);
     }
 
 }

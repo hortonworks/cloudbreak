@@ -2,14 +2,10 @@ package com.sequenceiq.environment.experience.common;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import com.sequenceiq.environment.experience.config.ExperiencePathConfig;
 
 @ExtendWith(MockitoExtension.class)
 public class CommonExperiencePathCreatorTest {
@@ -17,16 +13,8 @@ public class CommonExperiencePathCreatorTest {
     @InjectMocks
     private CommonExperiencePathCreator underTest;
 
-    @Mock
-    private ExperiencePathConfig componentsToReplace;
-
-    @BeforeEach
-    void setUp() {
-        underTest.setUp();
-    }
-
     @Test
-    void testCreatePathToExperienceShouldCombineThePathCorretly() {
+    void testCreatePathToExperienceShouldCombineThePathCorrectly() {
         CommonExperience xp = createCommonExperience();
         String expected = xp.getBaseAddress() + ":" + xp.getEnvironmentEndpointPort() + xp.getInternalEnvironmentEndpoint();
 
@@ -36,7 +24,7 @@ public class CommonExperiencePathCreatorTest {
     }
 
     @Test
-    void testCreatePathToExperiencePolicyProviderShouldCombineThePathCorretly() {
+    void testCreatePathToExperiencePolicyProviderShouldCombineThePathCorrectly() {
         CommonExperience xp = createCommonExperience();
         String expected = xp.getBaseAddress() + ":" + xp.getPolicyPort() + xp.getPolicyEndpoint();
 

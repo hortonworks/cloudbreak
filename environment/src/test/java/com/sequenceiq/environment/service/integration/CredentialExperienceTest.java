@@ -12,6 +12,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executors;
 
@@ -21,7 +22,6 @@ import jakarta.ws.rs.client.Client;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -42,6 +42,11 @@ import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorFactory
 import com.sequenceiq.cloudbreak.auth.security.CrnUserDetailsService;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.CredentialConnector;
+import com.sequenceiq.cloudbreak.cloud.event.credential.CredentialExperiencePolicyRequest;
+import com.sequenceiq.cloudbreak.cloud.event.credential.CredentialExperiencePolicyResult;
+import com.sequenceiq.cloudbreak.cloud.event.credential.CredentialPrerequisitesRequest;
+import com.sequenceiq.cloudbreak.cloud.event.credential.CredentialPrerequisitesResult;
+import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
 import com.sequenceiq.cloudbreak.cloud.handler.CredentialPrerequisitesHandler;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformInitializer;
@@ -64,6 +69,7 @@ import com.sequenceiq.environment.authorization.EnvironmentCredentialFiltering;
 import com.sequenceiq.environment.credential.reactor.handler.CredentialExperiencePolicyHandler;
 import com.sequenceiq.environment.credential.repository.CredentialRepository;
 import com.sequenceiq.environment.credential.service.AzureCredentialCertificateService;
+import com.sequenceiq.environment.credential.service.CloudPlatformRequestProvider;
 import com.sequenceiq.environment.credential.service.CredentialCreateService;
 import com.sequenceiq.environment.credential.service.CredentialDeleteService;
 import com.sequenceiq.environment.credential.service.CredentialEntitlementService;
@@ -177,19 +183,47 @@ public class CredentialExperienceTest {
     @MockBean
     private FlowEventListener flowEventListener;
 
+    @MockBean
+    private CloudPlatformRequestProvider cloudPlatformRequestProvider;
+
     @Inject
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
     @Mock
     private RegionAwareInternalCrnGenerator regionAwareInternalCrnGenerator;
 
+    @Mock
+    private CredentialPrerequisitesRequest credentialPrerequisitesRequest;
+
+    @Mock
+    private CredentialPrerequisitesResult credentialPrerequisitesResult;
+
+    @Mock
+    private CredentialExperiencePolicyRequest credentialExperiencePolicyRequest;
+
+    private CredentialExperiencePolicyResult credentialExperiencePolicyResult;
+
     @BeforeEach
-    public void setup() {
+    public void setup() throws InterruptedException {
         when(userPreferencesRepository.save(any())).thenReturn(new UserPreferences("xid", "audit-xid", "user"));
 
         when(cloudPlatformConnectors.get(any(CloudPlatformVariant.class))).thenReturn(connector);
         when(cloudPlatformConnectors.getDefault(any())).thenReturn(connector);
         when(connector.credentials()).thenReturn(credentialConnector);
+        when(credentialPrerequisitesRequest.selector()).thenReturn("selector");
+        when(credentialPrerequisitesRequest.await()).thenReturn(credentialPrerequisitesResult);
+        when(credentialPrerequisitesResult.getStatus()).thenReturn(EventStatus.OK);
+        when(cloudPlatformRequestProvider.getCredentialPrerequisitesRequest(any(), any(), any(), any(), any())).thenReturn(credentialPrerequisitesRequest);
+
+
+        Map<String, String> experiencePolicies = new HashMap<>();
+        experiencePolicies.put("Data Warehouses", COMMON_POLICY);
+        experiencePolicies.put("Kubernetes cluster manager", LIFTIE_POLICY);
+        credentialExperiencePolicyResult = new CredentialExperiencePolicyResult(0L, experiencePolicies);
+        when(credentialExperiencePolicyRequest.selector()).thenReturn("selector");
+        when(credentialExperiencePolicyRequest.await()).thenReturn(credentialExperiencePolicyResult);
+
+        when(cloudPlatformRequestProvider.getCredentialExperiencePolicyRequest(any())).thenReturn(credentialExperiencePolicyRequest);
 
         CrnTestUtil.mockCrnGenerator(regionAwareCrnGenerator);
     }
@@ -201,10 +235,6 @@ public class CredentialExperienceTest {
         CredentialPrerequisitesResponse res = testSkeleton("AWS", Boolean.TRUE);
         assertNotNull(res.getAws().getPolicies());
         assertEquals(3, res.getAws().getPolicies().size());
-        ArgumentCaptor<String> a = ArgumentCaptor.forClass(String.class);
-        ArgumentCaptor<String> b = ArgumentCaptor.forClass(String.class);
-        verify(commonExperienceConnectorService).collectPolicy(a.capture(), b.capture());
-        assertTrue(a.getValue().contains("{cloudProvider}"));
         assertTrue(res.getAws().getPolicies().containsKey("Environment"));
         assertTrue(res.getAws().getPolicies().containsKey("Data Warehouses"));
         assertTrue(res.getAws().getPolicies().containsKey("Kubernetes cluster manager"));
@@ -235,6 +265,7 @@ public class CredentialExperienceTest {
 
     private CredentialPrerequisitesResponse testSkeleton(String cloudProvider, Boolean entitlementEnabled) {
 
+        when(credentialPrerequisitesResult.getCredentialPrerequisitesResponse()).thenReturn(getCredentialPrerequisitesResponse(cloudProvider, ASTERISK));
         when(credentialConnector.getPrerequisites(any(), any(), any(), any(), any())).thenReturn(getCredentialPrerequisitesResponse(cloudProvider, ASTERISK));
 
         when(entitlementService.awsRestrictedPolicy(anyString())).thenReturn(entitlementEnabled);

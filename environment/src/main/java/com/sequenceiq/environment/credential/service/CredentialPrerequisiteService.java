@@ -48,10 +48,13 @@ public class CredentialPrerequisiteService {
 
     private final EntitlementService entitlementService;
 
+    private final CloudPlatformRequestProvider cloudPlatformRequestProvider;
+
     public CredentialPrerequisiteService(EventBus eventBus, UserPreferencesService userPreferencesService, ErrorHandlerAwareReactorEventFactory eventFactory,
-            EntitlementService entitlementService) {
+            EntitlementService entitlementService, CloudPlatformRequestProvider cloudPlatformRequestProvider) {
         this.userPreferencesService = userPreferencesService;
         this.entitlementService = entitlementService;
+        this.cloudPlatformRequestProvider = cloudPlatformRequestProvider;
         this.eventFactory = eventFactory;
         this.eventBus = eventBus;
     }
@@ -63,7 +66,7 @@ public class CredentialPrerequisiteService {
     public CredentialPrerequisitesResponse getPrerequisites(String cloudPlatform, boolean govCloud, String deploymentAddress, CredentialType type,
             boolean internal) {
         CredentialPrerequisitesResponse result = getCloudbreakPrerequisites(cloudPlatform, govCloud, deploymentAddress, type, internal);
-        if (isPolicyFetchFromExperiencesAllowed()) {
+        if (internal || isPolicyFetchFromExperiencesAllowed()) {
             if (AWS.name().equalsIgnoreCase(cloudPlatform)) {
                 try {
                     Map<String, String> policies = getExperiencePrerequisites(cloudPlatform);
@@ -90,7 +93,7 @@ public class CredentialPrerequisiteService {
                 .withPlatform(cloudPlatform)
                 .withWorkspaceId(TEMP_WORKSPACE_ID)
                 .build();
-        CredentialExperiencePolicyRequest request = new CredentialExperiencePolicyRequest(cloudContext);
+        CredentialExperiencePolicyRequest request = cloudPlatformRequestProvider.getCredentialExperiencePolicyRequest(cloudContext);
         LOGGER.debug("Triggering event: {}", request);
         eventBus.notify(request.selector(), eventFactory.createEvent(request));
         String message = String.format("Failed to get experience policies for platform '%s': ", cloudPlatform);
@@ -126,7 +129,7 @@ public class CredentialPrerequisiteService {
                 .withGovCloud(govCloud)
                 .withWorkspaceId(TEMP_WORKSPACE_ID)
                 .build();
-        CredentialPrerequisitesRequest request = new CredentialPrerequisitesRequest(
+        CredentialPrerequisitesRequest request = cloudPlatformRequestProvider.getCredentialPrerequisitesRequest(
                 cloudContext,
                 internal ? null : userPreferencesService.getExternalIdForCurrentUser(),
                 internal ? null : userPreferencesService.getAuditExternalIdForCurrentUser(),
