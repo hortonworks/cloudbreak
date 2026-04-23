@@ -67,7 +67,6 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FEDRAMP
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_DATABUS_ENDPOINT_VALIDATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_LOAD_BALANCER;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_REBUILD;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_HYBRID_CLOUD;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_JUMPGATE_ROOT_CA_AUTO_ROTATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_LAKEHOUSE_OPTIMIZER_ENABLED;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_MICRO_DUTY_SDX;
@@ -561,10 +560,6 @@ public class EntitlementService {
 
     public boolean azureAddDiskEnabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_CB_AZURE_ADD_DISK);
-    }
-
-    public boolean hybridCloudEnabled(String accountId) {
-        return isEntitlementRegistered(accountId, CDP_HYBRID_CLOUD);
     }
 
     public boolean isSdxRuntimeUpgradeEnabledOnMediumDuty(String accountId) {

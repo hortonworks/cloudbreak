@@ -11,7 +11,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.util.StringUtils;
 
 import com.cloudera.thunderhead.service.environments2api.model.Environment;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.sdx.TargetPlatform;
 import com.sequenceiq.cloudbreak.sdx.common.service.PlatformAwareSdxCommonService;
@@ -23,9 +22,6 @@ import com.sequenceiq.remoteenvironment.api.v1.environment.model.DescribeRemoteE
 public abstract class AbstractPdlSdxService implements PlatformAwareSdxCommonService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractPdlSdxService.class);
-
-    @Inject
-    private EntitlementService entitlementService;
 
     @Lazy
     @Qualifier("environmentApiEndpoint")
@@ -46,7 +42,7 @@ public abstract class AbstractPdlSdxService implements PlatformAwareSdxCommonSer
 
     @Override
     public boolean isPlatformEntitled(String accountId) {
-        return entitlementService.hybridCloudEnabled(accountId);
+        return true;
     }
 
     public Environment getPrivateEnvForPublicEnv(String publicEnvCrn) {

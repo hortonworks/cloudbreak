@@ -836,47 +836,6 @@ class EnvironmentCreationServiceTest {
     }
 
     @Test
-    void testHybridEnvironmentWithEntitlementNotAssigned() {
-        ParametersDto parametersDto = ParametersDto.builder().withAwsParametersDto(AwsParametersDto.builder().build()).build();
-        String environmentCrn = "crn";
-        EnvironmentCreationDto environmentCreationDto = EnvironmentCreationDto.builder()
-                .withName(ENVIRONMENT_NAME)
-                .withCreator(CRN)
-                .withAccountId(ACCOUNT_ID)
-                .withCrn(environmentCrn)
-                .withAuthentication(AuthenticationDto.builder().build())
-                .withParameters(parametersDto)
-                .withFreeIpaCreation(FreeIpaCreationDto.builder(FREE_IPA_INSTANCE_COUNT_BY_GROUP).build())
-                .withLocation(LocationDto.builder()
-                        .withName("test")
-                        .withDisplayName("test")
-                        .withLatitude(0.1)
-                        .withLongitude(0.1)
-                        .build())
-                .withEnvironmentType(EnvironmentType.HYBRID)
-                .build();
-        Environment environment = new Environment();
-        environment.setName(ENVIRONMENT_NAME);
-        environment.setId(1L);
-        environment.setAccountId(ACCOUNT_ID);
-        Credential credential = new Credential();
-        credential.setCloudPlatform("platform");
-        when(environmentService.isNameOccupied(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(false);
-        when(environmentDtoConverter.creationDtoToEnvironment(eq(environmentCreationDto))).thenReturn(environment);
-        when(environmentResourceService.getCredentialFromRequest(any(), eq(ACCOUNT_ID)))
-                .thenReturn(credential);
-        when(validatorService.validateParentChildRelation(any(), any())).thenReturn(ValidationResult.builder().build());
-        when(validatorService.validateNetworkCreation(any(), any())).thenReturn(ValidationResult.builder());
-        when(validatorService.validateFreeIpaCreation(any(), any())).thenReturn(ValidationResult.builder().build());
-        when(authenticationDtoConverter.dtoToAuthentication(any())).thenReturn(new EnvironmentAuthentication());
-
-        BadRequestException badRequestException = assertThrows(BadRequestException.class,
-                () -> environmentCreationServiceUnderTest.create(environmentCreationDto));
-
-        assertEquals("Creating Hybrid Environment requires CDP_HYBRID_CLOUD entitlement for your account", badRequestException.getMessage());
-    }
-
-    @Test
     void testHybridEnvironmentWithEntitlementAssigned() {
         ParametersDto parametersDto = ParametersDto.builder().withAwsParametersDto(AwsParametersDto.builder().build()).build();
         String environmentCrn = "crn";
@@ -911,7 +870,6 @@ class EnvironmentCreationServiceTest {
         when(validatorService.validateFreeIpaCreation(any(), any())).thenReturn(ValidationResult.builder().build());
         when(authenticationDtoConverter.dtoToAuthentication(any())).thenReturn(new EnvironmentAuthentication());
         when(environmentService.save(any())).thenReturn(environment);
-        when(entitlementService.hybridCloudEnabled(ACCOUNT_ID)).thenReturn(true);
 
         environmentCreationServiceUnderTest.create(environmentCreationDto);
 

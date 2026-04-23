@@ -65,7 +65,6 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_EXPRESS
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FEDRAMP_EXTERNAL_DATABASE_FORCE_DISABLED;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_LOAD_BALANCER;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_REBUILD;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_HYBRID_CLOUD;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_LAKEHOUSE_OPTIMIZER_ENABLED;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_MICRO_DUTY_SDX;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_MITIGATE_RELEASE_FAILURE_7218P1100;
@@ -1189,7 +1188,6 @@ public class MockUserManagementService extends UserManagementImplBase {
                                 .addEntitlements(createEntitlement(CDP_CB_AZURE_ADD_DISK))
                                 .addEntitlements(createEntitlement(DATALAKE_HORIZONTAL_SCALE))
                                 .addEntitlements(createEntitlement(CDP_EXPRESS_ONBOARDING))
-                                .addEntitlements(createEntitlement(CDP_HYBRID_CLOUD))
                                 .addEntitlements(createEntitlement(CDP_SKIP_CERTIFICATE_ROTATION_VALIDATION))
                                 .addEntitlements(createEntitlement(CDP_SECURITY_ENFORCING_SELINUX))
                                 .addEntitlements(createEntitlement(CDP_CB_CM_TEMPLATE_SYNC))

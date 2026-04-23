@@ -36,7 +36,6 @@ import com.cloudera.thunderhead.service.environments2api.model.Instance;
 import com.cloudera.thunderhead.service.environments2api.model.PrivateDatalakeDetails;
 import com.cloudera.thunderhead.service.environments2api.model.PvcEnvironmentDetails;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.sdx.OnPrem719WorkaroundService;
 import com.sequenceiq.cloudbreak.sdx.RdcView;
@@ -72,9 +71,6 @@ public class PdlSdxDescribeServiceTest {
     private static final String CM_IP = "cmIp";
 
     @Mock
-    private EntitlementService entitlementService;
-
-    @Mock
     private EnvironmentEndpoint environmentEndpoint;
 
     @Mock
@@ -107,7 +103,6 @@ public class PdlSdxDescribeServiceTest {
     @BeforeEach
     void setup() {
         when(detailedEnvironmentResponse.getRemoteEnvironmentCrn()).thenReturn(PDL_CRN);
-        when(entitlementService.hybridCloudEnabled(TENANT)).thenReturn(true);
         when(environmentEndpoint.getByCrn(ENV_CRN)).thenReturn(detailedEnvironmentResponse);
         when(pvcEnvironmentDetails.getPrivateDatalakeDetails()).thenReturn(privateDatalakeDetails);
         when(environment.getPvcEnvironmentDetails()).thenReturn(pvcEnvironmentDetails);

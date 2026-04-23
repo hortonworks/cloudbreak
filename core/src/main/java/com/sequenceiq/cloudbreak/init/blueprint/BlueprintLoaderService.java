@@ -29,7 +29,6 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.BlueprintFile;
-import com.sequenceiq.cloudbreak.domain.BlueprintHybridOption;
 import com.sequenceiq.cloudbreak.domain.BlueprintUpgradeOption;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintListFilters;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
@@ -132,11 +131,6 @@ public class BlueprintLoaderService {
         for (Entry<String, BlueprintFile> diffBlueprint : collectDeviationOfExistingAndDefaultBlueprints(blueprintsInDatabase).entrySet()) {
             if (blueprintListFilters.isLakehouseOptimizer(diffBlueprint.getValue()) && !entitlementService.isLakehouseOptimizerEnabled(accountId)) {
                 LOGGER.info("Lakehouse Optimizer blueprints are not enabled for workspace '{}', therefore not adding blueprint '{}' to the database.",
-                        workspace.getId(), diffBlueprint.getKey());
-                continue;
-            }
-            if (!BlueprintHybridOption.isNone(diffBlueprint.getValue().getHybridOption()) && !entitlementService.hybridCloudEnabled(accountId)) {
-                LOGGER.info("Hybrid cloud blueprints are not enabled for workspace '{}', therefore not adding blueprint '{}' to the database.",
                         workspace.getId(), diffBlueprint.getKey());
                 continue;
             }

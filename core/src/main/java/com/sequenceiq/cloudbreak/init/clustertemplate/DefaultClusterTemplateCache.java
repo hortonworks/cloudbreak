@@ -212,12 +212,7 @@ public class DefaultClusterTemplateCache {
     }
 
     public Map<String, String> defaultClusterTemplateRequestsForUser() {
-        CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
-        User user = userService.getOrCreate(cloudbreakUser);
-        Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
-        boolean hybridEnabled = entitlementService.hybridCloudEnabled(workspace.getTenant().getName());
         return defaultClusterTemplates.entrySet().stream()
-                .filter(e -> notHybridOrHybridEnabled(e.getValue().getKey(), hybridEnabled))
                 .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().getValue()));
     }
 
@@ -269,12 +264,10 @@ public class DefaultClusterTemplateCache {
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
         String accountId = workspace.getTenant().getName();
         boolean internalTenant = entitlementService.internalTenant(accountId);
-        boolean hybridEnabled = entitlementService.hybridCloudEnabled(accountId);
         defaultClusterTemplateRequests().forEach((key, value) -> {
             if (templateNamesMissingFromDb.contains(key)) {
                 DefaultClusterTemplateV4Request defaultClusterTemplate = value.getKey();
-                if (internalClusterTemplateValidator.shouldPopulate(defaultClusterTemplate, internalTenant) &&
-                        notHybridOrHybridEnabled(defaultClusterTemplate, hybridEnabled)) {
+                if (internalClusterTemplateValidator.shouldPopulate(defaultClusterTemplate, internalTenant)) {
                     ClusterTemplate clusterTemplate = defaultClusterTemplateV4RequestToClusterTemplateConverter.convert(defaultClusterTemplate);
                     clusterTemplate.setWorkspace(workspace);
                     Optional<Blueprint> blueprint = blueprints.stream()
@@ -288,10 +281,6 @@ public class DefaultClusterTemplateCache {
             }
         });
         return defaultTemplates;
-    }
-
-    private boolean notHybridOrHybridEnabled(DefaultClusterTemplateV4Request defaultClusterTemplate, boolean hybridEnabled) {
-        return !defaultClusterTemplate.getType().isHybrid() || hybridEnabled;
     }
 
     public Collection<String> defaultClusterTemplateNames() {

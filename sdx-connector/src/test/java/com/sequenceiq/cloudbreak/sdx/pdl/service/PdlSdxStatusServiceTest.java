@@ -24,7 +24,6 @@ import com.cloudera.thunderhead.service.environments2api.model.DescribeEnvironme
 import com.cloudera.thunderhead.service.environments2api.model.Environment;
 import com.cloudera.thunderhead.service.environments2api.model.PrivateDatalakeDetails;
 import com.cloudera.thunderhead.service.environments2api.model.PvcEnvironmentDetails;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.sdx.common.status.StatusCheckResult;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
@@ -39,9 +38,6 @@ public class PdlSdxStatusServiceTest {
     private static final String PDL_CRN = String.format("crn:altus:environments:us-west-1:%s:environment:crn1", TENANT);
 
     private static final String ENV_CRN = "crn:cdp:environments:us-west-1:tenant:environment:crn1";
-
-    @Mock
-    private EntitlementService entitlementService;
 
     @Mock
     private EnvironmentEndpoint environmentEndpoint;
@@ -70,7 +66,6 @@ public class PdlSdxStatusServiceTest {
     @BeforeEach
     void setup() {
         when(detailedEnvironmentResponse.getRemoteEnvironmentCrn()).thenReturn(PDL_CRN);
-        when(entitlementService.hybridCloudEnabled(TENANT)).thenReturn(true);
         when(environmentEndpoint.getByCrn(ENV_CRN)).thenReturn(detailedEnvironmentResponse);
         when(pvcEnvironmentDetails.getPrivateDatalakeDetails()).thenReturn(privateDatalakeDetails);
         when(environment.getPvcEnvironmentDetails()).thenReturn(pvcEnvironmentDetails);

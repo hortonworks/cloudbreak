@@ -3,12 +3,8 @@ package com.sequenceiq.remoteenvironment.service;
 import static com.sequenceiq.remoteenvironment.service.connector.RemoteEnvironmentConnectorType.CLASSIC_CLUSTER;
 import static com.sequenceiq.remoteenvironment.service.connector.RemoteEnvironmentConnectorType.PRIVATE_CONTROL_PLANE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
@@ -25,8 +21,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.cloudera.thunderhead.service.environments2api.model.DescribeEnvironmentResponse;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
-import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.util.test.AsyncTaskExecutorTestImpl;
 import com.sequenceiq.remoteenvironment.DescribeEnvironmentV2Response;
 import com.sequenceiq.remoteenvironment.api.v1.environment.model.DescribeRemoteEnvironment;
@@ -52,9 +46,6 @@ class RemoteEnvironmentServiceTest {
     @Mock
     private RemoteEnvironmentConnectorProvider remoteEnvironmentConnectorProvider;
 
-    @Mock
-    private EntitlementService entitlementService;
-
     @Spy
     private AsyncTaskExecutorTestImpl intermediateBuilderExecutor;
 
@@ -68,7 +59,6 @@ class RemoteEnvironmentServiceTest {
 
     @Test
     void testListWithAllType() {
-        when(entitlementService.hybridCloudEnabled(any())).thenReturn(true);
         SimpleRemoteEnvironmentResponse env1 = new SimpleRemoteEnvironmentResponse();
         SimpleRemoteEnvironmentResponse env2 = new SimpleRemoteEnvironmentResponse();
         SimpleRemoteEnvironmentResponse env3 = new SimpleRemoteEnvironmentResponse();
@@ -85,7 +75,6 @@ class RemoteEnvironmentServiceTest {
 
     @Test
     void testListWithUnknownTypes() {
-        when(entitlementService.hybridCloudEnabled(any())).thenReturn(true);
         SimpleRemoteEnvironmentResponse env1 = new SimpleRemoteEnvironmentResponse();
         SimpleRemoteEnvironmentResponse env2 = new SimpleRemoteEnvironmentResponse();
         SimpleRemoteEnvironmentResponse env3 = new SimpleRemoteEnvironmentResponse();
@@ -98,7 +87,6 @@ class RemoteEnvironmentServiceTest {
 
     @Test
     void testListWithMixedTypes() {
-        when(entitlementService.hybridCloudEnabled(any())).thenReturn(true);
         SimpleRemoteEnvironmentResponse env1 = new SimpleRemoteEnvironmentResponse();
         SimpleRemoteEnvironmentResponse env2 = new SimpleRemoteEnvironmentResponse();
         SimpleRemoteEnvironmentResponse env3 = new SimpleRemoteEnvironmentResponse();
@@ -116,7 +104,6 @@ class RemoteEnvironmentServiceTest {
 
     @Test
     void testListWithEmptyTypesList() {
-        when(entitlementService.hybridCloudEnabled(any())).thenReturn(true);
         SimpleRemoteEnvironmentResponse env1 = new SimpleRemoteEnvironmentResponse();
         SimpleRemoteEnvironmentResponse env2 = new SimpleRemoteEnvironmentResponse();
         SimpleRemoteEnvironmentResponse env3 = new SimpleRemoteEnvironmentResponse();
@@ -129,7 +116,6 @@ class RemoteEnvironmentServiceTest {
 
     @Test
     void testListWithPrivateControlPlaceType() {
-        when(entitlementService.hybridCloudEnabled(any())).thenReturn(true);
         SimpleRemoteEnvironmentResponse env1 = new SimpleRemoteEnvironmentResponse();
         SimpleRemoteEnvironmentResponse env2 = new SimpleRemoteEnvironmentResponse();
         SimpleRemoteEnvironmentResponse env3 = new SimpleRemoteEnvironmentResponse();
@@ -144,7 +130,6 @@ class RemoteEnvironmentServiceTest {
     @Test
     void testListWithClassicClusterType() {
         RemoteEnvironmentConnectorType connectorType = CLASSIC_CLUSTER;
-        when(entitlementService.hybridCloudEnabled(any())).thenReturn(true);
         SimpleRemoteEnvironmentResponse env1 = new SimpleRemoteEnvironmentResponse();
         env1.setEnvironmentCrn("crn:env1");
         SimpleRemoteEnvironmentResponse env2 = new SimpleRemoteEnvironmentResponse();
@@ -163,7 +148,6 @@ class RemoteEnvironmentServiceTest {
 
     @Test
     void testListWithBothTypes() {
-        when(entitlementService.hybridCloudEnabled(any())).thenReturn(true);
         SimpleRemoteEnvironmentResponse env1 = new SimpleRemoteEnvironmentResponse();
         env1.setCrn("crn:env1");
         SimpleRemoteEnvironmentResponse env2 = new SimpleRemoteEnvironmentResponse();
@@ -180,16 +164,7 @@ class RemoteEnvironmentServiceTest {
     }
 
     @Test
-    void testListNoEntitlement() {
-        when(entitlementService.hybridCloudEnabled(any())).thenReturn(false);
-        SimpleRemoteEnvironmentResponses actual = underTest.list(USER_CRN, null);
-        verify(remoteEnvironmentConnectorProvider, never()).all();
-        assertTrue(actual.getResponses().isEmpty());
-    }
-
-    @Test
-    void testDescribeV1WithEntitlement() {
-        when(entitlementService.hybridCloudEnabled(any())).thenReturn(true);
+    void testDescribeV1() {
         DescribeEnvironmentResponse response = new DescribeEnvironmentResponse();
         DescribeRemoteEnvironment request = new DescribeRemoteEnvironment();
         request.setCrn(ENVIRONMENT_CRN);
@@ -202,19 +177,7 @@ class RemoteEnvironmentServiceTest {
     }
 
     @Test
-    void testDescribeV1WithoutEntitlement() {
-        when(entitlementService.hybridCloudEnabled(any())).thenReturn(false);
-        DescribeRemoteEnvironment request = new DescribeRemoteEnvironment();
-        request.setCrn(ENVIRONMENT_CRN);
-
-        BadRequestException exception = assertThrows(BadRequestException.class, () -> underTest.describeV1(USER_CRN, request));
-
-        assertEquals("Entitlement CDP_HYBRID_CLOUD is required for this operation", exception.getMessage());
-    }
-
-    @Test
-    void testDescribeV2WithEntitlement() {
-        when(entitlementService.hybridCloudEnabled(any())).thenReturn(true);
+    void testDescribeV2() {
         DescribeEnvironmentV2Response response = new DescribeEnvironmentV2Response();
         DescribeRemoteEnvironment request = new DescribeRemoteEnvironment();
         request.setCrn(ENVIRONMENT_CRN);
@@ -224,16 +187,5 @@ class RemoteEnvironmentServiceTest {
         DescribeEnvironmentV2Response result = underTest.describeV2(USER_CRN, request);
 
         assertEquals(response, result);
-    }
-
-    @Test
-    void testDescribeV2WithoutEntitlement() {
-        when(entitlementService.hybridCloudEnabled(any())).thenReturn(false);
-        DescribeRemoteEnvironment request = new DescribeRemoteEnvironment();
-        request.setCrn(ENVIRONMENT_CRN);
-
-        BadRequestException exception = assertThrows(BadRequestException.class, () -> underTest.describeV2(USER_CRN, request));
-
-        assertEquals("Entitlement CDP_HYBRID_CLOUD is required for this operation", exception.getMessage());
     }
 }

@@ -350,9 +350,8 @@ class BlueprintLoaderServiceTest {
         assertEquals(lakehouseOptimizerEnabled ? 4 : 3, result.size());
     }
 
-    @ParameterizedTest
-    @ValueSource(booleans = {true, false})
-    void testLoadBlueprintsForTheWorkspaceWhenHybridDefaultBlueprintsAreMissing(boolean hybridEnabled) {
+    @Test
+    void testLoadBlueprintsForTheWorkspaceWhenHybridDefaultBlueprintsAreMissing() {
         Map<String, BlueprintFile> defaultBlueprints = generateCacheData(3, BlueprintUpgradeOption.ENABLED);
         defaultBlueprints.put("7.3.1 - Hybrid", new BlueprintFile.Builder()
                 .stackName("hybrid")
@@ -363,17 +362,12 @@ class BlueprintLoaderServiceTest {
                 .name("7.3.1 - Hybrid")
                 .build());
         setupMock(defaultBlueprints);
-        when(entitlementService.hybridCloudEnabled("1234")).thenReturn(hybridEnabled);
 
         Set<Blueprint> result = ThreadBasedUserCrnProvider.doAs(USER_CRN,
                 () -> underTest.loadBlueprintsForTheWorkspace(new HashSet<>(), workspace, this::mockSave));
 
-        assertEquals(hybridEnabled ? 4 : 3, result.size());
-        if (hybridEnabled) {
-            assertThat(result).anyMatch(bp -> BlueprintHybridOption.BURST_TO_CLOUD.equals(bp.getHybridOption()));
-        } else {
-            assertThat(result).noneMatch(bp -> BlueprintHybridOption.BURST_TO_CLOUD.equals(bp.getHybridOption()));
-        }
+        assertEquals(4, result.size());
+        assertThat(result).anyMatch(bp -> BlueprintHybridOption.BURST_TO_CLOUD.equals(bp.getHybridOption()));
     }
 
     @Test
