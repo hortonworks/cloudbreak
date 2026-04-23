@@ -14,24 +14,33 @@ import static org.mockito.Mockito.when;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.Authenticator;
+import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsNativeConnector;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsNativeResourceConnector;
-import com.sequenceiq.cloudbreak.cloud.aws.resource.tag.AwsNativeResourceTagUpdaterService;
+import com.sequenceiq.cloudbreak.cloud.azure.AzureConnector;
+import com.sequenceiq.cloudbreak.cloud.azure.AzureResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.gcp.GcpConnector;
+import com.sequenceiq.cloudbreak.cloud.gcp.GcpResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.cloudbreak.cloud.template.AbstractResourceConnector;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.modifytags.event.ModifyUserDefinedTagsCloudResourcesHandlerEvent;
@@ -72,7 +81,19 @@ class ModifyUserDefinedTagsCloudResourcesHandlerTest {
     private AwsNativeConnector awsNativeConnector;
 
     @Mock
-    private AwsNativeResourceTagUpdaterService awsNativeResourceTagUpdaterService;
+    private AwsNativeResourceConnector awsNativeResourceConnector;
+
+    @Mock
+    private AzureConnector azureConnector;
+
+    @Mock
+    private AzureResourceConnector azureResourceConnector;
+
+    @Mock
+    private GcpConnector gcpConnector;
+
+    @Mock
+    private GcpResourceConnector gcpResourceConnector;
 
     private HandlerEvent<ModifyUserDefinedTagsCloudResourcesHandlerEvent> event;
 
@@ -85,8 +106,29 @@ class ModifyUserDefinedTagsCloudResourcesHandlerTest {
         event = new HandlerEvent<>(new Event<>(request));
     }
 
-    @Test
-    void testDoAcceptSuccess() {
+    static Stream<Arguments> testDoAcceptSuccessDataProvider() {
+        return Stream.of(
+                Arguments.of("AWS_NATIVE"),
+                Arguments.of("AZURE"),
+                Arguments.of("GCP")
+        );
+    }
+
+    @ParameterizedTest
+    @MethodSource("testDoAcceptSuccessDataProvider")
+    void testDoAcceptSuccess(String cloudPlatformVariant) {
+        CloudConnector cloudConnector = switch (cloudPlatformVariant) {
+            case "AWS_NATIVE" -> awsNativeConnector;
+            case "AZURE" -> azureConnector;
+            case "GCP" -> gcpConnector;
+            default -> throw new IllegalStateException("Unexpected value: " + cloudPlatformVariant);
+        };
+        AbstractResourceConnector resourceConnector = switch (cloudPlatformVariant) {
+            case "AWS_NATIVE" -> awsNativeResourceConnector;
+            case "AZURE" -> azureResourceConnector;
+            case "GCP" -> gcpResourceConnector;
+            default -> throw new IllegalStateException("Unexpected value: " + cloudPlatformVariant);
+        };
         Stack stack = new Stack();
         stack.setResourceCrn(STACK_CRN);
         stack.setEnvironmentCrn(ENV_CRN);
@@ -107,21 +149,20 @@ class ModifyUserDefinedTagsCloudResourcesHandlerTest {
         CloudCredential cloudCredential = mock(CloudCredential.class);
         AuthenticatedContext authenticatedContext = mock(AuthenticatedContext.class);
         Authenticator authenticator = mock(Authenticator.class);
-        AwsNativeResourceConnector awsNativeResourceConnector = mock(AwsNativeResourceConnector.class);
 
         when(stackService.getById(STACK_ID)).thenReturn(stack);
         when(resourceService.getAllCloudResource(stack.getId())).thenReturn(List.of(cloudResource1, cloudResource2));
         when(stackUtil.getCloudCredential(ENV_CRN)).thenReturn(cloudCredential);
-        when(cloudPlatformConnectors.get(any(CloudPlatformVariant.class))).thenReturn(awsNativeConnector);
-        when(awsNativeConnector.authentication()).thenReturn(authenticator);
+        when(cloudPlatformConnectors.get(any(CloudPlatformVariant.class))).thenReturn(cloudConnector);
+        when(cloudConnector.authentication()).thenReturn(authenticator);
         when(authenticator.authenticate(any(CloudContext.class), eq(cloudCredential))).thenReturn(authenticatedContext);
-        when(awsNativeConnector.resources()).thenReturn(awsNativeResourceConnector);
+        when(cloudConnector.resources()).thenReturn(resourceConnector);
 
         Selectable result = underTest.doAccept(event);
 
         assertInstanceOf(ModifyUserDefinedTagsEvent.class, result);
         assertEquals(MODIFY_USER_DEFINED_TAGS_STACK_EVENT.name(), result.getSelector());
-        verify(awsNativeResourceConnector).updateTags(authenticatedContext, List.of(cloudResource1, cloudResource2), USER_DEFINED_TAGS);
+        verify(resourceConnector).updateTags(authenticatedContext, List.of(cloudResource1, cloudResource2), USER_DEFINED_TAGS);
     }
 
     @Test

@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.aws.connector.resource;
 
+import static com.sequenceiq.common.api.type.ResourceType.CLOUDFORMATION_STACK;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -19,6 +20,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseServer;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.model.database.CloudDatabaseServerSslCertificate;
@@ -105,6 +107,12 @@ class AwsResourceConnectorTest {
     @Test
     void testUpdateTags() {
         AuthenticatedContext ac = mock(AuthenticatedContext.class);
-        assertThrows(UnsupportedOperationException.class, () -> underTest.updateTags(ac, List.of(), Map.of()));
+        CloudResource cloudFormationStack = CloudResource.builder()
+                .withType(CLOUDFORMATION_STACK)
+                .withName("cloudFormationStack")
+                .build();
+
+        Map<String, String> userDefinedTags = Map.of("custom", "value");
+        assertThrows(UnsupportedOperationException.class, () -> underTest.updateTags(ac, List.of(cloudFormationStack), userDefinedTags));
     }
 }

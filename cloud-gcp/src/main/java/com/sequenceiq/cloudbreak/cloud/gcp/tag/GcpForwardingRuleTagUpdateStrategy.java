@@ -1,0 +1,49 @@
+package com.sequenceiq.cloudbreak.cloud.gcp.tag;
+
+import static com.sequenceiq.common.api.type.ResourceType.GCP_FORWARDING_RULE;
+
+import java.io.IOException;
+import java.util.Map;
+import java.util.Set;
+
+import jakarta.inject.Inject;
+
+import org.springframework.stereotype.Service;
+
+import com.google.api.services.compute.Compute;
+import com.google.api.services.compute.model.ForwardingRule;
+import com.google.api.services.compute.model.RegionSetLabelsRequest;
+import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
+import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContextBuilder;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.common.api.type.ResourceType;
+
+@Service
+public class GcpForwardingRuleTagUpdateStrategy implements GcpResourceTagUpdateStrategy {
+
+    @Inject
+    private GcpContextBuilder gcpContextBuilder;
+
+    @Override
+    public Set<ResourceType> supportedTypes() {
+        return Set.of(GCP_FORWARDING_RULE);
+    }
+
+    @Override
+    public void updateTags(AuthenticatedContext authenticatedContext, CloudResource cloudResource, Map<String, String> labels) throws IOException {
+        GcpContext gcpContext = gcpContextBuilder.contextInit(authenticatedContext.getCloudContext(), authenticatedContext, null, true);
+        Compute compute = gcpContext.getCompute();
+        String project = gcpContext.getProjectId();
+        String region = authenticatedContext.getCloudContext().getLocation().getRegion().getRegionName();
+        String forwardingRuleName = cloudResource.getName();
+
+        ForwardingRule forwardingRule = compute.forwardingRules().get(project, region, forwardingRuleName).execute();
+
+        RegionSetLabelsRequest setLabelsRequest = new RegionSetLabelsRequest();
+        setLabelsRequest.setLabelFingerprint(forwardingRule.getLabelFingerprint());
+        setLabelsRequest.setLabels(mergeLabels(forwardingRule.getLabels(), labels));
+
+        compute.forwardingRules().setLabels(project, region, forwardingRuleName, setLabelsRequest).execute();
+    }
+}

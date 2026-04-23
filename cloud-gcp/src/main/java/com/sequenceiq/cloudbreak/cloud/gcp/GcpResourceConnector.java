@@ -17,6 +17,7 @@ import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.TemplatingNotSupportedException;
 import com.sequenceiq.cloudbreak.cloud.gcp.sql.GcpDatabaseServerCertificateService;
 import com.sequenceiq.cloudbreak.cloud.gcp.sql.GcpDatabaseServerUpdateService;
+import com.sequenceiq.cloudbreak.cloud.gcp.tag.GcpResourceTagUpdaterService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
@@ -31,6 +32,7 @@ import com.sequenceiq.cloudbreak.cloud.template.AbstractResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
 import com.sequenceiq.cloudbreak.cloud.template.init.ContextBuilders;
 import com.sequenceiq.cloudbreak.cloud.template.loadbalancer.LoadBalancerResourceService;
+import com.sequenceiq.cloudbreak.service.CloudbreakRuntimeException;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.ResourceType;
 
@@ -49,6 +51,9 @@ public class GcpResourceConnector extends AbstractResourceConnector {
 
     @Inject
     private ContextBuilders contextBuilders;
+
+    @Inject
+    private GcpResourceTagUpdaterService gcpResourceTagUpdaterService;
 
     @Override
     public TlsInfo getTlsInfo(AuthenticatedContext authenticatedContext, CloudStack cloudStack) {
@@ -150,6 +155,17 @@ public class GcpResourceConnector extends AbstractResourceConnector {
     public CloudDatabaseServerSslCertificate getDatabaseServerActiveSslRootCertificate(AuthenticatedContext authenticatedContext, DatabaseStack stack)
             throws Exception {
         return gcpDatabaseServerCertificateService.getActiveSslRootCertificate(authenticatedContext, stack);
+    }
+
+    @Override
+    public void updateTag(AuthenticatedContext authenticatedContext, CloudResource cloudResource, Map<String, String> userDefinedTags) {
+        try {
+            gcpResourceTagUpdaterService.updateTags(authenticatedContext, cloudResource, userDefinedTags);
+            LOGGER.info("Successfully updated tags for cloud resource: {} with type: {}", cloudResource.getName(), cloudResource.getType());
+        } catch (Exception e) {
+            throw new CloudbreakRuntimeException(String.format("Failed to update tags for resource: %s with type: %s", cloudResource.getName(),
+                    cloudResource.getType()), e);
+        }
     }
 
     @Override

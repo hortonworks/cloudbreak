@@ -1,5 +1,10 @@
-package com.sequenceiq.cloudbreak.cloud.aws.resource.tag;
+package com.sequenceiq.cloudbreak.cloud.gcp.tag;
 
+import static com.sequenceiq.common.api.type.ResourceType.GCP_ATTACHED_DISK;
+import static com.sequenceiq.common.api.type.ResourceType.GCP_ATTACHED_DISKSET;
+import static com.sequenceiq.common.api.type.ResourceType.GCP_DISK;
+import static com.sequenceiq.common.api.type.ResourceType.GCP_INSTANCE;
+import static com.sequenceiq.common.api.type.ResourceType.GCP_SUBNET;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
@@ -18,13 +23,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.cloud.TagUpdateStrategy;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpLabelUtil;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.common.api.type.ResourceType;
 
 @ExtendWith(MockitoExtension.class)
-class AwsNativeResourceTagUpdaterServiceTest {
+class GcpResourceTagUpdaterServiceTest {
 
     private static final String INSTANCE_ID = "instanceId";
 
@@ -36,53 +41,58 @@ class AwsNativeResourceTagUpdaterServiceTest {
     private AuthenticatedContext authenticatedContext;
 
     @Mock
-    private TagUpdateStrategy ec2Strategy;
+    private GcpInstanceTagUpdateStrategy instanceStrategy;
 
     @Mock
-    private TagUpdateStrategy elbStrategy;
+    private GcpDiskTagUpdateStrategy diskStrategy;
 
-    private AwsNativeResourceTagUpdaterService underTest;
+    @Mock
+    private GcpLabelUtil gcpLabelUtil;
+
+    private GcpResourceTagUpdaterService underTest;
 
     @BeforeEach
     void setUp() {
-        when(ec2Strategy.supportedTypes()).thenReturn(Set.of(ResourceType.AWS_INSTANCE));
-        when(elbStrategy.supportedTypes()).thenReturn(Set.of(ResourceType.ELASTIC_LOAD_BALANCER));
-        underTest = new AwsNativeResourceTagUpdaterService(List.of(ec2Strategy, elbStrategy));
+        when(instanceStrategy.supportedTypes()).thenReturn(Set.of(GCP_INSTANCE));
+        when(diskStrategy.supportedTypes()).thenReturn(Set.of(GCP_DISK, GCP_ATTACHED_DISK, GCP_ATTACHED_DISKSET));
+        underTest = new GcpResourceTagUpdaterService(List.of(instanceStrategy, diskStrategy), gcpLabelUtil);
     }
 
     @Test
-    void testUpdateTagsAwsInstance() throws IOException {
-        CloudResource cloudResource = buildResource(ResourceType.AWS_INSTANCE, INSTANCE_ID, null);
+    void testUpdateTagsGcpInstance() throws IOException {
+        CloudResource cloudResource = buildResource(GCP_INSTANCE, INSTANCE_ID, null);
+        when(gcpLabelUtil.createLabelsFromTagsMap(USER_DEFINED_TAGS)).thenReturn(USER_DEFINED_TAGS);
 
         underTest.updateTags(authenticatedContext, cloudResource, USER_DEFINED_TAGS);
 
-        verify(ec2Strategy).updateTags(authenticatedContext, cloudResource, USER_DEFINED_TAGS);
-        verifyNoMoreInteractions(elbStrategy);
+        verify(instanceStrategy).updateTags(authenticatedContext, cloudResource, USER_DEFINED_TAGS);
+        verifyNoMoreInteractions(diskStrategy);
     }
 
     @Test
-    void testUpdateTagsAwsLoadBalancer() throws IOException {
-        CloudResource cloudResource = buildResource(ResourceType.ELASTIC_LOAD_BALANCER, null, RESOURCE_REFERENCE);
+    void testUpdateTagsGcpDisk() throws IOException {
+        CloudResource cloudResource = buildResource(GCP_DISK, null, RESOURCE_REFERENCE);
+        when(gcpLabelUtil.createLabelsFromTagsMap(USER_DEFINED_TAGS)).thenReturn(USER_DEFINED_TAGS);
 
         underTest.updateTags(authenticatedContext, cloudResource, USER_DEFINED_TAGS);
 
-        verify(elbStrategy).updateTags(authenticatedContext, cloudResource, USER_DEFINED_TAGS);
-        verifyNoMoreInteractions(ec2Strategy);
+        verify(diskStrategy).updateTags(authenticatedContext, cloudResource, USER_DEFINED_TAGS);
+        verifyNoMoreInteractions(instanceStrategy);
     }
 
     @Test
     void testUpdateTagsUnsupportedType() throws IOException {
-        CloudResource cloudResource = buildResource(ResourceType.AWS_EFS, null, RESOURCE_REFERENCE);
+        CloudResource cloudResource = buildResource(GCP_SUBNET, null, RESOURCE_REFERENCE);
 
         underTest.updateTags(authenticatedContext, cloudResource, USER_DEFINED_TAGS);
 
-        verifyNoMoreInteractions(ec2Strategy, elbStrategy);
+        verifyNoMoreInteractions(instanceStrategy, diskStrategy);
     }
 
     @Test
     void testUpdateTagsWhenRuntimeExceptionOccurs() throws IOException {
-        CloudResource cloudResource = buildResource(ResourceType.AWS_INSTANCE, INSTANCE_ID, null);
-        doThrow(new RuntimeException("AWS error")).when(ec2Strategy)
+        CloudResource cloudResource = buildResource(GCP_INSTANCE, INSTANCE_ID, null);
+        doThrow(new RuntimeException("GCP error")).when(instanceStrategy)
                 .updateTags(authenticatedContext, cloudResource, USER_DEFINED_TAGS);
 
         assertThrows(RuntimeException.class, () -> underTest.updateTags(authenticatedContext, cloudResource, USER_DEFINED_TAGS));

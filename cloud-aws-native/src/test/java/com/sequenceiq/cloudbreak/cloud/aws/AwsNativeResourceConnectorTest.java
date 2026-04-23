@@ -12,6 +12,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -200,7 +201,7 @@ public class AwsNativeResourceConnectorTest {
     }
 
     @Test
-    void testUpdateTags() {
+    void testUpdateTags() throws IOException {
         CloudResource awsInstance = CloudResource.builder()
                 .withType(ResourceType.AWS_INSTANCE)
                 .withName("awsInstance")

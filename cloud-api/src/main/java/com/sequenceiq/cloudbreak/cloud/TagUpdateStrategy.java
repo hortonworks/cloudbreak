@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.Set;
 
@@ -11,5 +12,5 @@ public interface TagUpdateStrategy {
 
     Set<ResourceType> supportedTypes();
 
-    void updateTags(AuthenticatedContext authenticatedContext, CloudResource cloudResource, Map<String, String> tags);
+    void updateTags(AuthenticatedContext authenticatedContext, CloudResource cloudResource, Map<String, String> tags) throws IOException;
 }

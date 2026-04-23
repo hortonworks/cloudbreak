@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -314,6 +315,13 @@ class YarnResourceConnectorTest {
 
     @Test
     void testUpdateTags() {
-        assertThrows(UnsupportedOperationException.class, () -> underTest.updateTags(authenticatedContextMock, List.of(), Map.of()));
+        AuthenticatedContext ac = mock(AuthenticatedContext.class);
+        CloudResource yarnApplication = CloudResource.builder()
+                .withType(YARN_APPLICATION)
+                .withName("yarnApplication")
+                .build();
+
+        Map<String, String> userDefinedTags = Map.of("custom", "value");
+        assertThrows(UnsupportedOperationException.class, () -> underTest.updateTags(ac, List.of(yarnApplication), userDefinedTags));
     }
 }

@@ -16,14 +16,21 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -32,6 +39,7 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.QuotaExceededException;
 import com.sequenceiq.cloudbreak.cloud.exception.TemplatingNotSupportedException;
+import com.sequenceiq.cloudbreak.cloud.gcp.tag.GcpResourceTagUpdaterService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
@@ -86,6 +94,9 @@ public class GcpResourceConnectorTest {
 
     @Mock
     private CloudResourceHelper cloudResourceHelper;
+
+    @Mock
+    private GcpResourceTagUpdaterService gcpResourceTagUpdaterService;
 
     @Test
     public void testGetDBStackTemplateWhenEverythingIsFine() throws TemplatingNotSupportedException {
@@ -243,9 +254,37 @@ public class GcpResourceConnectorTest {
     }
 
     @Test
-    void testUpdateTags() {
-        AuthenticatedContext ac = mock(AuthenticatedContext.class);
-        assertThrows(UnsupportedOperationException.class, () -> underTest.updateTags(ac, List.of(), Map.of()));
+    void testUpdateTags() throws IOException {
+        AuthenticatedContext authenticatedContext = mock(AuthenticatedContext.class);
+        CloudResource cloudResource1 = cloudResource("test-1", GCP_INSTANCE);
+        CloudResource cloudResource2 = cloudResource("test-2", GCP_INSTANCE);
+        List<CloudResource> cloudResources = List.of(cloudResource1, cloudResource2);
+        Map<String, String> userDefinedTags = Map.of("custom", "value");
+
+        underTest.updateTags(authenticatedContext, cloudResources, userDefinedTags);
+
+        verify(gcpResourceTagUpdaterService).updateTags(authenticatedContext, cloudResource1, userDefinedTags);
+        verify(gcpResourceTagUpdaterService).updateTags(authenticatedContext, cloudResource2, userDefinedTags);
+    }
+
+    @ParameterizedTest
+    @MethodSource("emptyAndNullUserDefinedTags")
+    void testUpdateTagsWhenUserDefinedTagsIsEmpty(Map<String, String> userDefinedTags) {
+        AuthenticatedContext authenticatedContext = mock(AuthenticatedContext.class);
+        CloudResource cloudResource1 = cloudResource("test-1", GCP_INSTANCE);
+        CloudResource cloudResource2 = cloudResource("test-2", GCP_INSTANCE);
+        List<CloudResource> cloudResources = List.of(cloudResource1, cloudResource2);
+
+        underTest.updateTags(authenticatedContext, cloudResources, userDefinedTags);
+
+        verifyNoInteractions(gcpResourceTagUpdaterService);
+    }
+
+    private static Stream<Arguments> emptyAndNullUserDefinedTags() {
+        return Stream.of(
+                Arguments.of((Object) null),
+                Arguments.of(Collections.emptyMap())
+        );
     }
 
     private CloudResource cloudResource(String name, ResourceType resourceType) {

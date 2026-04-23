@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
 import static com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts.ACCEPTANCE_POLICY_PARAMETER;
+import static com.sequenceiq.common.api.type.ResourceType.AZURE_INSTANCE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -360,6 +361,13 @@ public class AzureResourceConnectorTest {
 
     @Test
     void testUpdateTags() {
-        assertThrows(UnsupportedOperationException.class, () -> underTest.updateTags(ac, List.of(), Map.of()));
+        AuthenticatedContext ac = mock(AuthenticatedContext.class);
+        CloudResource azureInstance = CloudResource.builder()
+                .withType(AZURE_INSTANCE)
+                .withName("azureInstance")
+                .build();
+
+        Map<String, String> userDefinedTags = Map.of("custom", "value");
+        assertThrows(UnsupportedOperationException.class, () -> underTest.updateTags(ac, List.of(azureInstance), userDefinedTags));
     }
 }
