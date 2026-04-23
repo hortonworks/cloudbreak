@@ -7,7 +7,6 @@ import java.io.ByteArrayInputStream;
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -70,8 +69,6 @@ public class SaltConnector implements Closeable {
 
     private static final String SIGN_HEADER = "signature";
 
-    private static final List<Integer> ACCEPTED_STATUSES = Arrays.asList(HttpStatus.SC_OK, HttpStatus.SC_CREATED, HttpStatus.SC_ACCEPTED);
-
     private static final int PROXY_TIMEOUT = 90000;
 
     private static final int CONNECT_TIMEOUT_MS = 20_000;
@@ -87,6 +84,8 @@ public class SaltConnector implements Closeable {
     private final SaltErrorResolver saltErrorResolver;
 
     private final String hostname;
+
+    private final String saltVersion;
 
     public SaltConnector(GatewayConfig gatewayConfig, SSLContext sslContext, SaltErrorResolver saltErrorResolver, boolean restDebug,
             boolean saltLoggerEnabled, boolean saltLoggerResponseBodyEnabled, int connectTimeoutMs, OptionalInt readTimeout,
@@ -109,6 +108,7 @@ public class SaltConnector implements Closeable {
             saltPassword = Optional.ofNullable(gatewayConfig.getSaltPassword()).orElse(SALT_PASSWORD);
             signatureKey = gatewayConfig.getSignatureKey();
             this.saltErrorResolver = saltErrorResolver;
+            this.saltVersion = gatewayConfig.getSaltVersion().orElse(null);
         } catch (Exception e) {
             throw new RuntimeException("Failed to create rest client with 2-way-ssl config", e);
         }
@@ -364,6 +364,10 @@ public class SaltConnector implements Closeable {
         return hostname;
     }
 
+    public Optional<String> getSaltVersion() {
+        return Optional.ofNullable(saltVersion);
+    }
+
     private String toJson(Object target) {
         try {
             return MAPPER.writeValueAsString(target);
@@ -377,6 +381,7 @@ public class SaltConnector implements Closeable {
         StringBuilder sb = new StringBuilder("SaltConnector{");
         sb.append("saltTarget=").append(saltTarget);
         sb.append(", hostname='").append(hostname).append('\'');
+        sb.append(", saltVersion='").append(saltVersion).append('\'');
         sb.append('}');
         return sb.toString();
     }

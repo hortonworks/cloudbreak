@@ -76,6 +76,7 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.domain.CommandExecutionRespon
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.FullNodeResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.JidInfoResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.Minion;
+import com.sequenceiq.cloudbreak.orchestrator.salt.domain.MinionIpAddressesResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.PackageVersionResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.PingResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.RunningJobsResponse;
@@ -764,4 +765,93 @@ class SaltStateServiceTest {
         // THEN
         assertTrue(result.isEmpty());
     }
+
+    @Test
+    void testCollectMinionIpAddressesWithNoVersionsUsesAllConnectors() {
+        SaltConnector sc1 = mock(SaltConnector.class);
+        SaltConnector sc2 = mock(SaltConnector.class);
+        when(sc1.getSaltVersion()).thenReturn(Optional.empty());
+        when(sc2.getSaltVersion()).thenReturn(Optional.empty());
+
+        MinionIpAddressesResponse response1 = mock(MinionIpAddressesResponse.class);
+        MinionIpAddressesResponse response2 = mock(MinionIpAddressesResponse.class);
+        when(sc1.run(any(), eq("network.ipaddrs"), eq(LOCAL), eq(MinionIpAddressesResponse.class), any(Long.class))).thenReturn(response1);
+        when(sc2.run(any(), eq("network.ipaddrs"), eq(LOCAL), eq(MinionIpAddressesResponse.class), any(Long.class))).thenReturn(response2);
+
+        List<MinionIpAddressesResponse> result = underTest.collectMinionIpAddresses(List.of(sc1, sc2));
+
+        assertEquals(2, result.size());
+        assertTrue(result.contains(response1));
+        assertTrue(result.contains(response2));
+    }
+
+    @Test
+    void testCollectMinionIpAddressesWithVersionsFiltersToHighestVersion() {
+        SaltConnector scLow = mock(SaltConnector.class);
+        SaltConnector scHigh = mock(SaltConnector.class);
+        when(scLow.getSaltVersion()).thenReturn(Optional.of("3000.8"));
+        when(scHigh.getSaltVersion()).thenReturn(Optional.of("3001.8"));
+
+        MinionIpAddressesResponse responseHigh = mock(MinionIpAddressesResponse.class);
+        when(scHigh.run(any(), eq("network.ipaddrs"), eq(LOCAL), eq(MinionIpAddressesResponse.class), any(Long.class))).thenReturn(responseHigh);
+
+        List<MinionIpAddressesResponse> result = underTest.collectMinionIpAddresses(List.of(scLow, scHigh));
+
+        assertEquals(1, result.size());
+        assertTrue(result.contains(responseHigh));
+    }
+
+    @Test
+    void testCollectMinionIpAddressesWithVersionsExcludesConnectorsWithoutVersion() {
+        SaltConnector scNoVersion = mock(SaltConnector.class);
+        SaltConnector scWithVersion = mock(SaltConnector.class);
+        when(scNoVersion.getSaltVersion()).thenReturn(Optional.empty());
+        when(scWithVersion.getSaltVersion()).thenReturn(Optional.of("3001.8"));
+
+        MinionIpAddressesResponse responseVersioned = mock(MinionIpAddressesResponse.class);
+        when(scWithVersion.run(any(), eq("network.ipaddrs"), eq(LOCAL), eq(MinionIpAddressesResponse.class), any(Long.class))).thenReturn(responseVersioned);
+
+        List<MinionIpAddressesResponse> result = underTest.collectMinionIpAddresses(List.of(scNoVersion, scWithVersion));
+
+        assertEquals(1, result.size());
+        assertTrue(result.contains(responseVersioned));
+    }
+
+    @Test
+    void testCollectMinionIpAddressesMultipleConnectorsWithSameHighestVersionAreAllIncluded() {
+        SaltConnector sc1 = mock(SaltConnector.class);
+        SaltConnector sc2 = mock(SaltConnector.class);
+        SaltConnector sc3 = mock(SaltConnector.class);
+        when(sc1.getSaltVersion()).thenReturn(Optional.of("3001.8"));
+        when(sc2.getSaltVersion()).thenReturn(Optional.of("3001.8"));
+        when(sc3.getSaltVersion()).thenReturn(Optional.of("3000.8"));
+
+        MinionIpAddressesResponse response1 = mock(MinionIpAddressesResponse.class);
+        MinionIpAddressesResponse response2 = mock(MinionIpAddressesResponse.class);
+        when(sc1.run(any(), eq("network.ipaddrs"), eq(LOCAL), eq(MinionIpAddressesResponse.class), any(Long.class))).thenReturn(response1);
+        when(sc2.run(any(), eq("network.ipaddrs"), eq(LOCAL), eq(MinionIpAddressesResponse.class), any(Long.class))).thenReturn(response2);
+
+        List<MinionIpAddressesResponse> result = underTest.collectMinionIpAddresses(List.of(sc1, sc2, sc3));
+
+        assertEquals(2, result.size());
+        assertTrue(result.contains(response1));
+        assertTrue(result.contains(response2));
+    }
+
+    @Test
+    void testCollectMinionIpAddressesOldStyleVersionLowerThanNewStyle() {
+        SaltConnector scOld = mock(SaltConnector.class);
+        SaltConnector scNew = mock(SaltConnector.class);
+        when(scOld.getSaltVersion()).thenReturn(Optional.of("2017.7.5"));
+        when(scNew.getSaltVersion()).thenReturn(Optional.of("3000.8"));
+
+        MinionIpAddressesResponse responseNew = mock(MinionIpAddressesResponse.class);
+        when(scNew.run(any(), eq("network.ipaddrs"), eq(LOCAL), eq(MinionIpAddressesResponse.class), any(Long.class))).thenReturn(responseNew);
+
+        List<MinionIpAddressesResponse> result = underTest.collectMinionIpAddresses(List.of(scOld, scNew));
+
+        assertEquals(1, result.size());
+        assertTrue(result.contains(responseNew));
+    }
 }
+

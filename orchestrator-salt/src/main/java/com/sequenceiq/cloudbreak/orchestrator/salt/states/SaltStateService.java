@@ -39,6 +39,7 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import com.sequenceiq.cloudbreak.common.model.PackageInfo;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
+import com.sequenceiq.cloudbreak.common.type.Versioned;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.model.BootstrapParams;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
@@ -73,6 +74,7 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.domain.StateType;
 import com.sequenceiq.cloudbreak.orchestrator.salt.utils.MinionUtil;
 import com.sequenceiq.cloudbreak.service.retry.Retry;
 import com.sequenceiq.cloudbreak.service.retry.RetryType;
+import com.sequenceiq.cloudbreak.util.VersionComparator;
 
 @Service
 public class SaltStateService {
@@ -303,7 +305,14 @@ public class SaltStateService {
     }
 
     public List<MinionIpAddressesResponse> collectMinionIpAddresses(Collection<SaltConnector> saltConnectors) {
+        VersionComparator versionComparator = new VersionComparator();
+        Optional<String> maxVersion = saltConnectors.stream()
+                .map(SaltConnector::getSaltVersion)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .max((v1, v2) -> versionComparator.compare((Versioned) () -> v1, (Versioned) () -> v2));
         return saltConnectors.stream()
+                .filter(sc -> maxVersion.isEmpty() || maxVersion.equals(sc.getSaltVersion()))
                 .map(sc -> collectMinionIpAddresses(sc, Optional.empty()))
                 .toList();
     }
@@ -313,7 +322,7 @@ public class SaltStateService {
         MinionIpAddressesResponse minionIpAddressesResponse = measure(() -> sc.run(runTargets, "network.ipaddrs", LOCAL,
                         MinionIpAddressesResponse.class, NETWORK_IPADDRS_TIMEOUT),
                 LOGGER, "Network IP address call took {}ms");
-        LOGGER.debug("Minion ip response: {}", minionIpAddressesResponse);
+        LOGGER.debug("Minion IP response: {} on host [{}]", minionIpAddressesResponse, sc.getHostname());
         return minionIpAddressesResponse;
     }
 
@@ -333,7 +342,7 @@ public class SaltStateService {
 
     public boolean fileExists(SaltConnector sc, String fileLocation) {
         return measure(() -> sc.runWithLimitedRetry(new HostList(List.of(sc.getHostname())), "file.file_exists", LOCAL,
-                        PingResponse.class, fileLocation), LOGGER, "Checking if file exists took {}ms").getResult().stream()
+                PingResponse.class, fileLocation), LOGGER, "Checking if file exists took {}ms").getResult().stream()
                 .anyMatch(map -> map.values().stream().anyMatch(Boolean::booleanValue));
     }
 
