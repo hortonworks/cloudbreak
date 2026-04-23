@@ -9,8 +9,8 @@
             "default": "mockimage"
           }
         },
-        "os": "redhat8",
-        "os_type": "redhat8",
+        "os": "redhat9",
+        "os_type": "redhat9",
         "uuid": "DEFAULT_IMAGE_UUID"
       }
     ]

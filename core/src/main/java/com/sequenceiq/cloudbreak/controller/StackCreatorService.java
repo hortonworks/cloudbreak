@@ -225,7 +225,7 @@ public class StackCreatorService {
         Optional<String> runtimeVersion = getRuntimeVersionFromBlueprint(stackRequest, workspace.getId());
         validateArchitecture(stackRequest, runtimeVersion);
         validateSeLinuxEntitlement(stackRequest);
-        updateImageOsIfRequired(stackRequest, runtimeVersion);
+        updateImageOsIfRequired(stackRequest, runtimeVersion, accountId);
 
         Stack stackStub = measure(
                 () -> stackV4RequestToStackConverter.convert(environment, stackRequest),
@@ -342,13 +342,18 @@ public class StackCreatorService {
         return response;
     }
 
-    private void updateImageOsIfRequired(StackV4Request stackRequest, Optional<String> runtimeVersion) {
+    private void updateImageOsIfRequired(StackV4Request stackRequest, Optional<String> runtimeVersion, String accountId) {
         if (runtimeVersion.isPresent() && isVersionNewerOrEqualThanLimited(runtimeVersion.get(), CLOUDERA_STACK_VERSION_7_3_2)) {
+            if (!entitlementService.isEntitledToUseOS(accountId, OsType.getLatestOsType())) {
+                throw new BadRequestException(
+                        String.format("CDP %s is supported only on %s operating system, but the current account is not entitled to use it.",
+                                runtimeVersion.get(), OsType.getLatestOsType()));
+            }
             if (stackRequest.getImage() == null) {
                 stackRequest.setImage(new ImageSettingsV4Request());
             }
             if (StringUtils.isAllEmpty(stackRequest.getImage().getId(), stackRequest.getImage().getOs())) {
-                stackRequest.getImage().setOs(OsType.RHEL9.getOs());
+                stackRequest.getImage().setOs(OsType.getLatestOsType().getOs());
             }
         }
     }

@@ -14,6 +14,8 @@ public enum OsType {
     RHEL9("redhat9", "redhat9", "Red Hat Enterprise Linux 9", "RHEL 9", "el9",
             false, true);
 
+    private static final OsType LATEST_OS_TYPE = RHEL9;
+
     private final String os;
 
     private final String osType;
@@ -75,6 +77,17 @@ public enum OsType {
 
     public boolean matches(String os, String osType) {
         return this.os.equalsIgnoreCase(os) && this.osType.equalsIgnoreCase(osType);
+    }
+
+    public static OsType getLatestOsType() {
+        return LATEST_OS_TYPE;
+    }
+
+    public static OsType getPreviousOsType(OsType osType) {
+        return switch (osType) {
+            case RHEL9 -> RHEL8;
+            case RHEL8, CENTOS7 -> CENTOS7;
+        };
     }
 
     public static OsType getByOsTypeString(String osType) {

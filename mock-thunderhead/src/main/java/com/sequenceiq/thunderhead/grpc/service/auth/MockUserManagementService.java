@@ -58,7 +58,6 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAK
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_BACKUP_RESTORE_PERMISSION_CHECKS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_LOAD_BALANCER;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENABLE_DISTROX_INSTANCE_TYPES;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENABLE_RHEL9_IMAGES;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENABLE_ZOOKEEPER_TO_KRAFT_MIGRATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENDPOINT_GATEWAY_SKIP_VALIDATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_EXPERIENCE_DELETION_BY_ENVIRONMENT;
@@ -72,7 +71,6 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_MITIGAT
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_POSTGRES_UPGRADE_EXCEPTION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_POSTGRES_UPGRADE_SKIP_ATTACHED_DATAHUBS_CHECK;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_POSTGRES_UPGRADE_SKIP_SERVICE_STOP;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_PREFER_RHEL9_IMAGES;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_PRIVATELINKS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_AZURE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_GCP;
@@ -604,12 +602,6 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.tlsv13.only.enabled}")
     private boolean tlsv13OnlyEnabled;
-
-    @Value("${auth.mock.rhel9.enabled}")
-    private boolean rhel9Enabled;
-
-    @Value("${auth.mock.rhel9.preferred}")
-    private boolean rhel9Preferred;
 
     @Value("${auth.mock.verticalscale.ha.enabled}")
     private boolean verticalScaleHaEnabled;
@@ -1146,12 +1138,6 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (tlsv13OnlyEnabled) {
             builder.addEntitlements(createEntitlement(CDP_CB_SUPPORTS_TLS_1_3_ONLY));
-        }
-        if (rhel9Enabled) {
-            builder.addEntitlements(createEntitlement(CDP_ENABLE_RHEL9_IMAGES));
-        }
-        if (rhel9Preferred) {
-            builder.addEntitlements(createEntitlement(CDP_PREFER_RHEL9_IMAGES));
         }
         if (verticalScaleHaEnabled) {
             builder.addEntitlements(createEntitlement(CDP_CB_VERTICAL_SCALE_HA));

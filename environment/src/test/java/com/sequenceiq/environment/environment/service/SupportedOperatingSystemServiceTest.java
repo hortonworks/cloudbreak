@@ -6,6 +6,7 @@ import static com.sequenceiq.common.model.OsType.RHEL8;
 import static com.sequenceiq.common.model.OsType.RHEL9;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -40,21 +41,19 @@ class SupportedOperatingSystemServiceTest {
     @Test
     void listSupportedOperatingSystemRHEL8Default() {
         when(providerPreferencesService.isGovCloudDeployment()).thenReturn(false);
-        when(entitlementService.isEntitledToUseOS(any(), any())).thenReturn(Boolean.TRUE);
+        when(entitlementService.isEntitledToUseOS(any(), eq(RHEL9))).thenReturn(Boolean.FALSE);
 
         SupportedOperatingSystemResponse response = underTest.listSupportedOperatingSystem("account-id", null);
 
         assertEquals("redhat8", response.getDefaultOs());
         assertEquals(RHEL8.getOs(), response.getDefaultOs());
-        assertEquals(response.getOsTypes(), List.of(osTypeToOsTypeResponseConverter.convert(CENTOS7), osTypeToOsTypeResponseConverter.convert(RHEL8),
-                osTypeToOsTypeResponseConverter.convert(RHEL9)));
+        assertEquals(response.getOsTypes(), List.of(osTypeToOsTypeResponseConverter.convert(CENTOS7), osTypeToOsTypeResponseConverter.convert(RHEL8)));
     }
 
     @Test
     void listSupportedOperatingSystemRHEL9Default() {
         when(providerPreferencesService.isGovCloudDeployment()).thenReturn(false);
-        when(entitlementService.isEntitledToUseOS(any(), any())).thenReturn(Boolean.TRUE);
-        when(entitlementService.isRhel9ImagePreferred(any())).thenReturn(Boolean.TRUE);
+        when(entitlementService.isEntitledToUseOS(any(), eq(RHEL9))).thenReturn(Boolean.TRUE);
 
         SupportedOperatingSystemResponse response = underTest.listSupportedOperatingSystem("account-id", null);
 
@@ -68,7 +67,6 @@ class SupportedOperatingSystemServiceTest {
     void listSupportedOperatingSystemRHEL9DefaultWhenGov() {
         when(providerPreferencesService.isGovCloudDeployment()).thenReturn(true);
         when(entitlementService.isEntitledToUseOS(any(), any())).thenReturn(Boolean.TRUE);
-        when(entitlementService.isRhel9ImagePreferred(any())).thenReturn(Boolean.TRUE);
 
         SupportedOperatingSystemResponse response = underTest.listSupportedOperatingSystem("account-id", null);
 

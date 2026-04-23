@@ -1,6 +1,6 @@
 package com.sequenceiq.freeipa.service.image;
 
-import static com.sequenceiq.common.model.OsType.RHEL9;
+import static com.sequenceiq.common.model.OsType.getLatestOsType;
 
 import jakarta.inject.Inject;
 
@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareInternalCrnGeneratorUtil;
-import com.sequenceiq.common.model.OsType;
 
 @Service
 public class PreferredOsService {
@@ -28,9 +27,9 @@ public class PreferredOsService {
 
     public String getPreferredOs(String requestedOs) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
-        if (mustUseRhel9(accountId)) {
-            return RHEL9.getOs();
-        } else if (requestedASpecificOsType(requestedOs)) {
+        if (mustUseLatestOsType(accountId)) {
+            return getLatestOsType().getOs();
+        } else if (StringUtils.isNotBlank(requestedOs)) {
             return getOsTypeBasedOnRequestedOsType(requestedOs, accountId);
         } else {
             return defaultOs;
@@ -38,8 +37,8 @@ public class PreferredOsService {
     }
 
     private String getOsTypeBasedOnRequestedOsType(String requestedOs, String accountId) {
-        if (requestedRhel9(requestedOs)) {
-            if (notInternalUser() && entitlementService.isEntitledToUseOS(accountId, RHEL9)) {
+        if (requestedLatestOs(requestedOs)) {
+            if (notInternalUser() && entitlementService.isEntitledToUseOS(accountId, getLatestOsType())) {
                 return requestedOs;
             } else {
                 return defaultOs;
@@ -49,18 +48,12 @@ public class PreferredOsService {
         }
     }
 
-    private boolean requestedASpecificOsType(String requestedOs) {
-        return StringUtils.isNotBlank(requestedOs);
+    private boolean requestedLatestOs(String requestedOs) {
+        return getLatestOsType().getOs().equalsIgnoreCase(requestedOs);
     }
 
-    private boolean requestedRhel9(String requestedOs) {
-        return OsType.RHEL9.getOs().equalsIgnoreCase(requestedOs);
-    }
-
-    private boolean mustUseRhel9(String accountId) {
-        return notInternalUser()
-                && entitlementService.isEntitledToUseOS(accountId, RHEL9)
-                && entitlementService.isRhel9ImagePreferred(accountId);
+    private boolean mustUseLatestOsType(String accountId) {
+        return notInternalUser() && entitlementService.isEntitledToUseOS(accountId, getLatestOsType());
     }
 
     private boolean notInternalUser() {

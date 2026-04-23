@@ -82,7 +82,7 @@ freeipa:
       cert.file: database.crt
       ssl: false
   image.catalog:
-    default.os: redhat8
+    default.os: redhat9
     cache.ttl: 15
   platform.default.instanceType:
     AWS:

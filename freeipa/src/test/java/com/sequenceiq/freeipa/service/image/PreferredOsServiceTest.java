@@ -40,42 +40,33 @@ public class PreferredOsServiceTest {
     @InjectMocks
     private PreferredOsService victim;
 
-    @ParameterizedTest(name = "testGetDefaultOs: rhel9Enabled={0} rhel9Preferred={1} defaultOs={2} resultOs={3}")
+    @ParameterizedTest(name = "testGetDefaultOs: rhel9Enabled={0} defaultOs={1} resultOs={2}")
     @MethodSource("testGetDefaultOsData")
-    void testGetDefaultOs(boolean rhel9Enabled, boolean rhel9Preferred, OsType defaultOs, OsType resultOs) {
+    void testGetDefaultOs(boolean rhel9Enabled, OsType defaultOs, OsType resultOs) {
         ReflectionTestUtils.setField(victim, PreferredOsService.class, "defaultOs", defaultOs.getOs(), null);
-        when(entitlementService.isEntitledToUseOS(ACCOUNT_ID, RHEL9)).thenReturn(rhel9Enabled);
-        when(entitlementService.isRhel9ImagePreferred(ACCOUNT_ID)).thenReturn(rhel9Preferred);
+        when(entitlementService.isEntitledToUseOS(ACCOUNT_ID, OsType.getLatestOsType())).thenReturn(rhel9Enabled);
 
         String actual = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> victim.getDefaultOs());
 
         assertEquals(resultOs.getOs(), actual);
-
     }
 
     static Stream<Arguments> testGetDefaultOsData() {
         return Stream.of(
-                Arguments.of(true,  true,   CENTOS7, RHEL9),
-                Arguments.of(true,  true,   RHEL8,   RHEL9),
-                Arguments.of(true,  true,   RHEL9,   RHEL9),
-                Arguments.of(true,  false,  CENTOS7, CENTOS7),
-                Arguments.of(true,  false,  RHEL8,   RHEL8),
-                Arguments.of(true,  false,  RHEL9,   RHEL9),
-                Arguments.of(false, true,   CENTOS7, CENTOS7),
-                Arguments.of(false, true,   RHEL8,   RHEL8),
-                Arguments.of(false, true,   RHEL9,   RHEL9),
-                Arguments.of(false, false,  CENTOS7, CENTOS7),
-                Arguments.of(false, false,  RHEL8,   RHEL8),
-                Arguments.of(false, false,  RHEL9,   RHEL9)
+                Arguments.of(true, CENTOS7, RHEL9),
+                Arguments.of(true, RHEL8, RHEL9),
+                Arguments.of(true, RHEL9, RHEL9),
+                Arguments.of(false, CENTOS7, CENTOS7),
+                Arguments.of(false, RHEL8, RHEL8),
+                Arguments.of(false, RHEL9, RHEL9)
         );
     }
 
-    @ParameterizedTest(name = "testGetDefaultOs: rhel9Enabled={0} rhel9Preferred={1} defaultOs={2} resultOs={3}")
+    @ParameterizedTest(name = "testGetDefaultOs: rhel9Enabled={0} defaultOs={1} resultOs={2}")
     @MethodSource("testGetDefaultOsDataInternalUser")
-    void testGetDefaultOsInternal(boolean rhel9Enabled, boolean rhel9Preferred, OsType defaultOs, OsType resultOs) {
+    void testGetDefaultOsInternal(boolean rhel9Enabled, OsType defaultOs, OsType resultOs) {
         ReflectionTestUtils.setField(victim, PreferredOsService.class, "defaultOs", defaultOs.getOs(), null);
-        when(entitlementService.isEntitledToUseOS(ACCOUNT_ID, RHEL9)).thenReturn(rhel9Enabled);
-        when(entitlementService.isRhel9ImagePreferred(ACCOUNT_ID)).thenReturn(rhel9Preferred);
+        when(entitlementService.isEntitledToUseOS(ACCOUNT_ID, OsType.getLatestOsType())).thenReturn(rhel9Enabled);
 
         String actual = ThreadBasedUserCrnProvider.doAs(INTERNAL_CRN, () -> victim.getDefaultOs());
 
@@ -85,27 +76,20 @@ public class PreferredOsServiceTest {
 
     static Stream<Arguments> testGetDefaultOsDataInternalUser() {
         return Stream.of(
-                Arguments.of(true,  true,   CENTOS7, CENTOS7),
-                Arguments.of(true,  true,   RHEL8,   RHEL8),
-                Arguments.of(true,  true,   RHEL9,   RHEL9),
-                Arguments.of(true,  false,  CENTOS7, CENTOS7),
-                Arguments.of(true,  false,  RHEL8,   RHEL8),
-                Arguments.of(true,  false,  RHEL9,   RHEL9),
-                Arguments.of(false, true,   CENTOS7, CENTOS7),
-                Arguments.of(false, true,   RHEL8,   RHEL8),
-                Arguments.of(false, true,   RHEL9,   RHEL9),
-                Arguments.of(false, false,  CENTOS7, CENTOS7),
-                Arguments.of(false, false,  RHEL8,   RHEL8),
-                Arguments.of(false, false,  RHEL9,   RHEL9)
+                Arguments.of(true, CENTOS7, CENTOS7),
+                Arguments.of(true, RHEL8, RHEL8),
+                Arguments.of(true, RHEL9, RHEL9),
+                Arguments.of(false, CENTOS7, CENTOS7),
+                Arguments.of(false, RHEL8, RHEL8),
+                Arguments.of(false, RHEL9, RHEL9)
         );
     }
 
-    @ParameterizedTest(name = "getPreferredOs: rhel9Enabled={0} rhel9Preferred={1} defaultOs={2} requestedOs={3} resultOs={4}")
+    @ParameterizedTest(name = "getPreferredOs: rhel9Enabled={0} defaultOs={1} requestedOs={2} resultOs={3}")
     @MethodSource("getPreferredOsData")
-    void testGetPreferredOs(boolean rhel9Enabled, boolean rhel9Preferred, OsType defaultOs, OsType requestedOs, OsType resultOs) {
+    void testGetPreferredOs(boolean rhel9Enabled, OsType defaultOs, OsType requestedOs, OsType resultOs) {
         ReflectionTestUtils.setField(victim, PreferredOsService.class, "defaultOs", defaultOs.getOs(), null);
-        when(entitlementService.isRhel9ImagePreferred(ACCOUNT_ID)).thenReturn(rhel9Preferred);
-        when(entitlementService.isEntitledToUseOS(ACCOUNT_ID, RHEL9)).thenReturn(rhel9Enabled);
+        when(entitlementService.isEntitledToUseOS(ACCOUNT_ID, OsType.getLatestOsType())).thenReturn(rhel9Enabled);
 
         String actual = ThreadBasedUserCrnProvider.doAs(USER_CRN,
                 () -> victim.getPreferredOs(requestedOs == null ? null : requestedOs.getOs()));
@@ -115,34 +99,23 @@ public class PreferredOsServiceTest {
 
     static Stream<Arguments> getPreferredOsData() {
         return Stream.of(
-                Arguments.of(true, true,       RHEL8,    CENTOS7,     RHEL9),
-                Arguments.of(true, true,       RHEL8,    RHEL8,       RHEL9),
-                Arguments.of(true, true,       RHEL8,    RHEL9,       RHEL9),
-                Arguments.of(true, true,       RHEL8,    null,        RHEL9),
+                Arguments.of(true, RHEL8, CENTOS7, RHEL9),
+                Arguments.of(true, RHEL8, RHEL8, RHEL9),
+                Arguments.of(true, RHEL8, RHEL9, RHEL9),
+                Arguments.of(true, RHEL8, null, RHEL9),
 
-                Arguments.of(true, false,      RHEL8,    CENTOS7,     CENTOS7),
-                Arguments.of(true, false,      RHEL8,    RHEL8,       RHEL8),
-                Arguments.of(true, false,      RHEL8,    RHEL9,       RHEL9),
-                Arguments.of(true, false,      RHEL8,    null,        RHEL8),
-
-                Arguments.of(false, true,      RHEL8,    CENTOS7,     CENTOS7),
-                Arguments.of(false, true,      RHEL8,    RHEL8,       RHEL8),
-                Arguments.of(false, true,      RHEL8,    RHEL9,       RHEL8),
-                Arguments.of(false, true,      RHEL8,    null,        RHEL8),
-
-                Arguments.of(false, false,      RHEL8,    CENTOS7,     CENTOS7),
-                Arguments.of(false, false,      RHEL8,    RHEL8,       RHEL8),
-                Arguments.of(false, false,      RHEL8,    RHEL9,       RHEL8),
-                Arguments.of(false, false,      RHEL8,    null,        RHEL8)
+                Arguments.of(false, RHEL8, CENTOS7, CENTOS7),
+                Arguments.of(false, RHEL8, RHEL8, RHEL8),
+                Arguments.of(false, RHEL8, RHEL9, RHEL8),
+                Arguments.of(false, RHEL8, null, RHEL8)
         );
     }
 
-    @ParameterizedTest(name = "getPreferredOs: rhel9Enabled={0} rhel9Preferred={1} defaultOs={2} requestedOs={3} resultOs={4}")
+    @ParameterizedTest(name = "getPreferredOs: rhel9Enabled={0} defaultOs={1} requestedOs={2} resultOs={3}")
     @MethodSource("getPreferredOsDataInternal")
-    void testGetPreferredOsInternal(boolean rhel9Enabled, boolean rhel9Preferred, OsType defaultOs, OsType requestedOs, OsType resultOs) {
+    void testGetPreferredOsInternal(boolean rhel9Enabled, OsType defaultOs, OsType requestedOs, OsType resultOs) {
         ReflectionTestUtils.setField(victim, PreferredOsService.class, "defaultOs", defaultOs.getOs(), null);
-        when(entitlementService.isRhel9ImagePreferred(ACCOUNT_ID)).thenReturn(rhel9Preferred);
-        when(entitlementService.isEntitledToUseOS(ACCOUNT_ID, RHEL9)).thenReturn(rhel9Enabled);
+        when(entitlementService.isEntitledToUseOS(ACCOUNT_ID, OsType.getLatestOsType())).thenReturn(rhel9Enabled);
 
         String actual = ThreadBasedUserCrnProvider.doAs(INTERNAL_CRN,
                 () -> victim.getPreferredOs(requestedOs == null ? null : requestedOs.getOs()));
@@ -152,25 +125,15 @@ public class PreferredOsServiceTest {
 
     static Stream<Arguments> getPreferredOsDataInternal() {
         return Stream.of(
-                Arguments.of(true, true,       RHEL8,    CENTOS7,     CENTOS7),
-                Arguments.of(true, true,       RHEL8,    RHEL8,       RHEL8),
-                Arguments.of(true, true,       RHEL8,    RHEL9,       RHEL8),
-                Arguments.of(true, true,       RHEL8,    null,        RHEL8),
+                Arguments.of(true, RHEL8, CENTOS7, CENTOS7),
+                Arguments.of(true, RHEL8, RHEL8, RHEL8),
+                Arguments.of(true, RHEL8, RHEL9, RHEL8),
+                Arguments.of(true, RHEL8, null, RHEL8),
 
-                Arguments.of(true, false,      RHEL8,    CENTOS7,     CENTOS7),
-                Arguments.of(true, false,      RHEL8,    RHEL8,       RHEL8),
-                Arguments.of(true, false,      RHEL8,    RHEL9,       RHEL8),
-                Arguments.of(true, false,      RHEL8,    null,        RHEL8),
-
-                Arguments.of(false, true,      RHEL8,    CENTOS7,     CENTOS7),
-                Arguments.of(false, true,      RHEL8,    RHEL8,       RHEL8),
-                Arguments.of(false, true,      RHEL8,    RHEL9,       RHEL8),
-                Arguments.of(false, true,      RHEL8,    null,        RHEL8),
-
-                Arguments.of(false, false,      RHEL8,    CENTOS7,     CENTOS7),
-                Arguments.of(false, false,      RHEL8,    RHEL8,       RHEL8),
-                Arguments.of(false, false,      RHEL8,    RHEL9,       RHEL8),
-                Arguments.of(false, false,      RHEL8,    null,        RHEL8)
+                Arguments.of(false, RHEL8, CENTOS7, CENTOS7),
+                Arguments.of(false, RHEL8, RHEL8, RHEL8),
+                Arguments.of(false, RHEL8, RHEL9, RHEL8),
+                Arguments.of(false, RHEL8, null, RHEL8)
         );
     }
 }

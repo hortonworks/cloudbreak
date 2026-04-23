@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.common.model.OsType;
 
 @Component
 public class ImageOsService {
@@ -40,8 +41,8 @@ public class ImageOsService {
     public String getPreferredOs(String requestedOs) {
         if (StringUtils.isNotBlank(requestedOs)) {
             return requestedOs;
-        } else if (entitlementService.isRhel9ImagePreferred(ThreadBasedUserCrnProvider.getAccountId())) {
-            return RHEL9.getOs();
+        } else if (entitlementService.isEntitledToUseOS(ThreadBasedUserCrnProvider.getAccountId(), OsType.getLatestOsType())) {
+            return OsType.getLatestOsType().getOs();
         } else {
             return defaultOs;
         }

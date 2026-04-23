@@ -120,8 +120,6 @@ auth:
     mitigate.release.failure.7218P1100.enabled: false
     zookeeper.to.kraft.migration.enabled: true
     tlsv13.only.enabled: false
-    rhel9.enabled: true
-    rhel9.preferred: false
     verticalscale.ha.enabled: false
     cloudprivatelinks.enabled: true
     prefer.minifi.logging.enabled: true
