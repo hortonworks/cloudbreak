@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isCLOHttpsSupported;
 import static org.apache.commons.codec.binary.Base64.decodeBase64;
 
+import java.io.IOException;
 import java.security.KeyPair;
 import java.security.cert.X509Certificate;
 import java.util.Optional;
@@ -26,6 +27,8 @@ import com.sequenceiq.cloudbreak.aspect.Measure;
 import com.sequenceiq.cloudbreak.certificate.PkiUtil;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.client.SaltClientConfig;
+import com.sequenceiq.cloudbreak.cloud.model.Image;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyConfiguration;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyEnablementService;
@@ -163,6 +166,7 @@ public class TlsSecurityService {
                 .withAlternativeUserFacingCert(securityConfig.getAlternativeUserFacingCert())
                 .withAlternativeUserFacingKey(securityConfig.getAlternativeUserFacingKey())
                 .withGatewayServiceConfig(getGatewayServiceConfig(stack))
+                .withSaltVersion(getInstanceSaltVersion(gatewayInstance))
                 .build();
         if (clusterProxyService.isCreateConfigForClusterProxy(stack)) {
             gatewayConfig
@@ -243,6 +247,17 @@ public class TlsSecurityService {
 
     private SecurityConfig getSecurityConfigByStackIdOrThrowNotFound(Long stackId) {
         return securityConfigService.findOneByStackId(stackId).orElseThrow(() -> new NotFoundException("Security config doesn't exist."));
+    }
+
+    public String getInstanceSaltVersion(InstanceMetadataView instanceMetadata) {
+        try {
+            if (instanceMetadata.getImage() != null) {
+                return instanceMetadata.getImage().get(Image.class).getPackageVersion(ImagePackageVersion.SALT);
+            }
+        } catch (IOException | IllegalArgumentException e) {
+            LOGGER.warn("Missing image information for instance: " + instanceMetadata.getInstanceId(), e);
+        }
+        return null;
     }
 
 }
