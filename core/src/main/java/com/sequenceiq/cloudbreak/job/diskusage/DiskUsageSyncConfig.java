@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.job.diskusage;
 
+import java.util.Set;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -12,6 +14,9 @@ public class DiskUsageSyncConfig {
     @Value("${diskusage-sync.enabled:true}")
     private boolean enabled;
 
+    @Value("#{'${diskusage-sync.enabled-providers}'.split(',')}")
+    private Set<String> enabledProviders;
+
     @Value("${diskusage-sync.dbdiskthreshold:80}")
     private int dbDiskUsageThresholdPercentage;
 
@@ -21,12 +26,19 @@ public class DiskUsageSyncConfig {
     @Value("${diskusage-sync.maxsize:1000}")
     private int maxDiskSize;
 
+    @Value("${diskusage-sync.dryrun}")
+    private boolean dryRun;
+
     public int getIntervalInMinutes() {
         return intervalInMinutes;
     }
 
     public boolean isDiskUsageSyncEnabled() {
         return enabled;
+    }
+
+    public Set<String> getEnabledProviders() {
+        return enabledProviders;
     }
 
     public int getDbDiskUsageThresholdPercentage() {
@@ -39,5 +51,9 @@ public class DiskUsageSyncConfig {
 
     public int getMaxDiskSize() {
         return maxDiskSize;
+    }
+
+    public boolean isDryRun() {
+        return dryRun;
     }
 }

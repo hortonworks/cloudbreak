@@ -895,9 +895,11 @@ provider-sync:
 diskusage-sync:
   intervalminutes: 720
   enabled: true
+  enabled-providers: AWS,AZURE
   dbdiskthreshold: 80
   increment: 100
   maxsize: 1000
+  dryrun: true
 
 clusterdns:
   host: localhost

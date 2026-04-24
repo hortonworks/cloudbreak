@@ -11,6 +11,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -60,6 +61,8 @@ import com.sequenceiq.cloudbreak.view.StackView;
 public class StackUtil {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackUtil.class);
+
+    private static final String DEPRECATED_DEVICE_PATH_PREFIX = "/dev/sd";
 
     @Inject
     private ResourceAttributeUtil resourceAttributeUtil;
@@ -345,5 +348,25 @@ public class StackUtil {
     public boolean stopStartScalingFailureRecoveryEnabled(StackView stack) {
         String accountId = Crn.safeFromString(stack.getResourceCrn()).getAccountId();
         return entitlementService.stopStartScalingFailureRecoveryEnabled(accountId);
+    }
+
+    public boolean hasDiskResourcesWithDeprecatedDevicePaths(Stack stack) {
+        return hasDiskResourcesWithDeprecatedDevicePaths(stack.getDiskResources());
+    }
+
+    public boolean hasDiskResourcesWithDeprecatedDevicePaths(StackDto stackDto) {
+        return hasDiskResourcesWithDeprecatedDevicePaths(stackDto.getDiskResources());
+    }
+
+    private boolean hasDiskResourcesWithDeprecatedDevicePaths(List<Resource> diskResources) {
+        return diskResources.stream()
+                .map(resource -> resourceAttributeUtil.getTypedAttributes(resource, VolumeSetAttributes.class))
+                .flatMap(Optional::stream)
+                .map(VolumeSetAttributes::getVolumes)
+                .filter(Objects::nonNull)
+                .flatMap(List::stream)
+                .map(Volume::getDevice)
+                .filter(Objects::nonNull)
+                .anyMatch(device -> device.startsWith(DEPRECATED_DEVICE_PATH_PREFIX));
     }
 }
