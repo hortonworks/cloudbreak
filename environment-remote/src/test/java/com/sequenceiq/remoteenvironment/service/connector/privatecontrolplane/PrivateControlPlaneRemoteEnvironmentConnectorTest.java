@@ -1,6 +1,7 @@
 package com.sequenceiq.remoteenvironment.service.connector.privatecontrolplane;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -42,6 +43,7 @@ import com.sequenceiq.remoteenvironment.DescribeEnvironmentV2Response;
 import com.sequenceiq.remoteenvironment.api.v1.environment.model.DescribeRemoteEnvironment;
 import com.sequenceiq.remoteenvironment.api.v1.environment.model.RemoteEnvironmentBase;
 import com.sequenceiq.remoteenvironment.api.v1.environment.model.SimpleRemoteEnvironmentResponse;
+import com.sequenceiq.remoteenvironment.api.v1.environment.model.ValidateForDatalakeResponse;
 import com.sequenceiq.remoteenvironment.controller.v1.converter.PrivateControlPlaneEnvironmentToRemoteEnvironmentConverter;
 import com.sequenceiq.remoteenvironment.domain.PrivateControlPlane;
 import com.sequenceiq.remoteenvironment.service.PrivateControlPlaneService;
@@ -382,5 +384,18 @@ class PrivateControlPlaneRemoteEnvironmentConnectorTest {
                 );
 
         assertEquals("certecske", result.getContents());
+    }
+
+    @Test
+    void testValidateForDatalakeShouldReturnAlwaysValidResponse() {
+        ValidateForDatalakeResponse response = underTest.validateForDatalake(USER_CRN, ENV_CRN);
+
+        assertNotNull(response);
+        assertTrue(response.isValid());
+        assertNotNull(response.getValidations());
+        assertTrue(response.getValidations().isEmpty());
+        verifyNoInteractions(privateControlPlaneServiceMock);
+        verifyNoInteractions(privateControlPlaneClient);
+        verifyNoInteractions(converterMock);
     }
 }

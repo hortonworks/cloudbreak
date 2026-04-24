@@ -37,6 +37,7 @@ import com.sequenceiq.remoteenvironment.DescribeEnvironmentPropertiesV2Response;
 import com.sequenceiq.remoteenvironment.DescribeEnvironmentV2Response;
 import com.sequenceiq.remoteenvironment.RemoteEnvironmentException;
 import com.sequenceiq.remoteenvironment.api.v1.environment.model.SimpleRemoteEnvironmentResponse;
+import com.sequenceiq.remoteenvironment.api.v1.environment.model.ValidateForDatalakeResponse;
 import com.sequenceiq.remoteenvironment.controller.v1.converter.PrivateControlPlaneEnvironmentToRemoteEnvironmentConverter;
 import com.sequenceiq.remoteenvironment.domain.PrivateControlPlane;
 import com.sequenceiq.remoteenvironment.service.PrivateControlPlaneService;
@@ -165,6 +166,14 @@ public class PrivateControlPlaneRemoteEnvironmentConnector implements PayloadCon
     @Override
     public DescribeDatalakeServicesResponse getDatalakeServices(String userCrn, String environmentCrn) {
         return callRemoteEnvironment(userCrn, environmentCrn, this::getDatalakeServicesForEnvironmentWithActor);
+    }
+
+    @Override
+    public ValidateForDatalakeResponse validateForDatalake(String userCrn, String environmentCrn) {
+        ValidateForDatalakeResponse validResponse = new ValidateForDatalakeResponse();
+        validResponse.setValid(true);
+        validResponse.setValidations(List.of());
+        return validResponse;
     }
 
     private <T> T callRemoteEnvironment(String userCrn, String environmentCrn, PrivateControlPlaneCaller<T> function) {
