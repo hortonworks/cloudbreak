@@ -49,6 +49,7 @@ import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxDatabase;
 import com.sequenceiq.datalake.entity.SdxStatusEntity;
+import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.metric.SdxMetricService;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.service.sdx.DistroxService;
@@ -132,6 +133,9 @@ class SdxControllerTest {
 
     @Mock
     private SdxResizeService sdxResizeService;
+
+    @Mock
+    private SdxReactorFlowManager sdxReactorFlowManager;
 
     @InjectMocks
     private SdxController sdxController;
@@ -622,6 +626,33 @@ class SdxControllerTest {
                 SeLinux.ENFORCING));
         verify(sdxService).getByCrn(USER_CRN, sdxCluster.getCrn());
         verify(seLinuxService).modifySeLinuxOnDatalake(sdxCluster, USER_CRN, SeLinux.ENFORCING);
+        assertEquals(FlowType.FLOW, flowIdentifier.getType());
+        assertEquals("FLOW_ID", flowIdentifier.getPollableId());
+    }
+
+    @Test
+    void testRestartClusterServicesByName() {
+        SdxCluster sdxCluster = getValidSdxCluster();
+        when(sdxService.getByNameInAccountAllowDetached(USER_CRN, "TEST")).thenReturn(sdxCluster);
+        when(sdxReactorFlowManager.triggerRestartClusterServices(sdxCluster, false, false))
+                .thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
+        FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> sdxController.restartClusterServicesByName("TEST", false, false));
+        verify(sdxService).getByNameInAccountAllowDetached(USER_CRN, "TEST");
+        verify(sdxReactorFlowManager).triggerRestartClusterServices(sdxCluster, false, false);
+        assertEquals(FlowType.FLOW, flowIdentifier.getType());
+        assertEquals("FLOW_ID", flowIdentifier.getPollableId());
+    }
+
+    @Test
+    void testRestartClusterServicesByCrn() {
+        SdxCluster sdxCluster = getValidSdxCluster();
+        when(sdxService.getByCrn(USER_CRN, sdxCluster.getCrn())).thenReturn(sdxCluster);
+        when(sdxReactorFlowManager.triggerRestartClusterServices(sdxCluster, true, true))
+                .thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
+        FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> sdxController.restartClusterServicesByCrn(sdxCluster.getCrn(), true, true));
+        verify(sdxService).getByCrn(USER_CRN, sdxCluster.getCrn());
+        verify(sdxReactorFlowManager).triggerRestartClusterServices(sdxCluster, true, true);
         assertEquals(FlowType.FLOW, flowIdentifier.getType());
         assertEquals("FLOW_ID", flowIdentifier.getPollableId());
     }

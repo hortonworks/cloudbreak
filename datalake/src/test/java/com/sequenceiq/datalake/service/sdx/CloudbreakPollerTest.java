@@ -137,16 +137,6 @@ class CloudbreakPollerTest {
     }
 
     @Test
-    void testCcmUpgradeFinished() {
-        whenCheckFlowState().thenReturn(FlowState.UNKNOWN);
-        whenCheckStackStatus()
-                .thenReturn(statusResponse(Status.UPGRADE_CCM_IN_PROGRESS, Status.UPGRADE_CCM_IN_PROGRESS))
-                .thenReturn(statusResponse(Status.AVAILABLE, Status.AVAILABLE));
-        underTest.pollCcmUpgradeUntilAvailable(sdxCluster, pollingConfig);
-        verify(cloudbreakFlowService, atLeastOnce()).getLastKnownFlowState(sdxCluster);
-    }
-
-    @Test
     void pollCertificateRotationUntilAvailable() {
         whenCheckFlowState().thenReturn(FlowState.UNKNOWN);
         whenCheckStackStatus()
@@ -155,6 +145,16 @@ class CloudbreakPollerTest {
         underTest.pollCertificateRotationUntilAvailable(sdxCluster, pollingConfig);
         verify(cloudbreakFlowService, atLeastOnce()).getLastKnownFlowState(sdxCluster);
 
+    }
+
+    @Test
+    void testCcmUpgradeFinished() {
+        whenCheckFlowState().thenReturn(FlowState.UNKNOWN);
+        whenCheckStackStatus()
+                .thenReturn(statusResponse(Status.UPGRADE_CCM_IN_PROGRESS, Status.UPGRADE_CCM_IN_PROGRESS))
+                .thenReturn(statusResponse(Status.AVAILABLE, Status.AVAILABLE));
+        underTest.pollCcmUpgradeUntilAvailable(sdxCluster, pollingConfig);
+        verify(cloudbreakFlowService, atLeastOnce()).getLastKnownFlowState(sdxCluster);
     }
 
     @Test
@@ -176,6 +176,38 @@ class CloudbreakPollerTest {
                 .thenReturn(statusResponse(Status.AVAILABLE, Status.UPGRADE_CCM_FAILED, "cluster error"));
         assertThatThrownBy(() -> underTest.pollCcmUpgradeUntilAvailable(sdxCluster, pollingConfig))
                 .hasMessage("CCM upgrade failed on 'clusterName' cluster. Reason: cluster error")
+                .isInstanceOf(UserBreakException.class);
+    }
+
+    @Test
+    void testServiceRestartFinished() {
+        whenCheckFlowState().thenReturn(FlowState.UNKNOWN);
+        whenCheckStackStatus()
+                .thenReturn(statusResponse(Status.UPDATE_IN_PROGRESS, Status.UPDATE_IN_PROGRESS))
+                .thenReturn(statusResponse(Status.AVAILABLE, Status.AVAILABLE));
+        underTest.pollServiceRestartUntilAvailable(sdxCluster, pollingConfig);
+        verify(cloudbreakFlowService, atLeastOnce()).getLastKnownFlowState(sdxCluster);
+    }
+
+    @Test
+    void testServiceRestartFailedStack() {
+        whenCheckFlowState().thenReturn(FlowState.UNKNOWN);
+        whenCheckStackStatus()
+                .thenReturn(statusResponse(Status.UPDATE_IN_PROGRESS, Status.UPDATE_IN_PROGRESS))
+                .thenReturn(statusResponse(Status.UPDATE_FAILED, "stack error"));
+        assertThatThrownBy(() -> underTest.pollServiceRestartUntilAvailable(sdxCluster, pollingConfig))
+                .hasMessage("Cluster service restart failed on 'clusterName' cluster. Reason: stack error")
+                .isInstanceOf(UserBreakException.class);
+    }
+
+    @Test
+    void testServiceRestartFailedCluster() {
+        whenCheckFlowState().thenReturn(FlowState.UNKNOWN);
+        whenCheckStackStatus()
+                .thenReturn(statusResponse(Status.UPDATE_IN_PROGRESS, Status.UPDATE_IN_PROGRESS))
+                .thenReturn(statusResponse(Status.AVAILABLE, Status.UPDATE_FAILED, "cluster error"));
+        assertThatThrownBy(() -> underTest.pollServiceRestartUntilAvailable(sdxCluster, pollingConfig))
+                .hasMessage("Cluster service restart failed on 'clusterName' cluster. Reason: cluster error")
                 .isInstanceOf(UserBreakException.class);
     }
 

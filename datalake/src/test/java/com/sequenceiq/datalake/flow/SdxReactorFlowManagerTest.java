@@ -9,6 +9,8 @@ import static com.sequenceiq.datalake.flow.verticalscale.addvolumes.event.Datala
 import static com.sequenceiq.datalake.flow.verticalscale.rootvolume.event.DatalakeRootVolumeUpdateStateSelectors.DATALAKE_ROOT_VOLUME_UPDATE_EVENT;
 import static com.sequenceiq.flow.api.model.FlowType.FLOW;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
@@ -48,6 +50,7 @@ import com.sequenceiq.cloudbreak.util.TestConstants;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.events.EventSenderService;
+import com.sequenceiq.datalake.flow.datalake.restartservices.event.DatalakeRestartServicesStartEvent;
 import com.sequenceiq.datalake.flow.datalake.upgrade.event.DatalakeUpgradeFlowChainStartEvent;
 import com.sequenceiq.datalake.flow.detach.event.DatalakeResizeFlowChainStartEvent;
 import com.sequenceiq.datalake.flow.modifyproxy.ModifyProxyConfigTrackerEvent;
@@ -331,5 +334,19 @@ class SdxReactorFlowManagerTest {
         assertEquals("TEST", captor.getValue().getClusterName());
         assertEquals(DATALAKE_ROOT_VOLUME_UPDATE_EVENT.selector(), captor.getValue().getSelector());
         assertEquals("flowId", result.getPollableId());
+    }
+
+    @Test
+    public void testTriggerRestartClusterServices() {
+        ArgumentCaptor<DatalakeRestartServicesStartEvent> captor = ArgumentCaptor.forClass(DatalakeRestartServicesStartEvent.class);
+        SdxCluster sdxCluster = mock(SdxCluster.class);
+        doReturn("TEST").when(sdxCluster).getName();
+
+        FlowIdentifier result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.triggerRestartClusterServices(sdxCluster, true, false));
+        verify(eventFactory).createEventWithErrHandler(anyMap(), captor.capture());
+        assertEquals("TEST", captor.getValue().getSdxName());
+        assertEquals(USER_CRN, captor.getValue().getUserId());
+        assertTrue(captor.getValue().isRollingRestart());
+        assertFalse(captor.getValue().isStaleServicesOnly());
     }
 }

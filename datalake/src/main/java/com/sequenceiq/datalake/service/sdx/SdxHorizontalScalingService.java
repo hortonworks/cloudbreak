@@ -134,7 +134,8 @@ public class SdxHorizontalScalingService {
 
     public FlowIdentifier rollingRestartServices(Long resourceId, String resourceCrn) {
         SdxCluster sdxCluster = sdxService.getById(resourceId);
-        FlowIdentifier flowId = stackV4Endpoint.rollingRestartServices(0L, resourceCrn, true);
+        FlowIdentifier flowId = ThreadBasedUserCrnProvider.doAsInternalActor(initatorUserCrn ->
+                stackV4Endpoint.restartClusterServices(0L, resourceCrn, true, true, initatorUserCrn));
         cloudbreakFlowService.saveLastCloudbreakFlowChainId(sdxCluster, flowId);
         return flowId;
     }

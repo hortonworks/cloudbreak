@@ -22,7 +22,7 @@ import com.sequenceiq.flow.reactor.api.event.EventSender;
 @Service
 public class SELinuxService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(VerticalScaleService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SELinuxService.class);
 
     @Inject
     private EventSender eventSender;
@@ -39,7 +39,7 @@ public class SELinuxService {
                 .withSelinuxMode(selinuxMode)
                 .build();
         FlowIdentifier flowIdentifier = eventSender.sendEvent(datalakeEnableSeLinuxEvent, new Event.Headers(getFlowTriggerUsercrn(userCrn)));
-        LOGGER.debug("Data Lake Cluster Vertical Scale flow trigger event sent for environment {}", sdxCluster.getName());
+        LOGGER.debug("Data Lake Cluster Enable SELinux flow trigger event sent for environment {}", sdxCluster.getName());
         return flowIdentifier;
     }
 

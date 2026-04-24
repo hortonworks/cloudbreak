@@ -156,4 +156,16 @@ public class CloudbreakStackService {
             throw new CloudbreakServiceException(message, e);
         }
     }
+
+    public void restartClusterServices(SdxCluster sdxCluster, boolean rollingRestart, boolean restartStaleServices) {
+        try {
+            FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAsInternalActor(initiatorUserCrn ->
+                    stackV4Endpoint.restartClusterServices(WORKSPACE_ID, sdxCluster.getStackCrn(), rollingRestart, restartStaleServices, initiatorUserCrn));
+            cloudbreakFlowService.saveLastCloudbreakFlowChainId(sdxCluster, flowIdentifier);
+        } catch (WebApplicationException e) {
+            String message = String.format("Could not restart cluster services in core, reason: %s", exceptionMessageExtractor.getErrorMessage(e));
+            LOGGER.warn(message, e);
+            throw new CloudbreakServiceException(message, e);
+        }
+    }
 }

@@ -70,6 +70,7 @@ import com.sequenceiq.datalake.flow.datalake.kraftmigration.DatalakeKraftMigrati
 import com.sequenceiq.datalake.flow.datalake.kraftmigration.KraftMigrationOperationType;
 import com.sequenceiq.datalake.flow.datalake.kraftmigration.event.DatalakeKraftMigrationStartEvent;
 import com.sequenceiq.datalake.flow.datalake.recovery.event.DatalakeRecoveryStartEvent;
+import com.sequenceiq.datalake.flow.datalake.restartservices.event.DatalakeRestartServicesStartEvent;
 import com.sequenceiq.datalake.flow.datalake.scale.event.DatalakeHorizontalScaleSdxEvent;
 import com.sequenceiq.datalake.flow.datalake.upgrade.event.DatalakeUpgradeFlowChainStartEvent;
 import com.sequenceiq.datalake.flow.datalake.upgrade.event.DatalakeUpgradePreparationFlowChainStartEvent;
@@ -340,6 +341,14 @@ public class SdxReactorFlowManager {
                 new SetDatalakeDefaultJavaVersionTriggerEvent(SET_DATALAKE_DEFAULT_JAVA_VERSION_EVENT.event(), cluster.getId(), initiatorUserCrn,
                         defaultJavaVersion, restartServices, restartCM, rollingRestart);
         return notify(datalakeDefaultJavaVersionTriggerEvent.selector(), datalakeDefaultJavaVersionTriggerEvent, cluster.getClusterName());
+    }
+
+    public FlowIdentifier triggerRestartClusterServices(SdxCluster cluster, boolean rollingRestart, boolean staleServicesOnly) {
+        LOGGER.info("Trigger Restart Cluster Services on Datalake for: {}, rolling restart: {}", cluster, rollingRestart);
+        String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
+        DatalakeRestartServicesStartEvent datalakeRestartServicesStartEvent =
+                new DatalakeRestartServicesStartEvent(cluster.getId(), cluster.getName(), initiatorUserCrn, rollingRestart, staleServicesOnly);
+        return notify(datalakeRestartServicesStartEvent.selector(), datalakeRestartServicesStartEvent, cluster.getClusterName());
     }
 
     private FlowIdentifier notify(String selector, Acceptable acceptable, String identifier, String userId) {

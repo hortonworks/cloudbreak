@@ -569,9 +569,9 @@ public class StackOperationService {
         return flowManager.triggerModifyProxyConfig(stack.getId(), previousProxyConfigCrn);
     }
 
-    public FlowIdentifier triggerServicesRollingRestart(String crn, boolean restartStaleServices) {
+    public FlowIdentifier triggerServicesRestart(String crn, boolean rollingRestart, boolean restartStaleServices) {
         StackView stack = stackDtoService.getStackViewByCrn(crn);
-        return flowManager.triggerClusterServicesRestart(stack.getId(), false, true, restartStaleServices);
+        return flowManager.triggerClusterServicesRestart(stack.getId(), false, rollingRestart, restartStaleServices);
     }
 
     public FlowIdentifier stackUpdateDisks(NameOrCrn nameOrCrn, DiskUpdateRequest updateRequest, String accountId) {

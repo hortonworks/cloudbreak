@@ -667,5 +667,24 @@ public interface SdxEndpoint {
     ResetJvmParamsV4Response resetJvmParamsByCrn(@NotEmpty @ValidCrn(resource = VM_DATALAKE) @PathParam("crn") String crn,
             @NotNull @Valid ResetJvmParamsRequest request);
 
-}
+    @POST
+    @Path("name/{name}/restart_cluster_services")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Restart cluster services on the Data Lake by its name",
+            operationId = "restartClusterServicesByName",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    FlowIdentifier restartClusterServicesByName(@PathParam("name") String name,
+            @QueryParam("rollingRestart") @DefaultValue("false") boolean rollingRestart,
+            @QueryParam("staleServicesOnly") @DefaultValue("false") boolean staleServicesOnly);
 
+    @POST
+    @Path("crn/{crn}/restart_cluster_services")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Restart cluster services on the Data Lake by its CRN",
+            operationId = "restartClusterServicesByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    FlowIdentifier restartClusterServicesByCrn(@NotEmpty @ValidCrn(resource = VM_DATALAKE) @PathParam("crn") String crn,
+            @QueryParam("rollingRestart") @DefaultValue("false") boolean rollingRestart,
+            @QueryParam("staleServicesOnly") @DefaultValue("false") boolean staleServicesOnly);
+
+}

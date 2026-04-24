@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.never;
@@ -248,6 +249,32 @@ public class CloudbreakStackServiceTest {
                 .hasCauseInstanceOf(WebApplicationException.class)
                 .hasRootCauseMessage(ERROR_MSG)
                 .hasMessage("Could not update public DNS entries in core, reason: " + ERROR_MSG);
+
+        verifyNoInteractions(cloudbreakFlowService);
+    }
+
+    @Test
+    void testRestartClusterServicesSuccess() {
+        SdxCluster sdxCluster = setupSdxCluster();
+        FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW, "1");
+        when(stackV4Endpoint.restartClusterServices(any(), any(), anyBoolean(), anyBoolean(), any())).thenReturn(flowIdentifier);
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.restartClusterServices(sdxCluster, true, false));
+
+        verify(cloudbreakFlowService).saveLastCloudbreakFlowChainId(sdxCluster, flowIdentifier);
+    }
+
+    @Test
+    void testRestartClusterServicesFailure() {
+        SdxCluster sdxCluster = setupSdxCluster();
+        when(stackV4Endpoint.restartClusterServices(any(), any(), anyBoolean(), anyBoolean(), any())).thenThrow(new WebApplicationException(ERROR_MSG));
+        when(exceptionMessageExtractor.getErrorMessage(any(WebApplicationException.class))).thenReturn(ERROR_MSG);
+
+        assertThatCode(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.restartClusterServices(sdxCluster, false, true)))
+                .isInstanceOf(CloudbreakServiceException.class)
+                .hasCauseInstanceOf(WebApplicationException.class)
+                .hasRootCauseMessage(ERROR_MSG)
+                .hasMessage("Could not restart cluster services in core, reason: " + ERROR_MSG);
 
         verifyNoInteractions(cloudbreakFlowService);
     }

@@ -907,12 +907,24 @@ public interface StackV4Endpoint {
             @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 
     @POST
+    @Deprecated
     @Path("{crn}/cm_rolling_restart")
     @Produces(MediaType.APPLICATION_JSON)
-    @Operation(summary = "Services rolling restart", operationId = "rollingRestartServices",
+    @Operation(summary = "Services rolling restart - DEPRECATED, use restartClusterServices instead",
+            operationId = "rollingRestartServices", deprecated = true,
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier rollingRestartServices(@PathParam("workspaceId") Long workspaceId, @PathParam("crn") String crn,
             @QueryParam("staleServicesOnly") @DefaultValue("false") boolean staleServicesOnly);
+
+    @POST
+    @Path("internal/{crn}/restart_cluster_services")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Restart cluster services", operationId = "restartClusterServices",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    FlowIdentifier restartClusterServices(@PathParam("workspaceId") Long workspaceId, @PathParam("crn") String crn,
+            @QueryParam("rollingRestart") @DefaultValue("false") boolean rollingRestart,
+            @QueryParam("staleServicesOnly") @DefaultValue("false") boolean staleServicesOnly,
+            @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 
     @PUT
     @Path("{name}/trigger_sku_migration")

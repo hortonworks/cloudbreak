@@ -81,6 +81,11 @@ public class CloudbreakPoller extends AbstractFlowPoller {
                 Status.getAvailableStatuses(), Sets.immutableEnumSet(Status.UPDATE_FAILED));
     }
 
+    public void pollServiceRestartUntilAvailable(SdxCluster sdxCluster, PollingConfig pollingConfig) {
+        waitForState("Cluster service restart", sdxCluster, pollingConfig,
+                Status.getAvailableStatuses(), Sets.immutableEnumSet(Status.UPDATE_FAILED));
+    }
+
     private void waitForState(
             String process,
             SdxCluster sdxCluster,

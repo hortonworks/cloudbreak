@@ -803,4 +803,18 @@ public class SdxController implements SdxEndpoint {
         SdxCluster sdxCluster = getSdxClusterByCrn(crn);
         return sdxReactorFlowManager.triggerUpdatePublicDnsEntries(sdxCluster);
     }
+
+    @Override
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.START_DATALAKE)
+    public FlowIdentifier restartClusterServicesByName(@ResourceName String name, boolean rollingRestart, boolean staleServicesOnly) {
+        SdxCluster sdxCluster = getSdxClusterByName(name);
+        return sdxReactorFlowManager.triggerRestartClusterServices(sdxCluster, rollingRestart, staleServicesOnly);
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.START_DATALAKE)
+    public FlowIdentifier restartClusterServicesByCrn(@ResourceCrn String crn, boolean rollingRestart, boolean staleServicesOnly) {
+        SdxCluster sdxCluster = getSdxClusterByCrn(crn);
+        return sdxReactorFlowManager.triggerRestartClusterServices(sdxCluster, rollingRestart, staleServicesOnly);
+    }
 }
