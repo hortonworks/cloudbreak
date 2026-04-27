@@ -144,8 +144,8 @@ integrationtest:
     distroXUpgrade3rdPartyTargetVersion: 7.3.1
     imageCatalogUrl3rdParty: https://cloudbreak-imagecatalog.s3.amazonaws.com/v3-test-cb-image-catalog.json
   upgradeDatabaseServer:
-    originalDatabaseMajorVersion: 14
-    targetDatabaseMajorVersion: 17
+    originalDatabaseMajorVersion: 11
+    targetDatabaseMajorVersion: 14
     latest:
       originalDatabaseMajorVersion: "14"
       targetDatabaseMajorVersion: "17"
@@ -241,7 +241,7 @@ integrationtest:
     diskEncryption:
       environmentKey:
       datahubKey:
-    embeddedDbUpgradeSourceVersion: 14
+    embeddedDbUpgradeSourceVersion: 11
     trust:
       subnetIds:
         - subnet-0476e538519ac9570
@@ -338,7 +338,7 @@ integrationtest:
       encryptionKeyUrl:
       resourceGroupName:
       managedIdentity:
-    embeddedDbUpgradeSourceVersion: 14
+    embeddedDbUpgradeSourceVersion: 11
     datahubCustomInstanceType: Standard_D8s_v3
 
   # gcp parameters

@@ -249,13 +249,7 @@ public class ImageValidatorE2ETestUtil {
     }
 
     private boolean shouldValidateWithSameRuntime(ImageV4Response imageUnderValidation) {
-        return isRhel9InitialVersion(imageUnderValidation) || isRhel8InitialVersion(imageUnderValidation)
-                || isArm64InitialVersion(imageUnderValidation);
-    }
-
-    private boolean isRhel9InitialVersion(ImageV4Response imageUnderValidation) {
-        return OsType.RHEL9.getOs().equalsIgnoreCase(imageUnderValidation.getOs())
-                && "7.3.2".equals(imageUnderValidation.getVersion());
+        return isRhel8InitialVersion(imageUnderValidation) || isArm64InitialVersion(imageUnderValidation);
     }
 
     private boolean isRhel8InitialVersion(ImageV4Response imageUnderValidation) {
