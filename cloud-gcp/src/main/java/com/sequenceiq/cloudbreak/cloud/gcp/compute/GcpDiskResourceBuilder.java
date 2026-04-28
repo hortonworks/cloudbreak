@@ -3,12 +3,14 @@ package com.sequenceiq.cloudbreak.cloud.gcp.compute;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import jakarta.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
@@ -19,6 +21,7 @@ import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpDiskType;
+import com.sequenceiq.cloudbreak.cloud.gcp.GcpPlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpResourceException;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.service.CustomGcpDiskEncryptionService;
@@ -27,6 +30,7 @@ import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpLabelUtil;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+import com.sequenceiq.cloudbreak.cloud.model.DiskType;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
@@ -46,6 +50,10 @@ public class GcpDiskResourceBuilder extends AbstractGcpComputeBuilder {
     @Inject
     private GcpImageUtil gcpImageUtil;
 
+    @Lazy
+    @Inject
+    private GcpPlatformParameters gcpPlatformParameters;
+
     @Override
     public List<CloudResource> create(GcpContext context, CloudInstance instance, long privateId, AuthenticatedContext auth, Group group, Image image) {
         CloudContext cloudContext = auth.getCloudContext();
@@ -63,7 +71,7 @@ public class GcpDiskResourceBuilder extends AbstractGcpComputeBuilder {
         disk.setDescription(description());
         disk.setSizeGb((long) group.getRootVolumeSize());
         disk.setName(buildableResources.getFirst().getName());
-        disk.setType(GcpDiskType.findByValue(group.getRootVolumeType()).getUrl(projectId, location));
+        disk.setType(getDiskType(group, instance).getUrl(projectId, location));
 
         InstanceTemplate template = group.getReferenceInstanceTemplate();
         customGcpDiskEncryptionService.addEncryptionKeyToDisk(template, disk);
@@ -81,6 +89,23 @@ public class GcpDiskResourceBuilder extends AbstractGcpComputeBuilder {
             return Collections.singletonList(createOperationAwareCloudResource(buildableResources.getFirst(), operation));
         } catch (GoogleJsonResponseException e) {
             throw new GcpResourceException(checkException(e), resourceType(), buildableResources.getFirst().getName());
+        }
+    }
+
+    private GcpDiskType getDiskType(Group group, CloudInstance instance) {
+        try {
+            return Optional.ofNullable(group.getRootVolumeType())
+                    .map(GcpDiskType::findByValue)
+                    .orElseGet(() -> Optional.ofNullable(instance)
+                            .map(CloudInstance::getTemplate)
+                            .map(InstanceTemplate::getFlavor)
+                            .map(gcpPlatformParameters::defaultRootDiskType)
+                            .map(DiskType::value)
+                            .map(GcpDiskType::findByValue)
+                            .orElse(GcpDiskType.SSD));
+        } catch (RuntimeException ex) {
+            LOGGER.warn("Exception during determining disktype, using {}", GcpDiskType.SSD, ex);
+            return GcpDiskType.SSD;
         }
     }
 

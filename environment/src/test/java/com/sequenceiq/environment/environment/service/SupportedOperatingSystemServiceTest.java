@@ -65,6 +65,20 @@ class SupportedOperatingSystemServiceTest {
     }
 
     @Test
+    void listSupportedOperatingSystemRHEL9DefaultWhenGov() {
+        when(providerPreferencesService.isGovCloudDeployment()).thenReturn(true);
+        when(entitlementService.isEntitledToUseOS(any(), any())).thenReturn(Boolean.TRUE);
+        when(entitlementService.isRhel9ImagePreferred(any())).thenReturn(Boolean.TRUE);
+
+        SupportedOperatingSystemResponse response = underTest.listSupportedOperatingSystem("account-id", null);
+
+        assertEquals("redhat9", response.getDefaultOs());
+        assertEquals(RHEL9.getOs(), response.getDefaultOs());
+        assertEquals(response.getOsTypes(), List.of(osTypeToOsTypeResponseConverter.convert(RHEL8),
+                osTypeToOsTypeResponseConverter.convert(RHEL9)));
+    }
+
+    @Test
     void listSupportedOperatingSystemRHEL9NotAllowed() {
         when(providerPreferencesService.isGovCloudDeployment()).thenReturn(false);
 
