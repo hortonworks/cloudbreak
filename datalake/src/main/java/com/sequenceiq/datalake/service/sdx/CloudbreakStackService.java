@@ -3,6 +3,7 @@ package com.sequenceiq.datalake.service.sdx;
 import java.util.Set;
 
 import jakarta.inject.Inject;
+import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.WebApplicationException;
 
 import org.slf4j.Logger;
@@ -56,6 +57,8 @@ public class CloudbreakStackService {
             ThreadBasedUserCrnProvider.doAsInternalActor(
                     () -> stackV4Endpoint.checkUpgradeRdsByClusterNameInternal(WORKSPACE_ID, sdxCluster.getClusterName(), targetMajorVersion,
                             initiatorUserCrn));
+        } catch (BadRequestException e) {
+            throw e;
         } catch (RuntimeException e) {
             String exceptionMessage = exceptionMessageExtractor.getErrorMessage(e);
             String message = "Rds upgrade validation failed: " + exceptionMessage;
