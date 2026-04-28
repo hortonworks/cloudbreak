@@ -6,6 +6,7 @@ base:
              - tags
              - recipes.runner
              - telemetry
+             - minifi
              - fluent
              - ntp
              - freeipa
