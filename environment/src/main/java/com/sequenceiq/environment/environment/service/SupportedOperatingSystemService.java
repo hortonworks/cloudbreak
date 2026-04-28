@@ -1,8 +1,10 @@
 package com.sequenceiq.environment.environment.service;
 
+import static com.sequenceiq.common.model.OsType.CENTOS7;
 import static com.sequenceiq.common.model.OsType.RHEL8;
 import static com.sequenceiq.common.model.OsType.RHEL9;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -38,21 +40,22 @@ public class SupportedOperatingSystemService {
 
     public SupportedOperatingSystemResponse listSupportedOperatingSystem(String accountId, String cloudPlatform) {
         SupportedOperatingSystemResponse response = new SupportedOperatingSystemResponse();
-
+        boolean rhel9Enabled = entitlementService.isEntitledToUseOS(accountId, RHEL9);
+        boolean preferRhel9Enabled = entitlementService.isRhel9ImagePreferred(accountId);
+        List<OsTypeResponse> supportedOs = new ArrayList<>();
         if (providerPreferencesService.isGovCloudDeployment()) {
-            response.setOsTypes(List.of(osTypeToOsTypeResponseConverter.convert(RHEL8)));
-            response.setDefaultOs(RHEL8.getOs());
-            LOGGER.info("List of supported OS for gov cloud response: {}", response);
-        } else {
-            boolean rhel9Enabled = entitlementService.isEntitledToUseOS(accountId, RHEL9);
-            boolean preferRhel9Enabled = entitlementService.isRhel9ImagePreferred(accountId);
-            List<OsTypeResponse> supportedOs = Arrays.stream(OsType.values())
+            supportedOs = Arrays.stream(OsType.values())
+                    .filter(os -> !CENTOS7.equals(os))
                     .filter(os -> !RHEL9.equals(os) || rhel9Enabled)
                     .map(osTypeToOsTypeResponseConverter::convert).collect(Collectors.toList());
-            response.setOsTypes(supportedOs);
-            response.setDefaultOs(preferRhel9Enabled ? RHEL9.getOs() : RHEL8.getOs());
-            LOGGER.info("List of supported OS. response: {}", response);
+        } else {
+            supportedOs = Arrays.stream(OsType.values())
+                    .filter(os -> !RHEL9.equals(os) || rhel9Enabled)
+                    .map(osTypeToOsTypeResponseConverter::convert).collect(Collectors.toList());
         }
+        response.setOsTypes(supportedOs);
+        response.setDefaultOs(preferRhel9Enabled ? RHEL9.getOs() : RHEL8.getOs());
+        LOGGER.info("List of supported OS for gov cloud response: {}", response);
 
         return response;
     }
