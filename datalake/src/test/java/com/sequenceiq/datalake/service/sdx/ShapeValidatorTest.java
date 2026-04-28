@@ -16,6 +16,7 @@ import static org.mockito.Mockito.when;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -25,6 +26,7 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.sdx.api.model.SdxClusterShape;
 
 @ExtendWith(MockitoExtension.class)
 class ShapeValidatorTest {
@@ -57,7 +59,7 @@ class ShapeValidatorTest {
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> underTest.validateShape(MEDIUM_DUTY_HA, notSupportedRuntime, detailedEnvironmentResponse));
 
-        assertEquals("Provisioning a Medium Duty SDX shape is only valid for CM version greater than or equal to "
+        assertEquals("Provisioning a Medium Duty SDX shape is only valid for runtime version greater than or equal to "
                 + MEDIUM_DUTY_REQUIRED_VERSION + " and not " + notSupportedRuntime, badRequestException.getMessage());
     }
 
@@ -109,5 +111,36 @@ class ShapeValidatorTest {
 
         assertEquals(String.format("Provisioning a micro duty data lake cluster is not enabled for %s. ", AWS.name()) +
                 "Contact Cloudera support to enable CDP_MICRO_DUTY_SDX entitlement for the account.", ex.getMessage());
+    }
+
+    @ParameterizedTest(name = "with shape {0}")
+    @EnumSource(value = SdxClusterShape.class, names = {"LIGHT_DUTY_WITHOUT_HBASE", "ENTERPRISE_WITHOUT_HBASE"})
+    void testValidateShapesWithoutHBaseNotEntitled(SdxClusterShape shape) {
+        DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
+        detailedEnvironmentResponse.setCloudPlatform(AWS.name());
+        detailedEnvironmentResponse.setCreator("crn:cdp:iam:us-west-1:hortonworks:user:test@test.com");
+
+        when(entitlementService.isDataLakeShapesWithoutHBaseAndHDFSEnabled(any())).thenReturn(false);
+
+        BadRequestException ex = assertThrows(BadRequestException.class, () ->
+                underTest.validateShape(shape, "7.3.3", detailedEnvironmentResponse));
+
+        assertEquals(String.format("Your account is not entitled to provision SDX with '%s' shape. " +
+                "Contact Cloudera support to enable CDP_MICRO_DUTY_SDX entitlement for the account.", shape), ex.getMessage());
+    }
+
+    @ParameterizedTest(name = "with shape {0}")
+    @EnumSource(value = SdxClusterShape.class, names = {"LIGHT_DUTY_WITHOUT_HBASE", "ENTERPRISE_WITHOUT_HBASE"})
+    void testValidateShapesWithoutHBaseWhenEntitled(SdxClusterShape shape) {
+        DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
+        detailedEnvironmentResponse.setCloudPlatform(AWS.name());
+        detailedEnvironmentResponse.setCreator("crn:cdp:iam:us-west-1:hortonworks:user:test@test.com");
+
+        when(entitlementService.isDataLakeShapesWithoutHBaseAndHDFSEnabled(any())).thenReturn(true);
+
+        assertThrows(BadRequestException.class, () -> underTest.validateShape(shape, "7.2.17", detailedEnvironmentResponse));
+        assertThrows(BadRequestException.class, () -> underTest.validateShape(shape, "7.3.0", detailedEnvironmentResponse));
+        assertDoesNotThrow(() -> underTest.validateShape(shape, "7.3.2", detailedEnvironmentResponse));
+        assertDoesNotThrow(() -> underTest.validateShape(shape, "7.3.3", detailedEnvironmentResponse));
     }
 }

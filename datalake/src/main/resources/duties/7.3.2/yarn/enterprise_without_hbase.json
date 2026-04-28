@@ -1,0 +1,45 @@
+{
+  "cluster": {
+    "blueprintName": "7.3.2 - Enterprise SDX template with Atlas, HMS, Ranger and their dependent services. Atlas with Postgres backend for Janus Graph",
+    "validateBlueprint": false
+  },
+  "customDomain": {
+    "domainName": "cloudera.site",
+    "hostgroupNameAsHostname": true
+  },
+  "instanceGroups": [
+    {
+      "name": "core",
+      "template": {
+        "yarn": {
+          "cpus": 4,
+          "memory": 16384
+        }
+      },
+      "nodeCount": 3,
+      "type": "GATEWAY"
+    },
+    {
+      "name": "auxiliary",
+      "template": {
+        "yarn": {
+          "cpus": 4,
+          "memory": 16384
+        }
+      },
+      "nodeCount": 1,
+      "type": "CORE"
+    },
+    {
+      "name": "idbroker",
+      "template": {
+        "yarn": {
+          "cpus": 4,
+          "memory": 16384
+        }
+      },
+      "nodeCount": 2,
+      "type": "CORE"
+    }
+  ]
+}

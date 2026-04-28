@@ -568,8 +568,9 @@ cb:
           7.3.2 - Edge Flow Management Light Duty=cdp-edge-flow-management-small;
           7.3.2 - Lakehouse Optimizer=cdp-lakehouse-optimizer;
           7.3.2 - Iceberg Replication Service=cdp-iceberg;
-          7.3.2 - Data Visualization=cdp-dataviz
-
+          7.3.2 - Data Visualization=cdp-dataviz;
+          7.3.2 - SDX light duty template with Atlas, HMS, Ranger and their dependent services, but no HDFS and HBASE=cdp-sdx-without-hdfs-hbase;
+          7.3.2 - Enterprise SDX template with Atlas, HMS, Ranger and their dependent services. Atlas with Postgres backend for Janus Graph=cdp-sdx-enterprise-without-hdfs-hbase;
   clustertemplate.defaults:
   template.defaults: minviable-gcp,minviable-azure-managed-disks,minviable-aws
 

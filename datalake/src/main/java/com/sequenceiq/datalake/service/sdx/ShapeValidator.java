@@ -4,8 +4,10 @@ import static com.sequenceiq.datalake.service.sdx.SdxVersionRuleEnforcer.ENTERPR
 import static com.sequenceiq.datalake.service.sdx.SdxVersionRuleEnforcer.MEDIUM_DUTY_MAXIMUM_VERSION;
 import static com.sequenceiq.datalake.service.sdx.SdxVersionRuleEnforcer.MEDIUM_DUTY_REQUIRED_VERSION;
 import static com.sequenceiq.datalake.service.sdx.SdxVersionRuleEnforcer.MICRO_DUTY_REQUIRED_VERSION;
+import static com.sequenceiq.datalake.service.sdx.SdxVersionRuleEnforcer.SHAPES_WITHOUT_HBASE_REQUIRED_VERSION;
 
 import java.util.Comparator;
+import java.util.Set;
 
 import jakarta.inject.Inject;
 
@@ -29,6 +31,9 @@ public class ShapeValidator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ShapeValidator.class);
 
+    private static final Set<SdxClusterShape> SHAPES_WITHOUT_HBASE_AND_HDFS = Set.of(SdxClusterShape.LIGHT_DUTY_WITHOUT_HBASE,
+            SdxClusterShape.ENTERPRISE_WITHOUT_HBASE);
+
     @Inject
     private EntitlementService entitlementService;
 
@@ -40,6 +45,8 @@ public class ShapeValidator {
             validateMediumDutyShape(runtime, validationBuilder, environment.getAccountId());
         } else if (SdxClusterShape.ENTERPRISE.equals(shape)) {
             validateEnterpriseShape(runtime, validationBuilder);
+        } else if (SHAPES_WITHOUT_HBASE_AND_HDFS.contains(shape)) {
+            validateShapesWithoutHBaseAndHDFS(runtime, validationBuilder, shape, environment.getAccountId());
         }
         ValidationResult validationResult = validationBuilder.build();
         if (validationResult.hasError()) {
@@ -49,31 +56,49 @@ public class ShapeValidator {
 
     private void validateMicroDutyShape(String runtime, DetailedEnvironmentResponse environment, ValidationResultBuilder validationBuilder) {
         if (!entitlementService.microDutySdxEnabled(Crn.safeFromString(environment.getCreator()).getAccountId())) {
-            validationBuilder.error(String.format("Provisioning a micro duty data lake cluster is not enabled for %s. " +
-                    "Contact Cloudera support to enable CDP_MICRO_DUTY_SDX entitlement for the account.", environment.getCloudPlatform()));
+            String message = String.format("Provisioning a micro duty data lake cluster is not enabled for %s. " +
+                    "Contact Cloudera support to enable CDP_MICRO_DUTY_SDX entitlement for the account.", environment.getCloudPlatform());
+            validationBuilder.error(message);
         }
         if (!isShapeVersionSupportedByMinimumRuntimeVersion(runtime, MICRO_DUTY_REQUIRED_VERSION)) {
-            validationBuilder.error("Provisioning a Micro Duty SDX shape is only valid for CM version greater than or equal to "
-                    + MICRO_DUTY_REQUIRED_VERSION + " and not " + runtime);
+            String message = String.format("Provisioning a Micro Duty SDX shape is only valid for runtime version greater than or equal to %s and not %s",
+                    MICRO_DUTY_REQUIRED_VERSION, runtime);
+            validationBuilder.error(message);
         }
     }
 
     private void validateMediumDutyShape(String runtime, ValidationResultBuilder validationBuilder, String accountId) {
         if (!isShapeVersionSupportedByMinimumRuntimeVersion(runtime, MEDIUM_DUTY_REQUIRED_VERSION)) {
-            validationBuilder.error("Provisioning a Medium Duty SDX shape is only valid for CM version greater than or equal to "
-                    + MEDIUM_DUTY_REQUIRED_VERSION + " and not " + runtime);
+            String message = String.format("Provisioning a Medium Duty SDX shape is only valid for runtime version greater than or equal to %s and not %s",
+                    MEDIUM_DUTY_REQUIRED_VERSION, runtime);
+            validationBuilder.error(message);
         }
         if (!isShapeVersionSupportedByMaximumRuntimeVersion(runtime, MEDIUM_DUTY_MAXIMUM_VERSION)
                 && !entitlementService.isSdxRuntimeUpgradeEnabledOnMediumDuty(accountId)) {
-            validationBuilder.error("Provisioning a Medium Duty SDX shape is only valid for 7.2.17 and below. If you want to provision a " +
-                    runtime + " SDX, Please use the ENTERPRISE shape!");
+            String message = String.format("Provisioning a Medium Duty SDX shape is only valid for 7.2.17 and below. " +
+                    "If you want to provision a %s SDX, Please use the ENTERPRISE shape!", runtime);
+            validationBuilder.error(message);
         }
     }
 
     private void validateEnterpriseShape(String runtime, ValidationResultBuilder validationBuilder) {
         if (!isShapeVersionSupportedByMinimumRuntimeVersion(runtime, ENTERPRISE_DATALAKE_REQUIRED_VERSION)) {
-            validationBuilder.error("Provisioning an Enterprise SDX shape is only valid for CM version greater than or equal to "
-                    + ENTERPRISE_DATALAKE_REQUIRED_VERSION + " and not " + runtime);
+            String message = String.format("Provisioning an Enterprise SDX shape is only valid for runtime version greater than or equal to %s and not %s",
+                    ENTERPRISE_DATALAKE_REQUIRED_VERSION, runtime);
+            validationBuilder.error(message);
+        }
+    }
+
+    private void validateShapesWithoutHBaseAndHDFS(String runtime, ValidationResultBuilder validationBuilder, SdxClusterShape shape, String accountId) {
+        if (!isShapeVersionSupportedByMinimumRuntimeVersion(runtime, SHAPES_WITHOUT_HBASE_REQUIRED_VERSION)) {
+            String message = String.format("Provisioning an %s SDX shape is only valid for runtime version greater than or equal to %s and not %s",
+                    shape.name(), SHAPES_WITHOUT_HBASE_REQUIRED_VERSION, runtime);
+            validationBuilder.error(message);
+        }
+        if (!entitlementService.isDataLakeShapesWithoutHBaseAndHDFSEnabled(accountId)) {
+            String message = String.format("Your account is not entitled to provision SDX with '%s' shape. " +
+                    "Contact Cloudera support to enable CDP_MICRO_DUTY_SDX entitlement for the account.", shape.name());
+            validationBuilder.error(message);
         }
     }
 

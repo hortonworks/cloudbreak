@@ -52,6 +52,7 @@ auth:
       backup.compression.enable: false
       upgrade.recovery.enabled: true
       knoxgateway.db.dr.enabled: true
+      shapes.withouthbase.enabled: true
     differentdatahubversionthandatalake.enabled: true
     datahub:
       instancetypes.enable: false
