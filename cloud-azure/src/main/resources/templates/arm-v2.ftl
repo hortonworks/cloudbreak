@@ -423,7 +423,7 @@
                                         "id": "${instance.diskEncryptionSetId}"
                                     },
                                     </#if>
-                                    "storageAccountType": "${instance.attachedDiskStorageType}"
+                                    "storageAccountType": "${instance.rootDiskStorageType}"
                                },
                                "name" : "[concat(parameters('vmNamePrefix'),'-osDisk', '${instance.instanceId}')]",
                                "osType" : "linux",

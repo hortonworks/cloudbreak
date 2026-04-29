@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import com.sequenceiq.cloudbreak.cloud.azure.AzurePlatformParameters;
@@ -12,6 +14,7 @@ import com.sequenceiq.cloudbreak.cloud.azure.subnetstrategy.AzureSubnetStrategy;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
+import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudAdlsGen2View;
 
 public class AzureStackView {
@@ -49,15 +52,18 @@ public class AzureStackView {
                 for (CloudInstance instance : group.getInstances()) {
                     InstanceTemplate template = instance.getTemplate();
                     String attachedDiskStorageName = armStorageView.getAttachedDiskStorageName(template);
-                    String attachedDiskStorageType = group.getRootVolumeType() != null ? group.getRootVolumeType() :
-                            template.getVolumes().isEmpty() ? azurePlatformParameters.defaultDiskType().value()
-                            : template.getVolumes().getFirst().getType();
+                    String rootDiskStorageType = Optional.ofNullable(group.getRootVolumeType())
+                            .orElseGet(() -> CollectionUtils.emptyIfNull(template.getVolumes()).stream()
+                                    .findFirst()
+                                    .map(Volume::getType)
+                                    .orElseGet(() -> azurePlatformParameters.defaultDiskType().value()));
+
                     AzureInstanceView azureInstance = AzureInstanceView.builder(instance)
                             .withStackName(stackName)
                             .withStackNamePrefixLength(stackNamePrefixLength)
                             .withType(group.getType())
                             .withAttachedDiskStorage(attachedDiskStorageName)
-                            .withAttachedDiskStorageType(attachedDiskStorageType)
+                            .withRootDiskStorageType(rootDiskStorageType)
                             .withGroupName(group.getName())
                             .withAvailabilitySetName(instanceGroupView.getAvailabilitySetName())
                             .withManagedDisk(true)

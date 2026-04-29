@@ -26,7 +26,7 @@ class AzureInstanceViewTest {
 
     private static final String ATTACHED_DISK_STORAGE = "attachedDiskStorage";
 
-    private static final String ATTACHED_DISK_STORAGE_TYPE = "attachedDiskStorageType";
+    private static final String ROOT_DISK_STORAGE_TYPE = "rootDiskStorageType";
 
     private static final String GROUP_NAME = "groupName";
 
@@ -70,7 +70,7 @@ class AzureInstanceViewTest {
                 .withStackNamePrefixLength(STACK_NAME_PREFIX_LENGTH)
                 .withType(TYPE)
                 .withAttachedDiskStorage(ATTACHED_DISK_STORAGE)
-                .withAttachedDiskStorageType(ATTACHED_DISK_STORAGE_TYPE)
+                .withRootDiskStorageType(ROOT_DISK_STORAGE_TYPE)
                 .withGroupName(GROUP_NAME)
                 .withStackName(STACK_NAME)
                 .withAvailabilitySetName(AVAILABILITY_SET_NAME)
@@ -85,7 +85,8 @@ class AzureInstanceViewTest {
         assertThat(ReflectionTestUtils.getField(underTest, "stackNamePrefixLength")).isEqualTo(STACK_NAME_PREFIX_LENGTH);
         assertThat(underTest.getType()).isSameAs(TYPE);
         assertThat(underTest.getAttachedDiskStorageName()).isEqualTo(ATTACHED_DISK_STORAGE);
-        assertThat(underTest.getAttachedDiskStorageType()).isEqualTo(ATTACHED_DISK_STORAGE_TYPE);
+        assertThat(underTest.getAttachedDiskStorageType()).isEqualTo(ROOT_DISK_STORAGE_TYPE);
+        assertThat(underTest.getRootDiskStorageType()).isEqualTo(ROOT_DISK_STORAGE_TYPE);
         assertThat(underTest.getGroupName()).isEqualTo(GROUP_NAME);
         assertThat(ReflectionTestUtils.getField(underTest, "stackName")).isEqualTo(STACK_NAME);
         assertThat(underTest.getAvailabilitySetName()).isEqualTo(AVAILABILITY_SET_NAME);

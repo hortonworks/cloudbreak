@@ -30,7 +30,7 @@ public final class AzureInstanceView {
 
     private final String attachedDiskStorage;
 
-    private final String attachedDiskStorageType;
+    private final String rootDiskStorageType;
 
     private final String groupName;
 
@@ -54,7 +54,7 @@ public final class AzureInstanceView {
         stackNamePrefixLength = builder.stackNamePrefixLength;
         type = builder.type;
         attachedDiskStorage = builder.attachedDiskStorage;
-        attachedDiskStorageType = builder.attachedDiskStorageType;
+        rootDiskStorageType = builder.rootDiskStorageType;
         groupName = builder.groupName;
         stackName = builder.stackName;
         availabilitySetName = builder.availabilitySetName;
@@ -150,13 +150,15 @@ public final class AzureInstanceView {
         return attachedDiskStorage;
     }
 
-    public String getAttachedDiskStorageType() {
-        return attachedDiskStorageType;
-    }
-
     /**
      * Used in freemarker template.
+     * @deprecated This getter is kept only for FreeMarker template backward compatibility.
      */
+    @Deprecated
+    public String getAttachedDiskStorageType() {
+        return rootDiskStorageType;
+    }
+
     public String getAttachedDiskStorageUrl() {
         return String.format(AzureStorage.STORAGE_BLOB_PATTERN, attachedDiskStorage);
     }
@@ -183,6 +185,10 @@ public final class AzureInstanceView {
 
     public int getRootVolumeSize() {
         return rootVolumeSize;
+    }
+
+    public String getRootDiskStorageType() {
+        return rootDiskStorageType;
     }
 
     public String getCustomImageId() {
@@ -232,7 +238,7 @@ public final class AzureInstanceView {
 
         private String attachedDiskStorage;
 
-        private String attachedDiskStorageType;
+        private String rootDiskStorageType;
 
         private String groupName;
 
@@ -277,8 +283,8 @@ public final class AzureInstanceView {
             return this;
         }
 
-        public Builder withAttachedDiskStorageType(String attachedDiskStorageType) {
-            this.attachedDiskStorageType = attachedDiskStorageType;
+        public Builder withRootDiskStorageType(String rootDiskStorageType) {
+            this.rootDiskStorageType = rootDiskStorageType;
             return this;
         }
 

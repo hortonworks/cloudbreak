@@ -324,7 +324,7 @@
                                        "id": "${instance.diskEncryptionSetId}"
                                    },
                                    </#if>
-                                   "storageAccountType": "${instance.attachedDiskStorageType}"
+                                   "storageAccountType": "${instance.rootDiskStorageType}"
                                },
                                </#if>
                                "name" : "[concat(parameters('vmNamePrefix'),'-osDisk', '${instance.instanceId}')]",
