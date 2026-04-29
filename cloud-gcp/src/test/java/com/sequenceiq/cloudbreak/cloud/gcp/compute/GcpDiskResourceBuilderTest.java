@@ -3,9 +3,9 @@ package com.sequenceiq.cloudbreak.cloud.gcp.compute;
 import static java.util.Collections.emptyList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -38,6 +38,7 @@ import com.google.api.services.compute.model.Operation;
 import com.google.common.collect.ImmutableMap;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.gcp.GcpPlatformParameters;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.service.CustomGcpDiskEncryptionService;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpImageUtil;
@@ -101,6 +102,9 @@ class GcpDiskResourceBuilderTest {
 
     @Mock
     private GcpLabelUtil gcpLabelUtil;
+
+    @Mock
+    private GcpPlatformParameters gcpPlatformParameters;
 
     private GcpContext context;
 
@@ -172,7 +176,7 @@ class GcpDiskResourceBuilderTest {
         instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
         instanceTemplate = new InstanceTemplate(flavor, name, privateId, volumes, InstanceStatus.CREATE_REQUESTED, params,
                 0L, "cb-centos66-amb200-2015-05-25", TemporaryStorage.ATTACHED_VOLUMES, 0L);
-        group = createGroup(50);
+        group = createGroup(50, null);
 
         buildableResource = List.of(CloudResource.builder()
                 .withType(ResourceType.GCP_DISK)
@@ -224,29 +228,36 @@ class GcpDiskResourceBuilderTest {
 
         assertNotNull(diskCaptor.getValue());
         assertEquals(encryptionKey, diskCaptor.getValue().getDiskEncryptionKey());
+        assertTrue(diskCaptor.getValue().getType().endsWith("pd-ssd"));
     }
 
     @Test
     void testBuildWithVeryLargeRootVolumeSize() throws Exception {
         int rootVolumeSize = Integer.MAX_VALUE;
-        Group group = createGroup(rootVolumeSize);
+        Group group = createGroup(rootVolumeSize, "pd-standard");
         List<CloudResource> build = underTest.build(context, cloudInstance, privateId, auth, group, buildableResource, cloudStack);
 
         assertNotNull(build);
-        verify(disks).insert(anyString(), anyString(), argThat(argument -> argument.getSizeGb().equals((long) rootVolumeSize)));
+        ArgumentCaptor<Disk> diskCaptor = ArgumentCaptor.forClass(Disk.class);
+        verify(disks).insert(anyString(), anyString(), diskCaptor.capture());
         verify(insert, times(1)).execute();
+        assertEquals(rootVolumeSize, diskCaptor.getValue().getSizeGb());
+        assertTrue(diskCaptor.getValue().getType().endsWith("pd-standard"));
     }
 
     @Test
     void testBuildWithVerySmallRootVolumeSize() throws Exception {
         int rootVolumeSize = Integer.MIN_VALUE;
-        Group group = createGroup(rootVolumeSize);
+        Group group = createGroup(rootVolumeSize, "pd-extreme");
 
         List<CloudResource> build = underTest.build(context, cloudInstance, privateId, auth, group, buildableResource, cloudStack);
 
         assertNotNull(build);
-        verify(disks).insert(anyString(), anyString(), argThat(argument -> argument.getSizeGb().equals((long) rootVolumeSize)));
+        ArgumentCaptor<Disk> diskCaptor = ArgumentCaptor.forClass(Disk.class);
+        verify(disks).insert(anyString(), anyString(), diskCaptor.capture());
         verify(insert, times(1)).execute();
+        assertEquals(rootVolumeSize, diskCaptor.getValue().getSizeGb());
+        assertTrue(diskCaptor.getValue().getType().endsWith("pd-extreme"));
     }
 
     @Test
@@ -264,11 +275,11 @@ class GcpDiskResourceBuilderTest {
         verify(disks).delete(PROJECT_ID, STACK_AZ, DISK_NAME);
     }
 
-    private Group createGroup(int rootVolumeSize) {
+    private Group createGroup(int rootVolumeSize, String diskType) {
         return Group.builder()
                 .withInstances(Collections.singletonList(createDefaultCloudInstance()))
-                .withRootVolumeType("pd-ssd")
                 .withRootVolumeSize(rootVolumeSize)
+                .withRootVolumeType(diskType)
                 .build();
     }
 
