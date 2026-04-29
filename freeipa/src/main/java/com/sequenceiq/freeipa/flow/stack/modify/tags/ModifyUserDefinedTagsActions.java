@@ -74,6 +74,7 @@ public class ModifyUserDefinedTagsActions {
                 LOGGER.debug("Update user defined tags for FreeIPA {}", payload);
                 stackUpdater.updateStackStatus(context.getStack(), DetailedStackStatus.UPDATE_IN_PROGRESS,
                         "Starting to update user defined tags on FreeIPA stack: " + context.getStack().getName());
+                setOperationId(variables, payload.getOperationId());
                 ModifyUserDefinedTagsStackHandlerEvent modifyUserDefinedTagsStackEvent =
                         new ModifyUserDefinedTagsStackHandlerEvent(payload.getResourceId(), payload.getOperationId(), payload.getUserDefinedTags());
                 sendEvent(context, modifyUserDefinedTagsStackEvent);

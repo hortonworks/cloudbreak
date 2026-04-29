@@ -58,6 +58,8 @@ import com.azure.resourcemanager.compute.fluent.models.DiskInner;
 import com.azure.resourcemanager.compute.fluent.models.ResourceSkuInner;
 import com.azure.resourcemanager.compute.fluent.models.VirtualMachineInner;
 import com.azure.resourcemanager.compute.models.ApiErrorException;
+import com.azure.resourcemanager.compute.models.AvailabilitySet;
+import com.azure.resourcemanager.compute.models.AvailabilitySets;
 import com.azure.resourcemanager.compute.models.CachingTypes;
 import com.azure.resourcemanager.compute.models.Disk;
 import com.azure.resourcemanager.compute.models.Disk.DefinitionStages.Blank;
@@ -88,6 +90,12 @@ import com.azure.resourcemanager.network.fluent.models.FrontendIpConfigurationIn
 import com.azure.resourcemanager.network.models.LoadBalancer;
 import com.azure.resourcemanager.network.models.LoadBalancerFrontend;
 import com.azure.resourcemanager.network.models.LoadBalancers;
+import com.azure.resourcemanager.network.models.NetworkInterface;
+import com.azure.resourcemanager.network.models.NetworkInterfaces;
+import com.azure.resourcemanager.network.models.NetworkSecurityGroup;
+import com.azure.resourcemanager.network.models.NetworkSecurityGroups;
+import com.azure.resourcemanager.network.models.PublicIpAddress;
+import com.azure.resourcemanager.network.models.PublicIpAddresses;
 import com.azure.resourcemanager.postgresql.PostgreSqlManager;
 import com.azure.resourcemanager.resources.ResourceManager;
 import com.azure.resourcemanager.resources.fluent.DeploymentsClient;
@@ -101,6 +109,7 @@ import com.azure.resourcemanager.resources.fluentcore.model.HasInnerModel;
 import com.azure.resourcemanager.resources.fluentcore.model.implementation.IndexableRefreshableWrapperImpl;
 import com.azure.resourcemanager.resources.implementation.GenericResourcesImpl;
 import com.azure.resourcemanager.resources.models.ResourceGroup;
+import com.azure.resourcemanager.resources.models.ResourceGroups;
 import com.azure.resourcemanager.storage.models.Kind;
 import com.azure.resourcemanager.storage.models.StorageAccount;
 import com.azure.resourcemanager.storage.models.StorageAccounts;
@@ -817,5 +826,173 @@ class AzureClientTest {
 
         assertTrue(result.isPresent());
         assertEquals(storageAccount2, result.get());
+    }
+
+    @Test
+    void testUpdateVirtualMachineTags() {
+        String resourceId = "resourceId";
+        Map<String, String> userDefinedTags = Map.of("key2", "newValue2");
+
+        VirtualMachines virtualMachines = mock(VirtualMachines.class);
+        VirtualMachine virtualMachine = mock(VirtualMachine.class);
+        VirtualMachine.Update update = mock(VirtualMachine.Update.class);
+
+        when(azureResourceManager.virtualMachines()).thenReturn(virtualMachines);
+        when(virtualMachines.getById(resourceId)).thenReturn(virtualMachine);
+        when(virtualMachine.update()).thenReturn(update);
+        when(update.withTags(any())).thenReturn(update);
+
+        underTest.updateVirtualMachineTags(resourceId, userDefinedTags);
+
+        verify(virtualMachine).update();
+        verify(update).withTags(userDefinedTags);
+        verify(update).apply();
+    }
+
+    @Test
+    void testUpdateDiskTags() {
+        String resourceId = "resourceId";
+        Map<String, String> userDefinedTags = Map.of("key2", "newValue2");
+
+        Disks disks = mock(Disks.class);
+        Disk disk = mock(Disk.class);
+        Disk.Update update = mock(Disk.Update.class);
+
+        when(azureResourceManager.disks()).thenReturn(disks);
+        when(disks.getById(resourceId)).thenReturn(disk);
+        when(disk.update()).thenReturn(update);
+        when(update.withTags(any())).thenReturn(update);
+
+        underTest.updateDiskTags(resourceId, userDefinedTags);
+
+        verify(disk).update();
+        verify(update).withTags(userDefinedTags);
+        verify(update).apply();
+    }
+
+    @Test
+    void testUpdateAvailabilitySetTags() {
+        String resourceId = "resourceId";
+        Map<String, String> userDefinedTags = Map.of("key2", "newValue2");
+
+        AvailabilitySets availabilitySets = mock(AvailabilitySets.class);
+        AvailabilitySet availabilitySet = mock(AvailabilitySet.class);
+        AvailabilitySet.Update update = mock(AvailabilitySet.Update.class);
+
+        when(azureResourceManager.availabilitySets()).thenReturn(availabilitySets);
+        when(availabilitySets.getById(resourceId)).thenReturn(availabilitySet);
+        when(availabilitySet.update()).thenReturn(update);
+        when(update.withTags(any())).thenReturn(update);
+
+        underTest.updateAvailabilitySetTags(resourceId, userDefinedTags);
+
+        verify(availabilitySet).update();
+        verify(update).withTags(userDefinedTags);
+        verify(update).apply();
+    }
+
+    @Test
+    void testUpdateNetworkSecurityGroupTags() {
+        String resourceId = "resourceId";
+        Map<String, String> userDefinedTags = Map.of("key2", "newValue2");
+
+        NetworkSecurityGroups networkSecurityGroups = mock(NetworkSecurityGroups.class);
+        NetworkSecurityGroup networkSecurityGroup = mock(NetworkSecurityGroup.class);
+        NetworkSecurityGroup.Update update = mock(NetworkSecurityGroup.Update.class);
+
+        when(azureResourceManager.networkSecurityGroups()).thenReturn(networkSecurityGroups);
+        when(networkSecurityGroups.getById(resourceId)).thenReturn(networkSecurityGroup);
+        when(networkSecurityGroup.update()).thenReturn(update);
+        when(update.withTags(any())).thenReturn(update);
+
+        underTest.updateNetworkSecurityGroupTags(resourceId, userDefinedTags);
+
+        verify(networkSecurityGroup).update();
+        verify(update).withTags(userDefinedTags);
+        verify(update).apply();
+    }
+
+    @Test
+    void testUpdatePublicIpTags() {
+        String resourceId = "resourceId";
+        Map<String, String> userDefinedTags = Map.of("key2", "newValue2");
+
+        PublicIpAddresses publicIpAddresses = mock(PublicIpAddresses.class);
+        PublicIpAddress publicIpAddress = mock(PublicIpAddress.class);
+        PublicIpAddress.Update update = mock(PublicIpAddress.Update.class);
+
+        when(azureResourceManager.publicIpAddresses()).thenReturn(publicIpAddresses);
+        when(publicIpAddresses.getById(resourceId)).thenReturn(publicIpAddress);
+        when(publicIpAddress.update()).thenReturn(update);
+        when(update.withTags(any())).thenReturn(update);
+
+        underTest.updatePublicIpTags(resourceId, userDefinedTags);
+
+        verify(publicIpAddress).update();
+        verify(update).withTags(userDefinedTags);
+        verify(update).apply();
+    }
+
+    @Test
+    void testUpdateResourceGroupTags() {
+        String resourceName = "resourceName";
+        Map<String, String> userDefinedTags = Map.of("key2", "newValue2");
+
+        ResourceGroups resourceGroups = mock(ResourceGroups.class);
+        ResourceGroup resourceGroup = mock(ResourceGroup.class);
+        ResourceGroup.Update update = mock(ResourceGroup.Update.class);
+
+        when(azureResourceManager.resourceGroups()).thenReturn(resourceGroups);
+        when(resourceGroups.getByName(resourceName)).thenReturn(resourceGroup);
+        when(resourceGroup.update()).thenReturn(update);
+        when(update.withTags(any())).thenReturn(update);
+
+        underTest.updateResourceGroupTags(resourceName, userDefinedTags);
+
+        verify(resourceGroup).update();
+        verify(update).withTags(userDefinedTags);
+        verify(update).apply();
+    }
+
+    @Test
+    void testUpdateNetworkInterfaceTags() {
+        String resourceId = "resourceId";
+        Map<String, String> userDefinedTags = Map.of("key2", "newValue2");
+
+        NetworkInterfaces networkInterfaces = mock(NetworkInterfaces.class);
+        NetworkInterface networkInterface = mock(NetworkInterface.class);
+        NetworkInterface.Update update = mock(NetworkInterface.Update.class);
+
+        when(azureResourceManager.networkInterfaces()).thenReturn(networkInterfaces);
+        when(networkInterfaces.getById(resourceId)).thenReturn(networkInterface);
+        when(networkInterface.update()).thenReturn(update);
+        when(update.withTags(any())).thenReturn(update);
+
+        underTest.updateNetworkInterfaceTags(resourceId, userDefinedTags);
+
+        verify(networkInterface).update();
+        verify(update).withTags(userDefinedTags);
+        verify(update).apply();
+    }
+
+    @Test
+    void testUpdateLoadBalancerTags() {
+        String resourceId = "resourceId";
+        Map<String, String> userDefinedTags = Map.of("key2", "newValue2");
+
+        LoadBalancers loadBalancers = mock(LoadBalancers.class);
+        LoadBalancer loadBalancer = mock(LoadBalancer.class);
+        LoadBalancer.Update update = mock(LoadBalancer.Update.class);
+
+        when(azureResourceManager.loadBalancers()).thenReturn(loadBalancers);
+        when(loadBalancers.getById(resourceId)).thenReturn(loadBalancer);
+        when(loadBalancer.update()).thenReturn(update);
+        when(update.withTags(any())).thenReturn(update);
+
+        underTest.updateLoadBalancerTags(resourceId, userDefinedTags);
+
+        verify(loadBalancer).update();
+        verify(update).withTags(userDefinedTags);
+        verify(update).apply();
     }
 }

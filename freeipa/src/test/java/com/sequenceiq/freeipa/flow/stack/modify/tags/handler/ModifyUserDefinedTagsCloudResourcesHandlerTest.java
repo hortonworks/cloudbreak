@@ -150,7 +150,6 @@ class ModifyUserDefinedTagsCloudResourcesHandlerTest {
         CloudCredential cloudCredential = mock(CloudCredential.class);
         AuthenticatedContext authenticatedContext = mock(AuthenticatedContext.class);
         Authenticator authenticator = mock(Authenticator.class);
-        AwsNativeResourceConnector awsNativeResourceConnector = mock(AwsNativeResourceConnector.class);
 
         when(stackService.getStackById(STACK_ID)).thenReturn(stack);
         when(resourceService.getAllCloudResource(stack.getId())).thenReturn(List.of(cloudResource1, cloudResource2));

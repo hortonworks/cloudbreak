@@ -156,21 +156,13 @@ public class AwsNativeResourceConnector extends AbstractResourceConnector {
     }
 
     @Override
-    public void updateTags(AuthenticatedContext authenticatedContext, List<CloudResource> cloudResources, Map<String, String> userDefinedTags) {
-        if (userDefinedTags == null || userDefinedTags.isEmpty()) {
-            LOGGER.debug("Skip updating user defined tags on cloud resources because user defined tags are empty.");
-            return;
-        }
-        for (CloudResource cloudResource : cloudResources) {
-            LOGGER.debug("Updating tags for cloud resource: {} with type: {} with tags: {}", cloudResource.getName(), cloudResource.getType(),
-                    userDefinedTags);
-            try {
-                awsNativeResourceTagUpdaterService.updateTags(authenticatedContext, cloudResource, userDefinedTags);
-                LOGGER.debug("Successfully updated tags for cloud resource: {} with type: {}", cloudResource.getName(), cloudResource.getType());
-            } catch (Exception e) {
-                throw new CloudbreakRuntimeException(String.format("Failed to update tags for resource: %s with type: %s", cloudResource.getName(),
-                        cloudResource.getType()), e);
-            }
+    public void updateTag(AuthenticatedContext authenticatedContext, CloudResource cloudResource, Map<String, String> userDefinedTags) {
+        try {
+            awsNativeResourceTagUpdaterService.updateTags(authenticatedContext, cloudResource, userDefinedTags);
+            LOGGER.debug("Successfully updated tags for cloud resource: {} with type: {}", cloudResource.getName(), cloudResource.getType());
+        } catch (Exception e) {
+            throw new CloudbreakRuntimeException(String.format("Failed to update tags for resource: %s with type: %s", cloudResource.getName(),
+                    cloudResource.getType()), e);
         }
     }
 

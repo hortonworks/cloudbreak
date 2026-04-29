@@ -1258,4 +1258,116 @@ public class AzureClient {
                 .create());
 
     }
+
+    public void updateVirtualMachineTags(String resourceId, Map<String, String> tags) {
+        handleException(() -> {
+            azure.virtualMachines()
+                    .getById(resourceId)
+                    .update()
+                    .withTags(tags)
+                    .apply();
+        });
+    }
+
+    public Map<String, String> getVirtualMachineTags(String resourceId) {
+        return handleException(() -> azure.virtualMachines().getById(resourceId).tags());
+    }
+
+    public void updateDiskTags(String resourceId, Map<String, String> tags) {
+        handleException(() -> {
+            azure.disks()
+                    .getById(resourceId)
+                    .update()
+                    .withTags(tags)
+                    .apply();
+        });
+    }
+
+    public Map<String, String> getDiskTags(String resourceId) {
+        return handleException(() -> azure.disks().getById(resourceId).tags());
+    }
+
+    public void updateAvailabilitySetTags(String resourceId, Map<String, String> tags) {
+        handleException(() -> {
+            azure.availabilitySets()
+                    .getById(resourceId)
+                    .update()
+                    .withTags(tags)
+                    .apply();
+        });
+    }
+
+    public Map<String, String> getAvailabilitySetTags(String resourceId) {
+        return handleException(() -> azure.availabilitySets().getById(resourceId).tags());
+    }
+
+    public void updateNetworkSecurityGroupTags(String resourceId, Map<String, String> tags) {
+        handleException(() -> {
+            azure.networkSecurityGroups()
+                    .getById(resourceId)
+                    .update()
+                    .withTags(tags)
+                    .apply();
+        });
+    }
+
+    public Map<String, String> getNetworkSecurityGroupTags(String resourceId) {
+        return handleException(() -> azure.networkSecurityGroups().getById(resourceId).tags());
+    }
+
+    public void updatePublicIpTags(String resourceId, Map<String, String> tags) {
+        handleException(() -> {
+            azure.publicIpAddresses()
+                    .getById(resourceId)
+                    .update()
+                    .withTags(tags)
+                    .apply();
+        });
+    }
+
+    public Map<String, String> getPublicIpTags(String resourceId) {
+        return handleException(() -> azure.publicIpAddresses().getById(resourceId).tags());
+    }
+
+    public void updateResourceGroupTags(String resourceName, Map<String, String> tags) {
+        handleException(() -> {
+            azure.resourceGroups()
+                    .getByName(resourceName)
+                    .update()
+                    .withTags(tags)
+                    .apply();
+        });
+    }
+
+    public Map<String, String> getResourceGroupTags(String resourceName) {
+        return handleException(() -> azure.resourceGroups().getByName(resourceName).tags());
+    }
+
+    public void updateNetworkInterfaceTags(String resourceId, Map<String, String> tags) {
+        handleException(() -> {
+            azure.networkInterfaces()
+                    .getById(resourceId)
+                    .update()
+                    .withTags(tags)
+                    .apply();
+        });
+    }
+
+    public Map<String, String> getNetworkInterfaceTags(String resourceId) {
+        return handleException(() -> azure.networkInterfaces().getById(resourceId).tags());
+    }
+
+    public void updateLoadBalancerTags(String resourceId, Map<String, String> tags) {
+        handleException(() -> {
+            azure.loadBalancers()
+                    .getById(resourceId)
+                    .update()
+                    .withTags(tags)
+                    .apply();
+        });
+    }
+
+    public Map<String, String> getLoadBalancerTags(String resourceId) {
+        return handleException(() -> azure.loadBalancers().getById(resourceId).tags());
+    }
 }
