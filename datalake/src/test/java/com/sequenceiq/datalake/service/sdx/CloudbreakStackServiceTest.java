@@ -15,6 +15,7 @@ import static org.mockito.Mockito.when;
 import java.util.Set;
 import java.util.function.Supplier;
 
+import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.WebApplicationException;
 
 import org.junit.jupiter.api.Test;
@@ -52,6 +53,8 @@ public class CloudbreakStackServiceTest {
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:1234:user:1";
 
     private static final String ERROR_MSG = "error";
+
+    private static final String VALIDATION_ERROR_MGS = "There are attached Data Hub clusters in incorrect state";
 
     @Mock
     private StackV4Endpoint stackV4Endpoint;
@@ -159,6 +162,18 @@ public class CloudbreakStackServiceTest {
                 .hasCauseInstanceOf(RuntimeException.class)
                 .hasRootCauseMessage(ERROR_MSG)
                 .hasMessage("Rds upgrade validation failed: " + ERROR_MSG);
+    }
+
+    @Test
+    void testCheckUpgradeRdsByClusterNameInternalThrowsValidationException() {
+        SdxCluster sdxCluster = setupSdxCluster();
+        TargetMajorVersion targetMajorVersion = TargetMajorVersion.VERSION_11;
+        doThrow(new BadRequestException(VALIDATION_ERROR_MGS)).when(stackV4Endpoint)
+                .checkUpgradeRdsByClusterNameInternal(WORKSPACE_ID, sdxCluster.getName(), targetMajorVersion, USER_CRN);
+
+        assertThatCode(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.checkUpgradeRdsByClusterNameInternal(sdxCluster, targetMajorVersion)))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessage(VALIDATION_ERROR_MGS);
     }
 
     @ValueSource(booleans = {true, false})
