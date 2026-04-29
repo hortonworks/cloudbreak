@@ -6,12 +6,15 @@ import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIP
 import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPFreeIPAStatus.Value.UNSET;
 import static com.sequenceiq.freeipa.flow.freeipa.trust.setup.FreeIpaTrustSetupState.FINAL_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.trust.setup.FreeIpaTrustSetupState.INIT_STATE;
+import static com.sequenceiq.freeipa.flow.freeipa.trust.setup.FreeIpaTrustSetupState.TRUST_SETUP_ADD_TRUST_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.trust.setup.FreeIpaTrustSetupState.TRUST_SETUP_CONFIGURE_DNS_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.trust.setup.FreeIpaTrustSetupState.TRUST_SETUP_FAILED_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.trust.setup.FreeIpaTrustSetupState.TRUST_SETUP_FINISHED_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.trust.setup.FreeIpaTrustSetupState.TRUST_SETUP_PREPARE_IPA_SERVER_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.trust.setup.FreeIpaTrustSetupState.TRUST_SETUP_UPDATE_PILLAR_DATA_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.trust.setup.FreeIpaTrustSetupState.TRUST_SETUP_VALIDATION_STATE;
+import static com.sequenceiq.freeipa.flow.freeipa.trust.setup.event.FreeIpaTrustSetupFlowEvent.TRUST_SETUP_ADD_TRUST_FAILED_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.trust.setup.event.FreeIpaTrustSetupFlowEvent.TRUST_SETUP_ADD_TRUST_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.trust.setup.event.FreeIpaTrustSetupFlowEvent.TRUST_SETUP_CONFIGURE_DNS_FAILED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.trust.setup.event.FreeIpaTrustSetupFlowEvent.TRUST_SETUP_CONFIGURE_DNS_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.trust.setup.event.FreeIpaTrustSetupFlowEvent.TRUST_SETUP_EVENT;
@@ -67,9 +70,14 @@ public class FreeIpaTrustSetupFlowConfig
                     .failureEvent(TRUST_SETUP_CONFIGURE_DNS_FAILED_EVENT)
 
                     .from(TRUST_SETUP_UPDATE_PILLAR_DATA_STATE)
-                    .to(TRUST_SETUP_FINISHED_STATE)
+                    .to(TRUST_SETUP_ADD_TRUST_STATE)
                     .event(TRUST_SETUP_UPDATE_PILLAR_DATA_FINISHED_EVENT)
                     .failureEvent(TRUST_SETUP_UPDATE_PILLAR_DATA_FAILED_EVENT)
+
+                    .from(TRUST_SETUP_ADD_TRUST_STATE)
+                    .to(TRUST_SETUP_FINISHED_STATE)
+                    .event(TRUST_SETUP_ADD_TRUST_FINISHED_EVENT)
+                    .failureEvent(TRUST_SETUP_ADD_TRUST_FAILED_EVENT)
 
                     .from(TRUST_SETUP_FINISHED_STATE)
                     .to(FINAL_STATE)

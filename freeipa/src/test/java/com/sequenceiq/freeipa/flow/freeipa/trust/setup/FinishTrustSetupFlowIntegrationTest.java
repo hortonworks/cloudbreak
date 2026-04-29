@@ -57,9 +57,11 @@ import com.sequenceiq.freeipa.flow.StackStatusFinalizer;
 import com.sequenceiq.freeipa.flow.freeipa.trust.setupfinish.action.FreeIpaTrustSetupFinishAction;
 import com.sequenceiq.freeipa.flow.freeipa.trust.setupfinish.action.FreeIpaTrustSetupFinishFailedAction;
 import com.sequenceiq.freeipa.flow.freeipa.trust.setupfinish.action.FreeIpaTrustSetupFinishSuccessAction;
+import com.sequenceiq.freeipa.flow.freeipa.trust.setupfinish.action.FreeIpaTrustSetupFinishValidateTrustAction;
 import com.sequenceiq.freeipa.flow.freeipa.trust.setupfinish.config.FreeIpaTrustSetupFinishFlowConfig;
 import com.sequenceiq.freeipa.flow.freeipa.trust.setupfinish.event.FreeIpaTrustSetupFinishEvent;
 import com.sequenceiq.freeipa.flow.freeipa.trust.setupfinish.handler.FreeIpaTrustSetupFinishAddTrustHandler;
+import com.sequenceiq.freeipa.flow.freeipa.trust.setupfinish.handler.FreeIpaTrustSetupFinishValidateTrustHandler;
 import com.sequenceiq.freeipa.service.CredentialService;
 import com.sequenceiq.freeipa.service.crossrealm.CrossRealmTrustService;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
@@ -184,26 +186,28 @@ class FinishTrustSetupFlowIntegrationTest {
         InOrder stackStatusVerify = inOrder(stackUpdater);
 
         stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, TRUST_SETUP_FINISH_IN_PROGRESS, "Add cross-realm trust to FreeIPA");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, TRUST_SETUP_FINISH_IN_PROGRESS, "Validating cross-realm trust");
         stackStatusVerify.verify(stackUpdater)
                 .updateStackStatus(stack, DetailedStackStatus.TRUST_SETUP_FINISH_SUCCESSFUL,
                         "Finish setting up cross-realm trust was successful");
 
         InOrder crossRealmStatusVerify = inOrder(crossRealmTrustService);
         crossRealmStatusVerify.verify(crossRealmTrustService).updateTrustStateByStackId(stack.getId(), TrustStatus.TRUST_SETUP_FINISH_IN_PROGRESS);
+        crossRealmStatusVerify.verify(crossRealmTrustService).updateTrustStateByStackId(stack.getId(), TrustStatus.TRUST_SETUP_FINISH_IN_PROGRESS);
         crossRealmStatusVerify.verify(crossRealmTrustService).updateTrustStateByStackId(stack.getId(), TrustStatus.TRUST_ACTIVE);
         verify(crossRealmTrustStatusSyncJobService).schedule(STACK_ID);
     }
 
     @Test
-    public void testAddTrustFails() throws FreeIpaClientException {
+    public void testAddTrustFails() throws Exception {
         when(crossRealmTrustService.getTrustProvider(STACK_ID)).thenReturn(activeDirectoryTrustService);
-        doThrow(new FreeIpaClientException("Cross-realm add trust failed")).when(activeDirectoryTrustService).addTrust(STACK_ID);
+        doThrow(new IllegalStateException("Cross-realm add bidirectional trust failed")).when(activeDirectoryTrustService).addTwoWayTrust(STACK_ID);
         testFlow();
         InOrder stackStatusVerify = inOrder(stackUpdater);
 
         stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, TRUST_SETUP_FINISH_IN_PROGRESS, "Add cross-realm trust to FreeIPA");
         stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, TRUST_SETUP_FINISH_FAILED,
-                "Failed to finish cross-realm trust FreeIPA: Cross-realm add trust failed");
+                "Failed to finish cross-realm trust FreeIPA: Cross-realm add bidirectional trust failed");
 
         InOrder crossRealmStatusVerify = inOrder(crossRealmTrustService);
         crossRealmStatusVerify.verify(crossRealmTrustService).updateTrustStateByStackId(stack.getId(), TrustStatus.TRUST_SETUP_FINISH_IN_PROGRESS);
@@ -247,10 +251,12 @@ class FinishTrustSetupFlowIntegrationTest {
             FreeIpaTrustSetupFinishFlowConfig.class,
             FlowIntegrationTestConfig.class,
             WebApplicationExceptionMessageExtractor.class,
-            FreeIpaTrustSetupFinishFailedAction.class,
             FreeIpaTrustSetupFinishAction.class,
+            FreeIpaTrustSetupFinishFailedAction.class,
+            FreeIpaTrustSetupFinishValidateTrustAction.class,
             FreeIpaTrustSetupFinishSuccessAction.class,
             FreeIpaTrustSetupFinishAddTrustHandler.class,
+            FreeIpaTrustSetupFinishValidateTrustHandler.class,
             CrossRealmTrustService.class,
             TaskResultConverter.class
     })

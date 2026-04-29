@@ -16,6 +16,7 @@ import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.type.KdcType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.TrustStatus;
 import com.sequenceiq.freeipa.entity.CrossRealmTrust;
+import com.sequenceiq.freeipa.entity.util.TrustRelationshipType;
 import com.sequenceiq.freeipa.repository.CrossRealmTrustRepository;
 import com.sequenceiq.freeipa.service.freeipa.trust.setup.TrustProvider;
 
@@ -50,6 +51,10 @@ public class CrossRealmTrustService {
 
     public void updateTrustStateByStackId(Long stackId, TrustStatus trustStatus) {
         crossRealmTrustRepository.updateTrustStatusByStackId(stackId, trustStatus);
+    }
+
+    public void updateTrustRelationshipTypeByStackId(Long stackId, TrustRelationshipType trustRelationshipType) {
+        crossRealmTrustRepository.updateTrustRelationshipTypeByStackId(stackId, trustRelationshipType);
     }
 
     public void updateOperationIdByStackId(Long stackId, String operationId) {

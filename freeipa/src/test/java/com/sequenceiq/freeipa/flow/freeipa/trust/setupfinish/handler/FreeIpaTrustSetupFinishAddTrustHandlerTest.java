@@ -51,8 +51,7 @@ class FreeIpaTrustSetupFinishAddTrustHandlerTest {
         Selectable result = handler.doAccept(handlerEvent);
 
         assertTrue(result instanceof FreeIpaTrustSetupFinishAddTrustSuccess);
-        verify(trustProvider).addTrust(STACK_ID);
-        verify(trustProvider).validateTrust(STACK_ID);
+        verify(trustProvider).addTwoWayTrust(STACK_ID);
     }
 
     @Test

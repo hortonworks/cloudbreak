@@ -73,8 +73,21 @@ public class ActiveDirectoryTrustService extends TrustProvider {
         CrossRealmTrust crossRealmTrust = getCrossRealmTrustService().getByStackId(stackId);
 
         FreeIpaClient client = getFreeIpaClientFactory().getFreeIpaClientForStack(stack);
+        Trust trust = client.addTrust(crossRealmTrust.getTrustSecret(), "ad", false, crossRealmTrust.getKdcRealm().toUpperCase(Locale.ROOT));
+        LOGGER.debug("Added Active Directory trust (bidirectional=false) [{}] for crossRealm [{}]", trust, crossRealmTrust);
+    }
+
+    @Retryable(value = RetryableFreeIpaClientException.class,
+            maxAttemptsExpression = RetryableFreeIpaClientException.MAX_RETRIES_EXPRESSION,
+            backoff = @Backoff(delayExpression = RetryableFreeIpaClientException.DELAY_EXPRESSION,
+                    multiplierExpression = RetryableFreeIpaClientException.MULTIPLIER_EXPRESSION))
+    @Override
+    public void addTwoWayTrust(Long stackId) throws FreeIpaClientException {
+        Stack stack = getStackService().getByIdWithListsInTransaction(stackId);
+        CrossRealmTrust crossRealmTrust = getCrossRealmTrustService().getByStackId(stackId);
+        FreeIpaClient client = getFreeIpaClientFactory().getFreeIpaClientForStack(stack);
         Trust trust = client.addTrust(crossRealmTrust.getTrustSecret(), "ad", true, crossRealmTrust.getKdcRealm().toUpperCase(Locale.ROOT));
-        LOGGER.debug("Added Active Directory trust [{}] for crossRealm [{}], start validation", trust, crossRealmTrust);
+        LOGGER.debug("Added Active Directory bidirectional trust [{}] for crossRealm [{}]", trust, crossRealmTrust);
     }
 
     @Override

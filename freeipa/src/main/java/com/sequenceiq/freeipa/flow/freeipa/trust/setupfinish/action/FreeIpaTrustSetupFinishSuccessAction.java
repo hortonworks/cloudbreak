@@ -14,13 +14,16 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SuccessDetails;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.entity.util.TrustRelationshipType;
+import com.sequenceiq.freeipa.flow.freeipa.trust.setupfinish.event.FreeIpaTrustSetupFinishValidateTrustSuccess;
 import com.sequenceiq.freeipa.flow.stack.StackContext;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
+import com.sequenceiq.freeipa.service.crossrealm.CrossRealmTrustService;
 import com.sequenceiq.freeipa.service.operation.OperationService;
 import com.sequenceiq.freeipa.sync.crossrealmtrust.CrossRealmTrustStatusSyncJobService;
 
 @Component("FreeIpaTrustSetupFinishSuccessAction")
-public class FreeIpaTrustSetupFinishSuccessAction extends FreeIpaTrustSetupFinishBaseAction<StackEvent> {
+public class FreeIpaTrustSetupFinishSuccessAction extends FreeIpaTrustSetupFinishBaseAction<FreeIpaTrustSetupFinishValidateTrustSuccess> {
 
     @Inject
     private OperationService operationService;
@@ -28,14 +31,18 @@ public class FreeIpaTrustSetupFinishSuccessAction extends FreeIpaTrustSetupFinis
     @Inject
     private CrossRealmTrustStatusSyncJobService crossRealmTrustStatusSyncJobService;
 
+    @Inject
+    private CrossRealmTrustService crossRealmTrustService;
+
     public FreeIpaTrustSetupFinishSuccessAction() {
-        super(StackEvent.class);
+        super(FreeIpaTrustSetupFinishValidateTrustSuccess.class);
     }
 
     @Override
-    protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) throws Exception {
+    protected void doExecute(StackContext context, FreeIpaTrustSetupFinishValidateTrustSuccess payload, Map<Object, Object> variables) throws Exception {
         Stack stack = context.getStack();
         updateStatuses(stack, TRUST_SETUP_FINISH_SUCCESSFUL, "Finish setting up cross-realm trust was successful", TRUST_ACTIVE);
+        crossRealmTrustService.updateTrustRelationshipTypeByStackId(stack.getId(), TrustRelationshipType.TWO_WAY);
         getEventService().sendEventAndNotification(stack, context.getFlowTriggerUserCrn(), FREEIPA_SETUP_FINISH_TRUST_FINISHED);
         operationService.completeOperation(stack.getAccountId(), getOperationId(variables), List.of(new SuccessDetails(stack.getEnvironmentCrn())), List.of());
         crossRealmTrustStatusSyncJobService.schedule(stack.getId());

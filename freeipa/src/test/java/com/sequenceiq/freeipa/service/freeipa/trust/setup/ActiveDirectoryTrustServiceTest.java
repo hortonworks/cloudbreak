@@ -163,7 +163,7 @@ class ActiveDirectoryTrustServiceTest {
         underTest.addTrust(STACK_ID);
         underTest.validateTrust(STACK_ID);
 
-        verify(client).addTrust("secret", "ad", true, "HYBRID.CLOUDERA.ORG");
+        verify(client).addTrust("secret", "ad", false, "HYBRID.CLOUDERA.ORG");
         verify(trustStatusValidationService).validateTrustStatus(stack, crossRealmTrust);
     }
 
@@ -218,9 +218,26 @@ class ActiveDirectoryTrustServiceTest {
         doReturn(client).when(underTest.getFreeIpaClientFactory()).getFreeIpaClientForStack(stack);
         when(crossRealmTrust.getTrustSecret()).thenReturn("secret");
         when(crossRealmTrust.getKdcRealm()).thenReturn("realm");
-        when(client.addTrust("secret", "ad", true, "REALM")).thenReturn(trust);
+        when(client.addTrust("secret", "ad", false, "REALM")).thenReturn(trust);
 
         underTest.addTrust(stackId);
+
+        verify(client).addTrust("secret", "ad", false, "REALM");
+    }
+
+    @Test
+    void testAddTwoWayTrust() throws Exception {
+        Long stackId = 2L;
+        Trust trust = mock(Trust.class);
+
+        doReturn(stack).when(underTest.getStackService()).getByIdWithListsInTransaction(stackId);
+        doReturn(crossRealmTrust).when(underTest.getCrossRealmTrustService()).getByStackId(stackId);
+        doReturn(client).when(underTest.getFreeIpaClientFactory()).getFreeIpaClientForStack(stack);
+        when(crossRealmTrust.getTrustSecret()).thenReturn("secret");
+        when(crossRealmTrust.getKdcRealm()).thenReturn("realm");
+        when(client.addTrust("secret", "ad", true, "REALM")).thenReturn(trust);
+
+        underTest.addTwoWayTrust(stackId);
 
         verify(client).addTrust("secret", "ad", true, "REALM");
     }

@@ -30,11 +30,12 @@ public class CrossRealmTrustStatusSyncService {
         if (validationResult.hasError()) {
             LOGGER.warn("Cross realm trust status validation failed: {}", validationResult.getFormattedErrors());
             trustStatus = TrustStatus.TRUST_BROKEN;
+            crossRealmTrustService.updateTrustStateByStackId(stack.getId(), trustStatus);
         } else {
             LOGGER.info("Cross realm trust status validation passed");
             trustStatus = TrustStatus.TRUST_ACTIVE;
+            crossRealmTrustService.updateTrustStateByStackId(stack.getId(), trustStatus);
         }
-        crossRealmTrustService.updateTrustStateByStackId(stack.getId(), trustStatus);
     }
 
 }

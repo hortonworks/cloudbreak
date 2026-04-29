@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.TrustStatus;
 import com.sequenceiq.freeipa.entity.CrossRealmTrust;
+import com.sequenceiq.freeipa.entity.util.TrustRelationshipType;
 
 @Transactional(Transactional.TxType.REQUIRED)
 public interface CrossRealmTrustRepository extends JpaRepository<CrossRealmTrust, Long> {
@@ -22,6 +23,10 @@ public interface CrossRealmTrustRepository extends JpaRepository<CrossRealmTrust
     @Modifying
     @Query("UPDATE CrossRealmTrust trust SET trust.operationId = :operationId WHERE trust.stack.id = :stackId")
     int updateOperationIdByStackId(Long stackId, String operationId);
+
+    @Modifying
+    @Query("UPDATE CrossRealmTrust trust SET trust.trustRelationshipType = :trustRelationshipType WHERE trust.stack.id = :stackId")
+    int updateTrustRelationshipTypeByStackId(Long stackId, TrustRelationshipType trustRelationshipType);
 
     @Modifying
     @Query("DELETE FROM CrossRealmTrust trust WHERE trust.stack.id = :stackId")

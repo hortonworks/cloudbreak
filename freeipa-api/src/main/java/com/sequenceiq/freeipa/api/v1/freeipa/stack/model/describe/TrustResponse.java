@@ -16,6 +16,9 @@ public class TrustResponse {
     @Schema(description = CrossRealmTrustModelDescriptions.TRUST_STATUS, requiredMode = Schema.RequiredMode.REQUIRED)
     private String trustStatus;
 
+    @Schema(description = CrossRealmTrustModelDescriptions.TRUST_RELATIONSHIP_TYPE, requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private String trustRelationshipType;
+
     @Schema(description = CrossRealmTrustModelDescriptions.OPERATION_ID, requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String operationId;
 
@@ -87,6 +90,14 @@ public class TrustResponse {
         this.kdcType = kdcType;
     }
 
+    public String getTrustRelationshipType() {
+        return trustRelationshipType;
+    }
+
+    public void setTrustRelationshipType(String trustRelationshipType) {
+        this.trustRelationshipType = trustRelationshipType;
+    }
+
     @Override
     public String toString() {
         return "TrustResponse{" +
@@ -97,6 +108,7 @@ public class TrustResponse {
                 ", ip='" + ip + '\'' +
                 ", dnsIp='" + dnsIp + '\'' +
                 ", kdcType='" + kdcType + '\'' +
+                ", trustRelationshipType='" + trustRelationshipType + '\'' +
                 '}';
     }
 }
