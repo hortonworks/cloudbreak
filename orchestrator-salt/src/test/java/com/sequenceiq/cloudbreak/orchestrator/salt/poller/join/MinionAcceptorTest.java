@@ -13,29 +13,41 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import com.dyngr.core.AttemptState;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.Fingerprint;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.FingerprintsResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.Minion;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.MinionFingersOnMasterResponse;
+import com.sequenceiq.cloudbreak.orchestrator.salt.domain.MinionIpAddressesResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.MinionKeysOnMasterResponse;
+import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStateService;
 
 class MinionAcceptorTest {
 
     private final SaltConnector sc = mock(SaltConnector.class);
 
+    private final SaltStateService saltStateService = mock(SaltStateService.class);
+
     @BeforeEach
     void init() {
         when(sc.getHostname()).thenReturn("hostname.domain");
+        MinionIpAddressesResponse minionIpAddressesResponse = new MinionIpAddressesResponse();
+        minionIpAddressesResponse.setResult(List.of(Map.of()));
+        when(saltStateService.collectMinionIpAddresses(eq(sc), any())).thenReturn(minionIpAddressesResponse);
     }
 
     @Test
@@ -57,10 +69,11 @@ class MinionAcceptorTest {
         when(response.getUnacceptedMinions()).thenReturn(List.of("m2.d", "m3.d"));
         when(sc.wheel(eq("key.list_all"), isNull(), eq(MinionKeysOnMasterResponse.class))).thenReturn(response);
 
-        MinionAcceptor underTest = new MinionAcceptor(List.of(sc), List.of(m1, m2, m3), new EqualMinionFpMatcher(), new FingerprintFromSbCollector());
+        MinionAcceptor underTest = new MinionAcceptor(List.of(sc), List.of(m1, m2, m3), new EqualMinionFpMatcher(), new FingerprintFromSbCollector(),
+                saltStateService);
 
         CloudbreakOrchestratorFailedException exception = assertThrows(CloudbreakOrchestratorFailedException.class, underTest::acceptMinions);
-        assertEquals("There were minions in denied and unaccepted state at the same time: [m2.d, m3.d]", exception.getMessage());
+        assertEquals("Minion(s) were removed, restart bootstrap to ensure all minion present", exception.getMessage());
     }
 
     @Test
@@ -77,7 +90,8 @@ class MinionAcceptorTest {
         when(response.getAllMinions()).thenReturn(List.of("m2.d"));
         when(sc.wheel(eq("key.list_all"), isNull(), eq(MinionKeysOnMasterResponse.class))).thenReturn(response);
 
-        MinionAcceptor underTest = new MinionAcceptor(List.of(sc), List.of(m1, m2), new EqualMinionFpMatcher(), new FingerprintFromSbCollector());
+        MinionAcceptor underTest = new MinionAcceptor(List.of(sc), List.of(m1, m2), new EqualMinionFpMatcher(), new FingerprintFromSbCollector(),
+                saltStateService);
 
         assertThrows(CloudbreakOrchestratorFailedException.class, underTest::acceptMinions);
     }
@@ -97,7 +111,8 @@ class MinionAcceptorTest {
         when(response.getUnacceptedMinions()).thenReturn(List.of());
         when(sc.wheel(eq("key.list_all"), isNull(), eq(MinionKeysOnMasterResponse.class))).thenReturn(response);
 
-        MinionAcceptor underTest = new MinionAcceptor(List.of(sc), List.of(m1, m2), new EqualMinionFpMatcher(), new FingerprintFromSbCollector());
+        MinionAcceptor underTest = new MinionAcceptor(List.of(sc), List.of(m1, m2), new EqualMinionFpMatcher(), new FingerprintFromSbCollector(),
+                saltStateService);
         underTest.acceptMinions();
     }
 
@@ -119,8 +134,9 @@ class MinionAcceptorTest {
         when(response.getUnacceptedMinions()).thenReturn(unacceptedMinions);
         when(sc.wheel(eq("key.list_all"), isNull(), eq(MinionKeysOnMasterResponse.class))).thenReturn(response);
 
-        MinionAcceptor underTest = new MinionAcceptor(List.of(sc), List.of(m1, m2), new EqualMinionFpMatcher(), fingerprintCollector);
-        underTest.acceptMinions();
+        MinionAcceptor underTest = new MinionAcceptor(List.of(sc), List.of(m1, m2), new EqualMinionFpMatcher(), fingerprintCollector,
+                saltStateService);
+        assertThrows(CloudbreakOrchestratorFailedException.class, underTest::acceptMinions);
         verify(sc).wheel(eq("key.delete"), eq(unacceptedMinions), eq(Object.class));
         verify(fingerprintCollector, never()).collectFingerprintFromMinions(any(), any());
     }
@@ -141,7 +157,8 @@ class MinionAcceptorTest {
         when(sc.wheel(eq("key.list_all"), isNull(), eq(MinionKeysOnMasterResponse.class))).thenReturn(response);
         when(sc.wheel(eq("key.finger"), anyCollection(), eq(MinionFingersOnMasterResponse.class))).thenThrow(new RuntimeException("failure"));
 
-        MinionAcceptor underTest = new MinionAcceptor(List.of(sc), List.of(m1, m2), new EqualMinionFpMatcher(), new FingerprintFromSbCollector());
+        MinionAcceptor underTest = new MinionAcceptor(List.of(sc), List.of(m1, m2), new EqualMinionFpMatcher(), new FingerprintFromSbCollector(),
+                saltStateService);
 
         assertThrows(CloudbreakOrchestratorFailedException.class, underTest::acceptMinions);
     }
@@ -164,7 +181,8 @@ class MinionAcceptorTest {
         when(sc.wheel(eq("key.list_all"), isNull(), eq(MinionKeysOnMasterResponse.class))).thenReturn(keysOnMasterResponse);
         when(sc.wheel(eq("key.finger"), anyCollection(), eq(MinionFingersOnMasterResponse.class))).thenReturn(fingersOnMasterResponse);
 
-        MinionAcceptor underTest = new MinionAcceptor(List.of(sc), List.of(m1, m2), new EqualMinionFpMatcher(), new FingerprintFromSbCollector());
+        MinionAcceptor underTest = new MinionAcceptor(List.of(sc), List.of(m1, m2), new EqualMinionFpMatcher(), new FingerprintFromSbCollector(),
+                saltStateService);
 
         assertThrows(CloudbreakOrchestratorFailedException.class, underTest::acceptMinions);
     }
@@ -195,7 +213,8 @@ class MinionAcceptorTest {
         when(fingerprintsResponse.getFingerprints()).thenReturn(List.of(fingerprint));
         when(fingerprintCollector.collectFingerprintFromMinions(eq(sc), argThat(arg -> arg.containsAll(List.of(m1))))).thenReturn(fingerprintsResponse);
 
-        MinionAcceptor underTest = new MinionAcceptor(List.of(sc), List.of(m1, m2), new EqualMinionFpMatcher(), fingerprintCollector);
+        MinionAcceptor underTest = new MinionAcceptor(List.of(sc), List.of(m1, m2), new EqualMinionFpMatcher(), fingerprintCollector,
+                saltStateService);
 
         assertThrows(CloudbreakOrchestratorFailedException.class, underTest::acceptMinions);
     }
@@ -252,7 +271,8 @@ class MinionAcceptorTest {
         when(fingerprintCollector.collectFingerprintFromMinions(eq(sc), argThat(arg -> arg.containsAll(List.of(m1, m2, m3))))).thenReturn(fingerprintsResponse);
         when(fingerprintsResponse.getFingerprints()).thenReturn(List.of(fp2, fp1, fp3));
 
-        MinionAcceptor underTest = spy(new MinionAcceptor(List.of(sc), List.of(m1, m2, m3, m4),  new EqualMinionFpMatcher(), fingerprintCollector));
+        MinionAcceptor underTest = spy(new MinionAcceptor(List.of(sc), List.of(m1, m2, m3, m4),  new EqualMinionFpMatcher(), fingerprintCollector,
+                saltStateService));
 
         assertThrows(CloudbreakOrchestratorFailedException.class, underTest::acceptMinions);
     }
@@ -276,7 +296,65 @@ class MinionAcceptorTest {
         when(response.getUnacceptedMinions()).thenReturn(List.of());
         when(sc.wheel(eq("key.list_all"), isNull(), eq(MinionKeysOnMasterResponse.class))).thenReturn(response);
 
-        MinionAcceptor underTest = new MinionAcceptor(List.of(sc), List.of(m1, m2, m3), new EqualMinionFpMatcher(), new FingerprintFromSbCollector());
+        MinionAcceptor underTest = new MinionAcceptor(List.of(sc), List.of(m1, m2, m3), new EqualMinionFpMatcher(), new FingerprintFromSbCollector(),
+                saltStateService);
         underTest.acceptMinions();
+    }
+
+    @Test
+    void shouldPropagateWhenDeletePollingFails() throws Exception {
+        MinionKeysOnMasterResponse response = mock(MinionKeysOnMasterResponse.class);
+
+        Minion m1 = new Minion();
+        m1.setHostName("m1");
+        m1.setDomain("d");
+        Minion m2 = new Minion();
+        m2.setHostName("m2");
+        m2.setDomain("d");
+
+        when(response.getAllMinions()).thenReturn(List.of("m1.d", "m2.d"));
+        when(response.getDeniedMinions()).thenReturn(List.of("m2.d"));
+        when(response.getUnacceptedMinions()).thenReturn(List.of());
+        when(sc.wheel(eq("key.list_all"), isNull(), eq(MinionKeysOnMasterResponse.class))).thenReturn(response);
+        MinionIpAddressesResponse minionIpAddressesResponse = new MinionIpAddressesResponse();
+        Map<String, JsonNode> minionResult = new HashMap<>();
+        minionResult.put("m2.d", JsonNodeFactory.instance.arrayNode().add("10.0.0.2"));
+        minionIpAddressesResponse.setResult(List.of(minionResult));
+        when(saltStateService.collectMinionIpAddresses(sc, java.util.Optional.of(Set.of("m2.d")))).thenReturn(minionIpAddressesResponse);
+
+        MinionAcceptor underTest = spy(new MinionAcceptor(List.of(sc), List.of(m1, m2), new EqualMinionFpMatcher(), new FingerprintFromSbCollector(),
+                saltStateService));
+        when(underTest.getMinionDeletionPollingTimeoutInMinutes()).thenReturn(0L);
+
+        CloudbreakOrchestratorFailedException exception = assertThrows(CloudbreakOrchestratorFailedException.class, underTest::acceptMinions);
+        assertEquals("Failed while polling deleted minion keys", exception.getMessage());
+    }
+
+    @Test
+    void minionDeletionPollerShouldContinueWhenMinionIsPresentAndReachable() {
+        MinionIpAddressesResponse minionIpAddressesResponse = new MinionIpAddressesResponse();
+        Map<String, JsonNode> minionResult = new HashMap<>();
+        minionResult.put("m1.d", JsonNodeFactory.instance.arrayNode().add("10.0.0.2"));
+        minionIpAddressesResponse.setResult(List.of(minionResult));
+        when(saltStateService.collectMinionIpAddresses(sc, java.util.Optional.of(Set.of("m1.d")))).thenReturn(minionIpAddressesResponse);
+
+        MinionDeletionPoller minionDeletionPoller = new MinionDeletionPoller(sc, Set.of("m1.d"), saltStateService);
+
+        assertEquals(AttemptState.CONTINUE, minionDeletionPoller.process().getState());
+        assertEquals(Set.of("m1.d"), minionDeletionPoller.getRemainingReachableMinions());
+    }
+
+    @Test
+    void minionDeletionPollerShouldFinishWhenMinionIsUnreachable() {
+        MinionIpAddressesResponse minionIpAddressesResponse = new MinionIpAddressesResponse();
+        Map<String, JsonNode> minionResult = new HashMap<>();
+        minionResult.put("m1.d", JsonNodeFactory.instance.textNode("false"));
+        minionIpAddressesResponse.setResult(List.of(minionResult));
+        when(saltStateService.collectMinionIpAddresses(sc, java.util.Optional.of(Set.of("m1.d")))).thenReturn(minionIpAddressesResponse);
+
+        MinionDeletionPoller minionDeletionPoller = new MinionDeletionPoller(sc, Set.of("m1.d"), saltStateService);
+
+        assertEquals(AttemptState.FINISH, minionDeletionPoller.process().getState());
+        assertEquals(Set.of(), minionDeletionPoller.getRemainingReachableMinions());
     }
 }

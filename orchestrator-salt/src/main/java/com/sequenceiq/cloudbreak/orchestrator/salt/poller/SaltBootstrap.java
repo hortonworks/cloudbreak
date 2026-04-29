@@ -159,8 +159,8 @@ public class SaltBootstrap implements OrchestratorBootstrap {
     protected MinionAcceptor createMinionAcceptor() {
         List<Minion> minions = createMinionsFromOriginalTargets();
         return params.isSaltBootstrapFpSupported() ?
-                new MinionAcceptor(saltConnectors, minions, new EqualMinionFpMatcher(), new FingerprintFromSbCollector())
-                : new MinionAcceptor(saltConnectors, minions, new AcceptAllFpMatcher(), new DummyFingerprintCollector());
+                new MinionAcceptor(saltConnectors, minions, new EqualMinionFpMatcher(), new FingerprintFromSbCollector(), saltStateService)
+                : new MinionAcceptor(saltConnectors, minions, new AcceptAllFpMatcher(), new DummyFingerprintCollector(), saltStateService);
     }
 
     private List<Minion> createMinionsFromOriginalTargets() {

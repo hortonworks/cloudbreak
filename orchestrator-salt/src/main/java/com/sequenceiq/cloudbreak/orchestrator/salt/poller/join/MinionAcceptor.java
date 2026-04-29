@@ -4,15 +4,18 @@ import static java.util.function.Predicate.not;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.ImmutableMultimap;
+import com.dyngr.Polling;
+import com.dyngr.exception.PollerException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.Fingerprint;
@@ -20,10 +23,15 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.domain.FingerprintsResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.Minion;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.MinionFingersOnMasterResponse;
 import com.sequenceiq.cloudbreak.orchestrator.salt.domain.MinionKeysOnMasterResponse;
+import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStateService;
 
 public class MinionAcceptor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MinionAcceptor.class);
+
+    private static final Long MINION_DELETION_POLLING_INTERVAL_IN_SECONDS = 5L;
+
+    private static final long MINION_DELETION_POLLING_TIMEOUT_IN_MINUTES = 2L;
 
     private final Collection<SaltConnector> saltConnectors;
 
@@ -33,27 +41,35 @@ public class MinionAcceptor {
 
     private final FingerprintCollector fingerprintCollector;
 
+    private final SaltStateService saltStateService;
+
     public MinionAcceptor(Collection<SaltConnector> saltConnectors, List<Minion> minions, MinionFingerprintMatcher fingerprintMatcher,
-            FingerprintCollector fingerprintCollector) {
+            FingerprintCollector fingerprintCollector, SaltStateService saltStateService) {
         this.saltConnectors = saltConnectors;
         this.minions = minions;
         this.fingerprintMatcher = fingerprintMatcher;
         this.fingerprintCollector = fingerprintCollector;
+        this.saltStateService = saltStateService;
     }
 
     public void acceptMinions() throws CloudbreakOrchestratorFailedException {
+        boolean removedAnyMinion = false;
         for (SaltConnector sc : saltConnectors) {
             LOGGER.info("Running for master: [{}]", sc.getHostname());
             MinionKeysOnMasterResponse minionKeysOnMaster = fetchMinionsFromMaster(sc, minions);
             List<String> unacceptedMinions = minionKeysOnMaster.getUnacceptedMinions();
             List<String> deniedMinions = minionKeysOnMaster.getDeniedMinions();
             List<String> removedUnacceptedMinions = cleanupMinionIds(sc, deniedMinions, unacceptedMinions);
+            removedAnyMinion = removedAnyMinion || !removedUnacceptedMinions.isEmpty();
             unacceptedMinions = unacceptedMinions.stream().filter(not(removedUnacceptedMinions::contains)).collect(Collectors.toList());
             if (!unacceptedMinions.isEmpty()) {
                 proceedWithAcceptingMinions(sc, unacceptedMinions);
             } else {
                 LOGGER.info("No unaccepted minions found on master: [{}]", sc.getHostname());
             }
+        }
+        if (removedAnyMinion) {
+            throw new CloudbreakOrchestratorFailedException("Minion(s) were removed, restart bootstrap to ensure all minion present");
         }
     }
 
@@ -75,32 +91,57 @@ public class MinionAcceptor {
         if (!minionIdsInBothDeniedAndUnacceptedState.isEmpty()) {
             LOGGER.info("There are minions in denied and unaccepted state at the same time, lets remove them: " +
                     minionIdsInBothDeniedAndUnacceptedState);
-            sc.wheel("key.delete", minionIdsInBothDeniedAndUnacceptedState, Object.class);
-            throw new CloudbreakOrchestratorFailedException("There were minions in denied and unaccepted state at the same time: " +
-                    minionIdsInBothDeniedAndUnacceptedState,
-                    ImmutableMultimap.of(sc.getHostname(), "There were minions in denied and unaccepted state at the same time: " +
-                            minionIdsInBothDeniedAndUnacceptedState));
+            deleteSaltKey(sc, minionIdsInBothDeniedAndUnacceptedState);
         }
         return minionIdsInBothDeniedAndUnacceptedState;
     }
 
-    private void removeMinionIdsOnlyInDeniedState(SaltConnector sc, List<String> deniedMinions, List<String> unacceptedMinions) {
+    private void deleteSaltKey(SaltConnector sc, List<String> minionIdsToDelete) throws CloudbreakOrchestratorFailedException {
+        sc.wheel("key.delete", minionIdsToDelete, Object.class);
+        pollUntilMinionDisappearsFromIpAddrResponse(sc, minionIdsToDelete);
+    }
+
+    private void pollUntilMinionDisappearsFromIpAddrResponse(SaltConnector sc, List<String> minionIdsToDelete) throws CloudbreakOrchestratorFailedException {
+        MinionDeletionPoller minionDeletionPoller = new MinionDeletionPoller(sc, new HashSet<>(minionIdsToDelete), saltStateService);
+        try {
+            Polling.waitPeriodly(MINION_DELETION_POLLING_INTERVAL_IN_SECONDS, TimeUnit.SECONDS)
+                    .stopAfterDelay(getMinionDeletionPollingTimeoutInMinutes(), TimeUnit.MINUTES)
+                    .stopIfException(false)
+                    .run(minionDeletionPoller);
+        } catch (PollerException e) {
+            Set<String> remainingMinions = minionDeletionPoller.getRemainingReachableMinions();
+            LOGGER.error("Failed while polling deleted minion keys on master [{}], minions: {}, remaining: {}",
+                    sc.getHostname(), minionIdsToDelete, remainingMinions, e);
+            throw new CloudbreakOrchestratorFailedException("Failed while polling deleted minion keys", e);
+        } catch (RuntimeException e) {
+            LOGGER.error("Unexpected failure while polling deleted minion keys on master [{}], minions: {}", sc.getHostname(), minionIdsToDelete, e);
+            throw new CloudbreakOrchestratorFailedException("Failed while polling deleted minion keys", e);
+        }
+    }
+
+    long getMinionDeletionPollingTimeoutInMinutes() {
+        return MINION_DELETION_POLLING_TIMEOUT_IN_MINUTES;
+    }
+
+    private void removeMinionIdsOnlyInDeniedState(SaltConnector sc, List<String> deniedMinions, List<String> unacceptedMinions)
+            throws CloudbreakOrchestratorFailedException {
         ArrayList<String> minionIdsOnlyDenied = new ArrayList<String>(deniedMinions);
         minionIdsOnlyDenied.removeAll(unacceptedMinions);
         if (!minionIdsOnlyDenied.isEmpty()) {
             LOGGER.info("There are minions in denied state, removing: {}", minionIdsOnlyDenied);
-            sc.wheel("key.delete", minionIdsOnlyDenied, Object.class);
+            deleteSaltKey(sc, minionIdsOnlyDenied);
         }
     }
 
-    private List<String> removeMinionIdsThatAreNotExpected(SaltConnector sc, List<String> unacceptedMinions) {
+    private List<String> removeMinionIdsThatAreNotExpected(SaltConnector sc, List<String> unacceptedMinions)
+            throws CloudbreakOrchestratorFailedException {
         List<String> expectedMinionIds = minions.stream().map(Minion::getId).collect(Collectors.toList());
         List<String> unexpectedMinionIds = unacceptedMinions.stream()
                 .filter(not(expectedMinionIds::contains))
                 .collect(Collectors.toList());
         if (!unexpectedMinionIds.isEmpty()) {
             LOGGER.info("There are minions that are not expected, removing: {}", unexpectedMinionIds);
-            sc.wheel("key.delete", unexpectedMinionIds, Object.class);
+            deleteSaltKey(sc, unexpectedMinionIds);
         }
         return unexpectedMinionIds;
     }
@@ -146,8 +187,7 @@ public class MinionAcceptor {
         MinionKeysOnMasterResponse response = sc.wheel("key.list_all", null, MinionKeysOnMasterResponse.class);
         LOGGER.debug("Minion keys on master response: {}", response);
         if (!response.getAllMinions().containsAll(minionId)) {
-            throw new CloudbreakOrchestratorFailedException("There are missing minions from salt response",
-                    ImmutableMultimap.of(sc.getHostname(), "There are missing minions from salt response"));
+            throw new CloudbreakOrchestratorFailedException("There are missing minions from salt response");
         }
         return response;
     }
@@ -160,8 +200,7 @@ public class MinionAcceptor {
             unacceptedMinions = response.getUnacceptedMinions();
         } catch (Exception e) {
             LOGGER.error("Error during fetching fingerprints from master for minions: {}", minions, e);
-            throw new CloudbreakOrchestratorFailedException("Error during fetching fingerprints from master for minions", e,
-                    ImmutableMultimap.of(sc.getHostname(), "Error during fetching fingerprints from master for minions"));
+            throw new CloudbreakOrchestratorFailedException("Error during fetching fingerprints from master for minions", e);
         }
         validateMasterFingerprintResponse(minions, unacceptedMinions, sc);
         return unacceptedMinions;
@@ -171,8 +210,7 @@ public class MinionAcceptor {
             throws CloudbreakOrchestratorFailedException {
         if (!unacceptedMinions.keySet().containsAll(minions)) {
             LOGGER.error("Fingerprints from master {} doesn't contain all requested minions {}", unacceptedMinions.keySet(), minions);
-            throw new CloudbreakOrchestratorFailedException("Fingerprints from master doesn't contain all requested minions",
-                    ImmutableMultimap.of(sc.getHostname(), "Fingerprints from master doesn't contain all requested minions"));
+            throw new CloudbreakOrchestratorFailedException("Fingerprints from master doesn't contain all requested minions");
         }
     }
 }

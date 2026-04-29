@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.orchestrator.salt.domain;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -32,8 +33,17 @@ public class MinionIpAddressesResponse {
         return result.stream()
                 .flatMap(result -> result.entrySet().stream())
                 .filter(entry -> entry.getValue() == null || "false".equals(entry.getValue().asText()))
-                .map(entry -> entry.getKey())
+                .map(Map.Entry::getKey)
                 .collect(Collectors.toList());
+    }
+
+    @JsonIgnore
+    public Set<String> getReachableNodes() {
+        return result.stream()
+                .flatMap(result -> result.entrySet().stream())
+                .filter(entry -> entry.getValue() != null && !"false".equals(entry.getValue().asText()))
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toSet());
     }
 
     public List<Map<String, JsonNode>> getResult() {
