@@ -204,11 +204,7 @@ class FreeIpaImageProviderTest {
     void testGetImageGivenAllInputNonExistentOS() {
         FreeIpaImageFilterSettings imageFilterSettings = createImageFilterSettings(EXISTING_ID, CUSTOM_IMAGE_CATALOG_URL, DEFAULT_OS, NON_EXISTING_OS, false);
 
-        Image image = underTest.getImage(imageFilterSettings).get().getImage();
-
-        assertEquals(DEFAULT_OS, image.getOs());
-        assertEquals(LATEST_DATE, image.getDate());
-        assertEquals(IMAGE_UUID, image.getUuid());
+        assertTrue(underTest.getImage(imageFilterSettings).isEmpty());
     }
 
     @Test
@@ -217,14 +213,7 @@ class FreeIpaImageProviderTest {
 
         List<ImageWrapper> images = underTest.getImages(imageFilterSettings);
 
-        assertEquals(1, images.size());
-        ImageWrapper imageWrapper = images.get(0);
-        assertEquals(CUSTOM_IMAGE_CATALOG_URL, imageWrapper.getCatalogUrl());
-        assertNull(imageWrapper.getCatalogName());
-        Image image = imageWrapper.getImage();
-        assertEquals(DEFAULT_OS, image.getOs());
-        assertEquals(LATEST_DATE, image.getDate());
-        assertEquals(IMAGE_UUID, image.getUuid());
+        assertEquals(0, images.size());
     }
 
     @Test

@@ -28,6 +28,8 @@ class FreeIpaImageFilterTest {
 
     private static final String REDHAT_8 = "redhat8";
 
+    private static final String REDHAT_9 = "redhat9";
+
     private static final String CENTOS_7 = "centos7";
 
     private static final String REGION_1 = "eu-central-1";
@@ -60,6 +62,23 @@ class FreeIpaImageFilterTest {
         List<Image> actual = underTest.filterImages(candidateImages, imageFilterSettings);
 
         assertTrue(actual.containsAll(candidateImages));
+        verify(providerSpecificImageFilter).filterImages(any(), any());
+    }
+
+    @Test
+    void setUnderTestFilterImagesShouldReturnAllButRhel9ImageWhenMajorOsUpgradeIsEnabled() {
+        List<Image> candidateImages = List.of(
+                createImage("image-1", REDHAT_8, AWS, REGION_1),
+                createImage("image-3", REDHAT_9, AWS, REGION_1),
+                createImage("image-2", CENTOS_7, AWS, REGION_1)
+        );
+        FreeIpaImageFilterSettings imageFilterSettings = createImageFilterSettings(CENTOS_7, null, REGION_1, AWS, true);
+
+        List<Image> actual = underTest.filterImages(candidateImages, imageFilterSettings);
+
+        assertTrue(actual.containsAll(List.of(createImage("image-1", REDHAT_8, AWS, REGION_1),
+                createImage("image-2", CENTOS_7, AWS, REGION_1))));
+        assertEquals(2, actual.size());
         verify(providerSpecificImageFilter).filterImages(any(), any());
     }
 

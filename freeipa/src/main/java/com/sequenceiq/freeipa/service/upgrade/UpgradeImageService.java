@@ -129,6 +129,7 @@ public class UpgradeImageService {
             OsType currentOsType = OsType.getByOs(currentImage.getOs());
             if (defaultOsType != currentOsType
                     && defaultOsType.ordinal() > currentOsType.ordinal()
+                    && currentOsType.getMajorOsTargets().contains(defaultOsType)
                     && targetImages.stream().noneMatch(img -> defaultOs.equalsIgnoreCase(img.getOs()))) {
                 String platformString = platformStringTransformer.getPlatformString(stack);
                 FreeIpaImageFilterSettings imageFilterSettings = new FreeIpaImageFilterSettings(null, catalog, defaultOs, defaultOs,
