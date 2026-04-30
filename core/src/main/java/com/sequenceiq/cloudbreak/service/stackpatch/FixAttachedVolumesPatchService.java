@@ -34,7 +34,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cloud.notification.ResourceNotifier;
-import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
@@ -59,8 +58,6 @@ import com.sequenceiq.common.api.type.ResourceType;
 @Service
 public class FixAttachedVolumesPatchService extends ExistingStackPatchService {
     private static final Logger LOGGER = LoggerFactory.getLogger(FixAttachedVolumesPatchService.class);
-
-    private static final String DEPRECATED_DEVICE_PATH_PREFIX = "/dev/sd";
 
     private static final Pattern UUID_RESULT_REGEX_PATTERN = Pattern.compile("(.*): UUID=\"([a-z0-9-]+)\"");
 
@@ -103,9 +100,6 @@ public class FixAttachedVolumesPatchService extends ExistingStackPatchService {
     private PartialSaltStateUpdateService partialSaltStateUpdateService;
 
     @Inject
-    private ResourceAttributeUtil resourceAttributeUtil;
-
-    @Inject
     private StackUpdater stackUpdater;
 
     @Override
@@ -118,11 +112,7 @@ public class FixAttachedVolumesPatchService extends ExistingStackPatchService {
         boolean affected;
         if (AFFECTED_PROVIDERS.contains(stack.cloudPlatform().toLowerCase(Locale.ROOT))) {
             setVolumeSetResourcesForStack(stack);
-            affected = stack.getDiskResources().stream()
-                    .map(resource -> resourceAttributeUtil.getTypedAttributes(resource, VolumeSetAttributes.class))
-                    .flatMap(Optional::stream)
-                    .flatMap(volumeSet -> volumeSet.getVolumes().stream())
-                    .anyMatch(volume -> volume.getDevice().startsWith(DEPRECATED_DEVICE_PATH_PREFIX));
+            affected = stackUtil.hasDiskResourcesWithDeprecatedDevicePaths(stack);
         } else {
             affected = false;
         }

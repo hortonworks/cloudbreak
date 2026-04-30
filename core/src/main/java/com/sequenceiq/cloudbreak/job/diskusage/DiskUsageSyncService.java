@@ -5,7 +5,6 @@ import java.util.Set;
 
 import jakarta.inject.Inject;
 
-import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -23,7 +22,7 @@ import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFa
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
-import com.sequenceiq.cloudbreak.service.stack.flow.StackOperationService;
+import com.sequenceiq.cloudbreak.util.StackUtil;
 
 @Service
 public class DiskUsageSyncService {
@@ -40,22 +39,26 @@ public class DiskUsageSyncService {
     private GatewayConfigService gatewayConfigService;
 
     @Inject
-    private StackOperationService stackOperationService;
-
-    @Inject
     private CloudbreakFlowMessageService flowMessageService;
 
     @Inject
     private ReactorFlowManager flowManager;
 
+    @Inject
+    private StackUtil stackUtil;
+
     public void checkDbDisk(StackDto stack) {
         try {
-            int usage = checkDbDiskUsage(stack);
-            LOGGER.debug("Database disk usage for stack: {} is {}%", stack.getResourceCrn(), usage);
-            if (usage >= diskUsageSyncConfig.getDbDiskUsageThresholdPercentage()) {
-                LOGGER.warn("Database disk usage for stack: {} is at {}%, which is above the warning threshold of {}%",
-                        stack.getResourceCrn(), usage, diskUsageSyncConfig.getDbDiskUsageThresholdPercentage());
-                resizeDbDisk(stack, usage);
+            if (!stackUtil.hasDiskResourcesWithDeprecatedDevicePaths(stack)) {
+                int usage = checkDbDiskUsage(stack);
+                LOGGER.debug("Database disk usage for stack: {} is {}%", stack.getResourceCrn(), usage);
+                if (usage >= diskUsageSyncConfig.getDbDiskUsageThresholdPercentage()) {
+                    LOGGER.warn("Database disk usage for stack: {} is at {}%, which is above the warning threshold of {}%",
+                            stack.getResourceCrn(), usage, diskUsageSyncConfig.getDbDiskUsageThresholdPercentage());
+                    resizeDbDisk(stack, usage);
+                }
+            } else {
+                LOGGER.info("Stack {} has deprecated device paths, DB disk check and resize is skipped.", stack.getResourceCrn());
             }
         } catch (Exception e) {
             LOGGER.error("Error during disk usage sync, skipping and logging it: ", e);
@@ -87,13 +90,22 @@ public class DiskUsageSyncService {
         DiskUpdateRequest updateRequest = new DiskUpdateRequest();
         updateRequest.setGroup(stack.getPrimaryGatewayGroup().getGroupName());
         updateRequest.setDiskType(DiskType.DATABASE_DISK);
-        Integer newSize = getNewSize(stack, usage);
-        if (newSize == null) {
-            return;
+        Integer currentSize = getCurrentSize(stack);
+        if (currentSize != null) {
+            Integer newSize = getNewSize(stack, currentSize, usage);
+            if (newSize != null) {
+                updateRequest.setSize(newSize);
+                if (diskUsageSyncConfig.isDryRun()) {
+                    LOGGER.info("[DRY-RUN] Embedded DB disk resize simulation for stack {}. " +
+                                    "Actual usage is {}% of {}GB. In a real run, it would be increased to {}GB, " +
+                                    "but now we are just testing the logic.",
+                            stack.getResourceCrn(), usage, currentSize, newSize);
+                } else {
+                    logResizeEvent(stack.getId(), newSize);
+                    flowManager.triggerStackUpdateDisks(stack, updateRequest);
+                }
+            }
         }
-        updateRequest.setSize(newSize);
-        logResizeEvent(stack.getId(), newSize);
-        flowManager.triggerStackUpdateDisks(stack, updateRequest);
     }
 
     private void logResizeEvent(Long stackId, int newSize) {
@@ -104,8 +116,7 @@ public class DiskUsageSyncService {
                 String.valueOf(newSize));
     }
 
-    @Nullable
-    private Integer getNewSize(StackDto stack, int usage) {
+    private Integer getCurrentSize(StackDto stack) {
         Set<VolumeTemplate> volumeTemplates = stack.getPrimaryGatewayGroup().getTemplate().getVolumeTemplates();
         Optional<VolumeTemplate> dbVolumeTemplate = volumeTemplates.stream()
                 .filter(volumeTemplate -> volumeTemplate.getUsageType() == VolumeUsageType.DATABASE)
@@ -114,7 +125,10 @@ public class DiskUsageSyncService {
             LOGGER.error("Database volume template not found for stack: {}, resizing not possible", stack.getResourceCrn());
             return null;
         }
-        int currentSize = dbVolumeTemplate.get().getVolumeSize();
+        return dbVolumeTemplate.get().getVolumeSize();
+    }
+
+    private Integer getNewSize(StackDto stack, int currentSize, int usage) {
         int newSize = currentSize + diskUsageSyncConfig.getDiskIncrementSize();
         newSize = Math.min(newSize, diskUsageSyncConfig.getMaxDiskSize());
         if (newSize <= currentSize) {
@@ -135,5 +149,4 @@ public class DiskUsageSyncService {
                 String.valueOf(currentSize),
                 String.valueOf(usage));
     }
-
 }

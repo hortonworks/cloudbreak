@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.tls;
 
+import static com.sequenceiq.cloudbreak.tls.CipherSuitesLimitType.BLACKBOX_EXPORTER;
 import static com.sequenceiq.common.api.encryptionprofile.TlsVersion.TLS_1_2;
 import static com.sequenceiq.common.api.encryptionprofile.TlsVersion.TLS_1_3;
 
@@ -110,6 +111,10 @@ public class EncryptionProfileProvider {
 
     public String getTls13CipherSuites(Map<String, List<String>> userEncryptionProfileMap) {
         return getCipherSuiteByTlsVersion(TLS_1_3.getVersion(), userEncryptionProfileMap, true);
+    }
+
+    public List<String> getBlackboxCipherSuites() {
+        return EncryptionProfileConverter.toListString(cipherSuiteProvider.getLegacyCipherSuitesByLimitType(BLACKBOX_EXPORTER));
     }
 
 }

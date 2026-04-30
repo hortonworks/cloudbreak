@@ -35,6 +35,7 @@ import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFa
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
+import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.cloudbreak.view.InstanceGroupView;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
@@ -70,6 +71,9 @@ class DiskUsageSyncServiceTest {
 
     @Mock
     private CloudbreakFlowMessageService flowMessageService;
+
+    @Mock
+    private StackUtil stackUtil;
 
     @InjectMocks
     private DiskUsageSyncService underTest;
@@ -150,6 +154,16 @@ class DiskUsageSyncServiceTest {
     }
 
     @Test
+    @DisplayName("Test that resize respects max disk size")
+    void testResizeAboveMaxDiskSize() throws CloudbreakOrchestratorFailedException {
+        setupForResize(DB_DISK_USAGE_THRESHOLD, MAX_DISK_SIZE + 50);
+
+        underTest.checkDbDisk(stack);
+
+        verify(flowManager, never()).triggerStackUpdateDisks(eq(stack), any());
+    }
+
+    @Test
     @DisplayName("Test that resize is not triggered if DB volume template is not found")
     void testNoResizeWhenDbVolumeNotFound() throws CloudbreakOrchestratorFailedException {
         when(hostOrchestrator.getDatabaseDiskUsagePercentage(gatewayConfig, PRIMARY_GW_FQDN)).thenReturn(Optional.of(DB_DISK_USAGE_THRESHOLD));
@@ -166,6 +180,26 @@ class DiskUsageSyncServiceTest {
     @DisplayName("Test that checkDbDisk handles orchestrator failure gracefully")
     void testCheckDbDiskHandlesOrchestratorFailure() throws CloudbreakOrchestratorFailedException {
         when(hostOrchestrator.getDatabaseDiskUsagePercentage(gatewayConfig, PRIMARY_GW_FQDN)).thenThrow(new CloudbreakOrchestratorFailedException("Error"));
+
+        assertDoesNotThrow(() -> underTest.checkDbDisk(stack));
+        verify(flowManager, never()).triggerStackUpdateDisks(any(), any());
+    }
+
+    @Test
+    @DisplayName("Test that checkDbDisk doesn't trigger the resize flow in case of dryRun")
+    void testCheckDbDiskDryRun() throws CloudbreakOrchestratorFailedException {
+        setupForResize(DB_DISK_USAGE_THRESHOLD + 1, 200);
+        when(diskUsageSyncConfig.isDryRun()).thenReturn(true);
+
+        assertDoesNotThrow(() -> underTest.checkDbDisk(stack));
+
+        verify(flowManager, never()).triggerStackUpdateDisks(any(), any());
+    }
+
+    @Test
+    @DisplayName("Test that checkDbDisk doesn't trigger the resize flow in case of deprecated device paths")
+    void testCheckDbDiskWithDeprecatedDevicePaths() {
+        when(stackUtil.hasDiskResourcesWithDeprecatedDevicePaths(stack)).thenReturn(true);
 
         assertDoesNotThrow(() -> underTest.checkDbDisk(stack));
         verify(flowManager, never()).triggerStackUpdateDisks(any(), any());

@@ -19,29 +19,34 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
+import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Template;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
@@ -56,6 +61,7 @@ import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.cloudbreak.view.StackView;
 import com.sequenceiq.common.api.type.ResourceType;
 
+@ExtendWith(MockitoExtension.class)
 class StackUtilTest {
 
     private static final String ENV_CRN = "envCrn";
@@ -81,12 +87,7 @@ class StackUtilTest {
     private ArgumentCaptor<Set<Node>> nodesCaptor;
 
     @InjectMocks
-    private final StackUtil stackUtil = new StackUtil();
-
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.initMocks(this);
-    }
+    private StackUtil stackUtil;
 
     @Test
     void testGetUptimeForClusterZero() {
@@ -331,5 +332,88 @@ class StackUtilTest {
                 .build();
         resource.setAttributes(new Json(volumeSetAttributes));
         return resource;
+    }
+
+    @Test
+    void testIsAffectedWhenAzureWithNewResources() {
+        Stack stack = new Stack();
+        stack.setId(1L);
+        stack.setPlatformVariant(CloudConstants.AZURE);
+        stack.setCloudPlatform(CloudPlatform.AZURE.name());
+        VolumeSetAttributes volumeSetAttributes = createVolumeSetAttributes(null,
+                List.of(new VolumeSetAttributes.Volume("id", "/dev/disk/azure/scsi1/lun1", 10, "type", CloudVolumeUsageType.GENERAL)));
+        Resource volumeSetResource = createAzureVolumeSetResource("instance1", volumeSetAttributes);
+        stack.setResources(Set.of(volumeSetResource));
+        when(resourceAttributeUtil.getTypedAttributes(volumeSetResource, VolumeSetAttributes.class)).thenReturn(Optional.of(volumeSetAttributes));
+
+        boolean affected = stackUtil.hasDiskResourcesWithDeprecatedDevicePaths(stack);
+
+        assertFalse(affected);
+    }
+
+    @Test
+    void testIsAffectedWhenAzureWithDeprecatedDevices() {
+        Stack stack = new Stack();
+        stack.setId(1L);
+        stack.setPlatformVariant(CloudConstants.AZURE);
+        stack.setCloudPlatform(CloudPlatform.AZURE.name());
+        VolumeSetAttributes volumeSetAttributes = createVolumeSetAttributes(null,
+                List.of(new VolumeSetAttributes.Volume("id", "/dev/sdf", 10, "type", CloudVolumeUsageType.GENERAL)));
+        Resource volumeSetResource = createAzureVolumeSetResource("instance1", volumeSetAttributes);
+        stack.setResources(Set.of(volumeSetResource));
+        when(resourceAttributeUtil.getTypedAttributes(volumeSetResource, VolumeSetAttributes.class)).thenReturn(Optional.of(volumeSetAttributes));
+
+        boolean affected = stackUtil.hasDiskResourcesWithDeprecatedDevicePaths(stack);
+
+        assertTrue(affected);
+    }
+
+    @Test
+    void testIsAffectedWhenAzureWithoutVolumes() {
+        Stack stack = new Stack();
+        stack.setId(1L);
+        stack.setPlatformVariant(CloudConstants.AZURE);
+        stack.setCloudPlatform(CloudPlatform.AZURE.name());
+        VolumeSetAttributes volumeSetAttributes = createVolumeSetAttributes(null, null);
+        Resource volumeSetResource = createAzureVolumeSetResource("instance1", volumeSetAttributes);
+        stack.setResources(Set.of(volumeSetResource));
+        when(resourceAttributeUtil.getTypedAttributes(volumeSetResource, VolumeSetAttributes.class)).thenReturn(Optional.of(volumeSetAttributes));
+
+        boolean affected = stackUtil.hasDiskResourcesWithDeprecatedDevicePaths(stack);
+
+        assertFalse(affected);
+    }
+
+    @Test
+    void testIsAffectedWhenAzureWithVolumesNullDevice() {
+        Stack stack = new Stack();
+        stack.setId(1L);
+        stack.setPlatformVariant(CloudConstants.AZURE);
+        stack.setCloudPlatform(CloudPlatform.AZURE.name());
+        VolumeSetAttributes volumeSetAttributes = createVolumeSetAttributes(null,
+                List.of(new VolumeSetAttributes.Volume("id", null, 10, "type", CloudVolumeUsageType.GENERAL)));
+        Resource volumeSetResource = createAzureVolumeSetResource("instance1", volumeSetAttributes);
+        stack.setResources(Set.of(volumeSetResource));
+        when(resourceAttributeUtil.getTypedAttributes(volumeSetResource, VolumeSetAttributes.class)).thenReturn(Optional.of(volumeSetAttributes));
+
+        boolean affected = stackUtil.hasDiskResourcesWithDeprecatedDevicePaths(stack);
+
+        assertFalse(affected);
+    }
+
+    private Resource createAzureVolumeSetResource(String instanceId, VolumeSetAttributes volumeSetAttributes) {
+        Resource resource = new Resource();
+        resource.setId(1L);
+        resource.setInstanceId(instanceId);
+        resource.setAttributes(new Json(volumeSetAttributes));
+        resource.setResourceType(ResourceType.AZURE_VOLUMESET);
+        return resource;
+    }
+
+    private VolumeSetAttributes createVolumeSetAttributes(String fstab, List<VolumeSetAttributes.Volume> volumes) {
+        return new VolumeSetAttributes.Builder()
+                .withVolumes(volumes)
+                .withFstab(fstab)
+                .build();
     }
 }

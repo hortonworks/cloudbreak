@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.quartz.JobSchedulerService;
 import com.sequenceiq.cloudbreak.quartz.configuration.scheduler.TransactionalScheduler;
+import com.sequenceiq.cloudbreak.quartz.model.JobResource;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.util.RandomUtil;
 import com.sequenceiq.cloudbreak.view.StackView;
@@ -35,8 +36,6 @@ public class DiskUsageSyncJobService implements JobSchedulerService {
     private static final String JOB_GROUP = "diskusage-sync-jobs";
 
     private static final String TRIGGER_GROUP = "diskusage-sync-triggers";
-
-    private static final String UNKNOWN_PROVIDER_NAME = "UNKNOWN";
 
     @Inject
     private TransactionalScheduler scheduler;
@@ -67,22 +66,30 @@ public class DiskUsageSyncJobService implements JobSchedulerService {
     }
 
     public void schedule(StackView stack) {
-        if (properties.isDiskUsageSyncEnabled()) {
-            try {
+        try {
+            if (properties.isDiskUsageSyncEnabled() && properties.getEnabledProviders().contains(stack.getCloudPlatform())) {
                 scheduleJob(new DiskUsageSyncJobAdapter(stack.getId(), applicationContext));
-            } catch (Exception e) {
-                LOGGER.error("Error during scheduling disk usage sync job: {}", stack.getResourceCrn(), e);
+            } else {
+                LOGGER.debug("DiskUsageSync schedule is skipped on stack {} on provider {}, diskUsageSyncEnabled: {}, enabled providers: {}",
+                        stack.getResourceCrn(), stack.getCloudPlatform(), properties.isDiskUsageSyncEnabled(), properties.getEnabledProviders());
             }
+        } catch (Exception e) {
+            LOGGER.error("Error during scheduling disk usage sync job: {}", stack.getResourceCrn(), e);
         }
     }
 
     public void schedule(DiskUsageSyncJobAdapter resource) {
-        if (properties.isDiskUsageSyncEnabled()) {
-            try {
+        JobResource jobResource = resource.getJobResource();
+        try {
+            String provider = jobResource.getProvider().orElse(null);
+            if (properties.isDiskUsageSyncEnabled() && provider != null && properties.getEnabledProviders().contains(provider)) {
                 scheduleJob(resource);
-            } catch (Exception e) {
-                LOGGER.error("Error during scheduling disk usage sync job: {}", resource.getJobResource().getRemoteResourceId(), e);
+            } else {
+                LOGGER.debug("DiskUsageSync schedule is skipped on resource {} on provider {}, diskUsageSyncEnabled: {}, enabled providers: {}",
+                        jobResource.getRemoteResourceId(), provider, properties.isDiskUsageSyncEnabled(), properties.getEnabledProviders());
             }
+        } catch (Exception e) {
+            LOGGER.error("Error during scheduling disk usage sync job: {}", jobResource.getRemoteResourceId(), e);
         }
     }
 
