@@ -41,7 +41,7 @@ public class FreeIpaImageFilter {
         if (StringUtils.isNotBlank(imageFilterSettings.currentImageId())) {
             return candidateImages.stream()
                     .filter(img -> filterPlatformAndRegion(imageFilterSettings, img))
-                    .filter(img -> osSupported(img.getOs()))
+                    .filter(img -> filterOs(imageFilterSettings, img))
                     .filter(img -> filterTags(imageFilterSettings, img))
                     //It's not clear why we check the provider image reference (eg. the AMI in case of AWS) as imageId here.
                     //For safety and backward compatibility reasons the check remains here but should be checked if it really needed.
