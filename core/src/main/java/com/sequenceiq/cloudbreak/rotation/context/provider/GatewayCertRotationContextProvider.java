@@ -17,6 +17,7 @@ import jakarta.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxySecretProvider;
 import com.sequenceiq.cloudbreak.clusterproxy.ReadConfigResponse;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.knox.KnoxRoles;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.ClusterHostServiceRunner;
@@ -58,6 +59,9 @@ public class GatewayCertRotationContextProvider extends AbstractKnoxCertRotation
     @Inject
     private ClusterProxyService clusterProxyService;
 
+    @Inject
+    private ClusterProxySecretProvider clusterProxySecretProvider;
+
     @Override
     public Map<SecretRotationStep, RotationContext> getContexts(String resourceCrn) {
         Map<SecretRotationStep, RotationContext> result = new HashMap<>();
@@ -80,7 +84,7 @@ public class GatewayCertRotationContextProvider extends AbstractKnoxCertRotation
         result.put(VAULT, vaultRotationContext);
         result.put(CUSTOM_JOB, getCustomJobRotationContext(stack.getResourceCrn(), fullGateway, stack));
         result.put(CM_SERVICE_ROLE_RESTART, getCMServiceRoleRestartRotationContext(stack.getResourceCrn()));
-        result.put(CLUSTER_PROXY_UPDATE, getClusterProxyUpdateConfigContext(stack.getResourceCrn(), fullGateway));
+        result.put(CLUSTER_PROXY_UPDATE, getClusterProxyUpdateConfigContext(stack.getResourceCrn(), fullGateway, newGatewaySecrets));
         return result;
     }
 
@@ -129,10 +133,12 @@ public class GatewayCertRotationContextProvider extends AbstractKnoxCertRotation
         return customJobRotationContextBuilder.build();
     }
 
-    private RotationContext getClusterProxyUpdateConfigContext(String resourceCrn, Gateway gateway) {
+    private RotationContext getClusterProxyUpdateConfigContext(String resourceCrn, Gateway gateway, GatewayView newGatewaySecrets) {
         return ClusterProxyUpdateConfigRotationContext.builder()
                 .withResourceCrn(resourceCrn)
-                .withKnoxSecretPath(() -> clusterProxyRotationService.generateClusterProxySecretFormat(gateway.getTokenKeySecret().getSecret()))
+                .withNewGatewaySecrets(newGatewaySecrets)
+                .withCurrentGatewayId(gateway.getId())
+                .withKnoxSecretPath(() -> clusterProxySecretProvider.generateClusterProxySecretFormat(gateway.getTokenKeySecret().getSecret()))
                 .build();
     }
 

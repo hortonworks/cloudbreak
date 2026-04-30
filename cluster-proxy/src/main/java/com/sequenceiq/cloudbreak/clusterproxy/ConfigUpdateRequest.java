@@ -20,12 +20,6 @@ public class ConfigUpdateRequest {
     private String knoxSecretRef;
 
     @JsonCreator
-    public ConfigUpdateRequest(String clusterCrn, String uriOfKnox) {
-        this.clusterCrn = clusterCrn;
-        this.uriOfKnox = uriOfKnox;
-    }
-
-    @JsonCreator
     public ConfigUpdateRequest(String clusterCrn, String uriOfKnox, String knoxSecretRef) {
         this.clusterCrn = clusterCrn;
         this.uriOfKnox = uriOfKnox;
