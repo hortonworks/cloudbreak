@@ -4,7 +4,7 @@ import jakarta.inject.Inject;
 
 import org.testng.annotations.Test;
 
-import com.sequenceiq.it.cloudbreak.assertion.sdx.SdxAssertion;
+import com.sequenceiq.it.cloudbreak.assertion.stack.StackAssertion;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -18,7 +18,7 @@ public class SdxEncryptionProfileTests extends PreconditionSdxE2ETest {
     private SdxTestClient sdxTestClient;
 
     @Inject
-    private SdxAssertion sdxAssertion;
+    private StackAssertion stackAssertion;
 
     @Test(dataProvider = TEST_CONTEXT)
     @UseSpotInstances
@@ -37,11 +37,11 @@ public class SdxEncryptionProfileTests extends PreconditionSdxE2ETest {
                 .await(SdxClusterStatusResponse.RUNNING)
                 .awaitForHealthyInstances()
                 .then((tc, testDto, client) -> {
-                    sdxAssertion.validateFileContentExists(testDto, "/etc/cloudera-scm-server/cm.settings",
+                    stackAssertion.validateFileContentExists(testDto, "/etc/cloudera-scm-server/cm.settings",
                             "SUPPORTED_TLS_VERSIONS\\s*TLSv1.2,TLSv1.3");
-                    sdxAssertion.validateFileContentExists(testDto, "/etc/nginx/sites-enabled/ssl.conf",
+                    stackAssertion.validateFileContentExists(testDto, "/etc/nginx/sites-enabled/ssl.conf",
                             "ssl_protocols\\s*TLSv1.2\\s*TLSv1.3");
-                    sdxAssertion.validateFileContentExists(testDto, "/etc/nginx/sites-enabled/ssl-user-facing.conf",
+                    stackAssertion.validateFileContentExists(testDto, "/etc/nginx/sites-enabled/ssl-user-facing.conf",
                             "ssl_protocols\\s*TLSv1.2\\s*TLSv1.3");
                     return testDto;
                 })

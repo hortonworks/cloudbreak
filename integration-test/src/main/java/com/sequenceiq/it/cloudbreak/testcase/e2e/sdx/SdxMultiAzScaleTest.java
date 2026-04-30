@@ -18,7 +18,7 @@ import org.testng.annotations.Test;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.loadbalancer.LoadBalancerResponse;
-import com.sequenceiq.it.cloudbreak.assertion.sdx.SdxAssertion;
+import com.sequenceiq.it.cloudbreak.assertion.stack.StackAssertion;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonClusterManagerProperties;
 import com.sequenceiq.it.cloudbreak.context.Description;
@@ -47,7 +47,7 @@ public class SdxMultiAzScaleTest extends PreconditionSdxE2ETest {
     private SdxUtil sdxUtil;
 
     @Inject
-    private SdxAssertion sdxAssertion;
+    private StackAssertion stackAssertion;
 
     @Test(dataProvider = TEST_CONTEXT)
     @UseSpotInstances
@@ -101,7 +101,7 @@ public class SdxMultiAzScaleTest extends PreconditionSdxE2ETest {
                 })
                 .then((tc, testDto, client) -> {
                     List<LoadBalancerResponse> loadBalancers = sdxUtil.getLoadbalancers(testDto, client);
-                    sdxAssertion.validateLoadBalancerFQDNInTheHosts(testDto, loadBalancers);
+                    stackAssertion.validateLoadBalancerFQDNInTheHosts(testDto, loadBalancers);
                     return testDto;
                 })
                 .validate();

@@ -10,7 +10,7 @@ import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.loadbalancer.LoadBalancerResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
-import com.sequenceiq.it.cloudbreak.assertion.sdx.SdxAssertion;
+import com.sequenceiq.it.cloudbreak.assertion.stack.StackAssertion;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
@@ -33,7 +33,7 @@ public class SdxCloudStorageTest extends PreconditionSdxE2ETest {
     private SdxUtil sdxUtil;
 
     @Inject
-    private SdxAssertion sdxAssertion;
+    private StackAssertion stackAssertion;
 
     @Test(dataProvider = TEST_CONTEXT)
     @UseSpotInstances
@@ -67,7 +67,7 @@ public class SdxCloudStorageTest extends PreconditionSdxE2ETest {
                 })
                 .then((tc, testDto, client) -> {
                     List<LoadBalancerResponse> loadBalancers = sdxUtil.getLoadbalancers(testDto, client);
-                    sdxAssertion.validateLoadBalancerFQDNInTheHosts(testDto, loadBalancers);
+                    stackAssertion.validateLoadBalancerFQDNInTheHosts(testDto, loadBalancers);
                     return testDto;
                 })
                 .validate();
