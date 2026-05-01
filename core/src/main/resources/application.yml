@@ -884,7 +884,7 @@ existing-stack-patcher:
     fstab-validation:
       enabled: true
     aws-gp2-to-gp3-migration:
-      enabled: true
+      enabled: false
 
 dynamic-entitlement:
   entitlements:

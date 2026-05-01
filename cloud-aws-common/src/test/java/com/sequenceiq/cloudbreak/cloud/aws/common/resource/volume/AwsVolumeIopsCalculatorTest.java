@@ -93,7 +93,7 @@ public class AwsVolumeIopsCalculatorTest {
             "16000, 16000"
     })
     void testCalculateEquivalentIops(int volumeSizeGb, int expectedIops) {
-        int actualIops = underTest.getEquivalentGp3IopsforGp2Volume(volumeSizeGb);
+        int actualIops = underTest.getEquivalentGp3IopsForGp2Volume(volumeSizeGb);
         assertEquals(expectedIops, actualIops,
                 String.format("Volume size %d GB should yield %d IOPS", volumeSizeGb, expectedIops));
     }
@@ -102,9 +102,9 @@ public class AwsVolumeIopsCalculatorTest {
     void testSmallVolumeUsesGp3Baseline() {
         // Volumes under 1000 GB should get at least 3000 IOPS (GP3 baseline)
         // even if GP2 would give less
-        assertEquals(3000, underTest.getEquivalentGp3IopsforGp2Volume(10));
-        assertEquals(3000, underTest.getEquivalentGp3IopsforGp2Volume(100));
-        assertEquals(3000, underTest.getEquivalentGp3IopsforGp2Volume(999));
+        assertEquals(3000, underTest.getEquivalentGp3IopsForGp2Volume(10));
+        assertEquals(3000, underTest.getEquivalentGp3IopsForGp2Volume(100));
+        assertEquals(3000, underTest.getEquivalentGp3IopsForGp2Volume(999));
     }
 
     @Test
@@ -112,20 +112,20 @@ public class AwsVolumeIopsCalculatorTest {
         // Volumes that would get more than 3000 IOPS from GP2 should match that
         // GP2 formula: size * 3 IOPS/GB
         // 1001 * 3 = 3003
-        assertEquals(3003, underTest.getEquivalentGp3IopsforGp2Volume(1001));
+        assertEquals(3003, underTest.getEquivalentGp3IopsForGp2Volume(1001));
         // 2000 * 3 = 6000
-        assertEquals(6000, underTest.getEquivalentGp3IopsforGp2Volume(2000));
+        assertEquals(6000, underTest.getEquivalentGp3IopsForGp2Volume(2000));
         // 4000 * 3 = 12000
-        assertEquals(12000, underTest.getEquivalentGp3IopsforGp2Volume(4000));
+        assertEquals(12000, underTest.getEquivalentGp3IopsForGp2Volume(4000));
     }
 
     @Test
     void testLargeVolumeCappedAtMax() {
         // Volumes larger than 5333 GB would exceed 16000 IOPS limit
         // Should be capped at 16000
-        assertEquals(16000, underTest.getEquivalentGp3IopsforGp2Volume(5334));
-        assertEquals(16000, underTest.getEquivalentGp3IopsforGp2Volume(10000));
-        assertEquals(16000, underTest.getEquivalentGp3IopsforGp2Volume(100000));
+        assertEquals(16000, underTest.getEquivalentGp3IopsForGp2Volume(5334));
+        assertEquals(16000, underTest.getEquivalentGp3IopsForGp2Volume(10000));
+        assertEquals(16000, underTest.getEquivalentGp3IopsForGp2Volume(100000));
     }
 
     @Test
@@ -133,36 +133,36 @@ public class AwsVolumeIopsCalculatorTest {
         // Test exactly at the transition points
 
         // At 1000 GB: GP2 gives exactly 3000 IOPS, which equals GP3 baseline
-        assertEquals(3000, underTest.getEquivalentGp3IopsforGp2Volume(1000));
+        assertEquals(3000, underTest.getEquivalentGp3IopsForGp2Volume(1000));
 
         // At 5333 GB: GP2 gives 15999 IOPS (just under max)
-        assertEquals(15999, underTest.getEquivalentGp3IopsforGp2Volume(5333));
+        assertEquals(15999, underTest.getEquivalentGp3IopsForGp2Volume(5333));
 
         // At 5334 GB: GP2 would give 16002 IOPS, but capped at 16000
-        assertEquals(16000, underTest.getEquivalentGp3IopsforGp2Volume(5334));
+        assertEquals(16000, underTest.getEquivalentGp3IopsForGp2Volume(5334));
     }
 
     @Test
     void testMinimumVolumeSize() {
         // Even a 1 GB volume should get reasonable IOPS (GP3 baseline)
-        assertEquals(3000, underTest.getEquivalentGp3IopsforGp2Volume(1));
+        assertEquals(3000, underTest.getEquivalentGp3IopsForGp2Volume(1));
     }
 
     @Test
     void testTypicalUseCases() {
         // Test some typical real-world volume sizes
         // Small boot volume
-        assertEquals(3000, underTest.getEquivalentGp3IopsforGp2Volume(50));
+        assertEquals(3000, underTest.getEquivalentGp3IopsForGp2Volume(50));
         // Medium boot volume
-        assertEquals(3000, underTest.getEquivalentGp3IopsforGp2Volume(100));
+        assertEquals(3000, underTest.getEquivalentGp3IopsForGp2Volume(100));
         // Large boot volume
-        assertEquals(3000, underTest.getEquivalentGp3IopsforGp2Volume(500));
+        assertEquals(3000, underTest.getEquivalentGp3IopsForGp2Volume(500));
         // 1 TB data volume
-        assertEquals(3000, underTest.getEquivalentGp3IopsforGp2Volume(1000));
+        assertEquals(3000, underTest.getEquivalentGp3IopsForGp2Volume(1000));
         // 2 TB data volume
-        assertEquals(6000, underTest.getEquivalentGp3IopsforGp2Volume(2000));
+        assertEquals(6000, underTest.getEquivalentGp3IopsForGp2Volume(2000));
         // 5 TB data volume
-        assertEquals(15000, underTest.getEquivalentGp3IopsforGp2Volume(5000));
+        assertEquals(15000, underTest.getEquivalentGp3IopsForGp2Volume(5000));
     }
 
 }

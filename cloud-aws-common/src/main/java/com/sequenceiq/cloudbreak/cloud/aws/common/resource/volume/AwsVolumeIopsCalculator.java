@@ -41,7 +41,7 @@ public class AwsVolumeIopsCalculator {
      * @param volumeSizeGb the size of the volume in GB
      * @return the calculated IOPS value to use for the GP3 volume
      */
-    public int getEquivalentGp3IopsforGp2Volume(int volumeSizeGb) {
+    public int getEquivalentGp3IopsForGp2Volume(int volumeSizeGb) {
         // Calculate GP2 IOPS: 3 IOPS per GB
         int gp2Iops = volumeSizeGb * GP2_IOPS_PER_GB;
 

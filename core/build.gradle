@@ -297,8 +297,8 @@ dependencies {
   testImplementation group: 'com.jayway.restassured',     name: 'json-path'
   testImplementation group: 'com.h2database',             name: 'h2'
   testImplementation group: 'org.awaitility',             name: 'awaitility',          version: awaitilityVersion
-  testRuntimeOnly group: 'org.testcontainers',         name: 'postgresql',          version: testContainersVersion
-  testRuntimeOnly group: 'org.testcontainers',         name: 'junit-jupiter',       version: testContainersVersion
+  testImplementation group: 'org.testcontainers',         name: 'postgresql',          version: testContainersVersion
+  testImplementation group: 'org.testcontainers',         name: 'junit-jupiter',       version: testContainersVersion
   testImplementation group: 'org.assertj',                name: 'assertj-core',        version: assertjVersion
   testImplementation group: 'org.yaml',                   name: 'snakeyaml',           version: snakeYamlVersion
   testImplementation group: 'org.hamcrest',               name: 'hamcrest',            version: hamcrestVersion
@@ -310,4 +310,12 @@ sourceSets {
     main {
         java.srcDirs += "${projectDir}/src/main/generated"
     }
+}
+
+test {
+  if (project.hasProperty("componentTest")) {
+    include "com/sequenceiq/cloudbreak/service/component/**"
+  } else {
+    exclude "com/sequenceiq/cloudbreak/service/component/**"
+  }
 }

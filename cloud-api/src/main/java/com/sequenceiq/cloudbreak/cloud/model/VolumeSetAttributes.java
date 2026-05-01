@@ -152,17 +152,26 @@ public class VolumeSetAttributes {
 
         private CloudVolumeStatus cloudVolumeStatus;
 
+        private CloudVolumeModificationState modificationState;
+
+        public Volume(String id, String device, Integer size, String type, CloudVolumeUsageType cloudVolumeUsageType) {
+            this(id, device, size, type, cloudVolumeUsageType, null);
+        }
+
+        @JsonCreator
         public Volume(@JsonProperty("id") String id,
                 @JsonProperty("device") String device,
                 @JsonProperty("size") Integer size,
                 @JsonProperty("type") String type,
-                @JsonProperty("usageType") CloudVolumeUsageType cloudVolumeUsageType) {
+                @JsonProperty("usageType") CloudVolumeUsageType cloudVolumeUsageType,
+                @JsonProperty("modificationState") CloudVolumeModificationState modificationState) {
             this.id = id;
             this.device = device;
             this.type = type;
             this.size = size;
             this.cloudVolumeUsageType = cloudVolumeUsageType;
             this.cloudVolumeStatus = null;
+            this.modificationState = modificationState;
         }
 
         public String getId() {
@@ -213,6 +222,14 @@ public class VolumeSetAttributes {
             this.cloudVolumeStatus = cloudVolumeStatus;
         }
 
+        public CloudVolumeModificationState getModificationState() {
+            return modificationState;
+        }
+
+        public void setModificationState(CloudVolumeModificationState modificationState) {
+            this.modificationState = modificationState;
+        }
+
         @Override
         public String toString() {
             return "Volume{" +
@@ -221,6 +238,7 @@ public class VolumeSetAttributes {
                     ", size=" + size +
                     ", type='" + type + '\'' +
                     ", cloudVolumeUsageType=" + cloudVolumeUsageType +
+                    ", modificationState=" + modificationState +
                     '}';
         }
 

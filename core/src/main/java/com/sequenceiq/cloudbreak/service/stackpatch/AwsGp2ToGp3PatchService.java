@@ -4,7 +4,6 @@ import static com.sequenceiq.cloudbreak.domain.stack.StackPatchType.AWS_GP2_TO_G
 import static java.lang.String.format;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -18,13 +17,13 @@ import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.cloudera.thunderhead.service.common.usage.UsageProto;
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
@@ -35,6 +34,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.service.AwsCommonDiskUpdateSer
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AuthenticatedContextView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudConnectResources;
+import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeModificationState;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
 import com.sequenceiq.cloudbreak.common.json.Json;
@@ -48,8 +48,8 @@ import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stackstatus.StackStatusService;
 import com.sequenceiq.cloudbreak.util.CloudConnectorHelper;
-import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.common.api.type.ResourceType;
+import com.sequenceiq.common.model.AwsDiskType;
 
 import software.amazon.awssdk.services.ec2.model.DescribeVolumesModificationsRequest;
 import software.amazon.awssdk.services.ec2.model.DescribeVolumesModificationsResponse;
@@ -62,50 +62,41 @@ import software.amazon.awssdk.services.ec2.model.VolumeState;
 import software.amazon.awssdk.services.ec2.model.VolumeType;
 
 /**
- * This service is responsible for migrating AWS EBS volumes from gp2 to gp3 volume types. The general flow of the service is:
- * 1. Check if the stack is affected by the migration. A stack is affected if the local database has a record of any gp2 volumes.
- * 2. If the stack is affected, initiate the volume conversion.
- * <br/>
+ * Migrates AWS EBS volumes from gp2 to gp3.
+ * <ol>
+ *   <li>{@link #isAffected} — AWS stack, entitlement on, DB still lists migratable gp2 volumes.</li>
+ *   <li>{@link #doApply} — Starts AWS modification and/or polls EC2 until each batch completes.</li>
+ * </ol>
+ * <p/>
  * The volume conversion process requires multiple passes since volume migration can take up to 24 hours and there can be large numbers of volumes. The job
  * of the first pass is to get a list of all the volumes that need conversion and use the AWS API to initiate the conversion. Any subsequent
  * passes will then monitor the volumes to see if they have either completed successfully or failed. Additionally, each pass of the stack patcher will
  * only process a limited number of volumes. This is for the following reasons:
- * 1. Filters provided to the AWS API have a maximum number of values that can be provided
- * 2. Limits the number of AWS API calls that are needed so the API doesn't get throttled
- * 3. Eliminiates an unbounded state management string we store in the DB
- * <br/>
- * To keep track of which volumes need monitoring and which volumes failed or succeeded conversion this patch process uses the statusReason property of the
- * StackStatus object. The format is: started:vol1,vol2,vol3|failed:vol1,vol2|completed:vol1,vol2 - storing the complete list of volumes that started migration
- * and the list of volumes that failed (either to initiate or during migration). Every run of this process when hasBeenStarted is true must first get
- * the last UPDATE_IN_PROGRESS status and parse out which volumes to check (those in started that are not in failed) and which to
- * skip (those in a failed state).
- * <br/>
- * Some important rules:
- * 1. if doApply returns false, the process will execute again in the future. This should be used if volume migration is still in progress, e.g. if any
- *    of the volumes are still listed as "modifying" or "optimizing".
- * 2. If all the volumes failed to initiate the migration, the doApply should throw a new CloudbreakRuntimeException exception to make the stack process
- *    as failed.
- * 3. If all the volumes were migrated successfully, then the doApply should return true.
- * 4. Once a volume is successfully migrated, the volume information should be updated in the database and a usage event should be sent to
- *    record the success.
- * <br/>
- * Criteria for successful migration:
- * 1. The volume state is set to "completed" and volume type is listed as "gp3"
+ * <ol>
+ *   <li>Filters provided to the AWS API have a maximum number of values that can be provided</li>
+ *   <li>Limits the number of AWS API calls that are needed so the API doesn't get throttled</li>
+ *   <li>Eliminates an unbounded state management string we store in the DB</li>
+ * </ol>
+ * <p/>
+ * Runs over multiple scheduler passes: modification can take a long time and each pass caps how many volumes are
+ * described or converted (see batch limit constant) so Describe/Modify APIs stay within filter sizes and throttle limits.
+ * <p/>
+ * State is tracked with {@link DetailedStackStatus} (migration started → in progress → complete/failed) and with
+ * {@link CloudVolumeModificationState} on volume entries inside AWS_VOLUMESET / AWS_ROOT_DISK resource attributes.
+ * <p/>
+ * Rules:
+ * <ol>
+ *   <li>If {@link #doApply} returns {@code false}, the job runs again (still optimizing, more batches, or partial batch).</li>
+ *   <li>If every volume in an initiation attempt fails (no successes, at least one error), patch fails via
+ *       {@link ExistingStackPatchApplyException}.</li>
+ *   <li>When nothing remains to migrate and monitoring is finished, {@link #doApply} returns {@code true}.</li>
+ *   <li>Completed volumes update DB metadata to gp3 and emit usage.</li>
+ * </ol>
  */
 @Service
 public class AwsGp2ToGp3PatchService extends ExistingStackPatchService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsGp2ToGp3PatchService.class);
-
-    private static final String STARTED_PREFIX = "started:";
-
-    private static final String FAILED_PREFIX = "failed:";
-
-    private static final String COMPLETED_PREFIX = "completed:";
-
-    private static final String PART_SEPARATOR = "|";
-
-    private static final int NUM_STATE_PARTS = 3;
 
     private static final int VOLUME_BATCH_LIMIT = 50;
 
@@ -129,9 +120,6 @@ public class AwsGp2ToGp3PatchService extends ExistingStackPatchService {
 
     @Inject
     private AwsVolumeIopsCalculator volumeIopsCalculator;
-
-    @Inject
-    private StackUtil stackUtil;
 
     @Inject
     private EntitlementService entitlementService;
@@ -162,15 +150,10 @@ public class AwsGp2ToGp3PatchService extends ExistingStackPatchService {
             return false;
         }
 
-        // Make sure the entitlement is enabled for the stack's account
-        String accountId = Crn.safeFromString(stack.getResourceCrn()).getAccountId();
-        if (!entitlementService.isGp2toGp3MigrationEnabled(stack.getResourceCrn())) {
-            return false;
-        }
         LOGGER.debug("Calling isAffected() for stack {}", stack.getId());
         Collection<Resource> resources = resourceService.findAllByStackIdAndResourceTypeIn(stack.getId(),
                 List.of(ResourceType.AWS_ROOT_DISK, ResourceType.AWS_VOLUMESET));
-        List<VolumeSetAttributes.Volume> gp2Volumes = stackUtil.getGp2VolumesFromResources(resources);
+        List<VolumeSetAttributes.Volume> gp2Volumes = getGp2VolumesFromResources(resources);
         return !gp2Volumes.isEmpty();
     }
 
@@ -185,84 +168,86 @@ public class AwsGp2ToGp3PatchService extends ExistingStackPatchService {
      */
     @Override
     protected boolean doApply(Stack inputStack) throws ExistingStackPatchApplyException {
-        LOGGER.info("Starting GP2 to GP3 volume migration for stack {}", inputStack.getResourceCrn());
+        LOGGER.info("Running GP2 to GP3 volume migration for stack {}", inputStack.getResourceCrn());
+
+        // Make sure the entitlement is enabled for the stack's account
+        String accountId = Crn.safeFromString(inputStack.getResourceCrn()).getAccountId();
+        if (!entitlementService.isGp2toGp3MigrationEnabled(accountId)) {
+            LOGGER.info("Entitlement for GP2 to GP3 volume migration is not enabled for account {}", accountId);
+            return false;
+        }
 
         List<StackStatus> statusList = stackStatusService.findAllStackStatusesById(inputStack.getId());
         AmazonEc2Client awsClient = getAwsClient(inputStack);
 
         boolean hasBeenStarted = isStackPatchProcessStarted(statusList);
         if (hasBeenStarted) {
-            LOGGER.debug("Reviewing volume status for stack patcher");
+            LOGGER.info("Reviewing volume status for stack patcher");
             return checkVolumeMigration(inputStack, statusList, awsClient);
         } else {
-            LOGGER.debug("Starting patcher");
-            return startPatchProcess(inputStack, awsClient, null);
+            LOGGER.info("Starting patcher");
+            return startPatchProcess(inputStack, awsClient);
         }
     }
 
     /**
      * Starts the migration process. This is called the first time the stack patcher is run for a stack,
      * or when starting a new batch of volumes after a previous batch completes.
-     * 
+     *
      * @param inputStack the Stack object that was passed to the doApply method
      * @param awsClient the AWS EC2 client to use for volume operations
-     * @param volumeIdsToProcess optional list of specific volumes to process; if null, all eligible volumes are processed
-     * @return true if stack patch process should finish or false if another pass is needed
-     * @throws ExistingStackPatchApplyException if something went wrong and the stack patch process should be marked as failed
+     * @return {@code true} if there is nothing left to migrate; {@code false} if another scheduler pass is needed
+     * @throws ExistingStackPatchApplyException if initiation fails wholly or something else prevents continuing
      */
-    private boolean startPatchProcess(Stack inputStack, AmazonEc2Client awsClient, List<VolumeSetAttributes.Volume> volumeIdsToProcess)
+    private boolean startPatchProcess(Stack inputStack, AmazonEc2Client awsClient)
             throws ExistingStackPatchApplyException {
+        Collection<Resource> resources = resourceService.findAllByStackIdAndResourceTypeIn(inputStack.getId(),
+                List.of(ResourceType.AWS_ROOT_DISK, ResourceType.AWS_VOLUMESET));
+        List<VolumeSetAttributes.Volume> validGp2Volumes = getValidatedBatchOfGp2VolumeListForMigration(inputStack, awsClient, resources);
+
+        if (validGp2Volumes.isEmpty()) {
+            LOGGER.info("No valid GP2 volumes to migrate for stack {} after validation", inputStack.getResourceCrn());
+            return true;
+        }
+
         Stack stack = inputStack;
-        stack.setStackStatus(new StackStatus(stack, Status.UPDATE_REQUESTED, "GP2 migration started",
+        stack.setStackStatus(new StackStatus(stack, Status.UPDATE_IN_PROGRESS, format("GP2 migration started for %s GP2 volumes", validGp2Volumes.size()),
                 DetailedStackStatus.VOLUME_MIGRATION_STARTED));
-        // We are going to update the stack status again so we need to update the stack object with the new status.
         stack = stackService.save(stack);
         stackPatchUsageReporterService.reportUsage(stack, AWS_GP2_TO_GP3_MIGRATION,
-                UsageProto.CDPStackPatchEventType.Value.UNSET, "GP2 migration started");
+                UsageProto.CDPStackPatchEventType.Value.UNSET, format("GP2 migration started for %s GP2 volumes", validGp2Volumes.size()));
 
-        // This is a new stack patch job for the stack so we'll start from the beginning.
-        // The initiateVolumeConversionForStack() method will return a ConversionStatus object that contains the status of the volume conversion.
-        ConversionStatus status = initiateAwsVolumeConversionForStack(inputStack, awsClient, volumeIdsToProcess);
+        boolean inBatch = false;
+        if (validGp2Volumes.size() > VOLUME_BATCH_LIMIT) {
+            inBatch = true;
+            validGp2Volumes = validGp2Volumes.subList(0, VOLUME_BATCH_LIMIT);
+            LOGGER.info("Found more than {} GP2 volumes to migrate for stack {}, limiting to {} volumes",
+                    VOLUME_BATCH_LIMIT, stack.getResourceCrn(), VOLUME_BATCH_LIMIT);
+        }
 
-        if (!status.cloudbreakExceptions().isEmpty() && status.successes().isEmpty()) {
-            // If all the volumes threw an error then just make the patcher as Failed. We'll log a message,
-            // update the status, and then throw an error.
-            String message = format("Failed to apply GP2 to GP3 migration for stack %s: %s",
-                    stack.getResourceCrn(), stack.getId());
-            LOGGER.error(message);
-            String stateMessage = buildMigrationStateMessage(List.of(), new ArrayList<>(status.cloudbreakExceptions().keySet()), List.of());
-            stack.setStackStatus(new StackStatus(stack, Status.UPDATE_FAILED, stateMessage,
-                    DetailedStackStatus.VOLUME_MIGRATION_FAILED));
-            stackService.save(stack);
-            throw new ExistingStackPatchApplyException(message);
-        } else if (status.cloudbreakExceptions().isEmpty() && !status.successes().isEmpty()) {
-            // No exceptions were thrown. Return false so the stackpatcher gets marked as SKIPPED and reviewed again. Store the list
-            // of volumes that got started in the status message.
-            LOGGER.debug("All the migrations were started.");
-            String stateMessage = buildMigrationStateMessage(status.successes(), List.of(), List.of());
-            stack.setStackStatus(new StackStatus(stack, Status.UPDATE_IN_PROGRESS, stateMessage,
-                    DetailedStackStatus.VOLUME_MIGRATION_IN_PROGRESS));
-            stackService.save(stack);
-            return false;
-        } else if (status.cloudbreakExceptions().isEmpty() && status.successes().isEmpty()) {
-            // both are empty, so there were no gp2 volumes to convert. Just return true.
-            LOGGER.info(format("No GP2 volumes were found to migrate for stack %s.", stack.getId()));
-            stack.setStackStatus(new StackStatus(stack, Status.UPDATE_FAILED, "No valid GP2 volumes found",
-                    DetailedStackStatus.VOLUME_MIGRATION_FAILED));
-            stackService.save(stack);
-            return true;
-        } else {
-            // Return false so the stackpatcher gets marked as SKIPPED and reviewed again. Even though some failed we need to check the rest.
-            // Store both started and failed volume lists in the status reason for subsequent runs to parse.
-            String message = format("Failed to apply some of GP2 to GP3 migrations for stack %s: %s",
-                    stack.getResourceCrn(), stack.getId());
-            LOGGER.error(message);
-            String stateMessage = buildMigrationStateMessage(status.successes(), new ArrayList<>(status.cloudbreakExceptions().keySet()), List.of());
-            stack.setStackStatus(new StackStatus(stack, Status.UPDATE_IN_PROGRESS, stateMessage,
-                    DetailedStackStatus.VOLUME_MIGRATION_IN_PROGRESS));
-            stackService.save(stack);
+        ConversionStatus status = initiateAwsVolumeConversionForStack(inputStack, awsClient, validGp2Volumes);
+        updateResourceMetadata(inputStack.getId(), new HashSet<>(status.successes()), Set.of(), status.cloudbreakExceptions().keySet(), resources);
+
+        if (inBatch) {
+            // We only processed a subgroup of volumes, so we need to run another iteration. Even if they all failed,
+            // we need to attempt the next batch.
             return false;
         }
+
+        // If this point is reached, then there is only one batch.
+        if (status.successes().isEmpty() && !status.cloudbreakExceptions().isEmpty()) {
+            String message = format("All volumes in batch failed immediately id: %s crn: %s", stack.getId(), stack.getResourceCrn());
+            LOGGER.error(message);
+            stack.setStackStatus(new StackStatus(stack, Status.AVAILABLE, "Failed to apply GP2 to GP3 migration",
+                    DetailedStackStatus.VOLUME_MIGRATION_COMPLETE));
+            stackService.save(stack);
+
+            // Nothing to recheck to just return true.
+            return true;
+        }
+
+        // Return false to re-run the stack patch process to check on in-progress volumes.
+        return false;
     }
 
     /**
@@ -278,36 +263,43 @@ public class AwsGp2ToGp3PatchService extends ExistingStackPatchService {
      * @throws ExistingStackPatchApplyException if something went wrong and the stack patch process should be marked as failed
      */
     private boolean checkVolumeMigration(Stack stack, List<StackStatus> statusList, AmazonEc2Client awsClient) throws ExistingStackPatchApplyException {
-        // Parse the last UPDATE_IN_PROGRESS status to get volumes that started migration and volumes that failed
-        MigrationVolumeState migrationState = parseMigrationStateFromStatus(statusList);
-        boolean anotherPassNeeded = updateVolumeStates(migrationState, awsClient, stack);
-        String stateMessage = buildMigrationStateMessage(migrationState.startedVolumeIds(),
-                migrationState.failedVolumeIds(), migrationState.completedVolumeIds());
+        Collection<Resource> resources = resourceService.findAllByStackIdAndResourceTypeIn(stack.getId(),
+                List.of(ResourceType.AWS_ROOT_DISK, ResourceType.AWS_VOLUMESET));
+        List<VolumeSetAttributes.Volume> cloudbreakGp2Volumes = getGp2VolumesFromResourcesByState(resources,
+                CloudVolumeModificationState.GP2_TO_GP3_IN_PROGRESS);
+
+        boolean anotherPassNeeded = updateVolumeStates(cloudbreakGp2Volumes, awsClient, stack, resources);
         if (anotherPassNeeded) {
-            stack.setStackStatus(new StackStatus(stack, Status.UPDATE_IN_PROGRESS, stateMessage,
-                    DetailedStackStatus.VOLUME_MIGRATION_IN_PROGRESS));
-            stackService.save(stack);
             return false;
         } else {
-            // All the conversions finished.
-            stack.setStackStatus(new StackStatus(stack, Status.AVAILABLE, stateMessage,
-                    DetailedStackStatus.VOLUME_MIGRATION_COMPLETE));
-            stackService.save(stack);
+            List<VolumeSetAttributes.Volume> validGp2Volumes = getValidatedBatchOfGp2VolumeListForMigration(stack, awsClient, resources);
 
-            // The current batch was finished, check to see if another batch of volumes needs to be processed.
-            List<VolumeSetAttributes.Volume> nextBatch = getNextBatch(stack, awsClient);
-            if  (nextBatch.isEmpty()) {
-                // There are no volumes remaining.
+            if (validGp2Volumes.isEmpty()) {
+                Pair<Long, Long> finalResults = countGp2ToGp3TerminalVolumesFromResources(resources);
+
+                // No more volumes to process, just mark the stack patcher as done.
+                stack.setStackStatus(new StackStatus(stack, Status.AVAILABLE,
+                        format("GP2 migration finished. Failed: %s Succeeded: %s", finalResults.getLeft(), finalResults.getRight()),
+                        DetailedStackStatus.VOLUME_MIGRATION_COMPLETE));
+                stack = stackService.save(stack);
                 stackPatchUsageReporterService.reportUsage(stack, AWS_GP2_TO_GP3_MIGRATION,
-                        UsageProto.CDPStackPatchEventType.Value.UNSET, "GP2 migration finished");
+                        UsageProto.CDPStackPatchEventType.Value.UNSET,
+                        format("GP2 migration finished. Failed: %s Succeeded: %s", finalResults.getLeft(), finalResults.getRight()));
                 return true;
             }
 
-            stackPatchUsageReporterService.reportUsage(stack, AWS_GP2_TO_GP3_MIGRATION,
-                    UsageProto.CDPStackPatchEventType.Value.UNSET, "GP2 migration moving to next batch");
+            if (validGp2Volumes.size() > VOLUME_BATCH_LIMIT) {
+                validGp2Volumes = validGp2Volumes.subList(0, VOLUME_BATCH_LIMIT);
+                LOGGER.info("Found more than {} GP2 volumes to migrate for stack {}, limiting to {} volumes",
+                        VOLUME_BATCH_LIMIT, stack.getResourceCrn(), VOLUME_BATCH_LIMIT);
+            }
 
-            // There is a new batch of volumes that need to be processed.
-            return startPatchProcess(stack, awsClient, nextBatch);
+            ConversionStatus status = initiateAwsVolumeConversionForStack(stack, awsClient, validGp2Volumes);
+            // Pass a null to so that we get a refreshed list of Resources to update.
+            updateResourceMetadata(stack.getId(), new HashSet<>(status.successes()), Set.of(), status.cloudbreakExceptions().keySet(), null);
+            // If this point is reached, there was a previous batch so we don't want to mark the stack patch
+            // as failed. Just return false, the next pass will summary everything.
+            return false;
         }
     }
 
@@ -315,40 +307,46 @@ public class AwsGp2ToGp3PatchService extends ExistingStackPatchService {
      * Updates the migration state of volumes by checking their current status in AWS.
      * Iterates through all volumes that started migration and categorizes them as completed,
      * failed, or still in-progress. Updates the database metadata for any newly completed volumes.
-     * 
-     * @param migrationState the current migration state with lists of started, failed, and completed volume IDs
+     *
+     * @param inProgressVolumes volumes marked in-progress for gp2→gp3 in resource metadata
      * @param awsClient the AWS EC2 client to query volume status
      * @param stack the stack being patched
      * @return true if another pass is needed (volumes still in progress), false if all volumes are complete or failed
+     *         or the input List is empty
      * @throws ExistingStackPatchApplyException if unable to retrieve volume information from AWS
      */
-    private boolean updateVolumeStates(MigrationVolumeState migrationState, AmazonEc2Client awsClient, Stack stack) throws ExistingStackPatchApplyException {
-        List<String> newStartedList = new ArrayList<>();
-        List<String> newlyCompletedList = new ArrayList<>();
+    private boolean updateVolumeStates(List<VolumeSetAttributes.Volume> inProgressVolumes,
+            AmazonEc2Client awsClient, Stack stack, Collection<Resource> resources) throws ExistingStackPatchApplyException {
+        if (inProgressVolumes.isEmpty()) {
+            return false;
+        }
+
+        Set<String> newlyCompletedList = new HashSet<>();
+        Set<String> newlyFailedList = new HashSet<>();
+        Map<String, Volume> awsVolumes = getAwsVolumeInfo(inProgressVolumes, awsClient);
+        Map<String, VolumeModification> awsVolumeModifications = getLatestVolumeModification(
+                inProgressVolumes.stream().map(VolumeSetAttributes.Volume::getId).toList(), awsClient);
         boolean anotherPassNeeded = false;
-        for (String volumeId : migrationState.startedVolumeIds()) {
+        for (VolumeSetAttributes.Volume volume : inProgressVolumes) {
             // Iterate through all the started volume IDs and check their status.
-            Optional<Volume> awsVolume = getAwsVolumeInfo(volumeId, awsClient);
-            if  (awsVolume.isEmpty()) {
+            Volume awsVolume = awsVolumes.get(volume.getId());
+            if (awsVolume == null) {
                 // this shouldn't happen, but if it does, we need further investigation.
-                throw new ExistingStackPatchApplyException(format("Unable to get volume info for volume from AWS: %s", volumeId));
+                throw new ExistingStackPatchApplyException(format("Unable to get volume info for volume from AWS: %s", volume.getId()));
             }
-            MigrationState state = isVolumeMigrationComplete(awsVolume.get(), getLatestVolumeModification(volumeId, awsClient));
+            MigrationState state = isVolumeMigrationComplete(awsVolume, awsVolumeModifications.get(volume.getId()));
             switch (state) {
                 case COMPLETE:
-                    // Add to completed list. The completed list can only grow.
-                    migrationState.completedVolumeIds().add(volumeId);
-                    newlyCompletedList.add(volumeId);
+                    newlyCompletedList.add(volume.getId());
+                    stackPatchUsageReporterService.reportUsage(stack, AWS_GP2_TO_GP3_MIGRATION, UsageProto.CDPStackPatchEventType.Value.UNSET,
+                            "Conversion successful for " + volume.getId());
                     break;
                 case FAILED:
-                    // Add to the failed list. The failed list can only grow.
-                    migrationState.failedVolumeIds().add(volumeId);
+                    newlyFailedList.add(volume.getId());
                     stackPatchUsageReporterService.reportUsage(stack, AWS_GP2_TO_GP3_MIGRATION, UsageProto.CDPStackPatchEventType.Value.UNSET,
-                            "Conversion failed for " + volumeId);
+                            "Conversion failed for " + volume.getId());
                     break;
                 case IN_PROGRESS:
-                    // Add to the new list for volumes that are still in-progress. This list should either shrink or stay the same.
-                    newStartedList.add(volumeId);
                     anotherPassNeeded = true;
                     break;
                 default:
@@ -357,46 +355,9 @@ public class AwsGp2ToGp3PatchService extends ExistingStackPatchService {
             }
         }
 
-        // Update the migration state with the new list of in-progress volumes.
-        migrationState.startedVolumeIds().clear();
-        migrationState.startedVolumeIds().addAll(newStartedList);
-
-        for (String volumeId : newlyCompletedList) {
-            stackPatchUsageReporterService.reportUsage(stack, AWS_GP2_TO_GP3_MIGRATION, UsageProto.CDPStackPatchEventType.Value.UNSET,
-                    "Conversion successful for " + volumeId);
-            updateResourceMetadata(stack.getId(), volumeId);
-        }
+        updateResourceMetadata(stack.getId(), Set.of(), newlyCompletedList, newlyFailedList, resources);
 
         return anotherPassNeeded;
-    }
-
-    /**
-     * Retrieves the next batch of GP2 volumes to migrate for the given stack.
-     * This method excludes volumes that have already been processed in previous migration runs
-     * and limits the batch size to VOLUME_BATCH_LIMIT to prevent AWS API throttling.
-     * 
-     * @param stack the stack to get volumes from
-     * @param awsClient the AWS EC2 client to validate volumes
-     * @return a list of validated GP2 volumes to migrate, up to VOLUME_BATCH_LIMIT in size
-     */
-    private List<VolumeSetAttributes.Volume> getNextBatch(Stack stack, AmazonEc2Client awsClient) {
-        // Step 1: Get a list of GP2 volumes that Cloudbreak has a record of.
-        List<VolumeSetAttributes.Volume> validGp2Volumes = getValidatedGp2VolumeList(stack, awsClient);
-
-        // Step 2: Volume IDs already recorded from past completed migration runs.
-        Set<String> visitedIds = parseCompletePastMigrationStateFromStatus(stack.getId());
-
-        List<VolumeSetAttributes.Volume> batch = new ArrayList<>();
-        for (VolumeSetAttributes.Volume volume : validGp2Volumes) {
-            if (batch.size() >= VOLUME_BATCH_LIMIT) {
-                break;
-            }
-            String volumeId = volume.getId();
-            if (volumeId != null && !visitedIds.contains(volumeId)) {
-                batch.add(volume);
-            }
-        }
-        return batch;
     }
 
     /**
@@ -406,26 +367,26 @@ public class AwsGp2ToGp3PatchService extends ExistingStackPatchService {
      * @param modState the latest VolumeModificationState for the volume
      * @return MigrationState indicating COMPLETE, IN_PROGRESS, or FAILED
      */
-    private MigrationState isVolumeMigrationComplete(Volume awsVolume, Optional<VolumeModification> modState) {
-        if (modState.isEmpty()) {
+    private MigrationState isVolumeMigrationComplete(Volume awsVolume, VolumeModification modState) {
+        if (modState == null) {
             // This is an edge case where we did not get any modification state from AWS.
-            LOGGER.warn("Migration state was empty");
+            LOGGER.warn("Migration state was empty for volume: {}", awsVolume.volumeId());
             return MigrationState.FAILED;
         }
 
-        VolumeModificationState state = modState.get().modificationState();
+        VolumeModificationState state = modState.modificationState();
         if (state.equals(VolumeModificationState.MODIFYING) || state.equals(VolumeModificationState.OPTIMIZING)) {
             // Migration is still in progress so we need another pass of this stack patcher.
             return MigrationState.IN_PROGRESS;
         } else if (state.equals(VolumeModificationState.FAILED)) {
             // The migration failed during the process. Add to failed list so we skip on subsequent runs.
-            LOGGER.warn("Migration state was failed: {}", modState.get().statusMessage());
+            LOGGER.warn("Migration state was failed: {}", modState.statusMessage());
             return MigrationState.FAILED;
         } else if (state.equals(VolumeModificationState.UNKNOWN_TO_SDK_VERSION)) {
             if (awsVolume.state().equals(VolumeState.IN_USE) && awsVolume.volumeType().equals(VolumeType.GP3)) {
                 return MigrationState.COMPLETE;
             } else {
-                // Since the state is definitely not FAILED and the destired state is not yet met, return IN_PROGRESS
+                // Since the state is definitely not FAILED and the desired state is not yet met, return IN_PROGRESS
                 return MigrationState.IN_PROGRESS;
             }
         } else {
@@ -463,16 +424,19 @@ public class AwsGp2ToGp3PatchService extends ExistingStackPatchService {
                 .toList();
 
         for (int i = sorted.size() - 1; i >= 0; i--) {
-            if (sorted.get(i).getDetailedStackStatus().equals(DetailedStackStatus.VOLUME_MIGRATION_COMPLETE) ||
-                    sorted.get(i).getDetailedStackStatus().equals(DetailedStackStatus.VOLUME_MIGRATION_FAILED)) {
-                // If we encounter an ending state first, then we know the previous process (if any) has finished
-                // and a new process should start.
-                return false;
-            }
-
-            if (sorted.get(i).getDetailedStackStatus().equals(DetailedStackStatus.VOLUME_MIGRATION_IN_PROGRESS)) {
-                // If we encounter an starting state first, then we know the stack patch process has started.
-                return true;
+            switch (sorted.get(i).getDetailedStackStatus()) {
+                case VOLUME_MIGRATION_COMPLETE -> {
+                    // If we encounter an ending state first, then we know the previous process (if any) has finished
+                    // and a new process should start.
+                    return false;
+                }
+                case VOLUME_MIGRATION_STARTED -> {
+                    // If we encounter a starting state first, then we know the stack patch process has started.
+                    return true;
+                }
+                default -> {
+                    // do nothing. move to the next status.
+                }
             }
         }
 
@@ -481,142 +445,24 @@ public class AwsGp2ToGp3PatchService extends ExistingStackPatchService {
     }
 
     /**
-     * Builds the status message storing volumes that started migration, completed, and failed.
-     * Format: started:vol1,vol2,vol3|failed:vol4,vol5|completed:vol6,vol7
-     * 
-     * @param startedVolumeIds list of volume IDs that successfully started migration and are still in progress
-     * @param failedVolumeIds list of volume IDs that failed (either to initiate or during migration)
-     * @param completedVolumeIds list of volume IDs that have completed migration successfully
-     * @return the formatted status message string
-     */
-    private String buildMigrationStateMessage(List<String> startedVolumeIds, List<String> failedVolumeIds, List<String> completedVolumeIds) {
-        String startedPart = STARTED_PREFIX + (startedVolumeIds != null ? String.join(",", startedVolumeIds) : "");
-        String failedPart = FAILED_PREFIX + (failedVolumeIds != null ? String.join(",", failedVolumeIds) : "");
-        String completedPart = COMPLETED_PREFIX + (completedVolumeIds != null ? String.join(",", completedVolumeIds) : "");
-        return startedPart + PART_SEPARATOR + failedPart +  PART_SEPARATOR + completedPart;
-    }
-
-    /**
-     * Parses the status message from the last UPDATE_IN_PROGRESS to extract volumes that started migration,
-     * completed migration, and failed migration.
-     * 
-     * @param statusList the list of stack statuses (will find the most recent UPDATE_IN_PROGRESS)
-     * @return MigrationVolumeState with started, failed, and completed volume IDs, or empty lists if not parseable
-     */
-    private MigrationVolumeState parseMigrationStateFromStatus(List<StackStatus> statusList) {
-        Optional<StackStatus> lastUpdateInProgress = findLastUpdateInProgressStatus(statusList);
-        if (lastUpdateInProgress.isEmpty()) {
-            return new MigrationVolumeState();
-        }
-        String statusReason = lastUpdateInProgress.get().getStatusReason();
-        if (Strings.isNullOrEmpty(statusReason)) {
-            return new MigrationVolumeState();
-        }
-        return parseMigrationStateMessage(statusReason);
-    }
-
-    /**
-     * Collects all volume IDs from stack statuses for past successful migration runs
-     * ({@link DetailedStackStatus#VOLUME_MIGRATION_COMPLETE}).
-     *
-     * @param stackId the stack id
-     * @return distinct volume IDs from started, completed, and failed lists in those status reasons
-     */
-    private Set<String> parseCompletePastMigrationStateFromStatus(Long stackId) {
-        List<StackStatus> statusList = stackStatusService.findAllStackStatusesById(stackId);
-
-        List<StackStatus> completedRuns = statusList.stream()
-                .filter(status -> status.getStatus() == Status.AVAILABLE)
-                .filter(status -> status.getDetailedStackStatus() == DetailedStackStatus.VOLUME_MIGRATION_COMPLETE)
-                .toList();
-
-        Set<String> visited = new HashSet<>();
-        for  (StackStatus status : completedRuns) {
-            MigrationVolumeState currState = parseMigrationStateMessage(status.getStatusReason());
-            visited.addAll(currState.startedVolumeIds());
-            visited.addAll(currState.completedVolumeIds());
-            visited.addAll(currState.failedVolumeIds());
-        }
-
-        return visited;
-    }
-
-    /**
-     * Parses a status reason string into MigrationVolumeState.
-     * Expected format: started:vol1,vol2|failed:vol3|completed:vol4,vol5
-     * 
-     * @param statusReason the status reason string to parse
-     * @return MigrationVolumeState containing lists of started, failed, and completed volume IDs
-     */
-    private MigrationVolumeState parseMigrationStateMessage(String statusReason) {
-        List<String> started = new ArrayList<>();
-        List<String> failed = new ArrayList<>();
-        List<String> completed = new ArrayList<>();
-
-        if (statusReason.contains(PART_SEPARATOR)) {
-            String[] parts = statusReason.split("\\" + PART_SEPARATOR, NUM_STATE_PARTS);
-            for (String part : parts) {
-                String trimmed = part.trim();
-                if (trimmed.startsWith(STARTED_PREFIX)) {
-                    started = parseVolumeIds(trimmed, STARTED_PREFIX);
-                } else if (trimmed.startsWith(FAILED_PREFIX)) {
-                    failed = parseVolumeIds(trimmed, FAILED_PREFIX);
-                } else if (trimmed.startsWith(COMPLETED_PREFIX)) {
-                    completed = parseVolumeIds(trimmed, COMPLETED_PREFIX);
-                }
-            }
-        }
-        return new MigrationVolumeState(started, failed, completed);
-    }
-
-    /**
-     * Parses a comma-separated list of volume IDs from an input string after removing a prefix.
-     * 
-     * @param input the input string containing prefix and volume IDs
-     * @param prefix the prefix to remove from the input string
-     * @return list of trimmed, non-empty volume IDs
-     */
-    private List<String> parseVolumeIds(String input, String prefix) {
-        String ids = input.substring(prefix.length()).trim();
-        if (ids.isEmpty()) {
-            return new ArrayList<>();
-        }
-        return Arrays.stream(ids.split(","))
-                .map(String::trim)
-                .filter(s -> !s.isEmpty())
-                .collect(Collectors.toList());
-    }
-
-    /**
-     * Finds the most recent StackStatus with UPDATE_IN_PROGRESS and VOLUME_MIGRATION_IN_PROGRESS.
-     * 
-     * @param statusList the list of stack statuses to search
-     * @return the most recent matching StackStatus, or empty if none found
-     */
-    private Optional<StackStatus> findLastUpdateInProgressStatus(List<StackStatus> statusList) {
-        return statusList.stream()
-                .filter(status -> status.getStatus() == Status.UPDATE_IN_PROGRESS)
-                .filter(status -> status.getDetailedStackStatus() == DetailedStackStatus.VOLUME_MIGRATION_IN_PROGRESS)
-                .max(Comparator.comparing(StackStatus::getCreated));
-    }
-
-    /**
      * Returns the latest volume modification state for a given volume ID by querying AWS.
      * 
-     * @param volumeId the ID of the volume to check
+     * @param volumeIds a List of volume IDs to check
      * @param awsClient the AWS EC2 client to use
      * @return the latest volume modification state, or empty if no modification state is found
      */
-    private Optional<VolumeModification> getLatestVolumeModification(String volumeId, AmazonEc2Client awsClient) {
+    private Map<String, VolumeModification> getLatestVolumeModification(List<String> volumeIds, AmazonEc2Client awsClient) {
         DescribeVolumesModificationsRequest request = DescribeVolumesModificationsRequest.builder()
-                .volumeIds(volumeId)
+                .volumeIds(volumeIds)
                 .build();
 
         DescribeVolumesModificationsResponse response = awsClient.describeVolumeModifications(request);
         if (response.volumesModifications().isEmpty()) {
-            return Optional.empty();
+            return new HashMap<>();
+        } else {
+            return response.volumesModifications().stream().collect(Collectors.toMap(VolumeModification::volumeId, Function.identity()));
         }
-        return Optional.ofNullable(response.volumesModifications().getFirst());
+
     }
 
     /**
@@ -627,48 +473,45 @@ public class AwsGp2ToGp3PatchService extends ExistingStackPatchService {
      * - Are GP2 in AWS
      * - Are attached to a VM (IN_USE state)
      * <p/>
-     * This method is bounded to account for large clusters. The maximum number of volumes returned is
-     * limited by the VOLUME_BATCH_LIMIT constant.
+     * Returns every migratable gp2 volume that passes validation (no batch cap here; callers limit to
+     * {@link #VOLUME_BATCH_LIMIT} when calling EC2 modify).
      * 
      * @param stack the stack to get the GP2 volumes from
      * @param awsClient the AWS EC2 client to use for querying volume state
      * @return a list of GP2 volumes that are valid and exist in AWS, or an empty list if no valid volumes are found
      */
-    private List<VolumeSetAttributes.Volume> getValidatedGp2VolumeList(Stack stack, AmazonEc2Client awsClient) {
-        // Get a list of gp2 volumes that Cloudbreak knows about.
-        Collection<Resource> resources = resourceService.findAllByStackIdAndResourceTypeIn(stack.getId(),
-                List.of(ResourceType.AWS_ROOT_DISK, ResourceType.AWS_VOLUMESET));
-        List<VolumeSetAttributes.Volume> cloudbreakGp2Volumes = stackUtil.getGp2VolumesFromResources(resources);
+    private List<VolumeSetAttributes.Volume> getValidatedBatchOfGp2VolumeListForMigration(Stack stack, AmazonEc2Client awsClient,
+            Collection<Resource> resources) {
+        List<VolumeSetAttributes.Volume> cloudbreakGp2Volumes = getGp2VolumesFromResources(resources);
 
-        if (cloudbreakGp2Volumes.size() > VOLUME_BATCH_LIMIT) {
-            // We want to limit the number of volume we process at any given point in time. Otherwise, there is the possibility
-            // of getting throttled by AWS or providing too many filter values to the API and getting errors.
-            cloudbreakGp2Volumes = cloudbreakGp2Volumes.subList(0, VOLUME_BATCH_LIMIT);
-            LOGGER.warn("Found more than {} GP2 volumes to migrate for stack {}, limiting to {} volumes",
-                    VOLUME_BATCH_LIMIT, stack.getResourceCrn(), VOLUME_BATCH_LIMIT);
-        }
-
-        // Based on the stack information, get a map of volume IDs to AWS volume state.
-        Map<String, Volume> awsVolumeMap = getAwsGp2Volumes(stack, awsClient, cloudbreakGp2Volumes);
+        Map<String, Volume> awsVolumeMap = getAwsVolumeInfo(cloudbreakGp2Volumes, awsClient);
 
         // Filter only volumes that actually exist in AWS and are GP2
         List<VolumeSetAttributes.Volume> validGp2Volumes = cloudbreakGp2Volumes.stream()
                 .filter(volume -> {
                     if (volume.getId() == null || volume.getId().isEmpty()) {
-                        // Volume ID is empty, don't include since we need the ID later.
+                        // Volume ID is empty, don't include since we need the ID later. Should never happen, but
+                        // validating input to make sure.
+                        LOGGER.warn("Volume ID was empty in cloudbreak DB.");
                         return false;
                     }
                     if (volume.getSize() == null || volume.getSize() <= 0) {
-                        // Volume size is empty, don't include since we need the size later.
+                        // Volume size is empty, don't include since we need the size later. Should never happen, but
+                        // validating input to make sure.
+                        LOGGER.warn("Volume size was empty in cloudbreak DB.");
                         return false;
                     }
                     Volume awsVolume = awsVolumeMap.get(volume.getId());
                     if (awsVolume == null) {
-                        // The volume is unknown to AWS, don't include.
+                        // The volume is unknown to AWS, don't include. Should never happen, but
+                        // validating input to make sure.
+                        LOGGER.warn("Volume in cloudbreak DB is not known by AWS. volumeID: {}", volume.getId());
                         return false;
                     }
                     if (VolumeType.GP2 != awsVolume.volumeType()) {
-                        // The volume is not GP2, don't include.
+                        // The volume in AWS not GP2, don't include. Should never happen, but
+                        // validating input to make sure.
+                        LOGGER.warn("GP2 volume in cloudbreak DB is not GP2 in AWS. volumeID: {} awsType: {}", volume.getId(), awsVolume.volumeType());
                         return false;
                     }
                     if (VolumeState.IN_USE != awsVolume.state()) {
@@ -676,6 +519,7 @@ public class AwsGp2ToGp3PatchService extends ExistingStackPatchService {
                         // See https://docs.aws.amazon.com/ebs/latest/userguide/ebs-describing-volumes.html#volume-state for more information.
                         // We don't want to migrate volumes that are not attached to a VM (e.g. AVAILABLE) or volumes that have
                         // a state of ERROR, CREATING, etc.
+                        LOGGER.warn("AWS volume state is not IN_USE. volumeID: {} awsState: {}", volume.getId(), awsVolume.state());
                         return false;
                     }
                     return true;
@@ -687,37 +531,20 @@ public class AwsGp2ToGp3PatchService extends ExistingStackPatchService {
 
     /**
      * Initiates the AWS volume conversion from GP2 to GP3 for a stack.
-     * This method validates GP2 volumes, calculates appropriate IOPS for GP3 conversion,
-     * and initiates the AWS volume modification for each volume. Volumes are processed
-     * individually to avoid AWS API throttling.
-     * 
-     * @param stack the stack to initiate the volume conversion for
+     * Calculates GP3 IOPS per volume and calls EC2 modify for each id. Volumes are processed
+     * one at a time to reduce throttling.
+     *
+     * @param stack the stack (for logging and usage on errors)
      * @param awsClient the AWS EC2 client used to perform volume modifications
-     * @param volumeIdsToProcess optional list of specific volumes to process; if null or empty,
-     *                           all valid GP2 volumes will be retrieved and processed
-     * @return a ConversionStatus object containing the status of the volume conversion.
-     *         The object contains a map of volume IDs to CloudbreakException for failed conversions
-     *         and a list of volume IDs that were successfully initiated. If no volumes were migrated,
-     *         the object will contain an empty map and list.
+     * @param volumesToMigrate gp2 volumes to convert (callers supply a batch with valid ids and sizes)
+     * @return successes and per-volume {@link CloudbreakException}s for failed initiations
      */
-    private ConversionStatus initiateAwsVolumeConversionForStack(Stack stack, AmazonEc2Client awsClient, List<VolumeSetAttributes.Volume> volumeIdsToProcess) {
-        List<VolumeSetAttributes.Volume> validGp2Volumes = volumeIdsToProcess;
-        if ((volumeIdsToProcess == null) || volumeIdsToProcess.isEmpty()) {
-            validGp2Volumes = getValidatedGp2VolumeList(stack, awsClient);
-        }
-
-        if (validGp2Volumes.isEmpty()) {
-            LOGGER.info("No valid GP2 volumes to migrate for stack {} after validation", stack.getResourceCrn());
-            return new ConversionStatus(new HashMap<>(), new ArrayList<>());
-        }
-
-        // Calculate IOPS for each volume based on its size. We have already filtered out missing IDs and Size, so
-        // we don't need to recheck the values again.
-        Map<String, Integer> volumeIopsMap = validGp2Volumes.stream()
+    private ConversionStatus initiateAwsVolumeConversionForStack(Stack stack, AmazonEc2Client awsClient, List<VolumeSetAttributes.Volume> volumesToMigrate) {
+        Map<String, Integer> volumeIopsMap = volumesToMigrate.stream()
                 .collect(Collectors.toMap(
                         VolumeSetAttributes.Volume::getId,
                         volume -> {
-                            int targetIops = volumeIopsCalculator.getEquivalentGp3IopsforGp2Volume(volume.getSize());
+                            int targetIops = volumeIopsCalculator.getEquivalentGp3IopsForGp2Volume(volume.getSize());
                             LOGGER.debug("Volume {} ({} GB) will be migrated with {} IOPS", volume.getId(), volume.getSize(), targetIops);
                             return targetIops;
                         }
@@ -739,7 +566,7 @@ public class AwsGp2ToGp3PatchService extends ExistingStackPatchService {
                         iops);
                 conversionStatus.successes().add(volumeId);
             } catch (CloudbreakException e) {
-                String message = format("Migration AWS error for volume %s : %s", stack.getResourceCrn(), volumeId);
+                String message = format("Migration AWS error for volume. volume id: %s resource crn: %s", volumeId, stack.getResourceCrn());
                 LOGGER.error(message, e);
                 conversionStatus.cloudbreakExceptions().put(volumeId, e);
                 stackPatchUsageReporterService.reportUsage(stack, AWS_GP2_TO_GP3_MIGRATION, UsageProto.CDPStackPatchEventType.Value.UNSET,
@@ -761,92 +588,104 @@ public class AwsGp2ToGp3PatchService extends ExistingStackPatchService {
     }
 
     /**
-     * Updates the database resource metadata to reflect a migrated GP3 volume.
-     * After AWS volume migration is initiated, this method updates the stored VolumeSetAttributes
-     * to show GP3 as the volume type with the specified IOPS, ensuring database state matches AWS reality.
-     * 
-     * @param stackId the ID of the stack whose resources should be updated
-     * @param volumeId the ID of the volume that was migrated
+     * Updates persisted {@link VolumeSetAttributes} on stack resources after initiation or polling.
+     * Marks volumes in-progress after successful modify initiation, finished (and gp3 type) when done,
+     * or failed when initiation or migration fails.
+     *
+     * @param stackId the stack owning the resources
+     * @param inProgressList volume ids that just started modifying
+     * @param finishedList volume ids confirmed migrated to gp3
+     * @param failedList volume ids that failed initiation or aws migration
      */
-    private void updateResourceMetadata(Long stackId, String volumeId) {
-        Collection<Resource> resources = resourceService.getAllByStackId(stackId);
-        LOGGER.debug("Updating database metadata for volume {}", volumeId);
+    private void updateResourceMetadata(Long stackId, Set<String> inProgressList, Set<String> finishedList,
+            Set<String> failedList, Collection<Resource> resources) {
+        if (resources == null || resources.isEmpty()) {
+            resources = resourceService.findAllByStackIdAndResourceTypeIn(stackId,
+                    List.of(ResourceType.AWS_ROOT_DISK, ResourceType.AWS_VOLUMESET));
+        }
 
-        boolean found = false;
         for (Resource res : resources) {
+            boolean saveNeeded = false;
             Optional<VolumeSetAttributes> volumeSetOptional = resourceAttributeUtil.getTypedAttributes(res, VolumeSetAttributes.class);
             if (volumeSetOptional.isPresent()) {
                 VolumeSetAttributes volumeSet = volumeSetOptional.get();
                 List<VolumeSetAttributes.Volume> existingVolumes = volumeSet.getVolumes();
                 if (existingVolumes != null) {
-                    for (VolumeSetAttributes.Volume volume : existingVolumes) {
-                        if (volumeId.equals(volume.getId())) {
-                            volume.setType(VolumeType.GP3.toString());
-                            res.setAttributes(new Json(volumeSet));
-                            resourceService.save(res);
-                            LOGGER.info("Successfully updated volume {} to GP3", volumeId);
-                            found = true;
-                            break;
-                        }
-                    }
-                }
-                if (found) {
-                    break;
+                    saveNeeded = updateVolumeInformation(inProgressList, finishedList, failedList, existingVolumes, volumeSet, res);
                 }
             }
-        }
-
-        if (!found) {
-            LOGGER.warn("Volume {} not found in resources for stack {}", volumeId, stackId);
+            if (saveNeeded) {
+                resourceService.save(res);
+                LOGGER.info("Successfully saved resource {} - {}", res.getId(), res.getResourceName());
+            }
         }
     }
 
     /**
-     * Queries AWS EC2 API to retrieve volume information for the specified Cloudbreak volumes.
-     * Returns a map of volume IDs to their corresponding AWS Volume objects for quick lookup.
-     * 
-     * @param stack the stack to retrieve volumes from
-     * @param awsClient the AWS EC2 client to use for querying
-     * @param cloudbreakGp2Volumes the list of Cloudbreak volumes to query in AWS
-     * @return a map of volume ID to AWS Volume object
+     * Used to store the state of the AWS gp2→gp3 modification outcome in the appropriate {@link VolumeSetAttributes.Volume}
+     * by setting the modification state on the volume. The following logic is implemented:
+     * <p/>
+     * If volume in  {@code inProgressList} -> set modification state to GP2_TO_GP3_IN_PROGRESS<br/>
+     * If volume in  {@code failedList} -> set modification state to GP2_TO_GP3_FAILED<br/>
+     * If volume in  {@code finishedList} -> set modification state to GP2_TO_GP3_FINISHED and volume type to GP3<br/>
+     *
+     * @return true if any volume was updated (caller should persist {@code res})
      */
-    private Map<String, Volume> getAwsGp2Volumes(Stack stack, AmazonEc2Client awsClient, List<VolumeSetAttributes.Volume> cloudbreakGp2Volumes) {
-        if (cloudbreakGp2Volumes.isEmpty()) {
-            return Map.of();
+    private boolean updateVolumeInformation(Set<String> inProgressList, Set<String> finishedList,
+            Set<String> failedList, List<VolumeSetAttributes.Volume> existingVolumes, VolumeSetAttributes volumeSet,
+            Resource res) {
+        boolean changesMade = false;
+        for (VolumeSetAttributes.Volume volume : existingVolumes) {
+            if (inProgressList.contains(volume.getId())) {
+                volume.setModificationState(CloudVolumeModificationState.GP2_TO_GP3_IN_PROGRESS);
+                res.setAttributes(new Json(volumeSet));
+                LOGGER.info("Updating volume to in-progress - {}", volume.getId());
+                changesMade = true;
+            } else if (failedList.contains(volume.getId())) {
+                volume.setModificationState(CloudVolumeModificationState.GP2_TO_GP3_FAILED);
+                res.setAttributes(new Json(volumeSet));
+                LOGGER.info("Updating volume to failed - {}", volume.getId());
+                changesMade = true;
+            } else if (finishedList.contains(volume.getId())) {
+                volume.setModificationState(CloudVolumeModificationState.GP2_TO_GP3_FINISHED);
+                volume.setType(VolumeType.GP3.toString());
+                res.setAttributes(new Json(volumeSet));
+                LOGGER.info("Updating volume to finished - {}", volume.getId());
+                changesMade = true;
+            }
         }
+        return changesMade;
+    }
 
-        List<String> volumeIds = cloudbreakGp2Volumes.stream()
+    /**
+     * Describes the given volumes in EC2 and returns a map keyed by aws volume id.
+     *
+     * @param volumes cloudbreak-side volume rows (null or empty ids are skipped)
+     * @param awsClient EC2 client
+     * @return volume id → EC2 Volume; missing ids omitted (empty response yields empty map)
+     */
+    private Map<String, Volume> getAwsVolumeInfo(List<VolumeSetAttributes.Volume> volumes, AmazonEc2Client awsClient) {
+        if (volumes.isEmpty()) {
+            return new HashMap<>();
+        }
+        LOGGER.debug("Querying {} volumes in EC2", volumes.size());
+
+        List<String> volumeIdStrings = volumes.stream()
                 .map(VolumeSetAttributes.Volume::getId)
+                .filter(id -> id != null && !id.isEmpty())
                 .toList();
-
-        DescribeVolumesRequest request = DescribeVolumesRequest.builder()
-                .volumeIds(volumeIds)
-                .build();
-
-        DescribeVolumesResponse response = awsClient.describeVolumes(request);
-        return response.volumes().stream()
-                .collect(Collectors.toMap(Volume::volumeId, Function.identity()));
-    }
-
-    /**
-     * Queries AWS EC2 API to retrieve information for a specific volume.
-     * 
-     * @param volumeId the ID of the volume to query
-     * @param awsClient the AWS EC2 client to use for querying
-     * @return the AWS Volume object if found, or empty if the volume doesn't exist
-     */
-    private Optional<Volume> getAwsVolumeInfo(String volumeId, AmazonEc2Client awsClient) {
-        LOGGER.debug("Querying volume {}", volumeId);
+        if (volumeIdStrings.isEmpty()) {
+            return new HashMap<>();
+        }
 
         DescribeVolumesRequest describeVolumeRequest = DescribeVolumesRequest.builder()
-                .volumeIds(volumeId)
+                .volumeIds(volumeIdStrings)
                 .build();
         DescribeVolumesResponse response = awsClient.describeVolumes(describeVolumeRequest);
         if (response.volumes().isEmpty()) {
-            return Optional.empty();
+            return new HashMap<>();
         } else {
-            Volume volume = response.volumes().get(0);
-            return Optional.of(volume);
+            return response.volumes().stream().collect(Collectors.toMap(Volume::volumeId, Function.identity()));
         }
     }
 
@@ -857,44 +696,100 @@ public class AwsGp2ToGp3PatchService extends ExistingStackPatchService {
      * @return the authenticated AWS EC2 client
      */
     @VisibleForTesting
-    AmazonEc2Client getAwsClient(Stack stack) {
+    public AmazonEc2Client getAwsClient(Stack stack) {
         CloudConnectResources ccr = cloudConnectorHelper.getCloudConnectorResources(stack);
         AuthenticatedContext authContext = ccr.getAuthenticatedContext();
         return new AuthenticatedContextView(authContext).getAmazonEC2Client();
     }
 
     /**
-     * Holds the parsed migration state from stack status. This is only used internally to allow for simplier maintenance of state.
+     * Retrieves GP2 volumes from the stack's resource metadata stored in the database.
+     * This method examines AWS_VOLUMESET and AWS_ROOT_DISK resources to identify volumes
+     * with GP2 type.
+     *
+     * NOTE: This returns database metadata which may be stale if volumes were modified
+     * outside of Cloudbreak. Always validate against actual AWS state before making changes.
+     *
+     * @return a list of GP2 volumes found in the stack's resource metadata
      */
-    private static class MigrationVolumeState {
-        private List<String> startedVolumeIds;
+    @VisibleForTesting
+    List<VolumeSetAttributes.Volume> getGp2VolumesFromResources(Collection<Resource> resources) {
+        LOGGER.debug("Checking {} resources for unprocessed GP2 volumes", resources.size());
 
-        private List<String> failedVolumeIds;
+        List<VolumeSetAttributes.Volume> gp2Volumes = resources.stream()
+                .map(resourceAttributeUtil::<VolumeSetAttributes>getTypedAttributes)
+                .flatMap(Optional::stream)
+                .map(VolumeSetAttributes::getVolumes)
+                .flatMap(List::stream)
+                .filter(volume -> AwsDiskType.Gp2.toString().equalsIgnoreCase(volume.getType()))
+                .filter(volume -> volume.getModificationState() == null)
+                .collect(Collectors.toList());
 
-        private List<String> completedVolumeIds;
-
-        private MigrationVolumeState() {
-            this.startedVolumeIds = new ArrayList<>();
-            this.failedVolumeIds = new ArrayList<>();
-            this.completedVolumeIds = new ArrayList<>();
-        }
-
-        private MigrationVolumeState(List<String> startedVolumeIds, List<String> failedVolumeIds, List<String> completedVolumeIds) {
-            this.startedVolumeIds = startedVolumeIds;
-            this.failedVolumeIds = failedVolumeIds;
-            this.completedVolumeIds = completedVolumeIds;
-        }
-
-        public List<String> startedVolumeIds() {
-            return startedVolumeIds;
-        }
-
-        public List<String> failedVolumeIds() {
-            return failedVolumeIds;
-        }
-
-        public List<String> completedVolumeIds() {
-            return completedVolumeIds;
-        }
+        LOGGER.debug("Found {} GP2 volumes from stack resources", gp2Volumes.size());
+        return gp2Volumes;
     }
+
+    /**
+     * Retrieves GP2 volumes from the stack's resource metadata stored in the database.
+     * This method examines AWS_VOLUMESET and AWS_ROOT_DISK resources to identify volumes
+     * with GP2 type.
+     *
+     * NOTE: This returns database metadata which may be stale if volumes were modified
+     * outside of Cloudbreak. Always validate against actual AWS state before making changes.
+     *
+     * @param resources stack resources to scan
+     * @param modificationState modification state to match (e.g. in-progress)
+     * @return matching gp2 volumes from resource metadata
+     */
+    @VisibleForTesting
+    List<VolumeSetAttributes.Volume> getGp2VolumesFromResourcesByState(Collection<Resource> resources, CloudVolumeModificationState modificationState) {
+        LOGGER.debug("Checking {} resources for GP2 volumes by state {}", resources.size(), modificationState.name());
+
+        List<VolumeSetAttributes.Volume> gp2Volumes = resources.stream()
+                .map(resourceAttributeUtil::<VolumeSetAttributes>getTypedAttributes)
+                .flatMap(Optional::stream)
+                .map(VolumeSetAttributes::getVolumes)
+                .flatMap(List::stream)
+                .filter(volume -> AwsDiskType.Gp2.toString().equalsIgnoreCase(volume.getType()))
+                .filter(volume -> (volume.getModificationState() != null) && (volume.getModificationState().equals(modificationState)))
+                .collect(Collectors.toList());
+
+        LOGGER.debug("Found {} GP2 volumes from stack resources", gp2Volumes.size());
+        return gp2Volumes;
+    }
+
+    /**
+     * Counts volumes in terminal GP2→GP3 migration states from stack resource metadata (same resource
+     * traversal as {@link #getGp2VolumesFromResourcesByState}).
+     *
+     * @param resources stack resources to scan
+     * @return left: volumes with {@link CloudVolumeModificationState#GP2_TO_GP3_FAILED} and type Gp2;
+     *         right: volumes with {@link CloudVolumeModificationState#GP2_TO_GP3_FINISHED} and type Gp3
+     */
+    private Pair<Long, Long> countGp2ToGp3TerminalVolumesFromResources(Collection<Resource> resources) {
+        LOGGER.debug("Counting GP2 to GP3 terminal-state volumes across {} resources", resources.size());
+
+        List<VolumeSetAttributes.Volume> volumes = resources.stream()
+                .map(resourceAttributeUtil::<VolumeSetAttributes>getTypedAttributes)
+                .flatMap(Optional::stream)
+                .map(VolumeSetAttributes::getVolumes)
+                .flatMap(List::stream)
+                .toList();
+
+        long failedGp2Count = volumes.stream()
+                .filter(volume -> CloudVolumeModificationState.GP2_TO_GP3_FAILED.equals(volume.getModificationState()))
+                .filter(volume -> AwsDiskType.Gp2.toString().equalsIgnoreCase(volume.getType()))
+                .count();
+
+        long finishedGp3Count = volumes.stream()
+                .filter(volume -> CloudVolumeModificationState.GP2_TO_GP3_FINISHED.equals(volume.getModificationState()))
+                .filter(volume -> AwsDiskType.Gp3.toString().equalsIgnoreCase(volume.getType()))
+                .count();
+
+        LOGGER.debug("Found {} GP2_TO_GP3_FAILED Gp2 volumes and {} GP2_TO_GP3_FINISHED Gp3 volumes",
+                failedGp2Count, finishedGp3Count);
+
+        return Pair.of(failedGp2Count, finishedGp3Count);
+    }
+
 }

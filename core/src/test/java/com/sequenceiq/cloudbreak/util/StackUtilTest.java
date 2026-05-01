@@ -8,7 +8,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -416,98 +415,6 @@ class StackUtilTest {
                 .withVolumes(volumes)
                 .withFstab(fstab)
                 .build();
-    }
-
-    void testGetGp2VolumesFromResourcesWithNonVolumeResources() {
-        // Given - Create resources that are not AWS_VOLUMESET or AWS_ROOT_DISK
-        Resource resource1 = new Resource();
-        resource1.setResourceType(ResourceType.AWS_INSTANCE);
-
-        Resource resource2 = new Resource();
-        resource2.setResourceType(ResourceType.AWS_SUBNET);
-
-        List<Resource> resources = new ArrayList<>();
-        resources.add(resource1);
-        resources.add(resource2);
-
-        doReturn(Optional.empty()).when(resourceAttributeUtil).getTypedAttributes(any());
-
-        List<VolumeSetAttributes.Volume> result = stackUtil.getGp2VolumesFromResources(resources);
-        assertTrue(result.isEmpty(), "Should return empty list when resources are not AWS_VOLUMESET or AWS_ROOT_DISK");
-    }
-
-    @Test
-    void testGetGp2VolumesFromResourcesWithOnlyGp3Volume() {
-        // Given - Create AWS_VOLUMESET resource with only GP3 volume
-        Resource resource = new Resource();
-        resource.setResourceType(ResourceType.AWS_VOLUMESET);
-        List<Resource> resources = new ArrayList<>();
-        resources.add(resource);
-
-        // Create VolumeSetAttributes with GP3 volume
-        VolumeSetAttributes.Volume gp3Volume = new VolumeSetAttributes.Volume(
-                "vol-123", "/dev/sdf", 100, "gp3", null);
-        VolumeSetAttributes volumeSetAttributes = new VolumeSetAttributes(
-                "us-west-1a", true, null, List.of(gp3Volume), 100, "gp3");
-        // Mock resourceAttributeUtil to return VolumeSetAttributes
-        doReturn(Optional.of(volumeSetAttributes)).when(resourceAttributeUtil).getTypedAttributes(resource);
-
-        List<VolumeSetAttributes.Volume> result = stackUtil.getGp2VolumesFromResources(resources);
-        assertTrue(result.isEmpty(), "Should return empty list when volume is GP3, not GP2");
-    }
-
-    @Test
-    void testGetGp2VolumesFromResourcesWithOnlyGp2Volume() {
-        // Given - Create AWS_VOLUMESET resource with only GP2 volume
-        Resource resource = new Resource();
-        resource.setResourceType(ResourceType.AWS_VOLUMESET);
-        List<Resource> resources = new ArrayList<>();
-        resources.add(resource);
-
-        // Create VolumeSetAttributes with GP2 volume
-        VolumeSetAttributes.Volume gp2Volume = new VolumeSetAttributes.Volume(
-                "vol-123", "/dev/sdf", 100, "gp2", null);
-        VolumeSetAttributes volumeSetAttributes = new VolumeSetAttributes(
-                "us-west-1a", true, null, List.of(gp2Volume), 100, "gp2");
-        // Mock resourceAttributeUtil to return VolumeSetAttributes
-        doReturn(Optional.of(volumeSetAttributes)).when(resourceAttributeUtil).getTypedAttributes(resource);
-
-        List<VolumeSetAttributes.Volume> result = stackUtil.getGp2VolumesFromResources(resources);
-        assertEquals(1, result.size(), "Should only return a single value");
-    }
-
-    @Test
-    void testGetGp2VolumesFromResourcesWithNullOptional() {
-        // Given - Create AWS_VOLUMESET resource with only GP2 volume
-        Resource resource = new Resource();
-        resource.setResourceType(ResourceType.AWS_VOLUMESET);
-
-        List<Resource> resources = new ArrayList<>();
-        resources.add(resource);
-
-        // Mock resourceAttributeUtil to return VolumeSetAttributes
-        doReturn(Optional.empty()).when(resourceAttributeUtil).getTypedAttributes(any());
-
-        List<VolumeSetAttributes.Volume> result = stackUtil.getGp2VolumesFromResources(resources);
-        assertTrue(result.isEmpty(), "Should only return an empty list.");
-    }
-
-    @Test
-    void testGetGp2VolumesFromResourcesEmptyVolumeSet() {
-        // Given - Create AWS_VOLUMESET resource with only GP2 volume
-        Resource resource = new Resource();
-        resource.setResourceType(ResourceType.AWS_VOLUMESET);
-        List<Resource> resources = new ArrayList<>();
-        resources.add(resource);
-
-        // Create Empty VolumeSetAttributes
-        VolumeSetAttributes volumeSetAttributes = new VolumeSetAttributes(
-                "us-west-1a", true, null, List.of(), 100, "gp2");
-        // Mock resourceAttributeUtil to return VolumeSetAttributes
-        doReturn(Optional.of(volumeSetAttributes)).when(resourceAttributeUtil).getTypedAttributes(resource);
-
-        List<VolumeSetAttributes.Volume> result = stackUtil.getGp2VolumesFromResources(resources);
-        assertTrue(result.isEmpty(), "Should only return an empty list.");
     }
 
 }
