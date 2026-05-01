@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.gcp;
 
 import static com.sequenceiq.cloudbreak.cloud.gcp.GcpDiskType.LOCAL_SSD;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
@@ -19,6 +20,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
+import com.sequenceiq.common.model.VolumeInfo;
 
 @ExtendWith(MockitoExtension.class)
 class GcpResourceVolumeConnectorTest {
@@ -78,5 +80,25 @@ class GcpResourceVolumeConnectorTest {
         return new VolumeSetAttributes.Builder()
                 .withVolumes(volumes)
                 .build();
+    }
+
+    @Test
+    void getVolumeInfoFromResourceVolumeForLocalSsd() {
+        VolumeSetAttributes.Volume vol = new VolumeSetAttributes.Volume("i2v1", "/dev/disk/by-id/google-abc", 10, "local-ssd", CloudVolumeUsageType.GENERAL);
+        VolumeInfo volumeInfo = underTest.getVolumeInfoFromResourceVolume(vol);
+        assertEquals("abc", volumeInfo.getId());
+        assertEquals("/dev/disk/by-id/google-abc", volumeInfo.getDevice());
+        assertEquals("10", volumeInfo.getSize());
+        assertFalse(volumeInfo.isDatabaseType());
+    }
+
+    @Test
+    void getVolumeInfoFromResourceVolumeForNonEphemeralDevice() {
+        VolumeSetAttributes.Volume vol = new VolumeSetAttributes.Volume("i2v1", "/dev/disk/by-id/google-abc", 10, "HDD", CloudVolumeUsageType.DATABASE);
+        VolumeInfo volumeInfo = underTest.getVolumeInfoFromResourceVolume(vol);
+        assertEquals("i2v1", volumeInfo.getId());
+        assertEquals("/dev/disk/by-id/google-abc", volumeInfo.getDevice());
+        assertEquals("10", volumeInfo.getSize());
+        assertTrue(volumeInfo.isDatabaseType());
     }
 }

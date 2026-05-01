@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.compute;
 
+import static com.sequenceiq.cloudbreak.cloud.gcp.GcpConstants.DEVICE_NAME_PREFIX;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -100,6 +102,10 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
 
             String diskDeviceName = getDiskDeviceName(volume.getType(), localSsdDeviceNameGenerator, volumeName);
 
+            if (GcpDiskType.LOCAL_SSD.value().equals(volume.getType())) {
+                volumeName = diskDeviceName.replace(DEVICE_NAME_PREFIX, "");
+            }
+
             volumes.add(new VolumeSetAttributes.Volume(volumeName, diskDeviceName,
                     volume.getSize(), volume.getType(), volume.getVolumeUsageType()));
         }
@@ -122,7 +128,7 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
         if (GcpDiskType.LOCAL_SSD.value().equals(volumeType)) {
             return deviceNameGenerator.next();
         } else {
-            return GcpConstants.DEVICE_NAME_PREFIX + volumeName;
+            return DEVICE_NAME_PREFIX + volumeName;
         }
     }
 

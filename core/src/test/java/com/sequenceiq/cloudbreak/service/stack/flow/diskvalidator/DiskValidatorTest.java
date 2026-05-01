@@ -11,6 +11,7 @@ import static com.sequenceiq.cloudbreak.service.metrics.MetricType.VOLUME_MOUNT_
 import static com.sequenceiq.cloudbreak.service.stack.flow.diskvalidator.DiskValidator.VOLUMES_INADEQUATE_EVENT_TYPE;
 import static com.sequenceiq.cloudbreak.service.stack.flow.diskvalidator.LsblkFetcher.LSBLK_COMMAND;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -36,6 +37,7 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
+import com.sequenceiq.cloudbreak.cloud.ResourceVolumeConnector;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
@@ -116,6 +118,9 @@ class DiskValidatorTest {
     public void init() {
         CloudConnector cloudConnector = mock(CloudConnector.class);
         when(cloudConnector.scriptResources()).thenReturn(() -> FETCHER_SCRIPT);
+        ResourceVolumeConnector resourceVolumeConnector = mock(ResourceVolumeConnector.class);
+        when(cloudConnector.volumeConnector()).thenReturn(resourceVolumeConnector);
+        doCallRealMethod().when(resourceVolumeConnector).getVolumeInfoFromResourceVolume(any());
         when(cloudPlatformConnectors.get(any())).thenReturn(cloudConnector);
     }
 

@@ -26,7 +26,6 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
-import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
 import com.sequenceiq.cloudbreak.common.metrics.MetricService;
@@ -37,6 +36,7 @@ import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFa
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
+import com.sequenceiq.common.model.VolumeInfo;
 
 @Service
 public class DiskValidator {
@@ -67,7 +67,8 @@ public class DiskValidator {
 
     public void validateDisks(Stack stack, Set<Node> nodes) throws CloudbreakOrchestratorFailedException {
         List<Resource> diskResources = stack.getDiskResources();
-        MultiValuedMap<String, VolumeInfo> volumeInfos = getVolumeInfos(diskResources);
+        MultiValuedMap<String, VolumeInfo> volumeInfos = getVolumeInfos(diskResources,
+                new CloudPlatformVariant(stack.cloudPlatform(), stack.getPlatformVariant()));
 
         Set<String> hostNames = nodes.stream().map(Node::getHostname).collect(Collectors.toSet());
         List<GatewayConfig> allGatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
@@ -82,13 +83,14 @@ public class DiskValidator {
         }
     }
 
-    private MultiValuedMap<String, VolumeInfo> getVolumeInfos(List<Resource> diskResources) {
+    private MultiValuedMap<String, VolumeInfo> getVolumeInfos(List<Resource> diskResources, CloudPlatformVariant platformVariant) {
         MultiValuedMap<String, VolumeInfo> volumeInfos = new ArrayListValuedHashMap<>();
         for (Resource diskResource : diskResources) {
             resourceAttributeUtil.getTypedAttributes(diskResource, VolumeSetAttributes.class).ifPresent(volumeSetAttributes -> {
                 for (VolumeSetAttributes.Volume volume : volumeSetAttributes.getVolumes()) {
-                    volumeInfos.put(diskResource.getInstanceId(), new VolumeInfo(volume.getId(), volume.getDevice(), volume.getSize().toString(),
-                            volume.getCloudVolumeUsageType() == CloudVolumeUsageType.DATABASE));
+                    // This fix is if disk validator is called on existing clusters
+                    VolumeInfo volumeInfo = volumeIdWithDeviceFetcher.fetchVolumeInfo(platformVariant, volume);
+                    volumeInfos.put(diskResource.getInstanceId(), volumeInfo);
                 }
             });
         }
