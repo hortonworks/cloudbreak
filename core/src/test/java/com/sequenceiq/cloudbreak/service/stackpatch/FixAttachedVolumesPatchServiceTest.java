@@ -21,7 +21,6 @@ import static org.mockito.Mockito.when;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
@@ -48,7 +47,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cloud.notification.ResourceNotifier;
-import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -77,9 +75,6 @@ import com.sequenceiq.common.api.type.ResourceType;
 class FixAttachedVolumesPatchServiceTest {
     @Mock
     private ResourceService resourceService;
-
-    @Mock
-    private ResourceAttributeUtil resourceAttributeUtil;
 
     @Mock
     private GatewayConfigService gatewayConfigService;
@@ -147,7 +142,6 @@ class FixAttachedVolumesPatchServiceTest {
                 List.of(new VolumeSetAttributes.Volume("id", "/dev/disk/azure/scsi1/lun1", 10, "type", CloudVolumeUsageType.GENERAL)));
         Resource volumeSetResource = createAzureVolumeSetResource("instance1", volumeSetAttributes).getKey();
         when(resourceService.findAllByResourceStatusAndResourceTypeAndStackId(any(), any(), any())).thenReturn(List.of(volumeSetResource));
-        when(resourceAttributeUtil.getTypedAttributes(volumeSetResource, VolumeSetAttributes.class)).thenReturn(Optional.of(volumeSetAttributes));
 
         boolean affected = underTest.isAffected(stack);
 
@@ -164,7 +158,7 @@ class FixAttachedVolumesPatchServiceTest {
                 createVolumeSetAttributes(null, List.of(new VolumeSetAttributes.Volume("id", "/dev/sdc", 10, "type", CloudVolumeUsageType.GENERAL)));
         Resource volumeSetResource = createAzureVolumeSetResource("instance1", volumeSetAttributes).getKey();
         when(resourceService.findAllByResourceStatusAndResourceTypeAndStackId(any(), any(), any())).thenReturn(List.of(volumeSetResource));
-        when(resourceAttributeUtil.getTypedAttributes(volumeSetResource, VolumeSetAttributes.class)).thenReturn(Optional.of(volumeSetAttributes));
+        when(stackUtil.hasDiskResourcesWithDeprecatedDevicePaths(stack)).thenReturn(true);
 
         boolean affected = underTest.isAffected(stack);
 

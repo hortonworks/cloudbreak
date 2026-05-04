@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.service.telemetry;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -30,6 +31,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
@@ -49,6 +51,8 @@ import com.sequenceiq.cloudbreak.telemetry.context.TelemetryContext;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentClusterType;
 import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringUrlResolver;
 import com.sequenceiq.cloudbreak.telemetry.orchestrator.TelemetrySaltPillarDecorator;
+import com.sequenceiq.cloudbreak.tls.CipherSuiteProvider;
+import com.sequenceiq.cloudbreak.tls.EncryptionProfileProvider;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
 import com.sequenceiq.common.api.telemetry.model.DataBusCredential;
 import com.sequenceiq.common.api.telemetry.model.Features;
@@ -106,6 +110,13 @@ public class TelemetryConfigServiceTest {
 
     @Mock
     private TelemetryFeatureService telemetryFeatureService;
+
+    @Spy
+    private CipherSuiteProvider cipherSuiteProvider;
+
+    @Spy
+    @InjectMocks
+    private EncryptionProfileProvider encryptionProfileProvider;
 
     @BeforeEach
     public void setUp() throws TransactionService.TransactionExecutionException {
@@ -300,6 +311,37 @@ public class TelemetryConfigServiceTest {
 
         CdpAccessKeyType cdpAccessKeyType = underTest.getCdpAccessKeyType(stack);
         assertEquals(CdpAccessKeyType.ECDSA, cdpAccessKeyType);
+    }
+
+    @Test
+    public void testCreateTelemetryContextWithTlsCipherSuitesInExactlyOrdering() throws IOException {
+        // GIVEN
+        UserManagementProto.Account account = UserManagementProto.Account.newBuilder()
+                .setClouderaManagerLicenseKey("myLicense")
+                .build();
+        MonitoringCredential monitoringCredential = new MonitoringCredential();
+        monitoringCredential.setAccessKey("accessKey");
+        monitoringCredential.setPrivateKey("privateKey");
+
+        given(umsClient.getAccountDetails(anyString())).willReturn(account);
+        given(entitlementService.isComputeMonitoringEnabled(anyString())).willReturn(true);
+        given(altusMachineUserService.getOrCreateMonitoringCredentialIfNeeded(any(Stack.class), any(CdpAccessKeyType.class)))
+                .willReturn(Optional.of(monitoringCredential));
+        given(dataBusEndpointProvider.getDataBusEndpoint(anyString(), anyBoolean())).willReturn("myendpoint");
+        given(dataBusEndpointProvider.getDatabusS3Endpoint(anyString(), anyString())).willReturn("endpoint");
+
+        // WHEN
+        TelemetryContext result = underTest.createTelemetryContext(createStack(telemetry(false, true)));
+        // THEN
+        assertThat(result.getTlsCipherSuites()).containsExactly(
+                "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384",
+                "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256",
+                "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384",
+                "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256",
+                "TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA",
+                "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA",
+                "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA",
+                "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA");
     }
 
     private Stack createStack() {

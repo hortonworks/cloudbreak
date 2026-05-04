@@ -87,6 +87,8 @@ public class TelemetryDecorator implements TelemetryContextProvider<StackDto> {
 
     private final TelemetryFeatureService telemetryFeatureService;
 
+    private final EncryptionProfileProvider encryptionProfileProvider;
+
     public TelemetryDecorator(AltusMachineUserService altusMachineUserService,
             VmLogsService vmLogsService,
             EntitlementService entitlementService,
@@ -108,6 +110,7 @@ public class TelemetryDecorator implements TelemetryContextProvider<StackDto> {
         this.clusterComponentConfigProvider = clusterComponentConfigProvider;
         this.version = version;
         this.telemetryFeatureService = telemetryFeatureService;
+        this.encryptionProfileProvider = encryptionProfileProvider;
     }
 
     @Override
@@ -124,6 +127,8 @@ public class TelemetryDecorator implements TelemetryContextProvider<StackDto> {
         telemetryContext.setCloudPlatform(stack.getCloudPlatform());
         telemetryContext.setClusterType(mapToFluentClusterType(stack.getType()));
         telemetryContext.setTelemetry(telemetry);
+
+        telemetryContext.setTlsCipherSuites(encryptionProfileProvider.getBlackboxCipherSuites());
 
         Image image = getImage(stack);
         if (image != null) {

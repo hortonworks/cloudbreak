@@ -47,6 +47,7 @@ import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringServiceType;
 import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringUrlResolver;
 import com.sequenceiq.cloudbreak.telemetry.orchestrator.TelemetryConfigProvider;
 import com.sequenceiq.cloudbreak.telemetry.orchestrator.TelemetrySaltPillarDecorator;
+import com.sequenceiq.cloudbreak.tls.EncryptionProfileProvider;
 import com.sequenceiq.common.api.telemetry.model.DataBusCredential;
 import com.sequenceiq.common.api.telemetry.model.Logging;
 import com.sequenceiq.common.api.telemetry.model.Monitoring;
@@ -104,6 +105,9 @@ public class TelemetryConfigService implements TelemetryConfigProvider, Telemetr
     @Inject
     private TransactionService transactionService;
 
+    @Inject
+    private EncryptionProfileProvider encryptionProfileProvider;
+
     @Override
     public Map<String, SaltPillarProperties> createTelemetryConfigs(Long stackId, Set<TelemetryComponentType> components) {
         Stack stack = stackService.getStackById(stackId);
@@ -127,6 +131,8 @@ public class TelemetryConfigService implements TelemetryConfigProvider, Telemetr
         telemetryContext.setClusterDetails(createClusterDetails(stack, databusContext));
         NodeStatusContext nodeStatusContext = createNodeStatusContext(stack);
         telemetryContext.setNodeStatusContext(nodeStatusContext);
+
+        telemetryContext.setTlsCipherSuites(encryptionProfileProvider.getBlackboxCipherSuites());
 
         if (telemetry != null) {
             telemetryContext.setLogShipperContext(createLogShipperContext(stack, telemetry));

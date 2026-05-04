@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -49,6 +50,7 @@ import com.sequenceiq.cloudbreak.telemetry.VmLogsService;
 import com.sequenceiq.cloudbreak.telemetry.context.TelemetryContext;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentClusterType;
 import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringUrlResolver;
+import com.sequenceiq.cloudbreak.tls.CipherSuiteProvider;
 import com.sequenceiq.cloudbreak.tls.EncryptionProfileProvider;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
@@ -68,9 +70,6 @@ class TelemetryDecoratorTest {
 
     @Mock
     private AltusMachineUserService altusMachineUserService;
-
-    @Mock
-    private EncryptionProfileProvider encryptionProfileProvider;
 
     @Mock
     private VmLogsService vmLogsService;
@@ -104,6 +103,10 @@ class TelemetryDecoratorTest {
 
     @Spy
     private Monitoring monitoring;
+
+    private final CipherSuiteProvider cipherSuiteProvider = new CipherSuiteProvider();
+
+    private final EncryptionProfileProvider encryptionProfileProvider = new EncryptionProfileProvider(cipherSuiteProvider);
 
     @BeforeEach
     void setUp() throws CloudbreakImageNotFoundException {
@@ -341,6 +344,29 @@ class TelemetryDecoratorTest {
         when(dataBusEndpointProvider.getDatabusS3Endpoint(anyString(), anyString())).thenReturn("https://cloudera-dbus-dev.amazonaws.com");
         when(vmLogsService.getVmLogs()).thenReturn(new ArrayList<>());
         when(altusMachineUserService.getCdpAccessKeyType(any())).thenReturn(CdpAccessKeyType.ECDSA);
+    }
+
+    @Test
+    void testCreateTelemetryContextWithTlsCipherSuitesInExactlyOrdering() {
+        when(telemetry.isComputeMonitoringEnabled()).thenReturn(true);
+        when(entitlementService.isComputeMonitoringEnabled(anyString())).thenReturn(true);
+        when(telemetry.getMonitoring()).thenReturn(monitoring);
+        when(monitoring.getRemoteWriteUrl()).thenReturn("https://remotewrite:80/api/v1/write");
+        when(clusterComponentConfigProvider.getSaltStateComponentCbVersion(2L)).thenReturn("2.65.0-b62");
+        // WHEN
+        TelemetryContext result = underTest.createTelemetryContext(createStack());
+        // THEN
+        assertTrue(result.getMonitoringContext().isEnabled());
+        verify(altusMachineUserService, times(1)).storeMonitoringCredential(any(Optional.class), any(Stack.class), any(CdpAccessKeyType.class));
+        assertThat(result.getTlsCipherSuites()).containsExactly(
+                "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384",
+                "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256",
+                "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384",
+                "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256",
+                "TLS_ECDHE_ECDSA_WITH_AES_256_CBC_SHA",
+                "TLS_ECDHE_ECDSA_WITH_AES_128_CBC_SHA",
+                "TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA",
+                "TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA");
     }
 
     private StackDto createStack() {
