@@ -83,7 +83,7 @@ public class RollingVerticalScaleInstancesHandler extends ExceptionCatcherEventH
 
             Map<String, String> updatedInstanceType = getInstancetypeMetadata(connector, ac, request.getCloudResources());
             updateRollingVerticalScaleResult(request.getResourceId(), rollingVerticalScaleResult,
-                    updatedInstanceType, resourceStatus, requestedInstanceType, stackVerticalScaleV4Request);
+                    updatedInstanceType, request.getCloudResources(), requestedInstanceType, stackVerticalScaleV4Request);
 
             InstanceStoreMetadata instanceStoreMetadata =  stackUpscaleService.getInstanceStorageInfo(ac,
                     requestedInstanceType, connector);
@@ -110,16 +110,16 @@ public class RollingVerticalScaleInstancesHandler extends ExceptionCatcherEventH
     }
 
     private void updateRollingVerticalScaleResult(Long stackId, RollingVerticalScaleResult result, Map<String, String> updatedInstanceType,
-            List<CloudResourceStatus> cloudResourceStatuses, String requestedInstanceType, StackVerticalScaleV4Request stackVerticalScaleV4Request) {
+            List<CloudResource> cloudResources, String requestedInstanceType, StackVerticalScaleV4Request stackVerticalScaleV4Request) {
         Set<String> successfullyScaledInstances = new HashSet<>();
         List<String> failedInstances = new ArrayList<>();
-        for (CloudResourceStatus status : cloudResourceStatuses) {
-            String instanceId = status.getCloudResource().getInstanceId();
+        for (CloudResource cloudResource : cloudResources) {
+            String instanceId = cloudResource.getInstanceId();
             if (updatedInstanceType.containsKey(instanceId) && updatedInstanceType.get(instanceId).equals(requestedInstanceType)) {
                 result.setStatus(instanceId, RollingVerticalScaleStatus.SCALED);
                 successfullyScaledInstances.add(instanceId);
             } else {
-                result.setStatus(instanceId, RollingVerticalScaleStatus.SCALING_FAILED, status.getStatusReason());
+                result.setStatus(instanceId, RollingVerticalScaleStatus.SCALING_FAILED);
                 failedInstances.add(instanceId);
             }
         }

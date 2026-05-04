@@ -5,7 +5,6 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_FAI
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_ROOT_VOLUME_INCREASED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_ROOT_VOLUME_INCREASING;
-import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_VERTICALSCALED_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_VERTICALSCALED_INSTANCES;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_VERTICALSCALE_RESTARTED_INSTANCES;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_VERTICALSCALE_RESTARTING_INSTANCES;
@@ -16,6 +15,7 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_VERTICALSCAL
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_VERTICALSCALE_STOP_INSTANCES_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_VERTICALSCALE_WAITING_FOR_SERVICES_HEALTHY;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_VERTICALSCALE_WAITING_FOR_SERVICES_HEALTHY_UNSUCCESSFUL;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_VERTICALSCALING_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_VERTICALSCALING_INSTANCES;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_VERTICALSCALING_INSTANCES_FAILED;
 
@@ -143,7 +143,7 @@ public class RollingVerticalScaleService {
     public void failedVerticalScale(Long stackId, List<String> instanceIds, String message) {
         clusterService.updateClusterStatusByStackId(stackId, DetailedStackStatus.CLUSTER_VERTICALSCALE_FAILED, message);
         flowMessageService.fireEventAndLog(stackId, UPDATE_FAILED.name(),
-                CLUSTER_VERTICALSCALED_FAILED, message, String.join(", ", instanceIds));
+                CLUSTER_VERTICALSCALING_FAILED, message, String.join(", ", instanceIds));
     }
 
     public void verticalScalingCompletedSuccessfully(Long stackId, String message) {

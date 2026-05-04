@@ -359,6 +359,7 @@ public enum ResourceEvent {
     CLUSTER_ROOT_VOLUME_INCREASING("cluster.increasing.rootvolume"),
     CLUSTER_ROOT_VOLUME_INCREASED("cluster.increased.rootvolume"),
     CLUSTER_VERTICALSCALED_FAILED("cluster.change.verticalscale.failed"),
+    CLUSTER_VERTICALSCALING_FAILED("cluster.verticalscale.failed"),
 
     CLUSTER_VOLUME_MISSING("cluster.volume.missing"),
     CLUSTER_VOLUME_MISSING_BY_SIZE("cluster.volume.missing.by.size"),
