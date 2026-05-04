@@ -37,6 +37,9 @@ public class StackStatusV4Response {
     @Schema(description = ClusterModelDescription.CERT_EXPIRATION_DETAILS)
     private String certExpirationDetails;
 
+    @Schema(description = ClusterModelDescription.CONFIG_STALENESS)
+    private ConfigStalenessV4Response configStaleness;
+
     @Schema(description = ModelDescriptions.StackModelDescription.PROVIDER_SYNC_STATES)
     private Set<ProviderSyncState> providerSyncStates = new HashSet<>();
 
@@ -104,6 +107,14 @@ public class StackStatusV4Response {
         this.certExpirationDetails = certExpirationDetails;
     }
 
+    public ConfigStalenessV4Response getConfigStaleness() {
+        return configStaleness;
+    }
+
+    public void setConfigStaleness(ConfigStalenessV4Response configStaleness) {
+        this.configStaleness = configStaleness;
+    }
+
     public Set<ProviderSyncState> getProviderSyncStates() {
         return providerSyncStates;
     }
@@ -123,6 +134,7 @@ public class StackStatusV4Response {
                 ", crn='" + crn + '\'' +
                 ", certExpirationState=" + certExpirationState + '\'' +
                 ", certExpirationDetails='" + certExpirationDetails +
+                ", configStaleness='" + configStaleness +
                 ", providerSyncStates=" + providerSyncStates +
                 '}';
     }

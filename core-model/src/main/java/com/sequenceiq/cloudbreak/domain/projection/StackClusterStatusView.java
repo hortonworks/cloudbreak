@@ -4,6 +4,7 @@ import java.util.Set;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.common.api.type.CertExpirationState;
+import com.sequenceiq.common.api.type.ConfigStalenessState;
 import com.sequenceiq.common.model.ProviderSyncState;
 
 public interface StackClusterStatusView {
@@ -27,6 +28,10 @@ public interface StackClusterStatusView {
     CertExpirationState getCertExpirationState();
 
     String getCertExpirationDetails();
+
+    ConfigStalenessState getConfigStalenessState();
+
+    String getConfigStalenessDetails();
 
     Set<ProviderSyncState> getProviderSyncStates();
 }
