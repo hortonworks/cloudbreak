@@ -1130,7 +1130,7 @@ public interface StackV4Endpoint {
             @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 
     @POST
-    @Path("internal/crn/{crn}/update-trusted-realm")
+    @Path("internal/crn/{crn}/update_trusted_realm")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     @Operation(summary = "Trigger update of the trusted realm configuration on the cluster", operationId = "triggerUpdateTrustedRealm",
