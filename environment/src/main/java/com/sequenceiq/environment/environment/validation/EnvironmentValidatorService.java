@@ -47,6 +47,7 @@ import com.sequenceiq.environment.environment.service.validation.SeLinuxValidati
 import com.sequenceiq.environment.environment.validation.validators.EncryptionKeyArnValidator;
 import com.sequenceiq.environment.environment.validation.validators.EncryptionKeyUrlValidator;
 import com.sequenceiq.environment.environment.validation.validators.EncryptionKeyValidator;
+import com.sequenceiq.environment.environment.validation.validators.EnvironmentComputeClusterEntitlementValidator;
 import com.sequenceiq.environment.environment.validation.validators.ManagedIdentityRoleValidator;
 import com.sequenceiq.environment.environment.validation.validators.NetworkValidator;
 import com.sequenceiq.environment.environment.validation.validators.PublicKeyValidator;
@@ -98,6 +99,8 @@ public class EnvironmentValidatorService {
 
     private final SeLinuxValidationService seLinuxValidationService;
 
+    private final EnvironmentComputeClusterEntitlementValidator computeClusterEntitlementValidator;
+
     public EnvironmentValidatorService(NetworkValidator networkValidator,
             PlatformParameterService platformParameterService,
             EnvironmentResourceService environmentResourceService,
@@ -113,7 +116,8 @@ public class EnvironmentValidatorService {
             EnvironmentRecipeService recipeService,
             ManagedIdentityRoleValidator encryptionRoleValidator,
             @Value("${environment.freeipa.groupInstanceCount.minimum}") Integer ipaMinimumInstanceCountByGroup,
-            SeLinuxValidationService seLinuxValidationService) {
+            SeLinuxValidationService seLinuxValidationService,
+            EnvironmentComputeClusterEntitlementValidator computeClusterEntitlementValidator) {
         this.networkValidator = networkValidator;
         this.platformParameterService = platformParameterService;
         this.environmentResourceService = environmentResourceService;
@@ -130,6 +134,7 @@ public class EnvironmentValidatorService {
         this.ipaMinimumInstanceCountByGroup = ipaMinimumInstanceCountByGroup;
         this.encryptionRoleValidator = encryptionRoleValidator;
         this.seLinuxValidationService = seLinuxValidationService;
+        this.computeClusterEntitlementValidator = computeClusterEntitlementValidator;
     }
 
     public void validateFreeipaRecipesExistsByName(Set<String> resourceNames) {
@@ -345,6 +350,7 @@ public class EnvironmentValidatorService {
             Set<String> environmentSubnets) {
         ValidationResultBuilder resultBuilder = ValidationResult.builder().prefix("Default externalized compute cluster validation failed");
         if (externalizedComputeCluster.isCreate()) {
+            resultBuilder.merge(computeClusterEntitlementValidator.validate(accountId));
             validateWorkerNodeSubnets(externalizedComputeCluster, environmentSubnets, resultBuilder);
             if (externalizedComputeCluster.isPrivateCluster() && !externalizedComputeCluster.getKubeApiAuthorizedIpRanges().isEmpty()) {
                 resultBuilder.error("The 'kubeApiAuthorizedIpRanges' parameter cannot be specified when 'privateCluster' is enabled.");

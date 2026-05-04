@@ -104,6 +104,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_STO
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATALAKE_HORIZONTAL_SCALE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATA_LAKE_LIGHT_TO_MEDIUM_MIGRATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.E2E_TEST_ONLY;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.ENABLE_COMPUTE_CLUSTER;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.FMS_FREEIPA_BATCH_CALL;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.LOCAL_DEV;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.OBSERVABILITY_DMP;
@@ -558,6 +559,9 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.compute.ui.enabled}")
     private boolean computeUiEnabled;
+
+    @Value("${auth.mock.compute.cluster.enabled}")
+    private boolean computeClusterEnabled;
 
     @Value("${auth.mock.ranger.ldap.usersync}")
     private boolean rangerLdapUsersyncEnabled;
@@ -1100,6 +1104,9 @@ public class MockUserManagementService extends UserManagementImplBase {
             builder.addEntitlements(createEntitlement(COMPUTE_UI));
             builder.addEntitlements(createEntitlement(COMPUTE_API_LIFTIE));
             builder.addEntitlements(createEntitlement(COMPUTE_API_LIFTIE_BETA));
+        }
+        if (computeClusterEnabled) {
+            builder.addEntitlements(createEntitlement(ENABLE_COMPUTE_CLUSTER));
         }
         if (rangerLdapUsersyncEnabled) {
             builder.addEntitlements(createEntitlement(CDP_RANGER_LDAP_USERSYNC));

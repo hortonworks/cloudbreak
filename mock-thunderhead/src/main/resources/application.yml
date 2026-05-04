@@ -109,6 +109,8 @@ auth:
     compute:
       ui:
         enabled: true
+      cluster:
+        enabled: true
     ranger.ldap.usersync: true
     tlsv13.enable: false
     dev.telemetry.yum.repo.enabled: false

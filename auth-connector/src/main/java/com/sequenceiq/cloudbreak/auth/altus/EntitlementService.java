@@ -104,6 +104,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_STO
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATALAKE_HORIZONTAL_SCALE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATA_LAKE_LIGHT_TO_MEDIUM_MIGRATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.E2E_TEST_ONLY;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.ENABLE_COMPUTE_CLUSTER;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.ENABLE_RMS_ON_DATALAKE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.FMS_FREEIPA_BATCH_CALL;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.JUMPGATE_ENABLE_NEW_ROOT_CA;
@@ -401,6 +402,10 @@ public class EntitlementService {
 
     public boolean isComputeMonitoringEnabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_CENTRAL_COMPUTE_MONITORING);
+    }
+
+    public boolean isComputeClusterEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, ENABLE_COMPUTE_CLUSTER);
     }
 
     public boolean isAzureCertificateAuthEnabled(String accountId) {

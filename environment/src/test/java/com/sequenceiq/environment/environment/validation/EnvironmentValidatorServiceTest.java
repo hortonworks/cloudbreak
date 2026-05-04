@@ -9,6 +9,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -51,6 +52,7 @@ import com.sequenceiq.environment.environment.service.validation.SeLinuxValidati
 import com.sequenceiq.environment.environment.validation.validators.EncryptionKeyArnValidator;
 import com.sequenceiq.environment.environment.validation.validators.EncryptionKeyUrlValidator;
 import com.sequenceiq.environment.environment.validation.validators.EncryptionKeyValidator;
+import com.sequenceiq.environment.environment.validation.validators.EnvironmentComputeClusterEntitlementValidator;
 import com.sequenceiq.environment.environment.validation.validators.ManagedIdentityRoleValidator;
 import com.sequenceiq.environment.environment.validation.validators.NetworkValidator;
 import com.sequenceiq.environment.environment.validation.validators.PublicKeyValidator;
@@ -105,6 +107,9 @@ class EnvironmentValidatorServiceTest {
     @Mock
     private SeLinuxValidationService seLinuxValidationService;
 
+    @Mock
+    private EnvironmentComputeClusterEntitlementValidator computeClusterEntitlementValidator;
+
     private EnvironmentValidatorService underTest;
 
     private static Stream<Arguments> freeIpaCreationArguments() {
@@ -158,7 +163,10 @@ class EnvironmentValidatorServiceTest {
                 recipeService,
                 encryptionRoleValidator,
                 1,
-                seLinuxValidationService);
+                seLinuxValidationService,
+                computeClusterEntitlementValidator);
+        lenient().when(computeClusterEntitlementValidator.validate(anyString()))
+                .thenReturn(ValidationResult.builder().build());
     }
 
     @Test
@@ -623,6 +631,23 @@ class EnvironmentValidatorServiceTest {
         assertTrue(validationResult.hasError());
         assertThat(validationResult.getErrors())
                 .containsOnly("Specified compute cluster subnet 'subnet3' does not exist in the environment");
+    }
+
+    @Test
+    void testValidateExternalizedComputeClusterWhenEntitlementNotEnabled() {
+        when(computeClusterEntitlementValidator.validate(ACCOUNT))
+                .thenReturn(ValidationResult.builder()
+                        .error("You are not entitled to use externalized compute cluster. "
+                                + "Please contact Cloudera to enable ENABLE_COMPUTE_CLUSTER for your account.")
+                        .build());
+
+        ValidationResult validationResult = underTest.validateExternalizedComputeCluster(
+                ExternalizedComputeClusterDto.builder().withCreate(true).withPrivateCluster(true).build(), ACCOUNT, Set.of());
+
+        assertTrue(validationResult.hasError());
+        assertThat(validationResult.getErrors()).containsOnly(
+                "You are not entitled to use externalized compute cluster. "
+                        + "Please contact Cloudera to enable ENABLE_COMPUTE_CLUSTER for your account.");
     }
 
     private Environment aValidEnvirontmentWithParent() {
