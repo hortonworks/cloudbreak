@@ -119,7 +119,8 @@ public class ImageService {
                 imageRequest.getId(),
                 imageRequest.getCatalog(),
                 null,
-                StringUtils.isNotBlank(imageRequest.getOs()) ? imageRequest.getOs() : preferredOsService.getPreferredOs(imageRequest.getOs()),
+                StringUtils.isNotBlank(imageRequest.getOs()) ? imageRequest.getOs() :
+                        StringUtils.isBlank(imageRequest.getId()) ? preferredOsService.getPreferredOs(imageRequest.getOs()) : null,
                 stack.getRegion(),
                 platformStringTransformer.getPlatformString(stack),
                 false,
