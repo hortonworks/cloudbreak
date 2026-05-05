@@ -3,6 +3,7 @@ package com.sequenceiq.freeipa.service;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import jakarta.inject.Inject;
@@ -71,19 +72,22 @@ public class GatewayConfigService {
      * @return primary gateway config
      */
     public GatewayConfig getPrimaryGatewayConfig(Stack stack) {
-        return getGatewayConfig(stack, getPrimaryGwInstance(stack));
-
+        return getPrimaryGatewayConfigIfPresent(stack).orElseThrow(() -> new NotFoundException("Gateway instance is not found"));
     }
 
-    private InstanceMetaData getPrimaryGwInstance(Stack stack) {
+    public Optional<GatewayConfig> getPrimaryGatewayConfigIfPresent(Stack stack) {
+        return getPrimaryGwInstanceIfPresent(stack).map(primaryGw -> getGatewayConfig(stack, primaryGw));
+    }
+
+    private Optional<InstanceMetaData> getPrimaryGwInstanceIfPresent(Stack stack) {
         Set<InstanceMetaData> instanceMetaDatas = instanceMetaDataRepository.findNotTerminatedForStack(stack.getId());
-        return getPrimaryGwInstance(instanceMetaDatas);
+        return getPrimaryGwInstanceIfPresent(instanceMetaDatas);
     }
 
-    private InstanceMetaData getPrimaryGwInstance(Collection<InstanceMetaData> instanceMetaDatas) {
+    private Optional<InstanceMetaData> getPrimaryGwInstanceIfPresent(Collection<InstanceMetaData> instanceMetaDatas) {
         return instanceMetaDatas.stream()
                 .filter(im -> InstanceMetadataType.GATEWAY_PRIMARY.equals(im.getInstanceMetadataType()))
-                .findFirst().orElseThrow(() -> new NotFoundException("Gateway instance is not found"));
+                .findFirst();
     }
 
     public GatewayConfig getGatewayConfig(Stack stack, InstanceMetaData gatewayInstance) {

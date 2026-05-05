@@ -34,6 +34,7 @@ import com.sequenceiq.cloudbreak.client.RPCResponse;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.metrics.MetricsClient;
+import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.salt.SaltSyncService;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.service.StatusCheckerJobService;
 import com.sequenceiq.flow.core.FlowLogService;
@@ -149,6 +150,7 @@ class StackStatusTest {
         lenient().when(autoSyncConfig.isSaltCheckEnabled()).thenReturn(Boolean.FALSE);
         lenient().when(autoSyncConfig.isUpdateStatus()).thenReturn(Boolean.TRUE);
         lenient().when(autoSyncConfig.isEnabled()).thenReturn(Boolean.TRUE);
+        lenient().when(gatewayConfigService.getPrimaryGatewayConfigIfPresent(any())).thenReturn(Optional.of(GatewayConfig.builder().build()));
     }
 
     private InstanceMetaData createInstance(String instanceName, String ip) {

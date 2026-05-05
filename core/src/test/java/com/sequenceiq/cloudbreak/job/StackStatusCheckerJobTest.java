@@ -65,6 +65,7 @@ import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.cloudbreak.metrics.MetricsClient;
+import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.salt.SaltSyncService;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.service.StatusCheckerJobService;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
@@ -227,6 +228,7 @@ public class StackStatusCheckerJobTest {
         lenient().when(config.isSaltCheckEnabled()).thenReturn(Boolean.FALSE);
         lenient().when(messagesService.getMessage(eq(CLUSTER_FAILED_NODES_SALT_FAILURE_EVENT.getMessage())))
                 .thenReturn("Salt is not healthy for this host.");
+        lenient().when(gatewayConfigService.getPrimaryGatewayConfigIfPresent(any())).thenReturn(Optional.of(GatewayConfig.builder().build()));
     }
 
     @AfterEach
