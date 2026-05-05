@@ -25,6 +25,7 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -409,11 +410,12 @@ public class ClusterService implements LocalPaasRdcViewExtender {
     }
 
     public void updateClusterCertExpirationState(ClusterView cluster, boolean hostCertificateExpiring, String certExpirationDetails) {
-        if (VALID == cluster.getCertExpirationState() && hostCertificateExpiring) {
+        if (hostCertificateExpiring &&
+                (VALID == cluster.getCertExpirationState() || !Objects.equals(certExpirationDetails, cluster.getCertExpirationDetails()))) {
             LOGGER.info("Update cert expiration state from {} to {}", cluster.getCertExpirationState(), HOST_CERT_EXPIRING);
             repository.updateCertExpirationState(cluster.getId(), HOST_CERT_EXPIRING,
                     StringUtils.abbreviate(certExpirationDetails, MAX_WIDTH_CERT_EXPIRATION_DETAILS));
-        } else if (HOST_CERT_EXPIRING == cluster.getCertExpirationState() && !hostCertificateExpiring) {
+        } else if (!hostCertificateExpiring && HOST_CERT_EXPIRING == cluster.getCertExpirationState()) {
             LOGGER.info("Update cert expiration state from {} to {}", cluster.getCertExpirationState(), VALID);
             repository.updateCertExpirationState(cluster.getId(), VALID, "");
         }
