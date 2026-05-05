@@ -82,7 +82,7 @@ public class PkiUtil {
 
     private static final int CSR_PRINT_INDEX = 64;
 
-    private static final String EC_CURVE = "secp384r1";
+    private static final String EC_CURVE = "P-384";
 
     private static final String SHA_384_WITH_ECDSA = "SHA384withECDSA";
 
@@ -158,9 +158,10 @@ public class PkiUtil {
 
     public static KeyPair generateEcdsaKeypair() {
         try {
+            SecureRandom secureRandom = SecureRandom.getInstance("DEFAULT", "BCFIPS");
             KeyPairGenerator keyGen = KeyPairGenerator.getInstance("EC", "BCFIPS");
             ECGenParameterSpec ecSpec = new ECGenParameterSpec(EC_CURVE);
-            keyGen.initialize(ecSpec, SecureRandom.getInstanceStrong());
+            keyGen.initialize(ecSpec, secureRandom);
             return keyGen.generateKeyPair();
         } catch (Exception e) {
             throw new PkiException("Failed to generate ECDSA PK for the cluster!", e);
