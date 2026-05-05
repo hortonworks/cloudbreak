@@ -108,11 +108,11 @@ LOGFILE="${config[logfile]}"
 STATUSFILEPREFIX="${config[statusfileprefix]}"
 BACKUP_PATH_POSTFIX="${FOLDER}"
 
-BACKUP_OPTIONS=""
+BACKUP_OPTIONS="--disable-role-check "
 if [[ "$TYPE" = "FULL" ]]; then
-    BACKUP_OPTIONS="-q"
+    BACKUP_OPTIONS+="-q"
 elif [[ "$TYPE" = "DATA" ]]; then
-    BACKUP_OPTIONS="-q --data --online"
+    BACKUP_OPTIONS+="-q --data --online"
 fi
 
 doLog(){

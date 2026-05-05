@@ -51,6 +51,8 @@ public class FreeIpaTopologyService {
 
     private static final String CA_SERVER_ROLE = "CA server";
 
+    private static final String DNS_SERVER_ROLE = "DNS server";
+
     @Inject
     private InstanceMetaDataService instanceMetaDataService;
 
@@ -103,7 +105,7 @@ public class FreeIpaTopologyService {
 
     @VisibleForTesting
     Set<UnorderedPair> generateTopology(Set<String> nodes) {
-        LOGGER.debug("Generating topology for FreeIPA [{}}", nodes);
+        LOGGER.debug("Generating topology for FreeIPA {}", nodes);
         Map<String, Integer> connectionRemaining = createConnectionRemainingPerNode(nodes);
         Set<UnorderedPair> generatedTopology = new HashSet<>();
         for (String node : new LinkedHashSet<>(connectionRemaining.keySet())) {
@@ -187,15 +189,15 @@ public class FreeIpaTopologyService {
     }
 
     private void waitForCaRoleToBeEnabled(FreeIpaClient freeIpaClient, Set<String> allNodesFqdn) throws Exception {
-        LOGGER.info("Start polling if [{}] role is enabled on all instances", CA_SERVER_ROLE);
+        LOGGER.info("Start polling if {} roles are enabled on all instances", Set.of(CA_SERVER_ROLE, DNS_SERVER_ROLE));
         try {
             poller.runPoller(pollingInterval, pollingDelay,
-                    new FreeIpaServerRoleEnabledForServersPoller(freeIpaClient, CA_SERVER_ROLE, allNodesFqdn));
+                    new FreeIpaServerRoleEnabledForServersPoller(freeIpaClient, Set.of(CA_SERVER_ROLE, DNS_SERVER_ROLE), allNodesFqdn));
         } catch (PollerStoppedException e) {
-            LOGGER.warn("Polling for [{}] role enablement timed out without success", CA_SERVER_ROLE);
+            LOGGER.warn("Polling for {} roles enablement timed out without success", Set.of(CA_SERVER_ROLE, DNS_SERVER_ROLE));
             throw e;
         } catch (PollerException e) {
-            LOGGER.error("Polling for [{}] role enablement failed", CA_SERVER_ROLE, e);
+            LOGGER.error("Polling for {} roles enablement failed", Set.of(CA_SERVER_ROLE, DNS_SERVER_ROLE), e);
             if (e.getCause() != null) {
                 throw (Exception) e.getCause();
             }
