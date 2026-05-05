@@ -13,6 +13,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.client.RestClientUtil;
 import com.sequenceiq.common.model.Architecture;
+import com.sequenceiq.common.model.OsType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.ImageCatalog;
 
@@ -32,6 +33,11 @@ public class FreeIpaImageUtil {
             List<Image> lastTwoImages = images.stream()
                     .filter(image -> hasImageOnClouderProvider(image, cloudProvider, region) && hasArchitecture(image, architecture))
                     .limit(2)
+                    .sorted((o1, o2) -> {
+                        OsType o1Os = OsType.getByOs(o1.getOs());
+                        OsType o2Os = OsType.getByOs(o2.getOs());
+                        return Integer.compare(o2Os.ordinal(), o1Os.ordinal());
+                    })
                     .toList();
             if (lastTwoImages.size() != 2) {
                 throw new RuntimeException(
