@@ -112,21 +112,28 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
     private Set<String> getHostsWithSaltFailure(Stack stack) {
         try {
             if (autoSyncConfig.isSaltCheckEnabled() && !Set.of(STOPPED, DELETED_ON_PROVIDER_SIDE).contains(stack.getStackStatus().getStatus())) {
-                GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
-                Optional<Set<String>> failedMinions = saltSyncService.checkSaltMinions(gatewayConfig);
-                if (failedMinions.isPresent()) {
-                    Set<String> reachableImdFqdns = stack.getReachableInstances().stream().map(InstanceMetaData::getDiscoveryFQDN).collect(toSet());
-                    Set<String> failedMinionsPresentInDatabase = failedMinions.get().stream().filter(reachableImdFqdns::contains).collect(toSet());
-                    if (!failedMinionsPresentInDatabase.isEmpty()) {
-                        LOGGER.debug("Salt minions check failed for: {}", failedMinionsPresentInDatabase);
-                        if (autoSyncConfig.isSaltCheckStatusChangeEnabled()) {
-                            return failedMinionsPresentInDatabase;
-                        }
-                    }
+                Optional<GatewayConfig> gatewayConfig = gatewayConfigService.getPrimaryGatewayConfigIfPresent(stack);
+                if (gatewayConfig.isPresent()) {
+                    Optional<Set<String>> failedMinions = saltSyncService.checkSaltMinions(gatewayConfig.get());
+                    return failedMinions.map(failedMinionFqdns -> getFilteredFailedMinions(stack, failedMinionFqdns)).orElse(Set.of());
+                } else {
+                    LOGGER.warn("Gateway instance cannot be found, skipping salt check.");
                 }
             }
         } catch (Exception e) {
             LOGGER.warn("Failed to check salt status on instances, skipping. Reason: ", e);
+        }
+        return Set.of();
+    }
+
+    private Set<String> getFilteredFailedMinions(Stack stack, Set<String> failedMinions) {
+        Set<String> reachableImdFqdns = stack.getReachableInstances().stream().map(InstanceMetaData::getDiscoveryFQDN).collect(toSet());
+        Set<String> failedMinionsPresentInDatabase = failedMinions.stream().filter(reachableImdFqdns::contains).collect(toSet());
+        if (!failedMinionsPresentInDatabase.isEmpty()) {
+            LOGGER.debug("Salt minions check failed for: {}", failedMinionsPresentInDatabase);
+            if (autoSyncConfig.isSaltCheckStatusChangeEnabled()) {
+                return failedMinionsPresentInDatabase;
+            }
         }
         return Set.of();
     }

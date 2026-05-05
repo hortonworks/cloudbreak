@@ -46,12 +46,16 @@ public class GatewayConfigService {
         return getGatewayConfig(stack.getStack(), stack.getSecurityConfig(), gatewayInstance, stack.hasGateway());
     }
 
-    public GatewayConfig getPrimaryGatewayConfig(StackDto stackDto) {
+    public Optional<GatewayConfig> getPrimaryGatewayConfigIfPresent(StackDto stackDto) {
         InstanceMetadataView gatewayInstance = stackDto.getPrimaryGatewayInstance();
         if (gatewayInstance == null) {
-            throw new NotFoundException("Gateway instance does not found");
+            return Optional.empty();
         }
-        return getGatewayConfig(stackDto.getStack(), stackDto.getSecurityConfig(), gatewayInstance, stackDto.hasGateway());
+        return Optional.of(getGatewayConfig(stackDto.getStack(), stackDto.getSecurityConfig(), gatewayInstance, stackDto.hasGateway()));
+    }
+
+    public GatewayConfig getPrimaryGatewayConfig(StackDto stackDto) {
+        return getPrimaryGatewayConfigIfPresent(stackDto).orElseThrow(() -> new NotFoundException("Gateway instance does not found"));
     }
 
     public GatewayConfig getGatewayConfig(StackView stack, SecurityConfig securityConfig, InstanceMetadataView gatewayInstance,
