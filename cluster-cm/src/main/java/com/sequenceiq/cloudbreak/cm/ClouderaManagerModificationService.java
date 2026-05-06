@@ -1186,9 +1186,9 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     }
 
     @Override
-    public void restartClusterServices() {
+    public void restartClusterServices(boolean restartStaleServices) {
         try {
-            restartServices(false, false);
+            restartServices(false, restartStaleServices);
         } catch (ApiException | CloudbreakException e) {
             LOGGER.info("Could not restart services", e);
             throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
