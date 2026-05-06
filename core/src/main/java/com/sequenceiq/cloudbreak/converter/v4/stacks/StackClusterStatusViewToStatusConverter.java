@@ -1,16 +1,13 @@
 package com.sequenceiq.cloudbreak.converter.v4.stacks;
 
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.ConfigStalenessV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Responses;
 import com.sequenceiq.cloudbreak.domain.projection.StackClusterStatusView;
-import com.sequenceiq.common.api.type.ConfigStalenessState;
 
 @Component
 public class StackClusterStatusViewToStatusConverter {
@@ -25,16 +22,8 @@ public class StackClusterStatusViewToStatusConverter {
         response.setClusterStatusReason(source.getClusterStatusReason());
         response.setCertExpirationState(source.getCertExpirationState());
         response.setCertExpirationDetails(source.getCertExpirationDetails());
-        response.setConfigStaleness(convertConfigStaleness(source));
         response.setProviderSyncStates(source.getProviderSyncStates());
         return response;
-    }
-
-    private ConfigStalenessV4Response convertConfigStaleness(StackClusterStatusView source) {
-        ConfigStalenessV4Response configStaleness = new ConfigStalenessV4Response();
-        configStaleness.setState(Objects.requireNonNullElse(source.getConfigStalenessState(), ConfigStalenessState.UP_TO_DATE).name());
-        configStaleness.setDetails(source.getConfigStalenessDetails());
-        return configStaleness;
     }
 
     public StackStatusV4Responses convert(Iterable<StackClusterStatusView> sources) {

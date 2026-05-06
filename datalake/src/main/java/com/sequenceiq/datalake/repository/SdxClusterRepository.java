@@ -21,7 +21,6 @@ import com.sequenceiq.cloudbreak.quartz.model.JobResource;
 import com.sequenceiq.cloudbreak.quartz.model.JobResourceRepository;
 import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
 import com.sequenceiq.common.api.type.CertExpirationState;
-import com.sequenceiq.common.api.type.ConfigStalenessState;
 import com.sequenceiq.common.model.ProviderSyncState;
 import com.sequenceiq.datalake.entity.SdxCluster;
 
@@ -83,13 +82,6 @@ public interface SdxClusterRepository extends AccountAwareResourceRepository<Sdx
     @Modifying
     @Query("UPDATE SdxCluster s SET s.certExpirationState = :state, s.certExpirationDetails = :details WHERE s.id = :id")
     void updateCertExpirationState(@Param("id") Long id, @Param("state") CertExpirationState state, @Param("details") String details);
-
-    @Modifying
-    @Query("UPDATE SdxCluster s SET s.configStalenessState = :state, s.configStalenessDetails = :details WHERE s.id = :id")
-    void updateConfigStalenessState(
-            @Param("id") Long id,
-            @Param("state") ConfigStalenessState configStalenessState,
-            @Param("details") String configStalenessDetails);
 
     @Modifying
     @Query("UPDATE SdxCluster s SET s.providerSyncStates = :state WHERE s.id = :id")

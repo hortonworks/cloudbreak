@@ -33,7 +33,6 @@ import com.sequenceiq.cloudbreak.common.notification.NotificationState;
 import com.sequenceiq.cloudbreak.common.notification.NotificationStateConverter;
 import com.sequenceiq.cloudbreak.converter.ArchitectureConverter;
 import com.sequenceiq.cloudbreak.converter.CertExpirationStateConverter;
-import com.sequenceiq.cloudbreak.converter.ConfigStalenessStateConverter;
 import com.sequenceiq.cloudbreak.converter.FileSystemTypeConverter;
 import com.sequenceiq.cloudbreak.converter.ProviderSyncSetToStringConverter;
 import com.sequenceiq.cloudbreak.converter.SeLinuxConverter;
@@ -42,7 +41,6 @@ import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
 import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
 import com.sequenceiq.common.api.type.CertExpirationState;
-import com.sequenceiq.common.api.type.ConfigStalenessState;
 import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.common.model.ProviderSyncState;
@@ -142,13 +140,6 @@ public class SdxCluster implements AccountAwareResource {
     @Convert(converter = CertExpirationStateConverter.class)
     private CertExpirationState certExpirationState = CertExpirationState.VALID;
 
-    private String certExpirationDetails;
-
-    @Convert(converter = ConfigStalenessStateConverter.class)
-    private ConfigStalenessState configStalenessState = ConfigStalenessState.UP_TO_DATE;
-
-    private String configStalenessDetails;
-
     @Column(name = "sdx_cluster_service_version")
     private String sdxClusterServiceVersion;
 
@@ -170,6 +161,8 @@ public class SdxCluster implements AccountAwareResource {
     @Convert(converter = ArchitectureConverter.class)
     @Column(name = "architecture")
     private Architecture architecture;
+
+    private String certExpirationDetails;
 
     @Convert(converter = ProviderSyncSetToStringConverter.class)
     private Set<ProviderSyncState> providerSyncStates = new HashSet<>();
@@ -487,22 +480,6 @@ public class SdxCluster implements AccountAwareResource {
 
     public void setCertExpirationDetails(String certExpirationDetails) {
         this.certExpirationDetails = certExpirationDetails;
-    }
-
-    public ConfigStalenessState getConfigStalenessState() {
-        return configStalenessState;
-    }
-
-    public void setConfigStalenessState(ConfigStalenessState configStalenessState) {
-        this.configStalenessState = configStalenessState;
-    }
-
-    public String getConfigStalenessDetails() {
-        return configStalenessDetails;
-    }
-
-    public void setConfigStalenessDetails(String configStalenessDetails) {
-        this.configStalenessDetails = configStalenessDetails;
     }
 
     public Set<ProviderSyncState> getProviderSyncStates() {
