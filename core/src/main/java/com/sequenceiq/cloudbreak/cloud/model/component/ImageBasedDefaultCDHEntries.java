@@ -21,6 +21,7 @@ import org.springframework.util.ObjectUtils;
 
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.ImageStackDetails;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
@@ -75,28 +76,40 @@ public class ImageBasedDefaultCDHEntries {
 
     private ImageBasedDefaultCDHInfo createImageBasedDefaultCDHInfo(Image image) {
         DefaultCDHInfo defaultCdhInfo = new DefaultCDHInfo();
-        defaultCdhInfo.setVersion(image.getStackDetails().getRepo().getStack().get(StackRepoDetails.REPOSITORY_VERSION));
+        defaultCdhInfo.setVersion(getStackDetailsVersion(image));
         defaultCdhInfo.setRepo(getRepoDetails(image));
         defaultCdhInfo.setParcels(getParcels(image));
         defaultCdhInfo.setCsd(image.getPreWarmCsd());
         return new ImageBasedDefaultCDHInfo(defaultCdhInfo, image);
     }
 
-    private List<ClouderaManagerProduct> getParcels(Image image) {
-        return image.getPreWarmParcels()
-                .stream()
-                .map(parcel -> preWarmParcelParser.parseProductFromParcel(parcel, image.getPreWarmCsd()))
-                .flatMap(Optional::stream)
-                .collect(Collectors.toList());
+    private String getStackDetailsVersion(Image image) {
+        return Optional.ofNullable(image)
+                .map(Image::getStackDetails)
+                .map(ImageStackDetails::getRepo)
+                .map(com.sequenceiq.cloudbreak.cloud.model.catalog.StackRepoDetails::getStack)
+                .map(stack -> stack.get(StackRepoDetails.REPOSITORY_VERSION))
+                .orElse(null);
     }
 
     private ClouderaManagerDefaultStackRepoDetails getRepoDetails(Image image) {
         ClouderaManagerDefaultStackRepoDetails repoDetails = new ClouderaManagerDefaultStackRepoDetails();
-        Map<String, String> repoStack = new HashMap<>(image.getStackDetails().getRepo().getStack());
+        Map<String, String> repoStack = new HashMap<>(Optional.ofNullable(image)
+                .map(Image::getStackDetails)
+                .map(ImageStackDetails::getRepo)
+                .map(com.sequenceiq.cloudbreak.cloud.model.catalog.StackRepoDetails::getStack)
+                .orElse(Map.of()));
         repoStack.remove(StackRepoDetails.REPOSITORY_VERSION);
         repoDetails.setStack(repoStack);
 
         return repoDetails;
+    }
+
+    private List<ClouderaManagerProduct> getParcels(Image image) {
+        return image.getPreWarmParcels().stream()
+                .map(parcel -> preWarmParcelParser.parseProductFromParcel(parcel, image.getPreWarmCsd()))
+                .flatMap(Optional::stream)
+                .toList();
     }
 
     private BinaryOperator<ImageBasedDefaultCDHInfo> preferOs() {
