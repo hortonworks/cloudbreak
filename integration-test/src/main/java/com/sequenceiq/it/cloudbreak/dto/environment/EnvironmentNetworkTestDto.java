@@ -9,6 +9,7 @@ import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAws
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAzureParams;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkGcpParams;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkMockParams;
+import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkOpenstackParams;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkYarnParams;
 import com.sequenceiq.environment.api.v1.environment.model.base.PrivateSubnetCreation;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentNetworkRequest;
@@ -75,6 +76,7 @@ public class EnvironmentNetworkTestDto extends AbstractCloudbreakTestDto<Environ
         getRequest().setMock(null);
         getRequest().setSubnetIds(null);
         getRequest().setGcp(null);
+        getRequest().setOpenstack(null);
         getRequest().setNetworkCidr(networkCIDR);
         return this;
     }
@@ -106,6 +108,12 @@ public class EnvironmentNetworkTestDto extends AbstractCloudbreakTestDto<Environ
 
     public EnvironmentNetworkTestDto withMock(EnvironmentNetworkMockParams mock) {
         getRequest().setMock(mock);
+        return this;
+    }
+
+    public EnvironmentNetworkTestDto withOpenstack(EnvironmentNetworkOpenstackParams openstack) {
+        getRequest().setNetworkCidr(null);
+        getRequest().setOpenstack(openstack);
         return this;
     }
 

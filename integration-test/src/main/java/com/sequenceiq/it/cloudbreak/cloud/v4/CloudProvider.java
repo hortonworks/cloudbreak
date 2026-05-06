@@ -204,6 +204,22 @@ public interface CloudProvider {
 
     String getFreeIpaImageCatalogUrl();
 
+    default String getFreeIpaImageCatalog() {
+        return null;
+    }
+
+    default String getFreeIpaImageId() {
+        return null;
+    }
+
+    default String getSdxImageCatalog() {
+        return null;
+    }
+
+    default String getSdxImageId() {
+        return null;
+    }
+
     String getVariant();
 
     String getFreeIpaUpgradeImageId();

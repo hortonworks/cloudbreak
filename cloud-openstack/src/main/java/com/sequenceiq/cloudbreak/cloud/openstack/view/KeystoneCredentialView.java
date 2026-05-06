@@ -102,27 +102,27 @@ public class KeystoneCredentialView {
         return cloudCredential.getParameter("keystoneVersion", String.class);
     }
 
-    private record KeystoneConfig(
+    record KeystoneConfig(
             String endpoint,
             String facing,
             String userName,
             String password,
             KeystoneV3 keystoneV3
     ) {
-        private record KeystoneV3(
+        record KeystoneV3(
                 Project project,
                 Domain domain
         ) {
         }
 
-        private record Project(
+        record Project(
                 String projectName,
                 String projectDomainName,
                 String userDomain
         ) {
         }
 
-        private record Domain(
+        record Domain(
                 String userDomain,
                 String domainName
         ) {

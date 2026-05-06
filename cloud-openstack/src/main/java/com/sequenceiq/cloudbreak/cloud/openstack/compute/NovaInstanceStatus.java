@@ -7,9 +7,8 @@ import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 public enum NovaInstanceStatus {
 
     STARTED("ACTIVE"),
-    STOPPED("SHUTOFF"),
-    SUSPENDED("SUSPENDED"),
-    PAUSED("PAUSED");
+    SHUTOFF("SHUTOFF"),
+    STOPPED("STOPPED");
 
     private final String status;
 
@@ -33,6 +32,6 @@ public enum NovaInstanceStatus {
     }
 
     private static boolean isStoppedInstanceStatus(String status) {
-        return status.equals(STOPPED.status) || status.equals(SUSPENDED.status) || status.equals(PAUSED.status);
+        return status.equals(SHUTOFF.status) || status.equals(STOPPED.status);
     }
 }

@@ -9,6 +9,7 @@ import com.sequenceiq.environment.api.v1.credential.model.parameters.aws.AwsCred
 import com.sequenceiq.environment.api.v1.credential.model.parameters.azure.AzureCredentialRequestParameters;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.gcp.GcpCredentialParameters;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.mock.MockParameters;
+import com.sequenceiq.environment.api.v1.credential.model.parameters.openstack.OpenstackParameters;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.yarn.YarnParameters;
 import com.sequenceiq.environment.api.v1.credential.model.request.CredentialRequest;
 import com.sequenceiq.environment.api.v1.credential.model.request.EditCredentialRequest;
@@ -70,6 +71,7 @@ public class CredentialTestDto extends DeletableEnvironmentTestDto<CredentialReq
         editRequest.setGcp(request.getGcp());
         editRequest.setMock(request.getMock());
         editRequest.setYarn(request.getYarn());
+        editRequest.setOpenstack(request.getOpenstack());
         editRequest.setCloudPlatform(request.getName());
         editRequest.setDescription(request.getName());
         editRequest.setCloudPlatform(getCloudPlatform().name());
@@ -108,6 +110,11 @@ public class CredentialTestDto extends DeletableEnvironmentTestDto<CredentialReq
 
     public CredentialTestDto withMockParameters(MockParameters mockParameters) {
         getRequest().setMock(mockParameters);
+        return this;
+    }
+
+    public CredentialTestDto withOpenstackParameters(OpenstackParameters parameters) {
+        getRequest().setOpenstack(parameters);
         return this;
     }
 

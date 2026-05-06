@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.task.AbstractPollTask;
 import com.sequenceiq.cloudbreak.cloud.template.ComputeResourceBuilder;
 import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
@@ -40,6 +41,12 @@ public class PollComputeStatusTask extends AbstractPollTask<List<CloudVmInstance
     public boolean completed(List<CloudVmInstanceStatus> status) {
         for (CloudVmInstanceStatus result : status) {
             if (result.getStatus().isTransient()) {
+                return false;
+            }
+            if (context.isBuild() && result.getStatus() == InstanceStatus.STOPPED) {
+                return false;
+            }
+            if (!context.isBuild() && result.getStatus() == InstanceStatus.STARTED) {
                 return false;
             }
         }

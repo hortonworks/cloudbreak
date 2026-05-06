@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.openstack.securitygroup;
 
+import java.util.List;
+import java.util.Objects;
+
 import org.openstack4j.api.Builders;
 import org.openstack4j.api.OSClient;
 import org.openstack4j.api.compute.ComputeSecurityGroupService;
@@ -36,19 +39,28 @@ public class OpenStackSecurityGroupResourceBuilder extends AbstractOpenStackGrou
             ComputeSecurityGroupService securityGroupService = osClient.compute().securityGroups();
             SecGroupExtension securityGroup = securityGroupService.create(resource.getName(), "");
             String securityGroupId = securityGroup.getId();
+            List<? extends Rule> existingRules = securityGroupService.get(securityGroupId).getRules();
             for (SecurityRule rule : security.getRules()) {
                 IPProtocol osProtocol = getProtocol(rule.getProtocol());
                 String cidr = rule.getCidr();
                 for (PortDefinition portStr : rule.getPorts()) {
                     int from = Integer.parseInt(portStr.getFrom());
                     int to = Integer.parseInt(portStr.getTo());
-                    securityGroupService.createRule(createRule(securityGroupId, osProtocol, cidr, from, to));
+                    if (!ruleExists(existingRules, osProtocol, cidr, from, to)) {
+                        securityGroupService.createRule(createRule(securityGroupId, osProtocol, cidr, from, to));
+                    }
                 }
             }
             String subnetCidr = network.getSubnet().getCidr();
-            securityGroupService.createRule(createRule(securityGroupId, IPProtocol.TCP, subnetCidr, MIN_PORT, MAX_PORT));
-            securityGroupService.createRule(createRule(securityGroupId, IPProtocol.UDP, subnetCidr, MIN_PORT, MAX_PORT));
-            securityGroupService.createRule(createRule(securityGroupId, IPProtocol.ICMP, "0.0.0.0/0"));
+            if (!ruleExists(existingRules, IPProtocol.TCP, subnetCidr, MIN_PORT, MAX_PORT)) {
+                securityGroupService.createRule(createRule(securityGroupId, IPProtocol.TCP, subnetCidr, MIN_PORT, MAX_PORT));
+            }
+            if (!ruleExists(existingRules, IPProtocol.UDP, subnetCidr, MIN_PORT, MAX_PORT)) {
+                securityGroupService.createRule(createRule(securityGroupId, IPProtocol.UDP, subnetCidr, MIN_PORT, MAX_PORT));
+            }
+            if (!ruleExists(existingRules, IPProtocol.ICMP, "0.0.0.0/0", -1, -1)) {
+                securityGroupService.createRule(createRule(securityGroupId, IPProtocol.ICMP, "0.0.0.0/0"));
+            }
             return createPersistedResource(resource, group.getName(), securityGroup.getId());
         } catch (OS4JException ex) {
             throw new OpenStackResourceException("SecurityGroup creation failed", resourceType(), resource.getName(), ex);
@@ -74,6 +86,15 @@ public class OpenStackSecurityGroupResourceBuilder extends AbstractOpenStackGrou
     @Override
     protected boolean checkStatus(OpenStackContext context, AuthenticatedContext auth, CloudResource resource) {
         return true;
+    }
+
+    private boolean ruleExists(List<? extends Rule> existingRules, IPProtocol protocol, String cidr, int fromPort, int toPort) {
+        return existingRules.stream().anyMatch(r ->
+                r.getIPProtocol() == protocol
+                        && r.getFromPort() == fromPort
+                        && r.getToPort() == toPort
+                        && r.getRange() != null
+                        && Objects.equals(r.getRange().getCidr(), cidr));
     }
 
     private Rule createRule(String securityGroupId, IPProtocol protocol, String cidr, int fromPort, int toPort) {

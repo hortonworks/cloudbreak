@@ -70,16 +70,20 @@ public class OpenStackNetworkConnector implements DefaultNetworkConnector {
 
     @Override
     public NetworkCidr getNetworkCidr(Network network, CloudCredential credential) {
+        String networkId = network.getStringParameter(NETWORK_ID);
+        if (networkId == null) {
+            throw new BadRequestException("Network id must be provided for OpenStack");
+        }
         OSClient<?> osClient = openStackClient.createOSClient(credential);
-        org.openstack4j.model.network.Network openstackNetwork = osClient.networking().network().get(network.getStringParameter(NETWORK_ID));
+        org.openstack4j.model.network.Network openstackNetwork = osClient.networking().network().get(networkId);
         if (openstackNetwork == null) {
-            throw new BadRequestException("Network not found with id: " + network.getStringParameter(NETWORK_ID));
+            throw new BadRequestException("Network not found with id: " + networkId);
         }
         List<String> subnets = openstackNetwork.getSubnets().stream()
                 .map(subnet -> osClient.networking().subnet().get(subnet).getCidr())
                 .toList();
         if (subnets.isEmpty()) {
-            throw new BadRequestException("No subnets found for network: " + network.getStringParameter(NETWORK_ID));
+            throw new BadRequestException("No subnets found for network: " + networkId);
         }
         // TODO: Openstack - one subnet supported for now
         return new NetworkCidr(subnets.getFirst());

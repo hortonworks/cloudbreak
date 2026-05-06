@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -63,22 +64,20 @@ public class GatewaySecurityGroupDecorator {
     private void addSecurityRuleToSecurityGroup(Stack stack, Set<String> defaultGatewayCidrs, InstanceGroup gateway) {
         SecurityGroup securityGroup = gateway.getSecurityGroup();
         Set<SecurityRule> rules = securityGroup.getSecurityRules();
-        String ports = collectPortsWithoutDuplicateHttpsPort(stack, securityGroup);
-        defaultGatewayCidrs.forEach(cloudbreakCidr -> rules.add(createSecurityRule(securityGroup, cloudbreakCidr, ports)));
-        LOGGER.info("The control plane cidrs {} are added to the {} gateway group for the {} port.", defaultGatewayCidrs, gateway.getGroupName(),
-                stack.getGatewayPort());
+        String ports = collectPortsWithoutDuplicates(stack, securityGroup);
+        if (!ports.isEmpty()) {
+            defaultGatewayCidrs.forEach(cloudbreakCidr -> rules.add(createSecurityRule(securityGroup, cloudbreakCidr, ports)));
+            LOGGER.info("The control plane cidrs {} are added to the {} gateway group for the {} port.", defaultGatewayCidrs, gateway.getGroupName(), ports);
+        }
     }
 
-    private String collectPortsWithoutDuplicateHttpsPort(Stack stack, SecurityGroup securityGroup) {
+    private String collectPortsWithoutDuplicates(Stack stack, SecurityGroup securityGroup) {
         Set<String> existingPorts = securityGroup.getSecurityRules().stream()
                 .flatMap(securityRule -> Arrays.stream(securityRule.getPorts()))
                 .collect(Collectors.toSet());
-        String gatewayPortString = getEffectiveGatewayPort(stack);
-        if (!existingPorts.contains(httpsPort.toString())) {
-            return gatewayPortString + ',' + httpsPort;
-        } else {
-            return gatewayPortString;
-        }
+        return Stream.of(getEffectiveGatewayPort(stack), httpsPort.toString())
+                .filter(port -> !existingPorts.contains(port))
+                .collect(Collectors.joining(","));
     }
 
     private String getEffectiveGatewayPort(Stack stack) {

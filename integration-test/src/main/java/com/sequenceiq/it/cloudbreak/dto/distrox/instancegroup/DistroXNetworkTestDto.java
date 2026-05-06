@@ -5,6 +5,7 @@ import com.sequenceiq.distrox.api.v1.distrox.model.network.NetworkV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.network.aws.AwsNetworkV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.network.azure.AzureNetworkV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.network.mock.MockNetworkV1Parameters;
+import com.sequenceiq.distrox.api.v1.distrox.model.network.openstack.OpenstackNetworkV1Parameters;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.AbstractCloudbreakTestDto;
@@ -32,6 +33,11 @@ public class DistroXNetworkTestDto extends AbstractCloudbreakTestDto<NetworkV1Re
 
     public DistroXNetworkTestDto withMock(MockNetworkV1Parameters mock) {
         getRequest().setMock(mock);
+        return this;
+    }
+
+    public DistroXNetworkTestDto withOpenstack(OpenstackNetworkV1Parameters openstack) {
+        getRequest().setOpenstack(openstack);
         return this;
     }
 

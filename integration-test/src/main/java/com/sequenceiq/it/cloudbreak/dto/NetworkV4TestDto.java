@@ -4,6 +4,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.A
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.AzureNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.GcpNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.MockNetworkV4Parameters;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.OpenStackNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.YarnNetworkV4Parameters;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.network.NetworkV4Response;
@@ -47,6 +48,11 @@ public class NetworkV4TestDto extends AbstractCloudbreakTestDto<NetworkV4Request
 
     public NetworkV4TestDto withYarn(YarnNetworkV4Parameters yarn) {
         getRequest().setYarn(yarn);
+        return this;
+    }
+
+    public NetworkV4TestDto withOpenStack(OpenStackNetworkV4Parameters openStack) {
+        getRequest().setOpenstack(openStack);
         return this;
     }
 

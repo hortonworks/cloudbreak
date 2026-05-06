@@ -44,6 +44,7 @@ import com.sequenceiq.it.cloudbreak.action.sdx.SdxRefreshAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxRefreshInternalAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxRepairAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxRepairInternalAction;
+import com.sequenceiq.it.cloudbreak.action.sdx.SdxRepairInternalByNodeIdsAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxResizeAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxRestoreAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxRestoreInternalAction;
@@ -188,6 +189,10 @@ public class SdxTestClient {
 
     public Action<SdxInternalTestDto, SdxClient> repairInternal(String... hostGroups) {
         return new SdxRepairInternalAction(hostGroups);
+    }
+
+    public Action<SdxInternalTestDto, SdxClient> repairInternalByNodeIds(String... ids) {
+        return new SdxRepairInternalByNodeIdsAction(ids);
     }
 
     public Action<SdxInternalTestDto, SdxClient> syncInternal() {

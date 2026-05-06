@@ -5,6 +5,7 @@ import java.util.List;
 import jakarta.ws.rs.core.Response;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.product.ClouderaManagerProductV4Request;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 
@@ -41,6 +42,11 @@ public class ClouderaManagerTestDto extends AbstractCloudbreakTestDto<ClouderaMa
 
     public ClouderaManagerTestDto withClouderaManagerProduct(ClouderaManagerProductTestDto clouderaManagerProductEntity) {
         getRequest().setProducts(List.of(clouderaManagerProductEntity.getRequest()));
+        return this;
+    }
+
+    public ClouderaManagerTestDto withProducts(List<ClouderaManagerProductV4Request> products) {
+        getRequest().setProducts(products);
         return this;
     }
 }

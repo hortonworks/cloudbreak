@@ -52,6 +52,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.network.AzureNet
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.network.GcpNetworkParameters;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.network.MockNetworkParameters;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.network.NetworkRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.network.OpenStackNetworkParameters;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.region.PlacementRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.security.SecurityGroupRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.security.SecurityRuleRequest;
@@ -364,6 +365,13 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
             azure.setSubnetId(request.getAzure().getSubnetId());
             azure.setResourceGroupName(request.getAzure().getResourceGroupName());
             networkRequest.setAzure(azure);
+        } else if (request.getOpenstack() != null) {
+            OpenStackNetworkParameters openstack = new OpenStackNetworkParameters();
+            openstack.setNetworkId(request.getOpenstack().getNetworkId());
+            openstack.setRouterId(request.getOpenstack().getRouterId());
+            openstack.setSubnetId(request.getOpenstack().getSubnetId());
+            openstack.setPublicNetId(request.getOpenstack().getPublicNetId());
+            networkRequest.setOpenstack(openstack);
         }
         getRequest().setNetwork(networkRequest);
         return this;

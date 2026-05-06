@@ -407,6 +407,9 @@ public class EnvironmentApiConverter {
     }
 
     private LocationDto locationRequestToDto(LocationRequest location) {
+        if (location == null) {
+            return null;
+        }
         return LocationDto.builder()
                 .withName(location.getName())
                 .withLatitude(location.getLatitude())
@@ -416,7 +419,7 @@ public class EnvironmentApiConverter {
     }
 
     private Set<String> locationRequestToRegions(LocationRequest location, String cloudPlatform) {
-        if (CloudPlatform.YARN.equalsIgnoreCase(cloudPlatform)) {
+        if (location == null || CloudPlatform.YARN.equalsIgnoreCase(cloudPlatform) || StringUtils.isEmpty(location.getName())) {
             return Set.of();
         }
         return Set.of(location.getName());

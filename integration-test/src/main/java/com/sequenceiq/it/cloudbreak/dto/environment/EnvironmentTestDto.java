@@ -158,7 +158,7 @@ public class EnvironmentTestDto
     }
 
     public EnvironmentTestDto withCreateFreeIpa(Boolean create) {
-        getRequest().getFreeIpa().setCreate(create);
+        getOrCreateFreeIpa().setCreate(create);
         return this;
     }
 
@@ -196,11 +196,10 @@ public class EnvironmentTestDto
 
     public EnvironmentTestDto withFreeIpaImage(String imageCatalog, String imageUuid) {
         if (!Strings.isNullOrEmpty(imageCatalog) && !Strings.isNullOrEmpty(imageUuid)) {
-            FreeIpaImageRequest imageRequest = new FreeIpaImageRequest();
+            FreeIpaImageRequest imageRequest = getOrCreateFreeIpaImage();
             imageRequest.setCatalog(imageCatalog);
             imageRequest.setId(imageUuid);
             withCreateFreeIpa(true);
-            getRequest().getFreeIpa().setImage(imageRequest);
         }
         return this;
     }
@@ -218,12 +217,28 @@ public class EnvironmentTestDto
 
     public EnvironmentTestDto withFreeIpaOs(String os) {
         if (!Strings.isNullOrEmpty(os)) {
-            FreeIpaImageRequest imageRequest = new FreeIpaImageRequest();
+            FreeIpaImageRequest imageRequest = getOrCreateFreeIpaImage();
             imageRequest.setOs(os);
             withCreateFreeIpa(true);
-            getRequest().getFreeIpa().setImage(imageRequest);
         }
         return this;
+    }
+
+    private AttachedFreeIpaRequest getOrCreateFreeIpa() {
+        AttachedFreeIpaRequest freeIpa = getRequest().getFreeIpa();
+        if (freeIpa == null) {
+            freeIpa = new AttachedFreeIpaRequest();
+            getRequest().setFreeIpa(freeIpa);
+        }
+        return freeIpa;
+    }
+
+    private FreeIpaImageRequest getOrCreateFreeIpaImage() {
+        AttachedFreeIpaRequest freeIpa = getOrCreateFreeIpa();
+        if (freeIpa.getImage() == null) {
+            freeIpa.setImage(new FreeIpaImageRequest());
+        }
+        return freeIpa.getImage();
     }
 
     public EnvironmentTestDto withMarketplaceFreeIpaImage() {
