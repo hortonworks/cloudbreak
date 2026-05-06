@@ -16,7 +16,7 @@
           {
             "count": 1,
             "size": 128,
-            "type": "pd-standard"
+            "type": "pd-balanced"
           }
         ]
       },
@@ -33,7 +33,7 @@
           {
             "count": 1,
             "size": 128,
-            "type": "pd-standard"
+            "type": "pd-balanced"
           }
         ]
       },
@@ -67,7 +67,7 @@
           {
             "count": 1,
             "size": 128,
-            "type": "pd-standard"
+            "type": "pd-balanced"
           }
         ]
       },
@@ -83,7 +83,7 @@
         "attachedVolumes": [
           {
             "count": 0,
-            "type": "pd-standard"
+            "type": "pd-balanced"
           }
         ]
       },
