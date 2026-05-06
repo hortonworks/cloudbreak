@@ -1,0 +1,36 @@
+name: Auto close old PRs
+on:
+  schedule:
+    - cron: "0 8 * * *"
+  workflow_dispatch:
+permissions:
+  pull-requests: write
+  issues: write
+jobs:
+  close-old-prs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Close PRs created more than 30 days ago
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          cutoff=$(date -u -d "30 days ago" +"%Y-%m-%dT%H:%M:%SZ")
+          gh label create "auto-closed" \
+            --repo "$REPO" \
+            --color "ededed" \
+            --description "Closed automatically by the auto-close-old-prs workflow." \
+            2>/dev/null || true
+          gh pr list \
+            --repo "$REPO" \
+            --state open \
+            --limit 1000 \
+            --json number,title,createdAt,isDraft \
+            --jq ".[] | select(.createdAt < \"$cutoff\") | .number" |
+          while read pr; do
+            echo "Closing PR #$pr"
+            gh pr comment "$pr" --repo "$REPO" --body \
+              "Automatically closing this PR because it was created more than 30 days ago."
+            gh pr edit "$pr" --repo "$REPO" --add-label "auto-closed"
+            gh pr close "$pr" --repo "$REPO"
+          done
