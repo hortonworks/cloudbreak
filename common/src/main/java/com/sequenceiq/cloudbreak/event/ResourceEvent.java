@@ -886,17 +886,17 @@ public enum ResourceEvent {
     ENVIRONMENT_REPAIR_TRUST_VALIDATION_FAILED("environment.repair.cross.realm.trust.validation.failed"),
     ENVIRONMENT_REPAIR_TRUST_FAILED("environment.repair.cross.realm.trust.failed"),
 
-    FREEIPA_SETUP_TRUST_STARTED("environment.setup.cross.realm.trust.started"),
-    FREEIPA_SETUP_TRUST_FINISHED("environment.setup.cross.realm.trust.finished"),
-    FREEIPA_SETUP_TRUST_FAILED("environment.setup.cross.realm.trust.failed"),
+    FREEIPA_SETUP_TRUST_STARTED("freeipa.setup.cross.realm.trust.started"),
+    FREEIPA_SETUP_TRUST_FINISHED("freeipa.setup.cross.realm.trust.finished"),
+    FREEIPA_SETUP_TRUST_FAILED("freeipa.setup.cross.realm.trust.failed"),
 
-    FREEIPA_CANCEL_TRUST_STARTED("environment.cancel.cross.realm.trust.started"),
-    FREEIPA_CANCEL_TRUST_FINISHED("environment.cancel.cross.realm.trust.finished"),
-    FREEIPA_CANCEL_TRUST_FAILED("environment.cancel.cross.realm.trust.failed"),
+    FREEIPA_CANCEL_TRUST_STARTED("freeipa.cancel.cross.realm.trust.started"),
+    FREEIPA_CANCEL_TRUST_FINISHED("freeipa.cancel.cross.realm.trust.finished"),
+    FREEIPA_CANCEL_TRUST_FAILED("freeipa.cancel.cross.realm.trust.failed"),
 
-    FREEIPA_SETUP_FINISH_TRUST_STARTED("environment.setup.finish.cross.realm.trust.started"),
-    FREEIPA_SETUP_FINISH_TRUST_FINISHED("environment.setup.finish.cross.realm.trust.finished"),
-    FREEIPA_SETUP_FINISH_TRUST_FAILED("environment.setup.finish.cross.realm.trust.failed"),
+    FREEIPA_SETUP_FINISH_TRUST_STARTED("freeipa.setup.finish.cross.realm.trust.started"),
+    FREEIPA_SETUP_FINISH_TRUST_FINISHED("freeipa.setup.finish.cross.realm.trust.finished"),
+    FREEIPA_SETUP_FINISH_TRUST_FAILED("freeipa.setup.finish.cross.realm.trust.failed"),
 
     FREEIPA_CREATION_STARTED("freeipa.creation.started"),
     FREEIPA_CREATION_FINISHED("freeipa.creation.finished"),
