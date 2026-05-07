@@ -14,7 +14,7 @@ public class FreeIpaVersions {
 
     private static final String IMAGES_PROPERTY = "images";
 
-    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private final List<String> versions;
 
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
