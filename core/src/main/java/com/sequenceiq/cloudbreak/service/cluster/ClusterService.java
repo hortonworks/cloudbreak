@@ -431,6 +431,12 @@ public class ClusterService implements LocalPaasRdcViewExtender {
         }
     }
 
+    public void updateClusterConfigurationStalenessByStackId(Long stackId, ConfigStalenessState configStalenessState, String configStalenessDetails) {
+        Stack stack = stackDtoService.getStackReferenceById(stackId);
+        LOGGER.info("Cluster configuration became {}", configStalenessState);
+        repository.updateConfigStalenessState(stack.getClusterId(), configStalenessState, configStalenessDetails);
+    }
+
     public boolean isRangerRazEnabledOnCluster(StackDto stack) {
         ClusterView cluster = stack.getCluster();
         ClusterApi clusterApi = clusterApiConnectors.getConnector(stack);

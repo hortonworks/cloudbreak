@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.common.type.HealthCheckResult.HEALTHY;
 import static com.sequenceiq.cloudbreak.common.type.HealthCheckResult.UNHEALTHY;
 import static com.sequenceiq.common.api.type.CertExpirationState.HOST_CERT_EXPIRING;
 import static com.sequenceiq.common.api.type.CertExpirationState.VALID;
+import static com.sequenceiq.common.api.type.ConfigStalenessState.RESTART_IN_PROGRESS;
 import static com.sequenceiq.common.api.type.ConfigStalenessState.STALE;
 import static com.sequenceiq.common.api.type.ConfigStalenessState.UP_TO_DATE;
 import static java.util.Collections.emptySet;
@@ -185,6 +186,17 @@ class ClusterServiceTest {
                 {"No change when fresh", UP_TO_DATE, Boolean.FALSE, Boolean.FALSE, null, ""},
                 {"No change when stale", STALE, Boolean.TRUE, Boolean.FALSE, null, ""}
         };
+    }
+
+    @Test
+    void testUpdateClusterConfigurationStalenessByStackId() {
+        Stack stack = mock(Stack.class);
+        when(stack.getClusterId()).thenReturn(CLUSTER_ID);
+        when(stackDtoService.getStackReferenceById(STACK_ID)).thenReturn(stack);
+
+        underTest.updateClusterConfigurationStalenessByStackId(STACK_ID, RESTART_IN_PROGRESS, "Restart in progress");
+
+        verify(repository, times(1)).updateConfigStalenessState(CLUSTER_ID, RESTART_IN_PROGRESS, "Restart in progress");
     }
 
     @ParameterizedTest(name = "{0}")

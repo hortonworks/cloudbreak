@@ -25,7 +25,9 @@ import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.restart.ClusterServicesRestartRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.restart.ClusterServicesRestartResult;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.metrics.MetricType;
+import com.sequenceiq.common.api.type.ConfigStalenessState;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 
 @Configuration
@@ -35,13 +37,18 @@ public class ClusterServicesRestartActions {
     @Inject
     private StackUpdater stackUpdater;
 
+    @Inject
+    private ClusterService clusterService;
+
     @Bean(name = "CLUSTER_SERVICE_RESTARTING_STATE")
     public Action<?, ?> startingCluster() {
         return new AbstractClusterAction<>(ClusterServicesRestartTriggerEvent.class) {
             @Override
             protected void doExecute(ClusterViewContext context, ClusterServicesRestartTriggerEvent payload, Map<Object, Object> variables) {
-                stackUpdater.updateStackStatus(context.getStackId(), DetailedStackStatus.CLUSTER_RESTART_IN_PROGRESS);
-                ClusterServicesRestartRequest request = new ClusterServicesRestartRequest(context.getStackId(), payload.isRollingRestart(),
+                long stackId = context.getStackId();
+                stackUpdater.updateStackStatus(stackId, DetailedStackStatus.CLUSTER_RESTART_IN_PROGRESS);
+                clusterService.updateClusterConfigurationStalenessByStackId(stackId, ConfigStalenessState.RESTART_IN_PROGRESS, "Restart in progress");
+                ClusterServicesRestartRequest request = new ClusterServicesRestartRequest(stackId, payload.isRollingRestart(),
                         payload.isRestartStaleServices(), payload.isReallocateMemory());
                 request.setDatahubRefreshNeeded(payload.isRefreshNeeded());
                 String selector = EventSelectorUtil.selector(ClusterServicesRestartRequest.class);
@@ -56,6 +63,7 @@ public class ClusterServicesRestartActions {
             @Override
             protected void doExecute(ClusterViewContext context, ClusterServicesRestartResult payload, Map<Object, Object> variables) {
                 stackUpdater.updateStackStatus(context.getStack().getId(), DetailedStackStatus.AVAILABLE);
+                clusterService.updateClusterConfigurationStalenessByStackId(context.getStackId(), ConfigStalenessState.UP_TO_DATE, "");
                 getMetricService().incrementMetricCounter(MetricType.CLUSTER_START_SUCCESSFUL, context.getStack());
                 sendEvent(context);
             }

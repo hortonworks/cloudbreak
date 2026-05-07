@@ -7,6 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 public enum ConfigStalenessState {
     UP_TO_DATE,
     STALE,
+    RESTART_IN_PROGRESS,
     UNKNOWN;
 
     public static ConfigStalenessState fromString(String configStalenessState) {
