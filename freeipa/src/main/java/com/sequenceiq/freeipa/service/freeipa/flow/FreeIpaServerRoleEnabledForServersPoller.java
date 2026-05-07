@@ -1,6 +1,8 @@
 package com.sequenceiq.freeipa.service.freeipa.flow;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -23,32 +25,44 @@ public class FreeIpaServerRoleEnabledForServersPoller implements AttemptMaker<Vo
 
     private final FreeIpaClient freeIpaClient;
 
-    private final String role;
+    private final Set<String> roles;
 
     private final Set<String> servers;
 
     private int attempt;
 
-    public FreeIpaServerRoleEnabledForServersPoller(FreeIpaClient freeIpaClient, String role, Set<String> servers) {
+    public FreeIpaServerRoleEnabledForServersPoller(FreeIpaClient freeIpaClient, Set<String> roles, Set<String> servers) {
+        Objects.requireNonNull(roles);
         Objects.requireNonNull(servers);
         this.freeIpaClient = freeIpaClient;
-        this.role = role;
+        this.roles = roles;
         this.servers = servers;
     }
 
     @Override
     public AttemptResult<Void> process() throws Exception {
         attempt++;
-        LOGGER.debug("Checking if [{}] role is enabled for servers [{}]. Attempt: [{}]", role, servers, attempt);
+        LOGGER.debug("Checking if roles {} are enabled for servers {}. Attempt: [{}]", roles, servers, attempt);
         try {
-            List<ServerRole> serverRoles = freeIpaClient.findServerRoles(role, null, null);
-            boolean roleEnabledForAllServers = servers.stream().allMatch(server -> isRoleEnabledForServer(server, serverRoles));
-            if (roleEnabledForAllServers) {
+            List<ServerRole> serverRoles = freeIpaClient.findServerRoles(null, null, null);
+            Map<String, Set<String>> missingByRole = new HashMap<>();
+            for (String role : roles) {
+                Set<String> missing = servers.stream()
+                        .filter(server -> !isRoleEnabledForServer(server, role, serverRoles))
+                        .collect(Collectors.toSet());
+                if (!missing.isEmpty()) {
+                    missingByRole.put(role, missing);
+                }
+            }
+
+            if (missingByRole.isEmpty()) {
                 return AttemptResults.justFinish();
             } else {
-                Set<String> missingRole = servers.stream().filter(server -> !isRoleEnabledForServer(server, serverRoles)).collect(Collectors.toSet());
-                LOGGER.debug("Not all servers are enabled for role: {}", serverRoles);
-                return AttemptResults.continueFor(new FreeIpaClientException(String.format("Role [%s] is not enabled for servers %s", role, missingRole)));
+                String aggregatedError = missingByRole.entrySet().stream()
+                        .map(e -> String.format("Role [%s] is not enabled for servers %s", e.getKey(), e.getValue()))
+                        .collect(Collectors.joining(", "));
+                LOGGER.debug("Not all servers are enabled for all roles: {}", aggregatedError);
+                return AttemptResults.continueFor(new FreeIpaClientException(aggregatedError));
             }
         } catch (FreeIpaClientException e) {
             LOGGER.debug("We were unable to fetch server roles", e);
@@ -56,7 +70,10 @@ public class FreeIpaServerRoleEnabledForServersPoller implements AttemptMaker<Vo
         }
     }
 
-    private boolean isRoleEnabledForServer(String server, List<ServerRole> serverRoles) {
-        return serverRoles.stream().anyMatch(serverRole -> serverRole.getServerFqdn().equals(server) && ENABLED_STATUS.equals(serverRole.getStatus()));
+    private boolean isRoleEnabledForServer(String server, String role, List<ServerRole> serverRoles) {
+        return serverRoles.stream().anyMatch(serverRole ->
+                serverRole.getServerFqdn().equals(server)
+                        && role.equals(serverRole.getRole())
+                        && ENABLED_STATUS.equals(serverRole.getStatus()));
     }
 }
