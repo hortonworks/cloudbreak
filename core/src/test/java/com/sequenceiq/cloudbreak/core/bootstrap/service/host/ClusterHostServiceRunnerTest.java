@@ -14,6 +14,7 @@ import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -98,6 +99,7 @@ import com.sequenceiq.cloudbreak.ldap.LdapConfigService;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
+import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorStateParams;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.GrainProperties;
 import com.sequenceiq.cloudbreak.orchestrator.model.NodeReachabilityResult;
@@ -662,6 +664,7 @@ class ClusterHostServiceRunnerTest {
     }
 
     @Test
+    @MockitoSettings(strictness = Strictness.LENIENT)
     void testRedeployGatewayCertificate() throws CloudbreakOrchestratorException {
         Set<Node> nodes = Sets.newHashSet(node("fqdn1"), node("fqdn2"), node("fqdn3"),
                 node("gateway1"), node("gateway3"));
@@ -690,13 +693,78 @@ class ClusterHostServiceRunnerTest {
                 .thenReturn("cipher1,cipher2,ECDHE-RSA-AES256-GCM-SHA384");
         when(encryptionProfileProvider.getIanaCipherSuites(any(), any(), anyBoolean()))
                 .thenReturn("cipher1,cipher2,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384");
+        OrchestratorStateParams stateParams = mock(OrchestratorStateParams.class);
 
         setupMocksForRunClusterServices();
 
-        underTest.redeployGatewayCertificate(stack);
+        underTest.redeployGatewayCertificate(stack, stateParams);
 
-        verify(hostOrchestrator, times(1)).initServiceRun(eq(stack), eq(gwConfigs), eq(nodes), eq(nodes), any(), any(), eq(CloudPlatform.AWS.name()));
-        verify(hostOrchestrator).runService(eq(gwConfigs), eq(nodes), any());
+        verify(hostOrchestrator).uploadStates(eq(gwConfigs), any());
+        verify(hostOrchestrator).uploadGatewayPillar(eq(gwConfigs), eq(nodes), any(), any());
+        verify(hostOrchestrator).runOrchestratorState(eq(stateParams));
+    }
+
+    @Test
+    @MockitoSettings(strictness = Strictness.LENIENT)
+    void testRedeployGatewayCertificateRedeployStatesError() throws CloudbreakOrchestratorException {
+        List<GatewayConfig> gwConfigs = List.of(GatewayConfig.builder().build());
+        when(gatewayConfigService.getAllGatewayConfigs(stack)).thenReturn(gwConfigs);
+        doThrow(new CloudbreakOrchestratorFailedException("upload states failed")).when(hostOrchestrator).uploadStates(any(), any());
+        OrchestratorStateParams stateParams = mock(OrchestratorStateParams.class);
+
+        CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class,
+                () -> underTest.redeployGatewayCertificate(stack, stateParams));
+
+        assertEquals("upload states failed", exception.getMessage());
+        verify(hostOrchestrator).uploadStates(eq(gwConfigs), any());
+        verify(hostOrchestrator, never()).uploadGatewayPillar(any(), any(), any(), any());
+        verify(hostOrchestrator, never()).runOrchestratorState(any());
+    }
+
+    @Test
+    @MockitoSettings(strictness = Strictness.LENIENT)
+    void testRedeployGatewayCertificateRedeployGatewayPillarError() throws CloudbreakOrchestratorException {
+        Set<Node> nodes = Sets.newHashSet(node("fqdn1"));
+        when(stackUtil.collectNodes(any())).thenReturn(nodes);
+        when(stackUtil.collectReachableNodes(any())).thenReturn(nodes);
+        List<GatewayConfig> gwConfigs = List.of(GatewayConfig.builder().build());
+        when(gatewayConfigService.getAllGatewayConfigs(stack)).thenReturn(gwConfigs);
+        setupMocksForRunClusterServices();
+        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(any(), any())).thenReturn(ENCRYPTION_PROFILE_CRN);
+        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(ENCRYPTION_PROFILE_CRN)).thenReturn(mock(EncryptionProfileResponse.class));
+        doThrow(new CloudbreakOrchestratorFailedException("upload pillar failed")).when(hostOrchestrator).uploadGatewayPillar(any(), any(), any(), any());
+        OrchestratorStateParams stateParams = mock(OrchestratorStateParams.class);
+
+        CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class,
+                () -> underTest.redeployGatewayCertificate(stack, stateParams));
+
+        assertEquals("upload pillar failed", exception.getMessage());
+        verify(hostOrchestrator).uploadStates(eq(gwConfigs), any());
+        verify(hostOrchestrator).uploadGatewayPillar(eq(gwConfigs), eq(nodes), any(), any());
+        verify(hostOrchestrator, never()).runOrchestratorState(any());
+    }
+
+    @Test
+    @MockitoSettings(strictness = Strictness.LENIENT)
+    void testRedeployGatewayCertificateRunStateError() throws CloudbreakOrchestratorException {
+        Set<Node> nodes = Sets.newHashSet(node("fqdn1"));
+        when(stackUtil.collectNodes(any())).thenReturn(nodes);
+        when(stackUtil.collectReachableNodes(any())).thenReturn(nodes);
+        List<GatewayConfig> gwConfigs = List.of(GatewayConfig.builder().build());
+        when(gatewayConfigService.getAllGatewayConfigs(stack)).thenReturn(gwConfigs);
+        setupMocksForRunClusterServices();
+        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(any(), any())).thenReturn(ENCRYPTION_PROFILE_CRN);
+        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(ENCRYPTION_PROFILE_CRN)).thenReturn(mock(EncryptionProfileResponse.class));
+        OrchestratorStateParams stateParams = mock(OrchestratorStateParams.class);
+        doThrow(new CloudbreakOrchestratorFailedException("run state failed")).when(hostOrchestrator).runOrchestratorState(stateParams);
+
+        CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class,
+                () -> underTest.redeployGatewayCertificate(stack, stateParams));
+
+        assertEquals("run state failed", exception.getMessage());
+        verify(hostOrchestrator).uploadStates(eq(gwConfigs), any());
+        verify(hostOrchestrator).uploadGatewayPillar(eq(gwConfigs), eq(nodes), any(), any());
+        verify(hostOrchestrator).runOrchestratorState(eq(stateParams));
     }
 
     @Test

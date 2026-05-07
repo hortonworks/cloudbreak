@@ -111,6 +111,7 @@ import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFa
 import com.sequenceiq.cloudbreak.orchestrator.host.GrainOperation;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorGrainRunnerParams;
+import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorStateParams;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayServiceConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.GrainProperties;
@@ -468,21 +469,19 @@ public class ClusterHostServiceRunner {
         }
     }
 
-    public void redeployGatewayCertificate(StackDto stackDto) {
+    public void redeployGatewayCertificate(StackDto stackDto, OrchestratorStateParams stateParams) {
         throwIfNull(stackDto, () -> new IllegalArgumentException("Stack should not be null"));
         throwIfNull(stackDto.getCluster(), () -> new IllegalArgumentException("Cluster should not be null"));
         try {
-            Set<Node> allNodes = stackUtil.collectNodes(stackDto);
-            Set<Node> reachableNodes = stackUtil.collectReachableNodes(stackDto);
-            List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stackDto);
-            List<GrainProperties> grainsProperties = grainPropertiesService.createGrainProperties(gatewayConfigs, stackDto, reachableNodes);
-            SaltConfig saltConfig = createSaltConfig(stackDto, grainsProperties);
-            ExitCriteriaModel exitCriteriaModel = clusterDeletionBasedModel(stackDto.getStack().getId(), stackDto.getCluster().getId());
-            hostOrchestrator.initServiceRun(stackDto, gatewayConfigs, allNodes, reachableNodes, saltConfig, exitCriteriaModel, stackDto.getCloudPlatform());
-            hostOrchestrator.runService(gatewayConfigs, reachableNodes, exitCriteriaModel);
-        } catch (CloudbreakOrchestratorCancelledException e) {
-            throw new CancellationException(e.getMessage());
-        } catch (CloudbreakOrchestratorException | IOException e) {
+            LOGGER.info("Redeploying public certificate of the cluster, starting to re-deploy salt states");
+            redeployStates(stackDto);
+            LOGGER.debug("Redeploying gateway pillars");
+            redeployGatewayPillarOnly(stackDto, emptySet());
+            LOGGER.debug("Redeploying public certificate NGiNX certificate");
+            hostOrchestrator.runOrchestratorState(stateParams);
+            LOGGER.info("Public certificate redeployment has been finished on the cluster");
+        } catch (CloudbreakOrchestratorException e) {
+            LOGGER.warn("Orchestration exception during redeploying gateway certificate", e);
             throw new CloudbreakServiceException(e.getMessage(), e);
         }
     }

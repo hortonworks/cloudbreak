@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -22,9 +23,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.ClusterHostServiceRunner;
 import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorStateParams;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
+import com.sequenceiq.cloudbreak.service.salt.SaltStateParamsService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.StackView;
@@ -54,13 +57,19 @@ class ClusterServiceRunnerTest {
     @Mock
     private TlsSecurityService tlsSecurityService;
 
+    @Mock
+    private SaltStateParamsService saltStateParamsService;
+
     @InjectMocks
     private ClusterServiceRunner underTest;
 
     @Test
     void testRedeployGatewayCertificateWhenRedeployOnHostRunnerThrowRuntimeException() {
         when(stackDtoService.getById(anyLong())).thenReturn(stackDto);
-        doThrow(new RuntimeException("Stg. failed")).when(hostRunner).redeployGatewayCertificate(any());
+        OrchestratorStateParams stateParams = mock(OrchestratorStateParams.class);
+        when(saltStateParamsService.createStateParamsForReachableNodes(stackDto, "nginx/renewpubliccert", 100, 3))
+                .thenReturn(stateParams);
+        doThrow(new RuntimeException("Stg. failed")).when(hostRunner).redeployGatewayCertificate(any(), eq(stateParams));
 
         assertThrows(RuntimeException.class, () -> underTest.redeployGatewayCertificate(0L));
     }
@@ -68,10 +77,13 @@ class ClusterServiceRunnerTest {
     @Test
     void testRedeployGatewayCertificateHappyFlow() {
         when(stackDtoService.getById(anyLong())).thenReturn(stackDto);
+        OrchestratorStateParams stateParams = mock(OrchestratorStateParams.class);
+        when(saltStateParamsService.createStateParamsForReachableNodes(stackDto, "nginx/renewpubliccert", 100, 3))
+                .thenReturn(stateParams);
 
         underTest.redeployGatewayCertificate(0L);
 
-        verify(hostRunner, times(1)).redeployGatewayCertificate(any());
+        verify(hostRunner, times(1)).redeployGatewayCertificate(any(), eq(stateParams));
     }
 
     @Test

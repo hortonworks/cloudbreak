@@ -17,11 +17,13 @@ import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.ClusterHostServiceRunner;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorStateParams;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.gateway.GatewayService;
+import com.sequenceiq.cloudbreak.service.salt.SaltStateParamsService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.view.ClusterView;
@@ -32,6 +34,12 @@ import com.sequenceiq.cloudbreak.view.StackView;
 @Component
 public class ClusterServiceRunner {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterServiceRunner.class);
+
+    private static final int MAX_RETRY_ON_ERROR = 3;
+
+    private static final int MAX_RETRY = 100;
+
+    private static final String NGINX_RENEWPUBLICCERT_STATE_NAME = "nginx/renewpubliccert";
 
     @Inject
     private StackDtoService stackDtoService;
@@ -53,6 +61,9 @@ public class ClusterServiceRunner {
 
     @Inject
     private GatewayService gatewayService;
+
+    @Inject
+    private SaltStateParamsService saltStateParamsService;
 
     public void runClusterManagerServices(StackDto stackDto, boolean runPreServiceDeploymentRecipe) {
         ClusterView cluster = stackDto.getCluster();
@@ -84,7 +95,9 @@ public class ClusterServiceRunner {
 
     public void redeployGatewayCertificate(Long stackId) {
         StackDto stackDto = stackDtoService.getById(stackId);
-        hostRunner.redeployGatewayCertificate(stackDto);
+        OrchestratorStateParams stateParams = saltStateParamsService.createStateParamsForReachableNodes(stackDto, NGINX_RENEWPUBLICCERT_STATE_NAME,
+                MAX_RETRY, MAX_RETRY_ON_ERROR);
+        hostRunner.redeployGatewayCertificate(stackDto, stateParams);
     }
 
     public void redeployGatewayPillar(Long stackId) {
