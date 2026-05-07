@@ -44,7 +44,6 @@ public class SdxClusterDetailResponse extends SdxClusterResponse implements Tagg
                     .withSeLinux(sdxClusterResponse.getSeLinuxPolicy())
                     .withTags(sdxClusterResponse.getTags())
                     .withCertExpirationState(sdxClusterResponse.getCertExpirationState())
-                    .withConfigStaleness(sdxClusterResponse.getConfigStaleness())
                     .withSdxClusterServiceVersion(sdxClusterResponse.getSdxClusterServiceVersion())
                     .withDetached(sdxClusterResponse.isDetached())
                     .withDetachedClusterName(sdxClusterResponse.getDetachedClusterName())
@@ -118,8 +117,6 @@ public class SdxClusterDetailResponse extends SdxClusterResponse implements Tagg
         private Map<String, String> tags = new HashMap<>();
 
         private CertExpirationState certExpirationState;
-
-        private SdxConfigStalenessResponse configStaleness;
 
         private String sdxClusterServiceVersion;
 
@@ -252,11 +249,6 @@ public class SdxClusterDetailResponse extends SdxClusterResponse implements Tagg
             return this;
         }
 
-        public Builder withConfigStaleness(SdxConfigStalenessResponse configStaleness) {
-            this.configStaleness = configStaleness;
-            return this;
-        }
-
         public Builder withProviderSyncStates(Set<ProviderSyncState> providerSyncStates) {
             this.providerSyncStates = providerSyncStates;
             return this;
@@ -303,7 +295,6 @@ public class SdxClusterDetailResponse extends SdxClusterResponse implements Tagg
             sdxClusterDetailResponse.setEnableMultiAz(enableMultiAz);
             sdxClusterDetailResponse.setTags(tags);
             sdxClusterDetailResponse.setCertExpirationState(certExpirationState);
-            sdxClusterDetailResponse.setConfigStaleness(configStaleness);
             sdxClusterDetailResponse.setSdxClusterServiceVersion(sdxClusterServiceVersion);
             sdxClusterDetailResponse.setDetached(detached);
             sdxClusterDetailResponse.setDetachedClusterName(detachedClusterName);

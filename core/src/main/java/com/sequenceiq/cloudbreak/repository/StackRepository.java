@@ -164,8 +164,6 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
             + "c.statusReason as clusterStatusReason, "
             + "c.certExpirationState as certExpirationState, "
             + "c.certExpirationDetails as certExpirationDetails, "
-            + "c.configStalenessState as configStalenessState, "
-            + "c.configStalenessDetails as configStalenessDetails, "
             + "s.providerSyncStates as providerSyncStates "
             + "FROM Stack s "
             + "LEFT JOIN s.cluster c "

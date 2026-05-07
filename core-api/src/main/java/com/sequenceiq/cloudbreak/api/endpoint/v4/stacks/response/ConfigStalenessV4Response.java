@@ -33,12 +33,4 @@ public class ConfigStalenessV4Response implements JsonEntity {
     public void setDetails(String details) {
         this.details = details;
     }
-
-    @Override
-    public String toString() {
-        return "ConfigStalenessV4Response{" +
-                "state='" + state + '\'' +
-                ", details='" + details + '\'' +
-                '}';
-    }
 }
