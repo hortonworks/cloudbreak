@@ -32,12 +32,14 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.AutoscaleV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.ConfigStalenessV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
 import com.sequenceiq.cloudbreak.client.CloudbreakInternalCrnClient;
 import com.sequenceiq.cloudbreak.client.CloudbreakServiceCrnEndpoints;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.service.StatusCheckerJobService;
 import com.sequenceiq.common.api.type.CertExpirationState;
+import com.sequenceiq.common.api.type.ConfigStalenessState;
 import com.sequenceiq.common.model.ProviderSyncState;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
@@ -282,6 +284,30 @@ class SdxClusterStatusCheckerJobTest {
             verify(sdxClusterRepository, times(1)).updateCertExpirationState(sdxCluster.getId(),
                     stack.getCertExpirationState(),
                     stack.getCertExpirationDetails());
+        }
+    }
+
+    @ParameterizedTest
+    @EnumSource(ConfigStalenessState.class)
+    void testUpdateConfigStalenessStateIfDifferent(ConfigStalenessState newState) {
+        setUpSdxStatus(DatalakeStatusEnum.RUNNING);
+        ConfigStalenessV4Response configStaleness = new ConfigStalenessV4Response();
+        configStaleness.setState(newState.name());
+        configStaleness.setDetails("details");
+        stack.setConfigStaleness(configStaleness);
+        stack.setStatus(Status.AVAILABLE);
+        sdxCluster.setConfigStalenessState(ConfigStalenessState.UP_TO_DATE);
+
+        underTest.executeJob(jobExecutionContext);
+
+        if (newState == ConfigStalenessState.UP_TO_DATE) {
+            verify(sdxClusterRepository, never()).updateConfigStalenessState(sdxCluster.getId(),
+                    newState,
+                    "details");
+        } else {
+            verify(sdxClusterRepository, times(1)).updateConfigStalenessState(sdxCluster.getId(),
+                    newState,
+                    "details");
         }
     }
 

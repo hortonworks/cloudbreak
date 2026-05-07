@@ -81,6 +81,9 @@ public class SdxClusterResponse {
     @Schema(description = ClusterModelDescription.CERT_EXPIRATION_DETAILS)
     private String certExpirationDetails;
 
+    @Schema(description = ClusterModelDescription.CONFIG_STALENESS)
+    private SdxConfigStalenessResponse configStaleness;
+
     @Schema(description = ModelDescriptions.DATA_LAKE_CLUSTER_SERVICE_VERSION)
     private String sdxClusterServiceVersion;
 
@@ -247,6 +250,14 @@ public class SdxClusterResponse {
 
     public void setCertExpirationDetails(String certExpirationDetails) {
         this.certExpirationDetails = certExpirationDetails;
+    }
+
+    public SdxConfigStalenessResponse getConfigStaleness() {
+        return configStaleness;
+    }
+
+    public void setConfigStaleness(SdxConfigStalenessResponse configStaleness) {
+        this.configStaleness = configStaleness;
     }
 
     public String getSdxClusterServiceVersion() {

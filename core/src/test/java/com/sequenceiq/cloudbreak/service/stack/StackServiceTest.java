@@ -120,6 +120,7 @@ import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.api.type.CertExpirationState;
+import com.sequenceiq.common.api.type.ConfigStalenessState;
 import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.common.model.ProviderSyncState;
 import com.sequenceiq.flow.core.FlowLogService;
@@ -652,6 +653,9 @@ class StackServiceTest {
 
     @Test
     void testGetStatusByCrnsInternalShouldReturnWithStatuses() {
+        String stalenessDetails = "The following services are running with stale configurations: core_settings and knox (on idbroker0 and master0) and " +
+                "Hive Metastore, atlas, hbase, hdfs, kafka, ranger, and solr (on master0). " +
+                "Please redeploy client configurations or restart these services to apply the pending updates.";
         when(stackRepository.getStatusByCrnsInternal(any(), any())).thenReturn(List.of(new StackClusterStatusView() {
             @Override
             public Long getId() {
@@ -703,6 +707,16 @@ class StackServiceTest {
                 return "Certificate of Cloudera Manager Agent will expire within 364 days. Warning threshold: 366.";
             }
 
+            @Override
+            public ConfigStalenessState getConfigStalenessState() {
+                return ConfigStalenessState.STALE;
+            }
+
+            @Override
+            public String getConfigStalenessDetails() {
+                return stalenessDetails;
+            }
+
             public Set<ProviderSyncState> getProviderSyncStates() {
                 return Set.of(ProviderSyncState.VALID);
             }
@@ -710,6 +724,9 @@ class StackServiceTest {
 
         List<StackClusterStatusView> statuses = underTest.getStatusesByCrnsInternal(List.of("crn1"), StackType.WORKLOAD);
         assertEquals(1, statuses.size());
+        assertThat(statuses.getFirst())
+                .returns(ConfigStalenessState.STALE, StackClusterStatusView::getConfigStalenessState)
+                .returns(stalenessDetails,  StackClusterStatusView::getConfigStalenessDetails);
     }
 
     private Set<StackIdView> findClusterConnectedToDatalake(
