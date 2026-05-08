@@ -28,7 +28,7 @@ public class ClusterCertificateRenewTriggerCondition implements FlowTriggerCondi
     public FlowTriggerConditionResult isFlowTriggerable(Payload payload) {
         FlowTriggerConditionResult result = FlowTriggerConditionResult.ok();
         StackView stack = stackDtoService.getStackViewById(payload.getResourceId());
-        if (!resouresIsInTriggerableState(stack)) {
+        if (!resourceIsInTriggerableState(stack)) {
             String msg = String.format("Certificate renewal could not be triggered, because the cluster's state('%s') is not available.",
                     stack.getStackStatus().getDetailedStackStatus().name());
             LOGGER.info(msg);
@@ -44,8 +44,8 @@ public class ClusterCertificateRenewTriggerCondition implements FlowTriggerCondi
         return result;
     }
 
-    private static boolean resouresIsInTriggerableState(StackView stack) {
-        return stack.getClusterId() != null
-                && (stack.isAvailable() || DetailedStackStatus.CERTIFICATE_RENEWAL_FAILED.equals(stack.getStackStatus().getDetailedStackStatus()));
+    private static boolean resourceIsInTriggerableState(StackView stack) {
+        return stack.getClusterId() != null && (stack.isAvailable() || stack.hasNodeFailure()
+                || DetailedStackStatus.CERTIFICATE_RENEWAL_FAILED.equals(stack.getStackStatus().getDetailedStackStatus()));
     }
 }
