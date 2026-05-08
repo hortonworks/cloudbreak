@@ -17,6 +17,7 @@ import com.cloudera.thunderhead.service.environments2api.model.DescribeEnvironme
 import com.cloudera.thunderhead.service.environments2api.model.Environment;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
+import com.sequenceiq.common.api.type.EnvironmentType;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.remoteenvironment.api.v1.environment.endpoint.RemoteEnvironmentEndpoint;
@@ -51,16 +52,26 @@ class AbstractPdlSdxServiceTest {
     @BeforeEach
     void setUp() {
         when(environmentEndpoint.getByCrn(any())).thenReturn(detailedEnvironmentResponse);
-        when(detailedEnvironmentResponse.getRemoteEnvironmentCrn()).thenReturn("remoteCrn");
+        when(detailedEnvironmentResponse.getEnvironmentType()).thenReturn(EnvironmentType.HYBRID.name());
+        lenient().when(detailedEnvironmentResponse.getRemoteEnvironmentCrn()).thenReturn("remoteCrn");
         lenient().when(describeResponse.getEnvironment()).thenReturn(environment);
         lenient().when(remoteEnvironmentEndpoint.getByCrn(any())).thenReturn(describeResponse);
     }
 
     @Test
-    void getPrivateEnvForPublicEnv() {
+    void getPrivateEnvForPublicEnvWithHybridEnvironment() {
         Environment result = underTest.getPrivateEnvForPublicEnv("publicEnvCrn");
 
         assertThat(result).isEqualTo(environment);
+    }
+
+    @Test
+    void getPrivateEnvForPublicEnvWithPublicCloudEnvironment() {
+        when(detailedEnvironmentResponse.getEnvironmentType()).thenReturn(EnvironmentType.PUBLIC_CLOUD.name());
+
+        Environment result = underTest.getPrivateEnvForPublicEnv("publicEnvCrn");
+
+        assertThat(result).isNull();
     }
 
     @Test

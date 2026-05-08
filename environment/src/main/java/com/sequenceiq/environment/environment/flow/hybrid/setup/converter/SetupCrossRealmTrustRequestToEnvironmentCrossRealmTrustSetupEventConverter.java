@@ -53,13 +53,14 @@ public class SetupCrossRealmTrustRequestToEnvironmentCrossRealmTrustSetupEventCo
             String envName,
             String envCrn,
             SetupCrossRealmTrustV2Request request) {
-        EnvironmentCrossRealmTrustSetupEvent.Builder eventBuilder = createEventBuilder(envId, accountId, envName, envCrn, request.getTrustSecret());
-        eventBuilder.withRemoteEnvironmentCrn(request.getRemoteEnvironmentCrn());
+        EnvironmentCrossRealmTrustSetupEvent.Builder eventBuilder =
+                createEventBuilder(envId, accountId, envName, envCrn, request.getRemoteEnvironmentCrn(), request.getTrustSecret());
         convertKdcParameters(eventBuilder, request.getAd(), request.getMit(), request.getDnsServerIps());
         return eventBuilder.build();
     }
 
-    private EnvironmentCrossRealmTrustSetupEvent.Builder createEventBuilder(long envId, String accountId, String envName, String envCrn, String trustSecret) {
+    private EnvironmentCrossRealmTrustSetupEvent.Builder createEventBuilder(
+            long envId, String accountId, String envName, String envCrn, String remoteEnvironmentCrn, String trustSecret) {
         return EnvironmentCrossRealmTrustSetupEvent.builder()
                 .withAccepted(new Promise<>())
                 .withSelector(TRUST_SETUP_VALIDATION_EVENT.selector())
@@ -67,6 +68,7 @@ public class SetupCrossRealmTrustRequestToEnvironmentCrossRealmTrustSetupEventCo
                 .withResourceName(envName)
                 .withResourceCrn(envCrn)
                 .withAccountId(accountId)
+                .withRemoteEnvironmentCrn(remoteEnvironmentCrn)
                 .withTrustSecret(trustSecret);
     }
 
@@ -104,8 +106,9 @@ public class SetupCrossRealmTrustRequestToEnvironmentCrossRealmTrustSetupEventCo
             String envName,
             String envCrn,
             AddCrossRealmTrustV2Request request) {
-        EnvironmentCrossRealmTrustSetupEvent.Builder eventBuilder = createEventBuilder(envId, accountId, envName, envCrn, request.getTrustSecret());
-        convertKdcParameters(eventBuilder, request.getAd(), null, request.getDnsServerIps());
+        EnvironmentCrossRealmTrustSetupEvent.Builder eventBuilder =
+                createEventBuilder(envId, accountId, envName, envCrn, request.getRemoteEnvironmentCrn(), request.getTrustSecret());
+        convertKdcParameters(eventBuilder, request.getAd(), request.getMit(), request.getDnsServerIps());
         return eventBuilder.build();
     }
 }

@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.api.v2.environment.model.request;
 
+import static com.sequenceiq.environment.api.doc.environment.EnvironmentModelDescription.REMOTE_ENVIRONMENT_CRN;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaModelDescriptions.CrossRealmTrustModelDescriptions;
 
 import java.util.ArrayList;
@@ -19,10 +20,16 @@ public class AddCrossRealmTrustV2Request {
     @Schema(description = CrossRealmTrustModelDescriptions.AD)
     private SetupCrossRealmTrustV2ActiveDirectoryRequest ad;
 
+    @Schema(description = CrossRealmTrustModelDescriptions.MIT)
+    private SetupCrossRealmTrustV2MitRequest mit;
+
     @NotEmpty
     @Size(min = 1, max = 1)
     @Schema(description = CrossRealmTrustModelDescriptions.DNS_IPS, requiredMode = Schema.RequiredMode.REQUIRED)
     private List<String> dnsServerIps = new ArrayList<>();
+
+    @Schema(description = REMOTE_ENVIRONMENT_CRN)
+    private String remoteEnvironmentCrn;
 
     @Schema(description = CrossRealmTrustModelDescriptions.TRUST_SECRET)
     private String trustSecret;
@@ -35,12 +42,28 @@ public class AddCrossRealmTrustV2Request {
         this.ad = ad;
     }
 
+    public SetupCrossRealmTrustV2MitRequest getMit() {
+        return mit;
+    }
+
+    public void setMit(SetupCrossRealmTrustV2MitRequest mit) {
+        this.mit = mit;
+    }
+
     public List<String> getDnsServerIps() {
         return dnsServerIps;
     }
 
     public void setDnsServerIps(List<String> dnsServerIps) {
         this.dnsServerIps = dnsServerIps;
+    }
+
+    public String getRemoteEnvironmentCrn() {
+        return remoteEnvironmentCrn;
+    }
+
+    public void setRemoteEnvironmentCrn(String remoteEnvironmentCrn) {
+        this.remoteEnvironmentCrn = remoteEnvironmentCrn;
     }
 
     public String getTrustSecret() {
@@ -55,7 +78,9 @@ public class AddCrossRealmTrustV2Request {
     public String toString() {
         return "AddCrossRealmTrustV2Request{" +
                 "ad=" + ad +
+                ", mit=" + mit +
                 ", dnsServerIps=" + dnsServerIps +
+                ", remoteEnvironmentCrn=" + remoteEnvironmentCrn +
                 '}';
     }
 }
