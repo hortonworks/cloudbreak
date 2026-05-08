@@ -108,11 +108,15 @@ LOGFILE="${config[logfile]}"
 STATUSFILEPREFIX="${config[statusfileprefix]}"
 BACKUP_PATH_POSTFIX="${FOLDER}"
 
+{%- if grains['os_family'] == 'RedHat' and grains['osmajorrelease'] | int == 7 %}
 BACKUP_OPTIONS=""
+{%- else %}
+BACKUP_OPTIONS="--disable-role-check "
+{%- endif %}
 if [[ "$TYPE" = "FULL" ]]; then
-    BACKUP_OPTIONS="-q"
+    BACKUP_OPTIONS+="-q"
 elif [[ "$TYPE" = "DATA" ]]; then
-    BACKUP_OPTIONS="-q --data --online"
+    BACKUP_OPTIONS+="-q --data --online"
 fi
 
 doLog(){

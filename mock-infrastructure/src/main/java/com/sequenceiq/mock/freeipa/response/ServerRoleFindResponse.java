@@ -1,6 +1,7 @@
 package com.sequenceiq.mock.freeipa.response;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.springframework.stereotype.Component;
 
@@ -19,14 +20,18 @@ public class ServerRoleFindResponse extends AbstractFreeIpaResponse<List<ServerR
     protected List<ServerRole> handleInternal(List<CloudVmMetaDataStatus> metadatas, String body) {
         return metadatas.stream()
                 .map(metadata ->
-                        createServerRole(metadata.getCloudVmInstanceStatus().getCloudInstance().getStringParameter(CloudInstance.DISCOVERY_NAME)))
+                        metadata.getCloudVmInstanceStatus().getCloudInstance().getStringParameter(CloudInstance.DISCOVERY_NAME))
+                .flatMap(serverFqdn -> Stream.of(
+                        createServerRole(serverFqdn, "CA server"),
+                        createServerRole(serverFqdn, "DNS server")
+                ))
                 .toList();
     }
 
-    private ServerRole createServerRole(String serverFqdn) {
+    private ServerRole createServerRole(String serverFqdn, String role) {
         ServerRole serverRole = new ServerRole();
         serverRole.setServerFqdn(serverFqdn);
-        serverRole.setRole("CA server");
+        serverRole.setRole(role);
         serverRole.setStatus("enabled");
         return serverRole;
     }
