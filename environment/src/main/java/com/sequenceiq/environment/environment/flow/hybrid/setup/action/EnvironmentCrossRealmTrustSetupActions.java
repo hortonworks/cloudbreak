@@ -5,6 +5,8 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_SETUP_TR
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_SETUP_TRUST_STARTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_SETUP_TRUST_VALIDATION_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_SETUP_TRUST_VALIDATION_STARTED;
+import static com.sequenceiq.common.api.type.EnvironmentType.HYBRID;
+import static com.sequenceiq.environment.environment.EnvironmentStatus.AVAILABLE;
 import static com.sequenceiq.environment.environment.EnvironmentStatus.TRUST_SETUP_FINISH_REQUIRED;
 import static com.sequenceiq.environment.environment.EnvironmentStatus.TRUST_SETUP_IN_PROGRESS;
 import static com.sequenceiq.environment.environment.EnvironmentStatus.TRUST_SETUP_VALIDATION_IN_PROGRESS;
@@ -106,11 +108,15 @@ public class EnvironmentCrossRealmTrustSetupActions {
         return new AbstractEnvironmentCrossRealmTrustSetupAction<>(EnvironmentCrossRealmTrustSetupEvent.class) {
             @Override
             protected void doExecute(CommonContext context, EnvironmentCrossRealmTrustSetupEvent payload, Map<Object, Object> variables) {
+                boolean hybrid = environmentService.findById(payload.getResourceId())
+                        .map(env -> HYBRID.equals(env.getEnvironmentType()))
+                        .orElse(false);
+                EnvironmentStatus targetStatus = hybrid ? TRUST_SETUP_FINISH_REQUIRED : AVAILABLE;
                 EnvironmentDto environmentDto = environmentStatusUpdateService
                         .updateEnvironmentStatusAndNotify(
                                 context,
                                 payload,
-                                TRUST_SETUP_FINISH_REQUIRED,
+                                targetStatus,
                                 ENVIRONMENT_SETUP_TRUST_FINISHED,
                                 TRUST_SETUP_FINISHED_STATE);
                 metricService.incrementMetricCounter(ENV_TRUST_SETUP_FINISHED, environmentDto);

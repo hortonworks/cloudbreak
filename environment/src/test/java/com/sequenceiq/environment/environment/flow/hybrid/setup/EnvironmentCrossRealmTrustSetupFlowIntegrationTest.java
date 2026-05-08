@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_SETUP_TR
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_SETUP_TRUST_FINISHED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_SETUP_TRUST_STARTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_SETUP_TRUST_VALIDATION_STARTED;
+import static com.sequenceiq.environment.environment.EnvironmentStatus.AVAILABLE;
 import static com.sequenceiq.environment.environment.EnvironmentStatus.TRUST_SETUP_FAILED;
 import static com.sequenceiq.environment.environment.EnvironmentStatus.TRUST_SETUP_FINISH_REQUIRED;
 import static com.sequenceiq.environment.environment.EnvironmentStatus.TRUST_SETUP_IN_PROGRESS;
@@ -27,6 +28,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -69,11 +71,14 @@ import com.sequenceiq.cloudbreak.ha.NodeConfig;
 import com.sequenceiq.cloudbreak.ha.service.NodeValidator;
 import com.sequenceiq.cloudbreak.quartz.configuration.scheduler.TransactionalScheduler;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
+import com.sequenceiq.common.api.type.EnvironmentType;
 import com.sequenceiq.environment.api.v1.environment.model.request.SetupCrossRealmTrustRequest;
 import com.sequenceiq.environment.api.v2.environment.model.request.SetupCrossRealmTrustV2ActiveDirectoryRequest;
 import com.sequenceiq.environment.api.v2.environment.model.request.SetupCrossRealmTrustV2KdcServerRequest;
+import com.sequenceiq.environment.api.v2.environment.model.request.SetupCrossRealmTrustV2MitRequest;
 import com.sequenceiq.environment.api.v2.environment.model.request.SetupCrossRealmTrustV2Request;
 import com.sequenceiq.environment.environment.domain.Environment;
+import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDtoConverter;
 import com.sequenceiq.environment.environment.flow.EnvironmentReactorFlowManager;
 import com.sequenceiq.environment.environment.flow.hybrid.setup.action.EnvironmentCrossRealmTrustSetupActions;
@@ -176,6 +181,9 @@ class EnvironmentCrossRealmTrustSetupFlowIntegrationTest {
     @MockBean
     private ClusterAvailabilityValidator clusterAvailabilityValidator;
 
+    @Inject
+    private EnvironmentService environmentService;
+
     private Environment environment;
 
     @BeforeEach
@@ -185,6 +193,10 @@ class EnvironmentCrossRealmTrustSetupFlowIntegrationTest {
         environment.setResourceCrn(ENVIRONMENT_CRN);
         environment.setName(ENVIRONMENT_NAME);
         environment.setAccountId(ACCOUNT_ID);
+
+        EnvironmentDto hybridEnvironmentDto = mock(EnvironmentDto.class);
+        when(hybridEnvironmentDto.getEnvironmentType()).thenReturn(EnvironmentType.HYBRID);
+        when(environmentService.findById(ENVIRONMENT_ID)).thenReturn(Optional.of(hybridEnvironmentDto));
     }
 
     @Test
@@ -238,6 +250,41 @@ class EnvironmentCrossRealmTrustSetupFlowIntegrationTest {
                 any(CommonContext.class),
                 any(Payload.class),
                 eq(TRUST_SETUP_FINISH_REQUIRED),
+                eq(ENVIRONMENT_SETUP_TRUST_FINISHED),
+                eq(TRUST_SETUP_FINISHED_STATE)
+        );
+    }
+
+    @Test
+    void testPrepareCrossRealmTrustV2MitWhenSuccessfulSetsAvailable() {
+        EnvironmentDto publicCloudEnvironmentDto = mock(EnvironmentDto.class);
+        when(publicCloudEnvironmentDto.getEnvironmentType()).thenReturn(EnvironmentType.PUBLIC_CLOUD);
+        when(environmentService.findById(ENVIRONMENT_ID)).thenReturn(Optional.of(publicCloudEnvironmentDto));
+
+        FlowIdentifier flowIdentifier = triggerFlowV2Mit();
+        letItFlow(flowIdentifier);
+        flowFinishedSuccessfully();
+
+        InOrder environmentStatusVerify = inOrder(environmentStatusUpdateService);
+
+        environmentStatusVerify.verify(environmentStatusUpdateService).updateEnvironmentStatusAndNotify(
+                any(CommonContext.class),
+                any(Payload.class),
+                eq(TRUST_SETUP_VALIDATION_IN_PROGRESS),
+                eq(ENVIRONMENT_SETUP_TRUST_VALIDATION_STARTED),
+                eq(TRUST_SETUP_VALIDATION_STATE)
+        );
+        environmentStatusVerify.verify(environmentStatusUpdateService).updateEnvironmentStatusAndNotify(
+                any(CommonContext.class),
+                any(Payload.class),
+                eq(TRUST_SETUP_IN_PROGRESS),
+                eq(ENVIRONMENT_SETUP_TRUST_STARTED),
+                eq(TRUST_SETUP_STATE)
+        );
+        environmentStatusVerify.verify(environmentStatusUpdateService).updateEnvironmentStatusAndNotify(
+                any(CommonContext.class),
+                any(Payload.class),
+                eq(AVAILABLE),
                 eq(ENVIRONMENT_SETUP_TRUST_FINISHED),
                 eq(TRUST_SETUP_FINISHED_STATE)
         );
@@ -326,6 +373,30 @@ class EnvironmentCrossRealmTrustSetupFlowIntegrationTest {
         setupCrossRealmTrustRequest.setDnsServerIps(List.of("8.8.8.8"));
         setupCrossRealmTrustRequest.setTrustSecret("trust-secret");
         setupCrossRealmTrustRequest.setRemoteEnvironmentCrn("remoteenvcrn");
+        return ThreadBasedUserCrnProvider.doAs(
+                USER_CRN,
+                () -> environmentReactorFlowManager.triggerSetupCrossRealmTrust(
+                        ENVIRONMENT_ID,
+                        ACCOUNT_ID,
+                        ENVIRONMENT_NAME,
+                        USER_CRN,
+                        ENVIRONMENT_CRN,
+                        setupCrossRealmTrustRequest
+                )
+        );
+    }
+
+    private FlowIdentifier triggerFlowV2Mit() {
+        SetupCrossRealmTrustV2Request setupCrossRealmTrustRequest = new SetupCrossRealmTrustV2Request();
+        SetupCrossRealmTrustV2MitRequest mit = new SetupCrossRealmTrustV2MitRequest();
+        mit.setRealm("realm");
+        SetupCrossRealmTrustV2KdcServerRequest server = new SetupCrossRealmTrustV2KdcServerRequest();
+        server.setFqdn("fqdn");
+        server.setIp("10.0.0.1");
+        mit.setServers(List.of(server));
+        setupCrossRealmTrustRequest.setMit(mit);
+        setupCrossRealmTrustRequest.setDnsServerIps(List.of("8.8.8.8"));
+        setupCrossRealmTrustRequest.setTrustSecret("trust-secret");
         return ThreadBasedUserCrnProvider.doAs(
                 USER_CRN,
                 () -> environmentReactorFlowManager.triggerSetupCrossRealmTrust(

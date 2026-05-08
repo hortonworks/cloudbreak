@@ -11,6 +11,8 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_CANCEL_T
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_CANCEL_TRUST_STARTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_CANCEL_TRUST_VALIDATION_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_CANCEL_TRUST_VALIDATION_STARTED;
+import static com.sequenceiq.common.api.type.EnvironmentType.HYBRID;
+import static com.sequenceiq.environment.environment.EnvironmentStatus.AVAILABLE;
 import static com.sequenceiq.environment.environment.EnvironmentStatus.TRUST_CANCEL_CONFIG_REMOVAL_IN_PROGRESS;
 import static com.sequenceiq.environment.environment.EnvironmentStatus.TRUST_CANCEL_IN_PROGRESS;
 import static com.sequenceiq.environment.environment.EnvironmentStatus.TRUST_CANCEL_SALT_UPDATE_IN_PROGRESS;
@@ -47,6 +49,7 @@ import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.hybrid.cancel.event.EnvironmentCrossRealmTrustCancelEvent;
 import com.sequenceiq.environment.environment.flow.hybrid.cancel.event.EnvironmentCrossRealmTrustCancelFailedEvent;
+import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.environment.service.EnvironmentStatusUpdateService;
 import com.sequenceiq.environment.metrics.EnvironmentMetricService;
 import com.sequenceiq.flow.core.CommonContext;
@@ -60,11 +63,15 @@ public class EnvironmentCrossRealmTrustCancelActions {
 
     private final EnvironmentMetricService metricService;
 
+    private final EnvironmentService environmentService;
+
     public EnvironmentCrossRealmTrustCancelActions(
             EnvironmentStatusUpdateService environmentStatusUpdateService,
-            EnvironmentMetricService metricService) {
+            EnvironmentMetricService metricService,
+            EnvironmentService environmentService) {
         this.environmentStatusUpdateService = environmentStatusUpdateService;
         this.metricService = metricService;
+        this.environmentService = environmentService;
     }
 
     @Bean(name = "TRUST_CANCEL_VALIDATION_STATE")
@@ -161,11 +168,15 @@ public class EnvironmentCrossRealmTrustCancelActions {
         return new AbstractEnvironmentCrossRealmTrustCancelAction<>(EnvironmentCrossRealmTrustCancelEvent.class) {
             @Override
             protected void doExecute(CommonContext context, EnvironmentCrossRealmTrustCancelEvent payload, Map<Object, Object> variables) {
+                boolean hybrid = environmentService.findById(payload.getResourceId())
+                        .map(env -> HYBRID.equals(env.getEnvironmentType()))
+                        .orElse(false);
+                EnvironmentStatus targetStatus = hybrid ? TRUST_SETUP_REQUIRED : AVAILABLE;
                 EnvironmentDto environmentDto = environmentStatusUpdateService
                         .updateEnvironmentStatusAndNotify(
                                 context,
                                 payload,
-                                TRUST_SETUP_REQUIRED,
+                                targetStatus,
                                 ENVIRONMENT_CANCEL_TRUST_FINISHED,
                                 TRUST_CANCEL_FINISHED_STATE);
                 metricService.incrementMetricCounter(ENV_TRUST_CANCEL_FINISHED, environmentDto);

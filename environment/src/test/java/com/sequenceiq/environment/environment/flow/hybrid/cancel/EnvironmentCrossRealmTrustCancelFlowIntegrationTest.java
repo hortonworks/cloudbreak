@@ -9,6 +9,7 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_CANCEL_T
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_CANCEL_TRUST_SALT_UPDATE_STARTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_CANCEL_TRUST_STARTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_CANCEL_TRUST_VALIDATION_STARTED;
+import static com.sequenceiq.environment.environment.EnvironmentStatus.AVAILABLE;
 import static com.sequenceiq.environment.environment.EnvironmentStatus.TRUST_CANCEL_CONFIG_REMOVAL_FAILED;
 import static com.sequenceiq.environment.environment.EnvironmentStatus.TRUST_CANCEL_CONFIG_REMOVAL_IN_PROGRESS;
 import static com.sequenceiq.environment.environment.EnvironmentStatus.TRUST_CANCEL_FAILED;
@@ -81,6 +82,7 @@ import com.sequenceiq.cloudbreak.ha.NodeConfig;
 import com.sequenceiq.cloudbreak.ha.service.NodeValidator;
 import com.sequenceiq.cloudbreak.quartz.configuration.scheduler.TransactionalScheduler;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
+import com.sequenceiq.common.api.type.EnvironmentType;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDtoConverter;
@@ -238,6 +240,7 @@ class EnvironmentCrossRealmTrustCancelFlowIntegrationTest {
         environmentDto.setId(ENVIRONMENT_ID);
         environmentDto.setResourceCrn(ENVIRONMENT_CRN);
         environmentDto.setName(ENVIRONMENT_NAME);
+        environmentDto.setEnvironmentType(EnvironmentType.HYBRID);
         when(environmentService.findById(ENVIRONMENT_ID)).thenReturn(Optional.of(environmentDto));
     }
 
@@ -294,6 +297,39 @@ class EnvironmentCrossRealmTrustCancelFlowIntegrationTest {
                 eq(ENVIRONMENT_CANCEL_TRUST_FINISHED),
                 eq(TRUST_CANCEL_FINISHED_STATE)
         );
+    }
+
+    @Test
+    void testCancelCrossRealmTrustForNonHybridEnvSetsAvailable() {
+        EnvironmentDto publicCloudEnvironmentDto = new EnvironmentDto();
+        publicCloudEnvironmentDto.setId(ENVIRONMENT_ID);
+        publicCloudEnvironmentDto.setResourceCrn(ENVIRONMENT_CRN);
+        publicCloudEnvironmentDto.setName(ENVIRONMENT_NAME);
+        publicCloudEnvironmentDto.setEnvironmentType(EnvironmentType.PUBLIC_CLOUD);
+        when(environmentService.findById(ENVIRONMENT_ID)).thenReturn(Optional.of(publicCloudEnvironmentDto));
+
+        testFlow();
+        InOrder environmentStatusVerify = inOrder(environmentStatusUpdateService);
+
+        environmentStatusVerify.verify(environmentStatusUpdateService).updateEnvironmentStatusAndNotify(
+                any(CommonContext.class), any(Payload.class),
+                eq(TRUST_CANCEL_VALIDATION_IN_PROGRESS), eq(ENVIRONMENT_CANCEL_TRUST_VALIDATION_STARTED), eq(TRUST_CANCEL_VALIDATION_STATE));
+        environmentStatusVerify.verify(environmentStatusUpdateService).updateEnvironmentStatusAndNotify(
+                any(CommonContext.class), any(Payload.class),
+                eq(TRUST_CANCEL_IN_PROGRESS), eq(ENVIRONMENT_CANCEL_TRUST_STARTED), eq(TRUST_CANCEL_STATE));
+        environmentStatusVerify.verify(environmentStatusUpdateService).updateEnvironmentStatusAndNotify(
+                any(CommonContext.class), any(Payload.class),
+                eq(TRUST_CANCEL_CONFIG_REMOVAL_IN_PROGRESS), eq(ENVIRONMENT_CANCEL_TRUST_CONFIG_REMOVAL_STARTED), eq(TRUST_CANCEL_CONFIG_REMOVAL_STATE));
+        environmentStatusVerify.verify(environmentStatusUpdateService).updateEnvironmentStatusAndNotify(
+                any(CommonContext.class), any(Payload.class),
+                eq(TRUST_CANCEL_TRUST_ENTITY_DELETE_IN_PROGRESS), eq(ENVIRONMENT_CANCEL_TRUST_ENTITY_DELETE_STARTED),
+                eq(TRUST_CANCEL_TRUST_ENTITY_DELETE_STATE));
+        environmentStatusVerify.verify(environmentStatusUpdateService).updateEnvironmentStatusAndNotify(
+                any(CommonContext.class), any(Payload.class),
+                eq(TRUST_CANCEL_SALT_UPDATE_IN_PROGRESS), eq(ENVIRONMENT_CANCEL_TRUST_SALT_UPDATE_STARTED), eq(TRUST_CANCEL_SALT_UPDATE_STATE));
+        environmentStatusVerify.verify(environmentStatusUpdateService).updateEnvironmentStatusAndNotify(
+                any(CommonContext.class), any(Payload.class),
+                eq(AVAILABLE), eq(ENVIRONMENT_CANCEL_TRUST_FINISHED), eq(TRUST_CANCEL_FINISHED_STATE));
     }
 
     @Test

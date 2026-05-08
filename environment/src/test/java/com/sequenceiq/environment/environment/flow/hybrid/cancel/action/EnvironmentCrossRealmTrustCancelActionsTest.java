@@ -2,7 +2,9 @@ package com.sequenceiq.environment.environment.flow.hybrid.cancel.action;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -11,6 +13,7 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -29,10 +32,12 @@ import org.springframework.test.util.ReflectionTestUtils;
 import com.sequenceiq.cloudbreak.common.metrics.MetricService;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
+import com.sequenceiq.common.api.type.EnvironmentType;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.hybrid.cancel.event.EnvironmentCrossRealmTrustCancelEvent;
 import com.sequenceiq.environment.environment.flow.hybrid.cancel.event.EnvironmentCrossRealmTrustCancelFailedEvent;
+import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.environment.service.EnvironmentStatusUpdateService;
 import com.sequenceiq.environment.metrics.EnvironmentMetricService;
 import com.sequenceiq.environment.metrics.MetricType;
@@ -93,6 +98,9 @@ class EnvironmentCrossRealmTrustCancelActionsTest {
     @Mock
     private EnvironmentCrossRealmTrustCancelEvent actionPayload;
 
+    @Mock
+    private EnvironmentService environmentService;
+
     @InjectMocks
     private EnvironmentCrossRealmTrustCancelActions actions;
 
@@ -105,7 +113,7 @@ class EnvironmentCrossRealmTrustCancelActionsTest {
         when(stateContext.getMessageHeader(MessageFactory.HEADERS.FLOW_PARAMETERS.name())).thenReturn(flowParameters);
         when(runningFlows.getFlowChainId(anyString())).thenReturn(null);
 
-        actions = new EnvironmentCrossRealmTrustCancelActions(environmentStatusUpdateService, metricService);
+        actions = new EnvironmentCrossRealmTrustCancelActions(environmentStatusUpdateService, metricService, environmentService);
 
         when(stateContext.getMessageHeader(MessageFactory.HEADERS.DATA.name())).thenReturn(actions);
         when(stateContext.getExtendedState()).thenReturn(extendedState);
@@ -146,7 +154,11 @@ class EnvironmentCrossRealmTrustCancelActionsTest {
     }
 
     @Test
-    void testFinishedAction() {
+    void testFinishedActionForHybridEnvSetsTrustSetupRequired() {
+        EnvironmentDto hybridEnvDto = mock(EnvironmentDto.class);
+        when(hybridEnvDto.getEnvironmentType()).thenReturn(EnvironmentType.HYBRID);
+        when(environmentService.findById(anyLong())).thenReturn(Optional.of(hybridEnvDto));
+        when(stateContext.getMessageHeader(MessageFactory.HEADERS.DATA.name())).thenReturn(actionPayload);
         when(environmentStatusUpdateService.updateEnvironmentStatusAndNotify(
                 any(), any(), any(), any(), any()))
                 .thenReturn(environmentDto);
@@ -157,7 +169,30 @@ class EnvironmentCrossRealmTrustCancelActionsTest {
         verify(environmentStatusUpdateService).updateEnvironmentStatusAndNotify(
                 any(),
                 any(),
+                eq(EnvironmentStatus.TRUST_SETUP_REQUIRED),
                 any(),
+                any()
+        );
+        verify(metricService).incrementMetricCounter(MetricType.ENV_TRUST_CANCEL_FINISHED, environmentDto);
+    }
+
+    @Test
+    void testFinishedActionForNonHybridEnvSetsAvailable() {
+        EnvironmentDto publicCloudEnvDto = mock(EnvironmentDto.class);
+        when(publicCloudEnvDto.getEnvironmentType()).thenReturn(EnvironmentType.PUBLIC_CLOUD);
+        when(environmentService.findById(anyLong())).thenReturn(Optional.of(publicCloudEnvDto));
+        when(stateContext.getMessageHeader(MessageFactory.HEADERS.DATA.name())).thenReturn(actionPayload);
+        when(environmentStatusUpdateService.updateEnvironmentStatusAndNotify(
+                any(), any(), any(), any(), any()))
+                .thenReturn(environmentDto);
+
+        Action<?, ?> action = configureAction(() -> actions.finishedAction());
+        action.execute(stateContext);
+
+        verify(environmentStatusUpdateService).updateEnvironmentStatusAndNotify(
+                any(),
+                any(),
+                eq(EnvironmentStatus.AVAILABLE),
                 any(),
                 any()
         );
