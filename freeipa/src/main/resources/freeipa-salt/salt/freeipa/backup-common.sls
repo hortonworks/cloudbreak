@@ -1,6 +1,7 @@
 /usr/local/bin/freeipa_backup:
   file.managed:
     - source: salt://freeipa/scripts/freeipa_backup
+    - template: jinja
     - user: root
     - group: root
     - mode: 750
