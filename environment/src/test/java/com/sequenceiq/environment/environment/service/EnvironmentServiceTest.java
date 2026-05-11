@@ -415,10 +415,18 @@ class EnvironmentServiceTest {
         verify(environmentRepository, times(deleteCrnCallCount)).deleteByResourceCrn(crn);
     }
 
+    @Test
+    void disableEncryptionProfile() {
+        ThreadBasedUserCrnProvider.doAs(TestConstants.CRN, () -> {
+            environmentServiceUnderTest.disableEncryptionProfile(ENV_CRN);
+        });
+
+        verify(environmentRepository).removeEncryptionProfileCrn(eq(ENV_CRN));
+    }
+
     @Configuration
     @Import(EnvironmentService.class)
     static class Config {
 
     }
-
 }

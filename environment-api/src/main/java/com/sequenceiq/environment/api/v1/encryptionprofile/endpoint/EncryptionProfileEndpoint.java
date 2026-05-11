@@ -119,4 +119,22 @@ public interface EncryptionProfileEndpoint {
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier enableEncryptionProfileByName(@NotEmpty @PathParam("encryptionProfileName") String encryptionProfileName,
             @QueryParam("envNameOrCrn") String envNameOrCrn);
+
+    @PUT
+    @Path("disable_encryption_profile_by_crn")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Disable encryption profile in the given environment by crn",
+            operationId = "disableEncryptionProfileByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    FlowIdentifier disableEncryptionProfileByCrn(@NotEmpty @QueryParam("envCrn") String envCrn);
+
+    @PUT
+    @Path("disable_encryption_profile_by_name")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Disable encryption profile in the given environment by name",
+            operationId = "disableEncryptionProfileByName",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    FlowIdentifier disableEncryptionProfileByName(@NotEmpty @QueryParam("envName") String envName);
 }

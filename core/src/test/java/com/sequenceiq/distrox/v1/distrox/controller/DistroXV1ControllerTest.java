@@ -375,4 +375,22 @@ class DistroXV1ControllerTest {
         });
         verify(migrateRdsService).migrateRds(NameOrCrn.ofCrn(CRN), "accountId");
     }
+
+    @Test
+    void testDisableEncryptionProfileByCrn() {
+        doAs(TEST_USER_CRN, () -> {
+            distroXV1Controller.disableEncryptionProfileByCrn(CRN);
+        });
+
+        verify(stackOperationService).disableEncryptionProfile(NameOrCrn.ofCrn(CRN), ACCOUNT_ID);
+    }
+
+    @Test
+    void testDisableEncryptionProfileByName() {
+        doAs(TEST_USER_CRN, () -> {
+            distroXV1Controller.disableEncryptionProfileByName(NAME);
+        });
+
+        verify(stackOperationService).disableEncryptionProfile(NameOrCrn.ofName(NAME), ACCOUNT_ID);
+    }
 }

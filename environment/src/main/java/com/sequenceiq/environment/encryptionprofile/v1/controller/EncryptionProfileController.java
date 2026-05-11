@@ -15,6 +15,7 @@ import com.sequenceiq.authorization.annotation.FilterListBasedOnPermissions;
 import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.authorization.annotation.ResourceName;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
@@ -150,13 +151,25 @@ public class EncryptionProfileController extends WebSocketNotificationController
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.REPAIR_FREEIPA)
     public FlowIdentifier enableEncryptionProfileByCrn(@ResourceCrn String encryptionProfileCrn, String envNameOrCrn) {
-        return encryptionProfileFlowService.enableEncryptionProfileByCrn(envNameOrCrn, encryptionProfileCrn);
+        return encryptionProfileFlowService.enableEncryptionProfileByCrn(NameOrCrn.ofCrn(envNameOrCrn), encryptionProfileCrn);
     }
 
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.REPAIR_FREEIPA)
     public FlowIdentifier enableEncryptionProfileByName(@ResourceName String encryptionProfileName, String envNameOrCrn) {
-        return encryptionProfileFlowService.enableEncryptionProfileByName(envNameOrCrn, encryptionProfileName);
+        return encryptionProfileFlowService.enableEncryptionProfileByName(NameOrCrn.ofName(envNameOrCrn), encryptionProfileName);
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.REPAIR_FREEIPA)
+    public FlowIdentifier disableEncryptionProfileByCrn(@ResourceCrn String envCrn) {
+        return encryptionProfileFlowService.disableEncryptionProfile(NameOrCrn.ofCrn(envCrn));
+    }
+
+    @Override
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.REPAIR_FREEIPA)
+    public FlowIdentifier disableEncryptionProfileByName(@ResourceName String envName) {
+        return encryptionProfileFlowService.disableEncryptionProfile(NameOrCrn.ofName(envName));
     }
 
     private void verifyEncryptionProfileEntitlement(String accountId) {

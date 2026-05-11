@@ -994,4 +994,16 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
         return stackOperationService.updateSslConfigsOnCluster(NameOrCrn.ofCrn(crn), ThreadBasedUserCrnProvider.getAccountId(),
                 encryptionProfileNameOrCrn);
     }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.UPGRADE_DATAHUB)
+    public FlowIdentifier disableEncryptionProfileByCrn(@ResourceCrn String crn) {
+        return stackOperationService.disableEncryptionProfile(NameOrCrn.ofCrn(crn), ThreadBasedUserCrnProvider.getAccountId());
+    }
+
+    @Override
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.UPGRADE_DATAHUB)
+    public FlowIdentifier disableEncryptionProfileByName(@ResourceName String name) {
+        return stackOperationService.disableEncryptionProfile(NameOrCrn.ofName(name), ThreadBasedUserCrnProvider.getAccountId());
+    }
 }

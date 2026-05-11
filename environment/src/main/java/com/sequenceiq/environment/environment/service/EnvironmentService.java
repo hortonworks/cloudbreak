@@ -554,4 +554,8 @@ public class EnvironmentService extends AbstractAccountAwareResourceService<Envi
             environment.setRemoteEnvironmentCrn(environmentHybridDto.getRemoteEnvironmentCrn());
         }
     }
+
+    public void disableEncryptionProfile(String environmentCrn) {
+        environmentRepository.removeEncryptionProfileCrn(environmentCrn);
+    }
 }

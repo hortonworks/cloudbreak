@@ -80,6 +80,7 @@ import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterRepairService;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterOperationService;
 import com.sequenceiq.cloudbreak.service.cluster.model.HostGroupName;
 import com.sequenceiq.cloudbreak.service.cluster.model.RepairValidation;
@@ -99,6 +100,7 @@ import com.sequenceiq.cloudbreak.service.stack.TargetedUpscaleSupportService;
 import com.sequenceiq.cloudbreak.service.validation.EncryptionProfileValidator;
 import com.sequenceiq.cloudbreak.service.validation.ZookeeperToKraftMigrationValidator;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.environment.api.v1.encryptionprofile.model.EncryptionProfileResponse;
@@ -192,6 +194,9 @@ class StackOperationServiceTest {
 
     @Mock
     private EncryptionProfileValidator encryptionProfileValidator;
+
+    @Mock
+    private ClusterService clusterService;
 
     @Captor
     private ArgumentCaptor<Map<String, Set<Long>>> capturedInstances;
@@ -860,5 +865,21 @@ class StackOperationServiceTest {
 
         verify(encryptionProfileValidator, times(1)).validate(stack);
         verify(flowManager, times(1)).triggerUpdateSslConfigsOnCluster(eq(STACK_ID), eq(encryptionProfileCrn));
+    }
+
+    @Test
+    public void testDisableEncryptionProfile() {
+        StackDto stack = mock(StackDto.class);
+        ClusterView clusterView = mock(ClusterView.class);
+        NameOrCrn nameOrCrn = NameOrCrn.ofName("Test");
+
+        when(stack.getId()).thenReturn(STACK_ID);
+        when(stack.getCluster()).thenReturn(clusterView);
+        when(clusterView.getId()).thenReturn(123L);
+        when(stackDtoService.getByNameOrCrn(eq(nameOrCrn), eq("accountId"))).thenReturn(stack);
+
+        underTest.disableEncryptionProfile(nameOrCrn, "accountId");
+
+        verify(flowManager).triggerPillarConfigurationUpdate(STACK_ID);
     }
 }

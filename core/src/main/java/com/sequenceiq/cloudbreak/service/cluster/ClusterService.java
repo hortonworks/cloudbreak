@@ -632,4 +632,8 @@ public class ClusterService implements LocalPaasRdcViewExtender {
         }
         return clusterApi.clusterModificationService().getServiceConfigValue(stackDto.getName(), request.getServiceName(), request.getConfigName());
     }
+
+    public void disableEncryptionProfile(Long clusterId) {
+        repository.removeEncryptionProfileCrn(clusterId);
+    }
 }

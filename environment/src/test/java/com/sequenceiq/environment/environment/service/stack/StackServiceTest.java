@@ -151,4 +151,12 @@ class StackServiceTest {
         assertEquals("stack2", response.getFirst().getName());
     }
 
+    @Test
+    void testUpdatePillarConfigurationByCrn() {
+        String resourceCrn = "resourceCrn";
+
+        ThreadBasedUserCrnProvider.doAs(USERCRN, () -> underTest.updatePillarConfigurationByCrn(resourceCrn));
+
+        verify(stackV4Endpoint).updatePillarConfigurationByCrn(0L, resourceCrn);
+    }
 }

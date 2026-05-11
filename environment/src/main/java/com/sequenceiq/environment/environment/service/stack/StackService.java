@@ -147,4 +147,15 @@ public class StackService {
             throw new StackOperationFailedException(errorMessage, e);
         }
     }
+
+    public FlowIdentifier updatePillarConfigurationByCrn(String stackCrn) {
+        try {
+            LOGGER.debug("Updating pillar configuration for cluster {}", stackCrn);
+            return ThreadBasedUserCrnProvider.doAsInternalActor(() -> stackV4Endpoint.updatePillarConfigurationByCrn(0L, stackCrn));
+        } catch (WebApplicationException e) {
+            String errorMessage = messageExtractor.getErrorMessage(e);
+            LOGGER.error("Failed to update pillar configuration for cluster {} due to: '{}'.", stackCrn, errorMessage, e);
+            throw new StackOperationFailedException(errorMessage, e);
+        }
+    }
 }

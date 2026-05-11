@@ -951,4 +951,21 @@ public interface DistroXV1Endpoint {
     FlowIdentifier updateSslConfigurationsByCrn(@NotEmpty @ValidCrn(resource = {DATAHUB}) @PathParam("crn") String crn,
             @QueryParam("encryptionProfileNameOrCrn") String encryptionProfileNameOrCrn);
 
+    @PUT
+    @Path("crn/{crn}/disable_encryption_profile")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Disable encryption profile in the given cluster by crn",
+            operationId = "disableEncryptionProfileByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    FlowIdentifier disableEncryptionProfileByCrn(@NotEmpty @PathParam("crn") String crn);
+
+    @PUT
+    @Path("{name}/disable_encryption_profile")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Disable encryption profile in the given cluster by name",
+            operationId = "disableEncryptionProfileByName",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    FlowIdentifier disableEncryptionProfileByName(@NotEmpty @PathParam("name") String name);
 }

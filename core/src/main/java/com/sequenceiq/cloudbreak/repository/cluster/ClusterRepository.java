@@ -135,4 +135,9 @@ public interface ClusterRepository extends WorkspaceResourceRepository<Cluster, 
     default Class<Cluster> getEntityClass() {
         return Cluster.class;
     }
+
+    @Modifying
+    @Query("UPDATE Cluster c SET c.encryptionProfileCrn = null " +
+            "WHERE c.id = :clusterId")
+    void removeEncryptionProfileCrn(@Param("clusterId") Long clusterId);
 }

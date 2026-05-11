@@ -779,4 +779,10 @@ public class StackOperationService {
         encryptionProfileValidator.validate(stack);
         return flowManager.triggerUpdateSslConfigsOnCluster(stack.getId(), encryptionProfileCrn);
     }
+
+    public FlowIdentifier disableEncryptionProfile(NameOrCrn nameOrCrn, String accountId) {
+        StackDto stack = stackDtoService.getByNameOrCrn(nameOrCrn, accountId);
+        clusterService.disableEncryptionProfile(stack.getCluster().getId());
+        return flowManager.triggerPillarConfigurationUpdate(stack.getId());
+    }
 }

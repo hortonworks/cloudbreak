@@ -331,6 +331,13 @@ class ClusterServiceTest {
         assertEquals(Set.of("cluster-name"), clusterNames);
     }
 
+    @Test
+    void testRemoveEncryptionProfileCrn() {
+        underTest.disableEncryptionProfile(CLUSTER_ID);
+
+        verify(repository).removeEncryptionProfileCrn(CLUSTER_ID);
+    }
+
     private StackDto setupStack(long stackId) {
         StackDto stackDto = mock(StackDto.class);
         lenient().when(stackDto.getId()).thenReturn(stackId);
