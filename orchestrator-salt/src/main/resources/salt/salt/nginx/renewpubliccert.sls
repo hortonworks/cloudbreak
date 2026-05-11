@@ -34,7 +34,7 @@
     - group: root
     - mode: 600
     - require_in:
-    - service: restart_nginx_after_ssl_reconfig_with_user_facing
+      - service: restart_nginx_after_ssl_reconfig_with_user_facing
 
 /etc/certs-user-facing/alternative-server.pem:
   file.managed:
@@ -44,7 +44,7 @@
     - group: root
     - mode: 600
     - require_in:
-    - service: restart_nginx_after_ssl_reconfig_with_user_facing
+      - service: restart_nginx_after_ssl_reconfig_with_user_facing
 
 {% endif %}
 
