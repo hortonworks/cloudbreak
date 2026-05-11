@@ -11,7 +11,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.FreeIpaServerRequest;
 @Component
 public class FreeIpaServerRequestProvider {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaCreationHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaServerRequestProvider.class);
 
     private static final String FREEIPA_HOSTNAME = "ipaserver";
 

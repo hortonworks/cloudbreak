@@ -1,13 +1,11 @@
 package com.sequenceiq.environment.environment.flow.creation.handler.freeipa;
 
 import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
-import static com.sequenceiq.cloudbreak.util.SecurityGroupSeparator.getSecurityGroupIds;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationHandlerSelectors.CREATE_FREEIPA_EVENT;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.START_COMPUTE_CLUSTER_CREATION_WAITING_EVENT;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -33,7 +31,6 @@ import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
 import com.sequenceiq.cloudbreak.polling.PollingService;
-import com.sequenceiq.cloudbreak.util.CidrUtil;
 import com.sequenceiq.common.api.backup.request.BackupRequest;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 import com.sequenceiq.common.api.type.Tunnel;
@@ -44,7 +41,6 @@ import com.sequenceiq.environment.environment.dto.AuthenticationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationAwsParametersDto;
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationDto;
-import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationEvent;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationFailureEvent;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
@@ -70,7 +66,6 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.aws.Aws
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.aws.AwsInstanceTemplateSpotParameters;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.region.PlacementRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.security.SecurityGroupRequest;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.security.SecurityRuleRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.security.StackAuthenticationRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.CreateFreeIpaRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.SecurityRequest;
@@ -82,10 +77,6 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
     private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaCreationHandler.class);
 
     private static final String MASTER_GROUP_NAME = "master";
-
-    private static final String TCP = "tcp";
-
-    private static final List<String> DEFAULT_SECURITY_GROUP_PORTS = List.of("22");
 
     private final EnvironmentService environmentService;
 
@@ -100,6 +91,8 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
     private final PollingService<FreeIpaPollerObject> freeIpaPollingService;
 
     private final FreeIpaServerRequestProvider freeIpaServerRequestProvider;
+
+    private final FreeIpaSecurityGroupRequestProvider freeIpaSecurityGroupRequestProvider;
 
     private final TelemetryApiConverter telemetryApiConverter;
 
@@ -124,6 +117,7 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
             Map<CloudPlatform, FreeIpaNetworkProvider> freeIpaNetworkProviderMapByCloudPlatform,
             PollingService<FreeIpaPollerObject> freeIpaPollingService,
             FreeIpaServerRequestProvider freeIpaServerRequestProvider,
+            FreeIpaSecurityGroupRequestProvider freeIpaSecurityGroupRequestProvider,
             TelemetryApiConverter telemetryApiConverter,
             BackupConverter backupConverter,
             CloudPlatformConnectors connectors,
@@ -139,6 +133,7 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
         this.freeIpaNetworkProviderMapByCloudPlatform = freeIpaNetworkProviderMapByCloudPlatform;
         this.freeIpaPollingService = freeIpaPollingService;
         this.freeIpaServerRequestProvider = freeIpaServerRequestProvider;
+        this.freeIpaSecurityGroupRequestProvider = freeIpaSecurityGroupRequestProvider;
         this.telemetryApiConverter = telemetryApiConverter;
         this.backupConverter = backupConverter;
         this.connectors = connectors;
@@ -268,7 +263,7 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
 
         SecurityGroupRequest securityGroupRequest = null;
         if (environment.getSecurityAccess() != null) {
-            securityGroupRequest = createSecurityGroupRequest(environment.getSecurityAccess());
+            securityGroupRequest = freeIpaSecurityGroupRequestProvider.createSecurityGroupRequest(environment);
         }
         createFreeIpaRequest.setInstanceGroups(createInstanceGroupRequests(createFreeIpaRequest, securityGroupRequest, environment, multiAzRequired));
         createFreeIpaRequest.setRecipes(environment.getFreeIpaCreation().getRecipes());
@@ -343,25 +338,6 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
         createFreeIpaRequest.setAuthentication(stackAuthenticationRequest);
     }
 
-    private SecurityGroupRequest createSecurityGroupRequest(SecurityAccessDto securityAccess) {
-        SecurityGroupRequest securityGroupRequest = new SecurityGroupRequest();
-        if (!Strings.isNullOrEmpty(securityAccess.getCidr())) {
-            securityGroupRequest.setSecurityRules(new ArrayList<>());
-            for (String cidr : CidrUtil.cidrs(securityAccess.getCidr())) {
-                SecurityRuleRequest securityRuleRequest = createSecurityRuleRequest(cidr);
-                securityGroupRequest.getSecurityRules().add(securityRuleRequest);
-            }
-            securityGroupRequest.setSecurityGroupIds(new HashSet<>());
-        } else if (!Strings.isNullOrEmpty(securityAccess.getDefaultSecurityGroupId())) {
-            securityGroupRequest.setSecurityGroupIds(getSecurityGroupIds(securityAccess.getDefaultSecurityGroupId()));
-            securityGroupRequest.setSecurityRules(new ArrayList<>());
-        } else {
-            securityGroupRequest.setSecurityRules(new ArrayList<>());
-            securityGroupRequest.setSecurityGroupIds(new HashSet<>());
-        }
-        return securityGroupRequest;
-    }
-
     private void setUseCcm(Tunnel tunnel, CreateFreeIpaRequest createFreeIpaRequest) {
         createFreeIpaRequest.setUseCcm(Tunnel.CCM == tunnel);
         createFreeIpaRequest.setTunnel(tunnel);
@@ -407,15 +383,6 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
                     instanceTemplateRequest.setAws(aws);
                 });
         return instanceTemplateRequest;
-    }
-
-    private SecurityRuleRequest createSecurityRuleRequest(String cidr) {
-        SecurityRuleRequest securityRuleRequest = new SecurityRuleRequest();
-        securityRuleRequest.setModifiable(false);
-        securityRuleRequest.setPorts(DEFAULT_SECURITY_GROUP_PORTS);
-        securityRuleRequest.setProtocol(TCP);
-        securityRuleRequest.setSubnet(cidr);
-        return securityRuleRequest;
     }
 
     private void awaitFreeIpaCreation(EnvironmentDto environment, FlowIdentifier flowIdentifier) {

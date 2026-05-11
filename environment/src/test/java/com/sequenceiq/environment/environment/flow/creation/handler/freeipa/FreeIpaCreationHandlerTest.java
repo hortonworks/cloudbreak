@@ -39,6 +39,7 @@ import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
 import com.sequenceiq.cloudbreak.polling.PollingResult;
 import com.sequenceiq.cloudbreak.polling.PollingService;
+import com.sequenceiq.common.api.type.EnvironmentType;
 import com.sequenceiq.environment.configuration.SupportedPlatforms;
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.environment.domain.Environment;
@@ -110,6 +111,9 @@ public class FreeIpaCreationHandlerTest {
     private FreeIpaServerRequestProvider freeIpaServerRequestProvider;
 
     @Mock
+    private FreeIpaSecurityGroupRequestProvider freeIpaSecurityGroupRequestProvider;
+
+    @Mock
     private TelemetryApiConverter telemetryApiConverter;
 
     @Mock
@@ -140,6 +144,7 @@ public class FreeIpaCreationHandlerTest {
                 freeIpaNetworkProviderMapByCloudPlatform,
                 freeIpaPollingService,
                 freeIpaServerRequestProvider,
+                freeIpaSecurityGroupRequestProvider,
                 telemetryApiConverter,
                 backupConverter,
                 connectors,
@@ -579,7 +584,7 @@ public class FreeIpaCreationHandlerTest {
         return environmentDto;
     }
 
-    private EnvironmentDto someEnvironmentWithFreeIpaCreation() {
+    private EnvironmentDto someEnvironmentWithFreeIpaCreation(EnvironmentType environmentType) {
         EnvironmentDto dto = new EnvironmentDto();
 
         dto.setId(ENVIRONMENT_ID);
@@ -590,8 +595,13 @@ public class FreeIpaCreationHandlerTest {
         dto.setRegions(Set.of(createRegion("someWhereOverTheRainbow")));
         dto.setFreeIpaCreation(FreeIpaCreationDto.builder(FREE_IPA_INSTANCE_COUNT_BY_GROUP).withCreate(true).build());
         dto.setNetwork(NetworkDto.builder().withNetworkCidr(YARN_NETWORK_CIDR).build());
+        dto.setEnvironmentType(environmentType);
 
         return dto;
+    }
+
+    private EnvironmentDto someEnvironmentWithFreeIpaCreation() {
+        return someEnvironmentWithFreeIpaCreation(EnvironmentType.PUBLIC_CLOUD);
     }
 
     private EnvironmentDto aNonYarnEnvironmentDtoWithParentEnvironment() {
