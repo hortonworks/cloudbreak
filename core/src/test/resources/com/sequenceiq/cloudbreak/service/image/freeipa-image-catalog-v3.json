@@ -1225,10 +1225,7 @@
           "caf34fa1-60b8-499b-9fd7-33f75b4ff34b",
           "acf84d5f-ad03-4453-8e66-da8c4fd280f1"
         ],
-        "defaults": [],
-        "versions": [
-          "2.37.0-b134"
-        ]
+        "defaults": []
       }
     ]
   }

@@ -21,10 +21,7 @@
         "images": [
           "DEFAULT_IMAGE_UUID"
         ],
-        "defaults": [],
-        "versions": [
-          "CB_VERSION"
-        ]
+        "defaults": []
       }
     ]
   }

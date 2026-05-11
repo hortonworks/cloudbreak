@@ -18,11 +18,11 @@ public class ImageCatalogMockService {
 
     private static final String PATCH_VERSION_POSTFIX = ".600";
 
-    public String getImageCatalogByName(String name, String cbVersion, String runtimeVersion, String cmVersion, String defaultImageUuid,
+    public String getImageCatalogByName(String name, String runtimeVersion, String cmVersion, String defaultImageUuid,
             String nonDefaultImageUuid, String mockServerAddress) {
         String catalog = FileReaderUtils.readFileFromClasspathQuietly(String.format("mock-image-catalogs/%s.json", name));
         String nextRuntimeVersion = getNextRuntimeVersion(runtimeVersion);
-        return catalog.replace("CB_VERSION", cbVersion)
+        return catalog
                 .replace("CDH_RUNTIME_NEXT", nextRuntimeVersion)
                 .replace("CDH_RUNTIME", runtimeVersion)
                 .replace("CDH_RELEASE_NEXT", nextRuntimeVersion + PATCH_VERSION_POSTFIX)

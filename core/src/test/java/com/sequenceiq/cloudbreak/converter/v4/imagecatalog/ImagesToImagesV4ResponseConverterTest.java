@@ -8,7 +8,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.UUID;
 
@@ -58,8 +57,7 @@ class ImagesToImagesV4ResponseConverterTest extends AbstractEntityConverterTest<
         Images images = new Images(
                 Collections.singletonList(getImage(REDHAT_7)),
                 Collections.singletonList(getImage(REDHAT_7)),
-                Collections.emptyList(),
-                new HashSet<>()
+                Collections.emptyList()
         );
         return images;
     }

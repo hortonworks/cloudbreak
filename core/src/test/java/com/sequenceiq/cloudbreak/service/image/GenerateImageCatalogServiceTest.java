@@ -88,8 +88,6 @@ public class GenerateImageCatalogServiceTest {
                 .returns(catalogImage.getPreWarmCsd(), com.sequenceiq.cloudbreak.cloud.model.catalog.Image::getPreWarmCsd)
                 .returns(catalogImage.getCmBuildNumber(), com.sequenceiq.cloudbreak.cloud.model.catalog.Image::getCmBuildNumber)
                 .returns(true, com.sequenceiq.cloudbreak.cloud.model.catalog.Image::isAdvertised);
-        assertThat(actual.getImages().getSupportedVersions())
-                .isEmpty();
         assertThat(actual.getVersions())
                 .isNull();
     }

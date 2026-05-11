@@ -60,8 +60,6 @@ public class CachedImageCatalogWrapperProviderTest {
 
     private static final String CB_IMAGE_CATALOG_WITHOUT_CDH_IMAGES = "cb-image-catalog-without-cdh-images.json";
 
-    private static final String CB_VERSION = "1.16.5";
-
     private static final List<String> RC_IMAGE_CATALOG_OS_TYPES = Lists.newArrayList("amazonlinux", "centos7", "amazonlinux2", "sles12", "ubuntu16");
 
     private static final List<String> CB_AMAZONLINUX_FILTER = Lists.newArrayList("amazonlinux");
@@ -105,7 +103,7 @@ public class CachedImageCatalogWrapperProviderTest {
         CloudbreakImageCatalogV3 catalog = underTest.getImageCatalogWrapper(CB_IMAGE_CATALOG_V2_JSON).getImageCatalog();
 
         assertNotNull(catalog);
-        Optional<CloudbreakVersion> ver = catalog.getVersions().getCloudbreakVersions().stream().filter(v -> v.getVersions().contains(CB_VERSION)).findFirst();
+        Optional<CloudbreakVersion> ver = catalog.getVersions().getCloudbreakVersions().stream().findFirst();
         assertTrue(ver.isPresent(), "Check that the parsed ImageCatalog contains the desired version of Cloudbreak.");
         List<String> imageIds = ver.get().getImageIds();
         assertNotNull(imageIds);

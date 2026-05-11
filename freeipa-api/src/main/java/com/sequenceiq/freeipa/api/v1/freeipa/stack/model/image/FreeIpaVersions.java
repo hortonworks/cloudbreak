@@ -15,7 +15,7 @@ public class FreeIpaVersions {
     private static final String IMAGES_PROPERTY = "images";
 
     @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED)
-    private final List<String> versions;
+    private final List<String> versions = null;
 
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     private final List<String> defaults;
@@ -25,16 +25,10 @@ public class FreeIpaVersions {
 
     @JsonCreator
     public FreeIpaVersions(
-            @JsonProperty("versions") List<String> versions,
             @JsonProperty("defaults") List<String> defaults,
             @JsonProperty(IMAGES_PROPERTY) List<String> imageIds) {
-        this.versions = Optional.ofNullable(versions).orElse(List.of());
         this.defaults = Optional.ofNullable(defaults).orElse(List.of());
         this.imageIds = Optional.ofNullable(imageIds).orElse(List.of());
-    }
-
-    public List<String> getVersions() {
-        return versions;
     }
 
     public List<String> getDefaults() {
@@ -49,7 +43,6 @@ public class FreeIpaVersions {
     @Override
     public String toString() {
         return "FreeIpaVersions{"
-                + "versions=" + versions
                 + ", defaults=" + defaults
                 + ", imageIds=" + imageIds
                 + '}';

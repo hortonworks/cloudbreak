@@ -43,7 +43,7 @@ public class ImageCatalogTestClient {
     }
 
     public Action<ImageCatalogTestDto, CloudbreakClient> getV4WithAllImages() {
-        return new ImageCatalogGetAction(true, false);
+        return new ImageCatalogGetAction(true);
     }
 
     public Action<ImageCatalogTestDto, CloudbreakClient> getImagesByNameV4() {

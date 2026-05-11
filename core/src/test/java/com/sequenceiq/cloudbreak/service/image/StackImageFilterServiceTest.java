@@ -17,7 +17,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 
@@ -178,8 +177,7 @@ class StackImageFilterServiceTest {
         Images images = new Images(
                 Collections.singletonList(getImage("a", IMAGE_BASE_ID)),
                 Collections.singletonList(getImage("b", IMAGE_CDH_ID)),
-                Collections.emptyList(),
-                new HashSet<>()
+                Collections.emptyList()
         );
         return StatedImages.statedImages(images, CUSTOM_IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME);
     }

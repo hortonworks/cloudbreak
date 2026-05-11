@@ -158,7 +158,7 @@ public class AdvertisedImageProviderTest {
     }
 
     private CloudbreakImageCatalogV3 anImageCatalogV3() {
-        Images images = new Images(baseImages(), cdhImages(), null, null);
+        Images images = new Images(baseImages(), cdhImages(), null);
         return new CloudbreakImageCatalogV3(images, null);
     }
 
@@ -202,7 +202,6 @@ public class AdvertisedImageProviderTest {
         return ImageFilter.builder()
                 .withImageCatalog(anImageCatalog())
                 .withPlatforms(Collections.singleton(imageCatalogPlatform(PLATFORM_AWS)))
-                .withCbVersion("CB version")
                 .withBaseImageEnabled(enableBaseImages)
                 .build();
     }

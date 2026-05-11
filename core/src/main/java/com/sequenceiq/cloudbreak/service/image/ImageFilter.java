@@ -26,19 +26,20 @@ public class ImageFilter {
 
     private final boolean defaultOnly;
 
-    private String cbVersion;
+    private final boolean includeUnversionedImages;
 
-    private ImageFilter(ImageCatalog imageCatalog, Set<ImageCatalogPlatform> platforms, String cbVersion, boolean baseImageEnabled,
-            Set<String> operatingSystems, String clusterVersion, Architecture architecture, Predicate<Image> additionalPredicate, boolean defaultOnly) {
+    private ImageFilter(ImageCatalog imageCatalog, Set<ImageCatalogPlatform> platforms, boolean baseImageEnabled,
+            Set<String> operatingSystems, String clusterVersion, Architecture architecture, Predicate<Image> additionalPredicate, boolean defaultOnly,
+            boolean includeUnversionedImages) {
         this.imageCatalog = imageCatalog;
         this.platforms = platforms;
-        this.cbVersion = cbVersion;
         this.baseImageEnabled = baseImageEnabled;
         this.operatingSystems = operatingSystems;
         this.clusterVersion = clusterVersion;
         this.architecture = architecture;
         this.additionalPredicate = additionalPredicate;
         this.defaultOnly = defaultOnly;
+        this.includeUnversionedImages = includeUnversionedImages;
     }
 
     public ImageCatalog getImageCatalog() {
@@ -47,10 +48,6 @@ public class ImageFilter {
 
     public Set<ImageCatalogPlatform> getPlatforms() {
         return platforms;
-    }
-
-    public String getCbVersion() {
-        return cbVersion;
     }
 
     public boolean isBaseImageEnabled() {
@@ -77,9 +74,8 @@ public class ImageFilter {
         return defaultOnly;
     }
 
-    public ImageFilter withCbVersion(String cbVersion) {
-        this.cbVersion = cbVersion;
-        return this;
+    public boolean isIncludingUnversionedImages() {
+        return includeUnversionedImages;
     }
 
     @Override
@@ -91,8 +87,8 @@ public class ImageFilter {
                 ", operatingSystems=" + operatingSystems +
                 ", clusterVersion='" + clusterVersion + '\'' +
                 ", architecture=" + architecture +
-                ", cbVersion='" + cbVersion + '\'' +
                 ", additionalPredicate=" + additionalPredicate +
+                ", includeUnversionedImages=" + includeUnversionedImages +
                 '}';
     }
 
@@ -108,8 +104,6 @@ public class ImageFilter {
 
         private Set<ImageCatalogPlatform> platforms;
 
-        private String cbVersion;
-
         private boolean baseImageEnabled;
 
         private Set<String> operatingSystems;
@@ -119,6 +113,8 @@ public class ImageFilter {
         private Architecture architecture;
 
         private boolean defaultOnly;
+
+        private boolean includeUnversionedImages;
 
         private ImageFilterBuilder() {
         }
@@ -135,11 +131,6 @@ public class ImageFilter {
 
         public ImageFilterBuilder withPlatforms(Set<ImageCatalogPlatform> platforms) {
             this.platforms = platforms;
-            return this;
-        }
-
-        public ImageFilterBuilder withCbVersion(String cbVersion) {
-            this.cbVersion = cbVersion;
             return this;
         }
 
@@ -168,9 +159,14 @@ public class ImageFilter {
             return this;
         }
 
+        public ImageFilterBuilder withIncludeUnversionedImages(boolean includeUnversionedImages) {
+            this.includeUnversionedImages = includeUnversionedImages;
+            return this;
+        }
+
         public ImageFilter build() {
-            return new ImageFilter(imageCatalog, platforms, cbVersion, baseImageEnabled, operatingSystems, clusterVersion, architecture, additionalPredicate,
-                    defaultOnly);
+            return new ImageFilter(imageCatalog, platforms, baseImageEnabled, operatingSystems, clusterVersion, architecture, additionalPredicate,
+                    defaultOnly, includeUnversionedImages);
         }
     }
 }

@@ -107,7 +107,7 @@ public class CachedImageCatalogWrapperProvider {
         List<Image> filteredCdhImages = filterImages(catalogImages.getCdhImages(), enabledOsPredicate());
         List<Image> filteredFreeipaImages = filterImages(catalogImages.getFreeIpaImages(), enabledOsPredicate());
 
-        Images images = new Images(filteredBaseImages, filteredCdhImages, filteredFreeipaImages, catalogImages.getSupportedVersions());
+        Images images = new Images(filteredBaseImages, filteredCdhImages, filteredFreeipaImages);
         return new CloudbreakImageCatalogV3(images, catalog.getVersions());
     }
 

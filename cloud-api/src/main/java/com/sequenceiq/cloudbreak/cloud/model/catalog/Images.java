@@ -1,10 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.model.catalog;
 
 import static java.util.Collections.emptyList;
-import static java.util.Collections.emptySet;
 
 import java.util.List;
-import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -28,18 +26,14 @@ public class Images {
 
     private final List<Image> freeIpaImages;
 
-    private final Set<String> supportedVersions;
-
     @JsonCreator
     public Images(
             @JsonProperty(BASE_IMAGES) List<Image> baseImages,
             @JsonProperty(CDH_IMAGES) List<Image> cdhImages,
-            @JsonProperty(FREEIPA_IMAGES) List<Image> freeIpaImages,
-            @JsonProperty("supported-cb-versions") Set<String> supportedVersions) {
+            @JsonProperty(FREEIPA_IMAGES) List<Image> freeIpaImages) {
         this.baseImages = (baseImages == null) ? emptyList() : baseImages;
         this.cdhImages = (cdhImages == null) ? emptyList() : cdhImages;
         this.freeIpaImages = (freeIpaImages == null) ? emptyList() : freeIpaImages;
-        this.supportedVersions = (supportedVersions == null) ? emptySet() : supportedVersions;
     }
 
     @JsonProperty(BASE_IMAGES)
@@ -55,11 +49,6 @@ public class Images {
     @JsonProperty(FREEIPA_IMAGES)
     public List<Image> getFreeIpaImages() {
         return freeIpaImages;
-    }
-
-    @JsonIgnore
-    public Set<String> getSupportedVersions() {
-        return supportedVersions;
     }
 
     @JsonIgnore

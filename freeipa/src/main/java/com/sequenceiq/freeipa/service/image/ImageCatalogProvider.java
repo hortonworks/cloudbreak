@@ -47,9 +47,6 @@ public class ImageCatalogProvider {
     @Value("#{'${cb.enabled.linux.types}'.split(',')}")
     private List<String> enabledLinuxTypes;
 
-    @Value("${info.app.version:}")
-    private String freeIpaVersion;
-
     @Inject
     private ObjectMapper objectMapper;
 
@@ -57,7 +54,7 @@ public class ImageCatalogProvider {
     private RestClientFactory restClientFactory;
 
     @Cacheable(cacheNames = "imageCatalogCache", key = "#catalogUrl")
-    public ImageCatalog getImageCatalog(String catalogUrl)  {
+    public ImageCatalog getImageCatalog(String catalogUrl) {
         try {
             if (Objects.nonNull(catalogUrl)) {
                 long started = System.currentTimeMillis();
@@ -123,8 +120,8 @@ public class ImageCatalogProvider {
     private FreeIpaVersions filterDefaultsAndImageIds(List<String> filteredUuids, FreeIpaVersions versions) {
         List<String> defaults = versions.getDefaults().stream().filter(filteredUuids::contains).collect(Collectors.toList());
         List<String> imageIds = versions.getImageIds().stream().filter(filteredUuids::contains).collect(Collectors.toList());
-        LOGGER.debug("Filtered versions: [versions: {}, defaults: {}, images: {}]", versions.getVersions(), defaults, imageIds);
-        return new FreeIpaVersions(versions.getVersions(), defaults, imageIds);
+        LOGGER.debug("Filtered versions: [defaults: {}, images: {}]", defaults, imageIds);
+        return new FreeIpaVersions(defaults, imageIds);
     }
 
     private List<Image> filterImages(List<Image> imageList, Predicate<Image> predicate) {
@@ -150,7 +147,7 @@ public class ImageCatalogProvider {
         return enabledLinuxTypes.stream().filter(StringUtils::isNoneBlank).collect(Collectors.toList());
     }
 
-    private String readResponse(WebTarget target, Response response)  {
+    private String readResponse(WebTarget target, Response response) {
         if (!response.getStatusInfo().getFamily().equals(Family.SUCCESSFUL)) {
             throw new ImageCatalogException(String.format("Failed to get image catalog from '%s' due to: '%s'",
                     target.getUri().toString(), response.getStatusInfo().getReasonPhrase()));
@@ -175,7 +172,7 @@ public class ImageCatalogProvider {
                     .filter(Image::isAdvertised)
                     .map(Image::getUuid)
                     .collect(Collectors.toList());
-            List<FreeIpaVersions> versionList = List.of(new FreeIpaVersions(List.of(freeIpaVersion), List.of(), advertisedImageUuids));
+            List<FreeIpaVersions> versionList = List.of(new FreeIpaVersions(List.of(), advertisedImageUuids));
             Versions versions = new Versions(versionList);
             LOGGER.debug("Generated versions: '{}'", versions);
             return versions;

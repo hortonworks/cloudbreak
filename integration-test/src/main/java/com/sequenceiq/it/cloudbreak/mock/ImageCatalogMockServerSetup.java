@@ -21,8 +21,6 @@ public class ImageCatalogMockServerSetup {
 
     private String cdhRuntime;
 
-    private String cbVersion;
-
     private String mockImageCatalogServer;
 
     @Inject
@@ -34,74 +32,66 @@ public class ImageCatalogMockServerSetup {
     @PostConstruct
     void initImageCatalogIfNecessary() {
         mockImageCatalogServer = serverProperties.getMockImageCatalogAddr();
-        cbVersion = serverProperties.getCbVersion();
         cdhRuntime = commonClusterManagerProperties.getRuntimeVersion();
         cdhUpgradeRuntime = commonClusterManagerProperties.getUpgrade().getCurrentRuntimeVersion(false);
     }
 
-    // DYNAMIC address http://localhost:10080/thunderhead/mock-image-catalog?catalog-name=cb-catalog&cb-version=CB-2.29.0&runtime=7.2.2
+    // DYNAMIC address http://localhost:10080/thunderhead/mock-image-catalog?catalog-name=cb-catalog&runtime=7.2.2
     public String getFreeIpaImageCatalogUrl() {
-        return String.format("https://%s/mock-image-catalog?catalog-name=%s&cb-version=%s&runtime=%s&mock-server-address=%s",
+        return String.format("https://%s/mock-image-catalog?catalog-name=%s&runtime=%s&mock-server-address=%s",
                 mockImageCatalogServer,
                 "freeipa-catalog",
-                cbVersion,
                 cdhRuntime,
                 mockImageCatalogServer);
     }
 
     public String getFreeIpaImageCatalogUrlWitdDefaultImageUuid(String defaultImageUuid) {
-        return String.format("https://%s/mock-image-catalog?catalog-name=%s&cb-version=%s&runtime=%s&default-image-uuid=%s&mock-server-address=%s",
+        return String.format("https://%s/mock-image-catalog?catalog-name=%s&runtime=%s&default-image-uuid=%s&mock-server-address=%s",
                 mockImageCatalogServer,
                 "freeipa-catalog",
-                cbVersion,
                 cdhRuntime,
                 defaultImageUuid,
                 mockImageCatalogServer);
     }
 
     public String getImageCatalogUrl() {
-        return String.format("https://%s/mock-image-catalog?catalog-name=%s&cb-version=%s&runtime=%s&mock-server-address=%s",
+        return String.format("https://%s/mock-image-catalog?catalog-name=%s&runtime=%s&mock-server-address=%s",
                 mockImageCatalogServer,
                 "cb-catalog",
-                cbVersion,
                 cdhRuntime,
                 mockImageCatalogServer);
     }
 
     public String getPreWarmedImageCatalogUrl() {
-        return String.format("https://%s/mock-image-catalog?catalog-name=%s&cb-version=%s&runtime=%s&mock-server-address=%s",
+        return String.format("https://%s/mock-image-catalog?catalog-name=%s&runtime=%s&mock-server-address=%s",
                 mockImageCatalogServer,
                 "catalog-with-prewarmed",
-                cbVersion,
                 cdhRuntime,
                 mockImageCatalogServer);
     }
 
     public String getPreWarmedImageCatalogUrlWithDefaultImageUuid(String defaultImageUuid) {
-        return String.format("https://%s/mock-image-catalog?catalog-name=%s&cb-version=%s&runtime=%s&default-image-uuid=%s&mock-server-address=%s",
+        return String.format("https://%s/mock-image-catalog?catalog-name=%s&runtime=%s&default-image-uuid=%s&mock-server-address=%s",
                 mockImageCatalogServer,
                 "catalog-with-prewarmed",
-                cbVersion,
                 cdhRuntime,
                 defaultImageUuid,
                 mockImageCatalogServer);
     }
 
     public String getPreWarmedImageCatalogUrlWithCmAndCdhVersions(String cmVersion, String cdhVersion) {
-        return String.format("https://%s/mock-image-catalog?catalog-name=%s&cb-version=%s&runtime=%s&cm=%s&mock-server-address=%s",
+        return String.format("https://%s/mock-image-catalog?catalog-name=%s&runtime=%s&cm=%s&mock-server-address=%s",
                 mockImageCatalogServer,
                 "catalog-with-prewarmed",
-                cbVersion,
                 cdhVersion,
                 cmVersion,
                 mockImageCatalogServer);
     }
 
     public String getUpgradeImageCatalogUrl() {
-        return String.format("https://%s/mock-image-catalog?catalog-name=%s&cb-version=%s&runtime=%s&mock-server-address=%s",
+        return String.format("https://%s/mock-image-catalog?catalog-name=%s&runtime=%s&mock-server-address=%s",
                 mockImageCatalogServer,
                 "catalog-with-for-upgrade",
-                cbVersion,
                 cdhUpgradeRuntime,
                 mockImageCatalogServer);
     }

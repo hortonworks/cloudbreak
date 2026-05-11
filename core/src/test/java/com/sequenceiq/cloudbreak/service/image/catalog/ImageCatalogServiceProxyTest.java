@@ -20,7 +20,7 @@ import com.sequenceiq.cloudbreak.service.image.ImageFilter;
 public class ImageCatalogServiceProxyTest {
 
     @Mock
-    private VersionBasedImageCatalogService versionBasedImageCatalogService;
+    private FilterBasedImageCatalogService filterBasedImageCatalogService;
 
     @Mock
     private AdvertisedImageCatalogService advertisedImageCatalogService;
@@ -43,7 +43,7 @@ public class ImageCatalogServiceProxyTest {
 
         victim.getImages(cloudbreakImageCatalogV3, imageFilter);
 
-        verify(versionBasedImageCatalogService).getImages(cloudbreakImageCatalogV3, imageFilter);
+        verify(filterBasedImageCatalogService).getImages(cloudbreakImageCatalogV3, imageFilter);
         verifyNoInteractions(advertisedImageCatalogService);
     }
 
@@ -52,7 +52,7 @@ public class ImageCatalogServiceProxyTest {
         victim.getImages(cloudbreakImageCatalogV3, imageFilter);
 
         verify(advertisedImageCatalogService).getImages(cloudbreakImageCatalogV3, imageFilter);
-        verifyNoInteractions(versionBasedImageCatalogService);
+        verifyNoInteractions(filterBasedImageCatalogService);
     }
 
     @Test
@@ -61,7 +61,7 @@ public class ImageCatalogServiceProxyTest {
 
         victim.getImageFilterResult(cloudbreakImageCatalogV3);
 
-        verify(versionBasedImageCatalogService).getImageFilterResult(cloudbreakImageCatalogV3);
+        verify(filterBasedImageCatalogService).getImageFilterResult(cloudbreakImageCatalogV3);
         verifyNoInteractions(advertisedImageCatalogService);
     }
 
@@ -70,7 +70,7 @@ public class ImageCatalogServiceProxyTest {
         victim.getImageFilterResult(cloudbreakImageCatalogV3);
 
         verify(advertisedImageCatalogService).getImageFilterResult(cloudbreakImageCatalogV3);
-        verifyNoInteractions(versionBasedImageCatalogService);
+        verifyNoInteractions(filterBasedImageCatalogService);
     }
 
     @Test
@@ -79,7 +79,7 @@ public class ImageCatalogServiceProxyTest {
 
         victim.validate(cloudbreakImageCatalogV3);
 
-        verify(versionBasedImageCatalogService).validate(cloudbreakImageCatalogV3);
+        verify(filterBasedImageCatalogService).validate(cloudbreakImageCatalogV3);
         verifyNoInteractions(advertisedImageCatalogService);
     }
 
@@ -88,6 +88,6 @@ public class ImageCatalogServiceProxyTest {
         victim.validate(cloudbreakImageCatalogV3);
 
         verify(advertisedImageCatalogService).validate(cloudbreakImageCatalogV3);
-        verifyNoInteractions(versionBasedImageCatalogService);
+        verifyNoInteractions(filterBasedImageCatalogService);
     }
 }

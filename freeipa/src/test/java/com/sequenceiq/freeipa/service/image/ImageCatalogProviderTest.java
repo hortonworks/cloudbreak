@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.assertj.core.util.Lists;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -47,22 +46,14 @@ class ImageCatalogProviderTest {
 
     private static final List<String> CB_CENTOS_7_FILTER = Lists.newArrayList("centos7");
 
-    private static final String DEFAULT_VERSION = "2.20.0-dev.1";
-
     @InjectMocks
     private ImageCatalogProvider underTest;
 
     @Spy
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    @BeforeEach
-    public void initTests() {
-        ReflectionTestUtils.setField(underTest, ImageCatalogProvider.class, "freeIpaVersion", DEFAULT_VERSION, null);
-    }
-
     @Test
     void testReadImageCatalogFromFile() {
-
         String path = getPath(IMAGE_CATALOG_JSON);
         ReflectionTestUtils.setField(underTest, "etcConfigDir", path);
         ReflectionTestUtils.setField(underTest, "enabledLinuxTypes", Collections.emptyList());
@@ -77,7 +68,6 @@ class ImageCatalogProviderTest {
         assertEquals("61851893-8340-411d-afb7-e1b55107fb10", freeIpaVersions.getImageIds().get(0));
         assertEquals(2, freeIpaVersions.getDefaults().size());
         assertEquals(List.of("71851893-8340-411d-afb7-e1b55107fb10", "b465c893-fe04-44b1-ae8e-0452bbb39c99"), freeIpaVersions.getDefaults());
-        assertEquals(4, freeIpaVersions.getVersions().size());
     }
 
     @Test

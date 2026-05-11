@@ -7,7 +7,6 @@ import static com.sequenceiq.cloudbreak.util.NameUtil.generateArchiveName;
 import static com.sequenceiq.common.model.ImageCatalogPlatform.imageCatalogPlatform;
 import static com.sequenceiq.common.model.OsType.getLatestOsType;
 import static java.util.Collections.emptyList;
-import static java.util.Collections.emptySet;
 import static java.util.stream.Collectors.partitioningBy;
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
@@ -90,9 +89,6 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
     static final String CLOUDBREAK_DEFAULT_CATALOG_NAME = "cloudbreak-default";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ImageCatalogService.class);
-
-    @Value("${info.app.version:}")
-    private String cbVersion;
 
     @Value("${cb.image.catalog.url}")
     private String defaultCatalogUrl;
@@ -263,7 +259,6 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
             ImageFilter imageFilter = ImageFilter.builder()
                     .withImageCatalog(getDefaultImageCatalog(user))
                     .withPlatforms(platforms)
-                    .withCbVersion(cbVersion)
                     .withBaseImageEnabled(baseImageEnabled())
                     .withOperatingSystems(operatingSystems)
                     .withDefaultOnly(defaultOnly)
@@ -280,7 +275,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
     public StatedImage getLatestImageDefaultPreferred(ImageFilter imageFilter, boolean selectBaseImage)
             throws CloudbreakImageCatalogException, CloudbreakImageNotFoundException {
         LOGGER.info("Trying to select a {} image.", selectBaseImage ? "base" : "prewarmed");
-        StatedImages statedImages = getImages(imageFilter.withCbVersion(cbVersion));
+        StatedImages statedImages = getImages(imageFilter);
         List<Image> images = selectBaseImage ? statedImages.getImages().getBaseImages() : statedImages.getImages().getCdhImages();
         Image defaultBaseImage = getLatestImageDefaultPreferred(imageFilter, images);
         return statedImage(defaultBaseImage, statedImages.getImageCatalogUrl(), statedImages.getImageCatalogName());
@@ -292,9 +287,8 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
 
     private String imageNotFoundErrorMessage(ImageFilter imageFilter) {
         return String.format(
-                "Could not find any image for platform '%s %s', runtime '%s' and Cloudbreak version '%s' in '%s' image catalog.",
-                getPlatform(imageFilter), getOses(imageFilter), imageFilter.getClusterVersion(), cbVersion,
-                getImageCatalogName(imageFilter));
+                "Could not find any image for platform '%s %s', runtime '%s' in '%s' image catalog.",
+                getPlatform(imageFilter), getOses(imageFilter), imageFilter.getClusterVersion(), getImageCatalogName(imageFilter));
     }
 
     private String getPlatform(ImageFilter imageFilter) {
@@ -320,28 +314,26 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
     public StatedImages getImages(Long workspaceId, String imageCatalogName, String runtimeVersion, ImageCatalogPlatform provider, boolean defaultOnly,
             String architecture)
             throws CloudbreakImageCatalogException {
-        return getImages(getLoggedInUser(), workspaceId, imageCatalogName, runtimeVersion, ImmutableSet.of(provider), true, defaultOnly,
-                architecture);
+        return getImages(getLoggedInUser(), workspaceId, imageCatalogName, runtimeVersion, ImmutableSet.of(provider), defaultOnly, architecture);
     }
 
     public List<Image> getAllCdhImages(String accountId, Long workspaceId, String imageCatalogName, Set<ImageCatalogPlatform> provider)
             throws CloudbreakImageCatalogException {
-        return getImages(accountId, workspaceId, imageCatalogName, provider, null, false, false, null)
-                .getImages().getCdhImages();
+        return getImages(accountId, workspaceId, imageCatalogName, provider, null, false, null, true).getImages().getCdhImages();
     }
 
     @SuppressWarnings("checkstyle:ParameterNumber")
     StatedImages getImages(User user, Long workspaceId, String imageCatalogName, String runtimeVersion,
-            Set<ImageCatalogPlatform> providers, boolean applyVersionBasedFiltering, boolean defaultOnly, String architecture)
+            Set<ImageCatalogPlatform> providers, boolean defaultOnly, String architecture)
             throws CloudbreakImageCatalogException {
         String accountId = Crn.safeFromString(user.getUserCrn()).getAccountId();
-        return getImages(accountId, workspaceId, imageCatalogName, providers, runtimeVersion, applyVersionBasedFiltering, defaultOnly, architecture);
+        return getImages(accountId, workspaceId, imageCatalogName, providers, runtimeVersion, defaultOnly, architecture, false);
     }
 
     @SuppressWarnings("checkstyle:ParameterNumber")
     StatedImages getImages(String accountId, Long workspaceId, String imageCatalogName,
-            Set<ImageCatalogPlatform> providers, String runtimeVersion, boolean applyVersionBasedFiltering, boolean defaultOnly, String architecture)
-            throws CloudbreakImageCatalogException {
+            Set<ImageCatalogPlatform> providers, String runtimeVersion, boolean defaultOnly, String architecture,
+            boolean includeUnversionedImages) throws CloudbreakImageCatalogException {
         try {
             ImageCatalog imageCatalog = getImageCatalogByName(workspaceId, imageCatalogName);
             if (isCustomImageCatalog(imageCatalog)) {
@@ -350,10 +342,10 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
                 ImageFilter imageFilter = ImageFilter.builder()
                         .withImageCatalog(imageCatalog)
                         .withPlatforms(providers)
-                        .withCbVersion(applyVersionBasedFiltering ? cbVersion : null)
                         .withBaseImageEnabled(baseImageEnabled(accountId))
                         .withClusterVersion(runtimeVersion)
                         .withDefaultOnly(defaultOnly)
+                        .withIncludeUnversionedImages(includeUnversionedImages)
                         .withArchitecture(architecture == null ? null : Architecture.fromStringWithFallback(architecture))
                         .build();
                 return getImages(imageFilter);
@@ -372,8 +364,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
         try {
             List<Image> cbImages = getImages(ImageType.RUNTIME, imageCatalog, providers);
             List<Image> freeIpaImages = getImages(ImageType.FREEIPA, imageCatalog, providers);
-            return statedImages(new Images(null, cbImages, freeIpaImages,
-                    Set.of(cbVersion)), imageCatalog.getImageCatalogUrl(), imageCatalog.getName());
+            return statedImages(new Images(null, cbImages, freeIpaImages), imageCatalog.getImageCatalogUrl(), imageCatalog.getName());
         } catch (CloudbreakImageNotFoundException ex) {
             throw new CloudbreakImageCatalogException(ex.getMessage());
         }
@@ -535,7 +526,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
     }
 
     private Images emptyImages() {
-        return new Images(emptyList(), emptyList(), emptyList(), emptySet());
+        return new Images(emptyList(), emptyList(), emptyList());
     }
 
     private Optional<? extends Image> getImage(String imageId, Images images) {
@@ -612,8 +603,8 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
         Images rawImages = images.getImages();
         List<Image> baseImagesFiltered = filterImages(rawImages.getBaseImages(), filterName, imageFilterPredicate);
         List<Image> cdhImagesFiltered = filterImages(rawImages.getCdhImages(), filterName, imageFilterPredicate);
-        return statedImages(new Images(baseImagesFiltered, cdhImagesFiltered, rawImages.getFreeIpaImages(),
-                rawImages.getSupportedVersions()), images.getImageCatalogUrl(), images.getImageCatalogName());
+        return statedImages(new Images(baseImagesFiltered, cdhImagesFiltered, rawImages.getFreeIpaImages()),
+                images.getImageCatalogUrl(), images.getImageCatalogName());
     }
 
     private List<Image> filterImages(List<Image> images, String filterName, Predicate<Image> imageFilterPredicate) {
@@ -648,10 +639,6 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
     }
 
     public Images propagateImagesIfRequested(Long workspaceId, String name, Boolean withImages) {
-        return propagateImagesIfRequested(workspaceId, name, withImages, true);
-    }
-
-    public Images propagateImagesIfRequested(Long workspaceId, String name, Boolean withImages, Boolean applyVersionBasedFiltering) {
         if (BooleanUtils.isTrue(withImages)) {
             Set<ImageCatalogPlatform> platforms = new HashSet<>();
             platforms.addAll(preferencesService.enabledPlatforms()
@@ -663,7 +650,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
                     .map(e -> imageCatalogPlatform(e.concat("_GOV").toUpperCase(Locale.ROOT)))
                     .collect(Collectors.toSet()));
             try {
-                return getImages(getLoggedInUser(), workspaceId, name, null, platforms, applyVersionBasedFiltering, false, null).getImages();
+                return getImages(getLoggedInUser(), workspaceId, name, null, platforms, false, null).getImages();
             } catch (CloudbreakImageCatalogException e) {
                 LOGGER.info("No images was found: ", e);
             }

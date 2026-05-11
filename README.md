@@ -338,7 +338,7 @@ Otherwise, IntelliJ will constantly reorder your imports differently from CB con
 and this indicates that the certificate of the Mock-Infrastructure service needs to be added to the Java trust store **if you run FreeIPA and/or Cloudbreak(core) services locally and would like to create deployments with `mock` provider or simply run the integration tests locally.**
 Because the image catalog could not be downloaded from the mentioned service due to SSL handshake issues, for example:
 ```
-{"message":"Creation of FreeIPA failed: Failed to get image catalog: javax.net.ssl.SSLHandshakeException: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target from https://localhost:10090/mock-image-catalog?catalog-name=freeipa-catalog&cb-version=2.68.0-b64&runtime=7.2.15&mock-server-address=localhost:10090","payload":null}
+{"message":"Creation of FreeIPA failed: Failed to get image catalog: javax.net.ssl.SSLHandshakeException: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target from https://localhost:10090/mock-image-catalog?catalog-name=freeipa-catalog&runtime=7.2.15&mock-server-address=localhost:10090","payload":null}
 ```
 
 Example import commands, **do not forget to update the path of the certificate to your Cloudbreak repository location:**

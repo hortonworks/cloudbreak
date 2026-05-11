@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.service.image.catalog;
 
 import static com.sequenceiq.cloudbreak.service.image.StatedImages.statedImages;
-import static java.util.Collections.singleton;
 import static java.util.stream.Collectors.toList;
 
 import java.util.Collection;
@@ -44,8 +43,7 @@ public class AdvertisedImageProvider {
                 new Images(
                         getImages(getBaseImagesOrEmptyList(imageCatalogV3, imageFilter), imageFilter.getPlatforms()),
                         getImages(imageCatalogV3.getImages().getCdhImages(), imageFilter.getPlatforms()),
-                        imageCatalogV3.getImages().getFreeIpaImages(),
-                        singleton(imageFilter.getCbVersion())),
+                        imageCatalogV3.getImages().getFreeIpaImages()),
                 imageFilter.getImageCatalog().getImageCatalogUrl(),
                 imageFilter.getImageCatalog().getName());
     }

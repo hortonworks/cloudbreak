@@ -33,7 +33,7 @@ public class GenerateImageCatalogService {
                 StatedImage statedImage = imageCatalogService.getImage(stack.getWorkspace().getId(), image.getImageCatalogUrl(), image.getImageCatalogName(),
                         image.getImageId());
                 if (Strings.isNullOrEmpty(statedImage.getImage().getSourceImageId())) {
-                    Images images = new Images(null, List.of(copyCatalogImageAndSetAdvertisedFlag(statedImage.getImage())), null, null);
+                    Images images = new Images(null, List.of(copyCatalogImageAndSetAdvertisedFlag(statedImage.getImage())), null);
                     return new CloudbreakImageCatalogV3(images, null);
                 } else {
                     throw new CloudbreakServiceException(

@@ -20,7 +20,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -35,9 +34,9 @@ import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.repository.ImageCatalogRepository;
 import com.sequenceiq.cloudbreak.service.image.catalog.AdvertisedImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.catalog.AdvertisedImageProvider;
+import com.sequenceiq.cloudbreak.service.image.catalog.FilterBasedImageCatalogService;
+import com.sequenceiq.cloudbreak.service.image.catalog.FilterBasedImageProvider;
 import com.sequenceiq.cloudbreak.service.image.catalog.ImageCatalogServiceProxy;
-import com.sequenceiq.cloudbreak.service.image.catalog.VersionBasedImageCatalogService;
-import com.sequenceiq.cloudbreak.service.image.catalog.VersionBasedImageProvider;
 import com.sequenceiq.cloudbreak.service.user.UserProfileService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.structuredevent.LegacyRestRequestThreadLocalService;
@@ -62,9 +61,6 @@ class ImageCatalogServiceDefaultNotFoundTest {
     @Mock
     private UserProfileService userProfileService;
 
-    @Spy
-    private ImageCatalogVersionFilter versionFilter;
-
     @Mock
     private ImageCatalogRepository imageCatalogRepository;
 
@@ -87,7 +83,7 @@ class ImageCatalogServiceDefaultNotFoundTest {
     private ProviderSpecificImageFilter providerSpecificImageFilter;
 
     @InjectMocks
-    private VersionBasedImageProvider versionBasedImageProvider;
+    private FilterBasedImageProvider filterBasedImageProvider;
 
     @Mock
     private AdvertisedImageProvider advertisedImageProvider;
@@ -117,16 +113,15 @@ class ImageCatalogServiceDefaultNotFoundTest {
     private AdvertisedImageCatalogService advertisedImageCatalogService;
 
     @InjectMocks
-    private VersionBasedImageCatalogService versionBasedImageCatalogService;
+    private FilterBasedImageCatalogService filterBasedImageCatalogService;
 
     @BeforeEach
     void beforeTest() {
-        ReflectionTestUtils.setField(underTest, "cbVersion", "5.0.0");
         ReflectionTestUtils.setField(underTest, "defaultCatalogUrl", "");
         ReflectionTestUtils.setField(underTest, "imageCatalogServiceProxy", imageCatalogServiceProxy);
         ReflectionTestUtils.setField(imageCatalogServiceProxy, "advertisedImageCatalogService", advertisedImageCatalogService);
-        ReflectionTestUtils.setField(imageCatalogServiceProxy, "versionBasedImageCatalogService", versionBasedImageCatalogService);
-        ReflectionTestUtils.setField(versionBasedImageCatalogService, "versionBasedImageProvider", versionBasedImageProvider);
+        ReflectionTestUtils.setField(imageCatalogServiceProxy, "filterBasedImageCatalogService", filterBasedImageCatalogService);
+        ReflectionTestUtils.setField(filterBasedImageCatalogService, "filterBasedImageProvider", filterBasedImageProvider);
 
         when(preferencesService.enabledPlatforms()).thenReturn(new HashSet<>(Arrays.asList(PROVIDERS)));
         lenient().when(imageOsService.isSupported(any())).thenReturn(true);
@@ -144,7 +139,7 @@ class ImageCatalogServiceDefaultNotFoundTest {
             underTest.getImagePrewarmedDefaultPreferred(imageFilter);
         } catch (CloudbreakImageNotFoundException exception) {
             assertEquals(
-                    "Could not find any image for platform 'gcp redhat8', runtime 'null' and Cloudbreak version '5.0.0' in 'null' image catalog.",
+                    "Could not find any image for platform 'gcp redhat8', runtime 'null' in 'null' image catalog.",
                     exception.getMessage());
         }
         verify(providerSpecificImageFilter, never()).filterImages(any(), anyList());
@@ -162,7 +157,6 @@ class ImageCatalogServiceDefaultNotFoundTest {
         ImageFilter imageFilter = ImageFilter.builder()
                 .withImageCatalog(imageCatalog)
                 .withPlatforms(Set.of(imageCatalogPlatform("aws")))
-                .withCbVersion("2.6")
                 .withOperatingSystems(Set.of("centos7"))
                 .build();
         ThreadBasedUserCrnProvider.doAs(ACTOR, () -> {
@@ -170,8 +164,7 @@ class ImageCatalogServiceDefaultNotFoundTest {
                 underTest.getImagePrewarmedDefaultPreferred(imageFilter);
             } catch (CloudbreakImageNotFoundException exception) {
                 assertEquals(
-                        "Could not find any image for platform 'aws centos7', runtime 'null' " +
-                                "and Cloudbreak version '5.0.0' in 'null' image catalog.",
+                        "Could not find any image for platform 'aws centos7', runtime 'null' in 'null' image catalog.",
                         exception.getMessage());
             } catch (CloudbreakImageCatalogException e) {
                 throw new RuntimeException(e);
@@ -193,7 +186,6 @@ class ImageCatalogServiceDefaultNotFoundTest {
         ImageFilter imageFilter = ImageFilter.builder()
                 .withImageCatalog(imageCatalog)
                 .withPlatforms(Set.of(imageCatalogPlatform("aws")))
-                .withCbVersion("2.6")
                 .withOperatingSystems(Set.of("centos7"))
                 .withArchitecture(Architecture.ARM64)
                 .build();
@@ -202,8 +194,7 @@ class ImageCatalogServiceDefaultNotFoundTest {
                 underTest.getImagePrewarmedDefaultPreferred(imageFilter);
             } catch (CloudbreakImageNotFoundException exception) {
                 assertEquals(
-                        "Could not find any image for platform 'aws centos7-arm64', runtime 'null' " +
-                                "and Cloudbreak version '5.0.0' in 'null' image catalog.",
+                        "Could not find any image for platform 'aws centos7-arm64', runtime 'null' in 'null' image catalog.",
                         exception.getMessage());
             } catch (CloudbreakImageCatalogException e) {
                 throw new RuntimeException(e);

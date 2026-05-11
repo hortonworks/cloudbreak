@@ -6,7 +6,6 @@ import static org.mockito.AdditionalAnswers.returnsSecondArg;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -26,7 +25,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.mockito.Spy;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -41,9 +39,9 @@ import com.sequenceiq.cloudbreak.domain.UserProfile;
 import com.sequenceiq.cloudbreak.repository.ImageCatalogRepository;
 import com.sequenceiq.cloudbreak.service.image.catalog.AdvertisedImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.catalog.AdvertisedImageProvider;
+import com.sequenceiq.cloudbreak.service.image.catalog.FilterBasedImageCatalogService;
+import com.sequenceiq.cloudbreak.service.image.catalog.FilterBasedImageProvider;
 import com.sequenceiq.cloudbreak.service.image.catalog.ImageCatalogServiceProxy;
-import com.sequenceiq.cloudbreak.service.image.catalog.VersionBasedImageCatalogService;
-import com.sequenceiq.cloudbreak.service.image.catalog.VersionBasedImageProvider;
 import com.sequenceiq.cloudbreak.service.user.UserProfileService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.structuredevent.LegacyRestRequestThreadLocalService;
@@ -63,9 +61,6 @@ public class ImageCatalogServiceDefaultTest {
 
     @Mock
     private ImageCatalogProvider imageCatalogProvider;
-
-    @Spy
-    private ImageCatalogVersionFilter versionFilter;
 
     @Mock
     private UserProfileService userProfileService;
@@ -92,21 +87,18 @@ public class ImageCatalogServiceDefaultTest {
     private EntitlementService entitlementService;
 
     @Mock
-    private PrefixMatcherService prefixMatcherService;
-
-    @Mock
     private LatestDefaultImageUuidProvider latestDefaultImageUuidProvider;
 
     @Mock
     private ProviderSpecificImageFilter providerSpecificImageFilter;
 
     @InjectMocks
-    private VersionBasedImageProvider versionBasedImageProvider;
+    private FilterBasedImageProvider filterBasedImageProvider;
 
     @Mock
     private AdvertisedImageProvider advertisedImageProvider;
 
-    @Mock
+    @InjectMocks
     private CloudbreakVersionListProvider cloudbreakVersionListProvider;
 
     @Mock
@@ -122,26 +114,26 @@ public class ImageCatalogServiceDefaultTest {
     private AdvertisedImageCatalogService advertisedImageCatalogService;
 
     @InjectMocks
-    private VersionBasedImageCatalogService versionBasedImageCatalogService;
+    private FilterBasedImageCatalogService filterBasedImageCatalogService;
 
     @InjectMocks
     private ImageCatalogService underTest;
 
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][]{
-                // catalog                  //provider  //clusterVersion    // expected image           //cbversion     //os
+                // catalog                  //provider  //clusterVersion    // expected image           //os
                 {"Testing catalog for filterin 2.6 runtimes  for 5.0.0 CB  without os limit",
-                        DEFAULT_CDH_IMAGE_CATALOG, "aws", "2.6", "latest-hdp", "5.0.0", ""},
+                        DEFAULT_CDH_IMAGE_CATALOG, "aws", "2.6", "latest-hdp", ""},
                 {"Testing catalog for filterin 2.6 runtimes for 5.0.0 CB with centos7 limit",
-                        DEFAULT_CDH_IMAGE_CATALOG, "aws", "2.6", "latest-hdp", "5.0.0", "centos7"},
+                        DEFAULT_CDH_IMAGE_CATALOG, "aws", "2.6", "latest-hdp", "centos7"},
                 {"Testing catalog for filterin 2.6 runtimes for 5.0.0 CB with amazonlinux2 limit",
-                        DEFAULT_CDH_IMAGE_CATALOG, "aws", "2.6", "latest-amazonlinux-hdp", "5.0.0", "amazonlinux2"},
+                        DEFAULT_CDH_IMAGE_CATALOG, "aws", "2.6", "latest-amazonlinux-hdp", "amazonlinux2"},
                 {"Testing catalog for filterin 2.6 runtimes for 6.0.0 CB without os limit",
-                        DEFAULT_CDH_IMAGE_CATALOG, "aws", "2.6", "second-latest-hdp", "6.0.0", ""},
+                        DEFAULT_CDH_IMAGE_CATALOG, "aws", "2.6", "second-latest-hdp", ""},
                 {"Testing catalog for filterin 2.6 runtimes for 6.1.0 CB without os limit",
-                        DEFAULT_CDH_IMAGE_CATALOG, "aws", "2.6", "second-latest-hdp", "6.1.0", ""},
+                        DEFAULT_CDH_IMAGE_CATALOG, "aws", "2.6", "second-latest-hdp", ""},
                 {"Testing catalog for filterin 2.6 runtimes for 9.0.0 CB without os limit",
-                        DEFAULT_CDH_IMAGE_CATALOG, "aws", "2.6", "latest-hdp", "9.0.0", ""}
+                        DEFAULT_CDH_IMAGE_CATALOG, "aws", "2.6", "latest-hdp", ""}
         });
     }
 
@@ -162,25 +154,23 @@ public class ImageCatalogServiceDefaultTest {
 
         ReflectionTestUtils.setField(underTest, "imageCatalogServiceProxy", imageCatalogServiceProxy);
         ReflectionTestUtils.setField(imageCatalogServiceProxy, "advertisedImageCatalogService", advertisedImageCatalogService);
-        ReflectionTestUtils.setField(imageCatalogServiceProxy, "versionBasedImageCatalogService", versionBasedImageCatalogService);
-        ReflectionTestUtils.setField(versionBasedImageCatalogService, "versionBasedImageProvider", versionBasedImageProvider);
+        ReflectionTestUtils.setField(imageCatalogServiceProxy, "filterBasedImageCatalogService", filterBasedImageCatalogService);
+        ReflectionTestUtils.setField(filterBasedImageCatalogService, "filterBasedImageProvider", filterBasedImageProvider);
+        ReflectionTestUtils.setField(filterBasedImageProvider, "cloudbreakVersionListProvider", cloudbreakVersionListProvider);
     }
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
     public void testGetDefaultImageShouldReturnProperDefaultImage(String name, String catalogFile, String provider,
-            String clusterVersion, String expectedImageId, String cbVersion, String os) throws Exception {
+            String clusterVersion, String expectedImageId, String os) throws Exception {
         // GIVEN
         String catalogJson = FileReaderUtils.readFileFromClasspath(catalogFile);
         CloudbreakImageCatalogV3 catalog = JsonUtil.readValue(catalogJson, CloudbreakImageCatalogV3.class);
         when(imageCatalogProvider.getImageCatalogV3(catalogFile)).thenReturn(catalog);
         when(imageCatalog.getImageCatalogUrl()).thenReturn(catalogFile);
-        ReflectionTestUtils.setField(underTest, "cbVersion", cbVersion);
         ReflectionTestUtils.setField(underTest, "defaultCatalogUrl", "");
 
         // WHEN
-        when(prefixMatcherService.prefixMatchForCBVersion(eq(cbVersion), any()))
-                .thenReturn(new PrefixMatchImages(Set.of(expectedImageId), Collections.emptySet(), Set.of(cbVersion)));
         Set<String> operatingSystems = null;
         if (StringUtils.isNotEmpty(os)) {
             operatingSystems = Collections.singleton(os);
@@ -189,7 +179,6 @@ public class ImageCatalogServiceDefaultTest {
         ImageFilter imageFilter = ImageFilter.builder()
                 .withImageCatalog(imageCatalog)
                 .withPlatforms(Set.of(imageCatalogPlatform(provider)))
-                .withCbVersion(cbVersion)
                 .withOperatingSystems(operatingSystems)
                 .withClusterVersion(clusterVersion)
                 .build();

@@ -64,9 +64,6 @@
   "versions": {
     "cloudbreak": [
       {
-        "versions": [
-          "1.16.2"
-        ],
         "images": [
           "666aa8bf-bc1a-4cc6-43f1-427b4432c8c2"
         ]

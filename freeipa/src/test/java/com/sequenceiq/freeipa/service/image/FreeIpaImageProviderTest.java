@@ -102,13 +102,11 @@ class FreeIpaImageProviderTest {
         lenient().when(supportedOsService.isSupported(REDHAT8)).thenReturn(false);
 
         ReflectionTestUtils.setField(underTest, FreeIpaImageProvider.class, "defaultCatalogUrl", DEFAULT_CATALOG_URL, null);
-        ReflectionTestUtils.setField(underTest, FreeIpaImageProvider.class, "freeIpaVersion", DEFAULT_VERSION, null);
         ReflectionTestUtils.setField(underTest, "freeIpaImageFilter", freeIpaImageFilter);
     }
 
     @Test
-    void testGetImageGivenNoInputWithInvalidAppVersion() {
-        ReflectionTestUtils.setField(underTest, FreeIpaImageProvider.class, "freeIpaVersion", "2.21.0-dcv.1", null);
+    void testGetImageGivenCentos7OS() {
         FreeIpaImageFilterSettings imageFilterSettings = createImageFilterSettings(null, null, null, CENTOS7, false);
 
         Optional<ImageWrapper> image = underTest.getImage(imageFilterSettings);
@@ -129,28 +127,7 @@ class FreeIpaImageProviderTest {
     }
 
     @Test
-    void testGetImageGivenNoInputWithGbnAppVersion() {
-        ReflectionTestUtils.setField(underTest, FreeIpaImageProvider.class, "freeIpaVersion", "2.21.0-b1", null);
-        doTestGetImageGivenNoInput();
-    }
-
-    @Test
-    void testGetImageGivenNoInputWithVersionNotInCatalog() {
-        ReflectionTestUtils.setField(underTest, FreeIpaImageProvider.class, "freeIpaVersion", "2.20.0-dev.2", null);
-        doTestGetImageGivenNoInput();
-    }
-
-    @Test
-    void testGetImagesGivenNoInputWithInvalidAppVersion() {
-        ReflectionTestUtils.setField(underTest, FreeIpaImageProvider.class, "freeIpaVersion", "2.21.0-dcv.1", null);
-        FreeIpaImageFilterSettings imageFilterSettings = createImageFilterSettings(null, null, null, CENTOS7, false);
-
-        List<ImageWrapper> images = underTest.getImages(imageFilterSettings);
-
-        assertTrue(images.isEmpty());
-    }
-
-    private void doTestGetImageGivenNoInput() {
+    void testGetImageNoInput() {
         FreeIpaImageFilterSettings imageFilterSettings = createImageFilterSettings(null, null, null, null, false);
 
         Image image = underTest.getImage(imageFilterSettings).get().getImage();
@@ -158,6 +135,15 @@ class FreeIpaImageProviderTest {
         assertEquals(DEFAULT_OS, image.getOs());
         assertEquals(LATEST_DATE_NO_INPUT, image.getDate());
         assertEquals("71851893-8340-411d-afb7-e1b55107fb10", image.getUuid());
+    }
+
+    @Test
+    void testGetImagesGivenNoInputWithInvalidAppVersion() {
+        FreeIpaImageFilterSettings imageFilterSettings = createImageFilterSettings(null, null, null, CENTOS7, false);
+
+        List<ImageWrapper> images = underTest.getImages(imageFilterSettings);
+
+        assertTrue(images.isEmpty());
     }
 
     @Test

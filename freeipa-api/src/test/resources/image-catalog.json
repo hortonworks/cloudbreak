@@ -48,9 +48,6 @@
   "versions": {
     "freeipa": [
       {
-        "versions": [
-          "2.49.0-b135-1-gb13840b"
-        ],
         "defaults": [
           "f377c56e-9ad8-47fe-9b53-c3a554500897"
         ],

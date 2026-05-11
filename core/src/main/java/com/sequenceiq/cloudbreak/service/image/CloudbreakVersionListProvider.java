@@ -17,8 +17,6 @@ public class CloudbreakVersionListProvider {
             return Collections.emptyList();
         }
         Versions versions = catalog.getVersions();
-        return !versions.getCloudbreakVersions().isEmpty() ?
-                versions.getCloudbreakVersions() :
-                versions.getFreeipaVersions();
+        return versions.getCloudbreakVersions().isEmpty() ? versions.getFreeipaVersions() : versions.getCloudbreakVersions();
     }
 }

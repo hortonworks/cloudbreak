@@ -397,10 +397,7 @@
           "f6e778fc-7f17-4535-9021-515351df3691",
           "44b140a4-bd0b-457d-b174-e988bee3ca47"
         ],
-        "defaults": null,
-        "versions": [
-          "2.1.0"
-        ]
+        "defaults": null
       },
       {
         "images": [
@@ -412,10 +409,7 @@
           "9d657d5d-b80c-4a17-6f4d-847061ef3f71",
           "685f5067-743e-43a5-7d5e-c5d30f5fefe4"
         ],
-        "defaults": null,
-        "versions": [
-          "2.2.0"
-        ]
+        "defaults": null
       },
       {
         "images": [
@@ -425,10 +419,7 @@
           "4ae5ad91-3157-457f-6f64-5f07bc7aa10c",
           "685f5067-743e-43a5-7d5e-c5d30f5fefe0"
         ],
-        "defaults": null,
-        "versions": [
-          "2.4.0"
-        ]
+        "defaults": null
       },
       {
         "images": [
@@ -439,10 +430,7 @@
           "4102fae2-5de9-4bbd-4c6c-de663c87f6d0",
           "609a7f43-fb5b-480b-af79-eb71791c705b"
         ],
-        "defaults": null,
-        "versions": [
-          "2.5.0"
-        ]
+        "defaults": null
       },
       {
         "images": [
@@ -452,10 +440,7 @@
           "a99d040b-c8ea-488b-5fa7-d526e22600e1",
           "4ae5ad91-3157-457f-6f64-5f07bc7aa10c"
         ],
-        "defaults": null,
-        "versions": [
-          "2.4.1"
-        ]
+        "defaults": null
       },
       {
         "images": [
@@ -465,10 +450,7 @@
           "4102fae2-5de9-4bbd-4c6c-de663c87f6d0",
           "083f7289-876f-4267-436b-ece5504adb06"
         ],
-        "defaults": null,
-        "versions": [
-          "2.6.0"
-        ]
+        "defaults": null
       },
       {
         "images": [
@@ -478,10 +460,7 @@
           "4ae5ad91-3157-457f-6f64-5f07bc7aa10c",
           "3849e0ec-c39f-4b5a-7eb8-5e24ced5a4ac"
         ],
-        "defaults": null,
-        "versions": [
-          "2.4.2"
-        ]
+        "defaults": null
       }
     ]
   }

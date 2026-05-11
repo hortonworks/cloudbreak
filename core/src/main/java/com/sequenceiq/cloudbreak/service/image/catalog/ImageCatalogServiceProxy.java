@@ -15,7 +15,7 @@ import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterResult;
 public class ImageCatalogServiceProxy implements ImageCatalogService {
 
     @Inject
-    private VersionBasedImageCatalogService versionBasedImageCatalogService;
+    private FilterBasedImageCatalogService filterBasedImageCatalogService;
 
     @Inject
     private AdvertisedImageCatalogService advertisedImageCatalogService;
@@ -41,6 +41,6 @@ public class ImageCatalogServiceProxy implements ImageCatalogService {
     }
 
     private ImageCatalogService getImageCatalogService(CloudbreakImageCatalogV3 imageCatalogV3) {
-        return imageCatalogV3.getVersions() == null ? advertisedImageCatalogService : versionBasedImageCatalogService;
+        return imageCatalogV3.getVersions() == null ? advertisedImageCatalogService : filterBasedImageCatalogService;
     }
 }

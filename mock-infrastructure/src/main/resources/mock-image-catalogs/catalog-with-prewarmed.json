@@ -141,9 +141,6 @@
         ],
         "defaults": [
           "DEFAULT_IMAGE_UUID"
-        ],
-        "versions": [
-          "CB_VERSION"
         ]
       }
     ]

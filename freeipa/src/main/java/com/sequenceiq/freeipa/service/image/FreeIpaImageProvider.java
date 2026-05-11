@@ -6,8 +6,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import jakarta.inject.Inject;
@@ -36,9 +34,6 @@ public class FreeIpaImageProvider implements ImageProvider {
     @Value("${freeipa.image.catalog.url}")
     private String defaultCatalogUrl;
 
-    @Value("${info.app.version:}")
-    private String freeIpaVersion;
-
     @Inject
     private FreeIpaImageFilter freeIpaImageFilter;
 
@@ -55,7 +50,7 @@ public class FreeIpaImageProvider implements ImageProvider {
         FreeIpaImageFilterSettings imageFilterSettings = populateImageFilterSettings(freeIpaImageFilterSettings);
         ImageCatalog cachedImageCatalog = imageCatalogProvider.getImageCatalog(imageFilterSettings.catalog());
         List<Image> compatibleImages = freeIpaImageFilter.filterImages(cachedImageCatalog.getImages().getFreeipaImages(), imageFilterSettings);
-        List<String> imagesInVersions = filterFreeIpaVersionsByAppVersion(cachedImageCatalog.getVersions().getFreeIpaVersions())
+        List<String> imagesInVersions = cachedImageCatalog.getVersions().getFreeIpaVersions()
                 .stream()
                 .map(FreeIpaVersions::getImageIds)
                 .flatMap(Collection::stream)
@@ -77,7 +72,6 @@ public class FreeIpaImageProvider implements ImageProvider {
     }
 
     private Optional<Image> findImageForAppVersion(FreeIpaImageFilterSettings freeIpaImageFilterSettings, ImageCatalog catalog) {
-        List<FreeIpaVersions> versions = filterFreeIpaVersionsByAppVersion(catalog.getVersions().getFreeIpaVersions());
         List<Image> compatibleImages = freeIpaImageFilter.filterImages(catalog.getImages().getFreeipaImages(), freeIpaImageFilterSettings);
         LOGGER.trace("[{}] compatible images found, by the following parameters: imageId: {}, imageOs: {}, region: {}, platform: {}, tagFilters: {}",
                 compatibleImages.size(),
@@ -88,8 +82,9 @@ public class FreeIpaImageProvider implements ImageProvider {
                 freeIpaImageFilterSettings.tagFilters()
         );
 
-        return findImageInDefaults(versions, compatibleImages)
-                .or(() -> findImageByApplicationVersion(versions, compatibleImages))
+        List<FreeIpaVersions> freeIpaVersions = catalog.getVersions().getFreeIpaVersions();
+        return findImageInDefaults(freeIpaVersions, compatibleImages)
+                .or(() -> findNonDefaultImage(freeIpaVersions, compatibleImages))
                 .or(() -> freeIpaImageFilter.findMostRecentImage(compatibleImages));
     }
 
@@ -102,7 +97,7 @@ public class FreeIpaImageProvider implements ImageProvider {
         return findImageForAppVersion(imageFilterSettings, renewedImageCatalog);
     }
 
-    private Optional<Image> findImageByApplicationVersion(List<FreeIpaVersions> versions, List<Image> compatibleImages) {
+    private Optional<Image> findNonDefaultImage(List<FreeIpaVersions> versions, List<Image> compatibleImages) {
         LOGGER.debug("Default image not found. Attempt to find an image, compatible with the application version.");
         return findImage(versions, compatibleImages, FreeIpaVersions::getImageIds);
     }
@@ -122,44 +117,4 @@ public class FreeIpaImageProvider implements ImageProvider {
                 .max(freeIpaImageFilter.newestImageWithPreferredOs());
     }
 
-    private List<FreeIpaVersions> filterFreeIpaVersionsByAppVersion(List<FreeIpaVersions> freeIpaVersions) {
-        List<FreeIpaVersions> exactFreeIpaVersionsMatches = freeIpaVersions.stream()
-                .filter(toExactVersionMatch())
-                .toList();
-        if (!exactFreeIpaVersionsMatches.isEmpty()) {
-            LOGGER.trace("Exact version match found in image catalog for app version: {}", freeIpaVersion);
-            return exactFreeIpaVersionsMatches;
-        }
-        List<FreeIpaVersions> prefixFreeIpaVersions = freeIpaVersions.stream()
-                .filter(toPrefixVersionMatch())
-                .collect(toList());
-        if (!prefixFreeIpaVersions.isEmpty()) {
-            LOGGER.trace("Prefix version match found in image catalog for app version: {}", freeIpaVersion);
-            return prefixFreeIpaVersions;
-        }
-
-        LOGGER.warn("Not found matching version in image catalog. Falling back to most recent image.");
-        return freeIpaVersions;
-    }
-
-    private Predicate<? super FreeIpaVersions> toPrefixVersionMatch() {
-        return freeIpaVersions -> freeIpaVersions.getVersions().stream().anyMatch(
-                version -> {
-                    Optional<String> appVersionPrefix = extractVersionWithoutBuildTypeAndNumber(freeIpaVersion);
-                    Optional<String> versionPrefix = extractVersionWithoutBuildTypeAndNumber(version);
-                    return appVersionPrefix.isPresent() && appVersionPrefix.equals(versionPrefix);
-                });
-    }
-
-    private Optional<String> extractVersionWithoutBuildTypeAndNumber(String version) {
-        Matcher appVersionMatcher = VERSION_PATTERN.matcher(version);
-        if (!appVersionMatcher.matches() || appVersionMatcher.groupCount() != 2) {
-            return Optional.empty();
-        }
-        return Optional.of(appVersionMatcher.group(1));
-    }
-
-    private Predicate<? super FreeIpaVersions> toExactVersionMatch() {
-        return freeIpaVersions -> freeIpaVersions.getVersions().contains(freeIpaVersion);
-    }
 }

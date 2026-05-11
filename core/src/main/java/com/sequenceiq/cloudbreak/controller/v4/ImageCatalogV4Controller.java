@@ -120,8 +120,7 @@ public class ImageCatalogV4Controller extends NotificationController implements 
     public ImageCatalogV4Response getByName(Long workspaceId, @ResourceName String name, Boolean withImages, Boolean applyVersionBasedFiltering) {
         ImageCatalog catalog = imageCatalogService.getImageCatalogByName(NameOrCrn.ofName(name), restRequestThreadLocalService.getRequestedWorkspaceId());
         ImageCatalogV4Response imageCatalogResponse = imageCatalogToImageCatalogV4ResponseConverter.convert(catalog);
-        Images images = imageCatalogService.propagateImagesIfRequested(restRequestThreadLocalService.getRequestedWorkspaceId(), name,
-                withImages, applyVersionBasedFiltering);
+        Images images = imageCatalogService.propagateImagesIfRequested(restRequestThreadLocalService.getRequestedWorkspaceId(), name, withImages);
         if (images != null) {
             imageCatalogResponse.setImages(imagesToImagesV4ResponseConverter.convert(images));
         }
@@ -134,8 +133,7 @@ public class ImageCatalogV4Controller extends NotificationController implements 
             @InitiatorUserCrn String initiatorUserCrn) {
         ImageCatalog catalog = imageCatalogService.getImageCatalogByName(NameOrCrn.ofName(name), restRequestThreadLocalService.getRequestedWorkspaceId());
         ImageCatalogV4Response imageCatalogResponse = imageCatalogToImageCatalogV4ResponseConverter.convert(catalog);
-        Images images = imageCatalogService.propagateImagesIfRequested(restRequestThreadLocalService.getRequestedWorkspaceId(), name,
-                withImages, applyVersionBasedFiltering);
+        Images images = imageCatalogService.propagateImagesIfRequested(restRequestThreadLocalService.getRequestedWorkspaceId(), name, withImages);
         if (images != null) {
             imageCatalogResponse.setImages(imagesToImagesV4ResponseConverter.convert(images));
         }
@@ -262,8 +260,8 @@ public class ImageCatalogV4Controller extends NotificationController implements 
 
     private Images getImagesFromSingleStatedImage(StatedImage statedImage) {
         return statedImage.getImage().isPrewarmed()
-                ? new Images(List.of(), List.of(statedImage.getImage()), List.of(), Set.of())
-                : new Images(List.of(statedImage.getImage()), List.of(), List.of(), Set.of());
+                ? new Images(List.of(), List.of(statedImage.getImage()), List.of())
+                : new Images(List.of(statedImage.getImage()), List.of(), List.of());
     }
 
     @Override
