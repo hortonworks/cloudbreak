@@ -116,7 +116,7 @@ auth:
     dev.telemetry.yum.repo.enabled: false
     lakehouse.optimizer.enabled: true
     ephemeral.xfs.support.enabled: false
-    configure.encryption.profile.enabled: false
+    configure.encryption.profile.enabled: true
     mitigate.release.failure.7218P1100.enabled: false
     zookeeper.to.kraft.migration.enabled: true
     tlsv13.only.enabled: false
