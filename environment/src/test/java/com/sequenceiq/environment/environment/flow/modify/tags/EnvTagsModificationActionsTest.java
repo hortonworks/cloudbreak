@@ -3,6 +3,7 @@ package com.sequenceiq.environment.environment.flow.modify.tags;
 import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationHandlerSelectors.MODIFY_USER_DEFINED_TAGS_ON_DATAHUBS_EVENT;
 import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationHandlerSelectors.MODIFY_USER_DEFINED_TAGS_ON_DATALAKE_EVENT;
 import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationHandlerSelectors.MODIFY_USER_DEFINED_TAGS_ON_FREEIPA_EVENT;
+import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationHandlerSelectors.MODIFY_USER_DEFINED_TAGS_ON_REDBEAMS_EVENT;
 import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationStateSelectors.FINALIZE_MODIFY_USER_DEFINED_TAGS_EVENT;
 import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationStateSelectors.FINISH_MODIFY_USER_DEFINED_TAGS_EVENT;
 import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationStateSelectors.HANDLED_FAILED_MODIFY_USER_DEFINED_TAGS_EVENT;
@@ -10,6 +11,7 @@ import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvT
 import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationStateSelectors.START_MODIFY_USER_DEFINED_TAGS_DATAHUBS_EVENT;
 import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationStateSelectors.START_MODIFY_USER_DEFINED_TAGS_DATALAKE_EVENT;
 import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationStateSelectors.START_MODIFY_USER_DEFINED_TAGS_FREEIPA_EVENT;
+import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationStateSelectors.START_MODIFY_USER_DEFINED_TAGS_REDBEAMS_EVENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
@@ -135,6 +137,15 @@ class EnvTagsModificationActionsTest {
                 EnvironmentStatus.USER_DEFINED_TAGS_MODIFICATION_ON_DATAHUBS_IN_PROGRESS,
                 ResourceEvent.ENVIRONMENT_USER_DEFINED_TAGS_MODIFICATION_ON_DATAHUBS_STARTED,
                 EnvTagsModificationState.USER_DEFINED_TAGS_MODIFICATION_DATAHUBS_STATE
+            ),
+            Arguments.of(
+                "Redbeams stack",
+                START_MODIFY_USER_DEFINED_TAGS_REDBEAMS_EVENT.selector(),
+                (Function<EnvTagsModificationActions, Action<?, ?>>) EnvTagsModificationActions::modifyUserDefinedTagsOnRedbeams,
+                MODIFY_USER_DEFINED_TAGS_ON_REDBEAMS_EVENT.event(),
+                EnvironmentStatus.USER_DEFINED_TAGS_MODIFICATION_ON_REDBEAMS_IN_PROGRESS,
+                ResourceEvent.ENVIRONMENT_USER_DEFINED_TAGS_MODIFICATION_ON_REDBEAMS_STARTED,
+                EnvTagsModificationState.USER_DEFINED_TAGS_MODIFICATION_REDBEAMS_STATE
             ),
             Arguments.of(
                 "Finished",

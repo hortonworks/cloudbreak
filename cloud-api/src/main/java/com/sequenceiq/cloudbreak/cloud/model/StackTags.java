@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.model;
 import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.ANY;
 import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -44,6 +45,17 @@ public class StackTags {
         if (tags != null) {
             userDefinedTags.putAll(tags);
         }
+    }
+
+    public Map<String, String> getUserDefinedTagsWithoutDefaultTags(Map<String, String> userDefinedTags) {
+        if (userDefinedTags == null) {
+            return Map.of();
+        }
+        Map<String, String> result = new HashMap<>(userDefinedTags);
+        if (defaultTags != null) {
+            result.keySet().removeAll(defaultTags.keySet());
+        }
+        return result;
     }
 
     @Override

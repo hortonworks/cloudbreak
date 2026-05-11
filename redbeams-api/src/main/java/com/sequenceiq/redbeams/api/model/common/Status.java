@@ -45,8 +45,11 @@ public enum Status {
     DB_SSL_MIGRATION_COMPLETED,
     DB_SSL_MIGRATION_IN_PROGRESS,
     DB_SSL_MIGRATION_FAILED,
-    UNKNOWN,
-    DELETED_ON_PROVIDER_SIDE;
+    DELETED_ON_PROVIDER_SIDE,
+    MODIFY_USER_DEFINED_TAGS_COMPLETED,
+    MODIFY_USER_DEFINED_TAGS_IN_PROGRESS,
+    MODIFY_USER_DEFINED_TAGS_FAILED,
+    UNKNOWN;
 
     private static final Map<Status, Status> IN_PROGRESS_TO_FINAL_STATUS_MAPPING = ImmutableMap.<Status, Status>builder()
             .put(REQUESTED, CREATE_FAILED)
@@ -68,10 +71,11 @@ public enum Status {
             .put(SSL_ROTATE_REQUESTED, SSL_ROTATE_FAILED)
             .put(SSL_ROTATE_IN_PROGRESS, SSL_ROTATE_FAILED)
             .put(DB_SSL_MIGRATION_IN_PROGRESS, DB_SSL_MIGRATION_FAILED)
+            .put(MODIFY_USER_DEFINED_TAGS_IN_PROGRESS, MODIFY_USER_DEFINED_TAGS_FAILED)
             .build();
 
     private static final List<Status> IS_AVAILABLE_LIST = Arrays.asList(
-            AVAILABLE, MAINTENANCE_MODE_ENABLED, SSL_ROTATED, VALIDATE_UPGRADE_FAILED, DB_SSL_MIGRATION_COMPLETED);
+            AVAILABLE, MAINTENANCE_MODE_ENABLED, SSL_ROTATED, VALIDATE_UPGRADE_FAILED, DB_SSL_MIGRATION_COMPLETED, MODIFY_USER_DEFINED_TAGS_COMPLETED);
 
     public boolean isAvailable() {
         return IS_AVAILABLE_LIST.contains(valueOf(name()));
@@ -164,7 +168,8 @@ public enum Status {
                  WAIT_FOR_SYNC,
                  SSL_ROTATE_IN_PROGRESS,
                  SSL_ROTATE_REQUESTED,
-                 DB_SSL_MIGRATION_IN_PROGRESS -> true;
+                 DB_SSL_MIGRATION_IN_PROGRESS,
+                 MODIFY_USER_DEFINED_TAGS_IN_PROGRESS -> true;
             default -> false;
         };
     }

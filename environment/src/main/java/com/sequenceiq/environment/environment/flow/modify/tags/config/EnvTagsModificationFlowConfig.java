@@ -8,6 +8,7 @@ import static com.sequenceiq.environment.environment.flow.modify.tags.EnvTagsMod
 import static com.sequenceiq.environment.environment.flow.modify.tags.EnvTagsModificationState.USER_DEFINED_TAGS_MODIFICATION_FAILED_STATE;
 import static com.sequenceiq.environment.environment.flow.modify.tags.EnvTagsModificationState.USER_DEFINED_TAGS_MODIFICATION_FINISHED_STATE;
 import static com.sequenceiq.environment.environment.flow.modify.tags.EnvTagsModificationState.USER_DEFINED_TAGS_MODIFICATION_FREEIPA_STATE;
+import static com.sequenceiq.environment.environment.flow.modify.tags.EnvTagsModificationState.USER_DEFINED_TAGS_MODIFICATION_REDBEAMS_STATE;
 import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationStateSelectors.FAILED_MODIFY_USER_DEFINED_TAGS_EVENT;
 import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationStateSelectors.FINALIZE_MODIFY_USER_DEFINED_TAGS_EVENT;
 import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationStateSelectors.FINISH_MODIFY_USER_DEFINED_TAGS_EVENT;
@@ -16,6 +17,7 @@ import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvT
 import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationStateSelectors.START_MODIFY_USER_DEFINED_TAGS_DATAHUBS_EVENT;
 import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationStateSelectors.START_MODIFY_USER_DEFINED_TAGS_DATALAKE_EVENT;
 import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationStateSelectors.START_MODIFY_USER_DEFINED_TAGS_FREEIPA_EVENT;
+import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationStateSelectors.START_MODIFY_USER_DEFINED_TAGS_REDBEAMS_EVENT;
 
 import java.util.List;
 
@@ -50,7 +52,10 @@ public class EnvTagsModificationFlowConfig extends
                     .from(USER_DEFINED_TAGS_MODIFICATION_DATALAKE_STATE).to(USER_DEFINED_TAGS_MODIFICATION_DATAHUBS_STATE)
                     .event(START_MODIFY_USER_DEFINED_TAGS_DATAHUBS_EVENT).defaultFailureEvent()
 
-                    .from(USER_DEFINED_TAGS_MODIFICATION_DATAHUBS_STATE).to(USER_DEFINED_TAGS_MODIFICATION_FINISHED_STATE)
+                    .from(USER_DEFINED_TAGS_MODIFICATION_DATAHUBS_STATE).to(USER_DEFINED_TAGS_MODIFICATION_REDBEAMS_STATE)
+                    .event(START_MODIFY_USER_DEFINED_TAGS_REDBEAMS_EVENT).defaultFailureEvent()
+
+                    .from(USER_DEFINED_TAGS_MODIFICATION_REDBEAMS_STATE).to(USER_DEFINED_TAGS_MODIFICATION_FINISHED_STATE)
                     .event(FINISH_MODIFY_USER_DEFINED_TAGS_EVENT).defaultFailureEvent()
 
                     .from(USER_DEFINED_TAGS_MODIFICATION_FINISHED_STATE).to(FINAL_STATE)

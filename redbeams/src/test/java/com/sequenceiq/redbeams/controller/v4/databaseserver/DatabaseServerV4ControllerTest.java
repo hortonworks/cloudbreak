@@ -11,6 +11,7 @@ import static org.mockito.Mockito.when;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -51,6 +52,7 @@ import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.domain.upgrade.UpgradeDatabaseRequest;
 import com.sequenceiq.redbeams.domain.upgrade.UpgradeDatabaseResponse;
+import com.sequenceiq.redbeams.service.RedbeamsTagUpdaterService;
 import com.sequenceiq.redbeams.service.dbserverconfig.DatabaseServerConfigService;
 import com.sequenceiq.redbeams.service.stack.RedbeamsCreationService;
 import com.sequenceiq.redbeams.service.stack.RedbeamsRotateSslService;
@@ -139,6 +141,9 @@ public class DatabaseServerV4ControllerTest {
 
     @Mock
     private RedbeamsRotateSslService redbeamsRotateSslService;
+
+    @Mock
+    private RedbeamsTagUpdaterService redbeamsTagUpdaterService;
 
     private DatabaseServerConfig server;
 
@@ -458,6 +463,17 @@ public class DatabaseServerV4ControllerTest {
         FlowIdentifier response = underTest.turnOnSslEnforcementOnProviderByCrnInternal(SERVER_CRN);
 
         verify(redbeamsRotateSslService).turnOnSsl(SERVER_CRN);
+        assertEquals("1", response.getPollableId());
+    }
+
+    @Test
+    void testModifyUserDefinedTags() {
+        FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW, "1");
+        Map<String, String> userDefinedTags = Map.of("custom", "value");
+        when(redbeamsTagUpdaterService.triggerUserDefinedTagsUpdate(SERVER_CRN, userDefinedTags)).thenReturn(flowIdentifier);
+        FlowIdentifier response = underTest.modifyUserDefinedTags(SERVER_CRN, userDefinedTags, USER_CRN);
+
+        verify(redbeamsTagUpdaterService).triggerUserDefinedTagsUpdate(SERVER_CRN, userDefinedTags);
         assertEquals("1", response.getPollableId());
     }
 

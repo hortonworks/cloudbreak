@@ -1,5 +1,7 @@
 package com.sequenceiq.redbeams.flow;
 
+import static com.sequenceiq.redbeams.flow.redbeams.stack.modify.tags.event.ModifyUserDefinedTagsStateSelectors.MODIFY_USER_DEFINED_TAGS_REDBEAMS_START_EVENT;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +29,7 @@ import com.sequenceiq.flow.core.model.FlowAcceptResult;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.flow.service.FlowNameFormatService;
+import com.sequenceiq.redbeams.flow.redbeams.stack.modify.tags.event.ModifyUserDefinedTagsEvent;
 
 @Component
 public class RedbeamsFlowManager {
@@ -55,6 +58,11 @@ public class RedbeamsFlowManager {
             Map<String, String> additionalProperties) {
         String selector = EventSelectorUtil.selector(SecretRotationFlowChainTriggerEvent.class);
         return notify(selector, new SecretRotationFlowChainTriggerEvent(selector, resourceId, resourceCrn, secretTypes, executionType, additionalProperties));
+    }
+
+    public FlowIdentifier triggerUserDefinedTagsUpdate(Long resourceId, Map<String, String> userDefinedTags) {
+        String selector = MODIFY_USER_DEFINED_TAGS_REDBEAMS_START_EVENT.event();
+        return notify(selector, new ModifyUserDefinedTagsEvent(selector, resourceId, userDefinedTags));
     }
 
     private FlowIdentifier notify(String selector, Event<Acceptable> event) {

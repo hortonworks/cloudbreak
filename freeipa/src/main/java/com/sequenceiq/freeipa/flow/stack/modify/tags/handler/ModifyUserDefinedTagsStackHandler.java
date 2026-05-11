@@ -41,7 +41,7 @@ public class ModifyUserDefinedTagsStackHandler extends ExceptionCatcherEventHand
 
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<ModifyUserDefinedTagsStackHandlerEvent> event) {
-        LOGGER.error("Modify user defined tags on FreeIPA stack failed.", e);
+        LOGGER.warn("Modify user defined tags on FreeIPA stack failed.", e);
         return new ModifyUserDefinedTagsFailedEvent(resourceId, "UPDATE_USER_DEFINED_TAGS_FREEIPA_STACK_PHASE", e, ERROR);
     }
 
@@ -55,6 +55,7 @@ public class ModifyUserDefinedTagsStackHandler extends ExceptionCatcherEventHand
             stackUpdater.updateUserDefinedTags(stack, userDefinedTags);
             return new ModifyUserDefinedTagsEvent(FINISH_MODIFY_USER_DEFINED_TAGS_FREEIPA_EVENT.selector(), resourceId, operationId, userDefinedTags);
         } catch (Exception e) {
+            LOGGER.warn("Modify user defined tags on FreeIPA stack failed.", e);
             return new ModifyUserDefinedTagsFailedEvent(resourceId, "UPDATE_USER_DEFINED_TAGS_FREEIPA_STACK_PHASE", e, ERROR);
         }
     }

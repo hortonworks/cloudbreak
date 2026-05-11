@@ -63,6 +63,8 @@ public final class Notes {
                 "Upgrades a database server to a higher major version.";
         public static final String ROTATE =
                 "Rotates database server secrets";
+        public static final String MODIFY_USER_DEFINED_TAGS =
+                "Updates the user defined tags of a database server";
         public static final String VALIDATE_UPGRADE =
                 "Validates if upgrade is possible on the database server to a higher major version.";
         public static final String VALIDATE_UPGRADE_CLEANUP =

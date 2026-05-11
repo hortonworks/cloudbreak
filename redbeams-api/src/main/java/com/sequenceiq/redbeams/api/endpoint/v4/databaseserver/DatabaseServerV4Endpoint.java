@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.validation.ValidCrn.Effect.DENY;
 import static com.sequenceiq.redbeams.doc.ParamDescriptions.DatabaseParamDescriptions.CRN;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import jakarta.validation.Valid;
@@ -410,4 +411,12 @@ public interface DatabaseServerV4Endpoint {
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     List<RetryableFlowResponse> listRetryableFlows(
             @QueryParam("database") @ValidCrn(resource = DATABASE_SERVER) @NotNull String databaseCrn);
+
+    @PUT
+    @Path("internal/crn/{crn}/modify_user_defined_tags")
+    @Operation(summary = DatabaseServerOpDescription.MODIFY_USER_DEFINED_TAGS, description = DatabaseServerNotes.MODIFY_USER_DEFINED_TAGS,
+            operationId = "modifyUserDefinedTags",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    FlowIdentifier modifyUserDefinedTags(@ValidCrn(resource = DATABASE_SERVER) @NotNull @Parameter(description = DatabaseServerParamDescriptions.CRN)
+    @PathParam("crn") String crn, @NotNull Map<String, String> tags, @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 }

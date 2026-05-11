@@ -1423,4 +1423,34 @@ public class AzureClient {
         return handleException(() -> azure.loadBalancers().getById(resourceId).tags())
                 .orElseThrow(() -> new CloudConnectorException("Could not fetch load balancer tags"));
     }
+
+    public void updateSingleServerTags(String resourceId, Map<String, String> tags) {
+        handleException(() -> {
+            postgreSqlManager.servers()
+                    .getById(resourceId)
+                    .update()
+                    .withTags(tags)
+                    .apply();
+        });
+    }
+
+    public Map<String, String> getSingleServerTags(String resourceId) {
+        return handleException(() -> postgreSqlManager.servers().getById(resourceId).tags())
+                .orElseThrow(() -> new CloudConnectorException("Could not get single server tags"));
+    }
+
+    public void updateFlexibleServerTags(String resourceId, Map<String, String> tags) {
+        handleException(() -> {
+            postgreSqlFlexibleManager.servers()
+                    .getById(resourceId)
+                    .update()
+                    .withTags(tags)
+                    .apply();
+        });
+    }
+
+    public Map<String, String> getFlexibleServerTags(String resourceId) {
+        return handleException(() -> postgreSqlFlexibleManager.servers().getById(resourceId).tags())
+                .orElseThrow(() -> new CloudConnectorException("Could not get flexible serveer tags"));
+    }
 }

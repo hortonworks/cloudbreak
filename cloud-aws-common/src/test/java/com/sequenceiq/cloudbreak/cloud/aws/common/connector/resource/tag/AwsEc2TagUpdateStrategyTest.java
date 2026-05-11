@@ -35,7 +35,7 @@ import software.amazon.awssdk.services.ec2.model.TagDescription;
 import software.amazon.awssdk.services.ec2.model.Volume;
 
 @ExtendWith(MockitoExtension.class)
-class Ec2TagUpdateStrategyTest {
+class AwsEc2TagUpdateStrategyTest {
 
     private static final String INSTANCE_ID = "instanceId";
 
@@ -62,7 +62,7 @@ class Ec2TagUpdateStrategyTest {
     private AwsTaggingService awsTaggingService;
 
     @InjectMocks
-    private Ec2TagUpdateStrategy underTest;
+    private AwsEc2TagUpdateStrategy underTest;
 
     @Test
     void testUpdateTagsForAwsInstance() {

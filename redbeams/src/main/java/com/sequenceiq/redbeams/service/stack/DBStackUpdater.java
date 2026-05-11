@@ -2,6 +2,7 @@ package com.sequenceiq.redbeams.service.stack;
 
 import static org.slf4j.LoggerFactory.getLogger;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -14,8 +15,10 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
+import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.SslCertificateType;
 import com.sequenceiq.redbeams.configuration.DatabaseServerSslCertificateConfig;
 import com.sequenceiq.redbeams.configuration.SslCertificateEntry;
@@ -92,5 +95,13 @@ public class DBStackUpdater {
             LOGGER.error("Sync back ssl cert from cloud provider side failed because {}.", e.toString());
             throw new CloudbreakServiceException(e);
         }
+    }
+
+    public void updateUserDefinedTags(DBStack stack, Map<String, String> userDefinedTags) {
+        LOGGER.info("Modifying user defined tags for {}", stack.getResourceCrn());
+        StackTags stackTags = stack.getTags().getUnchecked(StackTags.class);
+        stackTags.updateUserDefinedTags(userDefinedTags);
+        stack.setTags(new Json(stackTags));
+        dbStackService.save(stack);
     }
 }

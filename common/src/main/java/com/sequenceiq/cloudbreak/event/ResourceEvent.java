@@ -221,6 +221,7 @@ public enum ResourceEvent {
     ENVIRONMENT_USER_DEFINED_TAGS_MODIFICATION_ON_FREEIPA_STARTED("environment.user.defined.tags.modification.freeipa.started"),
     ENVIRONMENT_USER_DEFINED_TAGS_MODIFICATION_ON_DATALAKE_STARTED("environment.user.defined.tags.modification.datalake.started"),
     ENVIRONMENT_USER_DEFINED_TAGS_MODIFICATION_ON_DATAHUBS_STARTED("environment.user.defined.tags.modification.datahubs.started"),
+    ENVIRONMENT_USER_DEFINED_TAGS_MODIFICATION_ON_REDBEAMS_STARTED("environment.user.defined.tags.modification.redbeams.started"),
     ENVIRONMENT_USER_DEFINED_TAGS_MODIFICATION_FAILED("environment.user.defined.tags.modification.failed"),
     ENVIRONMENT_USER_DEFINED_TAGS_MODIFICATION_FINISHED("environment.user.defined.tags.modification.finished"),
 

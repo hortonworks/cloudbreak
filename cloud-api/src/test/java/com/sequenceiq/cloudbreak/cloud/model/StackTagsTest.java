@@ -42,4 +42,9 @@ class StackTagsTest {
         assertEquals(DEFAULT_TAGS, stackTags.getDefaultTags());
         assertEquals(USER_DEFINED_TAGS, stackTags.getUserDefinedTags());
     }
+
+    @Test
+    void getUserDefinedTagsWithoutDefaultTags() {
+        assertEquals(Map.of("custom", "value"), stackTags.getUserDefinedTagsWithoutDefaultTags(Map.of("custom", "value", "owner", "jane doe")));
+    }
 }

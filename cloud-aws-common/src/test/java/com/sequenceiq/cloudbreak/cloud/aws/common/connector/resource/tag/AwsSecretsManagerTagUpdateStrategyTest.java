@@ -19,7 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTaggingService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.CommonAwsClient;
-import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonKmsClient;
+import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonSecretsManagerClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -29,13 +29,13 @@ import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.common.api.type.ResourceType;
 
-import software.amazon.awssdk.services.kms.model.ListResourceTagsRequest;
-import software.amazon.awssdk.services.kms.model.ListResourceTagsResponse;
-import software.amazon.awssdk.services.kms.model.Tag;
-import software.amazon.awssdk.services.kms.model.TagResourceRequest;
+import software.amazon.awssdk.services.secretsmanager.model.DescribeSecretRequest;
+import software.amazon.awssdk.services.secretsmanager.model.DescribeSecretResponse;
+import software.amazon.awssdk.services.secretsmanager.model.Tag;
+import software.amazon.awssdk.services.secretsmanager.model.TagResourceRequest;
 
 @ExtendWith(MockitoExtension.class)
-class KmsTagUpdateStrategyTest {
+class AwsSecretsManagerTagUpdateStrategyTest {
 
     private static final String REGION_NAME = "regionName";
 
@@ -47,9 +47,9 @@ class KmsTagUpdateStrategyTest {
 
     private static final String EXISTING_TAG_VALUE = "existingTagValue";
 
-    private static final Map<String, String> USER_DEFINED_TAGS = Map.of("custom", "value");
-
     private static final Map<String, String> EXISTING_TAGS = Map.of(EXISTING_TAG_KEY, EXISTING_TAG_VALUE);
+
+    private static final Map<String, String> USER_DEFINED_TAGS = Map.of("custom", "value");
 
     @Mock
     private AuthenticatedContext authenticatedContext;
@@ -70,13 +70,13 @@ class KmsTagUpdateStrategyTest {
     private CommonAwsClient commonAwsClient;
 
     @Mock
-    private AmazonKmsClient kmsClient;
+    private AmazonSecretsManagerClient secretsManagerClient;
 
     @Mock
     private AwsTaggingService awsTaggingService;
 
     @InjectMocks
-    private KmsTagUpdateStrategy underTest;
+    private AwsSecretsManagerTagUpdateStrategy underTest;
 
     @BeforeEach
     void setUp() {
@@ -88,48 +88,48 @@ class KmsTagUpdateStrategyTest {
     }
 
     @Test
-    void testUpdateTagsForAwsKmsKey() {
-        CloudResource cloudResource = buildResource(ResourceType.AWS_KMS_KEY, null, RESOURCE_REFERENCE);
-        List<Tag> expectedTags = toKmsTags(USER_DEFINED_TAGS);
-        when(commonAwsClient.createAWSKMS(any(AwsCredentialView.class), eq(REGION_NAME))).thenReturn(kmsClient);
-        when(kmsClient.listResourceTags(any(ListResourceTagsRequest.class))).thenReturn(ListResourceTagsResponse.builder()
+    void testUpdateTagsForAwsSecretsManagerSecret() {
+        CloudResource cloudResource = buildResource(ResourceType.AWS_SECRETSMANAGER_SECRET, null, RESOURCE_REFERENCE);
+        List<Tag> expectedTags = toSecretsTags(USER_DEFINED_TAGS);
+        when(commonAwsClient.createSecretsManagerClient(any(AwsCredentialView.class), eq(REGION_NAME))).thenReturn(secretsManagerClient);
+        when(secretsManagerClient.describeSecret(any(DescribeSecretRequest.class))).thenReturn(DescribeSecretResponse.builder()
+                        .arn(RESOURCE_REFERENCE)
                         .tags(Tag.builder()
-                                .tagKey(EXISTING_TAG_KEY)
-                                .tagValue(EXISTING_TAG_VALUE)
+                                .key(EXISTING_TAG_KEY)
+                                .value(EXISTING_TAG_VALUE)
                                 .build())
                 .build());
-        when(awsTaggingService.prepareKmsTags(USER_DEFINED_TAGS)).thenReturn(expectedTags);
+        when(awsTaggingService.prepareSecretsManagerTags(USER_DEFINED_TAGS)).thenReturn(expectedTags);
 
         underTest.updateTags(authenticatedContext, cloudResource, USER_DEFINED_TAGS);
 
-        verify(kmsClient).tagResource(software.amazon.awssdk.services.kms.model.TagResourceRequest.builder()
-                .keyId(RESOURCE_REFERENCE)
+        verify(secretsManagerClient).tagResource(TagResourceRequest.builder()
+                .secretId(RESOURCE_REFERENCE)
                 .tags(expectedTags)
                 .build());
     }
 
     @Test
     void testUpdateTagsSkipUpdateWhenTagsAlreadyUpToDate() {
-        CloudResource cloudResource = buildResource(ResourceType.AWS_KMS_KEY, null, RESOURCE_REFERENCE);
-        when(commonAwsClient.createAWSKMS(any(AwsCredentialView.class), eq(REGION_NAME))).thenReturn(kmsClient);
-        when(kmsClient.listResourceTags(any(ListResourceTagsRequest.class))).thenReturn(ListResourceTagsResponse.builder()
+        CloudResource cloudResource = buildResource(ResourceType.AWS_SECRETSMANAGER_SECRET, null, RESOURCE_REFERENCE);
+        when(commonAwsClient.createSecretsManagerClient(any(AwsCredentialView.class), eq(REGION_NAME))).thenReturn(secretsManagerClient);
+        when(secretsManagerClient.describeSecret(any(DescribeSecretRequest.class))).thenReturn(DescribeSecretResponse.builder()
+                .arn(RESOURCE_REFERENCE)
                 .tags(Tag.builder()
-                        .tagKey(EXISTING_TAG_KEY)
-                        .tagValue(EXISTING_TAG_VALUE)
+                        .key(EXISTING_TAG_KEY)
+                        .value(EXISTING_TAG_VALUE)
                         .build())
                 .build());
 
         underTest.updateTags(authenticatedContext, cloudResource, EXISTING_TAGS);
 
-        verify(kmsClient, times(0)).tagResource(any(TagResourceRequest.class));
+        verify(secretsManagerClient, times(0)).tagResource(any(TagResourceRequest.class));
     }
 
-    private List<Tag> toKmsTags(Map<String, String> tags) {
+    private List<Tag> toSecretsTags(Map<String, String> tags) {
         return tags.entrySet().stream()
                 .map(e -> Tag.builder()
-                        .tagKey(e.getKey())
-                        .tagValue(e.getValue())
-                        .build())
+                        .key(e.getKey()).value(e.getValue()).build())
                 .toList();
     }
 

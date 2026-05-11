@@ -232,6 +232,7 @@ class FreeIpaServiceTest {
     @Test
     void triggerUserDefinedTagsUpdateFailureTest() {
         Map<String, String> userDefinedTags = Map.of("owner", "john doe");
+
         when(freeIpaV1Endpoint.triggerUserDefinedTagsUpdateInternal(ENVCRN, userDefinedTags)).thenThrow(new WebApplicationException("Error"));
         when(webApplicationExceptionMessageExtractor.getErrorMessage(any())).thenReturn("custom error");
         assertThatThrownBy(() -> ThreadBasedUserCrnProvider.doAs(USERCRN, () -> underTest.triggerUserDefinedTagsUpdate(ENVCRN, userDefinedTags)))

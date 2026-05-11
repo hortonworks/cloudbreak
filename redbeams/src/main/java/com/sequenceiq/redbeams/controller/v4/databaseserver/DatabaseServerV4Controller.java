@@ -7,6 +7,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -70,6 +71,7 @@ import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.domain.upgrade.UpgradeDatabaseRequest;
 import com.sequenceiq.redbeams.service.RedBeamsRetryService;
+import com.sequenceiq.redbeams.service.RedbeamsTagUpdaterService;
 import com.sequenceiq.redbeams.service.dbserverconfig.DatabaseServerConfigService;
 import com.sequenceiq.redbeams.service.dbserverconfig.DatabaseServerSslCertificateConfigService;
 import com.sequenceiq.redbeams.service.rotation.RedbeamsRotationService;
@@ -139,6 +141,9 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
 
     @Inject
     private RedBeamsRetryService retryService;
+
+    @Inject
+    private RedbeamsTagUpdaterService redbeamsTagUpdaterService;
 
     @Override
     @CheckPermissionByResourceCrn(action = DESCRIBE_ENVIRONMENT)
@@ -402,6 +407,12 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
     @AccountIdNotNeeded
     public List<RetryableFlowResponse> listRetryableFlows(@ResourceCrn String databaseCrn) {
         return retryService.getRetryableFlows(databaseCrn);
+    }
+
+    @Override
+    @InternalOnly
+    public FlowIdentifier modifyUserDefinedTags(@ResourceCrn String crn, Map<String, String> tags, @InitiatorUserCrn String initiatorUserCrn) {
+        return redbeamsTagUpdaterService.triggerUserDefinedTagsUpdate(crn, tags);
     }
 
     @Override

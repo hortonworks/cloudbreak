@@ -287,6 +287,10 @@ public enum EnvironmentStatus {
             com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.USER_DEFINED_TAGS_MODIFICATION_ON_DATAHUBS_IN_PROGRESS),
     USER_DEFINED_TAGS_MODIFICATION_ON_DATAHUBS_FAILED(
             com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.USER_DEFINED_TAGS_MODIFICATION_ON_DATAHUBS_FAILED),
+    USER_DEFINED_TAGS_MODIFICATION_ON_REDBEAMS_IN_PROGRESS(
+            com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.USER_DEFINED_TAGS_MODIFICATION_ON_REDBEAMS_IN_PROGRESS),
+    USER_DEFINED_TAGS_MODIFICATION_ON_REDBEAMS_FAILED(
+            com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.USER_DEFINED_TAGS_MODIFICATION_ON_REDBEAMS_FAILED),
     USER_DEFINED_TAGS_MODIFICATION_FAILED(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.USER_DEFINED_TAGS_MODIFICATION_FAILED);
 
     public static final Set<EnvironmentStatus> AVAILABLE_STATUSES = Set.of(

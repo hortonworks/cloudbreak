@@ -1,5 +1,7 @@
 package com.sequenceiq.environment.environment.service.database;
 
+import java.util.Map;
+
 import jakarta.ws.rs.WebApplicationException;
 
 import org.slf4j.Logger;
@@ -10,6 +12,7 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentDatabaseServerCertificateStatusV4Request;
 import com.sequenceiq.environment.exception.RedbeamsOperationFailedException;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.DatabaseServerV4Endpoint;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.DatabaseServerCertificateStatusV4Request;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerCertificateStatusV4Responses;
@@ -53,6 +56,20 @@ public class RedBeamsService {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
             LOGGER.error(String.format("Failed to get DatabaseServersCertificateStatus for environments '%s' due to: '%s'",
                     request.getEnvironmentCrns(), errorMessage), e);
+            throw new RedbeamsOperationFailedException(errorMessage, e);
+        }
+    }
+
+    public FlowIdentifier triggerUserDefinedTagsUpdate(String crn, Map<String, String> userDefinedTags) {
+        try {
+            LOGGER.debug("Calling modifyUserDefinedTags endpoint for DB {} with tags {}", crn, userDefinedTags);
+            String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
+            return ThreadBasedUserCrnProvider.doAsInternalActor(
+                    () -> databaseServerV4Endpoint.modifyUserDefinedTags(crn, userDefinedTags, initiatorUserCrn)
+            );
+        } catch (WebApplicationException e) {
+            String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
+            LOGGER.error("Failed to update user defined tags for DB: {} due to: {}", crn, errorMessage);
             throw new RedbeamsOperationFailedException(errorMessage, e);
         }
     }

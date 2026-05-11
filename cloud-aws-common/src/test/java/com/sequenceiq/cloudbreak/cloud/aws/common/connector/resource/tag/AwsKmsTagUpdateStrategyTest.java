@@ -19,7 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTaggingService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.CommonAwsClient;
-import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEfsClient;
+import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonKmsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -29,13 +29,13 @@ import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.common.api.type.ResourceType;
 
-import software.amazon.awssdk.services.efs.model.ListTagsForResourceRequest;
-import software.amazon.awssdk.services.efs.model.ListTagsForResourceResponse;
-import software.amazon.awssdk.services.efs.model.Tag;
-import software.amazon.awssdk.services.efs.model.TagResourceRequest;
+import software.amazon.awssdk.services.kms.model.ListResourceTagsRequest;
+import software.amazon.awssdk.services.kms.model.ListResourceTagsResponse;
+import software.amazon.awssdk.services.kms.model.Tag;
+import software.amazon.awssdk.services.kms.model.TagResourceRequest;
 
 @ExtendWith(MockitoExtension.class)
-class EfsTagUpdateStrategyTest {
+class AwsKmsTagUpdateStrategyTest {
 
     private static final String REGION_NAME = "regionName";
 
@@ -70,13 +70,13 @@ class EfsTagUpdateStrategyTest {
     private CommonAwsClient commonAwsClient;
 
     @Mock
-    private AmazonEfsClient efsClient;
+    private AmazonKmsClient kmsClient;
 
     @Mock
     private AwsTaggingService awsTaggingService;
 
     @InjectMocks
-    private EfsTagUpdateStrategy underTest;
+    private AwsKmsTagUpdateStrategy underTest;
 
     @BeforeEach
     void setUp() {
@@ -88,47 +88,47 @@ class EfsTagUpdateStrategyTest {
     }
 
     @Test
-    void testUpdateTagsForAwsEfs() {
-        CloudResource cloudResource = buildResource(ResourceType.AWS_EFS, null, RESOURCE_REFERENCE);
-        List<Tag> expectedTags = toEfsTags(USER_DEFINED_TAGS);
-        when(commonAwsClient.createElasticFileSystemClient(any(AwsCredentialView.class), eq(REGION_NAME))).thenReturn(efsClient);
-        when(efsClient.listTagsForResource(any(ListTagsForResourceRequest.class))).thenReturn(ListTagsForResourceResponse.builder()
+    void testUpdateTagsForAwsKmsKey() {
+        CloudResource cloudResource = buildResource(ResourceType.AWS_KMS_KEY, null, RESOURCE_REFERENCE);
+        List<Tag> expectedTags = toKmsTags(USER_DEFINED_TAGS);
+        when(commonAwsClient.createAWSKMS(any(AwsCredentialView.class), eq(REGION_NAME))).thenReturn(kmsClient);
+        when(kmsClient.listResourceTags(any(ListResourceTagsRequest.class))).thenReturn(ListResourceTagsResponse.builder()
                         .tags(Tag.builder()
-                                .key(EXISTING_TAG_KEY)
-                                .value(EXISTING_TAG_VALUE)
+                                .tagKey(EXISTING_TAG_KEY)
+                                .tagValue(EXISTING_TAG_VALUE)
                                 .build())
                 .build());
-        when(awsTaggingService.prepareEfsTags(USER_DEFINED_TAGS)).thenReturn(expectedTags);
+        when(awsTaggingService.prepareKmsTags(USER_DEFINED_TAGS)).thenReturn(expectedTags);
 
         underTest.updateTags(authenticatedContext, cloudResource, USER_DEFINED_TAGS);
 
-        verify(efsClient).tagResource(TagResourceRequest.builder()
-                .resourceId(RESOURCE_REFERENCE)
+        verify(kmsClient).tagResource(software.amazon.awssdk.services.kms.model.TagResourceRequest.builder()
+                .keyId(RESOURCE_REFERENCE)
                 .tags(expectedTags)
                 .build());
     }
 
     @Test
     void testUpdateTagsSkipUpdateWhenTagsAlreadyUpToDate() {
-        CloudResource cloudResource = buildResource(ResourceType.AWS_EFS, null, RESOURCE_REFERENCE);
-        when(commonAwsClient.createElasticFileSystemClient(any(AwsCredentialView.class), eq(REGION_NAME))).thenReturn(efsClient);
-        when(efsClient.listTagsForResource(any(ListTagsForResourceRequest.class))).thenReturn(ListTagsForResourceResponse.builder()
+        CloudResource cloudResource = buildResource(ResourceType.AWS_KMS_KEY, null, RESOURCE_REFERENCE);
+        when(commonAwsClient.createAWSKMS(any(AwsCredentialView.class), eq(REGION_NAME))).thenReturn(kmsClient);
+        when(kmsClient.listResourceTags(any(ListResourceTagsRequest.class))).thenReturn(ListResourceTagsResponse.builder()
                 .tags(Tag.builder()
-                        .key(EXISTING_TAG_KEY)
-                        .value(EXISTING_TAG_VALUE)
+                        .tagKey(EXISTING_TAG_KEY)
+                        .tagValue(EXISTING_TAG_VALUE)
                         .build())
                 .build());
 
         underTest.updateTags(authenticatedContext, cloudResource, EXISTING_TAGS);
 
-        verify(efsClient, times(0)).tagResource(any(TagResourceRequest.class));
+        verify(kmsClient, times(0)).tagResource(any(TagResourceRequest.class));
     }
 
-    private List<Tag> toEfsTags(Map<String, String> tags) {
+    private List<Tag> toKmsTags(Map<String, String> tags) {
         return tags.entrySet().stream()
                 .map(e -> Tag.builder()
-                        .key(e.getKey())
-                        .value(e.getValue())
+                        .tagKey(e.getKey())
+                        .tagValue(e.getValue())
                         .build())
                 .toList();
     }

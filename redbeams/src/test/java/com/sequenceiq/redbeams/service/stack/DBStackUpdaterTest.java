@@ -14,7 +14,9 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.security.cert.X509Certificate;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -30,6 +32,7 @@ import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.SslCertificateType;
 import com.sequenceiq.redbeams.configuration.DatabaseServerSslCertificateConfig;
 import com.sequenceiq.redbeams.configuration.SslCertificateEntry;
@@ -232,5 +235,22 @@ public class DBStackUpdaterTest {
         when(sslConfigService.fetchById(1L)).thenReturn(Optional.of(sslConfig));
         underTest.updateSslConfig(STACK_ID, cloudContext, cloudCredential, databaseStack);
         verify(sslConfigService, never()).save(any(SslConfig.class));
+    }
+
+    @Test
+    void testUpdateUserDefinedTags() {
+        DBStack stack = new DBStack();
+        String resourceCrn = "resourceCrn";
+        Map<String, String> userDefinedTags = new HashMap<>(Map.of("owner", "john doe"));
+        Map<String, String> applicationTags = new HashMap<>(Map.of("application", "app"));
+        Map<String, String> defaultTags = new HashMap<>(Map.of("owner", "john doe", "creation-timestamp", "1773042126"));
+        Map<String, String> updateTags = Map.of("owner", "jane doe", "custom", "custom");
+        stack.setTags(new Json(Map.of("userDefinedTags", userDefinedTags, "applicationTags", applicationTags, "defaultTags", defaultTags)));
+        Json expectedTags = new Json(Map.of("userDefinedTags", updateTags, "applicationTags", applicationTags, "defaultTags", defaultTags));
+
+        underTest.updateUserDefinedTags(stack, updateTags);
+
+        assertEquals(expectedTags, stack.getTags());
+        verify(dbStackService).save(stack);
     }
 }

@@ -4,8 +4,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Map;
 import java.util.Set;
 
 import jakarta.ws.rs.WebApplicationException;
@@ -67,4 +69,30 @@ class RedBeamsServiceTest {
             assertEquals("Extracted error message", redbeamsOperationFailedException.getMessage());
     }
 
+    @Test
+    public void testTriggerUserDefinedTagsUpdate() {
+        String crn = "crn";
+        Map<String, String> userDefinedTags = Map.of("custom", "value");
+
+        ThreadBasedUserCrnProvider.doAs(ACTOR, () ->
+                redBeamsService.triggerUserDefinedTagsUpdate(crn, userDefinedTags));
+
+        verify(databaseServerV4Endpoint).modifyUserDefinedTags(crn, userDefinedTags, ACTOR);
+    }
+
+    @Test
+    public void testTriggerUserDefinedTagsUpdateWhenWebApplicationException() {
+        String crn = "crn";
+        Map<String, String> userDefinedTags = Map.of("custom", "value");
+
+        WebApplicationException webApplicationException = new WebApplicationException("Error");
+        when(databaseServerV4Endpoint.modifyUserDefinedTags(crn, userDefinedTags, ACTOR)).thenThrow(webApplicationException);
+        when(webApplicationExceptionMessageExtractor.getErrorMessage(webApplicationException)).thenReturn("Extracted error message");
+
+        RedbeamsOperationFailedException redbeamsOperationFailedException = assertThrows(
+                RedbeamsOperationFailedException.class,
+                () -> ThreadBasedUserCrnProvider.doAs(ACTOR, () ->
+                        redBeamsService.triggerUserDefinedTagsUpdate(crn, userDefinedTags)));
+        assertEquals("Extracted error message", redbeamsOperationFailedException.getMessage());
+    }
 }

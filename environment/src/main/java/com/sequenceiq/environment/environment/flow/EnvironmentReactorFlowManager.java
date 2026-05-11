@@ -360,6 +360,7 @@ public class EnvironmentReactorFlowManager {
         LOGGER.info("Environment tags modification flow triggered.");
         EnvTagsModificationEvent envTagsModificationEvent =
                 EnvTagsModificationEvent.builder()
+                        .withAccepted(new Promise<>())
                         .withSelector(START_MODIFY_ENVIRONMENT_TAGS_EVENT.selector())
                         .withResourceId(environment.getId())
                         .withResourceName(environment.getName())

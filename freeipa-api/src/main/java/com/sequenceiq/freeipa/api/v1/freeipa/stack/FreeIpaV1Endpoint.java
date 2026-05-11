@@ -450,5 +450,5 @@ public interface FreeIpaV1Endpoint {
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     OperationStatus triggerUserDefinedTagsUpdateInternal(
             @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @QueryParam("environment") @NotEmpty String environmentCrn,
-            @Valid @NotNull Map<String, String> tags);
+            @NotNull Map<String, String> tags);
 }

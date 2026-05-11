@@ -20,7 +20,7 @@ public class FlowResultPollerEvaluator {
                 : AttemptResults.justFinish();
     }
 
-    AttemptResult<List<FlowIdentifier>> attemptResultFinisher(List<AttemptResult<FlowIdentifier>> attemptResultList) {
+    public AttemptResult<List<FlowIdentifier>> attemptResultFinisher(List<AttemptResult<FlowIdentifier>> attemptResultList) {
         List<AttemptResult<FlowIdentifier>> anyFailure =
                 attemptResultList.stream().filter(it -> it.getState() == AttemptState.BREAK).collect(Collectors.toList());
 

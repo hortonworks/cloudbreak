@@ -42,7 +42,7 @@ public class ModifyUserDefinedTagsOnFreeIpaHandler extends ExceptionCatcherEvent
         try {
             freeIpaPollerService.waitForModifyUserDefinedTags(resourceId, resourceCrn, userDefinedTags);
         } catch (Exception e) {
-            LOGGER.error("Modify user defined tags on FreeIPA failed.", e);
+            LOGGER.warn("Modify user defined tags on FreeIPA failed.", e);
             return new EnvTagsModificationFailureEvent(resourceId, resourceName, resourceCrn, USER_DEFINED_TAGS_MODIFICATION_ON_FREEIPA_FAILED, e);
         }
         return EnvTagsModificationEvent.builder()
@@ -56,7 +56,7 @@ public class ModifyUserDefinedTagsOnFreeIpaHandler extends ExceptionCatcherEvent
 
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<EnvTagsModificationEvent> event) {
-        LOGGER.error("Modify user defined tags on freeIPA failed.", e);
+        LOGGER.warn("Modify user defined tags on FreeIPA failed.", e);
         String resourceName = event.getData().getResourceName();
         String resourceCrn = event.getData().getResourceCrn();
         return new EnvTagsModificationFailureEvent(resourceId, resourceName, resourceCrn, USER_DEFINED_TAGS_MODIFICATION_ON_FREEIPA_FAILED, e);

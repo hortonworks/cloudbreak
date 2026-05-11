@@ -43,7 +43,7 @@ public class ModifyUserDefinedTagsOnDatalakeHandler extends ExceptionCatcherEven
         try {
             stackPollerService.updateUserDefinedTagsOnStacks(resourceId, resourceCrn, userDefinedTags, StackType.DATALAKE);
         } catch (Exception e) {
-            LOGGER.error("Modify user defined tags on Data Lake failed.", e);
+            LOGGER.warn("Modify user defined tags on Data Lake failed.", e);
             return new EnvTagsModificationFailureEvent(resourceId, resourceName, resourceCrn, USER_DEFINED_TAGS_MODIFICATION_ON_DATALAKE_FAILED, e);
         }
         return EnvTagsModificationEvent.builder()
@@ -57,7 +57,7 @@ public class ModifyUserDefinedTagsOnDatalakeHandler extends ExceptionCatcherEven
 
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<EnvTagsModificationEvent> event) {
-        LOGGER.error("Modify user defined tags on Data Lake failed.", e);
+        LOGGER.warn("Modify user defined tags on Data Lake failed.", e);
         String resourceName = event.getData().getResourceName();
         String resourceCrn = event.getData().getResourceCrn();
         return new EnvTagsModificationFailureEvent(resourceId, resourceName, resourceCrn, USER_DEFINED_TAGS_MODIFICATION_ON_DATALAKE_FAILED, e);

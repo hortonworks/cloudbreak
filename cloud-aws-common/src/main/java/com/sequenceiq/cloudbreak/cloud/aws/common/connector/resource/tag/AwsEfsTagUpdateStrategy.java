@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common.connector.resource.tag;
 
-import static com.sequenceiq.common.api.type.ResourceType.AWS_SECRETSMANAGER_SECRET;
+import static com.sequenceiq.common.api.type.ResourceType.AWS_EFS;
 
 import java.util.Collection;
 import java.util.Map;
@@ -16,20 +16,20 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.cloud.TagUpdateStrategy;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTaggingService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.CommonAwsClient;
-import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonSecretsManagerClient;
+import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEfsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.common.api.type.ResourceType;
 
-import software.amazon.awssdk.services.secretsmanager.model.DescribeSecretRequest;
-import software.amazon.awssdk.services.secretsmanager.model.Tag;
-import software.amazon.awssdk.services.secretsmanager.model.TagResourceRequest;
+import software.amazon.awssdk.services.efs.model.ListTagsForResourceRequest;
+import software.amazon.awssdk.services.efs.model.Tag;
+import software.amazon.awssdk.services.efs.model.TagResourceRequest;
 
 @Service
-public class SecretsManagerTagUpdateStrategy implements TagUpdateStrategy {
+public class AwsEfsTagUpdateStrategy implements TagUpdateStrategy {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SecretsManagerTagUpdateStrategy.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AwsEfsTagUpdateStrategy.class);
 
     @Inject
     private CommonAwsClient commonAwsClient;
@@ -39,34 +39,34 @@ public class SecretsManagerTagUpdateStrategy implements TagUpdateStrategy {
 
     @Override
     public Set<ResourceType> supportedTypes() {
-        return Set.of(AWS_SECRETSMANAGER_SECRET);
+        return Set.of(AWS_EFS);
     }
 
     @Override
     public void updateTags(AuthenticatedContext authenticatedContext, CloudResource cloudResource, Map<String, String> tags) {
-        AmazonSecretsManagerClient secretsManagerClient = commonAwsClient.createSecretsManagerClient(
+        AmazonEfsClient efsClient = commonAwsClient.createElasticFileSystemClient(
                 new AwsCredentialView(authenticatedContext.getCloudCredential()),
                 authenticatedContext.getCloudContext().getLocation().getRegion().getRegionName());
 
-        String secretId = cloudResource.getReference();
+        String resourceId = cloudResource.getReference();
 
-        Map<String, String> existingTags = secretsManagerClient.describeSecret(
-                        DescribeSecretRequest.builder()
-                                .secretId(secretId)
+        Map<String, String> existingTags = efsClient.listTagsForResource(
+                        ListTagsForResourceRequest.builder()
+                                .resourceId(resourceId)
                                 .build())
                 .tags().stream()
                 .collect(Collectors.toMap(Tag::key, Tag::value));
 
         if (tagsAlreadyUpToDate(existingTags, tags)) {
-            LOGGER.info("Tags for Secrets Manager secret {} are already up to date, skipping update.", secretId);
+            LOGGER.info("Tags for EFS resource {} are already up to date, skipping update.", resourceId);
             return;
         }
 
-        Collection<Tag> secretsManagerTags = awsTaggingService.prepareSecretsManagerTags(tags);
+        Collection<Tag> efsTags = awsTaggingService.prepareEfsTags(tags);
 
-        secretsManagerClient.tagResource(TagResourceRequest.builder()
-                .secretId(secretId)
-                .tags(secretsManagerTags)
+        efsClient.tagResource(TagResourceRequest.builder()
+                .resourceId(resourceId)
+                .tags(efsTags)
                 .build());
     }
 }

@@ -2,7 +2,7 @@ package com.sequenceiq.environment.environment.flow.modify.tags.handler;
 
 import static com.sequenceiq.environment.environment.EnvironmentStatus.USER_DEFINED_TAGS_MODIFICATION_ON_DATAHUBS_FAILED;
 import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationHandlerSelectors.MODIFY_USER_DEFINED_TAGS_ON_DATAHUBS_EVENT;
-import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationStateSelectors.FINISH_MODIFY_USER_DEFINED_TAGS_EVENT;
+import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationStateSelectors.START_MODIFY_USER_DEFINED_TAGS_REDBEAMS_EVENT;
 
 import java.util.Map;
 
@@ -43,11 +43,11 @@ public class ModifyUserDefinedTagsOnDatahubsHandler extends ExceptionCatcherEven
         try {
             stackPollerService.updateUserDefinedTagsOnStacks(resourceId, resourceCrn, userDefinedTags, StackType.WORKLOAD);
         } catch (Exception e) {
-            LOGGER.error("Modify user defined tags on Data Hubs failed.", e);
+            LOGGER.warn("Modify user defined tags on Data Hubs failed.", e);
             return new EnvTagsModificationFailureEvent(resourceId, resourceName, resourceCrn, USER_DEFINED_TAGS_MODIFICATION_ON_DATAHUBS_FAILED, e);
         }
         return EnvTagsModificationEvent.builder()
-                .withSelector(FINISH_MODIFY_USER_DEFINED_TAGS_EVENT.name())
+                .withSelector(START_MODIFY_USER_DEFINED_TAGS_REDBEAMS_EVENT.name())
                 .withResourceId(resourceId)
                 .withResourceName(resourceName)
                 .withResourceCrn(resourceCrn)
@@ -57,7 +57,7 @@ public class ModifyUserDefinedTagsOnDatahubsHandler extends ExceptionCatcherEven
 
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<EnvTagsModificationEvent> event) {
-        LOGGER.error("Modify user defined tags on datahubs failed.", e);
+        LOGGER.warn("Modify user defined tags on Data Hubs failed.", e);
         String resourceName = event.getData().getResourceName();
         String resourceCrn = event.getData().getResourceCrn();
         return new EnvTagsModificationFailureEvent(resourceId, resourceName, resourceCrn, USER_DEFINED_TAGS_MODIFICATION_ON_DATAHUBS_FAILED, e);

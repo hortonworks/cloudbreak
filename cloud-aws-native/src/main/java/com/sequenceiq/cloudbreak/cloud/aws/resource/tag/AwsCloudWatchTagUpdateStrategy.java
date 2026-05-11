@@ -31,9 +31,9 @@ import software.amazon.awssdk.services.cloudwatch.model.Tag;
 import software.amazon.awssdk.services.cloudwatch.model.TagResourceRequest;
 
 @Service
-public class CloudWatchTagUpdateStrategy implements TagUpdateStrategy {
+public class AwsCloudWatchTagUpdateStrategy implements TagUpdateStrategy {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CloudWatchTagUpdateStrategy.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AwsCloudWatchTagUpdateStrategy.class);
 
     @Inject
     private CommonAwsClient commonAwsClient;

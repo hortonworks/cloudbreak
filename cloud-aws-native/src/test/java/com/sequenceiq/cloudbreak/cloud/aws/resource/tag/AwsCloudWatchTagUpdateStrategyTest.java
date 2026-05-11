@@ -38,7 +38,7 @@ import software.amazon.awssdk.services.cloudwatch.model.Tag;
 import software.amazon.awssdk.services.cloudwatch.model.TagResourceRequest;
 
 @ExtendWith(MockitoExtension.class)
-class CloudWatchTagUpdateStrategyTest {
+class AwsCloudWatchTagUpdateStrategyTest {
 
     private static final String REGION_NAME = "regionName";
 
@@ -87,7 +87,7 @@ class CloudWatchTagUpdateStrategyTest {
     private AwsTaggingService awsTaggingService;
 
     @InjectMocks
-    private CloudWatchTagUpdateStrategy underTest;
+    private AwsCloudWatchTagUpdateStrategy underTest;
 
     private CloudResource cloudResource;
 

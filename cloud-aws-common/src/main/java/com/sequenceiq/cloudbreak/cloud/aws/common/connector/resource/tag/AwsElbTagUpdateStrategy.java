@@ -29,9 +29,9 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.DescribeTags
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.Tag;
 
 @Service
-public class ElbTagUpdateStrategy implements TagUpdateStrategy {
+public class AwsElbTagUpdateStrategy implements TagUpdateStrategy {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ElbTagUpdateStrategy.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AwsElbTagUpdateStrategy.class);
 
     @Inject
     private CommonAwsClient commonAwsClient;

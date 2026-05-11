@@ -36,7 +36,7 @@ import software.amazon.awssdk.services.elasticloadbalancingv2.model.Tag;
 import software.amazon.awssdk.services.elasticloadbalancingv2.model.TagDescription;
 
 @ExtendWith(MockitoExtension.class)
-class ElbTagUpdateStrategyTest {
+class AwsElbTagUpdateStrategyTest {
 
     private static final String REGION_NAME = "regionName";
 
@@ -77,7 +77,7 @@ class ElbTagUpdateStrategyTest {
     private AwsTaggingService awsTaggingService;
 
     @InjectMocks
-    private ElbTagUpdateStrategy underTest;
+    private AwsElbTagUpdateStrategy underTest;
 
     @BeforeEach
     void setUp() {

@@ -165,6 +165,8 @@ public enum EnvironmentStatus {
     USER_DEFINED_TAGS_MODIFICATION_ON_DATALAKE_FAILED("Failed to modify user defined tags on Data Lake"),
     USER_DEFINED_TAGS_MODIFICATION_ON_DATAHUBS_IN_PROGRESS("Modifying user defined tags on Data Hubs"),
     USER_DEFINED_TAGS_MODIFICATION_ON_DATAHUBS_FAILED("Failed to modify user defined tags on Data Hubs"),
+    USER_DEFINED_TAGS_MODIFICATION_ON_REDBEAMS_IN_PROGRESS("Modifying user defined tags on RDS"),
+    USER_DEFINED_TAGS_MODIFICATION_ON_REDBEAMS_FAILED("Failed to modify user defined tags on RDS"),
     USER_DEFINED_TAGS_MODIFICATION_FAILED("Failed to modify user defined tags on attached resources"),
     FREEIPA_PREPARE_CROSS_REALM_TRUST_IN_PROGRESS("Preparing cross-realm trust on FreeIPA"),
     FREEIPA_PREPARE_CROSS_REALM_TRUST_PENDING("Cross-realm trust set-up on FreeIPA pending"),

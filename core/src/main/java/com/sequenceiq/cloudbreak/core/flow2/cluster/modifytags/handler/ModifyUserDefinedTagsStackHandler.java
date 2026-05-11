@@ -39,7 +39,7 @@ public class ModifyUserDefinedTagsStackHandler extends ExceptionCatcherEventHand
 
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<ModifyUserDefinedTagsStackHandlerEvent> event) {
-        LOGGER.error("Modify user defined tags on stack failed.", e);
+        LOGGER.warn("Modify user defined tags on stack failed.", e);
         return new ModifyUserDefinedTagsFailedEvent(resourceId, "UPDATE_USER_DEFINED_TAGS_STACK_PHASE", e);
     }
 
@@ -52,6 +52,7 @@ public class ModifyUserDefinedTagsStackHandler extends ExceptionCatcherEventHand
             stackUpdater.updateUserDefinedTags(stack, userDefinedTags);
             return new ModifyUserDefinedTagsEvent(FINISH_MODIFY_USER_DEFINED_TAGS_EVENT.selector(), resourceId, userDefinedTags);
         } catch (Exception e) {
+            LOGGER.warn("Modify user defined tags on stack failed.", e);
             return new ModifyUserDefinedTagsFailedEvent(resourceId, "UPDATE_USER_DEFINED_TAGS_STACK_PHASE", e);
         }
     }

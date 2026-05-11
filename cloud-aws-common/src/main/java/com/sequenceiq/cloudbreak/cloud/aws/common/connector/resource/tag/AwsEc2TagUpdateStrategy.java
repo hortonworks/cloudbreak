@@ -44,9 +44,9 @@ import software.amazon.awssdk.services.ec2.model.TagDescription;
 import software.amazon.awssdk.services.ec2.model.Volume;
 
 @Service
-public class Ec2TagUpdateStrategy implements TagUpdateStrategy {
+public class AwsEc2TagUpdateStrategy implements TagUpdateStrategy {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(Ec2TagUpdateStrategy.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AwsEc2TagUpdateStrategy.class);
 
     private static final int TAG_UPDATE_BATCH_SIZE = 1000;
 

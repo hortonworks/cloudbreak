@@ -9,8 +9,6 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsPageCollector;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 
 import software.amazon.awssdk.services.rds.RdsClient;
-import software.amazon.awssdk.services.rds.model.AddTagsToResourceRequest;
-import software.amazon.awssdk.services.rds.model.AddTagsToResourceResponse;
 import software.amazon.awssdk.services.rds.model.Certificate;
 import software.amazon.awssdk.services.rds.model.CreateDbParameterGroupRequest;
 import software.amazon.awssdk.services.rds.model.CreateDbParameterGroupResponse;
@@ -147,9 +145,5 @@ public class AmazonRdsClient extends AmazonClient {
 
     private DescribeCertificatesResponse describeCertificatesInternal(DescribeCertificatesRequest request) {
         return client.describeCertificates(request);
-    }
-
-    public AddTagsToResourceResponse addTagsToResource(AddTagsToResourceRequest addTagsToResourceRequest) {
-        return client.addTagsToResource(addTagsToResourceRequest);
     }
 }

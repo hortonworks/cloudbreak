@@ -97,6 +97,8 @@ import com.azure.resourcemanager.network.models.NetworkSecurityGroups;
 import com.azure.resourcemanager.network.models.PublicIpAddress;
 import com.azure.resourcemanager.network.models.PublicIpAddresses;
 import com.azure.resourcemanager.postgresql.PostgreSqlManager;
+import com.azure.resourcemanager.postgresql.models.Server;
+import com.azure.resourcemanager.postgresql.models.Servers;
 import com.azure.resourcemanager.resources.ResourceManager;
 import com.azure.resourcemanager.resources.fluent.DeploymentsClient;
 import com.azure.resourcemanager.resources.fluent.DeploymentsManagementClient;
@@ -187,6 +189,7 @@ class AzureClientTest {
     void setUp() {
         lenient().when(azureClientCredentials.getAzureResourceManager()).thenReturn(azureResourceManager);
         lenient().when(azureClientCredentials.getPostgreSqlManager()).thenReturn(postgreSqlManager);
+        lenient().when(azureClientCredentials.getPostgreSqlFlexibleManager()).thenReturn(postgreSqlFlexibleManager);
         lenient().when(azureExceptionHandler.handleException(any(Supplier.class))).thenCallRealMethod();
         lenient().when(azureExceptionHandler.handleException(any(Supplier.class), eq(Collections.emptySet()))).thenCallRealMethod();
         lenient().when(azureExceptionHandler.handleException(any(Supplier.class), any(), any())).thenCallRealMethod();
@@ -992,6 +995,50 @@ class AzureClientTest {
         underTest.updateLoadBalancerTags(resourceId, userDefinedTags);
 
         verify(loadBalancer).update();
+        verify(update).withTags(userDefinedTags);
+        verify(update).apply();
+    }
+
+    @Test
+    void testUpdateSingleServerTags() {
+        String resourceId = "resourceId";
+        Map<String, String> userDefinedTags = Map.of("key2", "newValue2");
+
+        Servers servers = mock(Servers.class);
+        Server server = mock(Server.class);
+        Server.Update update = mock(Server.Update.class);
+
+        when(postgreSqlManager.servers()).thenReturn(servers);
+        when(servers.getById(resourceId)).thenReturn(server);
+        when(server.update()).thenReturn(update);
+        when(update.withTags(any())).thenReturn(update);
+
+        underTest.updateSingleServerTags(resourceId, userDefinedTags);
+
+        verify(server).update();
+        verify(update).withTags(userDefinedTags);
+        verify(update).apply();
+    }
+
+    @Test
+    void testUpdateFlexibleServerTags() {
+        String resourceId = "resourceId";
+        Map<String, String> userDefinedTags = Map.of("key2", "newValue2");
+
+        com.azure.resourcemanager.postgresqlflexibleserver.models.Servers servers =
+                mock(com.azure.resourcemanager.postgresqlflexibleserver.models.Servers.class);
+        com.azure.resourcemanager.postgresqlflexibleserver.models.Server server = mock(com.azure.resourcemanager.postgresqlflexibleserver.models.Server.class);
+        com.azure.resourcemanager.postgresqlflexibleserver.models.Server.Update update =
+                mock(com.azure.resourcemanager.postgresqlflexibleserver.models.Server.Update.class);
+
+        when(postgreSqlFlexibleManager.servers()).thenReturn(servers);
+        when(servers.getById(resourceId)).thenReturn(server);
+        when(server.update()).thenReturn(update);
+        when(update.withTags(any())).thenReturn(update);
+
+        underTest.updateFlexibleServerTags(resourceId, userDefinedTags);
+
+        verify(server).update();
         verify(update).withTags(userDefinedTags);
         verify(update).apply();
     }

@@ -5,7 +5,6 @@ import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.modifytags.event.ModifyUserDefinedTagsStateSelectors.MODIFY_USER_DEFINED_TAGS_STACK_EVENT;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -64,7 +63,7 @@ public class ModifyUserDefinedTagsCloudResourcesHandler extends ExceptionCatcher
 
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<ModifyUserDefinedTagsCloudResourcesHandlerEvent> event) {
-        LOGGER.error("Modify user defined tags on stack's cloud resources failed.", e);
+        LOGGER.warn("Modify user defined tags on stack's cloud resources failed.", e);
         return new ModifyUserDefinedTagsFailedEvent(resourceId, "UPDATE_USER_DEFINED_TAGS_CLOUD_RESOURCES_PHASE", e);
     }
 
@@ -74,9 +73,11 @@ public class ModifyUserDefinedTagsCloudResourcesHandler extends ExceptionCatcher
         Map<String, String> userDefinedTags = event.getData().getUserDefinedTags();
         try {
             Stack stack = stackService.getById(resourceId);
+            LOGGER.debug("Updating cloud resources tags of stack: {} with tags: {}", stack.getResourceCrn(), userDefinedTags);
             updateCloudResourcesTags(stack, userDefinedTags);
             return new ModifyUserDefinedTagsEvent(MODIFY_USER_DEFINED_TAGS_STACK_EVENT.selector(), resourceId, userDefinedTags);
         } catch (Exception e) {
+            LOGGER.warn("Modify user defined tags on stack's cloud resources failed.", e);
             return new ModifyUserDefinedTagsFailedEvent(resourceId, "UPDATE_USER_DEFINED_TAGS_CLOUD_RESOURCES_PHASE", e);
         }
     }
@@ -89,10 +90,10 @@ public class ModifyUserDefinedTagsCloudResourcesHandler extends ExceptionCatcher
                 Variant.variant(stack.getPlatformVariant()));
         CloudConnector cloudConnector = cloudPlatformConnectors.get(cloudPlatformVariant);
         AuthenticatedContext ac = cloudConnector.authentication().authenticate(cloudContext, cloudCredential);
-        Map<String, String> tagsToUpdate = new HashMap<>(userDefinedTags);
+
         StackTags stackTags = stack.getTags().getUnchecked(StackTags.class);
-        tagsToUpdate.keySet().removeAll(stackTags.getDefaultTags().keySet());
-        LOGGER.debug("Updating cloud resources tags of stack: {} with tags: {}", stack.getResourceCrn(), tagsToUpdate);
+        Map<String, String> tagsToUpdate = stackTags.getUserDefinedTagsWithoutDefaultTags(userDefinedTags);
+
         cloudConnector.resources().updateTags(ac, cloudResources, tagsToUpdate);
     }
 

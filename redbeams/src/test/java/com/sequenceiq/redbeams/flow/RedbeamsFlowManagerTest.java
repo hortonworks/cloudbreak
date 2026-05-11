@@ -1,5 +1,6 @@
 package com.sequenceiq.redbeams.flow;
 
+import static com.sequenceiq.redbeams.flow.redbeams.stack.modify.tags.event.ModifyUserDefinedTagsStateSelectors.MODIFY_USER_DEFINED_TAGS_REDBEAMS_START_EVENT;
 import static com.sequenceiq.redbeams.rotation.RedbeamsSecretType.REDBEAMS_EXTERNAL_DATABASE_ROOT_PASSWORD;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -12,6 +13,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.Test;
@@ -43,6 +45,8 @@ class RedbeamsFlowManagerTest {
 
     private static final String FLOW_CHAIN_ID = "flowChainId";
 
+    private static final String FLOW_ID = "flowId";
+
     @Mock
     private EventBus reactor;
 
@@ -72,5 +76,21 @@ class RedbeamsFlowManagerTest {
         assertEquals(FlowType.FLOW_CHAIN, flowIdentifier.getType());
         assertEquals(FLOW_CHAIN_ID, flowIdentifier.getPollableId());
         verify(reactor, times(1)).notify(eq(EventSelectorUtil.selector(SecretRotationFlowChainTriggerEvent.class)), any(Event.class));
+    }
+
+    @Test
+    void triggerUserDefinedTagsUpdateShouldSucceed() throws InterruptedException {
+        Map<String, String> userDefinedTags = Map.of("custom", "value");
+        doNothing().when(nodeValidator).checkForRecentHeartbeat();
+        Acceptable data = mock(Acceptable.class);
+        Promise<AcceptResult> accepted = (Promise<AcceptResult>) mock(Promise.class);
+        when(data.accepted()).thenReturn(accepted);
+        Event<Acceptable> event = new Event<>(data);
+        when(eventFactory.createEventWithErrHandler(anyMap(), any(Acceptable.class))).thenReturn(event);
+        when(accepted.await(10L, TimeUnit.SECONDS)).thenReturn(FlowAcceptResult.runningInFlow(FLOW_ID));
+        FlowIdentifier flowIdentifier = underTest.triggerUserDefinedTagsUpdate(DATABASE_ID, userDefinedTags);
+        assertEquals(FlowType.FLOW, flowIdentifier.getType());
+        assertEquals(FLOW_ID, flowIdentifier.getPollableId());
+        verify(reactor, times(1)).notify(eq(MODIFY_USER_DEFINED_TAGS_REDBEAMS_START_EVENT.event()), any(Event.class));
     }
 }
