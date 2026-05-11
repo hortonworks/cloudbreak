@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.conf;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
@@ -8,6 +9,7 @@ import java.util.regex.Pattern;
 
 import jakarta.annotation.PostConstruct;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import com.google.api.services.compute.model.MachineType;
@@ -36,6 +38,15 @@ public class GcpInstanceTypeHyperDiskConfig {
         return getFamilyConfig(machineType)
                 .map(InstanceFamilyConfig::hyperDiskBalancedSupported)
                 .orElse(false);
+    }
+
+    public Pair<Boolean, Boolean> isHyperdiskBalancedSupportedForAllInstanceType(List<String> machineTypes) {
+        return machineTypes.stream()
+                .map(this::getFamilyConfig)
+                .map(configOptional -> Pair.of(configOptional.map(InstanceFamilyConfig::hyperDiskBalancedSupported).orElse(false),
+                        configOptional.map(InstanceFamilyConfig::pdBalancedSupported).orElse(true)))
+                .reduce(Pair.of(true, true), (result, next) ->
+                        Pair.of(result.getLeft() && next.getLeft(), result.getRight() && next.getRight()));
     }
 
     public Optional<InstanceFamilyConfig> getFamilyConfig(MachineType machineType) {

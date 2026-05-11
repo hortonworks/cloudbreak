@@ -144,7 +144,7 @@ class GcpMetadataCollectorTest {
     @Test
     void testCollectShouldReturnsWithTheVmMetadataListWithoutError() {
         List<CloudInstance> vms = createVms();
-        Map<String, Optional<NetworkInterface>> networkInterfaces = createNetworkInterfaces();
+        Map<String, Optional<GcpNetworkAndInstanceMetadata>> networkInterfaces = createNetworkInterfaces();
         when(gcpNetworkInterfaceProvider.provide(eq(authenticatedContext), any())).thenReturn(networkInterfaces);
 
         List<CloudVmMetaDataStatus> actual = underTest.collect(authenticatedContext, resources, vms, KNOWN_INSTANCES);
@@ -168,7 +168,7 @@ class GcpMetadataCollectorTest {
     @Test
     void testCollectShouldReturnsWithVmsInUnknownStatusWhenThereAreNoNetworkInterfaceFound() {
         List<CloudInstance> vms = createVms();
-        Map<String, Optional<NetworkInterface>> networkInterfaces = createEmptyNetworkInterfaces();
+        Map<String, Optional<GcpNetworkAndInstanceMetadata>> networkInterfaces = createEmptyNetworkInterfaces();
         when(gcpNetworkInterfaceProvider.provide(eq(authenticatedContext), any())).thenReturn(networkInterfaces);
 
         List<CloudVmMetaDataStatus> actual = underTest.collect(authenticatedContext, resources, vms, KNOWN_INSTANCES);
@@ -192,7 +192,7 @@ class GcpMetadataCollectorTest {
     @Test
     void testCollectShouldReturnsWithVmsInTerminatedStatusWhenThereAreMoVmFound() {
         List<CloudInstance> vms = createVmsWithOtherIds();
-        Map<String, Optional<NetworkInterface>> networkInterfaces = createEmptyNetworkInterfaces();
+        Map<String, Optional<GcpNetworkAndInstanceMetadata>> networkInterfaces = createEmptyNetworkInterfaces();
         when(gcpNetworkInterfaceProvider.provide(eq(authenticatedContext), any())).thenReturn(networkInterfaces);
 
         List<CloudVmMetaDataStatus> actual = underTest.collect(authenticatedContext, resources, vms, KNOWN_INSTANCES);
@@ -400,28 +400,28 @@ class GcpMetadataCollectorTest {
         return new InstanceTemplate(null, null, privateId, Collections.emptyList(), null, null, null, null, TemporaryStorage.ATTACHED_VOLUMES, 0L);
     }
 
-    private Map<String, Optional<NetworkInterface>> createNetworkInterfaces() {
-        Optional<NetworkInterface> networkInterface = createNetworkInterface();
+    private Map<String, Optional<GcpNetworkAndInstanceMetadata>> createNetworkInterfaces() {
+        Optional<GcpNetworkAndInstanceMetadata> networkInterface = createNetworkInterface();
         return Map.of(
                 INSTANCE_NAME_1, networkInterface,
                 INSTANCE_NAME_2, networkInterface,
                 INSTANCE_NAME_3, networkInterface);
     }
 
-    private Map<String, Optional<NetworkInterface>> createEmptyNetworkInterfaces() {
+    private Map<String, Optional<GcpNetworkAndInstanceMetadata>> createEmptyNetworkInterfaces() {
         return Map.of(
                 INSTANCE_NAME_1, Optional.empty(),
                 INSTANCE_NAME_2, Optional.empty(),
                 INSTANCE_NAME_3, Optional.empty());
     }
 
-    private Optional<NetworkInterface> createNetworkInterface() {
+    private Optional<GcpNetworkAndInstanceMetadata> createNetworkInterface() {
         NetworkInterface networkInterface = new NetworkInterface();
         AccessConfig accessConfig = new AccessConfig();
         networkInterface.setNetworkIP(PRIVATE_IP);
         accessConfig.setNatIP(PUBLIC_IP);
         networkInterface.setAccessConfigs(List.of(accessConfig));
-        return Optional.of(networkInterface);
+        return Optional.of(new GcpNetworkAndInstanceMetadata(networkInterface, "instanceType"));
     }
 
     private AuthenticatedContext createAuthenticatedContext() {

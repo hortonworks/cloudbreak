@@ -1,8 +1,13 @@
 package com.sequenceiq.cloudbreak.cloud.gcp.conf;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -13,8 +18,8 @@ class GcpInstanceTypeHyperDiskConfigTest {
         GcpInstanceTypeHyperDiskConfig underTest = new GcpInstanceTypeHyperDiskConfig(new HashMap<>(), new HashMap<>());
         underTest.init();
 
-        Assertions.assertTrue(underTest.getInstanceTypeConfig("anything").isEmpty());
-        Assertions.assertTrue(underTest.getFamilyConfig("anything").isEmpty());
+        assertTrue(underTest.getInstanceTypeConfig("anything").isEmpty());
+        assertTrue(underTest.getFamilyConfig("anything").isEmpty());
     }
 
     @Test
@@ -28,8 +33,8 @@ class GcpInstanceTypeHyperDiskConfigTest {
                         Map.entry("f2-t1", Mockito.mock(GcpInstanceTypeHyperDiskConfig.InstanceTypeConfig.class))));
         underTest.init();
 
-        Assertions.assertTrue(underTest.getInstanceTypeConfig("anything").isEmpty());
-        Assertions.assertTrue(underTest.getFamilyConfig("anything").isEmpty());
+        assertTrue(underTest.getInstanceTypeConfig("anything").isEmpty());
+        assertTrue(underTest.getFamilyConfig("anything").isEmpty());
     }
 
     @Test
@@ -54,7 +59,7 @@ class GcpInstanceTypeHyperDiskConfigTest {
         GcpInstanceTypeHyperDiskConfig underTest = new GcpInstanceTypeHyperDiskConfig(new HashMap<>(), new HashMap<>());
         underTest.init();
 
-        Assertions.assertFalse(underTest.isHyperdiskBalancedSupportedForInstanceType("anything"));
+        assertFalse(underTest.isHyperdiskBalancedSupportedForInstanceType("anything"));
     }
 
     @Test
@@ -71,6 +76,37 @@ class GcpInstanceTypeHyperDiskConfigTest {
                         Map.entry("f2-t1", Mockito.mock(GcpInstanceTypeHyperDiskConfig.InstanceTypeConfig.class))));
         underTest.init();
 
-        Assertions.assertTrue(underTest.isHyperdiskBalancedSupportedForInstanceType("f1-t1"));
+        assertTrue(underTest.isHyperdiskBalancedSupportedForInstanceType("f1-t1"));
+    }
+
+    @Test
+    void testIsHyperdiskBalancedSupportedForAllInstanceType() {
+        GcpInstanceTypeHyperDiskConfig.InstanceFamilyConfig hyperAndNormalFamily = Mockito.mock(GcpInstanceTypeHyperDiskConfig.InstanceFamilyConfig.class);
+        Mockito.when(hyperAndNormalFamily.hyperDiskBalancedSupported()).thenReturn(true);
+        Mockito.when(hyperAndNormalFamily.pdBalancedSupported()).thenReturn(true);
+        GcpInstanceTypeHyperDiskConfig.InstanceFamilyConfig onlyHyperFamily = Mockito.mock(GcpInstanceTypeHyperDiskConfig.InstanceFamilyConfig.class);
+        Mockito.when(onlyHyperFamily.hyperDiskBalancedSupported()).thenReturn(true);
+        GcpInstanceTypeHyperDiskConfig underTest = new GcpInstanceTypeHyperDiskConfig(
+                Map.ofEntries(
+                        Map.entry("c4d", onlyHyperFamily),
+                        Map.entry("c3d", hyperAndNormalFamily)),
+                Map.ofEntries(
+                        Map.entry("c3d-standard-16", Mockito.mock(GcpInstanceTypeHyperDiskConfig.InstanceTypeConfig.class)),
+                        Map.entry("c3d-highcpu-16", Mockito.mock(GcpInstanceTypeHyperDiskConfig.InstanceTypeConfig.class))
+                ));
+        underTest.init();
+        Pair<Boolean, Boolean> result = underTest.isHyperdiskBalancedSupportedForAllInstanceType(List.of("c3d-standard-16", "c2d-standard-16"));
+        Pair<Boolean, Boolean> resultHyper = underTest.isHyperdiskBalancedSupportedForAllInstanceType(List.of("c3d-standard-16", "c3d-highcpu-16"));
+        Pair<Boolean, Boolean> resultOnlyHyper = underTest.isHyperdiskBalancedSupportedForAllInstanceType(List.of("c4d-standard-16", "c4d-highcpu-16"));
+        Pair<Boolean, Boolean> resultUnresolvable = underTest.isHyperdiskBalancedSupportedForAllInstanceType(List.of("c4d-standard-16", "c2d-standard-16"));
+
+        assertFalse(result.getLeft());
+        assertTrue(result.getRight());
+        assertTrue(resultHyper.getLeft());
+        assertTrue(resultHyper.getRight());
+        assertTrue(resultOnlyHyper.getLeft());
+        assertFalse(resultOnlyHyper.getRight());
+        assertFalse(resultUnresolvable.getLeft());
+        assertFalse(resultUnresolvable.getRight());
     }
 }

@@ -22,19 +22,19 @@ public class CloudInstanceMetaData {
     private final CloudInstanceLifeCycle lifeCycle;
 
     public CloudInstanceMetaData(String privateIp, String publicIp) {
-        this(privateIp, publicIp, (String) null);
+        this(privateIp, publicIp, (String) null, (String) null);
     }
 
     public CloudInstanceMetaData(String privateIp, String publicIp, String actualInstanceType, CloudInstanceLifeCycle lifeCycle) {
         this(privateIp, publicIp, actualInstanceType, DEFAULT_SSH_PORT, null, lifeCycle);
     }
 
-    public CloudInstanceMetaData(String privateIp, String publicIp, String localityIndicator) {
-        this(privateIp, publicIp, DEFAULT_SSH_PORT, localityIndicator);
+    public CloudInstanceMetaData(String privateIp, String publicIp, String actualInstanceType, String localityIndicator) {
+        this(privateIp, publicIp, actualInstanceType, DEFAULT_SSH_PORT, localityIndicator);
     }
 
-    public CloudInstanceMetaData(String privateIp, String publicIp, int sshPort, String localityIndicator) {
-        this(privateIp, publicIp, null, sshPort, localityIndicator, CloudInstanceLifeCycle.getDefault());
+    public CloudInstanceMetaData(String privateIp, String publicIp, String actualInstanceType, int sshPort, String localityIndicator) {
+        this(privateIp, publicIp, actualInstanceType, sshPort, localityIndicator, CloudInstanceLifeCycle.getDefault());
     }
 
     @JsonCreator
@@ -80,7 +80,7 @@ public class CloudInstanceMetaData {
     @Override
     public String toString() {
         return "InstanceMetaData{"
-                + ", privateIp='" + privateIp + '\''
+                + "privateIp='" + privateIp + '\''
                 + ", publicIp='" + publicIp + '\''
                 + ", instanceType='" + instanceType + '\''
                 + ", localityIndicator='" + localityIndicator + '\''

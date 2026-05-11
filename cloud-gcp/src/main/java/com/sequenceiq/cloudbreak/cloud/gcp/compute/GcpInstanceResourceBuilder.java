@@ -60,6 +60,8 @@ import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.service.CustomGcpDiskEncryptionCreatorService;
 import com.sequenceiq.cloudbreak.cloud.gcp.service.CustomGcpDiskEncryptionService;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpImageUtil;
+import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpInstanceCreationContext;
+import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpInstanceTypeRetryExceptionMatcher;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpLabelUtil;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
@@ -145,12 +147,59 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
     @Override
     public List<CloudResource> build(GcpContext context, CloudInstance cloudInstance, long privateId, AuthenticatedContext auth,
             Group group, List<CloudResource> buildableResource, CloudStack cloudStack) throws Exception {
-        InstanceTemplate template = group.getReferenceInstanceTemplate();
-        String projectId = context.getProjectId();
-        String location = cloudInstance.getAvailabilityZone();
-        Compute compute = context.getCompute();
+        Instance instance;
+        if (entitlementService.isFallbackInstanceTypeEnabled(auth.getCloudContext().getAccountId())) {
+            instance = createNewInstanceWithInstanceTypeRetry(new GcpInstanceCreationContext(context, auth), cloudInstance, privateId, group,
+                    buildableResource, cloudStack);
+        } else {
+            instance = createNewInstance(new GcpInstanceCreationContext(context, auth), cloudInstance, privateId, group,
+                    buildableResource, cloudStack, group.getReferenceInstanceTemplate().getFlavor());
+        }
 
-        List<CloudResource> computeResources = context.getComputeResources(privateId);
+        if (instance != null) {
+            updateDiskSetWithInstanceName(auth, context.getComputeResources(privateId), instance);
+            assignToExistingInstanceGroup(context, group, instance, buildableResource, cloudInstance.getAvailabilityZone());
+        }
+        return singletonList(createOperationAwareCloudResource(buildableResource.get(0), (Operation) cloudInstance.getParameter(OPERATION_ID, Operation.class)));
+    }
+
+    private Instance createNewInstanceWithInstanceTypeRetry(GcpInstanceCreationContext instanceCreationContext, CloudInstance cloudInstance, long privateId,
+            Group group, List<CloudResource> buildableResource, CloudStack cloudStack) throws IOException {
+        Instance instance = null;
+        InstanceTemplate template = group.getReferenceInstanceTemplate();
+        List<String> possibleInstanceTypes = new ArrayList<>();
+        possibleInstanceTypes.add(template.getFlavor());
+        possibleInstanceTypes.addAll(Optional.ofNullable(template.getFallbackInstanceTypes()).orElse(List.of()));
+        GoogleJsonResponseException exceptionDuringCreation = null;
+        for (String instanceType : possibleInstanceTypes) {
+            try {
+                instance = createNewInstance(instanceCreationContext, cloudInstance, privateId, group, buildableResource, cloudStack, instanceType);
+                LOGGER.info("Successfully created instance using instance type: {}", instanceType);
+                break;
+            } catch (GoogleJsonResponseException e) {
+                exceptionDuringCreation = e;
+                if (GcpInstanceTypeRetryExceptionMatcher.isInstanceTypeNotSupported(e)) {
+                    LOGGER.info("Instance creation with instance type {} was not successful. " +
+                            "Retrying instance creation with different instance type.", instanceType, e);
+                } else {
+                    throw e;
+                }
+            }
+        }
+        if (instance == null) {
+            throw exceptionDuringCreation;
+        }
+        return instance;
+    }
+
+    private Instance createNewInstance(GcpInstanceCreationContext instanceCreationContext, CloudInstance cloudInstance, long privateId,
+            Group group, List<CloudResource> buildableResource, CloudStack cloudStack, String instanceType) throws IOException {
+        String projectId = instanceCreationContext.context().getProjectId();
+        String location = cloudInstance.getAvailabilityZone();
+        Compute compute = instanceCreationContext.context().getCompute();
+        InstanceTemplate template = group.getReferenceInstanceTemplate();
+
+        List<CloudResource> computeResources = instanceCreationContext.context().getComputeResources(privateId);
         List<AttachedDisk> listOfDisks = new ArrayList<>();
 
         listOfDisks.addAll(getBootDiskList(computeResources, projectId, cloudInstance.getAvailabilityZone()));
@@ -160,7 +209,7 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
         listOfDisks.forEach(disk -> customGcpDiskEncryptionService.addEncryptionKeyToDisk(template, disk));
 
         Instance instance = new Instance();
-        instance.setMachineType(String.format(MACHINETYPE_URL, projectId, location, template.getFlavor()));
+        instance.setMachineType(String.format(MACHINETYPE_URL, projectId, location, instanceType));
         instance.setDescription(description());
         instance.setName(buildableResource.get(0).getName());
         Optional<CloudFileSystemView> cloudFileSystemView = group.getIdentity();
@@ -180,7 +229,7 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
             }
         }
         instance.setCanIpForward(Boolean.FALSE);
-        instance.setNetworkInterfaces(getNetworkInterface(context, computeResources, group, cloudStack, cloudInstance));
+        instance.setNetworkInterfaces(getNetworkInterface(instanceCreationContext.context(), computeResources, group, cloudStack, cloudInstance));
         instance.setDisks(listOfDisks);
         instance.setServiceAccounts(extractServiceAccounts(group));
         Scheduling scheduling = new Scheduling();
@@ -191,7 +240,7 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
         scheduling.setPreemptible(preemptible);
         instance.setScheduling(scheduling);
 
-        configureTagsOnInstance(auth, group, instance);
+        configureTagsOnInstance(instanceCreationContext.auth(), group, instance);
         configureLabelsOnInstance(cloudStack, instance);
 
         Metadata metadata = new Metadata();
@@ -218,16 +267,16 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
         shieldedInstanceConfig.setEnableSecureBoot(entitlementService.isGcpSecureBootEnabled(ThreadBasedUserCrnProvider.getAccountId()));
         instance.setShieldedInstanceConfig(shieldedInstanceConfig);
 
-        Insert insert = compute.instances().insert(projectId, cloudInstance.getAvailabilityZone(), instance);
-        insert.setPrettyPrint(Boolean.TRUE);
         try {
+            Insert insert = compute.instances().insert(projectId, cloudInstance.getAvailabilityZone(), instance);
+            insert.setPrettyPrint(Boolean.TRUE);
             Operation operation = insert.execute();
             verifyOperation(operation, buildableResource);
-            updateDiskSetWithInstanceName(auth, computeResources, instance);
-            assignToExistingInstanceGroup(context, group, instance, buildableResource, cloudInstance.getAvailabilityZone());
-            return singletonList(createOperationAwareCloudResource(buildableResource.get(0), operation));
+            cloudInstance.putParameter(OPERATION_ID, operation);
+            return instance;
         } catch (GoogleJsonResponseException e) {
-            throw new GcpResourceException(checkException(e), resourceType(), buildableResource.get(0).getName());
+            LOGGER.info("Instance creation failed with error: {}", e.getDetails().getMessage());
+            throw e;
         }
     }
 
@@ -254,7 +303,7 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
      * also provides aggrigated monitoring
      */
     private void assignToExistingInstanceGroup(GcpContext context,
-        Group group, Instance instance, List<CloudResource> buildableResource, String zone) throws IOException {
+            Group group, Instance instance, List<CloudResource> buildableResource, String zone) throws IOException {
         Compute compute = context.getCompute();
         String projectId = context.getProjectId();
 
@@ -495,7 +544,7 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
     }
 
     private AttachedDisk createDisk(String projectId, boolean boot, String resourceName,
-        String zone, String diskType, boolean autoDelete, Optional<Volume> volume) {
+            String zone, String diskType, boolean autoDelete, Optional<Volume> volume) {
         AttachedDisk attachedDisk = new AttachedDisk();
         attachedDisk.setBoot(boot);
         attachedDisk.setAutoDelete(autoDelete);
@@ -516,7 +565,7 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
     }
 
     private List<NetworkInterface> getNetworkInterface(GcpContext context, List<CloudResource> computeResources, Group group,
-        CloudStack stack, CloudInstance instance) throws IOException {
+            CloudStack stack, CloudInstance instance) throws IOException {
         boolean noPublicIp = context.getNoPublicIp();
         String projectId = context.getProjectId();
         Location location = context.getLocation();
@@ -547,7 +596,7 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
     }
 
     private void prepareNetworkAndSubnet(String projectId, Region region, Network network, NetworkInterface networkInterface,
-        CloudInstance instance) {
+            CloudInstance instance) {
         String subnetId = Strings.isNullOrEmpty(instance.getSubnetId()) ? gcpStackUtil.getSubnetId(network) : instance.getSubnetId();
         if (StringUtils.isNotEmpty(gcpStackUtil.getSharedProjectId(network))) {
             networkInterface.setNetwork(gcpStackUtil.getNetworkUrl(gcpStackUtil.getSharedProjectId(network), gcpStackUtil.getCustomNetworkId(network)));

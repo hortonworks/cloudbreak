@@ -98,8 +98,8 @@ public class GcpDiskResourceBuilder extends AbstractGcpComputeBuilder {
                     .map(GcpDiskType::findByValue)
                     .orElseGet(() -> Optional.ofNullable(instance)
                             .map(CloudInstance::getTemplate)
-                            .map(InstanceTemplate::getFlavor)
-                            .map(gcpPlatformParameters::defaultRootDiskType)
+                            .map(instanceTemplate -> gcpPlatformParameters.defaultRootDiskType(instanceTemplate.getFlavor(),
+                                    instanceTemplate.getFallbackInstanceTypes()))
                             .map(DiskType::value)
                             .map(GcpDiskType::findByValue)
                             .orElse(GcpDiskType.SSD));

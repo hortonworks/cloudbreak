@@ -150,6 +150,24 @@ public interface PlatformParameters {
     }
 
     /**
+     * Default disk type of a platform for the given instancetype and fallback instance types
+     *
+     * @return the default {@link DiskType} of a platform
+     */
+    default DiskType defaultDiskType(String flavor, List<String> fallbackInstanceTypes) {
+        return defaultDiskType(flavor);
+    }
+
+    /**
+     * Default root disk type of a platform for a given flavor and fallback instance types
+     *
+     * @return the default root {@link DiskType} of a platform
+     */
+    default DiskType defaultRootDiskType(String flavor, List<String> fallbackInstanceTypes) {
+        return defaultRootDiskType(flavor);
+    }
+
+    /**
      * The recommended virtual machine types for the platform
      *
      * @return the {@link VmRecommendations} of a platform
@@ -209,4 +227,5 @@ public interface PlatformParameters {
         }
         return sortMap(regions);
     }
+
 }

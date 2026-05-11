@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.service;
 
+import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
@@ -46,6 +47,16 @@ public class CloudParameterCache {
         PlatformParameters platformParameters = getPlatformParameters().get(Platform.platform(cloudPlatform));
         if (platformParameters != null) {
             DiskType rootDiskType = platformParameters.defaultRootDiskType(instanceType);
+            return rootDiskType != null ? rootDiskType.getValue() : null;
+        } else {
+            return null;
+        }
+    }
+
+    public String getDefaultRootVolumeType(String cloudPlatform, String instanceType, List<String> fallbackInstanceTypes) {
+        PlatformParameters platformParameters = getPlatformParameters().get(Platform.platform(cloudPlatform));
+        if (platformParameters != null) {
+            DiskType rootDiskType = platformParameters.defaultRootDiskType(instanceType, fallbackInstanceTypes);
             return rootDiskType != null ? rootDiskType.getValue() : null;
         } else {
             return null;

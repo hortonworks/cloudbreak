@@ -68,7 +68,8 @@ public class DefaultModelService {
                 CloudVmInstanceStatus cloudVmInstanceStatus =
                         new CloudVmInstanceStatus(cloudInstanceWithId, instanceShouldFail ? InstanceStatus.FAILED : InstanceStatus.STARTED);
                 String publicIp = mockInfrastructureHost + ":10090/" + name;
-                CloudInstanceMetaData cloudInstanceMetaData = new CloudInstanceMetaData(address, publicIp, SSH_PORT, "MOCK");
+                String instanceType = cloudInstance.getTemplate().getFlavor();
+                CloudInstanceMetaData cloudInstanceMetaData = new CloudInstanceMetaData(address, publicIp, instanceType, SSH_PORT, "MOCK");
                 CloudVmMetaDataStatus cloudVmMetaDataStatus = new CloudVmMetaDataStatus(cloudVmInstanceStatus, cloudInstanceMetaData);
                 ret.add(cloudVmMetaDataStatus);
                 failureCounter--;

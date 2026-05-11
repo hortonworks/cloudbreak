@@ -98,7 +98,7 @@ public class AzureMetadataCollector implements MetadataCollector {
                     String localityIndicator = Optional.ofNullable(faultDomainCount)
                             .map(domainCount -> getLocalityIndicator(domainCount, authenticatedContext.getCloudContext(), instance.getValue(), resourceGroup))
                             .orElse(null);
-                    CloudInstanceMetaData md = new CloudInstanceMetaData(networkInterface.primaryPrivateIP(), publicIp, localityIndicator);
+                    CloudInstanceMetaData md = new CloudInstanceMetaData(networkInterface.primaryPrivateIP(), publicIp, vm.size().getValue(), localityIndicator);
 
                     InstanceTemplate template = templateMap.get(instanceId);
                     if (template != null) {

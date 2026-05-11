@@ -7,6 +7,7 @@ import static com.sequenceiq.cloudbreak.cloud.model.DisplayName.displayName;
 import static com.sequenceiq.cloudbreak.cloud.model.Orchestrator.orchestrator;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -20,6 +21,7 @@ import java.util.stream.Collectors;
 import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -41,6 +43,7 @@ import com.sequenceiq.cloudbreak.cloud.model.StackParamValidation;
 import com.sequenceiq.cloudbreak.cloud.model.TagSpecification;
 import com.sequenceiq.cloudbreak.cloud.model.VmRecommendations;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.type.OrchestratorConstants;
 import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
@@ -214,6 +217,41 @@ public class GcpPlatformParameters implements PlatformParameters {
     @Override
     public DiskType defaultRootDiskType(String flavor) {
         return diskType(hyperDiskConfig.isHyperdiskBalancedSupportedForInstanceType(flavor) ? defaultRootHyperDiskType : defaultRootDiskType);
+    }
+
+    @Override
+    public DiskType defaultDiskType(String flavor, List<String> fallbackInstanceTypes) {
+        Pair<Boolean, Boolean> hyperAndNormalDiskSupport =
+                hyperDiskConfig.isHyperdiskBalancedSupportedForAllInstanceType(getAllInstances(flavor, fallbackInstanceTypes));
+        if (hyperAndNormalDiskSupport.getLeft()) {
+            return diskType(defaultHyperDiskType);
+        } else if (hyperAndNormalDiskSupport.getRight()) {
+            return diskType(defaultDiskType);
+        } else {
+            throw new CloudbreakServiceException(String.format("Cannot determine disk type. Some instances support only hyperdisk, others normal disk: " +
+                    "instanceType: %s, fallbackInstanceTypes: %s", flavor, fallbackInstanceTypes));
+        }
+    }
+
+    @Override
+    public DiskType defaultRootDiskType(String flavor, List<String> fallbackInstanceTypes) {
+        Pair<Boolean, Boolean> hyperAndNormalDiskSupport =
+                hyperDiskConfig.isHyperdiskBalancedSupportedForAllInstanceType(getAllInstances(flavor, fallbackInstanceTypes));
+        if (hyperAndNormalDiskSupport.getLeft()) {
+            return diskType(defaultRootHyperDiskType);
+        } else if (hyperAndNormalDiskSupport.getRight()) {
+            return diskType(defaultRootDiskType);
+        } else {
+            throw new CloudbreakServiceException(String.format("Cannot determine root disk type. Some instances support only hyperdisk, others normal disk: " +
+                    "instanceType: %s, fallbackInstanceTypes: %s", flavor, fallbackInstanceTypes));
+        }
+    }
+
+    private List<String> getAllInstances(String flavor, List<String> fallbackInstanceTypes) {
+        List<String> result = new ArrayList<>();
+        result.add(flavor);
+        result.addAll(fallbackInstanceTypes);
+        return result;
     }
 
     public String getPrerequisitesCreationCommand(CredentialType type) {

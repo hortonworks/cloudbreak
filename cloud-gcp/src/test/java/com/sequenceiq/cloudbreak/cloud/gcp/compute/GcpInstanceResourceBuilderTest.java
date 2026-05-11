@@ -43,6 +43,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.google.api.client.googleapis.json.GoogleJsonError;
+import com.google.api.client.googleapis.json.GoogleJsonResponseException;
+import com.google.api.client.http.HttpHeaders;
+import com.google.api.client.http.HttpResponseException;
 import com.google.api.services.compute.Compute;
 import com.google.api.services.compute.Compute.InstanceGroups;
 import com.google.api.services.compute.Compute.InstanceGroups.AddInstances;
@@ -599,13 +603,73 @@ class GcpInstanceResourceBuilderTest {
         assertEquals("default", subnetCaptor.getValue());
     }
 
+    @Test
+    void testBuildWithInstanceTypeFallback() throws Exception {
+        String fallbackFlavor = "n2-standard-4";
+        Group group = newGroupWithParams(Map.of(), null, List.of(fallbackFlavor));
+        List<CloudResource> buildableResources = builder.create(context, group.getInstances().getFirst(), privateId, authenticatedContext, group, image);
+        context.addComputeResources(0L, buildableResources);
+
+        when(entitlementService.isFallbackInstanceTypeEnabled(anyString())).thenReturn(true);
+        when(compute.instances()).thenReturn(instances);
+        when(instances.insert(anyString(), anyString(), any(Instance.class))).thenReturn(insert);
+        when(insert.setPrettyPrint(anyBoolean())).thenReturn(insert);
+
+        GoogleJsonError error = new GoogleJsonError();
+        error.setMessage("Invalid value for field 'resource.machineType'");
+        error.setCode(400);
+        GoogleJsonResponseException fallbackEx = new GoogleJsonResponseException(
+                new HttpResponseException.Builder(400, "Bad Request", new HttpHeaders()), error);
+
+        when(insert.execute()).thenThrow(fallbackEx);
+
+        assertThrows(GoogleJsonResponseException.class, () -> ThreadBasedUserCrnProvider.doAsAndThrow(USER_CRN, () ->
+                builder.build(context, group.getInstances().getFirst(), privateId, authenticatedContext, group, buildableResources, cloudStack)));
+
+        verify(instances, times(2)).insert(anyString(), anyString(), instanceArg.capture());
+        List<Instance> capturedInstances = instanceArg.getAllValues();
+        assertTrue(capturedInstances.get(0).getMachineType().contains(flavor));
+        assertTrue(capturedInstances.get(1).getMachineType().contains(fallbackFlavor));
+    }
+
+    @Test
+    void testBuildWithInstanceTypeFallbackWhenEntitlementDisabled() throws IOException {
+        String fallbackFlavor = "n2-standard-4";
+        Group group = newGroupWithParams(Map.of(), null, List.of(fallbackFlavor));
+        List<CloudResource> buildableResources = builder.create(context, group.getInstances().getFirst(), privateId, authenticatedContext, group, image);
+        context.addComputeResources(0L, buildableResources);
+
+        when(entitlementService.isFallbackInstanceTypeEnabled(anyString())).thenReturn(false);
+        when(compute.instances()).thenReturn(instances);
+        when(instances.insert(anyString(), anyString(), any(Instance.class))).thenReturn(insert);
+        when(insert.setPrettyPrint(anyBoolean())).thenReturn(insert);
+
+        GoogleJsonError error = new GoogleJsonError();
+        error.setMessage("Machine type with name 'm1.medium' does not exist in zone 'az'");
+        error.setCode(400);
+        GoogleJsonResponseException fallbackEx = new GoogleJsonResponseException(
+                new HttpResponseException.Builder(400, "Bad Request", new HttpHeaders()), error);
+
+        when(insert.execute()).thenThrow(fallbackEx);
+
+        assertThrows(GoogleJsonResponseException.class, () -> ThreadBasedUserCrnProvider.doAsAndThrow(USER_CRN, () ->
+                builder.build(context, group.getInstances().getFirst(), privateId, authenticatedContext, group, buildableResources, cloudStack)));
+
+        verify(instances, times(1)).insert(anyString(), anyString(), instanceArg.capture());
+        assertTrue(instanceArg.getValue().getMachineType().contains(flavor));
+    }
+
     private Group newGroupWithParams(Map<String, Object> params) {
-        return newGroupWithParams(params, null);
+        return newGroupWithParams(params, null, List.of());
     }
 
     private Group newGroupWithParams(Map<String, Object> params, CloudFileSystemView cloudFileSystemView) {
+        return newGroupWithParams(params, cloudFileSystemView, List.of());
+    }
+
+    private Group newGroupWithParams(Map<String, Object> params, CloudFileSystemView cloudFileSystemView, List<String> fallbackInstanceTypes) {
         InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
-        CloudInstance cloudInstance = newCloudInstance(params, instanceAuthentication);
+        CloudInstance cloudInstance = newCloudInstance(params, instanceAuthentication, fallbackInstanceTypes);
         return Group.builder()
                 .withName(name)
                 .withType(InstanceGroupType.CORE)
@@ -619,8 +683,12 @@ class GcpInstanceResourceBuilderTest {
     }
 
     private CloudInstance newCloudInstance(Map<String, Object> params, InstanceAuthentication instanceAuthentication) {
-        InstanceTemplate instanceTemplate = new InstanceTemplate(flavor, name, privateId, volumes, InstanceStatus.CREATE_REQUESTED, params,
-                0L, "cb-centos66-amb200-2015-05-25", TemporaryStorage.ATTACHED_VOLUMES, 0L);
+        return newCloudInstance(params, instanceAuthentication, List.of());
+    }
+
+    private CloudInstance newCloudInstance(Map<String, Object> params, InstanceAuthentication instanceAuthentication, List<String> fallbackInstanceTypes) {
+        InstanceTemplate instanceTemplate = new InstanceTemplate(flavor, fallbackInstanceTypes, name, privateId, volumes, InstanceStatus.CREATE_REQUESTED,
+                params, 0L, "cb-centos66-amb200-2015-05-25", TemporaryStorage.ATTACHED_VOLUMES, 0L);
         return new CloudInstance(instanceId, instanceTemplate, instanceAuthentication, "subnet-1", AVAILABILITY_ZONE, params);
     }
 

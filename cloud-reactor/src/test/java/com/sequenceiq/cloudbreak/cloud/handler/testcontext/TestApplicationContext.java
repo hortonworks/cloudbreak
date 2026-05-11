@@ -200,7 +200,7 @@ public class TestApplicationContext {
         CloudVmInstanceStatus collectInstanceStatus = new CloudVmInstanceStatus(cloudInstance, InstanceStatus.IN_PROGRESS);
         when(collector.collect(any(), any(), any(), any()))
                 .thenReturn(Collections.singletonList(new CloudVmMetaDataStatus(collectInstanceStatus, new CloudInstanceMetaData("privateIp", "publicIp",
-                        "hypervisor"))));
+                        "instanceType", "hypervisor"))));
         when(instanceConnector.start(any(), any(), any()))
                 .thenReturn(Collections.singletonList(new CloudVmInstanceStatus(cloudInstance, InstanceStatus.STARTED)));
         when(instanceConnector.stop(any(), any(), any()))

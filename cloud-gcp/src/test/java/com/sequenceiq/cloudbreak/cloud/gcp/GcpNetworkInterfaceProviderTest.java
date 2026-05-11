@@ -60,11 +60,11 @@ public class GcpNetworkInterfaceProviderTest {
                     .thenReturn(gcpInstances.stream().filter(gcpInstance -> gcpInstance.getName().equals(entry.getKey())).findFirst());
         });
 
-        Map<String, Optional<NetworkInterface>> actual = underTest.provide(authenticatedContext, cloudResources);
+        Map<String, Optional<GcpNetworkAndInstanceMetadata>> actual = underTest.provide(authenticatedContext, cloudResources);
 
         assertEquals(instances.size(), actual.size());
         instances.entrySet().stream().forEach(entry -> {
-            assertEquals(getNetworkForInstance(gcpInstances, entry.getKey()), actual.get(entry.getKey()));
+            assertEquals(getNetworkForInstance(gcpInstances, entry.getKey()), actual.get(entry.getKey()).map(GcpNetworkAndInstanceMetadata::networkInterface));
             assertEquals(entry.getValue(), actual.get(entry.getKey()).isPresent());
         });
     }

@@ -47,6 +47,6 @@ public class ComputeApiExtractor implements CloudInstanceMetaDataExtractor {
                 }
             }
         }
-        return new CloudInstanceMetaData(privateIp, floatingIp, hypervisor);
+        return new CloudInstanceMetaData(privateIp, floatingIp, null, hypervisor);
     }
 }
