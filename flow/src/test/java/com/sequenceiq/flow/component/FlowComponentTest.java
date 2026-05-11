@@ -40,9 +40,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.util.ReflectionUtils;
 import org.testcontainers.containers.Container.ExecResult;
@@ -143,16 +144,16 @@ public class FlowComponentTest {
     @Inject
     private FlowLogRepository flowLogRepository;
 
-    @MockBean
+    @MockitoBean
     private SleepTriggerCondition sleepTriggerCondition;
 
-    @MockBean
+    @MockitoBean
     private MetricService metricService;
 
-    @MockBean
+    @MockitoBean
     private TransactionalScheduler scheduler;
 
-    @SpyBean
+    @MockitoSpyBean
     private SimpleMeterRegistry meterRegistry;
 
     @Inject
@@ -161,16 +162,13 @@ public class FlowComponentTest {
     @Inject
     private FlowChainLogService flowChainLogService;
 
-    @MockBean
+    @MockitoBean
     private FlowUsageSender flowUsageSender;
 
-    @MockBean
-    private FlowEventListener flowEventListener;
-
-    @MockBean
+    @MockitoBean
     private UsageReportProcessor usageReportProcessor;
 
-    @MockBean
+    @MockitoBean
     private RegionAwareInternalCrnGeneratorFactory regionAwareInternalCrnGeneratorFactory;
 
     @Inject
@@ -732,5 +730,12 @@ public class FlowComponentTest {
     private Consumer<FlowLog> noOp() {
         return flowLog -> {
         };
+    }
+
+    @TestConfiguration
+    static class Config {
+
+        @MockitoBean
+        private FlowEventListener flowEventListener;
     }
 }

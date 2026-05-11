@@ -551,6 +551,20 @@ public class Crn {
     }
 
     /**
+     * Constructor
+     * @param crnString a CRN represented as a String
+     */
+    Crn(String crnString) {
+        Crn parsedCrn = Crn.safeFromString(crnString);
+        this.partition = parsedCrn.getPartition();
+        this.service = parsedCrn.getService();
+        this.region = parsedCrn.getRegion();
+        this.accountId = parsedCrn.getAccountId();
+        this.resourceType = parsedCrn.getResourceType();
+        this.resource = parsedCrn.getResource();
+    }
+
+    /**
      * Returns the partition.
      *
      * @return the partition
