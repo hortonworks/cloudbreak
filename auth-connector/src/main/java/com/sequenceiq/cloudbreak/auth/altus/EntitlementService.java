@@ -38,6 +38,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_VERT
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_WIRE_ENCRYPTION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_XFS_FOR_EPHEMERAL_DISK_SUPPORTED;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CENTRAL_COMPUTE_MONITORING;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CHANGE_ENCRYPTION_PROFILE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_IDENTITY_MAPPING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_STORAGE_VALIDATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_STORAGE_VALIDATION_AWS;
@@ -670,5 +671,9 @@ public class EntitlementService {
 
     public boolean isGp2toGp3MigrationEnabled(String accountId) {
         return isEntitlementRegistered(accountId, GP2_TO_GP3_MIGRATION);
+    }
+
+    public boolean isChangeEncryptionProfileEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_CHANGE_ENCRYPTION_PROFILE);
     }
 }

@@ -169,6 +169,9 @@ public class MockUserManagementServiceTest {
 
                 {"gp2toGp3MigrationEnabled false", "gp2toGp3MigrationEnabled", false, "GP2_TO_GP3_MIGRATION", false},
                 {"gp2toGp3MigrationEnabled true", "gp2toGp3MigrationEnabled", true, "GP2_TO_GP3_MIGRATION", true},
+
+                {"changeEncryptionProfileEnabled false", "changeEncryptionProfileEnabled", false, "CDP_CHANGE_ENCRYPTION_PROFILE", false},
+                {"changeEncryptionProfileEnabled true", "changeEncryptionProfileEnabled", true, "CDP_CHANGE_ENCRYPTION_PROFILE", true},
         };
     }
 

@@ -125,6 +125,7 @@ auth:
     prefer.minifi.logging.enabled: true
     personal.view.cb.by.right.enabled: true
     gp2togp3.migration.enabled: true
+    change.encryption.profile.enabled: false
 crn:
   partition: cdp
   region: us-west-1

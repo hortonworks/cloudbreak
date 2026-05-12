@@ -220,6 +220,9 @@ class EntitlementServiceTest {
 
                 {"GP2_TO_GP3_MIGRATION", (EntitlementCheckFunction) EntitlementService::isGp2toGp3MigrationEnabled, false},
                 {"GP2_TO_GP3_MIGRATION", (EntitlementCheckFunction) EntitlementService::isGp2toGp3MigrationEnabled, true},
+
+                {"CDP_CHANGE_ENCRYPTION_PROFILE", (EntitlementCheckFunction) EntitlementService::isChangeEncryptionProfileEnabled, false},
+                {"CDP_CHANGE_ENCRYPTION_PROFILE", (EntitlementCheckFunction) EntitlementService::isChangeEncryptionProfileEnabled, true},
         };
     }
 

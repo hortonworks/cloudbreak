@@ -40,6 +40,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_USE_
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_VERTICAL_SCALE_HA;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_XFS_FOR_EPHEMERAL_DISK_SUPPORTED;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CENTRAL_COMPUTE_MONITORING;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CHANGE_ENCRYPTION_PROFILE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_IDENTITY_MAPPING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_STORAGE_VALIDATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_STORAGE_VALIDATION_AWS;
@@ -628,6 +629,9 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Value("${auth.mock.gp2togp3.migration.enabled}")
     private boolean gp2toGp3MigrationEnabled;
 
+    @Value("${auth.mock.change.encryption.profile.enabled}")
+    private boolean changeEncryptionProfileEnabled;
+
     @Inject
     private MockEnvironmentUserResourceRole mockEnvironmentUserResourceRole;
 
@@ -1168,6 +1172,10 @@ public class MockUserManagementService extends UserManagementImplBase {
 
         if (datalakeShapesWithoutHBaseAndHDFSEnabled) {
             builder.addEntitlements(createEntitlement(CDP_DATALAKE_SHAPES_WITHOUT_HBASE_AND_HDFS));
+        }
+
+        if (changeEncryptionProfileEnabled) {
+            builder.addEntitlements(createEntitlement(CDP_CHANGE_ENCRYPTION_PROFILE));
         }
 
         responseObserver.onNext(
