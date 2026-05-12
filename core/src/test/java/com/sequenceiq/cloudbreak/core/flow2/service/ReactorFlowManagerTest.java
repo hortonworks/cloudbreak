@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.service;
 
 import static com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers.MIGRATE_ZOOKEEPER_TO_KRAFT_CHAIN_TRIGGER_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers.UPDATE_SSL_CONFIG_CHAIN_TRIGGER_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers.UPDATE_TRUSTED_REALM_CHAIN_TRIGGER_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.addvolumes.AddVolumesEvent.ADD_VOLUMES_TRIGGER_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.deletevolumes.DeleteVolumesEvent.DELETE_VOLUMES_VALIDATION_EVENT;
@@ -73,6 +74,7 @@ import com.sequenceiq.cloudbreak.core.flow2.event.MaintenanceModeValidationTrigg
 import com.sequenceiq.cloudbreak.core.flow2.event.RollingVerticalScaleFlowChainTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackAndClusterUpscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackImageUpdateTriggerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.event.UpdateSslConfigTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.user.ExternalDatabaseUserOperation;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.rootvolumeupdate.event.CoreRootVolumeUpdateTriggerEvent;
@@ -233,8 +235,9 @@ class ReactorFlowManagerTest {
         underTest.triggerZookeeperToKraftMigrationFinalization(STACK_ID);
         underTest.triggerZookeeperToKraftMigrationRollback(STACK_ID);
         underTest.triggerUpdatePublicDnsEntriesInPem(STACK_ID);
+        underTest.triggerUpdateSslConfigsOnCluster(STACK_ID, "encryptionProfileCrn");
         underTest.triggerResetJvmParams(STACK_ID);
-        underTest.triggerUpdateTrustedRealm(STACK_ID, "crn", "crn", "realm", true);
+        underTest.triggerUpdateTrustedRealm(STACK_ID, "crn", "crn", "realm", true, false);
 
         int count = 0;
         for (Method method : underTest.getClass().getDeclaredMethods()) {
@@ -524,12 +527,23 @@ class ReactorFlowManagerTest {
     }
 
     @Test
+    void testTriggerUpdateSslConfigsOnCluster() {
+        underTest.triggerUpdateSslConfigsOnCluster(1L, "epCrn");
+
+        ArgumentCaptor<UpdateSslConfigTriggerEvent> eventCaptor = ArgumentCaptor.forClass(UpdateSslConfigTriggerEvent.class);
+        verify(reactorNotifier).notify(eq(1L), eq(UPDATE_SSL_CONFIG_CHAIN_TRIGGER_EVENT), eventCaptor.capture());
+        assertEquals(1L, eventCaptor.getValue().getResourceId());
+        assertEquals(UPDATE_SSL_CONFIG_CHAIN_TRIGGER_EVENT, eventCaptor.getValue().getSelector());
+        assertEquals("epCrn", eventCaptor.getValue().getEncryptionProfileCrn());
+    }
+
+    @Test
     void testTriggerUpdateTrustedRealmWithSaltUpdateRequired() {
         String resourceCrn = "crn:cdp:datahub:us-west-1:tenant:cluster:cluster-id";
         String environmentCrn = "crn:cdp:environments:us-west-1:tenant:environment:env-id";
         String realm = "EXAMPLE.COM";
 
-        underTest.triggerUpdateTrustedRealm(STACK_ID, resourceCrn, environmentCrn, realm, true);
+        underTest.triggerUpdateTrustedRealm(STACK_ID, resourceCrn, environmentCrn, realm, true, false);
 
         ArgumentCaptor<UpdateTrustedRealmChainTriggerEvent> captor = ArgumentCaptor.forClass(UpdateTrustedRealmChainTriggerEvent.class);
         verify(reactorNotifier, times(1)).notify(eq(STACK_ID), eq(UPDATE_TRUSTED_REALM_CHAIN_TRIGGER_EVENT), captor.capture());
@@ -540,6 +554,7 @@ class ReactorFlowManagerTest {
         assertEquals(environmentCrn, event.getEnvironmentCrn());
         assertEquals(realm, event.getRealm());
         assertEquals(true, event.isSaltUpdateRequired());
+        assertEquals(false, event.isRemove());
     }
 
     @Test
@@ -548,12 +563,13 @@ class ReactorFlowManagerTest {
         String environmentCrn = "crn:cdp:environments:us-west-1:tenant:environment:env-id";
         String realm = "HYBRID.REALM.COM";
 
-        underTest.triggerUpdateTrustedRealm(STACK_ID, resourceCrn, environmentCrn, realm, false);
+        underTest.triggerUpdateTrustedRealm(STACK_ID, resourceCrn, environmentCrn, realm, false, false);
 
         ArgumentCaptor<UpdateTrustedRealmChainTriggerEvent> captor = ArgumentCaptor.forClass(UpdateTrustedRealmChainTriggerEvent.class);
         verify(reactorNotifier, times(1)).notify(eq(STACK_ID), eq(UPDATE_TRUSTED_REALM_CHAIN_TRIGGER_EVENT), captor.capture());
         UpdateTrustedRealmChainTriggerEvent event = captor.getValue();
         assertEquals(false, event.isSaltUpdateRequired());
+        assertEquals(false, event.isRemove());
         assertEquals(realm, event.getRealm());
         assertEquals(environmentCrn, event.getEnvironmentCrn());
     }

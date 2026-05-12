@@ -406,6 +406,10 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
         return stackRepository.getStatusByCrnsInternal(crns, stackType);
     }
 
+    public List<StackClusterStatusView> getStatusesByEnvironmentCrn(String environmentCrn) {
+        return stackRepository.getStatusesByEnvironmentCrn(environmentCrn);
+    }
+
     public Set<AutoscaleStackV4Response> getAllForAutoscale() {
         try {
             return transactionService.required(() -> {

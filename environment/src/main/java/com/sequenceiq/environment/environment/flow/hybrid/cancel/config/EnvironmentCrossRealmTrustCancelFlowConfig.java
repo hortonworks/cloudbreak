@@ -3,15 +3,21 @@ package com.sequenceiq.environment.environment.flow.hybrid.cancel.config;
 
 import static com.sequenceiq.environment.environment.flow.hybrid.cancel.EnvironmentCrossRealmTrustCancelState.FINAL_STATE;
 import static com.sequenceiq.environment.environment.flow.hybrid.cancel.EnvironmentCrossRealmTrustCancelState.INIT_STATE;
+import static com.sequenceiq.environment.environment.flow.hybrid.cancel.EnvironmentCrossRealmTrustCancelState.TRUST_CANCEL_CONFIG_REMOVAL_STATE;
 import static com.sequenceiq.environment.environment.flow.hybrid.cancel.EnvironmentCrossRealmTrustCancelState.TRUST_CANCEL_FAILED_STATE;
 import static com.sequenceiq.environment.environment.flow.hybrid.cancel.EnvironmentCrossRealmTrustCancelState.TRUST_CANCEL_FINISHED_STATE;
+import static com.sequenceiq.environment.environment.flow.hybrid.cancel.EnvironmentCrossRealmTrustCancelState.TRUST_CANCEL_SALT_UPDATE_STATE;
 import static com.sequenceiq.environment.environment.flow.hybrid.cancel.EnvironmentCrossRealmTrustCancelState.TRUST_CANCEL_STATE;
+import static com.sequenceiq.environment.environment.flow.hybrid.cancel.EnvironmentCrossRealmTrustCancelState.TRUST_CANCEL_TRUST_ENTITY_DELETE_STATE;
 import static com.sequenceiq.environment.environment.flow.hybrid.cancel.EnvironmentCrossRealmTrustCancelState.TRUST_CANCEL_VALIDATION_STATE;
 import static com.sequenceiq.environment.environment.flow.hybrid.cancel.event.EnvironmentCrossRealmTrustCancelStateSelectors.FAILED_TRUST_CANCEL_EVENT;
 import static com.sequenceiq.environment.environment.flow.hybrid.cancel.event.EnvironmentCrossRealmTrustCancelStateSelectors.FINALIZE_TRUST_CANCEL_EVENT;
-import static com.sequenceiq.environment.environment.flow.hybrid.cancel.event.EnvironmentCrossRealmTrustCancelStateSelectors.FINISH_TRUST_CANCEL_EVENT;
+import static com.sequenceiq.environment.environment.flow.hybrid.cancel.event.EnvironmentCrossRealmTrustCancelStateSelectors.FINISH_TRUST_CANCEL_CONFIG_REMOVAL_EVENT;
 import static com.sequenceiq.environment.environment.flow.hybrid.cancel.event.EnvironmentCrossRealmTrustCancelStateSelectors.HANDLED_FAILED_TRUST_CANCEL_EVENT;
+import static com.sequenceiq.environment.environment.flow.hybrid.cancel.event.EnvironmentCrossRealmTrustCancelStateSelectors.TRUST_CANCEL_CONFIG_REMOVAL_EVENT;
 import static com.sequenceiq.environment.environment.flow.hybrid.cancel.event.EnvironmentCrossRealmTrustCancelStateSelectors.TRUST_CANCEL_EVENT;
+import static com.sequenceiq.environment.environment.flow.hybrid.cancel.event.EnvironmentCrossRealmTrustCancelStateSelectors.TRUST_CANCEL_SALT_UPDATE_EVENT;
+import static com.sequenceiq.environment.environment.flow.hybrid.cancel.event.EnvironmentCrossRealmTrustCancelStateSelectors.TRUST_CANCEL_TRUST_ENTITY_DELETE_EVENT;
 import static com.sequenceiq.environment.environment.flow.hybrid.cancel.event.EnvironmentCrossRealmTrustCancelStateSelectors.TRUST_CANCEL_VALIDATION_EVENT;
 
 import java.util.List;
@@ -45,9 +51,30 @@ public class EnvironmentCrossRealmTrustCancelFlowConfig extends AbstractFlowConf
             .event(TRUST_CANCEL_EVENT)
             .defaultFailureEvent()
 
+            // FreeIPA cross-realm trust cancel runs before CM config removal so that the realm name
+            // is still present in FreeIPA when we need to remove it from CM clusters.
+            // The trust entity itself is only deleted AFTER config removal succeeds (see TRUST_CANCEL_TRUST_ENTITY_DELETE_STATE).
             .from(TRUST_CANCEL_STATE)
+            .to(TRUST_CANCEL_CONFIG_REMOVAL_STATE)
+            .event(TRUST_CANCEL_CONFIG_REMOVAL_EVENT)
+            .defaultFailureEvent()
+
+            .from(TRUST_CANCEL_CONFIG_REMOVAL_STATE)
+            .to(TRUST_CANCEL_TRUST_ENTITY_DELETE_STATE)
+            .event(TRUST_CANCEL_TRUST_ENTITY_DELETE_EVENT)
+            .defaultFailureEvent()
+
+            .from(TRUST_CANCEL_TRUST_ENTITY_DELETE_STATE)
+            .to(TRUST_CANCEL_SALT_UPDATE_STATE)
+            .event(TRUST_CANCEL_SALT_UPDATE_EVENT)
+            .defaultFailureEvent()
+
+            // Salt update after trust entity deletion removes /etc/krb5.conf.d/trust.conf from clusters.
+            // Now that the trust entity is gone KerberosPillarConfigGenerator returns an empty trust pillar,
+            // so the file.absent Salt state takes effect.
+            .from(TRUST_CANCEL_SALT_UPDATE_STATE)
             .to(TRUST_CANCEL_FINISHED_STATE)
-            .event(FINISH_TRUST_CANCEL_EVENT)
+            .event(FINISH_TRUST_CANCEL_CONFIG_REMOVAL_EVENT)
             .defaultFailureEvent()
 
             .from(TRUST_CANCEL_FINISHED_STATE)

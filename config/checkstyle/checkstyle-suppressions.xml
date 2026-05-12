@@ -65,7 +65,7 @@
     <!-- suppressing checks in Autoscale -->
     <suppress checks="HideUtilityClassConstructor" files="PeriscopeApplication.java" />
     <suppress id="sysout" files="VersionedApplication.java"/>
-    <suppress checks="VisibilityModifierCheck" files=".*Test.java"/>
+    <suppress checks="VisibilityModifierCheck" files=".*Test\.java|.*TestBase\.java"/>
 
     <suppress files="^((?!.*[/\\]com[/\\]sequenceiq[/\\]freeipa[/\\]).)*$" checks="MatchXpath"/>
     <suppress files=".*FlowConfig" checks="MatchXpath"/>

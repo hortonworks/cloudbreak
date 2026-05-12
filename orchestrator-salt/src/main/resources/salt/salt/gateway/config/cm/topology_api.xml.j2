@@ -247,6 +247,10 @@
                 <name>RESOURCEMANAGER</name>
                 <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000</value>
             </param>
+            <param>
+                <name>YARNUIV2</name>
+                <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000</value>
+            </param>
             {%- endif %}
             {% if 'RESOURCEMANAGERAPI' in exposed and 'RESOURCEMANAGER' in salt['pillar.get']('gateway:location') -%}
             <param>
@@ -511,6 +515,12 @@
         {% for hostloc in salt['pillar.get']('gateway:location')['RESOURCEMANAGER'] -%}
         <url>{{ protocols['YARNUIV2'] }}://{{ hostloc }}:{{ ports['YARNUIV2'] }}/ws</url>
         {%- endfor %}
+    </service>
+    <service>
+         <role>YARNUIV2</role>
+         {% for hostloc in salt['pillar.get']('gateway:location')['RESOURCEMANAGER'] -%}
+         <url>{{ protocols['YARNUIV2'] }}://{{ hostloc }}:{{ ports['YARNUIV2'] }}</url>
+         {%- endfor %}
     </service>
     {%- endif %}
 

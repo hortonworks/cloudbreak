@@ -16,6 +16,8 @@ public class UpdateTrustedRealmTriggerEvent extends BaseFlowEvent {
 
     private final String realm;
 
+    private final boolean remove;
+
     @JsonCreator
     public UpdateTrustedRealmTriggerEvent(
             @JsonProperty("selector") String selector,
@@ -23,10 +25,12 @@ public class UpdateTrustedRealmTriggerEvent extends BaseFlowEvent {
             @JsonProperty("resourceCrn") String resourceCrn,
             @JsonProperty("environmentCrn") String environmentCrn,
             @JsonProperty("realm") String realm,
+            @JsonProperty("remove") boolean remove,
             @JsonIgnoreDeserialization @JsonProperty("accepted") Promise<AcceptResult> accepted) {
         super(selector, resourceId, resourceCrn, accepted);
         this.environmentCrn = environmentCrn;
         this.realm = realm;
+        this.remove = remove;
     }
 
     public static UpdateTrustedRealmTriggerEvent fromChainTrigger(UpdateTrustedRealmChainTriggerEvent chainEvent) {
@@ -36,6 +40,7 @@ public class UpdateTrustedRealmTriggerEvent extends BaseFlowEvent {
                 chainEvent.getResourceCrn(),
                 chainEvent.getEnvironmentCrn(),
                 chainEvent.getRealm(),
+                chainEvent.isRemove(),
                 chainEvent.accepted());
     }
 
@@ -47,11 +52,16 @@ public class UpdateTrustedRealmTriggerEvent extends BaseFlowEvent {
         return realm;
     }
 
+    public boolean isRemove() {
+        return remove;
+    }
+
     @Override
     public boolean equalsEvent(BaseFlowEvent other) {
         return isClassAndEqualsEvent(UpdateTrustedRealmTriggerEvent.class, other,
                 event -> Objects.equals(environmentCrn, event.environmentCrn)
-                        && Objects.equals(realm, event.realm));
+                        && Objects.equals(realm, event.realm)
+                        && remove == event.remove);
     }
 
     @Override
@@ -59,7 +69,7 @@ public class UpdateTrustedRealmTriggerEvent extends BaseFlowEvent {
         return "UpdateTrustedRealmTriggerEvent{" +
                 "environmentCrn='" + environmentCrn + '\'' +
                 ", realm='" + realm + '\'' +
+                ", remove=" + remove +
                 '}';
     }
 }
-

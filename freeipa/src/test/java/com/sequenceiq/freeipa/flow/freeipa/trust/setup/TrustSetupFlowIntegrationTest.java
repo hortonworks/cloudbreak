@@ -62,6 +62,7 @@ import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.events.EventSenderService;
 import com.sequenceiq.freeipa.flow.FlowIntegrationTestConfig;
 import com.sequenceiq.freeipa.flow.StackStatusFinalizer;
+import com.sequenceiq.freeipa.flow.freeipa.trust.setup.action.FreeIpaTrustSetupAddTrustAction;
 import com.sequenceiq.freeipa.flow.freeipa.trust.setup.action.FreeIpaTrustSetupConfigureDnsAction;
 import com.sequenceiq.freeipa.flow.freeipa.trust.setup.action.FreeIpaTrustSetupFailedAction;
 import com.sequenceiq.freeipa.flow.freeipa.trust.setup.action.FreeIpaTrustSetupFinishedAction;
@@ -70,6 +71,7 @@ import com.sequenceiq.freeipa.flow.freeipa.trust.setup.action.FreeIpaTrustSetupU
 import com.sequenceiq.freeipa.flow.freeipa.trust.setup.action.FreeIpaTrustSetupValidationAction;
 import com.sequenceiq.freeipa.flow.freeipa.trust.setup.config.FreeIpaTrustSetupFlowConfig;
 import com.sequenceiq.freeipa.flow.freeipa.trust.setup.event.FreeIpaTrustSetupEvent;
+import com.sequenceiq.freeipa.flow.freeipa.trust.setup.handler.FreeIpaTrustSetupAddTrustHandler;
 import com.sequenceiq.freeipa.flow.freeipa.trust.setup.handler.FreeIpaTrustSetupConfigureDnsHandler;
 import com.sequenceiq.freeipa.flow.freeipa.trust.setup.handler.FreeIpaTrustSetupPrepareServerHandler;
 import com.sequenceiq.freeipa.flow.freeipa.trust.setup.handler.FreeIpaTrustSetupUpdatePillarDataHandler;
@@ -217,11 +219,12 @@ class TrustSetupFlowIntegrationTest {
         stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, TRUST_SETUP_IN_PROGRESS, "Prepare IPA server");
         stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, TRUST_SETUP_IN_PROGRESS, "Configuring DNS");
         stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, TRUST_SETUP_IN_PROGRESS, "Updating pillar data");
+        stackStatusVerify.verify(stackUpdater).updateStackStatus(stack, TRUST_SETUP_IN_PROGRESS, "Adding cross-realm trust");
         stackStatusVerify.verify(stackUpdater)
                 .updateStackStatus(stack, DetailedStackStatus.TRUST_SETUP_FINISH_REQUIRED, "Prepare cross-realm trust finished");
 
         InOrder crossRealmStatusVerify = inOrder(crossRealmTrustService);
-        crossRealmStatusVerify.verify(crossRealmTrustService, times(4)).updateTrustStateByStackId(stack.getId(), TrustStatus.TRUST_SETUP_IN_PROGRESS);
+        crossRealmStatusVerify.verify(crossRealmTrustService, times(5)).updateTrustStateByStackId(stack.getId(), TrustStatus.TRUST_SETUP_IN_PROGRESS);
         crossRealmStatusVerify.verify(crossRealmTrustService).updateTrustStateByStackId(stack.getId(), TrustStatus.TRUST_SETUP_FINISH_REQUIRED);
 
         InOrder operationUpdateVerify = inOrder(operationService);
@@ -411,12 +414,14 @@ class TrustSetupFlowIntegrationTest {
             FreeIpaTrustSetupPrepareServerAction.class,
             FreeIpaTrustSetupConfigureDnsAction.class,
             FreeIpaTrustSetupUpdatePillarDataAction.class,
+            FreeIpaTrustSetupAddTrustAction.class,
             FreeIpaTrustSetupFinishedAction.class,
             FreeIpaTrustSetupFailedAction.class,
             FreeIpaTrustSetupValidationHandler.class,
             FreeIpaTrustSetupPrepareServerHandler.class,
             FreeIpaTrustSetupConfigureDnsHandler.class,
             FreeIpaTrustSetupUpdatePillarDataHandler.class,
+            FreeIpaTrustSetupAddTrustHandler.class,
             CrossRealmTrustService.class,
             TaskResultConverter.class
     })

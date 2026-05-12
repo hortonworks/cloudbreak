@@ -1,8 +1,11 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.trustedrealm;
 
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.trustedrealm.UpdateTrustedRealmEvent.UPDATE_TRUSTED_REALM_TRIGGER_EVENT;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
@@ -172,11 +175,11 @@ class UpdateTrustedRealmFlowIntegrationTest {
         letItFlow(flowIdentifier);
 
         assertFlowFinalized();
-        verify(updateTrustedRealmStatusService, times(1)).updatingTrustedRealm(STACK_ID);
+        verify(updateTrustedRealmStatusService, times(1)).updatingTrustedRealm(STACK_ID, false);
         verify(clusterService, times(1)).getClusterServiceConfigValue(eq(NameOrCrn.ofCrn(STACK_CRN)), any());
         verify(clusterService, times(1)).updateClusterServiceConfiguration(eq(NameOrCrn.ofCrn(STACK_CRN)), any(ClusterServiceConfigurationUpdate.class));
         verify(updateTrustedRealmStatusService, times(1)).success(STACK_ID);
-        verify(updateTrustedRealmStatusService, never()).failed(any(), any());
+        verify(updateTrustedRealmStatusService, never()).failed(any(), any(), anyBoolean());
     }
 
     @Test
@@ -188,11 +191,11 @@ class UpdateTrustedRealmFlowIntegrationTest {
         letItFlow(flowIdentifier);
 
         assertFlowFinalized();
-        verify(updateTrustedRealmStatusService, times(1)).updatingTrustedRealm(STACK_ID);
+        verify(updateTrustedRealmStatusService, times(1)).updatingTrustedRealm(STACK_ID, false);
         verify(clusterService, times(1)).getClusterServiceConfigValue(eq(NameOrCrn.ofCrn(STACK_CRN)), any());
         verify(clusterService, never()).updateClusterServiceConfiguration(any(), any());
         verify(updateTrustedRealmStatusService, times(1)).success(STACK_ID);
-        verify(updateTrustedRealmStatusService, never()).failed(any(), any());
+        verify(updateTrustedRealmStatusService, never()).failed(any(), any(), anyBoolean());
     }
 
     @Test
@@ -213,7 +216,7 @@ class UpdateTrustedRealmFlowIntegrationTest {
         assertTrue(updatedValue.contains(existingRealm), "Updated value should still contain the existing realm");
         assertTrue(updatedValue.contains(REALM), "Updated value should contain the new realm");
         verify(updateTrustedRealmStatusService, times(1)).success(STACK_ID);
-        verify(updateTrustedRealmStatusService, never()).failed(any(), any());
+        verify(updateTrustedRealmStatusService, never()).failed(any(), any(), anyBoolean());
     }
 
     @Test
@@ -225,10 +228,10 @@ class UpdateTrustedRealmFlowIntegrationTest {
         letItFlow(flowIdentifier);
 
         assertFlowFinalized();
-        verify(updateTrustedRealmStatusService, times(1)).updatingTrustedRealm(STACK_ID);
+        verify(updateTrustedRealmStatusService, times(1)).updatingTrustedRealm(STACK_ID, false);
         verify(clusterService, never()).updateClusterServiceConfiguration(any(), any());
         verify(updateTrustedRealmStatusService, never()).success(STACK_ID);
-        verify(updateTrustedRealmStatusService, times(1)).failed(eq(STACK_ID), any(Exception.class));
+        verify(updateTrustedRealmStatusService, times(1)).failed(eq(STACK_ID), any(Exception.class), eq(false));
     }
 
     @Test
@@ -241,9 +244,80 @@ class UpdateTrustedRealmFlowIntegrationTest {
         letItFlow(flowIdentifier);
 
         assertFlowFinalized();
-        verify(updateTrustedRealmStatusService, times(1)).updatingTrustedRealm(STACK_ID);
+        verify(updateTrustedRealmStatusService, times(1)).updatingTrustedRealm(STACK_ID, false);
         verify(updateTrustedRealmStatusService, never()).success(STACK_ID);
-        verify(updateTrustedRealmStatusService, times(1)).failed(eq(STACK_ID), any(Exception.class));
+        verify(updateTrustedRealmStatusService, times(1)).failed(eq(STACK_ID), any(Exception.class), eq(false));
+    }
+
+    @Test
+    void testRemoveTrustedRealmWhenRealmPresent() {
+        String existingRealms = "OTHER.COM," + REALM;
+        when(clusterService.getClusterServiceConfigValue(any(), any(ClusterServiceConfigurationLookup.class)))
+                .thenReturn(Optional.of(existingRealms));
+        doNothing().when(clusterService).updateClusterServiceConfiguration(any(), any(ClusterServiceConfigurationUpdate.class));
+
+        FlowIdentifier flowIdentifier = triggerFlow(true);
+        letItFlow(flowIdentifier);
+
+        assertFlowFinalized();
+        verify(updateTrustedRealmStatusService, times(1)).updatingTrustedRealm(STACK_ID, true);
+        ArgumentCaptor<ClusterServiceConfigurationUpdate> updateCaptor = ArgumentCaptor.forClass(ClusterServiceConfigurationUpdate.class);
+        verify(clusterService, times(1)).updateClusterServiceConfiguration(eq(NameOrCrn.ofCrn(STACK_CRN)), updateCaptor.capture());
+        String updatedValue = updateCaptor.getValue().getServiceConfigurations().get(0).getValue();
+        assertTrue(updatedValue.contains("OTHER.COM"), "Updated value should still contain the other realm");
+        assertFalse(updatedValue.contains(REALM), "Updated value should not contain the removed realm");
+        verify(updateTrustedRealmStatusService, times(1)).success(STACK_ID);
+        verify(updateTrustedRealmStatusService, never()).failed(any(), any(), anyBoolean());
+    }
+
+    @Test
+    void testRemoveTrustedRealmWhenLastRealmIsRemoved() {
+        // Only the realm being removed is configured; after removal CM should revert to default (null value).
+        when(clusterService.getClusterServiceConfigValue(any(), any(ClusterServiceConfigurationLookup.class)))
+                .thenReturn(Optional.of(REALM));
+        doNothing().when(clusterService).updateClusterServiceConfiguration(any(), any(ClusterServiceConfigurationUpdate.class));
+
+        FlowIdentifier flowIdentifier = triggerFlow(true);
+        letItFlow(flowIdentifier);
+
+        assertFlowFinalized();
+        verify(updateTrustedRealmStatusService, times(1)).updatingTrustedRealm(STACK_ID, true);
+        ArgumentCaptor<ClusterServiceConfigurationUpdate> updateCaptor = ArgumentCaptor.forClass(ClusterServiceConfigurationUpdate.class);
+        verify(clusterService, times(1)).updateClusterServiceConfiguration(eq(NameOrCrn.ofCrn(STACK_CRN)), updateCaptor.capture());
+        String updatedValue = updateCaptor.getValue().getServiceConfigurations().get(0).getValue();
+        assertNull(updatedValue, "Value should be null so CM reverts trusted_realms to its default");
+        verify(updateTrustedRealmStatusService, times(1)).success(STACK_ID);
+        verify(updateTrustedRealmStatusService, never()).failed(any(), any(), anyBoolean());
+    }
+
+    @Test
+    void testRemoveTrustedRealmWhenRealmNotPresent() {
+        when(clusterService.getClusterServiceConfigValue(any(), any(ClusterServiceConfigurationLookup.class)))
+                .thenReturn(Optional.of("OTHER.COM"));
+
+        FlowIdentifier flowIdentifier = triggerFlow(true);
+        letItFlow(flowIdentifier);
+
+        assertFlowFinalized();
+        verify(updateTrustedRealmStatusService, times(1)).updatingTrustedRealm(STACK_ID, true);
+        verify(clusterService, never()).updateClusterServiceConfiguration(any(), any());
+        verify(updateTrustedRealmStatusService, times(1)).success(STACK_ID);
+        verify(updateTrustedRealmStatusService, never()).failed(any(), any(), anyBoolean());
+    }
+
+    @Test
+    void testRemoveTrustedRealmWhenHandlerFails() {
+        doThrow(new RuntimeException("CM not reachable"))
+                .when(clusterService).getClusterServiceConfigValue(any(), any(ClusterServiceConfigurationLookup.class));
+
+        FlowIdentifier flowIdentifier = triggerFlow(true);
+        letItFlow(flowIdentifier);
+
+        assertFlowFinalized();
+        verify(updateTrustedRealmStatusService, times(1)).updatingTrustedRealm(STACK_ID, true);
+        verify(clusterService, never()).updateClusterServiceConfiguration(any(), any());
+        verify(updateTrustedRealmStatusService, never()).success(STACK_ID);
+        verify(updateTrustedRealmStatusService, times(1)).failed(eq(STACK_ID), any(Exception.class), eq(true));
     }
 
     private void assertFlowFinalized() {
@@ -253,11 +327,15 @@ class UpdateTrustedRealmFlowIntegrationTest {
     }
 
     private FlowIdentifier triggerFlow() {
+        return triggerFlow(false);
+    }
+
+    private FlowIdentifier triggerFlow(boolean remove) {
         String selector = UPDATE_TRUSTED_REALM_TRIGGER_EVENT.event();
         return ThreadBasedUserCrnProvider.doAs(
                 USER_CRN,
                 () -> reactorNotifier.notify(STACK_ID, selector,
-                        new UpdateTrustedRealmTriggerEvent(selector, STACK_ID, STACK_CRN, ENV_CRN, REALM, null)));
+                        new UpdateTrustedRealmTriggerEvent(selector, STACK_ID, STACK_CRN, ENV_CRN, REALM, remove, null)));
     }
 
     private void letItFlow(FlowIdentifier flowIdentifier) {

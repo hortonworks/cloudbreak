@@ -54,6 +54,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAK
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_DB_BACKUP_ENABLE_COMPRESSION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_KNOX_GATEWAY_DB_DR;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_RESIZE_RECOVERY;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_SHAPES_WITHOUT_HBASE_AND_HDFS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_BACKUP_RESTORE_PERMISSION_CHECKS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_LOAD_BALANCER;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENABLE_DISTROX_INSTANCE_TYPES;
@@ -103,6 +104,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_STO
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATALAKE_HORIZONTAL_SCALE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATA_LAKE_LIGHT_TO_MEDIUM_MIGRATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.E2E_TEST_ONLY;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.ENABLE_COMPUTE_CLUSTER;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.FMS_FREEIPA_BATCH_CALL;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.LOCAL_DEV;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.OBSERVABILITY_DMP;
@@ -558,6 +560,9 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Value("${auth.mock.compute.ui.enabled}")
     private boolean computeUiEnabled;
 
+    @Value("${auth.mock.compute.cluster.enabled}")
+    private boolean computeClusterEnabled;
+
     @Value("${auth.mock.ranger.ldap.usersync}")
     private boolean rangerLdapUsersyncEnabled;
 
@@ -623,6 +628,9 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.datalake.knoxgateway.db.dr.enabled}")
     private boolean datalakeKnoxGatewayDbDrEnabled;
+
+    @Value("${auth.mock.datalake.shapes.withouthbase.enabled}")
+    private boolean datalakeShapesWithoutHBaseAndHDFSEnabled;
 
     @Inject
     private MockEnvironmentUserResourceRole mockEnvironmentUserResourceRole;
@@ -1097,6 +1105,9 @@ public class MockUserManagementService extends UserManagementImplBase {
             builder.addEntitlements(createEntitlement(COMPUTE_API_LIFTIE));
             builder.addEntitlements(createEntitlement(COMPUTE_API_LIFTIE_BETA));
         }
+        if (computeClusterEnabled) {
+            builder.addEntitlements(createEntitlement(ENABLE_COMPUTE_CLUSTER));
+        }
         if (rangerLdapUsersyncEnabled) {
             builder.addEntitlements(createEntitlement(CDP_RANGER_LDAP_USERSYNC));
         }
@@ -1160,6 +1171,10 @@ public class MockUserManagementService extends UserManagementImplBase {
 
         if (datalakeKnoxGatewayDbDrEnabled) {
             builder.addEntitlements(createEntitlement(CDP_DATALAKE_KNOX_GATEWAY_DB_DR));
+        }
+
+        if (datalakeShapesWithoutHBaseAndHDFSEnabled) {
+            builder.addEntitlements(createEntitlement(CDP_DATALAKE_SHAPES_WITHOUT_HBASE_AND_HDFS));
         }
 
         responseObserver.onNext(

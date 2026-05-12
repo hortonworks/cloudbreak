@@ -1052,7 +1052,7 @@ public interface StackV4Endpoint {
             summary = "Modifies SELinux on a specific Stack", operationId = "modifySeLinuxByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier modifySeLinuxByCrn(@PathParam("workspaceId") Long workspaceId,
-        @NotEmpty @ValidCrn(resource = {DATAHUB, VM_DATALAKE}) @PathParam("crn") String crn, @PathParam("selinuxMode") SeLinux selinuxMode);
+            @NotEmpty @ValidCrn(resource = {DATAHUB, VM_DATALAKE}) @PathParam("crn") String crn, @PathParam("selinuxMode") SeLinux selinuxMode);
 
     @PUT
     @Path("internal/crn/{crn}/update_dns_entries")
@@ -1073,6 +1073,17 @@ public interface StackV4Endpoint {
             operationId = "getClustersNamesByEncryptionProfile",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     List<String> getClustersNamesByEncryptionProfile(@PathParam("workspaceId") Long workspaceId, @PathParam("crn") String encryptionProfileCrn);
+
+    @PUT
+    @Path("internal/crn/{crn}/update_ssl_configs")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Update SSL configs using encryption profile by stack CRN",
+            operationId = "updateSslConfigsByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    FlowIdentifier updateSslConfigurationsByCrn(@PathParam("workspaceId") Long workspaceId,
+            @NotEmpty @ValidCrn(resource = {DATAHUB, VM_DATALAKE}) @PathParam("crn") String crn,
+            @QueryParam("encryptionProfileNameOrCrn") String encryptionProfileNameOrCrn);
 
     @PUT
     @Path("internal/crn/{crn}/modify_notification_state/{notificationState}")

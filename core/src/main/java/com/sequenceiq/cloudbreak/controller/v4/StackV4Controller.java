@@ -830,6 +830,13 @@ public class StackV4Controller extends NotificationController implements StackV4
 
     @InternalOnly
     @Override
+    public FlowIdentifier updateSslConfigurationsByCrn(Long workspaceId, @ResourceCrn String crn, String encryptionProfileNameOrCrn) {
+        return stackOperationService.updateSslConfigsOnCluster(NameOrCrn.ofCrn(crn), ThreadBasedUserCrnProvider.getAccountId(),
+                encryptionProfileNameOrCrn);
+    }
+
+    @InternalOnly
+    @Override
     public void modifyNotificationStateByCrn(Long workspaceId, @ResourceCrn String crn, @InitiatorUserCrn String initiatorUserCrn,
         NotificationState notificationState) {
         Crn userCrn = Crn.ofUser(initiatorUserCrn);

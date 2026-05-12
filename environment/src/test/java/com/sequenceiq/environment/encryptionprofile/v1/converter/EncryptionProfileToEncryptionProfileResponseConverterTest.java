@@ -7,7 +7,6 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -21,8 +20,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
+import com.sequenceiq.cloudbreak.tls.EncryptionProfileProvider;
 import com.sequenceiq.common.api.encryptionprofile.TlsVersion;
-import com.sequenceiq.environment.api.v1.encryptionprofile.config.EncryptionProfileConfig;
 import com.sequenceiq.environment.api.v1.encryptionprofile.model.EncryptionProfileResponse;
 import com.sequenceiq.environment.encryptionprofile.domain.EncryptionProfile;
 
@@ -30,7 +29,7 @@ import com.sequenceiq.environment.encryptionprofile.domain.EncryptionProfile;
 class EncryptionProfileToEncryptionProfileResponseConverterTest {
 
     @Mock
-    private EncryptionProfileConfig encryptionProfileConfig;
+    private EncryptionProfileProvider encryptionProfileProvider;
 
     @InjectMocks
     private EncryptionProfileToEncryptionProfileResponseConverter converter;
@@ -55,12 +54,9 @@ class EncryptionProfileToEncryptionProfileResponseConverterTest {
 
     @Test
     void testConvertWithValidCipherSuitesFilterBasedOnAvailableCiphers() {
-        // TLS 1.2 only supports one of the cipher suites
-        when(encryptionProfileConfig.getAvailableCiphers(TlsVersion.TLS_1_2))
-                .thenReturn(new HashSet<>(Arrays.asList("TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256")));
-        // TLS 1.3 supports a different one
-        when(encryptionProfileConfig.getAvailableCiphers(TlsVersion.TLS_1_3))
-                .thenReturn(new HashSet<>(Arrays.asList("TLS_AES_128_GCM_SHA256")));
+        when(encryptionProfileProvider.getAllCipherSuitesAvailableByTlsVersion())
+                .thenReturn(Map.of(TlsVersion.TLS_1_2.getVersion(), List.of("TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"),
+                        TlsVersion.TLS_1_3.getVersion(), List.of("TLS_AES_128_GCM_SHA256")));
 
         EncryptionProfileResponse response = converter.convert(encryptionProfile);
 
@@ -70,44 +66,9 @@ class EncryptionProfileToEncryptionProfileResponseConverterTest {
         assertThat(response.getTlsVersions()).containsExactlyInAnyOrder("TLSv1.2", "TLSv1.3");
 
         Map<String, List<String>> expectedCipherMap = new HashMap<>();
-        expectedCipherMap.put("TLSv1.2", Arrays.asList("TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"));
-        expectedCipherMap.put("TLSv1.3", Arrays.asList("TLS_AES_128_GCM_SHA256"));
+        expectedCipherMap.put("TLSv1.2", List.of("TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"));
+        expectedCipherMap.put("TLSv1.3", List.of("TLS_AES_128_GCM_SHA256"));
 
         assertThat(response.getCipherSuites()).isEqualTo(expectedCipherMap);
-    }
-
-    @Test
-    void testConvertEmptyCipherSuitesReturnDefaultMap() {
-        // TLS 1.2 only supports one of the cipher suites
-        when(encryptionProfileConfig.getRequiredCiphers(TlsVersion.TLS_1_2))
-                .thenReturn(new HashSet<>(Arrays.asList("TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256")));
-        // TLS 1.3 supports a different one
-        when(encryptionProfileConfig.getRequiredCiphers(TlsVersion.TLS_1_3))
-                .thenReturn(new HashSet<>(Arrays.asList("TLS_AES_128_GCM_SHA256")));
-        encryptionProfile.setCipherSuites(Collections.emptyList());
-
-        EncryptionProfileResponse response = converter.convert(encryptionProfile);
-
-        assertThat(response.getName()).isEqualTo(NAME);
-        assertThat(response.getDescription()).isEqualTo(DESCRIPTION);
-        assertThat(response.getCrn()).isEqualTo(ENCRYPTION_PROFILE_CRN);
-        assertThat(response.getTlsVersions()).containsExactlyInAnyOrder("TLSv1.2", "TLSv1.3");
-
-        Map<String, List<String>> expectedCipherMap = new HashMap<>();
-        expectedCipherMap.put("TLSv1.2", Arrays.asList("TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256"));
-        expectedCipherMap.put("TLSv1.3", Arrays.asList("TLS_AES_128_GCM_SHA256"));
-
-        assertThat(response.getClouderaInternalCipherSuites()).isEqualTo(expectedCipherMap);
-    }
-
-    @Test
-    void testConvertUnsupportedTlsVersionsReturnEmptyCipherSets() {
-        when(encryptionProfileConfig.getAvailableCiphers(TlsVersion.TLS_1_2)).thenReturn(Collections.emptySet());
-        when(encryptionProfileConfig.getAvailableCiphers(TlsVersion.TLS_1_3)).thenReturn(Collections.emptySet());
-
-        EncryptionProfileResponse response = converter.convert(encryptionProfile);
-
-        assertThat(response.getCipherSuites().get("TLSv1.2")).isEmpty();
-        assertThat(response.getCipherSuites().get("TLSv1.3")).isEmpty();
     }
 }

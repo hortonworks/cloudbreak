@@ -205,6 +205,18 @@ public enum EnvironmentStatus {
             com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.TRUST_CANCEL_VALIDATION_FAILED),
     TRUST_CANCEL_IN_PROGRESS(
             com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.TRUST_CANCEL_IN_PROGRESS),
+    TRUST_CANCEL_CONFIG_REMOVAL_IN_PROGRESS(
+            com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.TRUST_CANCEL_CONFIG_REMOVAL_IN_PROGRESS),
+    TRUST_CANCEL_CONFIG_REMOVAL_FAILED(
+            com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.TRUST_CANCEL_CONFIG_REMOVAL_FAILED),
+    TRUST_CANCEL_TRUST_ENTITY_DELETE_IN_PROGRESS(
+            com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.TRUST_CANCEL_TRUST_ENTITY_DELETE_IN_PROGRESS),
+    TRUST_CANCEL_TRUST_ENTITY_DELETE_FAILED(
+            com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.TRUST_CANCEL_TRUST_ENTITY_DELETE_FAILED),
+    TRUST_CANCEL_SALT_UPDATE_IN_PROGRESS(
+            com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.TRUST_CANCEL_SALT_UPDATE_IN_PROGRESS),
+    TRUST_CANCEL_SALT_UPDATE_FAILED(
+            com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.TRUST_CANCEL_SALT_UPDATE_FAILED),
     TRUST_CANCEL_FAILED(
             com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.TRUST_CANCEL_FAILED),
 
@@ -255,6 +267,12 @@ public enum EnvironmentStatus {
     PROXY_CONFIG_MODIFICATION_ON_DATAHUBS_FAILED(
             com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.PROXY_CONFIG_MODIFICATION_ON_DATAHUBS_FAILED),
     PROXY_CONFIG_MODIFICATION_FAILED(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.PROXY_CONFIG_MODIFICATION_FAILED),
+
+    ENABLE_ENCRYPTION_PROFILE_IN_PROGRESS(
+            com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.ENABLE_ENCRYPTION_PROFILE_IN_PROGRESS),
+    ENABLE_ENCRYPTION_PROFILE_FAILED(
+            com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.ENABLE_ENCRYPTION_PROFILE_FAILED),
+
     USER_DEFINED_TAGS_MODIFICATION_ON_FREEIPA_IN_PROGRESS(
             com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.USER_DEFINED_TAGS_MODIFICATION_ON_FREEIPA_IN_PROGRESS),
     USER_DEFINED_TAGS_MODIFICATION_ON_FREEIPA_FAILED(

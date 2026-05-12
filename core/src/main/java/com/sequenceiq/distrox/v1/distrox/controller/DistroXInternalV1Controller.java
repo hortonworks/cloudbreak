@@ -63,6 +63,12 @@ public class DistroXInternalV1Controller implements DistroXInternalV1Endpoint {
 
     @Override
     @InternalOnly
+    public StackStatusV4Responses getStatusByEnvironmentCrn(@ResourceCrn String environmentCrn) {
+        return stackOperations.getStatusForInternalEnvironmentCrn(environmentCrn);
+    }
+
+    @Override
+    @InternalOnly
     public StackViewV4Responses list(@ResourceCrn String environmentCrn) {
         return stackOperations.listByEnvironmentCrn(restRequestThreadLocalService.getRequestedWorkspaceId(), environmentCrn,
                 List.of(StackType.WORKLOAD, StackType.DATALAKE));

@@ -55,6 +55,7 @@ import com.sequenceiq.externalizedcompute.entity.ExternalizedComputeClusterStatu
 import com.sequenceiq.externalizedcompute.entity.ExternalizedComputeClusterStatusEnum;
 import com.sequenceiq.externalizedcompute.flow.ExternalizedComputeClusterFlowManager;
 import com.sequenceiq.externalizedcompute.repository.ExternalizedComputeClusterRepository;
+import com.sequenceiq.externalizedcompute.service.validator.ExternalizedComputeEntitlementValidator;
 import com.sequenceiq.liftie.client.LiftieGrpcClient;
 
 @ExtendWith(MockitoExtension.class)
@@ -87,6 +88,9 @@ class ExternalizedComputeClusterServiceTest {
 
     @Mock
     private LiftieGrpcClient liftieGrpcClient;
+
+    @Mock
+    private ExternalizedComputeEntitlementValidator externalizedComputeEntitlementValidator;
 
     @InjectMocks
     private ExternalizedComputeClusterService clusterService;
@@ -450,6 +454,24 @@ class ExternalizedComputeClusterServiceTest {
                 .containsOnly("CrossAccount role does not have permissions for these operations : ssm:GetParameter, ssm:GetParameters, " +
                         "ssm:GetParameterHistory, ssm:GetParametersByPath. Please check if any Service Control Policies are in place. " +
                         "Documentation:  https://docs.aws.amazon.com/organizations/latest/userguide/orgs_manage_policies_scps.html.");
+    }
+
+    @Test
+    void testPrepareComputeClusterCreationWhenEntitlementMissing() {
+        doThrow(new BadRequestException("You are not entitled to use externalized compute cluster. "
+                + "Please contact Cloudera to enable ENABLE_COMPUTE_CLUSTER for your account."))
+                .when(externalizedComputeEntitlementValidator).validateComputeClusterEntitlement("1234");
+
+        ExternalizedComputeClusterRequest request = new ExternalizedComputeClusterRequest();
+        request.setName("cluster");
+        request.setEnvironmentCrn(ENV_CRN);
+
+        Crn userCrn = Crn.fromString(USER_CRN);
+
+        BadRequestException ex = assertThrows(BadRequestException.class,
+                () -> clusterService.prepareComputeClusterCreation(request, false, userCrn));
+        assertEquals("You are not entitled to use externalized compute cluster. "
+                + "Please contact Cloudera to enable ENABLE_COMPUTE_CLUSTER for your account.", ex.getMessage());
     }
 
 }

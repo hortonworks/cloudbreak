@@ -421,6 +421,17 @@ public class FreeIpaService {
         return outboundType != null ? outboundType : OutboundType.NOT_DEFINED;
     }
 
+    public FlowIdentifier updateSalt(String environmentCrn) {
+        try {
+            LOGGER.info("Calling freeipa to update salt");
+            return freeIpaV1Endpoint.updateSaltByName(environmentCrn, ThreadBasedUserCrnProvider.getAccountId());
+        } catch (WebApplicationException e) {
+            String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
+            LOGGER.error("Failed to update salt in FreeIpa for environment '{}' due to: '{}'", environmentCrn, errorMessage, e);
+            throw new FreeIpaOperationFailedException(errorMessage, e);
+        }
+    }
+
     public void modifyUserDefinedTags(String environmentCrn, Map<String, String> tags) {
         try {
             LOGGER.debug("Calling FreeIPA modify user defined tags for environment {} with tags {}", environmentCrn, tags);

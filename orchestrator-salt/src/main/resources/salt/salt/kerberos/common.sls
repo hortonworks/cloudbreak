@@ -78,6 +78,9 @@ copy_krb5_keytab:
   file.managed:
     - source: salt://kerberos/config/trust.conf.j2
     - template: jinja
+{% else %}
+/etc/krb5.conf.d/trust.conf:
+  file.absent
 {% endif %}
 
 {%- if "manager_server" in grains.get('roles', []) %}

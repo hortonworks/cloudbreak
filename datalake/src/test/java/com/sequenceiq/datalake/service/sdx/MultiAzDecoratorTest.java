@@ -85,7 +85,7 @@ class MultiAzDecoratorTest {
     }
 
     @ParameterizedTest(name = "{0}")
-    @EnumSource(value = SdxClusterShape.class, mode = Mode.EXCLUDE, names = {"MEDIUM_DUTY_HA", "ENTERPRISE"})
+    @EnumSource(value = SdxClusterShape.class, mode = Mode.EXCLUDE, names = {"MEDIUM_DUTY_HA", "ENTERPRISE", "ENTERPRISE_WITHOUT_HBASE"})
     void decorateStackRequestWithMultiAzShouldUseTheSingleEnvironmentPreferredSubnetIdWhenClusterShapeIsNotHAAndAws(SdxClusterShape clusterShape) {
         StackV4Request stackV4Request = new StackV4Request();
         stackV4Request.setInstanceGroups(List.of(getInstanceGroupV4Request(InstanceGroupType.GATEWAY), getInstanceGroupV4Request(InstanceGroupType.CORE)));
@@ -302,7 +302,7 @@ class MultiAzDecoratorTest {
     }
 
     @ParameterizedTest(name = "{0}")
-    @EnumSource(value = SdxClusterShape.class, mode = Mode.EXCLUDE, names = {"MEDIUM_DUTY_HA", "ENTERPRISE"})
+    @EnumSource(value = SdxClusterShape.class, mode = Mode.EXCLUDE, names = {"MEDIUM_DUTY_HA", "ENTERPRISE", "ENTERPRISE_WITHOUT_HBASE"})
     void decorateStackRequestWithMultiAzTestWhenAzureAndBadClusterShape(SdxClusterShape clusterShape) {
         DetailedEnvironmentResponse environment = new DetailedEnvironmentResponse();
         environment.setCloudPlatform(PLATFORM_AZURE);
@@ -315,7 +315,7 @@ class MultiAzDecoratorTest {
     }
 
     @ParameterizedTest(name = "{0}")
-    @EnumSource(value = SdxClusterShape.class, mode = Mode.EXCLUDE, names = {"MEDIUM_DUTY_HA", "ENTERPRISE"})
+    @EnumSource(value = SdxClusterShape.class, mode = Mode.EXCLUDE, names = {"MEDIUM_DUTY_HA", "ENTERPRISE", "ENTERPRISE_WITHOUT_HBASE"})
     void decorateStackRequestWithMultiAzTestWhenGcpAndBadClusterShape(SdxClusterShape clusterShape) {
         DetailedEnvironmentResponse environment = new DetailedEnvironmentResponse();
         environment.setCloudPlatform(PLATFORM_GCP);
@@ -497,7 +497,7 @@ class MultiAzDecoratorTest {
     }
 
     @ParameterizedTest(name = "{0}")
-    @EnumSource(value = SdxClusterShape.class, mode = Mode.EXCLUDE, names = {"MEDIUM_DUTY_HA", "ENTERPRISE"})
+    @EnumSource(value = SdxClusterShape.class, mode = Mode.EXCLUDE, names = {"MEDIUM_DUTY_HA", "ENTERPRISE", "ENTERPRISE_WITHOUT_HBASE"})
     void testValidateMultiAzThrowsExceptionWhenClusterShapeIsNotSupported(SdxClusterShape clusterShape) {
         DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
         detailedEnvironmentResponse.setName("envName");

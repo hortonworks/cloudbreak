@@ -55,6 +55,7 @@ import com.sequenceiq.environment.encryptionprofile.EncryptionProfileTestConstan
 import com.sequenceiq.environment.encryptionprofile.cache.DefaultEncryptionProfileProvider;
 import com.sequenceiq.environment.encryptionprofile.domain.EncryptionProfile;
 import com.sequenceiq.environment.encryptionprofile.respository.EncryptionProfileRepository;
+import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.service.cluster.ClusterService;
 
 @ExtendWith(MockitoExtension.class)
@@ -223,7 +224,7 @@ public class EncryptionProfileServiceTest {
 
         assertThatThrownBy(() -> underTest.getByCrn(ENCRYPTION_PROFILE_CRN))
                 .isInstanceOf(NotFoundException.class)
-                .hasMessage("Encryption Profile not found with Crn: " + ENCRYPTION_PROFILE_CRN);
+                .hasMessage("Encryption Profile not found with crn: " + ENCRYPTION_PROFILE_CRN);
 
         verify(repository).findByResourceCrn(ENCRYPTION_PROFILE_CRN);
     }
@@ -306,8 +307,8 @@ public class EncryptionProfileServiceTest {
         List<EncryptionProfile> result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.listAll());
 
         assertThat(result).isNotEmpty();
-        assertThat(result.get(0).getResourceCrn()).isEqualTo(ENCRYPTION_PROFILE_CRN);
-        assertThat(result.get(0).getAccountId()).isEqualTo(ACCOUNT_ID);
+        assertThat(result.getFirst().getResourceCrn()).isEqualTo(ENCRYPTION_PROFILE_CRN);
+        assertThat(result.getFirst().getAccountId()).isEqualTo(ACCOUNT_ID);
 
         verify(repository).findAllByAccountId(ACCOUNT_ID);
     }
@@ -320,8 +321,8 @@ public class EncryptionProfileServiceTest {
         List<EncryptionProfile> result = underTest.findAllById(ids);
 
         assertThat(result).isNotEmpty();
-        assertThat(result.get(0).getResourceCrn()).isEqualTo(ENCRYPTION_PROFILE_CRN);
-        assertThat(result.get(0).getAccountId()).isEqualTo(ACCOUNT_ID);
+        assertThat(result.getFirst().getResourceCrn()).isEqualTo(ENCRYPTION_PROFILE_CRN);
+        assertThat(result.getFirst().getAccountId()).isEqualTo(ACCOUNT_ID);
 
         verify(repository).findAllById(ids);
     }
@@ -333,8 +334,8 @@ public class EncryptionProfileServiceTest {
         List<ResourceWithId> resources = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.getEncryptionProfilesAsAuthorizationResources());
 
         assertThat(resources).isNotEmpty();
-        assertThat(resources.get(0).getResourceCrn()).isEqualTo(ENCRYPTION_PROFILE_CRN);
-        assertThat(resources.get(0).getId()).isEqualTo(ENCRYPTION_PROFILE.getId());
+        assertThat(resources.getFirst().getResourceCrn()).isEqualTo(ENCRYPTION_PROFILE_CRN);
+        assertThat(resources.getFirst().getId()).isEqualTo(ENCRYPTION_PROFILE.getId());
 
         verify(repository).findAuthorizationResourcesByAccountId(eq(ACCOUNT_ID));
     }
@@ -348,7 +349,7 @@ public class EncryptionProfileServiceTest {
         List<String> result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.getResourceCrnListByResourceNameList(resourceNames));
 
         assertThat(result).isNotEmpty();
-        assertThat(result.get(0)).isEqualTo(ENCRYPTION_PROFILE_CRN);
+        assertThat(result.getFirst()).isEqualTo(ENCRYPTION_PROFILE_CRN);
 
         verify(repository).findAllResourceCrnByNameListAndAccountId(resourceNames, ACCOUNT_ID);
     }
@@ -479,7 +480,7 @@ public class EncryptionProfileServiceTest {
 
         verify(repository, times(1)).findByResourceCrn("crn:cdp:environments:us-west-1:cloudera:encryptionProfile:custom-123");
         verify(repository, never()).findByNameAndAccountId(anyString(), anyString());
-        assertThat(ex).hasMessage("Encryption Profile not found with Crn: crn:cdp:environments:us-west-1:cloudera:encryptionProfile:custom-123");
+        assertThat(ex).hasMessage("Encryption Profile not found with crn: crn:cdp:environments:us-west-1:cloudera:encryptionProfile:custom-123");
     }
 
     @Test
@@ -522,6 +523,31 @@ public class EncryptionProfileServiceTest {
                 .hasMessage("Cipher suites list cannot be empty");
 
         verify(repository, never()).save(any());
+    }
+
+    @Test
+    void testSetEncryptionProfile() {
+        Environment environment = new Environment();
+        EncryptionProfile encryptionProfile = getTestEncryptionProfile();
+
+        when(repository.findByResourceCrn(ENCRYPTION_PROFILE_CRN)).thenReturn(Optional.of(encryptionProfile));
+
+        underTest.setEncryptionProfile(environment, ENCRYPTION_PROFILE_CRN);
+
+        assertThat(environment.getEncryptionProfileCrn()).isEqualTo(ENCRYPTION_PROFILE_CRN);
+    }
+
+    @Test
+    void testSetEncryptionProfileWhenEncryptionProfileDoesNotExist() {
+        Environment environment = new Environment();
+
+        when(repository.findByResourceCrn(ENCRYPTION_PROFILE_CRN)).thenReturn(Optional.empty());
+        when(defaultEncryptionProfileProvider.defaultEncryptionProfilesByCrn()).thenReturn(getDefaultEncryptionProfileCrnMap());
+
+        assertThatThrownBy(() -> underTest.setEncryptionProfile(environment, ENCRYPTION_PROFILE_CRN))
+                .isInstanceOf(NotFoundException.class)
+                .hasMessage("Encryption Profile not found with crn: " + ENCRYPTION_PROFILE_CRN);
+
     }
 
     private Map<String, EncryptionProfile> getDefaultEncryptionProfileNameMap() {

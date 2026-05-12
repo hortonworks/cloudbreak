@@ -9,12 +9,15 @@ import static com.sequenceiq.freeipa.flow.freeipa.trust.setupfinish.FreeIpaTrust
 import static com.sequenceiq.freeipa.flow.freeipa.trust.setupfinish.FreeIpaTrustSetupFinishState.TRUST_SETUP_FINISH_ADD_TRUST_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.trust.setupfinish.FreeIpaTrustSetupFinishState.TRUST_SETUP_FINISH_FAILED_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.trust.setupfinish.FreeIpaTrustSetupFinishState.TRUST_SETUP_FINISH_FINISHED_STATE;
+import static com.sequenceiq.freeipa.flow.freeipa.trust.setupfinish.FreeIpaTrustSetupFinishState.TRUST_SETUP_FINISH_VALIDATE_TRUST_STATE;
 import static com.sequenceiq.freeipa.flow.freeipa.trust.setupfinish.event.FreeIpaTrustSetupFinishFlowEvent.TRUST_SETUP_FINISH_ADD_TRUST_FAILED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.trust.setupfinish.event.FreeIpaTrustSetupFinishFlowEvent.TRUST_SETUP_FINISH_ADD_TRUST_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.trust.setupfinish.event.FreeIpaTrustSetupFinishFlowEvent.TRUST_SETUP_FINISH_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.trust.setupfinish.event.FreeIpaTrustSetupFinishFlowEvent.TRUST_SETUP_FINISH_FAILURE_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.trust.setupfinish.event.FreeIpaTrustSetupFinishFlowEvent.TRUST_SETUP_FINISH_FAILURE_HANDLED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.trust.setupfinish.event.FreeIpaTrustSetupFinishFlowEvent.TRUST_SETUP_FINISH_FINISHED_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.trust.setupfinish.event.FreeIpaTrustSetupFinishFlowEvent.TRUST_SETUP_FINISH_VALIDATE_TRUST_FAILED_EVENT;
+import static com.sequenceiq.freeipa.flow.freeipa.trust.setupfinish.event.FreeIpaTrustSetupFinishFlowEvent.TRUST_SETUP_FINISH_VALIDATE_TRUST_FINISHED_EVENT;
 
 import java.util.List;
 
@@ -43,9 +46,14 @@ public class FreeIpaTrustSetupFinishFlowConfig
                     .defaultFailureEvent()
 
                     .from(TRUST_SETUP_FINISH_ADD_TRUST_STATE)
-                    .to(TRUST_SETUP_FINISH_FINISHED_STATE)
+                    .to(TRUST_SETUP_FINISH_VALIDATE_TRUST_STATE)
                     .event(TRUST_SETUP_FINISH_ADD_TRUST_FINISHED_EVENT)
                     .failureEvent(TRUST_SETUP_FINISH_ADD_TRUST_FAILED_EVENT)
+
+                    .from(TRUST_SETUP_FINISH_VALIDATE_TRUST_STATE)
+                    .to(TRUST_SETUP_FINISH_FINISHED_STATE)
+                    .event(TRUST_SETUP_FINISH_VALIDATE_TRUST_FINISHED_EVENT)
+                    .failureEvent(TRUST_SETUP_FINISH_VALIDATE_TRUST_FAILED_EVENT)
 
                     .from(TRUST_SETUP_FINISH_FINISHED_STATE)
                     .to(FINAL_STATE)

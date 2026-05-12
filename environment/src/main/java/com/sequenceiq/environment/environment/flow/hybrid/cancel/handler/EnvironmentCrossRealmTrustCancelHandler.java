@@ -2,8 +2,9 @@ package com.sequenceiq.environment.environment.flow.hybrid.cancel.handler;
 
 import static com.sequenceiq.environment.environment.EnvironmentStatus.TRUST_CANCEL_FAILED;
 import static com.sequenceiq.environment.environment.flow.hybrid.cancel.event.EnvironmentCrossRealmTrustCancelHandlerSelectors.TRUST_CANCEL_HANDLER;
-import static com.sequenceiq.environment.environment.flow.hybrid.cancel.event.EnvironmentCrossRealmTrustCancelStateSelectors.FINISH_TRUST_CANCEL_EVENT;
+import static com.sequenceiq.environment.environment.flow.hybrid.cancel.event.EnvironmentCrossRealmTrustCancelStateSelectors.TRUST_CANCEL_CONFIG_REMOVAL_EVENT;
 
+import java.util.Locale;
 import java.util.Optional;
 
 import org.slf4j.Logger;
@@ -59,23 +60,27 @@ public class EnvironmentCrossRealmTrustCancelHandler extends ExceptionCatcherEve
         EnvironmentCrossRealmTrustCancelEvent data = event.getData();
         try {
             environmentService.removeRemoteEnvironmentCrn(data.getResourceCrn());
-
             Optional<DescribeFreeIpaResponse> describe = freeIpaService.describe(data.getResourceCrn());
+            String realm = describe
+                    .filter(r -> r.getTrust() != null && r.getTrust().getRealm() != null)
+                    .map(r -> r.getTrust().getRealm().toUpperCase(Locale.ROOT))
+                    .orElse(null);
             if (describe.isPresent()) {
                 DescribeFreeIpaResponse freeIpa = describe.get();
-                if (freeIpa.getStatus() == null || freeIpa.getAvailabilityStatus() == null) {
+                if (freeIpa.getStatus() == null) {
                     throw new FreeIpaOperationFailedException("FreeIPA status is unpredictable, cross realm trust cancel interrupted.");
                 } else {
                     LOGGER.info("FreeIPA will be cross realm trust cancel.");
                     freeIpaPollerService.waitForCrossRealmTrustCancel(data.getResourceId(), data.getResourceCrn());
                 }
             }
-            LOGGER.debug("FINISH_TRUST_CANCEL_EVENT event sent");
+            LOGGER.debug("TRUST_CANCEL_CONFIG_REMOVAL_EVENT event sent");
             return EnvironmentCrossRealmTrustCancelEvent.builder()
-                    .withSelector(FINISH_TRUST_CANCEL_EVENT.selector())
+                    .withSelector(TRUST_CANCEL_CONFIG_REMOVAL_EVENT.selector())
                     .withResourceCrn(data.getResourceCrn())
                     .withResourceId(data.getResourceId())
                     .withResourceName(data.getResourceName())
+                    .withRealm(realm)
                     .build();
         } catch (Exception e) {
             LOGGER.debug("TRUST_CANCEL_FAILED event sent");

@@ -1,6 +1,6 @@
 package com.sequenceiq.environment.encryptionprofile.v1.converter;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -10,17 +10,16 @@ import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.tls.EncryptionProfileProvider;
 import com.sequenceiq.common.api.encryptionprofile.TlsVersion;
-import com.sequenceiq.environment.api.v1.encryptionprofile.config.EncryptionProfileConfig;
 import com.sequenceiq.environment.api.v1.encryptionprofile.model.EncryptionProfileResponse;
 import com.sequenceiq.environment.encryptionprofile.domain.EncryptionProfile;
-import com.sequenceiq.environment.environment.dto.EncryptionProfileDto;
 
 @Component
 public class EncryptionProfileToEncryptionProfileResponseConverter {
 
     @Inject
-    private EncryptionProfileConfig encryptionProfileConfig;
+    private EncryptionProfileProvider encryptionProfileProvider;
 
     public EncryptionProfileResponse convert(EncryptionProfile source) {
         if (source == null) {
@@ -33,7 +32,7 @@ public class EncryptionProfileToEncryptionProfileResponseConverter {
         response.setCrn(source.getResourceCrn());
         response.setTlsVersions(source.getTlsVersions().stream().map(TlsVersion::getVersion).collect(Collectors.toSet()));
         response.setCipherSuites(getCipherSuiteMap(source.getCipherSuites(), source.getTlsVersions()));
-        response.setClouderaInternalCipherSuites(getClouderaCipherSuiteMap(source.getTlsVersions()));
+        response.setClouderaInternalCipherSuites(Collections.emptyMap());
         response.setCreated(source.getCreated());
         response.setStatus(source.getResourceStatus().name());
         return response;
@@ -42,41 +41,17 @@ public class EncryptionProfileToEncryptionProfileResponseConverter {
     private Map<String, List<String>> getCipherSuiteMap(
             List<String> cipherSuites,
             Set<TlsVersion> tlsVersions) {
+        Map<String, List<String>> availableCipherSuites = encryptionProfileProvider.getAllCipherSuitesAvailableByTlsVersion();
         return tlsVersions.stream().collect(Collectors.toMap(
                 TlsVersion::getVersion,
                 tlsVersion -> {
-                    Set<String> availableCiphers = encryptionProfileConfig.getAvailableCiphers(tlsVersion);
-                    return cipherSuites.stream()
+                    List<String> availableCiphers = availableCipherSuites.get(tlsVersion.getVersion());
+
+                    return cipherSuites
+                            .stream()
                             .filter(availableCiphers::contains)
                             .collect(Collectors.toList());
                 }
         ));
-    }
-
-    private Map<String, List<String>> getClouderaCipherSuiteMap(Set<TlsVersion> tlsVersions) {
-
-        return tlsVersions.stream().collect(Collectors.toMap(
-                TlsVersion::getVersion,
-                tlsVersion -> new ArrayList<>(encryptionProfileConfig.getRequiredCiphers(tlsVersion))
-        ));
-    }
-
-    public EncryptionProfileResponse dtoToResponse(EncryptionProfileDto encryptionProfile) {
-        if (encryptionProfile == null) {
-            return null;
-        }
-
-        EncryptionProfileResponse response = new EncryptionProfileResponse();
-        response.setName(encryptionProfile.getName());
-        response.setDescription(encryptionProfile.getDescription());
-        response.setCrn(encryptionProfile.getResourceCrn());
-        response.setCreated(encryptionProfile.getCreated());
-        response.setTlsVersions(encryptionProfile.getTlsVersions()
-                .stream()
-                .map(TlsVersion::getVersion)
-                .collect(Collectors.toSet()));
-        response.setCipherSuites(getCipherSuiteMap(encryptionProfile.getCipherSuites(), encryptionProfile.getTlsVersions()));
-        response.setClouderaInternalCipherSuites(getClouderaCipherSuiteMap(encryptionProfile.getTlsVersions()));
-        return response;
     }
 }

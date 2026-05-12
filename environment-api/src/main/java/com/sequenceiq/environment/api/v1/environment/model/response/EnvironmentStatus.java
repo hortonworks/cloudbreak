@@ -126,6 +126,12 @@ public enum EnvironmentStatus {
     TRUST_CANCEL_VALIDATION_IN_PROGRESS("Cross Realm Trust cancel validation in progress"),
     TRUST_CANCEL_VALIDATION_FAILED("Cross Realm Trust cancel validation failed"),
     TRUST_CANCEL_IN_PROGRESS("Cross Realm Trust cancel in progress"),
+    TRUST_CANCEL_CONFIG_REMOVAL_IN_PROGRESS("Cross Realm Trust configuration clean up in progress"),
+    TRUST_CANCEL_CONFIG_REMOVAL_FAILED("Cross Realm Trust cancel configuration clean up failed"),
+    TRUST_CANCEL_TRUST_ENTITY_DELETE_IN_PROGRESS("Cross Realm Trust entity deletion in progress"),
+    TRUST_CANCEL_TRUST_ENTITY_DELETE_FAILED("Cross Realm Trust entity deletion failed"),
+    TRUST_CANCEL_SALT_UPDATE_IN_PROGRESS("Cross Realm Trust cancel salt update in progress"),
+    TRUST_CANCEL_SALT_UPDATE_FAILED("Cross Realm Trust cancel salt update failed"),
     TRUST_CANCEL_FAILED("Cross Realm Trust cancel failed"),
 
     TRUST_SETUP_FINISH_VALIDATION_IN_PROGRESS("Cross Realm Trust setup finish validation in progress"),
@@ -166,7 +172,10 @@ public enum EnvironmentStatus {
     FREEIPA_FINISH_CROSS_REALM_TRUST_FAILED("Failed to finish setting up cross-realm trust on FreeIPA"),
     FREEIPA_FINISH_CROSS_REALM_TRUST_SUCCESSFUL("Setting up cross-realm trust on FreeIPA finished successfully"),
     UPGRADE_DEFAULT_OUTBOUND_ON_FREEIPA_IN_PROGRESS("Upgrading Default Outbound on FreeIPA"),
-    UPGRADE_DEFAULT_OUTBOUND_ON_FREEIPA_FAILED("Failed to upgrade Default Outbound on FreeIPA"),;
+    UPGRADE_DEFAULT_OUTBOUND_ON_FREEIPA_FAILED("Failed to upgrade Default Outbound on FreeIPA"),
+
+    ENABLE_ENCRYPTION_PROFILE_IN_PROGRESS("Enable encryption profile in progress"),
+    ENABLE_ENCRYPTION_PROFILE_FAILED("Enable encryption profile failed");
 
     private static final Set<EnvironmentStatus> STARTABLE_STATUSES = Set.of(
             AVAILABLE,

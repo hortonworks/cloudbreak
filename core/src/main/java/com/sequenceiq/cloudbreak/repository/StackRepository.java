@@ -255,6 +255,21 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
             + "FROM Stack s "
             + "LEFT JOIN s.cluster c "
             + "LEFT JOIN s.stackStatus ss "
+            + "WHERE s.environmentCrn = :environmentCrn AND s.terminated IS null")
+    List<StackClusterStatusView> getStatusesByEnvironmentCrn(@Param("environmentCrn") String environmentCrn);
+
+    @Query("SELECT s.id as id, "
+            + "s.resourceCrn as crn, "
+            + "s.name as name, "
+            + "ss.status as status, "
+            + "ss.statusReason as statusReason, "
+            + "c.id as clusterId, "
+            + "c.status as clusterStatus, "
+            + "c.statusReason as clusterStatusReason, "
+            + "c.certExpirationState as certExpirationState "
+            + "FROM Stack s "
+            + "LEFT JOIN s.cluster c "
+            + "LEFT JOIN s.stackStatus ss "
             + "WHERE s.name = :name AND s.workspace.id= :workspaceId")
     Optional<StackClusterStatusView> getStatusByNameAndWorkspace(@Param("name") String name, @Param("workspaceId") Long workspaceId);
 

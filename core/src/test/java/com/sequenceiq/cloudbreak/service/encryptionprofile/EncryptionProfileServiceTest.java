@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service.encryptionprofile;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -21,7 +22,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.util.TestConstants;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.environment.api.v1.encryptionprofile.endpoint.EncryptionProfileEndpoint;
@@ -31,10 +36,13 @@ import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvi
 @ExtendWith(MockitoExtension.class)
 class EncryptionProfileServiceTest {
 
-    private static final String USER_CRN = "crn:cdp:iam:us-west-1:1234:user:1";
+    private static final String USER_CRN = "crn:cdp:iam:us-west-1:cloudera:user:user@cloudera.com";
 
     @Mock
     private EncryptionProfileEndpoint encryptionProfileEndpoint;
+
+    @Mock
+    private ClusterService clusterService;
 
     @Mock
     private EntitlementService entitlementService;
@@ -43,37 +51,17 @@ class EncryptionProfileServiceTest {
     private EncryptionProfileService underTest;
 
     @Test
-    void testGetEncryptionProfileCrnWhenClusterEncryptionProfileIsNotNull() {
-        DetailedEnvironmentResponse environment = new DetailedEnvironmentResponse();
-        environment.setEncryptionProfileCrn("envEncryptionProfileCrn");
-        ClusterView cluster = mock(ClusterView.class);
-
-        when(cluster.getEncryptionProfileCrn()).thenReturn("clusterEpCrn");
-
-        String response = underTest.getEncryptionProfileCrn(environment, cluster);
-
-        assertEquals("clusterEpCrn", response);
-    }
-
-    @Test
-    void testGetEncryptionProfileCrnWhenClusterEncryptionProfileIsNullEnvironmentEncryptionProfileShouldBeUsed() {
+    void testGetEncryptionProfileWhenClusterEPIsNullEnvironmentFallback() {
         DetailedEnvironmentResponse environment = new DetailedEnvironmentResponse();
         environment.setEncryptionProfileCrn("environmentEp");
         ClusterView cluster = mock(ClusterView.class);
-
+        StackDto mockStack = mock(StackDto.class);
+        when(mockStack.getCluster()).thenReturn(cluster);
         when(cluster.getEncryptionProfileCrn()).thenReturn(null);
 
-        String response = underTest.getEncryptionProfileCrn(environment, cluster);
+        String response = underTest.getEncryptionProfileByCrnOrDefault(environment, mockStack);
 
         assertEquals("environmentEp", response);
-    }
-
-    @Test
-    void testGetEncryptionProfileByCrnWhenEncryptionProfileIsNullDefaultEncryptionProfileShouldBeUsed() {
-        ThreadBasedUserCrnProvider.doAs(TestConstants.CRN, () -> underTest.getEncryptionProfileByCrnOrDefault(null));
-
-        verify(encryptionProfileEndpoint, never()).getByCrn(anyString());
-        verify(encryptionProfileEndpoint, only()).getDefaultEncryptionProfile();
     }
 
     @Test
@@ -108,17 +96,6 @@ class EncryptionProfileServiceTest {
     }
 
     @Test
-    void testGetEncryptionProfileByNameOrCrnWhenInputIsNullResponseShouldBeNullAndDoesNotThrowException() {
-        when(entitlementService.isConfigureEncryptionProfileEnabled(anyString())).thenReturn(true);
-
-        EncryptionProfileResponse response  = assertDoesNotThrow(() ->
-                ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
-                        underTest.getEncryptionProfileByNameOrCrn(null, null)));
-
-        assertThat(response).isNull();
-    }
-
-    @Test
     void testGetEncryptionProfileByNameOrCrnWhenProfileNameIsUsed() {
         when(entitlementService.isConfigureEncryptionProfileEnabled(anyString())).thenReturn(true);
 
@@ -139,5 +116,69 @@ class EncryptionProfileServiceTest {
         verify(encryptionProfileEndpoint, times(1))
                 .getByCrn("crn:cdp:environments:us-west-1:cloudera:encryptionProfile:custom-123");
         verify(encryptionProfileEndpoint, never()).getByName(anyString());
+    }
+
+    @Test
+    void testSetEncryptionProfile() {
+        String encryptionProfileCrn = "encryptionProfileCrn";
+        Stack stack = mock(Stack.class);
+        Cluster  cluster = mock(Cluster.class);
+        EncryptionProfileResponse encryptionProfileResponse = new EncryptionProfileResponse();
+        encryptionProfileResponse.setCrn(encryptionProfileCrn);
+
+        when(stack.getCluster()).thenReturn(cluster);
+        when(encryptionProfileEndpoint.getByCrn(encryptionProfileCrn)).thenReturn(encryptionProfileResponse);
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.setEncryptionProfile(encryptionProfileCrn, stack));
+
+        verify(clusterService, times(1)).save(cluster);
+    }
+
+    @Test
+    void testSetEncryptionProfileShouldNotFailWhenEncryptionProfileIsNull() {
+        Stack stack = mock(Stack.class);
+
+        assertDoesNotThrow(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.setEncryptionProfile(null, stack)));
+
+        verify(clusterService, never()).save(any());
+    }
+
+    @Test
+    void testGetEncryptionProfileOrThrowExceptionByCrn() {
+        String encryptionProfileCrn = "crn:cdp:environments:us-west-1:cloudera:encryptionProfile:a645ac1b-14b6-45a7-88ef-b920ad9b32b4";
+
+        when(encryptionProfileEndpoint.getByCrn(encryptionProfileCrn)).thenReturn(mock(EncryptionProfileResponse.class));
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.getEncryptionProfileOrThrowException(encryptionProfileCrn));
+
+        verify(encryptionProfileEndpoint, never()).getByName(any());
+        verify(encryptionProfileEndpoint, times(1)).getByCrn(encryptionProfileCrn);
+    }
+
+    @Test
+    void testGetEncryptionProfileOrThrowExceptionByName() {
+        String encryptionProfileName = "epName";
+
+        when(encryptionProfileEndpoint.getByName(encryptionProfileName)).thenReturn(mock(EncryptionProfileResponse.class));
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.getEncryptionProfileOrThrowException(encryptionProfileName));
+
+        verify(encryptionProfileEndpoint, never()).getByCrn(any());
+        verify(encryptionProfileEndpoint, times(1)).getByName(encryptionProfileName);
+    }
+
+    @Test
+    void testGetEncryptionProfileOrThrowExceptionWhenEncryptionProfileIsNotFound() {
+        String encryptionProfileCrn = "crn:cdp:environments:us-west-1:cloudera:encryptionProfile:a645ac1b-14b6-45a7-88ef-b920ad9b32b4";
+
+        when(encryptionProfileEndpoint.getByCrn(encryptionProfileCrn)).thenReturn(null);
+
+        NotFoundException ex = assertThrows(NotFoundException.class, () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
+                underTest.getEncryptionProfileOrThrowException(encryptionProfileCrn)));
+
+        verify(encryptionProfileEndpoint, never()).getByName(any());
+        verify(encryptionProfileEndpoint, times(1)).getByCrn(encryptionProfileCrn);
+        assertEquals("Encryption profile not found: crn:cdp:environments:us-west-1:cloudera:encryptionProfile:a645ac1b-14b6-45a7-88ef-b920ad9b32b4",
+                ex.getMessage());
     }
 }

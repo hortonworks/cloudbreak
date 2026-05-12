@@ -20,6 +20,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.environment.environment.poller.StackPollerProvider;
 import com.sequenceiq.environment.exception.DatahubOperationFailedException;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -130,4 +132,29 @@ public class StackPollerService {
                 .collect(Collectors.toList());
     }
 
+    private String getDatalakeCrn(String envCrn) {
+        StackViewV4Responses stackViewV4Responses = stackV4Endpoint.list(0L, envCrn, true);
+        return stackViewV4Responses.getResponses().stream()
+                .filter(stack -> !SKIPPED_STATES.contains(stack.getCluster().getStatus()))
+                .map(StackViewV4Response::getCrn)
+                .toList()
+                .getFirst();
+    }
+
+    public void waitForUpdateSslConfigs(String envCrn, Long envId) {
+        String stackCrn = getDatalakeCrn(envCrn);
+        FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAsInternalActor(() ->
+            stackV4Endpoint.updateSslConfigurationsByCrn(0L, stackCrn, null));
+        try {
+            Polling.stopAfterDelay(maxTime, TimeUnit.SECONDS)
+                    .stopIfException(true)
+                    .waitPeriodly(sleepTime, TimeUnit.SECONDS)
+                    .run(() -> stackPollerProvider.updateSslConfig(envId, flowIdentifier));
+        } catch (PollerStoppedException e) {
+            String message = String.format("Update ssl configurations in stack timed out or error happened: %s", e.getMessage());
+            LOGGER.warn(message, e);
+            throw new CloudbreakServiceException(message);
+        }
+
+    }
 }

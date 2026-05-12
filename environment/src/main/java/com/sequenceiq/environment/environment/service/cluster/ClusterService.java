@@ -13,9 +13,13 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateTrustedRealmRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.common.api.type.EnvironmentType;
+import com.sequenceiq.environment.environment.dto.EnvironmentDto;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
 
 @Service
 public class ClusterService {
@@ -49,5 +53,25 @@ public class ClusterService {
                 .filter(workloadsBasedOnEnvironmentType)
                 .map(StackViewV4Response::getCrn)
                 .collect(Collectors.toList());
+    }
+
+    public List<FlowIdentifier> removeTrustedRealmConfigFromClusters(Optional<EnvironmentDto> environmentDto, String realm) {
+        if (environmentDto.isEmpty()) {
+            LOGGER.warn("Environment DTO is not present, skipping trusted realm removal from clusters.");
+            return List.of();
+        }
+        EnvironmentDto env = environmentDto.get();
+        String envCrn = env.getResourceCrn();
+        EnvironmentType environmentType = env.getEnvironmentType();
+
+        List<String> stackCrns = getStackCrnsForConfigUpdate(envCrn, environmentType);
+        return stackCrns.stream().map(crn -> {
+            LOGGER.info("Triggering async removal of trusted realm '{}' from cluster: {}", realm, crn);
+            UpdateTrustedRealmRequest request = new UpdateTrustedRealmRequest();
+            request.setRealm(realm);
+            request.setRemove(true);
+            return ThreadBasedUserCrnProvider.doAsInternalActor(
+                    () -> stackV4Endpoint.triggerUpdateTrustedRealm(0L, crn, request));
+        }).collect(Collectors.toList());
     }
 }

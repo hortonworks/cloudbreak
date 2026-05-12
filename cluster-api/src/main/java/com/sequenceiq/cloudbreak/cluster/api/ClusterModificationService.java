@@ -111,7 +111,7 @@ public interface ClusterModificationService {
 
     void restartAll(boolean withMgmtServices);
 
-    default void restartClusterServices() {
+    default void restartClusterServices(boolean restartStaleServices) {
         throw new UnsupportedOperationException("Interface not implemented.");
     }
 

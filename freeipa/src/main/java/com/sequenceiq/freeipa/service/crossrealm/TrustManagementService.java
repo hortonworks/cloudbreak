@@ -232,7 +232,7 @@ public class TrustManagementService {
         crossRealmTrust.setEnvironmentCrn(request.getEnvironmentCrn());
         setupTrustSecret(request.getTrustSecret(), crossRealmTrust);
         crossRealmTrust.setTrustStatus(TrustStatus.TRUST_SETUP_REQUIRED);
-        setKdcParameters(request.getAd(), null, crossRealmTrust, request.getDnsServerIps());
+        setKdcParameters(request.getAd(), request.getMit(), crossRealmTrust, request.getDnsServerIps());
         crossRealmTrust = crossRealmTrustService.save(crossRealmTrust);
         LOGGER.debug("Saved cross-realm trust configuration: {}", crossRealmTrust);
     }

@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.reactor.handler.cluster;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
@@ -106,7 +107,7 @@ public class ClusterServicesRestartHandlerTest {
 
         verify(connector, times(1)).reallocateMemory(false);
         verify(clusterModificationService, times(1)).rollingRestartServices(false);
-        verify(clusterModificationService, times(0)).restartClusterServices();
+        verify(clusterModificationService, times(0)).restartClusterServices(anyBoolean());
 
     }
 
@@ -118,7 +119,7 @@ public class ClusterServicesRestartHandlerTest {
         underTest.accept(new Event(new ClusterServicesRestartRequest(stack.getId(), false, false, false)));
 
         verify(clusterServicesRestartService, times(0)).refreshClusterOnRestart(any(), any(), any(), eq(false));
-        verify(clusterModificationService).restartClusterServices();
+        verify(clusterModificationService).restartClusterServices(anyBoolean());
 
     }
 

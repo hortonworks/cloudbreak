@@ -289,6 +289,13 @@ public class StackOperations implements HierarchyAuthResourcePropertyProvider {
         return stackClusterStatusViewToStatusConverter.convert(statuses);
     }
 
+    public StackStatusV4Responses getStatusForInternalEnvironmentCrn(String environmentCrn) {
+        LOGGER.info("Get stack statuses by environment CRN against internal user.");
+        List<StackClusterStatusView> statuses = stackService.getStatusesByEnvironmentCrn(environmentCrn);
+        LOGGER.info("Query Stack statuses by environment CRN {} successfully finished.", environmentCrn);
+        return stackClusterStatusViewToStatusConverter.convert(statuses);
+    }
+
     public FlowIdentifier deleteInstance(@NotNull NameOrCrn nameOrCrn, String accountId, boolean forced, String instanceId) {
         return stackCommonService.deleteInstanceInWorkspace(nameOrCrn, accountId, instanceId, forced);
     }
@@ -374,7 +381,7 @@ public class StackOperations implements HierarchyAuthResourcePropertyProvider {
         LOGGER.debug("Triggering update trusted realm for stack: {}", nameOrCrn);
         StackDto stackDto = stackDtoService.getByNameOrCrn(nameOrCrn, accountId);
         return clusterOperationService.triggerUpdateTrustedRealm(stackDto.getId(), stackDto.getResourceCrn(),
-                stackDto.getEnvironmentCrn(), request.getRealm(), request.isSaltUpdateRequired());
+                stackDto.getEnvironmentCrn(), request.getRealm(), request.isSaltUpdateRequired(), request.isRemove());
     }
 
     public FlowIdentifier updatePillarConfiguration(@NotNull NameOrCrn nameOrCrn, String accountId) {

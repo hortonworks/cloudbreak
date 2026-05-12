@@ -54,6 +54,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAK
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_DB_BACKUP_ENABLE_COMPRESSION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_KNOX_GATEWAY_DB_DR;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_RESIZE_RECOVERY;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_SHAPES_WITHOUT_HBASE_AND_HDFS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_BACKUP_RESTORE_PERMISSION_CHECKS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_LOAD_BALANCER;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_MEDIUM_DUTY_WITH_PROFILER;
@@ -103,6 +104,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_STO
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATALAKE_HORIZONTAL_SCALE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATA_LAKE_LIGHT_TO_MEDIUM_MIGRATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.E2E_TEST_ONLY;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.ENABLE_COMPUTE_CLUSTER;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.ENABLE_RMS_ON_DATALAKE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.FMS_FREEIPA_BATCH_CALL;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.JUMPGATE_ENABLE_NEW_ROOT_CA;
@@ -402,6 +404,10 @@ public class EntitlementService {
         return isEntitlementRegistered(accountId, CDP_CENTRAL_COMPUTE_MONITORING);
     }
 
+    public boolean isComputeClusterEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, ENABLE_COMPUTE_CLUSTER);
+    }
+
     public boolean isAzureCertificateAuthEnabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_AZURE_CERTIFICATE_AUTH);
     }
@@ -656,5 +662,9 @@ public class EntitlementService {
 
     public boolean isBlueprintJvmParameterRemovalEnabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_CB_BLUEPRINT_JVM_PARAMETER_REMOVAL);
+    }
+
+    public boolean isDataLakeShapesWithoutHBaseAndHDFSEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_DATALAKE_SHAPES_WITHOUT_HBASE_AND_HDFS);
     }
 }

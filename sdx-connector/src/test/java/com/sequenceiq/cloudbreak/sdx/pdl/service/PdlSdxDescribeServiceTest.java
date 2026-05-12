@@ -44,6 +44,7 @@ import com.sequenceiq.cloudbreak.sdx.common.model.SdxAccessView;
 import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
 import com.sequenceiq.cloudbreak.sdx.pdl.util.PdlRdcUtil;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
+import com.sequenceiq.common.api.type.EnvironmentType;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.remoteenvironment.api.v1.environment.endpoint.RemoteEnvironmentEndpoint;
@@ -103,6 +104,7 @@ public class PdlSdxDescribeServiceTest {
     @BeforeEach
     void setup() {
         when(detailedEnvironmentResponse.getRemoteEnvironmentCrn()).thenReturn(PDL_CRN);
+        when(detailedEnvironmentResponse.getEnvironmentType()).thenReturn(EnvironmentType.HYBRID.name());
         when(environmentEndpoint.getByCrn(ENV_CRN)).thenReturn(detailedEnvironmentResponse);
         when(pvcEnvironmentDetails.getPrivateDatalakeDetails()).thenReturn(privateDatalakeDetails);
         when(environment.getPvcEnvironmentDetails()).thenReturn(pvcEnvironmentDetails);

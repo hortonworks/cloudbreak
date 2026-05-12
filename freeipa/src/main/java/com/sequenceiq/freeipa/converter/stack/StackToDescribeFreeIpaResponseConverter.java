@@ -44,6 +44,7 @@ import com.sequenceiq.freeipa.entity.LoadBalancer;
 import com.sequenceiq.freeipa.entity.SecurityConfig;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.UserSyncStatus;
+import com.sequenceiq.freeipa.entity.util.TrustRelationshipType;
 import com.sequenceiq.freeipa.service.config.FreeIpaDomainUtils;
 import com.sequenceiq.freeipa.service.crossrealm.CrossRealmTrustService;
 import com.sequenceiq.freeipa.service.loadbalancer.FreeIpaLoadBalancerService;
@@ -219,6 +220,9 @@ public class StackToDescribeFreeIpaResponseConverter {
             trustResponse.setIp(trust.getKdcIp());
             trustResponse.setDnsIp(trust.getDnsIp());
             trustResponse.setKdcType(trust.getKdcType() != null ? trust.getKdcType().name() : KdcType.UNKNOWN.name());
+            trustResponse.setTrustRelationshipType(trust.getTrustRelationshipType() != null
+                    ? trust.getTrustRelationshipType().name()
+                    : TrustRelationshipType.UNKNOWN.name());
         } else if (hybridEnvironment) {
             trustResponse.setTrustStatus(TrustStatus.TRUST_SETUP_REQUIRED.name());
         } else {

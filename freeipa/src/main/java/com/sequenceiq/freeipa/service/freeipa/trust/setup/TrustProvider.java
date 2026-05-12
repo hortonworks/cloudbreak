@@ -96,6 +96,10 @@ public abstract class TrustProvider {
 
     public abstract void addTrust(Long stackId) throws Exception;
 
+    public void addTwoWayTrust(Long stackId) throws Exception {
+        LOGGER.info("No bidirectional trust setup needed for KDC type [{}]", kdcType());
+    }
+
     public void validateTrust(Long stackId) {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         CrossRealmTrust crossRealmTrust = crossRealmTrustService.getByStackId(stackId);

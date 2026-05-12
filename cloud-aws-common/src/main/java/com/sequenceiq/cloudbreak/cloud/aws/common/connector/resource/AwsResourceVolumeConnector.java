@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.RootVolumeFetchDto;
+import com.sequenceiq.cloudbreak.cloud.model.VolumeRecord;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 
@@ -76,5 +77,11 @@ public class AwsResourceVolumeConnector implements ResourceVolumeConnector {
     public Map<String, Integer> getAttachedVolumeCountPerInstance(AuthenticatedContext authenticatedContext, CloudStack cloudStack,
             Collection<String> instanceIds) {
         return awsAdditionalDiskAttachmentService.getAttachedVolumeCountPerInstance(authenticatedContext, instanceIds);
+    }
+
+    @Override
+    public Map<String, List<VolumeRecord>> describeAttachedVolumes(AuthenticatedContext authenticatedContext, CloudStack cloudStack,
+        Collection<String> instanceIds) {
+        return awsAdditionalDiskAttachmentService.describeAttachedVolumes(authenticatedContext, instanceIds);
     }
 }

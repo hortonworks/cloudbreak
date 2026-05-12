@@ -3,6 +3,7 @@ package com.sequenceiq.distrox.api.v1.distrox.endpoint;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.GET_BY_CRNS_INTERNAL;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.GET_BY_CRN_INSTANCES_INTERNAL;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.GET_BY_CRN_INTERNAL;
+import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.GET_STATUS_BY_ENV_CRN_INTERNAL;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.LIST;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.RENEW_CERTIFICATE_INTERNAL;
 
@@ -59,6 +60,14 @@ public interface DistroXInternalV1Endpoint {
             operationId = "getDistroXStatusInternalV1ByCrns",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     StackStatusV4Responses getStatusByCrns(StatusCrnsV4Request request);
+
+    @GET
+    @Path("status/by_env")
+    @Operation(summary = GET_STATUS_BY_ENV_CRN_INTERNAL, description = Notes.STACK_NOTES,
+            operationId = "getDistroXStatusInternalV1ByEnvCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    StackStatusV4Responses getStatusByEnvironmentCrn(
+            @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @QueryParam("environmentCrn") String environmentCrn);
 
     @GET
     @Path("list")

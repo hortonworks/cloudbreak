@@ -14,6 +14,7 @@ import com.cloudera.thunderhead.service.environments2api.model.Environment;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.sdx.TargetPlatform;
 import com.sequenceiq.cloudbreak.sdx.common.service.PlatformAwareSdxCommonService;
+import com.sequenceiq.common.api.type.EnvironmentType;
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.remoteenvironment.api.v1.environment.endpoint.RemoteEnvironmentEndpoint;
@@ -62,7 +63,9 @@ public abstract class AbstractPdlSdxService implements PlatformAwareSdxCommonSer
 
     public Optional<String> getPrivateCloudEnvCrn(String publicEnvCrn) {
         DetailedEnvironmentResponse detailedEnvironmentResponse = environmentEndpoint.getByCrn(publicEnvCrn);
-        return Optional.ofNullable(detailedEnvironmentResponse.getRemoteEnvironmentCrn());
+        return EnvironmentType.isHybridFromEnvironmentTypeString(detailedEnvironmentResponse.getEnvironmentType())
+                ? Optional.ofNullable(detailedEnvironmentResponse.getRemoteEnvironmentCrn())
+                : Optional.empty();
     }
 
     protected DescribeRemoteEnvironment getRemoteEnvironmentRequest(String remoteEnvCrn) {

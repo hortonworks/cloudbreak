@@ -52,6 +52,7 @@ auth:
       backup.compression.enable: false
       upgrade.recovery.enabled: true
       knoxgateway.db.dr.enabled: true
+      shapes.withouthbase.enabled: true
     differentdatahubversionthandatalake.enabled: true
     datahub:
       instancetypes.enable: false
@@ -108,12 +109,14 @@ auth:
     compute:
       ui:
         enabled: true
+      cluster:
+        enabled: true
     ranger.ldap.usersync: true
     tlsv13.enable: false
     dev.telemetry.yum.repo.enabled: false
     lakehouse.optimizer.enabled: true
     ephemeral.xfs.support.enabled: false
-    configure.encryption.profile.enabled: false
+    configure.encryption.profile.enabled: true
     mitigate.release.failure.7218P1100.enabled: false
     zookeeper.to.kraft.migration.enabled: true
     tlsv13.only.enabled: false

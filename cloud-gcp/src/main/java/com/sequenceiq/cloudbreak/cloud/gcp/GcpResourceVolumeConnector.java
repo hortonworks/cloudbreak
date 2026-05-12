@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.gcp;
 
+import static com.sequenceiq.cloudbreak.cloud.gcp.GcpConstants.DEVICE_NAME_PREFIX;
+
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -10,8 +12,10 @@ import com.sequenceiq.cloudbreak.cloud.ResourceVolumeConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.util.IndexingDeviceNameGenerator;
+import com.sequenceiq.common.model.VolumeInfo;
 
 @Service
 public class GcpResourceVolumeConnector implements ResourceVolumeConnector {
@@ -34,6 +38,17 @@ public class GcpResourceVolumeConnector implements ResourceVolumeConnector {
             return deviceNameGenerator.next();
         } else {
             return GcpConstants.DEVICE_NAME_PREFIX + volume.getId();
+        }
+    }
+
+    @Override
+    public VolumeInfo getVolumeInfoFromResourceVolume(VolumeSetAttributes.Volume volume) {
+        if (volume.getType().equals(GcpDiskType.LOCAL_SSD.value())) {
+            return new VolumeInfo(volume.getDevice().replace(DEVICE_NAME_PREFIX, ""), volume.getDevice(), volume.getSize(),
+                volume.getCloudVolumeUsageType() == CloudVolumeUsageType.DATABASE);
+        } else {
+            return new VolumeInfo(volume.getId(), volume.getDevice(), volume.getSize(),
+                volume.getCloudVolumeUsageType() == CloudVolumeUsageType.DATABASE);
         }
     }
 }

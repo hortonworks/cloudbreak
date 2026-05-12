@@ -14,9 +14,11 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
+import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
+import com.sequenceiq.common.model.VolumeInfo;
 
 @Service
 public class VolumeIdWithDeviceFetcher {
@@ -50,5 +52,9 @@ public class VolumeIdWithDeviceFetcher {
             });
         }
         return diskByIdResultMap;
+    }
+
+    public VolumeInfo fetchVolumeInfo(CloudPlatformVariant cloudPlatformVariant, VolumeSetAttributes.Volume volume) {
+        return cloudPlatformConnectors.get(cloudPlatformVariant).volumeConnector().getVolumeInfoFromResourceVolume(volume);
     }
 }

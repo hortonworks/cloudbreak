@@ -38,8 +38,7 @@ public class FreeIpaTrustSetupFinishAddTrustHandler extends ExceptionCatcherEven
         FreeIpaTrustSetupFinishAddRequest request = event.getData();
         try {
             TrustProvider trustProvider = crossRealmTrustService.getTrustProvider(request.getResourceId());
-            trustProvider.addTrust(request.getResourceId());
-            trustProvider.validateTrust(request.getResourceId());
+            trustProvider.addTwoWayTrust(request.getResourceId());
             return new FreeIpaTrustSetupFinishAddTrustSuccess(request.getResourceId());
         } catch (Exception e) {
             LOGGER.error("Failed to add trust on FreeIPA", e);

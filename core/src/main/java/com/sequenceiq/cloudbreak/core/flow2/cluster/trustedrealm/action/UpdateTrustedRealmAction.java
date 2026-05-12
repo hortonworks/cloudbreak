@@ -27,17 +27,17 @@ public class UpdateTrustedRealmAction extends AbstractUpdateTrustedRealmAction<U
     protected void prepareExecution(UpdateTrustedRealmTriggerEvent payload, Map<Object, Object> variables) {
         variables.put(ENVIRONMENT_CRN, payload.getEnvironmentCrn());
         variables.put(REALM, payload.getRealm());
+        variables.put(REMOVE, payload.isRemove());
     }
 
     @Override
     protected void doExecute(UpdateTrustedRealmContext context, UpdateTrustedRealmTriggerEvent payload, Map<Object, Object> variables) {
-        statusService.updatingTrustedRealm(context.getStack().getId());
+        statusService.updatingTrustedRealm(context.getStack().getId(), context.isRemove());
         sendEvent(context);
     }
 
     @Override
     protected Selectable createRequest(UpdateTrustedRealmContext context) {
-        return new UpdateTrustedRealmRequest(context.getStack().getId(), context.getEnvironmentCrn(), context.getRealm());
+        return new UpdateTrustedRealmRequest(context.getStack().getId(), context.getEnvironmentCrn(), context.getRealm(), context.isRemove());
     }
 }
-

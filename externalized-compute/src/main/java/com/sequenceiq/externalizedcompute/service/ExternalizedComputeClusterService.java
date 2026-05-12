@@ -41,6 +41,7 @@ import com.sequenceiq.externalizedcompute.entity.ExternalizedComputeClusterStatu
 import com.sequenceiq.externalizedcompute.entity.ExternalizedComputeClusterStatusEnum;
 import com.sequenceiq.externalizedcompute.flow.ExternalizedComputeClusterFlowManager;
 import com.sequenceiq.externalizedcompute.repository.ExternalizedComputeClusterRepository;
+import com.sequenceiq.externalizedcompute.service.validator.ExternalizedComputeEntitlementValidator;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.core.PayloadContextProvider;
 import com.sequenceiq.flow.core.ResourceIdProvider;
@@ -79,6 +80,9 @@ public class ExternalizedComputeClusterService implements ResourceIdProvider, Pa
 
     @Inject
     private Clock clock;
+
+    @Inject
+    private ExternalizedComputeEntitlementValidator externalizedComputeEntitlementValidator;
 
     @Override
     public Long getResourceIdByResourceCrn(String resourceCrn) {
@@ -130,6 +134,7 @@ public class ExternalizedComputeClusterService implements ResourceIdProvider, Pa
 
     public FlowIdentifier prepareComputeClusterCreation(ExternalizedComputeClusterRequest externalizedComputeClusterRequest,
             boolean defaultCluster, Crn userCrn) {
+        externalizedComputeEntitlementValidator.validateComputeClusterEntitlement(userCrn.getAccountId());
         ExternalizedComputeCluster externalizedComputeCluster = new ExternalizedComputeCluster();
         externalizedComputeCluster.setName(externalizedComputeClusterRequest.getName());
         DetailedEnvironmentResponse environment = environmentEndpoint.getByCrn(externalizedComputeClusterRequest.getEnvironmentCrn());

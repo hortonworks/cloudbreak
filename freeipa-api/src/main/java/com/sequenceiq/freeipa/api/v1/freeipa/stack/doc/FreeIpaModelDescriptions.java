@@ -152,6 +152,7 @@ public class FreeIpaModelDescriptions {
         public static final String DNS_SETUP_INSTRUCTIONS = "DNS setup instructions for cross-realm trust setup.";
         public static final String TRUST_DETAILS = "Cross realm trust details.";
         public static final String TRUST_STATUS = "The cross realm trust status.";
+        public static final String TRUST_RELATIONSHIP_TYPE = "The type of trust relationship (UNKNOWN, ONE_WAY, TWO_WAY).";
         public static final String OPERATION_ID = "The id of the last cross realm trust setup related operation.";
         public static final String AD = "Active Directory details.";
         public static final String MIT = "MIT KDC details.";

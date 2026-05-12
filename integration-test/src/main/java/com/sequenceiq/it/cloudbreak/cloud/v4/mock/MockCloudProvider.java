@@ -46,6 +46,7 @@ import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXInstanceTem
 import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXRootVolumeTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXVolumeTestDto;
+import com.sequenceiq.it.cloudbreak.dto.environment.EncryptionProfileTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
@@ -480,5 +481,10 @@ public class MockCloudProvider extends AbstractCloudProvider {
     @Override
     public DistroXTestDtoBase withResourceEncryption(DistroXTestDtoBase distroXTestDtoBase) {
         return distroXTestDtoBase;
+    }
+
+    @Override
+    public EncryptionProfileTestDto encryptionProfile(EncryptionProfileTestDto encryptionProfile) {
+        return encryptionProfile;
     }
 }

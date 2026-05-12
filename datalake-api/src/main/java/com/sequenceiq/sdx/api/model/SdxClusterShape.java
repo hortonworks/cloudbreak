@@ -3,8 +3,10 @@ package com.sequenceiq.sdx.api.model;
 public enum SdxClusterShape {
     CUSTOM(Boolean.FALSE, "-cus", Boolean.TRUE),
     LIGHT_DUTY(Boolean.FALSE, "-ld", Boolean.TRUE),
+    LIGHT_DUTY_WITHOUT_HBASE(Boolean.FALSE, "-ldl", Boolean.TRUE),
     MEDIUM_DUTY_HA(Boolean.TRUE, "-md", Boolean.TRUE),
     ENTERPRISE(Boolean.TRUE, "-ent", Boolean.TRUE),
+    ENTERPRISE_WITHOUT_HBASE(Boolean.TRUE, "-enl", Boolean.TRUE),
     MICRO_DUTY(Boolean.FALSE, "-mic", Boolean.TRUE),
     CONTAINERIZED(Boolean.FALSE, "-con", Boolean.FALSE);
 
@@ -33,6 +35,6 @@ public enum SdxClusterShape {
     }
 
     public boolean isHA() {
-        return MEDIUM_DUTY_HA.equals(this) || ENTERPRISE.equals(this);
+        return MEDIUM_DUTY_HA.equals(this) || ENTERPRISE.equals(this) || ENTERPRISE_WITHOUT_HBASE.equals(this);
     }
 }

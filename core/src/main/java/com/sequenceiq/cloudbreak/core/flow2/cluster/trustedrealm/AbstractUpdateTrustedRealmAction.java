@@ -21,6 +21,8 @@ public abstract class AbstractUpdateTrustedRealmAction<P extends Payload>
 
     protected static final String REALM = "REALM";
 
+    protected static final String REMOVE = "REMOVE";
+
     @Inject
     private StackDtoService stackDtoService;
 
@@ -35,7 +37,8 @@ public abstract class AbstractUpdateTrustedRealmAction<P extends Payload>
         MDCBuilder.buildMdcContext(stackView);
         String environmentCrn = (String) stateContext.getExtendedState().getVariables().get(ENVIRONMENT_CRN);
         String realm = (String) stateContext.getExtendedState().getVariables().get(REALM);
-        return new UpdateTrustedRealmContext(flowParameters, stackView, environmentCrn, realm);
+        boolean remove = Boolean.TRUE.equals(stateContext.getExtendedState().getVariables().get(REMOVE));
+        return new UpdateTrustedRealmContext(flowParameters, stackView, environmentCrn, realm, remove);
     }
 
     @Override
@@ -43,5 +46,3 @@ public abstract class AbstractUpdateTrustedRealmAction<P extends Payload>
         return new UpdateTrustedRealmFailureEvent(payload.getResourceId(), ex);
     }
 }
-
-

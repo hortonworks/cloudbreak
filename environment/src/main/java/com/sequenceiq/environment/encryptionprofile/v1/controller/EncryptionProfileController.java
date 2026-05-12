@@ -28,9 +28,11 @@ import com.sequenceiq.environment.api.v1.encryptionprofile.model.EncryptionProfi
 import com.sequenceiq.environment.api.v1.encryptionprofile.model.TlsVersionResponse;
 import com.sequenceiq.environment.authorization.EncryptionProfileFiltering;
 import com.sequenceiq.environment.encryptionprofile.domain.EncryptionProfile;
+import com.sequenceiq.environment.encryptionprofile.service.EncryptionProfileFlowService;
 import com.sequenceiq.environment.encryptionprofile.service.EncryptionProfileService;
 import com.sequenceiq.environment.encryptionprofile.v1.converter.EncryptionProfileRequestToEncryptionProfileConverter;
 import com.sequenceiq.environment.encryptionprofile.v1.converter.EncryptionProfileToEncryptionProfileResponseConverter;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.notification.WebSocketNotificationController;
 
 @Controller
@@ -45,16 +47,20 @@ public class EncryptionProfileController extends WebSocketNotificationController
 
     private final EntitlementService entitlementService;
 
+    private final EncryptionProfileFlowService encryptionProfileFlowService;
+
     public EncryptionProfileController(EncryptionProfileService encryptionProfileService,
             EncryptionProfileRequestToEncryptionProfileConverter encryptionProfileConverter,
             EncryptionProfileToEncryptionProfileResponseConverter encryptionProfileResponseConverter,
             EncryptionProfileFiltering encryptionProfileFiltering,
-            EntitlementService entitlementService) {
+            EntitlementService entitlementService,
+            EncryptionProfileFlowService encryptionProfileFlowService) {
         this.encryptionProfileService = encryptionProfileService;
         this.encryptionProfileConverter = encryptionProfileConverter;
         this.encryptionProfileResponseConverter = encryptionProfileResponseConverter;
         this.encryptionProfileFiltering = encryptionProfileFiltering;
         this.entitlementService = entitlementService;
+        this.encryptionProfileFlowService = encryptionProfileFlowService;
     }
 
     @Override
@@ -139,6 +145,18 @@ public class EncryptionProfileController extends WebSocketNotificationController
         Set<TlsVersionResponse> tlsVersions = encryptionProfileService.listCiphersByTlsVersion();
 
         return new CipherSuitesByTlsVersionResponse(tlsVersions);
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.REPAIR_FREEIPA)
+    public FlowIdentifier enableEncryptionProfileByCrn(@ResourceCrn String encryptionProfileCrn, String envNameOrCrn) {
+        return encryptionProfileFlowService.enableEncryptionProfileByCrn(envNameOrCrn, encryptionProfileCrn);
+    }
+
+    @Override
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.REPAIR_FREEIPA)
+    public FlowIdentifier enableEncryptionProfileByName(@ResourceName String encryptionProfileName, String envNameOrCrn) {
+        return encryptionProfileFlowService.enableEncryptionProfileByName(envNameOrCrn, encryptionProfileName);
     }
 
     private void verifyEncryptionProfileEntitlement(String accountId) {

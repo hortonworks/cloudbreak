@@ -32,6 +32,7 @@ import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXInstanceTem
 import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXRootVolumeTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXVolumeTestDto;
+import com.sequenceiq.it.cloudbreak.dto.environment.EncryptionProfileTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentAuthenticationTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentSecurityAccessTestDto;
@@ -262,4 +263,6 @@ public interface CloudProvider {
     String getAddDiskVolumeType();
 
     String getModifyDiskVolumeType();
+
+    EncryptionProfileTestDto encryptionProfile(EncryptionProfileTestDto encryptionProfile);
 }

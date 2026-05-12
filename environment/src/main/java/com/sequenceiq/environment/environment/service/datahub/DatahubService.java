@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.support.SupportV1Endpoint;
@@ -69,6 +70,18 @@ public class DatahubService {
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
             LOGGER.error("Failed to list Datahub clusters for environment '{}' due to: '{}'.", environmentCrn, errorMessage, e);
+            throw new DatahubOperationFailedException(errorMessage, e);
+        }
+    }
+
+    public StackStatusV4Responses getStatusesByEnvironmentCrn(String environmentCrn) {
+        try {
+            return ThreadBasedUserCrnProvider.doAsInternalActor(
+                    () -> distroXInternalV1Endpoint.getStatusByEnvironmentCrn(environmentCrn),
+                    Crn.safeFromString(environmentCrn).getAccountId());
+        } catch (WebApplicationException e) {
+            String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
+            LOGGER.error("Failed to get DataHub statuses for environment '{}' due to: '{}'.", environmentCrn, errorMessage, e);
             throw new DatahubOperationFailedException(errorMessage, e);
         }
     }

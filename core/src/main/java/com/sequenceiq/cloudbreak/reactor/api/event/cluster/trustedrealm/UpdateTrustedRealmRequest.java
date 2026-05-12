@@ -11,14 +11,18 @@ public class UpdateTrustedRealmRequest extends StackEvent {
 
     private final String realm;
 
+    private final boolean remove;
+
     @JsonCreator
     public UpdateTrustedRealmRequest(
             @JsonProperty("resourceId") Long stackId,
             @JsonProperty("environmentCrn") String environmentCrn,
-            @JsonProperty("realm") String realm) {
+            @JsonProperty("realm") String realm,
+            @JsonProperty("remove") boolean remove) {
         super(EventSelectorUtil.selector(UpdateTrustedRealmRequest.class), stackId);
         this.environmentCrn = environmentCrn;
         this.realm = realm;
+        this.remove = remove;
     }
 
     public String getEnvironmentCrn() {
@@ -28,5 +32,8 @@ public class UpdateTrustedRealmRequest extends StackEvent {
     public String getRealm() {
         return realm;
     }
-}
 
+    public boolean isRemove() {
+        return remove;
+    }
+}

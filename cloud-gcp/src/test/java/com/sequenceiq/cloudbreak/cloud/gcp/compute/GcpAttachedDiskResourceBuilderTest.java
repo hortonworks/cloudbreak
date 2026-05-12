@@ -293,7 +293,7 @@ public class GcpAttachedDiskResourceBuilderTest {
         assertEquals(CloudVolumeUsageType.GENERAL, vol2.getCloudVolumeUsageType());
 
         VolumeSetAttributes.Volume vol3 = attributes.getVolumes().get(2);
-        assertEquals("testname-master-1-2", vol3.getId());
+        assertEquals("local-nvme-ssd-0", vol3.getId());
         assertEquals("/dev/disk/by-id/google-local-nvme-ssd-0", vol3.getDevice());
         assertEquals(3, vol3.getSize());
         assertEquals(GcpDiskType.LOCAL_SSD.value(), vol3.getType());

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import jakarta.ws.rs.WebApplicationException;
 
@@ -11,7 +12,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
@@ -19,6 +23,8 @@ import com.sequenceiq.environment.environment.domain.EnvironmentView;
 import com.sequenceiq.environment.environment.flow.config.update.config.EnvStackConfigUpdatesFlowConfig;
 import com.sequenceiq.environment.exception.StackOperationFailedException;
 import com.sequenceiq.environment.store.EnvironmentInMemoryStateStore;
+import com.sequenceiq.flow.api.FlowEndpoint;
+import com.sequenceiq.flow.api.model.FlowCheckResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.service.FlowCancelService;
@@ -29,6 +35,12 @@ public class StackService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackService.class);
 
+    private static final List<Status> DELETED_STATUS = List.of(
+            Status.DELETE_IN_PROGRESS,
+            Status.DELETE_COMPLETED,
+            Status.DELETED_ON_PROVIDER_SIDE,
+            Status.DELETE_FAILED);
+
     private final StackV4Endpoint stackV4Endpoint;
 
     private final FlowCancelService flowCancelService;
@@ -37,15 +49,19 @@ public class StackService {
 
     private final WebApplicationExceptionMessageExtractor messageExtractor;
 
+    private final FlowEndpoint flowEndpoint;
+
     public StackService(
             StackV4Endpoint stackV4Endpoint,
             FlowCancelService flowCancelService,
             FlowLogDBService flowLogDBService,
-            WebApplicationExceptionMessageExtractor messageExtractor) {
+            WebApplicationExceptionMessageExtractor messageExtractor,
+            FlowEndpoint flowEndpoint) {
         this.stackV4Endpoint = stackV4Endpoint;
         this.flowCancelService = flowCancelService;
         this.flowLogDBService = flowLogDBService;
         this.messageExtractor = messageExtractor;
+        this.flowEndpoint = flowEndpoint;
     }
 
     public FlowIdentifier triggerSaltUpdateForStack(String stackName) {
@@ -94,6 +110,29 @@ public class StackService {
             }
         }
         return flowIdentifiers;
+    }
+
+    public FlowCheckResponse checkFlow(FlowIdentifier flowIdentifier) {
+        try {
+            LOGGER.debug("Getting stack operation status for flowIdentifier {}", flowIdentifier);
+            return switch (flowIdentifier.getType()) {
+                case FLOW -> flowEndpoint.hasFlowRunningByFlowId(flowIdentifier.getPollableId());
+                case FLOW_CHAIN -> flowEndpoint.hasFlowRunningByChainId(flowIdentifier.getPollableId());
+                case NOT_TRIGGERED -> throw new IllegalStateException("Stack flow is not triggered");
+            };
+        } catch (WebApplicationException e) {
+            String errorMessage = messageExtractor.getErrorMessage(e);
+            LOGGER.error("Failed to get operation status '{}' due to: '{}'", flowIdentifier, errorMessage, e);
+            throw new StackOperationFailedException(errorMessage, e);
+        }
+    }
+
+    public List<StackViewV4Response> getAllNotDeletedClustersByEnvironmentCrn(String environmentCrn) {
+        StackViewV4Responses stackViewV4Responses = stackV4Endpoint.list(0L, environmentCrn, false);
+        return stackViewV4Responses.getResponses()
+                .stream()
+                .filter(stack -> !DELETED_STATUS.contains(stack.getCluster().getStatus()))
+                .collect(Collectors.toList());
     }
 
     public void modifyUserDefinedTags(String crn, Map<String, String> userDefinedTags) {

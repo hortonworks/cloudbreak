@@ -14,6 +14,7 @@ import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -98,6 +99,7 @@ import com.sequenceiq.cloudbreak.ldap.LdapConfigService;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
+import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorStateParams;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.GrainProperties;
 import com.sequenceiq.cloudbreak.orchestrator.model.NodeReachabilityResult;
@@ -140,6 +142,7 @@ import com.sequenceiq.cloudbreak.view.GatewayView;
 import com.sequenceiq.cloudbreak.view.InstanceGroupView;
 import com.sequenceiq.cloudbreak.view.InstanceMetadataView;
 import com.sequenceiq.cloudbreak.view.StackView;
+import com.sequenceiq.common.api.encryptionprofile.TlsVersion;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.environment.api.v1.encryptionprofile.model.EncryptionProfileResponse;
@@ -444,29 +447,6 @@ class ClusterHostServiceRunnerTest {
         assertEquals(Boolean.TRUE, extractCmBundleCollection(clouderaManagerSettings));
     }
 
-    @Test
-    void testCreateCloudManagerSettingsWhenCloudProviderTypeSupportedForYARNCloud() {
-        ClouderaManagerRepo clouderaManagerRepo = new ClouderaManagerRepo();
-        GatewayConfig gatewayConfig = mock(GatewayConfig.class);
-        clouderaManagerRepo.setVersion("7.6.2");
-        when(stack.getCloudPlatform()).thenReturn(CloudPlatform.YARN.name());
-        ClusterPreCreationApi clusterPreCreationApi = mock(ClusterPreCreationApi.class);
-        when(stack.getStack().getResourceCrn()).thenReturn(TEST_CLUSTER_CRN);
-        ReflectionTestUtils.setField(underTest, "cmHeartbeatInterval", "testString");
-        ReflectionTestUtils.setField(underTest, "cmMissedHeartbeatInterval", "testString");
-        Set<String> serviceLocations = new HashSet<String>();
-        ClusterView cluster = mock(ClusterView.class);
-        when(stack.getCluster()).thenReturn(cluster);
-        ServiceLocationMap serviceLocationMap = mock(ServiceLocationMap.class);
-        when(clusterApiConnectors.getConnector(cluster)).thenReturn(clusterPreCreationApi);
-        when(clusterPreCreationApi.getServiceLocations()).thenReturn(serviceLocationMap);
-        when(serviceLocationMap.getAllVolumePath()).thenReturn(serviceLocations);
-        when(gatewayConfig.getPrivateAddress()).thenReturn("privateAddress");
-        Map<String, SaltPillarProperties> clouderaManagerSettings = underTest.createPillarWithClouderaManagerSettings(clouderaManagerRepo, stack, gatewayConfig);
-        boolean cloudProviderSetupSupported = extractCloudPlatformSupported(clouderaManagerSettings);
-        assertEquals(cloudProviderSetupSupported, Boolean.FALSE);
-    }
-
     private boolean extractCloudPlatformSupported(Map<String, SaltPillarProperties> clouderaManagerSettings) {
         SaltPillarProperties saltPillarProperties = clouderaManagerSettings.get("cloudera-manager-settings");
         Map<String, Object> clouderaManager = (Map<String, Object>) saltPillarProperties.getProperties().get("cloudera-manager");
@@ -525,8 +505,10 @@ class ClusterHostServiceRunnerTest {
         when(sssdConfigProvider.createSssdIpaPillar(eq(kerberosConfig), anyMap(), eq(ENV_CRN), any(), eq(EXTENDED_BLUEPRINT_TEXT)))
                 .thenReturn(Map.of("ipa", new SaltPillarProperties("ipapath", Map.of())));
         when(paywallConfigService.createPaywallPillarConfig(stack)).thenReturn(PAYWALL_PROPERTIES);
-        when(encryptionProfileService.getEncryptionProfileCrn(any(), any())).thenReturn(ENCRYPTION_PROFILE_CRN);
-        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(ENCRYPTION_PROFILE_CRN)).thenReturn(mock(EncryptionProfileResponse.class));
+        EncryptionProfileResponse response  = new EncryptionProfileResponse();
+        response.setTlsVersions(Set.of(TlsVersion.TLS_1_2.getVersion()));
+        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(any(), any())).thenReturn("epCrn");
+        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault("epCrn")).thenReturn(response);
         when(encryptionProfileProvider.getOpenSslCipherSuites(any(), any(), anyBoolean()))
                 .thenReturn("cipher1,cipher2,ECDHE-RSA-AES256-GCM-SHA384");
         when(encryptionProfileProvider.getIanaCipherSuites(any(), any(), anyBoolean()))
@@ -599,8 +581,10 @@ class ClusterHostServiceRunnerTest {
                 .thenReturn(Map.of("ipa", new SaltPillarProperties("ipapath", Map.of())));
         when(stack.getPlatformVariant()).thenReturn(AwsConstants.AwsVariant.AWS_NATIVE_GOV_VARIANT.variant().value());
         when(paywallConfigService.createPaywallPillarConfig(stack)).thenReturn(PAYWALL_PROPERTIES);
-        when(encryptionProfileService.getEncryptionProfileCrn(any(), any())).thenReturn(ENCRYPTION_PROFILE_CRN);
-        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(ENCRYPTION_PROFILE_CRN)).thenReturn(mock(EncryptionProfileResponse.class));
+        EncryptionProfileResponse encryptionProfileResponse = new EncryptionProfileResponse();
+        encryptionProfileResponse.setTlsVersions(Set.of(TlsVersion.TLS_1_2.getVersion()));
+        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(any(), any())).thenReturn(ENCRYPTION_PROFILE_CRN);
+        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(ENCRYPTION_PROFILE_CRN)).thenReturn(encryptionProfileResponse);
         when(encryptionProfileProvider.getOpenSslCipherSuites(any(), any(), anyBoolean()))
                 .thenReturn("cipher1,cipher2,ECDHE-RSA-AES256-GCM-SHA384");
         when(encryptionProfileProvider.getIanaCipherSuites(any(), any(), anyBoolean()))
@@ -648,8 +632,10 @@ class ClusterHostServiceRunnerTest {
                 .thenReturn(Map.of("ipa", new SaltPillarProperties("ipapath", Map.of())));
         when(paywallConfigService.createPaywallPillarConfig(stack)).thenReturn(PAYWALL_PROPERTIES);
         when(stack.getPlatformVariant()).thenReturn(AwsConstants.AwsVariant.AWS_NATIVE_GOV_VARIANT.variant().value());
-        when(encryptionProfileService.getEncryptionProfileCrn(any(), any())).thenReturn(ENCRYPTION_PROFILE_CRN);
-        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(ENCRYPTION_PROFILE_CRN)).thenReturn(mock(EncryptionProfileResponse.class));
+        EncryptionProfileResponse encryptionProfileResponse2 = new EncryptionProfileResponse();
+        encryptionProfileResponse2.setTlsVersions(Set.of(TlsVersion.TLS_1_2.getVersion()));
+        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(any(), any())).thenReturn(ENCRYPTION_PROFILE_CRN);
+        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(ENCRYPTION_PROFILE_CRN)).thenReturn(encryptionProfileResponse2);
         when(encryptionProfileProvider.getOpenSslCipherSuites(any(), any(), anyBoolean()))
                 .thenReturn("cipher1,cipher2,ECDHE-RSA-AES256-GCM-SHA384");
         when(encryptionProfileProvider.getIanaCipherSuites(any(), any(), anyBoolean()))
@@ -678,6 +664,7 @@ class ClusterHostServiceRunnerTest {
     }
 
     @Test
+    @MockitoSettings(strictness = Strictness.LENIENT)
     void testRedeployGatewayCertificate() throws CloudbreakOrchestratorException {
         Set<Node> nodes = Sets.newHashSet(node("fqdn1"), node("fqdn2"), node("fqdn3"),
                 node("gateway1"), node("gateway3"));
@@ -698,19 +685,86 @@ class ClusterHostServiceRunnerTest {
         );
         when(gatewayConfigService.getAllGatewayConfigs(stack)).thenReturn(gwConfigs);
         when(stack.getPlatformVariant()).thenReturn(AwsConstants.AwsVariant.AWS_NATIVE_GOV_VARIANT.variant().value());
-        when(encryptionProfileService.getEncryptionProfileCrn(any(), any())).thenReturn(ENCRYPTION_PROFILE_CRN);
-        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(ENCRYPTION_PROFILE_CRN)).thenReturn(mock(EncryptionProfileResponse.class));
+        EncryptionProfileResponse response  = new EncryptionProfileResponse();
+        response.setTlsVersions(Set.of(TlsVersion.TLS_1_2.getVersion()));
+        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(any(), any())).thenReturn("epCrn");
+        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault("epCrn")).thenReturn(response);
         when(encryptionProfileProvider.getOpenSslCipherSuites(any(), any(), anyBoolean()))
                 .thenReturn("cipher1,cipher2,ECDHE-RSA-AES256-GCM-SHA384");
         when(encryptionProfileProvider.getIanaCipherSuites(any(), any(), anyBoolean()))
                 .thenReturn("cipher1,cipher2,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384");
+        OrchestratorStateParams stateParams = mock(OrchestratorStateParams.class);
 
         setupMocksForRunClusterServices();
 
-        underTest.redeployGatewayCertificate(stack);
+        underTest.redeployGatewayCertificate(stack, stateParams);
 
-        verify(hostOrchestrator, times(1)).initServiceRun(eq(stack), eq(gwConfigs), eq(nodes), eq(nodes), any(), any(), eq(CloudPlatform.AWS.name()));
-        verify(hostOrchestrator).runService(eq(gwConfigs), eq(nodes), any());
+        verify(hostOrchestrator).uploadStates(eq(gwConfigs), any());
+        verify(hostOrchestrator).uploadGatewayPillar(eq(gwConfigs), eq(nodes), any(), any());
+        verify(hostOrchestrator).runOrchestratorState(eq(stateParams));
+    }
+
+    @Test
+    @MockitoSettings(strictness = Strictness.LENIENT)
+    void testRedeployGatewayCertificateRedeployStatesError() throws CloudbreakOrchestratorException {
+        List<GatewayConfig> gwConfigs = List.of(GatewayConfig.builder().build());
+        when(gatewayConfigService.getAllGatewayConfigs(stack)).thenReturn(gwConfigs);
+        doThrow(new CloudbreakOrchestratorFailedException("upload states failed")).when(hostOrchestrator).uploadStates(any(), any());
+        OrchestratorStateParams stateParams = mock(OrchestratorStateParams.class);
+
+        CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class,
+                () -> underTest.redeployGatewayCertificate(stack, stateParams));
+
+        assertEquals("upload states failed", exception.getMessage());
+        verify(hostOrchestrator).uploadStates(eq(gwConfigs), any());
+        verify(hostOrchestrator, never()).uploadGatewayPillar(any(), any(), any(), any());
+        verify(hostOrchestrator, never()).runOrchestratorState(any());
+    }
+
+    @Test
+    @MockitoSettings(strictness = Strictness.LENIENT)
+    void testRedeployGatewayCertificateRedeployGatewayPillarError() throws CloudbreakOrchestratorException {
+        Set<Node> nodes = Sets.newHashSet(node("fqdn1"));
+        when(stackUtil.collectNodes(any())).thenReturn(nodes);
+        when(stackUtil.collectReachableNodes(any())).thenReturn(nodes);
+        List<GatewayConfig> gwConfigs = List.of(GatewayConfig.builder().build());
+        when(gatewayConfigService.getAllGatewayConfigs(stack)).thenReturn(gwConfigs);
+        setupMocksForRunClusterServices();
+        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(any(), any())).thenReturn(ENCRYPTION_PROFILE_CRN);
+        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(ENCRYPTION_PROFILE_CRN)).thenReturn(mock(EncryptionProfileResponse.class));
+        doThrow(new CloudbreakOrchestratorFailedException("upload pillar failed")).when(hostOrchestrator).uploadGatewayPillar(any(), any(), any(), any());
+        OrchestratorStateParams stateParams = mock(OrchestratorStateParams.class);
+
+        CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class,
+                () -> underTest.redeployGatewayCertificate(stack, stateParams));
+
+        assertEquals("upload pillar failed", exception.getMessage());
+        verify(hostOrchestrator).uploadStates(eq(gwConfigs), any());
+        verify(hostOrchestrator).uploadGatewayPillar(eq(gwConfigs), eq(nodes), any(), any());
+        verify(hostOrchestrator, never()).runOrchestratorState(any());
+    }
+
+    @Test
+    @MockitoSettings(strictness = Strictness.LENIENT)
+    void testRedeployGatewayCertificateRunStateError() throws CloudbreakOrchestratorException {
+        Set<Node> nodes = Sets.newHashSet(node("fqdn1"));
+        when(stackUtil.collectNodes(any())).thenReturn(nodes);
+        when(stackUtil.collectReachableNodes(any())).thenReturn(nodes);
+        List<GatewayConfig> gwConfigs = List.of(GatewayConfig.builder().build());
+        when(gatewayConfigService.getAllGatewayConfigs(stack)).thenReturn(gwConfigs);
+        setupMocksForRunClusterServices();
+        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(any(), any())).thenReturn(ENCRYPTION_PROFILE_CRN);
+        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(ENCRYPTION_PROFILE_CRN)).thenReturn(mock(EncryptionProfileResponse.class));
+        OrchestratorStateParams stateParams = mock(OrchestratorStateParams.class);
+        doThrow(new CloudbreakOrchestratorFailedException("run state failed")).when(hostOrchestrator).runOrchestratorState(stateParams);
+
+        CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class,
+                () -> underTest.redeployGatewayCertificate(stack, stateParams));
+
+        assertEquals("run state failed", exception.getMessage());
+        verify(hostOrchestrator).uploadStates(eq(gwConfigs), any());
+        verify(hostOrchestrator).uploadGatewayPillar(eq(gwConfigs), eq(nodes), any(), any());
+        verify(hostOrchestrator).runOrchestratorState(eq(stateParams));
     }
 
     @Test
@@ -723,8 +777,10 @@ class ClusterHostServiceRunnerTest {
 
         when(environmentService.getByCrn(anyString())).thenReturn(detailedEnvironmentResponse);
         when(stackUtil.collectNodes(any())).thenReturn(nodes);
-        when(encryptionProfileService.getEncryptionProfileCrn(any(), any())).thenReturn(ENCRYPTION_PROFILE_CRN);
-        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(ENCRYPTION_PROFILE_CRN)).thenReturn(mock(EncryptionProfileResponse.class));
+        EncryptionProfileResponse redeployGatewayEncryptionProfile = new EncryptionProfileResponse();
+        redeployGatewayEncryptionProfile.setTlsVersions(Set.of(TlsVersion.TLS_1_2.getVersion()));
+        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(any(), any())).thenReturn(ENCRYPTION_PROFILE_CRN);
+        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(ENCRYPTION_PROFILE_CRN)).thenReturn(redeployGatewayEncryptionProfile);
         when(encryptionProfileProvider.getOpenSslCipherSuites(any(), any(), anyBoolean()))
                 .thenReturn("cipher1,cipher2,ECDHE-RSA-AES256-GCM-SHA384");
         when(encryptionProfileProvider.getIanaCipherSuites(any(), any(), anyBoolean()))
@@ -758,8 +814,10 @@ class ClusterHostServiceRunnerTest {
         grainProperties.put("fqdn2", Map.of("roles", "solr"));
         grainProperties.put("fqdn3", Map.of("roles", "solr"));
         when(grainPropertiesService.createGrainProperties(any(), any(), any())).thenReturn(List.of(grainProperties));
-        when(encryptionProfileService.getEncryptionProfileCrn(any(), any())).thenReturn(ENCRYPTION_PROFILE_CRN);
-        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(ENCRYPTION_PROFILE_CRN)).thenReturn(mock(EncryptionProfileResponse.class));
+        EncryptionProfileResponse response  = new EncryptionProfileResponse();
+        response.setTlsVersions(Set.of(TlsVersion.TLS_1_2.getVersion()));
+        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(any(), any())).thenReturn("epCrn");
+        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault("epCrn")).thenReturn(response);
 
         underTest.redeployGatewayPillarOnly(stack, Set.of("gateway1", "fqdn1"));
         ArgumentCaptor<SaltConfig> saltConfigCaptor = ArgumentCaptor.forClass(SaltConfig.class);
@@ -817,9 +875,9 @@ class ClusterHostServiceRunnerTest {
         when(stack.getEnvironmentCrn()).thenReturn(ENV_CRN);
         DetailedEnvironmentResponse detailedEnvironmentResponse = mock(DetailedEnvironmentResponse.class);
         when(environmentService.getByCrn(anyString())).thenReturn(detailedEnvironmentResponse);
-        when(encryptionProfileService.getEncryptionProfileCrn(any(), any())).thenReturn(ENCRYPTION_PROFILE_CRN);
         EncryptionProfileResponse encryptionProfileResponse = mock(EncryptionProfileResponse.class);
         when(encryptionProfileResponse.getTlsVersions()).thenReturn(Set.of("TLSv1.2", "TLSv1.3"));
+        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(any(), any())).thenReturn(ENCRYPTION_PROFILE_CRN);
         when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(ENCRYPTION_PROFILE_CRN)).thenReturn(encryptionProfileResponse);
         when(encryptionProfileProvider.getOpenSslCipherSuites(any(), any(), anyBoolean()))
                 .thenReturn("cipher1,cipher2,ECDHE-RSA-AES256-GCM-SHA384");
@@ -839,14 +897,16 @@ class ClusterHostServiceRunnerTest {
         setupMocksForRunClusterServices();
         setupMockforRangerRaz(StackType.DATALAKE, true);
         DetailedEnvironmentResponse detailedEnvironmentResponse = mock(DetailedEnvironmentResponse.class);
-
+        EncryptionProfileResponse response  = new EncryptionProfileResponse();
+        response.setTlsVersions(Set.of(TlsVersion.TLS_1_2.getVersion()));
         when(stack.getPlatformVariant()).thenReturn(AwsConstants.AwsVariant.AWS_NATIVE_GOV_VARIANT.variant().value());
         when(stackView.getPlatformVariant()).thenReturn(AwsConstants.AwsVariant.AWS_NATIVE_GOV_VARIANT.variant().value());
         when(environmentService.getByCrn(anyString())).thenReturn(detailedEnvironmentResponse);
-        when(encryptionProfileService.getEncryptionProfileCrn(any(), any())).thenReturn(ENCRYPTION_PROFILE_CRN);
         when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(ENCRYPTION_PROFILE_CRN)).thenReturn(mock(EncryptionProfileResponse.class));
         when(componentLocatorService.getImpalaCoordinatorLocations(any()))
                 .thenReturn(Map.of("ip1", List.of("ip1", "ip2")));
+
+        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(any())).thenReturn(response);
 
         underTest.redeployGatewayPillarOnly(stack, Set.of());
 
@@ -867,27 +927,10 @@ class ClusterHostServiceRunnerTest {
         DetailedEnvironmentResponse detailedEnvironmentResponse = mock(DetailedEnvironmentResponse.class);
 
         when(environmentService.getByCrn(anyString())).thenReturn(detailedEnvironmentResponse);
-        when(encryptionProfileService.getEncryptionProfileCrn(any(), any())).thenReturn(ENCRYPTION_PROFILE_CRN);
-        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(ENCRYPTION_PROFILE_CRN)).thenReturn(mock(EncryptionProfileResponse.class));
-
-        underTest.redeployGatewayPillarOnly(stack, Set.of());
-        ArgumentCaptor<SaltConfig> saltConfig = ArgumentCaptor.forClass(SaltConfig.class);
-        verify(hostOrchestrator).uploadGatewayPillar(any(), allNodesCaptor.capture(), any(), saltConfig.capture());
-
-        assertFalse(((Map<String, List<String>>) getGatewayProperties(saltConfig.getValue()).get("location")).containsKey("RANGERRAZ"));
-    }
-
-    @Test
-    @MockitoSettings(strictness = Strictness.LENIENT)
-    void testAddRangerRazPillarForDataLakeNodesNotAvailableToRedeployGateway() throws CloudbreakOrchestratorException {
-        setupMocksForRunClusterServices();
-        setupMockforRangerRaz(StackType.DATALAKE, true);
-        DetailedEnvironmentResponse detailedEnvironmentResponse = mock(DetailedEnvironmentResponse.class);
-
-        when(environmentService.getByCrn(anyString())).thenReturn(detailedEnvironmentResponse);
-        when(stack.getAliveInstancesInInstanceGroup(anyString())).thenReturn(Collections.emptyList());
-        when(encryptionProfileService.getEncryptionProfileCrn(any(), any())).thenReturn(ENCRYPTION_PROFILE_CRN);
-        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(ENCRYPTION_PROFILE_CRN)).thenReturn(mock(EncryptionProfileResponse.class));
+        EncryptionProfileResponse razNotEnabledEncryptionProfile = new EncryptionProfileResponse();
+        razNotEnabledEncryptionProfile.setTlsVersions(Set.of(TlsVersion.TLS_1_2.getVersion()));
+        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(any(), any())).thenReturn(ENCRYPTION_PROFILE_CRN);
+        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(ENCRYPTION_PROFILE_CRN)).thenReturn(razNotEnabledEncryptionProfile);
 
         underTest.redeployGatewayPillarOnly(stack, Set.of());
         ArgumentCaptor<SaltConfig> saltConfig = ArgumentCaptor.forClass(SaltConfig.class);
@@ -904,8 +947,10 @@ class ClusterHostServiceRunnerTest {
         DetailedEnvironmentResponse detailedEnvironmentResponse = mock(DetailedEnvironmentResponse.class);
 
         when(entitlementService.isConfigureEncryptionProfileEnabled(any())).thenReturn(true);
-        when(encryptionProfileService.getEncryptionProfileCrn(any(), any())).thenReturn(ENCRYPTION_PROFILE_CRN);
-        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(ENCRYPTION_PROFILE_CRN)).thenReturn(mock(EncryptionProfileResponse.class));
+        EncryptionProfileResponse dataHubEncryptionProfile = new EncryptionProfileResponse();
+        dataHubEncryptionProfile.setTlsVersions(Set.of(TlsVersion.TLS_1_2.getVersion()));
+        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(any(), any())).thenReturn(ENCRYPTION_PROFILE_CRN);
+        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(ENCRYPTION_PROFILE_CRN)).thenReturn(dataHubEncryptionProfile);
         when(environmentService.getByCrn(anyString())).thenReturn(detailedEnvironmentResponse);
         when(encryptionProfileProvider.getOpenSslCipherSuites(any(), any(), anyBoolean()))
                 .thenReturn("cipher1,cipher2,ECDHE-RSA-AES256-GCM-SHA384");
@@ -951,8 +996,10 @@ class ClusterHostServiceRunnerTest {
 
         when(environmentService.getByCrn(anyString())).thenReturn(detailedEnvironmentResponse);
         when(loadBalancerFqdnUtil.getLoadBalancersForStack(STACK_ID)).thenReturn(loadBalancers);
-        when(encryptionProfileService.getEncryptionProfileCrn(any(), any())).thenReturn(ENCRYPTION_PROFILE_CRN);
-        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(ENCRYPTION_PROFILE_CRN)).thenReturn(mock(EncryptionProfileResponse.class));
+        EncryptionProfileResponse floatingIpEncryptionProfile = new EncryptionProfileResponse();
+        floatingIpEncryptionProfile.setTlsVersions(Set.of(TlsVersion.TLS_1_2.getVersion()));
+        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(any(), any())).thenReturn(ENCRYPTION_PROFILE_CRN);
+        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(ENCRYPTION_PROFILE_CRN)).thenReturn(floatingIpEncryptionProfile);
         when(encryptionProfileProvider.getOpenSslCipherSuites(any(), any(), anyBoolean()))
                 .thenReturn("cipher1,cipher2,ECDHE-RSA-AES256-GCM-SHA384");
         when(encryptionProfileProvider.getIanaCipherSuites(any(), any(), anyBoolean()))
@@ -986,8 +1033,10 @@ class ClusterHostServiceRunnerTest {
         when(environmentService.getByCrn(anyString())).thenReturn(detailedEnvironmentResponse);
         when(stackUtil.collectNodes(any())).thenReturn(nodes);
         when(exposedServiceCollector.getAllServiceNames()).thenReturn(Set.of("RANGER"));
-        when(encryptionProfileService.getEncryptionProfileCrn(any(), any())).thenReturn(ENCRYPTION_PROFILE_CRN);
-        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(ENCRYPTION_PROFILE_CRN)).thenReturn(mock(EncryptionProfileResponse.class));
+        EncryptionProfileResponse edlRangerEncryptionProfile = new EncryptionProfileResponse();
+        edlRangerEncryptionProfile.setTlsVersions(Set.of(TlsVersion.TLS_1_2.getVersion()));
+        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(any(), any())).thenReturn(ENCRYPTION_PROFILE_CRN);
+        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(ENCRYPTION_PROFILE_CRN)).thenReturn(edlRangerEncryptionProfile);
         when(encryptionProfileProvider.getOpenSslCipherSuites(any(), any(), anyBoolean()))
                 .thenReturn("cipher1,cipher2,ECDHE-RSA-AES256-GCM-SHA384");
         when(encryptionProfileProvider.getIanaCipherSuites(any(), any(), anyBoolean()))
@@ -1054,8 +1103,10 @@ class ClusterHostServiceRunnerTest {
         bp.setBlueprintText(mediumDutyBP);
         ReflectionTestUtils.setField(stack, "instanceGroups", instanceGroups);
         ReflectionTestUtils.setField(stack, "blueprint", bp);
-        when(encryptionProfileService.getEncryptionProfileCrn(any(), any())).thenReturn(ENCRYPTION_PROFILE_CRN);
-        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(ENCRYPTION_PROFILE_CRN)).thenReturn(mock(EncryptionProfileResponse.class));
+        EncryptionProfileResponse mdRangerEncryptionProfile = new EncryptionProfileResponse();
+        mdRangerEncryptionProfile.setTlsVersions(Set.of(TlsVersion.TLS_1_2.getVersion()));
+        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(any(), any())).thenReturn(ENCRYPTION_PROFILE_CRN);
+        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(ENCRYPTION_PROFILE_CRN)).thenReturn(mdRangerEncryptionProfile);
 
         underTest.redeployGatewayPillarOnly(stack, Set.of());
 
@@ -1100,8 +1151,10 @@ class ClusterHostServiceRunnerTest {
         bp.setBlueprintText(lightDutyBP);
         ReflectionTestUtils.setField(stack, "instanceGroups", instanceGroups);
         ReflectionTestUtils.setField(stack, "blueprint", bp);
-        when(encryptionProfileService.getEncryptionProfileCrn(any(), any())).thenReturn(ENCRYPTION_PROFILE_CRN);
-        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(ENCRYPTION_PROFILE_CRN)).thenReturn(mock(EncryptionProfileResponse.class));
+        EncryptionProfileResponse ldRangerEncryptionProfile = new EncryptionProfileResponse();
+        ldRangerEncryptionProfile.setTlsVersions(Set.of(TlsVersion.TLS_1_2.getVersion()));
+        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(any(), any())).thenReturn(ENCRYPTION_PROFILE_CRN);
+        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(ENCRYPTION_PROFILE_CRN)).thenReturn(ldRangerEncryptionProfile);
         when(encryptionProfileProvider.getOpenSslCipherSuites(any(), any(), anyBoolean()))
                 .thenReturn("cipher1,cipher2,ECDHE-RSA-AES256-GCM-SHA384");
         when(encryptionProfileProvider.getIanaCipherSuites(any(), any(), anyBoolean()))
@@ -1164,8 +1217,10 @@ class ClusterHostServiceRunnerTest {
         when(kerberosConfigService.get(ENV_CRN, STACK_NAME)).thenReturn(Optional.of(kerberosConfig));
         when(kerberosDetailService.areClusterManagerManagedKerberosPackages(kerberosConfig)).thenReturn(true);
         when(entitlementService.isTlsv13Enabled(ACCOUNT_ID)).thenReturn(true);
-        when(encryptionProfileService.getEncryptionProfileCrn(any(), any())).thenReturn(ENCRYPTION_PROFILE_CRN);
-        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(ENCRYPTION_PROFILE_CRN)).thenReturn(mock(EncryptionProfileResponse.class));
+        EncryptionProfileResponse knoxEncryptionProfile = new EncryptionProfileResponse();
+        knoxEncryptionProfile.setTlsVersions(Set.of(TlsVersion.TLS_1_2.getVersion()));
+        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(any(), any())).thenReturn(ENCRYPTION_PROFILE_CRN);
+        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(ENCRYPTION_PROFILE_CRN)).thenReturn(knoxEncryptionProfile);
         when(encryptionProfileProvider.getOpenSslCipherSuites(any(), any(), anyBoolean()))
                 .thenReturn("cipher1,cipher2,ECDHE-RSA-AES256-GCM-SHA384");
         when(encryptionProfileProvider.getIanaCipherSuites(any(), any(), anyBoolean()))
@@ -1207,8 +1262,10 @@ class ClusterHostServiceRunnerTest {
         when(kerberosDetailService.areClusterManagerManagedKerberosPackages(kerberosConfig)).thenReturn(true);
         when(entitlementService.isTlsv13Enabled(ACCOUNT_ID)).thenReturn(true);
         when(environmentService.getByCrn(anyString())).thenReturn(detailedEnvironmentResponse);
-        when(encryptionProfileService.getEncryptionProfileCrn(any(), any())).thenReturn(ENCRYPTION_PROFILE_CRN);
-        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(ENCRYPTION_PROFILE_CRN)).thenReturn(mock(EncryptionProfileResponse.class));
+        EncryptionProfileResponse cdpLuksEncryptionProfile = new EncryptionProfileResponse();
+        cdpLuksEncryptionProfile.setTlsVersions(Set.of(TlsVersion.TLS_1_2.getVersion()));
+        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(any(), any())).thenReturn(ENCRYPTION_PROFILE_CRN);
+        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(ENCRYPTION_PROFILE_CRN)).thenReturn(cdpLuksEncryptionProfile);
         when(encryptionProfileProvider.getOpenSslCipherSuites(any(), any(), anyBoolean()))
                 .thenReturn("cipher1,cipher2,ECDHE-RSA-AES256-GCM-SHA384");
         when(encryptionProfileProvider.getIanaCipherSuites(any(), any(), anyBoolean()))
@@ -1240,8 +1297,12 @@ class ClusterHostServiceRunnerTest {
         KerberosConfig kerberosConfig = KerberosConfig.KerberosConfigBuilder.aKerberosConfig().withVerifyKdcTrust(true).build();
         when(kerberosConfigService.get(ENV_CRN, STACK_NAME)).thenReturn(Optional.of(kerberosConfig));
         when(kerberosDetailService.areClusterManagerManagedKerberosPackages(kerberosConfig)).thenReturn(true);
-        when(encryptionProfileService.getEncryptionProfileCrn(any(), any())).thenReturn(ENCRYPTION_PROFILE_CRN);
-        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(ENCRYPTION_PROFILE_CRN)).thenReturn(mock(EncryptionProfileResponse.class));
+
+        EncryptionProfileResponse response  = new EncryptionProfileResponse();
+        response.setTlsVersions(Set.of(TlsVersion.TLS_1_2.getVersion()));
+        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(any(), any())).thenReturn("epCrn");
+        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault("epCrn")).thenReturn(response);
+
         when(encryptionProfileProvider.getOpenSslCipherSuites(any(), any(), anyBoolean()))
                 .thenReturn("cipher1,cipher2,ECDHE-RSA-AES256-GCM-SHA384");
         when(encryptionProfileProvider.getIanaCipherSuites(any(), any(), anyBoolean()))
@@ -1274,8 +1335,10 @@ class ClusterHostServiceRunnerTest {
         when(gatewayConfig.getAlternativeUserFacingCert()).thenReturn("cert");
         when(gatewayConfig.getAlternativeUserFacingKey()).thenReturn("key");
         when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenReturn(gatewayConfig);
-        when(encryptionProfileService.getEncryptionProfileCrn(any(), any())).thenReturn(ENCRYPTION_PROFILE_CRN);
-        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(ENCRYPTION_PROFILE_CRN)).thenReturn(mock(EncryptionProfileResponse.class));
+        EncryptionProfileResponse alternativeCertEncryptionProfile = new EncryptionProfileResponse();
+        alternativeCertEncryptionProfile.setTlsVersions(Set.of(TlsVersion.TLS_1_2.getVersion()));
+        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(any(), any())).thenReturn(ENCRYPTION_PROFILE_CRN);
+        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(ENCRYPTION_PROFILE_CRN)).thenReturn(alternativeCertEncryptionProfile);
         when(encryptionProfileProvider.getOpenSslCipherSuites(any(), any(), anyBoolean()))
                 .thenReturn("cipher1,cipher2,ECDHE-RSA-AES256-GCM-SHA384");
         when(encryptionProfileProvider.getIanaCipherSuites(any(), any(), anyBoolean()))
@@ -1306,7 +1369,7 @@ class ClusterHostServiceRunnerTest {
         when(cluster.getId()).thenReturn(CLUSTER_ID);
         when(gatewayService.getByClusterId(CLUSTER_ID)).thenReturn(Optional.of(clusterGateway));
         when(stackView.getPlatformVariant()).thenReturn(AwsConstants.AWS_DEFAULT_VARIANT.value());
-        when(encryptionProfileService.getEncryptionProfileCrn(any(), any())).thenReturn(encryptionProfileCrn);
+        when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(any(), any())).thenReturn(encryptionProfileCrn);
         when(encryptionProfileService.getEncryptionProfileByCrnOrDefault(encryptionProfileCrn)).thenReturn(encryptionProfileResponse);
         when(encryptionProfileResponse.getTlsVersions()).thenReturn(tlsVersions);
         when(encryptionProfileResponse.getCipherSuites()).thenReturn(cipherSuites);

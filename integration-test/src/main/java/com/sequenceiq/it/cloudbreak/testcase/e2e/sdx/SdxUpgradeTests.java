@@ -16,7 +16,7 @@ import org.testng.annotations.Test;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.loadbalancer.LoadBalancerResponse;
 import com.sequenceiq.it.cloudbreak.assertion.audit.DatalakeAuditGrpcServiceAssertion;
-import com.sequenceiq.it.cloudbreak.assertion.sdx.SdxAssertion;
+import com.sequenceiq.it.cloudbreak.assertion.stack.StackAssertion;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CloudProvider;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonClusterManagerProperties;
@@ -59,7 +59,7 @@ public class SdxUpgradeTests extends PreconditionSdxE2ETest implements ImageVali
     private TestUpgradeCandidateProvider testUpgradeCandidateProvider;
 
     @Inject
-    private SdxAssertion sdxAssertion;
+    private StackAssertion stackAssertion;
 
     @Test(dataProvider = TEST_CONTEXT)
     @UseSpotInstances
@@ -103,7 +103,7 @@ public class SdxUpgradeTests extends PreconditionSdxE2ETest implements ImageVali
                 //.then(datalakeAuditGrpcServiceAssertion::upgradeClusterByNameInternal)
                 .then((tc, testDto, client) -> {
                     List<LoadBalancerResponse> loadBalancers = sdxUtil.getLoadbalancers(testDto, client);
-                    sdxAssertion.validateLoadBalancerFQDNInTheHosts(testDto, loadBalancers);
+                    stackAssertion.validateLoadBalancerFQDNInTheHosts(testDto, loadBalancers);
                     return testDto;
                 })
                 .validate();
@@ -152,7 +152,7 @@ public class SdxUpgradeTests extends PreconditionSdxE2ETest implements ImageVali
                         testDto.getResponse().getDatabaseEngineVersion(), tc, testDto))
                 .then((tc, testDto, client) -> {
                     List<LoadBalancerResponse> loadBalancers = sdxUtil.getLoadbalancers(testDto, client);
-                    sdxAssertion.validateLoadBalancerFQDNInTheHosts(testDto, loadBalancers);
+                    stackAssertion.validateLoadBalancerFQDNInTheHosts(testDto, loadBalancers);
                     return testDto;
                 })
                 .validate();

@@ -40,6 +40,7 @@ public class FreeIpaTrustCancelConfigurationHandler extends ExceptionCatcherEven
             TrustProvider trustProvider = crossRealmTrustService.getTrustProvider(request.getResourceId());
             trustProvider.deleteTrust(request.getResourceId());
             trustProvider.deleteDnsZones(request.getResourceId());
+            crossRealmTrustService.deleteByStackIdIfExists(request.getResourceId());
             return new FreeIpaTrustCancelConfigurationSuccess(request.getResourceId());
         } catch (Exception e) {
             LOGGER.error("Failed to cancel trust on FreeIPA", e);

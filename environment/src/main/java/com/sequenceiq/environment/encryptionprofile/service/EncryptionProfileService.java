@@ -37,6 +37,7 @@ import com.sequenceiq.environment.api.v1.encryptionprofile.model.TlsVersionRespo
 import com.sequenceiq.environment.encryptionprofile.cache.DefaultEncryptionProfileProvider;
 import com.sequenceiq.environment.encryptionprofile.domain.EncryptionProfile;
 import com.sequenceiq.environment.encryptionprofile.respository.EncryptionProfileRepository;
+import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.service.cluster.ClusterService;
 
 @Service
@@ -183,7 +184,7 @@ public class EncryptionProfileService implements CompositeAuthResourcePropertyPr
             Map<String, EncryptionProfile> defaultEncryptionProfileMap = defaultEncryptionProfileProvider.defaultEncryptionProfilesByCrn();
             EncryptionProfile encryptionProfile = defaultEncryptionProfileMap.get(encryptionProfileCrn);
             if (encryptionProfile == null) {
-                throw new NotFoundException("Encryption Profile not found with Crn: " + encryptionProfileCrn);
+                throw new NotFoundException("Encryption Profile not found with crn: " + encryptionProfileCrn);
             }
             return encryptionProfile;
         }
@@ -284,6 +285,13 @@ public class EncryptionProfileService implements CompositeAuthResourcePropertyPr
                 .stream()
                 .map(entry -> new TlsVersionResponse(entry.getKey(), new ArrayList<>(entry.getValue()), recommendedCipherSuites.get(entry.getKey())))
                 .collect(Collectors.toSet());
+    }
+
+    public void setEncryptionProfile(Environment environment, String encryptionProfileCrn) {
+        LOGGER.info("Enabling encryption profile for environment {}, env crn: {}, encryption profile crn: {}", environment.getName(),
+                environment.getResourceCrn(), encryptionProfileCrn);
+        EncryptionProfile encryptionProfile = getByCrn(encryptionProfileCrn);
+        environment.setEncryptionProfileCrn(encryptionProfile.getResourceCrn());
     }
 
     public EncryptionProfile getEncryptionProfileByNameOrCrn(String encryptionProfileNameOrCrn) {

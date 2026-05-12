@@ -3,8 +3,9 @@ package com.sequenceiq.freeipa.service.freeipa.flow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -26,6 +27,8 @@ class FreeIpaServerRoleEnabledForServersPollerTest {
 
     private static final String ROLE = "CA server";
 
+    private static final String DNS_ROLE = "DNS server";
+
     private static final String SERVER = "ipa.server.com";
 
     @Mock
@@ -33,17 +36,21 @@ class FreeIpaServerRoleEnabledForServersPollerTest {
 
     @Test
     void testConstructorShouldThrowNPEWhenServersIsNull() {
-        assertThrows(NullPointerException.class, () -> new FreeIpaServerRoleEnabledForServersPoller(freeIpaClient, ROLE, null));
+        assertThrows(NullPointerException.class, () -> new FreeIpaServerRoleEnabledForServersPoller(freeIpaClient, Set.of(ROLE), null));
+    }
+
+    @Test
+    void testConstructorShouldThrowNPEWhenRolesIsNull() {
+        assertThrows(NullPointerException.class, () -> new FreeIpaServerRoleEnabledForServersPoller(freeIpaClient, null, Set.of(SERVER)));
     }
 
     @Test
     void testProcessWhenRoleEnabledForAllServersShouldFinish() throws Exception {
         // GIVEN
-        ServerRole serverRole = new ServerRole();
-        serverRole.setServerFqdn(SERVER);
-        serverRole.setStatus("enabled");
-        when(freeIpaClient.findServerRoles(anyString(), any(), any())).thenReturn(List.of(serverRole));
-        FreeIpaServerRoleEnabledForServersPoller underTest = new FreeIpaServerRoleEnabledForServersPoller(freeIpaClient, ROLE, Set.of(SERVER));
+        ServerRole caRole = serverRole(SERVER, ROLE, "enabled");
+        ServerRole dnsRole = serverRole(SERVER, DNS_ROLE, "enabled");
+        when(freeIpaClient.findServerRoles(isNull(), any(), any())).thenReturn(List.of(caRole, dnsRole));
+        FreeIpaServerRoleEnabledForServersPoller underTest = new FreeIpaServerRoleEnabledForServersPoller(freeIpaClient, Set.of(ROLE, DNS_ROLE), Set.of(SERVER));
         // WHEN
         AttemptResult<Void> result = underTest.process();
         // THEN
@@ -51,13 +58,12 @@ class FreeIpaServerRoleEnabledForServersPollerTest {
     }
 
     @Test
-    void testProcessWhenRoleNotEnabledForAllServersShouldContinue() throws Exception {
+    void testProcessWhenOneRoleNotEnabledForAllServersShouldContinue() throws Exception {
         // GIVEN
-        ServerRole serverRole = new ServerRole();
-        serverRole.setServerFqdn(SERVER);
-        serverRole.setStatus("disabled");
-        when(freeIpaClient.findServerRoles(anyString(), any(), any())).thenReturn(List.of(serverRole));
-        FreeIpaServerRoleEnabledForServersPoller underTest = new FreeIpaServerRoleEnabledForServersPoller(freeIpaClient, ROLE, Set.of(SERVER));
+        ServerRole caRole = serverRole(SERVER, ROLE, "disabled");
+        ServerRole dnsRole = serverRole(SERVER, DNS_ROLE, "enabled");
+        when(freeIpaClient.findServerRoles(isNull(), any(), any())).thenReturn(List.of(caRole, dnsRole));
+        FreeIpaServerRoleEnabledForServersPoller underTest = new FreeIpaServerRoleEnabledForServersPoller(freeIpaClient, Set.of(ROLE, DNS_ROLE), Set.of(SERVER));
         // WHEN
         AttemptResult<Void> result = underTest.process();
         // THEN
@@ -65,13 +71,28 @@ class FreeIpaServerRoleEnabledForServersPollerTest {
     }
 
     @Test
+    void testProcessWhenBothRolesNotEnabledShouldContinueWithAggregatedError() throws Exception {
+        // GIVEN
+        when(freeIpaClient.findServerRoles(isNull(), any(), any())).thenReturn(List.of());
+        FreeIpaServerRoleEnabledForServersPoller underTest = new FreeIpaServerRoleEnabledForServersPoller(freeIpaClient, Set.of(ROLE, DNS_ROLE), Set.of(SERVER));
+        // WHEN
+        AttemptResult<Void> result = underTest.process();
+        // THEN
+        assertEquals(AttemptState.CONTINUE, result.getState());
+        assertNotNull(result.getCause());
+        String message = result.getCause().getMessage();
+        assertTrue(message.contains(ROLE), "Error should mention CA server role");
+        assertTrue(message.contains(DNS_ROLE), "Error should mention DNS server role");
+        assertTrue(message.contains(SERVER), "Error should mention missing server");
+    }
+
+    @Test
     void testProcessWhenRoleNotEnabledForDifferentServerShouldContinue() throws Exception {
         // GIVEN
-        ServerRole serverRole = new ServerRole();
-        serverRole.setServerFqdn("another.server.com");
-        serverRole.setStatus("enabled");
-        when(freeIpaClient.findServerRoles(anyString(), any(), any())).thenReturn(List.of(serverRole));
-        FreeIpaServerRoleEnabledForServersPoller underTest = new FreeIpaServerRoleEnabledForServersPoller(freeIpaClient, ROLE, Set.of(SERVER));
+        ServerRole caRole = serverRole("another.server.com", ROLE, "enabled");
+        ServerRole dnsRole = serverRole("another.server.com", DNS_ROLE, "enabled");
+        when(freeIpaClient.findServerRoles(isNull(), any(), any())).thenReturn(List.of(caRole, dnsRole));
+        FreeIpaServerRoleEnabledForServersPoller underTest = new FreeIpaServerRoleEnabledForServersPoller(freeIpaClient, Set.of(ROLE, DNS_ROLE), Set.of(SERVER));
         // WHEN
         AttemptResult<Void> result = underTest.process();
         // THEN
@@ -82,8 +103,8 @@ class FreeIpaServerRoleEnabledForServersPollerTest {
     void testProcessWhenClientThrowsExceptionShouldBreak() throws Exception {
         // GIVEN
         FreeIpaClientException exception = new FreeIpaClientException("error");
-        when(freeIpaClient.findServerRoles(anyString(), any(), any())).thenThrow(exception);
-        FreeIpaServerRoleEnabledForServersPoller underTest = new FreeIpaServerRoleEnabledForServersPoller(freeIpaClient, ROLE, Set.of(SERVER));
+        when(freeIpaClient.findServerRoles(isNull(), any(), any())).thenThrow(exception);
+        FreeIpaServerRoleEnabledForServersPoller underTest = new FreeIpaServerRoleEnabledForServersPoller(freeIpaClient, Set.of(ROLE, DNS_ROLE), Set.of(SERVER));
         // WHEN
         AttemptResult<Void> result = underTest.process();
         // THEN
@@ -95,7 +116,7 @@ class FreeIpaServerRoleEnabledForServersPollerTest {
     @Test
     void testProcessWithEmptyServerListShouldFinish() throws Exception {
         // GIVEN
-        FreeIpaServerRoleEnabledForServersPoller underTest = new FreeIpaServerRoleEnabledForServersPoller(freeIpaClient, ROLE, Set.of());
+        FreeIpaServerRoleEnabledForServersPoller underTest = new FreeIpaServerRoleEnabledForServersPoller(freeIpaClient, Set.of(ROLE, DNS_ROLE), Set.of());
         // WHEN
         AttemptResult<Void> result = underTest.process();
         // THEN
@@ -105,11 +126,19 @@ class FreeIpaServerRoleEnabledForServersPollerTest {
     @Test
     void testProcessWhenClientReturnsEmptyListShouldContinue() throws Exception {
         // GIVEN
-        when(freeIpaClient.findServerRoles(anyString(), any(), any())).thenReturn(List.of());
-        FreeIpaServerRoleEnabledForServersPoller underTest = new FreeIpaServerRoleEnabledForServersPoller(freeIpaClient, ROLE, Set.of(SERVER));
+        when(freeIpaClient.findServerRoles(isNull(), any(), any())).thenReturn(List.of());
+        FreeIpaServerRoleEnabledForServersPoller underTest = new FreeIpaServerRoleEnabledForServersPoller(freeIpaClient, Set.of(ROLE, DNS_ROLE), Set.of(SERVER));
         // WHEN
         AttemptResult<Void> result = underTest.process();
         // THEN
         assertEquals(AttemptState.CONTINUE, result.getState());
+    }
+
+    private ServerRole serverRole(String fqdn, String role, String status) {
+        ServerRole sr = new ServerRole();
+        sr.setServerFqdn(fqdn);
+        sr.setRole(role);
+        sr.setStatus(status);
+        return sr;
     }
 }

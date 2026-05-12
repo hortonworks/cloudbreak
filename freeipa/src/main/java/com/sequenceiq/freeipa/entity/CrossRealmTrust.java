@@ -19,6 +19,8 @@ import com.sequenceiq.cloudbreak.service.secret.SecretValue;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.TrustStatus;
+import com.sequenceiq.freeipa.entity.util.TrustRelationshipType;
+import com.sequenceiq.freeipa.entity.util.TrustRelationshipTypeConverter;
 import com.sequenceiq.freeipa.entity.util.TrustStatusConverter;
 
 @Entity
@@ -52,6 +54,9 @@ public class CrossRealmTrust implements AccountIdAwareResource {
 
     @Convert(converter = TrustStatusConverter.class)
     private TrustStatus trustStatus;
+
+    @Convert(converter = TrustRelationshipTypeConverter.class)
+    private TrustRelationshipType trustRelationshipType = TrustRelationshipType.UNKNOWN;
 
     @Convert(converter = SecretToString.class)
     @SecretValue
@@ -163,6 +168,14 @@ public class CrossRealmTrust implements AccountIdAwareResource {
         this.trustStatus = trustStatus;
     }
 
+    public TrustRelationshipType getTrustRelationshipType() {
+        return trustRelationshipType;
+    }
+
+    public void setTrustRelationshipType(TrustRelationshipType trustRelationshipType) {
+        this.trustRelationshipType = trustRelationshipType;
+    }
+
     @Override
     public String getAccountId() {
         return Objects.requireNonNull(Crn.fromString(environmentCrn)).getAccountId();
@@ -180,6 +193,7 @@ public class CrossRealmTrust implements AccountIdAwareResource {
                 ", kdcRealm='" + kdcRealm + '\'' +
                 ", dnsIp='" + dnsIp + '\'' +
                 ", trustStatus=" + trustStatus +
+                ", trustRelationshipType=" + trustRelationshipType +
                 ", operationId='" + operationId + '\'' +
                 '}';
     }

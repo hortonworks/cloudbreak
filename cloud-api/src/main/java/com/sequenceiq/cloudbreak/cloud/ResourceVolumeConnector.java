@@ -7,10 +7,13 @@ import java.util.Map;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
+import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.RootVolumeFetchDto;
+import com.sequenceiq.cloudbreak.cloud.model.VolumeRecord;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.common.model.VolumeInfo;
 
 public interface ResourceVolumeConnector {
 
@@ -102,6 +105,29 @@ public interface ResourceVolumeConnector {
 
     default Map<String, Map<String, String>> getVolumeDeviceMappingByInstance(AuthenticatedContext authenticatedContext, CloudStack cloudStack,
             List<CloudResource> cloudResources) {
+        throw new UnsupportedOperationException("Interface not implemented.");
+    }
+
+    /**
+     * Converts the VolumeSetAttributes.Volume to VolumeInfo.
+     *
+     * @param VolumeSetAttributes.Volume the Volume that needs to be converted to VolumeInfo Dto.
+     * @return VolumeInfo
+     */
+    default VolumeInfo getVolumeInfoFromResourceVolume(VolumeSetAttributes.Volume volume) {
+        return new VolumeInfo(volume.getId(), volume.getDevice(), volume.getSize(),
+                volume.getCloudVolumeUsageType() == CloudVolumeUsageType.DATABASE);
+    }
+
+    /**
+     * Describes the attached volumes per instance.
+     *
+     * @param authenticatedContext the authenticated context which holds the client object
+     * @param instanceIds          the list of instance IDs for which to get the attached volume counts
+     * @return a map where keys are instance IDs and values are VolumeRecord attached volumes
+     */
+    default Map<String, List<VolumeRecord>> describeAttachedVolumes(AuthenticatedContext authenticatedContext, CloudStack cloudStack,
+                                                                    Collection<String> instanceIds) {
         throw new UnsupportedOperationException("Interface not implemented.");
     }
 }

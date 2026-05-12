@@ -59,6 +59,7 @@ import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXInstanceTem
 import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXRootVolumeTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXVolumeTestDto;
+import com.sequenceiq.it.cloudbreak.dto.environment.EncryptionProfileTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
@@ -652,5 +653,10 @@ public class AzureCloudProvider extends AbstractCloudProvider {
     @Override
     public String getModifyDiskVolumeType() {
         return null;
+    }
+
+    @Override
+    public EncryptionProfileTestDto encryptionProfile(EncryptionProfileTestDto encryptionProfile) {
+        return encryptionProfile;
     }
 }

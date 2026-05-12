@@ -3,6 +3,7 @@ package com.sequenceiq.freeipa.flow.freeipa.trust.setup;
 import com.sequenceiq.flow.core.FlowState;
 import com.sequenceiq.flow.core.RestartAction;
 import com.sequenceiq.freeipa.flow.FillInMemoryStateStoreRestartAction;
+import com.sequenceiq.freeipa.flow.freeipa.trust.setup.action.FreeIpaTrustSetupAddTrustAction;
 import com.sequenceiq.freeipa.flow.freeipa.trust.setup.action.FreeIpaTrustSetupBaseAction;
 import com.sequenceiq.freeipa.flow.freeipa.trust.setup.action.FreeIpaTrustSetupConfigureDnsAction;
 import com.sequenceiq.freeipa.flow.freeipa.trust.setup.action.FreeIpaTrustSetupFailedAction;
@@ -17,6 +18,7 @@ public enum FreeIpaTrustSetupState implements FlowState {
     TRUST_SETUP_PREPARE_IPA_SERVER_STATE(FreeIpaTrustSetupPrepareServerAction.class),
     TRUST_SETUP_CONFIGURE_DNS_STATE(FreeIpaTrustSetupConfigureDnsAction.class),
     TRUST_SETUP_UPDATE_PILLAR_DATA_STATE(FreeIpaTrustSetupUpdatePillarDataAction.class),
+    TRUST_SETUP_ADD_TRUST_STATE(FreeIpaTrustSetupAddTrustAction.class),
     TRUST_SETUP_FINISHED_STATE(FreeIpaTrustSetupFinishedAction.class),
     TRUST_SETUP_FAILED_STATE(FreeIpaTrustSetupFailedAction.class),
     FINAL_STATE;

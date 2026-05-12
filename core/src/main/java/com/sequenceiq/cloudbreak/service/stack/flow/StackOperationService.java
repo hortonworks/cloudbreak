@@ -29,6 +29,7 @@ import jakarta.inject.Inject;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.WebApplicationException;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.ConcurrencyFailureException;
@@ -81,6 +82,7 @@ import com.sequenceiq.cloudbreak.service.cluster.model.HostGroupName;
 import com.sequenceiq.cloudbreak.service.cluster.model.RepairValidation;
 import com.sequenceiq.cloudbreak.service.cluster.model.Result;
 import com.sequenceiq.cloudbreak.service.datalake.DataLakeStatusCheckerService;
+import com.sequenceiq.cloudbreak.service.encryptionprofile.EncryptionProfileService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
 import com.sequenceiq.cloudbreak.service.migration.kraft.KraftMigrationService;
@@ -95,6 +97,7 @@ import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.StackStopRestrictionService;
 import com.sequenceiq.cloudbreak.service.stack.TargetedUpscaleSupportService;
+import com.sequenceiq.cloudbreak.service.validation.EncryptionProfileValidator;
 import com.sequenceiq.cloudbreak.service.validation.UpdatePublicDnsEntriesInPemValidator;
 import com.sequenceiq.cloudbreak.service.validation.ZookeeperToKraftMigrationValidator;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
@@ -202,6 +205,12 @@ public class StackOperationService {
 
     @Inject
     private KraftMigrationService kraftMigrationService;
+
+    @Inject
+    private EncryptionProfileValidator encryptionProfileValidator;
+
+    @Inject
+    private EncryptionProfileService encryptionProfileService;
 
     @Inject
     private StackNotificationService stackNotificationService;
@@ -755,5 +764,17 @@ public class StackOperationService {
 
     private void convertInputGroupToLowerCase(DiskUpdateRequest updateRequest) {
         updateRequest.getGroup().toLowerCase(Locale.ROOT);
+    }
+
+    public FlowIdentifier updateSslConfigsOnCluster(NameOrCrn nameOrCrn, String accountId, String encryptionProfileNameOrCrn) {
+        LOGGER.info("Triggering update encryption profile on on stack ('{}')", nameOrCrn.getNameOrCrn());
+        StackDto stack = stackDtoService.getByNameOrCrn(nameOrCrn, accountId);
+        String encryptionProfileCrn = null;
+        if (StringUtils.isNotEmpty(encryptionProfileNameOrCrn)) {
+            encryptionProfileCrn = encryptionProfileService
+                    .getEncryptionProfileOrThrowException(encryptionProfileNameOrCrn).getCrn();
+        }
+        encryptionProfileValidator.validate(stack);
+        return flowManager.triggerUpdateSslConfigsOnCluster(stack.getId(), encryptionProfileCrn);
     }
 }

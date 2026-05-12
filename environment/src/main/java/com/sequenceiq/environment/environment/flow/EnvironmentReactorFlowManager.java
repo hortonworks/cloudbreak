@@ -34,6 +34,8 @@ import com.sequenceiq.environment.environment.flow.config.update.event.EnvStackC
 import com.sequenceiq.environment.environment.flow.config.update.event.EnvStackConfigUpdatesStateSelectors;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationEvent;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteEvent;
+import com.sequenceiq.environment.environment.flow.encryptionprofile.event.EnableEncryptionProfileEvent;
+import com.sequenceiq.environment.environment.flow.encryptionprofile.event.EnableEncryptionProfileStateSelectors;
 import com.sequenceiq.environment.environment.flow.externalizedcluster.create.event.ExternalizedComputeClusterCreationEvent;
 import com.sequenceiq.environment.environment.flow.externalizedcluster.create.event.ExternalizedComputeClusterCreationStateSelectors;
 import com.sequenceiq.environment.environment.flow.externalizedcluster.reinitialization.event.ExternalizedComputeClusterReInitializationEvent;
@@ -338,6 +340,20 @@ public class EnvironmentReactorFlowManager {
         FlowIdentifier flowIdentifier = sendEvent(externalizedComputeClusterReInitializationEvent, userCrn);
         LOGGER.debug("Externalized compute cluster reinitialization flow trigger event sent for environment {}", environment.getName());
         return flowIdentifier;
+    }
+
+    public FlowIdentifier triggerEnableEncryptionProfile(long envId, String envName, String resourceCrn, String encryptionProfileCrn) {
+        LOGGER.info("Enable encryption profile for environment {} started", envName);
+        EnableEncryptionProfileEvent event = EnableEncryptionProfileEvent.builder()
+                .withAccepted(new Promise<>())
+                .withSelector(EnableEncryptionProfileStateSelectors.VALIDATE_ENABLE_ENCRYPTION_PROFILE_EVENT.selector())
+                .withResourceId(envId)
+                .withResourceName(envName)
+                .withResourceCrn(resourceCrn)
+                .withEncryptionProfileCrn(encryptionProfileCrn)
+                .build();
+
+        return sendEvent(event, ThreadBasedUserCrnProvider.getUserCrn());
     }
 
     public FlowIdentifier triggerEnvironmentTagsModification(Environment environment, Map<String, String> userDefinedTags) {

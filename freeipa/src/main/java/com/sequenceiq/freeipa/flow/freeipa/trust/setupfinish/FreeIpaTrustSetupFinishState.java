@@ -8,10 +8,12 @@ import com.sequenceiq.freeipa.flow.freeipa.trust.setupfinish.action.FreeIpaTrust
 import com.sequenceiq.freeipa.flow.freeipa.trust.setupfinish.action.FreeIpaTrustSetupFinishBaseAction;
 import com.sequenceiq.freeipa.flow.freeipa.trust.setupfinish.action.FreeIpaTrustSetupFinishFailedAction;
 import com.sequenceiq.freeipa.flow.freeipa.trust.setupfinish.action.FreeIpaTrustSetupFinishSuccessAction;
+import com.sequenceiq.freeipa.flow.freeipa.trust.setupfinish.action.FreeIpaTrustSetupFinishValidateTrustAction;
 
 public enum FreeIpaTrustSetupFinishState implements FlowState {
     INIT_STATE,
     TRUST_SETUP_FINISH_ADD_TRUST_STATE(FreeIpaTrustSetupFinishAction.class),
+    TRUST_SETUP_FINISH_VALIDATE_TRUST_STATE(FreeIpaTrustSetupFinishValidateTrustAction.class),
     TRUST_SETUP_FINISH_FINISHED_STATE(FreeIpaTrustSetupFinishSuccessAction.class),
     TRUST_SETUP_FINISH_FAILED_STATE(FreeIpaTrustSetupFinishFailedAction.class),
     FINAL_STATE;

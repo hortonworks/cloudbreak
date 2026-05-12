@@ -100,6 +100,7 @@ import com.sequenceiq.cloudbreak.core.flow2.event.StackDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackImageUpdateTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackLoadBalancerUpdateTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackSyncTriggerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.event.UpdateSslConfigTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.UpgradePreparationChainTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.user.ExternalDatabaseUserFlowStartEvent;
 import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.user.ExternalDatabaseUserOperation;
@@ -471,9 +472,10 @@ public class ReactorFlowManager {
         return reactorNotifier.notify(stackId, event.getSelector(), event);
     }
 
-    public FlowIdentifier triggerUpdateTrustedRealm(Long stackId, String resourceCrn, String environmentCrn, String realm, boolean saltUpdateRequired) {
+    public FlowIdentifier triggerUpdateTrustedRealm(Long stackId, String resourceCrn, String environmentCrn, String realm, boolean saltUpdateRequired,
+            boolean remove) {
         UpdateTrustedRealmChainTriggerEvent event = new UpdateTrustedRealmChainTriggerEvent(
-                FlowChainTriggers.UPDATE_TRUSTED_REALM_CHAIN_TRIGGER_EVENT, stackId, resourceCrn, environmentCrn, realm, saltUpdateRequired);
+                FlowChainTriggers.UPDATE_TRUSTED_REALM_CHAIN_TRIGGER_EVENT, stackId, resourceCrn, environmentCrn, realm, saltUpdateRequired, remove);
         return reactorNotifier.notify(stackId, event.getSelector(), event);
     }
 
@@ -657,5 +659,10 @@ public class ReactorFlowManager {
     public FlowIdentifier triggerUpdatePublicDnsEntriesInPem(Long stackId) {
         String selector = UpdatePublicDnsEntriesFlowEvent.UPDATE_PUBLIC_DNS_ENTRIES_TRIGGER_EVENT.event();
         return reactorNotifier.notify(stackId, selector, new StackEvent(selector, stackId));
+    }
+
+    public FlowIdentifier triggerUpdateSslConfigsOnCluster(Long stackId, String encryptionProfileCrn) {
+        String selector = FlowChainTriggers.UPDATE_SSL_CONFIG_CHAIN_TRIGGER_EVENT;
+        return reactorNotifier.notify(stackId, selector, new UpdateSslConfigTriggerEvent(selector, stackId, new Promise<>(), encryptionProfileCrn));
     }
 }

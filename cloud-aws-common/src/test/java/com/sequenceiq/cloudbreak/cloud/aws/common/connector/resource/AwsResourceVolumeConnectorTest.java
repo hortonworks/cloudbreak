@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.RootVolumeFetchDto;
+import com.sequenceiq.cloudbreak.cloud.model.VolumeRecord;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 
@@ -148,6 +149,18 @@ class AwsResourceVolumeConnectorTest {
         when(awsAdditionalDiskAttachmentService.getAttachedVolumeCountPerInstance(authenticatedContext, List.of("i1", "i2"))).thenReturn(expected);
 
         Map<String, Integer> result = underTest.getAttachedVolumeCountPerInstance(authenticatedContext, cloudStack, List.of("i1", "i2"));
+
+        assertThat(result).containsExactlyInAnyOrderEntriesOf(expected);
+    }
+
+    @Test
+    void testDescribeAttachedVolumes() {
+        Map<String, List<VolumeRecord>> expected = Map.of("instance1",
+                List.of(new VolumeRecord("vol-id", "/dev", 1, "gp2")));
+        CloudStack cloudStack = mock(CloudStack.class);
+        when(awsAdditionalDiskAttachmentService.describeAttachedVolumes(authenticatedContext, List.of("i1"))).thenReturn(expected);
+
+        Map<String, List<VolumeRecord>> result = underTest.describeAttachedVolumes(authenticatedContext, cloudStack, List.of("i1"));
 
         assertThat(result).containsExactlyInAnyOrderEntriesOf(expected);
     }

@@ -26,7 +26,9 @@ public class UpdateTrustedRealmFlowEventChainFactory implements FlowEventChainFa
     public FlowTriggerEventQueue createFlowTriggerEventQueue(UpdateTrustedRealmChainTriggerEvent event) {
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
         flowEventChain.add(new FlowChainInitPayload(getName(), event.getResourceId(), event.accepted()));
-        if (event.isSaltUpdateRequired()) {
+        // Salt update is only needed when adding/updating a trusted realm, not when removing one.
+        // During removal, the realm configuration is already gone so re-running Salt would be unnecessary and could fail.
+        if (event.isSaltUpdateRequired() && !event.isRemove()) {
             flowEventChain.add(new SaltUpdateTriggerEvent(event.getResourceId(), event.accepted(), false));
         }
         flowEventChain.add(UpdateTrustedRealmTriggerEvent.fromChainTrigger(event));
@@ -34,5 +36,3 @@ public class UpdateTrustedRealmFlowEventChainFactory implements FlowEventChainFa
         return new FlowTriggerEventQueue(getName(), event, flowEventChain);
     }
 }
-
-

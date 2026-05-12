@@ -36,7 +36,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
 import com.cloudera.api.swagger.AllHostsResourceApi;
 import com.cloudera.api.swagger.BatchResourceApi;
@@ -75,7 +74,6 @@ import com.cloudera.api.swagger.model.ApiService;
 import com.cloudera.api.swagger.model.ApiServiceConfig;
 import com.cloudera.api.swagger.model.ApiServiceList;
 import com.cloudera.api.swagger.model.ApiServiceRef;
-import com.cloudera.api.swagger.model.ApiServiceState;
 import com.cloudera.api.swagger.model.HTTPMethod;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Maps;
@@ -198,9 +196,6 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
 
     @Inject
     private ClusterCommandService clusterCommandService;
-
-    @Inject
-    private ClouderaManagerCommandsService clouderaManagerCommandsService;
 
     @Inject
     private ClouderaManagerFlinkConfigurationService clouderaManagerFlinkConfigurationService;
@@ -975,12 +970,11 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     @Override
     public void stopCluster(boolean disableKnoxAutorestart) throws CloudbreakException {
         ClusterView cluster = stack.getCluster();
-        ClustersResourceApi clustersResourceApi = clouderaManagerApiFactory.getClustersResourceApi(v31Client);
         try {
             LOGGER.debug("Stopping all Cloudera Runtime services");
             ExtendedPollingResult extendedPollingResult = clouderaManagerPollingServiceProvider.checkCmStatus(stack, v31Client);
             if (extendedPollingResult.isSuccess()) {
-                stopWithRunningCm(disableKnoxAutorestart, cluster, clustersResourceApi);
+                stopWithRunningCm(disableKnoxAutorestart, cluster);
             } else {
                 logPollingResult(extendedPollingResult);
                 skipStopWithStoppedCm();
@@ -989,6 +983,14 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
             LOGGER.info("Couldn't stop Cloudera Manager services", e);
             throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
         }
+    }
+
+    private void stopWithRunningCm(boolean disableKnoxAutorestart, ClusterView cluster) throws ApiException, CloudbreakException {
+        eventService.fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_CM_CLUSTER_SERVICES_STOPPING);
+        disableKnoxAutorestart(disableKnoxAutorestart);
+        Collection<ApiService> apiServices = readServices(stack);
+        clouderaManagerServiceManagementService.stopAllClusterRuntimeServices(v31Client, stack, cluster.getName(), apiServices);
+        eventService.fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_CM_CLUSTER_SERVICES_STOPPED);
     }
 
     private void logPollingResult(ExtendedPollingResult extendedPollingResult) {
@@ -1002,24 +1004,6 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
 
     private void skipStopWithStoppedCm() {
         LOGGER.debug("No need to stop Cloudera Manager services as Cloudera Manager is already stopped");
-        eventService.fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_CM_CLUSTER_SERVICES_STOPPED);
-    }
-
-    private void stopWithRunningCm(boolean disableKnoxAutorestart, ClusterView cluster, ClustersResourceApi clustersResourceApi)
-            throws ApiException, CloudbreakException {
-        eventService.fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_CM_CLUSTER_SERVICES_STOPPING);
-        disableKnoxAutorestart(disableKnoxAutorestart);
-        Collection<ApiService> apiServices = readServices(stack);
-        boolean anyServiceNotStopped = apiServices.stream()
-                .anyMatch(service -> !ApiServiceState.STOPPED.equals(service.getServiceState())
-                        && !ApiServiceState.STOPPING.equals(service.getServiceState())
-                        && !ApiServiceState.NA.equals(service.getServiceState()));
-        if (anyServiceNotStopped) {
-            ApiCommand apiCommand = clustersResourceApi.stopCommand(cluster.getName());
-            ExtendedPollingResult pollingResult = clouderaManagerPollingServiceProvider.startPollingCmShutdown(stack, v31Client, apiCommand.getId());
-            handlePollingResult(pollingResult.getPollingResult(), "Cluster was terminated while waiting for Hadoop services to stop",
-                    "Timeout while stopping Cloudera Manager services.");
-        }
         eventService.fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_CM_CLUSTER_SERVICES_STOPPED);
     }
 
@@ -1156,60 +1140,11 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
 
     private void startServices() throws ApiException, CloudbreakException {
         ClusterView cluster = stack.getCluster();
-        ClustersResourceApi apiInstance = clouderaManagerApiFactory.getClustersResourceApi(v31Client);
         LOGGER.debug("Starting all services for cluster.");
         eventService.fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), CLUSTER_CM_CLUSTER_SERVICES_STARTING);
         Collection<ApiService> apiServices = readServices(stack);
-        Set<ApiService> notStartedServices = apiServices.stream()
-                .filter(service -> !ApiServiceState.STARTED.equals(service.getServiceState())
-                        && !ApiServiceState.STARTING.equals(service.getServiceState())
-                        && !ApiServiceState.NA.equals(service.getServiceState()))
-                .collect(Collectors.toSet());
-        if (!notStartedServices.isEmpty()) {
-            LOGGER.debug("Starting cluster because the following services are not running: {}", notStartedServices.stream()
-                    .map(ApiService::getName)
-                    .filter(StringUtils::hasText)
-                    .collect(Collectors.toSet()));
-            ClusterCommand startCommand = null;
-            try {
-                startCommand = startServicesIfNotRunning(cluster, apiInstance);
-                ExtendedPollingResult pollingResult =
-                        clouderaManagerPollingServiceProvider.startPollingCmStartup(stack, v31Client, startCommand.getCommandId());
-                handlePollingResult(pollingResult, "Cluster was terminated while waiting for Cloudera Runtime services to start",
-                        "Timeout while stopping Cloudera Manager services.");
-            } finally {
-                if (startCommand != null) {
-                    clusterCommandService.delete(startCommand);
-                }
-            }
-        }
+        clouderaManagerServiceManagementService.startAllClusterRuntimeServices(v31Client, stack, cluster, apiServices);
         eventService.fireCloudbreakEvent(stack.getId(), UPDATE_IN_PROGRESS.name(), CLUSTER_CM_CLUSTER_SERVICES_STARTED);
-    }
-
-    private ClusterCommand startServicesIfNotRunning(ClusterView cluster, ClustersResourceApi clustersResourceApi)
-            throws ApiException {
-        Optional<ClusterCommand> startClusterCommand =
-                clusterCommandService.findTopByClusterIdAndClusterCommandType(cluster.getId(), ClusterCommandType.START_CLUSTER);
-        if (startClusterCommand.isPresent()) {
-            Optional<ApiCommand> apiCommand = clouderaManagerCommandsService.getApiCommandIfExist(v31Client, startClusterCommand.get().getCommandId());
-            if (apiCommand.isPresent() && Boolean.TRUE.equals(apiCommand.get().isActive())) {
-                return startClusterCommand.get();
-            } else {
-                clusterCommandService.delete(startClusterCommand.get());
-                return startServicesAndStoreCMCommand(cluster, clustersResourceApi);
-            }
-        } else {
-            return startServicesAndStoreCMCommand(cluster, clustersResourceApi);
-        }
-    }
-
-    private ClusterCommand startServicesAndStoreCMCommand(ClusterView cluster, ClustersResourceApi clustersResourceApi) throws ApiException {
-        ApiCommand startCommand = clustersResourceApi.startCommand(stack.getName());
-        ClusterCommand newStartClusterCommand = new ClusterCommand();
-        newStartClusterCommand.setClusterId(cluster.getId());
-        newStartClusterCommand.setCommandId(startCommand.getId());
-        newStartClusterCommand.setClusterCommandType(ClusterCommandType.START_CLUSTER);
-        return clusterCommandService.save(newStartClusterCommand);
     }
 
     private void startAgents() {
@@ -1251,9 +1186,9 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     }
 
     @Override
-    public void restartClusterServices() {
+    public void restartClusterServices(boolean restartStaleServices) {
         try {
-            restartServices(false, false);
+            restartServices(false, restartStaleServices);
         } catch (ApiException | CloudbreakException e) {
             LOGGER.info("Could not restart services", e);
             throw new ClouderaManagerOperationFailedException(e.getMessage(), e);

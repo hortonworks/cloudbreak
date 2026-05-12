@@ -17,6 +17,7 @@ public class DistroXOpDescription {
     public static final String GET_BY_CRN_INTERNAL = "get stack by crn (for internal user)";
     public static final String GET_BY_CRN_INSTANCES_INTERNAL = "get instances by crn (for internal user)";
     public static final String GET_BY_CRNS_INTERNAL = "get stack by crns (for internal user)";
+    public static final String GET_STATUS_BY_ENV_CRN_INTERNAL = "get stack statuses by environment crn (for internal user)";
     public static final String CREATE = "create stack";
     public static final String SEND_NOTIFICATION = "send stack health notification";
     public static final String DELETE_BY_NAME = "delete stack by name";

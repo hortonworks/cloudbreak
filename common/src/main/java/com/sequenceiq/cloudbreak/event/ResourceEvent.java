@@ -460,6 +460,8 @@ public enum ResourceEvent {
     CLUSTER_MODIFY_PROXY_CONFIG_FAILED("cluster.proxy.modification.failed"),
     CLUSTER_UPDATE_TRUSTED_REALM("cluster.update.trusted.realm"),
     CLUSTER_UPDATE_TRUSTED_REALM_FAILED("cluster.update.trusted.realm.failed"),
+    CLUSTER_REMOVE_TRUSTED_REALM("cluster.remove.trusted.realm"),
+    CLUSTER_REMOVE_TRUSTED_REALM_FAILED("cluster.remove.trusted.realm.failed"),
     CLUSTER_MANAGER_UPGRADE("cluster.manager.upgrade"),
     CLUSTER_MANAGER_UPGRADE_NOT_NEEDED("cluster.manager.upgrade.not.needed"),
     CLUSTER_MANAGER_UPGRADE_FINISHED("cluster.manager.upgrade.finished"),
@@ -869,8 +871,14 @@ public enum ResourceEvent {
 
     ENVIRONMENT_CANCEL_TRUST_VALIDATION_STARTED("environment.cancel.cross.realm.trust.validation.started"),
     ENVIRONMENT_CANCEL_TRUST_STARTED("environment.cancel.cross.realm.trust.started"),
+    ENVIRONMENT_CANCEL_TRUST_CONFIG_REMOVAL_STARTED("environment.cancel.cross.realm.trust.cm.removal.started"),
+    ENVIRONMENT_CANCEL_TRUST_ENTITY_DELETE_STARTED("environment.cancel.cross.realm.trust.entity.delete.started"),
+    ENVIRONMENT_CANCEL_TRUST_ENTITY_DELETE_FAILED("environment.cancel.cross.realm.trust.entity.delete.failed"),
+    ENVIRONMENT_CANCEL_TRUST_SALT_UPDATE_STARTED("environment.cancel.cross.realm.trust.salt.update.started"),
+    ENVIRONMENT_CANCEL_TRUST_SALT_UPDATE_FAILED("environment.cancel.cross.realm.trust.salt.update.failed"),
     ENVIRONMENT_CANCEL_TRUST_FINISHED("environment.cancel.cross.realm.trust.finished"),
     ENVIRONMENT_CANCEL_TRUST_VALIDATION_FAILED("environment.cancel.cross.realm.trust.validation.failed"),
+    ENVIRONMENT_CANCEL_TRUST_CONFIG_REMOVAL_FAILED("environment.cancel.cross.realm.trust.cm.removal.failed"),
     ENVIRONMENT_CANCEL_TRUST_FAILED("environment.cancel.cross.realm.trust.failed"),
 
     ENVIRONMENT_SETUP_FINISH_TRUST_VALIDATION_STARTED("environment.setup.finish.cross.realm.trust.validation.started"),
@@ -886,17 +894,17 @@ public enum ResourceEvent {
     ENVIRONMENT_REPAIR_TRUST_VALIDATION_FAILED("environment.repair.cross.realm.trust.validation.failed"),
     ENVIRONMENT_REPAIR_TRUST_FAILED("environment.repair.cross.realm.trust.failed"),
 
-    FREEIPA_SETUP_TRUST_STARTED("environment.setup.cross.realm.trust.started"),
-    FREEIPA_SETUP_TRUST_FINISHED("environment.setup.cross.realm.trust.finished"),
-    FREEIPA_SETUP_TRUST_FAILED("environment.setup.cross.realm.trust.failed"),
+    FREEIPA_SETUP_TRUST_STARTED("freeipa.setup.cross.realm.trust.started"),
+    FREEIPA_SETUP_TRUST_FINISHED("freeipa.setup.cross.realm.trust.finished"),
+    FREEIPA_SETUP_TRUST_FAILED("freeipa.setup.cross.realm.trust.failed"),
 
-    FREEIPA_CANCEL_TRUST_STARTED("environment.cancel.cross.realm.trust.started"),
-    FREEIPA_CANCEL_TRUST_FINISHED("environment.cancel.cross.realm.trust.finished"),
-    FREEIPA_CANCEL_TRUST_FAILED("environment.cancel.cross.realm.trust.failed"),
+    FREEIPA_CANCEL_TRUST_STARTED("freeipa.cancel.cross.realm.trust.started"),
+    FREEIPA_CANCEL_TRUST_FINISHED("freeipa.cancel.cross.realm.trust.finished"),
+    FREEIPA_CANCEL_TRUST_FAILED("freeipa.cancel.cross.realm.trust.failed"),
 
-    FREEIPA_SETUP_FINISH_TRUST_STARTED("environment.setup.finish.cross.realm.trust.started"),
-    FREEIPA_SETUP_FINISH_TRUST_FINISHED("environment.setup.finish.cross.realm.trust.finished"),
-    FREEIPA_SETUP_FINISH_TRUST_FAILED("environment.setup.finish.cross.realm.trust.failed"),
+    FREEIPA_SETUP_FINISH_TRUST_STARTED("freeipa.setup.finish.cross.realm.trust.started"),
+    FREEIPA_SETUP_FINISH_TRUST_FINISHED("freeipa.setup.finish.cross.realm.trust.finished"),
+    FREEIPA_SETUP_FINISH_TRUST_FAILED("freeipa.setup.finish.cross.realm.trust.failed"),
 
     FREEIPA_CREATION_STARTED("freeipa.creation.started"),
     FREEIPA_CREATION_FINISHED("freeipa.creation.finished"),
@@ -904,7 +912,15 @@ public enum ResourceEvent {
     FREEIPA_UPGRADE_FAILED("freeipa.upgrade.failed"),
     FREEIPA_IMAGE_CHANGE_STARTED("freeipa.image.change.started"),
     FREEIPA_IMAGE_CHANGE_FINISHED("freeipa.image.change.finished"),
-    FREEIPA_IMAGE_CHANGE_FAILED("freeipa.image.change.failed"),;
+    FREEIPA_IMAGE_CHANGE_FAILED("freeipa.image.change.failed"),
+
+    ENABLE_ENCRYPTION_PROFILE_STARTED("environment.enable.encryption.profile.started"),
+    ENABLE_ENCRYPTION_PROFILE_FINISHED("environment.enable.encryption.profile.finished"),
+    ENABLE_ENCRYPTION_PROFILE_FAILED("environment.enable.encryption.profile.failed"),
+    DISK_SYNC_FAILED("disk.sync.status.failed"),
+    DISK_SYNC_VOLUME_MISMATCH_FOUND("disk.sync.status.volume.mismatch.found"),
+    DISK_SYNC_FSTAB_MISMATCH_FOUND("disk.sync.status.fstab.mismatch.found"),
+    DISK_SYNC_VOLUME_MOUNT_MISMATCH_FOUND("disk.sync.status.volume.mount.mismatch.found"),;
 
     private final String message;
 

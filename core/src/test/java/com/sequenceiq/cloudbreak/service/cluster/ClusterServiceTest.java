@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.common.type.HealthCheckResult.HEALTHY;
 import static com.sequenceiq.cloudbreak.common.type.HealthCheckResult.UNHEALTHY;
 import static com.sequenceiq.common.api.type.CertExpirationState.HOST_CERT_EXPIRING;
 import static com.sequenceiq.common.api.type.CertExpirationState.VALID;
+import static com.sequenceiq.common.api.type.ConfigStalenessState.RESTART_IN_PROGRESS;
 import static com.sequenceiq.common.api.type.ConfigStalenessState.STALE;
 import static com.sequenceiq.common.api.type.ConfigStalenessState.UP_TO_DATE;
 import static java.util.Collections.emptySet;
@@ -118,26 +119,36 @@ class ClusterServiceTest {
 
     static Object[][] updateClusterCertExpirationStateScenarios() {
         return new Object[][]{
-                {"Change from valid to expiring", VALID, Boolean.TRUE, Boolean.TRUE, HOST_CERT_EXPIRING,
+                // name, currentState, currentDetails, hostCertificateExpiring, stateChanged, newState, incomingDetails
+                {"Change from valid to expiring", VALID, null, Boolean.TRUE, Boolean.TRUE, HOST_CERT_EXPIRING,
                         "Certificate of Cloudera Manager Agent will expire within 364 days. Warning threshold: 366."},
-                {"Change from expiring to valid", HOST_CERT_EXPIRING, Boolean.FALSE, Boolean.TRUE, VALID, ""},
-                {"No change when valid", VALID, Boolean.FALSE, Boolean.FALSE, null, ""},
-                {"No change when expiring", HOST_CERT_EXPIRING, Boolean.TRUE, Boolean.FALSE, null, ""}
+                {"Change from expiring to valid", HOST_CERT_EXPIRING, "old details", Boolean.FALSE, Boolean.TRUE, VALID, ""},
+                {"No change when valid", VALID, null, Boolean.FALSE, Boolean.FALSE, null, ""},
+                {"Update message when already expiring and details changed", HOST_CERT_EXPIRING,
+                        "Certificate of Cloudera Manager Agent will expire within 364 days. Warning threshold: 366.",
+                        Boolean.TRUE, Boolean.TRUE, HOST_CERT_EXPIRING,
+                        "Certificate of Cloudera Manager Agent will expire within 363 days. Warning threshold: 366."},
+                // When certs are still expiring and the message has not changed, no update should happen.
+                {"No change when already expiring and details unchanged", HOST_CERT_EXPIRING,
+                        "Certificate of Cloudera Manager Agent will expire within 363 days. Warning threshold: 366.",
+                        Boolean.TRUE, Boolean.FALSE, null,
+                        "Certificate of Cloudera Manager Agent will expire within 363 days. Warning threshold: 366."}
         };
     }
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("updateClusterCertExpirationStateScenarios")
-    public void testUpdateClusterCertExpirationState(String name, CertExpirationState current, Boolean hostCertificateExpiring, Boolean stateChanged,
-            CertExpirationState newState, String certExpirationDetails) {
+    public void testUpdateClusterCertExpirationState(String name, CertExpirationState current, String currentDetails, Boolean hostCertificateExpiring,
+            Boolean stateChanged, CertExpirationState newState, String incomingDetails) {
         Cluster cluster = new Cluster();
         cluster.setId(1L);
         cluster.setCertExpirationState(current);
+        cluster.setCertExpirationDetails(currentDetails);
 
-        underTest.updateClusterCertExpirationState(cluster, hostCertificateExpiring, certExpirationDetails);
+        underTest.updateClusterCertExpirationState(cluster, hostCertificateExpiring, incomingDetails);
 
         if (stateChanged) {
-            verify(repository, times(1)).updateCertExpirationState(cluster.getId(), newState, certExpirationDetails);
+            verify(repository, times(1)).updateCertExpirationState(cluster.getId(), newState, incomingDetails);
         } else {
             verifyNoInteractions(repository);
         }
@@ -175,6 +186,17 @@ class ClusterServiceTest {
                 {"No change when fresh", UP_TO_DATE, Boolean.FALSE, Boolean.FALSE, null, ""},
                 {"No change when stale", STALE, Boolean.TRUE, Boolean.FALSE, null, ""}
         };
+    }
+
+    @Test
+    void testUpdateClusterConfigurationStalenessByStackId() {
+        Stack stack = mock(Stack.class);
+        when(stack.getClusterId()).thenReturn(CLUSTER_ID);
+        when(stackDtoService.getStackReferenceById(STACK_ID)).thenReturn(stack);
+
+        underTest.updateClusterConfigurationStalenessByStackId(STACK_ID, RESTART_IN_PROGRESS, "Restart in progress");
+
+        verify(repository, times(1)).updateConfigStalenessState(CLUSTER_ID, RESTART_IN_PROGRESS, "Restart in progress");
     }
 
     @ParameterizedTest(name = "{0}")

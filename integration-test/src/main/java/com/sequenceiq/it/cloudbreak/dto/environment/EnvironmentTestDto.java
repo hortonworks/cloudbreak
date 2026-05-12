@@ -684,4 +684,22 @@ public class EnvironmentTestDto
         getRequest().setOverrideTunnel(Boolean.FALSE);
         return this;
     }
+
+    public EnvironmentTestDto withEncryptionProfile(EncryptionProfileTestDto encryptionProfileTestDto) {
+        getRequest().setEncryptionProfileNameOrCrn(encryptionProfileTestDto.getName());
+        return this;
+    }
+
+    public EnvironmentTestDto withEncryptionProfile() {
+        EncryptionProfileTestDto encryptionProfileTestDto = getTestContext().get(EncryptionProfileTestDto.class);
+        if (encryptionProfileTestDto == null || encryptionProfileTestDto.getName() == null) {
+            throw new IllegalArgumentException("Encryption Profile does not exist! " + encryptionProfileTestDto);
+        }
+        return withEncryptionProfile(encryptionProfileTestDto);
+    }
+
+    public EnvironmentTestDto withEncryptionProfile(String name) {
+        getRequest().setEncryptionProfileNameOrCrn(name);
+        return this;
+    }
 }

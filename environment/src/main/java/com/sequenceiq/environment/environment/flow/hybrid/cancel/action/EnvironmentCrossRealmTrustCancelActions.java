@@ -1,18 +1,35 @@
 package com.sequenceiq.environment.environment.flow.hybrid.cancel.action;
 
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_CANCEL_TRUST_CONFIG_REMOVAL_FAILED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_CANCEL_TRUST_CONFIG_REMOVAL_STARTED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_CANCEL_TRUST_ENTITY_DELETE_FAILED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_CANCEL_TRUST_ENTITY_DELETE_STARTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_CANCEL_TRUST_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_CANCEL_TRUST_FINISHED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_CANCEL_TRUST_SALT_UPDATE_FAILED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_CANCEL_TRUST_SALT_UPDATE_STARTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_CANCEL_TRUST_STARTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_CANCEL_TRUST_VALIDATION_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_CANCEL_TRUST_VALIDATION_STARTED;
+import static com.sequenceiq.common.api.type.EnvironmentType.HYBRID;
+import static com.sequenceiq.environment.environment.EnvironmentStatus.AVAILABLE;
+import static com.sequenceiq.environment.environment.EnvironmentStatus.TRUST_CANCEL_CONFIG_REMOVAL_IN_PROGRESS;
 import static com.sequenceiq.environment.environment.EnvironmentStatus.TRUST_CANCEL_IN_PROGRESS;
+import static com.sequenceiq.environment.environment.EnvironmentStatus.TRUST_CANCEL_SALT_UPDATE_IN_PROGRESS;
+import static com.sequenceiq.environment.environment.EnvironmentStatus.TRUST_CANCEL_TRUST_ENTITY_DELETE_IN_PROGRESS;
 import static com.sequenceiq.environment.environment.EnvironmentStatus.TRUST_CANCEL_VALIDATION_IN_PROGRESS;
 import static com.sequenceiq.environment.environment.EnvironmentStatus.TRUST_SETUP_REQUIRED;
+import static com.sequenceiq.environment.environment.flow.hybrid.cancel.EnvironmentCrossRealmTrustCancelState.TRUST_CANCEL_CONFIG_REMOVAL_STATE;
 import static com.sequenceiq.environment.environment.flow.hybrid.cancel.EnvironmentCrossRealmTrustCancelState.TRUST_CANCEL_FAILED_STATE;
 import static com.sequenceiq.environment.environment.flow.hybrid.cancel.EnvironmentCrossRealmTrustCancelState.TRUST_CANCEL_FINISHED_STATE;
+import static com.sequenceiq.environment.environment.flow.hybrid.cancel.EnvironmentCrossRealmTrustCancelState.TRUST_CANCEL_SALT_UPDATE_STATE;
 import static com.sequenceiq.environment.environment.flow.hybrid.cancel.EnvironmentCrossRealmTrustCancelState.TRUST_CANCEL_STATE;
+import static com.sequenceiq.environment.environment.flow.hybrid.cancel.EnvironmentCrossRealmTrustCancelState.TRUST_CANCEL_TRUST_ENTITY_DELETE_STATE;
 import static com.sequenceiq.environment.environment.flow.hybrid.cancel.EnvironmentCrossRealmTrustCancelState.TRUST_CANCEL_VALIDATION_STATE;
+import static com.sequenceiq.environment.environment.flow.hybrid.cancel.event.EnvironmentCrossRealmTrustCancelHandlerSelectors.TRUST_CANCEL_CONFIG_REMOVAL_HANDLER;
 import static com.sequenceiq.environment.environment.flow.hybrid.cancel.event.EnvironmentCrossRealmTrustCancelHandlerSelectors.TRUST_CANCEL_HANDLER;
+import static com.sequenceiq.environment.environment.flow.hybrid.cancel.event.EnvironmentCrossRealmTrustCancelHandlerSelectors.TRUST_CANCEL_SALT_UPDATE_HANDLER;
+import static com.sequenceiq.environment.environment.flow.hybrid.cancel.event.EnvironmentCrossRealmTrustCancelHandlerSelectors.TRUST_CANCEL_TRUST_ENTITY_DELETE_HANDLER;
 import static com.sequenceiq.environment.environment.flow.hybrid.cancel.event.EnvironmentCrossRealmTrustCancelHandlerSelectors.TRUST_CANCEL_VALIDATION_HANDLER;
 import static com.sequenceiq.environment.environment.flow.hybrid.cancel.event.EnvironmentCrossRealmTrustCancelStateSelectors.FINALIZE_TRUST_CANCEL_EVENT;
 import static com.sequenceiq.environment.environment.flow.hybrid.cancel.event.EnvironmentCrossRealmTrustCancelStateSelectors.HANDLED_FAILED_TRUST_CANCEL_EVENT;
@@ -32,6 +49,7 @@ import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.hybrid.cancel.event.EnvironmentCrossRealmTrustCancelEvent;
 import com.sequenceiq.environment.environment.flow.hybrid.cancel.event.EnvironmentCrossRealmTrustCancelFailedEvent;
+import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.environment.service.EnvironmentStatusUpdateService;
 import com.sequenceiq.environment.metrics.EnvironmentMetricService;
 import com.sequenceiq.flow.core.CommonContext;
@@ -45,11 +63,15 @@ public class EnvironmentCrossRealmTrustCancelActions {
 
     private final EnvironmentMetricService metricService;
 
+    private final EnvironmentService environmentService;
+
     public EnvironmentCrossRealmTrustCancelActions(
             EnvironmentStatusUpdateService environmentStatusUpdateService,
-            EnvironmentMetricService metricService) {
+            EnvironmentMetricService metricService,
+            EnvironmentService environmentService) {
         this.environmentStatusUpdateService = environmentStatusUpdateService;
         this.metricService = metricService;
+        this.environmentService = environmentService;
     }
 
     @Bean(name = "TRUST_CANCEL_VALIDATION_STATE")
@@ -87,16 +109,74 @@ public class EnvironmentCrossRealmTrustCancelActions {
         };
     }
 
+    @Bean(name = "TRUST_CANCEL_CONFIG_REMOVAL_STATE")
+    public Action<?, ?> crossRealmTrustCancelConfigRemovalAction() {
+        return new AbstractEnvironmentCrossRealmTrustCancelAction<>(EnvironmentCrossRealmTrustCancelEvent.class) {
+
+            @Override
+            protected void doExecute(CommonContext context, EnvironmentCrossRealmTrustCancelEvent payload, Map<Object, Object> variables) {
+                environmentStatusUpdateService
+                        .updateEnvironmentStatusAndNotify(
+                                context,
+                                payload,
+                                TRUST_CANCEL_CONFIG_REMOVAL_IN_PROGRESS,
+                                ENVIRONMENT_CANCEL_TRUST_CONFIG_REMOVAL_STARTED,
+                                TRUST_CANCEL_CONFIG_REMOVAL_STATE);
+                sendEvent(context, TRUST_CANCEL_CONFIG_REMOVAL_HANDLER.selector(), payload);
+            }
+        };
+    }
+
+    @Bean(name = "TRUST_CANCEL_TRUST_ENTITY_DELETE_STATE")
+    public Action<?, ?> crossRealmTrustEntityDeleteAction() {
+        return new AbstractEnvironmentCrossRealmTrustCancelAction<>(EnvironmentCrossRealmTrustCancelEvent.class) {
+
+            @Override
+            protected void doExecute(CommonContext context, EnvironmentCrossRealmTrustCancelEvent payload, Map<Object, Object> variables) {
+                environmentStatusUpdateService
+                        .updateEnvironmentStatusAndNotify(
+                                context,
+                                payload,
+                                TRUST_CANCEL_TRUST_ENTITY_DELETE_IN_PROGRESS,
+                                ENVIRONMENT_CANCEL_TRUST_ENTITY_DELETE_STARTED,
+                                TRUST_CANCEL_TRUST_ENTITY_DELETE_STATE);
+                sendEvent(context, TRUST_CANCEL_TRUST_ENTITY_DELETE_HANDLER.selector(), payload);
+            }
+        };
+    }
+
+    @Bean(name = "TRUST_CANCEL_SALT_UPDATE_STATE")
+    public Action<?, ?> crossRealmTrustCancelSaltUpdateAction() {
+        return new AbstractEnvironmentCrossRealmTrustCancelAction<>(EnvironmentCrossRealmTrustCancelEvent.class) {
+
+            @Override
+            protected void doExecute(CommonContext context, EnvironmentCrossRealmTrustCancelEvent payload, Map<Object, Object> variables) {
+                environmentStatusUpdateService
+                        .updateEnvironmentStatusAndNotify(
+                                context,
+                                payload,
+                                TRUST_CANCEL_SALT_UPDATE_IN_PROGRESS,
+                                ENVIRONMENT_CANCEL_TRUST_SALT_UPDATE_STARTED,
+                                TRUST_CANCEL_SALT_UPDATE_STATE);
+                sendEvent(context, TRUST_CANCEL_SALT_UPDATE_HANDLER.selector(), payload);
+            }
+        };
+    }
+
     @Bean(name = "TRUST_CANCEL_FINISHED_STATE")
     public Action<?, ?> finishedAction() {
         return new AbstractEnvironmentCrossRealmTrustCancelAction<>(EnvironmentCrossRealmTrustCancelEvent.class) {
             @Override
             protected void doExecute(CommonContext context, EnvironmentCrossRealmTrustCancelEvent payload, Map<Object, Object> variables) {
+                boolean hybrid = environmentService.findById(payload.getResourceId())
+                        .map(env -> HYBRID.equals(env.getEnvironmentType()))
+                        .orElse(false);
+                EnvironmentStatus targetStatus = hybrid ? TRUST_SETUP_REQUIRED : AVAILABLE;
                 EnvironmentDto environmentDto = environmentStatusUpdateService
                         .updateEnvironmentStatusAndNotify(
                                 context,
                                 payload,
-                                TRUST_SETUP_REQUIRED,
+                                targetStatus,
                                 ENVIRONMENT_CANCEL_TRUST_FINISHED,
                                 TRUST_CANCEL_FINISHED_STATE);
                 metricService.incrementMetricCounter(ENV_TRUST_CANCEL_FINISHED, environmentDto);
@@ -127,6 +207,9 @@ public class EnvironmentCrossRealmTrustCancelActions {
             private ResourceEvent convertStatus(EnvironmentStatus status) {
                 return switch (status) {
                     case TRUST_CANCEL_VALIDATION_FAILED -> ENVIRONMENT_CANCEL_TRUST_VALIDATION_FAILED;
+                    case TRUST_CANCEL_CONFIG_REMOVAL_FAILED -> ENVIRONMENT_CANCEL_TRUST_CONFIG_REMOVAL_FAILED;
+                    case TRUST_CANCEL_TRUST_ENTITY_DELETE_FAILED -> ENVIRONMENT_CANCEL_TRUST_ENTITY_DELETE_FAILED;
+                    case TRUST_CANCEL_SALT_UPDATE_FAILED -> ENVIRONMENT_CANCEL_TRUST_SALT_UPDATE_FAILED;
                     default -> ENVIRONMENT_CANCEL_TRUST_FAILED;
                 };
             }
