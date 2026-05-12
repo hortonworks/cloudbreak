@@ -137,7 +137,7 @@ public class DistroXUpgradeAvailabilityService {
     }
 
     private List<ImageInfoV4Response> filterForLatestImage(List<ImageInfoV4Response> candidates) {
-        ImageInfoV4Response latestImage = candidates.stream().max(ImageInfoV4Response.creationBasedComparator()).orElseThrow();
+        ImageInfoV4Response latestImage = candidates.stream().max(ImageInfoV4Response.defaultUpgradeCandidateComparator()).orElseThrow();
         LOGGER.debug("Choosing latest image with id {} as dry-run is specified", latestImage.getImageId());
         return List.of(latestImage);
     }

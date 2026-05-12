@@ -45,7 +45,7 @@ public class DistroXUpgradeImageSelector {
                 .filter(imageInfoV4Response -> runtime.equals(imageInfoV4Response.getComponentVersions().getCdp()))
                 .collect(Collectors.toList());
         validateThereIsMatchingRuntime(upgradeCandidates, imagesWithMatchingRuntime, runtime);
-        Optional<ImageInfoV4Response> imageInfoV4Response = imagesWithMatchingRuntime.stream().max(ImageInfoV4Response.creationBasedComparator());
+        Optional<ImageInfoV4Response> imageInfoV4Response = imagesWithMatchingRuntime.stream().max(ImageInfoV4Response.defaultUpgradeCandidateComparator());
         LOGGER.debug("Chosen image {} for {} runtime specified in the request", imageInfoV4Response, runtime);
         return imageInfoV4Response;
     }
@@ -81,7 +81,7 @@ public class DistroXUpgradeImageSelector {
     }
 
     private Optional<ImageInfoV4Response> selectLatestImageFromCandidates(List<ImageInfoV4Response> upgradeCandidates) {
-        Optional<ImageInfoV4Response> imageInfoV4Response = upgradeCandidates.stream().max(ImageInfoV4Response.creationBasedComparator());
+        Optional<ImageInfoV4Response> imageInfoV4Response = upgradeCandidates.stream().max(ImageInfoV4Response.defaultUpgradeCandidateComparator());
         LOGGER.debug("Choosing latest image {} as either upgrade request is empty or lockComponents is true", imageInfoV4Response);
         return imageInfoV4Response;
     }

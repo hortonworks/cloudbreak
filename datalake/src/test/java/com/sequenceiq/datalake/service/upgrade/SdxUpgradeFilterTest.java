@@ -70,6 +70,27 @@ class SdxUpgradeFilterTest {
     }
 
     @Test
+    public void testDryRunPrefersHighestCdpRuntimeNotNewestImageBuildDate() {
+        ImageInfoV4Response image7218 = new ImageInfoV4Response();
+        image7218.setImageId("img-7218");
+        image7218.setCreated(1_750_415_322L);
+        image7218.setComponentVersions(new ImageComponentVersions("", "", "7.2.18", "", "", "", List.of()));
+        ImageInfoV4Response image731 = new ImageInfoV4Response();
+        image731.setImageId("img-731");
+        image731.setCreated(1_749_129_833L);
+        image731.setComponentVersions(new ImageComponentVersions("", "", "7.3.1", "", "", "", List.of()));
+        UpgradeV4Response upgradeV4Response = new UpgradeV4Response();
+        upgradeV4Response.setUpgradeCandidates(List.of(image7218, image731));
+        sdxUpgradeRequest.setDryRun(true);
+
+        UpgradeV4Response actual = underTest.filterSdxUpgradeResponse(sdxUpgradeRequest, upgradeV4Response, SdxClusterShape.ENTERPRISE);
+
+        assertEquals(1, actual.getUpgradeCandidates().size());
+        assertEquals("7.3.1", actual.getUpgradeCandidates().getFirst().getComponentVersions().getCdp());
+        assertEquals("img-731", actual.getUpgradeCandidates().getFirst().getImageId());
+    }
+
+    @Test
     void testListingUpgradeCandidatesOnLightDuty() {
         ImageInfoV4Response imageInfoV4Response1 = new ImageInfoV4Response();
         imageInfoV4Response1.setComponentVersions(new ImageComponentVersions("",  "",  "7.2.17", "",  "", "", List.of()));

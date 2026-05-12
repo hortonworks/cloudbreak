@@ -49,7 +49,7 @@ public class ClusterUpgradeCandidateFilterService {
     }
 
     private List<ImageInfoV4Response> filterDatalakeUpgradeCandidates(List<ImageInfoV4Response> upgradeCandidates) {
-        return List.of(upgradeCandidates.stream().max(ImageInfoV4Response.creationBasedComparator()).orElseThrow());
+        return List.of(upgradeCandidates.stream().max(ImageInfoV4Response.defaultUpgradeCandidateComparator()).orElseThrow());
     }
 
     private List<ImageInfoV4Response> validateRuntime(List<ImageInfoV4Response> upgradeCandidates, String runtime) {

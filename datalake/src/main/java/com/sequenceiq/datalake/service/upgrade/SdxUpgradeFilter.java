@@ -55,7 +55,7 @@ public class SdxUpgradeFilter {
                 filteredUpgradeResponse.setUpgradeCandidates(latestImageByRuntime);
                 LOGGER.debug("Filtering for latest image per runtimes {}", latestImageByRuntime);
             } else if (upgradeSdxClusterRequest.isDryRun()) {
-                ImageInfoV4Response latestImage = upgradeCandidates.stream().max(ImageInfoV4Response.creationBasedComparator()).orElseThrow();
+                ImageInfoV4Response latestImage = upgradeCandidates.stream().max(ImageInfoV4Response.defaultUpgradeCandidateComparator()).orElseThrow();
                 filteredUpgradeResponse.setUpgradeCandidates(List.of(latestImage));
                 LOGGER.debug("Choosing latest image with id {} as dry-run is specified", latestImage.getImageId());
             } else {

@@ -2,6 +2,9 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image;
 
 import java.util.Comparator;
 import java.util.Objects;
+import java.util.Optional;
+
+import com.sequenceiq.cloudbreak.util.VersionComparator;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
@@ -134,8 +137,28 @@ public class ImageInfoV4Response implements Comparable<ImageInfoV4Response> {
         return ret;
     }
 
-    public static Comparator<ImageInfoV4Response> creationBasedComparator() {
-        return Comparator.comparingLong(ImageInfoV4Response::getCreated);
+    /**
+     * Prefer newer CDP runtime ({@link VersionComparator}) when choosing a default upgrade target; tie-break by image {@link #getCreated()}.
+     */
+    public static Comparator<ImageInfoV4Response> defaultUpgradeCandidateComparator() {
+        Comparator<String> cdpComparator = (left, right) -> {
+            if (left == null && right == null) {
+                return 0;
+            }
+            if (left == null) {
+                return -1;
+            }
+            if (right == null) {
+                return 1;
+            }
+            VersionComparator versionComparator = new VersionComparator();
+            return versionComparator.compare(() -> left, () -> right);
+        };
+        Comparator<ImageInfoV4Response> byCdp = Comparator.comparing(
+                image -> Optional.ofNullable(image.getComponentVersions()).map(ImageComponentVersions::getCdp).orElse(null),
+                cdpComparator);
+        Comparator<Long> byCreated = Comparator.nullsFirst(Long::compareTo);
+        return byCdp.thenComparing(ImageInfoV4Response::getCreated, byCreated);
     }
 
     @Override

@@ -22,39 +22,60 @@ class DistroXUpgradeImageSelectorTest {
 
     @Test
     public void testLatestImageFromCandidatesWhenRequestNull() {
-        List<ImageInfoV4Response> candidates = List.of(createImageResponse("A", 1L, "5"), createImageResponse("B", 6L, "3"), createImageResponse("C", 3L, "1"));
+        List<ImageInfoV4Response> candidates = List.of(
+                createImageResponse("A", 1L, "7.2.17"),
+                createImageResponse("B", 6L, "7.2.17"),
+                createImageResponse("C", 3L, "7.2.17"));
 
         ImageInfoV4Response result = underTest.determineImageId(null, createUpgradeV4Response(candidates));
 
         assertEquals("B", result.getImageId());
-        assertEquals("3", result.getComponentVersions().getCdp());
+        assertEquals("7.2.17", result.getComponentVersions().getCdp());
         assertEquals(6L, result.getCreated());
     }
 
     @Test
     public void testLatestImageFromCandidatesWhenRequestIsEmpty() {
-        List<ImageInfoV4Response> candidates = List.of(createImageResponse("A", 1L, "5"), createImageResponse("B", 6L, "3"), createImageResponse("C", 3L, "1"));
+        List<ImageInfoV4Response> candidates = List.of(
+                createImageResponse("A", 1L, "7.2.17"),
+                createImageResponse("B", 6L, "7.2.17"),
+                createImageResponse("C", 3L, "7.2.17"));
         UpgradeV4Request request = mock(UpgradeV4Request.class);
         when(request.isEmpty()).thenReturn(Boolean.TRUE);
 
         ImageInfoV4Response result = underTest.determineImageId(request, createUpgradeV4Response(candidates));
 
         assertEquals("B", result.getImageId());
-        assertEquals("3", result.getComponentVersions().getCdp());
+        assertEquals("7.2.17", result.getComponentVersions().getCdp());
         assertEquals(6L, result.getCreated());
     }
 
     @Test
     public void testLatestImageFromCandidatesWhenLockComponentsIsTrue() {
-        List<ImageInfoV4Response> candidates = List.of(createImageResponse("A", 1L, "5"), createImageResponse("B", 6L, "3"), createImageResponse("C", 3L, "1"));
+        List<ImageInfoV4Response> candidates = List.of(
+                createImageResponse("A", 1L, "7.2.17"),
+                createImageResponse("B", 6L, "7.2.17"),
+                createImageResponse("C", 3L, "7.2.17"));
         UpgradeV4Request request = mock(UpgradeV4Request.class);
         when(request.getLockComponents()).thenReturn(Boolean.TRUE);
 
         ImageInfoV4Response result = underTest.determineImageId(request, createUpgradeV4Response(candidates));
 
         assertEquals("B", result.getImageId());
-        assertEquals("3", result.getComponentVersions().getCdp());
+        assertEquals("7.2.17", result.getComponentVersions().getCdp());
         assertEquals(6L, result.getCreated());
+    }
+
+    @Test
+    public void testPrefersHigherCdpRuntimeOverNewerImageBuildDate() {
+        List<ImageInfoV4Response> candidates = List.of(
+                createImageResponse("olderBuildHigherRuntime", 100L, "7.3.1"),
+                createImageResponse("newerBuildLowerRuntime", 200L, "7.2.18"));
+
+        ImageInfoV4Response result = underTest.determineImageId(null, createUpgradeV4Response(candidates));
+
+        assertEquals("olderBuildHigherRuntime", result.getImageId());
+        assertEquals("7.3.1", result.getComponentVersions().getCdp());
     }
 
     @Test

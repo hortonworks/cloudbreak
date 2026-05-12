@@ -225,7 +225,7 @@ public class SdxRuntimeUpgradeService {
 
     private String determineImageId(SdxUpgradeRequest upgradeRequest, List<ImageInfoV4Response> upgradeCandidates) {
         if (Objects.isNull(upgradeRequest) || upgradeRequest.isEmpty() || Boolean.TRUE.equals(upgradeRequest.getLockComponents())) {
-            ImageInfoV4Response imageInfoV4Response = upgradeCandidates.stream().max(ImageInfoV4Response.creationBasedComparator()).orElseThrow();
+            ImageInfoV4Response imageInfoV4Response = upgradeCandidates.stream().max(ImageInfoV4Response.defaultUpgradeCandidateComparator()).orElseThrow();
             String imageId = imageInfoV4Response.getImageId();
             LOGGER.debug("Choosing latest image with id {} as either upgrade request is empty or lockComponents is true", imageId);
             return imageId;
@@ -273,7 +273,7 @@ public class SdxRuntimeUpgradeService {
                     runtime, availableRuntimes);
             throw new BadRequestException(errorMessage);
         } else {
-            ImageInfoV4Response imageInfoV4Response = imagesWithMatchingRuntime.get().max(ImageInfoV4Response.creationBasedComparator()).orElseThrow();
+            ImageInfoV4Response imageInfoV4Response = imagesWithMatchingRuntime.get().max(ImageInfoV4Response.defaultUpgradeCandidateComparator()).orElseThrow();
             return imageInfoV4Response.getImageId();
         }
     }
