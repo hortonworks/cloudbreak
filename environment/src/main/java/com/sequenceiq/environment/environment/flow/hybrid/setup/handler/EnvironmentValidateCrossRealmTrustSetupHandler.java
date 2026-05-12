@@ -43,7 +43,7 @@ public class EnvironmentValidateCrossRealmTrustSetupHandler extends ExceptionCat
         try {
             EnvironmentCrossRealmTrustSetupEvent data = environmentCrossRealmTrustSetupEvent.getData();
             LOGGER.debug("Validating cluster availability for environment CRN: {}", data.getResourceCrn());
-            clusterAvailabilityValidator.validateAllClustersAvailable(data.getResourceCrn());
+            clusterAvailabilityValidator.validateAllClustersAvailable(data.getResourceCrn(), "Cross-realm trust setup");
             LOGGER.debug("TRUST_SETUP_EVENT event sent");
             return data.toBuilder()
                     .withSelector(TRUST_SETUP_EVENT.selector())

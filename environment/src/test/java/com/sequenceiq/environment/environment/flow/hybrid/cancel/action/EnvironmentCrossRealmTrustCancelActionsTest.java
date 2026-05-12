@@ -30,11 +30,13 @@ import org.springframework.statemachine.state.State;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.common.metrics.MetricService;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.common.api.type.EnvironmentType;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
+import com.sequenceiq.environment.environment.flow.hybrid.cancel.EnvironmentCrossRealmTrustCancelState;
 import com.sequenceiq.environment.environment.flow.hybrid.cancel.event.EnvironmentCrossRealmTrustCancelEvent;
 import com.sequenceiq.environment.environment.flow.hybrid.cancel.event.EnvironmentCrossRealmTrustCancelFailedEvent;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
@@ -132,9 +134,9 @@ class EnvironmentCrossRealmTrustCancelActionsTest {
         verify(environmentStatusUpdateService).updateEnvironmentStatusAndNotify(
                 any(),
                 any(),
-                any(),
-                any(),
-                any()
+                eq(EnvironmentStatus.TRUST_CANCEL_VALIDATION_IN_PROGRESS),
+                eq(ResourceEvent.ENVIRONMENT_CANCEL_TRUST_VALIDATION_STARTED),
+                eq(EnvironmentCrossRealmTrustCancelState.TRUST_CANCEL_VALIDATION_STATE)
         );
     }
 
@@ -207,7 +209,7 @@ class EnvironmentCrossRealmTrustCancelActionsTest {
         Exception ex = new RuntimeException("failure");
 
         when(environmentStatusUpdateService.updateFailedEnvironmentStatusAndNotify(
-                any(), any(), any(), any(), any())).thenReturn(environmentDto);
+                any(), any(), any(), any(), any(), any())).thenReturn(environmentDto);
         when(payload.getEnvironmentStatus()).thenReturn(failedStatus);
         when(payload.getException()).thenReturn(ex);
 
@@ -218,6 +220,7 @@ class EnvironmentCrossRealmTrustCancelActionsTest {
         action.execute(stateContext);
 
         verify(environmentStatusUpdateService).updateFailedEnvironmentStatusAndNotify(
+                any(),
                 any(),
                 any(),
                 any(),

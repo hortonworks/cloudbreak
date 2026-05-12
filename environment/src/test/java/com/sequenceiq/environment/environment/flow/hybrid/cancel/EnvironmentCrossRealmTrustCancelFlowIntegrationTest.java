@@ -8,6 +8,7 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_CANCEL_T
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_CANCEL_TRUST_FINISHED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_CANCEL_TRUST_SALT_UPDATE_STARTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_CANCEL_TRUST_STARTED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_CANCEL_TRUST_VALIDATION_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.ENVIRONMENT_CANCEL_TRUST_VALIDATION_STARTED;
 import static com.sequenceiq.environment.environment.EnvironmentStatus.AVAILABLE;
 import static com.sequenceiq.environment.environment.EnvironmentStatus.TRUST_CANCEL_CONFIG_REMOVAL_FAILED;
@@ -16,6 +17,7 @@ import static com.sequenceiq.environment.environment.EnvironmentStatus.TRUST_CAN
 import static com.sequenceiq.environment.environment.EnvironmentStatus.TRUST_CANCEL_IN_PROGRESS;
 import static com.sequenceiq.environment.environment.EnvironmentStatus.TRUST_CANCEL_SALT_UPDATE_IN_PROGRESS;
 import static com.sequenceiq.environment.environment.EnvironmentStatus.TRUST_CANCEL_TRUST_ENTITY_DELETE_IN_PROGRESS;
+import static com.sequenceiq.environment.environment.EnvironmentStatus.TRUST_CANCEL_VALIDATION_FAILED;
 import static com.sequenceiq.environment.environment.EnvironmentStatus.TRUST_CANCEL_VALIDATION_IN_PROGRESS;
 import static com.sequenceiq.environment.environment.EnvironmentStatus.TRUST_SETUP_REQUIRED;
 import static com.sequenceiq.environment.environment.flow.hybrid.cancel.EnvironmentCrossRealmTrustCancelState.TRUST_CANCEL_CONFIG_REMOVAL_STATE;
@@ -97,6 +99,7 @@ import com.sequenceiq.environment.environment.flow.hybrid.cancel.handler.Environ
 import com.sequenceiq.environment.environment.flow.hybrid.cancel.handler.EnvironmentValidateCrossRealmTrustCancelHandler;
 import com.sequenceiq.environment.environment.flow.hybrid.setup.converter.SetupCrossRealmTrustRequestToEnvironmentCrossRealmTrustSetupEventConverter;
 import com.sequenceiq.environment.environment.poller.DatahubPollerProvider;
+import com.sequenceiq.environment.environment.service.ClusterAvailabilityValidator;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.environment.service.EnvironmentStatusUpdateService;
 import com.sequenceiq.environment.environment.service.cluster.ClusterService;
@@ -204,6 +207,9 @@ class EnvironmentCrossRealmTrustCancelFlowIntegrationTest {
 
     @MockBean
     private MultipleFlowsResultEvaluator multipleFlowsResultEvaluator;
+
+    @MockBean
+    private ClusterAvailabilityValidator clusterAvailabilityValidator;
 
     @MockBean
     private StackService stackService;
@@ -366,6 +372,7 @@ class EnvironmentCrossRealmTrustCancelFlowIntegrationTest {
                 any(BaseFailedFlowEvent.class),
                 eq(TRUST_CANCEL_CONFIG_REMOVAL_FAILED),
                 eq(ENVIRONMENT_CANCEL_TRUST_CONFIG_REMOVAL_FAILED),
+                any(),
                 eq(TRUST_CANCEL_FAILED_STATE)
         );
     }
@@ -399,6 +406,7 @@ class EnvironmentCrossRealmTrustCancelFlowIntegrationTest {
                 any(BaseFailedFlowEvent.class),
                 eq(TRUST_CANCEL_FAILED),
                 eq(ENVIRONMENT_CANCEL_TRUST_FAILED),
+                any(),
                 eq(TRUST_CANCEL_FAILED_STATE)
         );
     }
@@ -421,8 +429,34 @@ class EnvironmentCrossRealmTrustCancelFlowIntegrationTest {
         environmentStatusVerify.verify(environmentStatusUpdateService).updateFailedEnvironmentStatusAndNotify(
                 any(CommonContext.class),
                 any(BaseFailedFlowEvent.class),
-                eq(TRUST_CANCEL_FAILED),
-                eq(ENVIRONMENT_CANCEL_TRUST_FAILED),
+                eq(TRUST_CANCEL_VALIDATION_FAILED),
+                eq(ENVIRONMENT_CANCEL_TRUST_VALIDATION_FAILED),
+                any(),
+                eq(TRUST_CANCEL_FAILED_STATE)
+        );
+    }
+
+    @Test
+    public void testCancelCrossRealmTrustWhenClusterAvailabilityValidationFails() {
+        doThrow(new CloudbreakServiceException("Clusters are not available"))
+                .when(clusterAvailabilityValidator)
+                .validateAllClustersAvailable(ENVIRONMENT_CRN, "Cancel cross-realm trust");
+        testFlow();
+        InOrder environmentStatusVerify = inOrder(environmentStatusUpdateService);
+
+        environmentStatusVerify.verify(environmentStatusUpdateService).updateEnvironmentStatusAndNotify(
+                any(CommonContext.class),
+                any(Payload.class),
+                eq(TRUST_CANCEL_VALIDATION_IN_PROGRESS),
+                eq(ENVIRONMENT_CANCEL_TRUST_VALIDATION_STARTED),
+                eq(TRUST_CANCEL_VALIDATION_STATE)
+        );
+        environmentStatusVerify.verify(environmentStatusUpdateService).updateFailedEnvironmentStatusAndNotify(
+                any(CommonContext.class),
+                any(BaseFailedFlowEvent.class),
+                eq(TRUST_CANCEL_VALIDATION_FAILED),
+                eq(ENVIRONMENT_CANCEL_TRUST_VALIDATION_FAILED),
+                any(),
                 eq(TRUST_CANCEL_FAILED_STATE)
         );
     }

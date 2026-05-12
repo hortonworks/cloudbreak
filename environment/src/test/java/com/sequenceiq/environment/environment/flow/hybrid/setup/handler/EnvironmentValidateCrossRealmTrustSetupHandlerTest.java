@@ -62,7 +62,7 @@ class EnvironmentValidateCrossRealmTrustSetupHandlerTest {
 
         Selectable result = handler.doAccept(handlerEvent);
 
-        verify(clusterAvailabilityValidator).validateAllClustersAvailable(ENV_CRN);
+        verify(clusterAvailabilityValidator).validateAllClustersAvailable(ENV_CRN, "Cross-realm trust setup");
         assertThat(result).isInstanceOf(EnvironmentCrossRealmTrustSetupEvent.class);
         EnvironmentCrossRealmTrustSetupEvent newEvent = (EnvironmentCrossRealmTrustSetupEvent) result;
 
@@ -76,7 +76,7 @@ class EnvironmentValidateCrossRealmTrustSetupHandlerTest {
     void testDoAcceptValidationFailureReturnsFailedEvent() {
         when(handlerEvent.getData()).thenReturn(eventData);
         doThrow(new jakarta.ws.rs.BadRequestException("clusters not available"))
-                .when(clusterAvailabilityValidator).validateAllClustersAvailable(ENV_CRN);
+                .when(clusterAvailabilityValidator).validateAllClustersAvailable(ENV_CRN, "Cross-realm trust setup");
 
         Selectable result = handler.doAccept(handlerEvent);
 

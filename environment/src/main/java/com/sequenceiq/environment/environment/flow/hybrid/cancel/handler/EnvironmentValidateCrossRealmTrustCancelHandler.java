@@ -1,6 +1,5 @@
 package com.sequenceiq.environment.environment.flow.hybrid.cancel.handler;
 
-import static com.sequenceiq.environment.environment.EnvironmentStatus.TRUST_CANCEL_FAILED;
 import static com.sequenceiq.environment.environment.EnvironmentStatus.TRUST_CANCEL_VALIDATION_FAILED;
 import static com.sequenceiq.environment.environment.flow.hybrid.cancel.event.EnvironmentCrossRealmTrustCancelHandlerSelectors.TRUST_CANCEL_VALIDATION_HANDLER;
 import static com.sequenceiq.environment.environment.flow.hybrid.cancel.event.EnvironmentCrossRealmTrustCancelStateSelectors.TRUST_CANCEL_EVENT;
@@ -13,6 +12,7 @@ import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.environment.environment.flow.hybrid.cancel.event.EnvironmentCrossRealmTrustCancelEvent;
 import com.sequenceiq.environment.environment.flow.hybrid.cancel.event.EnvironmentCrossRealmTrustCancelFailedEvent;
+import com.sequenceiq.environment.environment.service.ClusterAvailabilityValidator;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
@@ -24,8 +24,12 @@ public class EnvironmentValidateCrossRealmTrustCancelHandler extends ExceptionCa
 
     private final EnvironmentService environmentService;
 
-    protected EnvironmentValidateCrossRealmTrustCancelHandler(EnvironmentService environmentService) {
+    private final ClusterAvailabilityValidator clusterAvailabilityValidator;
+
+    protected EnvironmentValidateCrossRealmTrustCancelHandler(EnvironmentService environmentService,
+            ClusterAvailabilityValidator clusterAvailabilityValidator) {
         this.environmentService = environmentService;
+        this.clusterAvailabilityValidator = clusterAvailabilityValidator;
     }
 
     @Override
@@ -43,8 +47,10 @@ public class EnvironmentValidateCrossRealmTrustCancelHandler extends ExceptionCa
         EnvironmentCrossRealmTrustCancelEvent data = environmentCrossRealmTrustCancelEvent.getData();
         LOGGER.debug("In EnvironmentValidateCrossRealmTrustCancelHandler.accept");
         try {
-            LOGGER.debug("TRUST_CANCEL_EVENT event sent");
+            LOGGER.debug("Validating cluster availability for environment CRN: {}", data.getResourceCrn());
+            clusterAvailabilityValidator.validateAllClustersAvailable(data.getResourceCrn(), "Cancel cross-realm trust");
             environmentService.validateCancelCrossRealmSetup();
+            LOGGER.debug("TRUST_CANCEL_EVENT event sent");
             return EnvironmentCrossRealmTrustCancelEvent.builder()
                     .withSelector(TRUST_CANCEL_EVENT.selector())
                     .withResourceCrn(data.getResourceCrn())
@@ -53,7 +59,7 @@ public class EnvironmentValidateCrossRealmTrustCancelHandler extends ExceptionCa
                     .build();
         } catch (Exception e) {
             LOGGER.debug("TRUST_CANCEL_FAILED event sent");
-            return new EnvironmentCrossRealmTrustCancelFailedEvent(data, e, TRUST_CANCEL_FAILED);
+            return new EnvironmentCrossRealmTrustCancelFailedEvent(data, e, TRUST_CANCEL_VALIDATION_FAILED);
         }
     }
 }

@@ -12,8 +12,6 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.environment.environment.service.datahub.DatahubService;
 import com.sequenceiq.environment.environment.service.sdx.SdxService;
-import com.sequenceiq.sdx.api.model.SdxClusterResponse;
-import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
 @Component
 public class ClusterAvailabilityValidator {
@@ -29,23 +27,17 @@ public class ClusterAvailabilityValidator {
         this.sdxService = sdxService;
     }
 
-    public void validateAllClustersAvailable(String environmentCrn) {
+    public void validateAllClustersAvailable(String environmentCrn, String flowType) {
         LOGGER.debug("Validating all cluster availability for environment CRN: {}", environmentCrn);
         List<String> nonAvailable = new ArrayList<>();
 
-        List<SdxClusterResponse> datalakes = sdxService.listByEnvironmentCrn(environmentCrn);
-        datalakes.stream()
-                .filter(sdx -> !SdxClusterStatusResponse.RUNNING.equals(sdx.getStatus()))
-                .map(sdx -> String.format("Data Lake %s (status: %s)", sdx.getCrn(), sdx.getStatus()))
-                .forEach(nonAvailable::add);
-
         datahubService.getStatusesByEnvironmentCrn(environmentCrn).getResponses().stream()
                 .filter(dh -> !Status.AVAILABLE.equals(dh.getStatus()))
-                .map(dh -> String.format("DataHub %s (status: %s)", dh.getCrn(), dh.getStatus()))
+                .map(dh -> String.format("%s (status: %s)", dh.getCrn(), dh.getStatus()))
                 .forEach(nonAvailable::add);
 
         if (!nonAvailable.isEmpty()) {
-            String message = "Cross-realm trust setup cannot be triggered because the following clusters are not available: "
+            String message = flowType + " cannot be triggered because the following clusters are not available: "
                     + String.join(", ", nonAvailable);
             LOGGER.warn(message);
             throw new BadRequestException(message);

@@ -4,7 +4,9 @@ import static com.sequenceiq.environment.environment.EnvironmentStatus.TRUST_CAN
 import static com.sequenceiq.environment.environment.flow.hybrid.cancel.event.EnvironmentCrossRealmTrustCancelHandlerSelectors.TRUST_CANCEL_VALIDATION_HANDLER;
 import static com.sequenceiq.environment.environment.flow.hybrid.cancel.event.EnvironmentCrossRealmTrustCancelStateSelectors.TRUST_CANCEL_EVENT;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -18,6 +20,7 @@ import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.environment.environment.flow.hybrid.cancel.event.EnvironmentCrossRealmTrustCancelEvent;
 import com.sequenceiq.environment.environment.flow.hybrid.cancel.event.EnvironmentCrossRealmTrustCancelFailedEvent;
+import com.sequenceiq.environment.environment.service.ClusterAvailabilityValidator;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
@@ -30,6 +33,9 @@ class EnvironmentValidateCrossRealmTrustCancelHandlerTest {
     @Mock
     private EnvironmentService environmentService;
 
+    @Mock
+    private ClusterAvailabilityValidator clusterAvailabilityValidator;
+
     @InjectMocks
     private EnvironmentValidateCrossRealmTrustCancelHandler handler;
 
@@ -37,7 +43,7 @@ class EnvironmentValidateCrossRealmTrustCancelHandlerTest {
 
     @BeforeEach
     void setUp() {
-        handler = new EnvironmentValidateCrossRealmTrustCancelHandler(environmentService);
+        handler = new EnvironmentValidateCrossRealmTrustCancelHandler(environmentService, clusterAvailabilityValidator);
 
         eventData = EnvironmentCrossRealmTrustCancelEvent.builder()
                 .withResourceId(100L)
@@ -59,6 +65,19 @@ class EnvironmentValidateCrossRealmTrustCancelHandlerTest {
         assertThat(newEvent.selector()).isEqualTo(TRUST_CANCEL_EVENT.selector());
         assertThat(newEvent.getResourceCrn()).isEqualTo(eventData.getResourceCrn());
         assertThat(newEvent.getResourceId()).isEqualTo(eventData.getResourceId());
+        verify(clusterAvailabilityValidator).validateAllClustersAvailable(eventData.getResourceCrn(), "Cancel cross-realm trust");
+    }
+
+    @Test
+    void testDoAcceptWhenClustersNotAvailableReturnsFailedEvent() {
+        when(handlerEvent.getData()).thenReturn(eventData);
+        doThrow(new RuntimeException("clusters not available"))
+                .when(clusterAvailabilityValidator).validateAllClustersAvailable(eventData.getResourceCrn(), "Cancel cross-realm trust");
+
+        Selectable result = handler.doAccept(handlerEvent);
+
+        assertThat(result).isInstanceOf(EnvironmentCrossRealmTrustCancelFailedEvent.class);
+        assertThat(((EnvironmentCrossRealmTrustCancelFailedEvent) result).getEnvironmentStatus()).isEqualTo(TRUST_CANCEL_VALIDATION_FAILED);
     }
 
     @Test

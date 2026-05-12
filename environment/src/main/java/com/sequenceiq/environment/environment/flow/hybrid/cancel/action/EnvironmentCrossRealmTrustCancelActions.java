@@ -37,6 +37,7 @@ import static com.sequenceiq.environment.metrics.MetricType.ENV_TRUST_CANCEL_FAI
 import static com.sequenceiq.environment.metrics.MetricType.ENV_TRUST_CANCEL_FINISHED;
 
 import java.util.Map;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -199,6 +200,7 @@ public class EnvironmentCrossRealmTrustCancelActions {
                                 payload,
                                 payload.getEnvironmentStatus(),
                                 convertStatus(payload.getEnvironmentStatus()),
+                                Set.of(payload.getException().getMessage()),
                                 TRUST_CANCEL_FAILED_STATE);
                 metricService.incrementMetricCounter(ENV_TRUST_CANCEL_FAILED, environmentDto, payload.getException());
                 sendEvent(context, HANDLED_FAILED_TRUST_CANCEL_EVENT.event(), payload);
