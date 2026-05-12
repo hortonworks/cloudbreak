@@ -12,11 +12,14 @@ public class PlatformDatabaseCapabilities {
 
     private final Map<Region, Map<String, List<String>>> supportedServerVersionsToUpgrade;
 
+    private final String latestDatabaseEngineVersion;
+
     public PlatformDatabaseCapabilities(Map<DatabaseAvailabiltyType, Collection<Region>> enabledRegions, Map<Region, String> regionDefaultInstanceTypeMap,
-            Map<Region, Map<String, List<String>>> supportedServerVersionsToUpgrade) {
+            Map<Region, Map<String, List<String>>> supportedServerVersionsToUpgrade, String latestDatabaseEngineVersion) {
         this.enabledRegions = enabledRegions;
         this.regionDefaultInstanceTypeMap = regionDefaultInstanceTypeMap;
         this.supportedServerVersionsToUpgrade = supportedServerVersionsToUpgrade;
+        this.latestDatabaseEngineVersion = latestDatabaseEngineVersion;
     }
 
     public Map<DatabaseAvailabiltyType, Collection<Region>> getEnabledRegions() {
@@ -29,5 +32,9 @@ public class PlatformDatabaseCapabilities {
 
     public Map<Region, Map<String, List<String>>> getSupportedServerVersionsToUpgrade() {
         return supportedServerVersionsToUpgrade;
+    }
+
+    public String getLatestDatabaseEngineVersion() {
+        return latestDatabaseEngineVersion;
     }
 }

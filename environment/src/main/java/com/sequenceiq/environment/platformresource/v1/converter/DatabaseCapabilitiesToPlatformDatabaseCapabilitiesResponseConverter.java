@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
@@ -28,8 +27,8 @@ public class DatabaseCapabilitiesToPlatformDatabaseCapabilitiesResponseConverter
             includedRegions.get(databaseAvailabilityType).addAll(
                     databaseEntry.getValue()
                         .stream()
-                        .map(e -> e.getRegionName())
-                        .collect(Collectors.toList()));
+                        .map(Region::getRegionName)
+                        .toList());
         }
         Map<String, String> defaultTypes = new HashMap<>();
         for (Map.Entry<Region, String> typeEntry : source.getRegionDefaultInstanceTypeMap().entrySet()) {
@@ -41,6 +40,13 @@ public class DatabaseCapabilitiesToPlatformDatabaseCapabilitiesResponseConverter
             String region = upgradeEntry.getKey().getRegionName();
             regionUpgradeVersions.put(region, upgradeEntry.getValue());
         }
-        return new PlatformDatabaseCapabilitiesResponse(includedRegions, defaultTypes, regionUpgradeVersions);
+
+
+        return new PlatformDatabaseCapabilitiesResponse(
+                includedRegions,
+                defaultTypes,
+                regionUpgradeVersions,
+                source.getLatestDatabaseEngineVersion()
+        );
     }
 }

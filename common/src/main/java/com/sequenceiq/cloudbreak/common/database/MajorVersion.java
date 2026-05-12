@@ -21,7 +21,8 @@ public enum MajorVersion implements Version, Versioned {
     VERSION_14("14"),
     VERSION_15("15"),
     VERSION_16("16"),
-    VERSION_17("17");
+    VERSION_17("17"),
+    VERSION_18("18");
 
     private final String version;
 

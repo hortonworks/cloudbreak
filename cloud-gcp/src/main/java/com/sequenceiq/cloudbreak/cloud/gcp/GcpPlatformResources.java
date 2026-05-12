@@ -107,6 +107,7 @@ import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
 import com.sequenceiq.cloudbreak.filter.MinimalHardwareFilter;
 import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
+import com.sequenceiq.cloudbreak.util.VersionComparator;
 
 @Service
 public class GcpPlatformResources implements PlatformResources {
@@ -121,6 +122,8 @@ public class GcpPlatformResources implements PlatformResources {
     private static final Set<Integer> GCP_LOCAL_SSD_POSSIBLE_NUMBER_VALUES = Set.of(1, 2, 3, 4, 5, 6, 7, 8, 16, 24);
 
     private static final Set<String> MACHINE_TYPES_WITH_LOCAL_SSD = Set.of("n1", "n2", "n2d");
+
+    private final VersionComparator versionComparator = new VersionComparator();
 
     @Value("${cb.gcp.default.vmtype:n2-standard-8}")
     private String gcpVmDefault;
@@ -775,9 +778,14 @@ public class GcpPlatformResources implements PlatformResources {
                 String defaultDbVmType = regionCoordinates.get(actualRegion).getDefaultDbVmType();
                 regionDefaultInstanceTypeMap.put(actualRegion, defaultDbVmType == null ? gcpDatabaseVmDefault : defaultDbVmType);
             }
-            return new PlatformDatabaseCapabilities(new HashMap<>(), regionDefaultInstanceTypeMap, new HashMap<>());
+            return new PlatformDatabaseCapabilities(
+                    new HashMap<>(),
+                    regionDefaultInstanceTypeMap,
+                    new HashMap<>(),
+                    getLatestDatabaseEngineVersion(cloudCredential, region).orElse(null)
+            );
         } catch (Exception e) {
-            return new PlatformDatabaseCapabilities(new HashMap<>(), new HashMap<>(), new HashMap<>());
+            return new PlatformDatabaseCapabilities(new HashMap<>(), new HashMap<>(), new HashMap<>(), null);
         }
     }
 
@@ -791,6 +799,26 @@ public class GcpPlatformResources implements PlatformResources {
         }
         defaultPlatformDatabaseCapabilities.setDefaultX86InstanceTypeRequirements(defaultDbInstanceTypes);
         return defaultPlatformDatabaseCapabilities;
+    }
+
+    private Optional<String> getLatestDatabaseEngineVersion(CloudCredential cloudCredential, Region region) {
+        try {
+            SQLAdmin sqlAdmin = gcpSQLAdminFactory.buildSQLAdmin(cloudCredential, cloudCredential.getName());
+            return sqlAdmin.flags().list().execute().getItems()
+                    .stream()
+                    .filter(e -> e.getAppliesTo().stream().anyMatch(db -> db.startsWith("POSTGRES")))
+                    .flatMap(e -> e.getAppliesTo().stream())
+                    .distinct()
+                    .map(this::tranformPostgresToVersion)
+                    .max((o1, o2) -> versionComparator.compare(() -> o1, () -> o2));
+        } catch (Exception e) {
+            LOGGER.error("Could not get the latest postgres version for provider: ", e);
+            return Optional.empty();
+        }
+    }
+
+    private String tranformPostgresToVersion(String input) {
+        return input.replace("POSTGRES_", "").replace("_", ".");
     }
 
     public Map<String, Set<String>> getAvailabilityZonesForVmTypes(ExtendedCloudCredential cloudCredential, Region region) {

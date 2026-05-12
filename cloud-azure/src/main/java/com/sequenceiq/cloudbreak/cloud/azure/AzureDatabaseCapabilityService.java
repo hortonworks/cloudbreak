@@ -45,10 +45,13 @@ import com.sequenceiq.cloudbreak.cloud.model.DefaultPlatformDatabaseCapabilities
 import com.sequenceiq.cloudbreak.cloud.model.PlatformDBStorageCapabilities;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformDatabaseCapabilities;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
+import com.sequenceiq.cloudbreak.util.VersionComparator;
 
 @Component
 public class AzureDatabaseCapabilityService {
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureDatabaseCapabilityService.class);
+
+    private final VersionComparator versionComparator = new VersionComparator();
 
     @Value("${cb.azure.database.flexible.instanceTypeRegex:^Standard_E4d?s.*$}")
     private String instanceTypeRegex;
@@ -81,7 +84,24 @@ public class AzureDatabaseCapabilityService {
         enabledRegions.put(databaseAvailabiltyType(ZONE_REDUNDANT.name()), getZoneRedundantSupportedRegions(regions, capabilityMap));
         Map<Region, String> regionInstanceTypeMap = getRegionInstanceTypeMap(regions, capabilityMap, filters);
         Map<Region, Map<String, List<String>>> supportedServerVersionsToUpgrade = getSupportedServerVersionsToUpgrade(regions, capabilityMap);
-        return new PlatformDatabaseCapabilities(enabledRegions, regionInstanceTypeMap, supportedServerVersionsToUpgrade);
+        return new PlatformDatabaseCapabilities(
+                enabledRegions,
+                regionInstanceTypeMap,
+                supportedServerVersionsToUpgrade,
+                getLatestDatabaseEngineVersion(cloudCredential, region).orElse(null)
+        );
+    }
+
+    private Optional<String> getLatestDatabaseEngineVersion(CloudCredential cloudCredential, Region region) {
+        try {
+            return azureClientService.getClient(cloudCredential)
+                    .getDatabaseVersions(region.value())
+                    .stream()
+                    .max((o1, o2) -> versionComparator.compare(() -> o1, () -> o2));
+        } catch (Exception e) {
+            LOGGER.error("Could not get the latest postgres version for provider: ", e);
+            return Optional.empty();
+        }
     }
 
     public CloudDatabaseVmTypes databaseVmTypes(CloudCredential cloudCredential, Region region) {

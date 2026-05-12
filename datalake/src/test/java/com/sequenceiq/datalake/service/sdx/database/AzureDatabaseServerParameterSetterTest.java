@@ -95,7 +95,7 @@ public class AzureDatabaseServerParameterSetterTest {
         Map<String, List<String>> includedRegions = new HashMap<>();
         includedRegions.put(SAME_ZONE.name(), List.of("region1"));
         PlatformDatabaseCapabilitiesResponse platformDatabaseCapabilitiesResponse =
-                new PlatformDatabaseCapabilitiesResponse(includedRegions, new HashMap<>());
+                new PlatformDatabaseCapabilitiesResponse(includedRegions, new HashMap<>(), null);
 
         when(azureDatabaseAttributesService.getAzureDatabaseType(any())).thenReturn(AzureDatabaseType.FLEXIBLE_SERVER);
         when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(any(), any(), any(), any(), any(), any()))
@@ -121,7 +121,7 @@ public class AzureDatabaseServerParameterSetterTest {
         Map<String, List<String>> includedRegions = new HashMap<>();
         includedRegions.put(ZONE_REDUNDANT.name(), List.of("region1"));
         PlatformDatabaseCapabilitiesResponse platformDatabaseCapabilitiesResponse =
-                new PlatformDatabaseCapabilitiesResponse(includedRegions, new HashMap<>());
+                new PlatformDatabaseCapabilitiesResponse(includedRegions, new HashMap<>(), null);
 
         when(azureDatabaseAttributesService.getAzureDatabaseType(any())).thenReturn(AzureDatabaseType.FLEXIBLE_SERVER);
         when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(any(), any(), any(), any(), any(), any()))

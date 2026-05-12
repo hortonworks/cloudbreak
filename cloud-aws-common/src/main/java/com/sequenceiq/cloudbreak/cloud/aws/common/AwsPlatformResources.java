@@ -119,6 +119,7 @@ import com.sequenceiq.cloudbreak.filter.MinimalHardwareFilter;
 import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
 import com.sequenceiq.cloudbreak.service.database.DbOverrideConfig;
 import com.sequenceiq.cloudbreak.util.PermanentlyFailedException;
+import com.sequenceiq.cloudbreak.util.VersionComparator;
 import com.sequenceiq.common.model.Architecture;
 
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
@@ -176,6 +177,7 @@ import software.amazon.awssdk.services.rds.model.Certificate;
 import software.amazon.awssdk.services.rds.model.DBEngineVersion;
 import software.amazon.awssdk.services.rds.model.DescribeCertificatesRequest;
 import software.amazon.awssdk.services.rds.model.DescribeDbEngineVersionsRequest;
+import software.amazon.awssdk.services.rds.model.DescribeDbEngineVersionsResponse;
 import software.amazon.awssdk.services.rds.model.DescribeOrderableDbInstanceOptionsRequest;
 
 @Service
@@ -210,6 +212,8 @@ public class AwsPlatformResources implements PlatformResources {
     private static final int MINIMUM_ST1_SIZE = 125;
 
     private static final int ONE_THOUSAND_TWENTY_FOUR = 1024;
+
+    private final VersionComparator versionComparator = new VersionComparator();
 
     @Inject
     private CommonAwsClient awsClient;
@@ -841,9 +845,14 @@ public class AwsPlatformResources implements PlatformResources {
                 }
                 regionDefaultInstanceTypeMap.put(actualRegion, defaultDbVmType);
             }
-            return new PlatformDatabaseCapabilities(new HashMap<>(), regionDefaultInstanceTypeMap, new HashMap<>());
+            return new PlatformDatabaseCapabilities(
+                    new HashMap<>(),
+                    regionDefaultInstanceTypeMap,
+                    new HashMap<>(),
+                    getLatestDatabaseEngineVersion(cloudCredential, region).orElse(null)
+            );
         } catch (Exception e) {
-            return new PlatformDatabaseCapabilities(new HashMap<>(), new HashMap<>(), new HashMap<>());
+            return new PlatformDatabaseCapabilities(new HashMap<>(), new HashMap<>(), new HashMap<>(), null);
         }
     }
 
@@ -853,6 +862,24 @@ public class AwsPlatformResources implements PlatformResources {
         defaultPlatformDatabaseCapabilities.setDefaultX86InstanceTypeRequirements(Set.of(awsDatabaseVmDefault));
         defaultPlatformDatabaseCapabilities.setDefaultArmInstanceTypeRequirements(Set.of(awsArmDatabaseVmDefault));
         return defaultPlatformDatabaseCapabilities;
+    }
+
+    private Optional<String> getLatestDatabaseEngineVersion(CloudCredential cloudCredential, Region region) {
+        try {
+            AmazonRdsClient rdsClient = getAmazonRdsClient(cloudCredential, region);
+            DescribeDbEngineVersionsRequest request = DescribeDbEngineVersionsRequest.builder()
+                    .engine(AwsPlatformResources.POSTGRES)
+                    .build();
+            DescribeDbEngineVersionsResponse response = rdsClient.describeDBEngineVersions(request);
+            return response.dbEngineVersions()
+                    .stream()
+                    .map(DBEngineVersion::engineVersion)
+                    .map(e -> e.split("-")[0])
+                    .max((o1, o2) -> versionComparator.compare(() -> o1, () -> o2));
+        } catch (Exception e) {
+            LOGGER.error("Could not get the latest postgres version for provider: ", e);
+            return Optional.empty();
+        }
     }
 
     private CloudVmTypes getCloudVmTypes(ExtendedCloudCredential cloudCredential, boolean dataHubArmEnabled, Region region, Map<String, String> filters,

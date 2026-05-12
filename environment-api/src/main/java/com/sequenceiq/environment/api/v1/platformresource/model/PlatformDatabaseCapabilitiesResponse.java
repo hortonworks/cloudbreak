@@ -17,21 +17,27 @@ public class PlatformDatabaseCapabilitiesResponse {
     @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private final Map<String, Map<String, List<String>>> regionUpgradeVersions;
 
+    @Schema(requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private final String latestDatabaseEngineVersion;
+
     public PlatformDatabaseCapabilitiesResponse(Map<String, List<String>> includedRegions, Map<String, String> regionDefaultInstances,
-            Map<String, Map<String, List<String>>> regionUpgradeVersions) {
+            Map<String, Map<String, List<String>>> regionUpgradeVersions, String latestDatabaseEngineVersion) {
         this.includedRegions = includedRegions;
         this.regionDefaultInstances = regionDefaultInstances;
         this.regionUpgradeVersions = regionUpgradeVersions;
+        this.latestDatabaseEngineVersion = latestDatabaseEngineVersion;
     }
 
-    public PlatformDatabaseCapabilitiesResponse(Map<String, List<String>> includedRegions, Map<String, String> regionDefaultInstances) {
-        this(includedRegions, regionDefaultInstances, new HashMap<>());
+    public PlatformDatabaseCapabilitiesResponse(Map<String, List<String>> includedRegions, Map<String, String> regionDefaultInstances,
+            String latestDatabaseEngineVersion) {
+        this(includedRegions, regionDefaultInstances, new HashMap<>(), latestDatabaseEngineVersion);
     }
 
     public PlatformDatabaseCapabilitiesResponse() {
         this.regionUpgradeVersions = new HashMap<>();
         this.includedRegions = new HashMap<>();
         this.regionDefaultInstances = new HashMap<>();
+        this.latestDatabaseEngineVersion = null;
     }
 
     public  Map<String, List<String>> getIncludedRegions() {
@@ -46,12 +52,17 @@ public class PlatformDatabaseCapabilitiesResponse {
         return regionUpgradeVersions;
     }
 
+    public String getLatestDatabaseEngineVersion() {
+        return latestDatabaseEngineVersion;
+    }
+
     @Override
     public String toString() {
         return "PlatformDatabaseCapabilitiesResponse{" +
                 "includedRegions=" + includedRegions +
                 ", regionDefaultInstances=" + regionDefaultInstances +
                 ", regionUpgradeVersions=" + regionUpgradeVersions +
+                ", latestDatabaseEngineVersion='" + latestDatabaseEngineVersion + '\'' +
                 '}';
     }
 }

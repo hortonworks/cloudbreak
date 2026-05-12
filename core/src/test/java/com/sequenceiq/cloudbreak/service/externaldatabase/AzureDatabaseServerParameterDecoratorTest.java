@@ -301,7 +301,7 @@ class AzureDatabaseServerParameterDecoratorTest {
     void testSetParametersHaFlexibleServerMultiAzNotSupportedRegion() {
         Map<String, List<String>> includedRegions = Map.ofEntries(entry(AzureHighAvailabiltyMode.ZONE_REDUNDANT.name(), List.of(OTHER_REGION)));
         PlatformDatabaseCapabilitiesResponse databaseCapabilities
-                = new PlatformDatabaseCapabilitiesResponse(includedRegions, new HashMap<>());
+                = new PlatformDatabaseCapabilitiesResponse(includedRegions, new HashMap<>(), null);
         testSetParametersHaFlexibleServerMultiAzSameZoneInternal(databaseCapabilities);
     }
 
@@ -320,7 +320,7 @@ class AzureDatabaseServerParameterDecoratorTest {
 
         DetailedEnvironmentResponse env = createEnvironment();
         Map<String, List<String>> includedRegions = Map.ofEntries(entry(AzureHighAvailabiltyMode.ZONE_REDUNDANT.name(), List.of(OTHER_REGION, LOCATION)));
-        PlatformDatabaseCapabilitiesResponse databaseCapabilities = new PlatformDatabaseCapabilitiesResponse(includedRegions, new HashMap<>());
+        PlatformDatabaseCapabilitiesResponse databaseCapabilities = new PlatformDatabaseCapabilitiesResponse(includedRegions, new HashMap<>(), null);
         when(environmentPlatformResourceEndpoint.getDatabaseCapabilities(ENVIRONMENT_CRN, LOCATION, CloudPlatform.AZURE.name(), null, AZURE_FLEXIBLE,
                 null))
                 .thenReturn(databaseCapabilities);

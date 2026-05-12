@@ -30,13 +30,17 @@ class DatabaseCapabilitiesToPlatformDatabaseCapabilitiesResponseConverterTest {
         regionDefaultInstanceTypeMap.put(region("region2"), "big");
         regionDefaultInstanceTypeMap.put(region("region3"), "big");
         PlatformDatabaseCapabilities source = new PlatformDatabaseCapabilities(
-                enabledRegions, regionDefaultInstanceTypeMap,
-                new HashMap<>());
+                enabledRegions,
+                regionDefaultInstanceTypeMap,
+                new HashMap<>(),
+                "17"
+        );
         PlatformDatabaseCapabilitiesResponse response = converter.convert(source);
 
 
         assertThat(source.getEnabledRegions().size()).isEqualTo(response.getIncludedRegions().size());
         assertThat(source.getRegionDefaultInstanceTypeMap().size()).isEqualTo(response.getRegionDefaultInstances().size());
+        assertThat(source.getLatestDatabaseEngineVersion()).isEqualTo(response.getLatestDatabaseEngineVersion());
     }
 
 }

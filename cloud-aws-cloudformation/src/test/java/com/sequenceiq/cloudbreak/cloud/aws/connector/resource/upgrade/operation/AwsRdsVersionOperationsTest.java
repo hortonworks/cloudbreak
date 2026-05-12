@@ -93,7 +93,6 @@ public class AwsRdsVersionOperationsTest {
                 {"version 6.1", "6.1"},
                 {"version 7.1", "7.1"},
                 {"version 8.1", "8.1"},
-                {"version 18.1", "18.1"},
                 {"version 123.1", "123.1"},
         };
     }

@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.aws.connector.resource.upgrade.operation
 
 import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsSdkErrorCodes.ACCESS_DENIED;
 import static com.sequenceiq.cloudbreak.cloud.model.DatabaseEngine.POSTGRESQL;
-import static com.sequenceiq.cloudbreak.common.database.MajorVersion.VERSION_17;
+import static com.sequenceiq.cloudbreak.common.database.MajorVersion.VERSION_18;
 import static com.sequenceiq.cloudbreak.common.database.MajorVersion.VERSION_FAMILY_9;
 
 import java.util.List;
@@ -56,12 +56,12 @@ public class AwsRdsVersionOperations {
             if (engineVersionMatcher.matches()) {
                 String engineMajorVersion = engineVersionMatcher.group(GROUP_MAJOR_VERSION);
                 int engineMajorVersionNumber = Integer.parseInt(engineMajorVersion);
-                if (VERSION_FAMILY_9.getMajorVersionFamily() <= engineMajorVersionNumber && VERSION_17.getMajorVersionFamily() >= engineMajorVersionNumber) {
+                if (VERSION_FAMILY_9.getMajorVersionFamily() <= engineMajorVersionNumber && VERSION_18.getMajorVersionFamily() >= engineMajorVersionNumber) {
                     // Family version matches the engine version for 9.5 and 9.6, and simply equals the major version otherwise
                     familyVersion = VERSION_FAMILY_9.getMajorVersionFamily() == engineMajorVersionNumber ? engineVersion : engineMajorVersion;
                 } else {
                     throwEngineVersionError(String.format("Unsupported RDS POSTGRESQL engine version %s, it is expected to be between %s and %s",
-                            engineVersion, VERSION_FAMILY_9, VERSION_17));
+                            engineVersion, VERSION_FAMILY_9, VERSION_18));
                 }
             } else {
                 throwEngineVersionError(String.format("Unsupported RDS POSTGRESQL engine version %s", engineVersion));
