@@ -206,7 +206,7 @@ public class SdxResizeService {
         stackRequest.setResourceCrn(newSdxCluster.getCrn());
         List<InstanceGroupV4Request> originalInstanceGroups = getInstanceGroupsByCDPConfig(sdxCluster.getClusterShape(), cloudPlatform, sdxCluster.getRuntime(),
                 sdxCluster.getArchitecture());
-        sdxInstanceService.overrideDefaultInstanceType(stackRequest, sdxClusterResizeRequest.getCustomInstanceGroups(), originalInstanceGroups,
+        sdxInstanceService.overrideDefaultInstanceType(environment, stackRequest, sdxClusterResizeRequest.getCustomInstanceGroups(), originalInstanceGroups,
                 stackV4Response.getInstanceGroups(), sdxCluster.getClusterShape());
         sdxInstanceService.overrideDefaultInstanceStorage(stackRequest, sdxClusterResizeRequest.getCustomInstanceGroupDiskSize(),
                 stackV4Response.getInstanceGroups(), sdxCluster.getClusterShape());

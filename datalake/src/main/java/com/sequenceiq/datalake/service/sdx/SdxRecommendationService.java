@@ -180,6 +180,19 @@ public class SdxRecommendationService {
         }
     }
 
+    public List<VmTypeResponse> getAvailableVmTypes(String credentialCrn, String cloudPlatform, String region, String availabilityZone, String architecture) {
+        PlatformVmtypesResponse platformVmtypesResponse = environmentClientService.getVmTypesByCredential(credentialCrn, region, cloudPlatform,
+                CdpResourceType.DATALAKE, availabilityZone, architecture);
+
+        Set<com.sequenceiq.environment.api.v1.platformresource.model.VmTypeResponse> vmTypes = Collections.emptySet();
+        if (platformVmtypesResponse.getVmTypes() != null && StringUtils.isNotBlank(availabilityZone)) {
+            vmTypes = platformVmtypesResponse.getVmTypes().get(availabilityZone).getVirtualMachines();
+        } else if (platformVmtypesResponse.getVmTypes() != null && !platformVmtypesResponse.getVmTypes().isEmpty()) {
+            vmTypes = platformVmtypesResponse.getVmTypes().values().iterator().next().getVirtualMachines();
+        }
+        return vmTypeConverter.convert(vmTypes);
+    }
+
     private void validateInstanceTypeArchitecture(SdxCluster sdxCluster, InstanceGroupV4Request instanceGroup, List<VmTypeResponse> availableVmTypes) {
         Optional<String> instanceType = Optional.ofNullable(instanceGroup.getTemplate()).map(InstanceTemplateV4Base::getInstanceType);
         Architecture selectedArchitecture = Optional.ofNullable(sdxCluster.getArchitecture()).orElse(Architecture.X86_64);
@@ -213,19 +226,6 @@ public class SdxRecommendationService {
 
     private boolean isCustomInstanceTypeProvided(InstanceGroupV4Request instanceGroup, String defaultTemplateVmType) {
         return !defaultTemplateVmType.equals(instanceGroup.getTemplate().getInstanceType());
-    }
-
-    private List<VmTypeResponse> getAvailableVmTypes(String credentialCrn, String cloudPlatform, String region, String availabilityZone, String architecture) {
-        PlatformVmtypesResponse platformVmtypesResponse = environmentClientService.getVmTypesByCredential(credentialCrn, region, cloudPlatform,
-                CdpResourceType.DATALAKE, availabilityZone, architecture);
-
-        Set<com.sequenceiq.environment.api.v1.platformresource.model.VmTypeResponse> vmTypes = Collections.emptySet();
-        if (platformVmtypesResponse.getVmTypes() != null && StringUtils.isNotBlank(availabilityZone)) {
-            vmTypes = platformVmtypesResponse.getVmTypes().get(availabilityZone).getVirtualMachines();
-        } else if (platformVmtypesResponse.getVmTypes() != null && !platformVmtypesResponse.getVmTypes().isEmpty()) {
-            vmTypes = platformVmtypesResponse.getVmTypes().values().iterator().next().getVirtualMachines();
-        }
-        return vmTypeConverter.convert(vmTypes);
     }
 
     private Map<String, List<VmTypeResponse>> filterAvailableVmTypesBasedOnDefault(List<VmTypeResponse> availableVmTypes,

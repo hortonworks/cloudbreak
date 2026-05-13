@@ -455,7 +455,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         String encryptionProfileCrn = encryptionProfileResponse != null ? encryptionProfileResponse.getCrn() : null;
         stackRequestHandler.setStackRequestParams(stackRequest, sdxClusterRequest.getJavaVersion(), sdxClusterRequest.isEnableRangerRaz(),
                 sdxClusterRequest.isEnableRangerRms(), encryptionProfileCrn);
-        sdxInstanceService.overrideDefaultInstanceType(stackRequest, sdxClusterRequest.getCustomInstanceGroups(), Collections.emptyList(),
+        sdxInstanceService.overrideDefaultInstanceType(environment, stackRequest, sdxClusterRequest.getCustomInstanceGroups(), Collections.emptyList(),
                 Collections.emptyList(), sdxClusterRequest.getClusterShape());
         recipeService.validateRecipes(sdxClusterRequest.getRecipes(), stackRequest);
         prepareCloudStorageForStack(sdxClusterRequest, stackRequest, sdxCluster, environment);

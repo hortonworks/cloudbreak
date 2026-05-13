@@ -2,6 +2,7 @@ package com.sequenceiq.datalake.service.sdx;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -21,13 +22,17 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.te
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.volume.VolumeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.template.volume.VolumeV4Response;
+import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.datalake.configuration.CDPConfigService;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.environment.api.v1.platformresource.model.PlatformDisksResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxInstanceGroupDiskRequest;
 import com.sequenceiq.sdx.api.model.SdxInstanceGroupRequest;
+import com.sequenceiq.sdx.api.model.VmTypeResponse;
 
 @Service
 public class SdxInstanceService {
@@ -36,6 +41,12 @@ public class SdxInstanceService {
 
     @Inject
     private CDPConfigService cdpConfigService;
+
+    @Inject
+    private SdxRecommendationService sdxRecommendationService;
+
+    @Inject
+    private EnvironmentService environmentService;
 
     public Set<String> getInstanceGroupNamesBySdxDetails(SdxClusterShape clusterShape, String runtimeVersion, String cloudPlatform) {
         if (clusterShape == null || StringUtils.isAnyBlank(runtimeVersion, cloudPlatform)) {
@@ -51,28 +62,54 @@ public class SdxInstanceService {
         return result;
     }
 
-    public void overrideDefaultInstanceType(StackV4Request defaultTemplate, List<SdxInstanceGroupRequest> customInstanceGroups,
-            List<InstanceGroupV4Request> originalInstanceGroups, List<InstanceGroupV4Response> currentInstanceGroups,
-            SdxClusterShape sdxClusterShape) {
-        if (CollectionUtils.isNotEmpty(customInstanceGroups)) {
-            LOGGER.debug("Override default template with custom instance groups from request.");
-            customInstanceGroups.forEach(customInstanceGroup -> {
-                InstanceGroupV4Request templateInstanceGroup = getTemplateInstanceGroup(defaultTemplate, customInstanceGroup.getName())
-                        .orElseThrow(() -> new BadRequestException("Custom instance group is missing from default template: " + customInstanceGroup.getName()));
-                overrideInstanceType(templateInstanceGroup, customInstanceGroup.getInstanceType());
-            });
-        } else if (CollectionUtils.isNotEmpty(originalInstanceGroups) && CollectionUtils.isNotEmpty(currentInstanceGroups)
-                && !SdxClusterShape.LIGHT_DUTY.equals(sdxClusterShape)) {
-            LOGGER.debug("Override default template with previous instance groups");
-            currentInstanceGroups.forEach(currentInstanceGroup -> {
-                originalInstanceGroups
-                        .stream()
-                        .filter(templateGroup -> StringUtils.equals(templateGroup.getName(), currentInstanceGroup.getName()))
-                        .findAny()
-                        .ifPresent(originalIGroup -> overrideDefaultInstanceTypeFromPreviousDatalake(defaultTemplate, currentInstanceGroup,
-                                originalIGroup));
-            });
+    public void overrideDefaultInstanceType(DetailedEnvironmentResponse environment, StackV4Request defaultTemplate,
+            List<SdxInstanceGroupRequest> customInstanceGroups, List<InstanceGroupV4Request> originalInstanceGroups,
+            List<InstanceGroupV4Response> currentInstanceGroups, SdxClusterShape sdxClusterShape) {
+        if (isOverrideNeeded(customInstanceGroups, originalInstanceGroups, currentInstanceGroups, sdxClusterShape)) {
+            String cloudPlatform = environment.getCloudPlatform();
+            String region = environment.getRegions().getNames().stream().findFirst().orElse(null);
+            List<VmTypeResponse> availableVmTypes = sdxRecommendationService.getAvailableVmTypes(environment.getCredential().getCrn(),
+                    cloudPlatform, region, null, Architecture.ALL_ARCHITECTURE);
+            Map<String, String> diskTypes = Optional.ofNullable(environmentService.getDiskTypes())
+                    .map(PlatformDisksResponse::getDiskMappings)
+                    .map(diskMapping -> diskMapping.get(cloudPlatform))
+                    .orElseGet(Map::of);
+
+            if (hasCustomInstanceGroups(customInstanceGroups)) {
+                LOGGER.debug("Override default template with custom instance groups from request.");
+                customInstanceGroups.forEach(customInstanceGroup -> {
+                    InstanceGroupV4Request templateInstanceGroup = getTemplateInstanceGroup(defaultTemplate, customInstanceGroup.getName())
+                            .orElseThrow(() ->
+                                    new BadRequestException("Custom instance group is missing from default template: " + customInstanceGroup.getName()));
+                    overrideInstanceType(templateInstanceGroup, customInstanceGroup.getInstanceType(), availableVmTypes, diskTypes);
+                });
+            } else if (isResize(originalInstanceGroups, currentInstanceGroups, sdxClusterShape)) {
+                LOGGER.debug("Override default template with previous instance groups");
+                currentInstanceGroups.forEach(currentInstanceGroup -> {
+                    originalInstanceGroups
+                            .stream()
+                            .filter(templateGroup -> StringUtils.equals(templateGroup.getName(), currentInstanceGroup.getName()))
+                            .findAny()
+                            .ifPresent(originalIGroup -> overrideDefaultInstanceTypeFromPreviousDatalake(defaultTemplate, currentInstanceGroup,
+                                    originalIGroup, availableVmTypes, diskTypes));
+                });
+            }
         }
+    }
+
+    private boolean isOverrideNeeded(List<SdxInstanceGroupRequest> customInstanceGroups, List<InstanceGroupV4Request> originalInstanceGroups,
+            List<InstanceGroupV4Response> currentInstanceGroups, SdxClusterShape sdxClusterShape) {
+        return hasCustomInstanceGroups(customInstanceGroups) || isResize(originalInstanceGroups, currentInstanceGroups, sdxClusterShape);
+    }
+
+    private boolean hasCustomInstanceGroups(List<SdxInstanceGroupRequest> customInstanceGroups) {
+        return CollectionUtils.isNotEmpty(customInstanceGroups);
+    }
+
+    private boolean isResize(List<InstanceGroupV4Request> originalInstanceGroups, List<InstanceGroupV4Response> currentInstanceGroups,
+            SdxClusterShape sdxClusterShape) {
+        return CollectionUtils.isNotEmpty(originalInstanceGroups) && CollectionUtils.isNotEmpty(currentInstanceGroups)
+                && !SdxClusterShape.LIGHT_DUTY.equals(sdxClusterShape);
     }
 
     private Optional<InstanceGroupV4Request> getTemplateInstanceGroup(StackV4Request defaultTemplate, String instanceName) {
@@ -84,20 +121,42 @@ public class SdxInstanceService {
     }
 
     private void overrideDefaultInstanceTypeFromPreviousDatalake(StackV4Request defaultTemplate, InstanceGroupV4Response currentInstanceGroup,
-            InstanceGroupV4Request originalInstanceGroup) {
+            InstanceGroupV4Request originalInstanceGroup, List<VmTypeResponse> availableVmTypes, Map<String, String> diskMappings) {
         if (currentInstanceGroup != null && currentInstanceGroup.getTemplate() != null && originalInstanceGroup.getTemplate() != null &&
                 !currentInstanceGroup.getTemplate().getInstanceType().equals(originalInstanceGroup.getTemplate().getInstanceType())) {
             getTemplateInstanceGroup(defaultTemplate, currentInstanceGroup.getName())
-                    .ifPresent(templateIg -> overrideInstanceType(templateIg, currentInstanceGroup.getTemplate().getInstanceType()));
+                    .ifPresent(templateIg -> overrideInstanceType(templateIg, currentInstanceGroup.getTemplate().getInstanceType(),
+                            availableVmTypes, diskMappings));
         }
     }
 
-    private void overrideInstanceType(InstanceGroupV4Request templateGroup, String newInstanceType) {
+    private void overrideInstanceType(InstanceGroupV4Request templateGroup, String newInstanceType, List<VmTypeResponse> availableVmTypes,
+            Map<String, String> diskMappings) {
         InstanceTemplateV4Request instanceTemplate = templateGroup.getTemplate();
         if (instanceTemplate != null && StringUtils.isNoneBlank(newInstanceType)) {
             LOGGER.info("Override instance group {} instance type from {} to {}",
                     templateGroup.getName(), instanceTemplate.getInstanceType(), newInstanceType);
             instanceTemplate.setInstanceType(newInstanceType);
+            availableVmTypes.stream()
+                    .filter(vmType -> vmType.getValue().equals(newInstanceType))
+                    .findFirst()
+                    .ifPresent(vmType -> overrideVolumeTypeIfNeeded(instanceTemplate, vmType, diskMappings));
+        }
+    }
+
+    private void overrideVolumeTypeIfNeeded(InstanceTemplateV4Request instanceTemplate, VmTypeResponse vmType, Map<String, String> diskMappings) {
+        Optional.ofNullable(vmType.getVmTypeMetaJson())
+                .map(metaData -> (String) metaData.getProperties().get(VmTypeMeta.DEFAULT_DISK_TYPE))
+                .filter(StringUtils::isNotBlank)
+                .ifPresent(diskType -> instanceTemplate.getAttachedVolumes()
+                        .forEach(vol -> overrideVolumeTypeIfNeeded(diskType, vmType, vol, diskMappings)));
+    }
+
+    private void overrideVolumeTypeIfNeeded(String newDiskType, VmTypeResponse vmTypeResponse, VolumeV4Request volumeV4Request,
+            Map<String, String> diskMappings) {
+        if (vmTypeResponse.getVmTypeMetaJson().getConfigs().stream()
+                .noneMatch(cfg -> diskMappings.getOrDefault(volumeV4Request.getType(), "").equals(cfg.getVolumeParameterType()))) {
+            volumeV4Request.setType(newDiskType);
         }
     }
 

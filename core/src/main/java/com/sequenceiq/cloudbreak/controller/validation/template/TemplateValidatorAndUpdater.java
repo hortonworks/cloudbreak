@@ -284,7 +284,7 @@ public class TemplateValidatorAndUpdater {
             if (config != null) {
                 validateVolumeCountInParameterConfig(config, value, vmType, validationBuilder, instanceGroup, stack);
             } else {
-                validationBuilder.error(String.format("The '%s' instance type does not support 'Ephemeral' volume type", vmType.value()));
+                validationBuilder.error(String.format("The '%s' instance type does not support '%s' volume type", vmType.value(), volumeParameterType));
             }
         }
     }
@@ -321,7 +321,7 @@ public class TemplateValidatorAndUpdater {
             if (config != null) {
                 validateVolumeSizeInParameterConfig(config, value, vmType, validationBuilder, instanceGroup, stack);
             } else {
-                validationBuilder.error(String.format("The '%s' instance type does not support 'Ephemeral' volume type", vmType.value()));
+                validationBuilder.error(String.format("The '%s' instance type does not support '%s' volume type", vmType.value(), volumeParameterType));
             }
         }
     }

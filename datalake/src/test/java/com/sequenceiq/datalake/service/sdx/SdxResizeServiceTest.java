@@ -782,7 +782,7 @@ class SdxResizeServiceTest {
         when(sdxBackupRestoreService.isDatalakeInBackupProgress(anyString(), anyString())).thenReturn(false);
         when(sdxBackupRestoreService.isDatalakeInRestoreProgress(anyString(), anyString())).thenReturn(false);
 
-        mockEnvironmentCall(resizeRequest, AWS);
+        DetailedEnvironmentResponse environmentResponse = mockEnvironmentCall(resizeRequest, AWS);
         ArgumentCaptor<SdxCluster> captorResize = ArgumentCaptor.forClass(SdxCluster.class);
         when(sdxReactorFlowManager.triggerSdxResize(anyLong(), captorResize.capture(), any(DatalakeDrSkipOptions.class), eq(false)))
                 .thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
@@ -797,16 +797,16 @@ class SdxResizeServiceTest {
         stackV4Response.setNetwork(getNetworkForCurrentDatalake());
         when(stackService.getDetail(anyString(), anySet(), anyString())).thenReturn(stackV4Response);
         when(accountIdService.getAccountIdFromUserCrn(any())).thenReturn(ACCOUNT_ID);
-        doCallRealMethod().when(sdxInstanceService).overrideDefaultInstanceType(any(), any(), any(), any(), any());
         doCallRealMethod().when(sdxInstanceService).overrideDefaultInstanceStorage(any(), any(), any(), any());
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
                 underTest.resizeSdx(USER_CRN, sdxCluster.getClusterName(), resizeRequest));
 
         StackV4Request stackV4Request = JsonUtil.readValue(captorResize.getValue().getStackRequest(), StackV4Request.class);
-        InstanceGroupV4Request idbrokerInstGroup = stackV4Request.getInstanceGroups().stream().filter(ig -> "idbroker".equals(ig.getName())).findAny().get();
         InstanceGroupV4Request masterInstGroup = stackV4Request.getInstanceGroups().stream().filter(ig -> "master".equals(ig.getName())).findAny().get();
-        assertEquals("m5.xlarge", idbrokerInstGroup.getTemplate().getInstanceType());
+        ArgumentCaptor<StackV4Request> stackV4RequestCaptor = ArgumentCaptor.forClass(StackV4Request.class);
+        verify(sdxInstanceService, times(1)).overrideDefaultInstanceType(eq(environmentResponse), stackV4RequestCaptor.capture(),
+                eq(resizeRequest.getCustomInstanceGroups()), eq(List.of()), eq(stackV4Response.getInstanceGroups()), eq(sdxCluster.getClusterShape()));
         assertEquals(256, masterInstGroup.getTemplate().getAttachedVolumes().stream().findAny().get().getSize());
     }
 
@@ -891,20 +891,19 @@ class SdxResizeServiceTest {
         when(sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(anyString(), anyString())).thenReturn(Optional.empty());
         when(sdxBackupRestoreService.isDatalakeInBackupProgress(anyString(), anyString())).thenReturn(false);
         when(sdxBackupRestoreService.isDatalakeInRestoreProgress(anyString(), anyString())).thenReturn(false);
-        mockEnvironmentCall(resizeRequest, AWS);
+        DetailedEnvironmentResponse environmentResponse = mockEnvironmentCall(resizeRequest, AWS);
         ArgumentCaptor<SdxCluster> captorResize = ArgumentCaptor.forClass(SdxCluster.class);
         when(sdxReactorFlowManager.triggerSdxResize(anyLong(), captorResize.capture(), any(DatalakeDrSkipOptions.class), eq(false)))
                 .thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
         String lightDutyJson = FileReaderUtils.readFileFromClasspath("/duties/7.2.10/aws/light_duty.json");
         CDPConfigKey cdpConfigKeyLightDuty = new CDPConfigKey(AWS, MEDIUM_DUTY_HA, "7.2.18");
         String enterpriseJson = FileReaderUtils.readFileFromClasspath("/duties/7.2.18/aws/enterprise.json");
-        CDPConfigKey cdpConfigKeyEnterprise = new CDPConfigKey(AWS, ENTERPRISE, "7.2.18");
-        when(cdpConfigService.getConfigForKey(eq(cdpConfigKeyLightDuty))).thenReturn(JsonUtil.readValue(lightDutyJson, StackV4Request.class));
+        StackV4Request lightDutyRequest = JsonUtil.readValue(lightDutyJson, StackV4Request.class);
+        when(cdpConfigService.getConfigForKey(eq(cdpConfigKeyLightDuty))).thenReturn(lightDutyRequest);
         when(stackRequestHandler.getStackRequest(eq(ENTERPRISE), any(), any(), any(), any(), any()))
                 .thenReturn(JsonUtil.readValue(enterpriseJson, StackV4Request.class));
         when(stackService.getDetail(anyString(), anySet(), anyString())).thenReturn(stackV4Response);
         when(accountIdService.getAccountIdFromUserCrn(any())).thenReturn(ACCOUNT_ID);
-        doCallRealMethod().when(sdxInstanceService).overrideDefaultInstanceType(any(), any(), any(), any(), any());
         doCallRealMethod().when(sdxInstanceService).overrideDefaultInstanceStorage(any(), any(), any(), any());
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
@@ -914,7 +913,10 @@ class SdxResizeServiceTest {
         InstanceGroupV4Request idbrokerInstGroup = stackV4Request.getInstanceGroups().stream().filter(ig -> "idbroker".equals(ig.getName())).findAny().get();
         InstanceGroupV4Request masterInstGroup = stackV4Request.getInstanceGroups().stream().filter(ig -> "master".equals(ig.getName())).findAny().get();
         assertEquals("t3.medium", idbrokerInstGroup.getTemplate().getInstanceType());
-        assertEquals("m5.x4large", masterInstGroup.getTemplate().getInstanceType());
+        ArgumentCaptor<StackV4Request> stackV4RequestCaptor = ArgumentCaptor.forClass(StackV4Request.class);
+        verify(sdxInstanceService, times(1)).overrideDefaultInstanceType(eq(environmentResponse), stackV4RequestCaptor.capture(),
+                eq(resizeRequest.getCustomInstanceGroups()), eq(lightDutyRequest.getInstanceGroups()), eq(stackV4Response.getInstanceGroups()),
+                eq(sdxCluster.getClusterShape()));
         assertEquals(1024, masterInstGroup.getTemplate().getAttachedVolumes().stream().findAny().get().getSize());
     }
 
@@ -1424,7 +1426,7 @@ class SdxResizeServiceTest {
         verify(multiAzDecorator, never()).decorateStackRequestWithPreviousNetwork(any(), any(), eq(subnetsByAz));
     }
 
-    private void mockEnvironmentCall(SdxClusterResizeRequest sdxClusterResizeRequest, CloudPlatform cloudPlatform) {
+    private DetailedEnvironmentResponse mockEnvironmentCall(SdxClusterResizeRequest sdxClusterResizeRequest, CloudPlatform cloudPlatform) {
         DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
         detailedEnvironmentResponse.setName(sdxClusterResizeRequest.getEnvironment());
         detailedEnvironmentResponse.setCloudPlatform(cloudPlatform.name());
@@ -1432,6 +1434,7 @@ class SdxResizeServiceTest {
         detailedEnvironmentResponse.setCrn(getCrn());
         detailedEnvironmentResponse.setCreator(detailedEnvironmentResponse.getCrn());
         when(environmentService.validateAndGetEnvironment(anyString())).thenReturn(detailedEnvironmentResponse);
+        return detailedEnvironmentResponse;
     }
 
     private List<InstanceGroupV4Response> getInstanceGroups(CloudPlatform cloudPlatform) {

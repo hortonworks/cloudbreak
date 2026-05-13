@@ -51,6 +51,7 @@ import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoin
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.environment.api.v1.platformresource.CredentialPlatformResourceEndpoint;
+import com.sequenceiq.environment.api.v1.platformresource.model.PlatformDisksResponse;
 import com.sequenceiq.environment.api.v1.platformresource.model.PlatformVmtypesResponse;
 
 @Service
@@ -133,6 +134,14 @@ public class EnvironmentService implements EnvironmentPropertyProvider, Composit
         try {
             return credentialPlatformResourceEndpoint.getVmTypesByCredential(null, credentialCrn, region, platformVariant, availabilityZone,
                     resourceType, architecture);
+        } catch (WebApplicationException e) {
+            throw webApplicationExceptionHandler.handleException(e);
+        }
+    }
+
+    public PlatformDisksResponse getDiskTypes() {
+        try {
+            return credentialPlatformResourceEndpoint.getDisktypes();
         } catch (WebApplicationException e) {
             throw webApplicationExceptionHandler.handleException(e);
         }
