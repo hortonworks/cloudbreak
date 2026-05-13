@@ -272,6 +272,16 @@ public class ModelDescriptions {
     public static final String ENCRYPTION_PROFILE_NAME_OR_CRN =
             "Name or CRN of the encryption profile to be used. Encryption Profile manages TLS version and cipher suites";
 
+    public static final String DATALAKE_CRN = "The CRN of the Datalake.";
+
+    public static final String RDS_UPGRADE_STATUS = "The RDS upgrade status: UPGRADE_REQUIRED, UPGRADE_NOT_REQUIRED, UNKNOWN, or NO_DATALAKE.";
+
+    public static final String TARGET_MAJOR_VERSION_STRING = "The target PostgreSQL major version (e.g. '14'); present only when status is UPGRADE_REQUIRED.";
+
+    public static final String CURRENT_MAJOR_VERSION_STRING = "The current PostgreSQL major version (e.g. '11'); present when the DB server was reachable.";
+
+    public static final String RDS_UPGRADE_STATUSES = "List of per-Datalake RDS upgrade status entries.";
+
     private ModelDescriptions() {
     }
 
@@ -287,5 +297,9 @@ public class ModelDescriptions {
         public static final String MIGRATE_DATABASE_TO_SSL_BY_NAME = "Migrate database to ssl of the data lake by name";
         public static final String MIGRATE_DATABASE_TO_SSL_BY_CRN = "Migrate database to ssl of the data lake by crn";
         public static final String MIGRATE_DATABASE_TO_SSL_NOTES = "Migrate non ssl to ssl based Database";
+        public static final String RDS_UPGRADE_STATUS_BY_DATALAKE_CRNS = "Check RDS upgrade status for a list of Datalake CRNs";
+        public static final String RDS_UPGRADE_STATUS_BY_DATALAKE_CRN = "Check RDS upgrade status for a single Datalake by CRN";
+        public static final String RDS_UPGRADE_STATUS_BY_DATALAKE_NAME = "Check RDS upgrade status for a single Datalake by name";
+        public static final String RDS_UPGRADE_STATUS_NOTES = "Returns whether an RDS major-version upgrade is required for the given Datalake(s)";
     }
 }

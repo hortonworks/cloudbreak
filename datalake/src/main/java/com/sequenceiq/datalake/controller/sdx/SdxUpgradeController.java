@@ -1,12 +1,16 @@
 package com.sequenceiq.datalake.controller.sdx;
 
+import java.util.List;
+
 import jakarta.inject.Inject;
 
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
+import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrnList;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceName;
 import com.sequenceiq.authorization.annotation.InternalOnly;
+import com.sequenceiq.authorization.annotation.ResourceCrnList;
 import com.sequenceiq.authorization.annotation.ResourceName;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
@@ -20,6 +24,7 @@ import com.sequenceiq.datalake.service.upgrade.ccm.SdxCcmUpgradeService;
 import com.sequenceiq.datalake.service.upgrade.database.SdxDatabaseServerUpgradeService;
 import com.sequenceiq.sdx.api.endpoint.SdxUpgradeEndpoint;
 import com.sequenceiq.sdx.api.model.SdxCcmUpgradeResponse;
+import com.sequenceiq.sdx.api.model.SdxDatabaseUpgradeStatus;
 import com.sequenceiq.sdx.api.model.SdxUpgradeDatabaseServerRequest;
 import com.sequenceiq.sdx.api.model.SdxUpgradeDatabaseServerResponse;
 import com.sequenceiq.sdx.api.model.SdxUpgradeReinitiableResponse;
@@ -131,4 +136,24 @@ public class SdxUpgradeController implements SdxUpgradeEndpoint {
                 Boolean.TRUE.equals(sdxUpgradeDatabaseServerRequest.getForced()));
     }
 
+    @Override
+    @CheckPermissionByResourceCrnList(action = AuthorizationResourceAction.DESCRIBE_DATALAKE)
+    public List<SdxDatabaseUpgradeStatus> getDatabaseServerUpgradeStatusByDatalakeCrns(@ResourceCrnList List<String> datalakeCrns) {
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
+        return sdxDatabaseServerUpgradeService.getDatabaseServerUpgradeStatusByDatalakeCrns(userCrn, datalakeCrns);
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_DATALAKE)
+    public SdxDatabaseUpgradeStatus getDatabaseServerUpgradeStatusByDatalakeCrn(@ResourceCrn String datalakeCrn) {
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
+        return sdxDatabaseServerUpgradeService.getDatabaseServerUpgradeStatus(userCrn, NameOrCrn.ofCrn(datalakeCrn));
+    }
+
+    @Override
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.DESCRIBE_DATALAKE)
+    public SdxDatabaseUpgradeStatus getDatabaseServerUpgradeStatusByDatalakeName(@ResourceName String datalakeName) {
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
+        return sdxDatabaseServerUpgradeService.getDatabaseServerUpgradeStatus(userCrn, NameOrCrn.ofName(datalakeName));
+    }
 }

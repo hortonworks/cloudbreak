@@ -3,6 +3,7 @@ package com.sequenceiq.datalake.service.upgrade.database;
 import static com.sequenceiq.cloudbreak.common.database.TargetMajorVersion.VERSION11;
 import static com.sequenceiq.cloudbreak.common.database.TargetMajorVersion.VERSION14;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -66,6 +67,7 @@ import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvi
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
+import com.sequenceiq.sdx.api.model.SdxDatabaseUpgradeStatus;
 import com.sequenceiq.sdx.api.model.SdxUpgradeDatabaseServerResponse;
 
 @ExtendWith(MockitoExtension.class)
@@ -506,6 +508,191 @@ public class SdxDatabaseServerUpgradeServiceTest {
         SdxStatusEntity status = new SdxStatusEntity();
         status.setStatus(statusEnum);
         return status;
+    }
+
+    @Test
+    void testIsUpgradeRequiredByDatalakeCrnWhenUpgradeNeeded() {
+        SdxCluster cluster = getSdxClusterWithExternalDb(SDX_CRN);
+        when(sdxService.getByNameOrCrn(eq(USER_CRN), eq(NameOrCrn.ofCrn(SDX_CRN)))).thenReturn(cluster);
+        when(databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntime(any(), eq(null))).thenReturn("14");
+        StackDatabaseServerResponse dbResponse = new StackDatabaseServerResponse();
+        dbResponse.setMajorVersion(MajorVersion.VERSION_11);
+        when(databaseService.getDatabaseServer(DB_CRN)).thenReturn(dbResponse);
+        when(sdxDatabaseServerUpgradeAvailabilityService.isUpgradeNeeded(eq(dbResponse), any(), eq(false))).thenReturn(true);
+
+        SdxDatabaseUpgradeStatus result = underTest.getDatabaseServerUpgradeStatus(USER_CRN, NameOrCrn.ofCrn(SDX_CRN));
+
+        assertEquals("UPGRADE_REQUIRED", result.getUpgradeStatus());
+        assertEquals(SDX_CRN, result.getDatalakeCrn());
+        assertEquals("14", result.getTargetMajorVersion());
+        assertEquals("11", result.getCurrentMajorVersion());
+    }
+
+    @Test
+    void testIsUpgradeRequiredByDatalakeCrnWhenUpgradeNotNeeded() {
+        SdxCluster cluster = getSdxClusterWithExternalDb(SDX_CRN);
+        when(sdxService.getByNameOrCrn(eq(USER_CRN), eq(NameOrCrn.ofCrn(SDX_CRN)))).thenReturn(cluster);
+        when(databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntime(any(), eq(null))).thenReturn("14");
+        StackDatabaseServerResponse dbResponse = new StackDatabaseServerResponse();
+        dbResponse.setMajorVersion(MajorVersion.VERSION_14);
+        when(databaseService.getDatabaseServer(DB_CRN)).thenReturn(dbResponse);
+        when(sdxDatabaseServerUpgradeAvailabilityService.isUpgradeNeeded(eq(dbResponse), any(), eq(false))).thenReturn(false);
+
+        SdxDatabaseUpgradeStatus result = underTest.getDatabaseServerUpgradeStatus(USER_CRN, NameOrCrn.ofCrn(SDX_CRN));
+
+        assertEquals("UPGRADE_NOT_REQUIRED", result.getUpgradeStatus());
+        assertEquals(SDX_CRN, result.getDatalakeCrn());
+        assertEquals("14", result.getCurrentMajorVersion());
+    }
+
+    @Test
+    void testIsUpgradeRequiredByDatalakeCrnWhenEmbeddedDatabase() {
+        SdxCluster cluster = getSdxCluster();
+        cluster.setCrn(SDX_CRN);
+        when(sdxService.getByNameOrCrn(eq(USER_CRN), eq(NameOrCrn.ofCrn(SDX_CRN)))).thenReturn(cluster);
+
+        SdxDatabaseUpgradeStatus result = underTest.getDatabaseServerUpgradeStatus(USER_CRN, NameOrCrn.ofCrn(SDX_CRN));
+
+        assertEquals("UPGRADE_NOT_REQUIRED", result.getUpgradeStatus());
+        assertEquals(SDX_CRN, result.getDatalakeCrn());
+        verifyNoInteractions(databaseService, sdxDatabaseServerUpgradeAvailabilityService);
+    }
+
+    @Test
+    void testIsUpgradeRequiredByDatalakeCrnWhenNotFound() {
+        when(sdxService.getByNameOrCrn(eq(USER_CRN), eq(NameOrCrn.ofCrn(SDX_CRN)))).thenThrow(new NotFoundException("not found"));
+
+        SdxDatabaseUpgradeStatus result = underTest.getDatabaseServerUpgradeStatus(USER_CRN, NameOrCrn.ofCrn(SDX_CRN));
+
+        assertEquals("NO_DATALAKE", result.getUpgradeStatus());
+        assertEquals(SDX_CRN, result.getDatalakeCrn());
+    }
+
+    @Test
+    void testIsUpgradeRequiredByDatalakeCrnWhenDbLookupFails() {
+        SdxCluster cluster = getSdxClusterWithExternalDb(SDX_CRN);
+        when(sdxService.getByNameOrCrn(eq(USER_CRN), eq(NameOrCrn.ofCrn(SDX_CRN)))).thenReturn(cluster);
+        when(databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntime(any(), eq(null))).thenReturn("14");
+        when(databaseService.getDatabaseServer(DB_CRN)).thenThrow(new RuntimeException("db unavailable"));
+
+        SdxDatabaseUpgradeStatus result = underTest.getDatabaseServerUpgradeStatus(USER_CRN, NameOrCrn.ofCrn(SDX_CRN));
+
+        assertEquals("UNKNOWN", result.getUpgradeStatus());
+        assertEquals(SDX_CRN, result.getDatalakeCrn());
+    }
+
+    // --- getDatabaseServerUpgradeStatus (by name) ---
+
+    @Test
+    void testIsUpgradeRequiredByDatalakeNameWhenUpgradeNeeded() {
+        SdxCluster cluster = getSdxClusterWithExternalDb(SDX_CRN);
+        when(sdxService.getByNameOrCrn(eq(USER_CRN), eq(NameOrCrn.ofName(SDX_CLUSTER_NAME)))).thenReturn(cluster);
+        when(databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntime(any(), eq(null))).thenReturn("14");
+        StackDatabaseServerResponse dbResponse = new StackDatabaseServerResponse();
+        dbResponse.setMajorVersion(MajorVersion.VERSION_11);
+        when(databaseService.getDatabaseServer(DB_CRN)).thenReturn(dbResponse);
+        when(sdxDatabaseServerUpgradeAvailabilityService.isUpgradeNeeded(eq(dbResponse), any(), eq(false))).thenReturn(true);
+
+        SdxDatabaseUpgradeStatus result = underTest.getDatabaseServerUpgradeStatus(USER_CRN, NameOrCrn.ofName(SDX_CLUSTER_NAME));
+
+        assertEquals("UPGRADE_REQUIRED", result.getUpgradeStatus());
+        assertEquals(SDX_CRN, result.getDatalakeCrn());
+    }
+
+    @Test
+    void testIsUpgradeRequiredByDatalakeNameWhenNotFound() {
+        when(sdxService.getByNameOrCrn(eq(USER_CRN), eq(NameOrCrn.ofName(SDX_CLUSTER_NAME))))
+                .thenThrow(new NotFoundException("not found"));
+
+        SdxDatabaseUpgradeStatus result = underTest.getDatabaseServerUpgradeStatus(USER_CRN, NameOrCrn.ofName(SDX_CLUSTER_NAME));
+
+        assertEquals("NO_DATALAKE", result.getUpgradeStatus());
+    }
+
+    // --- getDatabaseServerUpgradeStatusByDatalakeCrns (bulk) ---
+
+    @Test
+    void testIsUpgradeRequiredByDatalakeCrnsReturnsBulkResultsInOrder() {
+        String crn1 = "crn:cdp:datalake:us-west-1:acc:datalake:aa";
+        String crn2 = "crn:cdp:datalake:us-west-1:acc:datalake:bb";
+        String crn3 = "crn:cdp:datalake:us-west-1:acc:datalake:cc";
+
+        SdxCluster cluster1 = getSdxClusterWithExternalDb(crn1);
+        SdxCluster cluster2 = getSdxCluster();
+        cluster2.setCrn(crn2);
+        when(sdxService.getByNameOrCrn(eq(USER_CRN), eq(NameOrCrn.ofCrn(crn1)))).thenReturn(cluster1);
+        when(sdxService.getByNameOrCrn(eq(USER_CRN), eq(NameOrCrn.ofCrn(crn2)))).thenReturn(cluster2);
+        when(sdxService.getByNameOrCrn(eq(USER_CRN), eq(NameOrCrn.ofCrn(crn3)))).thenThrow(new NotFoundException("not found"));
+
+        when(databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntime(any(), eq(null))).thenReturn("14");
+        StackDatabaseServerResponse dbResponse = new StackDatabaseServerResponse();
+        dbResponse.setMajorVersion(MajorVersion.VERSION_11);
+        when(databaseService.getDatabaseServer(DB_CRN)).thenReturn(dbResponse);
+        when(sdxDatabaseServerUpgradeAvailabilityService.isUpgradeNeeded(eq(dbResponse), any(), eq(false))).thenReturn(true);
+
+        List<SdxDatabaseUpgradeStatus> statuses = underTest.getDatabaseServerUpgradeStatusByDatalakeCrns(USER_CRN, List.of(crn1, crn2, crn3));
+
+        assertEquals(3, statuses.size());
+        assertEquals(crn1, statuses.get(0).getDatalakeCrn());
+        assertEquals("UPGRADE_REQUIRED", statuses.get(0).getUpgradeStatus());
+        assertEquals(crn2, statuses.get(1).getDatalakeCrn());
+        assertEquals("UPGRADE_NOT_REQUIRED", statuses.get(1).getUpgradeStatus());
+        assertEquals(crn3, statuses.get(2).getDatalakeCrn());
+        assertEquals("NO_DATALAKE", statuses.get(2).getUpgradeStatus());
+    }
+
+    @Test
+    void testIsUpgradeRequiredByDatalakeCrnsEmptyListReturnsEmptyResponse() {
+        List<SdxDatabaseUpgradeStatus> statuses = underTest.getDatabaseServerUpgradeStatusByDatalakeCrns(USER_CRN, List.of());
+
+        assertEquals(0, statuses.size());
+        verifyNoInteractions(sdxService, databaseService, sdxDatabaseServerUpgradeAvailabilityService);
+    }
+
+    @Test
+    void testIsUpgradeRequiredByDatalakeCrnsNullListThrowsBadRequest() {
+        assertThrows(BadRequestException.class, () -> underTest.getDatabaseServerUpgradeStatusByDatalakeCrns(USER_CRN, null));
+        verifyNoInteractions(sdxService, databaseService, sdxDatabaseServerUpgradeAvailabilityService);
+    }
+
+    @Test
+    void testIsUpgradeRequiredByDatalakeCrnsExceedingMaxSizeThrowsBadRequest() {
+        List<String> tooManyCrns = java.util.stream.IntStream.rangeClosed(1, 51)
+                .mapToObj(i -> "crn:cdp:datalake:us-west-1:acc:datalake:" + i)
+                .toList();
+        assertThrows(BadRequestException.class, () -> underTest.getDatabaseServerUpgradeStatusByDatalakeCrns(USER_CRN, tooManyCrns));
+        verifyNoInteractions(sdxService, databaseService, sdxDatabaseServerUpgradeAvailabilityService);
+    }
+
+    @Test
+    void testIsUpgradeRequiredByDatalakeCrnNullCurrentVersionOnNoDb() {
+        SdxCluster cluster = getSdxClusterWithExternalDb(SDX_CRN);
+        when(sdxService.getByNameOrCrn(eq(USER_CRN), eq(NameOrCrn.ofCrn(SDX_CRN)))).thenReturn(cluster);
+        when(databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntime(any(), eq(null))).thenReturn("14");
+        StackDatabaseServerResponse dbResponse = new StackDatabaseServerResponse();
+        // majorVersion is null (unknown)
+        when(databaseService.getDatabaseServer(DB_CRN)).thenReturn(dbResponse);
+        when(sdxDatabaseServerUpgradeAvailabilityService.isUpgradeNeeded(eq(dbResponse), any(), eq(false))).thenReturn(true);
+
+        SdxDatabaseUpgradeStatus result = underTest.getDatabaseServerUpgradeStatus(USER_CRN, NameOrCrn.ofCrn(SDX_CRN));
+
+        assertEquals("UPGRADE_REQUIRED", result.getUpgradeStatus());
+        assertEquals("14", result.getTargetMajorVersion());
+        assertNull(result.getCurrentMajorVersion());
+    }
+
+    // --- helpers ---
+
+    private SdxCluster getSdxClusterWithExternalDb(String crn) {
+        SdxCluster cluster = new SdxCluster();
+        cluster.setCrn(crn);
+        cluster.setClusterName(SDX_CLUSTER_NAME);
+        cluster.setRuntime("7.2.18");
+        SdxDatabase sdxDatabase = new SdxDatabase();
+        sdxDatabase.setDatabaseAvailabilityType(SdxDatabaseAvailabilityType.NON_HA);
+        sdxDatabase.setDatabaseCrn(DB_CRN);
+        cluster.setSdxDatabase(sdxDatabase);
+        return cluster;
     }
 
 }

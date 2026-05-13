@@ -1,7 +1,10 @@
 package com.sequenceiq.sdx.api.endpoint;
 
+import java.util.List;
+
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
@@ -18,6 +21,7 @@ import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.sdx.api.model.SdxCcmUpgradeResponse;
+import com.sequenceiq.sdx.api.model.SdxDatabaseUpgradeStatus;
 import com.sequenceiq.sdx.api.model.SdxUpgradeDatabaseServerRequest;
 import com.sequenceiq.sdx.api.model.SdxUpgradeDatabaseServerResponse;
 import com.sequenceiq.sdx.api.model.SdxUpgradeReinitiableResponse;
@@ -115,4 +119,26 @@ public interface SdxUpgradeEndpoint {
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     SdxUpgradeDatabaseServerResponse upgradeDatabaseServerByCrn(@ValidCrn(resource = CrnResourceDescriptor.VM_DATALAKE) @PathParam("crn") String clusterCrn,
             @Valid SdxUpgradeDatabaseServerRequest sdxUpgradeDatabaseServerRequest);
+
+    @POST
+    @Path("/rds_upgrade_status")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Check RDS upgrade status for a list of Datalake CRNs", operationId = "getDatabaseServerUpgradeStatusByDatalakeCrns",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    List<SdxDatabaseUpgradeStatus> getDatabaseServerUpgradeStatusByDatalakeCrns(@NotNull List<String> datalakeCrns);
+
+    @GET
+    @Path("/crn/{datalakeCrn}/rds_upgrade_status")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Check RDS upgrade status for a single Datalake by CRN", operationId = "getDatabaseServerUpgradeStatusByDatalakeCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    SdxDatabaseUpgradeStatus getDatabaseServerUpgradeStatusByDatalakeCrn(
+            @ValidCrn(resource = CrnResourceDescriptor.VM_DATALAKE) @PathParam("datalakeCrn") String datalakeCrn);
+
+    @GET
+    @Path("/name/{datalakeName}/rds_upgrade_status")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Check RDS upgrade status for a single Datalake by name", operationId = "getDatabaseServerUpgradeStatusByDatalakeName",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    SdxDatabaseUpgradeStatus getDatabaseServerUpgradeStatusByDatalakeName(@PathParam("datalakeName") String datalakeName);
 }
