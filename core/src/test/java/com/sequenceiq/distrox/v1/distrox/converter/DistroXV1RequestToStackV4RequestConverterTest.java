@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -46,8 +47,11 @@ import com.sequenceiq.cloudbreak.cloud.model.network.SubnetType;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.provider.ProviderPreferencesService;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.TelemetryConverter;
+import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
+import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
 import com.sequenceiq.cloudbreak.service.datalake.SdxClientService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
+import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 import com.sequenceiq.common.model.Architecture;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.database.DistroXDatabaseAvailabilityType;
@@ -115,6 +119,9 @@ class DistroXV1RequestToStackV4RequestConverterTest {
 
     @Mock
     private ProviderPreferencesService providerPreferencesService;
+
+    @Mock
+    private PlatformAwareSdxConnector platformAwareSdxConnector;
 
     @InjectMocks
     private DistroXV1RequestToStackV4RequestConverter underTest;
@@ -600,6 +607,24 @@ class DistroXV1RequestToStackV4RequestConverterTest {
         StackV4Request result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.convert(source));
 
         assertThat(result.getArchitecture()).isEqualTo(Architecture.ARM64.getName());
+    }
+
+    @Test
+    void testTelemetry() {
+        DetailedEnvironmentResponse environment = createAwsEnvironment();
+        when(environmentClientService.getByName(anyString())).thenReturn(environment);
+        when(networkConverter.convertToNetworkV4Request(any())).thenReturn(createAwsNetworkV4Request());
+        SdxBasicView sdxBasicView = mock();
+        when(platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(any())).thenReturn(Optional.of(sdxBasicView));
+        TelemetryRequest telemetryRequest = mock();
+        when(telemetryConverter.convert(environment, sdxBasicView)).thenReturn(telemetryRequest);
+
+        DistroXV1Request source = new DistroXV1Request();
+        source.setEnvironmentName("env");
+
+        StackV4Request result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.convert(source));
+
+        assertThat(result.getTelemetry()).isEqualTo(telemetryRequest);
     }
 
     private void checkTagsV4WithV1(TagsV4Request input, TagsV1Request result) {

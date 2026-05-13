@@ -21,6 +21,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.altus.AltusDatabusConfiguration;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryConfiguration;
 import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringConfiguration;
 import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringUrlResolver;
@@ -41,7 +42,6 @@ import com.sequenceiq.common.api.telemetry.response.MonitoringResponse;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 import com.sequenceiq.common.api.type.FeatureSetting;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
-import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 
 @ExtendWith(MockitoExtension.class)
 class TelemetryConverterTest {
@@ -56,6 +56,8 @@ class TelemetryConverterTest {
 
     private static final String ACCOUNT_ID = "accountId";
 
+    private static final String SDX_CRN = "crn:cdp:cloudbreak:us-west-1:someone:sdxcluster:sdxId";
+
     @Mock
     private EntitlementService entitlementService;
 
@@ -63,6 +65,11 @@ class TelemetryConverterTest {
     private MonitoringUrlResolver monitoringUrlResolver;
 
     private TelemetryConverter underTest;
+
+    @Mock
+    private SdxBasicView sdxBasicView;
+
+    private DetailedEnvironmentResponse detailedEnvironmentResponse;
 
     @BeforeEach
     public void setUp() {
@@ -72,6 +79,13 @@ class TelemetryConverterTest {
         TelemetryConfiguration telemetryConfiguration =
                 new TelemetryConfiguration(altusDatabusConfiguration, monitoringConfig, null);
         underTest = new TelemetryConverter(telemetryConfiguration, entitlementService, true, true, monitoringUrlResolver);
+
+        lenient().when(sdxBasicView.crn()).thenReturn(SDX_CRN);
+        lenient().when(sdxBasicView.name()).thenReturn("sdxName");
+
+        detailedEnvironmentResponse = new DetailedEnvironmentResponse();
+        detailedEnvironmentResponse.setCrn("envCrn");
+        detailedEnvironmentResponse.setName("envName");
     }
 
     @Test
@@ -199,9 +213,9 @@ class TelemetryConverterTest {
     @Test
     void testConvertFromEnvAndSdxResponseWithoutInputs() {
         // GIVEN
-        SdxClusterResponse sdxClusterResponse = null;
+        SdxBasicView sdxBasicView = null;
         // WHEN
-        TelemetryRequest result = underTest.convert(new DetailedEnvironmentResponse(), null, sdxClusterResponse);
+        TelemetryRequest result = underTest.convert(new DetailedEnvironmentResponse(), sdxBasicView);
         // THEN
         assertNotNull(result.getWorkloadAnalytics());
         assertNotNull(result.getFeatures());
@@ -212,14 +226,14 @@ class TelemetryConverterTest {
     @Test
     void testConvertFromEnvAndSdxResponseWithDefaultDisabled() {
         // GIVEN
-        SdxClusterResponse sdxClusterResponse = null;
+        SdxBasicView sdxBasicView = null;
         AltusDatabusConfiguration altusDatabusConfiguration = new AltusDatabusConfiguration(DATABUS_ENDPOINT, DATABUS_S3_BUCKET, false, "", null);
         MonitoringConfiguration monitoringConfig = new MonitoringConfiguration();
         TelemetryConfiguration telemetryConfiguration =
                 new TelemetryConfiguration(altusDatabusConfiguration, monitoringConfig, null);
         TelemetryConverter converter = new TelemetryConverter(telemetryConfiguration, entitlementService, true, false, monitoringUrlResolver);
         // WHEN
-        TelemetryRequest result = converter.convert(new DetailedEnvironmentResponse(), null, sdxClusterResponse);
+        TelemetryRequest result = converter.convert(new DetailedEnvironmentResponse(), sdxBasicView);
         // THEN
         assertNull(result.getWorkloadAnalytics());
         assertNull(result.getFeatures().getMonitoring());
@@ -231,19 +245,14 @@ class TelemetryConverterTest {
     void testConvertFromEnvAndSdxResponseWithoutWAInput() {
         // GIVEN
         TelemetryResponse response = new TelemetryResponse();
+        detailedEnvironmentResponse.setTelemetry(response);
         LoggingResponse loggingResponse = new LoggingResponse();
         S3CloudStorageV1Parameters s3Params = new S3CloudStorageV1Parameters();
         s3Params.setInstanceProfile(INSTANCE_PROFILE_VALUE);
         loggingResponse.setS3(s3Params);
         response.setLogging(loggingResponse);
-        SdxClusterResponse sdxClusterResponse = new SdxClusterResponse();
-        String sdxCrn = "crn:cdp:cloudbreak:us-west-1:someone:sdxcluster:sdxId";
-        sdxClusterResponse.setCrn(sdxCrn);
-        sdxClusterResponse.setName("sdxName");
-        sdxClusterResponse.setEnvironmentCrn("envCrn");
-        sdxClusterResponse.setEnvironmentName("envName");
         // WHEN
-        TelemetryRequest result = underTest.convert(new DetailedEnvironmentResponse(), response, sdxClusterResponse);
+        TelemetryRequest result = underTest.convert(detailedEnvironmentResponse, sdxBasicView);
         // THEN
         assertTrue(result.getFeatures().getWorkloadAnalytics().getEnabled());
         assertEquals(INSTANCE_PROFILE_VALUE, result.getLogging().getS3().getInstanceProfile());
@@ -252,21 +261,15 @@ class TelemetryConverterTest {
         assertEquals("envCrn", result.getWorkloadAnalytics().getAttributes().get("databus.header.environment.crn").toString());
         assertEquals("envName", result.getWorkloadAnalytics().getAttributes().get("databus.header.environment.name").toString());
         assertEquals("sdxName", result.getWorkloadAnalytics().getAttributes().get("databus.header.datalake.name").toString());
-        assertEquals(sdxCrn, result.getWorkloadAnalytics().getAttributes().get("databus.header.datalake.crn").toString());
+        assertEquals(SDX_CRN, result.getWorkloadAnalytics().getAttributes().get("databus.header.datalake.crn").toString());
     }
 
     @Test
     void testConvertFromEnvAndSdxResponseWithWAEnabled() {
         // GIVEN
-        TelemetryResponse response = new TelemetryResponse();
-        SdxClusterResponse sdxClusterResponse = new SdxClusterResponse();
-        String sdxCrn = "crn:cdp:cloudbreak:us-west-1:someone:sdxcluster:sdxId";
-        sdxClusterResponse.setCrn(sdxCrn);
-        sdxClusterResponse.setName("sdxName");
-        sdxClusterResponse.setEnvironmentCrn("envCrn");
-        sdxClusterResponse.setEnvironmentName("envName");
+        detailedEnvironmentResponse.setTelemetry(new TelemetryResponse());
         // WHEN
-        TelemetryRequest result = underTest.convert(new DetailedEnvironmentResponse(), response, sdxClusterResponse);
+        TelemetryRequest result = underTest.convert(detailedEnvironmentResponse, sdxBasicView);
         // THEN
         assertTrue(result.getFeatures().getWorkloadAnalytics().getEnabled());
         assertEquals("sdxId", result.getWorkloadAnalytics().getAttributes().get("databus.header.sdx.id").toString());
@@ -274,23 +277,19 @@ class TelemetryConverterTest {
         assertEquals("envCrn", result.getWorkloadAnalytics().getAttributes().get("databus.header.environment.crn").toString());
         assertEquals("envName", result.getWorkloadAnalytics().getAttributes().get("databus.header.environment.name").toString());
         assertEquals("sdxName", result.getWorkloadAnalytics().getAttributes().get("databus.header.datalake.name").toString());
-        assertEquals(sdxCrn, result.getWorkloadAnalytics().getAttributes().get("databus.header.datalake.crn").toString());
+        assertEquals(SDX_CRN, result.getWorkloadAnalytics().getAttributes().get("databus.header.datalake.crn").toString());
     }
 
     @Test
     void testConvertFromEnvAndSdxResponseWithWADisabled() {
         // GIVEN
         TelemetryResponse response = new TelemetryResponse();
-        SdxClusterResponse sdxClusterResponse = new SdxClusterResponse();
-        sdxClusterResponse.setCrn("crn:cdp:cloudbreak:us-west-1:someone:sdxcluster:sdxId");
-        sdxClusterResponse.setName("sdxName");
-        sdxClusterResponse.setEnvironmentCrn("envCrn");
-        sdxClusterResponse.setEnvironmentName("envName");
+        detailedEnvironmentResponse.setTelemetry(response);
         FeaturesResponse featuresResponse = new FeaturesResponse();
         featuresResponse.addWorkloadAnalytics(false);
         response.setFeatures(featuresResponse);
         // WHEN
-        TelemetryRequest result = underTest.convert(new DetailedEnvironmentResponse(), response, sdxClusterResponse);
+        TelemetryRequest result = underTest.convert(detailedEnvironmentResponse, sdxBasicView);
         // THEN
         assertNull(result.getWorkloadAnalytics());
         assertFalse(result.getFeatures().getWorkloadAnalytics().getEnabled());
@@ -300,18 +299,14 @@ class TelemetryConverterTest {
     void testConvertFromEnvAndSdxResponseWithWADisabledGlobally() {
         // GIVEN
         TelemetryResponse response = new TelemetryResponse();
-        SdxClusterResponse sdxClusterResponse = new SdxClusterResponse();
-        sdxClusterResponse.setCrn("crn:cdp:cloudbreak:us-west-1:someone:sdxcluster:sdxId");
-        sdxClusterResponse.setName("sdxName");
-        sdxClusterResponse.setEnvironmentCrn("envCrn");
-        sdxClusterResponse.setEnvironmentName("envName");
+        detailedEnvironmentResponse.setTelemetry(response);
         AltusDatabusConfiguration altusDatabusConfiguration = new AltusDatabusConfiguration(DATABUS_ENDPOINT, DATABUS_S3_BUCKET, false, "", null);
         MonitoringConfiguration monitoringConfig = new MonitoringConfiguration();
         TelemetryConfiguration telemetryConfiguration =
                 new TelemetryConfiguration(altusDatabusConfiguration, monitoringConfig, null);
         TelemetryConverter converter = new TelemetryConverter(telemetryConfiguration, entitlementService, false, true, monitoringUrlResolver);
         // WHEN
-        TelemetryRequest result = converter.convert(new DetailedEnvironmentResponse(), response, sdxClusterResponse);
+        TelemetryRequest result = converter.convert(detailedEnvironmentResponse, sdxBasicView);
         // THEN
         assertNull(result.getWorkloadAnalytics());
     }
@@ -320,6 +315,7 @@ class TelemetryConverterTest {
     void testConvertFromEnvAndSdxResponseWithMonitoring() {
         // GIVEN
         TelemetryResponse response = new TelemetryResponse();
+        detailedEnvironmentResponse.setTelemetry(response);
         FeaturesResponse featuresResponse = new FeaturesResponse();
         featuresResponse.addMonitoring(true);
         response.setFeatures(featuresResponse);
@@ -327,7 +323,7 @@ class TelemetryConverterTest {
         monitoringResponse.setRemoteWriteUrl(MONITORING_REMOTE_WRITE_URL);
         response.setMonitoring(monitoringResponse);
         // WHEN
-        TelemetryRequest result = underTest.convert(new DetailedEnvironmentResponse(), response, null);
+        TelemetryRequest result = underTest.convert(detailedEnvironmentResponse, null);
         // THEN
         assertTrue(result.getFeatures().getMonitoring().getEnabled());
         assertEquals(MONITORING_REMOTE_WRITE_URL, result.getMonitoring().getRemoteWriteUrl());
@@ -337,13 +333,14 @@ class TelemetryConverterTest {
     void testConvertWithCloudStorageLoggingNotEnabled() {
         // GIVEN
         TelemetryResponse response = new TelemetryResponse();
+        detailedEnvironmentResponse.setTelemetry(response);
         FeaturesResponse featuresResponse = new FeaturesResponse();
         FeatureSetting fs = new FeatureSetting();
         fs.setEnabled(false);
         featuresResponse.setCloudStorageLogging(fs);
         response.setFeatures(featuresResponse);
         // WHEN
-        TelemetryRequest result = underTest.convert(new DetailedEnvironmentResponse(), response, null);
+        TelemetryRequest result = underTest.convert(detailedEnvironmentResponse, null);
         // THEN
         assertFalse(result.getFeatures().getCloudStorageLogging().getEnabled());
     }

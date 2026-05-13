@@ -34,11 +34,12 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.provider.ProviderPreferencesService;
 import com.sequenceiq.cloudbreak.common.type.Versioned;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.TelemetryConverter;
+import com.sequenceiq.cloudbreak.sdx.common.PlatformAwareSdxConnector;
+import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
 import com.sequenceiq.cloudbreak.service.datalake.SdxClientService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.util.VersionComparator;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
-import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.InstanceGroupV1Request;
@@ -100,6 +101,9 @@ public class DistroXV1RequestToStackV4RequestConverter {
     @Inject
     private ProviderPreferencesService providerPreferencesService;
 
+    @Inject
+    private PlatformAwareSdxConnector platformAwareSdxConnector;
+
     public StackV4Request convert(DistroXV1Request source) {
         DetailedEnvironmentResponse environment = Optional.ofNullable(environmentClientService.getByName(source.getEnvironmentName()))
                 .orElseThrow(() -> new BadRequestException("No environment name provided hence unable to obtain some important data"));
@@ -127,7 +131,7 @@ public class DistroXV1RequestToStackV4RequestConverter {
         request.setSharedService(sdxConverter.getSharedService(sdxClusterResponse));
         request.setCustomDomain(null);
         request.setTimeToLive(source.getTimeToLive());
-        request.setTelemetry(getTelemetryRequest(environment, sdxClusterResponse));
+        request.setTelemetry(getTelemetryRequest(environment));
         request.setGatewayPort(source.getGatewayPort());
         request.setExternalDatabase(getIfNotNull(source.getExternalDatabase(), databaseRequestConverter::convert));
         request.setEnableLoadBalancer(source.isEnableLoadBalancer());
@@ -218,9 +222,12 @@ public class DistroXV1RequestToStackV4RequestConverter {
 
     }
 
-    private TelemetryRequest getTelemetryRequest(DetailedEnvironmentResponse environment, SdxClusterResponse sdxClusterResponse) {
-        TelemetryResponse envTelemetryResp = environment != null ? environment.getTelemetry() : null;
-        return telemetryConverter.convert(environment, envTelemetryResp, sdxClusterResponse);
+    private TelemetryRequest getTelemetryRequest(DetailedEnvironmentResponse environment) {
+        SdxBasicView sdxBasicView = null;
+        if (environment != null) {
+            sdxBasicView = platformAwareSdxConnector.getSdxBasicViewByEnvironmentCrn(environment.getCrn()).orElse(null);
+        }
+        return telemetryConverter.convert(environment, sdxBasicView);
     }
 
     NetworkV4Request getNetwork(NetworkV1Request networkRequest, DetailedEnvironmentResponse environment,

@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.converter.v4.stacks;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -14,6 +13,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.cloudbreak.sdx.common.model.SdxBasicView;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryConfiguration;
 import com.sequenceiq.cloudbreak.telemetry.monitoring.MonitoringUrlResolver;
 import com.sequenceiq.common.api.telemetry.base.FeaturesBase;
@@ -32,10 +32,8 @@ import com.sequenceiq.common.api.telemetry.response.LoggingResponse;
 import com.sequenceiq.common.api.telemetry.response.MonitoringResponse;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 import com.sequenceiq.common.api.telemetry.response.WorkloadAnalyticsResponse;
-import com.sequenceiq.common.api.type.EnvironmentType;
 import com.sequenceiq.common.api.type.FeatureSetting;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
-import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 
 @Component
 public class TelemetryConverter {
@@ -129,16 +127,17 @@ public class TelemetryConverter {
         return telemetry;
     }
 
-    public TelemetryRequest convert(DetailedEnvironmentResponse environment, TelemetryResponse response, SdxClusterResponse sdxClusterResponse) {
+    public TelemetryRequest convert(DetailedEnvironmentResponse environment, SdxBasicView sdxBasicView) {
         LOGGER.debug("Creating telemetry request based on datalake and environment responses.");
+        TelemetryResponse telemetryResponse = environment != null ? environment.getTelemetry() : null;
         TelemetryRequest telemetryRequest = new TelemetryRequest();
         FeaturesRequest featuresRequest = new FeaturesRequest();
-        if (response != null) {
-            LoggingRequest loggingRequest = createLoggingRequestFromResponse(response);
+        if (telemetryResponse != null) {
+            LoggingRequest loggingRequest = createLoggingRequestFromResponse(telemetryResponse);
             telemetryRequest.setLogging(loggingRequest);
-            MonitoringRequest monitoringRequest = createMonitoringRequestFromResponse(response);
+            MonitoringRequest monitoringRequest = createMonitoringRequestFromResponse(telemetryResponse);
             telemetryRequest.setMonitoring(monitoringRequest);
-            FeaturesResponse featuresResponse = response.getFeatures();
+            FeaturesResponse featuresResponse = telemetryResponse.getFeatures();
             if (featuresResponse != null) {
                 LOGGER.debug("Setting cluster monitoring request (telemetry) based on environment response.");
                 featuresRequest.setMonitoring(featuresResponse.getMonitoring());
@@ -149,14 +148,10 @@ public class TelemetryConverter {
                     featuresRequest.addCloudStorageLogging(true);
                 }
             }
-            telemetryRequest.setFluentAttributes(response.getFluentAttributes());
+            telemetryRequest.setFluentAttributes(telemetryResponse.getFluentAttributes());
         }
-        if (!EnvironmentType.isHybridFromEnvironmentTypeString(environment.getEnvironmentType())) {
-            telemetryRequest.setWorkloadAnalytics(
-                    createWorkloadAnalyticsRequest(response, sdxClusterResponse));
-            Optional<FeatureSetting> waFeature = createWorkloadAnalyticsFeature(telemetryRequest.getWorkloadAnalytics());
-            featuresRequest.setWorkloadAnalytics(waFeature.orElse(null));
-        }
+        telemetryRequest.setWorkloadAnalytics(createWorkloadAnalyticsRequest(environment, sdxBasicView));
+        featuresRequest.setWorkloadAnalytics(createWorkloadAnalyticsFeature(telemetryRequest.getWorkloadAnalytics()));
         telemetryRequest.setFeatures(featuresRequest);
         return telemetryRequest;
     }
@@ -178,7 +173,7 @@ public class TelemetryConverter {
         return telemetryRequest;
     }
 
-    public Optional<FeatureSetting> createWorkloadAnalyticsFeature(WorkloadAnalyticsRequest waRequest) {
+    public FeatureSetting createWorkloadAnalyticsFeature(WorkloadAnalyticsRequest waRequest) {
         boolean waFeatureEnabled = false;
         if (waRequest != null) {
             waFeatureEnabled = true;
@@ -188,30 +183,30 @@ public class TelemetryConverter {
         }
         FeatureSetting waFeatureSetting = new FeatureSetting();
         waFeatureSetting.setEnabled(waFeatureEnabled);
-        return Optional.of(waFeatureSetting);
+        return waFeatureSetting;
     }
 
-    public WorkloadAnalyticsRequest createWorkloadAnalyticsRequest(TelemetryResponse response,
-            SdxClusterResponse sdxClusterResponse) {
+    public WorkloadAnalyticsRequest createWorkloadAnalyticsRequest(DetailedEnvironmentResponse environment,
+            SdxBasicView sdxBasicView) {
         WorkloadAnalyticsRequest workloadAnalyticsRequest = null;
         if (telemetryPublisherEnabled) {
-            Map<String, Object> waDefaultAttributes = createWAAttributesFromEnvironmentResponse(response);
-            workloadAnalyticsRequest = fillWARequestFromEnvironmentResponse(response, sdxClusterResponse, waDefaultAttributes);
+            workloadAnalyticsRequest = fillWARequestFromEnvironmentResponse(environment, sdxBasicView);
         } else {
             LOGGER.debug("Workload analytics feature is disabled (globally).");
         }
         return workloadAnalyticsRequest;
     }
 
-    private WorkloadAnalyticsRequest fillWARequestFromEnvironmentResponse(TelemetryResponse response,
-            SdxClusterResponse sdxClusterResponse, Map<String, Object> waDefaultAttributes) {
+    private WorkloadAnalyticsRequest fillWARequestFromEnvironmentResponse(DetailedEnvironmentResponse environment,
+            SdxBasicView sdxBasicView) {
         WorkloadAnalyticsRequest workloadAnalyticsRequest = null;
-        if (response != null && response.getFeatures() != null
-                && response.getFeatures().getWorkloadAnalytics() != null) {
-            if (response.getFeatures().getWorkloadAnalytics().getEnabled()) {
+
+        if (environment != null && environment.getTelemetry() != null && environment.getTelemetry().getFeatures() != null
+                && environment.getTelemetry().getFeatures().getWorkloadAnalytics() != null) {
+            if (environment.getTelemetry().getFeatures().getWorkloadAnalytics().getEnabled()) {
                 LOGGER.debug("Workload analytics feature is enabled. Filling telemetry request with datalake details.");
                 workloadAnalyticsRequest = new WorkloadAnalyticsRequest();
-                workloadAnalyticsRequest.setAttributes(enrichWithEnvironmentMetadata(waDefaultAttributes, sdxClusterResponse));
+                workloadAnalyticsRequest.setAttributes(createWAAttributes(environment, sdxBasicView));
             } else {
                 LOGGER.debug("Workload analytics feature is disabled.");
             }
@@ -219,7 +214,7 @@ public class TelemetryConverter {
             if (telemetryPublisherDefaultValue) {
                 LOGGER.debug("Filling workload analytics request (default).");
                 workloadAnalyticsRequest = new WorkloadAnalyticsRequest();
-                workloadAnalyticsRequest.setAttributes(enrichWithEnvironmentMetadata(waDefaultAttributes, sdxClusterResponse));
+                workloadAnalyticsRequest.setAttributes(createWAAttributes(environment, sdxBasicView));
             } else {
                 LOGGER.debug("Workload analytics feature is disabled (default value is false).");
             }
@@ -408,27 +403,34 @@ public class TelemetryConverter {
         return monitoringRequest;
     }
 
-    private Map<String, Object> enrichWithEnvironmentMetadata(Map<String, Object> attributes,
-            SdxClusterResponse sdxClusterResponse) {
-        Map<String, Object> newAttributes = new HashMap<>(attributes);
-        if (sdxClusterResponse != null) {
-            if (StringUtils.isNotEmpty(sdxClusterResponse.getCrn())) {
-                newAttributes.put(DATABUS_HEADER_SDX_ID,
-                        Crn.fromString(sdxClusterResponse.getCrn()).getResource());
-                newAttributes.put(DATABUS_HEADER_DATALAKE_CRN, sdxClusterResponse.getCrn());
+    private Map<String, Object> createWAAttributes(DetailedEnvironmentResponse environment, SdxBasicView sdxBasicView) {
+        Map<String, Object> waAttributes = new HashMap<>();
+        if (environment != null) {
+            if (environment.getTelemetry() != null
+                    && environment.getTelemetry().getWorkloadAnalytics() != null
+                    && MapUtils.isNotEmpty(environment.getTelemetry().getWorkloadAnalytics().getAttributes())) {
+                LOGGER.debug("Found environment level workload analytics attributes.");
+                waAttributes.putAll(environment.getTelemetry().getWorkloadAnalytics().getAttributes());
             }
-            if (StringUtils.isNotEmpty(sdxClusterResponse.getName())) {
-                newAttributes.put(DATABUS_HEADER_SDX_NAME, sdxClusterResponse.getName());
-                newAttributes.put(DATABUS_HEADER_DATALAKE_NAME, sdxClusterResponse.getName());
+            if (StringUtils.isNotEmpty(environment.getCrn())) {
+                waAttributes.put(DATABUS_HEADER_ENVIRONMENT_CRN, environment.getCrn());
             }
-            if (StringUtils.isNotEmpty(sdxClusterResponse.getEnvironmentCrn())) {
-                newAttributes.put(DATABUS_HEADER_ENVIRONMENT_CRN, sdxClusterResponse.getEnvironmentCrn());
-            }
-            if (StringUtils.isNotEmpty(sdxClusterResponse.getEnvironmentName())) {
-                newAttributes.put(DATABUS_HEADER_ENVIRONMENT_NAME, sdxClusterResponse.getEnvironmentName());
+            if (StringUtils.isNotEmpty(environment.getName())) {
+                waAttributes.put(DATABUS_HEADER_ENVIRONMENT_NAME, environment.getName());
             }
         }
-        return newAttributes;
+        if (sdxBasicView != null) {
+            LOGGER.debug("Adding datalake references to workload analytics attributes.");
+            if (StringUtils.isNotEmpty(sdxBasicView.crn())) {
+                waAttributes.put(DATABUS_HEADER_SDX_ID, Crn.safeFromString(sdxBasicView.crn()).getResource());
+                waAttributes.put(DATABUS_HEADER_DATALAKE_CRN, sdxBasicView.crn());
+            }
+            if (StringUtils.isNotEmpty(sdxBasicView.name())) {
+                waAttributes.put(DATABUS_HEADER_SDX_NAME, sdxBasicView.name());
+                waAttributes.put(DATABUS_HEADER_DATALAKE_NAME, sdxBasicView.name());
+            }
+        }
+        return waAttributes;
     }
 
     private void setMonitoring(TelemetryRequest request, Features features, String accountId) {
