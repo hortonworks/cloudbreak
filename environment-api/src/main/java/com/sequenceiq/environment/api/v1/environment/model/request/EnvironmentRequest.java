@@ -149,6 +149,9 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
     @Schema(description = EnvironmentModelDescription.SECRET_ENCRYPTION_ENABLED)
     private boolean secretEncryptionEnabled;
 
+    @Schema(description = EnvironmentModelDescription.REMOTE_ENVIRONMENT_CRN)
+    private String remoteEnvironmentCrn;
+
     public AttachedFreeIpaRequest getFreeIpa() {
         return freeIpa;
     }
@@ -394,6 +397,14 @@ public class EnvironmentRequest extends EnvironmentBaseRequest implements Creden
 
     public void setSecretEncryptionEnabled(boolean secretEncryptionEnabled) {
         this.secretEncryptionEnabled = secretEncryptionEnabled;
+    }
+
+    public String getRemoteEnvironmentCrn() {
+        return remoteEnvironmentCrn;
+    }
+
+    public void setRemoteEnvironmentCrn(String remoteEnvironmentCrn) {
+        this.remoteEnvironmentCrn = remoteEnvironmentCrn;
     }
 
     @Override

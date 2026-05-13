@@ -191,7 +191,8 @@ public class EnvironmentApiConverter {
                 .withCreatorClient(getHeaderOrItsFallbackValueOrDefault(USER_AGENT_HEADER, CDP_CALLER_ID_HEADER, CALLER_ID_NOT_FOUND))
                 .withEnvironmentType(environmentType == null ? EnvironmentType.PUBLIC_CLOUD : environmentType)
                 .withEncryptionProfileCrn(getEncryptionProfileCrn(request))
-                .withSecretEncryptionEnabled(request.isSecretEncryptionEnabled());
+                .withSecretEncryptionEnabled(request.isSecretEncryptionEnabled())
+                .withRemoteEnvironmentCrn(request.getRemoteEnvironmentCrn());
 
         NullUtil.doIfNotNull(request.getNetwork(), network -> {
             NetworkDto networkDto = networkRequestToDto(network);

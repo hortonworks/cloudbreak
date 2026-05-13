@@ -42,6 +42,8 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.exception.AwsDefaultRegionSelectionFailed;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.event.credential.CredentialDeletionRequest;
+import com.sequenceiq.cloudbreak.cloud.event.credential.CredentialDeletionResult;
 import com.sequenceiq.cloudbreak.cloud.event.credential.CredentialVerificationRequest;
 import com.sequenceiq.cloudbreak.cloud.event.credential.CredentialVerificationResult;
 import com.sequenceiq.cloudbreak.cloud.event.platform.ResourceDefinitionRequest;
@@ -133,7 +135,7 @@ public class EnvironmentServiceIntegrationTest {
     private Credential credential;
 
     @BeforeEach
-    public void setup() {
+    public void setup() throws InterruptedException {
         client = new EnvironmentServiceClientBuilder(String.format(SERVICE_ADDRESS, port))
                 .withCertificateValidation(false)
                 .withDebug(true)
@@ -151,8 +153,14 @@ public class EnvironmentServiceIntegrationTest {
         credential.setGovCloud(false);
         credential.setArchived(false);
         credential.setType(ENVIRONMENT);
+        credential.setAttributes("{}");
         credentialRequest = new CredentialRequest();
 
+        when(cloudPlatformRequestProvider.getResourceDefinitionRequest(any(), any())).thenReturn(resourceDefinitionRequest);
+        when(resourceDefinitionRequest.await()).thenReturn(new ResourceDefinitionResult(1L, DEFINITION_AWS));
+        when(cloudPlatformRequestProvider.getCredentialDeletionRequest(any(), any())).thenAnswer(
+                invocation -> new CredentialDeletionMockRequest(invocation.getArgument(0), invocation.getArgument(1))
+        );
         doNothing().when(grpcUmsClient).assignResourceRole(anyString(), anyString(), anyString());
         lenient().when(grpcUmsClient.hasRights(anyString(), anyList())).then(i -> {
             List<RightCheck> rightChecks = i.getArgument(1);
@@ -368,6 +376,19 @@ public class EnvironmentServiceIntegrationTest {
         public CredentialVerificationResult await() {
             return new CredentialVerificationResult(1L,
                     new CloudCredentialStatus(getCloudCredential(), CredentialStatus.CREATED));
+        }
+    }
+
+    static class CredentialDeletionMockRequest extends CredentialDeletionRequest {
+
+        CredentialDeletionMockRequest(CloudContext cloudContext, CloudCredential cloudCredential) {
+            super(cloudContext, cloudCredential);
+        }
+
+        @Override
+        public CredentialDeletionResult await() {
+            return new CredentialDeletionResult(1L,
+                    new CloudCredentialStatus(getCloudCredential(), CredentialStatus.DELETED));
         }
     }
 }

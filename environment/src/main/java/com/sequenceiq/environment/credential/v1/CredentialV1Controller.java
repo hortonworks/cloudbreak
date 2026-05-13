@@ -1,6 +1,8 @@
 package com.sequenceiq.environment.credential.v1;
 
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.EDIT_CREDENTIAL;
+import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.EDIT_ENVIRONMENT;
+import static com.sequenceiq.authorization.resource.AuthorizationVariableType.CRN;
 import static com.sequenceiq.authorization.resource.AuthorizationVariableType.NAME;
 import static com.sequenceiq.common.model.CredentialType.ENVIRONMENT;
 
@@ -128,7 +130,8 @@ public class CredentialV1Controller extends WebSocketNotificationController impl
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_CREDENTIAL)
-    public CredentialResponse create(CredentialRequest createCredentialRequest) {
+    @CheckPermissionByRequestProperty(path = "openstack.remoteEnvironmentCrn", type = CRN, action = EDIT_ENVIRONMENT, skipOnNull = true)
+    public CredentialResponse create(@RequestObject CredentialRequest createCredentialRequest) {
         LOGGER.debug("Create credential request has received: {}", createCredentialRequest);
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         credentialEntitlementService.checkAzureEntitlement(accountId, createCredentialRequest.getAzure());
@@ -169,6 +172,7 @@ public class CredentialV1Controller extends WebSocketNotificationController impl
 
     @Override
     @CheckPermissionByRequestProperty(path = "name", type = NAME, action = EDIT_CREDENTIAL)
+    @CheckPermissionByRequestProperty(path = "openstack.remoteEnvironmentCrn", type = CRN, action = EDIT_ENVIRONMENT, skipOnNull = true)
     public CredentialResponse modify(@RequestObject EditCredentialRequest editCredentialRequest) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         credentialEntitlementService.checkAzureEntitlement(accountId, editCredentialRequest.getAzure());

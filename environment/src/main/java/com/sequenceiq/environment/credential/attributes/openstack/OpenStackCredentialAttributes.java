@@ -12,6 +12,8 @@ public class OpenStackCredentialAttributes {
 
     private KeystoneV3Attributes keystoneV3;
 
+    private String remoteEnvironmentCrn;
+
     public String getEndpoint() {
         return endpoint;
     }
@@ -51,4 +53,13 @@ public class OpenStackCredentialAttributes {
     public void setKeystoneV3(KeystoneV3Attributes v3Parameter) {
         keystoneV3 = v3Parameter;
     }
+
+    public String getRemoteEnvironmentCrn() {
+        return remoteEnvironmentCrn;
+    }
+
+    public void setRemoteEnvironmentCrn(String remoteEnvironmentCrn) {
+        this.remoteEnvironmentCrn = remoteEnvironmentCrn;
+    }
+
 }

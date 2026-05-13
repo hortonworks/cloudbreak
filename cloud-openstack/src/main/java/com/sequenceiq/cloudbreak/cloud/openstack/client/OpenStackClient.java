@@ -15,8 +15,12 @@ import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
+import jakarta.inject.Inject;
+
 import org.apache.commons.lang3.StringUtils;
 import org.openstack4j.api.OSClient;
+import org.openstack4j.api.exceptions.AuthenticationException;
+import org.openstack4j.api.exceptions.ServerResponseException;
 import org.openstack4j.api.types.Facing;
 import org.openstack4j.core.transport.Config;
 import org.openstack4j.model.common.Identifier;
@@ -65,6 +69,9 @@ public class OpenStackClient {
     @Value("${cb.openstack.disable.ssl.verification:false}")
     private boolean disableSSLVerification;
 
+    @Inject
+    private OpenStackClusterProxyService clusterProxyService;
+
     private final Config config = Config.newConfig();
 
     @PostConstruct
@@ -84,14 +91,31 @@ public class OpenStackClient {
     public OSClient<?> createOSClient(AuthenticatedContext authenticatedContext) {
         String facing = authenticatedContext.getCloudCredential().getStringParameter(FACING);
         Token token = authenticatedContext.getParameter(Token.class);
+        KeystoneCredentialView credential = createKeystoneCredential(authenticatedContext);
+        if (StringUtils.isNotBlank(credential.getRemoteEnvironmentCrn())) {
+            String accountId = authenticatedContext.getCloudCredential().getAccountId();
+            Config jumpgateConfig = Config.newConfig()
+                    .withEndpointURLResolver(createJumpgateResolver(accountId, credential.getName()));
+            return OSFactory.clientFromToken(token, Facing.value(facing), jumpgateConfig);
+        }
         return OSFactory.clientFromToken(token, Facing.value(facing));
     }
 
     public OSClient<?> createOSClient(CloudCredential cloudCredential) {
         String facing = cloudCredential.getStringParameter(FACING);
         KeystoneCredentialView osCredential = createKeystoneCredential(cloudCredential);
-        Token token = createToken(osCredential);
+        Token token = createToken(osCredential, cloudCredential.getAccountId());
+        if (StringUtils.isNotBlank(osCredential.getRemoteEnvironmentCrn())) {
+            Config jumpgateConfig = Config.newConfig()
+                    .withEndpointURLResolver(createJumpgateResolver(cloudCredential.getAccountId(), osCredential.getName()));
+            return OSFactory.clientFromToken(token, Facing.value(facing), jumpgateConfig);
+        }
         return OSFactory.clientFromToken(token, Facing.value(facing));
+    }
+
+    private JumpgateEndpointURLResolver createJumpgateResolver(String accountId, String credentialName) {
+        String clusterCrn = clusterProxyService.generateClusterCrn(accountId, credentialName);
+        return new JumpgateEndpointURLResolver(clusterProxyService.buildProxyBaseUrl(clusterCrn));
     }
 
     public KeystoneCredentialView createKeystoneCredential(CloudCredential cloudCredential) {
@@ -149,34 +173,50 @@ public class OpenStackClient {
         return Optional.ofNullable(result);
     }
 
-    private Token createToken(KeystoneCredentialView osCredential) {
+    private Token createToken(KeystoneCredentialView osCredential, String accountId) {
         if (osCredential == null) {
             throw new CredentialVerificationException("Empty credential");
         }
         if (osCredential.getScope() == null) {
             throw new CredentialVerificationException("Null scope not supported");
         }
-        switch (osCredential.getScope()) {
-            case CB_KEYSTONE_V3_DOMAIN_SCOPE:
-                return OSFactory.builderV3().withConfig(config).endpoint(osCredential.getEndpoint())
+        String endpoint = resolveKeystoneEndpoint(osCredential, accountId);
+        try {
+            return switch (osCredential.getScope()) {
+                case CB_KEYSTONE_V3_DOMAIN_SCOPE -> OSFactory.builderV3().withConfig(config).endpoint(endpoint)
                         .credentials(osCredential.getUserName(), osCredential.getPassword(), Identifier.byName(osCredential.getUserDomain()))
                         .scopeToDomain(Identifier.byName(osCredential.getDomainName()))
                         .authenticate()
                         .getToken();
-            case CB_KEYSTONE_V3_PROJECT_SCOPE:
-                return OSFactory.builderV3().withConfig(config).endpoint(osCredential.getEndpoint())
+                case CB_KEYSTONE_V3_PROJECT_SCOPE -> OSFactory.builderV3().withConfig(config).endpoint(endpoint)
                         .credentials(osCredential.getUserName(), osCredential.getPassword(), Identifier.byName(osCredential.getUserDomain()))
                         .scopeToProject(Identifier.byName(osCredential.getProjectName()), Identifier.byName(osCredential.getProjectDomain()))
                         .authenticate()
                         .getToken();
-            default:
-                throw new CredentialVerificationException("Scope not supported: " + osCredential.getScope());
+                default -> throw new CredentialVerificationException("Scope not supported: " + osCredential.getScope());
+            };
+        } catch (AuthenticationException authenticationException) {
+            LOGGER.error("Openstack authentication failed, can not create token", authenticationException);
+            throw new CredentialVerificationException("Openstack authentication failed, can not create token: " + authenticationException.getMessage(),
+                    authenticationException);
+        } catch (ServerResponseException serverResponseException) {
+            LOGGER.error("Openstack authentication failed, ServerResponseException was thrown", serverResponseException);
+            throw new CredentialVerificationException("Openstack authentication failed, can not create token: " + serverResponseException.getMessage(),
+                    serverResponseException);
         }
+    }
+
+    private String resolveKeystoneEndpoint(KeystoneCredentialView osCredential, String accountId) {
+        if (StringUtils.isNotBlank(osCredential.getRemoteEnvironmentCrn())) {
+            String clusterCrn = clusterProxyService.generateClusterCrn(accountId, osCredential.getName());
+            return clusterProxyService.buildProxyUrl(clusterCrn, OpenStackClusterProxyService.KEYSTONE_SERVICE_NAME);
+        }
+        return osCredential.getEndpoint();
     }
 
     private void createAccessOrToken(AuthenticatedContext authenticatedContext) {
         KeystoneCredentialView osCredential = createKeystoneCredential(authenticatedContext.getCloudCredential());
-        Token token = createToken(osCredential);
+        Token token = createToken(osCredential, authenticatedContext.getCloudCredential().getAccountId());
         if (token != null) {
             authenticatedContext.putParameter(Token.class, token);
         } else {
@@ -187,7 +227,7 @@ public class OpenStackClient {
     public Set<String> getRegion(CloudCredential cloudCredential) {
         KeystoneCredentialView keystoneCredential = createKeystoneCredential(cloudCredential);
         Set<String> regions = new HashSet<>();
-        Token token = createToken(keystoneCredential);
+        Token token = createToken(keystoneCredential, cloudCredential.getAccountId());
         for (Service service : token.getCatalog()) {
             for (Endpoint endpoint : service.getEndpoints()) {
                 regions.add(endpoint.getRegion());

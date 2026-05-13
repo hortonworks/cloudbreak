@@ -17,6 +17,8 @@ import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.credential.CDPServicePolicyVerificationException;
 import com.sequenceiq.cloudbreak.cloud.event.credential.CDPServicePolicyVerificationRequest;
 import com.sequenceiq.cloudbreak.cloud.event.credential.CDPServicePolicyVerificationResult;
+import com.sequenceiq.cloudbreak.cloud.event.credential.CredentialDeletionRequest;
+import com.sequenceiq.cloudbreak.cloud.event.credential.CredentialDeletionResult;
 import com.sequenceiq.cloudbreak.cloud.event.credential.CredentialVerificationRequest;
 import com.sequenceiq.cloudbreak.cloud.event.credential.CredentialVerificationResult;
 import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
@@ -88,7 +90,11 @@ public class ServiceProviderCredentialAdapter {
             if (res.getStatus() != EventStatus.OK) {
                 String message = FAILED_CREDETIAL_VERIFICATION_MESSAGE;
                 LOGGER.info(message, res.getErrorDetails());
-                throw new CredentialVerificationException(message + res.getErrorDetails(), res.getErrorDetails());
+                if (res.getErrorDetails() != null) {
+                    throw new CredentialVerificationException(message + res.getErrorDetails(), res.getErrorDetails());
+                } else {
+                    throw new CredentialVerificationException(message + res.getStatusReason());
+                }
             }
             CloudCredentialStatus cloudCredentialStatus = res.getCloudCredentialStatus();
             if (CredentialStatus.FAILED.equals(cloudCredentialStatus.getStatus())) {
@@ -167,6 +173,34 @@ public class ServiceProviderCredentialAdapter {
 
     public Credential update(Credential credential) {
         return credential;
+    }
+
+    public void delete(Credential credential, String accountId) {
+        credential = credentialPrerequisiteService.decorateCredential(credential);
+        CloudContext cloudContext = CloudContext.Builder.builder()
+                .withId(credential.getId())
+                .withName(credential.getName())
+                .withCrn(credential.getResourceCrn())
+                .withPlatform(credential.getCloudPlatform())
+                .withVariant(credential.getCloudPlatform())
+                .withAccountId(accountId)
+                .build();
+        CloudCredential cloudCredential = credentialConverter.convert(credential);
+
+        CredentialDeletionRequest request = cloudPlatformRequestProvider.getCredentialDeletionRequest(cloudContext, cloudCredential);
+        LOGGER.debug("Triggering credential deletion event: {}", request);
+        eventBus.notify(request.selector(), eventFactory.createEvent(request));
+        try {
+            CredentialDeletionResult res = request.await();
+            LOGGER.debug("Credential deletion result: {}", res);
+            if (res.getStatus() != EventStatus.OK) {
+                LOGGER.warn("Credential deletion on provider side failed for '{}': {}",
+                        credential.getName(), res.getStatusReason(), res.getErrorDetails());
+            }
+        } catch (InterruptedException e) {
+            LOGGER.error("Error while executing credential deletion on provider", e);
+            Thread.currentThread().interrupt();
+        }
     }
 
     private boolean mergeCloudProviderParameters(Credential credential, Map<String, Object> newAttributes) {

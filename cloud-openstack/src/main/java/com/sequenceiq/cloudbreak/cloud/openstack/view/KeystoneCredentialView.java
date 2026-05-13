@@ -38,6 +38,10 @@ public class KeystoneCredentialView {
         return cloudCredential.getName();
     }
 
+    public String getFacing() {
+        return keystoneConfig.facing;
+    }
+
     public String getStackName() {
         return stackName;
     }
@@ -98,6 +102,10 @@ public class KeystoneCredentialView {
         }
     }
 
+    public String getRemoteEnvironmentCrn() {
+        return keystoneConfig.remoteEnvironmentCrn;
+    }
+
     public String getVersion() {
         return cloudCredential.getParameter("keystoneVersion", String.class);
     }
@@ -107,7 +115,8 @@ public class KeystoneCredentialView {
             String facing,
             String userName,
             String password,
-            KeystoneV3 keystoneV3
+            KeystoneV3 keystoneV3,
+            String remoteEnvironmentCrn
     ) {
         record KeystoneV3(
                 Project project,

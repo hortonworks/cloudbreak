@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.credential.CDPServicePolicyVerificationRequest;
+import com.sequenceiq.cloudbreak.cloud.event.credential.CredentialDeletionRequest;
 import com.sequenceiq.cloudbreak.cloud.event.credential.CredentialExperiencePolicyRequest;
 import com.sequenceiq.cloudbreak.cloud.event.credential.CredentialPrerequisitesRequest;
 import com.sequenceiq.cloudbreak.cloud.event.credential.CredentialVerificationRequest;
@@ -38,6 +39,10 @@ public class CloudPlatformRequestProvider {
 
     public CredentialExperiencePolicyRequest getCredentialExperiencePolicyRequest(CloudContext cloudContext) {
         return new CredentialExperiencePolicyRequest(cloudContext);
+    }
+
+    public CredentialDeletionRequest getCredentialDeletionRequest(CloudContext cloudContext, CloudCredential cloudCredential) {
+        return new CredentialDeletionRequest(cloudContext, cloudCredential);
     }
 
     public CredentialPrerequisitesRequest getCredentialPrerequisitesRequest(CloudContext cloudContext, String externalId, String auditExternalId,

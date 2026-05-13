@@ -2,11 +2,13 @@ package com.sequenceiq.freeipa.service.freeipa.config;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -30,6 +32,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.orchestration.Node;
@@ -42,6 +45,7 @@ import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.common.model.SeLinux;
 import com.sequenceiq.environment.api.v1.encryptionprofile.model.EncryptionProfileResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
 import com.sequenceiq.freeipa.api.model.Backup;
 import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.LoadBalancer;
@@ -75,6 +79,10 @@ class FreeIpaConfigServiceTest {
     private static final String PRIVATE_IP = "10.117.0.69";
 
     private static final String CIDR = "10.0.0.0/24";
+
+    private static final String REMOTE_CIDR = "192.168.0.0/16";
+
+    private static final String REMOTE_ENV_CRN = "crn:cdp:environments:us-west-1:acc:environment:remote-env-id";
 
     private static final String ENV_CRN = "envCrn";
 
@@ -138,7 +146,7 @@ class FreeIpaConfigServiceTest {
         subnetWithCidr.put("10.117.0.0", "16");
         ReflectionTestUtils.setField(underTest, "kerberosSecretLocation", KERBEROS_SECRET_LOCATION);
         ReflectionTestUtils.setField(underTest, "certMongerEnrollTtls", CERTMONGER_ENROLL_TTLS);
-        when(loadBalancerService.findByStackId(any())).thenReturn(Optional.empty());
+        lenient().when(loadBalancerService.findByStackId(any())).thenReturn(Optional.empty());
     }
 
     @Test
@@ -323,6 +331,81 @@ class FreeIpaConfigServiceTest {
                 stack, ImmutableSet.of(node));
 
         assertFalse(freeIpaConfigView.isAdTrustEnabled());
+    }
+
+    @Test
+    void testCidrBlocksUseRemoteEnvironmentCidrsWhenRemoteEnvironmentCrnSet() {
+        FreeIpa freeIpa = new FreeIpa();
+        freeIpa.setDomain(DOMAIN);
+        freeIpa.setAdminPassword(PASSWORD);
+        Stack stack = new Stack();
+        stack.setCloudPlatform(CloudPlatform.AWS.name());
+        stack.setRegion("region");
+        stack.setEnvironmentCrn(ENV_CRN);
+        Network network = new Network();
+        network.setNetworkCidrs(List.of(CIDR));
+        stack.setNetwork(network);
+        stack.setAccountId(ACCOUNT);
+        stack.setId(0L);
+        DetailedEnvironmentResponse detailedEnvironmentResponse = mock(DetailedEnvironmentResponse.class);
+        EncryptionProfileResponse encryptionProfileResponse = mock(EncryptionProfileResponse.class);
+        EnvironmentNetworkResponse remoteNetwork = mock(EnvironmentNetworkResponse.class);
+
+        when(encryptionProfileResponse.getTlsVersions()).thenReturn(Set.of(TlsVersion.TLS_1_2.getVersion(), TlsVersion.TLS_1_3.getVersion()));
+        when(cachedEnvironmentClientService.getByCrn(anyString())).thenReturn(detailedEnvironmentResponse);
+        when(detailedEnvironmentResponse.getRemoteEnvironmentCrn()).thenReturn(REMOTE_ENV_CRN);
+        when(detailedEnvironmentResponse.getNetwork()).thenReturn(remoteNetwork);
+        when(remoteNetwork.getNetworkCidrs()).thenReturn(Set.of(REMOTE_CIDR));
+        when(freeIpaService.findByStack(any())).thenReturn(freeIpa);
+        when(freeIpaClientFactory.getAdminUser()).thenReturn(ADMIN);
+        when(networkService.getFilteredSubnetWithCidr(any())).thenReturn(subnetWithCidr);
+        when(reverseDnsZoneCalculator.reverseDnsZoneForCidrs(any())).thenReturn(REVERSE_ZONE);
+        when(environment.getProperty("freeipa.platform.dnssec.validation.AWS", "true")).thenReturn("true");
+        GatewayConfig gatewayConfig = mock(GatewayConfig.class);
+        when(gatewayConfig.getHostname()).thenReturn(HOSTNAME);
+        when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenReturn(gatewayConfig);
+        when(environmentService.isSecretEncryptionEnabled(ENV_CRN)).thenReturn(false);
+        when(detailedEnvironmentResponse.getEncryptionProfileCrn()).thenReturn(ENCRYPTION_PROFILE_CRN);
+        when(cachedEncryptionProfileClientService.getByCrnOrDefaultIfEmpty(eq(ENCRYPTION_PROFILE_CRN))).thenReturn(encryptionProfileResponse);
+        when(encryptionProfileProvider.getOpenSslCipherSuites(any(), any(), anyBoolean()))
+                .thenReturn("cipher1,cipher2,ECDHE-RSA-AES256-GCM-SHA384");
+
+        Node node = new Node(PRIVATE_IP, null, null, null, HOSTNAME, DOMAIN, (String) null);
+
+        FreeIpaConfigView freeIpaConfigView = underTest.createFreeIpaConfigs(
+                stack, ImmutableSet.of(node));
+
+        assertEquals(List.of(REMOTE_CIDR), freeIpaConfigView.getCidrBlocks());
+    }
+
+    @Test
+    void testCidrBlocksThrowWhenRemoteEnvironmentHasNoCidrs() {
+        FreeIpa freeIpa = new FreeIpa();
+        freeIpa.setDomain(DOMAIN);
+        freeIpa.setAdminPassword(PASSWORD);
+        Stack stack = new Stack();
+        stack.setCloudPlatform(CloudPlatform.AWS.name());
+        stack.setRegion("region");
+        stack.setEnvironmentCrn(ENV_CRN);
+        Network network = new Network();
+        network.setNetworkCidrs(List.of(CIDR));
+        stack.setNetwork(network);
+        stack.setAccountId(ACCOUNT);
+        stack.setId(0L);
+        DetailedEnvironmentResponse detailedEnvironmentResponse = mock(DetailedEnvironmentResponse.class);
+
+        when(cachedEnvironmentClientService.getByCrn(anyString())).thenReturn(detailedEnvironmentResponse);
+        when(detailedEnvironmentResponse.getRemoteEnvironmentCrn()).thenReturn(REMOTE_ENV_CRN);
+        when(freeIpaService.findByStack(any())).thenReturn(freeIpa);
+        when(freeIpaClientFactory.getAdminUser()).thenReturn(ADMIN);
+        when(networkService.getFilteredSubnetWithCidr(any())).thenReturn(subnetWithCidr);
+        when(reverseDnsZoneCalculator.reverseDnsZoneForCidrs(any())).thenReturn(REVERSE_ZONE);
+        when(environment.getProperty("freeipa.platform.dnssec.validation.AWS", "true")).thenReturn("true");
+        when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenReturn(mock(GatewayConfig.class));
+
+        Node node = new Node(PRIVATE_IP, null, null, null, HOSTNAME, DOMAIN, (String) null);
+
+        assertThrows(CloudbreakServiceException.class, () -> underTest.createFreeIpaConfigs(stack, ImmutableSet.of(node)));
     }
 
     @ParameterizedTest(name = "{0}")

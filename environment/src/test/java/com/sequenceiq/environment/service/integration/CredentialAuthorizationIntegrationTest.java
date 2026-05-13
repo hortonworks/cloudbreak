@@ -38,8 +38,14 @@ import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
+import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.event.credential.CredentialDeletionRequest;
+import com.sequenceiq.cloudbreak.cloud.event.credential.CredentialDeletionResult;
 import com.sequenceiq.cloudbreak.cloud.event.platform.ResourceDefinitionRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.ResourceDefinitionResult;
+import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.CloudCredentialStatus;
+import com.sequenceiq.cloudbreak.cloud.model.CredentialStatus;
 import com.sequenceiq.cloudbreak.quartz.configuration.QuartzJobInitializer;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.common.model.CredentialType;
@@ -101,9 +107,14 @@ public class CredentialAuthorizationIntegrationTest {
     private EnvironmentServiceCrnEndpoints secondUserClient;
 
     @BeforeEach
-    public void setup() {
+    public void setup() throws InterruptedException {
         firstUserClient = getClient(FIRST_USER_CRN);
         secondUserClient = getClient(SECOND_USER_CRN);
+        when(cloudPlatformRequestProvider.getResourceDefinitionRequest(any(), any())).thenReturn(resourceDefinitionRequest);
+        when(resourceDefinitionRequest.await()).thenReturn(new ResourceDefinitionResult(1L, DEFINITION_AWS));
+        when(cloudPlatformRequestProvider.getCredentialDeletionRequest(any(), any())).thenAnswer(
+                invocation -> new CredentialDeletionMockRequest(invocation.getArgument(0), invocation.getArgument(1))
+        );
         doNothing().when(grpcUmsClient).assignResourceRole(anyString(), anyString(), anyString());
         lenient().when(grpcUmsClient.hasRights(anyString(), anyList(), any())).then(i -> {
             List<AuthorizationProto.RightCheck> rightChecks = i.getArgument(2);
@@ -289,6 +300,7 @@ public class CredentialAuthorizationIntegrationTest {
         credential.setType(CredentialType.ENVIRONMENT);
         credential.setGovCloud(false);
         credential.setArchived(false);
+        credential.setAttributes("{}");
         return credential;
     }
 
@@ -299,5 +311,18 @@ public class CredentialAuthorizationIntegrationTest {
                 .withIgnorePreValidation(true)
                 .build()
                 .withCrn(userCrn);
+    }
+
+    static class CredentialDeletionMockRequest extends CredentialDeletionRequest {
+
+        CredentialDeletionMockRequest(CloudContext cloudContext, CloudCredential cloudCredential) {
+            super(cloudContext, cloudCredential);
+        }
+
+        @Override
+        public CredentialDeletionResult await() {
+            return new CredentialDeletionResult(1L,
+                    new CloudCredentialStatus(getCloudCredential(), CredentialStatus.DELETED));
+        }
     }
 }

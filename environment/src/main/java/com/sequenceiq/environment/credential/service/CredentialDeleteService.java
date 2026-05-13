@@ -38,18 +38,22 @@ public class CredentialDeleteService {
 
     private final CredentialNotificationService credentialNotificationService;
 
+    private final ServiceProviderCredentialAdapter credentialAdapter;
+
     private final Set<String> enabledPlatforms;
 
     public CredentialDeleteService(CredentialRetrievalService credentialRetrievalService, CredentialNotificationService credentialNotificationService,
             EnvironmentViewService environmentViewService,
             OwnerAssignmentService ownerAssignmentService,
             CredentialRepository credentialRepository,
+            ServiceProviderCredentialAdapter credentialAdapter,
             @Value("${environment.enabledplatforms}") Set<String> enabledPlatforms) {
         this.credentialNotificationService = credentialNotificationService;
         this.credentialRetrievalService = credentialRetrievalService;
         this.environmentViewService = environmentViewService;
         this.ownerAssignmentService = ownerAssignmentService;
         this.credentialRepository = credentialRepository;
+        this.credentialAdapter = credentialAdapter;
         this.enabledPlatforms = enabledPlatforms;
     }
 
@@ -69,6 +73,7 @@ public class CredentialDeleteService {
         Credential credential = credentialRetrievalService.findByNameAndAccountId(name, accountId, enabledPlatforms, type)
                 .orElseThrow(notFound(NOT_FOUND_FORMAT_MESS_NAME, name));
         checkEnvironmentsForDeletion(credential);
+        credentialAdapter.delete(credential, accountId);
         LOGGER.debug("About to archive credential: {}", name);
         Credential archived = archiveCredential(credential);
         ownerAssignmentService.notifyResourceDeleted(archived.getResourceCrn());
@@ -80,6 +85,7 @@ public class CredentialDeleteService {
         Credential credential = credentialRetrievalService.findByCrnAndAccountId(crn, accountId, enabledPlatforms, type)
                 .orElseThrow(notFound(NOT_FOUND_FORMAT_MESS_NAME, crn));
         checkEnvironmentsForDeletion(credential);
+        credentialAdapter.delete(credential, accountId);
         LOGGER.debug("About to archive credential: {}", crn);
         Credential archived = archiveCredential(credential);
         ownerAssignmentService.notifyResourceDeleted(archived.getResourceCrn());

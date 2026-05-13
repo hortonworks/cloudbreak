@@ -265,3 +265,12 @@ wiam:
   host: localhost
   port: 8982
   grpc.timeout.sec: 60
+
+clusterProxy:
+  url: http://localhost:10180/cluster-proxy
+  enabled: true
+  disabledPlatforms: MOCK
+  readConfigPath: /rpc/readConfig
+  registerConfigPath: /rpc/forceRegisterConfig
+  updateConfigPath: /rpc/updateConfig
+  removeConfigPath: /rpc/removeConfig
