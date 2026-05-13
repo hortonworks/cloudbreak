@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.util;
 
+import static com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType.DATABASE;
 import static com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType.GENERAL;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.DISK_SYNC_FSTAB_MISMATCH_FOUND;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.DISK_SYNC_VOLUME_MISMATCH_FOUND;
@@ -12,6 +13,8 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -38,6 +41,7 @@ import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.dto.InstanceGroupDto;
 import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.job.disk.DiskSyncMode;
 import com.sequenceiq.cloudbreak.job.disk.model.InstanceResourceDto;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.salt.SaltOrchestrator;
@@ -118,7 +122,7 @@ class ResourceSyncUtilTest {
 
         underTest.syncFstab(instanceInfo, volumeSetAttributeFromDB, 1L, 2L, "inst1", "AVAILABLE");
 
-        verify(eventService, org.mockito.Mockito.never()).fireCloudbreakEvent(any(), any(), eq(DISK_SYNC_FSTAB_MISMATCH_FOUND), any());
+        verify(eventService, never()).fireCloudbreakEvent(any(), any(), eq(DISK_SYNC_FSTAB_MISMATCH_FOUND), any());
     }
 
     @Test
@@ -212,9 +216,8 @@ class ResourceSyncUtilTest {
         instanceInfo.setVolumes(Collections.emptyList());
         Map<String, InstanceResourceDto> saltInfoMap = Map.of("inst1", instanceInfo);
 
-        boolean result = underTest.updateResource(res, saltInfoMap, stack);
+        underTest.updateResource(List.of(res), saltInfoMap, stack, DiskSyncMode.DRY_RUN);
 
-        assertTrue(result);
         assertEquals("fstab", attr.getFstab());
     }
 
@@ -232,9 +235,9 @@ class ResourceSyncUtilTest {
         when(stack.getId()).thenReturn(1L);
         when(stack.getStatus()).thenReturn(com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE);
 
-        boolean result = underTest.updateResource(res, saltInfoMap, stack);
+        underTest.updateResource(List.of(res), saltInfoMap, stack, DiskSyncMode.DRY_RUN);
 
-        assertTrue(result);
+        verify(resourceService, times(0)).saveAll(anyList());
     }
 
     @Test
@@ -253,9 +256,9 @@ class ResourceSyncUtilTest {
         when(stack.getId()).thenReturn(1L);
         when(stack.getStatus()).thenReturn(com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE);
 
-        boolean result = underTest.updateResource(res, saltInfoMap, stack);
+        underTest.updateResource(List.of(res), saltInfoMap, stack, DiskSyncMode.DRY_RUN);
 
-        assertTrue(result);
+        verify(resourceService, never()).saveAll(anyList());
     }
 
     @Test
@@ -275,9 +278,12 @@ class ResourceSyncUtilTest {
         Map<String, Map<String, String>> saltFstabInfo = Map.of("host1", Map.of("fstab", "content"));
         when(saltOrchestrator.getFstabInformation(eq(connector), any(Target.class), any())).thenReturn(saltFstabInfo);
 
+        when(resourceService.findAllByStackIdAndResourceTypeIn(eq(1L), anyList())).thenReturn(Collections.emptyList());
+
         Map<String, String> result = underTest.getFstabInformation(1L);
 
         assertEquals("content", result.get("host1"));
+        verify(resourceService).findAllByStackIdAndResourceTypeIn(eq(1L), anyList());
     }
 
     @Test
@@ -310,5 +316,249 @@ class ResourceSyncUtilTest {
         underTest.checkForUnmountedVolumes(saltInfoMap, fqdnInstanceIdMap, cloudMetadata, stack);
 
         verify(eventService).fireCloudbreakEvent(eq(1L), eq("AVAILABLE"), eq(DISK_SYNC_VOLUME_MOUNT_MISMATCH_FOUND), anyList());
+    }
+
+    @Test
+    void testNormalizeFstabCollapsesWhitespace() {
+        String raw = "UUID=a  \t   /hadoopfs/fs1   ext4  defaults  0 0";
+        assertEquals("UUID=a /hadoopfs/fs1 ext4 defaults 0 0", underTest.normalizeFstab(raw));
+    }
+
+    @Test
+    void testCreateFstabFromLsblkSkipsInvalidAndSystemMounts() {
+        InstanceResourceDto instanceInfo = new InstanceResourceDto();
+        List<InstanceResourceDto.VolumeDto> disks = List.of(
+                new InstanceResourceDto.VolumeDto("skip-uuid", null, "/hadoopfs/fs1", 100, "pd-standard", null, "", "", "ext4"),
+                new InstanceResourceDto.VolumeDto("skip-mp", "d", null, 100, "pd-standard", "u1", "", "", "ext4"),
+                new InstanceResourceDto.VolumeDto("skip-root", null, "/", 100, "pd-standard", "u-root", "", "", "xfs"),
+                new InstanceResourceDto.VolumeDto("skip-boot", null, "/boot", 100, "pd-standard", "u-boot", "", "", "ext2"),
+                new InstanceResourceDto.VolumeDto("skip-efi", null, "/boot/efi", 100, "pd-standard", "u-efi", "", "", "vfat"),
+                new InstanceResourceDto.VolumeDto("ok", null, "/data", 50, "pd-balanced", "u-data", "", "", "ext4")
+        );
+        instanceInfo.setVolumes(disks);
+        assertEquals("UUID=u-data /data ext4 defaults,noatime,nofail 0 2", underTest.createFstabFromLsblk(instanceInfo));
+    }
+
+    @Test
+    void testCountHadoopMountsPerServerNullVolumeList() {
+        InstanceResourceDto dto = new InstanceResourceDto();
+        dto.setVolumes(null);
+        Map<String, Long> counts = underTest.countHadoopMountsPerServer(Map.of("i-1", dto));
+        assertEquals(0L, counts.get("i-1"));
+    }
+
+    @Test
+    void testGetMountedVolumesCountFiltersAndMatchesPrefixes() {
+        assertEquals(0L, underTest.getMountedVolumesCount("# /hadoopfs/fs1 ext4\n"));
+        assertEquals(0L, underTest.getMountedVolumesCount("onlyonecolumn"));
+        assertEquals(1L, underTest.getMountedVolumesCount("UUID=x /dbfs/data ext4 defaults 0 0"));
+        assertEquals(1L, underTest.getMountedVolumesCount("UUID=x /hadoopfs/ephfs/1 ext4 defaults 0 0"));
+        assertEquals(0L, underTest.getMountedVolumesCount("UUID=x /tmp ext4 defaults 0 0"));
+        assertEquals(2L, underTest.getMountedVolumesCount("UUID=a /hadoopfs/fs1 ext4 defaults 0 0\r\nUUID=b /dbfs ext4 defaults 0 0"));
+    }
+
+    @Test
+    void testSyncResourceDisksEqualSizesDifferentAttributesFiresMismatchEvent() {
+        StackDto stack = mock(StackDto.class);
+        when(stack.getId()).thenReturn(1L);
+        when(stack.getStatus()).thenReturn(com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE);
+
+        List<VolumeSetAttributes.Volume> databaseList = List.of(new VolumeSetAttributes.Volume("v1", "d1", 100, "pd-standard", GENERAL));
+        List<InstanceResourceDto.VolumeDto> saltDisks = List.of(
+                new InstanceResourceDto.VolumeDto("v1", "d1", "/hadoopfs/fs1", 200, "pd-standard", "u1", "", "", "ext4")
+        );
+
+        List<VolumeSetAttributes.Volume> result = underTest.syncResourceDisks(stack, databaseList, saltDisks, "i-1", 2L);
+
+        assertEquals(1, result.size());
+        assertEquals(200, result.get(0).getSize());
+        verify(eventService).fireCloudbreakEvent(eq(1L), anyString(), eq(DISK_SYNC_VOLUME_MISMATCH_FOUND), anyList());
+    }
+
+    @Test
+    void testSyncResourceDisksEqualSizesNoMismatchEvent() {
+        StackDto stack = mock(StackDto.class);
+        List<VolumeSetAttributes.Volume> databaseList = List.of(new VolumeSetAttributes.Volume("1", "d1", 10, "t1", GENERAL));
+        List<InstanceResourceDto.VolumeDto> saltDisks = List.of(
+                new InstanceResourceDto.VolumeDto("1", "d1", "/hadoopfs/fs1", 10, "t1", "u1", "", "", "ext4")
+        );
+        assertTrue(underTest.syncResourceDisks(stack, databaseList, saltDisks, "i-1", 2L).isEmpty());
+        verify(eventService, never()).fireCloudbreakEvent(any(), any(), eq(DISK_SYNC_VOLUME_MISMATCH_FOUND), any());
+    }
+
+    @Test
+    void testSyncResourceDisksNullDatabaseListReturnsEmpty() {
+        StackDto stack = mock(StackDto.class);
+        List<InstanceResourceDto.VolumeDto> saltDisks = List.of(
+                new InstanceResourceDto.VolumeDto("1", "d1", "/hadoopfs/fs1", 10, "t1", "u1", "", "", "ext4")
+        );
+        assertTrue(underTest.syncResourceDisks(stack, null, saltDisks, "i-1", 2L).isEmpty());
+        verify(eventService, never()).fireCloudbreakEvent(any(), any(), eq(DISK_SYNC_VOLUME_MISMATCH_FOUND), any());
+    }
+
+    @Test
+    void testSyncResourceDisksMapsDbfsMountToDatabaseUsageOnMismatch() {
+        StackDto stack = mock(StackDto.class);
+        when(stack.getId()).thenReturn(88L);
+        when(stack.getStatus()).thenReturn(com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE);
+        List<VolumeSetAttributes.Volume> databaseList = List.of(new VolumeSetAttributes.Volume("1", "d1", 10, "t1", GENERAL));
+        List<InstanceResourceDto.VolumeDto> saltDisks = List.of(
+                new InstanceResourceDto.VolumeDto("s1", "d1", "/my/dbfs/data", 10, "t1", "u1", "", "", "ext4"),
+                new InstanceResourceDto.VolumeDto("s2", "d2", "/hadoopfs/fs1", 20, "t1", "u2", "", "", "ext4")
+        );
+        List<VolumeSetAttributes.Volume> result = underTest.syncResourceDisks(stack, databaseList, saltDisks, "i-1", 2L);
+        assertEquals(2, result.size());
+        assertEquals(DATABASE, result.get(0).getCloudVolumeUsageType());
+        assertEquals(GENERAL, result.get(1).getCloudVolumeUsageType());
+        verify(eventService).fireCloudbreakEvent(eq(88L), anyString(), eq(DISK_SYNC_VOLUME_MISMATCH_FOUND), anyList());
+    }
+
+    @Test
+    void testUpdateResourceEmptySaltMapDoesNotSync() {
+        Resource res = mock(Resource.class);
+        when(res.getInstanceId()).thenReturn("inst1");
+        VolumeSetAttributes attr = new VolumeSetAttributes.Builder().withFstab("fstab").withVolumes(new ArrayList<>()).build();
+        when(resourceAttributeUtil.getTypedAttributes(eq(res), eq(VolumeSetAttributes.class))).thenReturn(Optional.of(attr));
+        StackDto stack = mock(StackDto.class);
+
+        underTest.updateResource(List.of(res), Collections.emptyMap(), stack, DiskSyncMode.PERSIST);
+
+        verify(resourceAttributeUtil, never()).setTypedAttributes(any(), any());
+        verify(resourceService, never()).saveAll(anyList());
+    }
+
+    @Test
+    void testUpdateResourceNoSaltEntryForInstanceDoesNotSync() {
+        Resource res = mock(Resource.class);
+        when(res.getInstanceId()).thenReturn("inst1");
+        VolumeSetAttributes attr = new VolumeSetAttributes.Builder().withFstab("fstab").withVolumes(new ArrayList<>()).build();
+        when(resourceAttributeUtil.getTypedAttributes(eq(res), eq(VolumeSetAttributes.class))).thenReturn(Optional.of(attr));
+        InstanceResourceDto other = new InstanceResourceDto();
+        other.setVolumes(Collections.emptyList());
+        StackDto stack = mock(StackDto.class);
+
+        underTest.updateResource(List.of(res), Map.of("other-instance", other), stack, DiskSyncMode.PERSIST);
+
+        verify(resourceAttributeUtil, never()).setTypedAttributes(any(), any());
+        verify(resourceService, never()).saveAll(anyList());
+    }
+
+    @Test
+    void testUpdateResourceFstabMismatchOnlyPersistsWhenUpdateDatabaseTrue() {
+        Resource res = mock(Resource.class);
+        when(res.getInstanceId()).thenReturn("inst1");
+        when(res.getId()).thenReturn(99L);
+
+        List<VolumeSetAttributes.Volume> dbVolumes = List.of(new VolumeSetAttributes.Volume("v1", "d1", 100, "pd-standard", GENERAL));
+        VolumeSetAttributes attr = new VolumeSetAttributes.Builder()
+                .withFstab("UUID=a /hadoopfs/fs1 ext4 defaults 0 0\nUUID=b /hadoopfs/fs2 ext4 defaults 0 0")
+                .withVolumes(new ArrayList<>(dbVolumes))
+                .build();
+        when(resourceAttributeUtil.getTypedAttributes(eq(res), eq(VolumeSetAttributes.class))).thenReturn(Optional.of(attr));
+
+        InstanceResourceDto instanceInfo = new InstanceResourceDto();
+        instanceInfo.setVolumes(List.of(
+                new InstanceResourceDto.VolumeDto("v1", "d1", "/hadoopfs/fs3", 100, "pd-standard", "uuid-1", "", "", "ext4")
+        ));
+        Map<String, InstanceResourceDto> saltInfoMap = Map.of("inst1", instanceInfo);
+
+        StackDto stack = mock(StackDto.class);
+        when(stack.getId()).thenReturn(1L);
+        when(stack.getStatus()).thenReturn(com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE);
+
+        underTest.updateResource(List.of(res), saltInfoMap, stack, DiskSyncMode.PERSIST);
+
+        verify(eventService).fireCloudbreakEvent(eq(1L), anyString(), eq(DISK_SYNC_FSTAB_MISMATCH_FOUND), anyList());
+        verify(eventService, never()).fireCloudbreakEvent(any(), any(), eq(DISK_SYNC_VOLUME_MISMATCH_FOUND), any());
+        verify(resourceAttributeUtil).setTypedAttributes(eq(res), any(VolumeSetAttributes.class));
+        verify(resourceService).saveAll(anyList());
+    }
+
+    @Test
+    void testGetFstabInformationUsesEmptyStringWhenFstabKeyMissing() {
+        Stack stack = mock(Stack.class);
+        when(stack.getCloudPlatform()).thenReturn("AWS");
+        when(stackService.getByIdWithLists(7L)).thenReturn(stack);
+        when(gatewayConfigService.getPrimaryGatewayConfig(stack)).thenReturn(mock(GatewayConfig.class));
+        when(stackUtil.collectNodesWithDiskData(stack)).thenReturn(Collections.emptySet());
+        when(resourceService.findAllByStackIdAndResourceTypeIn(eq(7L), anyList())).thenReturn(Collections.emptyList());
+        SaltConnector connector = mock(SaltConnector.class);
+        when(saltService.createSaltConnector(any(GatewayConfig.class))).thenReturn(connector);
+        when(saltOrchestrator.getFstabInformation(eq(connector), any(Target.class), any()))
+                .thenReturn(Map.of("host1", Map.of("fstab", "line1"), "host2", Map.of("other", "x")));
+
+        Map<String, String> result = underTest.getFstabInformation(7L);
+
+        assertEquals("line1", result.get("host1"));
+        assertEquals("", result.get("host2"));
+    }
+
+    @Test
+    void testGetFstabInformationPropagatesSaltException() {
+        Stack stack = mock(Stack.class);
+        when(stack.getCloudPlatform()).thenReturn("AWS");
+        when(stackService.getByIdWithLists(3L)).thenReturn(stack);
+        when(gatewayConfigService.getPrimaryGatewayConfig(stack)).thenReturn(mock(GatewayConfig.class));
+        when(stackUtil.collectNodesWithDiskData(stack)).thenReturn(Collections.emptySet());
+        when(resourceService.findAllByStackIdAndResourceTypeIn(eq(3L), anyList())).thenReturn(Collections.emptyList());
+        SaltConnector connector = mock(SaltConnector.class);
+        when(saltService.createSaltConnector(any(GatewayConfig.class))).thenReturn(connector);
+        when(saltOrchestrator.getFstabInformation(eq(connector), any(Target.class), any()))
+                .thenThrow(new IllegalStateException("salt down"));
+
+        assertThrows(IllegalStateException.class, () -> underTest.getFstabInformation(3L));
+    }
+
+    @Test
+    void testCheckForUnmountedVolumesSkipsWhenSaltCountMatchesCloud() {
+        Stack stack = mock(Stack.class);
+
+        InstanceGroupDto igDto = mock(InstanceGroupDto.class);
+        InstanceMetadataView imView = mock(InstanceMetadataView.class);
+        when(imView.getInstanceGroupName()).thenReturn("compute");
+        when(imView.getDiscoveryFQDN()).thenReturn("h1.example");
+        when(igDto.getNotDeletedInstanceMetaData()).thenReturn(List.of(imView));
+        when(stack.getInstanceGroupDtos()).thenReturn(List.of(igDto));
+
+        InstanceResourceDto saltDto = new InstanceResourceDto();
+        saltDto.setVolumes(List.of(new InstanceResourceDto.VolumeDto("v1", null, "/hadoopfs/fs1", 100, "t1", "u1", "", "", "")));
+        Map<String, InstanceResourceDto> saltInfoMap = Map.of("instance-42", saltDto);
+        Map<String, String> fqdnInstanceIdMap = Map.of("h1.example", "instance-42");
+        Map<String, List<VolumeRecord>> cloudMetadata = Map.of("instance-42", List.of(new VolumeRecord("v1", "d1", 100, "t1")));
+
+        underTest.checkForUnmountedVolumes(saltInfoMap, fqdnInstanceIdMap, cloudMetadata, stack);
+
+        verify(eventService, never()).fireCloudbreakEvent(any(), any(), eq(DISK_SYNC_VOLUME_MOUNT_MISMATCH_FOUND), any());
+    }
+
+    @Test
+    void testUpdateResourceVolumeMismatchPersistsWhenUpdateDatabaseTrue() {
+        Resource res = mock(Resource.class);
+        when(res.getInstanceId()).thenReturn("inst1");
+        when(res.getId()).thenReturn(5L);
+
+        List<VolumeSetAttributes.Volume> dbOne = List.of(new VolumeSetAttributes.Volume("v1", "d1", 10, "t1", GENERAL));
+        VolumeSetAttributes attr = new VolumeSetAttributes.Builder()
+                .withFstab("UUID=a /hadoopfs/fs1 ext4 defaults 0 0")
+                .withVolumes(new ArrayList<>(dbOne))
+                .build();
+        when(resourceAttributeUtil.getTypedAttributes(eq(res), eq(VolumeSetAttributes.class))).thenReturn(Optional.of(attr));
+
+        List<InstanceResourceDto.VolumeDto> twoSalt = List.of(
+                new InstanceResourceDto.VolumeDto("s1", "d1", "/hadoopfs/fs1", 10, "t1", "u1", "", "", "ext4"),
+                new InstanceResourceDto.VolumeDto("s2", "d2", "/hadoopfs/fs2", 20, "t1", "u2", "", "", "ext4")
+        );
+        InstanceResourceDto instanceInfo = new InstanceResourceDto();
+        instanceInfo.setVolumes(twoSalt);
+
+        StackDto stack = mock(StackDto.class);
+        when(stack.getId()).thenReturn(1L);
+        when(stack.getStatus()).thenReturn(com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE);
+
+        underTest.updateResource(List.of(res), Map.of("inst1", instanceInfo), stack, DiskSyncMode.PERSIST);
+
+        verify(eventService).fireCloudbreakEvent(eq(1L), anyString(), eq(DISK_SYNC_VOLUME_MISMATCH_FOUND), anyList());
+        verify(resourceAttributeUtil).setTypedAttributes(eq(res), any(VolumeSetAttributes.class));
+        verify(resourceService).saveAll(anyList());
     }
 }

@@ -54,7 +54,7 @@ public class DiskSyncJobTest {
 
         underTest.executeJob(mock(JobExecutionContext.class));
 
-        verify(diskSyncService, times(0)).syncResources(any());
+        verify(diskSyncService, times(0)).syncResources(any(), any(DiskSyncMode.class));
     }
 
     @Test
@@ -66,7 +66,7 @@ public class DiskSyncJobTest {
 
         underTest.executeJob(mock(JobExecutionContext.class));
 
-        verify(diskSyncService, times(0)).syncResources(stack);
+        verify(diskSyncService, times(0)).syncResources(stack, DiskSyncMode.DRY_RUN);
     }
 
     @Test
@@ -79,7 +79,7 @@ public class DiskSyncJobTest {
 
         underTest.executeJob(mock(JobExecutionContext.class));
 
-        verify(diskSyncService, times(1)).syncResources(stack);
+        verify(diskSyncService, times(1)).syncResources(stack, DiskSyncMode.DRY_RUN);
     }
 
     @Test
@@ -92,6 +92,6 @@ public class DiskSyncJobTest {
 
         underTest.executeJob(mock(JobExecutionContext.class));
 
-        verify(diskSyncService, times(0)).syncResources(stack);
+        verify(diskSyncService, times(0)).syncResources(stack, DiskSyncMode.DRY_RUN);
     }
 }

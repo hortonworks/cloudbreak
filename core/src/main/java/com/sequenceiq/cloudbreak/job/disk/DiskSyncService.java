@@ -61,7 +61,7 @@ public class DiskSyncService {
     @Inject
     private DiskInstanceInfoCollector diskInstanceInfoCollector;
 
-    public void syncResources(StackDto stackDto) {
+    public void syncResources(StackDto stackDto, DiskSyncMode diskSyncMode) {
         Stack stack = stackService.getByIdWithLists(stackDto.getId());
         DetailedStackStatus stackStatus = stack.getDetailedStatus();
         try {
@@ -75,9 +75,7 @@ public class DiskSyncService {
             Map<String, InstanceResourceDto> saltInfoMap = diskInstanceInfoCollector.getAndParseSaltInfo(stackDto, fqdnInstanceIdMap, cloudMetadata,
                     stackDto.getCloudPlatform());
             resourceSyncUtil.checkForUnmountedVolumes(saltInfoMap, fqdnInstanceIdMap, cloudMetadata, stack);
-            for (Resource res : volumeSetResources) {
-                resourceSyncUtil.updateResource(res, saltInfoMap, stackDto);
-            }
+            resourceSyncUtil.updateResource(volumeSetResources, saltInfoMap, stackDto, diskSyncMode);
         } catch (Exception ex) {
             LOGGER.error("Exception while running disk sync job on stack {}. Exception::", stackDto.getId(), ex);
             eventService.fireCloudbreakEvent(stackDto.getId(), stackStatus.name(), DISK_SYNC_FAILED, Collections.singletonList(ex.getMessage()));

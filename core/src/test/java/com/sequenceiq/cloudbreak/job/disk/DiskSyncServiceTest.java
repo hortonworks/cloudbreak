@@ -60,7 +60,7 @@ class DiskSyncServiceTest {
         when(stack.getDetailedStatus()).thenReturn(DetailedStackStatus.AVAILABLE);
         when(stackStatusAndReachabilityValidatorUtil.validateStackStatusAndReachability(stack)).thenReturn(false);
 
-        underTest.syncResources(stackDto);
+        underTest.syncResources(stackDto, DiskSyncMode.DRY_RUN);
 
         verify(eventService).fireCloudbreakEvent(eq(1L), eq("AVAILABLE"), eq(DISK_SYNC_FAILED), anyList());
     }
@@ -76,7 +76,7 @@ class DiskSyncServiceTest {
         when(stackDto.getCloudPlatform()).thenReturn("AWS");
         when(resourceService.findAllByStackIdAndResourceTypeIn(any(), any())).thenReturn(Collections.emptyList());
 
-        underTest.syncResources(stackDto);
+        underTest.syncResources(stackDto, DiskSyncMode.DRY_RUN);
 
         verifyNoInteractions(eventService);
     }
@@ -90,7 +90,7 @@ class DiskSyncServiceTest {
         when(stack.getDetailedStatus()).thenReturn(DetailedStackStatus.AVAILABLE);
         when(stackStatusAndReachabilityValidatorUtil.validateStackStatusAndReachability(stack)).thenThrow(new RuntimeException("error"));
 
-        underTest.syncResources(stackDto);
+        underTest.syncResources(stackDto, DiskSyncMode.DRY_RUN);
 
         verify(eventService).fireCloudbreakEvent(eq(1L), eq("AVAILABLE"), eq(DISK_SYNC_FAILED), anyList());
     }

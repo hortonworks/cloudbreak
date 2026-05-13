@@ -55,7 +55,7 @@ public class DiskSyncJob extends StatusCheckerJob {
             jobService.deregister(context.getJobDetail().getKey());
         } else if (status.isAvailable()) {
             LOGGER.info("DiskSyncJob will run...");
-            diskSyncService.syncResources(stack);
+            diskSyncService.syncResources(stack, DiskSyncMode.DRY_RUN);
         } else {
             LOGGER.info("DiskSyncJob will not run, because stack status is {}.", status);
         }

@@ -11,11 +11,13 @@ import static java.util.stream.Collectors.mapping;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -33,6 +35,7 @@ import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.dto.StackDto;
+import com.sequenceiq.cloudbreak.job.disk.DiskSyncMode;
 import com.sequenceiq.cloudbreak.job.disk.model.InstanceResourceDto;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.salt.SaltOrchestrator;
@@ -80,27 +83,44 @@ public class ResourceSyncUtil {
     @Inject
     private ResourceService resourceService;
 
-    public boolean updateResource(Resource res, Map<String, InstanceResourceDto> saltInfoMap, StackDto stack) {
-        String instanceId = res.getInstanceId();
-        VolumeSetAttributes volumeSetAttribute = resourceAttributeUtil.getTypedAttributes(res, VolumeSetAttributes.class).orElseThrow();
-        InstanceResourceDto instanceInfo = null;
-        if (!saltInfoMap.isEmpty()) {
-            instanceInfo = saltInfoMap.get(instanceId);
-        }
-        if (instanceInfo != null) {
-            List<VolumeSetAttributes.Volume> syncedVolumes = syncResourceDisks(stack, volumeSetAttribute.getVolumes(),
-                instanceInfo.getVolumes(), instanceId, res.getId());
-            LOGGER.info("Synced volumes for resource id {}, instance id {}, volumes - {}", res.getId(), instanceId, syncedVolumes);
-            volumeSetAttribute.setVolumes(syncedVolumes);
+    public void updateResource(List<Resource> resourceList, Map<String, InstanceResourceDto> saltInfoMap, StackDto stack, DiskSyncMode diskSyncMode) {
+        List<Resource> updatedResources = new ArrayList<>();
+        for (Resource res : resourceList) {
+            String instanceId = res.getInstanceId();
+            VolumeSetAttributes volumeSetAttribute = resourceAttributeUtil.getTypedAttributes(res, VolumeSetAttributes.class).orElseThrow();
+            InstanceResourceDto instanceInfo = null;
+            if (!saltInfoMap.isEmpty()) {
+                instanceInfo = saltInfoMap.get(instanceId);
+            }
+            if (instanceInfo != null) {
+                List<VolumeSetAttributes.Volume> syncedVolumes = syncResourceDisks(stack, volumeSetAttribute.getVolumes(),
+                        instanceInfo.getVolumes(), instanceId, res.getId());
+                LOGGER.info("Synced volumes for resource id {}, instance id {}, volumes - {}", res.getId(), instanceId, syncedVolumes);
+                if (!syncedVolumes.isEmpty()) {
+                    LOGGER.info("Resource volumes updated: resource id {}, instance id {}, original volumes - {}, synced volumes - {}", res.getId(),
+                        instanceId, volumeSetAttribute.getVolumes().toString(), syncedVolumes.toString());
+                    volumeSetAttribute.setVolumes(syncedVolumes);
+                }
 
-            // SYNC Fstab
-            String fstabFromLsblk = createFstabFromLsblk(instanceInfo);
-            LOGGER.info("DiskSyncJob: Created fstab from lsblk on instance: {}, fstab: {}", instanceId, fstabFromLsblk);
-            instanceInfo.setFstab(fstabFromLsblk);
-            syncFstab(instanceInfo, volumeSetAttribute, stack.getId(), res.getId(), instanceId, stack.getStatus().name());
+                String fstabFromLsblk = createFstabFromLsblk(instanceInfo);
+                LOGGER.info("DiskSyncJob: Created fstab from lsblk on instance: {}, fstab: {}", instanceId, fstabFromLsblk);
+                instanceInfo.setFstab(fstabFromLsblk);
+                boolean updated = syncFstab(instanceInfo, volumeSetAttribute, stack.getId(), res.getId(), instanceId, stack.getStatus().name());
+                if (updated) {
+                    LOGGER.info("Fstab updated: resource id {}, instance id {}, original fstab - {}, synced fstab - {}", res.getId(),
+                        instanceId, volumeSetAttribute.getFstab(), fstabFromLsblk);
+                    volumeSetAttribute.setFstab(fstabFromLsblk);
+                }
+
+                if (!syncedVolumes.isEmpty() || updated) {
+                    resourceAttributeUtil.setTypedAttributes(res, volumeSetAttribute);
+                    updatedResources.add(res);
+                }
+            }
         }
-        // Add resourceService.save here if needed
-        return true;
+        if (diskSyncMode.equals(DiskSyncMode.PERSIST) && !updatedResources.isEmpty()) {
+            resourceService.saveAll(updatedResources);
+        }
     }
 
     public String createFstabFromLsblk(InstanceResourceDto lsblkInfo) {
@@ -112,7 +132,7 @@ public class ResourceSyncUtil {
             .collect(Collectors.joining("\n"));
     }
 
-    public void syncFstab(InstanceResourceDto instanceInfo, VolumeSetAttributes volumeSetAttributeFromDB,
+    public boolean syncFstab(InstanceResourceDto instanceInfo, VolumeSetAttributes volumeSetAttributeFromDB,
         Long stackId, Long resourceId, String instanceId, String stackStatus) {
         String normalizedFstabFromDB = normalizeFstab(volumeSetAttributeFromDB.getFstab());
         if (getMountedVolumesCount(instanceInfo.getFstab()) != getMountedVolumesCount(normalizedFstabFromDB)) {
@@ -120,7 +140,9 @@ public class ResourceSyncUtil {
                 normalizedFstabFromDB, instanceInfo.getFstab());
             eventService.fireCloudbreakEvent(stackId, stackStatus, DISK_SYNC_FSTAB_MISMATCH_FOUND,
                     Arrays.asList(instanceId, normalizedFstabFromDB, instanceInfo.getFstab(), String.valueOf(resourceId)));
+            return true;
         }
+        return false;
     }
 
     public String normalizeFstab(String fstab) {
@@ -149,12 +171,35 @@ public class ResourceSyncUtil {
                 saltDisk.mountPoint() != null && saltDisk.mountPoint().contains("dbfs") ? DATABASE : GENERAL)
             )
             .toList();
-        if (databaseList != null && existingDisksOnInstance.size() != databaseList.size()) {
+        if (databaseList != null && !volumeListsMatch(databaseList, existingDisksOnInstance)) {
             LOGGER.info("Found volume mismatch in Resource table: saved resources : {} and actual resources are : {}", databaseList, existingDisksOnInstance);
             eventService.fireCloudbreakEvent(stack.getId(), stack.getStatus().name(), DISK_SYNC_VOLUME_MISMATCH_FOUND,
                 Arrays.asList(instanceId, databaseList.toString(), existingDisksOnInstance.toString(), String.valueOf(resourceId)));
+            return existingDisksOnInstance;
         }
-        return existingDisksOnInstance;
+        return Collections.emptyList();
+    }
+
+    private boolean volumeListsMatch(List<VolumeSetAttributes.Volume> databaseList, List<VolumeSetAttributes.Volume> instanceVolumes) {
+        if (databaseList.size() != instanceVolumes.size()) {
+            return false;
+        }
+        List<VolumeSetAttributes.Volume> unmatchedInstanceVolumes = new ArrayList<>(instanceVolumes);
+        for (VolumeSetAttributes.Volume dbVolume : databaseList) {
+            boolean matched = unmatchedInstanceVolumes.removeIf(instanceVolume -> volumesMatch(dbVolume, instanceVolume));
+            if (!matched) {
+                return false;
+            }
+        }
+        return unmatchedInstanceVolumes.isEmpty();
+    }
+
+    private boolean volumesMatch(VolumeSetAttributes.Volume dbVolume, VolumeSetAttributes.Volume instanceVolume) {
+        return Objects.equals(dbVolume.getId(), instanceVolume.getId())
+            && Objects.equals(dbVolume.getDevice(), instanceVolume.getDevice())
+            && Objects.equals(dbVolume.getSize(), instanceVolume.getSize())
+            && Objects.equals(dbVolume.getType(), instanceVolume.getType())
+            && dbVolume.getCloudVolumeUsageType() == instanceVolume.getCloudVolumeUsageType();
     }
 
     public Map<String, Long> countHadoopMountsPerServer(Map<String, InstanceResourceDto> saltInfoMap) {
