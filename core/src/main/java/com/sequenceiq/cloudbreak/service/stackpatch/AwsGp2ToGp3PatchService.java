@@ -604,6 +604,7 @@ public class AwsGp2ToGp3PatchService extends ExistingStackPatchService {
                     List.of(ResourceType.AWS_ROOT_DISK, ResourceType.AWS_VOLUMESET));
         }
 
+        List<Resource> resourcesToSave = new ArrayList<>();
         for (Resource res : resources) {
             boolean saveNeeded = false;
             Optional<VolumeSetAttributes> volumeSetOptional = resourceAttributeUtil.getTypedAttributes(res, VolumeSetAttributes.class);
@@ -615,9 +616,14 @@ public class AwsGp2ToGp3PatchService extends ExistingStackPatchService {
                 }
             }
             if (saveNeeded) {
-                resourceService.save(res);
-                LOGGER.info("Successfully saved resource {} - {}", res.getId(), res.getResourceName());
+                resourcesToSave.add(res);
             }
+        }
+
+        if (!resourcesToSave.isEmpty()) {
+            List<String> ids = resourcesToSave.stream().map(Resource::getResourceName).toList();
+            resourceService.saveAll(resourcesToSave);
+            LOGGER.info("Successfully saved resources {}", ids);
         }
     }
 

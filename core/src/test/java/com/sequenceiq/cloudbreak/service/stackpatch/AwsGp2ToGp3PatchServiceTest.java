@@ -294,12 +294,13 @@ class AwsGp2ToGp3PatchServiceTest {
 
         // Log all the calls to save a resource.
         List<Json> resourceUpdates = new ArrayList<>();
-        when(resourceService.save(any(Resource.class))).thenAnswer(inv -> {
-            Resource saved = inv.getArgument(0);
+        when(resourceService.saveAll(any(Iterable.class))).thenAnswer(inv -> {
+            Iterable<Resource> iterable = inv.getArgument(0);
+            Resource saved = iterable.iterator().next();
             resourceUpdates.add(saved.getAttributes());
             volumes.clear();
             volumes.addAll((new ResourceAttributeUtil()).getTypedAttributes(saved, VolumeSetAttributes.class).get().getVolumes());
-            return saved;
+            return List.of(saved);
         });
 
         // Execute pass 1
@@ -440,12 +441,13 @@ class AwsGp2ToGp3PatchServiceTest {
 
         // Log all the calls to save a resource.
         List<Json> resourceUpdates = new ArrayList<>();
-        when(resourceService.save(any(Resource.class))).thenAnswer(inv -> {
-            Resource saved = inv.getArgument(0);
+        when(resourceService.saveAll(any(Iterable.class))).thenAnswer(inv -> {
+            Iterable<Resource> iterable = inv.getArgument(0);
+            Resource saved = iterable.iterator().next();
             resourceUpdates.add(saved.getAttributes());
             volumes.clear();
             volumes.addAll((new ResourceAttributeUtil()).getTypedAttributes(saved, VolumeSetAttributes.class).get().getVolumes());
-            return saved;
+            return List.of(saved);
         });
 
         // Execute pass 1
@@ -715,12 +717,13 @@ class AwsGp2ToGp3PatchServiceTest {
 
         // Log all the calls to save a resource.
         List<Json> resourceUpdates = new ArrayList<>();
-        when(resourceService.save(any(Resource.class))).thenAnswer(inv -> {
-            Resource saved = inv.getArgument(0);
+        when(resourceService.saveAll(any(Iterable.class))).thenAnswer(inv -> {
+            Iterable<Resource> iterable = inv.getArgument(0);
+            Resource saved = iterable.iterator().next();
             resourceUpdates.add(saved.getAttributes());
             volumes.clear();
             volumes.addAll((new ResourceAttributeUtil()).getTypedAttributes(saved, VolumeSetAttributes.class).get().getVolumes());
-            return saved;
+            return List.of(saved);
         });
 
         // Execute pass 1
@@ -964,10 +967,10 @@ class AwsGp2ToGp3PatchServiceTest {
 
         // Store the resource save call.
         Resource[] updatedResource = new Resource[1];
-        when(resourceService.save(any(Resource.class))).thenAnswer(inv -> {
-            Resource saved = inv.getArgument(0);
-            updatedResource[0] = saved;
-            return saved;
+        when(resourceService.saveAll(any(Iterable.class))).thenAnswer(inv -> {
+            Iterable<Resource> saved = inv.getArgument(0);
+            updatedResource[0] = saved.iterator().next();
+            return List.of(saved);
         });
 
         // Execute pass 1
