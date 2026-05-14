@@ -53,7 +53,8 @@ public class CoreImageProvider implements ImageProvider {
     public List<ImageWrapper> getImages(FreeIpaImageFilterSettings imageFilterSettings) {
         try {
             List<Image> images = getImagesInCatalogForPlatform(imageFilterSettings.catalog(), imageFilterSettings.platform());
-            return images.stream()
+            List<Image> compatibleImages = freeIpaImageFilter.filterImages(images, imageFilterSettings);
+            return compatibleImages.stream()
                     .map(i -> ImageWrapper.ofCoreImage(i, imageFilterSettings.catalog()))
                     .collect(Collectors.toList());
         } catch (WebApplicationException e) {

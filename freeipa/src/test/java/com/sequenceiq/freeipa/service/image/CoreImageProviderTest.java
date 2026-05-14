@@ -146,6 +146,7 @@ class CoreImageProviderTest {
         imagesV4Response.setFreeipaImages(List.of(anImageResponse()));
         when(imageCatalogV4Endpoint.getImagesByName(WORKSPACE_ID_DEFAULT, CATALOG_NAME, null, PLATFORM, null, null, false, false, null))
                 .thenReturn(imagesV4Response);
+        when(freeIpaImageFilter.filterImages(any(), any())).thenAnswer(invocation -> invocation.getArgument(0));
 
         List<ImageWrapper> result = victim.getImages(createImageFilterSettings());
 
