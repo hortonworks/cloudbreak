@@ -185,6 +185,7 @@ import com.sequenceiq.distrox.v1.distrox.StackUpgradeOperations;
 import com.sequenceiq.distrox.v1.distrox.controller.DistroXUpgradeV1Controller;
 import com.sequenceiq.distrox.v1.distrox.converter.UpgradeConverter;
 import com.sequenceiq.distrox.v1.distrox.service.upgrade.rds.DistroXRdsUpgradeService;
+import com.sequenceiq.distrox.v1.distrox.service.upgrade.rds.DistroXRdsUpgradeStatusService;
 
 @ExtendWith(SpringExtension.class)
 @TestPropertySource(properties = {
@@ -294,6 +295,9 @@ public class DistroXUpgradeRetrievalComponentTest {
 
     @MockBean
     private DistroXRdsUpgradeService rdsUpgradeService;
+
+    @MockBean
+    private DistroXRdsUpgradeStatusService rdsUpgradeStatusService;
 
     @MockBean
     private StackCcmUpgradeService stackCcmUpgradeService;

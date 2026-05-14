@@ -1,5 +1,7 @@
 package com.sequenceiq.distrox.v1.distrox.controller;
 
+import java.util.List;
+
 import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
@@ -7,8 +9,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
+import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrnList;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceName;
 import com.sequenceiq.authorization.annotation.InternalOnly;
+import com.sequenceiq.authorization.annotation.ResourceCrnList;
 import com.sequenceiq.authorization.annotation.ResourceName;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
@@ -25,12 +29,14 @@ import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXUpgradeV1Endpoint;
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXCcmUpgradeV1Response;
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXUpgradeV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXUpgradeV1Response;
+import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.rds.DistroXDatabaseUpgradeStatus;
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.rds.DistroXRdsUpgradeV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.rds.DistroXRdsUpgradeV1Response;
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.reinit.DistroXUpgradeReinitiableV1Response;
 import com.sequenceiq.distrox.v1.distrox.converter.UpgradeConverter;
 import com.sequenceiq.distrox.v1.distrox.service.upgrade.DistroXUpgradeService;
 import com.sequenceiq.distrox.v1.distrox.service.upgrade.rds.DistroXRdsUpgradeService;
+import com.sequenceiq.distrox.v1.distrox.service.upgrade.rds.DistroXRdsUpgradeStatusService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 
 @Controller
@@ -46,6 +52,9 @@ public class DistroXUpgradeV1Controller implements DistroXUpgradeV1Endpoint {
 
     @Inject
     private DistroXRdsUpgradeService rdsUpgradeService;
+
+    @Inject
+    private DistroXRdsUpgradeStatusService rdsUpgradeStatusService;
 
     @Inject
     private StackCcmUpgradeService stackCcmUpgradeService;
@@ -164,6 +173,24 @@ public class DistroXUpgradeV1Controller implements DistroXUpgradeV1Endpoint {
         Long workspaceId = restRequestThreadLocalService.getRequestedWorkspaceId();
         return distroXUpgradeService.triggerOsUpgradeByUpgradeSets(NameOrCrn.ofCrn(crn), workspaceId, orderedOsUpgradeSetRequest.getImageId(),
                 orderedOsUpgradeSetRequest.getOrderedOsUpgradeSets());
+    }
+
+    @Override
+    @CheckPermissionByResourceCrnList(action = AuthorizationResourceAction.DESCRIBE_DATAHUB)
+    public List<DistroXDatabaseUpgradeStatus> getDatabaseServerUpgradeRequiredByDatahubCrns(@ResourceCrnList List<String> datahubCrns) {
+        return rdsUpgradeStatusService.getUpgradeRequiredByDatahubCrns(datahubCrns);
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_DATAHUB)
+    public DistroXDatabaseUpgradeStatus getDatabaseServerUpgradeRequiredByDatahubCrn(@ResourceCrn String datahubCrn) {
+        return rdsUpgradeStatusService.getUpgradeRequired(NameOrCrn.ofCrn(datahubCrn));
+    }
+
+    @Override
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.DESCRIBE_DATAHUB)
+    public DistroXDatabaseUpgradeStatus getDatabaseServerUpgradeRequiredByDatahubName(@ResourceName String datahubName) {
+        return rdsUpgradeStatusService.getUpgradeRequired(NameOrCrn.ofName(datahubName));
     }
 
     private void validateClusterName(String clusterName) {

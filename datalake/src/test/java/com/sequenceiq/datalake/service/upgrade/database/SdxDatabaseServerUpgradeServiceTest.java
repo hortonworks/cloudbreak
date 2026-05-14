@@ -581,8 +581,6 @@ public class SdxDatabaseServerUpgradeServiceTest {
         assertEquals(SDX_CRN, result.getDatalakeCrn());
     }
 
-    // --- getDatabaseServerUpgradeStatus (by name) ---
-
     @Test
     void testIsUpgradeRequiredByDatalakeNameWhenUpgradeNeeded() {
         SdxCluster cluster = getSdxClusterWithExternalDb(SDX_CRN);
@@ -608,8 +606,6 @@ public class SdxDatabaseServerUpgradeServiceTest {
 
         assertEquals("NO_DATALAKE", result.getUpgradeStatus());
     }
-
-    // --- getDatabaseServerUpgradeStatusByDatalakeCrns (bulk) ---
 
     @Test
     void testIsUpgradeRequiredByDatalakeCrnsReturnsBulkResultsInOrder() {
@@ -680,8 +676,6 @@ public class SdxDatabaseServerUpgradeServiceTest {
         assertEquals("14", result.getTargetMajorVersion());
         assertNull(result.getCurrentMajorVersion());
     }
-
-    // --- helpers ---
 
     private SdxCluster getSdxClusterWithExternalDb(String crn) {
         SdxCluster cluster = new SdxCluster();

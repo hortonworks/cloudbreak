@@ -1,7 +1,10 @@
 package com.sequenceiq.distrox.api.v1.distrox.endpoint;
 
+import java.util.List;
+
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
@@ -21,6 +24,7 @@ import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXCcmUpgradeV1Response;
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXUpgradeV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXUpgradeV1Response;
+import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.rds.DistroXDatabaseUpgradeStatus;
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.rds.DistroXRdsUpgradeV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.rds.DistroXRdsUpgradeV1Response;
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.reinit.DistroXUpgradeReinitiableV1Response;
@@ -142,5 +146,28 @@ public interface DistroXUpgradeV1Endpoint {
     @Operation(summary = "Upgrades distrox cluster OS by name and upgrades sets internal", operationId = "osUpgradeByUpgradeSetsInternal",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     FlowIdentifier osUpgradeByUpgradeSetsInternal(@PathParam("crn") String crn, OrderedOSUpgradeSetRequest orderedOsUpgradeSetRequest);
+
+    @POST
+    @Path("/rds_upgrade_status")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Check RDS upgrade status for a list of Datahub CRNs", operationId = "getDatabaseServerUpgradeRequiredByDatahubCrns",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    List<DistroXDatabaseUpgradeStatus> getDatabaseServerUpgradeRequiredByDatahubCrns(
+            @NotNull @ValidCrn(resource = CrnResourceDescriptor.DATAHUB) List<String> datahubCrns);
+
+    @GET
+    @Path("/crn/{datahubCrn}/rds_upgrade_status")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Check RDS upgrade status for a single Datahub by CRN", operationId = "getDatabaseServerUpgradeRequiredByDatahubCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    DistroXDatabaseUpgradeStatus getDatabaseServerUpgradeRequiredByDatahubCrn(
+            @ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("datahubCrn") String datahubCrn);
+
+    @GET
+    @Path("/name/{datahubName}/rds_upgrade_status")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Check RDS upgrade status for a single Datahub by name", operationId = "getDatabaseServerUpgradeRequiredByDatahubName",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    DistroXDatabaseUpgradeStatus getDatabaseServerUpgradeRequiredByDatahubName(@PathParam("datahubName") String datahubName);
 
 }
