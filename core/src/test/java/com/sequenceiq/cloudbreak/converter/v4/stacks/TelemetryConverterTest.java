@@ -211,6 +211,20 @@ class TelemetryConverterTest {
     }
 
     @Test
+    void testConvertFromNullEnvAndSdxResponse() {
+        // GIVEN
+        DetailedEnvironmentResponse detailedEnvironmentResponse = null;
+        SdxBasicView sdxBasicView = null;
+        // WHEN
+        TelemetryRequest result = underTest.convert(detailedEnvironmentResponse, sdxBasicView);
+        // THEN
+        assertNotNull(result.getWorkloadAnalytics());
+        assertNotNull(result.getFeatures());
+        assertTrue(result.getFeatures().getWorkloadAnalytics().getEnabled());
+        assertNull(result.getLogging());
+    }
+
+    @Test
     void testConvertFromEnvAndSdxResponseWithoutInputs() {
         // GIVEN
         SdxBasicView sdxBasicView = null;
