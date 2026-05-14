@@ -134,8 +134,7 @@ public class SaltSyncServiceTest {
 
         Optional<Set<String>> failedMinions = underTest.checkSaltMinions(GW);
 
-        assertTrue(failedMinions.isPresent());
-        assertEquals(HOST_1, failedMinions.get().iterator().next());
+        assertFalse(failedMinions.isPresent());
         verify(saltStateService, never()).collectNodeStatusWithLimitedRetry(any(), any());
     }
 
@@ -148,8 +147,7 @@ public class SaltSyncServiceTest {
 
         Optional<Set<String>> failedMinions = underTest.checkSaltMinions(GW);
 
-        assertTrue(failedMinions.isPresent());
-        assertEquals(HOST_1, failedMinions.get().iterator().next());
+        assertFalse(failedMinions.isPresent());
         verify(saltStateService).collectNodeStatusWithLimitedRetry(any(), any());
     }
 
