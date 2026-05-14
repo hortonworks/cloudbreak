@@ -27,7 +27,7 @@ import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.service.OperationException;
-import com.sequenceiq.cloudbreak.service.publicendpoint.GatewayPublicEndpointManagementService;
+import com.sequenceiq.cloudbreak.service.publicendpoint.ClusterPublicEndpointManagementService;
 import com.sequenceiq.cloudbreak.service.stack.LoadBalancerPersistenceService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.flow.MetadataSetupService;
@@ -67,7 +67,7 @@ public class AwsMigrationUtil {
     private EventBus eventBus;
 
     @Inject
-    private GatewayPublicEndpointManagementService gatewayPublicEndpointManagementService;
+    private ClusterPublicEndpointManagementService clusterPublicEndpointManagementService;
 
     public boolean allInstancesDeletedFromCloudFormation(AuthenticatedContext ac, CloudResource cloudResource) {
         String regionName = ac.getCloudContext().getLocation().getRegion().value();
@@ -112,7 +112,7 @@ public class AwsMigrationUtil {
         List<CloudLoadBalancerMetadata> cloudLoadBalancerMetadata = collectLoadBalancerMetadata(ac, ac.getCloudContext().getId());
         StackDto stackDto = stackDtoService.getById(ac.getCloudContext().getId(), false);
         metadataSetupService.saveLoadBalancerMetadata(stackDto.getStack(), cloudLoadBalancerMetadata);
-        gatewayPublicEndpointManagementService.updateDnsEntryForLoadBalancers(stackDto);
+        clusterPublicEndpointManagementService.refreshLoadBalancerDnsEntries(stackDto);
     }
 
     private List<CloudLoadBalancerMetadata> collectLoadBalancerMetadata(AuthenticatedContext authenticatedContext, Long stackId) {
