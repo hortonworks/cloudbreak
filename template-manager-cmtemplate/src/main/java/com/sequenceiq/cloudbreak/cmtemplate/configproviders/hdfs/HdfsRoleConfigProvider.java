@@ -78,15 +78,6 @@ public class HdfsRoleConfigProvider extends AbstractRoleConfigProvider {
                     );
                 }
                 return List.of();
-            case HdfsRoles.GATEWAY:
-                if (hdfsConfigHelper.isNamenodeHA(source) && StackType.DATALAKE.equals(source.getStackType())) {
-                    return List.of(config(
-                            HdfsConfigHelper.HDFS_CLIENT_CONFIG_SAFETY_VALVE,
-                            getSafetyValveProperty("dfs.client.block.write.replace-datanode-on-failure.policy", "NEVER")
-                                    + getSafetyValveProperty("dfs.client.block.write.replace-datanode-on-failure.enable", "false")
-                    ));
-                }
-                return List.of();
             default:
                 return List.of();
         }

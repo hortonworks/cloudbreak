@@ -520,7 +520,13 @@
           {
             "base":true,
             "refName":"hdfs-GATEWAY-BASE",
-            "roleType":"GATEWAY"
+            "roleType":"GATEWAY",
+            "configs":[
+              {
+                "name":"hdfs_client_config_safety_valve",
+                "value":"<property><name>dfs.client.block.write.replace-datanode-on-failure.policy</name><value>NEVER</value></property><property><name>dfs.client.block.write.replace-datanode-on-failure.enable</name><value>false</value></property>"
+              }
+            ]
           },
           {
             "base":true,

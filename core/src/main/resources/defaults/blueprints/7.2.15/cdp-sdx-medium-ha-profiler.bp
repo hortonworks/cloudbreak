@@ -136,8 +136,8 @@
                 "value": "2"
               },
               {
-                "name":"ranger.audit.solr.config.ttl",
-                "value":"30"
+                "name": "ranger.audit.solr.config.ttl",
+                "value": "30"
               }
             ]
           }
@@ -335,7 +335,13 @@
           {
             "base": true,
             "refName": "hdfs-GATEWAY-BASE",
-            "roleType": "GATEWAY"
+            "roleType": "GATEWAY",
+            "configs": [
+              {
+                "name": "hdfs_client_config_safety_valve",
+                "value": "<property><name>dfs.client.block.write.replace-datanode-on-failure.policy</name><value>NEVER</value></property><property><name>dfs.client.block.write.replace-datanode-on-failure.enable</name><value>false</value></property>"
+              }
+            ]
           },
           {
             "base": true,
@@ -428,7 +434,7 @@
             "refName": "hive-HIVEMETASTORE-BASE",
             "roleType": "HIVEMETASTORE",
             "configs": [
-              { 
+              {
                 "name": "hive_compactor_initiator_on",
                 "value": "false"
               }
