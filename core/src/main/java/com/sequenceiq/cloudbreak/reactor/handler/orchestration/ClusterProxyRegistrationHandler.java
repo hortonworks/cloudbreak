@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.reactor.handler.orchestration;
 
+import java.util.Optional;
+
 import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
@@ -7,7 +9,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyEnablementService;
-import com.sequenceiq.cloudbreak.clusterproxy.ConfigRegistrationResponse;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.provision.service.ClusterProxyService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -56,20 +57,22 @@ public class ClusterProxyRegistrationHandler implements EventHandler<ClusterProx
 
     private Selectable registerCluster(ClusterProxyRegistrationRequest request) {
         Stack stack = stackService.getByIdWithListsInTransaction(request.getResourceId());
+        Gateway gateway = null;
         try {
             if (!clusterProxyEnablementService.isClusterProxyApplicable(request.getCloudPlatform())) {
                 LOGGER.info("Cluster Proxy integration is DISABLED, skipping registering with Cluster Proxy service. Cluster CRN: {}", stack.getResourceCrn());
                 return new ClusterProxyRegistrationSuccess(request.getResourceId());
             }
-            ConfigRegistrationResponse registerResponse = clusterProxyService.registerCluster(stack);
+            Optional<Gateway> gatewayOptional = gatewayService.getById(stack.getGateway().getId());
             Cluster cluster = stack.getCluster();
             if (cluster.hasGateway()) {
                 LOGGER.debug("Updating Gateway for cluster {} in environment {} with public key certificate retrieved from Cluster Proxy",
                         cluster.getId(), stack.getEnvironmentCrn());
-                Gateway gateway = cluster.getGateway();
-                gateway.setTokenCert(registerResponse.getX509Unwrapped());
+                gateway = gatewayService.generateSignKeys(gatewayOptional.get());
                 gatewayService.save(gateway);
+                stack = stackService.getByIdWithListsInTransaction(request.getResourceId());
             }
+            clusterProxyService.registerCluster(stack);
             return new ClusterProxyRegistrationSuccess(request.getResourceId());
         } catch (Exception e) {
             LOGGER.error("Error occurred when registering cluster {} in environment {} to cluster proxy",
