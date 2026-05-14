@@ -38,7 +38,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.service.ResourceRetriever;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
-import com.sequenceiq.cloudbreak.service.publicendpoint.GatewayPublicEndpointManagementService;
+import com.sequenceiq.cloudbreak.service.publicendpoint.ClusterPublicEndpointManagementService;
 import com.sequenceiq.cloudbreak.service.stack.LoadBalancerPersistenceService;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
 import com.sequenceiq.cloudbreak.service.stack.flow.MetadataSetupService;
@@ -91,7 +91,7 @@ public class AwsMigrationUtilTest {
     private EventBus eventBus;
 
     @Mock
-    private GatewayPublicEndpointManagementService gatewayPublicEndpointManagementService;
+    private ClusterPublicEndpointManagementService clusterPublicEndpointManagementService;
 
     @Test
     public void testAllInstancesDeletedFromCloudFormationWhenASGroupNotFound() {
@@ -196,6 +196,6 @@ public class AwsMigrationUtilTest {
         spiedUnderTest.changeLoadBalancer(ac);
 
         verify(metadataSetupService, times(1)).saveLoadBalancerMetadata(any(), any());
-        verify(gatewayPublicEndpointManagementService, times(1)).updateDnsEntryForLoadBalancers(any());
+        verify(clusterPublicEndpointManagementService, times(1)).refreshLoadBalancerDnsEntries(any());
     }
 }
