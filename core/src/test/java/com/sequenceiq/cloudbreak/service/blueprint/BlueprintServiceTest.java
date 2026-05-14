@@ -10,6 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
@@ -44,6 +45,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
@@ -55,6 +58,7 @@ import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.BlueprintFile;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -62,6 +66,7 @@ import com.sequenceiq.cloudbreak.domain.view.BlueprintClusterView;
 import com.sequenceiq.cloudbreak.domain.view.BlueprintView;
 import com.sequenceiq.cloudbreak.domain.view.ClusterTemplateView;
 import com.sequenceiq.cloudbreak.init.blueprint.BlueprintLoaderService;
+import com.sequenceiq.cloudbreak.init.blueprint.DefaultBlueprintCache;
 import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
 import com.sequenceiq.cloudbreak.repository.BlueprintViewRepository;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
@@ -79,6 +84,8 @@ import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 @ExtendWith(MockitoExtension.class)
 class BlueprintServiceTest {
     private static final String ACCOUNT_ID = "ACCOUNT_ID";
+
+    private static final String USER_CRN = "crn:cdp:iam:us-west-1:" + ACCOUNT_ID + ":user:accountId";
 
     @Mock
     private TransactionService transactionService;
@@ -134,6 +141,15 @@ class BlueprintServiceTest {
     @Mock
     private CmTemplateProcessorFactory cmTemplateProcessorFactory;
 
+    @Mock
+    private CrnGeneratorService crnGeneratorService;
+
+    @Mock
+    private EntitlementService entitlementService;
+
+    @Mock
+    private DefaultBlueprintCache defaultBlueprintCache;
+
     @InjectMocks
     private BlueprintService underTest;
 
@@ -155,7 +171,8 @@ class BlueprintServiceTest {
         when(blueprintRepository.findByNameAndWorkspaceId(blueprint.getName(),
                 blueprint.getWorkspace().getId())).thenReturn(Optional.of(blueprint));
 
-        Blueprint result = underTest.deleteByWorkspace(NameOrCrn.ofName(blueprint.getName()), blueprint.getWorkspace().getId());
+        Blueprint result = ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> underTest.deleteByWorkspace(NameOrCrn.ofName(blueprint.getName()), blueprint.getWorkspace().getId()));
 
         assertEquals(blueprint, result);
         verify(blueprintRepository, times(1))
@@ -172,7 +189,8 @@ class BlueprintServiceTest {
         when(blueprintRepository.findByNameAndWorkspaceId(blueprint.getName(),
                 blueprint.getWorkspace().getId())).thenReturn(Optional.of(blueprint));
 
-        Blueprint result = underTest.deleteByWorkspace(NameOrCrn.ofName(blueprint.getName()), blueprint.getWorkspace().getId());
+        Blueprint result = ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> underTest.deleteByWorkspace(NameOrCrn.ofName(blueprint.getName()), blueprint.getWorkspace().getId()));
 
         assertEquals(blueprint, result);
         verify(blueprintRepository, times(1))
@@ -189,7 +207,8 @@ class BlueprintServiceTest {
         when(blueprintRepository.findByResourceCrnAndWorkspaceId(blueprint.getResourceCrn(),
                 blueprint.getWorkspace().getId())).thenReturn(Optional.of(blueprint));
 
-        Blueprint result = underTest.deleteByWorkspace(NameOrCrn.ofCrn(blueprint.getResourceCrn()), blueprint.getWorkspace().getId());
+        Blueprint result = ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> underTest.deleteByWorkspace(NameOrCrn.ofCrn(blueprint.getResourceCrn()), blueprint.getWorkspace().getId()));
 
         assertEquals(blueprint, result);
         verify(blueprintRepository, times(1))
@@ -206,7 +225,8 @@ class BlueprintServiceTest {
         when(blueprintRepository.findByNameAndWorkspaceId(blueprint.getName(),
                 blueprint.getWorkspace().getId())).thenReturn(Optional.of(blueprint));
 
-        Blueprint result = underTest.getByWorkspace(NameOrCrn.ofName(blueprint.getName()), blueprint.getWorkspace().getId());
+        Blueprint result = ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> underTest.getByWorkspace(NameOrCrn.ofName(blueprint.getName()), blueprint.getWorkspace().getId()));
 
         assertEquals(blueprint, result);
         verify(blueprintRepository, times(1))
@@ -221,7 +241,8 @@ class BlueprintServiceTest {
         when(blueprintRepository.findByResourceCrnAndWorkspaceId(blueprint.getResourceCrn(),
                 blueprint.getWorkspace().getId())).thenReturn(Optional.of(blueprint));
 
-        Blueprint result = underTest.getByWorkspace(NameOrCrn.ofCrn(blueprint.getResourceCrn()), blueprint.getWorkspace().getId());
+        Blueprint result = ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> underTest.getByWorkspace(NameOrCrn.ofCrn(blueprint.getResourceCrn()), blueprint.getWorkspace().getId()));
 
         assertEquals(blueprint, result);
         verify(blueprintRepository, times(1))
@@ -302,7 +323,8 @@ class BlueprintServiceTest {
         Blueprint blueprint1 = getBlueprint("One", DEFAULT);
         when(blueprintRepository.findByNameAndWorkspaceId("One", 1L)).thenReturn(Optional.of(blueprint1));
 
-        Blueprint foundBlueprint = underTest.getByNameForWorkspaceAndLoadDefaultsIfNecessary("One", getWorkspace());
+        Blueprint foundBlueprint = ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> underTest.getByNameForWorkspaceAndLoadDefaultsIfNecessary("One", getWorkspace()));
 
         assertEquals("One", foundBlueprint.getName());
         verify(blueprintRepository).findByNameAndWorkspaceId("One", 1L);
@@ -314,18 +336,21 @@ class BlueprintServiceTest {
     void testGetByNameForWorkspaceAndLoadDefaultsIfNecessaryWhenLoaded() {
         Blueprint blueprint1 = getBlueprint("One", DEFAULT);
         Blueprint blueprint2 = getBlueprint("Two", DEFAULT);
-        when(blueprintRepository.findByNameAndWorkspaceId("Two", 1L)).thenReturn(Optional.empty());
+        when(blueprintRepository.findByNameAndWorkspaceId("Two", 1L))
+                .thenReturn(Optional.empty())
+                .thenReturn(Optional.of(blueprint2));
         when(blueprintRepository.findAllByWorkspaceIdAndStatusIn(anyLong(), any())).thenReturn(Set.of(blueprint1));
         when(blueprintLoaderService.isAddingDefaultBlueprintsNecessaryForTheUser(any())).thenReturn(true);
-        when(blueprintLoaderService.loadBlueprintsForTheWorkspace(any(), any(), any())).thenReturn(Set.of(blueprint1, blueprint2));
+        when(blueprintLoaderService.loadBlueprintsForTheWorkspace(any(), any(), any(), anyBoolean())).thenReturn(Set.of(blueprint1, blueprint2));
 
-        Blueprint foundBlueprint = underTest.getByNameForWorkspaceAndLoadDefaultsIfNecessary("Two", getWorkspace());
+        Blueprint foundBlueprint = ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> underTest.getByNameForWorkspaceAndLoadDefaultsIfNecessary("Two", getWorkspace()));
 
         assertEquals("Two", foundBlueprint.getName());
-        verify(blueprintRepository).findByNameAndWorkspaceId("Two", 1L);
+        verify(blueprintRepository, times(2)).findByNameAndWorkspaceId("Two", 1L);
         verify(blueprintRepository).findAllByWorkspaceIdAndStatusIn(anyLong(), any());
         verify(blueprintLoaderService).isAddingDefaultBlueprintsNecessaryForTheUser(any());
-        verify(blueprintLoaderService).loadBlueprintsForTheWorkspace(any(), any(), any());
+        verify(blueprintLoaderService).loadBlueprintsForTheWorkspace(any(), any(), any(), anyBoolean());
     }
 
     @Test
@@ -335,26 +360,18 @@ class BlueprintServiceTest {
         when(blueprintRepository.findByNameAndWorkspaceId("Three", 1L)).thenReturn(Optional.empty());
         when(blueprintRepository.findAllByWorkspaceIdAndStatusIn(anyLong(), any())).thenReturn(Set.of(blueprint1));
         when(blueprintLoaderService.isAddingDefaultBlueprintsNecessaryForTheUser(any())).thenReturn(true);
-        when(blueprintLoaderService.loadBlueprintsForTheWorkspace(any(), any(), any())).thenReturn(Set.of(blueprint1, blueprint2));
+        when(blueprintLoaderService.loadBlueprintsForTheWorkspace(any(), any(), any(), anyBoolean())).thenReturn(Set.of(blueprint1, blueprint2));
 
         try {
-            underTest.getByNameForWorkspaceAndLoadDefaultsIfNecessary("Three", getWorkspace());
+            ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.getByNameForWorkspaceAndLoadDefaultsIfNecessary("Three", getWorkspace()));
         } catch (NotFoundException e) {
             assertThat(e.getMessage()).containsSequence("Three");
         }
 
-        verify(blueprintRepository).findByNameAndWorkspaceId("Three", 1L);
+        verify(blueprintRepository, times(2)).findByNameAndWorkspaceId("Three", 1L);
         verify(blueprintRepository).findAllByWorkspaceIdAndStatusIn(anyLong(), any());
         verify(blueprintLoaderService).isAddingDefaultBlueprintsNecessaryForTheUser(any());
-        verify(blueprintLoaderService).loadBlueprintsForTheWorkspace(any(), any(), any());
-    }
-
-    @Test
-    void testPopulateCrnCorrectly() {
-        Blueprint blueprint = new Blueprint();
-        underTest.decorateWithCrn(blueprint, ACCOUNT_ID);
-
-        assertTrue(blueprint.getResourceCrn().matches("crn:cdp:datahub:us-west-1:" + ACCOUNT_ID + ":clustertemplate:.*"));
+        verify(blueprintLoaderService).loadBlueprintsForTheWorkspace(any(), any(), any(), anyBoolean());
     }
 
     @Test
@@ -363,7 +380,8 @@ class BlueprintServiceTest {
                 getBlueprintView("bp2", DEFAULT, false),
                 getBlueprintView("bp3", DEFAULT, false));
         when(blueprintViewRepository.findAllByNotDeletedInWorkspace(1L)).thenReturn(blueprintViews);
-        Set<BlueprintView> result = underTest.getAllAvailableViewInWorkspaceAndFilterBySdxReady(1L, true);
+        Set<BlueprintView> result = ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> underTest.getAllAvailableViewInWorkspaceAndFilterBySdxReady(1L, true));
         assertEquals(3, result.size());
         assertTrue(result.stream().map(BlueprintView::getName).collect(Collectors.toSet()).containsAll(Set.of("bp1", "bp2", "bp3")));
         assertEquals(123456789L, result.stream().map(BlueprintView::getLastUpdated).findFirst().get());
@@ -375,7 +393,8 @@ class BlueprintServiceTest {
                 getBlueprintView("bp2", DEFAULT, false),
                 getBlueprintView("bp3", DEFAULT, false));
         when(blueprintViewRepository.findAllByNotDeletedInWorkspace(1L)).thenReturn(blueprintViews);
-        Set<BlueprintView> result = underTest.getAllAvailableViewInWorkspaceAndFilterBySdxReady(1L, true);
+        Set<BlueprintView> result = ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> underTest.getAllAvailableViewInWorkspaceAndFilterBySdxReady(1L, true));
         assertEquals(3, result.size());
     }
 
@@ -385,7 +404,8 @@ class BlueprintServiceTest {
                 getBlueprintView("bp2", DEFAULT, true),
                 getBlueprintView("bp3", DEFAULT, false));
         when(blueprintViewRepository.findAllByNotDeletedInWorkspace(1L)).thenReturn(blueprintViews);
-        Set<BlueprintView> result = underTest.getAllAvailableViewInWorkspaceAndFilterBySdxReady(1L, true);
+        Set<BlueprintView> result = ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> underTest.getAllAvailableViewInWorkspaceAndFilterBySdxReady(1L, true));
         assertEquals(3, result.size());
         assertTrue(result.stream().map(BlueprintView::getName).collect(Collectors.toSet()).containsAll(Set.of("bp1", "bp2", "bp3")));
     }
@@ -394,7 +414,8 @@ class BlueprintServiceTest {
     void testGetAllAvailableViewInWorkspaceGivenAttributeIsNullWhenWithSdxReady() {
         Set<BlueprintView> blueprintViews = Set.of(getBlueprintView("bp1", null));
         when(blueprintViewRepository.findAllByNotDeletedInWorkspace(1L)).thenReturn(blueprintViews);
-        Set<BlueprintView> result = underTest.getAllAvailableViewInWorkspaceAndFilterBySdxReady(1L, true);
+        Set<BlueprintView> result = ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> underTest.getAllAvailableViewInWorkspaceAndFilterBySdxReady(1L, true));
         assertEquals(1, result.size());
         assertTrue(result.stream().map(BlueprintView::getName).collect(Collectors.toSet()).contains("bp1"));
     }
@@ -403,17 +424,19 @@ class BlueprintServiceTest {
     void testGetAllAvailableViewInWorkspaceGivenAttributeValueIsNullWhenWithSdxReady() {
         Set<BlueprintView> blueprintViews = Set.of(getBlueprintView("bp1", new Json(null)));
         when(blueprintViewRepository.findAllByNotDeletedInWorkspace(1L)).thenReturn(blueprintViews);
-        Set<BlueprintView> result = underTest.getAllAvailableViewInWorkspaceAndFilterBySdxReady(1L, true);
+        Set<BlueprintView> result = ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> underTest.getAllAvailableViewInWorkspaceAndFilterBySdxReady(1L, true));
         assertEquals(1, result.size());
         assertTrue(result.stream().map(BlueprintView::getName).collect(Collectors.toSet()).contains("bp1"));
     }
 
     @Test
-    // if the tags are null or empty that same as no an sdx ready bp
+        // if the tags are null or empty that same as no an sdx ready bp
     void testGetAllAvailableViewInWorkspaceGivenAttributeValueIsNullWhenWithoutSdxReady() {
         Set<BlueprintView> blueprintViews = Set.of(getBlueprintView("bp1", new Json(null)));
         when(blueprintViewRepository.findAllByNotDeletedInWorkspace(1L)).thenReturn(blueprintViews);
-        Set<BlueprintView> result = underTest.getAllAvailableViewInWorkspaceAndFilterBySdxReady(1L, false);
+        Set<BlueprintView> result = ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> underTest.getAllAvailableViewInWorkspaceAndFilterBySdxReady(1L, false));
         assertEquals(1, result.size());
         assertTrue(result.stream().map(BlueprintView::getName).collect(Collectors.toSet()).contains("bp1"));
     }
@@ -424,41 +447,44 @@ class BlueprintServiceTest {
                 getBlueprintView("bp2", DEFAULT, false),
                 getBlueprintView("bp3", DEFAULT, false));
         when(blueprintViewRepository.findAllByNotDeletedInWorkspace(1L)).thenReturn(blueprintViews);
-        Set<BlueprintView> result = underTest.getAllAvailableViewInWorkspaceAndFilterBySdxReady(1L, false);
+        Set<BlueprintView> result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.getAllAvailableViewInWorkspaceAndFilterBySdxReady(1L, false));
         assertEquals(2, result.size());
         assertTrue(result.stream().map(BlueprintView::getName).collect(Collectors.toSet()).containsAll(Set.of("bp2", "bp3")));
     }
 
     @Test
-    // if the tags are null or empty that same as no an sdx ready bp
+        // if the tags are null or empty that same as no an sdx ready bp
     void testGetAllAvailableViewInWorkspaceGivenSdxReadyIsNullWhenWithoutSdxReady() {
         Set<BlueprintView> blueprintViews = Set.of(getBlueprintView("bp1", new Json("{}")),
                 getBlueprintView("bp2", DEFAULT, false),
                 getBlueprintView("bp3", DEFAULT, false));
         when(blueprintViewRepository.findAllByNotDeletedInWorkspace(1L)).thenReturn(blueprintViews);
-        Set<BlueprintView> result = underTest.getAllAvailableViewInWorkspaceAndFilterBySdxReady(1L, false);
+        Set<BlueprintView> result = ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> underTest.getAllAvailableViewInWorkspaceAndFilterBySdxReady(1L, false));
         assertEquals(3, result.size());
         assertTrue(result.stream().map(BlueprintView::getName).collect(Collectors.toSet()).containsAll(Set.of("bp1", "bp2", "bp3")));
     }
 
     @Test
-    // if the tags are null or empty that same as no an sdx ready bp
+        // if the tags are null or empty that same as no an sdx ready bp
     void testGetAllAvailableViewInWorkspaceGivenHasNullOfSdxReadyWhenWithoutSdxReady() {
         Set<BlueprintView> blueprintViews = Set.of(getBlueprintView("bp1", new Json("{}")),
                 getBlueprintView("bp2", DEFAULT, true),
                 getBlueprintView("bp3", DEFAULT, false));
         when(blueprintViewRepository.findAllByNotDeletedInWorkspace(1L)).thenReturn(blueprintViews);
-        Set<BlueprintView> result = underTest.getAllAvailableViewInWorkspaceAndFilterBySdxReady(1L, false);
+        Set<BlueprintView> result = ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> underTest.getAllAvailableViewInWorkspaceAndFilterBySdxReady(1L, false));
         assertEquals(2, result.size());
         assertTrue(result.stream().map(BlueprintView::getName).collect(Collectors.toSet()).containsAll(Set.of("bp1", "bp3")));
     }
 
     @Test
-    // if the tags are null or empty that same as no an sdx ready bp
+        // if the tags are null or empty that same as no an sdx ready bp
     void testGetAllAvailableViewInWorkspaceGivenAttributeIsNullWhenWithoutSdxReady() {
         Set<BlueprintView> blueprintViews = Set.of(getBlueprintView("bp1", null));
         when(blueprintViewRepository.findAllByNotDeletedInWorkspace(1L)).thenReturn(blueprintViews);
-        Set<BlueprintView> result = underTest.getAllAvailableViewInWorkspaceAndFilterBySdxReady(1L, false);
+        Set<BlueprintView> result = ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> underTest.getAllAvailableViewInWorkspaceAndFilterBySdxReady(1L, false));
         assertEquals(1, result.size());
         assertTrue(result.stream().map(BlueprintView::getName).collect(Collectors.toSet()).contains("bp1"));
     }
@@ -502,11 +528,12 @@ class BlueprintServiceTest {
         workspace.setId(1L);
         when(workspaceService.getByIdWithoutAuth(1L)).thenReturn(workspace);
         when(blueprintRepository.save(blueprint)).thenReturn(blueprint);
+        when(crnGeneratorService.createBlueprintCrn(ACCOUNT_ID)).thenReturn("resourceCrn");
 
         Blueprint savedBlueprint = underTest.createWithInternalUser(blueprint, 1L, ACCOUNT_ID);
 
         assertEquals(workspace, savedBlueprint.getWorkspace());
-        assertTrue(blueprint.getResourceCrn().matches("crn:cdp:datahub:us-west-1:" + ACCOUNT_ID + ":clustertemplate:.*"));
+        assertEquals("resourceCrn", blueprint.getResourceCrn());
         assertEquals(SERVICE_MANAGED, savedBlueprint.getStatus());
     }
 
@@ -586,6 +613,200 @@ class BlueprintServiceTest {
         assertFalse(underTest.anyOfTheServiceTypesPresentOnBlueprint("blueprint1", List.of("HIVE", "HBASE")));
         assertTrue(underTest.anyOfTheServiceTypesPresentOnBlueprint("blueprint2", List.of("HIVE", "HBASE")));
         assertFalse(underTest.anyOfTheServiceTypesPresentOnBlueprint("blueprint3", List.of("HIVE", "HBASE")));
+    }
+
+    @Test
+    void testGetByWorkspaceByNameWhenGlobalDefaultEnabledAndDefaultBlueprint() {
+        Blueprint blueprint = getBlueprint("default-bp", DEFAULT);
+        when(entitlementService.isGlobalDefaultTemplateEnabled(ACCOUNT_ID)).thenReturn(true);
+        when(defaultBlueprintCache.isDefaultByName("default-bp")).thenReturn(true);
+        when(blueprintRepository.findGlobalDefaultByName("default-bp")).thenReturn(Optional.of(blueprint));
+
+        Blueprint result = ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> underTest.getByWorkspace(NameOrCrn.ofName("default-bp"), 1L));
+
+        assertEquals(blueprint, result);
+        verify(blueprintRepository).findGlobalDefaultByName("default-bp");
+        verify(blueprintRepository, never()).findByNameAndWorkspaceId(anyString(), anyLong());
+    }
+
+    @Test
+    void testGetByWorkspaceByCrnWhenGlobalDefaultEnabledAndDefaultBlueprint() {
+        Blueprint blueprint = getBlueprint("default-bp", DEFAULT);
+        blueprint.setResourceCrn("crn:default-bp");
+        when(entitlementService.isGlobalDefaultTemplateEnabled(ACCOUNT_ID)).thenReturn(true);
+        when(defaultBlueprintCache.isDefaultByCrn("crn:default-bp")).thenReturn(true);
+        when(blueprintRepository.findGlobalDefaultByResourceCrn("crn:default-bp")).thenReturn(Optional.of(blueprint));
+
+        Blueprint result = ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> underTest.getByWorkspace(NameOrCrn.ofCrn("crn:default-bp"), 1L));
+
+        assertEquals(blueprint, result);
+        verify(blueprintRepository).findGlobalDefaultByResourceCrn("crn:default-bp");
+        verify(blueprintRepository, never()).findByResourceCrnAndWorkspaceId(anyString(), anyLong());
+    }
+
+    @Test
+    void testGetAllAvailableViewInWorkspaceAndFilterBySdxReadyWhenGlobalDefaultEnabled() {
+        BlueprintView globalView = getBlueprintView("global-view", DEFAULT, true);
+        BlueprintView workspaceView = getBlueprintView("workspace-view", USER_MANAGED, false);
+        BlueprintView workspaceDefaultView = getBlueprintView("workspace-default-view", DEFAULT, false);
+
+        when(blueprintViewRepository.findAllByNotDeletedInWorkspace(1L)).thenReturn(Set.of(workspaceView, workspaceDefaultView));
+        when(entitlementService.isGlobalDefaultTemplateEnabled(ACCOUNT_ID)).thenReturn(true);
+        when(blueprintViewRepository.findAllGlobalDefaults()).thenReturn(Set.of(globalView));
+
+        Set<BlueprintView> result = ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> underTest.getAllAvailableViewInWorkspaceAndFilterBySdxReady(1L, true));
+
+        assertEquals(2, result.size());
+        assertTrue(result.stream().map(BlueprintView::getName).collect(Collectors.toSet()).containsAll(Set.of("global-view", "workspace-view")));
+        assertFalse(result.stream().map(BlueprintView::getName).collect(Collectors.toSet()).contains("workspace-default-view"));
+    }
+
+    @Test
+    void testGetAllAvailableInWorkspaceWhenGlobalDefaultEnabled() {
+        Blueprint globalBp = getBlueprint("global-bp", DEFAULT);
+        Blueprint userBp = getBlueprint("user-bp", USER_MANAGED);
+
+        when(entitlementService.isGlobalDefaultTemplateEnabled(ACCOUNT_ID)).thenReturn(true);
+        when(blueprintRepository.findAllGlobalDefaults(Set.of(DEFAULT))).thenReturn(Set.of(globalBp));
+        when(blueprintRepository.findAllByWorkspaceIdAndStatusIn(1L, Set.of(USER_MANAGED, SERVICE_MANAGED))).thenReturn(Set.of(userBp));
+
+        Set<Blueprint> result = ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> underTest.getAllAvailableInWorkspace(getWorkspace()));
+
+        assertEquals(2, result.size());
+        assertTrue(result.contains(globalBp));
+        assertTrue(result.contains(userBp));
+    }
+
+    @Test
+    void testGetResourceCrnListByResourceNameListWhenGlobalDefaultEnabled() {
+        BlueprintFile bpFile = mock(BlueprintFile.class);
+        when(bpFile.getResourceCrn()).thenReturn("crn:bp-default");
+
+        when(entitlementService.isGlobalDefaultTemplateEnabled(ACCOUNT_ID)).thenReturn(true);
+        when(defaultBlueprintCache.isDefaultByName("bp-default")).thenReturn(true);
+        when(defaultBlueprintCache.isDefaultByName("bp-user")).thenReturn(false);
+        when(defaultBlueprintCache.defaultBlueprints()).thenReturn(Map.of("bp-default", bpFile));
+        when(blueprintRepository.findResourceCrnByNameAndAccountId("bp-user", ACCOUNT_ID)).thenReturn(Optional.of("crn:bp-user"));
+
+        List<String> crns = ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> underTest.getResourceCrnListByResourceNameList(List.of("bp-default", "bp-user")));
+
+        assertEquals(2, crns.size());
+        assertEquals("crn:bp-default", crns.get(0));
+        assertEquals("crn:bp-user", crns.get(1));
+    }
+
+    @Test
+    void testGetByNameForWorkspaceIdWhenGlobalDefaultEnabledAndDefaultBlueprint() {
+        Blueprint blueprint = getBlueprint("default-bp", DEFAULT);
+        when(entitlementService.isGlobalDefaultTemplateEnabled(ACCOUNT_ID)).thenReturn(true);
+        when(defaultBlueprintCache.isDefaultByName("default-bp")).thenReturn(true);
+        when(blueprintRepository.findGlobalDefaultByName("default-bp")).thenReturn(Optional.of(blueprint));
+
+        Blueprint result = ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> underTest.getByNameForWorkspaceId("default-bp", 1L));
+
+        assertEquals(blueprint, result);
+        verify(blueprintRepository).findGlobalDefaultByName("default-bp");
+    }
+
+    @Test
+    void testGetByNamesForWorkspaceIdWhenGlobalDefaultDisabled() {
+        Blueprint blueprint1 = getBlueprint("bp1", USER_MANAGED);
+        Blueprint blueprint2 = getBlueprint("bp2", USER_MANAGED);
+        Set<String> names = Set.of("bp1", "bp2");
+        when(blueprintRepository.findByNameInAndWorkspaceId(names, 1L)).thenReturn(Set.of(blueprint1, blueprint2));
+
+        Set<Blueprint> result = ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> underTest.getByNamesForWorkspaceId(names, 1L));
+
+        assertEquals(2, result.size());
+        assertTrue(result.containsAll(Set.of(blueprint1, blueprint2)));
+        verify(blueprintRepository).findByNameInAndWorkspaceId(names, 1L);
+        verify(blueprintRepository, never()).findGlobalDefaultByResourceNames(any());
+    }
+
+    @Test
+    void testGetByNamesForWorkspaceIdWhenGlobalDefaultDisabledAndResourceNotFound() {
+        Blueprint blueprint1 = getBlueprint("bp1", USER_MANAGED);
+        Set<String> names = Set.of("bp1", "bp2");
+        when(blueprintRepository.findByNameInAndWorkspaceId(names, 1L)).thenReturn(Set.of(blueprint1));
+
+        NotFoundException exception = assertThrows(NotFoundException.class, () -> ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> underTest.getByNamesForWorkspaceId(names, 1L)));
+
+        assertThat(exception.getMessage()).contains("bp2");
+    }
+
+    @Test
+    void testGetByNamesForWorkspaceIdWhenGlobalDefaultEnabledWithDefaultAndNonDefault() {
+        Blueprint defaultBp = getBlueprint("default-bp", DEFAULT);
+        Blueprint userBp = getBlueprint("user-bp", USER_MANAGED);
+        Set<String> names = Set.of("default-bp", "user-bp");
+        when(entitlementService.isGlobalDefaultTemplateEnabled(ACCOUNT_ID)).thenReturn(true);
+        when(defaultBlueprintCache.isDefaultByName("default-bp")).thenReturn(true);
+        when(defaultBlueprintCache.isDefaultByName("user-bp")).thenReturn(false);
+        when(blueprintRepository.findGlobalDefaultByResourceNames(Set.of("default-bp"))).thenReturn(Set.of(defaultBp));
+        when(blueprintRepository.findByNameInAndWorkspaceId(Set.of("user-bp"), 1L)).thenReturn(Set.of(userBp));
+
+        Set<Blueprint> result = ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> underTest.getByNamesForWorkspaceId(names, 1L));
+
+        assertEquals(2, result.size());
+        assertTrue(result.containsAll(Set.of(defaultBp, userBp)));
+    }
+
+    @Test
+    void testGetByNamesForWorkspaceIdWhenGlobalDefaultEnabledAndAllDefault() {
+        Blueprint defaultBp1 = getBlueprint("default-bp1", DEFAULT);
+        Blueprint defaultBp2 = getBlueprint("default-bp2", DEFAULT);
+        Set<String> names = Set.of("default-bp1", "default-bp2");
+        when(entitlementService.isGlobalDefaultTemplateEnabled(ACCOUNT_ID)).thenReturn(true);
+        when(defaultBlueprintCache.isDefaultByName("default-bp1")).thenReturn(true);
+        when(defaultBlueprintCache.isDefaultByName("default-bp2")).thenReturn(true);
+        when(blueprintRepository.findGlobalDefaultByResourceNames(names)).thenReturn(Set.of(defaultBp1, defaultBp2));
+        when(blueprintRepository.findByNameInAndWorkspaceId(Set.of(), 1L)).thenReturn(Set.of());
+
+        Set<Blueprint> result = ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> underTest.getByNamesForWorkspaceId(names, 1L));
+
+        assertEquals(2, result.size());
+        assertTrue(result.containsAll(Set.of(defaultBp1, defaultBp2)));
+        verify(blueprintRepository, never()).findByNameInAndWorkspaceId(names, 1L);
+    }
+
+    @Test
+    void testGetByNamesForWorkspaceIdWhenGlobalDefaultEnabledAndDefaultNotFound() {
+        Set<String> names = Set.of("default-bp");
+        when(entitlementService.isGlobalDefaultTemplateEnabled(ACCOUNT_ID)).thenReturn(true);
+        when(defaultBlueprintCache.isDefaultByName("default-bp")).thenReturn(true);
+        when(blueprintRepository.findGlobalDefaultByResourceNames(Set.of("default-bp"))).thenReturn(Set.of());
+
+        NotFoundException exception = assertThrows(NotFoundException.class, () -> ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> underTest.getByNamesForWorkspaceId(names, 1L)));
+
+        assertThat(exception.getMessage()).contains("default-bp");
+        verify(blueprintRepository, never()).findByNameInAndWorkspaceId(any(), anyLong());
+    }
+
+    @Test
+    void testGetByNamesForWorkspaceIdWhenGlobalDefaultEnabledAndNonDefaultNotFound() {
+        Blueprint defaultBp = getBlueprint("default-bp", DEFAULT);
+        Set<String> names = Set.of("default-bp", "user-bp");
+        when(entitlementService.isGlobalDefaultTemplateEnabled(ACCOUNT_ID)).thenReturn(true);
+        when(defaultBlueprintCache.isDefaultByName("default-bp")).thenReturn(true);
+        when(defaultBlueprintCache.isDefaultByName("user-bp")).thenReturn(false);
+        when(blueprintRepository.findGlobalDefaultByResourceNames(Set.of("default-bp"))).thenReturn(Set.of(defaultBp));
+        when(blueprintRepository.findByNameInAndWorkspaceId(Set.of("user-bp"), 1L)).thenReturn(Set.of());
+
+        NotFoundException exception = assertThrows(NotFoundException.class, () -> ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> underTest.getByNamesForWorkspaceId(names, 1L)));
+
+        assertThat(exception.getMessage()).contains("user-bp");
     }
 
     private Cluster getCluster(String name, Long id, Blueprint blueprint, DetailedStackStatus detailedStackStatus) {

@@ -13,7 +13,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
@@ -32,6 +32,7 @@ import com.sequenceiq.cloudbreak.domain.BlueprintFile;
 import com.sequenceiq.cloudbreak.domain.BlueprintUpgradeOption;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintListFilters;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.cloudbreak.service.blueprint.CrnGeneratorService;
 import com.sequenceiq.cloudbreak.service.template.ClusterTemplateService;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
@@ -54,7 +55,14 @@ public class BlueprintLoaderService {
     @Inject
     private EntitlementService entitlementService;
 
+    @Inject
+    private CrnGeneratorService crnGeneratorService;
+
     public boolean isAddingDefaultBlueprintsNecessaryForTheUser(Collection<Blueprint> blueprints) {
+        if (ThreadBasedUserCrnProvider.getUserCrn() != null
+                && entitlementService.isGlobalDefaultTemplateEnabled(ThreadBasedUserCrnProvider.getAccountId())) {
+            return false;
+        }
         for (Blueprint blueprintFromDatabase : blueprints) {
             BlueprintFile defaultBlueprint = defaultBlueprintCache.defaultBlueprints().get(blueprintFromDatabase.getName());
             if (mustUpdateTheExistingBlueprint(blueprintFromDatabase, defaultBlueprint)) {
@@ -68,28 +76,28 @@ public class BlueprintLoaderService {
     }
 
     @Measure(BlueprintLoaderService.class)
-    public Set<Blueprint> loadBlueprintsForTheWorkspace(Set<Blueprint> blueprintsInDatabase, Workspace workspace,
-            BiFunction<Iterable<Blueprint>, Workspace, Iterable<Blueprint>> saveMethod) {
-        Set<Blueprint> blueprintsWhichShouldBeUpdated = updateDefaultBlueprints(blueprintsInDatabase, workspace);
-        Set<Blueprint> blueprintsWhichAreMissing = addMissingBlueprints(blueprintsInDatabase, workspace);
+    public Set<Blueprint> loadBlueprintsForTheWorkspace(Set<Blueprint> blueprintsInDatabase,
+            Function<Iterable<Blueprint>, Iterable<Blueprint>> saveMethod, Workspace workspace, boolean globalDefaultMigration) {
+        Set<Blueprint> blueprintsWhichShouldBeUpdated = updateDefaultBlueprints(blueprintsInDatabase);
+        Set<Blueprint> blueprintsWhichAreMissing = addMissingBlueprints(blueprintsInDatabase, globalDefaultMigration);
         try {
             blueprintsWhichAreMissing.addAll(blueprintsWhichShouldBeUpdated);
-            deleteOldDefaults(blueprintsInDatabase);
+            deleteOldDefaults(blueprintsInDatabase, workspace);
             if (!blueprintsWhichAreMissing.isEmpty()) {
-                return Sets.newHashSet(getResultSetFromUpdateAndOriginalBlueprints(blueprintsInDatabase, blueprintsWhichAreMissing, workspace,
+                return Sets.newHashSet(getResultSetFromUpdateAndOriginalBlueprints(blueprintsInDatabase, blueprintsWhichAreMissing,
                         saveMethod));
             }
         } catch (Exception e) {
-            LOGGER.info("Cluster definitions {} is not available for {} workspace.", collectNames(blueprintsWhichAreMissing), workspace.getId());
+            LOGGER.info("Cluster definitions {} is not available.", collectNames(blueprintsWhichAreMissing));
         }
         return blueprintsInDatabase;
     }
 
-    public void deleteOldDefaults(Set<Blueprint> blueprintsInDatabase) {
+    public void deleteOldDefaults(Set<Blueprint> blueprintsInDatabase, Workspace workspace) {
         List<Blueprint> deletableDefaults = blueprintsInDatabase.stream()
                 .filter(blueprint -> blueprint.getStatus().equals(DEFAULT))
                 .filter(blueprint -> !defaultBlueprintCache.defaultBlueprints().containsKey(blueprint.getName()))
-                .filter(blueprint -> clusterTemplateService.getTemplatesByBlueprint(blueprint).isEmpty())
+                .filter(blueprint -> clusterTemplateService.getTemplatesByBlueprint(blueprint, workspace).isEmpty())
                 .collect(Collectors.toList());
 
         LOGGER.info("Put old default blueprints to DEFAULT_DELETED: " + deletableDefaults);
@@ -106,9 +114,9 @@ public class BlueprintLoaderService {
     }
 
     private Iterable<Blueprint> getResultSetFromUpdateAndOriginalBlueprints(Collection<Blueprint> blueprints,
-            Iterable<Blueprint> blueprintsWhichAreMissing, Workspace workspace, BiFunction<Iterable<Blueprint>, Workspace, Iterable<Blueprint>> saveMethod) {
+            Iterable<Blueprint> blueprintsWhichAreMissing, Function<Iterable<Blueprint>, Iterable<Blueprint>> saveMethod) {
         LOGGER.debug("Updating blueprints which should be modified.");
-        Iterable<Blueprint> savedBlueprints = saveMethod.apply(blueprintsWhichAreMissing, workspace);
+        Iterable<Blueprint> savedBlueprints = saveMethod.apply(blueprintsWhichAreMissing);
         LOGGER.debug("Finished to update blueprints which should be modified.");
         Map<String, Blueprint> resultBlueprints = new HashMap<>();
         for (Blueprint blueprint : blueprints.stream().filter(bp -> DEFAULT.equals(bp.getStatus())).collect(Collectors.toSet())) {
@@ -124,23 +132,25 @@ public class BlueprintLoaderService {
         return failedToUpdate.stream().map(Blueprint::getName).collect(Collectors.toSet());
     }
 
-    private Set<Blueprint> addMissingBlueprints(Collection<Blueprint> blueprintsInDatabase, Workspace workspace) {
+    private Set<Blueprint> addMissingBlueprints(Collection<Blueprint> blueprintsInDatabase, boolean globalDefaultMigration) {
         Set<Blueprint> resultList = new HashSet<>();
         LOGGER.debug("Adding default blueprints which are missing for the user.");
-        String accountId = ThreadBasedUserCrnProvider.getAccountId();
         for (Entry<String, BlueprintFile> diffBlueprint : collectDeviationOfExistingAndDefaultBlueprints(blueprintsInDatabase).entrySet()) {
-            if (blueprintListFilters.isLakehouseOptimizer(diffBlueprint.getValue()) && !entitlementService.isLakehouseOptimizerEnabled(accountId)) {
-                LOGGER.info("Lakehouse Optimizer blueprints are not enabled for workspace '{}', therefore not adding blueprint '{}' to the database.",
-                        workspace.getId(), diffBlueprint.getKey());
+            if (!globalDefaultMigration && blueprintListFilters.isLakehouseOptimizer(diffBlueprint.getValue()) &&
+                    !entitlementService.isLakehouseOptimizerEnabled(ThreadBasedUserCrnProvider.getAccountId())) {
+                LOGGER.info("Lakehouse Optimizer blueprints are not enabled, therefore not adding blueprint '{}' to the database.",
+                        diffBlueprint.getKey());
                 continue;
             }
-            LOGGER.debug("Default blueprint '{}' needs to be added for the '{}' workspace because the default validation missing.",
-                    diffBlueprint.getKey(), workspace.getId());
+            LOGGER.debug("Default blueprint '{}' needs to be added because the default validation missing.",
+                    diffBlueprint.getKey());
             Blueprint bp = new Blueprint();
-            prepareBlueprint(bp, diffBlueprint.getValue(), workspace);
+            prepareBlueprint(bp, diffBlueprint.getValue());
             bp.setName(diffBlueprint.getValue().getName());
-            bp = setupBlueprint(bp, workspace);
-            blueprintService.decorateWithCrn(bp, accountId);
+            bp = setupBlueprint(bp);
+            bp.setResourceCrn(globalDefaultMigration ?
+                    crnGeneratorService.createGlobalDefaultBlueprintCrn(bp.getName()) :
+                    crnGeneratorService.createBlueprintCrn(ThreadBasedUserCrnProvider.getAccountId()));
             resultList.add(bp);
         }
 
@@ -148,16 +158,16 @@ public class BlueprintLoaderService {
         return resultList;
     }
 
-    private Set<Blueprint> updateDefaultBlueprints(Iterable<Blueprint> blueprintsInDatabase, Workspace workspace) {
+    private Set<Blueprint> updateDefaultBlueprints(Iterable<Blueprint> blueprintsInDatabase) {
         Set<Blueprint> resultList = new HashSet<>();
         LOGGER.debug("Updating default blueprints which are contains text modifications.");
         for (Blueprint blueprintInDatabase : blueprintsInDatabase) {
             BlueprintFile defaultBlueprint = defaultBlueprintCache.defaultBlueprints().get(blueprintInDatabase.getName());
             if (isActiveBlueprintMustBeUpdatedAndNotUserManaged(blueprintInDatabase, defaultBlueprint)
                     || isNotActiveAndMustComeBack(blueprintInDatabase, defaultBlueprint)) {
-                LOGGER.debug("Default blueprint '{}' needs to modify for the '{}' workspace because the validation text changed.",
-                        blueprintInDatabase.getName(), workspace.getId());
-                resultList.add(prepareBlueprint(blueprintInDatabase, defaultBlueprint, workspace));
+                LOGGER.debug("Default blueprint '{}' needs to modify because the validation text changed.",
+                        blueprintInDatabase.getName());
+                resultList.add(prepareBlueprint(blueprintInDatabase, defaultBlueprint));
             }
         }
         LOGGER.debug("Finished to Update default blueprints which are contains text modifications.");
@@ -168,10 +178,10 @@ public class BlueprintLoaderService {
         return isActiveDefaultBlueprint(blueprintInDatabase)
                 && isBlueprintInTheDefaultCache(defaultBlueprint)
                 && (defaultBlueprintsDefaultBlueprintTextNotSameAsNew(blueprintInDatabase, defaultBlueprint.getDefaultBlueprintText())
-                        || defaultBlueprintContainsNewDescription(blueprintInDatabase, defaultBlueprint)
-                        || isBlueprintInDBSameNameButUserManaged(blueprintInDatabase, defaultBlueprint)
-                        || isUpgradeOptionModified(blueprintInDatabase, defaultBlueprint)
-                        || isHybridOptionModified(blueprintInDatabase, defaultBlueprint));
+                || defaultBlueprintContainsNewDescription(blueprintInDatabase, defaultBlueprint)
+                || isBlueprintInDBSameNameButUserManaged(blueprintInDatabase, defaultBlueprint)
+                || isUpgradeOptionModified(blueprintInDatabase, defaultBlueprint)
+                || isHybridOptionModified(blueprintInDatabase, defaultBlueprint));
     }
 
     private boolean isHybridOptionModified(Blueprint blueprintInDatabase, BlueprintFile defaultBlueprint) {
@@ -186,9 +196,8 @@ public class BlueprintLoaderService {
         return blueprintInDatabase.getName().equals(defaultBlueprint.getName()) && blueprintInDatabase.getStatus() == USER_MANAGED;
     }
 
-    private Blueprint prepareBlueprint(Blueprint blueprintFromDatabase, BlueprintFile newBlueprint,
-            Workspace workspace) {
-        setupBlueprint(blueprintFromDatabase, workspace);
+    private Blueprint prepareBlueprint(Blueprint blueprintFromDatabase, BlueprintFile newBlueprint) {
+        setupBlueprint(blueprintFromDatabase);
         blueprintFromDatabase.setDefaultBlueprintText(newBlueprint.getBlueprintText());
         blueprintFromDatabase.setBlueprintTextToBlankIfDefaultTextIsPresent(newBlueprint.getBlueprintText());
         blueprintFromDatabase.setDescription(newBlueprint.getDescription());
@@ -203,8 +212,7 @@ public class BlueprintLoaderService {
         return blueprintFromDatabase;
     }
 
-    private Blueprint setupBlueprint(Blueprint blueprint, Workspace workspace) {
-        blueprint.setWorkspace(workspace);
+    private Blueprint setupBlueprint(Blueprint blueprint) {
         blueprint.setStatus(DEFAULT);
         return blueprint;
     }
@@ -278,9 +286,9 @@ public class BlueprintLoaderService {
         return isActiveDefaultBlueprint(blueprintFromDatabase)
                 && isBlueprintInTheDefaultCache(defaultBlueprint)
                 && (defaultBlueprintsDefaultBlueprintTextNotSameAsNew(blueprintFromDatabase, defaultBlueprint.getDefaultBlueprintText())
-                        || defaultBlueprintContainsNewDescription(blueprintFromDatabase, defaultBlueprint)
-                        || isUpgradeOptionModified(blueprintFromDatabase, defaultBlueprint)
-                        || isHybridOptionModified(blueprintFromDatabase, defaultBlueprint));
+                || defaultBlueprintContainsNewDescription(blueprintFromDatabase, defaultBlueprint)
+                || isUpgradeOptionModified(blueprintFromDatabase, defaultBlueprint)
+                || isHybridOptionModified(blueprintFromDatabase, defaultBlueprint));
     }
 
     private boolean defaultBlueprintDoesNotExistInTheDatabase(Collection<Blueprint> blueprints) {

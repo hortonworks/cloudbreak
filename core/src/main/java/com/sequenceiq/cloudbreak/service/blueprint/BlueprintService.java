@@ -5,16 +5,19 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus.DE
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus.SERVICE_MANAGED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus.USER_MANAGED;
 import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
+import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFoundException;
 
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import jakarta.inject.Inject;
 import jakarta.validation.constraints.NotNull;
@@ -31,6 +34,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.MapBindingResult;
 
+import com.google.common.collect.Sets;
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.service.CompositeAuthResourcePropertyProvider;
 import com.sequenceiq.authorization.service.OwnerAssignmentService;
@@ -40,9 +44,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.aspect.Measure;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
-import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.cloud.model.AutoscaleRecommendation;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformRecommendation;
 import com.sequenceiq.cloudbreak.cloud.model.ScaleRecommendation;
@@ -63,6 +66,7 @@ import com.sequenceiq.cloudbreak.domain.view.BlueprintView;
 import com.sequenceiq.cloudbreak.domain.view.CompactView;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.init.blueprint.BlueprintLoaderService;
+import com.sequenceiq.cloudbreak.init.blueprint.DefaultBlueprintCache;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
 import com.sequenceiq.cloudbreak.repository.BlueprintViewRepository;
@@ -129,7 +133,7 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
     private BlueprintConfigValidator blueprintConfigValidator;
 
     @Inject
-    private RegionAwareCrnGenerator regionAwareCrnGenerator;
+    private CrnGeneratorService blueprintCrnService;
 
     @Inject
     private ClusterTemplateViewService clusterTemplateViewService;
@@ -143,13 +147,19 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
     @Inject
     private CmTemplateProcessorFactory cmTemplateProcessorFactory;
 
+    @Inject
+    private EntitlementService entitlementService;
+
+    @Inject
+    private DefaultBlueprintCache defaultBlueprintCache;
+
     public Blueprint get(Long id) {
         return blueprintRepository.findById(id).orElseThrow(notFound("Cluster definition", id));
     }
 
     public Blueprint createForLoggedInUser(Blueprint blueprint, Long workspaceId, String accountId, String creator) {
         validate(blueprint, false);
-        decorateWithCrn(blueprint, accountId);
+        blueprint.setResourceCrn(blueprintCrnService.createBlueprintCrn(accountId));
         ownerAssignmentService.assignResourceOwnerRoleIfEntitled(creator, blueprint.getResourceCrn());
         try {
             return super.createForLoggedInUserInTransaction(blueprint, workspaceId);
@@ -161,7 +171,7 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
 
     public Blueprint createWithInternalUser(Blueprint blueprint, Long workspaceId, String accountId) {
         validate(blueprint, true);
-        blueprint.setResourceCrn(createCRN(accountId));
+        blueprint.setResourceCrn(blueprintCrnService.createBlueprintCrn(accountId));
         try {
             return transactionService.required(() -> {
                 Workspace workspace = getWorkspaceService().getByIdWithoutAuth(workspaceId);
@@ -189,27 +199,51 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
     }
 
     public Blueprint deleteByWorkspace(NameOrCrn nameOrCrn, Long workspaceId) {
-        Blueprint deleted = nameOrCrn.hasName()
-                ? super.deleteByNameFromWorkspace(nameOrCrn.getName(), workspaceId)
-                : delete(blueprintRepository.findByResourceCrnAndWorkspaceId(nameOrCrn.getCrn(), workspaceId)
-                .orElseThrow(() -> notFound("blueprint", nameOrCrn.getCrn()).get()));
+        Blueprint deleted = delete(getByWorkspace(nameOrCrn, workspaceId));
         ownerAssignmentService.notifyResourceDeleted(deleted.getResourceCrn());
         return deleted;
     }
 
     public Blueprint getByWorkspace(@NotNull NameOrCrn nameOrCrn, Long workspaceId) {
-        return nameOrCrn.hasName()
-                ? getByNameForWorkspaceId(nameOrCrn.getName(), workspaceId)
-                : getByCrnAndWorkspaceIdAndAddToMdc(nameOrCrn.getCrn(), workspaceId);
+        if (nameOrCrn.hasName()) {
+            if (shouldReturnGlobalDefaultByName(nameOrCrn.getName())) {
+                return checkUsable(blueprintRepository.findGlobalDefaultByName(nameOrCrn.getName())
+                        .orElseThrow(notFound("Cluster template", nameOrCrn.getName())), nameOrCrn.getName());
+            }
+            return getByNameForWorkspaceId(nameOrCrn.getName(), workspaceId);
+        } else {
+            if (shouldReturnGlobalDefaultByCrn(nameOrCrn.getCrn())) {
+                return checkUsable(blueprintRepository.findGlobalDefaultByResourceCrn(nameOrCrn.getCrn())
+                        .orElseThrow(notFound("Cluster template", nameOrCrn.getCrn())), nameOrCrn.getCrn());
+            }
+            Blueprint bp = blueprintRepository.findByResourceCrnAndWorkspaceId(nameOrCrn.getCrn(), workspaceId)
+                    .orElseThrow(notFound("Cluster template", nameOrCrn.getCrn()));
+            MDCBuilder.buildMdcContext(bp);
+            return bp;
+        }
+    }
+
+    private Blueprint checkUsable(Blueprint blueprint, String identifier) {
+        if (blueprintListFilters.isLakehouseOptimizer(blueprint.getName())
+                && !entitlementService.isLakehouseOptimizerEnabled(ThreadBasedUserCrnProvider.getAccountId())) {
+            throw NotFoundException.notFoundException("Cluster template", identifier);
+        }
+        return blueprint;
+    }
+
+    private boolean shouldReturnGlobalDefaultByName(String name) {
+        return isGlobalDefaultTemplateEnabled()
+                && defaultBlueprintCache.isDefaultByName(name);
+    }
+
+    private boolean shouldReturnGlobalDefaultByCrn(String crn) {
+        return isGlobalDefaultTemplateEnabled()
+                && defaultBlueprintCache.isDefaultByCrn(crn);
     }
 
     public String getCdhVersion(@NotNull NameOrCrn nameOrCrn, Long workspaceId) {
         Blueprint blueprint = getByWorkspace(nameOrCrn, workspaceId);
         return new CmTemplateProcessor(blueprint.getBlueprintJsonText()).getStackVersion();
-    }
-
-    public void decorateWithCrn(Blueprint bp, String accountId) {
-        bp.setResourceCrn(createCRN(accountId));
     }
 
     private Set<String> getHueHostGroups(String blueprintText) {
@@ -253,7 +287,7 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
 
     public ScaleRecommendation getScaleRecommendationByDatahubCrn(Long workspaceId, String datahubCrn) {
         Blueprint blueprint = blueprintRepository.findByDatahubCrn(datahubCrn)
-                .orElseThrow(NotFoundException.notFound("Blueprint by datahub crn", datahubCrn));
+                .orElseThrow(notFound("Cluster template by datahub crn", datahubCrn));
         return cloudResourceAdvisor.createForBlueprint(workspaceId, blueprint);
     }
 
@@ -267,16 +301,6 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
         User user = getLoggedInUser();
         Workspace workspace = getWorkspaceService().get(workspaceId, user);
         return getAllAvailableInWorkspace(workspace);
-    }
-
-    public Set<Blueprint> findAllByWorkspaceWithoutUpdate(Workspace workspace) {
-        return getAllAvailableInWorkspaceWithoutUpdate(workspace);
-    }
-
-    public Set<Blueprint> findAllByWorkspaceIdWithoutUpdate(Long workspaceId) {
-        User user = getLoggedInUser();
-        Workspace workspace = getWorkspaceService().get(workspaceId, user);
-        return getAllAvailableInWorkspaceWithoutUpdate(workspace);
     }
 
     public boolean anyOfTheServiceTypesPresentOnBlueprint(String blueprintText, List<String> serviceTypes) {
@@ -294,11 +318,23 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
         User user = getLoggedInUser();
         Workspace workspace = getWorkspaceService().get(workspaceId, user);
         updateDefaultBlueprintCollection(workspace);
-        Set<BlueprintView> blueprintViews = blueprintViewRepository.findAllByNotDeletedInWorkspace(workspaceId);
+        Set<BlueprintView> blueprintViews = getAllByNotDeletedInWorkspace(workspaceId);
         return blueprintViews.stream()
-                .filter(blueprintListFilters::isDistroXDisplayed)
-                .filter(bp -> withSdx || !blueprintListFilters.isDatalakeBlueprint(bp))
+                .filter(blueprintListFilters.createFilter(withSdx, entitlementService.isLakehouseOptimizerEnabled(ThreadBasedUserCrnProvider.getAccountId())))
                 .collect(Collectors.toSet());
+    }
+
+    private Set<BlueprintView> getAllByNotDeletedInWorkspace(Long workspaceId) {
+        Set<BlueprintView> notDeletedDefaultsInAccount = blueprintViewRepository.findAllByNotDeletedInWorkspace(workspaceId);
+        if (isGlobalDefaultTemplateEnabled()) {
+            Set<BlueprintView> globalDefaultBlueprints = blueprintViewRepository.findAllGlobalDefaults();
+            Set<BlueprintView> result = new HashSet<>();
+            result.addAll(globalDefaultBlueprints);
+            result.addAll(notDeletedDefaultsInAccount.stream().filter(bp -> !DEFAULT.equals(bp.getStatus())).collect(Collectors.toSet()));
+            return result;
+        } else {
+            return notDeletedDefaultsInAccount;
+        }
     }
 
     @Measure(BlueprintService.class)
@@ -309,22 +345,71 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
 
     @Measure(BlueprintService.class)
     public Set<Blueprint> getAllAvailableInWorkspaceWithoutUpdate(Workspace workspace) {
-        return blueprintRepository.findAllByNotDeletedInWorkspace(workspace.getId());
+        if (isGlobalDefaultTemplateEnabled()) {
+            Set<Blueprint> defaultBlueprints = blueprintRepository.findAllGlobalDefaults(Set.of(DEFAULT));
+            Set<Blueprint> blueprintsInWorkspace =
+                    blueprintRepository.findAllByWorkspaceIdAndStatusIn(workspace.getId(), Set.of(USER_MANAGED, SERVICE_MANAGED));
+            return Stream.concat(defaultBlueprints.stream(), blueprintsInWorkspace.stream())
+                    .collect(Collectors.toCollection(LinkedHashSet::new));
+        } else {
+            return blueprintRepository.findAllByNotDeletedInWorkspace(workspace.getId());
+        }
+    }
+
+    private boolean isGlobalDefaultTemplateEnabled() {
+        return entitlementService.isGlobalDefaultTemplateEnabled(ThreadBasedUserCrnProvider.getAccountId());
+    }
+
+    @Override
+    public Blueprint getByNameForWorkspaceId(String name, Long workspaceId) {
+        if (shouldReturnGlobalDefaultByName(name)) {
+            return blueprintRepository.findGlobalDefaultByName(name).orElseThrow(notFound("Cluster template", name));
+        }
+        return super.getByNameForWorkspaceId(name, workspaceId);
+    }
+
+    @Override
+    public Set<Blueprint> getByNamesForWorkspaceId(Set<String> names, Long workspaceId) {
+        if (isGlobalDefaultTemplateEnabled()) {
+            Set<String> defaultResourceNames = names.stream().filter(defaultBlueprintCache::isDefaultByName).collect(Collectors.toSet());
+            Set<Blueprint> globalDefaultBlueprints = blueprintRepository.findGlobalDefaultByResourceNames(defaultResourceNames);
+            Set<String> notFound = Sets.difference(defaultResourceNames, globalDefaultBlueprints.stream().map(Blueprint::getName).collect(Collectors.toSet()));
+            if (!notFound.isEmpty()) {
+                throw new NotFoundException(String.format("No resource(s) found with name(s) '%s'",
+                        notFound.stream().map(name -> '\'' + name + '\'').collect(Collectors.joining(", "))));
+            }
+            Set<String> notDefaultResourceNames = names.stream().filter(bp -> !defaultBlueprintCache.isDefaultByName(bp)).collect(Collectors.toSet());
+            Set<Blueprint> notDefaultBlueprints = super.getByNamesForWorkspaceId(notDefaultResourceNames, workspaceId);
+            return Stream.concat(globalDefaultBlueprints.stream(), notDefaultBlueprints.stream()).collect(Collectors.toSet());
+        } else {
+            return super.getByNamesForWorkspaceId(names, workspaceId);
+        }
+    }
+
+    @Override
+    public Blueprint getByNameForWorkspaceId(String name, Long workspaceId, boolean fillMdcContext) {
+        if (shouldReturnGlobalDefaultByName(name)) {
+            return blueprintRepository.findGlobalDefaultByName(name).orElseThrow(notFound("Cluster template", name));
+        }
+        return super.getByNameForWorkspaceId(name, workspaceId, fillMdcContext);
     }
 
     @Measure(BlueprintService.class)
     public Blueprint getByNameForWorkspaceAndLoadDefaultsIfNecessary(String name, Workspace workspace) {
+        if (shouldReturnGlobalDefaultByName(name)) {
+            return blueprintRepository.findGlobalDefaultByName(name).orElseThrow(notFound("Cluster template", name));
+        }
         Optional<Blueprint> blueprint = blueprintRepository.findByNameAndWorkspaceId(name, workspace.getId());
         if (blueprint.isPresent()) {
             return blueprint.get();
         } else {
-            Set<Blueprint> updatedDefaultBlueprints = updateDefaultBlueprintCollection(workspace);
-            blueprint = filterBlueprintsByName(name, updatedDefaultBlueprints);
+            updateDefaultBlueprintCollection(workspace);
+            blueprint = blueprintRepository.findByNameAndWorkspaceId(name, workspace.getId());
             if (blueprint.isPresent()) {
                 return blueprint.get();
             }
         }
-        throw new NotFoundException(String.format("No cluster template found with name '%s'", name));
+        throw notFoundException("Cluster template", name);
     }
 
     @Measure(BlueprintService.class)
@@ -334,30 +419,27 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
         updateDefaultBlueprintCollection(workspace);
     }
 
-    private Set<Blueprint> updateDefaultBlueprintCollection(Workspace workspace) {
-        Set<Blueprint> blueprintsInDatabase = blueprintRepository.findAllByWorkspaceIdAndStatusIn(workspace.getId(),
-                Set.of(DEFAULT, DEFAULT_DELETED));
-        if (!blueprintLoaderService.isAddingDefaultBlueprintsNecessaryForTheUser(blueprintsInDatabase)) {
-            if (blueprintLoaderService.defaultBlueprintDoesNotExistInTheCache(blueprintsInDatabase)) {
-                blueprintLoaderService.deleteOldDefaults(blueprintsInDatabase);
+    public void updateDefaultBlueprintCollection(Workspace workspace) {
+        boolean globalDefaultMigration = workspace == null;
+        if (globalDefaultMigration || !isGlobalDefaultTemplateEnabled()) {
+            Set<ResourceStatus> statuses = Set.of(DEFAULT, DEFAULT_DELETED);
+            Set<Blueprint> blueprintsInDatabase = globalDefaultMigration ? blueprintRepository.findAllGlobalDefaults(statuses) :
+                    blueprintRepository.findAllByWorkspaceIdAndStatusIn(workspace.getId(), statuses);
+            if (!blueprintLoaderService.isAddingDefaultBlueprintsNecessaryForTheUser(blueprintsInDatabase)) {
+                if (blueprintLoaderService.defaultBlueprintDoesNotExistInTheCache(blueprintsInDatabase)) {
+                    blueprintLoaderService.deleteOldDefaults(blueprintsInDatabase, workspace);
+                }
+            } else {
+                LOGGER.debug("Modifying blueprints based on the defaults.");
+                try {
+                    Set<Blueprint> updatedBlueprints = blueprintLoaderService.loadBlueprintsForTheWorkspace(blueprintsInDatabase,
+                            blueprints -> saveDefaultsWithReadRight(blueprints, workspace), workspace, globalDefaultMigration);
+                    LOGGER.debug("Blueprint modifications finished based on the defaults.");
+                } catch (ConstraintViolationException e) {
+                    updateDefaultBlueprintCollection(workspace);
+                }
             }
-            return blueprintsInDatabase;
         }
-        LOGGER.debug("Modifying blueprints based on the defaults for the '{}' workspace.", workspace.getId());
-        try {
-            Set<Blueprint> updatedBlueprints = blueprintLoaderService.loadBlueprintsForTheWorkspace(
-                    blueprintsInDatabase,
-                    workspace,
-                    this::saveDefaultsWithReadRight);
-            LOGGER.debug("Blueprint modifications finished based on the defaults for '{}' workspace.", workspace.getId());
-            return updatedBlueprints;
-        } catch (ConstraintViolationException e) {
-            return updateDefaultBlueprintCollection(workspace);
-        }
-    }
-
-    private Optional<Blueprint> filterBlueprintsByName(String name, Collection<Blueprint> blueprints) {
-        return blueprints.stream().filter(blueprint -> name.equals(blueprint.getName())).findFirst();
     }
 
     public boolean isDatalakeBlueprint(Blueprint blueprint) {
@@ -372,7 +454,7 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
                     try {
                         return blueprintRepository.save(blueprint);
                     } catch (DataIntegrityViolationException e) {
-                        if (e.getMessage().contains("blueprintname_in_org_unique")) {
+                        if (e.getMessage().contains("blueprint_name_workspace_idx") || e.getMessage().contains("blueprint_name_null_workspace_idx")) {
                             LOGGER.debug("Blueprint already exists in the database: {}", blueprint.getName(), e);
                         } else {
                             LOGGER.warn("Cannot update the blueprint: {}, blueprinttext: {}", blueprint.getName(), blueprint.getBlueprintJsonText(), e);
@@ -549,33 +631,21 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
         return getByNameForWorkspaceAndLoadDefaultsIfNecessary(blueprintName, workspace).getBlueprintJsonText();
     }
 
-    private Blueprint getByCrnAndWorkspaceIdAndAddToMdc(String crn, Long workspaceId) {
-        Blueprint bp = blueprintRepository.findByResourceCrnAndWorkspaceId(crn, workspaceId)
-                .orElseThrow(() -> notFound("cluster template", crn).get());
-        MDCBuilder.buildMdcContext(bp);
-        return bp;
-    }
-
-    private String createCRN(String accountId) {
-        return regionAwareCrnGenerator.generateCrnStringWithUuid(CrnResourceDescriptor.CLUSTER_TEMPLATE, accountId);
-    }
-
     @Override
     public String getResourceCrnByResourceName(String resourceName) {
+        if (shouldReturnGlobalDefaultByName(resourceName)) {
+            return defaultBlueprintCache.defaultBlueprints().get(resourceName).getResourceCrn();
+        }
         return blueprintRepository.findResourceCrnByNameAndAccountId(resourceName, ThreadBasedUserCrnProvider.getAccountId())
-                .orElseThrow(NotFoundException.notFound("Blueprint", resourceName));
+                .orElseThrow(notFound("Cluster template", resourceName));
     }
 
     @Override
     public List<String> getResourceCrnListByResourceNameList(List<String> resourceNames) {
+        boolean globalDefaultBlueprintEnabled = isGlobalDefaultTemplateEnabled();
         return resourceNames.stream()
-                .map(resourceName -> blueprintRepository.findResourceCrnByNameAndAccountId(resourceName, ThreadBasedUserCrnProvider.getAccountId())
-                        .orElseThrow(NotFoundException.notFound("Blueprint", resourceName)))
+                .map(this::getResourceCrnByResourceName)
                 .collect(Collectors.toList());
-    }
-
-    public Blueprint getByResourceCrn(String resourceCrn) {
-        return blueprintRepository.findByResourceCrn(resourceCrn);
     }
 
     @Override

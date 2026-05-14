@@ -1,4 +1,9 @@
 {
   "name":"cluster-template-aws-ranger",
-  "cloudPlatform": "AWS"
+  "cloudPlatform": "AWS",
+  "distroXTemplate": {
+    "cluster": {
+      "blueprintName": "Blueprint name"
+    }
+  }
 }

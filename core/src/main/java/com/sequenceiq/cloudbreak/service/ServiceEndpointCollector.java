@@ -53,6 +53,7 @@ import com.sequenceiq.cloudbreak.template.views.ClusterExposedServiceView;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.cloudbreak.view.ClusterView;
 import com.sequenceiq.cloudbreak.view.GatewayView;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
 @Service
 public class ServiceEndpointCollector {
@@ -91,12 +92,12 @@ public class ServiceEndpointCollector {
     @Inject
     private CmTemplateGeneratorService clusterTemplateGeneratorService;
 
-    public Collection<ExposedServiceV4Response> getKnoxServices(Long workspaceId, String blueprintName) {
-        Blueprint blueprint = blueprintService.getByNameForWorkspaceId(blueprintName, workspaceId);
+    public Collection<ExposedServiceV4Response> getKnoxServices(Workspace workspace, String blueprintName) {
+        Blueprint blueprint = blueprintService.getByNameForWorkspaceId(blueprintName, workspace.getId());
         if (blueprint == null) {
             throw new NotFoundException(String.format("Blueprint could not be find by name: '%s'.", blueprintName));
         }
-        return getKnoxServices(blueprint, entitlementService.getEntitlements(blueprint.getWorkspace().getTenant().getName()));
+        return getKnoxServices(blueprint, entitlementService.getEntitlements(workspace.getTenant().getName()));
     }
 
     public String getManagerServerUrl(StackDtoDelegate stackDto, String managerIp) {

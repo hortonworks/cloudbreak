@@ -21,6 +21,7 @@ public class ClusterTemplateGetAction implements Action<ClusterTemplateTestDto, 
         ClusterTemplateV4Response response = client.getDefaultClient(testContext)
                 .clusterTemplateV4EndPoint()
                 .getByName(client.getWorkspaceId(), testDto.getName());
+        testDto.setResponse(response);
         testDto.setResponses(Sets.newHashSet(response));
         Log.whenJson(LOGGER, " ClusterTemplateEntity get call was successful:\n", response);
         return testDto;

@@ -1,4 +1,9 @@
 {
-  "name":"cluster-template-aws",
-  "cloudPlatform": "AWS"
+  "name": "cluster-template-aws",
+  "cloudPlatform": "AWS",
+  "distroXTemplate": {
+    "cluster": {
+      "blueprintName": "Blueprint name"
+    }
+  }
 }

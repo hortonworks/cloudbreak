@@ -87,6 +87,7 @@ class BlueprintListFiltersTest {
                 .stackName(stackName)
                 .stackVersion("stackVersion")
                 .stackType("stackType")
+                .resourceCrn("resourceCrn")
                 .build();
     }
 }

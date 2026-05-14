@@ -43,6 +43,7 @@ auth:
     cm.observability.saas.trial: false
     cm.observability.realtimejobs: false
     cm.observability.dmp: false
+    global.default.template.enabled: false
     datalake:
       customimage.enable: true
       loadbalancer.enable: true

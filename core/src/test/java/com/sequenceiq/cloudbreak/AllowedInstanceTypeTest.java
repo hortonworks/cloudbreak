@@ -6,12 +6,19 @@ import static com.sequenceiq.cloudbreak.cloud.azure.DistroxEnabledInstanceTypes.
 import static com.sequenceiq.cloudbreak.cloud.gcp.GcpEnabledInstanceTypes.GCP_ENABLED_TYPES_LIST;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 
+import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -24,6 +31,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import com.sequenceiq.cloudbreak.AllowedInstanceTypeTest.TestAppContext;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.requests.DefaultClusterTemplateV4Request;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.base64.Base64Util;
@@ -33,9 +41,13 @@ import com.sequenceiq.cloudbreak.common.provider.ProviderPreferencesService;
 import com.sequenceiq.cloudbreak.config.ConversionConfig;
 import com.sequenceiq.cloudbreak.converter.StackToTemplatePreparationObjectConverter;
 import com.sequenceiq.cloudbreak.converter.v4.clustertemplate.DefaultClusterTemplateV4RequestToClusterTemplateConverter;
+import com.sequenceiq.cloudbreak.domain.BlueprintFile;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterTemplate;
+import com.sequenceiq.cloudbreak.init.blueprint.DefaultBlueprintCache;
 import com.sequenceiq.cloudbreak.init.clustertemplate.DefaultClusterTemplateCache;
 import com.sequenceiq.cloudbreak.service.account.PreferencesService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
+import com.sequenceiq.cloudbreak.service.blueprint.CrnGeneratorService;
 import com.sequenceiq.cloudbreak.service.template.ClusterTemplateService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
@@ -43,11 +55,14 @@ import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLoca
 import com.sequenceiq.distrox.v1.distrox.service.InternalClusterTemplateValidator;
 
 @ExtendWith(SpringExtension.class)
-@SpringBootTest(classes = AllowedInstanceTypeTest.TestAppContext.class)
+@SpringBootTest(classes = TestAppContext.class)
 class AllowedInstanceTypeTest {
 
     @Inject
     private DefaultClusterTemplateCache templateCache;
+
+    @Inject
+    private DefaultClusterTemplateV4RequestToClusterTemplateConverter converter;
 
     @Test
     void validateAwsClusterTemplatesByInstanceType() {
@@ -139,5 +154,22 @@ class AllowedInstanceTypeTest {
         @MockBean
         private InternalClusterTemplateValidator internalClusterTemplateValidator;
 
+        @MockBean
+        private DefaultBlueprintCache defaultBlueprintCache;
+
+        @MockBean
+        private CrnGeneratorService crnGeneratorService;
+
+        @PostConstruct
+        public void setUp() {
+            when(converter.convert(any())).thenReturn(mock(ClusterTemplate.class));
+            doAnswer(invocation -> UUID.randomUUID().toString())
+                    .when(crnGeneratorService).createGlobalDefaultClusterDefinitionCrn(anyString());
+            doAnswer(invocation -> {
+                BlueprintFile blueprintFile = mock(BlueprintFile.class);
+                when(blueprintFile.getStackVersion()).thenReturn("x.y.z");
+                return blueprintFile;
+            }).when(defaultBlueprintCache).getDefaultByName(anyString());
+        }
     }
 }

@@ -1,4 +1,9 @@
 {
   "name":"cluster-template",
-  "cloudPlatform": "AZURE"
+  "cloudPlatform": "AZURE",
+  "distroXTemplate": {
+    "cluster": {
+      "blueprintName": "Blueprint name"
+    }
+  }
 }

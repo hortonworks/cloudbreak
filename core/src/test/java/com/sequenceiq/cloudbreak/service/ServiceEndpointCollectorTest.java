@@ -394,30 +394,33 @@ public class ServiceEndpointCollectorTest {
     @Test
     public void testGetKnoxServices() {
         mockBlueprintTextProcessor();
-        Collection<ExposedServiceV4Response> exposedServiceResponses = underTest.getKnoxServices(workspace.getId(), "blueprint");
+        when(workspace.getTenant()).thenReturn(new Tenant());
+
+        Collection<ExposedServiceV4Response> exposedServiceResponses = underTest.getKnoxServices(workspace, "blueprint");
         assertEquals(4L, exposedServiceResponses.size());
 
         mockBlueprintTextProcessor();
 
-        exposedServiceResponses = underTest.getKnoxServices(workspace.getId(), "blueprint");
+        exposedServiceResponses = underTest.getKnoxServices(workspace, "blueprint");
         assertEquals(4L, exposedServiceResponses.size());
 
         mockBlueprintTextProcessor();
 
-        exposedServiceResponses = underTest.getKnoxServices(workspace.getId(), "blueprint");
+        exposedServiceResponses = underTest.getKnoxServices(workspace, "blueprint");
         assertEquals(4L, exposedServiceResponses.size());
     }
 
     @Test
     public void testGetKnoxServicesWithLivyServer() {
         mockBlueprintTextProcessor();
+        when(workspace.getTenant()).thenReturn(new Tenant());
 
-        Collection<ExposedServiceV4Response> exposedServiceResponses = underTest.getKnoxServices(workspace.getId(), "blueprint");
+        Collection<ExposedServiceV4Response> exposedServiceResponses = underTest.getKnoxServices(workspace, "blueprint");
         assertEquals(4L, exposedServiceResponses.size());
 
         mockBlueprintTextProcessor();
 
-        exposedServiceResponses = underTest.getKnoxServices(workspace.getId(), "blueprint");
+        exposedServiceResponses = underTest.getKnoxServices(workspace, "blueprint");
         assertEquals(4L, exposedServiceResponses.size());
     }
 

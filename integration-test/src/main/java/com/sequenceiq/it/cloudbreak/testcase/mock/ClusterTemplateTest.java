@@ -13,6 +13,7 @@ import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.ClusterTemplateV4Type;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
+import com.sequenceiq.cloudbreak.auth.altus.model.Entitlement;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.it.cloudbreak.assertion.audit.ClusterTemplateAuditGrpcServiceAssertion;
 import com.sequenceiq.it.cloudbreak.assertion.clustertemplate.ClusterTemplateTestAssertion;
@@ -21,6 +22,7 @@ import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.client.LdapTestClient;
 import com.sequenceiq.it.cloudbreak.client.RecipeTestClient;
+import com.sequenceiq.it.cloudbreak.client.UmsTestClient;
 import com.sequenceiq.it.cloudbreak.cloud.v4.mock.MockCloudProvider;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
@@ -37,6 +39,7 @@ import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXNetworkTest
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTemplateTestDto;
+import com.sequenceiq.it.cloudbreak.dto.ums.UmsTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
 
@@ -65,6 +68,9 @@ public class ClusterTemplateTest extends AbstractMockTest {
 
     @Inject
     private ClusterTemplateAuditGrpcServiceAssertion clusterTemplateAuditGrpcServiceAssertion;
+
+    @Inject
+    private UmsTestClient umsTestClient;
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
@@ -184,7 +190,10 @@ public class ClusterTemplateTest extends AbstractMockTest {
     )
     public void testListDefaultClusterTemplate(MockedTestContext testContext) {
         String generatedKey = resourcePropertyProvider().getName();
+        String accountId = testContext.getActingUserCrn().getAccountId();
         testContext
+                .given(UmsTestDto.class)
+                .when(umsTestClient.grantEntitlement(accountId, Entitlement.CDP_GLOBAL_DEFAULT_TEMPLATE.name()))
                 .given(ClusterTemplateTestDto.class)
                 .when(clusterTemplateTestClient.listV4(), RunningParameter.key(generatedKey))
                 .then(this::validateDefaultCount)
@@ -289,7 +298,7 @@ public class ClusterTemplateTest extends AbstractMockTest {
                 .given(ClusterTemplateTestDto.class)
                 .withDistroXTemplateKey("dixTemplate")
                 .whenException(clusterTemplateTestClient.createV4(), NotFoundException.class,
-                        expectedMessage("No cluster template found with name 'thisBlueprintDoesNotExistsForSure'"))
+                        expectedMessage("Cluster template 'thisBlueprintDoesNotExistsForSure' not found."))
                 .validate();
     }
 

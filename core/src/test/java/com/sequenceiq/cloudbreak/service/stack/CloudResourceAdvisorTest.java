@@ -22,6 +22,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.AutoscaleRecommendation;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
@@ -52,6 +53,8 @@ public class CloudResourceAdvisorTest {
     private static final String VERSION_7_2_0 = "7.2.0";
 
     private static final String TEST_BLUEPRINT_NAME = "testBp";
+
+    private static final String USER_CRN = "crn:cdp:iam:us-west-1:account1:user:user1";
 
     @Mock
     private Workspace workspace;
@@ -106,7 +109,7 @@ public class CloudResourceAdvisorTest {
         when(blueprintTextProcessorFactory.createBlueprintTextProcessor("{\"Blueprints\":{123:2}}")).thenReturn(blueprintTextProcessor);
         when(blueprintService.getByNameForWorkspaceId(any(), anyLong())).thenReturn(blueprint);
         assertEquals(new AutoscaleRecommendation(Set.of(), Set.of()),
-                underTest.getAutoscaleRecommendation(workspace.getId(), TEST_BLUEPRINT_NAME));
+                ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.getAutoscaleRecommendation(workspace.getId(), TEST_BLUEPRINT_NAME)));
     }
 
     @Test
@@ -118,7 +121,7 @@ public class CloudResourceAdvisorTest {
         when(blueprintTextProcessor.recommendAutoscale(any(), any())).thenReturn(new AutoscaleRecommendation(Set.of("compute"), Set.of("compute")));
         when(blueprintService.getByNameForWorkspaceId(any(), anyLong())).thenReturn(blueprint);
         assertEquals(new AutoscaleRecommendation(Set.of("compute"), Set.of("compute")),
-                underTest.getAutoscaleRecommendation(workspace.getId(), TEST_BLUEPRINT_NAME));
+                ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.getAutoscaleRecommendation(workspace.getId(), TEST_BLUEPRINT_NAME)));
     }
 
     @Test
@@ -130,7 +133,7 @@ public class CloudResourceAdvisorTest {
         when(blueprintTextProcessor.recommendAutoscale(any(), any())).thenReturn(new AutoscaleRecommendation(Set.of(), Set.of()));
         when(blueprintService.getByNameForWorkspaceId(any(), anyLong())).thenReturn(blueprint);
         assertEquals(new AutoscaleRecommendation(Set.of(), Set.of()),
-                underTest.getAutoscaleRecommendation(workspace.getId(), TEST_BLUEPRINT_NAME));
+                ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.getAutoscaleRecommendation(workspace.getId(), TEST_BLUEPRINT_NAME)));
     }
 
     @Test
@@ -140,7 +143,8 @@ public class CloudResourceAdvisorTest {
         Blueprint blueprint = createBlueprint();
         when(blueprintTextProcessorFactory.createBlueprintTextProcessor("{\"Blueprints\":{123:2}}")).thenReturn(blueprintTextProcessor);
         when(blueprintTextProcessor.recommendResize(anyList(), any())).thenReturn(new ResizeRecommendation(Set.of(), Set.of()));
-        ScaleRecommendation scaleRecommendation = underTest.createForBlueprint(this.workspace.getId(), blueprint);
+        ScaleRecommendation scaleRecommendation = ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> underTest.createForBlueprint(this.workspace.getId(), blueprint));
         assertEquals(new AutoscaleRecommendation(Set.of(), Set.of()), scaleRecommendation.getAutoscaleRecommendation());
         assertEquals(new ResizeRecommendation(Set.of(), Set.of()), scaleRecommendation.getResizeRecommendation());
     }
@@ -153,7 +157,8 @@ public class CloudResourceAdvisorTest {
         when(blueprintTextProcessorFactory.createBlueprintTextProcessor("{\"Blueprints\":{123:2}}")).thenReturn(blueprintTextProcessor);
         when(blueprintTextProcessor.recommendAutoscale(any(), any())).thenReturn(new AutoscaleRecommendation(Set.of("compute"), Set.of("compute")));
         when(blueprintTextProcessor.recommendResize(anyList(), any())).thenReturn(new ResizeRecommendation(Set.of("compute"), Set.of("compute")));
-        ScaleRecommendation scaleRecommendation = underTest.createForBlueprint(this.workspace.getId(), blueprint);
+        ScaleRecommendation scaleRecommendation = ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> underTest.createForBlueprint(this.workspace.getId(), blueprint));
         assertEquals(new AutoscaleRecommendation(Set.of("compute"), Set.of("compute")), scaleRecommendation.getAutoscaleRecommendation());
         assertEquals(new ResizeRecommendation(Set.of("compute"), Set.of("compute")), scaleRecommendation.getResizeRecommendation());
     }

@@ -212,7 +212,7 @@ public class CloudResourceAdvisor {
     public ScaleRecommendation createForBlueprint(Long workspaceId, Blueprint blueprint) {
         LOGGER.debug("Scale advice for blueprintName: {}.", blueprint.getName());
         BlueprintTextProcessor blueprintTextProcessor = getBlueprintTextProcessor(blueprint);
-        List<String> entitlements = entitlementService.getEntitlements(blueprint.getWorkspace().getTenant().getName());
+        List<String> entitlements = entitlementService.getEntitlements(ThreadBasedUserCrnProvider.getAccountId());
         AutoscaleRecommendation autoscale = recommendAutoscale(blueprintTextProcessor, entitlements);
         ResizeRecommendation resize = recommendResize(blueprintTextProcessor, entitlements);
 
@@ -223,7 +223,7 @@ public class CloudResourceAdvisor {
         LOGGER.debug("Autoscale advice for blueprintName: {}.", blueprintName);
         BlueprintTextProcessor blueprintTextProcessor = getBlueprintTextProcessor(workspaceId, blueprintName);
         Blueprint blueprint = getBlueprint(blueprintName, workspaceId);
-        List<String> entitlements = entitlementService.getEntitlements(blueprint.getWorkspace().getTenant().getName());
+        List<String> entitlements = entitlementService.getEntitlements(ThreadBasedUserCrnProvider.getAccountId());
         return recommendAutoscale(blueprintTextProcessor, entitlements);
     }
 

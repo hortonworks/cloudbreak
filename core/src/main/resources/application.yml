@@ -301,6 +301,7 @@ cb:
     defaultLifeTime: 604800
 
   blueprint:
+    global.migration.enabled: false
     cm:
       gov:
         exclusions:

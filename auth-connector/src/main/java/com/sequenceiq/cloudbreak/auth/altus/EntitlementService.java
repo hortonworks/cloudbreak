@@ -71,6 +71,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FEDRAMP
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_DATABUS_ENDPOINT_VALIDATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_LOAD_BALANCER;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_REBUILD;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_GLOBAL_DEFAULT_TEMPLATE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_JUMPGATE_ROOT_CA_AUTO_ROTATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_LAKEHOUSE_OPTIMIZER_ENABLED;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_MICRO_DUTY_SDX;
@@ -680,5 +681,9 @@ public class EntitlementService {
 
     public boolean isUpdateResourceAttributesEnabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_CB_ENABLE_UPDATE_RESOURCE_ATTRIBUTES);
+    }
+
+    public boolean isGlobalDefaultTemplateEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_GLOBAL_DEFAULT_TEMPLATE);
     }
 }

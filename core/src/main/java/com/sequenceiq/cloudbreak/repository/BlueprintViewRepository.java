@@ -20,6 +20,9 @@ public interface BlueprintViewRepository extends WorkspaceResourceRepository<Blu
     @Query("SELECT b FROM BlueprintView b WHERE b.workspace.id= :workspaceId AND b.status <> 'DEFAULT_DELETED'")
     Set<BlueprintView> findAllByNotDeletedInWorkspace(@Param("workspaceId") Long workspaceId);
 
+    @Query("SELECT b FROM BlueprintView b WHERE b.workspace IS NULL AND b.status = 'DEFAULT'")
+    Set<BlueprintView> findAllGlobalDefaults();
+
     @Query("SELECT b.status as status FROM BlueprintView b WHERE b.resourceCrn = :resourceCrn")
     BlueprintStatusView findViewByResourceCrn(@Param("resourceCrn") String resourceCrn);
 }

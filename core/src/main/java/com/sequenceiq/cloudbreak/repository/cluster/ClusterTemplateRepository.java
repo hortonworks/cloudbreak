@@ -33,6 +33,10 @@ public interface ClusterTemplateRepository extends WorkspaceResourceRepository<C
             + "AND (c.status <> 'DEFAULT_DELETED' AND c.status <> 'DELETED')")
     Set<ClusterTemplate> getTemplatesByBlueprintId(@Param("blueprintId") Long blueprintId, @Param("workspaceId") Long workspaceId);
 
+    @Query("SELECT c FROM ClusterTemplate c WHERE c.stackTemplate.cluster.blueprint.id = :blueprintId "
+            + "AND (c.status <> 'DEFAULT_DELETED' AND c.status <> 'DELETED')")
+    Set<ClusterTemplate> getTemplatesByBlueprintId(@Param("blueprintId") Long blueprintId);
+
     @Query("SELECT c.resourceCrn FROM ClusterTemplate c WHERE c.name = :name AND c.workspace.tenant.name = :accountId")
     String findResourceCrnByNameAndAccountId(@Param("name") String name, @Param("accountId") String accountId);
 

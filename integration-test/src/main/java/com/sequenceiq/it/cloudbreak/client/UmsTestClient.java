@@ -51,8 +51,16 @@ public class UmsTestClient {
         return new GrantEntitlementAction(accountId, entitlementName);
     }
 
+    public Action<UmsTestDto, UmsClient> grantEntitlement(String accountId, String entitlementName, int waitInSeconds) {
+        return new GrantEntitlementAction(accountId, entitlementName, waitInSeconds);
+    }
+
     public Action<UmsTestDto, UmsClient> revokeEntitlement(String accountId, String entitlementName) {
         return new RevokeEntitlementAction(accountId, entitlementName);
+    }
+
+    public Action<UmsTestDto, UmsClient> revokeEntitlement(String accountId, String entitlementName, int waitInSeconds) {
+        return new RevokeEntitlementAction(accountId, entitlementName, waitInSeconds);
     }
 
     public Action<UmsGroupTestDto, UmsClient> createUserGroup(String groupName) {

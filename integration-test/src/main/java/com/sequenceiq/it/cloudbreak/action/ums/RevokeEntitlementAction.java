@@ -26,9 +26,16 @@ public class RevokeEntitlementAction implements Action<UmsTestDto, UmsClient> {
 
     private final String entitlementName;
 
+    private final int waitInSeconds;
+
     public RevokeEntitlementAction(String accountId, String entitlementName) {
+        this(accountId, entitlementName, WAIT_IN_SECONDS);
+    }
+
+    public RevokeEntitlementAction(String accountId, String entitlementName, int waitInSeconds) {
         this.accountId = accountId;
         this.entitlementName = entitlementName;
+        this.waitInSeconds = waitInSeconds;
     }
 
     @Override
@@ -37,7 +44,7 @@ public class RevokeEntitlementAction implements Action<UmsTestDto, UmsClient> {
         try {
             client.getDefaultClient(testContext).revokeEntitlement(accountId, entitlementName);
             //This is necessary because the ttl on the ums account caching
-            Thread.sleep(Duration.of(WAIT_IN_SECONDS, ChronoUnit.SECONDS));
+            Thread.sleep(Duration.of(waitInSeconds, ChronoUnit.SECONDS));
             Log.when(LOGGER, format(" UMS entitlement has been revoked for account '%s'. ", accountId));
         } catch (StatusRuntimeException e) {
             Log.when(LOGGER, format(" Exception during calling UMS mock: '%s' ", e.getMessage()));

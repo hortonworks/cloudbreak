@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.init.blueprint;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -20,12 +21,14 @@ import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.requests.BlueprintV4Request;
 import com.sequenceiq.cloudbreak.cmtemplate.utils.BlueprintUtils;
 import com.sequenceiq.cloudbreak.common.anonymizer.AnonymizerUtil;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.gov.CommonGovService;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.provider.ProviderPreferencesService;
 import com.sequenceiq.cloudbreak.converter.v4.blueprint.BlueprintV4RequestToBlueprintConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.BlueprintFile;
+import com.sequenceiq.cloudbreak.service.blueprint.CrnGeneratorService;
 
 @Component
 @Scope("prototype")
@@ -53,12 +56,16 @@ public class DefaultBlueprintCache {
     @Inject
     private GovCloudExclusionFilter govCloudExculsionFilter;
 
+    @Inject
+    private CrnGeneratorService crnGeneratorService;
+
     @PostConstruct
     public void loadBlueprintsFromFile() {
         Map<String, Set<String>> blueprints = blueprints();
         boolean govCloudDeployment = commonGovService.govCloudDeployment(
                 preferencesService.enabledGovPlatforms(),
                 preferencesService.enabledPlatforms());
+        Set<String> generatedCrns = new HashSet<>();
         for (Map.Entry<String, Set<String>> blueprintEntry : blueprints.entrySet()) {
             try {
                 for (String blueprintText : blueprintEntry.getValue()) {
@@ -78,6 +85,12 @@ public class DefaultBlueprintCache {
                         bp.setTags(new Json(tagParameters));
                         JsonNode description = jsonNode.get("description");
                         bp.setDescription(description == null ? split[0] : description.asText(split[0]));
+                        String resourceCrn = crnGeneratorService.createGlobalDefaultBlueprintCrn(bp.getName());
+                        if (generatedCrns.contains(resourceCrn)) {
+                            throw new RuntimeException(String.format(
+                                    "%s global default blueprint crn was already generated from another blueprint name.", resourceCrn));
+                        }
+                        generatedCrns.add(resourceCrn);
                         BlueprintFile bpf = new BlueprintFile.Builder()
                                 .name(bp.getName())
                                 .blueprintText(bp.getBlueprintText())
@@ -90,6 +103,7 @@ public class DefaultBlueprintCache {
                                 .hostGroupCount(bp.getHostGroupCount())
                                 .description(bp.getDescription())
                                 .tags(bp.getTags())
+                                .resourceCrn(resourceCrn)
                                 .build();
                         String fileName = split[1];
 
@@ -106,6 +120,27 @@ public class DefaultBlueprintCache {
                 LOGGER.error("Can not read default validation from file: ", e);
             }
         }
+    }
+
+    public boolean isDefaultByName(String blueprintName) {
+        return defaultBlueprints.containsKey(blueprintName);
+    }
+
+    public boolean isDefaultByCrn(String crn) {
+        return defaultBlueprints.values()
+                .stream()
+                .anyMatch(b -> b.getResourceCrn().equals(crn));
+    }
+
+    public BlueprintFile getDefaultByName(String blueprintName) {
+        return defaultBlueprints.get(blueprintName);
+    }
+
+    public BlueprintFile getDefaultByCrn(String crn) {
+        return defaultBlueprints.values()
+                .stream()
+                .filter(b -> b.getResourceCrn().equals(crn))
+                .findFirst().orElseThrow(NotFoundException.notFound("Cluster template", crn));
     }
 
     public Set<String> getBlueprintVersions() {

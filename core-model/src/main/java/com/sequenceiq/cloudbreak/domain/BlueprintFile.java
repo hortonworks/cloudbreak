@@ -29,8 +29,11 @@ public class BlueprintFile {
 
     private Json tags;
 
+    private String resourceCrn;
+
     private BlueprintFile(String name, String blueprintText, String defaultBlueprintText, String stackName, String description, int hostGroupCount,
-            String stackType, String stackVersion, BlueprintUpgradeOption blueprintUpgradeOption, BlueprintHybridOption hybridOption, Json tags) {
+            String stackType, String stackVersion, BlueprintUpgradeOption blueprintUpgradeOption, BlueprintHybridOption hybridOption, Json tags,
+            String resourceCrn) {
         this.name = name;
         this.blueprintText = blueprintText;
         this.defaultBlueprintText = defaultBlueprintText;
@@ -42,6 +45,7 @@ public class BlueprintFile {
         this.blueprintUpgradeOption = blueprintUpgradeOption;
         this.hybridOption = hybridOption;
         this.tags = tags;
+        this.resourceCrn = resourceCrn;
     }
 
     public String getDescription() {
@@ -88,6 +92,10 @@ public class BlueprintFile {
         return tags;
     }
 
+    public String getResourceCrn() {
+        return resourceCrn;
+    }
+
     @Override
     public String toString() {
         return "Blueprint{" +
@@ -100,6 +108,7 @@ public class BlueprintFile {
                 ", blueprintUpgradeOption=" + blueprintUpgradeOption +
                 ", hybridOption=" + hybridOption +
                 ", tags=" + tags +
+                ", resourceCrn=" + resourceCrn +
                 '}';
     }
 
@@ -125,6 +134,8 @@ public class BlueprintFile {
         private BlueprintHybridOption hybridOption;
 
         private Json tags;
+
+        private String resourceCrn;
 
         public Builder name(String name) {
             this.name = name;
@@ -181,14 +192,20 @@ public class BlueprintFile {
             return this;
         }
 
+        public Builder resourceCrn(String resourceCrn) {
+            this.resourceCrn = resourceCrn;
+            return this;
+        }
+
         public BlueprintFile build() {
             Preconditions.checkNotNull(name);
             Preconditions.checkNotNull(blueprintText);
             Preconditions.checkNotNull(stackName);
             Preconditions.checkNotNull(stackVersion);
             Preconditions.checkNotNull(stackType);
+            Preconditions.checkNotNull(resourceCrn);
             return new BlueprintFile(name, blueprintText, defaultBlueprintText, stackName, description, hostGroupCount, stackType, stackVersion,
-                    blueprintUpgradeOption, hybridOption, tags);
+                    blueprintUpgradeOption, hybridOption, tags, resourceCrn);
         }
     }
 }

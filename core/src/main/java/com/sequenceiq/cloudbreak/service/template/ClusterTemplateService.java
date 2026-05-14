@@ -25,7 +25,6 @@ import jakarta.ws.rs.ForbiddenException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 
@@ -62,6 +61,7 @@ import com.sequenceiq.cloudbreak.init.clustertemplate.DefaultClusterTemplateCach
 import com.sequenceiq.cloudbreak.repository.cluster.ClusterTemplateRepository;
 import com.sequenceiq.cloudbreak.service.AbstractWorkspaceAwareResourceService;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
+import com.sequenceiq.cloudbreak.service.blueprint.BlueprintListFilters;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.database.DatabaseService;
@@ -150,8 +150,11 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
     @Inject
     private DatabaseService databaseService;
 
-    @Autowired
+    @Inject
     private DefaultClusterTemplateCache defaultClusterTemplateCache;
+
+    @Inject
+    private BlueprintListFilters blueprintListFilters;
 
     @Override
     protected WorkspaceResourceRepository<ClusterTemplate, Long> repository() {
@@ -187,8 +190,12 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
         }
     }
 
-    public Set<ClusterTemplate> getTemplatesByBlueprint(Blueprint blueprint) {
-        return clusterTemplateRepository.getTemplatesByBlueprintId(blueprint.getId(), blueprint.getWorkspace().getId());
+    public Set<ClusterTemplate> getTemplatesByBlueprint(Blueprint blueprint, Workspace workspace) {
+        if (workspace == null) {
+            return clusterTemplateRepository.getTemplatesByBlueprintId(blueprint.getId());
+        } else {
+            return clusterTemplateRepository.getTemplatesByBlueprintId(blueprint.getId(), blueprint.getWorkspace().getId());
+        }
     }
 
     @Override
@@ -376,24 +383,26 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
     }
 
     private void updateDefaultClusterTemplates(Workspace workspace) {
-        Set<ClusterTemplate> clusterTemplates = clusterTemplateRepository.findAllByNotDeletedInWorkspace(workspace.getId());
-        if (clusterTemplateLoaderService.isDefaultClusterTemplateUpdateNecessaryForUser(clusterTemplates)) {
-            LOGGER.debug("Modifying clusterDefinitions based on the defaults for the '{} ({})' workspace.", workspace.getName(), workspace.getId());
-            Collection<ClusterTemplate> outdatedTemplates = clusterTemplateLoaderService.collectOutdatedTemplatesInDb(clusterTemplates);
-            LOGGER.debug("Outdated clusterDefinitions collected: '{}'.", outdatedTemplates.size());
-            int optimisticError = 0;
-            try {
-                delete(new HashSet<>(outdatedTemplates));
-            } catch (OptimisticLockingFailureException e) {
-                optimisticError++;
+        if (!entitlementService.isGlobalDefaultTemplateEnabled(ThreadBasedUserCrnProvider.getAccountId())) {
+            Set<ClusterTemplate> clusterTemplates = clusterTemplateRepository.findAllByNotDeletedInWorkspace(workspace.getId());
+            if (clusterTemplateLoaderService.isDefaultClusterTemplateUpdateNecessaryForUser(clusterTemplates)) {
+                LOGGER.debug("Modifying clusterDefinitions based on the defaults for the '{} ({})' workspace.", workspace.getName(), workspace.getId());
+                Collection<ClusterTemplate> outdatedTemplates = clusterTemplateLoaderService.collectOutdatedTemplatesInDb(clusterTemplates);
+                LOGGER.debug("Outdated clusterDefinitions collected: '{}'.", outdatedTemplates.size());
+                int optimisticError = 0;
+                try {
+                    delete(new HashSet<>(outdatedTemplates));
+                } catch (OptimisticLockingFailureException e) {
+                    optimisticError++;
+                }
+                LOGGER.debug("{} Outdated clusterDefinitions tried to delete. Deleted: '{}', optimistic locking error: {}.", outdatedTemplates.size(),
+                        outdatedTemplates.size() - optimisticError, optimisticError);
+                LOGGER.debug("Outdated clusterDefinitions deleted: '{}'.", outdatedTemplates.size());
+                clusterTemplates = clusterTemplateRepository.findAllByNotDeletedInWorkspace(workspace.getId());
+                LOGGER.debug("None deleted clusterDefinitions collected: '{}'.", clusterTemplates.size());
+                clusterTemplateLoaderService.loadClusterTemplatesForWorkspace(clusterTemplates, workspace, this::createAll);
+                LOGGER.debug("ClusterDefinition modifications finished based on the defaults for '{}' workspace.", workspace.getId());
             }
-            LOGGER.debug("{} Outdated clusterDefinitions tried to delete. Deleted: '{}', optimistic locking error: {}.", outdatedTemplates.size(),
-                    outdatedTemplates.size() - optimisticError, optimisticError);
-            LOGGER.debug("Outdated clusterDefinitions deleted: '{}'.", outdatedTemplates.size());
-            clusterTemplates = clusterTemplateRepository.findAllByNotDeletedInWorkspace(workspace.getId());
-            LOGGER.debug("None deleted clusterDefinitions collected: '{}'.", clusterTemplates.size());
-            clusterTemplateLoaderService.loadClusterTemplatesForWorkspace(clusterTemplates, workspace, this::createAll);
-            LOGGER.debug("ClusterDefinition modifications finished based on the defaults for '{}' workspace.", workspace.getId());
         }
     }
 
@@ -433,10 +442,15 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
         if (clusterTemplateOptional.isEmpty()) {
             throw new BadRequestException(format("Cluster definition does not exist with crn '%s'", crn));
         }
-        if (!internalClusterTemplateValidator.shouldPopulate(clusterTemplateOptional.get(), internalTenant)) {
+        ClusterTemplate clusterTemplate = clusterTemplateOptional.get();
+        if (!internalClusterTemplateValidator.shouldPopulate(clusterTemplate, internalTenant)) {
             throw new BadRequestException(format("Cluster definition does not exist with crn '%s'", crn));
         }
-        return clusterTemplateOptional.get();
+        if (blueprintListFilters.isLakehouseOptimizer(clusterTemplate.getName()) &&
+                !entitlementService.isLakehouseOptimizerEnabled(ThreadBasedUserCrnProvider.getAccountId())) {
+            throw new BadRequestException(format("Cluster definition does not exist with crn '%s'", crn));
+        }
+        return clusterTemplate;
     }
 
     public ClusterTemplate deleteByCrn(String crn, Long workspaceId, boolean internalTenant) {
@@ -473,6 +487,9 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
 
     @Override
     public String getResourceCrnByResourceName(String resourceName) {
+        if (shouldServeFromDefault(resourceName)) {
+            return getClusterTemplateFromGlobalDefaults(resourceName).getResourceCrn();
+        }
         return clusterTemplateRepository.findResourceCrnByNameAndAccountId(resourceName, ThreadBasedUserCrnProvider.getAccountId());
     }
 
@@ -481,10 +498,6 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
         return resourceNames.stream()
                 .map(resourceName -> clusterTemplateRepository.findResourceCrnByNameAndAccountId(resourceName, ThreadBasedUserCrnProvider.getAccountId()))
                 .collect(Collectors.toList());
-    }
-
-    public ClusterTemplate getByResourceCrn(String resourceCrn) {
-        return clusterTemplateRepository.findByResourceCrn(resourceCrn);
     }
 
     @Override
@@ -505,4 +518,46 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
         return AuthorizationResourceType.CLUSTER_DEFINITION;
     }
 
+    @Override
+    public ClusterTemplate getByNameForWorkspace(String name, Workspace workspace) {
+        if (shouldServeFromDefault(name)) {
+            return getClusterTemplateFromGlobalDefaults(name);
+        }
+        return super.getByNameForWorkspace(name, workspace);
+    }
+
+    @Override
+    public Set<ClusterTemplate> getByNamesForWorkspaceId(Set<String> names, Long workspaceId) {
+        return super.getByNamesForWorkspaceId(names, workspaceId);
+    }
+
+    @Override
+    public ClusterTemplate getByNameForWorkspaceId(String name, Long workspaceId, boolean fillMdcContext) {
+        if (shouldServeFromDefault(name)) {
+            return getClusterTemplateFromGlobalDefaults(name);
+        }
+        return super.getByNameForWorkspaceId(name, workspaceId, fillMdcContext);
+    }
+
+    @Override
+    public ClusterTemplate getByNameForWorkspaceId(String name, Long workspaceId) {
+        if (shouldServeFromDefault(name)) {
+            return getClusterTemplateFromGlobalDefaults(name);
+        }
+        return super.getByNameForWorkspaceId(name, workspaceId);
+    }
+
+    private boolean shouldServeFromDefault(String name) {
+        return entitlementService.isGlobalDefaultTemplateEnabled(ThreadBasedUserCrnProvider.getAccountId())
+                && defaultClusterTemplateCache.getTemplateByName(name).isPresent();
+    }
+
+    private ClusterTemplate getClusterTemplateFromGlobalDefaults(String name) {
+        ClusterTemplate clusterTemplate = defaultClusterTemplateCache.getTemplateByName(name)
+                .orElseThrow(NotFoundException.notFound("Cluster definition", name));
+        if (blueprintListFilters.isLakehouseOptimizer(name) && !entitlementService.isLakehouseOptimizerEnabled(ThreadBasedUserCrnProvider.getAccountId())) {
+            throw NotFoundException.notFoundException("Cluster definition", name);
+        }
+        return clusterTemplate;
+    }
 }

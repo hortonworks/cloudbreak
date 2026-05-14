@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.stream.Collectors;
 
 import jakarta.annotation.PostConstruct;
@@ -38,7 +39,10 @@ import com.sequenceiq.cloudbreak.common.provider.ProviderPreferencesService;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.converter.v4.clustertemplate.DefaultClusterTemplateV4RequestToClusterTemplateConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.BlueprintFile;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterTemplate;
+import com.sequenceiq.cloudbreak.init.blueprint.DefaultBlueprintCache;
+import com.sequenceiq.cloudbreak.service.blueprint.CrnGeneratorService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
@@ -52,7 +56,9 @@ public class DefaultClusterTemplateCache {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultClusterTemplateCache.class);
 
-    private final Map<String, Pair<DefaultClusterTemplateV4Request, String>> defaultClusterTemplates = new ConcurrentHashMap<>();
+    private final Map<String, Pair<DefaultClusterTemplateV4Request, String>> defaultClusterTemplateRequests = new ConcurrentHashMap<>();
+
+    private final Map<String, ClusterTemplate> defaultClusterTemplates = new ConcurrentSkipListMap<>();
 
     @Value("#{'${cb.clustertemplate.defaults:}'.split(',')}")
     private List<String> clusterTemplates;
@@ -82,6 +88,12 @@ public class DefaultClusterTemplateCache {
 
     @Inject
     private CommonGovService commonGovService;
+
+    @Inject
+    private DefaultBlueprintCache defaultBlueprintCache;
+
+    @Inject
+    private CrnGeneratorService crnGeneratorService;
 
     @PostConstruct
     public void loadClusterTemplatesFromFile() {
@@ -124,12 +136,26 @@ public class DefaultClusterTemplateCache {
                 .forEach(clusterTemplateName -> {
                     try {
                         String templateAsString = readFileFromClasspath(clusterTemplateName);
-                        addClusterTemplateToDefaultClusterTemplates(
+                        DefaultClusterTemplateV4Request defaultClusterTemplateV4Request = addClusterTemplateToDefaultClusterTemplates(
                                 clusterTemplateName,
                                 templateAsString,
                                 enabledPlatforms,
                                 enabledGovPlatforms);
-                        LOGGER.debug("Default clustertemplate is loaded into cache by resource file: {}", clusterTemplateName);
+                        if (defaultClusterTemplateV4Request != null) {
+                            ClusterTemplate clusterTemplate = defaultClusterTemplateV4RequestToClusterTemplateConverter.convert(
+                                    defaultClusterTemplateV4Request);
+                            String resourceCrn = getGlobalDefaultClusterDefinitionCrn(defaultClusterTemplateV4Request.getName());
+                            if (defaultClusterTemplates.containsKey(resourceCrn)) {
+                                throw new RuntimeException(String.format(
+                                        "%s global default cluster template crn was already generated from another template name.", resourceCrn));
+                            }
+                            clusterTemplate.setResourceCrn(resourceCrn);
+                            BlueprintFile blueprint = defaultBlueprintCache.getDefaultByName(
+                                    defaultClusterTemplateV4Request.getDistroXTemplate().getCluster().getBlueprintName());
+                            clusterTemplate.setClouderaRuntimeVersion(blueprint.getStackVersion());
+                            defaultClusterTemplates.put(resourceCrn, clusterTemplate);
+                            LOGGER.debug("Default clustertemplate is loaded into cache by resource file: {}", clusterTemplateName);
+                        }
                     } catch (IOException e) {
                         String msg = "Could not load cluster template: " + clusterTemplateName;
                         if (!clusterTemplateName.endsWith(".json")) {
@@ -140,17 +166,24 @@ public class DefaultClusterTemplateCache {
                 });
     }
 
-    private void addClusterTemplateToDefaultClusterTemplates(String clusterTemplateName, String templateAsString,
+    private String getGlobalDefaultClusterDefinitionCrn(String name) {
+        return crnGeneratorService.createGlobalDefaultClusterDefinitionCrn(name);
+    }
+
+    private DefaultClusterTemplateV4Request addClusterTemplateToDefaultClusterTemplates(String clusterTemplateName, String templateAsString,
             Set<String> enabledPlatforms, Set<String> enabledGovPlatforms) throws IOException {
         DefaultClusterTemplateV4Request clusterTemplateRequest = new Json(templateAsString).get(DefaultClusterTemplateV4Request.class);
         boolean useIt = doUseIt(clusterTemplateName, clusterTemplateRequest, enabledPlatforms, enabledGovPlatforms);
         if (useIt) {
-            if (defaultClusterTemplates.get(clusterTemplateRequest.getName()) != null) {
+            if (defaultClusterTemplateRequests.get(clusterTemplateRequest.getName()) != null) {
                 LOGGER.warn("Default cluster template exists and it will be override: {}", clusterTemplateRequest.getName());
             }
-            defaultClusterTemplates.put(
+            defaultClusterTemplateRequests.put(
                     clusterTemplateRequest.getName(),
                     Pair.of(clusterTemplateRequest, Base64Util.encode(templateAsString)));
+            return clusterTemplateRequest;
+        } else {
+            return null;
         }
     }
 
@@ -208,11 +241,11 @@ public class DefaultClusterTemplateCache {
     }
 
     public Map<String, Pair<DefaultClusterTemplateV4Request, String>> defaultClusterTemplateRequests() {
-        return defaultClusterTemplates;
+        return defaultClusterTemplateRequests;
     }
 
     public Map<String, String> defaultClusterTemplateRequestsForUser() {
-        return defaultClusterTemplates.entrySet().stream()
+        return defaultClusterTemplateRequests.entrySet().stream()
                 .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().getValue()));
     }
 
@@ -308,7 +341,16 @@ public class DefaultClusterTemplateCache {
     }
 
     public String getByName(String name) {
-        return defaultClusterTemplates.get(name).getValue();
+        return defaultClusterTemplateRequests.get(name).getValue();
+    }
+
+    public Optional<ClusterTemplate> getTemplateByName(String name) {
+        String resourceCrn = getGlobalDefaultClusterDefinitionCrn(name);
+        return Optional.ofNullable(defaultClusterTemplates.get(resourceCrn));
+    }
+
+    public Optional<ClusterTemplate> getDefaultClusterTemplateByResourceCrn(String resourceCrn) {
+        return Optional.ofNullable(defaultClusterTemplates.get(resourceCrn));
     }
 
     private List<String> getFiles() throws IOException {
@@ -323,5 +365,9 @@ public class DefaultClusterTemplateCache {
                         throw new RuntimeException(e);
                     }
                 }).collect(Collectors.toList());
+    }
+
+    public Collection<ClusterTemplate> getDefaultClusterTemplates() {
+        return defaultClusterTemplates.values();
     }
 }

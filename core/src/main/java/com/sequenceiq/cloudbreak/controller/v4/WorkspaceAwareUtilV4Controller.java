@@ -11,6 +11,7 @@ import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.WorkspaceAwareUtilV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.ExposedServiceV4Responses;
 import com.sequenceiq.cloudbreak.service.ServiceEndpointCollector;
+import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 
 @Controller
@@ -22,11 +23,14 @@ public class WorkspaceAwareUtilV4Controller extends NotificationController imple
     @Inject
     private CloudbreakRestRequestThreadLocalService threadLocalService;
 
+    @Inject
+    private WorkspaceService workspaceService;
+
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.DESCRIBE_CLUSTER_TEMPLATE)
     public ExposedServiceV4Responses getKnoxServices(Long workspaceId, @ResourceName String blueprintName) {
         return new ExposedServiceV4Responses(Sets.newHashSet(serviceEndpointCollector.getKnoxServices(
-                threadLocalService.getRequestedWorkspaceId(), blueprintName)));
+                workspaceService.getByIdWithoutAuth(threadLocalService.getRequestedWorkspaceId()), blueprintName)));
     }
 
 }

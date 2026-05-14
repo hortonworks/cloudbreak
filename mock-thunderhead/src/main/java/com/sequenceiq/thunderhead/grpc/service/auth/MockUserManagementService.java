@@ -68,6 +68,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FALLBAC
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FEDRAMP_EXTERNAL_DATABASE_FORCE_DISABLED;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_LOAD_BALANCER;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_REBUILD;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_GLOBAL_DEFAULT_TEMPLATE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_LAKEHOUSE_OPTIMIZER_ENABLED;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_MICRO_DUTY_SDX;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_MITIGATE_RELEASE_FAILURE_7218P1100;
@@ -321,9 +322,9 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     private final Map<String, Set<String>> accountUsers = new ConcurrentHashMap<>();
 
-    private final Set<String> grantedEntitlements = new ConcurrentSkipListSet<>();
+    private final Map<String, Set<String>> grantedEntitlements = new ConcurrentHashMap<>();
 
-    private final Set<String> revokedEntitlements = new ConcurrentSkipListSet<>();
+    private final Map<String, Set<String>> revokedEntitlements = new ConcurrentHashMap<>();
 
     @Inject
     private JsonUtil jsonUtil;
@@ -624,6 +625,9 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Value("${auth.mock.datalake.shapes.withouthbase.enabled}")
     private boolean datalakeShapesWithoutHBaseAndHDFSEnabled;
 
+    @Value("${auth.mock.global.default.template.enabled}")
+    private boolean globalDefaultTemplateEnabled;
+
     @Value("${auth.mock.gp2togp3.migration.enabled}")
     private boolean gp2toGp3MigrationEnabled;
 
@@ -915,309 +919,149 @@ public class MockUserManagementService extends UserManagementImplBase {
         mockCrnService.ensureProperAccountIdUsage(accountId);
         LOGGER.info("Get account: {}", accountId);
         Account.Builder builder = Account.newBuilder();
-        if (enableBaseImages) {
-            builder.addEntitlements(createEntitlement(CDP_BASE_IMAGE));
-        }
-        if (enableFreeIpaRebuild) {
-            builder.addEntitlements(createEntitlement(CDP_FREEIPA_REBUILD));
-        }
-        if (enableFreeIpaLoadBalancer) {
-            builder.addEntitlements(createEntitlement(CDP_FREEIPA_LOAD_BALANCER));
-        }
-        if (enableCloudStorageValidation) {
-            builder.addEntitlements(createEntitlement(CDP_CLOUD_STORAGE_VALIDATION));
-        }
-        if (enableAwsCloudStorageValidation) {
-            builder.addEntitlements(createEntitlement(CDP_CLOUD_STORAGE_VALIDATION_AWS));
-        }
-        if (enableAzureCloudStorageValidation) {
-            builder.addEntitlements(createEntitlement(CDP_CLOUD_STORAGE_VALIDATION_AZURE));
-        }
-        if (enableGcpCloudStorageValidation) {
-            builder.addEntitlements(createEntitlement(CDP_CLOUD_STORAGE_VALIDATION_GCP));
-        }
-        if (microDutySdxEnabled) {
-            builder.addEntitlements(createEntitlement(CDP_MICRO_DUTY_SDX));
-        }
-        if (haRepairEnabled) {
-            builder.addEntitlements(createEntitlement(CDP_ALLOW_HA_REPAIR));
-        }
-        if (enableAzureSingleResourceGroupDedicatedStorageAccount) {
-            builder.addEntitlements(createEntitlement(CDP_AZURE_SINGLE_RESOURCE_GROUP_DEDICATED_STORAGE_ACCOUNT));
-        }
-        if (enableAzureMarketplaceImages) {
-            builder.addEntitlements(createEntitlement(CDP_AZURE_IMAGE_MARKETPLACE));
-        }
-        if (enableAzureMarketplaceImagesOnly) {
-            builder.addEntitlements(createEntitlement(CDP_AZURE_IMAGE_MARKETPLACE_ONLY));
-        }
-        if (enableCloudIdentityMapping) {
-            builder.addEntitlements(createEntitlement(CDP_CLOUD_IDENTITY_MAPPING));
-        }
-        if (enableInternalRepositoryForUpgrade) {
-            builder.addEntitlements(createEntitlement(CDP_ALLOW_INTERNAL_REPOSITORY_FOR_UPGRADE));
-        }
-        if (enableHbaseCloudStorage) {
-            builder.addEntitlements(createEntitlement(CDP_SDX_HBASE_CLOUD_STORAGE));
-        }
-        if (enableDifferentDataHubVersionThanDataLake) {
-            builder.addEntitlements(createEntitlement(CDP_ALLOW_DIFFERENT_DATAHUB_VERSION_THAN_DATALAKE));
-        }
-        if (datalakeLoadBalancerEnabled) {
-            builder.addEntitlements(createEntitlement(CDP_DATA_LAKE_LOAD_BALANCER));
-        }
-        if (enableExperienceDeletionByEnvironment) {
-            builder.addEntitlements(createEntitlement(CDP_EXPERIENCE_DELETION_BY_ENVIRONMENT));
-        }
-        if (azureEndpointGatewayEnabled) {
-            builder.addEntitlements(createEntitlement(CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_AZURE));
-        }
-        if (gcpEndpointGatewayEnabled) {
-            builder.addEntitlements(createEntitlement(CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_GCP));
-        }
-        if (datalakeBackupOnResize) {
-            builder.addEntitlements(createEntitlement(CDP_DATALAKE_BACKUP_ON_RESIZE));
-        }
-        if (datalakeBackupRestorePermissionChecks) {
-            builder.addEntitlements(createEntitlement(CDP_DATA_LAKE_BACKUP_RESTORE_PERMISSION_CHECKS));
-        }
-        if (datalakeResizeRecovery) {
-            builder.addEntitlements(createEntitlement(CDP_DATALAKE_RESIZE_RECOVERY));
-        }
-        if (datalakeLightToMediumMigration) {
-            builder.addEntitlements(createEntitlement(DATA_LAKE_LIGHT_TO_MEDIUM_MIGRATION));
-        }
-        if (cmSyncCommandPollerEnabled) {
-            builder.addEntitlements(createEntitlement(CDP_USE_CM_SYNC_COMMAND_POLLER));
-        }
-        if (conclusionCheckerSendUserEvent) {
-            builder.addEntitlements(createEntitlement(CDP_CONCLUSION_CHECKER_SEND_USER_EVENT));
-        }
-        if (userSyncCredentialsUpdateOptimizationEnabled) {
-            builder.addEntitlements(createEntitlement(CDP_USER_SYNC_CREDENTIALS_UPDATE_OPTIMIZATION));
-        }
-        if (endpointGatewaySkipValidation) {
-            builder.addEntitlements(createEntitlement(CDP_ENDPOINT_GATEWAY_SKIP_VALIDATION));
-        }
-        if (diagnosticsEnabled) {
-            builder.addEntitlements(createEntitlement(CDP_VM_DIAGNOSTICS));
-        }
-        if (enableSaas || accountId.contains("CDP_SAAS")) {
-            builder.addEntitlements(createEntitlement(CDP_SAAS));
-        }
-        if (enableFmsFreeipaBatchCall) {
-            builder.addEntitlements(createEntitlement(FMS_FREEIPA_BATCH_CALL));
-        }
-        if (enableAwsVariantMigration) {
-            builder.addEntitlements(createEntitlement(CDP_CB_AWS_VARIANT_MIGRATION));
-        }
-        if (edpProgressBarEnabled) {
-            builder.addEntitlements(createEntitlement(UI_EDP_PROGRESS_BAR));
-        }
-        if (enableDistroxInstanceTypes) {
-            builder.addEntitlements(createEntitlement(CDP_ENABLE_DISTROX_INSTANCE_TYPES));
-        }
-        if (enableUnboundElimination) {
-            builder.addEntitlements(createEntitlement(CDP_UNBOUND_ELIMINATION));
-        }
-        if (enableTargetedUpscale) {
-            builder.addEntitlements(createEntitlement(CDP_TARGETED_UPSCALE));
-        }
-        if (enableE2ETestOnly) {
-            builder.addEntitlements(createEntitlement(E2E_TEST_ONLY));
-        }
-        if (skipRollingUpgradeValidationEnabled) {
-            builder.addEntitlements(createEntitlement(CDP_SKIP_ROLLING_UPGRADE_VALIDATION));
-        }
-        if (enableWorkloadIamSync) {
-            builder.addEntitlements(createEntitlement(WORKLOAD_IAM_SYNC));
-        }
-        if (enableWorkloadIamSyncRouting) {
-            builder.addEntitlements(createEntitlement(WORKLOAD_IAM_USERSYNC_ROUTING));
-        }
-        if (enableSdxSaasIntegration) {
-            builder.addEntitlements(createEntitlement(CDP_SAAS_SDX_INTEGRATION));
-        }
-        if ((enableComputeMonitoring || grantedEntitlements.contains(CDP_CENTRAL_COMPUTE_MONITORING.name()))
-                && !revokedEntitlements.contains(CDP_CENTRAL_COMPUTE_MONITORING.name())) {
-            builder.addEntitlements(createEntitlement(CDP_CENTRAL_COMPUTE_MONITORING));
-        }
-        if (enableUsersyncEnforceGroupMemberLimit) {
-            builder.addEntitlements(createEntitlement(CDP_USERSYNC_ENFORCE_GROUP_MEMBER_LIMIT));
-        }
-        if (enablePostgresUpgradeException) {
-            builder.addEntitlements(createEntitlement(CDP_POSTGRES_UPGRADE_EXCEPTION));
-        }
-        if (enableUsersyncSplitFreeIPAUserRetrieval) {
-            builder.addEntitlements(createEntitlement(CDP_USERSYNC_SPLIT_FREEIPA_USER_RETRIEVAL));
-        }
-        if (enableLongTimeDatalakeBackup) {
-            builder.addEntitlements(createEntitlement(CDP_DATALAKE_BACKUP_LONG_TIMEOUT));
-        }
-        if (skipPostgresUpgradeAttachedDatahubsCheck) {
-            builder.addEntitlements(createEntitlement(CDP_POSTGRES_UPGRADE_SKIP_ATTACHED_DATAHUBS_CHECK));
-        }
-        if (skipUpgradeAttachedDatahubsCheck) {
-            builder.addEntitlements(createEntitlement(CDP_UPGRADE_SKIP_ATTACHED_DATAHUBS_CHECK));
-        }
-        if (skipPostgresUpgradeServicesAndCmStop) {
-            builder.addEntitlements(createEntitlement(CDP_POSTGRES_UPGRADE_SKIP_SERVICE_STOP));
-        }
-        if (enableTargetingSubnetsForEndpointAccessGateway) {
-            builder.addEntitlements(createEntitlement(TARGETING_SUBNETS_FOR_ENDPOINT_ACCESS_GATEWAY));
-        }
-        if (azureCertificateAuth) {
-            builder.addEntitlements(createEntitlement(CDP_AZURE_CERTIFICATE_AUTH));
-        }
-        if (costCalculationEnabled) {
-            builder.addEntitlements(createEntitlement(CDP_CB_COST_CALCULATION));
-        }
-        if (co2CalculationEnabled) {
-            builder.addEntitlements(createEntitlement(CDP_CB_CO2_CALCULATION));
-        }
-        if (enforceAwsNativeForSingleAzEnabled) {
-            builder.addEntitlements(createEntitlement(CDP_CB_ENFORCE_AWS_NATIVE_FOR_SINGLE_AZ_FREEIPA));
-            builder.addEntitlements(createEntitlement(CDP_CB_ENFORCE_AWS_NATIVE_FOR_SINGLE_AZ_DATALAKE));
-            builder.addEntitlements(createEntitlement(CDP_CB_ENFORCE_AWS_NATIVE_FOR_SINGLE_AZ_DATAHUB));
-        }
-        if (dlBackupCompressionEnable) {
-            builder.addEntitlements(createEntitlement(CDP_DATALAKE_DB_BACKUP_ENABLE_COMPRESSION));
-        }
-        if (secretEncryptionEnabled) {
-            builder.addEntitlements(createEntitlement(CDP_CB_SECRET_ENCRYPTION));
-        }
-        if (secretEncryptionForCommercialAwsEnabled) {
-            builder.addEntitlements(createEntitlement(CDP_CB_SECRET_ENCRYPTION_FOR_COMMERCIAL_AWS));
-        }
-        if (cmObservabilitySaasPremium) {
-            builder.addEntitlements(createEntitlement(OBSERVABILITY_SAAS_PREMIUM));
-        }
-        if (cmObservabilitySaasTrial) {
-            builder.addEntitlements(createEntitlement(OBSERVABILITY_SAAS_TRIAL));
-        }
-        if (cmObservabilityRealtimeJobs) {
-            builder.addEntitlements(createEntitlement(OBSERVABILITY_REAL_TIME_JOBS));
-        }
-        if (cmObservabilityDmp) {
-            builder.addEntitlements(createEntitlement(OBSERVABILITY_DMP));
-        }
-        if (computeUiEnabled) {
-            builder.addEntitlements(createEntitlement(COMPUTE_UI));
-            builder.addEntitlements(createEntitlement(COMPUTE_API_LIFTIE));
-            builder.addEntitlements(createEntitlement(COMPUTE_API_LIFTIE_BETA));
-        }
-        if (computeClusterEnabled) {
-            builder.addEntitlements(createEntitlement(ENABLE_COMPUTE_CLUSTER));
-        }
-        if (rangerLdapUsersyncEnabled) {
-            builder.addEntitlements(createEntitlement(CDP_RANGER_LDAP_USERSYNC));
-        }
-        if (azureFlexibleUpgradeLongPollingEnabled) {
-            builder.addEntitlements(createEntitlement(CDP_AZURE_DATABASE_FLEXIBLE_SERVER_UPGRADE_LONG_POLLING));
-        }
-        if (azureSingleServerRejectEnabled) {
-            builder.addEntitlements(createEntitlement(CDP_AZURE_DATABASE_SINGLE_SERVER_REJECT));
-        }
-        if (gcpSecureBootEnabled) {
-            builder.addEntitlements(createEntitlement(CDP_CB_GCP_SECURE_BOOT));
-        }
-        if (datahubForceOsUpgradeEnabled) {
-            builder.addEntitlements(createEntitlement(CDP_DATAHUB_FORCE_OS_UPGRADE));
-        }
-        if (tlsv13Enabled) {
-            builder.addEntitlements(createEntitlement(CDP_CB_TLS_1_3));
-        }
-        if (devTelemetryYumRepoEnabled) {
-            builder.addEntitlements(createEntitlement(CDP_CB_USE_DEV_TELEMETRY_YUM_REPO));
-        }
-        if (lakehouseOptimizerEnabled) {
-            builder.addEntitlements(createEntitlement(CDP_LAKEHOUSE_OPTIMIZER_ENABLED));
-        }
-        if (ephemeralXfsSupportEnabled) {
-            builder.addEntitlements(createEntitlement(CDP_CB_XFS_FOR_EPHEMERAL_DISK_SUPPORTED));
-        }
-        if (configureEncryptionProfileEnabled) {
-            builder.addEntitlements(createEntitlement(CDP_CB_CONFIGURE_ENCRYPTION_PROFILE));
-        }
-        if (zookeeperToKRaftMigrationEnabled) {
-            builder.addEntitlements(createEntitlement(CDP_ENABLE_ZOOKEEPER_TO_KRAFT_MIGRATION));
-        }
-        if (mitigateReleaseFailure7218P1100Enabled) {
-            builder.addEntitlements(createEntitlement(CDP_MITIGATE_RELEASE_FAILURE_7218P1100));
-        }
-        if (tlsv13OnlyEnabled) {
-            builder.addEntitlements(createEntitlement(CDP_CB_SUPPORTS_TLS_1_3_ONLY));
-        }
-        if (verticalScaleHaEnabled) {
-            builder.addEntitlements(createEntitlement(CDP_CB_VERTICAL_SCALE_HA));
-        }
-        if (cloudprivatelinksEnabled) {
-            builder.addEntitlements(createEntitlement(CDP_PRIVATELINKS));
-        }
-        if (preferMinifiLoggingEnabled) {
-            builder.addEntitlements(createEntitlement(CDP_CB_PREFER_MINIFI_LOGGING));
-        }
-        if (personalViewCbByRightEnabled) {
-            builder.addEntitlements(createEntitlement(PERSONAL_VIEW_CB_BY_RIGHT));
-        }
+        addEntitlement(builder, accountId, enableBaseImages, CDP_BASE_IMAGE);
+        addEntitlement(builder, accountId, enableFreeIpaRebuild, CDP_FREEIPA_REBUILD);
+        addEntitlement(builder, accountId, enableFreeIpaLoadBalancer, CDP_FREEIPA_LOAD_BALANCER);
+        addEntitlement(builder, accountId, enableCloudStorageValidation, CDP_CLOUD_STORAGE_VALIDATION);
+        addEntitlement(builder, accountId, enableAwsCloudStorageValidation, CDP_CLOUD_STORAGE_VALIDATION_AWS);
+        addEntitlement(builder, accountId, enableAzureCloudStorageValidation, CDP_CLOUD_STORAGE_VALIDATION_AZURE);
+        addEntitlement(builder, accountId, enableGcpCloudStorageValidation, CDP_CLOUD_STORAGE_VALIDATION_GCP);
+        addEntitlement(builder, accountId, microDutySdxEnabled, CDP_MICRO_DUTY_SDX);
+        addEntitlement(builder, accountId, haRepairEnabled, CDP_ALLOW_HA_REPAIR);
+        addEntitlement(builder, accountId, enableAzureSingleResourceGroupDedicatedStorageAccount, CDP_AZURE_SINGLE_RESOURCE_GROUP_DEDICATED_STORAGE_ACCOUNT);
+        addEntitlement(builder, accountId, enableAzureMarketplaceImages, CDP_AZURE_IMAGE_MARKETPLACE);
+        addEntitlement(builder, accountId, enableAzureMarketplaceImagesOnly, CDP_AZURE_IMAGE_MARKETPLACE_ONLY);
+        addEntitlement(builder, accountId, enableCloudIdentityMapping, CDP_CLOUD_IDENTITY_MAPPING);
+        addEntitlement(builder, accountId, enableInternalRepositoryForUpgrade, CDP_ALLOW_INTERNAL_REPOSITORY_FOR_UPGRADE);
+        addEntitlement(builder, accountId, enableHbaseCloudStorage, CDP_SDX_HBASE_CLOUD_STORAGE);
+        addEntitlement(builder, accountId, enableDifferentDataHubVersionThanDataLake, CDP_ALLOW_DIFFERENT_DATAHUB_VERSION_THAN_DATALAKE);
+        addEntitlement(builder, accountId, datalakeLoadBalancerEnabled, CDP_DATA_LAKE_LOAD_BALANCER);
+        addEntitlement(builder, accountId, enableExperienceDeletionByEnvironment, CDP_EXPERIENCE_DELETION_BY_ENVIRONMENT);
+        addEntitlement(builder, accountId, azureEndpointGatewayEnabled, CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_AZURE);
+        addEntitlement(builder, accountId, gcpEndpointGatewayEnabled, CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_GCP);
+        addEntitlement(builder, accountId, datalakeBackupOnResize, CDP_DATALAKE_BACKUP_ON_RESIZE);
+        addEntitlement(builder, accountId, datalakeBackupRestorePermissionChecks, CDP_DATA_LAKE_BACKUP_RESTORE_PERMISSION_CHECKS);
+        addEntitlement(builder, accountId, datalakeResizeRecovery, CDP_DATALAKE_RESIZE_RECOVERY);
+        addEntitlement(builder, accountId, datalakeLightToMediumMigration, DATA_LAKE_LIGHT_TO_MEDIUM_MIGRATION);
+        addEntitlement(builder, accountId, cmSyncCommandPollerEnabled, CDP_USE_CM_SYNC_COMMAND_POLLER);
+        addEntitlement(builder, accountId, conclusionCheckerSendUserEvent, CDP_CONCLUSION_CHECKER_SEND_USER_EVENT);
+        addEntitlement(builder, accountId, userSyncCredentialsUpdateOptimizationEnabled, CDP_USER_SYNC_CREDENTIALS_UPDATE_OPTIMIZATION);
+        addEntitlement(builder, accountId, endpointGatewaySkipValidation, CDP_ENDPOINT_GATEWAY_SKIP_VALIDATION);
+        addEntitlement(builder, accountId, diagnosticsEnabled, CDP_VM_DIAGNOSTICS);
+        addEntitlement(builder, accountId, enableSaas || accountId.contains("CDP_SAAS"), CDP_SAAS);
+        addEntitlement(builder, accountId, enableFmsFreeipaBatchCall, FMS_FREEIPA_BATCH_CALL);
+        addEntitlement(builder, accountId, enableAwsVariantMigration, CDP_CB_AWS_VARIANT_MIGRATION);
+        addEntitlement(builder, accountId, edpProgressBarEnabled, UI_EDP_PROGRESS_BAR);
+        addEntitlement(builder, accountId, enableDistroxInstanceTypes, CDP_ENABLE_DISTROX_INSTANCE_TYPES);
+        addEntitlement(builder, accountId, enableUnboundElimination, CDP_UNBOUND_ELIMINATION);
+        addEntitlement(builder, accountId, enableTargetedUpscale, CDP_TARGETED_UPSCALE);
+        addEntitlement(builder, accountId, enableE2ETestOnly, E2E_TEST_ONLY);
+        addEntitlement(builder, accountId, skipRollingUpgradeValidationEnabled, CDP_SKIP_ROLLING_UPGRADE_VALIDATION);
+        addEntitlement(builder, accountId, enableWorkloadIamSync, WORKLOAD_IAM_SYNC);
+        addEntitlement(builder, accountId, enableWorkloadIamSyncRouting, WORKLOAD_IAM_USERSYNC_ROUTING);
+        addEntitlement(builder, accountId, enableSdxSaasIntegration, CDP_SAAS_SDX_INTEGRATION);
+        addEntitlement(builder, accountId, enableComputeMonitoring, CDP_CENTRAL_COMPUTE_MONITORING);
+        addEntitlement(builder, accountId, enableUsersyncEnforceGroupMemberLimit, CDP_USERSYNC_ENFORCE_GROUP_MEMBER_LIMIT);
+        addEntitlement(builder, accountId, enablePostgresUpgradeException, CDP_POSTGRES_UPGRADE_EXCEPTION);
+        addEntitlement(builder, accountId, enableUsersyncSplitFreeIPAUserRetrieval, CDP_USERSYNC_SPLIT_FREEIPA_USER_RETRIEVAL);
+        addEntitlement(builder, accountId, enableLongTimeDatalakeBackup, CDP_DATALAKE_BACKUP_LONG_TIMEOUT);
+        addEntitlement(builder, accountId, skipPostgresUpgradeAttachedDatahubsCheck, CDP_POSTGRES_UPGRADE_SKIP_ATTACHED_DATAHUBS_CHECK);
+        addEntitlement(builder, accountId, skipUpgradeAttachedDatahubsCheck, CDP_UPGRADE_SKIP_ATTACHED_DATAHUBS_CHECK);
+        addEntitlement(builder, accountId, skipPostgresUpgradeServicesAndCmStop, CDP_POSTGRES_UPGRADE_SKIP_SERVICE_STOP);
+        addEntitlement(builder, accountId, enableTargetingSubnetsForEndpointAccessGateway, TARGETING_SUBNETS_FOR_ENDPOINT_ACCESS_GATEWAY);
+        addEntitlement(builder, accountId, azureCertificateAuth, CDP_AZURE_CERTIFICATE_AUTH);
+        addEntitlement(builder, accountId, costCalculationEnabled, CDP_CB_COST_CALCULATION);
+        addEntitlement(builder, accountId, co2CalculationEnabled, CDP_CB_CO2_CALCULATION);
+        addEntitlement(builder, accountId, enforceAwsNativeForSingleAzEnabled, CDP_CB_ENFORCE_AWS_NATIVE_FOR_SINGLE_AZ_FREEIPA);
+        addEntitlement(builder, accountId, enforceAwsNativeForSingleAzEnabled, CDP_CB_ENFORCE_AWS_NATIVE_FOR_SINGLE_AZ_DATALAKE);
+        addEntitlement(builder, accountId, enforceAwsNativeForSingleAzEnabled, CDP_CB_ENFORCE_AWS_NATIVE_FOR_SINGLE_AZ_DATAHUB);
+        addEntitlement(builder, accountId, dlBackupCompressionEnable, CDP_DATALAKE_DB_BACKUP_ENABLE_COMPRESSION);
+        addEntitlement(builder, accountId, secretEncryptionEnabled, CDP_CB_SECRET_ENCRYPTION);
+        addEntitlement(builder, accountId, secretEncryptionForCommercialAwsEnabled, CDP_CB_SECRET_ENCRYPTION_FOR_COMMERCIAL_AWS);
+        addEntitlement(builder, accountId, cmObservabilitySaasPremium, OBSERVABILITY_SAAS_PREMIUM);
+        addEntitlement(builder, accountId, cmObservabilitySaasTrial, OBSERVABILITY_SAAS_TRIAL);
+        addEntitlement(builder, accountId, cmObservabilityRealtimeJobs, OBSERVABILITY_REAL_TIME_JOBS);
+        addEntitlement(builder, accountId, cmObservabilityDmp, OBSERVABILITY_DMP);
+        addEntitlement(builder, accountId, computeUiEnabled, COMPUTE_UI);
+        addEntitlement(builder, accountId, computeUiEnabled, COMPUTE_API_LIFTIE);
+        addEntitlement(builder, accountId, computeUiEnabled, COMPUTE_API_LIFTIE_BETA);
+        addEntitlement(builder, accountId, computeClusterEnabled, ENABLE_COMPUTE_CLUSTER);
+        addEntitlement(builder, accountId, rangerLdapUsersyncEnabled, CDP_RANGER_LDAP_USERSYNC);
+        addEntitlement(builder, accountId, azureFlexibleUpgradeLongPollingEnabled, CDP_AZURE_DATABASE_FLEXIBLE_SERVER_UPGRADE_LONG_POLLING);
+        addEntitlement(builder, accountId, azureSingleServerRejectEnabled, CDP_AZURE_DATABASE_SINGLE_SERVER_REJECT);
+        addEntitlement(builder, accountId, gcpSecureBootEnabled, CDP_CB_GCP_SECURE_BOOT);
+        addEntitlement(builder, accountId, datahubForceOsUpgradeEnabled, CDP_DATAHUB_FORCE_OS_UPGRADE);
+        addEntitlement(builder, accountId, tlsv13Enabled, CDP_CB_TLS_1_3);
+        addEntitlement(builder, accountId, devTelemetryYumRepoEnabled, CDP_CB_USE_DEV_TELEMETRY_YUM_REPO);
+        addEntitlement(builder, accountId, lakehouseOptimizerEnabled, CDP_LAKEHOUSE_OPTIMIZER_ENABLED);
+        addEntitlement(builder, accountId, ephemeralXfsSupportEnabled, CDP_CB_XFS_FOR_EPHEMERAL_DISK_SUPPORTED);
+        addEntitlement(builder, accountId, configureEncryptionProfileEnabled, CDP_CB_CONFIGURE_ENCRYPTION_PROFILE);
+        addEntitlement(builder, accountId, zookeeperToKRaftMigrationEnabled, CDP_ENABLE_ZOOKEEPER_TO_KRAFT_MIGRATION);
+        addEntitlement(builder, accountId, mitigateReleaseFailure7218P1100Enabled, CDP_MITIGATE_RELEASE_FAILURE_7218P1100);
+        addEntitlement(builder, accountId, tlsv13OnlyEnabled, CDP_CB_SUPPORTS_TLS_1_3_ONLY);
+        addEntitlement(builder, accountId, verticalScaleHaEnabled, CDP_CB_VERTICAL_SCALE_HA);
+        addEntitlement(builder, accountId, cloudprivatelinksEnabled, CDP_PRIVATELINKS);
+        addEntitlement(builder, accountId, preferMinifiLoggingEnabled, CDP_CB_PREFER_MINIFI_LOGGING);
+        addEntitlement(builder, accountId, personalViewCbByRightEnabled, PERSONAL_VIEW_CB_BY_RIGHT);
+        addEntitlement(builder, accountId, datalakeKnoxGatewayDbDrEnabled, CDP_DATALAKE_KNOX_GATEWAY_DB_DR);
+        addEntitlement(builder, accountId, gp2toGp3MigrationEnabled, GP2_TO_GP3_MIGRATION);
+        addEntitlement(builder, accountId, datalakeShapesWithoutHBaseAndHDFSEnabled, CDP_DATALAKE_SHAPES_WITHOUT_HBASE_AND_HDFS);
+        addEntitlement(builder, accountId, changeEncryptionProfileEnabled, CDP_CHANGE_ENCRYPTION_PROFILE);
+        addEntitlement(builder, accountId, freeipaMultiazMigrationEnable, CDP_CB_FREEIPA_MULTI_AZ_MIGRATION);
+        addEntitlement(builder, accountId, globalDefaultTemplateEnabled, CDP_GLOBAL_DEFAULT_TEMPLATE);
 
-        if (datalakeKnoxGatewayDbDrEnabled) {
-            builder.addEntitlements(createEntitlement(CDP_DATALAKE_KNOX_GATEWAY_DB_DR));
-        }
-        if (gp2toGp3MigrationEnabled) {
-            builder.addEntitlements(createEntitlement(GP2_TO_GP3_MIGRATION));
-        }
-
-        if (datalakeShapesWithoutHBaseAndHDFSEnabled) {
-            builder.addEntitlements(createEntitlement(CDP_DATALAKE_SHAPES_WITHOUT_HBASE_AND_HDFS));
-        }
-
-        if (changeEncryptionProfileEnabled) {
-            builder.addEntitlements(createEntitlement(CDP_CHANGE_ENCRYPTION_PROFILE));
-        }
-
-        if (freeipaMultiazMigrationEnable) {
-            builder.addEntitlements(createEntitlement(CDP_CB_FREEIPA_MULTI_AZ_MIGRATION));
-        }
+        addEntitlement(builder, accountId, true, CLOUDERA_INTERNAL_ACCOUNT);
+        addEntitlement(builder, accountId, true, CDP_FEDRAMP_EXTERNAL_DATABASE_FORCE_DISABLED);
+        addEntitlement(builder, accountId, true, CDP_AZURE_UAE_CENTRAL);
+        addEntitlement(builder, accountId, true, DATAHUB_IMPALA_SCHEDULE_BASED_SCALING);
+        addEntitlement(builder, accountId, true, DATAHUB_GCP_AUTOSCALING);
+        addEntitlement(builder, accountId, true, DATAHUB_AWS_STOP_START_SCALING);
+        addEntitlement(builder, accountId, true, DATAHUB_AZURE_STOP_START_SCALING);
+        addEntitlement(builder, accountId, true, DATAHUB_GCP_STOP_START_SCALING);
+        addEntitlement(builder, accountId, true, DATAHUB_STOP_START_SCALING_FAILURE_RECOVERY);
+        addEntitlement(builder, accountId, true, LOCAL_DEV);
+        addEntitlement(builder, accountId, true, CDP_CP_CUSTOM_DL_TEMPLATE);
+        addEntitlement(builder, accountId, true, OJDBC_TOKEN_DH);
+        addEntitlement(builder, accountId, true, CDP_CM_BULK_HOSTS_REMOVAL);
+        addEntitlement(builder, accountId, true, CDP_DATAHUB_EXPERIMENTAL_SCALE_LIMITS);
+        addEntitlement(builder, accountId, true, CDP_CB_AZURE_MULTIAZ);
+        addEntitlement(builder, accountId, true, CDP_CB_GCP_MULTIAZ);
+        addEntitlement(builder, accountId, true, CDP_CB_AZURE_RESIZE_DISK);
+        addEntitlement(builder, accountId, true, CDP_CB_AZURE_DELETE_DISK);
+        addEntitlement(builder, accountId, true, CDP_CB_AZURE_ADD_DISK);
+        addEntitlement(builder, accountId, true, CDP_EXPRESS_ONBOARDING);
+        addEntitlement(builder, accountId, true, CDP_SKIP_CERTIFICATE_ROTATION_VALIDATION);
+        addEntitlement(builder, accountId, true, CDP_SECURITY_ENFORCING_SELINUX);
+        addEntitlement(builder, accountId, true, CDP_CB_CM_TEMPLATE_SYNC);
+        addEntitlement(builder, accountId, true, CDP_CB_NOTIFICATION_SENDING_ENABLED);
+        addEntitlement(builder, accountId, true, CDP_CB_DB_DISK_AUTO_RESIZE);
+        addEntitlement(builder, accountId, true, CDP_CB_DISABLE_STRICT_IMAGE_CATALOG_URL_VALIDATION);
+        addEntitlement(builder, accountId, true, CDP_FALLBACK_INSTANCETYPE);
 
         responseObserver.onNext(
                 GetAccountResponse.newBuilder()
                         .setAccount(builder
                                 .setClouderaManagerLicenseKey(cbLicense)
                                 .setWorkloadSubdomain(ACCOUNT_SUBDOMAIN)
-                                .addEntitlements(createEntitlement(CLOUDERA_INTERNAL_ACCOUNT))
-                                .addEntitlements(createEntitlement(CDP_FEDRAMP_EXTERNAL_DATABASE_FORCE_DISABLED))
-                                .addEntitlements(createEntitlement(CDP_AZURE_UAE_CENTRAL))
-                                .addEntitlements(createEntitlement(DATAHUB_IMPALA_SCHEDULE_BASED_SCALING))
-                                .addEntitlements(createEntitlement(DATAHUB_GCP_AUTOSCALING))
-                                .addEntitlements(createEntitlement(DATAHUB_AWS_STOP_START_SCALING))
-                                .addEntitlements(createEntitlement(DATAHUB_AZURE_STOP_START_SCALING))
-                                .addEntitlements(createEntitlement(DATAHUB_GCP_STOP_START_SCALING))
-                                .addEntitlements(createEntitlement(DATAHUB_STOP_START_SCALING_FAILURE_RECOVERY))
-                                .addEntitlements(createEntitlement(LOCAL_DEV))
-                                .addEntitlements(createEntitlement(CDP_CP_CUSTOM_DL_TEMPLATE))
-                                .addEntitlements(createEntitlement(OJDBC_TOKEN_DH))
-                                .addEntitlements(createEntitlement(CDP_CM_BULK_HOSTS_REMOVAL))
-                                .addEntitlements(createEntitlement(CDP_DATAHUB_EXPERIMENTAL_SCALE_LIMITS))
-                                .addEntitlements(createEntitlement(CDP_CB_AZURE_MULTIAZ))
-                                .addEntitlements(createEntitlement(CDP_CB_GCP_MULTIAZ))
-                                .addEntitlements(createEntitlement(CDP_CB_AZURE_RESIZE_DISK))
-                                .addEntitlements(createEntitlement(CDP_CB_AZURE_DELETE_DISK))
-                                .addEntitlements(createEntitlement(CDP_CB_AZURE_ADD_DISK))
-                                .addEntitlements(createEntitlement(CDP_EXPRESS_ONBOARDING))
-                                .addEntitlements(createEntitlement(CDP_SKIP_CERTIFICATE_ROTATION_VALIDATION))
-                                .addEntitlements(createEntitlement(CDP_SECURITY_ENFORCING_SELINUX))
-                                .addEntitlements(createEntitlement(CDP_CB_CM_TEMPLATE_SYNC))
-                                .addEntitlements(createEntitlement(CDP_CB_NOTIFICATION_SENDING_ENABLED))
-                                .addEntitlements(createEntitlement(CDP_CB_DB_DISK_AUTO_RESIZE))
-                                .addEntitlements(createEntitlement(CDP_CB_DISABLE_STRICT_IMAGE_CATALOG_URL_VALIDATION))
-                                .addEntitlements(createEntitlement(CDP_FALLBACK_INSTANCETYPE))
                                 .setGlobalPasswordPolicy(workloadPasswordPolicy)
                                 .setAccountId(getAccountId(request.getExternalAccountId(), accountId))
                                 .setExternalAccountId(getExternalAccountId(request.getExternalAccountId(), accountId))
                                 .build())
                         .build());
         responseObserver.onCompleted();
+    }
+
+    private void addEntitlement(Account.Builder builder, String accountId, boolean enabled,
+            com.sequenceiq.cloudbreak.auth.altus.model.Entitlement entitlement) {
+        addEntitlement(builder, accountId, enabled, entitlement.name());
+    }
+
+    private void addEntitlement(Account.Builder builder, String accountId, boolean enabled, String entitlement) {
+        if (revokedEntitlements.containsKey(accountId) && revokedEntitlements.get(accountId).contains(entitlement)) {
+            return;
+        } else if (enabled || grantedEntitlements.containsKey(accountId) && grantedEntitlements.get(accountId).contains(entitlement)) {
+            builder.addEntitlements(createEntitlement(entitlement));
+        }
     }
 
     private String getExternalAccountId(String externalAccountId, String accountId) {
@@ -1242,11 +1086,17 @@ public class MockUserManagementService extends UserManagementImplBase {
     public void grantEntitlement(GrantEntitlementRequest request, StreamObserver<GrantEntitlementResponse> responseObserver) {
         LOGGER.info("Grant entitlement '{}' for account: {}", request.getEntitlementName(), request.getAccountId());
         if (request.getEntitlementName().equalsIgnoreCase("CLEAN_UP")) {
-            grantedEntitlements.clear();
-            revokedEntitlements.clear();
+            if (grantedEntitlements.containsKey(request.getAccountId().getAccountId())) {
+                grantedEntitlements.get(request.getAccountId().getAccountId()).clear();
+            }
+            if (revokedEntitlements.containsKey(request.getAccountId().getAccountId())) {
+                revokedEntitlements.get(request.getAccountId().getAccountId()).clear();
+            }
         } else {
-            grantedEntitlements.add(request.getEntitlementName());
-            revokedEntitlements.remove(request.getEntitlementName());
+            grantedEntitlements.computeIfAbsent(request.getAccountId().getAccountId(), i -> new ConcurrentSkipListSet<>());
+            grantedEntitlements.get(request.getAccountId().getAccountId()).add(request.getEntitlementName());
+            revokedEntitlements.computeIfAbsent(request.getAccountId().getAccountId(), i -> new ConcurrentSkipListSet<>());
+            revokedEntitlements.get(request.getAccountId().getAccountId()).remove(request.getEntitlementName());
         }
         responseObserver.onNext(GrantEntitlementResponse.newBuilder().build());
         responseObserver.onCompleted();
@@ -1255,8 +1105,10 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Override
     public void revokeEntitlement(RevokeEntitlementRequest request, StreamObserver<RevokeEntitlementResponse> responseObserver) {
         LOGGER.info("Revoke entitlement '{}' for account: {}", request.getEntitlementName(), request.getAccountId());
-        grantedEntitlements.remove(request.getEntitlementName());
-        revokedEntitlements.add(request.getEntitlementName());
+        grantedEntitlements.computeIfAbsent(request.getAccountId().getAccountId(), i -> new ConcurrentSkipListSet<>());
+        grantedEntitlements.get(request.getAccountId().getAccountId()).remove(request.getEntitlementName());
+        revokedEntitlements.computeIfAbsent(request.getAccountId().getAccountId(), i -> new ConcurrentSkipListSet<>());
+        revokedEntitlements.get(request.getAccountId().getAccountId()).add(request.getEntitlementName());
         responseObserver.onNext(RevokeEntitlementResponse.newBuilder().build());
         responseObserver.onCompleted();
     }

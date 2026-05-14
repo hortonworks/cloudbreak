@@ -3,6 +3,9 @@ package com.sequenceiq.cloudbreak.init.clustertemplate;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
@@ -28,7 +31,10 @@ import com.sequenceiq.cloudbreak.common.gov.CommonGovService;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.provider.ProviderPreferencesService;
 import com.sequenceiq.cloudbreak.converter.v4.clustertemplate.DefaultClusterTemplateV4RequestToClusterTemplateConverter;
+import com.sequenceiq.cloudbreak.domain.BlueprintFile;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterTemplate;
+import com.sequenceiq.cloudbreak.init.blueprint.DefaultBlueprintCache;
+import com.sequenceiq.cloudbreak.service.blueprint.CrnGeneratorService;
 
 @ExtendWith(MockitoExtension.class)
 class DefaultClusterTemplateCacheTest {
@@ -45,11 +51,24 @@ class DefaultClusterTemplateCacheTest {
     private CommonGovService commonGovService;
 
     @Mock
+    private CrnGeneratorService crnGeneratorService;
+
+    @Mock
     private DefaultClusterTemplateV4RequestToClusterTemplateConverter defaultClusterTemplateV4RequestToClusterTemplateConverter;
+
+    @Mock
+    private DefaultBlueprintCache defaultBlueprintCache;
 
     @BeforeEach
     void setUp() throws Exception {
         underTest.setDefaultTemplateDir("test/defaults/clustertemplates/");
+        lenient().doAnswer(invocation -> invocation.getArguments()[0])
+                .when(crnGeneratorService).createGlobalDefaultClusterDefinitionCrn(anyString());
+        lenient().doAnswer(invocation -> {
+            BlueprintFile blueprintFile = mock(BlueprintFile.class);
+            when(blueprintFile.getStackVersion()).thenReturn("x.y.z");
+            return blueprintFile;
+        }).when(defaultBlueprintCache).getDefaultByName(anyString());
     }
 
     @Test

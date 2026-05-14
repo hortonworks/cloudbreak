@@ -75,9 +75,6 @@ class BlueprintLoaderServiceTest {
     private BlueprintLoaderService underTest;
 
     @Mock
-    private DefaultBlueprintCache blueprintCache;
-
-    @Mock
     private DefaultBlueprintCache defaultBlueprintCache;
 
     @Mock
@@ -94,6 +91,9 @@ class BlueprintLoaderServiceTest {
 
     @Mock
     private EntitlementService entitlementService;
+
+    @Mock
+    private CrnGeneratorService crnGeneratorService;
 
     public static Blueprint createBlueprint(ResourceStatus resourceStatus, int index, BlueprintUpgradeOption upgradeOption) {
         Blueprint blueprint = new Blueprint();
@@ -122,6 +122,7 @@ class BlueprintLoaderServiceTest {
                 .name("multi-node-hdfs-yarn" + index)
                 .description("test validation" + index)
                 .blueprintUpgradeOption(upgradeOption)
+                .resourceCrn("resourceCrn")
                 .build();
     }
 
@@ -211,10 +212,10 @@ class BlueprintLoaderServiceTest {
         // We have a2, a3, a4 as defaults
         Map<String, BlueprintFile> defaultBlueprints = generateCacheData(3, 2, BlueprintUpgradeOption.ENABLED);
         setupMock(defaultBlueprints);
-        when(clusterTemplateService.getTemplatesByBlueprint(any(Blueprint.class))).thenReturn(emptyClusterTemplateList);
+        when(clusterTemplateService.getTemplatesByBlueprint(any(Blueprint.class), any(Workspace.class))).thenReturn(emptyClusterTemplateList);
 
         Collection<Blueprint> resultSet = ThreadBasedUserCrnProvider.doAs(USER_CRN,
-                () -> underTest.loadBlueprintsForTheWorkspace(blueprints, workspace, this::mockSave));
+                () -> underTest.loadBlueprintsForTheWorkspace(blueprints, this::mockSave, workspace, false));
 
         ArgumentCaptor<Iterable<Blueprint>> argument = ArgumentCaptor.forClass(Iterable.class);
         verify(blueprintService).pureSaveAll(argument.capture());
@@ -240,9 +241,9 @@ class BlueprintLoaderServiceTest {
         // We have a2, a3, a4 as defaults
         Map<String, BlueprintFile> defaultBlueprints = generateCacheData(3, 2, BlueprintUpgradeOption.ENABLED);
         setupMock(defaultBlueprints);
-        when(clusterTemplateService.getTemplatesByBlueprint(any(Blueprint.class))).thenReturn(notEmptyClusterTemplateList);
+        when(clusterTemplateService.getTemplatesByBlueprint(any(Blueprint.class), any(Workspace.class))).thenReturn(notEmptyClusterTemplateList);
         Collection<Blueprint> resultSet = ThreadBasedUserCrnProvider.doAs(USER_CRN,
-                () -> underTest.loadBlueprintsForTheWorkspace(blueprints, workspace, this::mockSave));
+                () -> underTest.loadBlueprintsForTheWorkspace(blueprints, this::mockSave, workspace, false));
 
         ArgumentCaptor<Iterable<Blueprint>> argument = ArgumentCaptor.forClass(Iterable.class);
         verify(blueprintService).pureSaveAll(argument.capture());
@@ -270,7 +271,7 @@ class BlueprintLoaderServiceTest {
         setupMock(generateCacheData(3, BlueprintUpgradeOption.ENABLED));
 
         Collection<Blueprint> resultSet = ThreadBasedUserCrnProvider.doAs(USER_CRN,
-                () -> underTest.loadBlueprintsForTheWorkspace(blueprints, workspace, this::mockSave));
+                () -> underTest.loadBlueprintsForTheWorkspace(blueprints, this::mockSave, workspace, false));
         assertEquals(3L, resultSet.size());
     }
 
@@ -280,7 +281,7 @@ class BlueprintLoaderServiceTest {
         setupMock(generateCacheData(3, BlueprintUpgradeOption.ENABLED));
 
         Collection<Blueprint> resultSet = ThreadBasedUserCrnProvider.doAs(USER_CRN,
-                () -> underTest.loadBlueprintsForTheWorkspace(blueprints, workspace, this::mockSave));
+                () -> underTest.loadBlueprintsForTheWorkspace(blueprints, this::mockSave, workspace, false));
 
         assertEquals(3L, resultSet.size());
     }
@@ -293,7 +294,7 @@ class BlueprintLoaderServiceTest {
         setupMock(generateCacheData(1, BlueprintUpgradeOption.ENABLED));
 
         Collection<Blueprint> resultSet = ThreadBasedUserCrnProvider.doAs(USER_CRN,
-                () -> underTest.loadBlueprintsForTheWorkspace(blueprints, workspace, this::mockSave));
+                () -> underTest.loadBlueprintsForTheWorkspace(blueprints, this::mockSave, workspace, false));
 
         assertTrue(resultSet.stream().findFirst().isPresent());
         assertEquals(DEFAULT, resultSet.stream().findFirst().get().getStatus());
@@ -308,7 +309,7 @@ class BlueprintLoaderServiceTest {
         setupMock(generateCacheData(1, BlueprintUpgradeOption.ENABLED));
 
         Collection<Blueprint> resultSet = ThreadBasedUserCrnProvider.doAs(USER_CRN,
-                () -> underTest.loadBlueprintsForTheWorkspace(blueprints, workspace, this::mockSave));
+                () -> underTest.loadBlueprintsForTheWorkspace(blueprints, this::mockSave, workspace, false));
         assertTrue(resultSet.stream().findFirst().isPresent());
         assertEquals(DEFAULT, resultSet.stream().findFirst().get().getStatus());
         assertEquals(USER_MANAGED, blueprint.getStatus());
@@ -325,7 +326,7 @@ class BlueprintLoaderServiceTest {
         setupMock(generateCacheData(3, BlueprintUpgradeOption.ENABLED));
 
         Set<Blueprint> result = ThreadBasedUserCrnProvider.doAs(USER_CRN,
-                () -> underTest.loadBlueprintsForTheWorkspace(blueprints, workspace, this::mockSave));
+                () -> underTest.loadBlueprintsForTheWorkspace(blueprints, this::mockSave, workspace, false));
 
         assertTrue(result.stream().allMatch(bp -> bp.getBlueprintText() == null && bp.getDefaultBlueprintText() != null));
     }
@@ -340,12 +341,13 @@ class BlueprintLoaderServiceTest {
                 .stackVersion("stackVersion")
                 .stackType("CDH")
                 .name("7.3.1 - Lakehouse Optimizer")
+                .resourceCrn("resourceCrn")
                 .build());
         setupMock(defaultBlueprints);
         when(entitlementService.isLakehouseOptimizerEnabled("1234")).thenReturn(lakehouseOptimizerEnabled);
 
         Set<Blueprint> result = ThreadBasedUserCrnProvider.doAs(USER_CRN,
-                () -> underTest.loadBlueprintsForTheWorkspace(new HashSet<>(), workspace, this::mockSave));
+                () -> underTest.loadBlueprintsForTheWorkspace(new HashSet<>(), this::mockSave, workspace, false));
 
         assertEquals(lakehouseOptimizerEnabled ? 4 : 3, result.size());
     }
@@ -360,11 +362,12 @@ class BlueprintLoaderServiceTest {
                 .stackVersion("stackVersion")
                 .stackType("CDH")
                 .name("7.3.1 - Hybrid")
+                .resourceCrn("resourceCrn")
                 .build());
         setupMock(defaultBlueprints);
 
         Set<Blueprint> result = ThreadBasedUserCrnProvider.doAs(USER_CRN,
-                () -> underTest.loadBlueprintsForTheWorkspace(new HashSet<>(), workspace, this::mockSave));
+                () -> underTest.loadBlueprintsForTheWorkspace(new HashSet<>(), this::mockSave, workspace, false));
 
         assertEquals(4, result.size());
         assertThat(result).anyMatch(bp -> BlueprintHybridOption.BURST_TO_CLOUD.equals(bp.getHybridOption()));
@@ -385,7 +388,7 @@ class BlueprintLoaderServiceTest {
         assertTrue(result);
     }
 
-    private Iterable<Blueprint> mockSave(Iterable<Blueprint> blueprints, Workspace workspace) {
+    private Iterable<Blueprint> mockSave(Iterable<Blueprint> blueprints) {
         return blueprints;
     }
 

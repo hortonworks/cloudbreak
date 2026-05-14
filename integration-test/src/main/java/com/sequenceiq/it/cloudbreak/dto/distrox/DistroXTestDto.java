@@ -175,7 +175,7 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
     }
 
     @Override
-    public CloudbreakTestDto refresh() {
+    public DistroXTestDto refresh() {
         return when(distroXTestClient.refresh(), key("refresh-distrox-" + getName()).withSkipOnFail(false).withLogError(false));
     }
 

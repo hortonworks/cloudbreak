@@ -26,12 +26,22 @@ public interface BlueprintRepository extends WorkspaceResourceRepository<Bluepri
 
     Set<Blueprint> findAllByWorkspaceIdAndStatusIn(Long workspaceId, Set<ResourceStatus> statuses);
 
+    @Query("SELECT b FROM Blueprint b WHERE b.workspace IS NULL AND b.status IN (:statuses)")
+    Set<Blueprint> findAllGlobalDefaults(@Param("statuses") Set<ResourceStatus> statuses);
+
+    @Query("SELECT b FROM Blueprint b WHERE b.workspace IS NULL AND b.name = :name")
+    Optional<Blueprint> findGlobalDefaultByName(@Param("name") String name);
+
+    @Query("SELECT b FROM Blueprint b WHERE b.workspace IS NULL AND b.resourceCrn = :resourceCrn")
+    Optional<Blueprint> findGlobalDefaultByResourceCrn(@Param("resourceCrn") String resourceCrn);
+
+    @Query("SELECT b FROM Blueprint b WHERE b.workspace IS NULL AND b.name IN (:names)")
+    Set<Blueprint> findGlobalDefaultByResourceNames(@Param("names") Set<String> names);
+
     @Override
     <S extends Blueprint> List<S> saveAll(Iterable<S> entities);
 
     Optional<Blueprint> findByResourceCrnAndWorkspaceId(String resourceCrn, Long workspaceId);
-
-    Blueprint findByResourceCrn(String resourceCrn);
 
     @Query("SELECT b.resourceCrn FROM Blueprint b WHERE b.name = :name AND b.workspace.tenant.name = :accountId")
     Optional<String> findResourceCrnByNameAndAccountId(@Param("name") String name, @Param("accountId") String accountId);
@@ -39,12 +49,6 @@ public interface BlueprintRepository extends WorkspaceResourceRepository<Bluepri
     @Query("SELECT b.name as name, b.resourceCrn as crn FROM Blueprint b WHERE b.workspace.tenant.name = :accountId AND b.resourceCrn IN (:resourceCrns)")
     List<ResourceCrnAndNameView> findResourceNamesByCrnAndAccountId(@Param("resourceCrns") Collection<String> resourceCrns,
             @Param("accountId") String accountId);
-
-    @Query("SELECT b.name FROM Blueprint b WHERE b.resourceCrn = :resourceCrn AND b.workspace.tenant.name = :accountId")
-    Optional<String> findResourceNameByCrnAndAccountId(@Param("resourceCrn") String resourceCrn, @Param("accountId") String accountId);
-
-    @Query("SELECT b.resourceCrn FROM Blueprint b WHERE b.workspace.tenant.name = :accountId")
-    List<String> findAllResourceCrnsByAccountId(@Param("accountId") String accountId);
 
     @Query("SELECT s.cluster.blueprint FROM Stack s WHERE s.resourceCrn = :datahubCrn AND s.type = 'WORKLOAD'")
     Optional<Blueprint> findByDatahubCrn(@Param("datahubCrn") String datahubCrn);
