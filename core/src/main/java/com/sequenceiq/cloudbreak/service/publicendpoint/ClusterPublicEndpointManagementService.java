@@ -81,6 +81,7 @@ public class ClusterPublicEndpointManagementService {
             gatewayPublicEndpointManagementService.updateDnsEntry(stack, null);
             dnsEntryServices.forEach(dnsEntryService -> dnsEntryService.createOrUpdate(stack));
         }
+        registerLoadBalancerWithFreeIPA(stack.getStack());
     }
 
     public boolean manageCertificateAndDnsInPem(StackView stackView) {
@@ -98,6 +99,13 @@ public class ClusterPublicEndpointManagementService {
     }
 
     public void registerLoadBalancerWithFreeIPA(StackView stack) {
+        LOGGER.info("Refreshing load balancer DNS entries in FreeIPA for cluster '{}'", stack.getName());
         freeIPAEndpointManagementService.registerLoadBalancerDomainWithFreeIPA(stack);
+    }
+
+    public void refreshLoadBalancerDnsEntries(StackDtoDelegate stack) {
+        LOGGER.info("Refreshing load balancer DNS entries in PEM for cluster '{}'", stack.getName());
+        gatewayPublicEndpointManagementService.updateDnsEntryForLoadBalancers(stack);
+        registerLoadBalancerWithFreeIPA(stack.getStack());
     }
 }

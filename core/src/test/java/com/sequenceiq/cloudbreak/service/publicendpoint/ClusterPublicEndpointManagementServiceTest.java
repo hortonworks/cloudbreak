@@ -26,6 +26,7 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.service.publicendpoint.dns.AllHostPublicDnsEntryService;
 import com.sequenceiq.cloudbreak.service.publicendpoint.dns.BaseDnsEntryService;
 import com.sequenceiq.cloudbreak.service.publicendpoint.dns.KafkaBrokerPublicDnsEntryService;
+import com.sequenceiq.cloudbreak.view.StackView;
 
 @ExtendWith(MockitoExtension.class)
 class ClusterPublicEndpointManagementServiceTest {
@@ -34,7 +35,13 @@ class ClusterPublicEndpointManagementServiceTest {
     private Stack stack;
 
     @Mock
+    private StackView stackView;
+
+    @Mock
     private GatewayPublicEndpointManagementService gatewayPublicEndpointManagementService;
+
+    @Mock
+    private FreeIPAEndpointManagementService freeIPAEndpointManagementService;
 
     @Mock
     private List<BaseDnsEntryService> dnsEntryServices;
@@ -44,22 +51,26 @@ class ClusterPublicEndpointManagementServiceTest {
 
     @Test
     void testRefreshDnsEntriesWhenPemIsDisabled() {
+        when(stack.getStack()).thenReturn(stackView);
         when(gatewayPublicEndpointManagementService.manageCertificateAndDnsInPem(any())).thenReturn(false);
 
         underTest.refreshDnsEntries(stack);
 
         verify(gatewayPublicEndpointManagementService, never()).updateDnsEntry(stack, null);
         verifyNoInteractions(dnsEntryServices);
+        verify(freeIPAEndpointManagementService, times(1)).registerLoadBalancerDomainWithFreeIPA(stackView);
     }
 
     @Test
     void testRefreshDnsEntriesWhenPemIsEnabled() {
+        when(stack.getStack()).thenReturn(stackView);
         when(gatewayPublicEndpointManagementService.manageCertificateAndDnsInPem(any())).thenReturn(true);
 
         underTest.refreshDnsEntries(stack);
 
         verify(gatewayPublicEndpointManagementService, times(1)).updateDnsEntry(stack, null);
         verify(dnsEntryServices, times(1)).forEach(any());
+        verify(freeIPAEndpointManagementService, times(1)).registerLoadBalancerDomainWithFreeIPA(stackView);
     }
 
     @Test
@@ -143,5 +154,16 @@ class ClusterPublicEndpointManagementServiceTest {
 
         verify(gatewayPublicEndpointManagementService, times(1)).renewCertificate(stack);
         verify(gatewayPublicEndpointManagementService, times(1)).updateDnsEntryForLoadBalancers(stack);
+    }
+
+    @Test
+    void testRefreshLoadBalancerDnsEntries() {
+        when(stack.getStack()).thenReturn(stackView);
+        when(stack.getName()).thenReturn("cluster-name");
+
+        underTest.refreshLoadBalancerDnsEntries(stack);
+
+        verify(gatewayPublicEndpointManagementService, times(1)).updateDnsEntryForLoadBalancers(stack);
+        verify(freeIPAEndpointManagementService, times(1)).registerLoadBalancerDomainWithFreeIPA(stackView);
     }
 }
