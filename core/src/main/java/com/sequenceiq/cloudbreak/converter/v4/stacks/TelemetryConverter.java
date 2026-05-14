@@ -173,7 +173,7 @@ public class TelemetryConverter {
         return telemetryRequest;
     }
 
-    public FeatureSetting createWorkloadAnalyticsFeature(WorkloadAnalyticsRequest waRequest) {
+    private FeatureSetting createWorkloadAnalyticsFeature(WorkloadAnalyticsRequest waRequest) {
         boolean waFeatureEnabled = false;
         if (waRequest != null) {
             waFeatureEnabled = true;
@@ -186,50 +186,31 @@ public class TelemetryConverter {
         return waFeatureSetting;
     }
 
-    public WorkloadAnalyticsRequest createWorkloadAnalyticsRequest(DetailedEnvironmentResponse environment,
-            SdxBasicView sdxBasicView) {
+    private WorkloadAnalyticsRequest createWorkloadAnalyticsRequest(DetailedEnvironmentResponse environment, SdxBasicView sdxBasicView) {
         WorkloadAnalyticsRequest workloadAnalyticsRequest = null;
         if (telemetryPublisherEnabled) {
-            workloadAnalyticsRequest = fillWARequestFromEnvironmentResponse(environment, sdxBasicView);
+            if (environment != null && environment.getTelemetry() != null && environment.getTelemetry().getFeatures() != null
+                    && environment.getTelemetry().getFeatures().getWorkloadAnalytics() != null) {
+                if (environment.getTelemetry().getFeatures().getWorkloadAnalytics().getEnabled()) {
+                    LOGGER.debug("Workload analytics feature is enabled. Filling telemetry request with datalake details.");
+                    workloadAnalyticsRequest = new WorkloadAnalyticsRequest();
+                    workloadAnalyticsRequest.setAttributes(createWorkloadAnalyticsAttributes(environment, sdxBasicView));
+                } else {
+                    LOGGER.debug("Workload analytics feature is disabled.");
+                }
+            } else {
+                if (telemetryPublisherDefaultValue) {
+                    LOGGER.debug("Filling workload analytics request (default).");
+                    workloadAnalyticsRequest = new WorkloadAnalyticsRequest();
+                    workloadAnalyticsRequest.setAttributes(createWorkloadAnalyticsAttributes(environment, sdxBasicView));
+                } else {
+                    LOGGER.debug("Workload analytics feature is disabled (default value is false).");
+                }
+            }
         } else {
             LOGGER.debug("Workload analytics feature is disabled (globally).");
         }
         return workloadAnalyticsRequest;
-    }
-
-    private WorkloadAnalyticsRequest fillWARequestFromEnvironmentResponse(DetailedEnvironmentResponse environment,
-            SdxBasicView sdxBasicView) {
-        WorkloadAnalyticsRequest workloadAnalyticsRequest = null;
-
-        if (environment != null && environment.getTelemetry() != null && environment.getTelemetry().getFeatures() != null
-                && environment.getTelemetry().getFeatures().getWorkloadAnalytics() != null) {
-            if (environment.getTelemetry().getFeatures().getWorkloadAnalytics().getEnabled()) {
-                LOGGER.debug("Workload analytics feature is enabled. Filling telemetry request with datalake details.");
-                workloadAnalyticsRequest = new WorkloadAnalyticsRequest();
-                workloadAnalyticsRequest.setAttributes(createWAAttributes(environment, sdxBasicView));
-            } else {
-                LOGGER.debug("Workload analytics feature is disabled.");
-            }
-        } else {
-            if (telemetryPublisherDefaultValue) {
-                LOGGER.debug("Filling workload analytics request (default).");
-                workloadAnalyticsRequest = new WorkloadAnalyticsRequest();
-                workloadAnalyticsRequest.setAttributes(createWAAttributes(environment, sdxBasicView));
-            } else {
-                LOGGER.debug("Workload analytics feature is disabled (default value is false).");
-            }
-        }
-        return workloadAnalyticsRequest;
-    }
-
-    private Map<String, Object> createWAAttributesFromEnvironmentResponse(TelemetryResponse response) {
-        Map<String, Object> waDefaultAttributes = new HashMap<>();
-        if (response != null && response.getWorkloadAnalytics() != null
-                && MapUtils.isNotEmpty(response.getWorkloadAnalytics().getAttributes())) {
-            LOGGER.debug("Found environment level workload analytics attributes.");
-            waDefaultAttributes = new HashMap<>(response.getWorkloadAnalytics().getAttributes());
-        }
-        return waDefaultAttributes;
     }
 
     private FeaturesRequest createFeaturesRequestFromSource(Telemetry telemetry) {
@@ -403,34 +384,34 @@ public class TelemetryConverter {
         return monitoringRequest;
     }
 
-    private Map<String, Object> createWAAttributes(DetailedEnvironmentResponse environment, SdxBasicView sdxBasicView) {
-        Map<String, Object> waAttributes = new HashMap<>();
+    private Map<String, Object> createWorkloadAnalyticsAttributes(DetailedEnvironmentResponse environment, SdxBasicView sdxBasicView) {
+        Map<String, Object> attributes = new HashMap<>();
         if (environment != null) {
             if (environment.getTelemetry() != null
                     && environment.getTelemetry().getWorkloadAnalytics() != null
                     && MapUtils.isNotEmpty(environment.getTelemetry().getWorkloadAnalytics().getAttributes())) {
                 LOGGER.debug("Found environment level workload analytics attributes.");
-                waAttributes.putAll(environment.getTelemetry().getWorkloadAnalytics().getAttributes());
+                attributes.putAll(environment.getTelemetry().getWorkloadAnalytics().getAttributes());
             }
             if (StringUtils.isNotEmpty(environment.getCrn())) {
-                waAttributes.put(DATABUS_HEADER_ENVIRONMENT_CRN, environment.getCrn());
+                attributes.put(DATABUS_HEADER_ENVIRONMENT_CRN, environment.getCrn());
             }
             if (StringUtils.isNotEmpty(environment.getName())) {
-                waAttributes.put(DATABUS_HEADER_ENVIRONMENT_NAME, environment.getName());
+                attributes.put(DATABUS_HEADER_ENVIRONMENT_NAME, environment.getName());
             }
         }
         if (sdxBasicView != null) {
             LOGGER.debug("Adding datalake references to workload analytics attributes.");
             if (StringUtils.isNotEmpty(sdxBasicView.crn())) {
-                waAttributes.put(DATABUS_HEADER_SDX_ID, Crn.safeFromString(sdxBasicView.crn()).getResource());
-                waAttributes.put(DATABUS_HEADER_DATALAKE_CRN, sdxBasicView.crn());
+                attributes.put(DATABUS_HEADER_SDX_ID, Crn.safeFromString(sdxBasicView.crn()).getResource());
+                attributes.put(DATABUS_HEADER_DATALAKE_CRN, sdxBasicView.crn());
             }
             if (StringUtils.isNotEmpty(sdxBasicView.name())) {
-                waAttributes.put(DATABUS_HEADER_SDX_NAME, sdxBasicView.name());
-                waAttributes.put(DATABUS_HEADER_DATALAKE_NAME, sdxBasicView.name());
+                attributes.put(DATABUS_HEADER_SDX_NAME, sdxBasicView.name());
+                attributes.put(DATABUS_HEADER_DATALAKE_NAME, sdxBasicView.name());
             }
         }
-        return waAttributes;
+        return attributes;
     }
 
     private void setMonitoring(TelemetryRequest request, Features features, String accountId) {
