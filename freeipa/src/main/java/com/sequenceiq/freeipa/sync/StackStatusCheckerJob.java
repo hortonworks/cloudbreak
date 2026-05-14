@@ -127,7 +127,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
     }
 
     private Set<String> getFilteredFailedMinions(Stack stack, Set<String> failedMinions) {
-        Set<String> reachableImdFqdns = stack.getReachableInstances().stream().map(InstanceMetaData::getDiscoveryFQDN).collect(toSet());
+        Set<String> reachableImdFqdns = stack.getNotDeletedInstanceMetaDataSet().stream().map(InstanceMetaData::getDiscoveryFQDN).collect(toSet());
         Set<String> failedMinionsPresentInDatabase = failedMinions.stream().filter(reachableImdFqdns::contains).collect(toSet());
         if (!failedMinionsPresentInDatabase.isEmpty()) {
             LOGGER.debug("Salt minions check failed for: {}", failedMinionsPresentInDatabase);

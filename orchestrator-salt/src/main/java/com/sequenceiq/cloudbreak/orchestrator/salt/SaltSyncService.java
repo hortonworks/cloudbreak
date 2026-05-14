@@ -67,7 +67,6 @@ public class SaltSyncService {
             }
         } catch (Exception e) {
             LOGGER.error("Error occurred during check of salt check result json file: ", e);
-            return Optional.of(Set.of(gatewayConfig.getHostname()));
         }
         return Optional.empty();
     }
