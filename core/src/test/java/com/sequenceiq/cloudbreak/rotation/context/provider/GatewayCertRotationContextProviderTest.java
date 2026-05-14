@@ -21,7 +21,6 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxySecretProvider;
 import com.sequenceiq.cloudbreak.clusterproxy.ReadConfigResponse;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.ClusterHostServiceRunner;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.provision.service.ClusterProxyService;
@@ -73,9 +72,6 @@ class GatewayCertRotationContextProviderTest {
 
     @Mock
     private ClusterProxyRotationService clusterProxyRotationService;
-
-    @Mock
-    private ClusterProxySecretProvider clusterProxySecretProvider;
 
     @Mock
     private ReadConfigResponse readConfigResponse;

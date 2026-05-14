@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.clusterproxy;
 
 import static java.util.Arrays.asList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.spy;
 import static org.springframework.test.web.client.ExpectedCount.once;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.content;
@@ -72,6 +73,7 @@ class ClusterProxyRegistrationClientTest {
         ConfigRegistrationRequest request = configRegistrationRequest(STACK_CRN, ENVIORONMENT_CRN, CLUSTER_ID, clusterServiceConfig, CERTIFICATES);
 
         ConfigRegistrationResponse response = new ConfigRegistrationResponse();
+        response.setX509Unwrapped("X509PublicKey");
         mockServer.expect(once(), MockRestRequestMatchers.requestTo(new URI(CLUSTER_PROXY_URL + REGISTER_CONFIG_PATH)))
                 .andExpect(content().json(JsonUtil.writeValueAsStringSilent(request)))
                 .andExpect(method(HttpMethod.POST))
@@ -80,11 +82,12 @@ class ClusterProxyRegistrationClientTest {
                         .body(JsonUtil.writeValueAsStringSilent(response)));
 
         ConfigRegistrationResponse registrationResponse = service.registerConfig(request);
+        assertEquals("X509PublicKey", registrationResponse.getX509Unwrapped());
     }
 
     @Test
     void shouldUpdateKnoxUrlWithClusterProxy() throws URISyntaxException, JsonProcessingException {
-        ConfigUpdateRequest request = configUpdateRequest(STACK_CRN, KNOX_URI, "vaulturl");
+        ConfigUpdateRequest request = configUpdateRequest(STACK_CRN, KNOX_URI);
         mockServer.expect(once(), MockRestRequestMatchers.requestTo(new URI(CLUSTER_PROXY_URL + UPDATE_CONFIG_PATH)))
                 .andExpect(content().json(JsonUtil.writeValueAsStringSilent(request)))
                 .andExpect(method(HttpMethod.POST))
@@ -112,17 +115,14 @@ class ClusterProxyRegistrationClientTest {
     }
 
     private ConfigRegistrationRequest configRegistrationRequest(String stackCrn, String environmentCrn, String clusterId,
-            ClusterServiceConfig serviceConfig, List<String> certificates) {
-        return new ConfigRegistrationRequestBuilder(stackCrn)
-                .withEnvironmentCrn(environmentCrn)
-                .withAliases(List.of(clusterId))
-                .withServices(List.of(serviceConfig))
-                .withCertificates(certificates)
-                .build();
+                                                                ClusterServiceConfig serviceConfig, List<String> certificates) {
+        return new ConfigRegistrationRequestBuilder(stackCrn).withEnvironmentCrn(environmentCrn)
+                .withAliases(List.of(clusterId)).withServices(List.of(serviceConfig))
+                .withCertificates(certificates).build();
     }
 
-    private ConfigUpdateRequest configUpdateRequest(String stackCrn, String knoxUri, String knoxSecretRef) {
-        return new ConfigUpdateRequest(stackCrn, knoxUri, knoxSecretRef);
+    private ConfigUpdateRequest configUpdateRequest(String stackCrn, String knoxUri) {
+        return new ConfigUpdateRequest(stackCrn, knoxUri);
     }
 
     @AfterEach
