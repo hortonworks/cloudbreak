@@ -99,6 +99,7 @@ public class FreeIpaRotationTests extends AbstractE2ETest {
                     checkDirectoryManagerPassword(instanceMetaDataResponses, originalPasswordsFromPillarMap);
                     return testDto;
                 })
+                .useAlternativeServiceEndpointIfConfigured()
                 .given(FreeIpaRotationTestDto.class)
                 .withSecrets(List.of(FREEIPA_ADMIN_PASSWORD))
                 .when(freeIpaTestClient.rotateSecret())

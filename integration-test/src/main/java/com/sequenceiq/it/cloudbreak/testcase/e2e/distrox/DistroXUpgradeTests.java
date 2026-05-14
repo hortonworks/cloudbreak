@@ -118,6 +118,7 @@ public class DistroXUpgradeTests extends AbstractE2ETest {
                 .when(distroXTestClient.create())
                 .await(STACK_AVAILABLE)
                 .awaitForHealthyInstances()
+                .useAlternativeServiceEndpointIfConfigured()
 
                 .given(DistroXUpgradeTestDto.class)
                 .withRuntime(targetRuntimeVersion)
@@ -157,6 +158,7 @@ public class DistroXUpgradeTests extends AbstractE2ETest {
                 .withRuntime(targetRuntimeVersion3rdParty)
                 .given(secondDhName, DistroXTestDto.class)
                 .when(distroXTestClient.upgrade(), key(secondDhName))
+                .useAlternativeServiceEndpointIfConfigured()
 
                 .given(DistroXUpgradeTestDto.class)
                 .withImageId(targetImage)

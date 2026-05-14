@@ -100,6 +100,7 @@ public class SdxResizeTestUtil extends PreconditionSdxE2ETest  {
 
                     return testDto;
                 })
+                .useAlternativeServiceEndpointIfConfigured()
                 .when(sdxTestClient.resize(), key(sdxKey))
                 .await(SdxClusterStatusResponse.STOP_IN_PROGRESS, key(sdxKey).withoutWaitForFlow())
                 .await(SdxClusterStatusResponse.STACK_CREATION_IN_PROGRESS, key(sdxKey).withoutWaitForFlow());

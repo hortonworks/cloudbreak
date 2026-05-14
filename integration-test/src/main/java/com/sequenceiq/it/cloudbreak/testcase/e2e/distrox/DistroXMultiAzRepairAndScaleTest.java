@@ -80,6 +80,7 @@ public class DistroXMultiAzRepairAndScaleTest extends AbstractE2EWithReusableRes
                 .when(distroXTestClient.create(), key(datahubKey))
                 .await(STACK_AVAILABLE, key(datahubKey))
                 .awaitForHealthyInstances()
+                .useAlternativeServiceEndpointIfConfigured()
                 .given(datahubKey, DistroXTestDto.class)
                 .when(distroXTestClient.get(), key(datahubKey))
                 .then((tc, testDto, client) -> {
@@ -130,6 +131,7 @@ public class DistroXMultiAzRepairAndScaleTest extends AbstractE2EWithReusableRes
                     validateMultiAz(testDto, tc, "provisioning");
                     return testDto;
                 })
+                .useAlternativeServiceEndpointIfConfigured()
                 .when(distroXTestClient.scale(params.getHostGroup(), params.getScaleUpTarget()))
                 .await(STACK_AVAILABLE, key(datahubKey))
                 .awaitForHealthyInstances()

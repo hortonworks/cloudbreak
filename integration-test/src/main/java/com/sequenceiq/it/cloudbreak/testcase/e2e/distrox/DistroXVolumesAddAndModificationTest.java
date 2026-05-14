@@ -146,6 +146,7 @@ public class DistroXVolumesAddAndModificationTest extends AbstractE2EWithReusabl
                     return testDto;
                 })
                 .awaitForHealthyInstances()
+                .useAlternativeServiceEndpointIfConfigured()
                 .given("dx", DistroXTestDto.class)
                 .when(distroXTestClient.updateDisks(UPDATE_SIZE, testContext.getCloudProvider().getModifyDiskVolumeType(),
                         TEST_INSTANCE_GROUP, DiskType.ADDITIONAL_DISK), RunningParameter.key("dx"))

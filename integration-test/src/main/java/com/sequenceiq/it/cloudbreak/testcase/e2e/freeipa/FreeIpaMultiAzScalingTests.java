@@ -84,6 +84,7 @@ public class FreeIpaMultiAzScalingTests extends AbstractE2ETest {
                     validateMultiAz(testDto.getRequest().getEnvironmentCrn(), client, testDto.getName(), tc, OperationType.UPSCALE);
                     return testDto;
                 })
+                .useAlternativeServiceEndpointIfConfigured()
                 .given(FreeIpaDownscaleTestDto.class)
                 .withAvailabilityType(AvailabilityType.TWO_NODE_BASED)
                 .when(freeIpaTestClient.downscale())

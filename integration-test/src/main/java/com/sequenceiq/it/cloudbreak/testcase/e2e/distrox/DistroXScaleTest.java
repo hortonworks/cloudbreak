@@ -101,6 +101,7 @@ public class DistroXScaleTest extends AbstractE2ETest {
                     return testDto;
                 })
                 .await(STACK_NODE_FAILURE)
+                .useAlternativeServiceEndpointIfConfigured()
                 .then((tc, testDto, client) -> validateVolumesOnScalingInstances(tc, testDto, client, params))
                 .when(distroXTestClient.scale(params.getHostGroup(), params.getScaleUpTarget()))
                 .then((tc, testDto, client) -> {

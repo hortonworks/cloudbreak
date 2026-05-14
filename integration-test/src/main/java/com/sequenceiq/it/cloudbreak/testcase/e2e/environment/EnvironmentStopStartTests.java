@@ -190,6 +190,7 @@ public class EnvironmentStopStartTests extends AbstractE2ETest {
                 .when(environmentTestClient.stop())
                 .await(EnvironmentStatus.ENV_STOPPED)
 
+                .useAlternativeServiceEndpointIfConfigured()
                 .given(EnvironmentTestDto.class)
                 .when(environmentTestClient.start())
                 .await(EnvironmentStatus.AVAILABLE)

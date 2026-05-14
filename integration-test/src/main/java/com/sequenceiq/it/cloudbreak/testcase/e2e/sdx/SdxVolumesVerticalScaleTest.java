@@ -84,6 +84,7 @@ public class SdxVolumesVerticalScaleTest extends PreconditionSdxE2ETest {
             .await(SdxClusterStatusResponse.RUNNING)
             .when(sdxTestClient.describeInternalWithResources())
             .awaitForHealthyInstances()
+            .useAlternativeServiceEndpointIfConfigured()
             .given(SdxInternalTestDto.class)
             .when(sdxTestClient.updateDisks(UPDATE_SIZE, testContext.getCloudProvider().getModifyDiskVolumeType(), TEST_INSTANCE_GROUP,
                     DiskType.ADDITIONAL_DISK))

@@ -76,6 +76,7 @@ public class DistroXArmImageTest extends PreconditionSdxE2ETest {
                 .when(distroXTestClient.create(), key(distrox))
                 .await(STACK_AVAILABLE)
                 .awaitForHealthyInstances()
+                .useAlternativeServiceEndpointIfConfigured()
                 .then(validateArchitectureAndImage(Architecture.ARM64, sourceImage))
                 // Sync packages
                 .when(distroXTestClient.syncPackages())

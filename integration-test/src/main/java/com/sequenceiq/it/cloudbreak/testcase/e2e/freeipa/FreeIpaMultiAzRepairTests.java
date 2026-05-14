@@ -68,6 +68,7 @@ public class FreeIpaMultiAzRepairTests extends AbstractE2ETest {
                 .await(FREEIPA_AVAILABLE)
                 .awaitForHealthyInstances()
                 .then((tc, testDto, client) -> selinuxAssertions.validateAll(tc, testDto, false))
+                .useAlternativeServiceEndpointIfConfigured()
                 .when(freeIpaTestClient.repair(InstanceMetadataType.GATEWAY_PRIMARY))
                 .await(FREEIPA_AVAILABLE)
                 .then((tc, testDto, client) -> {

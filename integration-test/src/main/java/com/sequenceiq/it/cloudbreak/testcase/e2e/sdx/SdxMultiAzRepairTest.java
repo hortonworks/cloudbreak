@@ -77,6 +77,7 @@ public class SdxMultiAzRepairTest extends PreconditionSdxE2ETest {
                     return testDto;
                 })
                 .awaitForHostGroups(List.of(MASTER.getName()), InstanceStatus.DELETED_ON_PROVIDER_SIDE)
+                .useAlternativeServiceEndpointIfConfigured()
                 .when(sdxTestClient.repair(MASTER.getName()), key(sdx))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdx))
                 .given(sdx, SdxTestDto.class)

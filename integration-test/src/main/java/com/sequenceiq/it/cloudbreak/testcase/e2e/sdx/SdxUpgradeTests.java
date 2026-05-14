@@ -86,6 +86,7 @@ public class SdxUpgradeTests extends PreconditionSdxE2ETest implements ImageVali
                     expectedVolumeIds.addAll(getCloudFunctionality(tc).listInstancesVolumeIds(testDto.getName(), instances));
                     return testDto;
                 })
+                .useAlternativeServiceEndpointIfConfigured()
                 .when(sdxTestClient.upgrade())
                 .await(SdxClusterStatusResponse.DATALAKE_UPGRADE_IN_PROGRESS, doNotWaitForFlow())
                 .await(SdxClusterStatusResponse.RUNNING)
@@ -137,6 +138,7 @@ public class SdxUpgradeTests extends PreconditionSdxE2ETest implements ImageVali
                     expectedVolumeIds.addAll(getCloudFunctionality(tc).listInstancesVolumeIds(testDto.getName(), instances));
                     return testDto;
                 })
+                .useAlternativeServiceEndpointIfConfigured()
                 .when(sdxTestClient.upgrade())
                 .await(SdxClusterStatusResponse.DATALAKE_UPGRADE_IN_PROGRESS, doNotWaitForFlow())
                 .await(SdxClusterStatusResponse.RUNNING)
@@ -205,6 +207,7 @@ public class SdxUpgradeTests extends PreconditionSdxE2ETest implements ImageVali
                     expectedVolumeIds.addAll(getCloudFunctionality(tc).listInstancesVolumeIds(testDto.getName(), instances));
                     return testDto;
                 })
+                .useAlternativeServiceEndpointIfConfigured()
                 .when(sdxTestClient.upgrade())
                 .await(SdxClusterStatusResponse.DATALAKE_UPGRADE_IN_PROGRESS, doNotWaitForFlow())
                 .await(SdxClusterStatusResponse.RUNNING)
