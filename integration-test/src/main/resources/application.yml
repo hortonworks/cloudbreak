@@ -382,6 +382,10 @@ integrationtest:
       volumeSize: 100
       volumeCount: 1
       volumeType: pd-balanced
+      hyperDiskInstanceType: n4-highmem-8
+      mixedInstanceType: c3-highmem-8
+      hyperDiskBalanced: hyperdisk-balanced
+      hyperDiskThroughput: hyperdisk-throughput
     storageOptimizedInstance:
       type: n2-highmem-8
       rootVolumeSize: 200

@@ -44,7 +44,6 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.Instanc
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceTemplateRequest;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.VolumeRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.aws.AwsInstanceTemplateParameters;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.aws.AwsInstanceTemplateSpotParameters;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.aws.InstanceGroupAwsNetworkParameters;
@@ -264,8 +263,7 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
             instanceGroupCount = OptionalInt.empty();
             instanceCountByGroup = OptionalInt.empty();
         }
-        return withInstanceGroupsEntity(InstanceGroupTestDto.defaultHostGroup(getTestContext()), instanceGroupCount,
-                instanceCountByGroup);
+        return withInstanceGroupsEntity(InstanceGroupTestDto.defaultFreeipaHostGroup(getTestContext()), instanceGroupCount, instanceCountByGroup);
     }
 
     private Function<InstanceGroupV4Request, InstanceGroupRequest> mapInstanceGroupRequest(OptionalInt instanceCountByGroup) {
@@ -315,16 +313,6 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
     private InstanceTemplateRequest mapInstanceTemplateRequest(InstanceGroupV4Request request) {
         InstanceTemplateRequest template = new InstanceTemplateRequest();
         template.setInstanceType(getCloudProvider().getFreeIpaInstanceType());
-        template.setAttachedVolumes(request.getTemplate().getAttachedVolumes()
-                .stream()
-                .map(volreq -> {
-                    VolumeRequest volumeRequest = new VolumeRequest();
-                    volumeRequest.setCount(volreq.getCount());
-                    volumeRequest.setSize(volreq.getSize());
-                    volumeRequest.setType(volreq.getType());
-                    return volumeRequest;
-                })
-                .collect(Collectors.toSet()));
         Optional.ofNullable(request.getTemplate().getAws())
                 .map(AwsInstanceTemplateV4Parameters::getSpot)
                 .map(AwsInstanceTemplateV4SpotParameters::getPercentage)

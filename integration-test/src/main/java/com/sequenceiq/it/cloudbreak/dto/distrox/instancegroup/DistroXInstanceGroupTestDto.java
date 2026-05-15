@@ -17,6 +17,7 @@ import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.WORKER;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -73,6 +74,12 @@ public class DistroXInstanceGroupTestDto extends AbstractCloudbreakTestDto<Insta
         return Stream.of(groupTypes)
                 .map(groupType -> create(testContext, cloudPlatform, groupType))
                 .collect(Collectors.toList());
+    }
+
+    public static Map<HostGroupType, DistroXInstanceGroupTestDto> getHostGroupMap(TestContext testContext, CloudPlatform cloudPlatform,
+            HostGroupType... groupTypes) {
+        return Stream.of(groupTypes)
+                .collect(Collectors.toMap(groupType -> groupType, groupType -> create(testContext, cloudPlatform, groupType)));
     }
 
     private static DistroXInstanceGroupTestDto create(TestContext testContext, CloudPlatform cloudPlatform, HostGroupType hostGroupType) {

@@ -79,6 +79,10 @@ public class InstanceGroupTestDto extends AbstractCloudbreakTestDto<InstanceGrou
         return withHostGroup(testContext, MASTER, COMPUTE, WORKER, GATEWAY);
     }
 
+    public static List<InstanceGroupTestDto> defaultFreeipaHostGroup(TestContext testContext) {
+        return withHostGroup(testContext, MASTER);
+    }
+
     public static List<InstanceGroupTestDto> sdxHostGroup(TestContext testContext) {
         return withHostGroup(testContext, MASTER, IDBROKER);
     }

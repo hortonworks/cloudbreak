@@ -325,6 +325,14 @@ public class GcpProperties {
 
         private String volumeType;
 
+        private String hyperDiskInstanceType;
+
+        private String mixedInstanceType;
+
+        private String hyperDiskBalanced;
+
+        private String hyperDiskThroughput;
+
         public String getType() {
             return type;
         }
@@ -363,6 +371,38 @@ public class GcpProperties {
 
         public void setVolumeType(String volumeType) {
             this.volumeType = volumeType;
+        }
+
+        public String getHyperDiskInstanceType() {
+            return hyperDiskInstanceType;
+        }
+
+        public void setHyperDiskInstanceType(String hyperDiskInstanceType) {
+            this.hyperDiskInstanceType = hyperDiskInstanceType;
+        }
+
+        public String getMixedInstanceType() {
+            return mixedInstanceType;
+        }
+
+        public void setMixedInstanceType(String mixedInstanceType) {
+            this.mixedInstanceType = mixedInstanceType;
+        }
+
+        public String getHyperDiskBalanced() {
+            return hyperDiskBalanced;
+        }
+
+        public void setHyperDiskBalanced(String hyperDiskBalanced) {
+            this.hyperDiskBalanced = hyperDiskBalanced;
+        }
+
+        public String getHyperDiskThroughput() {
+            return hyperDiskThroughput;
+        }
+
+        public void setHyperDiskThroughput(String hyperDiskThroughput) {
+            this.hyperDiskThroughput = hyperDiskThroughput;
         }
     }
 

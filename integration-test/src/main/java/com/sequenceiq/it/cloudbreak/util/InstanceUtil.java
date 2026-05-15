@@ -36,6 +36,12 @@ public class InstanceUtil {
                 .getMetadata().stream().collect(Collectors.toMap(InstanceMetaDataV4Response::getInstanceId, InstanceMetaDataV4Response::getPrivateIp));
     }
 
+    public static Map<String, String> getInstanceIpIdMapForAllGroup(List<InstanceGroupV4Response> instanceGroupV4Responses) {
+        return instanceGroupV4Responses.stream()
+                .flatMap(ig -> ig.getMetadata().stream())
+                .collect(Collectors.toMap(InstanceMetaDataV4Response::getInstanceId, InstanceMetaDataV4Response::getPrivateIp));
+    }
+
     public static Map<String, String> getInstancesWithAz(List<InstanceGroupV4Response> instanceGroupV4Responses, String hostGroupName) {
         InstanceGroupV4Response instanceGroupV4Response = instanceGroupV4Responses.stream().filter(instanceGroup ->
                 instanceGroup.getName().equals(hostGroupName)).findFirst().orElse(null);
