@@ -212,6 +212,12 @@
                 <value>enableStickySession=true;noFallback=true;enableLoadBalancing=true</value>
             </param>
             {%- endif %}
+            {% if 'LAKEHOUSE_OPTIMIZER' in exposed and 'CLO_SERVER' in salt['pillar.get']('gateway:location') -%}
+             <param>
+                <name>LAKEHOUSE_OPTIMIZER</name>
+                <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000</value>
+             </param>
+            {%- endif %}
             {% if 'LIVYSERVER_API' in exposed and 'LIVY_SERVER' in salt['pillar.get']('gateway:location') -%}
             <param>
                 <name>LIVYSERVER</name>
