@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.flow.freeipa.salt.update.action;
 
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_SALT_UPDATE_FINISHED;
+
 import java.util.Map;
 import java.util.Set;
 
@@ -38,6 +40,7 @@ public class SaltUpdateFinishedAction extends AbstractStackProvisionAction<Insta
     @Override
     protected void doExecute(StackContext context, InstallFreeIpaServicesSuccess payload, Map<Object, Object> variables) {
         stackUpdater.updateStackStatus(context.getStack(), DetailedStackStatus.AVAILABLE, "Salt update finished");
+        getEventService().sendEventAndNotification(context.getStack(), context.getFlowTriggerUserCrn(), FREEIPA_SALT_UPDATE_FINISHED);
         if (isOperationIdSet(variables) && (!isChainedAction(variables) || isFinalChain(variables))) {
             LOGGER.debug("Complete operation with id: [{}]", getOperationId(variables));
             SuccessDetails successDetails = new SuccessDetails(context.getStack().getEnvironmentCrn());

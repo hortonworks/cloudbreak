@@ -1,5 +1,9 @@
 package com.sequenceiq.freeipa.flow.freeipa.cleanup;
 
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_CLEANUP_FAILED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_CLEANUP_FINISHED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_CLEANUP_STARTED;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -47,6 +51,9 @@ public class FreeIpaCleanupActions {
         return new AbstractFreeIpaCleanupAction<>(CleanupEvent.class) {
             @Override
             protected void doExecute(FreeIpaContext context, CleanupEvent payload, Map<Object, Object> variables) {
+                List<String> hosts = payload.getHosts() == null ? List.of() : payload.getHosts().stream().sorted().toList();
+                getEventService().sendEventAndNotification(context.getStack(), context.getFlowTriggerUserCrn(), FREEIPA_CLEANUP_STARTED,
+                        List.of(String.valueOf(hosts.size()), String.join(",", hosts)));
                 if (shouldSkipState(payload, variables) || payload.getHosts() == null || payload.getHosts().isEmpty()) {
                     LOGGER.info("Host is empty, skipping revoking certificates");
                     RevokeCertsResponse response =
@@ -160,6 +167,9 @@ public class FreeIpaCleanupActions {
 
             @Override
             protected void doExecute(FreeIpaContext context, RemoveRolesResponse payload, Map<Object, Object> variables) {
+                List<String> hosts = payload.getHosts() == null ? List.of() : payload.getHosts().stream().sorted().toList();
+                getEventService().sendEventAndNotification(context.getStack(), context.getFlowTriggerUserCrn(), FREEIPA_CLEANUP_FINISHED,
+                        List.of(String.valueOf(hosts.size()), String.join(",", hosts)));
                 CleanupEvent cleanupEvent = new CleanupEvent(FreeIpaCleanupEvent.CLEANUP_FINISHED_EVENT.event(), payload.getResourceId(), payload.getUsers(),
                         payload.getHosts(), payload.getRoles(), payload.getIps(), payload.getStatesToSkip(), payload.getAccountId(), payload.getOperationId(),
                         payload.getClusterName(), payload.getEnvironmentCrn());
@@ -185,6 +195,9 @@ public class FreeIpaCleanupActions {
             @Override
             protected void doExecute(FreeIpaContext context, CleanupFailureEvent payload, Map<Object, Object> variables) {
                 LOGGER.error("Cleanup failed with payload: " + payload);
+                String errorReason = payload.getException() == null ? "Unknown error" : payload.getException().getMessage();
+                getEventService().sendEventAndNotification(context.getStack(), context.getFlowTriggerUserCrn(), FREEIPA_CLEANUP_FAILED,
+                        List.of(payload.getFailedPhase(), errorReason));
                 String environmentCrn = payload.getEnvironmentCrn();
                 SuccessDetails successDetails = new SuccessDetails(environmentCrn);
                 successDetails.getAdditionalDetails()

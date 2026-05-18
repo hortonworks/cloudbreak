@@ -1,5 +1,8 @@
 package com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.action;
 
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_CHANGE_PRIMARY_GATEWAY_FAILED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_CHANGE_PRIMARY_GATEWAY_FINISHED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_CHANGE_PRIMARY_GATEWAY_STARTED;
 import static com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.ChangePrimaryGatewayFlowEvent.CHANGE_PRIMARY_GATEWAY_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.ChangePrimaryGatewayFlowEvent.CHANGE_PRIMARY_GATEWAY_METADATA_FAILED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.ChangePrimaryGatewayFlowEvent.CHANGE_PRIMARY_GATEWAY_METADATA_FINISHED_EVENT;
@@ -66,6 +69,9 @@ public class ChangePrimaryGatewayActions {
                 setFinalChain(variables, payload.getFinalChain());
                 LOGGER.info("Starting to change the primary gateway {}", payload);
                 stackUpdater.updateStackStatus(stack, DetailedStackStatus.REPAIR_IN_PROGRESS, "Starting to change the primary gateway");
+                List<String> repairInstanceIds = payload.getRepairInstanceIds() == null ? List.of() : payload.getRepairInstanceIds();
+                getEventService().sendEventAndNotification(stack, context.getFlowTriggerUserCrn(), FREEIPA_CHANGE_PRIMARY_GATEWAY_STARTED,
+                        List.of(getOperationMode(payload.getFinalChain()), String.join(",", repairInstanceIds)));
                 sendEvent(context, CHANGE_PRIMARY_GATEWAY_STARTING_FINISHED_EVENT.selector(), new StackEvent(stack.getId()));
             }
         };
@@ -183,6 +189,8 @@ public class ChangePrimaryGatewayActions {
             protected void doExecute(ChangePrimaryGatewayContext context, StackEvent payload, Map<Object, Object> variables) {
                 Stack stack = context.getStack();
                 SuccessDetails successDetails = new SuccessDetails(stack.getEnvironmentCrn());
+                getEventService().sendEventAndNotification(stack, context.getFlowTriggerUserCrn(), FREEIPA_CHANGE_PRIMARY_GATEWAY_FINISHED,
+                        List.of(getOperationMode(isFinalChain(variables))));
 
                 if (isFinalChain(variables)) {
                     successDetails.getAdditionalDetails().put("DownscaleHosts", getDownscaleHosts(variables));
@@ -219,6 +227,8 @@ public class ChangePrimaryGatewayActions {
                 }
                 String errorReason = getErrorReason(payload.getException());
                 stackUpdater.updateStackStatus(context.getStack(), DetailedStackStatus.REPAIR_FAILED, errorReason);
+                getEventService().sendEventAndNotification(stack, context.getFlowTriggerUserCrn(), FREEIPA_CHANGE_PRIMARY_GATEWAY_FAILED,
+                        List.of(getOperationMode(isFinalChain(variables)), errorReason));
                 Operation operation = operationService.failOperation(
                         stack.getAccountId(), getOperationId(variables), message, List.of(successDetails), List.of(failureDetails));
                 sendFailedOperationNotificationIfApplicable(stack, context.getFlowTriggerUserCrn(), operation, errorReason);
@@ -233,5 +243,9 @@ public class ChangePrimaryGatewayActions {
                 payloadConverters.add(new HealthCheckFailedToChangePrimaryGatewayFailureEventConverter());
             }
         };
+    }
+
+    private String getOperationMode(boolean finalChain) {
+        return finalChain ? "repair-final" : "repair-chained";
     }
 }

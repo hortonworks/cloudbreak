@@ -1,5 +1,8 @@
 package com.sequenceiq.freeipa.flow.freeipa.upscale.action;
 
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_UPSCALE_FAILED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_UPSCALE_FINISHED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_UPSCALE_STARTED;
 import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNullOtherwise;
 import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
 import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.VALIDATION;
@@ -188,6 +191,8 @@ public class FreeIpaUpscaleActions {
                 Stack stack = context.getStack();
                 LOGGER.info("Starting upscale {}", payload);
                 stackUpdater.updateStackStatus(stack, getInProgressStatus(variables), "Starting upscale");
+                getEventService().sendEventAndNotification(stack, context.getFlowTriggerUserCrn(), FREEIPA_UPSCALE_STARTED,
+                        List.of(getOperationMode(variables), String.valueOf(payload.getInstanceCountByGroup())));
                 String operationId = payload.getOperationId();
                 setOperationId(variables, operationId);
                 setInstanceCountByGroup(variables, payload.getInstanceCountByGroup());
@@ -713,6 +718,9 @@ public class FreeIpaUpscaleActions {
             protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
                 Stack stack = context.getStack();
                 stackUpdater.updateStackStatus(stack, getUpscaleCompleteStatus(variables), "Upscale complete");
+                List<String> upscaleHosts = getUpscaleHosts(variables);
+                getEventService().sendEventAndNotification(stack, context.getFlowTriggerUserCrn(), FREEIPA_UPSCALE_FINISHED,
+                        List.of(getOperationMode(variables), String.valueOf(upscaleHosts.size()), String.join(",", upscaleHosts)));
                 if (!isChainedAction(variables)) {
                     environmentService.setFreeIpaNodeCount(stack.getEnvironmentCrn(), stack.getNotDeletedInstanceMetaDataSet().size());
                 }
@@ -767,6 +775,8 @@ public class FreeIpaUpscaleActions {
                         List.of(getSuccessDetails(payload, environmentCrn)),
                         List.of(getFailureDetails(payload, environmentCrn))
                 );
+                getEventService().sendEventAndNotification(stack, context.getFlowTriggerUserCrn(), FREEIPA_UPSCALE_FAILED,
+                        List.of(getOperationMode(variables), errorReason));
                 sendFailedOperationNotificationIfApplicable(stack, context.getFlowTriggerUserCrn(), operation, errorReason);
                 instanceMetaDataService.updateInstanceStatusOnUpscaleFailure(notDeletedInstanceMetaDataSet);
                 enableStatusChecker(stack, "Failed upscaling FreeIPA");
@@ -810,5 +820,9 @@ public class FreeIpaUpscaleActions {
 
             }
         };
+    }
+
+    private String getOperationMode(Map<Object, Object> variables) {
+        return Boolean.TRUE.equals(variables.get("REPAIR")) ? "repair" : "scale";
     }
 }

@@ -1,5 +1,8 @@
 package com.sequenceiq.freeipa.flow.freeipa.loadbalancer;
 
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_LOAD_BALANCER_PROVISION_FAILED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_LOAD_BALANCER_PROVISION_FINISHED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_LOAD_BALANCER_PROVISION_STARTED;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus.ADDING_LOAD_BALANCER_FINISHED;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus.CREATING_LOAD_BALANCER_FINISHED;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus.PROVISION_FAILED;
@@ -68,6 +71,7 @@ public class FreeIpaLoadBalancerProvisionActions {
             @Override
             protected void doExecute(StackContext context, LoadBalancerCreationTriggerEvent payload, Map<Object, Object> variables) {
                 stackUpdater().updateStackStatus(context.getStack(), getInProgressState(variables), "Creating FreeIPA load balancer configuration");
+                getEventService().sendEventAndNotification(context.getStack(), context.getFlowTriggerUserCrn(), FREEIPA_LOAD_BALANCER_PROVISION_STARTED);
                 Long stackId = payload.getResourceId();
                 if (freeIpaLoadBalancerService.findByStackId(stackId).isEmpty()) {
                     LOGGER.debug("Creating load balancer configuration for FreeIPA cluster");
@@ -152,6 +156,7 @@ public class FreeIpaLoadBalancerProvisionActions {
                 stackUpdater().updateStackStatus(context.getStack(),
                         isBootstrapMode(variables) ? CREATING_LOAD_BALANCER_FINISHED : ADDING_LOAD_BALANCER_FINISHED,
                         "FreeIPA load balancer creation finished");
+                getEventService().sendEventAndNotification(context.getStack(), context.getFlowTriggerUserCrn(), FREEIPA_LOAD_BALANCER_PROVISION_FINISHED);
                 sendEvent(context);
             }
 
@@ -178,6 +183,8 @@ public class FreeIpaLoadBalancerProvisionActions {
                 DetailedStackStatus detailedStackStatus = calculateFailureStatus(payload, variables);
                 Operation operation = failOperationIfPresent(context, variables, errorReason);
                 stackUpdater().updateStackStatus(context.getStack(), detailedStackStatus, errorReason);
+                getEventService().sendEventAndNotification(context.getStack(), context.getFlowTriggerUserCrn(), FREEIPA_LOAD_BALANCER_PROVISION_FAILED,
+                        List.of(errorReason));
                 if (!isBootstrapMode(variables)) {
                     sendFailedOperationNotificationIfApplicable(context.getStack(), context.getFlowTriggerUserCrn(), operation, errorReason);
                 }

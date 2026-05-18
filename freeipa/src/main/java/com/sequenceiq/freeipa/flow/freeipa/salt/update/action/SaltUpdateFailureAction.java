@@ -1,5 +1,8 @@
 package com.sequenceiq.freeipa.flow.freeipa.salt.update.action;
 
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_SALT_UPDATE_FAILED;
+
+import java.util.List;
 import java.util.Map;
 
 import jakarta.inject.Inject;
@@ -36,6 +39,7 @@ public class SaltUpdateFailureAction extends AbstractStackFailureAction<SaltUpda
         String errorMessage = getErrorReason(payload.getException());
         stackUpdater.updateStackStatus(context.getStack(), DetailedStackStatus.SALT_STATE_UPDATE_FAILED,
                 "Salt update failed with: " + errorMessage);
+        getEventService().sendEventAndNotification(context.getStack(), context.getFlowTriggerUserCrn(), FREEIPA_SALT_UPDATE_FAILED, List.of(errorMessage));
         if (isOperationIdSet(variables)) {
             Operation operation = operationService.failOperation(context.getStack().getAccountId(), getOperationId(variables), errorMessage);
             sendFailedOperationNotificationIfApplicable(context.getStack(), context.getFlowTriggerUserCrn(), operation, errorMessage);

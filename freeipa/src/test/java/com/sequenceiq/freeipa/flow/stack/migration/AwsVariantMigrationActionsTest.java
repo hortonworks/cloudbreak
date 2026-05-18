@@ -1,5 +1,8 @@
 package com.sequenceiq.freeipa.flow.stack.migration;
 
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_AWS_VARIANT_MIGRATION_FAILED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_AWS_VARIANT_MIGRATION_FINISHED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_AWS_VARIANT_MIGRATION_STARTED;
 import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -30,6 +33,7 @@ import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.events.EventSenderService;
 import com.sequenceiq.freeipa.flow.stack.StackFailureEvent;
+import com.sequenceiq.freeipa.flow.stack.migration.event.AwsVariantMigrationTriggerEvent;
 import com.sequenceiq.freeipa.metrics.FreeIpaMetricService;
 import com.sequenceiq.freeipa.metrics.MetricType;
 import com.sequenceiq.freeipa.service.operation.OperationService;
@@ -92,6 +96,7 @@ public class AwsVariantMigrationActionsTest {
         Map<Object, Object> variables = new HashMap<>();
         new AbstractActionTestSupport<>(getChangeVariantAction()).doExecute(context, payload, variables);
         verify(stackUpdater).updateVariant(payload.getResourceId(), CloudConstants.AWS_NATIVE);
+        verify(eventSenderService).sendEventAndNotification(stack, flowParameters.getFlowTriggerUserCrn(), FREEIPA_AWS_VARIANT_MIGRATION_FINISHED);
     }
 
     @Test
@@ -100,6 +105,21 @@ public class AwsVariantMigrationActionsTest {
         Map<Object, Object> variables = new HashMap<>();
         new AbstractActionTestSupport<>(getChangeVariantAction()).doExecute(context, payload, variables);
         verify(stackUpdater, never()).updateVariant(payload.getResourceId(), CloudConstants.AWS_NATIVE);
+        verify(eventSenderService).sendEventAndNotification(stack, flowParameters.getFlowTriggerUserCrn(), FREEIPA_AWS_VARIANT_MIGRATION_FINISHED);
+    }
+
+    @Test
+    public void testCreateResourcesSendsStartedNotification() throws Exception {
+        AwsVariantMigrationTriggerEvent payload = new AwsVariantMigrationTriggerEvent("selector", STACK_ID, "master");
+        Map<Object, Object> variables = new HashMap<>();
+
+        AbstractAwsVariantMigrationAction<AwsVariantMigrationTriggerEvent> action =
+                (AbstractAwsVariantMigrationAction<AwsVariantMigrationTriggerEvent>) underTest.createResources();
+        initActionPrivateFields(action);
+
+        new AbstractActionTestSupport<>(action).doExecute(context, payload, variables);
+
+        verify(eventSenderService).sendEventAndNotification(stack, flowParameters.getFlowTriggerUserCrn(), FREEIPA_AWS_VARIANT_MIGRATION_STARTED);
     }
 
     @Test
@@ -109,6 +129,8 @@ public class AwsVariantMigrationActionsTest {
         Map<Object, Object> variables = new HashMap<>();
         new AbstractActionTestSupport<>(getMigrationFailedAction()).doExecute(context, payload, variables);
         verify(metricService).incrementMetricCounter(MetricType.AWS_VARIANT_MIGRATION_FAILED, context.getStack(), payload.getException());
+        verify(eventSenderService).sendEventAndNotification(stack, flowParameters.getFlowTriggerUserCrn(), FREEIPA_AWS_VARIANT_MIGRATION_FAILED,
+                java.util.List.of("error reason"));
     }
 
     private AbstractAwsVariantMigrationAction<DeleteCloudFormationResult> getChangeVariantAction() {
@@ -131,5 +153,6 @@ public class AwsVariantMigrationActionsTest {
         ReflectionTestUtils.setField(action, null, eventBus, EventBus.class);
         ReflectionTestUtils.setField(action, null, reactorEventFactory, ErrorHandlerAwareReactorEventFactory.class);
         ReflectionTestUtils.setField(action, null, metricService, MetricService.class);
+        ReflectionTestUtils.setField(action, null, eventSenderService, EventSenderService.class);
     }
 }

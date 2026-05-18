@@ -88,6 +88,8 @@ public class ImageChangeActions {
             protected void doExecute(StackContext context, ImageChangeEvent payload, Map<Object, Object> variables) {
                 Stack stack = context.getStack();
                 getStackUpdater().updateStackStatus(context.getStack(), DetailedStackStatus.IMAGE_CHANGE_IN_PROGRESS, "Preparing image on cloud provider side");
+                getEventService().sendEventAndNotification(stack, context.getFlowTriggerUserCrn(), ResourceEvent.FREEIPA_IMAGE_CHANGE_STARTED,
+                        List.of(payload.getRequest().getId()));
                 CloudContext cloudContext = context.getCloudContext();
 
                 ImageEntity imageEntity = imageService.getByStack(stack);

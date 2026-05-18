@@ -1,5 +1,9 @@
 package com.sequenceiq.freeipa.flow.stack.stop.action;
 
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_STOP_FAILED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_STOP_FINISHED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_STOP_STARTED;
+
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -55,6 +59,7 @@ public class StackStopActions {
             @Override
             protected void doExecute(StackStopContext context, StackEvent payload, Map<Object, Object> variables) {
                 stackStopService.startStackStop(context);
+                getEventService().sendEventAndNotification(context.getStack(), context.getFlowTriggerUserCrn(), FREEIPA_STOP_STARTED);
                 sendEvent(context);
             }
 
@@ -93,6 +98,7 @@ public class StackStopActions {
             @Override
             protected void doExecute(StackStopContext context, StopInstancesResult payload, Map<Object, Object> variables) {
                 stackStopService.finishStackStop(context, payload);
+                getEventService().sendEventAndNotification(context.getStack(), context.getFlowTriggerUserCrn(), FREEIPA_STOP_FINISHED);
                 sendEvent(context);
             }
 
@@ -109,6 +115,8 @@ public class StackStopActions {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
                 stackStopService.handleStackStopError(context.getStack(), payload);
+                getEventService().sendEventAndNotification(context.getStack(), context.getFlowTriggerUserCrn(), FREEIPA_STOP_FAILED,
+                        List.of(getErrorReason(payload.getException())));
                 sendEvent(context);
             }
 

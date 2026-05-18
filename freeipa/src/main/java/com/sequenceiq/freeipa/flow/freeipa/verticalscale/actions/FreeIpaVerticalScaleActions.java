@@ -3,6 +3,9 @@ package com.sequenceiq.freeipa.flow.freeipa.verticalscale.actions;
 import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
 import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_VERTICAL_SCALE_FAILED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_VERTICAL_SCALE_FINISHED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_VERTICAL_SCALE_STARTED;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus.VERTICAL_SCALE_FAILED;
 import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
 import static com.sequenceiq.freeipa.flow.freeipa.verticalscale.event.FreeIpaVerticalScaleEvent.FINALIZED_EVENT;
@@ -75,6 +78,7 @@ public class FreeIpaVerticalScaleActions {
             protected void doExecute(StackContext ctx, FreeIpaVerticalScalingTriggerEvent payload, Map<Object, Object> variables) {
                 VerticalScaleRequest freeIPAVerticalScaleRequest = payload.getRequest();
                 Stack stack = stackService.getByIdWithListsInTransaction(payload.getResourceId());
+                getEventService().sendEventAndNotification(stack, ctx.getFlowTriggerUserCrn(), FREEIPA_VERTICAL_SCALE_STARTED);
                 try {
                     List<Resource> resources = resourceService.findAllByStackId(payload.getResourceId());
                     List<CloudResource> cloudResources =
@@ -122,6 +126,7 @@ public class FreeIpaVerticalScaleActions {
                 Long stackId = context.getStack().getId();
                 freeIPAVerticalScaleService.updateTemplateWithVerticalScaleInformation(stackId, payload.getFreeIPAVerticalScaleRequest());
                 stackUpdater.updateStackStatus(stackId, DetailedStackStatus.STOPPED, "Vertical scale complete");
+                getEventService().sendEventAndNotification(context.getStack(), context.getFlowTriggerUserCrn(), FREEIPA_VERTICAL_SCALE_FINISHED);
                 sendEvent(context, FINALIZED_EVENT.event(), payload);
             }
         };
@@ -142,6 +147,8 @@ public class FreeIpaVerticalScaleActions {
                 LOGGER.debug(message);
 
                 stackUpdater.updateStackStatus(stack.getId(), VERTICAL_SCALE_FAILED, message);
+                getEventService().sendEventAndNotification(stack, context.getFlowTriggerUserCrn(), FREEIPA_VERTICAL_SCALE_FAILED,
+                        List.of(errorReason));
                 if (isOperationIdSet(variables)) {
                     Operation operation = operationService.failOperation(stack.getAccountId(), getOperationId(variables), message);
                     sendFailedOperationNotificationIfApplicable(stack, context.getFlowTriggerUserCrn(), operation, errorReason);

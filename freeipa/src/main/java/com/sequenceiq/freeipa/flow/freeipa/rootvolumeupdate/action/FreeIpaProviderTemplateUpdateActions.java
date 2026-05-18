@@ -1,5 +1,8 @@
 package com.sequenceiq.freeipa.flow.freeipa.rootvolumeupdate.action;
 
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_PROVIDER_TEMPLATE_UPDATE_FAILED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_PROVIDER_TEMPLATE_UPDATE_FINISHED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_PROVIDER_TEMPLATE_UPDATE_STARTED;
 import static com.sequenceiq.freeipa.flow.freeipa.rootvolumeupdate.FreeIpaProviderTemplateUpdateFlowEvent.FREEIPA_PROVIDER_TEMPLATE_UPDATE_FAIL_HANDLED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.rootvolumeupdate.FreeIpaProviderTemplateUpdateFlowEvent.FREEIPA_PROVIDER_TEMPLATE_UPDATE_FINALIZED_EVENT;
 
@@ -41,6 +44,7 @@ public class FreeIpaProviderTemplateUpdateActions {
                 Stack stack = context.getStack();
                 LOGGER.info("Updating launch template {}", payload);
                 stackUpdater.updateStackStatus(stack, DetailedStackStatus.UPDATE_IN_PROGRESS, "Starting to update provider template.");
+                getEventService().sendEventAndNotification(stack, context.getFlowTriggerUserCrn(), FREEIPA_PROVIDER_TEMPLATE_UPDATE_STARTED);
                 String selector = EventSelectorUtil.selector(FreeIpaProviderTemplateUpdateHandlerRequest.class);
                 sendEvent(context, selector, new FreeIpaProviderTemplateUpdateHandlerRequest(selector, stack.getId(), payload.getOperationId(),
                         context.getCloudContext(), context.getCloudCredential(), context.getCloudStack()));
@@ -55,6 +59,7 @@ public class FreeIpaProviderTemplateUpdateActions {
             protected void doExecute(StackContext context, FreeIpaProviderTemplateUpdateEvent payload, Map<Object, Object> variables) {
                 Stack stack = context.getStack();
                 stackUpdater.updateStackStatus(stack, DetailedStackStatus.UPDATE_COMPLETE, "Updating Launch Template complete.");
+                getEventService().sendEventAndNotification(stack, context.getFlowTriggerUserCrn(), FREEIPA_PROVIDER_TEMPLATE_UPDATE_FINISHED);
                 sendEvent(context, FREEIPA_PROVIDER_TEMPLATE_UPDATE_FINALIZED_EVENT.selector(), new StackEvent(stack.getId()));
             }
         };
@@ -73,6 +78,8 @@ public class FreeIpaProviderTemplateUpdateActions {
                 String message = "Update Launch Template failed during " + payload.getFailedPhase();
                 String errorReason = getErrorReason(payload.getException());
                 stackUpdater.updateStackStatus(context.getStack(), DetailedStackStatus.UPDATE_FAILED, errorReason);
+                getEventService().sendEventAndNotification(stack, context.getFlowTriggerUserCrn(), FREEIPA_PROVIDER_TEMPLATE_UPDATE_FAILED,
+                        List.of(errorReason));
                 operationService.failOperation(stack.getAccountId(), getOperationId(variables), message, List.of(), List.of());
                 enableStatusChecker(stack, "Failed to update template for FreeIPA deployment.");
                 sendEvent(context, FREEIPA_PROVIDER_TEMPLATE_UPDATE_FAIL_HANDLED_EVENT.event(), payload);

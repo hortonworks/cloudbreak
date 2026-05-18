@@ -1,7 +1,11 @@
 package com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.action;
 
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_CHANGE_PRIMARY_GATEWAY_FAILED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_CHANGE_PRIMARY_GATEWAY_FINISHED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_CHANGE_PRIMARY_GATEWAY_STARTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_UPGRADE_FAILED;
 import static com.sequenceiq.freeipa.flow.OperationAwareAction.OPERATION_ID;
+import static com.sequenceiq.freeipa.flow.chain.FlowChainAwareAction.FINAL_CHAIN;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
@@ -31,7 +35,9 @@ import com.sequenceiq.freeipa.entity.Operation;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.events.EventSenderService;
 import com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.ChangePrimaryGatewayContext;
+import com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.event.ChangePrimaryGatewayEvent;
 import com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.event.ChangePrimaryGatewayFailureEvent;
+import com.sequenceiq.freeipa.flow.stack.StackEvent;
 import com.sequenceiq.freeipa.service.operation.OperationService;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
 import com.sequenceiq.freeipa.sync.FreeipaJobService;
@@ -71,9 +77,7 @@ class ChangePrimaryGatewayActionsNotificationTest {
     @BeforeEach
     void setUp() {
         context = new ChangePrimaryGatewayContext(new FlowParameters("flow", "user-crn"), stack);
-        doReturn("acc").when(stack).getAccountId();
         doReturn(1L).when(stack).getId();
-        doReturn("env-crn").when(stack).getEnvironmentCrn();
     }
 
     @Test
@@ -81,6 +85,8 @@ class ChangePrimaryGatewayActionsNotificationTest {
         Map<Object, Object> variables = new HashMap<>();
         variables.put(OPERATION_ID, "op-1");
         ChangePrimaryGatewayFailureEvent payload = new ChangePrimaryGatewayFailureEvent(1L, "phase", Set.of(), Map.of(), new Exception("boom"));
+        doReturn("acc").when(stack).getAccountId();
+        doReturn("env-crn").when(stack).getEnvironmentCrn();
         Operation operation = new Operation();
         operation.setOperationType(OperationType.UPGRADE);
         doReturn(operation).when(operationService).failOperation(any(), any(), any(), any(), any());
@@ -93,7 +99,41 @@ class ChangePrimaryGatewayActionsNotificationTest {
 
         new AbstractActionTestSupport<>(action).doExecute(context, payload, variables);
 
+        verify(eventSenderService).sendEventAndNotification(stack, "user-crn", FREEIPA_CHANGE_PRIMARY_GATEWAY_FAILED,
+                List.of("repair-chained", "boom"));
         verify(eventSenderService).sendEventAndNotification(stack, "user-crn", FREEIPA_UPGRADE_FAILED, List.of("boom"));
+    }
+
+    @Test
+    void startingActionSendsStartedNotification() throws Exception {
+        Map<Object, Object> variables = new HashMap<>();
+        ChangePrimaryGatewayEvent payload = new ChangePrimaryGatewayEvent("selector", 1L, List.of("i-1"), true, "op-1");
+
+        AbstractChangePrimaryGatewayAction<ChangePrimaryGatewayEvent> action =
+                (AbstractChangePrimaryGatewayAction<ChangePrimaryGatewayEvent>) underTest.startingAction();
+        initActionPrivateFields(action);
+
+        new AbstractActionTestSupport<>(action).doExecute(context, payload, variables);
+
+        verify(eventSenderService).sendEventAndNotification(stack, "user-crn", FREEIPA_CHANGE_PRIMARY_GATEWAY_STARTED,
+                List.of("repair-final", "i-1"));
+    }
+
+    @Test
+    void finishedActionSendsFinishedNotificationInChainedMode() throws Exception {
+        Map<Object, Object> variables = new HashMap<>();
+        variables.put(FINAL_CHAIN, false);
+        StackEvent payload = new StackEvent("selector", 1L);
+
+        AbstractChangePrimaryGatewayAction<StackEvent> action =
+                (AbstractChangePrimaryGatewayAction<StackEvent>) underTest.finsihedAction();
+        initActionPrivateFields(action);
+        ReflectionTestUtils.setField(action, null, operationService, OperationService.class);
+
+        new AbstractActionTestSupport<>(action).doExecute(context, payload, variables);
+
+        verify(eventSenderService).sendEventAndNotification(stack, "user-crn", FREEIPA_CHANGE_PRIMARY_GATEWAY_FINISHED,
+                List.of("repair-chained"));
     }
 
     private void initActionPrivateFields(Action<?, ?> action) {

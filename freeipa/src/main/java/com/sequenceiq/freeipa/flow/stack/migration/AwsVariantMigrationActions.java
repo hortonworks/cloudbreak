@@ -1,5 +1,8 @@
 package com.sequenceiq.freeipa.flow.stack.migration;
 
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_AWS_VARIANT_MIGRATION_FAILED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_AWS_VARIANT_MIGRATION_FINISHED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_AWS_VARIANT_MIGRATION_STARTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_UPGRADE_FAILED;
 import static com.sequenceiq.freeipa.flow.stack.migration.AwsVariantMigrationEvent.AWS_VARIANT_MIGRATION_FAIL_HANDLED_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.migration.AwsVariantMigrationEvent.AWS_VARIANT_MIGRATION_FINALIZED_EVENT;
@@ -51,6 +54,8 @@ public class AwsVariantMigrationActions {
             @Override
             protected void doExecute(AwsVariantMigrationFlowContext context, AwsVariantMigrationTriggerEvent payload, Map<Object, Object> variables)
                     throws Exception {
+                getEventService().sendEventAndNotification(context.getStack(), context.getFlowTriggerUserCrn(),
+                        FREEIPA_AWS_VARIANT_MIGRATION_STARTED);
                 CreateResourcesRequest request = new CreateResourcesRequest(context.getCloudContext(), context.getCloudCredential(), context.getCloudStack(),
                         payload.getHostGroupName());
                 sendEvent(context, request.selector(), request);
@@ -89,6 +94,8 @@ public class AwsVariantMigrationActions {
                 } else {
                     LOGGER.info("Variant won't be changed because the CF template exists");
                 }
+                getEventService().sendEventAndNotification(context.getStack(), context.getFlowTriggerUserCrn(),
+                        FREEIPA_AWS_VARIANT_MIGRATION_FINISHED);
                 sendEvent(context);
             }
 
@@ -117,6 +124,8 @@ public class AwsVariantMigrationActions {
                 LOGGER.info(message, payload.getException());
                 String statusReason = "AWS variant migration failed. " + errorReason;
                 stackUpdater.updateStackStatus(stack, DetailedStackStatus.UPGRADE_FAILED, statusReason);
+                getEventService().sendEventAndNotification(stack, context.getFlowTriggerUserCrn(), FREEIPA_AWS_VARIANT_MIGRATION_FAILED,
+                        List.of(errorReason));
                 getEventService().sendEventAndNotification(stack, context.getFlowTriggerUserCrn(), FREEIPA_UPGRADE_FAILED, List.of(statusReason));
                 operationService.failOperation(stack.getAccountId(), getOperationId(variables), message, List.of(successDetails), List.of(failureDetails));
                 metricService.incrementMetricCounter(MetricType.AWS_VARIANT_MIGRATION_FAILED, stack, payload.getException());

@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.flow.freeipa.salt.update.action;
 
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_SALT_UPDATE_STARTED;
+
 import java.util.Map;
 
 import jakarta.inject.Inject;
@@ -40,6 +42,7 @@ public class UpdateSaltFilesAction extends AbstractStackProvisionAction<SaltUpda
         setOperationId(variables, payload.getOperationId());
         setChainedAction(variables, payload.isChained());
         setFinalChain(variables, payload.isFinalChain());
+        getEventService().sendEventAndNotification(context.getStack(), context.getFlowTriggerUserCrn(), FREEIPA_SALT_UPDATE_STARTED);
         LOGGER.info("Reupload salt state files");
         sendEvent(context);
     }

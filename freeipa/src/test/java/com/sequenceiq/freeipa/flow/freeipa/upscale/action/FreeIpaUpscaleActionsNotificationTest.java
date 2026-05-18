@@ -1,7 +1,11 @@
 package com.sequenceiq.freeipa.flow.freeipa.upscale.action;
 
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_UPGRADE_FAILED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_UPSCALE_FAILED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_UPSCALE_FINISHED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_UPSCALE_STARTED;
 import static com.sequenceiq.freeipa.flow.OperationAwareAction.OPERATION_ID;
+import static com.sequenceiq.freeipa.flow.chain.FlowChainAwareAction.CHAINED_ACTION;
 import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
@@ -35,10 +39,13 @@ import com.sequenceiq.freeipa.entity.Operation;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.events.EventSenderService;
 import com.sequenceiq.freeipa.flow.freeipa.common.FreeIpaFailedFlowAnalyzer;
+import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleEvent;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleFailureEvent;
 import com.sequenceiq.freeipa.flow.stack.StackContext;
+import com.sequenceiq.freeipa.flow.stack.StackEvent;
 import com.sequenceiq.freeipa.service.EnvironmentService;
 import com.sequenceiq.freeipa.service.operation.OperationService;
+import com.sequenceiq.freeipa.service.stack.InstanceGroupAttributeAndStackTemplateUpdater;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
 import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
 import com.sequenceiq.freeipa.sync.FreeipaJobService;
@@ -91,15 +98,47 @@ class FreeIpaUpscaleActionsNotificationTest {
     @Mock
     private StackUpdater stackUpdater;
 
+    @Mock
+    private InstanceGroupAttributeAndStackTemplateUpdater instanceGroupAttributeAndStackTemplateUpdater;
+
     private StackContext context;
 
     @BeforeEach
     void setUp() {
         context = new StackContext(new FlowParameters("flow", "user-crn"), stack, cloudContext, cloudCredential, cloudStack);
-        doReturn("acc").when(stack).getAccountId();
         doReturn(1L).when(stack).getId();
-        doReturn("env-crn").when(stack).getEnvironmentCrn();
-        doReturn(Set.of()).when(stack).getNotDeletedInstanceMetaDataSet();
+    }
+
+    @Test
+    void startingActionSendsUpscaleStartedNotification() throws Exception {
+        Map<Object, Object> variables = new HashMap<>();
+        UpscaleEvent payload = new UpscaleEvent("selector", 1L, new java.util.ArrayList<>(), 2, false, false, false, "op-1", null);
+        doReturn(new Event<>(new Event.Headers(new HashMap<>()), payload)).when(reactorEventFactory).createEvent(any(), any());
+
+        AbstractUpscaleAction<UpscaleEvent> action = (AbstractUpscaleAction<UpscaleEvent>) underTest.startingAction();
+        initActionPrivateFields(action);
+        ReflectionTestUtils.setField(action, "instanceGroupAttributeAndStackTemplateUpdater", instanceGroupAttributeAndStackTemplateUpdater);
+
+        new AbstractActionTestSupport<>(action).doExecute(context, payload, variables);
+
+        verify(eventSenderService).sendEventAndNotification(stack, "user-crn", FREEIPA_UPSCALE_STARTED, List.of("scale", "2"));
+    }
+
+    @Test
+    void upscaleFinishedActionSendsUpscaleFinishedNotification() throws Exception {
+        Map<Object, Object> variables = new HashMap<>();
+        variables.put("UPSCALE_HOSTS", List.of("master0"));
+        variables.put(CHAINED_ACTION, true);
+        StackEvent payload = new StackEvent("selector", 1L);
+        doReturn(new Event<>(new Event.Headers(new HashMap<>()), payload)).when(reactorEventFactory).createEvent(any(), any());
+
+        AbstractUpscaleAction<StackEvent> action = (AbstractUpscaleAction<StackEvent>) underTest.upscaleFinsihedAction();
+        initActionPrivateFields(action);
+
+        new AbstractActionTestSupport<>(action).doExecute(context, payload, variables);
+
+        verify(eventSenderService).sendEventAndNotification(stack, "user-crn", FREEIPA_UPSCALE_FINISHED,
+                List.of("scale", "1", "master0"));
     }
 
     @Test
@@ -108,6 +147,9 @@ class FreeIpaUpscaleActionsNotificationTest {
         variables.put(OPERATION_ID, "op-1");
         variables.put("REPAIR", true);
         UpscaleFailureEvent payload = new UpscaleFailureEvent(1L, "phase", Set.of(), ERROR, Map.of(), new Exception("boom"));
+        doReturn("acc").when(stack).getAccountId();
+        doReturn("env-crn").when(stack).getEnvironmentCrn();
+        doReturn(Set.of()).when(stack).getNotDeletedInstanceMetaDataSet();
         Operation operation = new Operation();
         operation.setOperationType(OperationType.UPGRADE);
         doReturn(operation).when(operationService).failOperation(any(), any(), any(), any(), any());
@@ -122,6 +164,7 @@ class FreeIpaUpscaleActionsNotificationTest {
 
         new AbstractActionTestSupport<>(action).doExecute(context, payload, variables);
 
+        verify(eventSenderService).sendEventAndNotification(stack, "user-crn", FREEIPA_UPSCALE_FAILED, List.of("repair", "boom"));
         verify(eventSenderService).sendEventAndNotification(stack, "user-crn", FREEIPA_UPGRADE_FAILED, List.of("boom"));
     }
 

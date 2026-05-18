@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.flow.freeipa.salt.update.action;
 
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_SALT_UPDATE_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_UPGRADE_FAILED;
 import static com.sequenceiq.freeipa.flow.OperationAwareAction.OPERATION_ID;
 import static com.sequenceiq.freeipa.flow.freeipa.common.FailureType.ERROR;
@@ -90,6 +91,7 @@ class SaltUpdateFailureActionTest {
 
         new AbstractActionTestSupport<>(underTest).doExecute(context, payload, variables);
 
+        verify(eventSenderService).sendEventAndNotification(stack, "user-crn", FREEIPA_SALT_UPDATE_FAILED, List.of("boom"));
         verify(eventSenderService).sendEventAndNotification(stack, "user-crn", FREEIPA_UPGRADE_FAILED, List.of("boom"));
     }
 
@@ -105,6 +107,7 @@ class SaltUpdateFailureActionTest {
 
         new AbstractActionTestSupport<>(underTest).doExecute(context, payload, variables);
 
+        verify(eventSenderService).sendEventAndNotification(stack, "user-crn", FREEIPA_SALT_UPDATE_FAILED, List.of("boom"));
         verify(eventSenderService, never()).sendEventAndNotification(eq(stack), eq("user-crn"), eq(FREEIPA_UPGRADE_FAILED), any());
     }
 }

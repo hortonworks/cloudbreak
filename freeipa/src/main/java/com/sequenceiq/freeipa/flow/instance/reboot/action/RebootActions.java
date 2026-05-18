@@ -1,5 +1,9 @@
 package com.sequenceiq.freeipa.flow.instance.reboot.action;
 
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_REBOOT_FAILED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_REBOOT_FINISHED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_REBOOT_STARTED;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -85,6 +89,8 @@ public class RebootActions {
             @Override
             protected void doExecute(RebootContext context, RebootInstanceEvent payload, Map<Object, Object> variables) {
                 setOperationId(variables, payload.getOperationId());
+                getEventService().sendEventAndNotification(context.getStack(), context.getFlowTriggerUserCrn(), FREEIPA_REBOOT_STARTED,
+                        List.of(String.valueOf(context.getInstanceIdList().size()), context.getInstanceIds()));
                 LOGGER.info("Starting reboot for {}", context.getInstanceIds());
                 rebootService.startInstanceReboot(context);
                 sendEvent(context);
@@ -168,6 +174,8 @@ public class RebootActions {
             protected void doExecute(RebootContext context, HealthCheckSuccess payload, Map<Object, Object> variables) {
                 addMdcOperationId(variables);
                 rebootService.finishInstanceReboot(context);
+                getEventService().sendEventAndNotification(context.getStack(), context.getFlowTriggerUserCrn(), FREEIPA_REBOOT_FINISHED,
+                        List.of(String.valueOf(context.getInstanceIdList().size()), context.getInstanceIds()));
                 LOGGER.info("Finished rebooting {}.", context.getInstanceIds());
                 Stack stack = context.getStack();
                 SuccessDetails successDetails = new SuccessDetails(stack.getEnvironmentCrn());
@@ -209,9 +217,12 @@ public class RebootActions {
             protected void doExecute(RebootContext context, InstanceFailureEvent payload, Map<Object, Object> variables) {
                 addMdcOperationId(variables);
                 rebootService.handleInstanceRebootError(context);
+                String errorReason = getErrorReason(payload.getException());
                 String message = String.format("Rebooting failed for %s.", context.getInstanceIds());
                 LOGGER.error(message);
                 Stack stack = context.getStack();
+                getEventService().sendEventAndNotification(stack, context.getFlowTriggerUserCrn(), FREEIPA_REBOOT_FAILED,
+                        List.of(String.valueOf(context.getInstanceIdList().size()), context.getInstanceIds(), errorReason));
                 SuccessDetails successDetails = new SuccessDetails(stack.getEnvironmentCrn());
                 FailureDetails failureDetails = new FailureDetails(stack.getEnvironmentCrn(), message);
                 operationService.failOperation(stack.getAccountId(), getOperationId(variables), message, List.of(successDetails), List.of(failureDetails));

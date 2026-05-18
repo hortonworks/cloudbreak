@@ -1,5 +1,10 @@
 package com.sequenceiq.freeipa.flow.freeipa.diagnostics;
 
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_DIAGNOSTICS_COLLECTION_FAILED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_DIAGNOSTICS_COLLECTION_FINISHED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_DIAGNOSTICS_COLLECTION_STARTED;
+
+import java.util.List;
 import java.util.Map;
 
 import jakarta.inject.Inject;
@@ -16,6 +21,7 @@ import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
 import com.sequenceiq.cloudbreak.telemetry.diagnostics.DiagnosticsOperationsService;
 import com.sequenceiq.common.model.diagnostics.DiagnosticParameters;
 import com.sequenceiq.flow.core.CommonContext;
+import com.sequenceiq.freeipa.events.EventSenderService;
 import com.sequenceiq.freeipa.flow.freeipa.diagnostics.event.DiagnosticsCollectionEvent;
 import com.sequenceiq.freeipa.flow.freeipa.diagnostics.event.DiagnosticsCollectionFailureEvent;
 import com.sequenceiq.freeipa.flow.freeipa.diagnostics.event.DiagnosticsCollectionHandlerSelectors;
@@ -29,6 +35,9 @@ public class DiagnosticsCollectionActions {
     @Inject
     private DiagnosticsOperationsService diagnosticsOperationsService;
 
+    @Inject
+    private EventSenderService eventSenderService;
+
     @Bean(name = "DIAGNOSTICS_SALT_VALIDATION_STATE")
     public Action<?, ?> diagnosticsSaltValidateAction() {
         return new AbstractDiagnosticsCollectionActions<>(DiagnosticsCollectionEvent.class) {
@@ -36,6 +45,8 @@ public class DiagnosticsCollectionActions {
             protected void doExecute(CommonContext context, DiagnosticsCollectionEvent payload, Map<Object, Object> variables) {
                 String resourceCrn = payload.getResourceCrn();
                 LOGGER.debug("Flow entered into DIAGNOSTICS_SALT_VALIDATION_STATE. resourceCrn: '{}'", resourceCrn);
+                eventSenderService.sendEventAndNotificationWithoutStack(payload, FREEIPA_DIAGNOSTICS_COLLECTION_STARTED,
+                        context.getFlowTriggerUserCrn());
                 InMemoryStateStore.putStack(payload.getResourceId(), PollGroup.POLLABLE);
                 DiagnosticsCollectionEvent event = DiagnosticsCollectionEvent.builder()
                         .withResourceId(payload.getResourceId())
@@ -235,6 +246,8 @@ public class DiagnosticsCollectionActions {
             protected void doExecute(CommonContext context, DiagnosticsCollectionEvent payload, Map<Object, Object> variables) {
                 String resourceCrn = payload.getResourceCrn();
                 LOGGER.debug("Flow entered into DIAGNOSTICS_COLLECTION_FINISHED_STATE. resourceCrn: '{}'", resourceCrn);
+                eventSenderService.sendEventAndNotificationWithoutStack(payload, FREEIPA_DIAGNOSTICS_COLLECTION_FINISHED,
+                        context.getFlowTriggerUserCrn());
                 InMemoryStateStore.deleteStack(payload.getResourceId());
                 DiagnosticsCollectionEvent event = DiagnosticsCollectionEvent.builder()
                         .withResourceId(payload.getResourceId())
@@ -255,6 +268,9 @@ public class DiagnosticsCollectionActions {
             protected void doExecute(CommonContext context, DiagnosticsCollectionFailureEvent payload, Map<Object, Object> variables) {
                 String resourceCrn = payload.getResourceCrn();
                 LOGGER.debug("Flow entered into DIAGNOSTICS_COLLECTION_FAILED_STATE. resourceCrn: '{}'", resourceCrn);
+                String errorReason = payload.getException() == null ? "Unknown error" : payload.getException().getMessage();
+                eventSenderService.sendEventAndNotificationWithoutStack(payload, FREEIPA_DIAGNOSTICS_COLLECTION_FAILED,
+                        context.getFlowTriggerUserCrn(), List.of(errorReason));
                 InMemoryStateStore.deleteStack(payload.getResourceId());
                 DiagnosticParameters parameters = payload.getParameters();
                 if (payload.getException() != null) {

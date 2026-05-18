@@ -1,5 +1,8 @@
 package com.sequenceiq.freeipa.flow.freeipa.downscale.action;
 
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_DOWNSCALE_FAILED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_DOWNSCALE_FINISHED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_DOWNSCALE_STARTED;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.DOWNSCALE_ADD_ADDITIONAL_HOSTNAMES_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.DOWNSCALE_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent.DOWNSCALE_UPDATE_ENVIRONMENT_STACK_CONFIG_FAILED_EVENT;
@@ -118,6 +121,8 @@ public class FreeIpaDownscaleActions {
                         .map(InstanceMetaData::getDiscoveryFQDN)
                         .filter(Objects::nonNull)
                         .collect(Collectors.toList());
+                getEventService().sendEventAndNotification(stack, context.getFlowTriggerUserCrn(), FREEIPA_DOWNSCALE_STARTED,
+                        List.of(getOperationMode(payload.isRepair()), String.valueOf(fqdns.size()), String.join(",", fqdns)));
                 setDownscaleHosts(variables, fqdns);
                 setRepair(variables, payload.isRepair());
                 setChainedAction(variables, payload.isChained());
@@ -462,6 +467,9 @@ public class FreeIpaDownscaleActions {
             protected void doExecute(StackContext context, StackEvent payload, Map<Object, Object> variables) {
                 Stack stack = context.getStack();
                 stackUpdater.updateStackStatus(stack, getDownscaleCompleteStatus(variables), "Downscale complete");
+                List<String> downscaleHosts = getDownscaleHosts(variables);
+                getEventService().sendEventAndNotification(stack, context.getFlowTriggerUserCrn(), FREEIPA_DOWNSCALE_FINISHED,
+                        List.of(getOperationMode(isRepair(variables)), String.valueOf(downscaleHosts.size()), String.join(",", downscaleHosts)));
                 if (!isChainedAction(variables)) {
                     environmentService.setFreeIpaNodeCount(stack.getEnvironmentCrn(),  stack.getNotDeletedInstanceMetaDataSet().size());
                 }
@@ -499,6 +507,8 @@ public class FreeIpaDownscaleActions {
                 }
                 Operation operation = operationService.failOperation(
                         stack.getAccountId(), getOperationId(variables), message, List.of(successDetails), List.of(failureDetails));
+                getEventService().sendEventAndNotification(stack, context.getFlowTriggerUserCrn(), FREEIPA_DOWNSCALE_FAILED,
+                        List.of(getOperationMode(isRepair(variables)), errorReason));
                 sendFailedOperationNotificationIfApplicable(stack, context.getFlowTriggerUserCrn(), operation, errorReason);
                 enableStatusChecker(stack, "Failed downscaling FreeIPA");
                 sendEvent(context, FAIL_HANDLED_EVENT.event(), payload);
@@ -529,5 +539,9 @@ public class FreeIpaDownscaleActions {
         String clusterName = "";
         String environmentCrn = stack.getEnvironmentCrn();
         return new CleanupEvent(stack.getId(), users, hostsSet, roles, ips, statesToSkip, accountId, operationId, clusterName, environmentCrn);
+    }
+
+    private String getOperationMode(boolean repair) {
+        return repair ? "repair" : "scale";
     }
 }

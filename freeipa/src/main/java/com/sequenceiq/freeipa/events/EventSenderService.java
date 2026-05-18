@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import com.google.gson.Gson;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.dal.model.AccountAwareResource;
+import com.sequenceiq.cloudbreak.common.event.ResourceCrnPayload;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.ha.NodeConfig;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
@@ -75,9 +76,37 @@ public class EventSenderService {
     }
 
     public void sendEventAndNotificationWithoutStack(BaseNamedFlowEvent payload, ResourceEvent resourceEvent, String userCrn) {
-        CDPStructuredNotificationEvent cdpStructuredEvent = createStructureEventForMissingStack(payload, resourceEvent, userCrn);
+        sendEventAndNotificationWithoutStack(payload, resourceEvent, userCrn, new HashSet<>());
+    }
+
+    public void sendEventAndNotificationWithoutStack(BaseNamedFlowEvent payload, ResourceEvent resourceEvent, String userCrn,
+            Collection<?> messageArgs) {
+        CDPStructuredNotificationEvent cdpStructuredEvent = createStructureEventForMissingStack(
+                payload,
+                payload.getClass().getSimpleName().toLowerCase(Locale.ROOT),
+                payload.getResourceName(),
+                resourceEvent,
+                userCrn,
+                messageArgs);
         cdpDefaultStructuredEventClient.sendStructuredEvent(cdpStructuredEvent);
-        webSocketNotificationService.send(resourceEvent, payload, userCrn);
+        webSocketNotificationService.send(resourceEvent, messageArgs, payload, userCrn, null);
+    }
+
+    public void sendEventAndNotificationWithoutStack(ResourceCrnPayload payload, ResourceEvent resourceEvent, String userCrn) {
+        sendEventAndNotificationWithoutStack(payload, resourceEvent, userCrn, new HashSet<>());
+    }
+
+    public void sendEventAndNotificationWithoutStack(ResourceCrnPayload payload, ResourceEvent resourceEvent, String userCrn,
+            Collection<?> messageArgs) {
+        CDPStructuredNotificationEvent cdpStructuredEvent = createStructureEventForMissingStack(
+                payload,
+                payload.getClass().getSimpleName().toLowerCase(Locale.ROOT),
+                null,
+                resourceEvent,
+                userCrn,
+                messageArgs);
+        cdpDefaultStructuredEventClient.sendStructuredEvent(cdpStructuredEvent);
+        webSocketNotificationService.send(resourceEvent, messageArgs, payload, userCrn, null);
     }
 
     private CDPStructuredNotificationEvent getStructuredEvent(AccountAwareResource resource, ResourceEvent resourceEvent, Object payload,
@@ -102,15 +131,15 @@ public class EventSenderService {
         return new CDPStructuredNotificationEvent(operationDetails, notificationDetails, resourceEvent.name(), message);
     }
 
-    private CDPStructuredNotificationEvent createStructureEventForMissingStack(BaseNamedFlowEvent payload, ResourceEvent resourceEvent, String userCrn) {
-        String resourceType = payload.getClass().getSimpleName().toLowerCase(Locale.ROOT);
+    private CDPStructuredNotificationEvent createStructureEventForMissingStack(ResourceCrnPayload payload, String resourceType,
+            String resourceName, ResourceEvent resourceEvent, String userCrn, Collection<?> messageArgs) {
         String resourceCrn = payload.getResourceCrn();
         CDPOperationDetails operationDetails = new CDPOperationDetails(
                 System.currentTimeMillis(),
                 NOTIFICATION,
                 resourceType,
                 payload.getResourceId(),
-                payload.getResourceName(),
+                resourceName,
                 nodeConfig.getId(),
                 serviceVersion,
                 null,
@@ -120,7 +149,7 @@ public class EventSenderService {
                 resourceEvent.name());
 
         CDPStructuredNotificationDetails notificationDetails = getNotificationDetails(resourceEvent, resourceCrn, resourceType, payload);
-        String message = cloudbreakMessagesService.getMessage(resourceEvent.getMessage());
+        String message = cloudbreakMessagesService.getMessage(resourceEvent.getMessage(), messageArgs);
         return new CDPStructuredNotificationEvent(operationDetails, notificationDetails, resourceEvent.name(), message);
     }
 

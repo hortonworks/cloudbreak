@@ -1,7 +1,11 @@
 package com.sequenceiq.freeipa.flow.stack.dynamicentitlement;
 
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_REFRESH_ENTITLEMENT_FAILED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_REFRESH_ENTITLEMENT_FINISHED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_REFRESH_ENTITLEMENT_STARTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_UPGRADE_FAILED;
 
+import java.util.List;
 import java.util.Map;
 
 import jakarta.inject.Inject;
@@ -42,7 +46,9 @@ public class RefreshEntitlementParamsActions {
 
             @Override
             protected void doExecute(RefreshEntitlementParamsContext context, RefreshEntitlementParamsTriggerEvent payload, Map<Object, Object> variables) {
+                getEventService().sendEventAndNotification(context.getStack(), context.getFlowTriggerUserCrn(), FREEIPA_REFRESH_ENTITLEMENT_STARTED);
                 dynamicEntitlementRefreshService.storeChangedEntitlementsAndTelemetry(context.getStack(), payload.getChangedEntitlements());
+                getEventService().sendEventAndNotification(context.getStack(), context.getFlowTriggerUserCrn(), FREEIPA_REFRESH_ENTITLEMENT_FINISHED);
                 setChainedAction(variables, payload.isChained());
                 setFinalChain(variables, payload.isFinalChain());
                 setOperationId(variables, payload.getOperationId());
@@ -62,7 +68,9 @@ public class RefreshEntitlementParamsActions {
                 String message = String.format("Refresh entitlement based configurations failed: %s", errorReason);
                 LOGGER.info(message, payload.getException());
                 stackUpdater.updateStackStatus(stack, DetailedStackStatus.UPGRADE_FAILED, message);
-                getEventService().sendEventAndNotification(stack, context.getFlowTriggerUserCrn(), FREEIPA_UPGRADE_FAILED, java.util.List.of(message));
+                getEventService().sendEventAndNotification(stack, context.getFlowTriggerUserCrn(), FREEIPA_REFRESH_ENTITLEMENT_FAILED,
+                        List.of(errorReason));
+                getEventService().sendEventAndNotification(stack, context.getFlowTriggerUserCrn(), FREEIPA_UPGRADE_FAILED, List.of(message));
                 sendEvent(context, RefreshEntitlementParamsEvent.REFRESH_ENTITLEMENT_FAIL_HANDLED_EVENT.event(), payload);
             }
         };

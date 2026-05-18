@@ -1,7 +1,11 @@
 package com.sequenceiq.freeipa.flow.freeipa.downscale.action;
 
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_DOWNSCALE_FAILED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_DOWNSCALE_FINISHED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_DOWNSCALE_STARTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_UPGRADE_FAILED;
 import static com.sequenceiq.freeipa.flow.OperationAwareAction.OPERATION_ID;
+import static com.sequenceiq.freeipa.flow.chain.FlowChainAwareAction.CHAINED_ACTION;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
@@ -30,11 +34,14 @@ import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowRegister;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationType;
+import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Operation;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.events.EventSenderService;
+import com.sequenceiq.freeipa.flow.freeipa.downscale.event.DownscaleEvent;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.DownscaleFailureEvent;
 import com.sequenceiq.freeipa.flow.stack.StackContext;
+import com.sequenceiq.freeipa.flow.stack.StackEvent;
 import com.sequenceiq.freeipa.service.operation.OperationService;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
 import com.sequenceiq.freeipa.sync.FreeipaJobService;
@@ -83,9 +90,7 @@ class FreeIpaDownscaleActionsNotificationTest {
     @BeforeEach
     void setUp() {
         context = new StackContext(new FlowParameters("flow", "user-crn"), stack, cloudContext, cloudCredential, cloudStack);
-        doReturn("acc").when(stack).getAccountId();
         doReturn(1L).when(stack).getId();
-        doReturn("env-crn").when(stack).getEnvironmentCrn();
     }
 
     @Test
@@ -93,6 +98,7 @@ class FreeIpaDownscaleActionsNotificationTest {
         Map<Object, Object> variables = new HashMap<>();
         variables.put(OPERATION_ID, "op-1");
         DownscaleFailureEvent payload = new DownscaleFailureEvent(1L, "phase", Set.of(), Map.of(), new Exception("boom"));
+        doReturn("acc").when(stack).getAccountId();
         Operation operation = new Operation();
         operation.setOperationType(OperationType.UPGRADE);
         doReturn(operation).when(operationService).failOperation(any(), any(), any(), any(), any());
@@ -105,7 +111,46 @@ class FreeIpaDownscaleActionsNotificationTest {
 
         new AbstractActionTestSupport<>(action).doExecute(context, payload, variables);
 
+        verify(eventSenderService).sendEventAndNotification(stack, "user-crn", FREEIPA_DOWNSCALE_FAILED, List.of("scale", "boom"));
         verify(eventSenderService).sendEventAndNotification(stack, "user-crn", FREEIPA_UPGRADE_FAILED, List.of("boom"));
+    }
+
+    @Test
+    void startingDownscaleActionSendsStartedNotification() throws Exception {
+        Map<Object, Object> variables = new HashMap<>();
+        DownscaleEvent payload = new DownscaleEvent("selector", 1L, List.of("i-1"), 2, false, false, false, "op-1");
+        InstanceMetaData instanceMetaData = new InstanceMetaData();
+        instanceMetaData.setInstanceId("i-1");
+        instanceMetaData.setDiscoveryFQDN("master0");
+        doReturn(List.of(instanceMetaData)).when(stack).getAllInstanceMetaDataList();
+        doReturn(new Event<>(new Event.Headers(new HashMap<>()), payload)).when(reactorEventFactory).createEvent(any(), any());
+
+        AbstractDownscaleAction<DownscaleEvent> action =
+                (AbstractDownscaleAction<DownscaleEvent>) underTest.startingDownscaleAction();
+        initActionPrivateFields(action);
+
+        new AbstractActionTestSupport<>(action).doExecute(context, payload, variables);
+
+        verify(eventSenderService).sendEventAndNotification(stack, "user-crn", FREEIPA_DOWNSCALE_STARTED,
+                List.of("scale", "1", "master0"));
+    }
+
+    @Test
+    void downscaleFinishedActionSendsFinishedNotification() throws Exception {
+        Map<Object, Object> variables = new HashMap<>();
+        variables.put("DOWNSCALE_HOSTS", List.of("master0"));
+        variables.put(CHAINED_ACTION, true);
+        StackEvent payload = new StackEvent("selector", 1L);
+        doReturn(new Event<>(new Event.Headers(new HashMap<>()), payload)).when(reactorEventFactory).createEvent(any(), any());
+
+        AbstractDownscaleAction<StackEvent> action =
+                (AbstractDownscaleAction<StackEvent>) underTest.downscaleFinsihedAction();
+        initActionPrivateFields(action);
+
+        new AbstractActionTestSupport<>(action).doExecute(context, payload, variables);
+
+        verify(eventSenderService).sendEventAndNotification(stack, "user-crn", FREEIPA_DOWNSCALE_FINISHED,
+                List.of("scale", "1", "master0"));
     }
 
     private void initActionPrivateFields(Action<?, ?> action) {

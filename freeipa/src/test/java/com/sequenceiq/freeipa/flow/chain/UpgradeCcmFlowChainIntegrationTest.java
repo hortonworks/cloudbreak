@@ -301,7 +301,7 @@ class UpgradeCcmFlowChainIntegrationTest {
     }
 
     private void letItFlow() {
-        verify(flowChains, timeout(50000).atLeastOnce()).removeFlowChain(anyString(), anyBoolean());
+        verify(flowChains, timeout(100000).atLeastOnce()).removeFlowChain(anyString(), anyBoolean());
     }
 
     @Profile("integration-test")

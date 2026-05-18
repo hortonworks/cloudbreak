@@ -1,5 +1,8 @@
 package com.sequenceiq.freeipa.flow.freeipa.rootvolumeupdate.action;
 
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_PROVIDER_TEMPLATE_UPDATE_FAILED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_PROVIDER_TEMPLATE_UPDATE_FINISHED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_PROVIDER_TEMPLATE_UPDATE_STARTED;
 import static com.sequenceiq.freeipa.flow.freeipa.rootvolumeupdate.FreeIpaProviderTemplateUpdateFlowEvent.FREEIPA_PROVIDER_TEMPLATE_UPDATE_FINALIZED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.rootvolumeupdate.FreeIpaProviderTemplateUpdateFlowEvent.FREEIPA_PROVIDER_TEMPLATE_UPDATE_FINISHED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.rootvolumeupdate.FreeIpaProviderTemplateUpdateFlowEvent.FREEIPA_PROVIDER_TEMPLATE_UPDATE_TRIGGER_EVENT;
@@ -37,10 +40,15 @@ import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.events.EventSenderService;
+import com.sequenceiq.freeipa.flow.freeipa.common.FailureType;
 import com.sequenceiq.freeipa.flow.freeipa.rootvolumeupdate.event.FreeIpaProviderTemplateUpdateEvent;
+import com.sequenceiq.freeipa.flow.freeipa.rootvolumeupdate.event.FreeIpaProviderTemplateUpdateFailureEvent;
 import com.sequenceiq.freeipa.flow.freeipa.rootvolumeupdate.event.FreeIpaProviderTemplateUpdateHandlerRequest;
 import com.sequenceiq.freeipa.flow.stack.StackContext;
+import com.sequenceiq.freeipa.service.operation.OperationService;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
+import com.sequenceiq.freeipa.sync.FreeipaJobService;
 
 @ExtendWith(MockitoExtension.class)
 public class FreeIpaProviderTemplateUpdateActionsTest {
@@ -54,6 +62,15 @@ public class FreeIpaProviderTemplateUpdateActionsTest {
 
     @InjectMocks
     private FreeIpaProviderTemplateUpdateActions underTest;
+
+    @Mock
+    private EventSenderService eventSenderService;
+
+    @Mock
+    private OperationService operationService;
+
+    @Mock
+    private FreeipaJobService freeipaJobService;
 
     @Mock
     private FlowRegister runningFlows;
@@ -88,6 +105,7 @@ public class FreeIpaProviderTemplateUpdateActionsTest {
     void setUp() {
         variables = new HashMap<>();
         when(stack.getId()).thenReturn(1L);
+        when(flowParameters.getFlowTriggerUserCrn()).thenReturn("user-crn");
         context = new StackContext(flowParameters, stack, cloudContext, cloudCredential, cloudStack);
     }
 
@@ -102,6 +120,7 @@ public class FreeIpaProviderTemplateUpdateActionsTest {
         initActionPrivateFields(action);
         new AbstractActionTestSupport<>(action).doExecute(context, launchTemplateUpdateEvent, variables);
         verify(stackUpdater).updateStackStatus(eq(stack), eq(DetailedStackStatus.UPDATE_IN_PROGRESS), eq("Starting to update provider template."));
+        verify(eventSenderService).sendEventAndNotification(stack, "user-crn", FREEIPA_PROVIDER_TEMPLATE_UPDATE_STARTED);
         ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
         verify(eventBus).notify(captor.capture(), eventCaptor.capture());
         String selector = EventSelectorUtil.selector(FreeIpaProviderTemplateUpdateHandlerRequest.class);
@@ -121,14 +140,34 @@ public class FreeIpaProviderTemplateUpdateActionsTest {
         new AbstractActionTestSupport<>(action).doExecute(context, launchTemplateUpdateEvent, variables);
         ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
         verify(stackUpdater).updateStackStatus(eq(stack), eq(DetailedStackStatus.UPDATE_COMPLETE), eq("Updating Launch Template complete."));
+        verify(eventSenderService).sendEventAndNotification(stack, "user-crn", FREEIPA_PROVIDER_TEMPLATE_UPDATE_FINISHED);
         verify(eventBus).notify(captor.capture(), eventCaptor.capture());
         assertEquals(FREEIPA_PROVIDER_TEMPLATE_UPDATE_FINALIZED_EVENT.event(), captor.getValue());
         assertEquals(1L, ReflectionTestUtils.getField(eventCaptor.getValue().getData(), "stackId"));
+    }
+
+    @Test
+    void testLaunchTemplateUpdateFailureAction() throws Exception {
+        FreeIpaProviderTemplateUpdateFailureEvent payload =
+                new FreeIpaProviderTemplateUpdateFailureEvent(1L, "phase", new Exception("boom"), FailureType.ERROR);
+        doReturn("acc").when(stack).getAccountId();
+        Map<Object, Object> localVariables = new HashMap<>();
+
+        AbstractFreeIpaProviderTemplateUpdateAction<FreeIpaProviderTemplateUpdateFailureEvent> action =
+                (AbstractFreeIpaProviderTemplateUpdateAction<FreeIpaProviderTemplateUpdateFailureEvent>) underTest.failureAction();
+        initActionPrivateFields(action);
+        ReflectionTestUtils.setField(action, null, operationService, OperationService.class);
+
+        new AbstractActionTestSupport<>(action).doExecute(context, payload, localVariables);
+
+        verify(eventSenderService).sendEventAndNotification(stack, "user-crn", FREEIPA_PROVIDER_TEMPLATE_UPDATE_FAILED, java.util.List.of("boom"));
     }
 
     private void initActionPrivateFields(Action<?, ?> action) {
         ReflectionTestUtils.setField(action, null, runningFlows, FlowRegister.class);
         ReflectionTestUtils.setField(action, null, eventBus, EventBus.class);
         ReflectionTestUtils.setField(action, null, reactorEventFactory, ErrorHandlerAwareReactorEventFactory.class);
+        ReflectionTestUtils.setField(action, null, eventSenderService, EventSenderService.class);
+        ReflectionTestUtils.setField(action, "jobService", freeipaJobService, FreeipaJobService.class);
     }
 }

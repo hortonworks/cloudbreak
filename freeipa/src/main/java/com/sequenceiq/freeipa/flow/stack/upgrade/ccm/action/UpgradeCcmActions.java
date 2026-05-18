@@ -1,5 +1,8 @@
 package com.sequenceiq.freeipa.flow.stack.upgrade.ccm.action;
 
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_UPGRADE_CCM_FAILED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_UPGRADE_CCM_FINISHED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_UPGRADE_CCM_STARTED;
 import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.selector.UpgradeCcmHandlerSelector.UPGRADE_CCM_APPLY_UPGRADE_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.selector.UpgradeCcmHandlerSelector.UPGRADE_CCM_CHANGE_TUNNEL_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.selector.UpgradeCcmHandlerSelector.UPGRADE_CCM_CHECK_PREREQUISITES_EVENT;
@@ -15,6 +18,7 @@ import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.selector.UpgradeCcmH
 import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.selector.UpgradeCcmStateSelector.UPGRADE_CCM_FAILURE_HANDLED_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.selector.UpgradeCcmStateSelector.UPGRADE_CCM_FINISHED_EVENT;
 
+import java.util.List;
 import java.util.Map;
 
 import jakarta.inject.Inject;
@@ -25,6 +29,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.action.Action;
 
+import com.sequenceiq.freeipa.events.EventSenderService;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
 import com.sequenceiq.freeipa.flow.stack.upgrade.ccm.UpgradeCcmService;
 import com.sequenceiq.freeipa.flow.stack.upgrade.ccm.event.UpgradeCcmEvent;
@@ -39,6 +44,9 @@ public class UpgradeCcmActions {
     @Inject
     private UpgradeCcmService upgradeCcmService;
 
+    @Inject
+    private EventSenderService eventSenderService;
+
     @Bean(name = "UPGRADE_CCM_CHECK_PREREQUISITES_STATE")
     public Action<?, ?> checkPrerequisites() {
         return new AbstractUpgradeCcmAction<>(UpgradeCcmTriggerEvent.class) {
@@ -48,6 +56,7 @@ public class UpgradeCcmActions {
                 setFinalChain(variables, payload.isFinalFlow());
                 setChainedAction(variables, payload.isChained());
                 LOGGER.info("Starting checking prerequisites for FreeIPA CCM upgrade {}", payload);
+                eventSenderService.sendEventAndNotification(context.getStack(), context.getFlowTriggerUserCrn(), FREEIPA_UPGRADE_CCM_STARTED);
                 upgradeCcmService.checkPrerequisitesState(context.getStack().getId());
                 sendEvent(context, UPGRADE_CCM_CHECK_PREREQUISITES_EVENT.create(context.getStack().getId(), payload.getOldTunnel()));
             }
@@ -168,6 +177,7 @@ public class UpgradeCcmActions {
             protected void doExecute(UpgradeCcmContext context, UpgradeCcmEvent payload, Map<Object, Object> variables) {
                 LOGGER.info("FreeIPA CCM upgrade finished {}", payload);
                 upgradeCcmService.finishedState(context.getStack().getId(), payload.getMinaRemoved());
+                eventSenderService.sendEventAndNotification(context.getStack(), context.getFlowTriggerUserCrn(), FREEIPA_UPGRADE_CCM_FINISHED);
                 completeOperation(context.getStack().getAccountId(), context.getStack().getEnvironmentCrn(), variables);
                 StackEvent stackEvent = new StackEvent(context.getStack().getId());
                 sendEvent(context, UPGRADE_CCM_FINISHED_EVENT.event(), stackEvent);
@@ -182,9 +192,12 @@ public class UpgradeCcmActions {
             @Override
             protected void doExecute(UpgradeCcmContext context, UpgradeCcmFailureEvent payload, Map<Object, Object> variables) {
                 LOGGER.info("FreeIPA CCM upgrade failed {}", payload);
+                String errorReason = getErrorReason(payload.getException());
+                eventSenderService.sendEventAndNotification(context.getStack(), context.getFlowTriggerUserCrn(), FREEIPA_UPGRADE_CCM_FAILED,
+                        List.of(errorReason));
                 upgradeCcmService.changeTunnel(payload.getResourceId(), payload.getOldTunnel());
                 upgradeCcmService.failedState(context, payload);
-                failOperation(context.getStack().getAccountId(), payload.getException().getMessage(), variables);
+                failOperation(context.getStack().getAccountId(), errorReason, variables);
                 sendEvent(context, UPGRADE_CCM_FAILURE_HANDLED_EVENT.event(), new StackEvent(context.getStack().getId()));
             }
         };
@@ -197,8 +210,11 @@ public class UpgradeCcmActions {
             @Override
             protected void doExecute(UpgradeCcmContext context, UpgradeCcmFailureEvent payload, Map<Object, Object> variables) {
                 LOGGER.info("FreeIPA CCM upgrade failed {}", payload);
+                String errorReason = getErrorReason(payload.getException());
+                eventSenderService.sendEventAndNotification(context.getStack(), context.getFlowTriggerUserCrn(), FREEIPA_UPGRADE_CCM_FAILED,
+                        List.of(errorReason));
                 upgradeCcmService.failedState(context, payload);
-                failOperation(context.getStack().getAccountId(), payload.getException().getMessage(), variables);
+                failOperation(context.getStack().getAccountId(), errorReason, variables);
                 sendEvent(context, UPGRADE_CCM_FAILURE_HANDLED_EVENT.event(), new StackEvent(context.getStack().getId()));
             }
         };
@@ -226,5 +242,9 @@ public class UpgradeCcmActions {
                 sendEvent(context, UPGRADE_CCM_REVERT_ALL_FAILURE_EVENT.createBasedOn(payload));
             }
         };
+    }
+
+    private String getErrorReason(Exception payloadException) {
+        return payloadException == null || payloadException.getMessage() == null ?  "Unknown error" : payloadException.getMessage();
     }
 }

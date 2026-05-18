@@ -148,14 +148,14 @@ class EventSenderServiceTest {
     @Test
     void sendEventAndNotificationWithoutStack() {
         BaseNamedFlowEvent flowEvent = new BaseNamedFlowEvent("selector", STACK_ID, STACK_NAME, RESOURCE_CRN);
-        when(cloudbreakMessagesService.getMessage(any())).thenReturn(MESSAGE);
+        when(cloudbreakMessagesService.getMessage(any(), anyCollection())).thenReturn(MESSAGE);
 
         underTest.sendEventAndNotificationWithoutStack(flowEvent, ResourceEvent.ENVIRONMENT_FREEIPA_CREATION_FAILED, USER_CRN);
 
         ArgumentCaptor<CDPStructuredNotificationEvent> eventCaptor = ArgumentCaptor.forClass(CDPStructuredNotificationEvent.class);
         verify(cdpDefaultStructuredEventClient).sendStructuredEvent(eventCaptor.capture());
-        verify(webSocketNotificationService).send(eq(ResourceEvent.ENVIRONMENT_FREEIPA_CREATION_FAILED), eq(flowEvent), eq(USER_CRN));
-        verify(cloudbreakMessagesService).getMessage(any());
+        verify(webSocketNotificationService).send(eq(ResourceEvent.ENVIRONMENT_FREEIPA_CREATION_FAILED), anyCollection(), eq(flowEvent), eq(USER_CRN), isNull());
+        verify(cloudbreakMessagesService).getMessage(any(), anyCollection());
 
         CDPStructuredNotificationEvent capturedEvent = eventCaptor.getValue();
         CDPOperationDetails operationDetails = capturedEvent.getOperation();
@@ -267,7 +267,7 @@ class EventSenderServiceTest {
     @Test
     void createStructureEventForMissingStackShouldUseFlowEventDetails() {
         BaseNamedFlowEvent flowEvent = new BaseNamedFlowEvent("selector", STACK_ID, STACK_NAME, RESOURCE_CRN);
-        when(cloudbreakMessagesService.getMessage(any())).thenReturn(MESSAGE);
+        when(cloudbreakMessagesService.getMessage(any(), anyCollection())).thenReturn(MESSAGE);
 
         underTest.sendEventAndNotificationWithoutStack(flowEvent, ResourceEvent.ENVIRONMENT_FREEIPA_CREATION_FAILED, USER_CRN);
 
@@ -280,6 +280,19 @@ class EventSenderServiceTest {
         assert operationDetails.getResourceType().equals("basenamedflowevent");
         assert operationDetails.getUserCrn().equals(USER_CRN);
         assert operationDetails.getAccountId() == null;
+    }
+
+    @Test
+    void sendEventAndNotificationWithoutStackWithMessageArgs() {
+        BaseNamedFlowEvent flowEvent = new BaseNamedFlowEvent("selector", STACK_ID, STACK_NAME, RESOURCE_CRN);
+        List<String> messageArgs = List.of("boom");
+        when(cloudbreakMessagesService.getMessage(any(), eq(messageArgs))).thenReturn(MESSAGE);
+
+        underTest.sendEventAndNotificationWithoutStack(flowEvent, ResourceEvent.FREEIPA_DIAGNOSTICS_COLLECTION_FAILED, USER_CRN, messageArgs);
+
+        verify(webSocketNotificationService).send(eq(ResourceEvent.FREEIPA_DIAGNOSTICS_COLLECTION_FAILED), eq(messageArgs), eq(flowEvent), eq(USER_CRN),
+                isNull());
+        verify(cloudbreakMessagesService).getMessage(any(), eq(messageArgs));
     }
 
     @Test

@@ -1,5 +1,9 @@
 package com.sequenceiq.freeipa.flow.stack.start.action;
 
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_START_FAILED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_START_FINISHED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_START_STARTED;
+
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -67,6 +71,7 @@ public class StackStartActions {
             @Override
             protected void doExecute(StackStartContext context, StackEvent payload, Map<Object, Object> variables) {
                 stackStartService.startStack(context.getStack());
+                getEventService().sendEventAndNotification(context.getStack(), context.getFlowTriggerUserCrn(), FREEIPA_START_STARTED);
                 sendEvent(context);
             }
 
@@ -141,6 +146,7 @@ public class StackStartActions {
             @Override
             protected void doExecute(StackStartContext context, HealthCheckSuccess payload, Map<Object, Object> variables) {
                 stackStartService.finishStackStart(context);
+                getEventService().sendEventAndNotification(context.getStack(), context.getFlowTriggerUserCrn(), FREEIPA_START_FINISHED);
                 sendEvent(context);
             }
 
@@ -157,6 +163,8 @@ public class StackStartActions {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
                 stackStartService.handleStackStartError(context.getStack(), payload);
+                getEventService().sendEventAndNotification(context.getStack(), context.getFlowTriggerUserCrn(), FREEIPA_START_FAILED,
+                        List.of(getErrorReason(payload.getException())));
                 sendEvent(context);
             }
 

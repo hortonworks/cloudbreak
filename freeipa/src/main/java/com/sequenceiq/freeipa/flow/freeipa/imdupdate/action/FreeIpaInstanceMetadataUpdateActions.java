@@ -1,8 +1,12 @@
 package com.sequenceiq.freeipa.flow.freeipa.imdupdate.action;
 
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_INSTANCE_METADATA_UPDATE_FAILED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_INSTANCE_METADATA_UPDATE_FINISHED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.FREEIPA_INSTANCE_METADATA_UPDATE_STARTED;
 import static com.sequenceiq.freeipa.flow.freeipa.imdupdate.event.FreeIpaInstanceMetadataUpdateEvent.STACK_IMDUPDATE_FAIL_HANDLED_EVENT;
 import static com.sequenceiq.freeipa.flow.freeipa.imdupdate.event.FreeIpaInstanceMetadataUpdateEvent.STACK_IMDUPDATE_FINALIZED_EVENT;
 
+import java.util.List;
 import java.util.Map;
 
 import org.slf4j.Logger;
@@ -28,6 +32,8 @@ public class FreeIpaInstanceMetadataUpdateActions {
 
             @Override
             protected void doExecute(StackContext ctx, FreeIpaInstanceMetadataUpdateTriggerEvent payload, Map<Object, Object> variables) {
+                getEventService().sendEventAndNotification(ctx.getStack(), ctx.getFlowTriggerUserCrn(), FREEIPA_INSTANCE_METADATA_UPDATE_STARTED,
+                        List.of(String.valueOf(payload.getUpdateType())));
                 sendEvent(ctx, new FreeIpaInstanceMetadataUpdateRequest(ctx.getCloudContext(), ctx.getCloudCredential(),
                         ctx.getCloudStack(), payload.getUpdateType()));
             }
@@ -40,6 +46,7 @@ public class FreeIpaInstanceMetadataUpdateActions {
 
             @Override
             protected void doExecute(StackContext context, FreeIpaInstanceMetadataUpdateResult payload, Map<Object, Object> variables) {
+                getEventService().sendEventAndNotification(context.getStack(), context.getFlowTriggerUserCrn(), FREEIPA_INSTANCE_METADATA_UPDATE_FINISHED);
                 sendEvent(context, STACK_IMDUPDATE_FINALIZED_EVENT.event(), payload);
             }
         };
@@ -52,6 +59,9 @@ public class FreeIpaInstanceMetadataUpdateActions {
             @Override
             protected void doExecute(StackContext context, FreeIpaInstanceMetadataUpdateFailureEvent payload, Map<Object, Object> variables) {
                 LOGGER.error("Instance metadata update failed with: ", payload.getException());
+                String errorReason = getErrorReason(payload.getException());
+                getEventService().sendEventAndNotification(context.getStack(), context.getFlowTriggerUserCrn(), FREEIPA_INSTANCE_METADATA_UPDATE_FAILED,
+                        java.util.List.of(errorReason));
                 sendEvent(context, STACK_IMDUPDATE_FAIL_HANDLED_EVENT.event(), payload);
             }
         };
