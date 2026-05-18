@@ -295,7 +295,7 @@ class FreeIpaTopologyServiceTest {
 
         underTest.updateReplicationTopology(1L, Set.of(), freeIpaClient);
 
-        verify(poller).runPoller(anyLong(), anyLong(), any(FreeIpaServerRoleEnabledForServersPoller.class));
+        verify(poller).runPollerDontStopOnException(anyLong(), anyLong(), any(FreeIpaServerRoleEnabledForServersPoller.class));
     }
 
     @Test
@@ -305,7 +305,8 @@ class FreeIpaTopologyServiceTest {
         im.setDiscoveryFQDN("ipaserver1.example.com");
         imSet.add(im);
         when(instanceMetaDataService.findNotTerminatedForStack(anyLong())).thenReturn(imSet);
-        doThrow(new PollerStoppedException("timed out")).when(poller).runPoller(anyLong(), anyLong(), any(FreeIpaServerRoleEnabledForServersPoller.class));
+        doThrow(new PollerStoppedException("timed out")).when(poller)
+                .runPollerDontStopOnException(anyLong(), anyLong(), any(FreeIpaServerRoleEnabledForServersPoller.class));
 
         assertThrows(PollerStoppedException.class, () -> underTest.updateReplicationTopology(1L, Set.of(), freeIpaClient));
     }

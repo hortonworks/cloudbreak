@@ -191,7 +191,7 @@ public class FreeIpaTopologyService {
     private void waitForCaRoleToBeEnabled(FreeIpaClient freeIpaClient, Set<String> allNodesFqdn) throws Exception {
         LOGGER.info("Start polling if {} roles are enabled on all instances", Set.of(CA_SERVER_ROLE, DNS_SERVER_ROLE));
         try {
-            poller.runPoller(pollingInterval, pollingDelay,
+            poller.runPollerDontStopOnException(pollingInterval, pollingDelay,
                     new FreeIpaServerRoleEnabledForServersPoller(freeIpaClient, Set.of(CA_SERVER_ROLE, DNS_SERVER_ROLE), allNodesFqdn));
         } catch (PollerStoppedException e) {
             LOGGER.warn("Polling for {} roles enablement timed out without success", Set.of(CA_SERVER_ROLE, DNS_SERVER_ROLE));
