@@ -25,7 +25,6 @@ import org.springframework.util.CollectionUtils;
 import org.testng.TestNG;
 
 import com.google.common.collect.ImmutableMap;
-import com.sequenceiq.cloudbreak.util.BouncyCastleFipsProviderLoader;
 import com.sequenceiq.it.cloudbreak.cloud.v4.aws.AwsProperties;
 import com.sequenceiq.it.config.ITProps;
 import com.sequenceiq.it.util.TestNGUtil;
@@ -87,7 +86,7 @@ public class IntegrationTestApp implements CommandLineRunner {
         springApp.setWebApplicationType(WebApplicationType.NONE);
         springApp.setDefaultProperties(ImmutableMap.of("spring.main.allow-bean-definition-overriding", "true"));
         try {
-            BouncyCastleFipsProviderLoader.load();
+//            BouncyCastleFipsProviderLoader.load();
             ConfigurableApplicationContext context = springApp.run(args);
             LOG.info("Closing Spring test context.");
             context.close();

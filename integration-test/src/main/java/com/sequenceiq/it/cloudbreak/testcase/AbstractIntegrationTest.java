@@ -101,7 +101,7 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
 
     @BeforeMethod
     public final void minimalSetupForClusterCreation(Object[] data, ITestResult testResult) {
-        BouncyCastleFipsProviderLoader.load();
+//        BouncyCastleFipsProviderLoader.load();
         setupTest(testResult);
         setupTest((TestContext) data[0]);
     }
