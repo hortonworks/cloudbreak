@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.converter.v4.stacks;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -34,6 +35,7 @@ import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 import com.sequenceiq.common.api.telemetry.response.WorkloadAnalyticsResponse;
 import com.sequenceiq.common.api.type.FeatureSetting;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentBaseResponse;
 
 @Component
 public class TelemetryConverter {
@@ -189,9 +191,12 @@ public class TelemetryConverter {
     private WorkloadAnalyticsRequest createWorkloadAnalyticsRequest(DetailedEnvironmentResponse environment, SdxBasicView sdxBasicView) {
         WorkloadAnalyticsRequest workloadAnalyticsRequest = null;
         if (telemetryPublisherEnabled) {
-            if (environment != null && environment.getTelemetry() != null && environment.getTelemetry().getFeatures() != null
-                    && environment.getTelemetry().getFeatures().getWorkloadAnalytics() != null) {
-                if (environment.getTelemetry().getFeatures().getWorkloadAnalytics().getEnabled()) {
+            Optional<FeatureSetting> workloadAnalyticsFeature = Optional.ofNullable(environment)
+                    .map(EnvironmentBaseResponse::getTelemetry)
+                    .map(TelemetryResponse::getFeatures)
+                    .map(FeaturesBase::getWorkloadAnalytics);
+            if (workloadAnalyticsFeature.isPresent()) {
+                if (workloadAnalyticsFeature.get().getEnabled()) {
                     LOGGER.debug("Workload analytics feature is enabled. Filling telemetry request with datalake details.");
                     workloadAnalyticsRequest = new WorkloadAnalyticsRequest();
                     workloadAnalyticsRequest.setAttributes(createWorkloadAnalyticsAttributes(environment, sdxBasicView));
