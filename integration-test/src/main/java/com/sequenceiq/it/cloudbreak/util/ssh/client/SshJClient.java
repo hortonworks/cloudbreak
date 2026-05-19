@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.security.Security;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -22,6 +21,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.util.BouncyCastleFipsProviderLoader;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.log.Log;
 
@@ -60,16 +60,13 @@ public class SshJClient {
 
         LOGGER.info("Initializing SSHJ Client!");
         try {
-            Class<?> bcFipsClass = Class.forName("org.bouncycastle.jcajce.provider.BouncyCastleFipsProvider");
-            Security.addProvider((java.security.Provider) bcFipsClass.getDeclaredConstructor().newInstance());
+            BouncyCastleFipsProviderLoader.load();
             LOGGER.info("Injected BouncyCastle-FIPS provider as a workaround for SSHJ... Fingers crossed!");
-        } catch (ClassNotFoundException e) {
-            LOGGER.warn("BouncyCastle FIPS not found on the classpath. Falling back, but the test case will probably fail.");
         } catch (Exception e) {
             LOGGER.warn("Exception during the attempt to initialize BouncyCastle FIPS - the test case will probably fail.", e);
         }
 
-        SSHClient client = new SSHClient();
+        SSHClient client = new SSHClient(new DefaultConfig());
 
         client.addHostKeyVerifier(new PromiscuousVerifier());
         client.setConnectTimeout(TIMEOUT);
