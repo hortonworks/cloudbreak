@@ -46,7 +46,7 @@ public abstract class AbstractE2EWithReusableResourcesTest extends AbstractE2ETe
      */
     @BeforeClass
     public final void minimalSetupClass() {
-//        BouncyCastleFipsProviderLoader.load();
+        BouncyCastleFipsProviderLoader.load();
         TestContext testContext = getBean(TestContext.class);
         String className = getClass().getSimpleName();
         MDC.put("testlabel", className + "_setup");

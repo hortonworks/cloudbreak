@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.util.BouncyCastleFipsProviderLoader;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.log.Log;
 
@@ -58,12 +59,12 @@ public class SshJClient {
     public SSHClient createSshClient(String host, String user, String password, String privateKeyFilePath) throws IOException {
 
         LOGGER.info("Initializing SSHJ Client!");
-/*        try {
+        try {
             BouncyCastleFipsProviderLoader.load();
             LOGGER.info("Injected BouncyCastle-FIPS provider as a workaround for SSHJ... Fingers crossed!");
         } catch (Exception e) {
             LOGGER.warn("Exception during the attempt to initialize BouncyCastle FIPS - the test case will probably fail.", e);
-        }*/
+        }
 
         SSHClient client = new SSHClient(new DefaultConfig());
 
