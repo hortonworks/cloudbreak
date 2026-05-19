@@ -41,6 +41,7 @@ import net.schmizz.sshj.Config;
 import net.schmizz.sshj.ConfigImpl;
 import net.schmizz.sshj.common.Factory;
 import net.schmizz.sshj.common.LoggerFactory;
+import net.schmizz.sshj.common.SecurityUtils;
 import net.schmizz.sshj.transport.cipher.Cipher;
 import net.schmizz.sshj.transport.compression.NoneCompression;
 import net.schmizz.sshj.transport.kex.Curve25519SHA256;
@@ -74,6 +75,10 @@ import net.schmizz.sshj.userauth.keyprovider.PuTTYKeyFile;
  */
 public class DefaultConfig
         extends ConfigImpl {
+
+    static {
+        SecurityUtils.setRegisterBouncyCastle(false);
+    }
 
     private Logger log;
 
