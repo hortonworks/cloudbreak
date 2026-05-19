@@ -7,7 +7,13 @@
 
 {% set prefer_minifi_logging = salt['pillar.get']('fluent:preferMinifiLogging', False) == True %}
 
-{% set minifi_rpm = 'https://cloudera-build-2-us-west-2.vpc.cloudera.com/s3/build/76334049/cem-agents/1.x/ubuntu24/apt/tars/nifi-minifi-cpp/nifi-minifi-cpp-1.26.02-b30-x86_64.rpm' %}
+{% set cpuarch = salt['grains.get']('cpuarch') %}
+{% if cpuarch != 'aarch64' %}
+    {% set minifi_rpm = 'https://cloudera-build-2-us-west-2.vpc.cloudera.com/s3/build/76334049/cem-agents/1.x/ubuntu24/apt/tars/nifi-minifi-cpp/nifi-minifi-cpp-1.26.02-b30-x86_64.rpm' %}
+{% else %}
+    {% set minifi_rpm = 'https://cloudera-build-2-us-west-2.vpc.cloudera.com/s3/build/76334049/cem-agents/1.x/redhat8arm64/yum/tars/nifi-minifi-cpp/nifi-minifi-cpp-1.26.02-b30-arm64.rpm' %}
+{% endif %}
+
 {% if salt['pillar.get']('fluent:cloudStorageLoggingEnabled') %}
     {% set cloud_storage_logging_enabled = True %}
 {% else %}
@@ -56,7 +62,6 @@
     "region": region,
     "minifiRpm": minifi_rpm,
     "minifiInstalled": minifi_installed,
-    "minifiProperties": minifi_properties,
     "preferMinifiLogging": prefer_minifi_logging,
     "minifiPackageVersion": minifi_package_version
 }) %}
