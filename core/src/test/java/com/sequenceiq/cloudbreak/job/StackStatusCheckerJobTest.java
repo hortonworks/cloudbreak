@@ -226,8 +226,8 @@ public class StackStatusCheckerJobTest {
         lenient().when(cmTemplateProcessorFactory.get(anyString())).thenReturn(cmTemplateProcessor);
         lenient().when(stackDtoService.computeMonitoringEnabled(any())).thenReturn(Optional.of(true));
         lenient().when(config.isSaltCheckEnabled()).thenReturn(Boolean.FALSE);
-        lenient().when(messagesService.getMessage(eq(CLUSTER_FAILED_NODES_SALT_FAILURE_EVENT.getMessage())))
-                .thenReturn("Salt is not healthy for this host.");
+        lenient().when(messagesService.getMessage(eq(CLUSTER_FAILED_NODES_SALT_FAILURE_EVENT.getMessage()))).thenReturn(
+                "Some orchestrator components are not healthy for this host, please refer to 'Troubleshooting SaltStack' documentation or contact support.");
         lenient().when(gatewayConfigService.getPrimaryGatewayConfigIfPresent(any())).thenReturn(Optional.of(GatewayConfig.builder().build()));
     }
 
@@ -263,7 +263,8 @@ public class StackStatusCheckerJobTest {
         Map.Entry<String, Optional<String>> entry = failedNodesCaptor.getValue().entrySet().iterator().next();
         assertEquals("host1", entry.getKey());
         assertTrue(entry.getValue().isPresent());
-        assertEquals("Salt is not healthy for this host.", entry.getValue().get());
+        assertEquals("Some orchestrator components are not healthy for this host, please refer to 'Troubleshooting SaltStack' documentation or contact support.",
+                entry.getValue().get());
         verify(saltSyncService).checkSaltMinions(any());
     }
 
@@ -289,7 +290,8 @@ public class StackStatusCheckerJobTest {
         Map.Entry<String, Optional<String>> entry = failedNodesCaptor.getValue().entrySet().iterator().next();
         assertEquals("host1", entry.getKey());
         assertTrue(entry.getValue().isPresent());
-        assertEquals("Failure. Salt is not healthy for this host.", entry.getValue().get());
+        assertEquals("Failure. Some orchestrator components are not healthy for this host, " +
+                "please refer to 'Troubleshooting SaltStack' documentation or contact support.", entry.getValue().get());
         verify(saltSyncService).checkSaltMinions(any());
     }
 
