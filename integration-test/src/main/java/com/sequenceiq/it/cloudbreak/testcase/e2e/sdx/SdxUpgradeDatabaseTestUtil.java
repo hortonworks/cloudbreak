@@ -120,6 +120,10 @@ public class SdxUpgradeDatabaseTestUtil {
         return parseTargetMajorVersion(versionString);
     }
 
+    public String getRuntimeVersion() {
+        return commonClusterManagerProperties.getRuntimeVersion();
+    }
+
     public String getLatestRuntimeVersion() {
         return commonClusterManagerProperties.getLatestRuntimeVersion();
     }

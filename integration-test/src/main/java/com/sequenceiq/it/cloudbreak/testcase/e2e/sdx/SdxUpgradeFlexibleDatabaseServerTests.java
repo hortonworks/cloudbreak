@@ -36,6 +36,7 @@ public class SdxUpgradeFlexibleDatabaseServerTests extends PreconditionSdxE2ETes
     )
     public void testSDXFlexibleDatabaseUpgrade(TestContext testContext) {
         String sdx = resourcePropertyProvider().getName();
+        String runtimeVersion = sdxUpgradeDatabaseTestUtil.getRuntimeVersion();
 
         SdxDatabaseRequest sdxDatabaseRequest = new SdxDatabaseRequest();
         sdxDatabaseRequest.setAvailabilityType(SdxDatabaseAvailabilityType.NON_HA);
@@ -49,6 +50,7 @@ public class SdxUpgradeFlexibleDatabaseServerTests extends PreconditionSdxE2ETes
         testContext
                 .given(sdx, SdxTestDto.class)
                     .withCloudStorage()
+                    .withRuntimeVersion(runtimeVersion)
                     .withExternalDatabase(sdxDatabaseRequest)
                 .when(sdxTestClient.create(), key(sdx))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdx))

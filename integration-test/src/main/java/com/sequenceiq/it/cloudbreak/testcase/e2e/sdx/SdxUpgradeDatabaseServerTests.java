@@ -48,10 +48,11 @@ public class SdxUpgradeDatabaseServerTests extends AbstractE2ETest {
             then = "SDX upgrade database server should be successful, the cluster should be up and running"
     )
     public void testSDXDatabaseUpgrade(TestContext testContext) {
+        String runtimeVersion = sdxUpgradeDatabaseTestUtil.getRuntimeVersion();
         String originalDatabaseMajorVersion = sdxUpgradeDatabaseTestUtil.getOriginalDatabaseMajorVersion();
         TargetMajorVersion targetMajorVersion = sdxUpgradeDatabaseTestUtil.getTargetMajorVersion();
 
-        testSDXDatabaseUpgrade(testContext, null, originalDatabaseMajorVersion, targetMajorVersion);
+        testSDXDatabaseUpgrade(testContext, runtimeVersion, originalDatabaseMajorVersion, targetMajorVersion);
     }
 
     @Test(dataProvider = TEST_CONTEXT)
