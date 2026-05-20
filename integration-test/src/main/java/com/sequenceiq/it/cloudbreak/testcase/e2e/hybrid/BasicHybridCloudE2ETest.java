@@ -1,17 +1,23 @@
 package com.sequenceiq.it.cloudbreak.testcase.e2e.hybrid;
 
+import java.util.Optional;
+
 import jakarta.inject.Inject;
 
 import org.testng.annotations.Test;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.StackImageV4Response;
 import com.sequenceiq.it.cloudbreak.assertion.hybrid.HybridCloudAssertions;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
+import com.sequenceiq.it.cloudbreak.dto.AbstractTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ImageSettingsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
 import com.sequenceiq.it.util.imagevalidation.ImageValidatorE2ETest;
 import com.sequenceiq.it.util.imagevalidation.ImageValidatorE2ETestUtil;
+import com.sequenceiq.sdx.api.model.SdxClusterDetailResponse;
 
 public class BasicHybridCloudE2ETest extends HybridCloudE2ETest implements ImageValidatorE2ETest  {
 
@@ -53,7 +59,11 @@ public class BasicHybridCloudE2ETest extends HybridCloudE2ETest implements Image
 
     @Override
     public String getCbImageId(TestContext testContext) {
-        SdxInternalTestDto sdxInternalTestDto = testContext.get(CHILD_SDX_KEY);
-        return sdxInternalTestDto.getResponse().getStackV4Response().getImage().getId();
+        return Optional.ofNullable(testContext.get(CHILD_SDX_KEY, SdxInternalTestDto.class))
+                .map(AbstractTestDto::getResponse)
+                .map(SdxClusterDetailResponse::getStackV4Response)
+                .map(StackV4Response::getImage)
+                .map(StackImageV4Response::getId)
+                .orElse("");
     }
 }

@@ -48,6 +48,7 @@ import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.dto.util.StackMatrixTestDto;
+import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 import com.sequenceiq.it.cloudbreak.util.ssh.action.ScpDownloadClusterLogsActions;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
@@ -211,6 +212,10 @@ public abstract class HybridCloudE2ETest extends AbstractE2ETest {
                     .then((tc, dto, client) -> {
                         String runtimeVersion = commonClusterManagerProperties().getRuntimeVersion();
                         ClouderaManagerStackDescriptorV4Response response = dto.getResponse().getCdh().get(runtimeVersion);
+                        if (response == null) {
+                            throw new TestFailException(String.format("Catalog does not support %s platform with CDH version %s for OS type %s",
+                                    CHILD_CLOUD_PLATFORM, runtimeVersion, osType));
+                        }
                         cdhVersion = response.getVersion();
                         cdhParcel = response.getRepository().getStack().get(osType.getOsType());
                         return dto;
