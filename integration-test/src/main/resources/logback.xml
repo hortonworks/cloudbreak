@@ -24,6 +24,13 @@
         </sift>
     </appender>
 
+    <variable name="LOG_LEVEL_JERSEY" value="${INTEGRATIONTEST_LOGLEVEL_REQUESTS:-INFO}" />
+
+    <logger name="org.glassfish.jersey.logging" level="${LOG_LEVEL_JERSEY}">
+        <appender-ref ref="STDOUT" />
+        <appender-ref ref="SUITE_BASED" />
+    </logger>
+
     <root level="INFO">
         <appender-ref ref="STDOUT" />
         <appender-ref ref="SUITE_BASED" />
