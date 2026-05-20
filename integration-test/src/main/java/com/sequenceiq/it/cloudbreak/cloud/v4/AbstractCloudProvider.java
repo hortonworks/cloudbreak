@@ -2,6 +2,7 @@ package com.sequenceiq.it.cloudbreak.cloud.v4;
 
 import static com.sequenceiq.common.model.OsType.CENTOS7;
 import static com.sequenceiq.common.model.OsType.RHEL8;
+import static com.sequenceiq.common.model.OsType.RHEL9;
 import static java.lang.String.format;
 
 import java.util.Comparator;
@@ -18,6 +19,8 @@ import org.testng.util.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.BaseImageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.network.InstanceGroupNetworkV4Request;
+import com.sequenceiq.cloudbreak.common.type.Versioned;
+import com.sequenceiq.cloudbreak.util.VersionComparator;
 import com.sequenceiq.common.api.telemetry.request.LoggingRequest;
 import com.sequenceiq.common.api.type.ServiceEndpointCreation;
 import com.sequenceiq.common.model.Architecture;
@@ -373,13 +376,13 @@ public abstract class AbstractCloudProvider implements CloudProvider {
 
     public String getLatestDefaultBaseImage(ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient, String platform,
             Architecture architecture, boolean govCloud) {
-        Runtime.Version defaultRuntimeVersion = Runtime.Version.parse(commonClusterManagerProperties.getRuntimeVersion());
-        Runtime.Version baseRuntimeVersion = Runtime.Version.parse("7.2.18");
-        String osType = govCloud
-                ? RHEL8.getOsType()
-                : defaultRuntimeVersion.compareTo(baseRuntimeVersion) >= 0
-                    ? RHEL8.getOsType()
-                    : CENTOS7.getOsType();
+        Versioned targetRuntimeVersion = () -> commonClusterManagerProperties.getRuntimeVersion();
+        Versioned redhat8SupportedMinRuntimeVersion = () -> "7.2.18";
+        Versioned redhat9SupportedMinRuntimeVersion = () -> "7.3.2";
+        Comparator<Versioned> versionComparator = new VersionComparator();
+        boolean redhat8Supported = versionComparator.compare(targetRuntimeVersion, redhat8SupportedMinRuntimeVersion) >= 0;
+        boolean redhat9Supported = versionComparator.compare(targetRuntimeVersion, redhat9SupportedMinRuntimeVersion) >= 0;
+        String osType = redhat9Supported ? RHEL9.getOsType() : govCloud || redhat8Supported ? RHEL8.getOsType() : CENTOS7.getOsType();
 
         try {
             List<BaseImageV4Response> images = cloudbreakClient
