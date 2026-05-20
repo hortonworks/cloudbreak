@@ -29,6 +29,9 @@ import com.sequenceiq.freeipa.service.stack.FreeIpaInstanceHealthDetailsService;
 @Component
 public class FreeipaChecker {
 
+    private static final String MESSAGE_TEMPLATE_WITH_SALT_FAILURE_REASON =
+            "%s. Some orchestrator components are not healthy for host(s) [%s], please refer to 'Troubleshooting SaltStack' documentation or contact support.";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(FreeipaChecker.class);
 
     @Inject
@@ -61,7 +64,7 @@ public class FreeipaChecker {
             }
             String message = getMessages(responses);
             if (!hostsWithSaltFailure.isEmpty()) {
-                message = String.format("%s. %s: %s.", message, "Salt is not healthy on node(s)", Joiner.on(",").join(hostsWithSaltFailure));
+                message = String.format(MESSAGE_TEMPLATE_WITH_SALT_FAILURE_REASON, message, Joiner.on(",").join(hostsWithSaltFailure));
             }
             return Pair.of(statuses, message);
         }, LOGGER, ":::Auto sync::: freeipa server status is checked in {}ms");
