@@ -38,6 +38,7 @@ public class FreeIpaRebuildTests extends AbstractE2ETest {
         int instanceCountByGroup = 2;
 
         setUpEnvironmentTestDto(testContext, Boolean.TRUE, instanceCountByGroup)
+                .withFreeIpaOs("redhat8")
                 .when(getEnvironmentTestClient().create())
                 .awaitForCreationFlow()
                 .given(FreeIpaTestDto.class)
@@ -65,6 +66,7 @@ public class FreeIpaRebuildTests extends AbstractE2ETest {
         int instanceCountByGroup = 2;
 
         setUpEnvironmentTestDto(testContext, Boolean.TRUE, instanceCountByGroup)
+                .withFreeIpaOs("redhat8")
                 .when(getEnvironmentTestClient().create())
                 .awaitForCreationFlow()
                 .given(FreeIpaTestDto.class)
