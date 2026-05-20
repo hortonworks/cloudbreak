@@ -28,6 +28,8 @@ import com.sequenceiq.it.util.imagevalidation.ImageValidatorE2ETest;
 
 public class ForceJavaVersionE2ETest extends AbstractE2ETest implements ImageValidatorE2ETest {
 
+    private static final String VERSION_7_3_1 = "7.3.1";
+
     @Value("#{'${integrationtest.java.supportedVersions}'.split(',')}")
     private List<Integer> supportedJavaVersions;
 
@@ -56,7 +58,7 @@ public class ForceJavaVersionE2ETest extends AbstractE2ETest implements ImageVal
             then = "clusters are available and default java version is the forced one on all instances ")
     public void testClusterProvisionWithForcedJavaVersion(TestContext testContext) {
         Integer sdxJavaVersion = supportedJavaVersions.getFirst();
-        testContext.given(SdxInternalTestDto.class).withJavaVersion(sdxJavaVersion);
+        testContext.given(SdxInternalTestDto.class).withRuntimeVersion(VERSION_7_3_1).withJavaVersion(sdxJavaVersion);
         createDatalakeWithoutDatabase(testContext);
         Map<String, Integer> javaMajorVersions = sshJavaVersionActions.getJavaMajorVersions(getSdxPrivateIpAddresses(testContext));
         validateJavaVersions(sdxJavaVersion, javaMajorVersions);
