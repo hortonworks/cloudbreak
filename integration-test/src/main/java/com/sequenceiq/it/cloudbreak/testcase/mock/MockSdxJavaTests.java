@@ -56,6 +56,7 @@ public class MockSdxJavaTests extends AbstractMockTest {
                 .when(freeIpaTestClient.create())
                 .awaitForCreationFlow()
                 .given(sdxInternal, SdxInternalTestDto.class)
+                .withRuntimeVersion("7.3.1")
                 .withJavaVersion(8)
                 .when(sdxTestClient.createInternal(), key(sdxInternal))
                 .enableVerification()

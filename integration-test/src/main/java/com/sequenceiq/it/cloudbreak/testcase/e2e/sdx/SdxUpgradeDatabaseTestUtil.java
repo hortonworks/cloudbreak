@@ -74,7 +74,8 @@ public class SdxUpgradeDatabaseTestUtil {
         Map<String, Boolean> serviceStatusesByName = Map.of(
                 "postgresql-10", "10".equals(databaseMajorVersion),
                 "postgresql-11", "11".equals(databaseMajorVersion),
-                "postgresql-14", "14".equals(databaseMajorVersion)
+                "postgresql-14", "14".equals(databaseMajorVersion),
+                "postgresql-17", "17".equals(databaseMajorVersion)
         );
 
         sshJClientActions.checkSystemctlServiceStatusOnPrimaryGateway(testDto, instanceGroups, serviceStatusesByName);
@@ -91,7 +92,7 @@ public class SdxUpgradeDatabaseTestUtil {
             String databaseMajorVersion, String command) {
         Map<String, Pair<Integer, String>> dbVersions = sshJClientActions.executeSshCommandOnPrimaryGateways(instanceGroups, command, false);
         List<Pair<Integer, String>> wrongVersions = dbVersions.values().stream()
-                .filter(ssh -> !ssh.getValue().startsWith(databaseMajorVersion))
+                .filter(ssh -> !extractVersion(ssh.getValue()).startsWith(databaseMajorVersion))
                 .toList();
         if (!wrongVersions.isEmpty()) {
             String errorMsg = String.format("Datalake's database engine version check is wrong on primary gateways: %s, expected: %s",
@@ -100,6 +101,14 @@ public class SdxUpgradeDatabaseTestUtil {
             throw new TestFailException(errorMsg);
         }
         return testDto;
+    }
+
+    private String extractVersion(String output) {
+        return output.lines()
+                .map(String::trim)
+                .filter(line -> line.matches("\\d+\\."))
+                .findFirst()
+                .orElse("");
     }
 
     public String getOriginalDatabaseMajorVersion() {

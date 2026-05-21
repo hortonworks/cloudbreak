@@ -123,7 +123,7 @@ integrationtest:
     defaultPort: 7180
   cloudProvider: MOCK
   ycloudTest: false
-  runtimeVersion: 7.3.1
+  runtimeVersion: 7.3.2
   latestRuntimeVersion: 7.3.2
   upgrade:
     matrix:
@@ -131,17 +131,17 @@ integrationtest:
       7.2.18: 7.2.17
       7.3.1: 7.2.18
       7.3.2: 7.3.1
-    currentHARuntimeVersion: 7.2.18
-    currentGovHARuntimeVersion: 7.2.18
-    currentRuntimeVersion: 7.2.18
-    currentGovRuntimeVersion: 7.2.18
-    targetRuntimeVersion: 7.3.1
-    distroXUpgradeCurrentVersion: 7.2.18
-    distroXUpgradeCurrentGovVersion: 7.2.18
-    distroXUpgrade3rdPartyCurrentVersion: 7.2.18
-    distroXUpgrade3rdPartyCurrentGovVersion: 7.2.18
-    distroXUpgradeTargetVersion: 7.3.1
-    distroXUpgrade3rdPartyTargetVersion: 7.3.1
+    currentHARuntimeVersion: 7.3.1
+    currentGovHARuntimeVersion: 7.3.1
+    currentRuntimeVersion: 7.3.1
+    currentGovRuntimeVersion: 7.3.1
+    targetRuntimeVersion: 7.3.2
+    distroXUpgradeCurrentVersion: 7.3.1
+    distroXUpgradeCurrentGovVersion: 7.3.1
+    distroXUpgrade3rdPartyCurrentVersion: 7.3.1
+    distroXUpgrade3rdPartyCurrentGovVersion: 7.3.1
+    distroXUpgradeTargetVersion: 7.3.2
+    distroXUpgrade3rdPartyTargetVersion: 7.3.2
     imageCatalogUrl3rdParty: https://cloudbreak-imagecatalog.s3.amazonaws.com/v3-test-cb-image-catalog.json
   upgradeDatabaseServer:
     runtimeVersion: 7.3.1

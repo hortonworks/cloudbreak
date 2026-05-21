@@ -29,9 +29,11 @@ public class DistroXJavaTests extends AbstractMockTest {
     protected void setupTest(TestContext testContext) {
         createDefaultUser(testContext);
         createDefaultCredential(testContext);
+        createDefaultEnvironment(testContext);
+        createDefaultFreeIpa(testContext);
         createDefaultImageCatalog(testContext);
         initializeDefaultBlueprints(testContext);
-        createDefaultDatalake(testContext);
+        createDatalakeWithVersion(testContext, "7.3.1");
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)

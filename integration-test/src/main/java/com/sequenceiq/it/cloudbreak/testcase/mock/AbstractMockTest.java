@@ -11,6 +11,7 @@ import com.sequenceiq.it.cloudbreak.cloud.v4.mock.MockProperties;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
+import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.mock.ExecuteQueryToMockInfrastructure;
 import com.sequenceiq.it.cloudbreak.mock.ImageCatalogMockServerSetup;
 import com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest;
@@ -81,5 +82,14 @@ public abstract class AbstractMockTest extends AbstractIntegrationTest {
         createDefaultEnvironment(testContext);
         createDefaultFreeIpa(testContext);
         createDatalake(testContext);
+    }
+
+    @Override
+    protected void createDatalakeWithVersion(TestContext testContext, String runtimeVersion) {
+        testContext
+                .given(SdxInternalTestDto.class)
+                .withRuntimeVersion(runtimeVersion);
+        initiateDatalakeCreation(testContext);
+        waitForDatalakeCreation(testContext);
     }
 }

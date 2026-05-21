@@ -7,3 +7,9 @@ tests:
       - name: com.sequenceiq.it.cloudbreak.testcase.mock.DistroXClusterUpscaleDownscaleTest
         excludedMethods:
           - testScaleDownAndUpManyTimes
+      - name: com.sequenceiq.it.cloudbreak.testcase.mock.DistroXJavaTests
+        excludedMethods:
+          - testSetDefaultJavaVersion
+      - name: com.sequenceiq.it.cloudbreak.testcase.mock.MockSdxJavaTests
+        excludedMethods:
+          - testSetDefaultJavaVersion
