@@ -4,7 +4,11 @@ import static com.sequenceiq.cloudbreak.cloud.gcp.GcpDiskType.LOCAL_SSD;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -13,10 +17,22 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.google.api.services.compute.Compute;
+import com.google.api.services.compute.model.AttachedDisk;
+import com.google.api.services.compute.model.Instance;
+import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.gcp.client.GcpComputeFactory;
+import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
+import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
+import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
+import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
+import com.sequenceiq.cloudbreak.cloud.model.Group;
+import com.sequenceiq.cloudbreak.cloud.model.VolumeRecord;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
@@ -24,8 +40,28 @@ import com.sequenceiq.common.model.VolumeInfo;
 
 @ExtendWith(MockitoExtension.class)
 class GcpResourceVolumeConnectorTest {
+
+    private static final String PROJECT_ID = "test-project";
+
+    private static final String ZONE = "us-central1-a";
+
     @InjectMocks
     private GcpResourceVolumeConnector underTest;
+
+    @Mock
+    private GcpComputeFactory gcpComputeFactory;
+
+    @Mock
+    private GcpStackUtil gcpStackUtil;
+
+    @Mock
+    private AuthenticatedContext authenticatedContext;
+
+    @Mock
+    private CloudCredential cloudCredential;
+
+    @Mock
+    private Compute compute;
 
     @Test
     void testGetVolumeDeviceMappingByInstance() {
@@ -100,5 +136,85 @@ class GcpResourceVolumeConnectorTest {
         assertEquals("/dev/disk/by-id/google-abc", volumeInfo.getDevice());
         assertEquals(10, volumeInfo.getSize());
         assertTrue(volumeInfo.isDatabaseType());
+    }
+
+    @Test
+    void testDescribeAttachedVolumes() throws IOException {
+        when(authenticatedContext.getCloudCredential()).thenReturn(cloudCredential);
+        when(gcpComputeFactory.buildCompute(cloudCredential)).thenReturn(compute);
+        when(gcpStackUtil.getProjectId(cloudCredential)).thenReturn(PROJECT_ID);
+
+        CloudStack cloudStack = mockCloudStack();
+        Instance instance1 = createInstanceWithDisks("instance1",
+                bootDisk(),
+                persistentDisk("i1v0", 100L));
+        Instance instance2 = createInstanceWithDisks("instance2",
+                bootDisk(),
+                persistentDisk("i2v0", 300L),
+                localSsdDisk("local-ssd-0", 375L));
+        when(gcpStackUtil.getComputeInstanceWithId(eq(compute), eq(PROJECT_ID), eq(ZONE), eq("instance1"))).thenReturn(instance1);
+        when(gcpStackUtil.getComputeInstanceWithId(eq(compute), eq(PROJECT_ID), eq(ZONE), eq("instance2"))).thenReturn(instance2);
+
+        Map<String, List<VolumeRecord>> result = underTest.describeAttachedVolumes(authenticatedContext, cloudStack,
+                List.of("instance1", "instance2"));
+
+        assertEquals(2, result.size());
+        assertEquals(1, result.get("instance1").size());
+        assertEquals("i1v0", result.get("instance1").get(0).id());
+        assertEquals("/dev/disk/by-id/google-i1v0", result.get("instance1").get(0).device());
+        assertEquals(100, result.get("instance1").get(0).size());
+        assertEquals("PERSISTENT", result.get("instance1").get(0).type());
+        assertEquals(2, result.get("instance2").size());
+        assertEquals("i2v0", result.get("instance2").get(0).id());
+        assertEquals("/dev/disk/by-id/google-i2v0", result.get("instance2").get(0).device());
+        assertEquals(300, result.get("instance2").get(0).size());
+        assertEquals("PERSISTENT", result.get("instance2").get(0).type());
+        assertEquals("local-ssd-0", result.get("instance2").get(1).id());
+        assertEquals("/dev/disk/by-id/google-local-ssd-0", result.get("instance2").get(1).device());
+        assertEquals(375, result.get("instance2").get(1).size());
+        assertEquals("SCRATCH", result.get("instance2").get(1).type());
+    }
+
+    private CloudStack mockCloudStack() {
+        CloudStack cloudStack = mock(CloudStack.class);
+        CloudInstance instance1 = mock(CloudInstance.class);
+        when(instance1.getInstanceId()).thenReturn("instance1");
+        when(instance1.getAvailabilityZone()).thenReturn(ZONE);
+        CloudInstance instance2 = mock(CloudInstance.class);
+        when(instance2.getInstanceId()).thenReturn("instance2");
+        when(instance2.getAvailabilityZone()).thenReturn(ZONE);
+        Group group = mock(Group.class);
+        when(group.getInstances()).thenReturn(List.of(instance1, instance2));
+        when(cloudStack.getGroups()).thenReturn(List.of(group));
+        return cloudStack;
+    }
+
+    private Instance createInstanceWithDisks(String name, AttachedDisk... attachedDisks) {
+        Instance instance = new Instance();
+        instance.setName(name);
+        instance.setDisks(List.of(attachedDisks));
+        return instance;
+    }
+
+    private AttachedDisk bootDisk() {
+        return new AttachedDisk()
+                .setBoot(true)
+                .setSource("https://www.googleapis.com/compute/v1/projects/test-project/zones/us-central1-a/disks/boot-disk");
+    }
+
+    private AttachedDisk persistentDisk(String deviceName, Long sizeGb) {
+        return new AttachedDisk()
+                .setBoot(false)
+                .setDeviceName(deviceName)
+                .setDiskSizeGb(sizeGb)
+                .setType("PERSISTENT");
+    }
+
+    private AttachedDisk localSsdDisk(String deviceName, Long sizeGb) {
+        return new AttachedDisk()
+                .setBoot(false)
+                .setDeviceName(deviceName)
+                .setDiskSizeGb(sizeGb)
+                .setType("SCRATCH");
     }
 }
