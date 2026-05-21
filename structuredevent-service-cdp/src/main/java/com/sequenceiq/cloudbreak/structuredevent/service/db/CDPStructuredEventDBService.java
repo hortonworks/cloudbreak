@@ -9,8 +9,11 @@ import jakarta.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -36,6 +39,9 @@ import com.sequenceiq.cloudbreak.validation.ValidationResult;
 public class CDPStructuredEventDBService extends AbstractAccountAwareResourceService<CDPStructuredEventEntity> implements CDPStructuredEventService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CDPStructuredEventDBService.class);
+
+    @Value("${cdp.structuredevent.maxsize:20000}")
+    private int maxSize;
 
     @Inject
     private CDPStructuredEventRepository structuredEventRepository;
@@ -129,8 +135,9 @@ public class CDPStructuredEventDBService extends AbstractAccountAwareResourceSer
         LOGGER.debug("Gathering events for type: '{}' and resource CRN: '{}'", eventTypes, resourceCrn);
         List<StructuredEventType> types = getAllEventTypeIfEmpty(eventTypes);
         try {
-            List<CDPStructuredEventEntity> events = structuredEventRepository.findByEventTypeInAndResourceCrn(types, resourceCrn);
-            return (List<T>) Optional.ofNullable(events).orElse(new ArrayList<>()).stream()
+            Page<CDPStructuredEventEntity> events = pagingStructuredEventRepository.findByEventTypeInAndResourceCrn(types, resourceCrn,
+                    createPageRequest());
+            return (List<T>) Optional.ofNullable(events).orElse(Page.empty()).stream()
                     .map(event -> cdpStructuredEventEntityToCDPStructuredEventConverter
                             .convert(event))
                     .collect(Collectors.toList());
@@ -146,8 +153,9 @@ public class CDPStructuredEventDBService extends AbstractAccountAwareResourceSer
         LOGGER.debug("Gathering events for type: '{}' and resource CRN's: '{}'", eventTypes, resourceCrns);
         List<StructuredEventType> types = getAllEventTypeIfEmpty(eventTypes);
         try {
-            List<CDPStructuredEventEntity> events = structuredEventRepository.findByEventTypeInAndResourceCrnIn(types, resourceCrns);
-            return (List<T>) Optional.ofNullable(events).orElse(new ArrayList<>()).stream()
+            Page<CDPStructuredEventEntity> events = pagingStructuredEventRepository.findByEventTypeInAndResourceCrnIn(types, resourceCrns,
+                    createPageRequest());
+            return (List<T>) Optional.ofNullable(events).orElse(Page.empty()).stream()
                     .map(event -> cdpStructuredEventEntityToCDPStructuredEventConverter
                             .convert(event))
                     .collect(Collectors.toList());
@@ -180,6 +188,10 @@ public class CDPStructuredEventDBService extends AbstractAccountAwareResourceSer
                     CDPStructuredEventEntity.class.getSimpleName(), e.getMessage());
             throw e;
         }
+    }
+
+    private PageRequest createPageRequest() {
+        return PageRequest.of(0, maxSize, Sort.by("timestamp").descending());
     }
 
     private List<StructuredEventType> getAllEventTypeIfEmpty(List<StructuredEventType> eventTypes) {
