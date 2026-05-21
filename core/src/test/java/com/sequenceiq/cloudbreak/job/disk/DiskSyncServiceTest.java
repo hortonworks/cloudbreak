@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.job.disk;
 
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.DISK_SYNC_FAILED;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
@@ -18,6 +20,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.dto.StackDto;
 import com.sequenceiq.cloudbreak.service.diskupdate.DiskInstanceInfoCollector;
@@ -60,9 +63,11 @@ class DiskSyncServiceTest {
         when(stack.getDetailedStatus()).thenReturn(DetailedStackStatus.AVAILABLE);
         when(stackStatusAndReachabilityValidatorUtil.validateStackStatusAndReachability(stack)).thenReturn(false);
 
-        underTest.syncResources(stackDto, DiskSyncMode.DRY_RUN);
+        CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class, () -> underTest.syncResources(stackDto, DiskSyncMode.DRY_RUN));
 
         verify(eventService).fireCloudbreakEvent(eq(1L), eq("AVAILABLE"), eq(DISK_SYNC_FAILED), anyList());
+        assertEquals("Exception while trying to sync disks - The stack is either not in a valid state or not all nodes or reachable for disk sync to run!",
+                exception.getMessage());
     }
 
     @Test
@@ -90,8 +95,9 @@ class DiskSyncServiceTest {
         when(stack.getDetailedStatus()).thenReturn(DetailedStackStatus.AVAILABLE);
         when(stackStatusAndReachabilityValidatorUtil.validateStackStatusAndReachability(stack)).thenThrow(new RuntimeException("error"));
 
-        underTest.syncResources(stackDto, DiskSyncMode.DRY_RUN);
+        CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class, () -> underTest.syncResources(stackDto, DiskSyncMode.DRY_RUN));
 
         verify(eventService).fireCloudbreakEvent(eq(1L), eq("AVAILABLE"), eq(DISK_SYNC_FAILED), anyList());
+        assertEquals("Exception while trying to sync disks - error", exception.getMessage());
     }
 }

@@ -79,6 +79,7 @@ public class DiskSyncService {
         } catch (Exception ex) {
             LOGGER.error("Exception while running disk sync job on stack {}. Exception::", stackDto.getId(), ex);
             eventService.fireCloudbreakEvent(stackDto.getId(), stackStatus.name(), DISK_SYNC_FAILED, Collections.singletonList(ex.getMessage()));
+            throw new CloudbreakServiceException("Exception while trying to sync disks - " + ex.getMessage());
         }
     }
 

@@ -41,7 +41,7 @@ public class DiskSyncActions {
             protected void doExecute(ClusterViewContext ctx, DiskSyncRequest payload, Map<Object, Object> variables) {
                 Long stackId = payload.getResourceId();
                 LOGGER.debug("Disk sync flow init for stack {}", stackId);
-                sendEvent(ctx, DISK_SYNC_HANDLER_EVENT.event(), new DiskSyncHandlerEvent(stackId));
+                sendEvent(ctx, DISK_SYNC_HANDLER_EVENT.event(), new DiskSyncHandlerEvent(stackId, payload.getDiskSyncMode()));
             }
         };
     }

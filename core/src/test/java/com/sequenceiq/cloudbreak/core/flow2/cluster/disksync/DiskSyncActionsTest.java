@@ -34,6 +34,7 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
 import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
+import com.sequenceiq.cloudbreak.job.disk.DiskSyncMode;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.view.ClusterView;
@@ -88,7 +89,7 @@ class DiskSyncActionsTest {
 
     @Test
     void diskSyncInitActionSendsInitiatingEvent() throws Exception {
-        DiskSyncRequest request = new DiskSyncRequest(STACK_ID);
+        DiskSyncRequest request = new DiskSyncRequest(STACK_ID, DiskSyncMode.DRY_RUN);
         AbstractClusterAction<DiskSyncRequest> action = (AbstractClusterAction<DiskSyncRequest>) underTest.diskSyncInitAction();
         initActionPrivateFields(action);
         new AbstractActionTestSupport<>(action).doExecute(clusterContext, request, new HashMap<>());
