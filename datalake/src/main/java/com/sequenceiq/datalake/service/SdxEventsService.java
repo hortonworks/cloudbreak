@@ -12,6 +12,7 @@ import jakarta.inject.Inject;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -41,6 +42,9 @@ import com.sequenceiq.datalake.service.sdx.SdxService;
 public class SdxEventsService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SdxEventsService.class);
+
+    @Value("${cdp.structuredevent.maxsize:20000}")
+    private int maxSize;
 
     @Inject
     private SdxClusterRepository sdxClusterRepository;
@@ -72,7 +76,7 @@ public class SdxEventsService {
             LOGGER.info("No events from datalake and cloudbreak service");
             return List.of();
         }
-        return getSortedEvents(combinedEvents);
+        return sortAndFilterBasedOnPageSize(combinedEvents, maxSize);
     }
 
     public List<CDPStructuredEvent> getPagedDatalakeAuditEvents(String environmentCrn, List<StructuredEventType> types, Integer page, Integer size) {

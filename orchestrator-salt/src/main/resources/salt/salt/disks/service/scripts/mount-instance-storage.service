@@ -2,6 +2,9 @@
 Description=Mount Instance Storage On StartUp
 After=local-fs.target
 
+# If mnt.mount does exist then the unit waits for mnt.mount to be finished before starting
+After=mnt.mount
+
 [Service]
 ExecStart=/opt/salt/scripts/mount-instance-storage.sh
 

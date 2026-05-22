@@ -56,8 +56,7 @@ public class SdxEventController implements SdxEventEndpoint {
         StreamingOutput streamingOutput = output -> {
             try (ZipOutputStream zipOutputStream = new ZipOutputStream(output)) {
                 zipOutputStream.putNextEntry(new ZipEntry("struct-events.json"));
-                zipOutputStream.write(JsonUtil.writeValueAsString(events).getBytes());
-                zipOutputStream.closeEntry();
+                JsonUtil.writeValueToOutputStream(zipOutputStream, events);
             }
         };
         String fileName = "datalake-audit.zip";

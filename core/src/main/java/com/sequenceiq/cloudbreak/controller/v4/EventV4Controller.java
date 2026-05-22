@@ -130,8 +130,7 @@ public class EventV4Controller implements EventV4Endpoint {
         StreamingOutput streamingOutput = output -> {
             try (ZipOutputStream zipOutputStream = new ZipOutputStream(output)) {
                 zipOutputStream.putNextEntry(new ZipEntry("struct-events.json"));
-                zipOutputStream.write(JsonUtil.writeValueAsString(events).getBytes());
-                zipOutputStream.closeEntry();
+                JsonUtil.writeValueToOutputStream(zipOutputStream, events);
             }
         };
         return Response.ok(streamingOutput).header("content-disposition", "attachment; filename = struct-events.zip").build();

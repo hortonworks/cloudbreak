@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-
+set -x
 source /opt/salt/scripts/format-and-mount-common.sh
 
 MOUNT_PATH="{{ (salt['pillar.get']('mount')[salt['grains.get']('fqdn')])['mount_path'] }}"
@@ -166,9 +166,9 @@ find_format_and_mount_tempstorage_azure() {
         log $LOG_FILE "Temporary disk $device is not mounted"
         log $LOG_FILE "formatting temporary disk: $device"
         if [ "$FS_TYPE" = "xfs" ]; then
-          $(mkfs.xfs -f $devicename >> $LOG_FILE 2>&1)
+          $(mkfs.xfs -f $device >> $LOG_FILE 2>&1)
         else
-          $(mkfs -E lazy_itable_init=1 -O uninit_bg -F -t $FS_TYPE $devicename >> $LOG_FILE 2>&1)
+          $(mkfs -E lazy_itable_init=1 -O uninit_bg -F -t $FS_TYPE $device >> $LOG_FILE 2>&1)
         fi;
         if [ ! $? -eq 0 ]; then
           log $LOG_FILE "formatting of temporary disk device $device failed"
