@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import com.azure.core.management.exception.ManagementException;
 import com.azure.resourcemanager.compute.models.PowerState;
@@ -27,6 +28,7 @@ import com.azure.resourcemanager.compute.models.VirtualMachine;
 import com.azure.resourcemanager.compute.models.VirtualMachineInstanceView;
 import com.azure.resourcemanager.resources.fluentcore.arm.models.HasName;
 import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Multimaps;
 import com.sequenceiq.cloudbreak.client.ProviderAuthenticationFailedException;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
@@ -74,6 +76,9 @@ public class AzureVirtualMachineService {
         if (virtualMachines != null && !virtualMachines.isEmpty()) {
             return virtualMachines;
         } else {
+            if (virtualMachines == null) {
+                virtualMachines = Lists.newArrayList();
+            }
             LOGGER.info("We could not receive any VM in resource group. Let's try to fetch VMs by instance ids.");
             for (String privateInstanceId : privateInstanceIds) {
                 VirtualMachine virtualMachineByResourceGroup = azureClient.getVirtualMachineByResourceGroup(resourceGroup, privateInstanceId);
@@ -148,7 +153,7 @@ public class AzureVirtualMachineService {
     }
 
     private void errorIfEmpty(List<VirtualMachine> virtualMachines) {
-        if (virtualMachines.isEmpty()) {
+        if (CollectionUtils.isEmpty(virtualMachines)) {
             LOGGER.warn("Azure returned 0 vms when listing by resource group. This should not be possible, retrying");
             throw new CloudConnectorException("Operation failed, azure returned an empty list while trying to list vms in resource group.");
         }
