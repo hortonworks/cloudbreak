@@ -13,7 +13,9 @@ import static org.mockito.Mockito.when;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
+import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -21,11 +23,18 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.google.api.client.googleapis.json.GoogleJsonError;
+import com.google.api.client.googleapis.json.GoogleJsonResponseException;
+import com.google.api.client.http.HttpHeaders;
+import com.google.api.client.http.HttpResponseException;
 import com.google.api.services.compute.Compute;
+import com.google.api.services.compute.model.Disk;
 import com.google.api.services.compute.model.DisksResizeRequest;
 import com.google.api.services.compute.model.Operation;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
+import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpDiskInsertOperationService.GcpDiskInsertOutcome;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpOperationUtil;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
@@ -43,7 +52,9 @@ class GcpDiskUpdateRetryServiceTest {
 
     private static final String ZONE = "us-central1-a";
 
-    private static final String DISK_NAME = "i1v1";
+    private static final String DISK_NAME = "d0";
+
+    private static final String INSTANCE_ID = "instance-1";
 
     @InjectMocks
     private GcpDiskUpdateRetryService underTest;
@@ -53,6 +64,9 @@ class GcpDiskUpdateRetryServiceTest {
 
     @Mock
     private SyncPollingScheduler<List<CloudResourceStatus>> syncPollingScheduler;
+
+    @Mock
+    private GcpDiskInsertOperationService gcpDiskInsertOperationService;
 
     @Mock
     private Compute compute;
@@ -106,12 +120,153 @@ class GcpDiskUpdateRetryServiceTest {
     }
 
     @Test
+    void testInsertDiskReturnsOperationResourceWhenSubmittedAndDoesNotPoll() throws Exception {
+        Disk disk = new Disk().setName(DISK_NAME);
+        Operation operation = new Operation().setName("op-1");
+        when(gcpDiskInsertOperationService.insertDiskIfAbsent(eq(compute), eq(PROJECT_ID), eq(ZONE), eq(disk), eq(DISK_NAME)))
+                .thenReturn(new GcpDiskInsertOutcome(Optional.of(operation), Optional.empty()));
+
+        GcpCreateDiskParameters params = new GcpCreateDiskParameters(compute, PROJECT_ID, ZONE, DISK_NAME, disk, createDiskResource(), authenticatedContext);
+        Optional<CloudResource> result = underTest.insertDisk(params);
+
+        assertTrue(result.isPresent());
+        assertEquals("op-1", GcpOperationUtil.getOperationInfo(result.get()).operationId());
+        verifyNoInteractions(statusCheckFactory, syncPollingScheduler);
+    }
+
+    @Test
+    void testInsertDiskReusesUnattachedExistingDiskWithEmptyResult() throws Exception {
+        Disk disk = new Disk().setName(DISK_NAME);
+        when(gcpDiskInsertOperationService.insertDiskIfAbsent(eq(compute), eq(PROJECT_ID), eq(ZONE), eq(disk), eq(DISK_NAME)))
+                .thenReturn(new GcpDiskInsertOutcome(Optional.empty(), Optional.of(new Disk().setName(DISK_NAME))));
+
+        GcpCreateDiskParameters params = new GcpCreateDiskParameters(compute, PROJECT_ID, ZONE, DISK_NAME, disk, createDiskResource(), authenticatedContext);
+        Optional<CloudResource> result = underTest.insertDisk(params);
+
+        assertTrue(result.isEmpty());
+        verifyNoInteractions(statusCheckFactory, syncPollingScheduler);
+    }
+
+    @Test
+    void testInsertDiskReusesExistingDiskAttachedToTargetInstance() throws Exception {
+        Disk disk = new Disk().setName(DISK_NAME);
+        Disk existing = new Disk().setName(DISK_NAME)
+                .setUsers(List.of("https://www.googleapis.com/compute/v1/projects/test-project/zones/us-central1-a/instances/" + INSTANCE_ID));
+        when(gcpDiskInsertOperationService.insertDiskIfAbsent(eq(compute), eq(PROJECT_ID), eq(ZONE), eq(disk), eq(DISK_NAME)))
+                .thenReturn(new GcpDiskInsertOutcome(Optional.empty(), Optional.of(existing)));
+
+        GcpCreateDiskParameters params = new GcpCreateDiskParameters(compute, PROJECT_ID, ZONE, DISK_NAME, disk, createDiskResource(), authenticatedContext);
+        Optional<CloudResource> result = underTest.insertDisk(params);
+
+        assertTrue(result.isEmpty());
+        verifyNoInteractions(statusCheckFactory, syncPollingScheduler);
+    }
+
+    @Test
+    void testInsertDiskFailsWhenExistingDiskAttachedToDifferentInstance() throws Exception {
+        Disk disk = new Disk().setName(DISK_NAME);
+        Disk existing = new Disk().setName(DISK_NAME)
+                .setUsers(List.of("https://www.googleapis.com/compute/v1/projects/test-project/zones/us-central1-a/instances/other-instance"));
+        when(gcpDiskInsertOperationService.insertDiskIfAbsent(eq(compute), eq(PROJECT_ID), eq(ZONE), eq(disk), eq(DISK_NAME)))
+                .thenReturn(new GcpDiskInsertOutcome(Optional.empty(), Optional.of(existing)));
+
+        GcpCreateDiskParameters params = new GcpCreateDiskParameters(compute, PROJECT_ID, ZONE, DISK_NAME, disk, createDiskResource(), authenticatedContext);
+
+        CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class, () -> underTest.insertDisk(params));
+        assertTrue(exception.getMessage().contains("different instance"));
+        verifyNoInteractions(statusCheckFactory, syncPollingScheduler);
+    }
+
+    @Test
+    void testInsertDiskRetriesOnTransientGoogleError() throws Exception {
+        Disk disk = new Disk().setName(DISK_NAME);
+        when(gcpDiskInsertOperationService.insertDiskIfAbsent(eq(compute), eq(PROJECT_ID), eq(ZONE), eq(disk), eq(DISK_NAME)))
+                .thenThrow(googleException(HttpStatus.SC_SERVICE_UNAVAILABLE, "Service Unavailable"));
+
+        GcpCreateDiskParameters params = new GcpCreateDiskParameters(compute, PROJECT_ID, ZONE, DISK_NAME, disk, createDiskResource(), authenticatedContext);
+
+        assertThrows(CloudConnectorException.class, () -> underTest.insertDisk(params));
+        verifyNoInteractions(statusCheckFactory, syncPollingScheduler);
+    }
+
+    @Test
+    void testInsertDiskFailsFastOnNonTransientGoogleError() throws Exception {
+        Disk disk = new Disk().setName(DISK_NAME);
+        when(gcpDiskInsertOperationService.insertDiskIfAbsent(eq(compute), eq(PROJECT_ID), eq(ZONE), eq(disk), eq(DISK_NAME)))
+                .thenThrow(googleException(HttpStatus.SC_BAD_REQUEST, "Bad Request"));
+
+        GcpCreateDiskParameters params = new GcpCreateDiskParameters(compute, PROJECT_ID, ZONE, DISK_NAME, disk, createDiskResource(), authenticatedContext);
+
+        assertThrows(CloudbreakServiceException.class, () -> underTest.insertDisk(params));
+        verifyNoInteractions(statusCheckFactory, syncPollingScheduler);
+    }
+
+    @Test
+    void testDeleteDiskReturnsOperationResourceAndDoesNotPoll() throws Exception {
+        when(compute.disks()).thenReturn(disks);
+        Compute.Disks.Delete delete = mock(Compute.Disks.Delete.class);
+        Disk disk = new Disk().setName(DISK_NAME);
+        when(disks.delete(eq(PROJECT_ID), eq(ZONE), eq(DISK_NAME))).thenReturn(delete);
+        when(delete.execute()).thenReturn(new Operation().setName("op-2"));
+
+        GcpCreateDiskParameters params = new GcpCreateDiskParameters(compute, PROJECT_ID, ZONE, DISK_NAME, disk, createDiskResource(), authenticatedContext);
+        Optional<CloudResource> result = underTest.deleteDisk(params);
+
+        assertTrue(result.isPresent());
+        assertEquals("op-2", GcpOperationUtil.getOperationInfo(result.get()).operationId());
+        verify(disks).delete(eq(PROJECT_ID), eq(ZONE), eq(DISK_NAME));
+        verifyNoInteractions(statusCheckFactory, syncPollingScheduler);
+    }
+
+    @Test
+    void testDeleteDiskReturnsEmptyWhenDiskNotFound() throws Exception {
+        when(compute.disks()).thenReturn(disks);
+        Compute.Disks.Delete delete = mock(Compute.Disks.Delete.class);
+        Disk disk = new Disk().setName(DISK_NAME);
+        when(disks.delete(eq(PROJECT_ID), eq(ZONE), eq(DISK_NAME))).thenReturn(delete);
+        when(delete.execute()).thenThrow(googleException(HttpStatus.SC_NOT_FOUND, "Not Found"));
+
+        GcpCreateDiskParameters params = new GcpCreateDiskParameters(compute, PROJECT_ID, ZONE, DISK_NAME, disk, createDiskResource(), authenticatedContext);
+        Optional<CloudResource> result = underTest.deleteDisk(params);
+
+        assertTrue(result.isEmpty());
+        verifyNoInteractions(statusCheckFactory, syncPollingScheduler);
+    }
+
+    @Test
+    void testPollDiskOperationsSchedulesOncePerBatch() throws Exception {
+        CloudResource op1 = createDiskResource();
+        CloudResource op2 = createDiskResource();
+        PollTask<List<CloudResourceStatus>> task = mock(PollTask.class);
+        when(statusCheckFactory.newPollResourceTask(eq(underTest), eq(authenticatedContext), eq(List.of(op1, op2)), eq(gcpContext), eq(true)))
+                .thenReturn(task);
+
+        underTest.pollDiskOperations(authenticatedContext, gcpContext, List.of(op1, op2));
+
+        verify(syncPollingScheduler).schedule(task);
+    }
+
+    @Test
+    void testPollDiskOperationsReturnsEmptyWhenNothingToPoll() throws Exception {
+        List<CloudResourceStatus> result = underTest.pollDiskOperations(authenticatedContext, gcpContext, List.of());
+
+        assertTrue(result.isEmpty());
+        verifyNoInteractions(statusCheckFactory, syncPollingScheduler);
+    }
+
+    @Test
     void testCheckResourcesDelegatesToAttachedDiskSetCheck() {
         List<CloudResource> resources = List.of();
 
         List<CloudResourceStatus> result = underTest.checkResources(gcpContext, authenticatedContext, resources);
 
         assertEquals(0, result.size());
+    }
+
+    private GoogleJsonResponseException googleException(int statusCode, String statusMessage) {
+        GoogleJsonError details = new GoogleJsonError();
+        details.setCode(statusCode);
+        return new GoogleJsonResponseException(new HttpResponseException.Builder(statusCode, statusMessage, new HttpHeaders()), details);
     }
 
     private CloudResource createDiskResource() {
@@ -121,6 +276,7 @@ class GcpDiskUpdateRetryServiceTest {
                 .withType(ResourceType.GCP_ATTACHED_DISKSET)
                 .withStatus(CommonStatus.CREATED)
                 .withName("name")
+                .withInstanceId(INSTANCE_ID)
                 .withAvailabilityZone(ZONE)
                 .withParameters(parameters)
                 .build();

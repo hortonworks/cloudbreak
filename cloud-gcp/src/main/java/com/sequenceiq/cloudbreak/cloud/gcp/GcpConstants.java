@@ -23,6 +23,12 @@ public class GcpConstants implements CloudConstant {
 
     public static final String DEVICE_NAME_PREFIX = "/dev/disk/by-id/google-";
 
+    public static final String INSTANCE_URL_SEGMENT = "/instances/";
+
+    // Stable label applied to add-volumes data disks so orphaned disks from a previously failed/rerun attempt can be
+    // rediscovered and reused even though the disk name itself carries a per-attempt date hash.
+    public static final String CREATED_FOR_LABEL = "created-for";
+
     public GcpConstants() {
     }
 

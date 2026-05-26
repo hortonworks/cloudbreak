@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
@@ -30,18 +31,25 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.client.GcpComputeFactory;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContextBuilder;
+import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpCreateDiskParameters;
+import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpDiskCreationSpec;
+import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpDiskPlan;
 import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpDiskUpdateRetryService;
+import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpDiskUpdateService;
 import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpResizeDiskParameters;
+import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpReusedDisk;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
+import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeRecord;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.util.IndexingDeviceNameGenerator;
+import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.common.model.VolumeInfo;
 
@@ -58,6 +66,9 @@ public class GcpResourceVolumeConnector implements ResourceVolumeConnector {
 
     @Inject
     private GcpContextBuilder gcpContextBuilder;
+
+    @Inject
+    private GcpDiskUpdateService gcpDiskUpdateService;
 
     @Inject
     private GcpDiskUpdateRetryService gcpDiskUpdateRetryService;
@@ -148,6 +159,114 @@ public class GcpResourceVolumeConnector implements ResourceVolumeConnector {
     }
 
     /**
+     * Creates GCP additional/data disks for an add-volumes request. GCP has no batch disk-create API, so each disk
+     * insert is submitted concurrently on the {@code intermediateBuilderExecutor} via {@link GcpDiskUpdateRetryService}
+     * and all the resulting operations are polled together afterwards, so no executor thread is blocked on polling. The
+     * path is idempotent: {@link GcpDiskUpdateService#planDisks} reclaims still-unattached orphaned disks from a
+     * previous attempt (labeled with {@link GcpConstants#CREATED_FOR_LABEL}) and only creates the remainder, and each
+     * insert checks for an existing same-named disk. This is all-or-nothing: if any disk fails after retries (or the
+     * poll fails), every disk submitted in this call is best-effort deleted (rolled back) and the request fails, so a
+     * rerun starts from a clean state. Local SSD volumes cannot be created via add volumes on GCP.
+     */
+    @Override
+    public List<CloudResource> createVolumes(AuthenticatedContext authenticatedContext, Group group, VolumeSetAttributes.Volume volumeRequest,
+            CloudStack cloudStack, int volToAddPerInstance, List<CloudResource> cloudResources) throws CloudbreakServiceException {
+        if (GcpDiskType.LOCAL_SSD.value().equals(volumeRequest.getType())) {
+            throw new CloudbreakServiceException("Local SSD volumes cannot be created via add volumes on GCP.");
+        }
+        GcpContext gcpContext = gcpContextBuilder.contextInit(authenticatedContext.getCloudContext(), authenticatedContext, null, true);
+        Compute compute = gcpContext.getCompute();
+        String projectId = gcpContext.getProjectId();
+        List<CloudResource> targetResources = gcpDiskUpdateService.resolveVolumeSets(group, authenticatedContext, cloudResources);
+        GcpDiskPlan plan = gcpDiskUpdateService.planDisks(authenticatedContext, group, volumeRequest, cloudStack, volToAddPerInstance,
+                targetResources, compute);
+        List<GcpDiskCreationSpec> specs = plan.toCreate();
+        List<GcpReusedDisk> reused = plan.reused();
+        LOGGER.info("Provisioning GCP disks for group {} in project {}: creating {}, reusing {} orphaned disk(s).",
+                group.getName(), projectId, specs.size(), reused.size());
+
+        Map<Future<Optional<CloudResource>>, GcpDiskCreationSpec> futures = new LinkedHashMap<>();
+        for (GcpDiskCreationSpec spec : specs) {
+            GcpCreateDiskParameters params = new GcpCreateDiskParameters(compute, projectId, spec.zone(), spec.disk().getName(), spec.disk(),
+                    spec.resource(), authenticatedContext);
+            futures.put(intermediateBuilderExecutor.submit(() -> gcpDiskUpdateRetryService.insertDisk(params)), spec);
+        }
+
+        List<CloudResource> operationsToPoll = new ArrayList<>();
+        Map<String, String> failedDisks = new LinkedHashMap<>();
+        awaitDiskInserts(futures, operationsToPoll, failedDisks);
+
+        String failureMessage = buildInsertFailureMessage(failedDisks);
+        if (failureMessage == null) {
+            try {
+                gcpDiskUpdateRetryService.pollDiskOperations(authenticatedContext, gcpContext, operationsToPoll);
+            } catch (Exception ex) {
+                LOGGER.warn("Polling of GCP disk create operations failed.", ex);
+                Throwable cause = ex.getCause() != null ? ex.getCause() : ex;
+                failureMessage = "Failed while waiting for GCP disk create operations to finish: " + cause.getMessage();
+            }
+        }
+
+        if (failureMessage != null) {
+            GcpContext deleteContext = gcpContextBuilder.contextInit(authenticatedContext.getCloudContext(), authenticatedContext, null, false);
+            rollbackDisks(specs, compute, projectId, authenticatedContext, deleteContext);
+            throw new CloudbreakServiceException(failureMessage
+                    + " All newly created disks were rolled back, so the add volumes flow can be safely rerun.");
+        }
+
+        for (GcpDiskCreationSpec spec : specs) {
+            recordVolume(spec.resource(), spec.volume());
+        }
+        for (GcpReusedDisk reusedDisk : reused) {
+            recordVolume(reusedDisk.resource(), reusedDisk.volume());
+        }
+        LOGGER.info("Successfully provisioned GCP disks for group {} ({} created, {} reused).", group.getName(), specs.size(), reused.size());
+        return targetResources;
+    }
+
+    private void recordVolume(CloudResource resource, VolumeSetAttributes.Volume volume) {
+        VolumeSetAttributes attributes = resource.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
+        attributes.getVolumes().add(volume);
+        resource.setStatus(CommonStatus.CREATED);
+    }
+
+    private String buildInsertFailureMessage(Map<String, String> failedDisks) {
+        if (failedDisks.isEmpty()) {
+            return null;
+        }
+        String firstCause = failedDisks.values().stream().filter(StringUtils::isNotBlank).findFirst().orElse(null);
+        String message = String.format("Failed to create the following GCP disks: %s.", String.join(", ", failedDisks.keySet()));
+        if (firstCause != null) {
+            message += String.format(" First failure cause: %s", firstCause);
+        }
+        return message;
+    }
+
+    /**
+     * Waits for every submitted insert and collects the operation-aware resources to poll and the failures with their
+     * cause. Runs on the calling thread, so {@code operationsToPoll} and {@code failedDisks} are mutated single-threaded;
+     * the worker tasks never touch them. A reused existing disk yields an empty result (nothing to poll).
+     */
+    private void awaitDiskInserts(Map<Future<Optional<CloudResource>>, GcpDiskCreationSpec> futures, List<CloudResource> operationsToPoll,
+            Map<String, String> failedDisks) {
+        LOGGER.debug("Waiting for volume insert requests ({} futures)", futures.size());
+        for (Map.Entry<Future<Optional<CloudResource>>, GcpDiskCreationSpec> entry : futures.entrySet()) {
+            String diskName = entry.getValue().disk().getName();
+            try {
+                entry.getKey().get().ifPresent(operationsToPoll::add);
+            } catch (InterruptedException ex) {
+                Thread.currentThread().interrupt();
+                LOGGER.warn("Interrupted while waiting for GCP disk {} insert.", diskName, ex);
+                failedDisks.put(diskName, ex.getMessage());
+            } catch (Exception ex) {
+                LOGGER.warn("Failed to create GCP disk {}.", diskName, ex);
+                Throwable cause = ex.getCause() != null ? ex.getCause() : ex;
+                failedDisks.put(diskName, cause.getMessage());
+            }
+        }
+    }
+
+    /**
      * Maps every disk id to its {@link DiskResizeTarget}, parsing {@link VolumeSetAttributes} once per disk-set
      * resource. The zone is resolved from {@link VolumeSetAttributes#getAvailabilityZone()} (the source of truth used
      * by the GCP insert/delete calls), falling back to the resource-level column (e.g. older stacks) and left
@@ -174,6 +293,41 @@ public class GcpResourceVolumeConnector implements ResourceVolumeConnector {
             }
         }
         return volumeIdToTarget;
+    }
+
+    /**
+     * Deletes every disk submitted in this call so a failed create-volumes request leaves no orphaned disks behind.
+     * All specs are attempted (not only the ones whose insert polled clean), because a disk whose insert succeeded but
+     * whose poll then failed would otherwise be leaked. Deletes are submitted concurrently and their operations polled
+     * together afterwards. Best-effort: {@code deleteDisk} tolerates a missing disk, so specs that were never actually
+     * created are harmless; a failed deletion is logged and does not abort the remaining cleanup.
+     */
+    private void rollbackDisks(List<GcpDiskCreationSpec> specs, Compute compute, String projectId,
+            AuthenticatedContext authenticatedContext, GcpContext deleteContext) {
+        if (specs.isEmpty()) {
+            return;
+        }
+        LOGGER.info("Rolling back {} GCP disk(s) after a failed create-volumes request.", specs.size());
+        Map<Future<Optional<CloudResource>>, String> deleteFutures = new LinkedHashMap<>();
+        for (GcpDiskCreationSpec spec : specs) {
+            String diskName = spec.disk().getName();
+            GcpCreateDiskParameters params = new GcpCreateDiskParameters(compute, projectId, spec.zone(), diskName, spec.disk(),
+                    spec.resource(), authenticatedContext);
+            deleteFutures.put(intermediateBuilderExecutor.submit(() -> gcpDiskUpdateRetryService.deleteDisk(params)), diskName);
+        }
+        List<CloudResource> deleteOperations = new ArrayList<>();
+        for (Map.Entry<Future<Optional<CloudResource>>, String> entry : deleteFutures.entrySet()) {
+            try {
+                entry.getKey().get().ifPresent(deleteOperations::add);
+            } catch (Exception ex) {
+                LOGGER.warn("Failed to roll back GCP disk {} during create-volumes cleanup.", entry.getValue(), ex);
+            }
+        }
+        try {
+            gcpDiskUpdateRetryService.pollDiskOperations(authenticatedContext, deleteContext, deleteOperations);
+        } catch (Exception ex) {
+            LOGGER.warn("Failed while waiting for GCP disk rollback deletions to finish.", ex);
+        }
     }
 
     @Override

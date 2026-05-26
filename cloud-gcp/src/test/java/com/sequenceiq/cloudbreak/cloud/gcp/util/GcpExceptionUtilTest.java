@@ -54,4 +54,29 @@ class GcpExceptionUtilTest {
                 new HttpResponseException.Builder(HttpStatus.SC_INTERNAL_SERVER_ERROR, "Internal Server Error", new HttpHeaders()), details);
         assertFalse(GcpExceptionUtil.resourceNotFoundException(exception));
     }
+
+    @Test
+    void testConflictExceptionWhenCodeIsConflict() {
+        GoogleJsonError details = new GoogleJsonError();
+        details.set("code", HttpStatus.SC_CONFLICT);
+        GoogleJsonResponseException exception = new GoogleJsonResponseException(
+                new HttpResponseException.Builder(HttpStatus.SC_CONFLICT, "Conflict", new HttpHeaders()), details);
+        assertTrue(GcpExceptionUtil.conflictException(exception));
+    }
+
+    @Test
+    void testConflictExceptionWhenCodeIsOther() {
+        GoogleJsonError details = new GoogleJsonError();
+        details.set("code", HttpStatus.SC_NOT_FOUND);
+        GoogleJsonResponseException exception = new GoogleJsonResponseException(
+                new HttpResponseException.Builder(HttpStatus.SC_NOT_FOUND, "Not Found", new HttpHeaders()), details);
+        assertFalse(GcpExceptionUtil.conflictException(exception));
+    }
+
+    @Test
+    void testConflictExceptionWhenDetailsAreNull() {
+        GoogleJsonResponseException exception = new GoogleJsonResponseException(
+                new HttpResponseException.Builder(HttpStatus.SC_CONFLICT, "Conflict", new HttpHeaders()), null);
+        assertFalse(GcpExceptionUtil.conflictException(exception));
+    }
 }

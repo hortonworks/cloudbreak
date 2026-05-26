@@ -22,9 +22,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.Callable;
 
-import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,10 +34,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.task.AsyncTaskExecutor;
 
-import com.google.api.client.googleapis.json.GoogleJsonError;
-import com.google.api.client.googleapis.json.GoogleJsonResponseException;
-import com.google.api.client.http.HttpHeaders;
-import com.google.api.client.http.HttpResponseException;
 import com.google.api.services.compute.Compute;
 import com.google.api.services.compute.Compute.Disks;
 import com.google.api.services.compute.Compute.Disks.Delete;
@@ -52,6 +48,8 @@ import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpDiskType;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.service.CustomGcpDiskEncryptionService;
+import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpDiskInsertOperationService;
+import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpDiskInsertOperationService.GcpDiskInsertOutcome;
 import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpResourceNameService;
 import com.sequenceiq.cloudbreak.cloud.gcp.service.checker.OperationInfo;
 import com.sequenceiq.cloudbreak.cloud.gcp.service.checker.OperationType;
@@ -96,6 +94,9 @@ public class GcpAttachedDiskResourceBuilderTest {
 
     @Mock
     private CustomGcpDiskEncryptionService customGcpDiskEncryptionService;
+
+    @Mock
+    private GcpDiskInsertOperationService gcpDiskInsertOperationService;
 
     @Mock
     private AsyncTaskExecutor intermediateBuilderExecutor;
@@ -230,11 +231,9 @@ public class GcpAttachedDiskResourceBuilderTest {
 
     @Test
     void testBuildWithDiskEncryption() throws Exception {
-        GoogleJsonError details = new GoogleJsonError();
-        details.set("code", HttpStatus.SC_NOT_FOUND);
-        GoogleJsonResponseException exception = new GoogleJsonResponseException(
-                new HttpResponseException.Builder(HttpStatus.SC_NOT_FOUND, "Not Found", new HttpHeaders()), details);
-        when(get.execute()).thenThrow(exception);
+        Operation operation = new Operation().setName("operation");
+        when(gcpDiskInsertOperationService.insertDiskIfAbsent(any(), anyString(), anyString(), any(Disk.class), anyString()))
+                .thenReturn(new GcpDiskInsertOutcome(Optional.of(operation), Optional.empty()));
 
         CustomerEncryptionKey encryptionKey = new CustomerEncryptionKey();
         encryptionKey.setRawKey("rawKey==");
@@ -260,7 +259,8 @@ public class GcpAttachedDiskResourceBuilderTest {
 
     @Test
     void testBuildWithDiskEncryptionWithExistingDisk() throws Exception {
-        when(get.execute()).thenReturn(new Disk());
+        when(gcpDiskInsertOperationService.insertDiskIfAbsent(any(), anyString(), anyString(), any(Disk.class), anyString()))
+                .thenReturn(new GcpDiskInsertOutcome(Optional.empty(), Optional.of(new Disk())));
 
         List<CloudResource> build = underTest.build(context, cloudInstance, privateId, auth, group, buildableResource, cloudStack);
 
@@ -271,8 +271,8 @@ public class GcpAttachedDiskResourceBuilderTest {
         assertEquals(CommonStatus.CREATED, resource.getStatus());
         assertEquals("disk", resource.getName());
 
+        verify(gcpDiskInsertOperationService, atLeastOnce()).insertDiskIfAbsent(any(), anyString(), anyString(), any(Disk.class), anyString());
         verify(insert, never()).execute();
-
     }
 
     @Test

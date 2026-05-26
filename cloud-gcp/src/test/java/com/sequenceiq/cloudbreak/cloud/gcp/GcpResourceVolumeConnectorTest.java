@@ -6,10 +6,12 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -18,6 +20,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 
@@ -31,14 +34,20 @@ import org.springframework.core.task.AsyncTaskExecutor;
 
 import com.google.api.services.compute.Compute;
 import com.google.api.services.compute.model.AttachedDisk;
+import com.google.api.services.compute.model.Disk;
 import com.google.api.services.compute.model.Instance;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.client.GcpComputeFactory;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContextBuilder;
+import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpCreateDiskParameters;
+import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpDiskCreationSpec;
+import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpDiskPlan;
 import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpDiskUpdateRetryService;
+import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpDiskUpdateService;
 import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpResizeDiskParameters;
+import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpReusedDisk;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
@@ -70,16 +79,10 @@ class GcpResourceVolumeConnectorTest {
     private GcpStackUtil gcpStackUtil;
 
     @Mock
-    private AuthenticatedContext authenticatedContext;
-
-    @Mock
-    private CloudCredential cloudCredential;
-
-    @Mock
-    private Compute compute;
-
-    @Mock
     private GcpContextBuilder gcpContextBuilder;
+
+    @Mock
+    private GcpDiskUpdateService gcpDiskUpdateService;
 
     @Mock
     private GcpDiskUpdateRetryService gcpDiskUpdateRetryService;
@@ -88,16 +91,28 @@ class GcpResourceVolumeConnectorTest {
     private AsyncTaskExecutor intermediateBuilderExecutor;
 
     @Mock
-    private GcpContext gcpContext;
+    private AuthenticatedContext authenticatedContext;
 
     @Mock
     private CloudContext cloudContext;
 
-    private void mockContextAndExecutor() {
+    @Mock
+    private GcpContext gcpContext;
+
+    @Mock
+    private CloudCredential cloudCredential;
+
+    @Mock
+    private Compute compute;
+
+    private void mockContext() {
         when(authenticatedContext.getCloudContext()).thenReturn(cloudContext);
         when(gcpContextBuilder.contextInit(cloudContext, authenticatedContext, null, true)).thenReturn(gcpContext);
         when(gcpContext.getCompute()).thenReturn(compute);
         when(gcpContext.getProjectId()).thenReturn(PROJECT_ID);
+    }
+
+    private void mockExecutorRunsInline() {
         when(intermediateBuilderExecutor.submit(any(Callable.class))).thenAnswer(invocation -> {
             Callable<?> callable = invocation.getArgument(0);
             CompletableFuture<Object> future = new CompletableFuture<>();
@@ -108,6 +123,11 @@ class GcpResourceVolumeConnectorTest {
             }
             return future;
         });
+    }
+
+    private void mockContextAndExecutor() {
+        mockContext();
+        mockExecutorRunsInline();
     }
 
     @Test
@@ -184,6 +204,129 @@ class GcpResourceVolumeConnectorTest {
         verify(gcpDiskUpdateRetryService, never()).resizeDisk(any(GcpResizeDiskParameters.class), any(GcpContext.class));
     }
 
+    @Test
+    void testUpdateDiskVolumesIgnoresNonDiskSetResources() throws Exception {
+        mockContextAndExecutor();
+        CloudResource nonDiskSetResource = CloudResource.builder()
+                .withType(ResourceType.GCP_INSTANCE)
+                .withStatus(CommonStatus.CREATED)
+                .withName("instance-resource")
+                .withAvailabilityZone(ZONE)
+                .withParameters(new HashMap<>())
+                .build();
+
+        underTest.updateDiskVolumes(authenticatedContext, List.of("i1v1"), null, 200,
+                List.of(nonDiskSetResource, createZonedDiskResource("i1v1", 100)));
+
+        ArgumentCaptor<GcpResizeDiskParameters> captor = ArgumentCaptor.forClass(GcpResizeDiskParameters.class);
+        verify(gcpDiskUpdateRetryService).resizeDisk(captor.capture(), eq(gcpContext));
+        assertEquals("i1v1", captor.getValue().diskName());
+    }
+
+    @Test
+    void createVolumesRejectsLocalSsd() {
+        VolumeSetAttributes.Volume volumeRequest = new VolumeSetAttributes.Volume(null, "/dev/sdc", 100, LOCAL_SSD.value(), CloudVolumeUsageType.GENERAL);
+        CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class,
+                () -> underTest.createVolumes(authenticatedContext, mock(Group.class), volumeRequest, mock(CloudStack.class), 1, List.of()));
+        assertEquals("Local SSD volumes cannot be created via add volumes on GCP.", exception.getMessage());
+    }
+
+    @Test
+    void createVolumesCreatesDisksAndAddsVolumesToAttributes() throws Exception {
+        mockContext();
+        mockExecutorRunsInline();
+        VolumeSetAttributes attributes = new VolumeSetAttributes.Builder().withVolumes(new ArrayList<>()).build();
+        CloudResource resource = createVolumeSetResource("instance1", attributes);
+        resource.setStatus(CommonStatus.REQUESTED);
+        VolumeSetAttributes.Volume vol0 = new VolumeSetAttributes.Volume("d0", "/dev/disk/by-id/google-d0", 100, "pd-ssd", CloudVolumeUsageType.GENERAL);
+        VolumeSetAttributes.Volume vol1 = new VolumeSetAttributes.Volume("d1", "/dev/disk/by-id/google-d1", 100, "pd-ssd", CloudVolumeUsageType.GENERAL);
+        List<GcpDiskCreationSpec> specs = List.of(
+                new GcpDiskCreationSpec(resource, vol0, new Disk().setName("d0"), ZONE),
+                new GcpDiskCreationSpec(resource, vol1, new Disk().setName("d1"), ZONE));
+        Group group = mock(Group.class);
+        CloudStack cloudStack = mock(CloudStack.class);
+        VolumeSetAttributes.Volume volumeRequest = new VolumeSetAttributes.Volume(null, "/dev/sdc", 100, "pd-ssd", CloudVolumeUsageType.GENERAL);
+        when(gcpDiskUpdateService.resolveVolumeSets(eq(group), eq(authenticatedContext), anyList())).thenReturn(List.of(resource));
+        when(gcpDiskUpdateService.planDisks(eq(authenticatedContext), eq(group), eq(volumeRequest), eq(cloudStack), eq(2), anyList(), eq(compute)))
+                .thenReturn(new GcpDiskPlan(specs, List.of()));
+        when(gcpDiskUpdateRetryService.insertDisk(any(GcpCreateDiskParameters.class))).thenReturn(Optional.of(resource));
+
+        List<CloudResource> result = underTest.createVolumes(authenticatedContext, group, volumeRequest, cloudStack, 2, List.of(resource));
+
+        assertEquals(List.of(resource), result);
+        assertEquals(List.of(vol0, vol1), attributes.getVolumes());
+        assertEquals(CommonStatus.CREATED, resource.getStatus());
+        verify(gcpDiskUpdateRetryService, times(2)).insertDisk(any(GcpCreateDiskParameters.class));
+        // all inserts are polled together once, after the futures complete
+        verify(gcpDiskUpdateRetryService).pollDiskOperations(eq(authenticatedContext), eq(gcpContext), anyList());
+        verify(gcpDiskUpdateRetryService, never()).deleteDisk(any(GcpCreateDiskParameters.class));
+    }
+
+    @Test
+    void createVolumesReusesOrphanVolumesWithoutCreating() throws Exception {
+        mockContext();
+        VolumeSetAttributes attributes = new VolumeSetAttributes.Builder().withVolumes(new ArrayList<>()).build();
+        CloudResource resource = createVolumeSetResource("instance1", attributes);
+        resource.setStatus(CommonStatus.REQUESTED);
+        VolumeSetAttributes.Volume reusedVolume = new VolumeSetAttributes.Volume("orphan-1", "/dev/disk/by-id/google-orphan-1", 100, "pd-ssd",
+                CloudVolumeUsageType.GENERAL);
+        Group group = mock(Group.class);
+        CloudStack cloudStack = mock(CloudStack.class);
+        VolumeSetAttributes.Volume volumeRequest = new VolumeSetAttributes.Volume(null, "/dev/sdc", 100, "pd-ssd", CloudVolumeUsageType.GENERAL);
+        when(gcpDiskUpdateService.resolveVolumeSets(eq(group), eq(authenticatedContext), anyList())).thenReturn(List.of(resource));
+        when(gcpDiskUpdateService.planDisks(eq(authenticatedContext), eq(group), eq(volumeRequest), eq(cloudStack), eq(1), anyList(), eq(compute)))
+                .thenReturn(new GcpDiskPlan(List.of(), List.of(new GcpReusedDisk(resource, reusedVolume))));
+
+        List<CloudResource> result = underTest.createVolumes(authenticatedContext, group, volumeRequest, cloudStack, 1, List.of(resource));
+
+        assertEquals(List.of(resource), result);
+        assertEquals(List.of(reusedVolume), attributes.getVolumes());
+        assertEquals(CommonStatus.CREATED, resource.getStatus());
+        verify(gcpDiskUpdateRetryService, never()).insertDisk(any(GcpCreateDiskParameters.class));
+    }
+
+    @Test
+    void createVolumesRollsBackCreatedDisksWhenOneFails() throws Exception {
+        mockContext();
+        mockExecutorRunsInline();
+        VolumeSetAttributes attributes = new VolumeSetAttributes.Builder().withVolumes(new ArrayList<>()).build();
+        CloudResource resource = createVolumeSetResource("instance1", attributes);
+        VolumeSetAttributes.Volume vol0 = new VolumeSetAttributes.Volume("d0", "/dev/disk/by-id/google-d0", 100, "pd-ssd", CloudVolumeUsageType.GENERAL);
+        VolumeSetAttributes.Volume vol1 = new VolumeSetAttributes.Volume("d1", "/dev/disk/by-id/google-d1", 100, "pd-ssd", CloudVolumeUsageType.GENERAL);
+        List<GcpDiskCreationSpec> specs = List.of(
+                new GcpDiskCreationSpec(resource, vol0, new Disk().setName("d0"), ZONE),
+                new GcpDiskCreationSpec(resource, vol1, new Disk().setName("d1"), ZONE));
+        Group group = mock(Group.class);
+        CloudStack cloudStack = mock(CloudStack.class);
+        VolumeSetAttributes.Volume volumeRequest = new VolumeSetAttributes.Volume(null, "/dev/sdc", 100, "pd-ssd", CloudVolumeUsageType.GENERAL);
+        when(gcpDiskUpdateService.resolveVolumeSets(eq(group), eq(authenticatedContext), anyList())).thenReturn(List.of(resource));
+        when(gcpDiskUpdateService.planDisks(eq(authenticatedContext), eq(group), eq(volumeRequest), eq(cloudStack), eq(2), anyList(), eq(compute)))
+                .thenReturn(new GcpDiskPlan(specs, List.of()));
+        when(gcpDiskUpdateRetryService.insertDisk(any(GcpCreateDiskParameters.class))).thenAnswer(invocation -> {
+            GcpCreateDiskParameters params = invocation.getArgument(0);
+            if ("d1".equals(params.diskName())) {
+                throw new IOException("boom");
+            }
+            return Optional.of(resource);
+        });
+
+        GcpContext deleteContext = mock(GcpContext.class);
+        when(gcpContextBuilder.contextInit(cloudContext, authenticatedContext, null, false)).thenReturn(deleteContext);
+        when(gcpDiskUpdateRetryService.deleteDisk(any(GcpCreateDiskParameters.class))).thenReturn(Optional.empty());
+
+        CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class,
+                () -> underTest.createVolumes(authenticatedContext, group, volumeRequest, cloudStack, 2, List.of(resource)));
+
+        assertTrue(exception.getMessage().contains("d1"));
+        assertTrue(exception.getMessage().contains("boom"), "The aggregated exception should surface the underlying GCP failure cause");
+        assertTrue(attributes.getVolumes().isEmpty(), "No volumes should be added to the resource on an all-or-nothing failure");
+        verify(gcpDiskUpdateRetryService, times(2)).insertDisk(any(GcpCreateDiskParameters.class));
+        // every disk submitted in the call is rolled back (not only the ones that polled clean)
+        verify(gcpDiskUpdateRetryService, times(2)).deleteDisk(any(GcpCreateDiskParameters.class));
+        // the rollback deletions are polled against a build=false delete context so the poll reports DELETED
+        verify(gcpDiskUpdateRetryService).pollDiskOperations(eq(authenticatedContext), eq(deleteContext), anyList());
+    }
+
     private CloudResource createDiskResourceWithAttributeZone(String volumeId, int size) {
         VolumeSetAttributes.Volume volume = new VolumeSetAttributes.Volume(volumeId, "/dev/sdb", size, "pd-ssd", CloudVolumeUsageType.GENERAL);
         CloudResource cloudResource = CloudResource.builder()
@@ -211,25 +354,6 @@ class GcpResourceVolumeConnectorTest {
                 .build();
         cloudResource.setTypedAttributes(createVolumeSetAttributes(List.of(volume)));
         return cloudResource;
-    }
-
-    @Test
-    void testUpdateDiskVolumesIgnoresNonDiskSetResources() throws Exception {
-        mockContextAndExecutor();
-        CloudResource nonDiskSetResource = CloudResource.builder()
-                .withType(ResourceType.GCP_INSTANCE)
-                .withStatus(CommonStatus.CREATED)
-                .withName("instance-resource")
-                .withAvailabilityZone(ZONE)
-                .withParameters(new HashMap<>())
-                .build();
-
-        underTest.updateDiskVolumes(authenticatedContext, List.of("i1v1"), null, 200,
-                List.of(nonDiskSetResource, createZonedDiskResource("i1v1", 100)));
-
-        ArgumentCaptor<GcpResizeDiskParameters> captor = ArgumentCaptor.forClass(GcpResizeDiskParameters.class);
-        verify(gcpDiskUpdateRetryService).resizeDisk(captor.capture(), eq(gcpContext));
-        assertEquals("i1v1", captor.getValue().diskName());
     }
 
     private CloudResource createZonedDiskResource(String volumeId, int size) {

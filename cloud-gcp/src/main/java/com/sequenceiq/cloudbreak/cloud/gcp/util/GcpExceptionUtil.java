@@ -15,4 +15,10 @@ public class GcpExceptionUtil {
                 && ex.getDetails().containsKey(ERROR_CODE)
                 && (ex.getDetails().get(ERROR_CODE).equals(HttpStatus.SC_NOT_FOUND) || ex.getDetails().get(ERROR_CODE).equals(HttpStatus.SC_FORBIDDEN));
     }
+
+    public static boolean conflictException(GoogleJsonResponseException ex) {
+        return ex.getDetails() != null
+                && ex.getDetails().containsKey(ERROR_CODE)
+                && ex.getDetails().get(ERROR_CODE).equals(HttpStatus.SC_CONFLICT);
+    }
 }

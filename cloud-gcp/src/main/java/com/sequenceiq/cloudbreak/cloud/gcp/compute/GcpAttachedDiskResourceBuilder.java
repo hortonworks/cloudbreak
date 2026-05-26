@@ -24,7 +24,6 @@ import org.springframework.stereotype.Component;
 import com.google.api.client.auth.oauth2.TokenResponseException;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.compute.Compute;
-import com.google.api.services.compute.Compute.Disks.Insert;
 import com.google.api.services.compute.model.Disk;
 import com.google.api.services.compute.model.Operation;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -34,6 +33,8 @@ import com.sequenceiq.cloudbreak.cloud.gcp.GcpDiskType;
 import com.sequenceiq.cloudbreak.cloud.gcp.GcpResourceException;
 import com.sequenceiq.cloudbreak.cloud.gcp.context.GcpContext;
 import com.sequenceiq.cloudbreak.cloud.gcp.service.CustomGcpDiskEncryptionService;
+import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpDiskInsertOperationService;
+import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpDiskInsertOperationService.GcpDiskInsertOutcome;
 import com.sequenceiq.cloudbreak.cloud.gcp.service.GcpResourceNameService;
 import com.sequenceiq.cloudbreak.cloud.gcp.service.checker.OperationInfo;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpLabelUtil;
@@ -68,6 +69,9 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
 
     @Inject
     private CustomGcpDiskEncryptionService customGcpDiskEncryptionService;
+
+    @Inject
+    private GcpDiskInsertOperationService gcpDiskInsertOperationService;
 
     @Inject
     private PersistenceNotifier resourceNotifier;
@@ -152,7 +156,6 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
             List<OperationInfo> syncedOperations = Collections.synchronizedList(new ArrayList<>());
             VolumeSetAttributes volumeSetAttributes = volumeSetResource.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
             Map<String, String> labels = gcpLabelUtil.createLabelsFromTags(cloudStack);
-            String zoneName = context.getLocation().getAvailabilityZone().getValue();
 
             for (VolumeSetAttributes.Volume volume : volumeSetAttributes.getVolumes()) {
                 if (GcpDiskType.LOCAL_SSD.value().equals(volume.getType())) {
@@ -160,32 +163,21 @@ public class GcpAttachedDiskResourceBuilder extends AbstractGcpComputeBuilder {
                     continue;
                 }
                 Disk disk = createDisk(projectId, volume, labels, volumeSetAttributes);
-
-                Optional<Disk> diskFromProvider = fetchFromProvider(() ->
-                                compute.disks().get(context.getProjectId(), zoneName, disk.getName()).execute(),
-                        volumeSetResource.getName());
-
-                if (diskFromProvider.isEmpty()) {
-                    customGcpDiskEncryptionService.addEncryptionKeyToDisk(template, disk);
-                    Future<Void> submit = intermediateBuilderExecutor.submit(() -> {
-                        Insert insDisk = compute.disks().insert(projectId, volumeSetAttributes.getAvailabilityZone(), disk);
-                        try {
-                            Operation operation = insDisk.execute();
-                            syncedOperations.add(new OperationInfo(GcpOperationUtil.getOperationType(operation), operation.getName()));
-                            if (operation.getHttpErrorStatusCode() != null) {
-                                throw new GcpResourceException(operation.getHttpErrorMessage(), resourceType(), disk.getName());
-                            }
-                        } catch (TokenResponseException e) {
-                            throw gcpStackUtil.getMissingServiceAccountKeyError(e, projectId);
-                        } catch (GoogleJsonResponseException e) {
-                            throw new GcpResourceException(checkException(e), resourceType(), disk.getName());
-                        }
-                        return null;
-                    });
-                    futures.add(submit);
-                } else {
-                    LOGGER.info("Disk '{}' already exists, using it.", disk.getName());
-                }
+                customGcpDiskEncryptionService.addEncryptionKeyToDisk(template, disk);
+                Future<Void> submit = intermediateBuilderExecutor.submit(() -> {
+                    try {
+                        GcpDiskInsertOutcome outcome = gcpDiskInsertOperationService.insertDiskIfAbsent(compute, projectId,
+                                volumeSetAttributes.getAvailabilityZone(), disk, volumeSetResource.getName());
+                        outcome.operation().ifPresent(operation ->
+                                syncedOperations.add(new OperationInfo(GcpOperationUtil.getOperationType(operation), operation.getName())));
+                    } catch (TokenResponseException e) {
+                        throw gcpStackUtil.getMissingServiceAccountKeyError(e, projectId);
+                    } catch (GoogleJsonResponseException e) {
+                        throw new GcpResourceException(checkException(e), resourceType(), disk.getName());
+                    }
+                    return null;
+                });
+                futures.add(submit);
             }
             volumeSetResource.putParameter(GcpOperationUtil.OPERATION_INFOS, syncedOperations);
         }
