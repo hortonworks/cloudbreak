@@ -123,5 +123,10 @@ public class SpiStoreService {
         SpiDto spiDto = read(mockUuid);
         Group group = spiDto.getCloudStack().getGroups().stream().filter(g -> g.getName().equals(groupName)).findFirst().orElseThrow();
         group.getInstances().forEach(i -> i.getTemplate().setFlavor(instanceType));
+        // Reflect the scaled instance type on the stored VM metadata too. The metadata holds the real instance ids,
+        // so this is what MockMetadataCollector.collectInstanceTypes reads back to verify a vertical scale.
+        spiDto.getVmMetaDataStatuses().stream()
+                .filter(md -> groupName.equals(md.getCloudVmInstanceStatus().getCloudInstance().getTemplate().getGroupName()))
+                .forEach(md -> md.getCloudVmInstanceStatus().getCloudInstance().getTemplate().setFlavor(instanceType));
     }
 }

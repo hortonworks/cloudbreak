@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.instancegroup.template.InstanceTemplateV4Request;
+import com.sequenceiq.common.api.type.OrchestratorType;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -21,8 +22,16 @@ public class SdxVerticalScaleByCrnAction implements Action<SdxTestDto, SdxClient
 
     private final String verticalScaleKey;
 
+    private final OrchestratorType orchestratorType;
+
     public SdxVerticalScaleByCrnAction(String verticalScaleKey) {
         this.verticalScaleKey = verticalScaleKey;
+        this.orchestratorType = OrchestratorType.ALL_AT_ONCE;
+    }
+
+    public SdxVerticalScaleByCrnAction(String verticalScaleKey, OrchestratorType orchestratorType) {
+        this.verticalScaleKey = verticalScaleKey;
+        this.orchestratorType = orchestratorType;
     }
 
     @Override
@@ -48,6 +57,7 @@ public class SdxVerticalScaleByCrnAction implements Action<SdxTestDto, SdxClient
 
         verticalScaleRequest.setGroup(verticalScalingTestDto.getGroupName());
         verticalScaleRequest.setTemplate(instanceTemplateRequest);
+        verticalScaleRequest.setOrchestratorType(orchestratorType);
         return verticalScaleRequest;
     }
 }

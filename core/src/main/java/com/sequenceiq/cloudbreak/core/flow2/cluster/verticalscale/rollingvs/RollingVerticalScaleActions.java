@@ -246,7 +246,7 @@ public class RollingVerticalScaleActions {
 
                 if (!failedInstancesWithErrorMessage.isEmpty()) {
                     rollingVerticalScaleService.failedVerticalScale(stackId, failedInstancesWithErrorMessage.keySet().stream().toList(),
-                            failedInstancesWithErrorMessage.values().stream().toString());
+                            String.join(", ", failedInstancesWithErrorMessage.values()));
                     String errorMessage = String.format("Vertical scale instances failed for instances [%s] with errors [%s]",
                             failedInstancesWithErrorMessage.keySet(), failedInstancesWithErrorMessage.values());
                     LOGGER.error(errorMessage);

@@ -122,7 +122,7 @@ auth:
     mitigate.release.failure.7218P1100.enabled: false
     zookeeper.to.kraft.migration.enabled: true
     tlsv13.only.enabled: false
-    verticalscale.ha.enabled: false
+    verticalscale.ha.enabled: true
     cloudprivatelinks.enabled: true
     prefer.minifi.logging.enabled: true
     personal.view.cb.by.right.enabled: true

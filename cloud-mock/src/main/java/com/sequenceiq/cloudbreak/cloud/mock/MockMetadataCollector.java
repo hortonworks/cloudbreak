@@ -65,8 +65,26 @@ public class MockMetadataCollector implements MetadataCollector {
 
     @Override
     public InstanceTypeMetadata collectInstanceTypes(AuthenticatedContext ac, List<String> instanceIds) {
-        Map<String, String> instanceTypes = instanceIds.stream().collect(Collectors.toMap(i -> i, i -> LARGE));
+        Map<String, String> instanceIdToFlavor = collectInstanceIdToFlavor(ac);
+        Map<String, String> instanceTypes = instanceIds.stream()
+                .collect(Collectors.toMap(i -> i, i -> instanceIdToFlavor.getOrDefault(i, LARGE)));
         return new InstanceTypeMetadata(instanceTypes);
+    }
+
+    private Map<String, String> collectInstanceIdToFlavor(AuthenticatedContext ac) {
+        try {
+            CloudVmMetaDataStatus[] metadataStatuses = mockUrlFactory
+                    .get(ac, "/spi/cloud_instance_statuses")
+                    .get(CloudVmMetaDataStatus[].class);
+            return Arrays.stream(metadataStatuses)
+                    .map(md -> md.getCloudVmInstanceStatus().getCloudInstance())
+                    .filter(instance -> instance.getInstanceId() != null && instance.getTemplate() != null
+                            && instance.getTemplate().getFlavor() != null)
+                    .collect(Collectors.toMap(CloudInstance::getInstanceId, instance -> instance.getTemplate().getFlavor(), (first, second) -> first));
+        } catch (Exception e) {
+            LOGGER.warn("Failed to collect instance types from mock spi, falling back to default instance type '{}'", LARGE, e);
+            return Map.of();
+        }
     }
 
     @Override

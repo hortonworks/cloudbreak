@@ -25,6 +25,7 @@ import com.sequenceiq.it.cloudbreak.dto.verticalscale.VerticalScalingTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.microservice.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.testcase.mock.clouderamanager.AbstractClouderaManagerTest;
+import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
 public class FullVerticalScaleTest extends AbstractClouderaManagerTest {
 
@@ -68,24 +69,60 @@ public class FullVerticalScaleTest extends AbstractClouderaManagerTest {
             then = "the cluster should be vertical scale successfully")
     public void testCreateNewRegularDistroXCluster(MockedTestContext testContext) {
 
+        String targetGroup = "master";
         String freeipaVerticalScaleKey = "freeipaVerticalScaleKey";
         String sdxVerticalScaleKey = "sdxVerticalScaleKey";
         String distroxVerticalScaleKey = "distroxVerticalScaleKey";
         String xlargeInstanceType = "xlarge";
         testContext
+                .given(freeipaVerticalScaleKey, VerticalScalingTestDto.class)
+                .withGroup(targetGroup)
+                .withInstanceType(xlargeInstanceType)
+                .given(sdxVerticalScaleKey, VerticalScalingTestDto.class)
+                .withGroup(targetGroup)
+                .withInstanceType(xlargeInstanceType)
+                .given(distroxVerticalScaleKey, VerticalScalingTestDto.class)
+                .withGroup(targetGroup)
+                .withInstanceType(xlargeInstanceType)
+                // With the verticalscale.ha entitlement Data Lake/Data Hub vertical scaling is supported only on an available
+                // cluster, so scale them while everything (including FreeIPA) is still running. Scale the Data Lake first.
+                .given(SdxInternalTestDto.class)
+                .await(SdxClusterStatusResponse.RUNNING)
+                .when(sdxTestClient.verticalScale(sdxVerticalScaleKey))
+                .awaitForFlow()
+                .then((tc, dto, client) -> {
+                    CloudbreakClient cbClient = tc.getMicroserviceClient(CloudbreakClient.class);
+                    StackV4Response stackV4Response = cbClient.getDefaultClient(testContext).stackV4Endpoint().getByCrn(0L, dto.getCrn(), Set.of());
+                    String instanceType = stackV4Response.getInstanceGroups().stream().filter(ig -> ig.getName().equals(targetGroup))
+                            .findFirst().orElseThrow(() -> new TestFailException(
+                                    "Instance group '" + targetGroup + "' not found in stack response"))
+                            .getTemplate().getInstanceType();
+                    if (!instanceType.equals(xlargeInstanceType)) {
+                        throw new TestFailException("Vertical scaled instance type should be the same: " + instanceType);
+                    }
+                    return dto;
+                })
+                // Then scale the Data Hub, also while it is still running.
+                .given(DistroXTestDto.class)
+                .await(STACK_AVAILABLE)
+                .when(distroXClient.verticalScale(distroxVerticalScaleKey))
+                .awaitForFlow()
+                .then((tc, dto, client) -> {
+                    StackV4Response stackV4Response = client.getDefaultClient(testContext).distroXV1Endpoint().getByName(dto.getName(), Set.of());
+                    String instanceType = stackV4Response.getInstanceGroups().stream().filter(ig -> ig.getName().equals(targetGroup))
+                            .findFirst()
+                            .orElseThrow(() -> new TestFailException(
+                                    "Instance group '" + targetGroup + "' not found in stack response"))
+                            .getTemplate().getInstanceType();
+                    if (!instanceType.equals(xlargeInstanceType)) {
+                        throw new TestFailException("Vertical scaled instance type should be the same: " + instanceType);
+                    }
+                    return dto;
+                })
+                // FreeIPA vertical scaling still requires a stopped cluster, so stop the environment last and scale it.
                 .given(EnvironmentTestDto.class)
                 .when(environmentTestClient.stop())
                 .await(ENV_STOPPED)
-                .given(freeipaVerticalScaleKey, VerticalScalingTestDto.class)
-                .withGroup("master")
-                .withInstanceType(xlargeInstanceType)
-                .given(sdxVerticalScaleKey, VerticalScalingTestDto.class)
-                .withGroup("master")
-                .withInstanceType(xlargeInstanceType)
-                .given(distroxVerticalScaleKey, VerticalScalingTestDto.class)
-                .withGroup("master")
-                .withInstanceType(xlargeInstanceType)
-                .given(EnvironmentTestDto.class)
                 .when(environmentTestClient.verticalScale(freeipaVerticalScaleKey))
                 .awaitForFlow()
                 .given(FreeIpaTestDto.class)
@@ -95,31 +132,6 @@ public class FullVerticalScaleTest extends AbstractClouderaManagerTest {
                     String instanceType = freeIpaResponse.getInstanceGroups().getFirst().getInstanceTemplate().getInstanceType();
                     if (!instanceType.equals(xlargeInstanceType)) {
                         throw new TestFailException("Vertical scaled instance type should be the same, freeipa instance type " + instanceType);
-                    }
-                    return dto;
-                })
-                .given(DistroXTestDto.class)
-                .when(distroXClient.verticalScale(distroxVerticalScaleKey))
-                .awaitForFlow()
-                .then((tc, dto, client) -> {
-                    StackV4Response stackV4Response = client.getDefaultClient(testContext).distroXV1Endpoint().getByName(dto.getName(), Set.of());
-                    String instanceType = stackV4Response.getInstanceGroups().stream().filter(ig -> ig.getName().equals("master"))
-                            .findFirst().get().getTemplate().getInstanceType();
-                    if (!instanceType.equals(xlargeInstanceType)) {
-                        throw new TestFailException("Vertical scaled instance type should be the same: " + instanceType);
-                    }
-                    return dto;
-                })
-                .given(SdxInternalTestDto.class)
-                .when(sdxTestClient.verticalScale(distroxVerticalScaleKey))
-                .awaitForFlow()
-                .then((tc, dto, client) -> {
-                    CloudbreakClient cbClient = tc.getMicroserviceClient(CloudbreakClient.class);
-                    StackV4Response stackV4Response = cbClient.getDefaultClient(testContext).stackV4Endpoint().getByCrn(0L, dto.getCrn(), Set.of());
-                    String instanceType = stackV4Response.getInstanceGroups().stream().filter(ig -> ig.getName().equals("master"))
-                            .findFirst().get().getTemplate().getInstanceType();
-                    if (!instanceType.equals(xlargeInstanceType)) {
-                        throw new TestFailException("Vertical scaled instance type should be the same: " + instanceType);
                     }
                     return dto;
                 })

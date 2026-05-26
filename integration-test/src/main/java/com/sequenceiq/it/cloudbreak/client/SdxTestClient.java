@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskType;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
+import com.sequenceiq.common.api.type.OrchestratorType;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxAddDisksAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxAutotlsCertRotationAction;
@@ -345,5 +346,9 @@ public class SdxTestClient {
 
     public Action<SdxTestDto, SdxClient> validateKraftMigrationStatus(String desiredStatus) {
         return new SdxMigrationFromZookeeperToKraftStatusAction(desiredStatus);
+    }
+
+    public Action<SdxTestDto, SdxClient> oneByOneVerticalScaleByCrn(String verticalScaleKey) {
+        return new SdxVerticalScaleByCrnAction(verticalScaleKey, OrchestratorType.ONE_BY_ONE);
     }
 }

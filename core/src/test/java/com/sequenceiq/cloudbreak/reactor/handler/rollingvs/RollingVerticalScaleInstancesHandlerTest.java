@@ -7,8 +7,10 @@ import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -16,6 +18,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -49,6 +52,8 @@ import com.sequenceiq.cloudbreak.eventbus.Event;
 import com.sequenceiq.cloudbreak.eventbus.EventBus;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.RollingVerticalScaleInstancesRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.RollingVerticalScaleInstancesResult;
+import com.sequenceiq.cloudbreak.service.retry.Retry;
+import com.sequenceiq.cloudbreak.service.retry.RetryService;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.flow.event.EventSelectorUtil;
@@ -77,6 +82,9 @@ class RollingVerticalScaleInstancesHandlerTest {
 
     @Mock
     private CoreVerticalScaleService coreVerticalScaleService;
+
+    @Mock
+    private RetryService retry;
 
     @Mock
     private EventBus eventBus;
@@ -128,6 +136,8 @@ class RollingVerticalScaleInstancesHandlerTest {
         lenient().when(cloudConnector.metadata()).thenReturn(metadataCollector);
         lenient().when(cloudConnector.authentication()).thenReturn(authenticator);
         lenient().when(authenticator.authenticate(eq(cloudContext), eq(cloudCredential))).thenReturn(authenticatedContext);
+        lenient().doAnswer(invocation -> invocation.getArgument(0, Supplier.class).get())
+                .when(retry).testWith2SecDelayMax15Times(any(Supplier.class));
     }
 
     @Test
@@ -151,8 +161,7 @@ class RollingVerticalScaleInstancesHandlerTest {
         verify(stackUpscaleService).verticalScale(any(), eq(request), eq(cloudConnector), eq(GROUP_NAME));
         verify(metadataCollector).collectInstanceTypes(any(), anyList());
         verify(rollingVerticalScaleService).finishVerticalScaleInstances(eq(STACK_ID), anySet(), any(StackVerticalScaleV4Request.class));
-        // failedVerticalScaleInstances is always called, even with empty list when all instances succeed
-        verify(rollingVerticalScaleService).failedVerticalScaleInstances(eq(STACK_ID), anyList(), any(StackVerticalScaleV4Request.class), eq(""));
+        verify(rollingVerticalScaleService, never()).failedVerticalScaleInstances(eq(STACK_ID), anyList(), any(StackVerticalScaleV4Request.class), anyString());
 
         ArgumentCaptor<Event<RollingVerticalScaleInstancesResult>> eventCaptor = ArgumentCaptor.forClass(Event.class);
         verify(eventBus).notify(eq(EventSelectorUtil.selector(RollingVerticalScaleInstancesResult.class)), eventCaptor.capture());
@@ -211,6 +220,48 @@ class RollingVerticalScaleInstancesHandlerTest {
         Event<RollingVerticalScaleInstancesResult> capturedEvent = eventCaptor.getValue();
         assertThat(capturedEvent.getData().getResourceId()).isEqualTo(STACK_ID);
         assertThat(capturedEvent.getData().getRollingVerticalScaleResult()).isNotNull();
+    }
+
+    @Test
+    void testAcceptRetriesUntilInstanceTypePropagated() throws Exception {
+        // GIVEN: the cloud provider is eventually consistent - the first metadata read still reports the OLD
+        // instance type, only a later read reflects the requested type.
+        List<CloudResourceStatus> resourceStatuses = createSuccessfulResourceStatuses();
+        Map<String, String> staleMetadata = createInstanceTypeMetadata("m5.large");
+        Map<String, String> freshMetadata = createInstanceTypeMetadata(REQUESTED_INSTANCE_TYPE);
+
+        when(stackUpscaleService.verticalScale(any(), eq(request), eq(cloudConnector), eq(GROUP_NAME)))
+                .thenReturn(resourceStatuses);
+        when(metadataCollector.collectInstanceTypes(any(), anyList()))
+                .thenReturn(new InstanceTypeMetadata(staleMetadata))
+                .thenReturn(new InstanceTypeMetadata(freshMetadata));
+        when(stackUpscaleService.getInstanceStorageInfo(any(), anyString(), any()))
+                .thenReturn(new InstanceStoreMetadata());
+        lenient().doNothing().when(coreVerticalScaleService).updateTemplateWithVerticalScaleInformation(any(), any(), anyInt(), anyInt());
+        // Override the pass-through stub from setUp: one retry on ActionFailedException, matching the two
+        // collectInstanceTypes stubs above (stale → fresh).
+        doAnswer(invocation -> {
+            Supplier<?> supplier = invocation.getArgument(0, Supplier.class);
+            try {
+                return supplier.get();
+            } catch (Retry.ActionFailedException ignored) {
+                return supplier.get();
+            }
+        }).when(retry).testWith2SecDelayMax15Times(any(Supplier.class));
+
+        // WHEN
+        underTest.accept(Event.wrap(request));
+
+        // THEN: metadata is re-read until it reflects the requested type, and both instances end up scaled.
+        verify(stackUpscaleService).verticalScale(any(), eq(request), eq(cloudConnector), eq(GROUP_NAME));
+        verify(metadataCollector, times(2)).collectInstanceTypes(any(), anyList());
+        verify(rollingVerticalScaleService).finishVerticalScaleInstances(eq(STACK_ID), anySet(), any(StackVerticalScaleV4Request.class));
+        verify(rollingVerticalScaleService, never()).failedVerticalScaleInstances(eq(STACK_ID), anyList(), any(StackVerticalScaleV4Request.class), anyString());
+
+        ArgumentCaptor<Event<RollingVerticalScaleInstancesResult>> eventCaptor = ArgumentCaptor.forClass(Event.class);
+        verify(eventBus).notify(eq(EventSelectorUtil.selector(RollingVerticalScaleInstancesResult.class)), eventCaptor.capture());
+        assertThat(eventCaptor.getValue().getData().getResourceId()).isEqualTo(STACK_ID);
+        assertThat(eventCaptor.getValue().getData().getRollingVerticalScaleResult()).isNotNull();
     }
 
     private List<CloudResource> createCloudResources(List<String> instanceIds) {
