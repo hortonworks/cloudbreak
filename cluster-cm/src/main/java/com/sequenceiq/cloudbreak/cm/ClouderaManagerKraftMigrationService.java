@@ -1,8 +1,12 @@
 package com.sequenceiq.cloudbreak.cm;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import jakarta.inject.Inject;
 
@@ -12,11 +16,17 @@ import org.springframework.stereotype.Service;
 
 import com.cloudera.api.swagger.ClustersResourceApi;
 import com.cloudera.api.swagger.RoleConfigGroupsResourceApi;
+import com.cloudera.api.swagger.RolesResourceApi;
 import com.cloudera.api.swagger.ServicesResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiCommand;
+import com.cloudera.api.swagger.model.ApiHostRef;
+import com.cloudera.api.swagger.model.ApiRole;
+import com.cloudera.api.swagger.model.ApiRoleList;
+import com.cloudera.api.swagger.model.ApiRoleState;
 import com.cloudera.api.swagger.model.ApiService;
+import com.cloudera.api.swagger.model.ApiServiceRef;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.cm.commands.SyncApiCommandRetriever;
@@ -33,6 +43,10 @@ public class ClouderaManagerKraftMigrationService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerKraftMigrationService.class);
 
     private static final String KAFKA_SERVICE_TYPE = "KAFKA";
+
+    private static final String ZOOKEEPER_SERVICE_TYPE = "ZOOKEEPER";
+
+    private static final String KRAFT_ROLE_FILTER = "type==KRAFT";
 
     private static final String KRAFT_MIGRATION_COMMAND_NAME = "KRaftMigrationCommand";
 
@@ -210,5 +224,94 @@ public class ClouderaManagerKraftMigrationService {
             throw new CloudbreakException(
                     "Timeout during waiting for command API to be available (Zookeeper to KRaft migration rollback)");
         }
+    }
+
+    /**
+     * Prepares a cluster for ZooKeeper-to-KRaft migration when the stack has no dedicated KRaft host group.
+     * <p>
+     * For each host running a ZooKeeper role, this method ensures a matching {@code KRaft} role exists on the Kafka
+     * service in Cloudera Manager. New roles are created in {@link ApiRoleState#STOPPED} state so controllers are
+     * provisioned but not started; starting and migration are handled by later flow steps
+     * ({@link #enableZookeeperMigrationMode}, {@link #migrateZookeeperToKraft}, and related commands).
+     * <p>
+     * The operation is idempotent: hosts that already have a KRaft role on Kafka are skipped, and the method returns
+     * without calling CM when every Zookeeper host is already covered or when no Zookeeper roles are present.
+     */
+    public void installKraftAsStopped(ApiClient client, StackDtoDelegate stackDtoDelegate) throws CloudbreakException {
+        String clusterName = stackDtoDelegate.getCluster().getName();
+        ServicesResourceApi servicesResourceApi = clouderaManagerApiFactory.getServicesResourceApi(client);
+        RolesResourceApi rolesResourceApi = clouderaManagerApiFactory.getRolesResourceApi(client);
+
+        try {
+            String kafkaServiceName = requireServiceName(clusterName, KAFKA_SERVICE_TYPE, servicesResourceApi);
+            String zookeeperServiceName = requireServiceName(clusterName, ZOOKEEPER_SERVICE_TYPE, servicesResourceApi);
+
+            List<ApiHostRef> zookeeperHosts = hostRefsFromRoles(rolesResourceApi, clusterName, zookeeperServiceName, null);
+            LOGGER.debug("Found {} Zookeeper host(s) for cluster {}", zookeeperHosts.size(), clusterName);
+            if (zookeeperHosts.isEmpty()) {
+                LOGGER.debug("No Zookeeper hosts found, skipping KRaft role creation.");
+                return;
+            }
+
+            Set<String> hostsWithKraftRole = hostnamesFromRoles(rolesResourceApi, clusterName, kafkaServiceName, KRAFT_ROLE_FILTER);
+            List<ApiHostRef> hostsNeedingKraftRole = zookeeperHosts.stream()
+                    .filter(host -> host.getHostname() != null && !hostsWithKraftRole.contains(host.getHostname()))
+                    .toList();
+            if (hostsNeedingKraftRole.isEmpty()) {
+                LOGGER.debug("KRaft roles already exist on all required host(s), skipping role creation.");
+                return;
+            }
+
+            ApiRoleList kraftRoleList = buildStoppedKraftRoles(clusterName, kafkaServiceName, hostsNeedingKraftRole);
+            LOGGER.info("Creating stopped KRaft role(s) on Kafka service {} for host(s): {}",
+                    kafkaServiceName, hostsNeedingKraftRole.stream().map(ApiHostRef::getHostname).toList());
+            rolesResourceApi.createRoles(clusterName, kafkaServiceName, kraftRoleList);
+        } catch (ClouderaManagerOperationFailedException cmOpFailedExc) {
+            LOGGER.warn("CM operation failed due to: {}", cmOpFailedExc.getMessage(), cmOpFailedExc);
+            throw new CloudbreakException(cmOpFailedExc);
+        } catch (ApiException e) {
+            LOGGER.warn("Exception occurred during communicating with CM - {}", e.getMessage(), e);
+            throw new CloudbreakException(e);
+        }
+    }
+
+    private String requireServiceName(String clusterName, String serviceType, ServicesResourceApi servicesResourceApi) {
+        return configService.getServiceName(clusterName, serviceType, servicesResourceApi)
+                .orElseThrow(() -> new ClouderaManagerOperationFailedException(String.format("Service of type: %s is not found", serviceType)));
+    }
+
+    private List<ApiHostRef> hostRefsFromRoles(RolesResourceApi rolesResourceApi, String clusterName, String serviceName, String filter)
+            throws ApiException {
+        return roleItems(rolesResourceApi, clusterName, serviceName, filter).stream()
+                .map(ApiRole::getHostRef)
+                .filter(Objects::nonNull)
+                .toList();
+    }
+
+    private Set<String> hostnamesFromRoles(RolesResourceApi rolesResourceApi, String clusterName, String serviceName, String filter)
+            throws ApiException {
+        return roleItems(rolesResourceApi, clusterName, serviceName, filter).stream()
+                .map(ApiRole::getHostRef)
+                .filter(Objects::nonNull)
+                .map(ApiHostRef::getHostname)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+    }
+
+    private List<ApiRole> roleItems(RolesResourceApi rolesResourceApi, String clusterName, String serviceName, String filter) throws ApiException {
+        return Optional.ofNullable(rolesResourceApi.readRoles(clusterName, serviceName, filter, DataView.FULL.name()).getItems())
+                .orElse(List.of());
+    }
+
+    private ApiRoleList buildStoppedKraftRoles(String clusterName, String kafkaServiceName, List<ApiHostRef> hosts) {
+        ApiRoleList kraftRoleList = new ApiRoleList();
+        hosts.forEach(host -> kraftRoleList.addItemsItem(new ApiRole()
+                .type(KRAFT_ROLE_TYPE)
+                .roleState(ApiRoleState.STOPPED)
+                .hostRef(host)
+                .serviceRef(new ApiServiceRef()
+                        .clusterName(clusterName)
+                        .serviceName(kafkaServiceName))));
+        return kraftRoleList;
     }
 }
