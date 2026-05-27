@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.database;
 
 public class DbOverrideVersion {
+
     private String minRuntimeVersion;
 
     private String engineVersion;

@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.service.database.DatabaseDefaultVersionProvider;
+import com.sequenceiq.cloudbreak.service.database.DatabaseProvisioningValidator;
 import com.sequenceiq.common.model.AzureDatabaseType;
 import com.sequenceiq.datalake.configuration.PlatformConfig;
 import com.sequenceiq.datalake.entity.SdxCluster;
@@ -46,6 +47,9 @@ public class SdxExternalDatabaseConfigurerTest {
 
     @Mock
     private DatabaseDefaultVersionProvider databaseDefaultVersionProvider;
+
+    @Mock
+    private DatabaseProvisioningValidator databaseProvisioningValidator;
 
     @Mock
     private AzureDatabaseAttributesService azureDatabaseAttributesService;
@@ -90,6 +94,7 @@ public class SdxExternalDatabaseConfigurerTest {
         assertFalse(sdxDatabase.isCreateDatabase());
         assertEquals(SdxDatabaseAvailabilityType.NONE, sdxDatabase.getDatabaseAvailabilityType());
         assertEquals("11", sdxDatabase.getDatabaseEngineVersion());
+        verifyNoInteractions(databaseProvisioningValidator);
     }
 
     @Test
@@ -106,6 +111,7 @@ public class SdxExternalDatabaseConfigurerTest {
         assertTrue(sdxDatabase.isCreateDatabase());
         assertEquals(SdxDatabaseAvailabilityType.HA, sdxDatabase.getDatabaseAvailabilityType());
         assertEquals("11", sdxDatabase.getDatabaseEngineVersion());
+        verify(databaseProvisioningValidator).validateForProvisioning("11", null);
     }
 
     @Test
@@ -142,6 +148,7 @@ public class SdxExternalDatabaseConfigurerTest {
         assertEquals(SdxDatabaseAvailabilityType.NONE, sdxDatabase.getDatabaseAvailabilityType());
         assertEquals("11", sdxDatabase.getDatabaseEngineVersion());
         verifyNoInteractions(azureDatabaseAttributesService);
+        verifyNoInteractions(databaseProvisioningValidator);
     }
 
     @Test

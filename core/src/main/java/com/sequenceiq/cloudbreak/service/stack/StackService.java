@@ -112,6 +112,7 @@ import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.ServiceEndpointCollector;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.database.DatabaseDefaultVersionProvider;
+import com.sequenceiq.cloudbreak.service.database.DatabaseProvisioningValidator;
 import com.sequenceiq.cloudbreak.service.database.DatabaseService;
 import com.sequenceiq.cloudbreak.service.decorator.StackResponseDecorator;
 import com.sequenceiq.cloudbreak.service.environment.credential.OpenSshPublicKeyValidator;
@@ -282,6 +283,9 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
 
     @Inject
     private DatabaseDefaultVersionProvider databaseDefaultVersionProvider;
+
+    @Inject
+    private DatabaseProvisioningValidator databaseProvisioningValidator;
 
     @Inject
     private DatabaseService databaseService;
@@ -718,9 +722,19 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
         String dbEngineVersion = databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntime(
                 stack.getStackVersion(), stack.getExternalDatabaseEngineVersion()
         );
+        if (shouldValidateExternalDatabaseProvisioning(stack, dbEngineVersion)) {
+            databaseProvisioningValidator.validateForProvisioning(dbEngineVersion, stack.getStackVersion());
+        }
         if (stack.getDatabase() != null) {
             stack.getDatabase().setExternalDatabaseEngineVersion(dbEngineVersion);
         }
+    }
+
+    private boolean shouldValidateExternalDatabaseProvisioning(Stack stack, String dbEngineVersion) {
+        return dbEngineVersion != null
+                && stack.getDatabase() != null
+                && stack.getDatabase().getExternalDatabaseAvailabilityType() != null
+                && !stack.getDatabase().getExternalDatabaseAvailabilityType().isEmbedded();
     }
 
     public StackViewService getStackViewService() {

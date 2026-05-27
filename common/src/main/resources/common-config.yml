@@ -160,6 +160,12 @@ cb:
         engineVersion: 14
       - minRuntimeVersion: 7.3.2
         engineVersion: 17
+    deprecatedVersions:
+      - minRuntimeVersion: 7.3.2
+        engineVersion: 11
+    eolDates:
+      11: "2023-11-09"
+      14: "2026-11-12"
 
 quartz:
   initialization:

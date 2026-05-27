@@ -18,6 +18,7 @@ import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.type.Versioned;
 import com.sequenceiq.cloudbreak.service.database.DatabaseDefaultVersionProvider;
+import com.sequenceiq.cloudbreak.service.database.DatabaseProvisioningValidator;
 import com.sequenceiq.cloudbreak.util.VersionComparator;
 import com.sequenceiq.common.model.AzureDatabaseType;
 import com.sequenceiq.datalake.configuration.PlatformConfig;
@@ -46,6 +47,9 @@ public class SdxExternalDatabaseConfigurer {
     private DatabaseDefaultVersionProvider databaseDefaultVersionProvider;
 
     @Inject
+    private DatabaseProvisioningValidator databaseProvisioningValidator;
+
+    @Inject
     private AzureDatabaseAttributesService azureDatabaseAttributesService;
 
     private final Comparator<Versioned> versionComparator;
@@ -64,6 +68,9 @@ public class SdxExternalDatabaseConfigurer {
                 databaseAvailabilityType);
         boolean singleServerRequested = azureDatabaseType != null && azureDatabaseType.isSingleServer();
         String dbEngineVersion = databaseDefaultVersionProvider.calculateDbVersionBasedOnRuntime(sdxCluster.getRuntime(), requestedDbEngineVersion);
+        if (dbEngineVersion != null && SdxDatabaseAvailabilityType.hasExternalDatabase(databaseAvailabilityType)) {
+            databaseProvisioningValidator.validateForProvisioning(dbEngineVersion, sdxCluster.getRuntime());
+        }
         SdxDatabase sdxDatabase = DatabaseParameterInitUtil.setupDatabaseInitParams(databaseAvailabilityType, dbEngineVersion);
         configureAzureDatabase(cloudPlatform, azureDatabaseType, internalDatabaseRequest, databaseRequest, sdxDatabase);
         LOGGER.debug("Set database availability type to {}, and engine version to {}", sdxDatabase.getDatabaseAvailabilityType(),

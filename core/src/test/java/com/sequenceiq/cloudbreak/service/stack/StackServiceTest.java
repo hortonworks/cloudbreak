@@ -101,6 +101,7 @@ import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.TlsSecurityService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.database.DatabaseDefaultVersionProvider;
+import com.sequenceiq.cloudbreak.service.database.DatabaseProvisioningValidator;
 import com.sequenceiq.cloudbreak.service.database.DatabaseService;
 import com.sequenceiq.cloudbreak.service.environment.credential.OpenSshPublicKeyValidator;
 import com.sequenceiq.cloudbreak.service.externaldatabase.AzureDatabaseServerParameterDecorator;
@@ -264,6 +265,9 @@ class StackServiceTest {
     private DatabaseDefaultVersionProvider databaseDefaultVersionProvider;
 
     @Mock
+    private DatabaseProvisioningValidator databaseProvisioningValidator;
+
+    @Mock
     private StatedImage statedImage;
 
     @Mock
@@ -360,6 +364,7 @@ class StackServiceTest {
         verify(stack).setStackVersion(stackVersion);
         verify(stackRepository, times(2)).save(stack);
         verify(stack).populateStackIdForComponents();
+        verifyNoInteractions(databaseProvisioningValidator);
         assertEquals(calculatedDbVersion, database.getExternalDatabaseEngineVersion());
     }
 
@@ -387,6 +392,7 @@ class StackServiceTest {
         verify(stack).setStackVersion(stackVersion);
         verify(stack).populateStackIdForComponents();
         verify(stackRepository, times(2)).save(stack);
+        verify(databaseProvisioningValidator).validateForProvisioning(calculatedDbVersion, stackVersion);
         assertEquals(calculatedDbVersion, database.getExternalDatabaseEngineVersion());
     }
 
@@ -466,6 +472,7 @@ class StackServiceTest {
         verify(stack).populateStackIdForComponents();
         verify(stackRepository, times(2)).save(stack);
         verify(databaseService, never()).save(any());
+        verifyNoInteractions(databaseProvisioningValidator);
     }
 
     @Test
