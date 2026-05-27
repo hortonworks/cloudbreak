@@ -1,10 +1,11 @@
 {%- from 'minifi/settings.sls' import minifi with context %}
 {%- from 'telemetry/settings.sls' import telemetry with context %}
-# CONFIGURED BY SALT - do not edit
 {% if providerPrefix != "databus" %}
 
+MiNiFi Config Version: 3
 Flow Controller:
-    name: minifi-logging
+  name: minifi-logging
+  comment: CONFIGURED BY SALT - do not edit
 Processors:
 {% for logfile in telemetry.logs %}
 {%- if not ("type" in logfile and logfile["type"] == "salt" and not minifi.dbusIncludeSaltLogs) %}
@@ -131,7 +132,7 @@ Processors:
 {%- elif minifi.providerPrefix == "gcs" %}
   - id: {{ salt['random.get_str'](32) | uuid }}
     name: UploadToProvider
-    class: org.apache.nifi.minifi.azure.processors.PutGCSObject
+    class: org.apache.nifi.minifi.gcp.processors.PutGCSObject
     scheduling strategy: EVENT_DRIVEN
     auto-terminated relationships list:
         - success
