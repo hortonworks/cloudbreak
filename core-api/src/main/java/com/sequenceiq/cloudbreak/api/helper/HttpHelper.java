@@ -19,14 +19,14 @@ public class HttpHelper {
     private RestClientFactory restClientFactory;
 
     public Pair<StatusType, Integer> getContentLength(String url) {
-        WebTarget target = restClientFactory.getOrCreateWithFollowRedirects().target(url);
+        WebTarget target = restClientFactory.getOrCreateWithFollowRedirectsAndSecureForS3(url).target(url);
         try (Response response = target.request().head()) {
             return new ImmutablePair<>(response.getStatusInfo(), response.getLength());
         }
     }
 
     public Pair<StatusType, String> getContent(String url) {
-        WebTarget target = restClientFactory.getOrCreateWithFollowRedirects().target(url);
+        WebTarget target = restClientFactory.getOrCreateWithFollowRedirectsAndSecureForS3(url).target(url);
         try (Response response = target.request().get()) {
             StatusType responseStatusInfo = response.getStatusInfo();
             return responseStatusInfo.getFamily().equals(Family.SUCCESSFUL)

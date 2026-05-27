@@ -217,7 +217,7 @@ public class CachedImageCatalogWrapperProviderTest {
         String path = getPath(CB_IMAGE_CATALOG_VALID_JSON);
         String catalogUrl = "http";
 
-        when(restClientFactory.getOrCreateWithFollowRedirects()).thenReturn(clientMock);
+        when(restClientFactory.getOrCreateWithFollowRedirectsAndSecureForS3(catalogUrl)).thenReturn(clientMock);
         when(clientMock.target(catalogUrl)).thenReturn(webTargetMock);
         when(webTargetMock.request()).thenReturn(builderMock);
         when(builderMock.get()).thenReturn(responseMock);
@@ -242,7 +242,7 @@ public class CachedImageCatalogWrapperProviderTest {
         String path = getPath(CB_IMAGE_CATALOG_VALID_JSON);
         String catalogUrl = "http";
 
-        when(restClientFactory.getOrCreateWithFollowRedirects()).thenReturn(clientMock);
+        when(restClientFactory.getOrCreateWithFollowRedirectsAndSecureForS3(catalogUrl)).thenReturn(clientMock);
         when(clientMock.target(catalogUrl)).thenReturn(webTargetMock);
         when(webTargetMock.request()).thenReturn(builderMock);
         when(builderMock.get()).thenReturn(responseMock);

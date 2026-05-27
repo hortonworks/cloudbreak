@@ -89,7 +89,7 @@ public class ImageCatalogProvider {
 
     private String readCatalogContent(String catalogUrl) throws IOException {
         if (catalogUrl.startsWith("http")) {
-            Client client = restClientFactory.getOrCreateWithFollowRedirects();
+            Client client = restClientFactory.getOrCreateWithFollowRedirectsAndSecureForS3(catalogUrl);
             WebTarget target = client.target(catalogUrl);
             Response response = target.request().get();
             return readResponse(target, response);
