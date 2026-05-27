@@ -84,9 +84,9 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudSshKey;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSshKeys;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
-import com.sequenceiq.cloudbreak.cloud.model.ConfigSpecification;
 import com.sequenceiq.cloudbreak.cloud.model.Coordinate;
 import com.sequenceiq.cloudbreak.cloud.model.DefaultPlatformDatabaseCapabilities;
+import com.sequenceiq.cloudbreak.cloud.model.DefaultVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.DisplayName;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStoreMetadata;
@@ -95,12 +95,9 @@ import com.sequenceiq.cloudbreak.cloud.model.PlatformDatabaseCapabilities;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.RegionCoordinateSpecification;
 import com.sequenceiq.cloudbreak.cloud.model.RegionCoordinateSpecifications;
-import com.sequenceiq.cloudbreak.cloud.model.RegionSpecification;
-import com.sequenceiq.cloudbreak.cloud.model.RegionsSpecification;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta.VmTypeMetaBuilder;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterConfig;
-import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
 import com.sequenceiq.cloudbreak.cloud.model.database.CloudDatabaseServerSslCertificate;
 import com.sequenceiq.cloudbreak.cloud.model.database.CloudDatabaseServerSslCertificateType;
 import com.sequenceiq.cloudbreak.cloud.model.database.CloudDatabaseServerSslCertificates;
@@ -186,8 +183,6 @@ public class AwsPlatformResources implements PlatformResources {
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsPlatformResources.class);
 
     private static final int UNAUTHORIZED = 403;
-
-    private static final String ENABLED_AVAILABILITY_ZONES_FILE = "enabled-availability-zones";
 
     private static final String POSTGRES = "postgres";
 
@@ -284,35 +279,12 @@ public class AwsPlatformResources implements PlatformResources {
     @PostConstruct
     public void init() {
         readEnabledRegionsAndAvailabilityZones();
-        regionDisplayNames = readRegionDisplayNames(resourceDefinition("zone-coordinates"));
-        regionCoordinates = readRegionCoordinates(resourceDefinition("zone-coordinates"));
+        regionDisplayNames = readRegionDisplayNames(resourceDefinition("enabled-regions"));
+        regionCoordinates = readRegionCoordinates(resourceDefinition("enabled-regions"));
     }
 
     public String resourceDefinition(String resource) {
         return cloudbreakResourceReaderService.resourceDefinition("aws", resource);
-    }
-
-    private void addConfig(VmTypeMetaBuilder builder, ConfigSpecification configSpecification) {
-        if (configSpecification.getVolumeParameterType().equals(VolumeParameterType.AUTO_ATTACHED.name())) {
-            builder.withAutoAttachedConfig(volumeParameterConfig(configSpecification));
-        } else if (configSpecification.getVolumeParameterType().equals(VolumeParameterType.EPHEMERAL.name())) {
-            builder.withEphemeralConfig(volumeParameterConfig(configSpecification));
-        } else if (configSpecification.getVolumeParameterType().equals(MAGNETIC.name())) {
-            builder.withMagneticConfig(volumeParameterConfig(configSpecification));
-        } else if (configSpecification.getVolumeParameterType().equals(VolumeParameterType.SSD.name())) {
-            builder.withSsdConfig(volumeParameterConfig(configSpecification));
-        } else if (configSpecification.getVolumeParameterType().equals(ST1.name())) {
-            builder.withSt1Config(volumeParameterConfig(configSpecification));
-        }
-    }
-
-    private VolumeParameterConfig volumeParameterConfig(ConfigSpecification configSpecification) {
-        return new VolumeParameterConfig(
-                VolumeParameterType.valueOf(configSpecification.getVolumeParameterType()),
-                Integer.valueOf(configSpecification.getMinimumSize()),
-                Integer.valueOf(configSpecification.getMaximumSize()),
-                Integer.valueOf(configSpecification.getMinimumNumber()),
-                configSpecification.getMaximumNumberWithLimit());
     }
 
     private Map<Region, DisplayName> readRegionDisplayNames(String displayNames) {
@@ -361,8 +333,7 @@ public class AwsPlatformResources implements PlatformResources {
                                 regionEntry.isPresent() ? regionEntry.get().getKey().value() : regionCoordinateSpecification.getDisplayName(),
                                 regionCoordinateSpecification.isK8sSupported(),
                                 regionCoordinateSpecification.getEntitlements(),
-                                regionCoordinateSpecification.getDefaultDbVmtype(),
-                                regionCoordinateSpecification.getDefaultArmDbVmtype(),
+                                regionCoordinateSpecification.getDefaultVmtypes(),
                                 cdpServices));
             }
         } catch (IOException ignored) {
@@ -373,10 +344,10 @@ public class AwsPlatformResources implements PlatformResources {
 
     private void readEnabledRegionsAndAvailabilityZones() {
         try {
-            String fileName = resourceDefinition(ENABLED_AVAILABILITY_ZONES_FILE);
-            RegionsSpecification regionCoordinateSpecifications = JsonUtil.readValue(fileName, RegionsSpecification.class);
+            String fileName = resourceDefinition("enabled-regions");
+            RegionCoordinateSpecifications regionCoordinateSpecifications = JsonUtil.readValue(fileName, RegionCoordinateSpecifications.class);
             enabledRegions = regionCoordinateSpecifications.getItems().stream()
-                    .map(RegionSpecification::getName)
+                    .map(RegionCoordinateSpecification::getName)
                     .map(Region::region)
                     .collect(Collectors.toSet());
             enabledAvailabilityZones = regionCoordinateSpecifications.getItems().stream()
@@ -614,11 +585,12 @@ public class AwsPlatformResources implements PlatformResources {
     @Override
     @Cacheable(cacheNames = "cloudResourceRegionCache", key = "{ #cloudCredential?.id, #region, #availabilityZonesNeeded }")
     public CloudRegions regions(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters,
-            boolean availabilityZonesNeeded) {
+                                boolean availabilityZonesNeeded) {
         AmazonEc2Client ec2Client = awsClient.createEc2Client(new AwsCredentialView(cloudCredential));
         Map<Region, List<AvailabilityZone>> regionListMap = new HashMap<>();
         Map<Region, String> displayNames = new HashMap<>();
         Map<Region, Coordinate> coordinates = new HashMap<>();
+        Map<Region, DefaultVmTypes> defaultVmtypesMap = new HashMap<>();
 
         DescribeRegionsResponse describeRegionsResponse = describeRegionsResponse(ec2Client);
         String defaultRegion = awsDefaultZoneProvider.getDefaultZone(cloudCredential);
@@ -635,12 +607,22 @@ public class AwsPlatformResources implements PlatformResources {
                 }
                 addDisplayName(displayNames, awsRegion);
                 addCoordinate(coordinates, awsRegion);
+                addDefaultVmtypes(defaultVmtypesMap, awsRegion);
             }
         }
         if (region != null && !Strings.isNullOrEmpty(region.value())) {
             defaultRegion = region.value();
         }
-        return new CloudRegions(regionListMap, displayNames, coordinates, defaultRegion, true);
+        return new CloudRegions(regionListMap, displayNames, coordinates, defaultVmtypesMap, defaultRegion, true);
+    }
+
+    private void addDefaultVmtypes(
+            Map<Region, DefaultVmTypes> defaultVmtypesMap,
+            software.amazon.awssdk.services.ec2.model.Region awsRegion) {
+        Coordinate coordinate = regionCoordinates.get(region(awsRegion.regionName()));
+        if (coordinate != null) {
+            defaultVmtypesMap.put(region(awsRegion.regionName()), coordinate.getDefaultVmtypes());
+        }
     }
 
     @Override
@@ -649,27 +631,20 @@ public class AwsPlatformResources implements PlatformResources {
         Map<Region, List<AvailabilityZone>> regionListMap = new HashMap<>();
         Map<Region, String> displayNames = new HashMap<>();
         Map<Region, Coordinate> coordinates = new HashMap<>();
+        Map<Region, DefaultVmTypes> defaultVmtypesMap = new HashMap<>();
 
         for (Entry<Region, Coordinate> enabledRegion : regionCoordinates.entrySet()) {
             regionListMap.put(enabledRegion.getKey(), List.of());
             Coordinate regionCoordinateSpecification = enabledRegion.getValue();
             displayNames.put(enabledRegion.getKey(), enabledRegion.getValue().getDisplayName());
-            Coordinate coordinate =  coordinate(
-                    regionCoordinateSpecification.getLongitude().toString(),
-                    regionCoordinateSpecification.getLatitude().toString(),
-                    regionCoordinateSpecification.getDisplayName(),
-                    regionCoordinateSpecification.getKey(),
-                    regionCoordinateSpecification.isK8sSupported(),
-                    regionCoordinateSpecification.getEntitlements(),
-                    regionCoordinateSpecification.getDefaultDbVmType(),
-                    regionCoordinateSpecification.getDefaultArmDbVmType(),
-                    regionCoordinateSpecification.getCdpSupportedServices());
-            coordinates.put(enabledRegion.getKey(), coordinate);
+            coordinates.put(enabledRegion.getKey(), regionCoordinateSpecification);
+            defaultVmtypesMap.put(enabledRegion.getKey(), regionCoordinateSpecification.getDefaultVmtypes());
         }
         return new CloudRegions(
                 regionListMap,
                 displayNames,
                 coordinates,
+                defaultVmtypesMap,
                 awsDefaultZoneProvider.getAwsZoneParameterDefault(),
                 true);
     }
@@ -791,10 +766,10 @@ public class AwsPlatformResources implements PlatformResources {
     public Optional<String> getVirtualMachineUrl(ExtendedCloudCredential cloudCredential, Region region, String instanceId, Map<String, String> filters) {
         return Optional.of(
                 String.format(
-                    "https://%s.console.aws.amazon.com/ec2/v2/home?region=%s#Instances:search=%s",
-                    region.getRegionName(),
-                    region.getRegionName(),
-                    instanceId
+                        "https://%s.console.aws.amazon.com/ec2/v2/home?region=%s#Instances:search=%s",
+                        region.getRegionName(),
+                        region.getRegionName(),
+                        instanceId
                 )
         );
     }
@@ -833,14 +808,16 @@ public class AwsPlatformResources implements PlatformResources {
                 Coordinate coordinate = regionCoordinates.get(actualRegion);
                 String defaultDbVmType;
                 if (ARM64.getName().equals(architecture)) {
-                    defaultDbVmType = coordinate.getDefaultArmDbVmType();
-                    if (defaultDbVmType == null) {
+                    if (coordinate.getDefaultArmDbVmTypes() == null || coordinate.getDefaultArmDbVmTypes().isEmpty()) {
                         defaultDbVmType = awsArmDatabaseVmDefault;
+                    } else {
+                        defaultDbVmType = coordinate.getDefaultArmDbVmTypes().getFirst();
                     }
                 } else {
-                    defaultDbVmType = coordinate.getDefaultDbVmType();
-                    if (defaultDbVmType == null) {
+                    if (coordinate.getDefaultDbVmTypes() == null || coordinate.getDefaultDbVmTypes().isEmpty()) {
                         defaultDbVmType = awsDatabaseVmDefault;
+                    } else {
+                        defaultDbVmType = coordinate.getDefaultDbVmTypes().getFirst();
                     }
                 }
                 regionDefaultInstanceTypeMap.put(actualRegion, defaultDbVmType);
@@ -852,6 +829,7 @@ public class AwsPlatformResources implements PlatformResources {
                     getLatestDatabaseEngineVersion(cloudCredential, region).orElse(null)
             );
         } catch (Exception e) {
+            LOGGER.error("Could not get database capabilities for provider: ", e);
             return new PlatformDatabaseCapabilities(new HashMap<>(), new HashMap<>(), new HashMap<>(), null);
         }
     }

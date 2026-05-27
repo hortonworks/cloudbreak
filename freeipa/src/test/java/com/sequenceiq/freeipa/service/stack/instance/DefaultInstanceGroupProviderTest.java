@@ -1,9 +1,14 @@
 package com.sequenceiq.freeipa.service.stack.instance;
 
+import static com.sequenceiq.common.model.Architecture.X86_64;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -15,6 +20,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
+import com.sequenceiq.cloudbreak.cloud.model.Platform;
+import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.instance.AwsInstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.instance.AzureInstanceGroupParameters;
 import com.sequenceiq.cloudbreak.cloud.model.instance.AzureInstanceTemplate;
@@ -23,8 +30,11 @@ import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
 import com.sequenceiq.common.api.type.EncryptionType;
+import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 import com.sequenceiq.environment.api.v1.environment.endpoint.service.azure.HostEncryptionCalculator;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.FreeIpaResponse;
+import com.sequenceiq.environment.api.v1.environment.model.response.LocationResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.network.AwsNetworkParameters;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.network.NetworkRequest;
 import com.sequenceiq.freeipa.entity.InstanceGroupNetwork;
@@ -39,6 +49,8 @@ class DefaultInstanceGroupProviderTest {
     private static final String STACK_NM = "stack";
 
     private static final String IG_NAME = "instanceGroup";
+
+    private static final String INSTANCE_TYPE = "m5.2xlarge";
 
     private static final String AVAILABILITY_SET = "availabilitySet";
 
@@ -57,12 +69,25 @@ class DefaultInstanceGroupProviderTest {
     @Mock
     private HostEncryptionCalculator hostEncryptionCalculator;
 
+    @Mock
+    private FreeIpaResponse freeIpaResponse;
+
     @InjectMocks
     private DefaultInstanceGroupProvider underTest;
 
     @Test
     void createDefaultTemplateTestNoVolumeEncryptionWhenAzure() {
-        Template result = underTest.createDefaultTemplate(environmentResponse, CloudPlatform.AZURE, ACCOUNT_ID, null, null, null, null);
+        CredentialResponse credentialResponse = mock(CredentialResponse.class);
+        when(credentialResponse.getCrn()).thenReturn("crn");
+        LocationResponse locationResponse = mock(LocationResponse.class);
+        when(locationResponse.getName()).thenReturn("region");
+        when(environmentResponse.getLocation()).thenReturn(locationResponse);
+        when(environmentResponse.getCredential()).thenReturn(credentialResponse);
+        lenient().when(freeIpaResponse.getArchitecture()).thenReturn(X86_64.getName());
+        lenient().when(environmentResponse.getFreeIpa()).thenReturn(freeIpaResponse);
+        when(defaultInstanceTypeProvider.getForPlatform(anyString(), any(Platform.class), any(Region.class), any()))
+                .thenReturn(List.of(INSTANCE_TYPE));
+        Template result = underTest.createDefaultTemplate(environmentResponse, CloudPlatform.AZURE, ACCOUNT_ID, null, null, null, X86_64);
 
         assertThat(result).isNotNull();
         assertThat(result.getAttributes()).isNull();
@@ -70,7 +95,15 @@ class DefaultInstanceGroupProviderTest {
 
     @Test
     void createDefaultTemplateTestVolumeEncryptionAddedWhenAzure() {
-        Template result = underTest.createDefaultTemplate(environmentResponse, CloudPlatform.AZURE, ACCOUNT_ID, "dummyDiskEncryptionSet", null, null, null);
+        CredentialResponse credentialResponse = mock(CredentialResponse.class);
+        when(credentialResponse.getCrn()).thenReturn("crn");
+        LocationResponse locationResponse = mock(LocationResponse.class);
+        when(locationResponse.getName()).thenReturn("region");
+        when(environmentResponse.getLocation()).thenReturn(locationResponse);
+        when(environmentResponse.getCredential()).thenReturn(credentialResponse);
+        when(defaultInstanceTypeProvider.getForPlatform(anyString(), any(Platform.class), any(Region.class), any()))
+                .thenReturn(List.of(INSTANCE_TYPE));
+        Template result = underTest.createDefaultTemplate(environmentResponse, CloudPlatform.AZURE, ACCOUNT_ID, "dummyDiskEncryptionSet", null, null, X86_64);
 
         assertThat(result).isNotNull();
         Json attributes = result.getAttributes();
@@ -81,8 +114,16 @@ class DefaultInstanceGroupProviderTest {
 
     @Test
     void createDefaultTemplateTestVolumeEncryptionAddedWhenAzureAndNoDESAndEncryptionAtHostEnabled() {
+        CredentialResponse credentialResponse = mock(CredentialResponse.class);
+        when(credentialResponse.getCrn()).thenReturn("crn");
+        LocationResponse locationResponse = mock(LocationResponse.class);
+        when(locationResponse.getName()).thenReturn("region");
+        when(environmentResponse.getLocation()).thenReturn(locationResponse);
+        when(environmentResponse.getCredential()).thenReturn(credentialResponse);
         when(hostEncryptionCalculator.hostEncryptionRequired(any())).thenReturn(true);
-        Template result = underTest.createDefaultTemplate(environmentResponse, CloudPlatform.AZURE, ACCOUNT_ID, null, null, null, null);
+        when(defaultInstanceTypeProvider.getForPlatform(anyString(), any(Platform.class), any(Region.class), any()))
+                .thenReturn(List.of(INSTANCE_TYPE));
+        Template result = underTest.createDefaultTemplate(environmentResponse, CloudPlatform.AZURE, ACCOUNT_ID, null, null, null, X86_64);
 
         assertThat(result).isNotNull();
         Json attributes = result.getAttributes();
@@ -92,8 +133,16 @@ class DefaultInstanceGroupProviderTest {
 
     @Test
     void createDefaultTemplateTestVolumeEncryptionAddedWhenAzureAndEncryptionAtHostEnabled() {
+        CredentialResponse credentialResponse = mock(CredentialResponse.class);
+        when(credentialResponse.getCrn()).thenReturn("crn");
+        LocationResponse locationResponse = mock(LocationResponse.class);
+        when(locationResponse.getName()).thenReturn("region");
+        when(environmentResponse.getLocation()).thenReturn(locationResponse);
+        when(environmentResponse.getCredential()).thenReturn(credentialResponse);
         when(hostEncryptionCalculator.hostEncryptionRequired(any())).thenReturn(true);
-        Template result = underTest.createDefaultTemplate(environmentResponse, CloudPlatform.AZURE, ACCOUNT_ID, "dummyDiskEncryptionSet", null, null, null);
+        when(defaultInstanceTypeProvider.getForPlatform(anyString(), any(Platform.class), any(Region.class), any()))
+                .thenReturn(List.of(INSTANCE_TYPE));
+        Template result = underTest.createDefaultTemplate(environmentResponse, CloudPlatform.AZURE, ACCOUNT_ID, "dummyDiskEncryptionSet", null, null, X86_64);
 
         assertThat(result).isNotNull();
         Json attributes = result.getAttributes();
@@ -105,8 +154,15 @@ class DefaultInstanceGroupProviderTest {
 
     @Test
     void createDefaultTemplateTestDefaultVolumeEncryptionAddedWhenAwsCustomEncryptionKeyIsAbsent() {
-
-        Template result = underTest.createDefaultTemplate(environmentResponse, CloudPlatform.AWS, ACCOUNT_ID, null, null, null, null);
+        CredentialResponse credentialResponse = mock(CredentialResponse.class);
+        when(credentialResponse.getCrn()).thenReturn("crn");
+        LocationResponse locationResponse = mock(LocationResponse.class);
+        when(locationResponse.getName()).thenReturn("region");
+        when(environmentResponse.getLocation()).thenReturn(locationResponse);
+        when(environmentResponse.getCredential()).thenReturn(credentialResponse);
+        when(defaultInstanceTypeProvider.getForPlatform(anyString(), any(Platform.class), any(Region.class), any()))
+                .thenReturn(List.of(INSTANCE_TYPE));
+        Template result = underTest.createDefaultTemplate(environmentResponse, CloudPlatform.AWS, ACCOUNT_ID, null, null, null, X86_64);
 
         assertThat(result).isNotNull();
         Json attributes = result.getAttributes();
@@ -117,8 +173,15 @@ class DefaultInstanceGroupProviderTest {
 
     @Test
     void createDefaultTemplateTestCustomVolumeEncryptionWhenEncryptionIsPresent() {
-
-        Template result = underTest.createDefaultTemplate(environmentResponse, CloudPlatform.AWS, ACCOUNT_ID, null, null, "dummyAwsEncryptionKey", null);
+        CredentialResponse credentialResponse = mock(CredentialResponse.class);
+        when(credentialResponse.getCrn()).thenReturn("crn");
+        LocationResponse locationResponse = mock(LocationResponse.class);
+        when(locationResponse.getName()).thenReturn("region");
+        when(environmentResponse.getLocation()).thenReturn(locationResponse);
+        when(environmentResponse.getCredential()).thenReturn(credentialResponse);
+        when(defaultInstanceTypeProvider.getForPlatform(anyString(), any(Platform.class), any(Region.class), any()))
+                .thenReturn(List.of(INSTANCE_TYPE));
+        Template result = underTest.createDefaultTemplate(environmentResponse, CloudPlatform.AWS, ACCOUNT_ID, null, null, "dummyAwsEncryptionKey", X86_64);
 
         assertThat(result).isNotNull();
         Json attributes = result.getAttributes();
@@ -129,7 +192,15 @@ class DefaultInstanceGroupProviderTest {
 
     @Test
     void createDefaultTemplateTestVolumeEncryptionAddedWhenGcp() {
-        Template result = underTest.createDefaultTemplate(environmentResponse, CloudPlatform.GCP, ACCOUNT_ID, null, "dummyEncryptionKey", null, null);
+        CredentialResponse credentialResponse = mock(CredentialResponse.class);
+        when(credentialResponse.getCrn()).thenReturn("crn");
+        LocationResponse locationResponse = mock(LocationResponse.class);
+        when(locationResponse.getName()).thenReturn("region");
+        when(environmentResponse.getLocation()).thenReturn(locationResponse);
+        when(environmentResponse.getCredential()).thenReturn(credentialResponse);
+        when(defaultInstanceTypeProvider.getForPlatform(anyString(), any(Platform.class), any(Region.class), any()))
+                .thenReturn(List.of(INSTANCE_TYPE));
+        Template result = underTest.createDefaultTemplate(environmentResponse, CloudPlatform.GCP, ACCOUNT_ID, null, "dummyEncryptionKey", null, X86_64);
 
         assertThat(result).isNotNull();
         Json attributes = result.getAttributes();

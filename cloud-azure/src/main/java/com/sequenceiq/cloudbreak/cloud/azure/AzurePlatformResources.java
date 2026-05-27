@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
 import static com.sequenceiq.cloudbreak.cloud.azure.DistroxEnabledInstanceTypes.AZURE_ENABLED_TYPES_LIST;
-import static com.sequenceiq.cloudbreak.cloud.model.Coordinate.coordinate;
 import static com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType.EPHEMERAL;
 import static com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType.MAGNETIC;
 import static com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType.SSD;
@@ -69,6 +68,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.Coordinate;
 import com.sequenceiq.cloudbreak.cloud.model.DefaultPlatformDatabaseCapabilities;
+import com.sequenceiq.cloudbreak.cloud.model.DefaultVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStoreMetadata;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformDBStorageCapabilities;
@@ -84,7 +84,6 @@ import com.sequenceiq.cloudbreak.cloud.model.nosql.CloudNoSqlTables;
 import com.sequenceiq.cloudbreak.cloud.model.resourcegroup.CloudResourceGroup;
 import com.sequenceiq.cloudbreak.cloud.model.resourcegroup.CloudResourceGroups;
 import com.sequenceiq.cloudbreak.cloud.model.view.PlatformResourceSecurityGroupFilterView;
-import com.sequenceiq.cloudbreak.common.domain.CdpSupportedServices;
 import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
 import com.sequenceiq.cloudbreak.filter.MinimalHardwareFilter;
 import com.sequenceiq.cloudbreak.util.PermanentlyFailedException;
@@ -255,7 +254,7 @@ public class AzurePlatformResources implements PlatformResources {
     }
 
     @Override
-    @Cacheable(cacheNames = "cloudResourceRegionCache", key = "#cloudCredential?.id")
+    @Cacheable(cacheNames = "cloudResourceRegionCache", key = "{ #cloudCredential?.id, #region }")
     public CloudRegions regions(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters,
             boolean availabilityZonesNeeded) {
         AzureClient client = azureClientService.getClient(cloudCredential);
@@ -269,33 +268,20 @@ public class AzurePlatformResources implements PlatformResources {
         Map<Region, List<AvailabilityZone>> regionListMap = new HashMap<>();
         Map<Region, String> displayNames = new HashMap<>();
         Map<Region, Coordinate> coordinates = new HashMap<>();
+        Map<Region, DefaultVmTypes> defaultVmtypesMap = new HashMap<>();
 
         for (Entry<Region, AzureCoordinate> enabledRegion : azureRegionProvider.enabledRegions().entrySet()) {
             regionListMap.put(enabledRegion.getKey(), List.of());
             Coordinate regionCoordinateSpecification = enabledRegion.getValue();
             displayNames.put(enabledRegion.getKey(), enabledRegion.getValue().getDisplayName());
-
-            Set<CdpSupportedServices> cdpServices = regionCoordinateSpecification.getCdpSupportedServices()
-                    .stream()
-                    .map(e -> e.services())
-                    .flatMap(list -> list.stream())
-                    .collect(Collectors.toSet());
-            Coordinate coordinate =  coordinate(
-                    regionCoordinateSpecification.getLongitude().toString(),
-                    regionCoordinateSpecification.getLatitude().toString(),
-                    regionCoordinateSpecification.getDisplayName(),
-                    regionCoordinateSpecification.getKey(),
-                    regionCoordinateSpecification.isK8sSupported(),
-                    regionCoordinateSpecification.getEntitlements(),
-                    regionCoordinateSpecification.getDefaultDbVmType(),
-                    regionCoordinateSpecification.getDefaultArmDbVmType(),
-                    cdpServices);
-            coordinates.put(enabledRegion.getKey(), coordinate);
+            coordinates.put(enabledRegion.getKey(), regionCoordinateSpecification);
+            defaultVmtypesMap.put(enabledRegion.getKey(), regionCoordinateSpecification.getDefaultVmtypes());
         }
         return new CloudRegions(
                 regionListMap,
                 displayNames,
                 coordinates,
+                defaultVmtypesMap,
                 azureRegionProvider.getArmZoneParameterDefault(),
                 true);
     }

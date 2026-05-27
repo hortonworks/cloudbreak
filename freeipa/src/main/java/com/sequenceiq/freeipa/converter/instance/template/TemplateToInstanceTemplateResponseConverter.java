@@ -26,6 +26,9 @@ public class TemplateToInstanceTemplateResponseConverter implements Converter<Te
         if (attributes != null && attributes.getMap() != null) {
             response.setAttributes(attributes.getMap());
         }
+        if (source.getFallbackInstanceTypes() != null && source.getFallbackInstanceTypesAsList() != null) {
+            response.setFallbackInstanceTypes(source.getFallbackInstanceTypesAsList());
+        }
         return response;
     }
 }

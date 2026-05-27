@@ -1,5 +1,9 @@
 package com.sequenceiq.freeipa.entity;
 
+import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 import java.util.StringJoiner;
 
 import jakarta.persistence.Column;
@@ -50,6 +54,10 @@ public class Template implements AccountIdAwareResource {
     @Convert(converter = JsonToString.class)
     @Column(columnDefinition = "TEXT")
     private Json attributes;
+
+    @Convert(converter = JsonToString.class)
+    @Column(columnDefinition = "TEXT")
+    private Json fallbackInstanceTypes;
 
     @Convert(converter = SecretToString.class)
     @SecretValue
@@ -176,6 +184,27 @@ public class Template implements AccountIdAwareResource {
         this.accountId = accountId;
     }
 
+    public Json getFallbackInstanceTypes() {
+        return fallbackInstanceTypes;
+    }
+
+    public List<String> getFallbackInstanceTypesAsList() {
+        return Optional.ofNullable(fallbackInstanceTypes)
+                .filter(instanceTypesJson -> instanceTypesJson.getValue() != null)
+                .map(instanceTypesJson -> {
+                    try {
+                        return (List<String>) instanceTypesJson.get(List.class);
+                    } catch (IOException e) {
+                        return null;
+                    }
+                })
+                .orElse(Collections.emptyList());
+    }
+
+    public void setFallbackInstanceTypes(Json fallbackInstanceTypes) {
+        this.fallbackInstanceTypes = fallbackInstanceTypes;
+    }
+
     @Override
     public String toString() {
         return new StringJoiner(", ", Template.class.getSimpleName() + "[", "]")
@@ -193,6 +222,7 @@ public class Template implements AccountIdAwareResource {
                 .add("secretAttributes='***'")
                 .add("accountId=" + accountId)
                 .add("rootVolumeType=" + rootVolumeType)
+                .add("fallbackInstanceTypes=" + fallbackInstanceTypes)
                 .toString();
     }
 }

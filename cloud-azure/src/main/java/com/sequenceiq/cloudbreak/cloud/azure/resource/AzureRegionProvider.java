@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.cloud.azure.util.RegionUtil;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.cloud.model.Coordinate;
+import com.sequenceiq.cloudbreak.cloud.model.DefaultVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.RegionCoordinateSpecification;
 import com.sequenceiq.cloudbreak.cloud.model.RegionCoordinateSpecifications;
@@ -61,6 +62,7 @@ public class AzureRegionProvider {
         Map<Region, List<AvailabilityZone>> cloudRegions = new HashMap<>();
         Map<Region, String> displayNames = new HashMap<>();
         Map<Region, Coordinate> coordinates = new HashMap<>();
+        Map<Region, DefaultVmTypes> defaultVmtypesMap = new HashMap<>();
         String defaultRegion = armZoneParameterDefault;
         azureRegions = filterByEnabledRegions(azureRegions);
         List<AvailabilityZone> zones = azureAvailabilityZones.stream()
@@ -78,12 +80,13 @@ public class AzureRegionProvider {
                 } else {
                     coordinates.put(region(azureRegion.label()), coordinate);
                 }
+                defaultVmtypesMap.put(region(azureRegion.label()), coordinate.getDefaultVmtypes());
             }
         }
         if (region != null && !Strings.isNullOrEmpty(region.value())) {
             defaultRegion = region.value();
         }
-        return new CloudRegions(cloudRegions, displayNames, coordinates, defaultRegion, true);
+        return new CloudRegions(cloudRegions, displayNames, coordinates, defaultVmtypesMap, defaultRegion, true);
     }
 
     private boolean isEntitledFor(Coordinate coordinate, List<String> entitlements) {
@@ -153,7 +156,7 @@ public class AzureRegionProvider {
                                 .k8sSupported(regionCoordinateSpecification.isK8sSupported())
                                 .cdpSupportedServices(regionCoordinateSpecification.getCdpSupportedServices())
                                 .entitlements(regionCoordinateSpecification.getEntitlements())
-                                .defaultDbVmType(regionCoordinateSpecification.getDefaultDbVmtype())
+                                .defaultVmtypes(regionCoordinateSpecification.getDefaultVmtypes())
                                 .build());
             }
         } catch (IOException ignored) {

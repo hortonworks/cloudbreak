@@ -1,6 +1,10 @@
 package com.sequenceiq.freeipa.converter.instance.template;
 
+import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
+import static java.util.Objects.requireNonNullElse;
+
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -13,6 +17,7 @@ import org.springframework.util.CollectionUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.KeyEncryptionMethod;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
+import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.instance.AwsInstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.instance.AzureInstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.instance.GcpInstanceTemplate;
@@ -59,12 +64,18 @@ public class InstanceTemplateRequestToTemplateConverter {
     public Template convert(DetailedEnvironmentResponse environmentResponse, InstanceTemplateRequest source, CloudPlatform cloudPlatform, String accountId,
             String diskEncryptionSetId, String gcpKmsEncryptionKey, String awsKmsEncryptionKey, Architecture architecture) {
         //CHECKSTYLE:ON
+        List<String> defaultInstanceTypesProviderForPlatform = defaultInstanceTypeProvider.getForPlatform(
+                environmentResponse.getCredential().getCrn(),
+                platform(cloudPlatform.name()),
+                Region.region(environmentResponse.getLocation().getName()),
+                architecture
+        );
         Template template = new Template();
         template.setAccountId(accountId);
         template.setName(resourceNameGenerator.generateName(APIResourceType.TEMPLATE));
         template.setStatus(ResourceStatus.USER_MANAGED);
-        template.setInstanceType(Objects.requireNonNullElse(source.getInstanceType(),
-                defaultInstanceTypeProvider.getForPlatform(cloudPlatform.name(), architecture)));
+        template.setInstanceType(requireNonNullElse(source.getInstanceType(), defaultInstanceTypesProviderForPlatform.getFirst()));
+        Optional.ofNullable(source.getFallbackInstanceTypes()).map(Json::silent).ifPresent(template::setFallbackInstanceTypes);
         setVolumesProperty(source.getAttachedVolumes(), template, cloudPlatform);
         Map<String, Object> attributes = new HashMap<>();
         if (cloudPlatform == CloudPlatform.AWS) {

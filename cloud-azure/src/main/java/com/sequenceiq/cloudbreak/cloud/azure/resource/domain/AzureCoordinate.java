@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.sequenceiq.cloudbreak.cloud.model.Coordinate;
+import com.sequenceiq.cloudbreak.cloud.model.DefaultVmTypes;
 import com.sequenceiq.cloudbreak.common.domain.CdpSupportedServices;
 
 public class AzureCoordinate extends Coordinate {
@@ -18,8 +19,7 @@ public class AzureCoordinate extends Coordinate {
                 builder.key,
                 builder.k8sSupported,
                 builder.entitlements,
-                builder.defaultDbVmType,
-                null,
+                builder.defaultVmtypes,
                 builder.cdpSupportedServices);
     }
 
@@ -41,7 +41,7 @@ public class AzureCoordinate extends Coordinate {
 
         private List<String> entitlements = new ArrayList<>();
 
-        private String defaultDbVmType;
+        private DefaultVmTypes defaultVmtypes = new DefaultVmTypes();
 
         private Set<CdpSupportedServices> cdpSupportedServices = new HashSet<>();
 
@@ -85,8 +85,8 @@ public class AzureCoordinate extends Coordinate {
             return this;
         }
 
-        public AzureCoordinateBuilder defaultDbVmType(String defaultDbVmType) {
-            this.defaultDbVmType = defaultDbVmType;
+        public AzureCoordinateBuilder defaultVmtypes(DefaultVmTypes defaultVmtypes) {
+            this.defaultVmtypes = defaultVmtypes != null ? defaultVmtypes : new DefaultVmTypes();
             return this;
         }
 
@@ -110,7 +110,7 @@ public class AzureCoordinate extends Coordinate {
                     .displayName("California (West US)")
                     .key("us-west-1")
                     .k8sSupported(false)
-                    .defaultDbVmType(null)
+                    .defaultVmtypes(new DefaultVmTypes())
                     .entitlements(new ArrayList<>())
                     .cdpSupportedServices(new HashSet<>());
         }

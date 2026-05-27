@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.service.stack;
 
+import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
+import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -10,6 +12,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -22,6 +25,8 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
+import com.sequenceiq.cloudbreak.cloud.model.Platform;
+import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta;
 import com.sequenceiq.cloudbreak.cloud.service.CloudParameterService;
@@ -65,7 +70,8 @@ class FreeIpaRecommendationServiceTest {
         when(credentialService.getCredentialByCredCrn(anyString())).thenReturn(new Credential("AWS", "", "", "", ""));
         when(cloudParameterService.getVmTypesV2(any(), eq("eu-central-1"), eq("AWS"), eq(CdpResourceType.DEFAULT),
                 eq(Map.of("architecture", Architecture.X86_64.getName())))).thenReturn(initCloudVmTypes());
-        when(defaultInstanceTypeProvider.getForPlatform(eq("AWS"), eq(Architecture.X86_64))).thenReturn("medium");
+        when(defaultInstanceTypeProvider.getForPlatform(eq("cred"), eq(platform("AWS")), eq(region("eu-central-1")), eq(Architecture.X86_64)))
+                .thenReturn(List.of("medium"));
 
         FreeIpaRecommendationResponse recommendation = underTest.getRecommendation("cred", "eu-central-1", null, Architecture.X86_64.getName());
         assertEquals("medium", recommendation.getDefaultInstanceType());
@@ -79,7 +85,8 @@ class FreeIpaRecommendationServiceTest {
         when(credentialService.getCredentialByCredCrn(anyString())).thenReturn(new Credential("AWS", "", "", "", ""));
         when(cloudParameterService.getVmTypesV2(any(), eq("eu-central-1"), eq("AWS"), eq(CdpResourceType.DEFAULT),
                 eq(Map.of("architecture", Architecture.ARM64.getName())))).thenReturn(initCloudVmTypes());
-        when(defaultInstanceTypeProvider.getForPlatform(eq("AWS"), eq(Architecture.ARM64))).thenReturn("medium");
+        when(defaultInstanceTypeProvider.getForPlatform(eq("cred"), eq(platform("AWS")), eq(region("eu-central-1")), eq(Architecture.ARM64)))
+                .thenReturn(List.of("medium"));
 
         FreeIpaRecommendationResponse recommendation = underTest.getRecommendation("cred", "eu-central-1", null, Architecture.ARM64.getName());
         assertEquals("medium", recommendation.getDefaultInstanceType());
@@ -93,7 +100,8 @@ class FreeIpaRecommendationServiceTest {
         when(credentialService.getCredentialByCredCrn(anyString())).thenReturn(new Credential("AWS", "", "", "", ""));
         when(cloudParameterService.getVmTypesV2(any(), eq("eu-central-1"), eq("AWS"), eq(CdpResourceType.DEFAULT),
                 eq(Map.of("architecture", Architecture.X86_64.getName())))).thenReturn(initCloudVmTypes());
-        when(defaultInstanceTypeProvider.getForPlatform(eq("AWS"), eq(Architecture.X86_64))).thenReturn("medium");
+        when(defaultInstanceTypeProvider.getForPlatform(eq("cred"), eq(platform("AWS")), eq(region("eu-central-1")), eq(Architecture.X86_64)))
+                .thenReturn(List.of("medium"));
 
         FreeIpaRecommendationResponse recommendation = underTest.getRecommendation("cred", "eu-central-1", null, null);
         assertEquals("medium", recommendation.getDefaultInstanceType());
@@ -104,7 +112,8 @@ class FreeIpaRecommendationServiceTest {
 
     @Test
     public void testValidateCustomInstanceTypeWhenCustomInstanceTypeIsSmaller() {
-        when(defaultInstanceTypeProvider.getForPlatform(eq("AWS"), any())).thenReturn("medium");
+        when(defaultInstanceTypeProvider.getForPlatform(anyString(), any(Platform.class), any(Region.class), any()))
+                .thenReturn(List.of("medium"));
         when(cloudParameterService.getVmTypesV2(any(), eq("eu-central-1"), eq("AWS"), eq(CdpResourceType.DEFAULT), any())).thenReturn(initCloudVmTypes());
 
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
@@ -115,7 +124,8 @@ class FreeIpaRecommendationServiceTest {
 
     @Test
     public void testValidateCustomInstanceTypeWhenCustomInstanceTypeIsLarger() {
-        when(defaultInstanceTypeProvider.getForPlatform(eq("AWS"), any())).thenReturn("medium");
+        when(defaultInstanceTypeProvider.getForPlatform(anyString(), any(Platform.class), any(Region.class), any()))
+                .thenReturn(List.of("medium"));
         when(cloudParameterService.getVmTypesV2(any(), eq("eu-central-1"), eq("AWS"), eq(CdpResourceType.DEFAULT), any())).thenReturn(initCloudVmTypes());
 
         assertDoesNotThrow(() -> underTest.validateCustomInstanceType(createStack("large"), new Credential("AWS", "Cred", null, "crn", "account")));
@@ -123,7 +133,8 @@ class FreeIpaRecommendationServiceTest {
 
     @Test
     public void testValidateCustomInstanceTypeWhenArm64IsExpected() {
-        when(defaultInstanceTypeProvider.getForPlatform(eq("AWS"), any())).thenReturn("medium");
+        when(defaultInstanceTypeProvider.getForPlatform(anyString(), any(Platform.class), any(Region.class), any()))
+                .thenReturn(List.of("medium"));
         when(cloudParameterService.getVmTypesV2(any(), eq("eu-central-1"), eq("AWS"), eq(CdpResourceType.DEFAULT), any())).thenReturn(initCloudVmTypes());
 
         BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> {
@@ -136,7 +147,8 @@ class FreeIpaRecommendationServiceTest {
 
     @Test
     public void testValidateCustomInstanceTypeWhenX86IsExpected() {
-        when(defaultInstanceTypeProvider.getForPlatform(eq("AWS"), any())).thenReturn("medium");
+        when(defaultInstanceTypeProvider.getForPlatform(anyString(), any(Platform.class), any(Region.class), any()))
+                .thenReturn(List.of("medium"));
         when(cloudParameterService.getVmTypesV2(any(), eq("eu-central-1"), eq("AWS"), eq(CdpResourceType.DEFAULT), any()))
                 .thenReturn(initCloudVmTypes(Architecture.ARM64));
 

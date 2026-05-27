@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.model;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -26,14 +27,14 @@ public class RegionCoordinateSpecification {
     @JsonProperty("entitlements")
     private List<String> entitlements;
 
-    @JsonProperty("defaultDbVmtype")
-    private String defaultDbVmtype;
-
-    @JsonProperty("defaultArmDbVmtype")
-    private String defaultArmDbVmtype;
+    @JsonProperty("defaultVmtypes")
+    private DefaultVmTypes defaultVmtypes = new DefaultVmTypes();
 
     @JsonProperty("cdpSupportedServices")
     private Set<CdpSupportedServices> cdpSupportedServices = new HashSet<>();
+
+    @JsonProperty("zones")
+    private List<String> zones = new ArrayList<>();
 
     public String getName() {
         return name;
@@ -83,20 +84,12 @@ public class RegionCoordinateSpecification {
         this.entitlements = entitlements;
     }
 
-    public String getDefaultDbVmtype() {
-        return defaultDbVmtype;
+    public DefaultVmTypes getDefaultVmtypes() {
+        return defaultVmtypes;
     }
 
-    public void setDefaultDbVmtype(String defaultDbVmtype) {
-        this.defaultDbVmtype = defaultDbVmtype;
-    }
-
-    public String getDefaultArmDbVmtype() {
-        return defaultArmDbVmtype;
-    }
-
-    public void setDefaultArmDbVmtype(String defaultArmDbVmtype) {
-        this.defaultArmDbVmtype = defaultArmDbVmtype;
+    public void setDefaultVmtypes(DefaultVmTypes defaultVmtypes) {
+        this.defaultVmtypes = defaultVmtypes;
     }
 
     public Set<CdpSupportedServices> getCdpSupportedServices() {
@@ -106,4 +99,13 @@ public class RegionCoordinateSpecification {
     public void setCdpSupportedServices(Set<CdpSupportedServices> cdpSupportedServices) {
         this.cdpSupportedServices = cdpSupportedServices;
     }
+
+    public List<String> getZones() {
+        return zones;
+    }
+
+    public void setZones(List<String> zones) {
+        this.zones = zones;
+    }
+
 }

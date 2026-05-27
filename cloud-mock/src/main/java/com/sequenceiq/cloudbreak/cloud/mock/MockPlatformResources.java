@@ -28,6 +28,7 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.cloud.PlatformResources;
+import com.sequenceiq.cloudbreak.cloud.model.ArchitectureVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfigs;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
@@ -43,6 +44,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudSshKeys;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.Coordinate;
+import com.sequenceiq.cloudbreak.cloud.model.DefaultVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformDatabaseCapabilities;
@@ -73,6 +75,9 @@ public class MockPlatformResources implements PlatformResources {
 
     @Value("${cb.mock.default.database.vmtype:db.m5.large}")
     private String mockDatabaseVmDefault;
+
+    @Value("${cb.mock.default.freeipa.vmtype:large}")
+    private String mockFreeIPAVmDefault;
 
     private String defaultRegion;
 
@@ -168,8 +173,7 @@ public class MockPlatformResources implements PlatformResources {
                                 regionCoordinateSpecification.getName(),
                                 regionCoordinateSpecification.isK8sSupported(),
                                 regionCoordinateSpecification.getEntitlements(),
-                                regionCoordinateSpecification.getDefaultDbVmtype(),
-                                null,
+                                regionCoordinateSpecification.getDefaultVmtypes(),
                                 regionCoordinateSpecification.getCdpSupportedServices()));
             }
         } catch (IOException ignored) {
@@ -190,6 +194,7 @@ public class MockPlatformResources implements PlatformResources {
         Map<Region, List<AvailabilityZone>> regions = new HashMap<>();
         regions.put(region("USA"), getAvailabilityZones(USA_AVAILABILITY_ZONES));
         regions.put(region("Europe"), getAvailabilityZones(LONDON_AVAILABILITY_ZONES));
+        regions.put(region("London"), getAvailabilityZones(LONDON_AVAILABILITY_ZONES));
         return regions;
     }
 
@@ -256,7 +261,23 @@ public class MockPlatformResources implements PlatformResources {
     @Cacheable(cacheNames = "cloudResourceRegionCache", key = "#cloudCredential?.id")
     public CloudRegions regions(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters,
             boolean availabilityZonesNeeded) {
-        return new CloudRegions(regions, regionDisplayNames, regionCoordinates, defaultRegion, true);
+        Map<Region, DefaultVmTypes> defaultVmTypesMap = regions.keySet()
+                .stream()
+                .collect(Collectors.toMap(
+                        e -> e,
+                        e -> new DefaultVmTypes(
+                                new ArchitectureVmTypes(List.of(mockDatabaseVmDefault), List.of(mockDatabaseVmDefault)),
+                                new ArchitectureVmTypes(List.of(mockFreeIPAVmDefault), List.of(mockFreeIPAVmDefault))
+                        )
+                ));
+        return new CloudRegions(
+                regions,
+                regionDisplayNames,
+                regionCoordinates,
+                defaultVmTypesMap,
+                defaultRegion,
+                true
+        );
     }
 
     @Override
@@ -355,7 +376,7 @@ public class MockPlatformResources implements PlatformResources {
             CloudRegions regions = regions((ExtendedCloudCredential) cloudCredential, region, filters, false);
             Map<Region, String> regionDefaultInstanceTypeMap = new HashMap<>();
             for (Region actualRegion : regions.getCloudRegions().keySet()) {
-                String defaultDbVmType = regionCoordinates.get(actualRegion).getDefaultDbVmType();
+                String defaultDbVmType = regionCoordinates.get(actualRegion).getDefaultDbVmTypes().getFirst();
                 regionDefaultInstanceTypeMap.put(actualRegion, defaultDbVmType == null ? mockDatabaseVmDefault : defaultDbVmType);
             }
             return new PlatformDatabaseCapabilities(new HashMap<>(), regionDefaultInstanceTypeMap, new HashMap<>(), null);

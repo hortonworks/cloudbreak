@@ -1,12 +1,16 @@
 package com.sequenceiq.freeipa.service.stack.instance;
 
+import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
+import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.GCP;
 import static java.util.Map.entry;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import jakarta.inject.Inject;
@@ -58,13 +62,21 @@ public class DefaultInstanceGroupProvider {
 
     public Template createDefaultTemplate(DetailedEnvironmentResponse environmentResponse, CloudPlatform cloudPlatform,
         String accountId, String diskEncryptionSetId, String gcpKmsEncryptionKey, String awsKmsEncryptionKey, Architecture architecture) {
+
+        List<String> defaultInstanceTypeProviderForPlatform = defaultInstanceTypeProvider.getForPlatform(
+                environmentResponse.getCredential().getCrn(),
+                platform(cloudPlatform.name()),
+                region(environmentResponse.getLocation().getName()),
+                architecture
+        );
         Template template = new Template();
         template.setName(resourceNameGenerator.generateName(APIResourceType.TEMPLATE));
         template.setStatus(ResourceStatus.DEFAULT);
         template.setRootVolumeSize(defaultRootVolumeSizeProvider.getForPlatform(cloudPlatform.name()));
         template.setVolumeCount(0);
         template.setVolumeSize(0);
-        template.setInstanceType(defaultInstanceTypeProvider.getForPlatform(cloudPlatform.name(), architecture));
+        template.setInstanceType(defaultInstanceTypeProviderForPlatform.getFirst());
+        setFallbackInstanceTypes(template, defaultInstanceTypeProviderForPlatform);
         template.setAccountId(accountId);
         if (cloudPlatform == AWS) {
             if (awsKmsEncryptionKey != null) {
@@ -102,6 +114,16 @@ public class DefaultInstanceGroupProvider {
                     entry(GcpInstanceTemplate.KEY_ENCRYPTION_METHOD, KeyEncryptionMethod.KMS))));
         }
         return template;
+    }
+
+    private void setFallbackInstanceTypes(Template template, List<String> defaultInstanceTypeProviderForPlatform) {
+        if (defaultInstanceTypeProviderForPlatform.size() > 1) {
+            Optional.ofNullable(defaultInstanceTypeProviderForPlatform.subList(1, defaultInstanceTypeProviderForPlatform.size()))
+                    .map(Json::silent)
+                    .ifPresent(template::setFallbackInstanceTypes);
+        } else {
+            template.setFallbackInstanceTypes(null);
+        }
     }
 
     public Json createAttributes(CloudPlatform cloudPlatform, String stackName, String instanceGroupName) {

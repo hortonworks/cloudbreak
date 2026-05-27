@@ -8,6 +8,7 @@ import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.sequenceiq.cloudbreak.cloud.model.DefaultVmTypes;
 import com.sequenceiq.environment.api.v1.environment.model.response.CompactRegionResponse;
 import com.sequenceiq.environment.api.v1.platformresource.PlatformResourceModelDescription;
 
@@ -31,11 +32,15 @@ public class RegionResponse extends CompactRegionResponse {
     @Schema(description = PlatformResourceModelDescription.CDP_SERVICES, requiredMode = Schema.RequiredMode.REQUIRED)
     private Map<String, Set<String>> cdpSupportedServices;
 
+    @Schema
+    private Map<String, DefaultVmTypes> defaultVmtypes;
+
     public RegionResponse() {
         availabilityZones = new HashMap<>();
         locations = new ArrayList<>();
         k8sSupportedlocations = new ArrayList<>();
         cdpSupportedServices = new HashMap<>();
+        defaultVmtypes = new HashMap<>();
     }
 
     @JsonProperty("names")
@@ -88,6 +93,14 @@ public class RegionResponse extends CompactRegionResponse {
         this.cdpSupportedServices = cdpSupportedServices;
     }
 
+    public Map<String, DefaultVmTypes> getDefaultVmtypes() {
+        return defaultVmtypes;
+    }
+
+    public void setDefaultVmtypes(Map<String, DefaultVmTypes> defaultVmtypes) {
+        this.defaultVmtypes = defaultVmtypes;
+    }
+
     @Override
     public String toString() {
         return "RegionResponse{" +
@@ -95,6 +108,7 @@ public class RegionResponse extends CompactRegionResponse {
                 ", defaultRegion='" + defaultRegion + '\'' +
                 ", locations=" + locations +
                 ", cdpSupportedServices=" + cdpSupportedServices +
+                ", defaultVmtypes=" + defaultVmtypes +
                 '}';
     }
 }

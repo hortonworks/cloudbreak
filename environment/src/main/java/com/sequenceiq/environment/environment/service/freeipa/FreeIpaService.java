@@ -49,7 +49,6 @@ import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizeAllUsersReque
 import com.sequenceiq.freeipa.api.v1.operation.OperationV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationStatus;
 import com.sequenceiq.freeipa.api.v1.support.SupportV1Endpoint;
-import com.sequenceiq.freeipa.api.v1.support.response.FreeIpaPlatformSupportRequirements;
 import com.sequenceiq.freeipa.api.v2.freeipa.crossrealm.TrustV2Endpoint;
 import com.sequenceiq.freeipa.api.v2.freeipa.stack.model.crossrealm.AddCrossRealmTrustV2Request;
 import com.sequenceiq.freeipa.api.v2.freeipa.stack.model.crossrealm.AddCrossRealmTrustV2Response;
@@ -148,10 +147,6 @@ public class FreeIpaService {
             LOGGER.error(String.format("Failed to describe FreeIpa cluster for environment '%s' due to: '%s'.", envCrn, errorMessage), e);
             throw new FreeIpaOperationFailedException(errorMessage, e);
         }
-    }
-
-    public FreeIpaPlatformSupportRequirements internalGetInstanceTypesByPlatform(String platform) {
-        return ThreadBasedUserCrnProvider.doAsInternalActor(() -> supportV1Endpoint.getInstanceTypesByPlatform(platform));
     }
 
     public void delete(String environmentCrn, boolean forced) {

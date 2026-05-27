@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.cloud.model.Coordinate;
+import com.sequenceiq.cloudbreak.cloud.model.DefaultVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.environment.api.v1.platformresource.model.RegionResponse;
 
@@ -79,6 +80,10 @@ public class PlatformRegionsToRegionV1ResponseConverter {
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
                         (oldValue, newValue) -> oldValue, LinkedHashMap::new));
 
+        Map<String, DefaultVmTypes> defaultVmtypes = new HashMap<>();
+        source.getDefaultVmtypes()
+                .forEach((region, vmTypes) -> defaultVmtypes.put(region.value(), vmTypes));
+
         json.setNames(regions);
         json.setAvailabilityZones(availabilityZones);
         json.setDefaultRegion(source.getDefaultRegion());
@@ -86,7 +91,7 @@ public class PlatformRegionsToRegionV1ResponseConverter {
         json.setLocations(locations);
         json.setK8sSupportedlocations(k8sSupportedLocations);
         json.setCdpSupportedServices(cdpSupportedServices);
-
+        json.setDefaultVmtypes(defaultVmtypes);
         return json;
     }
 }

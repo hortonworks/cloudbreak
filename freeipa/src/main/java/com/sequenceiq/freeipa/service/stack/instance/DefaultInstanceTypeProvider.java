@@ -1,24 +1,24 @@
 package com.sequenceiq.freeipa.service.stack.instance;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Locale;
+import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
-import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
+import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
+import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
-import com.sequenceiq.cloudbreak.cloud.model.PlatformVariants;
+import com.sequenceiq.cloudbreak.cloud.model.Region;
+import com.sequenceiq.cloudbreak.service.CloudbreakRuntimeException;
 import com.sequenceiq.common.model.Architecture;
+import com.sequenceiq.freeipa.converter.cloud.CredentialToExtendedCloudCredentialConverter;
+import com.sequenceiq.freeipa.service.CredentialService;
 
 /**
  * This class reads the environment properties of default instance type configurations for each cloud provider platform.
@@ -37,50 +37,43 @@ public class DefaultInstanceTypeProvider {
 
     private static final String DEFAULT_INSTANCE_TYPE_PROPERTY_PERFIX = "freeipa.platform.default.instanceType.";
 
-    private Map<String, Map<Architecture, String>> platformInstanceTypeMap = new HashMap<>();
-
     @Inject
     private CloudPlatformConnectors cloudPlatformConnectors;
 
     @Inject
+    private CredentialToExtendedCloudCredentialConverter credentialToCloudCredentialConverter;
+
+    @Inject
+    private CredentialService credentialService;
+
+    @Inject
     private Environment environment;
 
-    @PostConstruct
-    public void init() {
-        PlatformVariants platformVariants = cloudPlatformConnectors.getPlatformVariants();
-        Map<String, Map<Architecture, String>> instanceMap = new HashMap<>();
-        platformVariants.getDefaultVariants().keySet().forEach(platform -> {
-            instanceMap.put(platform.value(), new HashMap<>());
-            String x86Instance = initPlatform(environment, platform, Architecture.X86_64);
-            if (StringUtils.isNotBlank(x86Instance)) {
-                instanceMap.get(platform.value()).put(Architecture.X86_64, x86Instance);
+    public List<String> getForPlatform(String credentialCrn, Platform platform, Region region, Architecture architecture) {
+        try {
+            ExtendedCloudCredential cloudCredential = credentialToCloudCredentialConverter
+                    .convert(credentialService.getCredentialByCredCrn(credentialCrn));
+            CloudRegions cloudRegions = cloudPlatformConnectors.getDefault(platform)
+                    .platformResources()
+                    .regions(cloudCredential, region, Map.of(), false);
+            architecture = architecture == null ? Architecture.X86_64 : architecture;
+            Map<Region, List<String>> defaultFreeIPAInstances = getDefaultMap(cloudRegions, architecture);
+            List<String> defaultFreeIPAInstance = defaultFreeIPAInstances.get(region);
+            if (defaultFreeIPAInstances.isEmpty() || defaultFreeIPAInstance == null) {
+                LOGGER.debug("No default instance type found for platform: {}. Falling back to default empty string. "
+                                + "Set '{}' property if '{}' is a valid cloud provider.",
+                        platform, DEFAULT_INSTANCE_TYPE_PROPERTY_PERFIX + platform, platform);
             }
-            String arm64Instance = initPlatform(environment, platform, Architecture.ARM64);
-            if (StringUtils.isNotBlank(arm64Instance)) {
-                instanceMap.get(platform.value()).put(Architecture.ARM64, arm64Instance);
-            }
-            if (StringUtils.isAllBlank(x86Instance, arm64Instance)) {
-                instanceMap.get(platform.value()).put(Architecture.X86_64, initPlatform(environment, platform, null));
-            }
-        });
-        platformInstanceTypeMap = Collections.unmodifiableMap(instanceMap);
+            return defaultFreeIPAInstance == null ? List.of() : defaultFreeIPAInstance;
+        } catch (Exception e) {
+            throw new CloudbreakRuntimeException(e);
+        }
     }
 
-    public String getForPlatform(String platform, Architecture architecture) {
-        if (!platformInstanceTypeMap.containsKey(platform.toUpperCase(Locale.ROOT))) {
-            LOGGER.debug("No default instance type found for platform: {}. Falling back to default empty string. "
-                            + "Set '{}' property if '{}' is a valid cloud provider.",
-                    platform, DEFAULT_INSTANCE_TYPE_PROPERTY_PERFIX + platform, platform);
-        }
-        return platformInstanceTypeMap.getOrDefault(platform.toUpperCase(Locale.ROOT), Collections.emptyMap())
-                .getOrDefault(Optional.ofNullable(architecture).orElse(Architecture.X86_64), "");
-    }
-
-    private String initPlatform(Environment environment, Platform platform, Architecture architecture) {
-        String propetyKey = DEFAULT_INSTANCE_TYPE_PROPERTY_PERFIX + platform.value() + (architecture == null ? "" : ('.' + architecture.getName()));
-        if (!environment.containsProperty(propetyKey)) {
-            LOGGER.debug("{} property is not set. Defaulting its value to empty string.", propetyKey);
-        }
-        return environment.getProperty(propetyKey, "");
+    private Map<Region, List<String>> getDefaultMap(CloudRegions cloudRegions, Architecture architecture) {
+        return switch (architecture) {
+            case ARM64 -> cloudRegions.getDefaultArmFreeIPAVmtypes();
+            default -> cloudRegions.getDefaultX86FreeIPAVmtypes();
+        };
     }
 }

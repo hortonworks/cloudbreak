@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.model;
 
+import static com.sequenceiq.common.model.Architecture.ARM64;
+import static com.sequenceiq.common.model.Architecture.X86_64;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -20,24 +23,28 @@ public class Coordinate {
 
     private final boolean k8sSupported;
 
-    private final String defaultDbVmType;
-
-    private final String defaultArmDbVmType;
+    private final DefaultVmTypes defaultVmtypes;
 
     private final List<String> entitlements;
 
     private final Set<CdpSupportedServices> cdpSupportedServices;
 
-    protected Coordinate(Double longitude, Double latitude, String displayName, String key, boolean k8sSupported, List<String> entitlements,
-        String defaultDbVmType, String defaultArmDbVmType, Set<CdpSupportedServices> cdpSupportedServices) {
+    protected Coordinate(
+            Double longitude,
+            Double latitude,
+            String displayName,
+            String key,
+            boolean k8sSupported,
+            List<String> entitlements,
+            DefaultVmTypes defaultVmtypes,
+            Set<CdpSupportedServices> cdpSupportedServices) {
         this.longitude = longitude;
         this.latitude = latitude;
         this.displayName = displayName;
         this.key = key;
         this.k8sSupported = k8sSupported;
         this.entitlements = entitlements;
-        this.defaultDbVmType = defaultDbVmType;
-        this.defaultArmDbVmType = defaultArmDbVmType;
+        this.defaultVmtypes = defaultVmtypes != null ? defaultVmtypes : new DefaultVmTypes();
         this.cdpSupportedServices = cdpSupportedServices;
     }
 
@@ -69,12 +76,24 @@ public class Coordinate {
         return k8sSupported;
     }
 
-    public String getDefaultDbVmType() {
-        return defaultDbVmType;
+    public DefaultVmTypes getDefaultVmtypes() {
+        return defaultVmtypes;
     }
 
-    public String getDefaultArmDbVmType() {
-        return defaultArmDbVmType;
+    public List<String> getDefaultDbVmTypes() {
+        return defaultVmtypes.getDatabaseVmType(X86_64);
+    }
+
+    public List<String> getDefaultArmDbVmTypes() {
+        return defaultVmtypes.getDatabaseVmType(ARM64);
+    }
+
+    public List<String> getDefaultX86FreeIPAVmtypes() {
+        return defaultVmtypes.getFreeipaVmType(X86_64);
+    }
+
+    public List<String> getDefaultArmFreeIPAVmtypes() {
+        return defaultVmtypes.getFreeipaVmType(ARM64);
     }
 
     public Set<CdpSupportedServices> getCdpSupportedServices() {
@@ -85,9 +104,15 @@ public class Coordinate {
         return Objects.equals(key, region.getRegionName()) || Objects.equals(displayName, region.getRegionName());
     }
 
-    public static Coordinate coordinate(String longitude, String latitude, String displayName, String key, boolean k8sSupported,
-                                        List<String> entitlements, String defaultDbVmType, String defaultArmDbVmType,
-                                        Set<CdpSupportedServices> cdpSupportedServices) {
+    public static Coordinate coordinate(
+            String longitude,
+            String latitude,
+            String displayName,
+            String key,
+            boolean k8sSupported,
+            List<String> entitlements,
+            DefaultVmTypes defaultVmtypes,
+            Set<CdpSupportedServices> cdpSupportedServices) {
         return new Coordinate(
                 Double.parseDouble(longitude),
                 Double.parseDouble(latitude),
@@ -95,8 +120,7 @@ public class Coordinate {
                 key,
                 k8sSupported,
                 entitlements,
-                defaultDbVmType,
-                defaultArmDbVmType,
+                defaultVmtypes,
                 cdpSupportedServices == null ? new HashSet<>() : cdpSupportedServices);
     }
 
@@ -108,8 +132,7 @@ public class Coordinate {
                 "us-west-1",
                 false,
                 new ArrayList<>(),
-                null,
-                null,
+                new DefaultVmTypes(),
                 Set.of());
     }
 }

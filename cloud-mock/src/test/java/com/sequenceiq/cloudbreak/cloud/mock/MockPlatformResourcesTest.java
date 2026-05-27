@@ -38,6 +38,8 @@ class MockPlatformResourcesTest {
     @Test
     void getDefaultRegionWhenNoDefaultFoundForMockProviderThenShouldReturnWithTheFirstElement() {
         ReflectionTestUtils.setField(underTest, "defaultRegions", "AWS:eu-west-1");
+        ReflectionTestUtils.setField(underTest, "mockDatabaseVmDefault", "largedb");
+        ReflectionTestUtils.setField(underTest, "mockFreeIPAVmDefault", "largefreeipa");
         underTest.init();
         CloudRegions regions = underTest.regions(extendedCloudCredential(new CloudCredential("crn", "mock", "account")),
         region("mock"), new HashMap<>(), true);
@@ -47,6 +49,8 @@ class MockPlatformResourcesTest {
     @Test
     void getDefaultRegionWhenDefaultFoundForMockProviderThenShouldReturnWithDefaultElement() {
         ReflectionTestUtils.setField(underTest, "defaultRegions", "AWS:eu-west-1,MOCK:Europe");
+        ReflectionTestUtils.setField(underTest, "mockDatabaseVmDefault", "largedb");
+        ReflectionTestUtils.setField(underTest, "mockFreeIPAVmDefault", "largefreeipa");
         underTest.init();
         CloudRegions regions = underTest.regions(extendedCloudCredential(new CloudCredential("crn", "mock", "account")),
                 region("mock"), new HashMap<>(), true);

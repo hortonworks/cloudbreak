@@ -1,8 +1,11 @@
 package com.sequenceiq.freeipa.service.stack;
 
+import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
+import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 import static com.sequenceiq.cloudbreak.constant.AwsPlatformResourcesFilterConstants.ARCHITECTURE;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -56,18 +59,23 @@ public class FreeIpaRecommendationService {
     public FreeIpaRecommendationResponse getRecommendation(String credentialCrn, String region, String availabilityZone, String architecture) {
         Credential credential = credentialService.getCredentialByCredCrn(credentialCrn);
         Architecture architectureEnum = Architecture.fromStringWithFallback(architecture);
-        String defaultInstanceType = defaultInstanceTypeProvider.getForPlatform(credential.getCloudPlatform(), architectureEnum);
+        List<String> defaultInstanceTypesProviderForPlatform = defaultInstanceTypeProvider.getForPlatform(
+                credentialCrn,
+                platform(credential.getCloudPlatform()),
+                region(region),
+                architectureEnum
+        );
         Set<VmType> availableAllVmTypes = getAvailableAllVmTypes(region, availabilityZone, credential, architectureEnum.getName());
 
         Optional<VmType> defaultVmType = availableAllVmTypes.stream()
-                .filter(vmType -> defaultInstanceType.equals(vmType.value()))
+                .filter(vmType -> defaultInstanceTypesProviderForPlatform.getFirst().equals(vmType.value()))
                 .findAny();
         Set<VmTypeResponse> availableVmTypes = availableAllVmTypes.stream()
                 .filter(vmType -> filterVmTypeLargerThanDefault(vmType, defaultVmType))
                 .map(vmType -> vmTypeConverter.convert(vmType))
                 .collect(Collectors.toSet());
 
-        return new FreeIpaRecommendationResponse(availableVmTypes, defaultInstanceType);
+        return new FreeIpaRecommendationResponse(availableVmTypes, defaultInstanceTypesProviderForPlatform.getFirst());
     }
 
     private Set<VmType> getAvailableAllVmTypes(String region, String availabilityZone, Credential credential, String architecture) {
@@ -112,8 +120,13 @@ public class FreeIpaRecommendationService {
     }
 
     public void validateCustomInstanceType(Stack stack, Credential credential) {
-        String defaultInstanceType = defaultInstanceTypeProvider.getForPlatform(stack.getCloudPlatform(), stack.getArchitecture());
-        Map<String, String> customInstanceTypes = getCustomInstanceTypes(stack, defaultInstanceType);
+        List<String> defaultInstanceTypesProviderForPlatform = defaultInstanceTypeProvider.getForPlatform(
+                credential.getCrn(),
+                platform(stack.getCloudPlatform()),
+                region(stack.getRegion()),
+                stack.getArchitecture()
+        );
+        Map<String, String> customInstanceTypes = getCustomInstanceTypes(stack, defaultInstanceTypesProviderForPlatform.getFirst());
         if (!customInstanceTypes.isEmpty()) {
             Set<VmType> availableAllVmTypes = getAvailableAllVmTypes(
                     stack.getRegion(),
@@ -121,10 +134,10 @@ public class FreeIpaRecommendationService {
                     credential,
                     Architecture.ALL_ARCHITECTURE);
             Set<VmTypeResponse> availableMinimumRequiredVmTypes = filterVmTypeLargerThanDefault(
-                    defaultInstanceType,
+                    defaultInstanceTypesProviderForPlatform.getFirst(),
                     availableAllVmTypes);
             Optional<VmType> defaultVmType = availableAllVmTypes.stream()
-                    .filter(vmType -> defaultInstanceType.equals(vmType.getValue()))
+                    .filter(vmType -> defaultInstanceTypesProviderForPlatform.getFirst().equals(vmType.getValue()))
                     .findAny();
             Set<String> minimumRequiredVmTypes = availableMinimumRequiredVmTypes.stream()
                     .map(VmTypeResponse::getValue)

@@ -125,7 +125,11 @@ class EnvironmentInitHandlerTest {
         when(virtualGroupService.createVirtualGroups(ACCOUNT_ID, CRN)).thenReturn(virtualGroups);
         CloudRegions cloudRegions = new CloudRegions(Map.of(region(REGION), List.of(AvailabilityZone.availabilityZone(availabilityZone))),
                 Collections.emptyMap(),
-                Collections.emptyMap(), "apple", true);
+                Collections.emptyMap(),
+                Map.of(),
+                "apple",
+                true
+        );
         when(environmentService.getRegionsByEnvironment(environment)).thenReturn(cloudRegions);
         ReflectionTestUtils.setField(environmentInitHandler, "maxAvailabilityZones", 3);
 

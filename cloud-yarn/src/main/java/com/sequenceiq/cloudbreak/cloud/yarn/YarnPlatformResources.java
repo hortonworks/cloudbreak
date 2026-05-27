@@ -71,8 +71,7 @@ public class YarnPlatformResources implements PlatformResources {
                                 regionCoordinateSpecification.getName(),
                                 regionCoordinateSpecification.isK8sSupported(),
                                 regionCoordinateSpecification.getEntitlements(),
-                                regionCoordinateSpecification.getDefaultDbVmtype(),
-                                null,
+                                regionCoordinateSpecification.getDefaultVmtypes(),
                                 regionCoordinateSpecification.getCdpSupportedServices()));
             }
         } catch (IOException ignored) {
@@ -99,7 +98,14 @@ public class YarnPlatformResources implements PlatformResources {
     @Override
     public CloudRegions regions(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters,
         boolean availabilityZonesNeeded) {
-        return new CloudRegions(Collections.emptyMap(), Collections.emptyMap(), regionCoordinates, "", Boolean.FALSE);
+        return new CloudRegions(
+                Collections.emptyMap(),
+                Collections.emptyMap(),
+                regionCoordinates,
+                Map.of(),
+                "",
+                Boolean.FALSE
+        );
     }
 
     @Override

@@ -22,6 +22,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.cloud.model.Coordinate;
+import com.sequenceiq.cloudbreak.cloud.model.DefaultVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.common.domain.CdpSupportedServices;
 import com.sequenceiq.environment.api.v1.platformresource.model.RegionResponse;
@@ -58,8 +59,7 @@ class PlatformRegionsToRegionV1ResponseConverterTest {
                 "coord1",
                 true,
                 List.of(),
-                "deafult",
-                "defaultArm",
+                new DefaultVmTypes(),
                 new HashSet<>(Arrays.asList(CdpSupportedServices.ALL)));
         Coordinate coord2 = coordinate(
                 "1",
@@ -68,18 +68,18 @@ class PlatformRegionsToRegionV1ResponseConverterTest {
                 "coord2",
                 true,
                 List.of(),
-                "deafult",
-                "defaultArm",
+                new DefaultVmTypes(),
                 new HashSet<>(Arrays.asList(CdpSupportedServices.ALL)));
         coordinates.put(region1, coord1);
         coordinates.put(region2, coord2);
 
         mockCloudRegions = new CloudRegions(
-            cloudRegions,
-            displayNames,
-            coordinates,
-            "defaultRegion",
-            true
+                cloudRegions,
+                displayNames,
+                coordinates,
+                Map.of(),
+                "defaultRegion",
+                true
         );
     }
 

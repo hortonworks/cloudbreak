@@ -4,297 +4,810 @@
       "name": "Australia Central",
       "latitude": "-35.3075",
       "longitude": "149.1244",
-      "cdpSupportedServices": [ "ALL" ]
+      "cdpSupportedServices": [
+        "ALL"
+      ],
+      "defaultVmtypes": {
+        "freeipa": {
+          "x86_64": ["Standard_D4s_v5"]
+        },
+        "database": {
+          "x86_64": ["Standard_E4ds_v4"]
+        }
+      }
     },
     {
       "name": "Australia East",
       "latitude": "-33.86",
       "longitude": "151.2094",
-      "cdpSupportedServices": [ "ALL" ]
+      "cdpSupportedServices": [
+        "ALL"
+      ],
+      "defaultVmtypes": {
+        "freeipa": {
+          "x86_64": ["Standard_D4s_v5"]
+        },
+        "database": {
+          "x86_64": ["Standard_E4ds_v4"]
+        }
+      }
     },
     {
       "name": "Australia Southeast",
       "latitude": "-37.8136",
       "longitude": "144.9631",
-      "cdpSupportedServices": [ "ALL" ]
+      "cdpSupportedServices": [
+        "ALL"
+      ],
+      "defaultVmtypes": {
+        "freeipa": {
+          "x86_64": ["Standard_D4s_v5"]
+        },
+        "database": {
+          "x86_64": ["Standard_E4ds_v4"]
+        }
+      }
     },
     {
       "name": "Austria East",
       "latitude": "48.20849",
       "longitude": "16.37208",
-      "cdpSupportedServices": [ "ALL" ]
+      "cdpSupportedServices": [
+        "ALL"
+      ],
+      "defaultVmtypes": {
+        "freeipa": {
+          "x86_64": ["Standard_D4s_v5"]
+        },
+        "database": {
+          "x86_64": ["Standard_E4ds_v4"]
+        }
+      }
     },
     {
       "name": "Belgium Central",
       "latitude": "50.85045",
       "longitude": "4.34878",
-      "cdpSupportedServices": [ "ENVIRONMENT", "DATAHUB", "COD" ]
+      "cdpSupportedServices": [
+        "ENVIRONMENT",
+        "DATAHUB",
+        "COD"
+      ],
+      "defaultVmtypes": {
+        "freeipa": {
+          "x86_64": ["Standard_D4s_v5"]
+        },
+        "database": {
+          "x86_64": ["Standard_E4ds_v4"]
+        }
+      }
     },
     {
       "name": "Brazil South",
       "latitude": "-23.55",
       "longitude": "-46.633",
-      "cdpSupportedServices": [ "ALL" ]
+      "cdpSupportedServices": [
+        "ALL"
+      ],
+      "defaultVmtypes": {
+        "freeipa": {
+          "x86_64": ["Standard_D4s_v5"]
+        },
+        "database": {
+          "x86_64": ["Standard_E4ds_v4"]
+        }
+      }
     },
     {
       "name": "Canada Central",
       "latitude": "43.653",
       "longitude": "-79.383",
-      "cdpSupportedServices": [ "ALL" ]
+      "cdpSupportedServices": [
+        "ALL"
+      ],
+      "defaultVmtypes": {
+        "freeipa": {
+          "x86_64": ["Standard_D4s_v5"]
+        },
+        "database": {
+          "x86_64": ["Standard_E4ds_v4"]
+        }
+      }
     },
     {
       "name": "Canada East",
       "latitude": "46.817",
       "longitude": "-71.217",
-      "cdpSupportedServices": [ "ALL" ]
+      "cdpSupportedServices": [
+        "ALL"
+      ],
+      "defaultVmtypes": {
+        "freeipa": {
+          "x86_64": ["Standard_D4s_v5"]
+        },
+        "database": {
+          "x86_64": ["Standard_E4ds_v4"]
+        }
+      }
     },
     {
       "name": "Central India",
       "latitude": "18.5822",
       "longitude": "73.9197",
-      "cdpSupportedServices": [ "ALL" ]
+      "cdpSupportedServices": [
+        "ALL"
+      ],
+      "defaultVmtypes": {
+        "freeipa": {
+          "x86_64": ["Standard_D4s_v5"]
+        },
+        "database": {
+          "x86_64": ["Standard_E4ds_v4"]
+        }
+      }
     },
     {
       "name": "Central US",
       "latitude": "41.5908",
       "longitude": "-93.6208",
-      "cdpSupportedServices": [ "ALL" ]
+      "cdpSupportedServices": [
+        "ALL"
+      ],
+      "defaultVmtypes": {
+        "freeipa": {
+          "x86_64": ["Standard_D4s_v5"]
+        },
+        "database": {
+          "x86_64": ["Standard_E4ds_v4"]
+        }
+      }
     },
     {
       "name": "Chile Central",
       "latitude": "-33.45694",
       "longitude": "-70.64827",
-      "cdpSupportedServices": [ "ENVIRONMENT", "DATAHUB", "COD" ]
+      "cdpSupportedServices": [
+        "ENVIRONMENT",
+        "DATAHUB",
+        "COD"
+      ],
+      "defaultVmtypes": {
+        "freeipa": {
+          "x86_64": ["Standard_D4s_v5"]
+        },
+        "database": {
+          "x86_64": ["Standard_E4ds_v4"]
+        }
+      }
     },
     {
       "name": "East Asia",
       "latitude": "22.267",
       "longitude": "114.188",
-      "cdpSupportedServices": [ "ALL" ]
+      "cdpSupportedServices": [
+        "ALL"
+      ],
+      "defaultVmtypes": {
+        "freeipa": {
+          "x86_64": ["Standard_D4s_v5"]
+        },
+        "database": {
+          "x86_64": ["Standard_E4ds_v4"]
+        }
+      }
     },
     {
       "name": "East US",
       "latitude": "37.3719",
       "longitude": "-79.8164",
-      "cdpSupportedServices": [ "ALL" ]
+      "cdpSupportedServices": [
+        "ALL"
+      ],
+      "defaultVmtypes": {
+        "freeipa": {
+          "x86_64": ["Standard_D4s_v5"]
+        },
+        "database": {
+          "x86_64": ["Standard_E4ds_v4"]
+        }
+      }
     },
     {
       "name": "East US 2",
       "latitude": "36.6681",
       "longitude": "-78.3889",
-      "cdpSupportedServices": [ "ALL" ]
+      "cdpSupportedServices": [
+        "ALL"
+      ],
+      "defaultVmtypes": {
+        "freeipa": {
+          "x86_64": ["Standard_D4s_v5"]
+        },
+        "database": {
+          "x86_64": ["Standard_E4ds_v4"]
+        }
+      }
     },
     {
       "name": "France Central",
       "latitude": "46.3772",
       "longitude": "2.3730",
-      "cdpSupportedServices": [ "ALL" ]
+      "cdpSupportedServices": [
+        "ALL"
+      ],
+      "defaultVmtypes": {
+        "freeipa": {
+          "x86_64": ["Standard_D4s_v5"]
+        },
+        "database": {
+          "x86_64": ["Standard_E4ds_v4"]
+        }
+      }
     },
     {
       "name": "Germany West Central",
       "latitude": "50.110924",
       "longitude": "8.682127",
-      "cdpSupportedServices": [ "ALL" ]
+      "cdpSupportedServices": [
+        "ALL"
+      ],
+      "defaultVmtypes": {
+        "freeipa": {
+          "x86_64": ["Standard_D4s_v5"]
+        },
+        "database": {
+          "x86_64": ["Standard_E4ds_v4"]
+        }
+      }
     },
     {
       "name": "Indonesia Central",
       "latitude": "-6.21462",
       "longitude": "106.84513",
-      "cdpSupportedServices": [ "ENVIRONMENT", "DATAHUB", "COD" ]
+      "cdpSupportedServices": [
+        "ENVIRONMENT",
+        "DATAHUB",
+        "COD"
+      ],
+      "defaultVmtypes": {
+        "freeipa": {
+          "x86_64": ["Standard_D4s_v5"]
+        },
+        "database": {
+          "x86_64": ["Standard_E4ds_v4"]
+        }
+      }
     },
     {
       "name": "Israel Central",
       "latitude": "31.771959",
       "longitude": "35.217018",
-      "cdpSupportedServices": [ "ALL" ]
+      "cdpSupportedServices": [
+        "ALL"
+      ],
+      "defaultVmtypes": {
+        "freeipa": {
+          "x86_64": ["Standard_D4s_v5"]
+        },
+        "database": {
+          "x86_64": ["Standard_E4ds_v4"]
+        }
+      }
     },
     {
       "name": "Italy North",
       "latitude": "42.83333333",
       "longitude": "12.83333333",
-      "cdpSupportedServices": [ "ALL" ]
+      "cdpSupportedServices": [
+        "ALL"
+      ],
+      "defaultVmtypes": {
+        "freeipa": {
+          "x86_64": ["Standard_D4s_v5"]
+        },
+        "database": {
+          "x86_64": ["Standard_E4ds_v4"]
+        }
+      }
     },
     {
       "name": "Japan East",
       "latitude": "35.68",
       "longitude": "139.77",
-      "cdpSupportedServices": [ "ALL" ]
+      "cdpSupportedServices": [
+        "ALL"
+      ],
+      "defaultVmtypes": {
+        "freeipa": {
+          "x86_64": ["Standard_D4s_v5"]
+        },
+        "database": {
+          "x86_64": ["Standard_E4ds_v4"]
+        }
+      }
     },
     {
       "name": "Japan West",
       "latitude": "34.6939",
       "longitude": "135.5022",
-      "cdpSupportedServices": [ "ALL" ]
+      "cdpSupportedServices": [
+        "ALL"
+      ],
+      "defaultVmtypes": {
+        "freeipa": {
+          "x86_64": ["Standard_D4s_v5"]
+        },
+        "database": {
+          "x86_64": ["Standard_E4ds_v4"]
+        }
+      }
     },
     {
       "name": "Korea Central",
       "latitude": "37.5665",
       "longitude": "126.9780",
-      "cdpSupportedServices": [ "ALL" ]
+      "cdpSupportedServices": [
+        "ALL"
+      ],
+      "defaultVmtypes": {
+        "freeipa": {
+          "x86_64": ["Standard_D4s_v5"]
+        },
+        "database": {
+          "x86_64": ["Standard_E4ds_v4"]
+        }
+      }
     },
     {
       "name": "Korea South",
       "latitude": "35.1796",
       "longitude": "129.0756",
-      "cdpSupportedServices": [ "ALL" ]
+      "cdpSupportedServices": [
+        "ALL"
+      ],
+      "defaultVmtypes": {
+        "freeipa": {
+          "x86_64": ["Standard_D4s_v5"]
+        },
+        "database": {
+          "x86_64": ["Standard_E4ds_v4"]
+        }
+      }
     },
     {
       "name": "Malaysia West",
       "latitude": "3.140853",
       "longitude": "101.693207",
-      "cdpSupportedServices": [ "ENVIRONMENT", "DATAHUB", "COD" ]
+      "cdpSupportedServices": [
+        "ENVIRONMENT",
+        "DATAHUB",
+        "COD"
+      ],
+      "defaultVmtypes": {
+        "freeipa": {
+          "x86_64": ["Standard_D4s_v5"]
+        },
+        "database": {
+          "x86_64": ["Standard_E4ds_v4"]
+        }
+      }
     },
     {
       "name": "Mexico Central",
       "latitude": "19.42847",
       "longitude": "-99.12766",
-      "cdpSupportedServices": [ "ENVIRONMENT", "DATAHUB", "COD" ]
+      "cdpSupportedServices": [
+        "ENVIRONMENT",
+        "DATAHUB",
+        "COD"
+      ],
+      "defaultVmtypes": {
+        "freeipa": {
+          "x86_64": ["Standard_D4s_v5"]
+        },
+        "database": {
+          "x86_64": ["Standard_E4ds_v4"]
+        }
+      }
     },
     {
       "name": "New Zealand North",
       "latitude": "-36.848461",
       "longitude": "174.763336",
-      "cdpSupportedServices": [ "ALL" ]
+      "cdpSupportedServices": [
+        "ALL"
+      ],
+      "defaultVmtypes": {
+        "freeipa": {
+          "x86_64": ["Standard_D4s_v5"]
+        },
+        "database": {
+          "x86_64": ["Standard_E4ds_v4"]
+        }
+      }
     },
     {
       "name": "North Central US",
       "latitude": "41.8819",
       "longitude": "-87.6278",
-      "cdpSupportedServices": [ "ALL" ]
+      "cdpSupportedServices": [
+        "ALL"
+      ],
+      "defaultVmtypes": {
+        "freeipa": {
+          "x86_64": ["Standard_D4s_v5"]
+        },
+        "database": {
+          "x86_64": ["Standard_E4ds_v4"]
+        }
+      }
     },
     {
       "name": "North Europe",
       "latitude": "53.3478",
       "longitude": "-6.2597",
-      "cdpSupportedServices": [ "ALL" ]
+      "cdpSupportedServices": [
+        "ALL"
+      ],
+      "defaultVmtypes": {
+        "freeipa": {
+          "x86_64": ["Standard_D4s_v5"]
+        },
+        "database": {
+          "x86_64": ["Standard_E4ds_v4"]
+        }
+      }
     },
     {
       "name": "Norway East",
       "latitude": "59.913868",
       "longitude": "10.752245",
-      "cdpSupportedServices": [ "ALL" ]
+      "cdpSupportedServices": [
+        "ALL"
+      ],
+      "defaultVmtypes": {
+        "freeipa": {
+          "x86_64": ["Standard_D4s_v5"]
+        },
+        "database": {
+          "x86_64": ["Standard_E4ds_v4"]
+        }
+      }
     },
     {
       "name": "Poland Central",
       "latitude": "52.237049",
       "longitude": "21.017532",
-      "cdpSupportedServices": [ "ALL" ]
+      "cdpSupportedServices": [
+        "ALL"
+      ],
+      "defaultVmtypes": {
+        "freeipa": {
+          "x86_64": ["Standard_D4s_v5"]
+        },
+        "database": {
+          "x86_64": ["Standard_E4ds_v4"]
+        }
+      }
     },
     {
       "name": "Qatar Central",
       "latitude": "25.286106",
       "longitude": "51.534817",
-      "entitlements": [ "CDP_AZURE_DATABASE_FLEXIBLE_SERVER" ],
-      "cdpSupportedServices": [ "ALL" ]
+      "cdpSupportedServices": [
+        "ALL"
+      ],
+      "defaultVmtypes": {
+        "freeipa": {
+          "x86_64": ["Standard_D4s_v5"]
+        },
+        "database": {
+          "x86_64": ["Standard_E4ds_v4"]
+        }
+      }
     },
     {
       "name": "South Africa North",
       "latitude": "-25.731340",
       "longitude": "28.218370",
-      "cdpSupportedServices": [ "ALL" ]
+      "cdpSupportedServices": [
+        "ALL"
+      ],
+      "defaultVmtypes": {
+        "freeipa": {
+          "x86_64": ["Standard_D4s_v5"]
+        },
+        "database": {
+          "x86_64": ["Standard_E4ds_v4"]
+        }
+      }
     },
     {
       "name": "South Central US",
       "latitude": "29.4167",
       "longitude": "-98.5",
-      "cdpSupportedServices": [ "ALL" ]
+      "cdpSupportedServices": [
+        "ALL"
+      ],
+      "defaultVmtypes": {
+        "freeipa": {
+          "x86_64": ["Standard_D4s_v5"]
+        },
+        "database": {
+          "x86_64": ["Standard_E4ds_v4"]
+        }
+      }
     },
     {
       "name": "South India",
       "latitude": "12.9822",
       "longitude": "80.1636",
-      "cdpSupportedServices": [ "ALL" ]
+      "cdpSupportedServices": [
+        "ALL"
+      ],
+      "defaultVmtypes": {
+        "freeipa": {
+          "x86_64": ["Standard_D4s_v5"]
+        },
+        "database": {
+          "x86_64": ["Standard_E4ds_v4"]
+        }
+      }
     },
     {
       "name": "Southeast Asia",
       "latitude": "1.283",
       "longitude": "103.833",
-      "cdpSupportedServices": [ "ALL" ]
+      "cdpSupportedServices": [
+        "ALL"
+      ],
+      "defaultVmtypes": {
+        "freeipa": {
+          "x86_64": ["Standard_D4s_v5"]
+        },
+        "database": {
+          "x86_64": ["Standard_E4ds_v4"]
+        }
+      }
     },
     {
       "name": "Spain Central",
       "latitude": "40.416775",
       "longitude": "-3.703790",
-      "cdpSupportedServices": [ "ALL" ]
+      "cdpSupportedServices": [
+        "ALL"
+      ],
+      "defaultVmtypes": {
+        "freeipa": {
+          "x86_64": ["Standard_D4s_v5"]
+        },
+        "database": {
+          "x86_64": ["Standard_E4ds_v4"]
+        }
+      }
     },
     {
       "name": "Sweden Central",
       "latitude": "60.5932999",
       "longitude": "16.9514008",
-      "cdpSupportedServices": [ "ALL" ]
+      "cdpSupportedServices": [
+        "ALL"
+      ],
+      "defaultVmtypes": {
+        "freeipa": {
+          "x86_64": ["Standard_D4s_v5"]
+        },
+        "database": {
+          "x86_64": ["Standard_E4ds_v4"]
+        }
+      }
     },
     {
       "name": "Switzerland North",
       "latitude": "47.451542",
       "longitude": "8.564572",
-      "cdpSupportedServices": [ "ALL" ]
+      "cdpSupportedServices": [
+        "ALL"
+      ],
+      "defaultVmtypes": {
+        "freeipa": {
+          "x86_64": ["Standard_D4s_v5"]
+        },
+        "database": {
+          "x86_64": ["Standard_E4ds_v4"]
+        }
+      }
     },
     {
       "name": "Switzerland West",
       "latitude": "47.373878",
       "longitude": "8.545094",
-      "entitlements": [ "CDP_AZURE_IMAGE_MARKETPLACE" ],
-      "cdpSupportedServices": [ "ALL" ]
+      "entitlements": [
+        "CDP_AZURE_IMAGE_MARKETPLACE"
+      ],
+      "cdpSupportedServices": [
+        "ALL"
+      ],
+      "defaultVmtypes": {
+        "freeipa": {
+          "x86_64": ["Standard_D4s_v5"]
+        },
+        "database": {
+          "x86_64": ["Standard_E4ds_v4"]
+        }
+      }
     },
     {
       "name": "UAE Central",
       "latitude": "59.913868",
       "longitude": "10.752245",
-      "entitlements": [ "CDP_AZURE_IMAGE_MARKETPLACE", "CDP_AZURE_UAE_CENTRAL" ],
-      "cdpSupportedServices": [ "ALL" ]
+      "entitlements": [
+        "CDP_AZURE_IMAGE_MARKETPLACE",
+        "CDP_AZURE_UAE_CENTRAL"
+      ],
+      "cdpSupportedServices": [
+        "ALL"
+      ],
+      "defaultVmtypes": {
+        "freeipa": {
+          "x86_64": ["Standard_D4s_v5"]
+        },
+        "database": {
+          "x86_64": ["Standard_E4ds_v4"]
+        }
+      }
     },
     {
       "name": "UAE North",
       "latitude": "25.266666",
       "longitude": "55.316666",
-      "cdpSupportedServices": [ "ALL" ]
+      "cdpSupportedServices": [
+        "ALL"
+      ],
+      "defaultVmtypes": {
+        "freeipa": {
+          "x86_64": ["Standard_D4s_v5"]
+        },
+        "database": {
+          "x86_64": ["Standard_E4ds_v4"]
+        }
+      }
     },
     {
       "name": "UK South",
       "latitude": "50.941",
       "longitude": "-0.799",
-      "cdpSupportedServices": [ "ALL" ]
+      "cdpSupportedServices": [
+        "ALL"
+      ],
+      "defaultVmtypes": {
+        "freeipa": {
+          "x86_64": ["Standard_D4s_v5"]
+        },
+        "database": {
+          "x86_64": ["Standard_E4ds_v4"]
+        }
+      }
     },
     {
       "name": "UK West",
       "latitude": "53.427",
       "longitude": "-3.084",
-      "cdpSupportedServices": [ "ALL" ]
+      "cdpSupportedServices": [
+        "ALL"
+      ],
+      "defaultVmtypes": {
+        "freeipa": {
+          "x86_64": ["Standard_D4s_v5"]
+        },
+        "database": {
+          "x86_64": ["Standard_E4ds_v4"]
+        }
+      }
     },
     {
       "name": "West Central US",
       "latitude": "40.890",
       "longitude": "-110.234",
-      "cdpSupportedServices": [ "ENVIRONMENT", "DATAHUB", "COD", "CDE", "CDF" ]
+      "cdpSupportedServices": [
+        "ENVIRONMENT",
+        "DATAHUB",
+        "COD",
+        "CDE",
+        "CDF"
+      ],
+      "defaultVmtypes": {
+        "freeipa": {
+          "x86_64": ["Standard_D4s_v5"]
+        },
+        "database": {
+          "x86_64": ["Standard_E4ds_v4"]
+        }
+      }
     },
     {
       "name": "West Europe",
       "latitude": "52.3667",
       "longitude": "4.9",
-      "cdpSupportedServices": [ "ALL" ]
+      "cdpSupportedServices": [
+        "ALL"
+      ],
+      "defaultVmtypes": {
+        "freeipa": {
+          "x86_64": ["Standard_D4s_v5"]
+        },
+        "database": {
+          "x86_64": ["Standard_E4ds_v4"]
+        }
+      }
     },
     {
       "name": "West India",
       "latitude": "19.088",
       "longitude": "72.868",
-      "cdpSupportedServices": [ "ENVIRONMENT", "DATAHUB", "COD" ]
+      "cdpSupportedServices": [
+        "ENVIRONMENT",
+        "DATAHUB",
+        "COD"
+      ],
+      "defaultVmtypes": {
+        "freeipa": {
+          "x86_64": ["Standard_D4s_v5"]
+        },
+        "database": {
+          "x86_64": ["Standard_E4ds_v4"]
+        }
+      }
     },
     {
       "name": "West US",
       "latitude": "37.783",
       "longitude": "-122.417",
-      "cdpSupportedServices": [ "ALL" ]
+      "cdpSupportedServices": [
+        "ALL"
+      ],
+      "defaultVmtypes": {
+        "freeipa": {
+          "x86_64": ["Standard_D4s_v5"]
+        },
+        "database": {
+          "x86_64": ["Standard_E4ds_v4"]
+        }
+      }
     },
     {
       "name": "West US 2",
       "latitude": "47.233",
       "longitude": "-119.852",
-      "cdpSupportedServices": [ "ALL" ]
-    },{
+      "cdpSupportedServices": [
+        "ALL"
+      ],
+      "defaultVmtypes": {
+        "freeipa": {
+          "x86_64": ["Standard_D4s_v5"]
+        },
+        "database": {
+          "x86_64": ["Standard_E4ds_v4"]
+        }
+      }
+    },
+    {
       "name": "West US 3",
       "latitude": "33.44838",
       "longitude": "-112.07404",
-      "cdpSupportedServices": [ "ENVIRONMENT", "DATAHUB", "COD" ]
+      "cdpSupportedServices": [
+        "ENVIRONMENT",
+        "DATAHUB",
+        "COD"
+      ],
+      "defaultVmtypes": {
+        "freeipa": {
+          "x86_64": ["Standard_D4s_v5"]
+        },
+        "database": {
+          "x86_64": ["Standard_E4ds_v4"]
+        }
+      }
     }
   ]
 }

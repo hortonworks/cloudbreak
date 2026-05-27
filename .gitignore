@@ -55,3 +55,4 @@ resource_names_*.json
 
 *.log
 .sdkmanrc
+.claude/settings.local.json

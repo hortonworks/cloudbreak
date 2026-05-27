@@ -222,8 +222,8 @@ public class StackToCloudStackConverter implements Converter<Stack, CloudStack> 
             Volume volume = new Volume("/mnt/vol" + (i + 1), template.getVolumeType(), template.getVolumeSize(), CloudVolumeUsageType.GENERAL);
             volumes.add(volume);
         }
-        return new InstanceTemplate(template.getInstanceType(), name, privateId, volumes, status, fields, template.getId(), instanceImageId,
-                TemporaryStorage.ATTACHED_VOLUMES, 0L);
+        return new InstanceTemplate(template.getInstanceType(), template.getFallbackInstanceTypesAsList(), name, privateId, volumes, status, fields,
+                template.getId(), instanceImageId, TemporaryStorage.ATTACHED_VOLUMES, 0L);
     }
 
     private Map<String, String> getUserDefinedTags(Stack stack) {

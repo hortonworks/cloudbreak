@@ -143,7 +143,7 @@ class GcpEnvironmentNetworkValidatorTest {
                         .withLocationDto(LocationDto.builder().build())
                         .build())
                 .build();
-        CloudRegions cloudRegions = new CloudRegions(Map.of(), Map.of(), Map.of(), "defaultRegion", Boolean.TRUE);
+        CloudRegions cloudRegions = new CloudRegions(Map.of(), Map.of(), Map.of(), Map.of(), "defaultRegion", Boolean.TRUE);
         when(platformParameterService.getRegionsByCredential(any(), eq(Boolean.TRUE))).thenReturn(cloudRegions);
 
         underTest.validateDuringFlow(environmentValidationDto, networkDto, validationResultBuilder);
@@ -168,7 +168,7 @@ class GcpEnvironmentNetworkValidatorTest {
                         .build())
                 .build();
 
-        CloudRegions cloudRegions = new CloudRegions(Map.of(), Map.of(), Map.of(), "defaultRegion", Boolean.TRUE);
+        CloudRegions cloudRegions = new CloudRegions(Map.of(), Map.of(), Map.of(), Map.of(), "defaultRegion", Boolean.TRUE);
         when(platformParameterService.getRegionsByCredential(any(), eq(Boolean.TRUE))).thenReturn(cloudRegions);
 
         underTest.validateDuringFlow(environmentValidationDto, networkDto, validationResultBuilder);
@@ -193,7 +193,7 @@ class GcpEnvironmentNetworkValidatorTest {
                         .build())
                 .build();
 
-        CloudRegions cloudRegions = new CloudRegions(Map.of(), Map.of(), Map.of(), "defaultRegion", Boolean.TRUE);
+        CloudRegions cloudRegions = new CloudRegions(Map.of(), Map.of(), Map.of(), Map.of(), "defaultRegion", Boolean.TRUE);
         when(platformParameterService.getRegionsByCredential(any(), eq(Boolean.TRUE))).thenReturn(cloudRegions);
 
         underTest.validateDuringFlow(environmentValidationDto, networkDto, validationResultBuilder);
@@ -222,7 +222,7 @@ class GcpEnvironmentNetworkValidatorTest {
                 .build();
 
         Map<Region, List<AvailabilityZone>> zonesByRegion = Map.of(Region.region("anotherRegion"), List.of(availabilityZone("gcp-region-zone-2")));
-        CloudRegions cloudRegions = new CloudRegions(zonesByRegion, Map.of(), Map.of(), "region", Boolean.TRUE);
+        CloudRegions cloudRegions = new CloudRegions(zonesByRegion, Map.of(), Map.of(), Map.of(), "region", Boolean.TRUE);
         when(platformParameterService.getRegionsByCredential(any(), eq(Boolean.TRUE))).thenReturn(cloudRegions);
 
         underTest.validateDuringFlow(environmentValidationDto, networkDto, validationResultBuilder);
@@ -454,7 +454,7 @@ class GcpEnvironmentNetworkValidatorTest {
     private List<AvailabilityZone> setupRegionsByCredential(Region region, String zone1, String zone2) {
         List<AvailabilityZone> zonesFromProvider = List.of(availabilityZone(zone1), availabilityZone(zone2));
         Map<Region, List<AvailabilityZone>> zonesByRegion = Map.of(region, zonesFromProvider);
-        CloudRegions cloudRegions = new CloudRegions(zonesByRegion, Map.of(), Map.of(), "region", Boolean.TRUE);
+        CloudRegions cloudRegions = new CloudRegions(zonesByRegion, Map.of(), Map.of(), Map.of(), "region", Boolean.TRUE);
         when(platformParameterService.getRegionsByCredential(any(), eq(Boolean.TRUE))).thenReturn(cloudRegions);
         return zonesFromProvider;
     }

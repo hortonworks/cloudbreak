@@ -92,6 +92,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.Coordinate;
 import com.sequenceiq.cloudbreak.cloud.model.DefaultPlatformDatabaseCapabilities;
+import com.sequenceiq.cloudbreak.cloud.model.DefaultVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformDatabaseCapabilities;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
@@ -102,7 +103,6 @@ import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta.VmTypeMetaBuilder;
 import com.sequenceiq.cloudbreak.cloud.model.dns.CloudPrivateDnsZones;
 import com.sequenceiq.cloudbreak.cloud.model.nosql.CloudNoSqlTables;
 import com.sequenceiq.cloudbreak.cloud.model.resourcegroup.CloudResourceGroups;
-import com.sequenceiq.cloudbreak.common.domain.CdpSupportedServices;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
 import com.sequenceiq.cloudbreak.filter.MinimalHardwareFilter;
@@ -175,7 +175,7 @@ public class GcpPlatformResources implements PlatformResources {
 
     @PostConstruct
     public void init() {
-        regionCoordinates = readRegionCoordinates(resourceDefinition("zone-coordinates"));
+        regionCoordinates = readRegionCoordinates(resourceDefinition("enabled-regions"));
     }
 
     public String resourceDefinition(String resource) {
@@ -195,9 +195,10 @@ public class GcpPlatformResources implements PlatformResources {
                                 regionCoordinateSpecification.getName(),
                                 regionCoordinateSpecification.isK8sSupported(),
                                 regionCoordinateSpecification.getEntitlements(),
-                                regionCoordinateSpecification.getDefaultDbVmtype(),
-                                null,
-                                regionCoordinateSpecification.getCdpSupportedServices()));
+                                regionCoordinateSpecification.getDefaultVmtypes(),
+                                regionCoordinateSpecification.getCdpSupportedServices()
+                        )
+                );
             }
         } catch (IOException ignored) {
             return regionCoordinates;
@@ -408,7 +409,7 @@ public class GcpPlatformResources implements PlatformResources {
     }
 
     @Override
-    @Cacheable(cacheNames = "cloudResourceRegionCache", key = "#cloudCredential?.id")
+    @Cacheable(cacheNames = "cloudResourceRegionCache", key = "{ #cloudCredential?.id, #region }")
     public CloudRegions regions(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters,
             boolean availabilityZonesNeeded) throws Exception {
         Compute compute = gcpComputeFactory.buildCompute(cloudCredential);
@@ -417,6 +418,7 @@ public class GcpPlatformResources implements PlatformResources {
         Map<Region, List<AvailabilityZone>> regionListMap = new HashMap<>();
         Map<Region, String> displayNames = new HashMap<>();
         Map<Region, Coordinate> coordinates = new HashMap<>();
+        Map<Region, DefaultVmTypes> defaultVmtypesMap = new HashMap<>();
 
         String defaultRegion = gcpZoneParameterDefault;
         RegionList regionList = compute.regions().list(projectId).execute();
@@ -433,12 +435,13 @@ public class GcpPlatformResources implements PlatformResources {
                 regionListMap.put(region(gcpRegion.getName()), availabilityZones);
                 displayNames.put(region(gcpRegion.getName()), displayName(gcpRegion.getName()));
                 addCoordinate(coordinates, gcpRegion);
+                defaultVmtypesMap.put(region(gcpRegion.getName()), coordinate.getDefaultVmtypes());
             }
         }
         if (region != null && !Strings.isNullOrEmpty(region.value())) {
             defaultRegion = region.value();
         }
-        return new CloudRegions(regionListMap, displayNames, coordinates, defaultRegion, true);
+        return new CloudRegions(regionListMap, displayNames, coordinates, defaultVmtypesMap, defaultRegion, true);
     }
 
     @Override
@@ -447,34 +450,20 @@ public class GcpPlatformResources implements PlatformResources {
         Map<Region, List<AvailabilityZone>> regionListMap = new HashMap<>();
         Map<Region, String> displayNames = new HashMap<>();
         Map<Region, Coordinate> coordinates = new HashMap<>();
-
+        Map<Region, DefaultVmTypes> defaultVmtypesMap = new HashMap<>();
 
         for (Map.Entry<Region, Coordinate> enabledRegion : regionCoordinates.entrySet()) {
-            Set<CdpSupportedServices> cdpServices = enabledRegion.getValue().getCdpSupportedServices()
-                    .stream()
-                    .map(e -> e.services())
-                    .flatMap(list -> list.stream())
-                    .collect(Collectors.toSet());
-
             regionListMap.put(enabledRegion.getKey(), List.of());
             Coordinate regionCoordinateSpecification = enabledRegion.getValue();
             displayNames.put(enabledRegion.getKey(), enabledRegion.getValue().getDisplayName());
-            Coordinate coordinate = coordinate(
-                    regionCoordinateSpecification.getLongitude().toString(),
-                    regionCoordinateSpecification.getLatitude().toString(),
-                    regionCoordinateSpecification.getDisplayName(),
-                    regionCoordinateSpecification.getKey(),
-                    regionCoordinateSpecification.isK8sSupported(),
-                    regionCoordinateSpecification.getEntitlements(),
-                    regionCoordinateSpecification.getDefaultDbVmType(),
-                    null,
-                    cdpServices);
-            coordinates.put(enabledRegion.getKey(), coordinate);
+            coordinates.put(enabledRegion.getKey(), regionCoordinateSpecification);
+            defaultVmtypesMap.put(enabledRegion.getKey(), regionCoordinateSpecification.getDefaultVmtypes());
         }
         return new CloudRegions(
                 regionListMap,
                 displayNames,
                 coordinates,
+                defaultVmtypesMap,
                 gcpZoneParameterDefault,
                 true);
     }
@@ -775,7 +764,7 @@ public class GcpPlatformResources implements PlatformResources {
             CloudRegions regions = regions((ExtendedCloudCredential) cloudCredential, region, filters, false);
             Map<Region, String> regionDefaultInstanceTypeMap = new HashMap<>();
             for (Region actualRegion : regions.getCloudRegions().keySet()) {
-                String defaultDbVmType = regionCoordinates.get(actualRegion).getDefaultDbVmType();
+                String defaultDbVmType = regionCoordinates.get(actualRegion).getDefaultDbVmTypes().getFirst();
                 regionDefaultInstanceTypeMap.put(actualRegion, defaultDbVmType == null ? gcpDatabaseVmDefault : defaultDbVmType);
             }
             return new PlatformDatabaseCapabilities(

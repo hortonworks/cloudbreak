@@ -113,8 +113,7 @@ public class OpenStackPlatformResources implements PlatformResources {
                                 regionCoordinateSpecification.getName(),
                                 regionCoordinateSpecification.isK8sSupported(),
                                 regionCoordinateSpecification.getEntitlements(),
-                                regionCoordinateSpecification.getDefaultDbVmtype(),
-                                null,
+                                regionCoordinateSpecification.getDefaultVmtypes(),
                                 regionCoordinateSpecification.getCdpSupportedServices()));
             }
         } catch (IOException ignored) {
@@ -227,13 +226,13 @@ public class OpenStackPlatformResources implements PlatformResources {
             cloudRegions.put(region(regionFromOpenStack), availabilityZones);
             displayNames.put(region(regionFromOpenStack), regionFromOpenStack);
             coordinates.put(region(regionFromOpenStack), Coordinate.coordinate("-119.7729841", "36.7477169", regionFromOpenStack, regionFromOpenStack,
-                    false, null, null, null, null));
+                    false, null, null, null));
         }
         String defaultRegion = null;
         if (!cloudRegions.keySet().isEmpty()) {
             defaultRegion = ((StringType) cloudRegions.keySet().toArray()[0]).value();
         }
-        CloudRegions regions = new CloudRegions(cloudRegions, displayNames, coordinates, defaultRegion, true);
+        CloudRegions regions = new CloudRegions(cloudRegions, displayNames, coordinates, Map.of(), defaultRegion, true);
         LOGGER.debug("Openstack regions result: {}", regions);
         return regions;
     }

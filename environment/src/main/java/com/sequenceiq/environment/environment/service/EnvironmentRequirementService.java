@@ -1,14 +1,16 @@
 package com.sequenceiq.environment.environment.service;
 
+import static java.util.stream.Collectors.toSet;
+
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.support.response.DataHubPlatformSupportRequirements;
 import com.sequenceiq.cloudbreak.cloud.model.CloudDatabaseVmTypes;
+import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.common.api.type.CdpResourceType;
@@ -61,13 +63,13 @@ public class EnvironmentRequirementService {
     public PlatformRequirementsResponse getPlatformRequirementsResponse(PlatformResourceRequest platformResourceRequest) {
         String cloudPlatform = platformResourceRequest.getCloudPlatform();
         Set<String> defaultInstanceTypesInRegion = getInstanceTypesInRegion(platformResourceRequest);
-        Set<String> freeIpaInstanceTypesInRegion = getFreeIpaInstanceTypesInRegion(platformResourceRequest);
         Set<String> databaseInstanceTypesInRegion = getCloudDatabaseVmTypes(platformResourceRequest);
+        Set<String> freeIpaInstanceTypesInRegion = getFreeIpaInstanceTypesInRegion(platformResourceRequest);
 
         return PlatformRequirementsResponse.builder()
                 .withDataHub(getDataHubSupportRequirements(defaultInstanceTypesInRegion, datahubService.getInstanceTypesByPlatform(cloudPlatform)))
                 .withDataLake(getDataLakeSupportRequirements(defaultInstanceTypesInRegion, sdxService.getInstanceTypesByPlatform(cloudPlatform)))
-                .withFreeIpa(getFreeIpaSupportRequirements(freeIpaInstanceTypesInRegion, freeIpaService.internalGetInstanceTypesByPlatform(cloudPlatform)))
+                .withFreeIpa(getFreeIpaSupportRequirements(freeIpaInstanceTypesInRegion, getFreeIpaPlatformSupportRequirements(platformResourceRequest)))
                 .withDatabase(getDatabaseSupportRequirements(databaseInstanceTypesInRegion, redBeamsService.getInstanceTypesByPlatform(cloudPlatform)))
                 .withInstanceTypesInRegion(defaultInstanceTypesInRegion)
                 .withDatabaseInstanceTypesInRegion(databaseInstanceTypesInRegion)
@@ -75,16 +77,25 @@ public class EnvironmentRequirementService {
                 .build();
     }
 
+    private FreeIpaPlatformSupportRequirements getFreeIpaPlatformSupportRequirements(PlatformResourceRequest platformResourceRequest) {
+        CloudRegions regions = platformParameterService.getRegionsByCredential(platformResourceRequest, false);
+        FreeIpaPlatformSupportRequirements freeIpaPlatformSupportRequirements = new FreeIpaPlatformSupportRequirements();
+        freeIpaPlatformSupportRequirements.setDefaultArmInstanceTypeRequirements(
+                regions.getDefaultArmFreeIPAVmtypesByRegion(platformResourceRequest.getRegion()).stream().collect(toSet()));
+        freeIpaPlatformSupportRequirements.setDefaultX86InstanceTypeRequirements(
+                regions.getDefaultX86FreeIPAVmtypesByRegion(platformResourceRequest.getRegion()).stream().collect(toSet()));
+        return freeIpaPlatformSupportRequirements;
+    }
+
     private Set<String> getCloudDatabaseVmTypes(PlatformResourceRequest platformResourceRequest) {
         CloudDatabaseVmTypes x86Vms = platformParameterService.getDatabaseVmTypesByCredential(getX86Request(platformResourceRequest));
         CloudDatabaseVmTypes armVms = platformParameterService.getDatabaseVmTypesByCredential(getARMRequest(platformResourceRequest));
 
         Set<String> vmTypes = new HashSet<>();
-        vmTypes.addAll(x86Vms.getCloudDatabaseVmResponses().values().stream().flatMap(Set::stream).collect(Collectors.toSet()));
-        vmTypes.addAll(armVms.getCloudDatabaseVmResponses().values().stream().flatMap(Set::stream).collect(Collectors.toSet()));
+        vmTypes.addAll(x86Vms.getCloudDatabaseVmResponses().values().stream().flatMap(Set::stream).collect(toSet()));
+        vmTypes.addAll(armVms.getCloudDatabaseVmResponses().values().stream().flatMap(Set::stream).collect(toSet()));
 
-        return vmTypes.stream()
-                .collect(Collectors.toSet());
+        return vmTypes.stream().collect(toSet());
     }
 
     private Set<String> getInstanceTypesInRegion(PlatformResourceRequest platformResourceRequest) {
@@ -92,12 +103,12 @@ public class EnvironmentRequirementService {
         CloudVmTypes armVms = platformParameterService.getVmTypesByCredential(getARMRequest(platformResourceRequest));
 
         Set<VmType> vmTypes = new HashSet<>();
-        vmTypes.addAll(x86Vms.getCloudVmResponses().values().stream().flatMap(Set::stream).collect(Collectors.toSet()));
-        vmTypes.addAll(armVms.getCloudVmResponses().values().stream().flatMap(Set::stream).collect(Collectors.toSet()));
+        vmTypes.addAll(x86Vms.getCloudVmResponses().values().stream().flatMap(Set::stream).collect(toSet()));
+        vmTypes.addAll(armVms.getCloudVmResponses().values().stream().flatMap(Set::stream).collect(toSet()));
 
         return vmTypes.stream()
                 .map(VmType::getValue)
-                .collect(Collectors.toSet());
+                .collect(toSet());
     }
 
     private Set<String> getFreeIpaInstanceTypesInRegion(PlatformResourceRequest platformResourceRequest) {
@@ -105,12 +116,12 @@ public class EnvironmentRequirementService {
         CloudVmTypes armVms = platformParameterService.getVmTypesByCredential(getFreeIpaARMRequest(platformResourceRequest));
 
         Set<VmType> vmTypes = new HashSet<>();
-        vmTypes.addAll(x86Vms.getCloudVmResponses().values().stream().flatMap(Set::stream).collect(Collectors.toSet()));
-        vmTypes.addAll(armVms.getCloudVmResponses().values().stream().flatMap(Set::stream).collect(Collectors.toSet()));
+        vmTypes.addAll(x86Vms.getCloudVmResponses().values().stream().flatMap(Set::stream).collect(toSet()));
+        vmTypes.addAll(armVms.getCloudVmResponses().values().stream().flatMap(Set::stream).collect(toSet()));
 
         return vmTypes.stream()
                 .map(VmType::getValue)
-                .collect(Collectors.toSet());
+                .collect(toSet());
     }
 
     private PlatformResourceRequest getX86Request(PlatformResourceRequest request) {
@@ -166,7 +177,7 @@ public class EnvironmentRequirementService {
         return requirements
                 .stream()
                 .filter(type -> !type.contains("custom"))
-                .collect(Collectors.toSet());
+                .collect(toSet());
     }
 
     private DataHubSupportRequirements getDataHubSupportRequirements(
@@ -192,6 +203,6 @@ public class EnvironmentRequirementService {
     private Set<String> getMissingInstanceTypes(Set<String> requiredInstanceTypes, Set<String> instanceTypesInRegion) {
         return requiredInstanceTypes.stream()
                 .filter(req -> !instanceTypesInRegion.contains(req))
-                .collect(Collectors.toSet());
+                .collect(toSet());
     }
 }
