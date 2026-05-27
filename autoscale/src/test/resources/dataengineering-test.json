@@ -3,6 +3,10 @@
   "displayName": "dataengineering",
   "services": [
     {
+      "refName": "data_context_connector-1afa",
+      "serviceType": "DATA_CONTEXT_CONNECTOR"
+    },
+    {
       "refName": "zookeeper",
       "serviceType": "ZOOKEEPER",
       "roleConfigGroups": [
