@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -26,6 +27,8 @@ import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 
 @Service
 public class StackResponseUtils {
+
+    private static final String DATA_CONTEXT_CONNECTOR = "DATA_CONTEXT_CONNECTOR";
 
     public Optional<InstanceMetaDataV4Response> getNotTerminatedPrimaryGateways(StackV4Response stackResponse) {
         return stackResponse.getInstanceGroups().stream().flatMap(ig -> ig.getMetadata().stream()).filter(
@@ -117,9 +120,11 @@ public class StackResponseUtils {
 
         Set<String> servicesOnHostGroup = new HashSet<>();
         for (ApiClusterTemplateService apiClusterTemplateService : cmTemplate.getServices()) {
-            for (ApiClusterTemplateRoleConfigGroup apiClusterTemplateRoleConfigGroup : apiClusterTemplateService.getRoleConfigGroups()) {
-                if (hostGroupRoleConfigNames.contains(apiClusterTemplateRoleConfigGroup.getRefName())) {
-                    servicesOnHostGroup.add(apiClusterTemplateRoleConfigGroup.getRoleType());
+            if (!Objects.equals(apiClusterTemplateService.getServiceType(), DATA_CONTEXT_CONNECTOR)) {
+                for (ApiClusterTemplateRoleConfigGroup apiClusterTemplateRoleConfigGroup : apiClusterTemplateService.getRoleConfigGroups()) {
+                    if (hostGroupRoleConfigNames.contains(apiClusterTemplateRoleConfigGroup.getRefName())) {
+                        servicesOnHostGroup.add(apiClusterTemplateRoleConfigGroup.getRoleType());
+                    }
                 }
             }
         }
