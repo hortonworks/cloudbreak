@@ -114,7 +114,7 @@ public class RollingVerticalScaleService {
         if (!instanceIds.isEmpty()) {
             if (payload.getTemplate().getInstanceType() != null) {
                 flowMessageService.fireEventAndLog(stackId,
-                        UPDATE_IN_PROGRESS.name(),
+                        UPDATE_FAILED.name(),
                         CLUSTER_VERTICALSCALING_INSTANCES_FAILED,
                         payload.getGroup(),
                         String.join(", ", instanceIds),

@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.core.flow2.stack.upscale;
 
 import static com.sequenceiq.cloudbreak.TestUtil.instanceMetaData;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_FAILED;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_INFRASTRUCTURE_UPDATE_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_REPAIR_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_UPSCALE_QUOTA_ISSUE;
@@ -214,7 +213,7 @@ class StackUpscaleServiceTest {
         UpscaleStackRequest<UpscaleStackResult> upscaleStackRequest = new UpscaleStackRequest<>(mock(CloudContext.class), mock(CloudCredential.class),
                 cloudStack, new ArrayList<>(), adjustmentTypeWithThreshold, false);
         underTest.upscale(mock(AuthenticatedContext.class), upscaleStackRequest, connector);
-        verify(flowMessageService, times(1)).fireEventAndLog(upscaleStackRequest.getResourceId(), UPDATE_IN_PROGRESS.name(), STACK_UPSCALE_QUOTA_ISSUE,
+        verify(flowMessageService, times(1)).fireEventAndLog(upscaleStackRequest.getResourceId(), UPDATE_FAILED.name(), STACK_UPSCALE_QUOTA_ISSUE,
                 "quota error");
         ArgumentCaptor<CloudStack> cloudStackArgumentCaptor = ArgumentCaptor.forClass(CloudStack.class);
         verify(resourceConnector, times(2)).upscale(any(), cloudStackArgumentCaptor.capture(), any(), eq(adjustmentTypeWithThreshold));
@@ -275,7 +274,7 @@ class StackUpscaleServiceTest {
                 cloudStack, new ArrayList<>(), adjustmentTypeWithThreshold, false);
         assertThrows(CloudConnectorException.class, () -> underTest.upscale(mock(AuthenticatedContext.class), upscaleStackRequest,
                 connector));
-        verify(flowMessageService, times(1)).fireEventAndLog(upscaleStackRequest.getResourceId(), UPDATE_IN_PROGRESS.name(), STACK_UPSCALE_QUOTA_ISSUE,
+        verify(flowMessageService, times(1)).fireEventAndLog(upscaleStackRequest.getResourceId(), UPDATE_FAILED.name(), STACK_UPSCALE_QUOTA_ISSUE,
                 "quota error");
         ArgumentCaptor<CloudStack> cloudStackArgumentCaptor = ArgumentCaptor.forClass(CloudStack.class);
         verify(resourceConnector, times(1)).upscale(any(), cloudStackArgumentCaptor.capture(), any(), eq(adjustmentTypeWithThreshold));
@@ -329,7 +328,7 @@ class StackUpscaleServiceTest {
                 cloudStack, new ArrayList<>(), adjustmentTypeWithThreshold, false);
         assertThrows(CloudConnectorException.class, () -> underTest.upscale(mock(AuthenticatedContext.class), upscaleStackRequest,
                 connector));
-        verify(flowMessageService, times(1)).fireEventAndLog(upscaleStackRequest.getResourceId(), UPDATE_IN_PROGRESS.name(), STACK_UPSCALE_QUOTA_ISSUE,
+        verify(flowMessageService, times(1)).fireEventAndLog(upscaleStackRequest.getResourceId(), UPDATE_FAILED.name(), STACK_UPSCALE_QUOTA_ISSUE,
                 "quota error");
         ArgumentCaptor<CloudStack> cloudStackArgumentCaptor = ArgumentCaptor.forClass(CloudStack.class);
         verify(resourceConnector, times(1)).upscale(any(), cloudStackArgumentCaptor.capture(), any(), eq(adjustmentTypeWithThreshold));
@@ -386,7 +385,7 @@ class StackUpscaleServiceTest {
 
         underTest.upscale(authenticatedContext, upscaleStackRequest, connector);
 
-        verify(flowMessageService, times(1)).fireEventAndLog(upscaleStackRequest.getResourceId(), UPDATE_IN_PROGRESS.name(), STACK_UPSCALE_QUOTA_ISSUE,
+        verify(flowMessageService, times(1)).fireEventAndLog(upscaleStackRequest.getResourceId(), UPDATE_FAILED.name(), STACK_UPSCALE_QUOTA_ISSUE,
                 "quota error");
         ArgumentCaptor<CloudStack> cloudStackArgumentCaptor = ArgumentCaptor.forClass(CloudStack.class);
         verify(resourceConnector, times(2)).upscale(any(), cloudStackArgumentCaptor.capture(), any(), eq(adjustmentTypeWithThreshold));
@@ -450,7 +449,7 @@ class StackUpscaleServiceTest {
                 cloudStack, new ArrayList<>(), adjustmentTypeWithThreshold, false);
         assertThrows(CloudConnectorException.class, () -> underTest.upscale(mock(AuthenticatedContext.class), upscaleStackRequest,
                 connector));
-        verify(flowMessageService, times(1)).fireEventAndLog(upscaleStackRequest.getResourceId(), UPDATE_IN_PROGRESS.name(), STACK_UPSCALE_QUOTA_ISSUE,
+        verify(flowMessageService, times(1)).fireEventAndLog(upscaleStackRequest.getResourceId(), UPDATE_FAILED.name(), STACK_UPSCALE_QUOTA_ISSUE,
                 "quota error");
         ArgumentCaptor<CloudStack> cloudStackArgumentCaptor = ArgumentCaptor.forClass(CloudStack.class);
         verify(resourceConnector, times(1)).upscale(any(), cloudStackArgumentCaptor.capture(), any(), eq(adjustmentTypeWithThreshold));
@@ -504,7 +503,7 @@ class StackUpscaleServiceTest {
         UpscaleStackRequest<UpscaleStackResult> upscaleStackRequest = new UpscaleStackRequest<>(mock(CloudContext.class), mock(CloudCredential.class),
                 cloudStack, new ArrayList<>(), adjustmentTypeWithThreshold, false);
         underTest.upscale(mock(AuthenticatedContext.class), upscaleStackRequest, connector);
-        verify(flowMessageService, times(1)).fireEventAndLog(upscaleStackRequest.getResourceId(), UPDATE_IN_PROGRESS.name(), STACK_UPSCALE_QUOTA_ISSUE,
+        verify(flowMessageService, times(1)).fireEventAndLog(upscaleStackRequest.getResourceId(), UPDATE_FAILED.name(), STACK_UPSCALE_QUOTA_ISSUE,
                 "quota error");
         ArgumentCaptor<CloudStack> cloudStackArgumentCaptor = ArgumentCaptor.forClass(CloudStack.class);
         verify(resourceConnector, times(2)).upscale(any(), cloudStackArgumentCaptor.capture(), any(), eq(adjustmentTypeWithThreshold));
@@ -578,7 +577,7 @@ class StackUpscaleServiceTest {
                 mock(RollingVerticalScaleResult.class));
         underTest.verticalScale(mock(AuthenticatedContext.class), request, cloudConnector, "master");
         verify(resourceConnector, times(2)).update(any(), eq(cloudStack), eq(cloudResources), eq(UpdateType.VERTICAL_SCALE), eq(Optional.of("master")));
-        verify(flowMessageService, times(1)).fireEventAndLog(eq(1L), eq(UPDATE_IN_PROGRESS.name()), eq(STACK_VERTICALSCALE_ISSUE), eq(errorMessage));
+        verify(flowMessageService, times(1)).fireEventAndLog(eq(1L), eq(UPDATE_FAILED.name()), eq(STACK_VERTICALSCALE_ISSUE), eq(errorMessage));
     }
 
     @Test

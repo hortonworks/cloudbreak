@@ -258,7 +258,7 @@ class RollingVerticalScaleServiceTest {
         underTest.failedVerticalScaleInstances(STACK_ID, INSTANCE_IDS, request, ERROR_MESSAGE);
 
         verify(flowMessageService, times(1)).fireEventAndLog(eq(STACK_ID),
-                eq(UPDATE_IN_PROGRESS.name()),
+                eq(UPDATE_FAILED.name()),
                 eq(CLUSTER_VERTICALSCALING_INSTANCES_FAILED),
                 eq(GROUP),
                 eq(String.join(", ", INSTANCE_IDS)),

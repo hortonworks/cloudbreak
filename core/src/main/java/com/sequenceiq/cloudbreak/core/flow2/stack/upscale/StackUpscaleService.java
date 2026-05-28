@@ -257,7 +257,7 @@ public class StackUpscaleService {
     private List<CloudResourceStatus> handleQuotaExceptionAndRetryUpscale(UpscaleStackRequest<UpscaleStackResult> request, CloudConnector connector,
             AuthenticatedContext ac, CloudStack cloudStack, AdjustmentTypeWithThreshold adjustmentTypeWithThreshold,
             QuotaExceededException quotaExceededException) throws QuotaExceededException, TransactionExecutionException {
-        flowMessageService.fireEventAndLog(request.getResourceId(), UPDATE_IN_PROGRESS.name(), STACK_UPSCALE_QUOTA_ISSUE,
+        flowMessageService.fireEventAndLog(request.getResourceId(), UPDATE_FAILED.name(), STACK_UPSCALE_QUOTA_ISSUE,
                 quotaExceededException.getQuotaErrorMessage());
         List<Group> groups = cloudStack.getGroups();
         int removableNodeCount = getRemovableNodeCount(adjustmentTypeWithThreshold, quotaExceededException, groups);
@@ -290,7 +290,7 @@ public class StackUpscaleService {
     private List<CloudResourceStatus> handleExceptionAndRetryUpdate(CoreVerticalScaleRequest<CoreVerticalScaleResult> request,
             CloudConnector connector, AuthenticatedContext ac, CloudStack cloudStack, Exception e, UpdateType type, String group) throws Exception {
         LOGGER.error("Failed to vertically scale the stack", e);
-        flowMessageService.fireEventAndLog(request.getResourceId(), UPDATE_IN_PROGRESS.name(), STACK_VERTICALSCALE_ISSUE,
+        flowMessageService.fireEventAndLog(request.getResourceId(), UPDATE_FAILED.name(), STACK_VERTICALSCALE_ISSUE,
                 e.getMessage());
         return connector.resources().update(ac, cloudStack, request.getResourceList(), type, Optional.ofNullable(group));
     }
@@ -298,7 +298,7 @@ public class StackUpscaleService {
     private List<CloudResourceStatus> handleExceptionAndRetryUpdate(RollingVerticalScaleInstancesRequest request,
             CloudConnector connector, AuthenticatedContext ac, CloudStack cloudStack, Exception e, UpdateType type, String group) throws Exception {
         LOGGER.error("Failed to vertically scale the stack", e);
-        flowMessageService.fireEventAndLog(request.getResourceId(), UPDATE_IN_PROGRESS.name(), STACK_VERTICALSCALE_ISSUE,
+        flowMessageService.fireEventAndLog(request.getResourceId(), UPDATE_FAILED.name(), STACK_VERTICALSCALE_ISSUE,
                 e.getMessage());
         return connector.resources().update(ac, cloudStack, request.getCloudResources(), type, Optional.ofNullable(group));
     }
