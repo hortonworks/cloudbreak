@@ -17,8 +17,9 @@ public class CloneCustomConfigurationsV4Request {
 
     @Schema(description = CustomConfigurationsJsonProperties.CUSTOM_CONFIGURATIONS_NAME)
     @Size(min = 1, max = 100,
-            message = "Length of custom configurations name must be from 1 to 100 characters and shouldn't contain semicolon and percentage symbol")
-    @Pattern(regexp = "^[^;\\/%]*$")
+            message = "Length of custom configurations name must be from 1 to 100 characters")
+    @Pattern(regexp = "^[a-zA-Z0-9][a-zA-Z0-9 _.-]*$",
+            message = "Custom configurations name must start with alphanumeric and contain only alphanumeric, space, underscore, dot, or hyphen characters")
     @NotNull
     private String name;
 

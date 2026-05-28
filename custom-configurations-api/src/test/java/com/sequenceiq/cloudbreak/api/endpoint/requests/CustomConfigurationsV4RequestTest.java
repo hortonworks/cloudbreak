@@ -23,10 +23,6 @@ class CustomConfigurationsV4RequestTest {
 
     private LocalValidatorFactoryBean localValidatorFactory;
 
-    private long expectedNameViolations;
-
-    private long resultedNameViolations;
-
     @BeforeEach
     public void setUp() {
         underTest = new CustomConfigurationsV4Request();
@@ -37,20 +33,26 @@ class CustomConfigurationsV4RequestTest {
 
     @ParameterizedTest
     @CsvSource({
-            "this is a valid name for custom configs,0",
+            "my-custom-config,0",
+            "Custom Config 1,0",
             "132-3 cUsToM cOnFiGs,0",
-            "!@#$^&*CC,0",
-            "another'' valid name,0",
-            "this an %invalid% name for custom configs.,1",
+            "config.name_with-all.allowed,0",
+            "A,0",
+            "9trailing,0",
+            "!@#$^&*CC,1",
+            "another'' valid name,1",
+            "<script>alert(1)</script>,1",
             "custom; configs 2,1",
             "custom/configs,1",
-            "/,1"
+            "/,1",
+            "' leading-space',1",
+            "this an %invalid% name,1"
     })
     void testCustomConfigsName(String name, String violation) {
         underTest.setName(name);
         Set<ConstraintViolation<CustomConfigurationsV4Request>> violationSet = localValidatorFactory.validate(underTest);
-        resultedNameViolations += violationSet.stream().filter(vio -> vio.getPropertyPath().toString().equals("name")).count();
-        expectedNameViolations += Integer.parseInt(violation);
-        assertEquals(expectedNameViolations, resultedNameViolations);
+        long nameViolations = violationSet.stream().filter(vio -> vio.getPropertyPath().toString().equals("name")).count();
+        assertEquals(Long.parseLong(violation), nameViolations,
+                "Unexpected violation count for name: '" + name + "'");
     }
 }
