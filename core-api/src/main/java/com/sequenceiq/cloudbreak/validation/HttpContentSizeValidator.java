@@ -34,6 +34,10 @@ public class HttpContentSizeValidator implements ConstraintValidator<ValidHttpCo
 
     @Override
     public boolean isValid(String value, ConstraintValidatorContext context) {
+        return isValid(value, context, true);
+    }
+
+    public boolean isValid(String value, ConstraintValidatorContext context, boolean followRedirects) {
         LOGGER.info("content size validation was called. Value: {}", value);
 
         if (value == null) {
@@ -43,7 +47,9 @@ public class HttpContentSizeValidator implements ConstraintValidator<ValidHttpCo
             return false;
         }
         try {
-            Pair<StatusType, Integer> contentLength = httpHelper.getContentLength(value);
+            Pair<StatusType, Integer> contentLength = followRedirects
+                    ? httpHelper.getContentLength(value)
+                    : httpHelper.getContentLengthNoRedirects(value);
             if (!contentLength.getKey().getFamily().equals(Family.SUCCESSFUL)) {
                 String msg = String.format(FAILED_TO_GET_BY_FAMILY_TYPE, value, contentLength.getKey().getReasonPhrase());
                 ValidatorUtil.addConstraintViolation(context, msg);

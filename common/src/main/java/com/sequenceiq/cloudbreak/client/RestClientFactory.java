@@ -30,4 +30,8 @@ public class RestClientFactory {
                 .build();
         return getOrCreate(configKey);
     }
+
+    public Client getOrCreateWithoutFollowRedirects() {
+        return getOrCreate(ConfigKey.builder().withFollowRedirects(false).build());
+    }
 }

@@ -34,4 +34,21 @@ public class HttpHelper {
                 : new ImmutablePair<>(responseStatusInfo, null);
         }
     }
+
+    public Pair<StatusType, Integer> getContentLengthNoRedirects(String url) {
+        WebTarget target = restClientFactory.getOrCreateWithoutFollowRedirects().target(url);
+        try (Response response = target.request().head()) {
+            return new ImmutablePair<>(response.getStatusInfo(), response.getLength());
+        }
+    }
+
+    public Pair<StatusType, String> getContentNoRedirects(String url) {
+        WebTarget target = restClientFactory.getOrCreateWithoutFollowRedirects().target(url);
+        try (Response response = target.request().get()) {
+            StatusType responseStatusInfo = response.getStatusInfo();
+            return responseStatusInfo.getFamily().equals(Family.SUCCESSFUL)
+                ? new ImmutablePair<>(responseStatusInfo, response.readEntity(String.class))
+                : new ImmutablePair<>(responseStatusInfo, null);
+        }
+    }
 }

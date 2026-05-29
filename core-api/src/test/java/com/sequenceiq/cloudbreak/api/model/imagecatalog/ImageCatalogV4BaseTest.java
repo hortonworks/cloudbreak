@@ -6,6 +6,7 @@ import static com.sequenceiq.cloudbreak.validation.ImageCatalogValidator.INVALID
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
@@ -47,7 +48,7 @@ class ImageCatalogV4BaseTest extends ValidatorTestHelper {
 
     @BeforeEach
     public void setUp() {
-        when(httpContentSizeValidator.isValid(anyString(), any(ConstraintValidatorContext.class))).thenReturn(true);
+        when(httpContentSizeValidator.isValid(anyString(), any(ConstraintValidatorContext.class), anyBoolean())).thenReturn(true);
     }
 
     @Test
@@ -56,7 +57,7 @@ class ImageCatalogV4BaseTest extends ValidatorTestHelper {
         String reasonPhrase = "Invalid reason phrase";
         when(statusType.getFamily()).thenReturn(Family.OTHER);
         when(statusType.getReasonPhrase()).thenReturn(reasonPhrase);
-        when(httpHelper.getContent(anyString())).thenReturn(new ImmutablePair<>(statusType, ""));
+        when(httpHelper.getContentNoRedirects(anyString())).thenReturn(new ImmutablePair<>(statusType, ""));
 
         ImageCatalogV4Base i = new ImageCatalogV4Base();
         i.setName("testname");
@@ -71,7 +72,7 @@ class ImageCatalogV4BaseTest extends ValidatorTestHelper {
 
     @Test
     void testContentStructureNotValid() {
-        when(httpHelper.getContent(anyString())).thenReturn(new ImmutablePair<>(statusType, "{}"));
+        when(httpHelper.getContentNoRedirects(anyString())).thenReturn(new ImmutablePair<>(statusType, "{}"));
         when(statusType.getFamily()).thenReturn(Family.SUCCESSFUL);
 
         ImageCatalogV4Base i = new ImageCatalogV4Base();
@@ -87,7 +88,7 @@ class ImageCatalogV4BaseTest extends ValidatorTestHelper {
 
     @Test
     void testContentNotAValidJSON() {
-        when(httpHelper.getContent(anyString())).thenReturn(new ImmutablePair<>(statusType, "{[]}"));
+        when(httpHelper.getContentNoRedirects(anyString())).thenReturn(new ImmutablePair<>(statusType, "{[]}"));
         when(statusType.getFamily()).thenReturn(Family.SUCCESSFUL);
 
         ImageCatalogV4Base i = new ImageCatalogV4Base();
@@ -102,7 +103,7 @@ class ImageCatalogV4BaseTest extends ValidatorTestHelper {
 
     @Test
     void testWhenWebTargetFailsWithException() {
-        when(httpHelper.getContent(anyString())).thenThrow(ProcessingException.class);
+        when(httpHelper.getContentNoRedirects(anyString())).thenThrow(ProcessingException.class);
 
         ImageCatalogV4Base i = new ImageCatalogV4Base();
         i.setName("testname");
@@ -117,7 +118,7 @@ class ImageCatalogV4BaseTest extends ValidatorTestHelper {
 
     @Test
     void testWhenContentIsTooBig() {
-        when(httpContentSizeValidator.isValid(anyString(), any(ConstraintValidatorContext.class))).thenReturn(false);
+        when(httpContentSizeValidator.isValid(anyString(), any(ConstraintValidatorContext.class), anyBoolean())).thenReturn(false);
 
         ImageCatalogV4Base i = new ImageCatalogV4Base();
         i.setName("testname");
