@@ -136,6 +136,14 @@ public class SdxStatusService {
         }).orElseThrow(() -> new NotFoundException("SdxCluster was not found with ID: " + datalakeId));
     }
 
+    public void setStatusForDatalake(DatalakeStatusEnum status, String statusReason, Long datalakeId) {
+        sdxClusterRepository.findById(datalakeId).ifPresentOrElse(
+                cluster -> setStatusForDatalake(status, statusReason, cluster),
+                () -> {
+                    throw new NotFoundException("SdxCluster was not found with ID: " + datalakeId);
+                });
+    }
+
     public void setStatusForDatalake(DatalakeStatusEnum status, String statusReason, SdxCluster sdxCluster) {
         try {
             transactionService.required(() -> {

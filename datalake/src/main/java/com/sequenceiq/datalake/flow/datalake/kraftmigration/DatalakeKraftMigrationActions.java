@@ -16,7 +16,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
-import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.flow.SdxContext;
 import com.sequenceiq.datalake.flow.SdxEvent;
@@ -105,9 +104,8 @@ public class DatalakeKraftMigrationActions {
             protected void doExecute(SdxContext context, SdxEvent payload, Map<Object, Object> variables) {
                 KraftMigrationOperationType operationType = (KraftMigrationOperationType) variables.get(OPERATION_TYPE_KEY);
                 LOGGER.info("ZooKeeper to KRaft {} finished for DataLake id {}", operationType, payload.getResourceId());
-                sdxStatusService.setStatusForDatalakeAndNotify(
+                sdxStatusService.setStatusForDatalake(
                         DatalakeStatusEnum.RUNNING,
-                        getFinishedResourceEvent(operationType),
                         getFinishedMessage(operationType),
                         payload.getResourceId());
                 sendEvent(context, DATALAKE_KRAFT_MIGRATION_FINALIZED_EVENT.event(), payload);
@@ -117,17 +115,6 @@ public class DatalakeKraftMigrationActions {
             protected Object getFailurePayload(SdxEvent payload, Optional<SdxContext> flowContext, Exception ex) {
                 LOGGER.error("ZooKeeper to KRaft migration finalization failed for DataLake id {}", payload.getResourceId(), ex);
                 return DatalakeKraftMigrationFailedEvent.from(payload, ex);
-            }
-
-            private ResourceEvent getFinishedResourceEvent(KraftMigrationOperationType operationType) {
-                if (operationType == null) {
-                    return ResourceEvent.DATALAKE_ZOOKEEPER_TO_KRAFT_MIGRATION_FINISHED;
-                }
-                return switch (operationType) {
-                    case MIGRATE -> ResourceEvent.DATALAKE_ZOOKEEPER_TO_KRAFT_MIGRATION_FINISHED;
-                    case FINALIZE -> ResourceEvent.DATALAKE_ZOOKEEPER_TO_KRAFT_FINALIZE_FINISHED;
-                    case ROLLBACK -> ResourceEvent.DATALAKE_ZOOKEEPER_TO_KRAFT_ROLLBACK_FINISHED;
-                };
             }
 
             private String getFinishedMessage(KraftMigrationOperationType operationType) {
@@ -160,7 +147,7 @@ public class DatalakeKraftMigrationActions {
             protected void doExecute(SdxContext context, DatalakeKraftMigrationFailedEvent payload, Map<Object, Object> variables) {
                 KraftMigrationOperationType operationType = (KraftMigrationOperationType) variables.get(OPERATION_TYPE_KEY);
                 LOGGER.error("ZooKeeper to KRaft {} failed for DataLake id {}", operationType, payload.getResourceId());
-                sdxStatusService.setStatusForDatalakeAndNotify(
+                sdxStatusService.setStatusForDatalake(
                         getFailedStatusEnum(operationType),
                         "ZooKeeper to KRaft migration failed: " + payload.getException().getMessage(),
                         payload.getResourceId());
