@@ -121,7 +121,7 @@ public class SdxUpgradeDatabaseTestUtil {
     }
 
     public String getRuntimeVersion() {
-        return commonClusterManagerProperties.getRuntimeVersion();
+        return commonClusterManagerProperties.getUpgradeDatabaseServer().getRuntimeVersion();
     }
 
     public String getLatestRuntimeVersion() {

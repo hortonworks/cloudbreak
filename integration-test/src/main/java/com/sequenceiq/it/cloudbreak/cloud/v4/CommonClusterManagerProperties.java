@@ -313,11 +313,21 @@ public class CommonClusterManagerProperties {
     }
 
     public static class UpgradeDatabaseServerProperties {
+        private String runtimeVersion;
+
         private String originalDatabaseMajorVersion;
 
         private String targetDatabaseMajorVersion;
 
         private DatabaseVersionProperties latest;
+
+        public String getRuntimeVersion() {
+            return runtimeVersion;
+        }
+
+        public void setRuntimeVersion(String runtimeVersion) {
+            this.runtimeVersion = runtimeVersion;
+        }
 
         public String getOriginalDatabaseMajorVersion() {
             return originalDatabaseMajorVersion;
