@@ -683,6 +683,198 @@
           "arm64": ["m7g.large"]
         }
       }
+    },
+    {
+      "name": "ap-southeast-6",
+      "displayName": "Asia Pacific (New Zealand)",
+      "latitude": "-41.286500",
+      "longitude": "174.776200",
+      "k8sSupported": true,
+      "defaultArmDbVmtype": "db.m7g.large",
+      "cdpSupportedServices": [ "ENVIRONMENT", "DATAHUB" ],
+      "zones": [
+        "ap-southeast-6a",
+        "ap-southeast-6b",
+        "ap-southeast-6c"
+      ],
+      "defaultVmtypes": {
+        "database": {
+          "arm64": ["db.m7g.large"],
+          "x86_64": ["db.m5.large"]
+        },
+        "freeipa": {
+          "x86_64": ["m6i.large"],
+          "arm64": ["m7g.large"]
+        }
+      }
+    },
+    {
+      "name": "ap-east-2",
+      "displayName": "Asia Pacific (Taipei)",
+      "latitude": "25.033000",
+      "longitude": "121.565400",
+      "k8sSupported": true,
+      "defaultArmDbVmtype": "db.m7g.large",
+      "cdpSupportedServices": [ "ENVIRONMENT", "DATAHUB" ],
+      "zones": [
+        "ap-east-2a",
+        "ap-east-2b",
+        "ap-east-2c"
+      ],
+      "defaultVmtypes": {
+        "database": {
+          "arm64": ["db.m7g.large"],
+          "x86_64": ["db.m5.large"]
+        },
+        "freeipa": {
+          "x86_64": ["m6i.large"],
+          "arm64": ["m7g.large"]
+        }
+      }
+    },
+    {
+      "name": "mx-central-1",
+      "displayName": "Mexico (Central)",
+      "latitude": "20.588800",
+      "longitude": "-100.389900",
+      "k8sSupported": true,
+      "defaultArmDbVmtype": "db.m7g.large",
+      "cdpSupportedServices": [ "ENVIRONMENT", "DATAHUB" ],
+      "zones": [
+        "mx-central-1a",
+        "mx-central-1b",
+        "mx-central-1c"
+      ],
+      "defaultVmtypes": {
+        "database": {
+          "arm64": ["db.m7g.large"],
+          "x86_64": ["db.m5.large"]
+        },
+        "freeipa": {
+          "x86_64": ["m6i.large"],
+          "arm64": ["m7g.large"]
+        }
+      }
+    },
+    {
+      "name": "ap-southeast-7",
+      "displayName": "Asia Pacific (Thailand)",
+      "latitude": "13.756300",
+      "longitude": "100.501800",
+      "k8sSupported": true,
+      "defaultArmDbVmtype": "db.m7g.large",
+      "cdpSupportedServices": [ "ENVIRONMENT", "DATAHUB" ],
+      "zones": [
+        "ap-southeast-7a",
+        "ap-southeast-7b",
+        "ap-southeast-7c"
+      ],
+      "defaultVmtypes": {
+        "database": {
+          "arm64": ["db.m7g.large"],
+          "x86_64": ["db.m5.large"]
+        },
+        "freeipa": {
+          "x86_64": ["m6i.large"],
+          "arm64": ["m7g.large"]
+        }
+      }
+    },
+    {
+      "name": "ap-southeast-5",
+      "displayName": "Asia Pacific (Malaysia)",
+      "latitude": "3.139000",
+      "longitude": "101.686900",
+      "k8sSupported": true,
+      "defaultArmDbVmtype": "db.m7g.large",
+      "cdpSupportedServices": [ "ENVIRONMENT", "DATAHUB" ],
+      "zones": [
+        "ap-southeast-5a",
+        "ap-southeast-5b",
+        "ap-southeast-5c"
+      ],
+      "defaultVmtypes": {
+        "database": {
+          "arm64": ["db.m7g.large"],
+          "x86_64": ["db.m5.large"]
+        },
+        "freeipa": {
+          "x86_64": ["m6i.large"],
+          "arm64": ["m7g.large"]
+        }
+      }
+    },
+    {
+      "name": "ap-southeast-4",
+      "displayName": "Asia Pacific (Melbourne)",
+      "latitude": "-37.813600",
+      "longitude": "144.963100",
+      "k8sSupported": true,
+      "defaultArmDbVmtype": "db.m7g.large",
+      "cdpSupportedServices": [ "ENVIRONMENT", "DATAHUB" ],
+      "zones": [
+        "ap-southeast-4a",
+        "ap-southeast-4b",
+        "ap-southeast-4c"
+      ],
+      "defaultVmtypes": {
+        "database": {
+          "arm64": ["db.m7g.large"],
+          "x86_64": ["db.m5.large"]
+        },
+        "freeipa": {
+          "x86_64": ["m5.large"],
+          "arm64": ["m7g.large"]
+        }
+      }
+    },
+    {
+      "name": "ap-northeast-3",
+      "displayName": "Asia Pacific (Osaka)",
+      "latitude": "34.693700",
+      "longitude": "135.502300",
+      "k8sSupported": true,
+      "defaultArmDbVmtype": "db.m7g.large",
+      "cdpSupportedServices": [ "ENVIRONMENT", "DATAHUB" ],
+      "zones": [
+        "ap-northeast-3a",
+        "ap-northeast-3b",
+        "ap-northeast-3c"
+      ],
+      "defaultVmtypes": {
+        "database": {
+          "arm64": ["db.m7g.large"],
+          "x86_64": ["db.m5.large"]
+        },
+        "freeipa": {
+          "x86_64": ["m6i.large"],
+          "arm64": ["m7g.large"]
+        }
+      }
+    },
+    {
+      "name": "eu-central-2",
+      "displayName": "Europe (Zurich)",
+      "latitude": "47.376900",
+      "longitude": "8.541700",
+      "k8sSupported": true,
+      "defaultArmDbVmtype": "db.m7g.large",
+      "cdpSupportedServices": [ "ENVIRONMENT", "DATAHUB" ],
+      "zones": [
+        "eu-central-2a",
+        "eu-central-2b",
+        "eu-central-2c"
+      ],
+      "defaultVmtypes": {
+        "database": {
+          "arm64": ["db.m7g.large"],
+          "x86_64": ["db.m5.large"]
+        },
+        "freeipa": {
+          "x86_64": ["m6i.large"],
+          "arm64": ["m7g.large"]
+        }
+      }
     }
   ]
 }

@@ -63,6 +63,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENABLE_
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENDPOINT_GATEWAY_SKIP_VALIDATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_EXPERIENCE_DELETION_BY_ENVIRONMENT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_EXPRESS_ONBOARDING;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FALLBACK_INSTANCETYPE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FEDRAMP_EXTERNAL_DATABASE_FORCE_DISABLED;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_LOAD_BALANCER;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_REBUILD;
@@ -1209,6 +1210,7 @@ public class MockUserManagementService extends UserManagementImplBase {
                                 .addEntitlements(createEntitlement(CDP_CB_CM_TEMPLATE_SYNC))
                                 .addEntitlements(createEntitlement(CDP_CB_NOTIFICATION_SENDING_ENABLED))
                                 .addEntitlements(createEntitlement(CDP_CB_DB_DISK_AUTO_RESIZE))
+                                .addEntitlements(createEntitlement(CDP_FALLBACK_INSTANCETYPE))
                                 .setGlobalPasswordPolicy(workloadPasswordPolicy)
                                 .setAccountId(getAccountId(request.getExternalAccountId(), accountId))
                                 .setExternalAccountId(getExternalAccountId(request.getExternalAccountId(), accountId))

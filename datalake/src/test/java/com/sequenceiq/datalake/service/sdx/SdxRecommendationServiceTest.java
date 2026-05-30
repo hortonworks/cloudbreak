@@ -211,7 +211,7 @@ class SdxRecommendationServiceTest {
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> underTest.validateVmTypeOverride(createEnvironment("AWS"), createSdxCluster(createStackRequest(), LIGHT_DUTY)));
 
-        assertEquals("Missing vm type for default template instance group: master - unknown", badRequestException.getMessage());
+        assertEquals("Missing vm type for default template instance group: master - [unknown]", badRequestException.getMessage());
     }
 
     @Test
@@ -235,6 +235,132 @@ class SdxRecommendationServiceTest {
                 () -> underTest.validateVmTypeOverride(createEnvironment("AWS"), sdxCluster));
 
         assertEquals("Invalid custom instance type for instance group: master - small", badRequestException.getMessage());
+    }
+
+    @Test
+    public void validateVmTypeOverrideWhenFallbackEntitlementEnabledAndFallbackTypeIsAvailable() {
+        when(cdpConfigService.getConfigForKey(any())).thenReturn(createStackRequest());
+        when(environmentClientService.getVmTypesByCredential(anyString(), anyString(), anyString(), eq(CdpResourceType.DATALAKE), any(), any()))
+                .thenReturn(createPlatformVmtypesResponse());
+        when(entitlementService.isFallbackInstanceTypeEnabled(anyString())).thenReturn(true);
+
+        StackV4Request stackRequest = createStackRequest();
+        stackRequest.getInstanceGroups().forEach(ig -> {
+            ig.getTemplate().setInstanceType("unavailable_type");
+            ig.getTemplate().setFallbackInstanceTypes(List.of("large"));
+        });
+        SdxCluster sdxCluster = createSdxCluster(stackRequest, LIGHT_DUTY);
+        DetailedEnvironmentResponse environment = createEnvironment("AWS");
+        environment.setAccountId("account-id");
+
+        assertDoesNotThrow(() -> underTest.validateVmTypeOverride(environment, sdxCluster));
+    }
+
+    @Test
+    public void validateVmTypeOverrideWhenFallbackEntitlementDisabledAndFallbackTypeIsAvailable() {
+        when(cdpConfigService.getConfigForKey(any())).thenReturn(createStackRequest());
+        when(environmentClientService.getVmTypesByCredential(anyString(), anyString(), anyString(), eq(CdpResourceType.DATALAKE), any(), any()))
+                .thenReturn(createPlatformVmtypesResponse());
+        when(entitlementService.isFallbackInstanceTypeEnabled(anyString())).thenReturn(false);
+
+        StackV4Request stackRequest = createStackRequest();
+        stackRequest.getInstanceGroups().forEach(ig -> {
+            ig.getTemplate().setInstanceType("unavailable_type");
+            ig.getTemplate().setFallbackInstanceTypes(List.of("large"));
+        });
+        SdxCluster sdxCluster = createSdxCluster(stackRequest, LIGHT_DUTY);
+        DetailedEnvironmentResponse environment = createEnvironment("AWS");
+        environment.setAccountId("account-id");
+
+        BadRequestException exception = assertThrows(BadRequestException.class,
+                () -> underTest.validateVmTypeOverride(environment, sdxCluster));
+
+        assertEquals("Invalid custom instance type for instance group: master - unavailable_type", exception.getMessage());
+    }
+
+    @Test
+    public void validateVmTypeOverrideWhenFallbackEntitlementEnabledButFallbackTypesAreNull() {
+        when(cdpConfigService.getConfigForKey(any())).thenReturn(createStackRequest());
+        when(environmentClientService.getVmTypesByCredential(anyString(), anyString(), anyString(), eq(CdpResourceType.DATALAKE), any(), any()))
+                .thenReturn(createPlatformVmtypesResponse());
+        when(entitlementService.isFallbackInstanceTypeEnabled(anyString())).thenReturn(true);
+
+        StackV4Request stackRequest = createStackRequest();
+        stackRequest.getInstanceGroups().forEach(ig -> {
+            ig.getTemplate().setInstanceType("unavailable_type");
+            ig.getTemplate().setFallbackInstanceTypes(null);
+        });
+        SdxCluster sdxCluster = createSdxCluster(stackRequest, LIGHT_DUTY);
+        DetailedEnvironmentResponse environment = createEnvironment("AWS");
+        environment.setAccountId("account-id");
+
+        BadRequestException exception = assertThrows(BadRequestException.class,
+                () -> underTest.validateVmTypeOverride(environment, sdxCluster));
+
+        assertEquals("Invalid custom instance type for instance group: master - unavailable_type", exception.getMessage());
+    }
+
+    @Test
+    public void validateVmTypeOverrideWhenFallbackEntitlementEnabledButNoFallbackTypeIsAvailable() {
+        when(cdpConfigService.getConfigForKey(any())).thenReturn(createStackRequest());
+        when(environmentClientService.getVmTypesByCredential(anyString(), anyString(), anyString(), eq(CdpResourceType.DATALAKE), any(), any()))
+                .thenReturn(createPlatformVmtypesResponse());
+        when(entitlementService.isFallbackInstanceTypeEnabled(anyString())).thenReturn(true);
+
+        StackV4Request stackRequest = createStackRequest();
+        stackRequest.getInstanceGroups().forEach(ig -> {
+            ig.getTemplate().setInstanceType("unavailable_type");
+            ig.getTemplate().setFallbackInstanceTypes(List.of("also_unavailable", "another_unavailable"));
+        });
+        SdxCluster sdxCluster = createSdxCluster(stackRequest, LIGHT_DUTY);
+        DetailedEnvironmentResponse environment = createEnvironment("AWS");
+        environment.setAccountId("account-id");
+
+        BadRequestException exception = assertThrows(BadRequestException.class,
+                () -> underTest.validateVmTypeOverride(environment, sdxCluster));
+
+        assertEquals("Invalid custom instance type for instance group: master - unavailable_type", exception.getMessage());
+    }
+
+    @Test
+    public void validateVmTypeOverrideWhenFallbackEntitlementEnabledAndSecondFallbackTypeIsAvailable() {
+        when(cdpConfigService.getConfigForKey(any())).thenReturn(createStackRequest());
+        when(environmentClientService.getVmTypesByCredential(anyString(), anyString(), anyString(), eq(CdpResourceType.DATALAKE), any(), any()))
+                .thenReturn(createPlatformVmtypesResponse());
+        when(entitlementService.isFallbackInstanceTypeEnabled(anyString())).thenReturn(true);
+
+        StackV4Request stackRequest = createStackRequest();
+        stackRequest.getInstanceGroups().forEach(ig -> {
+            ig.getTemplate().setInstanceType("unavailable_type");
+            ig.getTemplate().setFallbackInstanceTypes(List.of("also_unavailable", "large"));
+        });
+        SdxCluster sdxCluster = createSdxCluster(stackRequest, LIGHT_DUTY);
+        DetailedEnvironmentResponse environment = createEnvironment("AWS");
+        environment.setAccountId("account-id");
+
+        assertDoesNotThrow(() -> underTest.validateVmTypeOverride(environment, sdxCluster));
+    }
+
+    @Test
+    public void validateVmTypeOverrideWhenFallbackEntitlementEnabledAndFallbackTypeIsEmptyList() {
+        when(cdpConfigService.getConfigForKey(any())).thenReturn(createStackRequest());
+        when(environmentClientService.getVmTypesByCredential(anyString(), anyString(), anyString(), eq(CdpResourceType.DATALAKE), any(), any()))
+                .thenReturn(createPlatformVmtypesResponse());
+        when(entitlementService.isFallbackInstanceTypeEnabled(anyString())).thenReturn(true);
+
+        StackV4Request stackRequest = createStackRequest();
+        stackRequest.getInstanceGroups().forEach(ig -> {
+            ig.getTemplate().setInstanceType("unavailable_type");
+            ig.getTemplate().setFallbackInstanceTypes(List.of());
+        });
+        SdxCluster sdxCluster = createSdxCluster(stackRequest, LIGHT_DUTY);
+        DetailedEnvironmentResponse environment = createEnvironment("AWS");
+        environment.setAccountId("account-id");
+
+        BadRequestException exception = assertThrows(BadRequestException.class,
+                () -> underTest.validateVmTypeOverride(environment, sdxCluster));
+
+        assertEquals("Invalid custom instance type for instance group: master - unavailable_type", exception.getMessage());
     }
 
     @Test

@@ -12,6 +12,7 @@
       "name": "idbroker",
       "template": {
         "instanceType": "t3.medium",
+        "fallbackInstanceTypes": [ "t3a.medium", "t2.medium" ],
         "attachedVolumes": [
           {
             "count": 0,
@@ -28,6 +29,7 @@
       "name": "master",
       "template": {
         "instanceType": "m5.2xlarge",
+        "fallbackInstanceTypes": [ "m5a.2xlarge", "m6i.2xlarge" ],
         "attachedVolumes": [
           {
             "count": 1,

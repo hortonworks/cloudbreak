@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFo
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.DATALAKE_IMAGE_VALIDATION_WARNING;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -161,7 +162,7 @@ public class SdxRecommendationService {
                     validateInstanceTypeArchitecture(sdxCluster, instanceGroup, availableVmTypes);
                     VmTypeResponse defaultTemplateVmType = defaultVmTypesByInstanceGroup.get(instanceGroup.getName());
                     if (isCustomInstanceTypeProvided(instanceGroup, defaultTemplateVmType.getValue())
-                            && !isProvidedInstanceTypeIsAvailable(availableVmTypeNamesByInstanceGroup, instanceGroup)) {
+                            && !isProvidedInstanceTypeIsAvailable(environment.getAccountId(), availableVmTypeNamesByInstanceGroup, instanceGroup)) {
                         String message = String.format("Invalid custom instance type for instance group: %s - %s",
                                 instanceGroup.getName(), instanceGroup.getTemplate().getInstanceType());
                         LOGGER.warn(message);
@@ -219,9 +220,21 @@ public class SdxRecommendationService {
                 && !CloudPlatform.YARN.equalsIgnoreCase(cloudPlatform);
     }
 
-    private boolean isProvidedInstanceTypeIsAvailable(Map<String, List<String>> availableVmTypesByInstanceGroup, InstanceGroupV4Request instanceGroup) {
+    private boolean isProvidedInstanceTypeIsAvailable(String accountId, Map<String, List<String>> availableVmTypesByInstanceGroup,
+        InstanceGroupV4Request instanceGroup) {
+        List<String> instanceTypes = availableVmTypesByInstanceGroup.get(instanceGroup.getName());
         return availableVmTypesByInstanceGroup.containsKey(instanceGroup.getName())
-                && availableVmTypesByInstanceGroup.get(instanceGroup.getName()).contains(instanceGroup.getTemplate().getInstanceType());
+                && (hasInstanceType(instanceGroup, instanceTypes) || hasInstanceTypeForFallback(accountId, instanceGroup, instanceTypes));
+    }
+
+    private boolean hasInstanceType(InstanceGroupV4Request instanceGroup, List<String> instanceTypes) {
+        return instanceTypes.contains(instanceGroup.getTemplate().getInstanceType());
+    }
+
+    private boolean hasInstanceTypeForFallback(String accountId, InstanceGroupV4Request instanceGroup, List<String> instanceTypes) {
+        return entitlementService.isFallbackInstanceTypeEnabled(accountId)
+                && instanceGroup.getTemplate().getFallbackInstanceTypes() != null
+                && instanceGroup.getTemplate().getFallbackInstanceTypes().stream().anyMatch(instanceTypes::contains);
     }
 
     private boolean isCustomInstanceTypeProvided(InstanceGroupV4Request instanceGroup, String defaultTemplateVmType) {
@@ -253,21 +266,34 @@ public class SdxRecommendationService {
 
     private Map<String, VmTypeResponse> getDefaultVmTypesByInstanceGroup(List<VmTypeResponse> availableVmTypes, StackV4Request defaultTemplate) {
         Map<String, VmTypeResponse> vmTypesByName = availableVmTypes.stream().collect(Collectors.toMap(VmTypeResponse::getValue, Function.identity()));
-        Map<String, String> defaultInstanceTypesByInstanceGroup = defaultTemplate.getInstanceGroups().stream()
+        Map<String, List<String>> defaultInstanceTypesByInstanceGroup = defaultTemplate.getInstanceGroups().stream()
                 .filter(instanceGroup ->
                         ObjectUtils.allNotNull(instanceGroup.getName(), instanceGroup.getTemplate(), instanceGroup.getTemplate().getInstanceType()))
-                .collect(Collectors.toMap(InstanceGroupV4Request::getName, instanceGroup -> instanceGroup.getTemplate().getInstanceType()));
+                .collect(Collectors.toMap(InstanceGroupV4Request::getName, instanceGroup ->  {
+                    List<String> result = new ArrayList<>();
+                    String instanceType = instanceGroup.getTemplate().getInstanceType();
+                    List<String> fallbackInstanceTypes = instanceGroup.getTemplate().getFallbackInstanceTypes();
+                    result.add(instanceType);
+                    if (fallbackInstanceTypes != null && !fallbackInstanceTypes.isEmpty()) {
+                        result.addAll(fallbackInstanceTypes);
+                    }
+                    return result;
+                }));
 
         Map<String, VmTypeResponse> defaultVmTypesByInstanceGroup = new HashMap<>();
-        for (Entry<String, String> instanceGroup : defaultInstanceTypesByInstanceGroup.entrySet()) {
+        for (Entry<String, List<String>> instanceGroup : defaultInstanceTypesByInstanceGroup.entrySet()) {
             String instanceGroupName = instanceGroup.getKey();
-            String instanceType = instanceGroup.getValue();
-            if (!vmTypesByName.containsKey(instanceType)) {
-                String message = String.format("Missing vm type for default template instance group: %s - %s", instanceGroupName, instanceType);
+            List<String> instanceTypes = instanceGroup.getValue();
+            if (instanceTypes.stream().noneMatch(vmTypesByName::containsKey)) {
+                String message = String.format("Missing vm type for default template instance group: %s - %s", instanceGroupName, instanceTypes);
                 LOGGER.warn(message);
                 throw new BadRequestException(message);
             }
-            defaultVmTypesByInstanceGroup.put(instanceGroupName, vmTypesByName.get(instanceType));
+            Optional<VmTypeResponse> defaultVmType = instanceTypes.stream()
+                    .filter(vmTypesByName::containsKey)
+                    .findFirst()
+                    .map(vmTypesByName::get);
+            defaultVmType.ifPresent(vmTypeResponse -> defaultVmTypesByInstanceGroup.put(instanceGroupName, vmTypeResponse));
         }
         return defaultVmTypesByInstanceGroup;
     }
