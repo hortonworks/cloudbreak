@@ -81,6 +81,7 @@ public class AzureRegionProvider {
                     coordinates.put(region(azureRegion.label()), coordinate);
                 }
                 defaultVmtypesMap.put(region(azureRegion.label()), coordinate.getDefaultVmtypes());
+                defaultVmtypesMap.put(region(azureRegion.name()), coordinate.getDefaultVmtypes());
             }
         }
         if (region != null && !Strings.isNullOrEmpty(region.value())) {
