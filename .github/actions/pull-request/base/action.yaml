@@ -1,0 +1,218 @@
+name: 'Checkout and Setup Secrets'
+description: 'Checks out the repository and fetches secrets from Vault'
+
+inputs: {}
+
+outputs:
+  JIRA_WEBHOOK:
+    description: 'Jira webhook URL'
+    value: ${{ steps.build_secrets.outputs.JIRA_WEBHOOK }}
+  JIRA_CLOUD_TOKEN:
+    description: 'Jira cloud token'
+    value: ${{ steps.build_secrets.outputs.JIRA_CLOUD_TOKEN }}
+  CM_PRIVATE_REPO_PASSWORD:
+    description: 'CM private repo password'
+    value: ${{ steps.build_secrets.outputs.CM_PRIVATE_REPO_PASSWORD }}
+  CM_PRIVATE_REPO_USER:
+    description: 'CM private repo user'
+    value: ${{ steps.build_secrets.outputs.CM_PRIVATE_REPO_USER }}
+  DOCKERHUB_PASSWORD:
+    description: 'Dockerhub password'
+    value: ${{ steps.build_secrets.outputs.DOCKERHUB_PASSWORD }}
+  DOCKERHUB_USERNAME:
+    description: 'Dockerhub username'
+    value: ${{ steps.build_secrets.outputs.DOCKERHUB_USERNAME }}
+  GITHUB_TOKEN:
+    description: 'GitHub token'
+    value: ${{ steps.build_secrets.outputs.GITHUB_TOKEN }}
+  JIRA_TOKEN:
+    description: 'Jira token'
+    value: ${{ steps.build_secrets.outputs.JIRA_TOKEN }}
+  REAL_UMS_USERS_DEV:
+    description: 'Real UMS users dev'
+    value: ${{ steps.build_secrets.outputs.REAL_UMS_USERS_DEV }}
+  INTEGRATIONTEST_AWS_CREDENTIAL_ROLEARN:
+    description: 'AWS credential role ARN'
+    value: ${{ steps.build_secrets.outputs.INTEGRATIONTEST_AWS_CREDENTIAL_ROLEARN }}
+  INTEGRATIONTEST_AWS_CREDENTIAL_SECRETKEY:
+    description: 'AWS credential secret key'
+    value: ${{ steps.build_secrets.outputs.INTEGRATIONTEST_AWS_CREDENTIAL_SECRETKEY }}
+  INTEGRATIONTEST_AWS_CREDENTIAL_ACCESSKEYID:
+    description: 'AWS credential access key ID'
+    value: ${{ steps.build_secrets.outputs.INTEGRATIONTEST_AWS_CREDENTIAL_ACCESSKEYID }}
+  INTEGRATIONTEST_RDSCONFIG_RDSUSER:
+    description: 'RDS config user'
+    value: ${{ steps.build_secrets.outputs.INTEGRATIONTEST_RDSCONFIG_RDSUSER }}
+  INTEGRATIONTEST_RDSCONFIG_RDSPASSWORD:
+    description: 'RDS config password'
+    value: ${{ steps.build_secrets.outputs.INTEGRATIONTEST_RDSCONFIG_RDSPASSWORD }}
+  INTEGRATIONTEST_RDSCONFIG_RDSCONNECTIONURL:
+    description: 'RDS config connection URL'
+    value: ${{ steps.build_secrets.outputs.INTEGRATIONTEST_RDSCONFIG_RDSCONNECTIONURL }}
+  INTEGRATIONTEST_LDAPCONFIG_LDAPSERVERHOST:
+    description: 'LDAP server host'
+    value: ${{ steps.build_secrets.outputs.INTEGRATIONTEST_LDAPCONFIG_LDAPSERVERHOST }}
+  INTEGRATIONTEST_LDAPCONFIG_BINDPASSWORD:
+    description: 'LDAP bind password'
+    value: ${{ steps.build_secrets.outputs.INTEGRATIONTEST_LDAPCONFIG_BINDPASSWORD }}
+  INTEGRATIONTEST_AWS_DISKENCRYPTIONKEY:
+    description: 'AWS disk encryption key'
+    value: ${{ steps.build_secrets.outputs.INTEGRATIONTEST_AWS_DISKENCRYPTIONKEY }}
+  INTEGRATIONTEST_AWS_DISKENCRYPTION_ENVIRONMENTKEY:
+    description: 'AWS disk encryption environment key'
+    value: ${{ steps.build_secrets.outputs.INTEGRATIONTEST_AWS_DISKENCRYPTION_ENVIRONMENTKEY }}
+  INTEGRATIONTEST_AWS_DISKENCRYPTION_DATAHUBKEY:
+    description: 'AWS disk encryption datahub key'
+    value: ${{ steps.build_secrets.outputs.INTEGRATIONTEST_AWS_DISKENCRYPTION_DATAHUBKEY }}
+  INTEGRATIONTEST_AWS_CLOUDSTORAGE_S3_INSTANCEPROFILE:
+    description: 'AWS cloud storage S3 instance profile'
+    value: ${{ steps.build_secrets.outputs.INTEGRATIONTEST_AWS_CLOUDSTORAGE_S3_INSTANCEPROFILE }}
+  INTEGRATIONTEST_AWS_ACCOUNTID:
+    description: 'AWS account ID'
+    value: ${{ steps.build_secrets.outputs.INTEGRATIONTEST_AWS_ACCOUNTID }}
+  INTEGRATIONTEST_DATABASE_CONNECTIONURL:
+    description: 'Database connection URL'
+    value: ${{ steps.build_secrets.outputs.INTEGRATIONTEST_DATABASE_CONNECTIONURL }}
+  INTEGRATIONTEST_PROXY_HOST:
+    description: 'Proxy host'
+    value: ${{ steps.build_secrets.outputs.INTEGRATIONTEST_PROXY_HOST }}
+  INTEGRATIONTEST_PROXY_PORT:
+    description: 'Proxy port'
+    value: ${{ steps.build_secrets.outputs.INTEGRATIONTEST_PROXY_PORT }}
+  INTEGRATIONTEST_PROXY_NOPROXYHOSTS:
+    description: 'Proxy no-proxy hosts'
+    value: ${{ steps.build_secrets.outputs.INTEGRATIONTEST_PROXY_NOPROXYHOSTS }}
+  INTEGRATIONTEST_PROXY_USER:
+    description: 'Proxy user'
+    value: ${{ steps.build_secrets.outputs.INTEGRATIONTEST_PROXY_USER }}
+  INTEGRATIONTEST_PROXY_PASSWORD:
+    description: 'Proxy password'
+    value: ${{ steps.build_secrets.outputs.INTEGRATIONTEST_PROXY_PASSWORD }}
+  INTEGRATIONTEST_PROXY_USER2:
+    description: 'Proxy user 2'
+    value: ${{ steps.build_secrets.outputs.INTEGRATIONTEST_PROXY_USER2 }}
+  INTEGRATIONTEST_PROXY_PASSWORD2:
+    description: 'Proxy password 2'
+    value: ${{ steps.build_secrets.outputs.INTEGRATIONTEST_PROXY_PASSWORD2 }}
+  INTEGRATIONTEST_AWS_CLOUDSTORAGE_BASELOCATION:
+    description: 'AWS cloud storage base location'
+    value: ${{ steps.build_secrets.outputs.INTEGRATIONTEST_AWS_CLOUDSTORAGE_BASELOCATION }}
+  SEQ_PUB_FILE:
+    description: 'SEQ public file'
+    value: ${{ steps.build_secrets.outputs.SEQ_PUB_FILE }}
+  SEQ_PRIV_FILE:
+    description: 'SEQ private file'
+    value: ${{ steps.build_secrets.outputs.SEQ_PRIV_FILE }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: setup_secrets
+      id: build_secrets
+      uses: Kitchen/RE-thirdparty-actions/actions/vault@main
+      with:
+        tlsSkipVerify: true
+        url: https://re-vault.eng.cloudera.com/
+        method: kubernetes
+        path: rke_re_jenkins
+        role: cb
+        secrets: |
+          cb/data/JIRA_WEBHOOK JIRA_WEBHOOK | JIRA_WEBHOOK;
+          cb/data/JIRA_CLOUD_TOKEN JIRA_CLOUD_TOKEN | JIRA_CLOUD_TOKEN;
+          cb/data/CM_PRIVATE_REPO_PASSWORD CM_PRIVATE_REPO_PASSWORD | CM_PRIVATE_REPO_PASSWORD;
+          cb/data/CM_PRIVATE_REPO_USER CM_PRIVATE_REPO_USER | CM_PRIVATE_REPO_USER;
+          cb/data/DOCKERHUB_PASSWORD DOCKERHUB_PASSWORD | DOCKERHUB_PASSWORD;
+          cb/data/DOCKERHUB_USERNAME DOCKERHUB_USERNAME | DOCKERHUB_USERNAME;
+          cb/data/GITHUB_TOKEN GITHUB_TOKEN | GITHUB_TOKEN;
+          cb/data/JIRA_TOKEN JIRA_TOKEN | JIRA_TOKEN;
+          cb/data/REAL_UMS_USERS_DEV REAL_UMS_USERS_DEV|REAL_UMS_USERS_DEV;
+          cb/data/INTEGRATIONTEST_AWS_CREDENTIAL_ROLEARN INTEGRATIONTEST_AWS_CREDENTIAL_ROLEARN | INTEGRATIONTEST_AWS_CREDENTIAL_ROLEARN;
+          cb/data/INTEGRATIONTEST_AWS_CREDENTIAL_SECRETKEY INTEGRATIONTEST_AWS_CREDENTIAL_SECRETKEY | INTEGRATIONTEST_AWS_CREDENTIAL_SECRETKEY;
+          cb/data/INTEGRATIONTEST_AWS_CREDENTIAL_ACCESSKEYID INTEGRATIONTEST_AWS_CREDENTIAL_ACCESSKEYID | INTEGRATIONTEST_AWS_CREDENTIAL_ACCESSKEYID;
+          cb/data/INTEGRATIONTEST_RDSCONFIG_RDSUSER INTEGRATIONTEST_RDSCONFIG_RDSUSER | INTEGRATIONTEST_RDSCONFIG_RDSUSER;
+          cb/data/INTEGRATIONTEST_RDSCONFIG_RDSPASSWORD INTEGRATIONTEST_RDSCONFIG_RDSPASSWORD | INTEGRATIONTEST_RDSCONFIG_RDSPASSWORD;
+          cb/data/INTEGRATIONTEST_RDSCONFIG_RDSCONNECTIONURL INTEGRATIONTEST_RDSCONFIG_RDSCONNECTIONURL | INTEGRATIONTEST_RDSCONFIG_RDSCONNECTIONURL;
+          cb/data/INTEGRATIONTEST_LDAPCONFIG_LDAPSERVERHOST INTEGRATIONTEST_LDAPCONFIG_LDAPSERVERHOST | INTEGRATIONTEST_LDAPCONFIG_LDAPSERVERHOST;
+          cb/data/INTEGRATIONTEST_LDAPCONFIG_BINDPASSWORD INTEGRATIONTEST_LDAPCONFIG_BINDPASSWORD | INTEGRATIONTEST_LDAPCONFIG_BINDPASSWORD;
+          cb/data/INTEGRATIONTEST_AWS_DISKENCRYPTIONKEY INTEGRATIONTEST_AWS_DISKENCRYPTIONKEY | INTEGRATIONTEST_AWS_DISKENCRYPTIONKEY;
+          cb/data/INTEGRATIONTEST_AWS_DISKENCRYPTION_ENVIRONMENTKEY INTEGRATIONTEST_AWS_DISKENCRYPTION_ENVIRONMENTKEY | INTEGRATIONTEST_AWS_DISKENCRYPTION_ENVIRONMENTKEY;
+          cb/data/INTEGRATIONTEST_AWS_DISKENCRYPTION_DATAHUBKEY INTEGRATIONTEST_AWS_DISKENCRYPTION_DATAHUBKEY | INTEGRATIONTEST_AWS_DISKENCRYPTION_DATAHUBKEY;
+          cb/data/INTEGRATIONTEST_AWS_CLOUDSTORAGE_S3_INSTANCEPROFILE INTEGRATIONTEST_AWS_CLOUDSTORAGE_S3_INSTANCEPROFILE | INTEGRATIONTEST_AWS_CLOUDSTORAGE_S3_INSTANCEPROFILE;
+          cb/data/INTEGRATIONTEST_AWS_ACCOUNTID INTEGRATIONTEST_AWS_ACCOUNTID | INTEGRATIONTEST_AWS_ACCOUNTID;
+          cb/data/INTEGRATIONTEST_DATABASE_CONNECTIONURL INTEGRATIONTEST_DATABASE_CONNECTIONURL | INTEGRATIONTEST_DATABASE_CONNECTIONURL;
+          cb/data/INTEGRATIONTEST_PROXY_HOST INTEGRATIONTEST_PROXY_HOST | INTEGRATIONTEST_PROXY_HOST;
+          cb/data/INTEGRATIONTEST_PROXY_PORT INTEGRATIONTEST_PROXY_PORT | INTEGRATIONTEST_PROXY_PORT;
+          cb/data/INTEGRATIONTEST_PROXY_NOPROXYHOSTS INTEGRATIONTEST_PROXY_NOPROXYHOSTS | INTEGRATIONTEST_PROXY_NOPROXYHOSTS;
+          cb/data/INTEGRATIONTEST_PROXY_USER INTEGRATIONTEST_PROXY_USER | INTEGRATIONTEST_PROXY_USER;
+          cb/data/INTEGRATIONTEST_PROXY_PASSWORD INTEGRATIONTEST_PROXY_PASSWORD | INTEGRATIONTEST_PROXY_PASSWORD;
+          cb/data/INTEGRATIONTEST_PROXY_USER2 INTEGRATIONTEST_PROXY_USER2 | INTEGRATIONTEST_PROXY_USER2;
+          cb/data/INTEGRATIONTEST_PROXY_PASSWORD2 INTEGRATIONTEST_PROXY_PASSWORD2 | INTEGRATIONTEST_PROXY_PASSWORD2;
+          cb/data/INTEGRATIONTEST_AWS_CLOUDSTORAGE_BASELOCATION INTEGRATIONTEST_AWS_CLOUDSTORAGE_BASELOCATION | INTEGRATIONTEST_AWS_CLOUDSTORAGE_BASELOCATION;
+          cb/data/SEQ_PUB_FILE SEQ_PUB_FILE|SEQ_PUB_FILE;
+          cb/data/SEQ_PRIV_FILE SEQ_PRIV_FILE|SEQ_PRIV_FILE;
+          cb/data/SONARQUBE SONAR_HOST | SONAR_HOST;
+          cb/data/SONARQUBE SONAR_TOKEN | SONAR_TOKEN;
+    - name: cache_java_libs
+      id: cache-java
+      uses: cloudbreak/cloudbreak-github-actions/actions/cache@master
+      env:
+        cache-name: cache-java-libs
+      with:
+        path: |
+          /home/jenkins/.gradle/caches
+          /home/jenkins/.gradle/wrapper
+        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/build.gradle') }}
+        restore-keys: |
+          ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/build.gradle') }}
+          ${{ runner.os }}-build-${{ hashFiles('**/build.gradle') }}
+          ${{ runner.os }}-${{ hashFiles('**/build.gradle') }}
+    - if: ${{ steps.cache-java.outputs.cache-hit != 'true' }}
+      name: list_the_state_of_java_libs
+      continue-on-error: true
+      shell: bash
+      run: ./gradlew dependencies
+    - name: install_tools
+      shell: bash
+      run: |-
+        sudo apt-get update
+        DEBIAN_FRONTEND=noninteractive sudo apt-get install -y jq make uuid-runtime docker-compose-v2 git curl sed
+    - name: setup_environment_variables
+      shell: bash
+      run: |
+        echo "JIRA_WEBHOOK=${{ steps.build_secrets.outputs.JIRA_WEBHOOK}}" >> "$GITHUB_ENV"
+        echo "JIRA_CLOUD_TOKEN=${{ steps.build_secrets.outputs.JIRA_CLOUD_TOKEN}}" >> "$GITHUB_ENV"
+        echo "CM_PRIVATE_REPO_PASSWORD=${{ steps.build_secrets.outputs.CM_PRIVATE_REPO_PASSWORD}}" >> "$GITHUB_ENV"
+        echo "CM_PRIVATE_REPO_USER=${{ steps.build_secrets.outputs.CM_PRIVATE_REPO_USER}}" >> "$GITHUB_ENV"
+        echo "DOCKERHUB_PASSWORD=${{ steps.build_secrets.outputs.DOCKERHUB_PASSWORD}}" >> "$GITHUB_ENV"
+        echo "DOCKERHUB_USERNAME=${{ steps.build_secrets.outputs.DOCKERHUB_USERNAME}}" >> "$GITHUB_ENV"
+        echo "SONAR_HOST=${{ steps.build_secrets.outputs.SONAR_HOST}}" >> "$GITHUB_ENV"
+        echo "SONAR_TOKEN=${{ steps.build_secrets.outputs.SONAR_TOKEN}}" >> "$GITHUB_ENV"
+        echo "GITHUB_TOKEN=${{ steps.build_secrets.outputs.GITHUB_TOKEN}}" >> "$GITHUB_ENV"
+        echo "JIRA_TOKEN=${{ steps.build_secrets.outputs.JIRA_TOKEN}}" >> "$GITHUB_ENV"
+        echo "REAL_UMS_USERS_DEV=${{ steps.build_secrets.outputs.REAL_UMS_USERS_DEV}}" >> "$GITHUB_ENV"
+        echo "INTEGRATIONTEST_AWS_CREDENTIAL_ROLEARN=${{ steps.build_secrets.outputs.INTEGRATIONTEST_AWS_CREDENTIAL_ROLEARN}}" >> "$GITHUB_ENV"
+        echo "INTEGRATIONTEST_AWS_CREDENTIAL_SECRETKEY=${{ steps.build_secrets.outputs.INTEGRATIONTEST_AWS_CREDENTIAL_SECRETKEY}}" >> "$GITHUB_ENV"
+        echo "INTEGRATIONTEST_AWS_CREDENTIAL_ACCESSKEYID=${{ steps.build_secrets.outputs.INTEGRATIONTEST_AWS_CREDENTIAL_ACCESSKEYID}}" >> "$GITHUB_ENV"
+        echo "INTEGRATIONTEST_RDSCONFIG_RDSUSER=${{ steps.build_secrets.outputs.INTEGRATIONTEST_RDSCONFIG_RDSUSER}}" >> "$GITHUB_ENV"
+        echo "INTEGRATIONTEST_RDSCONFIG_RDSPASSWORD=${{ steps.build_secrets.outputs.INTEGRATIONTEST_RDSCONFIG_RDSPASSWORD}}" >> "$GITHUB_ENV"
+        echo "INTEGRATIONTEST_RDSCONFIG_RDSCONNECTIONURL=${{ steps.build_secrets.outputs.INTEGRATIONTEST_RDSCONFIG_RDSCONNECTIONURL}}" >> "$GITHUB_ENV"
+        echo "INTEGRATIONTEST_LDAPCONFIG_LDAPSERVERHOST=${{ steps.build_secrets.outputs.INTEGRATIONTEST_LDAPCONFIG_LDAPSERVERHOST}}" >> "$GITHUB_ENV"
+        echo "INTEGRATIONTEST_LDAPCONFIG_BINDPASSWORD=${{ steps.build_secrets.outputs.INTEGRATIONTEST_LDAPCONFIG_BINDPASSWORD}}" >> "$GITHUB_ENV"
+        echo "INTEGRATIONTEST_AWS_DISKENCRYPTIONKEY=${{ steps.build_secrets.outputs.INTEGRATIONTEST_AWS_DISKENCRYPTIONKEY}}" >> "$GITHUB_ENV"
+        echo "INTEGRATIONTEST_AWS_DISKENCRYPTION_ENVIRONMENTKEY=${{ steps.build_secrets.outputs.INTEGRATIONTEST_AWS_DISKENCRYPTION_ENVIRONMENTKEY}}" >> "$GITHUB_ENV"
+        echo "INTEGRATIONTEST_AWS_DISKENCRYPTION_DATAHUBKEY=${{ steps.build_secrets.outputs.INTEGRATIONTEST_AWS_DISKENCRYPTION_DATAHUBKEY}}" >> "$GITHUB_ENV"
+        echo "INTEGRATIONTEST_AWS_CLOUDSTORAGE_S3_INSTANCEPROFILE=${{ steps.build_secrets.outputs.INTEGRATIONTEST_AWS_CLOUDSTORAGE_S3_INSTANCEPROFILE}}" >> "$GITHUB_ENV"
+        echo "INTEGRATIONTEST_AWS_ACCOUNTID=${{ steps.build_secrets.outputs.INTEGRATIONTEST_AWS_ACCOUNTID}}" >> "$GITHUB_ENV"
+        echo "INTEGRATIONTEST_DATABASE_CONNECTIONURL=${{ steps.build_secrets.outputs.INTEGRATIONTEST_DATABASE_CONNECTIONURL}}" >> "$GITHUB_ENV"
+        echo "INTEGRATIONTEST_PROXY_HOST=${{ steps.build_secrets.outputs.INTEGRATIONTEST_PROXY_HOST}}" >> "$GITHUB_ENV"
+        echo "INTEGRATIONTEST_PROXY_PORT=${{ steps.build_secrets.outputs.INTEGRATIONTEST_PROXY_PORT}}" >> "$GITHUB_ENV"
+        echo "INTEGRATIONTEST_PROXY_NOPROXYHOSTS=${{ steps.build_secrets.outputs.INTEGRATIONTEST_PROXY_NOPROXYHOSTS}}" >> "$GITHUB_ENV"
+        echo "INTEGRATIONTEST_PROXY_USER=${{ steps.build_secrets.outputs.INTEGRATIONTEST_PROXY_USER}}" >> "$GITHUB_ENV"
+        echo "INTEGRATIONTEST_PROXY_PASSWORD=${{ steps.build_secrets.outputs.INTEGRATIONTEST_PROXY_PASSWORD}}" >> "$GITHUB_ENV"
+        echo "INTEGRATIONTEST_PROXY_USER2=${{ steps.build_secrets.outputs.INTEGRATIONTEST_PROXY_USER2}}" >> "$GITHUB_ENV"
+        echo "INTEGRATIONTEST_PROXY_PASSWORD2=${{ steps.build_secrets.outputs.INTEGRATIONTEST_PROXY_PASSWORD2}}" >> "$GITHUB_ENV"
+        echo "INTEGRATIONTEST_AWS_CLOUDSTORAGE_BASELOCATION=${{ steps.build_secrets.outputs.INTEGRATIONTEST_AWS_CLOUDSTORAGE_BASELOCATION}}" >> "$GITHUB_ENV"
+        echo "SEQ_PUB_FILE=${{ steps.build_secrets.outputs.SEQ_PUB_FILE}}" >> "$GITHUB_ENV"
+        echo "SEQ_PRIV_FILE<<EOF" >> "$GITHUB_ENV"
+        echo "${{ steps.build_secrets.outputs.SEQ_PRIV_FILE }}" >> "$GITHUB_ENV"
+        echo "EOF" >> "$GITHUB_ENV"

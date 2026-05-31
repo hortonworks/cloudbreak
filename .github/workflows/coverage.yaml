@@ -29,45 +29,11 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      - name: Setup secrets
-        id: build_secrets
-        uses: Kitchen/RE-thirdparty-actions/actions/vault@main
-        with:
-          tlsSkipVerify: true
-          url: https://re-vault.eng.cloudera.com/
-          method: kubernetes
-          path: rke_re_jenkins
-          role: cb
-          secrets: |
-            cb/data/CM_PRIVATE_REPO_PASSWORD CM_PRIVATE_REPO_PASSWORD | CM_PRIVATE_REPO_PASSWORD;
-            cb/data/CM_PRIVATE_REPO_USER CM_PRIVATE_REPO_USER | CM_PRIVATE_REPO_USER;
-            cb/data/SONARQUBE SONAR_HOST | SONAR_HOST;
-            cb/data/SONARQUBE SONAR_TOKEN | SONAR_TOKEN;
-      - name: Cache Java libs
-        id: cache-java
-        uses: cloudbreak/cloudbreak-github-actions/actions/cache@master
-        env:
-          cache-name: cache-java-libs
-        with:
-          path: |
-            /home/jenkins/.gradle/caches
-            /home/jenkins/.gradle/wrapper
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/build.gradle') }}
-          restore-keys: |
-            ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/build.gradle') }}
-            ${{ runner.os }}-build-${{ hashFiles('**/build.gradle') }}
-            ${{ runner.os }}-${{ hashFiles('**/build.gradle') }}
-      - if: ${{ steps.cache-java.outputs.cache-hit != 'true' }}
-        name: List the state of java libs
-        continue-on-error: true
-        run: ./gradlew dependencies
+      - name: prepare
+        uses: ./.github/actions/pull-request/base
       - name: Sonar analyze
         run: |-
           #!/bin/bash -x
-          export CM_PRIVATE_REPO_PASSWORD=$(echo "${{ steps.build_secrets.outputs.CM_PRIVATE_REPO_PASSWORD}}")
-          export CM_PRIVATE_REPO_USER=$(echo "${{ steps.build_secrets.outputs.CM_PRIVATE_REPO_USER}}")
-          export SONAR_TOKEN=$(echo "${{ steps.build_secrets.outputs.SONAR_TOKEN}}")
-          export SONAR_HOST=$(echo "${{ steps.build_secrets.outputs.SONAR_HOST}}")
           export SONAR_COVERAGE_EXCLUSION_COMMON="**/proto/**,**/generated/**,**/flow/**/*State.java,**/flow/**/event/*Event.java,**/flow/**/event/**/*Event.java,**/flow*/**/*Config.java,**/*Repository.java,**/configuration/*Properties.java,**/configuration/**/*Config.java,**/domain/**,**/Aspects/**"
           export CORE_SONAR_COVERAGE_EXCLUSION="${SONAR_COVERAGE_EXCLUSION_COMMON},**/reactor/api/event/**,**/flow2/**/*Config.java,**/flow2/**/*State.java,**/flow2/**/*Event.java"
           export DL_SONAR_COVERAGE_EXCLUSION="${SONAR_COVERAGE_EXCLUSION_COMMON},**/datalake/configuration/**"

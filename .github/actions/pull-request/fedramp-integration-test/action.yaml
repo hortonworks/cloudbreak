@@ -1,0 +1,82 @@
+name: 'FedRAMP Integration Test'
+description: 'Run FedRAMP integration tests'
+
+runs:
+  using: "composite"
+  steps:
+    - name: fedramp_integration_test
+      shell: bash
+      run: |-
+        export INTEGRATIONTEST_SUITE_FILES=file:/it/src/main/resources/testsuites/v4/mock/all-in-mock-package.yaml
+        export AWS=false
+        export INTEGRATIONTEST_UMS_HOST=thunderhead-mock
+        export INTEGRATIONTEST_UMS_PORT=8982
+        export INTEGRATIONTEST_CDL_HOST=thunderhead-mock
+        export INTEGRATIONTEST_CDL_PORT=8982
+        export INTEGRATIONTEST_AUTHDISTRIBUTOR_HOST=thunderhead-mock
+        export INTEGRATIONTEST_THREADCOUNT=4
+        export USE_FEDRAMP_CONTAINERS=true
+
+        make fedramp-integration-test-steps_fedramp_integration_test
+    - name: fedramp_integration_test_compress_results
+      if: ${{ always() }}
+      shell: bash
+      run: |-
+        cd integration-test
+        make compress-results
+    - name: fedramp_integration_test_collect_service_artifacts
+      uses: cloudbreak/cloudbreak-github-actions/actions/upload-artifact@master
+      if: ${{ always() }}
+      with:
+        name: fedramp-integration-test-cb-service-logs-artifact
+        retention-days: 5
+        path: |
+          integration-test/integcb-logs.tar.gz
+          integration-test/cloudbreak.log
+          integration-test/datalake.log
+          integration-test/redbeams.log
+          integration-test/environment.log
+          integration-test/freeipa.log
+          integration-test/thunderhead-mock.log
+          integration-test/jumpgate-interop.log
+          integration-test/jumpgate-admin.log
+          integration-test/jumpgate-proxy.log
+          integration-test/dev-gateway.log
+          integration-test/core-gateway.log
+          integration-test/envoy.log
+    - name: fedramp_integration_test_show_result
+      if: ${{ always() }}
+      uses: Kitchen/RE-thirdparty-actions/actions/testng-report@main
+      env:
+        GITHUB_TOKEN: ${{ env.GITHUB_TOKEN}}
+      with:
+        fail_if_empty: false
+        commit: ${{ github.event.pull_request.head.sha }}
+        show_skipped: true
+        check_name: 'FedRAMP Integration Test Report'
+        report_paths: |
+          **/testng-results.xml
+    - name: fedramp_integration_test_collect_test_artifacts
+      uses: cloudbreak/cloudbreak-github-actions/actions/upload-artifact@master
+      if: ${{ always() }}
+      with:
+        name: fedramp-integration-test-suites_log-artifact
+        retention-days: 5
+        path: |
+          integration-test/suites.tar.gz
+    - name: fedramp_integration_test_collect_test_result_artifacts
+      uses: cloudbreak/cloudbreak-github-actions/actions/upload-artifact@master
+      if: ${{ always() }}
+      with:
+        name: fedramp-integration-test-test-output-artifact
+        retention-days: 5
+        path: |
+          integration-test/test-output.tar.gz
+    - name: fedramp_integration_test_collect_test_console_output_artifacts
+      uses: cloudbreak/cloudbreak-github-actions/actions/upload-artifact@master
+      if: ${{ always() }}
+      with:
+        name: fedramp-integration-test-test_console_output-artifact
+        retention-days: 5
+        path: |
+          integration-test/test.out

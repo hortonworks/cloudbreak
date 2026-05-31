@@ -1,0 +1,60 @@
+name: 'Schema Compatibility Test'
+description: 'Run schema compatibility tests'
+
+runs:
+  using: "composite"
+  steps:
+    - name: schema_compatibility_test
+      id: schema_compatibility_test
+      shell: bash
+      run: |-
+        export INTEGRATIONTEST_SUITE_FILES=file:/it/src/main/resources/testsuites/v4/mock/all-in-mock-package.yaml
+        export AWS=false
+        export INTEGRATIONTEST_MAX_PG_NETWORK_OUTPUT=9.5GB
+        export INTEGRATIONTEST_UMS_HOST=thunderhead-mock
+        export INTEGRATIONTEST_UMS_PORT=8982
+        export INTEGRATIONTEST_CDL_HOST=thunderhead-mock
+        export INTEGRATIONTEST_CDL_PORT=8982
+
+        make schema-compatiblity-steps_schema_compatiblity
+    - name: schema_compatibility_test_collect_service_artifacts
+      uses: cloudbreak/cloudbreak-github-actions/actions/upload-artifact@master
+      if: ${{ always() }}
+      with:
+        name: schema-compatibility-service-artifact
+        retention-days: 5
+        path: |
+          integration-test/integcb-logs.tar.gz
+          integration-test/cloudbreak.log
+          integration-test/datalake.log
+          integration-test/redbeams.log
+          integration-test/environment.log
+          integration-test/freeipa.log
+          integration-test/thunderhead-mock.log
+          integration-test/jumpgate-interop.log
+          integration-test/jumpgate-admin.log
+          integration-test/jumpgate-proxy.log
+          integration-test/dev-gateway.log
+          integration-test/core-gateway.log
+          integration-test/envoy.log
+    - name: schema_compatibility_test_collect_test_artifacts
+      uses: cloudbreak/cloudbreak-github-actions/actions/upload-artifact@master
+      if: steps.schema_compatibility_test.conclusion == 'failure'
+      with:
+        name: schema-compatibility-test-artifact
+        retention-days: 5
+        path: |
+          integration-test/integcb/Profile
+          integration-test/integcb/docker-compose.yml
+          integration-test/integcb/*revert.result
+          integration-test/test.out
+          integration-test/swagger-validation-result.out
+          integration-test/suites_log/*.log
+          integration-test/test-output/**/*
+          integration-test/dumps/*.hprof
+    - name: schema_compatibility_test_check
+      if: steps.schema_compatibility_test.outcome == 'failure'
+      shell: bash
+      run: |
+        echo "Schema compatiblity failed, now failing the job."
+        exit 1

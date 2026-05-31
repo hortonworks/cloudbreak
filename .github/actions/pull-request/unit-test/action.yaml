@@ -1,0 +1,50 @@
+name: 'Unit Test'
+description: 'Run unit tests with coverage reporting'
+
+runs:
+  using: "composite"
+  steps:
+    - name: gradle_build
+      shell: bash
+      run: |-
+        make unit-test-steps_gradle_build
+    - name: add_test_report
+      if: ${{ always() }}
+      id: test-report
+      uses: Kitchen/RE-thirdparty-actions/actions/test-reporter@main
+      with:
+        name: JUnit Test Report
+        path: '**/build/test-results/test/TEST-*.xml'
+        reporter: java-junit
+        list-suites: 'failed'
+        list-tests: 'failed'
+        fail-on-error: 'true'
+        only-summary: 'true'
+    - name: add_coverage_to_pr
+      id: jacoco
+      uses: cloudbreak/cloudbreak-github-actions/actions/jacoco-report@master
+      with:
+        paths: |
+          core/build/reports/jacoco/test/jacocoTestReport.xml,
+          freeipa/build/reports/jacoco/test/jacocoTestReport.xml,
+          autoscale/build/reports/jacoco/test/jacocoTestReport.xml,
+          datalake/build/reports/jacoco/test/jacocoTestReport.xml,
+          environment-api/build/reports/jacoco/test/jacocoTestReport.xml,
+          environment-common/build/reports/jacoco/test/jacocoTestReport.xml,
+          environment-remote/build/reports/jacoco/test/jacocoTestReport.xml,
+          environment/build/reports/jacoco/test/jacocoTestReport.xml,
+          externalized-compute/build/reports/jacoco/test/jacocoTestReport.xml,
+          flow/build/reports/jacoco/test/jacocoTestReport.xml,
+          redbeams/build/reports/jacoco/test/jacocoTestReport.xml,
+          secret-engine/build/reports/jacoco/test/jacocoTestReport.xml,
+          secret-rotation/build/reports/jacoco/test/jacocoTestReport.xml,
+          template-manager-cmtemplate/build/reports/jacoco/test/jacocoTestReport.xml,
+          template-manager-core/build/reports/jacoco/test/jacocoTestReport.xml,
+          template-manager-recipe/build/reports/jacoco/test/jacocoTestReport.xml,
+          template-manager-tag/build/reports/jacoco/test/jacocoTestReport.xml
+        token: ${{ env.GITHUB_TOKEN}}
+        github_token: ${{ env.GITHUB_TOKEN}}
+        min-coverage-overall: 55
+        min-coverage-changed-files: 55
+        title: Cloudbreak code coverage report
+        update-comment: true

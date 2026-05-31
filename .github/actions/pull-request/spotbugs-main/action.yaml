@@ -1,0 +1,17 @@
+name: 'Spotbugs Main'
+description: 'Run SpotBugs on main sources'
+
+runs:
+  using: "composite"
+  steps:
+    - name: gradle_build
+      shell: bash
+      run: |-
+        make spotbugs-main-steps_gradle_build
+    - uses: cloudbreak/cloudbreak-github-actions/actions/spotbugs-github-action@master
+      if: success() || failure()
+      name: spotbugs_main_report
+      with:
+        name: SpotBugs Main Report
+        title: SpotBugs Main Report
+        path: '**/spotbugsXml.xml'

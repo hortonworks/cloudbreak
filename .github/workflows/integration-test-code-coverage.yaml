@@ -26,34 +26,11 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      - name: setup_secrets
-        id: build_secrets
-        uses: Kitchen/RE-thirdparty-actions/actions/vault@main
-        with:
-          tlsSkipVerify: true
-          url: https://re-vault.eng.cloudera.com/
-          method: kubernetes
-          path: rke_re_jenkins
-          role: cb
-          secrets: |
-            cb/data/CM_PRIVATE_REPO_PASSWORD CM_PRIVATE_REPO_PASSWORD | CM_PRIVATE_REPO_PASSWORD;
-            cb/data/CM_PRIVATE_REPO_USER CM_PRIVATE_REPO_USER | CM_PRIVATE_REPO_USER;
-            cb/data/DOCKERHUB_PASSWORD DOCKERHUB_PASSWORD | DOCKERHUB_PASSWORD;
-            cb/data/DOCKERHUB_USERNAME DOCKERHUB_USERNAME | DOCKERHUB_USERNAME;
-            cb/data/SONARQUBE SONAR_HOST | SONAR_HOST;
-            cb/data/SONARQUBE SONAR_TOKEN | SONAR_TOKEN;
-      - name: install_tools
-        run: |-
-          #!/bin/bash -x
-          sudo apt-get update
-          DEBIAN_FRONTEND=noninteractive sudo apt-get install -y jq make uuid-runtime docker-compose-v2 git curl
+      - name: prepare
+        uses: ./.github/actions/pull-request/base
       - name: integration_test
         continue-on-error: true
         run: |-
-          export CM_PRIVATE_REPO_PASSWORD=$(echo "${{ steps.build_secrets.outputs.CM_PRIVATE_REPO_PASSWORD}}")
-          export CM_PRIVATE_REPO_USER=$(echo "${{ steps.build_secrets.outputs.CM_PRIVATE_REPO_USER}}")
-          export DOCKERHUB_PASSWORD=$(echo "${{ steps.build_secrets.outputs.DOCKERHUB_PASSWORD}}")
-          export DOCKERHUB_USERNAME=$(echo "${{ steps.build_secrets.outputs.DOCKERHUB_USERNAME}}")
           export INTEGRATIONTEST_SUITE_FILES=file:/it/src/main/resources/testsuites/v4/mock/all-in-mock-package.yaml
           export AWS=false
           export INTEGRATIONTEST_UMS_HOST=thunderhead-mock
@@ -74,8 +51,6 @@ jobs:
       - name: upload_code_coverage_reports_to_sonar
         run: |-
           #!/bin/bash -x
-          export SONAR_TOKEN=$(echo "${{ steps.build_secrets.outputs.SONAR_TOKEN}}")
-          export SONAR_HOST=$(echo "${{ steps.build_secrets.outputs.SONAR_HOST}}")
           export SONAR_COVERAGE_EXCLUSION_COMMON="**/proto/**,**/generated/**,**/flow/**/*State.java,**/flow/**/event/*Event.java,**/flow/**/event/**/*Event.java,**/flow*/**/*Config.java,**/*Repository.java,**/configuration/*Properties.java,**/configuration/**/*Config.java,**/domain/**,**/Aspects/**"
           export CORE_SONAR_COVERAGE_EXCLUSION="${SONAR_COVERAGE_EXCLUSION_COMMON},**/reactor/api/event/**,**/flow2/**/*Config.java,**/flow2/**/*State.java,**/flow2/**/*Event.java"
           export DL_SONAR_COVERAGE_EXCLUSION="${SONAR_COVERAGE_EXCLUSION_COMMON},**/datalake/configuration/**"

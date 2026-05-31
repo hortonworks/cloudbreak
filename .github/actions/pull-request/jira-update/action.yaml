@@ -1,0 +1,13 @@
+name: 'Jira Update'
+description: 'Update Jira ticket with PR information'
+
+runs:
+  using: "composite"
+  steps:
+    - name: update_jira_ticket
+      shell: bash
+      run: |-
+        export PULL_REQUEST_NUMBER=$PULL_REQUEST_NUMBER
+        export BRANCH=$SOURCE_BRANCH
+        export PROJECT=$PROJECT
+        make jira-update-steps_update_jira_ticket

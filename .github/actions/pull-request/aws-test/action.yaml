@@ -1,0 +1,69 @@
+name: 'Aws Test'
+description: 'Run AWS integration tests'
+
+runs:
+  using: "composite"
+  steps:
+    - name: aws_test
+      shell: bash
+      run: |-
+        export AWS=true
+        export INTEGRATIONTEST_AWS_MULTIAZ=false
+        export INTEGRATIONTEST_CLOUDPROVIDER=AWS
+        export INTEGRATIONTEST_AWS_CLOUDSTORAGE_FILESYSTEMTYPE=S3
+        export INTEGRATIONTEST_OUTPUTDIR=.
+        export INTEGRATIONTEST_IMAGECATALOGNAME=cloudbreak-default
+        export AWS_DEFAULT_REGION=eu-central-1
+        export INTEGRATIONTEST_TIMEOUT=9000000
+        export INTEGRATIONTEST_UMS_HOST=thunderhead-mock
+        export INTEGRATIONTEST_UMS_PORT=8982
+        export INTEGRATIONTEST_CDL_HOST=thunderhead-mock
+        export INTEGRATIONTEST_CDL_PORT=8982
+
+        make aws-test-steps_aws_test
+    - name: aws_test_show_result
+      if: ${{ always() }}
+      uses: Kitchen/RE-thirdparty-actions/actions/testng-report@main
+      env:
+        GITHUB_TOKEN: ${{ env.GITHUB_TOKEN}}
+      with:
+        fail_if_empty: false
+        commit: ${{ github.event.pull_request.head.sha }}
+        show_skipped: true
+        check_name: 'AWS Test Report'
+        report_paths: |
+          **/testng-results.xml
+    - name: aws_test_compress_results
+      if: ${{ always() }}
+      shell: bash
+      run: |-
+        cd integration-test
+        make compress-results
+    - name: aws_test_collect_service_artifacts
+      uses: cloudbreak/cloudbreak-github-actions/actions/upload-artifact@master
+      if: ${{ always() }}
+      with:
+        name: aws-test-artifact
+        retention-days: 5
+        path: |
+          integration-test/integcb-logs.tar.gz
+          integration-test/cloudbreak.log
+          integration-test/datalake.log
+          integration-test/redbeams.log
+          integration-test/environment.log
+          integration-test/freeipa.log
+          integration-test/thunderhead-mock.log
+          integration-test/jumpgate-interop.log
+          integration-test/jumpgate-admin.log
+          integration-test/jumpgate-proxy.log
+          integration-test/dev-gateway.log
+          integration-test/core-gateway.log
+          integration-test/envoy.log
+    - name: aws_test_collect_test_artifacts
+      uses: cloudbreak/cloudbreak-github-actions/actions/upload-artifact@master
+      if: ${{ always() }}
+      with:
+        name: aws-test-artifact
+        retention-days: 5
+        path: |
+          integration-test/suites.tar.gz

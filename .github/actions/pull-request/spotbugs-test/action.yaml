@@ -1,0 +1,17 @@
+name: 'Spotbugs Test'
+description: 'Run SpotBugs on test sources'
+
+runs:
+  using: "composite"
+  steps:
+    - name: gradle_build
+      shell: bash
+      run: |-
+        make spotbugs-test-steps_gradle_build
+    - uses: cloudbreak/cloudbreak-github-actions/actions/spotbugs-github-action@master
+      if: ${{ always() }}
+      name: spotbugs_test_report
+      with:
+        name: SpotBugs Test Report
+        title: SpotBugs Test Report
+        path: '**/spotbugsXml.xml'

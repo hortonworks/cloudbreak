@@ -1,0 +1,10 @@
+name: 'Config Change Integration Test'
+description: 'Run config change integration tests'
+
+runs:
+  using: "composite"
+  steps:
+    - name: component_test
+      shell: bash
+      run: |-
+        make config-change-int-steps_config_change

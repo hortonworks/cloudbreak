@@ -1,0 +1,10 @@
+name: Auto Approve
+
+runs:
+  using: "composite"
+  steps:
+    - name: Auto Approve
+      uses: cloudbreak/cloudbreak-github-actions/actions/auto-approve-action@master
+      if: github.actor == 'dependabot[bot]' || github.actor == 'cloudbreak-jenkins'
+      with:
+        review-message: "Auto approved pull request."

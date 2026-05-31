@@ -1,0 +1,17 @@
+name: 'Checkstyle Main'
+description: 'Run checkstyle on main sources'
+
+runs:
+  using: "composite"
+  steps:
+    - name: gradle_build
+      shell: bash
+      run: |-
+        make checkstyle-main-steps_gradle_build
+    - uses: cloudbreak/cloudbreak-github-actions/actions/checkstyle-github-action@master
+      if: ${{ always() }}
+      name: checkstyle_main_report
+      with:
+        name: Checkstyle Main Report
+        title: Checkstyle Main Report
+        path: '**/checkstyle/main.xml'

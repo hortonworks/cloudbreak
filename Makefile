@@ -96,43 +96,43 @@ import-redbeams-aws-rds-root-certs:
 	 make -C redbeams import-aws-rds-root-certs
 
 jira-update-steps_update_jira_ticket:
-	 ./.github/workflows/pull-request/steps/jira-update-steps_update_jira_ticket.sh
+	 ./.github/actions/pull-request/jira-update/jira-update-steps_update_jira_ticket.sh
 
 unit-test-steps_gradle_build:
-	 ./.github/workflows/pull-request/steps/unit-test-steps_gradle_build.sh
+	 ./.github/actions/pull-request/unit-test/unit-test-steps_gradle_build.sh
 
 checkstyle-main-steps_gradle_build:
-	 ./.github/workflows/pull-request/steps/checkstyle-main-steps_gradle_build.sh
+	 ./.github/actions/pull-request/checkstyle-main/checkstyle-main-steps_gradle_build.sh
 
 checkstyle-test-steps_gradle_build:
-	 ./.github/workflows/pull-request/steps/checkstyle-test-steps_gradle_build.sh
+	 ./.github/actions/pull-request/checkstyle-test/checkstyle-test-steps_gradle_build.sh
 
 spotbugs-test-steps_gradle_build:
-	 ./.github/workflows/pull-request/steps/spotbugs-test-steps_gradle_build.sh
+	 ./.github/actions/pull-request/spotbugs-test/spotbugs-test-steps_gradle_build.sh
 
 spotbugs-main-steps_gradle_build:
-	 ./.github/workflows/pull-request/steps/spotbugs-main-steps_gradle_build.sh
+	 ./.github/actions/pull-request/spotbugs-main/spotbugs-main-steps_gradle_build.sh
 
 swagger-compatiblity-steps_openapi_compatibility_check:
-	 ./.github/workflows/pull-request/steps/swagger-compatiblity-steps_openapi_compatibility_check.sh
+	 ./.github/actions/pull-request/swagger-compatiblity/swagger-compatiblity-steps_openapi_compatibility_check.sh
 
 component-test-steps_component_test:
-	 ./.github/workflows/pull-request/steps/component-test-steps_component_test.sh
+	 ./.github/actions/pull-request/component-test/component-test-steps_component_test.sh
 
 integration-test-steps_integration_test:
-	 ./.github/workflows/pull-request/steps/integration-test-steps_integration_test.sh
+	 ./.github/actions/pull-request/integration-test/integration-test-steps_integration_test.sh
 
 config-change-int-steps_config_change:
-	 ./.github/workflows/pull-request/steps/config-change-int-steps_config_change.sh
+	 ./.github/actions/pull-request/config-change-integration-test/config-change-int-steps_config_change.sh
 
 schema-compatiblity-steps_schema_compatiblity:
-	 ./.github/workflows/pull-request/steps/schema-compatiblity-steps_schema_compatiblity.sh
+	 ./.github/actions/pull-request/schema-compatibility-test/schema-compatiblity-steps_schema_compatiblity.sh
 
 fedramp-integration-test-steps_fedramp_integration_test:
-	 ./.github/workflows/pull-request/steps/fedramp-integration-test-steps_integration_test.sh
+	 ./.github/actions/pull-request/fedramp-integration-test/fedramp-integration-test-steps_integration_test.sh
 
 real-ums-test-steps_real_ums_test:
-	 ./.github/workflows/pull-request/steps/real-ums-test-steps_real_ums_test.sh
+	 ./.github/actions/pull-request/real-ums-test/real-ums-test-steps_real_ums_test.sh
 
 aws-test-steps_aws_test:
-	 ./.github/workflows/pull-request/steps/aws-test-steps_aws_test.sh
+	 ./.github/actions/pull-request/aws-test/aws-test-steps_aws_test.sh

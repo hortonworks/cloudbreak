@@ -33,5 +33,5 @@ main() {
   fi
 }
 
-source $(pwd)/.github/workflows/pull-request/steps/prerequisites.sh
+source $(pwd)/.github/actions/pull-request/prerequisites.sh
 main "$@"

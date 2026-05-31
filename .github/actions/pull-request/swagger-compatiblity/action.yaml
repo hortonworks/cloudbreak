@@ -1,0 +1,10 @@
+name: 'Swagger Compatibility'
+description: 'Check OpenAPI/Swagger compatibility'
+
+runs:
+  using: "composite"
+  steps:
+    - name: openapi_compatibility_check
+      shell: bash
+      run: |-
+        make swagger-compatiblity-steps_openapi_compatibility_check

@@ -1,0 +1,17 @@
+name: 'Checkstyle Test'
+description: 'Run checkstyle on test sources'
+
+runs:
+  using: "composite"
+  steps:
+    - name: gradle_build
+      shell: bash
+      run: |-
+        make checkstyle-test-steps_gradle_build
+    - uses: cloudbreak/cloudbreak-github-actions/actions/checkstyle-github-action@master
+      if: ${{ always() }}
+      name: checkstyle_test_report
+      with:
+        name: Checkstyle Test Report
+        title: Checkstyle Test Report
+        path: '**/checkstyle/test.xml'

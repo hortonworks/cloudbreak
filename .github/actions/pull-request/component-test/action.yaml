@@ -1,0 +1,10 @@
+name: 'Component Test'
+description: 'Run component tests'
+
+runs:
+  using: "composite"
+  steps:
+    - name: component_test
+      shell: bash
+      run: |-
+        make component-test-steps_component_test

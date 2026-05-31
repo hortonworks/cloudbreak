@@ -5,5 +5,5 @@ main() {
   VERSION=$(get_latest_version) TARGET_BRANCH=$BRANCH make swagger-check
 }
 
-source $(pwd)/.github/workflows/pull-request/steps/prerequisites.sh
+source $(pwd)/.github/actions/pull-request/prerequisites.sh
 main "$@"
