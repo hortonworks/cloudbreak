@@ -36,6 +36,24 @@ certmongerIpaServiceDependency:
      - backup: False
      - unless: grep "After=.*ipa\.service.*" /usr/lib/systemd/system/certmonger.service
 
+{%- set enroll_ttls = salt['pillar.get']('freeipa:certmonger:enroll_ttls', '') %}
+certmonger-enroll-ttls:
+{%- if enroll_ttls != '' %}
+  ini.options_present:
+    - name: /etc/certmonger/certmonger.conf
+    - separator: ' = '
+    - sections:
+        defaults:
+          enroll_ttls: '{{ enroll_ttls }}'
+{%- else %}
+  ini.options_absent:
+    - name: /etc/certmonger/certmonger.conf
+    - sections:
+        defaults:
+          - enroll_ttls
+    - onlyif: test -f /etc/certmonger/certmonger.conf
+{%- endif %}
+
 {%- if grains['init'] == 'systemd' %}
 {%- for service in pillar['freeipa']['services'] %}
 {%- set command = 'systemctl show -p FragmentPath ' + service %}
@@ -83,6 +101,12 @@ reload-systemd:
   cmd.run:
     - name: systemctl daemon-reload
     - failhard: True
+
+restart-certmonger:
+  service.running:
+    - name: certmonger
+    - watch:
+      - ini: certmonger-enroll-ttls
 
 {%- endif %}
 

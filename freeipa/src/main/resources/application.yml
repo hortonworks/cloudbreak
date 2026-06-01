@@ -84,6 +84,9 @@ freeipa:
   image.catalog:
     default.os: redhat9
     cache.ttl: 15
+  certmonger:
+    # Renewal attempts in seconds before expiry: 12w, 8w, 4w, 2w, 1w, 3d, 2d, 1d, 12h, 6h, 2h, 1h
+    enroll_ttls: "7257600, 4838400, 2419200, 1209600, 604800, 259200, 172800, 86400, 43200, 21600, 7200, 3600"
   platform.dnssec.validation:
     AWS: false
     AZURE: false

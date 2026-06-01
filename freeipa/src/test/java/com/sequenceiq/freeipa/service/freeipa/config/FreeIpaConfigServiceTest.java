@@ -86,6 +86,8 @@ class FreeIpaConfigServiceTest {
 
     private static final String ENCRYPTION_PROFILE_CRN = "crn:cdp:environments:us-west-1:cloudera:encryptionProfile:custom-ep-123";
 
+    private static final String CERTMONGER_ENROLL_TTLS = "7776000, 7171200, 6566400, 5961600, 5356800";
+
     private Multimap<String, String> subnetWithCidr;
 
     @Mock
@@ -135,6 +137,7 @@ class FreeIpaConfigServiceTest {
         subnetWithCidr = ArrayListMultimap.create();
         subnetWithCidr.put("10.117.0.0", "16");
         ReflectionTestUtils.setField(underTest, "kerberosSecretLocation", KERBEROS_SECRET_LOCATION);
+        ReflectionTestUtils.setField(underTest, "certMongerEnrollTtls", CERTMONGER_ENROLL_TTLS);
         when(loadBalancerService.findByStackId(any())).thenReturn(Optional.empty());
     }
 
@@ -202,6 +205,9 @@ class FreeIpaConfigServiceTest {
         assertEquals(SeLinux.ENFORCING.name().toLowerCase(Locale.ROOT), freeIpaConfigView.getSeLinux());
         Map<String, Object> encryptionMap = freeIpaConfigView.getEncryptionConfig().toMap();
         assertEquals(TLS_VERSIONS, encryptionMap.get("tlsVersionsSpaceSeparated"));
+        assertEquals(CERTMONGER_ENROLL_TTLS, freeIpaConfigView.getCertMongerConfig().getEnrollTtls());
+        Map<String, Object> certmongerMap = (Map<String, Object>) freeIpaConfigView.toMap().get("certmonger");
+        assertEquals(CERTMONGER_ENROLL_TTLS, certmongerMap.get("enroll_ttls"));
     }
 
     @Test
@@ -376,4 +382,48 @@ class FreeIpaConfigServiceTest {
     // CHECKSTYLE:ON
     // @formatter:on
 
+    @Test
+    void testCertMongerConfigWithEmptyTtls() {
+        ReflectionTestUtils.setField(underTest, "certMongerEnrollTtls", "");
+        FreeIpa freeIpa = new FreeIpa();
+        freeIpa.setDomain(DOMAIN);
+        freeIpa.setAdminPassword(PASSWORD);
+        Stack stack = new Stack();
+        stack.setCloudPlatform(CloudPlatform.AWS.name());
+        stack.setRegion("region");
+        stack.setEnvironmentCrn(ENV_CRN);
+        Network network = new Network();
+        network.setNetworkCidrs(List.of(CIDR));
+        stack.setNetwork(network);
+        stack.setAccountId(ACCOUNT);
+        stack.setId(0L);
+        DetailedEnvironmentResponse detailedEnvironmentResponse = mock(DetailedEnvironmentResponse.class);
+        EncryptionProfileResponse encryptionProfileResponse = mock(EncryptionProfileResponse.class);
+
+        when(encryptionProfileResponse.getTlsVersions()).thenReturn(Set.of(TlsVersion.TLS_1_2.getVersion(), TlsVersion.TLS_1_3.getVersion()));
+        when(cachedEnvironmentClientService.getByCrn(anyString())).thenReturn(detailedEnvironmentResponse);
+        when(freeIpaService.findByStack(any())).thenReturn(freeIpa);
+        when(freeIpaClientFactory.getAdminUser()).thenReturn(ADMIN);
+        when(networkService.getFilteredSubnetWithCidr(any())).thenReturn(subnetWithCidr);
+        when(reverseDnsZoneCalculator.reverseDnsZoneForCidrs(any())).thenReturn(REVERSE_ZONE);
+        when(environment.getProperty("freeipa.platform.dnssec.validation.AWS", "true")).thenReturn("true");
+        GatewayConfig gatewayConfig = mock(GatewayConfig.class);
+        when(gatewayConfig.getHostname()).thenReturn(HOSTNAME);
+        when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenReturn(gatewayConfig);
+        when(environmentService.isSecretEncryptionEnabled(ENV_CRN)).thenReturn(false);
+        when(detailedEnvironmentResponse.getEncryptionProfileCrn()).thenReturn(ENCRYPTION_PROFILE_CRN);
+        when(cachedEncryptionProfileClientService.getByCrnOrDefaultIfEmpty(eq(ENCRYPTION_PROFILE_CRN))).thenReturn(encryptionProfileResponse);
+        when(encryptionProfileProvider.getOpenSslCipherSuites(any(), any(), anyBoolean()))
+                .thenReturn("cipher1,cipher2,ECDHE-RSA-AES256-GCM-SHA384");
+        when(crossRealmTrustService.getByStackId(any())).thenThrow(new NotFoundException("not found"));
+
+        Node node = new Node(PRIVATE_IP, null, null, null, HOSTNAME, DOMAIN, (String) null);
+
+        FreeIpaConfigView freeIpaConfigView = underTest.createFreeIpaConfigs(
+                stack, ImmutableSet.of(node));
+
+        assertEquals("", freeIpaConfigView.getCertMongerConfig().getEnrollTtls());
+        Map<String, Object> certmongerMap = (Map<String, Object>) freeIpaConfigView.toMap().get("certmonger");
+        assertEquals("", certmongerMap.get("enroll_ttls"));
+    }
 }

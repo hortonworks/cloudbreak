@@ -49,6 +49,9 @@ public class FreeIpaConfigService {
     @Value("${freeipa.kerberos.secret.location}")
     private String kerberosSecretLocation;
 
+    @Value("${freeipa.certmonger.enroll_ttls:}")
+    private String certMongerEnrollTtls;
+
     @Inject
     private NetworkService networkService;
 
@@ -134,6 +137,9 @@ public class FreeIpaConfigService {
                         .map(lb -> new FreeIpaLbConfigView(lb.getEndpoint(), lb.getFqdn(), lb.getIp()))
                         .orElse(new FreeIpaLbConfigView()))
                 .withAdTrustEnabled(adTrustEnabled)
+                .withCertmongerConfig(FreeIpaCertMongerConfigView.builder()
+                        .withEnrollTtls(certMongerEnrollTtls)
+                        .build())
                 .build();
     }
 

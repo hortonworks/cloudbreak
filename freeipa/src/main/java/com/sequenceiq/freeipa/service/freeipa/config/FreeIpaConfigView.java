@@ -55,6 +55,8 @@ public class FreeIpaConfigView {
 
     private final boolean adTrustEnabled;
 
+    private final FreeIpaCertMongerConfigView certMongerConfig;
+
     @SuppressWarnings("ExecutableStatementCount")
     private FreeIpaConfigView(Builder builder) {
         this.realm = builder.realm;
@@ -76,6 +78,7 @@ public class FreeIpaConfigView {
         this.lbConfig = builder.lbConfig;
         this.encryptionConfig = builder.encryptionConfig;
         this.adTrustEnabled = builder.adTrustEnabled;
+        this.certMongerConfig = builder.certMongerConfig;
     }
 
     public String getRealm() {
@@ -150,6 +153,10 @@ public class FreeIpaConfigView {
         return adTrustEnabled;
     }
 
+    public FreeIpaCertMongerConfigView getCertMongerConfig() {
+        return certMongerConfig;
+    }
+
     @SuppressWarnings("ExecutableStatementCount")
     public Map<String, Object> toMap() {
         Map<String, Object> map = new HashMap<>();
@@ -177,6 +184,7 @@ public class FreeIpaConfigView {
         map.put("loadBalancer", lbConfig.toMap());
         map.put("encryptionConfig", encryptionConfig.toMap());
         map.put("adTrustEnabled", adTrustEnabled);
+        map.put("certmonger", certMongerConfig.toMap());
 
         return map;
     }
@@ -221,7 +229,12 @@ public class FreeIpaConfigView {
 
         private boolean adTrustEnabled;
 
+        private FreeIpaCertMongerConfigView certMongerConfig;
+
         public FreeIpaConfigView build() {
+            if (certMongerConfig == null) {
+                certMongerConfig = FreeIpaCertMongerConfigView.builder().build();
+            }
             return new FreeIpaConfigView(this);
         }
 
@@ -317,6 +330,11 @@ public class FreeIpaConfigView {
 
         public Builder withAdTrustEnabled(boolean adTrustEnabled) {
             this.adTrustEnabled = adTrustEnabled;
+            return this;
+        }
+
+        public Builder withCertmongerConfig(FreeIpaCertMongerConfigView certmongerConfig) {
+            this.certMongerConfig = certmongerConfig;
             return this;
         }
     }

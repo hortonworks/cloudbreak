@@ -38,6 +38,7 @@ class FreeIpaConfigViewTest {
     void testToMap(boolean secretEncryptionEnabled) {
         FreeIpaBackupConfigView backupConfigView = mock(FreeIpaBackupConfigView.class);
         EncryptionProfileResponse encryptionProfileResponse = mock(EncryptionProfileResponse.class);
+        String ttls = "7776000, 604800, 86400, 3600";
 
         FreeIpaConfigView freeIpaConfigView = new Builder()
                 .withKerberosSecretLocation(KERBEROS_SECRET_LOCATION)
@@ -45,12 +46,30 @@ class FreeIpaConfigViewTest {
                 .withSeLinux(SeLinux.PERMISSIVE.name())
                 .withEncryptionConfig(new FreeIpaEncryptionConfigView(encryptionProfileProvider, encryptionProfileResponse))
                 .withSecretEncryptionEnabled(secretEncryptionEnabled)
+                .withCertmongerConfig(FreeIpaCertMongerConfigView.builder().withEnrollTtls(ttls).build())
                 .build();
 
         Map<String, Object> freeIpaConfigMap = freeIpaConfigView.toMap();
         assertEquals(secretEncryptionEnabled, freeIpaConfigMap.get("secretEncryptionEnabled"));
         assertEquals(KERBEROS_SECRET_LOCATION, freeIpaConfigMap.get("kerberosSecretLocation"));
         assertEquals(SeLinux.PERMISSIVE.name(), freeIpaConfigMap.get("selinux_mode"));
+        Map<String, Object> certmongerMap = (Map<String, Object>) freeIpaConfigMap.get("certmonger");
+        assertEquals(ttls, certmongerMap.get("enroll_ttls"));
+    }
+
+    @Test
+    void testToMapForCertMongerDefault() {
+        FreeIpaBackupConfigView backupConfigView = mock(FreeIpaBackupConfigView.class);
+        EncryptionProfileResponse encryptionProfileResponse = mock(EncryptionProfileResponse.class);
+
+        FreeIpaConfigView freeIpaConfigView = new Builder()
+                .withBackupConfig(backupConfigView)
+                .withEncryptionConfig(new FreeIpaEncryptionConfigView(encryptionProfileProvider, encryptionProfileResponse))
+                .build();
+
+        Map<String, Object> freeIpaConfigMap = freeIpaConfigView.toMap();
+        Map<String, Object> certmongerMap = (Map<String, Object>) freeIpaConfigMap.get("certmonger");
+        assertEquals("", certmongerMap.get("enroll_ttls"));
     }
 
     @Test
