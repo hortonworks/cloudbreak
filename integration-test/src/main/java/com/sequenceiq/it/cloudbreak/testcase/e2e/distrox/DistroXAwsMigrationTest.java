@@ -51,8 +51,8 @@ public class DistroXAwsMigrationTest extends AbstractE2ETest {
             when = "a valid DistroX",
             then = "DistroX cluster is multiAZ")
     public void testAwsNativeMigration(TestContext testContext) {
-        String currentVersion = commonClusterManagerProperties.getRuntimeVersion();
         String targetVersion = commonClusterManagerProperties.getLatestRuntimeVersion();
+        String currentVersion = commonClusterManagerProperties.getUpgrade().getMatrix().get(targetVersion);
         createDatalakeWithVersion(testContext, currentVersion);
 
         SdxInternalTestDto sdxInternalTestDto = testContext.get(SdxInternalTestDto.class);
