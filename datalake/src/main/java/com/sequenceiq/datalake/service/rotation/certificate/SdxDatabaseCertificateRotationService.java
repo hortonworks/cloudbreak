@@ -84,7 +84,7 @@ public class SdxDatabaseCertificateRotationService {
             return noDatalakeAnswer(dlCrn);
         }
         stackService.validateRdsSslCertRotation(dlCrn);
-        StackV4Response stack = stackService.getDetail(sdxCluster.getClusterName(), null, accountIdService.getAccountIdFromUserCrn(dlCrn));
+        StackV4Response stack = stackService.getDetail(sdxCluster.getClusterName(), null, accountIdService.getAccountIdFromResourceCrn(dlCrn));
         return checkPrerequisitesAndTrigger(sdxCluster, stack);
     }
 

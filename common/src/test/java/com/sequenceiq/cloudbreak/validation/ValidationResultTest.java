@@ -7,11 +7,16 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 class ValidationResultTest {
 
+    private static final String ERROR_MESSAGE = "Error should appear now.";
+
     @Test
-    public void testEmptyValidationResult() {
+    void testEmptyValidationResult() {
         ValidationResult result = ValidationResult.empty();
         assertEquals(ValidationResult.State.VALID, result.getState());
         assertTrue(result.getErrors().isEmpty());
@@ -19,21 +24,21 @@ class ValidationResultTest {
     }
 
     @Test
-    public void testAddingErrorChangesStateToError() {
+    void testAddingErrorChangesStateToError() {
         ValidationResult result = ValidationResult.builder().error("Sample error").build();
         assertEquals(ValidationResult.State.ERROR, result.getState());
         assertTrue(result.getErrors().contains("Sample error"));
     }
 
     @Test
-    public void testAddingWarningDoesNotChangeState() {
+    void testAddingWarningDoesNotChangeState() {
         ValidationResult result = ValidationResult.builder().warning("Sample warning").build();
         assertEquals(ValidationResult.State.VALID, result.getState());
         assertTrue(result.getWarnings().contains("Sample warning"));
     }
 
     @Test
-    public void testMergingValidationResultsCombinesErrorsAndWarnings() {
+    void testMergingValidationResultsCombinesErrorsAndWarnings() {
         ValidationResult result1 = ValidationResult.builder().error("Error 1").warning("Warning 1").build();
         ValidationResult result2 = ValidationResult.builder().error("Error 2").warning("Warning 2").build();
         ValidationResult mergedResult = result1.merge(result2);
@@ -42,7 +47,7 @@ class ValidationResultTest {
     }
 
     @Test
-    public void testFormattingProducesNumberedListForMultipleItems() {
+    void testFormattingProducesNumberedListForMultipleItems() {
         ValidationResult result = ValidationResult.builder().error("Error 1").error("Error 2").build();
         String formattedErrors = result.getFormattedErrors();
         assertTrue(formattedErrors.contains("1. Error 1"));
@@ -50,14 +55,14 @@ class ValidationResultTest {
     }
 
     @Test
-    public void testBuilderSetsPrefixCorrectly() {
+    void testBuilderSetsPrefixCorrectly() {
         ValidationResult result = ValidationResult.builder().prefix("Prefix").error("Error").error("asd").warning("Warning").build();
         assertTrue(result.getFormattedErrors().startsWith("Prefix"));
         assertTrue(result.getFormattedWarnings().startsWith("Prefix"));
     }
 
     @Test
-    public void testMergingValidWithErrorResultsInErrorState() {
+    void testMergingValidWithErrorResultsInErrorState() {
         ValidationResult validResult = ValidationResult.empty();
         ValidationResult errorResult = ValidationResult.builder().error("Error").build();
         ValidationResult mergedResult = validResult.merge(errorResult);
@@ -65,7 +70,7 @@ class ValidationResultTest {
     }
 
     @Test
-    public void testAddingEmptyErrorOrWarningDoesNotAffectStateOrLists() {
+    void testAddingEmptyErrorOrWarningDoesNotAffectStateOrLists() {
         ValidationResult result = ValidationResult.builder().error("").warning("").build();
         assertEquals(ValidationResult.State.VALID, result.getState());
         assertTrue(result.getErrors().isEmpty());
@@ -73,7 +78,7 @@ class ValidationResultTest {
     }
 
     @Test
-    public void testMergingWithNullDoesNotAlterOriginal() {
+    void testMergingWithNullDoesNotAlterOriginal() {
         ValidationResult original = ValidationResult.builder().error("Error").build();
         ValidationResult merged = original.merge(null);
         assertEquals(original.getState(), merged.getState());
@@ -82,7 +87,7 @@ class ValidationResultTest {
     }
 
     @Test
-    public void testFormattingSingleItemDoesNotIncludeNumbering() {
+    void testFormattingSingleItemDoesNotIncludeNumbering() {
         ValidationResult result = ValidationResult.builder().error("Single Error").build();
         String formattedErrors = result.getFormattedErrors();
         assertFalse(formattedErrors.contains("1. "));
@@ -90,7 +95,7 @@ class ValidationResultTest {
     }
 
     @Test
-    public void testPrefixHandledCorrectlyWhenEmptyOrNull() {
+    void testPrefixHandledCorrectlyWhenEmptyOrNull() {
         ValidationResult resultWithEmptyPrefix = ValidationResult.builder().prefix("").error("Error").build();
         assertFalse(resultWithEmptyPrefix.getFormattedErrors().startsWith(":"));
 
@@ -99,19 +104,19 @@ class ValidationResultTest {
     }
 
     @Test
-    public void testHasErrorReturnsTrueIfThereAreErrors() {
+    void testHasErrorReturnsTrueIfThereAreErrors() {
         ValidationResult result = ValidationResult.builder().error("Error").build();
         assertTrue(result.hasError());
     }
 
     @Test
-    public void testHasWarningReturnsTrueIfThereAreWarnings() {
+    void testHasWarningReturnsTrueIfThereAreWarnings() {
         ValidationResult validationResult = ValidationResult.builder().warning("Warning 1").build();
         assertTrue(validationResult.hasWarning());
     }
 
     @Test
-    public void testBuilderMultipleErrorsWarnings() {
+    void testBuilderMultipleErrorsWarnings() {
         ValidationResult validationResult = ValidationResult.builder()
                 .error("Error 1")
                 .warning("Warning 1")
@@ -122,5 +127,53 @@ class ValidationResultTest {
         assertTrue(validationResult.hasWarning());
         assertEquals(2, validationResult.getErrors().size());
         assertEquals(2, validationResult.getWarnings().size());
+    }
+
+    @Test
+    void testValidationResultOfError() {
+        ValidationResult validationResult = ValidationResult.ofError("Error message");
+
+        assertTrue(validationResult.hasError());
+        assertEquals(ValidationResult.State.ERROR, validationResult.getState());
+        assertEquals(1, validationResult.getErrors().size());
+        assertEquals("Error message", validationResult.getErrors().getFirst());
+        assertFalse(validationResult.hasWarning());
+        assertTrue(validationResult.getWarnings().isEmpty());
+    }
+
+    @NullSource
+    @ValueSource(strings = {""})
+    @ParameterizedTest
+    void testValidationResultOfErrorWithNUllOrEmpty(String errorMessage) {
+        ValidationResult validationResult = ValidationResult.builder().error(errorMessage).build();
+
+        assertFalse(validationResult.hasError());
+        assertEquals(ValidationResult.State.VALID, validationResult.getState());
+        assertTrue(validationResult.getErrors().isEmpty());
+        assertTrue(validationResult.getWarnings().isEmpty());
+    }
+
+    @Test
+    void testIfErrorWorks() {
+        ValidationResult result = ValidationResult.builder().ifError(() -> true, ERROR_MESSAGE).build();
+        assertError(result);
+    }
+
+    @Test
+    void testErrorWorks() {
+        ValidationResult result = ValidationResult.builder().error(ERROR_MESSAGE).build();
+        assertError(result);
+    }
+
+    @Test
+    void testDuplicateErrors() {
+        ValidationResult result = ValidationResult.builder().error(ERROR_MESSAGE).error(ERROR_MESSAGE).build();
+        assertError(result);
+    }
+
+    private void assertError(ValidationResult result) {
+        assertEquals(ValidationResult.State.ERROR, result.getState());
+        assertEquals(1, result.getErrors().size(), 1);
+        assertEquals(ERROR_MESSAGE, result.getErrors().getFirst());
     }
 }

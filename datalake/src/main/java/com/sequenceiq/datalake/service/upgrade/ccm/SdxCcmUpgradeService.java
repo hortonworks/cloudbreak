@@ -80,7 +80,7 @@ public class SdxCcmUpgradeService {
             return noDatalakeAnswer(environmentCrn);
         }
         SdxCluster sdxCluster = sdxClusterOpt.get();
-        StackV4Response stack = stackService.getDetail(sdxCluster.getClusterName(), null, accountIdService.getAccountIdFromUserCrn(environmentCrn));
+        StackV4Response stack = stackService.getDetail(sdxCluster.getClusterName(), null, accountIdService.getAccountIdFromResourceCrn(environmentCrn));
 
         if (Tunnel.getUpgradables().contains(stack.getTunnel())) {
             return checkPrerequisitesAndTrigger(sdxCluster, stack);

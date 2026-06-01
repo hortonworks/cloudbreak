@@ -19,7 +19,9 @@ auth:
     event-generation:
       expiration-minutes: 10
     freeipa:
-      multiaz.enable: true
+      multiaz:
+        enable: true
+        migration.enable: true
       rebuild.enable: true
       batch.call.enable: true
       loadbalancer.enable: true

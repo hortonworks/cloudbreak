@@ -24,6 +24,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_DB_D
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_ENFORCE_AWS_NATIVE_FOR_SINGLE_AZ_DATAHUB;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_ENFORCE_AWS_NATIVE_FOR_SINGLE_AZ_DATALAKE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_ENFORCE_AWS_NATIVE_FOR_SINGLE_AZ_FREEIPA;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_FREEIPA_MULTI_AZ_MIGRATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_GCP_MULTIAZ;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_GCP_SECURE_BOOT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_NOTIFICATION_SENDING_ENABLED;
@@ -675,5 +676,9 @@ public class EntitlementService {
 
     public boolean isChangeEncryptionProfileEnabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_CHANGE_ENCRYPTION_PROFILE);
+    }
+
+    public boolean isFreeIpaMultiAzMigrationEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_CB_FREEIPA_MULTI_AZ_MIGRATION);
     }
 }

@@ -67,6 +67,7 @@ public final class FreeIpaOperationDescriptions {
     public static final String MODIFY_SELINUX_BY_CRN = "Modifies SELinux of the FreeIPA instances";
     public static final String INTERNAL_MODIFY_TAGS_BY_ENV_ID =
             "Initiates the modification of the user defined tags for FreeIPA stack by environment CRN using the internal actor";
+    public static final String MULTI_AZ_MIGRATION = "Migrates FreeIPA from single-AZ to multi-AZ";
 
     private FreeIpaOperationDescriptions() {
     }

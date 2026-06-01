@@ -151,7 +151,7 @@ public class SdxResizeService {
 
     public Pair<SdxCluster, FlowIdentifier> resizeSdx(String userCrn, String clusterName, SdxClusterResizeRequest sdxClusterResizeRequest) {
         LOGGER.info("Re-sizing SDX cluster with name {}", clusterName);
-        String accountIdFromCrn = accountIdService.getAccountIdFromUserCrn(userCrn);
+        String accountIdFromCrn = accountIdService.getAccountIdFromResourceCrn(userCrn);
         String environmentName = sdxClusterResizeRequest.getEnvironment();
         SdxClusterShape shape = sdxClusterResizeRequest.getClusterShape();
 
@@ -277,9 +277,9 @@ public class SdxResizeService {
         multiAzDecorator.validateMultiAz(enableMultiAz, environmentResponse, shape, true);
         SdxCluster newSdxCluster = new SdxCluster();
         newSdxCluster.setCrn(regionAwareCrnGenerator.generateCrnStringWithUuid(CrnResourceDescriptor.VM_DATALAKE,
-                accountIdService.getAccountIdFromUserCrn(userCrn)));
+                accountIdService.getAccountIdFromResourceCrn(userCrn)));
         newSdxCluster.setClusterName(clusterName);
-        newSdxCluster.setAccountId(accountIdService.getAccountIdFromUserCrn(userCrn));
+        newSdxCluster.setAccountId(accountIdService.getAccountIdFromResourceCrn(userCrn));
         newSdxCluster.setClusterShape(shape);
         newSdxCluster.setSeLinux(sdxCluster.getSeLinux());
         newSdxCluster.setNotificationState(sdxCluster.getNotificationState());

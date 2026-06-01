@@ -274,7 +274,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
     public Optional<SdxCluster> findDetachedSdxClusterByOriginalCrn(String originalCrn) {
         LOGGER.info("Searching for detached SDX cluster by original crn {}", originalCrn);
         Optional<SdxCluster> result = Optional.empty();
-        String accountIdFromCrn = accountIdService.getAccountIdFromUserCrn(ThreadBasedUserCrnProvider.getUserCrn());
+        String accountIdFromCrn = accountIdService.getAccountIdFromResourceCrn(ThreadBasedUserCrnProvider.getUserCrn());
         List<SdxCluster> detachedSdxClusters = sdxClusterRepository.findByAccountIdAndOriginalCrnAndDeletedIsNull(accountIdFromCrn, originalCrn);
         if (detachedSdxClusters.size() == 1) {
             result = Optional.ofNullable(detachedSdxClusters.getFirst());
@@ -289,7 +289,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
 
     public SdxCluster getByCrn(String userCrn, String clusterCrn) {
         LOGGER.info("Searching for single SDX cluster by crn {}", clusterCrn);
-        String accountIdFromCrn = accountIdService.getAccountIdFromUserCrn(userCrn);
+        String accountIdFromCrn = accountIdService.getAccountIdFromResourceCrn(userCrn);
         Optional<SdxCluster> sdxCluster = sdxClusterRepository.findByAccountIdAndCrnAndDeletedIsNull(accountIdFromCrn, clusterCrn);
         if (sdxCluster.isPresent()) {
             return sdxCluster.get();
@@ -301,7 +301,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
     public List<SdxCluster> getSdxClustersByCrn(String userCrn, String clusterCrn, boolean includeDeleted) {
         LOGGER.info("Searching for all SDX clusters by crn {}", clusterCrn);
         List<SdxCluster> sdxClusterList = new ArrayList<>();
-        String accountIdFromCrn = accountIdService.getAccountIdFromUserCrn(userCrn);
+        String accountIdFromCrn = accountIdService.getAccountIdFromResourceCrn(userCrn);
         Optional<SdxCluster> sdxCluster = sdxClusterRepository.findByAccountIdAndCrnAndDeletedIsNull(accountIdFromCrn, clusterCrn);
         if (sdxCluster.isPresent()) {
             sdxClusterList.add(sdxCluster.get());
@@ -330,7 +330,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
 
     public String getEnvCrnByCrn(String userCrn, String clusterCrn) {
         LOGGER.info("Searching Environment Crn by SDX cluster {}", clusterCrn);
-        String accountIdFromCrn = accountIdService.getAccountIdFromUserCrn(userCrn);
+        String accountIdFromCrn = accountIdService.getAccountIdFromResourceCrn(userCrn);
         Optional<String> envCrn = sdxClusterRepository.findEnvCrnByAccountIdAndCrnAndDeletedIsNull(accountIdFromCrn, clusterCrn);
         if (envCrn.isPresent()) {
             return envCrn.get();
@@ -341,7 +341,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
 
     public SdxCluster getByNameInAccount(String userCrn, String name) {
         LOGGER.info("Searching for SDX cluster by name {}", name);
-        String accountIdFromCrn = accountIdService.getAccountIdFromUserCrn(userCrn);
+        String accountIdFromCrn = accountIdService.getAccountIdFromResourceCrn(userCrn);
         Optional<SdxCluster> sdxCluster = measure(() ->
                         sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNullAndDetachedIsFalse(accountIdFromCrn, name), LOGGER,
                 "Fetching SDX cluster took {}ms from DB. Name: [{}]", name);
@@ -350,7 +350,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
 
     public SdxCluster getByNameInAccountAllowDetached(String userCrn, String name) {
         LOGGER.info("Searching for SDX cluster by name {} allowing detached", name);
-        String accountIdFromCrn = accountIdService.getAccountIdFromUserCrn(userCrn);
+        String accountIdFromCrn = accountIdService.getAccountIdFromResourceCrn(userCrn);
         Optional<SdxCluster> sdxCluster = measure(() ->
                         sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNull(accountIdFromCrn, name), LOGGER,
                 "Fetching SDX cluster allowing detached took {}ms from DB. Name: [{}]", name);
@@ -393,7 +393,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
     private Pair<SdxCluster, FlowIdentifier> createSdx(final String userCrn, final String name, final SdxClusterRequest sdxClusterRequest,
             final StackV4Request internalStackV4Request, ImageSettingsV4Request imageSettingsV4Request) {
         LOGGER.info("Creating SDX cluster with name {}", name);
-        String accountId = accountIdService.getAccountIdFromUserCrn(userCrn);
+        String accountId = accountIdService.getAccountIdFromResourceCrn(userCrn);
         validateSdxRequest(name, sdxClusterRequest.getEnvironment(), accountId);
         DetailedEnvironmentResponse environment = environmentService.validateAndGetEnvironment(sdxClusterRequest.getEnvironment());
         platformAwareSdxConnector.validateIfOtherPlatformsHasSdx(environment.getCrn(), TargetPlatform.PAAS);
@@ -560,7 +560,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
     }
 
     private void setSecurity(SdxClusterRequest sdxClusterRequest, SdxCluster sdxCluster, String userCrn) {
-        String accountIdFromCrn = accountIdService.getAccountIdFromUserCrn(userCrn);
+        String accountIdFromCrn = accountIdService.getAccountIdFromResourceCrn(userCrn);
         if (sdxClusterRequest.getSecurity() != null && StringUtils.isNotBlank(sdxClusterRequest.getSecurity().getSeLinux())) {
             sdxCluster.setSeLinux(SeLinux.fromStringWithFallback(sdxClusterRequest.getSecurity().getSeLinux()));
             if (SeLinux.ENFORCING.equals(sdxCluster.getSeLinux())
@@ -592,9 +592,9 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
                 environmentResponse.getCloudPlatform(), environmentResponse.getAccountId());
         multiAzDecorator.validateMultiAz(cluster.isEnableMultiAz(), environmentResponse, cluster.getClusterShape(), false);
         SdxCluster newSdxCluster = new SdxCluster();
-        newSdxCluster.setCrn(createCrn(accountIdService.getAccountIdFromUserCrn(userCrn)));
+        newSdxCluster.setCrn(createCrn(accountIdService.getAccountIdFromResourceCrn(userCrn)));
         newSdxCluster.setClusterName(clusterName);
-        newSdxCluster.setAccountId(accountIdService.getAccountIdFromUserCrn(userCrn));
+        newSdxCluster.setAccountId(accountIdService.getAccountIdFromResourceCrn(userCrn));
         newSdxCluster.setClusterShape(cluster.getClusterShape());
         newSdxCluster.setCreated(clock.getCurrentTimeMillis());
         newSdxCluster.setEnvName(environmentResponse.getName());
@@ -858,24 +858,24 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
 
     public List<SdxCluster> listSdxByEnvCrn(String userCrn, String envCrn) {
         LOGGER.info("Listing SDX clusters by environment crn {}", envCrn);
-        String accountIdFromCrn = accountIdService.getAccountIdFromUserCrn(userCrn);
+        String accountIdFromCrn = accountIdService.getAccountIdFromResourceCrn(userCrn);
         return sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsFalse(accountIdFromCrn, envCrn);
     }
 
     public List<SdxCluster> listAllSdxByEnvCrn(String userCrn, String envCrn) {
         LOGGER.info("Listing all the SDX clusters by environment crn {}", envCrn);
-        String accountIdFromCrn = accountIdService.getAccountIdFromUserCrn(userCrn);
+        String accountIdFromCrn = accountIdService.getAccountIdFromResourceCrn(userCrn);
         return sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNull(accountIdFromCrn, envCrn);
     }
 
     public List<SdxCluster> listSdxByEnvCrn(String envCrn) {
         LOGGER.debug("Listing SDX clusters by environment crn {}", envCrn);
-        String accountIdFromCrn = accountIdService.getAccountIdFromUserCrn(envCrn);
+        String accountIdFromCrn = accountIdService.getAccountIdFromResourceCrn(envCrn);
         return sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsFalse(accountIdFromCrn, envCrn);
     }
 
     public List<SdxCluster> listSdx(String userCrn, String envName) {
-        String accountIdFromCrn = accountIdService.getAccountIdFromUserCrn(userCrn);
+        String accountIdFromCrn = accountIdService.getAccountIdFromResourceCrn(userCrn);
         if (envName != null) {
             LOGGER.info("Listing SDX clusters by environment name {}", envName);
             return sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNullAndDetachedIsFalse(accountIdFromCrn, envName);
@@ -885,7 +885,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
     }
 
     public List<SdxCluster> listAllSdx(String userCrn, String envName) {
-        String accountIdFromCrn = accountIdService.getAccountIdFromUserCrn(userCrn);
+        String accountIdFromCrn = accountIdService.getAccountIdFromResourceCrn(userCrn);
         if (envName != null) {
             LOGGER.info("Listing all the SDX clusters by environment name {}", envName);
             return sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNull(accountIdFromCrn, envName);
@@ -981,7 +981,7 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
     public Map<String, Optional<String>> getEnvironmentCrnsByResourceCrns(Collection<String> resourceCrns) {
         Set<String> resourceCrnSet = new LinkedHashSet<>(resourceCrns);
         List<SdxCluster> clusters = sdxClusterRepository.findAllByAccountIdAndCrnAndDeletedIsNullAndDetachedIsFalse(
-                accountIdService.getAccountIdFromUserCrn(ThreadBasedUserCrnProvider.getUserCrn()), resourceCrnSet);
+                accountIdService.getAccountIdFromResourceCrn(ThreadBasedUserCrnProvider.getUserCrn()), resourceCrnSet);
         Map<String, Optional<String>> resourceCrnWithEnvCrn = new LinkedHashMap<>();
         clusters.forEach(cluster -> resourceCrnWithEnvCrn.put(cluster.getCrn(), Optional.ofNullable(cluster.getEnvCrn())));
         return resourceCrnWithEnvCrn;

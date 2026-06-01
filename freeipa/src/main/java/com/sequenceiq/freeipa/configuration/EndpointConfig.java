@@ -30,6 +30,7 @@ import com.sequenceiq.freeipa.controller.EncryptionV1Controller;
 import com.sequenceiq.freeipa.controller.FreeIpaCO2V1Controller;
 import com.sequenceiq.freeipa.controller.FreeIpaCostV1Controller;
 import com.sequenceiq.freeipa.controller.FreeIpaInternalV1Controller;
+import com.sequenceiq.freeipa.controller.FreeIpaMigrationV1Controller;
 import com.sequenceiq.freeipa.controller.FreeIpaRotationV1Controller;
 import com.sequenceiq.freeipa.controller.FreeIpaUpgradeV1Controller;
 import com.sequenceiq.freeipa.controller.FreeIpaV1Controller;
@@ -73,6 +74,7 @@ public class EndpointConfig extends ResourceConfig {
             CDPStructuredEventV1Controller.class,
             UtilV1Controller.class,
             FreeIpaUpgradeV1Controller.class,
+            FreeIpaMigrationV1Controller.class,
             RecipeV1Controller.class,
             FreeIpaCostV1Controller.class,
             FreeIpaCO2V1Controller.class,
@@ -114,7 +116,7 @@ public class EndpointConfig extends ResourceConfig {
                 "API for working with FreeIPA clusters",
                 applicationVersion,
                 "https://localhost" + contextPath + FreeIpaApi.API_ROOT_CONTEXT
-                );
+        );
         openApiProvider.createConfig(openAPI, CONTROLLERS.stream().map(Class::getName).collect(Collectors.toSet()));
     }
 

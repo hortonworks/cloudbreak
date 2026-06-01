@@ -23,6 +23,7 @@ public enum AuthorizationResourceAction {
     REPAIR_FREEIPA("environments/repairFreeIPA", AuthorizationResourceType.ENVIRONMENT),
     SCALE_FREEIPA("environments/scaleFreeIPA", AuthorizationResourceType.ENVIRONMENT),
     UPGRADE_FREEIPA("environments/upgradeFreeIPA", AuthorizationResourceType.ENVIRONMENT),
+    MIGRATE_FREEIPA("environments/migrateFreeIPA", AuthorizationResourceType.ENVIRONMENT),
     CREATE_CREDENTIAL("environments/createCredential", AuthorizationResourceType.CREDENTIAL),
     CREATE_ENVIRONMENT("environments/createEnvironment", AuthorizationResourceType.ENVIRONMENT),
     GET_KEYTAB("environments/getKeytab", AuthorizationResourceType.ENVIRONMENT),

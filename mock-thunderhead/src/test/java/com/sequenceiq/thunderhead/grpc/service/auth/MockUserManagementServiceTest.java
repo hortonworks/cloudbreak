@@ -41,7 +41,7 @@ import io.grpc.StatusRuntimeException;
 import io.grpc.internal.testing.StreamRecorder;
 
 @ExtendWith(MockitoExtension.class)
-public class MockUserManagementServiceTest {
+class MockUserManagementServiceTest {
 
     private static final String VALID_LICENSE = "License file content";
 
@@ -172,11 +172,14 @@ public class MockUserManagementServiceTest {
 
                 {"changeEncryptionProfileEnabled false", "changeEncryptionProfileEnabled", false, "CDP_CHANGE_ENCRYPTION_PROFILE", false},
                 {"changeEncryptionProfileEnabled true", "changeEncryptionProfileEnabled", true, "CDP_CHANGE_ENCRYPTION_PROFILE", true},
+
+                {"freeipaMultiazMigrationEnable false", "freeipaMultiazMigrationEnable", false, "CDP_CB_FREEIPA_MULTI_AZ_MIGRATION", false},
+                {"freeipaMultiazMigrationEnable true", "freeipaMultiazMigrationEnable", true, "CDP_CB_FREEIPA_MULTI_AZ_MIGRATION", true},
         };
     }
 
     @Test
-    public void testSetLicenseShouldReturnACloudbreakLicense() throws IOException {
+    void testSetLicenseShouldReturnACloudbreakLicense() throws IOException {
         Path licenseFilePath = Files.createTempFile("license", "txt");
         Files.writeString(licenseFilePath, VALID_LICENSE);
         ReflectionTestUtils.setField(underTest, "cmLicenseFilePath", licenseFilePath.toString());
@@ -193,7 +196,7 @@ public class MockUserManagementServiceTest {
     }
 
     @Test
-    public void testSetLicenseShouldEmptyStringWhenTheFileIsNotExists() {
+    void testSetLicenseShouldEmptyStringWhenTheFileIsNotExists() {
         ReflectionTestUtils.setField(underTest, "cmLicenseFilePath", "/etc/license");
 
         IllegalStateException illegalStateException = assertThrows(IllegalStateException.class, () -> underTest.init());
@@ -203,7 +206,7 @@ public class MockUserManagementServiceTest {
     }
 
     @Test
-    public void testCreateWorkloadUsername() {
+    void testCreateWorkloadUsername() {
         String username = "&*foO$_#Bar22@baz13.com";
         String expected = "foo_bar22";
 
@@ -212,7 +215,7 @@ public class MockUserManagementServiceTest {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("testGetWorkloadCredentialsDataProvider")
-    public void testGetWorkloadCredentials(String userId, String expectedWorkloadUsername) throws IOException {
+    void testGetWorkloadCredentials(String userId, String expectedWorkloadUsername) throws IOException {
         Path sshPublicKeyFilePath = Files.createTempFile("key", ".pub");
         Files.writeString(sshPublicKeyFilePath, SAMPLE_SSH_PUBLIC_KEY);
         ReflectionTestUtils.setField(underTest, "sshPublicKeyFilePath", sshPublicKeyFilePath.toString());
@@ -248,7 +251,7 @@ public class MockUserManagementServiceTest {
     }
 
     @Test
-    public void testGetAccountIncludesPasswordPolicy() throws IOException {
+    void testGetAccountIncludesPasswordPolicy() throws IOException {
         Path licenseFilePath = Files.createTempFile("license", "txt");
         Files.writeString(licenseFilePath, VALID_LICENSE);
         ReflectionTestUtils.setField(underTest, "cmLicenseFilePath", licenseFilePath.toString());

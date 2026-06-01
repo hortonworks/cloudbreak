@@ -223,6 +223,9 @@ class EntitlementServiceTest {
 
                 {"CDP_CHANGE_ENCRYPTION_PROFILE", (EntitlementCheckFunction) EntitlementService::isChangeEncryptionProfileEnabled, false},
                 {"CDP_CHANGE_ENCRYPTION_PROFILE", (EntitlementCheckFunction) EntitlementService::isChangeEncryptionProfileEnabled, true},
+
+                {"CDP_CB_FREEIPA_MULTI_AZ_MIGRATION", (EntitlementCheckFunction) EntitlementService::isFreeIpaMultiAzMigrationEnabled, false},
+                {"CDP_CB_FREEIPA_MULTI_AZ_MIGRATION", (EntitlementCheckFunction) EntitlementService::isFreeIpaMultiAzMigrationEnabled, true},
         };
     }
 

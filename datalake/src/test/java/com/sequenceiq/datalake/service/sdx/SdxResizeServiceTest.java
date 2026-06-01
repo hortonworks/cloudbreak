@@ -242,7 +242,7 @@ class SdxResizeServiceTest {
         stackV4Response.setCluster(clusterV4Response);
         stackV4Response.setNetwork(getNetworkForCurrentDatalake());
         when(stackService.getDetail(anyString(), anySet(), anyString())).thenReturn(stackV4Response);
-        when(accountIdService.getAccountIdFromUserCrn(any())).thenReturn(ACCOUNT_ID);
+        when(accountIdService.getAccountIdFromResourceCrn(any())).thenReturn(ACCOUNT_ID);
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.resizeSdx(USER_CRN, CLUSTER_NAME, resizeRequest));
 
@@ -268,7 +268,7 @@ class SdxResizeServiceTest {
         sdxClusterResizeRequest.setClusterShape(MEDIUM_DUTY_HA);
         sdxClusterResizeRequest.setEnvironment(ENVIRONMENT_NAME);
         when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(Optional.empty());
-        when(accountIdService.getAccountIdFromUserCrn(any())).thenReturn(ACCOUNT_ID);
+        when(accountIdService.getAccountIdFromResourceCrn(any())).thenReturn(ACCOUNT_ID);
 
         NotFoundException notFoundException = assertThrows(NotFoundException.class, () -> underTest.resizeSdx(USER_CRN, "sdxcluster", sdxClusterResizeRequest));
 
@@ -287,7 +287,7 @@ class SdxResizeServiceTest {
 
         when(entitlementService.isDatalakeLightToMediumMigrationEnabled(anyString())).thenReturn(true);
         when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(Optional.of(sdxCluster));
-        when(accountIdService.getAccountIdFromUserCrn(any())).thenReturn(ACCOUNT_ID);
+        when(accountIdService.getAccountIdFromResourceCrn(any())).thenReturn(ACCOUNT_ID);
 
         BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> underTest.resizeSdx(USER_CRN, "sdxcluster",
                 sdxClusterResizeRequest));
@@ -322,7 +322,7 @@ class SdxResizeServiceTest {
         String mediumDutyJson = FileReaderUtils.readFileFromClasspath("/duties/7.2.15/gcp/medium_duty_ha.json");
         when(stackRequestHandler.getStackRequest(any(), any(), any(), any(), any(), any()))
                 .thenReturn(JsonUtil.readValue(mediumDutyJson, StackV4Request.class));
-        when(accountIdService.getAccountIdFromUserCrn(any())).thenReturn(ACCOUNT_ID);
+        when(accountIdService.getAccountIdFromResourceCrn(any())).thenReturn(ACCOUNT_ID);
 
         StackV4Response stackV4Response = new StackV4Response();
         stackV4Response.setStatus(Status.STOPPED);
@@ -367,7 +367,7 @@ class SdxResizeServiceTest {
         when(entitlementService.isDatalakeLightToMediumMigrationEnabled(anyString())).thenReturn(true);
         when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(Optional.of(sdxCluster));
         when(sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(anyString(), anyString())).thenReturn(Optional.of(sdxCluster));
-        when(accountIdService.getAccountIdFromUserCrn(any())).thenReturn(ACCOUNT_ID);
+        when(accountIdService.getAccountIdFromResourceCrn(any())).thenReturn(ACCOUNT_ID);
 
         BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> underTest.resizeSdx(USER_CRN, "sdxcluster",
                 sdxClusterResizeRequest));
@@ -389,7 +389,7 @@ class SdxResizeServiceTest {
         when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(Optional.of(sdxCluster));
         when(sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(anyString(), anyString())).thenReturn(Optional.empty());
         when(sdxBackupRestoreService.isDatalakeInBackupProgress(anyString(), anyString())).thenReturn(true);
-        when(accountIdService.getAccountIdFromUserCrn(any())).thenReturn(ACCOUNT_ID);
+        when(accountIdService.getAccountIdFromResourceCrn(any())).thenReturn(ACCOUNT_ID);
 
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.resizeSdx(USER_CRN, "sdxcluster", sdxClusterResizeRequest)),
@@ -413,7 +413,7 @@ class SdxResizeServiceTest {
         when(sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(anyString(), anyString())).thenReturn(Optional.empty());
         when(sdxBackupRestoreService.isDatalakeInBackupProgress(anyString(), anyString())).thenReturn(false);
         when(sdxBackupRestoreService.isDatalakeInRestoreProgress(anyString(), anyString())).thenReturn(true);
-        when(accountIdService.getAccountIdFromUserCrn(any())).thenReturn(ACCOUNT_ID);
+        when(accountIdService.getAccountIdFromResourceCrn(any())).thenReturn(ACCOUNT_ID);
 
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.resizeSdx(USER_CRN, "sdxcluster", sdxClusterResizeRequest)),
@@ -441,7 +441,7 @@ class SdxResizeServiceTest {
         when(sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(anyString(), anyString())).thenReturn(Optional.empty());
         when(sdxBackupRestoreService.isDatalakeInBackupProgress(anyString(), anyString())).thenReturn(false);
         when(sdxBackupRestoreService.isDatalakeInRestoreProgress(anyString(), anyString())).thenReturn(false);
-        when(accountIdService.getAccountIdFromUserCrn(any())).thenReturn(ACCOUNT_ID);
+        when(accountIdService.getAccountIdFromResourceCrn(any())).thenReturn(ACCOUNT_ID);
 
         mockEnvironmentCall(sdxClusterResizeRequest, AWS);
         when(sdxReactorFlowManager.triggerSdxResize(anyLong(), any(SdxCluster.class), any(DatalakeDrSkipOptions.class), eq(false)))
@@ -476,7 +476,7 @@ class SdxResizeServiceTest {
         when(sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(anyString(), anyString())).thenReturn(Optional.empty());
         when(sdxBackupRestoreService.isDatalakeInBackupProgress(anyString(), anyString())).thenReturn(false);
         when(sdxBackupRestoreService.isDatalakeInRestoreProgress(anyString(), anyString())).thenReturn(false);
-        when(accountIdService.getAccountIdFromUserCrn(any())).thenReturn(ACCOUNT_ID);
+        when(accountIdService.getAccountIdFromResourceCrn(any())).thenReturn(ACCOUNT_ID);
         mockEnvironmentCall(sdxClusterResizeRequest, AWS);
 
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
@@ -531,7 +531,7 @@ class SdxResizeServiceTest {
         ));
         detailedEnvironmentResponse.setNetwork(network);
         when(environmentService.validateAndGetEnvironment(anyString())).thenReturn(detailedEnvironmentResponse);
-        when(accountIdService.getAccountIdFromUserCrn(any())).thenReturn(ACCOUNT_ID);
+        when(accountIdService.getAccountIdFromResourceCrn(any())).thenReturn(ACCOUNT_ID);
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.resizeSdx(USER_CRN, CLUSTER_NAME, sdxClusterResizeRequest));
 
@@ -586,7 +586,7 @@ class SdxResizeServiceTest {
         stackV4Response.setCluster(clusterV4Response);
         stackV4Response.setNetwork(getNetworkForCurrentDatalake());
         when(stackService.getDetail(anyString(), anySet(), anyString())).thenReturn(stackV4Response);
-        when(accountIdService.getAccountIdFromUserCrn(any())).thenReturn(ACCOUNT_ID);
+        when(accountIdService.getAccountIdFromResourceCrn(any())).thenReturn(ACCOUNT_ID);
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.resizeSdx(USER_CRN, CLUSTER_NAME, sdxClusterResizeRequest));
         ArgumentCaptor<SdxCluster> sdxClusterArgumentCaptor = ArgumentCaptor.forClass(SdxCluster.class);
@@ -623,7 +623,7 @@ class SdxResizeServiceTest {
 
         when(entitlementService.isDatalakeLightToMediumMigrationEnabled(anyString())).thenReturn(true);
         when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(Optional.of(sdxCluster));
-        when(accountIdService.getAccountIdFromUserCrn(any())).thenReturn(ACCOUNT_ID);
+        when(accountIdService.getAccountIdFromResourceCrn(any())).thenReturn(ACCOUNT_ID);
 
         String mediumDutyJson = FileReaderUtils.readFileFromClasspath("/duties/7.2.10/aws/medium_duty_ha.json");
         StackV4Response stackV4Response = new StackV4Response();
@@ -658,7 +658,7 @@ class SdxResizeServiceTest {
 
         when(entitlementService.isDatalakeLightToMediumMigrationEnabled(anyString())).thenReturn(true);
         when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(Optional.of(sdxCluster));
-        when(accountIdService.getAccountIdFromUserCrn(any())).thenReturn(ACCOUNT_ID);
+        when(accountIdService.getAccountIdFromResourceCrn(any())).thenReturn(ACCOUNT_ID);
 
         String mediumDutyJson = FileReaderUtils.readFileFromClasspath("/duties/7.2.10/aws/medium_duty_ha.json");
         StackV4Response stackV4Response = new StackV4Response();
@@ -689,7 +689,7 @@ class SdxResizeServiceTest {
         sdxCluster.setCloudStorageBaseLocation("s3a://some/dir/");
 
         when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(Optional.of(sdxCluster));
-        when(accountIdService.getAccountIdFromUserCrn(any())).thenReturn(ACCOUNT_ID);
+        when(accountIdService.getAccountIdFromResourceCrn(any())).thenReturn(ACCOUNT_ID);
 
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.resizeSdx(USER_CRN, "sdxcluster", sdxClusterResizeRequest)));
@@ -733,7 +733,7 @@ class SdxResizeServiceTest {
         stackV4Response.setCluster(clusterV4Response);
         stackV4Response.setNetwork(getNetworkForCurrentDatalake());
         when(stackService.getDetail(anyString(), anySet(), anyString())).thenReturn(stackV4Response);
-        when(accountIdService.getAccountIdFromUserCrn(any())).thenReturn(ACCOUNT_ID);
+        when(accountIdService.getAccountIdFromResourceCrn(any())).thenReturn(ACCOUNT_ID);
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.resizeSdx(USER_CRN, CLUSTER_NAME, resizeRequest));
         ArgumentCaptor<SdxCluster> sdxClusterArgumentCaptor = ArgumentCaptor.forClass(SdxCluster.class);
@@ -796,7 +796,7 @@ class SdxResizeServiceTest {
         stackV4Response.setCluster(clusterV4Response);
         stackV4Response.setNetwork(getNetworkForCurrentDatalake());
         when(stackService.getDetail(anyString(), anySet(), anyString())).thenReturn(stackV4Response);
-        when(accountIdService.getAccountIdFromUserCrn(any())).thenReturn(ACCOUNT_ID);
+        when(accountIdService.getAccountIdFromResourceCrn(any())).thenReturn(ACCOUNT_ID);
         doCallRealMethod().when(sdxInstanceService).overrideDefaultInstanceStorage(any(), any(), any(), any());
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
@@ -848,7 +848,7 @@ class SdxResizeServiceTest {
         stackV4Response.setCluster(clusterV4Response);
         stackV4Response.setNetwork(getNetworkForCurrentDatalake());
         when(stackService.getDetail(anyString(), anySet(), anyString())).thenReturn(stackV4Response);
-        when(accountIdService.getAccountIdFromUserCrn(any())).thenReturn(ACCOUNT_ID);
+        when(accountIdService.getAccountIdFromResourceCrn(any())).thenReturn(ACCOUNT_ID);
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
                 underTest.resizeSdx(USER_CRN, sdxCluster.getClusterName(), resizeRequest));
@@ -903,7 +903,7 @@ class SdxResizeServiceTest {
         when(stackRequestHandler.getStackRequest(eq(ENTERPRISE), any(), any(), any(), any(), any()))
                 .thenReturn(JsonUtil.readValue(enterpriseJson, StackV4Request.class));
         when(stackService.getDetail(anyString(), anySet(), anyString())).thenReturn(stackV4Response);
-        when(accountIdService.getAccountIdFromUserCrn(any())).thenReturn(ACCOUNT_ID);
+        when(accountIdService.getAccountIdFromResourceCrn(any())).thenReturn(ACCOUNT_ID);
         doCallRealMethod().when(sdxInstanceService).overrideDefaultInstanceStorage(any(), any(), any(), any());
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
@@ -964,7 +964,7 @@ class SdxResizeServiceTest {
         when(stackRequestHandler.getStackRequest(eq(ENTERPRISE), any(), any(), any(), any(), any()))
                 .thenReturn(JsonUtil.readValue(enterpriseJson, StackV4Request.class));
         when(stackService.getDetail(anyString(), anySet(), anyString())).thenReturn(stackV4Response);
-        when(accountIdService.getAccountIdFromUserCrn(any())).thenReturn(ACCOUNT_ID);
+        when(accountIdService.getAccountIdFromResourceCrn(any())).thenReturn(ACCOUNT_ID);
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
                 underTest.resizeSdx(USER_CRN, sdxCluster.getClusterName(), resizeRequest));
@@ -1011,7 +1011,7 @@ class SdxResizeServiceTest {
         stackV4Response.setStatus(Status.STOPPED);
         stackV4Response.setNetwork(getNetworkForCurrentDatalake());
         when(stackService.getDetail(anyString(), anySet(), anyString())).thenReturn(stackV4Response);
-        when(accountIdService.getAccountIdFromUserCrn(any())).thenReturn(ACCOUNT_ID);
+        when(accountIdService.getAccountIdFromResourceCrn(any())).thenReturn(ACCOUNT_ID);
 
         doThrow(new BadRequestException("Invalid custom instance type for instance group: master - r5.large"))
                 .when(sdxRecommendationService).validateVmTypeOverride(any(), any());
@@ -1073,7 +1073,7 @@ class SdxResizeServiceTest {
                 .thenReturn(stackV4Response);
         when(stackRequestHandler.getStackRequest(any(), any(), any(), any(), any(), any()))
                 .thenReturn(JsonUtil.readValue(enterpriseDutyJson, StackV4Request.class));
-        when(accountIdService.getAccountIdFromUserCrn(any())).thenReturn(accountId);
+        when(accountIdService.getAccountIdFromResourceCrn(any())).thenReturn(accountId);
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.resizeSdx(USER_CRN, CLUSTER_NAME, resizeRequest));
 
@@ -1170,7 +1170,7 @@ class SdxResizeServiceTest {
                 .thenReturn(stackV4Response);
         when(stackRequestHandler.getStackRequest(any(), any(), any(), any(), any(), any()))
                 .thenReturn(JsonUtil.readValue(enterpriseDutyJson, StackV4Request.class));
-        when(accountIdService.getAccountIdFromUserCrn(any())).thenReturn(accountId);
+        when(accountIdService.getAccountIdFromResourceCrn(any())).thenReturn(accountId);
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.resizeSdx(USER_CRN, CLUSTER_NAME, resizeRequest));
 
@@ -1262,7 +1262,7 @@ class SdxResizeServiceTest {
         String mediumDutyJson = FileReaderUtils.readFileFromClasspath("/duties/7.2.18/aws/enterprise.json");
         when(stackRequestHandler.getStackRequest(any(), any(), any(), any(), any(), any()))
                 .thenReturn(JsonUtil.readValue(mediumDutyJson, StackV4Request.class));
-        when(accountIdService.getAccountIdFromUserCrn(any())).thenReturn(ACCOUNT_ID);
+        when(accountIdService.getAccountIdFromResourceCrn(any())).thenReturn(ACCOUNT_ID);
 
         StackV4Response stackV4Response = new StackV4Response();
         stackV4Response.setStatus(Status.STOPPED);
@@ -1332,7 +1332,7 @@ class SdxResizeServiceTest {
         String mediumDutyJson = FileReaderUtils.readFileFromClasspath("/duties/7.2.18/aws/enterprise.json");
         when(stackRequestHandler.getStackRequest(eq(ENTERPRISE), any(), any(), any(), any(), any()))
                 .thenReturn(JsonUtil.readValue(mediumDutyJson, StackV4Request.class));
-        when(accountIdService.getAccountIdFromUserCrn(any())).thenReturn(ACCOUNT_ID);
+        when(accountIdService.getAccountIdFromResourceCrn(any())).thenReturn(ACCOUNT_ID);
 
         StackV4Response stackV4Response = new StackV4Response();
         stackV4Response.setStatus(Status.STOPPED);
@@ -1378,7 +1378,7 @@ class SdxResizeServiceTest {
         when(sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(anyString(), anyString())).thenReturn(Optional.empty());
         when(sdxBackupRestoreService.isDatalakeInBackupProgress(anyString(), anyString())).thenReturn(false);
         when(sdxBackupRestoreService.isDatalakeInRestoreProgress(anyString(), anyString())).thenReturn(false);
-        when(accountIdService.getAccountIdFromUserCrn(any())).thenReturn(ACCOUNT_ID);
+        when(accountIdService.getAccountIdFromResourceCrn(any())).thenReturn(ACCOUNT_ID);
 
         mockEnvironmentCall(resizeRequest, AWS);
         when(sdxReactorFlowManager.triggerSdxResize(anyLong(), any(SdxCluster.class), any(DatalakeDrSkipOptions.class), eq(false)))

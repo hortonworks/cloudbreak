@@ -1,12 +1,16 @@
 package com.sequenceiq.environment.api.v1.environment.model.response;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.type.LoadBalancerCreation;
 import com.sequenceiq.common.api.type.OutboundInternetTraffic;
 import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
@@ -158,6 +162,19 @@ public class EnvironmentNetworkResponse extends EnvironmentNetworkBase {
 
     public void setGatewayEndpointSubnetMetas(Map<String, CloudSubnet> gatewayEndpointSubnetMetas) {
         this.gatewayEndpointSubnetMetas = gatewayEndpointSubnetMetas;
+    }
+
+    @Override
+    public Set<String> getAvailabilityZones(CloudPlatform cloudPlatform) {
+        return switch (cloudPlatform) {
+            case AWS -> Optional.ofNullable(subnetMetas)
+                    .map(Map::values)
+                    .map(subnets -> subnets.stream()
+                            .map(CloudSubnet::getAvailabilityZone)
+                            .collect(Collectors.toSet())
+                    ).orElse(Collections.emptySet());
+            default -> super.getAvailabilityZones(cloudPlatform);
+        };
     }
 
     @Override

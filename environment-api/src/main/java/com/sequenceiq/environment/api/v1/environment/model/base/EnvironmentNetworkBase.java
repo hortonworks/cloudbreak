@@ -211,10 +211,10 @@ public abstract class EnvironmentNetworkBase implements Serializable {
     }
 
     public Set<String> getAvailabilityZones(CloudPlatform cloudPlatform) {
-        switch (cloudPlatform) {
-            case AZURE : return azure != null ? azure.getAvailabilityZones() : Collections.emptySet();
-            case GCP : return gcp != null ? gcp.getAvailabilityZones() : Collections.emptySet();
-            default : return Collections.emptySet();
-        }
+        return switch (cloudPlatform) {
+            case AZURE -> azure != null ? azure.getAvailabilityZones() : Collections.emptySet();
+            case GCP -> gcp != null ? gcp.getAvailabilityZones() : Collections.emptySet();
+            default -> Collections.emptySet();
+        };
     }
 }

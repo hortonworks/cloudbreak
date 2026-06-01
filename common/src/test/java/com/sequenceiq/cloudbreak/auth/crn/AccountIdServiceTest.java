@@ -13,17 +13,17 @@ class AccountIdServiceTest {
 
     @Test
     void testGetAccountIdFromUserCrnShouldReturnTheAccountId() {
-        assertEquals("1234", underTest.getAccountIdFromUserCrn("crn:cdp:iam:us-west-1:1234:user:1"));
+        assertEquals("1234", underTest.getAccountIdFromResourceCrn("crn:cdp:iam:us-west-1:1234:user:1"));
     }
 
     @Test
-    void testGetAccountIdFromUserCrnShouldThrowBadRequestWhenTheUserCrnIsNull() {
-        assertThrows(BadRequestException.class, () -> underTest.getAccountIdFromUserCrn(null));
+    void testGetAccountIdFromUserCrnShouldThrowBadRequestWhenTheResourceCrnIsNull() {
+        assertThrows(BadRequestException.class, () -> underTest.getAccountIdFromResourceCrn(null));
     }
 
     @Test
-    void testGetAccountIdFromUserCrnShouldThrowBadRequestWhenTheUserCrnIsInvalid() {
-        assertThrows(BadRequestException.class, () -> underTest.getAccountIdFromUserCrn("crn"));
+    void testGetAccountIdFromUserCrnShouldThrowBadRequestWhenTheResourceCrnIsInvalid() {
+        assertThrows(BadRequestException.class, () -> underTest.getAccountIdFromResourceCrn("crn"));
     }
 
 }

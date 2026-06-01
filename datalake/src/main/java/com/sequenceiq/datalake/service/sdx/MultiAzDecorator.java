@@ -375,17 +375,8 @@ public class MultiAzDecorator {
 
     private void validateSubnetsInMultiAZIfNeeded(DetailedEnvironmentResponse environmentResponse, ValidationResult.ValidationResultBuilder validationBuilder) {
         if (environmentResponse.getNetwork() != null) {
-            Set<String> availabilityZones;
-            if (AWS.equalsIgnoreCase(environmentResponse.getCloudPlatform())) {
-                availabilityZones = environmentResponse.getNetwork()
-                        .getSubnetMetas()
-                        .values()
-                        .stream()
-                        .map(CloudSubnet::getAvailabilityZone)
-                        .collect(Collectors.toSet());
-            } else {
-                availabilityZones = environmentResponse.getNetwork().getAvailabilityZones(CloudPlatform.fromName(environmentResponse.getCloudPlatform()));
-            }
+            Set<String> availabilityZones =
+                    environmentResponse.getNetwork().getAvailabilityZones(CloudPlatform.fromName(environmentResponse.getCloudPlatform()));
             if (availabilityZones.size() == 1) {
                 validationBuilder.error(String.format("Multi AZ cluster requires subnets in multiple availability zones but the cluster " +
                         "uses subnest only from %s availability zone.", availabilityZones.stream().findFirst().get()));

@@ -128,7 +128,7 @@ class SdxCcmUpgradeServiceTest {
         when(sdxService.listSdxByEnvCrn(anyString())).thenReturn(List.of(sdxCluster));
         when(stackService.getDetail(CLUSTER_NAME, null, ACCOUNT_ID)).thenReturn(getStack(tunnel, Status.AVAILABLE));
         when(messagesService.getMessage(any())).thenReturn("not upgradeable");
-        when(accountIdService.getAccountIdFromUserCrn(any())).thenReturn(ACCOUNT_ID);
+        when(accountIdService.getAccountIdFromResourceCrn(any())).thenReturn(ACCOUNT_ID);
 
         SdxCcmUpgradeResponse response = underTest.upgradeCcm(ENV_CRN);
 
@@ -142,7 +142,7 @@ class SdxCcmUpgradeServiceTest {
         when(sdxService.listSdxByEnvCrn(anyString())).thenReturn(List.of(sdxCluster));
         when(stackService.getDetail(CLUSTER_NAME, null, ACCOUNT_ID)).thenReturn(getStack(Tunnel.CCMV2_JUMPGATE, Status.AVAILABLE));
         when(messagesService.getMessage(any())).thenReturn("latest");
-        when(accountIdService.getAccountIdFromUserCrn(any())).thenReturn(ACCOUNT_ID);
+        when(accountIdService.getAccountIdFromResourceCrn(any())).thenReturn(ACCOUNT_ID);
 
         SdxCcmUpgradeResponse response = underTest.upgradeCcm(ENV_CRN);
 
@@ -156,7 +156,7 @@ class SdxCcmUpgradeServiceTest {
         when(sdxService.listSdxByEnvCrn(anyString())).thenReturn(List.of(sdxCluster));
         when(stackService.getDetail(CLUSTER_NAME, null, ACCOUNT_ID)).thenReturn(getStack(Tunnel.CCM, Status.STOPPED));
         when(messagesService.getMessage(any())).thenReturn("unavailable");
-        when(accountIdService.getAccountIdFromUserCrn(any())).thenReturn(ACCOUNT_ID);
+        when(accountIdService.getAccountIdFromResourceCrn(any())).thenReturn(ACCOUNT_ID);
 
         SdxCcmUpgradeResponse response = underTest.upgradeCcm(ENV_CRN);
 
@@ -173,7 +173,7 @@ class SdxCcmUpgradeServiceTest {
         when(messagesService.getMessage(any(), any())).thenReturn("success");
         FlowIdentifier flowId = new FlowIdentifier(FlowType.FLOW, "flowId");
         when(sdxReactorFlowManager.triggerCcmUpgradeFlow(sdxCluster)).thenReturn(flowId);
-        when(accountIdService.getAccountIdFromUserCrn(any())).thenReturn(ACCOUNT_ID);
+        when(accountIdService.getAccountIdFromResourceCrn(any())).thenReturn(ACCOUNT_ID);
 
         SdxCcmUpgradeResponse response = underTest.upgradeCcm(ENV_CRN);
 

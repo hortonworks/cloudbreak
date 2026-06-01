@@ -11,12 +11,12 @@ public class AccountIdService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AccountIdService.class);
 
-    public String getAccountIdFromUserCrn(String userCrn) {
+    public String getAccountIdFromResourceCrn(String resourceCrn) {
         try {
-            return Crn.safeFromString(userCrn).getAccountId();
+            return Crn.safeFromString(resourceCrn).getAccountId();
         } catch (NullPointerException | CrnParseException e) {
-            LOGGER.warn("Can not parse CRN to find account ID: {}", userCrn, e);
-            throw new BadRequestException("Can not parse CRN to find account ID: " + userCrn);
+            LOGGER.warn("Can not parse CRN to find account ID: {}", resourceCrn, e);
+            throw new BadRequestException("Can not parse CRN to find account ID: " + resourceCrn);
         }
     }
 }

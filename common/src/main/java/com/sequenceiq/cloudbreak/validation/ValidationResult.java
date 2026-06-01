@@ -47,6 +47,10 @@ public class ValidationResult {
         return builder().build();
     }
 
+    public static ValidationResult ofError(String error) {
+        return builder().error(error).build();
+    }
+
     public static ValidationResultBuilder builder() {
         return new ValidationResultBuilder();
     }

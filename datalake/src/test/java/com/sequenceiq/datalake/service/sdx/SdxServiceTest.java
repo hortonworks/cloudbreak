@@ -275,7 +275,7 @@ class SdxServiceTest {
         sdxCluser.setClusterName(CLUSTER_NAME);
         when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNullAndDetachedIsFalse(eq(ACCOUNT_ID), eq(CLUSTER_NAME)))
                 .thenReturn(Optional.of(sdxCluser));
-        when(accountIdService.getAccountIdFromUserCrn(any())).thenReturn(ACCOUNT_ID);
+        when(accountIdService.getAccountIdFromResourceCrn(any())).thenReturn(ACCOUNT_ID);
 
         SdxCluster returnedSdxCluster = underTest.getByNameInAccount(USER_CRN, CLUSTER_NAME);
 
@@ -289,7 +289,7 @@ class SdxServiceTest {
         sdxCluser.setClusterName(CLUSTER_NAME);
         when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNullAndDetachedIsFalse(eq(ACCOUNT_ID), eq(CLUSTER_NAME)))
                 .thenReturn(Optional.of(sdxCluser));
-        when(accountIdService.getAccountIdFromUserCrn(any())).thenReturn(ACCOUNT_ID);
+        when(accountIdService.getAccountIdFromResourceCrn(any())).thenReturn(ACCOUNT_ID);
 
         SdxCluster returnedSdxCluster = underTest.getByNameOrCrn(USER_CRN, NameOrCrn.ofName(CLUSTER_NAME));
         assertEquals(sdxCluser, returnedSdxCluster);
@@ -359,7 +359,7 @@ class SdxServiceTest {
         sdxCluser.setClusterName(CLUSTER_NAME);
         sdxCluser.setSeLinux(SeLinux.PERMISSIVE);
         when(sdxClusterRepository.findByAccountIdAndCrnAndDeletedIsNull(eq(ACCOUNT_ID), eq(ENVIRONMENT_CRN))).thenReturn(Optional.of(sdxCluser));
-        when(accountIdService.getAccountIdFromUserCrn(any())).thenReturn(ACCOUNT_ID);
+        when(accountIdService.getAccountIdFromResourceCrn(any())).thenReturn(ACCOUNT_ID);
 
         SdxCluster returnedSdxCluster = underTest.getByCrn(USER_CRN, ENVIRONMENT_CRN);
 
@@ -385,7 +385,7 @@ class SdxServiceTest {
         sdxCluser.setEnvName("env");
         sdxCluser.setClusterName(CLUSTER_NAME);
         when(sdxClusterRepository.findByAccountIdAndCrnAndDeletedIsNull(eq(ACCOUNT_ID), eq(ENVIRONMENT_CRN))).thenReturn(Optional.of(sdxCluser));
-        when(accountIdService.getAccountIdFromUserCrn(any())).thenReturn(ACCOUNT_ID);
+        when(accountIdService.getAccountIdFromResourceCrn(any())).thenReturn(ACCOUNT_ID);
 
         SdxCluster returnedSdxCluster = underTest.getByNameOrCrn(USER_CRN, NameOrCrn.ofCrn(ENVIRONMENT_CRN));
 
@@ -398,7 +398,7 @@ class SdxServiceTest {
         sdxCluser.setEnvName("env");
         sdxCluser.setClusterName(CLUSTER_NAME);
         when(sdxClusterRepository.findByAccountIdAndCrnAndDeletedIsNull(eq(ACCOUNT_ID), eq(ENVIRONMENT_CRN))).thenReturn(Optional.empty());
-        when(accountIdService.getAccountIdFromUserCrn(any())).thenReturn(ACCOUNT_ID);
+        when(accountIdService.getAccountIdFromResourceCrn(any())).thenReturn(ACCOUNT_ID);
 
         Assertions.assertThatCode(() -> underTest.getByNameOrCrn(USER_CRN, NameOrCrn.ofCrn(ENVIRONMENT_CRN)))
                 .isInstanceOf(NotFoundException.class)
@@ -408,7 +408,7 @@ class SdxServiceTest {
     @Test
     void testGetSdxClusterByNameOrCrnWhenClusterNameProvidedThrowsExceptionIfClusterDoesNotExists() {
         when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(Optional.empty());
-        when(accountIdService.getAccountIdFromUserCrn(any())).thenReturn(ACCOUNT_ID);
+        when(accountIdService.getAccountIdFromResourceCrn(any())).thenReturn(ACCOUNT_ID);
 
         Assertions.assertThatCode(() -> underTest.getByNameOrCrn(USER_CRN, NameOrCrn.ofName(CLUSTER_NAME)))
                 .isInstanceOf(NotFoundException.class)
@@ -418,7 +418,7 @@ class SdxServiceTest {
     @Test
     void testGetSdxClusterByAccountIdWhenNoDeployedClusterShouldThrowSdxNotFoundException() {
         when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(Optional.empty());
-        when(accountIdService.getAccountIdFromUserCrn(any())).thenReturn(ACCOUNT_ID);
+        when(accountIdService.getAccountIdFromResourceCrn(any())).thenReturn(ACCOUNT_ID);
 
         NotFoundException notFoundException = assertThrows(NotFoundException.class, () -> underTest.getByNameInAccount(USER_CRN, "sdxcluster"));
 
@@ -429,7 +429,7 @@ class SdxServiceTest {
     void testListSdxClustersWhenEnvironmentNameProvidedAndTwoSdxIsInTheDatabaseShouldListAllSdxClusterWhichIsTwo() {
         List<SdxCluster> sdxClusters = List.of(new SdxCluster(), new SdxCluster());
         when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNullAndDetachedIsFalse(eq(ACCOUNT_ID), eq("envir"))).thenReturn(sdxClusters);
-        when(accountIdService.getAccountIdFromUserCrn(any())).thenReturn(ACCOUNT_ID);
+        when(accountIdService.getAccountIdFromResourceCrn(any())).thenReturn(ACCOUNT_ID);
 
         List<SdxCluster> sdxList = underTest.listSdx(USER_CRN, "envir");
 
@@ -440,7 +440,7 @@ class SdxServiceTest {
     void testListSdxClustersWhenEnvironmentCrnProvidedAndTwoSdxIsInTheDatabaseShouldListAllSdxClusterWhichIsTwo() {
         List<SdxCluster> sdxClusters = List.of(new SdxCluster(), new SdxCluster());
         when(sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsFalse(eq(ACCOUNT_ID), eq(ENVIRONMENT_CRN))).thenReturn(sdxClusters);
-        when(accountIdService.getAccountIdFromUserCrn(any())).thenReturn(ACCOUNT_ID);
+        when(accountIdService.getAccountIdFromResourceCrn(any())).thenReturn(ACCOUNT_ID);
 
         List<SdxCluster> sdxList = underTest.listSdxByEnvCrn(USER_CRN, ENVIRONMENT_CRN);
 
@@ -454,7 +454,7 @@ class SdxServiceTest {
         sdxCluser.setClusterName(CLUSTER_NAME);
         when(sdxClusterRepository.findByAccountIdAndCrnAndDeletedIsNull(eq(ACCOUNT_ID), eq(DATALAKE_CRN)))
                 .thenReturn(Optional.of(sdxCluser));
-        when(accountIdService.getAccountIdFromUserCrn(any())).thenReturn(ACCOUNT_ID);
+        when(accountIdService.getAccountIdFromResourceCrn(any())).thenReturn(ACCOUNT_ID);
 
         underTest.syncByCrn(USER_CRN, DATALAKE_CRN);
 
@@ -505,7 +505,7 @@ class SdxServiceTest {
         clusterWithoutEnv.setCrn("crn3");
         when(sdxClusterRepository.findAllByAccountIdAndCrnAndDeletedIsNullAndDetachedIsFalse(anyString(), anySet()))
                 .thenReturn(List.of(cluster1, cluster2, clusterWithoutEnv));
-        when(accountIdService.getAccountIdFromUserCrn(any())).thenReturn(ACCOUNT_ID);
+        when(accountIdService.getAccountIdFromResourceCrn(any())).thenReturn(ACCOUNT_ID);
 
         Map<String, Optional<String>> result = ThreadBasedUserCrnProvider.doAs(USER_CRN,
                 () -> underTest.getEnvironmentCrnsByResourceCrns(List.of("crn1", "crn2", "crn3")));
@@ -642,7 +642,7 @@ class SdxServiceTest {
         existing.setEnvName("envir");
         when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNullAndDetachedIsFalse(
                 anyString(), anyString())).thenReturn(Collections.singletonList(existing));
-        when(accountIdService.getAccountIdFromUserCrn(any())).thenReturn(ACCOUNT_ID);
+        when(accountIdService.getAccountIdFromResourceCrn(any())).thenReturn(ACCOUNT_ID);
 
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
@@ -654,7 +654,7 @@ class SdxServiceTest {
     void testCreateSdxClusterWithoutCloudStorageShouldThrownBadRequestException() {
         SdxClusterRequest sdxClusterRequest = createSdxClusterRequest("7.2.1", LIGHT_DUTY);
         when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(new ArrayList<>());
-        when(accountIdService.getAccountIdFromUserCrn(any())).thenReturn(ACCOUNT_ID);
+        when(accountIdService.getAccountIdFromResourceCrn(any())).thenReturn(ACCOUNT_ID);
         mockEnvironmentCall(sdxClusterRequest, AWS, null);
 
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
@@ -672,7 +672,7 @@ class SdxServiceTest {
 
         when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(new ArrayList<>());
         when(stackRequestHandler.getStackRequest(any(), any(), any(), any(), any(), any())).thenReturn(stackV4Request);
-        when(accountIdService.getAccountIdFromUserCrn(any())).thenReturn(ACCOUNT_ID);
+        when(accountIdService.getAccountIdFromResourceCrn(any())).thenReturn(ACCOUNT_ID);
         mockEnvironmentCall(sdxClusterRequest, AWS, null);
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, stackV4Request));
@@ -690,7 +690,7 @@ class SdxServiceTest {
 
         when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(new ArrayList<>());
         when(stackRequestHandler.getStackRequest(any(), any(), any(), any(), any(), any())).thenReturn(stackV4Request);
-        when(accountIdService.getAccountIdFromUserCrn(any())).thenReturn(ACCOUNT_ID);
+        when(accountIdService.getAccountIdFromResourceCrn(any())).thenReturn(ACCOUNT_ID);
         mockEnvironmentCall(sdxClusterRequest, AZURE, null);
 
         assertThatThrownBy(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, stackV4Request)))
@@ -710,7 +710,7 @@ class SdxServiceTest {
 
         when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(new ArrayList<>());
         when(stackRequestHandler.getStackRequest(any(), any(), any(), any(), any(), any())).thenReturn(stackV4Request);
-        when(accountIdService.getAccountIdFromUserCrn(any())).thenReturn(ACCOUNT_ID);
+        when(accountIdService.getAccountIdFromResourceCrn(any())).thenReturn(ACCOUNT_ID);
         mockEnvironmentCall(sdxClusterRequest, AZURE, null);
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, stackV4Request));
@@ -728,7 +728,7 @@ class SdxServiceTest {
         when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(new ArrayList<>());
         when(sdxClusterRepository.save(sdxClusterArgumentCaptor.capture())).thenReturn(mock(SdxCluster.class));
         when(stackRequestHandler.getStackRequest(any(), any(), any(), any(), any(), any())).thenReturn(stackV4Request);
-        when(accountIdService.getAccountIdFromUserCrn(any())).thenReturn(ACCOUNT_ID);
+        when(accountIdService.getAccountIdFromResourceCrn(any())).thenReturn(ACCOUNT_ID);
         mockEnvironmentCall(sdxClusterRequest, AWS, null);
         mockTransactionServiceRequired();
 
@@ -757,7 +757,7 @@ class SdxServiceTest {
         when(clock.getCurrentTimeMillis()).thenReturn(1L);
         when(stackRequestHandler.getStackRequest(any(), any(), any(), any(), any(), any())).thenReturn(stackV4Request);
         mockEnvironmentCall(sdxClusterRequest, AZURE, null);
-        when(accountIdService.getAccountIdFromUserCrn(any())).thenReturn(ACCOUNT_ID);
+        when(accountIdService.getAccountIdFromResourceCrn(any())).thenReturn(ACCOUNT_ID);
 
         doCallRealMethod().when(securityConfigService).prepareDefaultSecurityConfigs(any(), any(), any());
 
@@ -913,7 +913,7 @@ class SdxServiceTest {
             return sdxWithId;
         });
         when(clock.getCurrentTimeMillis()).thenReturn(1L);
-        when(accountIdService.getAccountIdFromUserCrn(any())).thenReturn(ACCOUNT_ID);
+        when(accountIdService.getAccountIdFromResourceCrn(any())).thenReturn(ACCOUNT_ID);
         mockEnvironmentCall(sdxClusterRequest, cloudPlatform, null);
 
         sdxClusterRequest.setEnableRangerRaz(false);
@@ -970,7 +970,7 @@ class SdxServiceTest {
         when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNullAndDetachedIsFalse(
                 anyString(), anyString())).thenReturn(Collections.emptyList());
         doThrow(new BadRequestException("java error")).when(commonJavaVersionValidator).validateByVmConfiguration(any(), eq(11));
-        when(accountIdService.getAccountIdFromUserCrn(any())).thenReturn(ACCOUNT_ID);
+        when(accountIdService.getAccountIdFromResourceCrn(any())).thenReturn(ACCOUNT_ID);
         mockEnvironmentCall(sdxClusterRequest, AWS, null);
 
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
@@ -988,7 +988,7 @@ class SdxServiceTest {
         when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNullAndDetachedIsFalse(
                 anyString(), anyString())).thenReturn(Collections.emptyList());
         doThrow(new BadRequestException("java error")).when(commonJavaVersionValidator).validateByVmConfiguration(any(), eq(11));
-        when(accountIdService.getAccountIdFromUserCrn(any())).thenReturn(ACCOUNT_ID);
+        when(accountIdService.getAccountIdFromResourceCrn(any())).thenReturn(ACCOUNT_ID);
         when(imageCatalogService.getImageResponseFromImageRequest(any(), any())).thenReturn(new ImageV4Response());
         mockEnvironmentCall(sdxClusterRequest, AWS, null);
 
@@ -1004,7 +1004,7 @@ class SdxServiceTest {
     @Test
     void testCreateInternalSdxClusterWithCustomInstanceGroupShouldFail() {
         when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(new ArrayList<>());
-        when(accountIdService.getAccountIdFromUserCrn(any())).thenReturn(ACCOUNT_ID);
+        when(accountIdService.getAccountIdFromResourceCrn(any())).thenReturn(ACCOUNT_ID);
         StackV4Request stackV4Request = new StackV4Request();
         ClusterV4Request clusterV4Request = new ClusterV4Request();
         stackV4Request.setCluster(clusterV4Request);
@@ -1037,7 +1037,7 @@ class SdxServiceTest {
         });
         when(clock.getCurrentTimeMillis()).thenReturn(1L);
         when(entitlementService.isEntitledToUseOS(any(), eq(OsType.CENTOS7))).thenReturn(true);
-        when(accountIdService.getAccountIdFromUserCrn(any())).thenReturn(ACCOUNT_ID);
+        when(accountIdService.getAccountIdFromResourceCrn(any())).thenReturn(ACCOUNT_ID);
 
         mockEnvironmentCall(sdxClusterRequest, AWS, null);
 
@@ -1071,7 +1071,7 @@ class SdxServiceTest {
             return sdxWithId;
         });
         when(clock.getCurrentTimeMillis()).thenReturn(1L);
-        when(accountIdService.getAccountIdFromUserCrn(any())).thenReturn(ACCOUNT_ID);
+        when(accountIdService.getAccountIdFromResourceCrn(any())).thenReturn(ACCOUNT_ID);
         mockEnvironmentCall(sdxClusterRequest, AWS, null);
 
         Pair<SdxCluster, FlowIdentifier> result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
@@ -1105,7 +1105,7 @@ class SdxServiceTest {
             return sdxWithId;
         });
         when(clock.getCurrentTimeMillis()).thenReturn(1L);
-        when(accountIdService.getAccountIdFromUserCrn(any())).thenReturn(ACCOUNT_ID);
+        when(accountIdService.getAccountIdFromResourceCrn(any())).thenReturn(ACCOUNT_ID);
 
         mockEnvironmentCall(sdxClusterRequest, AWS, null);
 
