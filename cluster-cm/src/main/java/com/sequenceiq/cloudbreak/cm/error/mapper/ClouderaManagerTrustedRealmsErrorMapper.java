@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cm.exception.CommandDetails;
+import com.sequenceiq.cloudbreak.domain.BlueprintHybridOption;
 import com.sequenceiq.cloudbreak.dto.StackDtoDelegate;
 import com.sequenceiq.cloudbreak.util.DocumentationLinkProvider;
 
@@ -13,7 +14,7 @@ public class ClouderaManagerTrustedRealmsErrorMapper implements ClouderaManagerE
 
     @Override
     public boolean canHandle(StackDtoDelegate stack, List<CommandDetails> failedCommands) {
-        return stack.getBlueprint().getHybridOption() != null
+        return stack.getBlueprint().getHybridOption() == BlueprintHybridOption.BURST_TO_CLOUD
                 && failedCommands.stream().anyMatch(command -> "RangerAdmin".equals(command.getName()));
     }
 

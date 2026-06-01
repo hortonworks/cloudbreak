@@ -43,8 +43,17 @@ class ClouderaManagerTrustedRealmsErrorMapperTest {
     }
 
     @Test
-    void nonHybridStack() {
+    void nonHybridStackNull() {
         when(blueprint.getHybridOption()).thenReturn(null);
+
+        boolean result = underTest.canHandle(stack, List.of(commandDetails));
+
+        assertThat(result).isFalse();
+    }
+
+    @Test
+    void nonHybridStackNone() {
+        when(blueprint.getHybridOption()).thenReturn(BlueprintHybridOption.NONE);
 
         boolean result = underTest.canHandle(stack, List.of(commandDetails));
 

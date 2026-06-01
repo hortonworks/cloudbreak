@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.domain;
 
+import java.util.Objects;
+
 import com.google.common.base.Preconditions;
 import com.sequenceiq.cloudbreak.common.json.Json;
 
@@ -79,7 +81,7 @@ public class BlueprintFile {
     }
 
     public BlueprintHybridOption getHybridOption() {
-        return hybridOption;
+        return Objects.requireNonNullElse(hybridOption, BlueprintHybridOption.NONE);
     }
 
     public Json getTags() {

@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.domain;
 
+import java.util.Objects;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
@@ -210,7 +212,7 @@ public class Blueprint implements ProvisionEntity, WorkspaceAwareResource {
     }
 
     public BlueprintHybridOption getHybridOption() {
-        return hybridOption;
+        return Objects.requireNonNullElse(hybridOption, BlueprintHybridOption.NONE);
     }
 
     public void setHybridOption(BlueprintHybridOption hybridOption) {
