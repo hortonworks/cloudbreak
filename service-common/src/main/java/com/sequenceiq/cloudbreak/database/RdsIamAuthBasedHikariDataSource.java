@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import com.zaxxer.hikari.util.Credentials;
 
 public class RdsIamAuthBasedHikariDataSource extends HikariDataSource {
 
@@ -19,6 +20,15 @@ public class RdsIamAuthBasedHikariDataSource extends HikariDataSource {
 
     @Override
     public String getPassword() {
+        return acquireIamToken();
+    }
+
+    @Override
+    public Credentials getCredentials() {
+        return Credentials.of(getUsername(), acquireIamToken());
+    }
+
+    private String acquireIamToken() {
         String token;
         String username = getUsername();
         LOGGER.debug("Acquiring IAM authentication token for RDS with user: '{}'", username);
