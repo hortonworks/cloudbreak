@@ -21,10 +21,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @JsonInclude(Include.NON_NULL)
 public class BlueprintV4Request extends BlueprintV4Base {
 
+    @Pattern(regexp = "^[^;\\/%<>]*$", message = "Resource name cannot contain special characters like <, >, ;, /, \\, or %.")
     @Schema(description = ModelDescriptions.NAME)
-    @Size(max = 100, min = 1, message = "The length of the blueprint's name has to be in range of 1 to 100 and should not contain semicolon "
-            + "and percentage character.")
-    @Pattern(regexp = "^[^;\\/%]*$")
+    @Size(max = 100, min = 1, message = "The length of the blueprint's name has to be in range of 1 to 100 and should not contain semicolon, "
+            + "percentage or HTML characters.")
     private String name;
 
     @ValidDeprecated(message = "Submitting Cluster Template by URL is not allowed anymore. Please use text based submission.")

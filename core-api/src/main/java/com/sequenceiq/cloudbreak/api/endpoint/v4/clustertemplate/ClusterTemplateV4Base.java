@@ -16,15 +16,15 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public abstract class ClusterTemplateV4Base implements JsonEntity {
 
-    @Size(max = 40, min = 5, message = "The length of name has to be in range of 5 to 40")
-    @Pattern(regexp = "^[^;\\/%]*$",
-            message = "Name should not contain semicolon, forward slash or percentage characters")
     @NotNull
+    @Pattern(regexp = "^[^;\\/%<>]*$", message = "Resource name cannot contain special characters like <, >, ;, /, \\, or %.")
     @Schema(description = ModelDescriptions.NAME, required = true)
+    @Size(max = 40, min = 5, message = "The length of name has to be in range of 5 to 40")
     private String name;
 
-    @Size(max = 1000)
+    @Pattern(regexp = "^[^<>]*$", message = "Description cannot contain HTML tags or the < and > characters.")
     @Schema(description = ModelDescriptions.DESCRIPTION)
+    @Size(max = 1000)
     private String description;
 
     @Schema(description = ClusterTemplateModelDescription.TEMPLATE, required = true)

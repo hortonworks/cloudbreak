@@ -991,7 +991,8 @@ public abstract class TestContext implements ApplicationContextAware {
 
     private boolean isMessageEquals(Exception exception, RunningParameter runningParameter) {
         return StringUtils.isBlank(runningParameter.getExpectedMessage())
-                || Pattern.compile(runningParameter.getExpectedMessage()).matcher(ResponseUtil.getErrorMessage(exception)).find();
+                || Pattern.compile(runningParameter.getExpectedMessage()).matcher(ResponseUtil.getErrorMessage(exception)).find()
+                || runningParameter.getExpectedMessage().equals(ResponseUtil.getErrorMessage(exception));
     }
 
     private boolean isPayloadEquals(Exception exception, RunningParameter runningParameter) {

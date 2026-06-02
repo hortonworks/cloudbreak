@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint;
 import java.util.HashMap;
 import java.util.Map;
 
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -18,8 +19,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Schema
 public abstract class BlueprintV4Base implements JsonEntity {
 
-    @Size(max = 1000)
+    @Pattern(regexp = "^[^<>]*$", message = "Description cannot contain HTML tags or the < and > characters.")
     @Schema(description = ModelDescriptions.DESCRIPTION)
+    @Size(max = 1000)
     private String description;
 
     @Schema(description = BlueprintModelDescription.BLUEPRINT)

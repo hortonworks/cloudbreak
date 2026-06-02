@@ -201,8 +201,8 @@ public class ClusterTemplateTest extends AbstractMockTest {
         testContext
                 .given(ClusterTemplateTestDto.class)
                 .withName(ILLEGAL_CT_NAME)
-                .whenException(clusterTemplateTestClient.createV4(), BadRequestException.class, expectedMessage("Name should not contain semicolon," +
-                        " forward slash or percentage characters"))
+                .whenException(clusterTemplateTestClient.createV4(), BadRequestException.class,
+                        expectedMessage("Resource name cannot contain special characters like <, >, ;, /, \\, or %."))
                 .validate();
     }
 
