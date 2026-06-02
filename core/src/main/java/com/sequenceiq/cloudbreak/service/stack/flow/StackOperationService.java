@@ -55,6 +55,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.resetjvmparams.
 import com.sequenceiq.cloudbreak.api.model.RotateSaltPasswordReason;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.notification.NotificationState;
@@ -781,6 +782,10 @@ public class StackOperationService {
     }
 
     public FlowIdentifier disableEncryptionProfile(NameOrCrn nameOrCrn, String accountId) {
+        if (!entitlementService.isChangeEncryptionProfileEnabled(accountId)) {
+            throw new CloudbreakServiceException("Disable encryption profile is not granted to the account. " +
+                    "Please contact your CDP administrator to enable it.");
+        }
         StackDto stack = stackDtoService.getByNameOrCrn(nameOrCrn, accountId);
         clusterService.disableEncryptionProfile(stack.getCluster().getId());
         return flowManager.triggerPillarConfigurationUpdate(stack.getId());

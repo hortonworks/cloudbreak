@@ -876,7 +876,7 @@ public class StackV4Controller extends NotificationController implements StackV4
 
     @Override
     @InternalOnly
-    public FlowIdentifier disableEncryptionProfileByCrn(@ResourceCrn String crn) {
+    public FlowIdentifier disableEncryptionProfileByCrn(Long workspaceId, @ResourceCrn String crn) {
         return stackOperationService.disableEncryptionProfile(NameOrCrn.ofCrn(crn), ThreadBasedUserCrnProvider.getAccountId());
     }
 }

@@ -1158,5 +1158,5 @@ public interface StackV4Endpoint {
     @Operation(summary = "Disable encryption profile in the given cluster by crn",
             operationId = "disableEncryptionProfileByCrn",
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
-    FlowIdentifier disableEncryptionProfileByCrn(@NotEmpty @PathParam("crn") String crn);
+    FlowIdentifier disableEncryptionProfileByCrn(@PathParam("workspaceId") Long workspaceId, @NotEmpty @PathParam("crn") String crn);
 }

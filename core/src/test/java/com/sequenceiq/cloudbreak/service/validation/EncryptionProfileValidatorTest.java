@@ -33,7 +33,7 @@ class EncryptionProfileValidatorTest {
     @Test
     void testEntitlement() {
         StackDto stack = new StackDto();
-        when(entitlementService.isConfigureEncryptionProfileEnabled(any())).thenReturn(false);
+        when(entitlementService.isChangeEncryptionProfileEnabled(any())).thenReturn(false);
 
         CloudbreakServiceException ex = assertThrows(CloudbreakServiceException.class, () ->
                 ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.validate(stack)));
@@ -45,7 +45,7 @@ class EncryptionProfileValidatorTest {
     void testValidateShouldThrowExceptionWhenRuntimeIsBellow732() {
         StackDto stack = mock(StackDto.class);
 
-        when(entitlementService.isConfigureEncryptionProfileEnabled(any())).thenReturn(true);
+        when(entitlementService.isChangeEncryptionProfileEnabled(any())).thenReturn(true);
         when(stack.getStackVersion()).thenReturn("7.3.1");
 
         CloudbreakServiceException ex = assertThrows(CloudbreakServiceException.class, () ->
@@ -58,7 +58,7 @@ class EncryptionProfileValidatorTest {
     void testValidateShouldWorkFor732AndClusterAvailable() {
         StackDto stack = mock(StackDto.class);
 
-        when(entitlementService.isConfigureEncryptionProfileEnabled(any())).thenReturn(true);
+        when(entitlementService.isChangeEncryptionProfileEnabled(any())).thenReturn(true);
         when(stack.getStackVersion()).thenReturn("7.3.2");
         when(stack.getStatus()).thenReturn(Status.AVAILABLE);
 
@@ -70,7 +70,7 @@ class EncryptionProfileValidatorTest {
     void testValidateShouldThrowExceptionWhenStatusIsNotAvailable() {
         StackDto stack = mock(StackDto.class);
 
-        when(entitlementService.isConfigureEncryptionProfileEnabled(any())).thenReturn(true);
+        when(entitlementService.isChangeEncryptionProfileEnabled(any())).thenReturn(true);
         when(stack.getStackVersion()).thenReturn("7.3.2");
         when(stack.getStatus()).thenReturn(Status.STOP_IN_PROGRESS);
 

@@ -134,6 +134,6 @@ public class StackService {
     public FlowIdentifier disableEncryptionProfile(String datalakeCrn) {
         LOGGER.info("Disabling encryption profile for CRN {}", datalakeCrn);
         return ThreadBasedUserCrnProvider.doAsInternalActor(
-                initiatorUserCrn -> stackV4Endpoint.disableEncryptionProfileByCrn(datalakeCrn));
+                initiatorUserCrn -> stackV4Endpoint.disableEncryptionProfileByCrn(WORKSPACE_ID_DEFAULT, datalakeCrn));
     }
 }

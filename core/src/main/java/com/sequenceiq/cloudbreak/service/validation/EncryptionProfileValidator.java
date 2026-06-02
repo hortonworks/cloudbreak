@@ -19,7 +19,7 @@ public class EncryptionProfileValidator {
     private EntitlementService entitlementService;
 
     public void validate(StackDto stackDto) {
-        if (!entitlementService.isConfigureEncryptionProfileEnabled(ThreadBasedUserCrnProvider.getAccountId())) {
+        if (!entitlementService.isChangeEncryptionProfileEnabled(ThreadBasedUserCrnProvider.getAccountId())) {
             throw new CloudbreakServiceException("Account not entitled for encryption profile. Please contact your CDP administrator to enable it.");
         }
         if (!isVersionNewerOrEqualThanLimited(stackDto::getStackVersion, CLOUDERA_STACK_VERSION_7_3_2)) {

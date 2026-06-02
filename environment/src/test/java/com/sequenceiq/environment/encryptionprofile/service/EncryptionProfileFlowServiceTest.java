@@ -16,6 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.environment.encryptionprofile.domain.EncryptionProfile;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.EnvironmentReactorFlowManager;
@@ -46,6 +47,9 @@ public class EncryptionProfileFlowServiceTest {
     @Mock
     private StackService stackService;
 
+    @Mock
+    private EntitlementService entitlementService;
+
     @InjectMocks
     private EncryptionProfileFlowService underTest;
 
@@ -59,6 +63,7 @@ public class EncryptionProfileFlowServiceTest {
         encryptionProfile.setName(ENCRYPTION_PROFILE_NAME);
         encryptionProfile.setResourceCrn(ENCRYPTION_PROFILE_CRN);
 
+        when(entitlementService.isChangeEncryptionProfileEnabled(any())).thenReturn(true);
         when(environmentService.getByCrnAndAccountId(eq("crn:cdp:environments:us-west-1:tenant:environment:envCrn"), any())).thenReturn(environmentDto);
         when(encryptionProfileService.getByCrn(eq(ENCRYPTION_PROFILE_CRN))).thenReturn(encryptionProfile);
 
@@ -79,6 +84,7 @@ public class EncryptionProfileFlowServiceTest {
         encryptionProfile.setName(ENCRYPTION_PROFILE_NAME);
         encryptionProfile.setResourceCrn(ENCRYPTION_PROFILE_CRN);
 
+        when(entitlementService.isChangeEncryptionProfileEnabled(any())).thenReturn(true);
         when(environmentService.getByNameAndAccountId(eq("envName"), any())).thenReturn(environmentDto);
         when(encryptionProfileService.getByNameAndAccountId(eq(ENCRYPTION_PROFILE_NAME), any())).thenReturn(encryptionProfile);
 
@@ -98,6 +104,7 @@ public class EncryptionProfileFlowServiceTest {
         SdxClusterResponse sdxClusterResponse = new SdxClusterResponse();
         sdxClusterResponse.setCrn("crn:cdp:datalake:us-west-1:Test:datalake:40231209-6037-4d4b-95b9-f3c30698ae98");
 
+        when(entitlementService.isChangeEncryptionProfileEnabled(any())).thenReturn(true);
         when(environmentService.getByCrnAndAccountId(eq("crn:cdp:environments:us-west-1:tenant:environment:envCrn"), any())).thenReturn(environmentDto);
         when(sdxService.list(eq(environmentDto.getName()))).thenReturn(List.of(sdxClusterResponse));
 
@@ -116,6 +123,7 @@ public class EncryptionProfileFlowServiceTest {
         SdxClusterResponse sdxClusterResponse = new SdxClusterResponse();
         sdxClusterResponse.setCrn("crn:cdp:datalake:us-west-1:Test:datalake:40231209-6037-4d4b-95b9-f3c30698ae98");
 
+        when(entitlementService.isChangeEncryptionProfileEnabled(any())).thenReturn(true);
         when(environmentService.getByNameAndAccountId(eq("envName"), any())).thenReturn(environmentDto);
         when(sdxService.list(eq(environmentDto.getName()))).thenReturn(List.of(sdxClusterResponse));
 

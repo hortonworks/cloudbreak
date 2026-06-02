@@ -873,6 +873,7 @@ class StackOperationServiceTest {
         ClusterView clusterView = mock(ClusterView.class);
         NameOrCrn nameOrCrn = NameOrCrn.ofName("Test");
 
+        when(entitlementService.isChangeEncryptionProfileEnabled(any())).thenReturn(true);
         when(stack.getId()).thenReturn(STACK_ID);
         when(stack.getCluster()).thenReturn(clusterView);
         when(clusterView.getId()).thenReturn(123L);
