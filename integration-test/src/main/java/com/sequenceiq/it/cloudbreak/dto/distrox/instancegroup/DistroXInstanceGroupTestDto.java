@@ -10,7 +10,9 @@ import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.EXECUTOR;
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.GATEWAY;
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.KRAFT;
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.MANAGER;
+import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.MANAGER_STREAMING;
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.MASTER;
+import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.MASTER_STREAMING;
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.MASTER_STREAMS;
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.SRM;
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.WORKER;
@@ -52,6 +54,10 @@ public class DistroXInstanceGroupTestDto extends AbstractCloudbreakTestDto<Insta
 
     public static List<DistroXInstanceGroupTestDto> dataMartHostGroups(TestContext testContext, CloudPlatform cloudPlatform) {
         return withHostGroup(testContext, cloudPlatform, MASTER, COORDINATOR, EXECUTOR);
+    }
+
+    public static List<DistroXInstanceGroupTestDto> streamingHostGroups(TestContext testContext, CloudPlatform cloudPlatform) {
+        return withHostGroup(testContext, cloudPlatform, MASTER_STREAMING, MANAGER_STREAMING, WORKER);
     }
 
     public static List<DistroXInstanceGroupTestDto> streamsHostGroups(TestContext testContext, CloudPlatform cloudPlatform) {

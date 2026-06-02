@@ -32,5 +32,5 @@ tests:
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa.FreeIpaRootVolumeModificationTest
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXKraftMigrationTest
         excludedMethods:
-          - testKraftMigrationRollback
           - testKraftMigrationFailAtUpscale
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxKraftMigrationTest

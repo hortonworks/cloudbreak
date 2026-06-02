@@ -117,6 +117,7 @@ integrationtest:
   dataMartDistroXBlueprintName: "%s - Data Mart: Apache Impala, Hue"
   streamsHADistroXBlueprintName: "%s - Streams Messaging High Availability: Apache Kafka, Schema Registry, Streams Messaging Manager, Streams Replication Manager, Cruise Control"
   streamsLDDistroXBlueprintName: "%s - Streams Messaging Light Duty: Apache Kafka, Schema Registry, Streams Messaging Manager, Streams Replication Manager, Cruise Control"
+  streamingAnalyticsLDDistroXBlueprintName: "%s - Streaming Analytics Light Duty with Apache Flink"
   clouderamanager:
     defaultUser: admin
     defaultPassword: cb1STPneh2b6KyJn

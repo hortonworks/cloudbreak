@@ -69,17 +69,25 @@ public class DistroXKraftMigrationTest extends AbstractE2EWithReusableResourcesT
     @Test(dataProvider = TEST_CONTEXT)
     @Description(
             given = "there is a running Cloudbreak, and an SDX cluster in available state",
-            when = "Streams Messaging Datahub is provisioned, and Kraft migration is performed",
-            then = "the Streams Messaging Datahub should be available and running in KRaft mode")
-    public void testKraftMigrationWithNodesInTemplate(TestContext testContext, ITestContext iTestContext) {
+            when = "Streaming Analytics Datahub is provisioned, Kraft migration, rollback then migration is performed",
+            then = "the Streaming Analytics Datahub should be available and running in KRaft mode")
+    public void testKraftMigrationWithRollbackWhenNodesNotInTemplate(TestContext testContext, ITestContext iTestContext) {
         testContext
                 .given(DistroXTestDto.class)
-                .withTemplate(commonClusterManagerProperties.getStreamsLDDistroXBlueprintName("7.3.2"))
-                .withInstanceGroupsEntity(DistroXInstanceGroupTestDto.streamsHostGroups(testContext, testContext.getCloudPlatform()))
+                .withTemplate(commonClusterManagerProperties.getStreamingAnalyticsLDDistroXBlueprintName("7.3.2"))
+                .withInstanceGroupsEntity(DistroXInstanceGroupTestDto.streamingHostGroups(testContext, testContext.getCloudPlatform()))
                 .when(distroXTestClient.create())
                 .await(STACK_AVAILABLE)
                 .awaitForHealthyInstances()
                 .when(distroXTestClient.validateKraftMigrationStatus(ZOOKEEPER_TO_KRAFT_MIGRATION_TRIGGERABLE.name()))
+                .when(distroXTestClient.startKraftMigration())
+                .await(STACK_AVAILABLE)
+                .awaitForHealthyInstances()
+                .when(distroXTestClient.validateKraftMigrationStatus(ZOOKEEPER_TO_KRAFT_MIGRATION_COMPLETE.name()))
+                .when(distroXTestClient.rollbackKraftMigration())
+                .await(STACK_AVAILABLE)
+                .awaitForHealthyInstances()
+                .when(distroXTestClient.validateKraftMigrationStatus(ROLLBACK_ZOOKEEPER_TO_KRAFT_MIGRATION_COMPLETE.name()))
                 .when(distroXTestClient.startKraftMigration())
                 .await(STACK_AVAILABLE)
                 .awaitForHealthyInstances()
@@ -96,7 +104,7 @@ public class DistroXKraftMigrationTest extends AbstractE2EWithReusableResourcesT
             given = "there is a running Cloudbreak, and an SDX cluster in available state",
             when = "Streams Messaging Datahub is provisioned, Kraft migration, rollback then migration is performed",
             then = "the Streams Messaging Datahub should be available and running in KRaft mode")
-    public void testKraftMigrationRollback(TestContext testContext, ITestContext iTestContext) {
+    public void testKraftMigrationWithRollbackWhenNodesInTemplate(TestContext testContext, ITestContext iTestContext) {
         testContext
                 .given(DistroXTestDto.class)
                 .withTemplate(commonClusterManagerProperties.getStreamsLDDistroXBlueprintName("7.3.2"))

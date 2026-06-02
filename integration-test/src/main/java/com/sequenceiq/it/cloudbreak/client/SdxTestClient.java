@@ -39,6 +39,10 @@ import com.sequenceiq.it.cloudbreak.action.sdx.SdxInternalSkuMigrationAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxInternalUpdatePublicDnsEntriesAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxInternalUpgradeAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxListAction;
+import com.sequenceiq.it.cloudbreak.action.sdx.SdxMigrationFromZookeeperToKraftFinalizeAction;
+import com.sequenceiq.it.cloudbreak.action.sdx.SdxMigrationFromZookeeperToKraftRollbackAction;
+import com.sequenceiq.it.cloudbreak.action.sdx.SdxMigrationFromZookeeperToKraftStartAction;
+import com.sequenceiq.it.cloudbreak.action.sdx.SdxMigrationFromZookeeperToKraftStatusAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxOsUpgradeAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxRefreshAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxRefreshInternalAction;
@@ -326,5 +330,25 @@ public class SdxTestClient {
 
     public Action<SdxInternalTestDto, SdxClient> updatePublicDnsEntriesInternal() {
         return new SdxInternalUpdatePublicDnsEntriesAction();
+    }
+
+    public Action<SdxTestDto, SdxClient> startKraftMigration() {
+        return new SdxMigrationFromZookeeperToKraftStartAction();
+    }
+
+    public Action<SdxTestDto, SdxClient> finalizeKraftMigration() {
+        return new SdxMigrationFromZookeeperToKraftFinalizeAction();
+    }
+
+    public Action<SdxTestDto, SdxClient> rollbackKraftMigration() {
+        return new SdxMigrationFromZookeeperToKraftRollbackAction();
+    }
+
+    public Action<SdxTestDto, SdxClient> getKraftMigrationStatus() {
+        return new SdxMigrationFromZookeeperToKraftStatusAction();
+    }
+
+    public Action<SdxTestDto, SdxClient> validateKraftMigrationStatus(String desiredStatus) {
+        return new SdxMigrationFromZookeeperToKraftStatusAction(desiredStatus);
     }
 }
