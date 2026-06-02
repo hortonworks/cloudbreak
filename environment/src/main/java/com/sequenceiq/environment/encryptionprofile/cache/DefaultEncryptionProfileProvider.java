@@ -19,7 +19,6 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.stereotype.Component;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.cloudbreak.common.gov.CommonGovService;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.provider.ProviderPreferencesService;
@@ -44,8 +43,6 @@ public class DefaultEncryptionProfileProvider {
     private final Map<String, EncryptionProfile> defaultEncryptionProfileByName = new HashMap<>();
 
     private final Map<String, EncryptionProfile> defaultEncryptionProfileByCrn = new HashMap<>();
-
-    private final ObjectMapper objectMapper = new ObjectMapper();
 
     private final PathMatchingResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
 

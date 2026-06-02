@@ -263,13 +263,26 @@ public class EncryptionProfileService implements CompositeAuthResourcePropertyPr
 
     @Override
     public List<String> getResourceCrnListByResourceNameList(List<String> resourceNames) {
-        return repository.findAllResourceCrnByNameListAndAccountId(resourceNames, ThreadBasedUserCrnProvider.getAccountId());
+        List<String> crns = new ArrayList<>(repository.findAllResourceCrnByNameListAndAccountId(resourceNames, ThreadBasedUserCrnProvider.getAccountId()));
+        Map<String, EncryptionProfile> defaultsByName = defaultEncryptionProfileProvider.defaultEncryptionProfilesByName();
+        resourceNames.stream()
+                .filter(defaultsByName::containsKey)
+                .map(name -> defaultsByName.get(name).getResourceCrn())
+                .forEach(crns::add);
+        return crns;
     }
 
     @Override
     public String getResourceCrnByResourceName(String resourceName) {
-        return repository.findResourceCrnByNameAndAccountId(resourceName, ThreadBasedUserCrnProvider.getAccountId())
-                .orElseThrow(notFound("Encryption profile", resourceName));
+        Optional<String> resourceCrn = repository.findResourceCrnByNameAndAccountId(resourceName, ThreadBasedUserCrnProvider.getAccountId());
+        if (resourceCrn.isPresent()) {
+            return resourceCrn.get();
+        }
+        EncryptionProfile defaultProfile = defaultEncryptionProfileProvider.defaultEncryptionProfilesByName().get(resourceName);
+        if (defaultProfile != null) {
+            return defaultProfile.getResourceCrn();
+        }
+        throw notFound("Encryption profile", resourceName).get();
     }
 
     @Override

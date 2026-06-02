@@ -37,10 +37,12 @@ public class ResourceCrnAthorizationFactory extends TypedAuthorizationFactory<Ch
     public Optional<AuthorizationRule> doGetAuthorization(CheckPermissionByResourceCrn methodAnnotation, String userCrn, ProceedingJoinPoint proceedingJoinPoint,
             MethodSignature methodSignature) {
         String resourceCrn = commonPermissionCheckingUtils.getParameter(proceedingJoinPoint, methodSignature, ResourceCrn.class, String.class);
-        crnAccountValidator.validateSameAccount(userCrn, resourceCrn);
         AuthorizationResourceAction action = methodAnnotation.action();
         LOGGER.trace("Getting authorization rule to authorize user [{}] for action [{}] over resource [{}]", userCrn, action, resourceCrn);
-        return calcAuthorization(resourceCrn, action);
+        return defaultResourceAuthorizationProvider.authorizeDefaultOrElseCompute(resourceCrn, action, () -> {
+            crnAccountValidator.validateSameAccount(userCrn, resourceCrn);
+            return environmentBasedAuthorizationProvider.getAuthorizations(resourceCrn, action);
+        });
     }
 
     public Optional<AuthorizationRule> calcAuthorization(String resourceCrn, AuthorizationResourceAction action) {
