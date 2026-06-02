@@ -516,13 +516,15 @@ public class GcpCloudProvider extends AbstractCloudProvider {
 
     @Override
     public void verifyVolumeEncryptionKey(List<String> volumeKmsKeyIds, String environmentName) {
-        String kmsKey = getEncryptionKey(true);
-        if (volumeKmsKeyIds.stream().noneMatch(keyId -> StringUtils.containsIgnoreCase(keyId, kmsKey))) {
-            LOGGER.error(format("Volume has NOT been encrypted with '%s' KMS key!", kmsKey));
-            throw new TestFailException(format("Volume has NOT been encrypted with '%s' KMS key!", kmsKey));
-        } else {
-            LOGGER.info(format("Volume has been encrypted with '%s' KMS key.", kmsKey));
-            Log.then(LOGGER, format(" Volume has been encrypted with '%s' KMS key. ", kmsKey));
+        if (!volumeKmsKeyIds.isEmpty()) {
+            String kmsKey = getEncryptionKey(true);
+            if (volumeKmsKeyIds.stream().noneMatch(keyId -> StringUtils.containsIgnoreCase(keyId, kmsKey))) {
+                LOGGER.error(format("Volume has NOT been encrypted with '%s' KMS key!", kmsKey));
+                throw new TestFailException(format("Volume has NOT been encrypted with '%s' KMS key!", kmsKey));
+            } else {
+                LOGGER.info(format("Volume has been encrypted with '%s' KMS key.", kmsKey));
+                Log.then(LOGGER, format(" Volume has been encrypted with '%s' KMS key. ", kmsKey));
+            }
         }
     }
 

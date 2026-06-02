@@ -600,13 +600,15 @@ public class AzureCloudProvider extends AbstractCloudProvider {
 
     @Override
     public void verifyVolumeEncryptionKey(List<String> volumesDesIds, String environmentName) {
-        String desKeyUrl = getDiskEncryptionKeyUrl();
-        if (volumesDesIds.stream().noneMatch(desId -> StringUtils.containsIgnoreCase(desId, "diskEncryptionSets/" + environmentName))) {
-            LOGGER.error(format("Volume has NOT been encrypted with '%s' DES key!", desKeyUrl));
-            throw new TestFailException(format("Volume has NOT been encrypted with '%s' DES key!", desKeyUrl));
-        } else {
-            LOGGER.info(format("Volume has been encrypted with '%s' DES key.", desKeyUrl));
-            Log.then(LOGGER, format(" Volume has been encrypted with '%s' DES key. ", desKeyUrl));
+        if (!volumesDesIds.isEmpty()) {
+            String desKeyUrl = getDiskEncryptionKeyUrl();
+            if (volumesDesIds.stream().noneMatch(desId -> StringUtils.containsIgnoreCase(desId, "diskEncryptionSets/" + environmentName))) {
+                LOGGER.error(format("Volume has NOT been encrypted with '%s' DES key!", desKeyUrl));
+                throw new TestFailException(format("Volume has NOT been encrypted with '%s' DES key!", desKeyUrl));
+            } else {
+                LOGGER.info(format("Volume has been encrypted with '%s' DES key.", desKeyUrl));
+                Log.then(LOGGER, format(" Volume has been encrypted with '%s' DES key. ", desKeyUrl));
+            }
         }
     }
 

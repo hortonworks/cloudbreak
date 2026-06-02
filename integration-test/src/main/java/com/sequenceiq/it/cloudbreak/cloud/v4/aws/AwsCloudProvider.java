@@ -543,13 +543,15 @@ public class AwsCloudProvider extends AbstractCloudProvider {
 
     @Override
     public void verifyVolumeEncryptionKey(List<String> volumeKmsKeyIds, String environmentName) {
-        String kmsKeyArn = getEncryptionKeyArn(true);
-        if (volumeKmsKeyIds.stream().noneMatch(keyId -> keyId.equalsIgnoreCase(kmsKeyArn))) {
-            LOGGER.error(format("Volume has not been encrypted with '%s' KMS key!", kmsKeyArn));
-            throw new TestFailException(format("Volume has not been encrypted with '%s' KMS key!", kmsKeyArn));
-        } else {
-            LOGGER.info(format("Volume has been encrypted with '%s' KMS key.", kmsKeyArn));
-            Log.then(LOGGER, format(" Volume has been encrypted with '%s' KMS key. ", kmsKeyArn));
+        if (!volumeKmsKeyIds.isEmpty()) {
+            String kmsKeyArn = getEncryptionKeyArn(true);
+            if (volumeKmsKeyIds.stream().noneMatch(keyId -> keyId.equalsIgnoreCase(kmsKeyArn))) {
+                LOGGER.error(format("Volume has not been encrypted with '%s' KMS key!", kmsKeyArn));
+                throw new TestFailException(format("Volume has not been encrypted with '%s' KMS key!", kmsKeyArn));
+            } else {
+                LOGGER.info(format("Volume has been encrypted with '%s' KMS key.", kmsKeyArn));
+                Log.then(LOGGER, format(" Volume has been encrypted with '%s' KMS key. ", kmsKeyArn));
+            }
         }
     }
 
