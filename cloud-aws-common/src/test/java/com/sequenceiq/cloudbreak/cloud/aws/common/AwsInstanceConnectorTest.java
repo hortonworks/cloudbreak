@@ -150,6 +150,7 @@ class AwsInstanceConnectorTest {
                 .withVariant("AWS")
                 .withLocation(Location.location(Region.region("region")))
                 .withAccountId("account")
+                .withEnableMultipleClient(true)
                 .build();
         CloudCredential credential = new CloudCredential("id", "alma", Map.of("accessKey", "ac", "secretKey", "secret"), "acc");
         authenticatedContext = awsAuthenticator.authenticate(context, credential);

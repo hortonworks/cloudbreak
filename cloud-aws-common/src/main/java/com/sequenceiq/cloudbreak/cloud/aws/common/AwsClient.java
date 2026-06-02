@@ -116,18 +116,23 @@ public abstract class AwsClient {
             String region = authenticatedContextView.getRegion();
             AwsCredentialView awsCredentialView = authenticatedContextView.getAwsCredentialView();
             AmazonEc2Client amazonEC2Client;
-            AmazonEc2Client startInstancesAmazonEc2Client;
             if (region != null) {
                 amazonEC2Client = createEc2Client(awsCredentialView, region);
-                startInstancesAmazonEc2Client = createEc2ClientForStartInstancesOperation(awsCredentialView, region);
                 AmazonElasticLoadBalancingClient loadBalancingClient = createElasticLoadBalancingClient(awsCredentialView, region);
                 authenticatedContext.putParameter(AmazonElasticLoadBalancingClient.class, loadBalancingClient);
             } else {
                 amazonEC2Client = createEc2Client(awsCredentialView);
-                startInstancesAmazonEc2Client = createEc2ClientForStartInstancesOperation(awsCredentialView);
             }
             authenticatedContext.putParameter(AmazonEc2Client.class, amazonEC2Client);
-            authenticatedContext.putParameter("StartInstances" + AmazonEc2Client.class.getName(), startInstancesAmazonEc2Client);
+            if (cloudContext.isMultipleClientEnabled()) {
+                AmazonEc2Client startInstancesAmazonEc2Client;
+                if (region != null) {
+                    startInstancesAmazonEc2Client = createEc2ClientForStartInstancesOperation(awsCredentialView, region);
+                } else {
+                    startInstancesAmazonEc2Client = createEc2ClientForStartInstancesOperation(awsCredentialView);
+                }
+                authenticatedContext.putParameter("StartInstances" + AmazonEc2Client.class.getName(), startInstancesAmazonEc2Client);
+            }
         } catch (AwsServiceException e) {
             throw new CredentialVerificationException(e.getMessage(), e);
         }

@@ -95,6 +95,16 @@ class AwsAuthenticatorTest {
         when(awsEnvironmentVariableChecker.isAwsAccessKeyAvailable(any(AwsCredentialView.class))).thenReturn(false);
         when(awsEnvironmentVariableChecker.isAwsSecretAccessKeyAvailable(any(AwsCredentialView.class))).thenReturn(false);
         testAuthenticate(Map.of(AWS, Map.of(DEFAULT_REGION_KEY, REGION, "roleBased", Map.of("roleArn", "role"))));
+        verify(awsEnvironmentVariableChecker, times(2)).isAwsAccessKeyAvailable(any(AwsCredentialView.class));
+        verify(awsEnvironmentVariableChecker, times(1)).isAwsSecretAccessKeyAvailable(any(AwsCredentialView.class));
+    }
+
+    @Test
+    void testAuthenticateSucceedWithRoleWhenMultipleClientNeeded() {
+        when(awsEnvironmentVariableChecker.isAwsAccessKeyAvailable(any(AwsCredentialView.class))).thenReturn(false);
+        when(awsEnvironmentVariableChecker.isAwsSecretAccessKeyAvailable(any(AwsCredentialView.class))).thenReturn(false);
+        testAuthenticate(Map.of(AWS, Map.of(DEFAULT_REGION_KEY, REGION, "roleBased", Map.of("roleArn", "role"))),
+                getCloudContextBuilder().withEnableMultipleClient(true).build());
         verify(awsEnvironmentVariableChecker, times(3)).isAwsAccessKeyAvailable(any(AwsCredentialView.class));
         verify(awsEnvironmentVariableChecker, times(1)).isAwsSecretAccessKeyAvailable(any(AwsCredentialView.class));
     }
@@ -114,21 +124,27 @@ class AwsAuthenticatorTest {
     }
 
     private AuthenticatedContext testAuthenticate(Map<String, Object> parameters) {
-        CloudContext context = CloudContext.Builder.builder()
+        CloudContext context = getCloudContextBuilder().build();
+        return testAuthenticate(parameters, context);
+    }
+
+    private static CloudContext.Builder getCloudContextBuilder() {
+        return CloudContext.Builder.builder()
                 .withId(1L)
                 .withName("context")
                 .withCrn("crn")
                 .withPlatform("AWS")
                 .withVariant("AWS")
                 .withLocation(Location.location(Region.region(REGION)))
-                .withAccountId("account")
-                .build();
+                .withAccountId("account");
+    }
+
+    private AuthenticatedContext testAuthenticate(Map<String, Object> parameters, CloudContext context) {
         CloudCredential credential = new CloudCredential("id", "alma", parameters, "acc");
         AuthenticatedContext auth = underTest.authenticate(context, credential);
         assertTrue(auth.hasParameter(AmazonEc2Client.class.getName()),
                 "Authenticated context does not have amazonClient after authentication");
         assertSame(amazonEC2Client, auth.getParameter(AmazonEc2Client.class));
-
         return auth;
     }
 

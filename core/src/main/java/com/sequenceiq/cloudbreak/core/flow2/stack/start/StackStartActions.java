@@ -206,6 +206,7 @@ public class StackStartActions {
                     .withWorkspaceId(stack.getWorkspaceId())
                     .withAccountId(Crn.safeFromString(stack.getResourceCrn()).getAccountId())
                     .withTenantId(stackDto.getTenant().getId())
+                    .withEnableMultipleClient(true)
                     .build();
             CloudCredential cloudCredential = stackUtil.getCloudCredential(stack.getEnvironmentCrn());
             return new StackStartStopContext(flowParameters, stackDto, stackDto.getInstanceGroupDtos(), cloudContext, cloudCredential);

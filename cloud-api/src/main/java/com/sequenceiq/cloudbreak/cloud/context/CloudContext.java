@@ -45,11 +45,16 @@ public class CloudContext {
      */
     private final String originalName;
 
+    /**
+     * For specific operations multiple clients needed for the given provider, but by default we should not "waste" time to generate all client
+     */
+    private final boolean enableMultipleClient;
+
     /*
      * We need this constructor because flow request objects use this class and it can not be serialized back to object
      */
     private CloudContext(Long id, String name, Platform platform, boolean govCloud, Variant variant, Location location, String userName, String accountId,
-            Long tenantId, String crn, String originalName) {
+            Long tenantId, String crn, String originalName, boolean enableMultipleClient) {
         this.id = id;
         this.name = name;
         this.platform = platform;
@@ -61,6 +66,7 @@ public class CloudContext {
         this.tenantId = tenantId;
         this.crn = crn;
         this.originalName = originalName;
+        this.enableMultipleClient = enableMultipleClient;
     }
 
     private CloudContext(Builder builder) {
@@ -75,6 +81,7 @@ public class CloudContext {
         this.userName = builder.userName;
         this.govCloud = builder.govCloud;
         this.originalName = builder.originalName;
+        this.enableMultipleClient = builder.enableMultipleClient;
     }
 
     public Long getId() {
@@ -125,6 +132,10 @@ public class CloudContext {
         return originalName;
     }
 
+    public boolean isMultipleClientEnabled() {
+        return enableMultipleClient;
+    }
+
     public Builder createPrototype() {
         return CloudContext.Builder.builder()
                 .withId(getId())
@@ -137,7 +148,8 @@ public class CloudContext {
                 .withUserName(getUserName())
                 .withCrn(getCrn())
                 .withGovCloud(isGovCloud())
-                .withOriginalName(getOriginalName());
+                .withOriginalName(getOriginalName())
+                .withEnableMultipleClient(isMultipleClientEnabled());
     }
 
     @Override
@@ -153,6 +165,7 @@ public class CloudContext {
                 ", tenantId='" + tenantId + '\'' +
                 ", crn='" + crn + '\'' +
                 ", govCloud='" + govCloud + '\'' +
+                ", enableMultipleClient='" + enableMultipleClient + '\'' +
                 '}';
     }
 
@@ -179,6 +192,8 @@ public class CloudContext {
         private boolean govCloud;
 
         private String originalName;
+
+        private boolean enableMultipleClient;
 
         public Builder withId(Long id) {
             this.id = id;
@@ -249,6 +264,11 @@ public class CloudContext {
 
         public Builder withOriginalName(String originalName) {
             this.originalName = originalName;
+            return this;
+        }
+
+        public Builder withEnableMultipleClient(boolean enableMultipleClient) {
+            this.enableMultipleClient = enableMultipleClient;
             return this;
         }
 
