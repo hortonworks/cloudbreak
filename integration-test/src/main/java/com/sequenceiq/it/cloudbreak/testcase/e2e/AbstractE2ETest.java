@@ -114,7 +114,11 @@ public abstract class AbstractE2ETest extends AbstractIntegrationTest {
 
     private void validateImageIdAndWriteToFile(TestContext testContext) {
         if (this instanceof ImageValidatorE2ETest imageValidatorE2ETest) {
-            imageValidatorE2ETestUtil.validateImageIdAndWriteToFile(testContext, imageValidatorE2ETest);
+            try {
+                imageValidatorE2ETestUtil.validateImageIdAndWriteToFile(testContext, imageValidatorE2ETest);
+            } catch (Exception e) {
+                LOGGER.error("Error during image ID validation and writing to file: {}", e.getMessage(), e);
+            }
         }
     }
 

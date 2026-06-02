@@ -9,6 +9,8 @@ import jakarta.inject.Inject;
 
 import org.testng.annotations.Test;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.StackImageV4Response;
 import com.sequenceiq.environment.environment.dto.FreeIpaLoadBalancerType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.it.cloudbreak.assertion.freeipa.FreeIpaAvailabilityAssertion;
@@ -16,12 +18,14 @@ import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
+import com.sequenceiq.it.cloudbreak.dto.AbstractTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaOperationStatusTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 import com.sequenceiq.it.util.imagevalidation.ImageValidatorE2ETest;
 import com.sequenceiq.it.util.imagevalidation.ImageValidatorE2ETestUtil;
+import com.sequenceiq.sdx.api.model.SdxClusterDetailResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
 public class FreeIpaUpgradeTests extends AbstractE2ETest implements ImageValidatorE2ETest {
@@ -93,6 +97,11 @@ public class FreeIpaUpgradeTests extends AbstractE2ETest implements ImageValidat
 
     @Override
     public String getCbImageId(TestContext testContext) {
-        return testContext.get(SdxTestDto.class).getResponse().getStackV4Response().getImage().getId();
+        return Optional.ofNullable(testContext.get(SdxTestDto.class))
+                .map(AbstractTestDto::getResponse)
+                .map(SdxClusterDetailResponse::getStackV4Response)
+                .map(StackV4Response::getImage)
+                .map(StackImageV4Response::getId)
+                .orElse(null);
     }
 }
