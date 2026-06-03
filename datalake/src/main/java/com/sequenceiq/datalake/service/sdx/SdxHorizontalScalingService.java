@@ -28,7 +28,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.datalake.entity.DatalakeInstanceGroupScalingDetails;
@@ -56,9 +55,6 @@ public class SdxHorizontalScalingService {
     private StackV4Endpoint stackV4Endpoint;
 
     @Inject
-    private EntitlementService entitlementService;
-
-    @Inject
     private EnvironmentService environmentClientService;
 
     @Inject
@@ -72,10 +68,6 @@ public class SdxHorizontalScalingService {
 
     public FlowIdentifier horizontalScaleDatalake(String name, DatalakeHorizontalScaleRequest scaleRequest) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
-        if (!entitlementService.isDatalakeHorizontalScaleEnabled(accountId)) {
-            throw new BadRequestException(String.format("Data lake horizontal scale is not enabled for account %s.", accountId));
-        }
-
         LOGGER.info("Horizontal scaling Data lake with name {}", name);
         SdxCluster sdxCluster = sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNullAndDetachedIsFalse(accountId, name)
                 .orElseThrow(() -> notFound("SDX cluster", name).get());

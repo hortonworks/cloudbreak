@@ -102,7 +102,6 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_GCP
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_GCP_STOP_START_SCALING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_IMPALA_SCHEDULE_BASED_SCALING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_STOP_START_SCALING_FAILURE_RECOVERY;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATALAKE_HORIZONTAL_SCALE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATA_LAKE_LIGHT_TO_MEDIUM_MIGRATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.E2E_TEST_ONLY;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.ENABLE_COMPUTE_CLUSTER;
@@ -1211,7 +1210,6 @@ public class MockUserManagementService extends UserManagementImplBase {
                                 .addEntitlements(createEntitlement(CDP_CB_AZURE_RESIZE_DISK))
                                 .addEntitlements(createEntitlement(CDP_CB_AZURE_DELETE_DISK))
                                 .addEntitlements(createEntitlement(CDP_CB_AZURE_ADD_DISK))
-                                .addEntitlements(createEntitlement(DATALAKE_HORIZONTAL_SCALE))
                                 .addEntitlements(createEntitlement(CDP_EXPRESS_ONBOARDING))
                                 .addEntitlements(createEntitlement(CDP_SKIP_CERTIFICATE_ROTATION_VALIDATION))
                                 .addEntitlements(createEntitlement(CDP_SECURITY_ENFORCING_SELINUX))

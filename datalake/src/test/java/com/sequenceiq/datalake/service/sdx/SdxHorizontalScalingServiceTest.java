@@ -33,7 +33,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.clouder
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.cluster.clouderamanager.ClouderaManagerV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.datalake.entity.DatalakeInstanceGroupScalingDetails;
@@ -64,9 +63,6 @@ public class SdxHorizontalScalingServiceTest {
 
     @Mock
     private StackV4Endpoint stackV4Endpoint;
-
-    @Mock
-    private EntitlementService entitlementService;
 
     @Mock
     private RegionAwareCrnGenerator regionAwareCrnGenerator;
