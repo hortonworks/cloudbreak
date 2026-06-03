@@ -26,6 +26,8 @@ import com.sequenceiq.freeipa.service.stack.StackService;
 public class FreeIpaServicesStopService {
     private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaServicesStopService.class);
 
+    private static final String STOP_COMMAND = "systemctl stop certmonger; sleep 30; ipactl stop";
+
     @Value("${freeipa.delayed.stop-start-sec}")
     private long delayInSec;
 
@@ -62,7 +64,7 @@ public class FreeIpaServicesStopService {
         try {
             LOGGER.info("Stopping instance: {}", instanceMetaData);
             GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
-            hostOrchestrator.runCommandOnHosts(List.of(gatewayConfig), Set.of(instanceMetaData.getDiscoveryFQDN()), "ipactl stop");
+            hostOrchestrator.runCommandOnHosts(List.of(gatewayConfig), Set.of(instanceMetaData.getDiscoveryFQDN()), STOP_COMMAND);
             LOGGER.info("Stopped instance: {}", instanceMetaData.getDiscoveryFQDN());
         } catch (CloudbreakOrchestratorFailedException e) {
             LOGGER.error("Failed to stop services on {}", instanceMetaData, e);
