@@ -19,6 +19,7 @@ base:
              - java
              - loadbalancer.loadbalancer_ip
              - kerberos
+             - cron
 
            'recipes:pre-cloudera-manager-start':
              - match: grain

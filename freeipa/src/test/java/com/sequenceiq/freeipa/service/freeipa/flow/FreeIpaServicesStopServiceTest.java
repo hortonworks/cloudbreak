@@ -86,7 +86,7 @@ public class FreeIpaServicesStopServiceTest {
 
         // Verify that the host orchestrator is called to stop services on the single instance
         verify(hostOrchestrator, times(1))
-                .runCommandOnHosts(eq(List.of(gatewayConfig)), eq(Set.of("instance1.fqdn")), eq("ipactl stop"));
+                .runCommandOnHosts(eq(List.of(gatewayConfig)), eq(Set.of("instance1.fqdn")), eq("systemctl stop certmonger; sleep 30; ipactl stop"));
 
         // Verify that no delayed executor is used since there's only one instance
         verify(delayedExecutorService, times(0)).runWithDelay(any(Runnable.class), anyLong(), any(TimeUnit.class));
@@ -111,7 +111,7 @@ public class FreeIpaServicesStopServiceTest {
 
         // Verify the first instance is stopped immediately
         verify(hostOrchestrator, times(1))
-                .runCommandOnHosts(eq(List.of(gatewayConfig)), eq(Set.of("instance1.fqdn")), eq("ipactl stop"));
+                .runCommandOnHosts(eq(List.of(gatewayConfig)), eq(Set.of("instance1.fqdn")), eq("systemctl stop certmonger; sleep 30; ipactl stop"));
 
         // Verify that the second instance is stopped after a delay
         verify(delayedExecutorService, times(1))
@@ -145,7 +145,7 @@ public class FreeIpaServicesStopServiceTest {
 
         // Simulate an exception when stopping services
         doThrow(new CloudbreakOrchestratorFailedException("Failed")).when(hostOrchestrator)
-                .runCommandOnHosts(eq(List.of(gatewayConfig)), eq(Set.of("instance1.fqdn")), eq("ipactl stop"));
+                .runCommandOnHosts(eq(List.of(gatewayConfig)), eq(Set.of("instance1.fqdn")), eq("systemctl stop certmonger; sleep 30; ipactl stop"));
 
         // Call the method
         underTest.stopServices(1L);
@@ -155,6 +155,6 @@ public class FreeIpaServicesStopServiceTest {
 
         // Verify that the host orchestrator is called and throws the exception
         verify(hostOrchestrator, times(1))
-                .runCommandOnHosts(eq(List.of(gatewayConfig)), eq(Set.of("instance1.fqdn")), eq("ipactl stop"));
+                .runCommandOnHosts(eq(List.of(gatewayConfig)), eq(Set.of("instance1.fqdn")), eq("systemctl stop certmonger; sleep 30; ipactl stop"));
     }
 }

@@ -5,6 +5,7 @@ import static com.sequenceiq.authorization.resource.AuthorizationVariableType.CR
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -302,9 +303,9 @@ public class ImageCatalogV4Controller extends NotificationController implements 
     @Override
     @AccountIdNotNeeded
     @DisableCheckPermissions
-    public ImageV4Response getImageFromDefault(Long workspaceId, String type, String provider) throws Exception {
+    public ImageV4Response getImageFromDefault(Long workspaceId, String type, String provider, String architecture) throws Exception {
         StatedImage statedImage = defaultImageCatalogService.getImageFromDefaultCatalog(type,
-                platformStringTransformer.getPlatformStringForImageCatalog(provider, false));
+                platformStringTransformer.getPlatformStringForImageCatalog(provider, false), Optional.ofNullable(Architecture.fromString(architecture, false)));
         return imageToImageV4ResponseConverter.convert(statedImage.getImage());
     }
 
