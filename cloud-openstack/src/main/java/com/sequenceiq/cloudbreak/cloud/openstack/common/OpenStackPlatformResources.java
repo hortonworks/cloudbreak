@@ -1,12 +1,10 @@
 package com.sequenceiq.cloudbreak.cloud.openstack.common;
 
-import static com.sequenceiq.cloudbreak.cloud.model.Coordinate.coordinate;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 import static com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType.MAGNETIC;
 import static com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType.values;
 import static com.sequenceiq.cloudbreak.cloud.openstack.common.OpenStackConstants.NETWORK_ID;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -34,6 +32,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.PlatformResources;
+import com.sequenceiq.cloudbreak.cloud.model.ArchitectureVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfigs;
 import com.sequenceiq.cloudbreak.cloud.model.CloudDatabaseVmTypes;
@@ -52,10 +51,9 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudSshKeys;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.Coordinate;
+import com.sequenceiq.cloudbreak.cloud.model.DefaultVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
-import com.sequenceiq.cloudbreak.cloud.model.RegionCoordinateSpecification;
-import com.sequenceiq.cloudbreak.cloud.model.RegionCoordinateSpecifications;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta;
 import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta.VmTypeMetaBuilder;
@@ -67,8 +65,6 @@ import com.sequenceiq.cloudbreak.cloud.model.nosql.CloudNoSqlTables;
 import com.sequenceiq.cloudbreak.cloud.model.resourcegroup.CloudResourceGroups;
 import com.sequenceiq.cloudbreak.cloud.openstack.client.OpenStackClient;
 import com.sequenceiq.cloudbreak.cloud.openstack.view.KeystoneCredentialView;
-import com.sequenceiq.cloudbreak.common.json.JsonUtil;
-import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
 
 @Service
 public class OpenStackPlatformResources implements PlatformResources {
@@ -91,36 +87,7 @@ public class OpenStackPlatformResources implements PlatformResources {
     private OpenStackClient openStackClient;
 
     @Inject
-    private CloudbreakResourceReaderService cloudbreakResourceReaderService;
-
-    @Inject
     private OpenStackAvailabilityZoneProvider openStackAvailabilityZoneProvider;
-
-    public String resourceDefinition(String resource) {
-        return cloudbreakResourceReaderService.resourceDefinition("openstack", resource);
-    }
-
-    private Map<Region, Coordinate> readRegionCoordinates(String displayNames) {
-        Map<Region, Coordinate> regionCoordinates = new HashMap<>();
-        try {
-            RegionCoordinateSpecifications regionCoordinateSpecifications = JsonUtil.readValue(displayNames, RegionCoordinateSpecifications.class);
-            for (RegionCoordinateSpecification regionCoordinateSpecification : regionCoordinateSpecifications.getItems()) {
-                regionCoordinates.put(region(regionCoordinateSpecification.getName()),
-                        coordinate(
-                                regionCoordinateSpecification.getLongitude(),
-                                regionCoordinateSpecification.getLatitude(),
-                                regionCoordinateSpecification.getDisplayName(),
-                                regionCoordinateSpecification.getName(),
-                                regionCoordinateSpecification.isK8sSupported(),
-                                regionCoordinateSpecification.getEntitlements(),
-                                regionCoordinateSpecification.getDefaultVmtypes(),
-                                regionCoordinateSpecification.getCdpSupportedServices()));
-            }
-        } catch (IOException ignored) {
-            return regionCoordinates;
-        }
-        return regionCoordinates;
-    }
 
     @Override
     public CloudNetworks networks(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) throws Exception {
@@ -218,6 +185,7 @@ public class OpenStackPlatformResources implements PlatformResources {
         Map<Region, List<AvailabilityZone>> cloudRegions = new HashMap<>();
         Map<Region, String> displayNames = new HashMap<>();
         Map<Region, Coordinate> coordinates = new HashMap<>();
+        Map<Region, DefaultVmTypes> defaultVmTypes = new HashMap<>();
         for (String regionFromOpenStack : regionsFromOpenStack) {
             List<AvailabilityZone> availabilityZones = new ArrayList<>();
             if (availabilityZonesNeeded) {
@@ -227,14 +195,22 @@ public class OpenStackPlatformResources implements PlatformResources {
             displayNames.put(region(regionFromOpenStack), regionFromOpenStack);
             coordinates.put(region(regionFromOpenStack), Coordinate.coordinate("-119.7729841", "36.7477169", regionFromOpenStack, regionFromOpenStack,
                     false, null, null, null));
+            defaultVmTypes.put(region(regionFromOpenStack), defaultVmTypes());
         }
         String defaultRegion = null;
         if (!cloudRegions.keySet().isEmpty()) {
             defaultRegion = ((StringType) cloudRegions.keySet().toArray()[0]).value();
         }
-        CloudRegions regions = new CloudRegions(cloudRegions, displayNames, coordinates, Map.of(), defaultRegion, true);
+        CloudRegions regions = new CloudRegions(cloudRegions, displayNames, coordinates, defaultVmTypes, defaultRegion, true);
         LOGGER.debug("Openstack regions result: {}", regions);
         return regions;
+    }
+
+    private DefaultVmTypes defaultVmTypes() {
+        DefaultVmTypes defaultVmTypes = new DefaultVmTypes();
+        ArchitectureVmTypes architectureVmTypes = new ArchitectureVmTypes(List.of("m1.large"), List.of());
+        defaultVmTypes.setFreeipa(architectureVmTypes);
+        return defaultVmTypes;
     }
 
     @Override
