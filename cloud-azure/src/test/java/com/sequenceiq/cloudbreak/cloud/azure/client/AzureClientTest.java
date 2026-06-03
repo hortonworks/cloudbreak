@@ -89,6 +89,7 @@ import com.azure.resourcemanager.network.models.LoadBalancers;
 import com.azure.resourcemanager.postgresql.PostgreSqlManager;
 import com.azure.resourcemanager.resources.ResourceManager;
 import com.azure.resourcemanager.resources.fluent.DeploymentsClient;
+import com.azure.resourcemanager.resources.fluent.DeploymentsManagementClient;
 import com.azure.resourcemanager.resources.fluent.ResourceManagementClient;
 import com.azure.resourcemanager.resources.fluent.models.WhatIfOperationResultInner;
 import com.azure.resourcemanager.resources.fluentcore.arm.AvailabilityZoneId;
@@ -608,9 +609,10 @@ class AzureClientTest {
         ResourceManager resourceManager = mock(ResourceManager.class);
         when(genericResources.manager()).thenReturn(resourceManager);
         ResourceManagementClient resourceManagementClient = mock(ResourceManagementClient.class);
-        when(resourceManager.serviceClient()).thenReturn(resourceManagementClient);
+        DeploymentsManagementClient deploymentsManagementClient = mock(DeploymentsManagementClient.class);
+        when(resourceManager.deploymentClient()).thenReturn(deploymentsManagementClient);
         DeploymentsClient deploymentsClient = mock(DeploymentsClient.class);
-        when(resourceManagementClient.getDeployments()).thenReturn(deploymentsClient);
+        when(deploymentsManagementClient.getDeployments()).thenReturn(deploymentsClient);
         return deploymentsClient;
     }
 

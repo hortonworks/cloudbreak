@@ -2,8 +2,11 @@ package com.sequenceiq.cloudbreak.cloud.azure;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
+import java.io.IOException;
 import java.lang.reflect.Field;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -11,9 +14,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.util.ReflectionUtils;
 
 import com.azure.core.management.exception.ManagementError;
+import com.azure.json.JsonProviders;
 import com.azure.resourcemanager.compute.models.ApiError;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.sequenceiq.cloudbreak.common.json.Json;
 
 public class AzureTestUtils {
 
@@ -23,17 +28,19 @@ public class AzureTestUtils {
     }
 
     public static ApiError apiError(String code, String message) {
-        ApiError apiError = new ApiError();
-        setField(apiError, "code", code);
-        setField(apiError, "message", message);
-        return apiError;
+        try {
+            Map<String, Object> errorMap = new HashMap<>();
+            errorMap.put("code", code);
+            errorMap.put("message", message);
+            String json = new Json(Map.of("error", errorMap)).getValue();
+            return ApiError.fromJson(JsonProviders.createReader(json));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static ManagementError managementError(String code, String message) {
-        ManagementError managementError = new ManagementError();
-        setField(managementError, "code", code);
-        setField(managementError, "message", message);
-        return managementError;
+        return new ManagementError(code, message);
     }
 
     public static void setDetails(ManagementError apiError, List<ManagementError> details) {

@@ -22,6 +22,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -36,6 +37,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.azure.core.management.exception.ManagementError;
+import com.azure.json.JsonProviders;
 import com.azure.resourcemanager.compute.models.ApiError;
 import com.azure.resourcemanager.compute.models.ApiErrorException;
 import com.azure.resourcemanager.resources.models.Deployment;
@@ -83,7 +85,7 @@ import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
 
 @ExtendWith(MockitoExtension.class)
-public class AzureUpscaleServiceTest {
+class AzureUpscaleServiceTest {
 
     private static final Map<String, Object> PARAMETERS = Collections.emptyMap();
 
@@ -147,7 +149,7 @@ public class AzureUpscaleServiceTest {
     private AzureImageTermsSignerService azureImageTermsSignerService;
 
     @BeforeEach
-    public void before() {
+    void before() {
         when(azureUtils.getStackName(any(CloudContext.class))).thenReturn(STACK_NAME);
         when(azureUtils.getFullInstanceId(nullable(String.class), nullable(String.class), nullable(String.class), nullable(String.class)))
                 .thenReturn("instanceid");
@@ -163,7 +165,7 @@ public class AzureUpscaleServiceTest {
     }
 
     @Test
-    public void testUpscaleWhenSourceImageSignAttempted() throws QuotaExceededException {
+    void testUpscaleWhenSourceImageSignAttempted() throws QuotaExceededException {
         CloudContext cloudContext = createCloudContext();
         CloudCredential cloudCredential = mock(CloudCredential.class);
         when(cloudCredential.getParameters()).thenReturn(Map.of("subscriptionId", "subscriptionId"));
@@ -229,7 +231,7 @@ public class AzureUpscaleServiceTest {
     }
 
     @Test
-    public void testUpscaleWhenSourceImageSignAttemptedAndFails() {
+    void testUpscaleWhenSourceImageSignAttemptedAndFails() {
         reset(azureUtils);
         when(azureUtils.getStackName(any(CloudContext.class))).thenReturn(STACK_NAME);
         CloudContext cloudContext = createCloudContext();
@@ -259,7 +261,7 @@ public class AzureUpscaleServiceTest {
     }
 
     @Test
-    public void testUpscaleThenThereAreNewInstancesRequired() throws QuotaExceededException {
+    void testUpscaleThenThereAreNewInstancesRequired() throws QuotaExceededException {
         vhdImageStubbing();
 
         CloudContext cloudContext = createCloudContext();
@@ -319,7 +321,7 @@ public class AzureUpscaleServiceTest {
     }
 
     @Test
-    public void testUpscaleButQuotaIssueHappen() throws QuotaExceededException {
+    void testUpscaleButQuotaIssueHappen() throws QuotaExceededException, IOException {
         vhdImageStubbing();
 
         CloudContext cloudContext = createCloudContext();
@@ -335,7 +337,7 @@ public class AzureUpscaleServiceTest {
         List<Group> scaledGroups = createScaledGroups(new CloudInstance("instanceid", instanceTemplate, null, null, null));
 
         when(cloudResourceHelper.getScaledGroups(stack)).thenReturn(scaledGroups);
-        ApiError cloudError = new ApiError();
+        ApiError cloudError = ApiError.fromJson(JsonProviders.createReader("{\"error\":{}}"));
         List<ManagementError> details = new ArrayList<>();
         AzureTestUtils.setDetails(cloudError, details);
         ManagementError quotaError = new ManagementError(
@@ -370,7 +372,7 @@ public class AzureUpscaleServiceTest {
     }
 
     @Test
-    public void testUpscaleWhenThereAreReattachableVolumeSets() throws QuotaExceededException {
+    void testUpscaleWhenThereAreReattachableVolumeSets() throws QuotaExceededException {
         vhdImageStubbing();
 
         CloudContext cloudContext = createCloudContext();
@@ -425,7 +427,7 @@ public class AzureUpscaleServiceTest {
     }
 
     @Test
-    public void testUpscaleWhenVmsNotStartedInTime() {
+    void testUpscaleWhenVmsNotStartedInTime() {
         vhdImageStubbing();
 
         CloudContext cloudContext = createCloudContext();

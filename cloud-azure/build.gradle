@@ -32,9 +32,9 @@ dependencies {
   implementation group: 'com.azure',                    name: 'azure-identity',                                 version: azureSdkIdentityVersion
   implementation group: 'com.azure',                    name: 'azure-storage-blob',                             version: azureSdkStorageBlobVersion
   implementation group: 'com.azure.resourcemanager',    name: 'azure-resourcemanager',                          version: azureSdkResourceManagerVersion
-  implementation group: 'com.azure.resourcemanager',    name: 'azure-resourcemanager-storage',                  version: azureSdkResourceManagerVersion
-  implementation group: 'com.azure.resourcemanager',    name: 'azure-resourcemanager-privatedns',               version: azureSdkResourceManagerVersion
-  implementation group: 'com.azure.resourcemanager',    name: 'azure-resourcemanager-sql',                      version: azureSdkResourceManagerVersion
+  implementation group: 'com.azure.resourcemanager',    name: 'azure-resourcemanager-storage'
+  implementation group: 'com.azure.resourcemanager',    name: 'azure-resourcemanager-privatedns'
+  implementation group: 'com.azure.resourcemanager',    name: 'azure-resourcemanager-sql'
   implementation group: 'com.azure.resourcemanager',    name: 'azure-resourcemanager-postgresql',               version: azureSdkResourceManagerPostgresqlVersion
   implementation group: 'com.azure.resourcemanager',    name: 'azure-resourcemanager-postgresqlflexibleserver', version: azureSdkResourceManagerFlexiblePostgresqlVersion
   implementation group: 'com.azure.resourcemanager',    name: 'azure-resourcemanager-marketplaceordering',      version: azureSdkResourceManagerMarketplaceVersion

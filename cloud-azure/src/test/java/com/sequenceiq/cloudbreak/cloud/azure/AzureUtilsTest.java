@@ -17,6 +17,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -43,6 +44,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import com.azure.core.management.exception.AdditionalInfo;
 import com.azure.core.management.exception.ManagementError;
 import com.azure.core.management.exception.ManagementException;
+import com.azure.json.JsonProviders;
 import com.azure.resourcemanager.compute.models.ApiError;
 import com.azure.resourcemanager.compute.models.ApiErrorException;
 import com.azure.resourcemanager.compute.models.PolicyViolation;
@@ -68,7 +70,7 @@ import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
 @ExtendWith(MockitoExtension.class)
-public class AzureUtilsTest {
+class AzureUtilsTest {
 
     private static final Long WORKSPACE_ID = 1L;
 
@@ -554,15 +556,14 @@ public class AzureUtilsTest {
     }
 
     @Test
-    void convertToCloudConnectorExceptionTestWhenDetailCloudErrorsHaveRequestDisallowedByPolicyCode() {
+    void convertToCloudConnectorExceptionTestWhenDetailCloudErrorsHaveRequestDisallowedByPolicyCode() throws IOException {
         ApiError cloudError = AzureTestUtils.apiError("InvalidTemplateDeployment",
                 "The template deployment failed with multiple errors. Please see details for more information.");
         List<ManagementError> details = new ArrayList<>();
         AzureTestUtils.setDetails(cloudError, details);
 
-        PolicyViolation policyViolation = new PolicyViolation();
-        AzureTestUtils.setField(policyViolation, "category", PolicyViolationCategory.OTHER);
-        AzureTestUtils.setField(policyViolation, "details", "dbajzath-azure-restricted-policy");
+        PolicyViolation policyViolation = PolicyViolation.fromJson(JsonProviders.createReader("{\"category\":\"" +
+                PolicyViolationCategory.OTHER.getValue() + "\",\"details\":\"dbajzath-azure-restricted-policy\"}"));
 
         ManagementError detail1 = AzureTestUtils.managementError("RequestDisallowedByPolicy",
                 "Resource 'cbimgwu29d62091481040a03' was disallowed by policy. Reasons: 'West US 2 location is disabled'. " +
@@ -599,9 +600,13 @@ public class AzureUtilsTest {
     private static ApiErrorException createCloudExceptionWithNoDetails(boolean withBody) {
         ApiErrorException e;
         if (withBody) {
-            ApiError cloudError = new ApiError();
-            AzureTestUtils.setDetails(cloudError, null);
-            e = new ApiErrorException("Serious problem", null, cloudError);
+            try {
+                ApiError cloudError = ApiError.fromJson(JsonProviders.createReader("{\"error\":{}}"));
+                AzureTestUtils.setDetails(cloudError, null);
+                e = new ApiErrorException("Serious problem", null, cloudError);
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
         } else {
             e = new ApiErrorException("Serious problem", null);
         }
@@ -609,7 +614,7 @@ public class AzureUtilsTest {
     }
 
     static Object[][] convertToCloudConnectorExceptionTestWhenCloudExceptionAndNoDetailsDataProvider() {
-        return new Object[][] {
+        return new Object[][]{
                 // testCaseName e
                 {"CloudException without body", createCloudExceptionWithNoDetails(false)},
                 {"CloudException with body but null details", createCloudExceptionWithNoDetails(true)},

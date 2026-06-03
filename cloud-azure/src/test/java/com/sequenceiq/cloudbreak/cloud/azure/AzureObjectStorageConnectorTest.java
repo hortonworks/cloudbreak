@@ -33,7 +33,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateRequest;
 
 @ExtendWith(MockitoExtension.class)
-public class AzureObjectStorageConnectorTest {
+class AzureObjectStorageConnectorTest {
 
     @Mock
     private EntitlementService entitlementService;
@@ -54,21 +54,21 @@ public class AzureObjectStorageConnectorTest {
     private AzureObjectStorageConnector underTest;
 
     @BeforeEach
-    public void setup() {
+    void setup() {
         when(entitlementService.azureCloudStorageValidationEnabled(anyString())).thenReturn(Boolean.TRUE);
         lenient().when(azureUtils.convertToCloudConnectorException(any(), anyString())).thenReturn(new CloudConnectorException("cce"));
         lenient().doAnswer(invocation -> ((Supplier) invocation.getArguments()[0]).get()).when(azureExceptionHandler).handleException(any(Supplier.class));
     }
 
     @Test
-    public void testGeneralError() {
+    void testGeneralError() {
         mockIDBrokerStorageValidationError(500, null);
         assertThrows(CloudConnectorException.class, () -> underTest.validateObjectStorage(getRequest()));
         verify(azureUtils).convertToCloudConnectorException(any(), anyString());
     }
 
     @Test
-    public void testGeneralErrorWithCloudError() {
+    void testGeneralErrorWithCloudError() {
         ApiError apiError = AzureTestUtils.apiError("RandomError", null);
         mockIDBrokerStorageValidationError(500, apiError);
         assertThrows(CloudConnectorException.class, () -> underTest.validateObjectStorage(getRequest()));
@@ -76,7 +76,7 @@ public class AzureObjectStorageConnectorTest {
     }
 
     @Test
-    public void testAuthorizationFailure() {
+    void testAuthorizationFailure() {
         ApiError apiError = AzureTestUtils.apiError("AuthorizationFailed", null);
         mockIDBrokerStorageValidationError(403, apiError);
         when(azureExceptionHandler.isForbidden(any(ManagementException.class))).thenReturn(true);

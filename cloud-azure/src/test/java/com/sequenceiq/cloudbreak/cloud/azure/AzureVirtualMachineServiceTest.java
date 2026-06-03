@@ -11,6 +11,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +25,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.azure.core.http.HttpResponse;
+import com.azure.json.JsonProviders;
 import com.azure.resourcemanager.compute.models.ApiError;
 import com.azure.resourcemanager.compute.models.ApiErrorException;
 import com.azure.resourcemanager.compute.models.PowerState;
@@ -172,13 +174,12 @@ class AzureVirtualMachineServiceTest {
     }
 
     @Test
-    void testGetVmStatusesWhenVmIsNotFoundOnProvider() {
+    void testGetVmStatusesWhenVmIsNotFoundOnProvider() throws IOException {
         when(ac.getParameter(AzureClient.class)).thenReturn(azureClient);
         when(ac.getCloudContext()).thenReturn(cloudContext);
         CloudInstance cloudInstance = cloudInstance(INSTANCE_1);
         when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, cloudInstance)).thenReturn(RESOURCE_GROUP);
-        ApiError apiError = new ApiError();
-        AzureTestUtils.setField(apiError, "code", "ResourceNotFound");
+        ApiError apiError = ApiError.fromJson(JsonProviders.createReader("{\"error\":{\"code\":\"ResourceNotFound\"}}"));
         HttpResponse httpResponse = mock(HttpResponse.class);
         when(azureExceptionHandler.isNotFound(any())).thenReturn(true);
         when(azureClient.getVirtualMachines(RESOURCE_GROUP))
@@ -194,13 +195,12 @@ class AzureVirtualMachineServiceTest {
     }
 
     @Test
-    void testGetVmStatusesWhenProviderThrowsUnknownErrorAboutTheInstance() {
+    void testGetVmStatusesWhenProviderThrowsUnknownErrorAboutTheInstance() throws IOException {
         when(ac.getParameter(AzureClient.class)).thenReturn(azureClient);
         when(ac.getCloudContext()).thenReturn(cloudContext);
         CloudInstance cloudInstance = cloudInstance(INSTANCE_1);
         when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, cloudInstance)).thenReturn(RESOURCE_GROUP);
-        ApiError apiError = new ApiError();
-        AzureTestUtils.setField(apiError, "code", "StrangeErrorCode");
+        ApiError apiError = ApiError.fromJson(JsonProviders.createReader("{\"error\":{\"code\":\"StrangeErrorCode\"}}"));
         when(azureClient.getVirtualMachines(RESOURCE_GROUP))
                 .thenThrow(new ApiErrorException(INSTANCE_1 + " is bad.", null, apiError));
 
@@ -234,14 +234,13 @@ class AzureVirtualMachineServiceTest {
     }
 
     @Test
-    void testGetVmStatusesWhenProviderReturnsNullInstanceIds() {
+    void testGetVmStatusesWhenProviderReturnsNullInstanceIds() throws IOException {
         when(ac.getParameter(AzureClient.class)).thenReturn(azureClient);
         when(ac.getCloudContext()).thenReturn(cloudContext);
         CloudInstance cloudInstance = cloudInstance(null);
         when(azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, cloudInstance)).thenReturn(RESOURCE_GROUP);
         AzureListResult<VirtualMachine> virtualMachines = createPagedList(List.of());
-        ApiError apiError = new ApiError();
-        AzureTestUtils.setField(apiError, "code", "ResourceGroupNotFound");
+        ApiError apiError = ApiError.fromJson(JsonProviders.createReader("{\"error\":{\"code\":\"ResourceGroupNotFound\"}}"));
         HttpResponse httpResponse = mock(HttpResponse.class);
         when(azureClient.getVirtualMachines(RESOURCE_GROUP))
                 .thenThrow(new ApiErrorException(String.format("Resource group '%s' could not be found.", RESOURCE_GROUP),

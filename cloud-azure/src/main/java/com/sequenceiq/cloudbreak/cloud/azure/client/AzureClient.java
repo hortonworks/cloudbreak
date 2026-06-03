@@ -1175,7 +1175,7 @@ public class AzureClient {
             LOGGER.debug("Calling what-if analysis for deployment {} in resource group {}", deploymentName, resourceGroupName);
             WhatIfOperationResultInner operation = azure.genericResources()
                     .manager()
-                    .serviceClient()
+                    .deploymentClient()
                     .getDeployments()
                     .whatIf(
                             resourceGroupName,
