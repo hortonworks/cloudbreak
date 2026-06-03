@@ -10,9 +10,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.sequenceiq.cloudbreak.cloud.network.NetworkCidr;
+
 @RestController
 @RequestMapping("/spi")
 public class SpiResourceController {
+
+    private static final String DEFAULT_NETWORK_CIDR = "192.168.0.0/16";
 
     private Map<String, PublicKey> publicKeys = new HashMap<>();
 
@@ -29,5 +33,10 @@ public class SpiResourceController {
     @GetMapping("/get_public_key/{publicKeyId}")
     public PublicKey getPubicKeyId(@PathVariable("publicKeyId") String publicKeyId) {
         return publicKeys.get(publicKeyId);
+    }
+
+    @GetMapping("/get_network_cidr")
+    public NetworkCidr getNetworkCidr() {
+        return new NetworkCidr(DEFAULT_NETWORK_CIDR);
     }
 }

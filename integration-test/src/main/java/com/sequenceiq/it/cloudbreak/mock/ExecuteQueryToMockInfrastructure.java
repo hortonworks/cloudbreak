@@ -42,7 +42,23 @@ public class ExecuteQueryToMockInfrastructure extends AbstractRestCallExecutor {
         Invocation.Builder invocation = buildWebTarget("/configure", decorateWebTarget, Map.of()).request();
         body.setPath(configuredPath);
         try (Response ignore = invocation.post(Entity.json(body))) {
+            LOGGER.debug("Successfully configured mock infrastructure for path {}", configuredPath);
+        } catch (Exception e) {
+            LOGGER.warn("Failed to configure mock infrastructure for path {}: {}", configuredPath, e.getMessage(), e);
+        }
+    }
 
+    public void executeClearConfigure(Map<String, String> pathVariables, MockResponse body) {
+        String configuredPath = body.getPath();
+        for (Map.Entry<String, String> entry : pathVariables.entrySet()) {
+            configuredPath = configuredPath.replace("{" + entry.getKey() + "}", entry.getValue());
+        }
+        Invocation.Builder invocation = buildWebTarget("/configure/clear", w -> w, Map.of()).request();
+        body.setPath(configuredPath);
+        try (Response ignore = invocation.post(Entity.json(body))) {
+            LOGGER.debug("Successfully cleared mock infrastructure configuration for path {}", configuredPath);
+        } catch (Exception e) {
+            LOGGER.warn("Failed to clear mock infrastructure configuration for path {}: {}", configuredPath, e.getMessage(), e);
         }
     }
 

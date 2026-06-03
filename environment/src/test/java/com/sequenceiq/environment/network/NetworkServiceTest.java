@@ -70,7 +70,7 @@ class NetworkServiceTest {
 
     private static final String TEST_NETWORK_CRN = "crn:cdp:environments:us-west-1:cloudera:network:d5310136-f814-4811-8787-124f1dc35b0a";
 
-    private static final String  TEST_ACCOUNT_ID = "d5310136-f814-4811-8787-124f1dc35b0a";
+    private static final String TEST_ACCOUNT_ID = "d5310136-f814-4811-8787-124f1dc35b0a";
 
     @Mock
     private BaseNetworkRepository networkRepository;
@@ -185,6 +185,44 @@ class NetworkServiceTest {
     }
 
     @Test
+    void testRefreshMetadataFromCloudProviderWithNullNetworkDtoDoesNotThrow() {
+        NetworkDto originalNetworkDto = mock(NetworkDto.class);
+        EnvironmentNetworkConverter environmentNetworkConverter = mock(EnvironmentNetworkConverter.class);
+        Network network = mock(Network.class);
+        Credential credential = mock(Credential.class);
+
+        BaseNetwork baseNetwork = new GcpNetwork();
+        baseNetwork.setRegistrationType(RegistrationType.EXISTING);
+
+        Environment environment = new Environment();
+        environment.setCloudPlatform("AWS");
+        environment.setCredential(credential);
+
+        EnvironmentEditDto environmentEditDto = EnvironmentEditDto.builder()
+                .withAccountId("accountId")
+                .withRefreshNetwork(true)
+                .build();
+
+        when(environmentNetworkConverterMap.get(any(CloudPlatform.class)))
+                .thenReturn(environmentNetworkConverter);
+        when(environmentNetworkConverter.convertToDto(baseNetwork))
+                .thenReturn(originalNetworkDto);
+        when(cloudNetworkService.retrieveSubnetMetadata(any(Environment.class), any(NetworkDto.class)))
+                .thenReturn(Map.of("s1", cloudSubnet("s1", "subnet1")));
+        when(cloudNetworkService.retrieveEndpointGatewaySubnetMetadata(any(Environment.class), any(NetworkDto.class)))
+                .thenReturn(Map.of("s1", cloudSubnet("s1", "subnet1")));
+        when(environmentNetworkConverter.convertToNetwork(any(BaseNetwork.class)))
+                .thenReturn(network);
+        when(environmentNetworkService.getNetworkCidr(any(Network.class), anyString(), any(Credential.class)))
+                .thenReturn(new NetworkCidr("10.0.0.0/16", List.of("10.0.0.0/16", "10.1.0.0/16")));
+
+        BaseNetwork result = underTest.refreshMetadataFromCloudProvider(baseNetwork, environmentEditDto, environment);
+
+        assertEquals("10.0.0.0/16", result.getNetworkCidr());
+        assertEquals("10.0.0.0/16,10.1.0.0/16", result.getNetworkCidrs());
+    }
+
+    @Test
     void testRefreshMetadataFromGoogleCloudProviderMustUseSubnetName() {
         NetworkDto networkDto = mock(NetworkDto.class);
         AuthenticationDto authenticationDto = mock(AuthenticationDto.class);
@@ -231,7 +269,7 @@ class NetworkServiceTest {
         when(environmentNetworkConverter.convertToNetwork(any(BaseNetwork.class)))
                 .thenReturn(network);
         when(environmentNetworkService.getNetworkCidr(any(Network.class), anyString(), any(Credential.class)))
-            .thenReturn(new NetworkCidr("10.0.0.0", new ArrayList<>()));
+                .thenReturn(new NetworkCidr("10.0.0.0", new ArrayList<>()));
 
         BaseNetwork result = underTest.refreshMetadataFromCloudProvider(baseNetwork, environmentEditDto, environment);
 

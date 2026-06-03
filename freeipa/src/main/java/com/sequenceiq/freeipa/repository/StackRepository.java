@@ -213,6 +213,11 @@ public interface StackRepository extends AccountAwareResourceRepository<Stack, L
     @Query("UPDATE Stack s SET s.platformvariant = :variant WHERE s.id = :id")
     int updateVariantByStackId(@Param("id") Long id, @Param("variant") String variant);
 
+    @Modifying
+    @Query("UPDATE Network n SET n.networkCidrs = :networkCidrs "
+            + "WHERE n.id = (SELECT s.network.id FROM Stack s WHERE s.id = :stackId)")
+    int updateNetworkCidrsByStackId(@Param("stackId") Long stackId, @Param("networkCidrs") String networkCidrs);
+
     @Query("SELECT s.accountId FROM Stack s WHERE s.id = :id")
     Optional<String> findAccountIdByStackId(@Param("id") Long id);
 

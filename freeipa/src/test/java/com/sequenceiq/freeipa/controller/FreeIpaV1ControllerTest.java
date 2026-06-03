@@ -42,6 +42,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.CreateFreeIpaReq
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.detachchildenv.DetachChildEnvironmentRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.list.ListFreeIpaResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.network.ModifyNetworkCidrsRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.reboot.RebootInstancesRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.rebuild.RebuildRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.repair.RepairInstancesRequest;
@@ -60,6 +61,7 @@ import com.sequenceiq.freeipa.service.stack.FreeIpaCreationService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaDeletionService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaDescribeService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaListService;
+import com.sequenceiq.freeipa.service.stack.FreeIpaModifyNetworkCidrsService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaModifyTagsService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaUpgradeCcmService;
 import com.sequenceiq.freeipa.service.stack.FreeipaModifyProxyConfigService;
@@ -137,6 +139,9 @@ class FreeIpaV1ControllerTest {
 
     @Mock
     private FreeIpaModifyTagsService freeIpaModifyTagsService;
+
+    @Mock
+    private FreeIpaModifyNetworkCidrsService freeIpaModifyNetworkCidrsService;
 
     @BeforeEach
     void setUp() {
@@ -392,5 +397,14 @@ class FreeIpaV1ControllerTest {
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.triggerUserDefinedTagsUpdateInternal(ENVIRONMENT_CRN, userDefinedTags));
 
         verify(freeIpaModifyTagsService).startUserDefinedTagsModificationOperation(eq(ENVIRONMENT_CRN), eq("hortonworks"), eq(userDefinedTags));
+    }
+
+    @Test
+    void testModifyNetworkCidrsInternal() {
+        List<String> networkCidrs = List.of("10.84.128.0/17", "10.84.0.0/17");
+        ModifyNetworkCidrsRequest request = new ModifyNetworkCidrsRequest(networkCidrs);
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.modifyNetworkCidrsByCrnInternal(ENVIRONMENT_CRN, request));
+
+        verify(freeIpaModifyNetworkCidrsService).modifyNetworkCidrs(eq(ENVIRONMENT_CRN), eq("hortonworks"), eq(networkCidrs));
     }
 }

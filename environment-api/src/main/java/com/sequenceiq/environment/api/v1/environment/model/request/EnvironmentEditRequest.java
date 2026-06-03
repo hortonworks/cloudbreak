@@ -87,6 +87,9 @@ public class EnvironmentEditRequest implements Serializable {
     @Schema(description = EnvironmentModelDescription.FREEIPA_PLATFORM_VARIANT)
     private String freeIpaPlatformVariant;
 
+    @Schema(description = EnvironmentModelDescription.REFRESH_NETWORK)
+    private boolean refreshNetwork;
+
     public String getDescription() {
         return description;
     }
@@ -239,6 +242,14 @@ public class EnvironmentEditRequest implements Serializable {
         this.hybridEnvironment = hybridEnvironment;
     }
 
+    public boolean isRefreshNetwork() {
+        return refreshNetwork;
+    }
+
+    public void setRefreshNetwork(boolean refreshNetwork) {
+        this.refreshNetwork = refreshNetwork;
+    }
+
     @Override
     public String toString() {
         return "EnvironmentEditRequest{" +
@@ -261,6 +272,7 @@ public class EnvironmentEditRequest implements Serializable {
                 ", freeIpaEnableMultiAz=" + freeIpaEnableMultiAz +
                 ", freeIpaPlatformVariant='" + freeIpaPlatformVariant + '\'' +
                 ", hybridEnvironment=" + hybridEnvironment +
+                ", refreshNetwork=" + refreshNetwork +
                 '}';
     }
 }

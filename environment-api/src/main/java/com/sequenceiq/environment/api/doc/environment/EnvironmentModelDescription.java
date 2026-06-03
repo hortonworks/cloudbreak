@@ -225,6 +225,13 @@ public class EnvironmentModelDescription {
 
     public static final String SECRET_ENCRYPTION_ENABLED = "Flag to enable or disable secret encryption";
 
+    public static final String REFRESH_NETWORK = "When true, re-discovers the environment's network metadata from the cloud provider and re-runs " +
+            "the CIDR-propagation flow when the CIDR set has changed. Fields refreshed from the cloud provider: subnet metadata, endpoint-gateway subnet " +
+            "metadata, networkCidr (singular), and networkCidrs (plural — the VPC CIDR list nginx allow-lists on FreeIPA, Data Lake, and every Data Hub). " +
+            "Any client-supplied networkCidr value in the network object is ignored. Can be combined with a network object: the payload updates " +
+            "availabilityZones, provider-specific parameters, and serviceEndpointCreation; the refresh writes the cloud-discovered fields above. " +
+            "Defaults to false.";
+
     private EnvironmentModelDescription() {
     }
 }

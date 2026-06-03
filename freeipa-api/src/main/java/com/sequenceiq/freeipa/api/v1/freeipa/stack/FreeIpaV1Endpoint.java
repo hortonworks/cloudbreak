@@ -7,6 +7,7 @@ import static com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaOperationDe
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaOperationDescriptions.MODIFY_SELINUX_BY_CRN;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaOperationDescriptions.RETRY;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaOperationDescriptions.ROOT_VOLUME_UPDATE_BY_CRN;
+import static com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaOperationDescriptions.UPDATE_NETWORK_CIDRS_BY_CRN;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaOperationDescriptions.UPDATE_SALT;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaOperationDescriptions.VERTICAL_SCALE_BY_CRN;
 
@@ -53,6 +54,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.imagecatalog.ChangeImag
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.imagecatalog.GenerateImageCatalogResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.imdupdate.InstanceMetadataUpdateRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.list.ListFreeIpaResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.network.ModifyNetworkCidrsRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.reboot.RebootInstancesRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.rebuild.RebuildRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.repair.RepairInstancesRequest;
@@ -451,4 +453,14 @@ public interface FreeIpaV1Endpoint {
     OperationStatus triggerUserDefinedTagsUpdateInternal(
             @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @QueryParam("environment") @NotEmpty String environmentCrn,
             @NotNull Map<String, String> tags);
+
+    @PUT
+    @Path("/internal/modify_network_cidrs")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(summary = UPDATE_NETWORK_CIDRS_BY_CRN, description = FreeIpaNotes.FREEIPA_NOTES,
+            operationId = "modifyNetworkCidrsByCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    void modifyNetworkCidrsByCrnInternal(
+            @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @QueryParam("environment") @NotEmpty String environmentCrn,
+            @NotNull @Valid ModifyNetworkCidrsRequest request);
 }

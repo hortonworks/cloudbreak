@@ -78,4 +78,12 @@ public class NetworkService extends AbstractArchivistService<Network> {
         return networkRepository.save(network);
     }
 
+    public int updateNetworkCidrsByEnvironmentCrn(String environmentCrn, List<String> networkCidrs) {
+        String joined = networkCidrs == null || networkCidrs.isEmpty() ? null : String.join(",", networkCidrs);
+        if (joined == null) {
+            return 0;
+        }
+        return networkRepository.updateNetworkCidrsByEnvironmentCrn(environmentCrn, joined);
+    }
+
 }

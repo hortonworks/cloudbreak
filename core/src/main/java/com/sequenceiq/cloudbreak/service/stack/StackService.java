@@ -535,6 +535,10 @@ public class StackService implements ResourceIdProvider, AuthorizationResourceNa
         return stackRepository.findByEnvironmentCrnAndStackType(environmentCrn, stackType);
     }
 
+    public List<Stack> getAllNotDeletedByEnvironmentCrnWithNetwork(String environmentCrn) {
+        return stackRepository.getAllNotDeletedByEnvironmentCrnWithNetwork(environmentCrn);
+    }
+
     public StackV4Response getByNameInWorkspaceWithEntries(String name, String accountId, Set<String> entries, StackType stackType, boolean withResources) {
         ShowTerminatedClustersAfterConfig showTerminatedClustersAfterConfig = showTerminatedClusterConfigService.get();
         Optional<StackDto> stack = findByNameAndWorkspaceId(name, accountId, stackType, showTerminatedClustersAfterConfig, withResources);

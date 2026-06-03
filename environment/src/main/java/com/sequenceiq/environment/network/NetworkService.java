@@ -131,21 +131,25 @@ public class NetworkService {
 
     private NetworkDto getNetworkDtoClone(EnvironmentEditDto editDto, NetworkDto originalNetworkDto, EnvironmentNetworkConverter environmentNetworkConverter) {
         NetworkDto editNetworkDto = editDto.getNetworkDto();
-        NetworkDto.Builder cloneNetworkDtoBuilder = NetworkDto.builder(originalNetworkDto);
-        if (CollectionUtils.isNotEmpty(editDto.getNetworkDto().getAvailabilityZones())) {
-            cloneNetworkDtoBuilder.withAvailabilityZones(editDto.getNetworkDto().getAvailabilityZones());
+        if (editNetworkDto == null) {
+            return originalNetworkDto;
+        } else {
+            NetworkDto.Builder cloneNetworkDtoBuilder = NetworkDto.builder(originalNetworkDto);
+            if (CollectionUtils.isNotEmpty(editNetworkDto.getAvailabilityZones())) {
+                cloneNetworkDtoBuilder.withAvailabilityZones(editNetworkDto.getAvailabilityZones());
+            }
+            if (MapUtils.isNotEmpty(editNetworkDto.getSubnetMetas())) {
+                cloneNetworkDtoBuilder.withSubnetMetas(editNetworkDto.getSubnetMetas());
+            }
+            if (MapUtils.isNotEmpty(editNetworkDto.getEndpointGatewaySubnetMetas())) {
+                cloneNetworkDtoBuilder.withEndpointGatewaySubnetMetas(editNetworkDto.getEndpointGatewaySubnetMetas());
+            }
+            if (editNetworkDto.getServiceEndpointCreation() != null) {
+                cloneNetworkDtoBuilder.withServiceEndpointCreation(editNetworkDto.getServiceEndpointCreation());
+            }
+            environmentNetworkConverter.extendBuilderWithProviderSpecificParameters(cloneNetworkDtoBuilder, originalNetworkDto, editNetworkDto);
+            return cloneNetworkDtoBuilder.build();
         }
-        if (MapUtils.isNotEmpty(editNetworkDto.getSubnetMetas())) {
-            cloneNetworkDtoBuilder.withSubnetMetas(editDto.getNetworkDto().getSubnetMetas());
-        }
-        if (MapUtils.isNotEmpty(editNetworkDto.getEndpointGatewaySubnetMetas())) {
-            cloneNetworkDtoBuilder.withEndpointGatewaySubnetMetas(editDto.getNetworkDto().getEndpointGatewaySubnetMetas());
-        }
-        if (editNetworkDto.getServiceEndpointCreation() != null) {
-            cloneNetworkDtoBuilder.withServiceEndpointCreation(editNetworkDto.getServiceEndpointCreation());
-        }
-        environmentNetworkConverter.extendBuilderWithProviderSpecificParameters(cloneNetworkDtoBuilder, originalNetworkDto, editDto.getNetworkDto());
-        return cloneNetworkDtoBuilder.build();
     }
 
     public BaseNetwork refreshProviderSpecificParameters(BaseNetwork originalNetwork, EnvironmentEditDto editDto, Environment environment) {

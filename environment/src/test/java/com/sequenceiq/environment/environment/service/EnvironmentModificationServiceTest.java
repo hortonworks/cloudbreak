@@ -16,10 +16,12 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import jakarta.inject.Inject;
@@ -871,6 +873,143 @@ class EnvironmentModificationServiceTest {
         verify(environmentDtoConverter, times(1)).environmentToDto(any());
         verify(environmentDtoConverter, times(1)).networkToNetworkDto(any());
         assertEquals(environment.getNetwork(), awsNetwork);
+    }
+
+    @Test
+    void editByNameNetworkCidrsChange() {
+        Environment environment = new Environment();
+        AwsNetwork awsNetwork = new AwsNetwork();
+        awsNetwork.setNetworkCidrs("10.84.128.0/17");
+        environment.setNetwork(awsNetwork);
+        environment.setCloudPlatform("AWS");
+
+        String networkCidrsString = "10.84.128.0/17,10.84.0.0/17";
+
+        AwsNetwork updatedAwsNetwork = new AwsNetwork();
+        updatedAwsNetwork.setNetworkCidrs(networkCidrsString);
+
+        Set<String> networkCidrsSet = Set.of("10.84.128.0/17", "10.84.0.0/17");
+        List<String> networkCidrsList = List.of("10.84.128.0/17", "10.84.0.0/17");
+        NetworkDto network = NetworkDto.builder()
+                .withNetworkCidrs(networkCidrsSet)
+                .build();
+        EnvironmentEditDto environmentDto = EnvironmentEditDto.builder()
+                .withAccountId(ACCOUNT_ID)
+                .withNetwork(network)
+                .build();
+
+        when(networkService.validate(awsNetwork, environmentDto, environment)).thenReturn(awsNetwork);
+        when(networkService.refreshMetadataFromCloudProvider(awsNetwork, environmentDto, environment)).thenReturn(updatedAwsNetwork);
+        when(networkService.refreshProviderSpecificParameters(updatedAwsNetwork, environmentDto, environment)).thenReturn(updatedAwsNetwork);
+        when(networkService.refreshServiceEndpointCreation(updatedAwsNetwork, environmentDto, environment)).thenReturn(updatedAwsNetwork);
+        when(networkService.findByEnvironment(any())).thenReturn(Optional.empty());
+        when(networkService.saveNetwork(any(), any(), anyString(), any(), any())).thenReturn(new AwsNetwork());
+
+        ThreadBasedUserCrnProvider.doAs(CRN, () -> environmentModificationServiceUnderTest.edit(environment, environmentDto));
+
+        ArgumentCaptor<Environment> environmentArgumentCaptor = ArgumentCaptor.forClass(Environment.class);
+        verify(environmentService).save(environmentArgumentCaptor.capture());
+
+        List<String> savedNetworkCidrs = Arrays.stream(environmentArgumentCaptor.getValue().getNetwork().getNetworkCidrs().split(","))
+                .map(String::trim)
+                .sorted()
+                .toList();
+        List<String> expectedNetworkCidrs = Arrays.stream(networkCidrsString.split(","))
+                .map(String::trim)
+                .sorted()
+                .toList();
+        assertEquals(expectedNetworkCidrs, savedNetworkCidrs);
+        verify(environmentReactorFlowManager).triggerNetworkCidrsModification(environment, networkCidrsList);
+    }
+
+    @Test
+    void editByNameRefreshNetworkWithoutNetworkDtoTriggersCidrsModification() {
+        Environment environment = new Environment();
+        AwsNetwork awsNetwork = new AwsNetwork();
+        awsNetwork.setNetworkCidrs("10.84.128.0/17");
+        environment.setNetwork(awsNetwork);
+        environment.setCloudPlatform("AWS");
+
+        String networkCidrsString = "10.84.128.0/17,10.84.0.0/17";
+        AwsNetwork updatedAwsNetwork = new AwsNetwork();
+        updatedAwsNetwork.setNetworkCidrs(networkCidrsString);
+        List<String> networkCidrsList = List.of("10.84.128.0/17", "10.84.0.0/17");
+
+        EnvironmentEditDto environmentDto = EnvironmentEditDto.builder()
+                .withAccountId(ACCOUNT_ID)
+                .withRefreshNetwork(true)
+                .build();
+
+        when(networkService.refreshMetadataFromCloudProvider(awsNetwork, environmentDto, environment)).thenReturn(updatedAwsNetwork);
+        when(networkService.refreshServiceEndpointCreation(updatedAwsNetwork, environmentDto, environment)).thenReturn(updatedAwsNetwork);
+        when(networkService.findByEnvironment(any())).thenReturn(Optional.empty());
+        when(networkService.saveNetwork(any(), any(), anyString(), any(), any())).thenReturn(new AwsNetwork());
+
+        ThreadBasedUserCrnProvider.doAs(CRN, () -> environmentModificationServiceUnderTest.edit(environment, environmentDto));
+
+        verify(networkService, never()).validate(any(), any(), any());
+        verify(networkService, never()).refreshProviderSpecificParameters(any(), any(), any());
+        verify(networkService, times(1)).refreshMetadataFromCloudProvider(awsNetwork, environmentDto, environment);
+        verify(networkService, times(1)).refreshServiceEndpointCreation(updatedAwsNetwork, environmentDto, environment);
+        verify(environmentReactorFlowManager).triggerNetworkCidrsModification(environment, networkCidrsList);
+    }
+
+    @Test
+    void editByNameRefreshNetworkWithNetworkDtoCallsAllRefreshMethods() {
+        Environment environment = new Environment();
+        AwsNetwork awsNetwork = new AwsNetwork();
+        awsNetwork.setNetworkCidrs("10.84.128.0/17");
+        environment.setNetwork(awsNetwork);
+        environment.setCloudPlatform("AWS");
+
+        String networkCidrsString = "10.84.128.0/17,10.84.0.0/17";
+        AwsNetwork updatedAwsNetwork = new AwsNetwork();
+        updatedAwsNetwork.setNetworkCidrs(networkCidrsString);
+        List<String> networkCidrsList = List.of("10.84.128.0/17", "10.84.0.0/17");
+
+        NetworkDto network = NetworkDto.builder().build();
+        EnvironmentEditDto environmentDto = EnvironmentEditDto.builder()
+                .withAccountId(ACCOUNT_ID)
+                .withNetwork(network)
+                .withRefreshNetwork(true)
+                .build();
+
+        when(networkService.validate(awsNetwork, environmentDto, environment)).thenReturn(awsNetwork);
+        when(networkService.refreshMetadataFromCloudProvider(awsNetwork, environmentDto, environment)).thenReturn(updatedAwsNetwork);
+        when(networkService.refreshProviderSpecificParameters(updatedAwsNetwork, environmentDto, environment)).thenReturn(updatedAwsNetwork);
+        when(networkService.refreshServiceEndpointCreation(updatedAwsNetwork, environmentDto, environment)).thenReturn(updatedAwsNetwork);
+        when(networkService.findByEnvironment(any())).thenReturn(Optional.empty());
+        when(networkService.saveNetwork(any(), any(), anyString(), any(), any())).thenReturn(new AwsNetwork());
+
+        ThreadBasedUserCrnProvider.doAs(CRN, () -> environmentModificationServiceUnderTest.edit(environment, environmentDto));
+
+        verify(networkService, times(1)).validate(awsNetwork, environmentDto, environment);
+        verify(networkService, times(1)).refreshMetadataFromCloudProvider(awsNetwork, environmentDto, environment);
+        verify(networkService, times(1)).refreshProviderSpecificParameters(updatedAwsNetwork, environmentDto, environment);
+        verify(networkService, times(1)).refreshServiceEndpointCreation(updatedAwsNetwork, environmentDto, environment);
+        verify(environmentReactorFlowManager).triggerNetworkCidrsModification(environment, networkCidrsList);
+    }
+
+    @Test
+    void editByNameRefreshNetworkFalseWithoutNetworkDtoDoesNothing() {
+        Environment environment = new Environment();
+        AwsNetwork awsNetwork = new AwsNetwork();
+        awsNetwork.setNetworkCidrs("10.84.128.0/17");
+        environment.setNetwork(awsNetwork);
+        environment.setCloudPlatform("AWS");
+
+        EnvironmentEditDto environmentDto = EnvironmentEditDto.builder()
+                .withAccountId(ACCOUNT_ID)
+                .withRefreshNetwork(false)
+                .build();
+
+        ThreadBasedUserCrnProvider.doAs(CRN, () -> environmentModificationServiceUnderTest.edit(environment, environmentDto));
+
+        verify(networkService, never()).validate(any(), any(), any());
+        verify(networkService, never()).refreshMetadataFromCloudProvider(any(), any(), any());
+        verify(networkService, never()).refreshProviderSpecificParameters(any(), any(), any());
+        verify(networkService, never()).refreshServiceEndpointCreation(any(), any(), any());
+        verify(environmentReactorFlowManager, never()).triggerNetworkCidrsModification(any(), any());
     }
 
     @Test

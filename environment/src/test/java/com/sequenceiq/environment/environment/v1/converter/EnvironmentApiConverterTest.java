@@ -296,7 +296,8 @@ class EnvironmentApiConverterTest {
         assertEquals(proxyConfig, actual.getProxyConfig());
         assertEquals(dataServices, actual.getDataServices());
         assertEquals("creator", actual.getCreator(),
-                "Creator must be the original creator from DB so billing tags (owner, Cloudera-Creator-Resource-Name) are preserved on edit.");
+                "Creator must be the original creator from DB so default tags (owner, Cloudera-Creator-Resource-Name, etc) are preserved on edit.");
+        assertTrue(actual.isRefreshNetwork());
 
         verify(accountTelemetryService).getOrDefault(any());
         verify(telemetryApiConverter).convertForEdit(any(), eq(request.getTelemetry()), any(), anyString());
@@ -643,6 +644,7 @@ class EnvironmentApiConverterTest {
         request.setAws(createAwsRequest());
         request.setFreeIpaEnableMultiAz(Boolean.TRUE);
         request.setFreeIpaPlatformVariant("AWS_NATIVE");
+        request.setRefreshNetwork(true);
         return request;
     }
 

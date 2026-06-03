@@ -60,6 +60,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.imagecatalog.ChangeImag
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.imagecatalog.GenerateImageCatalogResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.imdupdate.InstanceMetadataUpdateRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.list.ListFreeIpaResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.network.ModifyNetworkCidrsRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.reboot.RebootInstancesRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.rebuild.RebuildRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.repair.RepairInstancesRequest;
@@ -96,6 +97,7 @@ import com.sequenceiq.freeipa.service.stack.FreeIpaCreationService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaDeletionService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaDescribeService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaListService;
+import com.sequenceiq.freeipa.service.stack.FreeIpaModifyNetworkCidrsService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaModifyTagsService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaRecommendationService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaScalingService;
@@ -215,6 +217,9 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
 
     @Inject
     private FreeIpaModifyTagsService freeIpaModifyTagsService;
+
+    @Inject
+    private FreeIpaModifyNetworkCidrsService freeIpaModifyNetworkCidrsService;
 
     @Override
     @CheckPermissionByRequestProperty(path = "environmentCrn", type = CRN, action = EDIT_ENVIRONMENT)
@@ -550,5 +555,11 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
     @InternalOnly
     public OperationStatus triggerUserDefinedTagsUpdateInternal(@ResourceCrn String environmentCrn, Map<String, String> tags) {
         return freeIpaModifyTagsService.startUserDefinedTagsModificationOperation(environmentCrn, ThreadBasedUserCrnProvider.getAccountId(), tags);
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.EDIT_ENVIRONMENT)
+    public void modifyNetworkCidrsByCrnInternal(@ResourceCrn String environmentCrn, @RequestObject ModifyNetworkCidrsRequest request) {
+        freeIpaModifyNetworkCidrsService.modifyNetworkCidrs(environmentCrn, ThreadBasedUserCrnProvider.getAccountId(), request.networkCidrs());
     }
 }

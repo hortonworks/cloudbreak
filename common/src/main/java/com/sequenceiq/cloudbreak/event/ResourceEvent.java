@@ -225,6 +225,11 @@ public enum ResourceEvent {
     ENVIRONMENT_USER_DEFINED_TAGS_MODIFICATION_ON_EXPERIENCES_STARTED("environment.user.defined.tags.modification.experiences.started"),
     ENVIRONMENT_USER_DEFINED_TAGS_MODIFICATION_FAILED("environment.user.defined.tags.modification.failed"),
     ENVIRONMENT_USER_DEFINED_TAGS_MODIFICATION_FINISHED("environment.user.defined.tags.modification.finished"),
+    ENVIRONMENT_NETWORK_CIDRS_MODIFICATION_STARTED("environment.network.cidrs.modification.started"),
+    ENVIRONMENT_NETWORK_CIDRS_MODIFICATION_ON_FREEIPA_STARTED("environment.network.cidrs.modification.freeipa.started"),
+    ENVIRONMENT_NETWORK_CIDRS_MODIFICATION_ON_DATALAKE_AND_DATAHUBS_STARTED("environment.network.cidrs.modification.datalake.and.datahubs.started"),
+    ENVIRONMENT_NETWORK_CIDRS_MODIFICATION_FAILED("environment.network.cidrs.modification.failed"),
+    ENVIRONMENT_NETWORK_CIDRS_MODIFICATION_FINISHED("environment.network.cidrs.modification.finished"),
 
     CREDENTIAL_AZURE_INTERACTIVE_CREATED("credential.azure.interactive.created"),
     CREDENTIAL_AZURE_INTERACTIVE_STATUS("credential.azure.interactive.status"),

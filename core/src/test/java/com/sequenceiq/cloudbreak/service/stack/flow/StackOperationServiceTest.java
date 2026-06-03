@@ -18,6 +18,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -93,12 +94,14 @@ import com.sequenceiq.cloudbreak.service.datalake.DataLakeStatusCheckerService;
 import com.sequenceiq.cloudbreak.service.encryptionprofile.EncryptionProfileService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.migration.kraft.KraftMigrationService;
+import com.sequenceiq.cloudbreak.service.network.NetworkService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsClientService;
 import com.sequenceiq.cloudbreak.service.salt.RotateSaltPasswordTriggerService;
 import com.sequenceiq.cloudbreak.service.salt.RotateSaltPasswordValidator;
 import com.sequenceiq.cloudbreak.service.salt.SaltPasswordStatusService;
 import com.sequenceiq.cloudbreak.service.spot.SpotInstanceUsageCondition;
 import com.sequenceiq.cloudbreak.service.stack.StackDtoService;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.StackStopRestrictionService;
 import com.sequenceiq.cloudbreak.service.stack.TargetedUpscaleSupportService;
 import com.sequenceiq.cloudbreak.service.validation.EncryptionProfileValidator;
@@ -202,6 +205,12 @@ class StackOperationServiceTest {
 
     @Mock
     private ClusterService clusterService;
+
+    @Mock
+    private StackService stackService;
+
+    @Mock
+    private NetworkService networkService;
 
     @Captor
     private ArgumentCaptor<Map<String, Set<Long>>> capturedInstances;
@@ -936,7 +945,7 @@ class StackOperationServiceTest {
         NameOrCrn nameOrCrn = NameOrCrn.ofName("Test");
         String encryptionProfileName = "epName";
         String encryptionProfileCrn = "epCrn";
-        EncryptionProfileResponse encryptionProfileResponse = new  EncryptionProfileResponse();
+        EncryptionProfileResponse encryptionProfileResponse = new EncryptionProfileResponse();
         encryptionProfileResponse.setCrn(encryptionProfileCrn);
 
         when(stackDtoService.getByNameOrCrn(nameOrCrn, "accountId")).thenReturn(stack);
@@ -964,5 +973,29 @@ class StackOperationServiceTest {
         underTest.disableEncryptionProfile(nameOrCrn, "accountId");
 
         verify(flowManager).triggerDisableEncryptionProfileChain(STACK_ID);
+    }
+
+    @Test
+    void testUpdateNetworkCidrsForEnvironmentUpdatesAllStacksInsideOneTransaction() throws TransactionService.TransactionExecutionException {
+        String envCrn = "crn:cdp:environments:us-west-1:acc:environment:env";
+        List<String> networkCidrs = List.of("10.84.128.0/17", "10.84.0.0/17");
+        doAnswer(ans -> ((Supplier<?>) ans.getArgument(0)).get()).when(transactionService).required(any(Supplier.class));
+
+        underTest.updateNetworkCidrsForEnvironment(envCrn, networkCidrs);
+
+        verify(networkService).updateNetworkCidrsByEnvironmentCrn(envCrn, networkCidrs);
+    }
+
+    @Test
+    void testUpdateNetworkCidrsForEnvironmentPropagatesFailure() throws TransactionService.TransactionExecutionException {
+        String envCrn = "crn:cdp:environments:us-west-1:acc:environment:env";
+        List<String> networkCidrs = List.of("10.84.128.0/17", "10.84.0.0/17");
+        doAnswer(ans -> ((Supplier<?>) ans.getArgument(0)).get()).when(transactionService).required(any(Supplier.class));
+        doThrow(new RuntimeException("boom")).when(networkService).updateNetworkCidrsByEnvironmentCrn(envCrn, networkCidrs);
+
+        assertThatThrownBy(() -> underTest.updateNetworkCidrsForEnvironment(envCrn, networkCidrs))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessage("boom");
+        verify(networkService).updateNetworkCidrsByEnvironmentCrn(envCrn, networkCidrs);
     }
 }

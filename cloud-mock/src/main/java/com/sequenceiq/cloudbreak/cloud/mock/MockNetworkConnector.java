@@ -4,11 +4,15 @@ import static com.sequenceiq.cloudbreak.cloud.model.network.SubnetType.PUBLIC;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import jakarta.inject.Inject;
 import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.core.Response;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,6 +37,11 @@ import com.sequenceiq.cloudbreak.cloud.network.NetworkCidr;
 public class MockNetworkConnector implements DefaultNetworkConnector {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MockNetworkConnector.class);
+
+    private static final String FALLBACK_NETWORK_CIDR = "192.168.0.0/16";
+
+    @Inject
+    private MockUrlFactory mockUrlFactory;
 
     @Override
     public CreatedCloudNetwork createNetworkWithSubnets(NetworkCreationRequest request) {
@@ -66,7 +75,27 @@ public class MockNetworkConnector implements DefaultNetworkConnector {
 
     @Override
     public NetworkCidr getNetworkCidr(Network network, CloudCredential credential) {
-        return new NetworkCidr("192.168.0.0/16");
+        try (Response response = mockUrlFactory.get("/spi/get_network_cidr").get()) {
+            if (response.getStatus() != 200) {
+                LOGGER.warn("Mock-infrastructure returned status {} for /spi/get_network_cidr, falling back to {}",
+                        response.getStatus(), FALLBACK_NETWORK_CIDR);
+                return new NetworkCidr(FALLBACK_NETWORK_CIDR);
+            }
+            Map<String, Object> entity = response.readEntity(Map.class);
+            if (entity == null || entity.get("cidr") == null) {
+                return new NetworkCidr(FALLBACK_NETWORK_CIDR);
+            }
+            String cidr = entity.get("cidr").toString();
+            Object cidrsRaw = entity.get("cidrs");
+            if (cidrsRaw instanceof List<?> cidrsList && !cidrsList.isEmpty()) {
+                List<String> cidrs = cidrsList.stream().map(Object::toString).toList();
+                return new NetworkCidr(cidr, cidrs);
+            }
+            return new NetworkCidr(cidr);
+        } catch (Exception e) {
+            LOGGER.warn("Failed to fetch network CIDR from mock-infrastructure, falling back to {}: {}", FALLBACK_NETWORK_CIDR, e.getMessage());
+            return new NetworkCidr(FALLBACK_NETWORK_CIDR);
+        }
     }
 
     @Override

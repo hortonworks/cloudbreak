@@ -251,7 +251,7 @@ public class EnvironmentApiConverter {
 
     private void validateAzureExternalizedComputeParams(AzureExternalizedComputeParams params) {
         if (!"udr".equalsIgnoreCase(params.getOutboundType())) {
-                throw new BadRequestException(String.format("Azure Outbound type '%s' is not supported", params.getOutboundType()));
+            throw new BadRequestException(String.format("Azure Outbound type '%s' is not supported", params.getOutboundType()));
         }
     }
 
@@ -478,7 +478,8 @@ public class EnvironmentApiConverter {
                 .withAdminGroupName(request.getAdminGroupName())
                 .withFreeipaNodeCount(request.getFreeIpaNodeCount())
                 .withFreeIpaEnableMultiAz(request.getFreeIpaEnableMultiAz())
-                .withFreeIpaPlatformVariant(request.getFreeIpaPlatformVariant());
+                .withFreeIpaPlatformVariant(request.getFreeIpaPlatformVariant())
+                .withRefreshNetwork(request.isRefreshNetwork());
         NullUtil.doIfNotNull(request.getNetwork(), network -> builder.withNetwork(networkRequestToDto(network)));
         NullUtil.doIfNotNull(request.getAuthentication(), authentication -> builder.withAuthentication(authenticationRequestToDto(authentication)));
         NullUtil.doIfNotNull(request.getTelemetry(), telemetryRequest -> builder.withTelemetry(telemetryApiConverter.convertForEdit(

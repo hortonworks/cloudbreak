@@ -81,6 +81,10 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
             + "WHERE s.environmentCrn = :environmentCrn AND s.type = :type AND s.terminated IS null")
     List<StackIdView> findByEnvironmentCrnAndStackType(@Param("environmentCrn") String environmentCrn, @Param("type") StackType type);
 
+    @Query("SELECT s FROM Stack s LEFT JOIN FETCH s.network "
+            + "WHERE s.environmentCrn = :environmentCrn AND s.terminated IS null")
+    List<Stack> getAllNotDeletedByEnvironmentCrnWithNetwork(@Param("environmentCrn") String environmentCrn);
+
     @Query("SELECT COUNT(s.id) FROM Stack s "
             + "WHERE s.environmentCrn= :environmentCrn AND s.type = :type AND s.terminated IS null")
     Long countByEnvironmentCrnAndStackType(@Param("environmentCrn") String environmentCrn, @Param("type") StackType type);

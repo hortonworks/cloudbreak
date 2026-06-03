@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateNetworkCidrsRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -155,6 +156,20 @@ public class StackService {
         } catch (WebApplicationException e) {
             String errorMessage = messageExtractor.getErrorMessage(e);
             LOGGER.error("Failed to update pillar configuration for cluster {} due to: '{}'.", stackCrn, errorMessage, e);
+            throw new StackOperationFailedException(errorMessage, e);
+        }
+    }
+
+    public void updateNetworkCidrsForEnvironment(String environmentCrn, List<String> networkCidrs) {
+        try {
+            LOGGER.debug("Updating network CIDRs for stacks in environment {} with network CIDRs {}", environmentCrn, networkCidrs);
+            UpdateNetworkCidrsRequest request = new UpdateNetworkCidrsRequest(networkCidrs);
+            ThreadBasedUserCrnProvider.doAsInternalActor(
+                    () -> stackV4Endpoint.updateNetworkCidrsByEnvironmentInternal(0L, environmentCrn, request)
+            );
+        } catch (WebApplicationException e) {
+            String errorMessage = messageExtractor.getErrorMessage(e);
+            LOGGER.error("Failed to update network CIDRs for stacks in environment {} due to: {}", environmentCrn, errorMessage);
             throw new StackOperationFailedException(errorMessage, e);
         }
     }

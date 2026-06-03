@@ -22,6 +22,8 @@ public final class SpiEndpoints<T extends CloudbreakTestDto> {
 
     public static final String GET_PUBLIC_KEY_BY_ID = "/get_public_key/{publicKeyId}";
 
+    public static final String GET_NETWORK_CIDR = "/get_network_cidr";
+
     private T testDto;
 
     private MockedTestContext mockedTestContext;
@@ -63,6 +65,10 @@ public final class SpiEndpoints<T extends CloudbreakTestDto> {
         return (Spi.GetPublicKey<T>) EndpointProxyFactory.create(Spi.GetPublicKey.class, testDto, mockedTestContext);
     }
 
+    public Spi.GetNetworkCidr<T> getNetworkCidr() {
+        return (Spi.GetNetworkCidr<T>) EndpointProxyFactory.create(Spi.GetNetworkCidr.class, testDto, mockedTestContext);
+    }
+
     public SpiWithMockUuid.Launch<T> launch() {
         return (SpiWithMockUuid.Launch<T>) EndpointProxyFactory.create(SpiWithMockUuid.Launch.class, testDto, mockedTestContext);
     }
@@ -82,6 +88,11 @@ public final class SpiEndpoints<T extends CloudbreakTestDto> {
         @MockUri(url = GET_PUBLIC_KEY_BY_ID)
         interface GetPublicKey<T extends CloudbreakTestDto> extends VerificationEndpoint<T> {
             DefaultResponseConfigure<T, Map<String, String>> get();
+        }
+
+        @MockUri(url = GET_NETWORK_CIDR)
+        interface GetNetworkCidr<T extends CloudbreakTestDto> extends VerificationEndpoint<T> {
+            DefaultResponseConfigure<T, Map<String, Object>> get();
         }
     }
 

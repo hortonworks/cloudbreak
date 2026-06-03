@@ -41,6 +41,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateInstanceTypeRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateNetworkCidrsRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateTrustedRealmRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UserNamePasswordV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerSyncV4Request;
@@ -903,5 +904,11 @@ public class StackV4Controller extends NotificationController implements StackV4
     public ResourceUpdateResponse updateStackVolumeResourcesByCrn(Long workspaceId, @RequestObject StackResourceUpdateRequest request,
             @InitiatorUserCrn String initiatorUserCrn) {
         return stackOperationService.updateVolumeResourcesByCrn(request, ThreadBasedUserCrnProvider.getAccountId());
+    }
+
+    @Override
+    @InternalOnly
+    public void updateNetworkCidrsByEnvironmentInternal(Long workspaceId, @ResourceCrn String envCrn, @RequestObject UpdateNetworkCidrsRequest request) {
+        stackOperationService.updateNetworkCidrsForEnvironment(envCrn, request.networkCidrs());
     }
 }

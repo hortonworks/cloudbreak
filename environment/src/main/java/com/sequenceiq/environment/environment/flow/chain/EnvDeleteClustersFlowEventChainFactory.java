@@ -1,4 +1,4 @@
-package com.sequenceiq.environment.environment.flow.deletion.chain;
+package com.sequenceiq.environment.environment.flow.chain;
 
 import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentStatus.Value;
 import static com.cloudera.thunderhead.service.common.usage.UsageProto.CDPEnvironmentStatus.Value.DELETE_FAILED;

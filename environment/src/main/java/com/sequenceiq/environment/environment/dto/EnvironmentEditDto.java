@@ -57,6 +57,8 @@ public class EnvironmentEditDto {
 
     private final EnvironmentHybridDto environmentHybridDto;
 
+    private final boolean refreshNetwork;
+
     public EnvironmentEditDto(Builder builder) {
         this.description = builder.description;
         this.accountId = builder.accountId;
@@ -80,6 +82,7 @@ public class EnvironmentEditDto {
         this.freeIpaEnableMultiAz = builder.freeIpaEnableMultiAz;
         this.freeIpaPlatformVariant = builder.freeIpaPlatformVariant;
         this.environmentHybridDto = builder.environmentHybridDto;
+        this.refreshNetwork = builder.refreshNetwork;
     }
 
     public String getDescription() {
@@ -170,6 +173,10 @@ public class EnvironmentEditDto {
         return environmentHybridDto;
     }
 
+    public boolean isRefreshNetwork() {
+        return refreshNetwork;
+    }
+
     public static Builder builder() {
         return new Builder();
     }
@@ -199,6 +206,7 @@ public class EnvironmentEditDto {
                 ", freeIpaEnableMultiAz=" + freeIpaEnableMultiAz +
                 ", freeIpaPlatformVariant=" + freeIpaPlatformVariant +
                 ", environmentHybridDto=" + environmentHybridDto +
+                ", refreshNetwork=" + refreshNetwork +
                 '}';
     }
 
@@ -246,6 +254,8 @@ public class EnvironmentEditDto {
         private String freeIpaPlatformVariant;
 
         private EnvironmentHybridDto environmentHybridDto;
+
+        private boolean refreshNetwork;
 
         private Builder() {
         }
@@ -357,6 +367,11 @@ public class EnvironmentEditDto {
 
         public Builder withFreeIpaPlatformVariant(String freeIpaPlatformVariant) {
             this.freeIpaPlatformVariant = freeIpaPlatformVariant;
+            return this;
+        }
+
+        public Builder withRefreshNetwork(boolean refreshNetwork) {
+            this.refreshNetwork = refreshNetwork;
             return this;
         }
 

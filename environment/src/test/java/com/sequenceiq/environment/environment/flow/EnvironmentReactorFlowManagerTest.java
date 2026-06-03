@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.environment.flow;
 
+import static com.sequenceiq.environment.environment.flow.chain.FlowChainTriggers.ENV_MODIFY_NETWORK_CIDRS_TRIGGER_EVENT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
@@ -7,6 +8,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -41,6 +43,7 @@ import com.sequenceiq.environment.environment.flow.externalizedcluster.reinitial
 import com.sequenceiq.environment.environment.flow.externalizedcluster.reinitialization.event.ExternalizedComputeClusterReInitializationStateSelectors;
 import com.sequenceiq.environment.environment.flow.loadbalancer.event.LoadBalancerUpdateEvent;
 import com.sequenceiq.environment.environment.flow.loadbalancer.event.LoadBalancerUpdateStateSelectors;
+import com.sequenceiq.environment.environment.flow.modify.network.event.EnvNetworkCidrsModificationTriggerEvent;
 import com.sequenceiq.environment.environment.flow.modify.proxy.event.EnvProxyModificationDefaultEvent;
 import com.sequenceiq.environment.environment.flow.modify.proxy.event.EnvProxyModificationStateSelectors;
 import com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationEvent;
@@ -275,6 +278,32 @@ class EnvironmentReactorFlowManagerTest {
                 .returns(ENVIRONMENT_NAME, EnvTagsModificationEvent::getResourceName)
                 .returns(ENVIRONMENT_ID, EnvTagsModificationEvent::getResourceId)
                 .returns(userDefinedTags, EnvTagsModificationEvent::getUserDefinedTags);
+        verifyHeaders();
+    }
+
+    @Test
+    void triggerNetworkCidrsModification() {
+        List<String> networkCidrs = List.of("10.84.128.0/17", "10.84.0.0/17");
+        Environment environment = mock(Environment.class);
+        when(environment.getResourceCrn()).thenReturn(ENVIRONMENT_CRN);
+        when(environment.getName()).thenReturn(ENVIRONMENT_NAME);
+        when(environment.getId()).thenReturn(ENVIRONMENT_ID);
+        when(eventSender.sendEvent(any(EnvNetworkCidrsModificationTriggerEvent.class), any(Event.Headers.class))).thenReturn(flowIdentifier);
+
+        FlowIdentifier result = ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> underTest.triggerNetworkCidrsModification(environment, networkCidrs));
+
+        assertThat(result).isSameAs(flowIdentifier);
+        ArgumentCaptor<EnvNetworkCidrsModificationTriggerEvent> argumentCaptor = ArgumentCaptor.forClass(
+                EnvNetworkCidrsModificationTriggerEvent.class);
+        verify(eventSender).sendEvent(argumentCaptor.capture(), headersCaptor.capture());
+        EnvNetworkCidrsModificationTriggerEvent event = argumentCaptor.getValue();
+        assertThat(event)
+                .returns(ENV_MODIFY_NETWORK_CIDRS_TRIGGER_EVENT, BaseFlowEvent::selector)
+                .returns(ENVIRONMENT_CRN, EnvNetworkCidrsModificationTriggerEvent::getResourceCrn)
+                .returns(ENVIRONMENT_NAME, EnvNetworkCidrsModificationTriggerEvent::getResourceName)
+                .returns(ENVIRONMENT_ID, EnvNetworkCidrsModificationTriggerEvent::getResourceId)
+                .returns(networkCidrs, EnvNetworkCidrsModificationTriggerEvent::getNetworkCidrs);
         verifyHeaders();
     }
 

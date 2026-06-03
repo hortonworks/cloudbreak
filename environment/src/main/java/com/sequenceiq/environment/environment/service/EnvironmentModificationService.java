@@ -2,6 +2,7 @@ package com.sequenceiq.environment.environment.service;
 
 import static com.sequenceiq.common.model.CredentialType.ENVIRONMENT;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -374,18 +375,52 @@ public class EnvironmentModificationService {
 
     private void editNetworkIfChanged(Environment environment, EnvironmentEditDto editDto) {
         if (networkChanged(editDto)) {
-            BaseNetwork network = networkService.validate(environment.getNetwork(), editDto, environment);
+            BaseNetwork network = environment.getNetwork();
+            String originalNetworkCidrs = retrieveNetworkCidrs(environment);
+            if (editDto.getNetworkDto() != null) {
+                network = networkService.validate(network, editDto, environment);
+            }
             network = networkService.refreshMetadataFromCloudProvider(network, editDto, environment);
-            network = networkService.refreshProviderSpecificParameters(network, editDto, environment);
+            if (editDto.getNetworkDto() != null) {
+                network = networkService.refreshProviderSpecificParameters(network, editDto, environment);
+            }
             network = networkService.refreshServiceEndpointCreation(network, editDto, environment);
             if (network != null) {
                 environment.setNetwork(network);
+                String networkCidrs = environment.getNetwork().getNetworkCidrs();
+                if (networkCidrsChanged(originalNetworkCidrs, networkCidrs)) {
+                    environmentReactorFlowManager.triggerNetworkCidrsModification(environment, Arrays.stream(networkCidrs.split(",")).toList());
+                }
             }
         }
     }
 
+    private String retrieveNetworkCidrs(Environment environment) {
+        return Optional.ofNullable(environment)
+                .map(Environment::getNetwork)
+                .map(BaseNetwork::getNetworkCidrs)
+                .orElse(null);
+    }
+
+    private boolean networkCidrsChanged(String originalNetworkCidrs, String newNetworkCidrs) {
+        List<String> originalCidrs = Optional.ofNullable(originalNetworkCidrs)
+                .map(c -> Arrays.stream(c.split(","))
+                        .map(String::trim)
+                        .sorted()
+                        .toList())
+                .orElse(List.of());
+        List<String> newCidrs = Optional.ofNullable(newNetworkCidrs)
+                .map(c -> Arrays.stream(c.split(","))
+                        .map(String::trim)
+                        .sorted()
+                        .toList())
+                .orElse(List.of());
+
+        return !originalCidrs.equals(newCidrs);
+    }
+
     private boolean networkChanged(EnvironmentEditDto editDto) {
-        return editDto.getNetworkDto() != null;
+        return editDto.getNetworkDto() != null || editDto.isRefreshNetwork();
     }
 
     private void editDescriptionIfChanged(Environment environment, EnvironmentEditDto editDto) {

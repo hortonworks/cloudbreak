@@ -187,6 +187,16 @@ public class DefaultResponseConfigure<T extends CloudbreakTestDto, R> {
         return thenReturn(retValue, null, 200, 1, null);
     }
 
+    public T clearMockResponse() {
+        String crn = testDto.getCrn();
+        if (crn != null) {
+            pathVariable("mockUuid", crn);
+        }
+        MockResponse body = new MockResponse(null, null, getMethod().getHttpMethod().name(), getPath(), 0, 200, null, null);
+        executeQuery.executeClearConfigure(pathVariables(), body);
+        return testDto;
+    }
+
     public T thenReturn(R retValue, Class<?> clss) {
         return thenReturn(retValue, null, 200, 1, clss.getName());
     }

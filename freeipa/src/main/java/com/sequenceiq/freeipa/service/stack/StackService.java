@@ -268,6 +268,14 @@ public class StackService implements EnvironmentPropertyProvider, PayloadContext
         return stackRepository.updateVariantByStackId(stackId, variant);
     }
 
+    public int updateNetworkCidrsByStackId(Long stackId, List<String> networkCidrs) {
+        String joined = networkCidrs == null || networkCidrs.isEmpty() ? null : String.join(",", networkCidrs);
+        if (joined == null) {
+            return 0;
+        }
+        return stackRepository.updateNetworkCidrsByStackId(stackId, joined);
+    }
+
     @Override
     public Optional<Boolean> computeMonitoringEnabled(Stack entity) {
         Telemetry telemetry = entity.getTelemetry();

@@ -117,6 +117,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateInstanceTypeRequest;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateNetworkCidrsRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateTrustedRealmRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UserNamePasswordV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.ClouderaManagerSyncV4Request;
@@ -1195,4 +1196,16 @@ public interface StackV4Endpoint {
     ResourceUpdateResponse updateStackVolumeResourcesByCrn(@PathParam("workspaceId") Long workspaceId, @NotNull @Valid StackResourceUpdateRequest request,
             @NotEmpty @ValidCrn(resource = {CrnResourceDescriptor.USER, CrnResourceDescriptor.MACHINE_USER})
             @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+
+    @PUT
+    @Path("internal/{envCrn}/update_network_cidrs")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Operation(summary = "Update network CIDRs of all clusters in an environment by env CRN",
+            operationId = "updateNetworkCidrsByEnvironmentCrn",
+            responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
+    void updateNetworkCidrsByEnvironmentInternal(
+            @PathParam("workspaceId") Long workspaceId,
+            @NotEmpty @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @PathParam("envCrn") String envCrn,
+            @NotNull @Valid UpdateNetworkCidrsRequest request);
 }

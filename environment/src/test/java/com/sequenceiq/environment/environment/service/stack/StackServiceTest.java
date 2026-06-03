@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -23,6 +24,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateNetworkCidrsRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.views.ClusterViewV4Response;
@@ -158,5 +160,27 @@ class StackServiceTest {
         ThreadBasedUserCrnProvider.doAs(USERCRN, () -> underTest.updatePillarConfigurationByCrn(resourceCrn));
 
         verify(stackV4Endpoint).updatePillarConfigurationByCrn(0L, resourceCrn);
+    }
+
+    @Test
+    void testUpdateNetworkCidrsForEnvironment() {
+        List<String> networkCidrs = List.of("10.84.128.0/17", "10.84.0.0/17");
+
+        ThreadBasedUserCrnProvider.doAs(USERCRN, () -> underTest.updateNetworkCidrsForEnvironment(ENVIRONMENT_CRN, networkCidrs));
+
+        UpdateNetworkCidrsRequest request = new UpdateNetworkCidrsRequest(networkCidrs);
+        verify(stackV4Endpoint).updateNetworkCidrsByEnvironmentInternal(0L, ENVIRONMENT_CRN, request);
+    }
+
+    @Test
+    void testUpdateNetworkCidrsForEnvironmentFailureTest() {
+        List<String> networkCidrs = List.of("10.84.128.0/17", "10.84.0.0/17");
+        UpdateNetworkCidrsRequest request = new UpdateNetworkCidrsRequest(networkCidrs);
+        doThrow(new WebApplicationException("Error")).when(stackV4Endpoint).updateNetworkCidrsByEnvironmentInternal(0L, ENVIRONMENT_CRN, request);
+        when(webApplicationExceptionMessageExtractor.getErrorMessage(any())).thenReturn("custom error");
+        assertThatThrownBy(() -> ThreadBasedUserCrnProvider.doAs(USERCRN,
+                () -> underTest.updateNetworkCidrsForEnvironment(ENVIRONMENT_CRN, networkCidrs)))
+                .hasMessage("custom error")
+                .isExactlyInstanceOf(StackOperationFailedException.class);
     }
 }

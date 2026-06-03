@@ -293,7 +293,18 @@ public enum EnvironmentStatus {
             com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.USER_DEFINED_TAGS_MODIFICATION_ON_REDBEAMS_FAILED),
     USER_DEFINED_TAGS_MODIFICATION_ON_DATA_SERVICES_IN_PROGRESS(
             com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.USER_DEFINED_TAGS_MODIFICATION_ON_DATA_SERVICES_IN_PROGRESS),
-    USER_DEFINED_TAGS_MODIFICATION_FAILED(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.USER_DEFINED_TAGS_MODIFICATION_FAILED);
+    USER_DEFINED_TAGS_MODIFICATION_FAILED(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.USER_DEFINED_TAGS_MODIFICATION_FAILED),
+    NETWORK_CIDRS_MODIFICATION_IN_PROGRESS(
+            com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.NETWORK_CIDRS_MODIFICATION_IN_PROGRESS),
+    NETWORK_CIDRS_MODIFICATION_ON_FREEIPA_IN_PROGRESS(
+            com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.NETWORK_CIDRS_MODIFICATION_ON_FREEIPA_IN_PROGRESS),
+    NETWORK_CIDRS_MODIFICATION_ON_FREEIPA_FAILED(
+            com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.NETWORK_CIDRS_MODIFICATION_ON_FREEIPA_FAILED),
+    NETWORK_CIDRS_MODIFICATION_ON_DATALAKE_AND_DATAHUBS_IN_PROGRESS(
+            com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.NETWORK_CIDRS_MODIFICATION_ON_DATALAKE_AND_DATAHUBS_IN_PROGRESS),
+    NETWORK_CIDRS_MODIFICATION_ON_DATALAKE_AND_DATAHUBS_FAILED(
+            com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.NETWORK_CIDRS_MODIFICATION_ON_DATALAKE_AND_DATAHUBS_FAILED),
+    NETWORK_CIDRS_MODIFICATION_FAILED(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.NETWORK_CIDRS_MODIFICATION_FAILED);
 
     public static final Set<EnvironmentStatus> AVAILABLE_STATUSES = Set.of(
             CREATION_INITIATED,

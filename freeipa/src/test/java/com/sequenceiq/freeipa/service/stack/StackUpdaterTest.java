@@ -15,6 +15,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -37,6 +38,7 @@ import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.message.StackStatusMessageTransformator;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
+import com.sequenceiq.freeipa.entity.Network;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.entity.StackStatus;
 
@@ -419,5 +421,21 @@ public class StackUpdaterTest {
 
         assertEquals(expectedTags, stack.getTags());
         verify(stackService).save(stack);
+    }
+
+    @Test
+    void testUpdateNetworkCidrs() {
+        List<String> originalNetworkCidrs = List.of("10.84.128.0/17");
+        List<String> updatedNetworkCidrs = List.of("10.84.128.0/17", "10.84.0.0/17");
+        Stack stack = new Stack();
+        stack.setId(1L);
+        Network network = new Network();
+        network.setNetworkCidrs(originalNetworkCidrs);
+        stack.setNetwork(network);
+
+        underTest.updateNetworkCidrs(stack, updatedNetworkCidrs);
+
+        assertEquals(updatedNetworkCidrs, stack.getNetwork().getNetworkCidrs());
+        verify(stackService).updateNetworkCidrsByStackId(1L, updatedNetworkCidrs);
     }
 }

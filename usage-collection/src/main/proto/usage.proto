@@ -2395,6 +2395,13 @@ message CDPEnvironmentStatus {
     ENVIRONMENT_ENABLE_SELINUX_FINISHED = 35;
     // The status when enable SeLinux has been failed on the environment.
     ENVIRONMENT_ENABLE_SELINUX_FAILED = 36;
+
+    // The status when network CIDRs modification has been triggered on the environment.
+    NETWORK_CIDRS_MODIFICATION_STARTED = 37;
+    // The status when network CIDRs modification has been finished on the environment.
+    NETWORK_CIDRS_MODIFICATION_FINISHED = 38;
+    // The status when network CIDRs modification has been failed on the environment.
+    NETWORK_CIDRS_MODIFICATION_FAILED = 39;
   }
 }
 

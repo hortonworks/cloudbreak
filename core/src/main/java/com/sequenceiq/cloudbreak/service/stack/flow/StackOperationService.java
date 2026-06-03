@@ -91,6 +91,7 @@ import com.sequenceiq.cloudbreak.service.encryptionprofile.EncryptionProfileServ
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
 import com.sequenceiq.cloudbreak.service.migration.kraft.KraftMigrationService;
+import com.sequenceiq.cloudbreak.service.network.NetworkService;
 import com.sequenceiq.cloudbreak.service.notification.StackNotificationService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsClientService;
 import com.sequenceiq.cloudbreak.service.salt.RotateSaltPasswordTriggerService;
@@ -227,6 +228,9 @@ public class StackOperationService {
 
     @Inject
     private UserDefinedTagValidator userDefinedTagValidator;
+
+    @Inject
+    private NetworkService networkService;
 
     public FlowIdentifier removeInstance(StackDto stack, String instanceId, boolean forced) {
         InstanceMetaData metaData = updateNodeCountValidator.validateInstanceForDownscale(instanceId, stack.getStack());
@@ -860,5 +864,13 @@ public class StackOperationService {
         request.setResourceId(stack.getId());
         FlowIdentifier flowIdentifier = flowManager.triggerVolumeResourcesUpdateByCrn(request);
         return new ResourceUpdateResponse(flowIdentifier);
+    }
+
+    public void updateNetworkCidrsForEnvironment(String environmentCrn, List<String> networkCidrs) {
+        try {
+            transactionService.required(() -> networkService.updateNetworkCidrsByEnvironmentCrn(environmentCrn, networkCidrs));
+        } catch (TransactionExecutionException e) {
+            throw new TransactionRuntimeExecutionException(e);
+        }
     }
 }

@@ -34,6 +34,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.DiskUpdateReques
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.RotateSaltPasswordRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackResourceUpdateRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackVerticalScaleV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateNetworkCidrsRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.SaltPasswordStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.SaltPasswordStatusResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.rotaterdscert.StackRotateRdsCertificateV4Response;
@@ -315,5 +316,16 @@ class StackV4ControllerTest {
             underTest.updateStackVolumeResourcesByCrn(WORKSPACE_ID, request, USER_CRN);
         });
         verify(stackOperationService).updateVolumeResourcesByCrn(request, ACCOUNT_ID);
+    }
+
+    @Test
+    void testUpdateNetworkCidrsByEnvironmentInternal() {
+        List<String> networkCidrs = List.of("10.84.128.0/17", "10.84.0.0/17");
+        String envCrn = "crn:cdp:environments:us-west-1:acc:environment:env";
+        UpdateNetworkCidrsRequest request = new UpdateNetworkCidrsRequest(networkCidrs);
+        doAs(USER_CRN, () -> {
+            underTest.updateNetworkCidrsByEnvironmentInternal(WORKSPACE_ID, envCrn, request);
+        });
+        verify(stackOperationService).updateNetworkCidrsForEnvironment(envCrn, networkCidrs);
     }
 }

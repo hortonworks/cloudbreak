@@ -1,5 +1,6 @@
 package com.sequenceiq.environment.environment.service.freeipa;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -40,6 +41,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.crossrealm.RepairCrossR
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.detachchildenv.DetachChildEnvironmentRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.health.HealthDetailsFreeIpaResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.network.ModifyNetworkCidrsRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.VerticalScaleRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.VerticalScaleResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.UserV1Endpoint;
@@ -434,6 +436,18 @@ public class FreeIpaService {
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
             LOGGER.error("Failed to modify user defined tags on FreeIpa for environment {} due to: {}", environmentCrn, errorMessage, e);
+            throw new FreeIpaOperationFailedException(errorMessage, e);
+        }
+    }
+
+    public void updateNetworkCidrs(String environmentCrn, List<String> networkCidrs) {
+        try {
+            LOGGER.info("Calling FreeIPA modify network CIDRs for environment {} with network CIDRs {}", environmentCrn, networkCidrs);
+            ModifyNetworkCidrsRequest request = new ModifyNetworkCidrsRequest(networkCidrs);
+            ThreadBasedUserCrnProvider.doAsInternalActor(() -> freeIpaV1Endpoint.modifyNetworkCidrsByCrnInternal(environmentCrn, request));
+        } catch (WebApplicationException e) {
+            String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
+            LOGGER.error("Failed to modify network CIDRs on FreeIpa for environment {} due to: {}", environmentCrn, errorMessage, e);
             throw new FreeIpaOperationFailedException(errorMessage, e);
         }
     }

@@ -1,14 +1,16 @@
 package com.sequenceiq.environment.environment.flow;
 
 import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
+import static com.sequenceiq.environment.environment.flow.chain.FlowChainTriggers.ENV_DELETE_CLUSTERS_TRIGGER_EVENT;
+import static com.sequenceiq.environment.environment.flow.chain.FlowChainTriggers.ENV_MODIFY_NETWORK_CIDRS_TRIGGER_EVENT;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.START_ENVIRONMENT_INITIALIZATION_EVENT;
-import static com.sequenceiq.environment.environment.flow.deletion.chain.FlowChainTriggers.ENV_DELETE_CLUSTERS_TRIGGER_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.START_FREEIPA_DELETE_EVENT;
 import static com.sequenceiq.environment.environment.flow.hybrid.cancel.event.EnvironmentCrossRealmTrustCancelStateSelectors.TRUST_CANCEL_VALIDATION_EVENT;
 import static com.sequenceiq.environment.environment.flow.hybrid.repair.event.EnvironmentCrossRealmTrustRepairStateSelectors.TRUST_REPAIR_VALIDATION_EVENT;
 import static com.sequenceiq.environment.environment.flow.hybrid.setupfinish.event.EnvironmentCrossRealmTrustSetupFinishStateSelectors.TRUST_SETUP_FINISH_VALIDATION_EVENT;
 import static com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationStateSelectors.START_MODIFY_ENVIRONMENT_TAGS_EVENT;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -47,6 +49,7 @@ import com.sequenceiq.environment.environment.flow.hybrid.setup.event.Environmen
 import com.sequenceiq.environment.environment.flow.hybrid.setupfinish.event.EnvironmentCrossRealmTrustSetupFinishEvent;
 import com.sequenceiq.environment.environment.flow.loadbalancer.event.LoadBalancerUpdateEvent;
 import com.sequenceiq.environment.environment.flow.loadbalancer.event.LoadBalancerUpdateStateSelectors;
+import com.sequenceiq.environment.environment.flow.modify.network.event.EnvNetworkCidrsModificationTriggerEvent;
 import com.sequenceiq.environment.environment.flow.modify.proxy.event.EnvProxyModificationDefaultEvent;
 import com.sequenceiq.environment.environment.flow.modify.proxy.event.EnvProxyModificationStateSelectors;
 import com.sequenceiq.environment.environment.flow.modify.tags.event.EnvTagsModificationEvent;
@@ -368,6 +371,20 @@ public class EnvironmentReactorFlowManager {
                         .withUserDefinedTags(userDefinedTags)
                         .build();
         return sendEvent(envTagsModificationEvent, ThreadBasedUserCrnProvider.getUserCrn());
+    }
+
+    public FlowIdentifier triggerNetworkCidrsModification(Environment environment, List<String> networkCidrs) {
+        LOGGER.info("Environment network CIDRs modification flow triggered.");
+        EnvNetworkCidrsModificationTriggerEvent envNetworkCidrsTriggerEvent = EnvNetworkCidrsModificationTriggerEvent.builder()
+                .withAccepted(new Promise<>())
+                .withSelector(ENV_MODIFY_NETWORK_CIDRS_TRIGGER_EVENT)
+                .withResourceId(environment.getId())
+                .withResourceName(environment.getName())
+                .withResourceCrn(environment.getResourceCrn())
+                .withNetworkCidrs(networkCidrs)
+                .build();
+
+        return sendEvent(envNetworkCidrsTriggerEvent, ThreadBasedUserCrnProvider.getUserCrn());
     }
 
     private FlowIdentifier sendEvent(BaseNamedFlowEvent event, String userCrn) {

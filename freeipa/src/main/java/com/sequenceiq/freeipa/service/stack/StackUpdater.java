@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.service.stack;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -158,5 +159,11 @@ public class StackUpdater {
         stackTags.updateUserDefinedTags(userDefinedTags);
         stack.setTags(new Json(stackTags));
         stackService.save(stack);
+    }
+
+    public void updateNetworkCidrs(Stack stack, List<String> networkCidrs) {
+        LOGGER.info("Updating network CIDRs for {}", stack.getResourceCrn());
+        stack.getNetwork().setNetworkCidrs(networkCidrs);
+        stackService.updateNetworkCidrsByStackId(stack.getId(), networkCidrs);
     }
 }

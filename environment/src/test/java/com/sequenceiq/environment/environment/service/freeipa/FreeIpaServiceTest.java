@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -44,6 +45,7 @@ import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.freeipa.api.v1.freeipa.flow.FreeIpaV1FlowEndpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.network.ModifyNetworkCidrsRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.UserV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.FailureDetails;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SyncOperationStatus;
@@ -236,6 +238,27 @@ class FreeIpaServiceTest {
         when(freeIpaV1Endpoint.triggerUserDefinedTagsUpdateInternal(ENVCRN, userDefinedTags)).thenThrow(new WebApplicationException("Error"));
         when(webApplicationExceptionMessageExtractor.getErrorMessage(any())).thenReturn("custom error");
         assertThatThrownBy(() -> ThreadBasedUserCrnProvider.doAs(USERCRN, () -> underTest.triggerUserDefinedTagsUpdate(ENVCRN, userDefinedTags)))
+                .hasMessage("custom error")
+                .isExactlyInstanceOf(FreeIpaOperationFailedException.class);
+    }
+
+    @Test
+    void updateNetworkCidrs() {
+        List<String> networkCidrs = List.of("10.84.128.0/17", "10.84.0.0/17");
+
+        ThreadBasedUserCrnProvider.doAs(USERCRN, () -> underTest.updateNetworkCidrs(ENVCRN, networkCidrs));
+
+        ModifyNetworkCidrsRequest request = new ModifyNetworkCidrsRequest(networkCidrs);
+        verify(freeIpaV1Endpoint).modifyNetworkCidrsByCrnInternal(ENVCRN, request);
+    }
+
+    @Test
+    void updateNetworkCidrsFailureTest() {
+        List<String> networkCidrs = List.of("10.84.128.0/17", "10.84.0.0/17");
+        ModifyNetworkCidrsRequest request = new ModifyNetworkCidrsRequest(networkCidrs);
+        doThrow(new WebApplicationException("Error")).when(freeIpaV1Endpoint).modifyNetworkCidrsByCrnInternal(ENVCRN, request);
+        when(webApplicationExceptionMessageExtractor.getErrorMessage(any())).thenReturn("custom error");
+        assertThatThrownBy(() -> ThreadBasedUserCrnProvider.doAs(USERCRN, () -> underTest.updateNetworkCidrs(ENVCRN, networkCidrs)))
                 .hasMessage("custom error")
                 .isExactlyInstanceOf(FreeIpaOperationFailedException.class);
     }
