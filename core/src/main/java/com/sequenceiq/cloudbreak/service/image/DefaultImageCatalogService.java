@@ -10,6 +10,7 @@ import java.util.Set;
 
 import jakarta.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -55,18 +56,21 @@ public class DefaultImageCatalogService {
         return statedImage;
     }
 
-    public StatedImage getImageFromDefaultCatalog(String type, ImageCatalogPlatform provider)
+    public StatedImage getImageFromDefaultCatalog(String type, ImageCatalogPlatform provider, Optional<Architecture> architecture)
             throws CloudbreakImageCatalogException, CloudbreakImageNotFoundException {
         ImageType imageType = ImageType.valueOf(type);
         StatedImage statedImage;
         switch (imageType) {
             case FREEIPA:
                 List<Image> images = imageCatalogProvider.getImageCatalogV3(defaultFreeIpaCatalogUrl).getImages().getFreeIpaImages();
-                Optional<Image> image = images.stream().filter(i -> i.getImageSetsByProvider()
-                        .keySet().stream().anyMatch(key -> key.equalsIgnoreCase(provider.nameToLowerCase()))).max(getImageComparing(images));
-                statedImage = statedImage(image.orElseThrow(() ->
-                                new CloudbreakImageNotFoundException(String.format("Could not find any image with provider: '%s' in catalog: '%s'", provider,
-                                        FREEIPA_DEFAULT_CATALOG_NAME))),
+                Optional<Image> image = images.stream()
+                        .filter(i -> architecture.isEmpty() || StringUtils.equalsIgnoreCase(architecture.get().getName(), i.getArchitecture()))
+                        .filter(i -> i.getImageSetsByProvider().keySet()
+                                .stream()
+                                .anyMatch(key -> key.equalsIgnoreCase(provider.nameToLowerCase()))).max(getImageComparing(images));
+                statedImage = statedImage(image.orElseThrow(() -> new CloudbreakImageNotFoundException(
+                        String.format("Could not find any image with provider: '%s' and architecture: '%s' in catalog: '%s'",
+                                provider, architecture.isPresent() ? architecture.get() : "not defined", FREEIPA_DEFAULT_CATALOG_NAME))),
                         defaultFreeIpaCatalogUrl, FREEIPA_DEFAULT_CATALOG_NAME);
                 break;
             case RUNTIME:

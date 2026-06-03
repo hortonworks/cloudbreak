@@ -25,7 +25,7 @@ public enum Architecture {
         return result;
     }
 
-    private static Architecture fromString(String architecture, boolean fallback) {
+    public static Architecture fromString(String architecture, boolean fallback) {
         if (StringUtils.isEmpty(architecture)) {
             return fallback ? X86_64 : null;
         }

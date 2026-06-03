@@ -224,7 +224,8 @@ public interface ImageCatalogV4Endpoint {
             responses = @ApiResponse(responseCode = "200", description = "successful operation", useReturnTypeSchema = true))
     ImageV4Response getImageFromDefault(@PathParam("workspaceId") Long workspaceId,
             @PathParam("type") String type,
-            @PathParam("provider") String provider) throws Exception;
+            @PathParam("provider") String provider,
+            @QueryParam("architecture") String architecture) throws Exception;
 
     @GET
     @Path("default_runtime_versions")
