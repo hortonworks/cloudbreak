@@ -45,7 +45,8 @@ public enum Status {
     DB_SSL_MIGRATION_COMPLETED,
     DB_SSL_MIGRATION_IN_PROGRESS,
     DB_SSL_MIGRATION_FAILED,
-    UNKNOWN;
+    UNKNOWN,
+    DELETED_ON_PROVIDER_SIDE;
 
     private static final Map<Status, Status> IN_PROGRESS_TO_FINAL_STATUS_MAPPING = ImmutableMap.<Status, Status>builder()
             .put(REQUESTED, CREATE_FAILED)
@@ -137,7 +138,8 @@ public enum Status {
                 STOP_REQUESTED,
                 STOP_IN_PROGRESS,
                 STOPPED,
-                DELETE_IN_PROGRESS
+                DELETE_IN_PROGRESS,
+                DELETED_ON_PROVIDER_SIDE
         );
     }
 

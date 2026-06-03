@@ -5,7 +5,6 @@ import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AZURE;
 import static com.sequenceiq.common.model.AzureDatabaseType.AZURE_DATABASE_TYPE_KEY;
-import static java.util.Optional.empty;
 import static java.util.Optional.ofNullable;
 
 import java.util.HashMap;
@@ -76,12 +75,13 @@ public class DBStackStatusSyncService {
     private DBStackService dbStackService;
 
     public void sync(DBStack dbStack) {
-        DetailedDBStackStatus detailedDBStackStatus = getDetailedDBStackStatusFromProvider(dbStack);
+        DetailedDBStackStatus detailedDBStackStatus = getDetailedStatusFromProvider(dbStack);
+        LOGGER.debug(":::Auto sync::: Provider status got converted to DetailedDBStackStatus.{}", detailedDBStackStatus);
         Status status = detailedDBStackStatus.getStatus();
 
         if (dbStack.getStatus() != status) {
             if (status == null) {
-                LOGGER.warn(":::Auto sync::: Can not update DBStack status because 'ExternalDatabaseStatus.{}' is mapped to 'null'",
+                LOGGER.warn(":::Auto sync::: Can not update DBStack status because 'DetailedDBStackStatus.{}' is mapped to 'null'",
                         detailedDBStackStatus);
             } else {
                 LOGGER.debug(":::Auto sync::: Update DB Stack Status from '{}' to '{}'", dbStack.getStatus(), status);
@@ -94,18 +94,6 @@ public class DBStackStatusSyncService {
             LOGGER.debug(":::Auto sync::: Unschedule DB Stack Status sync as the status is '{}'", status);
             dbStackJobService.unschedule(dbStack.getId(), dbStack.getName());
         }
-    }
-
-    private DetailedDBStackStatus getDetailedDBStackStatusFromProvider(DBStack dbStack) {
-        Optional<ExternalDatabaseStatus> externalDatabaseStatus = getExternalDatabaseStatus(dbStack);
-        DetailedDBStackStatus detailedDBStackStatus = externalDatabaseStatus
-                .map(this::convert)
-                .orElse(DetailedDBStackStatus.UNKNOWN);
-
-        LOGGER.debug(":::Auto sync::: ExternalDatabaseStatus.{} got converted to DetailedDBStackStatus.{}",
-                externalDatabaseStatus, detailedDBStackStatus);
-
-        return detailedDBStackStatus;
     }
 
     private DetailedDBStackStatus convert(ExternalDatabaseStatus externalDatabaseStatus) {
@@ -121,13 +109,13 @@ public class DBStackStatusSyncService {
             case DELETE_IN_PROGRESS:
                 return DetailedDBStackStatus.DELETE_IN_PROGRESS;
             case DELETED:
-                return DetailedDBStackStatus.DELETE_COMPLETED;
+                return DetailedDBStackStatus.DELETED_ON_PROVIDER_SIDE;
             default:
                 return DetailedDBStackStatus.UNKNOWN;
         }
     }
 
-    private Optional<ExternalDatabaseStatus> getExternalDatabaseStatus(DBStack dbStack) {
+    private DetailedDBStackStatus getDetailedStatusFromProvider(DBStack dbStack) {
         try {
             Location location = location(region(dbStack.getRegion()), availabilityZone(dbStack.getAvailabilityZone()));
             String accountId = dbStack.getOwnerCrn().getAccountId();
@@ -157,14 +145,16 @@ public class DBStackStatusSyncService {
                     return handleSingleServerAutoMigration(dbStack, databaseStatusOptional, databaseStack, connector, ac);
                 }
             }
-            return databaseStatusOptional;
+            return databaseStatusOptional
+                    .map(this::convert)
+                    .orElse(DetailedDBStackStatus.UNKNOWN);
         } catch (Exception ex) {
             LOGGER.error(":::Auto sync::: External DB status lookup failed.", ex);
-            return empty();
+            return DetailedDBStackStatus.UNKNOWN;
         }
     }
 
-    private Optional<ExternalDatabaseStatus> handleSingleServerAutoMigration(DBStack dbStack, Optional<ExternalDatabaseStatus> databaseStatusOptional,
+    private DetailedDBStackStatus handleSingleServerAutoMigration(DBStack dbStack, Optional<ExternalDatabaseStatus> databaseStatusOptional,
             DatabaseStack databaseStack, CloudConnector connector, AuthenticatedContext ac) throws Exception {
         LOGGER.debug(":::Auto sync::: External DB is an Azure database and deleted. "
                 + "Checking if resource still exists in case of auto-migration and rollback");
@@ -172,7 +162,9 @@ public class DBStackStatusSyncService {
                 dbResourceService.findByStackAndNameAndType(dbStack.getId(), dbStack.getDatabaseServer().getName(), ResourceType.AZURE_DATABASE);
         if (serverResourceOptional.isEmpty()) {
             LOGGER.debug(":::Auto sync::: Database server resource not found");
-            return databaseStatusOptional;
+            return databaseStatusOptional
+                    .map(this::convert)
+                    .orElse(DetailedDBStackStatus.UNKNOWN);
         } else {
             DBResource dbResource = serverResourceOptional.get();
             AzureDatabaseType currentDatabaseType = currentDatabaseType(dbResource);
@@ -190,9 +182,9 @@ public class DBStackStatusSyncService {
                 updateResourceReference(dbResource, flippedRef);
                 updateDatabaseType(dbStack);
 
-                return ofNullable(status);
+                return convert(status);
             }
-            return databaseStatusOptional;
+            return DetailedDBStackStatus.DELETE_COMPLETED;
         }
     }
 
@@ -228,4 +220,5 @@ public class DBStackStatusSyncService {
 
         return new DatabaseStack(databaseStack.getNetwork(), dbServer, databaseStack.getTags(), databaseStack.getTemplate());
     }
+
 }

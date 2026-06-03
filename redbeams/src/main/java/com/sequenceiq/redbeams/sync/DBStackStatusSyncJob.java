@@ -12,7 +12,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.quartz.statuschecker.job.StatusCheckerJob;
+import com.sequenceiq.cloudbreak.quartz.statuschecker.service.StatusCheckerJobService;
 import com.sequenceiq.flow.core.FlowLogService;
+import com.sequenceiq.redbeams.api.model.common.Status;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.service.stack.DBStackService;
 
@@ -30,6 +32,12 @@ public class DBStackStatusSyncJob extends StatusCheckerJob {
     @Inject
     private DBStackStatusSyncService dbStackStatusSyncService;
 
+    @Inject
+    private DBStackJobService dbStackJobService;
+
+    @Inject
+    private StatusCheckerJobService jobService;
+
     @Override
     protected Optional<Object> getMdcContextObject() {
         Long dbStackId = Long.valueOf(getLocalId());
@@ -40,6 +48,7 @@ public class DBStackStatusSyncJob extends StatusCheckerJob {
     protected void executeJob(JobExecutionContext context) {
         Long dbStackId = Long.valueOf(getLocalId());
         DBStack dbStack = dbStackService.getById(dbStackId);
+        updateSyncScheduleIfNecessary(dbStack.getStatus(), context);
         if (flowLogService.isOtherFlowRunning(dbStackId)) {
             LOGGER.debug("DBStackStatusCheckerJob cannot run, because flow is running for stack: {}", dbStackId);
         } else {
@@ -47,6 +56,20 @@ public class DBStackStatusSyncJob extends StatusCheckerJob {
                 measure(() -> dbStackStatusSyncService.sync(dbStack), LOGGER, ":::Auto sync::: DB stack sync in {}ms");
             } catch (Exception e) {
                 LOGGER.info(":::Auto sync::: Error occurred during DB sync: {}", e.getMessage(), e);
+            }
+        }
+    }
+
+    private void updateSyncScheduleIfNecessary(Status status, JobExecutionContext context) {
+        if (Status.DELETED_ON_PROVIDER_SIDE.equals(status)) {
+            if (!jobService.isLongSyncJob(context)) {
+                LOGGER.info(":::Auto sync::: DB stack status is {}. Rescheduling sync job to long interval.", status);
+                dbStackJobService.scheduleLongIntervalCheck(Long.valueOf(getLocalId()));
+            }
+        } else {
+            if (jobService.isLongSyncJob(context)) {
+                LOGGER.info(":::Auto sync::: DB stack status is {}. Rescheduling sync job to short interval.", status);
+                dbStackJobService.schedule(Long.valueOf(getLocalId()));
             }
         }
     }

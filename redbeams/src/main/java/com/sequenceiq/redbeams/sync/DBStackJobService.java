@@ -32,6 +32,12 @@ public class DBStackJobService {
         }
     }
 
+    public void scheduleLongIntervalCheck(Long id) {
+        if (autoSyncConfig.isEnabled()) {
+            jobService.scheduleLongIntervalCheck(id, DBStackJobAdapter.class);
+        }
+    }
+
     public void unschedule(Long id, String name) {
         jobService.unschedule(String.valueOf(id));
         LOGGER.info("{} is unscheduled, it will not auto sync anymore", name);

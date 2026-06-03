@@ -144,6 +144,10 @@ public class DBStackStatusSyncServiceTest {
                 Arguments.of(Status.AVAILABLE, ExternalDatabaseStatus.START_IN_PROGRESS, DetailedDBStackStatus.START_IN_PROGRESS),
                 Arguments.of(Status.AVAILABLE, ExternalDatabaseStatus.STOPPED, DetailedDBStackStatus.STOPPED),
                 Arguments.of(Status.AVAILABLE, ExternalDatabaseStatus.STOP_IN_PROGRESS, DetailedDBStackStatus.STOP_IN_PROGRESS),
+                //DELETED from provider always maps to DELETED_ON_PROVIDER_SIDE
+                Arguments.of(Status.AVAILABLE, ExternalDatabaseStatus.DELETED, DetailedDBStackStatus.DELETED_ON_PROVIDER_SIDE),
+                //Recovery: provider reports STARTED for a previously DELETED_ON_PROVIDER_SIDE resource
+                Arguments.of(Status.DELETED_ON_PROVIDER_SIDE, ExternalDatabaseStatus.STARTED, DetailedDBStackStatus.STARTED),
                 //UPDATE_IN_PROGRESS status covers all non handled statuses. In this case DB Stack status should not be updated.
                 Arguments.of(Status.AVAILABLE, ExternalDatabaseStatus.UPDATE_IN_PROGRESS, DetailedDBStackStatus.UNKNOWN)
         );
@@ -302,17 +306,44 @@ public class DBStackStatusSyncServiceTest {
     }
 
     @Test
-    public void shouldSetStatusAndUnscheduleInCaseOfStopCompleted()
+    public void shouldReturnDeletedOnProviderSideWhenProviderDeleted()
             throws Exception {
         when(resourceConnector.getDatabaseServerStatusFailFast(authenticatedContext, databaseStack)).thenReturn(ExternalDatabaseStatus.DELETED);
         when(dbStack.getId()).thenReturn(DB_STACK_ID);
         when(dbStack.getStatus()).thenReturn(Status.DELETE_IN_PROGRESS);
         when(dbStack.getOwnerCrn()).thenReturn(crn);
-        when(dbStack.getName()).thenReturn(DB_NAME);
 
         victim.sync(dbStack);
 
-        verify(dbStackStatusUpdater).updateStatus(DB_STACK_ID, DetailedDBStackStatus.DELETE_COMPLETED);
-        verify(dbStackJobService).unschedule(DB_STACK_ID, DB_NAME);
+        verify(dbStackStatusUpdater).updateStatus(DB_STACK_ID, DetailedDBStackStatus.DELETED_ON_PROVIDER_SIDE);
+        verifyNoInteractions(dbStackJobService);
+    }
+
+    @Test
+    public void shouldReturnDeleteInProgressWhenProviderDeleting()
+            throws Exception {
+        when(resourceConnector.getDatabaseServerStatusFailFast(authenticatedContext, databaseStack)).thenReturn(ExternalDatabaseStatus.DELETE_IN_PROGRESS);
+        when(dbStack.getId()).thenReturn(DB_STACK_ID);
+        when(dbStack.getStatus()).thenReturn(Status.AVAILABLE);
+        when(dbStack.getOwnerCrn()).thenReturn(crn);
+
+        victim.sync(dbStack);
+
+        verify(dbStackStatusUpdater).updateStatus(DB_STACK_ID, DetailedDBStackStatus.DELETE_IN_PROGRESS);
+        verifyNoInteractions(dbStackJobService);
+    }
+
+    @Test
+    public void shouldNotUpdateStatusWhenProviderDeletingAndAlreadyDeleteInProgress()
+            throws Exception {
+        when(resourceConnector.getDatabaseServerStatusFailFast(authenticatedContext, databaseStack)).thenReturn(ExternalDatabaseStatus.DELETE_IN_PROGRESS);
+        when(dbStack.getId()).thenReturn(DB_STACK_ID);
+        when(dbStack.getStatus()).thenReturn(Status.DELETE_IN_PROGRESS);
+        when(dbStack.getOwnerCrn()).thenReturn(crn);
+
+        victim.sync(dbStack);
+
+        verifyNoInteractions(dbStackStatusUpdater);
+        verifyNoInteractions(dbStackJobService);
     }
 }

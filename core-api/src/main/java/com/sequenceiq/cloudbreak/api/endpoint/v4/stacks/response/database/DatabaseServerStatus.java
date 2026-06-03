@@ -38,7 +38,8 @@ public enum DatabaseServerStatus {
     DB_SSL_MIGRATION_REQUESTED,
     DB_SSL_MIGRATION_IN_PROGRESS,
     DB_SSL_MIGRATION_FAILED,
-    UNKNOWN;
+    UNKNOWN,
+    DELETED_ON_PROVIDER_SIDE;
 
     public boolean isAvailableForUpgrade() {
         return AVAILABLE.equals(this)
