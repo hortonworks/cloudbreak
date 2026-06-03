@@ -5,16 +5,20 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -86,14 +90,14 @@ public class DefaultImageCatalogServiceTest {
     @Test
     public void testGetImageFromDefaultCatalogWithoutRuntimeThrowsBadRequestInCaseOfNonFreeIpaImageType() {
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
-                () -> victim.getImageFromDefaultCatalog(ImageType.RUNTIME.name(), imageCatalogPlatform("aws")));
+                () -> victim.getImageFromDefaultCatalog(ImageType.RUNTIME.name(), imageCatalogPlatform("aws"), Optional.empty()));
         assertEquals("Runtime is required in case of 'RUNTIME' image type", badRequestException.getMessage());
     }
 
     @Test
     public void testGetImageFromDefaultCatalogWithoutRuntimeThrowsBadRequestInCaseOfNotSupportedImageType() {
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
-                () -> victim.getImageFromDefaultCatalog(ImageType.UNKNOWN.name(), imageCatalogPlatform("aws")));
+                () -> victim.getImageFromDefaultCatalog(ImageType.UNKNOWN.name(), imageCatalogPlatform("aws"), Optional.empty()));
         assertEquals("Type 'UNKNOWN' is not supported.", badRequestException.getMessage());
     }
 
@@ -137,7 +141,7 @@ public class DefaultImageCatalogServiceTest {
         when(notExpectedByProvider.getImageSetsByProvider()).thenReturn(notExpectedImageSetByProvider);
         when(notExpectedByProvider.getCreated()).thenReturn(0L);
 
-        StatedImage actual = victim.getImageFromDefaultCatalog(ImageType.FREEIPA.name(), imageCatalogPlatform("aws"));
+        StatedImage actual = victim.getImageFromDefaultCatalog(ImageType.FREEIPA.name(), imageCatalogPlatform("aws"), Optional.empty());
 
         assertEquals(expected, actual.getImage());
     }
@@ -162,7 +166,8 @@ public class DefaultImageCatalogServiceTest {
         when(notExpected.getImageSetsByProvider()).thenReturn(imageSetByProvider);
         when(notExpected.getCreated()).thenReturn(1L);
 
-        assertThrows(CloudbreakImageNotFoundException.class, () -> victim.getImageFromDefaultCatalog(ImageType.FREEIPA.name(), imageCatalogPlatform("aws")));
+        assertThrows(CloudbreakImageNotFoundException.class, () ->
+                victim.getImageFromDefaultCatalog(ImageType.FREEIPA.name(), imageCatalogPlatform("aws"), Optional.empty()));
     }
 
     @Test
@@ -176,5 +181,48 @@ public class DefaultImageCatalogServiceTest {
         assertEquals(Architecture.ARM64, imageFilterArgumentCaptor.getValue().getArchitecture());
         assertTrue(imageFilterArgumentCaptor.getValue().getPlatforms().stream().map(e -> e.nameToLowerCase()).collect(Collectors.toList())
                 .contains("aws"));
+    }
+
+    @ParameterizedTest(name = "testFreeipaArchitectureFiltering {displayName}_{0}_{1}")
+    @MethodSource("testFreeipaArchitectureFilteringDataProvider")
+    public void testFreeipaArchitectureFiltering(Optional<Architecture> architecture, String expectedImageId)
+            throws CloudbreakImageCatalogException, CloudbreakImageNotFoundException {
+        Image armImage = createAwsImage("1", 1L, Architecture.ARM64.getName());
+        Image x86Image = createAwsImage("2", 2L, Architecture.X86_64.getName());
+        Image armImage2 = createAwsImage("3", 3L, Architecture.ARM64.getName());
+        Image x86Image2 = createAwsImage("4", 4L, Architecture.X86_64.getName());
+        Image randomImage = createAwsImage("5", 5L, null);
+
+        CloudbreakImageCatalogV3 freeipaImageCatalogV3 = mock(CloudbreakImageCatalogV3.class);
+        Images images = mock(Images.class);
+        List<Image> imageList = List.of(armImage, x86Image, randomImage, armImage2, x86Image2);
+
+        when(imageCatalogProvider.getImageCatalogV3(DEFAULT_FREEIPA_CATALOG_URL)).thenReturn(freeipaImageCatalogV3);
+        when(freeipaImageCatalogV3.getImages()).thenReturn(images);
+        when(images.getFreeIpaImages()).thenReturn(imageList);
+
+        StatedImage actual = victim.getImageFromDefaultCatalog(ImageType.FREEIPA.name(), imageCatalogPlatform("aws"), architecture);
+
+        assertEquals(expectedImageId, actual.getImage().getUuid());
+
+        assertThrows(CloudbreakImageNotFoundException.class, () ->
+                victim.getImageFromDefaultCatalog(ImageType.FREEIPA.name(), imageCatalogPlatform("aws"), Optional.of(Architecture.UNKNOWN)));
+    }
+
+    private static Object[][] testFreeipaArchitectureFilteringDataProvider() {
+        return new Object[][]{
+                {Optional.of(Architecture.ARM64), "3"},
+                {Optional.of(Architecture.X86_64), "4"},
+                {Optional.empty(), "5"}
+        };
+    }
+
+    private Image createAwsImage(String uuid, Long time, String architecture) {
+        Image image = mock(Image.class);
+        lenient().when(image.getImageSetsByProvider()).thenReturn(Map.of("aws", Map.of()));
+        lenient().when(image.getCreated()).thenReturn(time);
+        lenient().when(image.getArchitecture()).thenReturn(architecture);
+        lenient().when(image.getUuid()).thenReturn(uuid);
+        return image;
     }
 }
