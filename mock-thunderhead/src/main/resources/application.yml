@@ -132,6 +132,23 @@ crn:
   partition: cdp
   region: us-west-1
 
+management:
+  endpoints:
+    web:
+      base-path: "/"
+      exposure:
+        include: info,health,prometheus
+      path-mapping:
+        prometheus: metrics
+  endpoint:
+    metrics:
+      enabled: true
+    prometheus:
+      enabled: true
+  info:
+    env:
+      enabled: true
+
 spring:
   datasource:
     url: jdbc:h2:mem:mydb

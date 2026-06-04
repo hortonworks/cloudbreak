@@ -355,7 +355,8 @@ subprojects {
             'externalized-compute',
             'environment-remote',
             'integration-test',
-            'mock-infrastructure'] && project.plugins.hasPlugin('org.springframework.boot')) {
+            'mock-infrastructure',
+            'mock-thunderhead'] && project.plugins.hasPlugin('org.springframework.boot')) {
       buildInfo.configure {
         destination = file("$project.buildDir")
         basename = project.bootJar.archiveBaseName.get()
