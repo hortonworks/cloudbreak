@@ -4,6 +4,16 @@ LOG_FOLDER="/var/log/cdp_resources_check"
 LOG_FILE="$LOG_FOLDER/cdp-resources-check.log"
 MAX_LOG_FILE_SIZE=10485760
 
+run_sysctl() {
+  if command -v sysctl >/dev/null 2>&1; then
+    sysctl "$@"
+  elif [ -x /usr/sbin/sysctl ]; then
+    /usr/sbin/sysctl "$@"
+  else
+    echo "sysctl: command not found"
+  fi
+}
+
 init_logfolder() {
   if [[ ! -d $LOG_FOLDER ]]; then
     mkdir -p $LOG_FOLDER
@@ -45,10 +55,10 @@ collect_system_resources() {
   du -a -h --max-depth=1 /var/log | sort -r -h | head -10 >> $LOG_FILE
   echo "---------------------" >> $LOG_FILE
   echo "sysctl fs.file-nr" >> $LOG_FILE
-  sysctl fs.file-nr >> $LOG_FILE
+  run_sysctl fs.file-nr >> $LOG_FILE
   echo "---------------------" >> $LOG_FILE
   echo "sysctl fs.file-max" >> $LOG_FILE
-  sysctl fs.file-max >> $LOG_FILE
+  run_sysctl fs.file-max >> $LOG_FILE
   echo "---------------------" >> $LOG_FILE
   echo "ls -la /proc/$$/fd" >> $LOG_FILE
   ls -la /proc/$$/fd >> $LOG_FILE
